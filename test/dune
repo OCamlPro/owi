@@ -1,0 +1,3 @@
+(test
+ (name main)
+ (modules main))

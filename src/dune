@@ -1,0 +1,8 @@
+(library
+ (name woi)
+ (modules pp types)
+ (libraries integers))
+
+(executable
+ (name woi)
+ (modules woi))
