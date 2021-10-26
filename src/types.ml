@@ -43,6 +43,7 @@ let bit_width = function
   | I32 | F32 -> 32
   | I64 | F64 -> 64
 
+(* TODO: heap_type missing ? *)
 type nonrec ref_type =
   | Func_ref | Extern_ref
 
@@ -51,9 +52,10 @@ type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
+type nonrec param_type = (id option * val_type) list
 type nonrec result_type = val_type list
 
-type nonrec func_type = result_type * result_type
+type nonrec func_type = param_type * result_type
 
 type nonrec limits = {
   min : u32;
@@ -72,14 +74,14 @@ type nonrec global_type = mut * val_type
 
 (* TODO: gadt ? *)
 type nonrec extern_type =
-  | Func of func_type
-  | Table of table_type
-  | Mem of mem_type
-  | Global of global_type
+  | Func of id option * func_type
+  | Table of id option * table_type
+  | Mem of id option * mem_type
+  | Global of id option * global_type
 
 (** Instructions *)
 
-type nonrec nn = | I32 | I64
+type nonrec nn = | S32 | S64
 
 type nonrec mm = nn
 
@@ -106,15 +108,19 @@ type nonrec irelop =
 type nonrec frelop =
   | Eq | Ne | Lt | Gt | Le | Ge
 
-type nonrec type_idx = u32
-type nonrec func_idx = u32
-type nonrec table_idx = u32
-type nonrec mem_idx = u32
-type nonrec global_idx = u32
-type nonrec elem_idx = u32
-type nonrec data_idx = u32
-type nonrec local_idx = u32
-type nonrec label_idx = u32
+type indice =
+  | Raw of u32
+  | Symbolic of id
+
+type nonrec type_idx = indice
+type nonrec func_idx = indice
+type nonrec table_idx = indice
+type nonrec mem_idx = indice
+type nonrec global_idx = indice
+type nonrec elem_idx = indice
+type nonrec data_idx = indice
+type nonrec local_idx = indice
+type nonrec label_idx = indice
 
 type memarg = {
   offset: u32;
@@ -208,17 +214,19 @@ type expr = instr list
 
 type func = {
   type_ : type_idx;
-  locals : val_type list;
+  locals : (val_type * id option) list;
   body : expr;
+  id : id option;
 }
 
-type table = table_type
+type table = id option * table_type
 
-type mem = mem_type
+type mem = id option * mem_type
 
 type global = {
   type_ : global_type;
   init : expr;
+  id : id option;
 }
 
 type elem_mode =
@@ -244,10 +252,10 @@ type data = {
 type start = func_idx
 
 type import_desc =
-  | Func of type_idx
-  | Table of table_type
-  | Mem of mem_type
-  | Global of global_type
+  | Func of id option * type_idx
+  | Table of id option * table_type
+  | Mem of id option * mem_type
+  | Global of id option * global_type
 
 type import = {
   module_ : name;
@@ -268,7 +276,7 @@ type export = {
 
 type module_ = {
   id : id option; (* only for text mode *)
-  types: func_type list;
+  types: (id option * func_type) list;
   funcs: func list;
   tables: table list;
   mems: mem list;
