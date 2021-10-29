@@ -1,0 +1,47 @@
+module_: LPAR MODULE MODULE
+##
+## Ends in an error in state: 2.
+##
+## module_ -> LPAR MODULE . RPAR EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## LPAR MODULE
+##
+
+Syntax error.
+
+module_: LPAR MODULE RPAR RPAR
+##
+## Ends in an error in state: 3.
+##
+## module_ -> LPAR MODULE RPAR . EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## LPAR MODULE RPAR
+##
+
+Syntax error 2.
+
+module_: LPAR RPAR
+##
+## Ends in an error in state: 1.
+##
+## module_ -> LPAR . MODULE RPAR EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## LPAR
+##
+
+Syntax error 3.
+
+module_: RPAR
+##
+## Ends in an error in state: 0.
+##
+## module_' -> . module_ [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+Syntax error 4.

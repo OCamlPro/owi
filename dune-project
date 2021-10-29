@@ -24,3 +24,4 @@
    (>= 4.08))
   (integers
    (>= 0.5.1))))
+(using menhir 2.1)

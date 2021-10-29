@@ -1,42 +1,51 @@
 open Types
 
-let print_nothing fmt () =
-  Format.fprintf fmt ""
+let print_nothing fmt () = Format.fprintf fmt ""
 
 let id fmt id =
   (* TODO: stop being dumb :-) *)
-  Format.fprintf fmt "$%a"
-    (fun fmt id -> Format.pp_print_list ~pp_sep:print_nothing Format.pp_print_char fmt id) id
+  Format.fprintf fmt "$%s" id
 
 let id_opt fmt = function
   | None -> ()
   | Some i -> id fmt i
 
 let u32 fmt u = Unsigned.UInt32.pp fmt u
+
 let i32 fmt i = Signed.Int32.pp fmt i
+
 let i64 fmt i = Signed.Int64.pp fmt i
+
 let f32 fmt f = Format.fprintf fmt "%f" f
+
 let f64 fmt f = Format.fprintf fmt "%f" f
 
 let char fmt c =
   (* TODO: ? *)
   Format.fprintf fmt "%c" (Uchar.to_char c)
 
-let name fmt name =
-  Format.pp_print_list ~pp_sep:print_nothing char fmt name
+let name fmt name = Format.pp_print_string fmt name
 
 let indice fmt = function
   | Raw u -> u32 fmt u
   | Symbolic i -> id fmt i
 
 let local_idx = indice
+
 let func_idx = indice
+
 let type_idx = indice
+
 let global_idx = indice
+
 let table_idx = indice
+
 let elem_idx = indice
+
 let data_idx = indice
+
 let label_idx = indice
+
 let mem_idx = indice
 
 let num_type fmt : num_type -> Unit.t = function
@@ -59,14 +68,12 @@ let param_type fmt (i, vt) =
 let params fmt params =
   Format.pp_print_list ~pp_sep:Format.pp_print_space param_type fmt params
 
-let result_type fmt vt =
-  Format.fprintf fmt "(result %a)" val_type vt
+let result_type fmt vt = Format.fprintf fmt "(result %a)" val_type vt
 
 let results fmt results =
   Format.pp_print_list ~pp_sep:Format.pp_print_space result_type fmt results
 
-let func_type fmt (l, r) =
-  Format.fprintf fmt "(func %a %a)" params l results r
+let func_type fmt (l, r) = Format.fprintf fmt "(func %a %a)" params l results r
 
 let limits fmt { min; max } =
   match max with
@@ -75,18 +82,15 @@ let limits fmt { min; max } =
 
 let mem_type fmt t = limits fmt t
 
-let table_type fmt (mt, rt) =
-  Format.fprintf fmt "%a %a" mem_type mt ref_type rt
+let table_type fmt (mt, rt) = Format.fprintf fmt "%a %a" mem_type mt ref_type rt
 
 let mut fmt = function
   | Const -> ()
   | Var -> Format.fprintf fmt "mut"
 
-let global_type fmt (m, vt) =
-  Format.fprintf fmt "(%a %a)" mut m val_type vt
+let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
 
-let local fmt (t, id) =
-  Format.fprintf fmt "(local %a %a)" id_opt id val_type t
+let local fmt (t, id) = Format.fprintf fmt "(local %a %a)" id_opt id val_type t
 
 let locals fmt locals =
   Format.pp_print_list ~pp_sep:Format.pp_print_space local fmt locals
@@ -176,22 +180,29 @@ let instr fmt = function
   | I64_extend32_s -> Format.fprintf fmt "i64.extend32_s"
   | I32_wrap_i64 -> Format.fprintf fmt "i32.wrap_i64"
   | I64_extend_i32 s -> Format.fprintf fmt "i64.extend_i32_%a" sx s
-  | I_trunc_f (n, n', s) -> Format.fprintf fmt "i%a.trunc_f%a_%a" nn n nn n' sx s
-  | I_trunc_sat_f (n, n', s) -> Format.fprintf fmt "i%a.trunc_sat_f%a_%a" nn n nn n' sx s
+  | I_trunc_f (n, n', s) ->
+    Format.fprintf fmt "i%a.trunc_f%a_%a" nn n nn n' sx s
+  | I_trunc_sat_f (n, n', s) ->
+    Format.fprintf fmt "i%a.trunc_sat_f%a_%a" nn n nn n' sx s
   | F32_demote_f64 -> Format.fprintf fmt "f32.demote_f64"
   | F64_promote_f32 -> Format.fprintf fmt "f64.promote_f32"
-  | F_convert_i (n, n', s) -> Format.fprintf fmt "f%a.convert_i%a_%a" nn n nn n' sx s
-  | I_reinterpret_f (n, n') -> Format.fprintf fmt "i%a.reinterpret_f%a" nn n nn n'
-  | F_reinterpret_i (n, n') -> Format.fprintf fmt "f%a.reinterpret_i%a" nn n nn n'
+  | F_convert_i (n, n', s) ->
+    Format.fprintf fmt "f%a.convert_i%a_%a" nn n nn n' sx s
+  | I_reinterpret_f (n, n') ->
+    Format.fprintf fmt "i%a.reinterpret_f%a" nn n nn n'
+  | F_reinterpret_i (n, n') ->
+    Format.fprintf fmt "f%a.reinterpret_i%a" nn n nn n'
   | Ref_null t -> Format.fprintf fmt "ref.null %a" ref_type t
   | Ref_is_null -> Format.fprintf fmt "ref.is_null"
   | Ref_func fid -> Format.fprintf fmt "ref.func %a" func_idx fid
   | Drop -> Format.fprintf fmt "drop"
   | Select vt -> begin
-      match vt with
-      | None -> Format.fprintf fmt "select"
-      | Some vt -> Format.fprintf fmt "select (%a)" results vt (* TODO: are the parens needed ? *)
-    end
+    match vt with
+    | None -> Format.fprintf fmt "select"
+    | Some vt ->
+      Format.fprintf fmt "select (%a)" results vt
+      (* TODO: are the parens needed ? *)
+  end
   | Local_get id -> Format.fprintf fmt "local.get %a" local_idx id
   | Local_set id -> Format.fprintf fmt "local.set %a" local_idx id
   | Local_tee id -> Format.fprintf fmt "local.tee %a" local_idx id
@@ -202,15 +213,19 @@ let instr fmt = function
   | Table_size id -> Format.fprintf fmt "table.size %a" table_idx id
   | Table_grow id -> Format.fprintf fmt "table.grow %a" table_idx id
   | Table_fill id -> Format.fprintf fmt "table.fill %a" table_idx id
-  | Table_copy (id, id') -> Format.fprintf fmt "table.copy %a %a" table_idx id table_idx id'
-  | Table_init (tid, eid) -> Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
+  | Table_copy (id, id') ->
+    Format.fprintf fmt "table.copy %a %a" table_idx id table_idx id'
+  | Table_init (tid, eid) ->
+    Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
   | Elem_drop id -> Format.fprintf fmt "elem.drop %a" elem_idx id
   | I_load (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_load (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
   | I_store (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_store (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
-  | I_load8 (n, s, ma) -> Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
-  | I_load16 (n, s, ma) -> Format.fprintf fmt "i%a.load16_%a %a" nn n sx s memarg ma
+  | I_load8 (n, s, ma) ->
+    Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
+  | I_load16 (n, s, ma) ->
+    Format.fprintf fmt "i%a.load16_%a %a" nn n sx s memarg ma
   | I64_load32 (s, ma) -> Format.fprintf fmt "i64.load32_%a %a" sx s memarg ma
   | I_store8 (n, ma) -> Format.fprintf fmt "i%a.store8 %a" nn n memarg ma
   | I_store16 (n, ma) -> Format.fprintf fmt "i%a.store16 %a" nn n memarg ma
@@ -228,7 +243,7 @@ let instr fmt = function
   | If_else (_ty, _expr, _expr') -> assert false
   | Br id -> Format.fprintf fmt "br %a" label_idx id
   | Br_if id -> Format.fprintf fmt "br_if %a" label_idx id
-  | Br_table (_ids, _id)-> assert false
+  | Br_table (_ids, _id) -> assert false
   | Return -> Format.fprintf fmt "return"
   | Call id -> Format.fprintf fmt "call %a" func_idx id
   | Call_indirect (_tbl_id, _ty_id) -> assert false
@@ -236,19 +251,19 @@ let instr fmt = function
 let body fmt instrs =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline instr fmt instrs
 
-let func fmt (f: func) =
+let func fmt (f : func) =
   (* TODO: typeuse ? *)
   Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals body f.body
 
 let expr _fmt _e = assert false
 
 let datas _fmt _datas = assert false
+
 let elems _fmt _elems = assert false
 
 let start fmt = function
   | None -> ()
-  | Some start ->
-    Format.fprintf fmt "(start %a)" func_idx start
+  | Some start -> Format.fprintf fmt "(start %a)" func_idx start
 
 let export_desc fmt = function
   | Func id -> Format.fprintf fmt "(func %a)" func_idx id
@@ -262,14 +277,14 @@ let export fmt e =
 let exports fmt exports =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline export fmt exports
 
-let global fmt (g: global) =
-  Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_ expr g.init
+let global fmt (g : global) =
+  Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_ expr
+    g.init
 
 let globals fmt globals =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline global fmt globals
 
-let mem fmt (id, ty) =
-  Format.fprintf fmt "(memory %a %a)" id_opt id mem_type ty
+let mem fmt (id, ty) = Format.fprintf fmt "(memory %a %a)" id_opt id mem_type ty
 
 let mems fmt mems =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline mem fmt mems
@@ -280,7 +295,7 @@ let table fmt (id, ty) =
 let tables fmt tables =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline table fmt tables
 
-let funcs fmt (funcs: func list) =
+let funcs fmt (funcs : func list) =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline func fmt funcs
 
 let import_desc fmt : import_desc -> Unit.t = function
@@ -288,23 +303,25 @@ let import_desc fmt : import_desc -> Unit.t = function
   | Func (id, tidx) -> Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx
   | Table (id, t) -> Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Mem (id, t) -> Format.fprintf fmt "(memory %a %a)" id_opt id mem_type t
-  | Global (id, t) -> Format.fprintf fmt "(global %a %a)" id_opt id global_type t
+  | Global (id, t) ->
+    Format.fprintf fmt "(global %a %a)" id_opt id global_type t
 
 let import fmt i =
-  Format.fprintf fmt "(import %a %a %a)" name i.module_ name i.name import_desc i.desc
+  Format.fprintf fmt "(import %a %a %a)" name i.module_ name i.name import_desc
+    i.desc
 
 let imports fmt imports =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline import fmt imports
 
-let type_ fmt (i, ft) =
-  Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
+let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
 let types fmt types =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline type_ fmt types
 
 let module_fields fmt m =
-  Format.fprintf fmt
-    "%a@.%a@.%a@.%a@%a@%a@%a@%a@%a@%a@." types m.types imports m.imports funcs m.funcs tables m.tables mems m.mems globals m.globals exports m.exports start m.start elems m.elems datas m.datas
+  Format.fprintf fmt "%a@.%a@.%a@.%a@%a@%a@%a@%a@%a@%a@." types m.types imports
+    m.imports funcs m.funcs tables m.tables mems m.mems globals m.globals
+    exports m.exports start m.start elems m.elems datas m.datas
 
 let module_ fmt m =
   Format.fprintf fmt "(module %a@.%a)" id_opt m.id module_fields m
