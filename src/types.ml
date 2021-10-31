@@ -70,9 +70,13 @@ type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
-type nonrec param_type = (id option * val_type) list
+type nonrec param = id option * val_type
 
-type nonrec result_type = val_type list
+type nonrec param_type = param list
+
+type nonrec result_ = val_type
+
+type nonrec result_type = result_ list
 
 type nonrec func_type = param_type * result_type
 
@@ -281,7 +285,7 @@ type expr = instr list
 
 type func =
   { (* type_ : type_idx TODO: ??? *)
-    locals : (val_type * id option) list
+    locals : param list
   ; body : expr
   ; id : id option
   }

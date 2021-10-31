@@ -62,18 +62,18 @@ let val_type fmt = function
   | Num_type t -> num_type fmt t
   | Ref_type t -> ref_type fmt t
 
-let param_type fmt (i, vt) =
-  Format.fprintf fmt "(param %a %a)" id_opt i val_type vt
+let param fmt (i, vt) = Format.fprintf fmt "(param %a %a)" id_opt i val_type vt
 
-let params fmt params =
-  Format.pp_print_list ~pp_sep:Format.pp_print_space param_type fmt params
+let param_type fmt params =
+  Format.pp_print_list ~pp_sep:Format.pp_print_space param fmt params
 
-let result_type fmt vt = Format.fprintf fmt "(result %a)" val_type vt
+let result_ fmt vt = Format.fprintf fmt "(result %a)" val_type vt
 
-let results fmt results =
-  Format.pp_print_list ~pp_sep:Format.pp_print_space result_type fmt results
+let result_type fmt results =
+  Format.pp_print_list ~pp_sep:Format.pp_print_space result_ fmt results
 
-let func_type fmt (l, r) = Format.fprintf fmt "(func %a %a)" params l results r
+let func_type fmt (l, r) =
+  Format.fprintf fmt "(func %a %a)" param_type l result_type r
 
 let limits fmt { min; max } =
   match max with
@@ -90,7 +90,7 @@ let mut fmt = function
 
 let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
 
-let local fmt (t, id) = Format.fprintf fmt "(local %a %a)" id_opt id val_type t
+let local fmt (id, t) = Format.fprintf fmt "(local %a %a)" id_opt id val_type t
 
 let locals fmt locals =
   Format.pp_print_list ~pp_sep:Format.pp_print_space local fmt locals
@@ -200,7 +200,7 @@ let instr fmt = function
     match vt with
     | None -> Format.fprintf fmt "select"
     | Some vt ->
-      Format.fprintf fmt "select (%a)" results vt
+      Format.fprintf fmt "select (%a)" result_type vt
       (* TODO: are the parens needed ? *)
   end
   | Local_get id -> Format.fprintf fmt "local.get %a" local_idx id
