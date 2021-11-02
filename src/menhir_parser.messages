@@ -1,4 +1,4 @@
-module_: LPAR MODULE ID U32
+module_: LPAR MODULE ID XOR
 ##
 ## Ends in an error in state: 4.
 ##
@@ -10,23 +10,23 @@ module_: LPAR MODULE ID U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC RPAR
+module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC ID XOR
 ##
-## Ends in an error in state: 39.
+## Ends in an error in state: 536.
 ##
-## export_desc -> FUNC . func_idx [ RPAR ]
+## module_field -> EXPORT NAME LPAR FUNC ID . RPAR [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
-## FUNC
+## EXPORT NAME LPAR FUNC ID
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC U32 RPAR U32
+module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC U32 RPAR XOR
 ##
-## Ends in an error in state: 47.
+## Ends in an error in state: 538.
 ##
-## par(module_field) -> LPAR module_field . RPAR [ RPAR LPAR ]
+## list(par(module_field)) -> LPAR module_field . RPAR list(par(module_field)) [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAR module_field
@@ -34,35 +34,50 @@ module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC U32 RPAR U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC U32 U32
+module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC U32 XOR
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 534.
 ##
-## par(export_desc) -> LPAR export_desc . RPAR [ RPAR ]
+## module_field -> EXPORT NAME LPAR FUNC U32 . RPAR [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR export_desc
+## EXPORT NAME LPAR FUNC U32
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT NAME LPAR U32
+module_: LPAR MODULE LPAR EXPORT NAME LPAR FUNC XOR
 ##
-## Ends in an error in state: 38.
+## Ends in an error in state: 533.
 ##
-## par(export_desc) -> LPAR . export_desc RPAR [ RPAR ]
+## module_field -> EXPORT NAME LPAR FUNC . ID RPAR [ RPAR ]
+## module_field -> EXPORT NAME LPAR FUNC . U32 RPAR [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
-## LPAR
+## EXPORT NAME LPAR FUNC
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT NAME U32
+module_: LPAR MODULE LPAR EXPORT NAME LPAR XOR
 ##
-## Ends in an error in state: 37.
+## Ends in an error in state: 532.
 ##
-## module_field -> EXPORT NAME . par(export_desc) [ RPAR ]
+## module_field -> EXPORT NAME LPAR . FUNC ID RPAR [ RPAR ]
+## module_field -> EXPORT NAME LPAR . FUNC U32 RPAR [ RPAR ]
+##
+## The known suffix of the stack is as follows:
+## EXPORT NAME LPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+module_: LPAR MODULE LPAR EXPORT NAME XOR
+##
+## Ends in an error in state: 531.
+##
+## module_field -> EXPORT NAME . LPAR FUNC ID RPAR [ RPAR ]
+## module_field -> EXPORT NAME . LPAR FUNC U32 RPAR [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXPORT NAME
@@ -70,11 +85,12 @@ module_: LPAR MODULE LPAR EXPORT NAME U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR EXPORT U32
+module_: LPAR MODULE LPAR EXPORT XOR
 ##
-## Ends in an error in state: 36.
+## Ends in an error in state: 530.
 ##
-## module_field -> EXPORT . NAME par(export_desc) [ RPAR ]
+## module_field -> EXPORT . NAME LPAR FUNC ID RPAR [ RPAR ]
+## module_field -> EXPORT . NAME LPAR FUNC U32 RPAR [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXPORT
@@ -82,11 +98,11 @@ module_: LPAR MODULE LPAR EXPORT U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR FUNC ID U32
+module_: LPAR MODULE LPAR FUNC ID XOR
 ##
-## Ends in an error in state: 8.
+## Ends in an error in state: 7.
 ##
-## module_field -> FUNC option(id) . nonempty_list(par(param)) par(result) body [ RPAR ]
+## module_field -> FUNC option(id) . list(par(param_or_result)) list(par(instr)) [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## FUNC option(id)
@@ -94,36 +110,16 @@ module_: LPAR MODULE LPAR FUNC ID U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR FUNC LPAR PARAM EXTERN_REF RPAR U32
+module_: LPAR MODULE LPAR FUNC LPAR PARAM ID EXTEND_I32
 ##
-## Ends in an error in state: 25.
+## Ends in an error in state: 18.
 ##
-## nonempty_list(par(param)) -> par(param) . [ LPAR ]
-## nonempty_list(par(param)) -> par(param) . nonempty_list(par(param)) [ LPAR ]
-##
-## The known suffix of the stack is as follows:
-## par(param)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-module_: LPAR MODULE LPAR FUNC LPAR PARAM EXTERN_REF U32
-##
-## Ends in an error in state: 23.
-##
-## par(param) -> LPAR param . RPAR [ LPAR ]
-##
-## The known suffix of the stack is as follows:
-## LPAR param
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-module_: LPAR MODULE LPAR FUNC LPAR PARAM ID EXPORT
-##
-## Ends in an error in state: 12.
-##
-## param -> PARAM option(id) . val_type [ RPAR ]
+## param_or_result -> PARAM option(id) . I32 [ RPAR ]
+## param_or_result -> PARAM option(id) . I64 [ RPAR ]
+## param_or_result -> PARAM option(id) . F32 [ RPAR ]
+## param_or_result -> PARAM option(id) . F64 [ RPAR ]
+## param_or_result -> PARAM option(id) . FUNC_REF [ RPAR ]
+## param_or_result -> PARAM option(id) . EXTERN_REF [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## PARAM option(id)
@@ -131,11 +127,16 @@ module_: LPAR MODULE LPAR FUNC LPAR PARAM ID EXPORT
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR FUNC LPAR PARAM U32
+module_: LPAR MODULE LPAR FUNC LPAR PARAM XOR
 ##
-## Ends in an error in state: 10.
+## Ends in an error in state: 16.
 ##
-## param -> PARAM . option(id) val_type [ RPAR ]
+## param_or_result -> PARAM . option(id) I32 [ RPAR ]
+## param_or_result -> PARAM . option(id) I64 [ RPAR ]
+## param_or_result -> PARAM . option(id) F32 [ RPAR ]
+## param_or_result -> PARAM . option(id) F64 [ RPAR ]
+## param_or_result -> PARAM . option(id) FUNC_REF [ RPAR ]
+## param_or_result -> PARAM . option(id) EXTERN_REF [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## PARAM
@@ -143,11 +144,52 @@ module_: LPAR MODULE LPAR FUNC LPAR PARAM U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR FUNC LPAR U32
+module_: LPAR MODULE LPAR FUNC LPAR RESULT EXTERN_REF RPAR XOR
+##
+## Ends in an error in state: 26.
+##
+## list(par(param_or_result)) -> LPAR param_or_result RPAR . list(par(param_or_result)) [ RPAR LPAR ]
+##
+## The known suffix of the stack is as follows:
+## LPAR param_or_result RPAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+module_: LPAR MODULE LPAR FUNC LPAR RESULT EXTERN_REF XOR
+##
+## Ends in an error in state: 25.
+##
+## list(par(param_or_result)) -> LPAR param_or_result . RPAR list(par(param_or_result)) [ RPAR LPAR ]
+##
+## The known suffix of the stack is as follows:
+## LPAR param_or_result
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+module_: LPAR MODULE LPAR FUNC LPAR RESULT XOR
 ##
 ## Ends in an error in state: 9.
 ##
-## par(param) -> LPAR . param RPAR [ LPAR ]
+## param_or_result -> RESULT . I32 [ RPAR ]
+## param_or_result -> RESULT . I64 [ RPAR ]
+## param_or_result -> RESULT . F32 [ RPAR ]
+## param_or_result -> RESULT . F64 [ RPAR ]
+## param_or_result -> RESULT . FUNC_REF [ RPAR ]
+## param_or_result -> RESULT . EXTERN_REF [ RPAR ]
+##
+## The known suffix of the stack is as follows:
+## RESULT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+module_: LPAR MODULE LPAR FUNC LPAR XOR
+##
+## Ends in an error in state: 8.
+##
+## list(par(param_or_result)) -> LPAR . param_or_result RPAR list(par(param_or_result)) [ RPAR LPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAR
@@ -155,12 +197,23 @@ module_: LPAR MODULE LPAR FUNC LPAR U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
+module_: LPAR MODULE LPAR FUNC RPAR XOR
+##
+## Ends in an error in state: 539.
+##
+## list(par(module_field)) -> LPAR module_field RPAR . list(par(module_field)) [ RPAR ]
+##
+## The known suffix of the stack is as follows:
+## LPAR module_field RPAR
+##
 
-module_: LPAR MODULE LPAR FUNC U32
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+module_: LPAR MODULE LPAR FUNC XOR
 ##
 ## Ends in an error in state: 6.
 ##
-## module_field -> FUNC . option(id) nonempty_list(par(param)) par(result) body [ RPAR ]
+## module_field -> FUNC . option(id) list(par(param_or_result)) list(par(instr)) [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## FUNC
@@ -168,11 +221,11 @@ module_: LPAR MODULE LPAR FUNC U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE LPAR U32
+module_: LPAR MODULE LPAR XOR
 ##
 ## Ends in an error in state: 5.
 ##
-## par(module_field) -> LPAR . module_field RPAR [ RPAR LPAR ]
+## list(par(module_field)) -> LPAR . module_field RPAR list(par(module_field)) [ RPAR ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAR
@@ -180,9 +233,9 @@ module_: LPAR MODULE LPAR U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE RPAR U32
+module_: LPAR MODULE RPAR XOR
 ##
-## Ends in an error in state: 52.
+## Ends in an error in state: 542.
 ##
 ## module_ -> LPAR MODULE option(id) list(par(module_field)) RPAR . EOF [ # ]
 ##
@@ -192,7 +245,7 @@ module_: LPAR MODULE RPAR U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR MODULE U32
+module_: LPAR MODULE XOR
 ##
 ## Ends in an error in state: 2.
 ##
@@ -204,7 +257,7 @@ module_: LPAR MODULE U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: LPAR U32
+module_: LPAR XOR
 ##
 ## Ends in an error in state: 1.
 ##
@@ -216,7 +269,7 @@ module_: LPAR U32
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-module_: U32
+module_: XOR
 ##
 ## Ends in an error in state: 0.
 ##
