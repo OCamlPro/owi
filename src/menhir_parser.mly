@@ -45,29 +45,43 @@
 %token UNREACHABLE
 %token CALL_INDIRECT
 %token LOAD32
-%token BLOCK ALIGN EQUAL IFELSE MEMORY RETURN NOP
+%token BLOCK ALIGN EQUAL MEMORY RETURN NOP
 %token FUNC
-%token EXPORT
+%token EXPORT IMPORT
+%token EXTERN
+%token MUTABLE
 %token MODULE
 %token RPAR
 %token LPAR
 %token EOF
-%token IF
+%token IF ELSE THEN
 %token DOT
 %token CONST
+%token START TYPE
+%token<string> NAT
 
 %{
 open Types
 
 type p_module_field =
-  | MExport of export
+  | MType of type_
+  | MGlobal of global
+  | MTable of table
+  | MMem of mem
   | MFunc of func
+  | MElem of elem
+  | MData of data
+  | MStart of start
+  | MImport of import
+  | MExport of export
 
 type p_param_or_result =
   | TmpParam of param
   | TmpResult of result_
 
-let log = Format.eprintf
+let nat32 s =
+  try Int32.of_string s with Failure _ -> failwith "error i32 constant out of range"
+
 %}
 
 %start <Types.module_> module_
@@ -76,96 +90,103 @@ let log = Format.eprintf
 
 %%
 
+(* Helpers *)
+
 let par(X) ==
-  | LPAR; x = X; RPAR; { x }
+  | LPAR; ~ = X; RPAR; <>
 
-let id ==
-  | id = ID; {
-    let id = String.sub id 1 (String.length id - 1) in
-    let res = id in
-    log "PARSED ID %a@." Pp.id res;
-    res
-  }
+(* Types *)
 
-let indice ==
-  | id = ID; {
-    let id = String.sub id 1 (String.length id - 1) in
-    let res = Symbolic id in
-    log "PARSED INDICE %a@." Pp.indice res;
-    res
-  }
-  | u = U32; {
-    let res = Raw u in
-    log "PARSED INDICE %a@." Pp.indice res;
-    res
-  }
-
-let func_idx ==
-  | i = indice; {
-    let res = i in
-    log "PARSED FUNC_IDX %a@." Pp.func_idx res;
-    res
-  }
-
-let export_desc ==
-  | FUNC; f = func_idx; {
-    let res = Func f in
-    log "PARSED EXPORT_DESC %a@." Pp.export_desc res;
-    res
-  }
-
-let num_type ==
-  | I32; {
-    let res = Types.I32 in
-    log "PARSED NUMTYPE %a@." Pp.num_type res;
-    res
-  }
-  | I64; {
-    let res = Types.I64 in
-    log "PARSED NUMTYPE %a@." Pp.num_type res;
-    res
-  }
-  | F32; {
-    let res = Types.F32 in
-    log "PARSED NUMTYPE %a@." Pp.num_type res;
-    res
-  }
-  | F64; {
-    let res = Types.F64 in
-    log "PARSED NUMTYPE %a@." Pp.num_type res;
-    res
-  }
+let ref_kind ==
+  | FUNC; { Func_ref }
+  | EXTERN; { Extern_ref }
 
 let ref_type ==
-  | FUNC_REF; {
-    let res = Func_ref in
-    log "PARSED REF_TYPE %a@." Pp.ref_type res;
-    res
-  }
-  | EXTERN_REF; {
-    let res = Extern_ref in
-    log "PARSED REF_TYPE %a@." Pp.ref_type res;
-    res
-  }
+  | FUNC_REF; { Func_ref }
+  | EXTERN_REF; { Extern_ref }
 
 let val_type ==
-  | nt = num_type; {
-    let res = Num_type nt in
-    log "PARSED VAL_TYPE %a@." Pp.val_type res;
-    res
+  | ~ = num_type; <Num_type>
+  | ~ = ref_type; <Ref_type>
+
+let global_type ==
+  | t = val_type; { Const, t }
+  | t = par(preceded(MUTABLE, val_type)); { Var, t }
+
+let def_type ==
+  | ~ = par(preceded(FUNC, func_type)); <>
+
+let func_type :=
+  | o = list(par(preceded(RESULT, list(val_type)))); { [], o }
+  | LPAR; PARAM; option(id); i = list(val_type); RPAR; x = func_type; {
+    let i', o = x in
+    i @ i', o
   }
-  | rt = ref_type; {
-    let res = Ref_type rt in
-    log "PARSED VAL_TYPE@ %a@." Pp.val_type res;
-    res
-  }
+
+let table_type ==
+  | ~ = limits; ~ = ref_type; { limits, ref_type }
+
+let mem_type ==
+  | ~ = limits; <>
+
+let limits ==
+  | min = NAT; { min = nat32; max = None }
+  | min = NAT; max = NAT; { min = nat32 min; max = Some (nat32 max) }
+
+let type_use ==
+  | ~ = par(preceded(TYPE, indice)); <>
+
+(* Immediates *)
+
+let num ==
+  | ~ = NAT; <>
+  | ~ = INT; <>
+  | ~ = FLOAT; <>
+
+(* var *)
+let indice ==
+  | ~ = ID; <Symbolic>
+  | ~ = U32; <Raw>
+
+(* bind_var *)
+let id ==
+  | ~ = ID; <>
+
+let func_idx ==
+  | ~ = indice; <>
+let elem_idx ==
+  | ~ = indice; <>
+let table_idx ==
+  | ~ = indice; <>
+let local_idx ==
+  | ~ = indice; <>
+let data_idx ==
+  | ~ = indice; <>
+let global_idx ==
+  | ~ = indice; <>
+let label_idx ==
+  | ~ = indice; <>
+let type_idx ==
+  | ~ = indice; <>
+
+(* TODO: TO CLASSIFY *)
+
+
+let export_desc ==
+  | FUNC; ~ = func_idx; <Func>
+
+let num_type ==
+  | I32; { Types.I32 }
+  | I64; { Types.I64 }
+  | F32; { Types.F32 }
+  | F64; { Types.F64 }
 
 let inn ==
   | I32; { Types.S32 }
   | I64; { Types.S64 }
 
 let result ==
- | RESULT; t = val_type; { t }
+ | RESULT; ~ = val_type; <>
 
 let fnn ==
   | F32; { Types.S32 }
@@ -231,26 +252,21 @@ let frelop ==
   | LE; { Le }
   | GE; { Ge }
 
-let elem_idx ==
-  | i = indice; { i }
-
-let table_idx ==
-  | i = indice; { i }
-
-let local_idx ==
-  | i = indice; { i }
-
-let data_idx ==
-  | i = indice; { i }
-
-let global_idx ==
-  | i = indice; { i }
-
-let label_idx ==
-  | i = indice; { i }
-
 let memarg ==
   | OFFSET; EQUAL; offset = U32; ALIGN; EQUAL; align = U32; { {offset = offset; align = align} }
+
+let block_type ==
+  | LPAR; RESULT; ~ = type_idx; LPAR; <Type_idx>
+  | LPAR; RESULT; t = val_type; RPAR; { Val_type (Some t) }
+  | { Val_type None }
+
+let else_ :=
+  | LPAR; ELSE; ~ = expr; RPAR; <>
+  | { [] }
+
+let then_ :=
+  | LPAR; THEN; ~ = expr; RPAR; <>
+  | i = instr; { [i] }
 
 let instr :=
   | I32; DOT; CONST; i = INT; { I32_const (Int64.to_int32 i) }
@@ -313,49 +329,68 @@ let instr :=
   | UNREACHABLE; { Unreachable }
   | BLOCK; { assert false }
   | LOOP; { assert false }
-  | IFELSE; { assert false }
+  | IF; (*_bt = option(block_type);*) _cond = par(instr);
+    i = then_;
+    i2 = else_; {
+      If_else (Val_type None, i, i2)
+    }
   | BR; ~ = label_idx; <Br>
   | BRIF; ~ = label_idx; <Br_if>
   | BRTABLE; { assert false }
   | RETURN; { Return }
   | CALL; ~ = func_idx; <Call>
   | CALL_INDIRECT; { assert false }
-  | i = par(instr); { i }
+  | ~ = par(instr); <>
+
+let expr :=
+  | ~ = list(instr); <>
 
 let param_or_result :=
   | PARAM; id = option(id); t = val_type; {
     let res = id, t in
-    log "PARSED PARAM %a@." Pp.param res;
     TmpParam res
   }
   | r = result; {
     let res = r in
-    log "PARSED RESULT %a@." Pp.result_ res;
     TmpResult res
   }
 
-let module_field :=
-  | EXPORT; n = NAME; d = par(export_desc); {
-    let res = { name = n; desc = d } in
-    log "PARSED MODULE FIELD %a@." Pp.export res;
-    MExport res
-  }
-  | FUNC; id = option(id); sig_ = list(par(param_or_result)); body = list(par(instr)); {
+let func_field :=
+  | FUNC; id = option(id); sig_ = list(par(param_or_result)); body = expr; {
     let (params, results) = List.fold_left (fun (params, results) -> function
       | TmpParam p -> if results <> [] then failwith "param after result" else (p::params, [])
       | TmpResult r -> (params, r::results)
     ) ([], []) sig_ in
-    let params = List.rev params in
     let _results = List.rev results in
-    let res = {
-      locals = params;
+    {
+      locals = List.rev params;
       body = body;
       id = id;
     }
-    in
-    log "PARSED MODULE FIELD %a@." Pp.func res;
-    MFunc res
   }
+
+let import_field :=
+  | IMPORT; {}
+
+let export_field :=
+  | EXPORT; n = NAME; d = par(export_desc); { { name = n; desc = d; } }
+
+(* Modules *)
+
+let type_ ==
+  | ~ = def_type; <>
+
+let type_def ==
+  | LPAR; id = option(id); TYPE; t = type_; RPAR; { id, t }
+
+let start ==
+  | ~ = par(preceded(START, func_idx)); <>
+
+let module_field :=
+  | ~ = type_def; <MType>
+  | ~ = export_field; <MExport>
+  | ~ = func_field; <MFunc>
+  | ~ = start; <MStart>
 
 let module_ :=
   | LPAR; MODULE; id = option(id); fields = list(par(module_field)); RPAR; EOF; {
@@ -363,6 +398,21 @@ let module_ :=
       match f with
       | MExport e -> { m with exports = e::m.exports }
       | MFunc f -> { m with funcs = f::m.funcs }
+      | MStart start ->
+        if Option.is_some m.start then failwith "multiple start sections"
+        else { m with start = Some start }
+      | MImport i ->
+        if m.funcs <> [] then failwith "import after function definition"
+        else if m.mems <> [] then failwith "import after memory definition"
+        else if m.tables <> [] then failwith "import after table definition"
+        else if m.globals <> [] then failwith "import after global definition"
+        else { m with imports = i::m.imports }
+      | MData d -> { m with datas = d::m.datas }
+      | MElem e -> { m with elems = e::m.elems }
+      | MMem mem -> { m with mems = mem::m.mems }
+      | MType t -> { m with types = t::m.types }
+      | MGlobal g -> { m with globals = g::m.globals }
+      | MTable t -> { m with tables = t::m.tables }
       ) {
         id = id;
         types = [];
@@ -378,6 +428,15 @@ let module_ :=
       }
       fields
     in
-    Format.eprintf "PARSED MODULE %a@." Pp.module_ res;
-    res
+    { res with
+      types = List.rev res.types;
+      funcs = List.rev res.funcs;
+      tables = List.rev res.tables;
+      mems = List.rev res.mems;
+      globals = List.rev res.globals;
+      elems = List.rev res.elems;
+      datas = List.rev res.datas;
+      imports = List.rev res.imports;
+      exports = List.rev res.exports;
+    }
   }

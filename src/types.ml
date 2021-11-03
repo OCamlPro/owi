@@ -269,17 +269,16 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of block_type * instr list
-  | Loop of block_type * instr list
-  | If_else of block_type * instr list * instr list
+  | Block of block_type * expr
+  | Loop of block_type * expr
+  | If_else of block_type * expr * expr
   | Br of label_idx
   | Br_if of label_idx
   | Br_table of label_idx list * label_idx
   | Return
   | Call of func_idx
   | Call_indirect of table_idx * type_idx
-
-type expr = instr list
+and expr = instr list
 
 (** Modules *)
 
@@ -346,10 +345,11 @@ type export =
   ; desc : export_desc
   }
 
+type type_ = (id option * func_type)
+
 type module_ =
   { id : id option
-  ; (* only for text mode *)
-    types : (id option * func_type) list
+  ; types : type_ list
   ; funcs : func list
   ; tables : table list
   ; mems : mem list
