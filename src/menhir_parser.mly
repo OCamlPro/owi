@@ -1,68 +1,8 @@
-%token<String.t> ID
-%token<String.t> NAME
 %token<Unsigned.UInt32.t> U32
 %token<Int64.t> INT
 %token<Float.t> FLOAT
-%token PARAM RESULT
-%token FUNC_REF EXTERN_REF
-%token I32 I64 F32 F64
-%token CLZ CTZ POPCNT
-%token ABS NEG SQRT CEIL FLOOR TRUNC NEAREST
-%token SIGNED UNSIGNED
-%token ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN
-%token EQZ
-%token EQ NE LT GT LE GE
-%token EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64
-%token TABLE GROW INIT COPY
-%token TEE
-%token ITEM
-%token REF
-%token SELECT
-%token DEMOTE_F64
-%token DROP
-%token UNDERSCORE
-%token GET
-%token FILL
-%token CONVERT
-%token SAT
-%token PROMOTE_F32
-%token SIZE
-%token SET
-%token IS_NULL
-%token LOCAL
-%token NULL
-%token REINTERPRET
-%token GLOBAL
-%token ELEM
-%token STORE8 STORE16 STORE STORE32
-%token BRTABLE
-%token CALL
-%token LOAD LOAD8
-%token LOAD16
-%token LOOP
-%token DATA
-%token BRIF BR
-%token OFFSET
-%token UNREACHABLE
-%token CALL_INDIRECT
-%token LOAD32
-%token BLOCK ALIGN EQUAL MEMORY RETURN NOP
-%token FUNC
-%token EXPORT IMPORT
-%token EXTERN
-%token MUTABLE
-%token MODULE
-%token RPAR
-%token LPAR
-%token EOF
-%token IF ELSE THEN
-%token DOT
-%token CONST
-%token START TYPE
-%token DECLARE
-%token END
-%token<string> NAT
-%token<string> STRING
+%token<String.t> ID NAME NAT STRING
+%token PARAM RESULT FUNC_REF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BRTABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BRIF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END
 
 %{
 open Types
@@ -78,12 +18,6 @@ type p_module_field =
   | MStart of start
   | MImport of import
   | MExport of export
-
-(*
-type p_param_or_result =
-  | TmpParam of param
-  | TmpResult of result_
-*)
 
 let u32 s =
   try Unsigned.UInt32.of_string s
@@ -129,26 +63,22 @@ let val_type :=
   | ~ = ref_type; <Ref_type>
 
 let global_type ==
-  | t = val_type; { Const, t }
-  | t = par(preceded(MUTABLE, val_type)); { Var, t }
+  | ~ = val_type; { Const, val_type }
+  | val_type = par(preceded(MUTABLE, val_type)); { Var, val_type }
 
 let def_type ==
   | ~ = par(preceded(FUNC, func_type)); <>
 
 let func_type :=
-    | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
-  | o = func_type_result; { [], o }
-  | LPAR; PARAM; i = list(val_type); RPAR; x = func_type; {
-    let i', o = x in
-    ((i @ i', o) : func_type)
+  | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
+  | i = par(list(val_type)); ~ = func_type; {
+    let i', o = func_type in
+    i @ i', o
   }
-  | LPAR; PARAM; _id = option(id); i = val_type; RPAR; x = func_type; {
-    let i', o = x in
-    ((i::i', o) : func_type)
+  | LPAR; PARAM; _id = option(id); ~ = val_type; RPAR; ~ = func_type; {
+    let i', o = func_type in
+    val_type::i', o
   }
-
-let func_type_result :=
-  | LPAR; RESULT; l = list(val_type); RPAR; r = func_type_result; { l @ r }
 
 let table_type ==
   | ~ = limits; ~ = ref_type; { limits, ref_type }
@@ -165,10 +95,12 @@ let type_use ==
 
 (* Immediates *)
 
+(*
 let num ==
   | ~ = NAT; <>
   | ~ = INT; <>
   | ~ = FLOAT; <>
+*)
 
 (* var *)
 let indice ==
@@ -336,7 +268,7 @@ let plain_instr :=
   | ~ = fnn; DOT; CONVERT; UNDERSCORE; ~ = inn; s = sx; <F_convert_i>
   | ~ = inn; DOT; REINTERPRET; UNDERSCORE; ~ = fnn; <I_reinterpret_f>
   | ~ = fnn; DOT; REINTERPRET; UNDERSCORE; ~ = inn; <F_reinterpret_i>
-  | REF; DOT; NULL; ~ = ref_type; <Ref_null>
+  | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
   | REF; DOT; IS_NULL; { Ref_is_null }
   | REF; FUNC; ~ = func_idx; <Ref_func>
   | ~ = inn; DOT; LOAD; ~ = memarg; <I_load>
@@ -787,9 +719,12 @@ let table ==
   | Some id -> table_fields (Symbolic id)
 }
 
+(* TODO: this is useful for last case of table_fields *)
+(*
 let init ==
   | ~ = list(elem_var); <>
   | ~ = elem_expr; <>
+*)
 
 let table_fields :=
   | ~ = table_type; {
@@ -808,7 +743,7 @@ let table_fields :=
     let tabs, elems, ims, exs = table_fields x in
       tabs, elems, ims, (inline_export (Export_table x))::exs
   }
-(* TODO: fix this conflict
+  (* TODO: fixme
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     let max = Some min in
@@ -818,7 +753,7 @@ let table_fields :=
       [{ type_ = Func_ref; init; mode }],
       [], []
   }
-     *)
+  *)
 
 (* TODO: use id *)
 let data ==
@@ -826,7 +761,7 @@ let data ==
     { init; mode = Data_passive }
   }
   | DATA; _ = option(id); memory_use = option(memory_use); ~ = offset; init = string_list; {
-    let memory_use = Option.value memory_use ~default:([I32_const.l]) in
+    let memory_use = Option.value memory_use ~default:(Raw (Unsigned.UInt32.of_int32 0l)) in
     { init; mode = Data_active (memory_use, offset) }
   }
 
@@ -939,36 +874,37 @@ let start ==
 
 let module_field :=
   | t = type_def; { [MType t] }
-  | e = par(export); { [MExport e] }
-  | f = par(func); {
+  | e = export; { [MExport e] }
+  | f = func; {
     let funcs, ims, exs = f in
       (List.map (fun f -> MFunc f) funcs)
     @ (List.map (fun i -> MImport i) ims)
     @ (List.map (fun e -> MExport e) exs)
   }
-  | s = par(start); { [MStart s] }
-  | i = par(import); { [MImport i] }
-  | e = par(elem); { [MElem e] }
-  | g = par(global); {
+  | s = start; { [MStart s] }
+  | i = import; { [MImport i] }
+  | e = elem; { [MElem e] }
+  | g = global; {
     let globs, ims, exs = g in
       (List.map (fun g -> MGlobal g) globs)
     @ (List.map (fun i -> MImport i) ims)
     @ (List.map (fun e -> MExport e) exs)
   }
-  | t = par(table); {
+  | t = table; {
     let tabs, elems, ims, exs = t in
       (List.map (fun t -> MTable (None, t)) tabs) (* TODO: is it really None ? *)
     @ (List.map (fun e -> MElem e) elems)
     @ (List.map (fun i -> MImport i) ims)
     @ (List.map (fun e -> MExport e) exs)
   }
-  | m = par(memory); {
+  | m = memory; {
     let mems, data, ims, exs = m in
       (List.map (fun (id, m) -> MMem (id, m)) mems)
     @ (List.map (fun d -> MData d) data)
     @ (List.map (fun i -> MImport i) ims)
     @ (List.map (fun e -> MExport e) exs)
   }
+  | d = par(data); { [MData d] }
 
 let module_ :=
   | LPAR; MODULE; id = option(id); fields = list(par(module_field)); RPAR; EOF; {
