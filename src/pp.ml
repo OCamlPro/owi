@@ -68,7 +68,7 @@ let block_type fmt = function
   | Val_type None -> ()
   | Val_type (Some t) -> Format.fprintf fmt "(result %a)" val_type t
 
-let param fmt (i, vt) = Format.fprintf fmt "(param %a %a)" id_opt i val_type vt
+let param fmt vt = Format.fprintf fmt "(param %a)" val_type vt
 
 let param_type fmt params =
   Format.pp_print_list ~pp_sep:Format.pp_print_space param fmt params
@@ -272,10 +272,10 @@ let start fmt = function
   | Some start -> Format.fprintf fmt "(start %a)" func_idx start
 
 let export_desc fmt = function
-  | Func id -> Format.fprintf fmt "(func %a)" func_idx id
-  | Table id -> Format.fprintf fmt "(table %a)" table_idx id
-  | Mem id -> Format.fprintf fmt "(memory %a)" mem_idx id
-  | Global id -> Format.fprintf fmt "(global %a)" global_idx id
+  | Export_func id -> Format.fprintf fmt "(func %a)" func_idx id
+  | Export_table id -> Format.fprintf fmt "(table %a)" table_idx id
+  | Export_mem id -> Format.fprintf fmt "(memory %a)" mem_idx id
+  | Export_global id -> Format.fprintf fmt "(global %a)" global_idx id
 
 let export fmt e =
   Format.fprintf fmt "(export %a %a)" name e.name export_desc e.desc
@@ -306,10 +306,13 @@ let funcs fmt (funcs : func list) =
 
 let import_desc fmt : import_desc -> Unit.t = function
   (* TODO: in Func case, check what is the "typeuse" *)
-  | Func (id, tidx) -> Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx
-  | Table (id, t) -> Format.fprintf fmt "(table %a %a)" id_opt id table_type t
-  | Mem (id, t) -> Format.fprintf fmt "(memory %a %a)" id_opt id mem_type t
-  | Global (id, t) ->
+  | Import_func (id, tidx) ->
+    Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx
+  | Import_table (id, t) ->
+    Format.fprintf fmt "(table %a %a)" id_opt id table_type t
+  | Import_mem (id, t) ->
+    Format.fprintf fmt "(memory %a %a)" id_opt id mem_type t
+  | Import_global (id, t) ->
     Format.fprintf fmt "(global %a %a)" id_opt id global_type t
 
 let import fmt i =

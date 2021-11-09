@@ -66,7 +66,7 @@ let token buf =
     let id = Utf8.lexeme buf in
     let id = String.sub id 1 (String.length id - 1) in
     ID id
-  | "" -> EOF
+  (* | "" -> EOF *)
   | _ ->
     let position = fst @@ lexing_positions buf in
     let tok = Utf8.lexeme buf in

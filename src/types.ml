@@ -5,8 +5,6 @@ let pp_pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
 
 (** Values *)
 
-type nonrec byte = Char.t
-
 type nonrec u8 = Unsigned.UInt8.t
 
 type nonrec u16 = Unsigned.UInt16.t
@@ -78,7 +76,7 @@ type nonrec result_ = val_type
 
 type nonrec result_type = result_ list
 
-type nonrec func_type = param_type * result_type
+type nonrec func_type = result_type * result_type
 
 type nonrec limits =
   { min : u32
@@ -278,16 +276,17 @@ type instr =
   | Return
   | Call of func_idx
   | Call_indirect of table_idx * type_idx
+
 and expr = instr list
 
-(** Modules *)
-
 type func =
-  { (* type_ : type_idx TODO: ??? *)
-    locals : param list
+  { type_f : type_idx
+  ; locals : param list
   ; body : expr
   ; id : id option
   }
+
+(* Tables & Memories *)
 
 type table = id option * table_type
 
@@ -300,33 +299,34 @@ type global =
   }
 
 type elem_mode =
-  | Passive
-  | Active of table_idx * expr (* table * offset *)
-  | Declarative
+  | Elem_passive
+  | Elem_active of table_idx * expr
+  | Elem_declarative
 
 type elem =
   { type_ : ref_type
-  ; init : expr list
+  ; init : expr
   ; mode : elem_mode
   }
 
 type data_mode =
-  | Passive
-  | Active of mem_idx * expr
-(* memory * offset *)
+  | Data_passive
+  | Data_active of mem_idx * expr
 
 type data =
-  { init : byte list
+  { init : string
   ; mode : data_mode
   }
+
+(* Modules *)
 
 type start = func_idx
 
 type import_desc =
-  | Func of id option * type_idx
-  | Table of id option * table_type
-  | Mem of id option * mem_type
-  | Global of id option * global_type
+  | Import_func of id option * type_idx
+  | Import_table of id option * table_type
+  | Import_mem of id option * mem_type
+  | Import_global of id option * global_type
 
 type import =
   { module_ : name
@@ -335,17 +335,17 @@ type import =
   }
 
 type export_desc =
-  | Func of func_idx
-  | Table of table_idx
-  | Mem of mem_idx
-  | Global of global_idx
+  | Export_func of func_idx
+  | Export_table of table_idx
+  | Export_mem of mem_idx
+  | Export_global of global_idx
 
 type export =
   { name : name
   ; desc : export_desc
   }
 
-type type_ = (id option * func_type)
+type type_ = id option * func_type
 
 type module_ =
   { id : id option
