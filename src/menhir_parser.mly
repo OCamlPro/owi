@@ -1,8 +1,7 @@
-%token<Unsigned.UInt32.t> U32
-%token<Int64.t> INT
+%token <String.t> NUM
 %token<Float.t> FLOAT
 %token<String.t> ID NAME NAT STRING
-%token PARAM RESULT FUNC_REF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BRTABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BRIF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END
+%token PARAM RESULT FUNC_REF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BRTABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BRIF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN
 
 %{
 open Types
@@ -36,7 +35,7 @@ let inline_type_explicit _ = Obj.magic
 
 %}
 
-%start <Types.module_> module_
+%start <Types.file> file
 
 %%
 
@@ -98,14 +97,14 @@ let type_use ==
 (*
 let num ==
   | ~ = NAT; <>
-  | ~ = INT; <>
+  | ~ = NUM; <>
   | ~ = FLOAT; <>
 *)
 
 (* var *)
 let indice ==
   | ~ = ID; <Symbolic>
-  | ~ = U32; <Raw>
+  | n = NUM; { Raw (Unsigned.UInt32.of_string n) }
 
 (* bind_var *)
 let id ==
@@ -192,8 +191,8 @@ let frelop ==
   | GE; { Ge }
 
 let memarg ==
-  | OFFSET; EQUAL; offset = U32; ALIGN; EQUAL; align = U32; {
-    {offset = offset; align = align}
+  | OFFSET; EQUAL; offset = NUM; ALIGN; EQUAL; align = NUM; {
+    {offset = u32 offset; align = u32 align}
   }
 
 let elem_idx == | ~ = indice; <>
@@ -246,8 +245,8 @@ let plain_instr :=
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
   | ELEM; DOT; DROP; ~ = elem_idx; <Elem_drop>
-  | I32; DOT; CONST; i = INT; { I32_const (Int64.to_int32 i) }
-  | I64; DOT; CONST; ~ = INT; <I64_const>
+  | I32; DOT; CONST; i = NUM; { I32_const (Int32.of_string i) }
+  | I64; DOT; CONST; n = NUM; { I64_const (Int64.of_string n) }
   | F32; DOT; CONST; ~ = FLOAT; <F32_const>
   | ~ = inn; DOT; ~ = iunop; <I_unop>
   | ~ = fnn; DOT; ~ = funop; <F_unop>
@@ -463,12 +462,13 @@ let expr_aux ==
   | LOOP; ~ = labeling_opt; b = block; {
     let _c' = labeling_opt in
     let bt, es = b in
+
     [], block bt es
   }
   | IF; ~ = labeling_opt; ~ = if_block; {
     let _c' = labeling_opt in
-    let bt, (es, es1, es2) = if_block in
-    es, if_ bt es1 es2
+    let bt, (_param_or_result, (es, es1, es2)) = if_block in
+    es, If_else (bt, es1, es2)
   }
 
 let expr :=
@@ -514,10 +514,10 @@ let call_expr_results :=
 
 let if_block ==
   | ~ = type_use; ~ = if_block_param_body; {
-    Obj.magic (type_use, if_block_param_body)
+    Type_idx type_use, if_block_param_body
   }
   | ~ = if_block_param_body; {
-    Obj.magic (if_block_param_body)
+    Val_type None, if_block_param_body
   }
 
 let if_block_param_body :=
@@ -644,9 +644,9 @@ let func_result_body :=
   }
 
 let func_body :=
-  | body = expr; {
-  let type_f = -1l in
-  let type_f = Unsigned.UInt32.of_int32 type_f in
+  | body = instr_list; {
+    let type_f = -1l in
+    let type_f = Unsigned.UInt32.of_int32 type_f in
     let type_f = Raw type_f in
     { type_f; locals = []; body; id = None }
   }
@@ -907,7 +907,7 @@ let module_field :=
   | d = par(data); { [MData d] }
 
 let module_ :=
-  | LPAR; MODULE; id = option(id); fields = list(par(module_field)); RPAR; EOF; {
+  | MODULE; id = option(id); fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let res = List.fold_left (fun m f ->
       match f with
@@ -917,11 +917,11 @@ let module_ :=
         if Option.is_some m.start then failwith "multiple start sections"
         else { m with start = Some start }
       | MImport i ->
-        if m.funcs <> [] then failwith "import after function definition"
-        else if m.mems <> [] then failwith "import after memory definition"
-        else if m.tables <> [] then failwith "import after table definition"
-        else if m.globals <> [] then failwith "import after global definition"
-        else { m with imports = i::m.imports }
+        if m.funcs <> [] then failwith "import after function definition";
+        if m.mems <> [] then failwith "import after memory definition";
+        if m.tables <> [] then failwith "import after table definition";
+        if m.globals <> [] then failwith "import after global definition";
+        { m with imports = i::m.imports }
       | MData d -> { m with datas = d::m.datas }
       | MElem e -> { m with elems = e::m.elems }
       | MMem mem -> { m with mems = mem::m.mems }
@@ -955,3 +955,15 @@ let module_ :=
       exports = List.rev res.exports;
     }
   }
+
+let assert_ ==
+    | ASSERT_RETURN; LPAR; INVOKE; s = NAME; a = list(expr); RPAR; r = expr; {
+    Assert_return (s, a, r)
+}
+
+let stanza ==
+  | ~ = par(module_); <Module>
+  | ~ = par(assert_); <Assert>
+
+let file :=
+  | ~ = list(stanza); EOF; <>

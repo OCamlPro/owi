@@ -28,23 +28,25 @@ let name = [%sedlex.regexp? "\"", Star (Sub (any, "\"")), "\""]
 
 let id = [%sedlex.regexp? "$", Plus id_char]
 
-let rec nom buf =
+let rec token buf =
   match%sedlex buf with
-  | Plus any_blank -> nom buf
-  | _ -> ()
-
-let token buf =
-  nom buf;
-  match%sedlex buf with
+  | Plus any_blank -> token buf
+  | "assert_return" -> ASSERT_RETURN
+  | "unreachable" -> UNREACHABLE
   | "module" -> MODULE
+  | "invoke" -> INVOKE
   | "export" -> EXPORT
   | "import" -> IMPORT
   | "result" -> RESULT
+  | "return" -> RETURN
   | "param" -> PARAM
   | "local" -> LOCAL
   | "const" -> CONST
+  | "else" -> ELSE
   | "func" -> FUNC
+  | "then" -> THEN
   | "get" -> GET
+  | "nop" -> NOP
   | "i32" -> I32
   | "i64" -> I64
   | "f32" -> F32
@@ -54,12 +56,13 @@ let token buf =
   | "_u" -> UNSIGNED
   | "lt" -> LT
   | "eq" -> EQ
+  | "(;" -> comment buf; token buf
   | "(" -> LPAR
   | ")" -> RPAR
   | "." -> DOT
   | "_" -> UNDERSCORE
   | "=" -> EQUAL
-  | num -> INT (Int64.of_string (Utf8.lexeme buf))
+  | num -> NUM (Utf8.lexeme buf)
   | name -> NAME (Utf8.lexeme buf)
   | eof -> EOF
   | id ->
@@ -71,5 +74,12 @@ let token buf =
     let position = fst @@ lexing_positions buf in
     let tok = Utf8.lexeme buf in
     raise @@ LexError (position, Printf.sprintf "unexpected character %S" tok)
+and comment buf =
+  match%sedlex buf with
+  | ";)" -> ()
+  | "(;" -> comment buf; comment buf
+  | eof -> failwith "eof in comment"
+  | any -> comment buf
+  | _ -> assert false
 
 let lexer buf = Sedlexing.with_tokenizer token buf

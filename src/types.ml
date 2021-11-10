@@ -360,3 +360,12 @@ type module_ =
   ; imports : import list
   ; exports : export list
   }
+
+type assert_ =
+  | Assert_return of string * expr list * expr
+
+type stanza =
+  | Module of module_
+  | Assert of assert_
+
+type file = stanza list

@@ -246,7 +246,8 @@ let instr fmt = function
   | Unreachable -> Format.fprintf fmt "unreachable"
   | Block (_ty, _expr) -> assert false
   | Loop (_ty, _expr) -> assert false
-  | If_else (_ty, _expr, _expr') -> assert false
+  | If_else (_ty, _expr, _expr') ->
+    Format.fprintf fmt "<if>"
   | Br id -> Format.fprintf fmt "br %a" label_idx id
   | Br_if id -> Format.fprintf fmt "br_if %a" label_idx id
   | Br_table (_ids, _id) -> assert false
@@ -261,11 +262,14 @@ let func fmt (f : func) =
   (* TODO: typeuse ? *)
   Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals body f.body
 
-let expr _fmt _e = assert false
+let expr fmt _e =
+  Format.fprintf fmt "<expr>"
 
-let datas _fmt _datas = assert false
+let datas fmt _datas =
+  Format.fprintf fmt "<datas>"
 
-let elems _fmt _elems = assert false
+let elems fmt _elems =
+  Format.fprintf fmt "<elems>"
 
 let start fmt = function
   | None -> ()
@@ -334,3 +338,10 @@ let module_fields fmt m =
 
 let module_ fmt m =
   Format.fprintf fmt "(module %a@.%a)" id_opt m.id module_fields m
+
+let stanza fmt = function
+  | Module m -> module_ fmt m
+  | Assert _ -> Format.fprintf fmt "<assert>"
+
+let file fmt l =
+  Format.pp_print_list ~pp_sep:Format.pp_print_newline stanza fmt l

@@ -14,15 +14,15 @@ let state checkpoint : int =
     0
   | S.Cons (Element (s, _, _, _), _) -> I.number s
 
-let handle_syntax_error lexbuf checkpoint =
-  let message =
+let handle_syntax_error lexbuf _checkpoint =
+  let message = "Syntax error"(*
     try W.Menhir_parser_errors.message (state checkpoint) with
-    | Not_found -> "Syntax error"
+    | Not_found -> "Syntax error"*)
   in
   Format.eprintf "%s %a\n%!" message W.Types.pp_pos
     (fst @@ Sedlexing.lexing_positions lexbuf)
 
-let rec loop next_token lexbuf (checkpoint : W.Types.module_ I.checkpoint) =
+let rec loop next_token lexbuf (checkpoint : W.Types.file I.checkpoint) =
   match checkpoint with
   | I.InputNeeded _env ->
     let token = next_token () in
@@ -33,7 +33,7 @@ let rec loop next_token lexbuf (checkpoint : W.Types.module_ I.checkpoint) =
     let checkpoint = I.resume checkpoint in
     loop next_token lexbuf checkpoint
   | I.HandlingError env -> handle_syntax_error lexbuf env
-  | I.Accepted ast -> Format.printf "%a\n%!" W.Pp.module_ ast
+  | I.Accepted ast -> Format.printf "%a\n%!" W.Pp.file ast
   | I.Rejected ->
     (* Cannot happen as we stop at syntax error immediatly *)
     assert false
@@ -42,7 +42,7 @@ let process lexbuf =
   let lexer = W.Lexer.lexer lexbuf in
   try
     loop lexer lexbuf
-      (W.Menhir_parser.Incremental.module_
+      (W.Menhir_parser.Incremental.file
          (fst @@ Sedlexing.lexing_positions lexbuf) )
   with
   | W.Lexer.LexError (pos, msg) ->
@@ -64,6 +64,4 @@ let () =
 
   process lexbuf;
 
-  close_in chan;
-
-  Format.printf "Hello!@."
+  close_in chan
