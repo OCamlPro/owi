@@ -1,7 +1,6 @@
 %token <String.t> NUM
-%token<Float.t> FLOAT
-%token<String.t> ID NAME NAT STRING
-%token PARAM RESULT FUNC_REF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BRTABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BRIF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN
+%token<String.t> ID NAME STRING
+%token ASSERT_INVALID ASSERT_MALFORMED ASSERT_TRAP PARAM RESULT FUNCREF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE
 
 %{
 open Types
@@ -21,17 +20,6 @@ type p_module_field =
 let u32 s =
   try Unsigned.UInt32.of_string s
   with Failure _ -> failwith "error u32 constant out of range"
-
-(* TODO *)
-let inline_type = Obj.magic
-let bind_global = Obj.magic
-let bind_func = Obj.magic
-let if_ _ _ = Obj.magic
-let block _ = Obj.magic
-let call_indirect _ = Obj.magic
-let loop _ = Obj.magic
-let select = Obj.magic
-let inline_type_explicit _ = Obj.magic
 
 %}
 
@@ -54,7 +42,7 @@ let ref_kind ==
   | EXTERN; { Extern_ref }
 
 let ref_type ==
-  | FUNC_REF; { Func_ref }
+  | FUNCREF; { Func_ref }
   | EXTERN_REF; { Extern_ref }
 
 let val_type :=
@@ -70,7 +58,7 @@ let def_type ==
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
-  | i = par(list(val_type)); ~ = func_type; {
+  | i = par(preceded(PARAM, list(val_type))); ~ = func_type; {
     let i', o = func_type in
     i @ i', o
   }
@@ -86,8 +74,8 @@ let mem_type ==
   | ~ = limits; <>
 
 let limits ==
-  | min = NAT; { {min = u32 min; max = None} }
-  | min = NAT; max = NAT; { {min = u32 min; max = Some (u32 max) } }
+  | min = NUM; { {min = u32 min; max = None} }
+  | min = NUM; max = NUM; { {min = u32 min; max = Some (u32 max) } }
 
 let type_use ==
   | ~ = par(preceded(TYPE, indice)); <>
@@ -96,9 +84,7 @@ let type_use ==
 
 (*
 let num ==
-  | ~ = NAT; <>
   | ~ = NUM; <>
-  | ~ = FLOAT; <>
 *)
 
 (* var *)
@@ -113,8 +99,8 @@ let id ==
 
 (* TODO: TO CLASSIFY *)
 
-let labeling_opt == | { fun _ -> assert false }
-let labeling_end_opt == | { assert false }
+let labeling_opt == | { fun _ -> Format.eprintf "labeling_opt@."; assert false }
+let labeling_end_opt == | { Format.eprintf "labeling_end_opt@."; assert false }
 
 let num_type ==
   | I32; { Types.I32 }
@@ -215,8 +201,15 @@ let plain_instr :=
   | UNREACHABLE; { Unreachable }
   | DROP; { Drop }
   | BR; ~ = label_idx; <Br>
-  | BRIF; ~ = label_idx; <Br_if>
-  | BRTABLE; { assert false }
+  | BR_IF; ~ = label_idx; <Br_if>
+  | BR_TABLE; ~ = label_idx; l = list(label_idx); {
+    let l = label_idx :: l in
+    let xs, x = match List.rev l with
+      | [] -> assert false
+      | hd::tl -> List.rev tl, hd
+    in
+    Br_table (xs, x)
+  }
   | RETURN; { Return }
   | CALL; ~ = func_idx; <Call>
   | LOCAL; DOT; GET; ~ = local_idx; <Local_get>
@@ -245,9 +238,10 @@ let plain_instr :=
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
   | ELEM; DOT; DROP; ~ = elem_idx; <Elem_drop>
-  | I32; DOT; CONST; i = NUM; { I32_const (Int32.of_string i) }
+  | I32; DOT; CONST; n = NUM; { I32_const (Int32.of_string n) }
   | I64; DOT; CONST; n = NUM; { I64_const (Int64.of_string n) }
-  | F32; DOT; CONST; ~ = FLOAT; <F32_const>
+  | F32; DOT; CONST; n = NUM; { F32_const (Float.of_string n) }
+  | F64; DOT; CONST; n = NUM; { F64_const (Float.of_string n) }
   | ~ = inn; DOT; ~ = iunop; <I_unop>
   | ~ = fnn; DOT; ~ = funop; <F_unop>
   | ~ = inn; DOT; ~ = ibinop; <I_binop>
@@ -270,10 +264,10 @@ let plain_instr :=
   | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
   | REF; DOT; IS_NULL; { Ref_is_null }
   | REF; FUNC; ~ = func_idx; <Ref_func>
-  | ~ = inn; DOT; LOAD; ~ = memarg; <I_load>
-  | ~ = fnn; DOT; LOAD; ~ = memarg; <F_load>
-  | ~ = inn; DOT; STORE; ~ = memarg; <I_store>
-  | ~ = fnn; DOT; STORE; ~ = memarg; <F_store>
+  | ~ = inn; DOT; LOAD; ~ = option(memarg); <I_load>
+  | ~ = fnn; DOT; LOAD; ~ = option(memarg); <F_load>
+  | ~ = inn; DOT; STORE; ~ = option(memarg); <I_store>
+  | ~ = fnn; DOT; STORE; ~ = option(memarg); <F_store>
   | ~ = inn; DOT; LOAD8; ~ = sx; ~ = memarg; <I_load8>
   | ~ = inn; DOT; LOAD16; ~ = sx; ~ = memarg; <I_load16>
   | I64; DOT; LOAD32; ~ = sx; ~ = memarg; <I64_load32>
@@ -292,7 +286,7 @@ let plain_instr :=
 let select_instr ==
   | SELECT; ~ = select_instr_results; {
     let b, ts = select_instr_results in
-    select (if b then (Some ts) else None)
+    Select (if b then (Some ts) else None)
   }
 
 let select_instr_results :=
@@ -305,7 +299,7 @@ let select_instr_results :=
 let select_instr_instr ==
   | SELECT; ~ = select_instr_results_instr; {
     let b, ts, es = select_instr_results_instr in
-    select (if b then Some ts else None), es
+    Select (if b then Some ts else None), es
   }
 
 let select_instr_results_instr :=
@@ -319,20 +313,22 @@ let select_instr_results_instr :=
 
 let call_instr ==
   | CALL_INDIRECT; ~ = id; ~ = call_instr_type; {
-    call_indirect id call_instr_type
+    let _ = call_instr_type in (* TODO *)
+    Call_indirect (Symbolic id, Symbolic "TODO")
   }
   | CALL_INDIRECT; ~ = call_instr_type; {
-    call_indirect 0l call_instr_type
+    let _ = call_instr_type in (* TODO *)
+    Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), Symbolic "TODO")
   }
 
 let call_instr_type ==
-  | ~ = type_use; ~ = call_instr_params; {
+  | _ = type_use; ~ = call_instr_params; {
     match call_instr_params with
-    | ([], []) -> type_use
-    | ft -> inline_type_explicit type_use ft
+    | ([], []) -> [], [](* type_use *)
+    | _ft -> [], [] (* TODO: inline_type_explicit type_use ft *)
   }
   | ~ = call_instr_params; {
-    inline_type call_instr_params
+    (*inline_type*) call_instr_params
   }
 
 let call_instr_params :=
@@ -352,24 +348,24 @@ let call_instr_results :=
 
 let call_instr_instr ==
   | CALL_INDIRECT; ~ = id; ~ = call_instr_type_instr; {
-    let x, es = call_instr_type_instr in
-    call_indirect id x, es
+    let _x, es = call_instr_type_instr in (* TODO: use x *)
+    Call_indirect (Symbolic id, Symbolic "TODO"), es
   }
   | CALL_INDIRECT; ~ = call_instr_type_instr; {
-    let x, es = call_instr_type_instr in
-    call_indirect 0l x, es
+    let _x, es = call_instr_type_instr in (* TODO: use x *)
+    Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), Symbolic "TODO"), es
   }
 
 let call_instr_type_instr ==
   | ~ = type_use; ~ = call_instr_params_instr; {
-    let t = type_use (* TODO: type_ *) in
+    let _t = type_use (* TODO: type_ *) in
     match call_instr_params_instr with
-    | ([], []), es -> t, es
-    | ft, es -> inline_type_explicit t ft, es
+    | ([], []), es -> (*TODO: t*) ([], []), es
+    | _ft, es -> (* TODO: t*) ([], []), es (* TODO: inline_type_explicit t ft, es *)
   }
   | ~ = call_instr_params_instr; {
     let ft, es = call_instr_params_instr in
-    inline_type ft, es
+    (* TODO: inline_type*) ft, es
   }
 
 let call_instr_params_instr :=
@@ -395,33 +391,36 @@ let block_instr ==
   | BLOCK; ~ = labeling_opt; b = block; END; ~ = labeling_end_opt; {
     let _c' = labeling_opt labeling_end_opt in
     let bt, es = b in
-    block bt es
+    Block (bt, es)
   }
   | LOOP; ~ = labeling_opt; ~ = block; END; ~ = labeling_end_opt; {
     let _c' = labeling_opt labeling_end_opt in
     let bt, es = block in
-    loop bt es
+    Loop (bt, es)
   }
   | IF; ~ = labeling_opt; ~ = block; END; ~ = labeling_end_opt; {
     let _c' = labeling_opt labeling_end_opt in
     let bt, es = block in
-    if_ bt es []
+    If_else (bt, es, [])
   }
   | IF; ~ = labeling_opt; ~ = block; ELSE; le1 = labeling_end_opt; ~ = instr_list; END; le2 = labeling_end_opt; {
     let _c' = labeling_opt (le1 @ le2) in
-    let ts, es1 = block in
-    if_ ts es1 instr_list
+    let bt, es1 = block in
+    If_else (bt, es1, instr_list)
   }
 
 let block ==
   | ~ = type_use; ~ = block_param_body; {
+    Type_idx (type_use), snd block_param_body
+    (* TODO:
     Type_idx (inline_type_explicit type_use (fst block_param_body)), snd block_param_body
+       *)
   }
   | ~ = block_param_body; {
     let bt = match fst block_param_body with
       | [], [] -> Val_type None
       | [], [t] -> Val_type (Some t)
-      | ft -> Type_idx (inline_type ft)
+      | _ft -> Type_idx (Symbolic "TODO") (* TODO: Type_idx (inline_type ft) *)
     in
     bt, snd block_param_body
   }
@@ -444,26 +443,26 @@ let expr_aux ==
   | ~ = plain_instr; ~ = expr_list; { expr_list, plain_instr }
   | SELECT; ~ = select_expr_result; {
     let b, ts, es = select_expr_result in
-    es, select (if b then Some ts else None)
+    es, Select (if b then Some ts else None)
   }
-  | CALL_INDIRECT; _ = id; ~ = call_expr_type; {(* TODO: use id ? *)
+  | CALL_INDIRECT; ~ = id; ~ = call_expr_type; {(* TODO: use id ? *)
     let x, es = call_expr_type in
-    es, call_indirect call_expr_type x
+    es, Call_indirect (Symbolic id, x)
   }
   | CALL_INDIRECT; ~ = call_expr_type; {
     let x, es = call_expr_type in
-    es, call_indirect 0l x
+    es, Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), x)
   }
-  | BLOCK; ~ = labeling_opt; b = block; {
+  | BLOCK; ~ = labeling_opt; ~ = block; {
     let _c' = labeling_opt in (* TODO ? *)
-    let bt, es = b in
-    [], block bt es
+    let bt, es = block in
+    [], Block (bt, es)
   }
-  | LOOP; ~ = labeling_opt; b = block; {
+  | LOOP; ~ = labeling_opt; ~ = block; {
     let _c' = labeling_opt in
-    let bt, es = b in
-
-    [], block bt es
+    let bt, es = block in
+    (* TODO: block or loop ? *)
+    [], Loop (bt, es)
   }
   | IF; ~ = labeling_opt; ~ = if_block; {
     let _c' = labeling_opt in
@@ -488,11 +487,11 @@ let call_expr_type ==
     match call_expr_params with
     (* TODO: | ([], []), es -> (Obj.magic type_use) type_, es *)
     (*| ft, es -> inline_type ((Obj.magic type_use) type_) ft, es*)
-    | _ -> assert false
+    | _ -> Symbolic "TODO", []
   }
   | ~ = call_expr_params; {
-    let ft, es = call_expr_params in
-    inline_type ft, es
+    let _ft, es = call_expr_params in
+    (* TODO: inline_type*) Symbolic "TODO", es
   }
 
 let call_expr_params :=
@@ -563,21 +562,22 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    let x = bind_func id in
-    func_fields x
+    match id with
+    | None -> func_fields (Symbolic "TODO_func")
+    | Some id -> func_fields (Symbolic id)
   }
 
 let func_fields :=
   | ~ = type_use; ~ = func_fields_body; {
     fun _x ->
       let _foo, f = func_fields_body in
-      [{ f with type_f = type_use }],
+      [{ f with type_f = FTId type_use }],
       [], []
   }
   | ~ = func_fields_body; {
     fun _x ->
       let type_f, f = func_fields_body in
-      let type_f = inline_type type_f in
+      let type_f = FTFt type_f in
       [{ f with type_f }],
       [], []
   }
@@ -585,21 +585,21 @@ let func_fields :=
     fun _x ->
       let module_, name = inline_import in
       [],
-      [{ module_; name; desc = Import_func (None, type_use) }],
+      [{ module_; name; desc = Import_func (None, FTId type_use) }],
       []
   }
   | ~ = inline_import; ~ = func_fields_import; {
     fun _x ->
       let module_, name = inline_import in
-      let y = inline_type func_fields_import in (* TODO: ? *)
       [],
-      [{ module_; name; desc = Import_func (None, y) }],
+      [{ module_; name; desc = Import_func (None, FTFt func_fields_import) }],
       []
   }
   | ~ = inline_export; ~ = func_fields; {
     fun x ->
       let fns, ims, exs = func_fields x in
-      fns, ims, (inline_export (Export_func x))::exs
+      let e = { name = inline_export; desc = Export_func x } in
+      fns, ims, e::exs
   }
 
 let func_fields_import :=
@@ -648,6 +648,7 @@ let func_body :=
     let type_f = -1l in
     let type_f = Unsigned.UInt32.of_int32 type_f in
     let type_f = Raw type_f in
+    let type_f = FTId type_f in
     { type_f; locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
@@ -715,16 +716,13 @@ let elem ==
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
   match id with
-  | None -> failwith "TODO (anon table)"
+  | None -> table_fields (Symbolic "TODO_anon_table")
   | Some id -> table_fields (Symbolic id)
 }
 
-(* TODO: this is useful for last case of table_fields *)
-(*
 let init ==
   | ~ = list(elem_var); <>
   | ~ = elem_expr; <>
-*)
 
 let table_fields :=
   | ~ = table_type; {
@@ -740,10 +738,10 @@ let table_fields :=
   }
   | ~ = inline_export; ~ = table_fields; {
     fun x ->
-    let tabs, elems, ims, exs = table_fields x in
-      tabs, elems, ims, (inline_export (Export_table x))::exs
+      let tabs, elems, ims, exs = table_fields x in
+      let e = { name = inline_export; desc = Export_table x } in
+      tabs, elems, ims, e::exs
   }
-  (* TODO: fixme
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     let max = Some min in
@@ -753,7 +751,6 @@ let table_fields :=
       [{ type_ = Func_ref; init; mode }],
       [], []
   }
-  *)
 
 (* TODO: use id *)
 let data ==
@@ -768,7 +765,7 @@ let data ==
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
     match id with
-    | None -> failwith "TODO (anon memory)"
+    | None -> memory_fields (Symbolic "TODO (anon memory)")
     | Some id -> memory_fields (Symbolic id)
   }
 
@@ -786,8 +783,9 @@ let memory_fields :=
   }
   | ~ = inline_export; ~ = memory_fields; {
     fun x ->
-    let mems, data, ims, exs = memory_fields x in
-    mems, data, ims, inline_export (Export_mem x) ::exs
+      let mems, data, ims, exs = memory_fields x in
+      let e = { name = inline_export; desc = Export_mem x } in
+      mems, data, ims, e::exs
   }
   | LPAR; DATA; init = string_list; RPAR; {
     fun x ->
@@ -801,8 +799,9 @@ let memory_fields :=
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    let x = bind_global id in
-    global_fields x
+    match id with
+    | None -> global_fields (Symbolic "TODO")
+    | Some id -> global_fields (Symbolic id)
   }
 
 (* TODO: None -> _x ? *)
@@ -821,17 +820,17 @@ let global_fields :=
   | ~ = inline_export; ~ = global_fields; {
       fun x ->
         let globs, ims, exs = global_fields x in
-        globs, ims, (inline_export (Export_global x)) :: exs
+        let e = { name = inline_export; desc = Export_global x } in
+        globs, ims, e::exs
   }
 
 (* Imports & Exports *)
 
 let import_desc ==
-  | FUNC; ~ = option(id); ~ = type_use; <Import_func>
+  | FUNC; id = option(id); ~ = type_use; { Import_func (id, FTId type_use) }
   | i = preceded(FUNC, pair(option(id), func_type)); {
     let id, ft = i in
-    let ft = inline_type ft in
-    Import_func (id, ft)
+    Import_func (id, FTFt ft)
   }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
@@ -857,9 +856,7 @@ let export ==
   }
 
 let inline_export ==
-  | LPAR; EXPORT; name = NAME; RPAR;  {
-    fun d -> { name; desc = d }
-  }
+  | LPAR; EXPORT; ~ = NAME; RPAR;  <>
 
 (* Modules *)
 
@@ -867,7 +864,7 @@ let type_ ==
   | ~ = def_type; <>
 
 let type_def ==
-  | ~ = option(id); TYPE; ~ = type_; <>
+  | TYPE; ~ = option(id); ~ = type_; <>
 
 let start ==
   | ~ = par(preceded(START, indice)); <>
@@ -957,9 +954,10 @@ let module_ :=
   }
 
 let assert_ ==
-    | ASSERT_RETURN; LPAR; INVOKE; s = NAME; a = list(expr); RPAR; r = expr; {
-    Assert_return (s, a, r)
-}
+  | ASSERT_RETURN; LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; ~ = list(expr); <Assert_return>
+  | ASSERT_TRAP; LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; ~ = NAME; <Assert_trap>
+  | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed>
+  | ASSERT_INVALID; ~ = par(module_); ~ = NAME; <Assert_invalid>
 
 let stanza ==
   | ~ = par(module_); <Module>

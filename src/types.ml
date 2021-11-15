@@ -248,10 +248,10 @@ type instr =
   | Table_init of table_idx * elem_idx
   | Elem_drop of elem_idx
   (* Memory instructions *)
-  | I_load of nn * memarg
-  | F_load of nn * memarg
-  | I_store of nn * memarg
-  | F_store of nn * memarg
+  | I_load of nn * memarg option
+  | F_load of nn * memarg option
+  | I_store of nn * memarg option
+  | F_store of nn * memarg option
   | I_load8 of nn * sx * memarg
   | I_load16 of nn * sx * memarg
   | I64_load32 of sx * memarg
@@ -279,8 +279,12 @@ type instr =
 
 and expr = instr list
 
+type func_type_bis =
+  | FTId of type_idx
+  | FTFt of func_type
+
 type func =
-  { type_f : type_idx
+  { type_f : func_type_bis
   ; locals : param list
   ; body : expr
   ; id : id option
@@ -323,7 +327,7 @@ type data =
 type start = func_idx
 
 type import_desc =
-  | Import_func of id option * type_idx
+  | Import_func of id option * func_type_bis
   | Import_table of id option * table_type
   | Import_mem of id option * mem_type
   | Import_global of id option * global_type
@@ -362,7 +366,10 @@ type module_ =
   }
 
 type assert_ =
-  | Assert_return of string * expr list * expr
+  | Assert_return of string * expr list * expr list
+  | Assert_trap of string * expr list * string
+  | Assert_malformed of string list * string
+  | Assert_invalid of module_ * string
 
 type stanza =
   | Module of module_

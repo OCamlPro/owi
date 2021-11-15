@@ -224,10 +224,26 @@ let instr fmt = function
   | Table_init (tid, eid) ->
     Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
   | Elem_drop id -> Format.fprintf fmt "elem.drop %a" elem_idx id
-  | I_load (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
-  | F_load (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
-  | I_store (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
-  | F_store (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
+  | I_load (n, ma) ->
+    begin match ma with
+    | None -> Format.fprintf fmt "<I_load>"
+    | Some ma -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
+    end
+  | F_load (n, ma) ->
+    begin match ma with
+    | None -> Format.fprintf fmt "<F_load>"
+    | Some ma -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
+    end
+  | I_store (n, ma) ->
+    begin match ma with
+    | None -> Format.fprintf fmt "<I_store>"
+    | Some ma -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
+    end
+  | F_store (n, ma) ->
+    begin match ma with
+    | None -> Format.fprintf fmt "<F_store>"
+    | Some ma -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
+    end
   | I_load8 (n, s, ma) ->
     Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
   | I_load16 (n, s, ma) ->
@@ -244,16 +260,16 @@ let instr fmt = function
   | Data_drop id -> Format.fprintf fmt "data.drop %a" data_idx id
   | Nop -> Format.fprintf fmt "nop"
   | Unreachable -> Format.fprintf fmt "unreachable"
-  | Block (_ty, _expr) -> assert false
-  | Loop (_ty, _expr) -> assert false
+  | Block (_ty, _expr) -> Format.fprintf fmt "<block>"
+  | Loop (_ty, _expr) -> Format.fprintf fmt "<loop>"
   | If_else (_ty, _expr, _expr') ->
     Format.fprintf fmt "<if>"
   | Br id -> Format.fprintf fmt "br %a" label_idx id
   | Br_if id -> Format.fprintf fmt "br_if %a" label_idx id
-  | Br_table (_ids, _id) -> assert false
+  | Br_table (_ids, _id) -> Format.fprintf fmt "<br_table>"
   | Return -> Format.fprintf fmt "return"
   | Call id -> Format.fprintf fmt "call %a" func_idx id
-  | Call_indirect (_tbl_id, _ty_id) -> assert false
+  | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
 
 let body fmt instrs =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline instr fmt instrs
@@ -310,8 +326,8 @@ let funcs fmt (funcs : func list) =
 
 let import_desc fmt : import_desc -> Unit.t = function
   (* TODO: in Func case, check what is the "typeuse" *)
-  | Import_func (id, tidx) ->
-    Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx
+  | Import_func (_id, _tidx) -> assert false
+    (* Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx *)
   | Import_table (id, t) ->
     Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Import_mem (id, t) ->
@@ -332,7 +348,7 @@ let types fmt types =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline type_ fmt types
 
 let module_fields fmt m =
-  Format.fprintf fmt "%a@.%a@.%a@.%a@%a@%a@%a@%a@%a@%a@." types m.types imports
+  Format.fprintf fmt "%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@." types m.types imports
     m.imports funcs m.funcs tables m.tables mems m.mems globals m.globals
     exports m.exports start m.start elems m.elems datas m.datas
 
