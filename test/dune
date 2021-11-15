@@ -1,3 +1,6 @@
 (test
  (name main)
- (modules main))
+ (modules main)
+ (deps
+  (source_tree reference))
+ (libraries bos woi))
