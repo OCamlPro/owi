@@ -1,6 +1,6 @@
 %token <String.t> NUM
-%token<String.t> ID NAME STRING
-%token ASSERT_INVALID ASSERT_MALFORMED ASSERT_TRAP PARAM RESULT FUNCREF EXTERN_REF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAPI64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT SAT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE
+%token<String.t> ID NAME
+%token ASSERT_INVALID ASSERT_MALFORMED ASSERT_TRAP PARAM RESULT FUNCREF EXTERNREF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAP_I64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE REGISTER TRUNC_SAT BINARY
 
 %{
 open Types
@@ -19,7 +19,35 @@ type p_module_field =
 
 let u32 s =
   try Unsigned.UInt32.of_string s
-  with Failure _ -> failwith "error u32 constant out of range"
+  with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
+
+let u64 s =
+  try Unsigned.UInt64.of_string s
+  with Failure _ -> failwith (Format.sprintf "error u64 constant `%s` out of range" s)
+
+let i32 s =
+  try Int32.of_string s
+  with Failure _ ->
+    (* TODO *)
+    Format.eprintf "error: i32_of_string: `%s`, using u32 instead@." s;
+    let u32 = u32 s in
+    Obj.magic u32
+
+let i64 s =
+  try Int64.of_string s
+  with Failure _ ->
+    (* TODO *)
+    Format.eprintf "error: i64_of_string: `%s`, using u64 instead@." s;
+    let u64 = u64 s in
+    Obj.magic u64
+
+let f64 s =
+  try Float.of_string s
+  with Failure _ ->
+    (* TODO *)
+    Format.eprintf "error: f64_of_string: `%s` (using `nan` instead)@." s;
+    Float.nan
+
 
 %}
 
@@ -33,7 +61,7 @@ let par(X) ==
   | LPAR; ~ = X; RPAR; <>
 
 let string_list ==
-  | l = list(STRING); { String.concat "" l }
+  | l = list(NAME); { String.concat "" l }
 
 (* Types *)
 
@@ -43,7 +71,7 @@ let ref_kind ==
 
 let ref_type ==
   | FUNCREF; { Func_ref }
-  | EXTERN_REF; { Extern_ref }
+  | EXTERNREF; { Extern_ref }
 
 let val_type :=
   | ~ = num_type; <Num_type>
@@ -99,7 +127,7 @@ let id ==
 
 (* TODO: TO CLASSIFY *)
 
-let labeling_opt == | { fun _ -> Format.eprintf "labeling_opt@."; assert false }
+let labeling_opt == | id = option(id); { fun _ -> Some id (* TODO ? *) }
 let labeling_end_opt == | { Format.eprintf "labeling_end_opt@."; assert false }
 
 let num_type ==
@@ -238,10 +266,10 @@ let plain_instr :=
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
   | ELEM; DOT; DROP; ~ = elem_idx; <Elem_drop>
-  | I32; DOT; CONST; n = NUM; { I32_const (Int32.of_string n) }
-  | I64; DOT; CONST; n = NUM; { I64_const (Int64.of_string n) }
-  | F32; DOT; CONST; n = NUM; { F32_const (Float.of_string n) }
-  | F64; DOT; CONST; n = NUM; { F64_const (Float.of_string n) }
+  | I32; DOT; CONST; n = NUM; { I32_const (i32 n) }
+  | I64; DOT; CONST; n = NUM; { I64_const (i64 n) }
+  | F32; DOT; CONST; n = NUM; { F32_const (f64 n) }
+  | F64; DOT; CONST; n = NUM; { F64_const (f64 n) }
   | ~ = inn; DOT; ~ = iunop; <I_unop>
   | ~ = fnn; DOT; ~ = funop; <F_unop>
   | ~ = inn; DOT; ~ = ibinop; <I_binop>
@@ -252,10 +280,10 @@ let plain_instr :=
   | ~ = inn; DOT; EXTEND8; SIGNED; <I_extend8_s>
   | ~ = inn; DOT; EXTEND16; SIGNED; <I_extend16_s>
   | I64; DOT; EXTEND32; SIGNED; { I64_extend32_s }
-  | I32; DOT; WRAPI64; { I32_wrap_i64 }
+  | I32; DOT; WRAP_I64; { I32_wrap_i64 }
   | I64; DOT; EXTEND_I32; ~ = sx; <I64_extend_i32>
   | ~ = inn; DOT; TRUNC; UNDERSCORE; ~ = fnn; s = sx; <I_trunc_f>
-  | ~ = inn; DOT; TRUNC; UNDERSCORE; SAT; UNDERSCORE; ~ = fnn; s = sx; <I_trunc_sat_f>
+  | ~ = inn; DOT; TRUNC_SAT; UNDERSCORE; ~ = fnn; s = sx; <I_trunc_sat_f>
   | F32; DOT; DEMOTE_F64; { F32_demote_f64 }
   | F64; DOT; PROMOTE_F32; { F64_promote_f32 }
   | ~ = fnn; DOT; CONVERT; UNDERSCORE; ~ = inn; s = sx; <F_convert_i>
@@ -263,17 +291,17 @@ let plain_instr :=
   | ~ = fnn; DOT; REINTERPRET; UNDERSCORE; ~ = inn; <F_reinterpret_i>
   | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
   | REF; DOT; IS_NULL; { Ref_is_null }
-  | REF; FUNC; ~ = func_idx; <Ref_func>
+  | REF; DOT; FUNC; ~ = func_idx; <Ref_func>
   | ~ = inn; DOT; LOAD; ~ = option(memarg); <I_load>
   | ~ = fnn; DOT; LOAD; ~ = option(memarg); <F_load>
   | ~ = inn; DOT; STORE; ~ = option(memarg); <I_store>
   | ~ = fnn; DOT; STORE; ~ = option(memarg); <F_store>
-  | ~ = inn; DOT; LOAD8; ~ = sx; ~ = memarg; <I_load8>
-  | ~ = inn; DOT; LOAD16; ~ = sx; ~ = memarg; <I_load16>
-  | I64; DOT; LOAD32; ~ = sx; ~ = memarg; <I64_load32>
-  | ~ = inn; DOT; STORE8; ~ = memarg; <I_store8>
-  | ~ = inn; DOT; STORE16; ~ = memarg; <I_store16>
-  | I64; DOT; STORE32; ~ = memarg; <I64_store32>
+  | ~ = inn; DOT; LOAD8; ~ = sx; ~ = option(memarg); <I_load8>
+  | ~ = inn; DOT; LOAD16; ~ = sx; ~ = option(memarg); <I_load16>
+  | I64; DOT; LOAD32; ~ = sx; ~ = option(memarg); <I64_load32>
+  | ~ = inn; DOT; STORE8; ~ = option(memarg); <I_store8>
+  | ~ = inn; DOT; STORE16; ~ = option(memarg); <I_store16>
+  | I64; DOT; STORE32; ~ = option(memarg); <I64_store32>
   | MEMORY; DOT; SIZE; { Memory_size }
   | MEMORY; DOT; GROW; { Memory_grow }
   | MEMORY; DOT; FILL; { Memory_fill }
@@ -682,8 +710,8 @@ let elem_var ==
   | ~ = indice; <Ref_func>
 
 let elem_list ==
-  | ~ = elem_kind; ~ = list(elem_var); <>
-  | ~ = ref_type; ~ = elem_expr; <>
+  | ~ = elem_kind; l = list(elem_var); { elem_kind, [l] }
+  | ~ = ref_type; l = list(elem_expr); { ref_type, l }
 
 (* TODO: store the ID ? *)
 let elem ==
@@ -692,7 +720,7 @@ let elem ==
     let mode = Elem_passive in
     { type_; init = init; mode }
   }
-  | ELEM; _ = option(id); ~ = table_use; ~ = offset; ~ = elem_list; {
+  | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; ~ = elem_list; {
     let type_, init = elem_list in
     let mode = Elem_active (table_use, offset) in
     { type_; init = init; mode }
@@ -710,7 +738,7 @@ let elem ==
   | ELEM; _ = option(id); ~ = offset; init = list(elem_var); {
     let type_ = Func_ref in
     let mode = Elem_active (Raw Unsigned.UInt32.zero, offset) in
-    { type_; init = init; mode }
+    { type_; init = [init]; mode }
   }
 
 let table ==
@@ -745,6 +773,7 @@ let table_fields :=
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     let max = Some min in
+    let init = [init] in
     fun x ->
       let mode = Elem_active (x, [I32_const 0l]) in
       [{ min; max }, ref_type],
@@ -842,7 +871,7 @@ let import ==
   }
 
 let inline_import ==
-  | LPAR; IMPORT; ~ = NAME; ~ = NAME; IMPORT; <>
+  | LPAR; IMPORT; ~ = NAME; ~ = NAME; RPAR; <>
 
 let export_desc ==
   | FUNC; ~ = indice; <Export_func>
@@ -867,7 +896,7 @@ let type_def ==
   | TYPE; ~ = option(id); ~ = type_; <>
 
 let start ==
-  | ~ = par(preceded(START, indice)); <>
+  | START; ~ = indice; <>
 
 let module_field :=
   | t = type_def; { [MType t] }
@@ -954,14 +983,21 @@ let module_ :=
   }
 
 let assert_ ==
-  | ASSERT_RETURN; LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; ~ = list(expr); <Assert_return>
+  | ASSERT_RETURN; LPAR; INVOKE; _ = option(id); ~ = NAME; ~ = list(expr); RPAR; ~ = list(expr); <Assert_return>
   | ASSERT_TRAP; LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; ~ = NAME; <Assert_trap>
+  (* TODO: check binary *)
+  | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed>
   | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed>
   | ASSERT_INVALID; ~ = par(module_); ~ = NAME; <Assert_invalid>
+
+let register ==
+  | REGISTER; ~ = NAME; <>
 
 let stanza ==
   | ~ = par(module_); <Module>
   | ~ = par(assert_); <Assert>
+  | ~ = par(register); <Register>
+  | LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; <Invoke>
 
 let file :=
   | ~ = list(stanza); EOF; <>

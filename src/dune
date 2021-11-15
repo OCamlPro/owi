@@ -1,6 +1,6 @@
 (library
  (name woi)
- (modules lexer menhir_parser menhir_parser_errors pp types)
+ (modules handle lexer menhir_parser menhir_parser_errors pp types)
  (libraries integers menhirLib ppxlib sedlex)
  (preprocess
   (pps sedlex.ppx)))

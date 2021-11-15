@@ -252,12 +252,12 @@ type instr =
   | F_load of nn * memarg option
   | I_store of nn * memarg option
   | F_store of nn * memarg option
-  | I_load8 of nn * sx * memarg
-  | I_load16 of nn * sx * memarg
-  | I64_load32 of sx * memarg
-  | I_store8 of nn * memarg
-  | I_store16 of nn * memarg
-  | I64_store32 of memarg
+  | I_load8 of nn * sx * memarg option
+  | I_load16 of nn * sx * memarg option
+  | I64_load32 of sx * memarg option
+  | I_store8 of nn * memarg option
+  | I_store16 of nn * memarg option
+  | I64_store32 of memarg option
   | Memory_size
   | Memory_grow
   | Memory_fill
@@ -309,7 +309,7 @@ type elem_mode =
 
 type elem =
   { type_ : ref_type
-  ; init : expr
+  ; init : expr list
   ; mode : elem_mode
   }
 
@@ -374,5 +374,7 @@ type assert_ =
 type stanza =
   | Module of module_
   | Assert of assert_
+  | Register of string
+  | Invoke of string * expr list
 
 type file = stanza list
