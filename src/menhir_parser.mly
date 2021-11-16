@@ -17,6 +17,8 @@ type p_module_field =
   | MImport of import
   | MExport of export
 
+let u32_of_i32 = Unsigned.UInt32.of_int32
+
 let u32 s =
   try Unsigned.UInt32.of_string s
   with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
@@ -29,7 +31,7 @@ let i32 s =
   try Int32.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.eprintf "error: i32_of_string: `%s`, using u32 instead@." s;
+    Format.ifprintf Format.err_formatter "error: i32_of_string: `%s`, using u32 instead@." s;
     let u32 = u32 s in
     Obj.magic u32
 
@@ -37,7 +39,7 @@ let i64 s =
   try Int64.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.eprintf "error: i64_of_string: `%s`, using u64 instead@." s;
+    Format.ifprintf Format.err_formatter "error: i64_of_string: `%s`, using u64 instead@." s;
     let u64 = u64 s in
     Obj.magic u64
 
@@ -45,7 +47,7 @@ let f64 s =
   try Float.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.eprintf "error: f64_of_string: `%s` (using `nan` instead)@." s;
+    Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `nan` instead)@." s;
     Float.nan
 
 
@@ -118,7 +120,7 @@ let num ==
 (* var *)
 let indice ==
   | ~ = ID; <Symbolic>
-  | n = NUM; { Raw (Unsigned.UInt32.of_string n) }
+  | n = NUM; { Raw (u32 n) }
 
 (* bind_var *)
 let id ==
@@ -128,7 +130,7 @@ let id ==
 (* TODO: TO CLASSIFY *)
 
 let labeling_opt == | id = option(id); { fun _ -> Some id (* TODO ? *) }
-let labeling_end_opt == | { Format.eprintf "labeling_end_opt@."; assert false }
+let labeling_end_opt == | id = option(id); { [id] (* TODO ? *) }
 
 let num_type ==
   | I32; { Types.I32 }
@@ -204,8 +206,25 @@ let frelop ==
   | LE; { Le }
   | GE; { Ge }
 
+let align ==
+  | ALIGN; EQUAL; ~ = NUM; <>
+
+(* TODO: factorize with offset ? *)
+let memarg_offset ==
+  | OFFSET; EQUAL; ~ = NUM; <>
+
 let memarg ==
-  | OFFSET; EQUAL; offset = NUM; ALIGN; EQUAL; align = NUM; {
+  | offset = option(memarg_offset); align = option(align); {
+    let offset =
+      match offset with
+      | None -> "0" (* TODO *)
+      | Some offset -> offset
+    in
+    let align =
+      match align with
+      | None -> "0" (* TODO *)
+      | Some align -> align
+    in
     {offset = u32 offset; align = u32 align}
   }
 
@@ -245,24 +264,37 @@ let plain_instr :=
   | LOCAL; DOT; TEE; ~ = local_idx; <Local_tee>
   | GLOBAL; DOT; GET; ~ = global_idx; <Global_get>
   | GLOBAL; DOT; SET; ~ = global_idx; <Global_set>
-  | TABLE; DOT; GET; ~ = table_idx; <Table_get>
-  | TABLE; DOT; SET; ~ = table_idx; <Table_set>
-  | TABLE; DOT; SIZE; ~ = table_idx; <Table_size>
-  | TABLE; DOT; GROW; ~ = table_idx; <Table_grow>
-  | TABLE; DOT; FILL; ~ = table_idx; <Table_fill>
+  | TABLE; DOT; GET; table_idx = option(table_idx); {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_get table_idx
+  }
+  | TABLE; DOT; SET; table_idx = option(table_idx); {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_set table_idx
+  }
+  | TABLE; DOT; SIZE; table_idx = option(table_idx); {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_size table_idx
+  }
+  | TABLE; DOT; GROW; table_idx = option(table_idx); {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_grow table_idx
+  }
+  | TABLE; DOT; FILL; table_idx = option(table_idx); {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_fill table_idx
+  }
+  | TABLE; DOT; COPY; {
+    Table_copy (
+      Raw (u32_of_i32 0l),
+      Raw (u32_of_i32 0l)
+    )
+  }
   | TABLE; DOT; COPY; src = table_idx; dst = table_idx; { Table_copy (src, dst) }
-  | TABLE; DOT; INIT; ~ = table_idx; ~ = elem_idx; <Table_init>
-(* TODO:
-  | TABLE_GET {  table_get 0l) }  /* Sugar */
-  | TABLE_SET { table_set 0l }  /* Sugar */
-  | TABLE_SIZE { table_size 0l }  /* Sugar */
-  | TABLE_GROW {table_grow 0l) }  /* Sugar */
-  | TABLE_FILL {  table_fill 0l) }  /* Sugar */
-  | TABLE_COPY  /* Sugar */
-    { table_copy 0l  0l }
-  | TABLE_INIT var  /* Sugar */
-    { table_init 0l ($2 elem) }
- * *)
+  | TABLE; DOT; INIT; table_idx = option(table_idx); ~ = elem_idx; {
+    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
+    Table_init (table_idx, elem_idx)
+  }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
   | ELEM; DOT; DROP; ~ = elem_idx; <Elem_drop>
@@ -292,16 +324,16 @@ let plain_instr :=
   | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
   | REF; DOT; IS_NULL; { Ref_is_null }
   | REF; DOT; FUNC; ~ = func_idx; <Ref_func>
-  | ~ = inn; DOT; LOAD; ~ = option(memarg); <I_load>
-  | ~ = fnn; DOT; LOAD; ~ = option(memarg); <F_load>
-  | ~ = inn; DOT; STORE; ~ = option(memarg); <I_store>
-  | ~ = fnn; DOT; STORE; ~ = option(memarg); <F_store>
-  | ~ = inn; DOT; LOAD8; ~ = sx; ~ = option(memarg); <I_load8>
-  | ~ = inn; DOT; LOAD16; ~ = sx; ~ = option(memarg); <I_load16>
-  | I64; DOT; LOAD32; ~ = sx; ~ = option(memarg); <I64_load32>
-  | ~ = inn; DOT; STORE8; ~ = option(memarg); <I_store8>
-  | ~ = inn; DOT; STORE16; ~ = option(memarg); <I_store16>
-  | I64; DOT; STORE32; ~ = option(memarg); <I64_store32>
+  | ~ = inn; DOT; LOAD; ~ = memarg; <I_load>
+  | ~ = fnn; DOT; LOAD; ~ = memarg; <F_load>
+  | ~ = inn; DOT; STORE; ~ = memarg; <I_store>
+  | ~ = fnn; DOT; STORE; ~ = memarg; <F_store>
+  | ~ = inn; DOT; LOAD8; ~ = sx; ~ = memarg; <I_load8>
+  | ~ = inn; DOT; LOAD16; ~ = sx; ~ = memarg; <I_load16>
+  | I64; DOT; LOAD32; ~ = sx; ~ = memarg; <I64_load32>
+  | ~ = inn; DOT; STORE8; ~ = memarg; <I_store8>
+  | ~ = inn; DOT; STORE16; ~ = memarg; <I_store16>
+  | I64; DOT; STORE32; ~ = memarg; <I64_store32>
   | MEMORY; DOT; SIZE; { Memory_size }
   | MEMORY; DOT; GROW; { Memory_grow }
   | MEMORY; DOT; FILL; { Memory_fill }
@@ -749,8 +781,8 @@ let table ==
 }
 
 let init ==
-  | ~ = list(elem_var); <>
-  | ~ = elem_expr; <>
+    | l = list(elem_var); { [l] }
+  | ~ = elem_expr; l = list(elem_expr); { elem_expr :: l }
 
 let table_fields :=
   | ~ = table_type; {
@@ -770,10 +802,9 @@ let table_fields :=
       let e = { name = inline_export; desc = Export_table x } in
       tabs, elems, ims, e::exs
   }
-  | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
+  | ~ = ref_type; LPAR; ELEM; init = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     let max = Some min in
-    let init = [init] in
     fun x ->
       let mode = Elem_active (x, [I32_const 0l]) in
       [{ min; max }, ref_type],
@@ -930,7 +961,7 @@ let module_field :=
     @ (List.map (fun i -> MImport i) ims)
     @ (List.map (fun e -> MExport e) exs)
   }
-  | d = par(data); { [MData d] }
+  | d = data; { [MData d] }
 
 let module_ :=
   | MODULE; id = option(id); fields = list(par(module_field)); {

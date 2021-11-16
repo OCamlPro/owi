@@ -248,16 +248,16 @@ type instr =
   | Table_init of table_idx * elem_idx
   | Elem_drop of elem_idx
   (* Memory instructions *)
-  | I_load of nn * memarg option
-  | F_load of nn * memarg option
-  | I_store of nn * memarg option
-  | F_store of nn * memarg option
-  | I_load8 of nn * sx * memarg option
-  | I_load16 of nn * sx * memarg option
-  | I64_load32 of sx * memarg option
-  | I_store8 of nn * memarg option
-  | I_store16 of nn * memarg option
-  | I64_store32 of memarg option
+  | I_load of nn * memarg
+  | F_load of nn * memarg
+  | I_store of nn * memarg
+  | F_store of nn * memarg
+  | I_load8 of nn * sx * memarg
+  | I_load16 of nn * sx * memarg
+  | I64_load32 of sx * memarg
+  | I_store8 of nn * memarg
+  | I_store16 of nn * memarg
+  | I64_store32 of memarg
   | Memory_size
   | Memory_grow
   | Memory_fill

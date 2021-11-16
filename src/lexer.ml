@@ -74,14 +74,20 @@ let rec token buf =
   | "trunc_sat" -> TRUNC_SAT
   (* 8 *)
   | "br_table" -> BR_TABLE
+  | "copysign" -> COPYSIGN
+  | "extend16" -> EXTEND16
+  | "extend32" -> EXTEND32
   | "register" -> REGISTER
   | "wrap_i64" -> WRAP_I64
   (* 7 *)
   | "convert" -> CONVERT
   | "declare" -> DECLARE
+  | "extend8" -> EXTEND8
   | "funcref" -> FUNCREF
   | "is_null" -> IS_NULL
+  | "nearest" -> NEAREST
   | "store16" -> STORE16
+  | "store32" -> STORE32
   (* 6 *)
   | "binary" -> BINARY
   | "export" -> EXPORT
@@ -93,11 +99,14 @@ let rec token buf =
   | "load32" -> LOAD32
   | "memory" -> MEMORY
   | "module" -> MODULE
+  | "offset" -> OFFSET
+  | "popcnt" -> POPCNT
   | "result" -> RESULT
   | "return" -> RETURN
   | "select" -> SELECT
   | "store8" -> STORE8
   (* 5 *)
+  | "align" -> ALIGN
   | "block" -> BLOCK
   | "br_if" -> BR_IF
   | "const" -> CONST
@@ -112,30 +121,42 @@ let rec token buf =
   | "trunc" -> TRUNC
   (* 4 *)
   | "call" -> CALL
+  | "ceil" -> CEIL
+  | "copy" -> COPY
   | "data" -> DATA
   | "drop" -> DROP
   | "elem" -> ELEM
   | "else" -> ELSE
+  | "fill" -> FILL
   | "func" -> FUNC
   | "grow" -> GROW
+  | "init" -> INIT
+  | "item" -> ITEM
   | "load" -> LOAD
   | "loop" -> LOOP
   | "null" -> NULL
+  | "rotl" -> ROTL
+  | "rotr" -> ROTR
   | "size" -> SIZE
   | "sqrt" -> SQRT
   | "then" -> THEN
   | "type" -> TYPE
   (* 3 *)
+  | "abs" -> ABS
   | "add" -> ADD
   | "and" -> AND
+  | "clz" -> CLZ
   | "ctz" -> CTZ
   | "div" -> DIV
   | "eqz" -> EQZ
+  | "end" -> END
   | "f32" -> F32
   | "f64" -> F64
   | "get" -> GET
   | "i32" -> I32
   | "i64" -> I64
+  | "max" -> MAX
+  | "min" -> MIN
   | "mul" -> MUL
   | "mut" -> MUTABLE
   | "neg" -> NEG
@@ -143,8 +164,11 @@ let rec token buf =
   | "ref" -> REF
   | "rem" -> REM
   | "set" -> SET
+  | "shl" -> SHL
+  | "shr" -> SHR
   | "sub" -> SUB
   | "tee" -> TEE
+  | "xor" -> XOR
   (* 2 *)
   | "br" -> BR
   | "eq" -> EQ
@@ -154,6 +178,7 @@ let rec token buf =
   | "le" -> LE
   | "lt" -> LT
   | "ne" -> NE
+  | "or" -> OR
   | "_s" -> SIGNED
   | "_u" -> UNSIGNED
   | ";;" -> single_comment buf; token buf

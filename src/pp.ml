@@ -225,55 +225,25 @@ let instr fmt = function
     Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
   | Elem_drop id -> Format.fprintf fmt "elem.drop %a" elem_idx id
   | I_load (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_load>"
-    | Some ma -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
-    end
+    Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_load (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<F_load>"
-    | Some ma -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
-    end
+    Format.fprintf fmt "f%a.load %a" nn n memarg ma
   | I_store (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_store>"
-    | Some ma -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
-    end
+    Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_store (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<F_store>"
-    | Some ma -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
-    end
+    Format.fprintf fmt "f%a.load %a" nn n memarg ma
   | I_load8 (n, s, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_load8>"
-    | Some ma -> Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
-    end
+    Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
   | I_load16 (n, s, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_load16>"
-    | Some ma -> Format.fprintf fmt "i%a.load16_%a %a" nn n sx s memarg ma
-    end
+    Format.fprintf fmt "i%a.load16_%a %a" nn n sx s memarg ma
   | I64_load32 (s, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I64_load32>"
-    | Some ma -> Format.fprintf fmt "i64.load32_%a %a" sx s memarg ma
-    end
+    Format.fprintf fmt "i64.load32_%a %a" sx s memarg ma
   | I_store8 (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_store8>"
-    | Some ma -> Format.fprintf fmt "i%a.store8 %a" nn n memarg ma
-    end
+    Format.fprintf fmt "i%a.store8 %a" nn n memarg ma
   | I_store16 (n, ma) ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I_store16>"
-    | Some ma -> Format.fprintf fmt "i%a.store16 %a" nn n memarg ma
-    end
+    Format.fprintf fmt "i%a.store16 %a" nn n memarg ma
   | I64_store32 ma ->
-    begin match ma with
-    | None -> Format.fprintf fmt "<I64_store32>"
-    | Some ma -> Format.fprintf fmt "i64.store32 %a" memarg ma
-    end
+    Format.fprintf fmt "i64.store32 %a" memarg ma
   | Memory_size -> Format.fprintf fmt "memory.size"
   | Memory_grow -> Format.fprintf fmt "memory.grow"
   | Memory_fill -> Format.fprintf fmt "memory.fill"
