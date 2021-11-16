@@ -381,11 +381,13 @@
       (elem.drop 0)))
   "unknown elem segment 0")
 
+(; TODO
 (assert_invalid
   (module
     (func (export "test")
       (table.init 0 (i32.const 12) (i32.const 1) (i32.const 1))))
   "unknown table 0")
+;)
 
 (assert_invalid
   (module
@@ -395,14 +397,14 @@
       (elem.drop 4)))
   "unknown elem segment 4")
 
-(assert_invalid
+(; TODO (assert_invalid
   (module
     (elem funcref (ref.func 0))
     (func (result i32) (i32.const 0))
     (func (export "test")
       (table.init 4 (i32.const 12) (i32.const 1) (i32.const 1))))
   "unknown table 0")
-
+;)
 
 (module
   (table $t0 30 30 funcref)

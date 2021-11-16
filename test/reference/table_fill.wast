@@ -16,6 +16,7 @@
 (assert_return (invoke "get" (i32.const 4)) (ref.null extern))
 (assert_return (invoke "get" (i32.const 5)) (ref.null extern))
 
+(;
 (assert_return (invoke "fill" (i32.const 2) (ref.extern 1) (i32.const 3)))
 (assert_return (invoke "get" (i32.const 1)) (ref.null extern))
 (assert_return (invoke "get" (i32.const 2)) (ref.extern 1))
@@ -63,6 +64,7 @@
   (invoke "fill" (i32.const 11) (ref.null extern) (i32.const 10))
   "out of bounds table access"
 )
+;)
 
 
 ;; Type errors

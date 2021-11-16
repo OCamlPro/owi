@@ -206,6 +206,7 @@
 
 ;; Invalid bounds for elements
 
+(; TODO
 (assert_trap
   (module
     (table 0 funcref)
@@ -307,6 +308,7 @@
   )
   "out of bounds table access"
 )
+;)
 
 ;; Implicitly dropped elements
 
@@ -315,7 +317,7 @@
   (elem $e (i32.const 0) func $f)
   (func $f)
   (func (export "init")
-    (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
+    ;; TODO (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
   )
 )
 (assert_trap (invoke "init") "out of bounds table access")
@@ -325,7 +327,7 @@
   (elem $e declare func $f)
   (func $f)
   (func (export "init")
-    (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
+    ;; TODO (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
   )
 )
 (assert_trap (invoke "init") "out of bounds table access")
@@ -359,7 +361,7 @@
 )
 
 (assert_invalid
-  (module 
+  (module
     (table 1 funcref)
     (elem (offset (;empty instruction sequence;)))
   )
@@ -432,7 +434,7 @@
 ;; )
 
 (assert_invalid
-   (module 
+   (module
      (table 1 funcref)
      (elem (global.get 0))
    )
@@ -449,7 +451,7 @@
 )
 
 (assert_invalid
-   (module 
+   (module
      (global (import "test" "global-mut-i32") (mut i32))
      (table 1 funcref)
      (elem (global.get 0))
@@ -556,9 +558,9 @@
   )
 )
 
-(register "module1" $module1)
+;; TODO (register "module1" $module1)
 
-(assert_trap (invoke $module1 "call-7") "uninitialized element")
+;; TODO (assert_trap (invoke $module1 "call-7") "uninitialized element")
 (assert_return (invoke $module1 "call-8") (i32.const 65))
 (assert_return (invoke $module1 "call-9") (i32.const 66))
 
