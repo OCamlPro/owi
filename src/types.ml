@@ -365,16 +365,41 @@ type module_ =
   ; exports : export list
   }
 
-type assert_ =
-  | Assert_return of string * expr list * expr list
-  | Assert_trap of string * expr list * string
-  | Assert_malformed of string list * string
-  | Assert_invalid of module_ * string
+type const =
+  | Const_num_val of num_type * string
+  | Const_null of ref_type
+  | Const_host of int
 
-type stanza =
+type action =
+  | Invoke of string option * string *  const list
+  | Get of string option * string
+
+type num_pat =
+  | NP_value of string
+  | NP_nan_canon
+  | NP_nan_arith
+
+type result =
+  | Result_const of const
+  | Result_extern_ref
+  | Result_func_ref
+
+type failure = string
+
+type assert_ =
+  | Assert_return of action * result list
+  | Assert_trap of action * failure
+  | Assert_malformed of module_ * failure
+  | Assert_malformed_quote of string list * failure
+  | Assert_malformed_binary of string list * failure
+  | Assert_invalid of module_ * failure
+  | Assert_invalid_quote of string list * failure
+  | Assert_invalid_binary of string list * failure
+
+type cmd =
   | Module of module_
   | Assert of assert_
-  | Register of string
-  | Invoke of string * expr list
+  | Register of string * string option
+  | Action of action
 
-type file = stanza list
+type file = cmd list

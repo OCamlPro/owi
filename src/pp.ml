@@ -347,15 +347,14 @@ let module_fields fmt m =
 let module_ fmt m =
   Format.fprintf fmt "(module %a@.%a)" id_opt m.id module_fields m
 
-let register fmt s =
+let register fmt (s, _name) =
   Format.fprintf fmt "(register %s)" s
 
-let stanza fmt = function
+let cmd fmt = function
   | Module m -> module_ fmt m
   | Assert _ -> Format.fprintf fmt "<assert>"
-  | Register s -> register fmt s
-  | Invoke (_n, _es) -> Format.fprintf fmt "<invoke>"
-
+  | Register (s, name) -> register fmt (s, name)
+  | Action _a -> Format.fprintf fmt "<action>"
 
 let file fmt l =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline stanza fmt l
+  Format.pp_print_list ~pp_sep:Format.pp_print_newline cmd fmt l

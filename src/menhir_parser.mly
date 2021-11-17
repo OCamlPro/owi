@@ -92,7 +92,7 @@ let func_type :=
     let i', o = func_type in
     i @ i', o
   }
-  | LPAR; PARAM; _id = option(id); ~ = val_type; RPAR; ~ = func_type; {
+  | LPAR; PARAM; _id = id; ~ = val_type; RPAR; ~ = func_type; {
     let i', o = func_type in
     val_type::i', o
   }
@@ -291,7 +291,7 @@ let plain_instr :=
     )
   }
   | TABLE; DOT; COPY; src = table_idx; dst = table_idx; { Table_copy (src, dst) }
-  | TABLE; DOT; INIT; table_idx = option(table_idx); ~ = elem_idx; {
+  | TABLE; DOT; INIT; table_idx = ioption(table_idx); ~ = elem_idx; {
     let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
     Table_init (table_idx, elem_idx)
   }
@@ -1013,22 +1013,34 @@ let module_ :=
     }
   }
 
+let const ==
+  | ~ = num_type; DOT; CONST; ~ = NUM; <Const_num_val>
+  | REF; DOT; NULL; ~ = ref_kind; <Const_null>
+
+let result ==
+  | ~ = const; <Result_const>
+
 let assert_ ==
-  | ASSERT_RETURN; LPAR; INVOKE; _ = option(id); ~ = NAME; ~ = list(expr); RPAR; ~ = list(expr); <Assert_return>
-  | ASSERT_TRAP; LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; ~ = NAME; <Assert_trap>
-  (* TODO: check binary *)
-  | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed>
-  | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed>
+  | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
+  | ASSERT_TRAP; ~ = par(action); ~ = NAME; <Assert_trap>
+  | ASSERT_MALFORMED; ~ = par(module_); ~ = NAME; <Assert_malformed>
+  | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_quote>
+  | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_binary>
   | ASSERT_INVALID; ~ = par(module_); ~ = NAME; <Assert_invalid>
+  | ASSERT_INVALID; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_quote>
+  | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
 
 let register ==
-  | REGISTER; ~ = NAME; <>
+    | REGISTER; ~ = NAME; ~ = option(NAME); <Register>
 
-let stanza ==
+let action ==
+  | INVOKE; ~ = ioption(id); ~ = NAME; ~ = list(par(const)); <Invoke>
+
+let cmd ==
   | ~ = par(module_); <Module>
   | ~ = par(assert_); <Assert>
-  | ~ = par(register); <Register>
-  | LPAR; INVOKE; ~ = NAME; ~ = list(expr); RPAR; <Invoke>
+  | ~ = par(register); <>
+  | ~ = par(action); <Action>
 
 let file :=
-  | ~ = list(stanza); EOF; <>
+  | ~ = list(cmd); EOF; <>
