@@ -1031,7 +1031,7 @@ let assert_ ==
   | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
 
 let register ==
-    | REGISTER; ~ = NAME; ~ = option(NAME); <Register>
+    | REGISTER; ~ = NAME; ~ = option(id); <Register>
 
 let action ==
   | INVOKE; ~ = ioption(id); ~ = NAME; ~ = list(par(const)); <Invoke>

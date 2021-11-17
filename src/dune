@@ -1,6 +1,6 @@
 (library
  (name woi)
- (modules handle lexer menhir_parser menhir_parser_errors pp types)
+ (modules handle interpret lexer menhir_parser menhir_parser_errors pp types)
  (libraries integers menhirLib ppxlib sedlex)
  (preprocess
   (pps sedlex.ppx)))
@@ -42,7 +42,7 @@
 ; (target menhir_parser.messages.new)
 ; (action
 ;  (with-stdout-to
- ;  menhir_parser.messages.new
+;  menhir_parser.messages.new
 ;   (run
 ;    menhir
 ;    --canonical

@@ -371,7 +371,7 @@ type const =
   | Const_host of int
 
 type action =
-  | Invoke of string option * string *  const list
+  | Invoke of string option * string * const list
   | Get of string option * string
 
 type num_pat =

@@ -1,0 +1,3 @@
+(module)
+
+(register "A" $A)

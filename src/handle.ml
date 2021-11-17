@@ -14,7 +14,9 @@ let state checkpoint : int =
   | S.Cons (Element (s, _, _, _), _) -> I.number s
 
 let handle_syntax_error lexbuf _checkpoint =
-  let message = "Syntax error"(*
+  let message =
+    "Syntax error"
+    (*
     try W.Menhir_parser_errors.message (state checkpoint) with
     | Not_found -> "Syntax error"*)
   in
@@ -33,7 +35,7 @@ let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
     let checkpoint = I.resume checkpoint in
     loop next_token lexbuf checkpoint
   | I.HandlingError env -> handle_syntax_error lexbuf env
-  | I.Accepted ast -> Format.ifprintf Format.std_formatter "%a\n%!" Pp.file ast
+  | I.Accepted ast -> ast
   | I.Rejected ->
     (* Cannot happen as we stop at syntax error immediatly *)
     assert false
@@ -47,4 +49,15 @@ let process lexbuf =
   with
   | Lexer.LexError (pos, msg) ->
     Format.fprintf Format.err_formatter "lexing error : %s at %a%!" msg
-      Types.pp_pos pos
+      Types.pp_pos pos;
+    exit 1
+
+(*
+let rec f x=f x
+
+let f _=assert false
+
+let f=Obj.magic
+
+let f _=exit 1
+   *)

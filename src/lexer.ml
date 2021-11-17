@@ -13,26 +13,31 @@ let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
 let any_blank = [%sedlex.regexp? blank | newline]
 
 let sign = [%sedlex.regexp? '+' | '-']
-let digit = [%sedlex.regexp? '0' .. '9']
-let hexdigit = [%sedlex.regexp?  digit | 'a'..'f' | 'A' .. 'F']
-let num = [%sedlex.regexp? digit, Star (Opt('_'), digit)]
 
-let hexnum = [%sedlex.regexp? hexdigit, Star(Opt ('_') | hexdigit)]
+let digit = [%sedlex.regexp? '0' .. '9']
+
+let hexdigit = [%sedlex.regexp? digit | 'a' .. 'f' | 'A' .. 'F']
+
+let num = [%sedlex.regexp? digit, Star (Opt '_', digit)]
+
+let hexnum = [%sedlex.regexp? hexdigit, Star (Opt '_' | hexdigit)]
 
 let hexfrac = [%sedlex.regexp? hexnum]
+
 let frac = [%sedlex.regexp? num]
 
-let float = [%sedlex.regexp?
-    Opt(sign), num, '.', Opt(frac)
-  | Opt(sign), num, Opt('.', Opt(frac)), ('e' | 'E'), Opt(sign), num
-  | Opt(sign), "0x", hexnum, '.', Opt(hexfrac)
-  | Opt(sign), "0x", hexnum, Opt('.', Opt(hexfrac)), ('p' | 'P'), Opt(sign), num
-  | Opt(sign), "inf"
-  | Opt(sign), "nan"
-  | Opt(sign), "nan:", "0x", hexnum
-]
+let float =
+  [%sedlex.regexp?
+    ( Opt sign, num, '.', Opt frac
+    | Opt sign, num, Opt ('.', Opt frac), ('e' | 'E'), Opt sign, num
+    | Opt sign, "0x", hexnum, '.', Opt hexfrac
+    | Opt sign, "0x", hexnum, Opt ('.', Opt hexfrac), ('p' | 'P'), Opt sign, num
+    | Opt sign, "inf"
+    | Opt sign, "nan"
+    | Opt sign, "nan:", "0x", hexnum )]
 
-let nat = [%sedlex.regexp? num | ("0x", hexnum)]
+let nat = [%sedlex.regexp? num | "0x", hexnum]
+
 let int = [%sedlex.regexp? sign, nat]
 
 let num = [%sedlex.regexp? float | int | nat]
@@ -181,8 +186,12 @@ let rec token buf =
   | "or" -> OR
   | "_s" -> SIGNED
   | "_u" -> UNSIGNED
-  | ";;" -> single_comment buf; token buf
-  | "(;" -> comment buf; token buf
+  | ";;" ->
+    single_comment buf;
+    token buf
+  | "(;" ->
+    comment buf;
+    token buf
   (* 1 *)
   | "(" -> LPAR
   | ")" -> RPAR
@@ -202,13 +211,17 @@ let rec token buf =
     let position = fst @@ lexing_positions buf in
     let tok = Utf8.lexeme buf in
     raise @@ LexError (position, Printf.sprintf "unexpected character `%S`" tok)
+
 and comment buf =
   match%sedlex buf with
   | ";)" -> ()
-  | "(;" -> comment buf; comment buf
+  | "(;" ->
+    comment buf;
+    comment buf
   | eof -> failwith "eof in comment"
   | any -> comment buf
   | _ -> assert false
+
 and single_comment buf =
   match%sedlex buf with
   | newline -> ()

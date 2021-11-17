@@ -224,26 +224,18 @@ let instr fmt = function
   | Table_init (tid, eid) ->
     Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
   | Elem_drop id -> Format.fprintf fmt "elem.drop %a" elem_idx id
-  | I_load (n, ma) ->
-    Format.fprintf fmt "i%a.load %a" nn n memarg ma
-  | F_load (n, ma) ->
-    Format.fprintf fmt "f%a.load %a" nn n memarg ma
-  | I_store (n, ma) ->
-    Format.fprintf fmt "i%a.load %a" nn n memarg ma
-  | F_store (n, ma) ->
-    Format.fprintf fmt "f%a.load %a" nn n memarg ma
+  | I_load (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
+  | F_load (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
+  | I_store (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
+  | F_store (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
   | I_load8 (n, s, ma) ->
     Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
   | I_load16 (n, s, ma) ->
     Format.fprintf fmt "i%a.load16_%a %a" nn n sx s memarg ma
-  | I64_load32 (s, ma) ->
-    Format.fprintf fmt "i64.load32_%a %a" sx s memarg ma
-  | I_store8 (n, ma) ->
-    Format.fprintf fmt "i%a.store8 %a" nn n memarg ma
-  | I_store16 (n, ma) ->
-    Format.fprintf fmt "i%a.store16 %a" nn n memarg ma
-  | I64_store32 ma ->
-    Format.fprintf fmt "i64.store32 %a" memarg ma
+  | I64_load32 (s, ma) -> Format.fprintf fmt "i64.load32_%a %a" sx s memarg ma
+  | I_store8 (n, ma) -> Format.fprintf fmt "i%a.store8 %a" nn n memarg ma
+  | I_store16 (n, ma) -> Format.fprintf fmt "i%a.store16 %a" nn n memarg ma
+  | I64_store32 ma -> Format.fprintf fmt "i64.store32 %a" memarg ma
   | Memory_size -> Format.fprintf fmt "memory.size"
   | Memory_grow -> Format.fprintf fmt "memory.grow"
   | Memory_fill -> Format.fprintf fmt "memory.fill"
@@ -254,8 +246,7 @@ let instr fmt = function
   | Unreachable -> Format.fprintf fmt "unreachable"
   | Block (_ty, _expr) -> Format.fprintf fmt "<block>"
   | Loop (_ty, _expr) -> Format.fprintf fmt "<loop>"
-  | If_else (_ty, _expr, _expr') ->
-    Format.fprintf fmt "<if>"
+  | If_else (_ty, _expr, _expr') -> Format.fprintf fmt "<if>"
   | Br id -> Format.fprintf fmt "br %a" label_idx id
   | Br_if id -> Format.fprintf fmt "br_if %a" label_idx id
   | Br_table (_ids, _id) -> Format.fprintf fmt "<br_table>"
@@ -270,14 +261,11 @@ let func fmt (f : func) =
   (* TODO: typeuse ? *)
   Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals body f.body
 
-let expr fmt _e =
-  Format.fprintf fmt "<expr>"
+let expr fmt _e = Format.fprintf fmt "<expr>"
 
-let datas fmt _datas =
-  Format.fprintf fmt "<datas>"
+let datas fmt _datas = Format.fprintf fmt "<datas>"
 
-let elems fmt _elems =
-  Format.fprintf fmt "<elems>"
+let elems fmt _elems = Format.fprintf fmt "<elems>"
 
 let start fmt = function
   | None -> ()
@@ -318,8 +306,8 @@ let funcs fmt (funcs : func list) =
 
 let import_desc fmt : import_desc -> Unit.t = function
   (* TODO: in Func case, check what is the "typeuse" *)
-  | Import_func (_id, _tidx) -> assert false
-    (* Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx *)
+  | Import_func (_id, _tidx) ->
+    assert false (* Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx *)
   | Import_table (id, t) ->
     Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Import_mem (id, t) ->
@@ -340,15 +328,22 @@ let types fmt types =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline type_ fmt types
 
 let module_fields fmt m =
-  Format.fprintf fmt "%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@." types m.types imports
-    m.imports funcs m.funcs tables m.tables mems m.mems globals m.globals
-    exports m.exports start m.start elems m.elems datas m.datas
+  Format.fprintf fmt "%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@." types m.types
+    imports m.imports funcs m.funcs tables m.tables mems m.mems globals
+    m.globals exports m.exports start m.start elems m.elems datas m.datas
 
 let module_ fmt m =
   Format.fprintf fmt "(module %a@.%a)" id_opt m.id module_fields m
 
-let register fmt (s, _name) =
-  Format.fprintf fmt "(register %s)" s
+let register fmt (s, _name) = Format.fprintf fmt "(register %s)" s
+
+let const fmt = function
+  | Const_num_val (nt, s) -> Format.fprintf fmt "%a.const %s" num_type nt s
+  | _ -> failwith "not yet implemented"
+
+let result fmt = function
+  | Result_const c -> Format.fprintf fmt "(%a)" const c
+  | _ -> failwith "not yet implemented"
 
 let cmd fmt = function
   | Module m -> module_ fmt m
@@ -356,5 +351,4 @@ let cmd fmt = function
   | Register (s, name) -> register fmt (s, name)
   | Action _a -> Format.fprintf fmt "<action>"
 
-let file fmt l =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline cmd fmt l
+let file fmt l = Format.pp_print_list ~pp_sep:Format.pp_print_newline cmd fmt l
