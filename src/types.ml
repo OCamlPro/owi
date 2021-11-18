@@ -172,31 +172,13 @@ type indice =
   | Raw of u32
   | Symbolic of id
 
-type nonrec type_idx = indice
-
-type nonrec func_idx = indice
-
-type nonrec table_idx = indice
-
-type nonrec mem_idx = indice
-
-type nonrec global_idx = indice
-
-type nonrec elem_idx = indice
-
-type nonrec data_idx = indice
-
-type nonrec local_idx = indice
-
-type nonrec label_idx = indice
-
 type memarg =
   { offset : u32
   ; align : u32
   }
 
 type block_type =
-  | Type_idx of type_idx
+  | Type_idx of indice
   | Val_type of val_type option
 (* TODO: where does the option goes ? *)
 
@@ -228,25 +210,25 @@ type instr =
   (* Reference instructions *)
   | Ref_null of ref_type
   | Ref_is_null
-  | Ref_func of func_idx
+  | Ref_func of indice
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option (* TODO: why is it a list and not just tuple ? *)
   (* Variable instructions *)
-  | Local_get of local_idx
-  | Local_set of local_idx
-  | Local_tee of local_idx
-  | Global_get of global_idx
-  | Global_set of global_idx
+  | Local_get of indice
+  | Local_set of indice
+  | Local_tee of indice
+  | Global_get of indice
+  | Global_set of indice
   (* Table instructions *)
-  | Table_get of table_idx
-  | Table_set of table_idx
-  | Table_size of table_idx
-  | Table_grow of table_idx
-  | Table_fill of table_idx
-  | Table_copy of table_idx * table_idx
-  | Table_init of table_idx * elem_idx
-  | Elem_drop of elem_idx
+  | Table_get of indice
+  | Table_set of indice
+  | Table_size of indice
+  | Table_grow of indice
+  | Table_fill of indice
+  | Table_copy of indice * indice
+  | Table_init of indice * indice
+  | Elem_drop of indice
   (* Memory instructions *)
   | I_load of nn * memarg
   | F_load of nn * memarg
@@ -262,25 +244,25 @@ type instr =
   | Memory_grow
   | Memory_fill
   | Memory_copy
-  | Memory_init of data_idx
-  | Data_drop of data_idx
+  | Memory_init of indice
+  | Data_drop of indice
   (* Control instructions *)
   | Nop
   | Unreachable
   | Block of block_type * expr
   | Loop of block_type * expr
   | If_else of block_type * expr * expr
-  | Br of label_idx
-  | Br_if of label_idx
-  | Br_table of label_idx list * label_idx
+  | Br of indice
+  | Br_if of indice
+  | Br_table of indice list * indice
   | Return
-  | Call of func_idx
-  | Call_indirect of table_idx * type_idx
+  | Call of indice
+  | Call_indirect of indice * indice
 
 and expr = instr list
 
 type func_type_bis =
-  | FTId of type_idx
+  | FTId of indice
   | FTFt of func_type
 
 type func =
@@ -304,7 +286,7 @@ type global =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of table_idx * expr
+  | Elem_active of indice * expr
   | Elem_declarative
 
 type elem =
@@ -315,7 +297,7 @@ type elem =
 
 type data_mode =
   | Data_passive
-  | Data_active of mem_idx * expr
+  | Data_active of indice * expr
 
 type data =
   { init : string
@@ -324,7 +306,7 @@ type data =
 
 (* Modules *)
 
-type start = func_idx
+type start = indice
 
 type import_desc =
   | Import_func of id option * func_type_bis
@@ -339,10 +321,10 @@ type import =
   }
 
 type export_desc =
-  | Export_func of func_idx
-  | Export_table of table_idx
-  | Export_mem of mem_idx
-  | Export_global of global_idx
+  | Export_func of indice
+  | Export_table of indice
+  | Export_mem of indice
+  | Export_global of indice
 
 type export =
   { name : name

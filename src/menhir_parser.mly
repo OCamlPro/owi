@@ -89,13 +89,11 @@ let def_type ==
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
-  | i = par(preceded(PARAM, list(val_type))); ~ = func_type; {
-    let i', o = func_type in
-    i @ i', o
+  | i = par(preceded(PARAM, list(val_type))); (i2, o) = func_type; {
+    i @ i2, o
   }
-  | LPAR; PARAM; _id = id; ~ = val_type; RPAR; ~ = func_type; {
-    let i', o = func_type in
-    val_type::i', o
+  | LPAR; PARAM; _id = id; ~ = val_type; RPAR; (i2, o) = func_type; {
+    val_type::i2, o
   }
 
 let table_type ==
@@ -216,31 +214,16 @@ let memarg_offset ==
 
 let memarg ==
   | offset = option(memarg_offset); align = option(align); {
-    let offset =
-      match offset with
-      | None -> "0" (* TODO *)
-      | Some offset -> offset
-    in
-    let align =
-      match align with
-      | None -> "0" (* TODO *)
-      | Some align -> align
-    in
-    {offset = u32 offset; align = u32 align}
+    (* TODO: check default *)
+    let offset = u32 @@ Option.value offset ~default:"0" in
+    let align = u32 @@ Option.value align ~default:"0" in
+    {offset; align}
   }
-
-let elem_idx == | ~ = indice; <>
-let func_idx == | ~ = indice; <>
-let table_idx == | ~ = indice; <>
-let local_idx == | ~ = indice; <>
-let data_idx == | ~ = indice; <>
-let label_idx == | ~ = indice; <>
-let global_idx == | ~ = indice; <>
 
 let instr ==
 | ~ = plain_instr; { [plain_instr] }
-| ~ = select_instr_instr; { let e, es = select_instr_instr in e::es }
-| ~ = call_instr_instr; { let e, es = call_instr_instr in e::es }
+| (e, es) = select_instr_instr; { e::es }
+| (e, es) = call_instr_instr; { e::es }
 | ~ = block_instr; { [ block_instr ] }
 | ~ = expr; { expr }
 
@@ -248,42 +231,36 @@ let plain_instr :=
   | NOP; { Nop }
   | UNREACHABLE; { Unreachable }
   | DROP; { Drop }
-  | BR; ~ = label_idx; <Br>
-  | BR_IF; ~ = label_idx; <Br_if>
-  | BR_TABLE; ~ = label_idx; l = list(label_idx); {
-    let l = label_idx :: l in
-    let xs, x = match List.rev l with
+  | BR; ~ = indice; <Br>
+  | BR_IF; ~ = indice; <Br_if>
+  | BR_TABLE; ~ = indice; l = list(indice); {
+    let xs, x = match List.rev @@ indice::l with
       | [] -> assert false
       | hd::tl -> List.rev tl, hd
     in
     Br_table (xs, x)
   }
   | RETURN; { Return }
-  | CALL; ~ = func_idx; <Call>
-  | LOCAL; DOT; GET; ~ = local_idx; <Local_get>
-  | LOCAL; DOT; SET; ~ = local_idx; <Local_set>
-  | LOCAL; DOT; TEE; ~ = local_idx; <Local_tee>
-  | GLOBAL; DOT; GET; ~ = global_idx; <Global_get>
-  | GLOBAL; DOT; SET; ~ = global_idx; <Global_set>
-  | TABLE; DOT; GET; table_idx = option(table_idx); {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_get table_idx
+  | CALL; ~ = indice; <Call>
+  | LOCAL; DOT; GET; ~ = indice; <Local_get>
+  | LOCAL; DOT; SET; ~ = indice; <Local_set>
+  | LOCAL; DOT; TEE; ~ = indice; <Local_tee>
+  | GLOBAL; DOT; GET; ~ = indice; <Global_get>
+  | GLOBAL; DOT; SET; ~ = indice; <Global_set>
+  | TABLE; DOT; GET; indice = option(indice); {
+    Table_get (Option.value indice ~default:(Raw (u32_of_i32 0l)))
   }
-  | TABLE; DOT; SET; table_idx = option(table_idx); {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_set table_idx
+  | TABLE; DOT; SET; indice = option(indice); {
+    Table_set (Option.value indice ~default:(Raw (u32_of_i32 0l)))
   }
-  | TABLE; DOT; SIZE; table_idx = option(table_idx); {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_size table_idx
+  | TABLE; DOT; SIZE; indice = option(indice); {
+    Table_size (Option.value indice ~default:(Raw (u32_of_i32 0l)))
   }
-  | TABLE; DOT; GROW; table_idx = option(table_idx); {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_grow table_idx
+  | TABLE; DOT; GROW; indice = option(indice); {
+    Table_grow (Option.value indice ~default:(Raw (u32_of_i32 0l)))
   }
-  | TABLE; DOT; FILL; table_idx = option(table_idx); {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_fill table_idx
+  | TABLE; DOT; FILL; indice = option(indice); {
+    Table_fill (Option.value indice ~default:(Raw (u32_of_i32 0l)))
   }
   | TABLE; DOT; COPY; {
     Table_copy (
@@ -291,14 +268,13 @@ let plain_instr :=
       Raw (u32_of_i32 0l)
     )
   }
-  | TABLE; DOT; COPY; src = table_idx; dst = table_idx; { Table_copy (src, dst) }
-  | TABLE; DOT; INIT; table_idx = ioption(table_idx); ~ = elem_idx; {
-    let table_idx = Option.value table_idx ~default:(Raw (u32_of_i32 0l)) in
-    Table_init (table_idx, elem_idx)
+  | TABLE; DOT; COPY; src = indice; dst = indice; { Table_copy (src, dst) }
+  | TABLE; DOT; INIT; t_indice = ioption(indice); ~ = indice; {
+    Table_init (Option.value t_indice ~default:(Raw (u32_of_i32 0l)), indice)
   }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
-  | ELEM; DOT; DROP; ~ = elem_idx; <Elem_drop>
+  | ELEM; DOT; DROP; ~ = indice; <Elem_drop>
   | I32; DOT; CONST; n = NUM; { I32_const (i32 n) }
   | I64; DOT; CONST; n = NUM; { I64_const (i64 n) }
   | F32; DOT; CONST; n = NUM; { F32_const (f64 n) }
@@ -324,7 +300,7 @@ let plain_instr :=
   | ~ = fnn; DOT; REINTERPRET; UNDERSCORE; ~ = inn; <F_reinterpret_i>
   | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
   | REF; DOT; IS_NULL; { Ref_is_null }
-  | REF; DOT; FUNC; ~ = func_idx; <Ref_func>
+  | REF; DOT; FUNC; ~ = indice; <Ref_func>
   | ~ = inn; DOT; LOAD; ~ = memarg; <I_load>
   | ~ = fnn; DOT; LOAD; ~ = memarg; <F_load>
   | ~ = inn; DOT; STORE; ~ = memarg; <I_store>
@@ -339,33 +315,29 @@ let plain_instr :=
   | MEMORY; DOT; GROW; { Memory_grow }
   | MEMORY; DOT; FILL; { Memory_fill }
   | MEMORY; DOT; COPY; { Memory_copy }
-  | MEMORY; DOT; INIT; ~ = data_idx; <Memory_init>
-  | DATA; DOT; DROP; ~ = data_idx; <Data_drop>
+  | MEMORY; DOT; INIT; ~ = indice; <Memory_init>
+  | DATA; DOT; DROP; ~ = indice; <Data_drop>
 
 (* Instructions & Expressions *)
 
 let select_instr ==
-  | SELECT; ~ = select_instr_results; {
-    let b, ts = select_instr_results in
+  | SELECT; (b, ts) = select_instr_results; {
     Select (if b then (Some ts) else None)
   }
 
 let select_instr_results :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = select_instr_results; {
-    let _, ts = select_instr_results in
+  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts) = select_instr_results; {
     true, l @ ts
   }
   | {false, []}
 
 let select_instr_instr ==
-  | SELECT; ~ = select_instr_results_instr; {
-    let b, ts, es = select_instr_results_instr in
+  | SELECT; (b, ts, es) = select_instr_results_instr; {
     Select (if b then Some ts else None), es
   }
 
 let select_instr_results_instr :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = select_instr_results_instr; {
-    let _, ts, es = select_instr_results_instr in
+  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts, es) = select_instr_results_instr; {
     true, l @ ts, es
   }
   | ~ = instr; {
@@ -373,13 +345,11 @@ let select_instr_results_instr :=
   }
 
 let call_instr ==
-  | CALL_INDIRECT; ~ = id; ~ = call_instr_type; {
-    let _ = call_instr_type in (* TODO *)
-    Call_indirect (Symbolic id, Symbolic "TODO")
+  | CALL_INDIRECT; ~ = id; _ = call_instr_type; {
+    Call_indirect (Symbolic id, dumb_indice)
   }
-  | CALL_INDIRECT; ~ = call_instr_type; {
-    let _ = call_instr_type in (* TODO *)
-    Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), Symbolic "TODO")
+  | CALL_INDIRECT; _ = call_instr_type; {
+    Call_indirect (Raw (u32_of_i32 0l), dumb_indice)
   }
 
 let call_instr_type ==
@@ -393,8 +363,7 @@ let call_instr_type ==
   }
 
 let call_instr_params :=
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = call_instr_params; {
-    let ts1, ts2 = call_instr_params in
+  | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
     l @ ts1, ts2
   }
   | ~ = call_instr_results; {
@@ -408,40 +377,33 @@ let call_instr_results :=
   | { [] }
 
 let call_instr_instr ==
-  | CALL_INDIRECT; ~ = id; ~ = call_instr_type_instr; {
-    let _x, es = call_instr_type_instr in (* TODO: use x *)
-    Call_indirect (Symbolic id, Symbolic "TODO"), es
+  | CALL_INDIRECT; ~ = id; (_x, es) = call_instr_type_instr; {
+    Call_indirect (Symbolic id, dumb_indice), es
   }
-  | CALL_INDIRECT; ~ = call_instr_type_instr; {
-    let _x, es = call_instr_type_instr in (* TODO: use x *)
-    Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), Symbolic "TODO"), es
+  | CALL_INDIRECT; (_x, es) = call_instr_type_instr; {
+    Call_indirect (Raw (u32_of_i32 0l), dumb_indice), es
   }
 
 let call_instr_type_instr ==
-  | ~ = type_use; ~ = call_instr_params_instr; {
-    let _t = type_use (* TODO: type_ *) in
+  | _t = type_use; ~ = call_instr_params_instr; {
     match call_instr_params_instr with
     | ([], []), es -> (*TODO: t*) ([], []), es
     | _ft, es -> (* TODO: t*) ([], []), es (* TODO: inline_type_explicit t ft, es *)
   }
-  | ~ = call_instr_params_instr; {
-    let ft, es = call_instr_params_instr in
+  | (ft, es) = call_instr_params_instr; {
     (* TODO: inline_type*) ft, es
   }
 
 let call_instr_params_instr :=
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = call_instr_params_instr; {
-    let (ts1, ts2), es = call_instr_params_instr in
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
     (l @ ts1, ts2), es
   }
-  | ~ = call_instr_results_instr; {
-    let ts, es = call_instr_results_instr in
+  | (ts, es) = call_instr_results_instr; {
     ([], ts), es
   }
 
 let call_instr_results_instr :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = call_instr_results_instr; {
-    let ts, es = call_instr_results_instr in
+  | LPAR; RESULT; l = list(val_type); RPAR; (ts, es) = call_instr_results_instr; {
     l @ ts, es
   }
   | ~ = instr; {
@@ -449,96 +411,73 @@ let call_instr_results_instr :=
   }
 
 let block_instr ==
-  | BLOCK; ~ = labeling_opt; b = block; END; ~ = labeling_end_opt; {
-    let _c' = labeling_opt labeling_end_opt in
-    let bt, es = b in
+  | BLOCK; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
     Block (bt, es)
   }
-  | LOOP; ~ = labeling_opt; ~ = block; END; ~ = labeling_end_opt; {
-    let _c' = labeling_opt labeling_end_opt in
-    let bt, es = block in
+  | LOOP; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
     Loop (bt, es)
   }
-  | IF; ~ = labeling_opt; ~ = block; END; ~ = labeling_end_opt; {
-    let _c' = labeling_opt labeling_end_opt in
-    let bt, es = block in
+  | IF; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
     If_else (bt, es, [])
   }
-  | IF; ~ = labeling_opt; ~ = block; ELSE; le1 = labeling_end_opt; ~ = instr_list; END; le2 = labeling_end_opt; {
-    let _c' = labeling_opt (le1 @ le2) in
-    let bt, es1 = block in
+  | IF; _ = labeling_opt; (bt, es1) = block; ELSE; _ = labeling_end_opt; ~ = instr_list; END; _ = labeling_end_opt; {
     If_else (bt, es1, instr_list)
   }
 
 let block ==
-  | ~ = type_use; ~ = block_param_body; {
-    Type_idx (type_use), snd block_param_body
-    (* TODO:
-    Type_idx (inline_type_explicit type_use (fst block_param_body)), snd block_param_body
-       *)
+  | ~ = type_use; (_l, r) = block_param_body; {
+    Type_idx (type_use), r
+    (* TODO: Type_idx (inline_type_explicit type_use _l), snd r *)
   }
-  | ~ = block_param_body; {
-    let bt = match fst block_param_body with
+  | (l, r) = block_param_body; {
+    let bt = match l with
       | [], [] -> Val_type None
       | [], [t] -> Val_type (Some t)
       | _ft -> Type_idx (Symbolic "TODO") (* TODO: Type_idx (inline_type ft) *)
     in
-    bt, snd block_param_body
+    bt, r
   }
 
 let block_param_body :=
   | ~ = block_result_body; <>
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = block_param_body; {
-    let (ins, out), instr_list = block_param_body in
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), instr_list) = block_param_body; {
     (l @ ins, out), instr_list
   }
 
 let block_result_body :=
   | ~ = instr_list; { ([], []), instr_list }
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = block_result_body; {
-    let (ins, out), instr_list = block_result_body in
+  | LPAR; RESULT; l = list(val_type); RPAR; ((ins, out), instr_list) = block_result_body; {
     (ins, l @out), instr_list
   }
 
 let expr_aux ==
   | ~ = plain_instr; ~ = expr_list; { expr_list, plain_instr }
-  | SELECT; ~ = select_expr_result; {
-    let b, ts, es = select_expr_result in
+  | SELECT; (b, ts, es) = select_expr_result; {
     es, Select (if b then Some ts else None)
   }
-  | CALL_INDIRECT; ~ = id; ~ = call_expr_type; {(* TODO: use id ? *)
-    let x, es = call_expr_type in
+  | CALL_INDIRECT; ~ = id; (x, es) = call_expr_type; {
     es, Call_indirect (Symbolic id, x)
   }
-  | CALL_INDIRECT; ~ = call_expr_type; {
-    let x, es = call_expr_type in
-    es, Call_indirect (Raw (Unsigned.UInt32.of_int32 0l), x)
+  | CALL_INDIRECT; (x, es) = call_expr_type; {
+    es, Call_indirect (Raw (u32_of_i32 0l), x)
   }
-  | BLOCK; ~ = labeling_opt; ~ = block; {
-    let _c' = labeling_opt in (* TODO ? *)
-    let bt, es = block in
+  | BLOCK; _ = labeling_opt; (bt, es) = block; {
     [], Block (bt, es)
   }
-  | LOOP; ~ = labeling_opt; ~ = block; {
-    let _c' = labeling_opt in
-    let bt, es = block in
-    (* TODO: block or loop ? *)
+  | LOOP; _ = labeling_opt; (bt, es) = block; {
     [], Loop (bt, es)
   }
-  | IF; ~ = labeling_opt; ~ = if_block; {
-    let _c' = labeling_opt in
-    let bt, (_param_or_result, (es, es1, es2)) = if_block in
+  | IF; _ = labeling_opt; (bt, (_param_or_result, (es, es1, es2))) = if_block; {
     es, If_else (bt, es1, es2)
   }
 
 let expr :=
-  | expr_aux = par(expr_aux); {
-    let es, e' = expr_aux in es @ [e']
+  | (es, e) = par(expr_aux); {
+    es @ [e]
   }
 
 let select_expr_result :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = select_expr_result; {
-    let _, ts, es = select_expr_result in
+  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts, es) = select_expr_result; {
     true, l @ ts, es
   }
   | ~ = expr_list; { false, [], expr_list }
@@ -548,55 +487,46 @@ let call_expr_type ==
     match call_expr_params with
     (* TODO: | ([], []), es -> (Obj.magic type_use) type_, es *)
     (*| ft, es -> inline_type ((Obj.magic type_use) type_) ft, es*)
-    | _ -> Symbolic "TODO", []
+    | _ -> dumb_indice, []
   }
-  | ~ = call_expr_params; {
-    let _ft, es = call_expr_params in
-    (* TODO: inline_type*) Symbolic "TODO", es
+  | (_ft, es) = call_expr_params; {
+    dumb_indice, es
   }
 
 let call_expr_params :=
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = call_expr_params; {
-    let (ts1, ts2), es = call_expr_params in
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_expr_params; {
     (l @ ts1, ts2), es
   }
-  | ~ = call_expr_results; {
-    let ts, es = call_expr_results in
+  | (ts, es) = call_expr_results; {
     ([], ts), es
   }
 
 let call_expr_results :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = call_expr_results; {
-    let ts, es = call_expr_results in
+  | LPAR; RESULT; l = list(val_type); RPAR; (ts, es) = call_expr_results; {
     l @ ts, es
   }
   | ~ = expr_list; { [], expr_list }
 
 let if_block ==
-  | ~ = type_use; ~ = if_block_param_body; {
-    Type_idx type_use, if_block_param_body
-  }
+  | ~ = type_use; ~ = if_block_param_body; { Type_idx type_use, if_block_param_body }
   | ~ = if_block_param_body; {
     Val_type None, if_block_param_body
   }
 
 let if_block_param_body :=
   | ~ = if_block_result_body; <>
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = if_block_param_body; {
-    let (ins, out), if_ = if_block_param_body in
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), if_) = if_block_param_body; {
     (l @ ins, out), if_
   }
 
 let if_block_result_body :=
   | ~ = if_; { ([], []), if_ }
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = if_block_result_body; {
-    let (ins, out), if_ = if_block_result_body in
+  | LPAR; RESULT; l = list(val_type); RPAR; ((ins, out), if_) = if_block_result_body; {
     (ins, l @ out), if_
   }
 
 let if_ :=
-  | ~ = expr; ~ = if_; {
-    let es0, es1, es2 = if_ in
+  | ~ = expr; (es0, es1, es2) = if_; {
     expr @ es0, es1, es2
   }
   | LPAR; THEN; es1 = instr_list; RPAR; LPAR; ELSE; es2 = instr_list; RPAR; {
@@ -644,62 +574,47 @@ let func_fields :=
     [MImport { module_; name; desc = Import_func (None, FTFt func_fields_import) }]
   }
   | ~ = inline_export; ~ = func_fields; {
-    let e = { name = inline_export; desc = Export_func dumb_indice } in
-    MExport e :: func_fields
+    MExport { name = inline_export; desc = Export_func dumb_indice } :: func_fields
   }
 
 let func_fields_import :=
   | ~ = func_fields_import_result; <>
-  | LPAR; PARAM; ins = list(val_type); RPAR; ~ = func_fields_import; {
-    let ins', out = func_fields_import in
-    ins @ ins', out
+  | LPAR; PARAM; ins = list(val_type); RPAR; (ins2, out) = func_fields_import; {
+    ins @ ins2, out
   }
-  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; ~ = func_fields_import; {
-    let ins', out = func_fields_import in
-    val_type  :: ins', out
+  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; (ins2, out) = func_fields_import; {
+    val_type :: ins2, out
   }
 
 let func_fields_import_result :=
   | { [], [] }
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = func_fields_import_result; {
-    let ins, out = func_fields_import_result in
+  | LPAR; RESULT; l = list(val_type); RPAR; (ins, out) = func_fields_import_result; {
     ins, l @ out
   }
 
 let func_fields_body :=
   | ~ = func_result_body; <>
-  | LPAR; PARAM; l = list(val_type); RPAR; ~ = func_fields_body; {
-    let ins, out = fst func_fields_body in
-    let ins = l @ ins in
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), r) = func_fields_body; {
     (* TODO: anon_locals ? *)
-    (ins, out), snd func_fields_body
+    (l @ ins, out), r
   }
-  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; ~ = func_fields_body; {
-    let ins, out = fst func_fields_body in
-    let ins = val_type :: ins in
+  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; ((ins, out), r) = func_fields_body; {
     (* TODO: use id ? *)
-    (ins, out), snd func_fields_body
+    (val_type :: ins, out), r
   }
 
 let func_result_body :=
   | ~ = func_body; { ([], []), func_body }
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = func_result_body; {
-    let ins, out = fst func_result_body in
-    let out = l @ out in
-    (ins, out), snd func_result_body
+  | LPAR; RESULT; l = list(val_type); RPAR; ((ins, out), r) = func_result_body; {
+    (ins, l @ out), r
   }
 
 let func_body :=
   | body = instr_list; {
-    let type_f = -1l in
-    let type_f = Unsigned.UInt32.of_int32 type_f in
-    let type_f = Raw type_f in
-    let type_f = FTId type_f in
-    { type_f; locals = []; body; id = None }
+    { type_f = FTId (Raw (u32_of_i32 (-1l))); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
-    let l = List.map (fun v -> None, v) l in
-    { func_body with locals = l @ func_body.locals  }
+    { func_body with locals = (List.map (fun v -> None, v) l) @ func_body.locals  }
   }
   | LPAR; LOCAL; ~ = id; ~ = val_type; RPAR; ~ = func_body; {
     { func_body with locals = (Some id, val_type) :: func_body.locals }
@@ -733,30 +648,20 @@ let elem_list ==
 
 (* TODO: store the ID ? *)
 let elem ==
-  | ELEM; _ = option(id); ~ = elem_list; {
-    let type_, init = elem_list in
-    let mode = Elem_passive in
-    [ MElem { type_; init = init; mode } ]
+  | ELEM; _ = option(id); (type_, init) = elem_list; {
+    [ MElem { type_; init; mode = Elem_passive } ]
   }
-  | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; ~ = elem_list; {
-    let type_, init = elem_list in
-    let mode = Elem_active (table_use, offset) in
-    [ MElem { type_; init = init; mode } ]
+  | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; (type_, init) = elem_list; {
+    [ MElem { type_; init; mode = Elem_active (table_use, offset) } ]
   }
-  | ELEM; _ = option(id); DECLARE; ~ = elem_list; {
-    let type_, init = elem_list in
-    let mode = Elem_declarative in
-    [ MElem { type_; init = init; mode } ]
+  | ELEM; _ = option(id); DECLARE; (type_, init) = elem_list; {
+    [ MElem { type_; init; mode = Elem_declarative } ]
   }
-  | ELEM; _ = option(id); ~ = offset; ~ = elem_list; {
-    let type_, init = elem_list in
-    let mode = Elem_active (Raw Unsigned.UInt32.zero, offset) in
-    [ MElem { type_; init = init; mode } ]
+  | ELEM; _ = option(id); ~ = offset; (type_, init) = elem_list; {
+    [ MElem { type_; init; mode = Elem_active (Raw Unsigned.UInt32.zero, offset) } ]
   }
   | ELEM; _ = option(id); ~ = offset; init = list(elem_var); {
-    let type_ = Func_ref in
-    let mode = Elem_active (Raw Unsigned.UInt32.zero, offset) in
-    [ MElem { type_; init = [init]; mode } ]
+    [ MElem { type_ = Func_ref; init = [init]; mode = Elem_active (Raw Unsigned.UInt32.zero, offset) } ]
   }
 
 let table ==
@@ -782,13 +687,11 @@ let table_fields :=
     [ MImport { module_; name; desc = Import_table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
-    let e = MExport { name = inline_export; desc = Export_table dumb_indice } in
-    e :: table_fields
+    MExport { name = inline_export; desc = Export_table dumb_indice } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; init = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
-    let max = Some min in
-    [ MTable (None, ({ min; max }, ref_type))
+    [ MTable (None, ({ min; max = Some min }, ref_type))
     ; MElem { type_ = Func_ref; init; mode = Elem_active (dumb_indice, []) } ]
   }
 
@@ -798,7 +701,7 @@ let data ==
     [ MData { init; mode = Data_passive } ]
   }
   | DATA; _ = option(id); memory_use = option(memory_use); ~ = offset; init = string_list; {
-    let memory_use = Option.value memory_use ~default:(Raw (Unsigned.UInt32.of_int32 0l)) in
+    let memory_use = Option.value memory_use ~default:(Raw (u32_of_i32 0l)) in
     [ MData { init; mode = Data_active (memory_use, offset) } ]
   }
 
@@ -820,13 +723,11 @@ let memory_fields :=
     [ MImport { module_; name; desc = Import_mem (None, mem_type) } ] (* TODO: None ? *)
   }
   | ~ = inline_export; ~ = memory_fields; {
-    let e = MExport { name = inline_export; desc = Export_mem dumb_indice } in
-    e :: memory_fields
+    MExport { name = inline_export; desc = Export_mem dumb_indice } :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
     let min = u32_of_i32 @@ Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
-    let max = Some min in
-    [ MMem (None, { min; max})
+    [ MMem (None, { min; max = Some min})
     ; MData { init; mode = Data_active (dumb_indice, []) } ]
   }
 
@@ -848,18 +749,14 @@ let global_fields :=
     [ MImport { module_; name; desc = Import_global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
-    let e = MExport { name = inline_export; desc = Export_global dumb_indice } in
-    e :: global_fields
+    MExport { name = inline_export; desc = Export_global dumb_indice } :: global_fields
   }
 
 (* Imports & Exports *)
 
 let import_desc ==
   | FUNC; id = option(id); ~ = type_use; { Import_func (id, FTId type_use) }
-  | i = preceded(FUNC, pair(option(id), func_type)); {
-    let id, ft = i in
-    Import_func (id, FTFt ft)
-  }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, FTFt ft) }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>
@@ -911,7 +808,6 @@ let module_field :=
 
 let module_ :=
   | MODULE; id = option(id); fields = list(par(module_field)); {
-    let fields = List.flatten fields in
     let res = List.fold_left (fun m f ->
       match f with
       | MExport e -> { m with exports = e::m.exports }
@@ -944,7 +840,7 @@ let module_ :=
         imports = [];
         exports = [];
       }
-      fields
+      (List.flatten fields)
     in
     { res with
       types = List.rev res.types;
