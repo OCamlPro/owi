@@ -50,6 +50,7 @@ let f64 s =
     Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `nan` instead)@." s;
     Float.nan
 
+let dumb_indice = Symbolic "_dumb_indice_todo_"
 
 %}
 
@@ -622,44 +623,29 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    match id with
-    | None -> func_fields (Symbolic "TODO_func")
-    | Some id -> func_fields (Symbolic id)
+    let id = Symbolic (Option.value id ~default:"TODO_func") in
+    List.rev_map (function
+      | MExport e -> MExport { e with desc = Export_func id }
+      | field -> field
+    ) func_fields
   }
 
 let func_fields :=
-  | ~ = type_use; ~ = func_fields_body; {
-    fun _x ->
-      let _foo, f = func_fields_body in
-      [{ f with type_f = FTId type_use }],
-      [], []
+  | ~ = type_use; (_todo, f) = func_fields_body; {
+    [MFunc { f with type_f = FTId type_use }]
   }
-  | ~ = func_fields_body; {
-    fun _x ->
-      let type_f, f = func_fields_body in
-      let type_f = FTFt type_f in
-      [{ f with type_f }],
-      [], []
+  | (type_f, f) = func_fields_body; {
+    [MFunc { f with type_f = FTFt type_f }]
   }
-  | ~ = inline_import; ~ = type_use; _ = func_fields_import; {
-    fun _x ->
-      let module_, name = inline_import in
-      [],
-      [{ module_; name; desc = Import_func (None, FTId type_use) }],
-      []
+  | (module_, name) = inline_import; ~ = type_use; _ = func_fields_import; {
+    [MImport { module_; name; desc = Import_func (None, FTId type_use) }]
   }
-  | ~ = inline_import; ~ = func_fields_import; {
-    fun _x ->
-      let module_, name = inline_import in
-      [],
-      [{ module_; name; desc = Import_func (None, FTFt func_fields_import) }],
-      []
+  | (module_, name) = inline_import; ~ = func_fields_import; {
+    [MImport { module_; name; desc = Import_func (None, FTFt func_fields_import) }]
   }
   | ~ = inline_export; ~ = func_fields; {
-    fun x ->
-      let fns, ims, exs = func_fields x in
-      let e = { name = inline_export; desc = Export_func x } in
-      fns, ims, e::exs
+    let e = { name = inline_export; desc = Export_func dumb_indice } in
+    MExport e :: func_fields
   }
 
 let func_fields_import :=
@@ -750,138 +736,120 @@ let elem ==
   | ELEM; _ = option(id); ~ = elem_list; {
     let type_, init = elem_list in
     let mode = Elem_passive in
-    { type_; init = init; mode }
+    [ MElem { type_; init = init; mode } ]
   }
   | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; ~ = elem_list; {
     let type_, init = elem_list in
     let mode = Elem_active (table_use, offset) in
-    { type_; init = init; mode }
+    [ MElem { type_; init = init; mode } ]
   }
   | ELEM; _ = option(id); DECLARE; ~ = elem_list; {
     let type_, init = elem_list in
     let mode = Elem_declarative in
-    { type_; init = init; mode }
+    [ MElem { type_; init = init; mode } ]
   }
   | ELEM; _ = option(id); ~ = offset; ~ = elem_list; {
     let type_, init = elem_list in
     let mode = Elem_active (Raw Unsigned.UInt32.zero, offset) in
-    { type_; init = init; mode }
+    [ MElem { type_; init = init; mode } ]
   }
   | ELEM; _ = option(id); ~ = offset; init = list(elem_var); {
     let type_ = Func_ref in
     let mode = Elem_active (Raw Unsigned.UInt32.zero, offset) in
-    { type_; init = [init]; mode }
+    [ MElem { type_; init = [init]; mode } ]
   }
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
-  match id with
-  | None -> table_fields (Symbolic "TODO_anon_table")
-  | Some id -> table_fields (Symbolic id)
+  let id = Symbolic (Option.value id ~default:"TODO_table") in
+  List.rev_map (function
+    | MExport e -> MExport { e with desc = Export_table id }
+    | MElem e -> MElem { e with mode = Elem_active (id, [I32_const 0l]) }
+    | field -> field
+  ) table_fields
 }
 
 let init ==
-    | l = list(elem_var); { [l] }
+  | l = list(elem_var); { [l] }
   | ~ = elem_expr; l = list(elem_expr); { elem_expr :: l }
 
+(* TODO: None ? *)
 let table_fields :=
   | ~ = table_type; {
-    fun _x ->
-      [table_type], [], [], []
+    [ MTable (None, table_type) ]
   }
-  | ~ = inline_import; ~ = table_type; {
-    fun _x ->
-      let module_, name = inline_import in
-      [], [],
-      [{ module_; name; desc = Import_table (None, table_type) }],
-      []
+  | (module_, name) = inline_import; ~ = table_type; {
+    [ MImport { module_; name; desc = Import_table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
-    fun x ->
-      let tabs, elems, ims, exs = table_fields x in
-      let e = { name = inline_export; desc = Export_table x } in
-      tabs, elems, ims, e::exs
+    let e = MExport { name = inline_export; desc = Export_table dumb_indice } in
+    e :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; init = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     let max = Some min in
-    fun x ->
-      let mode = Elem_active (x, [I32_const 0l]) in
-      [{ min; max }, ref_type],
-      [{ type_ = Func_ref; init; mode }],
-      [], []
+    [ MTable (None, ({ min; max }, ref_type))
+    ; MElem { type_ = Func_ref; init; mode = Elem_active (dumb_indice, []) } ]
   }
 
 (* TODO: use id *)
 let data ==
   | DATA; _ = option(id); init = string_list; {
-    { init; mode = Data_passive }
+    [ MData { init; mode = Data_passive } ]
   }
   | DATA; _ = option(id); memory_use = option(memory_use); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw (Unsigned.UInt32.of_int32 0l)) in
-    { init; mode = Data_active (memory_use, offset) }
+    [ MData { init; mode = Data_active (memory_use, offset) } ]
   }
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
-    match id with
-    | None -> memory_fields (Symbolic "TODO (anon memory)")
-    | Some id -> memory_fields (Symbolic id)
+    let id = Symbolic (Option.value id ~default:"TODO_memory") in
+    List.rev_map (function
+      | MExport e -> MExport { e with desc = Export_mem id }
+      | MData d -> MData { d with mode = Data_active (id, [I32_const 0l]) }
+      | field -> field
+    ) memory_fields
   }
 
 let memory_fields :=
   | ~ = mem_type; {
-    fun _x ->
-      [None, mem_type], [], [], [] (* TODO: None ? *)
+    [ MMem (None, mem_type) ] (* TODO: None ? *)
   }
-  | ~ = inline_import; ~ = mem_type; {
-    let module_, name = inline_import in
-    fun _x ->
-      [], [],
-      [ { module_; name; desc = Import_mem (None, mem_type) } ], (* TODO: None ? *)
-      []
+  | (module_, name) = inline_import; ~ = mem_type; {
+    [ MImport { module_; name; desc = Import_mem (None, mem_type) } ] (* TODO: None ? *)
   }
   | ~ = inline_export; ~ = memory_fields; {
-    fun x ->
-      let mems, data, ims, exs = memory_fields x in
-      let e = { name = inline_export; desc = Export_mem x } in
-      mems, data, ims, e::exs
+    let e = MExport { name = inline_export; desc = Export_mem dumb_indice } in
+    e :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
-    fun x ->
-    let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
-    let min = Unsigned.UInt32.of_int32 min in (* TODO: this shouldn't be needed.. *)
+    let min = u32_of_i32 @@ Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     let max = Some min in
-    [ None, { min; max}  ],
-    [ { init; mode = Data_active (x, [I32_const 0l]) } ],
-    [], []
+    [ MMem (None, { min; max})
+    ; MData { init; mode = Data_active (dumb_indice, []) } ]
   }
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    match id with
-    | None -> global_fields (Symbolic "TODO")
-    | Some id -> global_fields (Symbolic id)
+    let id = Symbolic (Option.value id ~default:"TODO_global") in
+    List.rev_map (function
+      | MExport e -> MExport { e with desc = Export_global id }
+      | field -> field
+    ) global_fields
   }
 
 (* TODO: None -> _x ? *)
 let global_fields :=
   | type_ = global_type; init = const_expr; {
-    fun _x ->
-    [ { type_; init; id = None } ], [], []
+    [ MGlobal { type_; init; id = None } ]
   }
-  | ~ = inline_import; ~ = global_type; {
-    fun _x ->
-    let module_, name = inline_import in
-    [],
-    [ { module_; name; desc = Import_global (None, global_type) } ],
-    []
+  | (module_, name) = inline_import; ~ = global_type; {
+    [ MImport { module_; name; desc = Import_global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
-      fun x ->
-        let globs, ims, exs = global_fields x in
-        let e = { name = inline_export; desc = Export_global x } in
-        globs, ims, e::exs
+    let e = MExport { name = inline_export; desc = Export_global dumb_indice } in
+    e :: global_fields
   }
 
 (* Imports & Exports *)
@@ -898,7 +866,7 @@ let import_desc ==
 
 let import ==
   | IMPORT; module_ = NAME; name = NAME; desc = par(import_desc); {
-    { module_; name; desc }
+    [ MImport { module_; name; desc } ]
   }
 
 let inline_import ==
@@ -912,7 +880,7 @@ let export_desc ==
 
 let export ==
   | EXPORT; name = NAME; desc = par(export_desc); {
-    { name; desc; }
+    [ MExport { name; desc; } ]
   }
 
 let inline_export ==
@@ -924,44 +892,22 @@ let type_ ==
   | ~ = def_type; <>
 
 let type_def ==
-  | TYPE; ~ = option(id); ~ = type_; <>
+  | TYPE; id = option(id); ~ = type_; { [ MType (id, type_) ] }
 
 let start ==
-  | START; ~ = indice; <>
+  | START; ~ = indice; { [ MStart indice ] }
 
 let module_field :=
-  | t = type_def; { [MType t] }
-  | e = export; { [MExport e] }
-  | f = func; {
-    let funcs, ims, exs = f in
-      (List.map (fun f -> MFunc f) funcs)
-    @ (List.map (fun i -> MImport i) ims)
-    @ (List.map (fun e -> MExport e) exs)
-  }
-  | s = start; { [MStart s] }
-  | i = import; { [MImport i] }
-  | e = elem; { [MElem e] }
-  | g = global; {
-    let globs, ims, exs = g in
-      (List.map (fun g -> MGlobal g) globs)
-    @ (List.map (fun i -> MImport i) ims)
-    @ (List.map (fun e -> MExport e) exs)
-  }
-  | t = table; {
-    let tabs, elems, ims, exs = t in
-      (List.map (fun t -> MTable (None, t)) tabs) (* TODO: is it really None ? *)
-    @ (List.map (fun e -> MElem e) elems)
-    @ (List.map (fun i -> MImport i) ims)
-    @ (List.map (fun e -> MExport e) exs)
-  }
-  | m = memory; {
-    let mems, data, ims, exs = m in
-      (List.map (fun (id, m) -> MMem (id, m)) mems)
-    @ (List.map (fun d -> MData d) data)
-    @ (List.map (fun i -> MImport i) ims)
-    @ (List.map (fun e -> MExport e) exs)
-  }
-  | d = data; { [MData d] }
+  | ~ = type_def; <>
+  | ~ = start; <>
+  | ~ = export; <>
+  | ~ = import; <>
+  | ~ = elem; <>
+  | ~ = data; <>
+  | ~ = func; <>
+  | ~ = global; <>
+  | ~ = table; <>
+  | ~ = memory; <>
 
 let module_ :=
   | MODULE; id = option(id); fields = list(par(module_field)); {

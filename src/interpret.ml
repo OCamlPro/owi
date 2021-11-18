@@ -36,11 +36,12 @@ let exec_action env = function
 let exec_assert env = function
   | Assert_return (action, results_expected) ->
     let env, results_got = exec_action env action in
-    if results_expected <> results_expected then begin
+    if results_expected <> results_expected then
       Format.eprintf "assert_return failed !@.expected: `%a`@.got: `%a`@."
-        (Format.pp_print_list Pp.result) results_expected
-        (Format.pp_print_list Pp.result) results_got
-    end;
+        (Format.pp_print_list Pp.result)
+        results_expected
+        (Format.pp_print_list Pp.result)
+        results_got;
     env
   | _ -> failwith "not yet implemented"
 
