@@ -5,18 +5,6 @@
 %{
 open Types
 
-type p_module_field =
-  | MType of type_
-  | MGlobal of global
-  | MTable of table
-  | MMem of mem
-  | MFunc of func
-  | MElem of elem
-  | MData of data
-  | MStart of start
-  | MImport of import
-  | MExport of export
-
 let u32_of_i32 = Unsigned.UInt32.of_int32
 
 let u32 s =
@@ -808,51 +796,8 @@ let module_field :=
 
 let module_ :=
   | MODULE; id = option(id); fields = list(par(module_field)); {
-    let res = List.fold_left (fun m f ->
-      match f with
-      | MExport e -> { m with exports = e::m.exports }
-      | MFunc f -> { m with funcs = f::m.funcs }
-      | MStart start ->
-        if Option.is_some m.start then failwith "multiple start sections"
-        else { m with start = Some start }
-      | MImport i ->
-        if m.funcs <> [] then failwith "import after function definition";
-        if m.mems <> [] then failwith "import after memory definition";
-        if m.tables <> [] then failwith "import after table definition";
-        if m.globals <> [] then failwith "import after global definition";
-        { m with imports = i::m.imports }
-      | MData d -> { m with datas = d::m.datas }
-      | MElem e -> { m with elems = e::m.elems }
-      | MMem mem -> { m with mems = mem::m.mems }
-      | MType t -> { m with types = t::m.types }
-      | MGlobal g -> { m with globals = g::m.globals }
-      | MTable t -> { m with tables = t::m.tables }
-      ) {
-        id = id;
-        types = [];
-        funcs = [];
-        tables = [];
-        mems = [];
-        globals = [];
-        elems = [];
-        datas = [];
-        start = None;
-        imports = [];
-        exports = [];
-      }
-      (List.flatten fields)
-    in
-    { res with
-      types = List.rev res.types;
-      funcs = List.rev res.funcs;
-      tables = List.rev res.tables;
-      mems = List.rev res.mems;
-      globals = List.rev res.globals;
-      elems = List.rev res.elems;
-      datas = List.rev res.datas;
-      imports = List.rev res.imports;
-      exports = List.rev res.exports;
-    }
+    let fields = List.flatten fields in
+    { id; fields }
   }
 
 let const ==

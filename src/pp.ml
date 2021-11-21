@@ -263,13 +263,7 @@ let func fmt (f : func) =
 
 let expr fmt _e = Format.fprintf fmt "<expr>"
 
-let datas fmt _datas = Format.fprintf fmt "<datas>"
-
-let elems fmt _elems = Format.fprintf fmt "<elems>"
-
-let start fmt = function
-  | None -> ()
-  | Some start -> Format.fprintf fmt "(start %a)" func_idx start
+let start fmt start = Format.fprintf fmt "(start %a)" func_idx start
 
 let export_desc fmt = function
   | Export_func id -> Format.fprintf fmt "(func %a)" func_idx id
@@ -280,26 +274,14 @@ let export_desc fmt = function
 let export fmt e =
   Format.fprintf fmt "(export %a %a)" name e.name export_desc e.desc
 
-let exports fmt exports =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline export fmt exports
-
 let global fmt (g : global) =
   Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_ expr
     g.init
 
-let globals fmt globals =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline global fmt globals
-
 let mem fmt (id, ty) = Format.fprintf fmt "(memory %a %a)" id_opt id mem_type ty
-
-let mems fmt mems =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline mem fmt mems
 
 let table fmt (id, ty) =
   Format.fprintf fmt "(table %a %a)" id_opt id table_type ty
-
-let tables fmt tables =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline table fmt tables
 
 let funcs fmt (funcs : func list) =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline func fmt funcs
@@ -319,21 +301,28 @@ let import fmt i =
   Format.fprintf fmt "(import %a %a %a)" name i.module_ name i.name import_desc
     i.desc
 
-let imports fmt imports =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline import fmt imports
-
 let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
-let types fmt types =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline type_ fmt types
+let data fmt _d = Format.fprintf fmt "(data <TODO>)"
 
-let module_fields fmt m =
-  Format.fprintf fmt "%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@.%a@." types m.types
-    imports m.imports funcs m.funcs tables m.tables mems m.mems globals
-    m.globals exports m.exports start m.start elems m.elems datas m.datas
+let elem fmt _e = Format.fprintf fmt "(elem <TODO>)"
+
+let module_field fmt = function
+  | MType t -> type_ fmt t
+  | MGlobal g -> global fmt g
+  | MTable t -> table fmt t
+  | MMem m -> mem fmt m
+  | MFunc f -> func fmt f
+  | MElem e -> elem fmt e
+  | MData d -> data fmt d
+  | MStart s -> start fmt s
+  | MImport i -> import fmt i
+  | MExport e -> export fmt e
 
 let module_ fmt m =
-  Format.fprintf fmt "(module %a@.%a)" id_opt m.id module_fields m
+  Format.fprintf fmt "(module %a@.%a)" id_opt m.id
+    (Format.pp_print_list ~pp_sep:Format.pp_print_newline module_field)
+    m.fields
 
 let register fmt (s, _name) = Format.fprintf fmt "(register %s)" s
 

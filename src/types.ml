@@ -333,18 +333,21 @@ type export =
 
 type type_ = id option * func_type
 
+type module_field =
+  | MType of type_
+  | MGlobal of global
+  | MTable of table
+  | MMem of mem
+  | MFunc of func
+  | MElem of elem
+  | MData of data
+  | MStart of start
+  | MImport of import
+  | MExport of export
+
 type module_ =
   { id : id option
-  ; types : type_ list
-  ; funcs : func list
-  ; tables : table list
-  ; mems : mem list
-  ; globals : global list
-  ; elems : elem list
-  ; datas : data list
-  ; start : start option
-  ; imports : import list
-  ; exports : export list
+  ; fields : module_field list
   }
 
 type const =

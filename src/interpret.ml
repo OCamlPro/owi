@@ -1,13 +1,15 @@
-open Types
+open Simplify
 
 type env =
-  { last_module : module_ option
-  ; seen_modules : (string, module_) Hashtbl.t
-  ; registered_modules : (string, module_) Hashtbl.t
+  { modules : module_ Array.t
+  ; last_module : int option
+  ; seen_modules : (string, int) Hashtbl.t
+  ; registered_modules : (string, int) Hashtbl.t
   }
 
 let empty_env =
-  { last_module = None
+  { modules = [||]
+  ; last_module = None
   ; seen_modules = Hashtbl.create 64
   ; registered_modules = Hashtbl.create 64
   }
@@ -15,26 +17,14 @@ let empty_env =
 let _invoke _env _f _args = ()
 
 let exec_action env = function
-  | Invoke (mod_name, _f, _args) ->
-    let module_ =
-      match mod_name with
-      | None -> begin
-        match env.last_module with
-        | None -> failwith "no module defined"
-        | Some last_module -> last_module
-      end
-      | Some mod_name -> begin
-        match Hashtbl.find_opt env.seen_modules mod_name with
-        | None -> failwith (Format.sprintf "unknown module $%s" mod_name)
-        | Some module_ -> module_
-      end
-    in
+  | Invoke_indice (i, _f, _args) ->
+    let module_ = env.modules.(i) in
     ignore module_;
     (env, [])
   | Get _ -> failwith "not yet implemented"
 
 let exec_assert env = function
-  | Assert_return (action, results_expected) ->
+  | SAssert_return (action, results_expected) ->
     let env, results_got = exec_action env action in
     if results_expected <> results_expected then
       Format.eprintf "assert_return failed !@.expected: `%a`@.got: `%a`@."
@@ -45,36 +35,22 @@ let exec_assert env = function
     env
   | _ -> failwith "not yet implemented"
 
-let exec_register env name mod_name =
-  let to_register =
-    match mod_name with
-    | None -> begin
-      match env.last_module with
-      | None -> failwith "no module defined"
-      | Some last_module -> last_module
-    end
-    | Some mod_name -> begin
-      match Hashtbl.find_opt env.seen_modules mod_name with
-      | None -> failwith (Format.sprintf "unknown module $%s" mod_name)
-      | Some module_ -> module_
-    end
-  in
-  (* TODO: add/replace ? *)
-  Hashtbl.replace env.registered_modules name to_register;
+let exec_register env name i =
+  Hashtbl.replace env.registered_modules name i;
   env
 
-let exec_module env m =
-  Option.iter
-    (fun id -> Hashtbl.replace env.seen_modules id m (* TODO: add/replace ? *))
-    m.id;
-  { env with last_module = Some m }
+let exec_module env i = { env with last_module = Some i }
 
 let exec_cmd env = function
-  | Module m -> exec_module env m
+  | Module_indice i -> exec_module env i
   | Assert a -> exec_assert env a
-  | Register (name, mod_name) -> exec_register env name mod_name
+  | Register_indice (name, i) -> exec_register env name i
   | Action a -> fst (exec_action env a)
 
-let exec ast =
-  let env = List.fold_left (fun env cmd -> exec_cmd env cmd) empty_env ast in
+let exec script modules =
+  let env =
+    List.fold_left
+      (fun env cmd -> exec_cmd env cmd)
+      { empty_env with modules } script
+  in
   ignore env

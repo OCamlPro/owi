@@ -26,10 +26,14 @@ let () =
 
   let lexbuf = Sedlexing.Utf8.from_channel chan in
 
-  let ast = Woi.Handle.process lexbuf in
+  let script = Woi.Handle.process lexbuf in
 
   close_in chan;
 
-  print_debug Format.err_formatter "%a\n%!" Woi.Pp.file ast;
+  Woi.Check.script script;
 
-  Woi.Interpret.exec ast
+  print_debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
+
+  let script, modules = Woi.Simplify.script script in
+
+  Woi.Interpret.exec script modules
