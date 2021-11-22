@@ -351,7 +351,10 @@ type module_ =
   }
 
 type const =
-  | Const_num_val of num_type * string
+  | Const_I32 of i32
+  | Const_I64 of i64
+  | Const_F32 of f32
+  | Const_F64 of f64
   | Const_null of ref_type
   | Const_host of int
 

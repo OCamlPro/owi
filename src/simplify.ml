@@ -16,7 +16,13 @@ type module_ =
   }
 *)
 
-type module_ = { fields : module_field list }
+type module_ =
+  { fields : module_field list
+  ; funcs : func Array.t
+  ; last_func : int option
+  ; seen_funcs : (string, int) Hashtbl.t
+  ; exported_funcs : (string, int) Hashtbl.t
+  }
 
 type action =
   | Invoke_indice of int * string * const list
@@ -70,12 +76,61 @@ let assert_ last_module seen_modules =
   | Assert_invalid_quote (m, failure) -> SAssert_malformed_quote (m, failure)
   | Assert_invalid_binary (m, failure) -> SAssert_invalid_binary (m, failure)
 
+let mk_module m =
+  let fields = m.Types.fields in
+
+  let funcs =
+    Array.of_list @@ List.rev
+    @@ List.fold_left
+         (fun acc -> function
+           | MFunc f -> f :: acc (* TODO: mk_func f ? *)
+           | _field -> acc )
+         [] fields
+  in
+
+  let curr_func = ref (-1) in
+  let last_func = ref None in
+  let seen_funcs = Hashtbl.create 512 in
+  let exported_funcs = Hashtbl.create 512 in
+
+  List.iter
+    (function
+      | MFunc f ->
+        incr curr_func;
+        let i = !curr_func in
+        last_func := Some i;
+        Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
+      | MExport { name; desc } -> begin
+        match desc with
+        | Export_func indice ->
+          let i =
+            match indice with
+            | Raw i -> Unsigned.UInt32.to_int i
+            | Symbolic id -> begin
+              match Hashtbl.find_opt seen_funcs id with
+              | None -> failwith "undefined export"
+              | Some i -> i
+            end
+          in
+          Hashtbl.replace exported_funcs name i
+        | _ -> ()
+      end
+      | _ -> () )
+    fields;
+
+  { fields
+  ; funcs
+  ; last_func = None
+  ; seen_funcs = Hashtbl.create 512
+  ; exported_funcs
+  }
+
 let script script =
   let modules =
     Array.of_list @@ List.rev
     @@ List.fold_left
          (fun acc -> function
-           | Module m -> { fields = m.fields } :: acc
+           | Module m -> mk_module m :: acc
            | Assert _
            | Register _
            | Action _ ->

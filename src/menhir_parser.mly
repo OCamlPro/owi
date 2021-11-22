@@ -541,9 +541,10 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    let id = Symbolic (Option.value id ~default:"TODO_func") in
+    let indice = Symbolic (Option.value id ~default:"TODO_func") in
     List.rev_map (function
-      | MExport e -> MExport { e with desc = Export_func id }
+      | MExport e -> MExport { e with desc = Export_func indice }
+      | MFunc f -> MFunc { f with id }
       | field -> field
     ) func_fields
   }
@@ -801,7 +802,13 @@ let module_ :=
   }
 
 let const ==
-  | ~ = num_type; DOT; CONST; ~ = NUM; <Const_num_val>
+  | ~ = num_type; DOT; CONST; num = NUM; {
+    match num_type with
+    | I32 -> Const_I32 (i32 num)
+    | I64 -> Const_I64 (i64 num)
+    | F32 -> Const_F32 (Float.of_string num)
+    | F64 -> Const_F64 (Float.of_string num)
+  }
   | REF; DOT; NULL; ~ = ref_kind; <Const_null>
 
 let result ==

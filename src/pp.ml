@@ -2,9 +2,7 @@ open Types
 
 let print_nothing fmt () = Format.fprintf fmt ""
 
-let id fmt id =
-  (* TODO: stop being dumb :-) *)
-  Format.fprintf fmt "$%s" id
+let id fmt id = Format.fprintf fmt "$%s" id
 
 let id_opt fmt = function
   | None -> ()
@@ -19,10 +17,6 @@ let i64 fmt i = Signed.Int64.pp fmt i
 let f32 fmt f = Format.fprintf fmt "%f" f
 
 let f64 fmt f = Format.fprintf fmt "%f" f
-
-let char fmt c =
-  (* TODO: ? *)
-  Format.fprintf fmt "%c" (Uchar.to_char c)
 
 let name fmt name = Format.pp_print_string fmt name
 
@@ -62,6 +56,10 @@ let result_type fmt results =
 
 let func_type fmt (l, r) =
   Format.fprintf fmt "(func %a %a)" param_type l result_type r
+
+let func_type_bis fmt = function
+  | FTId id -> Format.fprintf fmt "%a" indice id
+  | FTFt ft -> Format.fprintf fmt "%a" func_type ft
 
 let limits fmt { min; max } =
   match max with
@@ -269,9 +267,9 @@ let funcs fmt (funcs : func list) =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline func fmt funcs
 
 let import_desc fmt : import_desc -> Unit.t = function
-  (* TODO: in Func case, check what is the "typeuse" *)
-  | Import_func (_id, _tidx) ->
-    assert false (* Format.fprintf fmt "(func %a %a)" id_opt id indice tidx *)
+  | Import_func (id, t) ->
+    (* TODO: fixme *)
+    Format.fprintf fmt "%a %a" id_opt id func_type_bis t
   | Import_table (id, t) ->
     Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Import_mem (id, t) ->
@@ -285,7 +283,11 @@ let import fmt i =
 
 let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
-let data fmt _d = Format.fprintf fmt "(data <TODO>)"
+let data_mode fmt = function
+  | Data_passive -> ()
+  | Data_active (i, e) -> Format.fprintf fmt "%a %a" indice i expr e
+
+let data fmt d = Format.fprintf fmt {|(data %a "%s")|} data_mode d.mode d.init
 
 let elem fmt _e = Format.fprintf fmt "(elem <TODO>)"
 
@@ -309,16 +311,45 @@ let module_ fmt m =
 let register fmt (s, _name) = Format.fprintf fmt "(register %s)" s
 
 let const fmt = function
-  | Const_num_val (nt, s) -> Format.fprintf fmt "%a.const %s" num_type nt s
-  | _ -> failwith "not yet implemented"
+  | Const_I32 i -> Format.fprintf fmt "i32.const %a" i32 i
+  | Const_I64 i -> Format.fprintf fmt "i64.const %a" i64 i
+  | Const_F32 f -> Format.fprintf fmt "f32.const %a" f32 f
+  | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
+  | Const_null rt -> Format.fprintf fmt "(%a)" ref_type rt
+  | Const_host _i -> Format.fprintf fmt "<TODO: const Const_host>"
+
+let consts fmt c =
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+    (fun fmt c -> Format.fprintf fmt "(%a)" const c)
+    fmt c
 
 let result fmt = function
   | Result_const c -> Format.fprintf fmt "(%a)" const c
   | _ -> failwith "not yet implemented"
 
+let action fmt = function
+  | Invoke (mod_name, name, c) ->
+    Format.fprintf fmt "(invoke %a %s %a)" id_opt mod_name name consts c
+  | Get _ -> Format.fprintf fmt "<action_get TODO>"
+
+let result_bis fmt = function
+  | Result_const c -> Format.fprintf fmt "%a" const c
+  | _ -> Format.fprintf fmt "<results TODO>"
+
+let results fmt r =
+  Format.pp_print_list ~pp_sep:Format.pp_print_space result_bis fmt r
+
+let assert_ fmt = function
+  | Assert_return (a, l) ->
+    Format.fprintf fmt "(assert_return %a %a)" action a results l
+  | Assert_trap (a, f) ->
+    Format.fprintf fmt {|(assert_trap %a "%s")|} action a f
+  | _ -> Format.fprintf fmt "<action TODO>"
+
 let cmd fmt = function
   | Module m -> module_ fmt m
-  | Assert _ -> Format.fprintf fmt "<assert>"
+  | Assert a -> assert_ fmt a
   | Register (s, name) -> register fmt (s, name)
   | Action _a -> Format.fprintf fmt "<action>"
 
