@@ -30,24 +30,6 @@ let indice fmt = function
   | Raw u -> u32 fmt u
   | Symbolic i -> id fmt i
 
-let local_idx = indice
-
-let func_idx = indice
-
-let type_idx = indice
-
-let global_idx = indice
-
-let table_idx = indice
-
-let elem_idx = indice
-
-let data_idx = indice
-
-let label_idx = indice
-
-let mem_idx = indice
-
 let num_type fmt : num_type -> Unit.t = function
   | I32 -> Format.fprintf fmt "i32"
   | I64 -> Format.fprintf fmt "i64"
@@ -64,7 +46,7 @@ let val_type fmt = function
 
 (* TODO: ? *)
 let block_type fmt = function
-  | Type_idx id -> Format.fprintf fmt "(result %a)" type_idx id
+  | Type_idx id -> Format.fprintf fmt "(result %a)" indice id
   | Val_type None -> ()
   | Val_type (Some t) -> Format.fprintf fmt "(result %a)" val_type t
 
@@ -200,7 +182,7 @@ let instr fmt = function
     Format.fprintf fmt "f%a.reinterpret_i%a" nn n nn n'
   | Ref_null t -> Format.fprintf fmt "ref.null %a" ref_type t
   | Ref_is_null -> Format.fprintf fmt "ref.is_null"
-  | Ref_func fid -> Format.fprintf fmt "ref.func %a" func_idx fid
+  | Ref_func fid -> Format.fprintf fmt "ref.func %a" indice fid
   | Drop -> Format.fprintf fmt "drop"
   | Select vt -> begin
     match vt with
@@ -209,21 +191,21 @@ let instr fmt = function
       Format.fprintf fmt "select (%a)" result_type vt
       (* TODO: are the parens needed ? *)
   end
-  | Local_get id -> Format.fprintf fmt "local.get %a" local_idx id
-  | Local_set id -> Format.fprintf fmt "local.set %a" local_idx id
-  | Local_tee id -> Format.fprintf fmt "local.tee %a" local_idx id
-  | Global_get id -> Format.fprintf fmt "global.get %a" global_idx id
-  | Global_set id -> Format.fprintf fmt "global.set %a" global_idx id
-  | Table_get id -> Format.fprintf fmt "table.get %a" table_idx id
-  | Table_set id -> Format.fprintf fmt "table.set %a" table_idx id
-  | Table_size id -> Format.fprintf fmt "table.size %a" table_idx id
-  | Table_grow id -> Format.fprintf fmt "table.grow %a" table_idx id
-  | Table_fill id -> Format.fprintf fmt "table.fill %a" table_idx id
+  | Local_get id -> Format.fprintf fmt "local.get %a" indice id
+  | Local_set id -> Format.fprintf fmt "local.set %a" indice id
+  | Local_tee id -> Format.fprintf fmt "local.tee %a" indice id
+  | Global_get id -> Format.fprintf fmt "global.get %a" indice id
+  | Global_set id -> Format.fprintf fmt "global.set %a" indice id
+  | Table_get id -> Format.fprintf fmt "table.get %a" indice id
+  | Table_set id -> Format.fprintf fmt "table.set %a" indice id
+  | Table_size id -> Format.fprintf fmt "table.size %a" indice id
+  | Table_grow id -> Format.fprintf fmt "table.grow %a" indice id
+  | Table_fill id -> Format.fprintf fmt "table.fill %a" indice id
   | Table_copy (id, id') ->
-    Format.fprintf fmt "table.copy %a %a" table_idx id table_idx id'
+    Format.fprintf fmt "table.copy %a %a" indice id indice id'
   | Table_init (tid, eid) ->
-    Format.fprintf fmt "table.init %a %a" table_idx tid elem_idx eid
-  | Elem_drop id -> Format.fprintf fmt "elem.drop %a" elem_idx id
+    Format.fprintf fmt "table.init %a %a" indice tid indice eid
+  | Elem_drop id -> Format.fprintf fmt "elem.drop %a" indice id
   | I_load (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_load (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
   | I_store (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
@@ -240,18 +222,18 @@ let instr fmt = function
   | Memory_grow -> Format.fprintf fmt "memory.grow"
   | Memory_fill -> Format.fprintf fmt "memory.fill"
   | Memory_copy -> Format.fprintf fmt "memory.copy"
-  | Memory_init id -> Format.fprintf fmt "memory.init %a" data_idx id
-  | Data_drop id -> Format.fprintf fmt "data.drop %a" data_idx id
+  | Memory_init id -> Format.fprintf fmt "memory.init %a" indice id
+  | Data_drop id -> Format.fprintf fmt "data.drop %a" indice id
   | Nop -> Format.fprintf fmt "nop"
   | Unreachable -> Format.fprintf fmt "unreachable"
   | Block (_ty, _expr) -> Format.fprintf fmt "<block>"
   | Loop (_ty, _expr) -> Format.fprintf fmt "<loop>"
   | If_else (_ty, _expr, _expr') -> Format.fprintf fmt "<if>"
-  | Br id -> Format.fprintf fmt "br %a" label_idx id
-  | Br_if id -> Format.fprintf fmt "br_if %a" label_idx id
+  | Br id -> Format.fprintf fmt "br %a" indice id
+  | Br_if id -> Format.fprintf fmt "br_if %a" indice id
   | Br_table (_ids, _id) -> Format.fprintf fmt "<br_table>"
   | Return -> Format.fprintf fmt "return"
-  | Call id -> Format.fprintf fmt "call %a" func_idx id
+  | Call id -> Format.fprintf fmt "call %a" indice id
   | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
 
 let body fmt instrs =
@@ -263,13 +245,13 @@ let func fmt (f : func) =
 
 let expr fmt _e = Format.fprintf fmt "<expr>"
 
-let start fmt start = Format.fprintf fmt "(start %a)" func_idx start
+let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
 let export_desc fmt = function
-  | Export_func id -> Format.fprintf fmt "(func %a)" func_idx id
-  | Export_table id -> Format.fprintf fmt "(table %a)" table_idx id
-  | Export_mem id -> Format.fprintf fmt "(memory %a)" mem_idx id
-  | Export_global id -> Format.fprintf fmt "(global %a)" global_idx id
+  | Export_func id -> Format.fprintf fmt "(func %a)" indice id
+  | Export_table id -> Format.fprintf fmt "(table %a)" indice id
+  | Export_mem id -> Format.fprintf fmt "(memory %a)" indice id
+  | Export_global id -> Format.fprintf fmt "(global %a)" indice id
 
 let export fmt e =
   Format.fprintf fmt "(export %a %a)" name e.name export_desc e.desc
@@ -289,7 +271,7 @@ let funcs fmt (funcs : func list) =
 let import_desc fmt : import_desc -> Unit.t = function
   (* TODO: in Func case, check what is the "typeuse" *)
   | Import_func (_id, _tidx) ->
-    assert false (* Format.fprintf fmt "(func %a %a)" id_opt id type_idx tidx *)
+    assert false (* Format.fprintf fmt "(func %a %a)" id_opt id indice tidx *)
   | Import_table (id, t) ->
     Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Import_mem (id, t) ->
