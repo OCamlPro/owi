@@ -1,6 +1,9 @@
 let i32_clz = Ocaml_intrinsics.Int32.count_leading_zeros
+
 let i64_clz = Ocaml_intrinsics.Int64.count_leading_zeros
+
 let i32_ctz = Ocaml_intrinsics.Int32.count_trailing_zeros
+
 let i64_ctz = Ocaml_intrinsics.Int64.count_trailing_zeros
 
 (* Taken from Base *)
