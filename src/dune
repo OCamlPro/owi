@@ -7,10 +7,11 @@
   lexer
   menhir_parser
   menhir_parser_errors
+  op
   pp
   simplify
   types)
- (libraries integers menhirLib ppxlib sedlex)
+ (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex)
  (preprocess
   (pps sedlex.ppx)))
 
