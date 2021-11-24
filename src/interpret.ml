@@ -23,7 +23,7 @@ let pp_stack fmt stack =
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Pp.const fmt stack
 
-exception Return of const Stack.t
+exception Return
 
 let exec_iunop stack nn op =
   let result =
@@ -46,7 +46,9 @@ let exec_iunop stack nn op =
         | Popcnt -> Op.i64_popcnt n
       in
       Const_I64 (Int64.of_int res)
-    | _ -> failwith "invalid type"
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
   in
   Stack.push result stack
 
@@ -79,13 +81,17 @@ let exec_funop stack nn op =
         | Nearest -> failwith "TODO: exec_funop Nearest"
       in
       Const_F64 res
-    | _ -> failwith "invalid type"
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
   in
   Stack.push result stack
 
 let exec_ibinop stack nn (op : Types.ibinop) =
   let result =
-    match (Stack.pop stack, Stack.pop stack) with
+    let n2 = Stack.pop stack in
+    let n1 = Stack.pop stack in
+    match (n1, n2) with
     | Const_I32 n1, Const_I32 n2 ->
       if nn <> S32 then failwith "invalid type";
       let res =
@@ -122,15 +128,19 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         | Rotr -> failwith "TODO Rotr"
       in
       Const_I64 res
-    | _, _ -> failwith "invalid type"
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
   in
   Stack.push result stack
 
 let exec_fbinop stack nn (op : Types.fbinop) =
   let result =
-    match (Stack.pop stack, Stack.pop stack) with
+    let n2 = Stack.pop stack in
+    let n1 = Stack.pop stack in
+    match (n1, n2) with
     | Const_F32 f1, Const_F32 f2 ->
-      if nn <> S32 then failwith "invalid types";
+      if nn <> S32 then failwith "invalid type";
       let res =
         match op with
         | Add -> Float.add f1 f2
@@ -143,7 +153,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       in
       Const_F32 res
     | Const_F64 f1, Const_F64 f2 ->
-      if nn <> S64 then failwith "invalid types";
+      if nn <> S64 then failwith "invalid type";
       let res =
         match op with
         | Add -> Float.add f1 f2
@@ -155,21 +165,216 @@ let exec_fbinop stack nn (op : Types.fbinop) =
         | Copysign -> Float.copy_sign f1 f2
       in
       Const_F64 res
-    | _, _ -> failwith "invalid type"
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
   in
   Stack.push result stack
 
-let exec_itestop _stack _nn _op = failwith "TODO"
+let exec_itestop stack nn op =
+  let result =
+    match Stack.pop stack with
+    | Const_I32 n -> (
+      if nn <> S32 then failwith "invalid type";
+      match op with
+      | Eqz ->
+        Const_I32
+          ( if n = 0l then
+            1l
+          else
+            0l ) )
+    | Const_I64 n -> (
+      if nn <> S64 then failwith "invalid type";
+      match op with
+      | Eqz ->
+        Const_I32
+          ( if n = 0L then
+            1l
+          else
+            0l ) )
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
+  in
+  Stack.push result stack
 
-let exec_irelop _stack _nn _op = failwith "TODO"
+let exec_irelop stack nn (op : Types.irelop) =
+  let result =
+    let n2 = Stack.pop stack in
+    let n1 = Stack.pop stack in
+    match (n1, n2) with
+    | Const_I32 n1, Const_I32 n2 ->
+      if nn <> S32 then failwith "invalid type";
+      let result =
+        match op with
+        | Eq ->
+          if n1 = n2 then
+            1l
+          else
+            0l
+        | Ne ->
+          if n1 <> n2 then
+            1l
+          else
+            0l
+        | Lt _sx ->
+          if n1 < n2 then
+            1l
+          else
+            0l
+        | Gt _sx ->
+          if n1 > n2 then
+            1l
+          else
+            0l
+        | Le _sx ->
+          if n1 <= n2 then
+            1l
+          else
+            0l
+        | Ge _sx ->
+          if n1 >= n2 then
+            1l
+          else
+            0l
+      in
+      Const_I32 result
+    | Const_I64 n1, Const_I64 n2 ->
+      if nn <> S64 then failwith "invalid type";
+      let result =
+        match op with
+        | Eq ->
+          if n1 = n2 then
+            1l
+          else
+            0l
+        | Ne ->
+          if n1 <> n2 then
+            1l
+          else
+            0l
+        | Lt _sx ->
+          if n1 < n2 then
+            1l
+          else
+            0l
+        | Gt _sx ->
+          if n1 > n2 then
+            1l
+          else
+            0l
+        | Le _sx ->
+          if n1 <= n2 then
+            1l
+          else
+            0l
+        | Ge _sx ->
+          if n1 >= n2 then
+            1l
+          else
+            0l
+      in
+      Const_I32 result
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
+  in
+  Stack.push result stack
 
-let exec_frelop _stack _nn _op = failwith "TODO"
+let exec_frelop stack nn (op : Types.frelop) =
+  let result =
+    let n2 = Stack.pop stack in
+    let n1 = Stack.pop stack in
+    match (n1, n2) with
+    | Const_F32 n1, Const_F32 n2 ->
+      if nn <> S32 then failwith "invalid type";
+      let result =
+        match op with
+        | Eq ->
+          if n1 = n2 then
+            1l
+          else
+            0l
+        | Ne ->
+          if n1 <> n2 then
+            1l
+          else
+            0l
+        | Lt ->
+          if n1 < n2 then
+            1l
+          else
+            0l
+        | Gt ->
+          if n1 > n2 then
+            1l
+          else
+            0l
+        | Le ->
+          if n1 <= n2 then
+            1l
+          else
+            0l
+        | Ge ->
+          if n1 >= n2 then
+            1l
+          else
+            0l
+      in
+      Const_I32 result
+    | Const_F64 n1, Const_F64 n2 ->
+      if nn <> S64 then failwith "invalid type";
+      let result =
+        match op with
+        | Eq ->
+          if n1 = n2 then
+            1l
+          else
+            0l
+        | Ne ->
+          if n1 <> n2 then
+            1l
+          else
+            0l
+        | Lt ->
+          if n1 < n2 then
+            1l
+          else
+            0l
+        | Gt ->
+          if n1 > n2 then
+            1l
+          else
+            0l
+        | Le ->
+          if n1 <= n2 then
+            1l
+          else
+            0l
+        | Ge ->
+          if n1 >= n2 then
+            1l
+          else
+            0l
+      in
+      Const_I32 result
+    | _
+    | (exception Stack.Empty) ->
+      failwith "invalid type"
+  in
+  Stack.push result stack
 
-let exec_instr _env _locals stack instr =
+let rec stack_pop_n stack acc n =
+  if n = 0 then acc
+  else stack_pop_n stack (Stack.pop stack :: acc) (n - 1)
+
+exception Branch of int
+
+let rec exec_instr env module_indice locals stack instr =
   Format.printf "stack        : [ %a ]@." pp_stack stack;
   Format.printf "running instr: %a@." Pp.instr instr;
   match instr with
-  | Return -> raise (Return stack)
+  | Return -> raise Return
   | I32_const n -> Stack.push (Const_I32 n) stack
   | I64_const n -> Stack.push (Const_I64 n) stack
   | F32_const f -> Stack.push (Const_F32 f) stack
@@ -193,25 +398,52 @@ let exec_instr _env _locals stack instr =
   | F_convert_i (_n, _n', _s) -> failwith "TODO exec_instr"
   | I_reinterpret_f (_n, _n') -> failwith "TODO exec_instr"
   | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
-  | Ref_null _t -> failwith "TODO exec_instr"
-  | Ref_is_null -> failwith "TODO exec_instr"
+  | Ref_null t -> Stack.push (Const_null t) stack
+  | Ref_is_null -> begin match Stack.pop stack with
+    | Const_null _t -> Stack.push (Const_I32 1l) stack
+    | _ | exception Stack.Empty -> failwith "invalid type"
+    end
   | Ref_func _fid -> failwith "TODO exec_instr"
   | Drop -> ignore (Stack.pop stack)
+  | Local_get (Raw i) -> Stack.push locals.(Unsigned.UInt32.to_int i) stack
+  | If_else (_bt, e1, e2) ->
+      begin match Stack.pop stack with
+      | Const_I32 b -> exec_expr env module_indice locals stack (if b <> 0l then e1 else e2)
+      | _ | exception Stack.Empty -> failwith "invalid type"
+    end
+  | Call (Raw i) ->
+    let module_ = env.modules.(module_indice) in
+    let func = module_.funcs.(Unsigned.UInt32.to_int i) in
+    let param_type, _result_type = match func.type_f with
+      | FTId _i -> failwith "TODO"
+      | FTFt (p, r) -> p, r
+    in
+    let n = List.length param_type in
+    let args = stack_pop_n stack [] n in
+    let res = exec_func env module_indice func args in
+    List.iter (fun x -> Stack.push x stack) (List.rev res)
+  | Br (Raw i) -> raise (Branch (Unsigned.UInt32.to_int i))
   | _ -> failwith "TODO (exec_instr)"
 
-let exec_func env module_indice func_indice args =
-  Format.printf "calling func : module %d, func %d@." module_indice func_indice;
-  let module_ = env.modules.(module_indice) in
-  let func = module_.funcs.(func_indice) in
+and exec_expr env module_indice locals stack e =
+  List.iter ( fun instr ->
+    try
+      exec_instr env module_indice locals stack instr
+    with Branch (-1) -> ()
+       | Branch (n) -> raise (Branch (n-1))
+  ) e
+
+and exec_func env module_indice func args =
+  Format.printf "calling func : module %d, func TODO@." module_indice;
   (* TODO: let locals = args @ func.locals in*)
-  let locals = args in
+  let locals = Array.of_list args in
   let stack = Stack.create () in
   let result =
     try
-      List.iter (fun instr -> exec_instr env locals stack instr) func.body;
+      exec_expr env module_indice locals stack func.body;
       stack
     with
-    | Return stack -> stack
+    | Return | Branch (-1) -> stack
   in
   Format.printf "stack        : [ %a ]@." pp_stack result;
   stack_to_list result
@@ -223,6 +455,8 @@ let invoke env module_indice f args =
     | None -> failwith "undefined export"
     | Some func -> func
   in
+  let module_ = env.modules.(module_indice) in
+  let func = module_.funcs.(func) in
   exec_func env module_indice func args
 
 let exec_action env = function
@@ -242,9 +476,9 @@ let exec_assert env = function
     let env, results_got = exec_action env action in
     let eq =
       List.length results_expected = List.length results_got
-      && List.fold_left2
-           (fun eq result const -> eq && compare_result_const result const)
-           true results_expected results_got
+      && List.for_all2
+           (fun result const -> compare_result_const result const)
+           results_expected results_got
     in
     if not eq then begin
       Format.eprintf "assert_return failed !@.expected: `%a`@.got: `%a`@."

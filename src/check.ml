@@ -13,10 +13,8 @@ let module_ m =
       | MExport _e -> ()
       | MFunc _f -> funcs := true
       | MStart _start ->
-        if !start then
-          failwith "multiple start section"
-        else
-          start := true
+        if !start then failwith "multiple start section";
+        start := true
       | MImport _i ->
         if !funcs then failwith "import after function definition";
         if !memory then failwith "import after memory definition";
