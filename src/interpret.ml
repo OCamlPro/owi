@@ -280,10 +280,25 @@ let rec exec_instr env module_indice locals stack instr =
   | Loop (_bt, e) -> exec_expr env module_indice locals stack e true
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
   | Memory_size ->
-    let _min, mem, _max = env.modules.(module_indice).memory in
-    let len = Int32.of_int @@ Bytes.length mem in
+    let mem, _max = env.modules.(module_indice).memory in
+    let len = Int32.of_int @@ (Bytes.length !mem / 65_536) in
     Stack.push stack (Const_I32 len)
-  | Memory_grow -> failwith "TODO Memory_grow"
+  | Memory_grow -> (
+    let mem, max = env.modules.(module_indice).memory in
+    let delta = 65_536 * (Int32.to_int @@ Stack.pop_i32 stack) in
+    let old_size = Bytes.length !mem in
+    match max with
+    | None ->
+      let new_mem = Bytes.extend !mem 0 delta in
+      mem := new_mem;
+      Stack.push stack (Const_I32 (Int32.of_int old_size))
+    | Some max ->
+      if old_size + delta > max * 65_536 then
+        Stack.push stack (Const_I32 (-1l))
+      else
+        let new_mem = Bytes.extend !mem 0 delta in
+        mem := new_mem;
+        Stack.push stack (Const_I32 (Int32.of_int (old_size / 65_536))) )
   | Memory_fill -> failwith "TODO Memory_fill"
   | Memory_copy -> failwith "TODO Memory_copy"
   | Memory_init _i -> failwith "TODO Memory_init"
@@ -309,7 +324,8 @@ let rec exec_instr env module_indice locals stack instr =
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
-    let _min, mem, _max = env.modules.(module_indice).memory in
+    let mem, _max = env.modules.(module_indice).memory in
+    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos = Stack.pop_i32 stack in
@@ -325,7 +341,8 @@ let rec exec_instr env module_indice locals stack instr =
   | F_load (_, _) -> failwith "TODO F_load"
   | I_store (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
-    let _min, mem, _max = env.modules.(module_indice).memory in
+    let mem, _max = env.modules.(module_indice).memory in
+    let mem = !mem in
     ignore align;
     (* TODO: use align *)
     match nn with
