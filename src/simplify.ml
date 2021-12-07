@@ -21,7 +21,8 @@ type module_ =
   ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
-  ; memory : Bytes.t ref * int option
+  ; memories : (Bytes.t ref * int option) array
+  ; tables : (ref_type * const Array.t * int option) array (* TODO: const ? *)
   }
 
 type action =
@@ -86,6 +87,8 @@ let mk_module m =
   let mem_max_size = ref None in
   let mem_bytes = ref (Bytes.create 0) in
 
+  let tables = ref [] in
+
   List.iter
     (function
       | MFunc f ->
@@ -113,10 +116,19 @@ let mk_module m =
         | _ -> ()
       end
       | MMem (_id, { min; max }) ->
-        mem_max_size := Option.map (fun max -> Unsigned.UInt32.to_int max) max;
+        mem_max_size := Option.map Unsigned.UInt32.to_int max;
         mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * 65_536)
+      | MTable (_id, ({ min; max }, rt)) ->
+        let tbl =
+          ( rt
+          , Array.make (Unsigned.UInt32.to_int min) (Obj.magic None)
+          , Option.map Unsigned.UInt32.to_int max )
+        in
+        tables := tbl :: !tables
       | _ -> () )
     fields;
+
+  let tables = Array.of_list @@ List.rev !tables in
 
   let funcs =
     Array.of_list @@ List.rev
@@ -181,7 +193,8 @@ let mk_module m =
   ; funcs
   ; seen_funcs = Hashtbl.create 512
   ; exported_funcs
-  ; memory = (mem_bytes, !mem_max_size)
+  ; memories = [| (mem_bytes, !mem_max_size) |]
+  ; tables
   }
 
 let script script =

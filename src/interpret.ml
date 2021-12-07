@@ -280,11 +280,11 @@ let rec exec_instr env module_indice locals stack instr =
   | Loop (_bt, e) -> exec_expr env module_indice locals stack e true
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
   | Memory_size ->
-    let mem, _max = env.modules.(module_indice).memory in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
     let len = Int32.of_int @@ (Bytes.length !mem / 65_536) in
     Stack.push stack (Const_I32 len)
   | Memory_grow -> (
-    let mem, max = env.modules.(module_indice).memory in
+    let mem, max = env.modules.(module_indice).memories.(0) in
     let delta = 65_536 * (Int32.to_int @@ Stack.pop_i32 stack) in
     let old_size = Bytes.length !mem in
     match max with
@@ -299,7 +299,12 @@ let rec exec_instr env module_indice locals stack instr =
         let new_mem = Bytes.extend !mem 0 delta in
         mem := new_mem;
         Stack.push stack (Const_I32 (Int32.of_int (old_size / 65_536))) )
-  | Memory_fill -> failwith "TODO Memory_fill"
+  | Memory_fill ->
+    let start = Int32.to_int @@ Stack.pop_i32 stack in
+    let byte = Int32.to_int @@ Stack.pop_i32 stack in
+    let stop = Int32.to_int @@ Stack.pop_i32 stack in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    Bytes.fill !mem start (stop - start) (Char.chr byte)
   | Memory_copy -> failwith "TODO Memory_copy"
   | Memory_init _i -> failwith "TODO Memory_init"
   | Select _t ->
@@ -324,7 +329,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memory in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
@@ -341,7 +346,7 @@ let rec exec_instr env module_indice locals stack instr =
   | F_load (_, _) -> failwith "TODO F_load"
   | I_store (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memory in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     ignore align;
     (* TODO: use align *)
@@ -359,14 +364,49 @@ let rec exec_instr env module_indice locals stack instr =
       if Bytes.length mem <= offset then failwith "invalid offset";
       Bytes.set_int64_le mem offset n )
   | F_store (_, _) -> failwith "TODO F_store"
-  | I_load8 (_, _, _) -> failwith "TODO I_load8"
+  | I_load8 (nn, sx, { offset; align }) -> (
+    let offset = Unsigned.UInt32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem = !mem in
+    (* TODO: use align *)
+    ignore align;
+    let pos = Stack.pop_i32 stack in
+    let offset = offset + Int32.to_int pos in
+    if Bytes.length mem <= offset then failwith "invalid_offset offset";
+    match nn with
+    | S32 ->
+      let res =
+        ( if sx = S then
+          Bytes.get_int8
+        else
+          Bytes.get_uint8 )
+          mem offset
+      in
+      Stack.push stack (Const_I32 (Int32.of_int res))
+    | S64 ->
+      let res =
+        ( if sx = S then
+          Bytes.get_int8
+        else
+          Bytes.get_uint8 )
+          mem offset
+      in
+      Stack.push stack (Const_I64 (Int64.of_int res)) )
   | I_load16 (_, _, _) -> failwith "TODO I_load16"
   | I64_load32 (_, _) -> failwith "TODO I64_load32"
   | I_store8 (_, _) -> failwith "TODO I_store8"
   | I_store16 (_, _) -> failwith "TODO I_store16"
   | I64_store32 _ -> failwith "TODO I64"
   | Data_drop _ -> failwith "TODO Data_drop"
-  | Br_table (_, _) -> failwith "TODO Br_table"
+  | Br_table (inds, i) ->
+    let target = Int32.to_int @@ Stack.pop_i32 stack in
+    let target =
+      if target < 0 then
+        i
+      else
+        Option.value (List.nth_opt inds target) ~default:i
+    in
+    raise (Branch (indice_to_int target))
   | Call_indirect (_, _) -> failwith "TODO Call_indirect"
 
 and exec_expr env module_indice locals stack e is_loop =
