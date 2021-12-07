@@ -10,6 +10,7 @@
   op
   pp
   simplify
+  stack
   types)
  (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex)
  (preprocess

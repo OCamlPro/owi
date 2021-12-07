@@ -3,8 +3,10 @@ let test_file f =
   match Bos.OS.File.read f with
   | Ok s ->
     let lexbuf = Sedlexing.Utf8.from_string s in
-    let _ast = Woi.Handle.process lexbuf in
-    ()
+    let script = Woi.Handle.process lexbuf in
+    Woi.Check.script script;
+    let script, modules = Woi.Simplify.script script in
+    Woi.Interpret.exec script modules
   | Error (`Msg e) ->
     Format.eprintf "error: %s@." e;
     exit 1

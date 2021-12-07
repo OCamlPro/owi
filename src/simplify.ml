@@ -79,15 +79,6 @@ let assert_ last_module seen_modules =
 let mk_module m =
   let fields = m.Types.fields in
 
-  let funcs =
-    Array.of_list @@ List.rev
-    @@ List.fold_left
-         (fun acc -> function
-           | MFunc f -> f :: acc (* TODO: mk_func f ? *)
-           | _field -> acc )
-         [] fields
-  in
-
   let curr_func = ref (-1) in
   let last_func = ref None in
   let seen_funcs = Hashtbl.create 512 in
@@ -108,7 +99,7 @@ let mk_module m =
             | Raw i -> Unsigned.UInt32.to_int i
             | Symbolic id -> begin
               match Hashtbl.find_opt seen_funcs id with
-              | None -> failwith "undefined export"
+              | None -> failwith @@ Format.sprintf "undefined export %s" id
               | Some i -> i
             end
           in
@@ -117,6 +108,52 @@ let mk_module m =
       end
       | _ -> () )
     fields;
+
+  let funcs =
+    Array.of_list @@ List.rev
+    @@ List.fold_left
+         (fun acc -> function
+           | MFunc f -> f :: acc
+           | _field -> acc )
+         [] fields
+  in
+
+  let funcs =
+    Array.map
+      (fun f ->
+        let local_tbl = Hashtbl.create 512 in
+        List.iteri
+          (fun i l ->
+            match l with
+            | None, _vt -> ()
+            | Some id, _vt -> Hashtbl.add local_tbl id i )
+          f.locals;
+        let body =
+          List.map
+            (function
+              | Br_if (Symbolic id) -> Br_if (Symbolic id) (* TODO *)
+              | Br (Symbolic id) -> Br (Symbolic id) (* TODO *)
+              | Call (Symbolic id) -> begin
+                match Hashtbl.find_opt seen_funcs id with
+                | None -> failwith @@ Format.sprintf "unbound func: %s" id
+                | Some i -> Call (Raw (Unsigned.UInt32.of_int i))
+              end
+              | Local_set (Symbolic id) -> begin
+                match Hashtbl.find_opt local_tbl id with
+                | None -> failwith @@ Format.sprintf "unbound local: %s" id
+                | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
+              end
+              | Local_get (Symbolic id) -> begin
+                match Hashtbl.find_opt local_tbl id with
+                | None -> failwith @@ Format.sprintf "unbound local: %s" id
+                | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
+              end
+              | i -> i )
+            f.body
+        in
+        { f with body } )
+      funcs
+  in
 
   { fields
   ; funcs
