@@ -21,6 +21,7 @@ type module_ =
   ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
+  ; memory : int * Bytes.t
   }
 
 type action =
@@ -96,7 +97,12 @@ let mk_module m =
             | Raw i -> Unsigned.UInt32.to_int i
             | Symbolic id -> begin
               match Hashtbl.find_opt seen_funcs id with
-              | None -> failwith @@ Format.sprintf "undefined export %s" id
+              | None ->
+                (* TODO: removes this from the parser and add some anonymous case instead *)
+                if id = "TODO_func" then
+                  !curr_func
+                else
+                  failwith @@ Format.sprintf "undefined export %s" id
               | Some i -> i
             end
           in
