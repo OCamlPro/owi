@@ -584,11 +584,9 @@ let func_fields_import_result :=
 let func_fields_body :=
   | ~ = func_result_body; <>
   | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), r) = func_fields_body; {
-    (* TODO: anon_locals ? *)
     ((List.map (fun i -> None, i) l) @ ins, out), r
   }
   | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; ((ins, out), r) = func_fields_body; {
-    (* TODO: use id ? *)
     ((Some id, val_type) :: ins, out), r
   }
 
