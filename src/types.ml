@@ -76,7 +76,7 @@ type nonrec result_ = val_type
 
 type nonrec result_type = result_ list
 
-type nonrec func_type = result_type * result_type
+type nonrec func_type = param_type * result_type
 
 type nonrec limits =
   { min : u32

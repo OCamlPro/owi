@@ -44,7 +44,7 @@ let block_type fmt = function
   | Val_type None -> ()
   | Val_type (Some t) -> Format.fprintf fmt "(result %a)" val_type t
 
-let param fmt vt = Format.fprintf fmt "(param %a)" val_type vt
+let param fmt (id, vt) = Format.fprintf fmt "(param %a%a)" id_opt id val_type vt
 
 let param_type fmt params =
   Format.pp_print_list ~pp_sep:Format.pp_print_space param fmt params

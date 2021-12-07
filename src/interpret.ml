@@ -395,14 +395,12 @@ let exec_register env name i =
 
 let exec_module env i =
   let curr_func = ref (-1) in
-  let last_func = ref None in
   let seen_funcs = env.modules.(i).seen_funcs in
   List.iter
     (function
       | MFunc f ->
         incr curr_func;
         let i = !curr_func in
-        last_func := Some i;
         Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
       | _ -> () )
     env.modules.(i).fields;

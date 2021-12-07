@@ -19,7 +19,6 @@ type module_ =
 type module_ =
   { fields : module_field list
   ; funcs : func Array.t
-  ; last_func : int option
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   }
@@ -80,7 +79,6 @@ let mk_module m =
   let fields = m.Types.fields in
 
   let curr_func = ref (-1) in
-  let last_func = ref None in
   let seen_funcs = Hashtbl.create 512 in
   let exported_funcs = Hashtbl.create 512 in
 
@@ -89,7 +87,6 @@ let mk_module m =
       | MFunc f ->
         incr curr_func;
         let i = !curr_func in
-        last_func := Some i;
         Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
       | MExport { name; desc } -> begin
         match desc with
@@ -122,45 +119,53 @@ let mk_module m =
     Array.map
       (fun f ->
         let local_tbl = Hashtbl.create 512 in
+        let param_n =
+          match f.type_f with
+          | FTId _i -> failwith "TODO FTId (simplify)"
+          | FTFt (pt, _rt) ->
+            List.iteri
+              (fun i p ->
+                match p with
+                | None, _vt -> ()
+                | Some id, _vt -> Hashtbl.add local_tbl id i )
+              pt;
+            List.length pt
+        in
         List.iteri
           (fun i l ->
             match l with
             | None, _vt -> ()
-            | Some id, _vt -> Hashtbl.add local_tbl id i )
+            | Some id, _vt -> Hashtbl.add local_tbl id (param_n + i) )
           f.locals;
-        let body =
-          List.map
-            (function
-              | Br_if (Symbolic id) -> Br_if (Symbolic id) (* TODO *)
-              | Br (Symbolic id) -> Br (Symbolic id) (* TODO *)
-              | Call (Symbolic id) -> begin
-                match Hashtbl.find_opt seen_funcs id with
-                | None -> failwith @@ Format.sprintf "unbound func: %s" id
-                | Some i -> Call (Raw (Unsigned.UInt32.of_int i))
-              end
-              | Local_set (Symbolic id) -> begin
-                match Hashtbl.find_opt local_tbl id with
-                | None -> failwith @@ Format.sprintf "unbound local: %s" id
-                | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
-              end
-              | Local_get (Symbolic id) -> begin
-                match Hashtbl.find_opt local_tbl id with
-                | None -> failwith @@ Format.sprintf "unbound local: %s" id
-                | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
-              end
-              | i -> i )
-            f.body
-        in
+        let rec body = function
+          | Br_if (Symbolic id) -> Br_if (Symbolic id) (* TODO *)
+          | Br (Symbolic id) -> Br (Symbolic id) (* TODO *)
+          | Call (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_funcs id with
+            | None -> failwith @@ Format.sprintf "unbound func: %s" id
+            | Some i -> Call (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Local_set (Symbolic id) -> begin
+            match Hashtbl.find_opt local_tbl id with
+            | None -> failwith @@ Format.sprintf "unbound local: %s" id
+            | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Local_get (Symbolic id) -> begin
+            match Hashtbl.find_opt local_tbl id with
+            | None -> failwith @@ Format.sprintf "unbound local: %s" id
+            | Some i -> Local_get (Raw (Unsigned.UInt32.of_int i))
+          end
+          | If_else (bt, e1, e2) -> If_else (bt, expr e1, expr e2)
+          | Loop (bt, e) -> Loop (bt, expr e)
+          | Block (bt, e) -> Block (bt, expr e)
+          | i -> i
+        and expr e = List.map body e in
+        let body = expr f.body in
         { f with body } )
       funcs
   in
 
-  { fields
-  ; funcs
-  ; last_func = None
-  ; seen_funcs = Hashtbl.create 512
-  ; exported_funcs
-  }
+  { fields; funcs; seen_funcs = Hashtbl.create 512; exported_funcs }
 
 let script script =
   let modules =

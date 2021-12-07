@@ -78,10 +78,10 @@ let def_type ==
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
   | i = par(preceded(PARAM, list(val_type))); (i2, o) = func_type; {
-    i @ i2, o
+    (List.map (fun i -> None, i) i) @ i2, o
   }
-  | LPAR; PARAM; _id = id; ~ = val_type; RPAR; (i2, o) = func_type; {
-    val_type::i2, o
+  | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; (i2, o) = func_type; {
+    (Some id, val_type)::i2, o
   }
 
 let table_type ==
@@ -569,10 +569,10 @@ let func_fields :=
 let func_fields_import :=
   | ~ = func_fields_import_result; <>
   | LPAR; PARAM; ins = list(val_type); RPAR; (ins2, out) = func_fields_import; {
-    ins @ ins2, out
+    (List.map (fun i -> None, i) ins) @ ins2, out
   }
-  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; (ins2, out) = func_fields_import; {
-    val_type :: ins2, out
+  | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; (ins2, out) = func_fields_import; {
+    (Some id, val_type) :: ins2, out
   }
 
 let func_fields_import_result :=
@@ -585,11 +585,11 @@ let func_fields_body :=
   | ~ = func_result_body; <>
   | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), r) = func_fields_body; {
     (* TODO: anon_locals ? *)
-    (l @ ins, out), r
+    ((List.map (fun i -> None, i) l) @ ins, out), r
   }
-  | LPAR; PARAM; _ = id; ~ = val_type; RPAR; ((ins, out), r) = func_fields_body; {
+  | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; ((ins, out), r) = func_fields_body; {
     (* TODO: use id ? *)
-    (val_type :: ins, out), r
+    ((Some id, val_type) :: ins, out), r
   }
 
 let func_result_body :=

@@ -1,20 +1,20 @@
 (module
-  (func $f (export "fibo") (param i32) (result i32)
+  (func $f (export "fibo") (param $n i32) (result i32)
 
     (if
       (i32.lt_s
-        (local.get 0)
+        (local.get $n)
         (i32.const 2))
-      (then (return (local.get 0))))
+      (then (return (local.get $n))))
     (return
       (i32.add
         (call $f
           (i32.sub
-            (local.get 0)
+            (local.get $n)
             (i32.const 2)))
-        (call 0
+        (call $f
           (i32.sub
-            (local.get 0)
+            (local.get $n)
             (i32.const 1)))
       )
     )
