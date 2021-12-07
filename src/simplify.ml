@@ -21,7 +21,7 @@ type module_ =
   ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
-  ; memory : int * Bytes.t
+  ; memory : int * Bytes.t * int
   }
 
 type action =
@@ -83,6 +83,10 @@ let mk_module m =
   let seen_funcs = Hashtbl.create 512 in
   let exported_funcs = Hashtbl.create 512 in
 
+  let mem_min_size = ref 0 in
+  let mem_max_size = ref 0 in
+  let mem_bytes = ref (Bytes.create 0) in
+
   List.iter
     (function
       | MFunc f ->
@@ -109,6 +113,10 @@ let mk_module m =
           Hashtbl.replace exported_funcs name i
         | _ -> ()
       end
+      | MMem (_id, { min; max }) ->
+        mem_min_size := Unsigned.UInt32.to_int min;
+        Option.iter (fun max -> mem_max_size := Unsigned.UInt32.to_int max) max;
+        mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * 65_536)
       | _ -> () )
     fields;
 
@@ -171,7 +179,12 @@ let mk_module m =
       funcs
   in
 
-  { fields; funcs; seen_funcs = Hashtbl.create 512; exported_funcs }
+  { fields
+  ; funcs
+  ; seen_funcs = Hashtbl.create 512
+  ; exported_funcs
+  ; memory = (!mem_min_size, !mem_bytes, !mem_max_size)
+  }
 
 let script script =
   let modules =

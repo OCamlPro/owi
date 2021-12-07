@@ -279,7 +279,10 @@ let rec exec_instr env module_indice locals stack instr =
     if b then raise (Branch (indice_to_int i))
   | Loop (_bt, e) -> exec_expr env module_indice locals stack e true
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
-  | Memory_size -> failwith "TODO Memory_size"
+  | Memory_size ->
+    let _min, mem, _max = env.modules.(module_indice).memory in
+    let len = Int32.of_int @@ Bytes.length mem in
+    Stack.push stack (Const_I32 len)
   | Memory_grow -> failwith "TODO Memory_grow"
   | Memory_fill -> failwith "TODO Memory_fill"
   | Memory_copy -> failwith "TODO Memory_copy"
@@ -304,9 +307,40 @@ let rec exec_instr env module_indice locals stack instr =
   | Table_copy _ -> failwith "TODO Table_copy"
   | Table_init _ -> failwith "TODO Table_init"
   | Elem_drop _ -> failwith "TODO Elem_drop"
-  | I_load _ -> failwith "TODO I_load"
+  | I_load (nn, { offset; align }) -> (
+    let offset = Unsigned.UInt32.to_int offset in
+    let _min, mem, _max = env.modules.(module_indice).memory in
+    (* TODO: use align *)
+    ignore align;
+    let pos = Stack.pop_i32 stack in
+    let offset = offset + Int32.to_int pos in
+    if Bytes.length mem <= offset then failwith "invalid_offset offset";
+    match nn with
+    | S32 ->
+      let res = Bytes.get_int32_le mem offset in
+      Stack.push stack (Const_I32 res)
+    | S64 ->
+      let res = Bytes.get_int64_le mem offset in
+      Stack.push stack (Const_I64 res) )
   | F_load (_, _) -> failwith "TODO F_load"
-  | I_store (_, _) -> failwith "TODO I_store"
+  | I_store (nn, { offset; align }) -> (
+    let offset = Unsigned.UInt32.to_int offset in
+    let _min, mem, _max = env.modules.(module_indice).memory in
+    ignore align;
+    (* TODO: use align *)
+    match nn with
+    | S32 ->
+      let n = Stack.pop_i32 stack in
+      let pos = Stack.pop_i32 stack in
+      let offset = offset + Int32.to_int pos in
+      if Bytes.length mem <= offset then failwith "invalid offset";
+      Bytes.set_int32_le mem offset n
+    | S64 ->
+      let n = Stack.pop_i64 stack in
+      let pos = Stack.pop_i32 stack in
+      let offset = offset + Int32.to_int pos in
+      if Bytes.length mem <= offset then failwith "invalid offset";
+      Bytes.set_int64_le mem offset n )
   | F_store (_, _) -> failwith "TODO F_store"
   | I_load8 (_, _, _) -> failwith "TODO I_load8"
   | I_load16 (_, _, _) -> failwith "TODO I_load16"
