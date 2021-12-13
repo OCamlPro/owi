@@ -661,7 +661,7 @@ let table ==
 
 let init ==
   | l = list(elem_var); { [l] }
-  | ~ = elem_expr; l = list(elem_expr); { elem_expr :: l }
+  | ~ = nonempty_list(elem_expr); <>
 
 (* TODO: None ? *)
 let table_fields :=
@@ -674,7 +674,7 @@ let table_fields :=
   | ~ = inline_export; ~ = table_fields; {
     MExport { name = inline_export; desc = Export_table dumb_indice } :: table_fields
   }
-  | ~ = ref_type; LPAR; ELEM; init = init; RPAR; {
+  | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     [ MTable (None, ({ min; max = Some min }, ref_type))
     ; MElem { type_ = Func_ref; init; mode = Elem_active (dumb_indice, []) } ]
