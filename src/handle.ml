@@ -51,13 +51,3 @@ let process lexbuf =
     Format.fprintf Format.err_formatter "lexing error : %s at %a%!" msg
       Types.pp_pos pos;
     exit 1
-
-(*
-let rec f x=f x
-
-let f _=assert false
-
-let f=Obj.magic
-
-let f _=exit 1
-   *)
