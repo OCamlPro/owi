@@ -27,7 +27,7 @@ let exec_iunop stack nn op =
       | Ctz -> Op.i32_ctz n
       | Popcnt -> Op.i32_popcnt n
     in
-    Stack.push stack (Const_I32 (Int32.of_int res))
+    Stack.push_i32_of_int stack res
   | S64 ->
     let n = Stack.pop_i64 stack in
     let res =
@@ -36,7 +36,7 @@ let exec_iunop stack nn op =
       | Ctz -> Op.i64_ctz n
       | Popcnt -> Op.i64_popcnt n
     in
-    Stack.push stack (Const_I64 (Int64.of_int res))
+    Stack.push_i64_of_int stack res
 
 let exec_funop stack nn op =
   match nn with
@@ -52,7 +52,7 @@ let exec_funop stack nn op =
       | Trunc -> Float.trunc f
       | Nearest -> failwith "TODO: exec_funop Nearest"
     in
-    Stack.push stack (Const_F32 res)
+    Stack.push_f32 stack res
   | S64 ->
     let f = Stack.pop_f64 stack in
     let res =
@@ -65,20 +65,19 @@ let exec_funop stack nn op =
       | Trunc -> Float.trunc f
       | Nearest -> failwith "TODO: exec_funop Nearest"
     in
-    Stack.push stack (Const_F64 res)
+    Stack.push_f64 stack res
 
 let exec_ibinop stack nn (op : Types.ibinop) =
-  Stack.push stack
-  @@
   match nn with
   | S32 ->
     let n1, n2 = Stack.pop2_i32 stack in
-    Const_I32
-      ( match op with
-      | Add -> Int32.add n1 n2
-      | Sub -> Int32.sub n1 n2
-      | Mul -> Int32.mul n1 n2
-      | Div _s -> Int32.div n1 n2
+    Stack.push_i32 stack
+      (let open Int32 in
+      match op with
+      | Add -> add n1 n2
+      | Sub -> sub n1 n2
+      | Mul -> mul n1 n2
+      | Div _s -> div n1 n2
       | Rem _s -> failwith "TODO Rem"
       | And -> failwith "TODO And"
       | Or -> failwith "TODO Or"
@@ -86,15 +85,16 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shl -> failwith "TODO Shl"
       | Shr _s -> failwith "TODO Shr"
       | Rotl -> failwith "TODO Rotl"
-      | Rotr -> failwith "TODO Rotr" )
+      | Rotr -> failwith "TODO Rotr")
   | S64 ->
     let n1, n2 = Stack.pop2_i64 stack in
-    Const_I64
-      ( match op with
-      | Add -> Int64.add n1 n2
-      | Sub -> Int64.sub n1 n2
-      | Mul -> Int64.mul n1 n2
-      | Div _s -> Int64.div n1 n2
+    Stack.push_i64 stack
+      (let open Int64 in
+      match op with
+      | Add -> add n1 n2
+      | Sub -> sub n1 n2
+      | Mul -> mul n1 n2
+      | Div _s -> div n1 n2
       | Rem _s -> failwith "TODO Rem"
       | And -> failwith "TODO And"
       | Or -> failwith "TODO Or"
@@ -102,99 +102,90 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shl -> failwith "TODO Shl"
       | Shr _s -> failwith "TODO Shr"
       | Rotl -> failwith "TODO Rotl"
-      | Rotr -> failwith "TODO Rotr" )
+      | Rotr -> failwith "TODO Rotr")
 
 let exec_fbinop stack nn (op : Types.fbinop) =
-  Stack.push stack
-  @@
   match nn with
   | S32 ->
     let f1, f2 = Stack.pop2_f32 stack in
-    Const_F32
-      ( match op with
-      | Add -> Float.add f1 f2
-      | Sub -> Float.sub f1 f2
-      | Mul -> Float.mul f1 f2
-      | Div -> Float.div f1 f2
-      | Min -> Float.min f1 f2
-      | Max -> Float.max f1 f2
-      | Copysign -> Float.copy_sign f1 f2 )
+    Stack.push_f32 stack
+      (let open Float in
+      match op with
+      | Add -> add f1 f2
+      | Sub -> sub f1 f2
+      | Mul -> mul f1 f2
+      | Div -> div f1 f2
+      | Min -> min f1 f2
+      | Max -> max f1 f2
+      | Copysign -> copy_sign f1 f2)
   | S64 ->
     let f1, f2 = Stack.pop2_f64 stack in
-    Const_F64
-      ( match op with
-      | Add -> Float.add f1 f2
-      | Sub -> Float.sub f1 f2
-      | Mul -> Float.mul f1 f2
-      | Div -> Float.div f1 f2
-      | Min -> Float.min f1 f2
-      | Max -> Float.max f1 f2
-      | Copysign -> Float.copy_sign f1 f2 )
-
-let i32_of_bool b =
-  if b then
-    1l
-  else
-    0l
+    Stack.push_f64 stack
+      (let open Float in
+      match op with
+      | Add -> add f1 f2
+      | Sub -> sub f1 f2
+      | Mul -> mul f1 f2
+      | Div -> div f1 f2
+      | Min -> min f1 f2
+      | Max -> max f1 f2
+      | Copysign -> copy_sign f1 f2)
 
 let exec_itestop stack nn op =
-  Stack.push stack
-    (Const_I32
-       ( match nn with
-       | S32 -> (
-         let n = Stack.pop_i32 stack in
-         match op with
-         | Eqz -> i32_of_bool (n = 0l) )
-       | S64 -> (
-         let n = Stack.pop_i64 stack in
-         match op with
-         | Eqz -> i32_of_bool (n = 0L) ) ) )
+  Stack.push_bool stack
+    ( match nn with
+    | S32 -> (
+      let n = Stack.pop_i32 stack in
+      match op with
+      | Eqz -> n = 0l )
+    | S64 -> (
+      let n = Stack.pop_i64 stack in
+      match op with
+      | Eqz -> n = 0L ) )
 
 let exec_irelop stack nn (op : Types.irelop) =
-  Stack.push stack
-    (Const_I32
-       ( match nn with
-       | S32 -> (
-         let n1, n2 = Stack.pop2_i32 stack in
-         match op with
-         | Eq -> i32_of_bool (n1 = n2)
-         | Ne -> i32_of_bool (n1 <> n2)
-         | Lt _sx -> i32_of_bool (n1 < n2)
-         | Gt _sx -> i32_of_bool (n1 > n2)
-         | Le _sx -> i32_of_bool (n1 <= n2)
-         | Ge _sx -> i32_of_bool (n1 >= n2) )
-       | S64 -> (
-         let n1, n2 = Stack.pop2_i64 stack in
-         match op with
-         | Eq -> i32_of_bool (n1 = n2)
-         | Ne -> i32_of_bool (n1 <> n2)
-         | Lt _sx -> i32_of_bool (n1 < n2)
-         | Gt _sx -> i32_of_bool (n1 > n2)
-         | Le _sx -> i32_of_bool (n1 <= n2)
-         | Ge _sx -> i32_of_bool (n1 >= n2) ) ) )
+  Stack.push_bool stack
+    ( match nn with
+    | S32 -> (
+      let n1, n2 = Stack.pop2_i32 stack in
+      match op with
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt _sx -> n1 < n2
+      | Gt _sx -> n1 > n2
+      | Le _sx -> n1 <= n2
+      | Ge _sx -> n1 >= n2 )
+    | S64 -> (
+      let n1, n2 = Stack.pop2_i64 stack in
+      match op with
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt _sx -> n1 < n2
+      | Gt _sx -> n1 > n2
+      | Le _sx -> n1 <= n2
+      | Ge _sx -> n1 >= n2 ) )
 
 let exec_frelop stack nn (op : Types.frelop) =
-  Stack.push stack
-  @@ Const_I32
-       ( match nn with
-       | S32 -> (
-         let n1, n2 = Stack.pop2_i32 stack in
-         match op with
-         | Eq -> i32_of_bool (n1 = n2)
-         | Ne -> i32_of_bool (n1 <> n2)
-         | Lt -> i32_of_bool (n1 < n2)
-         | Gt -> i32_of_bool (n1 > n2)
-         | Le -> i32_of_bool (n1 <= n2)
-         | Ge -> i32_of_bool (n1 >= n2) )
-       | S64 -> (
-         let n1, n2 = Stack.pop2_i64 stack in
-         match op with
-         | Eq -> i32_of_bool (n1 = n2)
-         | Ne -> i32_of_bool (n1 <> n2)
-         | Lt -> i32_of_bool (n1 < n2)
-         | Gt -> i32_of_bool (n1 > n2)
-         | Le -> i32_of_bool (n1 <= n2)
-         | Ge -> i32_of_bool (n1 >= n2) ) )
+  Stack.push_bool stack
+    ( match nn with
+    | S32 -> (
+      let n1, n2 = Stack.pop2_i32 stack in
+      match op with
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt -> n1 < n2
+      | Gt -> n1 > n2
+      | Le -> n1 <= n2
+      | Ge -> n1 >= n2 )
+    | S64 -> (
+      let n1, n2 = Stack.pop2_i64 stack in
+      match op with
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt -> n1 < n2
+      | Gt -> n1 > n2
+      | Le -> n1 <= n2
+      | Ge -> n1 >= n2 ) )
 
 exception Branch of int
 
@@ -219,10 +210,10 @@ let rec exec_instr env module_indice locals stack instr =
   | Return -> raise Return
   | Nop -> ()
   | Unreachable -> failwith "unreachable"
-  | I32_const n -> Stack.push stack (Const_I32 n)
-  | I64_const n -> Stack.push stack (Const_I64 n)
-  | F32_const f -> Stack.push stack (Const_F32 f)
-  | F64_const f -> Stack.push stack (Const_F64 f)
+  | I32_const n -> Stack.push_i32 stack n
+  | I64_const n -> Stack.push_i64 stack n
+  | F32_const f -> Stack.push_f32 stack f
+  | F64_const f -> Stack.push_f64 stack f
   | I_unop (nn, op) -> exec_iunop stack nn op
   | F_unop (nn, op) -> exec_funop stack nn op
   | I_binop (nn, op) -> exec_ibinop stack nn op
@@ -244,11 +235,10 @@ let rec exec_instr env module_indice locals stack instr =
   | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
   | Ref_null t -> Stack.push stack (Const_null t)
   | Ref_is_null ->
-    (* TODO: this is false, when do we return 0 ? :-) *)
-    let _t = Stack.pop_const_null stack in
-    Stack.push stack (Const_I32 1l)
+    let b = Stack.pop_is_null stack in
+    Stack.push_bool stack b
   | Ref_func _fid -> failwith "TODO exec_instr"
-  | Drop -> ignore (Stack.pop stack)
+  | Drop -> Stack.drop stack
   | Local_get i -> Stack.push stack locals.(indice_to_int i)
   | Local_set i ->
     (* TODO: check type ? *)
@@ -267,7 +257,7 @@ let rec exec_instr env module_indice locals stack instr =
     let func = module_.funcs.(indice_to_int i) in
     let param_type, _result_type =
       match func.type_f with
-      | FTId _i -> failwith "TODO"
+      | FTId _i -> failwith "internal error: FTId was not simplified"
       | FTFt (p, r) -> (p, r)
     in
     let args = Stack.pop_n stack (List.length param_type) in
@@ -281,28 +271,27 @@ let rec exec_instr env module_indice locals stack instr =
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
   | Memory_size ->
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let len = Int32.of_int @@ (Bytes.length !mem / 65_536) in
-    Stack.push stack (Const_I32 len)
+    let len = Bytes.length !mem / 65_536 in
+    Stack.push_i32_of_int stack len
   | Memory_grow -> (
     let mem, max = env.modules.(module_indice).memories.(0) in
-    let delta = 65_536 * (Int32.to_int @@ Stack.pop_i32 stack) in
+    let delta = Stack.pop_i32_to_int stack * 65_536 in
     let old_size = Bytes.length !mem in
     match max with
     | None ->
-      let new_mem = Bytes.extend !mem 0 delta in
-      mem := new_mem;
-      Stack.push stack (Const_I32 (Int32.of_int old_size))
+      mem := Bytes.extend !mem 0 delta;
+      Stack.push_i32_of_int stack old_size
     | Some max ->
       if old_size + delta > max * 65_536 then
-        Stack.push stack (Const_I32 (-1l))
-      else
-        let new_mem = Bytes.extend !mem 0 delta in
-        mem := new_mem;
-        Stack.push stack (Const_I32 (Int32.of_int (old_size / 65_536))) )
+        Stack.push_i32 stack (-1l)
+      else begin
+        mem := Bytes.extend !mem 0 delta;
+        Stack.push_i32_of_int stack (old_size / 65_536)
+      end )
   | Memory_fill ->
-    let start = Int32.to_int @@ Stack.pop_i32 stack in
-    let byte = Int32.to_int @@ Stack.pop_i32 stack in
-    let stop = Int32.to_int @@ Stack.pop_i32 stack in
+    let start = Stack.pop_i32_to_int stack in
+    let byte = Stack.pop_i32_to_int stack in
+    let stop = Stack.pop_i32_to_int stack in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     Bytes.fill !mem start (stop - start) (Char.chr byte)
   | Memory_copy -> failwith "TODO Memory_copy"
@@ -333,16 +322,15 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32 stack in
-    let offset = offset + Int32.to_int pos in
+    let offset = Stack.pop_i32_to_int stack + offset in
     if Bytes.length mem <= offset then failwith "invalid_offset offset";
     match nn with
     | S32 ->
       let res = Bytes.get_int32_le mem offset in
-      Stack.push stack (Const_I32 res)
+      Stack.push_i32 stack res
     | S64 ->
       let res = Bytes.get_int64_le mem offset in
-      Stack.push stack (Const_I64 res) )
+      Stack.push_i64 stack res )
   | F_load (_, _) -> failwith "TODO F_load"
   | I_store (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
@@ -353,14 +341,14 @@ let rec exec_instr env module_indice locals stack instr =
     match nn with
     | S32 ->
       let n = Stack.pop_i32 stack in
-      let pos = Stack.pop_i32 stack in
-      let offset = offset + Int32.to_int pos in
+      let pos = Stack.pop_i32_to_int stack in
+      let offset = offset + pos in
       if Bytes.length mem <= offset then failwith "invalid offset";
       Bytes.set_int32_le mem offset n
     | S64 ->
       let n = Stack.pop_i64 stack in
-      let pos = Stack.pop_i32 stack in
-      let offset = offset + Int32.to_int pos in
+      let pos = Stack.pop_i32_to_int stack in
+      let offset = offset + pos in
       if Bytes.length mem <= offset then failwith "invalid offset";
       Bytes.set_int64_le mem offset n )
   | F_store (_, _) -> failwith "TODO F_store"
@@ -370,8 +358,8 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32 stack in
-    let offset = offset + Int32.to_int pos in
+    let pos = Stack.pop_i32_to_int stack in
+    let offset = offset + pos in
     if Bytes.length mem <= offset then failwith "invalid_offset offset";
     match nn with
     | S32 ->
@@ -382,7 +370,7 @@ let rec exec_instr env module_indice locals stack instr =
           Bytes.get_uint8 )
           mem offset
       in
-      Stack.push stack (Const_I32 (Int32.of_int res))
+      Stack.push_i32_of_int stack res
     | S64 ->
       let res =
         ( if sx = S then
@@ -391,7 +379,7 @@ let rec exec_instr env module_indice locals stack instr =
           Bytes.get_uint8 )
           mem offset
       in
-      Stack.push stack (Const_I64 (Int64.of_int res)) )
+      Stack.push_i64_of_int stack res )
   | I_load16 (_, _, _) -> failwith "TODO I_load16"
   | I64_load32 (_, _) -> failwith "TODO I64_load32"
   | I_store8 (_, _) -> failwith "TODO I_store8"
@@ -399,12 +387,12 @@ let rec exec_instr env module_indice locals stack instr =
   | I64_store32 _ -> failwith "TODO I64"
   | Data_drop _ -> failwith "TODO Data_drop"
   | Br_table (inds, i) ->
-    let target = Int32.to_int @@ Stack.pop_i32 stack in
+    let target = Stack.pop_i32_to_int stack in
     let target =
-      if target < 0 then
+      if target < 0 || target >= Array.length inds then
         i
       else
-        Option.value (List.nth_opt inds target) ~default:i
+        inds.(target)
     in
     raise (Branch (indice_to_int target))
   | Call_indirect (_, _) -> failwith "TODO Call_indirect"

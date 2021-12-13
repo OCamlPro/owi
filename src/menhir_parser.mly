@@ -221,12 +221,10 @@ let plain_instr :=
   | DROP; { Drop }
   | BR; ~ = indice; <Br>
   | BR_IF; ~ = indice; <Br_if>
-  | BR_TABLE; ~ = indice; l = list(indice); {
-    let xs, x = match List.rev @@ indice::l with
-      | [] -> assert false
-      | hd::tl -> List.rev tl, hd
-    in
-    Br_table (xs, x)
+  | BR_TABLE; l = nonempty_list(indice); {
+    let xs = Array.of_list l in
+    let n = Array.length xs in
+    Br_table (Array.sub xs 0 (n - 1), xs.(n - 1))
   }
   | RETURN; { Return }
   | CALL; ~ = indice; <Call>

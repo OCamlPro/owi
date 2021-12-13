@@ -254,7 +254,7 @@ type instr =
   | If_else of block_type * expr * expr
   | Br of indice
   | Br_if of indice
-  | Br_table of indice list * indice
+  | Br_table of indice array * indice
   | Return
   | Call of indice
   | Call_indirect of indice * indice

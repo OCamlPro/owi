@@ -3,6 +3,26 @@ include Stdlib.Stack
 
 let push s v = push v s
 
+let push_bool s b =
+  push s
+    (Const_I32
+       ( if b then
+         1l
+       else
+         0l ) )
+
+let push_i32 s i = push s (Const_I32 i)
+
+let push_i32_of_int s i = push_i32 s (Int32.of_int i)
+
+let push_i64 s i = push s (Const_I64 i)
+
+let push_i64_of_int s i = push_i64 s (Int64.of_int i)
+
+let push_f32 s f = push s (Const_F32 f)
+
+let push_f64 s f = push s (Const_F64 f)
+
 let to_list s = to_seq s |> List.of_seq
 
 let pp fmt s =
@@ -11,12 +31,16 @@ let pp fmt s =
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Pp.const fmt s
 
+let drop s = ignore (pop s)
+
 let pop_i32 s =
   match pop s with
   | Const_I32 n -> n
   | _
   | (exception Empty) ->
     failwith "invalid type (expected i32)"
+
+let pop_i32_to_int s = Int32.to_int @@ pop_i32 s
 
 let pop2_i32 s =
   try
@@ -81,18 +105,15 @@ let pop2_f64 s =
 
 let pop_bool s =
   match pop s with
-  | Const_I32 n ->
-    if n = 0l then
-      false
-    else
-      true
+  | Const_I32 n -> n <> 0l
   | _
   | (exception Empty) ->
     failwith "invalid type (expected i32 (bool))"
 
-let pop_const_null s =
+let pop_is_null s =
   match pop s with
-  | Const_null t -> t
+  | Const_null _t -> true
+  | Const_host _t -> false (* TODO: check that a host is never null ? *)
   | _
   | (exception Empty) ->
     failwith "invalid type (expected const_null)"

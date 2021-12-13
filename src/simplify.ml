@@ -89,6 +89,10 @@ let mk_module m =
 
   let tables = ref [] in
 
+  let types = Hashtbl.create 512 in
+  let curr_type = ref (-1) in
+  let seen_types = Hashtbl.create 512 in
+
   List.iter
     (function
       | MFunc f ->
@@ -125,6 +129,12 @@ let mk_module m =
           , Option.map Unsigned.UInt32.to_int max )
         in
         tables := tbl :: !tables
+      | MType (id, t) -> (
+        incr curr_type;
+        Hashtbl.add types !curr_type t;
+        match id with
+        | None -> () (* TODO: is there really nothing to do ? *)
+        | Some id -> Hashtbl.add seen_types id !curr_type )
       | _ -> () )
     fields;
 
@@ -143,8 +153,24 @@ let mk_module m =
     Array.map
       (fun f ->
         let local_tbl = Hashtbl.create 512 in
-        let param_n =
+        let type_f =
           match f.type_f with
+          | FTId i -> (
+            let i =
+              match i with
+              | Raw i -> Unsigned.UInt32.to_int i
+              | Symbolic i -> (
+                match Hashtbl.find_opt seen_types i with
+                | None -> failwith @@ Format.sprintf "unbound type indice $%s" i
+                | Some i -> i )
+            in
+            match Hashtbl.find_opt types i with
+            | None -> failwith @@ Format.sprintf "unbound type indice %d" i
+            | Some t -> FTFt t )
+          | FTFt _ as t -> t
+        in
+        let param_n =
+          match type_f with
           | FTId _i -> failwith "TODO FTId (simplify)"
           | FTFt (pt, _rt) ->
             List.iteri
