@@ -402,18 +402,12 @@ let rec exec_instr env module_indice locals stack instr =
     if rt <> Func_ref then failwith "wrong table type (expected Func_ref)";
     let i = a.(fun_i) in
     let func = module_.funcs.(indice_to_int i) in
-    let param_type, result_type =
+    if func.type_f <> typ_i then failwith "Invalid Call_indirect type";
+    let param_type =
       match func.type_f with
       | FTId _i -> failwith "internal error: FTId was not simplified"
-      | FTFt (p, r) -> (p, r)
+      | FTFt (p, _r) -> p
     in
-    let exp_pt, exp_rt =
-      match typ_i with
-      | FTId _i -> failwith "internal error: FTId was not simplified"
-      | FTFt (p, r) -> (p, r)
-    in
-    if exp_pt <> param_type || exp_rt <> result_type then
-      failwith "Invalid Call_indirect type";
     let args = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
     List.iter (Stack.push stack) (List.rev res)
