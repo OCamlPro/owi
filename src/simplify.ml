@@ -22,7 +22,8 @@ type module_ =
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t ref * int option) array
-  ; tables : (ref_type * const Array.t * int option) array (* TODO: const ? *)
+  ; tables : (ref_type * indice Array.t * int option) array (* TODO: const ? *)
+  ; types : func_type Array.t
   }
 
 type action =
@@ -215,12 +216,15 @@ let mk_module m =
       funcs
   in
 
+  let types = Hashtbl.to_seq_values types |> Array.of_seq in
+
   { fields
   ; funcs
   ; seen_funcs = Hashtbl.create 512
   ; exported_funcs
   ; memories = [| (mem_bytes, !mem_max_size) |]
   ; tables
+  ; types
   }
 
 let script script =

@@ -182,6 +182,10 @@ type block_type =
   | Val_type of val_type option
 (* TODO: where does the option goes ? *)
 
+type func_type_bis =
+  | FTId of indice
+  | FTFt of func_type
+
 type instr =
   (* Numeric Instructions *)
   | I32_const of i32
@@ -257,13 +261,9 @@ type instr =
   | Br_table of indice array * indice
   | Return
   | Call of indice
-  | Call_indirect of indice * indice
+  | Call_indirect of indice * func_type_bis
 
 and expr = instr list
-
-type func_type_bis =
-  | FTId of indice
-  | FTFt of func_type
 
 type func =
   { type_f : func_type_bis

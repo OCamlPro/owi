@@ -331,22 +331,20 @@ let select_instr_results_instr :=
   }
 
 let call_instr ==
-  | CALL_INDIRECT; ~ = id; _ = call_instr_type; {
-    Call_indirect (Symbolic id, dumb_indice)
+  | CALL_INDIRECT; ~ = id; ~ = call_instr_type; {
+    Call_indirect (Symbolic id, call_instr_type)
   }
-  | CALL_INDIRECT; _ = call_instr_type; {
-    Call_indirect (Raw (u32_of_i32 0l), dumb_indice)
+  | CALL_INDIRECT; ~ = call_instr_type; {
+    Call_indirect (Raw (u32_of_i32 0l), call_instr_type)
   }
 
 let call_instr_type ==
-  | _ = type_use; ~ = call_instr_params; {
+  | ~ = type_use; ~ = call_instr_params; {
     match call_instr_params with
-    | ([], []) -> [], [](* type_use *)
-    | _ft -> [], [] (* TODO: inline_type_explicit type_use ft *)
+    | ([], []) -> FTId (type_use)
+    | (pt, rt) -> FTFt (List.map (fun t -> None, t) pt, rt) (* TODO: inline_type_explicit type_use ft *)
   }
-  | ~ = call_instr_params; {
-    (*inline_type*) call_instr_params
-  }
+  | (pt, rt) = call_instr_params; { FTFt (List.map (fun t -> None, t) pt, rt) }
 
 let call_instr_params :=
   | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
@@ -363,22 +361,20 @@ let call_instr_results :=
   | { [] }
 
 let call_instr_instr ==
-  | CALL_INDIRECT; ~ = id; (_x, es) = call_instr_type_instr; {
-    Call_indirect (Symbolic id, dumb_indice), es
+  | CALL_INDIRECT; ~ = id; (x, es) = call_instr_type_instr; {
+    Call_indirect (Symbolic id, x), es
   }
-  | CALL_INDIRECT; (_x, es) = call_instr_type_instr; {
-    Call_indirect (Raw (u32_of_i32 0l), dumb_indice), es
+  | CALL_INDIRECT; (x, es) = call_instr_type_instr; {
+    Call_indirect (Raw (u32_of_i32 0l), x), es
   }
 
 let call_instr_type_instr ==
-  | _t = type_use; ~ = call_instr_params_instr; {
+  | ~ = type_use; ~ = call_instr_params_instr; {
     match call_instr_params_instr with
-    | ([], []), es -> (*TODO: t*) ([], []), es
-    | _ft, es -> (* TODO: t*) ([], []), es (* TODO: inline_type_explicit t ft, es *)
+    | ([], []), es -> FTId (type_use), es
+    | (pt, rt), es -> FTFt ((List.map (fun t -> None, t) pt), rt), es (* TODO: inline_type_explicit t ft, es *)
   }
-  | (ft, es) = call_instr_params_instr; {
-    (* TODO: inline_type*) ft, es
-  }
+  | ((pt, rt), es) = call_instr_params_instr; { FTFt (List.map (fun t -> None, t) pt, rt), es }
 
 let call_instr_params_instr :=
   | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
@@ -469,14 +465,13 @@ let select_expr_result :=
   | ~ = expr_list; { false, [], expr_list }
 
 let call_expr_type ==
-  | _ = type_use; ~ = call_expr_params; {
+  | ~ = type_use; ~ = call_expr_params; {
     match call_expr_params with
-    (* TODO: | ([], []), es -> (Obj.magic type_use) type_, es *)
-    (*| ft, es -> inline_type ((Obj.magic type_use) type_) ft, es*)
-    | _ -> dumb_indice, []
+    | ([], []), es -> FTId type_use, es
+    | (pt, rt), es -> FTFt (List.map (fun t -> None, t) pt, rt), es (* TODO: type_use ? *)
   }
-  | (_ft, es) = call_expr_params; {
-    dumb_indice, es
+  | ((pt, rt), es) = call_expr_params; {
+    FTFt (List.map (fun t -> None, t) pt, rt), es
   }
 
 let call_expr_params :=

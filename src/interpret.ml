@@ -395,7 +395,28 @@ let rec exec_instr env module_indice locals stack instr =
         inds.(target)
     in
     raise (Branch (indice_to_int target))
-  | Call_indirect (_, _) -> failwith "TODO Call_indirect"
+  | Call_indirect (tbl_i, typ_i) ->
+    let fun_i = Stack.pop_i32_to_int stack in
+    let module_ = env.modules.(module_indice) in
+    let rt, a, _max = module_.tables.(indice_to_int tbl_i) in
+    if rt <> Func_ref then failwith "wrong table type (expected Func_ref)";
+    let i = a.(fun_i) in
+    let func = module_.funcs.(indice_to_int i) in
+    let param_type, result_type =
+      match func.type_f with
+      | FTId _i -> failwith "internal error: FTId was not simplified"
+      | FTFt (p, r) -> (p, r)
+    in
+    let exp_pt, exp_rt =
+      match typ_i with
+      | FTId _i -> failwith "internal error: FTId was not simplified"
+      | FTFt (p, r) -> (p, r)
+    in
+    if exp_pt <> param_type || exp_rt <> result_type then
+      failwith "Invalid Call_indirect type";
+    let args = Stack.pop_n stack (List.length param_type) in
+    let res = exec_func env module_indice func args in
+    List.iter (Stack.push stack) (List.rev res)
 
 and exec_expr env module_indice locals stack e is_loop =
   List.iter
