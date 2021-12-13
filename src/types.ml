@@ -391,3 +391,5 @@ type cmd =
   | Action of action
 
 type file = cmd list
+
+let page_size = 65_536

@@ -122,7 +122,7 @@ let mk_module m =
       end
       | MMem (_id, { min; max }) ->
         mem_max_size := Option.map Unsigned.UInt32.to_int max;
-        mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * 65_536)
+        mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * page_size)
       | MTable (_id, ({ min; max }, rt)) ->
         let tbl =
           ( rt

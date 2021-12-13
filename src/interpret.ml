@@ -272,22 +272,22 @@ let rec exec_instr env module_indice locals stack instr =
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
   | Memory_size ->
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let len = Bytes.length !mem / 65_536 in
+    let len = Bytes.length !mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> (
     let mem, max = env.modules.(module_indice).memories.(0) in
-    let delta = Stack.pop_i32_to_int stack * 65_536 in
+    let delta = Stack.pop_i32_to_int stack * page_size in
     let old_size = Bytes.length !mem in
     match max with
     | None ->
       mem := Bytes.extend !mem 0 delta;
       Stack.push_i32_of_int stack old_size
     | Some max ->
-      if old_size + delta > max * 65_536 then
+      if old_size + delta > max * page_size then
         Stack.push_i32 stack (-1l)
       else begin
         mem := Bytes.extend !mem 0 delta;
-        Stack.push_i32_of_int stack (old_size / 65_536)
+        Stack.push_i32_of_int stack (old_size / page_size)
       end )
   | Memory_fill ->
     let start = Stack.pop_i32_to_int stack in
