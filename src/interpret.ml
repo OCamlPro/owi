@@ -39,17 +39,18 @@ let exec_iunop stack nn op =
     Stack.push_i64_of_int stack res
 
 let exec_funop stack nn op =
+  let open Float in
   match nn with
   | S32 ->
     let f = Stack.pop_f32 stack in
     let res =
       match op with
-      | Abs -> Float.abs f
-      | Neg -> Float.neg f
-      | Sqrt -> Float.sqrt f
-      | Ceil -> Float.ceil f
-      | Floor -> Float.floor f
-      | Trunc -> Float.trunc f
+      | Abs -> abs f
+      | Neg -> neg f
+      | Sqrt -> sqrt f
+      | Ceil -> ceil f
+      | Floor -> floor f
+      | Trunc -> trunc f
       | Nearest -> failwith "TODO: exec_funop Nearest"
     in
     Stack.push_f32 stack res
@@ -57,12 +58,12 @@ let exec_funop stack nn op =
     let f = Stack.pop_f64 stack in
     let res =
       match op with
-      | Abs -> Float.abs f
-      | Neg -> Float.neg f
-      | Sqrt -> Float.sqrt f
-      | Ceil -> Float.ceil f
-      | Floor -> Float.floor f
-      | Trunc -> Float.trunc f
+      | Abs -> abs f
+      | Neg -> neg f
+      | Sqrt -> sqrt f
+      | Ceil -> ceil f
+      | Floor -> floor f
+      | Trunc -> trunc f
       | Nearest -> failwith "TODO: exec_funop Nearest"
     in
     Stack.push_f64 stack res
