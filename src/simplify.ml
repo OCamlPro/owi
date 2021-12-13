@@ -22,7 +22,7 @@ type module_ =
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t ref * int option) array
-  ; tables : (ref_type * indice Array.t * int option) array (* TODO: const ? *)
+  ; tables : (ref_type * indice option Array.t * int option) array
   ; types : func_type Array.t
   }
 
@@ -126,7 +126,7 @@ let mk_module m =
       | MTable (_id, ({ min; max }, rt)) ->
         let tbl =
           ( rt
-          , Array.make (Unsigned.UInt32.to_int min) (Obj.magic None)
+          , Array.make (Unsigned.UInt32.to_int min) None
           , Option.map Unsigned.UInt32.to_int max )
         in
         tables := tbl :: !tables

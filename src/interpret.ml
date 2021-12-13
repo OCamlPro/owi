@@ -400,7 +400,11 @@ let rec exec_instr env module_indice locals stack instr =
     let module_ = env.modules.(module_indice) in
     let rt, a, _max = module_.tables.(indice_to_int tbl_i) in
     if rt <> Func_ref then failwith "wrong table type (expected Func_ref)";
-    let i = a.(fun_i) in
+    let i =
+      match a.(fun_i) with
+      | None -> failwith @@ Format.sprintf "unbound table at indice %d" fun_i
+      | Some i -> i
+    in
     let func = module_.funcs.(indice_to_int i) in
     if func.type_f <> typ_i then failwith "Invalid Call_indirect type";
     let param_type =
