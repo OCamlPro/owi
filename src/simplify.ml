@@ -1,28 +1,12 @@
 open Types
 
-(*
-type module_ =
-  { id : id option
-  ; mem : mem option
-  ; start : start option
-  ; types : type_ Array.t
-  ; funcs : func Array.t
-  ; tables : table Array.t
-  ; globals : global Array.t
-  ; elems : elem Array.t
-  ; datas : data Array.t
-  ; imports : import Array.t
-  ; exports : export Array.t
-  }
-*)
-
 type module_ =
   { fields : module_field list
   ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t ref * int option) array
-  ; tables : (ref_type * indice option Array.t * int option) array
+  ; tables : (ref_type * instr option Array.t * int option) array
   ; types : func_type Array.t
   }
 
@@ -88,11 +72,15 @@ let mk_module m =
   let mem_max_size = ref None in
   let mem_bytes = ref (Bytes.create 0) in
 
+  let curr_table = ref (-1) in
   let tables = ref [] in
+  let seen_tables = Hashtbl.create 512 in
 
   let types = Hashtbl.create 512 in
   let curr_type = ref (-1) in
   let seen_types = Hashtbl.create 512 in
+
+  let passive_elements = ref [] in
 
   List.iter
     (function
@@ -123,7 +111,9 @@ let mk_module m =
       | MMem (_id, { min; max }) ->
         mem_max_size := Option.map Unsigned.UInt32.to_int max;
         mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * page_size)
-      | MTable (_id, ({ min; max }, rt)) ->
+      | MTable (id, ({ min; max }, rt)) ->
+        incr curr_table;
+        Option.iter (fun id -> Hashtbl.add seen_tables id !curr_table) id;
         let tbl =
           ( rt
           , Array.make (Unsigned.UInt32.to_int min) None
@@ -139,7 +129,95 @@ let mk_module m =
       | _ -> () )
     fields;
 
-  let tables = Array.of_list @@ List.rev !tables in
+  let tables =
+    Array.of_list
+    @@ List.rev_map
+         (fun (rt, table, max) ->
+           let table =
+             Array.map
+               (function
+                 | None -> None
+                 | Some e -> (
+                   match e with
+                   | Ref_func (Raw _i) as e -> Some e
+                   | Ref_func (Symbolic id) -> begin
+                     match Hashtbl.find_opt seen_funcs id with
+                     | None -> failwith @@ Format.sprintf "unbound id %s" id
+                     | Some i -> Some (Ref_func (Raw (Unsigned.UInt32.of_int i)))
+                   end
+                   | e -> Some e ) )
+               table
+           in
+           (rt, table, max) )
+         !tables
+  in
+
+  let curr_table = ref (-1) in
+
+  List.iter
+    (function
+      | MTable _t -> incr curr_table
+      | MElem e -> begin
+        match e.mode with
+        | Elem_passive ->
+          (* A passive element segment’s elements can be copied to a table using the table.init instruction. *)
+          passive_elements := (e.type_, e.init) :: !passive_elements
+        | Elem_active (indice, offset) ->
+          (* An active element segment copies its elements into a table during instantiation, as specified by a table index and a constant expression defining an offset into that table. *)
+          let table_ref_type, table, _max =
+            let indice =
+              match indice with
+              | Raw indice -> Unsigned.UInt32.to_int indice
+              | Symbolic id -> (
+                if id = "TODO_table" then
+                  (* TODO ? *)
+                  max !curr_table 0
+                else
+                  match Hashtbl.find_opt seen_tables id with
+                  | None ->
+                    failwith
+                    @@ Format.sprintf "unbound table id (in elem): `%s`" id
+                  | Some indice -> indice )
+            in
+            tables.(indice)
+          in
+          let offset =
+            match offset with
+            | [] -> failwith "empty offset"
+            | [ I32_const n ] -> Int32.to_int n
+            | _ -> failwith "unhandled offset expr kind"
+          in
+          if table_ref_type <> e.type_ then failwith "invalid elem type";
+          List.iteri
+            (fun i expr ->
+              List.iteri
+                (fun _j -> function
+                  | Ref_func rf ->
+                    let pos = offset + i (* + j TODO *) in
+                    let rf =
+                      match rf with
+                      | Raw i -> i
+                      | Symbolic rf -> (
+                        match Hashtbl.find_opt seen_funcs rf with
+                        | None ->
+                          failwith @@ Format.sprintf "unbound func %s@." rf
+                        | Some rf -> Unsigned.UInt32.of_int rf )
+                    in
+                    table.(pos) <- Some (Ref_func (Raw rf))
+                  | I32_const _ as ins ->
+                    let pos = offset + i (* + j TODO *) in
+                    table.(pos) <- Some ins
+                  | i ->
+                    failwith
+                    @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i )
+                expr )
+            e.init
+        | Elem_declarative ->
+          (* A declarative element segment is not available at runtime but merely serves to forward-declare references that are formed in code with instructions like ref.func. *)
+          ()
+      end
+      | _ -> () )
+    fields;
 
   let funcs =
     Array.of_list @@ List.rev
@@ -209,10 +287,38 @@ let mk_module m =
           | If_else (bt, e1, e2) -> If_else (bt, expr e1, expr e2)
           | Loop (bt, e) -> Loop (bt, expr e)
           | Block (bt, e) -> Block (bt, expr e)
+          | Call_indirect (tbl_i, typ_i) ->
+            let typ_i =
+              match typ_i with
+              | FTId i -> (
+                let i =
+                  match i with
+                  | Raw i -> Unsigned.UInt32.to_int i
+                  | Symbolic i -> (
+                    match Hashtbl.find_opt seen_types i with
+                    | None ->
+                      failwith @@ Format.sprintf "unbound type indice $%s" i
+                    | Some i -> i )
+                in
+                match Hashtbl.find_opt types i with
+                | None -> failwith @@ Format.sprintf "unbound type indice %d" i
+                | Some t -> FTFt t )
+              | FTFt _ as t -> t
+            in
+            let tbl_i =
+              match tbl_i with
+              | Raw i -> Raw i
+              | Symbolic tbl_i -> (
+                match Hashtbl.find_opt seen_tables tbl_i with
+                | None ->
+                  failwith @@ Format.sprintf "unbound table id $%s" tbl_i
+                | Some i -> Raw (Unsigned.UInt32.of_int i) )
+            in
+            Call_indirect (tbl_i, typ_i)
           | i -> i
         and expr e = List.map body e in
         let body = expr f.body in
-        { f with body } )
+        { f with body; type_f } )
       funcs
   in
 

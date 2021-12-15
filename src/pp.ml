@@ -234,14 +234,12 @@ let instr fmt = function
   | Call id -> Format.fprintf fmt "call %a" indice id
   | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
 
-let body fmt instrs =
+let expr fmt instrs =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline instr fmt instrs
 
 let func fmt (f : func) =
   (* TODO: typeuse ? *)
-  Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals body f.body
-
-let expr fmt _e = Format.fprintf fmt "<expr>"
+  Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals expr f.body
 
 let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
@@ -289,7 +287,16 @@ let data_mode fmt = function
 
 let data fmt d = Format.fprintf fmt {|(data %a "%s")|} data_mode d.mode d.init
 
-let elem fmt _e = Format.fprintf fmt "(elem <TODO>)"
+let elem_mode fmt = function
+  | Elem_passive -> Format.fprintf fmt "PASSIVE"
+  | Elem_active (i, e) ->
+    Format.fprintf fmt "ACTIVE <i: `%a`> <e: `%a`" indice i expr e
+  | Elem_declarative -> Format.fprintf fmt "DECLARATIVE"
+
+let elem fmt e =
+  Format.fprintf fmt "(elem <TYPE %a> <INIT %a> <MODE %a>)" ref_type e.type_
+    (Format.pp_print_list expr)
+    e.init elem_mode e.mode
 
 let module_field fmt = function
   | MType t -> type_ fmt t

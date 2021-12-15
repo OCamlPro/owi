@@ -406,11 +406,22 @@ let rec exec_instr env module_indice locals stack instr =
       | None -> failwith @@ Format.sprintf "unbound table at indice %d" fun_i
       | Some i -> i
     in
+    let i =
+      match i with
+      | Ref_func id -> id
+      | _ -> failwith "invalid type, expected Ref_func"
+    in
     let func = module_.funcs.(indice_to_int i) in
-    if func.type_f <> typ_i then failwith "Invalid Call_indirect type";
+    if func.type_f <> typ_i then
+      failwith
+      @@ Format.asprintf "Invalid Call_indirect type: `%a` <> `%a`"
+           Pp.func_type_bis func.type_f Pp.func_type_bis typ_i;
     let param_type =
       match func.type_f with
-      | FTId _i -> failwith "internal error: FTId was not simplified"
+      | FTId i ->
+        failwith
+        @@ Format.asprintf "internal error: FTId `%a` was not simplified"
+             Pp.indice i
       | FTFt (p, _r) -> p
     in
     let args = Stack.pop_n stack (List.length param_type) in

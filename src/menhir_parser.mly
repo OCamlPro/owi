@@ -646,8 +646,10 @@ let elem ==
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
-  let id = Symbolic (Option.value id ~default:"TODO_table") in
+  let tbl_id = Option.value id ~default:"TODO_table" in
+  let id = Symbolic tbl_id in
   List.rev_map (function
+    | MTable (_id, tbl) -> MTable (Some tbl_id, tbl)
     | MExport e -> MExport { e with desc = Export_table id }
     | MElem e -> MElem { e with mode = Elem_active (id, [I32_const 0l]) }
     | field -> field
