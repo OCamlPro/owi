@@ -1,296 +1,30 @@
-module Lib = struct
-  type void = |
+let mantissa = 23
 
-  module Fun = struct
-    let id x = x
+let pos_nan = 0x7fc0_0000l
 
-    let curry f x y = f (x, y)
+let neg_nan = 0xffc0_0000l
 
-    let uncurry f (x, y) = f x y
+let bare_nan = 0x7f80_0000l
 
-    let rec repeat n f x =
-      if n = 0 then
-        ()
-      else (
-        f x;
-        repeat (n - 1) f x
-      )
-  end
+let to_hex_string = Printf.sprintf "%lx"
 
-  module Int = struct
-    let log2 n =
-      if n <= 0 then failwith "log2";
-      let rec loop acc n =
-        if n = 1 then
-          acc
-        else
-          loop (acc + 1) (n lsr 1)
-      in
-      loop 0 n
+type t = Int32.t
 
-    let is_power_of_two n =
-      if n < 0 then failwith "is_power_of_two";
-      n <> 0 && n land (n - 1) = 0
-  end
+type bits = Int32.t
 
-  module String = struct
-    let implode cs =
-      let buf = Buffer.create 80 in
-      List.iter (Buffer.add_char buf) cs;
-      Buffer.contents buf
+let pos_inf = Int32.bits_of_float (1.0 /. 0.0)
 
-    let explode s =
-      let cs = ref [] in
-      for i = String.length s - 1 downto 0 do
-        cs := s.[i] :: !cs
-      done;
-      !cs
+let neg_inf = Int32.bits_of_float (-.(1.0 /. 0.0))
 
-    let split s c =
-      let len = String.length s in
-      let rec loop i =
-        if i > len then
-          []
-        else
-          let j =
-            try String.index_from s i c with
-            | Not_found -> len
-          in
-          String.sub s i (j - i) :: loop (j + 1)
-      in
-      loop 0
+let pos_nan = pos_nan
 
-    let breakup s n =
-      let rec loop i =
-        let len = min n (String.length s - i) in
-        if len = 0 then
-          []
-        else
-          String.sub s i len :: loop (i + len)
-      in
-      loop 0
+let neg_nan = neg_nan
 
-    let rec find_from_opt f s i =
-      if i = String.length s then
-        None
-      else if f s.[i] then
-        Some i
-      else
-        find_from_opt f s (i + 1)
-  end
+let bare_nan = bare_nan
 
-  module List = struct
-    let rec make n x = make' n x []
+let of_float = Int32.bits_of_float
 
-    and make' n x xs =
-      if n = 0 then
-        xs
-      else
-        make' (n - 1) x (x :: xs)
-
-    let rec table n f = table' n f []
-
-    and table' n f xs =
-      if n = 0 then
-        xs
-      else
-        table' (n - 1) f (f (n - 1) :: xs)
-
-    let rec take n xs =
-      match (n, xs) with
-      | 0, _ -> []
-      | n, x :: xs' when n > 0 -> x :: take (n - 1) xs'
-      | _ -> failwith "take"
-
-    let rec drop n xs =
-      match (n, xs) with
-      | 0, _ -> xs
-      | n, _ :: xs' when n > 0 -> drop (n - 1) xs'
-      | _ -> failwith "drop"
-
-    let rec last = function
-      | [ x ] -> x
-      | _ :: xs -> last xs
-      | [] -> failwith "last"
-
-    let rec split_last = function
-      | [ x ] -> ([], x)
-      | x :: xs ->
-        let ys, y = split_last xs in
-        (x :: ys, y)
-      | [] -> failwith "split_last"
-
-    let rec index_where p xs = index_where' p xs 0
-
-    and index_where' p xs i =
-      match xs with
-      | [] -> None
-      | x :: _xs' when p x -> Some i
-      | _x :: xs' -> index_where' p xs' (i + 1)
-
-    let index_of x = index_where (( = ) x)
-
-    let rec map_filter f = function
-      | [] -> []
-      | x :: xs -> (
-        match f x with
-        | None -> map_filter f xs
-        | Some y -> y :: map_filter f xs )
-
-    let rec concat_map f = function
-      | [] -> []
-      | x :: xs -> f x @ concat_map f xs
-
-    let rec pairwise f = function
-      | [] -> []
-      | x1 :: x2 :: xs -> f x1 x2 :: pairwise f xs
-      | _ -> failwith "pairwise"
-  end
-
-  module List32 = struct
-    let rec make n x = make' n x []
-
-    and make' n x xs =
-      if n = 0l then
-        xs
-      else
-        make' (Int32.sub n 1l) x (x :: xs)
-
-    let rec length xs = length' xs 0l
-
-    and length' xs n =
-      match xs with
-      | [] -> n
-      | _ :: xs' when n < Int32.max_int -> length' xs' (Int32.add n 1l)
-      | _ -> failwith "length"
-
-    let rec nth xs n =
-      match (n, xs) with
-      | 0l, x :: _ -> x
-      | n, _ :: xs' when n > 0l -> nth xs' (Int32.sub n 1l)
-      | _ -> failwith "nth"
-
-    let rec take n xs =
-      match (n, xs) with
-      | 0l, _ -> []
-      | n, x :: xs' when n > 0l -> x :: take (Int32.sub n 1l) xs'
-      | _ -> failwith "take"
-
-    let rec drop n xs =
-      match (n, xs) with
-      | 0l, _ -> xs
-      | n, _ :: xs' when n > 0l -> drop (Int32.sub n 1l) xs'
-      | _ -> failwith "drop"
-
-    let rec mapi f xs = mapi' f 0l xs
-
-    and mapi' f i = function
-      | [] -> []
-      | x :: xs -> f i x :: mapi' f (Int32.add i 1l) xs
-  end
-
-  module Array32 = struct
-    let make n x =
-      if n < 0l || Int64.of_int32 n > Int64.of_int max_int then
-        raise (Invalid_argument "Array32.make");
-      Array.make (Int32.to_int n) x
-
-    let length a = Int32.of_int (Array.length a)
-
-    let index_of_int32 i =
-      if i < 0l || Int64.of_int32 i > Int64.of_int max_int then
-        -1
-      else
-        Int32.to_int i
-
-    let get a i = Array.get a (index_of_int32 i)
-
-    let set a i x = Array.set a (index_of_int32 i) x
-
-    let blit a1 i1 a2 i2 n =
-      Array.blit a1 (index_of_int32 i1) a2 (index_of_int32 i2)
-        (index_of_int32 n)
-  end
-
-  module Bigarray = struct
-    open Bigarray
-
-    module Array1_64 = struct
-      let create kind layout n =
-        if n < 0L || n > Int64.of_int max_int then
-          raise (Invalid_argument "Bigarray.Array1_64.create");
-        Array1.create kind layout (Int64.to_int n)
-
-      let dim a = Int64.of_int (Array1.dim a)
-
-      let index_of_int64 i =
-        if i < 0L || i > Int64.of_int max_int then
-          -1
-        else
-          Int64.to_int i
-
-      let get a i = Array1.get a (index_of_int64 i)
-
-      let set a i x = Array1.set a (index_of_int64 i) x
-
-      let sub a i n = Array1.sub a (index_of_int64 i) (index_of_int64 n)
-    end
-  end
-
-  module Option = struct
-    let get o x =
-      match o with
-      | Some y -> y
-      | None -> x
-
-    let force o =
-      match o with
-      | Some y -> y
-      | None -> raise (Invalid_argument "Option.force")
-
-    let map f = function
-      | Some x -> Some (f x)
-      | None -> None
-
-    let app f = function
-      | Some x -> f x
-      | None -> ()
-  end
-end
-
-module Rep = struct
-  include Int32
-
-  let mantissa = 23
-
-  let pos_nan = 0x7fc0_0000l
-
-  let neg_nan = 0xffc0_0000l
-
-  let bare_nan = 0x7f80_0000l
-
-  let to_hex_string = Printf.sprintf "%lx"
-end
-
-let () = assert (Rep.mantissa <= 52)
-
-type t = Rep.t
-
-type bits = Rep.t
-
-let pos_inf = Rep.bits_of_float (1.0 /. 0.0)
-
-let neg_inf = Rep.bits_of_float (-.(1.0 /. 0.0))
-
-let pos_nan = Rep.pos_nan
-
-let neg_nan = Rep.neg_nan
-
-let bare_nan = Rep.bare_nan
-
-let of_float = Rep.bits_of_float
-
-let to_float = Rep.float_of_bits
+let to_float = Int32.float_of_bits
 
 let of_bits x = x
 
@@ -299,14 +33,14 @@ let to_bits x = x
 let is_inf x = x = pos_inf || x = neg_inf
 
 let is_nan x =
-  let xf = Rep.float_of_bits x in
+  let xf = Int32.float_of_bits x in
   xf <> xf
 
 (*
  * When the result of an arithmetic operation is NaN, the most significant
  * bit of the significand field is set.
  *)
-let canonicalize_nan x = Rep.logor x Rep.pos_nan
+let canonicalize_nan x = Int32.logor x pos_nan
 
 (*
  * When the result of a binary operation is NaN, the resulting NaN is computed
@@ -326,7 +60,7 @@ let determine_binary_nan x y =
     else if is_nan y then
       y
     else
-      Rep.pos_nan
+      pos_nan
   in
   canonicalize_nan nan
 
@@ -345,7 +79,7 @@ let determine_unary_nan x =
     if is_nan x then
       x
     else
-      Rep.pos_nan
+      pos_nan
   in
   canonicalize_nan nan
 
@@ -435,7 +169,7 @@ let min x y =
   let yf = to_float y in
   (* min -0 0 is -0 *)
   if xf = yf then
-    Rep.logor x y
+    Int32.logor x y
   else if xf < yf then
     x
   else if xf > yf then
@@ -448,7 +182,7 @@ let max x y =
   let yf = to_float y in
   (* max -0 0 is 0 *)
   if xf = yf then
-    Rep.logand x y
+    Int32.logand x y
   else if xf > yf then
     x
   else if xf < yf then
@@ -457,11 +191,11 @@ let max x y =
     determine_binary_nan x y
 
 (* abs, neg, copysign are purely bitwise operations, even on NaN values *)
-let abs x = Rep.logand x Rep.max_int
+let abs x = Int32.logand x Int32.max_int
 
-let neg x = Rep.logxor x Rep.min_int
+let neg x = Int32.logxor x Int32.min_int
 
-let copysign x y = Rep.logor (abs x) (Rep.logand y Rep.min_int)
+let copysign x y = Int32.logor (abs x) (Int32.logand y Int32.min_int)
 
 let eq x y = to_float x = to_float y
 
@@ -548,10 +282,10 @@ let float_of_string_prevent_double_rounding s =
     (* Else, bit twiddling to see what rounding to target precision will do. *)
     let open Int64 in
     let bits = bits_of_float z in
-    let lsb = shift_left 1L (52 - Rep.mantissa) in
+    let lsb = shift_left 1L (52 - mantissa) in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
     let tie = shift_right lsb 1 in
-    let mask = lognot (shift_left (-1L) (52 - Rep.mantissa)) in
+    let mask = lognot (shift_left (-1L) (52 - mantissa)) in
     (* If we have no tie, we are good. *)
     if logand bits mask <> tie then
       z
@@ -599,15 +333,15 @@ let of_signless_string s =
   else if s = "nan" then
     pos_nan
   else if String.length s > 6 && String.sub s 0 6 = "nan:0x" then
-    let x = Rep.of_string (String.sub s 4 (String.length s - 4)) in
-    if x = Rep.zero then
+    let x = Int32.of_string (String.sub s 4 (String.length s - 4)) in
+    if x = Int32.zero then
       raise (Failure "nan payload must not be zero")
-    else if Rep.logand x bare_nan <> Rep.zero then
+    else if Int32.logand x bare_nan <> Int32.zero then
       raise (Failure "nan payload must not overlap with exponent bits")
-    else if x < Rep.zero then
+    else if x < Int32.zero then
       raise (Failure "nan payload must not overlap with sign bit")
     else
-      Rep.logor x bare_nan
+      Int32.logor x bare_nan
   else
     let s' = String.concat "" (String.split_on_char '_' s) in
     let x = of_float (float_of_string_prevent_double_rounding s') in
@@ -641,31 +375,40 @@ let rec add_digits buf s i j k n =
     add_digits buf s (i + 1) j ((k + n - 1) mod n) n
   end
 
-let group_digits is_digit n s =
-  let isnt_digit c = not (is_digit c) in
-  let len = String.length s in
-  let x = Lib.Option.get (Lib.String.find_from_opt (( = ) 'x') s 0) 0 in
-  let mant = Lib.Option.get (Lib.String.find_from_opt is_digit s x) len in
-  let point = Lib.Option.get (Lib.String.find_from_opt isnt_digit s mant) len in
-  let frac = Lib.Option.get (Lib.String.find_from_opt is_digit s point) len in
-  let exp = Lib.Option.get (Lib.String.find_from_opt isnt_digit s frac) len in
-  let buf = Buffer.create (len * (n + 1) / n) in
-  Buffer.add_substring buf s 0 mant;
-  add_digits buf s mant point (((point - mant) mod n) + n) n;
-  Buffer.add_substring buf s point (frac - point);
-  add_digits buf s frac exp n n;
-  Buffer.add_substring buf s exp (len - exp);
-  Buffer.contents buf
+let group_digits =
+  let rec find_from_opt f s i =
+    if i = String.length s then
+      None
+    else if f s.[i] then
+      Some i
+    else
+      find_from_opt f s (i + 1)
+  in
+  fun is_digit n s ->
+    let isnt_digit c = not (is_digit c) in
+    let len = String.length s in
+    let x = Option.value (find_from_opt (( = ) 'x') s 0) ~default:0 in
+    let mant = Option.value (find_from_opt is_digit s x) ~default:len in
+    let point = Option.value (find_from_opt isnt_digit s mant) ~default:len in
+    let frac = Option.value (find_from_opt is_digit s point) ~default:len in
+    let exp = Option.value (find_from_opt isnt_digit s frac) ~default:len in
+    let buf = Buffer.create (len * (n + 1) / n) in
+    Buffer.add_substring buf s 0 mant;
+    add_digits buf s mant point (((point - mant) mod n) + n) n;
+    Buffer.add_substring buf s point (frac - point);
+    add_digits buf s frac exp n n;
+    Buffer.add_substring buf s exp (len - exp);
+    Buffer.contents buf
 
 let to_string' convert is_digit n x =
-  ( if x < Rep.zero then
+  ( if x < Int32.zero then
     "-"
   else
     "" )
   ^
   if is_nan x then
-    let payload = Rep.logand (abs x) (Rep.lognot bare_nan) in
-    "nan:0x" ^ group_digits is_hex_digit 4 (Rep.to_hex_string payload)
+    let payload = Int32.logand (abs x) (Int32.lognot bare_nan) in
+    "nan:0x" ^ group_digits is_hex_digit 4 (to_hex_string payload)
   else
     let s = convert (to_float (abs x)) in
     group_digits is_digit n
