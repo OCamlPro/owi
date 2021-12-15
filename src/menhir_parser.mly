@@ -37,6 +37,8 @@ let f64 s =
     (* TODO *)
     Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `nan` instead)@." s;
     Float.nan
+    
+let f32 = f64
 
 let dumb_indice = Symbolic "_dumb_indice_todo_"
 
@@ -799,8 +801,8 @@ let const ==
     match num_type with
     | I32 -> Const_I32 (i32 num)
     | I64 -> Const_I64 (i64 num)
-    | F32 -> Const_F32 (Float.of_string num)
-    | F64 -> Const_F64 (Float.of_string num)
+    | F32 -> Const_F32 (f32 num)
+    | F64 -> Const_F64 (f64 num)
   }
   | REF; DOT; NULL; ~ = ref_kind; <Const_null>
 

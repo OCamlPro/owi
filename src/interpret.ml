@@ -491,7 +491,7 @@ let exec_assert env = function
            results_expected results_got
     in
     if not eq then begin
-      Format.eprintf "assert_return failed !@.expected: `%a`@.got: `%a`@."
+      Format.eprintf "assert_return failed !@.expected: `%a`@.got     : `%a`@."
         (Format.pp_print_list Pp.result)
         results_expected Pp.consts results_got;
       exit 1

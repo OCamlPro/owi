@@ -191,9 +191,10 @@ let mk_module m =
           List.iteri
             (fun i expr ->
               List.iteri
-                (fun _j -> function
+                (fun _j ->
+                  let pos = offset + i (* + j TODO *) in
+                  function
                   | Ref_func rf ->
-                    let pos = offset + i (* + j TODO *) in
                     let rf =
                       match rf with
                       | Raw i -> i
@@ -204,9 +205,7 @@ let mk_module m =
                         | Some rf -> Unsigned.UInt32.of_int rf )
                     in
                     table.(pos) <- Some (Ref_func (Raw rf))
-                  | I32_const _ as ins ->
-                    let pos = offset + i (* + j TODO *) in
-                    table.(pos) <- Some ins
+                  | (I32_const _ | Ref_null _) as ins -> table.(pos) <- Some ins
                   | i ->
                     failwith
                     @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i )
