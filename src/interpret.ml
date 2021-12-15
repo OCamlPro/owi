@@ -39,9 +39,9 @@ let exec_iunop stack nn op =
     Stack.push_i64_of_int stack res
 
 let exec_funop stack nn op =
-  let open Float in
   match nn with
   | S32 ->
+    let open Float32 in
     let f = Stack.pop_f32 stack in
     let res =
       match op with
@@ -55,6 +55,7 @@ let exec_funop stack nn op =
     in
     Stack.push_f32 stack res
   | S64 ->
+    let open Float in
     let f = Stack.pop_f64 stack in
     let res =
       match op with
@@ -110,7 +111,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
   | S32 ->
     let f1, f2 = Stack.pop2_f32 stack in
     Stack.push_f32 stack
-      (let open Float in
+      (let open Float32 in
       match op with
       | Add -> add f1 f2
       | Sub -> sub f1 f2
@@ -118,7 +119,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2)
+      | Copysign -> copysign f1 f2)
   | S64 ->
     let f1, f2 = Stack.pop2_f64 stack in
     Stack.push_f64 stack
@@ -201,7 +202,7 @@ let init_local (_id, t) =
   match t with
   | Num_type I32 -> Const_I32 0l
   | Num_type I64 -> Const_I64 0L
-  | Num_type F32 -> Const_F32 0.
+  | Num_type F32 -> Const_F32 Float32.zero
   | Num_type F64 -> Const_F64 0.
   | Ref_type rt -> Const_null rt
 
@@ -282,7 +283,7 @@ let rec exec_instr env module_indice locals stack instr =
     match max with
     | None ->
       mem := Bytes.extend !mem 0 delta;
-      Stack.push_i32_of_int stack old_size
+      Stack.push_i32_of_int stack (old_size / page_size)
     | Some max ->
       if old_size + delta > max * page_size then
         Stack.push_i32 stack (-1l)
@@ -307,7 +308,10 @@ let rec exec_instr env module_indice locals stack instr =
         o1
       else
         o2 )
-  | Local_tee _ -> failwith "TODO Local_tee"
+  | Local_tee i ->
+    let v = Stack.pop stack in
+    locals.(indice_to_int i) <- v;
+    Stack.push stack v
   | Global_get _ -> failwith "TODO Global_get"
   | Global_set _ -> failwith "TODO Global_set"
   | Table_get _ -> failwith "TODO Table_get"
@@ -357,7 +361,27 @@ let rec exec_instr env module_indice locals stack instr =
         raise (Trap "out of bounds memory access");
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
-  | F_load (_, _) -> failwith "TODO F_load"
+  | F_load (nn, { offset; align }) -> (
+    let offset = Unsigned.UInt32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem = !mem in
+    (* TODO: use align *)
+    ignore align;
+    let pos = Stack.pop_i32_to_int stack in
+    let offset = pos + offset in
+    match nn with
+    | S32 ->
+      if Bytes.length mem < offset + 4 || pos < 0 then
+        raise (Trap "out of bounds memory access");
+      let res = Bytes.get_int32_le mem offset in
+      let res = Float32.of_bits res in
+      Stack.push_f32 stack res
+    | S64 ->
+      if Bytes.length mem < offset + 8 || pos < 0 then
+        raise (Trap "out of bounds memory access");
+      let res = Bytes.get_int64_le mem offset in
+      let res = Int64.float_of_bits res in
+      Stack.push_f64 stack res )
   | I_store (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
@@ -447,12 +471,8 @@ let rec exec_instr env module_indice locals stack instr =
     let i =
       match a.(fun_i) with
       | None -> failwith @@ Format.sprintf "unbound table at indice %d" fun_i
-      | Some i -> i
-    in
-    let i =
-      match i with
-      | Ref_func id -> id
-      | _ -> failwith "invalid type, expected Ref_func"
+      | Some (Ref_func id) -> id
+      | Some _r -> failwith "invalid type, expected Ref_func"
     in
     let func = module_.funcs.(indice_to_int i) in
     if func.type_f <> typ_i then
@@ -518,6 +538,11 @@ let exec_action env = function
 
 let compare_result_const result const =
   match result with
+  | Result_const (Const_F64 f) -> begin
+    match const with
+    | Const_F64 f2 -> Float.equal f f2
+    | _ -> false
+  end
   | Result_const c -> const = c
   | Result_func_ref -> failwith "TODO (compare_result_const)"
   | Result_extern_ref -> failwith "TODO (compare_result_const)"

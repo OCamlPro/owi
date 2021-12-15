@@ -38,7 +38,13 @@ let f64 s =
     Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `nan` instead)@." s;
     Float.nan
     
-let f32 = f64
+let f32 s =
+  try Float32.of_string s
+  with Failure _ ->
+    (* TODO *)
+    Format.ifprintf Format.err_formatter "error: f32_of_string: `%s` (using `pos_nan` instead)@." s;
+    Float32.pos_nan
+    
 
 let dumb_indice = Symbolic "_dumb_indice_todo_"
 
@@ -265,7 +271,7 @@ let plain_instr :=
   | ELEM; DOT; DROP; ~ = indice; <Elem_drop>
   | I32; DOT; CONST; n = NUM; { I32_const (i32 n) }
   | I64; DOT; CONST; n = NUM; { I64_const (i64 n) }
-  | F32; DOT; CONST; n = NUM; { F32_const (f64 n) }
+  | F32; DOT; CONST; n = NUM; { F32_const (f32 n) }
   | F64; DOT; CONST; n = NUM; { F64_const (f64 n) }
   | ~ = inn; DOT; ~ = iunop; <I_unop>
   | ~ = fnn; DOT; ~ = funop; <F_unop>

@@ -2,6 +2,7 @@
  (name woi)
  (modules
   check
+  float32
   handle
   interpret
   lexer

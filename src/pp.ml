@@ -14,7 +14,7 @@ let i32 fmt i = Signed.Int32.pp fmt i
 
 let i64 fmt i = Signed.Int64.pp fmt i
 
-let f32 fmt f = Format.fprintf fmt "%f" f
+let f32 fmt f = Format.fprintf fmt "%s" (Float32.to_string f)
 
 let f64 fmt f = Format.fprintf fmt "%f" f
 

@@ -32,7 +32,7 @@ type nonrec i32 = s32
 type nonrec i64 = s64
 
 (* TODO: Float32 module ? *)
-type nonrec f32 = Float.t
+type nonrec f32 = Float32.t
 
 type nonrec f64 = Float.t
 
