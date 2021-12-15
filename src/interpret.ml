@@ -190,6 +190,8 @@ let exec_frelop stack nn (op : Types.frelop) =
 
 exception Branch of int
 
+exception Trap of string
+
 let indice_to_int = function
   | Raw i -> Unsigned.UInt32.to_int i
   | Symbolic id ->
@@ -201,8 +203,7 @@ let init_local (_id, t) =
   | Num_type I64 -> Const_I64 0L
   | Num_type F32 -> Const_F32 0.
   | Num_type F64 -> Const_F64 0.
-  | Ref_type Func_ref -> Const_null Func_ref
-  | Ref_type Extern_ref -> Const_null Extern_ref
+  | Ref_type rt -> Const_null rt
 
 let rec exec_instr env module_indice locals stack instr =
   Format.printf "stack        : [ %a ]@." Stack.pp stack;
@@ -317,19 +318,43 @@ let rec exec_instr env module_indice locals stack instr =
   | Table_copy _ -> failwith "TODO Table_copy"
   | Table_init _ -> failwith "TODO Table_init"
   | Elem_drop _ -> failwith "TODO Elem_drop"
+  | I_load16 (nn, sx, { offset; align }) -> (
+    let offset = Unsigned.UInt32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem = !mem in
+    (* TODO: use align *)
+    ignore align;
+    let pos = Stack.pop_i32_to_int stack in
+    let offset = pos + offset in
+    if Bytes.length mem < offset + 2 || pos < 0 then
+      raise (Trap "out of bounds memory access");
+    let res =
+      ( if sx = S then
+        Bytes.get_int16_le
+      else
+        Bytes.get_uint16_le )
+        mem offset
+    in
+    match nn with
+    | S32 -> Stack.push_i32_of_int stack res
+    | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; align }) -> (
     let offset = Unsigned.UInt32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let offset = Stack.pop_i32_to_int stack + offset in
-    if Bytes.length mem <= offset then failwith "invalid_offset offset";
+    let pos = Stack.pop_i32_to_int stack in
+    let offset = pos + offset in
     match nn with
     | S32 ->
+      if Bytes.length mem < offset + 4 || pos < 0 then
+        raise (Trap "out of bounds memory access");
       let res = Bytes.get_int32_le mem offset in
       Stack.push_i32 stack res
     | S64 ->
+      if Bytes.length mem < offset + 8 || pos < 0 then
+        raise (Trap "out of bounds memory access");
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
   | F_load (_, _) -> failwith "TODO F_load"
@@ -344,7 +369,7 @@ let rec exec_instr env module_indice locals stack instr =
       let n = Stack.pop_i32 stack in
       let pos = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
-      if Bytes.length mem <= offset then failwith "invalid offset";
+      if Bytes.length mem < offset then failwith "invalid offset";
       Bytes.set_int32_le mem offset n
     | S64 ->
       let n = Stack.pop_i64 stack in
@@ -361,7 +386,8 @@ let rec exec_instr env module_indice locals stack instr =
     ignore align;
     let pos = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
-    if Bytes.length mem <= offset then failwith "invalid_offset offset";
+    if Bytes.length mem < offset + 1 || pos < 0 then
+      raise (Trap "out of bounds memory access");
     match nn with
     | S32 ->
       let res =
@@ -381,8 +407,25 @@ let rec exec_instr env module_indice locals stack instr =
           mem offset
       in
       Stack.push_i64_of_int stack res )
-  | I_load16 (_, _, _) -> failwith "TODO I_load16"
-  | I64_load32 (_, _) -> failwith "TODO I64_load32"
+  | I64_load32 (sx, { offset; align }) ->
+    let offset = Unsigned.UInt32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem = !mem in
+    (* TODO: use align *)
+    ignore align;
+    let pos = Stack.pop_i32_to_int stack in
+    let offset = pos + offset in
+    if Bytes.length mem < offset + 4 || pos < 0 then
+      raise (Trap "out of bounds memory access");
+    let res =
+      ( if sx = S then
+        Bytes.get_int32_le
+      else
+        (* TODO: why doesn't get_uint32_le exist ? *)
+        Bytes.get_int32_le )
+        mem offset
+    in
+    Stack.push_i64_of_int stack (Int32.to_int res)
   | I_store8 (_, _) -> failwith "TODO I_store8"
   | I_store16 (_, _) -> failwith "TODO I_store16"
   | I64_store32 _ -> failwith "TODO I64"
@@ -471,7 +514,7 @@ let exec_action env = function
   | Invoke_indice (i, f, args) ->
     let result = invoke env i f args in
     (env, result)
-  | Get _ -> failwith "not yet implemented"
+  | Get _ -> failwith "not yet implemented (exec_action)"
 
 let compare_result_const result const =
   match result with
@@ -481,6 +524,7 @@ let compare_result_const result const =
 
 let exec_assert env = function
   | SAssert_return (action, results_expected) ->
+    Format.printf "assert return...@.";
     (* TODO: why do we have to rev here, is it correct ? *)
     let results_expected = List.rev results_expected in
     let env, results_got = exec_action env action in
@@ -497,7 +541,23 @@ let exec_assert env = function
       exit 1
     end;
     env
-  | _ -> failwith "not yet implemented"
+  | SAssert_trap (action, expected) ->
+    Format.printf "assert trap...@.";
+    begin
+      try
+        let _env, _results = exec_action env action in
+        Format.eprintf "assert_trap failed !@.";
+        assert false
+      with
+      | Trap msg -> assert (msg = expected)
+    end;
+    env
+  | SAssert_malformed (_mod, _failure) -> (* TODO *) env
+  | SAssert_malformed_quote (_mod, _failure) -> (* TODO *) env
+  | SAssert_malformed_binary (_mod, _failure) -> (* TODO *) env
+  | SAssert_invalid (_mod, _failure) -> (* TODO *) env
+  | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
+  | SAssert_invalid_binary (_mod, _failure) -> (* TODO *) env
 
 let exec_register env name i =
   Hashtbl.replace env.registered_modules name i;
