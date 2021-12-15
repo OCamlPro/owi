@@ -69,6 +69,8 @@ let mk_module m =
   let seen_funcs = Hashtbl.create 512 in
   let exported_funcs = Hashtbl.create 512 in
 
+  let seen_memories = Hashtbl.create 512 in
+  let curr_memory = ref (-1) in
   let mem_max_size = ref None in
   let mem_bytes = ref (Bytes.create 0) in
 
@@ -108,7 +110,9 @@ let mk_module m =
           Hashtbl.replace exported_funcs name i
         | _ -> ()
       end
-      | MMem (_id, { min; max }) ->
+      | MMem (id, { min; max }) ->
+        incr curr_memory;
+        Option.iter (fun id -> Hashtbl.add seen_memories id !curr_memory) id;
         mem_max_size := Option.map Unsigned.UInt32.to_int max;
         mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * page_size)
       | MTable (id, ({ min; max }, rt)) ->
@@ -154,8 +158,37 @@ let mk_module m =
 
   let curr_table = ref (-1) in
 
+  let data_passive = ref [] in
+
   List.iter
     (function
+      | MData data -> begin
+        match data.mode with
+        | Data_passive ->
+          (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
+          data_passive := data.init :: !data_passive
+        | Data_active (indice, expr) ->
+          (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
+          let indice =
+            match indice with
+            | Raw i -> Unsigned.UInt32.to_int i
+            | Symbolic i -> (
+              match Hashtbl.find_opt seen_memories i with
+              | None -> failwith @@ Format.sprintf "unbound memory indice $%s" i
+              | Some i -> i )
+          in
+          if indice <> 0 then failwith "multiple memories are not supported yet";
+          let offset =
+            match expr with
+            | [] -> failwith "empty data offset"
+            | [ I32_const n ] -> Int32.to_int n
+            | _ -> failwith "TODO data offset"
+          in
+          let mem_bytes = !mem_bytes in
+          let len = String.length data.init in
+          let src = data.init in
+          Bytes.blit_string src 0 mem_bytes offset len
+      end
       | MTable _t -> incr curr_table
       | MElem e -> begin
         match e.mode with

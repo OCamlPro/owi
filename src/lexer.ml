@@ -204,7 +204,10 @@ let rec token buf =
     let id = String.sub id 1 (String.length id - 1) in
     ID id
   | num -> NUM (Utf8.lexeme buf)
-  | name -> NAME (Utf8.lexeme buf)
+  | name ->
+    let name = Utf8.lexeme buf in
+    let name = String.sub name 1 (String.length name - 2) in
+    NAME name
   | eof -> EOF
   (* | "" -> EOF *)
   | _ ->
