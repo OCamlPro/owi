@@ -10,8 +10,6 @@ let to_hex_string = Printf.sprintf "%lx"
 
 type t = Int32.t
 
-type bits = Int32.t
-
 let pos_inf = Int32.bits_of_float (1.0 /. 0.0)
 
 let neg_inf = Int32.bits_of_float (-.(1.0 /. 0.0))

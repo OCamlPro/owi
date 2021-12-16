@@ -197,22 +197,23 @@ let mk_module m =
           passive_elements := (e.type_, e.init) :: !passive_elements
         | Elem_active (indice, offset) ->
           (* An active element segment copies its elements into a table during instantiation, as specified by a table index and a constant expression defining an offset into that table. *)
-          let table_ref_type, table, _max =
+          let (table_ref_type, table, table_max_size), table_indice =
             let indice =
               match indice with
               | Raw indice -> Unsigned.UInt32.to_int indice
               | Symbolic id -> (
-                if id = "TODO_table" then
+                if id = "TODO_table" then begin
+                  Format.printf "this may fail...@.";
                   (* TODO ? *)
                   max !curr_table 0
-                else
+                end else
                   match Hashtbl.find_opt seen_tables id with
                   | None ->
                     failwith
                     @@ Format.sprintf "unbound table id (in elem): `%s`" id
                   | Some indice -> indice )
             in
-            tables.(indice)
+            (tables.(indice), indice)
           in
           let offset =
             match offset with
@@ -224,24 +225,37 @@ let mk_module m =
           List.iteri
             (fun i expr ->
               List.iteri
-                (fun _j ->
-                  let pos = offset + i (* + j TODO *) in
-                  function
-                  | Ref_func rf ->
-                    let rf =
-                      match rf with
-                      | Raw i -> i
-                      | Symbolic rf -> (
-                        match Hashtbl.find_opt seen_funcs rf with
-                        | None ->
-                          failwith @@ Format.sprintf "unbound func %s@." rf
-                        | Some rf -> Unsigned.UInt32.of_int rf )
-                    in
-                    table.(pos) <- Some (Ref_func (Raw rf))
-                  | (I32_const _ | Ref_null _) as ins -> table.(pos) <- Some ins
-                  | i ->
-                    failwith
-                    @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i )
+                (fun j x ->
+                  let new_elem =
+                    match x with
+                    | Ref_func rf ->
+                      let rf =
+                        match rf with
+                        | Raw i -> i
+                        | Symbolic rf -> (
+                          match Hashtbl.find_opt seen_funcs rf with
+                          | None ->
+                            failwith @@ Format.sprintf "unbound func %s@." rf
+                          | Some rf -> Unsigned.UInt32.of_int rf )
+                      in
+                      Some (Ref_func (Raw rf))
+                    | (I32_const _ | Ref_null _) as ins -> Some ins
+                    | i ->
+                      failwith
+                      @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i
+                  in
+                  let pos = offset + i + j in
+                  let len = Array.length table in
+                  if pos >= len then (
+                    let new_table = Array.make (pos + 1) None in
+                    for i = 0 to len - 1 do
+                      new_table.(i) <- table.(i)
+                    done;
+                    new_table.(pos) <- new_elem;
+                    tables.(table_indice) <-
+                      (table_ref_type, new_table, table_max_size)
+                  ) else
+                    table.(pos) <- new_elem )
                 expr )
             e.init
         | Elem_declarative ->

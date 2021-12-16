@@ -131,3 +131,13 @@ let pop_n =
 let pop s =
   try pop s with
   | Empty -> failwith "invalid type (pop)"
+
+let rec keep s n =
+  if n = 0 then
+    for _ = 0 to length s - 1 do
+      drop s
+    done
+  else
+    let x = pop s in
+    keep s (n - 1);
+    push s x

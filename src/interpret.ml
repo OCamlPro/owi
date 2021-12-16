@@ -466,11 +466,14 @@ let rec exec_instr env module_indice locals stack instr =
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i = Stack.pop_i32_to_int stack in
     let module_ = env.modules.(module_indice) in
-    let rt, a, _max = module_.tables.(indice_to_int tbl_i) in
+    let tbl_i = indice_to_int tbl_i in
+    let rt, a, _max = module_.tables.(tbl_i) in
     if rt <> Func_ref then failwith "wrong table type (expected Func_ref)";
+    if fun_i >= Array.length a then raise (Trap "undefined element");
     let i =
       match a.(fun_i) with
-      | None -> failwith @@ Format.sprintf "unbound table at indice %d" fun_i
+      | None ->
+        failwith @@ Format.sprintf "unbound function %d at table %d" fun_i tbl_i
       | Some (Ref_func id) -> id
       | Some _r -> failwith "invalid type, expected Ref_func"
     in
@@ -515,6 +518,12 @@ and exec_func env module_indice func args =
     | Branch -1 ->
       stack
   in
+  let return_type =
+    match func.type_f with
+    | FTId _id -> failwith "internal error"
+    | FTFt (_pt, rt) -> rt
+  in
+  Stack.keep stack (List.length return_type);
   Format.printf "stack        : [ %a ]@." Stack.pp result;
   Stack.to_list result
 
