@@ -69,6 +69,8 @@ let exec_funop stack nn op =
     in
     Stack.push_f64 stack res
 
+exception Trap of string
+
 let exec_ibinop stack nn (op : Types.ibinop) =
   match nn with
   | S32 ->
@@ -79,13 +81,32 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Add -> add n1 n2
       | Sub -> sub n1 n2
       | Mul -> mul n1 n2
-      | Div _s -> div n1 n2
-      | Rem _s -> failwith "TODO Rem"
-      | And -> failwith "TODO And"
-      | Or -> failwith "TODO Or"
-      | Xor -> failwith "TODO Xor"
-      | Shl -> failwith "TODO Shl"
-      | Shr _s -> failwith "TODO Shr"
+      | Div s -> begin
+        try
+          match s with
+          | S -> div n1 n2
+          | U -> unsigned_div n1 n2
+        with
+        | Division_by_zero -> raise (Trap "integer divide by zero")
+      end
+      | Rem s -> begin
+        try
+          match s with
+          | S -> rem n1 n2
+          | U -> unsigned_rem n1 n2
+        with
+        | Division_by_zero -> raise (Trap "integer divide by zero")
+      end
+      | And -> logand n1 n2
+      | Or -> logor n1 n2
+      | Xor -> logxor n1 n2
+      | Shl -> shift_left n1 (to_int n2)
+      | Shr s -> begin
+        let n2 = to_int n2 in
+        match s with
+        | S -> shift_right n1 n2
+        | U -> shift_right_logical n1 n2
+      end
       | Rotl -> failwith "TODO Rotl"
       | Rotr -> failwith "TODO Rotr")
   | S64 ->
@@ -96,13 +117,32 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Add -> add n1 n2
       | Sub -> sub n1 n2
       | Mul -> mul n1 n2
-      | Div _s -> div n1 n2
-      | Rem _s -> failwith "TODO Rem"
-      | And -> failwith "TODO And"
-      | Or -> failwith "TODO Or"
-      | Xor -> failwith "TODO Xor"
-      | Shl -> failwith "TODO Shl"
-      | Shr _s -> failwith "TODO Shr"
+      | Div s -> begin
+        try
+          match s with
+          | S -> div n1 n2
+          | U -> unsigned_div n1 n2
+        with
+        | Division_by_zero -> raise (Trap "integer divide by zero")
+      end
+      | Rem s -> begin
+        try
+          match s with
+          | S -> rem n1 n2
+          | U -> unsigned_rem n1 n2
+        with
+        | Division_by_zero -> raise (Trap "integer divide by zero")
+      end
+      | And -> logand n1 n2
+      | Or -> logor n1 n2
+      | Xor -> logxor n1 n2
+      | Shl -> shift_left n1 (to_int n2)
+      | Shr s -> begin
+        let n2 = to_int n2 in
+        match s with
+        | S -> shift_right n1 n2
+        | U -> shift_right_logical n1 n2
+      end
       | Rotl -> failwith "TODO Rotl"
       | Rotr -> failwith "TODO Rotr")
 
@@ -191,7 +231,7 @@ let exec_frelop stack nn (op : Types.frelop) =
 
 exception Branch of int
 
-exception Trap of string
+let fmt = Format.std_formatter
 
 let indice_to_int = function
   | Raw i -> Unsigned.UInt32.to_int i
@@ -207,8 +247,8 @@ let init_local (_id, t) =
   | Ref_type rt -> Const_null rt
 
 let rec exec_instr env module_indice locals stack instr =
-  Format.printf "stack        : [ %a ]@." Stack.pp stack;
-  Format.printf "running instr: %a@." Pp.instr instr;
+  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
+  Debug.debug fmt "running instr: %a@." Pp.instr instr;
   match instr with
   | Return -> raise Return
   | Nop -> ()
@@ -393,13 +433,15 @@ let rec exec_instr env module_indice locals stack instr =
       let n = Stack.pop_i32 stack in
       let pos = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
-      if Bytes.length mem < offset then failwith "invalid offset";
+      if Bytes.length mem < offset + 4 || pos < 0 then
+        raise (Trap "out of bounds memory access");
       Bytes.set_int32_le mem offset n
     | S64 ->
       let n = Stack.pop_i64 stack in
       let pos = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
-      if Bytes.length mem <= offset then failwith "invalid offset";
+      if Bytes.length mem < offset + 8 || pos < 0 then
+        raise (Trap "out of bounds memory access");
       Bytes.set_int64_le mem offset n )
   | F_store (_, _) -> failwith "TODO F_store"
   | I_load8 (nn, sx, { offset; align }) -> (
@@ -505,7 +547,7 @@ and exec_expr env module_indice locals stack e is_loop =
     e
 
 and exec_func env module_indice func args =
-  Format.printf "calling func : module %d, func %s@." module_indice
+  Debug.debug fmt "calling func : module %d, func %s@." module_indice
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
   let stack = Stack.create () in
@@ -524,11 +566,11 @@ and exec_func env module_indice func args =
     | FTFt (_pt, rt) -> rt
   in
   Stack.keep stack (List.length return_type);
-  Format.printf "stack        : [ %a ]@." Stack.pp result;
+  Debug.debug fmt "stack        : [ %a ]@." Stack.pp result;
   Stack.to_list result
 
 let invoke env module_indice f args =
-  Format.printf "invoke       : %s@." f;
+  Debug.debug fmt "invoke       : %s@." f;
   let module_ = env.modules.(module_indice) in
   let func =
     match Hashtbl.find_opt module_.exported_funcs f with
@@ -558,7 +600,7 @@ let compare_result_const result const =
 
 let exec_assert env = function
   | SAssert_return (action, results_expected) ->
-    Format.printf "assert return...@.";
+    Debug.debug fmt "assert return...@.";
     (* TODO: why do we have to rev here, is it correct ? *)
     let results_expected = List.rev results_expected in
     let env, results_got = exec_action env action in
@@ -568,19 +610,18 @@ let exec_assert env = function
            (fun result const -> compare_result_const result const)
            results_expected results_got
     in
-    if not eq then begin
-      Format.eprintf "assert_return failed !@.expected: `%a`@.got     : `%a`@."
+    if not eq then
+      Debug.debug Format.err_formatter
+        "assert_return failed !@.expected: `%a`@.got     : `%a`@."
         (Format.pp_print_list Pp.result)
         results_expected Pp.consts results_got;
-      exit 1
-    end;
     env
   | SAssert_trap (action, expected) ->
-    Format.printf "assert trap...@.";
+    Debug.debug fmt "assert trap...@.";
     begin
       try
         let _env, _results = exec_action env action in
-        Format.eprintf "assert_trap failed !@.";
+        Debug.debug Format.err_formatter "assert_trap failed !@.";
         assert false
       with
       | Trap msg -> assert (msg = expected)
@@ -604,8 +645,7 @@ let exec_module env i =
     (function
       | MFunc f ->
         incr curr_func;
-        let i = !curr_func in
-        Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
+        Option.iter (fun id -> Hashtbl.replace seen_funcs id !curr_func) f.id
       | _ -> () )
     env.modules.(i).fields;
   { env with last_module = Some i }

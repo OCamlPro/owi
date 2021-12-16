@@ -14,13 +14,7 @@ let () =
     error (Format.sprintf "file `%s` doesn't exist" file);
 
   let debug = argc = 3 && Sys.argv.(2) = "--debug" in
-
-  let print_debug =
-    if debug then
-      Format.fprintf
-    else
-      Format.ifprintf
-  in
+  if debug then Woi.Debug.enable ();
 
   let chan = open_in file in
 
@@ -32,7 +26,7 @@ let () =
 
   Woi.Check.script script;
 
-  print_debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
+  Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
 
   let script, modules = Woi.Simplify.script script in
 

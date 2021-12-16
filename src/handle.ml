@@ -20,9 +20,9 @@ let handle_syntax_error lexbuf _checkpoint =
     try W.Menhir_parser_errors.message (state checkpoint) with
     | Not_found -> "Syntax error"*)
   in
-  Format.eprintf "%s %a\n%!" message Types.pp_pos
-    (fst @@ Sedlexing.lexing_positions lexbuf);
-  exit 1
+  failwith
+  @@ Format.asprintf "%s %a\n%!" message Types.pp_pos
+       (fst @@ Sedlexing.lexing_positions lexbuf)
 
 let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
   match checkpoint with
@@ -48,6 +48,4 @@ let process lexbuf =
          (fst @@ Sedlexing.lexing_positions lexbuf) )
   with
   | Lexer.LexError (pos, msg) ->
-    Format.fprintf Format.err_formatter "lexing error : %s at %a%!" msg
-      Types.pp_pos pos;
-    exit 1
+    failwith @@ Format.asprintf "lexing error : %s at %a%!" msg Types.pp_pos pos

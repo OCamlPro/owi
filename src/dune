@@ -2,6 +2,7 @@
  (name woi)
  (modules
   check
+  debug
   float32
   handle
   interpret

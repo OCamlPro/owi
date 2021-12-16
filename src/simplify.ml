@@ -167,7 +167,7 @@ let mk_module m =
         | Data_passive ->
           (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
           data_passive := data.init :: !data_passive
-        | Data_active (indice, expr) ->
+        | Data_active (indice, expr) -> (
           (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
           let indice =
             match indice with
@@ -187,7 +187,14 @@ let mk_module m =
           let mem_bytes = !mem_bytes in
           let len = String.length data.init in
           let src = data.init in
-          Bytes.blit_string src 0 mem_bytes offset len
+          Debug.debug Format.std_formatter
+            "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
+             `%d` ; len = `%d`@."
+            src 0
+            (Bytes.to_string mem_bytes)
+            offset len;
+          try Bytes.blit_string src 0 mem_bytes offset len with
+          | Invalid_argument _ -> (* TODO *) () )
       end
       | MTable _t -> incr curr_table
       | MElem e -> begin
@@ -203,7 +210,7 @@ let mk_module m =
               | Raw indice -> Unsigned.UInt32.to_int indice
               | Symbolic id -> (
                 if id = "TODO_table" then begin
-                  Format.printf "this may fail...@.";
+                  Debug.debug Format.std_formatter "this may fail...@.";
                   (* TODO ? *)
                   max !curr_table 0
                 end else

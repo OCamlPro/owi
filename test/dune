@@ -2,5 +2,7 @@
  (name main)
  (modules main)
  (deps
-  (source_tree reference))
+  (source_tree reference)
+  (source_tree failing)
+  (source_tree passing))
  (libraries bos woi))
