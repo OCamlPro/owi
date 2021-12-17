@@ -122,7 +122,10 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Div s -> begin
         try
           match s with
-          | S -> div n1 n2
+          | S ->
+            if n1 = 0x8000000000000000L && n2 = -1L then
+              raise (Trap "integer overflow");
+            div n1 n2
           | U -> unsigned_div n1 n2
         with
         | Division_by_zero -> raise (Trap "integer divide by zero")
