@@ -702,10 +702,11 @@ let data ==
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
-    let id = Symbolic (Option.value id ~default:"TODO_memory") in
+    let mem_id = Symbolic (Option.value id ~default:"TODO_memory") in
     List.rev_map (function
-      | MExport e -> MExport { e with desc = Export_mem id }
-      | MData d -> MData { d with mode = Data_active (id, [I32_const 0l]) }
+      | MMem (_id, m) -> MMem (id, m)
+      | MExport e -> MExport { e with desc = Export_mem mem_id }
+      | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
       | field -> field
     ) memory_fields
   }

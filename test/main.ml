@@ -15,12 +15,10 @@ let test_file f =
       Format.printf "OK !@.";
       Ok ()
     with
-    | Failure s ->
-      Format.printf "FAILED !@.";
+    | Failure s
+    | Invalid_argument s ->
+      Format.printf "FAILED: `%s` !@." s;
       Error s
-    | _e ->
-      Format.printf "FAILED ! @.";
-      Error ""
   end
   | Error (`Msg e) ->
     Format.eprintf "error     : %s@." e;

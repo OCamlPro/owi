@@ -21,7 +21,7 @@ let handle_syntax_error lexbuf _checkpoint =
     | Not_found -> "Syntax error"*)
   in
   failwith
-  @@ Format.asprintf "%s %a\n%!" message Pp.pos
+  @@ Format.asprintf "%s %a" message Pp.pos
        (fst @@ Sedlexing.lexing_positions lexbuf)
 
 let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
