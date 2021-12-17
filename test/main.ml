@@ -1,3 +1,7 @@
+let count_total = ref 0
+
+let count_total_failed = ref 0
+
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
   match Bos.OS.File.read f with
@@ -29,10 +33,13 @@ let test_directory d =
   | Ok l ->
     List.iter
       (fun file ->
+        incr count_total;
         match test_file file with
         | Ok () -> ()
-        | Error _e -> incr count_error )
-      l;
+        | Error _e ->
+          incr count_error;
+          incr count_total_failed )
+      (List.sort compare l);
     if !count_error > 0 then
       Error (Format.sprintf "%d test failed !" !count_error)
     else
@@ -57,4 +64,5 @@ let () =
       Format.eprintf "error: %s@." e;
       has_error := true
   end;
+  Format.printf "results : %d / %d !@." !count_total_failed !count_total;
   if !has_error then exit 1

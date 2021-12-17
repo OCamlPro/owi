@@ -104,7 +104,7 @@ let mk_module m =
         | Export_func indice ->
           let i =
             match indice with
-            | Raw i -> Unsigned.UInt32.to_int i
+            | Raw i -> Uint32.to_int i
             | Symbolic id -> begin
               match Hashtbl.find_opt seen_funcs id with
               | None ->
@@ -122,15 +122,13 @@ let mk_module m =
       | MMem (id, { min; max }) ->
         incr curr_memory;
         Option.iter (fun id -> Hashtbl.add seen_memories id !curr_memory) id;
-        mem_max_size := Option.map Unsigned.UInt32.to_int max;
-        mem_bytes := Bytes.create (Unsigned.UInt32.to_int min * page_size)
+        mem_max_size := Option.map Uint32.to_int max;
+        mem_bytes := Bytes.create (Uint32.to_int min * page_size)
       | MTable (id, ({ min; max }, rt)) ->
         incr curr_table;
         Option.iter (fun id -> Hashtbl.add seen_tables id !curr_table) id;
         let tbl =
-          ( rt
-          , Array.make (Unsigned.UInt32.to_int min) None
-          , Option.map Unsigned.UInt32.to_int max )
+          (rt, Array.make (Uint32.to_int min) None, Option.map Uint32.to_int max)
         in
         tables := tbl :: !tables
       | MType (id, t) -> (
@@ -157,7 +155,7 @@ let mk_module m =
                    | Ref_func (Symbolic id) -> begin
                      match Hashtbl.find_opt seen_funcs id with
                      | None -> failwith @@ Format.sprintf "unbound id %s" id
-                     | Some i -> Some (Ref_func (Raw (Unsigned.UInt32.of_int i)))
+                     | Some i -> Some (Ref_func (Raw (Uint32.of_int i)))
                    end
                    | e -> Some e ) )
                 *)
@@ -182,7 +180,7 @@ let mk_module m =
           (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
           let indice =
             match indice with
-            | Raw i -> Unsigned.UInt32.to_int i
+            | Raw i -> Uint32.to_int i
             | Symbolic i -> (
               match Hashtbl.find_opt seen_memories i with
               | None -> failwith @@ Format.sprintf "unbound memory indice $%s" i
@@ -218,7 +216,7 @@ let mk_module m =
           let (table_ref_type, table, table_max_size), table_indice =
             let indice =
               match indice with
-              | Raw indice -> Unsigned.UInt32.to_int indice
+              | Raw indice -> Uint32.to_int indice
               | Symbolic id -> (
                 if id = "TODO_table" then begin
                   Debug.debug Format.std_formatter "this may fail...@.";
@@ -249,7 +247,7 @@ let mk_module m =
                     | Ref_func rf ->
                       let rf =
                         match rf with
-                        | Raw i -> Unsigned.UInt32.to_int i
+                        | Raw i -> Uint32.to_int i
                         | Symbolic rf -> (
                           match Hashtbl.find_opt seen_funcs rf with
                           | None ->
@@ -303,7 +301,7 @@ let mk_module m =
           | FTId i -> (
             let i =
               match i with
-              | Raw i -> Unsigned.UInt32.to_int i
+              | Raw i -> Uint32.to_int i
               | Symbolic i -> (
                 match Hashtbl.find_opt seen_types i with
                 | None -> failwith @@ Format.sprintf "unbound type indice $%s" i
@@ -338,17 +336,17 @@ let mk_module m =
           | Call (Symbolic id) -> begin
             match Hashtbl.find_opt seen_funcs id with
             | None -> failwith @@ Format.sprintf "unbound func: %s" id
-            | Some i -> Call (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Call (Raw (Uint32.of_int i))
           end
           | Local_set (Symbolic id) -> begin
             match Hashtbl.find_opt local_tbl id with
             | None -> failwith @@ Format.sprintf "unbound local: %s" id
-            | Some i -> Local_set (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Local_set (Raw (Uint32.of_int i))
           end
           | Local_get (Symbolic id) -> begin
             match Hashtbl.find_opt local_tbl id with
             | None -> failwith @@ Format.sprintf "unbound local: %s" id
-            | Some i -> Local_get (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Local_get (Raw (Uint32.of_int i))
           end
           | If_else (bt, e1, e2) -> If_else (bt, expr e1, expr e2)
           | Loop (bt, e) -> Loop (bt, expr e)
@@ -359,7 +357,7 @@ let mk_module m =
               | FTId i -> (
                 let i =
                   match i with
-                  | Raw i -> Unsigned.UInt32.to_int i
+                  | Raw i -> Uint32.to_int i
                   | Symbolic i -> (
                     match Hashtbl.find_opt seen_types i with
                     | None ->
@@ -378,43 +376,43 @@ let mk_module m =
                 match Hashtbl.find_opt seen_tables tbl_i with
                 | None ->
                   failwith @@ Format.sprintf "unbound table id $%s" tbl_i
-                | Some i -> Raw (Unsigned.UInt32.of_int i) )
+                | Some i -> Raw (Uint32.of_int i) )
             in
             Call_indirect (tbl_i, typ_i)
           | Global_set (Symbolic id) -> begin
             match Hashtbl.find_opt seen_globals id with
             | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
-            | Some i -> Global_set (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Global_set (Raw (Uint32.of_int i))
           end
           | Global_get (Symbolic id) -> begin
             match Hashtbl.find_opt seen_globals id with
             | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
-            | Some i -> Global_get (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Global_get (Raw (Uint32.of_int i))
           end
           | Ref_func (Symbolic id) -> begin
             match Hashtbl.find_opt seen_funcs id with
             | None -> failwith @@ Format.sprintf "unbound func indice $%s" id
-            | Some i -> Ref_func (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Ref_func (Raw (Uint32.of_int i))
           end
           | Table_size (Symbolic id) -> begin
             match Hashtbl.find_opt seen_tables id with
             | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_size (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Table_size (Raw (Uint32.of_int i))
           end
           | Table_get (Symbolic id) -> begin
             match Hashtbl.find_opt seen_tables id with
             | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_get (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Table_get (Raw (Uint32.of_int i))
           end
           | Table_set (Symbolic id) -> begin
             match Hashtbl.find_opt seen_tables id with
             | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_set (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Table_set (Raw (Uint32.of_int i))
           end
           | Table_grow (Symbolic id) -> begin
             match Hashtbl.find_opt seen_tables id with
             | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_grow (Raw (Unsigned.UInt32.of_int i))
+            | Some i -> Table_grow (Raw (Uint32.of_int i))
           end
           | i -> i
         and expr e = List.map body e in

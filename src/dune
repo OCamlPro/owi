@@ -2,21 +2,27 @@
  (name woi)
  (modules
   check
+  convert
   debug
   float32
+  float64
   handle
+  int32
+  int64
   interpret
   lexer
   menhir_parser
   menhir_parser_errors
-  op
   pp
   simplify
   stack
-  types)
+  types
+  uint32)
  (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex)
  (preprocess
-  (pps sedlex.ppx)))
+  (pps sedlex.ppx))
+ (instrumentation
+  (backend bisect_ppx)))
 
 (executable
  (name woi)

@@ -4,9 +4,9 @@ val neg_nan : t
 
 val pos_nan : t
 
-val of_bits : Int32.t -> t
+val of_bits : Int64.t -> t
 
-val to_bits : t -> Int32.t
+val to_bits : t -> Int64.t
 
 val zero : t
 

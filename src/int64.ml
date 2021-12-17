@@ -1,14 +1,15 @@
-let i32_clz = Ocaml_intrinsics.Int32.count_leading_zeros
+include Stdlib.Int64
 
-let i64_clz = Ocaml_intrinsics.Int64.count_leading_zeros
+let clz = Ocaml_intrinsics.Int64.count_leading_zeros
 
-let i32_ctz = Ocaml_intrinsics.Int32.count_trailing_zeros
+let ctz = Ocaml_intrinsics.Int64.count_trailing_zeros
 
-let i64_ctz = Ocaml_intrinsics.Int64.count_trailing_zeros
+exception InvalidConversion
+
+exception Overflow
 
 (* Taken from Base *)
-let i64_popcnt =
-  let open Int64 in
+let popcnt =
   let ( + ) = add in
   let ( - ) = sub in
   let ( * ) = mul in
@@ -32,8 +33,27 @@ let i64_popcnt =
     (* sum the bit counts in the top byte and shift it down *)
     to_int ((x * h01) lsr 56)
 
-(* Taken from Base *)
-let i32_popcnt =
-  (* On 64-bit systems, this is faster than implementing using [int32] arithmetic. *)
-  let mask = 0xffff_ffffL in
-  fun [@inline] x -> i64_popcnt (Int64.logand (Int64.of_int32 x) mask)
+(*
+ * Unsigned comparison in terms of signed comparison.
+ *)
+let cmp_u x op y = op (add x min_int) (add y min_int)
+
+let eq x y = x = y
+
+let ne x y = x <> y
+
+let lt_s x y = x < y
+
+let lt_u x y = cmp_u x ( < ) y
+
+let le_s x y = x <= y
+
+let le_u x y = cmp_u x ( <= ) y
+
+let gt_s x y = x > y
+
+let gt_u x y = cmp_u x ( > ) y
+
+let ge_s x y = x >= y
+
+let ge_u x y = cmp_u x ( >= ) y

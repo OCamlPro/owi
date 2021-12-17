@@ -1,40 +1,11 @@
 let pp_pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
   Format.fprintf out "line %d:%d" pos_lnum (pos_cnum - pos_bol)
 
+exception Trap of string
+
 (** Structure *)
 
 (** Values *)
-
-type nonrec u8 = Unsigned.UInt8.t
-
-type nonrec u16 = Unsigned.UInt16.t
-
-type nonrec u32 = Unsigned.UInt32.t
-
-type nonrec u64 = Unsigned.UInt64.t
-
-(* TODO: no Int8 module ? *)
-type nonrec s8 = Signed.Int32.t
-
-(* TODO: no Int16 module ? *)
-type nonrec s16 = Signed.Int32.t
-
-type nonrec s32 = Signed.Int32.t
-
-type nonrec s64 = Signed.Int64.t
-
-type nonrec i8 = s8
-
-type nonrec i16 = s16
-
-type nonrec i32 = s32
-
-type nonrec i64 = s64
-
-(* TODO: Float32 module ? *)
-type nonrec f32 = Float32.t
-
-type nonrec f64 = Float.t
 
 (* TODO: this must be utf8 *)
 type nonrec name = string
@@ -49,14 +20,6 @@ type nonrec num_type =
   | I64
   | F32
   | F64
-
-let bit_width = function
-  | I32
-  | F32 ->
-    32
-  | I64
-  | F64 ->
-    64
 
 (* TODO: heap_type missing ? *)
 type nonrec ref_type =
@@ -79,8 +42,8 @@ type nonrec result_type = result_ list
 type nonrec func_type = param_type * result_type
 
 type nonrec limits =
-  { min : u32
-  ; max : u32 option
+  { min : Uint32.t
+  ; max : Uint32.t option
   }
 
 type nonrec mem_type = limits
@@ -169,12 +132,12 @@ type nonrec frelop =
   | Ge
 
 type indice =
-  | Raw of u32
+  | Raw of Uint32.t
   | Symbolic of id
 
 type memarg =
-  { offset : u32
-  ; align : u32
+  { offset : Uint32.t
+  ; align : Uint32.t
   }
 
 type block_type =
@@ -188,10 +151,10 @@ type func_type_bis =
 
 type instr =
   (* Numeric Instructions *)
-  | I32_const of i32
-  | I64_const of i64
-  | F32_const of f32
-  | F64_const of f64
+  | I32_const of Int32.t
+  | I64_const of Int64.t
+  | F32_const of Float32.t
+  | F64_const of Float64.t
   | I_unop of nn * iunop
   | F_unop of nn * funop
   | I_binop of nn * ibinop
@@ -351,10 +314,10 @@ type module_ =
   }
 
 type const =
-  | Const_I32 of i32
-  | Const_I64 of i64
-  | Const_F32 of f32
-  | Const_F64 of f64
+  | Const_I32 of Int32.t
+  | Const_I64 of Int64.t
+  | Const_F32 of Float32.t
+  | Const_F64 of Float64.t
   | Const_null of ref_type
   | Const_host of int
 

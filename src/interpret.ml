@@ -22,19 +22,21 @@ let exec_iunop stack nn op =
   | S32 ->
     let n = Stack.pop_i32 stack in
     let res =
+      let open Int32 in
       match op with
-      | Clz -> Op.i32_clz n
-      | Ctz -> Op.i32_ctz n
-      | Popcnt -> Op.i32_popcnt n
+      | Clz -> clz n
+      | Ctz -> ctz n
+      | Popcnt -> popcnt n
     in
     Stack.push_i32_of_int stack res
   | S64 ->
     let n = Stack.pop_i64 stack in
     let res =
+      let open Int64 in
       match op with
-      | Clz -> Op.i64_clz n
-      | Ctz -> Op.i64_ctz n
-      | Popcnt -> Op.i64_popcnt n
+      | Clz -> clz n
+      | Ctz -> ctz n
+      | Popcnt -> popcnt n
     in
     Stack.push_i64_of_int stack res
 
@@ -55,7 +57,7 @@ let exec_funop stack nn op =
     in
     Stack.push_f32 stack res
   | S64 ->
-    let open Float in
+    let open Float64 in
     let f = Stack.pop_f64 stack in
     let res =
       match op with
@@ -68,8 +70,6 @@ let exec_funop stack nn op =
       | Nearest -> failwith "TODO: exec_funop Nearest"
     in
     Stack.push_f64 stack res
-
-exception Trap of string
 
 let exec_ibinop stack nn (op : Types.ibinop) =
   match nn with
@@ -164,11 +164,11 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copysign f1 f2)
+      | Copysign -> copy_sign f1 f2)
   | S64 ->
     let f1, f2 = Stack.pop2_f64 stack in
     Stack.push_f64 stack
-      (let open Float in
+      (let open Float64 in
       match op with
       | Add -> add f1 f2
       | Sub -> sub f1 f2
@@ -239,16 +239,16 @@ exception Branch of int
 let fmt = Format.std_formatter
 
 let indice_to_int = function
-  | Raw i -> Unsigned.UInt32.to_int i
+  | Raw i -> Uint32.to_int i
   | Symbolic id ->
     failwith @@ Format.sprintf "interpreter internal error: unbound id %s" id
 
 let init_local (_id, t) =
   match t with
-  | Num_type I32 -> Const_I32 0l
-  | Num_type I64 -> Const_I64 0L
+  | Num_type I32 -> Const_I32 Int32.zero
+  | Num_type I64 -> Const_I64 Int64.zero
   | Num_type F32 -> Const_F32 Float32.zero
-  | Num_type F64 -> Const_F64 0.
+  | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
 let rec exec_instr env module_indice locals stack instr =
@@ -273,8 +273,40 @@ let rec exec_instr env module_indice locals stack instr =
   | I_extend16_s _n -> failwith "TODO exec_instr"
   | I64_extend32_s -> failwith "TODO exec_instr"
   | I32_wrap_i64 -> failwith "TODO exec_instr"
-  | I64_extend_i32 _s -> failwith "TODO exec_instr"
-  | I_trunc_f (_n, _n', _s) -> failwith "TODO exec_instr"
+  | I64_extend_i32 _s ->
+    let n = Stack.pop_i32 stack in
+    let n = Int64.of_int32 n in
+    Stack.push_i64 stack n
+  | I_trunc_f (n, n', s) -> (
+    match (n, n') with
+    | S32, S32 -> (
+      let f = Stack.pop_f32 stack in
+      Stack.push_i32 stack
+      @@
+      match s with
+      | S -> Convert.Int32.trunc_f32_s f
+      | U -> Convert.Int32.trunc_f32_u f )
+    | S32, S64 -> (
+      let f = Stack.pop_f64 stack in
+      Stack.push_i32 stack
+      @@
+      match s with
+      | S -> Convert.Int32.trunc_f64_s f
+      | U -> Convert.Int32.trunc_f64_u f )
+    | S64, S32 -> (
+      let f = Stack.pop_f32 stack in
+      Stack.push_i64 stack
+      @@
+      match s with
+      | S -> Convert.Int64.trunc_f32_s f
+      | U -> Convert.Int64.trunc_f32_u f )
+    | S64, S64 -> (
+      let f = Stack.pop_f64 stack in
+      Stack.push_i64 stack
+      @@
+      match s with
+      | S -> Convert.Int64.trunc_f64_s f
+      | U -> Convert.Int64.trunc_f64_u f ) )
   | I_trunc_sat_f (_n, _n', _s) -> failwith "TODO exec_instr"
   | F32_demote_f64 -> failwith "TODO exec_instr"
   | F64_promote_f32 -> failwith "TODO exec_instr"
@@ -425,7 +457,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Table_init _ -> failwith "TODO Table_init"
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
@@ -445,7 +477,7 @@ let rec exec_instr env module_indice locals stack instr =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; align }) -> (
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
@@ -464,7 +496,7 @@ let rec exec_instr env module_indice locals stack instr =
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
   | F_load (nn, { offset; align }) -> (
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
@@ -482,10 +514,10 @@ let rec exec_instr env module_indice locals stack instr =
       if Bytes.length mem < offset + 8 || pos < 0 then
         raise (Trap "out of bounds memory access");
       let res = Bytes.get_int64_le mem offset in
-      let res = Int64.float_of_bits res in
+      let res = Float64.of_bits res in
       Stack.push_f64 stack res )
   | I_store (nn, { offset; align }) -> (
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     ignore align;
@@ -507,7 +539,7 @@ let rec exec_instr env module_indice locals stack instr =
       Bytes.set_int64_le mem offset n )
   | F_store (_, _) -> failwith "TODO F_store"
   | I_load8 (nn, sx, { offset; align }) -> (
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
@@ -536,7 +568,7 @@ let rec exec_instr env module_indice locals stack instr =
       in
       Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; align }) ->
-    let offset = Unsigned.UInt32.to_int offset in
+    let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let mem = !mem in
     (* TODO: use align *)
@@ -650,11 +682,6 @@ let exec_action env = function
 
 let compare_result_const result const =
   match result with
-  | Result_const (Const_F64 f) -> begin
-    match const with
-    | Const_F64 f2 -> Float.equal f f2
-    | _ -> false
-  end
   | Result_const c -> const = c
   | Result_func_ref -> failwith "TODO (compare_result_const)"
   | Result_extern_ref -> failwith "TODO (compare_result_const)"

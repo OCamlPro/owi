@@ -1,18 +1,18 @@
-let mantissa = 23
+let mantissa = 52
 
-let pos_nan = 0x7fc0_0000l
+let pos_nan = 0x7ff8_0000_0000_0000L
 
-let neg_nan = 0xffc0_0000l
+let neg_nan = 0xfff8_0000_0000_0000L
 
-let bare_nan = 0x7f80_0000l
+let bare_nan = 0x7ff0_0000_0000_0000L
 
-let to_hex_string = Printf.sprintf "%lx"
+let to_hex_string = Printf.sprintf "%Lx"
 
-type t = Int32.t
+type t = Int64.t
 
-let pos_inf = Int32.bits_of_float (1.0 /. 0.0)
+let pos_inf = Int64.bits_of_float (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_float (-.(1.0 /. 0.0))
+let neg_inf = Int64.bits_of_float (-.(1.0 /. 0.0))
 
 let pos_nan = pos_nan
 
@@ -20,9 +20,9 @@ let neg_nan = neg_nan
 
 let bare_nan = bare_nan
 
-let of_float = Int32.bits_of_float
+let of_float = Int64.bits_of_float
 
-let to_float = Int32.float_of_bits
+let to_float = Int64.float_of_bits
 
 let of_bits x = x
 
@@ -31,14 +31,14 @@ let to_bits x = x
 let is_inf x = x = pos_inf || x = neg_inf
 
 let is_nan x =
-  let xf = Int32.float_of_bits x in
+  let xf = Int64.float_of_bits x in
   xf <> xf
 
 (*
  * When the result of an arithmetic operation is NaN, the most significant
  * bit of the significand field is set.
  *)
-let canonicalize_nan x = Int32.logor x pos_nan
+let canonicalize_nan x = Int64.logor x pos_nan
 
 (*
  * When the result of a binary operation is NaN, the resulting NaN is computed
@@ -167,7 +167,7 @@ let min x y =
   let yf = to_float y in
   (* min -0 0 is -0 *)
   if xf = yf then
-    Int32.logor x y
+    Int64.logor x y
   else if xf < yf then
     x
   else if xf > yf then
@@ -180,7 +180,7 @@ let max x y =
   let yf = to_float y in
   (* max -0 0 is 0 *)
   if xf = yf then
-    Int32.logand x y
+    Int64.logand x y
   else if xf > yf then
     x
   else if xf < yf then
@@ -189,11 +189,11 @@ let max x y =
     determine_binary_nan x y
 
 (* abs, neg, copysign are purely bitwise operations, even on NaN values *)
-let abs x = Int32.logand x Int32.max_int
+let abs x = Int64.logand x Int64.max_int
 
-let neg x = Int32.logxor x Int32.min_int
+let neg x = Int64.logxor x Int64.min_int
 
-let copy_sign x y = Int32.logor (abs x) (Int32.logand y Int32.min_int)
+let copy_sign x y = Int64.logor (abs x) (Int64.logand y Int64.min_int)
 
 let eq x y = to_float x = to_float y
 
@@ -331,15 +331,15 @@ let of_signless_string s =
   else if s = "nan" then
     pos_nan
   else if String.length s > 6 && String.sub s 0 6 = "nan:0x" then
-    let x = Int32.of_string (String.sub s 4 (String.length s - 4)) in
-    if x = Int32.zero then
+    let x = Int64.of_string (String.sub s 4 (String.length s - 4)) in
+    if x = Int64.zero then
       raise (Failure "nan payload must not be zero")
-    else if Int32.logand x bare_nan <> Int32.zero then
+    else if Int64.logand x bare_nan <> Int64.zero then
       raise (Failure "nan payload must not overlap with exponent bits")
-    else if x < Int32.zero then
+    else if x < Int64.zero then
       raise (Failure "nan payload must not overlap with sign bit")
     else
-      Int32.logor x bare_nan
+      Int64.logor x bare_nan
   else
     let s' = String.concat "" (String.split_on_char '_' s) in
     let x = of_float (float_of_string_prevent_double_rounding s') in
@@ -399,13 +399,13 @@ let group_digits =
     Buffer.contents buf
 
 let to_string' convert is_digit n x =
-  ( if x < Int32.zero then
+  ( if x < Int64.zero then
     "-"
   else
     "" )
   ^
   if is_nan x then
-    let payload = Int32.logand (abs x) (Int32.lognot bare_nan) in
+    let payload = Int64.logand (abs x) (Int64.lognot bare_nan) in
     "nan:0x" ^ group_digits is_hex_digit 4 (to_hex_string payload)
   else
     let s = convert (to_float (abs x)) in

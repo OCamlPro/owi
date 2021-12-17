@@ -32,11 +32,11 @@ let i64 s =
     Obj.magic u64
 
 let f64 s =
-  try Float.of_string s
+  try Float64.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `nan` instead)@." s;
-    Float.nan
+    Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `pos_nan` instead)@." s;
+    Float64.pos_nan
     
 let f32 s =
   try Float32.of_string s
