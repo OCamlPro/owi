@@ -1,5 +1,4 @@
-let pp_pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
-  Format.fprintf out "line %d:%d" pos_lnum (pos_cnum - pos_bol)
+let page_size = 65_536
 
 exception Trap of string
 
@@ -69,8 +68,6 @@ type nonrec extern_type =
 type nonrec nn =
   | S32
   | S64
-
-type nonrec mm = nn
 
 type nonrec sx =
   | U
@@ -180,7 +177,7 @@ type instr =
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
-  | Select of val_type list option (* TODO: why is it a list and not just tuple ? *)
+  | Select of val_type list option
   (* Variable instructions *)
   | Local_get of indice
   | Local_set of indice
@@ -335,17 +332,15 @@ type result =
   | Result_extern_ref
   | Result_func_ref
 
-type failure = string
-
 type assert_ =
   | Assert_return of action * result list
-  | Assert_trap of action * failure
-  | Assert_malformed of module_ * failure
-  | Assert_malformed_quote of string list * failure
-  | Assert_malformed_binary of string list * failure
-  | Assert_invalid of module_ * failure
-  | Assert_invalid_quote of string list * failure
-  | Assert_invalid_binary of string list * failure
+  | Assert_trap of action * string
+  | Assert_malformed of module_ * string
+  | Assert_malformed_quote of string list * string
+  | Assert_malformed_binary of string list * string
+  | Assert_invalid of module_ * string
+  | Assert_invalid_quote of string list * string
+  | Assert_invalid_binary of string list * string
 
 type cmd =
   | Module of module_
@@ -354,5 +349,3 @@ type cmd =
   | Action of action
 
 type file = cmd list
-
-let page_size = 65_536

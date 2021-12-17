@@ -64,5 +64,7 @@ let () =
       Format.eprintf "error: %s@." e;
       has_error := true
   end;
-  Format.printf "results : %d / %d !@." !count_total_failed !count_total;
+  Format.printf "results : %d / %d !@."
+    (!count_total - !count_total_failed)
+    !count_total;
   if !has_error then exit 1

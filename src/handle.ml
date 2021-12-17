@@ -21,7 +21,7 @@ let handle_syntax_error lexbuf _checkpoint =
     | Not_found -> "Syntax error"*)
   in
   failwith
-  @@ Format.asprintf "%s %a\n%!" message Types.pp_pos
+  @@ Format.asprintf "%s %a\n%!" message Pp.pos
        (fst @@ Sedlexing.lexing_positions lexbuf)
 
 let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
@@ -48,4 +48,4 @@ let process lexbuf =
          (fst @@ Sedlexing.lexing_positions lexbuf) )
   with
   | Lexer.LexError (pos, msg) ->
-    failwith @@ Format.asprintf "lexing error : %s at %a%!" msg Types.pp_pos pos
+    failwith @@ Format.asprintf "lexing error : %s at %a%!" msg Pp.pos pos

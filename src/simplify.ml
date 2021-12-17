@@ -17,13 +17,13 @@ type action =
 
 type assert_ =
   | SAssert_return of action * result list
-  | SAssert_trap of action * failure
-  | SAssert_malformed of Types.module_ * failure
-  | SAssert_malformed_quote of string list * failure
-  | SAssert_malformed_binary of string list * failure
-  | SAssert_invalid of Types.module_ * failure
-  | SAssert_invalid_quote of string list * failure
-  | SAssert_invalid_binary of string list * failure
+  | SAssert_trap of action * string
+  | SAssert_malformed of Types.module_ * string
+  | SAssert_malformed_quote of string list * string
+  | SAssert_malformed_binary of string list * string
+  | SAssert_invalid of Types.module_ * string
+  | SAssert_invalid_quote of string list * string
+  | SAssert_invalid_binary of string list * string
 
 type cmd =
   | Module_indice of int

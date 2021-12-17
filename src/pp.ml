@@ -361,3 +361,6 @@ let cmd fmt = function
   | Action _a -> Format.fprintf fmt "<action>"
 
 let file fmt l = Format.pp_print_list ~pp_sep:Format.pp_print_newline cmd fmt l
+
+let pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
+  Format.fprintf out "line %d:%d" pos_lnum (pos_cnum - pos_bol)
