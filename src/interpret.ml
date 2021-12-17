@@ -252,7 +252,7 @@ let rec exec_instr env module_indice locals stack instr =
   match instr with
   | Return -> raise Return
   | Nop -> ()
-  | Unreachable -> failwith "unreachable"
+  | Unreachable -> raise @@ Trap "unreachable"
   | I32_const n -> Stack.push_i32 stack n
   | I64_const n -> Stack.push_i64 stack n
   | F32_const f -> Stack.push_f32 stack f
