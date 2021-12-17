@@ -723,9 +723,10 @@ let memory_fields :=
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    let id = Symbolic (Option.value id ~default:"TODO_global") in
+    let global_id = Symbolic (Option.value id ~default:"TODO_global") in
     List.rev_map (function
-      | MExport e -> MExport { e with desc = Export_global id }
+      | MGlobal g -> MGlobal { g with id }
+      | MExport e -> MExport { e with desc = Export_global global_id }
       | field -> field
     ) global_fields
   }

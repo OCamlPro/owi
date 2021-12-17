@@ -211,7 +211,7 @@ let exec_frelop stack nn (op : Types.frelop) =
   Stack.push_bool stack
     ( match nn with
     | S32 -> (
-      let n1, n2 = Stack.pop2_i32 stack in
+      let n1, n2 = Stack.pop2_f32 stack in
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
@@ -220,7 +220,7 @@ let exec_frelop stack nn (op : Types.frelop) =
       | Le -> n1 <= n2
       | Ge -> n1 >= n2 )
     | S64 -> (
-      let n1, n2 = Stack.pop2_i64 stack in
+      let n1, n2 = Stack.pop2_f64 stack in
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
@@ -352,8 +352,26 @@ let rec exec_instr env module_indice locals stack instr =
     let v = Stack.pop stack in
     locals.(indice_to_int i) <- v;
     Stack.push stack v
-  | Global_get _ -> failwith "TODO Global_get"
-  | Global_set _ -> failwith "TODO Global_set"
+  | Global_get i -> (
+    let i = indice_to_int i in
+    let (_mut, _typ), e = env.modules.(module_indice).globals.(i) in
+    match e with
+    | [] -> failwith "empty global expr"
+    | [ I32_const n ] -> Stack.push_i32 stack n
+    | _ -> failwith @@ Format.asprintf "TODO global_get expr: `%a`" Pp.expr e )
+  | Global_set i -> (
+    let i = indice_to_int i in
+    let (mut, typ), _e = env.modules.(module_indice).globals.(i) in
+    if mut = Const then failwith "Can't set const global";
+    match typ with
+    | Ref_type rt ->
+      failwith @@ Format.asprintf "TODO global set ref type `%a`" Pp.ref_type rt
+    | Num_type I32 ->
+      let v = Stack.pop_i32 stack in
+      env.modules.(module_indice).globals.(i) <- ((mut, typ), [ I32_const v ])
+    | Num_type nt ->
+      failwith @@ Format.asprintf "TODO global set num type `%a`" Pp.num_type nt
+    )
   | Table_get _ -> failwith "TODO Table_get"
   | Table_set _ -> failwith "TODO Table_set"
   | Table_size _ -> failwith "TODO Table_size"

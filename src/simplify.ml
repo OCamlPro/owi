@@ -8,6 +8,7 @@ type module_ =
   ; memories : (Bytes.t ref * int option) array
   ; tables : (ref_type * instr option Array.t * int option) array
   ; types : func_type Array.t
+  ; globals : (global_type * expr) Array.t
   }
 
 type action =
@@ -84,12 +85,20 @@ let mk_module m =
 
   let passive_elements = ref [] in
 
+  let curr_global = ref (-1) in
+  let globals = ref [] in
+  let seen_globals = Hashtbl.create 512 in
+
   List.iter
     (function
       | MFunc f ->
         incr curr_func;
         let i = !curr_func in
         Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
+      | MGlobal g ->
+        incr curr_global;
+        Option.iter (fun id -> Hashtbl.add seen_globals id !curr_global) g.id;
+        globals := (g.type_, g.init) :: !globals
       | MExport { name; desc } -> begin
         match desc with
         | Export_func indice ->
@@ -368,6 +377,16 @@ let mk_module m =
                 | Some i -> Raw (Unsigned.UInt32.of_int i) )
             in
             Call_indirect (tbl_i, typ_i)
+          | Global_set (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_globals id with
+            | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
+            | Some i -> Global_set (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Global_get (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_globals id with
+            | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
+            | Some i -> Global_get (Raw (Unsigned.UInt32.of_int i))
+          end
           | i -> i
         and expr e = List.map body e in
         let body = expr f.body in
@@ -375,6 +394,7 @@ let mk_module m =
       funcs
   in
 
+  let globals = List.rev !globals |> Array.of_list in
   let types = Hashtbl.to_seq_values types |> Array.of_seq in
 
   { fields
@@ -384,6 +404,7 @@ let mk_module m =
   ; memories = [| (mem_bytes, !mem_max_size) |]
   ; tables
   ; types
+  ; globals
   }
 
 let script script =
