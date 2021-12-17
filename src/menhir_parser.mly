@@ -544,6 +544,11 @@ let func ==
   | FUNC; id = option(id); ~ = func_fields; {
     let indice = Symbolic (Option.value id ~default:"TODO_func") in
     List.rev_map (function
+      | MImport i ->
+        begin match i.desc with
+        | Import_func (_id, ft) -> MImport { i with desc = Import_func (id, ft) }
+        | _ -> assert false
+        end
       | MExport e -> MExport { e with desc = Export_func indice }
       | MFunc f -> MFunc { f with id }
       | field -> field

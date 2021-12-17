@@ -280,7 +280,9 @@ let rec exec_instr env module_indice locals stack instr =
   | Ref_is_null ->
     let b = Stack.pop_is_null stack in
     Stack.push_bool stack b
-  | Ref_func _fid -> failwith "TODO exec_instr"
+  | Ref_func i ->
+    let i = indice_to_int i in
+    Stack.push_host stack i
   | Drop -> Stack.drop stack
   | Local_get i -> Stack.push stack locals.(indice_to_int i)
   | Local_set i ->
@@ -590,13 +592,12 @@ and exec_func env module_indice func args =
 let invoke env module_indice f args =
   Debug.debug fmt "invoke       : %s@." f;
   let module_ = env.modules.(module_indice) in
-  let func =
+  let func_indice =
     match Hashtbl.find_opt module_.exported_funcs f with
     | None -> failwith "undefined export"
-    | Some func -> func
+    | Some indice -> indice
   in
-  let module_ = env.modules.(module_indice) in
-  let func = module_.funcs.(func) in
+  let func = module_.funcs.(func_indice) in
   exec_func env module_indice func args
 
 let exec_action env = function

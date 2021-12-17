@@ -23,6 +23,8 @@ let push_f32 s f = push s (Const_F32 f)
 
 let push_f64 s f = push s (Const_F64 f)
 
+let push_host s n = push s (Const_host n)
+
 let to_list s = to_seq s |> List.of_seq
 
 let pp fmt s =

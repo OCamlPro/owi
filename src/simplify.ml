@@ -387,6 +387,11 @@ let mk_module m =
             | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
             | Some i -> Global_get (Raw (Unsigned.UInt32.of_int i))
           end
+          | Ref_func (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_funcs id with
+            | None -> failwith @@ Format.sprintf "unbound func indice $%s" id
+            | Some i -> Ref_func (Raw (Unsigned.UInt32.of_int i))
+          end
           | i -> i
         and expr e = List.map body e in
         let body = expr f.body in
