@@ -374,10 +374,47 @@ let rec exec_instr env module_indice locals stack instr =
     | Num_type nt ->
       failwith @@ Format.asprintf "TODO global set num type `%a`" Pp.num_type nt
     )
-  | Table_get _ -> failwith "TODO Table_get"
-  | Table_set _ -> failwith "TODO Table_set"
-  | Table_size _ -> failwith "TODO Table_size"
-  | Table_grow _ -> failwith "TODO Table_grow"
+  | Table_get indice ->
+    let indice = indice_to_int indice in
+    let t, table, _max = env.modules.(module_indice).tables.(indice) in
+    let indice = Stack.pop_i32_to_int stack in
+    let v =
+      match table.(indice) with
+      | exception Invalid_argument _ ->
+        raise @@ Trap "out of bounds table access"
+      | None -> Const_null t
+      | Some v -> v
+    in
+    Stack.push stack v
+  | Table_set indice -> (
+    let indice = indice_to_int indice in
+    let _t, table, _max = env.modules.(module_indice).tables.(indice) in
+    let v = Stack.pop stack in
+    let indice = Stack.pop_i32_to_int stack in
+    try table.(indice) <- Some v with
+    | Invalid_argument _ -> raise @@ Trap "out of bounds table access" )
+  | Table_size indice ->
+    let indice = indice_to_int indice in
+    let _t, table, _max = env.modules.(module_indice).tables.(indice) in
+    Stack.push_i32_of_int stack (Array.length table)
+  | Table_grow indice ->
+    let indice = indice_to_int indice in
+    let t, table, max = env.modules.(module_indice).tables.(indice) in
+    let size = Array.length table in
+    let new_size = size + Stack.pop_i32_to_int stack in
+    let allowed =
+      Option.value max ~default:Int.max_int >= new_size
+      && new_size >= 0 && new_size >= size
+    in
+    if not allowed then begin
+      Stack.drop stack;
+      Stack.push_i32_of_int stack (-1)
+    end else
+      let new_element = Stack.pop stack in
+      let new_table = Array.make new_size (Some new_element) in
+      Array.iteri (fun i x -> new_table.(i) <- x) table;
+      env.modules.(module_indice).tables.(indice) <- (t, new_table, max);
+      Stack.push_i32_of_int stack size
   | Table_fill _ -> failwith "TODO Table_fill"
   | Table_copy _ -> failwith "TODO Table_copy"
   | Table_init _ -> failwith "TODO Table_init"
@@ -536,10 +573,10 @@ let rec exec_instr env module_indice locals stack instr =
       match a.(fun_i) with
       | None ->
         failwith @@ Format.sprintf "unbound function %d at table %d" fun_i tbl_i
-      | Some (Ref_func id) -> id
-      | Some _r -> failwith "invalid type, expected Ref_func"
+      | Some (Const_host id) -> id
+      | Some _r -> failwith "invalid type, expected Const_host"
     in
-    let func = module_.funcs.(indice_to_int i) in
+    let func = module_.funcs.(i) in
     if func.type_f <> typ_i then
       failwith
       @@ Format.asprintf "Invalid Call_indirect type: `%a` <> `%a`"

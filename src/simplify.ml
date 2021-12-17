@@ -6,7 +6,7 @@ type module_ =
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t ref * int option) array
-  ; tables : (ref_type * instr option Array.t * int option) array
+  ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
   ; globals : (global_type * expr) Array.t
   }
@@ -147,6 +147,7 @@ let mk_module m =
     @@ List.rev_map
          (fun (rt, table, max) ->
            let table =
+             (*
              Array.map
                (function
                  | None -> None
@@ -159,7 +160,8 @@ let mk_module m =
                      | Some i -> Some (Ref_func (Raw (Unsigned.UInt32.of_int i)))
                    end
                    | e -> Some e ) )
-               table
+                *)
+             table
            in
            (rt, table, max) )
          !tables
@@ -247,15 +249,19 @@ let mk_module m =
                     | Ref_func rf ->
                       let rf =
                         match rf with
-                        | Raw i -> i
+                        | Raw i -> Unsigned.UInt32.to_int i
                         | Symbolic rf -> (
                           match Hashtbl.find_opt seen_funcs rf with
                           | None ->
                             failwith @@ Format.sprintf "unbound func %s@." rf
-                          | Some rf -> Unsigned.UInt32.of_int rf )
+                          | Some rf -> rf )
                       in
-                      Some (Ref_func (Raw rf))
-                    | (I32_const _ | Ref_null _) as ins -> Some ins
+                      Const_host rf
+                    | I32_const n -> Const_I32 n
+                    | I64_const n -> Const_I64 n
+                    | F32_const f -> Const_F32 f
+                    | F64_const f -> Const_F64 f
+                    | Ref_null rt -> Const_null rt
                     | i ->
                       failwith
                       @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i
@@ -264,14 +270,12 @@ let mk_module m =
                   let len = Array.length table in
                   if pos >= len then (
                     let new_table = Array.make (pos + 1) None in
-                    for i = 0 to len - 1 do
-                      new_table.(i) <- table.(i)
-                    done;
-                    new_table.(pos) <- new_elem;
+                    Array.iteri (fun i e -> new_table.(i) <- e) table;
+                    new_table.(pos) <- Some new_elem;
                     tables.(table_indice) <-
                       (table_ref_type, new_table, table_max_size)
                   ) else
-                    table.(pos) <- new_elem )
+                    table.(pos) <- Some new_elem )
                 expr )
             e.init
         | Elem_declarative ->
@@ -391,6 +395,26 @@ let mk_module m =
             match Hashtbl.find_opt seen_funcs id with
             | None -> failwith @@ Format.sprintf "unbound func indice $%s" id
             | Some i -> Ref_func (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Table_size (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_tables id with
+            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+            | Some i -> Table_size (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Table_get (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_tables id with
+            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+            | Some i -> Table_get (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Table_set (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_tables id with
+            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+            | Some i -> Table_set (Raw (Unsigned.UInt32.of_int i))
+          end
+          | Table_grow (Symbolic id) -> begin
+            match Hashtbl.find_opt seen_tables id with
+            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+            | Some i -> Table_grow (Raw (Unsigned.UInt32.of_int i))
           end
           | i -> i
         and expr e = List.map body e in

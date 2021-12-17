@@ -817,6 +817,7 @@ let const ==
     | F64 -> Const_F64 (f64 num)
   }
   | REF; DOT; NULL; ~ = ref_kind; <Const_null>
+  | REF; DOT; EXTERN; num = NUM; { Const_host (int_of_string num) }
 
 let result ==
   | ~ = const; <Result_const>
