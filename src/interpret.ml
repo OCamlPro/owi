@@ -353,7 +353,7 @@ let rec exec_instr env module_indice locals stack instr =
     in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
-    List.fold_left (fun acc el -> Stack.push acc el) stack (List.rev res)
+    res @ stack
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
@@ -666,7 +666,7 @@ let rec exec_instr env module_indice locals stack instr =
     in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
-    List.fold_left Stack.push stack (List.rev res)
+    res @ stack
 
 and exec_expr env module_indice locals stack e is_loop =
   List.fold_left
@@ -723,8 +723,6 @@ let compare_result_const result const =
 let exec_assert env = function
   | SAssert_return (action, results_expected) ->
     Debug.debug fmt "assert return...@.";
-    (* TODO: why do we have to rev here, is it correct ? *)
-    let results_expected = List.rev results_expected in
     let env, results_got = exec_action env action in
     let eq =
       List.length results_expected = List.length results_got
