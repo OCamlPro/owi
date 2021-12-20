@@ -3,24 +3,17 @@ open Simplify
 
 type env =
   { modules : module_ Array.t
-  ; last_module : int option
-  ; seen_modules : (string, int) Hashtbl.t
   ; registered_modules : (string, int) Hashtbl.t
   }
 
-let empty_env =
-  { modules = [||]
-  ; last_module = None
-  ; seen_modules = Hashtbl.create 64
-  ; registered_modules = Hashtbl.create 64
-  }
+let empty_env = { modules = [||]; registered_modules = Hashtbl.create 64 }
 
-exception Return
+exception Return of Stack.t
 
 let exec_iunop stack nn op =
   match nn with
   | S32 ->
-    let n = Stack.pop_i32 stack in
+    let n, stack = Stack.pop_i32 stack in
     let res =
       let open Int32 in
       match op with
@@ -30,7 +23,7 @@ let exec_iunop stack nn op =
     in
     Stack.push_i32_of_int stack res
   | S64 ->
-    let n = Stack.pop_i64 stack in
+    let n, stack = Stack.pop_i64 stack in
     let res =
       let open Int64 in
       match op with
@@ -44,7 +37,7 @@ let exec_funop stack nn op =
   match nn with
   | S32 ->
     let open Float32 in
-    let f = Stack.pop_f32 stack in
+    let f, stack = Stack.pop_f32 stack in
     let res =
       match op with
       | Abs -> abs f
@@ -58,7 +51,7 @@ let exec_funop stack nn op =
     Stack.push_f32 stack res
   | S64 ->
     let open Float64 in
-    let f = Stack.pop_f64 stack in
+    let f, stack = Stack.pop_f64 stack in
     let res =
       match op with
       | Abs -> abs f
@@ -74,7 +67,7 @@ let exec_funop stack nn op =
 let exec_ibinop stack nn (op : Types.ibinop) =
   match nn with
   | S32 ->
-    let n1, n2 = Stack.pop2_i32 stack in
+    let (n1, n2), stack = Stack.pop2_i32 stack in
     Stack.push_i32 stack
       (let open Int32 in
       match op with
@@ -112,7 +105,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Rotl -> failwith "TODO Rotl"
       | Rotr -> failwith "TODO Rotr")
   | S64 ->
-    let n1, n2 = Stack.pop2_i64 stack in
+    let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
       (let open Int64 in
       match op with
@@ -154,7 +147,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
 let exec_fbinop stack nn (op : Types.fbinop) =
   match nn with
   | S32 ->
-    let f1, f2 = Stack.pop2_f32 stack in
+    let (f1, f2), stack = Stack.pop2_f32 stack in
     Stack.push_f32 stack
       (let open Float32 in
       match op with
@@ -166,7 +159,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Max -> max f1 f2
       | Copysign -> copy_sign f1 f2)
   | S64 ->
-    let f1, f2 = Stack.pop2_f64 stack in
+    let (f1, f2), stack = Stack.pop2_f64 stack in
     Stack.push_f64 stack
       (let open Float64 in
       match op with
@@ -179,62 +172,77 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Copysign -> copy_sign f1 f2)
 
 let exec_itestop stack nn op =
-  Stack.push_bool stack
-    ( match nn with
-    | S32 -> (
-      let n = Stack.pop_i32 stack in
+  match nn with
+  | S32 ->
+    let n, stack = Stack.pop_i32 stack in
+    let res =
       match op with
-      | Eqz -> n = 0l )
-    | S64 -> (
-      let n = Stack.pop_i64 stack in
+      | Eqz -> n = 0l
+    in
+    Stack.push_bool stack res
+  | S64 ->
+    let n, stack = Stack.pop_i64 stack in
+    let res =
       match op with
-      | Eqz -> n = 0L ) )
+      | Eqz -> n = 0L
+    in
+    Stack.push_bool stack res
 
 let exec_irelop stack nn (op : Types.irelop) =
-  Stack.push_bool stack
-    ( match nn with
-    | S32 -> (
-      let n1, n2 = Stack.pop2_i32 stack in
+  match nn with
+  | S32 ->
+    let (n1, n2), stack = Stack.pop2_i32 stack in
+    let res =
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
       | Lt _sx -> n1 < n2
       | Gt _sx -> n1 > n2
       | Le _sx -> n1 <= n2
-      | Ge _sx -> n1 >= n2 )
-    | S64 -> (
-      let n1, n2 = Stack.pop2_i64 stack in
+      | Ge _sx -> n1 >= n2
+    in
+    Stack.push_bool stack res
+  | S64 ->
+    let (n1, n2), stack = Stack.pop2_i64 stack in
+    let res =
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
       | Lt _sx -> n1 < n2
       | Gt _sx -> n1 > n2
       | Le _sx -> n1 <= n2
-      | Ge _sx -> n1 >= n2 ) )
+      | Ge _sx -> n1 >= n2
+    in
+    Stack.push_bool stack res
 
 let exec_frelop stack nn (op : Types.frelop) =
-  Stack.push_bool stack
-    ( match nn with
-    | S32 -> (
-      let n1, n2 = Stack.pop2_f32 stack in
+  match nn with
+  | S32 ->
+    let (n1, n2), stack = Stack.pop2_f32 stack in
+    let res =
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
       | Lt -> n1 < n2
       | Gt -> n1 > n2
       | Le -> n1 <= n2
-      | Ge -> n1 >= n2 )
-    | S64 -> (
-      let n1, n2 = Stack.pop2_f64 stack in
+      | Ge -> n1 >= n2
+    in
+    Stack.push_bool stack res
+  | S64 ->
+    let (n1, n2), stack = Stack.pop2_f64 stack in
+    let res =
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
       | Lt -> n1 < n2
       | Gt -> n1 > n2
       | Le -> n1 <= n2
-      | Ge -> n1 >= n2 ) )
+      | Ge -> n1 >= n2
+    in
+    Stack.push_bool stack res
 
-exception Branch of int
+exception Branch of Stack.t * int
 
 let fmt = Format.std_formatter
 
@@ -255,8 +263,8 @@ let rec exec_instr env module_indice locals stack instr =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   Debug.debug fmt "running instr: %a@." Pp.instr instr;
   match instr with
-  | Return -> raise Return
-  | Nop -> ()
+  | Return -> raise @@ Return stack
+  | Nop -> stack
   | Unreachable -> raise @@ Trap "unreachable"
   | I32_const n -> Stack.push_i32 stack n
   | I64_const n -> Stack.push_i64 stack n
@@ -274,34 +282,34 @@ let rec exec_instr env module_indice locals stack instr =
   | I64_extend32_s -> failwith "TODO exec_instr"
   | I32_wrap_i64 -> failwith "TODO exec_instr"
   | I64_extend_i32 _s ->
-    let n = Stack.pop_i32 stack in
+    let n, stack = Stack.pop_i32 stack in
     let n = Int64.of_int32 n in
     Stack.push_i64 stack n
   | I_trunc_f (n, n', s) -> (
     match (n, n') with
     | S32, S32 -> (
-      let f = Stack.pop_f32 stack in
+      let f, stack = Stack.pop_f32 stack in
       Stack.push_i32 stack
       @@
       match s with
       | S -> Convert.Int32.trunc_f32_s f
       | U -> Convert.Int32.trunc_f32_u f )
     | S32, S64 -> (
-      let f = Stack.pop_f64 stack in
+      let f, stack = Stack.pop_f64 stack in
       Stack.push_i32 stack
       @@
       match s with
       | S -> Convert.Int32.trunc_f64_s f
       | U -> Convert.Int32.trunc_f64_u f )
     | S64, S32 -> (
-      let f = Stack.pop_f32 stack in
+      let f, stack = Stack.pop_f32 stack in
       Stack.push_i64 stack
       @@
       match s with
       | S -> Convert.Int64.trunc_f32_s f
       | U -> Convert.Int64.trunc_f32_u f )
     | S64, S64 -> (
-      let f = Stack.pop_f64 stack in
+      let f, stack = Stack.pop_f64 stack in
       Stack.push_i64 stack
       @@
       match s with
@@ -315,7 +323,7 @@ let rec exec_instr env module_indice locals stack instr =
   | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
   | Ref_null t -> Stack.push stack (Const_null t)
   | Ref_is_null ->
-    let b = Stack.pop_is_null stack in
+    let b, stack = Stack.pop_is_null stack in
     Stack.push_bool stack b
   | Ref_func i ->
     let i = indice_to_int i in
@@ -324,10 +332,11 @@ let rec exec_instr env module_indice locals stack instr =
   | Local_get i -> Stack.push stack locals.(indice_to_int i)
   | Local_set i ->
     (* TODO: check type ? *)
-    let v = Stack.pop stack in
-    locals.(indice_to_int i) <- v
+    let v, stack = Stack.pop stack in
+    locals.(indice_to_int i) <- v;
+    stack
   | If_else (_bt, e1, e2) ->
-    let b = Stack.pop_bool stack in
+    let b, stack = Stack.pop_bool stack in
     exec_expr env module_indice locals stack
       ( if b then
         e1
@@ -342,13 +351,16 @@ let rec exec_instr env module_indice locals stack instr =
       | FTId _i -> failwith "internal error: FTId was not simplified"
       | FTFt (p, r) -> (p, r)
     in
-    let args = Stack.pop_n stack (List.length param_type) in
+    let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
-    List.iter (Stack.push stack) (List.rev res)
-  | Br i -> raise (Branch (indice_to_int i))
+    List.fold_left (fun acc el -> Stack.push acc el) stack (List.rev res)
+  | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
-    let b = Stack.pop_bool stack in
-    if b then raise (Branch (indice_to_int i))
+    let b, stack = Stack.pop_bool stack in
+    if b then
+      raise (Branch (stack, indice_to_int i))
+    else
+      stack
   | Loop (_bt, e) -> exec_expr env module_indice locals stack e true
   | Block (_bt, e) -> exec_expr env module_indice locals stack e false
   | Memory_size ->
@@ -357,7 +369,8 @@ let rec exec_instr env module_indice locals stack instr =
     Stack.push_i32_of_int stack len
   | Memory_grow -> (
     let mem, max = env.modules.(module_indice).memories.(0) in
-    let delta = Stack.pop_i32_to_int stack * page_size in
+    let delta, stack = Stack.pop_i32_to_int stack in
+    let delta = delta * page_size in
     let old_size = Bytes.length !mem in
     match max with
     | None ->
@@ -371,24 +384,25 @@ let rec exec_instr env module_indice locals stack instr =
         Stack.push_i32_of_int stack (old_size / page_size)
       end )
   | Memory_fill ->
-    let start = Stack.pop_i32_to_int stack in
-    let byte = Stack.pop_i32_to_int stack in
-    let stop = Stack.pop_i32_to_int stack in
+    let start, stack = Stack.pop_i32_to_int stack in
+    let byte, stack = Stack.pop_i32_to_int stack in
+    let stop, stack = Stack.pop_i32_to_int stack in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    Bytes.fill !mem start (stop - start) (Char.chr byte)
+    Bytes.fill !mem start (stop - start) (Char.chr byte);
+    stack
   | Memory_copy -> failwith "TODO Memory_copy"
   | Memory_init _i -> failwith "TODO Memory_init"
   | Select _t ->
-    let b = Stack.pop_bool stack in
-    let o2 = Stack.pop stack in
-    let o1 = Stack.pop stack in
+    let b, stack = Stack.pop_bool stack in
+    let o2, stack = Stack.pop stack in
+    let o1, stack = Stack.pop stack in
     Stack.push stack
       ( if b then
         o1
       else
         o2 )
   | Local_tee i ->
-    let v = Stack.pop stack in
+    let v, stack = Stack.pop stack in
     locals.(indice_to_int i) <- v;
     Stack.push stack v
   | Global_get i -> (
@@ -406,15 +420,16 @@ let rec exec_instr env module_indice locals stack instr =
     | Ref_type rt ->
       failwith @@ Format.asprintf "TODO global set ref type `%a`" Pp.ref_type rt
     | Num_type I32 ->
-      let v = Stack.pop_i32 stack in
-      env.modules.(module_indice).globals.(i) <- ((mut, typ), [ I32_const v ])
+      let v, stack = Stack.pop_i32 stack in
+      env.modules.(module_indice).globals.(i) <- ((mut, typ), [ I32_const v ]);
+      stack
     | Num_type nt ->
       failwith @@ Format.asprintf "TODO global set num type `%a`" Pp.num_type nt
     )
   | Table_get indice ->
     let indice = indice_to_int indice in
     let t, table, _max = env.modules.(module_indice).tables.(indice) in
-    let indice = Stack.pop_i32_to_int stack in
+    let indice, stack = Stack.pop_i32_to_int stack in
     let v =
       match table.(indice) with
       | exception Invalid_argument _ ->
@@ -423,13 +438,16 @@ let rec exec_instr env module_indice locals stack instr =
       | Some v -> v
     in
     Stack.push stack v
-  | Table_set indice -> (
+  | Table_set indice ->
     let indice = indice_to_int indice in
     let _t, table, _max = env.modules.(module_indice).tables.(indice) in
-    let v = Stack.pop stack in
-    let indice = Stack.pop_i32_to_int stack in
-    try table.(indice) <- Some v with
-    | Invalid_argument _ -> raise @@ Trap "out of bounds table access" )
+    let v, stack = Stack.pop stack in
+    let indice, stack = Stack.pop_i32_to_int stack in
+    begin
+      try table.(indice) <- Some v with
+      | Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
+    stack
   | Table_size indice ->
     let indice = indice_to_int indice in
     let _t, table, _max = env.modules.(module_indice).tables.(indice) in
@@ -438,39 +456,41 @@ let rec exec_instr env module_indice locals stack instr =
     let indice = indice_to_int indice in
     let t, table, max = env.modules.(module_indice).tables.(indice) in
     let size = Array.length table in
-    let new_size = size + Stack.pop_i32_to_int stack in
+    let delta, stack = Stack.pop_i32_to_int stack in
+    let new_size = size + delta in
     let allowed =
       Option.value max ~default:Int.max_int >= new_size
       && new_size >= 0 && new_size >= size
     in
-    if not allowed then begin
-      Stack.drop stack;
+    if not allowed then
+      let stack = Stack.drop stack in
       Stack.push_i32_of_int stack (-1)
-    end else
-      let new_element = Stack.pop stack in
+    else
+      let new_element, stack = Stack.pop stack in
       let new_table = Array.make new_size (Some new_element) in
       Array.iteri (fun i x -> new_table.(i) <- x) table;
       env.modules.(module_indice).tables.(indice) <- (t, new_table, max);
       Stack.push_i32_of_int stack size
   | Table_fill _ -> failwith "TODO Table_fill"
   | Table_copy _ -> failwith "TODO Table_copy"
-  | Table_init (t_indice, e_indice) -> (
+  | Table_init (t_indice, e_indice) ->
     let t_indice = indice_to_int t_indice in
     let _t_t, table, _max = env.modules.(module_indice).tables.(t_indice) in
     let e_indice = indice_to_int e_indice in
     let _e_t, e_e = env.modules.(module_indice).elements.(e_indice) in
-    let n = Stack.pop_i32_to_int stack in
-    let s = Stack.pop_i32_to_int stack in
-    let _d = Stack.pop_i32_to_int stack in
+    let n, stack = Stack.pop_i32_to_int stack in
+    let s, stack = Stack.pop_i32_to_int stack in
+    let _d, stack = Stack.pop_i32_to_int stack in
     (*if s + n > Array.length e_e || d + n > Array.length table then
         raise @@ Trap "TODO";
       if e_t <> t_t then raise @@ Trap "TODO";*)
-    if n <> 0 then
+    ( if n <> 0 then
       try
         let v = e_e.(s) in
         table.(t_indice) <- Some v
       with
-      | Invalid_argument _ -> raise @@ Trap "out of bounds table access" )
+      | Invalid_argument _ -> raise @@ Trap "out of bounds table access" );
+    stack
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
@@ -478,7 +498,7 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     if Bytes.length mem < offset + 2 || pos < 0 then
       raise (Trap "out of bounds memory access");
@@ -498,7 +518,7 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     match nn with
     | S32 ->
@@ -517,7 +537,7 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     match nn with
     | S32 ->
@@ -540,19 +560,21 @@ let rec exec_instr env module_indice locals stack instr =
     (* TODO: use align *)
     match nn with
     | S32 ->
-      let n = Stack.pop_i32 stack in
-      let pos = Stack.pop_i32_to_int stack in
+      let n, stack = Stack.pop_i32 stack in
+      let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 4 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      Bytes.set_int32_le mem offset n
+      Bytes.set_int32_le mem offset n;
+      stack
     | S64 ->
-      let n = Stack.pop_i64 stack in
-      let pos = Stack.pop_i32_to_int stack in
+      let n, stack = Stack.pop_i64 stack in
+      let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 8 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      Bytes.set_int64_le mem offset n )
+      Bytes.set_int64_le mem offset n;
+      stack )
   | F_store (_, _) -> failwith "TODO F_store"
   | I_load8 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
@@ -560,7 +582,7 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
     if Bytes.length mem < offset + 1 || pos < 0 then
       raise (Trap "out of bounds memory access");
@@ -589,7 +611,7 @@ let rec exec_instr env module_indice locals stack instr =
     let mem = !mem in
     (* TODO: use align *)
     ignore align;
-    let pos = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     if Bytes.length mem < offset + 4 || pos < 0 then
       raise (Trap "out of bounds memory access");
@@ -607,16 +629,16 @@ let rec exec_instr env module_indice locals stack instr =
   | I64_store32 _ -> failwith "TODO I64"
   | Data_drop _ -> failwith "TODO Data_drop"
   | Br_table (inds, i) ->
-    let target = Stack.pop_i32_to_int stack in
+    let target, stack = Stack.pop_i32_to_int stack in
     let target =
       if target < 0 || target >= Array.length inds then
         i
       else
         inds.(target)
     in
-    raise (Branch (indice_to_int target))
+    raise (Branch (stack, indice_to_int target))
   | Call_indirect (tbl_i, typ_i) ->
-    let fun_i = Stack.pop_i32_to_int stack in
+    let fun_i, stack = Stack.pop_i32_to_int stack in
     let module_ = env.modules.(module_indice) in
     let tbl_i = indice_to_int tbl_i in
     let rt, a, _max = module_.tables.(tbl_i) in
@@ -642,18 +664,19 @@ let rec exec_instr env module_indice locals stack instr =
              Pp.indice i
       | FTFt (p, _r) -> p
     in
-    let args = Stack.pop_n stack (List.length param_type) in
+    let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
-    List.iter (Stack.push stack) (List.rev res)
+    List.fold_left Stack.push stack (List.rev res)
 
 and exec_expr env module_indice locals stack e is_loop =
-  List.iter
-    (fun instr ->
+  List.fold_left
+    (fun stack instr ->
       try exec_instr env module_indice locals stack instr with
-      | Branch -1 -> ()
-      | Branch 0 when is_loop -> exec_expr env module_indice locals stack e true
-      | Branch n -> raise (Branch (n - 1)) )
-    e
+      | Branch (stack, -1) -> stack
+      | Branch (stack, 0) when is_loop ->
+        exec_expr env module_indice locals stack e true
+      | Branch (stack, n) -> raise (Branch (stack, n - 1)) )
+    stack e
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
@@ -666,15 +689,11 @@ and exec_func env module_indice func args =
     | FTFt (_pt, rt) -> List.length rt
   in
   let result =
-    try
-      exec_expr env module_indice locals stack func.body false;
-      stack
-    with
-    | Return
-    | Branch -1 ->
-      stack
+    try exec_expr env module_indice locals stack func.body false with
+    | Return stack -> stack
+    | Branch (stack, -1) -> stack
   in
-  Stack.keep result to_keep;
+  let result = Stack.keep result to_keep in
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp result;
   Stack.to_list result
 
@@ -745,17 +764,7 @@ let exec_register env name i =
   Hashtbl.replace env.registered_modules name i;
   env
 
-let exec_module env i =
-  let curr_func = ref (-1) in
-  let seen_funcs = env.modules.(i).seen_funcs in
-  List.iter
-    (function
-      | MFunc f ->
-        incr curr_func;
-        Option.iter (fun id -> Hashtbl.replace seen_funcs id !curr_func) f.id
-      | _ -> () )
-    env.modules.(i).fields;
-  { env with last_module = Some i }
+let exec_module env _i = env
 
 let exec_cmd env = function
   | Module_indice i -> exec_module env i
