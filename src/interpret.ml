@@ -454,7 +454,23 @@ let rec exec_instr env module_indice locals stack instr =
       Stack.push_i32_of_int stack size
   | Table_fill _ -> failwith "TODO Table_fill"
   | Table_copy _ -> failwith "TODO Table_copy"
-  | Table_init _ -> failwith "TODO Table_init"
+  | Table_init (t_indice, e_indice) -> (
+    let t_indice = indice_to_int t_indice in
+    let _t_t, table, _max = env.modules.(module_indice).tables.(t_indice) in
+    let e_indice = indice_to_int e_indice in
+    let _e_t, e_e = env.modules.(module_indice).elements.(e_indice) in
+    let n = Stack.pop_i32_to_int stack in
+    let s = Stack.pop_i32_to_int stack in
+    let _d = Stack.pop_i32_to_int stack in
+    (*if s + n > Array.length e_e || d + n > Array.length table then
+        raise @@ Trap "TODO";
+      if e_t <> t_t then raise @@ Trap "TODO";*)
+    if n <> 0 then
+      try
+        let v = e_e.(s) in
+        table.(t_indice) <- Some v
+      with
+      | Invalid_argument _ -> raise @@ Trap "out of bounds table access" )
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
@@ -635,8 +651,7 @@ and exec_expr env module_indice locals stack e is_loop =
     (fun instr ->
       try exec_instr env module_indice locals stack instr with
       | Branch -1 -> ()
-      | Branch 0 when is_loop ->
-        exec_expr env module_indice locals stack e true (* TODO: -1 ? *)
+      | Branch 0 when is_loop -> exec_expr env module_indice locals stack e true
       | Branch n -> raise (Branch (n - 1)) )
     e
 
@@ -645,6 +660,11 @@ and exec_func env module_indice func args =
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
   let stack = Stack.create () in
+  let to_keep =
+    match func.type_f with
+    | FTId _id -> failwith "internal error"
+    | FTFt (_pt, rt) -> List.length rt
+  in
   let result =
     try
       exec_expr env module_indice locals stack func.body false;
@@ -654,12 +674,7 @@ and exec_func env module_indice func args =
     | Branch -1 ->
       stack
   in
-  let return_type =
-    match func.type_f with
-    | FTId _id -> failwith "internal error"
-    | FTFt (_pt, rt) -> rt
-  in
-  Stack.keep stack (List.length return_type);
+  Stack.keep result to_keep;
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp result;
   Stack.to_list result
 
@@ -701,7 +716,9 @@ let exec_assert env = function
     if not eq then begin
       Debug.debug Format.err_formatter
         "assert_return failed !@.expected: `%a`@.got     : `%a`@."
-        (Format.pp_print_list Pp.result)
+        (Format.pp_print_list
+           ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+           Pp.result )
         results_expected Pp.consts results_got;
       failwith "assert_return failed !"
     end;

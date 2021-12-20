@@ -415,18 +415,21 @@ let block_instr ==
   }
 
 let block ==
-  | ~ = type_use; (_l, r) = block_param_body; {
-    Type_idx (type_use), r
-    (* TODO: Type_idx (inline_type_explicit type_use _l), snd r *)
+  | ~ = type_use; (l, r) = block_param_body; {
+    let block_type = match l with
+    | ([], []) -> FTId type_use
+    | (pt, rt) -> FTFt (List.map (fun t -> None, t) pt, rt) (* TODO: type_use ? *)
+    in
+    Some block_type, r
   }
   | (l, r) = block_param_body; {
-    let bt = match l with
-      | [], [] -> Val_type None
-      | [], [t] -> Val_type (Some t)
-      | _ft -> Type_idx (Symbolic "TODO") (* TODO: Type_idx (inline_type ft) *)
+    let block_type = match l with
+      | [], [] -> None
+      | (pt, rt) -> Some (FTFt (List.map (fun t -> None, t) pt, rt))
     in
-    bt, r
+    block_type, r
   }
+
 
 let block_param_body :=
   | ~ = block_result_body; <>
@@ -497,9 +500,9 @@ let call_expr_results :=
   | ~ = expr_list; { [], expr_list }
 
 let if_block ==
-  | ~ = type_use; ~ = if_block_param_body; { Type_idx type_use, if_block_param_body }
+  | ~ = type_use; ~ = if_block_param_body; { Some (FTId type_use), if_block_param_body }
   | ~ = if_block_param_body; {
-    Val_type None, if_block_param_body
+    None, if_block_param_body
   }
 
 let if_block_param_body :=

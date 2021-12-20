@@ -38,12 +38,6 @@ let val_type fmt = function
   | Num_type t -> num_type fmt t
   | Ref_type t -> ref_type fmt t
 
-(* TODO: ? *)
-let block_type fmt = function
-  | Type_idx id -> Format.fprintf fmt "(result %a)" indice id
-  | Val_type None -> ()
-  | Val_type (Some t) -> Format.fprintf fmt "(result %a)" val_type t
-
 let param fmt (id, vt) = Format.fprintf fmt "(param %a%a)" id_opt id val_type vt
 
 let param_type fmt params =

@@ -9,6 +9,7 @@ type module_ =
   ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
   ; globals : (global_type * expr) Array.t
+  ; elements : (ref_type * const Array.t) Array.t
   }
 
 type action =
@@ -210,7 +211,34 @@ let mk_module m =
         match e.mode with
         | Elem_passive ->
           (* A passive element segment’s elements can be copied to a table using the table.init instruction. *)
-          passive_elements := (e.type_, e.init) :: !passive_elements
+          List.iter
+            (fun expr ->
+              let expr =
+                List.map
+                  (function
+                    | Ref_func rf ->
+                      let rf =
+                        match rf with
+                        | Raw i -> Uint32.to_int i
+                        | Symbolic rf -> (
+                          match Hashtbl.find_opt seen_funcs rf with
+                          | None ->
+                            failwith @@ Format.sprintf "unbound func %s@." rf
+                          | Some rf -> rf )
+                      in
+                      Const_host rf
+                    | I32_const n -> Const_I32 n
+                    | I64_const n -> Const_I64 n
+                    | F32_const f -> Const_F32 f
+                    | F64_const f -> Const_F64 f
+                    | Ref_null rt -> Const_null rt
+                    | i ->
+                      failwith
+                      @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i )
+                  expr
+              in
+              passive_elements := (e.type_, expr) :: !passive_elements )
+            e.init
         | Elem_active (indice, offset) ->
           (* An active element segment copies its elements into a table during instantiation, as specified by a table index and a constant expression defining an offset into that table. *)
           let (table_ref_type, table, table_max_size), table_indice =
@@ -414,6 +442,26 @@ let mk_module m =
             | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
             | Some i -> Table_grow (Raw (Uint32.of_int i))
           end
+          | Table_init (i, i') ->
+            let i =
+              match i with
+              | Raw i -> i
+              | Symbolic i -> (
+                match Hashtbl.find_opt seen_tables i with
+                | None ->
+                  failwith @@ Format.sprintf "unbound table indice $%s" i
+                | Some i -> Uint32.of_int i )
+            in
+            let i' =
+              match i' with
+              | Raw i' -> i'
+              | Symbolic i' -> (
+                match Hashtbl.find_opt seen_tables i' with
+                | None ->
+                  failwith @@ Format.sprintf "unbound table indice $%s" i'
+                | Some i' -> Uint32.of_int i' )
+            in
+            Table_init (Raw i, Raw i')
           | i -> i
         and expr e = List.map body e in
         let body = expr f.body in
@@ -422,6 +470,8 @@ let mk_module m =
   in
 
   let globals = List.rev !globals |> Array.of_list in
+  let elements = List.rev !passive_elements |> Array.of_list in
+  let elements = Array.map (fun (rt, l) -> (rt, Array.of_list l)) elements in
   let types = Hashtbl.to_seq_values types |> Array.of_seq in
 
   { fields
@@ -432,6 +482,7 @@ let mk_module m =
   ; tables
   ; types
   ; globals
+  ; elements
   }
 
 let script script =

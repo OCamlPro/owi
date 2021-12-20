@@ -143,3 +143,5 @@ let rec keep s n =
     let x = pop s in
     keep s (n - 1);
     push s x
+
+let keep_opt s n = Option.iter (fun n -> keep s n) n

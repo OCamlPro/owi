@@ -137,11 +137,7 @@ type memarg =
   ; align : Uint32.t
   }
 
-type block_type =
-  | Type_idx of indice
-  | Val_type of val_type option
-(* TODO: where does the option goes ? *)
-
+(* TODO: rename into block type ? *)
 type func_type_bis =
   | FTId of indice
   | FTFt of func_type
@@ -213,9 +209,9 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of block_type * expr
-  | Loop of block_type * expr
-  | If_else of block_type * expr * expr
+  | Block of func_type_bis option * expr
+  | Loop of func_type_bis option * expr
+  | If_else of func_type_bis option * expr * expr
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice
@@ -266,8 +262,6 @@ type data =
 
 (* Modules *)
 
-type start = indice
-
 type import_desc =
   | Import_func of id option * func_type_bis
   | Import_table of id option * table_type
@@ -301,7 +295,7 @@ type module_field =
   | MFunc of func
   | MElem of elem
   | MData of data
-  | MStart of start
+  | MStart of indice
   | MImport of import
   | MExport of export
 
