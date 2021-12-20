@@ -19,7 +19,7 @@ let i32 s =
   try Int32.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.ifprintf Format.err_formatter "error: i32_of_string: `%s`, using u32 instead@." s;
+    Debug.debug Format.err_formatter "error: i32_of_string: `%s`, using u32 instead@." s;
     let u32 = u32 s in
     Obj.magic u32
 
@@ -27,7 +27,7 @@ let i64 s =
   try Int64.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.ifprintf Format.err_formatter "error: i64_of_string: `%s`, using u64 instead@." s;
+    Debug.debug Format.err_formatter "error: i64_of_string: `%s`, using u64 instead@." s;
     let u64 = u64 s in
     Obj.magic u64
 
@@ -35,14 +35,14 @@ let f64 s =
   try Float64.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.ifprintf Format.err_formatter "error: f64_of_string: `%s` (using `pos_nan` instead)@." s;
+    Debug.debug Format.err_formatter "error: f64_of_string: `%s` (using `pos_nan` instead)@." s;
     Float64.pos_nan
     
 let f32 s =
   try Float32.of_string s
   with Failure _ ->
     (* TODO *)
-    Format.ifprintf Format.err_formatter "error: f32_of_string: `%s` (using `pos_nan` instead)@." s;
+    Debug.debug Format.err_formatter "error: f32_of_string: `%s` (using `pos_nan` instead)@." s;
     Float32.pos_nan
     
 
@@ -123,9 +123,6 @@ let id ==
 
 
 (* TODO: TO CLASSIFY *)
-
-let labeling_opt == | id = option(id); { fun _ -> Some id (* TODO ? *) }
-let labeling_end_opt == | id = option(id); { [id] (* TODO ? *) }
 
 let num_type ==
   | I32; { Types.I32 }
@@ -401,17 +398,22 @@ let call_instr_results_instr :=
   }
 
 let block_instr ==
-  | BLOCK; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
-    Block (bt, es)
+  | BLOCK; id = option(id); (bt, es) = block; END; id2 = option(id); {
+    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    Block (id, bt, es)
   }
-  | LOOP; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
-    Loop (bt, es)
+  | LOOP; id = option(id); (bt, es) = block; END; id2 = option(id); {
+    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    Loop (id, bt, es)
   }
-  | IF; _ = labeling_opt; (bt, es) = block; END; _ = labeling_end_opt; {
-    If_else (bt, es, [])
+  | IF; id = option(id); (bt, es) = block; END; id2 = option(id); {
+    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    If_else (id, bt, es, [])
   }
-  | IF; _ = labeling_opt; (bt, es1) = block; ELSE; _ = labeling_end_opt; ~ = instr_list; END; _ = labeling_end_opt; {
-    If_else (bt, es1, instr_list)
+  | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
+    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    if Option.is_some id && Option.is_some id3 then assert (id = id3);
+    If_else (id, bt, es1, instr_list)
   }
 
 let block ==
@@ -454,14 +456,14 @@ let expr_aux ==
   | CALL_INDIRECT; (x, es) = call_expr_type; {
     es, Call_indirect (Raw (u32_of_i32 0l), x)
   }
-  | BLOCK; _ = labeling_opt; (bt, es) = block; {
-    [], Block (bt, es)
+  | BLOCK; id = option(id); (bt, es) = block; {
+    [], Block (id, bt, es)
   }
-  | LOOP; _ = labeling_opt; (bt, es) = block; {
-    [], Loop (bt, es)
+  | LOOP; id = option(id); (bt, es) = block; {
+    [], Loop (id, bt, es)
   }
-  | IF; _ = labeling_opt; (bt, (_param_or_result, (es, es1, es2))) = if_block; {
-    es, If_else (bt, es1, es2)
+  | IF; id = option(id); (bt, (_param_or_result, (es, es1, es2))) = if_block; {
+    es, If_else (id, bt, es1, es2)
   }
 
 let expr :=

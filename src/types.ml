@@ -209,9 +209,9 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of block_type option * expr
-  | Loop of block_type option * expr
-  | If_else of block_type option * expr * expr
+  | Block of id option * block_type option * expr
+  | Loop of id option * block_type option * expr
+  | If_else of id option * block_type option * expr * expr
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice

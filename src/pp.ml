@@ -1,3 +1,5 @@
+let () = Format.pp_print_flush Format.err_formatter ()
+
 open Types
 
 let print_nothing fmt () = Format.fprintf fmt ""
@@ -54,6 +56,10 @@ let func_type fmt (l, r) =
 let block_type fmt = function
   | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
   | Bt_raw typ -> Format.fprintf fmt "%a" func_type typ
+
+let block_type_opt fmt = function
+  | None -> ()
+  | Some bt -> block_type fmt bt
 
 let limits fmt { min; max } =
   match max with
@@ -143,7 +149,7 @@ let frelop fmt = function
 let memarg fmt { offset; align } =
   Format.fprintf fmt "offset=%a align=%a" u32 offset u32 align
 
-let instr fmt = function
+let rec instr fmt = function
   | I32_const i -> Format.fprintf fmt "i32.const %a" i32 i
   | I64_const i -> Format.fprintf fmt "i64.const %a" i64 i
   | F32_const f -> Format.fprintf fmt "f32.const %a" f32 f
@@ -218,17 +224,25 @@ let instr fmt = function
   | Data_drop id -> Format.fprintf fmt "data.drop %a" indice id
   | Nop -> Format.fprintf fmt "nop"
   | Unreachable -> Format.fprintf fmt "unreachable"
-  | Block (_ty, _expr) -> Format.fprintf fmt "<block>"
-  | Loop (_ty, _expr) -> Format.fprintf fmt "<loop>"
-  | If_else (_ty, _expr, _expr') -> Format.fprintf fmt "<if>"
+  | Block (id, bt, _e) ->
+    Format.fprintf fmt "block %a %a <expr>" id_opt id block_type_opt bt
+  | Loop (id, bt, _expr) ->
+    Format.fprintf fmt "loop %a %a <expr>" id_opt id block_type_opt bt
+  | If_else (id, bt, _expr, _expr') ->
+    Format.fprintf fmt "if %a %a <expr> <expr'>" id_opt id block_type_opt bt
   | Br id -> Format.fprintf fmt "br %a" indice id
   | Br_if id -> Format.fprintf fmt "br_if %a" indice id
-  | Br_table (_ids, _id) -> Format.fprintf fmt "<br_table>"
+  | Br_table (ids, id) ->
+    Format.fprintf fmt "br_table %a %a"
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+         indice )
+      (Array.to_list ids) indice id
   | Return -> Format.fprintf fmt "return"
   | Call id -> Format.fprintf fmt "call %a" indice id
   | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
 
-let expr fmt instrs =
+and expr fmt instrs =
   Format.pp_print_list ~pp_sep:Format.pp_print_newline instr fmt instrs
 
 let func fmt (f : func) =

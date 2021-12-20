@@ -346,15 +346,47 @@ let mk_module m =
           (fun i (id, _t) ->
             Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
           locals;
-        let rec body = function
-          | Br_if (Symbolic id) -> Br_if (Symbolic id) (* TODO *)
-          | Br (Symbolic id) -> Br (Symbolic id) (* TODO *)
+
+        (* block_ids handling *)
+        let find_block_id id l =
+          let pos = ref (-1) in
+          begin
+            try List.iteri (fun i n -> if n = Some id then pos := i) l with
+            | Exit -> ()
+          end;
+
+          if !pos = -1 then
+            failwith @@ Format.sprintf "unbound label %s" id
+          else
+            Uint32.of_int !pos
+        in
+
+        (* handling an expression *)
+        let rec body block_ids = function
+          | Br_table (ids, id) ->
+            let ids =
+              Array.map
+                (function
+                  | Symbolic id -> Raw (find_block_id id block_ids)
+                  | Raw id -> Raw id )
+                ids
+            in
+            let id =
+              match id with
+              | Raw id -> Raw id
+              | Symbolic id -> Raw (find_block_id id block_ids)
+            in
+            Br_table (ids, id)
+          | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
+          | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
           | Call id -> Call (Raw (map_symb find_func id))
           | Local_set id -> Local_set (Raw (map_symb find_local id))
           | Local_get id -> Local_get (Raw (map_symb find_local id))
-          | If_else (bt, e1, e2) -> If_else (bt, expr e1, expr e2)
-          | Loop (bt, e) -> Loop (bt, expr e)
-          | Block (bt, e) -> Block (bt, expr e)
+          | If_else (id, bt, e1, e2) ->
+            let block_ids = id :: block_ids in
+            If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
+          | Loop (id, bt, e) -> Loop (id, bt, expr e (id :: block_ids))
+          | Block (id, bt, e) -> Block (id, bt, expr e (id :: block_ids))
           | Call_indirect (tbl_i, typ_i) ->
             let typ_i =
               match typ_i with
@@ -373,8 +405,8 @@ let mk_module m =
             Table_init
               (Raw (map_symb find_table i), Raw (map_symb find_table i'))
           | i -> i
-        and expr e = List.map body e in
-        let body = expr f.body in
+        and expr e block_ids = List.map (body block_ids) e in
+        let body = expr f.body [] in
         { f with body; type_f = Bt_raw type_f } )
       funcs
   in

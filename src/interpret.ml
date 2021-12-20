@@ -249,7 +249,7 @@ let fmt = Format.std_formatter
 let indice_to_int = function
   | Raw i -> Uint32.to_int i
   | Symbolic id ->
-    failwith @@ Format.sprintf "interpreter internal error: unbound id %s" id
+    failwith @@ Format.sprintf "interpreter internal error: unbound id $%s" id
 
 let get_bt = function
   | Bt_ind ind ->
@@ -286,7 +286,10 @@ let rec exec_instr env module_indice locals stack instr =
   | I_extend8_s _n -> failwith "TODO exec_instr"
   | I_extend16_s _n -> failwith "TODO exec_instr"
   | I64_extend32_s -> failwith "TODO exec_instr"
-  | I32_wrap_i64 -> failwith "TODO exec_instr"
+  | I32_wrap_i64 ->
+    let n, stack = Stack.pop_i64 stack in
+    let n = Convert.Int32.wrap_i64 n in
+    Stack.push_i32 stack n
   | I64_extend_i32 _s ->
     let n, stack = Stack.pop_i32 stack in
     let n = Int64.of_int32 n in
@@ -341,14 +344,14 @@ let rec exec_instr env module_indice locals stack instr =
     let v, stack = Stack.pop stack in
     locals.(indice_to_int i) <- v;
     stack
-  | If_else (_bt, e1, e2) ->
+  | If_else (_id, bt, e1, e2) ->
     let b, stack = Stack.pop_bool stack in
     exec_expr env module_indice locals stack
       ( if b then
         e1
       else
         e2 )
-      false
+      false bt
   | Call i ->
     let module_ = env.modules.(module_indice) in
     let func = module_.funcs.(indice_to_int i) in
@@ -363,8 +366,8 @@ let rec exec_instr env module_indice locals stack instr =
       raise (Branch (stack, indice_to_int i))
     else
       stack
-  | Loop (_bt, e) -> exec_expr env module_indice locals stack e true
-  | Block (_bt, e) -> exec_expr env module_indice locals stack e false
+  | Loop (_id, bt, e) -> exec_expr env module_indice locals stack e true bt
+  | Block (_id, bt, e) -> exec_expr env module_indice locals stack e false bt
   | Memory_size ->
     let mem, _max = env.modules.(module_indice).memories.(0) in
     let len = Bytes.length !mem / page_size in
@@ -644,7 +647,7 @@ let rec exec_instr env module_indice locals stack instr =
     let module_ = env.modules.(module_indice) in
     let tbl_i = indice_to_int tbl_i in
     let rt, a, _max = module_.tables.(tbl_i) in
-    if rt <> Func_ref then failwith "wrong table type (expected Func_ref)";
+    assert (rt = Func_ref);
     if fun_i >= Array.length a then raise (Trap "undefined element");
     let i =
       match a.(fun_i) with
@@ -654,17 +657,15 @@ let rec exec_instr env module_indice locals stack instr =
       | Some _r -> failwith "invalid type, expected Const_host"
     in
     let func = module_.funcs.(i) in
-    if func.type_f <> typ_i then
-      failwith
-      @@ Format.asprintf "Invalid Call_indirect type: `%a` <> `%a`"
-           Pp.block_type func.type_f Pp.block_type typ_i;
+    assert (func.type_f = typ_i);
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
     res @ stack
 
-and exec_expr env module_indice locals stack e is_loop =
+and exec_expr env module_indice locals stack e is_loop bt =
   Debug.debug fmt "starting expr@.";
+  let _rm = ref true in
   let stack =
     List.fold_left
       (fun stack instr ->
@@ -674,29 +675,44 @@ and exec_expr env module_indice locals stack e is_loop =
           stack
         | Branch (stack, 0) when is_loop ->
           Debug.debug fmt "Branch 0@.";
-          exec_expr env module_indice locals stack e true
+          exec_expr env module_indice locals stack e true bt
         | Branch (stack, n) ->
           Debug.debug fmt "Branch %d@." n;
+          (* TODO ? *)
+          let _stack =
+            match bt with
+            | None -> stack
+            | Some bt ->
+              let to_keep = List.length @@ snd (get_bt bt) in
+              Debug.debug fmt "to keep = %d@." to_keep;
+              Stack.keep stack to_keep
+          in
           raise (Branch (stack, n - 1)) )
       stack e
   in
-  Debug.debug fmt "done with expr@.";
-  stack
+  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
+  match bt with
+  | None -> stack
+  | Some bt ->
+    let to_keep = List.length @@ snd (get_bt bt) in
+    Debug.debug fmt "to keep = %d@." to_keep;
+    (* TODO: ? *)
+    let _stack = Stack.keep stack to_keep in
+    stack
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
-  let result =
-    try exec_expr env module_indice locals [] func.body false with
+  let stack =
+    try
+      exec_expr env module_indice locals [] func.body false (Some func.type_f)
+    with
     | Return stack -> stack
     | Branch (stack, -1) -> stack
   in
-  let _params, return_type = get_bt func.type_f in
-  let to_keep = List.length return_type in
-  let result = Stack.keep result to_keep in
-  Debug.debug fmt "stack        : [ %a ]@." Stack.pp result;
-  Stack.to_list result
+  let to_keep = List.length @@ snd (get_bt func.type_f) in
+  Stack.keep stack to_keep
 
 let invoke env module_indice f args =
   Debug.debug fmt "invoke       : %s@." f;
@@ -725,6 +741,7 @@ let exec_assert env = function
   | SAssert_return (action, results_expected) ->
     Debug.debug fmt "assert return...@.";
     let env, results_got = exec_action env action in
+    let results_got = List.rev results_got in
     let eq =
       List.length results_expected = List.length results_got
       && List.for_all2
