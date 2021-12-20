@@ -349,10 +349,10 @@ let call_instr ==
 let call_instr_type ==
   | ~ = type_use; ~ = call_instr_params; {
     match call_instr_params with
-    | ([], []) -> FTId (type_use)
-    | (pt, rt) -> FTFt (List.map (fun t -> None, t) pt, rt) (* TODO: inline_type_explicit type_use ft *)
+    | ([], []) -> Bt_ind (type_use)
+    | (pt, rt) -> Bt_raw (List.map (fun t -> None, t) pt, rt) (* TODO: inline_type_explicit type_use ft *)
   }
-  | (pt, rt) = call_instr_params; { FTFt (List.map (fun t -> None, t) pt, rt) }
+  | (pt, rt) = call_instr_params; { Bt_raw (List.map (fun t -> None, t) pt, rt) }
 
 let call_instr_params :=
   | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
@@ -379,10 +379,10 @@ let call_instr_instr ==
 let call_instr_type_instr ==
   | ~ = type_use; ~ = call_instr_params_instr; {
     match call_instr_params_instr with
-    | ([], []), es -> FTId (type_use), es
-    | (pt, rt), es -> FTFt ((List.map (fun t -> None, t) pt), rt), es (* TODO: inline_type_explicit t ft, es *)
+    | ([], []), es -> Bt_ind (type_use), es
+    | (pt, rt), es -> Bt_raw ((List.map (fun t -> None, t) pt), rt), es (* TODO: inline_type_explicit t ft, es *)
   }
-  | ((pt, rt), es) = call_instr_params_instr; { FTFt (List.map (fun t -> None, t) pt, rt), es }
+  | ((pt, rt), es) = call_instr_params_instr; { Bt_raw (List.map (fun t -> None, t) pt, rt), es }
 
 let call_instr_params_instr :=
   | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
@@ -417,15 +417,15 @@ let block_instr ==
 let block ==
   | ~ = type_use; (l, r) = block_param_body; {
     let block_type = match l with
-    | ([], []) -> FTId type_use
-    | (pt, rt) -> FTFt (List.map (fun t -> None, t) pt, rt) (* TODO: type_use ? *)
+    | ([], []) -> Bt_ind type_use
+    | (pt, rt) -> Bt_raw (List.map (fun t -> None, t) pt, rt) (* TODO: type_use ? *)
     in
     Some block_type, r
   }
   | (l, r) = block_param_body; {
     let block_type = match l with
       | [], [] -> None
-      | (pt, rt) -> Some (FTFt (List.map (fun t -> None, t) pt, rt))
+      | (pt, rt) -> Some (Bt_raw (List.map (fun t -> None, t) pt, rt))
     in
     block_type, r
   }
@@ -478,11 +478,11 @@ let select_expr_result :=
 let call_expr_type ==
   | ~ = type_use; ~ = call_expr_params; {
     match call_expr_params with
-    | ([], []), es -> FTId type_use, es
-    | (pt, rt), es -> FTFt (List.map (fun t -> None, t) pt, rt), es (* TODO: type_use ? *)
+    | ([], []), es -> Bt_ind type_use, es
+    | (pt, rt), es -> Bt_raw (List.map (fun t -> None, t) pt, rt), es (* TODO: type_use ? *)
   }
   | ((pt, rt), es) = call_expr_params; {
-    FTFt (List.map (fun t -> None, t) pt, rt), es
+    Bt_raw (List.map (fun t -> None, t) pt, rt), es
   }
 
 let call_expr_params :=
@@ -500,7 +500,7 @@ let call_expr_results :=
   | ~ = expr_list; { [], expr_list }
 
 let if_block ==
-  | ~ = type_use; ~ = if_block_param_body; { Some (FTId type_use), if_block_param_body }
+  | ~ = type_use; ~ = if_block_param_body; { Some (Bt_ind type_use), if_block_param_body }
   | ~ = if_block_param_body; {
     None, if_block_param_body
   }
@@ -560,16 +560,16 @@ let func ==
 
 let func_fields :=
   | ~ = type_use; (_todo, f) = func_fields_body; {
-    [MFunc { f with type_f = FTId type_use }]
+    [MFunc { f with type_f = Bt_ind type_use }]
   }
   | (type_f, f) = func_fields_body; {
-    [MFunc { f with type_f = FTFt type_f }]
+    [MFunc { f with type_f = Bt_raw type_f }]
   }
   | (module_, name) = inline_import; ~ = type_use; _ = func_fields_import; {
-    [MImport { module_; name; desc = Import_func (None, FTId type_use) }]
+    [MImport { module_; name; desc = Import_func (None, Bt_ind type_use) }]
   }
   | (module_, name) = inline_import; ~ = func_fields_import; {
-    [MImport { module_; name; desc = Import_func (None, FTFt func_fields_import) }]
+    [MImport { module_; name; desc = Import_func (None, Bt_raw func_fields_import) }]
   }
   | ~ = inline_export; ~ = func_fields; {
     MExport { name = inline_export; desc = Export_func dumb_indice } :: func_fields
@@ -607,7 +607,7 @@ let func_result_body :=
 
 let func_body :=
   | body = instr_list; {
-    { type_f = FTId (Raw (u32_of_i32 (-1l))); locals = []; body; id = None }
+    { type_f = Bt_ind (Raw (u32_of_i32 (-1l))); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
     { func_body with locals = (List.map (fun v -> None, v) l) @ func_body.locals  }
@@ -755,8 +755,8 @@ let global_fields :=
 (* Imports & Exports *)
 
 let import_desc ==
-  | FUNC; id = option(id); ~ = type_use; { Import_func (id, FTId type_use) }
-  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, FTFt ft) }
+  | FUNC; id = option(id); ~ = type_use; { Import_func (id, Bt_ind type_use) }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw ft) }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>

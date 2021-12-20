@@ -51,9 +51,9 @@ let result_type fmt results =
 let func_type fmt (l, r) =
   Format.fprintf fmt "(func %a %a)" param_type l result_type r
 
-let func_type_bis fmt = function
-  | FTId id -> Format.fprintf fmt "%a" indice id
-  | FTFt ft -> Format.fprintf fmt "%a" func_type ft
+let block_type fmt = function
+  | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
+  | Bt_raw typ -> Format.fprintf fmt "%a" func_type typ
 
 let limits fmt { min; max } =
   match max with
@@ -261,7 +261,7 @@ let funcs fmt (funcs : func list) =
 let import_desc fmt : import_desc -> Unit.t = function
   | Import_func (id, t) ->
     (* TODO: fixme *)
-    Format.fprintf fmt "%a %a" id_opt id func_type_bis t
+    Format.fprintf fmt "%a %a" id_opt id block_type t
   | Import_table (id, t) ->
     Format.fprintf fmt "(table %a %a)" id_opt id table_type t
   | Import_mem (id, t) ->

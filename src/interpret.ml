@@ -251,6 +251,12 @@ let indice_to_int = function
   | Symbolic id ->
     failwith @@ Format.sprintf "interpreter internal error: unbound id %s" id
 
+let get_bt = function
+  | Bt_ind ind ->
+    failwith
+    @@ Format.asprintf "internal error: unbound block_type %a" Pp.indice ind
+  | Bt_raw (pt, rt) -> (pt, rt)
+
 let init_local (_id, t) =
   match t with
   | Num_type I32 -> Const_I32 Int32.zero
@@ -346,11 +352,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Call i ->
     let module_ = env.modules.(module_indice) in
     let func = module_.funcs.(indice_to_int i) in
-    let param_type, _result_type =
-      match func.type_f with
-      | FTId _i -> failwith "internal error: FTId was not simplified"
-      | FTFt (p, r) -> (p, r)
-    in
+    let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
     res @ stack
@@ -655,44 +657,43 @@ let rec exec_instr env module_indice locals stack instr =
     if func.type_f <> typ_i then
       failwith
       @@ Format.asprintf "Invalid Call_indirect type: `%a` <> `%a`"
-           Pp.func_type_bis func.type_f Pp.func_type_bis typ_i;
-    let param_type =
-      match func.type_f with
-      | FTId i ->
-        failwith
-        @@ Format.asprintf "internal error: FTId `%a` was not simplified"
-             Pp.indice i
-      | FTFt (p, _r) -> p
-    in
+           Pp.block_type func.type_f Pp.block_type typ_i;
+    let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func args in
     res @ stack
 
 and exec_expr env module_indice locals stack e is_loop =
-  List.fold_left
-    (fun stack instr ->
-      try exec_instr env module_indice locals stack instr with
-      | Branch (stack, -1) -> stack
-      | Branch (stack, 0) when is_loop ->
-        exec_expr env module_indice locals stack e true
-      | Branch (stack, n) -> raise (Branch (stack, n - 1)) )
-    stack e
+  Debug.debug fmt "starting expr@.";
+  let stack =
+    List.fold_left
+      (fun stack instr ->
+        try exec_instr env module_indice locals stack instr with
+        | Branch (stack, -1) ->
+          Debug.debug fmt "Branch -1@.";
+          stack
+        | Branch (stack, 0) when is_loop ->
+          Debug.debug fmt "Branch 0@.";
+          exec_expr env module_indice locals stack e true
+        | Branch (stack, n) ->
+          Debug.debug fmt "Branch %d@." n;
+          raise (Branch (stack, n - 1)) )
+      stack e
+  in
+  Debug.debug fmt "done with expr@.";
+  stack
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
-  let stack = Stack.create () in
-  let to_keep =
-    match func.type_f with
-    | FTId _id -> failwith "internal error"
-    | FTFt (_pt, rt) -> List.length rt
-  in
   let result =
-    try exec_expr env module_indice locals stack func.body false with
+    try exec_expr env module_indice locals [] func.body false with
     | Return stack -> stack
     | Branch (stack, -1) -> stack
   in
+  let _params, return_type = get_bt func.type_f in
+  let to_keep = List.length return_type in
   let result = Stack.keep result to_keep in
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp result;
   Stack.to_list result

@@ -138,9 +138,9 @@ type memarg =
   }
 
 (* TODO: rename into block type ? *)
-type func_type_bis =
-  | FTId of indice
-  | FTFt of func_type
+type block_type =
+  | Bt_ind of indice
+  | Bt_raw of func_type
 
 type instr =
   (* Numeric Instructions *)
@@ -209,20 +209,20 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of func_type_bis option * expr
-  | Loop of func_type_bis option * expr
-  | If_else of func_type_bis option * expr * expr
+  | Block of block_type option * expr
+  | Loop of block_type option * expr
+  | If_else of block_type option * expr * expr
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice
   | Return
   | Call of indice
-  | Call_indirect of indice * func_type_bis
+  | Call_indirect of indice * block_type
 
 and expr = instr list
 
 type func =
-  { type_f : func_type_bis
+  { type_f : block_type
   ; locals : param list
   ; body : expr
   ; id : id option
@@ -263,7 +263,7 @@ type data =
 (* Modules *)
 
 type import_desc =
-  | Import_func of id option * func_type_bis
+  | Import_func of id option * block_type
   | Import_table of id option * table_type
   | Import_mem of id option * mem_type
   | Import_global of id option * global_type

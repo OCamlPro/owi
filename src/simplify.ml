@@ -34,21 +34,26 @@ type cmd =
 
 type script = module_ Array.t * cmd list
 
+let map_symb find_in_tbl = function
+  | Raw i -> i
+  | Symbolic id -> Uint32.of_int @@ find_in_tbl id
+
+let find_module name last seen =
+  match name with
+  | None -> begin
+    match last with
+    | None -> failwith "no module defined"
+    | Some i -> i
+  end
+  | Some mod_name -> begin
+    match Hashtbl.find_opt seen mod_name with
+    | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
+    | Some i -> i
+  end
+
 let action last_module seen_modules = function
   | Invoke (mod_name, f, args) ->
-    let i =
-      match mod_name with
-      | None -> begin
-        match last_module with
-        | None -> failwith "no module defined"
-        | Some i -> i
-      end
-      | Some mod_name -> begin
-        match Hashtbl.find_opt seen_modules mod_name with
-        | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
-        | Some i -> i
-      end
-    in
+    let i = find_module mod_name last_module seen_modules in
     Invoke_indice (i, f, args)
   | Get _ -> failwith "not yet implemented"
 
@@ -90,12 +95,29 @@ let mk_module m =
   let globals = ref [] in
   let seen_globals = Hashtbl.create 512 in
 
+  let find_func id =
+    match Hashtbl.find_opt seen_funcs id with
+    | None -> failwith @@ Format.sprintf "unbound func %s" id
+    | Some i -> i
+  in
+
+  let find_memory id =
+    match Hashtbl.find_opt seen_memories id with
+    | None -> failwith @@ Format.sprintf "unbound memory %s" id
+    | Some i -> i
+  in
+
+  let find_global id =
+    match Hashtbl.find_opt seen_globals id with
+    | None -> failwith @@ Format.sprintf "unbound func %s" id
+    | Some i -> i
+  in
+
   List.iter
     (function
       | MFunc f ->
         incr curr_func;
-        let i = !curr_func in
-        Option.iter (fun id -> Hashtbl.replace seen_funcs id i) f.id
+        Option.iter (fun id -> Hashtbl.replace seen_funcs id !curr_func) f.id
       | MGlobal g ->
         incr curr_global;
         Option.iter (fun id -> Hashtbl.add seen_globals id !curr_global) g.id;
@@ -104,18 +126,16 @@ let mk_module m =
         match desc with
         | Export_func indice ->
           let i =
-            match indice with
-            | Raw i -> Uint32.to_int i
-            | Symbolic id -> begin
-              match Hashtbl.find_opt seen_funcs id with
-              | None ->
-                (* TODO: removes this from the parser and add some anonymous case instead *)
-                if id = "TODO_func" then
-                  !curr_func
-                else
-                  failwith @@ Format.sprintf "undefined export %s" id
-              | Some i -> i
-            end
+            Uint32.to_int
+            @@ map_symb
+                 (fun id ->
+                   try find_func id with
+                   | Failure _ ->
+                     if id = "TODO_func" then
+                       !curr_func
+                     else
+                       failwith @@ Format.sprintf "undefined export %s" id )
+                 indice
           in
           Hashtbl.replace exported_funcs name i
         | _ -> ()
@@ -145,23 +165,13 @@ let mk_module m =
     Array.of_list
     @@ List.rev_map
          (fun (rt, table, max) ->
-           let table =
-             (*
-             Array.map
-               (function
-                 | None -> None
-                 | Some e -> (
-                   match e with
-                   | Ref_func (Raw _i) as e -> Some e
-                   | Ref_func (Symbolic id) -> begin
-                     match Hashtbl.find_opt seen_funcs id with
-                     | None -> failwith @@ Format.sprintf "unbound id %s" id
-                     | Some i -> Some (Ref_func (Raw (Uint32.of_int i)))
-                   end
-                   | e -> Some e ) )
-                *)
-             table
-           in
+           (* let table =
+                Array.map
+                  (Option.map (function
+                    | Ref_func id -> Ref_func (Raw (map_symb find_func id))
+                    | e -> e ) )
+                  table
+              in *)
            (rt, table, max) )
          !tables
   in
@@ -169,6 +179,12 @@ let mk_module m =
   let curr_table = ref (-1) in
 
   let data_passive = ref [] in
+
+  let find_table id =
+    match Hashtbl.find_opt seen_tables id with
+    | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+    | Some i -> i
+  in
 
   List.iter
     (function
@@ -179,15 +195,9 @@ let mk_module m =
           data_passive := data.init :: !data_passive
         | Data_active (indice, expr) -> (
           (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
-          let indice =
-            match indice with
-            | Raw i -> Uint32.to_int i
-            | Symbolic i -> (
-              match Hashtbl.find_opt seen_memories i with
-              | None -> failwith @@ Format.sprintf "unbound memory indice $%s" i
-              | Some i -> i )
-          in
-          if indice <> 0 then failwith "multiple memories are not supported yet";
+          let indice = map_symb find_memory indice in
+          if indice <> Uint32.zero then
+            failwith "multiple memories are not supported yet";
           let offset =
             match expr with
             | [] -> failwith "empty data offset"
@@ -217,16 +227,7 @@ let mk_module m =
                 List.map
                   (function
                     | Ref_func rf ->
-                      let rf =
-                        match rf with
-                        | Raw i -> Uint32.to_int i
-                        | Symbolic rf -> (
-                          match Hashtbl.find_opt seen_funcs rf with
-                          | None ->
-                            failwith @@ Format.sprintf "unbound func %s@." rf
-                          | Some rf -> rf )
-                      in
-                      Const_host rf
+                      Const_host (Uint32.to_int @@ map_symb find_func rf)
                     | I32_const n -> Const_I32 n
                     | I64_const n -> Const_I64 n
                     | F32_const f -> Const_F32 f
@@ -243,19 +244,16 @@ let mk_module m =
           (* An active element segment copies its elements into a table during instantiation, as specified by a table index and a constant expression defining an offset into that table. *)
           let (table_ref_type, table, table_max_size), table_indice =
             let indice =
-              match indice with
-              | Raw indice -> Uint32.to_int indice
-              | Symbolic id -> (
-                if id = "TODO_table" then begin
-                  Debug.debug Format.std_formatter "this may fail...@.";
-                  (* TODO ? *)
-                  max !curr_table 0
-                end else
-                  match Hashtbl.find_opt seen_tables id with
-                  | None ->
-                    failwith
-                    @@ Format.sprintf "unbound table id (in elem): `%s`" id
-                  | Some indice -> indice )
+              Uint32.to_int
+              @@ map_symb
+                   (fun id ->
+                     if id = "TODO_table" then begin
+                       Debug.debug Format.std_formatter "this may fail...@.";
+                       (* TODO ? *)
+                       max !curr_table 0
+                     end else
+                       find_table id )
+                   indice
             in
             (tables.(indice), indice)
           in
@@ -273,16 +271,7 @@ let mk_module m =
                   let new_elem =
                     match x with
                     | Ref_func rf ->
-                      let rf =
-                        match rf with
-                        | Raw i -> Uint32.to_int i
-                        | Symbolic rf -> (
-                          match Hashtbl.find_opt seen_funcs rf with
-                          | None ->
-                            failwith @@ Format.sprintf "unbound func %s@." rf
-                          | Some rf -> rf )
-                      in
-                      Const_host rf
+                      Const_host (Uint32.to_int @@ map_symb find_func rf)
                     | I32_const n -> Const_I32 n
                     | I64_const n -> Const_I64 n
                     | F32_const f -> Const_F32 f
@@ -320,152 +309,73 @@ let mk_module m =
          [] fields
   in
 
+  let find_type ind =
+    let i =
+      match ind with
+      | Raw i -> Uint32.to_int i
+      | Symbolic i -> begin
+        match Hashtbl.find_opt seen_types i with
+        | None -> failwith @@ Format.asprintf "unbound type id %a" Pp.id i
+        | Some i -> i
+      end
+    in
+    match Hashtbl.find_opt types i with
+    | None -> failwith @@ Format.sprintf "unbound type i %d" i
+    | Some t -> t
+  in
+
   let funcs =
     Array.map
       (fun f ->
         let local_tbl = Hashtbl.create 512 in
+        let find_local id =
+          match Hashtbl.find_opt local_tbl id with
+          | None -> failwith @@ Format.sprintf "unbound local %s" id
+          | Some i -> i
+        in
         let type_f =
           match f.type_f with
-          | FTId i -> (
-            let i =
-              match i with
-              | Raw i -> Uint32.to_int i
-              | Symbolic i -> (
-                match Hashtbl.find_opt seen_types i with
-                | None -> failwith @@ Format.sprintf "unbound type indice $%s" i
-                | Some i -> i )
-            in
-            match Hashtbl.find_opt types i with
-            | None -> failwith @@ Format.sprintf "unbound type indice %d" i
-            | Some t -> FTFt t )
-          | FTFt _ as t -> t
+          | Bt_ind ind ->
+            let t = find_type ind in
+            t
+          | Bt_raw t -> t
         in
-        let param_n =
-          match type_f with
-          | FTId _i -> failwith "TODO FTId (simplify)"
-          | FTFt (pt, _rt) ->
-            List.iteri
-              (fun i p ->
-                match p with
-                | None, _vt -> ()
-                | Some id, _vt -> Hashtbl.add local_tbl id i )
-              pt;
-            List.length pt
-        in
+        (* adding params and locals to the locals table *)
+        let locals = fst type_f @ f.locals in
         List.iteri
-          (fun i l ->
-            match l with
-            | None, _vt -> ()
-            | Some id, _vt -> Hashtbl.add local_tbl id (param_n + i) )
-          f.locals;
+          (fun i (id, _t) ->
+            Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
+          locals;
         let rec body = function
           | Br_if (Symbolic id) -> Br_if (Symbolic id) (* TODO *)
           | Br (Symbolic id) -> Br (Symbolic id) (* TODO *)
-          | Call (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_funcs id with
-            | None -> failwith @@ Format.sprintf "unbound func: %s" id
-            | Some i -> Call (Raw (Uint32.of_int i))
-          end
-          | Local_set (Symbolic id) -> begin
-            match Hashtbl.find_opt local_tbl id with
-            | None -> failwith @@ Format.sprintf "unbound local: %s" id
-            | Some i -> Local_set (Raw (Uint32.of_int i))
-          end
-          | Local_get (Symbolic id) -> begin
-            match Hashtbl.find_opt local_tbl id with
-            | None -> failwith @@ Format.sprintf "unbound local: %s" id
-            | Some i -> Local_get (Raw (Uint32.of_int i))
-          end
+          | Call id -> Call (Raw (map_symb find_func id))
+          | Local_set id -> Local_set (Raw (map_symb find_local id))
+          | Local_get id -> Local_get (Raw (map_symb find_local id))
           | If_else (bt, e1, e2) -> If_else (bt, expr e1, expr e2)
           | Loop (bt, e) -> Loop (bt, expr e)
           | Block (bt, e) -> Block (bt, expr e)
           | Call_indirect (tbl_i, typ_i) ->
             let typ_i =
               match typ_i with
-              | FTId i -> (
-                let i =
-                  match i with
-                  | Raw i -> Uint32.to_int i
-                  | Symbolic i -> (
-                    match Hashtbl.find_opt seen_types i with
-                    | None ->
-                      failwith @@ Format.sprintf "unbound type indice $%s" i
-                    | Some i -> i )
-                in
-                match Hashtbl.find_opt types i with
-                | None -> failwith @@ Format.sprintf "unbound type indice %d" i
-                | Some t -> FTFt t )
-              | FTFt _ as t -> t
+              | Bt_ind ind -> Bt_raw (find_type ind)
+              | t -> t
             in
-            let tbl_i =
-              match tbl_i with
-              | Raw i -> Raw i
-              | Symbolic tbl_i -> (
-                match Hashtbl.find_opt seen_tables tbl_i with
-                | None ->
-                  failwith @@ Format.sprintf "unbound table id $%s" tbl_i
-                | Some i -> Raw (Uint32.of_int i) )
-            in
-            Call_indirect (tbl_i, typ_i)
-          | Global_set (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_globals id with
-            | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
-            | Some i -> Global_set (Raw (Uint32.of_int i))
-          end
-          | Global_get (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_globals id with
-            | None -> failwith @@ Format.sprintf "unbound global indice $%s" id
-            | Some i -> Global_get (Raw (Uint32.of_int i))
-          end
-          | Ref_func (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_funcs id with
-            | None -> failwith @@ Format.sprintf "unbound func indice $%s" id
-            | Some i -> Ref_func (Raw (Uint32.of_int i))
-          end
-          | Table_size (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_tables id with
-            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_size (Raw (Uint32.of_int i))
-          end
-          | Table_get (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_tables id with
-            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_get (Raw (Uint32.of_int i))
-          end
-          | Table_set (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_tables id with
-            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_set (Raw (Uint32.of_int i))
-          end
-          | Table_grow (Symbolic id) -> begin
-            match Hashtbl.find_opt seen_tables id with
-            | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-            | Some i -> Table_grow (Raw (Uint32.of_int i))
-          end
+            Call_indirect (Raw (map_symb find_table tbl_i), typ_i)
+          | Global_set id -> Global_set (Raw (map_symb find_global id))
+          | Global_get id -> Global_get (Raw (map_symb find_global id))
+          | Ref_func id -> Ref_func (Raw (map_symb find_func id))
+          | Table_size id -> Table_size (Raw (map_symb find_table id))
+          | Table_get id -> Table_get (Raw (map_symb find_table id))
+          | Table_set id -> Table_set (Raw (map_symb find_table id))
+          | Table_grow id -> Table_grow (Raw (map_symb find_table id))
           | Table_init (i, i') ->
-            let i =
-              match i with
-              | Raw i -> i
-              | Symbolic i -> (
-                match Hashtbl.find_opt seen_tables i with
-                | None ->
-                  failwith @@ Format.sprintf "unbound table indice $%s" i
-                | Some i -> Uint32.of_int i )
-            in
-            let i' =
-              match i' with
-              | Raw i' -> i'
-              | Symbolic i' -> (
-                match Hashtbl.find_opt seen_tables i' with
-                | None ->
-                  failwith @@ Format.sprintf "unbound table indice $%s" i'
-                | Some i' -> Uint32.of_int i' )
-            in
-            Table_init (Raw i, Raw i')
+            Table_init
+              (Raw (map_symb find_table i), Raw (map_symb find_table i'))
           | i -> i
         and expr e = List.map body e in
         let body = expr f.body in
-        { f with body; type_f } )
+        { f with body; type_f = Bt_raw type_f } )
       funcs
   in
 
@@ -513,19 +423,7 @@ let script script =
           Module_indice i
         | Assert a -> Assert (assert_ !last_module seen_modules a)
         | Register (name, mod_name) ->
-          let i =
-            match mod_name with
-            | None -> begin
-              match !last_module with
-              | None -> failwith "no module defined"
-              | Some i -> i
-            end
-            | Some mod_name -> begin
-              match Hashtbl.find_opt seen_modules mod_name with
-              | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
-              | Some i -> i
-            end
-          in
+          let i = find_module mod_name !last_module seen_modules in
           Register_indice (name, i)
         | Action a -> Action (action !last_module seen_modules a) )
       script
