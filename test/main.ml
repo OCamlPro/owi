@@ -15,6 +15,8 @@ let test_file f =
       Format.printf "OK !@.";
       Ok ()
     with
+    (* TODO: do not catch Empty *)
+    | Woi.Stack.Empty -> Error "empty stack :S"
     | Failure s
     | Invalid_argument s ->
       Format.printf "FAILED: `%s` !@." s;

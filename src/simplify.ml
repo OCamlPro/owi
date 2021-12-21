@@ -372,18 +372,42 @@ let mk_module m =
           | Call id -> Call (Raw (map_symb find_func id))
           | Local_set id -> Local_set (Raw (map_symb find_local id))
           | Local_get id -> Local_get (Raw (map_symb find_local id))
+          | Local_tee id -> Local_tee (Raw (map_symb find_local id))
           | If_else (id, bt, e1, e2) ->
+            let bt =
+              Option.map
+                (function
+                  | Bt_ind ind -> Bt_raw types.(find_type ind)
+                  | t -> t )
+                bt
+            in
             let block_ids = id :: block_ids in
             If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
-          | Loop (id, bt, e) -> Loop (id, bt, expr e (id :: block_ids))
-          | Block (id, bt, e) -> Block (id, bt, expr e (id :: block_ids))
-          | Call_indirect (tbl_i, typ_i) ->
-            let typ_i =
-              match typ_i with
+          | Loop (id, bt, e) ->
+            let bt =
+              Option.map
+                (function
+                  | Bt_ind ind -> Bt_raw types.(find_type ind)
+                  | t -> t )
+                bt
+            in
+            Loop (id, bt, expr e (id :: block_ids))
+          | Block (id, bt, e) ->
+            let bt =
+              Option.map
+                (function
+                  | Bt_ind ind -> Bt_raw types.(find_type ind)
+                  | t -> t )
+                bt
+            in
+            Block (id, bt, expr e (id :: block_ids))
+          | Call_indirect (tbl_i, bt) ->
+            let bt =
+              match bt with
               | Bt_ind ind -> Bt_raw types.(find_type ind)
               | t -> t
             in
-            Call_indirect (Raw (map_symb find_table tbl_i), typ_i)
+            Call_indirect (Raw (map_symb find_table tbl_i), bt)
           | Global_set id -> Global_set (Raw (map_symb find_global id))
           | Global_get id -> Global_get (Raw (map_symb find_global id))
           | Ref_func id -> Ref_func (Raw (map_symb find_func id))
