@@ -405,7 +405,33 @@ let rec exec_instr env module_indice locals stack instr =
             convert_i64_u n
         in
         Stack.push_f64 stack n ) )
-  | I_reinterpret_f (_n, _n') -> failwith "TODO exec_instr"
+  | I_reinterpret_f (nn, nn') -> begin
+    match nn with
+    | S32 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        let n = Convert.Int32.reinterpret_f32 n in
+        Stack.push_i32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        (* TODO: is demote correct here ? *)
+        let n = Convert.Int32.reinterpret_f32 (Convert.Float32.demote_f64 n) in
+        Stack.push_i32 stack n
+    end
+    | S64 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        (* TODO: is promote correct here ? *)
+        let n = Convert.Int64.reinterpret_f64 (Convert.Float64.promote_f32 n) in
+        Stack.push_i64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        let n = Convert.Int64.reinterpret_f64 n in
+        Stack.push_i64 stack n
+    end
+  end
   | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
   | Ref_null t -> Stack.push stack (Const_null t)
   | Ref_is_null ->
