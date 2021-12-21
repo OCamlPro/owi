@@ -629,7 +629,30 @@ let rec exec_instr env module_indice locals stack instr =
         raise (Trap "out of bounds memory access");
       Bytes.set_int64_le mem offset n;
       stack )
-  | F_store (_, _) -> failwith "TODO F_store"
+  | F_store (nn, { offset; align }) -> (
+    let offset = Uint32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    ignore align;
+    (* TODO: use align *)
+    match nn with
+    | S32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let pos, stack = Stack.pop_i32_to_int stack in
+      (let offset = offset + pos in
+       if Bytes.length mem < offset + 4 || pos < 0 then
+         raise (Trap "out of bounds memory access") )
+      (* TODO: write a proper function for float32_le instead of Obj.magic *);
+      Bytes.set_int32_le mem offset (Obj.magic n);
+      stack
+    | S64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let pos, stack = Stack.pop_i32_to_int stack in
+      (let offset = offset + pos in
+       if Bytes.length mem < offset + 8 || pos < 0 then
+         raise (Trap "out of bounds memory access") )
+      (* TODO: write a proper function for float64_le instead of Obj.magic *);
+      Bytes.set_int64_le mem offset (Obj.magic n);
+      stack )
   | I_load8 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
