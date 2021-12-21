@@ -325,7 +325,10 @@ let rec exec_instr env module_indice locals stack instr =
       | S -> Convert.Int64.trunc_f64_s f
       | U -> Convert.Int64.trunc_f64_u f ) )
   | I_trunc_sat_f (_n, _n', _s) -> failwith "TODO exec_instr"
-  | F32_demote_f64 -> failwith "TODO exec_instr"
+  | F32_demote_f64 ->
+    let n, stack = Stack.pop_f64 stack in
+    let n = Convert.Float32.demote_f64 n in
+    Stack.push_f32 stack n
   | F64_promote_f32 ->
     let n, stack = Stack.pop_f32 stack in
     let n = Convert.Float64.promote_f32 n in
