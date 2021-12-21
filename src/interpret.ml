@@ -283,9 +283,37 @@ let rec exec_instr env module_indice locals stack instr =
   | I_testop (nn, op) -> exec_itestop stack nn op
   | I_relop (nn, op) -> exec_irelop stack nn op
   | F_relop (nn, op) -> exec_frelop stack nn op
-  | I_extend8_s _n -> failwith "TODO exec_instr"
-  | I_extend16_s _n -> failwith "TODO exec_instr"
-  | I64_extend32_s -> failwith "TODO exec_instr"
+  | I_extend8_s nn -> begin
+    match nn with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      (* TODO: fixme *)
+      let n = n in
+      Stack.push_i32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      (* TODO: fixme *)
+      let n = n in
+      Stack.push_i64 stack n
+  end
+  | I_extend16_s nn -> begin
+    match nn with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      (* TODO: fixme *)
+      let n = n in
+      Stack.push_i32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      (* TODO: fixme *)
+      let n = n in
+      Stack.push_i64 stack n
+  end
+  | I64_extend32_s ->
+    let n, stack = Stack.pop_i64 stack in
+    (* TODO: fixme *)
+    let n = n in
+    Stack.push_i64 stack n
   | I32_wrap_i64 ->
     let n, stack = Stack.pop_i64 stack in
     let n = Convert.Int32.wrap_i64 n in
@@ -745,7 +773,19 @@ let rec exec_instr env module_indice locals stack instr =
       raise (Trap "out of bounds memory access");
     Bytes.set_int16_le mem offset n;
     stack
-  | I64_store32 _ -> failwith "TODO I64"
+  | I64_store32 { offset; align } ->
+    let offset = Uint32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    ignore align;
+    (* TODO: use align *)
+    let n, stack = Stack.pop_i64 stack in
+    let n = Int64.to_int32 n in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    let offset = offset + pos in
+    if Bytes.length mem < offset + 4 || pos < 0 then
+      raise (Trap "out of bounds memory access");
+    Bytes.set_int32_le mem offset n;
+    stack
   | Data_drop _ -> failwith "TODO Data_drop"
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
