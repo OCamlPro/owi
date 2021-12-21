@@ -20,6 +20,7 @@ let test_file f =
       let msg = "empty stack :S" in
       Format.printf "FAILED: `%s` !@." msg;
       Error msg
+    | Assert_failure (s, _, _)
     | Woi.Types.Trap s
     | Failure s
     | Invalid_argument s ->

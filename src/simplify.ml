@@ -8,7 +8,7 @@ type module_ =
   ; memories : (Bytes.t * int option) array
   ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
-  ; globals : (global_type * expr) Array.t
+  ; globals : (global_type * const) Array.t
   ; elements : (ref_type * const Array.t) Array.t
   }
 
@@ -86,7 +86,7 @@ type env =
   ; types : func_type list
   }
 
-let mk_module m =
+let mk_module _modules m =
   let exported_funcs = Hashtbl.create 512 in
 
   let mem_max_size = ref None in
@@ -154,6 +154,10 @@ let mk_module m =
             | _ -> ()
           end;
           env
+        | MImport { desc = Import_func (id, _bt); _ } ->
+          let curr_func = env.curr_func + 1 in
+          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
+          { env with curr_func }
         | MMem (id, { min; max }) ->
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
@@ -227,7 +231,33 @@ let mk_module m =
       m.Types.fields
   in
 
-  let globals = List.rev env.globals |> Array.of_list in
+  let globals =
+    let globals = List.rev env.globals |> Array.of_list in
+    Array.map
+      (fun (type_, e) ->
+        let rec handle_e e =
+          match e with
+          | [] -> failwith "empty global expression"
+          | [ I32_const n ] -> Const_I32 n
+          | [ I64_const n ] -> Const_I64 n
+          | [ F32_const f ] -> Const_F32 f
+          | [ F64_const f ] -> Const_F64 f
+          | [ Ref_null rt ] -> Const_null rt
+          | [ Global_get ind ] ->
+            let (_mut, _typ), e =
+              globals.(Uint32.to_int @@ map_symb find_global ind)
+            in
+            handle_e e
+          | [ Ref_func ind ] ->
+            Const_host (Uint32.to_int @@ map_symb find_func ind)
+          | e ->
+            failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
+        in
+        let e = handle_e e in
+        (type_, e) )
+      globals
+  in
+
   let tables = List.rev env.tables |> Array.of_list in
   let types = List.rev env.types |> Array.of_list in
 
@@ -320,6 +350,9 @@ let mk_module m =
     @@ List.fold_left
          (fun acc -> function
            | MFunc f -> f :: acc
+           | MImport { desc = Import_func (id, type_f); _ } ->
+             (* TODO: how to import the function ? *)
+             { type_f; id; locals = []; body = [] } :: acc
            | _field -> acc )
          [] m.Types.fields
   in
@@ -450,7 +483,7 @@ let script script =
             (fun id -> Hashtbl.replace seen_modules id curr_module)
             m.id;
           let cmd = Module_indice curr_module in
-          let modules = mk_module m :: modules in
+          let modules = mk_module modules m :: modules in
           (curr_module, modules, cmd :: script)
         | Assert a ->
           let cmd = Assert (assert_ (Some curr_module) seen_modules a) in

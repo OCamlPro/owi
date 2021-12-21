@@ -589,17 +589,7 @@ let rec exec_instr env module_indice locals stack instr =
     let i = indice_to_int i in
     let globals = env.modules.(module_indice).globals in
     let (_mut, _typ), e = globals.(i) in
-    let rec handle_e = function
-      | [] -> failwith "empty global expr"
-      | [ I32_const n ] -> Stack.push_i32 stack n
-      | [ I64_const n ] -> Stack.push_i64 stack n
-      | [ Ref_null rt ] -> Stack.push stack (Const_null rt)
-      | [ Global_get n ] ->
-        let (_mut, _typ), e = globals.(indice_to_int n) in
-        handle_e e
-      | _ -> failwith @@ Format.asprintf "TODO global_get expr: `%a`" Pp.expr e
-    in
-    handle_e e
+    Stack.push stack e
   | Global_set i -> (
     let i = indice_to_int i in
     let (mut, typ), _e = env.modules.(module_indice).globals.(i) in
@@ -609,7 +599,7 @@ let rec exec_instr env module_indice locals stack instr =
       failwith @@ Format.asprintf "TODO global set ref type `%a`" Pp.ref_type rt
     | Num_type I32 ->
       let v, stack = Stack.pop_i32 stack in
-      env.modules.(module_indice).globals.(i) <- ((mut, typ), [ I32_const v ]);
+      env.modules.(module_indice).globals.(i) <- ((mut, typ), Const_I32 v);
       stack
     | Num_type nt ->
       failwith @@ Format.asprintf "TODO global set num type `%a`" Pp.num_type nt
