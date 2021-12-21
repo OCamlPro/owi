@@ -770,20 +770,18 @@ let rec exec_instr env module_indice locals stack instr =
     | S32 ->
       let n, stack = Stack.pop_f32 stack in
       let pos, stack = Stack.pop_i32_to_int stack in
-      (let offset = offset + pos in
-       if Bytes.length mem < offset + 4 || pos < 0 then
-         raise (Trap "out of bounds memory access") )
-      (* TODO: write a proper function for float32_le instead of Obj.magic *);
-      Bytes.set_int32_le mem offset (Obj.magic n);
+      let offset = offset + pos in
+      if Bytes.length mem < offset + 4 || pos < 0 then
+        raise (Trap "out of bounds memory access");
+      Bytes.set_int32_le mem offset (Float32.to_bits n);
       stack
     | S64 ->
       let n, stack = Stack.pop_f64 stack in
       let pos, stack = Stack.pop_i32_to_int stack in
-      (let offset = offset + pos in
-       if Bytes.length mem < offset + 8 || pos < 0 then
-         raise (Trap "out of bounds memory access") )
-      (* TODO: write a proper function for float64_le instead of Obj.magic *);
-      Bytes.set_int64_le mem offset (Obj.magic n);
+      let offset = offset + pos in
+      if Bytes.length mem < offset + 8 || pos < 0 then
+        raise (Trap "out of bounds memory access");
+      Bytes.set_int64_le mem offset (Float64.to_bits n);
       stack )
   | I_load8 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
@@ -950,7 +948,9 @@ and exec_expr env module_indice locals stack e is_loop bt =
       block_stack e
   in
   let block_stack = Stack.keep block_stack rt in
-  block_stack @ stack
+  let stack = block_stack @ stack in
+  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
+  stack
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
