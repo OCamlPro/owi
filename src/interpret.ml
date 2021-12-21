@@ -195,8 +195,8 @@ let exec_irelop stack nn (op : Types.irelop) =
     let res =
       let open Int32 in
       match op with
-      | Eq -> n1 = n2
-      | Ne -> n1 <> n2
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
       | Lt S -> lt_s n1 n2
       | Lt U -> lt_u n1 n2
       | Gt S -> gt_s n1 n2
@@ -212,8 +212,8 @@ let exec_irelop stack nn (op : Types.irelop) =
     let res =
       let open Int64 in
       match op with
-      | Eq -> n1 = n2
-      | Ne -> n1 <> n2
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
       | Lt S -> lt_s n1 n2
       | Lt U -> lt_u n1 n2
       | Gt S -> gt_s n1 n2
@@ -230,25 +230,27 @@ let exec_frelop stack nn (op : Types.frelop) =
   | S32 ->
     let (n1, n2), stack = Stack.pop2_f32 stack in
     let res =
+      let open Float32 in
       match op with
-      | Eq -> n1 = n2
-      | Ne -> n1 <> n2
-      | Lt -> n1 < n2
-      | Gt -> n1 > n2
-      | Le -> n1 <= n2
-      | Ge -> n1 >= n2
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt -> lt n1 n2
+      | Gt -> gt n1 n2
+      | Le -> le n1 n2
+      | Ge -> ge n1 n2
     in
     Stack.push_bool stack res
   | S64 ->
     let (n1, n2), stack = Stack.pop2_f64 stack in
     let res =
+      let open Float64 in
       match op with
-      | Eq -> n1 = n2
-      | Ne -> n1 <> n2
-      | Lt -> n1 < n2
-      | Gt -> n1 > n2
-      | Le -> n1 <= n2
-      | Ge -> n1 >= n2
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt -> lt n1 n2
+      | Gt -> gt n1 n2
+      | Le -> le n1 n2
+      | Ge -> ge n1 n2
     in
     Stack.push_bool stack res
 
@@ -578,6 +580,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Memory_copy -> failwith "TODO Memory_copy"
   | Memory_init _i -> failwith "TODO Memory_init"
   | Select _t ->
+    (* TODO: check that o1 and o2 have type t *)
     let b, stack = Stack.pop_bool stack in
     let o2, stack = Stack.pop stack in
     let o1, stack = Stack.pop stack in
@@ -909,22 +912,6 @@ let rec exec_instr env module_indice locals stack instr =
     res @ stack
 
 and exec_expr env module_indice locals stack e is_loop bt =
-  let stack =
-    List.fold_left
-      (fun stack instr ->
-        try exec_instr env module_indice locals stack instr with
-        | Branch (stack, -1) ->
-          Debug.debug fmt "Branch -1@.";
-          stack
-        | Branch (stack, 0) when is_loop ->
-          Debug.debug fmt "Branch 0@.";
-          exec_expr env module_indice locals stack e true bt
-        | Branch (stack, n) -> raise (Branch (stack, n - 1)) )
-      stack e
-  in
-  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  stack
-(*
   let pt, rt =
     match bt with
     | None -> (Int.max_int, Int.max_int)
@@ -932,34 +919,44 @@ and exec_expr env module_indice locals stack e is_loop bt =
       let pt, rt = get_bt bt in
       (List.length pt, List.length rt)
   in
-  let block_stack, _stack = Stack.pop_n stack pt in
+  let block_stack, stack = Stack.pop_n stack pt in
   let block_stack =
     List.fold_left
       (fun block_stack instr ->
         try exec_instr env module_indice locals block_stack instr with
         | Branch (block_stack, -1) -> block_stack
         | Branch (block_stack, 0) when is_loop ->
-          exec_expr env module_indice locals block_stack e true bt
-        | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1)) )
+          (* TODO: ?
+             exec_expr env module_indice locals block_stack e true bt
+          *)
+          raise
+          @@ Branch
+               (exec_expr env module_indice locals block_stack e true bt, -1)
+        | Branch (block_stack, 0) ->
+          let block_stack = Stack.keep block_stack rt in
+          let block_stack = block_stack @ stack in
+          raise (Branch (block_stack, -1))
+        | Branch (block_stack, n) ->
+          let block_stack = block_stack @ stack in
+          raise (Branch (block_stack, n - 1))
+        | Return block_stack ->
+          let block_stack = Stack.keep block_stack rt in
+          let block_stack = block_stack @ stack in
+          raise (Return block_stack) )
       block_stack e
   in
   let block_stack = Stack.keep block_stack rt in
-  block_stack @ List.rev stack
-     *)
+  block_stack @ stack
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
-  let stack =
-    try
-      exec_expr env module_indice locals [] func.body false (Some func.type_f)
-    with
-    | Return stack -> stack
-    | Branch (stack, -1) -> stack
-  in
-  let to_keep = List.length @@ snd (get_bt func.type_f) in
-  Stack.keep stack to_keep
+  try
+    exec_expr env module_indice locals [] func.body false (Some func.type_f)
+  with
+  | Return stack -> stack
+  | Branch (stack, -1) -> stack
 
 let invoke env module_indice f args =
   Debug.debug fmt "invoke       : %s@." f;

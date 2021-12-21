@@ -231,32 +231,24 @@ let mk_module _modules m =
       m.Types.fields
   in
 
-  let globals =
-    let globals = List.rev env.globals |> Array.of_list in
-    Array.map
-      (fun (type_, e) ->
-        let rec handle_e e =
-          match e with
-          | [] -> failwith "empty global expression"
-          | [ I32_const n ] -> Const_I32 n
-          | [ I64_const n ] -> Const_I64 n
-          | [ F32_const f ] -> Const_F32 f
-          | [ F64_const f ] -> Const_F64 f
-          | [ Ref_null rt ] -> Const_null rt
-          | [ Global_get ind ] ->
-            let (_mut, _typ), e =
-              globals.(Uint32.to_int @@ map_symb find_global ind)
-            in
-            handle_e e
-          | [ Ref_func ind ] ->
-            Const_host (Uint32.to_int @@ map_symb find_func ind)
-          | e ->
-            failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
-        in
-        let e = handle_e e in
-        (type_, e) )
-      globals
+  let globals = List.rev env.globals |> Array.of_list in
+
+  let rec const_expr = function
+    | [ I32_const n ] -> Const_I32 n
+    | [ I64_const n ] -> Const_I64 n
+    | [ F32_const f ] -> Const_F32 f
+    | [ F64_const f ] -> Const_F64 f
+    | [ Ref_null rt ] -> Const_null rt
+    | [ Global_get ind ] ->
+      let (_mut, _typ), e =
+        globals.(Uint32.to_int @@ map_symb find_global ind)
+      in
+      const_expr e
+    | [ Ref_func ind ] -> Const_host (Uint32.to_int @@ map_symb find_func ind)
+    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
   in
+
+  let globals = Array.map (fun (type_, e) -> (type_, const_expr e)) globals in
 
   let tables = List.rev env.tables |> Array.of_list in
   let types = List.rev env.types |> Array.of_list in
