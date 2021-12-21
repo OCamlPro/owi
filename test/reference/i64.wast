@@ -215,7 +215,7 @@
 (assert_return (invoke "shr_u" (i64.const -1) (i64.const 0x7fffffffffffffff)) (i64.const 1))
 (assert_return (invoke "shr_u" (i64.const -1) (i64.const 0x8000000000000000)) (i64.const -1))
 
-(; TODO (assert_return (invoke "rotl" (i64.const 1) (i64.const 1)) (i64.const 2))
+(assert_return (invoke "rotl" (i64.const 1) (i64.const 1)) (i64.const 2))
 (assert_return (invoke "rotl" (i64.const 1) (i64.const 0)) (i64.const 1))
 (assert_return (invoke "rotl" (i64.const -1) (i64.const 1)) (i64.const -1))
 (assert_return (invoke "rotl" (i64.const 1) (i64.const 64)) (i64.const 1))
@@ -242,7 +242,6 @@
 (assert_return (invoke "rotr" (i64.const 0xabd1234ef567809c) (i64.const 0x800000000000003f)) (i64.const 0x57a2469deacf0139))
 (assert_return (invoke "rotr" (i64.const 1) (i64.const 63)) (i64.const 2))
 (assert_return (invoke "rotr" (i64.const 0x8000000000000000) (i64.const 63)) (i64.const 1))
-;)
 
 (assert_return (invoke "clz" (i64.const 0xffffffffffffffff)) (i64.const 0))
 (assert_return (invoke "clz" (i64.const 0)) (i64.const 64))

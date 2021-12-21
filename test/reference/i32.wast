@@ -214,7 +214,6 @@
 (assert_return (invoke "shr_u" (i32.const -1) (i32.const 0x7fffffff)) (i32.const 1))
 (assert_return (invoke "shr_u" (i32.const -1) (i32.const 0x80000000)) (i32.const -1))
 
-(; TODO
 (assert_return (invoke "rotl" (i32.const 1) (i32.const 1)) (i32.const 2))
 (assert_return (invoke "rotl" (i32.const 1) (i32.const 0)) (i32.const 1))
 (assert_return (invoke "rotl" (i32.const -1) (i32.const 1)) (i32.const -1))
@@ -242,7 +241,6 @@
 (assert_return (invoke "rotr" (i32.const 0x769abcdf) (i32.const 0x8000000d)) (i32.const 0xe6fbb4d5))
 (assert_return (invoke "rotr" (i32.const 1) (i32.const 31)) (i32.const 2))
 (assert_return (invoke "rotr" (i32.const 0x80000000) (i32.const 31)) (i32.const 1))
-;)
 
 (assert_return (invoke "clz" (i32.const 0xffffffff)) (i32.const 0))
 (assert_return (invoke "clz" (i32.const 0)) (i32.const 32))

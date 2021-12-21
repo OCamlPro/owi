@@ -125,7 +125,7 @@
 (module (import "test" "func-i32->i32" (func (param i32) (result i32))))
 (module (import "test" "func-i64->i64" (func (param i64) (result i64))))
 
-(; TODO (assert_unlinkable
+(assert_unlinkable
   (module (import "test" "unknown" (func)))
   "unknown import"
 )
@@ -223,7 +223,7 @@
   (module (import "spectest" "memory" (func)))
   "incompatible import type"
 )
-;)
+
 
 
 ;; Globals
@@ -255,7 +255,6 @@
 (module (import "test" "global-f32" (global f32)))
 (module (import "test" "global-mut-i64" (global (mut i64))))
 
-(; TODO
 (assert_unlinkable
   (module (import "test" "unknown" (global i32)))
   "unknown import"
@@ -338,7 +337,6 @@
   (module (import "spectest" "memory" (global i32)))
   "incompatible import type"
 )
-;)
 
 
 ;; Tables
@@ -409,7 +407,6 @@
 (module (import "spectest" "table" (table 10 25 funcref)))
 (module (import "spectest" "table" (table 5 25 funcref)))
 
-(; TODO
 (assert_unlinkable
   (module (import "test" "unknown" (table 10 funcref)))
   "unknown import"
@@ -460,7 +457,6 @@
   (module (import "spectest" "print_i32" (table 10 funcref)))
   "incompatible import type"
 )
-;)
 
 
 
@@ -468,7 +464,7 @@
 
 (module
   (import "spectest" "memory" (memory 1 2))
-  ;; TODO (data (memory 0) (i32.const 10) "\10")
+  (data (memory 0) (i32.const 10) "\10")
 
   (func (export "load") (param i32) (result i32) (i32.load (local.get 0)))
 )
@@ -480,7 +476,7 @@
 
 (module
   (memory (import "spectest" "memory") 1 2)
-  ;; TODO (data (memory 0) (i32.const 10) "\10")
+  (data (memory 0) (i32.const 10) "\10")
 
   (func (export "load") (param i32) (result i32) (i32.load (local.get 0)))
 )
@@ -512,7 +508,6 @@
 (module (import "spectest" "memory" (memory 1 3)))
 (module (import "spectest" "memory" (memory 0 3)))
 
-(; TODO
 (assert_unlinkable
   (module (import "test" "unknown" (memory 1)))
   "unknown import"
@@ -572,7 +567,6 @@
   (module (import "spectest" "memory" (memory 1 1)))
   "incompatible import type"
 )
-;)
 
 (module
   (import "spectest" "memory" (memory 0 3))  ;; actual has max size 2
@@ -588,14 +582,14 @@
   (memory (export "memory") 1) ;; initial size is 1
   (func (export "grow") (result i32) (memory.grow (i32.const 1)))
 )
-;; TODO (register "grown-memory" $Mgm)
+(register "grown-memory" $Mgm)
 (assert_return (invoke $Mgm "grow") (i32.const 1)) ;; now size is 2
 (module $Mgim1
   ;; imported memory limits should match, because external memory size is 2 now
   (memory (export "memory") (import "grown-memory" "memory") 2)
   (func (export "grow") (result i32) (memory.grow (i32.const 1)))
 )
-;; TODO (register "grown-imported-memory" $Mgim1)
+(register "grown-imported-memory" $Mgim1)
 (assert_return (invoke $Mgim1 "grow") (i32.const 2)) ;; now size is 3
 (module $Mgim2
   ;; imported memory limits should match, because external memory size is 3 now
@@ -680,7 +674,7 @@
 ;; in modules from which wasm can import.
 (module)
 (register "not wasm")
-(; TODO (assert_unlinkable
+(assert_unlinkable
   (module
     (import "not wasm" "overloaded" (func))
     (import "not wasm" "overloaded" (func (param i32)))
@@ -701,4 +695,3 @@
   )
   "unknown import"
 )
-;)

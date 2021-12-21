@@ -102,8 +102,8 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         | S -> shift_right n1 n2
         | U -> shift_right_logical n1 n2
       end
-      | Rotl -> failwith "TODO Rotl"
-      | Rotr -> failwith "TODO Rotr")
+      | Rotl -> rotl n1 n2
+      | Rotr -> rotr n1 n2)
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
@@ -141,8 +141,8 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         | S -> shift_right n1 n2
         | U -> shift_right_logical n1 n2
       end
-      | Rotl -> failwith "TODO Rotl"
-      | Rotr -> failwith "TODO Rotr")
+      | Rotl -> rotl n1 n2
+      | Rotr -> rotr n1 n2)
 
 let exec_fbinop stack nn (op : Types.fbinop) =
   match nn with
@@ -193,25 +193,35 @@ let exec_irelop stack nn (op : Types.irelop) =
   | S32 ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
     let res =
+      let open Int32 in
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
-      | Lt _sx -> n1 < n2
-      | Gt _sx -> n1 > n2
-      | Le _sx -> n1 <= n2
-      | Ge _sx -> n1 >= n2
+      | Lt S -> lt_s n1 n2
+      | Lt U -> lt_u n1 n2
+      | Gt S -> gt_s n1 n2
+      | Gt U -> gt_u n1 n2
+      | Le S -> le_s n1 n2
+      | Le U -> le_u n1 n2
+      | Ge S -> ge_s n1 n2
+      | Ge U -> ge_u n1 n2
     in
     Stack.push_bool stack res
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     let res =
+      let open Int64 in
       match op with
       | Eq -> n1 = n2
       | Ne -> n1 <> n2
-      | Lt _sx -> n1 < n2
-      | Gt _sx -> n1 > n2
-      | Le _sx -> n1 <= n2
-      | Ge _sx -> n1 >= n2
+      | Lt S -> lt_s n1 n2
+      | Lt U -> lt_u n1 n2
+      | Gt S -> gt_s n1 n2
+      | Gt U -> gt_u n1 n2
+      | Le S -> le_s n1 n2
+      | Le U -> le_u n1 n2
+      | Ge S -> ge_s n1 n2
+      | Ge U -> ge_u n1 n2
     in
     Stack.push_bool stack res
 
@@ -287,32 +297,27 @@ let rec exec_instr env module_indice locals stack instr =
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
-      (* TODO: fixme *)
-      let n = n in
+      let n = Int32.extend_s 8 n in
       Stack.push_i32 stack n
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
-      (* TODO: fixme *)
-      let n = n in
+      let n = Int64.extend_s 8 n in
       Stack.push_i64 stack n
   end
   | I_extend16_s nn -> begin
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
-      (* TODO: fixme *)
-      let n = n in
+      let n = Int32.extend_s 16 n in
       Stack.push_i32 stack n
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
-      (* TODO: fixme *)
-      let n = n in
+      let n = Int64.extend_s 16 n in
       Stack.push_i64 stack n
   end
   | I64_extend32_s ->
     let n, stack = Stack.pop_i64 stack in
-    (* TODO: fixme *)
-    let n = n in
+    let n = Int64.extend_s 32 n in
     Stack.push_i64 stack n
   | I32_wrap_i64 ->
     let n, stack = Stack.pop_i64 stack in

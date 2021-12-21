@@ -220,13 +220,13 @@
 
 (assert_return (invoke "set-7" (f32.const 8)))
 (assert_return (invoke "set-8" (f64.const 9)))
-;; TODO: (assert_return (invoke "set-mr" (ref.extern 10)))
+(assert_return (invoke "set-mr" (ref.extern 10)))
 
 (assert_return (invoke "get-x") (i32.const 6))
 (assert_return (invoke "get-y") (i64.const 7))
 (assert_return (invoke "get-7") (f32.const 8))
 (assert_return (invoke "get-8") (f64.const 9))
-;; TODO: (assert_return (invoke "get-mr") (ref.extern 10))
+(assert_return (invoke "get-mr") (ref.extern 10))
 
 (assert_return (invoke "as-select-first") (i32.const 6))
 (assert_return (invoke "as-select-mid") (i32.const 2))

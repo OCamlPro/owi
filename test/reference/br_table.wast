@@ -1434,9 +1434,9 @@
 
 (assert_return (invoke "nested-br_table-loop-block" (i32.const 1)) (i32.const 3))
 
-;; TODO (assert_return (invoke "meet-externref" (i32.const 0) (ref.extern 1)) (ref.extern 1))
-;; TODO (assert_return (invoke "meet-externref" (i32.const 1) (ref.extern 1)) (ref.extern 1))
-;; TODO (assert_return (invoke "meet-externref" (i32.const 2) (ref.extern 1)) (ref.extern 1))
+(assert_return (invoke "meet-externref" (i32.const 0) (ref.extern 1)) (ref.extern 1))
+(assert_return (invoke "meet-externref" (i32.const 1) (ref.extern 1)) (ref.extern 1))
+(assert_return (invoke "meet-externref" (i32.const 2) (ref.extern 1)) (ref.extern 1))
 
 (assert_invalid
   (module (func $type-arg-void-vs-num (result i32)

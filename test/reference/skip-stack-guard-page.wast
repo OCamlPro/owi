@@ -2272,7 +2272,6 @@
   )
 )
 
-(; TODO
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 0)) "call stack exhausted")
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 100)) "call stack exhausted")
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 200)) "call stack exhausted")
@@ -2283,4 +2282,3 @@
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 700)) "call stack exhausted")
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 800)) "call stack exhausted")
 (assert_exhaustion (invoke "test-guard-page-skip" (i32.const 900)) "call stack exhausted")
-;)

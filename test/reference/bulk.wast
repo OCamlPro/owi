@@ -154,7 +154,7 @@
 (module
   (memory 1)
   (data $p "x")
-  ;; TODO (data $a (memory 0) (i32.const 0) "x")
+  (data $a (memory 0) (i32.const 0) "x")
 
   (func (export "drop_passive") (data.drop $p))
   (func (export "init_passive") (param $len i32)
@@ -204,12 +204,11 @@
   (func $zero (result i32) (i32.const 0))
   (func $one (result i32) (i32.const 1))
 
-  (; TODO (func (export "init") (param i32 i32 i32)
+  (func (export "init") (param i32 i32 i32)
     (table.init 0
       (local.get 0)
       (local.get 1)
       (local.get 2)))
-  ;)
 
   (func (export "call") (param i32) (result i32)
     (call_indirect (result i32)
@@ -249,14 +248,14 @@
   (elem $a (table 0) (i32.const 0) func $f)
 
   (func (export "drop_passive") (elem.drop $p))
-  (; TODO (func (export "init_passive") (param $len i32)
+  (func (export "init_passive") (param $len i32)
     (table.init $p (i32.const 0) (i32.const 0) (local.get $len))
-  ) ;)
+  )
 
   (func (export "drop_active") (elem.drop $a))
-  (; TODO (func (export "init_active") (param $len i32)
+  (func (export "init_active") (param $len i32)
     (table.init $a (i32.const 0) (i32.const 0) (local.get $len))
-  ) ;)
+  )
 )
 
 (invoke "init_passive" (i32.const 1))

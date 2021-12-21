@@ -94,11 +94,10 @@
   (start $print)
 )
 
-(; TODO (assert_trap
+(assert_trap
   (module (func $main (unreachable)) (start $main))
   "unreachable"
 )
-;)
 
 (assert_malformed
   (module quote "(module (func $a (unreachable)) (func $b (unreachable)) (start $a) (start $b))")

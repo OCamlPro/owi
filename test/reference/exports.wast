@@ -86,11 +86,11 @@
   (export "e" (global $g))
   (global $g i32 (i32.const 42))
 )
-;; TODO: (assert_return (get "e") (i32.const 42))
-;; TODO: (assert_return (get $Global "e") (i32.const 42))
+(assert_return (get "e") (i32.const 42))
+(assert_return (get $Global "e") (i32.const 42))
 (module)
 (module $Other2)
-;; TODO: (assert_return (get $Global "e") (i32.const 42))
+(assert_return (get $Global "e") (i32.const 42))
 
 (assert_invalid
   (module (export "a" (global 0)))
@@ -145,8 +145,6 @@
 (module (export "a" (table $a)) (table $a 0 funcref))
 (module (export "a" (table $a)) (table $a 0 1 funcref))
 
-(; TODO: access table ;)
-
 (assert_invalid
   (module (export "a" (table 0)))
   "unknown table"
@@ -200,8 +198,6 @@
 (module (export "a" (memory 0)) (memory 0 1))
 (module (export "a" (memory $a)) (memory $a 0))
 (module (export "a" (memory $a)) (memory $a 0 1))
-
-(; TODO: access memory ;)
 
 (assert_invalid
   (module (export "a" (memory 0)))
