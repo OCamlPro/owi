@@ -558,17 +558,21 @@ let rec exec_instr env module_indice locals stack instr =
     let delta, stack = Stack.pop_i32_to_int stack in
     let delta = delta * page_size in
     let old_size = Bytes.length mem in
-    match max with
-    | None ->
-      memories.(0) <- (Bytes.extend mem 0 delta, None);
-      Stack.push_i32_of_int stack (old_size / page_size)
-    | Some max ->
-      if old_size + delta > max * page_size then
-        Stack.push_i32 stack (-1l)
-      else begin
-        memories.(0) <- (Bytes.extend mem 0 delta, Some max);
+    let new_size = old_size + delta in
+    if new_size >= page_size * page_size then
+      Stack.push_i32 stack (-1l)
+    else
+      match max with
+      | None ->
+        memories.(0) <- (Bytes.extend mem 0 delta, None);
         Stack.push_i32_of_int stack (old_size / page_size)
-      end )
+      | Some max ->
+        if new_size > max * page_size then
+          Stack.push_i32 stack (-1l)
+        else begin
+          memories.(0) <- (Bytes.extend mem 0 delta, Some max);
+          Stack.push_i32_of_int stack (old_size / page_size)
+        end )
   | Memory_fill ->
     let start, stack = Stack.pop_i32_to_int stack in
     let byte, stack = Stack.pop_i32_to_int stack in

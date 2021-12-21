@@ -206,12 +206,12 @@ let mk_module _modules m =
             let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
             let len = String.length data.init in
             let src = data.init in
-            Debug.debug Format.std_formatter
-              "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
-               `%d` ; len = `%d`@."
-              src 0
-              (Bytes.to_string mem_bytes)
-              offset len;
+            (* Debug.debug Format.std_formatter
+               "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
+                `%d` ; len = `%d`@."
+               src 0
+               (Bytes.to_string mem_bytes)
+               offset len; *)
             begin
               try Bytes.blit_string src 0 mem_bytes offset len with
               | Invalid_argument _ -> (* TODO *) ()
