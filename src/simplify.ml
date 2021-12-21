@@ -83,40 +83,47 @@ type env =
   ; globals : (global_type * expr) list
   ; mem_bytes : Bytes.t Array.t
   ; tables : (ref_type * const option array * int option) list
+  ; types : func_type list
   }
 
 let mk_module m =
-  let seen_funcs = Hashtbl.create 512 in
   let exported_funcs = Hashtbl.create 512 in
 
-  let seen_memories = Hashtbl.create 512 in
   let mem_max_size = ref None in
 
-  let seen_tables = Hashtbl.create 512 in
-
-  let types = Hashtbl.create 512 in
   let seen_types = Hashtbl.create 512 in
+  let find_type ind =
+    match ind with
+    | Raw i -> Uint32.to_int i
+    | Symbolic i -> begin
+      match Hashtbl.find_opt seen_types i with
+      | None -> failwith @@ Format.asprintf "unbound type id %a" Pp.id i
+      | Some i -> i
+    end
+  in
 
-  let seen_globals = Hashtbl.create 512 in
-
+  let seen_funcs = Hashtbl.create 512 in
   let find_func id =
     match Hashtbl.find_opt seen_funcs id with
     | None -> failwith @@ Format.sprintf "unbound func %s" id
     | Some i -> i
   in
 
+  let seen_memories = Hashtbl.create 512 in
   let find_memory id =
     match Hashtbl.find_opt seen_memories id with
     | None -> failwith @@ Format.sprintf "unbound memory %s" id
     | Some i -> i
   in
 
+  let seen_globals = Hashtbl.create 512 in
   let find_global id =
     match Hashtbl.find_opt seen_globals id with
     | None -> failwith @@ Format.sprintf "unbound global %s" id
     | Some i -> i
   in
 
+  let seen_tables = Hashtbl.create 512 in
   let find_table id =
     match Hashtbl.find_opt seen_tables id with
     | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
@@ -170,11 +177,9 @@ let mk_module m =
           { env with curr_table; tables }
         | MType (id, t) ->
           let curr_type = env.curr_type + 1 in
-          Hashtbl.add types curr_type t;
-          ( match id with
-          | None -> () (* TODO: is there really nothing to do ? *)
-          | Some id -> Hashtbl.add seen_types id curr_type );
-          { env with curr_type }
+          let types = t :: env.types in
+          Option.iter (fun id -> Hashtbl.add seen_types id curr_type) id;
+          { env with curr_type; types }
         | MData data -> begin
           match data.mode with
           | Data_passive ->
@@ -217,12 +222,14 @@ let mk_module m =
       ; globals = []
       ; mem_bytes = Array.init 1 (fun _i -> Bytes.create 0)
       ; tables = []
+      ; types = []
       }
       m.Types.fields
   in
 
   let globals = List.rev env.globals |> Array.of_list in
   let tables = List.rev env.tables |> Array.of_list in
+  let types = List.rev env.types |> Array.of_list in
 
   let curr_table = ref (-1) in
   let passive_elements = ref [] in
@@ -314,21 +321,6 @@ let mk_module m =
          [] m.Types.fields
   in
 
-  let find_type ind =
-    let i =
-      match ind with
-      | Raw i -> Uint32.to_int i
-      | Symbolic i -> begin
-        match Hashtbl.find_opt seen_types i with
-        | None -> failwith @@ Format.asprintf "unbound type id %a" Pp.id i
-        | Some i -> i
-      end
-    in
-    match Hashtbl.find_opt types i with
-    | None -> failwith @@ Format.sprintf "unbound type i %d" i
-    | Some t -> t
-  in
-
   let funcs =
     Array.map
       (fun f ->
@@ -340,9 +332,7 @@ let mk_module m =
         in
         let type_f =
           match f.type_f with
-          | Bt_ind ind ->
-            let t = find_type ind in
-            t
+          | Bt_ind ind -> types.(find_type ind)
           | Bt_raw t -> t
         in
         (* adding params and locals to the locals table *)
@@ -369,19 +359,11 @@ let mk_module m =
         (* handling an expression *)
         let rec body block_ids = function
           | Br_table (ids, id) ->
-            let ids =
-              Array.map
-                (function
-                  | Symbolic id -> Raw (find_block_id id block_ids)
-                  | Raw id -> Raw id )
-                ids
-            in
-            let id =
-              match id with
-              | Raw id -> Raw id
+            let f = function
               | Symbolic id -> Raw (find_block_id id block_ids)
+              | Raw id -> Raw id
             in
-            Br_table (ids, id)
+            Br_table (Array.map f ids, f id)
           | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
           | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
           | Call id -> Call (Raw (map_symb find_func id))
@@ -395,7 +377,7 @@ let mk_module m =
           | Call_indirect (tbl_i, typ_i) ->
             let typ_i =
               match typ_i with
-              | Bt_ind ind -> Bt_raw (find_type ind)
+              | Bt_ind ind -> Bt_raw types.(find_type ind)
               | t -> t
             in
             Call_indirect (Raw (map_symb find_table tbl_i), typ_i)
@@ -418,7 +400,6 @@ let mk_module m =
 
   let elements = List.rev !passive_elements |> Array.of_list in
   let elements = Array.map (fun (rt, l) -> (rt, Array.of_list l)) elements in
-  let types = Hashtbl.to_seq_values types |> Array.of_seq in
 
   { fields = m.Types.fields
   ; funcs
