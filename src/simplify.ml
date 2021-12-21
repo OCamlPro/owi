@@ -38,6 +38,10 @@ let map_symb find_in_tbl = function
   | Raw i -> i
   | Symbolic id -> Uint32.of_int @@ find_in_tbl id
 
+let map_symb_opt default find_in_tbl = function
+  | None -> default
+  | Some sym -> map_symb find_in_tbl sym
+
 let find_module name last seen =
   match name with
   | None -> begin
@@ -127,15 +131,7 @@ let mk_module m =
         | Export_func indice ->
           let i =
             Uint32.to_int
-            @@ map_symb
-                 (fun id ->
-                   try find_func id with
-                   | Failure _ ->
-                     if id = "TODO_func" then
-                       !curr_func
-                     else
-                       failwith @@ Format.sprintf "undefined export %s" id )
-                 indice
+            @@ map_symb_opt (Uint32.of_int !curr_func) find_func indice
           in
           Hashtbl.replace exported_funcs name i
         | _ -> ()
@@ -195,7 +191,7 @@ let mk_module m =
           data_passive := data.init :: !data_passive
         | Data_active (indice, expr) -> (
           (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
-          let indice = map_symb find_memory indice in
+          let indice = map_symb_opt Uint32.zero find_memory indice in
           if indice <> Uint32.zero then
             failwith "multiple memories are not supported yet";
           let offset =
@@ -245,15 +241,7 @@ let mk_module m =
           let (table_ref_type, table, table_max_size), table_indice =
             let indice =
               Uint32.to_int
-              @@ map_symb
-                   (fun id ->
-                     if id = "TODO_table" then begin
-                       Debug.debug Format.std_formatter "this may fail...@.";
-                       (* TODO ? *)
-                       max !curr_table 0
-                     end else
-                       find_table id )
-                   indice
+              @@ map_symb_opt (Uint32.of_int !curr_table) find_table indice
             in
             (tables.(indice), indice)
           in

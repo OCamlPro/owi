@@ -242,7 +242,7 @@ type global =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of indice * expr
+  | Elem_active of indice option * expr
   | Elem_declarative
 
 type elem =
@@ -253,7 +253,7 @@ type elem =
 
 type data_mode =
   | Data_passive
-  | Data_active of indice * expr
+  | Data_active of indice option * expr
 
 type data =
   { init : string
@@ -275,10 +275,10 @@ type import =
   }
 
 type export_desc =
-  | Export_func of indice
-  | Export_table of indice
-  | Export_mem of indice
-  | Export_global of indice
+  | Export_func of indice option
+  | Export_table of indice option
+  | Export_mem of indice option
+  | Export_global of indice option
 
 type export =
   { name : name

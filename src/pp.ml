@@ -26,6 +26,10 @@ let indice fmt = function
   | Raw u -> u32 fmt u
   | Symbolic i -> id fmt i
 
+let indice_opt fmt = function
+  | None -> ()
+  | Some i -> indice fmt i
+
 let num_type fmt : num_type -> Unit.t = function
   | I32 -> Format.fprintf fmt "i32"
   | I64 -> Format.fprintf fmt "i64"
@@ -252,10 +256,10 @@ let func fmt (f : func) =
 let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
 let export_desc fmt = function
-  | Export_func id -> Format.fprintf fmt "(func %a)" indice id
-  | Export_table id -> Format.fprintf fmt "(table %a)" indice id
-  | Export_mem id -> Format.fprintf fmt "(memory %a)" indice id
-  | Export_global id -> Format.fprintf fmt "(global %a)" indice id
+  | Export_func id -> Format.fprintf fmt "(func %a)" indice_opt id
+  | Export_table id -> Format.fprintf fmt "(table %a)" indice_opt id
+  | Export_mem id -> Format.fprintf fmt "(memory %a)" indice_opt id
+  | Export_global id -> Format.fprintf fmt "(global %a)" indice_opt id
 
 let export fmt e =
   Format.fprintf fmt "(export %a %a)" name e.name export_desc e.desc
@@ -291,14 +295,14 @@ let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
 let data_mode fmt = function
   | Data_passive -> ()
-  | Data_active (i, e) -> Format.fprintf fmt "%a %a" indice i expr e
+  | Data_active (i, e) -> Format.fprintf fmt "%a %a" indice_opt i expr e
 
 let data fmt d = Format.fprintf fmt {|(data %a "%s")|} data_mode d.mode d.init
 
 let elem_mode fmt = function
   | Elem_passive -> Format.fprintf fmt "PASSIVE"
   | Elem_active (i, e) ->
-    Format.fprintf fmt "ACTIVE <i: `%a`> <e: `%a`" indice i expr e
+    Format.fprintf fmt "ACTIVE <i: `%a`> <e: `%a`" indice_opt i expr e
   | Elem_declarative -> Format.fprintf fmt "DECLARATIVE"
 
 let elem fmt e =

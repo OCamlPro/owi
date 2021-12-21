@@ -37,16 +37,13 @@ let f64 s =
     (* TODO *)
     Debug.debug Format.err_formatter "error: f64_of_string: `%s` (using `pos_nan` instead)@." s;
     Float64.pos_nan
-    
+
 let f32 s =
   try Float32.of_string s
   with Failure _ ->
     (* TODO *)
     Debug.debug Format.err_formatter "error: f32_of_string: `%s` (using `pos_nan` instead)@." s;
     Float32.pos_nan
-    
-
-let dumb_indice = Symbolic "_dumb_indice_todo_"
 
 %}
 
@@ -547,14 +544,14 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    let indice = Symbolic (Option.value id ~default:"TODO_func") in
+    let func_id = Option.map (fun id -> Symbolic id) id in
     List.rev_map (function
       | MImport i ->
         begin match i.desc with
         | Import_func (_id, ft) -> MImport { i with desc = Import_func (id, ft) }
         | _ -> assert false
         end
-      | MExport e -> MExport { e with desc = Export_func indice }
+      | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
       | field -> field
     ) func_fields
@@ -574,7 +571,7 @@ let func_fields :=
     [MImport { module_; name; desc = Import_func (None, Bt_raw func_fields_import) }]
   }
   | ~ = inline_export; ~ = func_fields; {
-    MExport { name = inline_export; desc = Export_func dumb_indice } :: func_fields
+    MExport { name = inline_export; desc = Export_func None } :: func_fields
   }
 
 let func_fields_import :=
@@ -650,26 +647,25 @@ let elem ==
     [ MElem { type_; init; mode = Elem_passive } ]
   }
   | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_active (table_use, offset) } ]
+    [ MElem { type_; init; mode = Elem_active (Some table_use, offset) } ]
   }
   | ELEM; _ = option(id); DECLARE; (type_, init) = elem_list; {
     [ MElem { type_; init; mode = Elem_declarative } ]
   }
   | ELEM; _ = option(id); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_active (Raw Unsigned.UInt32.zero, offset) } ]
+    [ MElem { type_; init; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
   }
   | ELEM; _ = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { type_ = Func_ref; init = [init]; mode = Elem_active (Raw Unsigned.UInt32.zero, offset) } ]
+    [ MElem { type_ = Func_ref; init = [init]; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
   }
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
-  let tbl_id = Option.value id ~default:"TODO_table" in
-  let id = Symbolic tbl_id in
+  let tbl_id = Option.map (fun id -> Symbolic id) id in
   List.rev_map (function
-    | MTable (_id, tbl) -> MTable (Some tbl_id, tbl)
-    | MExport e -> MExport { e with desc = Export_table id }
-    | MElem e -> MElem { e with mode = Elem_active (id, [I32_const 0l]) }
+    | MTable (_id, tbl) -> MTable (id, tbl)
+    | MExport e -> MExport { e with desc = Export_table tbl_id }
+    | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }
     | field -> field
   ) table_fields
 }
@@ -687,12 +683,12 @@ let table_fields :=
     [ MImport { module_; name; desc = Import_table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
-    MExport { name = inline_export; desc = Export_table dumb_indice } :: table_fields
+    MExport { name = inline_export; desc = Export_table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Unsigned.UInt32.of_int @@ List.length init in
     [ MTable (None, ({ min; max = Some min }, ref_type))
-    ; MElem { type_ = Func_ref; init; mode = Elem_active (dumb_indice, []) } ]
+    ; MElem { type_ = Func_ref; init; mode = Elem_active (None, []) } ]
   }
 
 (* TODO: use id *)
@@ -702,12 +698,12 @@ let data ==
   }
   | DATA; _ = option(id); memory_use = option(memory_use); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw (u32_of_i32 0l)) in
-    [ MData { init; mode = Data_active (memory_use, offset) } ]
+    [ MData { init; mode = Data_active (Some memory_use, offset) } ]
   }
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
-    let mem_id = Symbolic (Option.value id ~default:"TODO_memory") in
+    let mem_id = Option.map (fun id -> Symbolic id) id in
     List.rev_map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
@@ -724,17 +720,17 @@ let memory_fields :=
     [ MImport { module_; name; desc = Import_mem (None, mem_type) } ] (* TODO: None ? *)
   }
   | ~ = inline_export; ~ = memory_fields; {
-    MExport { name = inline_export; desc = Export_mem dumb_indice } :: memory_fields
+    MExport { name = inline_export; desc = Export_mem None } :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
     let min = u32_of_i32 @@ Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     [ MMem (None, { min; max = Some min})
-    ; MData { init; mode = Data_active (dumb_indice, []) } ]
+    ; MData { init; mode = Data_active (None, []) } ]
   }
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    let global_id = Symbolic (Option.value id ~default:"TODO_global") in
+    let global_id = Option.map (fun id -> Symbolic id) id in
     List.rev_map (function
       | MGlobal g -> MGlobal { g with id }
       | MExport e -> MExport { e with desc = Export_global global_id }
@@ -751,7 +747,7 @@ let global_fields :=
     [ MImport { module_; name; desc = Import_global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
-    MExport { name = inline_export; desc = Export_global dumb_indice } :: global_fields
+    MExport { name = inline_export; desc = Export_global None } :: global_fields
   }
 
 (* Imports & Exports *)
@@ -772,10 +768,10 @@ let inline_import ==
   | LPAR; IMPORT; ~ = NAME; ~ = NAME; RPAR; <>
 
 let export_desc ==
-  | FUNC; ~ = indice; <Export_func>
-  | TABLE; ~ = indice; <Export_table>
-  | MEMORY; ~ = indice; <Export_mem>
-  | GLOBAL; ~ = indice; <Export_global>
+  | FUNC; ~ = indice; { Export_func (Some indice) }
+  | TABLE; ~ = indice; { Export_table (Some indice) }
+  | MEMORY; ~ = indice; { Export_mem (Some indice) }
+  | GLOBAL; ~ = indice; { Export_global (Some indice) }
 
 let export ==
   | EXPORT; name = NAME; desc = par(export_desc); {
