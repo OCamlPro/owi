@@ -326,7 +326,10 @@ let rec exec_instr env module_indice locals stack instr =
       | U -> Convert.Int64.trunc_f64_u f ) )
   | I_trunc_sat_f (_n, _n', _s) -> failwith "TODO exec_instr"
   | F32_demote_f64 -> failwith "TODO exec_instr"
-  | F64_promote_f32 -> failwith "TODO exec_instr"
+  | F64_promote_f32 ->
+    let n, stack = Stack.pop_f32 stack in
+    let n = Convert.Float64.promote_f32 n in
+    Stack.push_f64 stack n
   | F_convert_i (n, n', s) -> (
     match n with
     | S32 -> (
@@ -699,8 +702,46 @@ let rec exec_instr env module_indice locals stack instr =
         mem offset
     in
     Stack.push_i64_of_int stack (Int32.to_int res)
-  | I_store8 (_, _) -> failwith "TODO I_store8"
-  | I_store16 (_, _) -> failwith "TODO I_store16"
+  | I_store8 (nn, { offset; align }) ->
+    let offset = Uint32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    ignore align;
+    (* TODO: use align *)
+    let n, stack =
+      match nn with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        (Int32.to_int n, stack)
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        (Int64.to_int n, stack)
+    in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    let offset = offset + pos in
+    if Bytes.length mem < offset + 1 || pos < 0 then
+      raise (Trap "out of bounds memory access");
+    Bytes.set_int8 mem offset n;
+    stack
+  | I_store16 (nn, { offset; align }) ->
+    let offset = Uint32.to_int offset in
+    let mem, _max = env.modules.(module_indice).memories.(0) in
+    ignore align;
+    (* TODO: use align *)
+    let n, stack =
+      match nn with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        (Int32.to_int n, stack)
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        (Int64.to_int n, stack)
+    in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    let offset = offset + pos in
+    if Bytes.length mem < offset + 2 || pos < 0 then
+      raise (Trap "out of bounds memory access");
+    Bytes.set_int16_le mem offset n;
+    stack
   | I64_store32 _ -> failwith "TODO I64"
   | Data_drop _ -> failwith "TODO Data_drop"
   | Br_table (inds, i) ->
