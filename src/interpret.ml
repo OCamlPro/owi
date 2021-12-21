@@ -318,9 +318,13 @@ let rec exec_instr env module_indice locals stack instr =
     let n, stack = Stack.pop_i64 stack in
     let n = Convert.Int32.wrap_i64 n in
     Stack.push_i32 stack n
-  | I64_extend_i32 _s ->
+  | I64_extend_i32 s ->
     let n, stack = Stack.pop_i32 stack in
-    let n = Int64.of_int32 n in
+    let n =
+      match s with
+      | S -> Convert.Int64.extend_i32_s n
+      | U -> Convert.Int64.extend_i32_u n
+    in
     Stack.push_i64 stack n
   | I_trunc_f (n, n', s) -> (
     match (n, n') with
@@ -360,16 +364,16 @@ let rec exec_instr env module_indice locals stack instr =
         let n, stack = Stack.pop_f32 stack in
         let n =
           match s with
-          | S -> Convert.Int32.trunc_f32_s n
-          | U -> Convert.Int32.trunc_f32_u n
+          | S -> Convert.Int32.trunc_sat_f32_s n
+          | U -> Convert.Int32.trunc_sat_f32_u n
         in
         Stack.push_i32 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let n =
           match s with
-          | S -> Convert.Int32.trunc_f64_s n
-          | U -> Convert.Int32.trunc_f64_u n
+          | S -> Convert.Int32.trunc_sat_f64_s n
+          | U -> Convert.Int32.trunc_sat_f64_u n
         in
         Stack.push_i32 stack n
     end
@@ -379,16 +383,16 @@ let rec exec_instr env module_indice locals stack instr =
         let n, stack = Stack.pop_f32 stack in
         let n =
           match s with
-          | S -> Convert.Int64.trunc_f32_s n
-          | U -> Convert.Int64.trunc_f32_u n
+          | S -> Convert.Int64.trunc_sat_f32_s n
+          | U -> Convert.Int64.trunc_sat_f32_u n
         in
         Stack.push_i64 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let n =
           match s with
-          | S -> Convert.Int64.trunc_f64_s n
-          | U -> Convert.Int64.trunc_f64_u n
+          | S -> Convert.Int64.trunc_sat_f64_s n
+          | U -> Convert.Int64.trunc_sat_f64_u n
         in
         Stack.push_i64 stack n
     end
@@ -910,8 +914,6 @@ let rec exec_instr env module_indice locals stack instr =
     res @ stack
 
 and exec_expr env module_indice locals stack e is_loop bt =
-  Debug.debug fmt "starting expr@.";
-  let _rm = ref true in
   let stack =
     List.fold_left
       (fun stack instr ->
@@ -922,29 +924,33 @@ and exec_expr env module_indice locals stack e is_loop bt =
         | Branch (stack, 0) when is_loop ->
           Debug.debug fmt "Branch 0@.";
           exec_expr env module_indice locals stack e true bt
-        | Branch (stack, n) ->
-          Debug.debug fmt "Branch %d@." n;
-          (* TODO ? *)
-          let _stack =
-            match bt with
-            | None -> stack
-            | Some bt ->
-              let to_keep = List.length @@ snd (get_bt bt) in
-              Debug.debug fmt "to keep = %d@." to_keep;
-              Stack.keep stack to_keep
-          in
-          raise (Branch (stack, n - 1)) )
+        | Branch (stack, n) -> raise (Branch (stack, n - 1)) )
       stack e
   in
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  match bt with
-  | None -> stack
-  | Some bt ->
-    let to_keep = List.length @@ snd (get_bt bt) in
-    Debug.debug fmt "to keep = %d@." to_keep;
-    (* TODO: ? *)
-    let _stack = Stack.keep stack to_keep in
-    stack
+  stack
+(*
+  let pt, rt =
+    match bt with
+    | None -> (Int.max_int, Int.max_int)
+    | Some bt ->
+      let pt, rt = get_bt bt in
+      (List.length pt, List.length rt)
+  in
+  let block_stack, _stack = Stack.pop_n stack pt in
+  let block_stack =
+    List.fold_left
+      (fun block_stack instr ->
+        try exec_instr env module_indice locals block_stack instr with
+        | Branch (block_stack, -1) -> block_stack
+        | Branch (block_stack, 0) when is_loop ->
+          exec_expr env module_indice locals block_stack e true bt
+        | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1)) )
+      block_stack e
+  in
+  let block_stack = Stack.keep block_stack rt in
+  block_stack @ List.rev stack
+     *)
 
 and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
@@ -978,10 +984,22 @@ let exec_action env = function
   | Get _ -> failwith "not yet implemented (exec_action)"
 
 let compare_result_const result const =
-  match result with
-  | Result_const c -> const = c
-  | Result_func_ref -> failwith "TODO (compare_result_const)"
-  | Result_extern_ref -> failwith "TODO (compare_result_const)"
+  match (result, const) with
+  | Result_const (Const_I32 n), Const_I32 n' -> n = n'
+  | Result_const (Const_I64 n), Const_I64 n' -> n = n'
+  | Result_const (Const_F32 n), Const_F32 n' -> n = n'
+  | Result_const (Const_F64 n), Const_F64 n' -> n = n'
+  | Result_const (Const_null rt), Const_null rt' -> rt = rt'
+  | Result_const (Const_host n), Const_host n' -> n = n'
+  | Result_const (Const_I32 _), _
+  | Result_const (Const_I64 _), _
+  | Result_const (Const_F32 _), _
+  | Result_const (Const_F64 _), _
+  | Result_const (Const_null _), _
+  | Result_const (Const_host _), _ ->
+    false
+  | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
+  | Result_extern_ref, _ -> failwith "TODO (compare_result_const)"
 
 let exec_assert env = function
   | SAssert_return (action, results_expected) ->
