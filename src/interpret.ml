@@ -1025,6 +1025,7 @@ let exec_assert env = function
       | Trap msg -> assert (msg = expected)
     end;
     env
+  | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
   | SAssert_malformed (_mod, _failure) -> (* TODO *) env
   | SAssert_malformed_quote (_mod, _failure) -> (* TODO *) env
   | SAssert_malformed_binary (_mod, _failure) -> (* TODO *) env

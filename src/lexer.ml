@@ -59,6 +59,8 @@ let id = [%sedlex.regexp? "$", Plus id_char]
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
+  (* 17 *)
+  | "assert_exhaustion" -> ASSERT_EXHAUSTION
   (* 16 *)
   | "assert_malformed" -> ASSERT_MALFORMED
   (* 14 *)

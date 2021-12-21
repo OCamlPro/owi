@@ -335,6 +335,7 @@ type assert_ =
   | Assert_invalid of module_ * string
   | Assert_invalid_quote of string list * string
   | Assert_invalid_binary of string list * string
+  | Assert_exhaustion of action * string
 
 type cmd =
   | Module of module_

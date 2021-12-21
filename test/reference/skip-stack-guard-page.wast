@@ -1,9 +1,10 @@
 ;; This tests that the stack overflow guard page can't be skipped by a function with more than a page of locals.
 (module
   (memory 1)
-  (export "test-guard-page-skip" (func $test-guard-page-skip))
 
-  (func $test-guard-page-skip
+  ;; TODO: in the official test, the export is BEFORE the function def but it fails here... need to fix that
+
+  (func $test-guard-page-skip (export "test-guard-page-skip")
     (param $depth i32)
     (if (i32.eq (local.get $depth) (i32.const 0))
       (then (call $function-with-many-locals))

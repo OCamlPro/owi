@@ -19,6 +19,7 @@ type action =
 type assert_ =
   | SAssert_return of action * result list
   | SAssert_trap of action * string
+  | SAssert_exhaustion of action * string
   | SAssert_malformed of Types.module_ * string
   | SAssert_malformed_quote of string list * string
   | SAssert_malformed_binary of string list * string
@@ -66,6 +67,7 @@ let assert_ last_module seen_modules =
   function
   | Assert_return (a, res) -> SAssert_return (action a, res)
   | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
+  | Assert_exhaustion (a, failure) -> SAssert_exhaustion (action a, failure)
   | Assert_malformed (module_, failure) -> SAssert_malformed (module_, failure)
   | Assert_malformed_quote (m, failure) -> SAssert_malformed_quote (m, failure)
   | Assert_malformed_binary (m, failure) -> SAssert_malformed_binary (m, failure)
