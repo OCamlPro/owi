@@ -46,7 +46,7 @@ let exec_funop stack nn op =
       | Ceil -> ceil f
       | Floor -> floor f
       | Trunc -> trunc f
-      | Nearest -> failwith "TODO: exec_funop Nearest"
+      | Nearest -> nearest f
     in
     Stack.push_f32 stack res
   | S64 ->
@@ -60,7 +60,7 @@ let exec_funop stack nn op =
       | Ceil -> ceil f
       | Floor -> floor f
       | Trunc -> trunc f
-      | Nearest -> failwith "TODO: exec_funop Nearest"
+      | Nearest -> nearest f
     in
     Stack.push_f64 stack res
 
