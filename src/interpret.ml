@@ -357,7 +357,7 @@ let rec exec_instr env module_indice locals stack instr =
     let func = module_.funcs.(indice_to_int i) in
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res = exec_func env module_indice func args in
+    let res = exec_func env module_indice func (List.rev args) in
     res @ stack
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
@@ -664,7 +664,7 @@ let rec exec_instr env module_indice locals stack instr =
     assert (func.type_f = typ_i);
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res = exec_func env module_indice func args in
+    let res = exec_func env module_indice func (List.rev args) in
     res @ stack
 
 and exec_expr env module_indice locals stack e is_loop bt =
