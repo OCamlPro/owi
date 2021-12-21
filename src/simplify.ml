@@ -265,7 +265,10 @@ let mk_module m =
           let (table_ref_type, table, table_max_size), table_indice =
             let indice =
               Uint32.to_int
-              @@ map_symb_opt (Uint32.of_int !curr_table) find_table indice
+              @@ map_symb_opt
+                   (* TODO: why do we have to use 0 when curr_table < 0 ? *)
+                   (Uint32.of_int (max 0 !curr_table))
+                   find_table indice
             in
             (tables.(indice), indice)
           in

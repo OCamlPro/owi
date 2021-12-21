@@ -364,6 +364,7 @@ let assert_ fmt = function
     Format.fprintf fmt "(assert_return %a %a)" action a results l
   | Assert_trap (a, f) ->
     Format.fprintf fmt {|(assert_trap %a "%s")|} action a f
+  | Assert_invalid (_m, _n) -> Format.fprintf fmt "<assert_invalid>"
   | _ -> Format.fprintf fmt "<action TODO>"
 
 let cmd fmt = function
