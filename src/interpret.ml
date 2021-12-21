@@ -370,30 +370,32 @@ let rec exec_instr env module_indice locals stack instr =
   | Block (_id, bt, e) -> exec_expr env module_indice locals stack e false bt
   | Memory_size ->
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let len = Bytes.length !mem / page_size in
+    let len = Bytes.length mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> (
-    let mem, max = env.modules.(module_indice).memories.(0) in
+    let memories = env.modules.(module_indice).memories in
+    let mem, max = memories.(0) in
     let delta, stack = Stack.pop_i32_to_int stack in
     let delta = delta * page_size in
-    let old_size = Bytes.length !mem in
+    let old_size = Bytes.length mem in
     match max with
     | None ->
-      mem := Bytes.extend !mem 0 delta;
+      memories.(0) <- (Bytes.extend mem 0 delta, None);
       Stack.push_i32_of_int stack (old_size / page_size)
     | Some max ->
       if old_size + delta > max * page_size then
         Stack.push_i32 stack (-1l)
       else begin
-        mem := Bytes.extend !mem 0 delta;
+        memories.(0) <- (Bytes.extend mem 0 delta, Some max);
         Stack.push_i32_of_int stack (old_size / page_size)
       end )
   | Memory_fill ->
     let start, stack = Stack.pop_i32_to_int stack in
     let byte, stack = Stack.pop_i32_to_int stack in
     let stop, stack = Stack.pop_i32_to_int stack in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
-    Bytes.fill !mem start (stop - start) (Char.chr byte);
+    let memories = env.modules.(module_indice).memories in
+    let mem, _max = memories.(0) in
+    Bytes.fill mem start (stop - start) (Char.chr byte);
     stack
   | Memory_copy -> failwith "TODO Memory_copy"
   | Memory_init _i -> failwith "TODO Memory_init"
@@ -508,7 +510,6 @@ let rec exec_instr env module_indice locals stack instr =
   | I_load16 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -528,7 +529,6 @@ let rec exec_instr env module_indice locals stack instr =
   | I_load (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -547,7 +547,6 @@ let rec exec_instr env module_indice locals stack instr =
   | F_load (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -568,7 +567,6 @@ let rec exec_instr env module_indice locals stack instr =
   | I_store (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     ignore align;
     (* TODO: use align *)
     match nn with
@@ -592,7 +590,6 @@ let rec exec_instr env module_indice locals stack instr =
   | I_load8 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -621,7 +618,6 @@ let rec exec_instr env module_indice locals stack instr =
   | I64_load32 (sx, { offset; align }) ->
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
-    let mem = !mem in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in

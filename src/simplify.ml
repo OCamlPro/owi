@@ -5,7 +5,7 @@ type module_ =
   ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
-  ; memories : (Bytes.t ref * int option) array
+  ; memories : (Bytes.t * int option) array
   ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
   ; globals : (global_type * expr) Array.t
@@ -73,30 +73,30 @@ let assert_ last_module seen_modules =
   | Assert_invalid_quote (m, failure) -> SAssert_malformed_quote (m, failure)
   | Assert_invalid_binary (m, failure) -> SAssert_invalid_binary (m, failure)
 
-let mk_module m =
-  let fields = m.Types.fields in
+type env =
+  { curr_func : int
+  ; curr_global : int
+  ; curr_memory : int
+  ; curr_table : int
+  ; curr_type : int
+  ; data_passive : string list
+  ; globals : (global_type * expr) list
+  ; mem_bytes : Bytes.t Array.t
+  ; tables : (ref_type * const option array * int option) list
+  }
 
-  let curr_func = ref (-1) in
+let mk_module m =
   let seen_funcs = Hashtbl.create 512 in
   let exported_funcs = Hashtbl.create 512 in
 
   let seen_memories = Hashtbl.create 512 in
-  let curr_memory = ref (-1) in
   let mem_max_size = ref None in
-  let mem_bytes = ref (Bytes.create 0) in
 
-  let curr_table = ref (-1) in
-  let tables = ref [] in
   let seen_tables = Hashtbl.create 512 in
 
   let types = Hashtbl.create 512 in
-  let curr_type = ref (-1) in
   let seen_types = Hashtbl.create 512 in
 
-  let passive_elements = ref [] in
-
-  let curr_global = ref (-1) in
-  let globals = ref [] in
   let seen_globals = Hashtbl.create 512 in
 
   let find_func id =
@@ -113,68 +113,9 @@ let mk_module m =
 
   let find_global id =
     match Hashtbl.find_opt seen_globals id with
-    | None -> failwith @@ Format.sprintf "unbound func %s" id
+    | None -> failwith @@ Format.sprintf "unbound global %s" id
     | Some i -> i
   in
-
-  List.iter
-    (function
-      | MFunc f ->
-        incr curr_func;
-        Option.iter (fun id -> Hashtbl.replace seen_funcs id !curr_func) f.id
-      | MGlobal g ->
-        incr curr_global;
-        Option.iter (fun id -> Hashtbl.add seen_globals id !curr_global) g.id;
-        globals := (g.type_, g.init) :: !globals
-      | MExport { name; desc } -> begin
-        match desc with
-        | Export_func indice ->
-          let i =
-            Uint32.to_int
-            @@ map_symb_opt (Uint32.of_int !curr_func) find_func indice
-          in
-          Hashtbl.replace exported_funcs name i
-        | _ -> ()
-      end
-      | MMem (id, { min; max }) ->
-        incr curr_memory;
-        Option.iter (fun id -> Hashtbl.add seen_memories id !curr_memory) id;
-        mem_max_size := Option.map Uint32.to_int max;
-        mem_bytes := Bytes.create (Uint32.to_int min * page_size)
-      | MTable (id, ({ min; max }, rt)) ->
-        incr curr_table;
-        Option.iter (fun id -> Hashtbl.add seen_tables id !curr_table) id;
-        let tbl =
-          (rt, Array.make (Uint32.to_int min) None, Option.map Uint32.to_int max)
-        in
-        tables := tbl :: !tables
-      | MType (id, t) -> (
-        incr curr_type;
-        Hashtbl.add types !curr_type t;
-        match id with
-        | None -> () (* TODO: is there really nothing to do ? *)
-        | Some id -> Hashtbl.add seen_types id !curr_type )
-      | _ -> () )
-    fields;
-
-  let tables =
-    Array.of_list
-    @@ List.rev_map
-         (fun (rt, table, max) ->
-           (* let table =
-                Array.map
-                  (Option.map (function
-                    | Ref_func id -> Ref_func (Raw (map_symb find_func id))
-                    | e -> e ) )
-                  table
-              in *)
-           (rt, table, max) )
-         !tables
-  in
-
-  let curr_table = ref (-1) in
-
-  let data_passive = ref [] in
 
   let find_table id =
     match Hashtbl.find_opt seen_tables id with
@@ -182,36 +123,112 @@ let mk_module m =
     | Some i -> i
   in
 
+  let env =
+    List.fold_left
+      (fun env -> function
+        | MFunc f ->
+          let curr_func = env.curr_func + 1 in
+          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
+          { env with curr_func }
+        | MGlobal g ->
+          let curr_global = env.curr_global + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) g.id;
+          let globals = (g.type_, g.init) :: env.globals in
+          { env with curr_global; globals }
+        | MExport { name; desc } ->
+          begin
+            match desc with
+            | Export_func indice ->
+              let i =
+                Uint32.to_int
+                @@ map_symb_opt (Uint32.of_int env.curr_func) find_func indice
+              in
+              Hashtbl.replace exported_funcs name i
+            | _ -> ()
+          end;
+          env
+        | MMem (id, { min; max }) ->
+          let curr_memory = env.curr_memory + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
+          mem_max_size := Option.map Uint32.to_int max;
+          env.mem_bytes.(curr_memory) <-
+            Bytes.create (Uint32.to_int min * page_size);
+          env
+        | MTable (id, ({ min; max }, rt)) ->
+          let curr_table = env.curr_table + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
+          let a = Array.make (Uint32.to_int min) None in
+          (* TODO: let a =
+               Array.map
+                 (Option.map (function
+                   | Ref_func id -> Ref_func (Raw (map_symb find_func id))
+                   | e -> e ) )
+                 a
+             in *)
+          let tbl = (rt, a, Option.map Uint32.to_int max) in
+          let tables = tbl :: env.tables in
+          { env with curr_table; tables }
+        | MType (id, t) ->
+          let curr_type = env.curr_type + 1 in
+          Hashtbl.add types curr_type t;
+          ( match id with
+          | None -> () (* TODO: is there really nothing to do ? *)
+          | Some id -> Hashtbl.add seen_types id curr_type );
+          { env with curr_type }
+        | MData data -> begin
+          match data.mode with
+          | Data_passive ->
+            (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
+            let data_passive = data.init :: env.data_passive in
+            { env with data_passive }
+          | Data_active (indice, expr) ->
+            (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
+            let indice = map_symb_opt Uint32.zero find_memory indice in
+            if indice <> Uint32.zero then
+              failwith "multiple memories are not supported yet";
+            let offset =
+              match expr with
+              | [] -> failwith "empty data offset"
+              | [ I32_const n ] -> Int32.to_int n
+              | _ -> failwith "TODO data offset"
+            in
+            let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
+            let len = String.length data.init in
+            let src = data.init in
+            Debug.debug Format.std_formatter
+              "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
+               `%d` ; len = `%d`@."
+              src 0
+              (Bytes.to_string mem_bytes)
+              offset len;
+            begin
+              try Bytes.blit_string src 0 mem_bytes offset len with
+              | Invalid_argument _ -> (* TODO *) ()
+            end;
+            env
+        end
+        | _ -> env )
+      { curr_func = -1
+      ; curr_global = -1
+      ; curr_memory = -1
+      ; curr_table = -1
+      ; curr_type = -1
+      ; data_passive = []
+      ; globals = []
+      ; mem_bytes = Array.init 1 (fun _i -> Bytes.create 0)
+      ; tables = []
+      }
+      m.Types.fields
+  in
+
+  let globals = List.rev env.globals |> Array.of_list in
+  let tables = List.rev env.tables |> Array.of_list in
+
+  let curr_table = ref (-1) in
+  let passive_elements = ref [] in
+
   List.iter
     (function
-      | MData data -> begin
-        match data.mode with
-        | Data_passive ->
-          (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
-          data_passive := data.init :: !data_passive
-        | Data_active (indice, expr) -> (
-          (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
-          let indice = map_symb_opt Uint32.zero find_memory indice in
-          if indice <> Uint32.zero then
-            failwith "multiple memories are not supported yet";
-          let offset =
-            match expr with
-            | [] -> failwith "empty data offset"
-            | [ I32_const n ] -> Int32.to_int n
-            | _ -> failwith "TODO data offset"
-          in
-          let mem_bytes = !mem_bytes in
-          let len = String.length data.init in
-          let src = data.init in
-          Debug.debug Format.std_formatter
-            "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
-             `%d` ; len = `%d`@."
-            src 0
-            (Bytes.to_string mem_bytes)
-            offset len;
-          try Bytes.blit_string src 0 mem_bytes offset len with
-          | Invalid_argument _ -> (* TODO *) () )
-      end
       | MTable _t -> incr curr_table
       | MElem e -> begin
         match e.mode with
@@ -286,7 +303,7 @@ let mk_module m =
           ()
       end
       | _ -> () )
-    fields;
+    m.Types.fields;
 
   let funcs =
     Array.of_list @@ List.rev
@@ -294,7 +311,7 @@ let mk_module m =
          (fun acc -> function
            | MFunc f -> f :: acc
            | _field -> acc )
-         [] fields
+         [] m.Types.fields
   in
 
   let find_type ind =
@@ -399,16 +416,15 @@ let mk_module m =
       funcs
   in
 
-  let globals = List.rev !globals |> Array.of_list in
   let elements = List.rev !passive_elements |> Array.of_list in
   let elements = Array.map (fun (rt, l) -> (rt, Array.of_list l)) elements in
   let types = Hashtbl.to_seq_values types |> Array.of_seq in
 
-  { fields
+  { fields = m.Types.fields
   ; funcs
   ; seen_funcs = Hashtbl.create 512
   ; exported_funcs
-  ; memories = [| (mem_bytes, !mem_max_size) |]
+  ; memories = [| (env.mem_bytes.(0), !mem_max_size) |]
   ; tables
   ; types
   ; globals
@@ -416,37 +432,34 @@ let mk_module m =
   }
 
 let script script =
-  let modules =
-    Array.of_list @@ List.rev
-    @@ List.fold_left
-         (fun acc -> function
-           | Module m -> mk_module m :: acc
-           | Assert _
-           | Register _
-           | Action _ ->
-             acc )
-         [] script
-  in
-
-  let curr_module = ref (-1) in
-  let last_module = ref None in
-  let seen_modules = Hashtbl.create 512 in
-
-  let script =
-    List.map
-      (function
+  let _curr_module, modules, script =
+    let seen_modules = Hashtbl.create 512 in
+    List.fold_left
+      (fun (curr_module, modules, script) -> function
         | Module m ->
-          incr curr_module;
-          let i = !curr_module in
-          last_module := Some i;
-          Option.iter (fun id -> Hashtbl.replace seen_modules id i) m.id;
-          Module_indice i
-        | Assert a -> Assert (assert_ !last_module seen_modules a)
+          let curr_module = curr_module + 1 in
+          Option.iter
+            (fun id -> Hashtbl.replace seen_modules id curr_module)
+            m.id;
+          let cmd = Module_indice curr_module in
+          let modules = mk_module m :: modules in
+          (curr_module, modules, cmd :: script)
+        | Assert a ->
+          let cmd = Assert (assert_ (Some curr_module) seen_modules a) in
+          (curr_module, modules, cmd :: script)
         | Register (name, mod_name) ->
-          let i = find_module mod_name !last_module seen_modules in
-          Register_indice (name, i)
-        | Action a -> Action (action !last_module seen_modules a) )
-      script
+          let cmd =
+            Register_indice
+              (name, find_module mod_name (Some curr_module) seen_modules)
+          in
+          (curr_module, modules, cmd :: script)
+        | Action a ->
+          let cmd = Action (action (Some curr_module) seen_modules a) in
+          (curr_module, modules, cmd :: script) )
+      (-1, [], []) script
   in
+
+  let script = List.rev script in
+  let modules = List.rev modules |> Array.of_list in
 
   (script, modules)
