@@ -352,7 +352,47 @@ let rec exec_instr env module_indice locals stack instr =
       match s with
       | S -> Convert.Int64.trunc_f64_s f
       | U -> Convert.Int64.trunc_f64_u f ) )
-  | I_trunc_sat_f (_n, _n', _s) -> failwith "TODO exec_instr"
+  | I_trunc_sat_f (nn, nn', s) -> begin
+    match nn with
+    | S32 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        let n =
+          match s with
+          | S -> Convert.Int32.trunc_f32_s n
+          | U -> Convert.Int32.trunc_f32_u n
+        in
+        Stack.push_i32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        let n =
+          match s with
+          | S -> Convert.Int32.trunc_f64_s n
+          | U -> Convert.Int32.trunc_f64_u n
+        in
+        Stack.push_i32 stack n
+    end
+    | S64 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        let n =
+          match s with
+          | S -> Convert.Int64.trunc_f32_s n
+          | U -> Convert.Int64.trunc_f32_u n
+        in
+        Stack.push_i64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        let n =
+          match s with
+          | S -> Convert.Int64.trunc_f64_s n
+          | U -> Convert.Int64.trunc_f64_u n
+        in
+        Stack.push_i64 stack n
+    end
+  end
   | F32_demote_f64 ->
     let n, stack = Stack.pop_f64 stack in
     let n = Convert.Float32.demote_f64 n in
@@ -432,7 +472,33 @@ let rec exec_instr env module_indice locals stack instr =
         Stack.push_i64 stack n
     end
   end
-  | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
+  | F_reinterpret_i (nn, nn') -> begin
+    match nn with
+    | S32 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n = Convert.Float32.reinterpret_i32 n in
+        Stack.push_f32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        (* TODO: is Int64.to_int correct here ? *)
+        let n = Convert.Float32.reinterpret_i32 (Int64.to_int32 n) in
+        Stack.push_f32 stack n
+    end
+    | S64 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        (* TODO: is Int64.of_int32 correct here ? *)
+        let n = Convert.Float64.reinterpret_i64 (Int64.of_int32 n) in
+        Stack.push_f64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n = Convert.Float64.reinterpret_i64 n in
+        Stack.push_f64 stack n
+    end
+  end
   | Ref_null t -> Stack.push stack (Const_null t)
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in
