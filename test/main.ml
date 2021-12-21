@@ -16,7 +16,10 @@ let test_file f =
       Ok ()
     with
     (* TODO: do not catch Empty *)
-    | Woi.Stack.Empty -> Error "empty stack :S"
+    | Woi.Stack.Empty ->
+      let msg = "empty stack :S" in
+      Format.printf "FAILED: `%s` !@." msg;
+      Error msg
     | Failure s
     | Invalid_argument s ->
       Format.printf "FAILED: `%s` !@." s;
