@@ -327,7 +327,50 @@ let rec exec_instr env module_indice locals stack instr =
   | I_trunc_sat_f (_n, _n', _s) -> failwith "TODO exec_instr"
   | F32_demote_f64 -> failwith "TODO exec_instr"
   | F64_promote_f32 -> failwith "TODO exec_instr"
-  | F_convert_i (_n, _n', _s) -> failwith "TODO exec_instr"
+  | F_convert_i (n, n', s) -> (
+    match n with
+    | S32 -> (
+      let open Convert.Float32 in
+      match n' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n =
+          if s = S then
+            convert_i32_s n
+          else
+            convert_i32_u n
+        in
+        Stack.push_f32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n =
+          if s = S then
+            convert_i64_s n
+          else
+            convert_i64_u n
+        in
+        Stack.push_f32 stack n )
+    | S64 -> (
+      let open Convert.Float64 in
+      match n' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n =
+          if s = S then
+            convert_i32_s n
+          else
+            convert_i32_u n
+        in
+        Stack.push_f64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n =
+          if s = S then
+            convert_i64_s n
+          else
+            convert_i64_u n
+        in
+        Stack.push_f64 stack n ) )
   | I_reinterpret_f (_n, _n') -> failwith "TODO exec_instr"
   | F_reinterpret_i (_n, _n') -> failwith "TODO exec_instr"
   | Ref_null t -> Stack.push stack (Const_null t)
