@@ -696,7 +696,7 @@ let data ==
   | DATA; _ = option(id); init = string_list; {
     [ MData { init; mode = Data_passive } ]
   }
-  | DATA; _ = option(id); memory_use = option(memory_use); ~ = offset; init = string_list; {
+  | DATA; _ = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw (u32_of_i32 0l)) in
     [ MData { init; mode = Data_active (Some memory_use, offset) } ]
   }
