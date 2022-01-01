@@ -28,7 +28,8 @@ let test_file f =
     | Woi.Types.Trap s
     | Failure s
     | Invalid_argument s ->
-      Format.printf "FAILED: `%s` !@." s;
+      Format.printf "FAILED: `%s` !@."
+        (String.concat " " @@ String.split_on_char '\n' s);
       Error s
   end
   | Error (`Msg e) ->
