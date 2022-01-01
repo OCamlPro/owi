@@ -923,15 +923,16 @@ let exec_assert env = function
            (fun result const -> compare_result_const result const)
            results_expected results_got
     in
-    if not eq then begin
-      Debug.debug Format.err_formatter
-        "assert_return failed !@.expected: `%a`@.got     : `%a`@."
-        (Format.pp_print_list
-           ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
-           Pp.result )
-        results_expected Pp.consts results_got;
-      failwith "assert_return failed !"
-    end;
+    if not eq then
+      begin
+        failwith
+        @@ Format.asprintf
+             "assert_return failed !@.expected: `%a`@.got     : `%a`@."
+             (Format.pp_print_list
+                ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+                Pp.result )
+             results_expected Pp.consts results_got
+      end;
     env
   | SAssert_trap (action, expected) ->
     Debug.debug fmt "assert trap...@.";
