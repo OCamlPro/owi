@@ -284,9 +284,9 @@ let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
 let data_mode fmt = function
   | Data_passive -> ()
-  | Data_active (i, e) -> Format.fprintf fmt "%a %a" indice_opt i expr e
+  | Data_active (i, e) -> Format.fprintf fmt "(%a %a)" indice_opt i expr e
 
-let data fmt d = Format.fprintf fmt {|(data %a "%s")|} data_mode d.mode d.init
+let data fmt d = Format.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
 
 let elem_mode fmt = function
   | Elem_passive -> Format.fprintf fmt "PASSIVE"
