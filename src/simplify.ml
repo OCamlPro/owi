@@ -390,7 +390,14 @@ let mk_module _modules m =
         let find_block_id id l =
           let pos = ref (-1) in
           begin
-            try List.iteri (fun i n -> if n = Some id then pos := i) l
+            try
+              List.iteri
+                (fun i n ->
+                  if n = Some id then begin
+                    pos := i;
+                    raise Exit
+                  end )
+                l
             with Exit -> ()
           end;
 
