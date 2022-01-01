@@ -961,7 +961,6 @@ let exec_module env i =
   let module_ = env.modules.(i) in
   Option.iter
     (fun f_id ->
-      Debug.debug fmt "INITIALIZING MODULEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE@.";
       let _res = exec_func env i module_.funcs.(f_id) [] in
       () )
     module_.start;

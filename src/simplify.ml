@@ -172,9 +172,6 @@ let mk_module _modules m =
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           { env with curr_func }
         | MMem (id, { min; max }) ->
-          Debug.debug Format.std_formatter
-            "MEM : MIN = %d ; MAX = %d ***************************@."
-            (Int32.to_int min) (Int32.to_int min);
           Format.pp_print_flush Format.std_formatter ();
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
@@ -452,12 +449,10 @@ let mk_module _modules m =
           | Table_set id -> Table_set (Raw (map_symb find_table id))
           | Table_grow id -> Table_grow (Raw (map_symb find_table id))
           | Table_init (i, i') ->
-            Debug.debug Format.std_formatter "DILLE 1@.";
             let res =
               Table_init
                 (Raw (map_symb find_table i), Raw (map_symb find_table i'))
             in
-            Debug.debug Format.std_formatter "DILLE 2@.";
             res
           | i -> i
         and expr e block_ids = List.map (body block_ids) e in

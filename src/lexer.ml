@@ -6,6 +6,40 @@ open Menhir_parser
 
 exception LexError of Lexing.position * string
 
+let mk_string s =
+  let b = Buffer.create (String.length s) in
+  let i = ref 0 in
+  while !i < String.length s do
+    let c =
+      if s.[!i] <> '\\' then s.[!i]
+      else
+        match
+          incr i;
+          s.[!i]
+        with
+        | 'n' -> '\n'
+        | 'r' -> '\r'
+        | 't' -> '\t'
+        | '\\' -> '\\'
+        | '\'' -> '\''
+        | '\"' -> '\"'
+        | 'u' ->
+          let j = !i + 2 in
+          i := String.index_from s j '}';
+          let n = int_of_string ("0x" ^ String.sub s j (!i - j)) in
+          let bs = Wutf8.encode [ n ] in
+          Buffer.add_substring b bs 0 (String.length bs - 1);
+          bs.[String.length bs - 1]
+        | h ->
+          incr i;
+          Char.chr
+            (int_of_string ("0x" ^ String.make 1 h ^ String.make 1 s.[!i]))
+    in
+    Buffer.add_char b c;
+    incr i
+  done;
+  Buffer.contents b
+
 let blank = [%sedlex.regexp? ' ' | '\t']
 
 let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
@@ -209,6 +243,7 @@ let rec token buf =
   | name ->
     let name = Utf8.lexeme buf in
     let name = String.sub name 1 (String.length name - 2) in
+    let name = mk_string name in
     NAME name
   | eof -> EOF
   (* | "" -> EOF *)
