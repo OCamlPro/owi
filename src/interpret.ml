@@ -525,7 +525,18 @@ let rec exec_instr env module_indice locals stack instr =
     let mem, _max = memories.(0) in
     Bytes.fill mem start (stop - start) (Char.chr byte);
     stack
-  | Memory_copy -> failwith "TODO Memory_copy"
+  | Memory_copy ->
+    let memories = env.modules.(module_indice).memories in
+    let mem, _max = memories.(0) in
+    let n, stack = Stack.pop_i32_to_int stack in
+    let s, stack = Stack.pop_i32_to_int stack in
+    let d, stack = Stack.pop_i32_to_int stack in
+    if d + n > Bytes.length mem then raise @@ Trap "out of bounds memory access";
+    begin
+      try Bytes.blit mem s mem d n
+      with Invalid_argument _ -> raise (Trap "out of bounds memory access")
+    end;
+    stack
   | Memory_init _i -> failwith "TODO Memory_init"
   | Select _t ->
     (* TODO: check that o1 and o2 have type t *)
