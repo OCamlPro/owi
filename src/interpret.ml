@@ -16,20 +16,14 @@ let exec_iunop stack nn op =
     let n, stack = Stack.pop_i32 stack in
     let res =
       let open Int32 in
-      match op with
-      | Clz -> clz n
-      | Ctz -> ctz n
-      | Popcnt -> popcnt n
+      match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
     in
     Stack.push_i32_of_int stack res
   | S64 ->
     let n, stack = Stack.pop_i64 stack in
     let res =
       let open Int64 in
-      match op with
-      | Clz -> clz n
-      | Ctz -> ctz n
-      | Popcnt -> popcnt n
+      match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
     in
     Stack.push_i64_of_int stack res
 
@@ -81,16 +75,11 @@ let exec_ibinop stack nn (op : Types.ibinop) =
             if n1 = 0x80000000l && n2 = -1l then raise (Trap "integer overflow");
             div n1 n2
           | U -> unsigned_div n1 n2
-        with
-        | Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> raise (Trap "integer divide by zero")
       end
       | Rem s -> begin
-        try
-          match s with
-          | S -> rem n1 n2
-          | U -> unsigned_rem n1 n2
-        with
-        | Division_by_zero -> raise (Trap "integer divide by zero")
+        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+        with Division_by_zero -> raise (Trap "integer divide by zero")
       end
       | And -> logand n1 n2
       | Or -> logor n1 n2
@@ -98,9 +87,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shl -> shift_left n1 (to_int n2)
       | Shr s -> begin
         let n2 = to_int n2 in
-        match s with
-        | S -> shift_right n1 n2
-        | U -> shift_right_logical n1 n2
+        match s with S -> shift_right n1 n2 | U -> shift_right_logical n1 n2
       end
       | Rotl -> rotl n1 n2
       | Rotr -> rotr n1 n2)
@@ -120,16 +107,11 @@ let exec_ibinop stack nn (op : Types.ibinop) =
               raise (Trap "integer overflow");
             div n1 n2
           | U -> unsigned_div n1 n2
-        with
-        | Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> raise (Trap "integer divide by zero")
       end
       | Rem s -> begin
-        try
-          match s with
-          | S -> rem n1 n2
-          | U -> unsigned_rem n1 n2
-        with
-        | Division_by_zero -> raise (Trap "integer divide by zero")
+        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+        with Division_by_zero -> raise (Trap "integer divide by zero")
       end
       | And -> logand n1 n2
       | Or -> logor n1 n2
@@ -137,9 +119,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shl -> shift_left n1 (to_int n2)
       | Shr s -> begin
         let n2 = to_int n2 in
-        match s with
-        | S -> shift_right n1 n2
-        | U -> shift_right_logical n1 n2
+        match s with S -> shift_right n1 n2 | U -> shift_right_logical n1 n2
       end
       | Rotl -> rotl n1 n2
       | Rotr -> rotr n1 n2)
@@ -175,17 +155,11 @@ let exec_itestop stack nn op =
   match nn with
   | S32 ->
     let n, stack = Stack.pop_i32 stack in
-    let res =
-      match op with
-      | Eqz -> n = 0l
-    in
+    let res = match op with Eqz -> n = 0l in
     Stack.push_bool stack res
   | S64 ->
     let n, stack = Stack.pop_i64 stack in
-    let res =
-      match op with
-      | Eqz -> n = 0L
-    in
+    let res = match op with Eqz -> n = 0L in
     Stack.push_bool stack res
 
 let exec_irelop stack nn (op : Types.irelop) =
@@ -419,42 +393,22 @@ let rec exec_instr env module_indice locals stack instr =
       match n' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n =
-          if s = S then
-            convert_i32_s n
-          else
-            convert_i32_u n
-        in
+        let n = if s = S then convert_i32_s n else convert_i32_u n in
         Stack.push_f32 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n =
-          if s = S then
-            convert_i64_s n
-          else
-            convert_i64_u n
-        in
+        let n = if s = S then convert_i64_s n else convert_i64_u n in
         Stack.push_f32 stack n )
     | S64 -> (
       let open Convert.Float64 in
       match n' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n =
-          if s = S then
-            convert_i32_s n
-          else
-            convert_i32_u n
-        in
+        let n = if s = S then convert_i32_s n else convert_i32_u n in
         Stack.push_f64 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n =
-          if s = S then
-            convert_i64_s n
-          else
-            convert_i64_u n
-        in
+        let n = if s = S then convert_i64_s n else convert_i64_u n in
         Stack.push_f64 stack n ) )
   | I_reinterpret_f (nn, nn') -> begin
     match nn with
@@ -526,12 +480,7 @@ let rec exec_instr env module_indice locals stack instr =
     stack
   | If_else (_id, bt, e1, e2) ->
     let b, stack = Stack.pop_bool stack in
-    exec_expr env module_indice locals stack
-      ( if b then
-        e1
-      else
-        e2 )
-      false bt
+    exec_expr env module_indice locals stack (if b then e1 else e2) false bt
   | Call i ->
     let module_ = env.modules.(module_indice) in
     let func = module_.funcs.(indice_to_int i) in
@@ -542,10 +491,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
-    if b then
-      raise (Branch (stack, indice_to_int i))
-    else
-      stack
+    if b then raise (Branch (stack, indice_to_int i)) else stack
   | Loop (_id, bt, e) -> exec_expr env module_indice locals stack e true bt
   | Block (_id, bt, e) -> exec_expr env module_indice locals stack e false bt
   | Memory_size ->
@@ -559,16 +505,14 @@ let rec exec_instr env module_indice locals stack instr =
     let delta = delta * page_size in
     let old_size = Bytes.length mem in
     let new_size = old_size + delta in
-    if new_size >= page_size * page_size then
-      Stack.push_i32 stack (-1l)
+    if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
     else
       match max with
       | None ->
         memories.(0) <- (Bytes.extend mem 0 delta, None);
         Stack.push_i32_of_int stack (old_size / page_size)
       | Some max ->
-        if new_size > max * page_size then
-          Stack.push_i32 stack (-1l)
+        if new_size > max * page_size then Stack.push_i32 stack (-1l)
         else begin
           memories.(0) <- (Bytes.extend mem 0 delta, Some max);
           Stack.push_i32_of_int stack (old_size / page_size)
@@ -588,11 +532,7 @@ let rec exec_instr env module_indice locals stack instr =
     let b, stack = Stack.pop_bool stack in
     let o2, stack = Stack.pop stack in
     let o1, stack = Stack.pop stack in
-    Stack.push stack
-      ( if b then
-        o1
-      else
-        o2 )
+    Stack.push stack (if b then o1 else o2)
   | Local_tee i ->
     let v, stack = Stack.pop stack in
     locals.(indice_to_int i) <- v;
@@ -634,8 +574,8 @@ let rec exec_instr env module_indice locals stack instr =
     let v, stack = Stack.pop stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
-      try table.(indice) <- Some v with
-      | Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+      try table.(indice) <- Some v
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
     stack
   | Table_size indice ->
@@ -678,8 +618,7 @@ let rec exec_instr env module_indice locals stack instr =
       try
         let v = e_e.(s) in
         table.(t_indice) <- Some v
-      with
-      | Invalid_argument _ -> raise @@ Trap "out of bounds table access" );
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access" );
     stack
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
@@ -692,11 +631,7 @@ let rec exec_instr env module_indice locals stack instr =
     if Bytes.length mem < offset + 2 || pos < 0 then
       raise (Trap "out of bounds memory access");
     let res =
-      ( if sx = S then
-        Bytes.get_int16_le
-      else
-        Bytes.get_uint16_le )
-        mem offset
+      (if sx = S then Bytes.get_int16_le else Bytes.get_uint16_le) mem offset
     in
     match nn with
     | S32 -> Stack.push_i32_of_int stack res
@@ -792,25 +727,10 @@ let rec exec_instr env module_indice locals stack instr =
     let offset = offset + pos in
     if Bytes.length mem < offset + 1 || pos < 0 then
       raise (Trap "out of bounds memory access");
+    let res = (if sx = S then Bytes.get_int8 else Bytes.get_uint8) mem offset in
     match nn with
-    | S32 ->
-      let res =
-        ( if sx = S then
-          Bytes.get_int8
-        else
-          Bytes.get_uint8 )
-          mem offset
-      in
-      Stack.push_i32_of_int stack res
-    | S64 ->
-      let res =
-        ( if sx = S then
-          Bytes.get_int8
-        else
-          Bytes.get_uint8 )
-          mem offset
-      in
-      Stack.push_i64_of_int stack res )
+    | S32 -> Stack.push_i32_of_int stack res
+    | S64 -> Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; align }) ->
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
@@ -821,10 +741,8 @@ let rec exec_instr env module_indice locals stack instr =
     if Bytes.length mem < offset + 4 || pos < 0 then
       raise (Trap "out of bounds memory access");
     let res =
-      ( if sx = S then
-        Bytes.get_int32_le
-      else
-        (* TODO: why doesn't get_uint32_le exist ? *)
+      ( if sx = S then Bytes.get_int32_le
+      else (* TODO: why doesn't get_uint32_le exist ? *)
         Bytes.get_int32_le )
         mem offset
     in
@@ -886,10 +804,7 @@ let rec exec_instr env module_indice locals stack instr =
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
     let target =
-      if target < 0 || target >= Array.length inds then
-        i
-      else
-        inds.(target)
+      if target < 0 || target >= Array.length inds then i else inds.(target)
     in
     raise (Branch (stack, indice_to_int target))
   | Call_indirect (tbl_i, typ_i) ->
@@ -1025,10 +940,10 @@ let exec_assert env = function
         let _env, _results = exec_action env action in
         Debug.debug Format.err_formatter "assert_trap failed !@.";
         assert false
-      with
-      | Trap msg -> assert (msg = expected)
+      with Trap msg -> assert (msg = expected)
     end;
     env
+  | SAssert_trap_module (_module, _expected) -> (* TODO *) env
   | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
   | SAssert_malformed (_mod, _failure) -> (* TODO *) env
   | SAssert_malformed_quote (_mod, _failure) -> (* TODO *) env
@@ -1041,7 +956,15 @@ let exec_register env name i =
   Hashtbl.replace env.registered_modules name i;
   env
 
-let exec_module env _i = env
+let exec_module env i =
+  let module_ = env.modules.(i) in
+  Option.iter
+    (fun f_id ->
+      Debug.debug fmt "INITIALIZING MODULEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE@.";
+      let _res = exec_func env i module_.funcs.(f_id) [] in
+      () )
+    module_.start;
+  env
 
 let exec_cmd env = function
   | Module_indice i -> exec_module env i

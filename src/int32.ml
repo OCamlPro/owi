@@ -30,17 +30,13 @@ let cmp_u x op y = op (add x min_int) (add y min_int)
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  if d = zero then
-    raise Division_by_zero
+  if d = zero then raise Division_by_zero
   else
     let t = shift_right d (bitwidth - 1) in
     let n' = logand n (lognot t) in
     let q = shift_left (div (shift_right_logical n' 1) d) 1 in
     let r = sub n (mul q d) in
-    if cmp_u r ( < ) d then
-      (q, r)
-    else
-      (add q one, sub r d)
+    if cmp_u r ( < ) d then (q, r) else (add q one, sub r d)
 
 let of_bits x = x
 
@@ -75,12 +71,9 @@ let high_int = logxor low_int minus_one
 
 (* result is truncated toward zero *)
 let div_s x y =
-  if y = zero then
-    raise Division_by_zero
-  else if x = low_int && y = minus_one then
-    raise Overflow
-  else
-    div x y
+  if y = zero then raise Division_by_zero
+  else if x = low_int && y = minus_one then raise Overflow
+  else div x y
 
 (* result is floored (which is the same as truncating for unsigned values) *)
 let div_u x y =
@@ -88,11 +81,7 @@ let div_u x y =
   q
 
 (* result has the sign of the dividend *)
-let rem_s x y =
-  if y = zero then
-    raise Division_by_zero
-  else
-    rem x y
+let rem_s x y = if y = zero then raise Division_by_zero else rem x y
 
 let rem_u x y =
   let _q, r = divrem_u x y in
@@ -128,8 +117,7 @@ let needs_extend = shl one (of_int (bitwidth - 1)) <> min_int
  * away the top 32-bitwidth bits.
  *)
 let as_unsigned x =
-  if not needs_extend then
-    x
+  if not needs_extend then x
   else
     (* Mask with bottom #bitwidth bits set *)
     let mask = shift_right_logical minus_one (32 - bitwidth) in
@@ -233,12 +221,10 @@ let sign_extend i =
    *   -1 (Int32) << 32 = -1
    * Then the logor will be also wrong. So we check and bail out early.
    * *)
-  if not needs_extend then
-    i
+  if not needs_extend then i
   else
     let sign_bit = logand (of_int (1 lsl (bitwidth - 1))) i in
-    if sign_bit = zero then
-      i
+    if sign_bit = zero then i
     else
       (* Build a sign-extension mask *)
       let sign_mask = shift_left minus_one bitwidth in
@@ -247,20 +233,16 @@ let sign_extend i =
 let of_string s =
   let len = String.length s in
   let rec parse_hex i num =
-    if i = len then
-      num
-    else if s.[i] = '_' then
-      parse_hex (i + 1) num
+    if i = len then num
+    else if s.[i] = '_' then parse_hex (i + 1) num
     else
       let digit = of_int (hex_digit s.[i]) in
       require (le_u num (shr_u minus_one (of_int 4)));
       parse_hex (i + 1) (logor (shift_left num 4) digit)
   in
   let rec parse_dec i num =
-    if i = len then
-      num
-    else if s.[i] = '_' then
-      parse_dec (i + 1) num
+    if i = len then num
+    else if s.[i] = '_' then parse_dec (i + 1) num
     else
       let digit = of_int (dec_digit s.[i]) in
       require (lt_u num max_upper || (num = max_upper && le_u digit max_lower));
@@ -270,8 +252,7 @@ let of_string s =
     require (len - i > 0);
     if i + 2 <= len && s.[i] = '0' && s.[i + 1] = 'x' then
       parse_hex (i + 2) zero
-    else
-      parse_dec i zero
+    else parse_dec i zero
   in
   require (len > 0);
   let parsed =
@@ -308,12 +289,7 @@ let rec add_digits buf s i j k n =
 
 let group_digits n s =
   let len = String.length s in
-  let num =
-    if s.[0] = '-' then
-      1
-    else
-      0
-  in
+  let num = if s.[0] = '-' then 1 else 0 in
   let buf = Buffer.create (len * (n + 1) / n) in
   Buffer.add_substring buf s 0 num;
   add_digits buf s num len (((len - num) mod n) + n) n;
@@ -322,9 +298,7 @@ let group_digits n s =
 let to_string_s i = group_digits 3 (to_string i)
 
 let to_string_u i =
-  if i >= zero then
-    group_digits 3 (to_string i)
-  else
-    group_digits 3 (to_string (div_u i ten) ^ to_string (rem_u i ten))
+  if i >= zero then group_digits 3 (to_string i)
+  else group_digits 3 (to_string (div_u i ten) ^ to_string (rem_u i ten))
 
 let to_hex_string i = "0x" ^ group_digits 4 (to_hex_string i)

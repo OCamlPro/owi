@@ -8,13 +8,7 @@ let create () = []
 
 let push s v = v :: s
 
-let push_bool s b =
-  push s
-    (Const_I32
-       ( if b then
-         1l
-       else
-         0l ) )
+let push_bool s b = push s (Const_I32 (if b then 1l else 0l))
 
 let push_i32 s i = push s (Const_I32 i)
 
@@ -38,21 +32,15 @@ let pp fmt s =
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Pp.const fmt s
 
-let pop = function
-  | [] -> raise Empty
-  | hd :: tl -> (hd, tl)
+let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
-let drop = function
-  | [] -> raise Empty
-  | _hd :: tl -> tl
+let drop = function [] -> raise Empty | _hd :: tl -> tl
 
 let pop_i32 s =
   let hd, tl = pop s in
   match hd with
   | Const_I32 n -> (n, tl)
-  | _
-  | (exception Empty) ->
-    failwith "invalid type (expected i32)"
+  | _ | (exception Empty) -> failwith "invalid type (expected i32)"
 
 let pop_i32_to_int s =
   let hd, tl = pop_i32 s in
@@ -65,8 +53,7 @@ let pop2_i32 s =
     match (n1, n2) with
     | Const_I32 n1, Const_I32 n2 -> ((n1, n2), tl)
     | _ -> failwith "invalid type (expected i32)"
-  with
-  | Empty -> failwith "invalid type (expected i32)"
+  with Empty -> failwith "invalid type (expected i32)"
 
 let pop_i64 s =
   try
@@ -74,8 +61,7 @@ let pop_i64 s =
     match hd with
     | Const_I64 n -> (n, tl)
     | _ -> failwith "invalid type (expected i64)"
-  with
-  | Empty -> failwith "invalid type (expected i64)"
+  with Empty -> failwith "invalid type (expected i64)"
 
 let pop2_i64 s =
   try
@@ -84,8 +70,7 @@ let pop2_i64 s =
     match (n1, n2) with
     | Const_I64 n1, Const_I64 n2 -> ((n1, n2), tl)
     | _ -> failwith "invalid type (expected i64)"
-  with
-  | Empty -> failwith "invalid type (expected i64)"
+  with Empty -> failwith "invalid type (expected i64)"
 
 let pop_f32 s =
   try
@@ -93,8 +78,7 @@ let pop_f32 s =
     match hd with
     | Const_F32 f -> (f, tl)
     | _ -> failwith "invalid type (expected f32)"
-  with
-  | Empty -> failwith "invalid type (expected f32)"
+  with Empty -> failwith "invalid type (expected f32)"
 
 let pop2_f32 s =
   try
@@ -103,8 +87,7 @@ let pop2_f32 s =
     match (n1, n2) with
     | Const_F32 n1, Const_F32 n2 -> ((n1, n2), tl)
     | _ -> failwith "invalid type (expected f32)"
-  with
-  | Empty -> failwith "invalid type (expected f32)"
+  with Empty -> failwith "invalid type (expected f32)"
 
 let pop_f64 s =
   try
@@ -112,8 +95,7 @@ let pop_f64 s =
     match hd with
     | Const_F64 f -> (f, tl)
     | _ -> failwith "invalid type (expected f64)"
-  with
-  | Empty -> failwith "invalid type (expected f64)"
+  with Empty -> failwith "invalid type (expected f64)"
 
 let pop2_f64 s =
   try
@@ -122,8 +104,7 @@ let pop2_f64 s =
     match (n1, n2) with
     | Const_F64 n1, Const_F64 n2 -> ((n1, n2), tl)
     | _ -> failwith "invalid type (expected f64)"
-  with
-  | Empty -> failwith "invalid type (expected f64)"
+  with Empty -> failwith "invalid type (expected f64)"
 
 let pop_bool s =
   try
@@ -131,8 +112,7 @@ let pop_bool s =
     match hd with
     | Const_I32 n -> (n <> 0l, tl)
     | _ -> failwith "invalid type (expected i32 (bool))"
-  with
-  | Empty -> failwith "invalid type (expected i32 (bool))"
+  with Empty -> failwith "invalid type (expected i32 (bool))"
 
 let pop_is_null s =
   try
@@ -141,8 +121,7 @@ let pop_is_null s =
     | Const_null _t -> (true, tl)
     | Const_host _t -> (false, tl) (* TODO: check that a host is never null ? *)
     | _ -> failwith "invalid type (expected const_null)"
-  with
-  | Empty -> failwith "invalid type (expected const_null)"
+  with Empty -> failwith "invalid type (expected const_null)"
 
 let pop_n s n =
   (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)

@@ -96,8 +96,8 @@ let mem_type ==
   | ~ = limits; <>
 
 let limits ==
-  | min = NUM; { {min = u32 min; max = None} }
-  | min = NUM; max = NUM; { {min = u32 min; max = Some (u32 max) } }
+  | min = NUM; { {min = i32 min; max = None} }
+  | min = NUM; max = NUM; { {min = i32 min; max = Some (i32 max) } }
 
 let type_use ==
   | ~ = par(preceded(TYPE, indice)); <>
@@ -686,7 +686,7 @@ let table_fields :=
     MExport { name = inline_export; desc = Export_table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
-    let min = Unsigned.UInt32.of_int @@ List.length init in
+    let min = Int32.of_int @@ List.length init in
     [ MTable (None, ({ min; max = Some min }, ref_type))
     ; MElem { type_ = Func_ref; init; mode = Elem_active (None, []) } ]
   }
@@ -704,7 +704,7 @@ let data ==
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
     let mem_id = Option.map (fun id -> Symbolic id) id in
-    List.rev_map (function
+    List.map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
       | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
@@ -723,7 +723,8 @@ let memory_fields :=
     MExport { name = inline_export; desc = Export_mem None } :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
-    let min = u32_of_i32 @@ Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
+    let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
+    
     [ MMem (None, { min; max = Some min})
     ; MData { init; mode = Data_active (None, []) } ]
   }
@@ -828,6 +829,7 @@ let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
   | ASSERT_EXHAUSTION; ~ = par(action); ~ = NAME; <Assert_exhaustion>
   | ASSERT_TRAP; ~ = par(action); ~ = NAME; <Assert_trap>
+  | ASSERT_TRAP; ~ = par(module_); ~ = NAME; <Assert_trap_module>
   | ASSERT_MALFORMED; ~ = par(module_); ~ = NAME; <Assert_malformed>
   | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_quote>
   | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_binary>

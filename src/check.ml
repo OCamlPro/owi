@@ -29,9 +29,4 @@ let module_ m =
       | MTable _t -> tables := true )
     m.fields
 
-let script s =
-  List.iter
-    (function
-      | Module m -> module_ m
-      | _ -> () )
-    s
+let script s = List.iter (function Module m -> module_ m | _ -> ()) s

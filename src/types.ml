@@ -41,8 +41,8 @@ type nonrec result_type = result_ list
 type nonrec func_type = param_type * result_type
 
 type nonrec limits =
-  { min : Uint32.t
-  ; max : Uint32.t option
+  { min : Int32.t
+  ; max : Int32.t option
   }
 
 type nonrec mem_type = limits
@@ -329,6 +329,7 @@ type result =
 type assert_ =
   | Assert_return of action * result list
   | Assert_trap of action * string
+  | Assert_trap_module of module_ * string
   | Assert_malformed of module_ * string
   | Assert_malformed_quote of string list * string
   | Assert_malformed_binary of string list * string

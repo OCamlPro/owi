@@ -30,8 +30,7 @@ let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
     let token = next_token () in
     let checkpoint = I.offer checkpoint token in
     loop next_token lexbuf checkpoint
-  | I.Shifting _
-  | I.AboutToReduce _ ->
+  | I.Shifting _ | I.AboutToReduce _ ->
     let checkpoint = I.resume checkpoint in
     loop next_token lexbuf checkpoint
   | I.HandlingError env -> handle_syntax_error lexbuf env
@@ -46,6 +45,5 @@ let process lexbuf =
     loop lexer lexbuf
       (Menhir_parser.Incremental.file
          (fst @@ Sedlexing.lexing_positions lexbuf) )
-  with
-  | Lexer.LexError (pos, msg) ->
+  with Lexer.LexError (pos, msg) ->
     failwith @@ Format.asprintf "lexing error : %s at %a%!" msg Pp.pos pos

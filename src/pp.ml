@@ -6,9 +6,7 @@ let print_nothing fmt () = Format.fprintf fmt ""
 
 let id fmt id = Format.fprintf fmt "$%s" id
 
-let id_opt fmt = function
-  | None -> ()
-  | Some i -> id fmt i
+let id_opt fmt = function None -> () | Some i -> id fmt i
 
 let u32 fmt u = Unsigned.UInt32.pp fmt u
 
@@ -22,13 +20,9 @@ let f64 fmt f = Format.fprintf fmt "%s" (Float64.to_string f)
 
 let name fmt name = Format.pp_print_string fmt name
 
-let indice fmt = function
-  | Raw u -> u32 fmt u
-  | Symbolic i -> id fmt i
+let indice fmt = function Raw u -> u32 fmt u | Symbolic i -> id fmt i
 
-let indice_opt fmt = function
-  | None -> ()
-  | Some i -> indice fmt i
+let indice_opt fmt = function None -> () | Some i -> indice fmt i
 
 let num_type fmt : num_type -> Unit.t = function
   | I32 -> Format.fprintf fmt "i32"
@@ -61,22 +55,18 @@ let block_type fmt = function
   | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
   | Bt_raw typ -> Format.fprintf fmt "%a" func_type typ
 
-let block_type_opt fmt = function
-  | None -> ()
-  | Some bt -> block_type fmt bt
+let block_type_opt fmt = function None -> () | Some bt -> block_type fmt bt
 
 let limits fmt { min; max } =
   match max with
-  | None -> Format.fprintf fmt "%a" u32 min
-  | Some max -> Format.fprintf fmt "%a %a" u32 min u32 max
+  | None -> Format.fprintf fmt "%a" i32 min
+  | Some max -> Format.fprintf fmt "%a %a" i32 min i32 max
 
 let mem_type fmt t = limits fmt t
 
 let table_type fmt (mt, rt) = Format.fprintf fmt "%a %a" mem_type mt ref_type rt
 
-let mut fmt = function
-  | Const -> ()
-  | Var -> Format.fprintf fmt "mut"
+let mut fmt = function Const -> () | Var -> Format.fprintf fmt "mut"
 
 let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
 
@@ -130,8 +120,7 @@ let fbinop fmt : Types.fbinop -> Unit.t = function
   | Max -> Format.fprintf fmt "max"
   | Copysign -> Format.fprintf fmt "copysign"
 
-let itestop fmt = function
-  | Eqz -> Format.fprintf fmt "eqz"
+let itestop fmt = function Eqz -> Format.fprintf fmt "eqz"
 
 let irelop fmt : irelop -> Unit.t = function
   | Eq -> Format.fprintf fmt "eq"

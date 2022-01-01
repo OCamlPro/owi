@@ -51,8 +51,7 @@ let test_directory d =
       (List.sort compare l);
     if !count_error > 0 then
       Error (Format.sprintf "%d test failed !" !count_error)
-    else
-      Ok ()
+    else Ok ()
   | Error (`Msg e) ->
     Format.eprintf "error      : %s@." e;
     Error e

@@ -10,6 +10,7 @@ type module_ =
   ; types : func_type Array.t
   ; globals : (global_type * const) Array.t
   ; elements : (ref_type * const Array.t) Array.t
+  ; start : int option
   }
 
 type action =
@@ -19,6 +20,7 @@ type action =
 type assert_ =
   | SAssert_return of action * result list
   | SAssert_trap of action * string
+  | SAssert_trap_module of Types.module_ * string
   | SAssert_exhaustion of action * string
   | SAssert_malformed of Types.module_ * string
   | SAssert_malformed_quote of string list * string
@@ -46,9 +48,7 @@ let map_symb_opt default find_in_tbl = function
 let find_module name last seen =
   match name with
   | None -> begin
-    match last with
-    | None -> failwith "no module defined"
-    | Some i -> i
+    match last with None -> failwith "no module defined" | Some i -> i
   end
   | Some mod_name -> begin
     match Hashtbl.find_opt seen mod_name with
@@ -67,6 +67,8 @@ let assert_ last_module seen_modules =
   function
   | Assert_return (a, res) -> SAssert_return (action a, res)
   | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
+  | Assert_trap_module (module_, failure) ->
+    SAssert_trap_module (module_, failure)
   | Assert_exhaustion (a, failure) -> SAssert_exhaustion (action a, failure)
   | Assert_malformed (module_, failure) -> SAssert_malformed (module_, failure)
   | Assert_malformed_quote (m, failure) -> SAssert_malformed_quote (m, failure)
@@ -86,6 +88,7 @@ type env =
   ; mem_bytes : Bytes.t Array.t
   ; tables : (ref_type * const option array * int option) list
   ; types : func_type list
+  ; start : int option
   }
 
 let mk_module _modules m =
@@ -135,6 +138,14 @@ let mk_module _modules m =
   let env =
     List.fold_left
       (fun env -> function
+        | MStart indice ->
+          begin
+            match env.start with
+            | None -> ()
+            | Some _id -> failwith "multiple start functions are not allowed"
+          end;
+          let indice = Uint32.to_int @@ map_symb find_func indice in
+          { env with start = Some indice }
         | MFunc f ->
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
@@ -161,16 +172,20 @@ let mk_module _modules m =
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           { env with curr_func }
         | MMem (id, { min; max }) ->
+          Debug.debug Format.std_formatter
+            "MEM : MIN = %d ; MAX = %d ***************************@."
+            (Int32.to_int min) (Int32.to_int min);
+          Format.pp_print_flush Format.std_formatter ();
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          mem_max_size := Option.map Uint32.to_int max;
+          mem_max_size := Option.map Int32.to_int max;
           env.mem_bytes.(curr_memory) <-
-            Bytes.create (Uint32.to_int min * page_size);
+            Bytes.create (Int32.to_int min * page_size);
           env
         | MTable (id, ({ min; max }, rt)) ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
-          let a = Array.make (Uint32.to_int min) None in
+          let a = Array.make (Int32.to_int min) None in
           (* TODO: let a =
                Array.map
                  (Option.map (function
@@ -178,7 +193,7 @@ let mk_module _modules m =
                    | e -> e ) )
                  a
              in *)
-          let tbl = (rt, a, Option.map Uint32.to_int max) in
+          let tbl = (rt, a, Option.map Int32.to_int max) in
           let tables = tbl :: env.tables in
           { env with curr_table; tables }
         | MType (id, t) ->
@@ -206,16 +221,16 @@ let mk_module _modules m =
             let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
             let len = String.length data.init in
             let src = data.init in
-            (* Debug.debug Format.std_formatter
-               "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
-                `%d` ; len = `%d`@."
-               src 0
-               (Bytes.to_string mem_bytes)
-               offset len; *)
-            begin
-              try Bytes.blit_string src 0 mem_bytes offset len with
-              | Invalid_argument _ -> (* TODO *) ()
-            end;
+            (*
+            let bytes_len = Bytes.length mem_bytes in
+            Debug.debug Format.std_formatter
+              "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
+               `%d` ; len = `%d` ; bytes_len = %d@."
+              src 0
+              (Bytes.to_string mem_bytes)
+              offset len bytes_len;
+   *)
+            Bytes.blit_string src 0 mem_bytes offset len;
             env
         end
         | _ -> env )
@@ -229,9 +244,12 @@ let mk_module _modules m =
       ; mem_bytes = Array.init 1 (fun _i -> Bytes.create 0)
       ; tables = []
       ; types = []
+      ; start = None
       }
       m.Types.fields
   in
+
+  let start = env.start in
 
   let globals = List.rev env.globals |> Array.of_list in
 
@@ -327,9 +345,8 @@ let mk_module _modules m =
                     Array.iteri (fun i e -> new_table.(i) <- e) table;
                     new_table.(pos) <- Some new_elem;
                     tables.(table_indice) <-
-                      (table_ref_type, new_table, table_max_size)
-                  ) else
-                    table.(pos) <- Some new_elem )
+                      (table_ref_type, new_table, table_max_size) )
+                  else table.(pos) <- Some new_elem )
                 expr )
             e.init
         | Elem_declarative ->
@@ -376,14 +393,12 @@ let mk_module _modules m =
         let find_block_id id l =
           let pos = ref (-1) in
           begin
-            try List.iteri (fun i n -> if n = Some id then pos := i) l with
-            | Exit -> ()
+            try List.iteri (fun i n -> if n = Some id then pos := i) l
+            with Exit -> ()
           end;
 
-          if !pos = -1 then
-            failwith @@ Format.sprintf "unbound label %s" id
-          else
-            Uint32.of_int !pos
+          if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id
+          else Uint32.of_int !pos
         in
 
         (* handling an expression *)
@@ -403,9 +418,7 @@ let mk_module _modules m =
           | If_else (id, bt, e1, e2) ->
             let bt =
               Option.map
-                (function
-                  | Bt_ind ind -> Bt_raw types.(find_type ind)
-                  | t -> t )
+                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
                 bt
             in
             let block_ids = id :: block_ids in
@@ -413,18 +426,14 @@ let mk_module _modules m =
           | Loop (id, bt, e) ->
             let bt =
               Option.map
-                (function
-                  | Bt_ind ind -> Bt_raw types.(find_type ind)
-                  | t -> t )
+                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
                 bt
             in
             Loop (id, bt, expr e (id :: block_ids))
           | Block (id, bt, e) ->
             let bt =
               Option.map
-                (function
-                  | Bt_ind ind -> Bt_raw types.(find_type ind)
-                  | t -> t )
+                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
                 bt
             in
             Block (id, bt, expr e (id :: block_ids))
@@ -443,8 +452,13 @@ let mk_module _modules m =
           | Table_set id -> Table_set (Raw (map_symb find_table id))
           | Table_grow id -> Table_grow (Raw (map_symb find_table id))
           | Table_init (i, i') ->
-            Table_init
-              (Raw (map_symb find_table i), Raw (map_symb find_table i'))
+            Debug.debug Format.std_formatter "DILLE 1@.";
+            let res =
+              Table_init
+                (Raw (map_symb find_table i), Raw (map_symb find_table i'))
+            in
+            Debug.debug Format.std_formatter "DILLE 2@.";
+            res
           | i -> i
         and expr e block_ids = List.map (body block_ids) e in
         let body = expr f.body [] in
@@ -464,6 +478,7 @@ let mk_module _modules m =
   ; types
   ; globals
   ; elements
+  ; start
   }
 
 let script script =

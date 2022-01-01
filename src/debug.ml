@@ -5,7 +5,4 @@ let enable, disable, is_enabled =
   , fun () -> !debug_on = true )
 
 let debug fmt =
-  if is_enabled () then
-    Format.fprintf fmt
-  else
-    Format.ifprintf fmt
+  if is_enabled () then Format.fprintf fmt else Format.ifprintf fmt
