@@ -307,7 +307,6 @@
   )
   "out of bounds table access"
 )
-;)
 
 ;; Implicitly dropped elements
 
