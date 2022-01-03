@@ -95,13 +95,17 @@ let rec token buf =
   | Plus any_blank -> token buf
   (* 17 *)
   | "assert_exhaustion" -> ASSERT_EXHAUSTION
+  | "assert_unlinkable" -> ASSERT_UNLINKABLE
   (* 16 *)
   | "assert_malformed" -> ASSERT_MALFORMED
   (* 14 *)
   | "assert_invalid" -> ASSERT_INVALID
+  | "nan:arithmetic" ->
+    NUM (Float.to_string @@ Float.of_string "0xc_0000_0000_0000")
   (* 13 *)
   | "assert_return" -> ASSERT_RETURN
   | "call_indirect" -> CALL_INDIRECT
+  | "nan:canonical" -> NUM (Float.to_string Float.nan)
   (* 11 *)
   | "assert_trap" -> ASSERT_TRAP
   | "promote_f32" -> PROMOTE_F32

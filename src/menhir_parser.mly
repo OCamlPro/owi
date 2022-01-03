@@ -1,6 +1,6 @@
 %token <String.t> NUM
 %token<String.t> ID NAME
-%token ASSERT_INVALID ASSERT_MALFORMED ASSERT_EXHAUSTION ASSERT_TRAP PARAM RESULT FUNCREF EXTERNREF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAP_I64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE REGISTER TRUNC_SAT BINARY
+%token ASSERT_INVALID ASSERT_MALFORMED ASSERT_EXHAUSTION ASSERT_TRAP ASSERT_UNLINKABLE PARAM RESULT FUNCREF EXTERNREF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAP_I64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE REGISTER TRUNC_SAT BINARY
 
 %{
 open Types
@@ -11,39 +11,13 @@ let u32 s =
   try Unsigned.UInt32.of_string s
   with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
 
-let u64 s =
-  try Unsigned.UInt64.of_string s
-  with Failure _ -> failwith (Format.sprintf "error u64 constant `%s` out of range" s)
+let i32 s = Int32.of_string s
 
-let i32 s =
-  try Int32.of_string s
-  with Failure _ ->
-    (* TODO *)
-    Debug.debug Format.err_formatter "error: i32_of_string: `%s`, using u32 instead@." s;
-    let u32 = u32 s in
-    Obj.magic u32
+let i64 s = Int64.of_string s
 
-let i64 s =
-  try Int64.of_string s
-  with Failure _ ->
-    (* TODO *)
-    Debug.debug Format.err_formatter "error: i64_of_string: `%s`, using u64 instead@." s;
-    let u64 = u64 s in
-    Obj.magic u64
+let f64 s = Float64.of_string s
 
-let f64 s =
-  try Float64.of_string s
-  with Failure _ ->
-    (* TODO *)
-    Debug.debug Format.err_formatter "error: f64_of_string: `%s` (using `pos_nan` instead)@." s;
-    Float64.pos_nan
-
-let f32 s =
-  try Float32.of_string s
-  with Failure _ ->
-    (* TODO *)
-    Debug.debug Format.err_formatter "error: f32_of_string: `%s` (using `pos_nan` instead)@." s;
-    Float32.pos_nan
+let f32 s = Float32.of_string s
 
 %}
 
@@ -806,7 +780,17 @@ let module_field :=
   | ~ = memory; <>
 
 let module_ :=
-  | MODULE; id = option(id); fields = list(par(module_field)); {
+  | MODULE; id = ioption(id); fields = list(par(module_field)); {
+    (* TODO: handle fields_bin
+    let fields_bin = String.concat "" l in *)
+    let fields = List.flatten fields in
+    { id; fields }
+  }
+
+let module_binary :=
+  | MODULE; id = ioption(id); BINARY; fields = list(par(module_field)); _ = list(NAME); {
+    (* TODO: handle fields_bin
+    let fields_bin = String.concat "" l in *)
     let fields = List.flatten fields in
     { id; fields }
   }
@@ -836,15 +820,18 @@ let assert_ ==
   | ASSERT_INVALID; ~ = par(module_); ~ = NAME; <Assert_invalid>
   | ASSERT_INVALID; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_quote>
   | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
+  | ASSERT_UNLINKABLE; ~ = par(module_); ~ = NAME; <Assert_unlinkable>
 
 let register ==
   | REGISTER; ~ = NAME; ~ = option(id); <Register>
 
 let action ==
   | INVOKE; ~ = ioption(id); ~ = NAME; ~ = list(par(const)); <Invoke>
+  | GET; ~ = ioption(id); ~ = NAME; <Get>
 
 let cmd ==
   | ~ = par(module_); <Module>
+  | ~ = par(module_binary); <Module>
   | ~ = par(assert_); <Assert>
   | ~ = par(register); <>
   | ~ = par(action); <Action>

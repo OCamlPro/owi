@@ -90,7 +90,6 @@
   (module (import "Mg" "glob" (global (mut i32))))
   "incompatible import type"
 )
-;)
 
 
 (module $Mref_ex
@@ -284,7 +283,7 @@
   )
   "out of bounds memory access"
 )
-;)
+
 (assert_return (invoke $Mt "call" (i32.const 7)) (i32.const 0))
 
 

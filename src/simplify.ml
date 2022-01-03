@@ -28,6 +28,7 @@ type assert_ =
   | SAssert_invalid of Types.module_ * string
   | SAssert_invalid_quote of string list * string
   | SAssert_invalid_binary of string list * string
+  | SAssert_unlinkable of Types.module_ * string
 
 type cmd =
   | Module_indice of int
@@ -60,7 +61,9 @@ let action last_module seen_modules = function
   | Invoke (mod_name, f, args) ->
     let i = find_module mod_name last_module seen_modules in
     Invoke_indice (i, f, args)
-  | Get _ -> failwith "not yet implemented"
+  | Get (id, n) ->
+    (* TODO: simplify this *)
+    Get (id, n)
 
 let assert_ last_module seen_modules =
   let action = action last_module seen_modules in
@@ -76,6 +79,7 @@ let assert_ last_module seen_modules =
   | Assert_invalid (module_, failure) -> SAssert_invalid (module_, failure)
   | Assert_invalid_quote (m, failure) -> SAssert_malformed_quote (m, failure)
   | Assert_invalid_binary (m, failure) -> SAssert_invalid_binary (m, failure)
+  | Assert_unlinkable (m, s) -> SAssert_unlinkable (m, s)
 
 type env =
   { curr_func : int

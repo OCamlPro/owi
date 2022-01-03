@@ -6,7 +6,7 @@ type env =
   ; registered_modules : (string, int) Hashtbl.t
   }
 
-let empty_env = { modules = [||]; registered_modules = Hashtbl.create 64 }
+let empty_env () = { modules = [||]; registered_modules = Hashtbl.create 64 }
 
 exception Return of Stack.t
 
@@ -963,6 +963,7 @@ let exec_assert env = function
   | SAssert_invalid (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_binary (_mod, _failure) -> (* TODO *) env
+  | SAssert_unlinkable (_mod, _failure) -> (* TODO *) env
 
 let exec_register env name i =
   Hashtbl.replace env.registered_modules name i;
@@ -987,6 +988,7 @@ let exec script modules =
   let env =
     List.fold_left
       (fun env cmd -> exec_cmd env cmd)
-      { empty_env with modules } script
+      { (empty_env ()) with modules }
+      script
   in
   ignore env
