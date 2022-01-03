@@ -181,7 +181,7 @@ let mk_module _modules m =
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
           mem_max_size := Option.map Int32.to_int max;
           env.mem_bytes.(curr_memory) <-
-            Bytes.create (Int32.to_int min * page_size);
+            Bytes.make (Int32.to_int min * page_size) (Char.chr 0);
           env
         | MTable (id, ({ min; max }, rt)) ->
           let curr_table = env.curr_table + 1 in
@@ -242,7 +242,7 @@ let mk_module _modules m =
       ; curr_type = -1
       ; data_passive = []
       ; globals = []
-      ; mem_bytes = Array.init 1 (fun _i -> Bytes.create 0)
+      ; mem_bytes = Array.init 1 (fun _i -> Bytes.make 0 (Char.chr 0))
       ; tables = []
       ; types = []
       ; start = None
