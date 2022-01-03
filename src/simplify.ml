@@ -175,6 +175,26 @@ let mk_module _modules m =
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           { env with curr_func }
+        | MImport { desc = Import_global (id, gt); module_; name } ->
+          let curr_global = env.curr_global + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
+          let spectest = module_ = "spectest" in
+          let init =
+            match name with
+            | "global_i32" when spectest -> [ I32_const 666l ]
+            | "global_i64" when spectest -> [ I64_const 666L ]
+            | "global_f32" when spectest ->
+              [ F32_const (Float32.of_float 666.) ]
+            | "global_f64" when spectest ->
+              [ F64_const (Float64.of_float 666.) ]
+            | name ->
+              failwith
+              @@ Format.asprintf
+                   "TODO Import_global (module = %s; name = %s; id = %a)"
+                   module_ name Pp.id_opt id
+          in
+          let globals = (gt, init) :: env.globals in
+          { env with curr_global; globals }
         | MMem (id, { min; max }) ->
           Format.pp_print_flush Format.std_formatter ();
           let curr_memory = env.curr_memory + 1 in

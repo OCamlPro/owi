@@ -553,20 +553,36 @@ let rec exec_instr env module_indice locals stack instr =
     let globals = env.modules.(module_indice).globals in
     let (_mut, _typ), e = globals.(i) in
     Stack.push stack e
-  | Global_set i -> (
+  | Global_set i ->
     let i = indice_to_int i in
     let (mut, typ), _e = env.modules.(module_indice).globals.(i) in
     if mut = Const then failwith "Can't set const global";
-    match typ with
-    | Ref_type rt ->
-      failwith @@ Format.asprintf "TODO global set ref type `%a`" Pp.ref_type rt
-    | Num_type I32 ->
-      let v, stack = Stack.pop_i32 stack in
-      env.modules.(module_indice).globals.(i) <- ((mut, typ), Const_I32 v);
-      stack
-    | Num_type nt ->
-      failwith @@ Format.asprintf "TODO global set num type `%a`" Pp.num_type nt
-    )
+    let v, stack =
+      match typ with
+      | Ref_type rt -> begin
+        (* TODO: it's weird that they are the same type ? *)
+        match rt with
+        | Extern_ref | Func_ref ->
+          let v, stack = Stack.pop_host stack in
+          (Const_host v, stack)
+      end
+      | Num_type nt -> (
+        match nt with
+        | I32 ->
+          let v, stack = Stack.pop_i32 stack in
+          (Const_I32 v, stack)
+        | I64 ->
+          let v, stack = Stack.pop_i64 stack in
+          (Const_I64 v, stack)
+        | F32 ->
+          let v, stack = Stack.pop_f32 stack in
+          (Const_F32 v, stack)
+        | F64 ->
+          let v, stack = Stack.pop_f64 stack in
+          (Const_F64 v, stack) )
+    in
+    env.modules.(module_indice).globals.(i) <- ((mut, typ), v);
+    stack
   | Table_get indice ->
     let indice = indice_to_int indice in
     let t, table, _max = env.modules.(module_indice).tables.(indice) in
