@@ -837,4 +837,10 @@ let cmd ==
   | ~ = par(action); <Action>
 
 let file :=
-  | ~ = list(cmd); EOF; <>
+  | ~ = nonempty_list(cmd); EOF; <>
+  | fields = nonempty_list(par(module_field)); EOF; {
+    let fields = List.flatten fields in
+    let id = None in
+    let module_ = { id; fields } in
+    [ Module module_ ]
+  }
