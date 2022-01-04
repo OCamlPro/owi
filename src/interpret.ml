@@ -504,15 +504,12 @@ let rec exec_instr env module_indice locals stack instr =
     if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
     else
       match max with
-      | None ->
-        memories.(0) <- (Bytes.extend mem 0 delta, None);
-        Stack.push_i32_of_int stack (old_size / page_size)
-      | Some max ->
-        if new_size > max * page_size then Stack.push_i32 stack (-1l)
-        else begin
-          memories.(0) <- (Bytes.extend mem 0 delta, Some max);
-          Stack.push_i32_of_int stack (old_size / page_size)
-        end )
+      | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
+      | (None | Some _) as max ->
+        let bytes = Bytes.extend mem 0 delta in
+        Bytes.fill bytes old_size delta (Char.chr 0);
+        memories.(0) <- (bytes, max);
+        Stack.push_i32_of_int stack (old_size / page_size) )
   | Memory_fill ->
     let start, stack = Stack.pop_i32_to_int stack in
     let byte, stack = Stack.pop_i32_to_int stack in
@@ -873,29 +870,23 @@ and exec_expr env module_indice locals stack e is_loop bt =
   in
   let block_stack, stack = Stack.pop_n stack pt in
   let block_stack =
-    List.fold_left
-      (fun block_stack instr ->
-        try exec_instr env module_indice locals block_stack instr with
-        | Branch (block_stack, -1) -> block_stack
-        | Branch (block_stack, 0) when is_loop ->
-          (* TODO: ?
-             exec_expr env module_indice locals block_stack e true bt
-          *)
-          raise
-          @@ Branch
-               (exec_expr env module_indice locals block_stack e true bt, -1)
-        | Branch (block_stack, 0) ->
-          let block_stack = Stack.keep block_stack rt in
-          let block_stack = block_stack @ stack in
-          raise (Branch (block_stack, -1))
-        | Branch (block_stack, n) ->
-          let block_stack = block_stack @ stack in
-          raise (Branch (block_stack, n - 1))
-        | Return block_stack ->
-          let block_stack = Stack.keep block_stack rt in
-          let block_stack = block_stack @ stack in
-          raise (Return block_stack) )
-      block_stack e
+    try
+      List.fold_left
+        (fun block_stack instr ->
+          try exec_instr env module_indice locals block_stack instr
+          with Branch (block_stack, -1) -> block_stack )
+        block_stack e
+    with
+    | Branch (block_stack, 0) when is_loop ->
+      exec_expr env module_indice locals block_stack e true bt
+    | Branch (block_stack, 0) -> block_stack
+    | Branch (block_stack, n) ->
+      let block_stack = block_stack @ stack in
+      raise (Branch (block_stack, n - 1))
+    | Return block_stack ->
+      let block_stack = Stack.keep block_stack rt in
+      let block_stack = block_stack @ stack in
+      raise (Return block_stack)
   in
   let block_stack = Stack.keep block_stack rt in
   let stack = block_stack @ stack in
