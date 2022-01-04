@@ -1,5 +1,7 @@
 (lang dune 2.8)
 
+(using menhir 2.1)
+
 (name woi)
 
 (license ISC)
@@ -24,4 +26,3 @@
    (>= 4.08))
   (integers
    (>= 0.5.1))))
-(using menhir 2.1)

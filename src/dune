@@ -12,7 +12,6 @@
   interpret
   lexer
   menhir_parser
-  menhir_parser_errors
   pp
   simplify
   stack
@@ -31,42 +30,5 @@
  (libraries sedlex woi))
 
 (menhir
- (flags --table --canonical --explain)
+ (flags --table --canonical)
  (modules menhir_parser))
-
-(rule
- (target menhir_parser_errors.ml)
- (action
-  (with-stdout-to
-   menhir_parser_errors.ml
-   (run
-    menhir
-    --canonical
-    menhir_parser.mly
-    ;--compile-errors
-    ;menhir_parser.messages
-    )))
- (deps menhir_parser.mly menhir_parser.messages))
-
-;(rule
-; (alias gen_menhir_messages)
-; (target menhir_parser.messages.raw)
-; (action
-;  (with-stdout-to
-;   menhir_parser.messages.raw
-;   (run menhir --canonical --list-errors menhir_parser.mly)))
-; (deps menhir_parser.mly))
-
-;(rule
-; (alias update_menhir_messages)
-; (target menhir_parser.messages.new)
-; (action
-;  (with-stdout-to
-;  menhir_parser.messages.new
-;   (run
-;    menhir
-;    --canonical
-;    --update-errors
-;    menhir_parser.messages
-;    menhir_parser.mly)))
-; (deps menhir_parser.mly menhir_parser.messages))
