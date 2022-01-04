@@ -706,14 +706,18 @@ let memory_fields :=
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
     let global_id = Option.map (fun id -> Symbolic id) id in
-    List.rev_map (function
+    List.map (function
       | MGlobal g -> MGlobal { g with id }
       | MExport e -> MExport { e with desc = Export_global global_id }
+      | MImport i ->
+        begin match i.desc with
+        | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
+        | _ -> assert false
+        end
       | field -> field
     ) global_fields
   }
 
-(* TODO: None -> _x ? *)
 let global_fields :=
   | type_ = global_type; init = const_expr; {
     [ MGlobal { type_; init; id = None } ]

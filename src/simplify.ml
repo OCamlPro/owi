@@ -139,6 +139,21 @@ let mk_module _modules m =
     | Some i -> i
   in
 
+  let rec const_expr globals = function
+    | [ I32_const n ] -> Const_I32 n
+    | [ I64_const n ] -> Const_I64 n
+    | [ F32_const f ] -> Const_F32 f
+    | [ F64_const f ] -> Const_F64 f
+    | [ Ref_null rt ] -> Const_null rt
+    | [ Global_get ind ] ->
+      let (_mut, _typ), e =
+        globals.(Uint32.to_int @@ map_symb find_global ind)
+      in
+      const_expr globals e
+    | [ Ref_func ind ] -> Const_host (Uint32.to_int @@ map_symb find_func ind)
+    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
+  in
+
   let env =
     List.fold_left
       (fun env -> function
@@ -171,11 +186,20 @@ let mk_module _modules m =
             | _ -> ()
           end;
           env
-        | MImport { desc = Import_func (id, _bt); _ } ->
+        | MImport { desc = Import_func (id, _t); _ } ->
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           { env with curr_func }
-        | MImport { desc = Import_global (id, gt); module_; name } ->
+        | MImport { desc = Import_mem (id, _t); module_; name } ->
+          let curr_memory = env.curr_memory + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
+          if module_ = "spectest" && name = "memory" then begin
+            mem_max_size := Some 2;
+            env.mem_bytes.(curr_memory) <- Bytes.make page_size (Char.chr 0)
+          end;
+          (* TODO: other cases *)
+          env
+        | MImport { desc = Import_global (id, t); module_; name } ->
           let curr_global = env.curr_global + 1 in
           Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
           let spectest = module_ = "spectest" in
@@ -193,10 +217,9 @@ let mk_module _modules m =
                    "TODO Import_global (module = %s; name = %s; id = %a)"
                    module_ name Pp.id_opt id
           in
-          let globals = (gt, init) :: env.globals in
+          let globals = (t, init) :: env.globals in
           { env with curr_global; globals }
         | MMem (id, { min; max }) ->
-          Format.pp_print_flush Format.std_formatter ();
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
           mem_max_size := Option.map Int32.to_int max;
@@ -234,10 +257,10 @@ let mk_module _modules m =
             if indice <> Uint32.zero then
               failwith "multiple memories are not supported yet";
             let offset =
-              match expr with
-              | [] -> failwith "empty data offset"
-              | [ I32_const n ] -> Int32.to_int n
-              | _ -> failwith "TODO data offset"
+              match const_expr (List.rev env.globals |> Array.of_list) expr with
+              | Const_I32 n -> Int32.to_int n
+              | c ->
+                failwith @@ Format.asprintf "TODO data_offset `%a`" Pp.const c
             in
             let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
             let len = String.length data.init in
@@ -250,7 +273,7 @@ let mk_module _modules m =
               src 0
               (Bytes.to_string mem_bytes)
               offset len bytes_len;
-   *)
+               *)
             Bytes.blit_string src 0 mem_bytes offset len;
             env
         end
@@ -274,20 +297,7 @@ let mk_module _modules m =
 
   let globals = List.rev env.globals |> Array.of_list in
 
-  let rec const_expr = function
-    | [ I32_const n ] -> Const_I32 n
-    | [ I64_const n ] -> Const_I64 n
-    | [ F32_const f ] -> Const_F32 f
-    | [ F64_const f ] -> Const_F64 f
-    | [ Ref_null rt ] -> Const_null rt
-    | [ Global_get ind ] ->
-      let (_mut, _typ), e =
-        globals.(Uint32.to_int @@ map_symb find_global ind)
-      in
-      const_expr e
-    | [ Ref_func ind ] -> Const_host (Uint32.to_int @@ map_symb find_func ind)
-    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
-  in
+  let const_expr = const_expr globals in
 
   let globals = Array.map (fun (type_, e) -> (type_, const_expr e)) globals in
 

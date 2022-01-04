@@ -391,7 +391,7 @@
 )
 
 (assert_invalid
-  (module 
+  (module
     (memory 1)
     (data (offset (;empty instruction sequence;)))
   )
@@ -463,7 +463,7 @@
 ;; )
 
 (assert_invalid
-   (module 
+   (module
      (memory 1)
      (data (global.get 0))
    )
@@ -480,7 +480,7 @@
 )
 
 (assert_invalid
-   (module 
+   (module
      (global (import "test" "global-mut-i32") (mut i32))
      (memory 1)
      (data (global.get 0))
