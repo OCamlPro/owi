@@ -6,6 +6,7 @@ type module_ =
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t * int option) array
+  ; datas : string option array
   ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
   ; globals : (global_type * const) Array.t
@@ -87,7 +88,7 @@ type env =
   ; curr_memory : int
   ; curr_table : int
   ; curr_type : int
-  ; data_passive : string list
+  ; datas : string option list
   ; globals : (global_type * expr) list
   ; mem_bytes : Bytes.t Array.t
   ; tables : (ref_type * const option array * int option) list
@@ -249,8 +250,8 @@ let mk_module _modules m =
           match data.mode with
           | Data_passive ->
             (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
-            let data_passive = data.init :: env.data_passive in
-            { env with data_passive }
+            let datas = Some data.init :: env.datas in
+            { env with datas }
           | Data_active (indice, expr) ->
             (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
             let indice = map_symb_opt Uint32.zero find_memory indice in
@@ -275,7 +276,8 @@ let mk_module _modules m =
               offset len bytes_len;
                *)
             Bytes.blit_string src 0 mem_bytes offset len;
-            env
+            let datas = None :: env.datas in
+            { env with datas }
         end
         | _ -> env )
       { curr_func = -1
@@ -283,7 +285,7 @@ let mk_module _modules m =
       ; curr_memory = -1
       ; curr_table = -1
       ; curr_type = -1
-      ; data_passive = []
+      ; datas = []
       ; globals = []
       ; mem_bytes = Array.init 1 (fun _i -> Bytes.make 0 (Char.chr 0))
       ; tables = []
@@ -295,6 +297,7 @@ let mk_module _modules m =
 
   let start = env.start in
 
+  let datas = List.rev env.datas |> Array.of_list in
   let globals = List.rev env.globals |> Array.of_list in
 
   let const_expr = const_expr globals in
@@ -515,6 +518,7 @@ let mk_module _modules m =
   ; globals
   ; elements
   ; start
+  ; datas
   }
 
 let script script =

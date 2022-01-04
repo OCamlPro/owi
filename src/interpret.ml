@@ -527,13 +527,27 @@ let rec exec_instr env module_indice locals stack instr =
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
     let d, stack = Stack.pop_i32_to_int stack in
-    if d + n > Bytes.length mem then raise @@ Trap "out of bounds memory access";
     begin
       try Bytes.blit mem s mem d n
       with Invalid_argument _ -> raise (Trap "out of bounds memory access")
     end;
     stack
-  | Memory_init _i -> failwith "TODO Memory_init"
+  | Memory_init i ->
+    let m = env.modules.(module_indice) in
+    let mem, _max = m.memories.(0) in
+    let src =
+      match m.datas.(indice_to_int i) with
+      | None -> raise @@ Trap "out of bounds memory access"
+      | Some src -> src
+    in
+    let n, stack = Stack.pop_i32_to_int stack in
+    let s, stack = Stack.pop_i32_to_int stack in
+    let d, stack = Stack.pop_i32_to_int stack in
+    begin
+      try Bytes.blit_string src s mem d n
+      with Invalid_argument _ -> raise (Trap "out of bounds memory access")
+    end;
+    stack
   | Select _t ->
     (* TODO: check that o1 and o2 have type t *)
     let b, stack = Stack.pop_bool stack in
@@ -823,7 +837,9 @@ let rec exec_instr env module_indice locals stack instr =
       raise (Trap "out of bounds memory access");
     Bytes.set_int32_le mem offset n;
     stack
-  | Data_drop _ -> failwith "TODO Data_drop"
+  | Data_drop i ->
+    env.modules.(module_indice).datas.(indice_to_int i) <- None;
+    stack
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
     let target =
