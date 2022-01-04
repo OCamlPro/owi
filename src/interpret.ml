@@ -648,9 +648,6 @@ let rec exec_instr env module_indice locals stack instr =
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
     let _d, stack = Stack.pop_i32_to_int stack in
-    (*if s + n > Array.length e_e || d + n > Array.length table then
-        raise @@ Trap "TODO";
-      if e_t <> t_t then raise @@ Trap "TODO";*)
     ( if n <> 0 then
       try
         let v = e_e.(s) in
@@ -777,13 +774,13 @@ let rec exec_instr env module_indice locals stack instr =
     let offset = pos + offset in
     if Bytes.length mem < offset + 4 || pos < 0 then
       raise (Trap "out of bounds memory access");
+    let res = Int32.to_int @@ Bytes.get_int32_le mem offset in
     let res =
-      ( if sx = S then Bytes.get_int32_le
-      else (* TODO: why doesn't get_uint32_le exist ? *)
-        Bytes.get_int32_le )
-        mem offset
+      if sx = S || Sys.word_size = 32 then res
+      else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))
+      else failwith "unsupported word size"
     in
-    Stack.push_i64_of_int stack (Int32.to_int res)
+    Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; align }) ->
     let offset = Uint32.to_int offset in
     let mem, _max = env.modules.(module_indice).memories.(0) in
@@ -855,8 +852,7 @@ let rec exec_instr env module_indice locals stack instr =
     if fun_i >= Array.length a then raise (Trap "undefined element");
     let i =
       match a.(fun_i) with
-      | None ->
-        failwith @@ Format.sprintf "unbound function %d at table %d" fun_i tbl_i
+      | None -> raise @@ Trap "uninitialized element"
       | Some (Const_host id) -> id
       | Some _r -> failwith "invalid type, expected Const_host"
     in
