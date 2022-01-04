@@ -861,35 +861,19 @@ let rec exec_instr env module_indice locals stack instr =
     res @ stack
 
 and exec_expr env module_indice locals stack e is_loop bt =
-  let pt, rt =
-    match bt with
-    | None -> (Int.max_int, Int.max_int)
-    | Some bt ->
-      let pt, rt = get_bt bt in
-      (List.length pt, List.length rt)
+  let rt =
+    Option.fold ~none:Int.max_int
+      ~some:(fun bt -> List.length (snd @@ get_bt bt))
+      bt
   in
-  let block_stack, stack = Stack.pop_n stack pt in
   let block_stack =
-    try
-      List.fold_left
-        (fun block_stack instr ->
-          try exec_instr env module_indice locals block_stack instr
-          with Branch (block_stack, -1) -> block_stack )
-        block_stack e
-    with
-    | Branch (block_stack, 0) when is_loop ->
-      exec_expr env module_indice locals block_stack e true bt
-    | Branch (block_stack, 0) -> block_stack
-    | Branch (block_stack, n) ->
-      let block_stack = block_stack @ stack in
-      raise (Branch (block_stack, n - 1))
-    | Return block_stack ->
-      let block_stack = Stack.keep block_stack rt in
-      let block_stack = block_stack @ stack in
-      raise (Return block_stack)
+    try List.fold_left (exec_instr env module_indice locals) stack e with
+    | Branch (block_stack, 0) ->
+      if is_loop then exec_expr env module_indice locals block_stack e true bt
+      else block_stack
+    | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1))
   in
-  let block_stack = Stack.keep block_stack rt in
-  let stack = block_stack @ stack in
+  let stack = Stack.keep block_stack rt @ stack in
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   stack
 
@@ -900,7 +884,7 @@ and exec_func env module_indice func args =
   try
     exec_expr env module_indice locals [] func.body false (Some func.type_f)
   with
-  | Return stack -> stack
+  | Return stack -> Stack.keep stack (List.length (snd @@ get_bt func.type_f))
   | Branch (stack, -1) -> stack
 
 let invoke env module_indice f args =
