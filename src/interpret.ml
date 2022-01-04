@@ -84,11 +84,9 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | And -> logand n1 n2
       | Or -> logor n1 n2
       | Xor -> logxor n1 n2
-      | Shl -> shift_left n1 (to_int n2)
-      | Shr s -> begin
-        let n2 = to_int n2 in
-        match s with S -> shift_right n1 n2 | U -> shift_right_logical n1 n2
-      end
+      | Shl -> shl n1 n2
+      | Shr S -> shr_s n1 n2
+      | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
       | Rotr -> rotr n1 n2)
   | S64 ->
@@ -116,11 +114,9 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | And -> logand n1 n2
       | Or -> logor n1 n2
       | Xor -> logxor n1 n2
-      | Shl -> shift_left n1 (to_int n2)
-      | Shr s -> begin
-        let n2 = to_int n2 in
-        match s with S -> shift_right n1 n2 | U -> shift_right_logical n1 n2
-      end
+      | Shl -> shl n1 n2
+      | Shr S -> shr_s n1 n2
+      | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
       | Rotr -> rotr n1 n2)
 
