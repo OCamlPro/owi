@@ -100,12 +100,11 @@ let rec token buf =
   | "assert_malformed" -> ASSERT_MALFORMED
   (* 14 *)
   | "assert_invalid" -> ASSERT_INVALID
-  | "nan:arithmetic" ->
-    NUM (Float.to_string @@ Float.of_string "0xc_0000_0000_0000")
+  | "nan:arithmetic" -> NAN_ARITH
   (* 13 *)
   | "assert_return" -> ASSERT_RETURN
   | "call_indirect" -> CALL_INDIRECT
-  | "nan:canonical" -> NUM (Float.to_string Float.nan)
+  | "nan:canonical" -> NAN_CANON
   (* 11 *)
   | "assert_trap" -> ASSERT_TRAP
   | "promote_f32" -> PROMOTE_F32

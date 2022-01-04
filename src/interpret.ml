@@ -923,18 +923,30 @@ let exec_action env = function
 
 let compare_result_const result const =
   match (result, const) with
-  | Result_const (Const_I32 n), Const_I32 n' -> n = n'
-  | Result_const (Const_I64 n), Const_I64 n' -> n = n'
-  | Result_const (Const_F32 n), Const_F32 n' -> n = n'
-  | Result_const (Const_F64 n), Const_F64 n' -> n = n'
-  | Result_const (Const_null rt), Const_null rt' -> rt = rt'
-  | Result_const (Const_host n), Const_host n' -> n = n'
-  | Result_const (Const_I32 _), _
-  | Result_const (Const_I64 _), _
-  | Result_const (Const_F32 _), _
-  | Result_const (Const_F64 _), _
-  | Result_const (Const_null _), _
-  | Result_const (Const_host _), _ ->
+  | Result_const (Literal (Const_I32 n)), Const_I32 n' -> n = n'
+  | Result_const (Literal (Const_I64 n)), Const_I64 n' -> n = n'
+  | Result_const (Literal (Const_F32 n)), Const_F32 n' -> n = n'
+  | Result_const (Literal (Const_F64 n)), Const_F64 n' -> n = n'
+  | Result_const (Literal (Const_null rt)), Const_null rt' -> rt = rt'
+  | Result_const (Literal (Const_host n)), Const_host n' -> n = n'
+  | Result_const (Nan_canon S32), Const_F32 f ->
+    f = Float32.pos_nan || f = Float32.neg_nan
+  | Result_const (Nan_canon S64), Const_F64 f ->
+    f = Float64.pos_nan || f = Float64.neg_nan
+  | Result_const (Nan_arith S32), Const_F32 f ->
+    let pos_nan = Float32.to_bits Float32.pos_nan in
+    Int32.logand (Float32.to_bits f) pos_nan = pos_nan
+  | Result_const (Nan_arith S64), Const_F64 f ->
+    let pos_nan = Float64.to_bits Float64.pos_nan in
+    Int64.logand (Float64.to_bits f) pos_nan = pos_nan
+  | Result_const (Nan_arith _), _
+  | Result_const (Nan_canon _), _
+  | Result_const (Literal (Const_I32 _)), _
+  | Result_const (Literal (Const_I64 _)), _
+  | Result_const (Literal (Const_F32 _)), _
+  | Result_const (Literal (Const_F64 _)), _
+  | Result_const (Literal (Const_null _)), _
+  | Result_const (Literal (Const_host _)), _ ->
     false
   | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
   | Result_extern_ref, _ -> failwith "TODO (compare_result_const)"

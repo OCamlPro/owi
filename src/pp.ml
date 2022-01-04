@@ -332,8 +332,13 @@ let consts fmt c =
     (fun fmt c -> Format.fprintf fmt "(%a)" const c)
     fmt c
 
+let result_const fmt = function
+  | Literal c -> const fmt c
+  | Nan_canon n -> Format.fprintf fmt "float%a.const nan:canonical" nn n
+  | Nan_arith n -> Format.fprintf fmt "float%a.const nan:arithmetic" nn n
+
 let result fmt = function
-  | Result_const c -> Format.fprintf fmt "(%a)" const c
+  | Result_const c -> Format.fprintf fmt "(%a)" result_const c
   | _ -> failwith "not yet implemented"
 
 let action fmt = function
@@ -342,7 +347,7 @@ let action fmt = function
   | Get _ -> Format.fprintf fmt "<action_get TODO>"
 
 let result_bis fmt = function
-  | Result_const c -> Format.fprintf fmt "%a" const c
+  | Result_const c -> Format.fprintf fmt "%a" result_const c
   | _ -> Format.fprintf fmt "<results TODO>"
 
 let results fmt r =

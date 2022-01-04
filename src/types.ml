@@ -316,13 +316,13 @@ type action =
   | Invoke of string option * string * const list
   | Get of string option * string
 
-type num_pat =
-  | NP_value of string
-  | NP_nan_canon
-  | NP_nan_arith
+type result_const =
+  | Literal of const
+  | Nan_canon of nn
+  | Nan_arith of nn
 
 type result =
-  | Result_const of const
+  | Result_const of result_const
   | Result_extern_ref
   | Result_func_ref
 
