@@ -165,15 +165,15 @@ let exec_irelop stack nn (op : Types.irelop) =
     let res =
       let open Int32 in
       match op with
-      | Eq -> eq n1 n2
-      | Ne -> ne n1 n2
-      | Lt S -> lt_s n1 n2
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt S -> n1 < n2
       | Lt U -> lt_u n1 n2
-      | Gt S -> gt_s n1 n2
+      | Gt S -> n1 > n2
       | Gt U -> gt_u n1 n2
-      | Le S -> le_s n1 n2
+      | Le S -> n1 <= n2
       | Le U -> le_u n1 n2
-      | Ge S -> ge_s n1 n2
+      | Ge S -> n1 >= n2
       | Ge U -> ge_u n1 n2
     in
     Stack.push_bool stack res
@@ -182,15 +182,15 @@ let exec_irelop stack nn (op : Types.irelop) =
     let res =
       let open Int64 in
       match op with
-      | Eq -> eq n1 n2
-      | Ne -> ne n1 n2
-      | Lt S -> lt_s n1 n2
+      | Eq -> n1 = n2
+      | Ne -> n1 <> n2
+      | Lt S -> n1 < n2
       | Lt U -> lt_u n1 n2
-      | Gt S -> gt_s n1 n2
+      | Gt S -> n1 > n2
       | Gt U -> gt_u n1 n2
-      | Le S -> le_s n1 n2
+      | Le S -> n1 <= n2
       | Le U -> le_u n1 n2
-      | Ge S -> ge_s n1 n2
+      | Ge S -> n1 >= n2
       | Ge U -> ge_u n1 n2
     in
     Stack.push_bool stack res
@@ -651,19 +651,19 @@ let rec exec_instr env module_indice locals stack instr =
     end;
     stack
   | Table_copy _ -> failwith "TODO Table_copy"
-  | Table_init (t_indice, e_indice) ->
-    let t_indice = indice_to_int t_indice in
-    let _t_t, table, _max = env.modules.(module_indice).tables.(t_indice) in
-    let e_indice = indice_to_int e_indice in
-    let _e_t, e_e = env.modules.(module_indice).elements.(e_indice) in
+  | Table_init (t_i, e_i) ->
+    let m = env.modules.(module_indice) in
+    let _typ, table, _max = m.tables.(indice_to_int t_i) in
+    let _typ, el = m.elements.(indice_to_int e_i) in
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
-    let _d, stack = Stack.pop_i32_to_int stack in
-    ( if n <> 0 then
+    let d, stack = Stack.pop_i32_to_int stack in
+    begin
       try
-        let v = e_e.(s) in
-        table.(t_indice) <- Some v
-      with Invalid_argument _ -> raise @@ Trap "out of bounds table access" );
+        let v = Some el.(s) in
+        Array.fill table d n v
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
     stack
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
@@ -857,12 +857,11 @@ let rec exec_instr env module_indice locals stack instr =
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i, stack = Stack.pop_i32_to_int stack in
     let module_ = env.modules.(module_indice) in
-    let tbl_i = indice_to_int tbl_i in
-    let rt, a, _max = module_.tables.(tbl_i) in
+    let rt, a, _max = module_.tables.(indice_to_int tbl_i) in
     assert (rt = Func_ref);
-    if fun_i >= Array.length a then raise (Trap "undefined element");
     let i =
       match a.(fun_i) with
+      | exception Invalid_argument _ -> raise @@ Trap "undefined element"
       | None -> raise @@ Trap "uninitialized element"
       | Some (Const_host id) -> id
       | Some _r -> failwith "invalid type, expected Const_host"
