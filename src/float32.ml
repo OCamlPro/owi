@@ -1,5 +1,3 @@
-let mantissa = 23
-
 let pos_nan = 0x7fc0_0000l
 
 let neg_nan = 0xffc0_0000l
@@ -13,12 +11,6 @@ type t = Int32.t
 let pos_inf = Int32.bits_of_float (1.0 /. 0.0)
 
 let neg_inf = Int32.bits_of_float (-.(1.0 /. 0.0))
-
-let pos_nan = pos_nan
-
-let neg_nan = neg_nan
-
-let bare_nan = bare_nan
 
 let of_float = Int32.bits_of_float
 
@@ -215,10 +207,10 @@ let float_of_string_prevent_double_rounding s =
     (* Else, bit twiddling to see what rounding to target precision will do. *)
     let open Int64 in
     let bits = bits_of_float z in
-    let lsb = shift_left 1L (52 - mantissa) in
+    let lsb = shift_left 1L 29 in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
     let tie = shift_right lsb 1 in
-    let mask = lognot (shift_left (-1L) (52 - mantissa)) in
+    let mask = lognot (shift_left (-1L) 29) in
     (* If we have no tie, we are good. *)
     if logand bits mask <> tie then z
     else
