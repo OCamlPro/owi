@@ -512,12 +512,12 @@ let rec exec_instr env module_indice locals stack instr =
         Stack.push_i32_of_int stack (old_size / page_size) )
   | Memory_fill ->
     let len, stack = Stack.pop_i32_to_int stack in
-    let c, stack = Stack.pop_i32_to_int stack in
+    let c, stack = Stack.pop_i32_to_char stack in
     let pos, stack = Stack.pop_i32_to_int stack in
     let memories = env.modules.(module_indice).memories in
     let mem, _max = memories.(0) in
     begin
-      try Bytes.fill mem pos len (Char.chr c)
+      try Bytes.fill mem pos len c
       with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
     end;
     stack

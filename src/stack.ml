@@ -46,6 +46,10 @@ let pop_i32_to_int s =
   let hd, tl = pop_i32 s in
   (Int32.to_int hd, tl)
 
+let pop_i32_to_char s =
+  let hd, tl = pop_i32 s in
+  (Char.chr (Int32.to_int hd), tl)
+
 let pop2_i32 s =
   try
     let n2, s = pop s in
