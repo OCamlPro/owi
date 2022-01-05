@@ -511,21 +511,24 @@ let rec exec_instr env module_indice locals stack instr =
         memories.(0) <- (bytes, max);
         Stack.push_i32_of_int stack (old_size / page_size) )
   | Memory_fill ->
-    let start, stack = Stack.pop_i32_to_int stack in
-    let byte, stack = Stack.pop_i32_to_int stack in
-    let stop, stack = Stack.pop_i32_to_int stack in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let c, stack = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
     let memories = env.modules.(module_indice).memories in
     let mem, _max = memories.(0) in
-    Bytes.fill mem start (stop - start) (Char.chr byte);
+    begin
+      try Bytes.fill mem pos len (Char.chr c)
+      with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
+    end;
     stack
   | Memory_copy ->
     let memories = env.modules.(module_indice).memories in
     let mem, _max = memories.(0) in
-    let n, stack = Stack.pop_i32_to_int stack in
-    let s, stack = Stack.pop_i32_to_int stack in
-    let d, stack = Stack.pop_i32_to_int stack in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src_pos, stack = Stack.pop_i32_to_int stack in
+    let dst_pos, stack = Stack.pop_i32_to_int stack in
     begin
-      try Bytes.blit mem s mem d n
+      try Bytes.blit mem src_pos mem dst_pos len
       with Invalid_argument _ -> raise (Trap "out of bounds memory access")
     end;
     stack
