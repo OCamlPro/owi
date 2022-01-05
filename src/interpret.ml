@@ -6,8 +6,6 @@ type env =
   ; registered_modules : (string, int) Hashtbl.t
   }
 
-let empty_env () = { modules = [||]; registered_modules = Hashtbl.create 64 }
-
 exception Return of Stack.t
 
 let exec_iunop stack nn op =
@@ -1012,7 +1010,7 @@ let exec script modules =
   let env =
     List.fold_left
       (fun env cmd -> exec_cmd env cmd)
-      { (empty_env ()) with modules }
+      { modules; registered_modules = Hashtbl.create 64 }
       script
   in
   ignore env
