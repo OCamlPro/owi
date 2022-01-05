@@ -32,7 +32,7 @@ let num_type fmt : num_type -> Unit.t = function
 
 let ref_type fmt = function
   | Func_ref -> Format.fprintf fmt "funcref"
-  | Extern_ref -> Format.fprintf fmt "externref"
+  | Extern_ref -> Format.fprintf fmt "extern"
 
 let val_type fmt = function
   | Num_type t -> num_type fmt t
@@ -323,8 +323,8 @@ let const fmt = function
   | Const_I64 i -> Format.fprintf fmt "i64.const %a" i64 i
   | Const_F32 f -> Format.fprintf fmt "f32.const %a" f32 f
   | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
-  | Const_null rt -> Format.fprintf fmt "(%a)" ref_type rt
-  | Const_host _i -> Format.fprintf fmt "<TODO: const Const_host>"
+  | Const_null rt -> Format.fprintf fmt "ref.null %a" ref_type rt
+  | Const_host i -> Format.fprintf fmt "ref.extern %d" i
 
 let consts fmt c =
   Format.pp_print_list

@@ -498,6 +498,7 @@ let mk_module _modules m =
                 (Raw (map_symb find_table i), Raw (map_symb find_table i'))
             in
             res
+          | Table_fill id -> Table_fill (Raw (map_symb find_table id))
           | i -> i
         and expr e block_ids = List.map (body block_ids) e in
         let body = expr f.body [] in

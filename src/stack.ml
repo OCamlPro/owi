@@ -118,6 +118,14 @@ let pop_host s =
     | _ -> failwith "invalid type (expected host)"
   with Empty -> failwith "invalid type (expected host)"
 
+let pop_ref s =
+  try
+    let hd, tl = pop s in
+    match hd with
+    | Const_host _ | Const_null _ -> (hd, tl)
+    | _ -> failwith "invalid type (expected ref)"
+  with Empty -> failwith "invalid type (expected ref)"
+
 let pop_bool s =
   try
     let hd, tl = pop s in

@@ -638,7 +638,18 @@ let rec exec_instr env module_indice locals stack instr =
       Array.iteri (fun i x -> new_table.(i) <- x) table;
       env.modules.(module_indice).tables.(indice) <- (t, new_table, max);
       Stack.push_i32_of_int stack size
-  | Table_fill _ -> failwith "TODO Table_fill"
+  | Table_fill t_i ->
+    let _typ, tbl, _max =
+      env.modules.(module_indice).tables.(indice_to_int t_i)
+    in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let x, stack = Stack.pop_ref stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    begin
+      try Array.fill tbl pos len (Some x)
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
+    stack
   | Table_copy _ -> failwith "TODO Table_copy"
   | Table_init (t_indice, e_indice) ->
     let t_indice = indice_to_int t_indice in
