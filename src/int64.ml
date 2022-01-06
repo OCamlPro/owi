@@ -108,7 +108,7 @@ let saturate_u x = min (max x zero) minus_one
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then failwith "of_string"
+let require b = if not b then failwith "of_string (int64)"
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'

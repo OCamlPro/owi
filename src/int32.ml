@@ -93,7 +93,7 @@ let saturate_u x = sx (min (max x zero) minus_one)
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then failwith "of_string"
+let require b = if not b then failwith "of_string (int32)"
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
@@ -106,6 +106,14 @@ let hex_digit = function
   | _ -> failwith "of_string"
 
 let max_upper, max_lower = divrem_u minus_one 10l
+
+let sign_extend i =
+  let sign_bit = logand (of_int (1 lsl (32 - 1))) i in
+  if sign_bit = zero then i
+  else
+    (* Build a sign-extension mask *)
+    let sign_mask = shift_left minus_one 32 in
+    logor sign_mask i
 
 let of_string s =
   let len = String.length s in
@@ -141,5 +149,6 @@ let of_string s =
       neg n
     | _ -> parse_int 0
   in
+  let parsed = sign_extend parsed in
   require (low_int <= parsed && parsed <= high_int);
   parsed
