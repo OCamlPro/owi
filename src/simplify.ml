@@ -89,6 +89,7 @@ type env =
   ; curr_table : int
   ; curr_type : int
   ; curr_element : int
+  ; curr_data : int
   ; datas : string option list
   ; globals : (global_type * expr) list
   ; mem_bytes : Bytes.t Array.t
@@ -144,6 +145,13 @@ let mk_module _modules m =
   let seen_elements = Hashtbl.create 512 in
   let find_element id =
     match Hashtbl.find_opt seen_elements id with
+    | None -> failwith @@ Format.sprintf "unbound element indice $%s" id
+    | Some i -> i
+  in
+
+  let seen_datas = Hashtbl.create 512 in
+  let find_data id =
+    match Hashtbl.find_opt seen_datas id with
     | None -> failwith @@ Format.sprintf "unbound element indice $%s" id
     | Some i -> i
   in
@@ -270,45 +278,32 @@ let mk_module _modules m =
                | Elem_declarative -> env
              end *)
           { env with curr_element }
-        | MData data -> begin
-          match data.mode with
-          | Data_passive ->
-            (* A passive data segment’s contents can be copied into a memory using the memory.init instruction. *)
-            let datas = Some data.init :: env.datas in
-            { env with datas }
-          | Data_active (indice, expr) ->
-            (* An active data segment copies its contents into a memory during instantiation, as specified by a memory index and a constant expression defining an offset into that memory. *)
-            let indice = map_symb_opt Uint32.zero find_memory indice in
-            if indice <> Uint32.zero then
-              failwith "multiple memories are not supported yet";
-            let offset =
+        | MData data ->
+          let curr_data = env.curr_data + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_datas id curr_data) data.id;
+          let data =
+            match data.mode with
+            | Data_passive -> Some data.init
+            | Data_active (indice, expr) -> (
+              let indice = map_symb_opt Uint32.zero find_memory indice in
               match const_expr (List.rev env.globals |> Array.of_list) expr with
-              | Const_I32 n -> Int32.to_int n
+              | Const_I32 offset ->
+                let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
+                let len = String.length data.init in
+                Bytes.blit_string data.init 0 mem_bytes (Int32.to_int offset)
+                  len;
+                None
               | c ->
-                failwith @@ Format.asprintf "TODO data_offset `%a`" Pp.const c
-            in
-            let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
-            let len = String.length data.init in
-            let src = data.init in
-            (*
-            let bytes_len = Bytes.length mem_bytes in
-            Debug.debug Format.std_formatter
-              "blitting: src = `%s`; pos = `%d` ; mem_bytes = `%s` ; offset = \
-               `%d` ; len = `%d` ; bytes_len = %d@."
-              src 0
-              (Bytes.to_string mem_bytes)
-              offset len bytes_len;
-               *)
-            Bytes.blit_string src 0 mem_bytes offset len;
-            let datas = None :: env.datas in
-            { env with datas }
-        end )
+                failwith @@ Format.asprintf "TODO data_offset `%a`" Pp.const c )
+          in
+          { env with datas = data :: env.datas; curr_data } )
       { curr_func = -1
       ; curr_global = -1
       ; curr_memory = -1
       ; curr_table = -1
       ; curr_type = -1
       ; curr_element = -1
+      ; curr_data = -1
       ; datas = []
       ; globals = []
       ; mem_bytes = Array.init 1 (fun _i -> Bytes.make 0 (Char.chr 0))
@@ -525,6 +520,8 @@ let mk_module _modules m =
             in
             res
           | Table_fill id -> Table_fill (Raw (map_symb find_table id))
+          | Memory_init id -> Memory_init (Raw (map_symb find_data id))
+          | Data_drop id -> Data_drop (Raw (map_symb find_data id))
           | i -> i
         and expr e block_ids = List.map (body block_ids) e in
         let body = expr f.body [] in

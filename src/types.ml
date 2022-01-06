@@ -257,7 +257,8 @@ type data_mode =
   | Data_active of indice option * expr
 
 type data =
-  { init : string
+  { id : id option
+  ; init : string
   ; mode : data_mode
   }
 

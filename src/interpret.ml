@@ -533,18 +533,22 @@ let rec exec_instr env module_indice locals stack instr =
   | Memory_init i ->
     let m = env.modules.(module_indice) in
     let mem, _max = m.memories.(0) in
-    let src =
-      match m.datas.(indice_to_int i) with
-      | None -> raise @@ Trap "out of bounds memory access"
-      | Some src -> src
-    in
+    let data = m.datas.(indice_to_int i) in
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
     let d, stack = Stack.pop_i32_to_int stack in
-    begin
-      try Bytes.blit_string src s mem d n
-      with Invalid_argument _ -> raise (Trap "out of bounds memory access")
-    end;
+    if
+      s + n > Option.fold ~none:0 ~some:String.length data
+      || d + n > Bytes.length mem
+    then raise @@ Trap "out of bounds memory access";
+    (* The n check is not needed, it's just an optimisation. If it's 0 it'll just do nothing. *)
+    if n <> 0 then
+      Option.iter
+        (fun src ->
+          try Bytes.blit_string src s mem d n
+          with Invalid_argument _ -> raise (Trap "out of bounds memory access")
+          )
+        data;
     stack
   | Select _t ->
     (* TODO: check that o1 and o2 have type t *)

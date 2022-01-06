@@ -663,14 +663,13 @@ let table_fields :=
     ; MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) } ]
   }
 
-(* TODO: use id *)
 let data ==
-  | DATA; _ = option(id); init = string_list; {
-    [ MData { init; mode = Data_passive } ]
+  | DATA; id = option(id); init = string_list; {
+    [ MData { id; init; mode = Data_passive } ]
   }
-  | DATA; _ = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
+  | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw (u32_of_i32 0l)) in
-    [ MData { init; mode = Data_active (Some memory_use, offset) } ]
+    [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
   }
 
 let memory ==
@@ -698,7 +697,7 @@ let memory_fields :=
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     
     [ MMem (None, { min; max = Some min})
-    ; MData { init; mode = Data_active (None, []) } ]
+    ; MData { id = None; init; mode = Data_active (None, []) } ]
   }
 
 let global ==
