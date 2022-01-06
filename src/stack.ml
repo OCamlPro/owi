@@ -48,7 +48,7 @@ let pop_i32_to_int s =
 
 let pop_i32_to_char s =
   let hd, tl = pop_i32 s in
-  (Char.chr (Int32.to_int hd), tl)
+  (Char.chr (Int32.to_int hd mod 256), tl)
 
 let pop2_i32 s =
   try
