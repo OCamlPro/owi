@@ -88,6 +88,7 @@ type env =
   ; curr_memory : int
   ; curr_table : int
   ; curr_type : int
+  ; curr_element : int
   ; datas : string option list
   ; globals : (global_type * expr) list
   ; mem_bytes : Bytes.t Array.t
@@ -137,6 +138,13 @@ let mk_module _modules m =
   let find_table id =
     match Hashtbl.find_opt seen_tables id with
     | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
+    | Some i -> i
+  in
+
+  let seen_elements = Hashtbl.create 512 in
+  let find_element id =
+    match Hashtbl.find_opt seen_elements id with
+    | None -> failwith @@ Format.sprintf "unbound element indice $%s" id
     | Some i -> i
   in
 
@@ -200,6 +208,12 @@ let mk_module _modules m =
           end;
           (* TODO: other cases *)
           env
+        | MImport { desc = Import_table (id, t); module_; name } ->
+          let curr_table = env.curr_table + 1 in
+          Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
+          if module_ = "spectest" && name = "table" then () else ();
+          let tables = (snd t, [||], None) :: env.tables in
+          { env with curr_table; tables }
         | MImport { desc = Import_global (id, t); module_; name } ->
           let curr_global = env.curr_global + 1 in
           Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
@@ -246,6 +260,16 @@ let mk_module _modules m =
           let types = t :: env.types in
           Option.iter (fun id -> Hashtbl.add seen_types id curr_type) id;
           { env with curr_type; types }
+        | MElem e ->
+          let curr_element = env.curr_element + 1 in
+          Option.iter (fun id -> Hashtbl.add seen_elements id curr_element) e.id;
+          (* begin
+               match e.mode with
+               | Elem_passive -> env
+               | Elem_active (_indice, _offset) -> env
+               | Elem_declarative -> env
+             end *)
+          { env with curr_element }
         | MData data -> begin
           match data.mode with
           | Data_passive ->
@@ -278,13 +302,13 @@ let mk_module _modules m =
             Bytes.blit_string src 0 mem_bytes offset len;
             let datas = None :: env.datas in
             { env with datas }
-        end
-        | _ -> env )
+        end )
       { curr_func = -1
       ; curr_global = -1
       ; curr_memory = -1
       ; curr_table = -1
       ; curr_type = -1
+      ; curr_element = -1
       ; datas = []
       ; globals = []
       ; mem_bytes = Array.init 1 (fun _i -> Bytes.make 0 (Char.chr 0))
@@ -349,10 +373,12 @@ let mk_module _modules m =
             (tables.(indice), indice)
           in
           let offset =
-            match offset with
-            | [] -> failwith "empty offset"
-            | [ I32_const n ] -> Int32.to_int n
-            | _ -> failwith "unhandled offset expr kind"
+            match const_expr offset with
+            | Const_I32 n -> Int32.to_int n
+            | c ->
+              failwith
+              @@ Format.asprintf "unhandled elem offset const kind: `%a`"
+                   Pp.const c
           in
           if table_ref_type <> e.type_ then failwith "invalid elem type";
           List.iteri
@@ -495,7 +521,7 @@ let mk_module _modules m =
           | Table_init (i, i') ->
             let res =
               Table_init
-                (Raw (map_symb find_table i), Raw (map_symb find_table i'))
+                (Raw (map_symb find_table i), Raw (map_symb find_element i'))
             in
             res
           | Table_fill id -> Table_fill (Raw (map_symb find_table id))

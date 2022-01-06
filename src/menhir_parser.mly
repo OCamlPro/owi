@@ -615,22 +615,21 @@ let elem_list ==
   | ~ = elem_kind; l = list(elem_var); { elem_kind, [l] }
   | ~ = ref_type; l = list(elem_expr); { ref_type, l }
 
-(* TODO: store the ID ? *)
 let elem ==
-  | ELEM; _ = option(id); (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_passive } ]
+  | ELEM; id = option(id); (type_, init) = elem_list; {
+    [ MElem { id; type_; init; mode = Elem_passive } ]
   }
-  | ELEM; _ = option(id); table_use = par(table_use); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_active (Some table_use, offset) } ]
+  | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (type_, init) = elem_list; {
+    [ MElem { id; type_; init; mode = Elem_active (Some table_use, offset) } ]
   }
-  | ELEM; _ = option(id); DECLARE; (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_declarative } ]
+  | ELEM; id = option(id); DECLARE; (type_, init) = elem_list; {
+    [ MElem { id; type_; init; mode = Elem_declarative } ]
   }
-  | ELEM; _ = option(id); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { type_; init; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
+  | ELEM; id = option(id); ~ = offset; (type_, init) = elem_list; {
+    [ MElem { id; type_; init; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
   }
-  | ELEM; _ = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { type_ = Func_ref; init = [init]; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
+  | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
+    [ MElem { id; type_ = Func_ref; init = [init]; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
   }
 
 let table ==
@@ -648,7 +647,6 @@ let init ==
   | l = list(elem_var); { [l] }
   | ~ = nonempty_list(elem_expr); <>
 
-(* TODO: None ? *)
 let table_fields :=
   | ~ = table_type; {
     [ MTable (None, table_type) ]
@@ -662,7 +660,7 @@ let table_fields :=
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Int32.of_int @@ List.length init in
     [ MTable (None, ({ min; max = Some min }, ref_type))
-    ; MElem { type_ = Func_ref; init; mode = Elem_active (None, []) } ]
+    ; MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) } ]
   }
 
 (* TODO: use id *)

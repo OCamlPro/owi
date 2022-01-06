@@ -652,12 +652,12 @@ let rec exec_instr env module_indice locals stack instr =
   | Table_init (t_i, e_i) ->
     let m = env.modules.(module_indice) in
     let _typ, table, _max = m.tables.(indice_to_int t_i) in
-    let _typ, el = m.elements.(indice_to_int e_i) in
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
     let d, stack = Stack.pop_i32_to_int stack in
     begin
       try
+        let _typ, el = m.elements.(indice_to_int e_i) in
         let v = Some el.(s) in
         Array.fill table d n v
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"

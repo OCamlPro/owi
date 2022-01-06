@@ -246,7 +246,8 @@ type elem_mode =
   | Elem_declarative
 
 type elem =
-  { type_ : ref_type
+  { id : id option
+  ; type_ : ref_type
   ; init : expr list
   ; mode : elem_mode
   }
