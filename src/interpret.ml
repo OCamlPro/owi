@@ -533,22 +533,11 @@ let rec exec_instr env module_indice locals stack instr =
   | Memory_init i ->
     let m = env.modules.(module_indice) in
     let mem, _max = m.memories.(0) in
-    let data = m.datas.(indice_to_int i) in
-    let n, stack = Stack.pop_i32_to_int stack in
-    let s, stack = Stack.pop_i32_to_int stack in
-    let d, stack = Stack.pop_i32_to_int stack in
-    if
-      s + n > Option.fold ~none:0 ~some:String.length data
-      || d + n > Bytes.length mem
-    then raise @@ Trap "out of bounds memory access";
-    (* The n check is not needed, it's just an optimisation. If it's 0 it'll just do nothing. *)
-    if n <> 0 then
-      Option.iter
-        (fun src ->
-          try Bytes.blit_string src s mem d n
-          with Invalid_argument _ -> raise (Trap "out of bounds memory access")
-          )
-        data;
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src_pos, stack = Stack.pop_i32_to_int stack in
+    let dst_pos, stack = Stack.pop_i32_to_int stack in
+    ( try Bytes.blit_string m.datas.(indice_to_int i) src_pos mem dst_pos len
+      with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
     stack
   | Select _t ->
     (* TODO: check that o1 and o2 have type t *)
@@ -848,7 +837,7 @@ let rec exec_instr env module_indice locals stack instr =
     Bytes.set_int32_le mem offset n;
     stack
   | Data_drop i ->
-    env.modules.(module_indice).datas.(indice_to_int i) <- None;
+    env.modules.(module_indice).datas.(indice_to_int i) <- "";
     stack
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in

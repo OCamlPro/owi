@@ -6,7 +6,7 @@ type module_ =
   ; seen_funcs : (string, int) Hashtbl.t
   ; exported_funcs : (string, int) Hashtbl.t
   ; memories : (Bytes.t * int option) array
-  ; datas : string option array
+  ; datas : string array
   ; tables : (ref_type * const option Array.t * int option) array
   ; types : func_type Array.t
   ; globals : (global_type * const) Array.t
@@ -90,7 +90,7 @@ type env =
   ; curr_type : int
   ; curr_element : int
   ; curr_data : int
-  ; datas : string option list
+  ; datas : string list
   ; globals : (global_type * expr) list
   ; mem_bytes : Bytes.t Array.t
   ; tables : (ref_type * const option array * int option) list
@@ -283,7 +283,7 @@ let mk_module _modules m =
           Option.iter (fun id -> Hashtbl.add seen_datas id curr_data) data.id;
           let data =
             match data.mode with
-            | Data_passive -> Some data.init
+            | Data_passive -> data.init
             | Data_active (indice, expr) -> (
               let indice = map_symb_opt Uint32.zero find_memory indice in
               match const_expr (List.rev env.globals |> Array.of_list) expr with
@@ -292,7 +292,7 @@ let mk_module _modules m =
                 let len = String.length data.init in
                 Bytes.blit_string data.init 0 mem_bytes (Int32.to_int offset)
                   len;
-                None
+                ""
               | c ->
                 failwith @@ Format.asprintf "TODO data_offset `%a`" Pp.const c )
           in
