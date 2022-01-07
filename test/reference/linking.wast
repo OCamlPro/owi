@@ -144,6 +144,8 @@
   )
 )
 
+(register "Mt" $Mt)
+
 (module $Nt
   (type (func))
   (type (func (result i32)))

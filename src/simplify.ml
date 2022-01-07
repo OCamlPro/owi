@@ -1,16 +1,31 @@
 open Types
 
+type 'a runtime =
+  | Local of 'a
+  | Imported of int * int
+
+type runtime_table = (ref_type * const option Array.t * int option) runtime
+
+type runtime_global = (global_type * const) runtime
+
+type runtime_memory = (bytes * int option) runtime
+
+type runtime_func = func runtime
+
 type module_ =
   { fields : module_field list
-  ; funcs : func Array.t
   ; seen_funcs : (string, int) Hashtbl.t
-  ; exported_funcs : (string, int) Hashtbl.t
-  ; memories : (Bytes.t * int option) array
   ; datas : string array
-  ; tables : (ref_type * const option Array.t * int option) array
+  ; funcs : runtime_func array
+  ; memories : runtime_memory array
+  ; tables : runtime_table array
   ; types : func_type Array.t
-  ; globals : (global_type * const) Array.t
-  ; elements : (ref_type * const Array.t) Array.t
+  ; globals : runtime_global array
+  ; elements : (ref_type * expr Array.t) Array.t
+  ; exported_funcs : (string, int) Hashtbl.t
+  ; exported_globals : (string, int) Hashtbl.t
+  ; exported_memories : (string, int) Hashtbl.t
+  ; exported_tables : (string, int) Hashtbl.t
   ; start : int option
   }
 
@@ -91,12 +106,17 @@ type env =
   ; curr_element : int
   ; curr_data : int
   ; datas : string list
-  ; globals : (global_type * expr) list
-  ; mem_bytes : bytes array
-  ; tables : (ref_type * const option array * int option) list
+  ; funcs : runtime_func list
+  ; globals : runtime_global list
+  ; memories : runtime_memory list
+  ; tables : runtime_table list
   ; types : func_type list
   ; start : int option
   }
+
+let indice_to_int = function
+  | Raw i -> Uint32.to_int i
+  | Symbolic i -> failwith @@ Format.sprintf "indice_to_int: %s" i
 
 let find_id tbl x = function
   | Raw i -> Uint32.to_int i
@@ -110,10 +130,34 @@ let find_ind tbl x ind =
   | None -> failwith @@ Format.asprintf "unbound %s indice %s" x ind
   | Some i -> i
 
-let mk_module _modules m =
-  let exported_funcs = Hashtbl.create 512 in
+let rec get_table (modules : module_ array) tables i =
+  match tables.(i) with
+  | Local (rt, tbl, max) ->
+    (rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
+  | Imported (m, i) -> get_table modules modules.(m).tables i
 
-  let mem_max_size = ref None in
+let rec get_global (modules : module_ array) globals i =
+  match globals.(i) with
+  | Local (gt, g) -> (gt, g, fun g -> globals.(i) <- Local (gt, g))
+  | Imported (m, i) -> get_global modules modules.(m).globals i
+
+let rec get_memory (modules : module_ array) memories i =
+  match memories.(i) with
+  | Local (m, max) -> (m, max, fun m max -> memories.(i) <- Local (m, max))
+  | Imported (m, i) -> get_memory modules modules.(m).memories i
+
+let rec get_func (modules : module_ array) funcs i =
+  match funcs.(i) with
+  (* TODO: do we need set somewhere ? *)
+  | Local f -> (f, fun f -> funcs.(i) <- Local f)
+  | Imported (m, i) -> get_func modules modules.(m).funcs i
+
+let mk_module registered_modules modules m =
+  let modules = Array.of_list @@ List.rev modules in
+  let exported_funcs = Hashtbl.create 512 in
+  let exported_globals = Hashtbl.create 512 in
+  let exported_memories = Hashtbl.create 512 in
+  let exported_tables = Hashtbl.create 512 in
 
   let seen_types = Hashtbl.create 512 in
   let find_type = find_id seen_types "type" in
@@ -136,25 +180,21 @@ let mk_module _modules m =
   let seen_datas = Hashtbl.create 512 in
   let find_data = find_ind seen_datas "data" in
 
-  let rec const_expr globals = function
+  let find_module = find_ind registered_modules "module" in
+
+  let const_expr find_global globals = function
     | [ I32_const n ] -> Const_I32 n
     | [ I64_const n ] -> Const_I64 n
     | [ F32_const f ] -> Const_F32 f
     | [ F64_const f ] -> Const_F64 f
     | [ Ref_null rt ] -> Const_null rt
-    | [ Global_get ind ] ->
-      let (_mut, _typ), e =
-        globals.(Uint32.to_int @@ map_symb find_global ind)
+    | [ Global_get i ] ->
+      let _gt, e, _set =
+        get_global modules globals (Uint32.to_int @@ find_global i)
       in
-      const_expr globals e
+      e
     | [ Ref_func ind ] -> Const_host (Uint32.to_int @@ map_symb find_func ind)
     | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
-  in
-
-  let const_expr_to_int globals e =
-    match const_expr globals e with
-    | Const_I32 n -> Int32.to_int n
-    | _whatever -> failwith "TODO const_expr_to_int"
   in
 
   let env =
@@ -171,11 +211,17 @@ let mk_module _modules m =
         | MFunc f ->
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
-          { env with curr_func }
+          let funcs = Local f :: env.funcs in
+          { env with curr_func; funcs }
         | MGlobal g ->
           let curr_global = env.curr_global + 1 in
           Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) g.id;
-          let globals = (g.type_, g.init) :: env.globals in
+          let init =
+            const_expr (map_symb find_global)
+              (Array.of_list @@ List.rev env.globals)
+              g.init
+          in
+          let globals = Local (g.type_, init) :: env.globals in
           { env with curr_global; globals }
         | MExport { name; desc } ->
           begin
@@ -183,67 +229,88 @@ let mk_module _modules m =
             | Export_func indice ->
               let i = map_symb_opt env.curr_func find_func indice in
               Hashtbl.replace exported_funcs name i
-            | _ -> ()
+            | Export_table indice ->
+              let i = map_symb_opt env.curr_table find_table indice in
+              Hashtbl.replace exported_tables name i
+            | Export_global indice ->
+              let i = map_symb_opt env.curr_global find_global indice in
+              Hashtbl.replace exported_globals name i
+            | Export_mem indice ->
+              let i = map_symb_opt env.curr_memory find_memory indice in
+              Hashtbl.replace exported_memories name i
           end;
           env
-        | MImport { desc = Import_func (id, _t); _ } ->
+        | MImport { desc = Import_func (id, _t); module_; name } ->
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
-          { env with curr_func }
+          let module_indice = find_module module_ in
+          let func_indice =
+            match
+              Hashtbl.find_opt modules.(module_indice).exported_funcs name
+            with
+            | None -> failwith @@ Format.sprintf "Unbound imported func %s" name
+            | Some ind -> ind
+          in
+          let funcs = Imported (module_indice, func_indice) :: env.funcs in
+          { env with curr_func; funcs }
         | MImport { desc = Import_mem (id, _t); module_; name } ->
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          if module_ = "spectest" && name = "memory" then begin
-            mem_max_size := Some 2;
-            env.mem_bytes.(curr_memory) <- Bytes.make page_size (Char.chr 0)
-          end;
-          (* TODO: other cases *)
-          env
-        | MImport { desc = Import_table (id, t); module_; name } ->
+          let module_indice = find_module module_ in
+          let mem_indice =
+            match
+              Hashtbl.find_opt modules.(module_indice).exported_memories name
+            with
+            | None -> failwith "Unbound imported memory"
+            | Some ind -> ind
+          in
+          let memories = Imported (module_indice, mem_indice) :: env.memories in
+          { env with curr_memory; memories }
+        | MImport { desc = Import_table (id, _t); module_; name } ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
+          (* TODO: fix this *)
           if module_ = "spectest" && name = "table" then () else ();
-          let tables = (snd t, [||], None) :: env.tables in
+          let module_indice = find_module module_ in
+          let table_indice =
+            match
+              Hashtbl.find_opt modules.(module_indice).exported_tables name
+            with
+            | None -> failwith "Unbound imported table"
+            | Some ind -> ind
+          in
+          let tables = Imported (module_indice, table_indice) :: env.tables in
           { env with curr_table; tables }
-        | MImport { desc = Import_global (id, t); module_; name } ->
+        | MImport { desc = Import_global (id, _t); module_; name } ->
           let curr_global = env.curr_global + 1 in
           Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
-          let spectest = module_ = "spectest" in
-          let init =
-            match name with
-            | "global_i32" when spectest -> [ I32_const 666l ]
-            | "global_i64" when spectest -> [ I64_const 666L ]
-            | "global_f32" when spectest ->
-              [ F32_const (Float32.of_float 666.) ]
-            | "global_f64" when spectest ->
-              [ F64_const (Float64.of_float 666.) ]
-            | name ->
-              failwith
-              @@ Format.asprintf
-                   "TODO Import_global (module = %s; name = %s; id = %a)"
-                   module_ name Pp.id_opt id
+          let module_indice = find_module module_ in
+          let global_indice =
+            match
+              Hashtbl.find_opt modules.(module_indice).exported_globals name
+            with
+            | None ->
+              failwith @@ Format.sprintf "Unbound imported global %s" name
+            | Some ind -> ind
           in
-          let globals = (t, init) :: env.globals in
+          let globals =
+            Imported (module_indice, global_indice) :: env.globals
+          in
           { env with curr_global; globals }
         | MMem (id, { min; max }) ->
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          mem_max_size := Option.map Int32.to_int max;
-          env.mem_bytes.(curr_memory) <-
-            Bytes.make (Int32.to_int min * page_size) (Char.chr 0);
-          env
+          let max = Option.map Int32.to_int max in
+          let new_bytes =
+            Bytes.make (Int32.to_int min * page_size) (Char.chr 0)
+          in
+          let memories = Local (new_bytes, max) :: env.memories in
+          { env with curr_memory; memories }
         | MTable (id, ({ min; max }, rt)) ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
           let a = Array.make (Int32.to_int min) None in
-          (* TODO: let a =
-               Array.map
-                 (Option.map (function
-                   | Ref_func id -> Ref_func (Raw (map_symb find_func id))
-                   | e -> e ) )
-                 a
-             in *)
-          let tbl = (rt, a, Option.map Int32.to_int max) in
+          let tbl = Local (rt, a, Option.map Int32.to_int max) in
           let tables = tbl :: env.tables in
           { env with curr_table; tables }
         | MType (id, t) ->
@@ -262,10 +329,16 @@ let mk_module _modules m =
             match data.mode with
             | Data_passive -> data.init
             | Data_active (indice, expr) -> (
-              let indice = map_symb_opt 0 find_memory indice in
-              match const_expr (List.rev env.globals |> Array.of_list) expr with
+              let indice = map_symb_opt env.curr_memory find_memory indice in
+              let globals = List.rev env.globals in
+              let globals = Array.of_list globals in
+              match const_expr (map_symb find_global) globals expr with
               | Const_I32 offset ->
-                let mem_bytes = env.mem_bytes.(indice) in
+                let mem_bytes, _max, _set =
+                  get_memory modules
+                    (Array.of_list @@ List.rev env.memories)
+                    indice
+                in
                 let len = String.length data.init in
                 Bytes.blit_string data.init 0 mem_bytes (Int32.to_int offset)
                   len;
@@ -282,8 +355,9 @@ let mk_module _modules m =
       ; curr_element = -1
       ; curr_data = -1
       ; datas = []
+      ; funcs = []
       ; globals = []
-      ; mem_bytes = Array.init 1 (fun _i -> Bytes.make 0 (Char.chr 0))
+      ; memories = []
       ; tables = []
       ; types = []
       ; start = None
@@ -296,172 +370,290 @@ let mk_module _modules m =
   let globals = List.rev env.globals |> Array.of_list in
   let tables = List.rev env.tables |> Array.of_list in
   let types = List.rev env.types |> Array.of_list in
-  let const_expr = const_expr globals in
-  let const_expr_to_int = const_expr_to_int globals in
-  let globals = Array.map (fun (type_, e) -> (type_, const_expr e)) globals in
+  let memories = List.rev env.memories |> Array.of_list in
+  let funcs = List.rev env.funcs |> Array.of_list in
 
-  let _curr_table, elements =
+  let _curr_table, fields, segments =
     List.fold_left
-      (fun (curr_table, elements) -> function
-        | MTable _ -> (curr_table + 1, elements)
-        | MElem e -> (
+      (fun (curr_table, fields, segments) -> function
+        | MTable _ as f -> (curr_table + 1, f :: fields, segments)
+        | MElem e as f -> (
           match e.mode with
           | Elem_passive ->
-            let new_elements =
-              List.rev_map (fun expr -> (e.type_, const_expr expr)) e.init
+            let segment =
+              List.map
+                (List.map (function
+                  | Ref_func i -> Ref_func (Raw (map_symb find_func i))
+                  | Ref_null rt -> Ref_null rt
+                  | i ->
+                    failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i )
+                  )
+                e.init
             in
-            (curr_table, new_elements @ elements)
+            (curr_table, f :: fields, (e.type_, segment) :: segments)
           | Elem_active (ti, offset) ->
-            let ti = map_symb_opt env.curr_table find_table ti in
-            let table_ref_type, table, table_max_size = tables.(ti) in
-            let offset = const_expr_to_int offset in
-            if table_ref_type <> e.type_ then failwith "invalid elem type";
-            List.iteri
-              (fun i expr ->
-                List.iteri
-                  (fun j x ->
-                    let new_elem = const_expr [ x ] in
-                    let pos = offset + i + j in
-                    let len = Array.length table in
-                    if pos >= len then (
-                      let new_table = Array.make (pos + 1) None in
-                      Array.iteri (fun i e -> new_table.(i) <- e) table;
-                      new_table.(pos) <- Some new_elem;
-                      tables.(ti) <- (table_ref_type, new_table, table_max_size)
-                      )
-                    else table.(pos) <- Some new_elem )
-                  expr )
-              e.init;
-            (curr_table, elements)
-          | Elem_declarative -> (curr_table, elements) )
-        | _ -> (curr_table, elements) )
-      (-1, []) m.Types.fields
+            let ti = Option.map (map_symb find_table) ti in
+            let ti = Option.map (fun i -> Raw i) ti in
+            let f =
+              List.map (function
+                | Ref_func i -> Ref_func (Raw (map_symb find_func i))
+                | Ref_null rt -> Ref_null rt
+                | I32_const n -> I32_const n
+                | Global_get i -> Global_get (Raw (map_symb find_global i))
+                | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i )
+            in
+            let init = List.map f e.init in
+            let offset = f offset in
+            ( curr_table
+            , MElem { e with mode = Elem_active (ti, offset); init } :: fields
+            , (e.type_, []) :: segments )
+          | Elem_declarative ->
+            (curr_table, f :: fields, (e.type_, []) :: segments) )
+        | f -> (curr_table, f :: fields, segments) )
+      (-1, [], []) m.Types.fields
   in
+  let fields = List.rev fields in
 
-  let elements = List.rev elements |> Array.of_list in
-  let elements = Array.map (fun (rt, l) -> (rt, [| l |])) elements in
-
-  let funcs =
-    Array.of_list @@ List.rev
-    @@ List.fold_left
-         (fun acc -> function
-           | MFunc f -> f :: acc
-           | MImport { desc = Import_func (id, type_f); _ } ->
-             (* TODO: how to import the function ? *)
-             { type_f; id; locals = []; body = [] } :: acc
-           | _field -> acc )
-         [] m.Types.fields
-  in
+  let segments = List.rev segments |> Array.of_list in
+  let segments = Array.map (fun (rt, l) -> (rt, Array.of_list l)) segments in
 
   let funcs =
     Array.map
-      (fun f ->
-        let local_tbl = Hashtbl.create 512 in
-        let find_local id =
-          match Hashtbl.find_opt local_tbl id with
-          | None -> failwith @@ Format.sprintf "unbound local %s" id
-          | Some i -> i
-        in
-        let type_f =
-          match f.type_f with
-          | Bt_ind ind -> types.(find_type ind)
-          | Bt_raw t -> t
-        in
-        (* adding params and locals to the locals table *)
-        let locals = fst type_f @ f.locals in
-        List.iteri
-          (fun i (id, _t) ->
-            Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
-          locals;
+      (function
+        | Local f ->
+          let local_tbl = Hashtbl.create 512 in
+          let find_local id =
+            match Hashtbl.find_opt local_tbl id with
+            | None -> failwith @@ Format.sprintf "unbound local %s" id
+            | Some i -> i
+          in
+          let type_f =
+            match f.type_f with
+            | Bt_ind ind -> types.(find_type ind)
+            | Bt_raw t -> t
+          in
+          (* adding params and locals to the locals table *)
+          let locals = fst type_f @ f.locals in
+          List.iteri
+            (fun i (id, _t) ->
+              Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
+            locals;
 
-        (* block_ids handling *)
-        let find_block_id id l =
-          let pos = ref (-1) in
-          begin
-            try
-              List.iteri
-                (fun i n ->
-                  if n = Some id then begin
-                    pos := i;
-                    raise Exit
-                  end )
-                l
-            with Exit -> ()
-          end;
+          (* block_ids handling *)
+          let find_block_id id l =
+            let pos = ref (-1) in
+            begin
+              try
+                List.iteri
+                  (fun i n ->
+                    if n = Some id then begin
+                      pos := i;
+                      raise Exit
+                    end )
+                  l
+              with Exit -> ()
+            end;
 
-          if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id
-          else Uint32.of_int !pos
-        in
+            if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id
+            else Uint32.of_int !pos
+          in
 
-        let bt_to_raw =
-          Option.map (function
-            | Bt_ind ind -> Bt_raw types.(find_type ind)
-            | t -> t )
-        in
+          let bt_to_raw =
+            Option.map (function
+              | Bt_ind ind -> Bt_raw types.(find_type ind)
+              | t -> t )
+          in
 
-        (* handling an expression *)
-        let rec body block_ids = function
-          | Br_table (ids, id) ->
-            let f = function
-              | Symbolic id -> Raw (find_block_id id block_ids)
-              | Raw id -> Raw id
-            in
-            Br_table (Array.map f ids, f id)
-          | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
-          | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
-          | Call id -> Call (Raw (map_symb find_func id))
-          | Local_set id -> Local_set (Raw (map_symb find_local id))
-          | Local_get id -> Local_get (Raw (map_symb find_local id))
-          | Local_tee id -> Local_tee (Raw (map_symb find_local id))
-          | If_else (id, bt, e1, e2) ->
-            let bt = bt_to_raw bt in
-            let block_ids = id :: block_ids in
-            If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
-          | Loop (id, bt, e) ->
-            let bt = bt_to_raw bt in
-            Loop (id, bt, expr e (id :: block_ids))
-          | Block (id, bt, e) ->
-            let bt = bt_to_raw bt in
-            Block (id, bt, expr e (id :: block_ids))
-          | Call_indirect (tbl_i, bt) ->
-            let bt = Option.get @@ bt_to_raw (Some bt) in
-            Call_indirect (Raw (map_symb find_table tbl_i), bt)
-          | Global_set id -> Global_set (Raw (map_symb find_global id))
-          | Global_get id -> Global_get (Raw (map_symb find_global id))
-          | Ref_func id -> Ref_func (Raw (map_symb find_func id))
-          | Table_size id -> Table_size (Raw (map_symb find_table id))
-          | Table_get id -> Table_get (Raw (map_symb find_table id))
-          | Table_set id -> Table_set (Raw (map_symb find_table id))
-          | Table_grow id -> Table_grow (Raw (map_symb find_table id))
-          | Table_init (i, i') ->
-            Table_init
-              (Raw (map_symb find_table i), Raw (map_symb find_element i'))
-          | Table_fill id -> Table_fill (Raw (map_symb find_table id))
-          | Memory_init id -> Memory_init (Raw (map_symb find_data id))
-          | Data_drop id -> Data_drop (Raw (map_symb find_data id))
-          | i -> i
-        and expr e block_ids = List.map (body block_ids) e in
-        let body = expr f.body [] in
-        { f with body; type_f = Bt_raw type_f } )
+          (* handling an expression *)
+          let rec body block_ids = function
+            | Br_table (ids, id) ->
+              let f = function
+                | Symbolic id -> Raw (find_block_id id block_ids)
+                | Raw id -> Raw id
+              in
+              Br_table (Array.map f ids, f id)
+            | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
+            | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
+            | Call id -> Call (Raw (map_symb find_func id))
+            | Local_set id -> Local_set (Raw (map_symb find_local id))
+            | Local_get id -> Local_get (Raw (map_symb find_local id))
+            | Local_tee id -> Local_tee (Raw (map_symb find_local id))
+            | If_else (id, bt, e1, e2) ->
+              let bt = bt_to_raw bt in
+              let block_ids = id :: block_ids in
+              If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
+            | Loop (id, bt, e) ->
+              let bt = bt_to_raw bt in
+              Loop (id, bt, expr e (id :: block_ids))
+            | Block (id, bt, e) ->
+              let bt = bt_to_raw bt in
+              Block (id, bt, expr e (id :: block_ids))
+            | Call_indirect (tbl_i, bt) ->
+              let bt = Option.get @@ bt_to_raw (Some bt) in
+              Call_indirect (Raw (map_symb find_table tbl_i), bt)
+            | Global_set id -> Global_set (Raw (map_symb find_global id))
+            | Global_get id -> Global_get (Raw (map_symb find_global id))
+            | Ref_func id -> Ref_func (Raw (map_symb find_func id))
+            | Table_size id -> Table_size (Raw (map_symb find_table id))
+            | Table_get id -> Table_get (Raw (map_symb find_table id))
+            | Table_set id -> Table_set (Raw (map_symb find_table id))
+            | Table_grow id -> Table_grow (Raw (map_symb find_table id))
+            | Table_init (i, i') ->
+              Table_init
+                (Raw (map_symb find_table i), Raw (map_symb find_element i'))
+            | Table_fill id -> Table_fill (Raw (map_symb find_table id))
+            | Memory_init id -> Memory_init (Raw (map_symb find_data id))
+            | Data_drop id -> Data_drop (Raw (map_symb find_data id))
+            | i -> i
+          and expr e block_ids = List.map (body block_ids) e in
+          let body = expr f.body [] in
+          Local { f with body; type_f = Bt_raw type_f }
+        | Imported _ as f -> f )
       funcs
   in
 
-  { fields = m.Types.fields
+  { fields
   ; funcs
   ; seen_funcs = Hashtbl.create 512
-  ; exported_funcs
-  ; memories = [| (env.mem_bytes.(0), !mem_max_size) |]
+  ; memories
   ; tables
   ; types
   ; globals
-  ; elements
+  ; elements = segments
   ; start
   ; datas
+  ; exported_funcs
+  ; exported_globals
+  ; exported_memories
+  ; exported_tables
   }
 
 let script script =
+  let script =
+    Module
+      { id = Some "spectest"
+      ; fields =
+          [ MMem (Some "memory", { min = 1l; max = None })
+          ; MFunc
+              { type_f = Bt_raw ([ (None, Num_type I32) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print"
+              }
+          ; MFunc
+              { type_f = Bt_raw ([ (None, Num_type I32) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_i32"
+              }
+          ; MFunc
+              { type_f = Bt_raw ([ (None, Num_type I64) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_i64"
+              }
+          ; MFunc
+              { type_f = Bt_raw ([ (None, Num_type F32) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_f32"
+              }
+          ; MFunc
+              { type_f = Bt_raw ([ (None, Num_type F64) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_f64"
+              }
+          ; MFunc
+              { type_f =
+                  Bt_raw ([ (None, Num_type I32); (None, Num_type F32) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_i32_f32"
+              }
+          ; MFunc
+              { type_f =
+                  Bt_raw ([ (None, Num_type F64); (None, Num_type F64) ], [])
+              ; locals = []
+              ; body = []
+              ; id = Some "print_f64_f64"
+              }
+          ; MTable (Some "table", ({ min = 10l; max = Some 20l }, Func_ref))
+          ; MGlobal
+              { type_ = (Var, Num_type I32)
+              ; init = [ I32_const 666l ]
+              ; id = Some "global_i32"
+              }
+          ; MGlobal
+              { type_ = (Var, Num_type I64)
+              ; init = [ I64_const 666L ]
+              ; id = Some "global_i64"
+              }
+          ; MGlobal
+              { type_ = (Var, Num_type F32)
+              ; init = [ F32_const Float32.zero ]
+              ; id = Some "global_f32"
+              }
+          ; MGlobal
+              { type_ = (Var, Num_type F64)
+              ; init = [ F64_const Float64.zero ]
+              ; id = Some "global_f64"
+              }
+          ; MExport
+              { name = "memory"; desc = Export_mem (Some (Symbolic "memory")) }
+          ; MExport
+              { name = "table"; desc = Export_table (Some (Symbolic "table")) }
+          ; MExport
+              { name = "print"; desc = Export_func (Some (Symbolic "print")) }
+          ; MExport
+              { name = "print_i32"
+              ; desc = Export_func (Some (Symbolic "print_i32"))
+              }
+          ; MExport
+              { name = "print_f32"
+              ; desc = Export_func (Some (Symbolic "print_f32"))
+              }
+          ; MExport
+              { name = "print_i64"
+              ; desc = Export_func (Some (Symbolic "print_i64"))
+              }
+          ; MExport
+              { name = "print_f64"
+              ; desc = Export_func (Some (Symbolic "print_f64"))
+              }
+          ; MExport
+              { name = "print_i32_f32"
+              ; desc = Export_func (Some (Symbolic "print_i32_f32"))
+              }
+          ; MExport
+              { name = "print_f64_f64"
+              ; desc = Export_func (Some (Symbolic "print_f64_f64"))
+              }
+          ; MExport
+              { name = "global_i32"
+              ; desc = Export_global (Some (Symbolic "global_i32"))
+              }
+          ; MExport
+              { name = "global_i64"
+              ; desc = Export_global (Some (Symbolic "global_i64"))
+              }
+          ; MExport
+              { name = "global_f32"
+              ; desc = Export_global (Some (Symbolic "global_f32"))
+              }
+          ; MExport
+              { name = "global_f64"
+              ; desc = Export_global (Some (Symbolic "global_f64"))
+              }
+          ]
+      }
+    :: Register ("spectest", Some "spectest")
+    :: script
+  in
+
   let _curr_module, modules, script =
     let seen_modules = Hashtbl.create 512 in
+    let registered_modules = Hashtbl.create 512 in
     List.fold_left
       (fun (curr_module, modules, script) -> function
         | Module m ->
@@ -470,16 +662,15 @@ let script script =
             (fun id -> Hashtbl.replace seen_modules id curr_module)
             m.id;
           let cmd = Module_indice curr_module in
-          let modules = mk_module modules m :: modules in
+          let modules = mk_module registered_modules modules m :: modules in
           (curr_module, modules, cmd :: script)
         | Assert a ->
           let cmd = Assert (assert_ (Some curr_module) seen_modules a) in
           (curr_module, modules, cmd :: script)
         | Register (name, mod_name) ->
-          let cmd =
-            Register_indice
-              (name, find_module mod_name (Some curr_module) seen_modules)
-          in
+          let indice = find_module mod_name (Some curr_module) seen_modules in
+          Hashtbl.replace registered_modules name indice;
+          let cmd = Register_indice (name, indice) in
           (curr_module, modules, cmd :: script)
         | Action a ->
           let cmd = Action (action (Some curr_module) seen_modules a) in

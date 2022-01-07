@@ -635,7 +635,7 @@ let elem ==
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
   let tbl_id = Option.map (fun id -> Symbolic id) id in
-  List.map (function
+  List.rev_map (function
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
     | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }
@@ -659,8 +659,8 @@ let table_fields :=
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = Int32.of_int @@ List.length init in
-    [ MTable (None, ({ min; max = Some min }, ref_type))
-    ; MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) } ]
+    [ MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) }
+    ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }
 
 let data ==
@@ -703,7 +703,7 @@ let memory_fields :=
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
     let global_id = Option.map (fun id -> Symbolic id) id in
-    List.map (function
+    List.rev_map (function
       | MGlobal g -> MGlobal { g with id }
       | MExport e -> MExport { e with desc = Export_global global_id }
       | MImport i ->

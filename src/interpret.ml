@@ -245,6 +245,22 @@ let init_local (_id, t) =
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
+let const_expr globals = function
+  | [ I32_const n ] -> Some (Const_I32 n)
+  | [ I64_const n ] -> Some (Const_I64 n)
+  | [ F32_const f ] -> Some (Const_F32 f)
+  | [ F64_const f ] -> Some (Const_F64 f)
+  | [ Ref_null rt ] -> Some (Const_null rt)
+  | [ Global_get ind ] ->
+    let (_mut, _typ), e =
+      match globals.(indice_to_int ind) with
+      | Local (gt, e) -> (gt, e)
+      | Imported _ -> failwith "imported global not allowed in const exprrrrr"
+    in
+    Some e
+  | [ Ref_func ind ] -> Some (Const_host (indice_to_int ind))
+  | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
+
 let rec exec_instr env module_indice locals stack instr =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   Debug.debug fmt "running instr: %a@." Pp.instr instr;
@@ -476,8 +492,10 @@ let rec exec_instr env module_indice locals stack instr =
     let b, stack = Stack.pop_bool stack in
     exec_expr env module_indice locals stack (if b then e1 else e2) false bt
   | Call i ->
-    let module_ = env.modules.(module_indice) in
-    let func = module_.funcs.(indice_to_int i) in
+    let func, _set =
+      Simplify.get_func env.modules env.modules.(module_indice).funcs
+        (indice_to_int i)
+    in
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env module_indice func (List.rev args) in
@@ -489,12 +507,15 @@ let rec exec_instr env module_indice locals stack instr =
   | Loop (_id, bt, e) -> exec_expr env module_indice locals stack e true bt
   | Block (_id, bt, e) -> exec_expr env module_indice locals stack e false bt
   | Memory_size ->
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     let len = Bytes.length mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> (
-    let memories = env.modules.(module_indice).memories in
-    let mem, max = memories.(0) in
+    let mem, max, set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     let delta, stack = Stack.pop_i32_to_int stack in
     let delta = delta * page_size in
     let old_size = Bytes.length mem in
@@ -506,22 +527,24 @@ let rec exec_instr env module_indice locals stack instr =
       | (None | Some _) as max ->
         let bytes = Bytes.extend mem 0 delta in
         Bytes.fill bytes old_size delta (Char.chr 0);
-        memories.(0) <- (bytes, max);
+        set bytes max;
         Stack.push_i32_of_int stack (old_size / page_size) )
   | Memory_fill ->
     let len, stack = Stack.pop_i32_to_int stack in
     let c, stack = Stack.pop_i32_to_char stack in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let memories = env.modules.(module_indice).memories in
-    let mem, _max = memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     begin
       try Bytes.fill mem pos len c
       with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
     end;
     stack
   | Memory_copy ->
-    let memories = env.modules.(module_indice).memories in
-    let mem, _max = memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     let len, stack = Stack.pop_i32_to_int stack in
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
@@ -532,7 +555,7 @@ let rec exec_instr env module_indice locals stack instr =
     stack
   | Memory_init i ->
     let m = env.modules.(module_indice) in
-    let mem, _max = m.memories.(0) in
+    let mem, _max, _set = Simplify.get_memory env.modules m.memories 0 in
     let len, stack = Stack.pop_i32_to_int stack in
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
@@ -552,11 +575,12 @@ let rec exec_instr env module_indice locals stack instr =
   | Global_get i ->
     let i = indice_to_int i in
     let globals = env.modules.(module_indice).globals in
-    let (_mut, _typ), e = globals.(i) in
+    let _gt, e, _set = Init.get_global env.modules globals i in
     Stack.push stack e
   | Global_set i ->
     let i = indice_to_int i in
-    let (mut, typ), _e = env.modules.(module_indice).globals.(i) in
+    let globals = env.modules.(module_indice).globals in
+    let (mut, typ), _e, set = Init.get_global env.modules globals i in
     if mut = Const then failwith "Can't set const global";
     let v, stack =
       match typ with
@@ -582,11 +606,15 @@ let rec exec_instr env module_indice locals stack instr =
           let v, stack = Stack.pop_f64 stack in
           (Const_F64 v, stack) )
     in
-    env.modules.(module_indice).globals.(i) <- ((mut, typ), v);
+    set v;
     stack
   | Table_get indice ->
     let indice = indice_to_int indice in
-    let t, table, _max = env.modules.(module_indice).tables.(indice) in
+    let t, table, _max =
+      match env.modules.(module_indice).tables.(indice) with
+      | Local (t, tbl, max) -> (t, tbl, max)
+      | Imported _ -> failwith "TODO Imported Table_get"
+    in
     let indice, stack = Stack.pop_i32_to_int stack in
     let v =
       match table.(indice) with
@@ -598,7 +626,11 @@ let rec exec_instr env module_indice locals stack instr =
     Stack.push stack v
   | Table_set indice ->
     let indice = indice_to_int indice in
-    let _t, table, _max = env.modules.(module_indice).tables.(indice) in
+    let _t, table, _max =
+      match env.modules.(module_indice).tables.(indice) with
+      | Local (t, tbl, max) -> (t, tbl, max)
+      | Imported _ -> failwith "TODO Imported Table_set"
+    in
     let v, stack = Stack.pop stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
@@ -608,11 +640,21 @@ let rec exec_instr env module_indice locals stack instr =
     stack
   | Table_size indice ->
     let indice = indice_to_int indice in
-    let _t, table, _max = env.modules.(module_indice).tables.(indice) in
+    let _t, table, _max =
+      match env.modules.(module_indice).tables.(indice) with
+      | Local (t, tbl, max) -> (t, tbl, max)
+      | Imported _ -> failwith "TODO Imported Table_size"
+    in
     Stack.push_i32_of_int stack (Array.length table)
   | Table_grow indice ->
     let indice = indice_to_int indice in
-    let t, table, max = env.modules.(module_indice).tables.(indice) in
+    let tables = env.modules.(module_indice).tables in
+    let table, max, set_table =
+      match tables.(indice) with
+      | Local (t, tbl, max) ->
+        (tbl, max, fun table -> tables.(indice) <- Local (t, table, max))
+      | Imported _ -> failwith "TODO Imported Table_grow"
+    in
     let size = Array.length table in
     let delta, stack = Stack.pop_i32_to_int stack in
     let new_size = size + delta in
@@ -627,11 +669,13 @@ let rec exec_instr env module_indice locals stack instr =
       let new_element, stack = Stack.pop stack in
       let new_table = Array.make new_size (Some new_element) in
       Array.iteri (fun i x -> new_table.(i) <- x) table;
-      env.modules.(module_indice).tables.(indice) <- (t, new_table, max);
+      set_table new_table;
       Stack.push_i32_of_int stack size
   | Table_fill t_i ->
-    let _typ, tbl, _max =
-      env.modules.(module_indice).tables.(indice_to_int t_i)
+    let tbl =
+      match env.modules.(module_indice).tables.(indice_to_int t_i) with
+      | Local (_t, tbl, _max) -> tbl
+      | Imported _ -> failwith "TODO Imported Table_grow"
     in
     let len, stack = Stack.pop_i32_to_int stack in
     let x, stack = Stack.pop_ref stack in
@@ -644,14 +688,18 @@ let rec exec_instr env module_indice locals stack instr =
   | Table_copy _ -> failwith "TODO Table_copy"
   | Table_init (t_i, e_i) ->
     let m = env.modules.(module_indice) in
-    let _typ, table, _max = m.tables.(indice_to_int t_i) in
+    let table =
+      match m.tables.(indice_to_int t_i) with
+      | Local (_t, tbl, _max) -> tbl
+      | Imported _ -> failwith "TODO Imported Table_grow"
+    in
     let n, stack = Stack.pop_i32_to_int stack in
     let s, stack = Stack.pop_i32_to_int stack in
     let d, stack = Stack.pop_i32_to_int stack in
     begin
       try
         let _typ, el = m.elements.(indice_to_int e_i) in
-        let v = Some el.(s) in
+        let v = const_expr m.globals el.(s) in
         Array.fill table d n v
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
@@ -659,7 +707,9 @@ let rec exec_instr env module_indice locals stack instr =
   | Elem_drop _ -> failwith "TODO Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -674,7 +724,9 @@ let rec exec_instr env module_indice locals stack instr =
     | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -692,7 +744,9 @@ let rec exec_instr env module_indice locals stack instr =
       Stack.push_i64 stack res )
   | F_load (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -712,7 +766,9 @@ let rec exec_instr env module_indice locals stack instr =
       Stack.push_f64 stack res )
   | I_store (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     ignore align;
     (* TODO: use align *)
     match nn with
@@ -734,7 +790,9 @@ let rec exec_instr env module_indice locals stack instr =
       stack )
   | F_store (nn, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     ignore align;
     (* TODO: use align *)
     match nn with
@@ -756,7 +814,9 @@ let rec exec_instr env module_indice locals stack instr =
       stack )
   | I_load8 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -769,7 +829,9 @@ let rec exec_instr env module_indice locals stack instr =
     | S64 -> Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; align }) ->
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -785,7 +847,9 @@ let rec exec_instr env module_indice locals stack instr =
     Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; align }) ->
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     ignore align;
     (* TODO: use align *)
     let n, stack =
@@ -805,7 +869,9 @@ let rec exec_instr env module_indice locals stack instr =
     stack
   | I_store16 (nn, { offset; align }) ->
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     ignore align;
     (* TODO: use align *)
     let n, stack =
@@ -825,7 +891,9 @@ let rec exec_instr env module_indice locals stack instr =
     stack
   | I64_store32 { offset; align } ->
     let offset = Uint32.to_int offset in
-    let mem, _max = env.modules.(module_indice).memories.(0) in
+    let mem, _max, _set =
+      Simplify.get_memory env.modules env.modules.(module_indice).memories 0
+    in
     ignore align;
     (* TODO: use align *)
     let n, stack = Stack.pop_i64 stack in
@@ -848,7 +916,9 @@ let rec exec_instr env module_indice locals stack instr =
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i, stack = Stack.pop_i32_to_int stack in
     let module_ = env.modules.(module_indice) in
-    let rt, a, _max = module_.tables.(indice_to_int tbl_i) in
+    let rt, a, _max, _set =
+      Simplify.get_table env.modules module_.tables (indice_to_int tbl_i)
+    in
     assert (rt = Func_ref);
     let i =
       match a.(fun_i) with
@@ -857,7 +927,7 @@ let rec exec_instr env module_indice locals stack instr =
       | Some (Const_host id) -> id
       | Some _r -> failwith "invalid type, expected Const_host"
     in
-    let func = module_.funcs.(i) in
+    let func, _set = Simplify.get_func env.modules module_.funcs i in
     assert (func.type_f = typ_i);
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
@@ -899,7 +969,7 @@ let invoke env module_indice f args =
     | None -> failwith "undefined export"
     | Some indice -> indice
   in
-  let func = module_.funcs.(func_indice) in
+  let func, _set = Simplify.get_func env.modules module_.funcs func_indice in
   exec_func env module_indice func args
 
 let exec_action env = function
@@ -986,9 +1056,11 @@ let exec_register env name i =
 
 let exec_module env i =
   let module_ = env.modules.(i) in
+  Init.module_ env.registered_modules env.modules module_;
   Option.iter
     (fun f_id ->
-      let _res = exec_func env i module_.funcs.(f_id) [] in
+      let func, _set = Simplify.get_func env.modules module_.funcs f_id in
+      let _res = exec_func env i func [] in
       () )
     module_.start;
   env

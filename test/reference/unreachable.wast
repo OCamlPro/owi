@@ -301,4 +301,3 @@
 (assert_trap (invoke "as-convert-operand") "unreachable")
 
 (assert_trap (invoke "as-memory.grow-size") "unreachable")
-

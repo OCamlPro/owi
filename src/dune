@@ -7,6 +7,7 @@
   float32
   float64
   handle
+  init
   int32
   int64
   interpret
