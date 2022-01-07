@@ -919,7 +919,7 @@ let rec exec_instr env module_indice locals stack instr =
     let rt, a, _max, _set =
       Simplify.get_table env.modules module_.tables (indice_to_int tbl_i)
     in
-    assert (rt = Func_ref);
+    if rt <> Func_ref then raise @@ Trap "indirect call type mismatch";
     let i =
       match a.(fun_i) with
       | exception Invalid_argument _ -> raise @@ Trap "undefined element"

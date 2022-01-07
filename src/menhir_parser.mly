@@ -639,6 +639,10 @@ let table ==
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
     | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }
+    | MImport i -> begin match i.desc with
+      | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
+      | _whatever -> assert false
+    end
     | field -> field
   ) table_fields
 }
@@ -675,7 +679,7 @@ let data ==
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
     let mem_id = Option.map (fun id -> Symbolic id) id in
-    List.map (function
+    List.rev_map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
       | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
@@ -696,8 +700,8 @@ let memory_fields :=
   | LPAR; DATA; init = string_list; RPAR; {
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     
-    [ MMem (None, { min; max = Some min})
-    ; MData { id = None; init; mode = Data_active (None, []) } ]
+    [ MData { id = None; init; mode = Data_active (None, []) } 
+    ; MMem (None, { min; max = Some min}) ]
   }
 
 let global ==

@@ -373,10 +373,9 @@ let mk_module registered_modules modules m =
   let memories = List.rev env.memories |> Array.of_list in
   let funcs = List.rev env.funcs |> Array.of_list in
 
-  let _curr_table, fields, segments =
+  let fields, segments =
     List.fold_left
-      (fun (curr_table, fields, segments) -> function
-        | MTable _ as f -> (curr_table + 1, f :: fields, segments)
+      (fun (fields, segments) -> function
         | MElem e as f -> (
           match e.mode with
           | Elem_passive ->
@@ -390,7 +389,7 @@ let mk_module registered_modules modules m =
                   )
                 e.init
             in
-            (curr_table, f :: fields, (e.type_, segment) :: segments)
+            (f :: fields, (e.type_, segment) :: segments)
           | Elem_active (ti, offset) ->
             let ti = Option.map (map_symb find_table) ti in
             let ti = Option.map (fun i -> Raw i) ti in
@@ -404,13 +403,11 @@ let mk_module registered_modules modules m =
             in
             let init = List.map f e.init in
             let offset = f offset in
-            ( curr_table
-            , MElem { e with mode = Elem_active (ti, offset); init } :: fields
+            ( MElem { e with mode = Elem_active (ti, offset); init } :: fields
             , (e.type_, []) :: segments )
-          | Elem_declarative ->
-            (curr_table, f :: fields, (e.type_, []) :: segments) )
-        | f -> (curr_table, f :: fields, segments) )
-      (-1, [], []) m.Types.fields
+          | Elem_declarative -> (f :: fields, (e.type_, []) :: segments) )
+        | f -> (f :: fields, segments) )
+      ([], []) m.Types.fields
   in
   let fields = List.rev fields in
 
@@ -533,7 +530,7 @@ let script script =
     Module
       { id = Some "spectest"
       ; fields =
-          [ MMem (Some "memory", { min = 1l; max = None })
+          [ MMem (Some "memory", { min = 1l; max = Some 2l })
           ; MFunc
               { type_f = Bt_raw ([ (None, Num_type I32) ], [])
               ; locals = []
@@ -658,6 +655,7 @@ let script script =
       (fun (curr_module, modules, script) -> function
         | Module m ->
           let curr_module = curr_module + 1 in
+          Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
           Option.iter
             (fun id -> Hashtbl.replace seen_modules id curr_module)
             m.id;
