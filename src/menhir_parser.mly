@@ -172,7 +172,6 @@ let frelop ==
 let align ==
   | ALIGN; EQUAL; ~ = NUM; <>
 
-(* TODO: factorize with offset ? *)
 let memarg_offset ==
   | OFFSET; EQUAL; ~ = NUM; <>
 
@@ -527,7 +526,7 @@ let func ==
         end
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
-      | field -> field
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) func_fields
   }
 
@@ -643,7 +642,7 @@ let table ==
       | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
       | _whatever -> assert false
     end
-    | field -> field
+    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
   ) table_fields
 }
 
@@ -683,16 +682,20 @@ let memory ==
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
       | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
-      | field -> field
+      | MImport i -> begin match i.desc with
+        | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
+        | _whatever -> assert false
+        end
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) memory_fields
   }
 
 let memory_fields :=
   | ~ = mem_type; {
-    [ MMem (None, mem_type) ] (* TODO: None ? *)
+    [ MMem (None, mem_type) ]
   }
   | (module_, name) = inline_import; ~ = mem_type; {
-    [ MImport { module_; name; desc = Import_mem (None, mem_type) } ] (* TODO: None ? *)
+    [ MImport { module_; name; desc = Import_mem (None, mem_type) } ]
   }
   | ~ = inline_export; ~ = memory_fields; {
     MExport { name = inline_export; desc = Export_mem None } :: memory_fields
@@ -715,7 +718,7 @@ let global ==
         | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
         | _ -> assert false
         end
-      | field -> field
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) global_fields
   }
 

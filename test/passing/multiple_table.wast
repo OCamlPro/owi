@@ -2,8 +2,6 @@
   (type $ii-i (func (param i32 i32) (result i32)))
 
   (table $t1 funcref (elem $f $g))
-  ;;(table $t1 2 funcref)
-  ;;(elem (table $t1) (i32.const 0) func $f $g)
   (table $t2 funcref (elem $h $i $j))
   (table $t3 4 funcref)
   (elem (table $t3) (i32.const 0) func $g $h)

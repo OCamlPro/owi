@@ -31,7 +31,7 @@ type module_ =
 
 type action =
   | Invoke_indice of int * string * const list
-  | Get of string option * string
+  | Get_indice of int * string
 
 type assert_ =
   | SAssert_return of action * result list
@@ -77,9 +77,9 @@ let action last_module seen_modules = function
   | Invoke (mod_name, f, args) ->
     let i = find_module mod_name last_module seen_modules in
     Invoke_indice (i, f, args)
-  | Get (id, n) ->
-    (* TODO: simplify this *)
-    Get (id, n)
+  | Get (mod_name, n) ->
+    let i = find_module mod_name last_module seen_modules in
+    Get_indice (i, n)
 
 let assert_ last_module seen_modules =
   let action = action last_module seen_modules in
@@ -130,27 +130,24 @@ let find_ind tbl x ind =
   | None -> failwith @@ Format.asprintf "unbound %s indice %s" x ind
   | Some i -> i
 
-let rec get_table (modules : module_ array) tables i =
+let rec get_table (modules : module_ array) mi i =
+  let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, tbl, max) ->
-    (rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
-  | Imported (m, i) -> get_table modules modules.(m).tables i
+    (mi, rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
+  | Imported (mi, i) -> get_table modules mi i
 
 let rec get_global (modules : module_ array) globals i =
   match globals.(i) with
   | Local (gt, g) -> (gt, g, fun g -> globals.(i) <- Local (gt, g))
-  | Imported (m, i) -> get_global modules modules.(m).globals i
+  | Imported (mi, i) ->
+    let globals = modules.(mi).globals in
+    get_global modules globals i
 
 let rec get_memory (modules : module_ array) memories i =
   match memories.(i) with
   | Local (m, max) -> (m, max, fun m max -> memories.(i) <- Local (m, max))
   | Imported (m, i) -> get_memory modules modules.(m).memories i
-
-let rec get_func (modules : module_ array) funcs i =
-  match funcs.(i) with
-  (* TODO: do we need set somewhere ? *)
-  | Local f -> (f, fun f -> funcs.(i) <- Local f)
-  | Imported (m, i) -> get_func modules modules.(m).funcs i
 
 let mk_module registered_modules modules m =
   let modules = Array.of_list @@ List.rev modules in

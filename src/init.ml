@@ -1,16 +1,31 @@
 open Types
 open Simplify
 
-let rec get_table (modules : module_ array) tables i =
+let rec get_table (modules : module_ array) mi i =
+  let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, tbl, max) ->
-    (rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
-  | Imported (m, i) -> get_table modules modules.(m).tables i
+    (mi, rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
+  | Imported (mi, i) -> get_table modules mi i
 
-let rec get_global (modules : module_ array) globals i =
+let rec get_global (modules : module_ array) mi i =
+  let globals = modules.(mi).globals in
   match globals.(i) with
-  | Local (gt, g) -> (gt, g, fun g -> globals.(i) <- Local (gt, g))
-  | Imported (m, i) -> get_global modules modules.(m).globals i
+  | Local (gt, g) -> (mi, gt, g, fun g -> globals.(i) <- Local (gt, g))
+  | Imported (mi, i) -> get_global modules mi i
+
+let rec get_func (modules : module_ array) mi i =
+  let funcs = modules.(mi).funcs in
+  match funcs.(i) with
+  (* TODO: do we need set somewhere ? *)
+  | Local f -> (mi, f, fun f -> funcs.(i) <- Local f)
+  | Imported (m, i) -> get_func modules m i
+
+let rec get_memory (modules : module_ array) mi i =
+  let memories = modules.(mi).memories in
+  match memories.(i) with
+  | Local (m, max) -> (mi, m, max, fun m max -> memories.(i) <- Local (m, max))
+  | Imported (mi, i) -> get_memory modules mi i
 
 let indice_to_int = function
   | Raw i -> Uint32.to_int i
@@ -19,7 +34,8 @@ let indice_to_int = function
     @@ Format.sprintf
          "interpreter internal error (indice_to_int init): unbound id $%s" id
 
-let module_ _registered_modules modules (m : module_) =
+let module_ _registered_modules modules module_indice =
+  let m = modules.(module_indice) in
   let const_expr = function
     | [ I32_const n ] -> Const_I32 n
     | [ I64_const n ] -> Const_I64 n
@@ -27,7 +43,9 @@ let module_ _registered_modules modules (m : module_) =
     | [ F64_const f ] -> Const_F64 f
     | [ Ref_null rt ] -> Const_null rt
     | [ Global_get i ] ->
-      let _gt, e, _set = get_global modules m.globals (indice_to_int i) in
+      let _mi, _gt, e, _set =
+        get_global modules module_indice (indice_to_int i)
+      in
       e
     | [ Ref_func ind ] -> Const_host (indice_to_int ind)
     | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
@@ -50,8 +68,8 @@ let module_ _registered_modules modules (m : module_) =
              let ti =
                Option.value ti ~default:(Raw (Uint32.of_int curr_table))
              in
-             let table_ref_type, table, _max, set_table =
-               get_table modules m.tables (indice_to_int ti)
+             let _mi, table_ref_type, table, _max, set_table =
+               get_table modules module_indice (indice_to_int ti)
              in
              let offset = const_expr_to_int offset in
              if table_ref_type <> e.type_ then failwith "invalid elem type";
