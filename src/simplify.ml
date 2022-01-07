@@ -130,13 +130,6 @@ let find_ind tbl x ind =
   | None -> failwith @@ Format.asprintf "unbound %s indice %s" x ind
   | Some i -> i
 
-let rec get_table (modules : module_ array) mi i =
-  let tables = modules.(mi).tables in
-  match tables.(i) with
-  | Local (rt, tbl, max) ->
-    (mi, rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
-  | Imported (mi, i) -> get_table modules mi i
-
 let rec get_global (modules : module_ array) globals i =
   match globals.(i) with
   | Local (gt, g) -> (gt, g, fun g -> globals.(i) <- Local (gt, g))
