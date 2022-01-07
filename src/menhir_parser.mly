@@ -635,7 +635,7 @@ let elem ==
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
   let tbl_id = Option.map (fun id -> Symbolic id) id in
-  List.rev_map (function
+  List.map (function
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
     | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }

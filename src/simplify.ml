@@ -45,7 +45,7 @@ let map_symb find_in_tbl = function
 
 let map_symb_opt default find_in_tbl = function
   | None -> default
-  | Some sym -> map_symb find_in_tbl sym
+  | Some sym -> Uint32.to_int @@ map_symb find_in_tbl sym
 
 let find_module name last seen =
   match name with
@@ -92,11 +92,23 @@ type env =
   ; curr_data : int
   ; datas : string list
   ; globals : (global_type * expr) list
-  ; mem_bytes : Bytes.t Array.t
+  ; mem_bytes : bytes array
   ; tables : (ref_type * const option array * int option) list
   ; types : func_type list
   ; start : int option
   }
+
+let find_id tbl x = function
+  | Raw i -> Uint32.to_int i
+  | Symbolic i -> (
+    match Hashtbl.find_opt tbl i with
+    | None -> failwith @@ Format.asprintf "unbound %s id %a" x Pp.id i
+    | Some i -> i )
+
+let find_ind tbl x ind =
+  match Hashtbl.find_opt tbl ind with
+  | None -> failwith @@ Format.asprintf "unbound %s indice %s" x ind
+  | Some i -> i
 
 let mk_module _modules m =
   let exported_funcs = Hashtbl.create 512 in
@@ -104,57 +116,25 @@ let mk_module _modules m =
   let mem_max_size = ref None in
 
   let seen_types = Hashtbl.create 512 in
-  let find_type ind =
-    match ind with
-    | Raw i -> Uint32.to_int i
-    | Symbolic i -> begin
-      match Hashtbl.find_opt seen_types i with
-      | None -> failwith @@ Format.asprintf "unbound type id %a" Pp.id i
-      | Some i -> i
-    end
-  in
+  let find_type = find_id seen_types "type" in
 
   let seen_funcs = Hashtbl.create 512 in
-  let find_func id =
-    match Hashtbl.find_opt seen_funcs id with
-    | None -> failwith @@ Format.sprintf "unbound func %s" id
-    | Some i -> i
-  in
+  let find_func = find_ind seen_funcs "func" in
 
   let seen_memories = Hashtbl.create 512 in
-  let find_memory id =
-    match Hashtbl.find_opt seen_memories id with
-    | None -> failwith @@ Format.sprintf "unbound memory %s" id
-    | Some i -> i
-  in
+  let find_memory = find_ind seen_memories "memory" in
 
   let seen_globals = Hashtbl.create 512 in
-  let find_global id =
-    match Hashtbl.find_opt seen_globals id with
-    | None -> failwith @@ Format.sprintf "unbound global %s" id
-    | Some i -> i
-  in
+  let find_global = find_ind seen_globals "global" in
 
   let seen_tables = Hashtbl.create 512 in
-  let find_table id =
-    match Hashtbl.find_opt seen_tables id with
-    | None -> failwith @@ Format.sprintf "unbound table indice $%s" id
-    | Some i -> i
-  in
+  let find_table = find_ind seen_tables "table" in
 
   let seen_elements = Hashtbl.create 512 in
-  let find_element id =
-    match Hashtbl.find_opt seen_elements id with
-    | None -> failwith @@ Format.sprintf "unbound element indice $%s" id
-    | Some i -> i
-  in
+  let find_element = find_ind seen_elements "element" in
 
   let seen_datas = Hashtbl.create 512 in
-  let find_data id =
-    match Hashtbl.find_opt seen_datas id with
-    | None -> failwith @@ Format.sprintf "unbound element indice $%s" id
-    | Some i -> i
-  in
+  let find_data = find_ind seen_datas "data" in
 
   let rec const_expr globals = function
     | [ I32_const n ] -> Const_I32 n
@@ -169,6 +149,12 @@ let mk_module _modules m =
       const_expr globals e
     | [ Ref_func ind ] -> Const_host (Uint32.to_int @@ map_symb find_func ind)
     | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
+  in
+
+  let const_expr_to_int globals e =
+    match const_expr globals e with
+    | Const_I32 n -> Int32.to_int n
+    | _whatever -> failwith "TODO const_expr_to_int"
   in
 
   let env =
@@ -195,10 +181,7 @@ let mk_module _modules m =
           begin
             match desc with
             | Export_func indice ->
-              let i =
-                Uint32.to_int
-                @@ map_symb_opt (Uint32.of_int env.curr_func) find_func indice
-              in
+              let i = map_symb_opt env.curr_func find_func indice in
               Hashtbl.replace exported_funcs name i
             | _ -> ()
           end;
@@ -271,12 +254,6 @@ let mk_module _modules m =
         | MElem e ->
           let curr_element = env.curr_element + 1 in
           Option.iter (fun id -> Hashtbl.add seen_elements id curr_element) e.id;
-          (* begin
-               match e.mode with
-               | Elem_passive -> env
-               | Elem_active (_indice, _offset) -> env
-               | Elem_declarative -> env
-             end *)
           { env with curr_element }
         | MData data ->
           let curr_data = env.curr_data + 1 in
@@ -285,10 +262,10 @@ let mk_module _modules m =
             match data.mode with
             | Data_passive -> data.init
             | Data_active (indice, expr) -> (
-              let indice = map_symb_opt Uint32.zero find_memory indice in
+              let indice = map_symb_opt 0 find_memory indice in
               match const_expr (List.rev env.globals |> Array.of_list) expr with
               | Const_I32 offset ->
-                let mem_bytes = env.mem_bytes.(Uint32.to_int indice) in
+                let mem_bytes = env.mem_bytes.(indice) in
                 let len = String.length data.init in
                 Bytes.blit_string data.init 0 mem_bytes (Int32.to_int offset)
                   len;
@@ -315,101 +292,54 @@ let mk_module _modules m =
   in
 
   let start = env.start in
-
   let datas = List.rev env.datas |> Array.of_list in
   let globals = List.rev env.globals |> Array.of_list in
-
-  let const_expr = const_expr globals in
-
-  let globals = Array.map (fun (type_, e) -> (type_, const_expr e)) globals in
-
   let tables = List.rev env.tables |> Array.of_list in
   let types = List.rev env.types |> Array.of_list in
+  let const_expr = const_expr globals in
+  let const_expr_to_int = const_expr_to_int globals in
+  let globals = Array.map (fun (type_, e) -> (type_, const_expr e)) globals in
 
-  let curr_table = ref (-1) in
-  let passive_elements = ref [] in
-
-  List.iter
-    (function
-      | MTable _t -> incr curr_table
-      | MElem e -> begin
-        match e.mode with
-        | Elem_passive ->
-          (* A passive element segment’s elements can be copied to a table using the table.init instruction. *)
-          List.iter
-            (fun expr ->
-              let expr =
-                List.map
-                  (function
-                    | Ref_func rf ->
-                      Const_host (Uint32.to_int @@ map_symb find_func rf)
-                    | I32_const n -> Const_I32 n
-                    | I64_const n -> Const_I64 n
-                    | F32_const f -> Const_F32 f
-                    | F64_const f -> Const_F64 f
-                    | Ref_null rt -> Const_null rt
-                    | i ->
-                      failwith
-                      @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i )
-                  expr
-              in
-              passive_elements := (e.type_, expr) :: !passive_elements )
-            e.init
-        | Elem_active (indice, offset) ->
-          (* An active element segment copies its elements into a table during instantiation, as specified by a table index and a constant expression defining an offset into that table. *)
-          let (table_ref_type, table, table_max_size), table_indice =
-            let indice =
-              Uint32.to_int
-              @@ map_symb_opt
-                   (* TODO: why do we have to use 0 when curr_table < 0 ? *)
-                   (Uint32.of_int (max 0 !curr_table))
-                   find_table indice
+  let _curr_table, elements =
+    List.fold_left
+      (fun (curr_table, elements) -> function
+        | MTable _ -> (curr_table + 1, elements)
+        | MElem e -> (
+          match e.mode with
+          | Elem_passive ->
+            let new_elements =
+              List.rev_map (fun expr -> (e.type_, const_expr expr)) e.init
             in
-            (tables.(indice), indice)
-          in
-          let offset =
-            match const_expr offset with
-            | Const_I32 n -> Int32.to_int n
-            | c ->
-              failwith
-              @@ Format.asprintf "unhandled elem offset const kind: `%a`"
-                   Pp.const c
-          in
-          if table_ref_type <> e.type_ then failwith "invalid elem type";
-          List.iteri
-            (fun i expr ->
-              List.iteri
-                (fun j x ->
-                  let new_elem =
-                    match x with
-                    | Ref_func rf ->
-                      Const_host (Uint32.to_int @@ map_symb find_func rf)
-                    | I32_const n -> Const_I32 n
-                    | I64_const n -> Const_I64 n
-                    | F32_const f -> Const_F32 f
-                    | F64_const f -> Const_F64 f
-                    | Ref_null rt -> Const_null rt
-                    | i ->
-                      failwith
-                      @@ Format.asprintf "TODO element expr: `%a`" Pp.instr i
-                  in
-                  let pos = offset + i + j in
-                  let len = Array.length table in
-                  if pos >= len then (
-                    let new_table = Array.make (pos + 1) None in
-                    Array.iteri (fun i e -> new_table.(i) <- e) table;
-                    new_table.(pos) <- Some new_elem;
-                    tables.(table_indice) <-
-                      (table_ref_type, new_table, table_max_size) )
-                  else table.(pos) <- Some new_elem )
-                expr )
-            e.init
-        | Elem_declarative ->
-          (* A declarative element segment is not available at runtime but merely serves to forward-declare references that are formed in code with instructions like ref.func. *)
-          ()
-      end
-      | _ -> () )
-    m.Types.fields;
+            (curr_table, new_elements @ elements)
+          | Elem_active (ti, offset) ->
+            let ti = map_symb_opt env.curr_table find_table ti in
+            let table_ref_type, table, table_max_size = tables.(ti) in
+            let offset = const_expr_to_int offset in
+            if table_ref_type <> e.type_ then failwith "invalid elem type";
+            List.iteri
+              (fun i expr ->
+                List.iteri
+                  (fun j x ->
+                    let new_elem = const_expr [ x ] in
+                    let pos = offset + i + j in
+                    let len = Array.length table in
+                    if pos >= len then (
+                      let new_table = Array.make (pos + 1) None in
+                      Array.iteri (fun i e -> new_table.(i) <- e) table;
+                      new_table.(pos) <- Some new_elem;
+                      tables.(ti) <- (table_ref_type, new_table, table_max_size)
+                      )
+                    else table.(pos) <- Some new_elem )
+                  expr )
+              e.init;
+            (curr_table, elements)
+          | Elem_declarative -> (curr_table, elements) )
+        | _ -> (curr_table, elements) )
+      (-1, []) m.Types.fields
+  in
+
+  let elements = List.rev elements |> Array.of_list in
+  let elements = Array.map (fun (rt, l) -> (rt, [| l |])) elements in
 
   let funcs =
     Array.of_list @@ List.rev
@@ -463,6 +393,12 @@ let mk_module _modules m =
           else Uint32.of_int !pos
         in
 
+        let bt_to_raw =
+          Option.map (function
+            | Bt_ind ind -> Bt_raw types.(find_type ind)
+            | t -> t )
+        in
+
         (* handling an expression *)
         let rec body block_ids = function
           | Br_table (ids, id) ->
@@ -478,33 +414,17 @@ let mk_module _modules m =
           | Local_get id -> Local_get (Raw (map_symb find_local id))
           | Local_tee id -> Local_tee (Raw (map_symb find_local id))
           | If_else (id, bt, e1, e2) ->
-            let bt =
-              Option.map
-                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
-                bt
-            in
+            let bt = bt_to_raw bt in
             let block_ids = id :: block_ids in
             If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
           | Loop (id, bt, e) ->
-            let bt =
-              Option.map
-                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
-                bt
-            in
+            let bt = bt_to_raw bt in
             Loop (id, bt, expr e (id :: block_ids))
           | Block (id, bt, e) ->
-            let bt =
-              Option.map
-                (function Bt_ind ind -> Bt_raw types.(find_type ind) | t -> t)
-                bt
-            in
+            let bt = bt_to_raw bt in
             Block (id, bt, expr e (id :: block_ids))
           | Call_indirect (tbl_i, bt) ->
-            let bt =
-              match bt with
-              | Bt_ind ind -> Bt_raw types.(find_type ind)
-              | t -> t
-            in
+            let bt = Option.get @@ bt_to_raw (Some bt) in
             Call_indirect (Raw (map_symb find_table tbl_i), bt)
           | Global_set id -> Global_set (Raw (map_symb find_global id))
           | Global_get id -> Global_get (Raw (map_symb find_global id))
@@ -514,11 +434,8 @@ let mk_module _modules m =
           | Table_set id -> Table_set (Raw (map_symb find_table id))
           | Table_grow id -> Table_grow (Raw (map_symb find_table id))
           | Table_init (i, i') ->
-            let res =
-              Table_init
-                (Raw (map_symb find_table i), Raw (map_symb find_element i'))
-            in
-            res
+            Table_init
+              (Raw (map_symb find_table i), Raw (map_symb find_element i'))
           | Table_fill id -> Table_fill (Raw (map_symb find_table id))
           | Memory_init id -> Memory_init (Raw (map_symb find_data id))
           | Data_drop id -> Data_drop (Raw (map_symb find_data id))
@@ -528,9 +445,6 @@ let mk_module _modules m =
         { f with body; type_f = Bt_raw type_f } )
       funcs
   in
-
-  let elements = List.rev !passive_elements |> Array.of_list in
-  let elements = Array.map (fun (rt, l) -> (rt, Array.of_list l)) elements in
 
   { fields = m.Types.fields
   ; funcs
