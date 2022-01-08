@@ -16,11 +16,11 @@ type module_ =
   { fields : module_field list
   ; seen_funcs : (string, int) Hashtbl.t
   ; datas : string array
-  ; mutable funcs : runtime_func array
-  ; mutable memories : runtime_memory array
-  ; mutable tables : runtime_table array
-  ; mutable globals : runtime_global array
-  ; mutable globals_tmp : (global_type * expr) runtime array
+  ; funcs : runtime_func array
+  ; memories : runtime_memory array
+  ; tables : runtime_table array
+  ; globals : runtime_global array
+  ; globals_tmp : (global_type * expr) runtime array
   ; types : func_type Array.t
   ; elements : (ref_type * expr Array.t) Array.t
   ; exported_funcs : (string, int) Hashtbl.t

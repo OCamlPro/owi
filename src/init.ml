@@ -55,7 +55,8 @@ let module_ _registered_modules modules module_indice =
       m.funcs
   in
 
-  modules.(module_indice).funcs <- funcs;
+  let m = { m with funcs } in
+  modules.(module_indice) <- m;
 
   let memories =
     Array.map
@@ -72,7 +73,8 @@ let module_ _registered_modules modules module_indice =
       m.memories
   in
 
-  modules.(module_indice).memories <- memories;
+  let m = { m with memories } in
+  modules.(module_indice) <- m;
 
   let tables =
     Array.map
@@ -89,7 +91,8 @@ let module_ _registered_modules modules module_indice =
       m.tables
   in
 
-  modules.(module_indice).tables <- tables;
+  let m = { m with tables } in
+  modules.(module_indice) <- m;
 
   let globals =
     Array.map
@@ -106,7 +109,8 @@ let module_ _registered_modules modules module_indice =
       m.globals_tmp
   in
 
-  modules.(module_indice).globals_tmp <- [||];
+  let m = { m with globals_tmp = [||] } in
+  modules.(module_indice) <- m;
 
   let rec const_expr = function
     | [ I32_const n ] -> Const_I32 n
@@ -133,7 +137,8 @@ let module_ _registered_modules modules module_indice =
       globals
   in
 
-  modules.(module_indice).globals <- globals;
+  let m = { m with globals } in
+  modules.(module_indice) <- m;
 
   let const_expr_to_int e =
     match const_expr e with
