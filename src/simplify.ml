@@ -4,7 +4,7 @@ type 'a runtime =
   | Local of 'a
   | Imported of int * indice
 
-type runtime_table = (ref_type * const option Array.t * int option) runtime
+type runtime_table = (ref_type * const option array * int option) runtime
 
 type runtime_global = (global_type * const) runtime
 
@@ -21,8 +21,8 @@ type module_ =
   ; tables : runtime_table array
   ; globals : runtime_global array
   ; globals_tmp : (global_type * expr) runtime array
-  ; types : func_type Array.t
-  ; elements : (ref_type * expr Array.t) Array.t
+  ; types : func_type array
+  ; elements : (ref_type * const array) array
   ; exported_funcs : (string, int) Hashtbl.t
   ; exported_globals : (string, int) Hashtbl.t
   ; exported_memories : (string, int) Hashtbl.t
@@ -163,6 +163,15 @@ let mk_module registered_modules m =
 
   let find_module = find_ind registered_modules "module" in
 
+  let aux = function
+    | Ref_func i -> Ref_func (map_symb_raw find_func i)
+    | Ref_null rt -> Ref_null rt
+    | I32_const n -> I32_const n
+    | Global_get i -> Global_get (map_symb_raw find_global i)
+    | (I64_const _ | F32_const _ | F64_const _) as c -> c
+    | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i
+  in
+
   let env =
     List.fold_left
       (fun env -> function
@@ -267,18 +276,24 @@ let mk_module registered_modules m =
       m.Types.fields
   in
 
+  let globals_tmp =
+    List.map
+      (function
+        | Local (gt, b) -> Local (gt, List.map aux b) | Imported _ as i -> i )
+      env.globals_tmp
+  in
+
   let start = env.start in
   let datas = List.rev env.datas |> Array.of_list in
-  let globals = List.rev env.globals |> Array.of_list in
-  let globals_tmp = List.rev env.globals_tmp |> Array.of_list in
+  let globals_tmp = List.rev globals_tmp |> Array.of_list in
   let tables = List.rev env.tables |> Array.of_list in
   let types = List.rev env.types |> Array.of_list in
   let memories = List.rev env.memories |> Array.of_list in
   let funcs = List.rev env.funcs |> Array.of_list in
 
-  let fields, segments =
+  let fields =
     List.fold_left
-      (fun (fields, segments) -> function
+      (fun fields -> function
         | MExport { name; desc } ->
           let desc =
             match desc with
@@ -304,10 +319,10 @@ let mk_module registered_modules m =
                    indice )
           in
           let f = MExport { name; desc } in
-          (f :: fields, segments)
+          f :: fields
         | MData data as f -> begin
           match data.mode with
-          | Data_passive -> (f :: fields, segments)
+          | Data_passive -> f :: fields
           | Data_active (indice, expr) ->
             let indice = Option.map (map_symb_raw find_memory) indice in
             let expr =
@@ -323,44 +338,24 @@ let mk_module registered_modules m =
             in
             let mode = Data_active (indice, expr) in
             let f = MData { data with mode } in
-            (f :: fields, segments)
+            f :: fields
         end
-        | MElem e as f -> (
-          match e.mode with
-          | Elem_passive ->
-            let segment =
-              List.map
-                (List.map (function
-                  | Ref_func i -> Ref_func (map_symb_raw find_func i)
-                  | Ref_null rt -> Ref_null rt
-                  | i ->
-                    failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i )
-                  )
-                e.init
-            in
-            (f :: fields, (e.type_, segment) :: segments)
-          | Elem_active (ti, offset) ->
-            let ti = Option.map (map_symb_raw find_table) ti in
-            let f =
-              List.map (function
-                | Ref_func i -> Ref_func (map_symb_raw find_func i)
-                | Ref_null rt -> Ref_null rt
-                | I32_const n -> I32_const n
-                | Global_get i -> Global_get (map_symb_raw find_global i)
-                | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i )
-            in
-            let init = List.map f e.init in
-            let offset = f offset in
-            ( MElem { e with mode = Elem_active (ti, offset); init } :: fields
-            , (e.type_, []) :: segments )
-          | Elem_declarative -> (f :: fields, (e.type_, []) :: segments) )
-        | f -> (f :: fields, segments) )
-      ([], []) m.Types.fields
+        | MElem e ->
+          let aux = List.map aux in
+          let init = List.map aux e.init in
+          let mode =
+            match e.mode with
+            | Elem_passive -> e.mode
+            | Elem_active (ti, offset) ->
+              let ti = Option.map (map_symb_raw find_table) ti in
+              Elem_active (ti, aux offset)
+            | Elem_declarative -> e.mode
+          in
+          MElem { e with mode; init } :: fields
+        | f -> f :: fields )
+      [] m.Types.fields
   in
   let fields = List.rev fields in
-
-  let segments = List.rev segments |> Array.of_list in
-  let segments = Array.map (fun (rt, l) -> (rt, Array.of_list l)) segments in
 
   let funcs =
     Array.map
@@ -477,9 +472,9 @@ let mk_module registered_modules m =
   ; memories
   ; tables
   ; types
-  ; globals
+  ; globals = [||]
   ; globals_tmp
-  ; elements = segments
+  ; elements = [||]
   ; start
   ; datas
   ; exported_funcs

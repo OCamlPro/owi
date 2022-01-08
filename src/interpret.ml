@@ -245,21 +245,23 @@ let init_local (_id, t) =
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
-let const_expr globals = function
-  | [ I32_const n ] -> Some (Const_I32 n)
-  | [ I64_const n ] -> Some (Const_I64 n)
-  | [ F32_const f ] -> Some (Const_F32 f)
-  | [ F64_const f ] -> Some (Const_F64 f)
-  | [ Ref_null rt ] -> Some (Const_null rt)
-  | [ Global_get ind ] ->
+let count_trap = ref (-1)
+
+let const_instr globals = function
+  | I32_const n -> Const_I32 n
+  | I64_const n -> Const_I64 n
+  | F32_const f -> Const_F32 f
+  | F64_const f -> Const_F64 f
+  | Ref_null rt -> Const_null rt
+  | Global_get ind ->
     let (_mut, _typ), e =
       match globals.(indice_to_int ind) with
       | Local (gt, e) -> (gt, e)
       | Imported _ -> failwith "imported global not allowed in const exprrrrr"
     in
-    Some e
-  | [ Ref_func ind ] -> Some (Const_host (indice_to_int ind))
-  | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
+    e
+  | Ref_func ind -> Const_host (indice_to_int ind)
+  | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.instr e
 
 let rec exec_instr env module_indice locals stack instr =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
@@ -677,26 +679,69 @@ let rec exec_instr env module_indice locals stack instr =
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
     stack
-  | Table_copy _ -> failwith "TODO Table_copy"
-  | Table_init (t_i, e_i) ->
-    let m = env.modules.(module_indice) in
-    let table =
-      match m.tables.(indice_to_int t_i) with
-      | Local (_t, tbl, _max) -> tbl
-      | Imported _ -> failwith "TODO Imported Table_grow"
+  | Table_copy (ti_dst, ti_src) -> (
+    let modules = env.modules in
+    let _mi, _rt, tbl_dst, _max, _set =
+      Init.get_table modules module_indice (indice_to_int ti_dst)
     in
-    let n, stack = Stack.pop_i32_to_int stack in
-    let s, stack = Stack.pop_i32_to_int stack in
-    let d, stack = Stack.pop_i32_to_int stack in
+    let _mi, _rt, tbl_src, _max, _set =
+      Init.get_table modules module_indice (indice_to_int ti_src)
+    in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src, stack = Stack.pop_i32_to_int stack in
+    let dst, stack = Stack.pop_i32_to_int stack in
+    if src + len > Array.length tbl_src || dst + len > Array.length tbl_dst then
+      raise @@ Trap "out of bounds table access";
+    if len = 0 then stack
+    else
+      try
+        Array.blit tbl_src src tbl_dst dst len;
+        stack
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access" )
+  | Table_init (t_i, e_i) ->
+    let modules = env.modules in
+    let m = modules.(module_indice) in
+    let _mi, _rt, table, _max, _set =
+      Init.get_table modules module_indice (indice_to_int t_i)
+    in
+    (*
+    Format.eprintf "TABLE = `%a`@."
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt " | ")
+         (fun fmt c ->
+           Format.pp_print_option
+             ~none:(fun fmt () -> Format.fprintf fmt "_")
+             Pp.const fmt c ) )
+      (Array.to_list table);
+       *)
+    let len, stack = Stack.pop_i32_to_int stack in
+    let pos_x, stack = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    (* Format.eprintf "len = %d ; pos_x = %d ; pos = %d@." len pos_x pos; *)
     begin
       try
         let _typ, el = m.elements.(indice_to_int e_i) in
-        let v = const_expr m.globals el.(s) in
-        Array.fill table d n v
+        for i = 0 to len - 1 do
+          let x = el.(pos_x + i) in
+          Array.fill table (pos + i) 1 (Some x)
+        done
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
+    (*
+    Format.eprintf "TABLE = `%a`@."
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt " | ")
+         (fun fmt c ->
+           Format.pp_print_option
+             ~none:(fun fmt () -> Format.fprintf fmt "_")
+             Pp.const fmt c ) )
+      (Array.to_list table);
+       *)
     stack
-  | Elem_drop _ -> failwith "TODO Elem_drop"
+  | Elem_drop ind ->
+    let rt, elem = env.modules.(module_indice).elements.(indice_to_int ind) in
+    Array.iteri (fun i _e -> elem.(i) <- Const_null rt) elem;
+    stack
   | I_load16 (nn, sx, { offset; align }) -> (
     let offset = Uint32.to_int offset in
     let _mi, mem, _max, _set = Init.get_memory env.modules module_indice 0 in
@@ -897,7 +942,8 @@ let rec exec_instr env module_indice locals stack instr =
       | exception Invalid_argument _ -> raise @@ Trap "undefined element"
       | None -> raise @@ Trap "uninitialized element"
       | Some (Const_host id) -> id
-      | Some _r -> failwith "invalid type, expected Const_host"
+      | Some (Const_null _rt) -> raise @@ Trap "uninitialized element"
+      | Some _ -> raise @@ Trap "uninitialized element"
     in
     let module_indice, func = Init.get_func env.modules module_indice i in
     let pt', rt' = get_bt typ_i in
@@ -1012,13 +1058,21 @@ let exec_assert env = function
       end;
     env
   | SAssert_trap (action, expected) ->
-    Debug.debug fmt "assert trap...@.";
+    incr count_trap;
+    Debug.debug fmt "assert trap %d...@." !count_trap;
     begin
       try
         let _env, _results = exec_action env action in
-        Debug.debug Format.err_formatter "assert_trap failed !@.";
-        assert false
-      with Trap msg -> assert (msg = expected)
+        failwith
+        @@ Format.sprintf
+             "assert_trap %d failed ; expected `%s` but did not trap"
+             !count_trap expected
+      with Trap msg ->
+        let res = msg = expected in
+        if not res then
+          Debug.debug Format.err_formatter "expected `%s` but got `%s`@."
+            expected msg;
+        assert (msg = expected)
     end;
     env
   | SAssert_trap_module (_module, _expected) -> (* TODO *) env

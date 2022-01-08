@@ -128,6 +128,23 @@ let module_ _registered_modules modules module_indice =
     | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
   in
 
+  let const_instr = function
+    | I32_const n -> Const_I32 n
+    | I64_const n -> Const_I64 n
+    | F32_const f -> Const_F32 f
+    | F64_const f -> Const_F64 f
+    | Ref_null rt -> Const_null rt
+    | Global_get i -> begin
+      match globals.(indice_to_int i) with
+      | Local (_gt, e) -> const_expr e
+      | Imported (mi, i) ->
+        let _mi, _gt, e, _set = get_global modules mi (indice_to_int i) in
+        e
+    end
+    | Ref_func ind -> Const_host (indice_to_int ind)
+    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.instr e
+  in
+
   let globals =
     Array.map
       (function
@@ -145,103 +162,128 @@ let module_ _registered_modules modules module_indice =
     | _whatever -> failwith "TODO const_expr_to_int"
   in
 
-  ignore
-  @@ List.fold_left
-       (fun (curr_func, curr_global, curr_memory, curr_data, curr_table) field ->
-         match field with
-         | MFunc _ ->
-           (curr_func + 1, curr_global, curr_memory, curr_data, curr_table)
-         | MExport { desc; name } ->
-           begin
-             match desc with
-             | Export_func ind ->
-               let ind =
-                 Option.value ind ~default:(Raw (Uint32.of_int curr_func))
-               in
-               Hashtbl.add m.exported_funcs name (indice_to_int ind)
-             | Export_table ind ->
-               let ind =
-                 Option.value ind ~default:(Raw (Uint32.of_int curr_table))
-               in
-               Hashtbl.add m.exported_tables name (indice_to_int ind)
-             | Export_global ind ->
-               let ind =
-                 Option.value ind ~default:(Raw (Uint32.of_int curr_global))
-               in
-               Hashtbl.add m.exported_globals name (indice_to_int ind)
-             | Export_mem ind ->
-               let ind =
-                 Option.value ind ~default:(Raw (Uint32.of_int curr_memory))
-               in
-               Hashtbl.add m.exported_memories name (indice_to_int ind)
-           end;
-           (curr_func, curr_global, curr_memory, curr_data, curr_table)
-         | MMem _ ->
-           (curr_func, curr_global, curr_memory + 1, curr_data, curr_table)
-         | MTable _ ->
-           (curr_func, curr_global, curr_memory, curr_data, curr_table + 1)
-         | MData data ->
-           let curr_data = curr_data + 1 in
-           begin
-             match data.mode with
-             | Data_passive -> ()
-             | Data_active (indice, expr) ->
-               let indice =
-                 indice_to_int
-                   (Option.value indice
-                      ~default:(Raw (Uint32.of_int curr_memory)) )
-               in
-               let offset = const_expr_to_int expr in
-               let _mi, mem_bytes, _max, _set =
-                 get_memory modules module_indice indice
-               in
-               let len = String.length data.init in
-               Bytes.blit_string data.init 0 mem_bytes offset len
-           end;
-           (curr_func, curr_global, curr_memory, curr_data, curr_table)
-         | MElem e ->
-           begin
-             match e.mode with
-             | Elem_active (ti, offset) ->
-               let ti =
-                 Option.value ti ~default:(Raw (Uint32.of_int curr_table))
-               in
-               let _mi, table_ref_type, table, _max, set_table =
-                 get_table modules module_indice (indice_to_int ti)
-               in
-               let offset = const_expr_to_int offset in
-               if table_ref_type <> e.type_ then failwith "invalid elem type";
-               List.iteri
-                 (fun i expr ->
-                   List.iteri
-                     (fun j x ->
-                       let new_elem = const_expr [ x ] in
-                       let pos = offset + i + j in
-                       let len = Array.length table in
-                       if pos >= len then (
-                         let new_table = Array.make (pos + 1) None in
-                         Array.iteri (fun i e -> new_table.(i) <- e) table;
-                         new_table.(pos) <- Some new_elem;
-                         set_table new_table )
-                       else table.(pos) <- Some new_elem )
-                     expr )
-                 e.init
-             | _ -> ()
-           end;
-           (curr_func, curr_global, curr_memory, curr_data, curr_table)
-         | MType _ | MStart _ ->
-           (curr_func, curr_global, curr_memory, curr_data, curr_table)
-         | MGlobal _ ->
-           (curr_func, curr_global + 1, curr_memory, curr_data, curr_table)
-         | MImport i -> begin
-           match i.desc with
-           | Import_func _ ->
-             (curr_func + 1, curr_global, curr_memory, curr_data, curr_table)
-           | Import_global _ ->
-             (curr_func, curr_global + 1, curr_memory, curr_data, curr_table)
-           | Import_mem _ ->
-             (curr_func, curr_global, curr_memory + 1, curr_data, curr_table)
-           | Import_table _ ->
-             (curr_func, curr_global, curr_memory, curr_data, curr_table + 1)
-         end )
-       (-1, -1, -1, -1, -1) m.fields
+  let elements, _curr_func, _curr_global, _curr_memory, _curr_data, _curr_table
+      =
+    List.fold_left
+      (fun (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
+           field ->
+        match field with
+        | MFunc _ ->
+          (elems, curr_func + 1, curr_global, curr_memory, curr_data, curr_table)
+        | MExport { desc; name } ->
+          begin
+            match desc with
+            | Export_func ind ->
+              let ind =
+                Option.value ind ~default:(Raw (Uint32.of_int curr_func))
+              in
+              Hashtbl.add m.exported_funcs name (indice_to_int ind)
+            | Export_table ind ->
+              let ind =
+                Option.value ind ~default:(Raw (Uint32.of_int curr_table))
+              in
+              Hashtbl.add m.exported_tables name (indice_to_int ind)
+            | Export_global ind ->
+              let ind =
+                Option.value ind ~default:(Raw (Uint32.of_int curr_global))
+              in
+              Hashtbl.add m.exported_globals name (indice_to_int ind)
+            | Export_mem ind ->
+              let ind =
+                Option.value ind ~default:(Raw (Uint32.of_int curr_memory))
+              in
+              Hashtbl.add m.exported_memories name (indice_to_int ind)
+          end;
+          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
+        | MMem _ ->
+          (elems, curr_func, curr_global, curr_memory + 1, curr_data, curr_table)
+        | MTable _ ->
+          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table + 1)
+        | MData data ->
+          let curr_data = curr_data + 1 in
+          begin
+            match data.mode with
+            | Data_passive -> ()
+            | Data_active (indice, expr) ->
+              let indice =
+                indice_to_int
+                  (Option.value indice
+                     ~default:(Raw (Uint32.of_int curr_memory)) )
+              in
+              let offset = const_expr_to_int expr in
+              let _mi, mem_bytes, _max, _set =
+                get_memory modules module_indice indice
+              in
+              let len = String.length data.init in
+              Bytes.blit_string data.init 0 mem_bytes offset len
+          end;
+          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
+        | MElem e ->
+          let init =
+            Array.of_list
+              (List.flatten @@ List.map (List.map const_instr) e.init)
+          in
+          let init =
+            match e.mode with
+            | Elem_active (ti, offset) ->
+              let ti =
+                Option.value ti ~default:(Raw (Uint32.of_int curr_table))
+              in
+              let _mi, table_ref_type, table, _max, _set_table =
+                get_table modules module_indice (indice_to_int ti)
+              in
+              let offset = const_expr_to_int offset in
+              if table_ref_type <> e.type_ then failwith "invalid elem type";
+              Array.iteri (fun i init -> table.(offset + i) <- Some init) init;
+              [||]
+            | Elem_declarative -> [||]
+            | Elem_passive -> init
+          in
+          ( (e.type_, init) :: elems
+          , curr_func
+          , curr_global
+          , curr_memory
+          , curr_data
+          , curr_table )
+        | MType _ | MStart _ ->
+          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
+        | MGlobal _ ->
+          (elems, curr_func, curr_global + 1, curr_memory, curr_data, curr_table)
+        | MImport i -> begin
+          match i.desc with
+          | Import_func _ ->
+            ( elems
+            , curr_func + 1
+            , curr_global
+            , curr_memory
+            , curr_data
+            , curr_table )
+          | Import_global _ ->
+            ( elems
+            , curr_func
+            , curr_global + 1
+            , curr_memory
+            , curr_data
+            , curr_table )
+          | Import_mem _ ->
+            ( elems
+            , curr_func
+            , curr_global
+            , curr_memory + 1
+            , curr_data
+            , curr_table )
+          | Import_table _ ->
+            ( elems
+            , curr_func
+            , curr_global
+            , curr_memory
+            , curr_data
+            , curr_table + 1 )
+        end )
+      ([], -1, -1, -1, -1, -1) m.fields
+  in
+
+  let elements = Array.of_list @@ List.rev elements in
+
+  let m = { m with elements } in
+  modules.(module_indice) <- m
