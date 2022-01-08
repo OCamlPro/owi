@@ -492,9 +492,7 @@ let rec exec_instr env module_indice locals stack instr =
     let b, stack = Stack.pop_bool stack in
     exec_expr env module_indice locals stack (if b then e1 else e2) false bt
   | Call i ->
-    let m, func, _set =
-      Init.get_func env.modules module_indice (indice_to_int i)
-    in
+    let m, func = Init.get_func env.modules module_indice (indice_to_int i) in
     let param_type, _result_type = get_bt func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env m func (List.rev args) in
@@ -901,7 +899,7 @@ let rec exec_instr env module_indice locals stack instr =
       | Some (Const_host id) -> id
       | Some _r -> failwith "invalid type, expected Const_host"
     in
-    let module_indice, func, _set = Init.get_func env.modules module_indice i in
+    let module_indice, func = Init.get_func env.modules module_indice i in
     let pt', rt' = get_bt typ_i in
     let pt, rt = get_bt func.type_f in
     assert (pt = pt');
@@ -945,7 +943,7 @@ let invoke env module_indice f args =
     | None -> failwith "undefined export"
     | Some indice -> indice
   in
-  let module_indice, func, _set =
+  let module_indice, func =
     Init.get_func env.modules module_indice func_indice
   in
   exec_func env module_indice func args
@@ -1041,9 +1039,7 @@ let exec_module env module_indice =
   Init.module_ env.registered_modules env.modules module_indice;
   Option.iter
     (fun f_id ->
-      let module_indice, func, _set =
-        Init.get_func env.modules module_indice f_id
-      in
+      let module_indice, func = Init.get_func env.modules module_indice f_id in
       let _res = exec_func env module_indice func [] in
       () )
     env.modules.(module_indice).start;

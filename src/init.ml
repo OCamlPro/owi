@@ -19,8 +19,7 @@ let rec get_global (modules : module_ array) mi i =
 let rec get_func (modules : module_ array) mi i =
   let funcs = modules.(mi).funcs in
   match funcs.(i) with
-  (* TODO: do we need set somewhere ? *)
-  | Local f -> (mi, f, fun f -> funcs.(i) <- Local f)
+  | Local f -> (mi, f)
   | Imported (m, Raw i) -> get_func modules m (Uint32.to_int i)
   | _ -> failwith @@ Format.sprintf "get_func got Symbolic id"
 
