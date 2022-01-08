@@ -946,9 +946,9 @@ let rec exec_instr env module_indice locals stack instr =
       | Some _ -> raise @@ Trap "uninitialized element"
     in
     let module_indice, func = Init.get_func env.modules module_indice i in
-    let pt', rt' = get_bt typ_i in
     let pt, rt = get_bt func.type_f in
-    assert (pt = pt');
+    let _pt', rt' = get_bt typ_i in
+    (* assert (pt = pt'); *)
     assert (rt = rt');
     let args, stack = Stack.pop_n stack (List.length pt) in
     let res = exec_func env module_indice func (List.rev args) in
