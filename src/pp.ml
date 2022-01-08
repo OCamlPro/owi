@@ -199,8 +199,8 @@ let rec instr fmt = function
   | Elem_drop id -> Format.fprintf fmt "elem.drop %a" indice id
   | I_load (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
   | F_load (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
-  | I_store (n, ma) -> Format.fprintf fmt "i%a.load %a" nn n memarg ma
-  | F_store (n, ma) -> Format.fprintf fmt "f%a.load %a" nn n memarg ma
+  | I_store (n, ma) -> Format.fprintf fmt "i%a.store %a" nn n memarg ma
+  | F_store (n, ma) -> Format.fprintf fmt "f%a.store %a" nn n memarg ma
   | I_load8 (n, s, ma) ->
     Format.fprintf fmt "i%a.load8_%a %a" nn n sx s memarg ma
   | I_load16 (n, s, ma) ->

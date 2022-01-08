@@ -1038,7 +1038,6 @@ let exec_register env name i =
   env
 
 let exec_module env module_indice =
-  let module_ = env.modules.(module_indice) in
   Init.module_ env.registered_modules env.modules module_indice;
   Option.iter
     (fun f_id ->
@@ -1047,7 +1046,7 @@ let exec_module env module_indice =
       in
       let _res = exec_func env module_indice func [] in
       () )
-    module_.start;
+    env.modules.(module_indice).start;
   env
 
 let exec_cmd env = function
