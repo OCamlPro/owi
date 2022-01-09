@@ -661,7 +661,7 @@ let table_fields :=
     MExport { name = inline_export; desc = Export_table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
-    let min = Int32.of_int @@ List.length init in
+    let min = Int32.of_int @@ List.length (List.flatten init) in
     [ MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) }
     ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }

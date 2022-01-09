@@ -949,7 +949,7 @@ let rec exec_instr env module_indice locals stack instr =
     let pt, rt = get_bt func.type_f in
     let _pt', rt' = get_bt typ_i in
     (* assert (pt = pt'); *)
-    assert (rt = rt');
+    if rt <> rt' then raise @@ Trap "indirect call type mismatch";
     let args, stack = Stack.pop_n stack (List.length pt) in
     let res = exec_func env module_indice func (List.rev args) in
     res @ stack
