@@ -287,7 +287,6 @@ let mk_module registered_modules m =
   let datas = List.rev env.datas |> Array.of_list in
   let globals_tmp = List.rev globals_tmp |> Array.of_list in
   let tables = List.rev env.tables |> Array.of_list in
-  let types = List.rev env.types |> Array.of_list in
   let memories = List.rev env.memories |> Array.of_list in
   let funcs = List.rev env.funcs |> Array.of_list in
 
@@ -357,6 +356,22 @@ let mk_module registered_modules m =
   in
   let fields = List.rev fields in
 
+  (* adding implicit type definitions *)
+  let types =
+    let types =
+      Array.fold_left
+        (fun types -> function
+          | Local f -> begin
+            match f.type_f with
+            | Bt_ind _ind -> types
+            | Bt_raw t -> if List.mem t types then types else t :: types
+          end
+          | Imported _ -> types )
+        env.types funcs
+    in
+    Array.of_list (List.rev types)
+  in
+
   let funcs =
     Array.map
       (function
@@ -367,13 +382,14 @@ let mk_module registered_modules m =
             | None -> failwith @@ Format.sprintf "unbound local %s" id
             | Some i -> i
           in
-          let type_f =
+          let pt, rt =
             match f.type_f with
             | Bt_ind ind -> types.(find_type ind)
             | Bt_raw t -> t
           in
+
           (* adding params and locals to the locals table *)
-          let locals = fst type_f @ f.locals in
+          let locals = pt @ f.locals in
           List.iteri
             (fun i (id, _t) ->
               Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
@@ -461,7 +477,7 @@ let mk_module registered_modules m =
               i
           and expr e block_ids = List.map (body block_ids) e in
           let body = expr f.body [] in
-          Local { f with body; type_f = Bt_raw type_f }
+          Local { f with body; type_f = Bt_raw (pt, rt) }
         | Imported _ as f -> f )
       funcs
   in

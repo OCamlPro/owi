@@ -38,6 +38,8 @@ let indice_to_int = function
          "interpreter internal error (indice_to_int init): unbound id $%s" id
 
 let module_ _registered_modules modules module_indice =
+  Debug.debug Format.err_formatter "initializing module %d@." module_indice;
+
   let m = modules.(module_indice) in
 
   let funcs =
