@@ -8,6 +8,8 @@ type env =
 
 exception Return of Stack.t
 
+let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
+
 let exec_iunop stack nn op =
   match nn with
   | S32 ->
@@ -947,9 +949,9 @@ let rec exec_instr env module_indice locals stack instr =
     in
     let module_indice, func = Init.get_func env.modules module_indice i in
     let pt, rt = get_bt func.type_f in
-    let _pt', rt' = get_bt typ_i in
-    (* assert (pt = pt'); *)
-    if rt <> rt' then raise @@ Trap "indirect call type mismatch";
+    let pt', rt' = get_bt typ_i in
+    if not (rt = rt' && List.equal p_type_eq pt pt') then
+      raise @@ Trap "indirect call type mismatch";
     let args, stack = Stack.pop_n stack (List.length pt) in
     let res = exec_func env module_indice func (List.rev args) in
     res @ stack
