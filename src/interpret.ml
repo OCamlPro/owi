@@ -706,26 +706,23 @@ let rec exec_instr env module_indice locals stack instr =
     let _mi, _rt, table, _max, _set =
       Init.get_table modules module_indice (indice_to_int t_i)
     in
-    (*
-    Format.eprintf "TABLE = `%a`@."
-      (Format.pp_print_list
-         ~pp_sep:(fun fmt () -> Format.fprintf fmt " | ")
-         (fun fmt c ->
-           Format.pp_print_option
-             ~none:(fun fmt () -> Format.fprintf fmt "_")
-             Pp.const fmt c ) )
-      (Array.to_list table);
-       *)
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in
     let pos, stack = Stack.pop_i32_to_int stack in
-    (* Format.eprintf "len = %d ; pos_x = %d ; pos = %d@." len pos_x pos; *)
+    let _typ, el = m.elements.(indice_to_int e_i) in
+    (* TODO: this is dumb, why do we have to fail even when len = 0 ?
+     * I don't remember where exactly but somewhere else it's the opposite:
+     * if len is 0 then we do not fail...
+     * if it wasn't needed, the following check would be useless
+     * as the next one would take care of it *)
+    if pos_x > Array.length el || pos > Array.length table then
+      raise @@ Trap "out of bounds table access";
     begin
       try
-        let _typ, el = m.elements.(indice_to_int e_i) in
         for i = 0 to len - 1 do
-          let x = el.(pos_x + i) in
-          Array.fill table (pos + i) 1 (Some x)
+          match el.(pos_x + i) with
+          | Const_null _ -> raise @@ Trap "out of bounds table access"
+          | x -> Array.fill table (pos + i) 1 (Some x)
         done
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
