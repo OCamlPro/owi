@@ -714,9 +714,12 @@ let rec exec_instr env module_indice locals stack instr =
      * I don't remember where exactly but somewhere else it's the opposite:
      * if len is 0 then we do not fail...
      * if it wasn't needed, the following check would be useless
-     * as the next one would take care of it *)
-    if pos_x > Array.length el || pos > Array.length table then
-      raise @@ Trap "out of bounds table access";
+     * as the next one would take care of it
+     * (or maybe not because we don't want to fail
+     * in the middle of the loop but still...)*)
+    if
+      pos_x + len > Array.length el || pos + len > Array.length table || 0 > len
+    then raise @@ Trap "out of bounds table access";
     begin
       try
         for i = 0 to len - 1 do
