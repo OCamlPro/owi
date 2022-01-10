@@ -150,10 +150,10 @@ let mk_module registered_modules m =
 
   let aux = function
     | Ref_func i -> Ref_func (map_symb_raw find_func i)
-    | Ref_null rt -> Ref_null rt
-    | I32_const n -> I32_const n
     | Global_get i -> Global_get (map_symb_raw find_global i)
-    | (I64_const _ | F32_const _ | F64_const _) as c -> c
+    | (I64_const _ | F32_const _ | F64_const _ | Ref_null _ | I32_const _) as c
+      ->
+      c
     | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i
   in
 
@@ -309,17 +309,7 @@ let mk_module registered_modules m =
           | Data_passive -> f :: fields
           | Data_active (indice, expr) ->
             let indice = Option.map (map_symb_raw find_memory) indice in
-            let expr =
-              List.map
-                (function
-                  | Global_get ind -> Global_get (map_symb_raw find_global ind)
-                  | I32_const c -> I32_const c
-                  | i ->
-                    failwith
-                    @@ Format.asprintf "TODO DATA INSTR SIMPLIFY: `%a`" Pp.instr
-                         i )
-                expr
-            in
+            let expr = List.map aux expr in
             let mode = Data_active (indice, expr) in
             let f = MData { data with mode } in
             f :: fields

@@ -1,34 +1,54 @@
 open Types
 open Simplify
 
+let rec set_table (modules : module_ array) mi i new_table =
+  let tables = modules.(mi).tables in
+  match tables.(i) with
+  | Local (rt, _old_table, max) -> tables.(i) <- Local (rt, new_table, max)
+  | Imported (mi, Raw i) -> set_table modules mi (Uint32.to_int i) new_table
+  | _ -> assert false
+
 let rec get_table (modules : module_ array) mi i =
   let tables = modules.(mi).tables in
   match tables.(i) with
-  | Local (rt, tbl, max) ->
-    (mi, rt, tbl, max, fun tbl -> tables.(i) <- Local (rt, tbl, max))
+  | Local (rt, tbl, max) -> ((mi, i), rt, tbl, max)
   | Imported (mi, Raw i) -> get_table modules mi (Uint32.to_int i)
-  | _ -> failwith @@ Format.sprintf "get_table got Symbolic id"
+  | _ -> assert false
+
+let rec set_global (modules : module_ array) mi i new_global =
+  let globals = modules.(mi).globals in
+  match globals.(i) with
+  | Local (t, _old_global) -> globals.(i) <- Local (t, new_global)
+  | Imported (mi, Raw i) -> set_global modules mi (Uint32.to_int i) new_global
+  | _ -> assert false
 
 let rec get_global (modules : module_ array) mi i =
   let globals = modules.(mi).globals in
   match globals.(i) with
-  | Local (gt, g) -> (mi, gt, g, fun g -> globals.(i) <- Local (gt, g))
+  | Local (gt, g) -> (mi, gt, g)
   | Imported (mi, Raw i) -> get_global modules mi (Uint32.to_int i)
-  | _ -> failwith @@ Format.sprintf "get_global got Symbolic id"
+  | _ -> assert false
 
 let rec get_func (modules : module_ array) mi i =
   let funcs = modules.(mi).funcs in
   match funcs.(i) with
   | Local f -> (mi, f)
   | Imported (m, Raw i) -> get_func modules m (Uint32.to_int i)
-  | _ -> failwith @@ Format.sprintf "get_func got Symbolic id"
+  | _ -> assert false
+
+let rec set_memory (modules : module_ array) mi i new_mem =
+  let memories = modules.(mi).memories in
+  match memories.(i) with
+  | Local (_old_mem, max) -> memories.(i) <- Local (new_mem, max)
+  | Imported (mi, Raw i) -> set_memory modules mi (Uint32.to_int i) new_mem
+  | _ -> assert false
 
 let rec get_memory (modules : module_ array) mi i =
   let memories = modules.(mi).memories in
   match memories.(i) with
-  | Local (m, max) -> (mi, m, max, fun m max -> memories.(i) <- Local (m, max))
+  | Local (m, max) -> (m, max)
   | Imported (mi, Raw i) -> get_memory modules mi (Uint32.to_int i)
-  | _ -> failwith @@ Format.sprintf "get_memory got Symbolic id"
+  | _ -> assert false
 
 let indice_to_int = function
   | Raw i -> Uint32.to_int i
@@ -123,28 +143,12 @@ let module_ _registered_modules modules module_indice =
       match globals.(indice_to_int i) with
       | Local (_gt, e) -> const_expr e
       | Imported (mi, i) ->
-        let _mi, _gt, e, _set = get_global modules mi (indice_to_int i) in
+        let _mi, _gt, e = get_global modules mi (indice_to_int i) in
         e
     end
     | [ Ref_func ind ] -> Const_host (indice_to_int ind)
-    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.expr e
-  in
-
-  let const_instr = function
-    | I32_const n -> Const_I32 n
-    | I64_const n -> Const_I64 n
-    | F32_const f -> Const_F32 f
-    | F64_const f -> Const_F64 f
-    | Ref_null rt -> Const_null rt
-    | Global_get i -> begin
-      match globals.(indice_to_int i) with
-      | Local (_gt, e) -> const_expr e
-      | Imported (mi, i) ->
-        let _mi, _gt, e, _set = get_global modules mi (indice_to_int i) in
-        e
-    end
-    | Ref_func ind -> Const_host (indice_to_int ind)
-    | e -> failwith @@ Format.asprintf "TODO global expression: `%a`" Pp.instr e
+    | e ->
+      failwith @@ Format.asprintf "invalid constant expression: `%a`" Pp.expr e
   in
 
   let globals =
@@ -161,7 +165,11 @@ let module_ _registered_modules modules module_indice =
   let const_expr_to_int e =
     match const_expr e with
     | Const_I32 n -> Int32.to_int n
-    | _whatever -> failwith "TODO const_expr_to_int"
+    | instr ->
+      failwith
+      @@ Format.asprintf
+           "invalid constant expression, expected i32.const but got `%a`"
+           Pp.const instr
   in
 
   let elements, _curr_func, _curr_global, _curr_memory, _curr_data, _curr_table
@@ -213,9 +221,7 @@ let module_ _registered_modules modules module_indice =
                      ~default:(Raw (Uint32.of_int curr_memory)) )
               in
               let offset = const_expr_to_int expr in
-              let _mi, mem_bytes, _max, _set =
-                get_memory modules module_indice indice
-              in
+              let mem_bytes, _max = get_memory modules module_indice indice in
               let len = String.length data.init in
               try Bytes.blit_string data.init 0 mem_bytes offset len
               with Invalid_argument _ ->
@@ -225,7 +231,9 @@ let module_ _registered_modules modules module_indice =
         | MElem e ->
           let init =
             Array.of_list
-              (List.flatten @@ List.map (List.map const_instr) e.init)
+              ( List.flatten
+              @@ List.map (List.map (fun instr -> const_expr [ instr ])) e.init
+              )
           in
           let init =
             match e.mode with
@@ -233,7 +241,7 @@ let module_ _registered_modules modules module_indice =
               let ti =
                 Option.value ti ~default:(Raw (Uint32.of_int curr_table))
               in
-              let _mi, table_ref_type, table, _max, _set_table =
+              let _mi, table_ref_type, table, _max =
                 get_table modules module_indice (indice_to_int ti)
               in
               let offset = const_expr_to_int offset in
