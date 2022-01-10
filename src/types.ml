@@ -4,14 +4,6 @@ exception Trap of string
 
 (** Structure *)
 
-(** Values *)
-
-(* TODO: this must be utf8 *)
-type nonrec name = string
-
-(* TODO: this should only be 0..9 A..Z a..Z ! # $ % & ′ * + - . / : < = > ? @ \ ^ _ ` | ~ *)
-type nonrec id = string
-
 (** Types *)
 
 type nonrec num_type =
@@ -30,7 +22,7 @@ type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
-type nonrec param = id option * val_type
+type nonrec param = string option * val_type
 
 type nonrec param_type = param list
 
@@ -58,10 +50,10 @@ type nonrec global_type = mut * val_type
 
 (* TODO: gadt ? *)
 type nonrec extern_type =
-  | Func of id option * func_type
-  | Table of id option * table_type
-  | Mem of id option * mem_type
-  | Global of id option * global_type
+  | Func of string option * func_type
+  | Table of string option * table_type
+  | Mem of string option * mem_type
+  | Global of string option * global_type
 
 (** Instructions *)
 
@@ -130,7 +122,7 @@ type nonrec frelop =
 
 type indice =
   | Raw of Uint32.t
-  | Symbolic of id
+  | Symbolic of string
 
 type memarg =
   { offset : Uint32.t
@@ -209,9 +201,9 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of id option * block_type option * expr
-  | Loop of id option * block_type option * expr
-  | If_else of id option * block_type option * expr * expr
+  | Block of string option * block_type option * expr
+  | Loop of string option * block_type option * expr
+  | If_else of string option * block_type option * expr * expr
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice
@@ -225,19 +217,19 @@ type func =
   { type_f : block_type
   ; locals : param list
   ; body : expr
-  ; id : id option
+  ; id : string option
   }
 
 (* Tables & Memories *)
 
-type table = id option * table_type
+type table = string option * table_type
 
-type mem = id option * mem_type
+type mem = string option * mem_type
 
 type global =
   { type_ : global_type
   ; init : expr
-  ; id : id option
+  ; id : string option
   }
 
 type elem_mode =
@@ -246,7 +238,7 @@ type elem_mode =
   | Elem_declarative
 
 type elem =
-  { id : id option
+  { id : string option
   ; type_ : ref_type
   ; init : expr list
   ; mode : elem_mode
@@ -257,7 +249,7 @@ type data_mode =
   | Data_active of indice option * expr
 
 type data =
-  { id : id option
+  { id : string option
   ; init : string
   ; mode : data_mode
   }
@@ -265,14 +257,14 @@ type data =
 (* Modules *)
 
 type import_desc =
-  | Import_func of id option * block_type
-  | Import_table of id option * table_type
-  | Import_mem of id option * mem_type
-  | Import_global of id option * global_type
+  | Import_func of string option * block_type
+  | Import_table of string option * table_type
+  | Import_mem of string option * mem_type
+  | Import_global of string option * global_type
 
 type import =
-  { module_ : name
-  ; name : name
+  { module_ : string
+  ; name : string
   ; desc : import_desc
   }
 
@@ -283,11 +275,11 @@ type export_desc =
   | Export_global of indice option
 
 type export =
-  { name : name
+  { name : string
   ; desc : export_desc
   }
 
-type type_ = id option * func_type
+type type_ = string option * func_type
 
 type module_field =
   | MType of type_
@@ -302,7 +294,7 @@ type module_field =
   | MExport of export
 
 type module_ =
-  { id : id option
+  { id : string option
   ; fields : module_field list
   }
 

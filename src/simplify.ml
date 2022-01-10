@@ -60,10 +60,6 @@ let map_symb find_in_tbl = function
   | Raw i -> i
   | Symbolic id -> Uint32.of_int @@ find_in_tbl id
 
-let map_symb_opt default find_in_tbl = function
-  | None -> default
-  | Some sym -> Uint32.to_int @@ map_symb find_in_tbl sym
-
 let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
 
 let find_module name last seen =
@@ -102,10 +98,6 @@ type env =
   ; types : func_type list
   ; start : int option
   }
-
-let indice_to_int = function
-  | Raw i -> Uint32.to_int i
-  | Symbolic i -> failwith @@ Format.sprintf "indice_to_int: %s" i
 
 let find_id tbl x = function
   | Raw i -> Uint32.to_int i

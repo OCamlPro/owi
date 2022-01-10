@@ -4,8 +4,6 @@ type t = const list
 
 exception Empty
 
-let create () = []
-
 let push s v = v :: s
 
 let push_bool s b = push s (Const_I32 (if b then 1l else 0l))
@@ -24,10 +22,7 @@ let push_f64 s f = push s (Const_F64 f)
 
 let push_host s n = push s (Const_host n)
 
-let to_list s = s
-
 let pp fmt s =
-  let s = to_list s in
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Pp.const fmt s
@@ -139,7 +134,7 @@ let pop_is_null s =
     let hd, tl = pop s in
     match hd with
     | Const_null _t -> (true, tl)
-    | Const_host _t -> (false, tl) (* TODO: check that a host is never null ? *)
+    | Const_host _t -> (false, tl)
     | _ -> failwith "invalid type (expected const_null)"
   with Empty -> failwith "invalid type (expected const_null)"
 

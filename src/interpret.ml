@@ -230,14 +230,9 @@ let fmt = Format.std_formatter
 
 let indice_to_int = function
   | Raw i -> Uint32.to_int i
-  | Symbolic id ->
-    failwith @@ Format.sprintf "interpreter internal error: unbound id $%s" id
+  | Symbolic _id -> assert false
 
-let get_bt = function
-  | Bt_ind ind ->
-    failwith
-    @@ Format.asprintf "internal error: unbound block_type %a" Pp.indice ind
-  | Bt_raw (pt, rt) -> (pt, rt)
+let get_bt = function Bt_ind _ind -> assert false | Bt_raw (pt, rt) -> (pt, rt)
 
 let init_local (_id, t) =
   match t with
@@ -246,26 +241,6 @@ let init_local (_id, t) =
   | Num_type F32 -> Const_F32 Float32.zero
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
-
-let count_trap = ref (-1)
-
-let const_instr globals = function
-  | I32_const n -> Const_I32 n
-  | I64_const n -> Const_I64 n
-  | F32_const f -> Const_F32 f
-  | F64_const f -> Const_F64 f
-  | Ref_null rt -> Const_null rt
-  | Global_get ind ->
-    let (_mut, _typ), e =
-      match globals.(indice_to_int ind) with
-      | Local (gt, e) -> (gt, e)
-      | Imported _ -> failwith "imported global not allowed in const exprrrrr"
-    in
-    e
-  | Ref_func ind -> Const_host (indice_to_int ind)
-  | e ->
-    failwith
-    @@ Format.asprintf "not allowed constant expression: `%a`" Pp.instr e
 
 let rec exec_instr env module_indice locals stack instr =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
@@ -946,11 +921,9 @@ and exec_func env module_indice func args =
   Debug.debug fmt "calling func : module %d, func %s@." module_indice
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
-  try
-    exec_expr env module_indice locals [] func.body false (Some func.type_f)
-  with
-  | Return stack -> Stack.keep stack (List.length (snd @@ get_bt func.type_f))
-  | Branch (stack, -1) -> stack
+  try exec_expr env module_indice locals [] func.body false (Some func.type_f)
+  with Return stack ->
+    Stack.keep stack (List.length (snd @@ get_bt func.type_f))
 
 let invoke env module_indice f args =
   Debug.debug fmt "invoke       : %s@." f;
@@ -1029,15 +1002,12 @@ let exec_assert env = function
       end;
     env
   | SAssert_trap (action, expected) ->
-    incr count_trap;
-    Debug.debug fmt "assert trap %d...@." !count_trap;
     begin
       try
         let _env, _results = exec_action env action in
         failwith
-        @@ Format.sprintf
-             "assert_trap %d failed ; expected `%s` but did not trap"
-             !count_trap expected
+        @@ Format.sprintf "assert_trap failed ; expected `%s` but did not trap"
+             expected
       with Trap msg ->
         let res = msg = expected in
         if not res then

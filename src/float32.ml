@@ -319,7 +319,3 @@ let to_string' convert is_digit n x =
       (if s.[String.length s - 1] = '.' then s ^ "0" else s)
 
 let to_string = to_string' (Printf.sprintf "%.17g") is_digit 3
-
-let to_hex_string x =
-  if is_inf x then to_string x
-  else to_string' (Printf.sprintf "%h") is_hex_digit 4 x

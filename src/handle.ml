@@ -5,23 +5,9 @@ let error msg =
 module I = Menhir_parser.MenhirInterpreter
 module S = MenhirLib.General
 
-let state checkpoint : int =
-  match Lazy.force (I.stack checkpoint) with
-  | S.Nil ->
-    (* Hmm... The parser is in its initial state. Its number is
-       usually 0. This is a BIG HACK. TEMPORARY *)
-    0
-  | S.Cons (Element (s, _, _, _), _) -> I.number s
-
 let handle_syntax_error lexbuf _checkpoint =
-  let message =
-    "Syntax error"
-    (*
-    try W.Menhir_parser_errors.message (state checkpoint) with
-    | Not_found -> "Syntax error"*)
-  in
   failwith
-  @@ Format.asprintf "%s %a" message Pp.pos
+  @@ Format.asprintf "syntax error: %a" Pp.pos
        (fst @@ Sedlexing.lexing_positions lexbuf)
 
 let rec loop next_token lexbuf (checkpoint : Types.file I.checkpoint) =
