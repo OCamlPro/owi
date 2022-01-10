@@ -15,19 +15,11 @@ let test_file f =
       Format.printf "OK !@.";
       Ok ()
     with
-    (* TODO: do not catch Empty *)
-    | Stack_overflow ->
-      let msg = "stack overflow :S" in
-      Format.printf "FAILED: `%s` !@." msg;
-      Error msg
-    | Woi.Stack.Empty ->
-      let msg = "empty stack :S" in
-      Format.printf "FAILED: `%s` !@." msg;
-      Error msg
     | Assert_failure (s, _, _)
     | Woi.Types.Trap s
     | Failure s
-    | Invalid_argument s ->
+    | Invalid_argument s
+    ->
       Format.printf "FAILED: `%s` !@."
         (String.concat " " @@ String.split_on_char '\n' s);
       Error s

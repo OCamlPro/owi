@@ -983,3 +983,12 @@
   (module quote "(func (result i32) (i32.const nan:canonical))")
   "unexpected token"
 )
+
+(assert_malformed
+  (module quote "(func (result i32) (i32.const nan:arithmetic))")
+  "unexpected token"
+)
+(assert_malformed
+  (module quote "(func (result i32) (i32.const nan:canonical))")
+  "unexpected token"
+)
