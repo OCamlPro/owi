@@ -4,7 +4,8 @@ type 'a runtime =
   | Local of 'a
   | Imported of int * indice
 
-type runtime_table = (ref_type * const option array * int option) runtime
+type runtime_table =
+  (ref_type * (int * const) option array * int option) runtime
 
 type runtime_global = (global_type * const) runtime
 
@@ -28,6 +29,7 @@ type module_ =
   ; exported_memories : (string, int) Hashtbl.t
   ; exported_tables : (string, int) Hashtbl.t
   ; start : int option
+  ; should_trap : string option
   }
 
 type action =
@@ -37,7 +39,6 @@ type action =
 type assert_ =
   | SAssert_return of action * result list
   | SAssert_trap of action * string
-  | SAssert_trap_module of Types.module_ * string
   | SAssert_exhaustion of action * string
   | SAssert_malformed of Types.module_ * string
   | SAssert_malformed_quote of string list * string
@@ -83,22 +84,6 @@ let action last_module seen_modules = function
   | Get (mod_name, n) ->
     let i = find_module mod_name last_module seen_modules in
     Get_indice (i, n)
-
-let assert_ last_module seen_modules =
-  let action = action last_module seen_modules in
-  function
-  | Assert_return (a, res) -> SAssert_return (action a, res)
-  | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
-  | Assert_trap_module (module_, failure) ->
-    SAssert_trap_module (module_, failure)
-  | Assert_exhaustion (a, failure) -> SAssert_exhaustion (action a, failure)
-  | Assert_malformed (module_, failure) -> SAssert_malformed (module_, failure)
-  | Assert_malformed_quote (m, failure) -> SAssert_malformed_quote (m, failure)
-  | Assert_malformed_binary (m, failure) -> SAssert_malformed_binary (m, failure)
-  | Assert_invalid (module_, failure) -> SAssert_invalid (module_, failure)
-  | Assert_invalid_quote (m, failure) -> SAssert_malformed_quote (m, failure)
-  | Assert_invalid_binary (m, failure) -> SAssert_invalid_binary (m, failure)
-  | Assert_unlinkable (m, s) -> SAssert_unlinkable (m, s)
 
 type env =
   { curr_func : int
@@ -497,7 +482,32 @@ let mk_module registered_modules m =
   ; exported_globals
   ; exported_memories
   ; exported_tables
+  ; should_trap = None
   }
+
+let assert_ curr_module last_module seen_modules =
+  let action = action last_module seen_modules in
+  function
+  | Assert_return (a, res) -> (curr_module, SAssert_return (action a, res))
+  | Assert_trap (a, failure) -> (curr_module, SAssert_trap (action a, failure))
+  | Assert_trap_module _ ->
+    (* This should have been handled before and turned into a module with `should_trap` set ! *)
+    assert false
+  | Assert_exhaustion (a, failure) ->
+    (curr_module, SAssert_exhaustion (action a, failure))
+  | Assert_malformed (module_, failure) ->
+    (curr_module, SAssert_malformed (module_, failure))
+  | Assert_malformed_quote (m, failure) ->
+    (curr_module, SAssert_malformed_quote (m, failure))
+  | Assert_malformed_binary (m, failure) ->
+    (curr_module, SAssert_malformed_binary (m, failure))
+  | Assert_invalid (module_, failure) ->
+    (curr_module, SAssert_invalid (module_, failure))
+  | Assert_invalid_quote (m, failure) ->
+    (curr_module, SAssert_malformed_quote (m, failure))
+  | Assert_invalid_binary (m, failure) ->
+    (curr_module, SAssert_invalid_binary (m, failure))
+  | Assert_unlinkable (m, s) -> (curr_module, SAssert_unlinkable (m, s))
 
 let script script =
   let script =
@@ -636,8 +646,21 @@ let script script =
           let cmd = Module_indice curr_module in
           let modules = mk_module registered_modules m :: modules in
           (curr_module, modules, cmd :: script)
+        | Assert (Assert_trap_module (m, msg)) ->
+          let curr_module = curr_module + 1 in
+          Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
+          Option.iter
+            (fun id -> Hashtbl.replace seen_modules id curr_module)
+            m.id;
+          let cmd = Module_indice curr_module in
+          let module_ = mk_module registered_modules m in
+          let module_ = { module_ with should_trap = Some msg } in
+          (curr_module, module_ :: modules, cmd :: script)
         | Assert a ->
-          let cmd = Assert (assert_ (Some curr_module) seen_modules a) in
+          let curr_module, cmd =
+            assert_ curr_module (Some curr_module) seen_modules a
+          in
+          let cmd = Assert cmd in
           (curr_module, modules, cmd :: script)
         | Register (name, mod_name) ->
           let indice = find_module mod_name (Some curr_module) seen_modules in

@@ -617,7 +617,7 @@ let rec exec_instr env module_indice locals stack instr =
       | exception Invalid_argument _ ->
         raise @@ Trap "out of bounds table access"
       | None -> Const_null t
-      | Some v -> v
+      | Some (_mi, v) -> v
     in
     Stack.push stack v
   | Table_set indice ->
@@ -630,7 +630,7 @@ let rec exec_instr env module_indice locals stack instr =
     let v, stack = Stack.pop stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
-      try table.(indice) <- Some v
+      try table.(indice) <- Some (module_indice, v)
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
     stack
@@ -663,7 +663,7 @@ let rec exec_instr env module_indice locals stack instr =
       Stack.push_i32_of_int stack (-1)
     else
       let new_element, stack = Stack.pop stack in
-      let new_table = Array.make new_size (Some new_element) in
+      let new_table = Array.make new_size (Some (module_indice, new_element)) in
       Array.iteri (fun i x -> new_table.(i) <- x) table;
       set_table new_table;
       Stack.push_i32_of_int stack size
@@ -677,7 +677,7 @@ let rec exec_instr env module_indice locals stack instr =
     let x, stack = Stack.pop_ref stack in
     let pos, stack = Stack.pop_i32_to_int stack in
     begin
-      try Array.fill tbl pos len (Some x)
+      try Array.fill tbl pos len (Some (module_indice, x))
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
     stack
@@ -725,20 +725,10 @@ let rec exec_instr env module_indice locals stack instr =
         for i = 0 to len - 1 do
           match el.(pos_x + i) with
           | Const_null _ -> raise @@ Trap "out of bounds table access"
-          | x -> Array.fill table (pos + i) 1 (Some x)
+          | x -> Array.fill table (pos + i) 1 (Some (module_indice, x))
         done
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
-    (*
-    Format.eprintf "TABLE = `%a`@."
-      (Format.pp_print_list
-         ~pp_sep:(fun fmt () -> Format.fprintf fmt " | ")
-         (fun fmt c ->
-           Format.pp_print_option
-             ~none:(fun fmt () -> Format.fprintf fmt "_")
-             Pp.const fmt c ) )
-      (Array.to_list table);
-       *)
     stack
   | Elem_drop ind ->
     let rt, elem = env.modules.(module_indice).elements.(indice_to_int ind) in
@@ -939,12 +929,12 @@ let rec exec_instr env module_indice locals stack instr =
       Init.get_table env.modules module_indice (indice_to_int tbl_i)
     in
     if rt <> Func_ref then raise @@ Trap "indirect call type mismatch";
-    let i =
+    let module_indice, i =
       match a.(fun_i) with
-      | exception Invalid_argument _ -> raise @@ Trap "undefined element"
+      | exception Invalid_argument _ ->
+        raise @@ Trap "undefined element" (* fails here *)
       | None -> raise @@ Trap "uninitialized element"
-      | Some (Const_host id) -> id
-      | Some (Const_null _rt) -> raise @@ Trap "uninitialized element"
+      | Some (mi, Const_host id) -> (mi, id)
       | Some _ -> raise @@ Trap "uninitialized element"
     in
     let module_indice, func = Init.get_func env.modules module_indice i in
@@ -1077,7 +1067,6 @@ let exec_assert env = function
         assert (msg = expected)
     end;
     env
-  | SAssert_trap_module (_module, _expected) -> (* TODO *) env
   | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
   | SAssert_malformed (_mod, _failure) -> (* TODO *) env
   | SAssert_malformed_quote (_mod, _failure) -> (* TODO *) env
@@ -1092,14 +1081,23 @@ let exec_register env name i =
   env
 
 let exec_module env module_indice =
-  Init.module_ env.registered_modules env.modules module_indice;
-  Option.iter
-    (fun f_id ->
-      let module_indice, func = Init.get_func env.modules module_indice f_id in
-      let _res = exec_func env module_indice func [] in
-      () )
-    env.modules.(module_indice).start;
-  env
+  try
+    Init.module_ env.registered_modules env.modules module_indice;
+    Option.iter
+      (fun f_id ->
+        let module_indice, func =
+          Init.get_func env.modules module_indice f_id
+        in
+        let _res = exec_func env module_indice func [] in
+        () )
+      env.modules.(module_indice).start;
+    env
+  with Trap msg -> (
+    match env.modules.(module_indice).should_trap with
+    | None -> raise @@ Trap msg
+    | Some expected ->
+      assert (msg = expected);
+      env )
 
 let exec_cmd env = function
   | Module_indice i -> exec_module env i

@@ -206,7 +206,7 @@ let module_ _registered_modules modules module_indice =
           begin
             match data.mode with
             | Data_passive -> ()
-            | Data_active (indice, expr) ->
+            | Data_active (indice, expr) -> (
               let indice =
                 indice_to_int
                   (Option.value indice
@@ -217,7 +217,9 @@ let module_ _registered_modules modules module_indice =
                 get_memory modules module_indice indice
               in
               let len = String.length data.init in
-              Bytes.blit_string data.init 0 mem_bytes offset len
+              try Bytes.blit_string data.init 0 mem_bytes offset len
+              with Invalid_argument _ ->
+                raise @@ Trap "out of bounds memory access" )
           end;
           (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
         | MElem e ->
@@ -236,7 +238,17 @@ let module_ _registered_modules modules module_indice =
               in
               let offset = const_expr_to_int offset in
               if table_ref_type <> e.type_ then failwith "invalid elem type";
-              Array.iteri (fun i init -> table.(offset + i) <- Some init) init;
+              if Array.length table < Array.length init + offset then
+                raise @@ Trap "out of bounds table access";
+              begin
+                try
+                  Array.iteri
+                    (fun i init ->
+                      table.(offset + i) <- Some (module_indice, init) )
+                    init
+                with Invalid_argument _ ->
+                  raise @@ Trap "out of bounds table access"
+              end;
               [||]
             | Elem_declarative -> [||]
             | Elem_passive -> init
