@@ -33,8 +33,8 @@ type nonrec result_type = result_ list
 type nonrec func_type = param_type * result_type
 
 type nonrec limits =
-  { min : Int32.t
-  ; max : Int32.t option
+  { min : int
+  ; max : int option
   }
 
 type nonrec mem_type = limits
@@ -121,15 +121,14 @@ type nonrec frelop =
   | Ge
 
 type indice =
-  | Raw of Uint32.t
+  | Raw of int
   | Symbolic of string
 
 type memarg =
-  { offset : Uint32.t
-  ; align : Uint32.t
+  { offset : int
+  ; align : int
   }
 
-(* TODO: rename into block type ? *)
 type block_type =
   | Bt_ind of indice
   | Bt_raw of func_type

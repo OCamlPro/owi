@@ -17,7 +17,6 @@
   simplify
   stack
   types
-  uint32
   wutf8)
  (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex)
  (preprocess

@@ -228,9 +228,7 @@ exception Branch of Stack.t * int
 
 let fmt = Format.std_formatter
 
-let indice_to_int = function
-  | Raw i -> Uint32.to_int i
-  | Symbolic _id -> assert false
+let indice_to_int = function Raw i -> i | Symbolic _id -> assert false
 
 let get_bt = function Bt_ind _ind -> assert false | Bt_raw (pt, rt) -> (pt, rt)
 
@@ -689,7 +687,6 @@ let rec exec_instr env module_indice locals stack instr =
     Array.iteri (fun i _e -> elem.(i) <- Const_null rt) elem;
     stack
   | I_load16 (nn, sx, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     (* TODO: use align *)
     ignore align;
@@ -704,7 +701,6 @@ let rec exec_instr env module_indice locals stack instr =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     (* TODO: use align *)
     ignore align;
@@ -722,7 +718,6 @@ let rec exec_instr env module_indice locals stack instr =
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
   | F_load (nn, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     (* TODO: use align *)
     ignore align;
@@ -742,7 +737,6 @@ let rec exec_instr env module_indice locals stack instr =
       let res = Float64.of_bits res in
       Stack.push_f64 stack res )
   | I_store (nn, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     ignore align;
     (* TODO: use align *)
@@ -764,7 +758,6 @@ let rec exec_instr env module_indice locals stack instr =
       Bytes.set_int64_le mem offset n;
       stack )
   | F_store (nn, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     ignore align;
     (* TODO: use align *)
@@ -786,7 +779,6 @@ let rec exec_instr env module_indice locals stack instr =
       Bytes.set_int64_le mem offset (Float64.to_bits n);
       stack )
   | I_load8 (nn, sx, { offset; align }) -> (
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     (* TODO: use align *)
     ignore align;
@@ -799,7 +791,6 @@ let rec exec_instr env module_indice locals stack instr =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; align }) ->
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     (* TODO: use align *)
     ignore align;
@@ -815,7 +806,6 @@ let rec exec_instr env module_indice locals stack instr =
     in
     Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; align }) ->
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     ignore align;
     (* TODO: use align *)
@@ -835,7 +825,6 @@ let rec exec_instr env module_indice locals stack instr =
     Bytes.set_int8 mem offset n;
     stack
   | I_store16 (nn, { offset; align }) ->
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     ignore align;
     (* TODO: use align *)
@@ -855,7 +844,6 @@ let rec exec_instr env module_indice locals stack instr =
     Bytes.set_int16_le mem offset n;
     stack
   | I64_store32 { offset; align } ->
-    let offset = Uint32.to_int offset in
     let mem, _max = Init.get_memory env.modules module_indice 0 in
     ignore align;
     (* TODO: use align *)

@@ -5,53 +5,53 @@ let rec set_table (modules : module_ array) mi i new_table =
   let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, _old_table, max) -> tables.(i) <- Local (rt, new_table, max)
-  | Imported (mi, Raw i) -> set_table modules mi (Uint32.to_int i) new_table
+  | Imported (mi, Raw i) -> set_table modules mi i new_table
   | _ -> assert false
 
 let rec get_table (modules : module_ array) mi i =
   let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, tbl, max) -> ((mi, i), rt, tbl, max)
-  | Imported (mi, Raw i) -> get_table modules mi (Uint32.to_int i)
+  | Imported (mi, Raw i) -> get_table modules mi i
   | _ -> assert false
 
 let rec set_global (modules : module_ array) mi i new_global =
   let globals = modules.(mi).globals in
   match globals.(i) with
   | Local (t, _old_global) -> globals.(i) <- Local (t, new_global)
-  | Imported (mi, Raw i) -> set_global modules mi (Uint32.to_int i) new_global
+  | Imported (mi, Raw i) -> set_global modules mi i new_global
   | _ -> assert false
 
 let rec get_global (modules : module_ array) mi i =
   let globals = modules.(mi).globals in
   match globals.(i) with
   | Local (gt, g) -> (mi, gt, g)
-  | Imported (mi, Raw i) -> get_global modules mi (Uint32.to_int i)
+  | Imported (mi, Raw i) -> get_global modules mi i
   | _ -> assert false
 
 let rec get_func (modules : module_ array) mi i =
   let funcs = modules.(mi).funcs in
   match funcs.(i) with
   | Local f -> (mi, f)
-  | Imported (m, Raw i) -> get_func modules m (Uint32.to_int i)
+  | Imported (m, Raw i) -> get_func modules m i
   | _ -> assert false
 
 let rec set_memory (modules : module_ array) mi i new_mem =
   let memories = modules.(mi).memories in
   match memories.(i) with
   | Local (_old_mem, max) -> memories.(i) <- Local (new_mem, max)
-  | Imported (mi, Raw i) -> set_memory modules mi (Uint32.to_int i) new_mem
+  | Imported (mi, Raw i) -> set_memory modules mi i new_mem
   | _ -> assert false
 
 let rec get_memory (modules : module_ array) mi i =
   let memories = modules.(mi).memories in
   match memories.(i) with
   | Local (m, max) -> (m, max)
-  | Imported (mi, Raw i) -> get_memory modules mi (Uint32.to_int i)
+  | Imported (mi, Raw i) -> get_memory modules mi i
   | _ -> assert false
 
 let indice_to_int = function
-  | Raw i -> Uint32.to_int i
+  | Raw i -> i
   | Symbolic id ->
     failwith
     @@ Format.sprintf
@@ -69,7 +69,7 @@ let module_ _registered_modules modules module_indice =
           let i =
             match Hashtbl.find_opt modules.(mi).exported_funcs name with
             | None -> failwith @@ Format.sprintf "unbound imported func %s" name
-            | Some i -> Uint32.of_int i
+            | Some i -> i
           in
           Imported (mi, Raw i)
         | (Local _ | Imported _) as f -> f )
@@ -87,7 +87,7 @@ let module_ _registered_modules modules module_indice =
             match Hashtbl.find_opt modules.(mi).exported_memories name with
             | None ->
               failwith @@ Format.sprintf "unbound imported memories %s" name
-            | Some i -> Uint32.of_int i
+            | Some i -> i
           in
           Imported (mi, Raw i)
         | (Local _ | Imported _) as f -> f )
@@ -105,7 +105,7 @@ let module_ _registered_modules modules module_indice =
             match Hashtbl.find_opt modules.(mi).exported_tables name with
             | None ->
               failwith @@ Format.sprintf "unbound imported tables %s" name
-            | Some i -> Uint32.of_int i
+            | Some i -> i
           in
           Imported (mi, Raw i)
         | (Local _ | Imported _) as f -> f )
@@ -123,7 +123,7 @@ let module_ _registered_modules modules module_indice =
             match Hashtbl.find_opt modules.(mi).exported_globals name with
             | None ->
               failwith @@ Format.sprintf "unbound imported globals %s" name
-            | Some i -> Uint32.of_int i
+            | Some i -> i
           in
           Imported (mi, Raw i)
         | (Local _ | Imported _) as f -> f )
@@ -184,24 +184,16 @@ let module_ _registered_modules modules module_indice =
           begin
             match desc with
             | Export_func ind ->
-              let ind =
-                Option.value ind ~default:(Raw (Uint32.of_int curr_func))
-              in
+              let ind = Option.value ind ~default:(Raw curr_func) in
               Hashtbl.add m.exported_funcs name (indice_to_int ind)
             | Export_table ind ->
-              let ind =
-                Option.value ind ~default:(Raw (Uint32.of_int curr_table))
-              in
+              let ind = Option.value ind ~default:(Raw curr_table) in
               Hashtbl.add m.exported_tables name (indice_to_int ind)
             | Export_global ind ->
-              let ind =
-                Option.value ind ~default:(Raw (Uint32.of_int curr_global))
-              in
+              let ind = Option.value ind ~default:(Raw curr_global) in
               Hashtbl.add m.exported_globals name (indice_to_int ind)
             | Export_mem ind ->
-              let ind =
-                Option.value ind ~default:(Raw (Uint32.of_int curr_memory))
-              in
+              let ind = Option.value ind ~default:(Raw curr_memory) in
               Hashtbl.add m.exported_memories name (indice_to_int ind)
           end;
           (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
@@ -216,9 +208,7 @@ let module_ _registered_modules modules module_indice =
             | Data_passive -> ()
             | Data_active (indice, expr) -> (
               let indice =
-                indice_to_int
-                  (Option.value indice
-                     ~default:(Raw (Uint32.of_int curr_memory)) )
+                indice_to_int (Option.value indice ~default:(Raw curr_memory))
               in
               let offset = const_expr_to_int expr in
               let mem_bytes, _max = get_memory modules module_indice indice in
@@ -238,9 +228,7 @@ let module_ _registered_modules modules module_indice =
           let init =
             match e.mode with
             | Elem_active (ti, offset) ->
-              let ti =
-                Option.value ti ~default:(Raw (Uint32.of_int curr_table))
-              in
+              let ti = Option.value ti ~default:(Raw curr_table) in
               let _mi, table_ref_type, table, _max =
                 get_table modules module_indice (indice_to_int ti)
               in

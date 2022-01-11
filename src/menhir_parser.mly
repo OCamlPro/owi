@@ -3,10 +3,9 @@
 %token NAN_ARITH NAN_CANON ASSERT_INVALID ASSERT_MALFORMED ASSERT_EXHAUSTION ASSERT_TRAP ASSERT_UNLINKABLE PARAM RESULT FUNCREF EXTERNREF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAP_I64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE REGISTER TRUNC_SAT BINARY
 
 %{
-let u32_of_i32 = Uint32.of_int32
 
 let u32 s =
-  try Uint32.of_string s
+  try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
   with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
 
 let i32 s = Int32.of_string s
@@ -70,8 +69,16 @@ let mem_type ==
   | ~ = limits; <>
 
 let limits ==
-  | min = NUM; { {min = i32 min; max = None} }
-  | min = NUM; max = NUM; { {min = i32 min; max = Some (i32 max) } }
+  | min = NUM; {
+    let min = Int32.to_int (i32 min) in
+    let max = None in
+    { min; max}
+  }
+  | min = NUM; max = NUM; {
+    let min = Int32.to_int (i32 min) in
+    let max = Some (Int32.to_int (i32 max)) in
+    { min; max }
+  }
 
 let type_use ==
   | ~ = par(preceded(TYPE, indice)); <>
@@ -209,29 +216,26 @@ let plain_instr :=
   | GLOBAL; DOT; GET; ~ = indice; <Global_get>
   | GLOBAL; DOT; SET; ~ = indice; <Global_set>
   | TABLE; DOT; GET; indice = option(indice); {
-    Table_get (Option.value indice ~default:(Raw (u32_of_i32 0l)))
+    Table_get (Option.value indice ~default:(Raw 0))
   }
   | TABLE; DOT; SET; indice = option(indice); {
-    Table_set (Option.value indice ~default:(Raw (u32_of_i32 0l)))
+    Table_set (Option.value indice ~default:(Raw 0))
   }
   | TABLE; DOT; SIZE; indice = option(indice); {
-    Table_size (Option.value indice ~default:(Raw (u32_of_i32 0l)))
+    Table_size (Option.value indice ~default:(Raw 0))
   }
   | TABLE; DOT; GROW; indice = option(indice); {
-    Table_grow (Option.value indice ~default:(Raw (u32_of_i32 0l)))
+    Table_grow (Option.value indice ~default:(Raw 0))
   }
   | TABLE; DOT; FILL; indice = option(indice); {
-    Table_fill (Option.value indice ~default:(Raw (u32_of_i32 0l)))
+    Table_fill (Option.value indice ~default:(Raw 0))
   }
   | TABLE; DOT; COPY; {
-    Table_copy (
-      Raw (u32_of_i32 0l),
-      Raw (u32_of_i32 0l)
-    )
+    Table_copy (Raw 0, Raw 0)
   }
   | TABLE; DOT; COPY; src = indice; dst = indice; { Table_copy (src, dst) }
   | TABLE; DOT; INIT; t_indice = ioption(indice); ~ = indice; {
-    Table_init (Option.value t_indice ~default:(Raw (u32_of_i32 0l)), indice)
+    Table_init (Option.value t_indice ~default:(Raw 0), indice)
   }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
@@ -310,7 +314,7 @@ let call_instr ==
     Call_indirect (Symbolic id, call_instr_type)
   }
   | CALL_INDIRECT; ~ = call_instr_type; {
-    Call_indirect (Raw (u32_of_i32 0l), call_instr_type)
+    Call_indirect (Raw 0, call_instr_type)
   }
 
 let call_instr_type ==
@@ -340,7 +344,7 @@ let call_instr_instr ==
     Call_indirect (Symbolic id, x), es
   }
   | CALL_INDIRECT; (x, es) = call_instr_type_instr; {
-    Call_indirect (Raw (u32_of_i32 0l), x), es
+    Call_indirect (Raw 0, x), es
   }
 
 let call_instr_type_instr ==
@@ -424,7 +428,7 @@ let expr_aux ==
     es, Call_indirect (Symbolic id, x)
   }
   | CALL_INDIRECT; (x, es) = call_expr_type; {
-    es, Call_indirect (Raw (u32_of_i32 0l), x)
+    es, Call_indirect (Raw 0, x)
   }
   | BLOCK; id = option(id); (bt, es) = block; {
     [], Block (id, bt, es)
@@ -579,7 +583,7 @@ let func_result_body :=
 
 let func_body :=
   | body = instr_list; {
-    { type_f = Bt_ind (Raw (u32_of_i32 (-1l))); locals = []; body; id = None }
+    { type_f = Bt_ind (Raw Int.max_int); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
     { func_body with locals = (List.map (fun v -> None, v) l) @ func_body.locals  }
@@ -625,10 +629,10 @@ let elem ==
     [ MElem { id; type_; init; mode = Elem_declarative } ]
   }
   | ELEM; id = option(id); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
+    [ MElem { id; type_; init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { id; type_ = Func_ref; init = [init]; mode = Elem_active (Some (Raw Unsigned.UInt32.zero), offset) } ]
+    [ MElem { id; type_ = Func_ref; init = [init]; mode = Elem_active (Some (Raw 0), offset) } ]
   }
 
 let table ==
@@ -661,7 +665,7 @@ let table_fields :=
     MExport { name = inline_export; desc = Export_table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
-    let min = Int32.of_int @@ List.length (List.flatten init) in
+    let min = List.length (List.flatten init) in
     [ MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) }
     ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }
@@ -671,7 +675,7 @@ let data ==
     [ MData { id; init; mode = Data_passive } ]
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
-    let memory_use = Option.value memory_use ~default:(Raw (u32_of_i32 0l)) in
+    let memory_use = Option.value memory_use ~default:(Raw 0) in
     [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
   }
 
@@ -702,6 +706,7 @@ let memory_fields :=
   }
   | LPAR; DATA; init = string_list; RPAR; {
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
+    let min = Int32.to_int min in
     
     [ MData { id = None; init; mode = Data_active (None, []) } 
     ; MMem (None, { min; max = Some min}) ]

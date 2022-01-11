@@ -56,9 +56,7 @@ type cmd =
 
 type script = module_ Array.t * cmd list
 
-let map_symb find_in_tbl = function
-  | Raw i -> i
-  | Symbolic id -> Uint32.of_int @@ find_in_tbl id
+let map_symb find_in_tbl = function Raw i -> i | Symbolic id -> find_in_tbl id
 
 let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
 
@@ -100,7 +98,7 @@ type env =
   }
 
 let find_id tbl x = function
-  | Raw i -> Uint32.to_int i
+  | Raw i -> i
   | Symbolic i -> (
     match Hashtbl.find_opt tbl i with
     | None -> failwith @@ Format.asprintf "unbound %s id %a" x Pp.id i
@@ -158,7 +156,7 @@ let mk_module registered_modules m =
             | None -> ()
             | Some _id -> failwith "multiple start functions are not allowed"
           end;
-          let indice = Uint32.to_int @@ map_symb find_func indice in
+          let indice = map_symb find_func indice in
           { env with start = Some indice }
         | MFunc f ->
           let curr_func = env.curr_func + 1 in
@@ -202,17 +200,14 @@ let mk_module registered_modules m =
         | MMem (id, { min; max }) ->
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          let max = Option.map Int32.to_int max in
-          let new_bytes =
-            Bytes.make (Int32.to_int min * page_size) (Char.chr 0)
-          in
+          let new_bytes = Bytes.make (min * page_size) '\000' in
           let memories = Local (new_bytes, max) :: env.memories in
           { env with curr_memory; memories }
         | MTable (id, ({ min; max }, rt)) ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
-          let a = Array.make (Int32.to_int min) None in
-          let tbl = Local (rt, a, Option.map Int32.to_int max) in
+          let a = Array.make min None in
+          let tbl = Local (rt, a, max) in
           let tables = tbl :: env.tables in
           { env with curr_table; tables }
         | MType (id, t) ->
@@ -376,9 +371,8 @@ let mk_module registered_modules m =
                   l
               with Exit -> ()
             end;
-
-            if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id
-            else Uint32.of_int !pos
+            if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id;
+            !pos
           in
 
           let bt_to_raw =
@@ -496,7 +490,7 @@ let script script =
     Module
       { id = Some "spectest"
       ; fields =
-          [ MMem (Some "memory", { min = 1l; max = Some 2l })
+          [ MMem (Some "memory", { min = 1; max = Some 2 })
           ; MFunc
               { type_f = Bt_raw ([ (None, Num_type I32) ], [])
               ; locals = []
@@ -541,7 +535,7 @@ let script script =
               ; body = []
               ; id = Some "print_f64_f64"
               }
-          ; MTable (Some "table", ({ min = 10l; max = Some 20l }, Func_ref))
+          ; MTable (Some "table", ({ min = 10; max = Some 20 }, Func_ref))
           ; MGlobal
               { type_ = (Var, Num_type I32)
               ; init = [ I32_const 666l ]

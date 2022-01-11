@@ -8,19 +8,15 @@ let id fmt id = Format.fprintf fmt "$%s" id
 
 let id_opt fmt = function None -> () | Some i -> id fmt i
 
-let u32 fmt u = Unsigned.UInt32.pp fmt u
-
-let i32 fmt i = Signed.Int32.pp fmt i
-
-let i64 fmt i = Signed.Int64.pp fmt i
-
 let f32 fmt f = Format.fprintf fmt "%s" (Float32.to_string f)
 
 let f64 fmt f = Format.fprintf fmt "%s" (Float64.to_string f)
 
 let name fmt name = Format.pp_print_string fmt name
 
-let indice fmt = function Raw u -> u32 fmt u | Symbolic i -> id fmt i
+let indice fmt = function
+  | Raw u -> Format.pp_print_int fmt u
+  | Symbolic i -> id fmt i
 
 let indice_opt fmt = function None -> () | Some i -> indice fmt i
 
@@ -59,8 +55,8 @@ let block_type_opt fmt = function None -> () | Some bt -> block_type fmt bt
 
 let limits fmt { min; max } =
   match max with
-  | None -> Format.fprintf fmt "%a" i32 min
-  | Some max -> Format.fprintf fmt "%a %a" i32 min i32 max
+  | None -> Format.fprintf fmt "%d" min
+  | Some max -> Format.fprintf fmt "%d %d" min max
 
 let mem_type fmt t = limits fmt t
 
@@ -140,11 +136,11 @@ let frelop fmt = function
 
 (* TODO: when offset is 0 then do not print anything, if offset is N (memargN) then print nothing ? *)
 let memarg fmt { offset; align } =
-  Format.fprintf fmt "offset=%a align=%a" u32 offset u32 align
+  Format.fprintf fmt "offset=%d align=%d" offset align
 
 let rec instr fmt = function
-  | I32_const i -> Format.fprintf fmt "i32.const %a" i32 i
-  | I64_const i -> Format.fprintf fmt "i64.const %a" i64 i
+  | I32_const i -> Format.fprintf fmt "i32.const %ld" i
+  | I64_const i -> Format.fprintf fmt "i64.const %Ld" i
   | F32_const f -> Format.fprintf fmt "f32.const %a" f32 f
   | F64_const f -> Format.fprintf fmt "f64.const %a" f64 f
   | I_unop (n, op) -> Format.fprintf fmt "i%a.%a" nn n iunop op
@@ -319,8 +315,8 @@ let module_ fmt m =
 let register fmt (s, _name) = Format.fprintf fmt "(register %s)" s
 
 let const fmt = function
-  | Const_I32 i -> Format.fprintf fmt "i32.const %a" i32 i
-  | Const_I64 i -> Format.fprintf fmt "i64.const %a" i64 i
+  | Const_I32 i -> Format.fprintf fmt "i32.const %ld" i
+  | Const_I64 i -> Format.fprintf fmt "i64.const %Ld" i
   | Const_F32 f -> Format.fprintf fmt "f32.const %a" f32 f
   | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
   | Const_null rt -> Format.fprintf fmt "ref.null %a" ref_type rt
