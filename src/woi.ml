@@ -16,18 +16,10 @@ let () =
   let debug = argc = 3 && Sys.argv.(2) = "--debug" in
   if debug then Woi.Debug.enable ();
 
-  let chan = open_in file in
-
-  let lexbuf = Sedlexing.Utf8.from_channel chan in
-
-  let script = Woi.Handle.process lexbuf in
-
-  close_in chan;
-
-  Woi.Check.script script;
-
-  Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
-
-  let script, modules = Woi.Simplify.script script in
-
-  Woi.Interpret.exec script modules
+  match Woi.Parse.from_file file with
+  | Ok script ->
+    Woi.Check.script script;
+    Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
+    let script, modules = Woi.Simplify.script script in
+    Woi.Interpret.exec script modules
+  | Error e -> error e

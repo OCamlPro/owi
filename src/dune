@@ -1,22 +1,32 @@
 (library
- (name woi)
+ (public_name woi)
  (modules
   check
   convert
   debug
   float32
   float64
-  handle
   init
   int32
   int64
   interpret
   lexer
   menhir_parser
+  parse
   pp
   simplify
   stack
   types
+  wutf8)
+ (private_modules
+  convert
+  float32
+  float64
+  int32
+  int64
+  lexer
+  menhir_parser
+  stack
   wutf8)
  (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex)
  (preprocess
@@ -25,10 +35,9 @@
   (backend bisect_ppx)))
 
 (executable
- (name woi)
+ (public_name woi)
  (modules woi)
  (libraries sedlex woi))
 
 (menhir
- (flags --table --canonical)
  (modules menhir_parser))

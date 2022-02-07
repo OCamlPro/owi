@@ -20,18 +20,6 @@ exception Overflow
 (* Unsigned comparison in terms of signed comparison. *)
 let cmp_u x op y = op (add x min_int) (add y min_int)
 
-(* Unsigned division and remainder in terms of signed division; algorithm from
- * Hacker's Delight, Second Edition, by Henry S. Warren, Jr., section 9-3
- * "Unsigned Short Division from Signed Division". *)
-let divrem_u n d =
-  if d = zero then raise Division_by_zero
-  else
-    let t = shift_right d (32 - 1) in
-    let n' = logand n (lognot t) in
-    let q = shift_left (div (shift_right_logical n' 1) d) 1 in
-    let r = sub n (mul q d) in
-    if cmp_u r ( < ) d then (q, r) else (add q one, sub r d)
-
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
@@ -92,7 +80,9 @@ let hex_digit = function
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
   | _ -> failwith "of_string"
 
-let max_upper, max_lower = divrem_u minus_one 10l
+let max_upper = unsigned_div minus_one 10l
+
+let max_lower = unsigned_rem minus_one 10l
 
 let sign_extend i =
   let sign_bit = logand (of_int (1 lsl (32 - 1))) i in

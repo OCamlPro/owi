@@ -4,7 +4,7 @@ type token = Menhir_parser.token
 
 open Menhir_parser
 
-exception LexError of Lexing.position * string
+exception Error of Lexing.position * string
 
 let mk_string s =
   let b = Buffer.create (String.length s) in
@@ -253,7 +253,7 @@ let rec token buf =
   | _ ->
     let position = fst @@ lexing_positions buf in
     let tok = Utf8.lexeme buf in
-    raise @@ LexError (position, Printf.sprintf "unexpected character `%S`" tok)
+    raise @@ Error (position, Printf.sprintf "unexpected character `%S`" tok)
 
 and comment buf =
   match%sedlex buf with

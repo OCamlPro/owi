@@ -4,11 +4,9 @@ let count_total_failed = ref 0
 
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
-  match Bos.OS.File.read f with
-  | Ok s -> begin
+  match Woi.Parse.from_file (Fpath.to_string f) with
+  | Ok script -> begin
     try
-      let lexbuf = Sedlexing.Utf8.from_string s in
-      let script = Woi.Handle.process lexbuf in
       Woi.Check.script script;
       let script, modules = Woi.Simplify.script script in
       Woi.Interpret.exec script modules;
@@ -24,9 +22,7 @@ let test_file f =
         (String.concat " " @@ String.split_on_char '\n' s);
       Error s
   end
-  | Error (`Msg e) ->
-    Format.eprintf "error     : %s@." e;
-    Error e
+  | Error e -> Error e
 
 let test_directory d =
   let count_error = ref 0 in
