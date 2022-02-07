@@ -23,7 +23,6 @@
   float32
   float64
   int32
-  int64
   lexer
   menhir_parser
   stack

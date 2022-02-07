@@ -34,10 +34,13 @@ let val_type fmt = function
   | Num_type t -> num_type fmt t
   | Ref_type t -> ref_type fmt t
 
-let param fmt (id, vt) = Format.fprintf fmt "(param %a%a)" id_opt id val_type vt
+let param fmt (id, vt) =
+  Format.fprintf fmt "(param %a %a)" id_opt id val_type vt
 
 let param_type fmt params =
-  Format.pp_print_list ~pp_sep:Format.pp_print_space param fmt params
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+    param fmt params
 
 let result_ fmt vt = Format.fprintf fmt "(result %a)" val_type vt
 
@@ -49,7 +52,7 @@ let func_type fmt (l, r) =
 
 let block_type fmt = function
   | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
-  | Bt_raw typ -> Format.fprintf fmt "%a" func_type typ
+  | Bt_raw (l, r) -> Format.fprintf fmt "%a %a" param_type l result_type r
 
 let block_type_opt fmt = function None -> () | Some bt -> block_type fmt bt
 
@@ -69,7 +72,9 @@ let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
 let local fmt (id, t) = Format.fprintf fmt "(local %a %a)" id_opt id val_type t
 
 let locals fmt locals =
-  Format.pp_print_list ~pp_sep:Format.pp_print_space local fmt locals
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+    local fmt locals
 
 let nn fmt = function
   | S32 -> Format.fprintf fmt "32"
@@ -232,11 +237,14 @@ let rec instr fmt = function
   | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
 
 and expr fmt instrs =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline instr fmt instrs
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+    instr fmt instrs
 
 let func fmt (f : func) =
   (* TODO: typeuse ? *)
-  Format.fprintf fmt "(func %a %a@.%a)" id_opt f.id locals f.locals expr f.body
+  Format.fprintf fmt "(func %a %a %a@\n  @[<v>%a@]@\n)" id_opt f.id block_type
+    f.type_f locals f.locals expr f.body
 
 let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
@@ -308,7 +316,7 @@ let module_field fmt = function
   | MExport e -> export fmt e
 
 let module_ fmt m =
-  Format.fprintf fmt "(module %a@.%a)" id_opt m.id
+  Format.fprintf fmt "(module %a@\n%a)" id_opt m.id
     (Format.pp_print_list ~pp_sep:Format.pp_print_newline module_field)
     m.fields
 
