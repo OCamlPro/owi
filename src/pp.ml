@@ -141,7 +141,8 @@ let frelop fmt = function
 
 (* TODO: when offset is 0 then do not print anything, if offset is N (memargN) then print nothing ? *)
 let memarg fmt { offset; align } =
-  Format.fprintf fmt "offset=%d align=%d" offset align
+  if offset = 0 && align = 0 then ()
+  else Format.fprintf fmt "offset=%d align=%d" offset align
 
 let rec instr fmt = function
   | I32_const i -> Format.fprintf fmt "i32.const %ld" i
@@ -222,8 +223,17 @@ let rec instr fmt = function
     Format.fprintf fmt "block %a %a <expr>" id_opt id block_type_opt bt
   | Loop (id, bt, _expr) ->
     Format.fprintf fmt "loop %a %a <expr>" id_opt id block_type_opt bt
-  | If_else (id, bt, _expr, _expr') ->
-    Format.fprintf fmt "if %a %a <expr> <expr'>" id_opt id block_type_opt bt
+  | If_else (id, bt, e1, e2) ->
+    Format.fprintf fmt
+      "(if %a %a@\n\
+      \  @[<v>(then@\n\
+      \  @[<v>%a@]@\n\
+       )@\n\
+       (else@\n\
+      \  @[<v>%a@]@\n\
+       )@]@\n\
+       )"
+      id_opt id block_type_opt bt expr e1 expr e2
   | Br id -> Format.fprintf fmt "br %a" indice id
   | Br_if id -> Format.fprintf fmt "br_if %a" indice id
   | Br_table (ids, id) ->
@@ -234,7 +244,8 @@ let rec instr fmt = function
       (Array.to_list ids) indice id
   | Return -> Format.fprintf fmt "return"
   | Call id -> Format.fprintf fmt "call %a" indice id
-  | Call_indirect (_tbl_id, _ty_id) -> Format.fprintf fmt "<call_indirect>"
+  | Call_indirect (tbl_id, ty_id) ->
+    Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
 
 and expr fmt instrs =
   Format.pp_print_list
@@ -267,7 +278,9 @@ let table fmt (id, ty) =
   Format.fprintf fmt "(table %a %a)" id_opt id table_type ty
 
 let funcs fmt (funcs : func list) =
-  Format.pp_print_list ~pp_sep:Format.pp_print_newline func fmt funcs
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+    func fmt funcs
 
 let import_desc fmt : import_desc -> Unit.t = function
   | Import_func (id, t) ->
@@ -293,15 +306,20 @@ let data_mode fmt = function
 let data fmt d = Format.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
 
 let elem_mode fmt = function
-  | Elem_passive -> Format.fprintf fmt "PASSIVE"
+  | Elem_passive -> ()
+  | Elem_declarative -> Format.fprintf fmt "declare"
   | Elem_active (i, e) ->
-    Format.fprintf fmt "ACTIVE <i: `%a`> <e: `%a`" indice_opt i expr e
-  | Elem_declarative -> Format.fprintf fmt "DECLARATIVE"
+    Format.fprintf fmt "(table %a) (offset %a)" indice_opt i expr e
 
-let elem fmt e =
-  Format.fprintf fmt "(elem <TYPE %a> <INIT %a> <MODE %a>)" ref_type e.type_
-    (Format.pp_print_list expr)
-    e.init elem_mode e.mode
+let elemexpr fmt e = Format.fprintf fmt "(item %a)" expr e
+
+let elem fmt (e : elem) =
+  Format.fprintf fmt "(elem %a %a %a %a)" id_opt e.id elem_mode e.mode ref_type
+    e.type_
+    (Format.pp_print_list
+       ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+       elemexpr )
+    e.init
 
 let module_field fmt = function
   | MType t -> type_ fmt t
@@ -316,8 +334,10 @@ let module_field fmt = function
   | MExport e -> export fmt e
 
 let module_ fmt m =
-  Format.fprintf fmt "(module %a@\n%a)" id_opt m.id
-    (Format.pp_print_list ~pp_sep:Format.pp_print_newline module_field)
+  Format.fprintf fmt "(module %a@\n  @[<v>%a@]@\n)" id_opt m.id
+    (Format.pp_print_list
+       ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+       module_field )
     m.fields
 
 let register fmt (s, _name) = Format.fprintf fmt "(register %s)" s
@@ -355,7 +375,9 @@ let result_bis fmt = function
   | _ -> Format.fprintf fmt "<results TODO>"
 
 let results fmt r =
-  Format.pp_print_list ~pp_sep:Format.pp_print_space result_bis fmt r
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+    result_bis fmt r
 
 let assert_ fmt = function
   | Assert_return (a, l) ->
@@ -371,7 +393,10 @@ let cmd fmt = function
   | Register (s, name) -> register fmt (s, name)
   | Action _a -> Format.fprintf fmt "<action>"
 
-let file fmt l = Format.pp_print_list ~pp_sep:Format.pp_print_newline cmd fmt l
+let file fmt l =
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+    cmd fmt l
 
 let pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
   Format.fprintf out "line %d:%d" pos_lnum (pos_cnum - pos_bol)
