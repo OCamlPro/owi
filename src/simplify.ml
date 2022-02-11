@@ -146,6 +146,22 @@ let mk_module registered_modules m =
     | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i
   in
 
+  (* checking duplicate globals *)
+  (* TODO: move this to Check module ? *)
+  let () =
+    let tbl = Hashtbl.create 512 in
+    List.iter
+      (function
+        | MGlobal { id; _ } | MImport { desc = Import_global (id, _); _ } ->
+          Option.iter
+            (fun id ->
+              if Hashtbl.mem tbl id then failwith "duplicate global";
+              Hashtbl.add tbl id () )
+            id
+        | _ -> () )
+      m.Types.fields
+  in
+
   let env =
     List.fold_left
       (fun env -> function
@@ -666,7 +682,13 @@ let rec script scr =
                   Format.eprintf "expected: `%s`@." msg;
                   Format.eprintf "got     : Ok@.";
                   assert false
-                with Failure e -> assert (e = msg) )
+                with Failure e ->
+                  let ok = e = msg in
+                  if not ok then begin
+                    Format.eprintf "expected: `%s`@." msg;
+                    Format.eprintf "got     : `%s`@." e;
+                    assert false
+                  end )
               | Error e ->
                 let ok = e = msg in
                 if not ok then begin
