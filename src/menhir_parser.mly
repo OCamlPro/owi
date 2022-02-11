@@ -321,9 +321,9 @@ let call_instr_type ==
   | ~ = type_use; ~ = call_instr_params; {
     match call_instr_params with
     | ([], []) -> Bt_ind (type_use)
-    | (pt, rt) -> Bt_raw (List.map (fun t -> None, t) pt, rt) (* TODO: inline_type_explicit type_use ft *)
+    | (pt, rt) -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt))
   }
-  | (pt, rt) = call_instr_params; { Bt_raw (List.map (fun t -> None, t) pt, rt) }
+  | (pt, rt) = call_instr_params; { Bt_raw (None, (List.map (fun t -> None, t) pt, rt)) }
 
 let call_instr_params :=
   | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
@@ -351,9 +351,9 @@ let call_instr_type_instr ==
   | ~ = type_use; ~ = call_instr_params_instr; {
     match call_instr_params_instr with
     | ([], []), es -> Bt_ind (type_use), es
-    | (pt, rt), es -> Bt_raw ((List.map (fun t -> None, t) pt), rt), es (* TODO: inline_type_explicit t ft, es *)
+    | (pt, rt), es -> Bt_raw (Some type_use, ((List.map (fun t -> None, t) pt), rt)), es
   }
-  | ((pt, rt), es) = call_instr_params_instr; { Bt_raw (List.map (fun t -> None, t) pt, rt), es }
+  | ((pt, rt), es) = call_instr_params_instr; { Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es }
 
 let call_instr_params_instr :=
   | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
@@ -394,14 +394,14 @@ let block ==
   | ~ = type_use; (l, r) = block_param_body; {
     let block_type = match l with
     | ([], []) -> Bt_ind type_use
-    | (pt, rt) -> Bt_raw (List.map (fun t -> None, t) pt, rt) (* TODO: type_use ? *)
+    | (pt, rt) -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt))
     in
     Some block_type, r
   }
   | (l, r) = block_param_body; {
     let block_type = match l with
       | [], [] -> None
-      | (pt, rt) -> Some (Bt_raw (List.map (fun t -> None, t) pt, rt))
+      | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
     in
     block_type, r
   }
@@ -436,7 +436,18 @@ let expr_aux ==
   | LOOP; id = option(id); (bt, es) = block; {
     [], Loop (id, bt, es)
   }
-  | IF; id = option(id); (bt, (_param_or_result, (es, es1, es2))) = if_block; {
+  | IF; id = option(id); (bt, ((pt, rt), (es, es1, es2))) = if_block; {
+    let bt = match pt, rt with
+    | [], [] -> bt
+    | pt, rt ->
+      let pt = List.map (fun t -> None, t) pt in
+      let raw = pt, rt in
+      begin match bt with
+      | Some (Bt_ind type_use) -> Some (Bt_raw (Some type_use, raw))
+      | Some (Bt_raw _) -> failwith "unexpected bt_raw"
+      | None -> Some (Bt_raw (None, raw))
+      end
+    in
     es, If_else (id, bt, es1, es2)
   }
 
@@ -455,10 +466,10 @@ let call_expr_type ==
   | ~ = type_use; ~ = call_expr_params; {
     match call_expr_params with
     | ([], []), es -> Bt_ind type_use, es
-    | (pt, rt), es -> Bt_raw (List.map (fun t -> None, t) pt, rt), es (* TODO: type_use ? *)
+    | (pt, rt), es -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt)), es
   }
   | ((pt, rt), es) = call_expr_params; {
-    Bt_raw (List.map (fun t -> None, t) pt, rt), es
+    Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es
   }
 
 let call_expr_params :=
@@ -539,13 +550,13 @@ let func_fields :=
     [MFunc { f with type_f = Bt_ind type_use }]
   }
   | (type_f, f) = func_fields_body; {
-    [MFunc { f with type_f = Bt_raw type_f }]
+    [MFunc { f with type_f = Bt_raw (None, type_f) }]
   }
   | (module_, name) = inline_import; ~ = type_use; _ = func_fields_import; {
     [MImport { module_; name; desc = Import_func (None, Bt_ind type_use) }]
   }
   | (module_, name) = inline_import; ~ = func_fields_import; {
-    [MImport { module_; name; desc = Import_func (None, Bt_raw func_fields_import) }]
+    [MImport { module_; name; desc = Import_func (None, Bt_raw (None, func_fields_import)) }]
   }
   | ~ = inline_export; ~ = func_fields; {
     MExport { name = inline_export; desc = Export_func None } :: func_fields
@@ -742,7 +753,7 @@ let global_fields :=
 
 let import_desc ==
   | FUNC; id = option(id); ~ = type_use; { Import_func (id, Bt_ind type_use) }
-  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw ft) }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw (None, ft)) }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>

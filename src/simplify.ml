@@ -41,7 +41,6 @@ type assert_ =
   | SAssert_trap of action * string
   | SAssert_exhaustion of action * string
   | SAssert_malformed of Types.module_ * string
-  | SAssert_malformed_quote of string list * string
   | SAssert_malformed_binary of string list * string
   | SAssert_invalid of Types.module_ * string
   | SAssert_invalid_quote of string list * string
@@ -326,7 +325,8 @@ let mk_module registered_modules m =
           | Local f -> begin
             match f.type_f with
             | Bt_ind _ind -> types
-            | Bt_raw t -> if List.mem t types then types else t :: types
+            | Bt_raw (_type_use, t) ->
+              if List.mem t types then types else t :: types
           end
           | Imported _ -> types )
         env.types funcs
@@ -347,7 +347,15 @@ let mk_module registered_modules m =
           let pt, rt =
             match f.type_f with
             | Bt_ind ind -> types.(find_type ind)
-            | Bt_raw t -> t
+            | Bt_raw (type_use, t) ->
+              begin
+                match type_use with
+                | None -> ()
+                | Some ind ->
+                  let t' = types.(find_type ind) in
+                  assert (t = t')
+              end;
+              t
           in
 
           (* adding params and locals to the locals table *)
@@ -377,8 +385,21 @@ let mk_module registered_modules m =
 
           let bt_to_raw =
             Option.map (function
-              | Bt_ind ind -> Bt_raw types.(find_type ind)
-              | t -> t )
+              | Bt_ind ind -> Bt_raw (Some ind, types.(find_type ind))
+              | Bt_raw (type_use, t) ->
+                begin
+                  match type_use with
+                  | None -> ()
+                  | Some ind ->
+                    (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
+                    let pt, rt = types.(find_type ind) in
+                    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
+                    let rt = List.map (fun t -> t) rt in
+                    let t' = (pt, rt) in
+                    let ok = t = t' in
+                    if not ok then failwith "inline function type"
+                end;
+                Bt_raw (None, t) )
           in
 
           (* handling an expression *)
@@ -438,7 +459,7 @@ let mk_module registered_modules m =
               i
           and expr e block_ids = List.map (body block_ids) e in
           let body = expr f.body [] in
-          Local { f with body; type_f = Bt_raw (pt, rt) }
+          Local { f with body; type_f = Bt_raw (None, (pt, rt)) }
         | Imported _ as f -> f )
       funcs
   in
@@ -473,64 +494,67 @@ let assert_ curr_module last_module seen_modules =
     (curr_module, SAssert_exhaustion (action a, failure))
   | Assert_malformed (module_, failure) ->
     (curr_module, SAssert_malformed (module_, failure))
-  | Assert_malformed_quote (m, failure) ->
-    (curr_module, SAssert_malformed_quote (m, failure))
+  | Assert_malformed_quote _ ->
+    (* This should have been checked before and removed ! *)
+    assert false
   | Assert_malformed_binary (m, failure) ->
     (curr_module, SAssert_malformed_binary (m, failure))
   | Assert_invalid (module_, failure) ->
     (curr_module, SAssert_invalid (module_, failure))
   | Assert_invalid_quote (m, failure) ->
-    (curr_module, SAssert_malformed_quote (m, failure))
+    (curr_module, SAssert_invalid_quote (m, failure))
   | Assert_invalid_binary (m, failure) ->
     (curr_module, SAssert_invalid_binary (m, failure))
   | Assert_unlinkable (m, s) -> (curr_module, SAssert_unlinkable (m, s))
 
-let script script =
-  let script =
+let rec script scr =
+  let scr =
     Module
       { id = Some "spectest"
       ; fields =
           [ MMem (Some "memory", { min = 1; max = Some 2 })
           ; MFunc
-              { type_f = Bt_raw ([ (None, Num_type I32) ], [])
+              { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print"
               }
           ; MFunc
-              { type_f = Bt_raw ([ (None, Num_type I32) ], [])
+              { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_i32"
               }
           ; MFunc
-              { type_f = Bt_raw ([ (None, Num_type I64) ], [])
+              { type_f = Bt_raw (None, ([ (None, Num_type I64) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_i64"
               }
           ; MFunc
-              { type_f = Bt_raw ([ (None, Num_type F32) ], [])
+              { type_f = Bt_raw (None, ([ (None, Num_type F32) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_f32"
               }
           ; MFunc
-              { type_f = Bt_raw ([ (None, Num_type F64) ], [])
+              { type_f = Bt_raw (None, ([ (None, Num_type F64) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_f64"
               }
           ; MFunc
               { type_f =
-                  Bt_raw ([ (None, Num_type I32); (None, Num_type F32) ], [])
+                  Bt_raw
+                    (None, ([ (None, Num_type I32); (None, Num_type F32) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_i32_f32"
               }
           ; MFunc
               { type_f =
-                  Bt_raw ([ (None, Num_type F64); (None, Num_type F64) ], [])
+                  Bt_raw
+                    (None, ([ (None, Num_type F64); (None, Num_type F64) ], []))
               ; locals = []
               ; body = []
               ; id = Some "print_f64_f64"
@@ -605,14 +629,14 @@ let script script =
           ]
       }
     :: Register ("spectest", Some "spectest")
-    :: script
+    :: scr
   in
 
-  let _curr_module, modules, script =
+  let _curr_module, modules, scr =
     let seen_modules = Hashtbl.create 512 in
     let registered_modules = Hashtbl.create 512 in
     List.fold_left
-      (fun (curr_module, modules, script) -> function
+      (fun (curr_module, modules, scr) -> function
         | Module m ->
           let curr_module = curr_module + 1 in
           Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
@@ -621,7 +645,7 @@ let script script =
             m.id;
           let cmd = Module_indice curr_module in
           let modules = mk_module registered_modules m :: modules in
-          (curr_module, modules, cmd :: script)
+          (curr_module, modules, cmd :: scr)
         | Assert (Assert_trap_module (m, msg)) ->
           let curr_module = curr_module + 1 in
           Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
@@ -631,25 +655,45 @@ let script script =
           let cmd = Module_indice curr_module in
           let module_ = mk_module registered_modules m in
           let module_ = { module_ with should_trap = Some msg } in
-          (curr_module, module_ :: modules, cmd :: script)
+          (curr_module, module_ :: modules, cmd :: scr)
+        | Assert (Assert_malformed_quote (m, msg)) ->
+          ( try
+              match Parse.from_string (String.concat "\n" m) with
+              | Ok scr -> (
+                try
+                  Check.script scr;
+                  let _script, _modules = script scr in
+                  Format.eprintf "expected: `%s`@." msg;
+                  Format.eprintf "got     : Ok@.";
+                  assert false
+                with Failure e -> assert (e = msg) )
+              | Error e ->
+                let ok = e = msg in
+                if not ok then begin
+                  Format.eprintf "expected: `%s`@." msg;
+                  Format.eprintf "got     : `%s`@." e;
+                  assert false
+                end
+            with Failure s -> assert (s = msg) );
+          (curr_module, modules, scr)
         | Assert a ->
           let curr_module, cmd =
             assert_ curr_module (Some curr_module) seen_modules a
           in
           let cmd = Assert cmd in
-          (curr_module, modules, cmd :: script)
+          (curr_module, modules, cmd :: scr)
         | Register (name, mod_name) ->
           let indice = find_module mod_name (Some curr_module) seen_modules in
           Hashtbl.replace registered_modules name indice;
           let cmd = Register_indice (name, indice) in
-          (curr_module, modules, cmd :: script)
+          (curr_module, modules, cmd :: scr)
         | Action a ->
           let cmd = Action (action (Some curr_module) seen_modules a) in
-          (curr_module, modules, cmd :: script) )
-      (-1, [], []) script
+          (curr_module, modules, cmd :: scr) )
+      (-1, [], []) scr
   in
 
-  let script = List.rev script in
+  let script = List.rev scr in
   let modules = List.rev modules |> Array.of_list in
 
   (script, modules)

@@ -131,7 +131,8 @@ type memarg =
 
 type block_type =
   | Bt_ind of indice
-  | Bt_raw of func_type
+  | Bt_raw of (indice option * func_type)
+(* the indice option is the optional typeuse, if it's some it must be equal to the func_type *)
 
 type instr =
   (* Numeric Instructions *)

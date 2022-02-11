@@ -231,7 +231,9 @@ let fmt = Format.std_formatter
 
 let indice_to_int = function Raw i -> i | Symbolic _id -> assert false
 
-let get_bt = function Bt_ind _ind -> assert false | Bt_raw (pt, rt) -> (pt, rt)
+let get_bt = function
+  | Bt_ind _ind -> assert false
+  | Bt_raw (_type_use, (pt, rt)) -> (pt, rt)
 
 let init_local (_id, t) =
   match t with
@@ -1007,7 +1009,6 @@ let exec_assert env = function
     env
   | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
   | SAssert_malformed (_mod, _failure) -> (* TODO *) env
-  | SAssert_malformed_quote (_mod, _failure) -> (* TODO *) env
   | SAssert_malformed_binary (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env

@@ -52,7 +52,8 @@ let func_type fmt (l, r) =
 
 let block_type fmt = function
   | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
-  | Bt_raw (l, r) -> Format.fprintf fmt "%a %a" param_type l result_type r
+  | Bt_raw (_type_use, (l, r)) ->
+    Format.fprintf fmt "%a %a" param_type l result_type r
 
 let block_type_opt fmt = function None -> () | Some bt -> block_type fmt bt
 

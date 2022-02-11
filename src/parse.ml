@@ -13,7 +13,7 @@ let from_lexbuf =
       (tok, start, stop)
     in
     try Ok (parser provider) with
-    | Menhir_parser.Error -> Error "parser error"
+    | Menhir_parser.Error -> Error "unexpected token"
     | Lexer.Error (_pos, _msg) -> Error "lexer error"
 
 (** Parse a script from a string. *)
