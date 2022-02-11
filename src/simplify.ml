@@ -690,7 +690,11 @@ let rec script scr =
                     assert false
                   end )
               | Error e ->
-                let ok = e = msg in
+                let ok =
+                  if msg = "unknown operator" then
+                    e = "unexpected token" || e = "lexer error"
+                  else e = msg
+                in
                 if not ok then begin
                   Format.eprintf "expected: `%s`@." msg;
                   Format.eprintf "got     : `%s`@." e;
