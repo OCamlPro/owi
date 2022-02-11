@@ -72,7 +72,8 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         try
           match s with
           | S ->
-            if n1 = 0x80000000l && n2 = -1l then raise (Trap "integer overflow");
+            if n1 = Int32.min_int && n2 = -1l then
+              raise (Trap "integer overflow");
             div n1 n2
           | U -> unsigned_div n1 n2
         with Division_by_zero -> raise (Trap "integer divide by zero")
@@ -101,7 +102,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         try
           match s with
           | S ->
-            if n1 = 0x8000000000000000L && n2 = -1L then
+            if n1 = Int64.min_int && n2 = -1L then
               raise (Trap "integer overflow");
             div n1 n2
           | U -> unsigned_div n1 n2
