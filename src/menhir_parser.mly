@@ -373,20 +373,20 @@ let call_instr_results_instr :=
 
 let block_instr ==
   | BLOCK; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
     Block (id, bt, es)
   }
   | LOOP; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
     Loop (id, bt, es)
   }
   | IF; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id && Option.is_some id2 then assert (id = id2);
+    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
     If_else (id, bt, es, [])
   }
   | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
-    if Option.is_some id && Option.is_some id2 then assert (id = id2);
-    if Option.is_some id && Option.is_some id3 then assert (id = id3);
+    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
+    if Option.is_some id3 && id <> id3 then failwith "mismatching label";
     If_else (id, bt, es1, instr_list)
   }
 
