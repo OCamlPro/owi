@@ -1008,8 +1008,6 @@ let exec_assert env = function
     end;
     env
   | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
-  | SAssert_malformed (_mod, _failure) -> (* TODO *) env
-  | SAssert_malformed_binary (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_binary (_mod, _failure) -> (* TODO *) env

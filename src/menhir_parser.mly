@@ -8,7 +8,9 @@ let u32 s =
   try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
   with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
 
-let i32 s = Int32.of_string s
+let i32 s =
+  try Int32.of_string s
+  with Failure _msg -> failwith "i32 constant out of range"
 
 let i64 s = Int64.of_string s
 

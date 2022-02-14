@@ -40,8 +40,6 @@ type assert_ =
   | SAssert_return of action * result list
   | SAssert_trap of action * string
   | SAssert_exhaustion of action * string
-  | SAssert_malformed of Types.module_ * string
-  | SAssert_malformed_binary of string list * string
   | SAssert_invalid of Types.module_ * string
   | SAssert_invalid_quote of string list * string
   | SAssert_invalid_binary of string list * string
@@ -144,22 +142,6 @@ let mk_module registered_modules m =
       ->
       c
     | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i
-  in
-
-  (* checking duplicate globals *)
-  (* TODO: move this to Check module ? *)
-  let () =
-    let tbl = Hashtbl.create 512 in
-    List.iter
-      (function
-        | MGlobal { id; _ } | MImport { desc = Import_global (id, _); _ } ->
-          Option.iter
-            (fun id ->
-              if Hashtbl.mem tbl id then failwith "duplicate global";
-              Hashtbl.add tbl id () )
-            id
-        | _ -> () )
-      m.Types.fields
   in
 
   let env =
@@ -364,6 +346,7 @@ let mk_module registered_modules m =
             match f.type_f with
             | Bt_ind ind -> types.(find_type ind)
             | Bt_raw (type_use, t) ->
+              (* TODO: move this to check ?*)
               begin
                 match type_use with
                 | None -> ()
@@ -407,6 +390,7 @@ let mk_module registered_modules m =
                   match type_use with
                   | None -> ()
                   | Some ind ->
+                    (* TODO: move this to check ? *)
                     (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
                     let pt, rt = types.(find_type ind) in
                     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
@@ -508,13 +492,15 @@ let assert_ curr_module last_module seen_modules =
     assert false
   | Assert_exhaustion (a, failure) ->
     (curr_module, SAssert_exhaustion (action a, failure))
-  | Assert_malformed (module_, failure) ->
-    (curr_module, SAssert_malformed (module_, failure))
+  | Assert_malformed _ ->
+    (* This should have been checked before and removed ! *)
+    assert false
   | Assert_malformed_quote _ ->
     (* This should have been checked before and removed ! *)
     assert false
-  | Assert_malformed_binary (m, failure) ->
-    (curr_module, SAssert_malformed_binary (m, failure))
+  | Assert_malformed_binary _ ->
+    (* This should have been checked before and removed ! *)
+    assert false
   | Assert_invalid (module_, failure) ->
     (curr_module, SAssert_invalid (module_, failure))
   | Assert_invalid_quote (m, failure) ->
@@ -672,6 +658,9 @@ let rec script scr =
           let module_ = mk_module registered_modules m in
           let module_ = { module_ with should_trap = Some msg } in
           (curr_module, module_ :: modules, cmd :: scr)
+        | Assert (Assert_malformed_binary _) ->
+          (* TODO: check this when binary format is supported *)
+          (curr_module, modules, scr)
         | Assert (Assert_malformed_quote (m, msg)) ->
           ( try
               match Parse.from_string (String.concat "\n" m) with
@@ -692,6 +681,7 @@ let rec script scr =
               | Error e ->
                 let ok =
                   if msg = "unknown operator" then
+                    (* TODO: open an issue on wasm to avoid having to do this... *)
                     e = "unexpected token" || e = "lexer error"
                   else e = msg
                 in
@@ -700,7 +690,13 @@ let rec script scr =
                   Format.eprintf "got     : `%s`@." e;
                   assert false
                 end
-            with Failure s -> assert (s = msg) );
+            with Failure e as exn ->
+              let ok = e = msg in
+              if not ok then begin
+                Format.eprintf "expected: `%s`@." msg;
+                Format.eprintf "got     : `%s`@." e;
+                raise exn
+              end );
           (curr_module, modules, scr)
         | Assert a ->
           let curr_module, cmd =
