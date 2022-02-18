@@ -25,6 +25,8 @@ let from_channel c = from_lexbuf (Sedlexing.Utf8.from_channel c)
 (** Parse a script from a file. *)
 let from_file ~filename =
   let chan = open_in filename in
-  let result = from_lexbuf (Sedlexing.Utf8.from_channel chan) in
-  close_in chan;
+  let result =
+    Fun.protect ~finally:(fun () -> close_in chan)
+      (fun () -> from_lexbuf (Sedlexing.Utf8.from_channel chan))
+  in
   result
