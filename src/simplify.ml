@@ -50,7 +50,7 @@ type cmd =
   | Register_indice of string * int
   | Action of action
 
-type script = module_ Array.t * cmd list
+type script = cmd list * module_ Array.t
 
 let map_symb find_in_tbl = function Raw i -> i | Symbolic id -> find_in_tbl id
 
