@@ -16,7 +16,7 @@ let () =
   let debug = argc = 3 && Sys.argv.(2) = "--debug" in
   if debug then Woi.Debug.enable ();
 
-  match Woi.Parse.from_file file with
+  match Woi.Parse.from_file ~filename:file with
   | Ok script ->
     Woi.Check.script script;
     Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;

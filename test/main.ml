@@ -8,7 +8,7 @@ let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
 
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
-  match Woi.Parse.from_file (Fpath.to_string f) with
+  match Woi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
     try
       Woi.Check.script script;
