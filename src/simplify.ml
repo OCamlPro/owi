@@ -30,6 +30,7 @@ type module_ =
   ; exported_tables : (string, int) Hashtbl.t
   ; start : int option
   ; should_trap : string option
+  ; should_not_link : string option
   }
 
 type action =
@@ -42,8 +43,6 @@ type assert_ =
   | SAssert_exhaustion of action * string
   | SAssert_invalid of Types.module_ * string
   | SAssert_invalid_quote of string list * string
-  | SAssert_invalid_binary of string list * string
-  | SAssert_unlinkable of Types.module_ * string
 
 type cmd =
   | Module_indice of int
@@ -266,25 +265,13 @@ let mk_module registered_modules m =
           let desc =
             match desc with
             | Export_func indice ->
-              Export_func
-                (Option.map
-                   (fun indice -> map_symb_raw find_func indice)
-                   indice )
+              Export_func (Option.map (map_symb_raw find_func) indice)
             | Export_table indice ->
-              Export_table
-                (Option.map
-                   (fun indice -> map_symb_raw find_table indice)
-                   indice )
+              Export_table (Option.map (map_symb_raw find_table) indice)
             | Export_global indice ->
-              Export_global
-                (Option.map
-                   (fun indice -> map_symb_raw find_global indice)
-                   indice )
+              Export_global (Option.map (map_symb_raw find_global) indice)
             | Export_mem indice ->
-              Export_mem
-                (Option.map
-                   (fun indice -> map_symb_raw find_memory indice)
-                   indice )
+              Export_mem (Option.map (map_symb_raw find_memory) indice)
           in
           let f = MExport { name; desc } in
           f :: fields
@@ -480,6 +467,7 @@ let mk_module registered_modules m =
   ; exported_memories
   ; exported_tables
   ; should_trap = None
+  ; should_not_link = None
   }
 
 let assert_ curr_module last_module seen_modules =
@@ -505,9 +493,12 @@ let assert_ curr_module last_module seen_modules =
     (curr_module, SAssert_invalid (module_, failure))
   | Assert_invalid_quote (m, failure) ->
     (curr_module, SAssert_invalid_quote (m, failure))
-  | Assert_invalid_binary (m, failure) ->
-    (curr_module, SAssert_invalid_binary (m, failure))
-  | Assert_unlinkable (m, s) -> (curr_module, SAssert_unlinkable (m, s))
+  | Assert_invalid_binary (_m, _failure) ->
+    (* This should have been checked before and removed ! *)
+    assert false
+  | Assert_unlinkable (_m, _s) ->
+    (* This should have been handled before and turned into a module with `should_not_link` set ! *)
+    assert false
 
 let rec script scr =
   let scr =
@@ -561,6 +552,31 @@ let rec script scr =
               ; body = []
               ; id = Some "print_f64_f64"
               }
+          ; MFunc
+              { type_f = Bt_raw (None, ([], []))
+              ; locals = []
+              ; body = []
+              ; id = Some "func"
+              }
+          ; MFunc
+              { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
+              ; locals = []
+              ; body = []
+              ; id = Some "func-i32"
+              }
+          ; MFunc
+              { type_f = Bt_raw (None, ([], [ Num_type I32 ]))
+              ; locals = []
+              ; body = []
+              ; id = Some "func->i32"
+              }
+          ; MFunc
+              { type_f =
+                  Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
+              ; locals = []
+              ; body = []
+              ; id = Some "func-i32->i32"
+              }
           ; MTable (Some "table", ({ min = 10; max = Some 20 }, Func_ref))
           ; MGlobal
               { type_ = (Var, Num_type I32)
@@ -581,6 +597,20 @@ let rec script scr =
               { type_ = (Var, Num_type F64)
               ; init = [ F64_const Float64.zero ]
               ; id = Some "global_f64"
+              }
+          ; MExport
+              { name = "func"; desc = Export_func (Some (Symbolic "func")) }
+          ; MExport
+              { name = "func-i32"
+              ; desc = Export_func (Some (Symbolic "func-i32"))
+              }
+          ; MExport
+              { name = "func->i32"
+              ; desc = Export_func (Some (Symbolic "func->i32"))
+              }
+          ; MExport
+              { name = "func-i32->i32"
+              ; desc = Export_func (Some (Symbolic "func-i32->i32"))
               }
           ; MExport
               { name = "memory"; desc = Export_mem (Some (Symbolic "memory")) }
@@ -641,16 +671,19 @@ let rec script scr =
       (fun (curr_module, modules, scr) -> function
         | Module m ->
           let curr_module = curr_module + 1 in
-          Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
+          Debug.debug Format.err_formatter "simplifying module %d... "
+            curr_module;
           Option.iter
             (fun id -> Hashtbl.replace seen_modules id curr_module)
             m.id;
           let cmd = Module_indice curr_module in
           let modules = mk_module registered_modules m :: modules in
+          Debug.debug Format.err_formatter "done !@\n";
           (curr_module, modules, cmd :: scr)
         | Assert (Assert_trap_module (m, msg)) ->
           let curr_module = curr_module + 1 in
-          Debug.debug Format.err_formatter "simplifying module %d@." curr_module;
+          Debug.debug Format.err_formatter "simplifying assert module %d@."
+            curr_module;
           Option.iter
             (fun id -> Hashtbl.replace seen_modules id curr_module)
             m.id;
@@ -659,12 +692,19 @@ let rec script scr =
           let module_ = { module_ with should_trap = Some msg } in
           (curr_module, module_ :: modules, cmd :: scr)
         | Assert (Assert_malformed_binary _) ->
+          Debug.debug Format.err_formatter
+            "simplifying assert malformed binary... ";
+          Debug.debug Format.err_formatter "done !";
           (* TODO: check this when binary format is supported *)
           (curr_module, modules, scr)
         | Assert (Assert_malformed_quote (m, msg)) ->
+          Debug.debug Format.err_formatter
+            "simplifying assert malformed quote... ";
           ( try
+              Debug.debug Format.err_formatter "TRY@\n";
               match Parse.from_string (String.concat "\n" m) with
               | Ok scr -> (
+                Debug.debug Format.err_formatter "OK@\n";
                 try
                   Check.script scr;
                   let _script, _modules = script scr in
@@ -679,6 +719,7 @@ let rec script scr =
                     assert false
                   end )
               | Error e ->
+                Debug.debug Format.err_formatter "ERROR@\n";
                 let ok =
                   if msg = "unknown operator" then
                     (* TODO: open an issue on wasm to avoid having to do this... *)
@@ -691,13 +732,107 @@ let rec script scr =
                   assert false
                 end
             with Failure e as exn ->
+              Debug.debug Format.err_formatter "EXN@\n";
               let ok = e = msg in
               if not ok then begin
                 Format.eprintf "expected: `%s`@." msg;
                 Format.eprintf "got     : `%s`@." e;
                 raise exn
               end );
+          Debug.debug Format.err_formatter "done !";
           (curr_module, modules, scr)
+        | Assert (Assert_invalid_binary _) ->
+          (* TODO: check this when binary format is supported *)
+          (curr_module, modules, scr)
+        | Assert (Assert_invalid (m, msg)) ->
+          (* TODO: re-enable all ignored errors  *)
+          let ignore_tmp =
+            [ "type mismatch"
+            ; "unknown local"
+            ; "unknown global"
+            ; "unknown function"
+            ; "unknown label"
+            ; "unknown elem segment 0"
+            ; "unknown elem segment 4"
+            ; "unknown table 0"
+            ; "unknown table"
+            ; "size minimum must not be greater than maximum"
+            ; "start function"
+            ; "invalid result arity"
+            ; "unknown data segment"
+            ; "unknown function 7"
+            ; "unknown memory 0"
+            ; "undeclared function reference"
+            ; "unknown data segment 1"
+            ; "unknown type"
+            ; "multiple memories"
+            ; "unknown memory"
+            ; "memory size must be at most 65536 pages (4GiB)"
+            ; "global is immutable"
+            ; "constant expression required"
+            ; "duplicate export name"
+            ; "unknown global 0"
+            ; "unknown global 1"
+            ]
+          in
+          if not @@ List.mem msg ignore_tmp then (
+            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
+              msg;
+            assert false );
+          (curr_module, modules, scr)
+        | Assert (Assert_invalid_quote (m, msg)) ->
+          (* TODO: re-enable all ignored errors  *)
+          let ignore_tmp =
+            [ "type mismatch"
+            ; "unknown local"
+            ; "unknown global"
+            ; "unknown function"
+            ; "unknown label"
+            ; "unknown elem segment 0"
+            ; "unknown elem segment 4"
+            ; "unknown table 0"
+            ; "unknown table"
+            ; "size minimum must not be greater than maximum"
+            ; "start function"
+            ; "invalid result arity"
+            ; "unknown data segment"
+            ; "unknown function 7"
+            ; "unknown memory 0"
+            ; "undeclared function reference"
+            ; "unknown data segment 1"
+            ; "unknown type"
+            ; "multiple memories"
+            ; "unknown memory"
+            ; "memory size must be at most 65536 pages (4GiB)"
+            ; "global is immutable"
+            ; "constant expression required"
+            ; "duplicate export name"
+            ; "unknown global 0"
+            ; "unknown global 1"
+            ]
+          in
+          let m =
+            match Parse.from_string (String.concat "\n" m) with
+            | Error _e -> assert false
+            | Ok [ Module m ] -> m
+            | Ok _ -> assert false
+          in
+          if not @@ List.mem msg ignore_tmp then (
+            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
+              msg;
+            assert false );
+          (curr_module, modules, scr)
+        | Assert (Assert_unlinkable (m, msg)) ->
+          let curr_module = curr_module + 1 in
+          Debug.debug Format.err_formatter
+            "simplifying (unlinkable) module %d@." curr_module;
+          Option.iter
+            (fun id -> Hashtbl.replace seen_modules id curr_module)
+            m.id;
+          let cmd = Module_indice curr_module in
+          let module_ = mk_module registered_modules m in
+          let module_ = { module_ with should_not_link = Some msg } in
+          (curr_module, module_ :: modules, cmd :: scr)
         | Assert a ->
           let curr_module, cmd =
             assert_ curr_module (Some curr_module) seen_modules a
@@ -717,5 +852,7 @@ let rec script scr =
 
   let script = List.rev scr in
   let modules = List.rev modules |> Array.of_list in
+
+  Debug.debug Format.err_formatter "END OF SIMPLIFY@\n";
 
   (script, modules)

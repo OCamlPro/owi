@@ -6,17 +6,23 @@
 
 let u32 s =
   try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
-  with Failure _ -> failwith (Format.sprintf "error u32 constant `%s` out of range" s)
+  with Failure _msg -> failwith "i32 constant"
 
 let i32 s =
   try Int32.of_string s
-  with Failure _msg -> failwith "i32 constant out of range"
+  with Failure _msg -> failwith "constant out of range"
 
-let i64 s = Int64.of_string s
+let i64 s =
+  try Int64.of_string s
+  with Failure _msg -> failwith "constant out of range"
 
-let f64 s = Float64.of_string s
+let f64 s =
+  try Float64.of_string s
+  with Failure _msg -> failwith "constant out of range"
 
-let f32 s = Float32.of_string s
+let f32 s =
+  try Float32.of_string s
+  with Failure _msg -> failwith "constant out of range"
 
 open Types
 

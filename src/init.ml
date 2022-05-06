@@ -68,7 +68,7 @@ let module_ _registered_modules modules module_indice =
         | Imported (mi, Symbolic name) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_funcs name with
-            | None -> failwith @@ Format.sprintf "unbound imported func %s" name
+            | None -> failwith "unknown import"
             | Some i -> i
           in
           Imported (mi, Raw i)
@@ -85,8 +85,7 @@ let module_ _registered_modules modules module_indice =
         | Imported (mi, Symbolic name) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_memories name with
-            | None ->
-              failwith @@ Format.sprintf "unbound imported memories %s" name
+            | None -> failwith "unknown import"
             | Some i -> i
           in
           Imported (mi, Raw i)
@@ -103,8 +102,7 @@ let module_ _registered_modules modules module_indice =
         | Imported (mi, Symbolic name) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_tables name with
-            | None ->
-              failwith @@ Format.sprintf "unbound imported tables %s" name
+            | None -> failwith "unknown import"
             | Some i -> i
           in
           Imported (mi, Raw i)
@@ -121,8 +119,7 @@ let module_ _registered_modules modules module_indice =
         | Imported (mi, Symbolic name) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_globals name with
-            | None ->
-              failwith @@ Format.sprintf "unbound imported globals %s" name
+            | None -> failwith "unknown import"
             | Some i -> i
           in
           Imported (mi, Raw i)

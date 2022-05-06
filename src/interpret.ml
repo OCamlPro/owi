@@ -1007,17 +1007,24 @@ let exec_assert env = function
         assert (msg = expected)
     end;
     env
-  | SAssert_exhaustion (_action, _expected) -> (* TODO *) env
+  | SAssert_exhaustion (action, expected) -> (
+    try
+      ignore @@ exec_action env action;
+      Format.eprintf "@.@.@. EXPECTED : `%S` @.@.@. " expected;
+      assert false
+    with Stack_overflow ->
+      assert (expected = "call stack exhausted");
+      env )
   | SAssert_invalid (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
-  | SAssert_invalid_binary (_mod, _failure) -> (* TODO *) env
-  | SAssert_unlinkable (_mod, _failure) -> (* TODO *) env
 
 let exec_register env name i =
   Hashtbl.replace env.registered_modules name i;
   env
 
 let exec_module env module_indice =
+  Debug.debug Format.err_formatter "EXEC START@\n";
+  let m = env.modules.(module_indice) in
   try
     Init.module_ env.registered_modules env.modules module_indice;
     Option.iter
@@ -1027,14 +1034,32 @@ let exec_module env module_indice =
         in
         let _res = exec_func env module_indice func [] in
         () )
-      env.modules.(module_indice).start;
+      m.start;
+    (* TODO: re-enable later to avoid missing some errors
+       if Option.is_some m.should_trap || Option.is_some m.should_not_link then
+         assert false;
+    *)
     env
-  with Trap msg -> (
-    match env.modules.(module_indice).should_trap with
+  with
+  | Trap msg -> (
+    match m.should_trap with
     | None -> raise @@ Trap msg
     | Some expected ->
       assert (msg = expected);
       env )
+  | Failure msg as exn -> (
+    match m.should_not_link with
+    | None -> raise exn
+    | Some expected ->
+      (* TODO: I'm not convinced it's the best behaviour, maybe open an issue to discuss it ? *)
+      if msg = "unknown import" && expected = "incompatible import type" then
+        env
+      else if msg <> expected then begin
+        Format.eprintf "got:      `%s`@\n" msg;
+        Format.eprintf "expected: `%s`@\n" expected;
+        assert false
+      end
+      else env )
 
 let exec_cmd env = function
   | Module_indice i -> exec_module env i

@@ -2,6 +2,10 @@ let count_total = ref 0
 
 let count_total_failed = ref 0
 
+let pp_red fmt s = Format.fprintf fmt "\x1b[31m%s\x1b[0m" s
+
+let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
+
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
   match Woi.Parse.from_file (Fpath.to_string f) with
@@ -10,7 +14,7 @@ let test_file f =
       Woi.Check.script script;
       let script, modules = Woi.Simplify.script script in
       Woi.Interpret.exec script modules;
-      Format.printf "OK !@.";
+      Format.printf "%a !@." pp_green "OK";
       Ok ()
     with
     | Assert_failure (s, _, _)
@@ -18,7 +22,7 @@ let test_file f =
     | Failure s
     | Invalid_argument s
     ->
-      Format.printf "FAILED: `%s` !@."
+      Format.printf "%a: `%s` !@." pp_red "FAILED"
         (String.concat " " @@ String.split_on_char '\n' s);
       Error s
   end
