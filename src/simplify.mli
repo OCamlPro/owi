@@ -30,6 +30,7 @@ type module_ =
   ; exported_tables : (string, int) Hashtbl.t
   ; start : int option
   ; should_trap : string option
+  ; should_not_link : string option
   }
 
 type action =
@@ -42,8 +43,6 @@ type assert_ =
   | SAssert_exhaustion of action * string
   | SAssert_invalid of Types.module_ * string
   | SAssert_invalid_quote of string list * string
-  | SAssert_invalid_binary of string list * string
-  | SAssert_unlinkable of Types.module_ * string
 
 type cmd =
   | Module_indice of int
