@@ -432,12 +432,12 @@ let mk_module registered_modules m =
             | Memory_init id -> Memory_init (Raw (map_symb find_data id))
             | Data_drop id -> Data_drop (Raw (map_symb find_data id))
             | Elem_drop id -> Elem_drop (Raw (map_symb find_element id))
-            | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _
-              | F_load _ | F_relop _ | I32_wrap_i64 | I_load16 _ | I64_load32 _
-              | Ref_null _ | Memory_copy | Memory_fill | F_reinterpret_i _
-              | I_reinterpret_f _ | I64_extend_i32 _ | I64_extend32_s
-              | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
-              | F64_promote_f32 | F_convert_i _ | I_load _ | I_load8 _
+            | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
+              | I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _
+              | F_relop _ | I32_wrap_i64 | Ref_null _ | Memory_copy
+              | Memory_fill | F_reinterpret_i _ | I_reinterpret_f _
+              | I64_extend_i32 _ | I64_extend32_s | F32_demote_f64
+              | I_extend8_s _ | I_extend16_s _ | F64_promote_f32 | F_convert_i _
               | I_trunc_f _ | I64_store32 _ | I_trunc_sat_f _ | F_store _
               | I_store _ | Memory_size | I_store8 _ | I_store16 _ | Ref_is_null
               | F_binop _ | F32_const _ | F64_const _ | I32_const _
@@ -778,6 +778,27 @@ let rec script scr =
             ; "duplicate export name"
             ; "unknown global 0"
             ; "unknown global 1"
+            ; "alignment must not be larger than natural"
+              (*
+            | I_load8 (_nn, _sx, { align; _ }) as i ->
+              if align >= 2 then
+                failwith "alignment must not be larger than natural";
+
+              i
+            | I_load16 (_nn, _sx, { align; _ }) as i ->
+              if align >= 4 then
+                failwith "alignment must not be larger than natural";
+              i
+            | I64_load32 (_sx, { align; _ }) as i ->
+              if align >= 8 then
+                failwith "alignment must not be larger than natural";
+              i
+            | (I_load (nn, { align; _ }) | F_load (nn, { align; _ })) as i ->
+              let max_allowed = match nn with S32 -> 8 | S64 -> 16 in
+              if align >= max_allowed then
+                failwith "alignment must not be larger than natural";
+              i
+             *)
             ]
           in
           if not @@ List.mem msg ignore_tmp then (
