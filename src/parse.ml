@@ -26,7 +26,8 @@ let from_channel c = from_lexbuf (Sedlexing.Utf8.from_channel c)
 let from_file ~filename =
   let chan = open_in filename in
   let result =
-    Fun.protect ~finally:(fun () -> close_in chan)
+    Fun.protect
+      ~finally:(fun () -> close_in chan)
       (fun () -> from_lexbuf (Sedlexing.Utf8.from_channel chan))
   in
   result
