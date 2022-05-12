@@ -185,7 +185,11 @@ let frelop ==
   | GE; { Ge }
 
 let align ==
-  | ALIGN; EQUAL; ~ = NUM; <>
+  | ALIGN; EQUAL; n = NUM; {
+    let n = u32 n in
+    if n = 0 || (Int.logand n (n - 1) <> 0) then failwith "alignment"
+    else n
+  }
 
 let memarg_offset ==
   | OFFSET; EQUAL; ~ = NUM; <>
@@ -194,7 +198,7 @@ let memarg ==
   | offset = option(memarg_offset); align = option(align); {
     (* TODO: check default *)
     let offset = u32 @@ Option.value offset ~default:"0" in
-    let align = u32 @@ Option.value align ~default:"0" in
+    let align = Option.value align ~default:0 in
     {offset; align}
   }
 
