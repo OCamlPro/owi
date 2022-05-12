@@ -59,13 +59,13 @@ let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
 let find_module name last seen =
   match name with
   | None -> begin
-    match last with None -> failwith "no module defined" | Some i -> i
-  end
+      match last with None -> failwith "no module defined" | Some i -> i
+    end
   | Some mod_name -> begin
-    match Hashtbl.find_opt seen mod_name with
-    | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
-    | Some i -> i
-  end
+      match Hashtbl.find_opt seen mod_name with
+      | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
+      | Some i -> i
+    end
 
 let action last_module seen_modules = function
   | Invoke (mod_name, f, args) ->
@@ -96,9 +96,9 @@ type env =
 let find_id tbl x = function
   | Raw i -> i
   | Symbolic i -> (
-    match Hashtbl.find_opt tbl i with
-    | None -> failwith @@ Format.asprintf "unbound %s id %a" x Pp.id i
-    | Some i -> i )
+      match Hashtbl.find_opt tbl i with
+      | None -> failwith @@ Format.asprintf "unbound %s id %a" x Pp.id i
+      | Some i -> i )
 
 let find_ind tbl x ind =
   match Hashtbl.find_opt tbl ind with
@@ -146,85 +146,85 @@ let mk_module registered_modules m =
   let env =
     List.fold_left
       (fun env -> function
-        | MStart indice ->
-          begin
-            match env.start with
-            | None -> ()
-            | Some _id -> failwith "multiple start functions are not allowed"
-          end;
-          let indice = map_symb find_func indice in
-          { env with start = Some indice }
-        | MFunc f ->
-          let curr_func = env.curr_func + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
-          let funcs = Local f :: env.funcs in
-          { env with curr_func; funcs }
-        | MGlobal g ->
-          let curr_global = env.curr_global + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) g.id;
-          let globals_tmp = Local (g.type_, g.init) :: env.globals_tmp in
-          { env with curr_global; globals_tmp }
-        | MExport _ -> env
-        | MImport { desc = Import_func (id, _t); module_; name } ->
-          let curr_func = env.curr_func + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
-          let module_indice = find_module module_ in
-          let funcs = Imported (module_indice, Symbolic name) :: env.funcs in
-          { env with curr_func; funcs }
-        | MImport { desc = Import_mem (id, _t); module_; name } ->
-          let curr_memory = env.curr_memory + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          let module_indice = find_module module_ in
-          let memories =
-            Imported (module_indice, Symbolic name) :: env.memories
-          in
-          { env with curr_memory; memories }
-        | MImport { desc = Import_table (id, _t); module_; name } ->
-          let curr_table = env.curr_table + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
-          let module_indice = find_module module_ in
-          let tables = Imported (module_indice, Symbolic name) :: env.tables in
-          { env with curr_table; tables }
-        | MImport { desc = Import_global (id, _t); module_; name } ->
-          let curr_global = env.curr_global + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
-          let module_indice = find_module module_ in
-          let globals_tmp =
-            Imported (module_indice, Symbolic name) :: env.globals_tmp
-          in
-          { env with curr_global; globals_tmp }
-        | MMem (id, { min; max }) ->
-          let curr_memory = env.curr_memory + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          let new_bytes = Bytes.make (min * page_size) '\000' in
-          let memories = Local (new_bytes, max) :: env.memories in
-          { env with curr_memory; memories }
-        | MTable (id, ({ min; max }, rt)) ->
-          let curr_table = env.curr_table + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
-          let a = Array.make min None in
-          let tbl = Local (rt, a, max) in
-          let tables = tbl :: env.tables in
-          { env with curr_table; tables }
-        | MType (id, t) ->
-          let curr_type = env.curr_type + 1 in
-          let types = t :: env.types in
-          Option.iter (fun id -> Hashtbl.add seen_types id curr_type) id;
-          { env with curr_type; types }
-        | MElem e ->
-          let curr_element = env.curr_element + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_elements id curr_element) e.id;
-          { env with curr_element }
-        | MData data ->
-          let curr_data = env.curr_data + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_datas id curr_data) data.id;
-          let data =
-            match data.mode with
-            | Data_passive -> data.init
-            | Data_active (_indice, _expr) -> ""
-          in
-          let datas = data :: env.datas in
-          { env with datas; curr_data } )
+          | MStart indice ->
+            begin
+              match env.start with
+              | None -> ()
+              | Some _id -> failwith "multiple start functions are not allowed"
+            end;
+            let indice = map_symb find_func indice in
+            { env with start = Some indice }
+          | MFunc f ->
+            let curr_func = env.curr_func + 1 in
+            Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
+            let funcs = Local f :: env.funcs in
+            { env with curr_func; funcs }
+          | MGlobal g ->
+            let curr_global = env.curr_global + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) g.id;
+            let globals_tmp = Local (g.type_, g.init) :: env.globals_tmp in
+            { env with curr_global; globals_tmp }
+          | MExport _ -> env
+          | MImport { desc = Import_func (id, _t); module_; name } ->
+            let curr_func = env.curr_func + 1 in
+            Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
+            let module_indice = find_module module_ in
+            let funcs = Imported (module_indice, Symbolic name) :: env.funcs in
+            { env with curr_func; funcs }
+          | MImport { desc = Import_mem (id, _t); module_; name } ->
+            let curr_memory = env.curr_memory + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
+            let module_indice = find_module module_ in
+            let memories =
+              Imported (module_indice, Symbolic name) :: env.memories
+            in
+            { env with curr_memory; memories }
+          | MImport { desc = Import_table (id, _t); module_; name } ->
+            let curr_table = env.curr_table + 1 in
+            Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
+            let module_indice = find_module module_ in
+            let tables = Imported (module_indice, Symbolic name) :: env.tables in
+            { env with curr_table; tables }
+          | MImport { desc = Import_global (id, _t); module_; name } ->
+            let curr_global = env.curr_global + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
+            let module_indice = find_module module_ in
+            let globals_tmp =
+              Imported (module_indice, Symbolic name) :: env.globals_tmp
+            in
+            { env with curr_global; globals_tmp }
+          | MMem (id, { min; max }) ->
+            let curr_memory = env.curr_memory + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
+            let new_bytes = Bytes.make (min * page_size) '\000' in
+            let memories = Local (new_bytes, max) :: env.memories in
+            { env with curr_memory; memories }
+          | MTable (id, ({ min; max }, rt)) ->
+            let curr_table = env.curr_table + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
+            let a = Array.make min None in
+            let tbl = Local (rt, a, max) in
+            let tables = tbl :: env.tables in
+            { env with curr_table; tables }
+          | MType (id, t) ->
+            let curr_type = env.curr_type + 1 in
+            let types = t :: env.types in
+            Option.iter (fun id -> Hashtbl.add seen_types id curr_type) id;
+            { env with curr_type; types }
+          | MElem e ->
+            let curr_element = env.curr_element + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_elements id curr_element) e.id;
+            { env with curr_element }
+          | MData data ->
+            let curr_data = env.curr_data + 1 in
+            Option.iter (fun id -> Hashtbl.add seen_datas id curr_data) data.id;
+            let data =
+              match data.mode with
+              | Data_passive -> data.init
+              | Data_active (_indice, _expr) -> ""
+            in
+            let datas = data :: env.datas in
+            { env with datas; curr_data } )
       { curr_func = -1
       ; curr_global = -1
       ; curr_memory = -1
@@ -261,43 +261,43 @@ let mk_module registered_modules m =
   let fields =
     List.fold_left
       (fun fields -> function
-        | MExport { name; desc } ->
-          let desc =
-            match desc with
-            | Export_func indice ->
-              Export_func (Option.map (map_symb_raw find_func) indice)
-            | Export_table indice ->
-              Export_table (Option.map (map_symb_raw find_table) indice)
-            | Export_global indice ->
-              Export_global (Option.map (map_symb_raw find_global) indice)
-            | Export_mem indice ->
-              Export_mem (Option.map (map_symb_raw find_memory) indice)
-          in
-          let f = MExport { name; desc } in
-          f :: fields
-        | MData data as f -> begin
-          match data.mode with
-          | Data_passive -> f :: fields
-          | Data_active (indice, expr) ->
-            let indice = Option.map (map_symb_raw find_memory) indice in
-            let expr = List.map aux expr in
-            let mode = Data_active (indice, expr) in
-            let f = MData { data with mode } in
+          | MExport { name; desc } ->
+            let desc =
+              match desc with
+              | Export_func indice ->
+                Export_func (Option.map (map_symb_raw find_func) indice)
+              | Export_table indice ->
+                Export_table (Option.map (map_symb_raw find_table) indice)
+              | Export_global indice ->
+                Export_global (Option.map (map_symb_raw find_global) indice)
+              | Export_mem indice ->
+                Export_mem (Option.map (map_symb_raw find_memory) indice)
+            in
+            let f = MExport { name; desc } in
             f :: fields
-        end
-        | MElem e ->
-          let aux = List.map aux in
-          let init = List.map aux e.init in
-          let mode =
-            match e.mode with
-            | Elem_passive -> e.mode
-            | Elem_active (ti, offset) ->
-              let ti = Option.map (map_symb_raw find_table) ti in
-              Elem_active (ti, aux offset)
-            | Elem_declarative -> e.mode
-          in
-          MElem { e with mode; init } :: fields
-        | f -> f :: fields )
+          | MData data as f -> begin
+              match data.mode with
+              | Data_passive -> f :: fields
+              | Data_active (indice, expr) ->
+                let indice = Option.map (map_symb_raw find_memory) indice in
+                let expr = List.map aux expr in
+                let mode = Data_active (indice, expr) in
+                let f = MData { data with mode } in
+                f :: fields
+            end
+          | MElem e ->
+            let aux = List.map aux in
+            let init = List.map aux e.init in
+            let mode =
+              match e.mode with
+              | Elem_passive -> e.mode
+              | Elem_active (ti, offset) ->
+                let ti = Option.map (map_symb_raw find_table) ti in
+                Elem_active (ti, aux offset)
+              | Elem_declarative -> e.mode
+            in
+            MElem { e with mode; init } :: fields
+          | f -> f :: fields )
       [] m.Types.fields
   in
   let fields = List.rev fields in
@@ -307,13 +307,13 @@ let mk_module registered_modules m =
     let types =
       Array.fold_left
         (fun types -> function
-          | Local f -> begin
-            match f.type_f with
-            | Bt_ind _ind -> types
-            | Bt_raw (_type_use, t) ->
-              if List.mem t types then types else t :: types
-          end
-          | Imported _ -> types )
+            | Local f -> begin
+                match f.type_f with
+                | Bt_ind _ind -> types
+                | Bt_raw (_type_use, t) ->
+                  if List.mem t types then types else t :: types
+              end
+            | Imported _ -> types )
         env.types funcs
     in
     Array.of_list (List.rev types)
@@ -348,7 +348,7 @@ let mk_module registered_modules m =
           let locals = pt @ f.locals in
           List.iteri
             (fun i (id, _t) ->
-              Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
+                Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
             locals;
 
           (* block_ids handling *)
@@ -358,10 +358,10 @@ let mk_module registered_modules m =
               try
                 List.iteri
                   (fun i n ->
-                    if n = Some id then begin
-                      pos := i;
-                      raise Exit
-                    end )
+                      if n = Some id then begin
+                        pos := i;
+                        raise Exit
+                      end )
                   l
               with Exit -> ()
             end;
@@ -669,184 +669,188 @@ let rec script scr =
     let registered_modules = Hashtbl.create 512 in
     List.fold_left
       (fun (curr_module, modules, scr) -> function
-        | Module m ->
-          let curr_module = curr_module + 1 in
-          Debug.debug Format.err_formatter "simplifying module %d... "
-            curr_module;
-          Option.iter
-            (fun id -> Hashtbl.replace seen_modules id curr_module)
-            m.id;
-          let cmd = Module_indice curr_module in
-          let modules = mk_module registered_modules m :: modules in
-          Debug.debug Format.err_formatter "done !@\n";
-          (curr_module, modules, cmd :: scr)
-        | Assert (Assert_trap_module (m, msg)) ->
-          let curr_module = curr_module + 1 in
-          Debug.debug Format.err_formatter "simplifying assert module %d@."
-            curr_module;
-          Option.iter
-            (fun id -> Hashtbl.replace seen_modules id curr_module)
-            m.id;
-          let cmd = Module_indice curr_module in
-          let module_ = mk_module registered_modules m in
-          let module_ = { module_ with should_trap = Some msg } in
-          (curr_module, module_ :: modules, cmd :: scr)
-        | Assert (Assert_malformed_binary _) ->
-          Debug.debug Format.err_formatter
-            "simplifying assert malformed binary... ";
-          Debug.debug Format.err_formatter "done !";
-          (* TODO: check this when binary format is supported *)
-          (curr_module, modules, scr)
-        | Assert (Assert_malformed_quote (m, msg)) ->
-          Debug.debug Format.err_formatter
-            "simplifying assert malformed quote... ";
-          ( try
-              Debug.debug Format.err_formatter "TRY@\n";
-              match Parse.from_string (String.concat "\n" m) with
-              | Ok scr -> (
-                Debug.debug Format.err_formatter "OK@\n";
-                try
-                  Check.script scr;
-                  let _script, _modules = script scr in
-                  Format.eprintf "expected: `%s`@." msg;
-                  Format.eprintf "got     : Ok@.";
-                  assert false
-                with Failure e ->
-                  let ok = e = msg in
+          | Module m ->
+            let curr_module = curr_module + 1 in
+            Debug.debug Format.err_formatter "simplifying module %d... "
+              curr_module;
+            Option.iter
+              (fun id -> Hashtbl.replace seen_modules id curr_module)
+              m.id;
+            let cmd = Module_indice curr_module in
+            let modules = mk_module registered_modules m :: modules in
+            Debug.debug Format.err_formatter "done !@\n";
+            (curr_module, modules, cmd :: scr)
+          | Assert (Assert_trap_module (m, msg)) ->
+            let curr_module = curr_module + 1 in
+            Debug.debug Format.err_formatter "simplifying assert module %d@."
+              curr_module;
+            Option.iter
+              (fun id -> Hashtbl.replace seen_modules id curr_module)
+              m.id;
+            let cmd = Module_indice curr_module in
+            let module_ = mk_module registered_modules m in
+            let module_ = { module_ with should_trap = Some msg } in
+            (curr_module, module_ :: modules, cmd :: scr)
+          | Assert (Assert_malformed_binary _) ->
+            Debug.debug Format.err_formatter
+              "simplifying assert malformed binary... ";
+            Debug.debug Format.err_formatter "done !";
+            (* TODO: check this when binary format is supported *)
+            (curr_module, modules, scr)
+          | Assert (Assert_malformed_quote (m, msg)) ->
+            Debug.debug Format.err_formatter
+              "simplifying assert malformed quote... ";
+            ( try
+                Debug.debug Format.err_formatter "TRY@\n";
+                match Parse.from_string (String.concat "\n" m) with
+                | Ok scr -> (
+                    Debug.debug Format.err_formatter "OK@\n";
+                    try
+                      Check.script scr;
+                      let _script, _modules = script scr in
+                      Format.eprintf "expected: `%s`@." msg;
+                      Format.eprintf "got     : Ok@.";
+                      assert false
+                    with Failure e ->
+                      let ok = e = msg in
+                      if not ok then begin
+                        Format.eprintf "expected: `%s`@." msg;
+                        Format.eprintf "got     : `%s`@." e;
+                        assert false
+                      end )
+                | Error e ->
+                  Debug.debug Format.err_formatter "ERROR@\n";
+                  let ok =
+                    if msg = "unknown operator" then
+                      (* TODO: open an issue on wasm to avoid having to do this... *)
+                      e = "unexpected token" || e = "lexer error"
+                    else e = msg
+                  in
                   if not ok then begin
                     Format.eprintf "expected: `%s`@." msg;
                     Format.eprintf "got     : `%s`@." e;
                     assert false
-                  end )
-              | Error e ->
-                Debug.debug Format.err_formatter "ERROR@\n";
+                  end
+              with Failure e as exn ->
+                Debug.debug Format.err_formatter "EXN@\n";
                 let ok =
-                  if msg = "unknown operator" then
-                    (* TODO: open an issue on wasm to avoid having to do this... *)
-                    e = "unexpected token" || e = "lexer error"
-                  else e = msg
-                in
+                  (* TODO: fix this in the official testsuite, the error message is never the same so it can't be fixed in woi... *)
+                  (e = "constant out of range" && msg = "i32 constant out of range")
+                  ||
+                  e = msg in
                 if not ok then begin
                   Format.eprintf "expected: `%s`@." msg;
                   Format.eprintf "got     : `%s`@." e;
-                  assert false
-                end
-            with Failure e as exn ->
-              Debug.debug Format.err_formatter "EXN@\n";
-              let ok = e = msg in
-              if not ok then begin
-                Format.eprintf "expected: `%s`@." msg;
-                Format.eprintf "got     : `%s`@." e;
-                raise exn
-              end );
-          Debug.debug Format.err_formatter "done !";
-          (curr_module, modules, scr)
-        | Assert (Assert_invalid_binary _) ->
-          (* TODO: check this when binary format is supported *)
-          (curr_module, modules, scr)
-        | Assert (Assert_invalid (m, msg)) ->
-          (* TODO: re-enable all ignored errors  *)
-          let ignore_tmp =
-            [ "type mismatch"
-            ; "unknown local"
-            ; "unknown global"
-            ; "unknown function"
-            ; "unknown label"
-            ; "unknown elem segment 0"
-            ; "unknown elem segment 4"
-            ; "unknown table 0"
-            ; "unknown table"
-            ; "size minimum must not be greater than maximum"
-            ; "start function"
-            ; "invalid result arity"
-            ; "unknown data segment"
-            ; "unknown function 7"
-            ; "unknown memory 0"
-            ; "undeclared function reference"
-            ; "unknown data segment 1"
-            ; "unknown type"
-            ; "multiple memories"
-            ; "unknown memory"
-            ; "memory size must be at most 65536 pages (4GiB)"
-            ; "global is immutable"
-            ; "constant expression required"
-            ; "duplicate export name"
-            ; "unknown global 0"
-            ; "unknown global 1"
-            ]
-          in
-          if not @@ List.mem msg ignore_tmp then (
-            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
-              msg;
-            assert false );
-          (curr_module, modules, scr)
-        | Assert (Assert_invalid_quote (m, msg)) ->
-          (* TODO: re-enable all ignored errors  *)
-          let ignore_tmp =
-            [ "type mismatch"
-            ; "unknown local"
-            ; "unknown global"
-            ; "unknown function"
-            ; "unknown label"
-            ; "unknown elem segment 0"
-            ; "unknown elem segment 4"
-            ; "unknown table 0"
-            ; "unknown table"
-            ; "size minimum must not be greater than maximum"
-            ; "start function"
-            ; "invalid result arity"
-            ; "unknown data segment"
-            ; "unknown function 7"
-            ; "unknown memory 0"
-            ; "undeclared function reference"
-            ; "unknown data segment 1"
-            ; "unknown type"
-            ; "multiple memories"
-            ; "unknown memory"
-            ; "memory size must be at most 65536 pages (4GiB)"
-            ; "global is immutable"
-            ; "constant expression required"
-            ; "duplicate export name"
-            ; "unknown global 0"
-            ; "unknown global 1"
-            ]
-          in
-          let m =
-            match Parse.from_string (String.concat "\n" m) with
-            | Error _e -> assert false
-            | Ok [ Module m ] -> m
-            | Ok _ -> assert false
-          in
-          if not @@ List.mem msg ignore_tmp then (
-            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
-              msg;
-            assert false );
-          (curr_module, modules, scr)
-        | Assert (Assert_unlinkable (m, msg)) ->
-          let curr_module = curr_module + 1 in
-          Debug.debug Format.err_formatter
-            "simplifying (unlinkable) module %d@." curr_module;
-          Option.iter
-            (fun id -> Hashtbl.replace seen_modules id curr_module)
-            m.id;
-          let cmd = Module_indice curr_module in
-          let module_ = mk_module registered_modules m in
-          let module_ = { module_ with should_not_link = Some msg } in
-          (curr_module, module_ :: modules, cmd :: scr)
-        | Assert a ->
-          let curr_module, cmd =
-            assert_ curr_module (Some curr_module) seen_modules a
-          in
-          let cmd = Assert cmd in
-          (curr_module, modules, cmd :: scr)
-        | Register (name, mod_name) ->
-          let indice = find_module mod_name (Some curr_module) seen_modules in
-          Hashtbl.replace registered_modules name indice;
-          let cmd = Register_indice (name, indice) in
-          (curr_module, modules, cmd :: scr)
-        | Action a ->
-          let cmd = Action (action (Some curr_module) seen_modules a) in
-          (curr_module, modules, cmd :: scr) )
+                  raise exn
+                end );
+            Debug.debug Format.err_formatter "done !";
+            (curr_module, modules, scr)
+          | Assert (Assert_invalid_binary _) ->
+            (* TODO: check this when binary format is supported *)
+            (curr_module, modules, scr)
+          | Assert (Assert_invalid (m, msg)) ->
+            (* TODO: re-enable all ignored errors  *)
+            let ignore_tmp =
+              [ "type mismatch"
+              ; "unknown local"
+              ; "unknown global"
+              ; "unknown function"
+              ; "unknown label"
+              ; "unknown elem segment 0"
+              ; "unknown elem segment 4"
+              ; "unknown table 0"
+              ; "unknown table"
+              ; "size minimum must not be greater than maximum"
+              ; "start function"
+              ; "invalid result arity"
+              ; "unknown data segment"
+              ; "unknown function 7"
+              ; "unknown memory 0"
+              ; "undeclared function reference"
+              ; "unknown data segment 1"
+              ; "unknown type"
+              ; "multiple memories"
+              ; "unknown memory"
+              ; "memory size must be at most 65536 pages (4GiB)"
+              ; "global is immutable"
+              ; "constant expression required"
+              ; "duplicate export name"
+              ; "unknown global 0"
+              ; "unknown global 1"
+              ]
+            in
+            if not @@ List.mem msg ignore_tmp then (
+              Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
+                msg;
+              assert false );
+            (curr_module, modules, scr)
+          | Assert (Assert_invalid_quote (m, msg)) ->
+            (* TODO: re-enable all ignored errors  *)
+            let ignore_tmp =
+              [ "type mismatch"
+              ; "unknown local"
+              ; "unknown global"
+              ; "unknown function"
+              ; "unknown label"
+              ; "unknown elem segment 0"
+              ; "unknown elem segment 4"
+              ; "unknown table 0"
+              ; "unknown table"
+              ; "size minimum must not be greater than maximum"
+              ; "start function"
+              ; "invalid result arity"
+              ; "unknown data segment"
+              ; "unknown function 7"
+              ; "unknown memory 0"
+              ; "undeclared function reference"
+              ; "unknown data segment 1"
+              ; "unknown type"
+              ; "multiple memories"
+              ; "unknown memory"
+              ; "memory size must be at most 65536 pages (4GiB)"
+              ; "global is immutable"
+              ; "constant expression required"
+              ; "duplicate export name"
+              ; "unknown global 0"
+              ; "unknown global 1"
+              ]
+            in
+            let m =
+              match Parse.from_string (String.concat "\n" m) with
+              | Error _e -> assert false
+              | Ok [ Module m ] -> m
+              | Ok _ -> assert false
+            in
+            if not @@ List.mem msg ignore_tmp then (
+              Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
+                msg;
+              assert false );
+            (curr_module, modules, scr)
+          | Assert (Assert_unlinkable (m, msg)) ->
+            let curr_module = curr_module + 1 in
+            Debug.debug Format.err_formatter
+              "simplifying (unlinkable) module %d@." curr_module;
+            Option.iter
+              (fun id -> Hashtbl.replace seen_modules id curr_module)
+              m.id;
+            let cmd = Module_indice curr_module in
+            let module_ = mk_module registered_modules m in
+            let module_ = { module_ with should_not_link = Some msg } in
+            (curr_module, module_ :: modules, cmd :: scr)
+          | Assert a ->
+            let curr_module, cmd =
+              assert_ curr_module (Some curr_module) seen_modules a
+            in
+            let cmd = Assert cmd in
+            (curr_module, modules, cmd :: scr)
+          | Register (name, mod_name) ->
+            let indice = find_module mod_name (Some curr_module) seen_modules in
+            Hashtbl.replace registered_modules name indice;
+            let cmd = Register_indice (name, indice) in
+            (curr_module, modules, cmd :: scr)
+          | Action a ->
+            let cmd = Action (action (Some curr_module) seen_modules a) in
+            (curr_module, modules, cmd :: scr) )
       (-1, [], []) scr
   in
 
