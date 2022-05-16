@@ -1,6 +1,6 @@
 %token <String.t> NUM
-%token<String.t> ID NAME
-%token NAN_ARITH NAN_CANON ASSERT_INVALID ASSERT_MALFORMED ASSERT_EXHAUSTION ASSERT_TRAP ASSERT_UNLINKABLE PARAM RESULT FUNCREF EXTERNREF I32 I64 F32 F64 CLZ CTZ POPCNT ABS NEG SQRT CEIL FLOOR TRUNC NEAREST SIGNED UNSIGNED ADD SUB MUL DIV REM AND OR XOR SHL SHR ROTL ROTR MIN MAX COPYSIGN EQZ EQ NE LT GT LE GE EXTEND8 EXTEND16 EXTEND32 EXTEND_I32 WRAP_I64 TABLE GROW INIT COPY TEE ITEM REF SELECT DEMOTE_F64 DROP UNDERSCORE GET FILL CONVERT PROMOTE_F32 SIZE SET IS_NULL LOCAL NULL REINTERPRET GLOBAL ELEM STORE8 STORE16 STORE STORE32 BR_TABLE CALL LOAD LOAD8 LOAD16 LOOP DATA BR_IF BR OFFSET UNREACHABLE CALL_INDIRECT LOAD32 BLOCK ALIGN EQUAL MEMORY RETURN NOP FUNC EXPORT IMPORT EXTERN MUTABLE MODULE RPAR LPAR EOF IF ELSE THEN DOT CONST START TYPE DECLARE END INVOKE ASSERT_RETURN QUOTE REGISTER TRUNC_SAT BINARY
+%token <String.t> ID NAME
+%token ALIGN ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE BINARY BLOCK BR BR_IF BR_TABLE CALL CALL_INDIRECT DATA DATA_DROP DECLARE DROP ELEM ELEM_DROP ELSE END EOF EQUAL EXPORT EXTERN EXTERNREF F32 F32_ABS F32_ADD F32_CEIL F32_CONST F32_CONVERT_I32_S F32_CONVERT_I32_U F32_CONVERT_I64_S F32_CONVERT_I64_U F32_COPYSIGN F32_DEMOTE_F64 F32_DIV F32_EQ F32_FLOOR F32_GE F32_GT F32_LE F32_LOAD F32_LT F32_MAX F32_MIN F32_MUL F32_NE F32_NEAREST F32_NEG F32_REINTERPRET_I32 F32_REINTERPRET_I64 F32_SQRT F32_STORE F32_SUB F32_TRUNC F64 F64_ABS F64_ADD F64_CEIL F64_CONST F64_CONVERT_I32_S F64_CONVERT_I32_U F64_CONVERT_I64_S F64_CONVERT_I64_U F64_COPYSIGN F64_DIV F64_EQ F64_FLOOR F64_GE F64_GT F64_LE F64_LOAD F64_LT F64_MAX F64_MIN F64_MUL F64_NE F64_NEAREST F64_NEG F64_PROMOTE_F32 F64_REINTERPRET_I32 F64_REINTERPRET_I64 F64_SQRT F64_STORE F64_SUB F64_TRUNC FUNC FUNCREF GET GLOBAL GLOBAL_GET GLOBAL_SET I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR IF IMPORT INVOKE ITEM LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE NAN_ARITH NAN_CANON NOP OFFSET PARAM QUOTE REF_EXTERN REF_FUNC REF_IS_NULL REF_NULL REGISTER RESULT RETURN RPAR SELECT START TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE UNREACHABLE
 
 %{
 
@@ -116,74 +116,6 @@ let num_type ==
   | F32; { Types.F32 }
   | F64; { Types.F64 }
 
-let inn ==
-  | I32; { Types.S32 }
-  | I64; { Types.S64 }
-
-let fnn ==
-  | F32; { Types.S32 }
-  | F64; { Types.S64 }
-
-let sx ==
-  | SIGNED; { S }
-  | UNSIGNED; { U }
-
-let iunop ==
-  | CLZ; { Clz }
-  | CTZ; { Ctz }
-  | POPCNT; { Popcnt }
-
-let ibinop ==
-  | ADD; { (Add: Types.ibinop) }
-  | SUB; { (Sub: Types.ibinop) }
-  | MUL; { (Mul: Types.ibinop) }
-  | DIV; s = sx; { (Div s: Types.ibinop) }
-  | REM; s = sx; { Rem s }
-  | AND; { And }
-  | OR; { Or }
-  | XOR; { Xor }
-  | SHL; { Shl }
-  | SHR; s = sx; { Shr s }
-  | ROTL; { Rotl }
-  | ROTR; { Rotr }
-
-let itestop ==
-  | EQZ; { Eqz }
-
-let irelop ==
-  | EQ; { (Eq : Types.irelop) }
-  | NE; { (Ne : Types.irelop) }
-  | LT; s = sx; { (Lt s: Types.irelop) }
-  | GT; s = sx; { (Gt s: Types.irelop) }
-  | LE; s = sx; { (Le s: Types.irelop) }
-  | GE; s = sx; { (Ge s: Types.irelop) }
-
-let funop ==
-  | ABS; { Abs }
-  | NEG; { Neg }
-  | SQRT; { Sqrt }
-  | CEIL; { Ceil }
-  | FLOOR; { Floor }
-  | TRUNC; { Trunc }
-  | NEAREST; { Nearest }
-
-let fbinop ==
-  | ADD; { Add }
-  | SUB; { Sub }
-  | MUL; { Mul }
-  | DIV; { Div }
-  | MIN; { Min }
-  | MAX; { Max }
-  | COPYSIGN; { Copysign }
-
-let frelop ==
-  | EQ; { Eq }
-  | NE; { Ne }
-  | LT; { Lt }
-  | GT; { Gt }
-  | LE; { Le }
-  | GE; { Ge }
-
 let align ==
   | ALIGN; EQUAL; n = NUM; {
     let n = u32 n in
@@ -222,78 +154,212 @@ let plain_instr :=
   }
   | RETURN; { Return }
   | CALL; ~ = indice; <Call>
-  | LOCAL; DOT; GET; ~ = indice; <Local_get>
-  | LOCAL; DOT; SET; ~ = indice; <Local_set>
-  | LOCAL; DOT; TEE; ~ = indice; <Local_tee>
-  | GLOBAL; DOT; GET; ~ = indice; <Global_get>
-  | GLOBAL; DOT; SET; ~ = indice; <Global_set>
-  | TABLE; DOT; GET; indice = option(indice); {
+  | LOCAL_GET; ~ = indice; <Local_get>
+  | LOCAL_SET; ~ = indice; <Local_set>
+  | LOCAL_TEE; ~ = indice; <Local_tee>
+  | GLOBAL_GET; ~ = indice; <Global_get>
+  | GLOBAL_SET; ~ = indice; <Global_set>
+  | TABLE_GET; indice = option(indice); {
     Table_get (Option.value indice ~default:(Raw 0))
   }
-  | TABLE; DOT; SET; indice = option(indice); {
+  | TABLE_SET; indice = option(indice); {
     Table_set (Option.value indice ~default:(Raw 0))
   }
-  | TABLE; DOT; SIZE; indice = option(indice); {
+  | TABLE_SIZE; indice = option(indice); {
     Table_size (Option.value indice ~default:(Raw 0))
   }
-  | TABLE; DOT; GROW; indice = option(indice); {
+  | TABLE_GROW; indice = option(indice); {
     Table_grow (Option.value indice ~default:(Raw 0))
   }
-  | TABLE; DOT; FILL; indice = option(indice); {
+  | TABLE_FILL; indice = option(indice); {
     Table_fill (Option.value indice ~default:(Raw 0))
   }
-  | TABLE; DOT; COPY; {
+  | TABLE_COPY; {
     Table_copy (Raw 0, Raw 0)
   }
-  | TABLE; DOT; COPY; src = indice; dst = indice; { Table_copy (src, dst) }
-  | TABLE; DOT; INIT; t_indice = ioption(indice); ~ = indice; {
+  | TABLE_COPY; src = indice; dst = indice; { Table_copy (src, dst) }
+  | TABLE_INIT; t_indice = ioption(indice); ~ = indice; {
     Table_init (Option.value t_indice ~default:(Raw 0), indice)
   }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
-  | ELEM; DOT; DROP; ~ = indice; <Elem_drop>
-  | I32; DOT; CONST; n = NUM; { I32_const (i32 n) }
-  | I64; DOT; CONST; n = NUM; { I64_const (i64 n) }
-  | F32; DOT; CONST; n = NUM; { F32_const (f32 n) }
-  | F64; DOT; CONST; n = NUM; { F64_const (f64 n) }
-  | ~ = inn; DOT; ~ = iunop; <I_unop>
-  | ~ = fnn; DOT; ~ = funop; <F_unop>
-  | ~ = inn; DOT; ~ = ibinop; <I_binop>
-  | ~ = fnn; DOT; ~ = fbinop; <F_binop>
-  | ~ = inn; DOT; ~ = itestop; <I_testop>
-  | ~ = inn; DOT; ~ = irelop; <I_relop>
-  | ~ = fnn; DOT; ~ = frelop; <F_relop>
-  | ~ = inn; DOT; EXTEND8; SIGNED; <I_extend8_s>
-  | ~ = inn; DOT; EXTEND16; SIGNED; <I_extend16_s>
-  | I64; DOT; EXTEND32; SIGNED; { I64_extend32_s }
-  | I32; DOT; WRAP_I64; { I32_wrap_i64 }
-  | I64; DOT; EXTEND_I32; ~ = sx; <I64_extend_i32>
-  | ~ = inn; DOT; TRUNC; UNDERSCORE; ~ = fnn; s = sx; <I_trunc_f>
-  | ~ = inn; DOT; TRUNC_SAT; UNDERSCORE; ~ = fnn; s = sx; <I_trunc_sat_f>
-  | F32; DOT; DEMOTE_F64; { F32_demote_f64 }
-  | F64; DOT; PROMOTE_F32; { F64_promote_f32 }
-  | ~ = fnn; DOT; CONVERT; UNDERSCORE; ~ = inn; s = sx; <F_convert_i>
-  | ~ = inn; DOT; REINTERPRET; UNDERSCORE; ~ = fnn; <I_reinterpret_f>
-  | ~ = fnn; DOT; REINTERPRET; UNDERSCORE; ~ = inn; <F_reinterpret_i>
-  | REF; DOT; NULL; ~ = ref_kind; <Ref_null>
-  | REF; DOT; IS_NULL; { Ref_is_null }
-  | REF; DOT; FUNC; ~ = indice; <Ref_func>
-  | ~ = inn; DOT; LOAD; ~ = memarg; <I_load>
-  | ~ = fnn; DOT; LOAD; ~ = memarg; <F_load>
-  | ~ = inn; DOT; STORE; ~ = memarg; <I_store>
-  | ~ = fnn; DOT; STORE; ~ = memarg; <F_store>
-  | ~ = inn; DOT; LOAD8; ~ = sx; ~ = memarg; <I_load8>
-  | ~ = inn; DOT; LOAD16; ~ = sx; ~ = memarg; <I_load16>
-  | I64; DOT; LOAD32; ~ = sx; ~ = memarg; <I64_load32>
-  | ~ = inn; DOT; STORE8; ~ = memarg; <I_store8>
-  | ~ = inn; DOT; STORE16; ~ = memarg; <I_store16>
-  | I64; DOT; STORE32; ~ = memarg; <I64_store32>
-  | MEMORY; DOT; SIZE; { Memory_size }
-  | MEMORY; DOT; GROW; { Memory_grow }
-  | MEMORY; DOT; FILL; { Memory_fill }
-  | MEMORY; DOT; COPY; { Memory_copy }
-  | MEMORY; DOT; INIT; ~ = indice; <Memory_init>
-  | DATA; DOT; DROP; ~ = indice; <Data_drop>
+  | ELEM_DROP; ~ = indice; <Elem_drop>
+  | I32_CONST; n = NUM; { I32_const (i32 n) }
+  | I64_CONST; n = NUM; { I64_const (i64 n) }
+  | F32_CONST; n = NUM; { F32_const (f32 n) }
+  | F64_CONST; n = NUM; { F64_const (f64 n) }
+  | I32_CLZ; { I_unop (S32, Clz) }
+  | I64_CLZ; { I_unop (S64, Clz) }
+  | I32_CTZ; { I_unop (S32, Ctz) }
+  | I64_CTZ; { I_unop (S64, Ctz) }
+  | I32_POPCNT; { I_unop (S32, Popcnt) }
+  | I64_POPCNT; { I_unop (S64, Popcnt) }
+  | F32_ABS; { F_unop (S32, Abs) } 
+  | F64_ABS; { F_unop (S64, Abs) }
+  | F32_NEG; { F_unop (S32, Neg) } 
+  | F64_NEG; { F_unop (S64, Neg) }
+  | F32_SQRT; { F_unop (S32, Sqrt) } 
+  | F64_SQRT; { F_unop (S64, Sqrt) }
+  | F32_CEIL; { F_unop (S32, Ceil) }
+  | F64_CEIL; { F_unop (S64, Ceil) }
+  | F32_FLOOR; { F_unop (S32, Floor) } 
+  | F64_FLOOR; { F_unop (S64, Floor) }
+  | F32_TRUNC; { F_unop (S32, Trunc) }
+  | F64_TRUNC; { F_unop (S64, Trunc) }
+  | F32_NEAREST; { F_unop (S32, Nearest) }
+  | F64_NEAREST; { F_unop (S64, Nearest) }
+  | I32_ADD; { I_binop (S32, Add) }
+  | I64_ADD; { I_binop (S64, Add) }
+  | I32_SUB; { I_binop (S32, Sub) }
+  | I64_SUB; { I_binop (S64, Sub) }
+  | I32_MUL; { I_binop (S32, Mul) }
+  | I64_MUL; { I_binop (S64, Mul) }
+  | I32_DIV_S; { I_binop (S32, Div S) }
+  | I64_DIV_S; { I_binop (S64, Div S) }
+  | I32_DIV_U; { I_binop (S32, Div U) }
+  | I64_DIV_U; { I_binop (S64, Div U) }
+  | I32_REM_S; { I_binop (S32, Rem S) }
+  | I64_REM_S; { I_binop (S64, Rem S) }
+  | I32_REM_U; { I_binop (S32, Rem U) }
+  | I64_REM_U; { I_binop (S64, Rem U) }
+  | I32_AND; { I_binop (S32, And) }
+  | I64_AND; { I_binop (S64, And) }
+  | I32_OR; { I_binop (S32, Or) }
+  | I64_OR; { I_binop (S64, Or) }
+  | I32_XOR; { I_binop (S32, Xor) }
+  | I64_XOR; { I_binop (S64, Xor) }
+  | I32_SHL; { I_binop (S32, Shl) }
+  | I64_SHL; { I_binop (S64, Shl) }
+  | I32_SHR_S; { I_binop (S32, Shr S) }
+  | I64_SHR_S; { I_binop (S64, Shr S) }
+  | I32_SHR_U; { I_binop (S32, Shr U) }
+  | I64_SHR_U; { I_binop (S64, Shr U) }
+  | I32_ROTL; { I_binop (S32, Rotl) }
+  | I64_ROTL; { I_binop (S64, Rotl) }
+  | I32_ROTR; { I_binop (S32, Rotr) }
+  | I64_ROTR; { I_binop (S64, Rotr) }
+  | F32_ADD; { F_binop (S32, Add) }
+  | F64_ADD; { F_binop (S64, Add) }
+  | F32_SUB; { F_binop (S32, Sub) }
+  | F64_SUB; { F_binop (S64, Sub) }
+  | F32_MUL; { F_binop (S32, Mul) }
+  | F64_MUL; { F_binop (S64, Mul) }
+  | F32_DIV; { F_binop (S32, Div) }
+  | F64_DIV; { F_binop (S64, Div) }
+  | F32_MIN; { F_binop (S32, Min) }
+  | F64_MIN; { F_binop (S64, Min) }
+  | F32_MAX; { F_binop (S32, Max) }
+  | F64_MAX; { F_binop (S64, Max) }
+  | F32_COPYSIGN; { F_binop (S32, Copysign) }
+  | F64_COPYSIGN; { F_binop (S64, Copysign) }
+  | I32_EQZ; { I_testop (S32, Eqz) }
+  | I64_EQZ; { I_testop (S64, Eqz) }
+  | I32_EQ; { I_relop (S32, Eq) }
+  | I64_EQ; { I_relop (S64, Eq) }
+  | I32_NE; { I_relop (S32, Ne) }
+  | I64_NE; { I_relop (S64, Ne) }
+  | I32_LT_S; { I_relop (S32, Lt S) }
+  | I64_LT_S; { I_relop (S64, Lt S) }
+  | I32_LT_U; { I_relop (S32, Lt U) }
+  | I64_LT_U; { I_relop (S64, Lt U) }
+  | I32_GT_S; { I_relop (S32, Gt S) }
+  | I64_GT_S; { I_relop (S64, Gt S) }
+  | I32_GT_U; { I_relop (S32, Gt U) }
+  | I64_GT_U; { I_relop (S64, Gt U) }
+  | I32_LE_S; { I_relop (S32, Le S) }
+  | I64_LE_S; { I_relop (S64, Le S) }
+  | I32_LE_U; { I_relop (S32, Le U) }
+  | I64_LE_U; { I_relop (S64, Le U) }
+  | I32_GE_S; { I_relop (S32, Ge S) }
+  | I64_GE_S; { I_relop (S64, Ge S) }
+  | I32_GE_U; { I_relop (S32, Ge U) }
+  | I64_GE_U; { I_relop (S64, Ge U) }
+  | F32_EQ; { F_relop (S32, Eq) }
+  | F64_EQ; { F_relop (S64, Eq) }
+  | F32_NE; { F_relop (S32, Ne) }
+  | F64_NE; { F_relop (S64, Ne) }
+  | F32_LT; { F_relop (S32, Lt) }
+  | F64_LT; { F_relop (S64, Lt) }
+  | F32_GT; { F_relop (S32, Gt) }
+  | F64_GT; { F_relop (S64, Gt) }
+  | F32_LE; { F_relop (S32, Le) }
+  | F64_LE; { F_relop (S64, Le) }
+  | F32_GE; { F_relop (S32, Ge) }
+  | F64_GE; { F_relop (S64, Ge) }
+  | I32_EXTEND8_S; { I_extend8_s S32 }
+  | I64_EXTEND8_S; { I_extend8_s S64 }
+  | I32_EXTEND16_S; { I_extend16_s S32 }
+  | I64_EXTEND16_S; { I_extend16_s S64 }
+  | I64_EXTEND32_S; { I64_extend32_s }
+  | I32_WRAP_I64; { I32_wrap_i64 }
+  | I64_EXTEND_I32_S; { I64_extend_i32 S }
+  | I64_EXTEND_I32_U; { I64_extend_i32 U }
+  | I32_TRUNC_F32_S; { I_trunc_f (S32, S32, S) }
+  | I32_TRUNC_F32_U; { I_trunc_f (S32, S32, U) }
+  | I32_TRUNC_F64_S; { I_trunc_f (S32, S64, S) }
+  | I32_TRUNC_F64_U; { I_trunc_f (S32, S64, U) }
+  | I64_TRUNC_F32_S; { I_trunc_f (S64, S32, S) }
+  | I64_TRUNC_F32_U; { I_trunc_f (S64, S32, U) }
+  | I64_TRUNC_F64_S; { I_trunc_f (S64, S64, S) }
+  | I64_TRUNC_F64_U; { I_trunc_f (S64, S64, U) }
+  | I32_TRUNC_SAT_F32_S; { I_trunc_sat_f (S32, S32, S) }
+  | I32_TRUNC_SAT_F32_U; { I_trunc_sat_f (S32, S32, U) }
+  | I32_TRUNC_SAT_F64_S; { I_trunc_sat_f (S32, S64, S) }
+  | I32_TRUNC_SAT_F64_U; { I_trunc_sat_f (S32, S64, U) }
+  | I64_TRUNC_SAT_F32_S; { I_trunc_sat_f (S64, S32, S) }
+  | I64_TRUNC_SAT_F32_U; { I_trunc_sat_f (S64, S32, U) }
+  | I64_TRUNC_SAT_F64_S; { I_trunc_sat_f (S64, S64, S) }
+  | I64_TRUNC_SAT_F64_U; { I_trunc_sat_f (S64, S64, U) }
+  | F32_DEMOTE_F64; { F32_demote_f64 }
+  | F64_PROMOTE_F32; { F64_promote_f32 }
+  | F32_CONVERT_I32_S; { F_convert_i (S32, S32, S) }
+  | F32_CONVERT_I32_U; { F_convert_i (S32, S32, U) }
+  | F32_CONVERT_I64_S; { F_convert_i (S32, S64, S) }
+  | F32_CONVERT_I64_U; { F_convert_i (S32, S64, U) }
+  | F64_CONVERT_I32_S; { F_convert_i (S64, S32, S) }
+  | F64_CONVERT_I32_U; { F_convert_i (S64, S32, U) }
+  | F64_CONVERT_I64_S; { F_convert_i (S64, S64, S) }
+  | F64_CONVERT_I64_U; { F_convert_i (S64, S64, U) }  
+  | I32_REINTERPRET_F32; { I_reinterpret_f (S32, S32) }
+  | I32_REINTERPRET_F64; { I_reinterpret_f (S32, S64) }
+  | I64_REINTERPRET_F32; { I_reinterpret_f (S64, S32) }
+  | I64_REINTERPRET_F64; { I_reinterpret_f (S64, S64) }
+  | F32_REINTERPRET_I32; { F_reinterpret_i (S32, S32) }
+  | F32_REINTERPRET_I64; { F_reinterpret_i (S32, S64) }
+  | F64_REINTERPRET_I32; { F_reinterpret_i (S64, S32) }
+  | F64_REINTERPRET_I64; { F_reinterpret_i (S64, S64) }
+  | REF_NULL; ~ = ref_kind; <Ref_null>
+  | REF_IS_NULL; { Ref_is_null }
+  | REF_FUNC; ~ = indice; <Ref_func>
+  | I32_LOAD; memarg = memarg; { I_load (S32, memarg) }
+  | I64_LOAD; memarg = memarg; { I_load (S64, memarg) }
+  | F32_LOAD; memarg = memarg; { F_load (S32, memarg) }
+  | F64_LOAD; memarg = memarg; { F_load (S64, memarg) }
+  | I32_STORE; memarg = memarg; { I_store (S32, memarg) }
+  | I64_STORE; memarg = memarg; { I_store (S64, memarg) }
+  | F32_STORE; memarg = memarg; { F_store (S32, memarg) }
+  | F64_STORE; memarg = memarg; { F_store (S64, memarg) }
+  | I32_LOAD8_S; memarg = memarg; { I_load8 (S32, S, memarg ) }
+  | I32_LOAD8_U; memarg = memarg; { I_load8 (S32, U, memarg ) }
+  | I64_LOAD8_S; memarg = memarg; { I_load8 (S64, S, memarg ) }
+  | I64_LOAD8_U; memarg = memarg; { I_load8 (S64, U, memarg ) }
+  | I32_LOAD16_S; memarg = memarg; { I_load16 (S32, S, memarg )  }
+  | I32_LOAD16_U; memarg = memarg; { I_load16 (S32, U, memarg ) }
+  | I64_LOAD16_S; memarg = memarg; { I_load16 (S64, S, memarg ) }
+  | I64_LOAD16_U; memarg = memarg; { I_load16 (S64, U, memarg ) }
+  | I64_LOAD32_S; memarg = memarg; { I64_load32 (S, memarg) }
+  | I64_LOAD32_U; memarg = memarg; { I64_load32 (U, memarg) }
+  | I32_STORE8; memarg = memarg; { I_store8 (S32, memarg) }
+  | I64_STORE8; memarg = memarg; { I_store8 (S64, memarg) }
+  | I32_STORE16; memarg = memarg; { I_store16 (S32, memarg) }
+  | I64_STORE16; memarg = memarg; { I_store16 (S64, memarg) }
+  | I64_STORE32; ~ = memarg; <I64_store32>
+  | MEMORY_SIZE; { Memory_size }
+  | MEMORY_GROW; { Memory_grow }
+  | MEMORY_FILL; { Memory_fill }
+  | MEMORY_COPY; { Memory_copy }
+  | MEMORY_INIT; ~ = indice; <Memory_init>
+  | DATA_DROP; ~ = indice; <Data_drop>
 
 (* Instructions & Expressions *)
 
@@ -832,30 +898,19 @@ let module_binary :=
   }
 
 let literal_const ==
-  | ~ = num_type; DOT; CONST; num = NUM; {
-    match num_type with
-    | I32 -> Const_I32 (i32 num)
-    | I64 -> Const_I64 (i64 num)
-    | F32 -> Const_F32 (f32 num)
-    | F64 -> Const_F64 (f64 num)
-  }
-  | REF; DOT; NULL; ~ = ref_kind; <Const_null>
-  | REF; DOT; EXTERN; num = NUM; { Const_host (int_of_string num) }
+  | I32_CONST; num = NUM; { Const_I32 (i32 num) }
+  | I64_CONST; num = NUM; { Const_I64 (i64 num) }
+  | F32_CONST; num = NUM; { Const_F32 (f32 num) }
+  | F64_CONST; num = NUM; { Const_F64 (f64 num) }
+  | REF_NULL; ~ = ref_kind; <Const_null>
+  | REF_EXTERN; num = NUM; { Const_host (int_of_string num) }
 
 let const ==
   | ~ = literal_const; <Literal>
-  | ~ = num_type; DOT; CONST; NAN_CANON; {
-    match num_type with
-    | F32 -> Nan_canon S32
-    | F64 -> Nan_canon S64
-    | I32 | I64 -> failwith "nan:canonical can't be an int"
-  }
-  | ~ = num_type; DOT; CONST; NAN_ARITH; {
-    match num_type with
-    | F32 -> Nan_arith S32
-    | F64 -> Nan_arith S64
-    | I32 | I64 -> failwith "nan:arithmetic can't be an int"
-  }
+  | F32_CONST; NAN_CANON; { Nan_canon S32 }
+  | F64_CONST; NAN_CANON; { Nan_canon S64 }
+  | F32_CONST; NAN_ARITH; { Nan_arith S32 }
+  | F64_CONST; NAN_ARITH; { Nan_arith S64 }
 
 let result ==
   | ~ = const; <Result_const>
