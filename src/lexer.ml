@@ -54,7 +54,7 @@ let hexdigit = [%sedlex.regexp? digit | 'a' .. 'f' | 'A' .. 'F']
 
 let num = [%sedlex.regexp? digit, Star (Opt '_', digit)]
 
-let hexnum = [%sedlex.regexp? hexdigit, Star (Opt '_' | hexdigit)]
+let hexnum = [%sedlex.regexp? hexdigit, Star (Opt '_', hexdigit)]
 
 let hexfrac = [%sedlex.regexp? hexnum]
 
@@ -351,7 +351,7 @@ let rec token buf =
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
     with Not_found ->
-      Format.eprintf "GOT: `%s`" operator;
+      Format.eprintf "GOT: `%s`@." operator;
       failwith "unknown operator" )
   | ";;" ->
     single_comment buf;
