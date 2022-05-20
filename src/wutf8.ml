@@ -51,3 +51,17 @@ and decode' = function
       (((b1 land 0x07) lsl 18) + (con b2 lsl 12) + (con b3 lsl 6) + con b4)
     :: decode' bs
   | _ -> raise Utf8
+
+let check_utf8 s =
+  let open Uutf in
+  let decoder = decoder ~encoding:`UTF_8 (`String s) in
+  let rec loop () =
+    match decode decoder with
+    | `Malformed _s ->
+      Debug.debug Format.err_formatter "GOT: `%S`" s;
+      failwith "malformed UTF-8 encoding"
+    | `Await -> assert false
+    | `End -> ()
+    | `Uchar _ -> loop ()
+  in
+  loop ()

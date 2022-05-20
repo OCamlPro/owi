@@ -351,7 +351,7 @@ let rec token buf =
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
     with Not_found ->
-      Format.eprintf "GOT: `%s`@." operator;
+      Debug.debug Format.err_formatter "GOT: `%s`@." operator;
       failwith "unknown operator" )
   | ";;" ->
     single_comment buf;

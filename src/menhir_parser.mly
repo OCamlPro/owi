@@ -34,6 +34,12 @@ open Types
 
 (* Helpers *)
 
+let utf8_name ==
+  | name = NAME; {
+    Wutf8.check_utf8 name;
+    name
+  }
+
 let par(X) ==
   | LPAR; ~ = X; RPAR; <>
 
@@ -837,12 +843,12 @@ let import_desc ==
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>
 
 let import ==
-  | IMPORT; module_ = NAME; name = NAME; desc = par(import_desc); {
+  | IMPORT; module_ = utf8_name; name = utf8_name; desc = par(import_desc); {
     [ MImport { module_; name; desc } ]
   }
 
 let inline_import ==
-  | LPAR; IMPORT; ~ = NAME; ~ = NAME; RPAR; <>
+  | LPAR; IMPORT; ln = utf8_name; rn = utf8_name; RPAR; { ln, rn }
 
 let export_desc ==
   | FUNC; ~ = indice; { Export_func (Some indice) }
@@ -851,12 +857,12 @@ let export_desc ==
   | GLOBAL; ~ = indice; { Export_global (Some indice) }
 
 let export ==
-  | EXPORT; name = NAME; desc = par(export_desc); {
+  | EXPORT; name = utf8_name; desc = par(export_desc); {
     [ MExport { name; desc; } ]
   }
 
 let inline_export ==
-  | LPAR; EXPORT; ~ = NAME; RPAR;  <>
+  | LPAR; EXPORT; ~ = utf8_name; RPAR;  <>
 
 (* Modules *)
 
@@ -929,11 +935,11 @@ let assert_ ==
   | ASSERT_UNLINKABLE; ~ = par(module_); ~ = NAME; <Assert_unlinkable>
 
 let register ==
-  | REGISTER; ~ = NAME; ~ = option(id); <Register>
+  | REGISTER; ~ = utf8_name; ~ = option(id); <Register>
 
 let action ==
-  | INVOKE; ~ = ioption(id); ~ = NAME; ~ = list(par(literal_const)); <Invoke>
-  | GET; ~ = ioption(id); ~ = NAME; <Get>
+  | INVOKE; ~ = ioption(id); ~ = utf8_name; ~ = list(par(literal_const)); <Invoke>
+  | GET; ~ = ioption(id); ~ = utf8_name; <Get>
 
 let cmd ==
   | ~ = par(module_); <Module>
