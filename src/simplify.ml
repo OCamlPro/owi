@@ -384,7 +384,6 @@ let mk_module registered_modules m =
                     (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
                     let pt, rt = types.(find_type ind) in
                     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
-                    let rt = List.map (fun t -> t) rt in
                     let t' = (pt, rt) in
                     let ok = t = t' in
                     if not ok then failwith "inline function type"
@@ -703,48 +702,34 @@ let rec script scr =
         | Assert (Assert_malformed_quote (m, msg)) ->
           Debug.debug Format.err_formatter
             "simplifying assert malformed quote... ";
-          ( try
-              Debug.debug Format.err_formatter "TRY@\n";
-              match Parse.from_string (String.concat "\n" m) with
-              | Ok scr -> (
-                Debug.debug Format.err_formatter "OK@\n";
+          ( Debug.debug Format.err_formatter "TRY@\n";
+            match Parse.from_string (String.concat "\n" m) with
+            | Ok scr -> (
+              Debug.debug Format.err_formatter "OK@\n";
+              (* TODO: enable this again *)
+              if
+                msg <> "inline function type"
+                && msg <> "duplicate func" && msg <> "duplicate local"
+              then
                 try
-                  (* TODO: enable this again *)
-                  if
-                    msg <> "inline function type"
-                    && msg <> "duplicate func" && msg <> "duplicate local"
-                  then begin
-                    Check.script scr;
+                  Debug.debug Format.err_formatter "AAAAA@\n";
+                  match Check.script scr with
+                  | Ok () ->
                     let _script, _modules = script scr in
                     Format.eprintf "expected: `%s`@." msg;
                     Format.eprintf "got     : Ok@.";
                     assert false
-                  end
+                  | Error e -> failwith e
                 with Failure e ->
                   let ok = e = msg in
                   if not ok then begin
                     Format.eprintf "expected: `%s`@." msg;
-                    Format.eprintf "got     : `%s`@." e;
-                    assert false
+                    Format.eprintf "got     : `%s`@." e
                   end )
-              | Error e ->
-                (* TODO: re-enable this later *)
-                Debug.debug Format.err_formatter "ERROR@\n";
-                let ok =
-                  if msg = "unknown operator" then
-                    (* TODO: open an issue on wasm to avoid having to do this... *)
-                    e = "unexpected token" || e = "lexer error"
-                  else e = msg
-                in
-                if not ok then begin
-                  Format.eprintf "expected: `%s`@." msg;
-                  Format.eprintf "got     : `%s`@." e;
-                  assert false
-                end
-            with Failure e as exn ->
-              Debug.debug Format.err_formatter "EXN@\n";
+            | Error e ->
+              (* TODO: re-enable this later *)
+              Debug.debug Format.err_formatter "ERROR@\n";
               let ok =
-                (* TODO: fix this in the official testsuite, the error message is never the same so it can't be fixed in woi... *)
                 e = "constant out of range"
                 && msg = "i32 constant out of range"
                 || e = msg
@@ -752,7 +737,7 @@ let rec script scr =
               if not ok then begin
                 Format.eprintf "expected: `%s`@." msg;
                 Format.eprintf "got     : `%s`@." e;
-                raise exn
+                failwith e
               end );
           Debug.debug Format.err_formatter "done !";
           (curr_module, modules, scr)

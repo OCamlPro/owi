@@ -17,9 +17,12 @@ let () =
   if debug then Woi.Debug.enable ();
 
   match Woi.Parse.from_file ~filename:file with
-  | Ok script ->
-    Woi.Check.script script;
-    Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
-    let script, modules = Woi.Simplify.script script in
-    Woi.Interpret.exec script modules
+  | Ok script -> begin
+    match Woi.Check.script script with
+    | Ok () ->
+      Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
+      let script, modules = Woi.Simplify.script script in
+      Woi.Interpret.exec script modules
+    | Error e -> error e
+  end
   | Error e -> error e

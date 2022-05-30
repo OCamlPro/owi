@@ -77,4 +77,16 @@ let module_ m =
            { env with tables = true } )
        (empty_env ()) m.fields
 
-let script s = List.iter (function Module m -> module_ m | _ -> ()) s
+let module_ m = try Ok (module_ m) with Failure e -> Error e
+
+let script s =
+  try
+    List.iter
+      (function
+        | Module m -> begin
+          match module_ m with Ok () -> () | Error e -> failwith e
+        end
+        | _ -> () )
+      s;
+    Ok ()
+  with Failure e -> Error e

@@ -14,7 +14,8 @@ let from_lexbuf =
     in
     try Ok (parser provider) with
     | Menhir_parser.Error -> Error "unexpected token"
-    | Lexer.Error (_pos, _msg) -> Error "lexer error"
+    | Lexer.Error (_pos, _msg) -> Error "unknown operator"
+    | Failure msg -> Error msg
 
 (** Parse a script from a string. *)
 let from_string s = from_lexbuf (Sedlexing.Utf8.from_string s)

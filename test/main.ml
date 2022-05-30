@@ -11,11 +11,13 @@ let test_file f =
   match Woi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
     try
-      Woi.Check.script script;
-      let script, modules = Woi.Simplify.script script in
-      Woi.Interpret.exec script modules;
-      Format.printf "%a !@." pp_green "OK";
-      Ok ()
+      match Woi.Check.script script with
+      | Ok () ->
+        let script, modules = Woi.Simplify.script script in
+        Woi.Interpret.exec script modules;
+        Format.printf "%a !@." pp_green "OK";
+        Ok ()
+      | Error e -> failwith e
     with
     | Assert_failure (s, _, _)
     | Woi.Types.Trap s
