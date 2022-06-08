@@ -1,5 +1,74 @@
 open Types
 
+let ignore_tmp =
+  [ "type mismatch"
+  ; "unknown local"
+  ; "unknown global"
+  ; "unknown function"
+  ; "unknown label"
+  ; "unknown elem segment 0"
+  ; "unknown elem segment 4"
+  ; "unknown table 0"
+  ; "unknown table"
+  ; "start function"
+  ; "invalid result arity"
+  ; "unknown data segment"
+  ; "unknown function 7"
+  ; "unknown memory 0"
+  ; "undeclared function reference"
+  ; "unknown data segment 1"
+  ; "multiple memories"
+  ; "unknown memory"
+  ; "global is immutable"
+  ; "constant expression required"
+  ; "duplicate export name"
+  ; "unknown global 0"
+  ; "unknown global 1"
+  ; "alignment must not be larger than natural"
+    (*
+            | I_load8 (_nn, _sx, { align; _ }) as i ->
+              if align >= 2 then
+                failwith "alignment must not be larger than natural";
+
+              i
+            | I_load16 (_nn, _sx, { align; _ }) as i ->
+              if align >= 4 then
+                failwith "alignment must not be larger than natural";
+              i
+            | I64_load32 (_sx, { align; _ }) as i ->
+              if align >= 8 then
+                failwith "alignment must not be larger than natural";
+              i
+            | (I_load (nn, { align; _ }) | F_load (nn, { align; _ })) as i ->
+              let max_allowed = match nn with S32 -> 8 | S64 -> 16 in
+              if align >= max_allowed then
+                failwith "alignment must not be larger than natural";
+              i
+             *)
+  ; "duplicate func"
+  ; "duplicate local"
+  ]
+
+let check_error ~expected ~got =
+  let ok =
+    got = "constant out of range"
+    && (expected = "i32 constant out of range" || expected = "i32 constant")
+    || got = expected
+    || List.mem expected ignore_tmp
+  in
+  if not ok then begin
+    Format.eprintf "expected: `%s`@." expected;
+    Format.eprintf "got     : `%s`@." got;
+    failwith got
+  end
+
+let check_limit min max =
+  Option.iter
+    (fun max ->
+      if min > max then failwith "size minimum must not be greater than maximum"
+      )
+    max
+
 type 'a runtime =
   | Local of 'a
   | Imported of int * indice
@@ -165,7 +234,13 @@ let mk_module registered_modules m =
           let globals_tmp = Local (g.type_, g.init) :: env.globals_tmp in
           { env with curr_global; globals_tmp }
         | MExport _ -> env
-        | MImport { desc = Import_func (id, _t); module_; name } ->
+        | MImport { desc = Import_func (id, t); module_; name } ->
+          ( match t with
+          | Bt_raw (None, _) -> ()
+          | Bt_ind ind | Bt_raw (Some ind, _) -> (
+            match ind with
+            | Raw n -> if n > env.curr_type then failwith "unknown type"
+            | Symbolic _n -> () (* TODO: check if known type*) ) );
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           let module_indice = find_module module_ in
@@ -194,6 +269,14 @@ let mk_module registered_modules m =
           in
           { env with curr_global; globals_tmp }
         | MMem (id, { min; max }) ->
+          if min > 65536 then
+            failwith "memory size must be at most 65536 pages (4GiB)";
+          Option.iter
+            (fun max ->
+              if max > 65536 then
+                failwith "memory size must be at most 65536 pages (4GiB)" )
+            max;
+          check_limit min max;
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
           let new_bytes = Bytes.make (min * page_size) '\000' in
@@ -202,6 +285,7 @@ let mk_module registered_modules m =
         | MTable (id, ({ min; max }, rt)) ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
+          check_limit min max;
           let a = Array.make min None in
           let tbl = Local (rt, a, max) in
           let tables = tbl :: env.tables in
@@ -335,16 +419,25 @@ let mk_module registered_modules m =
               try types.(find_type ind)
               with Invalid_argument _ -> failwith "unknown type"
             end
-            | Bt_raw (type_use, t) ->
+            | Bt_raw (type_use, t) -> begin
               (* TODO: move this to check ?*)
-              begin
-                match type_use with
-                | None -> ()
-                | Some ind ->
-                  let t' = types.(find_type ind) in
-                  assert (t = t')
-              end;
-              t
+              match type_use with
+              | None -> t
+              | Some ind ->
+                let t' =
+                  try types.(find_type ind)
+                  with Invalid_argument _ -> failwith "unknown type"
+                in
+                let func_type_equal (p1, r1) (p2, r2) =
+                  (* we ignore the argument name *)
+                  let p1 = List.map snd p1 in
+                  let p2 = List.map snd p2 in
+                  r1 = r2 && p1 = p2
+                in
+                if not (func_type_equal t t') then
+                  failwith "inline function type";
+                t' (* TODO: t ? *)
+            end
           in
 
           (* adding params and locals to the locals table *)
@@ -374,7 +467,12 @@ let mk_module registered_modules m =
 
           let bt_to_raw =
             Option.map (function
-              | Bt_ind ind -> Bt_raw (Some ind, types.(find_type ind))
+              | Bt_ind ind ->
+                let pt, rt =
+                  try types.(find_type ind)
+                  with Invalid_argument _ -> failwith "unknown type"
+                in
+                Bt_raw (Some ind, (pt, rt))
               | Bt_raw (type_use, t) ->
                 begin
                   match type_use with
@@ -382,7 +480,10 @@ let mk_module registered_modules m =
                   | Some ind ->
                     (* TODO: move this to check ? *)
                     (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
-                    let pt, rt = types.(find_type ind) in
+                    let pt, rt =
+                      try types.(find_type ind)
+                      with Invalid_argument _ -> failwith "unknown type"
+                    in
                     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
                     let t' = (pt, rt) in
                     let ok = t = t' in
@@ -696,152 +797,46 @@ let rec script scr =
         | Assert (Assert_malformed_binary _) ->
           Debug.debug Format.err_formatter
             "simplifying assert malformed binary... ";
-          Debug.debug Format.err_formatter "done !";
+          Debug.debug Format.err_formatter "done !@\n";
           (* TODO: check this when binary format is supported *)
           (curr_module, modules, scr)
-        | Assert (Assert_malformed_quote (m, msg)) ->
+        | Assert (Assert_malformed_quote (m, expected)) ->
           Debug.debug Format.err_formatter
             "simplifying assert malformed quote... ";
-          ( Debug.debug Format.err_formatter "TRY@\n";
-            match Parse.from_string (String.concat "\n" m) with
-            | Ok scr -> (
-              Debug.debug Format.err_formatter "OK@\n";
-              (* TODO: enable this again *)
-              if
-                msg <> "inline function type"
-                && msg <> "duplicate func" && msg <> "duplicate local"
-              then
-                try
-                  Debug.debug Format.err_formatter "AAAAA@\n";
-                  match Check.script scr with
-                  | Ok () ->
-                    let _script, _modules = script scr in
-                    Format.eprintf "expected: `%s`@." msg;
-                    Format.eprintf "got     : Ok@.";
-                    assert false
-                  | Error e -> failwith e
-                with Failure e ->
-                  let ok = e = msg in
-                  if not ok then begin
-                    Format.eprintf "expected: `%s`@." msg;
-                    Format.eprintf "got     : `%s`@." e
-                  end )
-            | Error e ->
-              (* TODO: re-enable this later *)
-              Debug.debug Format.err_formatter "ERROR@\n";
-              let ok =
-                e = "constant out of range"
-                && msg = "i32 constant out of range"
-                || e = msg
-              in
-              if not ok then begin
-                Format.eprintf "expected: `%s`@." msg;
-                Format.eprintf "got     : `%s`@." e;
-                failwith e
-              end );
-          Debug.debug Format.err_formatter "done !";
+
+          ( match Parse.from_string (String.concat "\n" m) with
+          | Ok scr -> (
+            try
+              match Check.script scr with
+              | Ok () ->
+                let _script, _modules = script scr in
+                check_error ~expected ~got:"Ok"
+              | Error got -> check_error ~expected ~got
+            with Failure got -> check_error ~expected ~got )
+          | Error got -> check_error ~expected ~got );
+          Debug.debug Format.err_formatter "done !@\n";
           (curr_module, modules, scr)
         | Assert (Assert_invalid_binary _) ->
           (* TODO: check this when binary format is supported *)
           (curr_module, modules, scr)
-        | Assert (Assert_invalid (m, msg)) ->
+        | Assert (Assert_invalid (m, expected)) ->
           (* TODO: re-enable all ignored errors  *)
-          let ignore_tmp =
-            [ "type mismatch"
-            ; "unknown local"
-            ; "unknown global"
-            ; "unknown function"
-            ; "unknown label"
-            ; "unknown elem segment 0"
-            ; "unknown elem segment 4"
-            ; "unknown table 0"
-            ; "unknown table"
-            ; "size minimum must not be greater than maximum"
-            ; "start function"
-            ; "invalid result arity"
-            ; "unknown data segment"
-            ; "unknown function 7"
-            ; "unknown memory 0"
-            ; "undeclared function reference"
-            ; "unknown data segment 1"
-            ; "unknown type"
-            ; "multiple memories"
-            ; "unknown memory"
-            ; "memory size must be at most 65536 pages (4GiB)"
-            ; "global is immutable"
-            ; "constant expression required"
-            ; "duplicate export name"
-            ; "unknown global 0"
-            ; "unknown global 1"
-            ; "alignment must not be larger than natural"
-              (*
-            | I_load8 (_nn, _sx, { align; _ }) as i ->
-              if align >= 2 then
-                failwith "alignment must not be larger than natural";
+          ( try
+              let scr = [ Module m ] in
+              match Check.script scr with
+              | Ok () ->
+                let _script, _modules = script scr in
+                check_error ~expected ~got:"Ok"
+              | Error got -> check_error ~expected ~got
+            with Failure got -> check_error ~expected ~got );
 
-              i
-            | I_load16 (_nn, _sx, { align; _ }) as i ->
-              if align >= 4 then
-                failwith "alignment must not be larger than natural";
-              i
-            | I64_load32 (_sx, { align; _ }) as i ->
-              if align >= 8 then
-                failwith "alignment must not be larger than natural";
-              i
-            | (I_load (nn, { align; _ }) | F_load (nn, { align; _ })) as i ->
-              let max_allowed = match nn with S32 -> 8 | S64 -> 16 in
-              if align >= max_allowed then
-                failwith "alignment must not be larger than natural";
-              i
-             *)
-            ]
-          in
-          if not @@ List.mem msg ignore_tmp then (
-            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
-              msg;
-            assert false );
           (curr_module, modules, scr)
-        | Assert (Assert_invalid_quote (m, msg)) ->
+        | Assert (Assert_invalid_quote (m, expected)) ->
           (* TODO: re-enable all ignored errors  *)
-          let ignore_tmp =
-            [ "type mismatch"
-            ; "unknown local"
-            ; "unknown global"
-            ; "unknown function"
-            ; "unknown label"
-            ; "unknown elem segment 0"
-            ; "unknown elem segment 4"
-            ; "unknown table 0"
-            ; "unknown table"
-            ; "size minimum must not be greater than maximum"
-            ; "start function"
-            ; "invalid result arity"
-            ; "unknown data segment"
-            ; "unknown function 7"
-            ; "unknown memory 0"
-            ; "undeclared function reference"
-            ; "unknown data segment 1"
-            ; "unknown type"
-            ; "multiple memories"
-            ; "unknown memory"
-            ; "memory size must be at most 65536 pages (4GiB)"
-            ; "global is immutable"
-            ; "constant expression required"
-            ; "duplicate export name"
-            ; "unknown global 0"
-            ; "unknown global 1"
-            ]
-          in
-          let m =
-            match Parse.from_string (String.concat "\n" m) with
-            | Error _e -> assert false
-            | Ok [ Module m ] -> m
-            | Ok _ -> assert false
-          in
-          if not @@ List.mem msg ignore_tmp then (
-            Format.eprintf "MODULE = `%a`@\n@\nmsg = `%s`@\n@\n" Pp.module_ m
-              msg;
-            assert false );
+          ( match Parse.from_string (String.concat "\n" m) with
+          | Error got -> check_error ~expected ~got
+          | Ok [ Module _m ] -> check_error ~expected ~got:"Ok"
+          | Ok _ -> assert false );
           (curr_module, modules, scr)
         | Assert (Assert_unlinkable (m, msg)) ->
           let curr_module = curr_module + 1 in

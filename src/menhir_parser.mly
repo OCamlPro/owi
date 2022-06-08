@@ -6,7 +6,7 @@
 
 let u32 s =
   try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
-  with Failure _msg -> failwith "i32 constant"
+  with Failure _msg -> failwith "constant out of range"
 
 let i32 s =
   try Int32.of_string s
@@ -84,13 +84,13 @@ let mem_type ==
 
 let limits ==
   | min = NUM; {
-    let min = Int32.to_int (i32 min) in
+    let min = u32 min in
     let max = None in
     { min; max}
   }
   | min = NUM; max = NUM; {
-    let min = Int32.to_int (i32 min) in
-    let max = Some (Int32.to_int (i32 max)) in
+    let min = u32 min in
+    let max = Some (u32 max) in
     { min; max }
   }
 
@@ -630,8 +630,10 @@ let func ==
   }
 
 let func_fields :=
-  | ~ = type_use; (_todo, f) = func_fields_body; {
-    [MFunc { f with type_f = Bt_ind type_use }]
+  | ~ = type_use; (ft, f) = func_fields_body; {
+    match ft with
+    | [], [] -> [MFunc { f with type_f = Bt_ind type_use }]
+    | (_pt, _rt) as ft -> [MFunc { f with type_f = Bt_raw (Some type_use, ft)}]
   }
   | (type_f, f) = func_fields_body; {
     [MFunc { f with type_f = Bt_raw (None, type_f) }]
