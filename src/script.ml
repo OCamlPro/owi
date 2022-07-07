@@ -38,7 +38,6 @@ let ignore_tmp =
   ; "multiple memories"
   ; "unknown memory"
   ; "global is immutable"
-  ; "constant expression required"
   ; "duplicate export name"
   ; "unknown global 0"
   ; "unknown global 1"

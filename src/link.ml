@@ -219,8 +219,14 @@ let module_ _registered_modules modules module_indice =
               let indice =
                 indice_to_int (Option.value indice ~default:(Raw curr_memory))
               in
-              let offset = const_expr_to_int expr in
-              let mem_bytes, _max = get_memory modules module_indice indice in
+              let offset =
+                try const_expr_to_int expr
+                with Invalid_argument _ -> failwith "out of bounds memory access"
+              in
+              let mem_bytes, _max =
+                try get_memory modules module_indice indice
+                with Invalid_argument _ -> failwith "out of bounds memory access"
+              in
               let len = String.length data.init in
               try Bytes.blit_string data.init 0 mem_bytes offset len
               with Invalid_argument _ ->
@@ -239,9 +245,13 @@ let module_ _registered_modules modules module_indice =
             | Elem_active (ti, offset) ->
               let ti = Option.value ti ~default:(Raw curr_table) in
               let _mi, table_ref_type, table, _max =
-                get_table modules module_indice (indice_to_int ti)
+                try get_table modules module_indice (indice_to_int ti)
+                with Invalid_argument _ -> failwith "unknown table"
               in
-              let offset = const_expr_to_int offset in
+              let offset =
+                try const_expr_to_int offset
+                with Invalid_argument _ -> failwith "unknown table"
+              in
               if table_ref_type <> e.type_ then failwith "invalid elem type";
               if Array.length table < Array.length init + offset then
                 raise @@ Trap "out of bounds table access";

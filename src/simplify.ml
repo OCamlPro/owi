@@ -120,7 +120,7 @@ let mk_module registered_modules m =
     | (I64_const _ | F32_const _ | F64_const _ | Ref_null _ | I32_const _) as c
       ->
       c
-    | i -> failwith @@ Format.asprintf "TODO expr: `%a`" Pp.instr i
+    | _i -> failwith "constant expression required"
   in
 
   let env =
