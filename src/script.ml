@@ -186,18 +186,23 @@ let rec simplify script =
           (* TODO: check this when binary format is supported *)
           (curr_module, modules, scr)
         | Assert (Assert_invalid (m, expected)) ->
-          ( try
-              let script = [ Module m ] in
-              match check script with
-              | Ok () ->
-                let _script, _modules = simplify script in
-                check_error ~expected ~got:"Ok"
-              | Error got -> check_error ~expected ~got
-            with Failure got -> check_error ~expected ~got );
-
+          let got =
+            try
+              match Check.module_ m with
+              | Ok () -> (
+                let m = Simplify.mk_module registered_modules m in
+                try
+                  Link.module_ registered_modules
+                    (Array.of_list @@ List.rev @@ (m :: modules))
+                    (curr_module + 1);
+                  "Ok"
+                with Failure got -> got )
+              | Error got -> got
+            with Failure got -> got
+          in
+          check_error ~expected ~got;
           (curr_module, modules, scr)
         | Assert (Assert_invalid_quote (m, expected)) ->
-          (* TODO: re-enable all ignored errors  *)
           ( match Parse.from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module _m ] -> check_error ~expected ~got:"Ok"
@@ -307,16 +312,15 @@ let exec_assert env = function
            (fun result const -> compare_result_const result const)
            results_expected results_got
     in
-    if not eq then
-      begin
-        failwith
-        @@ Format.asprintf
-             "assert_return failed !@.expected: `%a`@.got     : `%a`@."
-             (Format.pp_print_list
-                ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
-                Pp.result )
-             results_expected Pp.consts results_got
-      end;
+    if not eq then begin
+      failwith
+      @@ Format.asprintf
+           "assert_return failed !@.expected: `%a`@.got     : `%a`@."
+           (Format.pp_print_list
+              ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+              Pp.result )
+           results_expected Pp.consts results_got
+    end;
     env
   | SAssert_trap (action, expected) ->
     begin

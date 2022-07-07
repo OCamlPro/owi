@@ -181,9 +181,8 @@ let rec instr fmt = function
   | Select vt -> begin
     match vt with
     | None -> Format.fprintf fmt "select"
-    | Some vt ->
-      Format.fprintf fmt "select (%a)" result_type vt
-      (* TODO: are the parens needed ? *)
+    | Some vt -> Format.fprintf fmt "select (%a)" result_type vt
+    (* TODO: are the parens needed ? *)
   end
   | Local_get id -> Format.fprintf fmt "local.get %a" indice id
   | Local_set id -> Format.fprintf fmt "local.set %a" indice id
@@ -385,7 +384,9 @@ let assert_ fmt = function
     Format.fprintf fmt "(assert_return %a %a)" action a results l
   | Assert_trap (a, f) ->
     Format.fprintf fmt {|(assert_trap %a "%s")|} action a f
-  | Assert_invalid (_m, _n) -> Format.fprintf fmt "<assert_invalid>"
+  | Assert_invalid (m, msg) ->
+    Format.fprintf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" module_
+      m msg
   | _ -> Format.fprintf fmt "<action TODO>"
 
 let cmd fmt = function

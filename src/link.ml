@@ -58,9 +58,11 @@ let indice_to_int = function
          "interpreter internal error (indice_to_int init): unbound id $%s" id
 
 let module_ _registered_modules modules module_indice =
-  Debug.debug Format.err_formatter "initializing module %d@." module_indice;
+  Debug.debug Format.err_formatter "linking module %d@." module_indice;
 
   let m = modules.(module_indice) in
+
+  Debug.debug Format.err_formatter "module fetched@.";
 
   let funcs =
     Array.map
@@ -79,6 +81,8 @@ let module_ _registered_modules modules module_indice =
   let m = { m with funcs } in
   modules.(module_indice) <- m;
 
+  Debug.debug Format.err_formatter "module updated with funcs@.";
+
   let memories =
     Array.map
       (function
@@ -95,6 +99,8 @@ let module_ _registered_modules modules module_indice =
 
   let m = { m with memories } in
   modules.(module_indice) <- m;
+
+  Debug.debug Format.err_formatter "module updated with memories@.";
 
   let tables =
     Array.map
@@ -113,6 +119,8 @@ let module_ _registered_modules modules module_indice =
   let m = { m with tables } in
   modules.(module_indice) <- m;
 
+  Debug.debug Format.err_formatter "module updated with tables@.";
+
   let globals =
     Array.map
       (function
@@ -129,6 +137,8 @@ let module_ _registered_modules modules module_indice =
 
   let m = { m with globals_tmp = [||] } in
   modules.(module_indice) <- m;
+
+  Debug.debug Format.err_formatter "module updated with globals@.";
 
   let rec const_expr = function
     | [ I32_const n ] -> Const_I32 n
@@ -158,6 +168,8 @@ let module_ _registered_modules modules module_indice =
 
   let m = { m with globals } in
   modules.(module_indice) <- m;
+
+  Debug.debug Format.err_formatter "module updated with globals bis@.";
 
   let const_expr_to_int e =
     match const_expr e with
@@ -295,13 +307,20 @@ let module_ _registered_modules modules module_indice =
   let m = { m with elements } in
   modules.(module_indice) <- m;
 
+  Debug.debug Format.err_formatter "module updated with elements@.";
+
   Option.iter
     (fun n ->
-      let _module_indice, func = get_func modules module_indice n in
+      let _module_indice, func =
+        try get_func modules module_indice n
+        with Invalid_argument _ -> failwith "start function"
+      in
       let t =
         match func.type_f with
         | Bt_ind _n -> assert false
         | Bt_raw (_n, ft) -> ft
       in
       match t with [], [] -> () | _pt, _rt -> failwith "start function" )
-    m.start
+    m.start;
+
+  Debug.debug Format.err_formatter "module fully linked@."

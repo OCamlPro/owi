@@ -6,7 +6,7 @@ let m =
     ; fields =
         [ MMem (Some "memory", { min = 1; max = Some 2 })
         ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
+            { type_f = Bt_raw (None, ([], []))
             ; locals = []
             ; body = []
             ; id = Some "print"
