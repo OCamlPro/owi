@@ -6,11 +6,11 @@
   debug
   float32
   float64
-  init
   int32
   int64
   interpret
   lexer
+  link
   menhir_parser
   parse
   pp

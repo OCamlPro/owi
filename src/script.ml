@@ -251,7 +251,7 @@ let invoke env module_indice f args =
     | Some indice -> indice
   in
   let module_indice, func =
-    Init.get_func env.modules module_indice func_indice
+    Link.get_func env.modules module_indice func_indice
   in
   Interpret.exec_func env module_indice func args
 
@@ -263,7 +263,7 @@ let exec_action env = function
     match Hashtbl.find_opt env.modules.(mi).exported_globals name with
     | None -> failwith "exec_action"
     | Some g ->
-      let _mi, _t, e = Init.get_global env.modules mi g in
+      let _mi, _t, e = Link.get_global env.modules mi g in
       (env, [ e ]) )
 
 let compare_result_const result const =
