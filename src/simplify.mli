@@ -33,23 +33,6 @@ type module_ =
   ; should_not_link : string option
   }
 
-type action =
-  | Invoke_indice of int * string * const list
-  | Get_indice of int * string
+val find_module : string option -> 'a option -> (string, 'a) Hashtbl.t -> 'a
 
-type assert_ =
-  | SAssert_return of action * result list
-  | SAssert_trap of action * string
-  | SAssert_exhaustion of action * string
-  | SAssert_invalid of Types.module_ * string
-  | SAssert_invalid_quote of string list * string
-
-type cmd =
-  | Module_indice of int
-  | Assert of assert_
-  | Register_indice of string * int
-  | Action of action
-
-type script = cmd list * module_ Array.t
-
-val script : Types.file -> script
+val mk_module : (string, int) Hashtbl.t -> Types.module_ -> module_

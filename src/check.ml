@@ -78,15 +78,3 @@ let module_ m =
        (empty_env ()) m.fields
 
 let module_ m = try Ok (module_ m) with Failure e -> Error e
-
-let script s =
-  try
-    List.iter
-      (function
-        | Module m -> begin
-          match module_ m with Ok () -> () | Error e -> failwith e
-        end
-        | _ -> () )
-      s;
-    Ok ()
-  with Failure e -> Error e

@@ -293,4 +293,15 @@ let module_ _registered_modules modules module_indice =
   let elements = Array.of_list @@ List.rev elements in
 
   let m = { m with elements } in
-  modules.(module_indice) <- m
+  modules.(module_indice) <- m;
+
+  Option.iter
+    (fun n ->
+      let _module_indice, func = get_func modules module_indice n in
+      let t =
+        match func.type_f with
+        | Bt_ind _n -> assert false
+        | Bt_raw (_n, ft) -> ft
+      in
+      match t with [], [] -> () | _pt, _rt -> failwith "start function" )
+    m.start

@@ -14,7 +14,9 @@
   menhir_parser
   parse
   pp
+  script
   simplify
+  spectest
   stack
   types
   wutf8)

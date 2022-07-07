@@ -11,10 +11,10 @@ let test_file f =
   match Woi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
     try
-      match Woi.Check.script script with
+      match Woi.Script.check script with
       | Ok () ->
-        let script, modules = Woi.Simplify.script script in
-        Woi.Interpret.exec script modules;
+        let script, modules = Woi.Script.simplify script in
+        Woi.Script.exec script modules;
         Format.printf "%a !@." pp_green "OK";
         Ok ()
       | Error e -> failwith e

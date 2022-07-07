@@ -18,11 +18,11 @@ let () =
 
   match Woi.Parse.from_file ~filename:file with
   | Ok script -> begin
-    match Woi.Check.script script with
+    match Woi.Script.check script with
     | Ok () ->
       Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
-      let script, modules = Woi.Simplify.script script in
-      Woi.Interpret.exec script modules
+      let script, modules = Woi.Script.simplify script in
+      Woi.Script.exec script modules
     | Error e -> error e
   end
   | Error e -> error e
