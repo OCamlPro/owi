@@ -58,7 +58,8 @@ let indice_to_int = function
          "interpreter internal error (indice_to_int init): unbound id $%s" id
 
 let module_ _registered_modules modules module_indice =
-  Debug.debug Format.err_formatter "linking module %d@." module_indice;
+  Debug.debug Format.err_formatter "linking module %d/%d@." module_indice
+    (Array.length modules - 1);
 
   let m = modules.(module_indice) in
 
@@ -121,6 +122,9 @@ let module_ _registered_modules modules module_indice =
 
   Debug.debug Format.err_formatter "module updated with tables@.";
 
+  Debug.debug Format.err_formatter "MODULE 0 has %d exported globals@."
+    (Hashtbl.length modules.(0).exported_globals);
+
   let globals =
     Array.map
       (function
@@ -152,8 +156,7 @@ let module_ _registered_modules modules module_indice =
       let i = indice_to_int i in
       if i > !global_done then failwith "unknown global";
       match globals.(i) with
-      | Local (_gt, e) ->
-          const_expr e
+      | Local (_gt, e) -> const_expr e
       | Imported (mi, i) ->
         let _mi, _gt, e = get_global modules mi (indice_to_int i) in
         e
@@ -172,8 +175,7 @@ let module_ _registered_modules modules module_indice =
           | Imported (mi, i) -> Imported (mi, i)
         in
         global_done := i;
-        res
-      )
+        res )
       globals
   in
 
@@ -204,17 +206,29 @@ let module_ _registered_modules modules module_indice =
           begin
             match desc with
             | Export_func ind ->
-              let ind = Option.value ind ~default:(Raw curr_func) in
-              Hashtbl.add m.exported_funcs name (indice_to_int ind)
+              let i =
+                indice_to_int @@ Option.value ind ~default:(Raw curr_func)
+              in
+              if Array.length funcs <= i then failwith "unknown func";
+              Hashtbl.add m.exported_funcs name i
             | Export_table ind ->
-              let ind = Option.value ind ~default:(Raw curr_table) in
-              Hashtbl.add m.exported_tables name (indice_to_int ind)
+              let i =
+                indice_to_int @@ Option.value ind ~default:(Raw curr_table)
+              in
+              if Array.length tables <= i then failwith "unknown table";
+              Hashtbl.add m.exported_tables name i
             | Export_global ind ->
-              let ind = Option.value ind ~default:(Raw curr_global) in
-              Hashtbl.add m.exported_globals name (indice_to_int ind)
+              let i =
+                indice_to_int @@ Option.value ind ~default:(Raw curr_global)
+              in
+              if Array.length globals <= i then failwith "unknown global";
+              Hashtbl.add m.exported_globals name i
             | Export_mem ind ->
-              let ind = Option.value ind ~default:(Raw curr_memory) in
-              Hashtbl.add m.exported_memories name (indice_to_int ind)
+              let i =
+                indice_to_int @@ Option.value ind ~default:(Raw curr_memory)
+              in
+              if Array.length memories <= i then failwith "unknown memory";
+              Hashtbl.add m.exported_memories name i
           end;
           (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
         | MMem _ ->
@@ -232,11 +246,13 @@ let module_ _registered_modules modules module_indice =
               in
               let offset =
                 try const_expr_to_int expr
-                with Invalid_argument _ -> failwith "out of bounds memory access"
+                with Invalid_argument _ ->
+                  failwith "out of bounds memory access"
               in
               let mem_bytes, _max =
                 try get_memory modules module_indice indice
-                with Invalid_argument _ -> failwith "out of bounds memory access"
+                with Invalid_argument _ ->
+                  failwith "out of bounds memory access"
               in
               let len = String.length data.init in
               try Bytes.blit_string data.init 0 mem_bytes offset len

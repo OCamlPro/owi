@@ -294,8 +294,8 @@ let import_desc fmt : import_desc -> Unit.t = function
     Format.fprintf fmt "(global %a %a)" id_opt id global_type t
 
 let import fmt i =
-  Format.fprintf fmt "(import %a %a %a)" name i.module_ name i.name import_desc
-    i.desc
+  Format.fprintf fmt {|(import "%a" "%a" %a)|} name i.module_ name i.name
+    import_desc i.desc
 
 let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 

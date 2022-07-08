@@ -8,8 +8,6 @@ type assert_ =
   | SAssert_return of action * result list
   | SAssert_trap of action * string
   | SAssert_exhaustion of action * string
-  | SAssert_invalid of Types.module_ * string
-  | SAssert_invalid_quote of string list * string
 
 type cmd =
   | Module_indice of int
@@ -22,7 +20,6 @@ type script = cmd list * module_ Array.t
 let ignore_tmp =
   [ "type mismatch"
   ; "unknown local"
-  ; "unknown global"
   ; "unknown function"
   ; "unknown label"
   ; "unknown elem segment 0"
@@ -99,36 +96,6 @@ let action last_module seen_modules = function
     let i = Simplify.find_module mod_name last_module seen_modules in
     Get_indice (i, n)
 
-let assert_ curr_module last_module seen_modules =
-  let action = action last_module seen_modules in
-  function
-  | Assert_return (a, res) -> (curr_module, SAssert_return (action a, res))
-  | Assert_trap (a, failure) -> (curr_module, SAssert_trap (action a, failure))
-  | Assert_trap_module _ ->
-    (* This should have been handled before and turned into a module with `should_trap` set ! *)
-    assert false
-  | Assert_exhaustion (a, failure) ->
-    (curr_module, SAssert_exhaustion (action a, failure))
-  | Assert_malformed _ ->
-    (* This should have been checked before and removed ! *)
-    assert false
-  | Assert_malformed_quote _ ->
-    (* This should have been checked before and removed ! *)
-    assert false
-  | Assert_malformed_binary _ ->
-    (* This should have been checked before and removed ! *)
-    assert false
-  | Assert_invalid (module_, failure) ->
-    (curr_module, SAssert_invalid (module_, failure))
-  | Assert_invalid_quote (m, failure) ->
-    (curr_module, SAssert_invalid_quote (m, failure))
-  | Assert_invalid_binary (_m, _failure) ->
-    (* This should have been checked before and removed ! *)
-    assert false
-  | Assert_unlinkable (_m, _s) ->
-    (* This should have been handled before and turned into a module with `should_not_link` set ! *)
-    assert false
-
 let rec simplify script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
 
@@ -188,14 +155,19 @@ let rec simplify script =
           let got =
             try
               match Check.module_ m with
-              | Ok () -> (
+              | Ok () ->
+                (* we do a deep copy because this is going to change some state that should actually not change as the module is invalid... *)
+                let deep_copy v =
+                  Marshal.from_string (Marshal.to_string v []) 0
+                in
+                let registered_modules = deep_copy registered_modules in
+                let modules = deep_copy modules in
                 let m = Simplify.mk_module registered_modules m in
-                try
-                  Link.module_ registered_modules
-                    (Array.of_list @@ List.rev @@ (m :: modules))
-                    (curr_module + 1);
-                  "Ok"
-                with Failure got -> got )
+                let rev_modules = Array.of_list @@ List.rev @@ (m :: modules) in
+                Array.iteri
+                  (fun i _m -> Link.module_ registered_modules rev_modules i)
+                  rev_modules;
+                "Ok"
               | Error got -> got
             with Failure got -> got
           in
@@ -219,11 +191,16 @@ let rec simplify script =
           let module_ = { module_ with Simplify.should_not_link = Some msg } in
           (curr_module, module_ :: modules, cmd :: scr)
         | Assert a ->
-          let curr_module, cmd =
-            assert_ curr_module (Some curr_module) seen_modules a
+          let action = action (Some curr_module) seen_modules in
+          let cmd =
+            match a with
+            | Assert_return (a, res) -> SAssert_return (action a, res)
+            | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
+            | Assert_exhaustion (a, failure) ->
+              SAssert_exhaustion (action a, failure)
+            | _ -> assert false (* should have been handled before *)
           in
-          let cmd = Assert cmd in
-          (curr_module, modules, cmd :: scr)
+          (curr_module, modules, Assert cmd :: scr)
         | Register (name, mod_name) ->
           let indice =
             Simplify.find_module mod_name (Some curr_module) seen_modules
@@ -239,8 +216,6 @@ let rec simplify script =
 
   let script = List.rev scr in
   let modules = List.rev modules |> Array.of_list in
-
-  Debug.debug Format.err_formatter "END OF SIMPLIFY@\n";
 
   (script, modules)
 
@@ -344,8 +319,6 @@ let exec_assert env = function
     with Stack_overflow ->
       assert (expected = "call stack exhausted");
       env )
-  | SAssert_invalid (_mod, _failure) -> (* TODO *) env
-  | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
 
 let exec script modules =
   let env =
@@ -356,8 +329,7 @@ let exec script modules =
         | Register_indice (name, i) ->
           Hashtbl.replace env.Interpret.registered_modules name i;
           env
-        | Action a -> fst (exec_action env a)
-      )
+        | Action a -> fst (exec_action env a) )
       { Interpret.modules; registered_modules = Hashtbl.create 64 }
       script
   in
