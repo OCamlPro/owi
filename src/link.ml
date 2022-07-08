@@ -209,7 +209,7 @@ let module_ _registered_modules modules module_indice =
               let i =
                 indice_to_int @@ Option.value ind ~default:(Raw curr_func)
               in
-              if Array.length funcs <= i then failwith "unknown func";
+              if Array.length funcs <= i then failwith "unknown function";
               Hashtbl.add m.exported_funcs name i
             | Export_table ind ->
               let i =
