@@ -347,20 +347,17 @@ let exec_assert env = function
   | SAssert_invalid (_mod, _failure) -> (* TODO *) env
   | SAssert_invalid_quote (_mod, _failure) -> (* TODO *) env
 
-let exec_register env name i =
-  Hashtbl.replace env.Interpret.registered_modules name i;
-  env
-
-let exec_cmd env = function
-  | Module_indice i -> Interpret.exec_module env i
-  | Assert a -> exec_assert env a
-  | Register_indice (name, i) -> exec_register env name i
-  | Action a -> fst (exec_action env a)
-
 let exec script modules =
   let env =
     List.fold_left
-      (fun env cmd -> exec_cmd env cmd)
+      (fun env -> function
+        | Module_indice i -> Interpret.exec_module env i
+        | Assert a -> exec_assert env a
+        | Register_indice (name, i) ->
+          Hashtbl.replace env.Interpret.registered_modules name i;
+          env
+        | Action a -> fst (exec_action env a)
+      )
       { Interpret.modules; registered_modules = Hashtbl.create 64 }
       script
   in

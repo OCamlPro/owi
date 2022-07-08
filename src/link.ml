@@ -140,6 +140,8 @@ let module_ _registered_modules modules module_indice =
 
   Debug.debug Format.err_formatter "module updated with globals@.";
 
+  let global_done = ref ~-1 in
+
   let rec const_expr = function
     | [ I32_const n ] -> Const_I32 n
     | [ I64_const n ] -> Const_I64 n
@@ -147,8 +149,11 @@ let module_ _registered_modules modules module_indice =
     | [ F64_const f ] -> Const_F64 f
     | [ Ref_null rt ] -> Const_null rt
     | [ Global_get i ] -> begin
-      match globals.(indice_to_int i) with
-      | Local (_gt, e) -> const_expr e
+      let i = indice_to_int i in
+      if i > !global_done then failwith "unknown global";
+      match globals.(i) with
+      | Local (_gt, e) ->
+          const_expr e
       | Imported (mi, i) ->
         let _mi, _gt, e = get_global modules mi (indice_to_int i) in
         e
@@ -159,10 +164,16 @@ let module_ _registered_modules modules module_indice =
   in
 
   let globals =
-    Array.map
-      (function
-        | Local (gt, e) -> Local (gt, const_expr e)
-        | Imported (mi, i) -> Imported (mi, i) )
+    Array.mapi
+      (fun i g ->
+        let res =
+          match g with
+          | Local (gt, e) -> Local (gt, const_expr e)
+          | Imported (mi, i) -> Imported (mi, i)
+        in
+        global_done := i;
+        res
+      )
       globals
   in
 
