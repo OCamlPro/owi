@@ -403,6 +403,7 @@
       (table.init 4 (i32.const 12) (i32.const 1) (i32.const 1))))
   "unknown table 0")
 
+
 (module
   (table $t0 30 30 funcref)
   (table $t1 28 28 funcref)

@@ -82,6 +82,7 @@
 (assert_return (invoke $Mg "get_mut") (i32.const 241))
 (assert_return (invoke $Ng "Mg.get_mut") (i32.const 241))
 
+
 (assert_unlinkable
   (module (import "Mg" "mut_glob" (global i32)))
   "incompatible import type"
@@ -143,7 +144,6 @@
     (call_indirect (type 0) (local.get 0))
   )
 )
-
 (register "Mt" $Mt)
 
 (module $Nt
@@ -285,7 +285,6 @@
   )
   "out of bounds memory access"
 )
-
 (assert_return (invoke $Mt "call" (i32.const 7)) (i32.const 0))
 
 

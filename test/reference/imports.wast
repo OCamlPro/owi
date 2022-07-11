@@ -90,7 +90,7 @@
 (assert_return (invoke "print64" (i64.const 24)))
 
 (assert_invalid
-  (module
+  (module 
     (type (func (result i32)))
     (import "test" "func" (func (type 1)))
   )
@@ -223,7 +223,6 @@
   (module (import "spectest" "memory" (func)))
   "incompatible import type"
 )
-
 
 
 ;; Globals
@@ -586,7 +585,7 @@
 (assert_return (invoke $Mgm "grow") (i32.const 1)) ;; now size is 2
 (module $Mgim1
   ;; imported memory limits should match, because external memory size is 2 now
-  (memory (export "memory") (import "grown-memory" "memory") 2)
+  (memory (export "memory") (import "grown-memory" "memory") 2) 
   (func (export "grow") (result i32) (memory.grow (i32.const 1)))
 )
 (register "grown-imported-memory" $Mgim1)

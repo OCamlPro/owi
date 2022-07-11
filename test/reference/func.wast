@@ -416,6 +416,7 @@
 (assert_return (invoke "init-local-f32") (f32.const 0))
 (assert_return (invoke "init-local-f64") (f64.const 0))
 
+
 ;; Expansion of inline function types
 
 (module

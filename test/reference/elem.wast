@@ -315,7 +315,7 @@
   (elem $e (i32.const 0) func $f)
   (func $f)
   (func (export "init")
-  (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
+    (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
   )
 )
 (assert_trap (invoke "init") "out of bounds table access")
@@ -376,7 +376,7 @@
 
 (assert_invalid
   (module
-    (global (import "test" "global-i32") i32)
+    (global (import "spectest" "global_i32") i32)
     (table 1 funcref)
     (elem (offset (global.get 0) (global.get 0)))
   )
@@ -385,7 +385,7 @@
 
 (assert_invalid
   (module
-    (global (import "test" "global-i32") i32)
+    (global (import "spectest" "global_i32") i32)
     (table 1 funcref)
     (elem (offset (global.get 0) (i32.const 0)))
   )
@@ -441,12 +441,19 @@
 
 (assert_invalid
    (module
-     (global (import "test" "global-i32") i32)
+     (global (import "spectest" "global_i32") i32)
      (table 1 funcref)
      (elem (global.get 1))
    )
    "unknown global 1"
 )
+
+(module
+  (global $g (mut i32) (i32.const 56))
+  (export "global-mut-i32" (global $g))
+)
+
+(register "test")
 
 (assert_invalid
    (module

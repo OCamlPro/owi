@@ -145,6 +145,8 @@
 (module (export "a" (table $a)) (table $a 0 funcref))
 (module (export "a" (table $a)) (table $a 0 1 funcref))
 
+(; TODO: access table ;)
+
 (assert_invalid
   (module (export "a" (table 0)))
   "unknown table"
@@ -198,6 +200,8 @@
 (module (export "a" (memory 0)) (memory 0 1))
 (module (export "a" (memory $a)) (memory $a 0))
 (module (export "a" (memory $a)) (memory $a 0 1))
+
+(; TODO: access memory ;)
 
 (assert_invalid
   (module (export "a" (memory 0)))
