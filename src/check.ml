@@ -59,9 +59,9 @@ let module_ m =
            begin
              match i.desc with
              | Import_mem (id, _) ->
+               add_memory id;
                if env.memory || env.imported_memory then
                  failwith "multiple memories";
-               add_memory id;
                { env with imported_memory = true }
              | Import_func _ -> env
              | Import_global (id, _) ->
@@ -74,9 +74,9 @@ let module_ m =
          | MData _d -> env
          | MElem _e -> env
          | MMem (id, _) ->
+           add_memory id;
            if env.memory || env.imported_memory then
              failwith "multiple memories";
-           add_memory id;
            { env with memory = true }
          | MType _t -> env
          | MGlobal { id; _ } ->
