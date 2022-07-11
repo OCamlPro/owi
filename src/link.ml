@@ -251,8 +251,7 @@ let module_ _registered_modules modules module_indice =
               in
               let mem_bytes, _max =
                 try get_memory modules module_indice indice
-                with Invalid_argument _ ->
-                  failwith "out of bounds memory access"
+                with Invalid_argument _ -> failwith "unknown memory"
               in
               let len = String.length data.init in
               try Bytes.blit_string data.init 0 mem_bytes offset len

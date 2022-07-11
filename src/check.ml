@@ -3,6 +3,7 @@ open Types
 type env =
   { start : bool
   ; memory : bool
+  ; imported_memory : bool
   ; funcs : bool
   ; tables : bool
   ; globals : bool
@@ -11,6 +12,7 @@ type env =
 let empty_env () =
   { start = false
   ; memory = false
+  ; imported_memory = false
   ; funcs = false
   ; tables = false
   ; globals = false
@@ -56,17 +58,25 @@ let module_ m =
            if env.globals then failwith "import after global";
            begin
              match i.desc with
-             | Import_mem (id, _) -> add_memory id
-             | Import_func _ -> ()
-             | Import_global (id, _) -> add_global id
-             | Import_table (id, _) -> add_table id
-           end;
-           env
+             | Import_mem (id, _) ->
+               if env.memory || env.imported_memory then
+                 failwith "multiple memories";
+               add_memory id;
+               { env with imported_memory = true }
+             | Import_func _ -> env
+             | Import_global (id, _) ->
+               add_global id;
+               env
+             | Import_table (id, _) ->
+               add_table id;
+               env
+           end
          | MData _d -> env
          | MElem _e -> env
          | MMem (id, _) ->
+           if env.memory || env.imported_memory then
+             failwith "multiple memories";
            add_memory id;
-           if env.memory then failwith "duplicate memory";
            { env with memory = true }
          | MType _t -> env
          | MGlobal { id; _ } ->

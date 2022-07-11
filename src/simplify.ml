@@ -413,7 +413,10 @@ let mk_module registered_modules m =
               Br_table (Array.map f ids, f id)
             | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
             | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
-            | Call id -> Call (Raw (map_symb find_func id))
+            | Call id ->
+              let id = map_symb find_func id in
+              if id >= Array.length funcs then failwith "unknown function";
+              Call (Raw id)
             | Local_set id -> Local_set (map_symb_raw find_local id)
             | Local_get id -> Local_get (map_symb_raw find_local id)
             | Local_tee id -> Local_tee (map_symb_raw find_local id)
@@ -428,8 +431,10 @@ let mk_module registered_modules m =
               let bt = bt_to_raw bt in
               Block (id, bt, expr e (id :: block_ids))
             | Call_indirect (tbl_i, bt) ->
+              let tbl_i = map_symb find_table tbl_i in
+              if tbl_i >= Array.length tables then failwith "unknown table";
               let bt = Option.get @@ bt_to_raw (Some bt) in
-              Call_indirect (map_symb_raw find_table tbl_i, bt)
+              Call_indirect (Raw tbl_i, bt)
             | Global_set id -> Global_set (map_symb_raw find_global id)
             | Global_get id -> Global_get (map_symb_raw find_global id)
             | Ref_func id -> Ref_func (map_symb_raw find_func id)
