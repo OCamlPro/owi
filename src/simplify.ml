@@ -359,21 +359,34 @@ let mk_module registered_modules m =
             locals;
 
           (* block_ids handling *)
-          let find_block_id id l =
-            let pos = ref (-1) in
-            begin
-              try
-                List.iteri
-                  (fun i n ->
-                    if n = Some id then begin
-                      pos := i;
-                      raise Exit
-                    end )
-                  l
-              with Exit -> ()
-            end;
-            if !pos = -1 then failwith @@ Format.sprintf "unbound label %s" id;
-            !pos
+          let block_id_to_raw (loop_count, block_ids) id =
+            let id =
+              match id with
+              | Symbolic id ->
+                Debug.debug Format.err_formatter "SYMBOLIC BLOCK ID %s@\n" id;
+                let pos = ref (-1) in
+                begin
+                  try
+                    List.iteri
+                      (fun i n ->
+                        if n = Some id then begin
+                          pos := i;
+                          raise Exit
+                        end )
+                      block_ids
+                  with Exit -> ()
+                end;
+                if !pos = -1 then
+                  failwith @@ Format.sprintf "unbound label %s" id;
+                !pos
+              | Raw id ->
+                Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;
+                id
+            in
+            (* this is > and not >= because you can `br 0` without any block to target the function *)
+            if id > List.length block_ids + loop_count then
+              failwith "unknown label";
+            Raw id
           in
 
           let bt_to_raw =
@@ -404,15 +417,12 @@ let mk_module registered_modules m =
           in
 
           (* handling an expression *)
-          let rec body block_ids = function
+          let rec body (loop_count, block_ids) = function
             | Br_table (ids, id) ->
-              let f = function
-                | Symbolic id -> Raw (find_block_id id block_ids)
-                | Raw id -> Raw id
-              in
+              let f = block_id_to_raw (loop_count, block_ids) in
               Br_table (Array.map f ids, f id)
-            | Br_if (Symbolic id) -> Br_if (Raw (find_block_id id block_ids))
-            | Br (Symbolic id) -> Br (Raw (find_block_id id block_ids))
+            | Br_if id -> Br_if (block_id_to_raw (loop_count, block_ids) id)
+            | Br id -> Br (block_id_to_raw (loop_count, block_ids) id)
             | Call id ->
               let id = map_symb find_func id in
               if id >= Array.length funcs then failwith "unknown function";
@@ -423,13 +433,23 @@ let mk_module registered_modules m =
             | If_else (id, bt, e1, e2) ->
               let bt = bt_to_raw bt in
               let block_ids = id :: block_ids in
-              If_else (id, bt, expr e1 block_ids, expr e2 block_ids)
+              If_else
+                ( id
+                , bt
+                , expr e1 (loop_count, block_ids)
+                , expr e2 (loop_count, block_ids) )
             | Loop (id, bt, e) ->
               let bt = bt_to_raw bt in
-              Loop (id, bt, expr e (id :: block_ids))
+              (* we need to add two block_ids because in a loop you can either
+                  - br 0 (to loop)
+                  - br 1 (to exit)
+                 TODO: should the second one be None ? is the order correct ?
+              *)
+              let e = expr e (loop_count + 1, id :: block_ids) in
+              Loop (id, bt, e)
             | Block (id, bt, e) ->
               let bt = bt_to_raw bt in
-              Block (id, bt, expr e (id :: block_ids))
+              Block (id, bt, expr e (loop_count, id :: block_ids))
             | Call_indirect (tbl_i, bt) ->
               let tbl_i = map_symb find_table tbl_i in
               if tbl_i >= Array.length tables then failwith "unknown table";
@@ -462,11 +482,13 @@ let mk_module registered_modules m =
               | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
               | F64_promote_f32 | F_convert_i _ | I_trunc_f _ | I_trunc_sat_f _
               | Ref_is_null | F_binop _ | F32_const _ | F64_const _
-              | I32_const _ | I64_const _ | Unreachable | Br _ | Br_if _ | Drop
-              | Select _ | Nop | Return ) as i ->
+              | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
+              | Return ) as i ->
               i
-          and expr e block_ids = List.map (body block_ids) e in
-          let body = expr f.body [] in
+          and expr e (loop_count, block_ids) =
+            List.map (body (loop_count, block_ids)) e
+          in
+          let body = expr f.body (0, []) in
           Local { f with body; type_f = Bt_raw (None, (pt, rt)) }
         | Imported _ as f -> f )
       funcs
