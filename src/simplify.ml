@@ -470,6 +470,10 @@ let mk_module registered_modules m =
       funcs
   in
 
+  Option.iter
+    (fun i -> if i >= Array.length funcs then failwith "unknown function")
+    start;
+
   { fields
   ; funcs
   ; seen_funcs = Hashtbl.create 512
