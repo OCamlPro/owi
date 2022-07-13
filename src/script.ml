@@ -48,11 +48,11 @@ let ignore_tmp =
 
 let check_error ~expected ~got =
   let ok =
-    got = "constant out of range"
-    && (expected = "i32 constant out of range" || expected = "i32 constant")
-    || got = expected
+    got = expected
     || List.mem expected ignore_tmp
     || String.starts_with ~prefix:got expected
+    || got = "constant out of range"
+       && (expected = "i32 constant out of range" || expected = "i32 constant")
   in
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
@@ -270,9 +270,7 @@ let exec_assert env = function
     let results_got = List.rev results_got in
     let eq =
       List.length results_expected = List.length results_got
-      && List.for_all2
-           (fun result const -> compare_result_const result const)
-           results_expected results_got
+      && List.for_all2 compare_result_const results_expected results_got
     in
     if not eq then begin
       failwith
@@ -285,6 +283,7 @@ let exec_assert env = function
     end;
     env
   | SAssert_trap (action, expected) ->
+    Debug.debug fmt "assert trap...@.";
     let got =
       try
         let _env, _results = exec_action env action in
@@ -294,6 +293,7 @@ let exec_assert env = function
     check_error ~expected ~got;
     env
   | SAssert_exhaustion (action, expected) ->
+    Debug.debug fmt "assert exhaustion...@.";
     let got =
       try
         ignore @@ exec_action env action;
@@ -304,7 +304,7 @@ let exec_assert env = function
     env
 
 let exec script modules =
-  let env =
+  let _env =
     List.fold_left
       (fun env -> function
         | Module_indice i -> Interpret.exec_module env i
@@ -316,4 +316,4 @@ let exec script modules =
       { Interpret.modules; registered_modules = Hashtbl.create 64 }
       script
   in
-  ignore env
+  ()
