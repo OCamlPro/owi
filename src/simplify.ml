@@ -478,8 +478,10 @@ let mk_module registered_modules m =
             | Table_set id -> Table_set (map_symb_raw find_table id)
             | Table_grow id -> Table_grow (map_symb_raw find_table id)
             | Table_init (i, i') ->
-              Table_init
-                (map_symb_raw find_table i, map_symb_raw find_element i')
+              let i = map_symb find_table i in
+              if i >= Array.length tables then failwith "unknown table";
+              (* TODO: check i' ? *)
+              Table_init (Raw i, map_symb_raw find_element i')
             | Table_fill id -> Table_fill (map_symb_raw find_table id)
             | Table_copy (i, i') ->
               Table_copy (map_symb_raw find_table i, map_symb_raw find_table i')
@@ -492,7 +494,10 @@ let mk_module registered_modules m =
               let id = map_symb find_data id in
               if id >= Array.length datas then failwith "unknown data segment";
               Data_drop (Raw id)
-            | Elem_drop id -> Elem_drop (Raw (map_symb find_element id))
+            | Elem_drop id ->
+              let id = map_symb find_element id in
+              if id > env.curr_element then failwith "unknown elem segment";
+              Elem_drop (Raw id)
             | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
               | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
               | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
