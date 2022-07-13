@@ -453,7 +453,10 @@ let mk_module registered_modules m =
               if id >= Array.length funcs then failwith "unknown function";
               Call (Raw id)
             | Local_set id -> Local_set (map_symb_raw find_local id)
-            | Local_get id -> Local_get (map_symb_raw find_local id)
+            | Local_get id ->
+              let id = map_symb find_local id in
+              if id >= List.length locals then failwith "unknown local";
+              Local_get (Raw id)
             | Local_tee id -> Local_tee (map_symb_raw find_local id)
             | If_else (id, bt, e1, e2) ->
               let bt = bt_to_raw bt in
@@ -476,7 +479,10 @@ let mk_module registered_modules m =
               let bt = Option.get @@ bt_to_raw (Some bt) in
               Call_indirect (Raw tbl_i, bt)
             | Global_set id -> Global_set (map_symb_raw find_global id)
-            | Global_get id -> Global_get (map_symb_raw find_global id)
+            | Global_get id ->
+              let id = map_symb find_global id in
+              if id >= Array.length globals_tmp then failwith "unknown global";
+              Global_get (Raw id)
             | Ref_func id -> Ref_func (map_symb_raw find_func id)
             | Table_size id -> Table_size (map_symb_raw find_table id)
             | Table_get id -> Table_get (map_symb_raw find_table id)
