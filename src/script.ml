@@ -19,16 +19,8 @@ type script = cmd list * module_ Array.t
 
 let ignore_tmp =
   [ "type mismatch"
-  ; "unknown elem segment 0"
-  ; "unknown elem segment 4"
-  ; "unknown table 0"
   ; "invalid result arity"
-  ; "unknown function 7"
-  ; "unknown memory 0"
   ; "undeclared function reference"
-  ; "unknown data segment 1"
-  ; "unknown global 0"
-  ; "unknown global 1"
   ; "alignment must not be larger than natural"
     (*
             | I_load8 (_nn, _sx, { align; _ }) as i ->
@@ -60,6 +52,7 @@ let check_error ~expected ~got =
     && (expected = "i32 constant out of range" || expected = "i32 constant")
     || got = expected
     || List.mem expected ignore_tmp
+    || String.starts_with ~prefix:got expected
   in
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
@@ -126,17 +119,19 @@ let rec simplify script =
         | Assert (Assert_malformed_quote (m, expected)) ->
           Debug.debug Format.err_formatter
             "simplifying assert malformed quote... ";
-
-          ( match Parse.from_string (String.concat "\n" m) with
-          | Ok script -> (
-            try
-              match check script with
-              | Ok () ->
-                let _script, _modules = simplify script in
-                check_error ~expected ~got:"Ok"
-              | Error got -> check_error ~expected ~got
-            with Failure got -> check_error ~expected ~got )
-          | Error got -> check_error ~expected ~got );
+          let got =
+            match Parse.from_string (String.concat "\n" m) with
+            | Ok script -> (
+              try
+                match check script with
+                | Ok () ->
+                  let _script, _modules = simplify script in
+                  "Ok"
+                | Error got -> got
+              with Failure got -> got )
+            | Error got -> got
+          in
+          check_error ~expected ~got;
           Debug.debug Format.err_formatter "done !@\n";
           (curr_module, modules, scr)
         | Assert (Assert_invalid_binary _) ->
@@ -165,10 +160,12 @@ let rec simplify script =
           check_error ~expected ~got;
           (curr_module, modules, scr)
         | Assert (Assert_invalid_quote (m, expected)) ->
-          ( match Parse.from_string (String.concat "\n" m) with
-          | Error got -> check_error ~expected ~got
-          | Ok [ Module _m ] -> check_error ~expected ~got:"Ok"
-          | Ok _ -> assert false );
+          let got =
+            match Parse.from_string (String.concat "\n" m) with
+            | Error got -> got
+            | Ok _ -> "Ok"
+          in
+          check_error ~expected ~got;
           (curr_module, modules, scr)
         | Assert (Assert_unlinkable (m, msg)) ->
           let curr_module = curr_module + 1 in
@@ -288,28 +285,23 @@ let exec_assert env = function
     end;
     env
   | SAssert_trap (action, expected) ->
-    begin
+    let got =
       try
         let _env, _results = exec_action env action in
-        failwith
-        @@ Format.sprintf "assert_trap failed ; expected `%s` but did not trap"
-             expected
-      with Trap msg ->
-        let res = msg = expected in
-        if not res then
-          Debug.debug Format.err_formatter "expected `%s` but got `%s`@."
-            expected msg;
-        assert (msg = expected)
-    end;
+        "Ok"
+      with Trap got -> got
+    in
+    check_error ~expected ~got;
     env
-  | SAssert_exhaustion (action, expected) -> (
-    try
-      ignore @@ exec_action env action;
-      Format.eprintf "@.@.@. EXPECTED : `%S` @.@.@. " expected;
-      assert false
-    with Stack_overflow ->
-      assert (expected = "call stack exhausted");
-      env )
+  | SAssert_exhaustion (action, expected) ->
+    let got =
+      try
+        ignore @@ exec_action env action;
+        "Ok"
+      with Stack_overflow -> "call stack exhausted"
+    in
+    check_error ~expected ~got;
+    env
 
 let exec script modules =
   let env =
