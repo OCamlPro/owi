@@ -465,11 +465,6 @@ let mk_module registered_modules m =
                 , expr e2 (loop_count, block_ids) )
             | Loop (id, bt, e) ->
               let bt = bt_to_raw bt in
-              (* we need to add two block_ids because in a loop you can either
-                 - br 0 (to loop)
-                 - br 1 (to exit)
-                   TODO: should the second one be None ? is the order correct ?
-              *)
               let e = expr e (loop_count + 1, id :: block_ids) in
               Loop (id, bt, e)
             | Block (id, bt, e) ->
