@@ -452,12 +452,18 @@ let mk_module registered_modules m =
               let id = map_symb find_func id in
               if id >= Array.length funcs then failwith "unknown function";
               Call (Raw id)
-            | Local_set id -> Local_set (map_symb_raw find_local id)
+            | Local_set id ->
+              let id = map_symb find_local id in
+              if id >= List.length locals then failwith "unknown local";
+              Local_set (Raw id)
             | Local_get id ->
               let id = map_symb find_local id in
               if id >= List.length locals then failwith "unknown local";
               Local_get (Raw id)
-            | Local_tee id -> Local_tee (map_symb_raw find_local id)
+            | Local_tee id ->
+              let id = map_symb find_local id in
+              if id >= List.length locals then failwith "unknown local";
+              Local_tee (Raw id)
             | If_else (id, bt, e1, e2) ->
               let bt = bt_to_raw bt in
               let block_ids = id :: block_ids in
