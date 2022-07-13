@@ -483,8 +483,15 @@ let mk_module registered_modules m =
             | Table_fill id -> Table_fill (map_symb_raw find_table id)
             | Table_copy (i, i') ->
               Table_copy (map_symb_raw find_table i, map_symb_raw find_table i')
-            | Memory_init id -> Memory_init (Raw (map_symb find_data id))
-            | Data_drop id -> Data_drop (Raw (map_symb find_data id))
+            | Memory_init id ->
+              if Array.length memories < 1 then failwith "unknown memory";
+              let id = map_symb find_data id in
+              if id >= Array.length datas then failwith "unknown data segment";
+              Memory_init (Raw id)
+            | Data_drop id ->
+              let id = map_symb find_data id in
+              if id >= Array.length datas then failwith "unknown data segment";
+              Data_drop (Raw id)
             | Elem_drop id -> Elem_drop (Raw (map_symb find_element id))
             | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
               | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
