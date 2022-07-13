@@ -291,6 +291,13 @@ let mk_module registered_modules m =
               Elem_active (ti, aux offset)
             | Elem_declarative -> e.mode
           in
+          List.iter
+            (List.iter (function
+              | Ref_func i ->
+                if map_symb find_func i >= Array.length funcs then
+                  failwith "unknown function"
+              | _instr -> () ) )
+            init;
           MElem { e with mode; init } :: fields
         | f -> f :: fields )
       [] m.Types.fields
