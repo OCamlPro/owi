@@ -308,8 +308,10 @@ let data fmt d = Format.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
 let elem_mode fmt = function
   | Elem_passive -> ()
   | Elem_declarative -> Format.fprintf fmt "declare"
-  | Elem_active (i, e) ->
-    Format.fprintf fmt "(table %a) (offset %a)" indice_opt i expr e
+  | Elem_active (i, e) -> (
+    match i with
+    | None -> Format.fprintf fmt "(offset %a)" expr e
+    | Some i -> Format.fprintf fmt "(table %a) (offset %a)" indice i expr e )
 
 let elemexpr fmt e = Format.fprintf fmt "(item %a)" expr e
 
