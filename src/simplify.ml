@@ -242,7 +242,17 @@ let mk_module registered_modules m =
   let globals_tmp =
     List.map
       (function
-        | Local (gt, b) -> Local (gt, List.map aux b) | Imported _ as i -> i )
+        | Local (gt, b) ->
+          let b = List.map aux b in
+          List.iter
+            (function
+              | Ref_func i ->
+                let i = map_symb find_func i in
+                if i >= List.length env.funcs then failwith "unknown function"
+              | _instr -> () )
+            b;
+          Local (gt, b)
+        | Imported _ as i -> i )
       env.globals_tmp
   in
 
