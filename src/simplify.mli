@@ -1,17 +1,17 @@
 open Types
 
-type 'a runtime =
+type ('a, 'b) runtime =
   | Local of 'a
-  | Imported of int * indice
+  | Imported of int * indice * 'b
 
 type runtime_table =
-  (ref_type * (int * const) option array * int option) runtime
+  (ref_type * (int * const) option array * int option, unit) runtime
 
-type runtime_global = (global_type * const) runtime
+type runtime_global = (global_type * const, global_type) runtime
 
-type runtime_memory = (bytes * int option) runtime
+type runtime_memory = (bytes * int option, unit) runtime
 
-type runtime_func = func runtime
+type runtime_func = (func, unit) runtime
 
 type module_ =
   { fields : module_field list
@@ -21,7 +21,7 @@ type module_ =
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
-  ; globals_tmp : (global_type * expr) runtime array
+  ; globals_tmp : (global_type * expr, global_type) runtime array
   ; types : func_type array
   ; elements : (ref_type * const array) array
   ; exported_funcs : (string, int) Hashtbl.t

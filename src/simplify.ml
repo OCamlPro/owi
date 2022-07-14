@@ -7,18 +7,18 @@ let check_limit min max =
       )
     max
 
-type 'a runtime =
+type ('a, 'b) runtime =
   | Local of 'a
-  | Imported of int * indice
+  | Imported of int * indice * 'b
 
 type runtime_table =
-  (ref_type * (int * const) option array * int option) runtime
+  (ref_type * (int * const) option array * int option, unit) runtime
 
-type runtime_global = (global_type * const) runtime
+type runtime_global = (global_type * const, global_type) runtime
 
-type runtime_memory = (bytes * int option) runtime
+type runtime_memory = (bytes * int option, unit) runtime
 
-type runtime_func = func runtime
+type runtime_func = (func, unit) runtime
 
 type module_ =
   { fields : module_field list
@@ -28,7 +28,7 @@ type module_ =
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
-  ; globals_tmp : (global_type * expr) runtime array
+  ; globals_tmp : (global_type * expr, global_type) runtime array
   ; types : func_type array
   ; elements : (ref_type * const array) array
   ; exported_funcs : (string, int) Hashtbl.t
@@ -66,7 +66,7 @@ type env =
   ; datas : string list
   ; funcs : runtime_func list
   ; globals : runtime_global list
-  ; globals_tmp : (global_type * expr) runtime list
+  ; globals_tmp : (global_type * expr, global_type) runtime list
   ; memories : runtime_memory list
   ; tables : runtime_table list
   ; types : func_type list
@@ -155,28 +155,32 @@ let mk_module registered_modules m =
           let curr_func = env.curr_func + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
           let module_indice = find_module module_ in
-          let funcs = Imported (module_indice, Symbolic name) :: env.funcs in
+          let funcs =
+            Imported (module_indice, Symbolic name, ()) :: env.funcs
+          in
           { env with curr_func; funcs }
         | MImport { desc = Import_mem (id, _t); module_; name } ->
           let curr_memory = env.curr_memory + 1 in
           Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
           let module_indice = find_module module_ in
           let memories =
-            Imported (module_indice, Symbolic name) :: env.memories
+            Imported (module_indice, Symbolic name, ()) :: env.memories
           in
           { env with curr_memory; memories }
         | MImport { desc = Import_table (id, _t); module_; name } ->
           let curr_table = env.curr_table + 1 in
           Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
           let module_indice = find_module module_ in
-          let tables = Imported (module_indice, Symbolic name) :: env.tables in
+          let tables =
+            Imported (module_indice, Symbolic name, ()) :: env.tables
+          in
           { env with curr_table; tables }
-        | MImport { desc = Import_global (id, _t); module_; name } ->
+        | MImport { desc = Import_global (id, t); module_; name } ->
           let curr_global = env.curr_global + 1 in
           Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
           let module_indice = find_module module_ in
           let globals_tmp =
-            Imported (module_indice, Symbolic name) :: env.globals_tmp
+            Imported (module_indice, Symbolic name, t) :: env.globals_tmp
           in
           { env with curr_global; globals_tmp }
         | MMem (id, { min; max }) ->
@@ -484,7 +488,19 @@ let mk_module registered_modules m =
               if tbl_i >= Array.length tables then failwith "unknown table";
               let bt = Option.get @@ bt_to_raw (Some bt) in
               Call_indirect (Raw tbl_i, bt)
-            | Global_set id -> Global_set (map_symb_raw find_global id)
+            | Global_set id ->
+              let id = map_symb find_global id in
+              (* TODO: it seems there's not test for this, add one ? *)
+              if id >= Array.length globals_tmp then failwith "unknown global";
+              begin
+                match globals_tmp.(id) with
+                | Local ((mut, _vt), _) | Imported (_, _, (mut, _vt)) -> begin
+                  match mut with
+                  | Const -> failwith "global is immutable"
+                  | Var -> ()
+                end
+              end;
+              Global_set (Raw id)
             | Global_get id ->
               let id = map_symb find_global id in
               if id >= Array.length globals_tmp then failwith "unknown global";

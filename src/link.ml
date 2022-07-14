@@ -5,49 +5,49 @@ let rec set_table (modules : module_ array) mi i new_table =
   let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, _old_table, max) -> tables.(i) <- Local (rt, new_table, max)
-  | Imported (mi, Raw i) -> set_table modules mi i new_table
+  | Imported (mi, Raw i, ()) -> set_table modules mi i new_table
   | _ -> assert false
 
 let rec get_table (modules : module_ array) mi i =
   let tables = modules.(mi).tables in
   match tables.(i) with
   | Local (rt, tbl, max) -> ((mi, i), rt, tbl, max)
-  | Imported (mi, Raw i) -> get_table modules mi i
+  | Imported (mi, Raw i, ()) -> get_table modules mi i
   | _ -> assert false
 
 let rec set_global (modules : module_ array) mi i new_global =
   let globals = modules.(mi).globals in
   match globals.(i) with
   | Local (t, _old_global) -> globals.(i) <- Local (t, new_global)
-  | Imported (mi, Raw i) -> set_global modules mi i new_global
+  | Imported (mi, Raw i, _t) -> set_global modules mi i new_global
   | _ -> assert false
 
 let rec get_global (modules : module_ array) mi i =
   let globals = modules.(mi).globals in
   match globals.(i) with
   | Local (gt, g) -> (mi, gt, g)
-  | Imported (mi, Raw i) -> get_global modules mi i
+  | Imported (mi, Raw i, _t) -> get_global modules mi i
   | _ -> assert false
 
 let rec get_func (modules : module_ array) mi i =
   let funcs = modules.(mi).funcs in
   match funcs.(i) with
   | Local f -> (mi, f)
-  | Imported (m, Raw i) -> get_func modules m i
+  | Imported (m, Raw i, ()) -> get_func modules m i
   | _ -> assert false
 
 let rec set_memory (modules : module_ array) mi i new_mem =
   let memories = modules.(mi).memories in
   match memories.(i) with
   | Local (_old_mem, max) -> memories.(i) <- Local (new_mem, max)
-  | Imported (mi, Raw i) -> set_memory modules mi i new_mem
+  | Imported (mi, Raw i, ()) -> set_memory modules mi i new_mem
   | _ -> assert false
 
 let rec get_memory (modules : module_ array) mi i =
   let memories = modules.(mi).memories in
   match memories.(i) with
   | Local (m, max) -> (m, max)
-  | Imported (mi, Raw i) -> get_memory modules mi i
+  | Imported (mi, Raw i, ()) -> get_memory modules mi i
   | _ -> assert false
 
 let indice_to_int = function
@@ -68,13 +68,13 @@ let module_ _registered_modules modules module_indice =
   let funcs =
     Array.map
       (function
-        | Imported (mi, Symbolic name) ->
+        | Imported (mi, Symbolic name, ()) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_funcs name with
             | None -> failwith "unknown import"
             | Some i -> i
           in
-          Imported (mi, Raw i)
+          Imported (mi, Raw i, ())
         | (Local _ | Imported _) as f -> f )
       m.funcs
   in
@@ -87,13 +87,13 @@ let module_ _registered_modules modules module_indice =
   let memories =
     Array.map
       (function
-        | Imported (mi, Symbolic name) ->
+        | Imported (mi, Symbolic name, ()) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_memories name with
             | None -> failwith "unknown import"
             | Some i -> i
           in
-          Imported (mi, Raw i)
+          Imported (mi, Raw i, ())
         | (Local _ | Imported _) as f -> f )
       m.memories
   in
@@ -106,13 +106,13 @@ let module_ _registered_modules modules module_indice =
   let tables =
     Array.map
       (function
-        | Imported (mi, Symbolic name) ->
+        | Imported (mi, Symbolic name, ()) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_tables name with
             | None -> failwith "unknown import"
             | Some i -> i
           in
-          Imported (mi, Raw i)
+          Imported (mi, Raw i, ())
         | (Local _ | Imported _) as f -> f )
       m.tables
   in
@@ -128,13 +128,13 @@ let module_ _registered_modules modules module_indice =
   let globals =
     Array.map
       (function
-        | Imported (mi, Symbolic name) ->
+        | Imported (mi, Symbolic name, t) ->
           let i =
             match Hashtbl.find_opt modules.(mi).exported_globals name with
             | None -> failwith "unknown import"
             | Some i -> i
           in
-          Imported (mi, Raw i)
+          Imported (mi, Raw i, t)
         | (Local _ | Imported _) as f -> f )
       m.globals_tmp
   in
@@ -157,7 +157,7 @@ let module_ _registered_modules modules module_indice =
       if i > !global_done then failwith "unknown global";
       match globals.(i) with
       | Local (_gt, e) -> const_expr e
-      | Imported (mi, i) ->
+      | Imported (mi, i, _t) ->
         let _mi, _gt, e = get_global modules mi (indice_to_int i) in
         e
     end
@@ -172,7 +172,7 @@ let module_ _registered_modules modules module_indice =
         let res =
           match g with
           | Local (gt, e) -> Local (gt, const_expr e)
-          | Imported (mi, i) -> Imported (mi, i)
+          | Imported (mi, i, t) -> Imported (mi, i, t)
         in
         global_done := i;
         res )
