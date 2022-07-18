@@ -405,8 +405,7 @@ let mk_module registered_modules m =
                       block_ids
                   with Exit -> ()
                 end;
-                if !pos = -1 then
-                  failwith @@ Format.sprintf "unbound label %s" id;
+                if !pos = -1 then failwith "unknown label";
                 !pos
               | Raw id ->
                 Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;

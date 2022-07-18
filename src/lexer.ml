@@ -84,12 +84,18 @@ let id_char =
     | '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '/' | ':'
     | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' | '*' )]
 
-let operator =
-  [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':')]
-
 let name = [%sedlex.regexp? "\"", Star (Sub (any, "\"") | "\\\""), "\""]
 
+let operator =
+  [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':'), Star name]
+
 let id = [%sedlex.regexp? "$", Plus id_char]
+
+let bad_name = [%sedlex.regexp? name, Plus (name | id | operator)]
+
+let bad_id = [%sedlex.regexp? id, Plus name]
+
+let bad_num = [%sedlex.regexp? num, Plus (name | id | operator)]
 
 let keywords =
   let tbl = Hashtbl.create 512 in
@@ -346,6 +352,7 @@ let keywords =
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
+  | bad_num | bad_id | bad_name -> failwith "unknown operator"
   | num -> NUM (Utf8.lexeme buf)
   | operator -> (
     let operator = Utf8.lexeme buf in
