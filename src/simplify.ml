@@ -22,7 +22,6 @@ type runtime_func = (func, unit) runtime
 
 type module_ =
   { fields : module_field list
-  ; seen_funcs : (string, int) Hashtbl.t
   ; datas : string array
   ; funcs : runtime_func array
   ; memories : runtime_memory array
@@ -559,7 +558,6 @@ let mk_module registered_modules m =
 
   { fields
   ; funcs
-  ; seen_funcs = Hashtbl.create 512
   ; memories
   ; tables
   ; types

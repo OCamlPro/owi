@@ -15,7 +15,6 @@ type runtime_func = (func, unit) runtime
 
 type module_ =
   { fields : module_field list
-  ; seen_funcs : (string, int) Hashtbl.t
   ; datas : string array
   ; funcs : runtime_func array
   ; memories : runtime_memory array
