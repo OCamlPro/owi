@@ -57,6 +57,15 @@ let indice_to_int = function
     @@ Format.sprintf
          "interpreter internal error (indice_to_int init): unbound id $%s" id
 
+type acc =
+  { elems : (ref_type * const array) list
+  ; curr_func : int
+  ; curr_global : int
+  ; curr_memory : int
+  ; curr_data : int
+  ; curr_table : int
+  }
+
 let module_ _registered_modules modules module_indice =
   Debug.debug Format.err_formatter "linking module %d/%d@." module_indice
     (Array.length modules - 1);
@@ -194,14 +203,17 @@ let module_ _registered_modules modules module_indice =
            Pp.const instr
   in
 
-  let elements, _curr_func, _curr_global, _curr_memory, _curr_data, _curr_table
-      =
+  let { elems = elements; _ } =
     List.fold_left
-      (fun (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
-           field ->
+      (fun ( { elems
+             ; curr_func
+             ; curr_global
+             ; curr_memory
+             ; curr_data
+             ; curr_table
+             } as acc ) field ->
         match field with
-        | MFunc _ ->
-          (elems, curr_func + 1, curr_global, curr_memory, curr_data, curr_table)
+        | MFunc _ -> { acc with curr_func = curr_func + 1 }
         | MExport { desc; name } ->
           begin
             match desc with
@@ -230,11 +242,9 @@ let module_ _registered_modules modules module_indice =
               if Array.length memories <= i then failwith "unknown memory";
               Hashtbl.add m.exported_memories name i
           end;
-          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
-        | MMem _ ->
-          (elems, curr_func, curr_global, curr_memory + 1, curr_data, curr_table)
-        | MTable _ ->
-          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table + 1)
+          acc
+        | MMem _ -> { acc with curr_memory = curr_memory + 1 }
+        | MTable _ -> { acc with curr_table = curr_table + 1 }
         | MData data ->
           let curr_data = curr_data + 1 in
           begin
@@ -258,7 +268,7 @@ let module_ _registered_modules modules module_indice =
               with Invalid_argument _ ->
                 raise @@ Trap "out of bounds memory access" )
           end;
-          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
+          { acc with curr_data }
         | MElem e ->
           let init =
             Array.of_list
@@ -294,48 +304,24 @@ let module_ _registered_modules modules module_indice =
             | Elem_declarative -> [||]
             | Elem_passive -> init
           in
-          ( (e.type_, init) :: elems
-          , curr_func
-          , curr_global
-          , curr_memory
-          , curr_data
-          , curr_table )
-        | MType _ | MStart _ ->
-          (elems, curr_func, curr_global, curr_memory, curr_data, curr_table)
-        | MGlobal _ ->
-          (elems, curr_func, curr_global + 1, curr_memory, curr_data, curr_table)
+          { acc with elems = (e.type_, init) :: elems }
+        | MType _ | MStart _ -> acc
+        | MGlobal _ -> { acc with curr_global = curr_global + 1 }
         | MImport i -> begin
           match i.desc with
-          | Import_func _ ->
-            ( elems
-            , curr_func + 1
-            , curr_global
-            , curr_memory
-            , curr_data
-            , curr_table )
-          | Import_global _ ->
-            ( elems
-            , curr_func
-            , curr_global + 1
-            , curr_memory
-            , curr_data
-            , curr_table )
-          | Import_mem _ ->
-            ( elems
-            , curr_func
-            , curr_global
-            , curr_memory + 1
-            , curr_data
-            , curr_table )
-          | Import_table _ ->
-            ( elems
-            , curr_func
-            , curr_global
-            , curr_memory
-            , curr_data
-            , curr_table + 1 )
+          | Import_func _ -> { acc with curr_func = curr_func + 1 }
+          | Import_global _ -> { acc with curr_global = curr_global + 1 }
+          | Import_mem _ -> { acc with curr_memory = curr_memory + 1 }
+          | Import_table _ -> { acc with curr_table = curr_table + 1 }
         end )
-      ([], -1, -1, -1, -1, -1) m.fields
+      { elems = []
+      ; curr_func = -1
+      ; curr_global = -1
+      ; curr_memory = -1
+      ; curr_data = -1
+      ; curr_table = -1
+      }
+      m.fields
   in
 
   let elements = Array.of_list @@ List.rev elements in
