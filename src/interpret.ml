@@ -229,7 +229,7 @@ exception Branch of Stack.t * int
 
 let fmt = Format.std_formatter
 
-let indice_to_int = function Raw i -> i | Symbolic _id -> assert false
+let indice_to_int = function I i -> i
 
 let get_bt = function
   | Bt_ind _ind -> assert false
@@ -243,9 +243,9 @@ let init_local (_id, t) =
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
-let rec exec_instr env module_indice locals stack instr =
+let rec exec_instr env module_indice locals stack (instr:simplified_indice instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  Debug.debug fmt "running instr: %a@." Pp.Input.instr instr;
+  Debug.debug fmt "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack
@@ -891,7 +891,7 @@ let rec exec_instr env module_indice locals stack instr =
     let res = exec_func env module_indice func (List.rev args) in
     res @ stack
 
-and exec_expr env module_indice locals stack e is_loop bt =
+and exec_expr env module_indice locals stack (e:simplified_indice expr) is_loop bt =
   let rt =
     Option.fold ~none:Int.max_int
       ~some:(fun bt -> List.length (snd @@ get_bt bt))

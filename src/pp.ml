@@ -442,6 +442,6 @@ module Input = struct
 end
 
 module Simplified = struct
-  include Make_Expr(Symbolic_indice)
+  include Make_Expr(Simplified_indice)
   include Global
 end

@@ -19,12 +19,11 @@ type runtime_global = (global_type * const, global_type) runtime
 type runtime_memory = (bytes * int option, unit) runtime
 
 type runtime_func = (simplified_indice func, unit) runtime
-type runtime_input_func = (indice func, unit) runtime
 
 type module_ =
   { fields : module_field list
   ; datas : string array
-  ; funcs : runtime_input_func array
+  ; funcs : runtime_func array
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
@@ -43,6 +42,7 @@ type module_ =
 let map_symb find_in_tbl = function Raw i -> i | Symbolic id -> find_in_tbl id
 
 let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
+let map_symb_raw' find_in_tbl sym = I (map_symb find_in_tbl sym)
 
 let find_module name last seen =
   match name with
@@ -64,7 +64,7 @@ type env =
   ; curr_element : int
   ; curr_data : int
   ; datas : string list
-  ; funcs : runtime_input_func list
+  ; funcs : (indice func, unit) runtime list
   ; globals : runtime_global list
   ; globals_tmp : (global_type * indice expr, global_type) runtime list
   ; memories : runtime_memory list
@@ -85,7 +85,7 @@ let find_ind tbl x ind =
   | None -> failwith @@ Format.asprintf "unbound %s indice (simplify) %s" x ind
   | Some i -> i
 
-type out_indice = indice
+type out_indice = simplified_indice
 
 let mk_module registered_modules m =
   let exported_funcs = Hashtbl.create 512 in
@@ -390,7 +390,7 @@ let mk_module registered_modules m =
             locals;
 
           (* block_ids handling *)
-          let block_id_to_raw (loop_count, block_ids) id =
+          let block_id_to_raw (loop_count, block_ids) id : out_indice =
             let id =
               match id with
               | Symbolic id ->
@@ -416,7 +416,7 @@ let mk_module registered_modules m =
             (* this is > and not >= because you can `br 0` without any block to target the function *)
             if id > List.length block_ids + loop_count then
               failwith "unknown label";
-            Raw id
+            I id
           in
 
           let bt_to_raw =
@@ -456,19 +456,19 @@ let mk_module registered_modules m =
             | Call id ->
               let id = map_symb find_func id in
               if id >= Array.length funcs then failwith "unknown function";
-              Call (Raw id)
+              Call (I id)
             | Local_set id ->
               let id = map_symb find_local id in
               if id >= List.length locals then failwith "unknown local";
-              Local_set (Raw id)
+              Local_set (I id)
             | Local_get id ->
               let id = map_symb find_local id in
               if id >= List.length locals then failwith "unknown local";
-              Local_get (Raw id)
+              Local_get (I id)
             | Local_tee id ->
               let id = map_symb find_local id in
               if id >= List.length locals then failwith "unknown local";
-              Local_tee (Raw id)
+              Local_tee (I id)
             | If_else (id, bt, e1, e2) ->
               let bt = bt_to_raw bt in
               let block_ids = id :: block_ids in
@@ -488,7 +488,7 @@ let mk_module registered_modules m =
               let tbl_i = map_symb find_table tbl_i in
               if tbl_i >= Array.length tables then failwith "unknown table";
               let bt = Option.get @@ bt_to_raw (Some bt) in
-              Call_indirect (Raw tbl_i, bt)
+              Call_indirect (I tbl_i, bt)
             | Global_set id ->
               let id = map_symb find_global id in
               (* TODO: it seems there's not test for this, add one ? *)
@@ -501,37 +501,37 @@ let mk_module registered_modules m =
                   | Var -> ()
                 end
               end;
-              Global_set (Raw id)
+              Global_set (I id)
             | Global_get id ->
               let id = map_symb find_global id in
               if id >= Array.length globals_tmp then failwith "unknown global";
-              Global_get (Raw id)
-            | Ref_func id -> Ref_func (map_symb_raw find_func id)
-            | Table_size id -> Table_size (map_symb_raw find_table id)
-            | Table_get id -> Table_get (map_symb_raw find_table id)
-            | Table_set id -> Table_set (map_symb_raw find_table id)
-            | Table_grow id -> Table_grow (map_symb_raw find_table id)
+              Global_get (I id)
+            | Ref_func id -> Ref_func (map_symb_raw' find_func id)
+            | Table_size id -> Table_size (map_symb_raw' find_table id)
+            | Table_get id -> Table_get (map_symb_raw' find_table id)
+            | Table_set id -> Table_set (map_symb_raw' find_table id)
+            | Table_grow id -> Table_grow (map_symb_raw' find_table id)
             | Table_init (i, i') ->
               let i = map_symb find_table i in
               if i >= Array.length tables then failwith "unknown table";
               (* TODO: check i' ? *)
-              Table_init (Raw i, map_symb_raw find_element i')
-            | Table_fill id -> Table_fill (map_symb_raw find_table id)
+              Table_init (I i, map_symb_raw' find_element i')
+            | Table_fill id -> Table_fill (map_symb_raw' find_table id)
             | Table_copy (i, i') ->
-              Table_copy (map_symb_raw find_table i, map_symb_raw find_table i')
+              Table_copy (map_symb_raw' find_table i, map_symb_raw' find_table i')
             | Memory_init id ->
               if Array.length memories < 1 then failwith "unknown memory";
               let id = map_symb find_data id in
               if id >= Array.length datas then failwith "unknown data segment";
-              Memory_init (Raw id)
+              Memory_init (I id)
             | Data_drop id ->
               let id = map_symb find_data id in
               if id >= Array.length datas then failwith "unknown data segment";
-              Data_drop (Raw id)
+              Data_drop (I id)
             | Elem_drop id ->
               let id = map_symb find_element id in
               if id > env.curr_element then failwith "unknown elem segment";
-              Elem_drop (Raw id)
+              Elem_drop (I id)
             | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
               | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
               | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
