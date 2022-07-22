@@ -95,7 +95,7 @@ let bad_name = [%sedlex.regexp? name, Plus (name | id | operator)]
 
 let bad_id = [%sedlex.regexp? id, Plus name]
 
-let bad_num = [%sedlex.regexp? num, Plus (name | id | operator)]
+let bad_num = [%sedlex.regexp? num, Plus id]
 
 let keywords =
   let tbl = Hashtbl.create 512 in
@@ -357,9 +357,7 @@ let rec token buf =
   | operator -> (
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
-    with Not_found ->
-      Debug.debug Format.err_formatter "GOT: `%s`@." operator;
-      failwith "unknown operator" )
+    with Not_found -> failwith "unknown operator" )
   | ";;" ->
     single_comment buf;
     token buf
