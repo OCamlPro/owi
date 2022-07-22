@@ -1,7 +1,7 @@
-type env = {
-  modules : Simplify.module_ array;
-  registered_modules : (string, int) Hashtbl.t;
-}
+type env =
+  { modules : Simplify.module_ array
+  ; registered_modules : (string, int) Hashtbl.t
+  }
 
 val exec_func : env -> int -> Types.func -> Types.const list -> Stack.t
 
