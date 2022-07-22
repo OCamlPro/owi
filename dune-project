@@ -25,4 +25,9 @@
   (ocaml
    (>= 4.08))
   (integers
-   (>= 0.5.1))))
+   (>= 0.5.1))
+  sedlex
+  menhir
+  ocaml_intrinsics
+  uutf
+  (bos :with-test)))
