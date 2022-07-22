@@ -27,7 +27,7 @@ type module_ =
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
-  ; globals_tmp : (global_type * expr, global_type) runtime array
+  ; globals_tmp : (global_type * indice expr, global_type) runtime array
   ; types : func_type array
   ; elements : (ref_type * const array) array
   ; exported_funcs : (string, int) Hashtbl.t
@@ -65,7 +65,7 @@ type env =
   ; datas : string list
   ; funcs : runtime_func list
   ; globals : runtime_global list
-  ; globals_tmp : (global_type * expr, global_type) runtime list
+  ; globals_tmp : (global_type * indice expr, global_type) runtime list
   ; memories : runtime_memory list
   ; tables : runtime_table list
   ; types : func_type list

@@ -134,7 +134,7 @@ type block_type =
   | Bt_raw of (indice option * func_type)
 (* the indice option is the optional typeuse, if it's some it must be equal to the func_type *)
 
-type instr =
+type 'indice instr =
   (* Numeric Instructions *)
   | I32_const of Int32.t
   | I64_const of Int64.t
@@ -162,25 +162,25 @@ type instr =
   (* Reference instructions *)
   | Ref_null of ref_type
   | Ref_is_null
-  | Ref_func of indice
+  | Ref_func of 'indice
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option
   (* Variable instructions *)
-  | Local_get of indice
-  | Local_set of indice
-  | Local_tee of indice
-  | Global_get of indice
-  | Global_set of indice
+  | Local_get of 'indice
+  | Local_set of 'indice
+  | Local_tee of 'indice
+  | Global_get of 'indice
+  | Global_set of 'indice
   (* Table instructions *)
-  | Table_get of indice
-  | Table_set of indice
-  | Table_size of indice
-  | Table_grow of indice
-  | Table_fill of indice
-  | Table_copy of indice * indice
-  | Table_init of indice * indice
-  | Elem_drop of indice
+  | Table_get of 'indice
+  | Table_set of 'indice
+  | Table_size of 'indice
+  | Table_grow of 'indice
+  | Table_fill of 'indice
+  | Table_copy of 'indice * 'indice
+  | Table_init of 'indice * 'indice
+  | Elem_drop of 'indice
   (* Memory instructions *)
   | I_load of nn * memarg
   | F_load of nn * memarg
@@ -196,27 +196,27 @@ type instr =
   | Memory_grow
   | Memory_fill
   | Memory_copy
-  | Memory_init of indice
-  | Data_drop of indice
+  | Memory_init of 'indice
+  | Data_drop of 'indice
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * block_type option * expr
-  | Loop of string option * block_type option * expr
-  | If_else of string option * block_type option * expr * expr
-  | Br of indice
-  | Br_if of indice
-  | Br_table of indice array * indice
+  | Block of string option * block_type option * 'indice expr
+  | Loop of string option * block_type option * 'indice expr
+  | If_else of string option * block_type option * 'indice expr * 'indice expr
+  | Br of 'indice
+  | Br_if of 'indice
+  | Br_table of 'indice array * 'indice
   | Return
-  | Call of indice
-  | Call_indirect of indice * block_type
+  | Call of 'indice
+  | Call_indirect of 'indice * block_type
 
-and expr = instr list
+and 'indice expr = 'indice instr list
 
 type func =
   { type_f : block_type
   ; locals : param list
-  ; body : expr
+  ; body : indice expr
   ; id : string option
   }
 
@@ -228,25 +228,25 @@ type mem = string option * mem_type
 
 type global =
   { type_ : global_type
-  ; init : expr
+  ; init : indice expr
   ; id : string option
   }
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of indice option * expr
+  | Elem_active of indice option * indice expr
   | Elem_declarative
 
 type elem =
   { id : string option
   ; type_ : ref_type
-  ; init : expr list
+  ; init : indice expr list
   ; mode : elem_mode
   }
 
 type data_mode =
   | Data_passive
-  | Data_active of indice option * expr
+  | Data_active of indice option * indice expr
 
 type data =
   { id : string option
