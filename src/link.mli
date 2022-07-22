@@ -19,7 +19,7 @@ val set_global : Simplify.module_ array -> int -> int -> Types.const -> unit
 val get_global :
   Simplify.module_ array -> int -> int -> int * Types.global_type * Types.const
 
-val get_func : Simplify.module_ array -> int -> int -> int * Types.func
+val get_func : Simplify.module_ array -> int -> int -> int * Types.indice Types.func
 
 val set_memory : Simplify.module_ array -> int -> int -> bytes -> unit
 

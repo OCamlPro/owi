@@ -278,8 +278,8 @@ let exec_assert env = function
            "assert_return failed !@.expected: `%a`@.got     : `%a`@."
            (Format.pp_print_list
               ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
-              Pp.result )
-           results_expected Pp.consts results_got
+              Pp.Input.result )
+           results_expected Pp.Input.consts results_got
     end;
     env
   | SAssert_trap (action, expected) ->

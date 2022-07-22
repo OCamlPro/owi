@@ -18,12 +18,13 @@ type runtime_global = (global_type * const, global_type) runtime
 
 type runtime_memory = (bytes * int option, unit) runtime
 
-type runtime_func = (func, unit) runtime
+type runtime_func = (simplified_indice func, unit) runtime
+type runtime_input_func = (indice func, unit) runtime
 
 type module_ =
   { fields : module_field list
   ; datas : string array
-  ; funcs : runtime_func array
+  ; funcs : runtime_input_func array
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
@@ -63,7 +64,7 @@ type env =
   ; curr_element : int
   ; curr_data : int
   ; datas : string list
-  ; funcs : runtime_func list
+  ; funcs : runtime_input_func list
   ; globals : runtime_global list
   ; globals_tmp : (global_type * indice expr, global_type) runtime list
   ; memories : runtime_memory list
@@ -83,6 +84,8 @@ let find_ind tbl x ind =
   match Hashtbl.find_opt tbl ind with
   | None -> failwith @@ Format.asprintf "unbound %s indice (simplify) %s" x ind
   | Some i -> i
+
+type out_indice = indice
 
 let mk_module registered_modules m =
   let exported_funcs = Hashtbl.create 512 in
@@ -444,7 +447,7 @@ let mk_module registered_modules m =
           in
 
           (* handling an expression *)
-          let rec body (loop_count, block_ids) = function
+          let rec body (loop_count, block_ids) : indice instr -> out_indice instr = function
             | Br_table (ids, id) ->
               let f = block_id_to_raw (loop_count, block_ids) in
               Br_table (Array.map f ids, f id)
@@ -543,7 +546,7 @@ let mk_module registered_modules m =
               | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
               | Return ) as i ->
               i
-          and expr e (loop_count, block_ids) =
+          and expr (e:indice expr) (loop_count, block_ids) : out_indice expr =
             List.map (body (loop_count, block_ids)) e
           in
           let body = expr f.body (0, []) in

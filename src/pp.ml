@@ -2,9 +2,33 @@ let () = Format.pp_print_flush Format.err_formatter ()
 
 open Types
 
-let print_nothing fmt () = Format.fprintf fmt ""
+module type Arg = sig
+  type indice
+  val indice : Format.formatter -> indice -> unit
+end
 
 let id fmt id = Format.fprintf fmt "$%s" id
+
+module Symbolic_indice : Arg with type indice = Types.indice = struct
+  type indice = Types.indice
+
+  let indice fmt = function
+  | Raw u -> Format.pp_print_int fmt u
+  | Symbolic i -> id fmt i
+
+end
+
+module Simplified_indice : Arg with type indice = Types.simplified_indice = struct
+  type indice = simplified_indice
+
+  let indice fmt = function
+  | I u -> Format.pp_print_int fmt u
+
+end
+
+module Make_Expr(Arg : Arg) = struct
+
+let print_nothing fmt () = Format.fprintf fmt ""
 
 let id_opt fmt = function None -> () | Some i -> id fmt i
 
@@ -14,9 +38,7 @@ let f64 fmt f = Format.fprintf fmt "%s" (Float64.to_string f)
 
 let name fmt name = Format.pp_print_string fmt name
 
-let indice fmt = function
-  | Raw u -> Format.pp_print_int fmt u
-  | Symbolic i -> id fmt i
+let indice = Arg.indice
 
 let indice_opt fmt = function None -> () | Some i -> indice fmt i
 
@@ -51,7 +73,7 @@ let func_type fmt (l, r) =
   Format.fprintf fmt "(func %a %a)" param_type l result_type r
 
 let block_type fmt = function
-  | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
+  | Bt_ind ind -> Format.fprintf fmt "%a" Symbolic_indice.indice ind
   | Bt_raw (_type_use, (l, r)) ->
     Format.fprintf fmt "%a %a" param_type l result_type r
 
@@ -252,18 +274,31 @@ and expr fmt instrs =
     ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
     instr fmt instrs
 
-let func fmt (f : func) =
+let func fmt (f : Arg.indice func) =
   (* TODO: typeuse ? *)
   Format.fprintf fmt "(func %a %a %a@\n  @[<v>%a@]@\n)" id_opt f.id block_type
     f.type_f locals f.locals expr f.body
 
+let funcs fmt (funcs : Arg.indice func list) =
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+    func fmt funcs
+    
+end
+
+module Input_Expr = Make_Expr(Symbolic_indice)
+
+module Global = struct
+open Input_Expr
 let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
+let symb_indice_opt fmt = function None -> () | Some i -> Symbolic_indice.indice fmt i
+
 let export_desc fmt = function
-  | Export_func id -> Format.fprintf fmt "(func %a)" indice_opt id
-  | Export_table id -> Format.fprintf fmt "(table %a)" indice_opt id
-  | Export_mem id -> Format.fprintf fmt "(memory %a)" indice_opt id
-  | Export_global id -> Format.fprintf fmt "(global %a)" indice_opt id
+  | Export_func id -> Format.fprintf fmt "(func %a)" symb_indice_opt id
+  | Export_table id -> Format.fprintf fmt "(table %a)" symb_indice_opt id
+  | Export_mem id -> Format.fprintf fmt "(memory %a)" symb_indice_opt id
+  | Export_global id -> Format.fprintf fmt "(global %a)" symb_indice_opt id
 
 let export fmt e =
   Format.fprintf fmt "(export %a %a)" name e.name export_desc e.desc
@@ -276,11 +311,6 @@ let mem fmt (id, ty) = Format.fprintf fmt "(memory %a %a)" id_opt id mem_type ty
 
 let table fmt (id, ty) =
   Format.fprintf fmt "(table %a %a)" id_opt id table_type ty
-
-let funcs fmt (funcs : func list) =
-  Format.pp_print_list
-    ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
-    func fmt funcs
 
 let import_desc fmt : import_desc -> Unit.t = function
   | Import_func (id, t) ->
@@ -301,7 +331,7 @@ let type_ fmt (i, ft) = Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
 
 let data_mode fmt = function
   | Data_passive -> ()
-  | Data_active (i, e) -> Format.fprintf fmt "(%a %a)" indice_opt i expr e
+  | Data_active (i, e) -> Format.fprintf fmt "(%a %a)" symb_indice_opt i expr e
 
 let data fmt d = Format.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
 
@@ -404,3 +434,14 @@ let file fmt l =
 
 let pos out { Ppxlib.pos_lnum; pos_cnum; pos_bol; _ } =
   Format.fprintf out "line %d:%d" pos_lnum (pos_cnum - pos_bol)
+end
+
+module Input = struct
+  include Input_Expr
+  include Global
+end
+
+module Simplified = struct
+  include Make_Expr(Symbolic_indice)
+  include Global
+end

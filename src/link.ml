@@ -172,7 +172,7 @@ let module_ _registered_modules modules module_indice =
     end
     | [ Ref_func ind ] -> Const_host (indice_to_int ind)
     | e ->
-      failwith @@ Format.asprintf "invalid constant expression: `%a`" Pp.expr e
+      failwith @@ Format.asprintf "invalid constant expression: `%a`" Pp.Input.expr e
   in
 
   let globals =
@@ -200,7 +200,7 @@ let module_ _registered_modules modules module_indice =
       failwith
       @@ Format.asprintf
            "invalid constant expression, expected i32.const but got `%a`"
-           Pp.const instr
+           Pp.Input.const instr
   in
 
   let { elems = elements; _ } =

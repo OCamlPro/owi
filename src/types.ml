@@ -124,6 +124,8 @@ type indice =
   | Raw of int
   | Symbolic of string
 
+type simplified_indice = I of int
+
 type memarg =
   { offset : int
   ; align : int
@@ -213,10 +215,10 @@ type 'indice instr =
 
 and 'indice expr = 'indice instr list
 
-type func =
+type 'indice func =
   { type_f : block_type
   ; locals : param list
-  ; body : indice expr
+  ; body : 'indice expr
   ; id : string option
   }
 
@@ -286,7 +288,7 @@ type module_field =
   | MGlobal of global
   | MTable of table
   | MMem of mem
-  | MFunc of func
+  | MFunc of indice func
   | MElem of elem
   | MData of data
   | MStart of indice

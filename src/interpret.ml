@@ -245,7 +245,7 @@ let init_local (_id, t) =
 
 let rec exec_instr env module_indice locals stack instr =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  Debug.debug fmt "running instr: %a@." Pp.instr instr;
+  Debug.debug fmt "running instr: %a@." Pp.Input.instr instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack

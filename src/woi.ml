@@ -20,7 +20,7 @@ let () =
   | Ok script -> begin
     match Woi.Script.check script with
     | Ok () ->
-      Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.file script;
+      Woi.Debug.debug Format.err_formatter "%a\n%!" Woi.Pp.Input.file script;
       let script, modules = Woi.Script.simplify script in
       Woi.Script.exec script modules
     | Error e -> error e

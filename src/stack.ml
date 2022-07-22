@@ -25,7 +25,7 @@ let push_host s n = push s (Const_host n)
 let pp fmt s =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
-    Pp.const fmt s
+    Pp.Input.const fmt s
 
 let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 

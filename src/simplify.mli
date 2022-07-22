@@ -11,12 +11,13 @@ type runtime_global = (global_type * const, global_type) runtime
 
 type runtime_memory = (bytes * int option, unit) runtime
 
-type runtime_func = (func, unit) runtime
+type runtime_func = (simplified_indice func, unit) runtime
+type runtime_input_func = (indice func, unit) runtime
 
 type module_ =
   { fields : module_field list
   ; datas : string array
-  ; funcs : runtime_func array
+  ; funcs : runtime_input_func array
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array

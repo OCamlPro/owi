@@ -625,7 +625,7 @@ let func ==
         end
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
     ) func_fields
   }
 
@@ -743,7 +743,7 @@ let table ==
       | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
       | _whatever -> assert false
     end
-    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
   ) table_fields
 }
 
@@ -787,7 +787,7 @@ let memory ==
         | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
         | _whatever -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
     ) memory_fields
   }
 
@@ -820,7 +820,7 @@ let global ==
         | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
         | _ -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
     ) global_fields
   }
 
