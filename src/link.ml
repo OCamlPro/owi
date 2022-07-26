@@ -62,7 +62,6 @@ type acc =
   ; curr_func : int
   ; curr_global : int
   ; curr_memory : int
-  ; curr_data : int
   ; curr_table : int
   }
 
@@ -209,7 +208,6 @@ let module_ _registered_modules modules module_indice =
              ; curr_func
              ; curr_global
              ; curr_memory
-             ; curr_data
              ; curr_table
              } as acc ) field ->
         match field with
@@ -246,7 +244,6 @@ let module_ _registered_modules modules module_indice =
         | MMem _ -> { acc with curr_memory = curr_memory + 1 }
         | MTable _ -> { acc with curr_table = curr_table + 1 }
         | MData data ->
-          let curr_data = curr_data + 1 in
           begin
             match data.mode with
             | Data_passive -> ()
@@ -268,7 +265,7 @@ let module_ _registered_modules modules module_indice =
               with Invalid_argument _ ->
                 raise @@ Trap "out of bounds memory access" )
           end;
-          { acc with curr_data }
+          acc
         | MElem e ->
           let init =
             Array.of_list
@@ -318,7 +315,6 @@ let module_ _registered_modules modules module_indice =
       ; curr_func = -1
       ; curr_global = -1
       ; curr_memory = -1
-      ; curr_data = -1
       ; curr_table = -1
       }
       m.fields
