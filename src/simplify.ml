@@ -42,6 +42,7 @@ type module_ =
 let map_symb find_in_tbl = function Raw i -> i | Symbolic id -> find_in_tbl id
 
 let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
+
 let map_symb_raw' find_in_tbl sym = I (map_symb find_in_tbl sym)
 
 let find_module name last seen =
@@ -447,7 +448,8 @@ let mk_module registered_modules m =
           in
 
           (* handling an expression *)
-          let rec body (loop_count, block_ids) : indice instr -> out_indice instr = function
+          let rec body (loop_count, block_ids) :
+              indice instr -> out_indice instr = function
             | Br_table (ids, id) ->
               let f = block_id_to_raw (loop_count, block_ids) in
               Br_table (Array.map f ids, f id)
@@ -518,7 +520,8 @@ let mk_module registered_modules m =
               Table_init (I i, map_symb_raw' find_element i')
             | Table_fill id -> Table_fill (map_symb_raw' find_table id)
             | Table_copy (i, i') ->
-              Table_copy (map_symb_raw' find_table i, map_symb_raw' find_table i')
+              Table_copy
+                (map_symb_raw' find_table i, map_symb_raw' find_table i')
             | Memory_init id ->
               if Array.length memories < 1 then failwith "unknown memory";
               let id = map_symb find_data id in
@@ -546,7 +549,7 @@ let mk_module registered_modules m =
               | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
               | Return ) as i ->
               i
-          and expr (e:indice expr) (loop_count, block_ids) : out_indice expr =
+          and expr (e : indice expr) (loop_count, block_ids) : out_indice expr =
             List.map (body (loop_count, block_ids)) e
           in
           let body = expr f.body (0, []) in

@@ -15,6 +15,7 @@
   parse
   pp
   script
+  simplify_bis
   simplify
   spectest
   stack
