@@ -1,6 +1,6 @@
 open Types
 
-type function_import = block_type
+type function_import = indice block_type
 
 type table_import = table_type
 

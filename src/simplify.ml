@@ -423,11 +423,12 @@ let mk_module registered_modules m =
           let bt_to_raw =
             Option.map (function
               | Bt_ind ind ->
+                let indice = find_type ind in
                 let pt, rt =
-                  try types.(find_type ind)
+                  try types.(indice)
                   with Invalid_argument _ -> failwith "unknown type"
                 in
-                Bt_raw (Some ind, (pt, rt))
+                Bt_raw (Some (I indice), (pt, rt))
               | Bt_raw (type_use, t) ->
                 begin
                   match type_use with

@@ -73,7 +73,7 @@ let func_type fmt (l, r) =
   Format.fprintf fmt "(func %a %a)" param_type l result_type r
 
 let block_type fmt = function
-  | Bt_ind ind -> Format.fprintf fmt "%a" Symbolic_indice.indice ind
+  | Bt_ind ind -> Format.fprintf fmt "%a" Arg.indice ind
   | Bt_raw (_type_use, (l, r)) ->
     Format.fprintf fmt "%a %a" param_type l result_type r
 

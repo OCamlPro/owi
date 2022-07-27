@@ -124,16 +124,16 @@ type indice =
   | Raw of int
   | Symbolic of string
 
-type simplified_indice = I of int
+type simplified_indice = I of int [@@unboxed]
 
 type memarg =
   { offset : int
   ; align : int
   }
 
-type block_type =
-  | Bt_ind of indice
-  | Bt_raw of (indice option * func_type)
+type 'indice block_type =
+  | Bt_ind of 'indice
+  | Bt_raw of ('indice option * func_type)
 (* the indice option is the optional typeuse, if it's some it must be equal to the func_type *)
 
 type 'indice instr =
@@ -203,20 +203,22 @@ type 'indice instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * block_type option * 'indice expr
-  | Loop of string option * block_type option * 'indice expr
-  | If_else of string option * block_type option * 'indice expr * 'indice expr
+  | Block of string option * 'indice block_type option * 'indice expr
+  | Loop of string option * 'indice block_type option * 'indice expr
+  | If_else of string option * 'indice block_type option * 'indice expr * 'indice expr
   | Br of 'indice
   | Br_if of 'indice
   | Br_table of 'indice array * 'indice
   | Return
   | Call of 'indice
-  | Call_indirect of 'indice * block_type
+  | Call_indirect of 'indice * 'indice block_type
 
 and 'indice expr = 'indice instr list
 
+(* TODO: func and expr should also be parametrised on block type:
+   using block_type before simplify and directly an indice after *)
 type 'indice func =
-  { type_f : block_type
+  { type_f : 'indice block_type
   ; locals : param list
   ; body : 'indice expr
   ; id : string option
@@ -228,38 +230,41 @@ type table = string option * table_type
 
 type mem = string option * mem_type
 
-type global =
+type 'indice global' =
   { type_ : global_type
-  ; init : indice expr
+  ; init : 'indice expr
   ; id : string option
   }
+type global = indice global'
 
-type elem_mode =
+type 'indice elem_mode =
   | Elem_passive
-  | Elem_active of indice option * indice expr
+  | Elem_active of 'indice option * 'indice expr
   | Elem_declarative
 
-type elem =
+type 'indice elem' =
   { id : string option
   ; type_ : ref_type
-  ; init : indice expr list
-  ; mode : elem_mode
+  ; init : 'indice expr list
+  ; mode : 'indice elem_mode
   }
+type elem = indice elem'
 
-type data_mode =
+type 'indice data_mode =
   | Data_passive
-  | Data_active of indice option * indice expr
+  | Data_active of 'indice option * 'indice expr
 
-type data =
+type 'indice data' =
   { id : string option
   ; init : string
-  ; mode : data_mode
+  ; mode : 'indice data_mode
   }
+type data = indice data'
 
 (* Modules *)
 
 type import_desc =
-  | Import_func of string option * block_type
+  | Import_func of string option * indice block_type
   | Import_table of string option * table_type
   | Import_mem of string option * mem_type
   | Import_global of string option * global_type
@@ -270,30 +275,33 @@ type import =
   ; desc : import_desc
   }
 
-type export_desc =
-  | Export_func of indice option
-  | Export_table of indice option
-  | Export_mem of indice option
-  | Export_global of indice option
+type 'indice export_desc' =
+  | Export_func of 'indice option
+  | Export_table of 'indice option
+  | Export_mem of 'indice option
+  | Export_global of 'indice option
+type export_desc = indice export_desc'
 
-type export =
+type 'indice export' =
   { name : string
-  ; desc : export_desc
+  ; desc : 'indice export_desc'
   }
+type export = indice export'
 
 type type_ = string option * func_type
 
-type module_field =
+type 'indice module_field' =
   | MType of type_
-  | MGlobal of global
+  | MGlobal of 'indice global'
   | MTable of table
   | MMem of mem
-  | MFunc of indice func
-  | MElem of elem
-  | MData of data
-  | MStart of indice
+  | MFunc of 'indice func
+  | MElem of 'indice elem'
+  | MData of 'indice data'
+  | MStart of 'indice
   | MImport of import
-  | MExport of export
+  | MExport of 'indice export'
+type module_field = indice module_field'
 
 type module_ =
   { id : string option
