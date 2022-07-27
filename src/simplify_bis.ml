@@ -115,12 +115,12 @@ type 'a named =
 type ('indice, 'bt) module_with_index =
   { id : string option
   ; type_ : func_type named
-  ; global : ('indice global', global_import) runtime named
+  ; global : (('indice, 'bt) global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
   ; func : (('indice, 'bt) func', function_import) runtime named
-  ; elem : 'indice elem' named
-  ; data : 'indice data' named
+  ; elem : ('indice, 'bt) elem' named
+  ; data : ('indice, 'bt) data' named
   ; export : 'indice export' list
   ; start : 'indice list
   }
@@ -288,7 +288,7 @@ module Rewrite_indices = struct
     | Some v -> v
 
   let rewrite_expr (module_ : assigned_module) (locals : param list)
-      (iexpr : indice expr) : index expr =
+      (iexpr : indice expr) : (index, func_type) expr' =
     (* block_ids handling *)
     let block_id_to_raw (loop_count, block_ids) id : index =
       let id =
@@ -321,10 +321,8 @@ module Rewrite_indices = struct
     let bt_to_raw =
       Option.map (function
         | Bt_ind ind ->
-          let { index; value = pt, rt } =
-            get "unknown type" module_.type_ ind
-          in
-          Bt_raw (Some index, (pt, rt))
+          let { value; _ } = get "unknown type" module_.type_ ind in
+          value
         | Bt_raw (type_use, t) ->
           begin
             match type_use with
@@ -336,7 +334,7 @@ module Rewrite_indices = struct
               let ok = equal_func_types t t' in
               if not ok then failwith "inline function type"
           end;
-          Bt_raw (None, t) )
+          t )
     in
 
     let find_local =
@@ -370,8 +368,8 @@ module Rewrite_indices = struct
     let find_data id = find "unknown data segment" module_.data id in
     let find_elem id = find "unknown elem segment" module_.elem id in
 
-    let rec body (loop_count, block_ids) : indice instr -> index instr =
-      function
+    let rec body (loop_count, block_ids) :
+        indice instr -> (index, func_type) instr' = function
       | Br_table (ids, id) ->
         let f = block_id_to_raw (loop_count, block_ids) in
         Br_table (Array.map f ids, f id)
@@ -437,7 +435,7 @@ module Rewrite_indices = struct
         | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
         | Return ) as i ->
         i
-    and expr (e : indice expr) (loop_count, block_ids) : index expr =
+    and expr (e : indice expr) (loop_count, block_ids) : (index, func_type) expr' =
       List.map (body (loop_count, block_ids)) e
     in
     let body = expr iexpr (0, []) in
@@ -452,12 +450,12 @@ module Rewrite_indices = struct
     | Bt_ind id -> (get "unbound type" module_.type_ id).value
     | Bt_raw (_, func_type) -> func_type
 
-  let rewrite_global (module_ : assigned_module) (global : indice global') :
-      index global' =
+  let rewrite_global (module_ : assigned_module) (global : global) :
+      (index, func_type) global' =
     { global with init = rewrite_simple_expr module_ global.init }
 
-  let rewrite_elem (module_ : assigned_module) (elem : indice elem') :
-      index elem' =
+  let rewrite_elem (module_ : assigned_module) (elem : elem) :
+      (index, func_type) elem' =
     let mode =
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
@@ -471,8 +469,8 @@ module Rewrite_indices = struct
     let init = List.map (rewrite_simple_expr module_) elem.init in
     { elem with init; mode }
 
-  let rewrite_data (module_ : assigned_module) (data : indice data') :
-      index data' =
+  let rewrite_data (module_ : assigned_module) (data : data) :
+      (index, func_type) data' =
     let mode =
       match data.mode with
       | Data_passive as mode -> mode
