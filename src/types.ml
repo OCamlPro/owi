@@ -290,18 +290,17 @@ type export = indice export'
 
 type type_ = string option * func_type
 
-type 'indice module_field' =
+type module_field =
   | MType of type_
-  | MGlobal of 'indice global'
+  | MGlobal of indice global'
   | MTable of table
   | MMem of mem
-  | MFunc of 'indice func
-  | MElem of 'indice elem'
-  | MData of 'indice data'
-  | MStart of 'indice
+  | MFunc of indice func
+  | MElem of indice elem'
+  | MData of indice data'
+  | MStart of indice
   | MImport of import
-  | MExport of 'indice export'
-type module_field = indice module_field'
+  | MExport of indice export'
 
 type module_ =
   { id : string option
