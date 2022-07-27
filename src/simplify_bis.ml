@@ -127,7 +127,7 @@ type ('indice, 'bt) module_with_index =
 
 type assigned_module = (indice, indice block_type) module_with_index
 
-type rewritten_module = (index, index) module_with_index
+type rewritten_module = (index, func_type) module_with_index
 
 module FuncType = struct
   type t = func_type
@@ -145,7 +145,7 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
   remove_param a = remove_param b
 
 module Assign_indicies : sig
-  val run : grouped_module -> assigned_module * index TypeMap.t
+  val run : grouped_module -> assigned_module
 end = struct
   type type_acc =
     { declared_types : func_type indexed list
@@ -154,8 +154,7 @@ end = struct
     ; all_types : index TypeMap.t
     }
 
-  let assign_types (module_ : grouped_module) :
-      func_type named * index TypeMap.t =
+  let assign_types (module_ : grouped_module) : func_type named =
     let assign_type
         { declared_types; named_types; last_assigned_index; all_types }
         (name, type_) =
@@ -192,8 +191,7 @@ end = struct
         { acc with declared_types; last_assigned_index; all_types }
     in
     let acc = List.fold_left assign_func_type acc module_.function_type in
-    ( { elements = List.rev acc.declared_types; named = acc.named_types }
-    , acc.all_types )
+    { elements = List.rev acc.declared_types; named = acc.named_types }
 
   let assign ~(get_name : 'a -> string option) (elements : 'a list) : 'a named =
     let assign_one (declared, named, last_assigned_index) elt =
@@ -231,8 +229,8 @@ end = struct
       if not (equal_func_types func_type func_type'.value) then
         failwith "inline func type"
 
-  let run (module_ : grouped_module) : assigned_module * index TypeMap.t =
-    let type_, all_types = assign_types module_ in
+  let run (module_ : grouped_module) : assigned_module =
+    let type_ = assign_types module_ in
     let global =
       assign
         ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
@@ -260,18 +258,17 @@ end = struct
       assign ~get_name:(fun (data : Types.data) -> data.id) module_.data
     in
     List.iter (check_type_id type_) module_.type_checks;
-    ( { id = module_.id
-      ; type_
-      ; global
-      ; table
-      ; mem
-      ; func
-      ; elem
-      ; data
-      ; export = module_.export
-      ; start = module_.start
-      }
-    , all_types )
+    { id = module_.id
+    ; type_
+    ; global
+    ; table
+    ; mem
+    ; func
+    ; elem
+    ; data
+    ; export = module_.export
+    ; start = module_.start
+    }
 end
 
 module Rewrite_indices = struct
@@ -335,9 +332,7 @@ module Rewrite_indices = struct
             | Some ind ->
               (* TODO: move this to check ? *)
               (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
-              let { value = t'; _ } =
-                get "unknown type" module_.type_ ind
-              in
+              let { value = t'; _ } = get "unknown type" module_.type_ ind in
               let ok = equal_func_types t t' in
               if not ok then failwith "inline function type"
           end;
@@ -427,10 +422,8 @@ module Rewrite_indices = struct
       | Memory_init id ->
         if List.length module_.mem.elements < 1 then failwith "unknown memory";
         Memory_init (find_data id)
-      | Data_drop id ->
-        Data_drop (find_data id)
-      | Elem_drop id ->
-        Elem_drop (find_elem id)
+      | Data_drop id -> Data_drop (find_data id)
+      | Elem_drop id -> Elem_drop (find_elem id)
       | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
         | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
         | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
@@ -454,10 +447,10 @@ module Rewrite_indices = struct
     (* TODO this should be rewrite_const_expr working on a subtype const_expr *)
     rewrite_expr module_ [] expr
 
-  let rewrite_block_type module_ typemap block_type : index =
+  let rewrite_block_type module_ block_type : func_type =
     match block_type with
-    | Bt_ind id -> find "unbound type" module_.type_ id
-    | Bt_raw (_, func_type) -> TypeMap.find func_type typemap
+    | Bt_ind id -> (get "unbound type" module_.type_ id).value
+    | Bt_raw (_, func_type) -> func_type
 
   let rewrite_global (module_ : assigned_module) (global : indice global') :
       index global' =
@@ -507,11 +500,10 @@ module Rewrite_indices = struct
     in
     { export with desc }
 
-  let rewrite_func (module_ : assigned_module) (typemap : index TypeMap.t)
-      (func : indice func) : (index, index) func' =
+  let rewrite_func (module_ : assigned_module) (func : indice func) :
+      (index, func_type) func' =
     let body = rewrite_expr module_ func.locals func.body in
-    (* TODO get rid of typemap by inlining the type in type_f *)
-    let type_f = rewrite_block_type module_ typemap func.type_f in
+    let type_f = rewrite_block_type module_ func.type_f in
     { func with body; type_f }
 
   let rewrite_runtime f r =
@@ -523,8 +515,7 @@ module Rewrite_indices = struct
         List.map (fun ind -> { ind with value = f ind.value }) named.elements
     }
 
-  let run (module_ : assigned_module) (typemap : index TypeMap.t) :
-      rewritten_module =
+  let run (module_ : assigned_module) : rewritten_module =
     let global =
       rewrite_named (rewrite_runtime (rewrite_global module_)) module_.global
     in
@@ -532,9 +523,7 @@ module Rewrite_indices = struct
     let data = rewrite_named (rewrite_data module_) module_.data in
     let export = List.map (rewrite_export module_) module_.export in
     let func =
-      rewrite_named
-        (rewrite_runtime (rewrite_func module_ typemap))
-        module_.func
+      rewrite_named (rewrite_runtime (rewrite_func module_)) module_.func
     in
     let start = List.map (find "unbound func" module_.func) module_.start in
     { module_ with global; elem; data; export; func; start }
