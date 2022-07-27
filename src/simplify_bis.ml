@@ -112,30 +112,41 @@ type 'a named =
   ; named : index StringMap.t
   }
 
-type assigned_module =
+type ('indice, 'bt) module_with_index =
   { id : string option
   ; type_ : func_type named
-  ; global : (global, global_import) runtime named
+  ; global : ('indice global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : (indice func, function_import) runtime named
-  ; elem : elem named
-  ; data : data named
-  ; export : export list
-  ; start : indice list
+  ; func : (('indice, 'bt) func', function_import) runtime named
+  ; elem : 'indice elem' named
+  ; data : 'indice data' named
+  ; export : 'indice export' list
+  ; start : 'indice list
   }
 
+type assigned_module = (indice, indice block_type) module_with_index
+
+type rewritten_module = (index, index) module_with_index
+
+module FuncType = struct
+  type t = func_type
+
+  let compare = compare
+end
+
+module TypeMap = Map.Make (FuncType)
+
+let equal_func_types (a : func_type) (b : func_type) : bool =
+  let remove_param (pt, rt) =
+    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
+    (pt, rt)
+  in
+  remove_param a = remove_param b
+
 module Assign_indicies : sig
-  val run : grouped_module -> assigned_module
+  val run : grouped_module -> assigned_module * index TypeMap.t
 end = struct
-  module FuncType = struct
-    type t = func_type
-
-    let compare = compare
-  end
-
-  module TypeMap = Map.Make (FuncType)
-
   type type_acc =
     { declared_types : func_type indexed list
     ; named_types : index StringMap.t
@@ -143,7 +154,8 @@ end = struct
     ; all_types : index TypeMap.t
     }
 
-  let assign_types (module_ : grouped_module) : func_type named =
+  let assign_types (module_ : grouped_module) :
+      func_type named * index TypeMap.t =
     let assign_type
         { declared_types; named_types; last_assigned_index; all_types }
         (name, type_) =
@@ -180,7 +192,8 @@ end = struct
         { acc with declared_types; last_assigned_index; all_types }
     in
     let acc = List.fold_left assign_func_type acc module_.function_type in
-    { elements = List.rev acc.declared_types; named = acc.named_types }
+    ( { elements = List.rev acc.declared_types; named = acc.named_types }
+    , acc.all_types )
 
   let assign ~(get_name : 'a -> string option) (elements : 'a list) : 'a named =
     let assign_one (declared, named, last_assigned_index) elt =
@@ -211,13 +224,15 @@ end = struct
       | Raw i -> I i
       | Symbolic name -> StringMap.find name types.named
     in
+    (* TODO more efficient version of that *)
     match List.find_opt (fun v -> v.index = id) types.elements with
     | None -> failwith "Unbound type"
     | Some func_type' ->
-      if not (func_type = func_type'.value) then failwith "BAD type"
+      if not (equal_func_types func_type func_type'.value) then
+        failwith "inline func type"
 
-  let run (module_ : grouped_module) : assigned_module =
-    let type_ = assign_types module_ in
+  let run (module_ : grouped_module) : assigned_module * index TypeMap.t =
+    let type_, all_types = assign_types module_ in
     let global =
       assign
         ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
@@ -245,17 +260,282 @@ end = struct
       assign ~get_name:(fun (data : Types.data) -> data.id) module_.data
     in
     List.iter (check_type_id type_) module_.type_checks;
-    { id = module_.id
-    ; type_
-    ; global
-    ; table
-    ; mem
-    ; func
-    ; elem
-    ; data
-    ; export = module_.export
-    ; start = module_.start
-    }
+    ( { id = module_.id
+      ; type_
+      ; global
+      ; table
+      ; mem
+      ; func
+      ; elem
+      ; data
+      ; export = module_.export
+      ; start = module_.start
+      }
+    , all_types )
 end
 
-module Rewrite_indices = struct end
+module Rewrite_indices = struct
+  let find msg (named : 'a named) (indice : indice) : index =
+    match indice with
+    | Raw i -> I i
+    | Symbolic name -> (
+      match StringMap.find_opt name named.named with
+      | None -> failwith msg
+      | Some i -> i )
+
+  let get msg (named : 'a named) (indice : indice) : 'a indexed =
+    let (I i) = find msg named indice in
+    (* TODO change named structure to make that sensible *)
+    match List.nth_opt named.elements i with
+    | None -> failwith msg
+    | Some v -> v
+
+  let rewrite_expr (module_ : assigned_module) (locals : param list)
+      (iexpr : indice expr) : index expr =
+    (* block_ids handling *)
+    let block_id_to_raw (loop_count, block_ids) id : index =
+      let id =
+        match id with
+        | Symbolic id ->
+          Debug.debug Format.err_formatter "SYMBOLIC BLOCK ID %s@\n" id;
+          let pos = ref (-1) in
+          begin
+            try
+              List.iteri
+                (fun i n ->
+                  if n = Some id then begin
+                    pos := i;
+                    raise Exit
+                  end )
+                block_ids
+            with Exit -> ()
+          end;
+          if !pos = -1 then failwith "unknown label";
+          !pos
+        | Raw id ->
+          Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;
+          id
+      in
+      (* this is > and not >= because you can `br 0` without any block to target the function *)
+      if id > List.length block_ids + loop_count then failwith "unknown label";
+      I id
+    in
+
+    let bt_to_raw =
+      Option.map (function
+        | Bt_ind ind ->
+          let { index; value = pt, rt } =
+            get "unknown type" module_.type_ ind
+          in
+          Bt_raw (Some index, (pt, rt))
+        | Bt_raw (type_use, t) ->
+          begin
+            match type_use with
+            | None -> ()
+            | Some ind ->
+              (* TODO: move this to check ? *)
+              (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
+              let { value = t'; _ } =
+                get "unknown type" module_.type_ ind
+              in
+              let ok = equal_func_types t t' in
+              if not ok then failwith "inline function type"
+          end;
+          Bt_raw (None, t) )
+    in
+
+    let find_local =
+      let locals, last_assigned_local =
+        List.fold_left
+          (fun (locals, next_free_index) ((name, _type) : param) ->
+            match name with
+            | None -> (locals, next_free_index + 1)
+            | Some name ->
+              ( StringMap.add name (I next_free_index) locals
+              , next_free_index + 1 ) )
+          (StringMap.empty, 0) locals
+      in
+      let find_local id =
+        match id with
+        | Raw i ->
+          if i > last_assigned_local then failwith "unknown local";
+          I i
+        | Symbolic name -> (
+          match StringMap.find_opt name locals with
+          | None -> failwith "unknown local"
+          | Some id -> id )
+      in
+      find_local
+    in
+
+    let find_table id = find "unknown table" module_.table id in
+    let find_func id = find "unknown function" module_.func id in
+    let find_global id = find "unknown global" module_.global id in
+    let _find_mem id = find "unknown memory" module_.mem id in
+    let find_data id = find "unknown data segment" module_.data id in
+    let find_elem id = find "unknown elem segment" module_.elem id in
+
+    let rec body (loop_count, block_ids) : indice instr -> index instr =
+      function
+      | Br_table (ids, id) ->
+        let f = block_id_to_raw (loop_count, block_ids) in
+        Br_table (Array.map f ids, f id)
+      | Br_if id -> Br_if (block_id_to_raw (loop_count, block_ids) id)
+      | Br id -> Br (block_id_to_raw (loop_count, block_ids) id)
+      | Call id -> Call (find_func id)
+      | Local_set id -> Local_set (find_local id)
+      | Local_get id -> Local_get (find_local id)
+      | Local_tee id -> Local_tee (find_local id)
+      | If_else (id, bt, e1, e2) ->
+        let bt = bt_to_raw bt in
+        let block_ids = id :: block_ids in
+        If_else
+          ( id
+          , bt
+          , expr e1 (loop_count, block_ids)
+          , expr e2 (loop_count, block_ids) )
+      | Loop (id, bt, e) ->
+        let bt = bt_to_raw bt in
+        let e = expr e (loop_count + 1, id :: block_ids) in
+        Loop (id, bt, e)
+      | Block (id, bt, e) ->
+        let bt = bt_to_raw bt in
+        Block (id, bt, expr e (loop_count, id :: block_ids))
+      | Call_indirect (tbl_i, bt) ->
+        let bt = Option.get @@ bt_to_raw (Some bt) in
+        Call_indirect (find_table tbl_i, bt)
+      | Global_set id ->
+        (* TODO: move this to check, this is not doable without linking *)
+        (*
+        (* TODO: it seems there's not test for this, add one ? *)
+        begin
+          match global with
+          | Local ((mut, _vt), _) | Imported (_, _, (mut, _vt)) -> begin
+            match mut with Const -> failwith "global is immutable" | Var -> ()
+          end
+        end;*)
+        Global_set (find_global id)
+      | Global_get id -> Global_get (find_global id)
+      | Ref_func id -> Ref_func (find_func id)
+      | Table_size id -> Table_size (find_table id)
+      | Table_get id -> Table_get (find_table id)
+      | Table_set id -> Table_set (find_table id)
+      | Table_grow id -> Table_grow (find_table id)
+      | Table_init (i, i') -> Table_init (find_table i, find_elem i')
+      | Table_fill id -> Table_fill (find_table id)
+      | Table_copy (i, i') -> Table_copy (find_table i, find_table i')
+      | Memory_init id ->
+        if List.length module_.mem.elements < 1 then failwith "unknown memory";
+        Memory_init (find_data id)
+      | Data_drop id ->
+        Data_drop (find_data id)
+      | Elem_drop id ->
+        Elem_drop (find_elem id)
+      | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
+        | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
+        | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
+        if List.length module_.mem.elements < 1 then failwith "unknown memory";
+        i
+      | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
+        | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
+        | I64_extend_i32 _ | I64_extend32_s | F32_demote_f64 | I_extend8_s _
+        | I_extend16_s _ | F64_promote_f32 | F_convert_i _ | I_trunc_f _
+        | I_trunc_sat_f _ | Ref_is_null | F_binop _ | F32_const _ | F64_const _
+        | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
+        | Return ) as i ->
+        i
+    and expr (e : indice expr) (loop_count, block_ids) : index expr =
+      List.map (body (loop_count, block_ids)) e
+    in
+    let body = expr iexpr (0, []) in
+    body
+
+  let rewrite_simple_expr module_ expr =
+    (* TODO this should be rewrite_const_expr working on a subtype const_expr *)
+    rewrite_expr module_ [] expr
+
+  let rewrite_block_type module_ typemap block_type : index =
+    match block_type with
+    | Bt_ind id -> find "unbound type" module_.type_ id
+    | Bt_raw (_, func_type) -> TypeMap.find func_type typemap
+
+  let rewrite_global (module_ : assigned_module) (global : indice global') :
+      index global' =
+    { global with init = rewrite_simple_expr module_ global.init }
+
+  let rewrite_elem (module_ : assigned_module) (elem : indice elem') :
+      index elem' =
+    let mode =
+      match elem.mode with
+      | (Elem_passive | Elem_declarative) as mode -> mode
+      | Elem_active (indice_opt, expr) ->
+        let indice_opt =
+          Option.map (find "unbound elem" module_.elem) indice_opt
+        in
+        let expr = rewrite_simple_expr module_ expr in
+        Elem_active (indice_opt, expr)
+    in
+    let init = List.map (rewrite_simple_expr module_) elem.init in
+    { elem with init; mode }
+
+  let rewrite_data (module_ : assigned_module) (data : indice data') :
+      index data' =
+    let mode =
+      match data.mode with
+      | Data_passive as mode -> mode
+      | Data_active (indice_opt, expr) ->
+        let indice_opt =
+          Option.map (find "unbound data" module_.data) indice_opt
+        in
+        let expr = rewrite_simple_expr module_ expr in
+        Data_active (indice_opt, expr)
+    in
+    { data with mode }
+
+  let rewrite_export (module_ : assigned_module) (export : indice export') :
+      index export' =
+    let desc =
+      match export.desc with
+      | Export_func id ->
+        Export_func ((Option.map (find "unbound func" module_.func)) id)
+      | Export_table id ->
+        Export_table ((Option.map (find "unbound table" module_.table)) id)
+      | Export_mem id ->
+        Export_mem ((Option.map (find "unbound mem" module_.mem)) id)
+      | Export_global id ->
+        Export_global ((Option.map (find "unbound global" module_.global)) id)
+    in
+    { export with desc }
+
+  let rewrite_func (module_ : assigned_module) (typemap : index TypeMap.t)
+      (func : indice func) : (index, index) func' =
+    let body = rewrite_expr module_ func.locals func.body in
+    (* TODO get rid of typemap by inlining the type in type_f *)
+    let type_f = rewrite_block_type module_ typemap func.type_f in
+    { func with body; type_f }
+
+  let rewrite_runtime f r =
+    match r with Local v -> Local (f v) | Imported i -> Imported i
+
+  let rewrite_named f named =
+    { named with
+      elements =
+        List.map (fun ind -> { ind with value = f ind.value }) named.elements
+    }
+
+  let run (module_ : assigned_module) (typemap : index TypeMap.t) :
+      rewritten_module =
+    let global =
+      rewrite_named (rewrite_runtime (rewrite_global module_)) module_.global
+    in
+    let elem = rewrite_named (rewrite_elem module_) module_.elem in
+    let data = rewrite_named (rewrite_data module_) module_.data in
+    let export = List.map (rewrite_export module_) module_.export in
+    let func =
+      rewrite_named
+        (rewrite_runtime (rewrite_func module_ typemap))
+        module_.func
+    in
+    let start = List.map (find "unbound func" module_.func) module_.start in
+    { module_ with global; elem; data; export; func; start }
+end

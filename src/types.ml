@@ -205,7 +205,8 @@ type 'indice instr =
   | Unreachable
   | Block of string option * 'indice block_type option * 'indice expr
   | Loop of string option * 'indice block_type option * 'indice expr
-  | If_else of string option * 'indice block_type option * 'indice expr * 'indice expr
+  | If_else of
+      string option * 'indice block_type option * 'indice expr * 'indice expr
   | Br of 'indice
   | Br_if of 'indice
   | Br_table of 'indice array * 'indice
@@ -217,12 +218,14 @@ and 'indice expr = 'indice instr list
 
 (* TODO: func and expr should also be parametrised on block type:
    using block_type before simplify and directly an indice after *)
-type 'indice func =
-  { type_f : 'indice block_type
+type ('indice, 'bt) func' =
+  { type_f : 'bt
   ; locals : param list
   ; body : 'indice expr
   ; id : string option
   }
+
+type 'indice func = ('indice, 'indice block_type) func'
 
 (* Tables & Memories *)
 
@@ -235,6 +238,7 @@ type 'indice global' =
   ; init : 'indice expr
   ; id : string option
   }
+
 type global = indice global'
 
 type 'indice elem_mode =
@@ -248,6 +252,7 @@ type 'indice elem' =
   ; init : 'indice expr list
   ; mode : 'indice elem_mode
   }
+
 type elem = indice elem'
 
 type 'indice data_mode =
@@ -259,6 +264,7 @@ type 'indice data' =
   ; init : string
   ; mode : 'indice data_mode
   }
+
 type data = indice data'
 
 (* Modules *)
@@ -280,12 +286,14 @@ type 'indice export_desc' =
   | Export_table of 'indice option
   | Export_mem of 'indice option
   | Export_global of 'indice option
+
 type export_desc = indice export_desc'
 
 type 'indice export' =
   { name : string
   ; desc : 'indice export_desc'
   }
+
 type export = indice export'
 
 type type_ = string option * func_type
