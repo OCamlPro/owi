@@ -365,3 +365,21 @@ type cmd =
   | Action of action
 
 type file = cmd list
+
+module Const = struct
+  type nonrec ibinop =
+    | Add
+    | Sub
+    | Mul
+
+  type instr =
+    | I32_const of Int32.t
+    | I64_const of Int64.t
+    | F32_const of Float32.t
+    | F64_const of Float64.t
+    | Ref_null of ref_type
+    | Global_get of simplified_indice
+    | I_binop of nn * ibinop
+
+  type expr = instr list
+end

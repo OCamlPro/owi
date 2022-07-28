@@ -112,23 +112,31 @@ type 'a named =
   ; named : index StringMap.t
   }
 
-type ('indice, 'bt) module_with_index =
+type assigned_module =
   { id : string option
   ; type_ : func_type named
   ; global :
-      (('indice, ('indice, 'bt) expr') global', global_import) runtime named
+      ((indice, (indice, indice block_type) expr') global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : (('indice, 'bt) func', 'bt) runtime named
-  ; elem : ('indice, ('indice, 'bt) expr') elem' named
-  ; data : ('indice, ('indice, 'bt) expr') data' named
-  ; export : 'indice export' list
-  ; start : 'indice list
+  ; func : ((indice, indice block_type) func', indice block_type) runtime named
+  ; elem : (indice, (indice, indice block_type) expr') elem' named
+  ; data : (indice, (indice, indice block_type) expr') data' named
+  ; export : indice export' list
+  ; start : indice list
   }
 
-type assigned_module = (indice, indice block_type) module_with_index
-
-type rewritten_module = (index, func_type) module_with_index
+type result =
+  { id : string option
+  ; global : ((index, Const.expr) global', global_import) runtime named
+  ; table : (table, table_import) runtime named
+  ; mem : (mem, mem_import) runtime named
+  ; func : ((index, func_type) func', func_type) runtime named
+  ; elem : (index, Const.expr) elem' named
+  ; data : (index, Const.expr) data' named
+  ; export : index export' list
+  ; start : index list
+  }
 
 module FuncType = struct
   type t = func_type
@@ -367,8 +375,8 @@ module Rewrite_indices = struct
     let find_data id = find "unknown data segment" module_.data id in
     let find_elem id = find "unknown elem segment" module_.elem id in
 
-    let rec body (loop_count, block_ids) :
-        instr -> (index, func_type) instr' = function
+    let rec body (loop_count, block_ids) : instr -> (index, func_type) instr' =
+      function
       | Br_table (ids, id) ->
         let f = block_id_to_raw (loop_count, block_ids) in
         Br_table (Array.map f ids, f id)
@@ -434,28 +442,46 @@ module Rewrite_indices = struct
         | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
         | Return ) as i ->
         i
-    and expr (e : expr) (loop_count, block_ids) :
-        (index, func_type) expr' =
+    and expr (e : expr) (loop_count, block_ids) : (index, func_type) expr' =
       List.map (body (loop_count, block_ids)) e
     in
     let body = expr iexpr (0, []) in
     body
 
-  let rewrite_simple_expr module_ expr =
-    (* TODO this should be rewrite_const_expr working on a subtype const_expr *)
-    rewrite_expr module_ [] expr
+  let rewrite_const_expr (module_ : assigned_module) (expr : (indice, _) expr')
+      : Const.expr =
+    let const_ibinop (op : ibinop) : Const.ibinop =
+      match op with
+      | Add -> Add
+      | Sub -> Sub
+      | Mul -> Mul
+      | _ -> failwith "not a constant expression"
+    in
 
-  let rewrite_block_type module_ block_type : func_type =
+    let const_instr (instr : (indice, _) instr') : Const.instr =
+      match instr with
+      | I32_const v -> I32_const v
+      | I64_const v -> I64_const v
+      | F32_const v -> F32_const v
+      | F64_const v -> F64_const v
+      | Ref_null v -> Ref_null v
+      | Global_get id -> Global_get (find "unknown global" module_.global id)
+      | I_binop (t, op) -> I_binop (t, const_ibinop op)
+      | _ -> failwith "not a constant expression"
+    in
+    List.map const_instr expr
+
+  let rewrite_block_type (module_ : assigned_module) block_type : func_type =
     match block_type with
     | Bt_ind id -> (get "unbound type" module_.type_ id).value
     | Bt_raw (_, func_type) -> func_type
 
   let rewrite_global (module_ : assigned_module) (global : global) :
-      (index, (index, func_type) expr') global' =
-    { global with init = rewrite_simple_expr module_ global.init }
+      (index, Const.expr) global' =
+    { global with init = rewrite_const_expr module_ global.init }
 
   let rewrite_elem (module_ : assigned_module) (elem : elem) :
-      (index, (index, func_type) expr') elem' =
+      (index, Const.expr) elem' =
     let mode =
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
@@ -463,14 +489,14 @@ module Rewrite_indices = struct
         let indice_opt =
           Option.map (find "unbound elem" module_.elem) indice_opt
         in
-        let expr = rewrite_simple_expr module_ expr in
+        let expr = rewrite_const_expr module_ expr in
         Elem_active (indice_opt, expr)
     in
-    let init = List.map (rewrite_simple_expr module_) elem.init in
+    let init = List.map (rewrite_const_expr module_) elem.init in
     { elem with init; mode }
 
   let rewrite_data (module_ : assigned_module) (data : data) :
-      (index, (index, func_type) expr') data' =
+      (index, Const.expr) data' =
     let mode =
       match data.mode with
       | Data_passive as mode -> mode
@@ -478,7 +504,7 @@ module Rewrite_indices = struct
         let indice_opt =
           Option.map (find "unbound data" module_.data) indice_opt
         in
-        let expr = rewrite_simple_expr module_ expr in
+        let expr = rewrite_const_expr module_ expr in
         Data_active (indice_opt, expr)
     in
     { data with mode }
@@ -518,7 +544,7 @@ module Rewrite_indices = struct
 
   let id x = x
 
-  let run (module_ : assigned_module) : rewritten_module =
+  let run (module_ : assigned_module) : result =
     let global =
       rewrite_named (rewrite_runtime (rewrite_global module_) id) module_.global
     in
@@ -532,8 +558,17 @@ module Rewrite_indices = struct
         module_.func
     in
     let start = List.map (find "unbound func" module_.func) module_.start in
-    { module_ with global; elem; data; export; func; start }
+    { id = module_.id
+    ; mem = module_.mem
+    ; table = module_.table
+    ; global
+    ; elem
+    ; data
+    ; export
+    ; func
+    ; start
+    }
 end
 
-let simplify (module_ : module_) : rewritten_module =
+let simplify (module_ : module_) : result =
   Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run

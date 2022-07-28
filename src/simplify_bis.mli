@@ -32,20 +32,16 @@ type 'a named =
 
 open Types
 
-type ('indice, 'bt) module_with_index =
+type result =
   { id : string option
-  ; type_ : func_type named
-  ; global :
-      (('indice, ('indice, 'bt) expr') global', global_import) runtime named
+  ; global : ((index, Const.expr) global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : (('indice, 'bt) func', 'bt) runtime named
-  ; elem : ('indice, ('indice, 'bt) expr') elem' named
-  ; data : ('indice, ('indice, 'bt) expr') data' named
-  ; export : 'indice export' list
-  ; start : 'indice list
+  ; func : ((index, func_type) func', func_type) runtime named
+  ; elem : (index, Const.expr) elem' named
+  ; data : (index, Const.expr) data' named
+  ; export : index export' list
+  ; start : index list
   }
 
-type rewritten_module = (index, func_type) module_with_index
-
-val simplify : Types.module_ -> rewritten_module
+val simplify : Types.module_ -> result
