@@ -108,7 +108,7 @@ type 'a indexed =
   }
 
 type 'a named =
-  { elements : 'a indexed list
+  { values : 'a indexed list
   ; named : index StringMap.t
   }
 
@@ -191,9 +191,9 @@ end = struct
         { acc with declared_types; last_assigned_index; all_types }
     in
     let acc = List.fold_left assign_func_type acc module_.function_type in
-    { elements = List.rev acc.declared_types; named = acc.named_types }
+    { values = List.rev acc.declared_types; named = acc.named_types }
 
-  let assign ~(get_name : 'a -> string option) (elements : 'a list) : 'a named =
+  let assign ~(get_name : 'a -> string option) (values : 'a list) : 'a named =
     let assign_one (declared, named, last_assigned_index) elt =
       let id = I last_assigned_index in
       let last_assigned_index = last_assigned_index + 1 in
@@ -205,9 +205,9 @@ end = struct
       (declared, named, last_assigned_index)
     in
     let declared, named, _last_assigned_index =
-      List.fold_left assign_one ([], StringMap.empty, 0) elements
+      List.fold_left assign_one ([], StringMap.empty, 0) values
     in
-    { elements = declared; named }
+    { values = declared; named }
 
   let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
       : string option =
@@ -223,7 +223,7 @@ end = struct
       | Symbolic name -> StringMap.find name types.named
     in
     (* TODO more efficient version of that *)
-    match List.find_opt (fun v -> v.index = id) types.elements with
+    match List.find_opt (fun v -> v.index = id) types.values with
     | None -> failwith "Unbound type"
     | Some func_type' ->
       if not (equal_func_types func_type func_type'.value) then
@@ -283,7 +283,7 @@ module Rewrite_indices = struct
   let get msg (named : 'a named) (indice : indice) : 'a indexed =
     let (I i) = find msg named indice in
     (* TODO change named structure to make that sensible *)
-    match List.nth_opt named.elements i with
+    match List.nth_opt named.values i with
     | None -> failwith msg
     | Some v -> v
 
@@ -418,14 +418,14 @@ module Rewrite_indices = struct
       | Table_fill id -> Table_fill (find_table id)
       | Table_copy (i, i') -> Table_copy (find_table i, find_table i')
       | Memory_init id ->
-        if List.length module_.mem.elements < 1 then failwith "unknown memory";
+        if List.length module_.mem.values < 1 then failwith "unknown memory";
         Memory_init (find_data id)
       | Data_drop id -> Data_drop (find_data id)
       | Elem_drop id -> Elem_drop (find_elem id)
       | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
         | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
         | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
-        if List.length module_.mem.elements < 1 then failwith "unknown memory";
+        if List.length module_.mem.values < 1 then failwith "unknown memory";
         i
       | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
         | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
@@ -509,8 +509,8 @@ module Rewrite_indices = struct
 
   let rewrite_named f named =
     { named with
-      elements =
-        List.map (fun ind -> { ind with value = f ind.value }) named.elements
+      values =
+        List.map (fun ind -> { ind with value = f ind.value }) named.values
     }
 
   let run (module_ : assigned_module) : rewritten_module =
