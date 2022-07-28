@@ -118,7 +118,7 @@ type ('indice, 'bt) module_with_index =
   ; global : (('indice, 'bt) global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : (('indice, 'bt) func', function_import) runtime named
+  ; func : (('indice, 'bt) func', 'bt) runtime named
   ; elem : ('indice, 'bt) elem' named
   ; data : ('indice, 'bt) data' named
   ; export : 'indice export' list
@@ -283,9 +283,7 @@ module Rewrite_indices = struct
   let get msg (named : 'a named) (indice : indice) : 'a indexed =
     let (I i) = find msg named indice in
     (* TODO change named structure to make that sensible *)
-    match List.nth_opt named.values i with
-    | None -> failwith msg
-    | Some v -> v
+    match List.nth_opt named.values i with None -> failwith msg | Some v -> v
 
   let rewrite_expr (module_ : assigned_module) (locals : param list)
       (iexpr : indice expr) : (index, func_type) expr' =
@@ -435,7 +433,8 @@ module Rewrite_indices = struct
         | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
         | Return ) as i ->
         i
-    and expr (e : indice expr) (loop_count, block_ids) : (index, func_type) expr' =
+    and expr (e : indice expr) (loop_count, block_ids) :
+        (index, func_type) expr' =
       List.map (body (loop_count, block_ids)) e
     in
     let body = expr iexpr (0, []) in
@@ -504,8 +503,11 @@ module Rewrite_indices = struct
     let type_f = rewrite_block_type module_ func.type_f in
     { func with body; type_f }
 
-  let rewrite_runtime f r =
-    match r with Local v -> Local (f v) | Imported i -> Imported i
+  let rewrite_import (f : 'a -> 'b) (import : 'a imp) : 'b imp =
+    { import with desc = f import.desc }
+
+  let rewrite_runtime f g r =
+    match r with Local v -> Local (f v) | Imported i -> Imported (g i)
 
   let rewrite_named f named =
     { named with
@@ -513,16 +515,24 @@ module Rewrite_indices = struct
         List.map (fun ind -> { ind with value = f ind.value }) named.values
     }
 
+  let id x = x
+
   let run (module_ : assigned_module) : rewritten_module =
     let global =
-      rewrite_named (rewrite_runtime (rewrite_global module_)) module_.global
+      rewrite_named (rewrite_runtime (rewrite_global module_) id) module_.global
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
     let data = rewrite_named (rewrite_data module_) module_.data in
     let export = List.map (rewrite_export module_) module_.export in
     let func =
-      rewrite_named (rewrite_runtime (rewrite_func module_)) module_.func
+      rewrite_named
+        (rewrite_runtime (rewrite_func module_)
+           (rewrite_import (rewrite_block_type module_)) )
+        module_.func
     in
     let start = List.map (find "unbound func" module_.func) module_.start in
     { module_ with global; elem; data; export; func; start }
 end
+
+let simplify (module_ : module_) : rewritten_module =
+  Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run
