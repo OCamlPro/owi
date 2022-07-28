@@ -26,6 +26,8 @@ let f32 s =
 
 open Types
 
+(** Prevents ocamlc -i -short-path from infering types containing the prefix Woi,
+    which makes dune think that this is a recursive dependency. *)
 module Woi = struct end
 %}
 
