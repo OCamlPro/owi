@@ -26,6 +26,7 @@ let f32 s =
 
 open Types
 
+module Woi = struct end
 %}
 
 %start <Types.file> file
