@@ -243,7 +243,7 @@ let init_local (_id, t) =
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
-let rec exec_instr env module_indice locals stack (instr:simplified_indice instr) =
+let rec exec_instr env module_indice locals stack (instr:simplified_instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   Debug.debug fmt "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
@@ -891,7 +891,7 @@ let rec exec_instr env module_indice locals stack (instr:simplified_indice instr
     let res = exec_func env module_indice func (List.rev args) in
     res @ stack
 
-and exec_expr env module_indice locals stack (e:simplified_indice expr) is_loop bt =
+and exec_expr env module_indice locals stack (e:simplified_expr) is_loop bt =
   let rt =
     Option.fold ~none:Int.max_int
       ~some:(fun bt -> List.length (snd @@ get_bt bt))

@@ -30,22 +30,22 @@ type 'a named =
   ; named : index StringMap.t
   }
 
+open Types
+
 type ('indice, 'bt) module_with_index =
   { id : string option
-  ; type_ : Types.func_type named
-  ; global : (('indice, 'bt) Types.global', global_import) runtime named
-  ; table : (Types.table, table_import) runtime named
-  ; mem : (Types.mem, mem_import) runtime named
-  ; func : (('indice, 'bt) Types.func', 'bt) runtime named
-  ; elem : ('indice, 'bt) Types.elem' named
-  ; data : ('indice, 'bt) Types.data' named
-  ; export : 'indice Types.export' list
+  ; type_ : func_type named
+  ; global :
+      (('indice, ('indice, 'bt) expr') global', global_import) runtime named
+  ; table : (table, table_import) runtime named
+  ; mem : (mem, mem_import) runtime named
+  ; func : (('indice, 'bt) func', 'bt) runtime named
+  ; elem : ('indice, ('indice, 'bt) expr') elem' named
+  ; data : ('indice, ('indice, 'bt) expr') data' named
+  ; export : 'indice export' list
   ; start : 'indice list
   }
 
-type assigned_module =
-  (Types.indice, Types.indice Types.block_type) module_with_index
-
-type rewritten_module = (index, Types.func_type) module_with_index
+type rewritten_module = (index, func_type) module_with_index
 
 val simplify : Types.module_ -> rewritten_module

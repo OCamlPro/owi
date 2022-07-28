@@ -27,7 +27,7 @@ type module_ =
   ; memories : runtime_memory array
   ; tables : runtime_table array
   ; globals : runtime_global array
-  ; globals_tmp : (global_type * indice expr, global_type) runtime array
+  ; globals_tmp : (global_type * expr, global_type) runtime array
   ; types : func_type array
   ; elements : (ref_type * const array) array
   ; exported_funcs : (string, int) Hashtbl.t
@@ -67,7 +67,7 @@ type env =
   ; datas : string list
   ; funcs : (indice func, unit) runtime list
   ; globals : runtime_global list
-  ; globals_tmp : (global_type * indice expr, global_type) runtime list
+  ; globals_tmp : (global_type * expr, global_type) runtime list
   ; memories : runtime_memory list
   ; tables : runtime_table list
   ; types : func_type list
@@ -450,7 +450,7 @@ let mk_module registered_modules m =
 
           (* handling an expression *)
           let rec body (loop_count, block_ids) :
-              indice instr -> out_indice instr = function
+              instr -> simplified_instr = function
             | Br_table (ids, id) ->
               let f = block_id_to_raw (loop_count, block_ids) in
               Br_table (Array.map f ids, f id)
@@ -550,7 +550,7 @@ let mk_module registered_modules m =
               | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
               | Return ) as i ->
               i
-          and expr (e : indice expr) (loop_count, block_ids) : out_indice expr =
+          and expr (e : expr) (loop_count, block_ids) : simplified_expr =
             List.map (body (loop_count, block_ids)) e
           in
           let body = expr f.body (0, []) in

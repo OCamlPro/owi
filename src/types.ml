@@ -206,10 +206,7 @@ type ('indice, 'bt) instr' =
   | Block of string option * 'bt option * ('indice, 'bt) expr'
   | Loop of string option * 'bt option * ('indice, 'bt) expr'
   | If_else of
-      string option
-      * 'bt option
-      * ('indice, 'bt) expr'
-      * ('indice, 'bt) expr'
+      string option * 'bt option * ('indice, 'bt) expr' * ('indice, 'bt) expr'
   | Br of 'indice
   | Br_if of 'indice
   | Br_table of 'indice array * 'indice
@@ -219,8 +216,13 @@ type ('indice, 'bt) instr' =
 
 and ('indice, 'bt) expr' = ('indice, 'bt) instr' list
 
-type 'indice instr = ('indice, 'indice block_type) instr'
-type 'indice expr = ('indice, 'indice block_type) expr'
+type instr = (indice, indice block_type) instr'
+type simplified_instr = (simplified_indice, simplified_indice block_type) instr'
+
+type expr = (indice, indice block_type) expr'
+type simplified_expr = (simplified_indice, simplified_indice block_type) expr'
+
+type result_expr = (simplified_indice, func_type) expr'
 
 (* TODO: func and expr should also be parametrised on block type:
    using block_type before simplify and directly an indice after *)
@@ -239,39 +241,39 @@ type table = string option * table_type
 
 type mem = string option * mem_type
 
-type ('indice, 'bt) global' =
+type ('indice, 'expr) global' =
   { type_ : global_type
-  ; init : ('indice, 'bt) expr'
+  ; init : 'expr
   ; id : string option
   }
 
-type global = (indice, indice block_type) global'
+type global = (indice, (indice, indice block_type) expr') global'
 
-type ('indice, 'bt) elem_mode =
+type ('indice, 'expr) elem_mode =
   | Elem_passive
-  | Elem_active of 'indice option * ('indice, 'bt) expr'
+  | Elem_active of 'indice option * 'expr
   | Elem_declarative
 
-type ('indice, 'bt) elem' =
+type ('indice, 'expr) elem' =
   { id : string option
   ; type_ : ref_type
-  ; init : ('indice, 'bt) expr' list
-  ; mode : ('indice, 'bt) elem_mode
+  ; init : 'expr list
+  ; mode : ('indice, 'expr) elem_mode
   }
 
-type elem = (indice, indice block_type) elem'
+type elem = (indice, (indice, indice block_type) expr') elem'
 
-type ('indice, 'bt) data_mode =
+type ('indice, 'expr) data_mode =
   | Data_passive
-  | Data_active of 'indice option * ('indice, 'bt) expr'
+  | Data_active of 'indice option * 'expr
 
-type ('indice, 'bt) data' =
+type ('indice, 'expr) data' =
   { id : string option
   ; init : string
-  ; mode : ('indice, 'bt) data_mode
+  ; mode : ('indice, 'expr) data_mode
   }
 
-type data = (indice, indice block_type) data'
+type data = (indice, (indice, indice block_type) expr') data'
 
 (* Modules *)
 
