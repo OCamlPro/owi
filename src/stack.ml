@@ -4,6 +4,8 @@ type t = const list
 
 exception Empty
 
+let empty = []
+
 let push s v = v :: s
 
 let push_bool s b = push s (Const_I32 (if b then 1l else 0l))

@@ -16,6 +16,7 @@
   pp
   script
   simplify_bis
+  link_bis
   simplify
   spectest
   stack
