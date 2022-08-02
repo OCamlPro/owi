@@ -6,3 +6,5 @@ let enable, disable, is_enabled =
 
 let debug fmt =
   if is_enabled () then Format.fprintf fmt else Format.ifprintf fmt
+
+let debugerr t = debug Format.err_formatter t

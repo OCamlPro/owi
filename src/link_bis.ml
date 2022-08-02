@@ -21,6 +21,8 @@ let empty_state =
 module Index = struct
   type t = S.index
 
+  let pp fmt (I id) = Format.fprintf fmt "%i" id
+
   let compare = compare
 end
 
@@ -29,13 +31,25 @@ module IMap = Map.Make (Index)
 module Env = struct
   type t = { globals : const IMap.t } [@@unboxed]
 
+  let pp fmt t =
+    let elt fmt (id, const) =
+      Format.fprintf fmt "%a -> %a" Index.pp id Pp.Global.const const
+    in
+    Format.fprintf fmt "@[<hov 2>{@ %a@ }@]"
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
+         elt )
+      (IMap.bindings t.globals)
+
   let empty = { globals = IMap.empty }
 
   let add_global id const env = { globals = IMap.add id const env.globals }
 
   let get_global (env : t) id : Types.const =
     match IMap.find_opt id env.globals with
-    | None -> failwith "unbound global"
+    | None ->
+      Debug.debugerr "%a@." pp env;
+      failwith "unbound global"
     | Some v -> v
 end
 
@@ -76,12 +90,15 @@ module Const_interp = struct
 end
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : const =
+  match import.desc with
+  | Var, _ -> failwith "non constant global"
+  | Const, _ -> (
   match StringMap.find import.module_ ls.by_module with
   | exception Not_found -> failwith ("unbound module " ^ import.module_)
   | exports -> (
     match StringMap.find import.name exports.globals with
     | exception Not_found -> failwith ("unbound name " ^ import.name)
-    | v -> v )
+      | v -> v ) )
 
 let eval_global ls env
     (global : ((S.index, Const.expr) global', S.global_import) S.runtime) :

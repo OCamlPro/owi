@@ -266,7 +266,8 @@ end = struct
           | None -> named
           | Some name -> StringMap.add name id named
         in
-        (declared, named, exports, last_assigned_index)
+        let elt = { index = id; value = elt } in
+        (elt :: declared, named, exports, last_assigned_index)
       | Export { name; id } ->
         let export =
           match id with
@@ -289,12 +290,13 @@ end = struct
         | None -> named
         | Some name -> StringMap.add name id named
       in
-      (declared, named, last_assigned_index)
+      let elt = { index = id; value = elt } in
+      (elt :: declared, named, last_assigned_index)
     in
     let declared, named, _last_assigned_index =
       List.fold_left assign_one ([], StringMap.empty, 0) values
     in
-    { values = declared; named }
+    { values = List.rev declared; named }
 
   let check_type_id (types : func_type named) (check : type_check) =
     let id, func_type = check in
