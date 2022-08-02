@@ -112,11 +112,21 @@ type 'a named =
   ; named : index StringMap.t
   }
 
+module Fields = struct
+  type 'a t = 'a named
+
+  let fold f v acc =
+    List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
+end
+
 type assigned_module =
   { id : string option
   ; type_ : func_type named
   ; global :
-      ((indice, (indice, indice block_type) expr') global', global_import) runtime named
+      ( (indice, (indice, indice block_type) expr') global'
+      , global_import )
+      runtime
+      named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
   ; func : ((indice, indice block_type) func', indice block_type) runtime named
@@ -542,10 +552,11 @@ module Rewrite_indices = struct
         List.map (fun ind -> { ind with value = f ind.value }) named.values
     }
 
-
   let run (module_ : assigned_module) : result =
     let global =
-      rewrite_named (rewrite_runtime (rewrite_global module_) Fun.id) module_.global
+      rewrite_named
+        (rewrite_runtime (rewrite_global module_) Fun.id)
+        module_.global
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
     let data = rewrite_named (rewrite_data module_) module_.data in

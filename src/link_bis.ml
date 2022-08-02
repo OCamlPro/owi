@@ -26,12 +26,20 @@ end
 
 module IMap = Map.Make (Index)
 
+module Env = struct
+  type t = { globals : const IMap.t } [@@unboxed]
+
+  let empty = { globals = IMap.empty }
+
+  let add_global id const env = { globals = IMap.add id const env.globals }
+end
+
 module Const_interp = struct
   open Types
 
-  type env = { globals : const IMap.t } [@@unboxed]
+  type env = Env.t
 
-  let get_global env id : Types.const =
+  let get_global (env : env) id : Types.const =
     match IMap.find_opt id env.globals with
     | None -> failwith "unbound global"
     | Some v -> v
@@ -81,3 +89,33 @@ let eval_global ls env
   match global with
   | S.Local global -> Const_interp.exec_expr env global.init
   | S.Imported import -> load_global ls import
+
+let eval_globals ls globals : Env.t =
+  S.Fields.fold
+    (fun id global env ->
+      let const = eval_global ls env global in
+      let env = Env.add_global id const env in
+      env )
+    globals Env.empty
+
+let populate_export env (export : exports) (e : S.index export') : exports =
+  ignore (env, export);
+  match e.desc with
+  | Export_func _id -> failwith "TODO"
+  | Export_table _id -> failwith "TODO"
+  | Export_mem _id -> failwith "TODO"
+  | Export_global _id -> failwith "TODO"
+
+let populate_exports env lst exports =
+  List.fold_left (populate_export env) exports lst
+
+let link_module (module_ : module_) (ls : link_state) : link_state =
+  let env = eval_globals ls module_.global in
+  let default = populate_exports env module_.export ls.default in
+  let by_module_exports = populate_exports env module_.export empty_exports in
+  let by_module =
+    match module_.id with
+    | None -> ls.by_module
+    | Some name -> StringMap.add name by_module_exports ls.by_module
+  in
+  { modules = module_ :: ls.modules; by_module; default }

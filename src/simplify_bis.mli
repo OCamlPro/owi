@@ -30,6 +30,11 @@ type 'a named =
   ; named : index StringMap.t
   }
 
+  module Fields :sig
+    type 'a t = 'a named
+    val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+  end  
+
 open Types
 
 type result =
