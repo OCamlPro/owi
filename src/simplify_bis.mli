@@ -1,5 +1,7 @@
 type table_import = Types.table_type
+
 type mem_import = Types.limits
+
 type global_import = Types.global_type
 
 type 'a imp =
@@ -30,12 +32,25 @@ type 'a named =
   ; named : index StringMap.t
   }
 
-  module Fields :sig
-    type 'a t = 'a named
-    val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
-  end  
+module Fields : sig
+  type 'a t = 'a named
+
+  val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+end
 
 open Types
+
+type 'a export =
+  { name : string
+  ; id : 'a
+  }
+
+type 'a exports =
+  { global : 'a export list
+  ; mem : 'a export list
+  ; table : 'a export list
+  ; func : 'a export list
+  }
 
 type result =
   { id : string option
@@ -45,7 +60,7 @@ type result =
   ; func : ((index, func_type) func', func_type) runtime named
   ; elem : (index, Const.expr) elem' named
   ; data : (index, Const.expr) data' named
-  ; export : index export' list
+  ; exports : index exports
   ; start : index list
   }
 

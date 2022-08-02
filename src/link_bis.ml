@@ -32,17 +32,17 @@ module Env = struct
   let empty = { globals = IMap.empty }
 
   let add_global id const env = { globals = IMap.add id const env.globals }
+
+  let get_global (env : t) id : Types.const =
+    match IMap.find_opt id env.globals with
+    | None -> failwith "unbound global"
+    | Some v -> v
 end
 
 module Const_interp = struct
   open Types
 
   type env = Env.t
-
-  let get_global (env : env) id : Types.const =
-    match IMap.find_opt id env.globals with
-    | None -> failwith "unbound global"
-    | Some v -> v
 
   let exec_ibinop stack nn (op : Const.ibinop) =
     match nn with
@@ -65,7 +65,7 @@ module Const_interp = struct
     | F64_const f -> Stack.push_f64 stack f
     | I_binop (nn, op) -> exec_ibinop stack nn op
     | Ref_null t -> Stack.push stack (Const_null t)
-    | Global_get id -> Stack.push stack (get_global env id)
+    | Global_get id -> Stack.push stack (Env.get_global env id)
 
   let exec_expr env (e : Const.expr) : const =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
@@ -98,21 +98,20 @@ let eval_globals ls globals : Env.t =
       env )
     globals Env.empty
 
-let populate_export env (export : exports) (e : S.index export') : exports =
-  ignore (env, export);
-  match e.desc with
-  | Export_func _id -> failwith "TODO"
-  | Export_table _id -> failwith "TODO"
-  | Export_mem _id -> failwith "TODO"
-  | Export_global _id -> failwith "TODO"
-
-let populate_exports env lst exports =
-  List.fold_left (populate_export env) exports lst
+let populate_exports env (added_exports : S.index S.exports) exports : exports =
+  let globals =
+    List.fold_left
+      (fun globals (export : _ S.export) ->
+        let const = Env.get_global env export.id in
+        StringMap.add export.name const globals )
+      exports.globals added_exports.global
+  in
+  { globals }
 
 let link_module (module_ : module_) (ls : link_state) : link_state =
   let env = eval_globals ls module_.global in
-  let default = populate_exports env module_.export ls.default in
-  let by_module_exports = populate_exports env module_.export empty_exports in
+  let default = populate_exports env module_.exports ls.default in
+  let by_module_exports = populate_exports env module_.exports empty_exports in
   let by_module =
     match module_.id with
     | None -> ls.by_module

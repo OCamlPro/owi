@@ -19,6 +19,15 @@ type ('a, 'b) runtime =
   | Local of 'a
   | Imported of 'b imp
 
+type 'a export =
+  { name : string
+  ; id : 'a
+  }
+
+type ('a, 'b) define_or_export =
+  | Define of ('a, 'b) runtime
+  | Export of indice option export
+
 type type_check = indice * func_type
 
 type grouped_module =
@@ -30,13 +39,12 @@ type grouped_module =
   ; type_checks : type_check list
         (* Types checks to perform after assignment.
            Come from function declarations with type indicies *)
-  ; global : (global, global_import) runtime list
-  ; table : (table, table_import) runtime list
-  ; mem : (mem, mem_import) runtime list
-  ; func : (indice func, function_import) runtime list
+  ; global : (global, global_import) define_or_export list
+  ; table : (table, table_import) define_or_export list
+  ; mem : (mem, mem_import) define_or_export list
+  ; func : (indice func, function_import) define_or_export list
   ; elem : elem list
   ; data : data list
-  ; export : export list
   ; start : indice list
   }
 
@@ -59,7 +67,6 @@ end = struct
     ; func = []
     ; elem = []
     ; data = []
-    ; export = []
     ; start = []
     }
 
@@ -67,15 +74,29 @@ end = struct
     let add field fields =
       match field with
       | MType type_ -> { fields with type_ = type_ :: fields.type_ }
-      | MGlobal global -> { fields with global = Local global :: fields.global }
+      | MGlobal global ->
+        { fields with global = Define (Local global) :: fields.global }
       | MImport ({ desc = Import_global (a, b); _ } as import) ->
-        { fields with global = Imported (imp import (a, b)) :: fields.global }
-      | MTable table -> { fields with table = Local table :: fields.table }
+        { fields with
+          global = Define (Imported (imp import (a, b))) :: fields.global
+        }
+      | MExport { name; desc = Export_global id } ->
+        { fields with global = Export { name; id } :: fields.global }
+      | MTable table ->
+        { fields with table = Define (Local table) :: fields.table }
       | MImport ({ desc = Import_table (a, b); _ } as import) ->
-        { fields with table = Imported (imp import (a, b)) :: fields.table }
-      | MMem mem -> { fields with mem = Local mem :: fields.mem }
+        { fields with
+          table = Define (Imported (imp import (a, b))) :: fields.table
+        }
+      | MExport { name; desc = Export_table id } ->
+        { fields with table = Export { name; id } :: fields.table }
+      | MMem mem -> { fields with mem = Define (Local mem) :: fields.mem }
       | MImport ({ desc = Import_mem (a, b); _ } as import) ->
-        { fields with mem = Imported (imp import (a, b)) :: fields.mem }
+        { fields with
+          mem = Define (Imported (imp import (a, b))) :: fields.mem
+        }
+      | MExport { name; desc = Export_mem id } ->
+        { fields with mem = Export { name; id } :: fields.mem }
       | MFunc func ->
         let function_type, type_checks =
           match func.type_f with
@@ -88,13 +109,16 @@ end = struct
             in
             (type_ :: fields.function_type, type_checks)
         in
-        let func = Local func :: fields.func in
+        let func = Define (Local func) :: fields.func in
         { fields with func; function_type; type_checks }
       | MImport ({ desc = Import_func (a, b); _ } as import) ->
-        { fields with func = Imported (imp import (a, b)) :: fields.func }
+        { fields with
+          func = Define (Imported (imp import (a, b))) :: fields.func
+        }
+      | MExport { name; desc = Export_func id } ->
+        { fields with func = Export { name; id } :: fields.func }
       | MElem elem -> { fields with elem = elem :: fields.elem }
       | MData data -> { fields with data = data :: fields.data }
-      | MExport export -> { fields with export = export :: fields.export }
       | MStart start -> { fields with start = start :: fields.start }
     in
     List.fold_right add module_.fields (empty_module module_.id)
@@ -119,6 +143,17 @@ module Fields = struct
     List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
 end
 
+type 'a exports =
+  { global : 'a export list
+  ; mem : 'a export list
+  ; table : 'a export list
+  ; func : 'a export list
+  }
+
+type opt_ind =
+  | Curr of index
+  | Indice of indice
+
 type assigned_module =
   { id : string option
   ; type_ : func_type named
@@ -132,7 +167,7 @@ type assigned_module =
   ; func : ((indice, indice block_type) func', indice block_type) runtime named
   ; elem : (indice, (indice, indice block_type) expr') elem' named
   ; data : (indice, (indice, indice block_type) expr') data' named
-  ; export : indice export' list
+  ; exports : opt_ind exports
   ; start : indice list
   }
 
@@ -144,7 +179,7 @@ type result =
   ; func : ((index, func_type) func', func_type) runtime named
   ; elem : (index, Const.expr) elem' named
   ; data : (index, Const.expr) data' named
-  ; export : index export' list
+  ; exports : index exports
   ; start : index list
   }
 
@@ -212,6 +247,39 @@ end = struct
     let acc = List.fold_left assign_func_type acc module_.function_type in
     { values = List.rev acc.declared_types; named = acc.named_types }
 
+  let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
+      : string option =
+    match elt with
+    | Local v -> get_name v
+    | Imported { assigned_name; _ } -> assigned_name
+
+  let assign_or_export ~(get_name : 'a -> string option)
+      (values : ('a, 'b) define_or_export list) :
+      ('a, 'b) runtime named * opt_ind export list =
+    let assign_one (declared, named, exports, last_assigned_index) elt =
+      match elt with
+      | Define elt ->
+        let id = I last_assigned_index in
+        let last_assigned_index = last_assigned_index + 1 in
+        let named =
+          match get_runtime_name get_name elt with
+          | None -> named
+          | Some name -> StringMap.add name id named
+        in
+        (declared, named, exports, last_assigned_index)
+      | Export { name; id } ->
+        let export =
+          match id with
+          | None -> Curr (I last_assigned_index)
+          | Some id -> Indice id
+        in
+        (declared, named, { name; id = export } :: exports, last_assigned_index)
+    in
+    let declared, named, exports, _last_assigned_index =
+      List.fold_left assign_one ([], StringMap.empty, [], 0) values
+    in
+    ({ values = List.rev declared; named }, exports)
+
   let assign ~(get_name : 'a -> string option) (values : 'a list) : 'a named =
     let assign_one (declared, named, last_assigned_index) elt =
       let id = I last_assigned_index in
@@ -227,12 +295,6 @@ end = struct
       List.fold_left assign_one ([], StringMap.empty, 0) values
     in
     { values = declared; named }
-
-  let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
-      : string option =
-    match elt with
-    | Local v -> get_name v
-    | Imported { assigned_name; _ } -> assigned_name
 
   let check_type_id (types : func_type named) (check : type_check) =
     let id, func_type = check in
@@ -250,24 +312,22 @@ end = struct
 
   let run (module_ : grouped_module) : assigned_module =
     let type_ = assign_types module_ in
-    let global =
-      assign
-        ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
+    let global, export_global =
+      assign_or_export
+        ~get_name:(fun ({ id; _ } : Types.global) -> id)
         module_.global
     in
-    let table =
-      assign
-        ~get_name:(get_runtime_name (fun ((id, _) : Types.table) -> id))
+    let table, export_table =
+      assign_or_export
+        ~get_name:(fun ((id, _) : Types.table) -> id)
         module_.table
     in
-    let mem =
-      assign
-        ~get_name:(get_runtime_name (fun ((id, _) : Types.mem) -> id))
-        module_.mem
+    let mem, export_mem =
+      assign_or_export ~get_name:(fun ((id, _) : Types.mem) -> id) module_.mem
     in
-    let func =
-      assign
-        ~get_name:(get_runtime_name (fun ({ id; _ } : _ Types.func) -> id))
+    let func, export_func =
+      assign_or_export
+        ~get_name:(fun ({ id; _ } : _ Types.func) -> id)
         module_.func
     in
     let elem =
@@ -277,6 +337,13 @@ end = struct
       assign ~get_name:(fun (data : Types.data) -> data.id) module_.data
     in
     List.iter (check_type_id type_) module_.type_checks;
+    let exports =
+      { global = export_global
+      ; table = export_table
+      ; mem = export_mem
+      ; func = export_func
+      }
+    in
     { id = module_.id
     ; type_
     ; global
@@ -285,7 +352,7 @@ end = struct
     ; func
     ; elem
     ; data
-    ; export = module_.export
+    ; exports
     ; start = module_.start
     }
 end
@@ -519,20 +586,22 @@ module Rewrite_indices = struct
     in
     { data with mode }
 
-  let rewrite_export (module_ : assigned_module) (export : indice export') :
-      index export' =
-    let desc =
-      match export.desc with
-      | Export_func id ->
-        Export_func ((Option.map (find "unbound func" module_.func)) id)
-      | Export_table id ->
-        Export_table ((Option.map (find "unbound table" module_.table)) id)
-      | Export_mem id ->
-        Export_mem ((Option.map (find "unbound mem" module_.mem)) id)
-      | Export_global id ->
-        Export_global ((Option.map (find "unbound global" module_.global)) id)
-    in
-    { export with desc }
+  let rewrite_export msg named exports =
+    List.map
+      (fun { name; id } ->
+        let id =
+          match id with Curr id -> id | Indice id -> find msg named id
+        in
+        { name; id } )
+      exports
+
+  let rewrite_exports (module_ : assigned_module) (exports : opt_ind exports) :
+      index exports =
+    { global = rewrite_export "unbound global" module_.global exports.global
+    ; mem = rewrite_export "unbound mem" module_.mem exports.mem
+    ; table = rewrite_export "unbound table" module_.table exports.table
+    ; func = rewrite_export "unbound func" module_.func exports.func
+    }
 
   let rewrite_func (module_ : assigned_module) (func : indice func) :
       (index, func_type) func' =
@@ -560,7 +629,7 @@ module Rewrite_indices = struct
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
     let data = rewrite_named (rewrite_data module_) module_.data in
-    let export = List.map (rewrite_export module_) module_.export in
+    let exports = rewrite_exports module_ module_.exports in
     let func =
       rewrite_named
         (rewrite_runtime (rewrite_func module_)
@@ -574,7 +643,7 @@ module Rewrite_indices = struct
     ; global
     ; elem
     ; data
-    ; export
+    ; exports
     ; func
     ; start
     }
