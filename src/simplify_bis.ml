@@ -1,4 +1,5 @@
 open Types
+module StringMap = Map.Make (String)
 
 type function_import = indice block_type
 
@@ -24,107 +25,13 @@ type 'a export =
   ; id : 'a
   }
 
-type ('a, 'b) define_or_export =
-  | Define of ('a, 'b) runtime
-  | Export of indice option export
-
 type type_check = indice * func_type
 
-type grouped_module =
-  { id : string option
-  ; type_ : type_ list
-  ; function_type : func_type list
-        (* Types comming from function declarations.
-           It contains potential duplication *)
-  ; type_checks : type_check list
-        (* Types checks to perform after assignment.
-           Come from function declarations with type indicies *)
-  ; global : (global, global_import) define_or_export list
-  ; table : (table, table_import) define_or_export list
-  ; mem : (mem, mem_import) define_or_export list
-  ; func : (indice func, function_import) define_or_export list
-  ; elem : elem list
-  ; data : data list
-  ; start : indice list
-  }
-
-module StringMap = Map.Make (String)
-
-module Group : sig
-  val group : module_ -> grouped_module
-end = struct
-  let imp (import : import) (assigned_name, desc) =
-    { module_ = import.module_; name = import.name; assigned_name; desc }
-
-  let empty_module id =
-    { id
-    ; type_ = []
-    ; function_type = []
-    ; type_checks = []
-    ; global = []
-    ; table = []
-    ; mem = []
-    ; func = []
-    ; elem = []
-    ; data = []
-    ; start = []
-    }
-
-  let group (module_ : Types.module_) : grouped_module =
-    let add field fields =
-      match field with
-      | MType type_ -> { fields with type_ = type_ :: fields.type_ }
-      | MGlobal global ->
-        { fields with global = Define (Local global) :: fields.global }
-      | MImport ({ desc = Import_global (a, b); _ } as import) ->
-        { fields with
-          global = Define (Imported (imp import (a, b))) :: fields.global
-        }
-      | MExport { name; desc = Export_global id } ->
-        { fields with global = Export { name; id } :: fields.global }
-      | MTable table ->
-        { fields with table = Define (Local table) :: fields.table }
-      | MImport ({ desc = Import_table (a, b); _ } as import) ->
-        { fields with
-          table = Define (Imported (imp import (a, b))) :: fields.table
-        }
-      | MExport { name; desc = Export_table id } ->
-        { fields with table = Export { name; id } :: fields.table }
-      | MMem mem -> { fields with mem = Define (Local mem) :: fields.mem }
-      | MImport ({ desc = Import_mem (a, b); _ } as import) ->
-        { fields with
-          mem = Define (Imported (imp import (a, b))) :: fields.mem
-        }
-      | MExport { name; desc = Export_mem id } ->
-        { fields with mem = Export { name; id } :: fields.mem }
-      | MFunc func ->
-        let function_type, type_checks =
-          match func.type_f with
-          | Bt_ind _ -> (fields.function_type, fields.type_checks)
-          | Bt_raw (id, type_) ->
-            let type_checks =
-              match id with
-              | None -> fields.type_checks
-              | Some id -> (id, type_) :: fields.type_checks
-            in
-            (type_ :: fields.function_type, type_checks)
-        in
-        let func = Define (Local func) :: fields.func in
-        { fields with func; function_type; type_checks }
-      | MImport ({ desc = Import_func (a, b); _ } as import) ->
-        { fields with
-          func = Define (Imported (imp import (a, b))) :: fields.func
-        }
-      | MExport { name; desc = Export_func id } ->
-        { fields with func = Export { name; id } :: fields.func }
-      | MElem elem -> { fields with elem = elem :: fields.elem }
-      | MData data -> { fields with data = data :: fields.data }
-      | MStart start -> { fields with start = start :: fields.start }
-    in
-    List.fold_right add module_.fields (empty_module module_.id)
-end
-
 type index = simplified_indice
+
+type opt_ind =
+  | Curr of index
+  | Indice of indice
 
 type 'a indexed =
   { index : index
@@ -150,23 +57,38 @@ type 'a exports =
   ; func : 'a export list
   }
 
-type opt_ind =
-  | Curr of index
-  | Indice of indice
+type known_elem = (indice, (indice, indice block_type) expr') elem'
+
+type known_data = (indice, (indice, indice block_type) expr') data'
+
+type grouped_module =
+  { id : string option
+  ; type_ : type_ list
+  ; function_type : func_type list
+        (* Types comming from function declarations.
+           It contains potential duplication *)
+  ; type_checks : type_check list
+        (* Types checks to perform after assignment.
+           Come from function declarations with type indicies *)
+  ; global : (global, global_import) runtime indexed list
+  ; table : (table, table_import) runtime indexed list
+  ; mem : (mem, mem_import) runtime indexed list
+  ; func : (indice func, function_import) runtime indexed list
+  ; elem : known_elem indexed list
+  ; data : known_data indexed list
+  ; exports : opt_ind exports
+  ; start : indice list
+  }
 
 type assigned_module =
   { id : string option
   ; type_ : func_type named
-  ; global :
-      ( (indice, (indice, indice block_type) expr') global'
-      , global_import )
-      runtime
-      named
+  ; global : (global, global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : ((indice, indice block_type) func', indice block_type) runtime named
-  ; elem : (indice, (indice, indice block_type) expr') elem' named
-  ; data : (indice, (indice, indice block_type) expr') data' named
+  ; func : (indice func, indice block_type) runtime named
+  ; elem : known_elem named
+  ; data : known_data named
   ; exports : opt_ind exports
   ; start : indice list
   }
@@ -182,6 +104,167 @@ type result =
   ; exports : index exports
   ; start : index list
   }
+
+module Group : sig
+  val group : module_ -> grouped_module
+end = struct
+  let imp (import : import) (assigned_name, desc) =
+    { module_ = import.module_; name = import.name; assigned_name; desc }
+
+  let empty_module id =
+    { id
+    ; type_ = []
+    ; function_type = []
+    ; type_checks = []
+    ; global = []
+    ; table = []
+    ; mem = []
+    ; func = []
+    ; elem = []
+    ; data = []
+    ; exports = { global = []; table = []; mem = []; func = [] }
+    ; start = []
+    }
+
+  type curr =
+    { global : int
+    ; table : int
+    ; mem : int
+    ; func : int
+    ; elem : int
+    ; data : int
+    }
+
+  let init_curr =
+    { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
+
+  let add_global value (fields : grouped_module) (curr : curr) =
+    let index = I curr.global in
+    ( { fields with global = { index; value } :: fields.global }
+    , { curr with global = succ curr.global } )
+
+  let add_table value (fields : grouped_module) (curr : curr) =
+    let index = I curr.table in
+    ( { fields with table = { index; value } :: fields.table }
+    , { curr with table = succ curr.table } )
+
+  let add_mem value (fields : grouped_module) (curr : curr) =
+    let index = I curr.mem in
+    ( { fields with mem = { index; value } :: fields.mem }
+    , { curr with mem = succ curr.mem } )
+
+  let add_func value (fields : grouped_module) (curr : curr) =
+    let index = I curr.func in
+    ( { fields with func = { index; value } :: fields.func }
+    , { curr with func = succ curr.func } )
+
+  let add_elem value (fields : grouped_module) (curr : curr) =
+    let index = I curr.elem in
+    ( { fields with elem = { index; value } :: fields.elem }
+    , { curr with elem = succ curr.elem } )
+
+  let add_data value (fields : grouped_module) (curr : curr) =
+    let index = I curr.data in
+    ( { fields with data = { index; value } :: fields.data }
+    , { curr with data = succ curr.data } )
+
+  let curr_id curr = function
+    | None -> Curr (I (pred curr))
+    | Some id -> Indice id
+
+  let group (module_ : Types.module_) : grouped_module =
+    let add ((fields : grouped_module), curr) field =
+      match field with
+      | MType type_ -> ({ fields with type_ = type_ :: fields.type_ }, curr)
+      | MGlobal global -> add_global (Local global) fields curr
+      | MImport ({ desc = Import_global (a, b); _ } as import) ->
+        add_global (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_global id } ->
+        let id = curr_id curr.global id in
+        ( { fields with
+            exports =
+              { fields.exports with
+                global = { name; id } :: fields.exports.global
+              }
+          }
+        , curr )
+      | MTable table -> add_table (Local table) fields curr
+      | MImport ({ desc = Import_table (a, b); _ } as import) ->
+        add_table (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_table id } ->
+        let id = curr_id curr.table id in
+        ( { fields with
+            exports =
+              { fields.exports with
+                table = { name; id } :: fields.exports.table
+              }
+          }
+        , curr )
+      | MMem mem -> add_mem (Local mem) fields curr
+      | MImport ({ desc = Import_mem (a, b); _ } as import) ->
+        add_mem (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_mem id } ->
+        let id = curr_id curr.mem id in
+        ( { fields with
+            exports =
+              { fields.exports with mem = { name; id } :: fields.exports.mem }
+          }
+        , curr )
+      | MFunc func ->
+        let function_type, type_checks =
+          match func.type_f with
+          | Bt_ind _ -> (fields.function_type, fields.type_checks)
+          | Bt_raw (id, type_) ->
+            let type_checks =
+              match id with
+              | None -> fields.type_checks
+              | Some id -> (id, type_) :: fields.type_checks
+            in
+            (type_ :: fields.function_type, type_checks)
+        in
+        let index = I curr.func in
+        let func = { value = Local func; index } :: fields.func in
+        ( { fields with func; function_type; type_checks }
+        , { curr with func = succ curr.func } )
+      | MImport ({ desc = Import_func (a, b); _ } as import) ->
+        add_func (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_func id } ->
+        let id = curr_id curr.func id in
+        ( { fields with
+            exports =
+              { fields.exports with func = { name; id } :: fields.exports.func }
+          }
+        , curr )
+      | MElem elem ->
+        let mode =
+          match elem.mode with
+          | (Elem_passive | Elem_declarative) as mode -> mode
+          | Elem_active (id, expr) ->
+            let id = Option.value id ~default:(Raw (curr.table - 1)) in
+            Elem_active (id, expr)
+        in
+        let elem = { elem with mode } in
+        add_elem elem fields curr
+      | MData data ->
+        let mode =
+          match data.mode with
+          | Data_passive -> Data_passive
+          | Data_active (id, expr) ->
+            let id = Option.value id ~default:(Raw (curr.table - 1)) in
+            Data_active (id, expr)
+        in
+        let data = { data with mode } in
+
+        add_data data fields curr
+      | MStart start -> ({ fields with start = start :: fields.start }, curr)
+    in
+    let module_, _curr =
+      List.fold_left add
+        (empty_module module_.id, init_curr)
+        (List.rev module_.fields)
+    in
+    module_
+end
 
 module FuncType = struct
   type t = func_type
@@ -253,50 +336,15 @@ end = struct
     | Local v -> get_name v
     | Imported { assigned_name; _ } -> assigned_name
 
-  let assign_or_export ~(get_name : 'a -> string option)
-      (values : ('a, 'b) define_or_export list) :
-      ('a, 'b) runtime named * opt_ind export list =
-    let assign_one (declared, named, exports, last_assigned_index) elt =
-      match elt with
-      | Define elt ->
-        let id = I last_assigned_index in
-        let last_assigned_index = last_assigned_index + 1 in
-        let named =
-          match get_runtime_name get_name elt with
-          | None -> named
-          | Some name -> StringMap.add name id named
-        in
-        let elt = { index = id; value = elt } in
-        (elt :: declared, named, exports, last_assigned_index)
-      | Export { name; id } ->
-        let export =
-          match id with
-          | None -> Curr (I last_assigned_index)
-          | Some id -> Indice id
-        in
-        (declared, named, { name; id = export } :: exports, last_assigned_index)
+  let name ~(get_name : 'a -> string option) (values : 'a indexed list) :
+      'a named =
+    let assign_one (named : index StringMap.t) (elt : _ indexed) =
+      match get_name elt.value with
+      | None -> named
+      | Some name -> StringMap.add name elt.index named
     in
-    let declared, named, exports, _last_assigned_index =
-      List.fold_left assign_one ([], StringMap.empty, [], 0) values
-    in
-    ({ values = List.rev declared; named }, exports)
-
-  let assign ~(get_name : 'a -> string option) (values : 'a list) : 'a named =
-    let assign_one (declared, named, last_assigned_index) elt =
-      let id = I last_assigned_index in
-      let last_assigned_index = last_assigned_index + 1 in
-      let named =
-        match get_name elt with
-        | None -> named
-        | Some name -> StringMap.add name id named
-      in
-      let elt = { index = id; value = elt } in
-      (elt :: declared, named, last_assigned_index)
-    in
-    let declared, named, _last_assigned_index =
-      List.fold_left assign_one ([], StringMap.empty, 0) values
-    in
-    { values = List.rev declared; named }
+    let named = List.fold_left assign_one StringMap.empty values in
+    { values; named }
 
   let check_type_id (types : func_type named) (check : type_check) =
     let id, func_type = check in
@@ -314,38 +362,33 @@ end = struct
 
   let run (module_ : grouped_module) : assigned_module =
     let type_ = assign_types module_ in
-    let global, export_global =
-      assign_or_export
-        ~get_name:(fun ({ id; _ } : Types.global) -> id)
+    let global =
+      name
+        ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
         module_.global
     in
-    let table, export_table =
-      assign_or_export
-        ~get_name:(fun ((id, _) : Types.table) -> id)
+    let table =
+      name
+        ~get_name:(get_runtime_name (fun ((id, _) : Types.table) -> id))
         module_.table
     in
-    let mem, export_mem =
-      assign_or_export ~get_name:(fun ((id, _) : Types.mem) -> id) module_.mem
+    let mem =
+      name
+        ~get_name:(get_runtime_name (fun ((id, _) : Types.mem) -> id))
+        module_.mem
     in
-    let func, export_func =
-      assign_or_export
-        ~get_name:(fun ({ id; _ } : _ Types.func) -> id)
+    let func =
+      name
+        ~get_name:(get_runtime_name (fun ({ id; _ } : _ Types.func) -> id))
         module_.func
     in
     let elem =
-      assign ~get_name:(fun (elem : Types.elem) -> elem.id) module_.elem
+      name ~get_name:(fun (elem : known_elem) -> elem.id) module_.elem
     in
     let data =
-      assign ~get_name:(fun (data : Types.data) -> data.id) module_.data
+      name ~get_name:(fun (data : known_data) -> data.id) module_.data
     in
     List.iter (check_type_id type_) module_.type_checks;
-    let exports =
-      { global = export_global
-      ; table = export_table
-      ; mem = export_mem
-      ; func = export_func
-      }
-    in
     { id = module_.id
     ; type_
     ; global
@@ -354,7 +397,7 @@ end = struct
     ; func
     ; elem
     ; data
-    ; exports
+    ; exports = module_.exports
     ; start = module_.start
     }
 end
@@ -559,32 +602,28 @@ module Rewrite_indices = struct
       (index, Const.expr) global' =
     { global with init = rewrite_const_expr module_ global.init }
 
-  let rewrite_elem (module_ : assigned_module) (elem : elem) :
+  let rewrite_elem (module_ : assigned_module) (elem : known_elem) :
       (index, Const.expr) elem' =
     let mode =
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
-      | Elem_active (indice_opt, expr) ->
-        let indice_opt =
-          Option.map (find "unbound elem" module_.elem) indice_opt
-        in
+      | Elem_active (indice, expr) ->
+        let indice = find "unbound elem" module_.elem indice in
         let expr = rewrite_const_expr module_ expr in
-        Elem_active (indice_opt, expr)
+        Elem_active (indice, expr)
     in
     let init = List.map (rewrite_const_expr module_) elem.init in
     { elem with init; mode }
 
-  let rewrite_data (module_ : assigned_module) (data : data) :
+  let rewrite_data (module_ : assigned_module) (data : known_data) :
       (index, Const.expr) data' =
     let mode =
       match data.mode with
       | Data_passive as mode -> mode
-      | Data_active (indice_opt, expr) ->
-        let indice_opt =
-          Option.map (find "unbound data" module_.data) indice_opt
-        in
+      | Data_active (indice, expr) ->
+        let indice = find "unbound data" module_.data indice in
         let expr = rewrite_const_expr module_ expr in
-        Data_active (indice_opt, expr)
+        Data_active (indice, expr)
     in
     { data with mode }
 

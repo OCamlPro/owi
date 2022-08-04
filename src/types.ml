@@ -251,7 +251,7 @@ type global = (indice, (indice, indice block_type) expr') global'
 
 type ('indice, 'expr) elem_mode =
   | Elem_passive
-  | Elem_active of 'indice option * 'expr
+  | Elem_active of 'indice * 'expr
   | Elem_declarative
 
 type ('indice, 'expr) elem' =
@@ -261,11 +261,11 @@ type ('indice, 'expr) elem' =
   ; mode : ('indice, 'expr) elem_mode
   }
 
-type elem = (indice, (indice, indice block_type) expr') elem'
+type elem = (indice option, (indice, indice block_type) expr') elem'
 
 type ('indice, 'expr) data_mode =
   | Data_passive
-  | Data_active of 'indice option * 'expr
+  | Data_active of 'indice * 'expr
 
 type ('indice, 'expr) data' =
   { id : string option
@@ -273,7 +273,7 @@ type ('indice, 'expr) data' =
   ; mode : ('indice, 'expr) data_mode
   }
 
-type data = (indice, (indice, indice block_type) expr') data'
+type data = (indice option, (indice, indice block_type) expr') data'
 
 (* Modules *)
 
