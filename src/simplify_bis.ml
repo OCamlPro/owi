@@ -608,7 +608,7 @@ module Rewrite_indices = struct
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
       | Elem_active (indice, expr) ->
-        let indice = find "unbound elem" module_.elem indice in
+        let indice = find "unbound table" module_.table indice in
         let expr = rewrite_const_expr module_ expr in
         Elem_active (indice, expr)
     in
@@ -621,7 +621,7 @@ module Rewrite_indices = struct
       match data.mode with
       | Data_passive as mode -> mode
       | Data_active (indice, expr) ->
-        let indice = find "unbound data" module_.data indice in
+        let indice = find "unbound memory" module_.mem indice in
         let expr = rewrite_const_expr module_ expr in
         Data_active (indice, expr)
     in
