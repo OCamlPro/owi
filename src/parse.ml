@@ -13,7 +13,12 @@ let from_lexbuf =
       (tok, start, stop)
     in
     try Ok (parser provider) with
-    | Menhir_parser.Error -> Error "unexpected token"
+    | Menhir_parser.Error ->
+      let start, _stop = Sedlexing.lexing_positions buf in
+      Debug.debugerr "file %s, line %i, char %i@." start.pos_fname
+        (start.pos_lnum + 1)
+        (start.pos_cnum - start.pos_bol);
+      Error "unexpected token"
     | Lexer.Error (_pos, _msg) -> Error "unknown operator"
     | Failure msg -> Error msg
 
