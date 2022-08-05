@@ -445,3 +445,7 @@ module Simplified = struct
   include Make_Expr(Simplified_indice)
   include Global
 end
+
+let pp_id fmt = function
+| None -> Format.fprintf fmt "Unnamed"
+| Some name -> Format.fprintf fmt "%s" name
