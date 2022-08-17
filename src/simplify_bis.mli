@@ -52,12 +52,14 @@ type 'a exports =
   ; func : 'a export list
   }
 
+type func = (index, func_type) func'
+
 type result =
   { id : string option
   ; global : ((index, Const.expr) global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
-  ; func : ((index, func_type) func', func_type) runtime named
+  ; func : (func, func_type) runtime named
   ; elem : (index, Const.expr) elem' named
   ; data : (index, Const.expr) data' named
   ; exports : index exports

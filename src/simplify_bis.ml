@@ -484,7 +484,7 @@ module Rewrite_indices = struct
           I i
         | Symbolic name -> (
           match StringMap.find_opt name locals with
-          | None -> failwith "unknown local"
+          | None -> failwith (Printf.sprintf "unknown local %s" name)
           | Some id -> id )
       in
       find_local
@@ -587,6 +587,7 @@ module Rewrite_indices = struct
       | F32_const v -> F32_const v
       | F64_const v -> F64_const v
       | Ref_null v -> Ref_null v
+      | Ref_func f -> Ref_func (find "unknown func" module_.func f)
       | Global_get id -> Global_get (find "unknown global" module_.global id)
       | I_binop (t, op) -> I_binop (t, const_ibinop op)
       | _ -> failwith "not a constant expression"
@@ -646,8 +647,9 @@ module Rewrite_indices = struct
 
   let rewrite_func (module_ : assigned_module) (func : indice func) :
       (index, func_type) func' =
-    let body = rewrite_expr module_ func.locals func.body in
     let type_f = rewrite_block_type module_ func.type_f in
+    let params, _ = type_f in
+    let body = rewrite_expr module_ (params @ func.locals) func.body in
     { func with body; type_f }
 
   let rewrite_import (f : 'a -> 'b) (import : 'a imp) : 'b imp =
@@ -689,6 +691,8 @@ module Rewrite_indices = struct
     ; start
     }
 end
+
+type func = (index, func_type) func'
 
 let simplify (module_ : module_) : result =
   Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run

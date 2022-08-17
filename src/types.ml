@@ -378,6 +378,7 @@ module Const = struct
     | F32_const of Float32.t
     | F64_const of Float64.t
     | Ref_null of ref_type
+    | Ref_func of simplified_indice
     | Global_get of simplified_indice
     | I_binop of nn * ibinop
 
