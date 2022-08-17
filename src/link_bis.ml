@@ -38,7 +38,9 @@ end
 module Func = struct
   type func_id = Fid of int
 
-  type t = Func of func_id * S.func
+  type t =
+    | WASM of func_id * S.func
+    | Extern of func_type
 
   let fresh =
     let r = ref (-1) in
@@ -46,7 +48,11 @@ module Func = struct
       incr r;
       Fid !r
 
-  let init func : t = Func (fresh (), func)
+  let init func : t = WASM (fresh (), func)
+
+  let type_ = function
+    | WASM (_, func) -> func.type_f
+    | Extern type_ -> type_
 end
 
 module Index = struct
@@ -306,9 +312,10 @@ let func_types_are_compatible _t1 _t2 =
 
 let load_func (ls : link_state) (import : func_type S.imp) : Func.t =
   let type_ : func_type = import.desc in
-  let (Func (_, type') as func) =
+  let func =
     load_from_module ls (fun (e : exports) -> e.functions) import
   in
+  let type' = Func.type_ func in
   if func_types_are_compatible type_ type' then func
   else failwith "incompatible function import "
 
