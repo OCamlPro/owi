@@ -20,8 +20,9 @@
   simplify
   spectest
   stack
+  stack_bis
   types
-  values
+  value
   wutf8)
  (private_modules convert float32 float64 lexer menhir_parser stack wutf8)
  (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)

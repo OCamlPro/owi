@@ -35,26 +35,6 @@ module Table = struct
   let init ?label (typ : table_type) : t = Table (fresh (), label, typ)
 end
 
-module Func = struct
-  type func_id = Fid of int
-
-  type t =
-    | WASM of func_id * S.func
-    | Extern of func_type
-
-  let fresh =
-    let r = ref (-1) in
-    fun () ->
-      incr r;
-      Fid !r
-
-  let init func : t = WASM (fresh (), func)
-
-  let type_ = function
-    | WASM (_, func) -> func.type_f
-    | Extern type_ -> type_
-end
-
 module Index = struct
   type t = S.index
 
@@ -67,17 +47,17 @@ module IMap = Map.Make (Index)
 
 module Env = struct
   type t =
-    { globals : const IMap.t
+    { globals : Value.t IMap.t
     ; memories : memory IMap.t
     ; tables : Table.t IMap.t
-    ; functions : Func.t IMap.t
+    ; functions : Value.func IMap.t
     ; data : string IMap.t
-    ; elem : const list IMap.t
+    ; elem : Value.t list IMap.t
     }
 
   let pp fmt t =
     let elt fmt (id, const) =
-      Format.fprintf fmt "%a -> %a" Index.pp id Pp.Global.const const
+      Format.fprintf fmt "%a -> %a" Index.pp id Value.pp const
     in
     Format.fprintf fmt "@[<hov 2>{@ %a@ }@]"
       (Format.pp_print_list
@@ -112,7 +92,7 @@ module Env = struct
   let add_elem id elem env =
     { env with elem = IMap.add id elem env.elem }
 
-  let get_global (env : t) id : Types.const =
+  let get_global (env : t) id : Value.t =
     match IMap.find_opt id env.globals with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -133,7 +113,7 @@ module Env = struct
       failwith "unbound table"
     | Some v -> v
 
-  let get_func (env : t) id : Func.t =
+  let get_func (env : t) id : Value.func =
     match IMap.find_opt id env.functions with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -147,7 +127,7 @@ module Env = struct
       failwith "unbound data"
     | Some v -> v
 
-  let get_elem (env : t) id : const list =
+  let get_elem (env : t) id : Value.t list =
     match IMap.find_opt id env.elem with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -156,10 +136,10 @@ module Env = struct
 end
 
 type exports =
-  { globals : const StringMap.t
+  { globals : Value.t StringMap.t
   ; memories : memory StringMap.t
   ; tables : Table.t StringMap.t
-  ; functions : Func.t StringMap.t
+  ; functions : Value.func StringMap.t
   }
 
 type module_to_run = {
@@ -180,6 +160,8 @@ module Const_interp = struct
 
   type env = Env.t
 
+  module Stack = Stack_bis
+
   let exec_ibinop stack nn (op : Const.ibinop) =
     match nn with
     | S32 ->
@@ -193,21 +175,20 @@ module Const_interp = struct
         (let open Int64 in
         match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2)
 
-  let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
+  let exec_instr (env : env) (stack : Stack_bis.t) (instr : Const.instr) =
     match instr with
     | I32_const n -> Stack.push_i32 stack n
     | I64_const n -> Stack.push_i64 stack n
     | F32_const f -> Stack.push_f32 stack f
     | F64_const f -> Stack.push_f64 stack f
     | I_binop (nn, op) -> exec_ibinop stack nn op
-    | Ref_null t -> Stack.push stack (Const_null t)
+    | Ref_null t -> Stack.push stack (Value.ref_null t)
     | Ref_func f ->
-      (* TODO: change the const type for that to be representable *)
-      let value = (assert false : Func.t -> const) (Env.get_func env f) in
+      let value = Value.Ref (Funcref (Some (Env.get_func env f))) in
       Stack.push stack value
     | Global_get id -> Stack.push stack (Env.get_global env id)
 
-  let exec_expr env (e : Const.expr) : const =
+  let exec_expr env (e : Const.expr) : Value.t =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
     match stack with
     | [] -> failwith "const expr returning zero values"
@@ -223,14 +204,14 @@ let load_from_module ls f (import : _ S.imp) =
     | exception Not_found -> failwith ("unbound name " ^ import.name)
     | v -> v )
 
-let load_global (ls : link_state) (import : S.global_import S.imp) : const =
+let load_global (ls : link_state) (import : S.global_import S.imp) : Value.t =
   match import.desc with
   | Var, _ -> failwith "non constant global"
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
 let eval_global ls env
     (global : ((S.index, Const.expr) global', S.global_import) S.runtime) :
-    const =
+    Value.t =
   match global with
   | S.Local global -> Const_interp.exec_expr env global.init
   | S.Imported import -> load_global ls import
@@ -243,7 +224,7 @@ let eval_globals ls globals : Env.t =
       env )
     globals Env.empty
 
-let eval_in_data (env : Env.t) (data : _ data') : (S.index, const) data' =
+let eval_in_data (env : Env.t) (data : _ data') : (S.index, Value.t) data' =
   let mode =
     match data.mode with
     | Data_passive -> Data_passive
@@ -310,18 +291,18 @@ let func_types_are_compatible _t1 _t2 =
   (* TODO *)
   true
 
-let load_func (ls : link_state) (import : func_type S.imp) : Func.t =
+let load_func (ls : link_state) (import : func_type S.imp) : Value.func =
   let type_ : func_type = import.desc in
   let func =
     load_from_module ls (fun (e : exports) -> e.functions) import
   in
-  let type' = Func.type_ func in
+  let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
   else failwith "incompatible function import "
 
-let eval_func ls (func : (S.func, func_type) S.runtime) : Func.t =
+let eval_func ls (func : (S.func, func_type) S.runtime) : Value.func =
   match func with
-  | Local func -> Func.init func
+  | Local func -> Value.Func.wasm func
   | Imported import -> load_func ls import
 
 let eval_functions ls env functions =
@@ -346,7 +327,7 @@ let active_data_expr length ~mem ~data =
     Data_drop data ]
 
 let get_i32 = function
-  | Const_I32 i -> i
+  | Value.I32 i -> i
   | _ -> failwith "Not an i32 const"
 
 let define_data env data =
