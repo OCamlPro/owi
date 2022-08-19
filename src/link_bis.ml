@@ -86,11 +86,9 @@ module Env = struct
   let add_func id func env =
     { env with functions = IMap.add id func env.functions }
 
-  let add_data id data env =
-    { env with data = IMap.add id data env.data }
+  let add_data id data env = { env with data = IMap.add id data env.data }
 
-  let add_elem id elem env =
-    { env with elem = IMap.add id elem env.elem }
+  let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
 
   let get_global (env : t) id : Value.t =
     match IMap.find_opt id env.globals with
@@ -142,18 +140,25 @@ type exports =
   ; functions : Value.func StringMap.t
   }
 
-type module_to_run = {
-  module_ : module_;
-  env : Env.t;
-  to_run : (S.index, func_type) expr' list;
-}
+type module_to_run =
+  { module_ : module_
+  ; env : Env.t
+  ; to_run : (S.index, func_type) expr' list
+  }
 
 type link_state =
   { modules : module_to_run list
   ; by_name : exports StringMap.t
+  ; by_id : exports StringMap.t
+  ; last : exports option
   }
 
-let empty_state = { modules = []; by_name = StringMap.empty }
+let empty_state =
+  { modules = []
+  ; by_name = StringMap.empty
+  ; by_id = StringMap.empty
+  ; last = None
+  }
 
 module Const_interp = struct
   open Types
@@ -293,9 +298,7 @@ let func_types_are_compatible _t1 _t2 =
 
 let load_func (ls : link_state) (import : func_type S.imp) : Value.func =
   let type_ : func_type = import.desc in
-  let func =
-    load_from_module ls (fun (e : exports) -> e.functions) import
-  in
+  let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
   else failwith "incompatible function import "
@@ -314,34 +317,26 @@ let eval_functions ls env functions =
     functions env
 
 let active_elem_expr length ~table ~elem =
-  [ I32_const 0l;
-    I32_const length;
-    Table_init (table, elem);
-    Elem_drop elem ]
+  [ I32_const 0l; I32_const length; Table_init (table, elem); Elem_drop elem ]
 
 let active_data_expr length ~mem ~data =
-  assert(mem = I 0);
-  [ I32_const 0l;
-    I32_const length;
-    Memory_init data;
-    Data_drop data ]
+  assert (mem = I 0);
+  [ I32_const 0l; I32_const length; Memory_init data; Data_drop data ]
 
-let get_i32 = function
-  | Value.I32 i -> i
-  | _ -> failwith "Not an i32 const"
+let get_i32 = function Value.I32 i -> i | _ -> failwith "Not an i32 const"
 
 let define_data env data =
   S.Fields.fold
     (fun id data (env, init) ->
-       let env = Env.add_data id data.init env in
-       let init =
-         match data.mode with
-         | Data_active (mem, offset) ->
-           let offset = Const_interp.exec_expr env offset in
-           active_data_expr (get_i32 offset) ~mem ~data:id :: init
-         | Data_passive -> init
-       in
-       env, init )
+      let env = Env.add_data id data.init env in
+      let init =
+        match data.mode with
+        | Data_active (mem, offset) ->
+          let offset = Const_interp.exec_expr env offset in
+          active_data_expr (get_i32 offset) ~mem ~data:id :: init
+        | Data_passive -> init
+      in
+      (env, init) )
     data (env, [])
 
 let define_elem env elem =
@@ -356,7 +351,7 @@ let define_elem env elem =
           active_elem_expr (get_i32 offset) ~table ~elem:id :: inits
         | Elem_passive | Elem_declarative -> inits
       in
-      env, inits )
+      (env, inits) )
     elem (env, [])
 
 let populate_exports env (exports : S.index S.exports) : exports =
@@ -382,19 +377,32 @@ let link_module (module_ : module_) (ls : link_state) : link_state =
   let env, init_active_data = define_data env module_.data in
   let env, init_active_elem = define_elem env module_.elem in
   Debug.debug Format.err_formatter "EVAL %a@\n" Env.pp env;
-  let by_name_exports = populate_exports env module_.exports in
-  let by_name =
+  let by_id_exports = populate_exports env module_.exports in
+  let by_id =
     (* TODO: this is not the actual module name *)
     match module_.id with
-    | None -> ls.by_name
-    | Some name -> StringMap.add name by_name_exports ls.by_name
+    | None -> ls.by_id
+    | Some id -> StringMap.add id by_id_exports ls.by_id
   in
-  let start =
-    List.map (fun start_id -> Call start_id) module_.start
+  let start = List.map (fun start_id -> Call start_id) module_.start in
+  let to_run = init_active_data @ init_active_elem @ [ start ] in
+  { modules = { module_; env; to_run } :: ls.modules
+  ; by_id
+  ; by_name = ls.by_name
+  ; last = Some by_id_exports
+  }
+
+let register_module (ls : link_state) ~name ~(id : string option) : link_state =
+  let exports =
+    match id with
+    | Some id -> begin
+      match StringMap.find_opt id ls.by_id with
+      | None -> failwith (Printf.sprintf "Unbound module id %s" id)
+      | Some e -> e
+    end
+    | None -> (
+      match ls.last with
+      | Some e -> e
+      | None -> failwith "No previous module to register" )
   in
-  let to_run =
-    init_active_data @
-    init_active_elem @
-    [ start ]
-  in
-  { modules = { module_; env; to_run } :: ls.modules; by_name }
+  { ls with by_name = StringMap.add name exports ls.by_name }

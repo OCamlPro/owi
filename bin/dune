@@ -1,0 +1,4 @@
+(executable
+ (public_name woi_bis)
+ (modules woi_bis)
+ (libraries sedlex woi))
