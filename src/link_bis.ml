@@ -389,9 +389,12 @@ let link_module (module_ : module_) (ls : link_state) : link_state =
     | None -> ls.by_name
     | Some name -> StringMap.add name by_name_exports ls.by_name
   in
+  let start =
+    List.map (fun start_id -> Call start_id) module_.start
+  in
   let to_run =
     init_active_data @
     init_active_elem @
-    [] (* TODO add start *)
+    [ start ]
   in
   { modules = { module_; env; to_run } :: ls.modules; by_name }
