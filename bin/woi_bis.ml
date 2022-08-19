@@ -38,7 +38,7 @@ let () =
           )
         link_state cmds
     in
-    ignore link_state;
+    List.iter Woi.Interpret_bis.exec_module link_state.modules;
     ()
   end
   | Error e -> error e

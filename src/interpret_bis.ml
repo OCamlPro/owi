@@ -2,10 +2,13 @@ open Types
 module S = Simplify_bis
 module Stack = Stack_bis
 module Link = Link_bis
+module Env = Link.Env
 
 type instr = (S.index, func_type) instr'
 
 type expr = (S.index, func_type) expr'
+
+type env = Link_bis.Env.t
 
 exception Return of Stack.t
 
@@ -232,10 +235,6 @@ let fmt = Format.std_formatter
 
 let indice_to_int = function I i -> i
 
-let get_bt = function
-  | Bt_ind _ind -> assert false
-  | Bt_raw (_type_use, (pt, rt)) -> (pt, rt)
-
 let init_local (_id, t) : Value.t =
   match t with
   | Num_type I32 -> I32 Int32.zero
@@ -244,10 +243,10 @@ let init_local (_id, t) : Value.t =
   | Num_type F64 -> F64 Float64.zero
   | Ref_type rt -> Value.ref_null rt
 
-let get_memory (env : Link_bis.Env.t) idx =
-  ignore env;
-  ignore idx;
-  assert false
+let mem_0 = I 0
+let get_memory (env : env) idx =
+  let Link.Memory.Memory mem = Link.IMap.find idx env.memories in
+  mem.data, mem.limits.max
 
 let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
@@ -491,12 +490,12 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
   | Loop (_id, bt, e) -> exec_expr env locals stack e true bt
   | Block (_id, bt, e) -> exec_expr env locals stack e false bt
   | Memory_size ->
-    (* let mem, _max = Link.get_memory env.modules 0 in
+    (* let mem, _max = Link.get_memory env.modules mem_0 in
      * let len = Bytes.length mem / page_size in
      * Stack.push_i32_of_int stack len *)
     failwith "TODO with the right env"
   | Memory_grow ->
-    (* let mem, max = Link.get_memory env.modules 0 in
+    (* let mem, max = Link.get_memory env.modules mem_0 in
      * let delta, stack = Stack.pop_i32_to_int stack in
      * let delta = delta * page_size in
      * let old_size = Bytes.length mem in
@@ -515,7 +514,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     (* let len, stack = Stack.pop_i32_to_int stack in
      * let c, stack = Stack.pop_i32_to_char stack in
      * let pos, stack = Stack.pop_i32_to_int stack in
-     * let mem, _max = Link.get_memory env.modules 0 in
+     * let mem, _max = Link.get_memory env.modules mem_0 in
      * begin
      *   try Bytes.fill mem pos len c
      *   with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
@@ -523,7 +522,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * stack *)
     failwith "TODO with the right env"
   | Memory_copy ->
-    (* let mem, _max = Link.get_memory env.modules 0 in
+    (* let mem, _max = Link.get_memory env.modules mem_0 in
      * let len, stack = Stack.pop_i32_to_int stack in
      * let src_pos, stack = Stack.pop_i32_to_int stack in
      * let dst_pos, stack = Stack.pop_i32_to_int stack in
@@ -534,7 +533,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * stack *)
     failwith "TODO with the right env"
   | Memory_init i ->
-    (* let mem, _max = Link.get_memory env.modules 0 in
+    (* let mem, _max = Link.get_memory env.modules mem_0 in
      * let len, stack = Stack.pop_i32_to_int stack in
      * let src_pos, stack = Stack.pop_i32_to_int stack in
      * let dst_pos, stack = Stack.pop_i32_to_int stack in
@@ -726,7 +725,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     ignore ind;
     failwith "TODO with the right env"
   | I_load16 (nn, sx, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -740,7 +739,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -757,7 +756,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
   | F_load (nn, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -776,7 +775,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
       let res = Float64.of_bits res in
       Stack.push_f64 stack res )
   | I_store (nn, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     ignore align;
     (* TODO: use align *)
     match nn with
@@ -797,7 +796,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
       Bytes.set_int64_le mem offset n;
       stack )
   | F_store (nn, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     ignore align;
     (* TODO: use align *)
     match nn with
@@ -818,7 +817,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
       Bytes.set_int64_le mem offset (Float64.to_bits n);
       stack )
   | I_load8 (nn, sx, { offset; align }) -> (
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -830,7 +829,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; align }) ->
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
     ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -845,7 +844,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     in
     Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; align }) ->
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     ignore align;
     (* TODO: use align *)
     let n, stack =
@@ -864,7 +863,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     Bytes.set_int8 mem offset n;
     stack
   | I_store16 (nn, { offset; align }) ->
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     ignore align;
     (* TODO: use align *)
     let n, stack =
@@ -883,7 +882,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     Bytes.set_int16_le mem offset n;
     stack
   | I64_store32 { offset; align } ->
-    let mem, _max = get_memory env 0 in
+    let mem, _max = get_memory env mem_0 in
     ignore align;
     (* TODO: use align *)
     let n, stack = Stack.pop_i64 stack in

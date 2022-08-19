@@ -6,9 +6,17 @@ type module_ = S.result
 module StringMap = Map.Make (String)
 
 module Memory = struct
-  type mem_id = Mid of int
+  type mem_id = Mid of int [@@unboxed]
 
-  type t = Memory of mem_id * string option * mem_type
+  type mem = bytes
+
+  type t =
+    | Memory of
+        { id : mem_id
+        ; label : string option
+        ; limits : mem_type
+        ; mutable data : mem
+        }
 
   let fresh =
     let r = ref (-1) in
@@ -16,7 +24,9 @@ module Memory = struct
       incr r;
       Mid !r
 
-  let init ?label (typ : mem_type) : t = Memory (fresh (), label, typ)
+  let init ?label (typ : mem_type) : t =
+    let data = Bytes.make (Types.page_size * typ.min) '0' in
+    Memory { id = fresh (); label; limits = typ; data }
 end
 
 type memory = Memory.t
@@ -43,6 +53,7 @@ module Index = struct
   let compare = compare
 end
 
+(* TODO efficient imap for contiguous index (array) *)
 module IMap = Map.Make (Index)
 
 module Env = struct
@@ -249,7 +260,7 @@ let limit_is_included l ~into =
 
 let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
   let limits : mem_type = import.desc in
-  let (Memory (_, _, limits') as mem) =
+  let (Memory { limits = limits'; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
   in
   if limit_is_included limits' ~into:limits then mem
