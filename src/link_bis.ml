@@ -45,6 +45,15 @@ module Table = struct
   let init ?label (typ : table_type) : t = Table (fresh (), label, typ)
 end
 
+module Global = struct
+  type t =
+    { mutable value : Value.t
+    ; label : string option
+    ; mut : Types.mut
+    ; type_ : Types.val_type
+    }
+end
+
 module Index = struct
   type t = S.index
 
@@ -57,18 +66,27 @@ end
 module IMap = Map.Make (Index)
 
 module Env = struct
+  type data =
+    { value : string
+    ; mutable dropped : bool
+    }
+  type elem =
+    { value : Value.t list
+    ; mutable dropped : bool
+    }
+
   type t =
-    { globals : Value.t IMap.t
+    { globals : Global.t IMap.t
     ; memories : memory IMap.t
     ; tables : Table.t IMap.t
     ; functions : Value.func IMap.t
-    ; data : string IMap.t
-    ; elem : Value.t list IMap.t
+    ; data : data IMap.t
+    ; elem : elem IMap.t
     }
 
   let pp fmt t =
-    let elt fmt (id, const) =
-      Format.fprintf fmt "%a -> %a" Index.pp id Value.pp const
+    let elt fmt (id, (global : Global.t)) =
+      Format.fprintf fmt "%a -> %a" Index.pp id Value.pp global.value
     in
     Format.fprintf fmt "@[<hov 2>{@ %a@ }@]"
       (Format.pp_print_list
@@ -101,7 +119,7 @@ module Env = struct
 
   let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
 
-  let get_global (env : t) id : Value.t =
+  let get_global (env : t) id : Global.t =
     match IMap.find_opt id env.globals with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -129,14 +147,14 @@ module Env = struct
       failwith (Format.asprintf "unbound function %a" Index.pp id)
     | Some v -> v
 
-  let get_data (env : t) id : string =
+  let get_data (env : t) id : data =
     match IMap.find_opt id env.data with
     | None ->
       Debug.debugerr "%a@." pp env;
       failwith "unbound data"
     | Some v -> v
 
-  let get_elem (env : t) id : Value.t list =
+  let get_elem (env : t) id : elem =
     match IMap.find_opt id env.elem with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -145,7 +163,7 @@ module Env = struct
 end
 
 type exports =
-  { globals : Value.t StringMap.t
+  { globals : Global.t StringMap.t
   ; memories : memory StringMap.t
   ; tables : Table.t StringMap.t
   ; functions : Value.func StringMap.t
@@ -202,7 +220,7 @@ module Const_interp = struct
     | Ref_func f ->
       let value = Value.Ref (Funcref (Some (Env.get_func env f))) in
       Stack.push stack value
-    | Global_get id -> Stack.push stack (Env.get_global env id)
+    | Global_get id -> Stack.push stack (Env.get_global env id).value
 
   let exec_expr env (e : Const.expr) : Value.t =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
@@ -220,23 +238,27 @@ let load_from_module ls f (import : _ S.imp) =
     | exception Not_found -> failwith ("unbound name " ^ import.name)
     | v -> v )
 
-let load_global (ls : link_state) (import : S.global_import S.imp) : Value.t =
+let load_global (ls : link_state) (import : S.global_import S.imp) : Global.t =
   match import.desc with
   | Var, _ -> failwith "non constant global"
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
 let eval_global ls env
     (global : ((S.index, Const.expr) global', S.global_import) S.runtime) :
-    Value.t =
+    Global.t =
   match global with
-  | S.Local global -> Const_interp.exec_expr env global.init
+  | S.Local global ->
+    let value = Const_interp.exec_expr env global.init in
+    let mut, type_ = global.type_ in
+    let global : Global.t = { value; label = global.id; mut; type_ } in
+    global
   | S.Imported import -> load_global ls import
 
 let eval_globals ls globals : Env.t =
   S.Fields.fold
     (fun id global env ->
-      let const = eval_global ls env global in
-      let env = Env.add_global id const env in
+      let global = eval_global ls env global in
+      let env = Env.add_global id global env in
       env )
     globals Env.empty
 
@@ -327,24 +349,36 @@ let eval_functions ls env functions =
       env )
     functions env
 
-let active_elem_expr length ~table ~elem =
-  [ I32_const 0l; I32_const length; Table_init (table, elem); Elem_drop elem ]
+let active_elem_expr ~offset ~length ~table ~elem =
+  [ I32_const offset
+  ; I32_const 0l
+  ; I32_const length
+  ; Table_init (table, elem)
+  ; Elem_drop elem
+  ]
 
-let active_data_expr length ~mem ~data =
+let active_data_expr ~offset ~length ~mem ~data =
   assert (mem = I 0);
-  [ I32_const 0l; I32_const length; Memory_init data; Data_drop data ]
+  [ I32_const offset
+  ; I32_const 0l
+  ; I32_const length
+  ; Memory_init data
+  ; Data_drop data
+  ]
 
 let get_i32 = function Value.I32 i -> i | _ -> failwith "Not an i32 const"
 
 let define_data env data =
   S.Fields.fold
     (fun id data (env, init) ->
-      let env = Env.add_data id data.init env in
+      let env = Env.add_data id { value = data.init; dropped = false } env in
       let init =
         match data.mode with
         | Data_active (mem, offset) ->
           let offset = Const_interp.exec_expr env offset in
-          active_data_expr (get_i32 offset) ~mem ~data:id :: init
+          let length = Int32.of_int @@ String.length data.init in
+          active_data_expr ~offset:(get_i32 offset) ~length ~mem ~data:id
+          :: init
         | Data_passive -> init
       in
       (env, init) )
@@ -354,12 +388,14 @@ let define_elem env elem =
   S.Fields.fold
     (fun id (elem : _ elem') (env, inits) ->
       let init = List.map (Const_interp.exec_expr env) elem.init in
-      let env = Env.add_elem id init env in
+      let env = Env.add_elem id { value = init; dropped = false } env in
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->
+          let length = Int32.of_int @@ List.length inits in
           let offset = Const_interp.exec_expr env offset in
-          active_elem_expr (get_i32 offset) ~table ~elem:id :: inits
+          active_elem_expr ~offset:(get_i32 offset) ~length ~table ~elem:id
+          :: inits
         | Elem_passive | Elem_declarative -> inits
       in
       (env, inits) )

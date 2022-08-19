@@ -263,12 +263,25 @@ let get_func (env : env) idx =
 let get_data (env : env) idx =
   match IMap.find_opt idx env.data with
   | None -> failwith "missing data"
-  | Some f -> f
+  | Some data ->
+    if data.dropped then
+      failwith "dropped data"
+    else
+      data
+
+let get_elem (env : env) idx =
+  match IMap.find_opt idx env.elem with
+  | None -> failwith "missing elem"
+  | Some elem ->
+    if elem.dropped then
+      failwith "dropped elem"
+    else
+      elem
 
 let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     (instr : instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  (* Debug.debug fmt "running instr: %a@." Pp.Simplified.instr instr; *)
+  Debug.debug fmt "running instr: %a@." Pp.Simplified_bis.instr instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack
@@ -555,7 +568,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
     let data = get_data env i in
-    ( try Bytes.blit_string data src_pos mem dst_pos len
+    ( try Bytes.blit_string data.value src_pos mem dst_pos len
       with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
     stack
   | Select _t ->
@@ -569,11 +582,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     locals.(indice_to_int i) <- v;
     Stack.push stack v
   | Global_get i ->
-    (* let i = indice_to_int i in
-     * let _mi, _gt, e = Link.get_global env.modules i in
-     * Stack.push stack e *)
-    ignore i;
-    failwith "TODO with the right env Global_get"
+    Stack.push stack (Env.get_global env i).value
   | Global_set i ->
     (* let i = indice_to_int i in
      * let _mi, (mut, typ), _e = Link.get_global env.modules i in
@@ -731,12 +740,10 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
      * stack *)
     ignore (t_i, e_i);
     failwith "TODO with the right env Table_init"
-  | Elem_drop ind ->
-    (* let rt, elem = env.modules.(module_indice).elements.(indice_to_int ind) in
-     * Array.iteri (fun i _e -> elem.(i) <- Const_null rt) elem;
-     * stack *)
-    ignore ind;
-    failwith "TODO with the right env Elem_drop"
+  | Elem_drop i ->
+    let elem = get_elem env i in
+    elem.dropped <- true;
+    stack
   | I_load16 (nn, sx, { offset; align }) -> (
     let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
@@ -907,10 +914,9 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     Bytes.set_int32_le mem offset n;
     stack
   | Data_drop i ->
-    (* env.modules.(module_indice).datas.(indice_to_int i) <- "";
-     * stack *)
-    ignore i;
-    failwith "TODO with the right env Data_drop"
+    let data = get_data env i in
+    data.dropped <- true;
+    stack
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
     let target =
