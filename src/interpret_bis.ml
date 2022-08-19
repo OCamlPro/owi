@@ -247,12 +247,13 @@ let init_local (_id, t) : Value.t =
 (* TODO move to module Env *)
 let mem_0 = I 0
 
+let get_raw_memory (env : env) idx =
+  match Link.IMap.find_opt idx env.memories with
+  | None -> failwith "missing memory"
+  | Some m -> m
+
 let get_memory (env : env) idx =
-  let (Link.Memory.Memory mem) =
-    match Link.IMap.find_opt idx env.memories with
-    | None -> failwith "missing memory"
-    | Some m -> m
-  in
+  let Memory mem = get_raw_memory env idx in
   (mem.data, mem.limits.max)
 
 let get_func (env : env) idx =
@@ -263,20 +264,12 @@ let get_func (env : env) idx =
 let get_data (env : env) idx =
   match IMap.find_opt idx env.data with
   | None -> failwith "missing data"
-  | Some data ->
-    if data.dropped then
-      failwith "dropped data"
-    else
-      data
+  | Some data -> if data.dropped then failwith "dropped data" else data
 
 let get_elem (env : env) idx =
   match IMap.find_opt idx env.elem with
   | None -> failwith "missing elem"
-  | Some elem ->
-    if elem.dropped then
-      failwith "dropped elem"
-    else
-      elem
+  | Some elem -> if elem.dropped then failwith "dropped elem" else elem
 
 let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     (instr : instr) =
@@ -520,48 +513,45 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
   | Loop (_id, bt, e) -> exec_expr env locals stack e true bt
   | Block (_id, bt, e) -> exec_expr env locals stack e false bt
   | Memory_size ->
-    (* let mem, _max = Link.get_memory env.modules mem_0 in
-     * let len = Bytes.length mem / page_size in
-     * Stack.push_i32_of_int stack len *)
-    failwith "TODO with the right env Memory_size"
-  | Memory_grow ->
-    (* let mem, max = Link.get_memory env.modules mem_0 in
-     * let delta, stack = Stack.pop_i32_to_int stack in
-     * let delta = delta * page_size in
-     * let old_size = Bytes.length mem in
-     * let new_size = old_size + delta in
-     * if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
-     * else
-     *   match max with
-     *   | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
-     *   | None | Some _ ->
-     *     let new_mem = Bytes.extend mem 0 delta in
-     *     Bytes.fill new_mem old_size delta (Char.chr 0);
-     *     Link.set_memory env.modules 0 new_mem;
-     *     Stack.push_i32_of_int stack (old_size / page_size) ) *)
-    failwith "TODO with the right env Memory_grow"
+    let mem, _max = get_memory env mem_0 in
+    let len = Bytes.length mem / page_size in
+    Stack.push_i32_of_int stack len
+  | Memory_grow -> begin
+    let Memory mem as mem' = get_raw_memory env mem_0 in
+    let delta, stack = Stack.pop_i32_to_int stack in
+    let delta = delta * page_size in
+    let old_size = Bytes.length mem.data in
+    let new_size = old_size + delta in
+    if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
+    else
+      match mem.limits.max with
+      | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
+      | None | Some _ ->
+        let new_mem = Bytes.extend mem.data 0 delta in
+        Bytes.fill new_mem old_size delta (Char.chr 0);
+        Link.Memory.update_memory mem' new_mem;
+        Stack.push_i32_of_int stack (old_size / page_size)
+  end
   | Memory_fill ->
-    (* let len, stack = Stack.pop_i32_to_int stack in
-     * let c, stack = Stack.pop_i32_to_char stack in
-     * let pos, stack = Stack.pop_i32_to_int stack in
-     * let mem, _max = Link.get_memory env.modules mem_0 in
-     * begin
-     *   try Bytes.fill mem pos len c
-     *   with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
-     * end;
-     * stack *)
-    failwith "TODO with the right env Memory_fill"
+    let len, stack = Stack.pop_i32_to_int stack in
+    let c, stack = Stack.pop_i32_to_char stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    let mem, _max = get_memory env mem_0 in
+    begin
+      try Bytes.fill mem pos len c
+      with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
+    end;
+    stack
   | Memory_copy ->
-    (* let mem, _max = Link.get_memory env.modules mem_0 in
-     * let len, stack = Stack.pop_i32_to_int stack in
-     * let src_pos, stack = Stack.pop_i32_to_int stack in
-     * let dst_pos, stack = Stack.pop_i32_to_int stack in
-     * begin
-     *   try Bytes.blit mem src_pos mem dst_pos len
-     *   with Invalid_argument _ -> raise (Trap "out of bounds memory access")
-     * end;
-     * stack *)
-    failwith "TODO with the right env Memory_copy"
+    let mem, _max = get_memory env mem_0 in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src_pos, stack = Stack.pop_i32_to_int stack in
+    let dst_pos, stack = Stack.pop_i32_to_int stack in
+    begin
+      try Bytes.blit mem src_pos mem dst_pos len
+      with Invalid_argument _ -> raise (Trap "out of bounds memory access")
+    end;
+    stack
   | Memory_init i ->
     let mem, _max = get_memory env mem_0 in
     let len, stack = Stack.pop_i32_to_int stack in
@@ -581,8 +571,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let v, stack = Stack.pop stack in
     locals.(indice_to_int i) <- v;
     Stack.push stack v
-  | Global_get i ->
-    Stack.push stack (Env.get_global env i).value
+  | Global_get i -> Stack.push stack (Env.get_global env i).value
   | Global_set i ->
     (* let i = indice_to_int i in
      * let _mi, (mut, typ), _e = Link.get_global env.modules i in

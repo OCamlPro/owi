@@ -14,7 +14,7 @@ module Memory = struct
     | Memory of
         { id : mem_id
         ; label : string option
-        ; limits : mem_type
+        ; limits : mem_type (* TODO: min is useless: part of data, remove *)
         ; mutable data : mem
         }
 
@@ -27,6 +27,10 @@ module Memory = struct
   let init ?label (typ : mem_type) : t =
     let data = Bytes.make (Types.page_size * typ.min) '0' in
     Memory { id = fresh (); label; limits = typ; data }
+
+  let update_memory (Memory mem) data =
+    mem.data <- data
+
 end
 
 type memory = Memory.t
