@@ -49,3 +49,6 @@ let ref_null (type_:Types.ref_type) =
   match type_ with
   | Func_ref -> Ref (Funcref None)
   | Extern_ref -> Ref (Externref None)
+
+let ref_func (f:func) : t =
+  Ref (Funcref (Some f))

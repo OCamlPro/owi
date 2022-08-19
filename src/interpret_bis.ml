@@ -3,6 +3,7 @@ module S = Simplify_bis
 module Stack = Stack_bis
 module Link = Link_bis
 module Env = Link.Env
+module IMap = Link.IMap
 
 type instr = (S.index, func_type) instr'
 
@@ -243,12 +244,29 @@ let init_local (_id, t) : Value.t =
   | Num_type F64 -> F64 Float64.zero
   | Ref_type rt -> Value.ref_null rt
 
+(* TODO move to module Env *)
 let mem_0 = I 0
-let get_memory (env : env) idx =
-  let Link.Memory.Memory mem = Link.IMap.find idx env.memories in
-  mem.data, mem.limits.max
 
-let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
+let get_memory (env : env) idx =
+  let (Link.Memory.Memory mem) =
+    match Link.IMap.find_opt idx env.memories with
+    | None -> failwith "missing memory"
+    | Some m -> m
+  in
+  (mem.data, mem.limits.max)
+
+let get_func (env : env) idx =
+  match IMap.find_opt idx env.functions with
+  | None -> failwith "missing functions"
+  | Some f -> f
+
+let get_data (env : env) idx =
+  match IMap.find_opt idx env.data with
+  | None -> failwith "missing data"
+  | Some f -> f
+
+let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
+    (instr : instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   (* Debug.debug fmt "running instr: %a@." Pp.Simplified.instr instr; *)
   match instr with
@@ -461,11 +479,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in
     Stack.push_bool stack b
-  | Ref_func i ->
-    ignore i;
-    failwith "TODO with the right env"
-    (* let i = indice_to_int i in
-     * Stack.push_host stack i *)
+  | Ref_func i -> Stack.push stack (Value.ref_func (get_func env i))
   | Drop -> Stack.drop stack
   | Local_get i -> Stack.push stack locals.(indice_to_int i)
   | Local_set i ->
@@ -475,14 +489,17 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
   | If_else (_id, bt, e1, e2) ->
     let b, stack = Stack.pop_bool stack in
     exec_expr env locals stack (if b then e1 else e2) false bt
-  | Call i ->
-    (* let m, func = Link.get_func env.modules (indice_to_int i) in
-     * let param_type, _result_type = get_bt func.type_f in
-     * let args, stack = Stack.pop_n stack (List.length param_type) in
-     * let res = exec_func env m (func : S.func) (List.rev args) in
-     * res @ stack *)
-    ignore i;
-    failwith "TODO with the right env"
+  | Call i -> begin
+    let func = get_func env i in
+    let param_type, _result_type = Value.Func.type_ func in
+    let args, stack = Stack.pop_n stack (List.length param_type) in
+    let res =
+      match func with
+      | WASM (_, func) -> exec_func env func (List.rev args)
+      | Extern (_, f) -> f (List.rev args)
+    in
+    res @ stack
+  end
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
@@ -493,7 +510,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     (* let mem, _max = Link.get_memory env.modules mem_0 in
      * let len = Bytes.length mem / page_size in
      * Stack.push_i32_of_int stack len *)
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Memory_size"
   | Memory_grow ->
     (* let mem, max = Link.get_memory env.modules mem_0 in
      * let delta, stack = Stack.pop_i32_to_int stack in
@@ -509,7 +526,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      *     Bytes.fill new_mem old_size delta (Char.chr 0);
      *     Link.set_memory env.modules 0 new_mem;
      *     Stack.push_i32_of_int stack (old_size / page_size) ) *)
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Memory_grow"
   | Memory_fill ->
     (* let len, stack = Stack.pop_i32_to_int stack in
      * let c, stack = Stack.pop_i32_to_char stack in
@@ -520,7 +537,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      *   with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
      * end;
      * stack *)
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Memory_fill"
   | Memory_copy ->
     (* let mem, _max = Link.get_memory env.modules mem_0 in
      * let len, stack = Stack.pop_i32_to_int stack in
@@ -531,20 +548,16 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      *   with Invalid_argument _ -> raise (Trap "out of bounds memory access")
      * end;
      * stack *)
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Memory_copy"
   | Memory_init i ->
-    (* let mem, _max = Link.get_memory env.modules mem_0 in
-     * let len, stack = Stack.pop_i32_to_int stack in
-     * let src_pos, stack = Stack.pop_i32_to_int stack in
-     * let dst_pos, stack = Stack.pop_i32_to_int stack in
-     * ( try
-     *     Bytes.blit_string
-     *       env.modules.(module_indice).datas.(indice_to_int i)
-     *       src_pos mem dst_pos len
-     *   with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
-     * stack *)
-    ignore i;
-    failwith "TODO with the right env"
+    let mem, _max = get_memory env mem_0 in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src_pos, stack = Stack.pop_i32_to_int stack in
+    let dst_pos, stack = Stack.pop_i32_to_int stack in
+    let data = get_data env i in
+    ( try Bytes.blit_string data src_pos mem dst_pos len
+      with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
+    stack
   | Select _t ->
     (* TODO: check that o1 and o2 have type t *)
     let b, stack = Stack.pop_bool stack in
@@ -560,7 +573,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * let _mi, _gt, e = Link.get_global env.modules i in
      * Stack.push stack e *)
     ignore i;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Global_get"
   | Global_set i ->
     (* let i = indice_to_int i in
      * let _mi, (mut, typ), _e = Link.get_global env.modules i in
@@ -592,7 +605,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * Link.set_global env.modules i v;
      * stack *)
     ignore i;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Global_set"
   | Table_get indice ->
     (* let indice = indice_to_int indice in
      * let _mi, t, table, _max = Link.get_table env.modules indice in
@@ -606,7 +619,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * in
      * Stack.push stack v *)
     ignore indice;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_get"
   | Table_set indice ->
     (* let indice = indice_to_int indice in
      * let _mi, _t, table, _max =
@@ -620,7 +633,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * end;
      * stack *)
     ignore indice;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_set"
   | Table_size indice ->
     (* let indice = indice_to_int indice in
      * let _mi, _t, table, _max =
@@ -628,7 +641,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * in
      * Stack.push_i32_of_int stack (Array.length table) *)
     ignore indice;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_size"
   | Table_grow indice ->
     (* let indice = indice_to_int indice in
      * let _mi, _t, table, max = Link.get_table env.modules indice in
@@ -649,7 +662,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      *   Link.set_table env.modules indice new_table;
      *   Stack.push_i32_of_int stack size *)
     ignore indice;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_grow"
   | Table_fill indice ->
     (* let indice = indice_to_int indice in
      * let _mi, _t, table, _max =
@@ -664,7 +677,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * end;
      * stack *)
     ignore indice;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_fill"
   | Table_copy (ti_dst, ti_src) ->
     (* let modules = env.modules in
      * let _mi, _rt, tbl_dst, _max =
@@ -685,7 +698,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      *     stack
      *   with Invalid_argument _ -> raise @@ Trap "out of bounds table access" ) *)
     ignore (ti_dst, ti_src);
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_copy"
   | Table_init (t_i, e_i) ->
     (* let modules = env.modules in
      * let m = modules.(module_indice) in
@@ -717,13 +730,13 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * end;
      * stack *)
     ignore (t_i, e_i);
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Table_init"
   | Elem_drop ind ->
     (* let rt, elem = env.modules.(module_indice).elements.(indice_to_int ind) in
      * Array.iteri (fun i _e -> elem.(i) <- Const_null rt) elem;
      * stack *)
     ignore ind;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Elem_drop"
   | I_load16 (nn, sx, { offset; align }) -> (
     let mem, _max = get_memory env mem_0 in
     (* TODO: use align *)
@@ -897,7 +910,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
     (* env.modules.(module_indice).datas.(indice_to_int i) <- "";
      * stack *)
     ignore i;
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Data_drop"
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
     let target =
@@ -928,7 +941,7 @@ let rec exec_instr env locals (stack : Stack.t) (instr : instr) =
      * let res = exec_func env func (List.rev args) in
      * res @ stack *)
     ignore (tbl_i, typ_i);
-    failwith "TODO with the right env"
+    failwith "TODO with the right env Call_indirect"
 
 and exec_expr env locals stack (e : expr) is_loop bt =
   let rt =
