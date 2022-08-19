@@ -21,10 +21,10 @@ let push_f32 s f = push s (F32 f)
 
 let push_f64 s f = push s (F64 f)
 
-let pp fmt s =
+let pp fmt (s:t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
-    Pp.Input.const fmt s
+    Value.pp fmt s
 
 let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
