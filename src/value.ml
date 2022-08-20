@@ -1,4 +1,3 @@
-
 module Func = struct
   type func_id = Fid of int [@@unboxed]
 
@@ -45,10 +44,12 @@ let pp fmt = function
   | F64 f -> Format.fprintf fmt "f64.const %a" Pp.Simplified.f64 f
   | Ref r -> pp_ref fmt r
 
-let ref_null (type_:Types.ref_type) =
+let ref_null (type_ : Types.ref_type) =
   match type_ with
   | Func_ref -> Ref (Funcref None)
   | Extern_ref -> Ref (Externref None)
 
-let ref_func (f:func) : t =
-  Ref (Funcref (Some f))
+let ref_func (f : func) : t = Ref (Funcref (Some f))
+
+let is_ref_null v =
+  match v with Ref (Funcref None) | Ref (Externref None) -> true | _ -> false

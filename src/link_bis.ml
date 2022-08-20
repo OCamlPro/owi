@@ -44,7 +44,7 @@ module Table = struct
         ; label : string option
         ; limits : limits
         ; type_ : ref_type
-        ; data : table
+        ; mutable data : table
         }
 
   let fresh =
@@ -58,6 +58,8 @@ module Table = struct
     let null = Value.ref_null ref_type in
     let table = Array.make limits.min null in
     Table { id = fresh (); label; limits; type_ = ref_type; data = table }
+
+  let update (Table table) data = table.data <- data
 end
 
 module Global = struct
@@ -87,7 +89,7 @@ module Env = struct
     }
 
   type elem =
-    { value : Value.t list
+    { value : Value.t array
     ; mutable dropped : bool
     }
 
@@ -404,7 +406,7 @@ let define_elem env elem =
   S.Fields.fold
     (fun id (elem : _ elem') (env, inits) ->
       let init = List.map (Const_interp.exec_expr env) elem.init in
-      let env = Env.add_elem id { value = init; dropped = false } env in
+      let env = Env.add_elem id { value = Array.of_list init; dropped = false } env in
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->

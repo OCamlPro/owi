@@ -104,6 +104,14 @@ let pop2_f64 s =
     | _ -> failwith "invalid type (expected f64)"
   with Empty -> failwith "invalid type (expected f64)"
 
+let pop_ref s =
+  try
+    let hd, tl = pop s in
+    match hd with
+    | Ref _ -> (hd, tl)
+    | _ -> failwith "invalid type (expected ref)"
+  with Empty -> failwith "invalid type (expected ref)"
+
 let pop_bool s =
   try
     let hd, tl = pop s in

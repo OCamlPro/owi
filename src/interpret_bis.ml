@@ -253,7 +253,7 @@ let get_raw_memory (env : env) idx =
   | Some m -> m
 
 let get_memory (env : env) idx =
-  let Memory mem = get_raw_memory env idx in
+  let (Memory mem) = get_raw_memory env idx in
   (mem.data, mem.limits.max)
 
 let get_func (env : env) idx =
@@ -522,7 +522,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let len = Bytes.length mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> begin
-    let Memory mem as mem' = get_raw_memory env mem_0 in
+    let (Memory mem as mem') = get_raw_memory env mem_0 in
     let delta, stack = Stack.pop_i32_to_int stack in
     let delta = delta * page_size in
     let old_size = Bytes.length mem.data in
@@ -610,7 +610,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     ignore i;
     failwith "TODO with the right env Global_set"
   | Table_get indice ->
-    let Table t = get_table env indice in
+    let (Table t) = get_table env indice in
     let indice, stack = Stack.pop_i32_to_int stack in
     let v =
       match t.data.(indice) with
@@ -620,116 +620,89 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     in
     Stack.push stack v
   | Table_set indice ->
-    (* let indice = indice_to_int indice in
-     * let _mi, _t, table, _max =
-     *   Link.get_table env.modules indice
-     * in
-     * let v, stack = Stack.pop stack in
-     * let indice, stack = Stack.pop_i32_to_int stack in
-     * begin
-     *   try table.(indice) <- Some (module_indice, v)
-     *   with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
-     * end;
-     * stack *)
-    ignore indice;
-    failwith "TODO with the right env Table_set"
+    let (Table t) = get_table env indice in
+    let v, stack = Stack.pop stack in
+    let indice, stack = Stack.pop_i32_to_int stack in
+    begin
+      try t.data.(indice) <- v
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
+    stack
   | Table_size indice ->
-    (* let indice = indice_to_int indice in
-     * let _mi, _t, table, _max =
-     *   Link.get_table env.modules indice
-     * in
-     * Stack.push_i32_of_int stack (Array.length table) *)
-    ignore indice;
-    failwith "TODO with the right env Table_size"
+    let (Table t) = get_table env indice in
+    Stack.push_i32_of_int stack (Array.length t.data)
   | Table_grow indice ->
-    (* let indice = indice_to_int indice in
-     * let _mi, _t, table, max = Link.get_table env.modules indice in
-     * let size = Array.length table in
-     * let delta, stack = Stack.pop_i32_to_int stack in
-     * let new_size = size + delta in
-     * let allowed =
-     *   Option.value max ~default:Int.max_int >= new_size
-     *   && new_size >= 0 && new_size >= size
-     * in
-     * if not allowed then
-     *   let stack = Stack.drop stack in
-     *   Stack.push_i32_of_int stack (-1)
-     * else
-     *   let new_element, stack = Stack.pop stack in
-     *   let new_table = Array.make new_size (Some (module_indice, new_element)) in
-     *   Array.iteri (fun i x -> new_table.(i) <- x) table;
-     *   Link.set_table env.modules indice new_table;
-     *   Stack.push_i32_of_int stack size *)
-    ignore indice;
-    failwith "TODO with the right env Table_grow"
+    let (Table t as table) = get_table env indice in
+    let size = Array.length t.data in
+    let delta, stack = Stack.pop_i32_to_int stack in
+    let new_size = size + delta in
+    let allowed =
+      Option.value t.limits.max ~default:Int.max_int >= new_size
+      && new_size >= 0 && new_size >= size
+    in
+    if not allowed then
+      let stack = Stack.drop stack in
+      Stack.push_i32_of_int stack (-1)
+    else
+      let new_element, stack = Stack.pop stack in
+      let new_table = Array.make new_size new_element in
+      Array.blit t.data 0 new_table 0 (Array.length t.data);
+      Link.Table.update table new_table;
+      Stack.push_i32_of_int stack size
   | Table_fill indice ->
-    (* let indice = indice_to_int indice in
-     * let _mi, _t, table, _max =
-     *   Link.get_table env.modules indice
-     * in
-     * let len, stack = Stack.pop_i32_to_int stack in
-     * let x, stack = Stack.pop_ref stack in
-     * let pos, stack = Stack.pop_i32_to_int stack in
-     * begin
-     *   try Array.fill table pos len (Some (module_indice, x))
-     *   with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
-     * end;
-     * stack *)
-    ignore indice;
-    failwith "TODO with the right env Table_fill"
-  | Table_copy (ti_dst, ti_src) ->
-    (* let modules = env.modules in
-     * let _mi, _rt, tbl_dst, _max =
-     *   Link.get_table modules (indice_to_int ti_dst)
-     * in
-     * let _mi, _rt, tbl_src, _max =
-     *   Link.get_table modules (indice_to_int ti_src)
-     * in
-     * let len, stack = Stack.pop_i32_to_int stack in
-     * let src, stack = Stack.pop_i32_to_int stack in
-     * let dst, stack = Stack.pop_i32_to_int stack in
-     * if src + len > Array.length tbl_src || dst + len > Array.length tbl_dst then
-     *   raise @@ Trap "out of bounds table access";
-     * if len = 0 then stack
-     * else
-     *   try
-     *     Array.blit tbl_src src tbl_dst dst len;
-     *     stack
-     *   with Invalid_argument _ -> raise @@ Trap "out of bounds table access" ) *)
-    ignore (ti_dst, ti_src);
-    failwith "TODO with the right env Table_copy"
+    let (Table t) = get_table env indice in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let x, stack = Stack.pop_ref stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    begin
+      try Array.fill t.data pos len x
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
+    stack
+  | Table_copy (ti_dst, ti_src) -> begin
+    let (Table t_src) = get_table env ti_src in
+    let (Table t_dst) = get_table env ti_dst in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let src, stack = Stack.pop_i32_to_int stack in
+    let dst, stack = Stack.pop_i32_to_int stack in
+    if
+      src + len > Array.length t_src.data || dst + len > Array.length t_dst.data
+    then raise @@ Trap "out of bounds table access";
+    if len = 0 then stack
+    else
+      try
+        Array.blit t_src.data src t_dst.data dst len;
+        stack
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+  end
   | Table_init (t_i, e_i) ->
-    (* let modules = env.modules in
-     * let m = modules.(module_indice) in
-     * let _mi, _rt, table, _max =
-     *   Link.get_table modules (indice_to_int t_i)
-     * in
-     * let len, stack = Stack.pop_i32_to_int stack in
-     * let pos_x, stack = Stack.pop_i32_to_int stack in
-     * let pos, stack = Stack.pop_i32_to_int stack in
-     * let _typ, el = m.elements.(indice_to_int e_i) in
-     * (\* TODO: this is dumb, why do we have to fail even when len = 0 ?
-     *  * I don't remember where exactly but somewhere else it's the opposite:
-     *  * if len is 0 then we do not fail...
-     *  * if it wasn't needed, the following check would be useless
-     *  * as the next one would take care of it
-     *  * (or maybe not because we don't want to fail
-     *  * in the middle of the loop but still...)*\)
-     * if
-     *   pos_x + len > Array.length el || pos + len > Array.length table || 0 > len
-     * then raise @@ Trap "out of bounds table access";
-     * begin
-     *   try
-     *     for i = 0 to len - 1 do
-     *       match el.(pos_x + i) with
-     *       | Const_null _ -> raise @@ Trap "out of bounds table access"
-     *       | x -> Array.fill table (pos + i) 1 (Some (module_indice, x))
-     *     done
-     *   with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
-     * end;
-     * stack *)
-    ignore (t_i, e_i);
-    failwith "TODO with the right env Table_init"
+    let (Table t) = get_table env t_i in
+    let elem = get_elem env e_i in
+    let len, stack = Stack.pop_i32_to_int stack in
+    let pos_x, stack = Stack.pop_i32_to_int stack in
+    let pos, stack = Stack.pop_i32_to_int stack in
+    (* TODO: this is dumb, why do we have to fail even when len = 0 ?
+     * I don't remember where exactly but somewhere else it's the opposite:
+     * if len is 0 then we do not fail...
+     * if it wasn't needed, the following check would be useless
+     * as the next one would take care of it
+     * (or maybe not because we don't want to fail
+     * in the middle of the loop but still...)*)
+    if
+      pos_x + len > Array.length elem.value
+      || pos + len > Array.length t.data
+      || 0 > len
+    then raise @@ Trap "out of bounds table access";
+    begin
+      try
+        for i = 0 to len - 1 do
+          let x = elem.value.(pos_x + i) in
+          if Value.is_ref_null x then raise @@ Trap "out of bounds table access"
+          else Array.fill t.data (pos + i) 1 x
+        done
+      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+    end;
+    stack
   | Elem_drop i ->
     let elem = get_elem env i in
     elem.dropped <- true;
