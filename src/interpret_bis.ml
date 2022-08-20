@@ -928,7 +928,6 @@ and exec_func env (func : S.func) args =
 
 let exec_module (module_ : Link_bis.module_to_run) =
   Debug.debug Format.err_formatter "EXEC START@\n";
-  (* let m = env.modules.(module_indice) in *)
   try
     List.iter
       (fun to_run ->
@@ -940,20 +939,10 @@ let exec_module (module_ : Link_bis.module_to_run) =
         | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
       module_.to_run
-    (* (\* Link.module_ env.registered_modules env.modules; *\)
-     * Option.iter
-     *   (fun f_id ->
-     *     let, func =
-     *       Link.get_func env.modules f_id
-     *     in
-     *     let _res = exec_func env (func:S.func) [] in
-     *     () )
-     *   m.start;
-     * (\* TODO: re-enable later to avoid missing some errors
-     *    if Option.is_some m.should_trap || Option.is_some m.should_not_link then
-     *      assert false;
-     * *\)
-     * env *)
+    (* TODO: re-enable later to avoid missing some errors
+       if Option.is_some m.should_trap || Option.is_some m.should_not_link then
+         assert false;
+    *)
   with exn -> raise exn
 (* TODO
    | Trap msg -> (
