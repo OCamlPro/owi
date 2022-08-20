@@ -574,37 +574,34 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     Stack.push stack v
   | Global_get i -> Stack.push stack (Env.get_global env i).value
   | Global_set i ->
-    (* let i = indice_to_int i in
-     * let _mi, (mut, typ), _e = Link.get_global env.modules i in
-     * if mut = Const then failwith "Can't set const global";
-     * let v, stack =
-     *   match typ with
-     *   | Ref_type rt -> begin
-     *     (\* TODO: it's weird that they are the same type ? *\)
-     *     match rt with
-     *     | Extern_ref | Func_ref ->
-     *       let v, stack = Stack.pop_host stack in
-     *       (Const_host v, stack)
-     *   end
-     *   | Num_type nt -> (
-     *     match nt with
-     *     | I32 ->
-     *       let v, stack = Stack.pop_i32 stack in
-     *       (Const_I32 v, stack)
-     *     | I64 ->
-     *       let v, stack = Stack.pop_i64 stack in
-     *       (Const_I64 v, stack)
-     *     | F32 ->
-     *       let v, stack = Stack.pop_f32 stack in
-     *       (Const_F32 v, stack)
-     *     | F64 ->
-     *       let v, stack = Stack.pop_f64 stack in
-     *       (Const_F64 v, stack) )
-     * in
-     * Link.set_global env.modules i v;
-     * stack *)
-    ignore i;
-    failwith "TODO with the right env Global_set"
+    let global = Env.get_global env i in
+    if global.mut = Const then failwith "Can't set const global";
+    let v, stack =
+      match global.typ with
+      | Ref_type rt -> begin
+        (* TODO: it's weird that they are the same type ? *)
+        match rt with
+        | Extern_ref | Func_ref ->
+          let v, stack = Stack.pop_ref stack in
+          (v, stack)
+      end
+      | Num_type nt -> (
+        match nt with
+        | I32 ->
+          let v, stack = Stack.pop_i32 stack in
+          (I32 v, stack)
+        | I64 ->
+          let v, stack = Stack.pop_i64 stack in
+          (I64 v, stack)
+        | F32 ->
+          let v, stack = Stack.pop_f32 stack in
+          (F32 v, stack)
+        | F64 ->
+          let v, stack = Stack.pop_f64 stack in
+          (F64 v, stack) )
+    in
+    global.value <- v;
+    stack
   | Table_get indice ->
     let (Table t) = get_table env indice in
     let indice, stack = Stack.pop_i32_to_int stack in

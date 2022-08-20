@@ -36,6 +36,7 @@ type memory = Memory.t
 module Table = struct
   type table_id = Tid of int
 
+  (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
   type table = Value.t array
 
   type t =
@@ -67,7 +68,7 @@ module Global = struct
     { mutable value : Value.t
     ; label : string option
     ; mut : Types.mut
-    ; type_ : Types.val_type
+    ; typ : Types.val_type
     }
 end
 
@@ -267,8 +268,8 @@ let eval_global ls env
   match global with
   | S.Local global ->
     let value = Const_interp.exec_expr env global.init in
-    let mut, type_ = global.type_ in
-    let global : Global.t = { value; label = global.id; mut; type_ } in
+    let mut, typ = global.type_ in
+    let global : Global.t = { value; label = global.id; mut; typ } in
     global
   | S.Imported import -> load_global ls import
 
@@ -406,7 +407,9 @@ let define_elem env elem =
   S.Fields.fold
     (fun id (elem : _ elem') (env, inits) ->
       let init = List.map (Const_interp.exec_expr env) elem.init in
-      let env = Env.add_elem id { value = Array.of_list init; dropped = false } env in
+      let env =
+        Env.add_elem id { value = Array.of_list init; dropped = false } env
+      in
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->
