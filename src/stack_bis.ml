@@ -112,6 +112,14 @@ let pop_ref s =
     | _ -> failwith "invalid type (expected ref)"
   with Empty -> failwith "invalid type (expected ref)"
 
+let pop_as_ref s =
+  try
+    let hd, tl = pop s in
+    match hd with
+    | Ref hd -> (hd, tl)
+    | _ -> failwith "invalid type (expected ref)"
+  with Empty -> failwith "invalid type (expected ref)"
+
 let pop_bool s =
   try
     let hd, tl = pop s in

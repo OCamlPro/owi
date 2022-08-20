@@ -611,10 +611,10 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
         raise @@ Trap "out of bounds table access"
       | v -> v
     in
-    Stack.push stack v
+    Stack.push stack (Ref v)
   | Table_set indice ->
     let (Table t) = get_table env indice in
-    let v, stack = Stack.pop stack in
+    let v, stack = Stack.pop_as_ref stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
       try t.data.(indice) <- v
@@ -637,7 +637,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       let stack = Stack.drop stack in
       Stack.push_i32_of_int stack (-1)
     else
-      let new_element, stack = Stack.pop stack in
+      let new_element, stack = Stack.pop_as_ref stack in
       let new_table = Array.make new_size new_element in
       Array.blit t.data 0 new_table 0 (Array.length t.data);
       Link.Table.update table new_table;
@@ -645,7 +645,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
   | Table_fill indice ->
     let (Table t) = get_table env indice in
     let len, stack = Stack.pop_i32_to_int stack in
-    let x, stack = Stack.pop_ref stack in
+    let x, stack = Stack.pop_as_ref stack in
     let pos, stack = Stack.pop_i32_to_int stack in
     begin
       try Array.fill t.data pos len x
@@ -888,7 +888,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       match t.data.(fun_i) with
       | exception Invalid_argument _ ->
         raise @@ Trap "undefined element" (* fails here *)
-      | Ref (Funcref (Some f)) -> f
+      | Funcref (Some f) -> f
       | _ -> raise @@ Trap "uninitialized element"
     in
     let pt, rt = Value.Func.type_ func in

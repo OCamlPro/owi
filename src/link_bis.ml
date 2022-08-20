@@ -37,7 +37,7 @@ module Table = struct
   type table_id = Tid of int
 
   (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
-  type table = Value.t array
+  type table = Value.ref_value array
 
   type t =
     | Table of
@@ -56,7 +56,7 @@ module Table = struct
 
   let init ?label (typ : table_type) : t =
     let limits, ref_type = typ in
-    let null = Value.ref_null ref_type in
+    let null = Value.ref_null' ref_type in
     let table = Array.make limits.min null in
     Table { id = fresh (); label; limits; type_ = ref_type; data = table }
 
@@ -90,7 +90,7 @@ module Env = struct
     }
 
   type elem =
-    { value : Value.t array
+    { value : Value.ref_value array
     ; mutable dropped : bool
     }
 
@@ -407,8 +407,18 @@ let define_elem env elem =
   S.Fields.fold
     (fun id (elem : _ elem') (env, inits) ->
       let init = List.map (Const_interp.exec_expr env) elem.init in
+      let init_as_ref =
+        List.map
+          (fun v ->
+            match v with
+            | Value.Ref v -> v
+            | _ -> failwith "elem initialized with a non ref value" )
+          init
+      in
       let env =
-        Env.add_elem id { value = Array.of_list init; dropped = false } env
+        Env.add_elem id
+          { value = Array.of_list init_as_ref; dropped = false }
+          env
       in
       let inits =
         match elem.mode with
