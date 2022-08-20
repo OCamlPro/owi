@@ -28,9 +28,7 @@ module Memory = struct
     let data = Bytes.make (Types.page_size * typ.min) '0' in
     Memory { id = fresh (); label; limits = typ; data }
 
-  let update_memory (Memory mem) data =
-    mem.data <- data
-
+  let update_memory (Memory mem) data = mem.data <- data
 end
 
 type memory = Memory.t
@@ -38,7 +36,16 @@ type memory = Memory.t
 module Table = struct
   type table_id = Tid of int
 
-  type t = Table of table_id * string option * table_type
+  type table = Value.t array
+
+  type t =
+    | Table of
+        { id : table_id
+        ; label : string option
+        ; limits : limits
+        ; type_ : ref_type
+        ; data : table
+        }
 
   let fresh =
     let r = ref (-1) in
@@ -46,7 +53,11 @@ module Table = struct
       incr r;
       Tid !r
 
-  let init ?label (typ : table_type) : t = Table (fresh (), label, typ)
+  let init ?label (typ : table_type) : t =
+    let limits, ref_type = typ in
+    let null = Value.ref_null ref_type in
+    let table = Array.make limits.min null in
+    Table { id = fresh (); label; limits; type_ = ref_type; data = table }
 end
 
 module Global = struct
@@ -74,6 +85,7 @@ module Env = struct
     { value : string
     ; mutable dropped : bool
     }
+
   type elem =
     { value : Value.t list
     ; mutable dropped : bool
@@ -310,10 +322,10 @@ let table_types_are_compatible (l1, (t1 : ref_type)) (l2, t2) =
 
 let load_table (ls : link_state) (import : S.table_import S.imp) : Table.t =
   let type_ : table_type = import.desc in
-  let (Table (_, _, type') as table) =
+  let (Table t as table) =
     load_from_module ls (fun (e : exports) -> e.tables) import
   in
-  if table_types_are_compatible type_ type' then table
+  if table_types_are_compatible type_ (t.limits, t.type_) then table
   else failwith "incompatible table import"
 
 let eval_table ls (table : (table, S.table_import) S.runtime) : Table.t =

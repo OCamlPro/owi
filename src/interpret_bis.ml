@@ -248,7 +248,7 @@ let init_local (_id, t) : Value.t =
 let mem_0 = I 0
 
 let get_raw_memory (env : env) idx =
-  match Link.IMap.find_opt idx env.memories with
+  match IMap.find_opt idx env.memories with
   | None -> failwith "missing memory"
   | Some m -> m
 
@@ -270,6 +270,11 @@ let get_elem (env : env) idx =
   match IMap.find_opt idx env.elem with
   | None -> failwith "missing elem"
   | Some elem -> if elem.dropped then failwith "dropped elem" else elem
+
+let get_table (env : env) idx =
+  match IMap.find_opt idx env.tables with
+  | None -> failwith "missing table"
+  | Some table -> table
 
 let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     (instr : instr) =
@@ -605,19 +610,15 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     ignore i;
     failwith "TODO with the right env Global_set"
   | Table_get indice ->
-    (* let indice = indice_to_int indice in
-     * let _mi, t, table, _max = Link.get_table env.modules indice in
-     * let indice, stack = Stack.pop_i32_to_int stack in
-     * let v =
-     *   match table.(indice) with
-     *   | exception Invalid_argument _ ->
-     *     raise @@ Trap "out of bounds table access"
-     *   | None -> Const_null t
-     *   | Some (_mi, v) -> v
-     * in
-     * Stack.push stack v *)
-    ignore indice;
-    failwith "TODO with the right env Table_get"
+    let Table t = get_table env indice in
+    let indice, stack = Stack.pop_i32_to_int stack in
+    let v =
+      match t.data.(indice) with
+      | exception Invalid_argument _ ->
+        raise @@ Trap "out of bounds table access"
+      | v -> v
+    in
+    Stack.push stack v
   | Table_set indice ->
     (* let indice = indice_to_int indice in
      * let _mi, _t, table, _max =
