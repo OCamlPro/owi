@@ -27,18 +27,38 @@ let () =
           | _ -> None )
         script
     in
+    let assertions =
+      List.filter_map
+        (function Woi.Types.Assert a -> Some a | _ -> None)
+        script
+    in
     let () = Format.printf "simplified %i@." (List.length cmds) in
     let link_state = Woi.Link_bis.empty_state in
-    let link_state =
+    let to_run, link_state =
       List.fold_left
-        (fun state cmd ->
+        (fun (to_run, state) cmd ->
           match cmd with
-          | `Module module_ -> Woi.Link_bis.link_module module_ state
-          | `Register (name, id) -> Woi.Link_bis.register_module state ~name ~id
-          )
-        link_state cmds
+          | `Module module_ ->
+            let module_to_run, state = Woi.Link_bis.link_module module_ state in
+            (module_to_run :: to_run, state)
+          | `Register (name, id) ->
+            (to_run, Woi.Link_bis.register_module state ~name ~id) )
+        ([], link_state) cmds
     in
-    List.iter Woi.Interpret_bis.exec_module link_state.modules;
+    List.iter Woi.Interpret_bis.exec_module (List.rev to_run);
+    List.iter
+      (* TODO: script_bis *)
+        (fun (assertion : Woi.Types.assert_) ->
+        match assertion with
+        | Assert_trap_module (m, expected) -> begin
+          let m = Woi.Simplify_bis.simplify m in
+          let to_run, _link_state = Woi.Link_bis.link_module m link_state in
+          match Woi.Interpret_bis.exec_module to_run with
+          | exception Woi.Types.Trap msg -> assert (msg = expected)
+          | () -> assert false
+        end
+        | _ -> failwith "TODO assertion" )
+      assertions;
     ()
   end
   | Error e -> error e

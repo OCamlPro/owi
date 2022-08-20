@@ -1,6 +1,8 @@
 module Func = struct
   type func_id = Fid of int [@@unboxed]
 
+  type 'value extern = Types.func_type * ('value list -> 'value list)
+
   type 'value t =
     | WASM of func_id * Simplify_bis.func
     | Extern of Types.func_type * ('value list -> 'value list)
@@ -12,6 +14,7 @@ module Func = struct
       Fid !r
 
   let wasm func : _ t = WASM (fresh (), func)
+  let extern (t, f) = Extern (t, f)
 
   let type_ = function
     | WASM (_, func) -> func.type_f
@@ -33,6 +36,8 @@ and ref_value =
 
 and func = t Func.t
 
+type extern_func = t Func.extern
+
 let pp_ref fmt = function
   | Externref _ -> Format.fprintf fmt "externref"
   | Funcref _ -> Format.fprintf fmt "funcref"
@@ -45,12 +50,9 @@ let pp fmt = function
   | Ref r -> pp_ref fmt r
 
 let ref_null' (type_ : Types.ref_type) =
-  match type_ with
-  | Func_ref -> Funcref None
-  | Extern_ref -> Externref None
+  match type_ with Func_ref -> Funcref None | Extern_ref -> Externref None
 
-let ref_null (type_ : Types.ref_type) =
-  Ref (ref_null' type_)
+let ref_null (type_ : Types.ref_type) = Ref (ref_null' type_)
 
 let ref_func (f : func) : t = Ref (Funcref (Some f))
 

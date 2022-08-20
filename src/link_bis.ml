@@ -195,18 +195,15 @@ type module_to_run =
   }
 
 type link_state =
-  { modules : module_to_run list
-  ; by_name : exports StringMap.t
+  { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
   }
 
+type extern_module = { functions : Value.extern_func StringMap.t }
+
 let empty_state =
-  { modules = []
-  ; by_name = StringMap.empty
-  ; by_id = StringMap.empty
-  ; last = None
-  }
+  { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
 
 module Const_interp = struct
   open Types
@@ -446,7 +443,8 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let functions = fill_exports Env.get_func exports.func in
   { globals; memories; tables; functions }
 
-let link_module (module_ : module_) (ls : link_state) : link_state =
+let link_module (module_ : module_) (ls : link_state) :
+    module_to_run * link_state =
   Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
   let env = eval_globals ls module_.global in
   let env = eval_memories ls env module_.mem in
@@ -464,11 +462,21 @@ let link_module (module_ : module_) (ls : link_state) : link_state =
   in
   let start = List.map (fun start_id -> Call start_id) module_.start in
   let to_run = init_active_data @ init_active_elem @ [ start ] in
-  { modules = { module_; env; to_run } :: ls.modules
-  ; by_id
-  ; by_name = ls.by_name
-  ; last = Some by_id_exports
-  }
+  let module_to_run = { module_; env; to_run } in
+  (module_to_run, { by_id; by_name = ls.by_name; last = Some by_id_exports })
+
+let link_extern_module (name : string) (module_ : extern_module)
+    (ls : link_state) : link_state =
+  Debug.debug Format.err_formatter "LINK EXTERN %s@\n" name;
+  let functions = StringMap.map Value.Func.extern module_.functions in
+  let exports =
+    { functions
+    ; globals = StringMap.empty
+    ; memories = StringMap.empty
+    ; tables = StringMap.empty
+    }
+  in
+  { ls with by_name = StringMap.add name exports ls.by_name }
 
 let register_module (ls : link_state) ~name ~(id : string option) : link_state =
   let exports =

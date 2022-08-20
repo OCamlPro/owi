@@ -928,40 +928,12 @@ and exec_func env (func : S.func) args =
 
 let exec_module (module_ : Link_bis.module_to_run) =
   Debug.debug Format.err_formatter "EXEC START@\n";
-  try
-    List.iter
-      (fun to_run ->
-        let end_stack =
-          exec_expr module_.env [||] Stack.empty to_run false None
-        in
-        match end_stack with
-        | [] -> ()
-        | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
-        )
-      module_.to_run
-    (* TODO: re-enable later to avoid missing some errors
-       if Option.is_some m.should_trap || Option.is_some m.should_not_link then
-         assert false;
-    *)
-  with exn -> raise exn
-(* TODO
-   | Trap msg -> (
-     match m.should_trap with
-     | None -> raise @@ Trap msg
-     | Some expected ->
-       assert (msg = expected);
-       )
-   | Failure msg as exn -> (
-     match m.should_not_link with
-     | None -> raise exn
-     | Some expected ->
-       (* TODO: I'm not convinced it's the best behaviour, maybe open an issue to discuss it ? *)
-       if msg = "unknown import" && expected = "incompatible import type" then
-         ()
-       else if msg <> expected then begin
-         Format.eprintf "got:      `%s`@\n" msg;
-         Format.eprintf "expected: `%s`@\n" expected;
-         assert false
-       end
-       else () )
-*)
+  List.iter
+    (fun to_run ->
+      let end_stack =
+        exec_expr module_.env [||] Stack.empty to_run false None
+      in
+      match end_stack with
+      | [] -> ()
+      | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack )
+    module_.to_run
