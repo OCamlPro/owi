@@ -504,11 +504,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let func = get_func env i in
     let param_type, _result_type = Value.Func.type_ func in
     let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res =
-      match func with
-      | WASM (_, func) -> exec_func env func (List.rev args)
-      | Extern (_, f) -> f (List.rev args)
-    in
+    let res = exec_vfunc env func (List.rev args) in
     res @ stack
   end
   | Br i -> raise (Branch (stack, indice_to_int i))
@@ -887,30 +883,24 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     in
     raise (Branch (stack, indice_to_int target))
   | Call_indirect (tbl_i, typ_i) ->
-    (* let fun_i, stack = Stack.pop_i32_to_int stack in
-     * (\* TODO: use this ? *\)
-     * let _module_indice, rt, a, _max =
-     *   Link.get_table env.modules (indice_to_int tbl_i)
-     * in
-     * if rt <> Func_ref then raise @@ Trap "indirect call type mismatch";
-     * let, i =
-     *   match a.(fun_i) with
-     *   | exception Invalid_argument _ ->
-     *     raise @@ Trap "undefined element" (\* fails here *\)
-     *   | None -> raise @@ Trap "uninitialized element"
-     *   | Some (mi, Const_host id) -> (mi, id)
-     *   | Some _ -> raise @@ Trap "uninitialized element"
-     * in
-     * let, func = Link.get_func env.modules i in
-     * let pt, rt = get_bt func.type_f in
-     * let pt', rt' = get_bt typ_i in
-     * if not (rt = rt' && List.equal p_type_eq pt pt') then
-     *   raise @@ Trap "indirect call type mismatch";
-     * let args, stack = Stack.pop_n stack (List.length pt) in
-     * let res = exec_func env func (List.rev args) in
-     * res @ stack *)
-    ignore (tbl_i, typ_i);
-    failwith "TODO with the right env Call_indirect"
+    let fun_i, stack = Stack.pop_i32_to_int stack in
+    (* TODO: use this ? *)
+    let (Table t) = get_table env tbl_i in
+    if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
+    let func =
+      match t.data.(fun_i) with
+      | exception Invalid_argument _ ->
+        raise @@ Trap "undefined element" (* fails here *)
+      | Ref (Funcref (Some f)) -> f
+      | _ -> raise @@ Trap "uninitialized element"
+    in
+    let pt, rt = Value.Func.type_ func in
+    let pt', rt' = typ_i in
+    if not (rt = rt' && List.equal p_type_eq pt pt') then
+      raise @@ Trap "indirect call type mismatch";
+    let args, stack = Stack.pop_n stack (List.length pt) in
+    let res = exec_vfunc env func (List.rev args) in
+    res @ stack
 
 and exec_expr env locals stack (e : expr) is_loop bt =
   let rt =
@@ -926,6 +916,11 @@ and exec_expr env locals stack (e : expr) is_loop bt =
   let stack = Stack.keep block_stack rt @ stack in
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   stack
+
+and exec_vfunc env (func : Value.func) args =
+  match func with
+  | WASM (_, func) -> exec_func env func args
+  | Extern (_, f) -> f args
 
 and exec_func env (func : S.func) args =
   (* Debug.debug fmt "calling func : module %d, func %s@."
