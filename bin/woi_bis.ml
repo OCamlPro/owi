@@ -2,6 +2,34 @@ let error msg =
   Format.eprintf "error: %s@." msg;
   exit 1
 
+let extern_module : Woi.Link_bis.extern_module =
+  let open Woi in
+  let module M = struct
+    type _ Value.externref_ty += Rint : int32 ref Value.externref_ty
+
+    let fresh i = ref i
+
+    let set r (i : int32) = r := i
+
+    let get r : int32 = !r
+  end in
+  let print_i32 (i : Int32.t) = Printf.printf "%li\n%!" i in
+  let functions =
+    [ ( "print_i32"
+      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+    ; ( "fresh"
+      , Value.Func.Extern_func
+          (Func (Arg (I32, Res), R1 (Externref M.Rint)), M.fresh) )
+    ; ( "set_i32r"
+      , Value.Func.Extern_func
+          (Func (Arg (Externref M.Rint, Arg (I32, Res)), R0), M.set) )
+    ; ( "get_i32r"
+      , Value.Func.Extern_func
+          (Func (Arg (Externref M.Rint, Res), R1 I32), M.get) )
+    ]
+  in
+  { functions }
+
 let () =
   let argc = Array.length Sys.argv in
 
@@ -34,6 +62,9 @@ let () =
     in
     let () = Format.printf "simplified %i@." (List.length cmds) in
     let link_state = Woi.Link_bis.empty_state in
+    let link_state =
+      Woi.Link_bis.link_extern_module "stuff" extern_module link_state
+    in
     let to_run, link_state =
       List.fold_left
         (fun (to_run, state) cmd ->

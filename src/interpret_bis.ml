@@ -310,6 +310,7 @@ let exec_extern_func stack (f : Value.extern_func) =
     | Externref ty -> Stack.push_as_externref stack ty v
   in
   match (rtype, r) with
+  | R0, () -> stack
   | R1 t1, v1 -> push_val t1 v1 stack
   | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
   | R3 (t1, t2, t3), (v1, v2, v3) ->
@@ -957,8 +958,7 @@ and exec_vfunc env stack (func : Value.func) : Stack.t =
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func env func (List.rev args) in
     res @ stack
-  | Extern f ->
-    exec_extern_func stack f
+  | Extern f -> exec_extern_func stack f
 
 and exec_func env (func : S.func) args =
   (* Debug.debug fmt "calling func : module %d, func %s@."

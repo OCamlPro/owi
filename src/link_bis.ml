@@ -200,7 +200,7 @@ type link_state =
   ; last : exports option
   }
 
-type extern_module = { functions : Value.extern_func StringMap.t }
+type extern_module = { functions : (string * Value.extern_func) list }
 
 let empty_state =
   { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
@@ -468,7 +468,10 @@ let link_module (module_ : module_) (ls : link_state) :
 let link_extern_module (name : string) (module_ : extern_module)
     (ls : link_state) : link_state =
   Debug.debug Format.err_formatter "LINK EXTERN %s@\n" name;
-  let functions = StringMap.map Value.Func.extern module_.functions in
+  let functions =
+    StringMap.map Value.Func.extern
+      (StringMap.of_seq (List.to_seq module_.functions))
+  in
   let exports =
     { functions
     ; globals = StringMap.empty

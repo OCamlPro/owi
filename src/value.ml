@@ -17,6 +17,7 @@ module Func = struct
     | Externref : 'a externref_ty -> 'a telt
 
   type _ rtype =
+    | R0 : unit rtype
     | R1 : 'a telt -> 'a rtype
     | R2 : 'a telt * 'b telt -> ('a * 'b) rtype
     | R3 : 'a telt * 'b telt * 'c telt -> ('a * 'b * 'c) rtype
@@ -41,6 +42,7 @@ module Func = struct
 
   let res_type (type t) (r : t rtype) : Types.result_type =
     match r with
+    | R0 -> [ ]
     | R1 a -> [ elt_type a ]
     | R2 (a, b) -> [ elt_type a; elt_type b ]
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
