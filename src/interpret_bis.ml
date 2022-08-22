@@ -276,6 +276,47 @@ let get_table (env : env) idx =
   | None -> failwith "missing table"
   | Some table -> table
 
+let exec_extern_func stack (f : Value.extern_func) =
+  let pop_arg (type ty) (stack : Stack.t) (arg : ty Value.Func.telt) :
+      ty * Stack.t =
+    match arg with
+    | I32 -> Stack.pop_i32 stack
+    | I64 -> Stack.pop_i64 stack
+    | F32 -> Stack.pop_f32 stack
+    | F64 -> Stack.pop_f64 stack
+    | Externref ety -> Stack.pop_as_externref ety stack
+  in
+  let rec apply :
+      type f r. Stack.t -> (f, r) Value.Func.atype -> f -> r * Stack.t =
+   fun stack ty f ->
+    match ty with
+    | Value.Func.Arg (arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | NArg (_, arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | Res -> (f, stack)
+  in
+  let (Extern_func (Func (atype, rtype), func)) = f in
+  let r, stack = apply stack atype func in
+  let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) (stack : Stack.t) :
+      Stack.t =
+    match arg with
+    | I32 -> Stack.push_i32 stack v
+    | I64 -> Stack.push_i64 stack v
+    | F32 -> Stack.push_f32 stack v
+    | F64 -> Stack.push_f64 stack v
+    | Externref ty -> Stack.push_as_externref stack ty v
+  in
+  match (rtype, r) with
+  | R1 t1, v1 -> push_val t1 v1 stack
+  | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
+  | R3 (t1, t2, t3), (v1, v2, v3) ->
+    push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
+  | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
+    push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
+
 let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     (instr : instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
@@ -502,10 +543,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     exec_expr env locals stack (if b then e1 else e2) false bt
   | Call i -> begin
     let func = get_func env i in
-    let param_type, _result_type = Value.Func.type_ func in
-    let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res = exec_vfunc env func (List.rev args) in
-    res @ stack
+    exec_vfunc env stack func
   end
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
@@ -895,9 +933,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let pt', rt' = typ_i in
     if not (rt = rt' && List.equal p_type_eq pt pt') then
       raise @@ Trap "indirect call type mismatch";
-    let args, stack = Stack.pop_n stack (List.length pt) in
-    let res = exec_vfunc env func (List.rev args) in
-    res @ stack
+    exec_vfunc env stack func
 
 and exec_expr env locals stack (e : expr) is_loop bt =
   let rt =
@@ -914,10 +950,15 @@ and exec_expr env locals stack (e : expr) is_loop bt =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc env (func : Value.func) args =
+and exec_vfunc env stack (func : Value.func) : Stack.t =
   match func with
-  | WASM (_, func) -> exec_func env func args
-  | Extern (_, f) -> f args
+  | WASM (_, func) ->
+    let param_type, _result_type = func.type_f in
+    let args, stack = Stack.pop_n stack (List.length param_type) in
+    let res = exec_func env func (List.rev args) in
+    res @ stack
+  | Extern f ->
+    exec_extern_func stack f
 
 and exec_func env (func : S.func) args =
   (* Debug.debug fmt "calling func : module %d, func %s@."

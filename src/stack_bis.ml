@@ -21,6 +21,8 @@ let push_f32 s f = push s (F32 f)
 
 let push_f64 s f = push s (F64 f)
 
+let push_as_externref s ty v = push s (Ref (Externref (Some (E (ty, v)))))
+
 let pp fmt (s:t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
@@ -119,6 +121,20 @@ let pop_as_ref s =
     | Ref hd -> (hd, tl)
     | _ -> failwith "invalid type (expected ref)"
   with Empty -> failwith "invalid type (expected ref)"
+
+let pop_as_externref (type ty) (ty : ty Value.externref_ty) s : ty * t =
+  try
+    let hd, tl = pop s in
+    match hd with
+    | Ref (Externref Some (E (ety, hd))) -> begin
+        match Value.eq_externref_ty ty ety with
+        | None ->
+          failwith "invalid type (externref)"
+        | Some E ->
+          (hd, tl)
+      end
+    | _ -> failwith "invalid type (expected extern ref)"
+  with Empty -> failwith "invalid type (expected extern ref)"
 
 let pop_bool s =
   try
