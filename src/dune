@@ -16,6 +16,7 @@
   parse
   pp
   script
+  script_bis
   simplify_bis
   link_bis
   simplify
