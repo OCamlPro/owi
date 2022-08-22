@@ -269,7 +269,16 @@ let rec run script =
               if not (compare_result_const res v) then failwith "Bad result" )
             res (List.rev stack);
           link_state
-        | Assert (Assert_trap _) -> failwith "TODO assert_trap"
+        | Assert (Assert_trap (a, msg)) -> begin
+          try
+            let _ = action link_state a in
+            assert false
+          with
+          | Trap tmsg ->
+            assert (msg = tmsg);
+            link_state
+          | _ -> assert false
+        end
         | Assert (Assert_exhaustion _) -> failwith "TODO assert_exhaustion"
         (* | Assert _a ->
          *   let action = action (Some curr_module) seen_modules in
