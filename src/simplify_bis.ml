@@ -261,7 +261,7 @@ end = struct
     let module_, _curr =
       List.fold_left add
         (empty_module module_.id, init_curr)
-        (List.rev module_.fields)
+        module_.fields
     in
     module_
 end
