@@ -75,13 +75,77 @@ let check script =
     Ok ()
   with Failure e -> Error e
 
-(* let action (link_state : Link.link_state) = function
- *   | Invoke (mod_name, f, args) ->
- *     let i = Simplify.find_module mod_name last_module seen_modules in
- *     Invoke_indice (i, f, args)
- *   | Get (mod_name, n) ->
- *     let i = Simplify.find_module mod_name last_module seen_modules in
- *     Get_indice (i, n) *)
+let load_func_from_module ls mod_name f_name =
+  let exports =
+    match mod_name with
+    | None -> begin
+      match ls.Link.last with
+      | None -> failwith "unbound last module"
+      | Some m -> m
+    end
+    | Some mod_name -> (
+      match Link.StringMap.find mod_name ls.Link.by_name with
+      | exception Not_found -> failwith ("unbound module " ^ mod_name)
+      | exports -> exports )
+  in
+  match Link.StringMap.find f_name exports.functions with
+  | exception Not_found -> failwith ("unbound name " ^ f_name)
+  | v -> (exports.Link.env, v)
+
+let compare_result_const result (const : Value.t) =
+  match (result, const) with
+  | Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
+  | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
+  | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
+  | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
+  | Result_const (Literal (Const_null _rt)), Ref _ -> failwith "TODO const null"
+  | Result_const (Literal (Const_host _n)), Ref _ -> failwith "TODO const host"
+  (* | Result_const (Literal (Const_null rt)), Const_null rt' -> rt = rt' *)
+  (* | Result_const (Literal (Const_host n)), Const_host n' -> n = n' *)
+  | Result_const (Nan_canon S32), F32 f ->
+    f = Float32.pos_nan || f = Float32.neg_nan
+  | Result_const (Nan_canon S64), F64 f ->
+    f = Float64.pos_nan || f = Float64.neg_nan
+  | Result_const (Nan_arith S32), F32 f ->
+    let pos_nan = Float32.to_bits Float32.pos_nan in
+    Int32.logand (Float32.to_bits f) pos_nan = pos_nan
+  | Result_const (Nan_arith S64), F64 f ->
+    let pos_nan = Float64.to_bits Float64.pos_nan in
+    Int64.logand (Float64.to_bits f) pos_nan = pos_nan
+  | Result_const (Nan_arith _), _
+  | Result_const (Nan_canon _), _
+  | Result_const (Literal (Const_I32 _)), _
+  | Result_const (Literal (Const_I64 _)), _
+  | Result_const (Literal (Const_F32 _)), _
+  | Result_const (Literal (Const_F64 _)), _
+  | Result_const (Literal (Const_null _)), _
+  | Result_const (Literal (Const_host _)), _ ->
+    false
+  | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
+  | Result_extern_ref, _ -> failwith "TODO (compare_result_const)"
+
+let value_of_const : Types.const -> Value.t =
+ fun const ->
+  match const with
+  | Const_I32 v -> I32 v
+  | Const_I64 v -> I64 v
+  | Const_F32 v -> F32 v
+  | Const_F64 v -> F64 v
+  | Const_null _ -> failwith "TODO null"
+  | Const_host _ -> failwith "TODO host"
+
+let action (link_state : Link.link_state) = function
+  | Invoke (mod_name, f, args) -> begin
+    Debug.debugerr "Invoke %s@." f;
+    let env, f = load_func_from_module link_state mod_name f in
+    let stack = List.map value_of_const args in
+    let stack = Interpret_bis.exec_vfunc env stack f in
+    stack
+  end
+  | Get (_mod_name, _n) ->
+    (* let i = Simplify.find_module mod_name last_module seen_modules in
+     * Get_indice (i, n) *)
+    failwith "TODO get action"
 
 let pp_name ppf (name, indice) =
   match name with
@@ -196,24 +260,34 @@ let rec run script =
            * let module_ = { module_ with Simplify.should_not_link = Some msg } in
            * (curr_module, module_ :: modules, cmd :: scr) *)
           failwith "TODO assert_unlinkable"
-        | Assert _a ->
-          (* let action = action (Some curr_module) seen_modules in
-           * let cmd =
-           *   match a with
-           *   | Assert_return (a, res) -> SAssert_return (action a, res)
-           *   | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
-           *   | Assert_exhaustion (a, failure) ->
-           *     SAssert_exhaustion (action a, failure)
-           *   | _ -> assert false (\* should have been handled before *\)
-           * in
-           * (curr_module, modules, Assert cmd :: scr) *)
-          failwith "TODO assert"
+        | Assert (Assert_malformed _) -> failwith "TODO assert_malformed"
+        | Assert (Assert_return (a, res)) ->
+          Debug.debugerr "Assert@.";
+          let stack = action link_state a in
+          List.iter2
+            (fun res v ->
+              if not (compare_result_const res v) then failwith "Bad result" )
+            res (List.rev stack);
+          link_state
+        | Assert (Assert_trap _) -> failwith "TODO assert_trap"
+        | Assert (Assert_exhaustion _) -> failwith "TODO assert_exhaustion"
+        (* | Assert _a ->
+         *   let action = action (Some curr_module) seen_modules in
+         *   let cmd =
+         *     match a with
+         *     | Assert_return (a, res) -> SAssert_return (action a, res)
+         *     | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
+         *     | Assert_exhaustion (a, failure) ->
+         *       SAssert_exhaustion (action a, failure)
+         *     | _ -> assert false (\* should have been handled before *\)
+         *   in
+         *   (curr_module, modules, Assert cmd :: scr) *)
         | Register (name, mod_name) ->
           Link.register_module link_state ~name ~id:mod_name
         | Action _a ->
           (* let cmd = Action (action (Some curr_module) seen_modules a) in
            * (curr_module, modules, cmd :: scr) ) *)
-          failwith "TODO action")
+          failwith "TODO action" )
       Link.empty_state script
   in
   link_state
@@ -243,36 +317,6 @@ let rec run script =
  *     | Some g ->
  *       let _mi, _t, e = Link.get_global env.modules mi g in
  *       (env, [ e ]) ) *)
-
-(* let compare_result_const result const =
- *   match (result, const) with
- *   | Result_const (Literal (Const_I32 n)), Const_I32 n' -> n = n'
- *   | Result_const (Literal (Const_I64 n)), Const_I64 n' -> n = n'
- *   | Result_const (Literal (Const_F32 n)), Const_F32 n' -> n = n'
- *   | Result_const (Literal (Const_F64 n)), Const_F64 n' -> n = n'
- *   | Result_const (Literal (Const_null rt)), Const_null rt' -> rt = rt'
- *   | Result_const (Literal (Const_host n)), Const_host n' -> n = n'
- *   | Result_const (Nan_canon S32), Const_F32 f ->
- *     f = Float32.pos_nan || f = Float32.neg_nan
- *   | Result_const (Nan_canon S64), Const_F64 f ->
- *     f = Float64.pos_nan || f = Float64.neg_nan
- *   | Result_const (Nan_arith S32), Const_F32 f ->
- *     let pos_nan = Float32.to_bits Float32.pos_nan in
- *     Int32.logand (Float32.to_bits f) pos_nan = pos_nan
- *   | Result_const (Nan_arith S64), Const_F64 f ->
- *     let pos_nan = Float64.to_bits Float64.pos_nan in
- *     Int64.logand (Float64.to_bits f) pos_nan = pos_nan
- *   | Result_const (Nan_arith _), _
- *   | Result_const (Nan_canon _), _
- *   | Result_const (Literal (Const_I32 _)), _
- *   | Result_const (Literal (Const_I64 _)), _
- *   | Result_const (Literal (Const_F32 _)), _
- *   | Result_const (Literal (Const_F64 _)), _
- *   | Result_const (Literal (Const_null _)), _
- *   | Result_const (Literal (Const_host _)), _ ->
- *     false
- *   | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
- *   | Result_extern_ref, _ -> failwith "TODO (compare_result_const)" *)
 
 (* let exec_assert env = function
  *   | SAssert_return (action, results_expected) ->

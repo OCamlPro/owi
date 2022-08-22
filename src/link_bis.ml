@@ -186,6 +186,7 @@ type exports =
   ; memories : memory StringMap.t
   ; tables : Table.t StringMap.t
   ; functions : Value.func StringMap.t
+  ; env : Env.t
   }
 
 type module_to_run =
@@ -441,7 +442,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let memories = fill_exports Env.get_memory exports.mem in
   let tables = fill_exports Env.get_table exports.table in
   let functions = fill_exports Env.get_func exports.func in
-  { globals; memories; tables; functions }
+  { globals; memories; tables; functions; env }
 
 let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
@@ -477,6 +478,7 @@ let link_extern_module (name : string) (module_ : extern_module)
     ; globals = StringMap.empty
     ; memories = StringMap.empty
     ; tables = StringMap.empty
+    ; env = Env.empty
     }
   in
   { ls with by_name = StringMap.add name exports ls.by_name }
