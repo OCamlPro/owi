@@ -49,6 +49,14 @@ let ignore_tmp =
   ; "duplicate local"
   ]
 
+let check_error' ~expected ~got =
+  let ok = String.starts_with ~prefix:expected got in
+  if not ok then begin
+    Format.eprintf "expected: `%s`@." expected;
+    Format.eprintf "got     : `%s`@." got;
+    failwith got
+  end
+
 let check_error ~expected ~got =
   let ok =
     got = expected
@@ -272,9 +280,9 @@ let rec run script =
             let _ = action link_state a in
             assert false
           with
-          | Trap tmsg ->
-            if tmsg <> msg then
-              failwith (Printf.sprintf "unexpected trap: \"%s\" \"%s\"" msg tmsg);
+          | Trap got ->
+            check_error' ~expected:msg ~got;
+            Debug.debugerr "expected trap: \"%s\"@." msg;
             link_state
           | _ -> assert false
         end
