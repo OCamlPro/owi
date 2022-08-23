@@ -61,6 +61,12 @@ module Table = struct
     Table { id = fresh (); label; limits; type_ = ref_type; data = table }
 
   let update (Table table) data = table.data <- data
+
+  let pp_id fmt (Tid i) = Format.fprintf fmt "%i" i
+
+  let pp fmt (Table t) =
+    Format.fprintf fmt "Table{%a %a %i}" pp_id t.id Pp.pp_id t.label
+      (Array.length t.data)
 end
 
 module Global = struct
@@ -84,15 +90,13 @@ end
 module IMap = Map.Make (Index)
 
 module Env = struct
-  type data =
-    { value : string
-    ; mutable dropped : bool
-    }
+  type data = { mutable value : string }
 
-  type elem =
-    { value : Value.ref_value array
-    ; mutable dropped : bool
-    }
+  let drop_data data = data.value <- ""
+
+  type elem = { mutable value : Value.ref_value array }
+
+  let drop_elem elem = elem.value <- [||]
 
   type t =
     { globals : Global.t IMap.t
@@ -243,7 +247,10 @@ module Const_interp = struct
     let stack = List.fold_left (exec_instr env) Stack.empty e in
     match stack with
     | [] -> failwith "const expr returning zero values"
-    | _ :: _ :: _ -> failwith "const expr returning more than one value"
+    | _ :: _ :: _ ->
+      failwith
+        (Format.asprintf "const expr returning more than one value %a"
+           Pp.Const.expr e )
     | [ result ] -> result
 end
 
@@ -375,7 +382,10 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  assert (mem = I 0);
+  let (I mem_id) = mem in
+  if mem_id <> 0 then begin
+    failwith (Printf.sprintf "wrong memory id: %i@." mem_id)
+  end;
   [ I32_const offset
   ; I32_const 0l
   ; I32_const length
@@ -388,7 +398,7 @@ let get_i32 = function Value.I32 i -> i | _ -> failwith "Not an i32 const"
 let define_data env data =
   S.Fields.fold
     (fun id data (env, init) ->
-      let env = Env.add_data id { value = data.init; dropped = false } env in
+      let env = Env.add_data id { value = data.init } env in
       let init =
         match data.mode with
         | Data_active (mem, offset) ->
@@ -413,11 +423,7 @@ let define_elem env elem =
             | _ -> failwith "elem initialized with a non ref value" )
           init
       in
-      let env =
-        Env.add_elem id
-          { value = Array.of_list init_as_ref; dropped = false }
-          env
-      in
+      let env = Env.add_elem id { value = Array.of_list init_as_ref } env in
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->

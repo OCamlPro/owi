@@ -43,6 +43,14 @@ module Shared = struct
 
   let result_type fmt results =
     Format.pp_print_list ~pp_sep:Format.pp_print_space result_ fmt results
+
+  let f32 fmt f = Format.fprintf fmt "%s" (Float32.to_string f)
+
+  let f64 fmt f = Format.fprintf fmt "%s" (Float64.to_string f)
+
+  let nn fmt = function
+    | S32 -> Format.fprintf fmt "32"
+    | S64 -> Format.fprintf fmt "64"
 end
 
 module Symbolic_indice :
@@ -90,14 +98,33 @@ struct
     Format.fprintf fmt "%a %a" Shared.param_type l Shared.result_type r
 end
 
+module Const = struct
+  let ibinop fmt : Types.Const.ibinop -> Unit.t = function
+    | Add -> Format.fprintf fmt "add"
+    | Sub -> Format.fprintf fmt "sub"
+    | Mul -> Format.fprintf fmt "mul"
+
+  let instr fmt (const : Const.instr) =
+    match const with
+    | I32_const i -> Format.fprintf fmt "i32.const %ld" i
+    | I64_const i -> Format.fprintf fmt "i64.const %Ld" i
+    | F32_const f -> Format.fprintf fmt "f32.const %a" Shared.f32 f
+    | F64_const f -> Format.fprintf fmt "f64.const %a" Shared.f64 f
+    | I_binop (n, op) -> Format.fprintf fmt "i%a.%a" Shared.nn n ibinop op
+    | Global_get id -> Format.fprintf fmt "global.get %a" Simplified_indice.indice id
+    | Ref_null t -> Format.fprintf fmt "ref.null %a" Shared.ref_type t
+    | Ref_func fid -> Format.fprintf fmt "ref.func %a" Simplified_indice.indice fid
+
+  let expr fmt instrs =
+    Format.pp_print_list
+      ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+      instr fmt instrs
+end
+
 module Make_Expr (Arg : Arg) = struct
   include Shared
 
   let print_nothing fmt () = Format.fprintf fmt ""
-
-  let f32 fmt f = Format.fprintf fmt "%s" (Float32.to_string f)
-
-  let f64 fmt f = Format.fprintf fmt "%s" (Float64.to_string f)
 
   let name fmt name = Format.pp_print_string fmt name
 
@@ -133,10 +160,6 @@ module Make_Expr (Arg : Arg) = struct
     Format.pp_print_list
       ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
       local fmt locals
-
-  let nn fmt = function
-    | S32 -> Format.fprintf fmt "32"
-    | S64 -> Format.fprintf fmt "64"
 
   let iunop fmt = function
     | Clz -> Format.fprintf fmt "clz"

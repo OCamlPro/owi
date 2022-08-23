@@ -136,7 +136,7 @@ let value_of_const : Types.const -> Value.t =
 
 let action (link_state : Link.link_state) = function
   | Invoke (mod_name, f, args) -> begin
-    Debug.debugerr "Invoke %s@." f;
+    Debug.debugerr "Invoke %s %a@." f Pp.Input.consts args;
     let env, f = load_func_from_module link_state mod_name f in
     let stack = List.rev_map value_of_const args in
     let stack = Interpret_bis.exec_vfunc env stack f in
@@ -291,10 +291,9 @@ let rec run script =
          *   (curr_module, modules, Assert cmd :: scr) *)
         | Register (name, mod_name) ->
           Link.register_module link_state ~name ~id:mod_name
-        | Action _a ->
-          (* let cmd = Action (action (Some curr_module) seen_modules a) in
-           * (curr_module, modules, cmd :: scr) ) *)
-          failwith "TODO action" )
+        | Action a ->
+          let _v = action link_state a in
+          link_state )
       Link.empty_state script
   in
   link_state

@@ -264,12 +264,12 @@ let get_func (env : env) idx =
 let get_data (env : env) idx =
   match IMap.find_opt idx env.data with
   | None -> failwith "missing data"
-  | Some data -> if data.dropped then failwith "dropped data" else data
+  | Some data -> data
 
 let get_elem (env : env) idx =
   match IMap.find_opt idx env.elem with
   | None -> failwith "missing elem"
-  | Some elem -> if elem.dropped then failwith "dropped elem" else elem
+  | Some elem -> elem
 
 let get_table (env : env) idx =
   match IMap.find_opt idx env.tables with
@@ -708,7 +708,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
   end
   | Table_init (t_i, e_i) ->
-    let (Table t) = get_table env t_i in
+    let (Table t as tbl) = get_table env t_i in
     let elem = get_elem env e_i in
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in
@@ -737,7 +737,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     stack
   | Elem_drop i ->
     let elem = get_elem env i in
-    elem.dropped <- true;
+    Env.drop_elem elem;
     stack
   | I_load16 (nn, sx, { offset; align }) -> (
     let mem, _max = get_memory env mem_0 in
@@ -910,7 +910,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     stack
   | Data_drop i ->
     let data = get_data env i in
-    data.dropped <- true;
+    Env.drop_data data;
     stack
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
