@@ -421,7 +421,7 @@ let define_elem env elem =
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->
-          let length = Int32.of_int @@ List.length inits in
+          let length = Int32.of_int @@ List.length init in
           let offset = Const_interp.exec_expr env offset in
           active_elem_expr ~offset:(get_i32 offset) ~length ~table ~elem:id
           :: inits

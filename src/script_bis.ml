@@ -138,7 +138,7 @@ let action (link_state : Link.link_state) = function
   | Invoke (mod_name, f, args) -> begin
     Debug.debugerr "Invoke %s@." f;
     let env, f = load_func_from_module link_state mod_name f in
-    let stack = List.map value_of_const args in
+    let stack = List.rev_map value_of_const args in
     let stack = Interpret_bis.exec_vfunc env stack f in
     stack
   end
@@ -217,29 +217,21 @@ let rec run script =
         | Assert (Assert_invalid_binary _) ->
           (* TODO: check this when binary format is supported *)
           link_state
-        | Assert (Assert_invalid (_m, _expected)) ->
-          (* let got =
-           *   try
-           *     match Check.module_ m with
-           *     | Ok () ->
-           *       (\* we do a deep copy because this is going to change some state that should actually not change as the module is invalid... *\)
-           *       let deep_copy v =
-           *         Marshal.from_string (Marshal.to_string v []) 0
-           *       in
-           *       let registered_modules = deep_copy registered_modules in
-           *       let modules = deep_copy modules in
-           *       let m = Simplify.mk_module registered_modules m in
-           *       let rev_modules = Array.of_list @@ List.rev @@ (m :: modules) in
-           *       Array.iteri
-           *         (fun i _m -> Link.module_ registered_modules rev_modules i)
-           *         rev_modules;
-           *       "Ok"
-           *     | Error got -> got
-           *   with Failure got -> got
-           * in
-           * check_error ~expected ~got;
-           * (curr_module, modules, scr) *)
-          failwith "TODO assert_invalid"
+        | Assert (Assert_invalid (m, expected)) ->
+          let got =
+            try
+              match Check.module_ m with
+              | Ok () ->
+                let m = Simplify_bis.simplify m in
+                let _module_to_run, _link_state =
+                  Link.link_module m link_state
+                in
+                "Ok"
+              | Error got -> got
+            with Failure got -> got
+          in
+          check_error ~expected ~got;
+          link_state
         | Assert (Assert_invalid_quote (m, expected)) ->
           let got =
             match Parse.from_string (String.concat "\n" m) with
@@ -264,10 +256,16 @@ let rec run script =
         | Assert (Assert_return (a, res)) ->
           Debug.debugerr "Assert@.";
           let stack = action link_state a in
-          List.iter2
-            (fun res v ->
-              if not (compare_result_const res v) then failwith "Bad result" )
-            res (List.rev stack);
+          if
+            not
+              (List.for_all2
+                 (fun res v -> compare_result_const res v)
+                 res (List.rev stack) )
+          then begin
+            Format.eprintf "got:      %a@.expected: %a@." Stack_bis.pp
+              (List.rev stack) Pp.Input.results res;
+            failwith "Bad result"
+          end;
           link_state
         | Assert (Assert_trap (a, msg)) -> begin
           try

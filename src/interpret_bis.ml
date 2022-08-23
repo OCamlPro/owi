@@ -928,7 +928,9 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       | exception Invalid_argument _ ->
         raise @@ Trap "undefined element" (* fails here *)
       | Funcref (Some f) -> f
-      | _ -> raise @@ Trap "uninitialized element"
+      | Funcref None ->
+        raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
+      | _ -> raise @@ Trap "element type error"
     in
     let pt, rt = Value.Func.type_ func in
     let pt', rt' = typ_i in
