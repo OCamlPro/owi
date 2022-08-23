@@ -273,7 +273,8 @@ let rec run script =
             assert false
           with
           | Trap tmsg ->
-            assert (msg = tmsg);
+            if tmsg <> msg then
+              failwith (Printf.sprintf "unexpected trap: \"%s\" \"%s\"" msg tmsg);
             link_state
           | _ -> assert false
         end

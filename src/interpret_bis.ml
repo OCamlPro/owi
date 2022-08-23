@@ -730,7 +730,9 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
         for i = 0 to len - 1 do
           let x = elem.value.(pos_x + i) in
           if Value.is_ref_null x then raise @@ Trap "out of bounds table access"
-          else Array.fill t.data (pos + i) 1 x
+          else begin
+            Array.set t.data (pos + i) x
+          end
         done
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
