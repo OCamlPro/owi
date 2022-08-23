@@ -78,9 +78,8 @@ module Simplified_indice :
 end
 
 module Simplified_bis_indice :
-  Arg
-    with type indice = Types.simplified_indice
-     and type bt = func_type = struct
+  Arg with type indice = Types.simplified_indice and type bt = func_type =
+struct
   type indice = simplified_indice
 
   type bt = func_type
@@ -93,6 +92,7 @@ end
 
 module Make_Expr (Arg : Arg) = struct
   include Shared
+
   let print_nothing fmt () = Format.fprintf fmt ""
 
   let f32 fmt f = Format.fprintf fmt "%s" (Float32.to_string f)
@@ -451,15 +451,43 @@ module Global = struct
       ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
       result_bis fmt r
 
+  let strings fmt l =
+    Format.fprintf fmt "[%a]"
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+         Format.pp_print_string )
+      l
+
   let assert_ fmt = function
     | Assert_return (a, l) ->
       Format.fprintf fmt "(assert_return %a %a)" action a results l
+    | Assert_exhaustion (a, msg) ->
+      Format.fprintf fmt "(assert_exhaustion %a %s)" action a msg
     | Assert_trap (a, f) ->
       Format.fprintf fmt {|(assert_trap %a "%s")|} action a f
+    | Assert_trap_module (m, f) ->
+      Format.fprintf fmt {|(assert_trap_module %a "%s")|} module_ m f
     | Assert_invalid (m, msg) ->
       Format.fprintf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
         module_ m msg
-    | _ -> Format.fprintf fmt "<action TODO>"
+    | Assert_unlinkable (m, msg) ->
+      Format.fprintf fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        module_ m msg
+    | Assert_malformed (m, msg) ->
+      Format.fprintf fmt "(assert_malformed@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        module_ m msg
+    | Assert_malformed_quote (ls, msg) ->
+      Format.fprintf fmt "(assert_malformed_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        strings ls msg
+    | Assert_invalid_quote (ls, msg) ->
+      Format.fprintf fmt "(assert_invalid_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        strings ls msg
+    | Assert_malformed_binary (ls, msg) ->
+      Format.fprintf fmt "(assert_malformed_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        strings ls msg
+    | Assert_invalid_binary (ls, msg) ->
+      Format.fprintf fmt "(assert_invalid_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
+        strings ls msg
 
   let cmd fmt = function
     | Module m -> module_ fmt m
