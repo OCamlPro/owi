@@ -250,7 +250,7 @@ end = struct
           match data.mode with
           | Data_passive -> Data_passive
           | Data_active (id, expr) ->
-            let id = Option.value id ~default:(Raw (curr.table - 1)) in
+            let id = Option.value id ~default:(Raw (curr.mem - 1)) in
             Data_active (id, expr)
         in
         let data = { data with mode } in
