@@ -191,6 +191,7 @@ type exports =
   ; tables : Table.t StringMap.t
   ; functions : Value.func StringMap.t
   ; env : Env.t
+        (* TODO remove env, this is only used by invoke and is quite inelegant *)
   }
 
 type module_to_run =
