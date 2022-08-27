@@ -3,6 +3,12 @@ module Simplify = Simplify_bis
 module Link = Link_bis
 module Interpret = Interpret_bis
 
+module Host_externref = struct
+  type t = int
+  let ty : t Value.Extern_ref.ty = Value.Extern_ref.fresh "host"
+  let value i = Value.Externref (Some (Value.E (ty, i)))
+end
+
 (* type action =
  *   | Invoke_indice of int * string * const list
  *   | Get_indice of int * string *)
@@ -107,7 +113,11 @@ let compare_result_const result (const : Value.t) =
   | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
   | Result_const (Literal (Const_null _rt)), Ref _ -> failwith "TODO const null"
-  | Result_const (Literal (Const_host _n)), Ref _ -> failwith "TODO const host"
+  | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) ->
+    begin match Value.cast_ref ref Host_externref.ty with
+      | None -> false
+      | Some n' -> n = n'
+    end
   (* | Result_const (Literal (Const_null rt)), Const_null rt' -> rt = rt' *)
   (* | Result_const (Literal (Const_host n)), Const_host n' -> n = n' *)
   | Result_const (Nan_canon S32), F32 f ->
@@ -140,7 +150,7 @@ let value_of_const : Types.const -> Value.t =
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
   | Const_null _ -> failwith "TODO null"
-  | Const_host _ -> failwith "TODO host"
+  | Const_host i -> Ref (Host_externref.value i)
 
 let action (link_state : Link.link_state) = function
   | Invoke (mod_name, f, args) -> begin

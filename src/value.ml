@@ -102,6 +102,11 @@ end
 
 type externref = E : 'a Extern_ref.ty * 'a -> externref
 
+let cast_ref (type r) (E (rty, r) : externref) (ty : r Extern_ref.ty) : r option =
+  match Extern_ref.eq rty ty with
+  | None -> None
+  | Some Eq -> Some r
+
 type t =
   | I32 of Int32.t
   | I64 of Int64.t
