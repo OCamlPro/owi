@@ -5,7 +5,7 @@ let error msg =
 let extern_module : Woi.Link_bis.extern_module =
   let open Woi in
   let module M = struct
-    type _ Value.externref_ty += Rint : int32 ref Value.externref_ty
+    let rint : int32 ref Value.Extern_ref.ty = Value.Extern_ref.fresh "int ref"
 
     let fresh i = ref i
 
@@ -19,13 +19,13 @@ let extern_module : Woi.Link_bis.extern_module =
       , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
     ; ( "fresh"
       , Value.Func.Extern_func
-          (Func (Arg (I32, Res), R1 (Externref M.Rint)), M.fresh) )
+          (Func (Arg (I32, Res), R1 (Externref M.rint)), M.fresh) )
     ; ( "set_i32r"
       , Value.Func.Extern_func
-          (Func (Arg (Externref M.Rint, Arg (I32, Res)), R0), M.set) )
+          (Func (Arg (Externref M.rint, Arg (I32, Res)), R0), M.set) )
     ; ( "get_i32r"
       , Value.Func.Extern_func
-          (Func (Arg (Externref M.Rint, Res), R1 I32), M.get) )
+          (Func (Arg (Externref M.rint, Res), R1 I32), M.get) )
     ]
   in
   { functions }

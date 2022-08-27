@@ -1,10 +1,35 @@
-type _ externref_ty = ..
+type ('a, 'b) eq = Eq : ('a, 'a) eq
 
-type ('a, 'b) eq = E : ('a, 'a) eq
+module Extern_ref : sig
+  type 'a ty
 
-let eq_externref_ty :
-    type a b. a externref_ty -> b externref_ty -> (a, b) eq option =
- fun a b -> if Obj.magic a = Obj.magic b then Some (Obj.magic E) else None
+  val fresh : string -> 'a ty
+
+  val name : _ ty -> string
+
+  val eq : 'a ty -> 'b ty -> ('a, 'b) eq option
+end = struct
+  type _ externref_ty = ..
+
+  type 'a ty =
+    { name : string
+    ; witness : 'a externref_ty
+    ; test : 'ty. 'ty externref_ty -> ('a, 'ty) eq option
+    }
+
+  let fresh (type t) name : t ty =
+    let module M = struct
+      type _ externref_ty += T : t externref_ty
+    end in
+    let test (type a) (witness : a externref_ty) : (t, a) eq option =
+      match witness with M.T -> Some Eq | _ -> None
+    in
+    { name; test; witness = M.T }
+
+  let name { name; _ } = name
+
+  let eq a b = a.test b.witness
+end
 
 module Func = struct
   type func_id = Fid of int [@@unboxed]
@@ -14,7 +39,7 @@ module Func = struct
     | I64 : Int64.t telt
     | F32 : Float32.t telt
     | F64 : Float64.t telt
-    | Externref : 'a externref_ty -> 'a telt
+    | Externref : 'a Extern_ref.ty -> 'a telt
 
   type _ rtype =
     | R0 : unit rtype
@@ -42,7 +67,7 @@ module Func = struct
 
   let res_type (type t) (r : t rtype) : Types.result_type =
     match r with
-    | R0 -> [ ]
+    | R0 -> []
     | R1 a -> [ elt_type a ]
     | R2 (a, b) -> [ elt_type a; elt_type b ]
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
@@ -75,7 +100,7 @@ module Func = struct
     | Extern (Extern_func (t, _f)) -> extern_type t
 end
 
-type externref = E : 'a externref_ty * 'a -> externref
+type externref = E : 'a Extern_ref.ty * 'a -> externref
 
 type t =
   | I32 of Int32.t

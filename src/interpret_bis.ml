@@ -708,7 +708,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
   end
   | Table_init (t_i, e_i) ->
-    let (Table t as tbl) = get_table env t_i in
+    let Table t = get_table env t_i in
     let elem = get_elem env e_i in
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in

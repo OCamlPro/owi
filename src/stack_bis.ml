@@ -122,15 +122,15 @@ let pop_as_ref s =
     | _ -> failwith "invalid type (expected ref)"
   with Empty -> failwith "invalid type (expected ref)"
 
-let pop_as_externref (type ty) (ty : ty Value.externref_ty) s : ty * t =
+let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * t =
   try
     let hd, tl = pop s in
     match hd with
     | Ref (Externref Some (E (ety, hd))) -> begin
-        match Value.eq_externref_ty ty ety with
+        match Value.Extern_ref.eq ty ety with
         | None ->
           failwith "invalid type (externref)"
-        | Some E ->
+        | Some Eq ->
           (hd, tl)
       end
     | _ -> failwith "invalid type (expected extern ref)"
