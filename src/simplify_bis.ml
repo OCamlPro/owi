@@ -105,6 +105,32 @@ type result =
   ; start : index list
   }
 
+module P = struct
+  open Format
+
+  let id fmt = Option.iter (fun id -> Format.fprintf fmt "@ %s" id)
+
+  let func fmt (func : _ runtime) =
+    match func with
+    | Local _ -> Format.fprintf fmt "local"
+    | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
+
+  let indexed f fmt indexed =
+    let (I i) = indexed.index in
+    Format.fprintf fmt "%i: %a" i f indexed.value
+
+  let lst f fmt l =
+    Format.fprintf fmt "[%a]"
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ", ") f)
+      l
+
+  let funcs fmt (funcs : _ runtime named) = lst (indexed func) fmt funcs.values
+
+  let result fmt (result : result) : unit =
+    fprintf fmt "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ )@]" id
+      result.id funcs result.func
+end
+
 module Group : sig
   val group : module_ -> grouped_module
 end = struct
@@ -259,9 +285,7 @@ end = struct
       | MStart start -> ({ fields with start = start :: fields.start }, curr)
     in
     let module_, _curr =
-      List.fold_left add
-        (empty_module module_.id, init_curr)
-        module_.fields
+      List.fold_left add (empty_module module_.id, init_curr) module_.fields
     in
     module_
 end
@@ -405,7 +429,11 @@ end
 module Rewrite_indices = struct
   let find msg (named : 'a named) (indice : indice) : index =
     match indice with
-    | Raw i -> I i
+    | Raw i ->
+      (* TODO change indexed strucure for that to be more efficient *)
+      if not (List.exists (fun { index; _ } -> index = I i) named.values) then
+        failwith msg;
+      I i
     | Symbolic name -> (
       match StringMap.find_opt name named.named with
       | None -> failwith msg
@@ -696,3 +724,10 @@ type func = (index, func_type) func'
 
 let simplify (module_ : module_) : result =
   Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run
+
+let simplify (module_ : module_) : result =
+  let simplified = simplify module_ in
+  Debug.debugerr "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
+  simplified
+
+module Pp = P

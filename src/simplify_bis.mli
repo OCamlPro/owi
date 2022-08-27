@@ -67,3 +67,7 @@ type result =
   }
 
 val simplify : Types.module_ -> result
+
+module Pp : sig
+  val result : Format.formatter -> result -> unit
+end
