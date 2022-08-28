@@ -310,6 +310,7 @@ module Assign_indicies : sig
 end = struct
   type type_acc =
     { declared_types : func_type indexed list
+    ; func_types : func_type indexed list
     ; named_types : index StringMap.t
     ; last_assigned_index : int
     ; all_types : index TypeMap.t
@@ -317,7 +318,7 @@ end = struct
 
   let assign_types (module_ : grouped_module) : func_type named =
     let assign_type
-        { declared_types; named_types; last_assigned_index; all_types }
+        { declared_types; func_types; named_types; last_assigned_index; all_types }
         (name, type_) =
       let id = I last_assigned_index in
       let last_assigned_index = last_assigned_index + 1 in
@@ -329,30 +330,37 @@ end = struct
       in
       let all_types = TypeMap.add type_ id all_types in
       (* Is there something to do/check when a type is already declared ? *)
-      { declared_types; named_types; last_assigned_index; all_types }
+      { declared_types; func_types; named_types; last_assigned_index; all_types }
     in
     let empty_acc =
       { declared_types = []
+      ; func_types = []
       ; named_types = StringMap.empty
       ; last_assigned_index = 0
       ; all_types = TypeMap.empty
       }
     in
-    let acc = List.fold_left assign_type empty_acc module_.type_ in
+    let acc = List.fold_left assign_type empty_acc (List.rev module_.type_) in
     let assign_func_type
-        ( { declared_types; named_types = _; last_assigned_index; all_types } as
+        ( { func_types; named_types = _; last_assigned_index; all_types; _ } as
         acc ) type_ =
       match TypeMap.find_opt type_ all_types with
       | Some _id -> acc
       | None ->
         let id = I last_assigned_index in
         let last_assigned_index = last_assigned_index + 1 in
-        let declared_types = { index = id; value = type_ } :: declared_types in
+        let func_types = { index = id; value = type_ } :: func_types in
         let all_types = TypeMap.add type_ id all_types in
-        { acc with declared_types; last_assigned_index; all_types }
+        { acc with func_types; last_assigned_index; all_types }
     in
-    let acc = List.fold_left assign_func_type acc module_.function_type in
-    { values = List.rev acc.declared_types; named = acc.named_types }
+    let acc = List.fold_left assign_func_type acc (List.rev module_.function_type) in
+    let values = List.rev acc.declared_types @ List.rev acc.func_types in
+    (* Format.printf "TYPES@.%a"
+     *   (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "@.")
+     *      (fun ppf {index; value} -> Format.fprintf ppf "%a: %a"
+     *                       Pp.Simplified_bis.indice index Pp.Input.func_type value))
+     *   values; *)
+    { values; named = acc.named_types }
 
   let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
       : string option =

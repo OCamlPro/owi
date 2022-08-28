@@ -275,10 +275,11 @@ let rec run script =
           Debug.debugerr "Assert@.";
           let stack = action link_state a in
           if
-            not
-              (List.for_all2
-                 (fun res v -> compare_result_const res v)
-                 res (List.rev stack) )
+            List.length res <> List.length stack
+            || not
+                 (List.for_all2
+                    (fun res v -> compare_result_const res v)
+                    res (List.rev stack) )
           then begin
             Format.eprintf "got:      %a@.expected: %a@." Stack_bis.pp
               (List.rev stack) Pp.Input.results res;
