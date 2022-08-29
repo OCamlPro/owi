@@ -712,10 +712,10 @@ let elem_expr ==
   | ~ = expr; <>
 
 let elem_var ==
-  | ~ = indice; <Ref_func>
+  | id = indice; { [Ref_func id] }
 
 let elem_list ==
-  | ~ = elem_kind; l = list(elem_var); { elem_kind, List.map (fun v -> [v]) l }
+  | ~ = elem_kind; l = list(elem_var); { elem_kind, l }
   | ~ = ref_type; l = list(elem_expr); { ref_type, l }
 
 let elem ==
@@ -732,7 +732,7 @@ let elem ==
     [ MElem { id; type_; init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { id; type_ = Func_ref; init = List.map (fun v -> [v]) init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ MElem { id; type_ = Func_ref; init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
 
 let table ==
@@ -751,7 +751,7 @@ let table ==
 }
 
 let init ==
-  | l = list(elem_var); { [l] }
+  | l = list(elem_var); { l }
   | ~ = nonempty_list(elem_expr); <>
 
 let table_fields :=
