@@ -424,7 +424,14 @@ let define_elem env elem =
             | _ -> failwith "elem initialized with a non ref value" )
           init
       in
-      let env = Env.add_elem id { value = Array.of_list init_as_ref } env in
+      let env =
+        match elem.mode with
+        | Elem_active _ | Elem_passive ->
+          Env.add_elem id { value = Array.of_list init_as_ref } env
+        | Elem_declarative ->
+          (* Declarative element have no runtime value *)
+          Env.add_elem id { value = [||] } env
+      in
       let inits =
         match elem.mode with
         | Elem_active (table, offset) ->
