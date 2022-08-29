@@ -112,7 +112,8 @@ let compare_result_const result (const : Value.t) =
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
   | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
-  | Result_const (Literal (Const_null _rt)), Ref _ -> failwith "TODO const null"
+  | Result_const (Literal (Const_null Func_ref)), Ref (Funcref None) -> true
+  | Result_const (Literal (Const_null Extern_ref)), Ref (Externref None) -> true
   | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) ->
     begin match Value.cast_ref ref Host_externref.ty with
       | None -> false
@@ -149,7 +150,7 @@ let value_of_const : Types.const -> Value.t =
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
-  | Const_null _ -> failwith "TODO null"
+  | Const_null rt -> Value.ref_null rt
   | Const_host i -> Ref (Host_externref.value i)
 
 let action (link_state : Link.link_state) = function
