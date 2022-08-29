@@ -409,7 +409,7 @@ module Global = struct
   let elemexpr fmt e = Format.fprintf fmt "(item %a)" expr e
 
   let elem fmt (e : elem) =
-    Format.fprintf fmt "(elem %a %a %a %a)" id_opt e.id elem_mode e.mode
+    Format.fprintf fmt "@[<hov 2>(elem %a %a %a %a)@]" id_opt e.id elem_mode e.mode
       ref_type e.type_
       (Format.pp_print_list
          ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
