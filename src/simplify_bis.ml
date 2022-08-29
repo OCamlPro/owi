@@ -110,9 +110,15 @@ module P = struct
 
   let id fmt = Option.iter (fun id -> Format.fprintf fmt "@ %s" id)
 
-  let func fmt (func : _ runtime) =
+  let func fmt (func : (_ func', _) runtime) =
     match func with
-    | Local _ -> Format.fprintf fmt "local"
+    | Local func -> begin
+        match func.id with
+        | None ->
+          Format.fprintf fmt "local"
+        | Some id ->
+          Format.fprintf fmt "$%s" id
+      end
     | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
   let indexed f fmt indexed =
