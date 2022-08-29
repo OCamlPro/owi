@@ -154,7 +154,7 @@ let pp_name ppf (name, indice) =
   | Some n -> Format.fprintf ppf "%s" n
   | None -> Format.fprintf ppf "%d" indice
 
-let rec run script =
+let rec run ~with_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
 
   let curr_module = ref 0 in
@@ -283,18 +283,19 @@ let rec run script =
             Format.eprintf "Wrong exn %s@." (Printexc.to_string exn);
             raise exn
         end
-        | Assert (Assert_exhaustion _) -> failwith "TODO assert_exhaustion"
-        (* | Assert _a ->
-         *   let action = action (Some curr_module) seen_modules in
-         *   let cmd =
-         *     match a with
-         *     | Assert_return (a, res) -> SAssert_return (action a, res)
-         *     | Assert_trap (a, failure) -> SAssert_trap (action a, failure)
-         *     | Assert_exhaustion (a, failure) ->
-         *       SAssert_exhaustion (action a, failure)
-         *     | _ -> assert false (\* should have been handled before *\)
-         *   in
-         *   (curr_module, modules, Assert cmd :: scr) *)
+        | Assert (Assert_exhaustion (a, expected)) ->
+          if with_exhaustion then begin
+            let got =
+              try
+                ignore @@ action link_state a;
+                "Ok"
+              with Stack_overflow -> "call stack exhausted"
+            in
+            check_error ~expected ~got;
+            link_state
+          end else
+            (* Assert_exhaustion ignored *)
+            link_state
         | Register (name, mod_name) ->
           Link.register_module link_state ~name ~id:mod_name
         | Action a ->
@@ -304,6 +305,6 @@ let rec run script =
   in
   link_state
 
-let exec script =
-  let _link_state = run script in
+let exec ?(with_exhaustion=false) script =
+  let _link_state = run ~with_exhaustion script in
   ()
