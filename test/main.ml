@@ -1,3 +1,5 @@
+module Script = Woi.Script_bis
+
 let count_total = ref 0
 
 let count_total_failed = ref 0
@@ -11,13 +13,9 @@ let test_file f =
   match Woi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
     try
-      match Woi.Script.check script with
-      | Ok () ->
-        let script, modules = Woi.Script.simplify script in
-        Woi.Script.exec script modules;
-        Format.printf "%a !@." pp_green "OK";
-        Ok ()
-      | Error e -> failwith e
+      Script.exec script;
+      Format.printf "%a !@." pp_green "OK";
+      Ok ()
     with
     | Assert_failure (s, _, _)
     | Woi.Types.Trap s
