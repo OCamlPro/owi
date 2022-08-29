@@ -289,13 +289,15 @@ let rec run script =
         | Assert (Assert_trap (a, msg)) -> begin
           try
             let _ = action link_state a in
-            assert false
+            failwith "unxpected success"
           with
           | Trap got ->
             check_error' ~expected:msg ~got;
             Debug.debugerr "expected trap: \"%s\"@." msg;
             link_state
-          | _ -> assert false
+          | exn ->
+            Format.eprintf "Wrong exn %s@." (Printexc.to_string exn);
+            raise exn
         end
         | Assert (Assert_exhaustion _) -> failwith "TODO assert_exhaustion"
         (* | Assert _a ->
