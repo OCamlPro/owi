@@ -9,23 +9,6 @@ module Host_externref = struct
   let value i = Value.Externref (Some (Value.E (ty, i)))
 end
 
-(* type action =
- *   | Invoke_indice of int * string * const list
- *   | Get_indice of int * string *)
-
-(* type assert_ =
- *   | SAssert_return of action * result list
- *   | SAssert_trap of action * string
- *   | SAssert_exhaustion of action * string *)
-
-(* type cmd =
- *   | Module_indice of int
- *   | Assert of assert_
- *   | Register_indice of string * int
- *   | Action of action *)
-
-(* type script = cmd list * module_ Array.t *)
-
 let ignore_tmp =
   [ "type mismatch"
   ; "invalid result arity"
@@ -321,85 +304,6 @@ let rec run script =
   in
   link_state
 
-(* let fmt = Format.std_formatter *)
-
-(* let invoke env module_indice f args =
- *   Debug.debug fmt "invoke       : %s@." f;
- *   let module_ = env.Interpret.modules.(module_indice) in
- *   let func_indice =
- *     match Hashtbl.find_opt module_.exported_funcs f with
- *     | None -> failwith "undefined export"
- *     | Some indice -> indice
- *   in
- *   let module_indice, func =
- *     Link.get_func env.modules module_indice func_indice
- *   in
- *   Interpret.exec_func env module_indice func args
- * 
- * let exec_action env = function
- *   | Invoke_indice (i, f, args) ->
- *     let result = invoke env i f args in
- *     (env, result)
- *   | Get_indice (mi, name) -> (
- *     match Hashtbl.find_opt env.modules.(mi).exported_globals name with
- *     | None -> failwith "exec_action"
- *     | Some g ->
- *       let _mi, _t, e = Link.get_global env.modules mi g in
- *       (env, [ e ]) ) *)
-
-(* let exec_assert env = function
- *   | SAssert_return (action, results_expected) ->
- *     Debug.debug fmt "assert return...@.";
- *     let env, results_got = exec_action env action in
- *     let results_got = List.rev results_got in
- *     let eq =
- *       List.length results_expected = List.length results_got
- *       && List.for_all2 compare_result_const results_expected results_got
- *     in
- *     if not eq then begin
- *       failwith
- *       @@ Format.asprintf
- *            "assert_return failed !@.expected: `%a`@.got     : `%a`@."
- *            (Format.pp_print_list
- *               ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
- *               Pp.Input.result )
- *            results_expected Pp.Input.consts results_got
- *     end;
- *     env
- *   | SAssert_trap (action, expected) ->
- *     Debug.debug fmt "assert trap...@.";
- *     let got =
- *       try
- *         let _env, _results = exec_action env action in
- *         "Ok"
- *       with Trap got -> got
- *     in
- *     check_error ~expected ~got;
- *     env
- *   | SAssert_exhaustion (action, expected) ->
- *     Debug.debug fmt "assert exhaustion...@.";
- *     let got =
- *       try
- *         ignore @@ exec_action env action;
- *         "Ok"
- *       with Stack_overflow -> "call stack exhausted"
- *     in
- *     check_error ~expected ~got;
- *     env *)
-
 let exec script =
-  (* let _env =
-   *   List.fold_left
-   *     (fun env -> function
-   *       | Module_indice i -> Interpret.exec_module env i
-   *       | Assert a -> exec_assert env a
-   *       | Register_indice (name, i) ->
-   *         Hashtbl.replace env.Interpret.registered_modules name i;
-   *         env
-   *       | Action a -> fst (exec_action env a) )
-   *     { Interpret.modules; registered_modules = Hashtbl.create 64 }
-   *     script
-   * in
-   * () *)
   let _link_state = run script in
   ()
