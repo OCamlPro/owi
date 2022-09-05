@@ -4,6 +4,7 @@ module S = Simplify_bis
 type module_ = S.result
 
 module StringMap = Map.Make (String)
+module StringSet = Set.Make (String)
 
 module Memory = struct
   type mem_id = Mid of int [@@unboxed]
@@ -148,42 +149,42 @@ module Env = struct
     match IMap.find_opt id env.globals with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith "unbound global"
+      failwith "unknown global"
     | Some v -> v
 
   let get_memory (env : t) id : Memory.t =
     match IMap.find_opt id env.memories with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith "unbound memory"
+      failwith "unknown memory"
     | Some v -> v
 
   let get_table (env : t) id : t' Table.t =
     match IMap.find_opt id env.tables with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith "unbound table"
+      failwith "unknown table"
     | Some v -> v
 
   let get_func (env : t) id : t' Value.func =
     match IMap.find_opt id env.functions with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith (Format.asprintf "unbound function %a" Index.pp id)
+      failwith (Format.asprintf "unknown function %a" Index.pp id)
     | Some v -> v
 
   let get_data (env : t) id : data =
     match IMap.find_opt id env.data with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith "unbound data"
+      failwith "unknown data"
     | Some v -> v
 
   let get_elem (env : t) id : t' elem =
     match IMap.find_opt id env.elem with
     | None ->
       Debug.debugerr "%a@." pp env;
-      failwith "unbound elem"
+      failwith "unknown elem"
     | Some v -> v
 end
 
@@ -266,15 +267,15 @@ end
 
 let load_from_module ls f (import : _ S.imp) =
   match StringMap.find import.module_ ls.by_name with
-  | exception Not_found -> failwith ("unbound module " ^ import.module_)
+  | exception Not_found -> failwith ("unknown module " ^ import.module_)
   | exports -> (
     match StringMap.find import.name (f exports) with
-    | exception Not_found -> failwith ("unbound name " ^ import.name)
+    | exception Not_found -> failwith ("unknown name " ^ import.name)
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   match import.desc with
-  | Var, _ -> failwith "non constant global"
+  | Var, _ -> failwith "constant expression required"
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
 let eval_global ls env
@@ -431,7 +432,7 @@ let define_elem env elem =
           (fun v ->
             match v with
             | Value.Ref v -> v
-            | _ -> failwith "elem initialized with a non ref value" )
+            | _ -> failwith "constant expression required" )
           init
       in
       let env =
@@ -455,17 +456,20 @@ let define_elem env elem =
     elem (env, [])
 
 let populate_exports env (exports : S.index S.exports) : exports =
-  let fill_exports get_env exports =
+  let fill_exports get_env exports names =
     List.fold_left
-      (fun acc (export : _ S.export) ->
+      (fun (acc, names) (export : _ S.export) ->
         let value = get_env env export.id in
-        StringMap.add export.name value acc )
-      StringMap.empty exports
+        if StringSet.mem export.name names then failwith "duplicate export name";
+        (StringMap.add export.name value acc, StringSet.add export.name names)
+        )
+      (StringMap.empty, names) exports
   in
-  let globals = fill_exports Env.get_global exports.global in
-  let memories = fill_exports Env.get_memory exports.mem in
-  let tables = fill_exports Env.get_table exports.table in
-  let functions = fill_exports Env.get_func exports.func in
+  let names = StringSet.empty in
+  let globals, names = fill_exports Env.get_global exports.global names in
+  let memories, names = fill_exports Env.get_memory exports.mem names in
+  let tables, names = fill_exports Env.get_table exports.table names in
+  let functions, _names = fill_exports Env.get_func exports.func names in
   { globals; memories; tables; functions }
 
 let link_module (module_ : module_) (ls : link_state) :

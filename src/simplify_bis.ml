@@ -113,12 +113,10 @@ module P = struct
   let func fmt (func : (_ func', _) runtime) =
     match func with
     | Local func -> begin
-        match func.id with
-        | None ->
-          Format.fprintf fmt "local"
-        | Some id ->
-          Format.fprintf fmt "$%s" id
-      end
+      match func.id with
+      | None -> Format.fprintf fmt "local"
+      | Some id -> Format.fprintf fmt "$%s" id
+    end
     | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
   let indexed f fmt indexed =
@@ -132,9 +130,14 @@ module P = struct
 
   let funcs fmt (funcs : _ runtime named) = lst (indexed func) fmt funcs.values
 
+  let export fmt (export : index export) =
+    Format.fprintf fmt "%s: %a" export.name Pp.Simplified_bis.indice export.id
+
   let result fmt (result : result) : unit =
-    fprintf fmt "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ )@]" id
-      result.id funcs result.func
+    fprintf fmt
+      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(export \
+       func %a)@]@@ )@]"
+      id result.id funcs result.func (lst export) result.exports.func
 end
 
 module Group : sig
@@ -324,8 +327,12 @@ end = struct
 
   let assign_types (module_ : grouped_module) : func_type named =
     let assign_type
-        { declared_types; func_types; named_types; last_assigned_index; all_types }
-        (name, type_) =
+        { declared_types
+        ; func_types
+        ; named_types
+        ; last_assigned_index
+        ; all_types
+        } (name, type_) =
       let id = I last_assigned_index in
       let last_assigned_index = last_assigned_index + 1 in
       let declared_types = { index = id; value = type_ } :: declared_types in
@@ -336,7 +343,12 @@ end = struct
       in
       let all_types = TypeMap.add type_ id all_types in
       (* Is there something to do/check when a type is already declared ? *)
-      { declared_types; func_types; named_types; last_assigned_index; all_types }
+      { declared_types
+      ; func_types
+      ; named_types
+      ; last_assigned_index
+      ; all_types
+      }
     in
     let empty_acc =
       { declared_types = []
@@ -359,7 +371,9 @@ end = struct
         let all_types = TypeMap.add type_ id all_types in
         { acc with func_types; last_assigned_index; all_types }
     in
-    let acc = List.fold_left assign_func_type acc (List.rev module_.function_type) in
+    let acc =
+      List.fold_left assign_func_type acc (List.rev module_.function_type)
+    in
     let values = List.rev acc.declared_types @ List.rev acc.func_types in
     (* Format.printf "TYPES@.%a"
      *   (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "@.")
@@ -619,7 +633,7 @@ module Rewrite_indices = struct
       | Add -> Add
       | Sub -> Sub
       | Mul -> Mul
-      | _ -> failwith "not a constant expression"
+      | _ -> failwith "constant expression required"
     in
 
     let const_instr (instr : (indice, _) instr') : Const.instr =
@@ -632,13 +646,13 @@ module Rewrite_indices = struct
       | Ref_func f -> Ref_func (find "unknown func" module_.func f)
       | Global_get id -> Global_get (find "unknown global" module_.global id)
       | I_binop (t, op) -> I_binop (t, const_ibinop op)
-      | _ -> failwith "not a constant expression"
+      | _ -> failwith "constant expression required"
     in
     List.map const_instr expr
 
   let rewrite_block_type (module_ : assigned_module) block_type : func_type =
     match block_type with
-    | Bt_ind id -> (get "unbound type" module_.type_ id).value
+    | Bt_ind id -> (get "unknown type" module_.type_ id).value
     | Bt_raw (_, func_type) -> func_type
 
   let rewrite_global (module_ : assigned_module) (global : global) :
@@ -651,7 +665,7 @@ module Rewrite_indices = struct
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
       | Elem_active (indice, expr) ->
-        let indice = find "unbound table" module_.table indice in
+        let indice = find "unknown table" module_.table indice in
         let expr = rewrite_const_expr module_ expr in
         Elem_active (indice, expr)
     in
@@ -664,7 +678,7 @@ module Rewrite_indices = struct
       match data.mode with
       | Data_passive as mode -> mode
       | Data_active (indice, expr) ->
-        let indice = find "unbound memory" module_.mem indice in
+        let indice = find "unknown memory" module_.mem indice in
         let expr = rewrite_const_expr module_ expr in
         Data_active (indice, expr)
     in
@@ -681,10 +695,10 @@ module Rewrite_indices = struct
 
   let rewrite_exports (module_ : assigned_module) (exports : opt_ind exports) :
       index exports =
-    { global = rewrite_export "unbound global" module_.global exports.global
-    ; mem = rewrite_export "unbound mem" module_.mem exports.mem
-    ; table = rewrite_export "unbound table" module_.table exports.table
-    ; func = rewrite_export "unbound func" module_.func exports.func
+    { global = rewrite_export "unknown global" module_.global exports.global
+    ; mem = rewrite_export "unknown mem" module_.mem exports.mem
+    ; table = rewrite_export "unknown table" module_.table exports.table
+    ; func = rewrite_export "unknown func" module_.func exports.func
     }
 
   let rewrite_func (module_ : assigned_module) (func : indice func) :
@@ -721,7 +735,7 @@ module Rewrite_indices = struct
            (rewrite_import (rewrite_block_type module_)) )
         module_.func
     in
-    let start = List.map (find "unbound func" module_.func) module_.start in
+    let start = List.map (find "unknown func" module_.func) module_.start in
     { id = module_.id
     ; mem = module_.mem
     ; table = module_.table

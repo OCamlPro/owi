@@ -93,6 +93,23 @@ let load_func_from_module ls mod_id f_name : Link.func =
   | exception Not_found -> failwith ("unbound name " ^ f_name)
   | v -> v
 
+let load_global_from_module ls mod_id name : Link.global =
+  let exports =
+    match mod_id with
+    | None -> begin
+      match ls.Link.last with
+      | None -> failwith "unbound last module"
+      | Some m -> m
+    end
+    | Some mod_id -> (
+      match Link.StringMap.find mod_id ls.Link.by_id with
+      | exception Not_found -> failwith ("unbound module " ^ mod_id)
+      | exports -> exports )
+  in
+  match Link.StringMap.find name exports.globals with
+  | exception Not_found -> failwith ("unbound name " ^ name)
+  | v -> v
+
 let compare_result_const result (const : value) =
   match (result, const) with
   | Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
@@ -152,10 +169,9 @@ let action (link_state : Link.link_state) = function
     let stack = Interpret_bis.exec_vfunc stack f in
     stack
   end
-  | Get (_mod_id, _n) ->
-    (* let i = Simplify.find_module mod_name last_module seen_modules in
-     * Get_indice (i, n) *)
-    failwith "TODO get action"
+  | Get (mod_id, name) ->
+    let global = load_global_from_module link_state mod_id name in
+    [global.value]
 
 let pp_name ppf (name, indice) =
   match name with
