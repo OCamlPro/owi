@@ -470,7 +470,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
 
 let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
-  let rec stuff =
+  let rec env_and_init_active_data_and_elem =
     lazy
       ( Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
         let env = eval_globals ls module_.global in
@@ -482,10 +482,14 @@ let link_module (module_ : module_) (ls : link_state) :
         (env, init_active_data, init_active_elem) )
   and finished_env =
     lazy
-      (let env, _init_active_data, _init_active_elem = Lazy.force stuff in
+      (let env, _init_active_data, _init_active_elem =
+         Lazy.force env_and_init_active_data_and_elem
+       in
        env )
   in
-  let env, init_active_data, init_active_elem = Lazy.force stuff in
+  let env, init_active_data, init_active_elem =
+    Lazy.force env_and_init_active_data_and_elem
+  in
   Debug.debug Format.err_formatter "EVAL %a@\n" Env.pp env;
   let by_id_exports = populate_exports env module_.exports in
   let by_id =
