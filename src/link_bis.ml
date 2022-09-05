@@ -37,15 +37,15 @@ module Table = struct
   type table_id = Tid of int
 
   (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
-  type table = Value.ref_value array
+  type 'env table = 'env Value.ref_value array
 
-  type t =
+  type 'env t =
     | Table of
         { id : table_id
         ; label : string option
         ; limits : limits
         ; type_ : ref_type
-        ; mutable data : table
+        ; mutable data : 'env table
         }
 
   let fresh =
@@ -54,7 +54,7 @@ module Table = struct
       incr r;
       Tid !r
 
-  let init ?label (typ : table_type) : t =
+  let init ?label (typ : table_type) : 'env t =
     let limits, ref_type = typ in
     let null = Value.ref_null' ref_type in
     let table = Array.make limits.min null in
@@ -70,8 +70,8 @@ module Table = struct
 end
 
 module Global = struct
-  type t =
-    { mutable value : Value.t
+  type 'env t =
+    { mutable value : 'env Value.t
     ; label : string option
     ; mut : Types.mut
     ; typ : Types.val_type
@@ -94,21 +94,23 @@ module Env = struct
 
   let drop_data data = data.value <- ""
 
-  type elem = { mutable value : Value.ref_value array }
+  type 'env elem = { mutable value : 'env Value.ref_value array }
 
   let drop_elem elem = elem.value <- [||]
 
   type t =
-    { globals : Global.t IMap.t
+    { globals : t' Global.t IMap.t
     ; memories : memory IMap.t
-    ; tables : Table.t IMap.t
-    ; functions : Value.func IMap.t
+    ; tables : t' Table.t IMap.t
+    ; functions : t' Value.func IMap.t
     ; data : data IMap.t
-    ; elem : elem IMap.t
+    ; elem : t' elem IMap.t
     }
 
+  and t' = t lazy_t
+
   let pp fmt t =
-    let elt fmt (id, (global : Global.t)) =
+    let elt fmt (id, (global : 'a Global.t)) =
       Format.fprintf fmt "%a -> %a" Index.pp id Value.pp global.value
     in
     Format.fprintf fmt "@[<hov 2>{@ %a@ }@]"
@@ -142,7 +144,7 @@ module Env = struct
 
   let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
 
-  let get_global (env : t) id : Global.t =
+  let get_global (env : t) id : t' Global.t =
     match IMap.find_opt id env.globals with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -156,14 +158,14 @@ module Env = struct
       failwith "unbound memory"
     | Some v -> v
 
-  let get_table (env : t) id : Table.t =
+  let get_table (env : t) id : t' Table.t =
     match IMap.find_opt id env.tables with
     | None ->
       Debug.debugerr "%a@." pp env;
       failwith "unbound table"
     | Some v -> v
 
-  let get_func (env : t) id : Value.func =
+  let get_func (env : t) id : t' Value.func =
     match IMap.find_opt id env.functions with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -177,7 +179,7 @@ module Env = struct
       failwith "unbound data"
     | Some v -> v
 
-  let get_elem (env : t) id : elem =
+  let get_elem (env : t) id : t' elem =
     match IMap.find_opt id env.elem with
     | None ->
       Debug.debugerr "%a@." pp env;
@@ -185,13 +187,19 @@ module Env = struct
     | Some v -> v
 end
 
+type global = Env.t' Global.t
+
+type table = Env.t' Table.t
+
+type func = Env.t' Value.func
+
+type value = Env.t' Value.t
+
 type exports =
-  { globals : Global.t StringMap.t
+  { globals : global StringMap.t
   ; memories : memory StringMap.t
-  ; tables : Table.t StringMap.t
-  ; functions : Value.func StringMap.t
-  ; env : Env.t
-        (* TODO remove env, this is only used by invoke and is quite inelegant *)
+  ; tables : table StringMap.t
+  ; functions : func StringMap.t
   }
 
 type module_to_run =
@@ -231,7 +239,8 @@ module Const_interp = struct
         (let open Int64 in
         match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2)
 
-  let exec_instr (env : env) (stack : Stack_bis.t) (instr : Const.instr) =
+  let exec_instr (env : env) (stack : Env.t' Stack_bis.t) (instr : Const.instr)
+      =
     match instr with
     | I32_const n -> Stack.push_i32 stack n
     | I64_const n -> Stack.push_i64 stack n
@@ -244,7 +253,7 @@ module Const_interp = struct
       Stack.push stack value
     | Global_get id -> Stack.push stack (Env.get_global env id).value
 
-  let exec_expr env (e : Const.expr) : Value.t =
+  let exec_expr env (e : Const.expr) : Env.t' Value.t =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
     match stack with
     | [] -> failwith "const expr returning zero values"
@@ -263,19 +272,19 @@ let load_from_module ls f (import : _ S.imp) =
     | exception Not_found -> failwith ("unbound name " ^ import.name)
     | v -> v )
 
-let load_global (ls : link_state) (import : S.global_import S.imp) : Global.t =
+let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   match import.desc with
   | Var, _ -> failwith "non constant global"
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
 let eval_global ls env
     (global : ((S.index, Const.expr) global', S.global_import) S.runtime) :
-    Global.t =
+    global =
   match global with
   | S.Local global ->
     let value = Const_interp.exec_expr env global.init in
     let mut, typ = global.type_ in
-    let global : Global.t = { value; label = global.id; mut; typ } in
+    let global : global = { value; label = global.id; mut; typ } in
     global
   | S.Imported import -> load_global ls import
 
@@ -287,7 +296,7 @@ let eval_globals ls globals : Env.t =
       env )
     globals Env.empty
 
-let eval_in_data (env : Env.t) (data : _ data') : (S.index, Value.t) data' =
+let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
   let mode =
     match data.mode with
     | Data_passive -> Data_passive
@@ -329,7 +338,7 @@ let eval_memories ls env memories =
 let table_types_are_compatible (l1, (t1 : ref_type)) (l2, t2) =
   limit_is_included l2 ~into:l1 && t1 = t2
 
-let load_table (ls : link_state) (import : S.table_import S.imp) : Table.t =
+let load_table (ls : link_state) (import : S.table_import S.imp) : table =
   let type_ : table_type = import.desc in
   let (Table t as table) =
     load_from_module ls (fun (e : exports) -> e.tables) import
@@ -337,7 +346,7 @@ let load_table (ls : link_state) (import : S.table_import S.imp) : Table.t =
   if table_types_are_compatible type_ (t.limits, t.type_) then table
   else failwith "incompatible table import"
 
-let eval_table ls (table : (table, S.table_import) S.runtime) : Table.t =
+let eval_table ls (table : (_, S.table_import) S.runtime) : table =
   match table with
   | Local (label, table_type) -> Table.init ?label table_type
   | Imported import -> load_table ls import
@@ -354,22 +363,23 @@ let func_types_are_compatible _t1 _t2 =
   (* TODO *)
   true
 
-let load_func (ls : link_state) (import : func_type S.imp) : Value.func =
+let load_func (ls : link_state) (import : func_type S.imp) : func =
   let type_ : func_type = import.desc in
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
   else failwith "incompatible function import "
 
-let eval_func ls (func : (S.func, func_type) S.runtime) : Value.func =
+let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
+    : func =
   match func with
-  | Local func -> Value.Func.wasm func
+  | Local func -> Value.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
-let eval_functions ls env functions =
+let eval_functions ls (finished_env : Env.t') env functions =
   S.Fields.fold
     (fun id func env ->
-      let func = eval_func ls func in
+      let func = eval_func ls finished_env func in
       let env = Env.add_func id func env in
       env )
     functions env
@@ -456,17 +466,26 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let memories = fill_exports Env.get_memory exports.mem in
   let tables = fill_exports Env.get_table exports.table in
   let functions = fill_exports Env.get_func exports.func in
-  { globals; memories; tables; functions; env }
+  { globals; memories; tables; functions }
 
 let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
-  Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
-  let env = eval_globals ls module_.global in
-  let env = eval_memories ls env module_.mem in
-  let env = eval_tables ls env module_.table in
-  let env = eval_functions ls env module_.func in
-  let env, init_active_data = define_data env module_.data in
-  let env, init_active_elem = define_elem env module_.elem in
+  let rec stuff =
+    lazy
+      ( Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
+        let env = eval_globals ls module_.global in
+        let env = eval_memories ls env module_.mem in
+        let env = eval_tables ls env module_.table in
+        let env = eval_functions ls finished_env env module_.func in
+        let env, init_active_data = define_data env module_.data in
+        let env, init_active_elem = define_elem env module_.elem in
+        (env, init_active_data, init_active_elem) )
+  and finished_env =
+    lazy
+      (let env, _init_active_data, _init_active_elem = Lazy.force stuff in
+       env )
+  in
+  let env, init_active_data, init_active_elem = Lazy.force stuff in
   Debug.debug Format.err_formatter "EVAL %a@\n" Env.pp env;
   let by_id_exports = populate_exports env module_.exports in
   let by_id =
@@ -492,7 +511,6 @@ let link_extern_module (name : string) (module_ : extern_module)
     ; globals = StringMap.empty
     ; memories = StringMap.empty
     ; tables = StringMap.empty
-    ; env = Env.empty
     }
   in
   { ls with by_name = StringMap.add name exports ls.by_name }

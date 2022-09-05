@@ -3,9 +3,13 @@ module Simplify = Simplify_bis
 module Link = Link_bis
 module Interpret = Interpret_bis
 
+type value = Link.value
+
 module Host_externref = struct
   type t = int
+
   let ty : t Value.Extern_ref.ty = Value.Extern_ref.fresh "host"
+
   let value i = Value.Externref (Some (Value.E (ty, i)))
 end
 
@@ -87,9 +91,9 @@ let load_func_from_module ls mod_id f_name : Link.func =
   in
   match Link.StringMap.find f_name exports.functions with
   | exception Not_found -> failwith ("unbound name " ^ f_name)
-  | v -> (exports.Link.env, v)
+  | v -> v
 
-let compare_result_const result (const : Value.t) =
+let compare_result_const result (const : value) =
   match (result, const) with
   | Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
@@ -97,11 +101,11 @@ let compare_result_const result (const : Value.t) =
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
   | Result_const (Literal (Const_null Func_ref)), Ref (Funcref None) -> true
   | Result_const (Literal (Const_null Extern_ref)), Ref (Externref None) -> true
-  | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) ->
-    begin match Value.cast_ref ref Host_externref.ty with
-      | None -> false
-      | Some n' -> n = n'
-    end
+  | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) -> begin
+    match Value.cast_ref ref Host_externref.ty with
+    | None -> false
+    | Some n' -> n = n'
+  end
   (* | Result_const (Literal (Const_null rt)), Const_null rt' -> rt = rt' *)
   (* | Result_const (Literal (Const_host n)), Const_host n' -> n = n' *)
   | Result_const (Nan_canon S32), F32 f ->
@@ -126,7 +130,7 @@ let compare_result_const result (const : Value.t) =
   | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
   | Result_extern_ref, _ -> failwith "TODO (compare_result_const)"
 
-let value_of_const : Types.const -> Value.t =
+let value_of_const : Types.const -> value =
  fun const ->
   match const with
   | Const_I32 v -> I32 v
@@ -145,7 +149,7 @@ let action (link_state : Link.link_state) = function
       mod_id f Pp.Input.consts args;
     let f = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
-    let stack = Interpret_bis.exec_vfunc env stack f in
+    let stack = Interpret_bis.exec_vfunc stack f in
     stack
   end
   | Get (_mod_id, _n) ->
@@ -297,8 +301,8 @@ let rec run ~with_exhaustion script =
             in
             check_error ~expected ~got;
             link_state
-          end else
-            (* Assert_exhaustion ignored *)
+          end
+          else (* Assert_exhaustion ignored *)
             link_state
         | Register (name, mod_name) ->
           Link.register_module link_state ~name ~id:mod_name
@@ -309,6 +313,6 @@ let rec run ~with_exhaustion script =
   in
   link_state
 
-let exec ?(with_exhaustion=false) script =
+let exec ?(with_exhaustion = false) script =
   let _link_state = run ~with_exhaustion script in
   ()

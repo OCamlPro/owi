@@ -11,11 +11,15 @@ type expr = (S.index, func_type) expr'
 
 type env = Link_bis.Env.t
 
-exception Return of Stack.t
+type value = Env.t' Value.t
+
+type stack = Env.t' Stack.t
+
+exception Return of stack
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
-let exec_iunop stack nn op : Value.t list =
+let exec_iunop stack nn op : value list =
   match nn with
   | S32 ->
     let n, stack = Stack.pop_i32 stack in
@@ -230,13 +234,13 @@ let exec_frelop stack nn (op : Types.frelop) =
     in
     Stack.push_bool stack res
 
-exception Branch of Stack.t * int
+exception Branch of stack * int
 
 let fmt = Format.std_formatter
 
 let indice_to_int = function I i -> i
 
-let init_local (_id, t) : Value.t =
+let init_local (_id, t) : value =
   match t with
   | Num_type I32 -> I32 Int32.zero
   | Num_type I64 -> I64 Int64.zero
@@ -277,8 +281,8 @@ let get_table (env : env) idx =
   | Some table -> table
 
 let exec_extern_func stack (f : Value.extern_func) =
-  let pop_arg (type ty) (stack : Stack.t) (arg : ty Value.Func.telt) :
-      ty * Stack.t =
+  let pop_arg (type ty) (stack : stack) (arg : ty Value.Func.telt) : ty * stack
+      =
     match arg with
     | I32 -> Stack.pop_i32 stack
     | I64 -> Stack.pop_i64 stack
@@ -286,8 +290,7 @@ let exec_extern_func stack (f : Value.extern_func) =
     | F64 -> Stack.pop_f64 stack
     | Externref ety -> Stack.pop_as_externref ety stack
   in
-  let rec apply :
-      type f r. Stack.t -> (f, r) Value.Func.atype -> f -> r * Stack.t =
+  let rec apply : type f r. stack -> (f, r) Value.Func.atype -> f -> r * stack =
    fun stack ty f ->
     match ty with
     | Value.Func.Arg (arg, args) ->
@@ -300,8 +303,8 @@ let exec_extern_func stack (f : Value.extern_func) =
   in
   let (Extern_func (Func (atype, rtype), func)) = f in
   let r, stack = apply stack atype func in
-  let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) (stack : Stack.t) :
-      Stack.t =
+  let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) (stack : stack) :
+      stack =
     match arg with
     | I32 -> Stack.push_i32 stack v
     | I64 -> Stack.push_i64 stack v
@@ -318,7 +321,7 @@ let exec_extern_func stack (f : Value.extern_func) =
   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
-let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
+let rec exec_instr (env : env) (locals : value array) (stack : stack)
     (instr : instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   Debug.debug fmt "running instr: %a@." Pp.Simplified_bis.instr instr;
@@ -544,7 +547,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     exec_expr env locals stack (if b then e1 else e2) false bt
   | Call i -> begin
     let func = get_func env i in
-    exec_vfunc env stack func
+    exec_vfunc stack func
   end
   | Br i -> raise (Branch (stack, indice_to_int i))
   | Br_if i ->
@@ -708,7 +711,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
   end
   | Table_init (t_i, e_i) ->
-    let Table t = get_table env t_i in
+    let (Table t) = get_table env t_i in
     let elem = get_elem env e_i in
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in
@@ -941,7 +944,7 @@ let rec exec_instr (env : env) (locals : Value.t array) (stack : Stack.t)
     let pt', rt' = typ_i in
     if not (rt = rt' && List.equal p_type_eq pt pt') then
       raise @@ Trap "indirect call type mismatch";
-    exec_vfunc env stack func
+    exec_vfunc stack func
 
 and exec_expr env locals stack (e : expr) is_loop bt =
   let rt =
@@ -958,18 +961,18 @@ and exec_expr env locals stack (e : expr) is_loop bt =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc env stack (func : Value.func) : Stack.t =
+and exec_vfunc stack (func : Env.t' Value.func) : stack =
   match func with
-  | WASM (_, func) ->
+  | WASM (_, func, env) ->
     let param_type, _result_type = func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res = exec_func env func (List.rev args) in
+    let res = exec_func (Lazy.force env) func (List.rev args) in
     res @ stack
   | Extern f -> exec_extern_func stack f
 
 and exec_func env (func : S.func) args =
-  (* Debug.debug fmt "calling func : module %d, func %s@."
-   *   (Option.value func.id ~default:"anonymous"); *)
+  Debug.debugerr "calling func : func %s@."
+    (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
   try exec_expr env locals [] func.body false (Some func.type_f)
   with Return stack -> Stack.keep stack (List.length (snd func.type_f))
