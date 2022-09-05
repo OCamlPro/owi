@@ -72,17 +72,17 @@ let check script =
     Ok ()
   with Failure e -> Error e
 
-let load_func_from_module ls mod_name f_name =
+let load_func_from_module ls mod_id f_name : Link.func =
   let exports =
-    match mod_name with
+    match mod_id with
     | None -> begin
       match ls.Link.last with
       | None -> failwith "unbound last module"
       | Some m -> m
     end
-    | Some mod_name -> (
-      match Link.StringMap.find mod_name ls.Link.by_name with
-      | exception Not_found -> failwith ("unbound module " ^ mod_name)
+    | Some mod_id -> (
+      match Link.StringMap.find mod_id ls.Link.by_id with
+      | exception Not_found -> failwith ("unbound module " ^ mod_id)
       | exports -> exports )
   in
   match Link.StringMap.find f_name exports.functions with
@@ -137,14 +137,18 @@ let value_of_const : Types.const -> Value.t =
   | Const_host i -> Ref (Host_externref.value i)
 
 let action (link_state : Link.link_state) = function
-  | Invoke (mod_name, f, args) -> begin
-    Debug.debugerr "Invoke %s %a@." f Pp.Input.consts args;
-    let env, f = load_func_from_module link_state mod_name f in
+  | Invoke (mod_id, f, args) -> begin
+    Debug.debugerr "Invoke %a %s %a@."
+      (Format.pp_print_option
+         ~none:(fun ppf () -> Format.fprintf ppf "<>")
+         Format.pp_print_string )
+      mod_id f Pp.Input.consts args;
+    let f = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
     let stack = Interpret_bis.exec_vfunc env stack f in
     stack
   end
-  | Get (_mod_name, _n) ->
+  | Get (_mod_id, _n) ->
     (* let i = Simplify.find_module mod_name last_module seen_modules in
      * Get_indice (i, n) *)
     failwith "TODO get action"
