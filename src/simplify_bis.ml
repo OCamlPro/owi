@@ -547,7 +547,7 @@ module Rewrite_indices = struct
     in
 
     let find_local =
-      let locals, last_assigned_local =
+      let locals, after_last_assigned_local =
         List.fold_left
           (fun (locals, next_free_index) ((name, _type) : param) ->
             match name with
@@ -560,7 +560,7 @@ module Rewrite_indices = struct
       let find_local id =
         match id with
         | Raw i ->
-          if i > last_assigned_local then failwith "unknown local";
+          if i >= after_last_assigned_local then failwith "unknown local";
           I i
         | Symbolic name -> (
           match StringMap.find_opt name locals with
