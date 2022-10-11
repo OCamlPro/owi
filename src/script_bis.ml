@@ -266,18 +266,21 @@ let rec run ~with_exhaustion script =
           in
           check_error ~expected ~got;
           link_state
-        | Assert (Assert_unlinkable (_m, _msg)) ->
-          (* let curr_module = curr_module + 1 in
-           * Debug.debug Format.err_formatter
-           *   "simplifying (unlinkable) module %d@." curr_module;
-           * Option.iter
-           *   (fun id -> Hashtbl.replace seen_modules id curr_module)
-           *   m.id;
-           * let cmd = Module_indice curr_module in
-           * let module_ = Simplify.mk_module registered_modules m in
-           * let module_ = { module_ with Simplify.should_not_link = Some msg } in
-           * (curr_module, module_ :: modules, cmd :: scr) *)
-          failwith "TODO assert_unlinkable"
+        | Assert (Assert_unlinkable (m, expected)) ->
+          let got =
+            try
+              match Check.module_ m with
+              | Ok () ->
+                let m = Simplify_bis.simplify m in
+                let _module_to_run, _link_state =
+                  Link.link_module m link_state
+                in
+                "Ok"
+              | Error got -> got
+            with Failure got -> got
+          in
+          check_error ~expected ~got;
+          link_state
         | Assert (Assert_malformed _) -> failwith "TODO assert_malformed"
         | Assert (Assert_return (a, res)) ->
           Debug.debugerr "Assert@.";

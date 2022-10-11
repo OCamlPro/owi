@@ -270,7 +270,9 @@ let load_from_module ls f (import : _ S.imp) =
   | exception Not_found -> failwith ("unknown module " ^ import.module_)
   | exports -> (
     match StringMap.find import.name (f exports) with
-    | exception Not_found -> failwith ("unknown name " ^ import.name)
+    | exception Not_found ->
+      Debug.debugerr "unknown import %s" import.name;
+      failwith "unknown import"
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
