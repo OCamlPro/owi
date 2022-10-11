@@ -111,14 +111,21 @@ module Env = struct
   and t' = t lazy_t
 
   let pp fmt t =
-    let elt fmt (id, (global : 'a Global.t)) =
+    let global fmt (id, (global : 'a Global.t)) =
       Format.fprintf fmt "%a -> %a" Index.pp id Value.pp global.value
     in
-    Format.fprintf fmt "@[<hov 2>{@ %a@ }@]"
+    let func fmt (id, (_func : 'a Value.func)) =
+      Format.fprintf fmt "%a -> func" Index.pp id
+    in
+    Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
       (Format.pp_print_list
          ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
-         elt )
+         global )
       (IMap.bindings t.globals)
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
+         func )
+      (IMap.bindings t.functions)
 
   let empty =
     { globals = IMap.empty
@@ -290,13 +297,13 @@ let eval_global ls env (global : (Const.expr global', S.global_import) S.runtime
     global
   | S.Imported import -> load_global ls import
 
-let eval_globals ls globals : Env.t =
+let eval_globals ls env globals : Env.t =
   S.Fields.fold
     (fun id global env ->
       let global = eval_global ls env global in
       let env = Env.add_global id global env in
       env )
-    globals Env.empty
+    globals env
 
 let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
   let mode =
@@ -478,10 +485,11 @@ let link_module (module_ : module_) (ls : link_state) :
   let rec env_and_init_active_data_and_elem =
     lazy
       ( Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
-        let env = eval_globals ls module_.global in
+        let env = Env.empty in
+        let env = eval_functions ls finished_env env module_.func in
+        let env = eval_globals ls env module_.global in
         let env = eval_memories ls env module_.mem in
         let env = eval_tables ls env module_.table in
-        let env = eval_functions ls finished_env env module_.func in
         let env, init_active_data = define_data env module_.data in
         let env, init_active_elem = define_elem env module_.elem in
         (env, init_active_data, init_active_elem) )
