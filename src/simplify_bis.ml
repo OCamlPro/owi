@@ -644,7 +644,19 @@ module Rewrite_indices = struct
       | F64_const v -> F64_const v
       | Ref_null v -> Ref_null v
       | Ref_func f -> Ref_func (find "unknown func" module_.func f)
-      | Global_get id -> Global_get (find "unknown global" module_.global id)
+      | Global_get id -> begin
+        let idx = find "unknown global" module_.global id in
+        let va = List.find (fun { index; _ } -> index= idx) module_.global.values in
+        let typ = match va.value with
+          | Local global -> global.type_
+          | Imported imported -> imported.desc
+        in
+        match fst typ with
+        | Const ->
+          Global_get idx
+        | Var ->
+          failwith "constant expression required"
+      end
       | I_binop (t, op) -> I_binop (t, const_ibinop op)
       | _ -> failwith "constant expression required"
     in
