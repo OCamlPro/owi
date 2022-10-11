@@ -486,6 +486,18 @@ module Rewrite_indices = struct
     (* TODO change named structure to make that sensible *)
     match List.nth_opt named.values i with None -> failwith msg | Some v -> v
 
+  let find_global (module_ : assigned_module) id =
+    let idx = find "unknown global" module_.global id in
+    let va =
+      List.find (fun { index; _ } -> index = idx) module_.global.values
+    in
+    let mut, _typ =
+      match va.value with
+      | Local global -> global.type_
+      | Imported imported -> imported.desc
+    in
+    (idx, mut)
+
   let rewrite_expr (module_ : assigned_module) (locals : param list)
       (iexpr : expr) : (index, func_type) expr' =
     (* block_ids handling *)
@@ -562,7 +574,6 @@ module Rewrite_indices = struct
 
     let find_table id = find "unknown table" module_.table id in
     let find_func id = find "unknown function" module_.func id in
-    let find_global id = find "unknown global" module_.global id in
     let _find_mem id = find "unknown memory" module_.mem id in
     let find_data id = find "unknown data segment" module_.data id in
     let find_elem id = find "unknown elem segment" module_.elem id in
@@ -596,18 +607,15 @@ module Rewrite_indices = struct
       | Call_indirect (tbl_i, bt) ->
         let bt = Option.get @@ bt_to_raw (Some bt) in
         Call_indirect (find_table tbl_i, bt)
-      | Global_set id ->
-        (* TODO: move this to check, this is not doable without linking *)
-        (*
-        (* TODO: it seems there's not test for this, add one ? *)
-        begin
-          match global with
-          | Local ((mut, _vt), _) | Imported (_, _, (mut, _vt)) -> begin
-            match mut with Const -> failwith "global is immutable" | Var -> ()
-          end
-        end;*)
-        Global_set (find_global id)
-      | Global_get id -> Global_get (find_global id)
+      | Global_set id -> begin
+        let idx, mut = find_global module_ id in
+        match mut with
+        | Const -> failwith "global is immutable"
+        | Var -> Global_set idx
+      end
+      | Global_get id ->
+        let idx, _mut = find_global module_ id in
+        Global_get idx
       | Ref_func id -> Ref_func (find_func id)
       | Table_size id -> Table_size (find_table id)
       | Table_get id -> Table_get (find_table id)
@@ -659,17 +667,10 @@ module Rewrite_indices = struct
       | Ref_null v -> Ref_null v
       | Ref_func f -> Ref_func (find "unknown func" module_.func f)
       | Global_get id -> begin
-        let idx = find "unknown global" module_.global id in
-        let va = List.find (fun { index; _ } -> index= idx) module_.global.values in
-        let typ = match va.value with
-          | Local global -> global.type_
-          | Imported imported -> imported.desc
-        in
-        match fst typ with
-        | Const ->
-          Global_get idx
-        | Var ->
-          failwith "constant expression required"
+        let idx, mut = find_global module_ id in
+        match mut with
+        | Const -> Global_get idx
+        | Var -> failwith "constant expression required"
       end
       | I_binop (t, op) -> I_binop (t, const_ibinop op)
       | _ -> failwith "constant expression required"
