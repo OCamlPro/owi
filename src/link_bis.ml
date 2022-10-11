@@ -283,9 +283,14 @@ let load_from_module ls f (import : _ S.imp) =
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
-  match import.desc with
-  | Var, _ -> failwith "constant expression required"
-  | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
+  let global = load_from_module ls (fun (e : exports) -> e.globals) import in
+  (match fst import.desc, global.mut with
+   | Var, Const | Const, Var -> failwith "incompatible import type"
+   | Const, Const | Var, Var -> ());
+  if snd import.desc <> global.typ then begin
+    failwith "incompatible import type"
+  end;
+  global
 
 let eval_global ls env (global : (Const.expr global', S.global_import) S.runtime)
     : global =
@@ -353,7 +358,7 @@ let load_table (ls : link_state) (import : S.table_import S.imp) : table =
     load_from_module ls (fun (e : exports) -> e.tables) import
   in
   if table_types_are_compatible type_ (t.limits, t.type_) then table
-  else failwith "incompatible table import"
+  else failwith "incompatible import type"
 
 let eval_table ls (table : (_, S.table_import) S.runtime) : table =
   match table with
