@@ -449,8 +449,8 @@ let mk_module registered_modules m =
           in
 
           (* handling an expression *)
-          let rec body (loop_count, block_ids) :
-              instr -> simplified_instr = function
+          let rec body (loop_count, block_ids) : instr -> simplified_instr =
+            function
             | Br_table (ids, id) ->
               let f = block_id_to_raw (loop_count, block_ids) in
               Br_table (Array.map f ids, f id)

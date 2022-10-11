@@ -60,35 +60,34 @@ let simplify_then_link_then_run file =
   let () = Woi.Debug.debugerr "* Done@." in
   ()
 
-let (run_as_script, debug, files) =
+let run_as_script, debug, files =
   let run_as_script = ref false in
   let debug = ref false in
   let files = ref [] in
-  let spec = Arg.[
-      "--script", Set run_as_script, "run as a reference test suite script";
-      "-s", Set run_as_script, "short for --script";
-      "--debug", Set debug, "debug mode";
-      "-d", Set debug, "short for --debug";
-    ]
+  let spec =
+    Arg.
+      [ ("--script", Set run_as_script, "run as a reference test suite script")
+      ; ("-s", Set run_as_script, "short for --script")
+      ; ("--debug", Set debug, "debug mode")
+      ; ("-d", Set debug, "short for --debug")
+      ]
   in
   Arg.parse spec (fun s -> files := s :: !files) "wast interpreter %s <file>";
-  !run_as_script, !debug, !files
-
+  (!run_as_script, !debug, !files)
 
 let () =
   if debug then Woi.Debug.enable ();
 
-  List.iter (fun file ->
+  List.iter
+    (fun file ->
       if not @@ Sys.file_exists file then
         error (Format.sprintf "file `%s` doesn't exist" file);
 
       match Woi.Parse.from_file ~filename:file with
       | Ok script -> begin
         Format.printf "%a@." Woi.Pp.Input.file script;
-        if run_as_script then
-          Woi.Script_bis.exec script
-        else
-          simplify_then_link_then_run script
+        if run_as_script then Woi.Script_bis.exec script
+        else simplify_then_link_then_run script
       end
-      | Error e -> error e)
+      | Error e -> error e )
     files

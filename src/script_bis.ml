@@ -171,7 +171,7 @@ let action (link_state : Link.link_state) = function
   end
   | Get (mod_id, name) ->
     let global = load_global_from_module link_state mod_id name in
-    [global.value]
+    [ global.value ]
 
 let pp_name ppf (name, indice) =
   match name with

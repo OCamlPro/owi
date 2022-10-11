@@ -56,7 +56,7 @@ type func = (index, func_type) func'
 
 type result =
   { id : string option
-  ; global : ((Const.expr) global', global_import) runtime named
+  ; global : (Const.expr global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
   ; func : (func, func_type) runtime named

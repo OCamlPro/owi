@@ -177,7 +177,7 @@ module MFloat32 = struct
     Float32.of_float
       Int32.(
         if x >= zero then to_float x
-        else to_float (logor (shift_right_logical x 1) (logand x 1l)) *. 2.0)
+        else to_float (logor (shift_right_logical x 1) (logand x 1l)) *. 2.0 )
 
   (*
    * Values that are too large would get rounded when represented in f64,
@@ -191,7 +191,7 @@ module MFloat32 = struct
         if abs x < 0x10_0000_0000_0000L then to_float x
         else
           let r = if logand x 0xfffL = 0L then 0L else 1L in
-          to_float (logor (shift_right x 12) r) *. 0x1p12)
+          to_float (logor (shift_right x 12) r) *. 0x1p12 )
 
   let convert_i64_u x =
     Float32.of_float
@@ -199,7 +199,7 @@ module MFloat32 = struct
         if lt_u x 0x10_0000_0000_0000L then to_float x
         else
           let r = if logand x 0xfffL = 0L then 0L else 1L in
-          to_float (logor (shift_right_logical x 12) r) *. 0x1p12)
+          to_float (logor (shift_right_logical x 12) r) *. 0x1p12 )
 
   let reinterpret_i32 = Float32.of_bits
 end
@@ -243,7 +243,7 @@ module MFloat64 = struct
     Float64.of_float
       Int64.(
         if x >= zero then to_float x
-        else to_float (logor (shift_right_logical x 1) (logand x 1L)) *. 2.0)
+        else to_float (logor (shift_right_logical x 1) (logand x 1L)) *. 2.0 )
 
   let reinterpret_i64 = Float64.of_bits
 end

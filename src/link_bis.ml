@@ -233,12 +233,12 @@ module Const_interp = struct
       let (n1, n2), stack = Stack.pop2_i32 stack in
       Stack.push_i32 stack
         (let open Int32 in
-        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2)
+        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       Stack.push_i64 stack
         (let open Int64 in
-        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2)
+        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
 
   let exec_instr (env : env) (stack : Env.t' Stack_bis.t) (instr : Const.instr)
       =
@@ -278,9 +278,8 @@ let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   | Var, _ -> failwith "constant expression required"
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
-let eval_global ls env
-    (global : ((Const.expr) global', S.global_import) S.runtime) :
-    global =
+let eval_global ls env (global : (Const.expr global', S.global_import) S.runtime)
+    : global =
   match global with
   | S.Local global ->
     let value = Const_interp.exec_expr env global.init in

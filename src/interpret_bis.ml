@@ -98,7 +98,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shr S -> shr_s n1 n2
       | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2)
+      | Rotr -> rotr n1 n2 )
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
@@ -128,7 +128,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shr S -> shr_s n1 n2
       | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2)
+      | Rotr -> rotr n1 n2 )
 
 let exec_fbinop stack nn (op : Types.fbinop) =
   match nn with
@@ -143,7 +143,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2)
+      | Copysign -> copy_sign f1 f2 )
   | S64 ->
     let (f1, f2), stack = Stack.pop2_f64 stack in
     Stack.push_f64 stack
@@ -155,7 +155,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2)
+      | Copysign -> copy_sign f1 f2 )
 
 let exec_itestop stack nn op =
   match nn with

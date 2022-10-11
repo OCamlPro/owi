@@ -111,9 +111,11 @@ module Const = struct
     | F32_const f -> Format.fprintf fmt "f32.const %a" Shared.f32 f
     | F64_const f -> Format.fprintf fmt "f64.const %a" Shared.f64 f
     | I_binop (n, op) -> Format.fprintf fmt "i%a.%a" Shared.nn n ibinop op
-    | Global_get id -> Format.fprintf fmt "global.get %a" Simplified_indice.indice id
+    | Global_get id ->
+      Format.fprintf fmt "global.get %a" Simplified_indice.indice id
     | Ref_null t -> Format.fprintf fmt "ref.null %a" Shared.ref_type t
-    | Ref_func fid -> Format.fprintf fmt "ref.func %a" Simplified_indice.indice fid
+    | Ref_func fid ->
+      Format.fprintf fmt "ref.func %a" Simplified_indice.indice fid
 
   let expr fmt instrs =
     Format.pp_print_list
@@ -409,8 +411,8 @@ module Global = struct
   let elemexpr fmt e = Format.fprintf fmt "(item %a)" expr e
 
   let elem fmt (e : elem) =
-    Format.fprintf fmt "@[<hov 2>(elem %a %a %a %a)@]" id_opt e.id elem_mode e.mode
-      ref_type e.type_
+    Format.fprintf fmt "@[<hov 2>(elem %a %a %a %a)@]" id_opt e.id elem_mode
+      e.mode ref_type e.type_
       (Format.pp_print_list
          ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
          elemexpr )
@@ -500,17 +502,18 @@ module Global = struct
       Format.fprintf fmt "(assert_malformed@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
         module_ m msg
     | Assert_malformed_quote (ls, msg) ->
-      Format.fprintf fmt "(assert_malformed_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-        strings ls msg
+      Format.fprintf fmt
+        "(assert_malformed_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" strings ls msg
     | Assert_invalid_quote (ls, msg) ->
       Format.fprintf fmt "(assert_invalid_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
         strings ls msg
     | Assert_malformed_binary (ls, msg) ->
-      Format.fprintf fmt "(assert_malformed_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-        strings ls msg
+      Format.fprintf fmt
+        "(assert_malformed_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" strings ls
+        msg
     | Assert_invalid_binary (ls, msg) ->
-      Format.fprintf fmt "(assert_invalid_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-        strings ls msg
+      Format.fprintf fmt
+        "(assert_invalid_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" strings ls msg
 
   let cmd fmt = function
     | Module m -> module_ fmt m

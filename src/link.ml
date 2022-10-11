@@ -171,7 +171,8 @@ let module_ _registered_modules modules module_indice =
     end
     | [ Ref_func ind ] -> Const_host (indice_to_int ind)
     | e ->
-      failwith @@ Format.asprintf "invalid constant expression: `%a`" Pp.Input.expr e
+      failwith
+      @@ Format.asprintf "invalid constant expression: `%a`" Pp.Input.expr e
   in
 
   let globals =
@@ -204,12 +205,8 @@ let module_ _registered_modules modules module_indice =
 
   let { elems = elements; _ } =
     List.fold_left
-      (fun ( { elems
-             ; curr_func
-             ; curr_global
-             ; curr_memory
-             ; curr_table
-             } as acc ) field ->
+      (fun ({ elems; curr_func; curr_global; curr_memory; curr_table } as acc)
+           field ->
         match field with
         | MFunc _ -> { acc with curr_func = curr_func + 1 }
         | MExport { desc; name } ->

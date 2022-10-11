@@ -1,4 +1,5 @@
 open Value
+
 type 'env t = 'env Value.t list
 
 exception Empty
@@ -23,7 +24,7 @@ let push_f64 s f = push s (F64 f)
 
 let push_as_externref s ty v = push s (Ref (Externref (Some (E (ty, v)))))
 
-let pp fmt (s:'env t) =
+let pp fmt (s : 'env t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Value.pp fmt s
@@ -126,13 +127,11 @@ let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
   try
     let hd, tl = pop s in
     match hd with
-    | Ref (Externref Some (E (ety, hd))) -> begin
-        match Value.Extern_ref.eq ty ety with
-        | None ->
-          failwith "invalid type (externref)"
-        | Some Eq ->
-          (hd, tl)
-      end
+    | Ref (Externref (Some (E (ety, hd)))) -> begin
+      match Value.Extern_ref.eq ty ety with
+      | None -> failwith "invalid type (externref)"
+      | Some Eq -> (hd, tl)
+    end
     | _ -> failwith "invalid type (expected extern ref)"
   with Empty -> failwith "invalid type (expected extern ref)"
 
@@ -149,7 +148,7 @@ let pop_is_null s =
     let hd, tl = pop s in
     match hd with
     | Ref (Externref None | Funcref None) -> (true, tl)
-    | Ref (Externref Some _ | Funcref Some _) -> (false, tl)
+    | Ref (Externref (Some _) | Funcref (Some _)) -> (false, tl)
     | _ -> failwith "invalid type (expected const_null)"
   with Empty -> failwith "invalid type (expected const_null)"
 

@@ -89,7 +89,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shr S -> shr_s n1 n2
       | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2)
+      | Rotr -> rotr n1 n2 )
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
@@ -119,7 +119,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Shr S -> shr_s n1 n2
       | Shr U -> shr_u n1 n2
       | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2)
+      | Rotr -> rotr n1 n2 )
 
 let exec_fbinop stack nn (op : Types.fbinop) =
   match nn with
@@ -134,7 +134,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2)
+      | Copysign -> copy_sign f1 f2 )
   | S64 ->
     let (f1, f2), stack = Stack.pop2_f64 stack in
     Stack.push_f64 stack
@@ -146,7 +146,7 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | Div -> div f1 f2
       | Min -> min f1 f2
       | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2)
+      | Copysign -> copy_sign f1 f2 )
 
 let exec_itestop stack nn op =
   match nn with
@@ -243,7 +243,7 @@ let init_local (_id, t) =
   | Num_type F64 -> Const_F64 Float64.zero
   | Ref_type rt -> Const_null rt
 
-let rec exec_instr env module_indice locals stack (instr:simplified_instr) =
+let rec exec_instr env module_indice locals stack (instr : simplified_instr) =
   Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
   Debug.debug fmt "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
@@ -891,7 +891,7 @@ let rec exec_instr env module_indice locals stack (instr:simplified_instr) =
     let res = exec_func env module_indice func (List.rev args) in
     res @ stack
 
-and exec_expr env module_indice locals stack (e:simplified_expr) is_loop bt =
+and exec_expr env module_indice locals stack (e : simplified_expr) is_loop bt =
   let rt =
     Option.fold ~none:Int.max_int
       ~some:(fun bt -> List.length (snd @@ get_bt bt))

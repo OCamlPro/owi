@@ -217,9 +217,11 @@ type ('indice, 'bt) instr' =
 and ('indice, 'bt) expr' = ('indice, 'bt) instr' list
 
 type instr = (indice, indice block_type) instr'
+
 type simplified_instr = (simplified_indice, simplified_indice block_type) instr'
 
 type expr = (indice, indice block_type) expr'
+
 type simplified_expr = (simplified_indice, simplified_indice block_type) expr'
 
 type result_expr = (simplified_indice, func_type) expr'
@@ -241,13 +243,13 @@ type table = string option * table_type
 
 type mem = string option * mem_type
 
-type ('expr) global' =
+type 'expr global' =
   { type_ : global_type
   ; init : 'expr
   ; id : string option
   }
 
-type global = ((indice, indice block_type) expr') global'
+type global = (indice, indice block_type) expr' global'
 
 type ('indice, 'expr) elem_mode =
   | Elem_passive

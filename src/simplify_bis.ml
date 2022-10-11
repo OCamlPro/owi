@@ -95,7 +95,7 @@ type assigned_module =
 
 type result =
   { id : string option
-  ; global : ((Const.expr) global', global_import) runtime named
+  ; global : (Const.expr global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
   ; func : ((index, func_type) func', func_type) runtime named
@@ -147,11 +147,10 @@ module P = struct
 
   let result fmt (result : result) : unit =
     fprintf fmt
-      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global %a)@]@ @[<hov 2>(export \
-       func %a)@]@@ )@]"
-      id result.id funcs result.func
-      globals result.global
-      (lst export) result.exports.func
+      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global \
+       %a)@]@ @[<hov 2>(export func %a)@]@@ )@]"
+      id result.id funcs result.func globals result.global (lst export)
+      result.exports.func
 end
 
 module Group : sig
@@ -683,7 +682,7 @@ module Rewrite_indices = struct
     | Bt_raw (_, func_type) -> func_type
 
   let rewrite_global (module_ : assigned_module) (global : global) :
-      (Const.expr) global' =
+      Const.expr global' =
     { global with init = rewrite_const_expr module_ global.init }
 
   let rewrite_elem (module_ : assigned_module) (elem : known_elem) :
@@ -752,7 +751,8 @@ module Rewrite_indices = struct
       let { named; values } =
         rewrite_named
           (rewrite_runtime (rewrite_global module_) Fun.id)
-          module_.global in
+          module_.global
+      in
       { named; values = List.rev values }
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
