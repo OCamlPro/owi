@@ -208,6 +208,7 @@ type exports =
   ; memories : memory StringMap.t
   ; tables : table StringMap.t
   ; functions : func StringMap.t
+  ; defined_names : StringSet.t
   }
 
 type module_to_run =
@@ -279,14 +280,17 @@ let load_from_module ls f (import : _ S.imp) =
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
       Debug.debugerr "unknown import %s" import.name;
-      failwith "unknown import"
+      if StringSet.mem import.name exports.defined_names then
+        failwith "incompatible import type"
+      else
+        failwith "unknown import"
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   let global = load_from_module ls (fun (e : exports) -> e.globals) import in
-  (match fst import.desc, global.mut with
-   | Var, Const | Const, Var -> failwith "incompatible import type"
-   | Const, Const | Var, Var -> ());
+  ( match (fst import.desc, global.mut) with
+  | Var, Const | Const, Var -> failwith "incompatible import type"
+  | Const, Const | Var, Var -> () );
   if snd import.desc <> global.typ then begin
     failwith "incompatible import type"
   end;
@@ -486,8 +490,8 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let globals, names = fill_exports Env.get_global exports.global names in
   let memories, names = fill_exports Env.get_memory exports.mem names in
   let tables, names = fill_exports Env.get_table exports.table names in
-  let functions, _names = fill_exports Env.get_func exports.func names in
-  { globals; memories; tables; functions }
+  let functions, names = fill_exports Env.get_func exports.func names in
+  { globals; memories; tables; functions; defined_names = names }
 
 let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
@@ -532,11 +536,17 @@ let link_extern_module (name : string) (module_ : extern_module)
     StringMap.map Value.Func.extern
       (StringMap.of_seq (List.to_seq module_.functions))
   in
+  let defined_names =
+    StringMap.fold
+      (fun name _ set -> StringSet.add name set)
+      functions StringSet.empty
+  in
   let exports =
     { functions
     ; globals = StringMap.empty
     ; memories = StringMap.empty
     ; tables = StringMap.empty
+    ; defined_names
     }
   in
   { ls with by_name = StringMap.add name exports ls.by_name }
