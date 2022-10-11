@@ -368,16 +368,20 @@ let eval_tables ls env tables =
       env )
     tables env
 
-let func_types_are_compatible _t1 _t2 =
-  (* TODO *)
-  true
+let func_types_are_compatible a b =
+  (* TODO: copied from Simplify_bis.equal_func_types => should factorize *)
+  let remove_param (pt, rt) =
+    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
+    (pt, rt)
+  in
+  remove_param a = remove_param b
 
 let load_func (ls : link_state) (import : func_type S.imp) : func =
   let type_ : func_type = import.desc in
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
-  else failwith "incompatible function import "
+  else failwith "incompatible import type"
 
 let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
     : func =
