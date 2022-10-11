@@ -763,7 +763,21 @@ module Rewrite_indices = struct
            (rewrite_import (rewrite_block_type module_)) )
         module_.func
     in
-    let start = List.map (find "unknown func" module_.func) module_.start in
+    let start =
+      List.map
+        (fun start ->
+          let idx = find "unknown func" func start in
+          let va = List.find (fun { index; _ } -> index = idx) func.values in
+          let param_typ, result_typ =
+            match va.value with
+            | Local func -> func.type_f
+            | Imported imported -> imported.desc
+          in
+          match (param_typ, result_typ) with
+          | [], [] -> idx
+          | _, _ -> failwith "start function" )
+        module_.start
+    in
     { id = module_.id
     ; mem = module_.mem
     ; table = module_.table
