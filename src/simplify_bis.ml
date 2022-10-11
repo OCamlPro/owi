@@ -420,10 +420,10 @@ end = struct
     in
     (* TODO more efficient version of that *)
     match List.find_opt (fun v -> v.index = id) types.values with
-    | None -> failwith "Unbound type"
+    | None -> failwith "unknown type"
     | Some func_type' ->
       if not (equal_func_types func_type func_type'.value) then
-        failwith "inline func type"
+        failwith "inline function type"
 
   let run (module_ : grouped_module) : assigned_module =
     let type_ = assign_types module_ in
