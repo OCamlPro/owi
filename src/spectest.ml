@@ -78,22 +78,22 @@ let m =
             }
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, Func_ref))
         ; MGlobal
-            { type_ = (Var, Num_type I32)
+            { type_ = (Const, Num_type I32)
             ; init = [ I32_const 666l ]
             ; id = Some "global_i32"
             }
         ; MGlobal
-            { type_ = (Var, Num_type I64)
+            { type_ = (Const, Num_type I64)
             ; init = [ I64_const 666L ]
             ; id = Some "global_i64"
             }
         ; MGlobal
-            { type_ = (Var, Num_type F32)
+            { type_ = (Const, Num_type F32)
             ; init = [ F32_const Float32.zero ]
             ; id = Some "global_f32"
             }
         ; MGlobal
-            { type_ = (Var, Num_type F64)
+            { type_ = (Const, Num_type F64)
             ; init = [ F64_const Float64.zero ]
             ; id = Some "global_f64"
             }
