@@ -538,7 +538,6 @@ module Rewrite_indices = struct
             match type_use with
             | None -> ()
             | Some ind ->
-              (* TODO: move this to check ? *)
               (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
               let { value = t'; _ } = get "unknown type" module_.type_ ind in
               let ok = equal_func_types t t' in
