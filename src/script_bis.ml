@@ -279,7 +279,7 @@ let rec run ~with_exhaustion script =
               | Error got -> got
             with Failure got -> got
           in
-          check_error ~expected ~got;
+          check_error' ~expected ~got;
           link_state
         | Assert (Assert_malformed _) -> failwith "TODO assert_malformed"
         | Assert (Assert_return (a, res)) ->

@@ -15,7 +15,7 @@ module Memory = struct
     | Memory of
         { id : mem_id
         ; label : string option
-        ; limits : mem_type (* TODO: min is useless: part of data, remove *)
+        ; mutable limits : mem_type
         ; mutable data : mem
         }
 
@@ -29,7 +29,10 @@ module Memory = struct
     let data = Bytes.make (Types.page_size * typ.min) '\x00' in
     Memory { id = fresh (); label; limits = typ; data }
 
-  let update_memory (Memory mem) data = mem.data <- data
+  let update_memory (Memory mem) data =
+    let limits = { mem.limits with min = max mem.limits.min (Bytes.length data / page_size) } in
+    mem.limits <- limits;
+    mem.data <- data
 end
 
 type memory = Memory.t
@@ -282,8 +285,7 @@ let load_from_module ls f (import : _ S.imp) =
       Debug.debugerr "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
         failwith "incompatible import type"
-      else
-        failwith "unknown import"
+      else failwith "unknown import"
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
@@ -324,21 +326,32 @@ let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
   in
   { data with mode }
 
-let limit_is_included l ~into =
-  into.min <= l.min
-  &&
-  match into.max with
-  | None -> true
-  | Some into_max -> (
-    match l.max with None -> false | Some l_max -> into_max >= l_max )
+let limit_is_included ~import ~imported =
+  imported.min >= import.min &&
+  match imported.max, import.max with
+  | _, None -> true
+  | None, Some _ -> false
+  | Some i, Some j -> i <= j
 
 let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
-  let limits : mem_type = import.desc in
-  let (Memory { limits = limits'; _ } as mem) =
+  let (Memory { limits = imported_limit; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
   in
-  if limit_is_included limits' ~into:limits then mem
-  else failwith "incompatible memory limits"
+  if limit_is_included ~import:import.desc ~imported:imported_limit then mem
+  else
+    let () =
+      Format.eprintf "%i %i %a %a@." import.desc.min imported_limit.min
+        (Format.pp_print_option Format.pp_print_int)
+        import.desc.max
+        (Format.pp_print_option Format.pp_print_int)
+        imported_limit.max
+    in
+    failwith
+      (Format.asprintf "incompatible import type for memory %s %s expected %a got %a"
+         import.module_ import.name
+         Pp.Input.mem_type import.desc
+         Pp.Input.mem_type imported_limit
+      )
 
 let eval_memory ls (memory : (mem, S.mem_import) S.runtime) : Memory.t =
   match memory with
@@ -353,8 +366,8 @@ let eval_memories ls env memories =
       env )
     memories env
 
-let table_types_are_compatible (l1, (t1 : ref_type)) (l2, t2) =
-  limit_is_included l2 ~into:l1 && t1 = t2
+let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
+  limit_is_included ~import ~imported && t1 = t2
 
 let load_table (ls : link_state) (import : S.table_import S.imp) : table =
   let type_ : table_type = import.desc in
@@ -362,7 +375,12 @@ let load_table (ls : link_state) (import : S.table_import S.imp) : table =
     load_from_module ls (fun (e : exports) -> e.tables) import
   in
   if table_types_are_compatible type_ (t.limits, t.type_) then table
-  else failwith "incompatible import type"
+  else failwith
+      (Format.asprintf "incompatible import type for table %s %s expected %a got %a"
+         import.module_ import.name
+         Pp.Input.table_type type_
+         Pp.Input.table_type (t.limits, t.type_)
+      )
 
 let eval_table ls (table : (_, S.table_import) S.runtime) : table =
   match table with
