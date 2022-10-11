@@ -47,7 +47,7 @@ module Fields = struct
   type 'a t = 'a named
 
   let fold f v acc =
-    List.fold_left (fun acc v -> f v.index v.value acc) acc (List.rev v.values)
+    List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
 end
 
 type 'a exports =
@@ -734,9 +734,11 @@ module Rewrite_indices = struct
 
   let run (module_ : assigned_module) : result =
     let global =
-      rewrite_named
-        (rewrite_runtime (rewrite_global module_) Fun.id)
-        module_.global
+      let { named; values } =
+        rewrite_named
+          (rewrite_runtime (rewrite_global module_) Fun.id)
+          module_.global in
+      { named; values = List.rev values }
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
     let data = rewrite_named (rewrite_data module_) module_.data in
