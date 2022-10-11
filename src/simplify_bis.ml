@@ -639,9 +639,15 @@ module Rewrite_indices = struct
       | Table_get id -> Table_get (find_table id)
       | Table_set id -> Table_set (find_table id)
       | Table_grow id -> Table_grow (find_table id)
-      | Table_init (i, i') -> Table_init (find_table i, find_elem i')
+      | Table_init (i, i') ->
+        let table = find_table i in
+        let elem = find_elem i' in
+        Table_init (table, elem)
       | Table_fill id -> Table_fill (find_table id)
-      | Table_copy (i, i') -> Table_copy (find_table i, find_table i')
+      | Table_copy (i, i') ->
+        let table = find_table i in
+        let table' = find_table i' in
+        Table_copy (table, table')
       | Memory_init id ->
         if List.length module_.mem.values < 1 then failwith "unknown memory";
         Memory_init (find_data id)
