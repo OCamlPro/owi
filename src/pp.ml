@@ -212,7 +212,7 @@ module Make_Expr (Arg : Arg) = struct
     | Lt s -> Format.fprintf fmt "lt_%a" sx s
     | Gt s -> Format.fprintf fmt "gt_%a" sx s
     | Le s -> Format.fprintf fmt "le_%a" sx s
-    | Ge s -> Format.fprintf fmt "gs_%a" sx s
+    | Ge s -> Format.fprintf fmt "ge_%a" sx s
 
   let frelop fmt = function
     | Eq -> Format.fprintf fmt "eq"
