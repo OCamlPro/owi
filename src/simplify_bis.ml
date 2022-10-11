@@ -119,6 +119,15 @@ module P = struct
     end
     | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
+  let global fmt (func : (_ global', _) runtime) =
+    match func with
+    | Local func -> begin
+      match func.id with
+      | None -> Format.fprintf fmt "local"
+      | Some id -> Format.fprintf fmt "$%s" id
+    end
+    | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
+
   let indexed f fmt indexed =
     let (I i) = indexed.index in
     Format.fprintf fmt "%i: %a" i f indexed.value
@@ -130,14 +139,19 @@ module P = struct
 
   let funcs fmt (funcs : _ runtime named) = lst (indexed func) fmt funcs.values
 
+  let globals fmt (globals : _ runtime named) =
+    lst (indexed global) fmt globals.values
+
   let export fmt (export : index export) =
     Format.fprintf fmt "%s: %a" export.name Pp.Simplified_bis.indice export.id
 
   let result fmt (result : result) : unit =
     fprintf fmt
-      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(export \
+      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global %a)@]@ @[<hov 2>(export \
        func %a)@]@@ )@]"
-      id result.id funcs result.func (lst export) result.exports.func
+      id result.id funcs result.func
+      globals result.global
+      (lst export) result.exports.func
 end
 
 module Group : sig
