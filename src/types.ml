@@ -241,13 +241,13 @@ type table = string option * table_type
 
 type mem = string option * mem_type
 
-type ('indice, 'expr) global' =
+type ('expr) global' =
   { type_ : global_type
   ; init : 'expr
   ; id : string option
   }
 
-type global = (indice, (indice, indice block_type) expr') global'
+type global = ((indice, indice block_type) expr') global'
 
 type ('indice, 'expr) elem_mode =
   | Elem_passive

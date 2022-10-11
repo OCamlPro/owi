@@ -95,7 +95,7 @@ type assigned_module =
 
 type result =
   { id : string option
-  ; global : ((index, Const.expr) global', global_import) runtime named
+  ; global : ((Const.expr) global', global_import) runtime named
   ; table : (table, table_import) runtime named
   ; mem : (mem, mem_import) runtime named
   ; func : ((index, func_type) func', func_type) runtime named
@@ -656,7 +656,7 @@ module Rewrite_indices = struct
     | Bt_raw (_, func_type) -> func_type
 
   let rewrite_global (module_ : assigned_module) (global : global) :
-      (index, Const.expr) global' =
+      (Const.expr) global' =
     { global with init = rewrite_const_expr module_ global.init }
 
   let rewrite_elem (module_ : assigned_module) (elem : known_elem) :

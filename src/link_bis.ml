@@ -279,7 +279,7 @@ let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   | Const, _ -> load_from_module ls (fun (e : exports) -> e.globals) import
 
 let eval_global ls env
-    (global : ((S.index, Const.expr) global', S.global_import) S.runtime) :
+    (global : ((Const.expr) global', S.global_import) S.runtime) :
     global =
   match global with
   | S.Local global ->
