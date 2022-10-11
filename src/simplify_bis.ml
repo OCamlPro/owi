@@ -220,6 +220,13 @@ end = struct
     | None -> Curr (I (pred curr))
     | Some id -> Indice id
 
+  let check_limit { min; max } =
+    Option.iter
+      (fun max ->
+        if min > max then
+          failwith "size minimum must not be greater than maximum" )
+      max
+
   let group (module_ : Types.module_) : grouped_module =
     let add ((fields : grouped_module), curr) field =
       match field with
@@ -236,7 +243,10 @@ end = struct
               }
           }
         , curr )
-      | MTable table -> add_table (Local table) fields curr
+      | MTable table ->
+        let _, (limits, _) = table in
+        check_limit limits;
+        add_table (Local table) fields curr
       | MImport ({ desc = Import_table (a, b); _ } as import) ->
         add_table (Imported (imp import (a, b))) fields curr
       | MExport { name; desc = Export_table id } ->
@@ -248,7 +258,17 @@ end = struct
               }
           }
         , curr )
-      | MMem mem -> add_mem (Local mem) fields curr
+      | MMem mem ->
+        let _, limits = mem in
+        if limits.min > 65536 then
+          failwith "memory size must be at most 65536 pages (4GiB)";
+        Option.iter
+          (fun max ->
+            if max > 65536 then
+              failwith "memory size must be at most 65536 pages (4GiB)" )
+          limits.max;
+        check_limit limits;
+        add_mem (Local mem) fields curr
       | MImport ({ desc = Import_mem (a, b); _ } as import) ->
         add_mem (Imported (imp import (a, b))) fields curr
       | MExport { name; desc = Export_mem id } ->
