@@ -666,13 +666,18 @@ module Rewrite_indices = struct
         | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
         if List.length module_.mem.values < 1 then failwith "unknown memory 0";
         i
+      | Select typ as i -> begin
+        match typ with
+        | None | Some [ _ ] -> i
+        | Some [] | Some (_ :: _ :: _) -> failwith "invalid result arity"
+      end
       | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
         | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
         | I64_extend_i32 _ | I64_extend32_s | F32_demote_f64 | I_extend8_s _
         | I_extend16_s _ | F64_promote_f32 | F_convert_i _ | I_trunc_f _
         | I_trunc_sat_f _ | Ref_is_null | F_binop _ | F32_const _ | F64_const _
-        | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
-        | Return ) as i ->
+        | I32_const _ | I64_const _ | Unreachable | Drop | Nop | Return ) as i
+        ->
         i
     and expr (e : expr) (loop_count, block_ids) : (index, func_type) expr' =
       List.map (body (loop_count, block_ids)) e

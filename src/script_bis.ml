@@ -15,7 +15,6 @@ end
 
 let ignore_tmp =
   [ "type mismatch"
-  ; "invalid result arity"
   ; "undeclared function reference"
   ; "alignment must not be larger than natural"
     (*
