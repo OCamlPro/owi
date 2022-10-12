@@ -339,13 +339,6 @@ let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
   in
   if limit_is_included ~import:import.desc ~imported:imported_limit then mem
   else
-    let () =
-      Format.eprintf "%i %i %a %a@." import.desc.min imported_limit.min
-        (Format.pp_print_option Format.pp_print_int)
-        import.desc.max
-        (Format.pp_print_option Format.pp_print_int)
-        imported_limit.max
-    in
     failwith
       (Format.asprintf "incompatible import type for memory %s %s expected %a got %a"
          import.module_ import.name
