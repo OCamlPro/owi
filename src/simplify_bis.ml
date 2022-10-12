@@ -48,6 +48,8 @@ module Fields = struct
 
   let fold f v acc =
     List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
+  let iter f v =
+    List.iter (fun v -> f v.index v.value) v.values
 end
 
 type 'a exports =

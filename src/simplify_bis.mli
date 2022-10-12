@@ -36,6 +36,7 @@ module Fields : sig
   type 'a t = 'a named
 
   val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+  val iter : (index -> 'a -> unit) -> 'a t -> unit
 end
 
 open Types

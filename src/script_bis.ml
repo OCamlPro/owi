@@ -178,6 +178,15 @@ let pp_name ppf (name, indice) =
   | Some n -> Format.fprintf ppf "%s" n
   | None -> Format.fprintf ppf "%d" indice
 
+let typecheck m =
+  try
+    Typecheck.typecheck_module m
+  with Failure s as exn ->
+    if s = "TODO" then
+      ()
+    else
+      raise exn
+
 let rec run ~with_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
 
@@ -190,6 +199,8 @@ let rec run ~with_exhaustion script =
           incr curr_module;
           Debug.debugerr "simplifying module %a... " pp_name name;
           let m = Simplify.simplify m in
+          Debug.debugerr "typechecking module... ";
+          typecheck m;
           Debug.debugerr "linking module... ";
           let module_to_run, link_state = Link.link_module m link_state in
           Debug.debugerr "eval module... !@\n";
@@ -201,6 +212,8 @@ let rec run ~with_exhaustion script =
           incr curr_module;
           Debug.debugerr "simplifying module %a... " pp_name name;
           let m = Simplify.simplify m in
+          Debug.debugerr "typechecking module... ";
+          typecheck m;
           Debug.debugerr "linking module... ";
           let module_to_run, _ignored_link_state =
             Link.link_module m link_state
@@ -249,6 +262,7 @@ let rec run ~with_exhaustion script =
               match Check.module_ m with
               | Ok () ->
                 let m = Simplify_bis.simplify m in
+                typecheck m;
                 let _module_to_run, _link_state =
                   Link.link_module m link_state
                 in
@@ -272,6 +286,7 @@ let rec run ~with_exhaustion script =
               match Check.module_ m with
               | Ok () ->
                 let m = Simplify_bis.simplify m in
+                typecheck m;
                 let _module_to_run, _link_state =
                   Link.link_module m link_state
                 in
