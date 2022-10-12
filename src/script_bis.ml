@@ -38,7 +38,6 @@ let ignore_tmp =
                 failwith "alignment must not be larger than natural";
               i
              *)
-  ; "duplicate local"
   ]
 
 let check_error' ~expected ~got =

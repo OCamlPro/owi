@@ -578,8 +578,11 @@ module Rewrite_indices = struct
             match name with
             | None -> (locals, next_free_index + 1)
             | Some name ->
-              ( StringMap.add name (I next_free_index) locals
-              , next_free_index + 1 ) )
+              if StringMap.mem name locals then
+                failwith (Printf.sprintf "duplicate local %s" name)
+              else
+                ( StringMap.add name (I next_free_index) locals
+                , next_free_index + 1 ) )
           (StringMap.empty, 0) locals
       in
       let find_local id =
