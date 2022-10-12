@@ -48,8 +48,8 @@ module Fields = struct
 
   let fold f v acc =
     List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
-  let iter f v =
-    List.iter (fun v -> f v.index v.value) v.values
+
+  let iter f v = List.iter (fun v -> f v.index v.value) v.values
 end
 
 type 'a exports =
@@ -423,12 +423,15 @@ end = struct
     | Local v -> get_name v
     | Imported { assigned_name; _ } -> assigned_name
 
-  let name ~(get_name : 'a -> string option) (values : 'a indexed list) :
+  let name kind ~(get_name : 'a -> string option) (values : 'a indexed list) :
       'a named =
     let assign_one (named : index StringMap.t) (elt : _ indexed) =
       match get_name elt.value with
       | None -> named
-      | Some name -> StringMap.add name elt.index named
+      | Some name ->
+        if StringMap.mem name named then
+          failwith (Printf.sprintf "duplicate %s %s" kind name)
+        else StringMap.add name elt.index named
     in
     let named = List.fold_left assign_one StringMap.empty values in
     { values; named }
@@ -450,30 +453,30 @@ end = struct
   let run (module_ : grouped_module) : assigned_module =
     let type_ = assign_types module_ in
     let global =
-      name
+      name "global"
         ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
         module_.global
     in
     let table =
-      name
+      name "table"
         ~get_name:(get_runtime_name (fun ((id, _) : Types.table) -> id))
         module_.table
     in
     let mem =
-      name
+      name "mem"
         ~get_name:(get_runtime_name (fun ((id, _) : Types.mem) -> id))
         module_.mem
     in
     let func =
-      name
+      name "func"
         ~get_name:(get_runtime_name (fun ({ id; _ } : _ Types.func) -> id))
         module_.func
     in
     let elem =
-      name ~get_name:(fun (elem : known_elem) -> elem.id) module_.elem
+      name "elem" ~get_name:(fun (elem : known_elem) -> elem.id) module_.elem
     in
     let data =
-      name ~get_name:(fun (data : known_data) -> data.id) module_.data
+      name "data" ~get_name:(fun (data : known_data) -> data.id) module_.data
     in
     List.iter (check_type_id type_) module_.type_checks;
     { id = module_.id
@@ -495,11 +498,11 @@ module Rewrite_indices = struct
     | Raw i ->
       (* TODO change indexed strucure for that to be more efficient *)
       if not (List.exists (fun { index; _ } -> index = I i) named.values) then
-        failwith msg;
+        failwith (Printf.sprintf "%s %i" msg i);
       I i
     | Symbolic name -> (
       match StringMap.find_opt name named.named with
-      | None -> failwith msg
+      | None -> failwith (Printf.sprintf "%s %s" msg name)
       | Some i -> i )
 
   let get msg (named : 'a named) (indice : indice) : 'a indexed =
@@ -651,14 +654,14 @@ module Rewrite_indices = struct
         let table' = find_table i' in
         Table_copy (table, table')
       | Memory_init id ->
-        if List.length module_.mem.values < 1 then failwith "unknown memory";
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
         Memory_init (find_data id)
       | Data_drop id -> Data_drop (find_data id)
       | Elem_drop id -> Elem_drop (find_elem id)
       | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
         | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
         | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
-        if List.length module_.mem.values < 1 then failwith "unknown memory";
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
         i
       | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
         | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
@@ -691,7 +694,7 @@ module Rewrite_indices = struct
       | F32_const v -> F32_const v
       | F64_const v -> F64_const v
       | Ref_null v -> Ref_null v
-      | Ref_func f -> Ref_func (find "unknown func" module_.func f)
+      | Ref_func f -> Ref_func (find "unknown function" module_.func f)
       | Global_get id -> begin
         let idx, mut = find_global module_ id in
         match mut with
@@ -749,9 +752,9 @@ module Rewrite_indices = struct
   let rewrite_exports (module_ : assigned_module) (exports : opt_ind exports) :
       index exports =
     { global = rewrite_export "unknown global" module_.global exports.global
-    ; mem = rewrite_export "unknown mem" module_.mem exports.mem
+    ; mem = rewrite_export "unknown memory" module_.mem exports.mem
     ; table = rewrite_export "unknown table" module_.table exports.table
-    ; func = rewrite_export "unknown func" module_.func exports.func
+    ; func = rewrite_export "unknown function" module_.func exports.func
     }
 
   let rewrite_func (module_ : assigned_module) (func : indice func) :
@@ -794,7 +797,7 @@ module Rewrite_indices = struct
     let start =
       List.map
         (fun start ->
-          let idx = find "unknown func" func start in
+          let idx = find "unknown function" func start in
           let va = List.find (fun { index; _ } -> index = idx) func.values in
           let param_typ, result_typ =
             match va.value with
