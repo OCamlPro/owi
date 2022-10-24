@@ -124,7 +124,7 @@ type indice =
   | Raw of int
   | Symbolic of string
 
-type simplified_indice = I of int [@@unboxed]
+type simplified_indice = int
 
 type memarg =
   { offset : int

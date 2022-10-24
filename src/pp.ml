@@ -70,29 +70,13 @@ module Symbolic_indice :
 end
 
 module Simplified_indice :
-  Arg
-    with type indice = Types.simplified_indice
-     and type bt = simplified_indice block_type = struct
-  type indice = simplified_indice
-
-  type bt = simplified_indice block_type
-
-  let indice fmt = function I u -> Format.pp_print_int fmt u
-
-  let bt fmt = function
-    | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
-    | Bt_raw (_type_use, (l, r)) ->
-      Format.fprintf fmt "%a %a" Shared.param_type l Shared.result_type r
-end
-
-module Simplified_bis_indice :
   Arg with type indice = Types.simplified_indice and type bt = func_type =
 struct
   type indice = simplified_indice
 
   type bt = func_type
 
-  let indice fmt = function I u -> Format.pp_print_int fmt u
+  let indice fmt u = Format.pp_print_int fmt u
 
   let bt fmt (l, r) =
     Format.fprintf fmt "%a %a" Shared.param_type l Shared.result_type r
@@ -537,11 +521,6 @@ end
 
 module Simplified = struct
   include Make_Expr (Simplified_indice)
-  include Global
-end
-
-module Simplified_bis = struct
-  include Make_Expr (Simplified_bis_indice)
 end
 
 let pp_id fmt = function

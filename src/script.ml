@@ -12,7 +12,6 @@ end
 
 let ignore_tmp =
   [ "type mismatch"
-  ; "undeclared function reference"
   ; "alignment must not be larger than natural"
     (*
             | I_load8 (_nn, _sx, { align; _ }) as i ->

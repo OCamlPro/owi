@@ -1,23 +1,12 @@
 open Types
-module S = Simplify
 module Env = Link.Env
 module IMap = Link.IMap
 
-type instr = (S.index, func_type) instr'
-
-type expr = (S.index, func_type) expr'
-
-type env = Link.Env.t
-
-type value = Env.t' Value.t
-
-type stack = Env.t' Stack.t
-
-exception Return of stack
+exception Return of Env.t' Stack.t
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
-let exec_iunop stack nn op : value list =
+let exec_iunop stack nn op =
   match nn with
   | S32 ->
     let n, stack = Stack.pop_i32 stack in
@@ -232,13 +221,9 @@ let exec_frelop stack nn (op : Types.frelop) =
     in
     Stack.push_bool stack res
 
-exception Branch of stack * int
+exception Branch of Env.t' Stack.t * int
 
-let fmt = Format.std_formatter
-
-let indice_to_int = function I i -> i
-
-let init_local (_id, t) : value =
+let init_local (_id, t) : Env.t' Value.t =
   match t with
   | Num_type I32 -> I32 Int32.zero
   | Num_type I64 -> I64 Int64.zero
@@ -247,40 +232,39 @@ let init_local (_id, t) : value =
   | Ref_type rt -> Value.ref_null rt
 
 (* TODO move to module Env *)
-let mem_0 = I 0
+let mem_0 = 0
 
-let get_raw_memory (env : env) idx =
+let get_raw_memory (env : Link.Env.t) idx =
   match IMap.find_opt idx env.memories with
   | None -> failwith "missing memory"
   | Some m -> m
 
-let get_memory (env : env) idx =
+let get_memory (env : Link.Env.t) idx =
   let (Memory mem) = get_raw_memory env idx in
   (mem.data, mem.limits.max)
 
-let get_func (env : env) idx =
+let get_func (env : Link.Env.t) idx =
   match IMap.find_opt idx env.functions with
   | None -> failwith "missing functions"
   | Some f -> f
 
-let get_data (env : env) idx =
+let get_data (env : Link.Env.t) idx =
   match IMap.find_opt idx env.data with
   | None -> failwith "missing data"
   | Some data -> data
 
-let get_elem (env : env) idx =
+let get_elem (env : Link.Env.t) idx =
   match IMap.find_opt idx env.elem with
   | None -> failwith "missing elem"
   | Some elem -> elem
 
-let get_table (env : env) idx =
+let get_table (env : Link.Env.t) idx =
   match IMap.find_opt idx env.tables with
   | None -> failwith "missing table"
   | Some table -> table
 
 let exec_extern_func stack (f : Value.extern_func) =
-  let pop_arg (type ty) (stack : stack) (arg : ty Value.Func.telt) : ty * stack
-      =
+  let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
     match arg with
     | I32 -> Stack.pop_i32 stack
     | I64 -> Stack.pop_i64 stack
@@ -288,7 +272,9 @@ let exec_extern_func stack (f : Value.extern_func) =
     | F64 -> Stack.pop_f64 stack
     | Externref ety -> Stack.pop_as_externref ety stack
   in
-  let rec apply : type f r. stack -> (f, r) Value.Func.atype -> f -> r * stack =
+  let rec apply :
+      type f r.
+      Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r * Env.t' Stack.t =
    fun stack ty f ->
     match ty with
     | Value.Func.Arg (arg, args) ->
@@ -301,8 +287,7 @@ let exec_extern_func stack (f : Value.extern_func) =
   in
   let (Extern_func (Func (atype, rtype), func)) = f in
   let r, stack = apply stack atype func in
-  let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) (stack : stack) :
-      stack =
+  let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) stack =
     match arg with
     | I32 -> Stack.push_i32 stack v
     | I64 -> Stack.push_i64 stack v
@@ -319,10 +304,10 @@ let exec_extern_func stack (f : Value.extern_func) =
   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
-let rec exec_instr (env : env) (locals : value array) (stack : stack)
-    (instr : instr) =
-  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
-  Debug.debug fmt "running instr: %a@." Pp.Simplified_bis.instr instr;
+let rec exec_instr env locals stack instr =
+  Debug.debug Format.std_formatter "stack        : [ %a ]@." Stack.pp stack;
+  Debug.debug Format.std_formatter "running instr: %a@." Pp.Simplified.instr
+    instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack
@@ -535,10 +520,10 @@ let rec exec_instr (env : env) (locals : value array) (stack : stack)
     Stack.push_bool stack b
   | Ref_func i -> Stack.push stack (Value.ref_func (get_func env i))
   | Drop -> Stack.drop stack
-  | Local_get i -> Stack.push stack locals.(indice_to_int i)
+  | Local_get i -> Stack.push stack locals.(i)
   | Local_set i ->
     let v, stack = Stack.pop stack in
-    locals.(indice_to_int i) <- v;
+    locals.(i) <- v;
     stack
   | If_else (_id, bt, e1, e2) ->
     let b, stack = Stack.pop_bool stack in
@@ -547,10 +532,10 @@ let rec exec_instr (env : env) (locals : value array) (stack : stack)
     let func = get_func env i in
     exec_vfunc stack func
   end
-  | Br i -> raise (Branch (stack, indice_to_int i))
+  | Br i -> raise (Branch (stack, i))
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
-    if b then raise (Branch (stack, indice_to_int i)) else stack
+    if b then raise (Branch (stack, i)) else stack
   | Loop (_id, bt, e) -> exec_expr env locals stack e true bt
   | Block (_id, bt, e) -> exec_expr env locals stack e false bt
   | Memory_size ->
@@ -610,7 +595,7 @@ let rec exec_instr (env : env) (locals : value array) (stack : stack)
     Stack.push stack (if b then o1 else o2)
   | Local_tee i ->
     let v, stack = Stack.pop stack in
-    locals.(indice_to_int i) <- v;
+    locals.(i) <- v;
     Stack.push stack v
   | Global_get i -> Stack.push stack (Env.get_global env i).value
   | Global_set i ->
@@ -923,7 +908,7 @@ let rec exec_instr (env : env) (locals : value array) (stack : stack)
     let target =
       if target < 0 || target >= Array.length inds then i else inds.(target)
     in
-    raise (Branch (stack, indice_to_int target))
+    raise (Branch (stack, target))
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i, stack = Stack.pop_i32_to_int stack in
     (* TODO: use this ? *)
@@ -944,7 +929,7 @@ let rec exec_instr (env : env) (locals : value array) (stack : stack)
       raise @@ Trap "indirect call type mismatch";
     exec_vfunc stack func
 
-and exec_expr env locals stack (e : expr) is_loop bt =
+and exec_expr env locals stack e is_loop bt =
   let rt =
     Option.fold ~none:Int.max_int ~some:(fun bt -> List.length (snd bt)) bt
   in
@@ -956,10 +941,10 @@ and exec_expr env locals stack (e : expr) is_loop bt =
     | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1))
   in
   let stack = Stack.keep block_stack rt @ stack in
-  Debug.debug fmt "stack        : [ %a ]@." Stack.pp stack;
+  Debug.debug Format.std_formatter "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc stack (func : Env.t' Value.func) : stack =
+and exec_vfunc stack (func : Env.t' Value.func) =
   match func with
   | WASM (_, func, env) ->
     let param_type, _result_type = func.type_f in
@@ -968,7 +953,7 @@ and exec_vfunc stack (func : Env.t' Value.func) : stack =
     res @ stack
   | Extern f -> exec_extern_func stack f
 
-and exec_func env (func : S.func) args =
+and exec_func env (func : Simplify.func) args =
   Debug.debugerr "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in

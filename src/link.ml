@@ -89,7 +89,7 @@ end
 module Index = struct
   type t = S.index
 
-  let pp fmt (I id) = Format.fprintf fmt "%i" id
+  let pp fmt id = Format.fprintf fmt "%i" id
 
   let compare = compare
 end
@@ -427,9 +427,8 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  let (I mem_id) = mem in
-  if mem_id <> 0 then begin
-    failwith (Printf.sprintf "wrong memory id: %i@." mem_id)
+  if mem <> 0 then begin
+    failwith (Printf.sprintf "wrong memory id: %i@." mem)
   end;
   [ I32_const offset
   ; I32_const 0l

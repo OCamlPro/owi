@@ -131,8 +131,7 @@ module P = struct
     | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
   let indexed f fmt indexed =
-    let (I i) = indexed.index in
-    Format.fprintf fmt "%i: %a" i f indexed.value
+    Format.fprintf fmt "%i: %a" indexed.index f indexed.value
 
   let lst f fmt l =
     Format.fprintf fmt "[%a]"
@@ -145,7 +144,7 @@ module P = struct
     lst (indexed global) fmt globals.values
 
   let export fmt (export : index export) =
-    Format.fprintf fmt "%s: %a" export.name Pp.Simplified_bis.indice export.id
+    Format.fprintf fmt "%s: %a" export.name Pp.Simplified.indice export.id
 
   let result fmt (result : result) : unit =
     fprintf fmt
@@ -189,38 +188,36 @@ end = struct
     { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
   let add_global value (fields : grouped_module) (curr : curr) =
-    let index = I curr.global in
+    let index = curr.global in
     ( { fields with global = { index; value } :: fields.global }
     , { curr with global = succ curr.global } )
 
   let add_table value (fields : grouped_module) (curr : curr) =
-    let index = I curr.table in
+    let index = curr.table in
     ( { fields with table = { index; value } :: fields.table }
     , { curr with table = succ curr.table } )
 
   let add_mem value (fields : grouped_module) (curr : curr) =
-    let index = I curr.mem in
+    let index = curr.mem in
     ( { fields with mem = { index; value } :: fields.mem }
     , { curr with mem = succ curr.mem } )
 
   let add_func value (fields : grouped_module) (curr : curr) =
-    let index = I curr.func in
+    let index = curr.func in
     ( { fields with func = { index; value } :: fields.func }
     , { curr with func = succ curr.func } )
 
   let add_elem value (fields : grouped_module) (curr : curr) =
-    let index = I curr.elem in
+    let index = curr.elem in
     ( { fields with elem = { index; value } :: fields.elem }
     , { curr with elem = succ curr.elem } )
 
   let add_data value (fields : grouped_module) (curr : curr) =
-    let index = I curr.data in
+    let index = curr.data in
     ( { fields with data = { index; value } :: fields.data }
     , { curr with data = succ curr.data } )
 
-  let curr_id curr = function
-    | None -> Curr (I (pred curr))
-    | Some id -> Indice id
+  let curr_id curr = function None -> Curr (pred curr) | Some id -> Indice id
 
   let check_limit { min; max } =
     Option.iter
@@ -292,7 +289,7 @@ end = struct
             in
             (type_ :: fields.function_type, type_checks)
         in
-        let index = I curr.func in
+        let index = curr.func in
         let func = { value = Local func; index } :: fields.func in
         ( { fields with func; function_type; type_checks }
         , { curr with func = succ curr.func } )
@@ -368,7 +365,7 @@ end = struct
         ; last_assigned_index
         ; all_types
         } (name, type_) =
-      let id = I last_assigned_index in
+      let id = last_assigned_index in
       let last_assigned_index = last_assigned_index + 1 in
       let declared_types = { index = id; value = type_ } :: declared_types in
       let named_types =
@@ -400,7 +397,7 @@ end = struct
       match TypeMap.find_opt type_ all_types with
       | Some _id -> acc
       | None ->
-        let id = I last_assigned_index in
+        let id = last_assigned_index in
         let last_assigned_index = last_assigned_index + 1 in
         let func_types = { index = id; value = type_ } :: func_types in
         let all_types = TypeMap.add type_ id all_types in
@@ -440,7 +437,7 @@ end = struct
     let id, func_type = check in
     let id =
       match id with
-      | Raw i -> I i
+      | Raw i -> i
       | Symbolic name -> StringMap.find name types.named
     in
     (* TODO more efficient version of that *)
@@ -497,16 +494,16 @@ module Rewrite_indices = struct
     match indice with
     | Raw i ->
       (* TODO change indexed strucure for that to be more efficient *)
-      if not (List.exists (fun { index; _ } -> index = I i) named.values) then
-        failwith (Printf.sprintf "%s %i" msg i);
-      I i
+      if not (List.exists (fun { index; _ } -> index = i) named.values) then
+        Format.ksprintf failwith "%s %i" msg i;
+      i
     | Symbolic name -> (
       match StringMap.find_opt name named.named with
-      | None -> failwith (Printf.sprintf "%s %s" msg name)
+      | None -> Format.ksprintf failwith "%s %s" msg name
       | Some i -> i )
 
   let get msg (named : 'a named) (indice : indice) : 'a indexed =
-    let (I i) = find msg named indice in
+    let i = find msg named indice in
     (* TODO change named structure to make that sensible *)
     match List.nth_opt named.values i with None -> failwith msg | Some v -> v
 
@@ -529,7 +526,6 @@ module Rewrite_indices = struct
       let id =
         match id with
         | Symbolic id ->
-          Debug.debug Format.err_formatter "SYMBOLIC BLOCK ID %s@\n" id;
           let pos = ref (-1) in
           begin
             try
@@ -544,13 +540,11 @@ module Rewrite_indices = struct
           end;
           if !pos = -1 then failwith "unknown label";
           !pos
-        | Raw id ->
-          Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;
-          id
+        | Raw id -> id
       in
       (* this is > and not >= because you can `br 0` without any block to target the function *)
       if id > List.length block_ids + loop_count then failwith "unknown label";
-      I id
+      id
     in
 
     let bt_to_raw =
@@ -581,15 +575,15 @@ module Rewrite_indices = struct
               if StringMap.mem name locals then
                 failwith (Printf.sprintf "duplicate local %s" name)
               else
-                ( StringMap.add name (I next_free_index) locals
-                , next_free_index + 1 ) )
+                (StringMap.add name next_free_index locals, next_free_index + 1)
+            )
           (StringMap.empty, 0) locals
       in
       let find_local id =
         match id with
         | Raw i ->
           if i >= after_last_assigned_local then failwith "unknown local";
-          I i
+          i
         | Symbolic name -> (
           match StringMap.find_opt name locals with
           | None -> failwith (Printf.sprintf "unknown local %s" name)
