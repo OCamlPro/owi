@@ -10,31 +10,6 @@ module Host_externref = struct
   let value i = Value.Externref (Some (Value.E (ty, i)))
 end
 
-let ignore_tmp =
-  [ "type mismatch"
-  ; "alignment must not be larger than natural"
-    (*
-            | I_load8 (_nn, _sx, { align; _ }) as i ->
-              if align >= 2 then
-                failwith "alignment must not be larger than natural";
-
-              i
-            | I_load16 (_nn, _sx, { align; _ }) as i ->
-              if align >= 4 then
-                failwith "alignment must not be larger than natural";
-              i
-            | I64_load32 (_sx, { align; _ }) as i ->
-              if align >= 8 then
-                failwith "alignment must not be larger than natural";
-              i
-            | (I_load (nn, { align; _ }) | F_load (nn, { align; _ })) as i ->
-              let max_allowed = match nn with S32 -> 8 | S64 -> 16 in
-              if align >= max_allowed then
-                failwith "alignment must not be larger than natural";
-              i
-             *)
-  ]
-
 let check_error' ~expected ~got =
   let ok = String.starts_with ~prefix:expected got in
   if not ok then begin
@@ -45,8 +20,7 @@ let check_error' ~expected ~got =
 
 let check_error ~expected ~got =
   let ok =
-    got = expected
-    || List.mem expected ignore_tmp
+    got = expected || expected = "type mismatch"
     || String.starts_with ~prefix:expected got
     || got = "constant out of range"
        && (expected = "i32 constant out of range" || expected = "i32 constant")

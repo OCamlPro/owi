@@ -655,9 +655,29 @@ module Rewrite_indices = struct
         Memory_init (find_data id)
       | Data_drop id -> Data_drop (find_data id)
       | Elem_drop id -> Elem_drop (find_elem id)
-      | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
-        | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
-        | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
+      (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
+      | (I_load8 (_, _, { align; _ }) | I_store8 (_, { align; _ })) as i ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        if align >= 1 then failwith "alignment must not be larger than natural";
+        i
+      | (I_load16 (_, _, { align; _ }) | I_store16 (_, { align; _ })) as i ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        if align >= 2 then failwith "alignment must not be larger than natural";
+        i
+      | (I64_load32 (_, { align; _ }) | I64_store32 { align; _ }) as i ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        if align >= 4 then failwith "alignment must not be larger than natural";
+        i
+      | ( I_load (nn, { align; _ })
+        | F_load (nn, { align; _ })
+        | F_store (nn, { align; _ })
+        | I_store (nn, { align; _ }) ) as i ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
+        if align >= max_allowed then
+          failwith "alignment must not be larger than natural";
+        i
+      | (Memory_copy | Memory_size | Memory_fill | Memory_grow) as i ->
         if List.length module_.mem.values < 1 then failwith "unknown memory 0";
         i
       | Select typ as i -> begin

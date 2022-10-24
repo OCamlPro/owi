@@ -730,10 +730,8 @@ let rec exec_instr env locals stack instr =
     let elem = get_elem env i in
     Env.drop_elem elem;
     stack
-  | I_load16 (nn, sx, { offset; align }) -> (
+  | I_load16 (nn, sx, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    (* TODO: use align *)
-    ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     if Bytes.length mem < offset + 2 || pos < 0 then
@@ -744,10 +742,8 @@ let rec exec_instr env locals stack instr =
     match nn with
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
-  | I_load (nn, { offset; align }) -> (
+  | I_load (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    (* TODO: use align *)
-    ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     match nn with
@@ -761,10 +757,8 @@ let rec exec_instr env locals stack instr =
         raise (Trap "out of bounds memory access");
       let res = Bytes.get_int64_le mem offset in
       Stack.push_i64 stack res )
-  | F_load (nn, { offset; align }) -> (
+  | F_load (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    (* TODO: use align *)
-    ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     match nn with
@@ -780,10 +774,8 @@ let rec exec_instr env locals stack instr =
       let res = Bytes.get_int64_le mem offset in
       let res = Float64.of_bits res in
       Stack.push_f64 stack res )
-  | I_store (nn, { offset; align }) -> (
+  | I_store (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    ignore align;
-    (* TODO: use align *)
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
@@ -801,10 +793,8 @@ let rec exec_instr env locals stack instr =
         raise (Trap "out of bounds memory access");
       Bytes.set_int64_le mem offset n;
       stack )
-  | F_store (nn, { offset; align }) -> (
+  | F_store (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    ignore align;
-    (* TODO: use align *)
     match nn with
     | S32 ->
       let n, stack = Stack.pop_f32 stack in
@@ -822,10 +812,8 @@ let rec exec_instr env locals stack instr =
         raise (Trap "out of bounds memory access");
       Bytes.set_int64_le mem offset (Float64.to_bits n);
       stack )
-  | I_load8 (nn, sx, { offset; align }) -> (
+  | I_load8 (nn, sx, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
-    (* TODO: use align *)
-    ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
     if Bytes.length mem < offset + 1 || pos < 0 then
@@ -834,10 +822,8 @@ let rec exec_instr env locals stack instr =
     match nn with
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
-  | I64_load32 (sx, { offset; align }) ->
+  | I64_load32 (sx, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
-    (* TODO: use align *)
-    ignore align;
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
     if Bytes.length mem < offset + 4 || pos < 0 then
@@ -849,10 +835,8 @@ let rec exec_instr env locals stack instr =
       else failwith "unsupported word size"
     in
     Stack.push_i64_of_int stack res
-  | I_store8 (nn, { offset; align }) ->
+  | I_store8 (nn, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
-    ignore align;
-    (* TODO: use align *)
     let n, stack =
       match nn with
       | S32 ->
@@ -868,10 +852,8 @@ let rec exec_instr env locals stack instr =
       raise (Trap "out of bounds memory access");
     Bytes.set_int8 mem offset n;
     stack
-  | I_store16 (nn, { offset; align }) ->
+  | I_store16 (nn, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
-    ignore align;
-    (* TODO: use align *)
     let n, stack =
       match nn with
       | S32 ->
@@ -887,10 +869,8 @@ let rec exec_instr env locals stack instr =
       raise (Trap "out of bounds memory access");
     Bytes.set_int16_le mem offset n;
     stack
-  | I64_store32 { offset; align } ->
+  | I64_store32 { offset; _ } ->
     let mem, _max = get_memory env mem_0 in
-    ignore align;
-    (* TODO: use align *)
     let n, stack = Stack.pop_i64 stack in
     let n = Int64.to_int32 n in
     let pos, stack = Stack.pop_i32_to_int stack in
