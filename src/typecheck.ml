@@ -195,9 +195,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | I_trunc_f (inn, fnn, _) | I_trunc_sat_f (inn, fnn, _) ->
     Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
   | I32_wrap_i64 -> Stack.pop [ i64 ] stack |> Stack.push [ i32 ]
-  | I_extend16_s nn -> Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
-  | I64_extend32_s | I64_extend_i32 _ ->
-    Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
+  | I_extend8_s nn | I_extend16_s nn ->
+    let t = itype nn in
+    Stack.pop [ t ] stack |> Stack.push [ t ]
+  | I64_extend32_s -> Stack.pop [ i64 ] stack |> Stack.push [ i64 ]
+  | I64_extend_i32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
   | Memory_grow -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
