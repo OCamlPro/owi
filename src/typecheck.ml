@@ -17,22 +17,25 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
+    ; globals : (Const.expr global', global_type) S.runtime S.named
     ; result_type : result_type
     }
 
   let local_get i t =
     match Index.Map.find i t.locals with
-    | exception Not_found -> failwith "Unbound local"
+    | exception Not_found -> assert false
     | v -> v
 
-  let make ~params ~locals ~result_type =
+  let global_get _i _t = (* TODO *) assert false
+
+  let make ~params ~locals ~globals ~result_type =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
       List.fold_left
         (fun locals (i, (_, typ)) -> Index.Map.add i typ locals)
         Index.Map.empty l
     in
-    { locals; result_type }
+    { locals; globals; result_type }
 end
 
 type env = Env.t
@@ -106,17 +109,11 @@ module Stack = struct
 
   let pop required stack =
     match match_prefix required stack with
-    | None ->
-      (* TODO proper message *)
-      failwith "Type error"
+    | None -> failwith "type mismatch"
     | Some stack -> stack
 
   let drop stack =
-    match stack with
-    | [] ->
-      (* TODO proper message *)
-      failwith "Type error"
-    | _ :: tl -> tl
+    match stack with [] -> failwith "type mismatch" | _ :: tl -> tl
 
   let push t stack = Continue (t @ stack)
 end
@@ -126,9 +123,7 @@ let check (s1 : state) (s2 : state) =
   | Stop, Stop -> Stop
   | Stop, Continue s | Continue s, Stop -> Continue s
   | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1
-    else (* TODO proper error *)
-      failwith "Type error"
+    if Stack.equal s1 s2 then Continue s1 else failwith "type mismatch"
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -161,13 +156,55 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | F_binop (s, _op) ->
     let t = ftype s in
     Stack.pop [ t; t ] stack |> Stack.push [ t ]
+  | I_testop (nn, _) -> Stack.pop [ itype nn ] stack |> Stack.push [ i32 ]
+  | I_relop (nn, _) ->
+    let t = itype nn in
+    Stack.pop [ t; t ] stack |> Stack.push [ i32 ]
+  | F_relop (nn, _) ->
+    let t = ftype nn in
+    Stack.pop [ t; t ] stack |> Stack.push [ i32 ]
   | Local_get i -> Stack.push [ Env.local_get i env ] stack
+  | Local_set i ->
+    let t = Env.local_get i env in
+    Stack.pop [ t ] stack |> Stack.push []
+  | Global_get i -> Stack.push [ Env.global_get i env ] stack
+  | Global_set i ->
+    let t = Env.global_get i env in
+    Stack.pop [ t ] stack |> Stack.push []
   | If_else (_id, block_type, e1, e2) ->
     let stack = Stack.pop [ i32 ] stack in
     let stack_e1 = typecheck_expr env stack e1 block_type in
     let stack_e2 = typecheck_expr env stack e2 block_type in
     check stack_e1 stack_e2
-  | _ -> failwith "TODO"
+  | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
+    Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
+  | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
+  | I_store8 (nn, _) | I_store16 (nn, _) | I_store (nn, _) ->
+    Stack.pop [ itype nn; i32 ] stack |> Stack.push []
+  | I64_store32 _ -> Stack.pop [ i64; i32 ] stack |> Stack.push []
+  | F_load (nn, _) -> Stack.pop [ i32 ] stack |> Stack.push [ ftype nn ]
+  | F_store (nn, _) -> Stack.pop [ ftype nn; i32 ] stack |> Stack.push []
+  | I_reinterpret_f (inn, fnn) ->
+    Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
+  | F_reinterpret_i (fnn, inn) ->
+    Stack.pop [ itype inn ] stack |> Stack.push [ ftype fnn ]
+  | F32_demote_f64 -> Stack.pop [ f64 ] stack |> Stack.push [ f32 ]
+  | F64_promote_f32 -> Stack.pop [ f32 ] stack |> Stack.push [ f64 ]
+  | F_convert_i (fnn, inn, _) ->
+    Stack.pop [ itype inn ] stack |> Stack.push [ ftype fnn ]
+  | I_trunc_f (inn, fnn, _) | I_trunc_sat_f (inn, fnn, _) ->
+    Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
+  | I32_wrap_i64 -> Stack.pop [ i64 ] stack |> Stack.push [ i32 ]
+  | I_extend16_s nn -> Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
+  | I64_extend32_s | I64_extend_i32 _ ->
+    Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
+  | Memory_grow -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
+  | Memory_size -> Stack.push [ i32 ] stack
+  | Memory_copy | Memory_init _ | Memory_fill ->
+    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+  | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env stack expr bt
+  | Call _i -> failwith "TODO TYPECHECK CALL"
+  | _ as i -> Format.kasprintf failwith "TODO %a" Pp.Simplified.instr i
 
 and typecheck_expr (env : env) (stack : stack) (expr : expr)
     (block_type : func_type option) : state =
@@ -186,8 +223,7 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
   | None -> ()
   | Some (required, _result) ->
     if not (Stack.equal (List.rev_map snd required) stack) then
-      (* TODO proper error *)
-      failwith "type error" );
+      failwith "type mismatch" );
   let state = loop stack expr in
   match (block_type, state) with
   | None, _ -> state
@@ -201,16 +237,20 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
     end;
     Continue required
 
-let typecheck_function (func : (S.func, func_type) S.runtime) =
+let typecheck_function globals (func : (S.func, func_type) S.runtime) =
   match func with
   | Imported _ -> ()
   | Local func -> (
     let params, result = func.type_f in
-    let env = Env.make ~params ~locals:func.locals ~result_type:result in
+    let env =
+      Env.make ~params ~locals:func.locals ~globals ~result_type:result
+    in
     Debug.debugerr "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
     | Stop -> ()
     | Continue _ -> () )
 
 let typecheck_module (module_ : Simplify.result) =
-  S.Fields.iter (fun _index func -> typecheck_function func) module_.func
+  S.Fields.iter
+    (fun _index func -> typecheck_function module_.global func)
+    module_.func

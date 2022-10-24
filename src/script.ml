@@ -20,7 +20,7 @@ let check_error' ~expected ~got =
 
 let check_error ~expected ~got =
   let ok =
-    got = expected || expected = "type mismatch"
+    got = expected
     || String.starts_with ~prefix:expected got
     || got = "constant out of range"
        && (expected = "i32 constant out of range" || expected = "i32 constant")

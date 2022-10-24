@@ -437,7 +437,7 @@ let active_data_expr ~offset ~length ~mem ~data =
   ; Data_drop data
   ]
 
-let get_i32 = function Value.I32 i -> i | _ -> failwith "Not an i32 const"
+let get_i32 = function Value.I32 i -> i | _ -> failwith "type mismatch"
 
 let define_data env data =
   S.Fields.fold
