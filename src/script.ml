@@ -126,7 +126,7 @@ let value_of_const : Types.const -> value =
 
 let action (link_state : Link.link_state) = function
   | Invoke (mod_id, f, args) -> begin
-    Debug.debugerr "Invoke %a %s %a@."
+    Debug.log "Invoke %a %s %a@."
       (Format.pp_print_option
          ~none:(fun ppf () -> Format.fprintf ppf "<>")
          Format.pp_print_string )
@@ -159,28 +159,28 @@ let rec run ~with_exhaustion script =
         | Module m ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.debugerr "simplifying module %a... " pp_name name;
+          Debug.log "simplifying module %a... " pp_name name;
           let m = Simplify.simplify m in
-          Debug.debugerr "typechecking module... ";
+          Debug.log "typechecking module... ";
           typecheck m;
-          Debug.debugerr "linking module... ";
+          Debug.log "linking module... ";
           let module_to_run, link_state = Link.link_module m link_state in
-          Debug.debugerr "eval module... !@\n";
+          Debug.log "eval module... !@\n";
           Interpret.exec_module module_to_run;
-          Debug.debugerr "done %a !@\n" pp_name name;
+          Debug.log "done %a !@\n" pp_name name;
           link_state
         | Assert (Assert_trap_module (m, msg)) ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.debugerr "simplifying module %a... " pp_name name;
+          Debug.log "simplifying module %a... " pp_name name;
           let m = Simplify.simplify m in
-          Debug.debugerr "typechecking module... ";
+          Debug.log "typechecking module... ";
           typecheck m;
-          Debug.debugerr "linking module... ";
+          Debug.log "linking module... ";
           let module_to_run, _ignored_link_state =
             Link.link_module m link_state
           in
-          Debug.debugerr "eval module... !@\n";
+          Debug.log "eval module... !@\n";
           begin
             try
               Interpret.exec_module module_to_run;
@@ -189,17 +189,15 @@ let rec run ~with_exhaustion script =
             | Trap trap_msg -> assert (msg = trap_msg)
             | _ -> assert false
           end;
-          Debug.debugerr "done %a !@\n" pp_name name;
+          Debug.log "done %a !@\n" pp_name name;
           link_state
         | Assert (Assert_malformed_binary _) ->
-          Debug.debug Format.err_formatter
-            "simplifying assert malformed binary... ";
-          Debug.debug Format.err_formatter "done !@\n";
+          Debug.log "simplifying assert malformed binary... ";
+          Debug.log "done !@\n";
           (* TODO: check this when binary format is supported *)
           link_state
         | Assert (Assert_malformed_quote (m, expected)) ->
-          Debug.debug Format.err_formatter
-            "simplifying assert malformed quote... ";
+          Debug.log "simplifying assert malformed quote... ";
           let got =
             match Parse.from_string (String.concat "\n" m) with
             | Ok script -> (
@@ -215,7 +213,7 @@ let rec run ~with_exhaustion script =
             | Error got -> got
           in
           check_error ~expected ~got;
-          Debug.debug Format.err_formatter "done !@\n";
+          Debug.log "done !@\n";
           link_state
         | Assert (Assert_invalid_binary _) ->
           (* TODO: check this when binary format is supported *)
@@ -262,7 +260,7 @@ let rec run ~with_exhaustion script =
           link_state
         | Assert (Assert_malformed _) -> failwith "TODO assert_malformed"
         | Assert (Assert_return (a, res)) ->
-          Debug.debugerr "Assert@.";
+          Debug.log "Assert@.";
           let stack = action link_state a in
           if
             List.length res <> List.length stack
@@ -283,7 +281,7 @@ let rec run ~with_exhaustion script =
           with
           | Trap got ->
             check_error' ~expected:msg ~got;
-            Debug.debugerr "expected trap: \"%s\"@." msg;
+            Debug.log "expected trap: \"%s\"@." msg;
             link_state
           | exn ->
             Format.eprintf "Wrong exn %s@." (Printexc.to_string exn);

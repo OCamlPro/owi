@@ -162,42 +162,42 @@ module Env = struct
   let get_global (env : t) id : t' Global.t =
     match IMap.find_opt id env.globals with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith "unknown global"
     | Some v -> v
 
   let get_memory (env : t) id : Memory.t =
     match IMap.find_opt id env.memories with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith "unknown memory"
     | Some v -> v
 
   let get_table (env : t) id : t' Table.t =
     match IMap.find_opt id env.tables with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith "unknown table"
     | Some v -> v
 
   let get_func (env : t) id : t' Value.func =
     match IMap.find_opt id env.functions with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith (Format.asprintf "unknown function %a" Index.pp id)
     | Some v -> v
 
   let get_data (env : t) id : data =
     match IMap.find_opt id env.data with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith "unknown data"
     | Some v -> v
 
   let get_elem (env : t) id : t' elem =
     match IMap.find_opt id env.elem with
     | None ->
-      Debug.debugerr "%a@." pp env;
+      Debug.log "%a@." pp env;
       failwith "unknown elem"
     | Some v -> v
 end
@@ -283,7 +283,7 @@ let load_from_module ls f (import : _ S.imp) =
   | exports -> (
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
-      Debug.debugerr "unknown import %s" import.name;
+      Debug.log "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
         failwith "incompatible import type"
       else failwith "unknown import"
@@ -508,7 +508,7 @@ let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
   let rec env_and_init_active_data_and_elem =
     lazy
-      ( Debug.debug Format.err_formatter "LINK %a@\n" Pp.pp_id module_.id;
+      ( Debug.log "LINK %a@\n" Pp.pp_id module_.id;
         let env = Env.empty in
         let env = eval_functions ls finished_env env module_.func in
         let env = eval_globals ls env module_.global in
@@ -527,7 +527,7 @@ let link_module (module_ : module_) (ls : link_state) :
   let env, init_active_data, init_active_elem =
     Lazy.force env_and_init_active_data_and_elem
   in
-  Debug.debug Format.err_formatter "EVAL %a@\n" Env.pp env;
+  Debug.log "EVAL %a@\n" Env.pp env;
   let by_id_exports = populate_exports env module_.exports in
   let by_id =
     (* TODO: this is not the actual module name *)
@@ -542,7 +542,7 @@ let link_module (module_ : module_) (ls : link_state) :
 
 let link_extern_module (name : string) (module_ : extern_module)
     (ls : link_state) : link_state =
-  Debug.debug Format.err_formatter "LINK EXTERN %s@\n" name;
+  Debug.log "LINK EXTERN %s@\n" name;
   let functions =
     StringMap.map Value.Func.extern
       (StringMap.of_seq (List.to_seq module_.functions))

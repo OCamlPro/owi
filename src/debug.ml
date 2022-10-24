@@ -4,7 +4,6 @@ let enable, disable, is_enabled =
   , (fun () -> debug_on := false)
   , fun () -> !debug_on = true )
 
-let debug fmt =
-  if is_enabled () then Format.fprintf fmt else Format.ifprintf fmt
-
-let debugerr t = debug Format.err_formatter t
+let log t =
+  if is_enabled () then Format.eprintf t
+  else Format.ifprintf Format.err_formatter t

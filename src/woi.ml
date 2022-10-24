@@ -39,7 +39,7 @@ let simplify_then_link_then_run file =
         | _ -> None )
       file
   in
-  let () = Woi.Debug.debugerr "* Simplified %i modules@." (List.length cmds) in
+  let () = Woi.Debug.log "* Simplified %i modules@." (List.length cmds) in
   let link_state = Woi.Link.empty_state in
   let link_state =
     Woi.Link.link_extern_module "stuff" extern_module link_state
@@ -55,9 +55,9 @@ let simplify_then_link_then_run file =
           (to_run, Woi.Link.register_module state ~name ~id) )
       ([], link_state) cmds
   in
-  let () = Woi.Debug.debugerr "* Linked@." in
+  let () = Woi.Debug.log "* Linked@." in
   List.iter Woi.Interpret.exec_module (List.rev to_run);
-  let () = Woi.Debug.debugerr "* Done@." in
+  let () = Woi.Debug.log "* Done@." in
   ()
 
 let run_as_script, debug, files =

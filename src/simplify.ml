@@ -850,7 +850,7 @@ let simplify (module_ : module_) : result =
 
 let simplify (module_ : module_) : result =
   let simplified = simplify module_ in
-  Debug.debugerr "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
+  Debug.log "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
   simplified
 
 module Pp = P

@@ -214,11 +214,11 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
     match expr with
     | [] -> Continue stack
     | instr :: tail -> (
-      Debug.debugerr "BEFORE: %a@." Stack.pp stack;
+      Debug.log "BEFORE: %a@." Stack.pp stack;
       match typecheck_instr env stack instr with
       | Stop -> Stop
       | Continue stack ->
-        Debug.debugerr "AFTER: %a@." Stack.pp stack;
+        Debug.log "AFTER: %a@." Stack.pp stack;
         loop stack tail )
   in
   ( match block_type with
@@ -247,7 +247,7 @@ let typecheck_function globals (func : (S.func, func_type) S.runtime) =
     let env =
       Env.make ~params ~locals:func.locals ~globals ~result_type:result
     in
-    Debug.debugerr "TYPECHECK function@.%a@." Pp.Simplified.func func;
+    Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
     | Stop -> ()
     | Continue _ -> () )

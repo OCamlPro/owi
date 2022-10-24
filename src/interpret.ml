@@ -305,9 +305,8 @@ let exec_extern_func stack (f : Value.extern_func) =
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
 let rec exec_instr env locals stack instr =
-  Debug.debug Format.std_formatter "stack        : [ %a ]@." Stack.pp stack;
-  Debug.debug Format.std_formatter "running instr: %a@." Pp.Simplified.instr
-    instr;
+  Debug.log "stack        : [ %a ]@." Stack.pp stack;
+  Debug.log "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack
@@ -921,7 +920,7 @@ and exec_expr env locals stack e is_loop bt =
     | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1))
   in
   let stack = Stack.keep block_stack rt @ stack in
-  Debug.debug Format.std_formatter "stack        : [ %a ]@." Stack.pp stack;
+  Debug.log "stack        : [ %a ]@." Stack.pp stack;
   stack
 
 and exec_vfunc stack (func : Env.t' Value.func) =
@@ -934,14 +933,14 @@ and exec_vfunc stack (func : Env.t' Value.func) =
   | Extern f -> exec_extern_func stack f
 
 and exec_func env (func : Simplify.func) args =
-  Debug.debugerr "calling func : func %s@."
+  Debug.log "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
   try exec_expr env locals [] func.body false (Some func.type_f)
   with Return stack -> Stack.keep stack (List.length (snd func.type_f))
 
 let exec_module (module_ : Link.module_to_run) =
-  Debug.debug Format.err_formatter "EXEC START@\n";
+  Debug.log "EXEC START@\n";
   List.iter
     (fun to_run ->
       let end_stack =
