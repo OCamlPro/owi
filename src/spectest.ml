@@ -66,14 +66,14 @@ let m =
         ; MFunc
             { type_f = Bt_raw (None, ([], [ Num_type I32 ]))
             ; locals = []
-            ; body = [I32_const 1l]
+            ; body = [ I32_const 1l ]
             ; id = Some "func->i32"
             }
         ; MFunc
             { type_f =
                 Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
             ; locals = []
-            ; body = [I32_const 1l]
+            ; body = [ I32_const 1l ]
             ; id = Some "func-i32->i32"
             }
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, Func_ref))

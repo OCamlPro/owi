@@ -9,21 +9,16 @@
   int32
   int64
   interpret
-  interpret_bis
   lexer
   link
   menhir_parser
   parse
   pp
   script
-  script_bis
-  simplify_bis
-  typecheck
-  link_bis
   simplify
   spectest
   stack
-  stack_bis
+  typecheck
   types
   value
   wutf8)

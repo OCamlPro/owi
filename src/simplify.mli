@@ -1,37 +1,75 @@
-open Types
+type table_import = Types.table_type
+
+type mem_import = Types.limits
+
+type global_import = Types.global_type
+
+type 'a imp =
+  { module_ : string
+  ; name : string
+  ; assigned_name : string option
+  ; desc : 'a
+  }
 
 type ('a, 'b) runtime =
   | Local of 'a
-  | Imported of int * indice * 'b
+  | Imported of 'b imp
 
-type runtime_table =
-  (ref_type * (int * const) option array * int option, unit) runtime
+module StringMap :
+  Map.S
+    with type key = Map.Make(String).key
+     and type 'a t = 'a Map.Make(String).t
 
-type runtime_global = (global_type * const, global_type) runtime
+type index = Types.simplified_indice
 
-type runtime_memory = (bytes * int option, unit) runtime
-
-type runtime_func = (simplified_indice func, unit) runtime
-
-type module_ =
-  { fields : module_field list
-  ; datas : string array
-  ; funcs : runtime_func array
-  ; memories : runtime_memory array
-  ; tables : runtime_table array
-  ; globals : runtime_global array
-  ; globals_tmp : (global_type * expr, global_type) runtime array
-  ; types : func_type array
-  ; elements : (ref_type * const array) array
-  ; exported_funcs : (string, int) Hashtbl.t
-  ; exported_globals : (string, int) Hashtbl.t
-  ; exported_memories : (string, int) Hashtbl.t
-  ; exported_tables : (string, int) Hashtbl.t
-  ; start : int option
-  ; should_trap : string option
-  ; should_not_link : string option
+type 'a indexed =
+  { index : index
+  ; value : 'a
   }
 
-val find_module : string option -> 'a option -> (string, 'a) Hashtbl.t -> 'a
+type 'a named =
+  { values : 'a indexed list
+  ; named : index StringMap.t
+  }
 
-val mk_module : (string, int) Hashtbl.t -> Types.module_ -> module_
+module Fields : sig
+  type 'a t = 'a named
+
+  val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+
+  val iter : (index -> 'a -> unit) -> 'a t -> unit
+end
+
+open Types
+
+type 'a export =
+  { name : string
+  ; id : 'a
+  }
+
+type 'a exports =
+  { global : 'a export list
+  ; mem : 'a export list
+  ; table : 'a export list
+  ; func : 'a export list
+  }
+
+type func = (index, func_type) func'
+
+type result =
+  { id : string option
+  ; global : (Const.expr global', global_import) runtime named
+  ; table : (table, table_import) runtime named
+  ; mem : (mem, mem_import) runtime named
+  ; func : (func, func_type) runtime named
+  ; elem : (index, Const.expr) elem' named
+  ; data : (index, Const.expr) data' named
+  ; exports : index exports
+  ; start : index list
+  }
+
+val simplify : Types.module_ -> result
+
+module Pp : sig
+  val result : Format.formatter -> result -> unit
+end

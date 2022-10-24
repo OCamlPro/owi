@@ -1,582 +1,842 @@
 open Types
+module StringMap = Map.Make (String)
 
-let check_limit min max =
-  Option.iter
-    (fun max ->
-      if min > max then failwith "size minimum must not be greater than maximum"
-      )
-    max
+type function_import = indice block_type
+
+type table_import = table_type
+
+type mem_import = mem_type
+
+type global_import = global_type
+
+type 'a imp =
+  { module_ : string
+  ; name : string
+  ; assigned_name : string option
+  ; desc : 'a
+  }
 
 type ('a, 'b) runtime =
   | Local of 'a
-  | Imported of int * indice * 'b
+  | Imported of 'b imp
 
-type runtime_table =
-  (ref_type * (int * const) option array * int option, unit) runtime
-
-type runtime_global = (global_type * const, global_type) runtime
-
-type runtime_memory = (bytes * int option, unit) runtime
-
-type runtime_func = (simplified_indice func, unit) runtime
-
-type module_ =
-  { fields : module_field list
-  ; datas : string array
-  ; funcs : runtime_func array
-  ; memories : runtime_memory array
-  ; tables : runtime_table array
-  ; globals : runtime_global array
-  ; globals_tmp : (global_type * expr, global_type) runtime array
-  ; types : func_type array
-  ; elements : (ref_type * const array) array
-  ; exported_funcs : (string, int) Hashtbl.t
-  ; exported_globals : (string, int) Hashtbl.t
-  ; exported_memories : (string, int) Hashtbl.t
-  ; exported_tables : (string, int) Hashtbl.t
-  ; start : int option
-  ; should_trap : string option
-  ; should_not_link : string option
+type 'a export =
+  { name : string
+  ; id : 'a
   }
 
-let map_symb find_in_tbl = function Raw i -> i | Symbolic id -> find_in_tbl id
+type type_check = indice * func_type
 
-let map_symb_raw find_in_tbl sym = Raw (map_symb find_in_tbl sym)
+type index = simplified_indice
 
-let map_symb_raw' find_in_tbl sym = I (map_symb find_in_tbl sym)
+type opt_ind =
+  | Curr of index
+  | Indice of indice
 
-let find_module name last seen =
-  match name with
-  | None -> begin
-    match last with None -> failwith "no module defined" | Some i -> i
-  end
-  | Some mod_name -> begin
-    match Hashtbl.find_opt seen mod_name with
-    | None -> failwith @@ Format.sprintf "unknown module $%s" mod_name
-    | Some i -> i
-  end
-
-type env =
-  { curr_func : int
-  ; curr_global : int
-  ; curr_memory : int
-  ; curr_table : int
-  ; curr_type : int
-  ; curr_element : int
-  ; curr_data : int
-  ; datas : string list
-  ; funcs : (indice func, unit) runtime list
-  ; globals : runtime_global list
-  ; globals_tmp : (global_type * expr, global_type) runtime list
-  ; memories : runtime_memory list
-  ; tables : runtime_table list
-  ; types : func_type list
-  ; start : int option
+type 'a indexed =
+  { index : index
+  ; value : 'a
   }
 
-let find_id tbl x = function
-  | Raw i -> i
-  | Symbolic i -> (
-    match Hashtbl.find_opt tbl i with
-    | None -> failwith @@ Format.asprintf "unbound %s id %a" x Pp.id i
-    | Some i -> i )
+type 'a named =
+  { values : 'a indexed list
+  ; named : index StringMap.t
+  }
 
-let find_ind tbl x ind =
-  match Hashtbl.find_opt tbl ind with
-  | None -> failwith @@ Format.asprintf "unbound %s indice (simplify) %s" x ind
-  | Some i -> i
+module Fields = struct
+  type 'a t = 'a named
 
-type out_indice = simplified_indice
+  let fold f v acc =
+    List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
 
-let mk_module registered_modules m =
-  let exported_funcs = Hashtbl.create 512 in
-  let exported_globals = Hashtbl.create 512 in
-  let exported_memories = Hashtbl.create 512 in
-  let exported_tables = Hashtbl.create 512 in
+  let iter f v = List.iter (fun v -> f v.index v.value) v.values
+end
 
-  let seen_types = Hashtbl.create 512 in
-  let find_type = find_id seen_types "type" in
+type 'a exports =
+  { global : 'a export list
+  ; mem : 'a export list
+  ; table : 'a export list
+  ; func : 'a export list
+  }
 
-  let seen_funcs = Hashtbl.create 512 in
-  let find_func = find_ind seen_funcs "func" in
+type known_elem = (indice, (indice, indice block_type) expr') elem'
 
-  let seen_memories = Hashtbl.create 512 in
-  let find_memory = find_ind seen_memories "memory" in
+type known_data = (indice, (indice, indice block_type) expr') data'
 
-  let seen_globals = Hashtbl.create 512 in
-  let find_global = find_ind seen_globals "global" in
+type grouped_module =
+  { id : string option
+  ; type_ : type_ list
+  ; function_type : func_type list
+        (* Types comming from function declarations.
+           It contains potential duplication *)
+  ; type_checks : type_check list
+        (* Types checks to perform after assignment.
+           Come from function declarations with type indicies *)
+  ; global : (global, global_import) runtime indexed list
+  ; table : (table, table_import) runtime indexed list
+  ; mem : (mem, mem_import) runtime indexed list
+  ; func : (indice func, function_import) runtime indexed list
+  ; elem : known_elem indexed list
+  ; data : known_data indexed list
+  ; exports : opt_ind exports
+  ; start : indice list
+  }
 
-  let seen_tables = Hashtbl.create 512 in
-  let find_table = find_ind seen_tables "table" in
+type assigned_module =
+  { id : string option
+  ; type_ : func_type named
+  ; global : (global, global_import) runtime named
+  ; table : (table, table_import) runtime named
+  ; mem : (mem, mem_import) runtime named
+  ; func : (indice func, indice block_type) runtime named
+  ; elem : known_elem named
+  ; data : known_data named
+  ; exports : opt_ind exports
+  ; start : indice list
+  }
 
-  let seen_elements = Hashtbl.create 512 in
-  let find_element = find_ind seen_elements "element" in
+type result =
+  { id : string option
+  ; global : (Const.expr global', global_import) runtime named
+  ; table : (table, table_import) runtime named
+  ; mem : (mem, mem_import) runtime named
+  ; func : ((index, func_type) func', func_type) runtime named
+  ; elem : (index, Const.expr) elem' named
+  ; data : (index, Const.expr) data' named
+  ; exports : index exports
+  ; start : index list
+  }
 
-  let seen_datas = Hashtbl.create 512 in
-  let find_data = find_ind seen_datas "data" in
+module P = struct
+  open Format
 
-  let find_module = find_ind registered_modules "module" in
+  let id fmt = Option.iter (fun id -> Format.fprintf fmt "@ %s" id)
 
-  let aux = function
-    | Ref_func i -> Ref_func (map_symb_raw find_func i)
-    | Global_get i -> Global_get (map_symb_raw find_global i)
-    | (I64_const _ | F32_const _ | F64_const _ | Ref_null _ | I32_const _) as c
-      ->
-      c
-    | _i -> failwith "constant expression required"
-  in
+  let func fmt (func : (_ func', _) runtime) =
+    match func with
+    | Local func -> begin
+      match func.id with
+      | None -> Format.fprintf fmt "local"
+      | Some id -> Format.fprintf fmt "$%s" id
+    end
+    | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
-  let env =
-    List.fold_left
-      (fun env -> function
-        | MStart indice ->
-          begin
-            match env.start with
-            | None -> ()
-            | Some _id -> failwith "multiple start functions are not allowed"
-          end;
-          let indice = map_symb find_func indice in
-          { env with start = Some indice }
-        | MFunc f ->
-          let curr_func = env.curr_func + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) f.id;
-          let funcs = Local f :: env.funcs in
-          { env with curr_func; funcs }
-        | MGlobal g ->
-          let curr_global = env.curr_global + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) g.id;
-          let globals_tmp = Local (g.type_, g.init) :: env.globals_tmp in
-          { env with curr_global; globals_tmp }
-        | MExport _ -> env
-        | MImport { desc = Import_func (id, t); module_; name } ->
-          ( match t with
-          | Bt_raw (None, _) -> ()
-          | Bt_ind ind | Bt_raw (Some ind, _) -> (
-            match ind with
-            | Raw n -> if n > env.curr_type then failwith "unknown type"
-            | Symbolic _n -> () (* TODO: check if known type*) ) );
-          let curr_func = env.curr_func + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_funcs id curr_func) id;
-          let module_indice = find_module module_ in
-          let funcs =
-            Imported (module_indice, Symbolic name, ()) :: env.funcs
-          in
-          { env with curr_func; funcs }
-        | MImport { desc = Import_mem (id, _t); module_; name } ->
-          let curr_memory = env.curr_memory + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          let module_indice = find_module module_ in
-          let memories =
-            Imported (module_indice, Symbolic name, ()) :: env.memories
-          in
-          { env with curr_memory; memories }
-        | MImport { desc = Import_table (id, _t); module_; name } ->
-          let curr_table = env.curr_table + 1 in
-          Option.iter (fun id -> Hashtbl.replace seen_tables id curr_table) id;
-          let module_indice = find_module module_ in
-          let tables =
-            Imported (module_indice, Symbolic name, ()) :: env.tables
-          in
-          { env with curr_table; tables }
-        | MImport { desc = Import_global (id, t); module_; name } ->
-          let curr_global = env.curr_global + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_globals id curr_global) id;
-          let module_indice = find_module module_ in
-          let globals_tmp =
-            Imported (module_indice, Symbolic name, t) :: env.globals_tmp
-          in
-          { env with curr_global; globals_tmp }
-        | MMem (id, { min; max }) ->
-          if min > 65536 then
-            failwith "memory size must be at most 65536 pages (4GiB)";
-          Option.iter
-            (fun max ->
-              if max > 65536 then
-                failwith "memory size must be at most 65536 pages (4GiB)" )
-            max;
-          check_limit min max;
-          let curr_memory = env.curr_memory + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_memories id curr_memory) id;
-          let new_bytes = Bytes.make (min * page_size) '\000' in
-          let memories = Local (new_bytes, max) :: env.memories in
-          { env with curr_memory; memories }
-        | MTable (id, ({ min; max }, rt)) ->
-          let curr_table = env.curr_table + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_tables id curr_table) id;
-          check_limit min max;
-          let a = Array.make min None in
-          let tbl = Local (rt, a, max) in
-          let tables = tbl :: env.tables in
-          { env with curr_table; tables }
-        | MType (id, t) ->
-          let curr_type = env.curr_type + 1 in
-          let types = t :: env.types in
-          Option.iter (fun id -> Hashtbl.add seen_types id curr_type) id;
-          { env with curr_type; types }
-        | MElem e ->
-          let curr_element = env.curr_element + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_elements id curr_element) e.id;
-          { env with curr_element }
-        | MData data ->
-          let curr_data = env.curr_data + 1 in
-          Option.iter (fun id -> Hashtbl.add seen_datas id curr_data) data.id;
-          let data =
-            match data.mode with
-            | Data_passive -> data.init
-            | Data_active (_indice, _expr) -> ""
-          in
-          let datas = data :: env.datas in
-          { env with datas; curr_data } )
-      { curr_func = -1
-      ; curr_global = -1
-      ; curr_memory = -1
-      ; curr_table = -1
-      ; curr_type = -1
-      ; curr_element = -1
-      ; curr_data = -1
-      ; datas = []
-      ; funcs = []
-      ; globals = []
-      ; globals_tmp = []
-      ; memories = []
-      ; tables = []
-      ; types = []
-      ; start = None
-      }
-      m.Types.fields
-  in
+  let global fmt (func : (_ global', _) runtime) =
+    match func with
+    | Local func -> begin
+      match func.id with
+      | None -> Format.fprintf fmt "local"
+      | Some id -> Format.fprintf fmt "$%s" id
+    end
+    | Imported { module_; name; _ } -> Format.fprintf fmt "%s.%s" module_ name
 
-  let globals_tmp =
-    List.map
-      (function
-        | Local (gt, b) ->
-          let b = List.map aux b in
-          List.iter
-            (function
-              | Ref_func i ->
-                let i = map_symb find_func i in
-                if i >= List.length env.funcs then failwith "unknown function"
-              | _instr -> () )
-            b;
-          Local (gt, b)
-        | Imported _ as i -> i )
-      env.globals_tmp
-  in
+  let indexed f fmt indexed =
+    let (I i) = indexed.index in
+    Format.fprintf fmt "%i: %a" i f indexed.value
 
-  let start = env.start in
-  let datas = List.rev env.datas |> Array.of_list in
-  let globals_tmp = List.rev globals_tmp |> Array.of_list in
-  let tables = List.rev env.tables |> Array.of_list in
-  let memories = List.rev env.memories |> Array.of_list in
-  let funcs = List.rev env.funcs |> Array.of_list in
+  let lst f fmt l =
+    Format.fprintf fmt "[%a]"
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ", ") f)
+      l
 
-  let add_exported_name =
-    let tbl = Hashtbl.create 512 in
-    fun name ->
-      if Hashtbl.mem tbl name then failwith "duplicate export name";
-      Hashtbl.add tbl name ()
-  in
+  let funcs fmt (funcs : _ runtime named) = lst (indexed func) fmt funcs.values
 
-  let fields =
-    List.fold_left
-      (fun fields -> function
-        | MExport { name; desc } ->
-          add_exported_name name;
-          let desc =
-            match desc with
-            | Export_func indice ->
-              Export_func (Option.map (map_symb_raw find_func) indice)
-            | Export_table indice ->
-              Export_table (Option.map (map_symb_raw find_table) indice)
-            | Export_global indice ->
-              Export_global (Option.map (map_symb_raw find_global) indice)
-            | Export_mem indice ->
-              Export_mem (Option.map (map_symb_raw find_memory) indice)
-          in
-          let f = MExport { name; desc } in
-          f :: fields
-        | MData data as f -> begin
-          match data.mode with
-          | Data_passive -> f :: fields
-          | Data_active (indice, expr) ->
-            let indice = Option.map (map_symb_raw find_memory) indice in
-            let expr = List.map aux expr in
-            let mode = Data_active (indice, expr) in
-            let f = MData { data with mode } in
-            f :: fields
-        end
-        | MElem e ->
-          let aux = List.map aux in
-          let init = List.map aux e.init in
-          let mode =
-            match e.mode with
-            | Elem_passive -> e.mode
-            | Elem_active (ti, offset) ->
-              let ti = Option.map (map_symb_raw find_table) ti in
-              Elem_active (ti, aux offset)
-            | Elem_declarative -> e.mode
-          in
-          List.iter
-            (List.iter (function
-              | Ref_func i ->
-                if map_symb find_func i >= Array.length funcs then
-                  failwith "unknown function"
-              | _instr -> () ) )
-            init;
-          MElem { e with mode; init } :: fields
-        | f -> f :: fields )
-      [] m.Types.fields
-  in
-  let fields = List.rev fields in
+  let globals fmt (globals : _ runtime named) =
+    lst (indexed global) fmt globals.values
 
-  (* adding implicit type definitions *)
-  let types =
-    let types =
-      Array.fold_left
-        (fun types -> function
-          | Local f -> begin
-            match f.type_f with
-            | Bt_ind _ind -> types
-            | Bt_raw (_type_use, t) ->
-              if List.mem t types then types else t :: types
-          end
-          | Imported _ -> types )
-        env.types funcs
-    in
-    Array.of_list (List.rev types)
-  in
+  let export fmt (export : index export) =
+    Format.fprintf fmt "%s: %a" export.name Pp.Simplified_bis.indice export.id
 
-  let funcs =
-    Array.map
-      (function
-        | Local f ->
-          let local_tbl = Hashtbl.create 512 in
-          let find_local id =
-            match Hashtbl.find_opt local_tbl id with
-            | None -> failwith @@ Format.sprintf "unbound local %s" id
-            | Some i -> i
-          in
-          let pt, rt =
-            match f.type_f with
-            | Bt_ind ind -> begin
-              try types.(find_type ind)
-              with Invalid_argument _ -> failwith "unknown type"
-            end
-            | Bt_raw (type_use, t) -> begin
-              (* TODO: move this to check ?*)
-              match type_use with
-              | None -> t
-              | Some ind ->
-                let t' =
-                  try types.(find_type ind)
-                  with Invalid_argument _ -> failwith "unknown type"
-                in
-                let func_type_equal (p1, r1) (p2, r2) =
-                  (* we ignore the argument name *)
-                  let p1 = List.map snd p1 in
-                  let p2 = List.map snd p2 in
-                  r1 = r2 && p1 = p2
-                in
-                if not (func_type_equal t t') then
-                  failwith "inline function type";
-                t' (* TODO: t ? *)
-            end
-          in
+  let result fmt (result : result) : unit =
+    fprintf fmt
+      "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global \
+       %a)@]@ @[<hov 2>(export func %a)@]@@ )@]"
+      id result.id funcs result.func globals result.global (lst export)
+      result.exports.func
+end
 
-          (* adding params and locals to the locals table *)
-          let locals = pt @ f.locals in
-          List.iteri
-            (fun i (id, _t) ->
-              Option.iter (fun id -> Hashtbl.add local_tbl id i) id )
-            locals;
+module Group : sig
+  val group : module_ -> grouped_module
+end = struct
+  let imp (import : import) (assigned_name, desc) =
+    { module_ = import.module_; name = import.name; assigned_name; desc }
 
-          (* block_ids handling *)
-          let block_id_to_raw (loop_count, block_ids) id : out_indice =
-            let id =
+  let empty_module id =
+    { id
+    ; type_ = []
+    ; function_type = []
+    ; type_checks = []
+    ; global = []
+    ; table = []
+    ; mem = []
+    ; func = []
+    ; elem = []
+    ; data = []
+    ; exports = { global = []; table = []; mem = []; func = [] }
+    ; start = []
+    }
+
+  type curr =
+    { global : int
+    ; table : int
+    ; mem : int
+    ; func : int
+    ; elem : int
+    ; data : int
+    }
+
+  let init_curr =
+    { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
+
+  let add_global value (fields : grouped_module) (curr : curr) =
+    let index = I curr.global in
+    ( { fields with global = { index; value } :: fields.global }
+    , { curr with global = succ curr.global } )
+
+  let add_table value (fields : grouped_module) (curr : curr) =
+    let index = I curr.table in
+    ( { fields with table = { index; value } :: fields.table }
+    , { curr with table = succ curr.table } )
+
+  let add_mem value (fields : grouped_module) (curr : curr) =
+    let index = I curr.mem in
+    ( { fields with mem = { index; value } :: fields.mem }
+    , { curr with mem = succ curr.mem } )
+
+  let add_func value (fields : grouped_module) (curr : curr) =
+    let index = I curr.func in
+    ( { fields with func = { index; value } :: fields.func }
+    , { curr with func = succ curr.func } )
+
+  let add_elem value (fields : grouped_module) (curr : curr) =
+    let index = I curr.elem in
+    ( { fields with elem = { index; value } :: fields.elem }
+    , { curr with elem = succ curr.elem } )
+
+  let add_data value (fields : grouped_module) (curr : curr) =
+    let index = I curr.data in
+    ( { fields with data = { index; value } :: fields.data }
+    , { curr with data = succ curr.data } )
+
+  let curr_id curr = function
+    | None -> Curr (I (pred curr))
+    | Some id -> Indice id
+
+  let check_limit { min; max } =
+    Option.iter
+      (fun max ->
+        if min > max then
+          failwith "size minimum must not be greater than maximum" )
+      max
+
+  let group (module_ : Types.module_) : grouped_module =
+    let add ((fields : grouped_module), curr) field =
+      match field with
+      | MType type_ -> ({ fields with type_ = type_ :: fields.type_ }, curr)
+      | MGlobal global -> add_global (Local global) fields curr
+      | MImport ({ desc = Import_global (a, b); _ } as import) ->
+        add_global (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_global id } ->
+        let id = curr_id curr.global id in
+        ( { fields with
+            exports =
+              { fields.exports with
+                global = { name; id } :: fields.exports.global
+              }
+          }
+        , curr )
+      | MTable table ->
+        let _, (limits, _) = table in
+        check_limit limits;
+        add_table (Local table) fields curr
+      | MImport ({ desc = Import_table (a, b); _ } as import) ->
+        add_table (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_table id } ->
+        let id = curr_id curr.table id in
+        ( { fields with
+            exports =
+              { fields.exports with
+                table = { name; id } :: fields.exports.table
+              }
+          }
+        , curr )
+      | MMem mem ->
+        let _, limits = mem in
+        if limits.min > 65536 then
+          failwith "memory size must be at most 65536 pages (4GiB)";
+        Option.iter
+          (fun max ->
+            if max > 65536 then
+              failwith "memory size must be at most 65536 pages (4GiB)" )
+          limits.max;
+        check_limit limits;
+        add_mem (Local mem) fields curr
+      | MImport ({ desc = Import_mem (a, b); _ } as import) ->
+        add_mem (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_mem id } ->
+        let id = curr_id curr.mem id in
+        ( { fields with
+            exports =
+              { fields.exports with mem = { name; id } :: fields.exports.mem }
+          }
+        , curr )
+      | MFunc func ->
+        let function_type, type_checks =
+          match func.type_f with
+          | Bt_ind _ -> (fields.function_type, fields.type_checks)
+          | Bt_raw (id, type_) ->
+            let type_checks =
               match id with
-              | Symbolic id ->
-                Debug.debug Format.err_formatter "SYMBOLIC BLOCK ID %s@\n" id;
-                let pos = ref (-1) in
-                begin
-                  try
-                    List.iteri
-                      (fun i n ->
-                        if n = Some id then begin
-                          pos := i;
-                          raise Exit
-                        end )
-                      block_ids
-                  with Exit -> ()
-                end;
-                if !pos = -1 then failwith "unknown label";
-                !pos
-              | Raw id ->
-                Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;
-                id
+              | None -> fields.type_checks
+              | Some id -> (id, type_) :: fields.type_checks
             in
-            (* this is > and not >= because you can `br 0` without any block to target the function *)
-            if id > List.length block_ids + loop_count then
-              failwith "unknown label";
-            I id
-          in
+            (type_ :: fields.function_type, type_checks)
+        in
+        let index = I curr.func in
+        let func = { value = Local func; index } :: fields.func in
+        ( { fields with func; function_type; type_checks }
+        , { curr with func = succ curr.func } )
+      | MImport ({ desc = Import_func (a, b); _ } as import) ->
+        add_func (Imported (imp import (a, b))) fields curr
+      | MExport { name; desc = Export_func id } ->
+        let id = curr_id curr.func id in
+        ( { fields with
+            exports =
+              { fields.exports with func = { name; id } :: fields.exports.func }
+          }
+        , curr )
+      | MElem elem ->
+        let mode =
+          match elem.mode with
+          | (Elem_passive | Elem_declarative) as mode -> mode
+          | Elem_active (id, expr) ->
+            let id = Option.value id ~default:(Raw (curr.table - 1)) in
+            Elem_active (id, expr)
+        in
+        let elem = { elem with mode } in
+        add_elem elem fields curr
+      | MData data ->
+        let mode =
+          match data.mode with
+          | Data_passive -> Data_passive
+          | Data_active (id, expr) ->
+            let id = Option.value id ~default:(Raw (curr.mem - 1)) in
+            Data_active (id, expr)
+        in
+        let data = { data with mode } in
 
-          let bt_to_raw =
-            Option.map (function
-              | Bt_ind ind ->
-                let indice = find_type ind in
-                let pt, rt =
-                  try types.(indice)
-                  with Invalid_argument _ -> failwith "unknown type"
-                in
-                Bt_raw (Some (I indice), (pt, rt))
-              | Bt_raw (type_use, t) ->
-                begin
-                  match type_use with
-                  | None -> ()
-                  | Some ind ->
-                    (* TODO: move this to check ? *)
-                    (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
-                    let pt, rt =
-                      try types.(find_type ind)
-                      with Invalid_argument _ -> failwith "unknown type"
-                    in
-                    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
-                    let t' = (pt, rt) in
-                    let ok = t = t' in
-                    if not ok then failwith "inline function type"
-                end;
-                Bt_raw (None, t) )
-          in
+        add_data data fields curr
+      | MStart start -> ({ fields with start = start :: fields.start }, curr)
+    in
+    let module_, _curr =
+      List.fold_left add (empty_module module_.id, init_curr) module_.fields
+    in
+    module_
+end
 
-          (* handling an expression *)
-          let rec body (loop_count, block_ids) : instr -> simplified_instr =
-            function
-            | Br_table (ids, id) ->
-              let f = block_id_to_raw (loop_count, block_ids) in
-              Br_table (Array.map f ids, f id)
-            | Br_if id -> Br_if (block_id_to_raw (loop_count, block_ids) id)
-            | Br id -> Br (block_id_to_raw (loop_count, block_ids) id)
-            | Call id ->
-              let id = map_symb find_func id in
-              if id >= Array.length funcs then failwith "unknown function";
-              Call (I id)
-            | Local_set id ->
-              let id = map_symb find_local id in
-              if id >= List.length locals then failwith "unknown local";
-              Local_set (I id)
-            | Local_get id ->
-              let id = map_symb find_local id in
-              if id >= List.length locals then failwith "unknown local";
-              Local_get (I id)
-            | Local_tee id ->
-              let id = map_symb find_local id in
-              if id >= List.length locals then failwith "unknown local";
-              Local_tee (I id)
-            | If_else (id, bt, e1, e2) ->
-              let bt = bt_to_raw bt in
-              let block_ids = id :: block_ids in
-              If_else
-                ( id
-                , bt
-                , expr e1 (loop_count, block_ids)
-                , expr e2 (loop_count, block_ids) )
-            | Loop (id, bt, e) ->
-              let bt = bt_to_raw bt in
-              let e = expr e (loop_count + 1, id :: block_ids) in
-              Loop (id, bt, e)
-            | Block (id, bt, e) ->
-              let bt = bt_to_raw bt in
-              Block (id, bt, expr e (loop_count, id :: block_ids))
-            | Call_indirect (tbl_i, bt) ->
-              let tbl_i = map_symb find_table tbl_i in
-              if tbl_i >= Array.length tables then failwith "unknown table";
-              let bt = Option.get @@ bt_to_raw (Some bt) in
-              Call_indirect (I tbl_i, bt)
-            | Global_set id ->
-              let id = map_symb find_global id in
-              (* TODO: it seems there's not test for this, add one ? *)
-              if id >= Array.length globals_tmp then failwith "unknown global";
-              begin
-                match globals_tmp.(id) with
-                | Local ((mut, _vt), _) | Imported (_, _, (mut, _vt)) -> begin
-                  match mut with
-                  | Const -> failwith "global is immutable"
-                  | Var -> ()
-                end
-              end;
-              Global_set (I id)
-            | Global_get id ->
-              let id = map_symb find_global id in
-              if id >= Array.length globals_tmp then failwith "unknown global";
-              Global_get (I id)
-            | Ref_func id -> Ref_func (map_symb_raw' find_func id)
-            | Table_size id -> Table_size (map_symb_raw' find_table id)
-            | Table_get id -> Table_get (map_symb_raw' find_table id)
-            | Table_set id -> Table_set (map_symb_raw' find_table id)
-            | Table_grow id -> Table_grow (map_symb_raw' find_table id)
-            | Table_init (i, i') ->
-              let i = map_symb find_table i in
-              if i >= Array.length tables then failwith "unknown table";
-              (* TODO: check i' ? *)
-              Table_init (I i, map_symb_raw' find_element i')
-            | Table_fill id -> Table_fill (map_symb_raw' find_table id)
-            | Table_copy (i, i') ->
-              Table_copy
-                (map_symb_raw' find_table i, map_symb_raw' find_table i')
-            | Memory_init id ->
-              if Array.length memories < 1 then failwith "unknown memory";
-              let id = map_symb find_data id in
-              if id >= Array.length datas then failwith "unknown data segment";
-              Memory_init (I id)
-            | Data_drop id ->
-              let id = map_symb find_data id in
-              if id >= Array.length datas then failwith "unknown data segment";
-              Data_drop (I id)
-            | Elem_drop id ->
-              let id = map_symb find_element id in
-              if id > env.curr_element then failwith "unknown elem segment";
-              Elem_drop (I id)
-            | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
-              | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
-              | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
-              if Array.length memories < 1 then failwith "unknown memory";
-              i
-            | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _
-              | F_relop _ | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _
-              | I_reinterpret_f _ | I64_extend_i32 _ | I64_extend32_s
-              | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
-              | F64_promote_f32 | F_convert_i _ | I_trunc_f _ | I_trunc_sat_f _
-              | Ref_is_null | F_binop _ | F32_const _ | F64_const _
-              | I32_const _ | I64_const _ | Unreachable | Drop | Select _ | Nop
-              | Return ) as i ->
-              i
-          and expr (e : expr) (loop_count, block_ids) : simplified_expr =
-            List.map (body (loop_count, block_ids)) e
-          in
-          let body = expr f.body (0, []) in
-          Local { f with body; type_f = Bt_raw (None, (pt, rt)) }
-        | Imported _ as f -> f )
-      funcs
+module FuncType = struct
+  type t = func_type
+
+  let compare = compare
+end
+
+module TypeMap = Map.Make (FuncType)
+
+let equal_func_types (a : func_type) (b : func_type) : bool =
+  let remove_param (pt, rt) =
+    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
+    (pt, rt)
   in
+  remove_param a = remove_param b
 
-  Option.iter
-    (fun i -> if i >= Array.length funcs then failwith "unknown function")
-    start;
+module Assign_indicies : sig
+  val run : grouped_module -> assigned_module
+end = struct
+  type type_acc =
+    { declared_types : func_type indexed list
+    ; func_types : func_type indexed list
+    ; named_types : index StringMap.t
+    ; last_assigned_index : int
+    ; all_types : index TypeMap.t
+    }
 
-  { fields
-  ; funcs
-  ; memories
-  ; tables
-  ; types
-  ; globals = [||]
-  ; globals_tmp
-  ; elements = [||]
-  ; start
-  ; datas
-  ; exported_funcs
-  ; exported_globals
-  ; exported_memories
-  ; exported_tables
-  ; should_trap = None
-  ; should_not_link = None
-  }
+  let assign_types (module_ : grouped_module) : func_type named =
+    let assign_type
+        { declared_types
+        ; func_types
+        ; named_types
+        ; last_assigned_index
+        ; all_types
+        } (name, type_) =
+      let id = I last_assigned_index in
+      let last_assigned_index = last_assigned_index + 1 in
+      let declared_types = { index = id; value = type_ } :: declared_types in
+      let named_types =
+        match name with
+        | None -> named_types
+        | Some name -> StringMap.add name id named_types
+      in
+      let all_types = TypeMap.add type_ id all_types in
+      (* Is there something to do/check when a type is already declared ? *)
+      { declared_types
+      ; func_types
+      ; named_types
+      ; last_assigned_index
+      ; all_types
+      }
+    in
+    let empty_acc =
+      { declared_types = []
+      ; func_types = []
+      ; named_types = StringMap.empty
+      ; last_assigned_index = 0
+      ; all_types = TypeMap.empty
+      }
+    in
+    let acc = List.fold_left assign_type empty_acc (List.rev module_.type_) in
+    let assign_func_type
+        ( { func_types; named_types = _; last_assigned_index; all_types; _ } as
+        acc ) type_ =
+      match TypeMap.find_opt type_ all_types with
+      | Some _id -> acc
+      | None ->
+        let id = I last_assigned_index in
+        let last_assigned_index = last_assigned_index + 1 in
+        let func_types = { index = id; value = type_ } :: func_types in
+        let all_types = TypeMap.add type_ id all_types in
+        { acc with func_types; last_assigned_index; all_types }
+    in
+    let acc =
+      List.fold_left assign_func_type acc (List.rev module_.function_type)
+    in
+    let values = List.rev acc.declared_types @ List.rev acc.func_types in
+    (* Format.printf "TYPES@.%a"
+     *   (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "@.")
+     *      (fun ppf {index; value} -> Format.fprintf ppf "%a: %a"
+     *                       Pp.Simplified_bis.indice index Pp.Input.func_type value))
+     *   values; *)
+    { values; named = acc.named_types }
+
+  let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
+      : string option =
+    match elt with
+    | Local v -> get_name v
+    | Imported { assigned_name; _ } -> assigned_name
+
+  let name kind ~(get_name : 'a -> string option) (values : 'a indexed list) :
+      'a named =
+    let assign_one (named : index StringMap.t) (elt : _ indexed) =
+      match get_name elt.value with
+      | None -> named
+      | Some name ->
+        if StringMap.mem name named then
+          failwith (Printf.sprintf "duplicate %s %s" kind name)
+        else StringMap.add name elt.index named
+    in
+    let named = List.fold_left assign_one StringMap.empty values in
+    { values; named }
+
+  let check_type_id (types : func_type named) (check : type_check) =
+    let id, func_type = check in
+    let id =
+      match id with
+      | Raw i -> I i
+      | Symbolic name -> StringMap.find name types.named
+    in
+    (* TODO more efficient version of that *)
+    match List.find_opt (fun v -> v.index = id) types.values with
+    | None -> failwith "unknown type"
+    | Some func_type' ->
+      if not (equal_func_types func_type func_type'.value) then
+        failwith "inline function type"
+
+  let run (module_ : grouped_module) : assigned_module =
+    let type_ = assign_types module_ in
+    let global =
+      name "global"
+        ~get_name:(get_runtime_name (fun ({ id; _ } : Types.global) -> id))
+        module_.global
+    in
+    let table =
+      name "table"
+        ~get_name:(get_runtime_name (fun ((id, _) : Types.table) -> id))
+        module_.table
+    in
+    let mem =
+      name "mem"
+        ~get_name:(get_runtime_name (fun ((id, _) : Types.mem) -> id))
+        module_.mem
+    in
+    let func =
+      name "func"
+        ~get_name:(get_runtime_name (fun ({ id; _ } : _ Types.func) -> id))
+        module_.func
+    in
+    let elem =
+      name "elem" ~get_name:(fun (elem : known_elem) -> elem.id) module_.elem
+    in
+    let data =
+      name "data" ~get_name:(fun (data : known_data) -> data.id) module_.data
+    in
+    List.iter (check_type_id type_) module_.type_checks;
+    { id = module_.id
+    ; type_
+    ; global
+    ; table
+    ; mem
+    ; func
+    ; elem
+    ; data
+    ; exports = module_.exports
+    ; start = module_.start
+    }
+end
+
+module Rewrite_indices = struct
+  let find msg (named : 'a named) (indice : indice) : index =
+    match indice with
+    | Raw i ->
+      (* TODO change indexed strucure for that to be more efficient *)
+      if not (List.exists (fun { index; _ } -> index = I i) named.values) then
+        failwith (Printf.sprintf "%s %i" msg i);
+      I i
+    | Symbolic name -> (
+      match StringMap.find_opt name named.named with
+      | None -> failwith (Printf.sprintf "%s %s" msg name)
+      | Some i -> i )
+
+  let get msg (named : 'a named) (indice : indice) : 'a indexed =
+    let (I i) = find msg named indice in
+    (* TODO change named structure to make that sensible *)
+    match List.nth_opt named.values i with None -> failwith msg | Some v -> v
+
+  let find_global (module_ : assigned_module) id =
+    let idx = find "unknown global" module_.global id in
+    let va =
+      List.find (fun { index; _ } -> index = idx) module_.global.values
+    in
+    let mut, _typ =
+      match va.value with
+      | Local global -> global.type_
+      | Imported imported -> imported.desc
+    in
+    (idx, mut)
+
+  let rewrite_expr (module_ : assigned_module) (locals : param list)
+      (iexpr : expr) : (index, func_type) expr' =
+    (* block_ids handling *)
+    let block_id_to_raw (loop_count, block_ids) id : index =
+      let id =
+        match id with
+        | Symbolic id ->
+          Debug.debug Format.err_formatter "SYMBOLIC BLOCK ID %s@\n" id;
+          let pos = ref (-1) in
+          begin
+            try
+              List.iteri
+                (fun i n ->
+                  if n = Some id then begin
+                    pos := i;
+                    raise Exit
+                  end )
+                block_ids
+            with Exit -> ()
+          end;
+          if !pos = -1 then failwith "unknown label";
+          !pos
+        | Raw id ->
+          Debug.debug Format.err_formatter "RAW BLOCK ID %d@\n" id;
+          id
+      in
+      (* this is > and not >= because you can `br 0` without any block to target the function *)
+      if id > List.length block_ids + loop_count then failwith "unknown label";
+      I id
+    in
+
+    let bt_to_raw =
+      Option.map (function
+        | Bt_ind ind ->
+          let { value; _ } = get "unknown type" module_.type_ ind in
+          value
+        | Bt_raw (type_use, t) ->
+          begin
+            match type_use with
+            | None -> ()
+            | Some ind ->
+              (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
+              let { value = t'; _ } = get "unknown type" module_.type_ ind in
+              let ok = equal_func_types t t' in
+              if not ok then failwith "inline function type"
+          end;
+          t )
+    in
+
+    let find_local =
+      let locals, after_last_assigned_local =
+        List.fold_left
+          (fun (locals, next_free_index) ((name, _type) : param) ->
+            match name with
+            | None -> (locals, next_free_index + 1)
+            | Some name ->
+              if StringMap.mem name locals then
+                failwith (Printf.sprintf "duplicate local %s" name)
+              else
+                ( StringMap.add name (I next_free_index) locals
+                , next_free_index + 1 ) )
+          (StringMap.empty, 0) locals
+      in
+      let find_local id =
+        match id with
+        | Raw i ->
+          if i >= after_last_assigned_local then failwith "unknown local";
+          I i
+        | Symbolic name -> (
+          match StringMap.find_opt name locals with
+          | None -> failwith (Printf.sprintf "unknown local %s" name)
+          | Some id -> id )
+      in
+      find_local
+    in
+
+    let find_table id = find "unknown table" module_.table id in
+    let find_func id = find "unknown function" module_.func id in
+    let _find_mem id = find "unknown memory" module_.mem id in
+    let find_data id = find "unknown data segment" module_.data id in
+    let find_elem id = find "unknown elem segment" module_.elem id in
+
+    let rec body (loop_count, block_ids) : instr -> (index, func_type) instr' =
+      function
+      | Br_table (ids, id) ->
+        let f = block_id_to_raw (loop_count, block_ids) in
+        Br_table (Array.map f ids, f id)
+      | Br_if id -> Br_if (block_id_to_raw (loop_count, block_ids) id)
+      | Br id -> Br (block_id_to_raw (loop_count, block_ids) id)
+      | Call id -> Call (find_func id)
+      | Local_set id -> Local_set (find_local id)
+      | Local_get id -> Local_get (find_local id)
+      | Local_tee id -> Local_tee (find_local id)
+      | If_else (id, bt, e1, e2) ->
+        let bt = bt_to_raw bt in
+        let block_ids = id :: block_ids in
+        If_else
+          ( id
+          , bt
+          , expr e1 (loop_count, block_ids)
+          , expr e2 (loop_count, block_ids) )
+      | Loop (id, bt, e) ->
+        let bt = bt_to_raw bt in
+        let e = expr e (loop_count + 1, id :: block_ids) in
+        Loop (id, bt, e)
+      | Block (id, bt, e) ->
+        let bt = bt_to_raw bt in
+        Block (id, bt, expr e (loop_count, id :: block_ids))
+      | Call_indirect (tbl_i, bt) ->
+        let bt = Option.get @@ bt_to_raw (Some bt) in
+        Call_indirect (find_table tbl_i, bt)
+      | Global_set id -> begin
+        let idx, mut = find_global module_ id in
+        match mut with
+        | Const -> failwith "global is immutable"
+        | Var -> Global_set idx
+      end
+      | Global_get id ->
+        let idx, _mut = find_global module_ id in
+        Global_get idx
+      | Ref_func id -> Ref_func (find_func id)
+      | Table_size id -> Table_size (find_table id)
+      | Table_get id -> Table_get (find_table id)
+      | Table_set id -> Table_set (find_table id)
+      | Table_grow id -> Table_grow (find_table id)
+      | Table_init (i, i') ->
+        let table = find_table i in
+        let elem = find_elem i' in
+        Table_init (table, elem)
+      | Table_fill id -> Table_fill (find_table id)
+      | Table_copy (i, i') ->
+        let table = find_table i in
+        let table' = find_table i' in
+        Table_copy (table, table')
+      | Memory_init id ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        Memory_init (find_data id)
+      | Data_drop id -> Data_drop (find_data id)
+      | Elem_drop id -> Elem_drop (find_elem id)
+      | ( I_load8 _ | I_load16 _ | I64_load32 _ | I_load _ | F_load _
+        | I64_store32 _ | I_store8 _ | I_store16 _ | F_store _ | I_store _
+        | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i ->
+        if List.length module_.mem.values < 1 then failwith "unknown memory 0";
+        i
+      | Select typ as i -> begin
+        match typ with
+        | None | Some [ _ ] -> i
+        | Some [] | Some (_ :: _ :: _) -> failwith "invalid result arity"
+      end
+      | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
+        | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
+        | I64_extend_i32 _ | I64_extend32_s | F32_demote_f64 | I_extend8_s _
+        | I_extend16_s _ | F64_promote_f32 | F_convert_i _ | I_trunc_f _
+        | I_trunc_sat_f _ | Ref_is_null | F_binop _ | F32_const _ | F64_const _
+        | I32_const _ | I64_const _ | Unreachable | Drop | Nop | Return ) as i
+        ->
+        i
+    and expr (e : expr) (loop_count, block_ids) : (index, func_type) expr' =
+      List.map (body (loop_count, block_ids)) e
+    in
+    let body = expr iexpr (0, []) in
+    body
+
+  let rewrite_const_expr (module_ : assigned_module) (expr : (indice, _) expr')
+      : Const.expr =
+    let const_ibinop (op : ibinop) : Const.ibinop =
+      match op with
+      | Add -> Add
+      | Sub -> Sub
+      | Mul -> Mul
+      | _ -> failwith "constant expression required"
+    in
+
+    let const_instr (instr : (indice, _) instr') : Const.instr =
+      match instr with
+      | I32_const v -> I32_const v
+      | I64_const v -> I64_const v
+      | F32_const v -> F32_const v
+      | F64_const v -> F64_const v
+      | Ref_null v -> Ref_null v
+      | Ref_func f -> Ref_func (find "unknown function" module_.func f)
+      | Global_get id -> begin
+        let idx, mut = find_global module_ id in
+        match mut with
+        | Const -> Global_get idx
+        | Var -> failwith "constant expression required"
+      end
+      | I_binop (t, op) -> I_binop (t, const_ibinop op)
+      | _ -> failwith "constant expression required"
+    in
+    List.map const_instr expr
+
+  let rewrite_block_type (module_ : assigned_module) block_type : func_type =
+    match block_type with
+    | Bt_ind id -> (get "unknown type" module_.type_ id).value
+    | Bt_raw (_, func_type) -> func_type
+
+  let rewrite_global (module_ : assigned_module) (global : global) :
+      Const.expr global' =
+    { global with init = rewrite_const_expr module_ global.init }
+
+  let rewrite_elem (module_ : assigned_module) (elem : known_elem) :
+      (index, Const.expr) elem' =
+    let mode =
+      match elem.mode with
+      | (Elem_passive | Elem_declarative) as mode -> mode
+      | Elem_active (indice, expr) ->
+        let indice = find "unknown table" module_.table indice in
+        let expr = rewrite_const_expr module_ expr in
+        Elem_active (indice, expr)
+    in
+    let init = List.map (rewrite_const_expr module_) elem.init in
+    { elem with init; mode }
+
+  let rewrite_data (module_ : assigned_module) (data : known_data) :
+      (index, Const.expr) data' =
+    let mode =
+      match data.mode with
+      | Data_passive as mode -> mode
+      | Data_active (indice, expr) ->
+        let indice = find "unknown memory" module_.mem indice in
+        let expr = rewrite_const_expr module_ expr in
+        Data_active (indice, expr)
+    in
+    { data with mode }
+
+  let rewrite_export msg named exports =
+    List.map
+      (fun { name; id } ->
+        let id =
+          match id with Curr id -> id | Indice id -> find msg named id
+        in
+        { name; id } )
+      exports
+
+  let rewrite_exports (module_ : assigned_module) (exports : opt_ind exports) :
+      index exports =
+    { global = rewrite_export "unknown global" module_.global exports.global
+    ; mem = rewrite_export "unknown memory" module_.mem exports.mem
+    ; table = rewrite_export "unknown table" module_.table exports.table
+    ; func = rewrite_export "unknown function" module_.func exports.func
+    }
+
+  let rewrite_func (module_ : assigned_module) (func : indice func) :
+      (index, func_type) func' =
+    let type_f = rewrite_block_type module_ func.type_f in
+    let params, _ = type_f in
+    let body = rewrite_expr module_ (params @ func.locals) func.body in
+    { func with body; type_f }
+
+  let rewrite_import (f : 'a -> 'b) (import : 'a imp) : 'b imp =
+    { import with desc = f import.desc }
+
+  let rewrite_runtime f g r =
+    match r with Local v -> Local (f v) | Imported i -> Imported (g i)
+
+  let rewrite_named f named =
+    { named with
+      values =
+        List.map (fun ind -> { ind with value = f ind.value }) named.values
+    }
+
+  let run (module_ : assigned_module) : result =
+    let global =
+      let { named; values } =
+        rewrite_named
+          (rewrite_runtime (rewrite_global module_) Fun.id)
+          module_.global
+      in
+      { named; values = List.rev values }
+    in
+    let elem = rewrite_named (rewrite_elem module_) module_.elem in
+    let data = rewrite_named (rewrite_data module_) module_.data in
+    let exports = rewrite_exports module_ module_.exports in
+    let func =
+      rewrite_named
+        (rewrite_runtime (rewrite_func module_)
+           (rewrite_import (rewrite_block_type module_)) )
+        module_.func
+    in
+    let start =
+      List.map
+        (fun start ->
+          let idx = find "unknown function" func start in
+          let va = List.find (fun { index; _ } -> index = idx) func.values in
+          let param_typ, result_typ =
+            match va.value with
+            | Local func -> func.type_f
+            | Imported imported -> imported.desc
+          in
+          match (param_typ, result_typ) with
+          | [], [] -> idx
+          | _, _ -> failwith "start function" )
+        module_.start
+    in
+    { id = module_.id
+    ; mem = module_.mem
+    ; table = module_.table
+    ; global
+    ; elem
+    ; data
+    ; exports
+    ; func
+    ; start
+    }
+end
+
+type func = (index, func_type) func'
+
+let simplify (module_ : module_) : result =
+  Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run
+
+let simplify (module_ : module_) : result =
+  let simplified = simplify module_ in
+  Debug.debugerr "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
+  simplified
+
+module Pp = P

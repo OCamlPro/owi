@@ -1,4 +1,4 @@
-module Script = Woi.Script_bis
+module Script = Woi.Script
 
 let count_total = ref 0
 

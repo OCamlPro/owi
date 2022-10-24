@@ -82,7 +82,7 @@ module Func = struct
     (arg_type arg, res_type res)
 
   type 'env t =
-    | WASM of func_id * Simplify_bis.func * 'env
+    | WASM of func_id * Simplify.func * 'env
     | Extern of extern_func
 
   let fresh =
