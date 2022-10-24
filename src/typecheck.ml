@@ -26,7 +26,7 @@ module Env = struct
     | v -> v
 
   let make ~params ~locals ~result_type =
-    let l = List.mapi (fun i v -> (I i, v)) (params @ locals) in
+    let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
       List.fold_left
         (fun locals (i, (_, typ)) -> Index.Map.add i typ locals)
@@ -207,7 +207,7 @@ let typecheck_function (func : (S.func, func_type) S.runtime) =
   | Local func -> (
     let params, result = func.type_f in
     let env = Env.make ~params ~locals:func.locals ~result_type:result in
-    Debug.debugerr "TYPECHECK function@.%a@." Pp.Simplified_bis.func func;
+    Debug.debugerr "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
     | Stop -> ()
     | Continue _ -> () )
