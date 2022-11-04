@@ -26,7 +26,14 @@ module Env = struct
     | exception Not_found -> assert false
     | v -> v
 
-  let global_get _i _t = (* TODO *) assert false
+  let global_get i t =
+    match List.find (fun S.{ index; _ } -> index = i) t.globals.values with
+    | exception Not_found -> assert false
+    | { value; _ } ->
+      let _mut, type_ =
+        match value with Local { type_; _ } -> type_ | Imported t -> t.desc
+      in
+      type_
 
   let make ~params ~locals ~globals ~result_type =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
