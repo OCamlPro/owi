@@ -130,7 +130,7 @@ let check (s1 : state) (s2 : state) =
   | Stop, Stop -> Stop
   | Stop, Continue s | Continue s, Stop -> Continue s
   | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1 else failwith "type mismatch"
+    if Stack.equal s1 s2 then Continue s1 else Debug.error "type mismatch"
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -140,11 +140,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     match Stack.match_prefix (List.rev env.result_type) stack with
     | Some _ -> Stop
     | None ->
-      let msg =
-        Format.asprintf "type mismatch: return %a" Stack.pp_error
-          (env.result_type, stack)
-      in
-      failwith msg
+      Debug.error "type mismatch: return %a" Stack.pp_error
+        (env.result_type, stack)
   end
   | Unreachable -> Stop
   | I32_const _ -> Stack.push [ i32 ] stack
