@@ -209,6 +209,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
   | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env stack expr bt
+  | Call_indirect (_, (pt, rt)) ->
+    Stack.pop (i32 :: List.map snd pt) stack |> Stack.push rt
   | Call _i -> failwith "TODO TYPECHECK CALL"
   | _ as i -> Format.kasprintf failwith "TODO %a" Pp.Simplified.instr i
 
@@ -236,10 +238,8 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
   | Some _, Stop -> Stop
   | Some (_params, required), Continue stack ->
     if not (Stack.equal (List.rev required) stack) then begin
-      let msg =
-        Format.asprintf "type mismatch: expr %a" Stack.pp_error (required, stack)
-      in
-      failwith msg
+      Debug.error "type mismatch: expr `%a` %a" Pp.Simplified.expr expr
+        Stack.pp_error (required, stack)
     end;
     Continue required
 
