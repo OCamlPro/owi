@@ -4,6 +4,7 @@
   check
   convert
   debug
+  err
   float32
   float64
   int32

@@ -116,11 +116,11 @@ module Stack = struct
 
   let pop required stack =
     match match_prefix required stack with
-    | None -> failwith "type mismatch"
+    | None -> Err.pp "type mismatch"
     | Some stack -> stack
 
   let drop stack =
-    match stack with [] -> failwith "type mismatch" | _ :: tl -> tl
+    match stack with [] -> Err.pp "type mismatch" | _ :: tl -> tl
 
   let push t stack = Continue (t @ stack)
 end
@@ -130,7 +130,7 @@ let check (s1 : state) (s2 : state) =
   | Stop, Stop -> Stop
   | Stop, Continue s | Continue s, Stop -> Continue s
   | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1 else Debug.error "type mismatch"
+    if Stack.equal s1 s2 then Continue s1 else Err.pp "type mismatch"
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -140,8 +140,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     match Stack.match_prefix (List.rev env.result_type) stack with
     | Some _ -> Stop
     | None ->
-      Debug.error "type mismatch: return %a" Stack.pp_error
-        (env.result_type, stack)
+      Err.pp "type mismatch: return %a" Stack.pp_error (env.result_type, stack)
   end
   | Unreachable -> Stop
   | I32_const _ -> Stack.push [ i32 ] stack
@@ -211,8 +210,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env stack expr bt
   | Call_indirect (_, (pt, rt)) ->
     Stack.pop (i32 :: List.map snd pt) stack |> Stack.push rt
-  | Call _i -> failwith "TODO TYPECHECK CALL"
-  | _ as i -> Format.kasprintf failwith "TODO %a" Pp.Simplified.instr i
+  | Call _i -> Err.pp "TODO TYPECHECK CALL"
+  | _ as i -> Err.pp "TODO %a" Pp.Simplified.instr i
 
 and typecheck_expr (env : env) (stack : stack) (expr : expr)
     (block_type : func_type option) : state =
@@ -231,14 +230,14 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
   | None -> ()
   | Some (required, _result) ->
     if not (Stack.equal (List.rev_map snd required) stack) then
-      failwith "type mismatch" );
+      Err.pp "type mismatch" );
   let state = loop stack expr in
   match (block_type, state) with
   | None, _ -> state
   | Some _, Stop -> Stop
   | Some (_params, required), Continue stack ->
     if not (Stack.equal (List.rev required) stack) then begin
-      Debug.error "type mismatch: expr `%a` %a" Pp.Simplified.expr expr
+      Err.pp "type mismatch: expr `%a` %a" Pp.Simplified.expr expr
         Stack.pp_error (required, stack)
     end;
     Continue required

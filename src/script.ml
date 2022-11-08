@@ -15,7 +15,7 @@ let check_error' ~expected ~got =
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
     Format.eprintf "got     : `%s`@." got;
-    failwith got
+    Err.pp "%s" got
   end
 
 let check_error ~expected ~got =
@@ -28,7 +28,7 @@ let check_error ~expected ~got =
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
     Format.eprintf "got     : `%s`@." got;
-    failwith got
+    Err.pp "%s" got
   end
 
 let check script =
@@ -36,7 +36,7 @@ let check script =
     List.iter
       (function
         | Module m -> begin
-          match Check.module_ m with Ok () -> () | Error e -> failwith e
+          match Check.module_ m with Ok () -> () | Error e -> Err.pp "%s" e
         end
         | _ -> () )
       script;
@@ -48,16 +48,16 @@ let load_func_from_module ls mod_id f_name : Link.func =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> failwith "unbound last module"
+      | None -> Err.pp "unbound last module"
       | Some m -> m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> failwith ("unbound module " ^ mod_id)
+      | exception Not_found -> Err.pp "unbound module " mod_id
       | exports -> exports )
   in
   match Link.StringMap.find f_name exports.functions with
-  | exception Not_found -> failwith ("unbound name " ^ f_name)
+  | exception Not_found -> Err.pp "unbound name " f_name
   | v -> v
 
 let load_global_from_module ls mod_id name : Link.global =
@@ -65,16 +65,16 @@ let load_global_from_module ls mod_id name : Link.global =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> failwith "unbound last module"
+      | None -> Err.pp "unbound last module"
       | Some m -> m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> failwith ("unbound module " ^ mod_id)
+      | exception Not_found -> Err.pp "unbound module " mod_id
       | exports -> exports )
   in
   match Link.StringMap.find name exports.globals with
-  | exception Not_found -> failwith ("unbound name " ^ name)
+  | exception Not_found -> Err.pp "unbound name " name
   | v -> v
 
 let compare_result_const result (const : value) =
@@ -111,8 +111,8 @@ let compare_result_const result (const : value) =
   | Result_const (Literal (Const_null _)), _
   | Result_const (Literal (Const_host _)), _ ->
     false
-  | Result_func_ref, _ -> failwith "TODO (compare_result_const)"
-  | Result_extern_ref, _ -> failwith "TODO (compare_result_const)"
+  | Result_func_ref, _ -> Err.pp "TODO (compare_result_const)"
+  | Result_extern_ref, _ -> Err.pp "TODO (compare_result_const)"
 
 let value_of_const : Types.const -> value =
  fun const ->
@@ -258,7 +258,7 @@ let rec run ~with_exhaustion script =
           in
           check_error' ~expected ~got;
           link_state
-        | Assert (Assert_malformed _) -> failwith "TODO assert_malformed"
+        | Assert (Assert_malformed _) -> Err.pp "TODO assert_malformed"
         | Assert (Assert_return (a, res)) ->
           Debug.log "Assert@.";
           let stack = action link_state a in
@@ -271,13 +271,13 @@ let rec run ~with_exhaustion script =
           then begin
             Format.eprintf "got:      %a@.expected: %a@." Stack.pp
               (List.rev stack) Pp.Input.results res;
-            failwith "Bad result"
+            Err.pp "Bad result"
           end;
           link_state
         | Assert (Assert_trap (a, msg)) -> begin
           try
-            let _ = action link_state a in
-            failwith "unxpected success"
+            let (_ : Link.Env.t' Stack.t) = action link_state a in
+            Err.pp "unxpected success"
           with
           | Trap got ->
             check_error' ~expected:msg ~got;

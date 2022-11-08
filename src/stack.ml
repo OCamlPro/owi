@@ -37,7 +37,7 @@ let pop_i32 s =
   let hd, tl = pop s in
   match hd with
   | I32 n -> (n, tl)
-  | _ | (exception Empty) -> failwith "invalid type (expected i32)"
+  | _ | (exception Empty) -> Err.pp "invalid type (expected i32)"
 
 let pop_i32_to_int s =
   let hd, tl = pop_i32 s in
@@ -53,16 +53,14 @@ let pop2_i32 s =
     let n1, tl = pop s in
     match (n1, n2) with
     | I32 n1, I32 n2 -> ((n1, n2), tl)
-    | _ -> failwith "invalid type (expected i32)"
-  with Empty -> failwith "invalid type (expected i32)"
+    | _ -> Err.pp "invalid type (expected i32)"
+  with Empty -> Err.pp "invalid type (expected i32)"
 
 let pop_i64 s =
   try
     let hd, tl = pop s in
-    match hd with
-    | I64 n -> (n, tl)
-    | _ -> failwith "invalid type (expected i64)"
-  with Empty -> failwith "invalid type (expected i64)"
+    match hd with I64 n -> (n, tl) | _ -> Err.pp "invalid type (expected i64)"
+  with Empty -> Err.pp "invalid type (expected i64)"
 
 let pop2_i64 s =
   try
@@ -70,16 +68,14 @@ let pop2_i64 s =
     let n1, tl = pop s in
     match (n1, n2) with
     | I64 n1, I64 n2 -> ((n1, n2), tl)
-    | _ -> failwith "invalid type (expected i64)"
-  with Empty -> failwith "invalid type (expected i64)"
+    | _ -> Err.pp "invalid type (expected i64)"
+  with Empty -> Err.pp "invalid type (expected i64)"
 
 let pop_f32 s =
   try
     let hd, tl = pop s in
-    match hd with
-    | F32 f -> (f, tl)
-    | _ -> failwith "invalid type (expected f32)"
-  with Empty -> failwith "invalid type (expected f32)"
+    match hd with F32 f -> (f, tl) | _ -> Err.pp "invalid type (expected f32)"
+  with Empty -> Err.pp "invalid type (expected f32)"
 
 let pop2_f32 s =
   try
@@ -87,16 +83,14 @@ let pop2_f32 s =
     let n1, tl = pop s in
     match (n1, n2) with
     | F32 n1, F32 n2 -> ((n1, n2), tl)
-    | _ -> failwith "invalid type (expected f32)"
-  with Empty -> failwith "invalid type (expected f32)"
+    | _ -> Err.pp "invalid type (expected f32)"
+  with Empty -> Err.pp "invalid type (expected f32)"
 
 let pop_f64 s =
   try
     let hd, tl = pop s in
-    match hd with
-    | F64 f -> (f, tl)
-    | _ -> failwith "invalid type (expected f64)"
-  with Empty -> failwith "invalid type (expected f64)"
+    match hd with F64 f -> (f, tl) | _ -> Err.pp "invalid type (expected f64)"
+  with Empty -> Err.pp "invalid type (expected f64)"
 
 let pop2_f64 s =
   try
@@ -104,24 +98,24 @@ let pop2_f64 s =
     let n1, tl = pop s in
     match (n1, n2) with
     | F64 n1, F64 n2 -> ((n1, n2), tl)
-    | _ -> failwith "invalid type (expected f64)"
-  with Empty -> failwith "invalid type (expected f64)"
+    | _ -> Err.pp "invalid type (expected f64)"
+  with Empty -> Err.pp "invalid type (expected f64)"
 
 let pop_ref s =
   try
     let hd, tl = pop s in
     match hd with
     | Ref _ -> (hd, tl)
-    | _ -> failwith "invalid type (expected ref)"
-  with Empty -> failwith "invalid type (expected ref)"
+    | _ -> Err.pp "invalid type (expected ref)"
+  with Empty -> Err.pp "invalid type (expected ref)"
 
 let pop_as_ref s =
   try
     let hd, tl = pop s in
     match hd with
     | Ref hd -> (hd, tl)
-    | _ -> failwith "invalid type (expected ref)"
-  with Empty -> failwith "invalid type (expected ref)"
+    | _ -> Err.pp "invalid type (expected ref)"
+  with Empty -> Err.pp "invalid type (expected ref)"
 
 let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
   try
@@ -129,19 +123,19 @@ let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
     match hd with
     | Ref (Externref (Some (E (ety, hd)))) -> begin
       match Value.Extern_ref.eq ty ety with
-      | None -> failwith "invalid type (externref)"
+      | None -> Err.pp "invalid type (externref)"
       | Some Eq -> (hd, tl)
     end
-    | _ -> failwith "invalid type (expected extern ref)"
-  with Empty -> failwith "invalid type (expected extern ref)"
+    | _ -> Err.pp "invalid type (expected extern ref)"
+  with Empty -> Err.pp "invalid type (expected extern ref)"
 
 let pop_bool s =
   try
     let hd, tl = pop s in
     match hd with
     | I32 n -> (n <> 0l, tl)
-    | _ -> failwith "invalid type (expected i32 (bool))"
-  with Empty -> failwith "invalid type (expected i32 (bool))"
+    | _ -> Err.pp "invalid type (expected i32 (bool))"
+  with Empty -> Err.pp "invalid type (expected i32 (bool))"
 
 let pop_is_null s =
   try
@@ -149,8 +143,8 @@ let pop_is_null s =
     match hd with
     | Ref (Externref None | Funcref None) -> (true, tl)
     | Ref (Externref (Some _) | Funcref (Some _)) -> (false, tl)
-    | _ -> failwith "invalid type (expected const_null)"
-  with Empty -> failwith "invalid type (expected const_null)"
+    | _ -> Err.pp "invalid type (expected const_null)"
+  with Empty -> Err.pp "invalid type (expected const_null)"
 
 let pop_n s n =
   (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)

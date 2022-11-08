@@ -352,12 +352,12 @@ let keywords =
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
-  | bad_num | bad_id | bad_name -> failwith "unknown operator"
+  | bad_num | bad_id | bad_name -> Err.pp "unknown operator"
   | num -> NUM (Utf8.lexeme buf)
   | operator -> (
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
-    with Not_found -> failwith "unknown operator" )
+    with Not_found -> Err.pp "unknown operator" )
   | ";;" ->
     single_comment buf;
     token buf
@@ -391,14 +391,14 @@ and comment buf =
   | "(;" ->
     comment buf;
     comment buf
-  | eof -> failwith "eof in comment"
+  | eof -> Err.pp "eof in comment"
   | any -> comment buf
   | _ -> assert false
 
 and single_comment buf =
   match%sedlex buf with
   | newline -> ()
-  | eof -> failwith "eof in single line comment"
+  | eof -> Err.pp "eof in single line comment"
   | any -> single_comment buf
   | _ -> assert false
 

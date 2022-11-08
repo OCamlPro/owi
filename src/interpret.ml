@@ -236,7 +236,7 @@ let mem_0 = 0
 
 let get_raw_memory (env : Link.Env.t) idx =
   match IMap.find_opt idx env.memories with
-  | None -> failwith "missing memory"
+  | None -> Err.pp "missing memory"
   | Some m -> m
 
 let get_memory (env : Link.Env.t) idx =
@@ -245,22 +245,22 @@ let get_memory (env : Link.Env.t) idx =
 
 let get_func (env : Link.Env.t) idx =
   match IMap.find_opt idx env.functions with
-  | None -> failwith "missing functions"
+  | None -> Err.pp "missing functions"
   | Some f -> f
 
 let get_data (env : Link.Env.t) idx =
   match IMap.find_opt idx env.data with
-  | None -> failwith "missing data"
+  | None -> Err.pp "missing data"
   | Some data -> data
 
 let get_elem (env : Link.Env.t) idx =
   match IMap.find_opt idx env.elem with
-  | None -> failwith "missing elem"
+  | None -> Err.pp "missing elem"
   | Some elem -> elem
 
 let get_table (env : Link.Env.t) idx =
   match IMap.find_opt idx env.tables with
-  | None -> failwith "missing table"
+  | None -> Err.pp "missing table"
   | Some table -> table
 
 let exec_extern_func stack (f : Value.extern_func) =
@@ -599,7 +599,7 @@ let rec exec_instr env locals stack instr =
   | Global_get i -> Stack.push stack (Env.get_global env i).value
   | Global_set i ->
     let global = Env.get_global env i in
-    if global.mut = Const then failwith "Can't set const global";
+    if global.mut = Const then Err.pp "Can't set const global";
     let v, stack =
       match global.typ with
       | Ref_type rt -> begin
@@ -831,7 +831,7 @@ let rec exec_instr env locals stack instr =
     let res =
       if sx = S || Sys.word_size = 32 then res
       else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))
-      else failwith "unsupported word size"
+      else Err.pp "unsupported word size"
     in
     Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; _ }) ->

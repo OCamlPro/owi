@@ -108,17 +108,17 @@ let saturate_u x = min (max x zero) minus_one
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then failwith "of_string (int64)"
+let require b = if not b then Err.pp "of_string (int64)"
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | _ -> failwith "of_string"
+  | _ -> Err.pp "of_string"
 
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
-  | _ -> failwith "of_string"
+  | _ -> Err.pp "of_string"
 
 let max_upper, max_lower = divrem_u minus_one 10L
 

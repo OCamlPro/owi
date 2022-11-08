@@ -7,5 +7,3 @@ let enable, disable, is_enabled =
 let log t =
   if is_enabled () then Format.eprintf t
   else Format.ifprintf Format.err_formatter t
-
-let error f = Format.kasprintf failwith f

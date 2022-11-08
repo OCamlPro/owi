@@ -59,7 +59,7 @@ let check_utf8 s =
     match decode decoder with
     | `Malformed _s ->
       Debug.log "GOT: `%S`" s;
-      failwith "malformed UTF-8 encoding"
+      Err.pp "malformed UTF-8 encoding"
     | `Await -> assert false
     | `End -> ()
     | `Uchar _ -> loop ()
