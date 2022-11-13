@@ -19,6 +19,7 @@ module Env = struct
     { locals : typ Index.Map.t
     ; globals : (Const.expr global', global_type) S.runtime S.named
     ; result_type : result_type
+    ; funcs : (Simplify.func, func_type) S.runtime S.named
     }
 
   let local_get i t =
@@ -35,14 +36,23 @@ module Env = struct
       in
       type_
 
-  let make ~params ~locals ~globals ~result_type =
+  let func_get i t =
+    match List.find (fun S.{ index; _ } -> index = i) t.funcs.values with
+    | exception Not_found -> assert false
+    | { value; _ } ->
+      let typ =
+        match value with Local { type_f; _ } -> type_f | Imported t -> t.desc
+      in
+      typ
+
+  let make ~params ~locals ~globals ~funcs ~result_type =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
       List.fold_left
         (fun locals (i, (_, typ)) -> Index.Map.add i typ locals)
         Index.Map.empty l
     in
-    { locals; globals; result_type }
+    { locals; globals; result_type; funcs }
 end
 
 type env = Env.t
@@ -170,6 +180,9 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Local_set i ->
     let t = Env.local_get i env in
     Stack.pop [ t ] stack |> Stack.push []
+  | Local_tee i ->
+    let t = Env.local_get i env in
+    Stack.pop [ t ] stack |> Stack.push [ t ]
   | Global_get i -> Stack.push [ Env.global_get i env ] stack
   | Global_set i ->
     let t = Env.global_get i env in
@@ -209,8 +222,29 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
   | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env stack expr bt
   | Call_indirect (_, (pt, rt)) ->
-    Stack.pop (i32 :: List.map snd pt) stack |> Stack.push rt
-  | Call _i -> Err.pp "TODO TYPECHECK CALL"
+    Stack.pop (i32 :: List.rev_map snd pt) stack |> Stack.push rt
+  | Call i ->
+    let pt, rt = Env.func_get i env in
+    Stack.pop (List.rev_map snd pt) stack |> Stack.push rt
+  | Data_drop _i -> stack |> Stack.push []
+  | Table_init _ | Table_copy _ | Table_fill _ ->
+    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+  | Table_grow _ -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
+  | Table_size _ -> Stack.push [ i32 ] stack
+  | Ref_is_null -> Stack.pop [ Ref_type Func_ref ] stack |> Stack.push [ i32 ]
+  | Ref_null rt -> Stack.push [ Ref_type rt ] stack
+  | Elem_drop _ -> Stack.push [] stack
+  | Select t -> begin
+    match t with
+    | None -> begin
+      match Stack.pop [ i32 ] stack with
+      | [] -> Err.pp "type mismatch"
+      | hd :: tl -> Stack.pop [ hd ] tl |> Stack.push [ hd ]
+    end
+    | Some t ->
+      Stack.pop [ i32 ] stack |> Stack.pop t |> Stack.pop t |> Stack.push t
+  end
+  | Table_get _i -> Err.pp "TODO Table_get"
   | _ as i -> Err.pp "TODO %a" Pp.Simplified.instr i
 
 and typecheck_expr (env : env) (stack : stack) (expr : expr)
@@ -242,13 +276,15 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
     end;
     Continue required
 
-let typecheck_function globals (func : (S.func, func_type) S.runtime) =
+let typecheck_function (module_ : Simplify.result)
+    (func : (S.func, func_type) S.runtime) =
   match func with
   | Imported _ -> ()
   | Local func -> (
     let params, result = func.type_f in
     let env =
-      Env.make ~params ~locals:func.locals ~globals ~result_type:result
+      Env.make ~params ~funcs:module_.func ~locals:func.locals
+        ~globals:module_.global ~result_type:result
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
@@ -257,5 +293,5 @@ let typecheck_function globals (func : (S.func, func_type) S.runtime) =
 
 let typecheck_module (module_ : Simplify.result) =
   S.Fields.iter
-    (fun _index func -> typecheck_function module_.global func)
+    (fun _index func -> typecheck_function module_ func)
     module_.func
