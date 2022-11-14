@@ -20,15 +20,16 @@ module Env = struct
     ; globals : (Const.expr global', global_type) S.runtime S.named
     ; result_type : result_type
     ; funcs : (Simplify.func, func_type) S.runtime S.named
+    ; blocks : func_type option list
     }
 
-  let local_get i t =
-    match Index.Map.find i t.locals with
+  let local_get i env =
+    match Index.Map.find i env.locals with
     | exception Not_found -> assert false
     | v -> v
 
-  let global_get i t =
-    match List.find (fun S.{ index; _ } -> index = i) t.globals.values with
+  let global_get i env =
+    match List.find (fun S.{ index; _ } -> index = i) env.globals.values with
     | exception Not_found -> assert false
     | { value; _ } ->
       let _mut, type_ =
@@ -36,14 +37,16 @@ module Env = struct
       in
       type_
 
-  let func_get i t =
-    match List.find (fun S.{ index; _ } -> index = i) t.funcs.values with
+  let func_get i env =
+    match List.find (fun S.{ index; _ } -> index = i) env.funcs.values with
     | exception Not_found -> assert false
     | { value; _ } ->
       let typ =
         match value with Local { type_f; _ } -> type_f | Imported t -> t.desc
       in
       typ
+
+  let block_type_get i env = List.nth env.blocks i
 
   let make ~params ~locals ~globals ~funcs ~result_type =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
@@ -52,7 +55,7 @@ module Env = struct
         (fun locals (i, (_, typ)) -> Index.Map.add i typ locals)
         Index.Map.empty l
     in
-    { locals; globals; result_type; funcs }
+    { locals; globals; result_type; funcs; blocks = [] }
 end
 
 type env = Env.t
@@ -60,8 +63,6 @@ type env = Env.t
 type stack = typ list
 
 type instr = (S.index, func_type) instr'
-
-type expr = (S.index, func_type) expr'
 
 let i32 = Num_type I32
 
@@ -126,11 +127,11 @@ module Stack = struct
 
   let pop required stack =
     match match_prefix required stack with
-    | None -> Err.pp "type mismatch"
+    | None -> Err.pp "type mismatch pop"
     | Some stack -> stack
 
   let drop stack =
-    match stack with [] -> Err.pp "type mismatch" | _ :: tl -> tl
+    match stack with [] -> Err.pp "type mismatch drop" | _ :: tl -> tl
 
   let push t stack = Continue (t @ stack)
 end
@@ -140,7 +141,7 @@ let check (s1 : state) (s2 : state) =
   | Stop, Stop -> Stop
   | Stop, Continue s | Continue s, Stop -> Continue s
   | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1 else Err.pp "type mismatch"
+    if Stack.equal s1 s2 then Continue s1 else Err.pp "type mismatch check"
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -220,7 +221,20 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
-  | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env stack expr bt
+  | Block (_, bt, expr) ->
+    let block_state = typecheck_expr env stack expr bt in
+    begin
+      match bt with
+      | None -> block_state
+      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
+    end
+  | Loop (_, bt, expr) ->
+    let block_state = typecheck_expr env stack expr bt in
+    begin
+      match bt with
+      | None -> block_state
+      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
+    end
   | Call_indirect (_, (pt, rt)) ->
     Stack.pop (i32 :: List.rev_map snd pt) stack |> Stack.push rt
   | Call i ->
@@ -244,11 +258,28 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     | Some t ->
       Stack.pop [ i32 ] stack |> Stack.pop t |> Stack.pop t |> Stack.push t
   end
+  | Ref_func _i -> Stack.push [ Ref_type Func_ref ] stack
+  (* TODO: *)
+  | Br i ->
+    let bt = Env.block_type_get i env in
+    begin
+      match bt with
+      | None -> Stack.push [] stack
+      | Some (pt, _rt) -> Stack.pop (List.map snd pt) stack |> Stack.push []
+    end
+  | Br_if i | Br_table (_, i) ->
+    let stack = Stack.pop [ i32 ] stack in
+    let bt = Env.block_type_get i env in
+    begin
+      match bt with
+      | None -> Stack.push [] stack
+      | Some (pt, _rt) -> Stack.pop (List.map snd pt) stack |> Stack.push []
+    end
   | Table_get _i -> Err.pp "TODO Table_get"
-  | _ as i -> Err.pp "TODO %a" Pp.Simplified.instr i
+  | Table_set _i -> Err.pp "TODO Table_set"
 
-and typecheck_expr (env : env) (stack : stack) (expr : expr)
-    (block_type : func_type option) : state =
+and typecheck_expr env stack expr (block_type : func_type option) : state =
+  let env = { env with blocks = block_type :: env.blocks } in
   let rec loop stack expr =
     match expr with
     | [] -> Continue stack
@@ -263,14 +294,16 @@ and typecheck_expr (env : env) (stack : stack) (expr : expr)
   ( match block_type with
   | None -> ()
   | Some (required, _result) ->
-    if not (Stack.equal (List.rev_map snd required) stack) then
-      Err.pp "type mismatch" );
+    let required = List.rev_map snd required in
+    if Option.is_none @@ Stack.match_prefix required stack then
+      Err.pp "type mismatch: %a" Stack.pp_error (required, stack) );
   let state = loop stack expr in
   match (block_type, state) with
   | None, _ -> state
   | Some _, Stop -> Stop
   | Some (_params, required), Continue stack ->
-    if not (Stack.equal (List.rev required) stack) then begin
+    let required = List.rev required in
+    if Option.is_none @@ Stack.match_prefix required stack then begin
       Err.pp "type mismatch: expr `%a` %a" Pp.Simplified.expr expr
         Stack.pp_error (required, stack)
     end;

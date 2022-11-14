@@ -587,7 +587,6 @@ let rec exec_instr env locals stack instr =
       with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
     stack
   | Select _t ->
-    (* TODO: check that o1 and o2 have type t *)
     let b, stack = Stack.pop_bool stack in
     let o2, stack = Stack.pop stack in
     let o1, stack = Stack.pop stack in
