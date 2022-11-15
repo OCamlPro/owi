@@ -22,6 +22,7 @@ module Env = struct
     ; funcs : (Simplify.func, func_type) S.runtime S.named
     ; blocks : func_type option list
     ; tables : (table, table_type) S.runtime S.named
+    ; elems : (int, Const.expr) elem' S.named
     }
 
   let local_get i env =
@@ -29,39 +30,40 @@ module Env = struct
     | exception Not_found -> assert false
     | v -> v
 
-  let global_get i env =
-    match List.find (fun S.{ index; _ } -> index = i) env.globals.values with
+  let get_value_at_indice i values =
+    match List.find (fun S.{ index; _ } -> index = i) values with
     | exception Not_found -> assert false
-    | { value; _ } ->
-      let _mut, type_ =
-        match value with Local { type_; _ } -> type_ | Imported t -> t.desc
-      in
-      type_
+    | { value; _ } -> value
+
+  let global_get i env =
+    let value = get_value_at_indice i env.globals.values in
+    let _mut, type_ =
+      match value with Local { type_; _ } -> type_ | Imported t -> t.desc
+    in
+    type_
 
   let func_get i env =
-    match List.find (fun S.{ index; _ } -> index = i) env.funcs.values with
-    | exception Not_found -> assert false
-    | { value; _ } -> (
-      match value with Local { type_f; _ } -> type_f | Imported t -> t.desc )
+    let value = get_value_at_indice i env.funcs.values in
+    match value with Local { type_f; _ } -> type_f | Imported t -> t.desc
 
   let block_type_get i env = List.nth env.blocks i
 
   let table_type_get i env =
-    match List.find (fun S.{ index; _ } -> index = i) env.tables.values with
-    | exception Not_found -> assert false
-    | { value; _ } -> (
-      match value with
-      | Local table -> snd (snd table)
-      | Imported t -> snd t.desc )
+    let value = get_value_at_indice i env.tables.values in
+    match value with Local table -> snd (snd table) | Imported t -> snd t.desc
 
-  let make ~params ~locals ~globals ~funcs ~result_type ~tables =
+  let elem_type_get i env =
+    let value = get_value_at_indice i env.elems.values in
+    value.type_
+
+  let make ~params ~locals ~globals ~funcs ~result_type ~tables ~elems =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
       List.fold_left
         (fun locals (i, (_, typ)) -> Index.Map.add i typ locals)
         Index.Map.empty l
     in
-    { locals; globals; result_type; funcs; tables; blocks = [] }
+    { locals; globals; result_type; funcs; tables; elems; blocks = [] }
 end
 
 type env = Env.t
@@ -244,7 +246,15 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map snd pt) stack |> Stack.push rt
   | Data_drop _i -> stack |> Stack.push []
-  | Table_init _ | Table_copy _ ->
+  | Table_init (ti, ei) ->
+    let table_typ = Env.table_type_get ti env in
+    let elem_typ = Env.elem_type_get ei env in
+    if table_typ <> elem_typ then Err.pp "type mismatch";
+    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+  | Table_copy (i, i') ->
+    let typ = Env.table_type_get i env in
+    let typ' = Env.table_type_get i' env in
+    if typ <> typ' then Err.pp "type mismatch";
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
   | Table_fill i ->
     let t_type = Env.table_type_get i env in
@@ -334,6 +344,7 @@ let typecheck_function (module_ : Simplify.result)
     let env =
       Env.make ~params ~funcs:module_.func ~locals:func.locals
         ~globals:module_.global ~result_type:result ~tables:module_.table
+        ~elems:module_.elem
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
