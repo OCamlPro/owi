@@ -249,8 +249,9 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Table_fill i ->
     let t_type = Env.table_type_get i env in
     Stack.pop [ i32; Ref_type t_type; i32 ] stack |> Stack.push []
-  | Table_grow _ ->
-    Stack.pop [ i32 ] stack |> Stack.pop_ref |> Stack.push [ i32 ]
+  | Table_grow i ->
+    let t_type = Env.table_type_get i env in
+    Stack.pop [ i32; Ref_type t_type ] stack |> Stack.push [ i32 ]
   | Table_size _ -> Stack.push [ i32 ] stack
   | Ref_is_null -> Stack.pop_ref stack |> Stack.push [ i32 ]
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
