@@ -275,16 +275,20 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let bt = Env.block_type_get i env in
     begin
       match bt with
-      | None -> Stack.push [] stack
-      | Some (pt, _rt) -> Stack.pop (List.map snd pt) stack |> Stack.push []
+      | None -> Stop
+      | Some (pt, _rt) ->
+        let _unwind = Stack.pop (List.map snd pt) stack in
+        Stop
     end
   | Br_if i | Br_table (_, i) ->
     let stack = Stack.pop [ i32 ] stack in
     let bt = Env.block_type_get i env in
     begin
       match bt with
-      | None -> Stack.push [] stack
-      | Some (pt, _rt) -> Stack.pop (List.map snd pt) stack |> Stack.push []
+      | None -> Stop
+      | Some (pt, _rt) ->
+        let _unwind = Stack.pop (List.map snd pt) stack in
+        Stop
     end
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
