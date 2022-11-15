@@ -133,8 +133,10 @@ module Stack = struct
 
   let pop required stack =
     match match_prefix required stack with
-    | None -> Err.pp "type mismatch pop"
+    | None -> Err.pp "type mismatch %a" pp_error (required, stack)
     | Some stack -> stack
+
+  let pop_ref = function Ref_type _ :: tl -> tl | _ -> Err.pp "type mismatch"
 
   let drop stack =
     match stack with [] -> Err.pp "type mismatch drop" | _ :: tl -> tl
@@ -147,7 +149,8 @@ let check (s1 : state) (s2 : state) =
   | Stop, Stop -> Stop
   | Stop, Continue s | Continue s, Stop -> Continue s
   | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1 else Err.pp "type mismatch check"
+    if Stack.equal s1 s2 then Continue s1
+    else Err.pp "type mismatch %a" Stack.pp_error (s1, s2)
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -156,8 +159,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Return -> begin
     match Stack.match_prefix (List.rev env.result_type) stack with
     | Some _ -> Stop
-    | None ->
-      Err.pp "type mismatch: return %a" Stack.pp_error (env.result_type, stack)
+    | None -> Err.pp "type mismatch %a" Stack.pp_error (env.result_type, stack)
   end
   | Unreachable -> Stop
   | I32_const _ -> Stack.push [ i32 ] stack
@@ -247,11 +249,14 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map snd pt) stack |> Stack.push rt
   | Data_drop _i -> stack |> Stack.push []
-  | Table_init _ | Table_copy _ | Table_fill _ ->
+  | Table_init _ | Table_copy _ ->
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+  | Table_fill i ->
+    let t_type = Env.table_type_get i env in
+    Stack.pop [ i32; Ref_type t_type; i32 ] stack |> Stack.push []
   | Table_grow _ -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
   | Table_size _ -> Stack.push [ i32 ] stack
-  | Ref_is_null -> Stack.pop [ Ref_type Func_ref ] stack |> Stack.push [ i32 ]
+  | Ref_is_null -> Stack.pop_ref stack |> Stack.push [ i32 ]
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
   | Elem_drop _ -> Stack.push [] stack
   | Select t -> begin
@@ -306,7 +311,7 @@ and typecheck_expr env stack expr (block_type : func_type option) : state =
   | Some (required, _result) ->
     let required = List.rev_map snd required in
     if Option.is_none @@ Stack.match_prefix required stack then
-      Err.pp "type mismatch: %a" Stack.pp_error (required, stack) );
+      Err.pp "type mismatch %a" Stack.pp_error (required, stack) );
   let state = loop stack expr in
   match (block_type, state) with
   | None, _ -> state
@@ -314,8 +319,8 @@ and typecheck_expr env stack expr (block_type : func_type option) : state =
   | Some (_params, required), Continue stack ->
     let required = List.rev required in
     if Option.is_none @@ Stack.match_prefix required stack then begin
-      Err.pp "type mismatch: expr `%a` %a" Pp.Simplified.expr expr
-        Stack.pp_error (required, stack)
+      Err.pp "type mismatch expr `%a` %a" Pp.Simplified.expr expr Stack.pp_error
+        (required, stack)
     end;
     Continue required
 
