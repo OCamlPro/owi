@@ -276,9 +276,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let bt = Env.block_type_get i env in
-    Option.iter
-      (fun (pt, _rt) -> ignore @@ Stack.pop (List.map snd pt) stack)
-      bt;
+    Option.iter (fun (_pt, rt) -> ignore @@ Stack.pop rt stack) bt;
     Continue stack
   | Br_table (_, i) ->
     let stack = Stack.pop [ i32 ] stack in
