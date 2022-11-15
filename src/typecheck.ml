@@ -146,11 +146,9 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
   | Nop -> Continue stack
   | Drop -> Continue (Stack.drop stack)
-  | Return -> begin
-    match Stack.match_prefix (List.rev env.result_type) stack with
-    | Some _ -> Stop
-    | None -> Err.pp "type mismatch %a" Stack.pp_error (env.result_type, stack)
-  end
+  | Return ->
+    ignore @@ Stack.pop (List.rev env.result_type) stack;
+    Stop
   | Unreachable -> Stop
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
@@ -193,9 +191,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     begin
       match block_type with
       | None -> Continue stack
-      | Some (pt, rt) ->
-        let check = Stack.pop (List.map snd pt) stack in
-        Stack.push rt check
+      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
     end
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
@@ -230,9 +226,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     begin
       match bt with
       | None -> Continue stack
-      | Some (pt, rt) ->
-        let check = Stack.pop (List.map snd pt) stack in
-        Stack.push rt check
+      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
     end
   | Call_indirect (_, (pt, rt)) ->
     Stack.pop (i32 :: List.rev_map snd pt) stack |> Stack.push rt
