@@ -88,6 +88,8 @@ type state =
   | Stop
   | Continue of stack
 
+let continue s = Continue s
+
 module Stack = struct
   let pp fmt (s : stack) =
     Format.fprintf fmt "[%a]"
@@ -119,12 +121,6 @@ module Stack = struct
     | Ref_type required, Ref_type got -> match_ref_type required got
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> false
 
-  let rec equal (s1 : stack) (s2 : stack) =
-    match (s1, s2) with
-    | [], [] -> true
-    | [], _ :: _ | _ :: _, [] -> false
-    | h1 :: t1, h2 :: t2 -> h1 = h2 && equal t1 t2
-
   let rec match_prefix required stack =
     match (required, stack) with
     | [], stack -> Some stack
@@ -145,14 +141,6 @@ module Stack = struct
 
   let push t stack = Continue (t @ stack)
 end
-
-let check (s1 : state) (s2 : state) =
-  match (s1, s2) with
-  | Stop, Stop -> Stop
-  | Stop, Continue s | Continue s, Stop -> Continue s
-  | Continue s1, Continue s2 ->
-    if Stack.equal s1 s2 then Continue s1
-    else Err.pp "type mismatch %a" Stack.pp_error (s1, s2)
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   match instr with
@@ -190,27 +178,33 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Local_get i -> Stack.push [ Env.local_get i env ] stack
   | Local_set i ->
     let t = Env.local_get i env in
-    Stack.pop [ t ] stack |> Stack.push []
+    Stack.pop [ t ] stack |> continue
   | Local_tee i ->
     let t = Env.local_get i env in
     Stack.pop [ t ] stack |> Stack.push [ t ]
   | Global_get i -> Stack.push [ Env.global_get i env ] stack
   | Global_set i ->
     let t = Env.global_get i env in
-    Stack.pop [ t ] stack |> Stack.push []
+    Stack.pop [ t ] stack |> continue
   | If_else (_id, block_type, e1, e2) ->
     let stack = Stack.pop [ i32 ] stack in
-    let stack_e1 = typecheck_expr env stack e1 block_type in
-    let stack_e2 = typecheck_expr env stack e2 block_type in
-    check stack_e1 stack_e2
+    let _stack_e1 = typecheck_expr env stack e1 block_type in
+    let _stack_e2 = typecheck_expr env stack e2 block_type in
+    begin
+      match block_type with
+      | None -> Continue stack
+      | Some (pt, rt) ->
+        let check = Stack.pop (List.map snd pt) stack in
+        Stack.push rt check
+    end
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
   | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
   | I_store8 (nn, _) | I_store16 (nn, _) | I_store (nn, _) ->
-    Stack.pop [ itype nn; i32 ] stack |> Stack.push []
-  | I64_store32 _ -> Stack.pop [ i64; i32 ] stack |> Stack.push []
+    Stack.pop [ itype nn; i32 ] stack |> continue
+  | I64_store32 _ -> Stack.pop [ i64; i32 ] stack |> continue
   | F_load (nn, _) -> Stack.pop [ i32 ] stack |> Stack.push [ ftype nn ]
-  | F_store (nn, _) -> Stack.pop [ ftype nn; i32 ] stack |> Stack.push []
+  | F_store (nn, _) -> Stack.pop [ ftype nn; i32 ] stack |> continue
   | I_reinterpret_f (inn, fnn) ->
     Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
   | F_reinterpret_i (fnn, inn) ->
@@ -230,12 +224,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_grow -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
-    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+    Stack.pop [ i32; i32; i32 ] stack |> continue
   | Block (_, bt, expr) | Loop (_, bt, expr) ->
     let _block_state = typecheck_expr env stack expr bt in
     begin
       match bt with
-      | None -> Stack.push [] stack
+      | None -> Continue stack
       | Some (pt, rt) ->
         let check = Stack.pop (List.map snd pt) stack in
         Stack.push rt check
@@ -245,64 +239,66 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Call i ->
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map snd pt) stack |> Stack.push rt
-  | Data_drop _i -> stack |> Stack.push []
+  | Data_drop _i -> stack |> continue
   | Table_init (ti, ei) ->
     let table_typ = Env.table_type_get ti env in
     let elem_typ = Env.elem_type_get ei env in
     if table_typ <> elem_typ then Err.pp "type mismatch";
-    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+    Stack.pop [ i32; i32; i32 ] stack |> continue
   | Table_copy (i, i') ->
     let typ = Env.table_type_get i env in
     let typ' = Env.table_type_get i' env in
     if typ <> typ' then Err.pp "type mismatch";
-    Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
+    Stack.pop [ i32; i32; i32 ] stack |> continue
   | Table_fill i ->
     let t_type = Env.table_type_get i env in
-    Stack.pop [ i32; Ref_type t_type; i32 ] stack |> Stack.push []
+    Stack.pop [ i32; Ref_type t_type; i32 ] stack |> continue
   | Table_grow i ->
     let t_type = Env.table_type_get i env in
     Stack.pop [ i32; Ref_type t_type ] stack |> Stack.push [ i32 ]
   | Table_size _ -> Stack.push [ i32 ] stack
   | Ref_is_null -> Stack.pop_ref stack |> Stack.push [ i32 ]
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
-  | Elem_drop _ -> Stack.push [] stack
-  | Select t -> begin
-    match t with
-    | None -> begin
-      match Stack.pop [ i32 ] stack with
-      | [] -> Err.pp "type mismatch"
-      | hd :: tl -> Stack.pop [ hd ] tl |> Stack.push [ hd ]
+  | Elem_drop _ -> Continue stack
+  | Select t ->
+    let stack = Stack.pop [ i32 ] stack in
+    begin
+      match t with
+      | None -> begin
+        match stack with
+        | [] -> Err.pp "type mismatch"
+        | hd :: tl -> Stack.pop [ hd ] tl |> Stack.push [ hd ]
+      end
+      | Some t -> Stack.pop t stack |> Stack.pop t |> Stack.push t
     end
-    | Some t ->
-      Stack.pop [ i32 ] stack |> Stack.pop t |> Stack.pop t |> Stack.push t
-  end
   | Ref_func _i -> Stack.push [ Ref_type Func_ref ] stack
   (* TODO: *)
   | Br i ->
     let bt = Env.block_type_get i env in
-    begin
-      match bt with
-      | None -> Stop
-      | Some (pt, _rt) ->
-        let _unwind = Stack.pop (List.map snd pt) stack in
-        Stop
-    end
-  | Br_if i | Br_table (_, i) ->
+    Option.iter
+      (fun (pt, _rt) -> ignore @@ Stack.pop (List.map snd pt) stack)
+      bt;
+    Stop
+  | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let bt = Env.block_type_get i env in
-    begin
-      match bt with
-      | None -> Stop
-      | Some (pt, _rt) ->
-        let _unwind = Stack.pop (List.map snd pt) stack in
-        Stop
-    end
+    Option.iter
+      (fun (pt, _rt) -> ignore @@ Stack.pop (List.map snd pt) stack)
+      bt;
+    Continue stack
+  | Br_table (_, i) ->
+    let stack = Stack.pop [ i32 ] stack in
+    let bt = Env.block_type_get i env in
+    Option.iter
+      (fun (pt, _rt) -> ignore @@ Stack.pop (List.map snd pt) stack)
+      bt;
+    Stop
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
     Stack.pop [ i32 ] stack |> Stack.push [ Ref_type t_typ ]
   | Table_set i ->
     let t_typ = Env.table_type_get i env in
-    Stack.pop [ Ref_type t_typ; i32 ] stack |> Stack.push []
+    Stack.pop [ Ref_type t_typ; i32 ] stack |> continue
 
 and typecheck_expr env stack expr (block_type : func_type option) : state =
   let env = { env with blocks = block_type :: env.blocks } in
