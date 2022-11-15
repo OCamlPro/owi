@@ -229,19 +229,14 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> Stack.push []
-  | Block (_, bt, expr) ->
-    let block_state = typecheck_expr env stack expr bt in
+  | Block (_, bt, expr) | Loop (_, bt, expr) ->
+    let _block_state = typecheck_expr env stack expr bt in
     begin
       match bt with
-      | None -> block_state
-      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
-    end
-  | Loop (_, bt, expr) ->
-    let block_state = typecheck_expr env stack expr bt in
-    begin
-      match bt with
-      | None -> block_state
-      | Some (pt, rt) -> Stack.pop (List.map snd pt) stack |> Stack.push rt
+      | None -> Stack.push [] stack
+      | Some (pt, rt) ->
+        let check = Stack.pop (List.map snd pt) stack in
+        Stack.push rt check
     end
   | Call_indirect (_, (pt, rt)) ->
     Stack.pop (i32 :: List.rev_map snd pt) stack |> Stack.push rt
@@ -254,7 +249,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Table_fill i ->
     let t_type = Env.table_type_get i env in
     Stack.pop [ i32; Ref_type t_type; i32 ] stack |> Stack.push []
-  | Table_grow _ -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
+  | Table_grow _ ->
+    Stack.pop [ i32 ] stack |> Stack.pop_ref |> Stack.push [ i32 ]
   | Table_size _ -> Stack.push [ i32 ] stack
   | Ref_is_null -> Stack.pop_ref stack |> Stack.push [ i32 ]
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
@@ -326,7 +322,7 @@ and typecheck_expr env stack expr (block_type : func_type option) : state =
       Err.pp "type mismatch expr `%a` %a" Pp.Simplified.expr expr Stack.pp_error
         (required, stack)
     end;
-    Continue required
+    if List.length env.blocks < 2 then Continue stack else Continue required
 
 let typecheck_function (module_ : Simplify.result)
     (func : (S.func, func_type) S.runtime) =
@@ -341,7 +337,9 @@ let typecheck_function (module_ : Simplify.result)
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env [] func.body (Some ([], result)) with
     | Stop -> ()
-    | Continue _ -> () )
+    | Continue s ->
+      let typ_f = snd func.type_f in
+      if s <> typ_f then Err.pp "type mismatch %a" Stack.pp_error (typ_f, s) )
 
 let typecheck_module (module_ : Simplify.result) =
   S.Fields.iter
