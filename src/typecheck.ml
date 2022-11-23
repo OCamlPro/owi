@@ -134,27 +134,35 @@ module Stack = struct
     | Ref_type required, Ref_type got -> match_ref_type required got
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> false
 
-  let rec unify_stack unwind ~required ~stack =
-    Debug.log "UNIFY       : require %a stack %a@." pp required pp stack;
-    match (required, stack) with
-    | [], [] -> Some []
-    | [], Any :: stack_tl ->
-      if unwind then unify_stack unwind ~required ~stack:stack_tl
-      else Some stack
-    | [], stack -> if unwind then None else Some stack
-    | Any :: required_tl, stack ->
-      unify_stack unwind ~required:required_tl ~stack
-    | _, [] -> None
-    | _ :: required_tl, Any :: _ ->
-      unify_stack unwind ~required:required_tl ~stack
-    | required_hd :: required_tl, stack_hd :: stack_tl ->
-      if not (match_types required_hd stack_hd) then
-        (* None *)
-        unify_stack unwind ~required ~stack:stack_tl
-      else unify_stack unwind ~required:required_tl ~stack:stack_tl
+  let rec equal s s' =
+    Debug.log "EQUAL        : require %a stack %a@." pp s pp s';
+    match (s, s') with
+    | [], s | s, [] -> List.for_all (( = ) Any) s
+    | Any :: tl, Any :: tl' -> equal tl s' || equal s tl'
+    | Any :: tl, hd :: tl' | hd :: tl', Any :: tl ->
+      equal tl (hd :: tl') || equal (Any :: tl) tl'
+    | hd :: tl, hd' :: tl' -> match_types hd hd' && equal tl tl'
+
+  let ( ||| ) l r =
+    match (l, r) with None, v | v, None -> v | Some l, _r -> Some l
+
+  let rec match_prefix ~prefix ~stack =
+    Debug.log "PREFIX       : require %a stack %a@." pp prefix pp stack;
+    match (prefix, stack) with
+    | [], stack -> Some stack
+    | Any :: tl, [] -> match_prefix ~prefix:tl ~stack:[]
+    | Any :: tl, Any :: tl' ->
+      match_prefix ~prefix:tl ~stack ||| match_prefix ~prefix ~stack:tl'
+    | Any :: tl, _hd :: tl' ->
+      match_prefix ~prefix ~stack:tl' ||| match_prefix ~prefix:tl ~stack
+    | _hd :: _tl, [] -> None
+    | _hd :: tl, Any :: tl' ->
+      match_prefix ~prefix ~stack:tl' ||| match_prefix ~prefix:tl ~stack
+    | hd :: tl, hd' :: tl' ->
+      if match_types hd hd' then match_prefix ~prefix:tl ~stack:tl' else None
 
   let pop required stack =
-    match unify_stack false ~required ~stack with
+    match match_prefix ~prefix:required ~stack with
     | None -> Err.pp "type mismatch (pop) %a" pp_error (required, stack)
     | Some stack -> stack
 
@@ -172,12 +180,19 @@ module Stack = struct
   let push t stack = continue (t @ stack)
 
   let check_bt bt stack =
-    let pt, rt =
-      match bt with
-      | None -> ([], [])
-      | Some (pt, rt) -> (List.map typ_of_pt pt, List.map typ_of_val_type rt)
-    in
-    pop pt stack |> push rt
+    match bt with
+    | None ->
+      Debug.log "CHECK BT NONE@.";
+      if not @@ equal stack [] then Err.pp "type mismatch (check_bt)"
+      else []
+    | Some (pt, rt) -> begin
+      Debug.log "CHECK BT SOME@.";
+      let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
+      begin match pop pt stack |> push rt with
+      | Stop -> assert false
+      | Continue stack -> stack
+      end
+    end
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
@@ -185,7 +200,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Nop -> continue stack
   | Drop -> continue (Stack.drop stack)
   | Return ->
-    ignore @@ Stack.pop (List.map typ_of_val_type env.result_type) stack;
+    ignore @@ Stack.pop (List.rev_map typ_of_val_type env.result_type) stack;
     Stop
   | Unreachable -> Stack.push [ any ] stack
   | I32_const _ -> Stack.push [ i32 ] stack
@@ -226,7 +241,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let stack = Stack.pop [ i32 ] stack in
     let _stack_e1 = typecheck_expr env e1 block_type in
     let _stack_e2 = typecheck_expr env e2 block_type in
-    Stack.check_bt block_type stack
+    continue @@ Stack.check_bt block_type stack
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
   | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
@@ -255,13 +270,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> continue
-  | Block (_, bt, expr) | Loop (_, bt, expr) -> begin
-    let _block_state = typecheck_expr env expr bt in
-    Stack.check_bt bt stack
-  end
+  | Block (_, bt, expr) | Loop (_, bt, expr) ->
+     typecheck_expr env expr bt
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
-    Stack.check_bt (Some bt) stack
+    continue @@ Stack.check_bt (Some bt) stack
   | Call i ->
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map typ_of_pt pt) stack
@@ -294,9 +307,9 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
       | None -> begin
         Debug.log "NONE@.";
         match stack with
-        | Any :: _hd :: tl | _hd :: Any :: tl -> continue (any :: tl)
+        | Any :: hd :: tl | hd :: Any :: tl -> continue (hd :: tl)
         | hd :: hd' :: tl when Stack.match_types hd hd' -> continue (hd :: tl)
-        | _ -> Err.pp "type mismatch"
+        | _ -> Err.pp "type mismatch (select)"
       end
       | Some t ->
         Debug.log "SOME@.";
@@ -309,9 +322,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let bt = Env.block_type_get i env in
     Option.iter
       (fun (_pt, rt) ->
-        ignore @@ Stack.pop (List.rev_map typ_of_val_type rt) stack )
+        Debug.log "EXPECTED PREFIX: %a@." Pp.Simplified.result_type rt;
+        ignore @@ Stack.pop (List.map typ_of_val_type rt) stack )
       bt;
-    Stop
+    Stack.push [] stack
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let bt = Env.block_type_get i env in
@@ -348,16 +362,13 @@ and typecheck_expr env expr (block_type : func_type option) : state =
         Debug.log "STACK  AFTER: %a@." Stack.pp stack;
         loop stack tail )
   in
-  (* TODO: is all of this useful ? just returning `loop pt expr` seems to be enough... *)
-  let pt, rt =
-    match block_type with
-    | None -> ([], [])
-    | Some (pt, rt) -> (List.map typ_of_pt pt, List.map typ_of_val_type rt)
-  in
-  match loop pt expr with
+  let initial_stack = Option.fold ~none:[] ~some:(fun (pt, _rt) -> List.map typ_of_pt pt) block_type in
+
+  match loop initial_stack expr with
   | Stop -> Stop
   | Continue stack ->
-    let _ign = Stack.pop rt stack in
+    Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
+    let _ign = Stack.check_bt block_type stack in
     continue stack
 
 let typecheck_function (module_ : Simplify.result) func =
@@ -374,14 +385,11 @@ let typecheck_function (module_ : Simplify.result) func =
     match typecheck_expr env func.body (Some ([], result)) with
     | Stop -> ()
     | Continue stack ->
-      let required = List.map typ_of_val_type (snd func.type_f) in
+      let required = List.rev_map typ_of_val_type (snd func.type_f) in
       Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
       Debug.log "STACK         IS: %a@." Stack.pp stack;
       begin
-        match Stack.unify_stack false ~required ~stack with
-        | Some [] -> ()
-        | Some [ Any ] -> ()
-        | None | Some _ ->
+        if not @@ Stack.equal required stack then
           Err.pp "type mismatch func %a" Stack.pp_error (required, stack)
       end )
 
