@@ -137,6 +137,11 @@ type 'indice block_type =
 (* the indice option is the optional typeuse, if it's some it must be equal to the func_type *)
 
 type ('indice, 'bt) instr' =
+  (* { desc : instr_desc
+       ; loc : Lexing.position
+       }
+
+     and instr_desc =*)
   (* Numeric Instructions *)
   | I32_const of Int32.t
   | I64_const of Int64.t

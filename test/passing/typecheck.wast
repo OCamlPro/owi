@@ -7,3 +7,26 @@
         drop
   )
 )
+
+(assert_invalid
+  (module
+    (func (result i32)
+      (block
+        (i32.const 0)
+      ))
+  )
+  "type mismatch"
+)
+
+(func (param i32) (result i32)
+(result i64)
+  i32.const 50
+  i64.const 51
+  local.get 0
+  br_if 0
+  drop
+  drop
+  i32.const 51
+  i64.const 52
+)
+)

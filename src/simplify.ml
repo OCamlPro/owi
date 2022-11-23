@@ -696,8 +696,7 @@ module Rewrite_indices = struct
     and expr (e : expr) (loop_count, block_ids) : (index, func_type) expr' =
       List.map (body (loop_count, block_ids)) e
     in
-    let body = expr iexpr (0, []) in
-    body
+    expr iexpr (0, [])
 
   let rewrite_const_expr (module_ : assigned_module) (expr : (indice, _) expr')
       : Const.expr =
