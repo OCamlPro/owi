@@ -28,13 +28,9 @@ module Index = struct
   include M
 end
 
-let result_type = function
-  | None -> []
-  | Some (_, rt) -> rt
+let result_type = function None -> [] | Some (_, rt) -> rt
 
-let param_type = function
-  | None -> []
-  | Some (pt, _) -> List.map snd pt
+let param_type = function None -> [] | Some (pt, _) -> List.map snd pt
 
 module Env = struct
   type t =
@@ -201,14 +197,16 @@ module Stack = struct
     end
 
   let pop_push bt stack =
-    continue @@ Option.fold ~none:[] ~some:(fun (pt, rt) ->
-      let pt, rt =
-        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
-      in
-      match pop pt stack |> push rt with
-      | Stop -> assert false
-      | Continue stack -> stack
-    ) bt
+    continue
+    @@ Option.fold ~none:[]
+         ~some:(fun (pt, rt) ->
+           let pt, rt =
+             (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
+           in
+           match pop pt stack |> push rt with
+           | Stop -> assert false
+           | Continue stack -> stack )
+         bt
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
@@ -287,10 +285,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> continue
-  | Block (_, bt, expr) ->
-    typecheck_expr env expr (result_type bt) bt
-  | Loop (_, bt, expr) ->
-    typecheck_expr env expr (param_type bt) bt
+  | Block (_, bt, expr) -> typecheck_expr env expr (result_type bt) bt
+  | Loop (_, bt, expr) -> typecheck_expr env expr (param_type bt) bt
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
     Stack.check_bt (Some bt) stack;
@@ -376,16 +372,17 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : state =
   in
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (pt, rt) -> List.map typ_of_pt pt, List.map typ_of_val_type rt)
+      ~some:(fun (pt, rt) ->
+        (List.map typ_of_pt pt, List.map typ_of_val_type rt) )
       block_type
   in
   match loop pt expr with
   | Stop -> Stop
-  | Continue stack ->
+  | Continue stack -> (
     Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
-    match Stack.match_prefix ~prefix:(List.rev rt) ~stack:(stack) with
+    match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
     | None -> Err.pp "type mismatch (loop)"
-    | Some _ -> continue stack
+    | Some _ -> continue stack )
 
 let typecheck_function (module_ : Simplify.result) func =
   match func with
