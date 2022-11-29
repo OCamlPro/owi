@@ -175,7 +175,7 @@ module Stack = struct
     | Any :: _ -> stack
     | _ :: tl -> tl
 
-  let push t stack = (t @ stack)
+  let push t stack = t @ stack
 
   let check_bt bt stack =
     match bt with
@@ -192,18 +192,18 @@ module Stack = struct
 
   let pop_push bt stack =
     Option.fold ~none:[]
-         ~some:(fun (pt, rt) ->
-           let pt, rt =
-             (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
-           in
-           pop pt stack |> push rt )
-         bt
+      ~some:(fun (pt, rt) ->
+        let pt, rt =
+          (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
+        in
+        pop pt stack |> push rt )
+      bt
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   match instr with
   | Nop -> stack
-  | Drop -> (Stack.drop stack)
+  | Drop -> Stack.drop stack
   | Return ->
     ignore @@ Stack.pop (List.rev_map typ_of_val_type env.result_type) stack;
     [ any ]
@@ -314,8 +314,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
       | None -> begin
         Debug.log "NONE@.";
         match stack with
-        | Any :: hd :: tl | hd :: Any :: tl -> (hd :: tl)
-        | hd :: hd' :: tl when Stack.match_types hd hd' -> (hd :: tl)
+        | Any :: hd :: tl | hd :: Any :: tl -> hd :: tl
+        | hd :: hd' :: tl when Stack.match_types hd hd' -> hd :: tl
         | _ -> Err.pp "type mismatch (select)"
       end
       | Some t ->
