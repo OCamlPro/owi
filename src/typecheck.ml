@@ -343,10 +343,17 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     let jt = Env.block_type_get i env in
     ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
     stack
-  | Br_table (_, i) ->
+  | Br_table (branches, i) ->
     let stack = Stack.pop [ i32 ] stack in
-    let jt = Env.block_type_get i env in
-    ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
+    let default_jt = Env.block_type_get i env in
+    ignore @@ Stack.pop (List.rev_map typ_of_val_type default_jt) stack;
+    Array.iter
+      (fun i ->
+        let jt = Env.block_type_get i env in
+        if not (List.length jt = List.length default_jt) then
+          Err.pp "type mismatch (br table)";
+        ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack )
+      branches;
     [ any ]
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
