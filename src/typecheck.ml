@@ -314,9 +314,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
       | None -> begin
         Debug.log "NONE@.";
         match stack with
+        | [Any] -> [Any]
         | Any :: hd :: tl | hd :: Any :: tl -> hd :: tl
         | hd :: hd' :: tl when Stack.match_types hd hd' -> hd :: tl
-        | _ -> Err.pp "type mismatch (select)"
+        | _ -> Err.pp "type mismatch (select) %a" Stack.pp stack
       end
       | Some t ->
         Debug.log "SOME@.";
