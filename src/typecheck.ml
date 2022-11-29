@@ -184,15 +184,23 @@ module Stack = struct
     | None ->
       Debug.log "CHECK BT NONE@.";
       if not @@ equal stack [] then Err.pp "type mismatch (check_bt)"
-      else []
     | Some (pt, rt) -> begin
       Debug.log "CHECK BT SOME@.";
-      let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
-      begin match pop pt stack |> push rt with
+      let pt, rt =
+        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
+      in
+      ignore (pop pt stack |> push rt)
+    end
+
+  let pop_push bt stack =
+    continue @@ Option.fold ~none:[] ~some:(fun (pt, rt) ->
+      let pt, rt =
+        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
+      in
+      match pop pt stack |> push rt with
       | Stop -> assert false
       | Continue stack -> stack
-      end
-    end
+    ) bt
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
@@ -241,7 +249,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let stack = Stack.pop [ i32 ] stack in
     let _stack_e1 = typecheck_expr env e1 block_type in
     let _stack_e2 = typecheck_expr env e2 block_type in
-    continue @@ Stack.check_bt block_type stack
+    Stack.check_bt block_type stack;
+    Stack.pop_push block_type stack
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
   | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
@@ -270,11 +279,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> continue
-  | Block (_, bt, expr) | Loop (_, bt, expr) ->
-     typecheck_expr env expr bt
+  | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env expr bt
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
-    continue @@ Stack.check_bt (Some bt) stack
+    Stack.check_bt (Some bt) stack;
+    Stack.pop_push (Some bt) stack
   | Call i ->
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map typ_of_pt pt) stack
@@ -362,14 +371,18 @@ and typecheck_expr env expr (block_type : func_type option) : state =
         Debug.log "STACK  AFTER: %a@." Stack.pp stack;
         loop stack tail )
   in
-  let initial_stack = Option.fold ~none:[] ~some:(fun (pt, _rt) -> List.map typ_of_pt pt) block_type in
-
-  match loop initial_stack expr with
+  let pt, rt =
+    Option.fold ~none:([], [])
+      ~some:(fun (pt, rt) -> List.map typ_of_pt pt, List.map typ_of_val_type rt)
+      block_type
+  in
+  match loop pt expr with
   | Stop -> Stop
   | Continue stack ->
     Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
-    let _ign = Stack.check_bt block_type stack in
-    continue stack
+    match Stack.match_prefix ~prefix:(List.rev rt) ~stack:(stack) with
+    | None -> Err.pp "type mismatch (loop)"
+    | Some _ -> continue stack
 
 let typecheck_function (module_ : Simplify.result) func =
   match func with
