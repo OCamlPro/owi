@@ -5,11 +5,13 @@ type typ =
   | Num_type of Types.num_type
   | Ref_type of Types.ref_type
   | Any
+  | Something
 
 let pp fmt = function
   | Num_type t -> Pp.Simplified.num_type fmt t
   | Ref_type t -> Pp.Simplified.ref_type fmt t
   | Any -> Format.fprintf fmt "any"
+  | Something -> Format.fprintf fmt "something"
 
 let typ_of_val_type = function
   | Types.Ref_type t -> Ref_type t
@@ -127,6 +129,7 @@ module Stack = struct
 
   let match_types required got =
     match (required, got) with
+    | Something, _ | _, Something -> true
     | Any, _ | _, Any -> true
     | Num_type required, Num_type got -> match_num_type required got
     | Ref_type required, Ref_type got -> match_ref_type required got
@@ -165,7 +168,7 @@ module Stack = struct
     | Some stack -> stack
 
   let pop_ref = function
-    | Ref_type _ :: tl -> tl
+    | (Something | Ref_type _) :: tl -> tl
     | Any :: _ as stack -> stack
     | _ -> Err.pp "type mismatch (pop_ref)"
 
@@ -318,7 +321,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
       | None -> begin
         Debug.log "NONE@.";
         match stack with
-        | Any :: _ -> [ Any ]
+        | Any :: _ -> [ Something; Any ]
         | hd :: Any :: _ -> hd :: [ Any ]
         | hd :: hd' :: tl when Stack.match_types hd hd' -> hd :: tl
         | _ -> Err.pp "type mismatch (select) %a" Stack.pp stack
