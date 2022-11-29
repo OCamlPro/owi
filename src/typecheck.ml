@@ -217,8 +217,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Drop -> continue (Stack.drop stack)
   | Return ->
     ignore @@ Stack.pop (List.rev_map typ_of_val_type env.result_type) stack;
-    Stop
-  | Unreachable -> Stack.push [ any ] stack
+    continue [ any ]
+  | Unreachable -> continue [ any ]
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
@@ -342,7 +342,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let jt = Env.block_type_get i env in
     Debug.log "EXPECTED PREFIX: %a@." Pp.Simplified.result_type jt;
     ignore @@ Stack.pop (List.map typ_of_val_type jt) stack;
-    Stack.push [] stack
+    continue [ any ]
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
@@ -352,7 +352,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
     ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
-    Stop
+    continue [ any ]
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
     Stack.pop [ i32 ] stack |> Stack.push [ Ref_type t_typ ]
