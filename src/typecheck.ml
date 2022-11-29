@@ -28,13 +28,21 @@ module Index = struct
   include M
 end
 
+let result_type = function
+  | None -> []
+  | Some (_, rt) -> rt
+
+let param_type = function
+  | None -> []
+  | Some (pt, _) -> List.map snd pt
+
 module Env = struct
   type t =
     { locals : typ Index.Map.t
     ; globals : (Const.expr global', global_type) S.runtime S.named
     ; result_type : result_type
     ; funcs : (Simplify.func, func_type) S.runtime S.named
-    ; blocks : func_type option list
+    ; blocks : result_type list
     ; tables : (table, table_type) S.runtime S.named
     ; elems : (int, Const.expr) elem' S.named
     }
@@ -247,8 +255,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     Stack.pop [ typ_of_val_type t ] stack |> continue
   | If_else (_id, block_type, e1, e2) ->
     let stack = Stack.pop [ i32 ] stack in
-    let _stack_e1 = typecheck_expr env e1 block_type in
-    let _stack_e2 = typecheck_expr env e2 block_type in
+    let _stack_e1 = typecheck_expr env e1 (result_type block_type) block_type in
+    let _stack_e2 = typecheck_expr env e2 (result_type block_type) block_type in
     Stack.check_bt block_type stack;
     Stack.pop_push block_type stack
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
@@ -279,7 +287,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack |> continue
-  | Block (_, bt, expr) | Loop (_, bt, expr) -> typecheck_expr env expr bt
+  | Block (_, bt, expr) ->
+    typecheck_expr env expr (result_type bt) bt
+  | Loop (_, bt, expr) ->
+    typecheck_expr env expr (param_type bt) bt
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
     Stack.check_bt (Some bt) stack;
@@ -328,27 +339,19 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
   | Ref_func _i -> Stack.push [ Ref_type Func_ref ] stack
   (* TODO: *)
   | Br i ->
-    let bt = Env.block_type_get i env in
-    Option.iter
-      (fun (_pt, rt) ->
-        Debug.log "EXPECTED PREFIX: %a@." Pp.Simplified.result_type rt;
-        ignore @@ Stack.pop (List.map typ_of_val_type rt) stack )
-      bt;
+    let jt = Env.block_type_get i env in
+    Debug.log "EXPECTED PREFIX: %a@." Pp.Simplified.result_type jt;
+    ignore @@ Stack.pop (List.map typ_of_val_type jt) stack;
     Stack.push [] stack
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
-    let bt = Env.block_type_get i env in
-    Option.iter
-      (fun (_pt, rt) ->
-        ignore @@ Stack.pop (List.rev_map typ_of_val_type rt) stack )
-      bt;
+    let jt = Env.block_type_get i env in
+    ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
     continue stack
   | Br_table (_, i) ->
     let stack = Stack.pop [ i32 ] stack in
-    let bt = Env.block_type_get i env in
-    Option.iter
-      (fun (pt, _rt) -> ignore @@ Stack.pop (List.rev_map typ_of_pt pt) stack)
-      bt;
+    let jt = Env.block_type_get i env in
+    ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
     Stop
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
@@ -357,8 +360,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let t_typ = Env.table_type_get i env in
     Stack.pop [ Ref_type t_typ; i32 ] stack |> continue
 
-and typecheck_expr env expr (block_type : func_type option) : state =
-  let env = { env with blocks = block_type :: env.blocks } in
+and typecheck_expr env expr jump_type (block_type : func_type option) : state =
+  let env = { env with blocks = jump_type :: env.blocks } in
   let rec loop stack expr =
     match expr with
     | [] -> continue stack
@@ -395,7 +398,7 @@ let typecheck_function (module_ : Simplify.result) func =
         ~elems:module_.elem
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
-    match typecheck_expr env func.body (Some ([], result)) with
+    match typecheck_expr env func.body result (Some ([], result)) with
     | Stop -> ()
     | Continue stack ->
       let required = List.rev_map typ_of_val_type (snd func.type_f) in
