@@ -341,8 +341,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
-    ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack;
-    stack
+    let stack = Stack.pop (List.rev_map typ_of_val_type jt) stack in
+    Stack.push (List.rev_map typ_of_val_type jt) stack
   | Br_table (branches, i) ->
     let stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
