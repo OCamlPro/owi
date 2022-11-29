@@ -103,7 +103,6 @@ let itype = function S32 -> i32 | S64 -> i64
 let ftype = function S32 -> f32 | S64 -> f64
 
 type state =
-  | Stop
   | Continue of stack
 
 let continue s = Continue s
@@ -204,7 +203,6 @@ module Stack = struct
              (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
            in
            match pop pt stack |> push rt with
-           | Stop -> assert false
            | Continue stack -> stack )
          bt
 end
@@ -365,7 +363,6 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : state =
       Debug.log "STACK BEFORE: %a@." Stack.pp stack;
       Debug.log "CURRENT INST: %a@." Pp.Simplified.instr instr;
       match typecheck_instr env stack instr with
-      | Stop -> Stop
       | Continue stack ->
         Debug.log "STACK  AFTER: %a@." Stack.pp stack;
         loop stack tail )
@@ -377,7 +374,6 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : state =
       block_type
   in
   match loop pt expr with
-  | Stop -> Stop
   | Continue stack -> (
     Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
     match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
@@ -396,7 +392,6 @@ let typecheck_function (module_ : Simplify.result) func =
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env func.body result (Some ([], result)) with
-    | Stop -> ()
     | Continue stack ->
       let required = List.rev_map typ_of_val_type (snd func.type_f) in
       Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
