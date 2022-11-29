@@ -250,7 +250,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     let stack_e2 =
       typecheck_expr env e2 (result_type block_type) block_type ~stack
     in
-    if not (Stack.equal stack_e1 stack_e2) then Err.pp "type mismatch (if else)";
+    if not (Stack.equal stack_e1 stack_e2) then
+      Err.pp "type mismatch (if else)";
     stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
@@ -376,10 +377,11 @@ and typecheck_expr env expr jump_type (block_type : func_type option)
   Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
   match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
   | None -> Err.pp "type mismatch (loop)"
-  | Some _ -> (
+  | Some _ ->
     match Stack.match_prefix ~prefix:(List.rev pt) ~stack:previous_stack with
     | None -> Err.pp "type mismatch (param type)"
-    | Some stack_to_push -> Stack.push (List.rev rt) stack_to_push )
+    | Some stack_to_push ->
+      Stack.push (List.rev rt) stack_to_push
 
 let typecheck_function (module_ : Simplify.result) func =
   match func with
