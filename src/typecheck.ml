@@ -102,10 +102,7 @@ let itype = function S32 -> i32 | S64 -> i64
 
 let ftype = function S32 -> f32 | S64 -> f64
 
-type state =
-  | Continue of stack
-
-let continue s = Continue s
+let continue s = s
 
 module Stack = struct
   let pp fmt (s : stack) =
@@ -202,12 +199,11 @@ module Stack = struct
            let pt, rt =
              (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
            in
-           match pop pt stack |> push rt with
-           | Continue stack -> stack )
+           pop pt stack |> push rt )
          bt
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
+let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   match instr with
   | Nop -> continue stack
   | Drop -> continue (Stack.drop stack)
@@ -354,7 +350,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : state =
     let t_typ = Env.table_type_get i env in
     Stack.pop [ Ref_type t_typ; i32 ] stack |> continue
 
-and typecheck_expr env expr jump_type (block_type : func_type option) : state =
+and typecheck_expr env expr jump_type (block_type : func_type option) : stack =
   let env = { env with blocks = jump_type :: env.blocks } in
   let rec loop stack expr =
     match expr with
@@ -363,7 +359,7 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : state =
       Debug.log "STACK BEFORE: %a@." Stack.pp stack;
       Debug.log "CURRENT INST: %a@." Pp.Simplified.instr instr;
       match typecheck_instr env stack instr with
-      | Continue stack ->
+      | stack ->
         Debug.log "STACK  AFTER: %a@." Stack.pp stack;
         loop stack tail )
   in
@@ -374,7 +370,7 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : state =
       block_type
   in
   match loop pt expr with
-  | Continue stack -> (
+  | stack -> (
     Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
     match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
     | None -> Err.pp "type mismatch (loop)"
@@ -392,7 +388,7 @@ let typecheck_function (module_ : Simplify.result) func =
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
     match typecheck_expr env func.body result (Some ([], result)) with
-    | Continue stack ->
+    | stack ->
       let required = List.rev_map typ_of_val_type (snd func.type_f) in
       Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
       Debug.log "STACK         IS: %a@." Stack.pp stack;
