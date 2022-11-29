@@ -191,7 +191,7 @@ module Stack = struct
     end
 
   let pop_push bt stack =
-    Option.fold ~none:[]
+    Option.fold ~none:stack
       ~some:(fun (pt, rt) ->
         let pt, rt =
           (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
@@ -244,10 +244,15 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
     let stack = Stack.pop [ i32 ] stack in
-    let _stack_e1 = typecheck_expr env e1 (result_type block_type) block_type in
-    let _stack_e2 = typecheck_expr env e2 (result_type block_type) block_type in
-    Stack.check_bt block_type stack;
-    Stack.pop_push block_type stack
+    let stack_e1 =
+      typecheck_expr env e1 (result_type block_type) block_type ~stack
+    in
+    let stack_e2 =
+      typecheck_expr env e2 (result_type block_type) block_type ~stack
+    in
+    if not (Stack.equal stack_e1 stack_e2) then
+      Err.pp "type mismatch (if else)";
+    stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
   | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
@@ -276,8 +281,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack
-  | Block (_, bt, expr) -> typecheck_expr env expr (result_type bt) bt
-  | Loop (_, bt, expr) -> typecheck_expr env expr (param_type bt) bt
+  | Block (_, bt, expr) -> typecheck_expr env expr (result_type bt) bt ~stack
+  | Loop (_, bt, expr) -> typecheck_expr env expr (param_type bt) bt ~stack
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
     Stack.check_bt (Some bt) stack;
@@ -314,7 +319,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
       | None -> begin
         Debug.log "NONE@.";
         match stack with
-        | [Any] -> [Any]
+        | [ Any ] -> [ Any ]
         | Any :: hd :: tl | hd :: Any :: tl -> hd :: tl
         | hd :: hd' :: tl when Stack.match_types hd hd' -> hd :: tl
         | _ -> Err.pp "type mismatch (select) %a" Stack.pp stack
@@ -348,7 +353,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     let t_typ = Env.table_type_get i env in
     Stack.pop [ Ref_type t_typ; i32 ] stack
 
-and typecheck_expr env expr jump_type (block_type : func_type option) : stack =
+and typecheck_expr env expr jump_type (block_type : func_type option)
+    ~stack:previous_stack : stack =
   let env = { env with blocks = jump_type :: env.blocks } in
   let rec loop stack expr =
     match expr with
@@ -367,12 +373,15 @@ and typecheck_expr env expr jump_type (block_type : func_type option) : stack =
         (List.map typ_of_pt pt, List.map typ_of_val_type rt) )
       block_type
   in
-  match loop pt expr with
-  | stack -> (
-    Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
-    match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
-    | None -> Err.pp "type mismatch (loop)"
-    | Some _ -> stack )
+  let stack = loop pt expr in
+  Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
+  match Stack.match_prefix ~prefix:(List.rev rt) ~stack with
+  | None -> Err.pp "type mismatch (loop)"
+  | Some _ ->
+    match Stack.match_prefix ~prefix:(List.rev pt) ~stack:previous_stack with
+    | None -> Err.pp "type mismatch (param type)"
+    | Some stack_to_push ->
+      Stack.push (List.rev rt) stack_to_push
 
 let typecheck_function (module_ : Simplify.result) func =
   match func with
@@ -385,7 +394,7 @@ let typecheck_function (module_ : Simplify.result) func =
         ~elems:module_.elem
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
-    match typecheck_expr env func.body result (Some ([], result)) with
+    match typecheck_expr env func.body result (Some ([], result)) ~stack:[] with
     | stack ->
       let required = List.rev_map typ_of_val_type (snd func.type_f) in
       Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
