@@ -313,6 +313,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     begin
       match t with
       | None -> begin
+        begin
+          match stack with
+          | [] -> ()
+          | Ref_type _ :: _tl -> Err.pp "type mismatch (select implicit)"
+          | _ -> ()
+        end;
         Debug.log "NONE@.";
         match stack with
         | Any :: _ -> [ Something; Any ]
