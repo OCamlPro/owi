@@ -269,9 +269,10 @@ module Const_interp = struct
   let exec_expr env (e : Const.expr) : Env.t' Value.t =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
     match stack with
-    | [] -> Err.pp "const expr returning zero values"
+    | [] -> Err.pp "type mismatch (const expr returning zero values)"
     | _ :: _ :: _ ->
-      Err.pp "const expr returning more than one value %a" Pp.Const.expr e
+      Err.pp "type mismatch (const expr returning more than one value %a)"
+        Pp.Const.expr e
     | [ result ] -> result
 end
 
