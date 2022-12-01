@@ -35,6 +35,10 @@ module Index = struct
   include M
 end
 
+let get_value_at_indice i values =
+  match List.find (fun S.{ index; _ } -> index = i) values with
+  | { value; _ } -> value
+
 module Env = struct
   type t =
     { locals : typ Index.Map.t
@@ -47,10 +51,6 @@ module Env = struct
     }
 
   let local_get i env = match Index.Map.find i env.locals with v -> v
-
-  let get_value_at_indice i values =
-    match List.find (fun S.{ index; _ } -> index = i) values with
-    | { value; _ } -> value
 
   let global_get i env =
     let value = get_value_at_indice i env.globals.values in
@@ -286,7 +286,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   | Call i ->
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map typ_of_pt pt) stack
-    |> Stack.push (List.map typ_of_val_type rt)
+    |> Stack.push (List.rev_map typ_of_val_type rt)
   | Data_drop _i -> stack
   | Table_init (ti, ei) ->
     let table_typ = Env.table_type_get ti env in
@@ -407,7 +407,41 @@ let typecheck_function (module_ : Simplify.result) func =
           Err.pp "type mismatch func %a" Stack.pp_error (required, stack)
       end )
 
+let typecheck_global (module_ : Simplify.result) global =
+  match global.Simplify.value with
+  | S.Imported _ -> ()
+  | Local ({ type_; init; _ } : 'expr global') -> (
+    let typecheck_const_instr stack = function
+      | Types.Const.I32_const _ -> Stack.push [ i32 ] stack
+      | I64_const _ -> Stack.push [ i64 ] stack
+      | F32_const _ -> Stack.push [ f32 ] stack
+      | F64_const _ -> Stack.push [ f64 ] stack
+      | Ref_null t -> Stack.push [ Ref_type t ] stack
+      | Ref_func _i -> Stack.push [ Ref_type Func_ref ] stack
+      | Global_get i ->
+        let value = get_value_at_indice i module_.global.values in
+        let _mut, type_ =
+          match value with Local { type_; _ } -> type_ | Imported t -> t.desc
+        in
+        Stack.push [ typ_of_val_type type_ ] stack
+      | I_binop (t, _op) ->
+        let t = match t with S32 -> i32 | S64 -> i64 in
+        Stack.pop [ t; t ] stack |> Stack.push [ t ]
+    in
+
+    let real_type =
+      List.fold_left (fun stack g -> typecheck_const_instr stack g) [] init
+    in
+    match real_type with
+    | [ real_type ] ->
+      if typ_of_val_type @@ snd type_ <> real_type then
+        Err.pp "type mismatch (typecheck_global)"
+    | _whatever -> Err.pp "type mismatch (typecheck_global wrong num)" )
+
 let typecheck_module (module_ : Simplify.result) =
   S.Fields.iter
     (fun _index func -> typecheck_function module_ func)
-    module_.func
+    module_.func;
+  List.iter
+    (fun global -> typecheck_global module_ global)
+    module_.global.values
