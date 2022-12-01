@@ -7,11 +7,16 @@ type typ =
   | Any
   | Something
 
-let pp fmt = function
+let pp_typ fmt = function
   | Num_type t -> Pp.Simplified.num_type fmt t
   | Ref_type t -> Pp.Simplified.ref_type fmt t
   | Any -> Format.fprintf fmt "any"
   | Something -> Format.fprintf fmt "something"
+
+let pp_typ_list fmt l =
+  Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
+    pp_typ fmt l
 
 let typ_of_val_type = function
   | Types.Ref_type t -> Ref_type t
@@ -30,17 +35,13 @@ module Index = struct
   include M
 end
 
-let result_type = function None -> [] | Some (_, rt) -> rt
-
-let param_type = function None -> [] | Some (pt, _) -> List.map snd pt
-
 module Env = struct
   type t =
     { locals : typ Index.Map.t
     ; globals : (Const.expr global', global_type) S.runtime S.named
     ; result_type : result_type
     ; funcs : (Simplify.func, func_type) S.runtime S.named
-    ; blocks : result_type list
+    ; blocks : typ list list
     ; tables : (table, table_type) S.runtime S.named
     ; elems : (int, Const.expr) elem' S.named
     }
@@ -105,10 +106,7 @@ let itype = function S32 -> i32 | S64 -> i64
 let ftype = function S32 -> f32 | S64 -> f64
 
 module Stack = struct
-  let pp fmt (s : stack) =
-    Format.fprintf fmt "[%a]"
-      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " ") pp)
-      s
+  let pp fmt (s : stack) = Format.fprintf fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
     Format.fprintf fmt "requires %a but stack has %a" pp expected pp got
@@ -247,12 +245,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
     let stack = Stack.pop [ i32 ] stack in
-    let stack_e1 =
-      typecheck_expr env e1 (result_type block_type) block_type ~stack
-    in
-    let stack_e2 =
-      typecheck_expr env e2 (result_type block_type) block_type ~stack
-    in
+    let stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
+    let stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     if not (Stack.equal stack_e1 stack_e2) then Err.pp "type mismatch (if else)";
     stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
@@ -283,8 +277,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack
-  | Block (_, bt, expr) -> typecheck_expr env expr (result_type bt) bt ~stack
-  | Loop (_, bt, expr) -> typecheck_expr env expr (param_type bt) bt ~stack
+  | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
+  | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
     Stack.check_bt (Some bt) stack;
@@ -335,24 +329,24 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   (* TODO: *)
   | Br i ->
     let jt = Env.block_type_get i env in
-    Debug.log "EXPECTED PREFIX: %a@." Pp.Simplified.result_type jt;
-    ignore @@ Stack.pop (List.map typ_of_val_type jt) stack;
+    Debug.log "EXPECTED PREFIX: %a@." pp_typ_list jt;
+    ignore @@ Stack.pop (List.rev jt) stack;
     [ any ]
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
-    let stack = Stack.pop (List.rev_map typ_of_val_type jt) stack in
-    Stack.push (List.rev_map typ_of_val_type jt) stack
+    let stack = Stack.pop (List.rev jt) stack in
+    Stack.push (List.rev jt) stack
   | Br_table (branches, i) ->
     let stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
-    ignore @@ Stack.pop (List.rev_map typ_of_val_type default_jt) stack;
+    ignore @@ Stack.pop (List.rev default_jt) stack;
     Array.iter
       (fun i ->
         let jt = Env.block_type_get i env in
         if not (List.length jt = List.length default_jt) then
           Err.pp "type mismatch (br table)";
-        ignore @@ Stack.pop (List.rev_map typ_of_val_type jt) stack )
+        ignore @@ Stack.pop (List.rev jt) stack )
       branches;
     [ any ]
   | Table_get i ->
@@ -362,8 +356,15 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     let t_typ = Env.table_type_get i env in
     Stack.pop [ Ref_type t_typ; i32 ] stack
 
-and typecheck_expr env expr jump_type (block_type : func_type option)
+and typecheck_expr env expr ~is_loop (block_type : func_type option)
     ~stack:previous_stack : stack =
+  let pt, rt =
+    Option.fold ~none:([], [])
+      ~some:(fun (pt, rt) ->
+        (List.map typ_of_pt pt, List.map typ_of_val_type rt) )
+      block_type
+  in
+  let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
   let rec loop stack expr =
     match expr with
@@ -375,12 +376,6 @@ and typecheck_expr env expr jump_type (block_type : func_type option)
       | stack ->
         Debug.log "STACK  AFTER: %a@." Stack.pp stack;
         loop stack tail )
-  in
-  let pt, rt =
-    Option.fold ~none:([], [])
-      ~some:(fun (pt, rt) ->
-        (List.map typ_of_pt pt, List.map typ_of_val_type rt) )
-      block_type
   in
   let stack = loop pt expr in
   Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
@@ -400,7 +395,9 @@ let typecheck_function (module_ : Simplify.result) func =
         ~elems:module_.elem
     in
     Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
-    match typecheck_expr env func.body result (Some ([], result)) ~stack:[] with
+    match
+      typecheck_expr env func.body ~is_loop:false (Some ([], result)) ~stack:[]
+    with
     | stack ->
       let required = List.rev_map typ_of_val_type (snd func.type_f) in
       Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
