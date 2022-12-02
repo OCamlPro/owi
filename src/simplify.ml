@@ -700,14 +700,6 @@ module Rewrite_indices = struct
 
   let rewrite_const_expr (module_ : assigned_module) (expr : (indice, _) expr')
       : Const.expr =
-    let const_ibinop (op : ibinop) : Const.ibinop =
-      match op with
-      | Add -> Add
-      | Sub -> Sub
-      | Mul -> Mul
-      | _ -> Err.pp "constant expression required"
-    in
-
     let const_instr (instr : (indice, _) instr') : Const.instr =
       match instr with
       | I32_const v -> I32_const v
@@ -722,7 +714,6 @@ module Rewrite_indices = struct
         | Const -> Global_get idx
         | Var -> Err.pp "constant expression required"
       end
-      | I_binop (t, op) -> I_binop (t, const_ibinop op)
       | _ -> Err.pp "constant expression required"
     in
     List.map const_instr expr
