@@ -23,7 +23,7 @@
   (owi TODO TODO TODO TODO))
  (depends
   (ocaml
-   (>= 4.08))
+   (>= 4.11))
   (integers
    (>= 0.5.1))
   sedlex

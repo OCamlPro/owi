@@ -13,7 +13,7 @@ homepage: "https://github.com/ocamlpro/owi"
 bug-reports: "https://github.com/ocamlpro/owi/issues"
 depends: [
   "dune" {>= "2.9"}
-  "ocaml" {>= "4.08"}
+  "ocaml" {>= "4.11"}
   "integers" {>= "0.5.1"}
   "sedlex"
   "menhir" {build & >= "20180528"}
