@@ -1,12 +1,12 @@
 {0 woi}
 
-{{:https://TODO} woi} is an {{:https://ocaml.org} OCaml} library/executable to TODO.
+{{:https://github.com/ocamlpro/owi} owi} is an {{:https://ocaml.org} OCaml} library/executable to TODO.
 
 {1:api API}
 
 
 {!modules:
-Woi
+Owi
 }
 
 
