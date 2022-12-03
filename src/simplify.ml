@@ -508,14 +508,15 @@ module Rewrite_indices = struct
     | None -> Err.pp "%s" msg
     | Some v -> v
 
-  let find_global (module_ : assigned_module) id =
+  let find_global (module_ : assigned_module) ~imported_only id =
     let idx = find "unknown global" module_.global id in
     let va =
       List.find (fun { index; _ } -> index = idx) module_.global.values
     in
     let mut, _typ =
       match va.value with
-      | Local global -> global.type_
+      | Local global ->
+        if imported_only then Err.pp "unknown global" else global.type_
       | Imported imported -> imported.desc
     in
     (idx, mut)
@@ -628,13 +629,13 @@ module Rewrite_indices = struct
         let bt = Option.get @@ bt_to_raw (Some bt) in
         Call_indirect (find_table tbl_i, bt)
       | Global_set id -> begin
-        let idx, mut = find_global module_ id in
+        let idx, mut = find_global module_ ~imported_only:false id in
         match mut with
         | Const -> Err.pp "global is immutable"
         | Var -> Global_set idx
       end
       | Global_get id ->
-        let idx, _mut = find_global module_ id in
+        let idx, _mut = find_global module_ ~imported_only:false id in
         Global_get idx
       | Ref_func id -> Ref_func (find_func id)
       | Table_size id -> Table_size (find_table id)
@@ -709,7 +710,7 @@ module Rewrite_indices = struct
       | Ref_null v -> Ref_null v
       | Ref_func f -> Ref_func (find "unknown function" module_.func f)
       | Global_get id -> begin
-        let idx, mut = find_global module_ id in
+        let idx, mut = find_global module_ ~imported_only:true id in
         match mut with
         | Const -> Global_get idx
         | Var -> Err.pp "constant expression required"

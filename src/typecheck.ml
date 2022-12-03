@@ -388,6 +388,7 @@ let typecheck_const_instr (module_ : Simplify.result) refs stack = function
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ref ] stack
   | Global_get i ->
+    Debug.log "GLOBAL GET %d@\n" i;
     let value = get_value_at_indice i module_.global.values in
     let _mut, type_ =
       match value with
@@ -414,6 +415,7 @@ let typecheck_global (module_ : Simplify.result) refs global =
     | _whatever -> Err.pp "type mismatch (typecheck_global wrong num)" )
 
 let typecheck_elem module_ refs (elem : (int, Const.expr) elem' S.indexed) =
+  Debug.log "ELEM INDEX = %d ; VALUE = @\n" elem.index;
   let expected_type = elem.value.type_ in
   List.iter
     (fun init ->
