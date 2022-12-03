@@ -1,3 +1,5 @@
+(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
 include Stdlib.Int64
 
 let clz = Ocaml_intrinsics.Int64.count_leading_zeros
@@ -8,7 +10,7 @@ exception InvalidConversion
 
 exception Overflow
 
-(* Taken from Base *)
+(* Taken from Base: https://github.com/janestreet/base *)
 let popcnt =
   let ( + ) = add in
   let ( - ) = sub in

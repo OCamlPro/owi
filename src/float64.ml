@@ -1,3 +1,5 @@
+(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
 let pos_nan = 0x7ff8_0000_0000_0000L
 
 let neg_nan = 0xfff8_0000_0000_0000L

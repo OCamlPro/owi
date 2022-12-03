@@ -1,3 +1,5 @@
+(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
 module MInt32 = struct
   let wrap_i64 x = Int64.to_int32 x
 

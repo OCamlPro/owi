@@ -1,3 +1,5 @@
+(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
 exception Utf8
 
 let string_implode cs =
