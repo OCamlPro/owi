@@ -66,6 +66,10 @@ module Env = struct
 
   let block_type_get i env = List.nth env.blocks i
 
+  let table_type_get_from_module i (module_ : Simplify.result) =
+    let value = get_value_at_indice i module_.table.values in
+    match value with Local table -> snd (snd table) | Imported t -> snd t.desc
+
   let table_type_get i env =
     let value = get_value_at_indice i env.tables.values in
     match value with Local table -> snd (snd table) | Imported t -> snd t.desc
@@ -388,7 +392,6 @@ let typecheck_const_instr (module_ : Simplify.result) refs stack = function
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ref ] stack
   | Global_get i ->
-    Debug.log "GLOBAL GET %d@\n" i;
     let value = get_value_at_indice i module_.global.values in
     let _mut, type_ =
       match value with
@@ -415,7 +418,6 @@ let typecheck_global (module_ : Simplify.result) refs global =
     | _whatever -> Err.pp "type mismatch (typecheck_global wrong num)" )
 
 let typecheck_elem module_ refs (elem : (int, Const.expr) elem' S.indexed) =
-  Debug.log "ELEM INDEX = %d ; VALUE = @\n" elem.index;
   let expected_type = elem.value.type_ in
   List.iter
     (fun init ->
@@ -424,8 +426,17 @@ let typecheck_elem module_ refs (elem : (int, Const.expr) elem' S.indexed) =
       | [ real_type ] ->
         if Ref_type expected_type <> real_type then
           Err.pp "type mismatch (typecheck_elem)"
-      | _whatever -> Err.pp "type mismatch (typecheck_global wrong num)" )
-    elem.value.init
+      | _whatever -> Err.pp "type mismatch (typecheck_elem wrong num)" )
+    elem.value.init;
+  match elem.value.mode with
+  | Elem_passive | Elem_declarative -> ()
+  | Elem_active (tbl_i, e) -> (
+    let tbl_type = Env.table_type_get_from_module tbl_i module_ in
+    if tbl_type <> expected_type then Err.pp "type mismatch";
+    match typecheck_const_expr module_ refs e with
+    | [ Ref_type t ] -> if t <> tbl_type then Err.pp "type mismatch"
+    | [ _t ] -> ()
+    | _whatever -> Err.pp "type mismatch (typecheck_elem)" )
 
 let typecheck_data module_ refs (data : (int, Const.expr) data' S.indexed) =
   match data.value.mode with
