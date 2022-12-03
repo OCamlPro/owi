@@ -427,10 +427,20 @@ let typecheck_elem module_ refs (elem : (int, Const.expr) elem' S.indexed) =
       | _whatever -> Err.pp "type mismatch (typecheck_global wrong num)" )
     elem.value.init
 
+let typecheck_data module_ refs (data : (int, Const.expr) data' S.indexed) =
+  match data.value.mode with
+  | Data_passive -> ()
+  | Data_active (_i, e) -> (
+    let t = typecheck_const_expr module_ refs e in
+    match t with
+    | [ _t ] -> ()
+    | _whatever -> Err.pp "type mismatch (typecheck_data)" )
+
 let typecheck_module (module_ : Simplify.result) =
   let refs = Hashtbl.create 512 in
   List.iter (typecheck_global module_ refs) module_.global.values;
   List.iter (typecheck_elem module_ refs) module_.elem.values;
+  List.iter (typecheck_data module_ refs) module_.data.values;
   List.iter
     (fun (export : int S.export) -> Hashtbl.add refs export.id ())
     module_.exports.func;

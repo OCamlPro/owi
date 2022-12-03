@@ -159,11 +159,11 @@ let rec run ~with_exhaustion script =
         | Module m ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.log "simplifying module %a... " pp_name name;
+          Debug.log "simplifying module %a...@\n" pp_name name;
           let m = Simplify.simplify m in
-          Debug.log "typechecking module... ";
+          Debug.log "typechecking module...@\n";
           typecheck m;
-          Debug.log "linking module... ";
+          Debug.log "linking module...@\n";
           let module_to_run, link_state = Link.link_module m link_state in
           Debug.log "eval module... !@\n";
           Interpret.exec_module module_to_run;
@@ -172,11 +172,11 @@ let rec run ~with_exhaustion script =
         | Assert (Assert_trap_module (m, msg)) ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.log "simplifying module %a... " pp_name name;
+          Debug.log "simplifying module %a...@\n" pp_name name;
           let m = Simplify.simplify m in
-          Debug.log "typechecking module... ";
+          Debug.log "typechecking module...@\n";
           typecheck m;
-          Debug.log "linking module... ";
+          Debug.log "linking module...@\n";
           let module_to_run, _ignored_link_state =
             Link.link_module m link_state
           in
