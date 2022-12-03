@@ -7,13 +7,6 @@ let string_implode cs =
   List.iter (Buffer.add_char buf) cs;
   Buffer.contents buf
 
-let string_explode s =
-  let cs = ref [] in
-  for i = String.length s - 1 downto 0 do
-    cs := s.[i] :: !cs
-  done;
-  !cs
-
 let con n = 0x80 lor (n land 0x3f)
 
 let rec encode ns = string_implode (List.map Char.chr (encode' ns))
@@ -30,28 +23,6 @@ and encode' = function
     :: con (n lsr 12)
     :: con (n lsr 6)
     :: con n :: encode' ns
-  | _ -> raise Utf8
-
-let con b = if b land 0xc0 = 0x80 then b land 0x3f else raise Utf8
-
-let code min n =
-  if n < min || (0xd800 <= n && n < 0xe000) || n >= 0x110000 then raise Utf8
-  else n
-
-let rec decode s = decode' (List.map Char.code (string_explode s))
-
-and decode' = function
-  | [] -> []
-  | b1 :: bs when b1 < 0x80 -> code 0x0 b1 :: decode' bs
-  | b1 :: _bs when b1 < 0xc0 -> raise Utf8
-  | b1 :: b2 :: bs when b1 < 0xe0 ->
-    code 0x80 (((b1 land 0x1f) lsl 6) + con b2) :: decode' bs
-  | b1 :: b2 :: b3 :: bs when b1 < 0xf0 ->
-    code 0x800 (((b1 land 0x0f) lsl 12) + (con b2 lsl 6) + con b3) :: decode' bs
-  | b1 :: b2 :: b3 :: b4 :: bs when b1 < 0xf8 ->
-    code 0x10000
-      (((b1 land 0x07) lsl 18) + (con b2 lsl 12) + (con b3 lsl 6) + con b4)
-    :: decode' bs
   | _ -> raise Utf8
 
 let check_utf8 s =
