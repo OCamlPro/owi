@@ -135,7 +135,6 @@ module Stack = struct
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> false
 
   let rec equal s s' =
-    Debug.log "EQUAL        : require %a stack %a@." pp s pp s';
     match (s, s') with
     | [], s | s, [] -> List.for_all (( = ) Any) s
     | Any :: tl, Any :: tl' -> equal tl s' || equal s tl'
@@ -147,7 +146,6 @@ module Stack = struct
     match (l, r) with None, v | v, None -> v | Some l, _r -> Some l
 
   let rec match_prefix ~prefix ~stack =
-    Debug.log "PREFIX       : require %a stack %a@." pp prefix pp stack;
     match (prefix, stack) with
     | [], stack -> Some stack
     | Any :: tl, [] -> match_prefix ~prefix:tl ~stack:[]
@@ -178,19 +176,6 @@ module Stack = struct
     | _ :: tl -> tl
 
   let push t stack = t @ stack
-
-  let check_bt bt stack =
-    match bt with
-    | None ->
-      Debug.log "CHECK BT NONE@.";
-      if not @@ equal stack [] then Err.pp "type mismatch (check_bt)"
-    | Some (pt, rt) -> begin
-      Debug.log "CHECK BT SOME@.";
-      let pt, rt =
-        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
-      in
-      ignore (pop pt stack |> push rt)
-    end
 
   let pop_push bt stack =
     Option.fold ~none:stack
@@ -282,7 +267,6 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
   | Call_indirect (_, bt) ->
     let stack = Stack.pop [ i32 ] stack in
-    Stack.check_bt (Some bt) stack;
     Stack.pop_push (Some bt) stack
   | Call i ->
     let pt, rt = Env.func_get i env in
@@ -320,7 +304,6 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
           | Ref_type _ :: _tl -> Err.pp "type mismatch (select implicit)"
           | _ -> ()
         end;
-        Debug.log "NONE@.";
         match stack with
         | Any :: _ -> [ Something; Any ]
         | hd :: Any :: _ -> hd :: [ Any ]
@@ -328,7 +311,6 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
         | _ -> Err.pp "type mismatch (select) %a" Stack.pp stack
       end
       | Some t ->
-        Debug.log "SOME@.";
         let t = List.map typ_of_val_type t in
         Stack.pop t stack |> Stack.pop t |> Stack.push t
     end
@@ -337,24 +319,23 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     Stack.push [ Ref_type Func_ref ] stack
   | Br i ->
     let jt = Env.block_type_get i env in
-    Debug.log "EXPECTED PREFIX: %a@." pp_typ_list jt;
-    ignore @@ Stack.pop (List.rev jt) stack;
+    ignore @@ Stack.pop jt stack;
     [ any ]
   | Br_if i ->
     let stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
-    let stack = Stack.pop (List.rev jt) stack in
+    let stack = Stack.pop jt stack in
     Stack.push (List.rev jt) stack
   | Br_table (branches, i) ->
     let stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
-    ignore @@ Stack.pop (List.rev default_jt) stack;
+    ignore @@ Stack.pop default_jt stack;
     Array.iter
       (fun i ->
         let jt = Env.block_type_get i env in
         if not (List.length jt = List.length default_jt) then
           Err.pp "type mismatch (br table)";
-        ignore @@ Stack.pop (List.rev jt) stack )
+        ignore @@ Stack.pop jt stack )
       branches;
     [ any ]
   | Table_get i ->
@@ -369,51 +350,33 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
   let pt, rt =
     Option.fold ~none:([], [])
       ~some:(fun (pt, rt) ->
-        (List.map typ_of_pt pt, List.map typ_of_val_type rt) )
+        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let rec loop stack expr =
-    match expr with
-    | [] -> stack
-    | instr :: tail -> (
-      Debug.log "STACK BEFORE: %a@." Stack.pp stack;
-      Debug.log "CURRENT INST: %a@." Pp.Simplified.instr instr;
-      match typecheck_instr env stack instr with
-      | stack ->
-        Debug.log "STACK  AFTER: %a@." Stack.pp stack;
-        loop stack tail )
-  in
-  let stack = loop pt expr in
-  Debug.log "LOOP IS OVER WITH STACK: %a@." Stack.pp stack;
-  if not (Stack.equal (List.rev rt) stack) then Err.pp "type mismatch (loop)";
-  match Stack.match_prefix ~prefix:(List.rev pt) ~stack:previous_stack with
+  let stack = List.fold_left (typecheck_instr env) (List.rev pt) expr in
+  if not (Stack.equal rt stack) then Err.pp "type mismatch (loop)";
+  match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
   | None -> Err.pp "type mismatch (param type)"
-  | Some stack_to_push -> Stack.push (List.rev rt) stack_to_push
+  | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (module_ : Simplify.result) func refs =
   match func with
   | S.Imported _ -> ()
-  | Local func -> (
+  | Local func ->
     let params, result = func.type_f in
     let env =
       Env.make ~params ~funcs:module_.func ~locals:func.locals
         ~globals:module_.global ~result_type:result ~tables:module_.table
         ~elems:module_.elem ~refs
     in
-    Debug.log "TYPECHECK function@.%a@." Pp.Simplified.func func;
-    match
+    let stack =
       typecheck_expr env func.body ~is_loop:false (Some ([], result)) ~stack:[]
-    with
-    | stack ->
-      let required = List.rev_map typ_of_val_type (snd func.type_f) in
-      Debug.log "FUNCTION EXPECTS: %a@." Stack.pp required;
-      Debug.log "STACK         IS: %a@." Stack.pp stack;
-      begin
-        if not @@ Stack.equal required stack then
-          Err.pp "type mismatch func %a" Stack.pp_error (required, stack)
-      end )
+    in
+    let required = List.rev_map typ_of_val_type (snd func.type_f) in
+    if not @@ Stack.equal required stack then
+      Err.pp "type mismatch func %a" Stack.pp_error (required, stack)
 
 let typecheck_const_instr (module_ : Simplify.result) refs stack = function
   | Types.Const.I32_const _ -> Stack.push [ i32 ] stack
@@ -431,7 +394,7 @@ let typecheck_const_instr (module_ : Simplify.result) refs stack = function
     in
     Stack.push [ typ_of_val_type type_ ] stack
   | I_binop (t, _op) ->
-    let t = match t with S32 -> i32 | S64 -> i64 in
+    let t = itype t in
     Stack.pop [ t; t ] stack |> Stack.push [ t ]
 
 let typecheck_const_expr (module_ : Simplify.result) refs =
