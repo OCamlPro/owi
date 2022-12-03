@@ -15,7 +15,7 @@ let check_error' ~expected ~got =
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
     Format.eprintf "got     : `%s`@." got;
-    Err.pp "%s" got
+    Log.err "%s" got
   end
 
 let check_error ~expected ~got =
@@ -28,7 +28,7 @@ let check_error ~expected ~got =
   if not ok then begin
     Format.eprintf "expected: `%s`@." expected;
     Format.eprintf "got     : `%s`@." got;
-    Err.pp "%s" got
+    Log.err "%s" got
   end
 
 let check script =
@@ -36,7 +36,7 @@ let check script =
     List.iter
       (function
         | Module m -> begin
-          match Check.module_ m with Ok () -> () | Error e -> Err.pp "%s" e
+          match Check.module_ m with Ok () -> () | Error e -> Log.err "%s" e
         end
         | _ -> () )
       script;
@@ -48,16 +48,16 @@ let load_func_from_module ls mod_id f_name : Link.func =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Err.pp "unbound last module"
+      | None -> Log.err "unbound last module"
       | Some m -> m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Err.pp "unbound module " mod_id
+      | exception Not_found -> Log.err "unbound module " mod_id
       | exports -> exports )
   in
   match Link.StringMap.find f_name exports.functions with
-  | exception Not_found -> Err.pp "unbound name " f_name
+  | exception Not_found -> Log.err "unbound name " f_name
   | v -> v
 
 let load_global_from_module ls mod_id name : Link.global =
@@ -65,16 +65,16 @@ let load_global_from_module ls mod_id name : Link.global =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Err.pp "unbound last module"
+      | None -> Log.err "unbound last module"
       | Some m -> m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Err.pp "unbound module " mod_id
+      | exception Not_found -> Log.err "unbound module " mod_id
       | exports -> exports )
   in
   match Link.StringMap.find name exports.globals with
-  | exception Not_found -> Err.pp "unbound name " name
+  | exception Not_found -> Log.err "unbound name " name
   | v -> v
 
 let compare_result_const result (const : value) =
@@ -111,8 +111,8 @@ let compare_result_const result (const : value) =
   | Result_const (Literal (Const_null _)), _
   | Result_const (Literal (Const_host _)), _ ->
     false
-  | Result_func_ref, _ -> Err.pp "TODO (compare_result_const)"
-  | Result_extern_ref, _ -> Err.pp "TODO (compare_result_const)"
+  | Result_func_ref, _ -> Log.err "TODO (compare_result_const)"
+  | Result_extern_ref, _ -> Log.err "TODO (compare_result_const)"
 
 let value_of_const : Types.const -> value =
  fun const ->
@@ -126,7 +126,7 @@ let value_of_const : Types.const -> value =
 
 let action (link_state : Link.link_state) = function
   | Invoke (mod_id, f, args) -> begin
-    Debug.log "Invoke %a %s %a@."
+    Log.debug "Invoke %a %s %a@."
       (Format.pp_print_option
          ~none:(fun ppf () -> Format.fprintf ppf "<>")
          Format.pp_print_string )
@@ -159,28 +159,28 @@ let rec run ~with_exhaustion script =
         | Module m ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.log "simplifying module %a...@\n" pp_name name;
+          Log.debug "simplifying module %a...@\n" pp_name name;
           let m = Simplify.simplify m in
-          Debug.log "typechecking module...@\n";
+          Log.debug "typechecking module...@\n";
           typecheck m;
-          Debug.log "linking module...@\n";
+          Log.debug "linking module...@\n";
           let module_to_run, link_state = Link.link_module m link_state in
-          Debug.log "eval module... !@\n";
+          Log.debug "eval module... !@\n";
           Interpret.exec_module module_to_run;
-          Debug.log "done %a !@\n" pp_name name;
+          Log.debug "done %a !@\n" pp_name name;
           link_state
         | Assert (Assert_trap_module (m, msg)) ->
           let name = (m.id, !curr_module) in
           incr curr_module;
-          Debug.log "simplifying module %a...@\n" pp_name name;
+          Log.debug "simplifying module %a...@\n" pp_name name;
           let m = Simplify.simplify m in
-          Debug.log "typechecking module...@\n";
+          Log.debug "typechecking module...@\n";
           typecheck m;
-          Debug.log "linking module...@\n";
+          Log.debug "linking module...@\n";
           let module_to_run, _ignored_link_state =
             Link.link_module m link_state
           in
-          Debug.log "eval module... !@\n";
+          Log.debug "eval module... !@\n";
           begin
             try
               Interpret.exec_module module_to_run;
@@ -189,15 +189,15 @@ let rec run ~with_exhaustion script =
             | Trap trap_msg -> assert (msg = trap_msg)
             | _ -> assert false
           end;
-          Debug.log "done %a !@\n" pp_name name;
+          Log.debug "done %a !@\n" pp_name name;
           link_state
         | Assert (Assert_malformed_binary _) ->
-          Debug.log "simplifying assert malformed binary... ";
-          Debug.log "done !@\n";
+          Log.debug "simplifying assert malformed binary... ";
+          Log.debug "done !@\n";
           (* TODO: check this when binary format is supported *)
           link_state
         | Assert (Assert_malformed_quote (m, expected)) ->
-          Debug.log "simplifying assert malformed quote... ";
+          Log.debug "simplifying assert malformed quote... ";
           let got =
             match Parse.from_string (String.concat "\n" m) with
             | Ok script -> (
@@ -213,7 +213,7 @@ let rec run ~with_exhaustion script =
             | Error got -> got
           in
           check_error ~expected ~got;
-          Debug.log "done !@\n";
+          Log.debug "done !@\n";
           link_state
         | Assert (Assert_invalid_binary _) ->
           (* TODO: check this when binary format is supported *)
@@ -258,9 +258,9 @@ let rec run ~with_exhaustion script =
           in
           check_error' ~expected ~got;
           link_state
-        | Assert (Assert_malformed _) -> Err.pp "TODO assert_malformed"
+        | Assert (Assert_malformed _) -> Log.err "TODO assert_malformed"
         | Assert (Assert_return (a, res)) ->
-          Debug.log "Assert@.";
+          Log.debug "Assert@.";
           let stack = action link_state a in
           if
             List.length res <> List.length stack
@@ -271,17 +271,17 @@ let rec run ~with_exhaustion script =
           then begin
             Format.eprintf "got:      %a@.expected: %a@." Stack.pp
               (List.rev stack) Pp.Input.results res;
-            Err.pp "Bad result"
+            Log.err "Bad result"
           end;
           link_state
         | Assert (Assert_trap (a, msg)) -> begin
           try
             let (_ : Link.Env.t' Stack.t) = action link_state a in
-            Err.pp "unxpected success"
+            Log.err "unxpected success"
           with
           | Trap got ->
             check_error' ~expected:msg ~got;
-            Debug.log "expected trap: \"%s\"@." msg;
+            Log.debug "expected trap: \"%s\"@." msg;
             link_state
           | exn ->
             Format.eprintf "Wrong exn %s@." (Printexc.to_string exn);

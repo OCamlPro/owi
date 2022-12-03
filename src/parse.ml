@@ -15,7 +15,7 @@ let from_lexbuf =
     try Ok (parser provider) with
     | Menhir_parser.Error ->
       let start, _stop = Sedlexing.lexing_positions buf in
-      Debug.log "file %s, line %i, char %i@." start.pos_fname
+      Log.debug "file %s, line %i, char %i@." start.pos_fname
         (start.pos_lnum + 1)
         (start.pos_cnum - start.pos_bol);
       Error "unexpected token"

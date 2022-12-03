@@ -265,10 +265,10 @@ let of_signless_string s =
   else
     let s' = String.concat "" (String.split_on_char '_' s) in
     let x = of_float (float_of_string_prevent_double_rounding s') in
-    if is_inf x then Err.pp "of_string" else x
+    if is_inf x then Log.err "of_string" else x
 
 let of_string s =
-  if s = "" then Err.pp "of_string"
+  if s = "" then Log.err "of_string"
   else if s.[0] = '+' || s.[0] = '-' then
     let x = of_signless_string (String.sub s 1 (String.length s - 1)) in
     if s.[0] = '+' then x else neg x

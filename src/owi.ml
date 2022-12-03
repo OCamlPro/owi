@@ -39,7 +39,7 @@ let simplify_then_link_then_run file =
         | _ -> None )
       file
   in
-  let () = Owi.Debug.log "* Simplified %i modules@." (List.length cmds) in
+  let () = Owi.Log.debug "* Simplified %i modules@." (List.length cmds) in
   let link_state = Owi.Link.empty_state in
   let link_state =
     Owi.Link.link_extern_module "stuff" extern_module link_state
@@ -55,9 +55,9 @@ let simplify_then_link_then_run file =
           (to_run, Owi.Link.register_module state ~name ~id) )
       ([], link_state) cmds
   in
-  let () = Owi.Debug.log "* Linked@." in
+  let () = Owi.Log.debug "* Linked@." in
   List.iter Owi.Interpret.exec_module (List.rev to_run);
-  let () = Owi.Debug.log "* Done@." in
+  let () = Owi.Log.debug "* Done@." in
   ()
 
 let run_as_script, debug, files =
@@ -76,7 +76,7 @@ let run_as_script, debug, files =
   (!run_as_script, !debug, !files)
 
 let () =
-  if debug then Owi.Debug.enable ();
+  Owi.Log.debug_on := debug;
 
   List.iter
     (fun file ->

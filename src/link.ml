@@ -162,43 +162,43 @@ module Env = struct
   let get_global (env : t) id : t' Global.t =
     match IMap.find_opt id env.globals with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown global"
+      Log.debug "%a@." pp env;
+      Log.err "unknown global"
     | Some v -> v
 
   let get_memory (env : t) id : Memory.t =
     match IMap.find_opt id env.memories with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown memory"
+      Log.debug "%a@." pp env;
+      Log.err "unknown memory"
     | Some v -> v
 
   let get_table (env : t) id : t' Table.t =
     match IMap.find_opt id env.tables with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown table"
+      Log.debug "%a@." pp env;
+      Log.err "unknown table"
     | Some v -> v
 
   let get_func (env : t) id : t' Value.func =
     match IMap.find_opt id env.functions with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown function %a" Index.pp id
+      Log.debug "%a@." pp env;
+      Log.err "unknown function %a" Index.pp id
     | Some v -> v
 
   let get_data (env : t) id : data =
     match IMap.find_opt id env.data with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown data"
+      Log.debug "%a@." pp env;
+      Log.err "unknown data"
     | Some v -> v
 
   let get_elem (env : t) id : t' elem =
     match IMap.find_opt id env.elem with
     | None ->
-      Debug.log "%a@." pp env;
-      Err.pp "unknown elem"
+      Log.debug "%a@." pp env;
+      Log.err "unknown elem"
     | Some v -> v
 end
 
@@ -269,32 +269,32 @@ module Const_interp = struct
   let exec_expr env (e : Const.expr) : Env.t' Value.t =
     let stack = List.fold_left (exec_instr env) Stack.empty e in
     match stack with
-    | [] -> Err.pp "type mismatch (const expr returning zero values)"
+    | [] -> Log.err "type mismatch (const expr returning zero values)"
     | _ :: _ :: _ ->
-      Err.pp "type mismatch (const expr returning more than one value %a)"
+      Log.err "type mismatch (const expr returning more than one value %a)"
         Pp.Const.expr e
     | [ result ] -> result
 end
 
 let load_from_module ls f (import : _ S.imp) =
   match StringMap.find import.module_ ls.by_name with
-  | exception Not_found -> Err.pp "unknown module %s" import.module_
+  | exception Not_found -> Log.err "unknown module %s" import.module_
   | exports -> (
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
-      Debug.log "unknown import %s" import.name;
+      Log.debug "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
-        Err.pp "incompatible import type"
-      else Err.pp "unknown import"
+        Log.err "incompatible import type"
+      else Log.err "unknown import"
     | v -> v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   let global = load_from_module ls (fun (e : exports) -> e.globals) import in
   ( match (fst import.desc, global.mut) with
-  | Var, Const | Const, Var -> Err.pp "incompatible import type"
+  | Var, Const | Const, Var -> Log.err "incompatible import type"
   | Const, Const | Var, Var -> () );
   if snd import.desc <> global.typ then begin
-    Err.pp "incompatible import type"
+    Log.err "incompatible import type"
   end;
   global
 
@@ -340,7 +340,7 @@ let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
   in
   if limit_is_included ~import:import.desc ~imported:imported_limit then mem
   else
-    Err.pp "incompatible import type for memory %s %s expected %a got %a"
+    Log.err "incompatible import type for memory %s %s expected %a got %a"
       import.module_ import.name Pp.Input.mem_type import.desc Pp.Input.mem_type
       imported_limit
 
@@ -367,7 +367,7 @@ let load_table (ls : link_state) (import : S.table_import S.imp) : table =
   in
   if table_types_are_compatible type_ (t.limits, t.type_) then table
   else
-    Err.pp "incompatible import type for table %s %s expected %a got %a"
+    Log.err "incompatible import type for table %s %s expected %a got %a"
       import.module_ import.name Pp.Input.table_type type_ Pp.Input.table_type
       (t.limits, t.type_)
 
@@ -397,7 +397,7 @@ let load_func (ls : link_state) (import : func_type S.imp) : func =
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
-  else Err.pp "incompatible import type"
+  else Log.err "incompatible import type"
 
 let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
     : func =
@@ -423,7 +423,7 @@ let active_elem_expr ~offset ~length ~table ~elem =
 
 let active_data_expr ~offset ~length ~mem ~data =
   if mem <> 0 then begin
-    Err.pp "wrong memory id: %i@." mem
+    Log.err "wrong memory id: %i@." mem
   end;
   [ I32_const offset
   ; I32_const 0l
@@ -432,7 +432,7 @@ let active_data_expr ~offset ~length ~mem ~data =
   ; Data_drop data
   ]
 
-let get_i32 = function Value.I32 i -> i | _ -> Err.pp "type mismatch"
+let get_i32 = function Value.I32 i -> i | _ -> Log.err "type mismatch"
 
 let define_data env data =
   S.Fields.fold
@@ -459,7 +459,7 @@ let define_elem env elem =
           (fun v ->
             match v with
             | Value.Ref v -> v
-            | _ -> Err.pp "constant expression required" )
+            | _ -> Log.err "constant expression required" )
           init
       in
       let env =
@@ -487,7 +487,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
     List.fold_left
       (fun (acc, names) (export : _ S.export) ->
         let value = get_env env export.id in
-        if StringSet.mem export.name names then Err.pp "duplicate export name";
+        if StringSet.mem export.name names then Log.err "duplicate export name";
         (StringMap.add export.name value acc, StringSet.add export.name names)
         )
       (StringMap.empty, names) exports
@@ -559,12 +559,12 @@ let register_module (ls : link_state) ~name ~(id : string option) : link_state =
     match id with
     | Some id -> begin
       match StringMap.find_opt id ls.by_id with
-      | None -> Err.pp "Unbound module id %s" id
+      | None -> Log.err "Unbound module id %s" id
       | Some e -> e
     end
     | None -> (
       match ls.last with
       | Some e -> e
-      | None -> Err.pp "No previous module to register" )
+      | None -> Log.err "No previous module to register" )
   in
   { ls with by_name = StringMap.add name exports ls.by_name }

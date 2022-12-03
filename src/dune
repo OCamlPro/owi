@@ -3,8 +3,6 @@
  (modules
   check
   convert
-  debug
-  err
   float32
   float64
   int32
@@ -12,6 +10,7 @@
   interpret
   lexer
   link
+  log
   menhir_parser
   parse
   pp

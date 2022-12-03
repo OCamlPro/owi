@@ -236,7 +236,7 @@ let mem_0 = 0
 
 let get_raw_memory (env : Link.Env.t) idx =
   match IMap.find_opt idx env.memories with
-  | None -> Err.pp "missing memory"
+  | None -> Log.err "missing memory"
   | Some m -> m
 
 let get_memory (env : Link.Env.t) idx =
@@ -245,22 +245,22 @@ let get_memory (env : Link.Env.t) idx =
 
 let get_func (env : Link.Env.t) idx =
   match IMap.find_opt idx env.functions with
-  | None -> Err.pp "missing functions"
+  | None -> Log.err "missing functions"
   | Some f -> f
 
 let get_data (env : Link.Env.t) idx =
   match IMap.find_opt idx env.data with
-  | None -> Err.pp "missing data"
+  | None -> Log.err "missing data"
   | Some data -> data
 
 let get_elem (env : Link.Env.t) idx =
   match IMap.find_opt idx env.elem with
-  | None -> Err.pp "missing elem"
+  | None -> Log.err "missing elem"
   | Some elem -> elem
 
 let get_table (env : Link.Env.t) idx =
   match IMap.find_opt idx env.tables with
-  | None -> Err.pp "missing table"
+  | None -> Log.err "missing table"
   | Some table -> table
 
 let exec_extern_func stack (f : Value.extern_func) =
@@ -305,8 +305,8 @@ let exec_extern_func stack (f : Value.extern_func) =
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
 let rec exec_instr env locals stack instr =
-  Debug.log "stack        : [ %a ]@." Stack.pp stack;
-  Debug.log "running instr: %a@." Pp.Simplified.instr instr;
+  Log.debug "stack        : [ %a ]@." Stack.pp stack;
+  Log.debug "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
   | Return -> raise @@ Return stack
   | Nop -> stack
@@ -598,7 +598,7 @@ let rec exec_instr env locals stack instr =
   | Global_get i -> Stack.push stack (Env.get_global env i).value
   | Global_set i ->
     let global = Env.get_global env i in
-    if global.mut = Const then Err.pp "Can't set const global";
+    if global.mut = Const then Log.err "Can't set const global";
     let v, stack =
       match global.typ with
       | Ref_type rt -> begin
@@ -830,7 +830,7 @@ let rec exec_instr env locals stack instr =
     let res =
       if sx = S || Sys.word_size = 32 then res
       else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))
-      else Err.pp "unsupported word size"
+      else Log.err "unsupported word size"
     in
     Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; _ }) ->
@@ -919,7 +919,7 @@ and exec_expr env locals stack e is_loop bt =
     | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1))
   in
   let stack = Stack.keep block_stack rt @ stack in
-  Debug.log "stack        : [ %a ]@." Stack.pp stack;
+  Log.debug "stack        : [ %a ]@." Stack.pp stack;
   stack
 
 and exec_vfunc stack (func : Env.t' Value.func) =
@@ -932,7 +932,7 @@ and exec_vfunc stack (func : Env.t' Value.func) =
   | Extern f -> exec_extern_func stack f
 
 and exec_func env (func : Simplify.func) args =
-  Debug.log "calling func : func %s@."
+  Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in
   try exec_expr env locals [] func.body false (Some func.type_f)

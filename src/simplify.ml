@@ -222,8 +222,8 @@ end = struct
   let check_limit { min; max } =
     Option.iter
       (fun max ->
-        if min > max then Err.pp "size minimum must not be greater than maximum"
-        )
+        if min > max then
+          Log.err "size minimum must not be greater than maximum" )
       max
 
   let group (module_ : Types.module_) : grouped_module =
@@ -260,11 +260,11 @@ end = struct
       | MMem mem ->
         let _, limits = mem in
         if limits.min > 65536 then
-          Err.pp "memory size must be at most 65536 pages (4GiB)";
+          Log.err "memory size must be at most 65536 pages (4GiB)";
         Option.iter
           (fun max ->
             if max > 65536 then
-              Err.pp "memory size must be at most 65536 pages (4GiB)" )
+              Log.err "memory size must be at most 65536 pages (4GiB)" )
           limits.max;
         check_limit limits;
         add_mem (Local mem) fields curr
@@ -426,7 +426,7 @@ end = struct
       match get_name elt.value with
       | None -> named
       | Some name ->
-        if StringMap.mem name named then Err.pp "duplicate %s %s" kind name
+        if StringMap.mem name named then Log.err "duplicate %s %s" kind name
         else StringMap.add name elt.index named
     in
     let named = List.fold_left assign_one StringMap.empty values in
@@ -441,10 +441,10 @@ end = struct
     in
     (* TODO more efficient version of that *)
     match List.find_opt (fun v -> v.index = id) types.values with
-    | None -> Err.pp "unknown type"
+    | None -> Log.err "unknown type"
     | Some func_type' ->
       if not (equal_func_types func_type func_type'.value) then
-        Err.pp "inline function type"
+        Log.err "inline function type"
 
   let run (module_ : grouped_module) : assigned_module =
     let type_ = assign_types module_ in
@@ -494,18 +494,18 @@ module Rewrite_indices = struct
     | Raw i ->
       (* TODO change indexed strucure for that to be more efficient *)
       if not (List.exists (fun { index; _ } -> index = i) named.values) then
-        Err.pp "%s %i" msg i;
+        Log.err "%s %i" msg i;
       i
     | Symbolic name -> (
       match StringMap.find_opt name named.named with
-      | None -> Err.pp "%s %s" msg name
+      | None -> Log.err "%s %s" msg name
       | Some i -> i )
 
   let get msg (named : 'a named) (indice : indice) : 'a indexed =
     let i = find msg named indice in
     (* TODO change named structure to make that sensible *)
     match List.nth_opt named.values i with
-    | None -> Err.pp "%s" msg
+    | None -> Log.err "%s" msg
     | Some v -> v
 
   let find_global (module_ : assigned_module) ~imported_only id =
@@ -516,7 +516,7 @@ module Rewrite_indices = struct
     let mut, _typ =
       match va.value with
       | Local global ->
-        if imported_only then Err.pp "unknown global" else global.type_
+        if imported_only then Log.err "unknown global" else global.type_
       | Imported imported -> imported.desc
     in
     (idx, mut)
@@ -540,12 +540,12 @@ module Rewrite_indices = struct
                 block_ids
             with Exit -> ()
           end;
-          if !pos = -1 then Err.pp "unknown label";
+          if !pos = -1 then Log.err "unknown label";
           !pos
         | Raw id -> id
       in
       (* this is > and not >= because you can `br 0` without any block to target the function *)
-      if id > List.length block_ids + loop_count then Err.pp "unknown label";
+      if id > List.length block_ids + loop_count then Log.err "unknown label";
       id
     in
 
@@ -562,7 +562,7 @@ module Rewrite_indices = struct
               (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
               let { value = t'; _ } = get "unknown type" module_.type_ ind in
               let ok = equal_func_types t t' in
-              if not ok then Err.pp "inline function type"
+              if not ok then Log.err "inline function type"
           end;
           t )
     in
@@ -574,7 +574,8 @@ module Rewrite_indices = struct
             match name with
             | None -> (locals, next_free_index + 1)
             | Some name ->
-              if StringMap.mem name locals then Err.pp "duplicate local %s" name
+              if StringMap.mem name locals then
+                Log.err "duplicate local %s" name
               else
                 (StringMap.add name next_free_index locals, next_free_index + 1)
             )
@@ -583,11 +584,11 @@ module Rewrite_indices = struct
       let find_local id =
         match id with
         | Raw i ->
-          if i >= after_last_assigned_local then Err.pp "unknown local";
+          if i >= after_last_assigned_local then Log.err "unknown local";
           i
         | Symbolic name -> (
           match StringMap.find_opt name locals with
-          | None -> Err.pp "unknown local %s" name
+          | None -> Log.err "unknown local %s" name
           | Some id -> id )
       in
       find_local
@@ -631,7 +632,7 @@ module Rewrite_indices = struct
       | Global_set id -> begin
         let idx, mut = find_global module_ ~imported_only:false id in
         match mut with
-        | Const -> Err.pp "global is immutable"
+        | Const -> Log.err "global is immutable"
         | Var -> Global_set idx
       end
       | Global_get id ->
@@ -652,39 +653,39 @@ module Rewrite_indices = struct
         let table' = find_table i' in
         Table_copy (table, table')
       | Memory_init id ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
         Memory_init (find_data id)
       | Data_drop id -> Data_drop (find_data id)
       | Elem_drop id -> Elem_drop (find_elem id)
       (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
       | (I_load8 (_, _, { align; _ }) | I_store8 (_, { align; _ })) as i ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
-        if align >= 1 then Err.pp "alignment must not be larger than natural";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
+        if align >= 1 then Log.err "alignment must not be larger than natural";
         i
       | (I_load16 (_, _, { align; _ }) | I_store16 (_, { align; _ })) as i ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
-        if align >= 2 then Err.pp "alignment must not be larger than natural";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
+        if align >= 2 then Log.err "alignment must not be larger than natural";
         i
       | (I64_load32 (_, { align; _ }) | I64_store32 { align; _ }) as i ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
-        if align >= 4 then Err.pp "alignment must not be larger than natural";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
+        if align >= 4 then Log.err "alignment must not be larger than natural";
         i
       | ( I_load (nn, { align; _ })
         | F_load (nn, { align; _ })
         | F_store (nn, { align; _ })
         | I_store (nn, { align; _ }) ) as i ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
         let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
         if align >= max_allowed then
-          Err.pp "alignment must not be larger than natural";
+          Log.err "alignment must not be larger than natural";
         i
       | (Memory_copy | Memory_size | Memory_fill | Memory_grow) as i ->
-        if List.length module_.mem.values < 1 then Err.pp "unknown memory 0";
+        if List.length module_.mem.values < 1 then Log.err "unknown memory 0";
         i
       | Select typ as i -> begin
         match typ with
         | None | Some [ _ ] -> i
-        | Some [] | Some (_ :: _ :: _) -> Err.pp "invalid result arity"
+        | Some [] | Some (_ :: _ :: _) -> Log.err "invalid result arity"
       end
       | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
         | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
@@ -713,9 +714,9 @@ module Rewrite_indices = struct
         let idx, mut = find_global module_ ~imported_only:true id in
         match mut with
         | Const -> Global_get idx
-        | Var -> Err.pp "constant expression required"
+        | Var -> Log.err "constant expression required"
       end
-      | _ -> Err.pp "constant expression required"
+      | _ -> Log.err "constant expression required"
     in
     List.map const_instr expr
 
@@ -819,7 +820,7 @@ module Rewrite_indices = struct
           in
           match (param_typ, result_typ) with
           | [], [] -> idx
-          | _, _ -> Err.pp "start function" )
+          | _, _ -> Log.err "start function" )
         module_.start
     in
     { id = module_.id
@@ -841,7 +842,7 @@ let simplify (module_ : module_) : result =
 
 let simplify (module_ : module_) : result =
   let simplified = simplify module_ in
-  Debug.log "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
+  Log.debug "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
   simplified
 
 module Pp = P

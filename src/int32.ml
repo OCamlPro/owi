@@ -70,17 +70,17 @@ let ge_u x y = cmp_u x ( >= ) y
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then Err.pp "of_string (int32)"
+let require b = if not b then Log.err "of_string (int32)"
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | _ -> Err.pp "of_string"
+  | _ -> Log.err "of_string"
 
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
-  | _ -> Err.pp "of_string"
+  | _ -> Log.err "of_string"
 
 let max_upper = unsigned_div minus_one 10l
 

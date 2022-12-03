@@ -31,8 +31,8 @@ let check_utf8 s =
   let rec loop () =
     match decode decoder with
     | `Malformed _s ->
-      Debug.log "GOT: `%S`" s;
-      Err.pp "malformed UTF-8 encoding"
+      Log.debug "GOT: `%S`" s;
+      Log.err "malformed UTF-8 encoding"
     | `Await -> assert false
     | `End -> ()
     | `Uchar _ -> loop ()

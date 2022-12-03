@@ -23,7 +23,7 @@ let module_ m =
   let add_global id =
     Option.iter
       (fun id ->
-        if Hashtbl.mem seen_globals id then Err.pp "duplicate global";
+        if Hashtbl.mem seen_globals id then Log.err "duplicate global";
         Hashtbl.add seen_globals id () )
       id
   in
@@ -31,7 +31,7 @@ let module_ m =
   let add_table id =
     Option.iter
       (fun id ->
-        if Hashtbl.mem seen_tables id then Err.pp "duplicate table";
+        if Hashtbl.mem seen_tables id then Log.err "duplicate table";
         Hashtbl.add seen_tables id () )
       id
   in
@@ -39,7 +39,7 @@ let module_ m =
   let add_memory id =
     Option.iter
       (fun id ->
-        if Hashtbl.mem seen_memories id then Err.pp "duplicate memory";
+        if Hashtbl.mem seen_memories id then Log.err "duplicate memory";
         Hashtbl.add seen_memories id () )
       id
   in
@@ -49,19 +49,19 @@ let module_ m =
          | MExport _e -> env
          | MFunc _f -> { env with funcs = true }
          | MStart _start ->
-           if env.start then Err.pp "multiple start sections";
+           if env.start then Log.err "multiple start sections";
            { env with start = true }
          | MImport i ->
-           if env.funcs then Err.pp "import after function";
-           if env.memory then Err.pp "import after memory";
-           if env.tables then Err.pp "import after table";
-           if env.globals then Err.pp "import after global";
+           if env.funcs then Log.err "import after function";
+           if env.memory then Log.err "import after memory";
+           if env.tables then Log.err "import after table";
+           if env.globals then Log.err "import after global";
            begin
              match i.desc with
              | Import_mem (id, _) ->
                add_memory id;
                if env.memory || env.imported_memory then
-                 Err.pp "multiple memories";
+                 Log.err "multiple memories";
                { env with imported_memory = true }
              | Import_func _ -> env
              | Import_global (id, _) ->
@@ -75,7 +75,7 @@ let module_ m =
          | MElem _e -> env
          | MMem (id, _) ->
            add_memory id;
-           if env.memory || env.imported_memory then Err.pp "multiple memories";
+           if env.memory || env.imported_memory then Log.err "multiple memories";
            { env with memory = true }
          | MType _t -> env
          | MGlobal { id; _ } ->

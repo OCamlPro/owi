@@ -444,7 +444,7 @@ module Global = struct
 
   let result fmt = function
     | Result_const c -> Format.fprintf fmt "(%a)" result_const c
-    | _ -> Err.pp "not yet implemented"
+    | _ -> Log.err "not yet implemented"
 
   let action fmt = function
     | Invoke (mod_name, name, c) ->
