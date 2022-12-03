@@ -198,7 +198,7 @@
   "\fa\ff\ff\ef\41\0b"
 )
 
-(assert_return (invoke "4294967249") (f64.const 4294967249))
+;; (assert_return (invoke "4294967249") (f64.const 4294967249))
 
 (assert_malformed
   (module quote "(global f32 (f32.const _100))")
