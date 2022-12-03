@@ -81,9 +81,15 @@
   (data (global.get $g) "a")
 )
 
-;; Use of internal globals in constant expressions is not allowed in MVP.
-;; (module (memory 1) (data (global.get 0) "a") (global i32 (i32.const 0)))
-;; (module (memory 1) (data (global.get $g) "a") (global $g i32 (i32.const 0)))
+(assert_invalid
+  (module (memory 1) (global i32 (i32.const 0)) (data (global.get 0) "a"))
+  "unknown global"
+)
+(assert_invalid
+  (module (memory 1) (global $g i32 (i32.const 0)) (data (global.get $g) "a"))
+  "unknown global"
+)
+
 
 ;; Corner cases
 
@@ -391,7 +397,7 @@
 )
 
 (assert_invalid
-  (module
+  (module 
     (memory 1)
     (data (offset (;empty instruction sequence;)))
   )
@@ -408,7 +414,7 @@
 
 (assert_invalid
   (module
-    (global (import "spectest" "global_i32") i32)
+    (global (import "test" "global-i32") i32)
     (memory 1)
     (data (offset (global.get 0) (global.get 0)))
   )
@@ -417,7 +423,7 @@
 
 (assert_invalid
   (module
-    (global (import "spectest" "global_i32") i32)
+    (global (import "test" "global-i32") i32)
     (memory 1)
     (data (offset (global.get 0) (i32.const 0)))
   )
@@ -456,14 +462,17 @@
   "constant expression required"
 )
 
-;; Use of internal globals in constant expressions is not allowed in MVP.
-;; (assert_invalid
-;;   (module (memory 1) (data (global.get $g)) (global $g (mut i32) (i32.const 0)))
-;;   "constant expression required"
-;; )
+(assert_invalid
+  (module
+    (global $g (import "test" "g") (mut i32))
+    (memory 1)
+    (data (global.get $g))
+  )
+  "constant expression required"
+)
 
 (assert_invalid
-   (module
+   (module 
      (memory 1)
      (data (global.get 0))
    )
@@ -472,22 +481,15 @@
 
 (assert_invalid
    (module
-     (global (import "spectest" "global_i32") i32)
+     (global (import "test" "global-i32") i32)
      (memory 1)
      (data (global.get 1))
    )
    "unknown global 1"
 )
 
-(module
-  (global $g (mut i32) (i32.const 56))
-  (export "global-mut-i32" (global $g))
-)
-
-(register "test")
-
 (assert_invalid
-   (module
+   (module 
      (global (import "test" "global-mut-i32") (mut i32))
      (memory 1)
      (data (global.get 0))
