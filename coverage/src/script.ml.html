@@ -724,7 +724,7 @@ let check_error' ~expected ~got =
   <span data-count="2445">i</span>f not ok then <span data-count="0">b</span>egin
     Format.eprintf "expected: `%s`@." expected;
     <span data-count="0">F</span>ormat.eprintf "got     : `%s`@." got;
-    <span data-count="0">E</span>rr.pp "%s" got
+    <span data-count="0">L</span>og.err "%s" got
   end
 
 let check_error ~expected ~got =
@@ -737,7 +737,7 @@ let check_error ~expected ~got =
   if not ok then <span data-count="0">b</span>egin
     Format.eprintf "expected: `%s`@." expected;
     <span data-count="0">F</span>ormat.eprintf "got     : `%s`@." got;
-    <span data-count="0">E</span>rr.pp "%s" got
+    <span data-count="0">L</span>og.err "%s" got
   end
 
 let check script =
@@ -745,7 +745,7 @@ let check script =
     List.iter
       (function
         | <span data-count="55">M</span>odule m -&gt; begin
-          match Check.module_ m with <span data-count="29">O</span>k () -&gt; () | <span data-count="26">E</span>rror e -&gt; Err.pp "%s" e
+          match Check.module_ m with <span data-count="29">O</span>k () -&gt; () | <span data-count="26">E</span>rror e -&gt; Log.err "%s" e
         end
         | <span data-count="0">_</span> -&gt; () )
       script;
@@ -757,16 +757,16 @@ let load_func_from_module ls mod_id f_name : Link.func =
     match mod_id with
     | <span data-count="23820">N</span>one -&gt; begin
       match ls.Link.last with
-      | <span data-count="0">N</span>one -&gt; Err.p<span data-count="0">p</span> "unbound last module"
+      | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "unbound last module"
       | <span data-count="23820">S</span>ome m -&gt; m
     end
     | <span data-count="103">S</span>ome mod_id -&gt; (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | <span data-count="0">e</span>xception Not_found -&gt; Err.p<span data-count="0">p</span> "unbound module " mod_id
+      | <span data-count="0">e</span>xception Not_found -&gt; Log.er<span data-count="0">r</span> "unbound module " mod_id
       | <span data-count="103">e</span>xports -&gt; exports )
   in
   match Link.StringMap.find f_name exports.functions with
-  | <span data-count="0">e</span>xception Not_found -&gt; Err.pp "unbound name " f_name
+  | <span data-count="0">e</span>xception Not_found -&gt; Log.err "unbound name " f_name
   | <span data-count="23923">v</span> -&gt; v
 
 let load_global_from_module ls mod_id name : Link.global =
@@ -774,16 +774,16 @@ let load_global_from_module ls mod_id name : Link.global =
     match mod_id with
     | <span data-count="1">N</span>one -&gt; begin
       match ls.Link.last with
-      | <span data-count="0">N</span>one -&gt; Err.p<span data-count="0">p</span> "unbound last module"
+      | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "unbound last module"
       | <span data-count="1">S</span>ome m -&gt; m
     end
     | <span data-count="10">S</span>ome mod_id -&gt; (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | <span data-count="0">e</span>xception Not_found -&gt; Err.p<span data-count="0">p</span> "unbound module " mod_id
+      | <span data-count="0">e</span>xception Not_found -&gt; Log.er<span data-count="0">r</span> "unbound module " mod_id
       | <span data-count="10">e</span>xports -&gt; exports )
   in
   match Link.StringMap.find name exports.globals with
-  | <span data-count="0">e</span>xception Not_found -&gt; Err.pp "unbound name " name
+  | <span data-count="0">e</span>xception Not_found -&gt; Log.err "unbound name " name
   | <span data-count="11">v</span> -&gt; v
 
 let compare_result_const result (const : value) =
@@ -820,8 +820,8 @@ let compare_result_const result (const : value) =
   | <span data-count="0">R</span>esult_const (Literal (Const_null _)), _
   | <span data-count="0">R</span>esult_const (Literal (Const_host _)), _ -&gt;
     false
-  | <span data-count="0">R</span>esult_func_ref, _ -&gt; Err.pp "TODO (compare_result_const)"
-  | <span data-count="0">R</span>esult_extern_ref, _ -&gt; Err.pp "TODO (compare_result_const)"
+  | <span data-count="0">R</span>esult_func_ref, _ -&gt; Log.err "TODO (compare_result_const)"
+  | <span data-count="0">R</span>esult_extern_ref, _ -&gt; Log.err "TODO (compare_result_const)"
 
 let value_of_const : Types.const -&gt; value =
  fun const -&gt;
@@ -835,7 +835,7 @@ let value_of_const : Types.const -&gt; value =
 
 let action (link_state : Link.link_state) = function
   | <span data-count="23923">I</span>nvoke (mod_id, f, args) -&gt; begin
-    Debug.log "Invoke %a %s %a@."
+    Log.debug "Invoke %a %s %a@."
       (Format.pp_print_optio<span data-count="23923">n</span>
          ~none:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf "&lt;&gt;")
          Format.pp_print_string )
@@ -868,28 +868,28 @@ let rec run ~with_exhaustion script =
         | <span data-count="1316">M</span>odule m -&gt;
           let name = (m.id, !curr_module) in
           incr curr_module;
-          <span data-count="1316">D</span>ebug.log "simplifying module %a...@\n" pp_name name;
+          <span data-count="1316">L</span>og.debug "simplifying module %a...@\n" pp_name name;
           <span data-count="1316">l</span>et m = Simplify.simplify m in
-          <span data-count="1287">D</span>ebug.log "typechecking module...@\n";
+          <span data-count="1287">L</span>og.debug "typechecking module...@\n";
           <span data-count="1287">t</span>ypecheck m;
-          <span data-count="1287">D</span>ebug.log "linking module...@\n";
+          <span data-count="1287">L</span>og.debug "linking module...@\n";
           <span data-count="1287">l</span>et module_to_run, link_state = Link.link_module m link_state in
-          <span data-count="1287">D</span>ebug.log "eval module... !@\n";
+          <span data-count="1287">L</span>og.debug "eval module... !@\n";
           <span data-count="1287">I</span>nterpret.exec_module module_to_run;
-          <span data-count="1287">D</span>ebug.log "done %a !@\n" pp_name name;
+          <span data-count="1287">L</span>og.debug "done %a !@\n" pp_name name;
           <span data-count="1287">l</span>ink_state
         | <span data-count="34">A</span>ssert (Assert_trap_module (m, msg)) -&gt;
           let name = (m.id, !curr_module) in
           incr curr_module;
-          <span data-count="34">D</span>ebug.log "simplifying module %a...@\n" pp_name name;
+          <span data-count="34">L</span>og.debug "simplifying module %a...@\n" pp_name name;
           <span data-count="34">l</span>et m = Simplify.simplify m in
-          <span data-count="34">D</span>ebug.log "typechecking module...@\n";
+          <span data-count="34">L</span>og.debug "typechecking module...@\n";
           <span data-count="34">t</span>ypecheck m;
-          <span data-count="34">D</span>ebug.log "linking module...@\n";
+          <span data-count="34">L</span>og.debug "linking module...@\n";
           <span data-count="34">l</span>et module_to_run, _ignored_link_state =
             Link.link_module m link_state
           in
-          <span data-count="34">D</span>ebug.log "eval module... !@\n";
+          <span data-count="34">L</span>og.debug "eval module... !@\n";
           <span data-count="34">b</span>egin
             try
               Interpret.exec_module module_to_run;
@@ -898,15 +898,15 @@ let rec run ~with_exhaustion script =
             | <span data-count="34">T</span>rap trap_msg -&gt; assert <span data-count="34">(</span>msg = trap_msg)
             | _ -&gt; assert false
           end;
-          Debug.log "done %a !@\n" pp_name name;
+          Log.debug "done %a !@\n" pp_name name;
           <span data-count="34">l</span>ink_state
         | <span data-count="736">A</span>ssert (Assert_malformed_binary _) -&gt;
-          Debug.log "simplifying assert malformed binary... ";
-          <span data-count="736">D</span>ebug.log "done !@\n";
+          Log.debug "simplifying assert malformed binary... ";
+          <span data-count="736">L</span>og.debug "done !@\n";
           (* TODO: check this when binary format is supported *)
           <span data-count="736">l</span>ink_state
         | <span data-count="567">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
-          Debug.log "simplifying assert malformed quote... ";
+          Log.debug "simplifying assert malformed quote... ";
           <span data-count="567">l</span>et got =
             match Parse.from_string (String.conca<span data-count="567">t</span> "\n" m) with
             | <span data-count="55">O</span>k script -&gt; (
@@ -922,7 +922,7 @@ let rec run ~with_exhaustion script =
             | <span data-count="512">E</span>rror got -&gt; got
           in
           check_error ~expected ~got;
-          Debug.log "done !@\n";
+          Log.debug "done !@\n";
           <span data-count="567">l</span>ink_state
         | <span data-count="5">A</span>ssert (Assert_invalid_binary _) -&gt;
           (* TODO: check this when binary format is supported *)
@@ -967,9 +967,9 @@ let rec run ~with_exhaustion script =
           in
           check_error' ~expected ~got;
           link_state
-        | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt; Err.pp "TODO assert_malformed"
+        | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt; Log.err "TODO assert_malformed"
         | <span data-count="21415">A</span>ssert (Assert_return (a, res)) -&gt;
-          Debug.log "Assert@.";
+          Log.debug "Assert@.";
           <span data-count="21415">l</span>et stack = action link_state a in
           <span data-count="21415">i</span>f
             List.lengt<span data-count="21415">h</span> res &lt;&gt; List.lengt<span data-count="21415">h</span> stac<span data-count="0">k</span>
@@ -980,17 +980,17 @@ let rec run ~with_exhaustion script =
           then <span data-count="0">b</span>egin
             Format.eprintf "got:      %a@.expected: %a@." Stack.pp
               (List.re<span data-count="0">v</span> stack) Pp.Input.results res;
-            <span data-count="0">E</span>rr.p<span data-count="0">p</span> "Bad result"
+            <span data-count="0">L</span>og.er<span data-count="0">r</span> "Bad result"
           end;
           <span data-count="21415">l</span>ink_state
         | <span data-count="2362">A</span>ssert (Assert_trap (a, msg)) -&gt; begin
           try
             let (_ : Link.Env.t' Stack.t) = action link_state a in
-            <span data-count="0">E</span>rr.p<span data-count="0">p</span> "unxpected success"
+            <span data-count="0">L</span>og.er<span data-count="0">r</span> "unxpected success"
           with
           | <span data-count="2362">T</span>rap got -&gt;
             check_error' ~expected:msg ~got;
-            Debug.log "expected trap: \"%s\"@." msg;
+            Log.debug "expected trap: \"%s\"@." msg;
             <span data-count="2362">l</span>ink_state
           | <span data-count="0">e</span>xn -&gt;
             Format.eprintf "Wrong exn %s@." (Printexc.to_strin<span data-count="0">g</span> exn);

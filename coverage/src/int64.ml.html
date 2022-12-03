@@ -473,17 +473,17 @@ let saturate_u x = <span data-count="0">m</span>in (ma<span data-count="0">x</sp
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = <span data-count="37824">i</span>f not b then <span data-count="4">E</span>rr.pp "of_string (int64)"
+let require b = <span data-count="37824">i</span>f not b then <span data-count="4">L</span>og.err "of_string (int64)"
 
 let dec_digit = function
   | <span data-count="4029">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="4029">e</span> c - Char.cod<span data-count="4029">e</span> '0'
-  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+  | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
 let hex_digit = function
   | <span data-count="19450">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="19450">e</span> c - Char.cod<span data-count="19450">e</span> '0'
   | <span data-count="2712">'</span>a' .. 'f' as c -&gt; 0xa + Char.cod<span data-count="2712">e</span> c - Char.cod<span data-count="2712">e</span> 'a'
   | <span data-count="201">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="201">e</span> c - Char.cod<span data-count="201">e</span> 'A'
-  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+  | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
 let max_upper, max_lower = divrem_<span data-count="1">u</span> minus_one 10L
 

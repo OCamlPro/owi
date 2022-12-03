@@ -367,17 +367,17 @@ let ge_u x y = <span data-count="393261">c</span>mp_u x ( &gt;= ) y
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = <span data-count="168502">i</span>f not b then <span data-count="4">E</span>rr.pp "of_string (int32)"
+let require b = <span data-count="168502">i</span>f not b then <span data-count="4">L</span>og.err "of_string (int32)"
 
 let dec_digit = function
   | <span data-count="56807">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="56807">e</span> c - Char.cod<span data-count="56807">e</span> '0'
-  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+  | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
 let hex_digit = function
   | <span data-count="10068">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="10068">e</span> c - Char.cod<span data-count="10068">e</span> '0'
   | <span data-count="1840">'</span>a' .. 'f' as c -&gt; 0xa + Char.cod<span data-count="1840">e</span> c - Char.cod<span data-count="1840">e</span> 'a'
   | <span data-count="149">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="149">e</span> c - Char.cod<span data-count="149">e</span> 'A'
-  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+  | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
 let max_upper = unsigned_di<span data-count="1">v</span> minus_one 10l
 

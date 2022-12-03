@@ -1388,43 +1388,43 @@ module Env = struct
   let get_global (env : t) id : t' Global.t =
     <span data-count="717">m</span>atch IMap.find_opt id env.globals with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown global"
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown global"
     | <span data-count="717">S</span>ome v -&gt; v
 
   let get_memory (env : t) id : Memory.t =
     <span data-count="187">m</span>atch IMap.find_opt id env.memories with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown memory"
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown memory"
     | <span data-count="187">S</span>ome v -&gt; v
 
   let get_table (env : t) id : t' Table.t =
     <span data-count="172">m</span>atch IMap.find_opt id env.tables with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown table"
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown table"
     | <span data-count="172">S</span>ome v -&gt; v
 
   let get_func (env : t) id : t' Value.func =
     <span data-count="6928">m</span>atch IMap.find_opt id env.functions with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown function %a" Index.pp id
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown function %a" Index.pp id
     | <span data-count="6928">S</span>ome v -&gt; v
 
   let get_data (env : t) id : data =
     <span data-count="0">m</span>atch IMap.find_opt id env.data with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown data"
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown data"
     | <span data-count="0">S</span>ome v -&gt; v
 
   let get_elem (env : t) id : t' elem =
     <span data-count="0">m</span>atch IMap.find_opt id env.elem with
     | <span data-count="0">N</span>one -&gt;
-      Debug.log "%a@." pp env;
-      <span data-count="0">E</span>rr.pp "unknown elem"
+      Log.debug "%a@." pp env;
+      <span data-count="0">L</span>og.err "unknown elem"
     | <span data-count="0">S</span>ome v -&gt; v
 end
 
@@ -1495,32 +1495,32 @@ module Const_interp = struct
   let exec_expr env (e : Const.expr) : Env.t' Value.t =
     <span data-count="2964">l</span>et stack = List.fold_left (exec_inst<span data-count="2964">r</span> env) Stack.empty e in
     <span data-count="2964">m</span>atch stack with
-    | <span data-count="0">[</span>] -&gt; Err.pp "type mismatch (const expr returning zero values)"
+    | <span data-count="0">[</span>] -&gt; Log.err "type mismatch (const expr returning zero values)"
     | <span data-count="0">_</span> :: _ :: _ -&gt;
-      Err.pp "type mismatch (const expr returning more than one value %a)"
+      Log.err "type mismatch (const expr returning more than one value %a)"
         Pp.Const.expr e
     | <span data-count="2964">[</span> result ] -&gt; result
 end
 
 let load_from_module ls f (import : _ S.imp) =
   <span data-count="385">m</span>atch StringMap.find import.module_ ls.by_name with
-  | <span data-count="0">e</span>xception Not_found -&gt; Err.pp "unknown module %s" import.module_
+  | <span data-count="0">e</span>xception Not_found -&gt; Log.err "unknown module %s" import.module_
   | <span data-count="385">e</span>xports -&gt; (
     match StringMap.find import.name (<span data-count="385">f</span> exports) with
     | <span data-count="33">e</span>xception Not_found -&gt;
-      Debug.log "unknown import %s" import.name;
+      Log.debug "unknown import %s" import.name;
       <span data-count="33">i</span>f StringSet.mem import.name exports.defined_names then
-        <span data-count="22">E</span>rr.pp "incompatible import type"
-      else <span data-count="11">E</span>rr.pp "unknown import"
+        <span data-count="22">L</span>og.err "incompatible import type"
+      else <span data-count="11">L</span>og.err "unknown import"
     | <span data-count="352">v</span> -&gt; v )
 
 let load_global (ls : link_state) (import : S.global_import S.imp) : global =
   <span data-count="55">l</span>et global = load_from_module ls (fun (e : exports) -&gt; <span data-count="55">e</span>.globals) import in
   <span data-count="47">(</span> match (fs<span data-count="47">t</span> import.desc, global.mut) with
-  | <span data-count="3">V</span>ar, Const | <span data-count="2">C</span>onst, Var -&gt; Err.p<span data-count="0">p</span> "incompatible import type"
+  | <span data-count="3">V</span>ar, Const | <span data-count="2">C</span>onst, Var -&gt; Log.er<span data-count="0">r</span> "incompatible import type"
   | <span data-count="33">C</span>onst, Const | <span data-count="9">V</span>ar, Var -&gt; () );
   if sn<span data-count="42">d</span> import.desc &lt;&gt; global.typ then begin
-    <span data-count="13">E</span>rr.p<span data-count="0">p</span> "incompatible import type"
+    <span data-count="13">L</span>og.er<span data-count="0">r</span> "incompatible import type"
   end;
   <span data-count="29">g</span>lobal
 
@@ -1566,7 +1566,7 @@ let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
   in
   <span data-count="44">i</span>f limit_is_included ~import:import.desc ~imported:imported_limit then <span data-count="38">m</span>em
   else
-    <span data-count="6">E</span>rr.pp "incompatible import type for memory %s %s expected %a got %a"
+    <span data-count="6">L</span>og.err "incompatible import type for memory %s %s expected %a got %a"
       import.module_ import.name Pp.Input.mem_type import.desc Pp.Input.mem_type
       imported_limit
 
@@ -1593,7 +1593,7 @@ let load_table (ls : link_state) (import : S.table_import S.imp) : table =
   in
   <span data-count="58">i</span>f table_types_are_compatible type_ (t.limits, t.type_) then <span data-count="50">t</span>able
   else
-    <span data-count="8">E</span>rr.pp "incompatible import type for table %s %s expected %a got %a"
+    <span data-count="8">L</span>og.err "incompatible import type for table %s %s expected %a got %a"
       import.module_ import.name Pp.Input.table_type type_ Pp.Input.table_type
       (t.limits, t.type_)
 
@@ -1623,7 +1623,7 @@ let load_func (ls : link_state) (import : func_type S.imp) : func =
   let func = load_from_module ls (fun (e : exports) -&gt; <span data-count="212">e</span>.functions) import in
   <span data-count="203">l</span>et type' = Value.Func.type_ func in
   <span data-count="203">i</span>f func_types_are_compatible type_ type' then <span data-count="185">f</span>unc
-  else <span data-count="18">E</span>rr.pp "incompatible import type"
+  else <span data-count="18">L</span>og.err "incompatible import type"
 
 let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
     : func =
@@ -1649,7 +1649,7 @@ let active_elem_expr ~offset ~length ~table ~elem =
 
 let active_data_expr ~offset ~length ~mem ~data =
   <span data-count="148">i</span>f mem &lt;&gt; 0 then begin
-    <span data-count="0">E</span>rr.p<span data-count="0">p</span> "wrong memory id: %i@." mem
+    <span data-count="0">L</span>og.er<span data-count="0">r</span> "wrong memory id: %i@." mem
   end;
   <span data-count="148">[</span> I32_const offset
   ; I32_const 0l
@@ -1658,7 +1658,7 @@ let active_data_expr ~offset ~length ~mem ~data =
   ; Data_drop data
   ]
 
-let get_i32 = function <span data-count="481">V</span>alue.I32 i -&gt; i | <span data-count="5">_</span> -&gt; Err.pp "type mismatch"
+let get_i32 = function <span data-count="481">V</span>alue.I32 i -&gt; i | <span data-count="5">_</span> -&gt; Log.err "type mismatch"
 
 let define_data env data =
   <span data-count="1345">S</span>.Fields.fold
@@ -1685,7 +1685,7 @@ let define_elem env elem =
           (fun v -&gt;
             <span data-count="1862">m</span>atch v with
             | <span data-count="1862">V</span>alue.Ref v -&gt; v
-            | <span data-count="0">_</span> -&gt; Err.pp "constant expression required" )
+            | <span data-count="0">_</span> -&gt; Log.err "constant expression required" )
           init
       in
       <span data-count="634">l</span>et env =
@@ -1713,7 +1713,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
     <span data-count="5342">L</span>ist.fold_left
       (fun (acc, names) (export : _ S.export) -&gt;
         <span data-count="6016">l</span>et value = get_env env export.id in
-        <span data-count="6016">i</span>f StringSet.mem export.name names then <span data-count="19">E</span>rr.p<span data-count="0">p</span> "duplicate export name";
+        <span data-count="6016">i</span>f StringSet.mem export.name names then <span data-count="19">L</span>og.er<span data-count="0">r</span> "duplicate export name";
         <span data-count="5997">(</span>StringMap.ad<span data-count="5997">d</span> export.name value acc, StringSet.ad<span data-count="5997">d</span> export.name names)
         )
       (StringMap.empty, names) exports
@@ -1785,13 +1785,13 @@ let register_module (ls : link_state) ~name ~(id : string option) : link_state =
     match id with
     | <span data-count="153">S</span>ome id -&gt; begin
       match StringMap.find_opt id ls.by_id with
-      | <span data-count="0">N</span>one -&gt; Err.p<span data-count="0">p</span> "Unbound module id %s" id
+      | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "Unbound module id %s" id
       | <span data-count="153">S</span>ome e -&gt; e
     end
     | <span data-count="7">N</span>one -&gt; (
       match ls.last with
       | <span data-count="7">S</span>ome e -&gt; e
-      | <span data-count="0">N</span>one -&gt; Err.p<span data-count="0">p</span> "No previous module to register" )
+      | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "No previous module to register" )
   in
   { ls with by_name = StringMap.ad<span data-count="160">d</span> name exports ls.by_name }
 </code></pre>

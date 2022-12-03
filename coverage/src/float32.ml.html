@@ -975,10 +975,10 @@ let of_signless_string s =
   else
     <span data-count="11623">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="11623">r</span> '_' s) in
     <span data-count="11623">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="11623">g</span> s') in
-    <span data-count="11623">i</span>f is_inf x then <span data-count="8">E</span>rr.pp "of_string" else <span data-count="11615">x</span>
+    <span data-count="11623">i</span>f is_inf x then <span data-count="8">L</span>og.err "of_string" else <span data-count="11615">x</span>
 
 let of_string s =
-  <span data-count="15385">i</span>f s = "" then <span data-count="0">E</span>rr.pp "of_string"
+  <span data-count="15385">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
   else <span data-count="15385">i</span>f s.[0] = '+<span data-count="149">'</span> || s.[0] = '-<span data-count="6966">'</span> then
     <span data-count="7115">l</span>et x = of_signless_string (String.su<span data-count="7115">b</span> s 1 (String.lengt<span data-count="7115">h</span> s - 1)) in
     <span data-count="7111">i</span>f s.[0] = '+' then <span data-count="149">x</span> else <span data-count="6962">n</span>eg x

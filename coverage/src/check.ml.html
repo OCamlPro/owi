@@ -241,7 +241,7 @@ let module_ m =
   <span data-count="1609">l</span>et add_global id =
     <span data-count="122">O</span>ption.iter
       (fun id -&gt;
-        <span data-count="31">i</span>f Hashtbl.mem seen_globals id then <span data-count="3">E</span>rr.p<span data-count="0">p</span> "duplicate global";
+        <span data-count="31">i</span>f Hashtbl.mem seen_globals id then <span data-count="3">L</span>og.er<span data-count="0">r</span> "duplicate global";
         <span data-count="28">H</span>ashtbl.add seen_globals id () )
       id
   in
@@ -249,7 +249,7 @@ let module_ m =
   <span data-count="1609">l</span>et add_table id =
     <span data-count="205">O</span>ption.iter
       (fun id -&gt;
-        <span data-count="44">i</span>f Hashtbl.mem seen_tables id then <span data-count="3">E</span>rr.p<span data-count="0">p</span> "duplicate table";
+        <span data-count="44">i</span>f Hashtbl.mem seen_tables id then <span data-count="3">L</span>og.er<span data-count="0">r</span> "duplicate table";
         <span data-count="41">H</span>ashtbl.add seen_tables id () )
       id
   in
@@ -257,7 +257,7 @@ let module_ m =
   <span data-count="1609">l</span>et add_memory id =
     <span data-count="424">O</span>ption.iter
       (fun id -&gt;
-        <span data-count="6">i</span>f Hashtbl.mem seen_memories id then <span data-count="3">E</span>rr.p<span data-count="0">p</span> "duplicate memory";
+        <span data-count="6">i</span>f Hashtbl.mem seen_memories id then <span data-count="3">L</span>og.er<span data-count="0">r</span> "duplicate memory";
         <span data-count="3">H</span>ashtbl.add seen_memories id () )
       id
   in
@@ -267,19 +267,19 @@ let module_ m =
          | <span data-count="312">M</span>Export _e -&gt; env
          | <span data-count="1523">M</span>Func _f -&gt; { env with funcs = true }
          | <span data-count="6">M</span>Start _start -&gt;
-           if env.start then <span data-count="1">E</span>rr.p<span data-count="0">p</span> "multiple start sections";
+           if env.start then <span data-count="1">L</span>og.er<span data-count="0">r</span> "multiple start sections";
            <span data-count="5">{</span> env with start = true }
          | <span data-count="161">M</span>Import i -&gt;
-           if env.funcs then <span data-count="4">E</span>rr.p<span data-count="0">p</span> "import after function";
-           <span data-count="157">i</span>f env.memory then <span data-count="4">E</span>rr.p<span data-count="0">p</span> "import after memory";
-           <span data-count="153">i</span>f env.tables then <span data-count="4">E</span>rr.p<span data-count="0">p</span> "import after table";
-           <span data-count="149">i</span>f env.globals then <span data-count="4">E</span>rr.p<span data-count="0">p</span> "import after global";
+           if env.funcs then <span data-count="4">L</span>og.er<span data-count="0">r</span> "import after function";
+           <span data-count="157">i</span>f env.memory then <span data-count="4">L</span>og.er<span data-count="0">r</span> "import after memory";
+           <span data-count="153">i</span>f env.tables then <span data-count="4">L</span>og.er<span data-count="0">r</span> "import after table";
+           <span data-count="149">i</span>f env.globals then <span data-count="4">L</span>og.er<span data-count="0">r</span> "import after global";
            <span data-count="145">b</span>egin
              match i.desc with
              | <span data-count="25">I</span>mport_mem (id, _) -&gt;
                add_memory id;
                <span data-count="24">i</span>f env.memor<span data-count="0">y</span> || env.imported_memor<span data-count="1">y</span> then
-                 <span data-count="1">E</span>rr.p<span data-count="0">p</span> "multiple memories";
+                 <span data-count="1">L</span>og.er<span data-count="0">r</span> "multiple memories";
                <span data-count="23">{</span> env with imported_memory = true }
              | <span data-count="45">I</span>mport_func _ -&gt; env
              | <span data-count="54">I</span>mport_global (id, _) -&gt;
@@ -293,7 +293,7 @@ let module_ m =
          | <span data-count="121">M</span>Elem _e -&gt; env
          | <span data-count="399">M</span>Mem (id, _) -&gt;
            add_memory id;
-           <span data-count="397">i</span>f env.memor<span data-count="2">y</span> || env.imported_memor<span data-count="2">y</span> then <span data-count="4">E</span>rr.p<span data-count="0">p</span> "multiple memories";
+           <span data-count="397">i</span>f env.memor<span data-count="2">y</span> || env.imported_memor<span data-count="2">y</span> then <span data-count="4">L</span>og.er<span data-count="0">r</span> "multiple memories";
            <span data-count="393">{</span> env with memory = true }
          | <span data-count="57">M</span>Type _t -&gt; env
          | <span data-count="68">M</span>Global { id; _ } -&gt;

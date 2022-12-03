@@ -1787,7 +1787,7 @@ module Global = struct
 
   let result fmt = function
     | <span data-count="0">R</span>esult_const c -&gt; Format.fprintf fmt "(%a)" result_const c
-    | <span data-count="0">_</span> -&gt; Err.pp "not yet implemented"
+    | <span data-count="0">_</span> -&gt; Log.err "not yet implemented"
 
   let action fmt = function
     | <span data-count="0">I</span>nvoke (mod_name, name, c) -&gt;

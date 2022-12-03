@@ -157,8 +157,8 @@ let check_utf8 s =
   <span data-count="29049">l</span>et rec loop () =
     <span data-count="214721">m</span>atch decode decoder with
     | <span data-count="176">`</span>Malformed _s -&gt;
-      Debug.log "GOT: `%S`" s;
-      <span data-count="176">E</span>rr.pp "malformed UTF-8 encoding"
+      Log.debug "GOT: `%S`" s;
+      <span data-count="176">L</span>og.err "malformed UTF-8 encoding"
     | `Await -&gt; assert false
     | <span data-count="28873">`</span>End -&gt; ()
     | <span data-count="185672">`</span>Uchar _ -&gt; loop ()

@@ -123,7 +123,7 @@ let from_lexbuf =
     try Ok (parse<span data-count="162">r</span> provider) with
     | <span data-count="60">M</span>enhir_parser.Error -&gt;
       let start, _stop = Sedlexing.lexing_positions buf in
-      <span data-count="60">D</span>ebug.log "file %s, line %i, char %i@." start.pos_fname
+      <span data-count="60">L</span>og.debug "file %s, line %i, char %i@." start.pos_fname
         (start.pos_lnum + 1)
         (start.pos_cnum - start.pos_bol);
       <span data-count="60">E</span>rror "unexpected token"
