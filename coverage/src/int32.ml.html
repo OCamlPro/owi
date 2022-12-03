@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>int32.ml &mdash; Coverage report</title>
+    <meta name="description" content="98.25% coverage in src/int32.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">src/</span>int32.ml
+        </a>
+      </h1>
+      <h2>98.25%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:42.11%"></span>
+      <span class="unvisited" style="bottom:37.59%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="unvisited"> </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="visited"> </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span > </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span class="visited"> </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span class="visited"> </span>
+<a id="L130"></a><span > </span>
+<a id="L131"></a><span > </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+</pre>
+<pre><code class="ocaml">(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
+include Stdlib.Int32
+
+let clz = Ocaml_intrinsics.Int32.count_leading_zeros
+
+let ctz = Ocaml_intrinsics.Int32.count_trailing_zeros
+
+(* Taken from Base https://github.com/janestreet/base *)
+let popcnt =
+  let mask = 0xffff_ffffL in
+  fun [@inline] x -&gt; <span data-count="8">I</span>nt64.popcnt (Int64.logan<span data-count="8">d</span> (Int64.of_int3<span data-count="8">2</span> x) mask)
+
+let to_hex_string = Printf.sprint<span data-count="1">f</span> "%lx"
+
+let of_int64 = Int64.to_int32
+
+let to_int64 = Int64.of_int32
+
+exception Overflow
+
+(* Unsigned comparison in terms of signed comparison. *)
+let cmp_u x op y = <span data-count="877469">o</span>p (ad<span data-count="877469">d</span> x min_int) (ad<span data-count="877469">d</span> y min_int)
+
+(* If bit (32 - 1) is set, sx will sign-extend t to maintain the
+ * invariant that small ints are stored sign-extended inside a wider int. *)
+let sx x =
+  <span data-count="12349">I</span>nt64.to_int32 @@ Int64.(shift_righ<span data-count="12349">t</span> (shift_lef<span data-count="12349">t</span> (Int64.of_int3<span data-count="12349">2</span> x) 32) 32)
+
+(* We don't override min_int and max_int since those are used
+ * by other functions (like parsing), and rely on it being
+ * min/max for int32 *)
+(* The smallest signed |32|-bits int. *)
+let low_int = shift_lef<span data-count="1">t</span> minus_one 31
+
+(* The largest signed |32|-bits int. *)
+let high_int = logxo<span data-count="1">r</span> low_int minus_one
+
+(* WebAssembly's shifts mask the shift count according to the 32. *)
+let shift f x y = <span data-count="12369">f</span> x (to_in<span data-count="12369">t</span> (logan<span data-count="12369">d</span> y 31l))
+
+let shl x y = <span data-count="134">s</span>x (shif<span data-count="134">t</span> shift_left x y)
+
+let shr_s x y = <span data-count="20">s</span>hift shift_right x y
+
+let shr_u x y = <span data-count="12215">s</span>x (shif<span data-count="12215">t</span> shift_right_logical x y)
+
+(* We must mask the count to implement rotates via shifts. *)
+let clamp_rotate_count n = <span data-count="26">t</span>o_int (logan<span data-count="26">d</span> n 31l)
+
+let rotl x y =
+  <span data-count="13">l</span>et n = clamp_rotate_count y in
+  <span data-count="13">l</span>ogor (sh<span data-count="13">l</span> x (of_in<span data-count="13">t</span> n)) (shr_<span data-count="13">u</span> x (of_in<span data-count="13">t</span> (32 - n)))
+
+let rotr x y =
+  <span data-count="13">l</span>et n = clamp_rotate_count y in
+  <span data-count="13">l</span>ogor (shr_<span data-count="13">u</span> x (of_in<span data-count="13">t</span> n)) (sh<span data-count="13">l</span> x (of_in<span data-count="13">t</span> (32 - n)))
+
+let extend_s n x =
+  <span data-count="14">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="14">t</span> x shift) shift
+
+let lt_u x y = <span data-count="56849">c</span>mp_u x ( &lt; ) y
+
+let le_u x y = <span data-count="427339">c</span>mp_u x ( &lt;= ) y
+
+let gt_u x y = <span data-count="20">c</span>mp_u x ( &gt; ) y
+
+let ge_u x y = <span data-count="393261">c</span>mp_u x ( &gt;= ) y
+
+(* String conversion that allows leading signs and unsigned values *)
+
+let require b = <span data-count="168502">i</span>f not b then <span data-count="4">E</span>rr.pp "of_string (int32)"
+
+let dec_digit = function
+  | <span data-count="56807">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="56807">e</span> c - Char.cod<span data-count="56807">e</span> '0'
+  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+
+let hex_digit = function
+  | <span data-count="10068">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="10068">e</span> c - Char.cod<span data-count="10068">e</span> '0'
+  | <span data-count="1840">'</span>a' .. 'f' as c -&gt; 0xa + Char.cod<span data-count="1840">e</span> c - Char.cod<span data-count="1840">e</span> 'a'
+  | <span data-count="149">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="149">e</span> c - Char.cod<span data-count="149">e</span> 'A'
+  | <span data-count="0">_</span> -&gt; Err.pp "of_string"
+
+let max_upper = unsigned_di<span data-count="1">v</span> minus_one 10l
+
+let max_lower = unsigned_re<span data-count="1">m</span> minus_one 10l
+
+let sign_extend i =
+  <span data-count="32931">l</span>et sign_bit = logand (of_in<span data-count="32931">t</span> (1 lsl (32 - 1))) i in
+  <span data-count="32931">i</span>f sign_bit = zero then <span data-count="31807">i</span>
+  else
+    (* Build a sign-extension mask *)
+    <span data-count="1124">l</span>et sign_mask = shift_left minus_one 32 in
+    <span data-count="1124">l</span>ogor sign_mask i
+
+let of_string s =
+  <span data-count="32935">l</span>et len = String.length s in
+  <span data-count="32935">l</span>et rec parse_hex i num =
+    <span data-count="14076">i</span>f i = len then <span data-count="1992">n</span>um
+    else <span data-count="12084">i</span>f s.[i] = '_' then <span data-count="27">p</span>arse_hex (i + 1) num
+    else
+      <span data-count="12057">l</span>et digit = of_int (hex_digi<span data-count="12057">t</span> s.[i]) in
+      <span data-count="12057">r</span>equire (le_<span data-count="12057">u</span> num (shr_<span data-count="12057">u</span> minus_one (of_in<span data-count="12057">t</span> 4)));
+      <span data-count="12056">p</span>arse_hex (i + 1) (logo<span data-count="12056">r</span> (shift_lef<span data-count="12056">t</span> num 4) digit)
+  in
+  let rec parse_dec i num =
+    <span data-count="87756">i</span>f i = len then <span data-count="30941">n</span>um
+    else <span data-count="56815">i</span>f s.[i] = '_' then <span data-count="8">p</span>arse_dec (i + 1) num
+    else
+      <span data-count="56807">l</span>et digit = of_int (dec_digi<span data-count="56807">t</span> s.[i]) in
+      <span data-count="56807">r</span>equire (lt_<span data-count="56807">u</span> num max_uppe<span data-count="56800">r</span> || (num = max_upper &amp;&amp; <span data-count="7">l</span>e_<span data-count="7">u</span> digit max_lower<span data-count="6">)</span>);
+      <span data-count="56806">p</span>arse_dec (i + 1) (ad<span data-count="56806">d</span> (mu<span data-count="56806">l</span> num 10l) digit)
+  in
+  let parse_int i =
+    <span data-count="32935">r</span>equire (len - i &gt; 0);
+    <span data-count="32935">i</span>f i + 2 &lt;= len &amp;&amp; <span data-count="12013">s</span>.[i] = '0' &amp;&amp; <span data-count="1995">s</span>.[i + 1] = 'x' then
+      <span data-count="1993">p</span>arse_hex (i + 2) zero
+    else <span data-count="30942">p</span>arse_dec i zero
+  in
+  require (len &gt; 0);
+  <span data-count="32935">l</span>et parsed =
+    match s.[0] with
+    | <span data-count="1">'</span>+' -&gt; parse_in<span data-count="1">t</span> 1
+    | <span data-count="837">'</span>-' -&gt;
+      let n = parse_int 1 in
+      <span data-count="837">r</span>equire (su<span data-count="837">b</span> n one &gt;= minus_one);
+      <span data-count="835">n</span>e<span data-count="835">g</span> n
+    | <span data-count="32097">_</span> -&gt; parse_in<span data-count="32095">t</span> 0
+  in
+  let parsed = sign_extend parsed in
+  <span data-count="32931">r</span>equire (low_int &lt;= parsed &amp;&amp; <span data-count="32931">p</span>arsed &lt;= high_int);
+  <span data-count="32931">p</span>arsed
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>
