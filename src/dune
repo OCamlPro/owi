@@ -28,7 +28,8 @@
  (preprocess
   (pps sedlex.ppx))
  (instrumentation
-  (backend bisect_ppx)))
+  (backend bisect_ppx --exclusions src/bisect.exclude)
+  (deps bisect.exclude)))
 
 (executable
  (public_name woi)
