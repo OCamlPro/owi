@@ -27,7 +27,10 @@
   (integers
    (>= 0.5.1))
   sedlex
-  menhir
+  (menhir
+   (and
+    :build
+    (>= 20180528)))
   ocaml_intrinsics
   uutf
   (bos :with-test)))
