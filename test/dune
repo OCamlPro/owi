@@ -5,4 +5,4 @@
   (source_tree reference)
   (source_tree failing)
   (source_tree passing))
- (libraries bos woi))
+ (libraries bos owi))

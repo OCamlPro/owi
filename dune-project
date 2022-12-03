@@ -2,25 +2,25 @@
 
 (using menhir 2.1)
 
-(name woi)
+(name owi)
 
 (license ISC)
 
-(authors "TODO")
+(authors "Léo Andrès <contact@ndrs.fr>" "Pierre Chambart <pierre.chambart@ocamlpro.com>")
 
-(maintainers "TODO")
+(maintainers "Léo Andrès <contact@ndrs.fr>")
 
-;(source
-; (github TODO/woi))
+(source
+ (github ocamlpro/owi))
 
 (generate_opam_files true)
 
 (package
- (name woi)
+ (name owi)
  (synopsis "OCaml library/executable to TODO")
- (description "woi is an OCaml library/executable to TODO.")
+ (description "owi is an OCaml library/executable to TODO.")
  (tags
-  (woi TODO TODO TODO TODO))
+  (owi TODO TODO TODO TODO))
  (depends
   (ocaml
    (>= 4.08))

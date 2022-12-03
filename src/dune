@@ -1,5 +1,5 @@
 (library
- (public_name woi)
+ (public_name owi)
  (modules
   check
   convert
@@ -32,9 +32,9 @@
   (deps bisect.exclude)))
 
 (executable
- (public_name woi)
- (modules woi)
- (libraries sedlex woi))
+ (public_name owi)
+ (modules owi)
+ (libraries sedlex owi))
 
 (menhir
  (modules menhir_parser))

@@ -1,13 +1,13 @@
-# woi
+# owi
 
-woi is an [OCaml] executable/library to TODO.
+owi is an [OCaml] executable/library to TODO.
 
 ## Installation
 
-`woi` can be installed with [opam]:
+`owi` can be installed with [opam]:
 
 ```sh
-opam install woi
+opam install owi
 ```
 
 If you don't have `opam`, you can install it following the [how to install opam] guide.
@@ -30,11 +30,11 @@ For more, have a look at the [example] folder, at the [documentation] or at the 
 [CHANGELOG]: ./CHANGES.md
 [example]: ./example/
 [LICENSE]: ./LICENSE.md
-[opam file]: ./woi.opam
+[opam file]: ./owi.opam
 [test suite]: ./test/
 
 [documentation]: TODO
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [OCaml]: https://ocaml.org
 [opam]: https://opam.ocaml.org/
-[woi]: TODO
+[owi]: TODO

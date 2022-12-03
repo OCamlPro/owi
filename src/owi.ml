@@ -2,8 +2,8 @@ let error msg =
   Format.eprintf "error: %s@." msg;
   exit 1
 
-let extern_module : Woi.Link.extern_module =
-  let open Woi in
+let extern_module : Owi.Link.extern_module =
+  let open Owi in
   let module M = struct
     let rint : int32 ref Value.Extern_ref.ty = Value.Extern_ref.fresh "int ref"
 
@@ -34,30 +34,30 @@ let simplify_then_link_then_run file =
   let cmds =
     List.filter_map
       (function
-        | Woi.Types.Module m -> Some (`Module (Woi.Simplify.simplify m))
-        | Woi.Types.Register (name, id) -> Some (`Register (name, id))
+        | Owi.Types.Module m -> Some (`Module (Owi.Simplify.simplify m))
+        | Owi.Types.Register (name, id) -> Some (`Register (name, id))
         | _ -> None )
       file
   in
-  let () = Woi.Debug.log "* Simplified %i modules@." (List.length cmds) in
-  let link_state = Woi.Link.empty_state in
+  let () = Owi.Debug.log "* Simplified %i modules@." (List.length cmds) in
+  let link_state = Owi.Link.empty_state in
   let link_state =
-    Woi.Link.link_extern_module "stuff" extern_module link_state
+    Owi.Link.link_extern_module "stuff" extern_module link_state
   in
   let to_run, _link_state =
     List.fold_left
       (fun (to_run, state) cmd ->
         match cmd with
         | `Module module_ ->
-          let module_to_run, state = Woi.Link.link_module module_ state in
+          let module_to_run, state = Owi.Link.link_module module_ state in
           (module_to_run :: to_run, state)
         | `Register (name, id) ->
-          (to_run, Woi.Link.register_module state ~name ~id) )
+          (to_run, Owi.Link.register_module state ~name ~id) )
       ([], link_state) cmds
   in
-  let () = Woi.Debug.log "* Linked@." in
-  List.iter Woi.Interpret.exec_module (List.rev to_run);
-  let () = Woi.Debug.log "* Done@." in
+  let () = Owi.Debug.log "* Linked@." in
+  List.iter Owi.Interpret.exec_module (List.rev to_run);
+  let () = Owi.Debug.log "* Done@." in
   ()
 
 let run_as_script, debug, files =
@@ -76,17 +76,17 @@ let run_as_script, debug, files =
   (!run_as_script, !debug, !files)
 
 let () =
-  if debug then Woi.Debug.enable ();
+  if debug then Owi.Debug.enable ();
 
   List.iter
     (fun file ->
       if not @@ Sys.file_exists file then
         error (Format.sprintf "file `%s` doesn't exist" file);
 
-      match Woi.Parse.from_file ~filename:file with
+      match Owi.Parse.from_file ~filename:file with
       | Ok script -> begin
-        Format.printf "%a@." Woi.Pp.Input.file script;
-        if run_as_script then Woi.Script.exec script
+        Format.printf "%a@." Owi.Pp.Input.file script;
+        if run_as_script then Owi.Script.exec script
         else simplify_then_link_then_run script
       end
       | Error e -> error e )

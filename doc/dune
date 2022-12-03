@@ -1,3 +1,3 @@
 (documentation
- (package woi)
+ (package owi)
  (mld_files index))
