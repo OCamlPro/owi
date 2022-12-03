@@ -939,7 +939,6 @@ and exec_func env (func : Simplify.func) args =
   with Return stack -> Stack.keep stack (List.length (snd func.type_f))
 
 let exec_module (module_ : Link.module_to_run) =
-  Debug.log "EXEC START@\n";
   List.iter
     (fun to_run ->
       let end_stack =

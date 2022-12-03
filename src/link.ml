@@ -503,15 +503,14 @@ let link_module (module_ : module_) (ls : link_state) :
     module_to_run * link_state =
   let rec env_and_init_active_data_and_elem =
     lazy
-      ( Debug.log "LINK %a@\n" Pp.pp_id module_.id;
-        let env = Env.empty in
-        let env = eval_functions ls finished_env env module_.func in
-        let env = eval_globals ls env module_.global in
-        let env = eval_memories ls env module_.mem in
-        let env = eval_tables ls env module_.table in
-        let env, init_active_data = define_data env module_.data in
-        let env, init_active_elem = define_elem env module_.elem in
-        (env, init_active_data, init_active_elem) )
+      (let env = Env.empty in
+       let env = eval_functions ls finished_env env module_.func in
+       let env = eval_globals ls env module_.global in
+       let env = eval_memories ls env module_.mem in
+       let env = eval_tables ls env module_.table in
+       let env, init_active_data = define_data env module_.data in
+       let env, init_active_elem = define_elem env module_.elem in
+       (env, init_active_data, init_active_elem) )
   and finished_env =
     lazy
       (let env, _init_active_data, _init_active_elem =
@@ -522,7 +521,6 @@ let link_module (module_ : module_) (ls : link_state) :
   let env, init_active_data, init_active_elem =
     Lazy.force env_and_init_active_data_and_elem
   in
-  Debug.log "EVAL %a@\n" Env.pp env;
   let by_id_exports = populate_exports env module_.exports in
   let by_id =
     (* TODO: this is not the actual module name *)
@@ -537,7 +535,6 @@ let link_module (module_ : module_) (ls : link_state) :
 
 let link_extern_module (name : string) (module_ : extern_module)
     (ls : link_state) : link_state =
-  Debug.log "LINK EXTERN %s@\n" name;
   let functions =
     StringMap.map Value.Func.extern
       (StringMap.of_seq (List.to_seq module_.functions))
