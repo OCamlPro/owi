@@ -390,7 +390,9 @@ let typecheck_const_instr (module_ : Simplify.result) refs stack = function
   | Global_get i ->
     let value = get_value_at_indice i module_.global.values in
     let _mut, type_ =
-      match value with Local { type_; _ } -> type_ | Imported t -> t.desc
+      match value with
+      | Local _ -> Err.pp "unknown global"
+      | Imported t -> t.desc
     in
     Stack.push [ typ_of_val_type type_ ] stack
   | I_binop (t, _op) ->
