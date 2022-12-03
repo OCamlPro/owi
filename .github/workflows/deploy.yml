@@ -1,0 +1,46 @@
+name: deploy
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: setup-ocaml
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: 4.14.0
+      - name: setup-deploy
+        run: |
+          opam pin add . -y --no-action
+          opam depext -y owi
+          opam install -y ./*.opam --deps-only --with-test --with-doc
+          opam upgrade --fixup
+          touch doc/.nojekyll
+      - name: api
+        run: |
+          opam exec -- dune build @doc
+          mv _build/default/_doc/_html doc/api
+      - name: coverage
+        run: |
+          opam exec -- dune runtest --instrument-with bisect_ppx
+          opam exec -- bisect-ppx-report html -o doc/coverage
+      - name: coverage-badge
+        run: |
+          label=coverage
+          percentage=$(opam exec -- bisect-ppx-report summary | sed -E 's/.*\((..).*/\1/g')
+          color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85)
+          opam exec -- ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg
+      - name: deploy
+        uses: JamesIves/github-pages-deploy-action@3.6.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: doc/
+          CLEAN: true
