@@ -205,7 +205,7 @@ let rec run ~with_exhaustion script =
                 match check script with
                 | Ok () ->
                   let _link_state : Link.link_state =
-                    run script ~with_exhaustion:false
+                    run script ~with_exhaustion
                   in
                   "Ok"
                 | Error got -> got
