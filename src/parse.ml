@@ -20,7 +20,16 @@ let from_lexbuf =
         (start.pos_lnum + 1)
         (start.pos_cnum - start.pos_bol);
       Error "unexpected token"
-    | Lexer.Error (_pos, _msg) -> Error "unknown operator"
+    | Lexer.Error (pos, msg) ->
+      if !Log.debug_on then
+        let file_line =
+          let cpos = pos.pos_cnum - pos.pos_bol in
+          Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
+            pos.pos_lnum cpos
+        in
+        let msg = Printf.sprintf "Error: Lexing error %s" msg in
+        Error (Printf.sprintf "%s\n%s\n" file_line msg)
+      else Error "unknown operator"
     | Failure msg -> Error msg
 
 (** Parse a script from a string. *)
@@ -35,6 +44,9 @@ let from_file ~filename =
   let result =
     Fun.protect
       ~finally:(fun () -> close_in chan)
-      (fun () -> from_lexbuf (Sedlexing.Utf8.from_channel chan))
+      (fun () ->
+        let lb = Sedlexing.Utf8.from_channel chan in
+        Sedlexing.set_filename lb filename;
+        from_lexbuf lb )
   in
   result

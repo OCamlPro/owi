@@ -346,15 +346,20 @@ let keywords =
     |];
   tbl
 
+let err buf msg =
+  let position = fst @@ lexing_positions buf in
+  let tok = Utf8.lexeme buf in
+  raise @@ Error (position, Printf.sprintf "%s %S" msg tok)
+
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
-  | bad_num | bad_id | bad_name -> Log.err "unknown operator"
+  | bad_num | bad_id | bad_name -> err buf "unknown operator"
   | num -> NUM (Utf8.lexeme buf)
   | operator -> (
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
-    with Not_found -> Log.err "unknown operator" )
+    with Not_found -> err buf "unknown operator" )
   | ";;" ->
     single_comment buf;
     token buf
