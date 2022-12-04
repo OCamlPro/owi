@@ -401,8 +401,8 @@ let call_indirect_prim ==
   | RETURN_CALL_INDIRECT; { fun (id, typ) -> Return_call_indirect (id, typ) }
 
 let call_instr ==
-  | ~ = call_indirect_prim; ~ = id; ~ = call_instr_type; {
-    call_indirect_prim (Symbolic id, call_instr_type)
+  | ~ = call_indirect_prim; ~ = indice; ~ = call_instr_type; {
+    call_indirect_prim (indice, call_instr_type)
   }
   | ~ = call_indirect_prim; ~ = call_instr_type; {
     call_indirect_prim (Raw 0, call_instr_type)
@@ -431,8 +431,8 @@ let call_instr_results :=
   | { [] }
 
 let call_instr_instr ==
-  | ~ = call_indirect_prim; ~ = id; (x, es) = call_instr_type_instr; {
-    call_indirect_prim (Symbolic id, x), es
+  | ~ = call_indirect_prim; ~ = indice; (x, es) = call_instr_type_instr; {
+    call_indirect_prim (indice, x), es
   }
   | ~ = call_indirect_prim; (x, es) = call_instr_type_instr; {
     call_indirect_prim (Raw 0, x), es
@@ -515,8 +515,8 @@ let expr_aux ==
   | SELECT; (b, ts, es) = select_expr_result; {
     es, Select (if b then Some ts else None)
   }
-  | ~ = call_indirect_prim; ~ = id; (x, es) = call_expr_type; {
-    es, call_indirect_prim (Symbolic id, x)
+  | ~ = call_indirect_prim; ~ = indice; (x, es) = call_expr_type; {
+    es, call_indirect_prim (indice, x)
   }
   | ~ = call_indirect_prim; (x, es) = call_expr_type; {
     es, call_indirect_prim (Raw 0, x)
