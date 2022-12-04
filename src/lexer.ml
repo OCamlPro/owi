@@ -330,6 +330,7 @@ let keywords =
      ; ("register", REGISTER)
      ; ("result", RESULT)
      ; ("return", RETURN)
+     ; ("return_call", RETURN_CALL)
      ; ("select", SELECT)
      ; ("start", START)
      ; ("table", TABLE)

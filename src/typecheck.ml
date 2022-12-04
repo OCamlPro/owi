@@ -274,6 +274,16 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
     let pt, rt = Env.func_get i env in
     Stack.pop (List.rev_map typ_of_pt pt) stack
     |> Stack.push (List.rev_map typ_of_val_type rt)
+  | Return_call i ->
+    let pt, rt = Env.func_get i env in
+    ignore @@ Stack.pop (List.rev_map typ_of_pt pt) stack;
+    if
+      not
+        (Stack.equal
+           (List.rev_map typ_of_val_type rt)
+           (List.rev_map typ_of_val_type env.result_type) )
+    then Log.err "type mismatch";
+    [ any ]
   | Data_drop _i -> stack
   | Table_init (ti, ei) ->
     let table_typ = Env.table_type_get ti env in

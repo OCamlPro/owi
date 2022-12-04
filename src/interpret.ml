@@ -509,6 +509,10 @@ let rec exec_instr env locals stack instr =
     let func = Env.get_func env i in
     exec_vfunc stack func
   end
+  | Return_call i -> begin
+    let func = get_func env i in
+    exec_vfunc ~return:true stack func
+  end
   | Br i -> raise (Branch (stack, i))
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
@@ -900,13 +904,18 @@ and exec_expr env locals stack e is_loop bt =
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc stack (func : Env.t' Value.Func.t) =
+and exec_vfunc ?(return=false) stack (func : Env.t' Value.Func.t) =
   match func with
   | WASM (_, func, env) ->
     let param_type, _result_type = func.type_f in
     let args, stack = Stack.pop_n stack (List.length param_type) in
-    let res = exec_func (Lazy.force env) func (List.rev args) in
-    res @ stack
+    let env = Lazy.force env in
+    let rev_args = List.rev args in
+    if return then
+      exec_func env func rev_args
+    else
+      let res = exec_func env func rev_args in
+      res @ stack
   | Extern f ->
     let stack = List.rev stack in
     exec_extern_func stack f

@@ -609,6 +609,7 @@ module Rewrite_indices = struct
       | Br_if id -> Br_if (block_id_to_raw (loop_count, block_ids) id)
       | Br id -> Br (block_id_to_raw (loop_count, block_ids) id)
       | Call id -> Call (find_func id)
+      | Return_call id -> Return_call (find_func id)
       | Local_set id -> Local_set (find_local id)
       | Local_get id -> Local_get (find_local id)
       | Local_tee id -> Local_tee (find_local id)
