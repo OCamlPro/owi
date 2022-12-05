@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>value.ml &mdash; Coverage report</title>
-    <meta name="description" content="55.38% coverage in src/value.ml">
+    <meta name="description" content="52.31% coverage in src/value.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>value.ml
         </a>
       </h1>
-      <h2>55.38%</h2>
+      <h2>52.31%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:17.48%"></span>
@@ -28,10 +28,12 @@
       <span class="unvisited" style="bottom:48.25%"></span>
       <span class="unvisited" style="bottom:45.45%"></span>
       <span class="some-visited" style="bottom:25.17%"></span>
+      <span class="unvisited" style="bottom:12.59%"></span>
       <span class="unvisited" style="bottom:11.89%"></span>
       <span class="unvisited" style="bottom:9.09%"></span>
       <span class="unvisited" style="bottom:8.39%"></span>
       <span class="unvisited" style="bottom:7.69%"></span>
+      <span class="unvisited" style="bottom:6.99%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -161,7 +163,7 @@
 <a id="L122"></a><span > </span>
 <a id="L123"></a><span > </span>
 <a id="L124"></a><span > </span>
-<a id="L125"></a><span class="visited"> </span>
+<a id="L125"></a><span class="unvisited"> </span>
 <a id="L126"></a><span class="unvisited"> </span>
 <a id="L127"></a><span > </span>
 <a id="L128"></a><span > </span>
@@ -169,7 +171,7 @@
 <a id="L130"></a><span class="unvisited"> </span>
 <a id="L131"></a><span class="unvisited"> </span>
 <a id="L132"></a><span class="unvisited"> </span>
-<a id="L133"></a><span class="visited"> </span>
+<a id="L133"></a><span class="unvisited"> </span>
 <a id="L134"></a><span > </span>
 <a id="L135"></a><span > </span>
 <a id="L136"></a><span class="visited"> </span>
@@ -452,15 +454,15 @@ and 'env func = 'env Func.t
 type extern_func = Func.extern_func
 
 let pp_ref fmt = function
-  | <span data-count="5">E</span>xternref _ -&gt; Format.fprintf fmt "externref"
+  | <span data-count="0">E</span>xternref _ -&gt; Format.fprintf fmt "externref"
   | <span data-count="0">F</span>uncref _ -&gt; Format.fprintf fmt "funcref"
 
 let pp fmt = function
-  | <span data-count="12">I</span>32 i -&gt; Format.fprintf fmt "i32.const %ld" i
+  | <span data-count="8">I</span>32 i -&gt; Format.fprintf fmt "i32.const %ld" i
   | <span data-count="0">I</span>64 i -&gt; Format.fprintf fmt "i64.const %Ld" i
   | <span data-count="0">F</span>32 f -&gt; Format.fprintf fmt "f32.const %a" Pp.Simplified.f32 f
   | <span data-count="0">F</span>64 f -&gt; Format.fprintf fmt "f64.const %a" Pp.Simplified.f64 f
-  | <span data-count="5">R</span>ef r -&gt; pp_ref fmt r
+  | <span data-count="0">R</span>ef r -&gt; pp_ref fmt r
 
 let ref_null' (type_ : Types.ref_type) =
   <span data-count="521">m</span>atch type_ with <span data-count="462">F</span>unc_ref -&gt; Funcref None | <span data-count="59">E</span>xtern_ref -&gt; Externref None
