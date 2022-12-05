@@ -1216,12 +1216,12 @@ module Memory = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="378">i</span>ncr r;
-      <span data-count="378">!</span>r
+      <span data-count="379">i</span>ncr r;
+      <span data-count="379">!</span>r
 
   let init ?label (typ : mem_type) : t =
-    <span data-count="378">l</span>et data = Bytes.make (Types.page_size * typ.min) '\x00' in
-    <span data-count="378">{</span> id = fres<span data-count="378">h</span> (); label; limits = typ; data }
+    <span data-count="379">l</span>et data = Bytes.make (Types.page_size * typ.min) '\x00' in
+    <span data-count="379">{</span> id = fres<span data-count="379">h</span> (); label; limits = typ; data }
 
   let update_memory mem data =
     <span data-count="97">l</span>et limits =
@@ -1252,14 +1252,14 @@ module Table = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="443">i</span>ncr r;
-      <span data-count="443">!</span>r
+      <span data-count="444">i</span>ncr r;
+      <span data-count="444">!</span>r
 
   let init ?label (typ : table_type) : 'env t =
-    <span data-count="443">l</span>et limits, ref_type = typ in
+    <span data-count="444">l</span>et limits, ref_type = typ in
     let null = Value.ref_null' ref_type in
-    <span data-count="443">l</span>et table = Array.make limits.min null in
-    <span data-count="443">{</span> id = fres<span data-count="443">h</span> (); label; limits; type_ = ref_type; data = table }
+    <span data-count="444">l</span>et table = Array.make limits.min null in
+    <span data-count="444">{</span> id = fres<span data-count="444">h</span> (); label; limits; type_ = ref_type; data = table }
 
   let update table data = <span data-count="27">t</span>able.data &lt;- data
 end
@@ -1331,48 +1331,48 @@ module Env = struct
     }
 
   let add_global id const env =
-    <span data-count="749">{</span> env with globals = IMap.ad<span data-count="749">d</span> id const env.globals }
+    <span data-count="753">{</span> env with globals = IMap.ad<span data-count="753">d</span> id const env.globals }
 
   let add_memory id mem env =
-    <span data-count="416">{</span> env with memories = IMap.ad<span data-count="416">d</span> id mem env.memories }
+    <span data-count="417">{</span> env with memories = IMap.ad<span data-count="417">d</span> id mem env.memories }
 
   let add_table id table env =
-    <span data-count="493">{</span> env with tables = IMap.ad<span data-count="493">d</span> id table env.tables }
+    <span data-count="494">{</span> env with tables = IMap.ad<span data-count="494">d</span> id table env.tables }
 
   let add_func id func env =
-    <span data-count="6507">{</span> env with functions = IMap.ad<span data-count="6507">d</span> id func env.functions }
+    <span data-count="6520">{</span> env with functions = IMap.ad<span data-count="6520">d</span> id func env.functions }
 
   let add_data id data env = <span data-count="326">{</span> env with data = IMap.ad<span data-count="326">d</span> id data env.data }
 
   let add_elem id elem env = <span data-count="634">{</span> env with elem = IMap.ad<span data-count="634">d</span> id elem env.elem }
 
   let get_global (env : t) id : t' Global.t =
-    <span data-count="821">m</span>atch IMap.find_opt id env.globals with
+    <span data-count="825">m</span>atch IMap.find_opt id env.globals with
     | <span data-count="0">N</span>one -&gt;
       Log.debug "%a@." pp env;
       <span data-count="0">L</span>og.err "unknown global"
-    | <span data-count="821">S</span>ome v -&gt; v
+    | <span data-count="825">S</span>ome v -&gt; v
 
   let get_memory (env : t) id : Memory.t =
-    <span data-count="926759">m</span>atch IMap.find_opt id env.memories with
+    <span data-count="926760">m</span>atch IMap.find_opt id env.memories with
     | <span data-count="0">N</span>one -&gt;
       Log.debug "%a@." pp env;
       <span data-count="0">L</span>og.err "unknown memory"
-    | <span data-count="926759">S</span>ome v -&gt; v
+    | <span data-count="926760">S</span>ome v -&gt; v
 
   let get_table (env : t) id : t' Table.t =
-    <span data-count="92090">m</span>atch IMap.find_opt id env.tables with
+    <span data-count="92091">m</span>atch IMap.find_opt id env.tables with
     | <span data-count="0">N</span>one -&gt;
       Log.debug "%a@." pp env;
       <span data-count="0">L</span>og.err "unknown table"
-    | <span data-count="92090">S</span>ome v -&gt; v
+    | <span data-count="92091">S</span>ome v -&gt; v
 
   let get_func (env : t) id : t' Value.func =
-    <span data-count="31798">m</span>atch IMap.find_opt id env.functions with
+    <span data-count="31811">m</span>atch IMap.find_opt id env.functions with
     | <span data-count="0">N</span>one -&gt;
       Log.debug "%a@." pp env;
       <span data-count="0">L</span>og.err "unknown function %a" Index.pp id
-    | <span data-count="31798">S</span>ome v -&gt; v
+    | <span data-count="31811">S</span>ome v -&gt; v
 
   let get_data (env : t) id : data =
     <span data-count="331">m</span>atch IMap.find_opt id env.data with
@@ -1439,11 +1439,11 @@ module Const_interp = struct
         match op with <span data-count="0">A</span>dd -&gt; ad<span data-count="0">d</span> n1 n2 | <span data-count="0">S</span>ub -&gt; su<span data-count="0">b</span> n1 n2 | <span data-count="0">M</span>ul -&gt; mu<span data-count="0">l</span> n1 n2 )
 
   let exec_instr (env : env) (stack : Env.t' Stack.t) (instr : Const.instr) =
-    <span data-count="3068">m</span>atch instr with
-    | <span data-count="676">I</span>32_const n -&gt; Stack.push_i32 stack n
-    | <span data-count="168">I</span>64_const n -&gt; Stack.push_i64 stack n
-    | <span data-count="168">F</span>32_const f -&gt; Stack.push_f32 stack f
-    | <span data-count="165">F</span>64_const f -&gt; Stack.push_f64 stack f
+    <span data-count="3072">m</span>atch instr with
+    | <span data-count="677">I</span>32_const n -&gt; Stack.push_i32 stack n
+    | <span data-count="169">I</span>64_const n -&gt; Stack.push_i64 stack n
+    | <span data-count="169">F</span>32_const f -&gt; Stack.push_f32 stack f
+    | <span data-count="166">F</span>64_const f -&gt; Stack.push_f64 stack f
     | <span data-count="0">I</span>_binop (nn, op) -&gt; exec_ibinop stack nn op
     | <span data-count="26">R</span>ef_null t -&gt; Stack.push stack (Value.ref_nul<span data-count="26">l</span> t)
     | <span data-count="1853">R</span>ef_func f -&gt;
@@ -1452,13 +1452,13 @@ module Const_interp = struct
     | <span data-count="12">G</span>lobal_get id -&gt; Stack.push stack (Env.get_globa<span data-count="12">l</span> env id).value
 
   let exec_expr env (e : Const.expr) : Env.t' Value.t =
-    <span data-count="3068">l</span>et stack = List.fold_left (exec_inst<span data-count="3068">r</span> env) Stack.empty e in
-    <span data-count="3068">m</span>atch stack with
+    <span data-count="3072">l</span>et stack = List.fold_left (exec_inst<span data-count="3072">r</span> env) Stack.empty e in
+    <span data-count="3072">m</span>atch stack with
     | <span data-count="0">[</span>] -&gt; Log.err "type mismatch (const expr returning zero values)"
     | <span data-count="0">_</span> :: _ :: _ -&gt;
       Log.err "type mismatch (const expr returning more than one value %a)"
         Pp.Const.expr e
-    | <span data-count="3068">[</span> result ] -&gt; result
+    | <span data-count="3072">[</span> result ] -&gt; result
 end
 
 let load_from_module ls f (import : _ S.imp) =
@@ -1485,20 +1485,20 @@ let load_global (ls : state) (import : S.global_import S.imp) : global =
 
 let eval_global ls env (global : (Const.expr global', S.global_import) S.runtime)
     : global =
-  <span data-count="775">m</span>atch global with
-  | <span data-count="720">S</span>.Local global -&gt;
+  <span data-count="779">m</span>atch global with
+  | <span data-count="724">S</span>.Local global -&gt;
     let value = Const_interp.exec_expr env global.init in
-    <span data-count="720">l</span>et mut, typ = global.type_ in
+    <span data-count="724">l</span>et mut, typ = global.type_ in
     let global : global = { value; label = global.id; mut; typ } in
     global
   | <span data-count="55">S</span>.Imported import -&gt; load_global ls import
 
 let eval_globals ls env globals : Env.t =
-  <span data-count="1427">S</span>.Fields.fold
+  <span data-count="1430">S</span>.Fields.fold
     (fun id global env -&gt;
-      <span data-count="775">l</span>et global = eval_global ls env global in
-      <span data-count="749">l</span>et env = Env.add_global id global env in
-      <span data-count="749">e</span>nv )
+      <span data-count="779">l</span>et global = eval_global ls env global in
+      <span data-count="753">l</span>et env = Env.add_global id global env in
+      <span data-count="753">e</span>nv )
     globals env
 
 (*
@@ -1532,16 +1532,16 @@ let load_memory (ls : state) (import : S.mem_import S.imp) : Memory.t =
       imported_limit
 
 let eval_memory ls (memory : (mem, S.mem_import) S.runtime) : Memory.t =
-  <span data-count="431">m</span>atch memory with
-  | <span data-count="378">L</span>ocal (label, mem_type) -&gt; Memory.init ?label mem_type
+  <span data-count="432">m</span>atch memory with
+  | <span data-count="379">L</span>ocal (label, mem_type) -&gt; Memory.init ?label mem_type
   | <span data-count="53">I</span>mported import -&gt; load_memory ls import
 
 let eval_memories ls env memories =
-  <span data-count="1401">S</span>.Fields.fold
+  <span data-count="1404">S</span>.Fields.fold
     (fun id mem env -&gt;
-      <span data-count="431">l</span>et memory = eval_memory ls mem in
-      <span data-count="416">l</span>et env = Env.add_memory id memory env in
-      <span data-count="416">e</span>nv )
+      <span data-count="432">l</span>et memory = eval_memory ls mem in
+      <span data-count="417">l</span>et env = Env.add_memory id memory env in
+      <span data-count="417">e</span>nv )
     memories env
 
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
@@ -1557,16 +1557,16 @@ let load_table (ls : state) (import : S.table_import S.imp) : table =
       (t.limits, t.type_)
 
 let eval_table ls (table : (_, S.table_import) S.runtime) : table =
-  <span data-count="508">m</span>atch table with
-  | <span data-count="443">L</span>ocal (label, table_type) -&gt; Table.init ?label table_type
+  <span data-count="509">m</span>atch table with
+  | <span data-count="444">L</span>ocal (label, table_type) -&gt; Table.init ?label table_type
   | <span data-count="65">I</span>mported import -&gt; load_table ls import
 
 let eval_tables ls env tables =
-  <span data-count="1386">S</span>.Fields.fold
+  <span data-count="1389">S</span>.Fields.fold
     (fun id table env -&gt;
-      <span data-count="508">l</span>et table = eval_table ls table in
-      <span data-count="493">l</span>et env = Env.add_table id table env in
-      <span data-count="493">e</span>nv )
+      <span data-count="509">l</span>et table = eval_table ls table in
+      <span data-count="494">l</span>et env = Env.add_table id table env in
+      <span data-count="494">e</span>nv )
     tables env
 
 let func_types_are_compatible a b =
@@ -1586,16 +1586,16 @@ let load_func (ls : state) (import : func_type S.imp) : func =
 
 let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
     : func =
-  <span data-count="6534">m</span>atch func with
-  | <span data-count="6322">L</span>ocal func -&gt; Value.Func.wasm func finished_env
+  <span data-count="6547">m</span>atch func with
+  | <span data-count="6335">L</span>ocal func -&gt; Value.Func.wasm func finished_env
   | <span data-count="212">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : Env.t') env functions =
-  <span data-count="1454">S</span>.Fields.fold
+  <span data-count="1457">S</span>.Fields.fold
     (fun id func env -&gt;
-      <span data-count="6534">l</span>et func = eval_func ls finished_env func in
-      <span data-count="6507">l</span>et env = Env.add_func id func env in
-      <span data-count="6507">e</span>nv )
+      <span data-count="6547">l</span>et func = eval_func ls finished_env func in
+      <span data-count="6520">l</span>et env = Env.add_func id func env in
+      <span data-count="6520">e</span>nv )
     functions env
 
 let active_elem_expr ~offset ~length ~table ~elem =
@@ -1620,7 +1620,7 @@ let active_data_expr ~offset ~length ~mem ~data =
 let get_i32 = function <span data-count="481">V</span>alue.I32 i -&gt; i | <span data-count="5">_</span> -&gt; Log.err "type mismatch"
 
 let define_data env data =
-  <span data-count="1371">S</span>.Fields.fold
+  <span data-count="1374">S</span>.Fields.fold
     (fun id data (env, init) -&gt;
       <span data-count="326">l</span>et env = Env.add_data id { value = data.init } env in
       <span data-count="326">l</span>et init =
@@ -1636,7 +1636,7 @@ let define_data env data =
     data (env, [])
 
 let define_elem env elem =
-  <span data-count="1369">S</span>.Fields.fold
+  <span data-count="1372">S</span>.Fields.fold
     (fun id (elem : _ elem') (env, inits) -&gt;
       <span data-count="634">l</span>et init = List.map (Const_interp.exec_exp<span data-count="634">r</span> env) elem.init in
       <span data-count="634">l</span>et init_as_ref =
@@ -1668,55 +1668,55 @@ let define_elem env elem =
     elem (env, [])
 
 let populate_exports env (exports : S.index S.exports) : exports =
-  <span data-count="1366">l</span>et fill_exports get_env exports names =
-    <span data-count="5446">L</span>ist.fold_left
+  <span data-count="1369">l</span>et fill_exports get_env exports names =
+    <span data-count="5458">L</span>ist.fold_left
       (fun (acc, names) (export : _ S.export) -&gt;
-        <span data-count="6458">l</span>et value = get_env env export.id in
-        <span data-count="6458">i</span>f StringSet.mem export.name names then <span data-count="19">L</span>og.er<span data-count="0">r</span> "duplicate export name";
-        <span data-count="6439">(</span>StringMap.ad<span data-count="6439">d</span> export.name value acc, StringSet.ad<span data-count="6439">d</span> export.name names)
+        <span data-count="6475">l</span>et value = get_env env export.id in
+        <span data-count="6475">i</span>f StringSet.mem export.name names then <span data-count="19">L</span>og.er<span data-count="0">r</span> "duplicate export name";
+        <span data-count="6456">(</span>StringMap.ad<span data-count="6456">d</span> export.name value acc, StringSet.ad<span data-count="6456">d</span> export.name names)
         )
       (StringMap.empty, names) exports
   in
   let names = StringSet.empty in
   let globals, names = fill_exports Env.get_global exports.global names in
-  <span data-count="1364">l</span>et memories, names = fill_exports Env.get_memory exports.mem names in
-  <span data-count="1361">l</span>et tables, names = fill_exports Env.get_table exports.table names in
-  <span data-count="1355">l</span>et functions, names = fill_exports Env.get_func exports.func names in
-  <span data-count="1347">{</span> globals; memories; tables; functions; defined_names = names }
+  <span data-count="1367">l</span>et memories, names = fill_exports Env.get_memory exports.mem names in
+  <span data-count="1364">l</span>et tables, names = fill_exports Env.get_table exports.table names in
+  <span data-count="1358">l</span>et functions, names = fill_exports Env.get_func exports.func names in
+  <span data-count="1350">{</span> globals; memories; tables; functions; defined_names = names }
 
 let module_ (module_ : module_) (ls : state) =
-  <span data-count="1454">L</span>og.debug "linking module...@\n";
-  <span data-count="1454">b</span>egin
+  <span data-count="1457">L</span>og.debug "linking      ...@\n";
+  <span data-count="1457">b</span>egin
     try
       let rec env_and_init_active_data_and_elem =
         lazy
-          <span data-count="1454">(</span>let env = Env.empty in
+          <span data-count="1457">(</span>let env = Env.empty in
            let env = eval_functions ls finished_env env module_.func in
-           <span data-count="1427">l</span>et env = eval_globals ls env module_.global in
-           <span data-count="1401">l</span>et env = eval_memories ls env module_.mem in
-           <span data-count="1386">l</span>et env = eval_tables ls env module_.table in
-           <span data-count="1371">l</span>et env, init_active_data = define_data env module_.data in
-           <span data-count="1369">l</span>et env, init_active_elem = define_elem env module_.elem in
-           <span data-count="1366">(</span>env, init_active_data, init_active_elem) )
+           <span data-count="1430">l</span>et env = eval_globals ls env module_.global in
+           <span data-count="1404">l</span>et env = eval_memories ls env module_.mem in
+           <span data-count="1389">l</span>et env = eval_tables ls env module_.table in
+           <span data-count="1374">l</span>et env, init_active_data = define_data env module_.data in
+           <span data-count="1372">l</span>et env, init_active_elem = define_elem env module_.elem in
+           <span data-count="1369">(</span>env, init_active_data, init_active_elem) )
       and finished_env =
         lazy
-          <span data-count="738">(</span>let env, _init_active_data, _init_active_elem =
+          <span data-count="740">(</span>let env, _init_active_data, _init_active_elem =
              Lazy.force env_and_init_active_data_and_elem
            in
-           <span data-count="738">e</span>nv )
+           <span data-count="740">e</span>nv )
       in
       let env, init_active_data, init_active_elem =
         Lazy.force env_and_init_active_data_and_elem
       in
-      <span data-count="1366">l</span>et by_id_exports = populate_exports env module_.exports in
-      <span data-count="1347">l</span>et by_id =
+      <span data-count="1369">l</span>et by_id_exports = populate_exports env module_.exports in
+      <span data-count="1350">l</span>et by_id =
         (* TODO: this is not the actual module name *)
         match module_.id with
         | <span data-count="1147">N</span>one -&gt; ls.by_id
-        | <span data-count="200">S</span>ome id -&gt; StringMap.ad<span data-count="200">d</span> id by_id_exports ls.by_id
+        | <span data-count="203">S</span>ome id -&gt; StringMap.ad<span data-count="203">d</span> id by_id_exports ls.by_id
       in
-      let start = List.map (fun start_id -&gt; <span data-count="9">C</span>all start_id) module_.start in
-      <span data-count="1347">l</span>et to_run = init_active_data @ init_active_elem @ [ start ] in
+      let start = List.map (fun start_id -&gt; <span data-count="11">C</span>all start_id) module_.start in
+      <span data-count="1350">l</span>et to_run = init_active_data @ init_active_elem @ [ start ] in
       let module_to_run = { module_; env; to_run } in
       Ok
         ( module_to_run
@@ -1746,19 +1746,19 @@ let extern_module (name : string) (module_ : extern_module) (ls : state) : state
   { ls with by_name = StringMap.ad<span data-count="0">d</span> name exports ls.by_name }
 
 let register_module (ls : state) ~name ~(id : string option) : state =
-  <span data-count="186">l</span>et exports =
+  <span data-count="187">l</span>et exports =
     match id with
-    | <span data-count="179">S</span>ome id -&gt; begin
+    | <span data-count="180">S</span>ome id -&gt; begin
       match StringMap.find_opt id ls.by_id with
       | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "Unbound module id %s" id
-      | <span data-count="179">S</span>ome e -&gt; e
+      | <span data-count="180">S</span>ome e -&gt; e
     end
     | <span data-count="7">N</span>one -&gt; (
       match ls.last with
       | <span data-count="7">S</span>ome e -&gt; e
       | <span data-count="0">N</span>one -&gt; Log.er<span data-count="0">r</span> "No previous module to register" )
   in
-  { ls with by_name = StringMap.ad<span data-count="186">d</span> name exports ls.by_name }
+  { ls with by_name = StringMap.ad<span data-count="187">d</span> name exports ls.by_name }
 </code></pre>
       </div>
     </div>
