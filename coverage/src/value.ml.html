@@ -432,10 +432,10 @@ module Func = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="6036">i</span>ncr r;
-      <span data-count="6036">F</span>id !r
+      <span data-count="6322">i</span>ncr r;
+      <span data-count="6322">F</span>id !r
 
-  let wasm func env : 'env t = <span data-count="6036">W</span>ASM (fres<span data-count="6036">h</span> (), func, env)
+  let wasm func env : 'env t = <span data-count="6322">W</span>ASM (fres<span data-count="6322">h</span> (), func, env)
 
   let extern f = <span data-count="0">E</span>xtern f
 
@@ -477,7 +477,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref fmt r
 
 let ref_null' (type_ : Types.ref_type) =
-  <span data-count="493">m</span>atch type_ with <span data-count="435">F</span>unc_ref -&gt; Funcref None | <span data-count="58">E</span>xtern_ref -&gt; Externref None
+  <span data-count="519">m</span>atch type_ with <span data-count="461">F</span>unc_ref -&gt; Funcref None | <span data-count="58">E</span>xtern_ref -&gt; Externref None
 
 let ref_null (type_ : Types.ref_type) = <span data-count="76">R</span>ef (ref_null<span data-count="76">'</span> type_)
 
