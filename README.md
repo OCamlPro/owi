@@ -16,9 +16,10 @@ If you can't or don't want to use `opam`, consult the [opam file] for build inst
 
 ## Quickstart
 
-Running the executable interpreter on a given Wasm file is as simple as:
-```sh
-$ cat test/passing/quickstart.wast
+Given a file `test/passing/quickstart.wast` with the following content:
+
+<!-- $MDX file=test/passing/quickstart.wast -->
+```wast
 (module $quickstart
   (func $f
     i32.const 24
@@ -28,6 +29,10 @@ $ cat test/passing/quickstart.wast
   )
   (start $f)
 )
+```
+
+Running the executable interpreter is as simple as:
+```sh
 $ dune exec src/bin/owi.exe -- --debug test/passing/quickstart.wast
 simplifying  ...
 typechecking ...
