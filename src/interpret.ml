@@ -938,13 +938,25 @@ and exec_func env (func : Simplify.func) args =
   try exec_expr env locals [] func.body false (Some func.type_f)
   with Return stack -> Stack.keep stack (List.length (snd func.type_f))
 
-let exec_module (module_ : Link.module_to_run) =
-  List.iter
-    (fun to_run ->
-      let end_stack =
-        exec_expr module_.env [||] Stack.empty to_run false None
-      in
-      match end_stack with
-      | [] -> ()
-      | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack )
-    module_.to_run
+let exec_vfunc stack func =
+  try Ok (exec_vfunc stack func) with
+  | Failure msg | Trap msg -> Error msg
+  | Stack_overflow -> Error "call stack exhausted"
+
+let module_ (module_ : Link.module_to_run) =
+  Log.debug "interpreting module...@\n";
+  try
+    List.iter
+      (fun to_run ->
+        let end_stack =
+          exec_expr module_.env [||] Stack.empty to_run false None
+        in
+        match end_stack with
+        | [] -> ()
+        | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
+        )
+      module_.to_run;
+    Ok ()
+  with
+  | Failure msg | Trap msg -> Error msg
+  | Stack_overflow -> Error "call stack exhausted"

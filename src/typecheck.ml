@@ -449,14 +449,18 @@ let typecheck_data module_ refs (data : (int, Const.expr) data' S.indexed) =
     | [ _t ] -> ()
     | _whatever -> Log.err "type mismatch (typecheck_data)" )
 
-let typecheck_module (module_ : Simplify.result) =
+let module_ (module_ : Simplify.result) =
+  Log.debug "typechecking module...@\n";
   let refs = Hashtbl.create 512 in
-  List.iter (typecheck_global module_ refs) module_.global.values;
-  List.iter (typecheck_elem module_ refs) module_.elem.values;
-  List.iter (typecheck_data module_ refs) module_.data.values;
-  List.iter
-    (fun (export : int S.export) -> Hashtbl.add refs export.id ())
-    module_.exports.func;
-  S.Fields.iter
-    (fun _index func -> typecheck_function module_ func refs)
-    module_.func
+  try
+    List.iter (typecheck_global module_ refs) module_.global.values;
+    List.iter (typecheck_elem module_ refs) module_.elem.values;
+    List.iter (typecheck_data module_ refs) module_.data.values;
+    List.iter
+      (fun (export : int S.export) -> Hashtbl.add refs export.id ())
+      module_.exports.func;
+    S.Fields.iter
+      (fun _index func -> typecheck_function module_ func refs)
+      module_.func;
+    Ok ()
+  with Failure msg -> Error msg

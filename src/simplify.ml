@@ -837,12 +837,13 @@ end
 
 type func = (index, func_type) func'
 
-let simplify (module_ : module_) : result =
-  Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run
-
-let simplify (module_ : module_) : result =
-  let simplified = simplify module_ in
-  Log.debug "@ @[<hov 2>SIMPLIFIED:@\n%a@]@ " P.result simplified;
-  simplified
+let module_ (module_ : module_) =
+  Log.debug "simplifying module...@\n";
+  try
+    let result =
+      Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run
+    in
+    Ok result
+  with Failure msg -> Error msg
 
 module Pp = P

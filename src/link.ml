@@ -499,42 +499,48 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let functions, names = fill_exports Env.get_func exports.func names in
   { globals; memories; tables; functions; defined_names = names }
 
-let link_module (module_ : module_) (ls : link_state) :
-    module_to_run * link_state =
-  let rec env_and_init_active_data_and_elem =
-    lazy
-      (let env = Env.empty in
-       let env = eval_functions ls finished_env env module_.func in
-       let env = eval_globals ls env module_.global in
-       let env = eval_memories ls env module_.mem in
-       let env = eval_tables ls env module_.table in
-       let env, init_active_data = define_data env module_.data in
-       let env, init_active_elem = define_elem env module_.elem in
-       (env, init_active_data, init_active_elem) )
-  and finished_env =
-    lazy
-      (let env, _init_active_data, _init_active_elem =
-         Lazy.force env_and_init_active_data_and_elem
-       in
-       env )
-  in
-  let env, init_active_data, init_active_elem =
-    Lazy.force env_and_init_active_data_and_elem
-  in
-  let by_id_exports = populate_exports env module_.exports in
-  let by_id =
-    (* TODO: this is not the actual module name *)
-    match module_.id with
-    | None -> ls.by_id
-    | Some id -> StringMap.add id by_id_exports ls.by_id
-  in
-  let start = List.map (fun start_id -> Call start_id) module_.start in
-  let to_run = init_active_data @ init_active_elem @ [ start ] in
-  let module_to_run = { module_; env; to_run } in
-  (module_to_run, { by_id; by_name = ls.by_name; last = Some by_id_exports })
+let module_ (module_ : module_) (ls : link_state) =
+  Log.debug "linking module...@\n";
+  begin
+    try
+      let rec env_and_init_active_data_and_elem =
+        lazy
+          (let env = Env.empty in
+           let env = eval_functions ls finished_env env module_.func in
+           let env = eval_globals ls env module_.global in
+           let env = eval_memories ls env module_.mem in
+           let env = eval_tables ls env module_.table in
+           let env, init_active_data = define_data env module_.data in
+           let env, init_active_elem = define_elem env module_.elem in
+           (env, init_active_data, init_active_elem) )
+      and finished_env =
+        lazy
+          (let env, _init_active_data, _init_active_elem =
+             Lazy.force env_and_init_active_data_and_elem
+           in
+           env )
+      in
+      let env, init_active_data, init_active_elem =
+        Lazy.force env_and_init_active_data_and_elem
+      in
+      let by_id_exports = populate_exports env module_.exports in
+      let by_id =
+        (* TODO: this is not the actual module name *)
+        match module_.id with
+        | None -> ls.by_id
+        | Some id -> StringMap.add id by_id_exports ls.by_id
+      in
+      let start = List.map (fun start_id -> Call start_id) module_.start in
+      let to_run = init_active_data @ init_active_elem @ [ start ] in
+      let module_to_run = { module_; env; to_run } in
+      Ok
+        ( module_to_run
+        , { by_id; by_name = ls.by_name; last = Some by_id_exports } )
+    with Failure msg -> Error msg
+  end
 
-let link_extern_module (name : string) (module_ : extern_module)
-    (ls : link_state) : link_state =
+let extern_module (name : string) (module_ : extern_module) (ls : link_state) :
+    link_state =
   let functions =
     StringMap.map Value.Func.extern
       (StringMap.of_seq (List.to_seq module_.functions))

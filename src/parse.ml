@@ -3,6 +3,7 @@
 
 (** Parse a script from a lexing buffer. *)
 let from_lexbuf =
+  Log.debug "parsing...@\n";
   let parser =
     MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.file
   in

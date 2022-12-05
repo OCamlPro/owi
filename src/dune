@@ -2,6 +2,7 @@
  (public_name owi)
  (modules
   check
+  compile
   convert
   float32
   float64

@@ -1,1 +1,1 @@
-val typecheck_module : Simplify.result -> unit
+val module_ : Simplify.result -> (unit, string) Result.t

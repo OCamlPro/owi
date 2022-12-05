@@ -68,7 +68,7 @@ type result =
   ; start : index list
   }
 
-val simplify : Types.module_ -> result
+val module_ : Types.module_ -> (result, string) Result.t
 
 module Pp : sig
   val result : Format.formatter -> result -> unit
