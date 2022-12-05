@@ -838,7 +838,7 @@ end
 type func = (index, func_type) func'
 
 let module_ (module_ : module_) =
-  Log.debug "simplifying module...@\n";
+  Log.debug "simplifying  ...@\n";
   try
     let result =
       Group.group module_ |> Assign_indicies.run |> Rewrite_indices.run

@@ -450,7 +450,7 @@ let typecheck_data module_ refs (data : (int, Const.expr) data' S.indexed) =
     | _whatever -> Log.err "type mismatch (typecheck_data)" )
 
 let module_ (module_ : Simplify.result) =
-  Log.debug "typechecking module...@\n";
+  Log.debug "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
   try
     List.iter (typecheck_global module_ refs) module_.global.values;

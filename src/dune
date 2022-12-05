@@ -31,10 +31,5 @@
   (backend bisect_ppx --exclusions src/bisect.exclude)
   (deps bisect.exclude)))
 
-(executable
- (public_name owi)
- (modules owi)
- (libraries sedlex owi))
-
 (menhir
  (modules menhir_parser))

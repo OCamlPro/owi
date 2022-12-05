@@ -921,7 +921,7 @@ let exec_vfunc stack func =
   | Stack_overflow -> Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
-  Log.debug "interpreting module...@\n";
+  Log.debug "interpreting ...@\n";
   try
     List.iter
       (fun to_run ->

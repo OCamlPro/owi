@@ -1,6 +1,7 @@
-(lang dune 2.9)
+(lang dune 3.0)
 
 (using menhir 2.1)
+(using mdx 0.2)
 
 (name owi)
 
@@ -44,4 +45,8 @@
     (>= "0.1")
     :dev))
   (odoc :with-doc)
-  (bos :with-test)))
+  (bos :with-test)
+  (mdx
+   (and
+    :with-test
+    (>= "2.1")))))

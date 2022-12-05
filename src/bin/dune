@@ -1,0 +1,4 @@
+(executable
+ (public_name owi)
+ (modules owi)
+ (libraries sedlex owi))

@@ -1,0 +1,5 @@
+(mdx
+ (libraries owi)
+ (deps
+  (file src/bin/owi.exe))
+ (files README.md))

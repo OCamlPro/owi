@@ -123,13 +123,17 @@ let action (link_state : Link.state) = function
 let rec run ~with_exhaustion script =
   let ( let* ) o f = Result.fold ~ok:f ~error:failwith o in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  let debug_on = !Log.debug_on in
+  let registered = ref false in
   let curr_module = ref 0 in
   List.fold_left
     (fun (link_state : Link.state) -> function
       | Module m ->
+        if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
         let* link_state = Compile.until_interpret link_state m in
+        Log.debug_on := debug_on;
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
@@ -198,8 +202,11 @@ let rec run ~with_exhaustion script =
         end;
         link_state
       | Register (name, mod_name) ->
+        if !curr_module = 1 && !registered = false then Log.debug_on := false;
         Log.debug "*** register@\n";
-        Link.register_module link_state ~name ~id:mod_name
+        let state = Link.register_module link_state ~name ~id:mod_name in
+        Log.debug_on := debug_on;
+        state
       | Action a ->
         Log.debug "*** action@\n";
         let* _stack = action link_state a in

@@ -486,7 +486,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
   { globals; memories; tables; functions; defined_names = names }
 
 let module_ (module_ : module_) (ls : state) =
-  Log.debug "linking module...@\n";
+  Log.debug "linking      ...@\n";
   begin
     try
       let rec env_and_init_active_data_and_elem =
