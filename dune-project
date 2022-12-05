@@ -18,10 +18,10 @@
 
 (package
  (name owi)
- (synopsis "OCaml library/executable to TODO")
- (description "owi is an OCaml library/executable to TODO.")
+ (synopsis "OCaml toolchain to work with WebAssembly, including and interpreter")
+ (description "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
  (tags
-  (owi TODO TODO TODO TODO))
+  (owi ocaml webassembly wasm interpreter compiler))
  (depends
   (ocaml
    (>= 4.13))
