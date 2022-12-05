@@ -411,10 +411,6 @@
 <a id="L387"></a><span > </span>
 <a id="L388"></a><span > </span>
 <a id="L389"></a><span > </span>
-<a id="L390"></a><span > </span>
-<a id="L391"></a><span > </span>
-<a id="L392"></a><span > </span>
-<a id="L393"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -808,10 +804,6 @@
 <a href="#L387">387</a>
 <a href="#L388">388</a>
 <a href="#L389">389</a>
-<a href="#L390">390</a>
-<a href="#L391">391</a>
-<a href="#L392">392</a>
-<a href="#L393">393</a>
 </pre>
 <pre><code class="ocaml">let page_size = 65_536
 
@@ -827,12 +819,10 @@ type nonrec num_type =
   | F32
   | F64
 
-(* TODO: heap_type missing ? *)
 type nonrec ref_type =
   | Func_ref
   | Extern_ref
 
-(* TODO: gadt ? *)
 type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
@@ -854,7 +844,6 @@ type nonrec limits =
 
 type nonrec mem_type = limits
 
-(* TODO: the spec is weird, shouldn't it be just `limits` ? is it really a product ? *)
 type nonrec table_type = limits * ref_type
 
 type nonrec mut =
@@ -863,7 +852,6 @@ type nonrec mut =
 
 type nonrec global_type = mut * val_type
 
-(* TODO: gadt ? *)
 type nonrec extern_type =
   | Func of string option * func_type
   | Table of string option * table_type
