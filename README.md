@@ -1,4 +1,4 @@
-# owi
+# owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
 
 [owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
 
