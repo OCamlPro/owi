@@ -503,7 +503,7 @@
 module Host_externref = struct
   type t = int
 
-  let ty : t Value.Extern_ref.ty = Value.Extern_ref.fres<span data-count="3">h</span> "host"
+  let ty : t Value.Extern_ref.ty = Value.Extern_ref.fres<span data-count="4">h</span> "host"
 
   let value i = <span data-count="31">V</span>alue.Externref (Some (Value.E (ty, i)))
 end

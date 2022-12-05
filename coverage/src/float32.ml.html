@@ -716,13 +716,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Printf.sprint<span data-count="3">f</span> "%lx"
+let to_hex_string = Printf.sprint<span data-count="5">f</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="3">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="5">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="3">t</span> (-<span data-count="3">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="5">t</span> (-<span data-count="5">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -783,7 +783,7 @@ let unary op x =
   <span data-count="154">l</span>et t = op (to_floa<span data-count="154">t</span> x) in
   <span data-count="154">i</span>f t = t then <span data-count="132">o</span>f_float t else <span data-count="22">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="3">t</span> 0.0
+let zero = of_floa<span data-count="5">t</span> 0.0
 
 let add x y = <span data-count="12707">b</span>inary x ( +. ) y
 
@@ -1030,7 +1030,7 @@ let to_string' convert is_digit n x =
     <span data-count="0">g</span>roup_digit<span data-count="0">s</span> is_digit n
       (if s.[String.lengt<span data-count="0">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="0">s</span>)
 
-let to_string = to_string<span data-count="3">'</span> (Printf.sprint<span data-count="3">f</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="5">'</span> (Printf.sprint<span data-count="5">f</span> "%.17g") is_digit 3
 </code></pre>
       </div>
     </div>

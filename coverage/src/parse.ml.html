@@ -114,16 +114,16 @@
 (** Parse a script from a lexing buffer. *)
 let from_lexbuf =
   Log.debug "parsing...@\n";
-  <span data-count="3">l</span>et parser =
+  <span data-count="5">l</span>et parser =
     MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.file
   in
-  <span data-count="3">f</span>un buf -&gt;
-    <span data-count="677">l</span>et provider () =
-      <span data-count="673857">l</span>et tok = Lexer.token buf in
-      <span data-count="673676">l</span>et start, stop = Sedlexing.lexing_positions buf in
-      <span data-count="673676">(</span>tok, start, stop)
+  <span data-count="5">f</span>un buf -&gt;
+    <span data-count="678">l</span>et provider () =
+      <span data-count="673987">l</span>et tok = Lexer.token buf in
+      <span data-count="673806">l</span>et start, stop = Sedlexing.lexing_positions buf in
+      <span data-count="673806">(</span>tok, start, stop)
     in
-    try Ok (parse<span data-count="165">r</span> provider) with
+    try Ok (parse<span data-count="166">r</span> provider) with
     | <span data-count="60">M</span>enhir_parser.Error -&gt;
       let start, _stop = Sedlexing.lexing_positions buf in
       <span data-count="60">L</span>og.debug "file %s, line %i, char %i@." start.pos_fname
@@ -141,13 +141,13 @@ let from_channel c = <span data-count="0">f</span>rom_lexbuf (Sedlexing.Utf8.fro
 
 (** Parse a script from a file. *)
 let from_file ~filename =
-  <span data-count="110">l</span>et chan = open_in filename in
-  <span data-count="110">l</span>et result =
+  <span data-count="111">l</span>et chan = open_in filename in
+  <span data-count="111">l</span>et result =
     Fun.protect
-      ~finally:(fun () -&gt; <span data-count="110">c</span>lose_in chan)
-      (fun () -&gt; <span data-count="110">f</span>rom_lexbuf (Sedlexing.Utf8.from_channe<span data-count="110">l</span> chan))
+      ~finally:(fun () -&gt; <span data-count="111">c</span>lose_in chan)
+      (fun () -&gt; <span data-count="111">f</span>rom_lexbuf (Sedlexing.Utf8.from_channe<span data-count="111">l</span> chan))
   in
-  <span data-count="110">r</span>esult
+  <span data-count="111">r</span>esult
 </code></pre>
       </div>
     </div>
