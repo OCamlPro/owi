@@ -1,3 +1,0 @@
-(module)
-
-(register "A" $A)
