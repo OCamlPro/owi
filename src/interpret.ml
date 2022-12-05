@@ -234,34 +234,11 @@ let init_local (_id, t) : Env.t' Value.t =
 (* TODO move to module Env *)
 let mem_0 = 0
 
-let get_raw_memory (env : Link.Env.t) idx =
-  match IMap.find_opt idx env.memories with
-  | None -> Log.err "missing memory"
-  | Some m -> m
+let get_memory (env : Env.t) idx =
+  let mem = Env.get_memory env idx in
+  Link.Memory.(get_data mem, get_limit_max mem)
 
-let get_memory (env : Link.Env.t) idx =
-  let (Memory mem) = get_raw_memory env idx in
-  (mem.data, mem.limits.max)
-
-let get_func (env : Link.Env.t) idx =
-  match IMap.find_opt idx env.functions with
-  | None -> Log.err "missing functions"
-  | Some f -> f
-
-let get_data (env : Link.Env.t) idx =
-  match IMap.find_opt idx env.data with
-  | None -> Log.err "missing data"
-  | Some data -> data
-
-let get_elem (env : Link.Env.t) idx =
-  match IMap.find_opt idx env.elem with
-  | None -> Log.err "missing elem"
-  | Some elem -> elem
-
-let get_table (env : Link.Env.t) idx =
-  match IMap.find_opt idx env.tables with
-  | None -> Log.err "missing table"
-  | Some table -> table
+let get_memory_raw env idx = Env.get_memory env idx
 
 let exec_extern_func stack (f : Value.extern_func) =
   let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
@@ -517,7 +494,7 @@ let rec exec_instr env locals stack instr =
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in
     Stack.push_bool stack b
-  | Ref_func i -> Stack.push stack (Value.ref_func (get_func env i))
+  | Ref_func i -> Stack.push stack (Value.ref_func (Env.get_func env i))
   | Drop -> Stack.drop stack
   | Local_get i -> Stack.push stack locals.(i)
   | Local_set i ->
@@ -528,7 +505,7 @@ let rec exec_instr env locals stack instr =
     let b, stack = Stack.pop_bool stack in
     exec_expr env locals stack (if b then e1 else e2) false bt
   | Call i -> begin
-    let func = get_func env i in
+    let func = Env.get_func env i in
     exec_vfunc stack func
   end
   | Br i -> raise (Branch (stack, i))
@@ -542,19 +519,21 @@ let rec exec_instr env locals stack instr =
     let len = Bytes.length mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> begin
-    let (Memory mem as mem') = get_raw_memory env mem_0 in
+    let mem = get_memory_raw env mem_0 in
+    let data = Link.Memory.get_data mem in
+    let max_size = Link.Memory.get_limit_max mem in
     let delta, stack = Stack.pop_i32_to_int stack in
     let delta = delta * page_size in
-    let old_size = Bytes.length mem.data in
+    let old_size = Bytes.length data in
     let new_size = old_size + delta in
     if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
     else
-      match mem.limits.max with
+      match max_size with
       | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
       | None | Some _ ->
-        let new_mem = Bytes.extend mem.data 0 delta in
+        let new_mem = Bytes.extend data 0 delta in
         Bytes.fill new_mem old_size delta (Char.chr 0);
-        Link.Memory.update_memory mem' new_mem;
+        Link.Memory.update_memory mem new_mem;
         Stack.push_i32_of_int stack (old_size / page_size)
   end
   | Memory_fill ->
@@ -582,7 +561,7 @@ let rec exec_instr env locals stack instr =
     let len, stack = Stack.pop_i32_to_int stack in
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
-    let data = get_data env i in
+    let data = Env.get_data env i in
     ( try Bytes.blit_string data.value src_pos mem dst_pos len
       with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
     stack
@@ -625,7 +604,7 @@ let rec exec_instr env locals stack instr =
     global.value <- v;
     stack
   | Table_get indice ->
-    let (Table t) = get_table env indice in
+    let t = Env.get_table env indice in
     let indice, stack = Stack.pop_i32_to_int stack in
     let v =
       match t.data.(indice) with
@@ -635,7 +614,7 @@ let rec exec_instr env locals stack instr =
     in
     Stack.push stack (Ref v)
   | Table_set indice ->
-    let (Table t) = get_table env indice in
+    let t = Env.get_table env indice in
     let v, stack = Stack.pop_as_ref stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
@@ -644,10 +623,10 @@ let rec exec_instr env locals stack instr =
     end;
     stack
   | Table_size indice ->
-    let (Table t) = get_table env indice in
+    let t = Env.get_table env indice in
     Stack.push_i32_of_int stack (Array.length t.data)
   | Table_grow indice ->
-    let (Table t as table) = get_table env indice in
+    let t = Env.get_table env indice in
     let size = Array.length t.data in
     let delta, stack = Stack.pop_i32_to_int stack in
     let new_size = size + delta in
@@ -662,10 +641,10 @@ let rec exec_instr env locals stack instr =
       let new_element, stack = Stack.pop_as_ref stack in
       let new_table = Array.make new_size new_element in
       Array.blit t.data 0 new_table 0 (Array.length t.data);
-      Link.Table.update table new_table;
+      Link.Table.update t new_table;
       Stack.push_i32_of_int stack size
   | Table_fill indice ->
-    let (Table t) = get_table env indice in
+    let t = Env.get_table env indice in
     let len, stack = Stack.pop_i32_to_int stack in
     let x, stack = Stack.pop_as_ref stack in
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -675,8 +654,8 @@ let rec exec_instr env locals stack instr =
     end;
     stack
   | Table_copy (ti_dst, ti_src) -> begin
-    let (Table t_src) = get_table env ti_src in
-    let (Table t_dst) = get_table env ti_dst in
+    let t_src = Env.get_table env ti_src in
+    let t_dst = Env.get_table env ti_dst in
     let len, stack = Stack.pop_i32_to_int stack in
     let src, stack = Stack.pop_i32_to_int stack in
     let dst, stack = Stack.pop_i32_to_int stack in
@@ -691,8 +670,8 @@ let rec exec_instr env locals stack instr =
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
   end
   | Table_init (t_i, e_i) ->
-    let (Table t) = get_table env t_i in
-    let elem = get_elem env e_i in
+    let t = Env.get_table env t_i in
+    let elem = Env.get_elem env e_i in
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -724,7 +703,7 @@ let rec exec_instr env locals stack instr =
     end;
     stack
   | Elem_drop i ->
-    let elem = get_elem env i in
+    let elem = Env.get_elem env i in
     Env.drop_elem elem;
     stack
   | I_load16 (nn, sx, { offset; _ }) -> (
@@ -877,7 +856,7 @@ let rec exec_instr env locals stack instr =
     Bytes.set_int32_le mem offset n;
     stack
   | Data_drop i ->
-    let data = get_data env i in
+    let data = Env.get_data env i in
     Env.drop_data data;
     stack
   | Br_table (inds, i) ->
@@ -888,7 +867,7 @@ let rec exec_instr env locals stack instr =
     raise (Branch (stack, target))
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i, stack = Stack.pop_i32_to_int stack in
-    let (Table t) = get_table env tbl_i in
+    let t = Env.get_table env tbl_i in
     if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
     let func =
       match t.data.(fun_i) with

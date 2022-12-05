@@ -1,6 +1,8 @@
 (* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
 
 module MInt32 = struct
+  type t = int32
+
   let wrap_i64 x = Int64.to_int32 x
 
   let trunc_f32_s x =
@@ -73,6 +75,8 @@ module MInt32 = struct
 end
 
 module MInt64 = struct
+  type t = int64
+
   let extend_i32_s x = Int64.of_int32 x
 
   let extend_i32_u x = Int64.logand (Int64.of_int32 x) 0x0000_0000_ffff_ffffL
@@ -153,6 +157,8 @@ module MInt64 = struct
 end
 
 module MFloat32 = struct
+  type t = Float32.t
+
   let demote_f64 x =
     let xf = Float64.to_float x in
     if xf = xf then Float32.of_float xf
@@ -207,6 +213,8 @@ module MFloat32 = struct
 end
 
 module MFloat64 = struct
+  type t = Float64.t
+
   let promote_f32 x =
     let xf = Float32.to_float x in
     if xf = xf then Float64.of_float xf

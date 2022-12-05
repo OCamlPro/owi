@@ -1,7 +1,5 @@
 open Types
 
-type value = Link.value
-
 module Host_externref = struct
   type t = int
 
@@ -27,7 +25,7 @@ let check_error_result expected = function
   | Ok _whatever -> assert false
   | Error got -> check_error ~expected ~got
 
-let load_func_from_module ls mod_id f_name : Link.func =
+let load_func_from_module ls mod_id f_name =
   let exports =
     match mod_id with
     | None -> begin
@@ -44,7 +42,7 @@ let load_func_from_module ls mod_id f_name : Link.func =
   | exception Not_found -> Log.err "unbound name " f_name
   | v -> v
 
-let load_global_from_module ls mod_id name : Link.global =
+let load_global_from_module ls mod_id name =
   let exports =
     match mod_id with
     | None -> begin
@@ -61,7 +59,7 @@ let load_global_from_module ls mod_id name : Link.global =
   | exception Not_found -> Log.err "unbound name " name
   | v -> v
 
-let compare_result_const result (const : value) =
+let compare_result_const result (const : 'env Value.t) =
   match (result, const) with
   | Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
@@ -96,7 +94,7 @@ let compare_result_const result (const : value) =
   | Result_func_ref, _ -> Log.err "TODO (compare_result_const)"
   | Result_extern_ref, _ -> Log.err "TODO (compare_result_const)"
 
-let value_of_const : Types.const -> value =
+let value_of_const : Types.const -> 'env Value.t =
  fun const ->
   match const with
   | Const_I32 v -> I32 v
@@ -106,7 +104,7 @@ let value_of_const : Types.const -> value =
   | Const_null rt -> Value.ref_null rt
   | Const_host i -> Ref (Host_externref.value i)
 
-let action (link_state : Link.link_state) = function
+let action (link_state : Link.state) = function
   | Invoke (mod_id, f, args) -> begin
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
@@ -127,7 +125,7 @@ let rec run ~with_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let curr_module = ref 0 in
   List.fold_left
-    (fun (link_state : Link.link_state) -> function
+    (fun (link_state : Link.state) -> function
       | Module m ->
         Log.debug "*** module@\n";
         incr curr_module;
@@ -149,7 +147,7 @@ let rec run ~with_exhaustion script =
           match Parse.from_string (String.concat "\n" m) with
           | Ok m -> (
             try
-              let _link_state : Link.link_state = run m ~with_exhaustion in
+              let _link_state : Link.state = run m ~with_exhaustion in
               assert false
             with Failure got -> check_error ~expected ~got )
           | Error got -> check_error ~expected ~got

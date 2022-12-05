@@ -7,29 +7,24 @@ module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
 module Memory = struct
-  type mem_id = Mid of int [@@unboxed]
-
-  type mem = bytes
-
   type t =
-    | Memory of
-        { id : mem_id
-        ; label : string option
-        ; mutable limits : mem_type
-        ; mutable data : mem
-        }
+    { id : int
+    ; label : string option
+    ; mutable limits : mem_type
+    ; mutable data : bytes
+    }
 
   let fresh =
     let r = ref (-1) in
     fun () ->
       incr r;
-      Mid !r
+      !r
 
   let init ?label (typ : mem_type) : t =
     let data = Bytes.make (Types.page_size * typ.min) '\x00' in
-    Memory { id = fresh (); label; limits = typ; data }
+    { id = fresh (); label; limits = typ; data }
 
-  let update_memory (Memory mem) data =
+  let update_memory mem data =
     let limits =
       { mem.limits with
         min = max mem.limits.min (Bytes.length data / page_size)
@@ -37,44 +32,37 @@ module Memory = struct
     in
     mem.limits <- limits;
     mem.data <- data
+
+  let get_data { data; _ } = data
+
+  let get_limit_max { limits; _ } = limits.max
 end
 
-type memory = Memory.t
-
 module Table = struct
-  type table_id = Tid of int
-
   (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
   type 'env table = 'env Value.ref_value array
 
   type 'env t =
-    | Table of
-        { id : table_id
-        ; label : string option
-        ; limits : limits
-        ; type_ : ref_type
-        ; mutable data : 'env table
-        }
+    { id : int
+    ; label : string option
+    ; limits : limits
+    ; type_ : ref_type
+    ; mutable data : 'env table
+    }
 
   let fresh =
     let r = ref (-1) in
     fun () ->
       incr r;
-      Tid !r
+      !r
 
   let init ?label (typ : table_type) : 'env t =
     let limits, ref_type = typ in
     let null = Value.ref_null' ref_type in
     let table = Array.make limits.min null in
-    Table { id = fresh (); label; limits; type_ = ref_type; data = table }
+    { id = fresh (); label; limits; type_ = ref_type; data = table }
 
-  let update (Table table) data = table.data <- data
-
-  let pp_id fmt (Tid i) = Format.fprintf fmt "%i" i
-
-  let pp fmt (Table t) =
-    Format.fprintf fmt "Table{%a %a %i}" pp_id t.id Pp.pp_id t.label
-      (Array.length t.data)
+  let update table data = table.data <- data
 end
 
 module Global = struct
@@ -108,7 +96,7 @@ module Env = struct
 
   type t =
     { globals : t' Global.t IMap.t
-    ; memories : memory IMap.t
+    ; memories : Memory.t IMap.t
     ; tables : t' Table.t IMap.t
     ; functions : t' Value.func IMap.t
     ; data : data IMap.t
@@ -208,11 +196,9 @@ type table = Env.t' Table.t
 
 type func = Env.t' Value.func
 
-type value = Env.t' Value.t
-
 type exports =
-  { globals : global StringMap.t
-  ; memories : memory StringMap.t
+  { globals : Env.t' Global.t StringMap.t
+  ; memories : Memory.t StringMap.t
   ; tables : table StringMap.t
   ; functions : func StringMap.t
   ; defined_names : StringSet.t
@@ -224,7 +210,7 @@ type module_to_run =
   ; to_run : (S.index, func_type) expr' list
   }
 
-type link_state =
+type state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
@@ -288,7 +274,7 @@ let load_from_module ls f (import : _ S.imp) =
       else Log.err "unknown import"
     | v -> v )
 
-let load_global (ls : link_state) (import : S.global_import S.imp) : global =
+let load_global (ls : state) (import : S.global_import S.imp) : global =
   let global = load_from_module ls (fun (e : exports) -> e.globals) import in
   ( match (fst import.desc, global.mut) with
   | Var, Const | Const, Var -> Log.err "incompatible import type"
@@ -316,6 +302,7 @@ let eval_globals ls env globals : Env.t =
       env )
     globals env
 
+(*
 let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
   let mode =
     match data.mode with
@@ -325,6 +312,7 @@ let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
       Data_active (id, const)
   in
   { data with mode }
+*)
 
 let limit_is_included ~import ~imported =
   imported.min >= import.min
@@ -334,8 +322,8 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : link_state) (import : S.mem_import S.imp) : memory =
-  let (Memory { limits = imported_limit; _ } as mem) =
+let load_memory (ls : state) (import : S.mem_import S.imp) : Memory.t =
+  let ({ Memory.limits = imported_limit; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
   in
   if limit_is_included ~import:import.desc ~imported:imported_limit then mem
@@ -360,12 +348,10 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : link_state) (import : S.table_import S.imp) : table =
+let load_table (ls : state) (import : S.table_import S.imp) : table =
   let type_ : table_type = import.desc in
-  let (Table t as table) =
-    load_from_module ls (fun (e : exports) -> e.tables) import
-  in
-  if table_types_are_compatible type_ (t.limits, t.type_) then table
+  let t = load_from_module ls (fun (e : exports) -> e.tables) import in
+  if table_types_are_compatible type_ (t.limits, t.type_) then t
   else
     Log.err "incompatible import type for table %s %s expected %a got %a"
       import.module_ import.name Pp.Input.table_type type_ Pp.Input.table_type
@@ -392,7 +378,7 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : link_state) (import : func_type S.imp) : func =
+let load_func (ls : state) (import : func_type S.imp) : func =
   let type_ : func_type = import.desc in
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
@@ -499,7 +485,7 @@ let populate_exports env (exports : S.index S.exports) : exports =
   let functions, names = fill_exports Env.get_func exports.func names in
   { globals; memories; tables; functions; defined_names = names }
 
-let module_ (module_ : module_) (ls : link_state) =
+let module_ (module_ : module_) (ls : state) =
   Log.debug "linking module...@\n";
   begin
     try
@@ -539,8 +525,8 @@ let module_ (module_ : module_) (ls : link_state) =
     with Failure msg -> Error msg
   end
 
-let extern_module (name : string) (module_ : extern_module) (ls : link_state) :
-    link_state =
+let extern_module (name : string) (module_ : extern_module) (ls : state) : state
+    =
   let functions =
     StringMap.map Value.Func.extern
       (StringMap.of_seq (List.to_seq module_.functions))
@@ -560,7 +546,7 @@ let extern_module (name : string) (module_ : extern_module) (ls : link_state) :
   in
   { ls with by_name = StringMap.add name exports ls.by_name }
 
-let register_module (ls : link_state) ~name ~(id : string option) : link_state =
+let register_module (ls : state) ~name ~(id : string option) : state =
   let exports =
     match id with
     | Some id -> begin
