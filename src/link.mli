@@ -101,6 +101,6 @@ val empty_state : state
 
 val register_module : state -> name:string -> id:string option -> state
 
-type extern_module
+type extern_module = { functions : (string * Value.extern_func) list }
 
 val extern_module : string -> extern_module -> state -> state

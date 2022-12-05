@@ -906,7 +906,9 @@ and exec_vfunc stack (func : Env.t' Value.func) =
     let args, stack = Stack.pop_n stack (List.length param_type) in
     let res = exec_func (Lazy.force env) func (List.rev args) in
     res @ stack
-  | Extern f -> exec_extern_func stack f
+  | Extern f ->
+    let stack = List.rev stack in
+    exec_extern_func stack f
 
 and exec_func env (func : Simplify.func) args =
   Log.debug "calling func : func %s@."

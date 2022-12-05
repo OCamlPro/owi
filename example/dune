@@ -1,0 +1,9 @@
+(executable
+ (name extern)
+ (libraries owi))
+
+(mdx
+ (libraries owi)
+ (deps
+  (file extern.exe))
+ (files README.md))
