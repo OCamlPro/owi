@@ -1384,7 +1384,7 @@ module Shared = struct
   let f64 fmt f = <span data-count="0">F</span>ormat.fprintf fmt "%s" (Float64.to_strin<span data-count="0">g</span> f)
 
   let nn fmt = function
-    | <span data-count="1">S</span>32 -&gt; Format.fprintf fmt "32"
+    | <span data-count="2">S</span>32 -&gt; Format.fprintf fmt "32"
     | <span data-count="0">S</span>64 -&gt; Format.fprintf fmt "64"
 end
 
@@ -1411,7 +1411,7 @@ struct
 
   type bt = func_type
 
-  let indice fmt u = <span data-count="1">F</span>ormat.pp_print_int fmt u
+  let indice fmt u = <span data-count="2">F</span>ormat.pp_print_int fmt u
 
   let bt fmt (l, r) =
     <span data-count="0">F</span>ormat.fprintf fmt "%a %a" Shared.param_type l Shared.result_type r
@@ -1500,8 +1500,8 @@ module Make_Expr (Arg : Arg) = struct
     | <span data-count="0">U</span> -&gt; Format.fprintf fmt "u"
     | <span data-count="0">S</span> -&gt; Format.fprintf fmt "s"
 
-  let ibinop fmt : Types.ibinop -&gt; Unit.t = <span data-count="1">f</span>unction
-    | <span data-count="1">A</span>dd -&gt; Format.fprintf fmt "add"
+  let ibinop fmt : Types.ibinop -&gt; Unit.t = <span data-count="2">f</span>unction
+    | <span data-count="2">A</span>dd -&gt; Format.fprintf fmt "add"
     | <span data-count="0">S</span>ub -&gt; Format.fprintf fmt "sub"
     | <span data-count="0">M</span>ul -&gt; Format.fprintf fmt "mul"
     | <span data-count="0">D</span>iv s -&gt; Format.fprintf fmt "div_%a" sx s
@@ -1547,13 +1547,13 @@ module Make_Expr (Arg : Arg) = struct
     else <span data-count="0">F</span>ormat.fprintf fmt "offset=%d align=%d" offset align
 
   let rec instr fmt = function
-    | <span data-count="2">I</span>32_const i -&gt; Format.fprintf fmt "i32.const %ld" i
+    | <span data-count="4">I</span>32_const i -&gt; Format.fprintf fmt "i32.const %ld" i
     | <span data-count="0">I</span>64_const i -&gt; Format.fprintf fmt "i64.const %Ld" i
     | <span data-count="0">F</span>32_const f -&gt; Format.fprintf fmt "f32.const %a" f32 f
     | <span data-count="0">F</span>64_const f -&gt; Format.fprintf fmt "f64.const %a" f64 f
     | <span data-count="0">I</span>_unop (n, op) -&gt; Format.fprintf fmt "i%a.%a" nn n iunop op
     | <span data-count="0">F</span>_unop (n, op) -&gt; Format.fprintf fmt "f%a.%a" nn n funop op
-    | <span data-count="1">I</span>_binop (n, op) -&gt; Format.fprintf fmt "i%a.%a" nn n ibinop op
+    | <span data-count="2">I</span>_binop (n, op) -&gt; Format.fprintf fmt "i%a.%a" nn n ibinop op
     | <span data-count="0">F</span>_binop (n, op) -&gt; Format.fprintf fmt "f%a.%a" nn n fbinop op
     | <span data-count="0">I</span>_testop (n, op) -&gt; Format.fprintf fmt "i%a.%a" nn n itestop op
     | <span data-count="0">I</span>_relop (n, op) -&gt; Format.fprintf fmt "i%a.%a" nn n irelop op
@@ -1578,7 +1578,7 @@ module Make_Expr (Arg : Arg) = struct
     | <span data-count="0">R</span>ef_null t -&gt; Format.fprintf fmt "ref.null %a" ref_type t
     | <span data-count="0">R</span>ef_is_null -&gt; Format.fprintf fmt "ref.is_null"
     | <span data-count="0">R</span>ef_func fid -&gt; Format.fprintf fmt "ref.func %a" indice fid
-    | <span data-count="1">D</span>rop -&gt; Format.fprintf fmt "drop"
+    | <span data-count="2">D</span>rop -&gt; Format.fprintf fmt "drop"
     | <span data-count="0">S</span>elect vt -&gt; begin
       match vt with
       | <span data-count="0">N</span>one -&gt; Format.fprintf fmt "select"
@@ -1644,7 +1644,7 @@ module Make_Expr (Arg : Arg) = struct
            indice )
         (Array.to_lis<span data-count="0">t</span> ids) indice id
     | <span data-count="0">R</span>eturn -&gt; Format.fprintf fmt "return"
-    | <span data-count="1">C</span>all id -&gt; Format.fprintf fmt "call %a" indice id
+    | <span data-count="2">C</span>all id -&gt; Format.fprintf fmt "call %a" indice id
     | <span data-count="0">C</span>all_indirect (tbl_id, ty_id) -&gt;
       Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
 

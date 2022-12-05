@@ -431,10 +431,10 @@ module Func = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="6335">i</span>ncr r;
-      <span data-count="6335">F</span>id !r
+      <span data-count="6336">i</span>ncr r;
+      <span data-count="6336">F</span>id !r
 
-  let wasm func env : 'env t = <span data-count="6335">W</span>ASM (fres<span data-count="6335">h</span> (), func, env)
+  let wasm func env : 'env t = <span data-count="6336">W</span>ASM (fres<span data-count="6336">h</span> (), func, env)
 
   let extern f = <span data-count="0">E</span>xtern f
 
@@ -469,7 +469,7 @@ let pp_ref fmt = function
   | <span data-count="0">F</span>uncref _ -&gt; Format.fprintf fmt "funcref"
 
 let pp fmt = function
-  | <span data-count="4">I</span>32 i -&gt; Format.fprintf fmt "i32.const %ld" i
+  | <span data-count="8">I</span>32 i -&gt; Format.fprintf fmt "i32.const %ld" i
   | <span data-count="0">I</span>64 i -&gt; Format.fprintf fmt "i64.const %Ld" i
   | <span data-count="0">F</span>32 f -&gt; Format.fprintf fmt "f32.const %a" Pp.Simplified.f32 f
   | <span data-count="0">F</span>64 f -&gt; Format.fprintf fmt "f64.const %a" Pp.Simplified.f64 f
