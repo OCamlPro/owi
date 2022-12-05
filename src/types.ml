@@ -12,12 +12,10 @@ type nonrec num_type =
   | F32
   | F64
 
-(* TODO: heap_type missing ? *)
 type nonrec ref_type =
   | Func_ref
   | Extern_ref
 
-(* TODO: gadt ? *)
 type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
@@ -39,7 +37,6 @@ type nonrec limits =
 
 type nonrec mem_type = limits
 
-(* TODO: the spec is weird, shouldn't it be just `limits` ? is it really a product ? *)
 type nonrec table_type = limits * ref_type
 
 type nonrec mut =
@@ -48,7 +45,6 @@ type nonrec mut =
 
 type nonrec global_type = mut * val_type
 
-(* TODO: gadt ? *)
 type nonrec extern_type =
   | Func of string option * func_type
   | Table of string option * table_type

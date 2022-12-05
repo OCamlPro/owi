@@ -602,7 +602,6 @@ let rec exec_instr env locals stack instr =
     let v, stack =
       match global.typ with
       | Ref_type rt -> begin
-        (* TODO: it's weird that they are the same type ? *)
         match rt with
         | Extern_ref | Func_ref ->
           let v, stack = Stack.pop_ref stack in
@@ -889,7 +888,6 @@ let rec exec_instr env locals stack instr =
     raise (Branch (stack, target))
   | Call_indirect (tbl_i, typ_i) ->
     let fun_i, stack = Stack.pop_i32_to_int stack in
-    (* TODO: use this ? *)
     let (Table t) = get_table env tbl_i in
     if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
     let func =
