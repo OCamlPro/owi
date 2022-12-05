@@ -631,6 +631,9 @@ module Rewrite_indices = struct
       | Call_indirect (tbl_i, bt) ->
         let bt = Option.get @@ bt_to_raw (Some bt) in
         Call_indirect (find_table tbl_i, bt)
+      | Return_call_indirect (tbl_i, bt) ->
+        let bt = Option.get @@ bt_to_raw (Some bt) in
+        Return_call_indirect (find_table tbl_i, bt)
       | Global_set id -> begin
         let idx, mut = find_global module_ ~imported_only:false id in
         match mut with

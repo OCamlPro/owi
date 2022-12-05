@@ -310,6 +310,8 @@ module Make_Expr (Arg : Arg) = struct
         (Array.to_list ids) indice id
     | Return -> Format.fprintf fmt "return"
     | Return_call id -> Format.fprintf fmt "return_call %a" indice id
+    | Return_call_indirect (tbl_id, ty_id) ->
+      Format.fprintf fmt "return_call_indirect %a %a" indice tbl_id block_type ty_id
     | Call id -> Format.fprintf fmt "call %a" indice id
     | Call_indirect (tbl_id, ty_id) ->
       Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id

@@ -331,6 +331,7 @@ let keywords =
      ; ("result", RESULT)
      ; ("return", RETURN)
      ; ("return_call", RETURN_CALL)
+     ; ("return_call_indirect", RETURN_CALL_INDIRECT)
      ; ("select", SELECT)
      ; ("start", START)
      ; ("table", TABLE)

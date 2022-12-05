@@ -507,10 +507,10 @@ let rec exec_instr env locals stack instr =
     exec_expr env locals stack (if b then e1 else e2) false bt
   | Call i -> begin
     let func = Env.get_func env i in
-    exec_vfunc stack func
+    exec_vfunc ~return:false stack func
   end
   | Return_call i -> begin
-    let func = get_func env i in
+    let func = Env.get_func env i in
     exec_vfunc ~return:true stack func
   end
   | Br i -> raise (Branch (stack, i))
@@ -871,6 +871,11 @@ let rec exec_instr env locals stack instr =
     in
     raise (Branch (stack, target))
   | Call_indirect (tbl_i, typ_i) ->
+    call_indirect ~return:false env stack (tbl_i, typ_i)
+  | Return_call_indirect (tbl_i, typ_i) ->
+    call_indirect ~return:true env stack (tbl_i, typ_i)
+
+and call_indirect ~return env stack (tbl_i, typ_i) =
     let fun_i, stack = Stack.pop_i32_to_int stack in
     let t = Env.get_table env tbl_i in
     if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
@@ -887,7 +892,7 @@ let rec exec_instr env locals stack instr =
     let pt', rt' = typ_i in
     if not (rt = rt' && List.equal p_type_eq pt pt') then
       raise @@ Trap "indirect call type mismatch";
-    exec_vfunc stack func
+    exec_vfunc ~return stack func
 
 and exec_expr env locals stack e is_loop bt =
   let rt =
@@ -904,7 +909,7 @@ and exec_expr env locals stack e is_loop bt =
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc ?(return=false) stack (func : Env.t' Value.Func.t) =
+and exec_vfunc ~return stack (func : Env.t' Value.Func.t) =
   match func with
   | WASM (_, func, env) ->
     let param_type, _result_type = func.type_f in
@@ -928,7 +933,7 @@ and exec_func env func args =
   with Return stack -> Stack.keep stack (List.length (snd func.type_f))
 
 let exec_vfunc stack func =
-  try Ok (exec_vfunc stack func) with
+  try Ok (exec_vfunc ~return:false stack func) with
   | Failure msg | Trap msg -> Error msg
   | Stack_overflow -> Error "call stack exhausted"
 
