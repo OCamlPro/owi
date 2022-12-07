@@ -1,9 +1,6 @@
-type table_import = Types.table_type
+(** the types of simplified modules *)
 
-type mem_import = Types.limits
-
-type global_import = Types.global_type
-
+(** the types of imported values *)
 type 'a imp =
   { module_ : string
   ; name : string
@@ -11,65 +8,60 @@ type 'a imp =
   ; desc : 'a
   }
 
+(** a value that is either local or imported *)
 type ('a, 'b) runtime =
   | Local of 'a
   | Imported of 'b imp
 
-module StringMap :
-  Map.S
-    with type key = Map.Make(String).key
-     and type 'a t = 'a Map.Make(String).t
-
-type index = Types.simplified_indice
-
+(** int indexed values *)
 type 'a indexed =
-  { index : index
+  { index : int
   ; value : 'a
   }
 
-type 'a named =
-  { values : 'a indexed list
-  ; named : index StringMap.t
-  }
+module StringMap : Map.S with type key = string
 
-module Fields : sig
-  type 'a t = 'a named
+(** named values (fields) *)
+module Named : sig
+  type 'a t =
+    { values : 'a indexed list
+    ; named : int StringMap.t
+    }
 
-  val fold : (index -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+  val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
-  val iter : (index -> 'a -> unit) -> 'a t -> unit
+  val iter : (int -> 'a -> unit) -> 'a t -> unit
 end
 
-open Types
-
-type 'a export =
+(** named export *)
+type export =
   { name : string
-  ; id : 'a
+  ; id : int
   }
 
-type 'a exports =
-  { global : 'a export list
-  ; mem : 'a export list
-  ; table : 'a export list
-  ; func : 'a export list
+(** named exports of a module *)
+type exports =
+  { global : export list
+  ; mem : export list
+  ; table : export list
+  ; func : export list
   }
 
-type func = (index, func_type) func'
-
-type result =
+(** the type of simplified modules *)
+type simplified_module =
   { id : string option
-  ; global : (Const.expr global', global_import) runtime named
-  ; table : (table, table_import) runtime named
-  ; mem : (mem, mem_import) runtime named
-  ; func : (func, func_type) runtime named
-  ; elem : (index, Const.expr) elem' named
-  ; data : (index, Const.expr) data' named
-  ; exports : index exports
-  ; start : index list
+  ; global : (Types.Const.expr Types.global', Types.global_type) runtime Named.t
+  ; table : (Types.table, Types.table_type) runtime Named.t
+  ; mem : (Types.mem, Types.limits) runtime Named.t
+  ; func : ((int, Types.func_type) Types.func', Types.func_type) runtime Named.t
+  ; elem : (int, Types.Const.expr) Types.elem' Named.t
+  ; data : (int, Types.Const.expr) Types.data' Named.t
+  ; exports : exports
+  ; start : int list
   }
 
-val module_ : Types.module_ -> (result, string) Result.t
+(** pretty print a simplified module *)
+val pp : Format.formatter -> simplified_module -> unit
 
-module Pp : sig
-  val result : Format.formatter -> result -> unit
-end
+(** simplify a module *)
+val module_ : Types.module_ -> (simplified_module, string) Result.t

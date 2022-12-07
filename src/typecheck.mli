@@ -1,1 +1,4 @@
-val module_ : Simplify.result -> (unit, string) Result.t
+(** typechecking module*)
+
+(** typecheck a given module *)
+val module_ : Simplify.simplified_module -> (unit, string) Result.t

@@ -32,8 +32,6 @@ end = struct
 end
 
 module Func = struct
-  type func_id = Fid of int [@@unboxed]
-
   type _ telt =
     | I32 : Int32.t telt
     | I64 : Int64.t telt
@@ -82,14 +80,14 @@ module Func = struct
     (arg_type arg, res_type res)
 
   type 'env t =
-    | WASM of func_id * Simplify.func * 'env
+    | WASM of int * (int, Types.func_type) Types.func' * 'env
     | Extern of extern_func
 
   let fresh =
     let r = ref (-1) in
     fun () ->
       incr r;
-      Fid !r
+      !r
 
   let wasm func env : 'env t = WASM (fresh (), func, env)
 

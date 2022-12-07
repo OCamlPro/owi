@@ -1,3 +1,5 @@
+(** runtime stack module *)
+
 type 'a t = 'a Value.t list
 
 val empty : 'a t

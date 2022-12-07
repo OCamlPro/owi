@@ -1,3 +1,5 @@
+(** custom Float32 module for Wasm *)
+
 type t
 
 val neg_nan : t

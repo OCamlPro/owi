@@ -1,8 +1,9 @@
 open Types
 module Env = Link.Env
-module IMap = Link.IMap
 
 exception Return of Env.t' Stack.t
+
+let page_size = 65_536
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
@@ -516,27 +517,25 @@ let rec exec_instr env locals stack instr =
   | Block (_id, bt, e) -> exec_expr env locals stack e false bt
   | Memory_size ->
     let mem, _max = get_memory env mem_0 in
-    let len = Bytes.length mem / Link.page_size in
+    let len = Bytes.length mem / page_size in
     Stack.push_i32_of_int stack len
   | Memory_grow -> begin
     let mem = get_memory_raw env mem_0 in
     let data = Link.Memory.get_data mem in
     let max_size = Link.Memory.get_limit_max mem in
     let delta, stack = Stack.pop_i32_to_int stack in
-    let delta = delta * Link.page_size in
+    let delta = delta * page_size in
     let old_size = Bytes.length data in
     let new_size = old_size + delta in
-    if new_size >= Link.page_size * Link.page_size then
-      Stack.push_i32 stack (-1l)
+    if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
     else
       match max_size with
-      | Some max when new_size > max * Link.page_size ->
-        Stack.push_i32 stack (-1l)
+      | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
       | None | Some _ ->
         let new_mem = Bytes.extend data 0 delta in
         Bytes.fill new_mem old_size delta (Char.chr 0);
         Link.Memory.update_memory mem new_mem;
-        Stack.push_i32_of_int stack (old_size / Link.page_size)
+        Stack.push_i32_of_int stack (old_size / page_size)
   end
   | Memory_fill ->
     let len, stack = Stack.pop_i32_to_int stack in
@@ -912,7 +911,7 @@ and exec_vfunc stack (func : Env.t' Value.func) =
     let stack = List.rev stack in
     exec_extern_func stack f
 
-and exec_func env (func : Simplify.func) args =
+and exec_func env func args =
   Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ args @ List.map init_local func.locals in

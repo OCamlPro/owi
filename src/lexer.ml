@@ -1,7 +1,4 @@
 open Sedlexing
-
-type token = Menhir_parser.token
-
 open Menhir_parser
 
 exception Error of Lexing.position * string

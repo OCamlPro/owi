@@ -1,3 +1,5 @@
+(** various conversion functions between i32, i64, f32 and f64 *)
+
 module Int32 : sig
   type t = int32
 

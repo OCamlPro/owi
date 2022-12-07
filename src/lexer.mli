@@ -1,8 +1,13 @@
-type token = Menhir_parser.token
+(** module for Wasm lexing *)
 
+(** lexing error exception *)
 exception Error of Lexing.position * string
 
-val token : Sedlexing.lexbuf -> token
+(** tokenizer *)
+val token : Sedlexing.lexbuf -> Menhir_parser.token
 
+(** lexer *)
 val lexer :
-  Sedlexing.lexbuf -> unit -> token * Lexing.position * Lexing.position
+     Sedlexing.lexbuf
+  -> unit
+  -> Menhir_parser.token * Lexing.position * Lexing.position

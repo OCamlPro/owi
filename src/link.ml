@@ -1,7 +1,6 @@
 open Types
-module S = Simplify
 
-type module_ = S.result
+type module_ = Simplify.simplified_module
 
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
@@ -76,16 +75,8 @@ module Global = struct
     }
 end
 
-module Index = struct
-  type t = S.index
-
-  let pp fmt id = Format.fprintf fmt "%i" id
-
-  let compare = compare
-end
-
 (* TODO efficient imap for contiguous index (array) *)
-module IMap = Map.Make (Index)
+module IMap = Map.Make (Int)
 
 module Env = struct
   type data = { mutable value : string }
@@ -109,10 +100,10 @@ module Env = struct
 
   let pp fmt t =
     let global fmt (id, (global : 'a Global.t)) =
-      Format.fprintf fmt "%a -> %a" Index.pp id Value.pp global.value
+      Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
     in
     let func fmt (id, (_func : 'a Value.func)) =
-      Format.fprintf fmt "%a -> func" Index.pp id
+      Format.fprintf fmt "%a -> func" Format.pp_print_int id
     in
     Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
       (Format.pp_print_list
@@ -174,7 +165,7 @@ module Env = struct
     match IMap.find_opt id env.functions with
     | None ->
       Log.debug "%a@." pp env;
-      Log.err "unknown function %a" Index.pp id
+      Log.err "unknown function %a" Format.pp_print_int id
     | Some v -> v
 
   let get_data (env : t) id : data =
@@ -209,7 +200,7 @@ type exports =
 type module_to_run =
   { module_ : module_
   ; env : Env.t
-  ; to_run : (S.index, func_type) expr' list
+  ; to_run : (int, func_type) expr' list
   }
 
 type state =
@@ -264,7 +255,7 @@ module Const_interp = struct
     | [ result ] -> result
 end
 
-let load_from_module ls f (import : _ S.imp) =
+let load_from_module ls f (import : _ Simplify.imp) =
   match StringMap.find import.module_ ls.by_name with
   | exception Not_found -> Log.err "unknown module %s" import.module_
   | exports -> (
@@ -276,7 +267,8 @@ let load_from_module ls f (import : _ S.imp) =
       else Log.err "unknown import"
     | v -> v )
 
-let load_global (ls : state) (import : S.global_import S.imp) : global =
+let load_global (ls : state) (import : Types.global_type Simplify.imp) : global
+    =
   let global = load_from_module ls (fun (e : exports) -> e.globals) import in
   ( match (fst import.desc, global.mut) with
   | Var, Const | Const, Var -> Log.err "incompatible import type"
@@ -286,18 +278,19 @@ let load_global (ls : state) (import : S.global_import S.imp) : global =
   end;
   global
 
-let eval_global ls env (global : (Const.expr global', S.global_import) S.runtime)
-    : global =
+let eval_global ls env
+    (global : (Const.expr global', Types.global_type) Simplify.runtime) : global
+    =
   match global with
-  | S.Local global ->
+  | Simplify.Local global ->
     let value = Const_interp.exec_expr env global.init in
     let mut, typ = global.type_ in
     let global : global = { value; label = global.id; mut; typ } in
     global
-  | S.Imported import -> load_global ls import
+  | Imported import -> load_global ls import
 
 let eval_globals ls env globals : Env.t =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id global env ->
       let global = eval_global ls env global in
       let env = Env.add_global id global env in
@@ -305,7 +298,7 @@ let eval_globals ls env globals : Env.t =
     globals env
 
 (*
-let eval_in_data (env : Env.t) (data : _ data') : (S.index, value) data' =
+let eval_in_data (env : Env.t) (data : _ data') : (int, value) data' =
   let mode =
     match data.mode with
     | Data_passive -> Data_passive
@@ -324,7 +317,7 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : state) (import : S.mem_import S.imp) : Memory.t =
+let load_memory (ls : state) (import : Types.limits Simplify.imp) : Memory.t =
   let ({ Memory.limits = imported_limit; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
   in
@@ -334,13 +327,13 @@ let load_memory (ls : state) (import : S.mem_import S.imp) : Memory.t =
       import.module_ import.name Pp.Input.mem_type import.desc Pp.Input.mem_type
       imported_limit
 
-let eval_memory ls (memory : (mem, S.mem_import) S.runtime) : Memory.t =
+let eval_memory ls (memory : (mem, Types.limits) Simplify.runtime) : Memory.t =
   match memory with
   | Local (label, mem_type) -> Memory.init ?label mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id mem env ->
       let memory = eval_memory ls mem in
       let env = Env.add_memory id memory env in
@@ -350,7 +343,7 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : state) (import : S.table_import S.imp) : table =
+let load_table (ls : state) (import : Types.table_type Simplify.imp) : table =
   let type_ : table_type = import.desc in
   let t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible type_ (t.limits, t.type_) then t
@@ -359,13 +352,13 @@ let load_table (ls : state) (import : S.table_import S.imp) : table =
       import.module_ import.name Pp.Input.table_type type_ Pp.Input.table_type
       (t.limits, t.type_)
 
-let eval_table ls (table : (_, S.table_import) S.runtime) : table =
+let eval_table ls (table : (_, Types.table_type) Simplify.runtime) : table =
   match table with
   | Local (label, table_type) -> Table.init ?label table_type
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id table env ->
       let table = eval_table ls table in
       let env = Env.add_table id table env in
@@ -380,21 +373,20 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : state) (import : func_type S.imp) : func =
+let load_func (ls : state) (import : func_type Simplify.imp) : func =
   let type_ : func_type = import.desc in
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.type_ func in
   if func_types_are_compatible type_ type' then func
   else Log.err "incompatible import type"
 
-let eval_func ls (finished_env : Env.t') (func : (S.func, func_type) S.runtime)
-    : func =
+let eval_func ls (finished_env : Env.t') func : func =
   match func with
-  | Local func -> Value.Func.wasm func finished_env
+  | Simplify.Local func -> Value.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Env.t') env functions =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id func env ->
       let func = eval_func ls finished_env func in
       let env = Env.add_func id func env in
@@ -423,7 +415,7 @@ let active_data_expr ~offset ~length ~mem ~data =
 let get_i32 = function Value.I32 i -> i | _ -> Log.err "type mismatch"
 
 let define_data env data =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id data (env, init) ->
       let env = Env.add_data id { value = data.init } env in
       let init =
@@ -439,7 +431,7 @@ let define_data env data =
     data (env, [])
 
 let define_elem env elem =
-  S.Fields.fold
+  Simplify.Named.fold
     (fun id (elem : _ elem') (env, inits) ->
       let init = List.map (Const_interp.exec_expr env) elem.init in
       let init_as_ref =
@@ -470,10 +462,10 @@ let define_elem env elem =
       (env, inits) )
     elem (env, [])
 
-let populate_exports env (exports : S.index S.exports) : exports =
+let populate_exports env (exports : Simplify.exports) : exports =
   let fill_exports get_env exports names =
     List.fold_left
-      (fun (acc, names) (export : _ S.export) ->
+      (fun (acc, names) (export : Simplify.export) ->
         let value = get_env env export.id in
         if StringSet.mem export.name names then Log.err "duplicate export name";
         (StringMap.add export.name value acc, StringSet.add export.name names)

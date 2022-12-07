@@ -1,3 +1,5 @@
+(** custom Int32 module for Wasm *)
+
 type t = int32
 
 exception Overflow

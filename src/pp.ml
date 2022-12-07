@@ -69,10 +69,9 @@ module Symbolic_indice :
       Format.fprintf fmt "%a %a" Shared.param_type l Shared.result_type r
 end
 
-module Simplified_indice :
-  Arg with type indice = Types.simplified_indice and type bt = func_type =
+module Simplified_indice : Arg with type indice = int and type bt = func_type =
 struct
-  type indice = simplified_indice
+  type indice = int
 
   type bt = func_type
 

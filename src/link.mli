@@ -1,15 +1,7 @@
-val page_size : int
+(** module to link a simplified/extern module and producing a runnable module
+    along with a link state *)
 
-module StringMap : sig
-  type 'a t
-
-  val find : string -> 'a t -> 'a
-end
-
-module StringSet : sig
-  type t
-end
-
+(** runtime memory *)
 module Memory : sig
   type t
 
@@ -20,6 +12,7 @@ module Memory : sig
   val update_memory : t -> bytes -> unit
 end
 
+(** runtime table *)
 module Table : sig
   type 'env table = 'env Value.ref_value array
 
@@ -34,6 +27,7 @@ module Table : sig
   val update : 'a t -> 'a table -> unit
 end
 
+(** runtime global *)
 module Global : sig
   type 'env t =
     { mutable value : 'env Value.t
@@ -43,6 +37,7 @@ module Global : sig
     }
 end
 
+(** runtime env *)
 module Env : sig
   type t
 
@@ -69,20 +64,18 @@ module Env : sig
   val drop_data : data -> unit
 end
 
-module IMap : sig
-  type key
-
-  type 'a t
-
-  val find_opt : key -> 'a t -> 'a option
-end
-
+(** runnable module *)
 type module_to_run =
-  { module_ : Simplify.result
+  { module_ : Simplify.simplified_module
   ; env : Env.t
-  ; to_run : (Simplify.index, Types.func_type) Types.expr' list
+  ; to_run : (int, Types.func_type) Types.expr' list
   }
 
+module StringMap : Map.S with type key = string
+
+module StringSet : Set.S
+
+(** runtime exported items *)
 type exports =
   { globals : Env.t' Global.t StringMap.t
   ; memories : Memory.t StringMap.t
@@ -91,18 +84,27 @@ type exports =
   ; defined_names : StringSet.t
   }
 
+(** link state *)
 type state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
   }
 
-val module_ : Simplify.result -> state -> (module_to_run * state, string) result
-
+(** the empty link state *)
 val empty_state : state
 
+(** link a module with a given link state, producing a runnable module and a new
+    link state *)
+val module_ :
+  Simplify.simplified_module -> state -> (module_to_run * state, string) result
+
+(** register a module inside a link state, producing a new link state *)
 val register_module : state -> name:string -> id:string option -> state
 
+(** extern modules *)
 type extern_module = { functions : (string * Value.extern_func) list }
 
+(** register an extern module with a given link state, producing a new link
+    state *)
 val extern_module : string -> extern_module -> state -> state

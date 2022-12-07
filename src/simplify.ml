@@ -20,31 +20,34 @@ type ('a, 'b) runtime =
   | Local of 'a
   | Imported of 'b imp
 
-type 'a export =
+type export =
   { name : string
-  ; id : 'a
+  ; id : int
+  }
+
+type opt_ind =
+  | Curr of int
+  | Indice of indice
+
+type opt_export =
+  { name : string
+  ; id : opt_ind
   }
 
 type type_check = indice * func_type
 
-type index = simplified_indice
-
-type opt_ind =
-  | Curr of index
-  | Indice of indice
-
 type 'a indexed =
-  { index : index
+  { index : int
   ; value : 'a
   }
 
-type 'a named =
-  { values : 'a indexed list
-  ; named : index StringMap.t
-  }
+let has_index idx { index; _ } = idx = index
 
-module Fields = struct
-  type 'a t = 'a named
+module Named = struct
+  type 'a t =
+    { values : 'a indexed list
+    ; named : int StringMap.t
+    }
 
   let fold f v acc =
     List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
@@ -52,11 +55,18 @@ module Fields = struct
   let iter f v = List.iter (fun v -> f v.index v.value) v.values
 end
 
-type 'a exports =
-  { global : 'a export list
-  ; mem : 'a export list
-  ; table : 'a export list
-  ; func : 'a export list
+type exports =
+  { global : export list
+  ; mem : export list
+  ; table : export list
+  ; func : export list
+  }
+
+type opt_exports =
+  { global : opt_export list
+  ; mem : opt_export list
+  ; table : opt_export list
+  ; func : opt_export list
   }
 
 type known_elem = (indice, (indice, indice block_type) expr') elem'
@@ -78,33 +88,33 @@ type grouped_module =
   ; func : (indice func, function_import) runtime indexed list
   ; elem : known_elem indexed list
   ; data : known_data indexed list
-  ; exports : opt_ind exports
+  ; exports : opt_exports
   ; start : indice list
   }
 
 type assigned_module =
   { id : string option
-  ; type_ : func_type named
-  ; global : (global, global_import) runtime named
-  ; table : (table, table_import) runtime named
-  ; mem : (mem, mem_import) runtime named
-  ; func : (indice func, indice block_type) runtime named
-  ; elem : known_elem named
-  ; data : known_data named
-  ; exports : opt_ind exports
+  ; type_ : func_type Named.t
+  ; global : (global, global_import) runtime Named.t
+  ; table : (table, table_import) runtime Named.t
+  ; mem : (mem, mem_import) runtime Named.t
+  ; func : (indice func, indice block_type) runtime Named.t
+  ; elem : known_elem Named.t
+  ; data : known_data Named.t
+  ; exports : opt_exports
   ; start : indice list
   }
 
-type result =
+type simplified_module =
   { id : string option
-  ; global : (Const.expr global', global_import) runtime named
-  ; table : (table, table_import) runtime named
-  ; mem : (mem, mem_import) runtime named
-  ; func : ((index, func_type) func', func_type) runtime named
-  ; elem : (index, Const.expr) elem' named
-  ; data : (index, Const.expr) data' named
-  ; exports : index exports
-  ; start : index list
+  ; global : (Const.expr global', global_import) runtime Named.t
+  ; table : (table, table_import) runtime Named.t
+  ; mem : (mem, mem_import) runtime Named.t
+  ; func : ((int, func_type) func', func_type) runtime Named.t
+  ; elem : (int, Const.expr) elem' Named.t
+  ; data : (int, Const.expr) data' Named.t
+  ; exports : exports
+  ; start : int list
   }
 
 module P = struct
@@ -138,20 +148,20 @@ module P = struct
       (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ", ") f)
       l
 
-  let funcs fmt (funcs : _ runtime named) = lst (indexed func) fmt funcs.values
+  let funcs fmt (funcs : _ runtime Named.t) =
+    lst (indexed func) fmt funcs.values
 
-  let globals fmt (globals : _ runtime named) =
+  let globals fmt (globals : _ runtime Named.t) =
     lst (indexed global) fmt globals.values
 
-  let export fmt (export : index export) =
+  let export fmt (export : export) =
     Format.fprintf fmt "%s: %a" export.name Pp.Simplified.indice export.id
 
-  let result fmt (result : result) : unit =
+  let simplified_module fmt (m : simplified_module) : unit =
     fprintf fmt
       "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global \
        %a)@]@ @[<hov 2>(export func %a)@]@@ )@]"
-      id result.id funcs result.func globals result.global (lst export)
-      result.exports.func
+      id m.id funcs m.func globals m.global (lst export) m.exports.func
 end
 
 module Group : sig
@@ -352,21 +362,21 @@ end = struct
   type type_acc =
     { declared_types : func_type indexed list
     ; func_types : func_type indexed list
-    ; named_types : index StringMap.t
-    ; last_assigned_index : int
-    ; all_types : index TypeMap.t
+    ; named_types : int StringMap.t
+    ; last_assigned_int : int
+    ; all_types : int TypeMap.t
     }
 
-  let assign_types (module_ : grouped_module) : func_type named =
+  let assign_types (module_ : grouped_module) : func_type Named.t =
     let assign_type
         { declared_types
         ; func_types
         ; named_types
-        ; last_assigned_index
+        ; last_assigned_int
         ; all_types
-        } (name, type_) =
-      let id = last_assigned_index in
-      let last_assigned_index = last_assigned_index + 1 in
+        } (name, type_) : type_acc =
+      let id = last_assigned_int in
+      let last_assigned_int = last_assigned_int + 1 in
       let declared_types = { index = id; value = type_ } :: declared_types in
       let named_types =
         match name with
@@ -375,33 +385,28 @@ end = struct
       in
       let all_types = TypeMap.add type_ id all_types in
       (* Is there something to do/check when a type is already declared ? *)
-      { declared_types
-      ; func_types
-      ; named_types
-      ; last_assigned_index
-      ; all_types
-      }
+      { declared_types; func_types; named_types; last_assigned_int; all_types }
     in
     let empty_acc =
       { declared_types = []
       ; func_types = []
       ; named_types = StringMap.empty
-      ; last_assigned_index = 0
+      ; last_assigned_int = 0
       ; all_types = TypeMap.empty
       }
     in
     let acc = List.fold_left assign_type empty_acc (List.rev module_.type_) in
     let assign_func_type
-        ( { func_types; named_types = _; last_assigned_index; all_types; _ } as
-        acc ) type_ =
+        ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
+        type_ =
       match TypeMap.find_opt type_ all_types with
       | Some _id -> acc
       | None ->
-        let id = last_assigned_index in
-        let last_assigned_index = last_assigned_index + 1 in
+        let id = last_assigned_int in
+        let last_assigned_int = last_assigned_int + 1 in
         let func_types = { index = id; value = type_ } :: func_types in
         let all_types = TypeMap.add type_ id all_types in
-        { acc with func_types; last_assigned_index; all_types }
+        { acc with func_types; last_assigned_int; all_types }
     in
     let acc =
       List.fold_left assign_func_type acc (List.rev module_.function_type)
@@ -409,8 +414,8 @@ end = struct
     let values = List.rev acc.declared_types @ List.rev acc.func_types in
     (* Format.printf "TYPES@.%a"
      *   (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "@.")
-     *      (fun ppf {index; value} -> Format.fprintf ppf "%a: %a"
-     *                       Pp.Simplified_bis.indice index Pp.Input.func_type value))
+     *      (fun ppf {int; value} -> Format.fprintf ppf "%a: %a"
+     *                       Pp.Simplified_bis.indice int Pp.Input.func_type value))
      *   values; *)
     { values; named = acc.named_types }
 
@@ -421,8 +426,8 @@ end = struct
     | Imported { assigned_name; _ } -> assigned_name
 
   let name kind ~(get_name : 'a -> string option) (values : 'a indexed list) :
-      'a named =
-    let assign_one (named : index StringMap.t) (elt : _ indexed) =
+      'a Named.t =
+    let assign_one (named : int StringMap.t) (elt : _ indexed) =
       match get_name elt.value with
       | None -> named
       | Some name ->
@@ -432,7 +437,7 @@ end = struct
     let named = List.fold_left assign_one StringMap.empty values in
     { values; named }
 
-  let check_type_id (types : func_type named) (check : type_check) =
+  let check_type_id (types : func_type Named.t) (check : type_check) =
     let id, func_type = check in
     let id =
       match id with
@@ -489,30 +494,27 @@ end = struct
 end
 
 module Rewrite_indices = struct
-  let find msg (named : 'a named) (indice : indice) : index =
+  let find msg (named : 'a Named.t) (indice : indice) : int =
     match indice with
     | Raw i ->
       (* TODO change indexed strucure for that to be more efficient *)
-      if not (List.exists (fun { index; _ } -> index = i) named.values) then
-        Log.err "%s %i" msg i;
+      if not (List.exists (has_index i) named.values) then Log.err "%s %i" msg i;
       i
     | Symbolic name -> (
       match StringMap.find_opt name named.named with
       | None -> Log.err "%s %s" msg name
       | Some i -> i )
 
-  let get msg (named : 'a named) (indice : indice) : 'a indexed =
+  let get msg (named : 'a Named.t) (indice : indice) : 'a indexed =
     let i = find msg named indice in
-    (* TODO change named structure to make that sensible *)
+    (* TODO change Named.t structure to make that sensible *)
     match List.nth_opt named.values i with
     | None -> Log.err "%s" msg
     | Some v -> v
 
   let find_global (module_ : assigned_module) ~imported_only id =
     let idx = find "unknown global" module_.global id in
-    let va =
-      List.find (fun { index; _ } -> index = idx) module_.global.values
-    in
+    let va = List.find (has_index idx) module_.global.values in
     let mut, _typ =
       match va.value with
       | Local global ->
@@ -522,9 +524,9 @@ module Rewrite_indices = struct
     (idx, mut)
 
   let rewrite_expr (module_ : assigned_module) (locals : param list)
-      (iexpr : expr) : (index, func_type) expr' =
+      (iexpr : expr) : (int, func_type) expr' =
     (* block_ids handling *)
-    let block_id_to_raw (loop_count, block_ids) id : index =
+    let block_id_to_raw (loop_count, block_ids) id : int =
       let id =
         match id with
         | Symbolic id ->
@@ -570,14 +572,13 @@ module Rewrite_indices = struct
     let find_local =
       let locals, after_last_assigned_local =
         List.fold_left
-          (fun (locals, next_free_index) ((name, _type) : param) ->
+          (fun (locals, next_free_int) ((name, _type) : param) ->
             match name with
-            | None -> (locals, next_free_index + 1)
+            | None -> (locals, next_free_int + 1)
             | Some name ->
               if StringMap.mem name locals then
                 Log.err "duplicate local %s" name
-              else
-                (StringMap.add name next_free_index locals, next_free_index + 1)
+              else (StringMap.add name next_free_int locals, next_free_int + 1)
             )
           (StringMap.empty, 0) locals
       in
@@ -600,7 +601,7 @@ module Rewrite_indices = struct
     let find_data id = find "unknown data segment" module_.data id in
     let find_elem id = find "unknown elem segment" module_.elem id in
 
-    let rec body (loop_count, block_ids) : instr -> (index, func_type) instr' =
+    let rec body (loop_count, block_ids) : instr -> (int, func_type) instr' =
       function
       | Br_table (ids, id) ->
         let f = block_id_to_raw (loop_count, block_ids) in
@@ -695,7 +696,7 @@ module Rewrite_indices = struct
         | I32_const _ | I64_const _ | Unreachable | Drop | Nop | Return ) as i
         ->
         i
-    and expr (e : expr) (loop_count, block_ids) : (index, func_type) expr' =
+    and expr (e : expr) (loop_count, block_ids) : (int, func_type) expr' =
       List.map (body (loop_count, block_ids)) e
     in
     expr iexpr (0, [])
@@ -730,7 +731,7 @@ module Rewrite_indices = struct
     { global with init = rewrite_const_expr module_ global.init }
 
   let rewrite_elem (module_ : assigned_module) (elem : known_elem) :
-      (index, Const.expr) elem' =
+      (int, Const.expr) elem' =
     let mode =
       match elem.mode with
       | (Elem_passive | Elem_declarative) as mode -> mode
@@ -743,7 +744,7 @@ module Rewrite_indices = struct
     { elem with init; mode }
 
   let rewrite_data (module_ : assigned_module) (data : known_data) :
-      (index, Const.expr) data' =
+      (int, Const.expr) data' =
     let mode =
       match data.mode with
       | Data_passive as mode -> mode
@@ -754,17 +755,17 @@ module Rewrite_indices = struct
     in
     { data with mode }
 
-  let rewrite_export msg named exports =
+  let rewrite_export msg named (exports : opt_export list) : export list =
     List.map
       (fun { name; id } ->
         let id =
           match id with Curr id -> id | Indice id -> find msg named id
         in
-        { name; id } )
+        ({ name; id } : export) )
       exports
 
-  let rewrite_exports (module_ : assigned_module) (exports : opt_ind exports) :
-      index exports =
+  let rewrite_exports (module_ : assigned_module) (exports : opt_exports) :
+      exports =
     { global = rewrite_export "unknown global" module_.global exports.global
     ; mem = rewrite_export "unknown memory" module_.mem exports.mem
     ; table = rewrite_export "unknown table" module_.table exports.table
@@ -772,7 +773,7 @@ module Rewrite_indices = struct
     }
 
   let rewrite_func (module_ : assigned_module) (func : indice func) :
-      (index, func_type) func' =
+      (int, func_type) func' =
     let type_f = rewrite_block_type module_ func.type_f in
     let params, _ = type_f in
     let body = rewrite_expr module_ (params @ func.locals) func.body in
@@ -786,18 +787,20 @@ module Rewrite_indices = struct
 
   let rewrite_named f named =
     { named with
-      values =
-        List.map (fun ind -> { ind with value = f ind.value }) named.values
+      Named.values =
+        List.map
+          (fun ind -> { ind with value = f ind.value })
+          named.Named.values
     }
 
-  let run (module_ : assigned_module) : result =
+  let run (module_ : assigned_module) : simplified_module =
     let global =
-      let { named; values } =
+      let { Named.named; values } =
         rewrite_named
           (rewrite_runtime (rewrite_global module_) Fun.id)
           module_.global
       in
-      { named; values = List.rev values }
+      { Named.named; values = List.rev values }
     in
     let elem = rewrite_named (rewrite_elem module_) module_.elem in
     let data = rewrite_named (rewrite_data module_) module_.data in
@@ -812,7 +815,7 @@ module Rewrite_indices = struct
       List.map
         (fun start ->
           let idx = find "unknown function" func start in
-          let va = List.find (fun { index; _ } -> index = idx) func.values in
+          let va = List.find (has_index idx) func.Named.values in
           let param_typ, result_typ =
             match va.value with
             | Local func -> func.type_f
@@ -835,8 +838,6 @@ module Rewrite_indices = struct
     }
 end
 
-type func = (index, func_type) func'
-
 let module_ (module_ : module_) =
   Log.debug "simplifying  ...@\n";
   try
@@ -846,4 +847,4 @@ let module_ (module_ : module_) =
     Ok result
   with Failure msg -> Error msg
 
-module Pp = P
+let pp = P.simplified_module

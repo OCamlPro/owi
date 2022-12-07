@@ -118,8 +118,6 @@ type indice =
   | Raw of int
   | Symbolic of string
 
-type simplified_indice = int
-
 type memarg =
   { offset : int
   ; align : int
@@ -217,13 +215,13 @@ and ('indice, 'bt) expr' = ('indice, 'bt) instr' list
 
 type instr = (indice, indice block_type) instr'
 
-type simplified_instr = (simplified_indice, simplified_indice block_type) instr'
+type simplified_instr = (int, int block_type) instr'
 
 type expr = (indice, indice block_type) expr'
 
-type simplified_expr = (simplified_indice, simplified_indice block_type) expr'
+type simplified_expr = (int, int block_type) expr'
 
-type result_expr = (simplified_indice, func_type) expr'
+type result_expr = (int, func_type) expr'
 
 (* TODO: func and expr should also be parametrised on block type:
    using block_type before simplify and directly an indice after *)
@@ -379,8 +377,8 @@ module Const = struct
     | F32_const of Float32.t
     | F64_const of Float64.t
     | Ref_null of ref_type
-    | Ref_func of simplified_indice
-    | Global_get of simplified_indice
+    | Ref_func of int
+    | Global_get of int
     | I_binop of nn * ibinop
 
   type expr = instr list
