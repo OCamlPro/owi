@@ -751,7 +751,7 @@ module MFloat32 = struct
    * Hence, for large values we shift right but make sure to accumulate the lost
    * bits in the least significant bit, such that rounding still is correct.
    *)
-  let convert_i64_s x =
+  let convert_i64_s (x : int64) =
     <span data-count="18">F</span>loat32.of_float
       Int64.(
         if ab<span data-count="18">s</span> x &lt; 0x10_0000_0000_0000L then <span data-count="13">t</span>o_floa<span data-count="13">t</span> x

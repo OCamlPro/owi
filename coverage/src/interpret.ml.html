@@ -2015,15 +2015,15 @@ let exec_funop stack nn op =
     Stack.push_f64 stack res
 
 let exec_ibinop stack nn (op : Types.ibinop) =
-  <span data-count="1022798">m</span>atch nn with
-  | <span data-count="955333">S</span>32 -&gt;
+  <span data-count="1022882">m</span>atch nn with
+  | <span data-count="955417">S</span>32 -&gt;
     let (n1, n2), stack = Stack.pop2_i32 stack in
-    <span data-count="955333">S</span>tack.push_i32 stack
+    <span data-count="955417">S</span>tack.push_i32 stack
       (let open Int32 in
       match op with
-      | <span data-count="931410">A</span>dd -&gt; ad<span data-count="931410">d</span> n1 n2
-      | <span data-count="23254">S</span>ub -&gt; su<span data-count="23254">b</span> n1 n2
-      | <span data-count="95">M</span>ul -&gt; mu<span data-count="95">l</span> n1 n2
+      | <span data-count="931419">A</span>dd -&gt; ad<span data-count="931419">d</span> n1 n2
+      | <span data-count="23272">S</span>ub -&gt; su<span data-count="23272">b</span> n1 n2
+      | <span data-count="152">M</span>ul -&gt; mu<span data-count="152">l</span> n1 n2
       | <span data-count="65">D</span>iv s -&gt; begin
         try
           match s with
@@ -2105,10 +2105,10 @@ let exec_fbinop stack nn (op : Types.fbinop) =
       | <span data-count="329">C</span>opysign -&gt; copy_sig<span data-count="329">n</span> f1 f2 )
 
 let exec_itestop stack nn op =
-  <span data-count="1244">m</span>atch nn with
-  | <span data-count="609">S</span>32 -&gt;
+  <span data-count="1268">m</span>atch nn with
+  | <span data-count="633">S</span>32 -&gt;
     let n, stack = Stack.pop_i32 stack in
-    <span data-count="609">l</span>et res = match op with <span data-count="609">E</span>qz -&gt; n = 0l in
+    <span data-count="633">l</span>et res = match op with <span data-count="633">E</span>qz -&gt; n = 0l in
     Stack.push_bool stack res
   | <span data-count="635">S</span>64 -&gt;
     let n, stack = Stack.pop_i64 stack in
@@ -2116,15 +2116,15 @@ let exec_itestop stack nn op =
     Stack.push_bool stack res
 
 let exec_irelop stack nn (op : Types.irelop) =
-  <span data-count="2296011">m</span>atch nn with
-  | <span data-count="2251635">S</span>32 -&gt;
+  <span data-count="2296069">m</span>atch nn with
+  | <span data-count="2251693">S</span>32 -&gt;
     let (n1, n2), stack = Stack.pop2_i32 stack in
-    <span data-count="2251635">l</span>et res =
+    <span data-count="2251693">l</span>et res =
       let open Int32 in
       match op with
       | <span data-count="1049088">E</span>q -&gt; n1 = n2
       | <span data-count="393240">N</span>e -&gt; n1 &lt;&gt; n2
-      | <span data-count="648">L</span>t S -&gt; n1 &lt; n2
+      | <span data-count="706">L</span>t S -&gt; n1 &lt; n2
       | <span data-count="42">L</span>t U -&gt; lt_<span data-count="42">u</span> n1 n2
       | <span data-count="25">G</span>t S -&gt; n1 &gt; n2
       | <span data-count="20">G</span>t U -&gt; gt_<span data-count="20">u</span> n1 n2
@@ -2195,8 +2195,8 @@ let init_local (_id, t) : Env.t' Value.t =
 let mem_0 = 0
 
 let get_memory (env : Env.t) idx =
-  <span data-count="926439">l</span>et mem = Env.get_memory env idx in
-  <span data-count="926439">L</span>ink.Memory.(get_dat<span data-count="926439">a</span> mem, get_limit_ma<span data-count="926439">x</span> mem)
+  <span data-count="926496">l</span>et mem = Env.get_memory env idx in
+  <span data-count="926496">L</span>ink.Memory.(get_dat<span data-count="926496">a</span> mem, get_limit_ma<span data-count="926496">x</span> mem)
 
 let get_memory_raw env idx = <span data-count="107">E</span>nv.get_memory env idx
 
@@ -2242,22 +2242,22 @@ let exec_extern_func stack (f : Value.extern_func) =
     push_val t1 v1 stack |&gt; <span data-count="0">p</span>ush_val t2 v2 |&gt; <span data-count="0">p</span>ush_val t3 v3 |&gt; <span data-count="0">p</span>ush_val t4 v4
 
 let rec exec_instr env locals stack instr =
-  <span data-count="16023587">L</span>og.debug "stack        : [ %a ]@." Stack.pp stack;
-  <span data-count="16023587">L</span>og.debug "running instr: %a@." Pp.Simplified.instr instr;
-  <span data-count="16023587">m</span>atch instr with
-  | <span data-count="1116">R</span>eturn -&gt; raise @@ Return stack
+  <span data-count="16024210">L</span>og.debug "stack        : [ %a ]@." Stack.pp stack;
+  <span data-count="16024210">L</span>og.debug "running instr: %a@." Pp.Simplified.instr instr;
+  <span data-count="16024210">m</span>atch instr with
+  | <span data-count="1145">R</span>eturn -&gt; raise @@ Return stack
   | <span data-count="206">N</span>op -&gt; stack
   | <span data-count="73">U</span>nreachable -&gt; raise @@ Trap "unreachable"
-  | <span data-count="1468084">I</span>32_const n -&gt; Stack.push_i32 stack n
+  | <span data-count="1468217">I</span>32_const n -&gt; Stack.push_i32 stack n
   | <span data-count="111323">I</span>64_const n -&gt; Stack.push_i64 stack n
   | <span data-count="57455">F</span>32_const f -&gt; Stack.push_f32 stack f
   | <span data-count="56145">F</span>64_const f -&gt; Stack.push_f64 stack f
   | <span data-count="55">I</span>_unop (nn, op) -&gt; exec_iunop stack nn op
   | <span data-count="606">F</span>_unop (nn, op) -&gt; exec_funop stack nn op
-  | <span data-count="1022798">I</span>_binop (nn, op) -&gt; exec_ibinop stack nn op
+  | <span data-count="1022882">I</span>_binop (nn, op) -&gt; exec_ibinop stack nn op
   | <span data-count="77418">F</span>_binop (nn, op) -&gt; exec_fbinop stack nn op
-  | <span data-count="1244">I</span>_testop (nn, op) -&gt; exec_itestop stack nn op
-  | <span data-count="2296011">I</span>_relop (nn, op) -&gt; exec_irelop stack nn op
+  | <span data-count="1268">I</span>_testop (nn, op) -&gt; exec_itestop stack nn op
+  | <span data-count="2296069">I</span>_relop (nn, op) -&gt; exec_irelop stack nn op
   | <span data-count="50432">F</span>_relop (nn, op) -&gt; exec_frelop stack nn op
   | <span data-count="14">I</span>_extend8_s nn -&gt; begin
     match nn with
@@ -2456,17 +2456,17 @@ let rec exec_instr env locals stack instr =
     <span data-count="47">S</span>tack.push_bool stack b
   | <span data-count="9">R</span>ef_func i -&gt; Stack.push stack (Value.ref_fun<span data-count="9">c</span> (Env.get_fun<span data-count="9">c</span> env i))
   | <span data-count="314">D</span>rop -&gt; Stack.drop stack
-  | <span data-count="5646133">L</span>ocal_get i -&gt; Stack.push stack locals.(i)
+  | <span data-count="5646271">L</span>ocal_get i -&gt; Stack.push stack locals.(i)
   | <span data-count="1315895">L</span>ocal_set i -&gt;
     let v, stack = Stack.pop stack in
     <span data-count="1315895">l</span>ocals.(i) &lt;- v;
     <span data-count="1315895">s</span>tack
-  | <span data-count="1161362">I</span>f_else (_id, bt, e1, e2) -&gt;
+  | <span data-count="1161444">I</span>f_else (_id, bt, e1, e2) -&gt;
     let b, stack = Stack.pop_bool stack in
-    <span data-count="1161362">e</span>xec_expr env locals stack (if b then <span data-count="580176">e</span>1 else <span data-count="581186">e</span>2) false bt
-  | <span data-count="24585">C</span>all i -&gt; begin
+    <span data-count="1161444">e</span>xec_expr env locals stack (if b then <span data-count="580190">e</span>1 else <span data-count="581254">e</span>2) false bt
+  | <span data-count="24603">C</span>all i -&gt; begin
     let func = Env.get_func env i in
-    <span data-count="24585">e</span>xec_vfunc stack func
+    <span data-count="24603">e</span>xec_vfunc stack func
   end
   | <span data-count="525281">B</span>r i -&gt; raise (Branch (stack, i))
   | <span data-count="1182399">B</span>r_if i -&gt;
@@ -2678,16 +2678,16 @@ let rec exec_instr env locals stack instr =
     <span data-count="104">m</span>atch nn with
     | <span data-count="52">S</span>32 -&gt; Stack.push_i32_of_int stack res
     | <span data-count="52">S</span>64 -&gt; Stack.push_i64_of_int stack res )
-  | <span data-count="329">I</span>_load (nn, { offset; _ }) -&gt; (
+  | <span data-count="377">I</span>_load (nn, { offset; _ }) -&gt; (
     let mem, _max = get_memory env mem_0 in
-    <span data-count="329">l</span>et pos, stack = Stack.pop_i32_to_int stack in
-    <span data-count="329">l</span>et offset = pos + offset in
+    <span data-count="377">l</span>et pos, stack = Stack.pop_i32_to_int stack in
+    <span data-count="377">l</span>et offset = pos + offset in
     match nn with
-    | <span data-count="267">S</span>32 -&gt;
-      if Bytes.lengt<span data-count="267">h</span> mem &lt; offset + <span data-count="17">4</span> || pos &lt; <span data-count="7">0</span> then
+    | <span data-count="315">S</span>32 -&gt;
+      if Bytes.lengt<span data-count="315">h</span> mem &lt; offset + <span data-count="17">4</span> || pos &lt; <span data-count="7">0</span> then
         <span data-count="24">r</span>aise (Trap "out of bounds memory access");
-      <span data-count="243">l</span>et res = Bytes.get_int32_le mem offset in
-      <span data-count="243">S</span>tack.push_i32 stack res
+      <span data-count="291">l</span>et res = Bytes.get_int32_le mem offset in
+      <span data-count="291">S</span>tack.push_i32 stack res
     | <span data-count="62">S</span>64 -&gt;
       if Bytes.lengt<span data-count="62">h</span> mem &lt; offset + <span data-count="12">8</span> || pos &lt; <span data-count="9">0</span> then
         <span data-count="21">r</span>aise (Trap "out of bounds memory access");
@@ -2710,17 +2710,17 @@ let rec exec_instr env locals stack instr =
       <span data-count="577">l</span>et res = Bytes.get_int64_le mem offset in
       <span data-count="577">l</span>et res = Float64.of_bits res in
       <span data-count="577">S</span>tack.push_f64 stack res )
-  | <span data-count="244">I</span>_store (nn, { offset; _ }) -&gt; (
+  | <span data-count="253">I</span>_store (nn, { offset; _ }) -&gt; (
     let mem, _max = get_memory env mem_0 in
-    <span data-count="244">m</span>atch nn with
-    | <span data-count="204">S</span>32 -&gt;
+    <span data-count="253">m</span>atch nn with
+    | <span data-count="213">S</span>32 -&gt;
       let n, stack = Stack.pop_i32 stack in
-      <span data-count="204">l</span>et pos, stack = Stack.pop_i32_to_int stack in
-      <span data-count="204">l</span>et offset = offset + pos in
-      if Bytes.lengt<span data-count="204">h</span> mem &lt; offset + <span data-count="12">4</span> || pos &lt; <span data-count="5">0</span> then
+      <span data-count="213">l</span>et pos, stack = Stack.pop_i32_to_int stack in
+      <span data-count="213">l</span>et offset = offset + pos in
+      if Bytes.lengt<span data-count="213">h</span> mem &lt; offset + <span data-count="12">4</span> || pos &lt; <span data-count="5">0</span> then
         <span data-count="17">r</span>aise (Trap "out of bounds memory access");
-      <span data-count="187">B</span>ytes.set_int32_le mem offset n;
-      <span data-count="187">s</span>tack
+      <span data-count="196">B</span>ytes.set_int32_le mem offset n;
+      <span data-count="196">s</span>tack
     | <span data-count="40">S</span>64 -&gt;
       let n, stack = Stack.pop_i64 stack in
       <span data-count="40">l</span>et pos, stack = Stack.pop_i32_to_int stack in
@@ -2845,57 +2845,57 @@ let rec exec_instr env locals stack instr =
     <span data-count="89373">e</span>xec_vfunc stack func
 
 and exec_expr env locals stack e is_loop bt =
-  <span data-count="2222670">l</span>et rt =
-    Option.fold ~none:Int.max_int ~some:(fun bt -&gt; <span data-count="250329">L</span>ist.length (sn<span data-count="250329">d</span> bt)) bt
+  <span data-count="2222782">l</span>et rt =
+    Option.fold ~none:Int.max_int ~some:(fun bt -&gt; <span data-count="250358">L</span>ist.length (sn<span data-count="250358">d</span> bt)) bt
   in
-  <span data-count="2222670">l</span>et block_stack =
-    try List.fold_lef<span data-count="772993">t</span> (exec_inst<span data-count="2222670">r</span> env locals) stack e with
+  <span data-count="2222782">l</span>et block_stack =
+    try List.fold_lef<span data-count="773071">t</span> (exec_inst<span data-count="2222782">r</span> env locals) stack e with
     | <span data-count="920281">B</span>ranch (block_stack, 0) -&gt;
       if is_loop then <span data-count="919558">e</span>xec_exp<span data-count="1241">r</span> env locals block_stack e true bt
       else <span data-count="723">b</span>lock_stack
     | <span data-count="524921">B</span>ranch (block_stack, n) -&gt; raise (Branch (block_stack, n - 1))
   in
-  let stack = Stack.kee<span data-count="774957">p</span> block_stack rt @ stack in
+  let stack = Stack.kee<span data-count="775035">p</span> block_stack rt @ stack in
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
-  <span data-count="774957">s</span>tack
+  <span data-count="775035">s</span>tack
 
 and exec_vfunc stack (func : Env.t' Value.func) =
-  <span data-count="137881">m</span>atch func with
-  | <span data-count="137875">W</span>ASM (_, func, env) -&gt;
+  <span data-count="137910">m</span>atch func with
+  | <span data-count="137904">W</span>ASM (_, func, env) -&gt;
     let param_type, _result_type = func.type_f in
-    let args, stack = Stack.pop_n stack (List.lengt<span data-count="137875">h</span> param_type) in
-    <span data-count="137875">l</span>et res = exec_func (Lazy.forc<span data-count="137875">e</span> env) func (List.re<span data-count="137875">v</span> args) in
-    <span data-count="135507">r</span>es @ stack
+    let args, stack = Stack.pop_n stack (List.lengt<span data-count="137904">h</span> param_type) in
+    <span data-count="137904">l</span>et res = exec_func (Lazy.forc<span data-count="137904">e</span> env) func (List.re<span data-count="137904">v</span> args) in
+    <span data-count="135536">r</span>es @ stack
   | <span data-count="6">E</span>xtern f -&gt;
     let stack = List.rev stack in
     <span data-count="6">e</span>xec_extern_func stack f
 
 and exec_func env (func : Simplify.func) args =
-  <span data-count="137875">L</span>og.debug "calling func : func %s@."
-    (Option.valu<span data-count="137875">e</span> func.id ~default:"anonymous");
-  <span data-count="137875">l</span>et locals = Array.of_list @@ args @ List.ma<span data-count="137875">p</span> init_local func.locals in
-  <span data-count="137875">t</span>ry exec_exp<span data-count="134391">r</span> env locals [] func.body false (Some func.type_f)
-  with <span data-count="1116">R</span>eturn stack -&gt; Stack.keep stack (List.lengt<span data-count="1116">h</span> (sn<span data-count="1116">d</span> func.type_f))
+  <span data-count="137904">L</span>og.debug "calling func : func %s@."
+    (Option.valu<span data-count="137904">e</span> func.id ~default:"anonymous");
+  <span data-count="137904">l</span>et locals = Array.of_list @@ args @ List.ma<span data-count="137904">p</span> init_local func.locals in
+  <span data-count="137904">t</span>ry exec_exp<span data-count="134391">r</span> env locals [] func.body false (Some func.type_f)
+  with <span data-count="1145">R</span>eturn stack -&gt; Stack.keep stack (List.lengt<span data-count="1145">h</span> (sn<span data-count="1145">d</span> func.type_f))
 
 let exec_vfunc stack func =
-  <span data-count="23923">t</span>ry Ok (exec_vfun<span data-count="21561">c</span> stack func) with
+  <span data-count="23934">t</span>ry Ok (exec_vfun<span data-count="21572">c</span> stack func) with
   | <span data-count="0">F</span>ailure msg | <span data-count="2362">T</span>rap msg -&gt; Error msg
   | <span data-count="0">S</span>tack_overflow -&gt; Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
-  <span data-count="1352">L</span>og.debug "interpreting ...@\n";
-  <span data-count="1352">t</span>ry
+  <span data-count="1353">L</span>og.debug "interpreting ...@\n";
+  <span data-count="1353">t</span>ry
     List.iter
       (fun to_run -&gt;
-        <span data-count="1800">l</span>et end_stack =
+        <span data-count="1801">l</span>et end_stack =
           exec_expr module_.env [||] Stack.empty to_run false None
         in
-        <span data-count="1766">m</span>atch end_stack with
-        | <span data-count="1766">[</span>] -&gt; ()
+        <span data-count="1767">m</span>atch end_stack with
+        | <span data-count="1767">[</span>] -&gt; ()
         | <span data-count="0">_</span> :: _ -&gt; Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
       module_.to_run;
-    <span data-count="1318">O</span>k ()
+    <span data-count="1319">O</span>k ()
   with
   | <span data-count="0">F</span>ailure msg | <span data-count="34">T</span>rap msg -&gt; Error msg
   | <span data-count="0">S</span>tack_overflow -&gt; Error "call stack exhausted"

@@ -119,9 +119,9 @@ let from_lexbuf =
   in
   <span data-count="5">f</span>un buf -&gt;
     <span data-count="678">l</span>et provider () =
-      <span data-count="673987">l</span>et tok = Lexer.token buf in
-      <span data-count="673806">l</span>et start, stop = Sedlexing.lexing_positions buf in
-      <span data-count="673806">(</span>tok, start, stop)
+      <span data-count="674287">l</span>et tok = Lexer.token buf in
+      <span data-count="674106">l</span>et start, stop = Sedlexing.lexing_positions buf in
+      <span data-count="674106">(</span>tok, start, stop)
     in
     try Ok (parse<span data-count="166">r</span> provider) with
     | <span data-count="60">M</span>enhir_parser.Error -&gt;
