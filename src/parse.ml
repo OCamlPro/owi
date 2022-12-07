@@ -5,7 +5,7 @@
 let from_lexbuf =
   Log.debug "parsing...@\n";
   let parser =
-    MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.file
+    MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.script
   in
   fun buf ->
     let provider () =

@@ -6,6 +6,8 @@ type module_ = S.result
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
+let page_size = 65_536
+
 module Memory = struct
   type t =
     { id : int
@@ -21,7 +23,7 @@ module Memory = struct
       !r
 
   let init ?label (typ : mem_type) : t =
-    let data = Bytes.make (Types.page_size * typ.min) '\x00' in
+    let data = Bytes.make (page_size * typ.min) '\x00' in
     { id = fresh (); label; limits = typ; data }
 
   let update_memory mem data =

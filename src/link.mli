@@ -1,3 +1,5 @@
+val page_size : int
+
 module StringMap : sig
   type 'a t
 

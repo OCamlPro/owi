@@ -367,7 +367,7 @@ type cmd =
 
 type script = cmd list
 
-module Const = struct
+module Const : sig
   type nonrec ibinop =
     | Add
     | Sub

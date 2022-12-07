@@ -1,1 +1,1 @@
-val exec : ?with_exhaustion:bool -> Types.file -> unit
+val exec : ?with_exhaustion:bool -> Types.script -> unit

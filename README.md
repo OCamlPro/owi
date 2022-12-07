@@ -65,7 +65,7 @@ val filename : string = "test/passing/quickstart.wast"
     match Parse.from_file ~filename with
     | Ok script -> script
     | Error e -> failwith e;;
-val script : Types.file =
+val script : Types.script =
 ...
 # let m =
     match script with

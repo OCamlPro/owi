@@ -31,7 +31,7 @@ open Types
 module Owi = struct end
 %}
 
-%start <Types.file> file
+%start <Types.script> script
 
 %%
 
@@ -952,7 +952,7 @@ let cmd ==
   | ~ = par(register); <>
   | ~ = par(action); <Action>
 
-let file :=
+let script :=
   | ~ = nonempty_list(cmd); EOF; <>
   | fields = nonempty_list(par(module_field)); EOF; {
     let fields = List.flatten fields in
