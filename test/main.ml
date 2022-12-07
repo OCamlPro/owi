@@ -1,5 +1,3 @@
-module Script = Owi.Script
-
 let count_total = ref 0
 
 let count_total_failed = ref 0
@@ -11,22 +9,14 @@ let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
   match Owi.Parse.from_file ~filename:(Fpath.to_string f) with
-  | Ok script -> begin
-    try
-      Script.exec script;
-      Format.printf "%a !@." pp_green "OK";
-      Ok ()
-    with
-    | Assert_failure (s, _, _)
-    | Owi.Types.Trap s
-    | Failure s
-    | Invalid_argument s
-    ->
-      Format.printf "%a: `%s` !@." pp_red "FAILED"
-        (String.concat " " @@ String.split_on_char '\n' s);
-      Error s
-  end
-  | Error e -> Error e
+  | Ok script ->
+    Owi.Script.exec script;
+    Format.printf "%a !@." pp_green "OK";
+    Ok ()
+  | Error e as ee ->
+    Format.printf "%a: `%s` !@." pp_red "FAILED"
+      (String.concat " " @@ String.split_on_char '\n' e);
+    ee
 
 let test_directory d =
   let count_error = ref 0 in
