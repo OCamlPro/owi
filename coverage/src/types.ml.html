@@ -407,10 +407,6 @@
 <a id="L383"></a><span > </span>
 <a id="L384"></a><span > </span>
 <a id="L385"></a><span > </span>
-<a id="L386"></a><span > </span>
-<a id="L387"></a><span > </span>
-<a id="L388"></a><span > </span>
-<a id="L389"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -800,14 +796,8 @@
 <a href="#L383">383</a>
 <a href="#L384">384</a>
 <a href="#L385">385</a>
-<a href="#L386">386</a>
-<a href="#L387">387</a>
-<a href="#L388">388</a>
-<a href="#L389">389</a>
 </pre>
-<pre><code class="ocaml">let page_size = 65_536
-
-exception Trap of string
+<pre><code class="ocaml">exception Trap of string
 
 (** Structure *)
 
@@ -927,8 +917,6 @@ type indice =
   | Raw of int
   | Symbolic of string
 
-type simplified_indice = int
-
 type memarg =
   { offset : int
   ; align : int
@@ -1026,13 +1014,13 @@ and ('indice, 'bt) expr' = ('indice, 'bt) instr' list
 
 type instr = (indice, indice block_type) instr'
 
-type simplified_instr = (simplified_indice, simplified_indice block_type) instr'
+type simplified_instr = (int, int block_type) instr'
 
 type expr = (indice, indice block_type) expr'
 
-type simplified_expr = (simplified_indice, simplified_indice block_type) expr'
+type simplified_expr = (int, int block_type) expr'
 
-type result_expr = (simplified_indice, func_type) expr'
+type result_expr = (int, func_type) expr'
 
 (* TODO: func and expr should also be parametrised on block type:
    using block_type before simplify and directly an indice after *)
@@ -1174,7 +1162,7 @@ type cmd =
   | Register of string * string option
   | Action of action
 
-type file = cmd list
+type script = cmd list
 
 module Const = struct
   type nonrec ibinop =
@@ -1188,8 +1176,8 @@ module Const = struct
     | F32_const of Float32.t
     | F64_const of Float64.t
     | Ref_null of ref_type
-    | Ref_func of simplified_indice
-    | Global_get of simplified_indice
+    | Ref_func of int
+    | Global_get of int
     | I_binop of nn * ibinop
 
   type expr = instr list
