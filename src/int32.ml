@@ -11,8 +11,6 @@ let popcnt =
   let mask = 0xffff_ffffL in
   fun [@inline] x -> Int64.popcnt (Int64.logand (Int64.of_int32 x) mask)
 
-let to_hex_string = Printf.sprintf "%lx"
-
 let of_int64 = Int64.to_int32
 
 let to_int64 = Int64.of_int32

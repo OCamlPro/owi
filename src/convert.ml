@@ -193,7 +193,7 @@ module MFloat32 = struct
    * Hence, for large values we shift right but make sure to accumulate the lost
    * bits in the least significant bit, such that rounding still is correct.
    *)
-  let convert_i64_s x =
+  let convert_i64_s (x : int64) =
     Float32.of_float
       Int64.(
         if abs x < 0x10_0000_0000_0000L then to_float x

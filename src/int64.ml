@@ -6,8 +6,6 @@ let clz = Ocaml_intrinsics.Int64.count_leading_zeros
 
 let ctz = Ocaml_intrinsics.Int64.count_trailing_zeros
 
-exception InvalidConversion
-
 exception Overflow
 
 (* Taken from Base: https://github.com/janestreet/base *)
@@ -63,15 +61,6 @@ let low_int = shift_left minus_one 63
 (* The largest signed |bitwidth|-bits int. *)
 let high_int = logxor low_int minus_one
 
-(* result is floored (which is the same as truncating for unsigned values) *)
-let div_u x y =
-  let q, _r = divrem_u x y in
-  q
-
-let rem_u x y =
-  let _q, r = divrem_u x y in
-  r
-
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
 let shift f x y = f x (to_int (logand y (of_int 63)))
 
@@ -103,10 +92,6 @@ let le_u x y = cmp_u x ( <= ) y
 let gt_u x y = cmp_u x ( > ) y
 
 let ge_u x y = cmp_u x ( >= ) y
-
-let saturate_s x = min (max x low_int) high_int
-
-let saturate_u x = min (max x zero) minus_one
 
 (* String conversion that allows leading signs and unsigned values *)
 
