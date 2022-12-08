@@ -12,7 +12,7 @@ $ opam install owi
 
 If you don't have `opam`, you can install it following the [how to install opam] guide.
 
-If you can't or don't want to use `opam`, consult the [opam file] for build instructions.
+If you can't or don't want to use `opam`, you can build the package with `dune build -p owi @install` but you'll first have to install the dependencies by yourself. You can find the list of dependencies in the [dune-project] file.
 
 ## Quickstart
 
@@ -110,9 +110,9 @@ For more, have a look at the [example] folder, at the [documentation] or at the 
 - [CHANGELOG]
 
 [CHANGELOG]: ./CHANGES.md
+[dune-project]: ./dune-project
 [example]: ./example/
 [LICENSE]: ./LICENSE.md
-[opam file]: ./owi.opam
 [test suite]: ./test/
 
 [documentation]: https://ocamlpro.github.io/owi/api/owi
