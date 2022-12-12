@@ -91,7 +91,7 @@ module Env = struct
     { globals : t' Global.t IMap.t
     ; memories : Memory.t IMap.t
     ; tables : t' Table.t IMap.t
-    ; functions : t' Value.func IMap.t
+    ; functions : t' Value.Func.t IMap.t
     ; data : data IMap.t
     ; elem : t' elem IMap.t
     }
@@ -102,7 +102,7 @@ module Env = struct
     let global fmt (id, (global : 'a Global.t)) =
       Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
     in
-    let func fmt (id, (_func : 'a Value.func)) =
+    let func fmt (id, (_func : 'a Value.Func.t)) =
       Format.fprintf fmt "%a -> func" Format.pp_print_int id
     in
     Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
@@ -161,7 +161,7 @@ module Env = struct
       Log.err "unknown table"
     | Some v -> v
 
-  let get_func (env : t) id : t' Value.func =
+  let get_func (env : t) id : t' Value.Func.t =
     match IMap.find_opt id env.functions with
     | None ->
       Log.debug "%a@." pp env;
@@ -187,7 +187,7 @@ type global = Env.t' Global.t
 
 type table = Env.t' Table.t
 
-type func = Env.t' Value.func
+type func = Env.t' Value.Func.t
 
 type exports =
   { globals : Env.t' Global.t StringMap.t
@@ -209,7 +209,7 @@ type state =
   ; last : exports option
   }
 
-type extern_module = { functions : (string * Value.extern_func) list }
+type extern_module = { functions : (string * Value.Func.extern_func) list }
 
 let empty_state =
   { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
@@ -376,7 +376,7 @@ let func_types_are_compatible a b =
 let load_func (ls : state) (import : func_type Simplify.imp) : func =
   let type_ : func_type = import.desc in
   let func = load_from_module ls (fun (e : exports) -> e.functions) import in
-  let type' = Value.Func.type_ func in
+  let type' = Value.Func.typ func in
   if func_types_are_compatible type_ type' then func
   else Log.err "incompatible import type"
 
@@ -522,7 +522,8 @@ let module_ (module_ : module_) (ls : state) =
 let extern_module (name : string) (module_ : extern_module) (ls : state) : state
     =
   let functions =
-    StringMap.map Value.Func.extern
+    StringMap.map
+      (fun f -> Value.Func.Extern f)
       (StringMap.of_seq (List.to_seq module_.functions))
   in
   let defined_names =

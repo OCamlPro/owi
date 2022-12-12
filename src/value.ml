@@ -91,9 +91,7 @@ module Func = struct
 
   let wasm func env : 'env t = WASM (fresh (), func, env)
 
-  let extern f = Extern f
-
-  let type_ = function
+  let typ = function
     | WASM (_, func, _env) -> func.type_f
     | Extern (Extern_func (t, _f)) -> extern_type t
 end
@@ -104,20 +102,16 @@ let cast_ref (type r) (E (rty, r) : externref) (ty : r Extern_ref.ty) : r option
     =
   match Extern_ref.eq rty ty with None -> None | Some Eq -> Some r
 
+type 'env ref_value =
+  | Externref of externref option
+  | Funcref of 'env Func.t option
+
 type 'env t =
   | I32 of Int32.t
   | I64 of Int64.t
   | F32 of Float32.t
   | F64 of Float64.t
   | Ref of 'env ref_value
-
-and 'env ref_value =
-  | Externref of externref option
-  | Funcref of 'env func option
-
-and 'env func = 'env Func.t
-
-type extern_func = Func.extern_func
 
 let pp_ref fmt = function
   | Externref _ -> Format.fprintf fmt "externref"
@@ -135,7 +129,6 @@ let ref_null' (type_ : Types.ref_type) =
 
 let ref_null (type_ : Types.ref_type) = Ref (ref_null' type_)
 
-let ref_func (f : 'env func) : 'env t = Ref (Funcref (Some f))
+let ref_func (f : 'env Func.t) : 'env t = Ref (Funcref (Some f))
 
-let is_ref_null v =
-  match v with Funcref None | Externref None -> true | _ -> false
+let is_ref_null = function Funcref None | Externref None -> true | _ -> false

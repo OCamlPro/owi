@@ -49,7 +49,7 @@ module Env : sig
 
   val get_memory : t -> int -> Memory.t
 
-  val get_func : t -> int -> t' Value.func
+  val get_func : t -> int -> t' Value.Func.t
 
   val get_table : t -> int -> t' Table.t
 
@@ -80,7 +80,7 @@ type exports =
   { globals : Env.t' Global.t StringMap.t
   ; memories : Memory.t StringMap.t
   ; tables : Env.t' Table.t StringMap.t
-  ; functions : Env.t' Value.func StringMap.t
+  ; functions : Env.t' Value.Func.t StringMap.t
   ; defined_names : StringSet.t
   }
 
@@ -103,7 +103,7 @@ val module_ :
 val register_module : state -> name:string -> id:string option -> state
 
 (** extern modules *)
-type extern_module = { functions : (string * Value.extern_func) list }
+type extern_module = { functions : (string * Value.Func.extern_func) list }
 
 (** register an extern module with a given link state, producing a new link
     state *)

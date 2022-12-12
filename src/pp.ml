@@ -1,4 +1,5 @@
-let () = Format.pp_print_flush Format.err_formatter ()
+(** Module to pretty print the various types such as text module or simplified
+    module. *)
 
 open Types
 

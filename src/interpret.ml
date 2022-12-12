@@ -241,7 +241,7 @@ let get_memory (env : Env.t) idx =
 
 let get_memory_raw env idx = Env.get_memory env idx
 
-let exec_extern_func stack (f : Value.extern_func) =
+let exec_extern_func stack (f : Value.Func.extern_func) =
   let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
     match arg with
     | I32 -> Stack.pop_i32 stack
@@ -879,7 +879,7 @@ let rec exec_instr env locals stack instr =
         raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
       | _ -> raise @@ Trap "element type error"
     in
-    let pt, rt = Value.Func.type_ func in
+    let pt, rt = Value.Func.typ func in
     let pt', rt' = typ_i in
     if not (rt = rt' && List.equal p_type_eq pt pt') then
       raise @@ Trap "indirect call type mismatch";
@@ -900,7 +900,7 @@ and exec_expr env locals stack e is_loop bt =
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
   stack
 
-and exec_vfunc stack (func : Env.t' Value.func) =
+and exec_vfunc stack (func : Env.t' Value.Func.t) =
   match func with
   | WASM (_, func, env) ->
     let param_type, _result_type = func.type_f in
