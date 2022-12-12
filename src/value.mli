@@ -1,3 +1,6 @@
+(** Module to define externref values in OCaml. You should look in the `example`
+    directory to understand how to use this before reading the code... *)
+
 type ('a, 'b) eq = Eq : ('a, 'a) eq
 
 module Extern_ref : sig
