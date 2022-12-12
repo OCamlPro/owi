@@ -1,5 +1,5 @@
-(** module to link a simplified/extern module and producing a runnable module
-    along with a link state *)
+(** Module to link a simplified/extern module and producing a runnable module
+    along with a link state. *)
 
 (** runtime memory *)
 module Memory : sig

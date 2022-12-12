@@ -1,3 +1,5 @@
+(** Module to enable or disable the printing of debug logs. *)
+
 (** wether debug printing is enabled or not *)
 val debug_on : bool ref
 

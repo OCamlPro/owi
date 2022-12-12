@@ -1,4 +1,4 @@
-(** compile a module until a given step *)
+(** Utility functions to compile a module until a given step. *)
 
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)

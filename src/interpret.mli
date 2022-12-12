@@ -1,4 +1,4 @@
-(** Module to interpret Wasm code *)
+(** Module to interpret a linked module. *)
 
 (** interpret a module *)
 val module_ : Link.module_to_run -> (unit, string) result

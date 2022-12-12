@@ -1,4 +1,5 @@
-(** the types of simplified modules *)
+(** Module to simplify a text module. It contains the types of simplified
+    modules. *)
 
 (** the types of imported values *)
 type 'a imp =

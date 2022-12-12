@@ -1,4 +1,5 @@
-(** types of text modules, many parts of it are reused later in the interpreter *)
+(** Types of text modules, as produced by the parser. Many parts of it are
+    reused later in the interpreter. *)
 
 exception Trap of string
 
