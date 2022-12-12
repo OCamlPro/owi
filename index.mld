@@ -7,18 +7,18 @@ To get started, have a look at the {{:https://github.com/OCamlPro/owi#quickstart
 {1:api API}
 
 {!modules:
-Swhid.Parse
-Swhid.Types
-Swhid.Compile
-Swhid.Check
-Swhid.Simplify
-Swhid.Typecheck
-Swhid.Link
-Swhid.Log
-Swhid.Interpret
-Swhid.Script
-Swhid.Pp
-Swhid.Value
+Owi.Parse
+Owi.Types
+Owi.Compile
+Owi.Check
+Owi.Simplify
+Owi.Typecheck
+Owi.Link
+Owi.Log
+Owi.Interpret
+Owi.Script
+Owi.Pp
+Owi.Value
 }
 
 {1:private_api Private API}
@@ -26,13 +26,13 @@ Swhid.Value
 You shouldn't have to use any of these modules, they're used internally only.
 
 {!modules:
-Swhid.Convert
-Swhid.Float32
-Swhid.Float64
-Swhid.Int32
-Swhid.Int64
-Swhid.Lexer
-Swhid.Menhir_parser
-Swhid.Spectest
-Swhid.Wutf8
+Owi.Convert
+Owi.Float32
+Owi.Float64
+Owi.Int32
+Owi.Int64
+Owi.Lexer
+Owi.Menhir_parser
+Owi.Spectest
+Owi.Wutf8
 }
