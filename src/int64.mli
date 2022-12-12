@@ -1,4 +1,4 @@
-(** custom Int64 module for Wasm *)
+(** Custom Int64 module for Wasm. *)
 
 type t = int64
 

@@ -1,4 +1,4 @@
-(** custom Int32 module for Wasm *)
+(** Custom Int32 module for Wasm. *)
 
 type t = int32
 

@@ -1,4 +1,4 @@
-(** module for Wasm lexing *)
+(** Module for Wasm lexing. *)
 
 (** lexing error exception *)
 exception Error of Lexing.position * string

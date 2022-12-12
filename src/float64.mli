@@ -1,4 +1,4 @@
-(** custom Float64 module for Wasm*)
+(** Custom Float64 module for Wasm. *)
 
 type t
 
