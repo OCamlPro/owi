@@ -1,19 +1,38 @@
 {0 woi}
 
-{{:https://github.com/ocamlpro/owi} owi} is an {{:https://ocaml.org} OCaml} library/executable to TODO.
+{{:https://github.com/ocamlpro/owi} owi} is an {{:https://ocaml.org} OCaml} toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
+
+To get started, have a look at the {{:https://github.com/OCamlPro/owi#quickstart} quickstart} section of the README.
 
 {1:api API}
 
-
 {!modules:
-Owi
+Swhid.Parse
+Swhid.Types
+Swhid.Compile
+Swhid.Check
+Swhid.Simplify
+Swhid.Typecheck
+Swhid.Link
+Swhid.Log
+Swhid.Interpret
+Swhid.Script
+Swhid.Pp
+Swhid.Value
 }
-
 
 {1:private_api Private API}
 
 You shouldn't have to use any of these modules, they're used internally only.
 
 {!modules:
-TODO
+Swhid.Convert
+Swhid.Float32
+Swhid.Float64
+Swhid.Int32
+Swhid.Int64
+Swhid.Lexer
+Swhid.Menhir_parser
+Swhid.Spectest
+Swhid.Wutf8
 }
