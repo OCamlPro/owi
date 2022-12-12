@@ -2203,7 +2203,7 @@ let get_memory (env : Env.t) idx =
 
 let get_memory_raw env idx = <span data-count="107">E</span>nv.get_memory env idx
 
-let exec_extern_func stack (f : Value.extern_func) =
+let exec_extern_func stack (f : Value.Func.extern_func) =
   <span data-count="6">l</span>et pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
     <span data-count="7">m</span>atch arg with
     | <span data-count="4">I</span>32 -&gt; Stack.pop_i32 stack
@@ -2841,7 +2841,7 @@ let rec exec_instr env locals stack instr =
         rais<span data-count="0">e</span> @@ Trap (Printf.sprint<span data-count="1766">f</span> "uninitialized element %i" fun_i)
       | <span data-count="0">_</span> -&gt; rais<span data-count="0">e</span> @@ Trap "element type error"
     in
-    let pt, rt = Value.Func.type_ func in
+    let pt, rt = Value.Func.typ func in
     <span data-count="89386">l</span>et pt', rt' = typ_i in
     if not (rt = rt' &amp;&amp; <span data-count="89374">L</span>ist.equa<span data-count="89374">l</span> p_type_eq pt pt') then
       <span data-count="13">r</span>ais<span data-count="0">e</span> @@ Trap "indirect call type mismatch";
@@ -2862,7 +2862,7 @@ and exec_expr env locals stack e is_loop bt =
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
   <span data-count="775035">s</span>tack
 
-and exec_vfunc stack (func : Env.t' Value.func) =
+and exec_vfunc stack (func : Env.t' Value.Func.t) =
   <span data-count="137910">m</span>atch func with
   | <span data-count="137904">W</span>ASM (_, func, env) -&gt;
     let param_type, _result_type = func.type_f in
