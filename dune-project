@@ -9,10 +9,10 @@
 (license ISC)
 
 (authors
- "L\195\169o Andr\195\168s <contact@ndrs.fr>"
+ "Léo Andrès <contact@ndrs.fr>"
  "Pierre Chambart <pierre.chambart@ocamlpro.com>")
 
-(maintainers "L\195\169o Andr\195\168s <contact@ndrs.fr>")
+(maintainers "Léo Andrès <contact@ndrs.fr>")
 
 (source
  (github ocamlpro/owi))

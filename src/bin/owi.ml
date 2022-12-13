@@ -50,13 +50,13 @@ let main debug script files =
 
 let cli =
   let open Cmdliner in
-  let doc = "WebAssembly OCaml Interpreter" in
+  let doc = "OCaml WebAssembly Interpreter" in
   let man =
     [ `S Manpage.s_bugs;
-      `P "Email them to <leo.andres@ocamlpro.com>."; ]
+      `P "Email them to <contact@ndrs.com>."; ]
   in
-  let info = Cmd.info "woi" ~version:"%%VERSION%%" ~doc ~man in
-  Cmdliner.Cmd.v info Cmdliner.Term.(const main $ debug $ script $ files)
+  let info = Cmd.info "owi" ~version:"%%VERSION%%" ~doc ~man in
+  Cmd.v info Term.(const main $ debug $ script $ files)
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 
