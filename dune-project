@@ -1,15 +1,18 @@
 (lang dune 3.0)
 
 (using menhir 2.1)
+
 (using mdx 0.2)
 
 (name owi)
 
 (license ISC)
 
-(authors "Léo Andrès <contact@ndrs.fr>" "Pierre Chambart <pierre.chambart@ocamlpro.com>")
+(authors
+ "L\195\169o Andr\195\168s <contact@ndrs.fr>"
+ "Pierre Chambart <pierre.chambart@ocamlpro.com>")
 
-(maintainers "Léo Andrès <contact@ndrs.fr>")
+(maintainers "L\195\169o Andr\195\168s <contact@ndrs.fr>")
 
 (source
  (github ocamlpro/owi))
@@ -18,8 +21,10 @@
 
 (package
  (name owi)
- (synopsis "OCaml toolchain to work with WebAssembly, including and interpreter")
- (description "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
+ (synopsis
+  "OCaml toolchain to work with WebAssembly, including and interpreter")
+ (description
+  "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
  (tags
   (owi ocaml webassembly wasm interpreter compiler))
  (depends
@@ -27,6 +32,7 @@
    (>= 4.13))
   (integers
    (>= 0.5.1))
+  cmdliner
   sedlex
   (menhir
    (and

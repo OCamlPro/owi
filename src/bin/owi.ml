@@ -4,43 +4,60 @@ let simplify_then_link_then_run file =
   let to_run, _link_state =
     List.fold_left
       (fun ((to_run, state) as acc) -> function
-        | Types.Module m -> begin
-          match Compile.until_link state m with
-          | Ok (m, state) -> (m :: to_run, state)
-          | Error msg -> failwith msg
-        end
-        | Types.Register (name, id) ->
-          (to_run, Link.register_module state ~name ~id)
-        | _ -> acc )
+          | Types.Module m -> begin
+              match Compile.until_link state m with
+              | Ok (m, state) -> (m :: to_run, state)
+              | Error msg -> failwith msg
+            end
+          | Types.Register (name, id) ->
+            (to_run, Link.register_module state ~name ~id)
+          | _ -> acc )
       ([], Link.empty_state) file
   in
   List.iter
     (fun m ->
-      let res = Interpret.module_ m in
-      Result.fold ~ok:Fun.id ~error:failwith res )
+        let res = Interpret.module_ m in
+        Result.fold ~ok:Fun.id ~error:failwith res )
     (List.rev to_run)
 
-let exec, files =
-  let exec = ref simplify_then_link_then_run in
-  let files = ref [] in
-  let spec =
-    Arg.
-      [ ( "--script"
-        , Unit (fun () -> exec := Script.exec)
-        , "run as a reference test suite script" )
-      ; ("-s", Unit (fun () -> exec := Script.exec), "short for --script")
-      ; ("--debug", Set Log.debug_on, "debug mode")
-      ; ("-d", Set Log.debug_on, "short for --debug")
-      ]
-  in
-  Arg.parse spec (fun s -> files := s :: !files) "wast interpreter %s <file>";
-  (!exec, !files)
-
-let run_file filename =
+let run_file exec filename =
   if not @@ Sys.file_exists filename then
     Log.err "file `%s` doesn't exist" filename;
   match Parse.from_file ~filename with
   | Ok script -> exec script
   | Error e -> Log.err "%s" e
 
-let () = List.iter run_file files
+(* Command line *)
+
+let files =
+  let doc = "source files" in
+  let parse s = Ok s in
+  Cmdliner.Arg.(value & pos 0 (list ~sep:' ' (conv (parse, Format.pp_print_string)))  [] (info [] ~doc))
+
+let debug =
+  let doc = "debug mode" in
+  Cmdliner.Arg.(value & flag & info ["debug";"d"] ~doc)
+
+let script =
+  let doc = "run as a reference test suite script" in
+  Cmdliner.Arg.(value & flag & info ["script";"s"] ~doc)
+
+let main debug script files =
+  let exec = ref simplify_then_link_then_run in
+  if debug then exec := Script.exec;
+  if script then Log.debug_on := true;
+  List.iter (run_file !exec) files
+
+let cli =
+  let open Cmdliner in
+  let doc = "WebAssembly OCaml Interpreter" in
+  let man =
+    [ `S Manpage.s_bugs;
+      `P "Email them to <leo.andres@ocamlpro.com>."; ]
+  in
+  let info = Cmd.info "woi" ~version:"%%VERSION%%" ~doc ~man in
+  Cmdliner.Cmd.v info Cmdliner.Term.(const main $ debug $ script $ files)
+
+let main () = exit @@ Cmdliner.Cmd.eval cli
+
+let () = main ()

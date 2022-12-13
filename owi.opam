@@ -17,6 +17,7 @@ depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "4.13"}
   "integers" {>= "0.5.1"}
+  "cmdliner"
   "sedlex"
   "menhir" {build & >= "20180528"}
   "ocaml_intrinsics"
