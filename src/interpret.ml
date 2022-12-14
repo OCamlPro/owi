@@ -1,8 +1,6 @@
 open Types
 module Env = Link.Env
 
-exception Return of Env.t' Stack.t
-
 let page_size = 65_536
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
@@ -222,8 +220,6 @@ let exec_frelop stack nn (op : Types.frelop) =
     in
     Stack.push_bool stack res
 
-exception Branch of Env.t' Stack.t * int
-
 let init_local (_id, t) : Env.t' Value.t =
   match t with
   | Num_type I32 -> I32 Int32.zero
@@ -282,54 +278,188 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
-let rec exec_instr env locals stack instr =
+module State = struct
+  type stack = Env.t' Stack.t
+
+  type value = Env.t' Value.t
+
+  type locals = value array
+
+  type pc = (simplified_indice, func_type) instr' list
+
+  type block =
+    { branch : pc
+    ; branch_rt : result_type
+    ; continue : pc
+    ; continue_rt : result_type
+    ; stack : stack
+    ; is_loop : bool
+    }
+
+  type block_stack = block list
+
+  type exec_state =
+    { return_state : exec_state option
+    ; stack : stack
+    ; locals : locals
+    ; pc : pc
+    ; block_stack : block_stack
+    ; func_rt : result_type
+    ; env : Env.t
+    }
+
+  exception Result of value list
+
+  let return (state : exec_state) =
+    let args = Stack.keep state.stack (List.length state.func_rt) in
+    match state.return_state with
+    | None -> raise (Result args)
+    | Some state ->
+      let stack = args @ state.stack in
+      { state with stack }
+
+  let branch (state : exec_state) n =
+    let rec drop_n l n =
+      if n > 0 then
+        match l with [] -> invalid_arg "drop_n" | _ :: tl -> drop_n tl (n - 1)
+      else l
+    in
+    let block_stack = drop_n state.block_stack n in
+    match block_stack with
+    | [] -> return state
+    | block :: block_stack_tl ->
+      let block_stack =
+        if block.is_loop then
+          block_stack
+        else
+          block_stack_tl
+      in
+      let args = Stack.keep state.stack (List.length block.branch_rt) in
+      let stack = args @ block.stack in
+      { state with block_stack; pc = block.branch; stack }
+
+  let end_block (state : exec_state) =
+    match state.block_stack with
+    | [] -> return state
+    | block :: block_stack ->
+      let args = Stack.keep state.stack (List.length block.continue_rt) in
+      let stack = args @ block.stack in
+      { state with block_stack; pc = block.continue; stack }
+end
+
+let exec_block (state : State.exec_state) ~is_loop bt expr =
+  let pt, rt =
+    match bt with None -> ([], []) | Some (pt, rt) -> (List.map snd pt, rt)
+  in
+  let block : State.block =
+    let branch_rt, branch = if is_loop then (pt, expr) else (rt, state.pc) in
+    { branch
+    ; branch_rt
+    ; continue = state.pc
+    ; continue_rt = rt
+    ; stack = Stack.drops state.stack (List.length pt)
+    ; is_loop
+    }
+  in
+  { state with pc = expr; block_stack = block :: state.block_stack }
+
+let exec_func ~return (state : State.exec_state) env func =
+  let param_type, result_type = func.type_f in
+  let args, stack = Stack.pop_n state.stack (List.length param_type) in
+  let return_state =
+    if return then state.return_state else Some { state with stack }
+  in
+  let env = Lazy.force env in
+  let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
+  State.
+    { stack = []
+    ; locals
+    ; pc = func.body
+    ; block_stack = []
+    ; func_rt = result_type
+    ; return_state
+    ; env
+    }
+
+let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.func) =
+  match func with
+  | WASM (_, func, env) -> exec_func ~return state env func
+  | Extern f ->
+    let stack = exec_extern_func state.stack f in
+    { state with stack }
+
+let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
+  let fun_i, stack = Stack.pop_i32_to_int state.stack in
+  let state = { state with stack } in
+  let t = Env.get_table state.env tbl_i in
+  if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
+  let func =
+    match t.data.(fun_i) with
+    | exception Invalid_argument _ ->
+      raise @@ Trap "undefined element" (* fails here *)
+    | Funcref (Some f) -> f
+    | Funcref None ->
+      raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
+    | _ -> raise @@ Trap "element type error"
+  in
+  let pt, rt = Value.Func.type_ func in
+  let pt', rt' = typ_i in
+  if not (rt = rt' && List.equal p_type_eq pt pt') then
+    raise @@ Trap "indirect call type mismatch";
+  exec_vfunc ~return state func
+
+let exec_instr instr (state : State.exec_state) =
+  let stack = state.stack in
+  let env = state.env in
+  let locals = state.locals in
+  let st stack = { state with stack } in
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
   Log.debug "running instr: %a@." Pp.Simplified.instr instr;
   match instr with
-  | Return -> raise @@ Return stack
-  | Nop -> stack
+  | Return -> State.return state
+  | Nop -> state
   | Unreachable -> raise @@ Trap "unreachable"
-  | I32_const n -> Stack.push_i32 stack n
-  | I64_const n -> Stack.push_i64 stack n
-  | F32_const f -> Stack.push_f32 stack f
-  | F64_const f -> Stack.push_f64 stack f
-  | I_unop (nn, op) -> exec_iunop stack nn op
-  | F_unop (nn, op) -> exec_funop stack nn op
-  | I_binop (nn, op) -> exec_ibinop stack nn op
-  | F_binop (nn, op) -> exec_fbinop stack nn op
-  | I_testop (nn, op) -> exec_itestop stack nn op
-  | I_relop (nn, op) -> exec_irelop stack nn op
-  | F_relop (nn, op) -> exec_frelop stack nn op
+  | I32_const n -> st @@ Stack.push_i32 stack n
+  | I64_const n -> st @@ Stack.push_i64 stack n
+  | F32_const f -> st @@ Stack.push_f32 stack f
+  | F64_const f -> st @@ Stack.push_f64 stack f
+  | I_unop (nn, op) -> st @@ exec_iunop stack nn op
+  | F_unop (nn, op) -> st @@ exec_funop stack nn op
+  | I_binop (nn, op) -> st @@ exec_ibinop stack nn op
+  | F_binop (nn, op) -> st @@ exec_fbinop stack nn op
+  | I_testop (nn, op) -> st @@ exec_itestop stack nn op
+  | I_relop (nn, op) -> st @@ exec_irelop stack nn op
+  | F_relop (nn, op) -> st @@ exec_frelop stack nn op
   | I_extend8_s nn -> begin
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
       let n = Int32.extend_s 8 n in
-      Stack.push_i32 stack n
+      st @@ Stack.push_i32 stack n
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
       let n = Int64.extend_s 8 n in
-      Stack.push_i64 stack n
+      st @@ Stack.push_i64 stack n
   end
   | I_extend16_s nn -> begin
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
       let n = Int32.extend_s 16 n in
-      Stack.push_i32 stack n
+      st @@ Stack.push_i32 stack n
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
       let n = Int64.extend_s 16 n in
-      Stack.push_i64 stack n
+      st @@ Stack.push_i64 stack n
   end
   | I64_extend32_s ->
     let n, stack = Stack.pop_i64 stack in
     let n = Int64.extend_s 32 n in
-    Stack.push_i64 stack n
+    st @@ Stack.push_i64 stack n
   | I32_wrap_i64 ->
     let n, stack = Stack.pop_i64 stack in
     let n = Convert.Int32.wrap_i64 n in
-    Stack.push_i32 stack n
+    st @@ Stack.push_i32 stack n
   | I64_extend_i32 s ->
     let n, stack = Stack.pop_i32 stack in
     let n =
@@ -337,8 +467,10 @@ let rec exec_instr env locals stack instr =
       | S -> Convert.Int64.extend_i32_s n
       | U -> Convert.Int64.extend_i32_u n
     in
-    Stack.push_i64 stack n
+    st @@ Stack.push_i64 stack n
   | I_trunc_f (n, n', s) -> (
+    st
+    @@
     match (n, n') with
     | S32, S32 -> (
       let f, stack = Stack.pop_f32 stack in
@@ -369,6 +501,8 @@ let rec exec_instr env locals stack instr =
       | S -> Convert.Int64.trunc_f64_s f
       | U -> Convert.Int64.trunc_f64_u f ) )
   | I_trunc_sat_f (nn, nn', s) -> begin
+    st
+    @@
     match nn with
     | S32 -> begin
       match nn' with
@@ -412,12 +546,14 @@ let rec exec_instr env locals stack instr =
   | F32_demote_f64 ->
     let n, stack = Stack.pop_f64 stack in
     let n = Convert.Float32.demote_f64 n in
-    Stack.push_f32 stack n
+    st @@ Stack.push_f32 stack n
   | F64_promote_f32 ->
     let n, stack = Stack.pop_f32 stack in
     let n = Convert.Float64.promote_f32 n in
-    Stack.push_f64 stack n
+    st @@ Stack.push_f64 stack n
   | F_convert_i (n, n', s) -> (
+    st
+    @@
     match n with
     | S32 -> (
       let open Convert.Float32 in
@@ -442,6 +578,8 @@ let rec exec_instr env locals stack instr =
         let n = if s = S then convert_i64_s n else convert_i64_u n in
         Stack.push_f64 stack n ) )
   | I_reinterpret_f (nn, nn') -> begin
+    st
+    @@
     match nn with
     | S32 -> begin
       match nn' with
@@ -467,6 +605,8 @@ let rec exec_instr env locals stack instr =
     end
   end
   | F_reinterpret_i (nn, nn') -> begin
+    st
+    @@
     match nn with
     | S32 -> begin
       match nn' with
@@ -491,38 +631,40 @@ let rec exec_instr env locals stack instr =
         Stack.push_f64 stack n
     end
   end
-  | Ref_null t -> Stack.push stack (Value.ref_null t)
+  | Ref_null t -> st @@ Stack.push stack (Value.ref_null t)
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in
-    Stack.push_bool stack b
-  | Ref_func i -> Stack.push stack (Value.ref_func (Env.get_func env i))
-  | Drop -> Stack.drop stack
-  | Local_get i -> Stack.push stack locals.(i)
+    st @@ Stack.push_bool stack b
+  | Ref_func i -> st @@ Stack.push stack (Value.ref_func (Env.get_func env i))
+  | Drop -> st @@ Stack.drop stack
+  | Local_get i -> st @@ Stack.push stack locals.(i)
   | Local_set i ->
     let v, stack = Stack.pop stack in
     locals.(i) <- v;
-    stack
+    st @@ stack
   | If_else (_id, bt, e1, e2) ->
     let b, stack = Stack.pop_bool stack in
-    exec_expr env locals stack (if b then e1 else e2) false bt
+    let state = { state with stack } in
+    exec_block state ~is_loop:false bt (if b then e1 else e2)
   | Call i -> begin
     let func = Env.get_func env i in
-    exec_vfunc ~return:false stack func
+    exec_vfunc ~return:false state func
   end
   | Return_call i -> begin
     let func = Env.get_func env i in
-    exec_vfunc ~return:true stack func
+    exec_vfunc ~return:true state func
   end
-  | Br i -> raise (Branch (stack, i))
+  | Br i -> State.branch state i
   | Br_if i ->
     let b, stack = Stack.pop_bool stack in
-    if b then raise (Branch (stack, i)) else stack
-  | Loop (_id, bt, e) -> exec_expr env locals stack e true bt
-  | Block (_id, bt, e) -> exec_expr env locals stack e false bt
+    let state = { state with stack } in
+    if b then State.branch state i else state
+  | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
+  | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
   | Memory_size ->
     let mem, _max = get_memory env mem_0 in
     let len = Bytes.length mem / page_size in
-    Stack.push_i32_of_int stack len
+    st @@ Stack.push_i32_of_int stack len
   | Memory_grow -> begin
     let mem = get_memory_raw env mem_0 in
     let data = Link.Memory.get_data mem in
@@ -531,6 +673,8 @@ let rec exec_instr env locals stack instr =
     let delta = delta * page_size in
     let old_size = Bytes.length data in
     let new_size = old_size + delta in
+    st
+    @@
     if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
     else
       match max_size with
@@ -550,7 +694,7 @@ let rec exec_instr env locals stack instr =
       try Bytes.fill mem pos len c
       with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
     end;
-    stack
+    st @@ stack
   | Memory_copy ->
     let mem, _max = get_memory env mem_0 in
     let len, stack = Stack.pop_i32_to_int stack in
@@ -560,7 +704,7 @@ let rec exec_instr env locals stack instr =
       try Bytes.blit mem src_pos mem dst_pos len
       with Invalid_argument _ -> raise (Trap "out of bounds memory access")
     end;
-    stack
+    st @@ stack
   | Memory_init i ->
     let mem, _max = get_memory env mem_0 in
     let len, stack = Stack.pop_i32_to_int stack in
@@ -569,17 +713,17 @@ let rec exec_instr env locals stack instr =
     let data = Env.get_data env i in
     ( try Bytes.blit_string data.value src_pos mem dst_pos len
       with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
-    stack
+    st @@ stack
   | Select _t ->
     let b, stack = Stack.pop_bool stack in
     let o2, stack = Stack.pop stack in
     let o1, stack = Stack.pop stack in
-    Stack.push stack (if b then o1 else o2)
+    st @@ Stack.push stack (if b then o1 else o2)
   | Local_tee i ->
     let v, stack = Stack.pop stack in
     locals.(i) <- v;
-    Stack.push stack v
-  | Global_get i -> Stack.push stack (Env.get_global env i).value
+    st @@ Stack.push stack v
+  | Global_get i -> st @@ Stack.push stack (Env.get_global env i).value
   | Global_set i ->
     let global = Env.get_global env i in
     if global.mut = Const then Log.err "Can't set const global";
@@ -607,7 +751,7 @@ let rec exec_instr env locals stack instr =
           (F64 v, stack) )
     in
     global.value <- v;
-    stack
+    st @@ stack
   | Table_get indice ->
     let t = Env.get_table env indice in
     let indice, stack = Stack.pop_i32_to_int stack in
@@ -617,7 +761,7 @@ let rec exec_instr env locals stack instr =
         raise @@ Trap "out of bounds table access"
       | v -> v
     in
-    Stack.push stack (Ref v)
+    st @@ Stack.push stack (Ref v)
   | Table_set indice ->
     let t = Env.get_table env indice in
     let v, stack = Stack.pop_as_ref stack in
@@ -626,10 +770,10 @@ let rec exec_instr env locals stack instr =
       try t.data.(indice) <- v
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
-    stack
+    st @@ stack
   | Table_size indice ->
     let t = Env.get_table env indice in
-    Stack.push_i32_of_int stack (Array.length t.data)
+    st @@ Stack.push_i32_of_int stack (Array.length t.data)
   | Table_grow indice ->
     let t = Env.get_table env indice in
     let size = Array.length t.data in
@@ -639,6 +783,8 @@ let rec exec_instr env locals stack instr =
       Option.value t.limits.max ~default:Int.max_int >= new_size
       && new_size >= 0 && new_size >= size
     in
+    st
+    @@
     if not allowed then
       let stack = Stack.drop stack in
       Stack.push_i32_of_int stack (-1)
@@ -657,7 +803,7 @@ let rec exec_instr env locals stack instr =
       try Array.fill t.data pos len x
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
-    stack
+    st @@ stack
   | Table_copy (ti_dst, ti_src) -> begin
     let t_src = Env.get_table env ti_src in
     let t_dst = Env.get_table env ti_dst in
@@ -667,6 +813,8 @@ let rec exec_instr env locals stack instr =
     if
       src + len > Array.length t_src.data || dst + len > Array.length t_dst.data
     then raise @@ Trap "out of bounds table access";
+    st
+    @@
     if len = 0 then stack
     else
       try
@@ -706,11 +854,11 @@ let rec exec_instr env locals stack instr =
         done
       with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
     end;
-    stack
+    st @@ stack
   | Elem_drop i ->
     let elem = Env.get_elem env i in
     Env.drop_elem elem;
-    stack
+    st @@ stack
   | I_load16 (nn, sx, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -720,6 +868,8 @@ let rec exec_instr env locals stack instr =
     let res =
       (if sx = S then Bytes.get_int16_le else Bytes.get_uint16_le) mem offset
     in
+    st
+    @@
     match nn with
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
@@ -727,6 +877,8 @@ let rec exec_instr env locals stack instr =
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
+    st
+    @@
     match nn with
     | S32 ->
       if Bytes.length mem < offset + 4 || pos < 0 then
@@ -742,6 +894,8 @@ let rec exec_instr env locals stack instr =
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = pos + offset in
+    st
+    @@
     match nn with
     | S32 ->
       if Bytes.length mem < offset + 4 || pos < 0 then
@@ -757,6 +911,8 @@ let rec exec_instr env locals stack instr =
       Stack.push_f64 stack res )
   | I_store (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
+    st
+    @@
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
@@ -776,6 +932,8 @@ let rec exec_instr env locals stack instr =
       stack )
   | F_store (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
+    st
+    @@
     match nn with
     | S32 ->
       let n, stack = Stack.pop_f32 stack in
@@ -800,6 +958,8 @@ let rec exec_instr env locals stack instr =
     if Bytes.length mem < offset + 1 || pos < 0 then
       raise (Trap "out of bounds memory access");
     let res = (if sx = S then Bytes.get_int8 else Bytes.get_uint8) mem offset in
+    st
+    @@
     match nn with
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
@@ -815,7 +975,7 @@ let rec exec_instr env locals stack instr =
       else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))
       else Log.err "unsupported word size"
     in
-    Stack.push_i64_of_int stack res
+    st @@ Stack.push_i64_of_int stack res
   | I_store8 (nn, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
     let n, stack =
@@ -832,7 +992,7 @@ let rec exec_instr env locals stack instr =
     if Bytes.length mem < offset + 1 || pos < 0 then
       raise (Trap "out of bounds memory access");
     Bytes.set_int8 mem offset n;
-    stack
+    st @@ stack
   | I_store16 (nn, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
     let n, stack =
@@ -849,7 +1009,7 @@ let rec exec_instr env locals stack instr =
     if Bytes.length mem < offset + 2 || pos < 0 then
       raise (Trap "out of bounds memory access");
     Bytes.set_int16_le mem offset n;
-    stack
+    st @@ stack
   | I64_store32 { offset; _ } ->
     let mem, _max = get_memory env mem_0 in
     let n, stack = Stack.pop_i64 stack in
@@ -859,92 +1019,68 @@ let rec exec_instr env locals stack instr =
     if Bytes.length mem < offset + 4 || pos < 0 then
       raise (Trap "out of bounds memory access");
     Bytes.set_int32_le mem offset n;
-    stack
+    st @@ stack
   | Data_drop i ->
     let data = Env.get_data env i in
     Env.drop_data data;
-    stack
+    st @@ stack
   | Br_table (inds, i) ->
     let target, stack = Stack.pop_i32_to_int stack in
     let target =
       if target < 0 || target >= Array.length inds then i else inds.(target)
     in
-    raise (Branch (stack, target))
+    let state = { state with stack } in
+    State.branch state target
   | Call_indirect (tbl_i, typ_i) ->
-    call_indirect ~return:false env stack (tbl_i, typ_i)
+    call_indirect ~return:false state (tbl_i, typ_i)
   | Return_call_indirect (tbl_i, typ_i) ->
-    call_indirect ~return:true env stack (tbl_i, typ_i)
+    call_indirect ~return:true state (tbl_i, typ_i)
 
-and call_indirect ~return env stack (tbl_i, typ_i) =
-    let fun_i, stack = Stack.pop_i32_to_int stack in
-    let t = Env.get_table env tbl_i in
-    if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
-    let func =
-      match t.data.(fun_i) with
-      | exception Invalid_argument _ ->
-        raise @@ Trap "undefined element" (* fails here *)
-      | Funcref (Some f) -> f
-      | Funcref None ->
-        raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
-      | _ -> raise @@ Trap "element type error"
-    in
-    let pt, rt = Value.Func.typ func in
-    let pt', rt' = typ_i in
-    if not (rt = rt' && List.equal p_type_eq pt pt') then
-      raise @@ Trap "indirect call type mismatch";
-    exec_vfunc ~return stack func
-
-and exec_expr env locals stack e is_loop bt =
-  let rt =
-    Option.fold ~none:Int.max_int ~some:(fun bt -> List.length (snd bt)) bt
+let rec loop (state : State.exec_state) =
+  let state =
+    match state.pc with
+    | instr :: pc -> exec_instr instr { state with pc }
+    | [] -> State.end_block state
   in
-  let block_stack =
-    try List.fold_left (exec_instr env locals) stack e with
-    | Branch (block_stack, 0) ->
-      if is_loop then exec_expr env locals block_stack e true bt
-      else block_stack
-    | Branch (block_stack, n) -> raise (Branch (block_stack, n - 1))
+  loop state
+
+
+let exec_expr env locals stack expr bt =
+  let state : State.exec_state =
+    let func_rt = match bt with None -> [] | Some rt -> rt in
+    { stack
+    ; locals
+    ; env
+    ; func_rt
+    ; block_stack = []
+    ; pc = expr
+    ; return_state = None
+    }
   in
-  let stack = Stack.keep block_stack rt @ stack in
-  Log.debug "stack        : [ %a ]@." Stack.pp stack;
-  stack
+  try loop state with State.Result args -> args
 
-and exec_vfunc ~return stack (func : Env.t' Value.Func.t) =
-  match func with
-  | WASM (_, func, env) ->
-    let param_type, _result_type = func.type_f in
-    let args, stack = Stack.pop_n stack (List.length param_type) in
-    let env = Lazy.force env in
-    let rev_args = List.rev args in
-    if return then
-      exec_func env func rev_args
-    else
-      let res = exec_func env func rev_args in
-      res @ stack
-  | Extern f ->
-    let stack = List.rev stack in
-    exec_extern_func stack f
-
-and exec_func env func args =
+let exec_func env (func : Simplify.func) args =
   Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
-  let locals = Array.of_list @@ args @ List.map init_local func.locals in
-  try exec_expr env locals [] func.body false (Some func.type_f)
-  with Return stack -> Stack.keep stack (List.length (snd func.type_f))
+  let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
+  exec_expr env locals [] func.body (Some (snd func.type_f))
 
-let exec_vfunc stack func =
-  try Ok (exec_vfunc ~return:false stack func) with
-  | Failure msg | Trap msg -> Error msg
-  | Stack_overflow -> Error "call stack exhausted"
+let exec_vfunc stack (func : Env.t' Value.func) =
+  match
+    match func with
+    | WASM (_, func, env) -> exec_func (Lazy.force env) func stack
+    | Extern f -> exec_extern_func stack f
+  with
+  | result -> Ok result
+  | (exception Failure msg) | (exception Trap msg) -> Error msg
+  | exception Stack_overflow -> Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
   Log.debug "interpreting ...@\n";
   try
     List.iter
       (fun to_run ->
-        let end_stack =
-          exec_expr module_.env [||] Stack.empty to_run false None
-        in
+        let end_stack = exec_expr module_.env [||] Stack.empty to_run None in
         match end_stack with
         | [] -> ()
         | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
