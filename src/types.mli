@@ -211,6 +211,8 @@ type ('indice, 'bt) instr' =
   | Br_if of 'indice
   | Br_table of 'indice array * 'indice
   | Return
+  | Return_call of 'indice
+  | Return_call_indirect of 'indice * 'bt
   | Call of 'indice
   | Call_indirect of 'indice * 'bt
 
