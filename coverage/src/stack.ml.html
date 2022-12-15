@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>stack.ml &mdash; Coverage report</title>
-    <meta name="description" content="65.00% coverage in src/stack.ml">
+    <meta name="description" content="65.60% coverage in src/stack.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,37 +15,38 @@
           <span class="dirname">src/</span>stack.ml
         </a>
       </h1>
-      <h2>65.00%</h2>
+      <h2>65.60%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:20.25%"></span>
-      <span class="some-visited" style="top:21.52%"></span>
-      <span class="unvisited" style="top:25.32%"></span>
-      <span class="unvisited" style="top:35.44%"></span>
-      <span class="unvisited" style="top:36.08%"></span>
-      <span class="unvisited" style="top:40.51%"></span>
-      <span class="unvisited" style="top:41.14%"></span>
-      <span class="unvisited" style="top:46.20%"></span>
-      <span class="unvisited" style="top:46.84%"></span>
-      <span class="unvisited" style="bottom:48.73%"></span>
-      <span class="unvisited" style="bottom:48.10%"></span>
-      <span class="unvisited" style="bottom:43.04%"></span>
-      <span class="unvisited" style="bottom:42.41%"></span>
-      <span class="unvisited" style="bottom:37.97%"></span>
-      <span class="unvisited" style="bottom:37.34%"></span>
-      <span class="unvisited" style="bottom:32.28%"></span>
-      <span class="unvisited" style="bottom:31.65%"></span>
-      <span class="unvisited" style="bottom:27.22%"></span>
-      <span class="unvisited" style="bottom:26.58%"></span>
-      <span class="unvisited" style="bottom:22.15%"></span>
-      <span class="unvisited" style="bottom:21.52%"></span>
-      <span class="unvisited" style="bottom:16.46%"></span>
-      <span class="unvisited" style="bottom:14.56%"></span>
-      <span class="unvisited" style="bottom:13.92%"></span>
-      <span class="unvisited" style="bottom:9.49%"></span>
-      <span class="unvisited" style="bottom:8.86%"></span>
-      <span class="unvisited" style="bottom:3.80%"></span>
-      <span class="unvisited" style="bottom:3.16%"></span>
+      <span class="some-visited" style="top:19.39%"></span>
+      <span class="some-visited" style="top:20.61%"></span>
+      <span class="unvisited" style="top:24.24%"></span>
+      <span class="unvisited" style="top:33.94%"></span>
+      <span class="unvisited" style="top:34.55%"></span>
+      <span class="unvisited" style="top:38.79%"></span>
+      <span class="unvisited" style="top:39.39%"></span>
+      <span class="unvisited" style="top:44.24%"></span>
+      <span class="unvisited" style="top:44.85%"></span>
+      <span class="unvisited" style="top:49.09%"></span>
+      <span class="unvisited" style="top:49.70%"></span>
+      <span class="unvisited" style="bottom:45.45%"></span>
+      <span class="unvisited" style="bottom:44.85%"></span>
+      <span class="unvisited" style="bottom:40.61%"></span>
+      <span class="unvisited" style="bottom:40.00%"></span>
+      <span class="unvisited" style="bottom:35.15%"></span>
+      <span class="unvisited" style="bottom:34.55%"></span>
+      <span class="unvisited" style="bottom:30.30%"></span>
+      <span class="unvisited" style="bottom:29.70%"></span>
+      <span class="unvisited" style="bottom:25.45%"></span>
+      <span class="unvisited" style="bottom:24.85%"></span>
+      <span class="unvisited" style="bottom:20.00%"></span>
+      <span class="unvisited" style="bottom:18.18%"></span>
+      <span class="unvisited" style="bottom:17.58%"></span>
+      <span class="unvisited" style="bottom:13.33%"></span>
+      <span class="unvisited" style="bottom:12.73%"></span>
+      <span class="unvisited" style="bottom:7.88%"></span>
+      <span class="unvisited" style="bottom:7.27%"></span>
+      <span class="unvisited" style="bottom:0.61%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -208,6 +209,13 @@
 <a id="L156"></a><span class="visited"> </span>
 <a id="L157"></a><span > </span>
 <a id="L158"></a><span class="visited"> </span>
+<a id="L159"></a><span > </span>
+<a id="L160"></a><span > </span>
+<a id="L161"></a><span class="visited"> </span>
+<a id="L162"></a><span > </span>
+<a id="L163"></a><span class="visited"> </span>
+<a id="L164"></a><span class="unvisited"> </span>
+<a id="L165"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -370,6 +378,13 @@
 <a href="#L156">156</a>
 <a href="#L157">157</a>
 <a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
 </pre>
 <pre><code class="ocaml">open Value
 
@@ -379,21 +394,21 @@ exception Empty
 
 let empty = []
 
-let push s v = <span data-count="11719026">v</span> :: s
+let push s v = <span data-count="40996701">v</span> :: s
 
-let push_bool s b = <span data-count="2347816">p</span>ush s (I32 (if b then <span data-count="975699">1</span>l else <span data-count="1372117">0</span>l))
+let push_bool s b = <span data-count="8060963">p</span>ush s (I32 (if b then <span data-count="975739">1</span>l else <span data-count="7085224">0</span>l))
 
-let push_i32 s i = <span data-count="3347729">p</span>ush s (I32 i)
+let push_i32 s i = <span data-count="5482571">p</span>ush s (I32 i)
 
 let push_i32_of_int s i = <span data-count="922828">p</span>ush_i32 s (Int32.of_in<span data-count="922828">t</span> i)
 
-let push_i64 s i = <span data-count="179463">p</span>ush s (I64 i)
+let push_i64 s i = <span data-count="10182630">p</span>ush s (I64 i)
 
 let push_i64_of_int s i = <span data-count="170">p</span>ush_i64 s (Int64.of_in<span data-count="170">t</span> i)
 
-let push_f32 s f = <span data-count="97655">p</span>ush s (F32 f)
+let push_f32 s f = <span data-count="97669">p</span>ush s (F32 f)
 
-let push_f64 s f = <span data-count="95833">p</span>ush s (F64 f)
+let push_f64 s f = <span data-count="95847">p</span>ush s (F64 f)
 
 let push_as_externref s ty v = <span data-count="1">p</span>ush s (Ref (Externref (Some (E (ty, v)))))
 
@@ -402,47 +417,47 @@ let pp fmt (s : 'env t) =
     ~pp_sep:(fun fmt () -&gt; <span data-count="2">F</span>ormat.fprintf fmt " ; ")
     Value.pp fmt s
 
-let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="11581204">h</span>d :: tl -&gt; (hd, tl)
+let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="35145534">h</span>d :: tl -&gt; (hd, tl)
 
 let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="320">_</span>hd :: tl -&gt; tl
 
 let pop_i32 s =
-  <span data-count="1022789">l</span>et hd, tl = pop s in
-  <span data-count="1022789">m</span>atch hd with
-  | <span data-count="1022789">I</span>32 n -&gt; (n, tl)
+  <span data-count="2446036">l</span>et hd, tl = pop s in
+  <span data-count="2446036">m</span>atch hd with
+  | <span data-count="2446036">I</span>32 n -&gt; (n, tl)
   | <span data-count="0">_</span> | <span data-count="0">(</span>exception Empty) -&gt; Log.err "invalid type (expected i32)"
 
 let pop_i32_to_int s =
-  <span data-count="1020378">l</span>et hd, tl = pop_i32 s in
-  <span data-count="1020378">(</span>Int32.to_in<span data-count="1020378">t</span> hd, tl)
+  <span data-count="1732041">l</span>et hd, tl = pop_i32 s in
+  <span data-count="1732041">(</span>Int32.to_in<span data-count="1732041">t</span> hd, tl)
 
 let pop_i32_to_char s =
   <span data-count="122">l</span>et hd, tl = pop_i32 s in
   <span data-count="122">(</span>Char.ch<span data-count="122">r</span> (Int32.to_in<span data-count="122">t</span> hd mod 256), tl)
 
 let pop2_i32 s =
-  <span data-count="3207110">t</span>ry
+  <span data-count="3918688">t</span>ry
     let n2, s = pop s in
-    <span data-count="3207110">l</span>et n1, tl = pop s in
-    <span data-count="3207110">m</span>atch (n1, n2) with
-    | <span data-count="3207110">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
+    <span data-count="3918688">l</span>et n1, tl = pop s in
+    <span data-count="3918688">m</span>atch (n1, n2) with
+    | <span data-count="3918688">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32)"
 
 let pop_i64 s =
-  <span data-count="969">t</span>ry
+  <span data-count="5002526">t</span>ry
     let hd, tl = pop s in
-    <span data-count="969">m</span>atch hd with
-    | <span data-count="969">I</span>64 n -&gt; (n, tl)
+    <span data-count="5002526">m</span>atch hd with
+    | <span data-count="5002526">I</span>64 n -&gt; (n, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
 let pop2_i64 s =
-  <span data-count="111841">t</span>ry
+  <span data-count="5113449">t</span>ry
     let n2, s = pop s in
-    <span data-count="111841">l</span>et n1, tl = pop s in
-    <span data-count="111841">m</span>atch (n1, n2) with
-    | <span data-count="111841">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
+    <span data-count="5113449">l</span>et n1, tl = pop s in
+    <span data-count="5113449">m</span>atch (n1, n2) with
+    | <span data-count="5113449">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
@@ -509,10 +524,10 @@ let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected extern ref)"
 
 let pop_bool s =
-  <span data-count="2344074">t</span>ry
+  <span data-count="8057221">t</span>ry
     let hd, tl = pop s in
-    <span data-count="2344074">m</span>atch hd with
-    | <span data-count="2344074">I</span>32 n -&gt; (n &lt;&gt; 0l, tl)
+    <span data-count="8057221">m</span>atch hd with
+    | <span data-count="8057221">I</span>32 n -&gt; (n &lt;&gt; 0l, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32 (bool))"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32 (bool))"
 
@@ -526,9 +541,16 @@ let pop_is_null s =
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected const_null)"
 
 let pop_n s n =
-  <span data-count="137904">(</span>List.filter<span data-count="137904">i</span> (fun i _hd -&gt; <span data-count="206146">i</span> &lt; n) s, List.filter<span data-count="137904">i</span> (fun i _hd -&gt; <span data-count="206146">i</span> &gt;= n) s)
+  <span data-count="5827116">(</span>List.filter<span data-count="5827116">i</span> (fun i _hd -&gt; <span data-count="5882081">i</span> &lt; n) s, List.filter<span data-count="5827116">i</span> (fun i _hd -&gt; <span data-count="5882081">i</span> &gt;= n) s)
 
-let keep s n = <span data-count="776180">L</span>ist.filteri (fun i _hd -&gt; <span data-count="247476">i</span> &lt; n) s
+let keep s n = <span data-count="1694623">L</span>ist.filteri (fun i _hd -&gt; <span data-count="247466">i</span> &lt; n) s
+
+let rec drop_n s n =
+  <span data-count="8321944">i</span>f n = 0 then <span data-count="7796947">s</span>
+  else
+    <span data-count="524997">m</span>atch s with
+    | <span data-count="0">[</span>] -&gt; invalid_arg "drop_n"
+    | <span data-count="524997">_</span> :: tl -&gt; drop_n tl (n - 1)
 </code></pre>
       </div>
     </div>
