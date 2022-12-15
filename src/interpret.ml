@@ -406,7 +406,8 @@ let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
   | WASM (_, func, env) -> exec_func ~return state env func
   | Extern f ->
     let stack = exec_extern_func state.stack f in
-    { state with stack }
+    let state = { state with stack } in
+    if return then State.return state else state
 
 let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   let fun_i, stack = Stack.pop_i32_to_int state.stack in
