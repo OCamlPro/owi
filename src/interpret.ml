@@ -246,9 +246,24 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | F64 -> Stack.pop_f64 stack
     | Externref ety -> Stack.pop_as_externref ety stack
   in
+  let rec split_args :
+      type f r.
+      Env.t' Stack.t -> (f, r) Value.Func.atype -> Env.t' Stack.t * Env.t' Stack.t =
+   fun stack ty ->
+    match ty with
+    | Value.Func.Arg (_arg, args) ->
+      let elt, stack = Stack.pop stack in
+      let elts, stack = split_args stack args in
+      elt :: elts, stack
+    | NArg (_, _arg, args) ->
+      let elt, stack = Stack.pop stack in
+      let elts, stack = split_args stack args in
+      elt :: elts, stack
+    | Res -> [], stack
+  in
   let rec apply :
       type f r.
-      Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r * Env.t' Stack.t =
+      Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r =
    fun stack ty f ->
     match ty with
     | Value.Func.Arg (arg, args) ->
@@ -257,10 +272,11 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | NArg (_, arg, args) ->
       let v, stack = pop_arg stack arg in
       apply stack args (f v)
-    | Res -> (f, stack)
+    | Res -> f
   in
   let (Extern_func (Func (atype, rtype), func)) = f in
-  let r, stack = apply stack atype func in
+  let args, stack = split_args stack atype in
+  let r = apply (List.rev args) atype func in
   let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) stack =
     match arg with
     | I32 -> Stack.push_i32 stack v
