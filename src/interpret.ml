@@ -248,22 +248,23 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
   in
   let rec split_args :
       type f r.
-      Env.t' Stack.t -> (f, r) Value.Func.atype -> Env.t' Stack.t * Env.t' Stack.t =
+         Env.t' Stack.t
+      -> (f, r) Value.Func.atype
+      -> Env.t' Stack.t * Env.t' Stack.t =
    fun stack ty ->
     match ty with
     | Value.Func.Arg (_arg, args) ->
       let elt, stack = Stack.pop stack in
       let elts, stack = split_args stack args in
-      elt :: elts, stack
+      (elt :: elts, stack)
     | NArg (_, _arg, args) ->
       let elt, stack = Stack.pop stack in
       let elts, stack = split_args stack args in
-      elt :: elts, stack
-    | Res -> [], stack
+      (elt :: elts, stack)
+    | Res -> ([], stack)
   in
-  let rec apply :
-      type f r.
-      Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r =
+  let rec apply : type f r. Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r
+      =
    fun stack ty f ->
     match ty with
     | Value.Func.Arg (arg, args) ->
@@ -339,12 +340,7 @@ module State = struct
     match block_stack with
     | [] -> return state
     | block :: block_stack_tl ->
-      let block_stack =
-        if block.is_loop then
-          block_stack
-        else
-          block_stack_tl
-      in
+      let block_stack = if block.is_loop then block_stack else block_stack_tl in
       let args = Stack.keep state.stack (List.length block.branch_rt) in
       let stack = args @ block.stack in
       { state with block_stack; pc = block.branch; stack }
@@ -385,7 +381,9 @@ let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
     if return then state.return_state else Some { state with stack }
   in
   let env = Lazy.force env in
-  let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
+  let locals =
+    Array.of_list @@ List.rev args @ List.map init_local func.locals
+  in
   State.
     { stack = []
     ; locals
@@ -1062,7 +1060,6 @@ let rec loop (state : State.exec_state) =
   in
   loop state
 
-
 let exec_expr env locals stack expr bt =
   let state : State.exec_state =
     let func_rt = match bt with None -> [] | Some rt -> rt in
@@ -1080,7 +1077,9 @@ let exec_expr env locals stack expr bt =
 let exec_func env (func : wasm_func) args =
   Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
-  let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
+  let locals =
+    Array.of_list @@ List.rev args @ List.map init_local func.locals
+  in
   exec_expr env locals [] func.body (Some (snd func.type_f))
 
 let exec_vfunc stack (func : Env.t' Value.Func.t) =
