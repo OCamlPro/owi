@@ -379,7 +379,11 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
   in
   { state with pc = expr; block_stack = block :: state.block_stack }
 
-let exec_func ~return (state : State.exec_state) env func =
+type wasm_func = (int, Types.func_type) Types.func'
+
+let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
+  Log.debug "calling func : func %s@."
+    (Option.value func.id ~default:"anonymous");
   let param_type, result_type = func.type_f in
   let args, stack = Stack.pop_n state.stack (List.length param_type) in
   let return_state =
@@ -1056,7 +1060,9 @@ let rec loop (state : State.exec_state) =
   let state =
     match state.pc with
     | instr :: pc -> exec_instr instr { state with pc }
-    | [] -> State.end_block state
+    | [] ->
+      Log.debug "stack        : [ %a ]@." Stack.pp state.stack;
+      State.end_block state
   in
   loop state
 
@@ -1075,7 +1081,7 @@ let exec_expr env locals stack expr bt =
   in
   try loop state with State.Result args -> args
 
-let exec_func env (func : (int, Types.func_type) Types.func') args =
+let exec_func env (func : wasm_func) args =
   Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
