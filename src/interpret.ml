@@ -252,15 +252,16 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
       -> (f, r) Value.Func.atype
       -> Env.t' Stack.t * Env.t' Stack.t =
    fun stack ty ->
+    let[@local] split_one_arg args =
+      let elt, stack = Stack.pop stack in
+      let elts, stack = split_args stack args in
+      (elt :: elts, stack)
+    in
     match ty with
-    | Value.Func.Arg (_arg, args) ->
-      let elt, stack = Stack.pop stack in
-      let elts, stack = split_args stack args in
-      (elt :: elts, stack)
-    | NArg (_, _arg, args) ->
-      let elt, stack = Stack.pop stack in
-      let elts, stack = split_args stack args in
-      (elt :: elts, stack)
+    | Value.Func.Arg (_, args) ->
+      split_one_arg args
+    | NArg (_, _, args) ->
+      split_one_arg args
     | Res -> ([], stack)
   in
   let rec apply : type f r. Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r
