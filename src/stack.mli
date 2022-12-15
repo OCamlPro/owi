@@ -10,6 +10,8 @@ val pp : Format.formatter -> 'a t -> unit
 
 val drop : 'a t -> 'a t
 
+val drops : 'a t -> int -> 'a t
+
 val pop : 'a t -> 'a Value.t * 'a t
 
 val pop_n : 'a t -> int -> 'a t * 'a t

@@ -285,7 +285,7 @@ module State = struct
 
   type locals = value array
 
-  type pc = (simplified_indice, func_type) instr' list
+  type pc = (int, func_type) instr' list
 
   type block =
     { branch : pc
@@ -381,7 +381,7 @@ let exec_func ~return (state : State.exec_state) env func =
     ; env
     }
 
-let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.func) =
+let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
   match func with
   | WASM (_, func, env) -> exec_func ~return state env func
   | Extern f ->
@@ -402,7 +402,7 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
       raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
     | _ -> raise @@ Trap "element type error"
   in
-  let pt, rt = Value.Func.type_ func in
+  let pt, rt = Value.Func.typ func in
   let pt', rt' = typ_i in
   if not (rt = rt' && List.equal p_type_eq pt pt') then
     raise @@ Trap "indirect call type mismatch";
@@ -1059,13 +1059,13 @@ let exec_expr env locals stack expr bt =
   in
   try loop state with State.Result args -> args
 
-let exec_func env (func : Simplify.func) args =
+let exec_func env (func : (int, Types.func_type) Types.func') args =
   Log.debug "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals = Array.of_list @@ List.rev args @ List.map init_local func.locals in
   exec_expr env locals [] func.body (Some (snd func.type_f))
 
-let exec_vfunc stack (func : Env.t' Value.func) =
+let exec_vfunc stack (func : Env.t' Value.Func.t) =
   match
     match func with
     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack
