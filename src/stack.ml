@@ -157,9 +157,9 @@ let pop_n s n =
 
 let keep s n = List.filteri (fun i _hd -> i < n) s
 
-let rec drops s n =
+let rec drop_n s n =
   if n = 0 then s
   else
     match s with
-    | [] -> invalid_arg "drops"
-    | _ :: tl -> drops tl (n - 1)
+    | [] -> invalid_arg "drop_n"
+    | _ :: tl -> drop_n tl (n - 1)

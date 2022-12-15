@@ -335,12 +335,7 @@ module State = struct
       { state with stack }
 
   let branch (state : exec_state) n =
-    let rec drop_n l n =
-      if n > 0 then
-        match l with [] -> invalid_arg "drop_n" | _ :: tl -> drop_n tl (n - 1)
-      else l
-    in
-    let block_stack = drop_n state.block_stack n in
+    let block_stack = Stack.drop_n state.block_stack n in
     match block_stack with
     | [] -> return state
     | block :: block_stack_tl ->
@@ -373,7 +368,7 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
     ; branch_rt
     ; continue = state.pc
     ; continue_rt = rt
-    ; stack = Stack.drops state.stack (List.length pt)
+    ; stack = Stack.drop_n state.stack (List.length pt)
     ; is_loop
     }
   in
