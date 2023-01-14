@@ -1,0 +1,1 @@
+available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"

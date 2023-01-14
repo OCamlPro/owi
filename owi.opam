@@ -43,3 +43,4 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/ocamlpro/owi.git"
+available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
