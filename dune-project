@@ -37,7 +37,7 @@
   (menhir
    (and
     :build
-    (>= 20180528)))
+    (>= 20220210)))
   ocaml_intrinsics
   uutf
   (bisect_ppx

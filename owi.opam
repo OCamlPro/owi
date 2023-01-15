@@ -19,7 +19,7 @@ depends: [
   "integers" {>= "0.5.1"}
   "cmdliner"
   "sedlex"
-  "menhir" {build & >= "20180528"}
+  "menhir" {build & >= "20220210"}
   "ocaml_intrinsics"
   "uutf"
   "bisect_ppx" {with-test & >= "2.5" & dev}
