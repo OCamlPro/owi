@@ -980,13 +980,15 @@ let exec_instr instr (state : State.exec_state) =
     let pos, stack = Stack.pop_i32_to_int stack in
     if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
       raise (Trap "out of bounds memory access");
-    let res = Int32.to_int @@ Bytes.get_int32_le mem (pos + offset) in
-    let res =
-      if sx = S || Sys.word_size = 32 then res
-      else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))
-      else Log.err "unsupported word size"
-    in
-    st @@ Stack.push_i64_of_int stack res
+    let res = Bytes.get_int32_le mem (pos + offset) in
+    if sx = S || Sys.word_size = 32 then
+      let res = Int64.of_int32 res in
+      st @@ Stack.push_i64 stack res
+    else if Sys.word_size = 64 then
+      let res = Int32.to_int res in
+      let res = Int.(logand res (sub (shift_left 1 32) 1)) in
+      st @@ Stack.push_i64_of_int stack res
+    else Log.err "unsupported word size"
   | I_store8 (nn, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
     let n, stack =

@@ -1,5 +1,6 @@
 ## unreleased
 
+- fix bug with i32 to int conversion
 - fix bug with address on i32 architecture
 - fix `menhir` lower bound
 
