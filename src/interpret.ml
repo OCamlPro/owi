@@ -686,10 +686,19 @@ let exec_instr instr (state : State.exec_state) =
     let delta = delta * page_size in
     let old_size = Bytes.length data in
     let new_size = old_size + delta in
+    let too_big =
+      if Sys.word_size = 64 then new_size >= page_size * page_size
+      else if Sys.word_size = 32 then
+        let page_size = Int64.of_int page_size in
+        let limit = Int64.mul page_size page_size in
+        let new_size = Int64.of_int new_size in
+        new_size >= limit
+      else Log.err "unsupported word size"
+    in
     st
     @@
-    if new_size >= page_size * page_size then Stack.push_i32 stack (-1l)
-    else
+    if too_big then Stack.push_i32 stack (-1l)
+    else begin
       match max_size with
       | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
       | None | Some _ ->
@@ -697,6 +706,7 @@ let exec_instr instr (state : State.exec_state) =
         Bytes.fill new_mem old_size delta (Char.chr 0);
         Link.Memory.update_memory mem new_mem;
         Stack.push_i32_of_int stack (old_size / page_size)
+    end
   end
   | Memory_fill ->
     let len, stack = Stack.pop_i32_to_int stack in
