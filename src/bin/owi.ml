@@ -4,20 +4,20 @@ let simplify_then_link_then_run file =
   let to_run, _link_state =
     List.fold_left
       (fun ((to_run, state) as acc) -> function
-          | Types.Module m -> begin
-              match Compile.until_link state m with
-              | Ok (m, state) -> (m :: to_run, state)
-              | Error msg -> failwith msg
-            end
-          | Types.Register (name, id) ->
-            (to_run, Link.register_module state ~name ~id)
-          | _ -> acc )
+        | Types.Module m -> begin
+          match Compile.until_link state m with
+          | Ok (m, state) -> (m :: to_run, state)
+          | Error msg -> failwith msg
+        end
+        | Types.Register (name, id) ->
+          (to_run, Link.register_module state ~name ~id)
+        | _ -> acc )
       ([], Link.empty_state) file
   in
   List.iter
     (fun m ->
-        let res = Interpret.module_ m in
-        Result.fold ~ok:Fun.id ~error:failwith res )
+      let res = Interpret.module_ m in
+      Result.fold ~ok:Fun.id ~error:failwith res )
     (List.rev to_run)
 
 let run_file exec filename =
@@ -35,8 +35,8 @@ let files =
   Cmdliner.Arg.(
     value
     & pos 0
-      (list ~sep:' ' (conv (parse, Format.pp_print_string)))
-      [] (info [] ~doc) )
+        (list ~sep:' ' (conv (parse, Format.pp_print_string)))
+        [] (info [] ~doc) )
 
 let debug =
   let doc = "debug mode" in
@@ -47,7 +47,10 @@ let script =
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
 let main debug script files =
-  let exec = if script then Script.exec ~with_exhaustion:true else simplify_then_link_then_run in
+  let exec =
+    if script then Script.exec ~with_exhaustion:true
+    else simplify_then_link_then_run
+  in
   if debug then Log.debug_on := true;
   List.iter (run_file exec) files
 

@@ -159,7 +159,4 @@ let keep s n = List.filteri (fun i _hd -> i < n) s
 
 let rec drop_n s n =
   if n = 0 then s
-  else
-    match s with
-    | [] -> invalid_arg "drop_n"
-    | _ :: tl -> drop_n tl (n - 1)
+  else match s with [] -> invalid_arg "drop_n" | _ :: tl -> drop_n tl (n - 1)
