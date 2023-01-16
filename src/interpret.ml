@@ -258,10 +258,8 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
       (elt :: elts, stack)
     in
     match ty with
-    | Value.Func.Arg (_, args) ->
-      split_one_arg args
-    | NArg (_, _, args) ->
-      split_one_arg args
+    | Value.Func.Arg (_, args) -> split_one_arg args
+    | NArg (_, _, args) -> split_one_arg args
     | Res -> ([], stack)
   in
   let rec apply : type f r. Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r
@@ -877,11 +875,11 @@ let exec_instr instr (state : State.exec_state) =
   | I_load16 (nn, sx, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let offset = pos + offset in
-    if Bytes.length mem < offset + 2 || pos < 0 then
+    if Bytes.length mem < pos + offset + 2 || offset < 0 || pos < 0 then
       raise (Trap "out of bounds memory access");
     let res =
-      (if sx = S then Bytes.get_int16_le else Bytes.get_uint16_le) mem offset
+      (if sx = S then Bytes.get_int16_le else Bytes.get_uint16_le)
+        mem (pos + offset)
     in
     st
     @@
@@ -891,37 +889,35 @@ let exec_instr instr (state : State.exec_state) =
   | I_load (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let offset = pos + offset in
     st
     @@
     match nn with
     | S32 ->
-      if Bytes.length mem < offset + 4 || pos < 0 then
+      if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      let res = Bytes.get_int32_le mem offset in
+      let res = Bytes.get_int32_le mem (pos + offset) in
       Stack.push_i32 stack res
     | S64 ->
-      if Bytes.length mem < offset + 8 || pos < 0 then
+      if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      let res = Bytes.get_int64_le mem offset in
+      let res = Bytes.get_int64_le mem (pos + offset) in
       Stack.push_i64 stack res )
   | F_load (nn, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let offset = pos + offset in
     st
     @@
     match nn with
     | S32 ->
-      if Bytes.length mem < offset + 4 || pos < 0 then
+      if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      let res = Bytes.get_int32_le mem offset in
+      let res = Bytes.get_int32_le mem (pos + offset) in
       let res = Float32.of_bits res in
       Stack.push_f32 stack res
     | S64 ->
-      if Bytes.length mem < offset + 8 || pos < 0 then
+      if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then
         raise (Trap "out of bounds memory access");
-      let res = Bytes.get_int64_le mem offset in
+      let res = Bytes.get_int64_le mem (pos + offset) in
       let res = Float64.of_bits res in
       Stack.push_f64 stack res )
   | I_store (nn, { offset; _ }) -> (
@@ -969,10 +965,11 @@ let exec_instr instr (state : State.exec_state) =
   | I_load8 (nn, sx, { offset; _ }) -> (
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let offset = offset + pos in
-    if Bytes.length mem < offset + 1 || pos < 0 then
+    if Bytes.length mem < pos + offset + 1 || offset < 0 || pos < 0 then
       raise (Trap "out of bounds memory access");
-    let res = (if sx = S then Bytes.get_int8 else Bytes.get_uint8) mem offset in
+    let res =
+      (if sx = S then Bytes.get_int8 else Bytes.get_uint8) mem (pos + offset)
+    in
     st
     @@
     match nn with
@@ -981,10 +978,9 @@ let exec_instr instr (state : State.exec_state) =
   | I64_load32 (sx, { offset; _ }) ->
     let mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let offset = pos + offset in
-    if Bytes.length mem < offset + 4 || pos < 0 then
+    if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
       raise (Trap "out of bounds memory access");
-    let res = Int32.to_int @@ Bytes.get_int32_le mem offset in
+    let res = Int32.to_int @@ Bytes.get_int32_le mem (pos + offset) in
     let res =
       if sx = S || Sys.word_size = 32 then res
       else if Sys.word_size = 64 then Int.(logand res (sub (shift_left 1 32) 1))

@@ -1,5 +1,6 @@
 ## unreleased
 
+- fix bug with address on i32 architecture
 - fix `menhir` lower bound
 
 ## 0.1 - 2023-01-14

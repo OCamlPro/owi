@@ -22,7 +22,10 @@ let check_error ~expected ~got =
   end
 
 let check_error_result expected = function
-  | Ok _whatever -> assert false
+  | Ok _whatever ->
+    Log.debug "expected: `%s`@." expected;
+    Log.debug "got     :  Ok@.";
+    Log.err "expected error but got Ok"
   | Error got -> check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
