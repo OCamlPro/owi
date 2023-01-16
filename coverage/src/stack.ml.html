@@ -18,35 +18,35 @@
       <h2>65.60%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:19.39%"></span>
-      <span class="some-visited" style="top:20.61%"></span>
-      <span class="unvisited" style="top:24.24%"></span>
-      <span class="unvisited" style="top:33.94%"></span>
-      <span class="unvisited" style="top:34.55%"></span>
-      <span class="unvisited" style="top:38.79%"></span>
-      <span class="unvisited" style="top:39.39%"></span>
-      <span class="unvisited" style="top:44.24%"></span>
-      <span class="unvisited" style="top:44.85%"></span>
-      <span class="unvisited" style="top:49.09%"></span>
-      <span class="unvisited" style="top:49.70%"></span>
-      <span class="unvisited" style="bottom:45.45%"></span>
-      <span class="unvisited" style="bottom:44.85%"></span>
-      <span class="unvisited" style="bottom:40.61%"></span>
-      <span class="unvisited" style="bottom:40.00%"></span>
-      <span class="unvisited" style="bottom:35.15%"></span>
-      <span class="unvisited" style="bottom:34.55%"></span>
-      <span class="unvisited" style="bottom:30.30%"></span>
-      <span class="unvisited" style="bottom:29.70%"></span>
-      <span class="unvisited" style="bottom:25.45%"></span>
-      <span class="unvisited" style="bottom:24.85%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:18.18%"></span>
-      <span class="unvisited" style="bottom:17.58%"></span>
-      <span class="unvisited" style="bottom:13.33%"></span>
-      <span class="unvisited" style="bottom:12.73%"></span>
-      <span class="unvisited" style="bottom:7.88%"></span>
-      <span class="unvisited" style="bottom:7.27%"></span>
-      <span class="unvisited" style="bottom:0.61%"></span>
+      <span class="some-visited" style="top:19.75%"></span>
+      <span class="some-visited" style="top:20.99%"></span>
+      <span class="unvisited" style="top:24.69%"></span>
+      <span class="unvisited" style="top:34.57%"></span>
+      <span class="unvisited" style="top:35.19%"></span>
+      <span class="unvisited" style="top:39.51%"></span>
+      <span class="unvisited" style="top:40.12%"></span>
+      <span class="unvisited" style="top:45.06%"></span>
+      <span class="unvisited" style="top:45.68%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:49.38%"></span>
+      <span class="unvisited" style="bottom:44.44%"></span>
+      <span class="unvisited" style="bottom:43.83%"></span>
+      <span class="unvisited" style="bottom:39.51%"></span>
+      <span class="unvisited" style="bottom:38.89%"></span>
+      <span class="unvisited" style="bottom:33.95%"></span>
+      <span class="unvisited" style="bottom:33.33%"></span>
+      <span class="unvisited" style="bottom:29.01%"></span>
+      <span class="unvisited" style="bottom:28.40%"></span>
+      <span class="unvisited" style="bottom:24.07%"></span>
+      <span class="unvisited" style="bottom:23.46%"></span>
+      <span class="unvisited" style="bottom:18.52%"></span>
+      <span class="unvisited" style="bottom:16.67%"></span>
+      <span class="unvisited" style="bottom:16.05%"></span>
+      <span class="unvisited" style="bottom:11.73%"></span>
+      <span class="unvisited" style="bottom:11.11%"></span>
+      <span class="unvisited" style="bottom:6.17%"></span>
+      <span class="unvisited" style="bottom:5.56%"></span>
+      <span class="some-visited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -212,10 +212,7 @@
 <a id="L159"></a><span > </span>
 <a id="L160"></a><span > </span>
 <a id="L161"></a><span class="visited"> </span>
-<a id="L162"></a><span > </span>
-<a id="L163"></a><span class="visited"> </span>
-<a id="L164"></a><span class="unvisited"> </span>
-<a id="L165"></a><span class="visited"> </span>
+<a id="L162"></a><span class="some-visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -382,9 +379,6 @@
 <a href="#L160">160</a>
 <a href="#L161">161</a>
 <a href="#L162">162</a>
-<a href="#L163">163</a>
-<a href="#L164">164</a>
-<a href="#L165">165</a>
 </pre>
 <pre><code class="ocaml">open Value
 
@@ -547,10 +541,7 @@ let keep s n = <span data-count="1694623">L</span>ist.filteri (fun i _hd -&gt; <
 
 let rec drop_n s n =
   <span data-count="8321944">i</span>f n = 0 then <span data-count="7796947">s</span>
-  else
-    <span data-count="524997">m</span>atch s with
-    | <span data-count="0">[</span>] -&gt; invalid_arg "drop_n"
-    | <span data-count="524997">_</span> :: tl -&gt; drop_n tl (n - 1)
+  else <span data-count="524997">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="524997">_</span> :: tl -&gt; drop_n tl (n - 1)
 </code></pre>
       </div>
     </div>
