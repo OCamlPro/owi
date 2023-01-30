@@ -41,23 +41,23 @@ end
 module Env : sig
   type t
 
-  type t' = t lazy_t
+  type t' = t Lazy.t
 
   type 'env elem = { mutable value : 'env Value.ref_value array }
 
   type data = { mutable value : string }
 
-  val get_memory : t -> int -> Memory.t
+  val get_memory : t -> int -> (Memory.t, string) Result.t
 
-  val get_func : t -> int -> t' Value.Func.t
+  val get_func : t -> int -> (t' Value.Func.t, string) Result.t
 
-  val get_table : t -> int -> t' Table.t
+  val get_table : t -> int -> (t' Table.t, string) Result.t
 
-  val get_elem : t -> int -> t' elem
+  val get_elem : t -> int -> (t' elem, string) Result.t
 
-  val get_data : t -> int -> data
+  val get_data : t -> int -> (data, string) Result.t
 
-  val get_global : t -> int -> t' Global.t
+  val get_global : t -> int -> (t' Global.t, string) Result.t
 
   val drop_elem : 'a elem -> unit
 
@@ -100,7 +100,8 @@ val module_ :
   Simplify.simplified_module -> state -> (module_to_run * state, string) result
 
 (** register a module inside a link state, producing a new link state *)
-val register_module : state -> name:string -> id:string option -> state
+val register_module :
+  state -> name:string -> id:string option -> (state, string) Result.t
 
 (** extern modules *)
 type extern_module = { functions : (string * Value.Func.extern_func) list }

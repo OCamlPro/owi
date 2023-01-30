@@ -256,11 +256,11 @@ let of_signless_string s =
   else if s = "nan" then pos_nan
   else if String.length s > 6 && String.sub s 0 6 = "nan:0x" then
     let x = Int64.of_string (String.sub s 4 (String.length s - 4)) in
-    if x = Int64.zero then raise (Failure "nan payload must not be zero")
+    if x = Int64.zero then failwith "nan payload must not be zero"
     else if Int64.logand x bare_nan <> Int64.zero then
-      raise (Failure "nan payload must not overlap with exponent bits")
+      failwith "nan payload must not overlap with exponent bits"
     else if x < Int64.zero then
-      raise (Failure "nan payload must not overlap with sign bit")
+      failwith "nan payload must not overlap with sign bit"
     else Int64.logor x bare_nan
   else
     let s' = String.concat "" (String.split_on_char '_' s) in

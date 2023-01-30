@@ -1,4 +1,5 @@
 open Types
+open Syntax
 
 module Host_externref = struct
   type t = int
@@ -18,49 +19,50 @@ let check_error ~expected ~got =
   if not ok then begin
     Log.debug "expected: `%s`@." expected;
     Log.debug "got     : `%s`@." got;
-    Log.err "%s" got
+    Error got
   end
+  else Ok ()
 
 let check_error_result expected = function
   | Ok _whatever ->
     Log.debug "expected: `%s`@." expected;
     Log.debug "got     :  Ok@.";
-    Log.err "expected error but got Ok"
+    error_s "expected Error (%S) but got Ok" expected
   | Error got -> check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
-  let exports =
+  let* exports =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Log.err "unbound last module"
-      | Some m -> m
+      | None -> Error "unbound last module"
+      | Some m -> Ok m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Log.err "unbound module " mod_id
-      | exports -> exports )
+      | exception Not_found -> error_s "unbound module %s" mod_id
+      | exports -> Ok exports )
   in
   match Link.StringMap.find f_name exports.functions with
-  | exception Not_found -> Log.err "unbound name " f_name
-  | v -> v
+  | exception Not_found -> error_s "unbound name %s" f_name
+  | v -> Ok v
 
 let load_global_from_module ls mod_id name =
-  let exports =
+  let* exports =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Log.err "unbound last module"
-      | Some m -> m
+      | None -> Error "unbound last module"
+      | Some m -> Ok m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Log.err "unbound module " mod_id
-      | exports -> exports )
+      | exception Not_found -> error_s "unbound module %s" mod_id
+      | exports -> Ok exports )
   in
   match Link.StringMap.find name exports.globals with
-  | exception Not_found -> Log.err "unbound name " name
-  | v -> v
+  | exception Not_found -> error_s "unbound name %s" name
+  | v -> Ok v
 
 let compare_result_const result (const : 'env Value.t) =
   match (result, const) with
@@ -114,22 +116,21 @@ let action (link_state : Link.state) = function
          ~none:(fun ppf () -> Format.pp_print_string ppf "")
          Format.pp_print_string )
       mod_id f Pp.Input.consts args;
-    let f = load_func_from_module link_state mod_id f in
+    let* f = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
     Interpret.exec_vfunc stack f
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";
-    let global = load_global_from_module link_state mod_id name in
+    let* global = load_global_from_module link_state mod_id name in
     Ok [ global.value ]
 
 let rec run ~with_exhaustion script =
-  let ( let* ) o f = Result.fold ~ok:f ~error:failwith o in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
-  List.fold_left
+  list_fold_left
     (fun (link_state : Link.state) -> function
       | Module m ->
         if !curr_module = 0 then Log.debug_on := false;
@@ -137,46 +138,48 @@ let rec run ~with_exhaustion script =
         incr curr_module;
         let* link_state = Compile.until_interpret link_state m in
         Log.debug_on := debug_on;
-        link_state
+        Ok link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
         incr curr_module;
         let* m, link_state = Compile.until_link link_state m in
-        check_error_result expected (Interpret.module_ m);
-        link_state
+        let* () = check_error_result expected (Interpret.module_ m) in
+        Ok link_state
       | Assert (Assert_malformed_binary _) ->
         Log.debug "*** assert_malformed_binary@\n";
         (* TODO: check this when binary format is supported *)
-        link_state
+        Ok link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug "*** assert_malformed_quote@\n";
-        begin
+        let* () =
           match Parse.from_string (String.concat "\n" m) with
-          | Ok m -> (
-            try
-              let _link_state : Link.state = run m ~with_exhaustion in
-              assert false
-            with Failure got -> check_error ~expected ~got )
+          | Ok m ->
+            let* (_link_state : Link.state) = run m ~with_exhaustion in
+            Error "exhaustion didn't happen"
           | Error got -> check_error ~expected ~got
-        end;
-        link_state
+        in
+        Ok link_state
       | Assert (Assert_invalid_binary _) ->
         Log.debug "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
-        link_state
+        Ok link_state
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
-        check_error_result expected (Compile.until_link link_state m);
-        link_state
+        let* () =
+          check_error_result expected (Compile.until_link link_state m)
+        in
+        Ok link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.debug "*** assert_invalid_quote@\n";
         let got = Parse.from_string (String.concat "\n" m) in
-        check_error_result expected got;
-        link_state
+        let* () = check_error_result expected got in
+        Ok link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.debug "*** assert_unlinkable@\n";
-        check_error_result expected (Compile.until_link link_state m);
-        link_state
+        let* () =
+          check_error_result expected (Compile.until_link link_state m)
+        in
+        Ok link_state
       | Assert (Assert_malformed _) ->
         Log.debug "*** assert_malformed@\n";
         Log.err "TODO"
@@ -189,33 +192,35 @@ let rec run ~with_exhaustion script =
         then begin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
             (List.rev stack) Pp.Input.results res;
-          Log.err "Bad result"
-        end;
-        link_state
+          Error "Bad result"
+        end
+        else Ok link_state
       | Assert (Assert_trap (a, expected)) ->
         Log.debug "*** assert_trap@\n";
         let got = action link_state a in
-        check_error_result expected got;
-        link_state
+        let* () = check_error_result expected got in
+        Ok link_state
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.debug "*** assert_exhaustion@\n";
-        if with_exhaustion then begin
-          let got = action link_state a in
-          check_error_result expected got
-        end;
-        link_state
+        let* () =
+          if with_exhaustion then
+            let got = action link_state a in
+            check_error_result expected got
+          else Ok ()
+        in
+        Ok link_state
       | Register (name, mod_name) ->
         if !curr_module = 1 && !registered = false then Log.debug_on := false;
         Log.debug "*** register@\n";
-        let state = Link.register_module link_state ~name ~id:mod_name in
+        let* state = Link.register_module link_state ~name ~id:mod_name in
         Log.debug_on := debug_on;
-        state
+        Ok state
       | Action a ->
         Log.debug "*** action@\n";
         let* _stack = action link_state a in
-        link_state )
+        Ok link_state )
     Link.empty_state script
 
 let exec ?(with_exhaustion = false) script =
   let _link_state = run ~with_exhaustion script in
-  ()
+  Ok ()
