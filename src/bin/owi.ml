@@ -1,31 +1,28 @@
 open Owi
+open Syntax
 
 let simplify_then_link_then_run file =
-  let to_run, _link_state =
-    List.fold_left
-      (fun ((to_run, state) as acc) -> function
-        | Types.Module m -> begin
-          match Compile.until_link state m with
-          | Ok (m, state) -> (m :: to_run, state)
-          | Error msg -> failwith msg
-        end
+  let* to_run, _link_state =
+    list_fold_left
+      (fun ((to_run, state) as acc) instruction ->
+        match instruction with
+        | Types.Module m ->
+          let* m, state = Compile.until_link state m in
+          Ok (m :: to_run, state)
         | Types.Register (name, id) ->
-          (to_run, Link.register_module state ~name ~id)
-        | _ -> acc )
+          let* state = Link.register_module state ~name ~id in
+          Ok (to_run, state)
+        | _ -> Ok acc )
       ([], Link.empty_state) file
   in
-  List.iter
-    (fun m ->
-      let res = Interpret.module_ m in
-      Result.fold ~ok:Fun.id ~error:failwith res )
-    (List.rev to_run)
+  list_iter Interpret.module_ (List.rev to_run)
 
 let run_file exec filename =
   if not @@ Sys.file_exists filename then
-    Log.err "file `%s` doesn't exist" filename;
-  match Parse.from_file ~filename with
-  | Ok script -> exec script
-  | Error e -> Log.err "%s" e
+    error_s "file `%s` doesn't exist" filename
+  else
+    let* script = Parse.from_file ~filename in
+    exec script
 
 (* Command line *)
 
@@ -52,7 +49,12 @@ let main debug script files =
     else simplify_then_link_then_run
   in
   if debug then Log.debug_on := true;
-  List.iter (run_file exec) files
+  let result = list_iter (run_file exec) files in
+  match result with
+  | Ok () -> ()
+  | Error e ->
+    Format.eprintf "%s@." e;
+    exit 1
 
 let cli =
   let open Cmdliner in

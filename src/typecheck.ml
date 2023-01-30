@@ -1,4 +1,5 @@
 open Types
+open Syntax
 
 type typ =
   | Num_type of Types.num_type
@@ -162,118 +163,152 @@ module Stack = struct
 
   let pop required stack =
     match match_prefix ~prefix:required ~stack with
-    | None -> Log.err "type mismatch (pop) %a" pp_error (required, stack)
-    | Some stack -> stack
+    | None -> error_s "type mismatch (pop) %a" pp_error (required, stack)
+    | Some stack -> Ok stack
 
   let pop_ref = function
-    | (Something | Ref_type _) :: tl -> tl
-    | Any :: _ as stack -> stack
-    | _ -> Log.err "type mismatch (pop_ref)"
+    | (Something | Ref_type _) :: tl -> Ok tl
+    | Any :: _ as stack -> Ok stack
+    | _ -> Error "type mismatch (pop_ref)"
 
   let drop stack =
     match stack with
-    | [] -> Log.err "type mismatch drop"
-    | Any :: _ -> stack
-    | _ :: tl -> tl
+    | [] -> Error "type mismatch drop"
+    | Any :: _ -> Ok stack
+    | _ :: tl -> Ok tl
 
-  let push t stack = t @ stack
+  let push t stack = ok @@ t @ stack
 
   let pop_push bt stack =
-    Option.fold ~none:stack
-      ~some:(fun (pt, rt) ->
-        let pt, rt =
-          (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
-        in
-        pop pt stack |> push rt )
-      bt
+    match bt with
+    | None -> Ok stack
+    | Some (pt, rt) ->
+      let pt, rt =
+        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
+      in
+      let* stack = pop pt stack in
+      push rt stack
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
+let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
+  (stack, string) Result.t =
   match instr with
-  | Nop -> stack
+  | Nop -> Ok stack
   | Drop -> Stack.drop stack
   | Return ->
-    ignore @@ Stack.pop (List.rev_map typ_of_val_type env.result_type) stack;
-    [ any ]
-  | Unreachable -> [ any ]
+    let* _stack =
+      Stack.pop (List.rev_map typ_of_val_type env.result_type) stack
+    in
+    Ok [ any ]
+  | Unreachable -> Ok [ any ]
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
   | I_unop (s, _op) ->
     let t = itype s in
-    Stack.pop [ t ] stack |> Stack.push [ t ]
+    let* stack = Stack.pop [ t ] stack in
+    Stack.push [ t ] stack
   | I_binop (s, _op) ->
     let t = itype s in
-    Stack.pop [ t; t ] stack |> Stack.push [ t ]
+    let* stack = Stack.pop [ t; t ] stack in
+    Stack.push [ t ] stack
   | F_unop (s, _op) ->
     let t = ftype s in
-    Stack.pop [ t ] stack |> Stack.push [ t ]
+    let* stack = Stack.pop [ t ] stack in
+    Stack.push [ t ] stack
   | F_binop (s, _op) ->
     let t = ftype s in
-    Stack.pop [ t; t ] stack |> Stack.push [ t ]
-  | I_testop (nn, _) -> Stack.pop [ itype nn ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ t; t ] stack in
+    Stack.push [ t ] stack
+  | I_testop (nn, _) ->
+    let* stack = Stack.pop [ itype nn ] stack in
+    Stack.push [ i32 ] stack
   | I_relop (nn, _) ->
     let t = itype nn in
-    Stack.pop [ t; t ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ t; t ] stack in
+    Stack.push [ i32 ] stack
   | F_relop (nn, _) ->
     let t = ftype nn in
-    Stack.pop [ t; t ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ t; t ] stack in
+    Stack.push [ i32 ] stack
   | Local_get i -> Stack.push [ Env.local_get i env ] stack
   | Local_set i ->
     let t = Env.local_get i env in
     Stack.pop [ t ] stack
   | Local_tee i ->
     let t = Env.local_get i env in
-    Stack.pop [ t ] stack |> Stack.push [ t ]
+    let* stack = Stack.pop [ t ] stack in
+    Stack.push [ t ] stack
   | Global_get i -> Stack.push [ typ_of_val_type @@ Env.global_get i env ] stack
   | Global_set i ->
     let t = Env.global_get i env in
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
-    let stack = Stack.pop [ i32 ] stack in
-    let stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
-    let stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
-    if not (Stack.equal stack_e1 stack_e2) then
-      Log.err "type mismatch (if else)";
-    stack_e1
+    let* stack = Stack.pop [ i32 ] stack in
+    let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
+    let* stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
+    if not (Stack.equal stack_e1 stack_e2) then Error "type mismatch (if else)"
+    else Ok stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
-    Stack.pop [ i32 ] stack |> Stack.push [ itype nn ]
-  | I64_load32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ itype nn ] stack
+  | I64_load32 _ ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ i64 ] stack
   | I_store8 (nn, _) | I_store16 (nn, _) | I_store (nn, _) ->
     Stack.pop [ itype nn; i32 ] stack
   | I64_store32 _ -> Stack.pop [ i64; i32 ] stack
-  | F_load (nn, _) -> Stack.pop [ i32 ] stack |> Stack.push [ ftype nn ]
+  | F_load (nn, _) ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ ftype nn ] stack
   | F_store (nn, _) -> Stack.pop [ ftype nn; i32 ] stack
   | I_reinterpret_f (inn, fnn) ->
-    Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
+    let* stack = Stack.pop [ ftype fnn ] stack in
+    Stack.push [ itype inn ] stack
   | F_reinterpret_i (fnn, inn) ->
-    Stack.pop [ itype inn ] stack |> Stack.push [ ftype fnn ]
-  | F32_demote_f64 -> Stack.pop [ f64 ] stack |> Stack.push [ f32 ]
-  | F64_promote_f32 -> Stack.pop [ f32 ] stack |> Stack.push [ f64 ]
+    let* stack = Stack.pop [ itype inn ] stack in
+    Stack.push [ ftype fnn ] stack
+  | F32_demote_f64 ->
+    let* stack = Stack.pop [ f64 ] stack in
+    Stack.push [ f32 ] stack
+  | F64_promote_f32 ->
+    let* stack = Stack.pop [ f32 ] stack in
+    Stack.push [ f64 ] stack
   | F_convert_i (fnn, inn, _) ->
-    Stack.pop [ itype inn ] stack |> Stack.push [ ftype fnn ]
+    let* stack = Stack.pop [ itype inn ] stack in
+    Stack.push [ ftype fnn ] stack
   | I_trunc_f (inn, fnn, _) | I_trunc_sat_f (inn, fnn, _) ->
-    Stack.pop [ ftype fnn ] stack |> Stack.push [ itype inn ]
-  | I32_wrap_i64 -> Stack.pop [ i64 ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ ftype fnn ] stack in
+    Stack.push [ itype inn ] stack
+  | I32_wrap_i64 ->
+    let* stack = Stack.pop [ i64 ] stack in
+    Stack.push [ i32 ] stack
   | I_extend8_s nn | I_extend16_s nn ->
     let t = itype nn in
-    Stack.pop [ t ] stack |> Stack.push [ t ]
-  | I64_extend32_s -> Stack.pop [ i64 ] stack |> Stack.push [ i64 ]
-  | I64_extend_i32 _ -> Stack.pop [ i32 ] stack |> Stack.push [ i64 ]
-  | Memory_grow -> Stack.pop [ i32 ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ t ] stack in
+    Stack.push [ t ] stack
+  | I64_extend32_s ->
+    let* stack = Stack.pop [ i64 ] stack in
+    Stack.push [ i64 ] stack
+  | I64_extend_i32 _ ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ i64 ] stack
+  | Memory_grow ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ i32 ] stack
   | Memory_size -> Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
     Stack.pop [ i32; i32; i32 ] stack
   | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
   | Call_indirect (_, bt) ->
-    let stack = Stack.pop [ i32 ] stack in
+    let* stack = Stack.pop [ i32 ] stack in
     Stack.pop_push (Some bt) stack
   | Call i ->
     let pt, rt = Env.func_get i env in
-    Stack.pop (List.rev_map typ_of_pt pt) stack
-    |> Stack.push (List.rev_map typ_of_val_type rt)
+    let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
+    Stack.push (List.rev_map typ_of_val_type rt) stack
   | Return_call i ->
     let pt, rt = Env.func_get i env in
     ignore @@ Stack.pop (List.rev_map typ_of_pt pt) stack;
@@ -282,94 +317,102 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) : stack =
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Log.err "type mismatch";
-    [ any ]
+    then Error "type mismatch"
+    else Ok [ any ]
   | Return_call_indirect (_, (pt, rt)) ->
-    let stack = Stack.pop [ i32 ] stack in
-    ignore @@ Stack.pop (List.rev_map typ_of_pt pt) stack;
+    let* stack = Stack.pop [ i32 ] stack in
+    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
       not
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Log.err "type mismatch";
-    [ any ]
-  | Data_drop _i -> stack
+    then Error "type mismatch"
+    else Ok [ any ]
+  | Data_drop _i -> Ok stack
   | Table_init (ti, ei) ->
     let table_typ = Env.table_type_get ti env in
     let elem_typ = Env.elem_type_get ei env in
-    if table_typ <> elem_typ then Log.err "type mismatch";
-    Stack.pop [ i32; i32; i32 ] stack
+    if table_typ <> elem_typ then Error "type mismatch"
+    else Stack.pop [ i32; i32; i32 ] stack
   | Table_copy (i, i') ->
     let typ = Env.table_type_get i env in
     let typ' = Env.table_type_get i' env in
-    if typ <> typ' then Log.err "type mismatch";
-    Stack.pop [ i32; i32; i32 ] stack
+    if typ <> typ' then Error "type mismatch"
+    else Stack.pop [ i32; i32; i32 ] stack
   | Table_fill i ->
     let t_type = Env.table_type_get i env in
     Stack.pop [ i32; Ref_type t_type; i32 ] stack
   | Table_grow i ->
     let t_type = Env.table_type_get i env in
-    Stack.pop [ i32; Ref_type t_type ] stack |> Stack.push [ i32 ]
+    let* stack = Stack.pop [ i32; Ref_type t_type ] stack in
+    Stack.push [ i32 ] stack
   | Table_size _ -> Stack.push [ i32 ] stack
-  | Ref_is_null -> Stack.pop_ref stack |> Stack.push [ i32 ]
+  | Ref_is_null ->
+    let* stack = Stack.pop_ref stack in
+    Stack.push [ i32 ] stack
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
-  | Elem_drop _ -> stack
+  | Elem_drop _ -> Ok stack
   | Select t ->
-    let stack = Stack.pop [ i32 ] stack in
+    let* stack = Stack.pop [ i32 ] stack in
     begin
       match t with
       | None -> begin
-        begin
+        let* () =
           match stack with
-          | [] -> ()
-          | Ref_type _ :: _tl -> Log.err "type mismatch (select implicit)"
-          | _ -> ()
-        end;
+          | Ref_type _ :: _tl -> Error "type mismatch (select implicit)"
+          | _ -> Ok ()
+        in
         match stack with
-        | Any :: _ -> [ Something; Any ]
-        | hd :: Any :: _ -> hd :: [ Any ]
-        | hd :: hd' :: tl when Stack.match_types hd hd' -> hd :: tl
-        | _ -> Log.err "type mismatch (select) %a" Stack.pp stack
+        | Any :: _ -> Ok [ Something; Any ]
+        | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
+        | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
+        | _ -> error_s "type mismatch (select) %a" Stack.pp stack
       end
       | Some t ->
         let t = List.map typ_of_val_type t in
-        Stack.pop t stack |> Stack.pop t |> Stack.push t
+        let* stack = Stack.pop t stack in
+        let* stack = Stack.pop t stack in
+        Stack.push t stack
     end
   | Ref_func i ->
-    if not @@ Hashtbl.mem env.refs i then
-      Log.err "undeclared function reference";
-    Stack.push [ Ref_type Func_ref ] stack
+    if not @@ Hashtbl.mem env.refs i then Error "undeclared function reference"
+    else Stack.push [ Ref_type Func_ref ] stack
   | Br i ->
     let jt = Env.block_type_get i env in
-    ignore @@ Stack.pop jt stack;
-    [ any ]
+    let* _stack = Stack.pop jt stack in
+    Ok [ any ]
   | Br_if i ->
-    let stack = Stack.pop [ i32 ] stack in
+    let* stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
-    let stack = Stack.pop jt stack in
+    let* stack = Stack.pop jt stack in
     Stack.push (List.rev jt) stack
   | Br_table (branches, i) ->
-    let stack = Stack.pop [ i32 ] stack in
+    let* stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
-    ignore @@ Stack.pop default_jt stack;
-    Array.iter
-      (fun i ->
-        let jt = Env.block_type_get i env in
-        if not (List.length jt = List.length default_jt) then
-          Log.err "type mismatch (br table)";
-        ignore @@ Stack.pop jt stack )
-      branches;
-    [ any ]
+    let* _stack = Stack.pop default_jt stack in
+    let* () =
+      array_iter
+        (fun i ->
+          let jt = Env.block_type_get i env in
+          if not (List.length jt = List.length default_jt) then
+            Error "type mismatch (br table)"
+          else
+            let* _stack = Stack.pop jt stack in
+            Ok () )
+        branches
+    in
+    Ok [ any ]
   | Table_get i ->
     let t_typ = Env.table_type_get i env in
-    Stack.pop [ i32 ] stack |> Stack.push [ Ref_type t_typ ]
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ Ref_type t_typ ] stack
   | Table_set i ->
     let t_typ = Env.table_type_get i env in
     Stack.pop [ Ref_type t_typ; i32 ] stack
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
-    ~stack:previous_stack : stack =
+  ~stack:previous_stack : (stack, string) Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
       ~some:(fun (pt, rt) ->
@@ -378,15 +421,16 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
   in
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let stack = List.fold_left (typecheck_instr env) (List.rev pt) expr in
-  if not (Stack.equal rt stack) then Log.err "type mismatch (loop)";
-  match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
-  | None -> Log.err "type mismatch (param type)"
-  | Some stack_to_push -> Stack.push rt stack_to_push
+  let* stack = list_fold_left (typecheck_instr env) (List.rev pt) expr in
+  if not (Stack.equal rt stack) then Error "type mismatch (loop)"
+  else
+    match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
+    | None -> Error "type mismatch (param type)"
+    | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (module_ : Simplify.simplified_module) func refs =
   match func with
-  | Simplify.Imported _ -> ()
+  | Simplify.Imported _ -> Ok ()
   | Local func ->
     let params, result = func.type_f in
     let env =
@@ -394,12 +438,13 @@ let typecheck_function (module_ : Simplify.simplified_module) func refs =
         ~globals:module_.global ~result_type:result ~tables:module_.table
         ~elems:module_.elem ~refs
     in
-    let stack =
+    let* stack =
       typecheck_expr env func.body ~is_loop:false (Some ([], result)) ~stack:[]
     in
     let required = List.rev_map typ_of_val_type (snd func.type_f) in
     if not @@ Stack.equal required stack then
-      Log.err "type mismatch func %a" Stack.pp_error (required, stack)
+      error_s "type mismatch func %a" Stack.pp_error (required, stack)
+    else Ok ()
 
 let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
   function
@@ -413,74 +458,80 @@ let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
     Stack.push [ Ref_type Func_ref ] stack
   | Global_get i ->
     let value = get_value_at_indice i module_.global.values in
-    let _mut, type_ =
+    let* _mut, type_ =
       match value with
-      | Local _ -> Log.err "unknown global"
-      | Imported t -> t.desc
+      | Local _ -> Error "unknown global"
+      | Imported t -> Ok t.desc
     in
     Stack.push [ typ_of_val_type type_ ] stack
   | I_binop (t, _op) ->
     let t = itype t in
-    Stack.pop [ t; t ] stack |> Stack.push [ t ]
+    let* stack = Stack.pop [ t; t ] stack in
+    Stack.push [ t ] stack
 
 let typecheck_const_expr (module_ : Simplify.simplified_module) refs =
-  List.fold_left (typecheck_const_instr module_ refs) []
+  list_fold_left (typecheck_const_instr module_ refs) []
 
 let typecheck_global (module_ : Simplify.simplified_module) refs global =
   match global.Simplify.value with
-  | Simplify.Imported _ -> ()
+  | Simplify.Imported _ -> Ok ()
   | Local ({ type_; init; _ } : 'expr global') -> (
-    let real_type = typecheck_const_expr module_ refs init in
+    let* real_type = typecheck_const_expr module_ refs init in
     match real_type with
     | [ real_type ] ->
       if typ_of_val_type @@ snd type_ <> real_type then
-        Log.err "type mismatch (typecheck_global)"
-    | _whatever -> Log.err "type mismatch (typecheck_global wrong num)" )
+        Error "type mismatch (typecheck_global)"
+      else Ok ()
+    | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 
 let typecheck_elem module_ refs (elem : (int, Const.expr) elem' Simplify.indexed)
     =
   let expected_type = elem.value.type_ in
-  List.iter
-    (fun init ->
-      let real_type = typecheck_const_expr module_ refs init in
-      match real_type with
-      | [ real_type ] ->
-        if Ref_type expected_type <> real_type then
-          Log.err "type mismatch (typecheck_elem)"
-      | _whatever -> Log.err "type mismatch (typecheck_elem wrong num)" )
-    elem.value.init;
+  let* () =
+    list_iter
+      (fun init ->
+        let* real_type = typecheck_const_expr module_ refs init in
+        match real_type with
+        | [ real_type ] ->
+          if Ref_type expected_type <> real_type then
+            Error "type mismatch (typecheck_elem)"
+          else Ok ()
+        | _whatever -> Error "type mismatch (typecheck_elem wrong num)" )
+      elem.value.init
+  in
   match elem.value.mode with
-  | Elem_passive | Elem_declarative -> ()
+  | Elem_passive | Elem_declarative -> Ok ()
   | Elem_active (tbl_i, e) -> (
     let tbl_type = Env.table_type_get_from_module tbl_i module_ in
-    if tbl_type <> expected_type then Log.err "type mismatch";
-    match typecheck_const_expr module_ refs e with
-    | [ Ref_type t ] -> if t <> tbl_type then Log.err "type mismatch"
-    | [ _t ] -> ()
-    | _whatever -> Log.err "type mismatch (typecheck_elem)" )
+    if tbl_type <> expected_type then Error "type mismatch"
+    else
+      let* t = typecheck_const_expr module_ refs e in
+      match t with
+      | [ Ref_type t ] -> if t <> tbl_type then Error "type mismatch" else Ok ()
+      | [ _t ] -> Ok ()
+      | _whatever -> Error "type mismatch (typecheck_elem)" )
 
 let typecheck_data module_ refs (data : (int, Const.expr) data' Simplify.indexed)
     =
   match data.value.mode with
-  | Data_passive -> ()
+  | Data_passive -> Ok ()
   | Data_active (_i, e) -> (
-    let t = typecheck_const_expr module_ refs e in
+    let* t = typecheck_const_expr module_ refs e in
     match t with
-    | [ _t ] -> ()
-    | _whatever -> Log.err "type mismatch (typecheck_data)" )
+    | [ _t ] -> Ok ()
+    | _whatever -> Error "type mismatch (typecheck_data)" )
 
 let module_ (module_ : Simplify.simplified_module) =
   Log.debug "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
-  try
-    List.iter (typecheck_global module_ refs) module_.global.values;
-    List.iter (typecheck_elem module_ refs) module_.elem.values;
-    List.iter (typecheck_data module_ refs) module_.data.values;
-    List.iter
-      (fun (export : Simplify.export) -> Hashtbl.add refs export.id ())
-      module_.exports.func;
-    Simplify.Named.iter
-      (fun _index func -> typecheck_function module_ func refs)
-      module_.func;
-    Ok ()
-  with Failure msg -> Error msg
+  let* () = list_iter (typecheck_global module_ refs) module_.global.values in
+  let* () = list_iter (typecheck_elem module_ refs) module_.elem.values in
+  let* () = list_iter (typecheck_data module_ refs) module_.data.values in
+  List.iter
+    (fun (export : Simplify.export) -> Hashtbl.add refs export.id ())
+    module_.exports.func;
+  Simplify.Named.fold
+    (fun _index func acc ->
+      let* () = acc in
+      typecheck_function module_ func refs )
+    module_.func (Ok ())

@@ -6,17 +6,26 @@ let pp_red fmt s = Format.fprintf fmt "\x1b[31m%s\x1b[0m" s
 
 let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
 
+let pp_ok fmt = Format.fprintf fmt "%a !@." pp_green "OK"
+
+let pp_error fmt msg = Format.fprintf fmt "%a: `%s` !@." pp_red "FAILED" msg
+
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
   match Owi.Parse.from_file ~filename:(Fpath.to_string f) with
-  | Ok script ->
-    Owi.Script.exec script;
-    Format.printf "%a !@." pp_green "OK";
-    Ok ()
-  | Error e as ee ->
-    Format.printf "%a: `%s` !@." pp_red "FAILED"
-      (String.concat " " @@ String.split_on_char '\n' e);
-    ee
+  | Ok script -> begin
+    match Owi.Script.exec script with
+    | Ok () as ok ->
+      pp_ok Format.std_formatter;
+      ok
+    | Error msg as error ->
+      pp_error Format.std_formatter msg;
+      error
+  end
+  | Error msg as e ->
+    let msg = String.concat " | " @@ String.split_on_char '\n' msg in
+    pp_error Format.std_formatter msg;
+    e
 
 let test_directory d =
   let count_error = ref 0 in

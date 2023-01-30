@@ -5,6 +5,8 @@ let page_size = 65_536
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
+let trap msg = raise (Trap msg)
+
 let exec_iunop stack nn op =
   match nn with
   | S32 ->
@@ -67,15 +69,14 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         try
           match s with
           | S ->
-            if n1 = Int32.min_int && n2 = -1l then
-              raise (Trap "integer overflow");
+            if n1 = Int32.min_int && n2 = -1l then trap "integer overflow";
             div n1 n2
           | U -> unsigned_div n1 n2
-        with Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> trap "integer divide by zero"
       end
       | Rem s -> begin
         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> trap "integer divide by zero"
       end
       | And -> logand n1 n2
       | Or -> logor n1 n2
@@ -97,15 +98,14 @@ let exec_ibinop stack nn (op : Types.ibinop) =
         try
           match s with
           | S ->
-            if n1 = Int64.min_int && n2 = -1L then
-              raise (Trap "integer overflow");
+            if n1 = Int64.min_int && n2 = -1L then trap "integer overflow";
             div n1 n2
           | U -> unsigned_div n1 n2
-        with Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> trap "integer divide by zero"
       end
       | Rem s -> begin
         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> raise (Trap "integer divide by zero")
+        with Division_by_zero -> trap "integer divide by zero"
       end
       | And -> logand n1 n2
       | Or -> logor n1 n2
@@ -231,9 +231,11 @@ let init_local (_id, t) : Env.t' Value.t =
 (* TODO move to module Env *)
 let mem_0 = 0
 
+let ( let* ) o f = Result.fold ~ok:f ~error:trap o
+
 let get_memory (env : Env.t) idx =
-  let mem = Env.get_memory env idx in
-  Link.Memory.(get_data mem, get_limit_max mem)
+  let* mem = Env.get_memory env idx in
+  Ok Link.Memory.(get_data mem, get_limit_max mem)
 
 let get_memory_raw env idx = Env.get_memory env idx
 
@@ -247,10 +249,9 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | Externref ety -> Stack.pop_as_externref ety stack
   in
   let rec split_args :
-      type f r.
-         Env.t' Stack.t
-      -> (f, r) Value.Func.atype
-      -> Env.t' Stack.t * Env.t' Stack.t =
+    type f r.
+    Env.t' Stack.t -> (f, r) Value.Func.atype -> Env.t' Stack.t * Env.t' Stack.t
+      =
    fun stack ty ->
     let[@local] split_one_arg args =
       let elt, stack = Stack.pop stack in
@@ -404,21 +405,19 @@ let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
 let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   let fun_i, stack = Stack.pop_i32_to_int state.stack in
   let state = { state with stack } in
-  let t = Env.get_table state.env tbl_i in
-  if t.type_ <> Func_ref then raise @@ Trap "indirect call type mismatch";
+  let* t = Env.get_table state.env tbl_i in
+  if t.type_ <> Func_ref then trap "indirect call type mismatch";
   let func =
     match t.data.(fun_i) with
-    | exception Invalid_argument _ ->
-      raise @@ Trap "undefined element" (* fails here *)
+    | exception Invalid_argument _ -> trap "undefined element" (* fails here *)
     | Funcref (Some f) -> f
-    | Funcref None ->
-      raise @@ Trap (Printf.sprintf "uninitialized element %i" fun_i)
-    | _ -> raise @@ Trap "element type error"
+    | Funcref None -> trap (Printf.sprintf "uninitialized element %i" fun_i)
+    | _ -> trap "element type error"
   in
   let pt, rt = Value.Func.typ func in
   let pt', rt' = typ_i in
   if not (rt = rt' && List.equal p_type_eq pt pt') then
-    raise @@ Trap "indirect call type mismatch";
+    trap "indirect call type mismatch";
   exec_vfunc ~return state func
 
 let exec_instr instr (state : State.exec_state) =
@@ -431,7 +430,7 @@ let exec_instr instr (state : State.exec_state) =
   match instr with
   | Return -> State.return state
   | Nop -> state
-  | Unreachable -> raise @@ Trap "unreachable"
+  | Unreachable -> trap "unreachable"
   | I32_const n -> st @@ Stack.push_i32 stack n
   | I64_const n -> st @@ Stack.push_i64 stack n
   | F32_const f -> st @@ Stack.push_f32 stack f
@@ -648,7 +647,9 @@ let exec_instr instr (state : State.exec_state) =
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in
     st @@ Stack.push_bool stack b
-  | Ref_func i -> st @@ Stack.push stack (Value.ref_func (Env.get_func env i))
+  | Ref_func i ->
+    let* f = Env.get_func env i in
+    st @@ Stack.push stack (Value.ref_func f)
   | Drop -> st @@ Stack.drop stack
   | Local_get i -> st @@ Stack.push stack locals.(i)
   | Local_set i ->
@@ -660,11 +661,11 @@ let exec_instr instr (state : State.exec_state) =
     let state = { state with stack } in
     exec_block state ~is_loop:false bt (if b then e1 else e2)
   | Call i -> begin
-    let func = Env.get_func env i in
+    let* func = Env.get_func env i in
     exec_vfunc ~return:false state func
   end
   | Return_call i -> begin
-    let func = Env.get_func env i in
+    let* func = Env.get_func env i in
     exec_vfunc ~return:true state func
   end
   | Br i -> State.branch state i
@@ -675,11 +676,11 @@ let exec_instr instr (state : State.exec_state) =
   | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
   | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
   | Memory_size ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let len = Bytes.length mem / page_size in
     st @@ Stack.push_i32_of_int stack len
   | Memory_grow -> begin
-    let mem = get_memory_raw env mem_0 in
+    let* mem = get_memory_raw env mem_0 in
     let data = Link.Memory.get_data mem in
     let max_size = Link.Memory.get_limit_max mem in
     let delta, stack = Stack.pop_i32_to_int stack in
@@ -712,30 +713,30 @@ let exec_instr instr (state : State.exec_state) =
     let len, stack = Stack.pop_i32_to_int stack in
     let c, stack = Stack.pop_i32_to_char stack in
     let pos, stack = Stack.pop_i32_to_int stack in
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     begin
       try Bytes.fill mem pos len c
-      with Invalid_argument _ -> raise @@ Trap "out of bounds memory access"
+      with Invalid_argument _ -> trap "out of bounds memory access"
     end;
     st @@ stack
   | Memory_copy ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let len, stack = Stack.pop_i32_to_int stack in
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
     begin
       try Bytes.blit mem src_pos mem dst_pos len
-      with Invalid_argument _ -> raise (Trap "out of bounds memory access")
+      with Invalid_argument _ -> trap "out of bounds memory access"
     end;
     st @@ stack
   | Memory_init i ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let len, stack = Stack.pop_i32_to_int stack in
     let src_pos, stack = Stack.pop_i32_to_int stack in
     let dst_pos, stack = Stack.pop_i32_to_int stack in
-    let data = Env.get_data env i in
+    let* data = Env.get_data env i in
     ( try Bytes.blit_string data.value src_pos mem dst_pos len
-      with Invalid_argument _ -> raise (Trap "out of bounds memory access") );
+      with Invalid_argument _ -> trap "out of bounds memory access" );
     st @@ stack
   | Select _t ->
     let b, stack = Stack.pop_bool stack in
@@ -746,9 +747,11 @@ let exec_instr instr (state : State.exec_state) =
     let v, stack = Stack.pop stack in
     locals.(i) <- v;
     st @@ Stack.push stack v
-  | Global_get i -> st @@ Stack.push stack (Env.get_global env i).value
+  | Global_get i ->
+    let* g = Env.get_global env i in
+    st @@ Stack.push stack g.value
   | Global_set i ->
-    let global = Env.get_global env i in
+    let* global = Env.get_global env i in
     if global.mut = Const then Log.err "Can't set const global";
     let v, stack =
       match global.typ with
@@ -776,29 +779,28 @@ let exec_instr instr (state : State.exec_state) =
     global.value <- v;
     st @@ stack
   | Table_get indice ->
-    let t = Env.get_table env indice in
+    let* t = Env.get_table env indice in
     let indice, stack = Stack.pop_i32_to_int stack in
     let v =
       match t.data.(indice) with
-      | exception Invalid_argument _ ->
-        raise @@ Trap "out of bounds table access"
+      | exception Invalid_argument _ -> trap "out of bounds table access"
       | v -> v
     in
     st @@ Stack.push stack (Ref v)
   | Table_set indice ->
-    let t = Env.get_table env indice in
+    let* t = Env.get_table env indice in
     let v, stack = Stack.pop_as_ref stack in
     let indice, stack = Stack.pop_i32_to_int stack in
     begin
       try t.data.(indice) <- v
-      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+      with Invalid_argument _ -> trap "out of bounds table access"
     end;
     st @@ stack
   | Table_size indice ->
-    let t = Env.get_table env indice in
+    let* t = Env.get_table env indice in
     st @@ Stack.push_i32_of_int stack (Array.length t.data)
   | Table_grow indice ->
-    let t = Env.get_table env indice in
+    let* t = Env.get_table env indice in
     let size = Array.length t.data in
     let delta, stack = Stack.pop_i32_to_int stack in
     let new_size = size + delta in
@@ -818,24 +820,24 @@ let exec_instr instr (state : State.exec_state) =
       Link.Table.update t new_table;
       Stack.push_i32_of_int stack size
   | Table_fill indice ->
-    let t = Env.get_table env indice in
+    let* t = Env.get_table env indice in
     let len, stack = Stack.pop_i32_to_int stack in
     let x, stack = Stack.pop_as_ref stack in
     let pos, stack = Stack.pop_i32_to_int stack in
     begin
       try Array.fill t.data pos len x
-      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+      with Invalid_argument _ -> trap "out of bounds table access"
     end;
     st @@ stack
   | Table_copy (ti_dst, ti_src) -> begin
-    let t_src = Env.get_table env ti_src in
-    let t_dst = Env.get_table env ti_dst in
+    let* t_src = Env.get_table env ti_src in
+    let* t_dst = Env.get_table env ti_dst in
     let len, stack = Stack.pop_i32_to_int stack in
     let src, stack = Stack.pop_i32_to_int stack in
     let dst, stack = Stack.pop_i32_to_int stack in
     if
       src + len > Array.length t_src.data || dst + len > Array.length t_dst.data
-    then raise @@ Trap "out of bounds table access";
+    then trap "out of bounds table access";
     st
     @@
     if len = 0 then stack
@@ -843,11 +845,11 @@ let exec_instr instr (state : State.exec_state) =
       try
         Array.blit t_src.data src t_dst.data dst len;
         stack
-      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+      with Invalid_argument _ -> trap "out of bounds table access"
   end
   | Table_init (t_i, e_i) ->
-    let t = Env.get_table env t_i in
-    let elem = Env.get_elem env e_i in
+    let* t = Env.get_table env t_i in
+    let* elem = Env.get_elem env e_i in
     let len, stack = Stack.pop_i32_to_int stack in
     let pos_x, stack = Stack.pop_i32_to_int stack in
     let pos, stack = Stack.pop_i32_to_int stack in
@@ -862,31 +864,31 @@ let exec_instr instr (state : State.exec_state) =
       pos_x + len > Array.length elem.value
       || pos + len > Array.length t.data
       || 0 > len
-    then raise @@ Trap "out of bounds table access";
+    then trap "out of bounds table access";
     begin
       try
         for i = 0 to len - 1 do
           let idx = pos_x + i in
           if idx < 0 || idx >= Array.length elem.value then
-            raise @@ Trap "out of bounds table access";
+            trap "out of bounds table access";
           let x = elem.value.(idx) in
           let idx = pos + i in
           if idx < 0 || idx >= Array.length t.data then
-            raise @@ Trap "out of bounds table access";
+            trap "out of bounds table access";
           Array.set t.data idx x
         done
-      with Invalid_argument _ -> raise @@ Trap "out of bounds table access"
+      with Invalid_argument _ -> trap "out of bounds table access"
     end;
     st @@ stack
   | Elem_drop i ->
-    let elem = Env.get_elem env i in
+    let* elem = Env.get_elem env i in
     Env.drop_elem elem;
     st @@ stack
   | I_load16 (nn, sx, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     if Bytes.length mem < pos + offset + 2 || offset < 0 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     let res =
       (if sx = S then Bytes.get_int16_le else Bytes.get_uint16_le)
         mem (pos + offset)
@@ -897,41 +899,41 @@ let exec_instr instr (state : State.exec_state) =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I_load (nn, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     st
     @@
     match nn with
     | S32 ->
       if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       let res = Bytes.get_int32_le mem (pos + offset) in
       Stack.push_i32 stack res
     | S64 ->
       if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       let res = Bytes.get_int64_le mem (pos + offset) in
       Stack.push_i64 stack res )
   | F_load (nn, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     st
     @@
     match nn with
     | S32 ->
       if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       let res = Bytes.get_int32_le mem (pos + offset) in
       let res = Float32.of_bits res in
       Stack.push_f32 stack res
     | S64 ->
       if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       let res = Bytes.get_int64_le mem (pos + offset) in
       let res = Float64.of_bits res in
       Stack.push_f64 stack res )
   | I_store (nn, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     st
     @@
     match nn with
@@ -940,7 +942,7 @@ let exec_instr instr (state : State.exec_state) =
       let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 4 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       Bytes.set_int32_le mem offset n;
       stack
     | S64 ->
@@ -948,11 +950,11 @@ let exec_instr instr (state : State.exec_state) =
       let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 8 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       Bytes.set_int64_le mem offset n;
       stack )
   | F_store (nn, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     st
     @@
     match nn with
@@ -961,7 +963,7 @@ let exec_instr instr (state : State.exec_state) =
       let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 4 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       Bytes.set_int32_le mem offset (Float32.to_bits n);
       stack
     | S64 ->
@@ -969,14 +971,14 @@ let exec_instr instr (state : State.exec_state) =
       let pos, stack = Stack.pop_i32_to_int stack in
       let offset = offset + pos in
       if Bytes.length mem < offset + 8 || pos < 0 then
-        raise (Trap "out of bounds memory access");
+        trap "out of bounds memory access";
       Bytes.set_int64_le mem offset (Float64.to_bits n);
       stack )
   | I_load8 (nn, sx, { offset; _ }) -> (
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     if Bytes.length mem < pos + offset + 1 || offset < 0 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     let res =
       (if sx = S then Bytes.get_int8 else Bytes.get_uint8) mem (pos + offset)
     in
@@ -986,10 +988,10 @@ let exec_instr instr (state : State.exec_state) =
     | S32 -> Stack.push_i32_of_int stack res
     | S64 -> Stack.push_i64_of_int stack res )
   | I64_load32 (sx, { offset; _ }) ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let pos, stack = Stack.pop_i32_to_int stack in
     if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     let res = Bytes.get_int32_le mem (pos + offset) in
     if sx = S || Sys.word_size = 32 then
       let res = Int64.of_int32 res in
@@ -1000,7 +1002,7 @@ let exec_instr instr (state : State.exec_state) =
       st @@ Stack.push_i64_of_int stack res
     else Log.err "unsupported word size"
   | I_store8 (nn, { offset; _ }) ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let n, stack =
       match nn with
       | S32 ->
@@ -1013,11 +1015,11 @@ let exec_instr instr (state : State.exec_state) =
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
     if Bytes.length mem < offset + 1 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     Bytes.set_int8 mem offset n;
     st @@ stack
   | I_store16 (nn, { offset; _ }) ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let n, stack =
       match nn with
       | S32 ->
@@ -1030,21 +1032,21 @@ let exec_instr instr (state : State.exec_state) =
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
     if Bytes.length mem < offset + 2 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     Bytes.set_int16_le mem offset n;
     st @@ stack
   | I64_store32 { offset; _ } ->
-    let mem, _max = get_memory env mem_0 in
+    let* mem, _max = get_memory env mem_0 in
     let n, stack = Stack.pop_i64 stack in
     let n = Int64.to_int32 n in
     let pos, stack = Stack.pop_i32_to_int stack in
     let offset = offset + pos in
     if Bytes.length mem < offset + 4 || pos < 0 then
-      raise (Trap "out of bounds memory access");
+      trap "out of bounds memory access";
     Bytes.set_int32_le mem offset n;
     st @@ stack
   | Data_drop i ->
-    let data = Env.get_data env i in
+    let* data = Env.get_data env i in
     Env.drop_data data;
     st @@ stack
   | Br_table (inds, i) ->
@@ -1098,7 +1100,7 @@ let exec_vfunc stack (func : Env.t' Value.Func.t) =
     | Extern f -> exec_extern_func stack f
   with
   | result -> Ok result
-  | (exception Failure msg) | (exception Trap msg) -> Error msg
+  | exception Trap msg -> Error msg
   | exception Stack_overflow -> Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
@@ -1114,5 +1116,5 @@ let module_ (module_ : Link.module_to_run) =
       module_.to_run;
     Ok ()
   with
-  | Failure msg | Trap msg -> Error msg
+  | Trap msg -> Error msg
   | Stack_overflow -> Error "call stack exhausted"

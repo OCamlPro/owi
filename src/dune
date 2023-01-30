@@ -19,6 +19,7 @@
   simplify
   spectest
   stack
+  syntax
   typecheck
   types
   value

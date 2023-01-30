@@ -39,8 +39,9 @@ module Owi = struct end
 
 let utf8_name ==
   | name = NAME; {
-    Wutf8.check_utf8 name;
-    name
+    match Wutf8.check_utf8 name with
+    | Ok () -> name
+    | Error msg -> failwith msg
   }
 
 let par(X) ==

@@ -58,7 +58,7 @@ type simplified_module =
   ; elem : (int, Types.Const.expr) Types.elem' Named.t
   ; data : (int, Types.Const.expr) Types.data' Named.t
   ; exports : exports
-  ; start : int list
+  ; start : int option
   }
 
 (** pretty print a simplified module *)
