@@ -388,21 +388,21 @@ exception Empty
 
 let empty = []
 
-let push s v = <span data-count="40996701">v</span> :: s
+let push s v = <span data-count="40996449">v</span> :: s
 
 let push_bool s b = <span data-count="8060963">p</span>ush s (I32 (if b then <span data-count="975739">1</span>l else <span data-count="7085224">0</span>l))
 
-let push_i32 s i = <span data-count="5482571">p</span>ush s (I32 i)
+let push_i32 s i = <span data-count="5482506">p</span>ush s (I32 i)
 
 let push_i32_of_int s i = <span data-count="922828">p</span>ush_i32 s (Int32.of_in<span data-count="922828">t</span> i)
 
-let push_i64 s i = <span data-count="10182630">p</span>ush s (I64 i)
+let push_i64 s i = <span data-count="10182566">p</span>ush s (I64 i)
 
 let push_i64_of_int s i = <span data-count="143">p</span>ush_i64 s (Int64.of_in<span data-count="143">t</span> i)
 
-let push_f32 s f = <span data-count="97669">p</span>ush s (F32 f)
+let push_f32 s f = <span data-count="97617">p</span>ush s (F32 f)
 
-let push_f64 s f = <span data-count="95847">p</span>ush s (F64 f)
+let push_f64 s f = <span data-count="95787">p</span>ush s (F64 f)
 
 let push_as_externref s ty v = <span data-count="1">p</span>ush s (Ref (Externref (Some (E (ty, v)))))
 
@@ -411,19 +411,19 @@ let pp fmt (s : 'env t) =
     ~pp_sep:(fun fmt () -&gt; <span data-count="2">F</span>ormat.fprintf fmt " ; ")
     Value.pp fmt s
 
-let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="35145534">h</span>d :: tl -&gt; (hd, tl)
+let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="35145522">h</span>d :: tl -&gt; (hd, tl)
 
 let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="320">_</span>hd :: tl -&gt; tl
 
 let pop_i32 s =
-  <span data-count="2446036">l</span>et hd, tl = pop s in
-  <span data-count="2446036">m</span>atch hd with
-  | <span data-count="2446036">I</span>32 n -&gt; (n, tl)
+  <span data-count="2446025">l</span>et hd, tl = pop s in
+  <span data-count="2446025">m</span>atch hd with
+  | <span data-count="2446025">I</span>32 n -&gt; (n, tl)
   | <span data-count="0">_</span> | <span data-count="0">(</span>exception Empty) -&gt; Log.err "invalid type (expected i32)"
 
 let pop_i32_to_int s =
-  <span data-count="1732041">l</span>et hd, tl = pop_i32 s in
-  <span data-count="1732041">(</span>Int32.to_in<span data-count="1732041">t</span> hd, tl)
+  <span data-count="1732030">l</span>et hd, tl = pop_i32 s in
+  <span data-count="1732030">(</span>Int32.to_in<span data-count="1732030">t</span> hd, tl)
 
 let pop_i32_to_char s =
   <span data-count="122">l</span>et hd, tl = pop_i32 s in
@@ -535,9 +535,9 @@ let pop_is_null s =
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected const_null)"
 
 let pop_n s n =
-  <span data-count="5827116">(</span>List.filter<span data-count="5827116">i</span> (fun i _hd -&gt; <span data-count="5882081">i</span> &lt; n) s, List.filter<span data-count="5827116">i</span> (fun i _hd -&gt; <span data-count="5882081">i</span> &gt;= n) s)
+  <span data-count="5827107">(</span>List.filter<span data-count="5827107">i</span> (fun i _hd -&gt; <span data-count="5882040">i</span> &lt; n) s, List.filter<span data-count="5827107">i</span> (fun i _hd -&gt; <span data-count="5882040">i</span> &gt;= n) s)
 
-let keep s n = <span data-count="1694623">L</span>ist.filteri (fun i _hd -&gt; <span data-count="247466">i</span> &lt; n) s
+let keep s n = <span data-count="1693286">L</span>ist.filteri (fun i _hd -&gt; <span data-count="247462">i</span> &lt; n) s
 
 let rec drop_n s n =
   <span data-count="8321944">i</span>f n = 0 then <span data-count="7796947">s</span>

@@ -400,13 +400,13 @@ module Func = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="6479">i</span>ncr r;
-      <span data-count="6479">!</span>r
+      <span data-count="5940">i</span>ncr r;
+      <span data-count="5940">!</span>r
 
-  let wasm func env : 'env t = <span data-count="6479">W</span>ASM (fres<span data-count="6479">h</span> (), func, env)
+  let wasm func env : 'env t = <span data-count="5940">W</span>ASM (fres<span data-count="5940">h</span> (), func, env)
 
   let typ = function
-    | <span data-count="801240">W</span>ASM (_, func, _env) -&gt; func.type_f
+    | <span data-count="801232">W</span>ASM (_, func, _env) -&gt; func.type_f
     | <span data-count="4">E</span>xtern (Extern_func (t, _f)) -&gt; extern_type t
 end
 
@@ -439,7 +439,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref fmt r
 
 let ref_null' (type_ : Types.ref_type) =
-  <span data-count="532">m</span>atch type_ with <span data-count="473">F</span>unc_ref -&gt; Funcref None | <span data-count="59">E</span>xtern_ref -&gt; Externref None
+  <span data-count="482">m</span>atch type_ with <span data-count="423">F</span>unc_ref -&gt; Funcref None | <span data-count="59">E</span>xtern_ref -&gt; Externref None
 
 let ref_null (type_ : Types.ref_type) = <span data-count="77">R</span>ef (ref_null<span data-count="77">'</span> type_)
 

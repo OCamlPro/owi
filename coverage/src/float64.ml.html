@@ -974,11 +974,11 @@ let of_signless_string s =
   else <span data-count="13956">i</span>f s = "nan" then <span data-count="1191">p</span>os_nan
   else <span data-count="12765">i</span>f String.lengt<span data-count="12765">h</span> s &gt; 6 &amp;&amp; <span data-count="7796">S</span>tring.su<span data-count="7796">b</span> s 0 6 = "nan:0x" then
     <span data-count="1073">l</span>et x = Int64.of_string (String.su<span data-count="1073">b</span> s 4 (String.lengt<span data-count="1073">h</span> s - 4)) in
-    <span data-count="1073">i</span>f x = Int64.zero then <span data-count="1">r</span>aise (Failure "nan payload must not be zero")
+    <span data-count="1073">i</span>f x = Int64.zero then <span data-count="1">f</span>ailwith "nan payload must not be zero"
     else <span data-count="1072">i</span>f Int64.logan<span data-count="1072">d</span> x bare_nan &lt;&gt; Int64.zero then
-      <span data-count="1">r</span>aise (Failure "nan payload must not overlap with exponent bits")
+      <span data-count="1">f</span>ailwith "nan payload must not overlap with exponent bits"
     else <span data-count="1071">i</span>f x &lt; Int64.zero then
-      <span data-count="0">r</span>aise (Failure "nan payload must not overlap with sign bit")
+      <span data-count="0">f</span>ailwith "nan payload must not overlap with sign bit"
     else <span data-count="1071">I</span>nt64.logor x bare_nan
   else
     <span data-count="11692">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="11692">r</span> '_' s) in

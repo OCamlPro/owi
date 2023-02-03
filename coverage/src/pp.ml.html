@@ -1363,11 +1363,11 @@ let id fmt id = <span data-count="0">F</span>ormat.fprintf fmt "$%s" id
 module Shared = struct
   let id_opt fmt = function <span data-count="0">N</span>one -&gt; () | <span data-count="0">S</span>ome i -&gt; id fmt i
 
-  let num_type fmt : num_type -&gt; Unit.t = <span data-count="2932">f</span>unction
-    | <span data-count="1753">I</span>32 -&gt; Format.fprintf fmt "i32"
-    | <span data-count="430">I</span>64 -&gt; Format.fprintf fmt "i64"
-    | <span data-count="427">F</span>32 -&gt; Format.fprintf fmt "f32"
-    | <span data-count="322">F</span>64 -&gt; Format.fprintf fmt "f64"
+  let num_type fmt : num_type -&gt; Unit.t = <span data-count="2599">f</span>unction
+    | <span data-count="1548">I</span>32 -&gt; Format.fprintf fmt "i32"
+    | <span data-count="379">I</span>64 -&gt; Format.fprintf fmt "i64"
+    | <span data-count="395">F</span>32 -&gt; Format.fprintf fmt "f32"
+    | <span data-count="277">F</span>64 -&gt; Format.fprintf fmt "f64"
 
   let ref_type fmt = function
     | <span data-count="19">F</span>unc_ref -&gt; Format.fprintf fmt "funcref"
