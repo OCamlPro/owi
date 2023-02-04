@@ -61,9 +61,9 @@ type 'a t =
 
 val cast_ref : externref -> 'a Extern_ref.ty -> 'a option
 
-val ref_null' : Types.ref_type -> 'a ref_value
+val ref_null' : Types.heap_type -> 'a ref_value
 
-val ref_null : Types.ref_type -> 'a t
+val ref_null : Types.heap_type -> 'a t
 
 val ref_func : 'a Func.t -> 'a t
 

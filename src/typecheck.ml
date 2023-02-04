@@ -3,13 +3,13 @@ open Syntax
 
 type typ =
   | Num_type of Types.num_type
-  | Ref_type of Types.ref_type
+  | Ref_type of Types.heap_type
   | Any
   | Something
 
 let pp_typ fmt = function
   | Num_type t -> Pp.Simplified.num_type fmt t
-  | Ref_type t -> Pp.Simplified.ref_type fmt t
+  | Ref_type t -> Pp.Simplified.heap_type fmt t
   | Any -> Format.fprintf fmt "any"
   | Something -> Format.fprintf fmt "something"
 
@@ -19,7 +19,7 @@ let pp_typ_list fmt l =
     pp_typ fmt l
 
 let typ_of_val_type = function
-  | Types.Ref_type t -> Ref_type t
+  | Types.Ref_type (_null, t) -> Ref_type t
   | Types.Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -122,11 +122,21 @@ module Stack = struct
     | F64, F64 -> true
     | _, _ -> false
 
-  let match_ref_type (required : Types.ref_type) (got : Types.ref_type) =
+  let match_ref_type required got =
     match (required, got) with
-    | Func_ref, Func_ref -> true
-    | Extern_ref, Extern_ref -> true
-    | _ -> false
+    | Types.Any_ht, _ -> true
+    | None_ht, None_ht -> true
+    | Eq_ht, Eq_ht -> true
+    | I31_ht, I31_ht -> true
+    | Struct_ht, Struct_ht -> true
+    | Array_ht, Array_ht -> true
+    | No_func_ht, No_func_ht -> true
+    | Func_ht, Func_ht -> true
+    | Extern_ht, Extern_ht -> true
+    | No_extern_ht, No_extern_ht -> true
+    | _ ->
+      (* TODO: complete this *)
+      false
 
   let match_types required got =
     match (required, got) with
@@ -311,13 +321,13 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     Stack.push (List.rev_map typ_of_val_type rt) stack
   | Return_call i ->
     let pt, rt = Env.func_get i env in
-    ignore @@ Stack.pop (List.rev_map typ_of_pt pt) stack;
+    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
       not
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Error "type mismatch"
+    then Error "type mismatch (return_call)"
     else Ok [ any ]
   | Return_call_indirect (_, (pt, rt)) ->
     let* stack = Stack.pop [ i32 ] stack in
@@ -327,25 +337,26 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Error "type mismatch"
+    then Error "type mismatch (return_call_indirect)"
     else Ok [ any ]
   | Data_drop _i -> Ok stack
   | Table_init (ti, ei) ->
     let table_typ = Env.table_type_get ti env in
     let elem_typ = Env.elem_type_get ei env in
-    if table_typ <> elem_typ then Error "type mismatch"
+    if not @@ Stack.match_ref_type (snd table_typ) (snd elem_typ) then
+      Error "type mismatch (table_init)"
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_copy (i, i') ->
     let typ = Env.table_type_get i env in
     let typ' = Env.table_type_get i' env in
-    if typ <> typ' then Error "type mismatch"
+    if typ <> typ' then Error "type mismatch (table_copy)"
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_fill i ->
-    let t_type = Env.table_type_get i env in
-    Stack.pop [ i32; Ref_type t_type; i32 ] stack
+    let _null, t = Env.table_type_get i env in
+    Stack.pop [ i32; Ref_type t; i32 ] stack
   | Table_grow i ->
-    let t_type = Env.table_type_get i env in
-    let* stack = Stack.pop [ i32; Ref_type t_type ] stack in
+    let _null, t = Env.table_type_get i env in
+    let* stack = Stack.pop [ i32; Ref_type t ] stack in
     Stack.push [ i32 ] stack
   | Table_size _ -> Stack.push [ i32 ] stack
   | Ref_is_null ->
@@ -377,7 +388,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     end
   | Ref_func i ->
     if not @@ Hashtbl.mem env.refs i then Error "undeclared function reference"
-    else Stack.push [ Ref_type Func_ref ] stack
+    else Stack.push [ Ref_type Func_ht ] stack
   | Br i ->
     let jt = Env.block_type_get i env in
     let* _stack = Stack.pop jt stack in
@@ -404,12 +415,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     in
     Ok [ any ]
   | Table_get i ->
-    let t_typ = Env.table_type_get i env in
+    let _null, t = Env.table_type_get i env in
     let* stack = Stack.pop [ i32 ] stack in
-    Stack.push [ Ref_type t_typ ] stack
+    Stack.push [ Ref_type t ] stack
   | Table_set i ->
-    let t_typ = Env.table_type_get i env in
-    Stack.pop [ Ref_type t_typ; i32 ] stack
+    let _null, t = Env.table_type_get i env in
+    Stack.pop [ Ref_type t; i32 ] stack
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
   ~stack:previous_stack : (stack, string) Result.t =
@@ -455,7 +466,7 @@ let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
   | Ref_null t -> Stack.push [ Ref_type t ] stack
   | Ref_func i ->
     Hashtbl.add refs i ();
-    Stack.push [ Ref_type Func_ref ] stack
+    Stack.push [ Ref_type Func_ht ] stack
   | Global_get i ->
     let value = get_value_at_indice i module_.global.values in
     let* _mut, type_ =
@@ -486,7 +497,7 @@ let typecheck_global (module_ : Simplify.simplified_module) refs global =
 
 let typecheck_elem module_ refs (elem : (int, Const.expr) elem' Simplify.indexed)
     =
-  let expected_type = elem.value.type_ in
+  let _null, expected_type = elem.value.type_ in
   let* () =
     list_iter
       (fun init ->
@@ -502,12 +513,13 @@ let typecheck_elem module_ refs (elem : (int, Const.expr) elem' Simplify.indexed
   match elem.value.mode with
   | Elem_passive | Elem_declarative -> Ok ()
   | Elem_active (tbl_i, e) -> (
-    let tbl_type = Env.table_type_get_from_module tbl_i module_ in
-    if tbl_type <> expected_type then Error "type mismatch"
+    let _null, tbl_type = Env.table_type_get_from_module tbl_i module_ in
+    if tbl_type <> expected_type then Error "type mismatch (elem_active)"
     else
       let* t = typecheck_const_expr module_ refs e in
       match t with
-      | [ Ref_type t ] -> if t <> tbl_type then Error "type mismatch" else Ok ()
+      | [ Ref_type t ] ->
+        if t <> tbl_type then Error "type mismatch (elem_active bis)" else Ok ()
       | [ _t ] -> Ok ()
       | _whatever -> Error "type mismatch (typecheck_elem)" )
 

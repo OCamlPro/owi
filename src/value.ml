@@ -61,7 +61,7 @@ module Func = struct
     | I64 -> Num_type I64
     | F32 -> Num_type F32
     | F64 -> Num_type F64
-    | Externref _ -> Ref_type Extern_ref
+    | Externref _ -> Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : Types.result_type =
     match r with
@@ -124,10 +124,12 @@ let pp fmt = function
   | F64 f -> Format.fprintf fmt "f64.const %a" Pp.Simplified.f64 f
   | Ref r -> pp_ref fmt r
 
-let ref_null' (type_ : Types.ref_type) =
-  match type_ with Func_ref -> Funcref None | Extern_ref -> Externref None
+let ref_null' = function
+  | Types.Func_ht -> Funcref None
+  | Extern_ht -> Externref None
+  | _ -> failwith "TODO ref_null' Value.ml"
 
-let ref_null (type_ : Types.ref_type) = Ref (ref_null' type_)
+let ref_null type_ = Ref (ref_null' type_)
 
 let ref_func (f : 'env Func.t) : 'env t = Ref (Funcref (Some f))
 

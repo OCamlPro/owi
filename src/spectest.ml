@@ -76,7 +76,7 @@ let m =
             ; body = [ I32_const 1l ]
             ; id = Some "func-i32->i32"
             }
-        ; MTable (Some "table", ({ min = 10; max = Some 20 }, Func_ref))
+        ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
         ; MGlobal
             { type_ = (Const, Num_type I32)
             ; init = [ I32_const 666l ]

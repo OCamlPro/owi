@@ -25,7 +25,7 @@ let module_ m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then Error "duplicate global"
+      if Hashtbl.mem seen id then error_s "duplicate global %s" id
       else Ok (Hashtbl.replace seen id ())
   in
   let add_table =
@@ -33,7 +33,7 @@ let module_ m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then Error "duplicate table"
+      if Hashtbl.mem seen id then error_s "duplicate table %s" id
       else Ok (Hashtbl.replace seen id ())
   in
   let add_memory =
@@ -41,14 +41,14 @@ let module_ m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then Error "duplicate memory"
+      if Hashtbl.mem seen id then error_s "duplicate memory %s" id
       else Ok (Hashtbl.add seen id ())
   in
 
   let* (_env : env) =
     List.fold_left
       (fun env field ->
-        let* env = env in
+        let* env in
         match field with
         | MExport _e -> Ok env
         | MFunc _f -> Ok { env with funcs = true }

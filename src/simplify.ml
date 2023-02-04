@@ -35,7 +35,7 @@ type opt_export =
   ; id : opt_ind
   }
 
-type type_check = indice * func_type
+type type_check = indice * str_type
 
 type 'a indexed =
   { index : int
@@ -76,7 +76,7 @@ type known_data = (indice, (indice, indice block_type) expr') data'
 
 type grouped_module =
   { id : string option
-  ; type_ : type_ list
+  ; type_ : type_def list
   ; function_type : func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
@@ -95,7 +95,7 @@ type grouped_module =
 
 type assigned_module =
   { id : string option
-  ; type_ : func_type Named.t
+  ; type_ : str_type Named.t
   ; global : (global, global_import) runtime Named.t
   ; table : (table, table_import) runtime Named.t
   ; mem : (mem, mem_import) runtime Named.t
@@ -240,7 +240,7 @@ end = struct
   let group (module_ : Types.module_) =
     let add ((fields : grouped_module), curr) field =
       match field with
-      | MType type_ -> ok ({ fields with type_ = type_ :: fields.type_ }, curr)
+      | MType type_ -> ok ({ fields with type_ = type_ @ fields.type_ }, curr)
       | MGlobal global -> ok @@ add_global (Local global) fields curr
       | MImport ({ desc = Import_global (a, b); _ } as import) ->
         ok @@ add_global (Imported (imp import (a, b))) fields curr
@@ -293,7 +293,7 @@ end = struct
             let type_checks =
               match id with
               | None -> fields.type_checks
-              | Some id -> (id, type_) :: fields.type_checks
+              | Some id -> (id, Def_func_t type_) :: fields.type_checks
             in
             (type_ :: fields.function_type, type_checks)
         in
@@ -336,13 +336,13 @@ end = struct
     Ok module_
 end
 
-module FuncType = struct
-  type t = func_type
+module StrType = struct
+  type t = str_type
 
   let compare = compare
 end
 
-module TypeMap = Map.Make (FuncType)
+module TypeMap = Map.Make (StrType)
 
 let equal_func_types (a : func_type) (b : func_type) : bool =
   let remove_param (pt, rt) =
@@ -355,29 +355,38 @@ module Assign_indicies : sig
   val run : grouped_module -> (assigned_module, string) Result.t
 end = struct
   type type_acc =
-    { declared_types : func_type indexed list
-    ; func_types : func_type indexed list
+    { declared_types : str_type indexed list
+    ; func_types : str_type indexed list
     ; named_types : int StringMap.t
     ; last_assigned_int : int
     ; all_types : int TypeMap.t
     }
 
-  let assign_types (module_ : grouped_module) : func_type Named.t =
+  let assign_types (module_ : grouped_module) : str_type Named.t =
     let assign_type
       { declared_types; func_types; named_types; last_assigned_int; all_types }
-      (name, type_) : type_acc =
-      let id = last_assigned_int in
-      let last_assigned_int = last_assigned_int + 1 in
-      let declared_types = { index = id; value = type_ } :: declared_types in
-      let named_types =
-        match name with
-        | None -> named_types
-        | Some name -> StringMap.add name id named_types
+      (name, sub_type) : type_acc =
+      let last_assigned_int, declared_types, named_types, all_types =
+        match sub_type with
+        | ((_final, _indices, str_type) : sub_type) ->
+          let id = last_assigned_int in
+          let last_assigned_int = succ last_assigned_int in
+          let declared_types =
+            { index = id; value = str_type } :: declared_types
+          in
+          let named_types =
+            match name with
+            | None -> named_types
+            | Some name -> StringMap.add name id named_types
+          in
+          let all_types = TypeMap.add str_type id all_types in
+          (last_assigned_int, declared_types, named_types, all_types)
       in
-      let all_types = TypeMap.add type_ id all_types in
+
       (* Is there something to do/check when a type is already declared ? *)
       { declared_types; func_types; named_types; last_assigned_int; all_types }
     in
+
     let empty_acc =
       { declared_types = []
       ; func_types = []
@@ -390,17 +399,22 @@ end = struct
     let assign_func_type
       ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
       type_ =
-      match TypeMap.find_opt type_ all_types with
-      | Some _id -> acc
-      | None ->
-        let id = last_assigned_int in
-        let last_assigned_int = last_assigned_int + 1 in
-        let func_types = { index = id; value = type_ } :: func_types in
-        let all_types = TypeMap.add type_ id all_types in
-        { acc with func_types; last_assigned_int; all_types }
+      match type_ with
+      | Def_func_t _ftype -> begin
+        match TypeMap.find_opt type_ all_types with
+        | Some _id -> acc
+        | None ->
+          let id = last_assigned_int in
+          let last_assigned_int = last_assigned_int + 1 in
+          let func_types = { index = id; value = type_ } :: func_types in
+          let all_types = TypeMap.add type_ id all_types in
+          { acc with func_types; last_assigned_int; all_types }
+      end
+      | Def_array_t _ | Def_struct_t _ -> acc
     in
     let acc =
-      List.fold_left assign_func_type acc (List.rev module_.function_type)
+      List.fold_left assign_func_type acc
+        (List.rev_map (fun ftype -> Def_func_t ftype) module_.function_type)
     in
     let values = List.rev acc.declared_types @ List.rev acc.func_types in
     (* Format.printf "TYPES@.%a"
@@ -427,20 +441,29 @@ end = struct
     let* named = list_fold_left assign_one StringMap.empty values in
     Ok { Named.values; named }
 
-  let check_type_id (types : func_type Named.t) (check : type_check) =
+  let check_type_id (types : str_type Named.t) (check : type_check) =
     let id, func_type = check in
-    let id =
+    let* func_type =
+      match func_type with
+      | Def_array_t _ | Def_struct_t _ -> Error "TODO: Simplify.check_type_id"
+      | Def_func_t func_type -> Ok func_type
+    in
+    let* id =
       match id with
-      | Raw i -> i
-      | Symbolic name -> StringMap.find name types.named
+      | Raw i -> Ok i
+      | Symbolic name -> (
+        match StringMap.find_opt name types.named with
+        | None -> error_s "internal error: can't find type with name %s" name
+        | Some t -> Ok t )
     in
     (* TODO more efficient version of that *)
     match List.find_opt (fun v -> v.index = id) types.values with
     | None -> Error "unknown type"
-    | Some func_type' ->
-      if not (equal_func_types func_type func_type'.value) then
+    | Some { value = Def_func_t func_type'; _ } ->
+      if not (equal_func_types func_type func_type') then
         Error "inline function type"
       else Ok ()
+    | Some _ -> Error "TODO: Simplify.check_type_id"
 
   let run (module_ : grouped_module) : (assigned_module, string) Result.t =
     let type_ = assign_types module_ in
@@ -543,15 +566,23 @@ module Rewrite_indices = struct
     in
 
     let bt_some_to_raw = function
-      | Bt_ind ind ->
-        let* { value; _ } = get "unknown type" module_.type_ ind in
-        Ok value
+      | Bt_ind ind -> begin
+        match get "unknown type" module_.type_ ind with
+        | Ok { value = Def_func_t t'; _ } -> Ok t'
+        | Error _ as e -> e
+        | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+      end
       | Bt_raw (type_use, t) -> (
         match type_use with
         | None -> Ok t
         | Some ind ->
           (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
-          let* { value = t'; _ } = get "unknown type" module_.type_ ind in
+          let* t' =
+            match get "unknown type" module_.type_ ind with
+            | Ok { value = Def_func_t t'; _ } -> Ok t'
+            | Error _ as e -> e
+            | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+          in
           let ok = equal_func_types t t' in
           if not ok then Error "inline function type" else Ok t )
     in
@@ -762,8 +793,13 @@ module Rewrite_indices = struct
   let rewrite_block_type (module_ : assigned_module) block_type =
     match block_type with
     | Bt_ind id ->
-      let* t = get "unknown type" module_.type_ id in
-      Ok t.value
+      let* t =
+        match get "unknown type" module_.type_ id with
+        | Ok { value = Def_func_t t'; _ } -> Ok t'
+        | Error _ as e -> e
+        | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+      in
+      Ok t
     | Bt_raw (_, func_type) -> Ok func_type
 
   let rewrite_global (module_ : assigned_module) (global : global) :

@@ -21,16 +21,22 @@ let from_lexbuf =
         (start.pos_cnum - start.pos_bol);
       Error "unexpected token"
     | Lexer.Error (pos, msg) ->
-      if !Log.debug_on then
+      if !Log.debug_on then begin
         let file_line =
           let cpos = pos.pos_cnum - pos.pos_bol in
           Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
             pos.pos_lnum cpos
         in
         let msg = Printf.sprintf "Error: Lexing error %s" msg in
-        Error (Printf.sprintf "%s\n%s\n" file_line msg)
-      else Error "unknown operator"
-    | Failure msg -> Error msg
+        Log.debug "%s\n%s\n" file_line msg
+      end;
+      Error "unknown operator"
+    | Failure msg ->
+      if !Log.debug_on then begin
+        let msg = Printf.sprintf "Error: Lexing error %s" msg in
+        Log.debug "%s\n" msg
+      end;
+      Error msg
 
 (** Parse a script from a string. *)
 let from_string s = from_lexbuf (Sedlexing.Utf8.from_string s)

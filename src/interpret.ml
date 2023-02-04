@@ -226,7 +226,7 @@ let init_local (_id, t) : Env.t' Value.t =
   | Num_type I64 -> I64 Int64.zero
   | Num_type F32 -> F32 Float32.zero
   | Num_type F64 -> F64 Float64.zero
-  | Ref_type rt -> Value.ref_null rt
+  | Ref_type (_null, rt) -> Value.ref_null rt
 
 (* TODO move to module Env *)
 let mem_0 = 0
@@ -406,7 +406,8 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   let fun_i, stack = Stack.pop_i32_to_int state.stack in
   let state = { state with stack } in
   let* t = Env.get_table state.env tbl_i in
-  if t.type_ <> Func_ref then trap "indirect call type mismatch";
+  let _null, ref_kind = t.type_ in
+  if ref_kind <> Func_ht then trap "indirect call type mismatch";
   let func =
     match t.data.(fun_i) with
     | exception Invalid_argument _ -> trap "undefined element" (* fails here *)
@@ -755,12 +756,7 @@ let exec_instr instr (state : State.exec_state) =
     if global.mut = Const then Log.err "Can't set const global";
     let v, stack =
       match global.typ with
-      | Ref_type rt -> begin
-        match rt with
-        | Extern_ref | Func_ref ->
-          let v, stack = Stack.pop_ref stack in
-          (v, stack)
-      end
+      | Ref_type _rt -> Stack.pop_ref stack
       | Num_type nt -> (
         match nt with
         | I32 ->
