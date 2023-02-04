@@ -1,6 +1,28 @@
 %token <String.t> NUM
 %token <String.t> ID NAME
-%token ALIGN ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE BINARY BLOCK BR BR_IF BR_TABLE CALL CALL_INDIRECT DATA DATA_DROP DECLARE DROP ELEM ELEM_DROP ELSE END EOF EQUAL EXPORT EXTERN EXTERNREF F32 F32_ABS F32_ADD F32_CEIL F32_CONST F32_CONVERT_I32_S F32_CONVERT_I32_U F32_CONVERT_I64_S F32_CONVERT_I64_U F32_COPYSIGN F32_DEMOTE_F64 F32_DIV F32_EQ F32_FLOOR F32_GE F32_GT F32_LE F32_LOAD F32_LT F32_MAX F32_MIN F32_MUL F32_NE F32_NEAREST F32_NEG F32_REINTERPRET_I32 F32_REINTERPRET_I64 F32_SQRT F32_STORE F32_SUB F32_TRUNC F64 F64_ABS F64_ADD F64_CEIL F64_CONST F64_CONVERT_I32_S F64_CONVERT_I32_U F64_CONVERT_I64_S F64_CONVERT_I64_U F64_COPYSIGN F64_DIV F64_EQ F64_FLOOR F64_GE F64_GT F64_LE F64_LOAD F64_LT F64_MAX F64_MIN F64_MUL F64_NE F64_NEAREST F64_NEG F64_PROMOTE_F32 F64_REINTERPRET_I32 F64_REINTERPRET_I64 F64_SQRT F64_STORE F64_SUB F64_TRUNC FUNC FUNCREF GET GLOBAL GLOBAL_GET GLOBAL_SET I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR IF IMPORT INVOKE ITEM LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE NAN_ARITH NAN_CANON NOP OFFSET PARAM QUOTE REF_EXTERN REF_FUNC REF_IS_NULL REF_NULL REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR SELECT START TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE UNREACHABLE
+%token ALIGN ANY_REF ARRAY ARRAY_REF ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY
+%token BINARY BLOCK BR BR_IF BR_TABLE
+%token CALL CALL_INDIRECT
+%token DATA DATA_DROP DECLARE DROP
+%token ELEM ELEM_DROP ELSE END EOF EQ EQ_REF EQUAL EXPORT EXTERN EXTERN_REF
+%token F32 F32_ABS F32_ADD F32_CEIL F32_CONST F32_CONVERT_I32_S F32_CONVERT_I32_U F32_CONVERT_I64_S F32_CONVERT_I64_U F32_COPYSIGN F32_DEMOTE_F64 F32_DIV F32_EQ F32_FLOOR F32_GE F32_GT F32_LE F32_LOAD F32_LT F32_MAX F32_MIN F32_MUL F32_NE F32_NEAREST F32_NEG F32_REINTERPRET_I32 F32_REINTERPRET_I64 F32_SQRT F32_STORE F32_SUB F32_TRUNC
+%token F64 F64_ABS F64_ADD F64_CEIL F64_CONST F64_CONVERT_I32_S F64_CONVERT_I32_U F64_CONVERT_I64_S F64_CONVERT_I64_U F64_COPYSIGN F64_DIV F64_EQ F64_FLOOR F64_GE F64_GT F64_LE F64_LOAD F64_LT F64_MAX F64_MIN F64_MUL F64_NE F64_NEAREST F64_NEG F64_PROMOTE_F32 F64_REINTERPRET_I32 F64_REINTERPRET_I64 F64_SQRT F64_STORE F64_SUB F64_TRUNC
+%token FIELD FUNC FUNC_REF
+%token GET GLOBAL GLOBAL_GET GLOBAL_SET
+%token I16 I31 I31_NEW I31_REF
+%token I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR
+%token I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR
+%token I8 IF IMPORT INVOKE ITEM
+%token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
+%token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE
+%token NAN_ARITH NAN_CANON NOEXTERN NOFUNC NONE NOP NULL NULL_EXTERN_REF NULL_FUNC_REF NULL_REF
+%token OFFSET
+%token PARAM
+%token QUOTE
+%token REC REF REF_EXTERN REF_FUNC REF_IS_NULL REF_NULL REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
+%token SELECT START STRUCT STRUCT_REF SUB
+%token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
+%token UNREACHABLE
 
 %{
 
@@ -52,13 +74,38 @@ let string_list ==
 
 (* Types *)
 
-let ref_kind ==
-  | FUNC; { Func_ref }
-  | EXTERN; { Extern_ref }
+let null_opt ==
+  | NULL; { Null }
+  | { No_null }
+
+let heap_type ==
+  | ANY; { Any_ht }
+  | NONE; { None_ht }
+  | EQ; { Eq_ht }
+  | I31; { I31_ht }
+  | STRUCT; { Struct_ht }
+  | ARRAY; { Array_ht }
+  | FUNC; { Func_ht }
+  | NOFUNC; { No_func_ht }
+  | EXTERN; { Extern_ht }
+  | NOEXTERN; { No_extern_ht }
 
 let ref_type ==
-  | FUNCREF; { Func_ref }
-  | EXTERNREF; { Extern_ref }
+  | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
+  | ANY_REF; { Null, Any_ht }
+  | NULL_REF; { Null, None_ht }
+  | EQ_REF; { Null, Eq_ht }
+  | I31_REF; { Null, I31_ht }
+  | STRUCT_REF; { Null, Struct_ht }
+  | ARRAY_REF; { Null, Array_ht }
+  | FUNC_REF; { Null, Func_ht }
+  | NULL_FUNC_REF; { Null, No_func_ht }
+  | EXTERN_REF; { Null, Extern_ht }
+  | NULL_EXTERN_REF; { Null, No_extern_ht }
+
+let packed_type :=
+  | I8; {I8}
+  | I16; {I16}
 
 let val_type :=
   | ~ = num_type; <Num_type>
@@ -68,8 +115,41 @@ let global_type ==
   | ~ = val_type; { Const, val_type }
   | val_type = par(preceded(MUTABLE, val_type)); { Var, val_type }
 
+let storage_type ==
+  | ~ = val_type; <Val_storage_t>
+  | ~ = packed_type; <Val_packed_t>
+
+let field_type ==
+  | ~ = storage_type; { Const, storage_type }
+  | t = par(preceded(MUTABLE, storage_type)); { Var, t }
+
+let struct_field ==
+    | FIELD; l = list(field_type); { None, l }
+    | FIELD; ~ = id; ~ = field_type; { Some id, [field_type] }
+
+let struct_type ==
+  | ~ = list(par(struct_field)); <>
+
+let array_type ==
+  | ~ = field_type; <>
+
+let str_type ==
+  | ~ = par(preceded(STRUCT, struct_type)); <Def_struct_t>
+  | ~ = par(preceded(ARRAY, array_type)); <Def_array_t>
+  | ~ = par(preceded(FUNC, func_type)); <Def_func_t>
+
+let sub_type ==
+  | ~ = str_type; { Final, [], str_type }
+  | LPAR; SUB; indices = list(indice); ~ = str_type; RPAR; {
+    No_final, indices, str_type
+  }
+
+let type_def ==
+  | TYPE; id = option(id); ~ = sub_type; { id, sub_type }
+
 let def_type ==
-  | ~ = par(preceded(FUNC, func_type)); <>
+  | ~ = type_def; { [ type_def ] }
+  | REC; ~ = list(par(type_def)); <>
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
@@ -204,15 +284,15 @@ let plain_instr :=
   | I64_CTZ; { I_unop (S64, Ctz) }
   | I32_POPCNT; { I_unop (S32, Popcnt) }
   | I64_POPCNT; { I_unop (S64, Popcnt) }
-  | F32_ABS; { F_unop (S32, Abs) } 
+  | F32_ABS; { F_unop (S32, Abs) }
   | F64_ABS; { F_unop (S64, Abs) }
-  | F32_NEG; { F_unop (S32, Neg) } 
+  | F32_NEG; { F_unop (S32, Neg) }
   | F64_NEG; { F_unop (S64, Neg) }
-  | F32_SQRT; { F_unop (S32, Sqrt) } 
+  | F32_SQRT; { F_unop (S32, Sqrt) }
   | F64_SQRT; { F_unop (S64, Sqrt) }
   | F32_CEIL; { F_unop (S32, Ceil) }
   | F64_CEIL; { F_unop (S64, Ceil) }
-  | F32_FLOOR; { F_unop (S32, Floor) } 
+  | F32_FLOOR; { F_unop (S32, Floor) }
   | F64_FLOOR; { F_unop (S64, Floor) }
   | F32_TRUNC; { F_unop (S32, Trunc) }
   | F64_TRUNC; { F_unop (S64, Trunc) }
@@ -329,7 +409,7 @@ let plain_instr :=
   | F64_CONVERT_I32_S; { F_convert_i (S64, S32, S) }
   | F64_CONVERT_I32_U; { F_convert_i (S64, S32, U) }
   | F64_CONVERT_I64_S; { F_convert_i (S64, S64, S) }
-  | F64_CONVERT_I64_U; { F_convert_i (S64, S64, U) }  
+  | F64_CONVERT_I64_U; { F_convert_i (S64, S64, U) }
   | I32_REINTERPRET_F32; { I_reinterpret_f (S32, S32) }
   | I32_REINTERPRET_F64; { I_reinterpret_f (S32, S64) }
   | I64_REINTERPRET_F32; { I_reinterpret_f (S64, S32) }
@@ -338,7 +418,7 @@ let plain_instr :=
   | F32_REINTERPRET_I64; { F_reinterpret_i (S32, S64) }
   | F64_REINTERPRET_I32; { F_reinterpret_i (S64, S32) }
   | F64_REINTERPRET_I64; { F_reinterpret_i (S64, S64) }
-  | REF_NULL; ~ = ref_kind; <Ref_null>
+  | REF_NULL; ~ = heap_type; <Ref_null>
   | REF_IS_NULL; { Ref_is_null }
   | REF_FUNC; ~ = indice; <Ref_func>
   | I32_LOAD; memarg = memarg; { I_load (S32, memarg) }
@@ -710,7 +790,7 @@ let offset ==
   | ~ = expr; <>
 
 let elem_kind ==
-  | FUNC; { Func_ref }
+  | FUNC; { Null, Func_ht }
 
 let elem_expr ==
   | LPAR; ITEM; ~ = const_expr; RPAR; <>
@@ -737,7 +817,7 @@ let elem ==
     [ MElem { id; type_; init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { id; type_ = Func_ref; init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ MElem { id; type_ = (Null, Func_ht); init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
 
 let table ==
@@ -771,7 +851,7 @@ let table_fields :=
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = List.length (List.flatten init) in
-    [ MElem { id = None; type_ = Func_ref; init; mode = Elem_active (None, []) }
+    [ MElem { id = None; type_ = (Null, Func_ht); init; mode = Elem_active (None, []) }
     ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }
 
@@ -812,8 +892,7 @@ let memory_fields :=
   | LPAR; DATA; init = string_list; RPAR; {
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     let min = Int32.to_int min in
-    
-    [ MData { id = None; init; mode = Data_active (None, []) } 
+    [ MData { id = None; init; mode = Data_active (None, []) }
     ; MMem (None, { min; max = Some min}) ]
   }
 
@@ -876,17 +955,16 @@ let inline_export ==
 
 (* Modules *)
 
-let type_ ==
-  | ~ = def_type; <>
-
-let type_def ==
-  | TYPE; id = option(id); ~ = type_; { [ MType (id, type_) ] }
+let type_field ==
+  | ~ = def_type; {
+    [ MType def_type ]
+  }
 
 let start ==
   | START; ~ = indice; { [ MStart indice ] }
 
 let module_field :=
-  | ~ = type_def; <>
+  | ~ = type_field; <>
   | ~ = start; <>
   | ~ = export; <>
   | ~ = import; <>
@@ -918,7 +996,7 @@ let literal_const ==
   | I64_CONST; num = NUM; { Const_I64 (i64 num) }
   | F32_CONST; num = NUM; { Const_F32 (f32 num) }
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
-  | REF_NULL; ~ = ref_kind; <Const_null>
+  | REF_NULL; ~ = heap_type; <Const_null>
   | REF_EXTERN; num = NUM; { Const_host (int_of_string num) }
 
 let const ==

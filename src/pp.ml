@@ -24,9 +24,23 @@ module Shared = struct
     | F32 -> Format.fprintf fmt "f32"
     | F64 -> Format.fprintf fmt "f64"
 
-  let ref_type fmt = function
-    | Func_ref -> Format.fprintf fmt "funcref"
-    | Extern_ref -> Format.fprintf fmt "extern"
+  let heap_type fmt = function
+    | Any_ht -> Format.fprintf fmt "any"
+    | None_ht -> Format.fprintf fmt "none"
+    | Eq_ht -> Format.fprintf fmt "eq"
+    | I31_ht -> Format.fprintf fmt "i31"
+    | Struct_ht -> Format.fprintf fmt "struct"
+    | Array_ht -> Format.fprintf fmt "array"
+    | Func_ht -> Format.fprintf fmt "func"
+    | No_func_ht -> Format.fprintf fmt "nofunc"
+    | Extern_ht -> Format.fprintf fmt "extern"
+    | No_extern_ht -> Format.fprintf fmt "noextern"
+
+  let null fmt = function
+    | No_null -> Format.fprintf fmt "nonull"
+    | Null -> Format.fprintf fmt "null"
+
+  let ref_type fmt (n, ht) = Format.fprintf fmt "%a %a" heap_type ht null n
 
   let val_type fmt = function
     | Num_type t -> num_type fmt t
@@ -97,7 +111,7 @@ module Const = struct
     | I_binop (n, op) -> Format.fprintf fmt "i%a.%a" Shared.nn n ibinop op
     | Global_get id ->
       Format.fprintf fmt "global.get %a" Simplified_indice.indice id
-    | Ref_null t -> Format.fprintf fmt "ref.null %a" Shared.ref_type t
+    | Ref_null t -> Format.fprintf fmt "ref.null %a" Shared.heap_type t
     | Ref_func fid ->
       Format.fprintf fmt "ref.func %a" Simplified_indice.indice fid
 
@@ -240,7 +254,7 @@ module Make_Expr (Arg : Arg) = struct
       Format.fprintf fmt "i%a.reinterpret_f%a" nn n nn n'
     | F_reinterpret_i (n, n') ->
       Format.fprintf fmt "f%a.reinterpret_i%a" nn n nn n'
-    | Ref_null t -> Format.fprintf fmt "ref.null %a" ref_type t
+    | Ref_null t -> Format.fprintf fmt "ref.null %a" heap_type t
     | Ref_is_null -> Format.fprintf fmt "ref.is_null"
     | Ref_func fid -> Format.fprintf fmt "ref.func %a" indice fid
     | Drop -> Format.fprintf fmt "drop"
@@ -378,8 +392,9 @@ module Global = struct
     Format.fprintf fmt {|(import "%a" "%a" %a)|} name i.module_ name i.name
       import_desc i.desc
 
-  let type_ fmt (i, ft) =
-    Format.fprintf fmt "(type %a %a)" id_opt i func_type ft
+  let type_ _fmt _l =
+    (* TODO *)
+    ()
 
   let data_mode fmt = function
     | Data_passive -> ()
@@ -432,7 +447,7 @@ module Global = struct
     | Const_I64 i -> Format.fprintf fmt "i64.const %Ld" i
     | Const_F32 f -> Format.fprintf fmt "f32.const %a" f32 f
     | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
-    | Const_null rt -> Format.fprintf fmt "ref.null %a" ref_type rt
+    | Const_null rt -> Format.fprintf fmt "ref.null %a" heap_type rt
     | Const_host i -> Format.fprintf fmt "ref.extern %d" i
 
   let consts fmt c =

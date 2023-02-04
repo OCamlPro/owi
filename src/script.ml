@@ -70,8 +70,8 @@ let compare_result_const result (const : 'env Value.t) =
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
   | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
-  | Result_const (Literal (Const_null Func_ref)), Ref (Funcref None) -> true
-  | Result_const (Literal (Const_null Extern_ref)), Ref (Externref None) -> true
+  | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
+  | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
   | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) -> begin
     match Value.cast_ref ref Host_externref.ty with
     | None -> false
@@ -125,7 +125,7 @@ let action (link_state : Link.state) = function
     let* global = load_global_from_module link_state mod_id name in
     Ok [ global.value ]
 
-let rec run ~with_exhaustion script =
+let run ~with_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
@@ -153,10 +153,19 @@ let rec run ~with_exhaustion script =
         Log.debug "*** assert_malformed_quote@\n";
         let* () =
           match Parse.from_string (String.concat "\n" m) with
-          | Ok m ->
-            let* (_link_state : Link.state) = run m ~with_exhaustion in
-            Error "exhaustion didn't happen"
           | Error got -> check_error ~expected ~got
+          | Ok [ Module m ] -> (
+            match Check.module_ m with
+            | Error got -> check_error ~expected ~got
+            | Ok () -> (
+              match Simplify.module_ m with
+              | Error got -> check_error ~expected ~got
+              | Ok _m ->
+                let got = "Ok" in
+                check_error ~expected ~got ) )
+          | Ok _ ->
+            let got = "expected a single module" in
+            check_error ~expected ~got
         in
         Ok link_state
       | Assert (Assert_invalid_binary _) ->
@@ -166,7 +175,9 @@ let rec run ~with_exhaustion script =
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
         let* () =
-          check_error_result expected (Compile.until_link link_state m)
+          match Compile.until_link link_state m with
+          | Ok _ -> check_error ~expected ~got:"Ok"
+          | Error got -> check_error ~expected ~got
         in
         Ok link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
@@ -222,5 +233,5 @@ let rec run ~with_exhaustion script =
     Link.empty_state script
 
 let exec ?(with_exhaustion = false) script =
-  let _link_state = run ~with_exhaustion script in
+  let* _link_state = run ~with_exhaustion script in
   Ok ()

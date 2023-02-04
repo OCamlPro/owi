@@ -10,13 +10,31 @@ type nonrec num_type =
   | F32
   | F64
 
-type nonrec ref_type =
-  | Func_ref
-  | Extern_ref
+type nullable =
+  | No_null
+  | Null
+
+type heap_type =
+  | Any_ht
+  | None_ht
+  | Eq_ht
+  | I31_ht
+  | Struct_ht
+  | Array_ht
+  | Func_ht
+  | No_func_ht
+  | Extern_ht
+  | No_extern_ht
+
+type nonrec ref_type = nullable * heap_type
 
 type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
+
+type nonrec packed_type =
+  | I8
+  | I16
 
 type nonrec param = string option * val_type
 
@@ -159,7 +177,7 @@ type ('indice, 'bt) instr' =
   | I_reinterpret_f of nn * nn
   | F_reinterpret_i of nn * nn
   (* Reference instructions *)
-  | Ref_null of ref_type
+  | Ref_null of heap_type
   | Ref_is_null
   | Ref_func of 'indice
   (* Parametric instructions *)
@@ -305,10 +323,35 @@ type 'indice export' =
 
 type export = indice export'
 
-type type_ = string option * func_type
+type final =
+  | Final
+  | No_final
+
+type storage_type =
+  | Val_storage_t of val_type
+  | Val_packed_t of packed_type
+
+type field_type = mut * storage_type
+
+type array_type = field_type
+
+type struct_field = string option * field_type list
+
+type struct_type = struct_field list
+
+type str_type =
+  | Def_struct_t of struct_type
+  | Def_array_t of array_type
+  | Def_func_t of func_type
+
+type sub_type = final * indice list * str_type
+
+type type_def = string option * sub_type
+
+type rec_type = type_def list
 
 type module_field =
-  | MType of type_
+  | MType of rec_type
   | MGlobal of global
   | MTable of table
   | MMem of mem
@@ -329,7 +372,7 @@ type const =
   | Const_I64 of Int64.t
   | Const_F32 of Float32.t
   | Const_F64 of Float64.t
-  | Const_null of ref_type
+  | Const_null of heap_type
   | Const_host of int
 
 type action =
@@ -378,7 +421,7 @@ module Const = struct
     | I64_const of Int64.t
     | F32_const of Float32.t
     | F64_const of Float64.t
-    | Ref_null of ref_type
+    | Ref_null of heap_type
     | Ref_func of int
     | Global_get of int
     | I_binop of nn * ibinop

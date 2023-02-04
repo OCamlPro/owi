@@ -59,8 +59,8 @@ module Table = struct
       !r
 
   let init ?label (typ : table_type) : 'env t =
-    let limits, ref_type = typ in
-    let null = Value.ref_null' ref_type in
+    let limits, ((_null, heap_type) as ref_type) = typ in
+    let null = Value.ref_null' heap_type in
     let table = Array.make limits.min null in
     { id = fresh (); label; limits; type_ = ref_type; data = table }
 
@@ -267,7 +267,7 @@ let load_from_module ls f (import : _ Simplify.imp) =
     | exception Not_found ->
       Log.debug "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
-        Error "incompatible import type"
+        Error "incompatible import type (Link.load_from_module)"
       else Error "unknown import"
     | v -> Ok v )
 
@@ -276,11 +276,12 @@ let load_global (ls : state) (import : Types.global_type Simplify.imp) :
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
-    | Var, Const | Const, Var -> Error "incompatible import type"
+    | Var, Const | Const, Var ->
+      Error "incompatible import type (Link.load_global)"
     | Const, Const | Var, Var -> Ok ()
   in
   if snd import.desc <> global.typ then begin
-    Error "incompatible import type"
+    Error "incompatible import type (Link.load_global bis)"
   end
   else Ok global
 
@@ -392,7 +393,7 @@ let load_func (ls : state) (import : func_type Simplify.imp) :
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.typ func in
   if func_types_are_compatible type_ type' then Ok func
-  else Error "incompatible import type"
+  else Error "incompatible import type (Link.load_func)"
 
 let eval_func ls (finished_env : Env.t') func : (func, string) Result.t =
   match func with

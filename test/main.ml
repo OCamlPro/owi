@@ -8,7 +8,7 @@ let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
 
 let pp_ok fmt = Format.fprintf fmt "%a !@." pp_green "OK"
 
-let pp_error fmt msg = Format.fprintf fmt "%a: `%s` !@." pp_red "FAILED" msg
+let pp_error fmt msg = Format.fprintf fmt "%a: %s !@." pp_red "FAILED" msg
 
 let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
@@ -59,6 +59,13 @@ let () =
   end;
   begin
     match test_directory Fpath.(v "reference") with
+    | Ok () -> ()
+    | Error e ->
+      Format.eprintf "error: %s@." e;
+      has_error := true
+  end;
+  begin
+    match test_directory Fpath.(v "gc") with
     | Ok () -> ()
     | Error e ->
       Format.eprintf "error: %s@." e;
