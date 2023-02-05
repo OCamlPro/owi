@@ -24,6 +24,8 @@ let push_f64 s f = push s (F64 f)
 
 let push_as_externref s ty v = push s (Ref (Externref (Some (E (ty, v)))))
 
+let push_array s a = push s (Ref (Arrayref (Some a)))
+
 let pp fmt (s : 'env t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")

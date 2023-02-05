@@ -108,6 +108,10 @@ let itype = function S32 -> i32 | S64 -> i64
 
 let ftype = function S32 -> f32 | S64 -> f64
 
+let arraytype _module_ _i =
+  (* TODO *)
+  f32
+
 module Stack = struct
   let pp fmt (s : stack) = Format.fprintf fmt "[%a]" pp_typ_list s
 
@@ -421,6 +425,15 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
   | Table_set i ->
     let _null, t = Env.table_type_get i env in
     Stack.pop [ Ref_type t; i32 ] stack
+  | Array_len ->
+    (* TODO: fixme, Something is not right *)
+    let* stack = Stack.pop [ Something ] stack in
+    Stack.push [ i32 ] stack
+  | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_default _
+    | Array_new_canon_elem _ | Array_new_canon_fixed _ | Array_get _
+    | Array_get_u _ | Array_set _ ) as i ->
+    failwith
+    @@ Format.asprintf "TODO (typecheck instr) %a" Pp.Simplified.instr i
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
   ~stack:previous_stack : (stack, string) Result.t =
@@ -479,6 +492,11 @@ let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
     let t = itype t in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
+  | Array_new_canon t ->
+    let t = arraytype module_ t in
+    let* stack = Stack.pop [ i32; t ] stack in
+    Stack.push [ Ref_type Array_ht ] stack
+  | Array_new_canon_default _i -> assert false
 
 let typecheck_const_expr (module_ : Simplify.simplified_module) refs =
   list_fold_left (typecheck_const_instr module_ refs) []
@@ -490,8 +508,11 @@ let typecheck_global (module_ : Simplify.simplified_module) refs global =
     let* real_type = typecheck_const_expr module_ refs init in
     match real_type with
     | [ real_type ] ->
-      if typ_of_val_type @@ snd type_ <> real_type then
-        Error "type mismatch (typecheck_global)"
+      let expected = typ_of_val_type @@ snd type_ in
+      if expected <> real_type then
+        error
+        @@ Format.asprintf "type mismatch (typecheck_global) got %a expected %a"
+             pp_typ real_type pp_typ expected
       else Ok ()
     | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 

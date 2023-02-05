@@ -105,6 +105,7 @@ let cast_ref (type r) (E (rty, r) : externref) (ty : r Extern_ref.ty) : r option
 type 'env ref_value =
   | Externref of externref option
   | Funcref of 'env Func.t option
+  | Arrayref of unit Array.t option
 
 type 'env t =
   | I32 of Int32.t
@@ -116,6 +117,7 @@ type 'env t =
 let pp_ref fmt = function
   | Externref _ -> Format.fprintf fmt "externref"
   | Funcref _ -> Format.fprintf fmt "funcref"
+  | Arrayref _ -> Format.fprintf fmt "array"
 
 let pp fmt = function
   | I32 i -> Format.fprintf fmt "i32.const %ld" i

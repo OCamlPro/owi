@@ -67,3 +67,5 @@ val push_f32 : 'a t -> Float32.t -> 'a t
 val push_f64 : 'a t -> Float64.t -> 'a t
 
 val push_as_externref : 'a t -> 'b Value.Extern_ref.ty -> 'b -> 'a t
+
+val push_array : 'a t -> unit Array.t -> 'a t

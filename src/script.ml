@@ -98,6 +98,10 @@ let compare_result_const result (const : 'env Value.t) =
     false
   | Result_func_ref, _ -> Log.err "TODO (compare_result_const)"
   | Result_extern_ref, _ -> Log.err "TODO (compare_result_const)"
+  | Result_const (Literal Const_array), _ ->
+    Log.err "TODO (Script.compare_result_const)"
+  | Result_const (Literal Const_eq), _ ->
+    Log.err "TODO (Script.compare_result_const)"
 
 let value_of_const : Types.const -> 'env Value.t =
  fun const ->
@@ -108,6 +112,8 @@ let value_of_const : Types.const -> 'env Value.t =
   | Const_F64 v -> F64 v
   | Const_null rt -> Value.ref_null rt
   | Const_host i -> Ref (Host_externref.value i)
+  | Const_array -> Log.err "TODO (Script.value_of_const)"
+  | Const_eq -> Log.err "TODO (Script.value_of_const)"
 
 let action (link_state : Link.state) = function
   | Invoke (mod_id, f, args) -> begin
