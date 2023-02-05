@@ -24,6 +24,10 @@ module Shared = struct
     | F32 -> Format.fprintf fmt "f32"
     | F64 -> Format.fprintf fmt "f64"
 
+  let full_indice fmt = function
+    | Raw u -> Format.pp_print_int fmt u
+    | Symbolic i -> id fmt i
+
   let heap_type fmt = function
     | Any_ht -> Format.fprintf fmt "any"
     | None_ht -> Format.fprintf fmt "none"
@@ -35,6 +39,7 @@ module Shared = struct
     | No_func_ht -> Format.fprintf fmt "nofunc"
     | Extern_ht -> Format.fprintf fmt "extern"
     | No_extern_ht -> Format.fprintf fmt "noextern"
+    | Def_ht i -> Format.fprintf fmt "%a" full_indice i
 
   let null fmt = function
     | No_null -> Format.fprintf fmt "nonull"
@@ -74,9 +79,7 @@ module Symbolic_indice :
 
   type bt = indice block_type
 
-  let indice fmt = function
-    | Raw u -> Format.pp_print_int fmt u
-    | Symbolic i -> id fmt i
+  let indice = Shared.full_indice
 
   let bt fmt = function
     | Bt_ind ind -> Format.fprintf fmt "%a" indice ind
@@ -114,6 +117,8 @@ module Const = struct
     | Ref_null t -> Format.fprintf fmt "ref.null %a" Shared.heap_type t
     | Ref_func fid ->
       Format.fprintf fmt "ref.func %a" Simplified_indice.indice fid
+    | Array_new_canon _ -> Format.fprintf fmt "array.new_canon"
+    | Array_new_canon_default _ -> Format.fprintf fmt "array.new_canon_default"
 
   let expr fmt instrs =
     Format.pp_print_list
@@ -330,6 +335,19 @@ module Make_Expr (Arg : Arg) = struct
     | Call id -> Format.fprintf fmt "call %a" indice id
     | Call_indirect (tbl_id, ty_id) ->
       Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
+    | Array_new_canon id -> Format.fprintf fmt "array.new_canon %a" indice id
+    | Array_new_canon_data (id1, id2) ->
+      Format.fprintf fmt "array.new_canon_data %a %a" indice id1 indice id2
+    | Array_new_canon_default id ->
+      Format.fprintf fmt "array.new_canon_default %a" indice id
+    | Array_new_canon_elem (id1, id2) ->
+      Format.fprintf fmt "array.new_canon_elem %a %a" indice id1 indice id2
+    | Array_new_canon_fixed (id, i) ->
+      Format.fprintf fmt "array.new_canon_fixed %a %d" indice id i
+    | Array_get id -> Format.fprintf fmt "array.get %a" indice id
+    | Array_get_u id -> Format.fprintf fmt "array.get_u %a" indice id
+    | Array_set id -> Format.fprintf fmt "array.set %a" indice id
+    | Array_len -> Format.fprintf fmt "array.len"
 
   and expr fmt instrs =
     Format.pp_print_list
@@ -392,9 +410,55 @@ module Global = struct
     Format.fprintf fmt {|(import "%a" "%a" %a)|} name i.module_ name i.name
       import_desc i.desc
 
-  let type_ _fmt _l =
-    (* TODO *)
-    ()
+  let packed_type fmt = function
+    | I8 -> Format.fprintf fmt "i8"
+    | I16 -> Format.fprintf fmt "i16"
+
+  let storage_type fmt = function
+    | Val_storage_t t -> val_type fmt t
+    | Val_packed_t t -> packed_type fmt t
+
+  let field_type fmt (m, t) = Format.fprintf fmt "%a %a" mut m storage_type t
+
+  let fields fmt =
+    Format.pp_print_list
+      ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+      field_type fmt
+
+  let struct_field fmt ((n : string option), f) =
+    Format.fprintf fmt "%a%a" id_opt n fields f
+
+  let struct_type fmt =
+    Format.pp_print_list
+      ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
+      struct_field fmt
+
+  let str_type fmt = function
+    | Def_struct_t t -> struct_type fmt t
+    | Def_array_t t -> field_type fmt t
+    | Def_func_t t -> func_type fmt t
+
+  let indices fmt ids =
+    Format.pp_print_list
+      ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+      indice fmt ids
+
+  let final fmt = function
+    | Final -> Format.fprintf fmt "final"
+    | No_final -> Format.fprintf fmt "no_final"
+
+  let sub_type fmt (f, ids, t) =
+    Format.fprintf fmt "%a %a %a" final f indices ids str_type t
+
+  let type_def fmt (id, t) = Format.fprintf fmt "%a%a" id_opt id sub_type t
+
+  let type_ fmt l =
+    (* TODO: special case for empty and singleton case to avoid a big rec printing *)
+    Format.fprintf fmt "%a"
+      (Format.pp_print_list
+         ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+         type_def )
+      l
 
   let data_mode fmt = function
     | Data_passive -> ()
@@ -449,6 +513,8 @@ module Global = struct
     | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
     | Const_null rt -> Format.fprintf fmt "ref.null %a" heap_type rt
     | Const_host i -> Format.fprintf fmt "ref.extern %d" i
+    | Const_array -> Format.fprintf fmt "ref.array"
+    | Const_eq -> Format.fprintf fmt "ref.eq"
 
   let consts fmt c =
     Format.pp_print_list

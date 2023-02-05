@@ -14,6 +14,10 @@ type nullable =
   | No_null
   | Null
 
+type indice =
+  | Raw of int
+  | Symbolic of string
+
 type heap_type =
   | Any_ht
   | None_ht
@@ -25,6 +29,7 @@ type heap_type =
   | No_func_ht
   | Extern_ht
   | No_extern_ht
+  | Def_ht of indice
 
 type nonrec ref_type = nullable * heap_type
 
@@ -132,10 +137,6 @@ type nonrec frelop =
   | Le
   | Ge
 
-type indice =
-  | Raw of int
-  | Symbolic of string
-
 type memarg =
   { offset : int
   ; align : int
@@ -230,6 +231,16 @@ type ('indice, 'bt) instr' =
   | Return_call_indirect of 'indice * 'bt
   | Call of 'indice
   | Call_indirect of 'indice * 'bt
+  (* Array instructions *)
+  | Array_get of 'indice
+  | Array_get_u of 'indice
+  | Array_len
+  | Array_new_canon of 'indice
+  | Array_new_canon_data of 'indice * 'indice
+  | Array_new_canon_default of 'indice
+  | Array_new_canon_elem of 'indice * 'indice
+  | Array_new_canon_fixed of 'indice * int
+  | Array_set of 'indice
 
 and ('indice, 'bt) expr' = ('indice, 'bt) instr' list
 
@@ -374,6 +385,8 @@ type const =
   | Const_F64 of Float64.t
   | Const_null of heap_type
   | Const_host of int
+  | Const_array
+  | Const_eq
 
 type action =
   | Invoke of string option * string * const list
@@ -425,6 +438,8 @@ module Const = struct
     | Ref_func of int
     | Global_get of int
     | I_binop of nn * ibinop
+    | Array_new_canon of int
+    | Array_new_canon_default of int
 
   type expr = instr list
 end

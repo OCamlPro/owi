@@ -396,32 +396,28 @@ end = struct
       }
     in
     let acc = List.fold_left assign_type empty_acc (List.rev module_.type_) in
-    let assign_func_type
+    let assign_heap_type
       ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
       type_ =
-      match type_ with
-      | Def_func_t _ftype -> begin
-        match TypeMap.find_opt type_ all_types with
-        | Some _id -> acc
-        | None ->
-          let id = last_assigned_int in
-          let last_assigned_int = last_assigned_int + 1 in
-          let func_types = { index = id; value = type_ } :: func_types in
-          let all_types = TypeMap.add type_ id all_types in
-          { acc with func_types; last_assigned_int; all_types }
-      end
-      | Def_array_t _ | Def_struct_t _ -> acc
+      match TypeMap.find_opt type_ all_types with
+      | Some _id -> acc
+      | None ->
+        let id = last_assigned_int in
+        let last_assigned_int = last_assigned_int + 1 in
+        let all_types = TypeMap.add type_ id all_types in
+        let func_types =
+          match type_ with
+          | Def_func_t _ftype -> { index = id; value = type_ } :: func_types
+          | Def_array_t (_mut, _storage_type) -> func_types
+          | Def_struct_t _ -> func_types
+        in
+        { acc with func_types; last_assigned_int; all_types }
     in
     let acc =
-      List.fold_left assign_func_type acc
+      List.fold_left assign_heap_type acc
         (List.rev_map (fun ftype -> Def_func_t ftype) module_.function_type)
     in
     let values = List.rev acc.declared_types @ List.rev acc.func_types in
-    (* Format.printf "TYPES@.%a"
-     *   (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "@.")
-     *      (fun ppf {int; value} -> Format.fprintf ppf "%a: %a"
-     *                       Pp.Simplified_bis.indice int Pp.Input.func_type value))
-     *   values; *)
     { values; named = acc.named_types }
 
   let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
@@ -622,6 +618,7 @@ module Rewrite_indices = struct
     let _find_mem id = find "unknown memory" module_.mem id in
     let find_data id = find "unknown data segment" module_.data id in
     let find_elem id = find "unknown elem segment" module_.elem id in
+    let find_type id = find "unknown type" module_.type_ id in
 
     let rec body (loop_count, block_ids) :
       instr -> ((int, func_type) instr', string) Result.t = function
@@ -753,14 +750,27 @@ module Rewrite_indices = struct
         | None | Some [ _ ] -> Ok i
         | Some [] | Some (_ :: _ :: _) -> Error "invalid result arity"
       end
+      | Array_new_canon_default id ->
+        let* id = find_type id in
+        ok @@ Array_new_canon_default id
+      | Array_set id ->
+        let* id = find_type id in
+        ok @@ Array_set id
+      | Array_get id ->
+        let* id = find_type id in
+        ok @@ Array_set id
       | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
         | I32_wrap_i64 | Ref_null _ | F_reinterpret_i _ | I_reinterpret_f _
         | I64_extend_i32 _ | I64_extend32_s | F32_demote_f64 | I_extend8_s _
         | I_extend16_s _ | F64_promote_f32 | F_convert_i _ | I_trunc_f _
         | I_trunc_sat_f _ | Ref_is_null | F_binop _ | F32_const _ | F64_const _
-        | I32_const _ | I64_const _ | Unreachable | Drop | Nop | Return ) as i
-        ->
+        | I32_const _ | I64_const _ | Unreachable | Drop | Nop | Return
+        | Array_len ) as i ->
         Ok i
+      | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_elem _
+        | Array_new_canon_fixed _ | Array_get_u _ ) as i ->
+        failwith
+        @@ Format.asprintf "TODO (Simplify.body) %a" Pp.Input_Expr.instr i
     and expr (e : expr) (loop_count, block_ids) :
       ((int, func_type) expr', string) Result.t =
       list_map (fun i -> body (loop_count, block_ids) i) e
@@ -786,7 +796,16 @@ module Rewrite_indices = struct
         | Const -> ok @@ Const.Global_get idx
         | Var -> Error "constant expression required"
       end
-      | _ -> Error "constant expression required"
+      | Array_new_canon t ->
+        let* t = find "unknown type" module_.type_ t in
+        ok @@ Const.Array_new_canon t
+      | Array_new_canon_default t ->
+        let* t = find "unknown type" module_.type_ t in
+        ok @@ Const.Array_new_canon_default t
+      | i ->
+        error
+        @@ Format.asprintf "constant expression required, got %a"
+             Pp.Input_Expr.instr i
     in
     list_map const_instr expr
 

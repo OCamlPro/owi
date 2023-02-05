@@ -248,6 +248,16 @@ module Const_interp = struct
     | Global_get id ->
       let* g = Env.get_global env id in
       ok @@ Stack.push stack g.value
+    | Array_new_canon _i ->
+      let len, stack = Stack.pop_i32_to_int stack in
+      (* TODO: check type of *default* *)
+      let _default, stack = Stack.pop stack in
+      let a = Array.init len (fun _i -> ()) in
+      ok @@ Stack.push_array stack a
+    | Array_new_canon_default _i ->
+      let len, stack = Stack.pop_i32_to_int stack in
+      let a = Array.init len (fun _i -> ()) in
+      ok @@ Stack.push_array stack a
 
   let exec_expr env (e : Const.expr) : (Env.t' Value.t, string) Result.t =
     let* stack = list_fold_left (exec_instr env) Stack.empty e in

@@ -1056,6 +1056,20 @@ let exec_instr instr (state : State.exec_state) =
     call_indirect ~return:false state (tbl_i, typ_i)
   | Return_call_indirect (tbl_i, typ_i) ->
     call_indirect ~return:true state (tbl_i, typ_i)
+  | Array_new_canon _t ->
+    let len, stack = Stack.pop_i32_to_int stack in
+    let _default, stack = Stack.pop stack in
+    let a = Array.init len (fun _i -> (* TODO: use default *) ()) in
+    st @@ Stack.push_array stack a
+  | Array_new_canon_default _t ->
+    let len, stack = Stack.pop_i32_to_int stack in
+    let default = (* TODO: get it from t *) () in
+    let a = Array.init len (fun _i -> default) in
+    st @@ Stack.push_array stack a
+  | ( Array_new_canon_data _ | Array_new_canon_elem _ | Array_new_canon_fixed _
+    | Array_get _ | Array_get_u _ | Array_set _ | Array_len ) as i ->
+    failwith
+    @@ Format.asprintf "TODO (Interpret.exec_instr) %a" Pp.Simplified.instr i
 
 let rec loop (state : State.exec_state) =
   let state =

@@ -48,9 +48,10 @@ module Func : sig
   val wasm : (int, Types.func_type) Types.func' -> 'a -> 'a t
 end
 
-type 'a ref_value =
+type 'env ref_value =
   | Externref of externref option
-  | Funcref of 'a Func.t option
+  | Funcref of 'env Func.t option
+  | Arrayref of unit array option
 
 type 'a t =
   | I32 of Int32.t

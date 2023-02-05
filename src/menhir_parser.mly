@@ -1,6 +1,6 @@
 %token <String.t> NUM
 %token <String.t> ID NAME
-%token ALIGN ANY_REF ARRAY ARRAY_REF ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY
+%token ALIGN ANY_REF ARRAY ARRAY_GET ARRAY_GET_U ARRAY_LEN ARRAY_NEW_CANON ARRAY_NEW_CANON_DATA ARRAY_NEW_CANON_DEFAULT ARRAY_NEW_CANON_ELEM ARRAY_NEW_CANON_FIXED ARRAY_REF ARRAY_SET ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY
 %token BINARY BLOCK BR BR_IF BR_TABLE
 %token CALL CALL_INDIRECT
 %token DATA DATA_DROP DECLARE DROP
@@ -19,7 +19,7 @@
 %token OFFSET
 %token PARAM
 %token QUOTE
-%token REC REF REF_EXTERN REF_FUNC REF_IS_NULL REF_NULL REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
+%token REC REF REF_ARRAY REF_EQ REF_EXTERN REF_FUNC REF_IS_NULL REF_NULL REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
 %token SELECT START STRUCT STRUCT_REF SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
@@ -89,6 +89,7 @@ let heap_type ==
   | NOFUNC; { No_func_ht }
   | EXTERN; { Extern_ht }
   | NOEXTERN; { No_extern_ht }
+  | ~ = indice; <Def_ht>
 
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
@@ -450,6 +451,19 @@ let plain_instr :=
   | MEMORY_COPY; { Memory_copy }
   | MEMORY_INIT; ~ = indice; <Memory_init>
   | DATA_DROP; ~ = indice; <Data_drop>
+  | ARRAY_GET; ~ = indice; <Array_get>
+  | ARRAY_GET_U; ~ = indice; <Array_get_u>
+  | ARRAY_LEN; { Array_len }
+  | ARRAY_NEW_CANON; ~ = indice; <Array_new_canon>
+  | ARRAY_NEW_CANON_DATA; i1 = indice; i2 = indice; <Array_new_canon_data>
+  | ARRAY_NEW_CANON_DEFAULT; ~ = indice; <Array_new_canon_default>
+  | ARRAY_NEW_CANON_ELEM; i1 = indice; i2 = indice; <Array_new_canon_elem>
+  | ARRAY_NEW_CANON_FIXED; ~ = indice; num = NUM; {
+    (* we need to convert to i32 to check it's okay *)
+    let num = i32 num in
+    let num = Int32.to_int num in
+    Array_new_canon_fixed (indice, num) }
+  | ARRAY_SET; ~ = indice; <Array_set>
 
 (* Instructions & Expressions *)
 
@@ -998,6 +1012,8 @@ let literal_const ==
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | REF_NULL; ~ = heap_type; <Const_null>
   | REF_EXTERN; num = NUM; { Const_host (int_of_string num) }
+  | REF_ARRAY; { Const_array }
+  | REF_EQ; { Const_eq }
 
 let const ==
   | ~ = literal_const; <Literal>
