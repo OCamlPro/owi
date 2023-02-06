@@ -254,6 +254,9 @@ module Const_interp = struct
       let len, stack = Stack.pop_i32_to_int stack in
       let a = Array.init len (fun _i -> ()) in
       ok @@ Stack.push_array stack a
+    | I31_new ->
+      (* TODO *)
+      ok stack
 
   let exec_expr env (e : Const.expr) : (Env.t' Value.t, string) Result.t =
     let* stack = list_fold_left (exec_instr env) Stack.empty e in

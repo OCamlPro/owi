@@ -96,16 +96,23 @@ let compare_result_const result (const : 'env Value.t) =
   | Result_const (Literal (Const_null _)), _
   | Result_const (Literal (Const_host _)), _ ->
     false
-  | Result_func_ref, _ -> Log.err "TODO (compare_result_const)"
-  | Result_extern_ref, _ -> Log.err "TODO (compare_result_const)"
+  | Result_func_ref, _ ->
+    Log.debug "TODO (compare_result_const)";
+    false
+  | Result_extern_ref, _ ->
+    Log.debug "TODO (compare_result_const)";
+    false
   | Result_const (Literal Const_array), _ ->
-    Log.err "TODO (Script.compare_result_const)"
+    Log.debug "TODO (Script.compare_result_const)";
+    false
   | Result_const (Literal Const_eq), _ ->
-    Log.err "TODO (Script.compare_result_const)"
+    Log.debug "TODO (Script.compare_result_const)";
+    false
+  | Result_const (Literal Const_i31), _ ->
+    Log.debug "TODO (Script.compare_result_const)";
+    false
 
-let value_of_const : Types.Symbolic.const -> 'env Value.t =
- fun const ->
-  match const with
+let value_of_const : Types.Symbolic.const -> 'env Value.t = function
   | Const_I32 v -> I32 v
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
@@ -114,6 +121,7 @@ let value_of_const : Types.Symbolic.const -> 'env Value.t =
   | Const_host i -> Ref (Host_externref.value i)
   | Const_array -> Log.err "TODO (Script.value_of_const)"
   | Const_eq -> Log.err "TODO (Script.value_of_const)"
+  | Const_i31 -> Log.err "TODO (Script.value_of_const)"
 
 let action (link_state : Link.state) = function
   | Types.Symbolic.Invoke (mod_id, f, args) -> begin
