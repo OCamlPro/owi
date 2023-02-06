@@ -798,9 +798,10 @@ module Rewrite_indices = struct
       | I31_get_u -> Ok I31_get_u
       | Array_len -> Ok Array_len
       | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_elem _
-        | Array_new_canon_fixed _ | Array_get_u _ ) as i ->
-        failwith
-        @@ Format.asprintf "TODO (Simplify.body) %a" Symbolic.Pp.instr i
+        | Array_new_canon_fixed _ | Array_get_u _ | Struct_get _ | Struct_set _
+        | Struct_new_canon _ | Struct_new_canon_default _ ) as i ->
+        Log.debug "TODO (Simplify.body) %a" Symbolic.Pp.instr i;
+        Ok Nop
     and expr (e : Symbolic.expr) (loop_count, block_ids) :
       (expr, string) Result.t =
       list_map (fun i -> body (loop_count, block_ids) i) e
