@@ -65,13 +65,13 @@ val filename : string = "test/passing/quickstart.wast"
     match Parse.from_file ~filename with
     | Ok script -> script
     | Error e -> failwith e;;
-val script : Types.script =
+val script : Types.Symbolic.script =
 ...
 # let m =
     match script with
     | Module m :: _ -> m
     | _ -> failwith "expected a module first";;
-val m : Types.module_ =
+val m : Types.Symbolic.modul =
 ...
 # let module_to_run, link_state =
     match Compile.until_link Link.empty_state m with

@@ -55,7 +55,7 @@ module Func = struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : Types.val_type =
+  let elt_type (type t) (e : t telt) : Types.Simplified.val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64
@@ -63,7 +63,7 @@ module Func = struct
     | F64 -> Num_type F64
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : Types.result_type =
+  let res_type (type t) (r : t rtype) : Types.Simplified.result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -71,16 +71,17 @@ module Func = struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> Types.param_type = function
+  let rec arg_type : type t r. (t, r) atype -> Types.Simplified.param_type =
+    function
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []
 
-  let extern_type (Func (arg, res)) : Types.func_type =
+  let extern_type (Func (arg, res)) : Types.Simplified.func_type =
     (arg_type arg, res_type res)
 
   type 'env t =
-    | WASM of int * (int, Types.func_type) Types.func' * 'env
+    | WASM of int * Types.Simplified.func * 'env
     | Extern of extern_func
 
   let fresh =
@@ -122,12 +123,12 @@ let pp_ref fmt = function
 let pp fmt = function
   | I32 i -> Format.fprintf fmt "i32.const %ld" i
   | I64 i -> Format.fprintf fmt "i64.const %Ld" i
-  | F32 f -> Format.fprintf fmt "f32.const %a" Pp.Simplified.f32 f
-  | F64 f -> Format.fprintf fmt "f64.const %a" Pp.Simplified.f64 f
+  | F32 f -> Format.fprintf fmt "f32.const %a" Types.Simplified.Pp.f32 f
+  | F64 f -> Format.fprintf fmt "f64.const %a" Types.Simplified.Pp.f64 f
   | Ref r -> pp_ref fmt r
 
 let ref_null' = function
-  | Types.Func_ht -> Funcref None
+  | Types.Simplified.Func_ht -> Funcref None
   | Extern_ht -> Externref None
   | _ -> failwith "TODO ref_null' Value.ml"
 

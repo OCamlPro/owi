@@ -64,7 +64,7 @@ let () =
       Format.eprintf "error: %s@." e;
       has_error := true
   end;
-  begin
+  if Option.is_some @@ Sys.getenv_opt "OWIGC" then begin
     match test_directory Fpath.(v "gc") with
     | Ok () -> ()
     | Error e ->

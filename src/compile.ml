@@ -4,7 +4,7 @@ let until_check m = Check.module_ m
 
 let until_simplify m =
   let* () = until_check m in
-  Simplify.module_ m
+  Simplify.modul m
 
 let until_typecheck m =
   let* m = until_simplify m in
@@ -13,7 +13,7 @@ let until_typecheck m =
 
 let until_link link_state m =
   let* m = until_typecheck m in
-  Link.module_ m link_state
+  Link.modul m link_state
 
 let until_interpret link_state m =
   let* m, link_state = until_link link_state m in

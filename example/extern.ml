@@ -37,7 +37,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run =
   match pure_wasm_module with
-  | Types.Module m :: _ -> begin
+  | Types.Symbolic.Module m :: _ -> begin
     match Compile.until_link link_state m with
     | Error msg -> failwith msg
     | Ok (m, _state) -> m

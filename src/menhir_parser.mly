@@ -47,13 +47,14 @@ let f32 s =
   with Failure _msg -> failwith "constant out of range"
 
 open Types
+open Types.Symbolic
 
 (** Prevents ocamlc -i -short-path from infering types containing the prefix Owi,
     which makes dune think that this is a recursive dependency. *)
 module Owi = struct end
 %}
 
-%start <Types.script> script
+%start <Types.Symbolic.script> script
 
 %%
 
@@ -191,8 +192,8 @@ let num ==
 
 (* var *)
 let indice ==
-  | ~ = ID; <Symbolic>
-  | n = NUM; { Raw (u32 n) }
+  | id = ID; { symbolic id }
+  | n = NUM; { raw (u32 n) }
 
 (* bind_var *)
 let id ==
@@ -251,26 +252,26 @@ let plain_instr :=
   | GLOBAL_GET; ~ = indice; <Global_get>
   | GLOBAL_SET; ~ = indice; <Global_set>
   | TABLE_GET; indice = option(indice); {
-    Table_get (Option.value indice ~default:(Raw 0))
+    Table_get (Option.value indice ~default:(raw 0))
   }
   | TABLE_SET; indice = option(indice); {
-    Table_set (Option.value indice ~default:(Raw 0))
+    Table_set (Option.value indice ~default:(raw 0))
   }
   | TABLE_SIZE; indice = option(indice); {
-    Table_size (Option.value indice ~default:(Raw 0))
+    Table_size (Option.value indice ~default:(raw 0))
   }
   | TABLE_GROW; indice = option(indice); {
-    Table_grow (Option.value indice ~default:(Raw 0))
+    Table_grow (Option.value indice ~default:(raw 0))
   }
   | TABLE_FILL; indice = option(indice); {
-    Table_fill (Option.value indice ~default:(Raw 0))
+    Table_fill (Option.value indice ~default:(raw 0))
   }
   | TABLE_COPY; {
-    Table_copy (Raw 0, Raw 0)
+    Table_copy (raw 0, raw 0)
   }
   | TABLE_COPY; src = indice; dst = indice; { Table_copy (src, dst) }
   | TABLE_INIT; t_indice = ioption(indice); ~ = indice; {
-    Table_init (Option.value t_indice ~default:(Raw 0), indice)
+    Table_init (Option.value t_indice ~default:(raw 0), indice)
   }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
@@ -500,16 +501,16 @@ let call_instr ==
     call_indirect_prim (indice, call_instr_type)
   }
   | ~ = call_indirect_prim; ~ = call_instr_type; {
-    call_indirect_prim (Raw 0, call_instr_type)
+    call_indirect_prim (raw 0, call_instr_type)
   }
 
 let call_instr_type ==
   | ~ = type_use; ~ = call_instr_params; {
     match call_instr_params with
-    | ([], []) -> Bt_ind (type_use)
-    | (pt, rt) -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt))
+    | ([], []) -> bt_ind (type_use)
+    | (pt, rt) -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt)
   }
-  | (pt, rt) = call_instr_params; { Bt_raw (None, (List.map (fun t -> None, t) pt, rt)) }
+  | (pt, rt) = call_instr_params; { bt_raw None (List.map (fun t -> None, t) pt, rt) }
 
 let call_instr_params :=
   | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
@@ -530,16 +531,16 @@ let call_instr_instr ==
     call_indirect_prim (indice, x), es
   }
   | ~ = call_indirect_prim; (x, es) = call_instr_type_instr; {
-    call_indirect_prim (Raw 0, x), es
+    call_indirect_prim (raw 0, x), es
   }
 
 let call_instr_type_instr ==
   | ~ = type_use; ~ = call_instr_params_instr; {
     match call_instr_params_instr with
-    | ([], []), es -> Bt_ind (type_use), es
-    | (pt, rt), es -> Bt_raw (Some type_use, ((List.map (fun t -> None, t) pt), rt)), es
+    | ([], []), es -> bt_ind (type_use), es
+    | (pt, rt), es -> bt_raw (Some type_use) ((List.map (fun t -> None, t) pt), rt), es
   }
-  | ((pt, rt), es) = call_instr_params_instr; { Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es }
+  | ((pt, rt), es) = call_instr_params_instr; { bt_raw None (List.map (fun t -> None, t) pt, rt), es }
 
 let call_instr_params_instr :=
   | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
@@ -579,15 +580,15 @@ let block_instr ==
 let block ==
   | ~ = type_use; (l, r) = block_param_body; {
     let block_type = match l with
-    | ([], []) -> Bt_ind type_use
-    | (pt, rt) -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt))
+    | ([], []) -> bt_ind type_use
+    | (pt, rt) -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt)
     in
     Some block_type, r
   }
   | (l, r) = block_param_body; {
     let block_type = match l with
       | [], [] -> None
-      | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
+      | (pt, rt) -> Some (bt_raw None (List.map (fun t -> None, t) pt, rt))
     in
     block_type, r
   }
@@ -614,7 +615,7 @@ let expr_aux ==
     es, call_indirect_prim (indice, x)
   }
   | ~ = call_indirect_prim; (x, es) = call_expr_type; {
-    es, call_indirect_prim (Raw 0, x)
+    es, call_indirect_prim (raw 0, x)
   }
   | BLOCK; id = option(id); (bt, es) = block; {
     [], Block (id, bt, es)
@@ -629,9 +630,9 @@ let expr_aux ==
       let pt = List.map (fun t -> None, t) pt in
       let raw = pt, rt in
       begin match bt with
-      | Some (Bt_ind type_use) -> Some (Bt_raw (Some type_use, raw))
-      | Some (Bt_raw _) -> failwith "unexpected bt_raw"
-      | None -> Some (Bt_raw (None, raw))
+      | Some (Arg.Bt_ind type_use) -> Some (bt_raw (Some type_use) raw)
+      | Some (Arg.Bt_raw _) -> failwith "unexpected Bt_raw"
+      | None -> Some (bt_raw None raw)
       end
     in
     es, If_else (id, bt, es1, es2)
@@ -651,11 +652,11 @@ let select_expr_result :=
 let call_expr_type ==
   | ~ = type_use; ~ = call_expr_params; {
     match call_expr_params with
-    | ([], []), es -> Bt_ind type_use, es
-    | (pt, rt), es -> Bt_raw (Some type_use, (List.map (fun t -> None, t) pt, rt)), es
+    | ([], []), es -> bt_ind type_use, es
+    | (pt, rt), es -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt), es
   }
   | ((pt, rt), es) = call_expr_params; {
-    Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es
+    bt_raw None (List.map (fun t -> None, t) pt, rt), es
   }
 
 let call_expr_params :=
@@ -673,7 +674,7 @@ let call_expr_results :=
   | ~ = expr_list; { [], expr_list }
 
 let if_block ==
-  | ~ = type_use; ~ = if_block_param_body; { Some (Bt_ind type_use), if_block_param_body }
+  | ~ = type_use; ~ = if_block_param_body; { Some (bt_ind type_use), if_block_param_body }
   | ~ = if_block_param_body; {
     None, if_block_param_body
   }
@@ -718,7 +719,7 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    let func_id = Option.map (fun id -> Symbolic id) id in
+    let func_id = Option.map symbolic id in
     List.rev_map (function
       | MImport i ->
         begin match i.desc with
@@ -727,24 +728,24 @@ let func ==
         end
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) func_fields
   }
 
 let func_fields :=
   | ~ = type_use; (ft, f) = func_fields_body; {
     match ft with
-    | [], [] -> [MFunc { f with type_f = Bt_ind type_use }]
-    | (_pt, _rt) as ft -> [MFunc { f with type_f = Bt_raw (Some type_use, ft)}]
+    | [], [] -> [MFunc { f with type_f = bt_ind type_use }]
+    | (_pt, _rt) as ft -> [MFunc { f with type_f = bt_raw (Some type_use) ft}]
   }
   | (type_f, f) = func_fields_body; {
-    [MFunc { f with type_f = Bt_raw (None, type_f) }]
+    [MFunc { f with type_f = bt_raw None type_f }]
   }
-  | (module_, name) = inline_import; ~ = type_use; _ = func_fields_import; {
-    [MImport { module_; name; desc = Import_func (None, Bt_ind type_use) }]
+  | (modul, name) = inline_import; ~ = type_use; _ = func_fields_import; {
+    [MImport { modul; name; desc = Import_func (None, bt_ind type_use) }]
   }
-  | (module_, name) = inline_import; ~ = func_fields_import; {
-    [MImport { module_; name; desc = Import_func (None, Bt_raw (None, func_fields_import)) }]
+  | (modul, name) = inline_import; ~ = func_fields_import; {
+    [MImport { modul; name; desc = Import_func (None, bt_raw None func_fields_import) }]
   }
   | ~ = inline_export; ~ = func_fields; {
     MExport { name = inline_export; desc = Export_func None } :: func_fields
@@ -782,7 +783,7 @@ let func_result_body :=
 
 let func_body :=
   | body = instr_list; {
-    { type_f = Bt_ind (Raw Int.max_int); locals = []; body; id = None }
+    { type_f = bt_ind (raw Int.max_int); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
     { func_body with locals = (List.map (fun v -> None, v) l) @ func_body.locals  }
@@ -828,15 +829,15 @@ let elem ==
     [ MElem { id; type_; init; mode = Elem_declarative } ]
   }
   | ELEM; id = option(id); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ MElem { id; type_; init; mode = Elem_active (Some (raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { id; type_ = (Null, Func_ht); init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ MElem { id; type_ = (Null, Func_ht); init; mode = Elem_active (Some (raw 0), offset) } ]
   }
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
-  let tbl_id = Option.map (fun id -> Symbolic id) id in
+  let tbl_id = Option.map symbolic id in
   List.rev_map (function
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
@@ -845,7 +846,7 @@ let table ==
       | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
       | _whatever -> assert false
     end
-    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
+    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
   ) table_fields
 }
 
@@ -857,8 +858,8 @@ let table_fields :=
   | ~ = table_type; {
     [ MTable (None, table_type) ]
   }
-  | (module_, name) = inline_import; ~ = table_type; {
-    [ MImport { module_; name; desc = Import_table (None, table_type) }]
+  | (modul, name) = inline_import; ~ = table_type; {
+    [ MImport { modul; name; desc = Import_table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
     MExport { name = inline_export; desc = Export_table None } :: table_fields
@@ -874,13 +875,13 @@ let data ==
     [ MData { id; init; mode = Data_passive } ]
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
-    let memory_use = Option.value memory_use ~default:(Raw 0) in
+    let memory_use = Option.value memory_use ~default:(raw 0) in
     [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
   }
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
-    let mem_id = Option.map (fun id -> Symbolic id) id in
+    let mem_id = Option.map symbolic id in
     List.rev_map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
@@ -889,7 +890,7 @@ let memory ==
         | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
         | _whatever -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) memory_fields
   }
 
@@ -897,8 +898,8 @@ let memory_fields :=
   | ~ = mem_type; {
     [ MMem (None, mem_type) ]
   }
-  | (module_, name) = inline_import; ~ = mem_type; {
-    [ MImport { module_; name; desc = Import_mem (None, mem_type) } ]
+  | (modul, name) = inline_import; ~ = mem_type; {
+    [ MImport { modul; name; desc = Import_mem (None, mem_type) } ]
   }
   | ~ = inline_export; ~ = memory_fields; {
     MExport { name = inline_export; desc = Export_mem None } :: memory_fields
@@ -912,7 +913,7 @@ let memory_fields :=
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    let global_id = Option.map (fun id -> Symbolic id) id in
+    let global_id = Option.map symbolic id in
     List.rev_map (function
       | MGlobal g -> MGlobal { g with id }
       | MExport e -> MExport { e with desc = Export_global global_id }
@@ -921,7 +922,7 @@ let global ==
         | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
         | _ -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.Input.module_field _field; assert false)
+      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
     ) global_fields
   }
 
@@ -929,8 +930,8 @@ let global_fields :=
   | type_ = global_type; init = const_expr; {
     [ MGlobal { type_; init; id = None } ]
   }
-  | (module_, name) = inline_import; ~ = global_type; {
-    [ MImport { module_; name; desc = Import_global (None, global_type) } ]
+  | (modul, name) = inline_import; ~ = global_type; {
+    [ MImport { modul; name; desc = Import_global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
     MExport { name = inline_export; desc = Export_global None } :: global_fields
@@ -939,15 +940,15 @@ let global_fields :=
 (* Imports & Exports *)
 
 let import_desc ==
-  | FUNC; id = option(id); ~ = type_use; { Import_func (id, Bt_ind type_use) }
-  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw (None, ft)) }
+  | FUNC; id = option(id); ~ = type_use; { Import_func (id, bt_ind type_use) }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, bt_raw None ft) }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>
 
 let import ==
-  | IMPORT; module_ = utf8_name; name = utf8_name; desc = par(import_desc); {
-    [ MImport { module_; name; desc } ]
+  | IMPORT; modul = utf8_name; name = utf8_name; desc = par(import_desc); {
+    [ MImport { modul; name; desc } ]
   }
 
 let inline_import ==
@@ -989,7 +990,7 @@ let module_field :=
   | ~ = table; <>
   | ~ = memory; <>
 
-let module_ :=
+let modul :=
   | MODULE; id = ioption(id); fields = list(par(module_field)); {
     (* TODO: handle fields_bin
     let fields_bin = String.concat "" l in *)
@@ -1029,14 +1030,14 @@ let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
   | ASSERT_EXHAUSTION; ~ = par(action); ~ = NAME; <Assert_exhaustion>
   | ASSERT_TRAP; ~ = par(action); ~ = NAME; <Assert_trap>
-  | ASSERT_TRAP; ~ = par(module_); ~ = NAME; <Assert_trap_module>
-  | ASSERT_MALFORMED; ~ = par(module_); ~ = NAME; <Assert_malformed>
+  | ASSERT_TRAP; ~ = par(modul); ~ = NAME; <Assert_trap_module>
+  | ASSERT_MALFORMED; ~ = par(modul); ~ = NAME; <Assert_malformed>
   | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_quote>
   | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_binary>
-  | ASSERT_INVALID; ~ = par(module_); ~ = NAME; <Assert_invalid>
+  | ASSERT_INVALID; ~ = par(modul); ~ = NAME; <Assert_invalid>
   | ASSERT_INVALID; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_quote>
   | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
-  | ASSERT_UNLINKABLE; ~ = par(module_); ~ = NAME; <Assert_unlinkable>
+  | ASSERT_UNLINKABLE; ~ = par(modul); ~ = NAME; <Assert_unlinkable>
 
 let register ==
   | REGISTER; ~ = utf8_name; ~ = option(id); <Register>
@@ -1046,7 +1047,7 @@ let action ==
   | GET; ~ = ioption(id); ~ = utf8_name; <Get>
 
 let cmd ==
-  | ~ = par(module_); <Module>
+  | ~ = par(modul); <Module>
   | ~ = par(module_binary); <Module>
   | ~ = par(assert_); <Assert>
   | ~ = par(register); <>
@@ -1057,6 +1058,6 @@ let script :=
   | fields = nonempty_list(par(module_field)); EOF; {
     let fields = List.flatten fields in
     let id = None in
-    let module_ = { id; fields } in
-    [ Module module_ ]
+    let modul = { id; fields } in
+    [ Module modul ]
   }
