@@ -251,6 +251,11 @@ struct
     | I31_get_u
     | I31_get_s
     | I31_new
+    (* struct*)
+    | Struct_get of indice * indice
+    | Struct_new_canon of indice
+    | Struct_new_canon_default of indice
+    | Struct_set of indice * indice
 
   and expr = instr list
 
@@ -323,6 +328,7 @@ struct
     | Const_array
     | Const_eq
     | Const_i31
+    | Const_struct
 
   module Const = struct
     type nonrec ibinop =
@@ -615,6 +621,13 @@ struct
       | I31_new -> Format.fprintf fmt "i31.new"
       | I31_get_s -> Format.fprintf fmt "i31.get_s"
       | I31_get_u -> Format.fprintf fmt "i31.get_u"
+      | Struct_get (i1, i2) ->
+        Format.fprintf fmt "struct.get %a %a" indice i1 indice i2
+      | Struct_new_canon i -> Format.fprintf fmt "struct.new_canon %a" indice i
+      | Struct_new_canon_default i ->
+        Format.fprintf fmt "struct.new_canon_default %a" indice i
+      | Struct_set (i1, i2) ->
+        Format.fprintf fmt "struct.set %a %a" indice i1 indice i2
 
     and expr fmt instrs =
       Format.pp_print_list
@@ -929,6 +942,7 @@ module Symbolic = struct
       | Const_array -> Format.fprintf fmt "ref.array"
       | Const_eq -> Format.fprintf fmt "ref.eq"
       | Const_i31 -> Format.fprintf fmt "ref.i31"
+      | Const_struct -> Format.fprintf fmt "ref.struct"
 
     let consts fmt c =
       Format.pp_print_list

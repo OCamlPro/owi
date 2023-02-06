@@ -435,8 +435,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     Stack.push [ i32 ] stack
   | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_default _
     | Array_new_canon_elem _ | Array_new_canon_fixed _ | Array_get _
-    | Array_get_u _ | Array_set _ ) as i ->
-    failwith @@ Format.asprintf "TODO (typecheck instr) %a" Pp.instr i
+    | Array_get_u _ | Array_set _ | Struct_get _ | Struct_set _
+    | Struct_new_canon _ | Struct_new_canon_default _ ) as i ->
+    Log.debug "TODO (typecheck instr) %a" Pp.instr i;
+    Ok stack
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
   ~stack:previous_stack : (stack, string) Result.t =

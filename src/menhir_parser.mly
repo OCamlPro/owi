@@ -19,8 +19,8 @@
 %token OFFSET
 %token PARAM
 %token QUOTE
-%token REC REF REF_ARRAY REF_EQ REF_EXTERN REF_FUNC REF_I31 REF_IS_NULL REF_NULL REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
-%token SELECT START STRUCT STRUCT_REF SUB
+%token REC REF REF_ARRAY REF_EQ REF_EXTERN REF_FUNC REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
+%token SELECT START STRUCT STRUCT_GET STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
 
@@ -452,6 +452,7 @@ let plain_instr :=
   | MEMORY_COPY; { Memory_copy }
   | MEMORY_INIT; ~ = indice; <Memory_init>
   | DATA_DROP; ~ = indice; <Data_drop>
+  (* array *)
   | ARRAY_GET; ~ = indice; <Array_get>
   | ARRAY_GET_U; ~ = indice; <Array_get_u>
   | ARRAY_LEN; { Array_len }
@@ -466,8 +467,14 @@ let plain_instr :=
     Array_new_canon_fixed (indice, num) }
   | ARRAY_SET; ~ = indice; <Array_set>
   | I31_NEW; { I31_new }
+  (* i31 *)
   | I31_GET_S; { I31_get_s }
   | I31_GET_U; { I31_get_u }
+  (* struct *)
+  | STRUCT_GET; i1 = indice; i2 = indice; <Struct_get>
+  | STRUCT_NEW_CANON; ~ = indice; <Struct_new_canon>
+  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_canon_default>
+  | STRUCT_SET; i1 = indice; i2 = indice; <Struct_set>
 
 (* Instructions & Expressions *)
 
@@ -1019,6 +1026,7 @@ let literal_const ==
   | REF_ARRAY; { Const_array }
   | REF_EQ; { Const_eq }
   | REF_I31; { Const_i31 }
+  | REF_STRUCT; { Const_struct }
 
 let const ==
   | ~ = literal_const; <Literal>
