@@ -1,4 +1,4 @@
-open Types
+open Types.Symbolic
 
 let m =
   Module

@@ -66,7 +66,7 @@ let load_global_from_module ls mod_id name =
 
 let compare_result_const result (const : 'env Value.t) =
   match (result, const) with
-  | Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
+  | Symbolic.Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
   | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
@@ -103,25 +103,26 @@ let compare_result_const result (const : 'env Value.t) =
   | Result_const (Literal Const_eq), _ ->
     Log.err "TODO (Script.compare_result_const)"
 
-let value_of_const : Types.const -> 'env Value.t =
+let value_of_const : Types.Symbolic.const -> 'env Value.t =
  fun const ->
   match const with
   | Const_I32 v -> I32 v
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
-  | Const_null rt -> Value.ref_null rt
+  | Const_null rt -> Value.ref_null (Simplify.convert_heap_type rt)
   | Const_host i -> Ref (Host_externref.value i)
   | Const_array -> Log.err "TODO (Script.value_of_const)"
   | Const_eq -> Log.err "TODO (Script.value_of_const)"
 
 let action (link_state : Link.state) = function
-  | Invoke (mod_id, f, args) -> begin
+  | Types.Symbolic.Invoke (mod_id, f, args) -> begin
+    (*
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
          ~none:(fun ppf () -> Format.pp_print_string ppf "")
          Format.pp_print_string )
-      mod_id f Pp.Input.consts args;
+      mod_id f Types.Symbolic.consts args;*)
     let* f = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
     Interpret.exec_vfunc stack f
@@ -138,7 +139,7 @@ let run ~with_exhaustion script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -> function
-      | Module m ->
+      | Types.Symbolic.Module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
@@ -164,7 +165,7 @@ let run ~with_exhaustion script =
             match Check.module_ m with
             | Error got -> check_error ~expected ~got
             | Ok () -> (
-              match Simplify.module_ m with
+              match Simplify.modul m with
               | Error got -> check_error ~expected ~got
               | Ok _m ->
                 let got = "Ok" in
@@ -208,7 +209,7 @@ let run ~with_exhaustion script =
           || not (List.for_all2 compare_result_const res (List.rev stack))
         then begin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
-            (List.rev stack) Pp.Input.results res;
+            (List.rev stack) Types.Symbolic.Pp.results res;
           Error "Bad result"
         end
         else Ok link_state

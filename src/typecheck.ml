@@ -1,15 +1,16 @@
 open Types
+open Types.Simplified
 open Syntax
 
 type typ =
-  | Num_type of Types.num_type
-  | Ref_type of Types.heap_type
+  | Num_type of num_type
+  | Ref_type of heap_type
   | Any
   | Something
 
 let pp_typ fmt = function
-  | Num_type t -> Pp.Simplified.num_type fmt t
-  | Ref_type t -> Pp.Simplified.heap_type fmt t
+  | Num_type t -> Pp.num_type fmt t
+  | Ref_type t -> Pp.heap_type fmt t
   | Any -> Format.fprintf fmt "any"
   | Something -> Format.fprintf fmt "something"
 
@@ -19,8 +20,8 @@ let pp_typ_list fmt l =
     pp_typ fmt l
 
 let typ_of_val_type = function
-  | Types.Ref_type (_null, t) -> Ref_type t
-  | Types.Num_type t -> Num_type t
+  | Simplified.Ref_type (_null, t) -> Ref_type t
+  | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
 
@@ -31,21 +32,18 @@ module Index = struct
 end
 
 let get_value_at_indice i values =
-  match List.find (fun Simplify.{ index; _ } -> index = i) values with
+  match List.find (fun { index; _ } -> index = i) values with
   | { value; _ } -> value
 
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals :
-        (Const.expr global', global_type) Simplify.runtime Simplify.Named.t
+    ; globals : (global, global_type) runtime Named.t
     ; result_type : result_type
-    ; funcs :
-        ((int, Types.func_type) Types.func', func_type) Simplify.runtime
-        Simplify.Named.t
+    ; funcs : (func, block_type) runtime Named.t
     ; blocks : typ list list
-    ; tables : (table, table_type) Simplify.runtime Simplify.Named.t
-    ; elems : (int, Const.expr) elem' Simplify.Named.t
+    ; tables : (table, table_type) runtime Named.t
+    ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
 
@@ -64,7 +62,7 @@ module Env = struct
 
   let block_type_get i env = List.nth env.blocks i
 
-  let table_type_get_from_module i (module_ : Simplify.simplified_module) =
+  let table_type_get_from_module i (module_ : Simplified.modul) =
     let value = get_value_at_indice i module_.table.values in
     match value with Local table -> snd (snd table) | Imported t -> snd t.desc
 
@@ -92,8 +90,6 @@ type env = Env.t
 
 type stack = typ list
 
-type instr = (int, func_type) instr'
-
 let i32 = Num_type I32
 
 let i64 = Num_type I64
@@ -118,7 +114,7 @@ module Stack = struct
   let pp_error fmt (expected, got) =
     Format.fprintf fmt "requires %a but stack has %a" pp expected pp got
 
-  let match_num_type (required : Types.num_type) (got : Types.num_type) =
+  let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
     | I32, I32 -> true
     | I64, I64 -> true
@@ -128,7 +124,7 @@ module Stack = struct
 
   let match_ref_type required got =
     match (required, got) with
-    | Types.Any_ht, _ -> true
+    | Types.Simplified.Any_ht, _ -> true
     | None_ht, None_ht -> true
     | Eq_ht, Eq_ht -> true
     | I31_ht, I31_ht -> true
@@ -432,8 +428,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
   | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_default _
     | Array_new_canon_elem _ | Array_new_canon_fixed _ | Array_get _
     | Array_get_u _ | Array_set _ ) as i ->
-    failwith
-    @@ Format.asprintf "TODO (typecheck instr) %a" Pp.Simplified.instr i
+    failwith @@ Format.asprintf "TODO (typecheck instr) %a" Pp.instr i
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
   ~stack:previous_stack : (stack, string) Result.t =
@@ -452,15 +447,15 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
     | None -> Error "type mismatch (param type)"
     | Some stack_to_push -> Stack.push rt stack_to_push
 
-let typecheck_function (module_ : Simplify.simplified_module) func refs =
+let typecheck_function (modul : modul) func refs =
   match func with
-  | Simplify.Imported _ -> Ok ()
+  | Imported _ -> Ok ()
   | Local func ->
     let params, result = func.type_f in
     let env =
-      Env.make ~params ~funcs:module_.func ~locals:func.locals
-        ~globals:module_.global ~result_type:result ~tables:module_.table
-        ~elems:module_.elem ~refs
+      Env.make ~params ~funcs:modul.func ~locals:func.locals
+        ~globals:modul.global ~result_type:result ~tables:modul.table
+        ~elems:modul.elem ~refs
     in
     let* stack =
       typecheck_expr env func.body ~is_loop:false (Some ([], result)) ~stack:[]
@@ -470,9 +465,8 @@ let typecheck_function (module_ : Simplify.simplified_module) func refs =
       error_s "type mismatch func %a" Stack.pp_error (required, stack)
     else Ok ()
 
-let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
-  function
-  | Types.Const.I32_const _ -> Stack.push [ i32 ] stack
+let typecheck_const_instr (modul : modul) refs stack = function
+  | Simplified.Const.I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
@@ -481,7 +475,7 @@ let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
   | Global_get i ->
-    let value = get_value_at_indice i module_.global.values in
+    let value = get_value_at_indice i modul.global.values in
     let* _mut, type_ =
       match value with
       | Local _ -> Error "unknown global"
@@ -493,19 +487,20 @@ let typecheck_const_instr (module_ : Simplify.simplified_module) refs stack =
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
   | Array_new_canon t ->
-    let t = arraytype module_ t in
+    let t = arraytype modul t in
     let* stack = Stack.pop [ i32; t ] stack in
     Stack.push [ Ref_type Array_ht ] stack
   | Array_new_canon_default _i -> assert false
 
-let typecheck_const_expr (module_ : Simplify.simplified_module) refs =
-  list_fold_left (typecheck_const_instr module_ refs) []
+let typecheck_const_expr (modul : modul) refs =
+  list_fold_left (typecheck_const_instr modul refs) []
 
-let typecheck_global (module_ : Simplify.simplified_module) refs global =
-  match global.Simplify.value with
-  | Simplify.Imported _ -> Ok ()
-  | Local ({ type_; init; _ } : 'expr global') -> (
-    let* real_type = typecheck_const_expr module_ refs init in
+let typecheck_global (modul : modul) refs
+  (global : (global, global_type) runtime indexed) =
+  match global.value with
+  | Imported _ -> Ok ()
+  | Local { type_; init; _ } -> (
+    let* real_type = typecheck_const_expr modul refs init in
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd type_ in
@@ -516,13 +511,12 @@ let typecheck_global (module_ : Simplify.simplified_module) refs global =
       else Ok ()
     | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 
-let typecheck_elem module_ refs (elem : (int, Const.expr) elem' Simplify.indexed)
-    =
+let typecheck_elem modul refs (elem : elem indexed) =
   let _null, expected_type = elem.value.type_ in
   let* () =
     list_iter
       (fun init ->
-        let* real_type = typecheck_const_expr module_ refs init in
+        let* real_type = typecheck_const_expr modul refs init in
         match real_type with
         | [ real_type ] ->
           if Ref_type expected_type <> real_type then
@@ -533,38 +527,38 @@ let typecheck_elem module_ refs (elem : (int, Const.expr) elem' Simplify.indexed
   in
   match elem.value.mode with
   | Elem_passive | Elem_declarative -> Ok ()
-  | Elem_active (tbl_i, e) -> (
-    let _null, tbl_type = Env.table_type_get_from_module tbl_i module_ in
+  | Elem_active (None, _e) -> assert false
+  | Elem_active (Some tbl_i, e) -> (
+    let _null, tbl_type = Env.table_type_get_from_module tbl_i modul in
     if tbl_type <> expected_type then Error "type mismatch (elem_active)"
     else
-      let* t = typecheck_const_expr module_ refs e in
+      let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
         if t <> tbl_type then Error "type mismatch (elem_active bis)" else Ok ()
       | [ _t ] -> Ok ()
       | _whatever -> Error "type mismatch (typecheck_elem)" )
 
-let typecheck_data module_ refs (data : (int, Const.expr) data' Simplify.indexed)
-    =
+let typecheck_data modul refs (data : data indexed) =
   match data.value.mode with
   | Data_passive -> Ok ()
   | Data_active (_i, e) -> (
-    let* t = typecheck_const_expr module_ refs e in
+    let* t = typecheck_const_expr modul refs e in
     match t with
     | [ _t ] -> Ok ()
     | _whatever -> Error "type mismatch (typecheck_data)" )
 
-let module_ (module_ : Simplify.simplified_module) =
+let module_ (modul : modul) =
   Log.debug "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
-  let* () = list_iter (typecheck_global module_ refs) module_.global.values in
-  let* () = list_iter (typecheck_elem module_ refs) module_.elem.values in
-  let* () = list_iter (typecheck_data module_ refs) module_.data.values in
+  let* () = list_iter (typecheck_global modul refs) modul.global.values in
+  let* () = list_iter (typecheck_elem modul refs) modul.elem.values in
+  let* () = list_iter (typecheck_data modul refs) modul.data.values in
   List.iter
-    (fun (export : Simplify.export) -> Hashtbl.add refs export.id ())
-    module_.exports.func;
-  Simplify.Named.fold
+    (fun (export : export) -> Hashtbl.add refs export.id ())
+    modul.exports.func;
+  Named.fold
     (fun _index func acc ->
       let* () = acc in
-      typecheck_function module_ func refs )
-    module_.func (Ok ())
+      typecheck_function modul func refs )
+    modul.func (Ok ())

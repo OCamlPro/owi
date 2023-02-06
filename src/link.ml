@@ -1,8 +1,6 @@
 open Types
+open Types.Simplified
 open Syntax
-
-type module_ = Simplify.simplified_module
-
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
@@ -12,7 +10,7 @@ module Memory = struct
   type t =
     { id : int
     ; label : string option
-    ; mutable limits : mem_type
+    ; mutable limits : limits
     ; mutable data : bytes
     }
 
@@ -22,7 +20,7 @@ module Memory = struct
       incr r;
       !r
 
-  let init ?label (typ : mem_type) : t =
+  let init ?label (typ : limits) : t =
     let data = Bytes.make (page_size * typ.min) '\x00' in
     { id = fresh (); label; limits = typ; data }
 
@@ -71,8 +69,8 @@ module Global = struct
   type 'env t =
     { mutable value : 'env Value.t
     ; label : string option
-    ; mut : Types.mut
-    ; typ : Types.val_type
+    ; mut : mut
+    ; typ : val_type
     }
 end
 
@@ -199,9 +197,9 @@ type exports =
   }
 
 type module_to_run =
-  { module_ : module_
+  { modul : modul
   ; env : Env.t
-  ; to_run : (int, func_type) expr' list
+  ; to_run : expr list
   }
 
 type state =
@@ -216,8 +214,6 @@ let empty_state =
   { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
 
 module Const_interp = struct
-  open Types
-
   type env = Env.t
 
   let exec_ibinop stack nn (op : Const.ibinop) =
@@ -264,14 +260,13 @@ module Const_interp = struct
     match stack with
     | [] -> Error "type mismatch (const expr returning zero values)"
     | _ :: _ :: _ ->
-      error_s "type mismatch (const expr returning more than one value %a)"
-        Pp.Const.expr e
+      error_s "type mismatch (const expr returning more than one value)"
     | [ result ] -> Ok result
 end
 
-let load_from_module ls f (import : _ Simplify.imp) =
-  match StringMap.find import.module_ ls.by_name with
-  | exception Not_found -> error_s "unknown module %s" import.module_
+let load_from_module ls f (import : _ Types.imp) =
+  match StringMap.find import.modul ls.by_name with
+  | exception Not_found -> error_s "unknown module %s" import.modul
   | exports -> (
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
@@ -281,7 +276,7 @@ let load_from_module ls f (import : _ Simplify.imp) =
       else Error "unknown import"
     | v -> Ok v )
 
-let load_global (ls : state) (import : Types.global_type Simplify.imp) :
+let load_global (ls : state) (import : global_type Types.imp) :
   (global, string) Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
@@ -296,10 +291,10 @@ let load_global (ls : state) (import : Types.global_type Simplify.imp) :
   else Ok global
 
 let eval_global ls env
-  (global : (Const.expr global', Types.global_type) Simplify.runtime) :
+  (global : (Types.Simplified.global, global_type) Types.runtime) :
   (global, string) Result.t =
   match global with
-  | Simplify.Local global ->
+  | Types.Local global ->
     let* value = Const_interp.exec_expr env global.init in
     let mut, typ = global.type_ in
     let global : global = { value; label = global.id; mut; typ } in
@@ -307,7 +302,7 @@ let eval_global ls env
   | Imported import -> load_global ls import
 
 let eval_globals ls env globals : (Env.t, string) Result.t =
-  Simplify.Named.fold
+  Types.Named.fold
     (fun id global env ->
       let* env in
       let* global = eval_global ls env global in
@@ -335,7 +330,7 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : state) (import : Types.limits Simplify.imp) :
+let load_memory (ls : state) (import : limits Types.imp) :
   (Memory.t, string) Result.t =
   let* ({ Memory.limits = imported_limit; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
@@ -343,17 +338,16 @@ let load_memory (ls : state) (import : Types.limits Simplify.imp) :
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
   else
     error_s "incompatible import type for memory %s %s expected %a got %a"
-      import.module_ import.name Pp.Input.mem_type import.desc Pp.Input.mem_type
-      imported_limit
+      import.modul import.name Pp.limits import.desc Pp.limits imported_limit
 
-let eval_memory ls (memory : (mem, Types.limits) Simplify.runtime) :
+let eval_memory ls (memory : (mem, limits) Types.runtime) :
   (Memory.t, string) Result.t =
   match memory with
   | Local (label, mem_type) -> ok @@ Memory.init ?label mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
-  Simplify.Named.fold
+  Types.Named.fold
     (fun id mem env ->
       let* env in
       let* memory = eval_memory ls mem in
@@ -364,24 +358,24 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : state) (import : Types.table_type Simplify.imp) :
+let load_table (ls : state) (import : table_type Types.imp) :
   (table, string) Result.t =
   let type_ : table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible type_ (t.limits, t.type_) then Ok t
   else
     error_s "incompatible import type for table %s %s expected %a got %a"
-      import.module_ import.name Pp.Input.table_type type_ Pp.Input.table_type
+      import.modul import.name Pp.table_type type_ Pp.table_type
       (t.limits, t.type_)
 
-let eval_table ls (table : (_, Types.table_type) Simplify.runtime) :
+let eval_table ls (table : (_, table_type) Types.runtime) :
   (table, string) Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Table.init ?label table_type
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
-  Simplify.Named.fold
+  Types.Named.fold
     (fun id table env ->
       let* env in
       let* table = eval_table ls table in
@@ -397,7 +391,7 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : state) (import : func_type Simplify.imp) :
+let load_func (ls : state) (import : func_type Types.imp) :
   (func, string) Result.t =
   let type_ : func_type = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
@@ -407,11 +401,11 @@ let load_func (ls : state) (import : func_type Simplify.imp) :
 
 let eval_func ls (finished_env : Env.t') func : (func, string) Result.t =
   match func with
-  | Simplify.Local func -> ok @@ Value.Func.wasm func finished_env
+  | Types.Local func -> ok @@ Value.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Env.t') env functions =
-  Simplify.Named.fold
+  Types.Named.fold
     (fun id func env ->
       let* env in
       let* func = eval_func ls finished_env func in
@@ -443,13 +437,15 @@ let active_data_expr ~offset ~length ~mem ~data =
 let get_i32 = function Value.I32 i -> Ok i | _ -> Error "type mismatch"
 
 let define_data env data =
-  Simplify.Named.fold
-    (fun id data env_and_init ->
+  Types.Named.fold
+    (fun id (data : Simplified.data) env_and_init ->
       let* env, init = env_and_init in
-      let env = Env.add_data id { value = data.init } env in
+      let data' : Env.data = { value = data.init } in
+      let env = Env.add_data id data' env in
       let* init =
         match data.mode with
-        | Data_active (mem, offset) ->
+        | Data_active (None, _) -> assert false
+        | Data_active (Some mem, offset) ->
           let* offset = Const_interp.exec_expr env offset in
           let length = Int32.of_int @@ String.length data.init in
           let* offset = get_i32 offset in
@@ -462,8 +458,8 @@ let define_data env data =
     (Ok (env, []))
 
 let define_elem env elem =
-  Simplify.Named.fold
-    (fun id (elem : _ elem') env_and_inits ->
+  Types.Named.fold
+    (fun id (elem : elem) env_and_inits ->
       let* env, inits = env_and_inits in
       let* init = list_map (Const_interp.exec_expr env) elem.init in
       let* init_as_ref =
@@ -484,7 +480,8 @@ let define_elem env elem =
       in
       let* inits =
         match elem.mode with
-        | Elem_active (table, offset) ->
+        | Elem_active (None, _) -> assert false
+        | Elem_active (Some table, offset) ->
           let length = Int32.of_int @@ List.length init in
           let* offset = Const_interp.exec_expr env offset in
           let* offset = get_i32 offset in
@@ -495,11 +492,11 @@ let define_elem env elem =
     elem
     (Ok (env, []))
 
-let populate_exports env (exports : Simplify.exports) :
+let populate_exports env (exports : Types.Simplified.exports) :
   (exports, string) Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) (export : Simplify.export) ->
+      (fun (acc, names) (export : Types.Simplified.export) ->
         let* value = get_env env export.id in
         if StringSet.mem export.name names then Error "duplicate export name"
         else
@@ -515,7 +512,7 @@ let populate_exports env (exports : Simplify.exports) :
   let* functions, names = fill_exports Env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let module_ (module_ : module_) (ls : state) =
+let modul (modul : modul) (ls : state) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
@@ -524,16 +521,16 @@ let module_ (module_ : module_) (ls : state) =
       lazy
         (let env = Env.empty in
          let env =
-           eval_functions ls finished_env env module_.func |> raise_on_error
+           eval_functions ls finished_env env modul.func |> raise_on_error
          in
-         let env = eval_globals ls env module_.global |> raise_on_error in
-         let env = eval_memories ls env module_.mem |> raise_on_error in
-         let env = eval_tables ls env module_.table |> raise_on_error in
+         let env = eval_globals ls env modul.global |> raise_on_error in
+         let env = eval_memories ls env modul.mem |> raise_on_error in
+         let env = eval_tables ls env modul.table |> raise_on_error in
          let env, init_active_data =
-           define_data env module_.data |> raise_on_error
+           define_data env modul.data |> raise_on_error
          in
          let env, init_active_elem =
-           define_elem env module_.elem |> raise_on_error
+           define_elem env modul.elem |> raise_on_error
          in
          (env, init_active_data, init_active_elem) )
     and finished_env =
@@ -549,17 +546,17 @@ let module_ (module_ : module_) (ls : state) =
     try Ok (Lazy.force env_and_init_active_data_and_elem)
     with E msg -> Error msg
   in
-  let* by_id_exports = populate_exports env module_.exports in
+  let* by_id_exports = populate_exports env modul.exports in
   let by_id =
     (* TODO: this is not the actual module name *)
-    match module_.id with
+    match modul.id with
     | None -> ls.by_id
     | Some id -> StringMap.add id by_id_exports ls.by_id
   in
-  let start = Option.map (fun start_id -> [ Call start_id ]) module_.start in
+  let start = Option.map (fun start_id -> [ Call start_id ]) modul.start in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
-  let module_to_run = { module_; env; to_run } in
+  let module_to_run = { modul; env; to_run } in
   Ok (module_to_run, { by_id; by_name = ls.by_name; last = Some by_id_exports })
 
 let extern_module (name : string) (module_ : extern_module) (ls : state) : state

@@ -40,12 +40,12 @@ module Func : sig
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
   type 'a t =
-    | WASM of int * (int, Types.func_type) Types.func' * 'a
+    | WASM of int * Types.Simplified.func * 'a
     | Extern of extern_func
 
-  val typ : 'a t -> Types.func_type
+  val typ : 'a t -> Types.Simplified.func_type
 
-  val wasm : (int, Types.func_type) Types.func' -> 'a -> 'a t
+  val wasm : Types.Simplified.func -> 'a -> 'a t
 end
 
 type 'env ref_value =
@@ -62,9 +62,9 @@ type 'a t =
 
 val cast_ref : externref -> 'a Extern_ref.ty -> 'a option
 
-val ref_null' : Types.heap_type -> 'a ref_value
+val ref_null' : Types.Simplified.heap_type -> 'a ref_value
 
-val ref_null : Types.heap_type -> 'a t
+val ref_null : Types.Simplified.heap_type -> 'a t
 
 val ref_func : 'a Func.t -> 'a t
 

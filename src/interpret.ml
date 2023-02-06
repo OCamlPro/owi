@@ -1,4 +1,5 @@
 open Types
+open Types.Simplified
 module Env = Link.Env
 
 let page_size = 65_536
@@ -55,7 +56,7 @@ let exec_funop stack nn op =
     in
     Stack.push_f64 stack res
 
-let exec_ibinop stack nn (op : Types.ibinop) =
+let exec_ibinop stack nn (op : ibinop) =
   match nn with
   | S32 ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
@@ -116,7 +117,7 @@ let exec_ibinop stack nn (op : Types.ibinop) =
       | Rotl -> rotl n1 n2
       | Rotr -> rotr n1 n2 )
 
-let exec_fbinop stack nn (op : Types.fbinop) =
+let exec_fbinop stack nn (op : fbinop) =
   match nn with
   | S32 ->
     let (f1, f2), stack = Stack.pop2_f32 stack in
@@ -154,7 +155,7 @@ let exec_itestop stack nn op =
     let res = match op with Eqz -> n = 0L in
     Stack.push_bool stack res
 
-let exec_irelop stack nn (op : Types.irelop) =
+let exec_irelop stack nn (op : irelop) =
   match nn with
   | S32 ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
@@ -191,7 +192,7 @@ let exec_irelop stack nn (op : Types.irelop) =
     in
     Stack.push_bool stack res
 
-let exec_frelop stack nn (op : Types.frelop) =
+let exec_frelop stack nn (op : frelop) =
   match nn with
   | S32 ->
     let (n1, n2), stack = Stack.pop2_f32 stack in
@@ -302,7 +303,7 @@ module State = struct
 
   type locals = value array
 
-  type pc = (int, func_type) instr' list
+  type pc = instr list
 
   type block =
     { branch : pc
@@ -370,7 +371,7 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
   in
   { state with pc = expr; block_stack = block :: state.block_stack }
 
-type wasm_func = (int, Types.func_type) Types.func'
+type wasm_func = Simplified.func
 
 let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
   Log.debug "calling func : func %s@."
@@ -427,7 +428,7 @@ let exec_instr instr (state : State.exec_state) =
   let locals = state.locals in
   let st stack = { state with stack } in
   Log.debug "stack        : [ %a ]@." Stack.pp stack;
-  Log.debug "running instr: %a@." Pp.Simplified.instr instr;
+  Log.debug "running instr: %a@." Simplified.Pp.instr instr;
   match instr with
   | Return -> State.return state
   | Nop -> state
@@ -1069,7 +1070,7 @@ let exec_instr instr (state : State.exec_state) =
   | ( Array_new_canon_data _ | Array_new_canon_elem _ | Array_new_canon_fixed _
     | Array_get _ | Array_get_u _ | Array_set _ | Array_len ) as i ->
     failwith
-    @@ Format.asprintf "TODO (Interpret.exec_instr) %a" Pp.Simplified.instr i
+    @@ Format.asprintf "TODO (Interpret.exec_instr) %a" Simplified.Pp.instr i
 
 let rec loop (state : State.exec_state) =
   let state =
