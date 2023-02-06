@@ -72,7 +72,7 @@ let compare_result_const result (const : 'env Value.t) =
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
   | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
-  | Result_const (Literal (Const_host n)), Ref (Externref (Some ref)) -> begin
+  | Result_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -> begin
     match Value.cast_ref ref Host_externref.ty with
     | None -> false
     | Some n' -> n = n'
@@ -106,7 +106,7 @@ let value_of_const : Types.Symbolic.const -> 'env Value.t = function
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
   | Const_null rt -> Value.ref_null (Simplify.convert_heap_type rt)
-  | Const_host i -> Ref (Host_externref.value i)
+  | Const_extern i -> Ref (Host_externref.value i)
   | i ->
     Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;
     I32 (Int32.of_int 666)

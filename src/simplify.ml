@@ -797,10 +797,17 @@ module Rewrite_indices = struct
       | I31_get_s -> Ok I31_get_s
       | I31_get_u -> Ok I31_get_u
       | Array_len -> Ok Array_len
+      | Ref_as_non_null -> Ok Ref_as_non_null
+      | Extern_externalize -> Ok Extern_externalize
+      | Extern_internalize -> Ok Extern_internalize
+      | Ref_eq -> Ok Ref_eq
       | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_elem _
-        | Array_new_canon_fixed _ | Array_get_u _ | Struct_get _ | Struct_set _
-        | Struct_new_canon _ | Struct_new_canon_default _ ) as i ->
-        Log.debug "TODO (Simplify.body) %a" Symbolic.Pp.instr i;
+        | Array_new_canon_fixed _ | Array_get_u _ | Struct_get _
+        | Struct_get_s _ | Struct_set _ | Struct_new_canon _
+        | Struct_new_canon_default _ | Ref_cast _ | Ref_test _
+        | Br_on_non_null _ | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ )
+        as i ->
+        Log.debug "TODO (Simplify.body) %a@\n" Symbolic.Pp.instr i;
         Ok Nop
     and expr (e : Symbolic.expr) (loop_count, block_ids) :
       (expr, string) Result.t =

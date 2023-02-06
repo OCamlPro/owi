@@ -188,6 +188,10 @@ struct
     | Ref_null of heap_type
     | Ref_is_null
     | Ref_func of indice
+    | Ref_as_non_null
+    | Ref_cast of nullable * heap_type
+    | Ref_test of nullable * heap_type
+    | Ref_eq
     (* Parametric instructions *)
     | Drop
     | Select of val_type list option
@@ -232,6 +236,10 @@ struct
     | Br of indice
     | Br_if of indice
     | Br_table of indice array * indice
+    | Br_on_cast of indice * nullable * heap_type
+    | Br_on_cast_fail of indice * nullable * heap_type
+    | Br_on_non_null of indice
+    | Br_on_null of indice
     | Return
     | Return_call of indice
     | Return_call_indirect of indice * block_type
@@ -253,9 +261,13 @@ struct
     | I31_new
     (* struct*)
     | Struct_get of indice * indice
+    | Struct_get_s of indice * indice
     | Struct_new_canon of indice
     | Struct_new_canon_default of indice
     | Struct_set of indice * indice
+    (* extern *)
+    | Extern_externalize
+    | Extern_internalize
 
   and expr = instr list
 
@@ -325,6 +337,7 @@ struct
     | Const_F64 of Float64.t
     | Const_null of heap_type
     | Const_host of int
+    | Const_extern of int
     | Const_array
     | Const_eq
     | Const_i31
@@ -398,7 +411,9 @@ struct
       | Def_ht i -> Format.fprintf fmt "%a" indice i
 
     let null fmt = function
-      | No_null -> Format.fprintf fmt "nonull"
+      | No_null ->
+        (* TODO: no notation to enforce nonnull ? *)
+        Format.fprintf fmt ""
       | Null -> Format.fprintf fmt "null"
 
     let ref_type fmt (n, ht) = Format.fprintf fmt "%a %a" heap_type ht null n
@@ -623,11 +638,28 @@ struct
       | I31_get_u -> Format.fprintf fmt "i31.get_u"
       | Struct_get (i1, i2) ->
         Format.fprintf fmt "struct.get %a %a" indice i1 indice i2
+      | Struct_get_s (i1, i2) ->
+        Format.fprintf fmt "struct.get_s %a %a" indice i1 indice i2
       | Struct_new_canon i -> Format.fprintf fmt "struct.new_canon %a" indice i
       | Struct_new_canon_default i ->
         Format.fprintf fmt "struct.new_canon_default %a" indice i
       | Struct_set (i1, i2) ->
         Format.fprintf fmt "struct.set %a %a" indice i1 indice i2
+      | Extern_externalize -> Format.fprintf fmt "extern.externalize"
+      | Extern_internalize -> Format.fprintf fmt "extern.internalize"
+      | Ref_as_non_null -> Format.fprintf fmt "ref.as_non_null"
+      | Ref_cast (n, t) ->
+        Format.fprintf fmt "ref.cast %a %a" null n heap_type t
+      | Ref_test (n, t) ->
+        Format.fprintf fmt "ref.test %a %a" null n heap_type t
+      | Br_on_non_null id -> Format.fprintf fmt "br_on_non_null %a" indice id
+      | Br_on_null id -> Format.fprintf fmt "br_on_null %a" indice id
+      | Br_on_cast (id, n, t) ->
+        Format.fprintf fmt "br_on_cast %a %a %a" indice id null n heap_type t
+      | Br_on_cast_fail (id, n, t) ->
+        Format.fprintf fmt "br_on_cast_fail %a %a %a" indice id null n heap_type
+          t
+      | Ref_eq -> Format.fprintf fmt "ref.eq"
 
     and expr fmt instrs =
       Format.pp_print_list
@@ -938,7 +970,8 @@ module Symbolic = struct
       | Const_F32 f -> Format.fprintf fmt "f32.const %a" f32 f
       | Const_F64 f -> Format.fprintf fmt "f64.const %a" f64 f
       | Const_null rt -> Format.fprintf fmt "ref.null %a" heap_type rt
-      | Const_host i -> Format.fprintf fmt "ref.extern %d" i
+      | Const_host i -> Format.fprintf fmt "ref.host %d" i
+      | Const_extern i -> Format.fprintf fmt "ref.extern %d" i
       | Const_array -> Format.fprintf fmt "ref.array"
       | Const_eq -> Format.fprintf fmt "ref.eq"
       | Const_i31 -> Format.fprintf fmt "ref.i31"
