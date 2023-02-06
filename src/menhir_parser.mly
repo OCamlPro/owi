@@ -1,13 +1,13 @@
 %token <String.t> NUM
 %token <String.t> ID NAME
 %token ALIGN ANY_REF ARRAY ARRAY_GET ARRAY_GET_U ARRAY_LEN ARRAY_NEW_CANON ARRAY_NEW_CANON_DATA ARRAY_NEW_CANON_DEFAULT ARRAY_NEW_CANON_ELEM ARRAY_NEW_CANON_FIXED ARRAY_REF ARRAY_SET ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY
-%token BINARY BLOCK BR BR_IF BR_TABLE
+%token BINARY BLOCK BR BR_IF BR_ON_CAST BR_ON_CAST_FAIL BR_ON_NON_NULL BR_ON_NULL BR_TABLE
 %token CALL CALL_INDIRECT
 %token DATA DATA_DROP DECLARE DROP
-%token ELEM ELEM_DROP ELSE END EOF EQ EQ_REF EQUAL EXPORT EXTERN EXTERN_REF
+%token ELEM ELEM_DROP ELSE END EOF EQ EQ_REF EQUAL EXPORT EXTERN EXTERN_EXTERNALIZE EXTERN_INTERNALIZE EXTERN_REF
 %token F32 F32_ABS F32_ADD F32_CEIL F32_CONST F32_CONVERT_I32_S F32_CONVERT_I32_U F32_CONVERT_I64_S F32_CONVERT_I64_U F32_COPYSIGN F32_DEMOTE_F64 F32_DIV F32_EQ F32_FLOOR F32_GE F32_GT F32_LE F32_LOAD F32_LT F32_MAX F32_MIN F32_MUL F32_NE F32_NEAREST F32_NEG F32_REINTERPRET_I32 F32_REINTERPRET_I64 F32_SQRT F32_STORE F32_SUB F32_TRUNC
 %token F64 F64_ABS F64_ADD F64_CEIL F64_CONST F64_CONVERT_I32_S F64_CONVERT_I32_U F64_CONVERT_I64_S F64_CONVERT_I64_U F64_COPYSIGN F64_DIV F64_EQ F64_FLOOR F64_GE F64_GT F64_LE F64_LOAD F64_LT F64_MAX F64_MIN F64_MUL F64_NE F64_NEAREST F64_NEG F64_PROMOTE_F32 F64_REINTERPRET_I32 F64_REINTERPRET_I64 F64_SQRT F64_STORE F64_SUB F64_TRUNC
-%token FIELD FUNC FUNC_REF
+%token FIELD FINAL FUNC FUNC_REF
 %token GET GLOBAL GLOBAL_GET GLOBAL_SET
 %token I16 I31 I31_GET_S I31_GET_U I31_NEW I31_REF
 %token I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR
@@ -19,8 +19,8 @@
 %token OFFSET
 %token PARAM
 %token QUOTE
-%token REC REF REF_ARRAY REF_EQ REF_EXTERN REF_FUNC REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
-%token SELECT START STRUCT STRUCT_GET STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
+%token REC REF REF_ARRAY REF_AS_NON_NULL REF_CAST REF_EQ REF_EXTERN REF_FUNC REF_HOST REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REF_TEST REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RPAR
+%token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCTREF STRUCT_SET SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
 
@@ -98,7 +98,7 @@ let ref_type ==
   | NULL_REF; { Null, None_ht }
   | EQ_REF; { Null, Eq_ht }
   | I31_REF; { Null, I31_ht }
-  | STRUCT_REF; { Null, Struct_ht }
+  | STRUCTREF; { Null, Struct_ht }
   | ARRAY_REF; { Null, Array_ht }
   | FUNC_REF; { Null, Func_ht }
   | NULL_FUNC_REF; { Null, No_func_ht }
@@ -144,6 +144,9 @@ let sub_type ==
   | ~ = str_type; { Final, [], str_type }
   | LPAR; SUB; indices = list(indice); ~ = str_type; RPAR; {
     No_final, indices, str_type
+  }
+  | LPAR; SUB; FINAL; indices = list(indice); ~ = str_type; RPAR; {
+    Final, indices, str_type
   }
 
 let type_def ==
@@ -238,6 +241,11 @@ let plain_instr :=
   | DROP; { Drop }
   | BR; ~ = indice; <Br>
   | BR_IF; ~ = indice; <Br_if>
+  | BR_ON_CAST; ~ = indice; ~ = null_opt; ~ = heap_type; <Br_on_cast>
+  | BR_ON_CAST_FAIL; ~ = indice; ~ = null_opt; ~ = heap_type; <Br_on_cast_fail>
+  | BR_ON_NON_NULL; ~ = indice; <Br_on_non_null>
+  | BR_ON_NULL; ~ = indice; <Br_on_null>
+
   | BR_TABLE; l = nonempty_list(indice); {
     let xs = Array.of_list l in
     let n = Array.length xs in
@@ -420,9 +428,15 @@ let plain_instr :=
   | F32_REINTERPRET_I64; { F_reinterpret_i (S32, S64) }
   | F64_REINTERPRET_I32; { F_reinterpret_i (S64, S32) }
   | F64_REINTERPRET_I64; { F_reinterpret_i (S64, S64) }
+  (* ref *)
   | REF_NULL; ~ = heap_type; <Ref_null>
   | REF_IS_NULL; { Ref_is_null }
   | REF_FUNC; ~ = indice; <Ref_func>
+  | REF_AS_NON_NULL; { Ref_as_non_null }
+  | REF_CAST; ~ = null_opt; ~ = heap_type; <Ref_cast>
+  | REF_TEST; ~ = null_opt; ~ = heap_type; <Ref_test>
+  | REF_EQ; { Ref_eq }
+  (* i32 *)
   | I32_LOAD; memarg = memarg; { I_load (S32, memarg) }
   | I64_LOAD; memarg = memarg; { I_load (S64, memarg) }
   | F32_LOAD; memarg = memarg; { F_load (S32, memarg) }
@@ -472,9 +486,13 @@ let plain_instr :=
   | I31_GET_U; { I31_get_u }
   (* struct *)
   | STRUCT_GET; i1 = indice; i2 = indice; <Struct_get>
+  | STRUCT_GET_S; i1 = indice; i2 = indice; <Struct_get_s>
   | STRUCT_NEW_CANON; ~ = indice; <Struct_new_canon>
   | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_canon_default>
   | STRUCT_SET; i1 = indice; i2 = indice; <Struct_set>
+  (* extern *)
+  | EXTERN_EXTERNALIZE; { Extern_externalize }
+  | EXTERN_INTERNALIZE; { Extern_internalize }
 
 (* Instructions & Expressions *)
 
@@ -602,7 +620,6 @@ let block ==
     in
     block_type, r
   }
-
 
 let block_param_body :=
   | ~ = block_result_body; <>
@@ -1022,7 +1039,8 @@ let literal_const ==
   | F32_CONST; num = NUM; { Const_F32 (f32 num) }
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | REF_NULL; ~ = heap_type; <Const_null>
-  | REF_EXTERN; num = NUM; { Const_host (int_of_string num) }
+  | REF_EXTERN; num = NUM; { Const_extern (int_of_string num) }
+  | REF_HOST; num = NUM; { Const_host (int_of_string num) }
   | REF_ARRAY; { Const_array }
   | REF_EQ; { Const_eq }
   | REF_I31; { Const_i31 }
@@ -1037,6 +1055,7 @@ let const ==
 
 let result ==
   | ~ = const; <Result_const>
+  | REF_EXTERN; { Result_extern_ref }
 
 let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
