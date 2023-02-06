@@ -98,6 +98,8 @@ let f32 = Num_type F32
 
 let f64 = Num_type F64
 
+let i31 = Ref_type I31_ht
+
 let any = Any
 
 let itype = function S32 -> i32 | S64 -> i64
@@ -425,6 +427,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     (* TODO: fixme, Something is not right *)
     let* stack = Stack.pop [ Something ] stack in
     Stack.push [ i32 ] stack
+  | I31_new ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ i31 ] stack
+  | I31_get_s | I31_get_u ->
+    let* stack = Stack.pop [ i31 ] stack in
+    Stack.push [ i32 ] stack
   | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_default _
     | Array_new_canon_elem _ | Array_new_canon_fixed _ | Array_get _
     | Array_get_u _ | Array_set _ ) as i ->
@@ -491,6 +499,9 @@ let typecheck_const_instr (modul : modul) refs stack = function
     let* stack = Stack.pop [ i32; t ] stack in
     Stack.push [ Ref_type Array_ht ] stack
   | Array_new_canon_default _i -> assert false
+  | I31_new ->
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ i31 ] stack
 
 let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []

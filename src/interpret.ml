@@ -1068,9 +1068,10 @@ let exec_instr instr (state : State.exec_state) =
     let a = Array.init len (fun _i -> default) in
     st @@ Stack.push_array stack a
   | ( Array_new_canon_data _ | Array_new_canon_elem _ | Array_new_canon_fixed _
-    | Array_get _ | Array_get_u _ | Array_set _ | Array_len ) as i ->
-    failwith
-    @@ Format.asprintf "TODO (Interpret.exec_instr) %a" Simplified.Pp.instr i
+    | Array_get _ | Array_get_u _ | Array_set _ | Array_len | I31_new
+    | I31_get_s | I31_get_u ) as i ->
+    Log.debug "TODO (Interpret.exec_instr) %a" Simplified.Pp.instr i;
+    st @@ stack
 
 let rec loop (state : State.exec_state) =
   let state =

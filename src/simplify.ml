@@ -789,11 +789,14 @@ module Rewrite_indices = struct
       | F64_const f -> ok @@ F64_const f
       | I32_const i -> ok @@ I32_const i
       | I64_const i -> ok @@ I64_const i
-      | Unreachable -> ok @@ Unreachable
-      | Drop -> ok @@ Drop
-      | Nop -> ok @@ Nop
-      | Return -> ok @@ Return
-      | Array_len -> ok @@ Array_len
+      | Unreachable -> Ok Unreachable
+      | Drop -> Ok Drop
+      | Nop -> Ok Nop
+      | Return -> Ok Return
+      | I31_new -> Ok I31_new
+      | I31_get_s -> Ok I31_get_s
+      | I31_get_u -> Ok I31_get_u
+      | Array_len -> Ok Array_len
       | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_elem _
         | Array_new_canon_fixed _ | Array_get_u _ ) as i ->
         failwith
@@ -829,6 +832,7 @@ module Rewrite_indices = struct
       | Array_new_canon_default t ->
         let* t = find "unknown type" modul.type_ (Some t) in
         ok @@ Array_new_canon_default t
+      | Symbolic.I31_new -> Ok I31_new
       | i ->
         error
         @@ Format.asprintf "constant expression required, got %a"
