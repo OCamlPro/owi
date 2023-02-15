@@ -3198,10 +3198,10 @@ struct
       | <span data-count="15">S</span>ome max -&gt; Format.fprintf fmt "%d %d" min max
 
     let num_type fmt = function
-      | <span data-count="1754">I</span>32 -&gt; Format.fprintf fmt "i32"
-      | <span data-count="430">I</span>64 -&gt; Format.fprintf fmt "i64"
-      | <span data-count="428">F</span>32 -&gt; Format.fprintf fmt "f32"
-      | <span data-count="322">F</span>64 -&gt; Format.fprintf fmt "f64"
+      | <span data-count="2012">I</span>32 -&gt; Format.fprintf fmt "i32"
+      | <span data-count="488">I</span>64 -&gt; Format.fprintf fmt "i64"
+      | <span data-count="487">F</span>32 -&gt; Format.fprintf fmt "f32"
+      | <span data-count="351">F</span>64 -&gt; Format.fprintf fmt "f64"
 
     let heap_type fmt = function
       | <span data-count="0">A</span>ny_ht -&gt; Format.fprintf fmt "any"
@@ -3210,9 +3210,9 @@ struct
       | <span data-count="0">I</span>31_ht -&gt; Format.fprintf fmt "i31"
       | <span data-count="0">S</span>truct_ht -&gt; Format.fprintf fmt "struct"
       | <span data-count="0">A</span>rray_ht -&gt; Format.fprintf fmt "array"
-      | <span data-count="20">F</span>unc_ht -&gt; Format.fprintf fmt "func"
+      | <span data-count="22">F</span>unc_ht -&gt; Format.fprintf fmt "func"
       | <span data-count="0">N</span>o_func_ht -&gt; Format.fprintf fmt "nofunc"
-      | <span data-count="31">E</span>xtern_ht -&gt; Format.fprintf fmt "extern"
+      | <span data-count="34">E</span>xtern_ht -&gt; Format.fprintf fmt "extern"
       | <span data-count="0">N</span>o_extern_ht -&gt; Format.fprintf fmt "noextern"
       | <span data-count="0">D</span>ef_ht i -&gt; Format.fprintf fmt "%a" indice i
 

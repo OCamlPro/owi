@@ -159,9 +159,9 @@
 </pre>
 <pre><code class="ocaml">let ( let* ) o f = <span data-count="492505">m</span>atch o with <span data-count="486840">O</span>k v -&gt; f v | <span data-count="5665">E</span>rror _ as e -&gt; e
 
-let error v = <span data-count="1057">E</span>rror v
+let error v = <span data-count="1329">E</span>rror v
 
-let error_s format = <span data-count="1037">F</span>ormat.kasprintf error format
+let error_s format = <span data-count="1309">F</span>ormat.kasprintf error format
 
 let ok v = <span data-count="123740">O</span>k v
 
