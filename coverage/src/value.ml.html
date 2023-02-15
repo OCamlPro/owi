@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>value.ml &mdash; Coverage report</title>
-    <meta name="description" content="50.00% coverage in src/value.ml">
+    <meta name="description" content="54.69% coverage in src/value.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,14 +15,11 @@
           <span class="dirname">src/</span>value.ml
         </a>
       </h1>
-      <h2>50.00%</h2>
+      <h2>54.69%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:17.99%"></span>
       <span class="unvisited" style="top:20.86%"></span>
-      <span class="unvisited" style="top:43.88%"></span>
-      <span class="unvisited" style="top:44.60%"></span>
-      <span class="unvisited" style="top:45.32%"></span>
       <span class="unvisited" style="bottom:49.64%"></span>
       <span class="unvisited" style="bottom:48.92%"></span>
       <span class="unvisited" style="bottom:48.20%"></span>
@@ -101,9 +98,9 @@
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span class="visited"> </span>
-<a id="L61"></a><span class="unvisited"> </span>
-<a id="L62"></a><span class="unvisited"> </span>
-<a id="L63"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span class="visited"> </span>
 <a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
@@ -344,7 +341,7 @@ end = struct
     }
 
   let fresh (type t) name : t ty =
-    <span data-count="5">l</span>et module M = struct
+    <span data-count="6">l</span>et module M = struct
       type _ externref_ty += T : t externref_ty
     end in
     let test (type a) (witness : a externref_ty) : (t, a) eq option =
@@ -382,29 +379,29 @@ module Func = struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : Types.Simplified.val_type =
-    <span data-count="7">m</span>atch e with
-    | <span data-count="4">I</span>32 -&gt; Num_type I32
-    | <span data-count="0">I</span>64 -&gt; Num_type I64
-    | <span data-count="0">F</span>32 -&gt; Num_type F32
-    | <span data-count="0">F</span>64 -&gt; Num_type F64
+    <span data-count="1392">m</span>atch e with
+    | <span data-count="707">I</span>32 -&gt; Num_type I32
+    | <span data-count="113">I</span>64 -&gt; Num_type I64
+    | <span data-count="226">F</span>32 -&gt; Num_type F32
+    | <span data-count="343">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : Types.Simplified.result_type =
-    <span data-count="4">m</span>atch r with
-    | <span data-count="2">R</span>0 -&gt; []
-    | <span data-count="2">R</span>1 a -&gt; [ elt_typ<span data-count="2">e</span> a ]
+    <span data-count="1277">m</span>atch r with
+    | <span data-count="1053">R</span>0 -&gt; []
+    | <span data-count="224">R</span>1 a -&gt; [ elt_typ<span data-count="224">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; Types.Simplified.param_type =
     function
-    | <span data-count="5">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="5">e</span> hd) :: arg_typ<span data-count="5">e</span> tl
+    | <span data-count="1168">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="1168">e</span> hd) :: arg_typ<span data-count="1168">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="4">R</span>es -&gt; []
+    | <span data-count="1277">R</span>es -&gt; []
 
   let extern_type (Func (arg, res)) : Types.Simplified.func_type =
-    <span data-count="4">(</span>arg_typ<span data-count="4">e</span> arg, res_typ<span data-count="4">e</span> res)
+    <span data-count="1277">(</span>arg_typ<span data-count="1277">e</span> arg, res_typ<span data-count="1277">e</span> res)
 
   type 'env t =
     | WASM of int * Types.Simplified.func * 'env
@@ -413,14 +410,14 @@ module Func = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="5830">i</span>ncr r;
-      <span data-count="5830">!</span>r
+      <span data-count="4621">i</span>ncr r;
+      <span data-count="4621">!</span>r
 
-  let wasm func env : 'env t = <span data-count="5830">W</span>ASM (fres<span data-count="5830">h</span> (), func, env)
+  let wasm func env : 'env t = <span data-count="4621">W</span>ASM (fres<span data-count="4621">h</span> (), func, env)
 
   let typ = function
-    | <span data-count="801240">W</span>ASM (_, func, _env) -&gt; func.type_f
-    | <span data-count="4">E</span>xtern (Extern_func (t, _f)) -&gt; extern_type t
+    | <span data-count="801189">W</span>ASM (_, func, _env) -&gt; func.type_f
+    | <span data-count="1277">E</span>xtern (Extern_func (t, _f)) -&gt; extern_type t
 end
 
 type externref = E : 'a Extern_ref.ty * 'a -&gt; externref
@@ -454,7 +451,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref fmt r
 
 let ref_null' = function
-  | <span data-count="414">T</span>ypes.Simplified.Func_ht -&gt; Funcref None
+  | <span data-count="415">T</span>ypes.Simplified.Func_ht -&gt; Funcref None
   | <span data-count="59">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">_</span> -&gt; failwith "TODO ref_null' Value.ml"
 
