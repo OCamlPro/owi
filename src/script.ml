@@ -129,6 +129,9 @@ let action (link_state : Link.state) = function
     Ok [ global.value ]
 
 let run ~with_exhaustion script =
+  let state =
+    Link.extern_module "spectest_extern" Spectest.extern_m Link.empty_state
+  in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
@@ -233,7 +236,7 @@ let run ~with_exhaustion script =
         Log.debug "*** action@\n";
         let* _stack = action link_state a in
         Ok link_state )
-    Link.empty_state script
+    state script
 
 let exec ?(with_exhaustion = false) script =
   let* _link_state = run ~with_exhaustion script in
