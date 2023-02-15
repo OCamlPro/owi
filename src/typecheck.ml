@@ -454,7 +454,8 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
   let* stack = list_fold_left (typecheck_instr env) (List.rev pt) expr in
-  if not (Stack.equal rt stack) then Error "type mismatch (loop)"
+  if not (Stack.equal rt stack) then
+    error_s "type mismatch block %a" Stack.pp_error (rt, stack)
   else
     match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
     | None -> Error "type mismatch (param type)"
