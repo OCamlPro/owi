@@ -1,81 +1,146 @@
 open Types.Symbolic
 
+let extern_m : Link.extern_module =
+  let fmt = Format.std_formatter in
+  let print = () in
+  let print_i32 i = Format.fprintf fmt "%li@\n%!" i in
+  let print_i64 i = Format.fprintf fmt "%Li@\n%!" i in
+  let print_f32 f = Format.fprintf fmt "%s@\n%!" (Float32.to_string f) in
+  let print_f64 f = Format.fprintf fmt "%s@\n%!" (Float64.to_string f) in
+  let print_i32_f32 i f =
+    print_i32 i;
+    print_f32 f
+  in
+  let print_f64_f64 f1 f2 =
+    print_f64 f1;
+    print_f64 f2
+  in
+  let func = () in
+  let func_in_i32 (_i : int32) = () in
+  let func_out_i32 = 1l in
+  let func_in_i32_out_i32 (_i : int32) = 1l in
+
+  let functions =
+    [ ("print", Value.Func.Extern_func (Func (Res, R0), print))
+    ; ( "print_i32"
+      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+    ; ( "print_i64"
+      , Value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64) )
+    ; ( "print_f32"
+      , Value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32) )
+    ; ( "print_f64"
+      , Value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64) )
+    ; ( "print_i32_f32"
+      , Value.Func.Extern_func
+          (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
+    ; ( "print_f64_f64"
+      , Value.Func.Extern_func
+          (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
+    ; ("func", Value.Func.Extern_func (Func (Res, R0), func))
+    ; ( "func-i32"
+      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32) )
+    ; ("func->i32", Value.Func.Extern_func (Func (Res, R1 I32), func_out_i32))
+    ; ( "func-i32->i32"
+      , Value.Func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
+    ]
+  in
+
+  { functions }
+
 let m =
   Module
     { id = Some "spectest"
     ; fields =
-        [ MMem (Some "memory", { min = 1; max = Some 2 })
-        ; MFunc
-            { type_f = Bt_raw (None, ([], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print"
+        [ MImport
+            { modul = "spectest_extern"
+            ; name = "print"
+            ; desc = Import_func (Some "print", Bt_raw (None, ([], [])))
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_i32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_i32"
+            ; desc =
+                Import_func
+                  ( Some "print_i32"
+                  , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type I64) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_i64"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_i64"
+            ; desc =
+                Import_func
+                  ( Some "print_i64"
+                  , Bt_raw (None, ([ (None, Num_type I64) ], [])) )
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type F32) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_f32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_f32"
+            ; desc =
+                Import_func
+                  ( Some "print_f32"
+                  , Bt_raw (None, ([ (None, Num_type F32) ], [])) )
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type F64) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_f64"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_f64"
+            ; desc =
+                Import_func
+                  ( Some "print_f64"
+                  , Bt_raw (None, ([ (None, Num_type F64) ], [])) )
             }
-        ; MFunc
-            { type_f =
-                Bt_raw
-                  (None, ([ (None, Num_type I32); (None, Num_type F32) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_i32_f32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_i32_f32"
+            ; desc =
+                Import_func
+                  ( Some "print_i32_f32"
+                  , Bt_raw
+                      ( None
+                      , ([ (None, Num_type I32); (None, Num_type F32) ], []) )
+                  )
             }
-        ; MFunc
-            { type_f =
-                Bt_raw
-                  (None, ([ (None, Num_type F64); (None, Num_type F64) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "print_f64_f64"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "print_f64_f64"
+            ; desc =
+                Import_func
+                  ( Some "print_f64_f64"
+                  , Bt_raw
+                      ( None
+                      , ([ (None, Num_type F64); (None, Num_type F64) ], []) )
+                  )
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "func"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "func"
+            ; desc = Import_func (Some "func", Bt_raw (None, ([], [])))
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([ (None, Num_type I32) ], []))
-            ; locals = []
-            ; body = []
-            ; id = Some "func-i32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "func-i32"
+            ; desc =
+                Import_func
+                  ( Some "func-i32"
+                  , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
             }
-        ; MFunc
-            { type_f = Bt_raw (None, ([], [ Num_type I32 ]))
-            ; locals = []
-            ; body = [ I32_const 1l ]
-            ; id = Some "func->i32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "func->i32"
+            ; desc =
+                Import_func
+                  (Some "func->i32", Bt_raw (None, ([], [ Num_type I32 ])))
             }
-        ; MFunc
-            { type_f =
-                Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
-            ; locals = []
-            ; body = [ I32_const 1l ]
-            ; id = Some "func-i32->i32"
+        ; MImport
+            { modul = "spectest_extern"
+            ; name = "func-i32->i32"
+            ; desc =
+                Import_func
+                  ( Some "func-i32->i32"
+                  , Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
+                  )
             }
+        ; MMem (Some "memory", { min = 1; max = Some 2 })
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
         ; MGlobal
             { type_ = (Const, Num_type I32)

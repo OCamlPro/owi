@@ -5,5 +5,8 @@
 (mdx
  (libraries owi)
  (deps
-  (file extern.exe))
+  (file extern.exe)
+  (file extern.ml)
+  (file extern.wast)
+  (file print.wast))
  (files README.md))
