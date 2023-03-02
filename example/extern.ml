@@ -26,7 +26,8 @@ let extern_module : Link.extern_module =
   { functions }
 
 (* a link state that contains our custom module, available under the name `sausage` *)
-let link_state = Link.extern_module "sausage" extern_module Link.empty_state
+let link_state =
+  Link.extern_module Link.empty_state ~name:"sausage" extern_module
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
@@ -38,7 +39,7 @@ let pure_wasm_module =
 let module_to_run =
   match pure_wasm_module with
   | Types.Symbolic.Module m :: _ -> begin
-    match Compile.until_link link_state m with
+    match Compile.until_link link_state ~name:None m with
     | Error msg -> failwith msg
     | Ok (m, _state) -> m
   end

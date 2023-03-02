@@ -74,7 +74,7 @@ val script : Types.Symbolic.script =
 val m : Types.Symbolic.modul =
 ...
 # let module_to_run, link_state =
-    match Compile.until_link Link.empty_state m with
+    match Compile.until_link Link.empty_state ~name:None m with
     | Ok v -> v
     | Error e -> failwith e;;
 val module_to_run : Link.module_to_run =

@@ -97,7 +97,10 @@ val empty_state : state
 (** link a module with a given link state, producing a runnable module and a new
     link state *)
 val modul :
-  Types.Simplified.modul -> state -> (module_to_run * state, string) result
+     state
+  -> name:string option
+  -> Types.Simplified.modul
+  -> (module_to_run * state, string) result
 
 (** register a module inside a link state, producing a new link state *)
 val register_module :
@@ -108,4 +111,4 @@ type extern_module = { functions : (string * Value.Func.extern_func) list }
 
 (** register an extern module with a given link state, producing a new link
     state *)
-val extern_module : string -> extern_module -> state -> state
+val extern_module : state -> name:string -> extern_module -> state
