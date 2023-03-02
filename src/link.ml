@@ -515,7 +515,7 @@ let populate_exports env (exports : Types.Simplified.exports) :
   let* functions, names = fill_exports Env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let modul (modul : modul) (ls : state) =
+let modul (ls : state) ~name (modul : modul) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
@@ -551,19 +551,22 @@ let modul (modul : modul) (ls : state) =
   in
   let* by_id_exports = populate_exports env modul.exports in
   let by_id =
-    (* TODO: this is not the actual module name *)
     match modul.id with
     | None -> ls.by_id
     | Some id -> StringMap.add id by_id_exports ls.by_id
+  in
+  let by_name =
+    match name with
+    | None -> ls.by_name
+    | Some name -> StringMap.add name by_id_exports ls.by_name
   in
   let start = Option.map (fun start_id -> [ Call start_id ]) modul.start in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
   let module_to_run = { modul; env; to_run } in
-  Ok (module_to_run, { by_id; by_name = ls.by_name; last = Some by_id_exports })
+  Ok (module_to_run, { by_id; by_name; last = Some by_id_exports })
 
-let extern_module (name : string) (module_ : extern_module) (ls : state) : state
-    =
+let extern_module (ls : state) ~name (module_ : extern_module) =
   let functions =
     StringMap.map
       (fun f -> Value.Func.Extern f)

@@ -130,7 +130,8 @@ let action (link_state : Link.state) = function
 
 let run ~with_exhaustion script =
   let state =
-    Link.extern_module "spectest_extern" Spectest.extern_m Link.empty_state
+    Link.extern_module Link.empty_state ~name:"spectest_extern"
+      Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
@@ -142,13 +143,13 @@ let run ~with_exhaustion script =
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
-        let* link_state = Compile.until_interpret link_state m in
+        let* link_state = Compile.until_interpret link_state ~name:None m in
         Log.debug_on := debug_on;
         Ok link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
         incr curr_module;
-        let* m, link_state = Compile.until_link link_state m in
+        let* m, link_state = Compile.until_link link_state ~name:None m in
         let* () = check_error_result expected (Interpret.module_ m) in
         Ok link_state
       | Assert (Assert_malformed_binary _) ->
@@ -181,7 +182,7 @@ let run ~with_exhaustion script =
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
         let* () =
-          match Compile.until_link link_state m with
+          match Compile.until_link link_state ~name:None m with
           | Ok _ -> check_error ~expected ~got:"Ok"
           | Error got -> check_error ~expected ~got
         in
@@ -194,7 +195,8 @@ let run ~with_exhaustion script =
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.debug "*** assert_unlinkable@\n";
         let* () =
-          check_error_result expected (Compile.until_link link_state m)
+          check_error_result expected
+            (Compile.until_link link_state ~name:None m)
         in
         Ok link_state
       | Assert (Assert_malformed _) ->

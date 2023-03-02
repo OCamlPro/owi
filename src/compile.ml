@@ -11,11 +11,11 @@ let until_typecheck m =
   let* () = Typecheck.module_ m in
   Ok m
 
-let until_link link_state m =
+let until_link link_state ~name m =
   let* m = until_typecheck m in
-  Link.modul m link_state
+  Link.modul link_state ~name m
 
-let until_interpret link_state m =
-  let* m, link_state = until_link link_state m in
+let until_interpret link_state ~name m =
+  let* m, link_state = until_link link_state ~name m in
   let* () = Interpret.module_ m in
   Ok link_state
