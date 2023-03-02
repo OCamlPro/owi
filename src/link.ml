@@ -556,11 +556,16 @@ let modul (modul : modul) (ls : state) =
     | None -> ls.by_id
     | Some id -> StringMap.add id by_id_exports ls.by_id
   in
+  let by_name =
+    match modul.id with
+    | None -> ls.by_name
+    | Some id -> StringMap.add id by_id_exports ls.by_name
+  in
   let start = Option.map (fun start_id -> [ Call start_id ]) modul.start in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
   let module_to_run = { modul; env; to_run } in
-  Ok (module_to_run, { by_id; by_name = ls.by_name; last = Some by_id_exports })
+  Ok (module_to_run, { by_id; by_name; last = Some by_id_exports })
 
 let extern_module (name : string) (module_ : extern_module) (ls : state) : state
     =
