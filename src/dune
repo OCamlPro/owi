@@ -41,4 +41,5 @@
   (deps bisect.exclude)))
 
 (menhir
+ (flags --table)
  (modules menhir_parser))
