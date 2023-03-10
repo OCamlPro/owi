@@ -39,15 +39,20 @@ let debug =
   let doc = "debug mode" in
   Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
+let profiling =
+  let doc = "profiling mode" in
+  Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
+
 let script =
   let doc = "run as a reference test suite script" in
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
-let main debug script files =
+let main profiling debug script files =
   let exec =
     if script then Script.exec ~with_exhaustion:true
     else simplify_then_link_then_run
   in
+  if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let result = list_iter (run_file exec) files in
   match result with
@@ -61,7 +66,7 @@ let cli =
   let doc = "OCaml WebAssembly Interpreter" in
   let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
   let info = Cmd.info "owi" ~version:"%%VERSION%%" ~doc ~man in
-  Cmd.v info Term.(const main $ debug $ script $ files)
+  Cmd.v info Term.(const main $ profiling $ debug $ script $ files)
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 
