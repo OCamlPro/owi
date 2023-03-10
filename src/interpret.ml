@@ -374,7 +374,7 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
 type wasm_func = Simplified.func
 
 let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
-  Log.debug "calling func : func %s@."
+  Log.debug1 "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let param_type, result_type = func.type_f in
   let args, stack = Stack.pop_n state.stack (List.length param_type) in
@@ -427,8 +427,8 @@ let exec_instr instr (state : State.exec_state) =
   let env = state.env in
   let locals = state.locals in
   let st stack = { state with stack } in
-  Log.debug "stack        : [ %a ]@." Stack.pp stack;
-  Log.debug "running instr: %a@." Simplified.Pp.instr instr;
+  Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
+  Log.debug2 "running instr: %a@." Simplified.Pp.instr instr;
   match instr with
   | Return -> State.return state
   | Nop -> state
@@ -1074,7 +1074,7 @@ let exec_instr instr (state : State.exec_state) =
     | Extern_internalize | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq
     | Br_on_cast _ | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i
     ->
-    Log.debug "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i;
+    Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i;
     st @@ stack
 
 let rec loop (state : State.exec_state) =
@@ -1082,7 +1082,7 @@ let rec loop (state : State.exec_state) =
     match state.pc with
     | instr :: pc -> exec_instr instr { state with pc }
     | [] ->
-      Log.debug "stack        : [ %a ]@." Stack.pp state.stack;
+      Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
       State.end_block state
   in
   loop state
@@ -1102,7 +1102,7 @@ let exec_expr env locals stack expr bt =
   try loop state with State.Result args -> args
 
 let exec_func env (func : wasm_func) args =
-  Log.debug "calling func : func %s@."
+  Log.debug1 "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals =
     Array.of_list @@ List.rev args @ List.map init_local func.locals
@@ -1120,7 +1120,7 @@ let exec_vfunc stack (func : Env.t' Value.Func.t) =
   | exception Stack_overflow -> Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
-  Log.debug "interpreting ...@\n";
+  Log.debug0 "interpreting ...@\n";
   try
     List.iter
       (fun to_run ->
