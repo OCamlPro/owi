@@ -2,6 +2,17 @@ open Types
 open Types.Simplified
 module Env = Link.Env
 
+module Log : sig
+  [@@@ocaml.warning "-32"]
+  type do_not_use
+  include module type of Log
+  val debug : do_not_use
+end = struct
+  type do_not_use = unit
+  include Log
+  let debug = ()
+end
+
 let page_size = 65_536
 
 let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
