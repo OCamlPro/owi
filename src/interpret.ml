@@ -316,6 +316,13 @@ module State = struct
 
   type block_stack = block list
 
+  type count =
+    { name : string option
+    ; mutable enter : int
+    ; mutable instructions : int
+    ; calls : (indice, count) Hashtbl.t
+    }
+
   type exec_state =
     { return_state : exec_state option
     ; stack : stack
@@ -324,7 +331,50 @@ module State = struct
     ; block_stack : block_stack
     ; func_rt : result_type
     ; env : Env.t
+    ; count : count
     }
+
+  let rec print_count ppf count =
+    let calls ppf tbl =
+      let l =
+        List.sort (fun (id1, _) (id2, _) -> compare id1 id2)
+        @@ List.of_seq @@ Hashtbl.to_seq tbl
+      in
+      match l with
+      | [] -> ()
+      | _ :: _ ->
+        Format.fprintf ppf "@ @[<v 2>calls@ %a@]"
+          (Format.pp_print_list
+             ~pp_sep:(fun ppf () -> Format.fprintf ppf "@ ")
+             (fun ppf (id, count) ->
+               let name ppf = function
+                 | None -> ()
+                 | Some name -> Format.fprintf ppf " %s" name
+               in
+               Format.fprintf ppf "@[<v 2>id %i%a@ %a@]" id name count.name
+                 print_count count ) )
+          l
+    in
+    Format.fprintf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter
+      count.instructions calls count.calls
+
+  let empty_count name =
+    { name; enter = 0; instructions = 0; calls = Hashtbl.create 0 }
+
+  let count_instruction state =
+    state.count.instructions <- state.count.instructions + 1
+
+  let enter_function_count count func_name func =
+    let c =
+      match Hashtbl.find_opt count.calls func with
+      | None ->
+        let c = empty_count func_name in
+        Hashtbl.add count.calls func c;
+        c
+      | Some c -> c
+    in
+    c.enter <- c.enter + 1;
+    c
 
   exception Result of value list
 
@@ -373,7 +423,7 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
 
 type wasm_func = Simplified.func
 
-let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
+let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
   Log.debug1 "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let param_type, result_type = func.type_f in
@@ -393,11 +443,12 @@ let exec_func ~return (state : State.exec_state) env (func : wasm_func) =
     ; func_rt = result_type
     ; return_state
     ; env
+    ; count = enter_function_count state.count func.id id
     }
 
 let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
   match func with
-  | WASM (_, func, env) -> exec_func ~return state env func
+  | WASM (id, func, env) -> exec_func ~return ~id state env func
   | Extern f ->
     let stack = exec_extern_func state.stack f in
     let state = { state with stack } in
@@ -423,6 +474,7 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   exec_vfunc ~return state func
 
 let exec_instr instr (state : State.exec_state) =
+  State.count_instruction state;
   let stack = state.stack in
   let env = state.env in
   let locals = state.locals in
@@ -1088,6 +1140,8 @@ let rec loop (state : State.exec_state) =
   loop state
 
 let exec_expr env locals stack expr bt =
+  let count = State.empty_count (Some "start") in
+  count.enter <- count.enter + 1;
   let state : State.exec_state =
     let func_rt = match bt with None -> [] | Some rt -> rt in
     { stack
@@ -1097,9 +1151,10 @@ let exec_expr env locals stack expr bt =
     ; block_stack = []
     ; pc = expr
     ; return_state = None
+    ; count
     }
   in
-  try loop state with State.Result args -> args
+  try loop state with State.Result args -> (args, count)
 
 let exec_func env (func : wasm_func) args =
   Log.debug1 "calling func : func %s@."
@@ -1107,7 +1162,11 @@ let exec_func env (func : wasm_func) args =
   let locals =
     Array.of_list @@ List.rev args @ List.map init_local func.locals
   in
-  exec_expr env locals [] func.body (Some (snd func.type_f))
+  let res, count = exec_expr env locals [] func.body (Some (snd func.type_f)) in
+  Log.profile "Exec func %s@.Instruction count: %i@."
+    (Option.value func.id ~default:"anonymous")
+    count.instructions;
+  res
 
 let exec_vfunc stack (func : Env.t' Value.Func.t) =
   match
@@ -1124,7 +1183,12 @@ let module_ (module_ : Link.module_to_run) =
   try
     List.iter
       (fun to_run ->
-        let end_stack = exec_expr module_.env [||] Stack.empty to_run None in
+        let end_stack, count =
+          exec_expr module_.env [||] Stack.empty to_run None
+        in
+        Log.profile "Exec module %s@.%a@."
+          (Option.value module_.modul.id ~default:"anonymous")
+          State.print_count count;
         match end_stack with
         | [] -> ()
         | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
