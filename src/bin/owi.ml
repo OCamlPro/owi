@@ -7,7 +7,7 @@ let simplify_then_link_then_run file =
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
         | Types.Symbolic.Module m ->
-          let* m, state = Compile.until_link state ~name:None m in
+          let* m, state = Compile.until_link state ~optimize:false ~name:None m in
           Ok (m :: to_run, state)
         | Types.Symbolic.Register (name, id) ->
           let* state = Link.register_module state ~name ~id in
@@ -49,7 +49,7 @@ let script =
 
 let main profiling debug script files =
   let exec =
-    if script then Script.exec ~with_exhaustion:true
+    if script then Script.exec ~with_exhaustion:true ~optimize:false
     else simplify_then_link_then_run
   in
   if profiling then Log.profiling_on := true;

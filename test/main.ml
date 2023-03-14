@@ -14,7 +14,7 @@ let test_file f =
   Format.printf "testing file     : `%a`... " Fpath.pp f;
   match Owi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
-    match Owi.Script.exec script with
+    match Owi.Script.exec script ~optimize:true with
     | Ok () as ok ->
       pp_ok Format.std_formatter;
       ok

@@ -128,7 +128,7 @@ let action (link_state : Link.state) = function
     let* global = load_global_from_module link_state mod_id name in
     Ok [ global.value ]
 
-let run ~with_exhaustion script =
+let run ~with_exhaustion ~optimize script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
@@ -143,13 +143,13 @@ let run ~with_exhaustion script =
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
-        let* link_state = Compile.until_interpret link_state ~name:None m in
+        let* link_state = Compile.until_interpret link_state ~optimize ~name:None m in
         Log.debug_on := debug_on;
         Ok link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
         incr curr_module;
-        let* m, link_state = Compile.until_link link_state ~name:None m in
+        let* m, link_state = Compile.until_link link_state ~optimize ~name:None m in
         let* () = check_error_result expected (Interpret.module_ m) in
         Ok link_state
       | Assert (Assert_malformed_binary _) ->
@@ -182,7 +182,7 @@ let run ~with_exhaustion script =
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
         let* () =
-          match Compile.until_link link_state ~name:None m with
+          match Compile.until_link link_state ~optimize ~name:None m with
           | Ok _ -> check_error ~expected ~got:"Ok"
           | Error got -> check_error ~expected ~got
         in
@@ -196,7 +196,7 @@ let run ~with_exhaustion script =
         Log.debug "*** assert_unlinkable@\n";
         let* () =
           check_error_result expected
-            (Compile.until_link link_state ~name:None m)
+            (Compile.until_link link_state ~optimize ~name:None m)
         in
         Ok link_state
       | Assert (Assert_malformed _) ->
@@ -240,6 +240,6 @@ let run ~with_exhaustion script =
         Ok link_state )
     state script
 
-let exec ?(with_exhaustion = false) script =
-  let* _link_state = run ~with_exhaustion script in
+let exec ?(with_exhaustion = false) ~optimize script =
+  let* _link_state = run ~with_exhaustion ~optimize script in
   Ok ()
