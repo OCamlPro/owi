@@ -69,27 +69,27 @@
 <a href="#L20">20</a>
 <a href="#L21">21</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="13895">m</span>atch o with <span data-count="2947">E</span>rror msg -&gt; Error msg | <span data-count="10948">O</span>k v -&gt; f v
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="13925">m</span>atch o with <span data-count="2947">E</span>rror msg -&gt; Error msg | <span data-count="10978">O</span>k v -&gt; f v
 
-let until_check m = <span data-count="2886">C</span>heck.module_ m
+let until_check m = <span data-count="2891">C</span>heck.module_ m
 
 let until_simplify m =
-  <span data-count="2886">l</span>et* () = until_chec<span data-count="2886">k</span> m in
-  <span data-count="2881">S</span>implify.modul m
+  <span data-count="2891">l</span>et* () = until_chec<span data-count="2891">k</span> m in
+  <span data-count="2886">S</span>implify.modul m
 
 let until_typecheck m =
-  <span data-count="2886">l</span>et* m = until_simplif<span data-count="2886">y</span> m in
-  <span data-count="2695">l</span>et* () = Typecheck.module<span data-count="2695">_</span> m in
-  <span data-count="1415">O</span>k m
+  <span data-count="2891">l</span>et* m = until_simplif<span data-count="2891">y</span> m in
+  <span data-count="2700">l</span>et* () = Typecheck.module<span data-count="2700">_</span> m in
+  <span data-count="1420">O</span>k m
 
 let until_link link_state ~name m =
-  <span data-count="2886">l</span>et* m = until_typechec<span data-count="2886">k</span> m in
-  <span data-count="1415">L</span>ink.modul link_state ~name m
+  <span data-count="2891">l</span>et* m = until_typechec<span data-count="2891">k</span> m in
+  <span data-count="1420">L</span>ink.modul link_state ~name m
 
 let until_interpret link_state ~name m =
-  <span data-count="1271">l</span>et* m, link_state = until_lin<span data-count="1271">k</span> link_state ~name m in
-  <span data-count="1271">l</span>et* () = Interpret.module<span data-count="1271">_</span> m in
-  <span data-count="1271">O</span>k link_state
+  <span data-count="1276">l</span>et* m, link_state = until_lin<span data-count="1276">k</span> link_state ~name m in
+  <span data-count="1276">l</span>et* () = Interpret.module<span data-count="1276">_</span> m in
+  <span data-count="1276">O</span>k link_state
 </code></pre>
       </div>
     </div>

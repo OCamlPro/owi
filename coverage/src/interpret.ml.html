@@ -2630,15 +2630,15 @@ let exec_funop stack nn op =
     Stack.push_f64 stack res
 
 let exec_ibinop stack nn (op : ibinop) =
-  <span data-count="6736062">m</span>atch nn with
-  | <span data-count="1666989">S</span>32 -&gt;
+  <span data-count="6736158">m</span>atch nn with
+  | <span data-count="1667085">S</span>32 -&gt;
     let (n1, n2), stack = Stack.pop2_i32 stack in
-    <span data-count="1666989">S</span>tack.push_i32 stack
+    <span data-count="1667085">S</span>tack.push_i32 stack
       (let open Int32 in
       match op with
       | <span data-count="931419">A</span>dd -&gt; ad<span data-count="931419">d</span> n1 n2
-      | <span data-count="734844">S</span>ub -&gt; su<span data-count="734844">b</span> n1 n2
-      | <span data-count="152">M</span>ul -&gt; mu<span data-count="152">l</span> n1 n2
+      | <span data-count="734892">S</span>ub -&gt; su<span data-count="734892">b</span> n1 n2
+      | <span data-count="200">M</span>ul -&gt; mu<span data-count="200">l</span> n1 n2
       | <span data-count="65">D</span>iv s -&gt; begin
         try
           match s with
@@ -2729,14 +2729,14 @@ let exec_itestop stack nn op =
     Stack.push_bool stack res
 
 let exec_irelop stack nn (op : irelop) =
-  <span data-count="2296075">m</span>atch nn with
-  | <span data-count="2251699">S</span>32 -&gt;
+  <span data-count="2296139">m</span>atch nn with
+  | <span data-count="2251763">S</span>32 -&gt;
     let (n1, n2), stack = Stack.pop2_i32 stack in
-    <span data-count="2251699">l</span>et res =
+    <span data-count="2251763">l</span>et res =
       let open Int32 in
       match op with
-      | <span data-count="1049094">E</span>q -&gt; n1 = n2
-      | <span data-count="393240">N</span>e -&gt; n1 &lt;&gt; n2
+      | <span data-count="1049122">E</span>q -&gt; n1 = n2
+      | <span data-count="393276">N</span>e -&gt; n1 &lt;&gt; n2
       | <span data-count="706">L</span>t S -&gt; n1 &lt; n2
       | <span data-count="42">L</span>t U -&gt; lt_<span data-count="42">u</span> n1 n2
       | <span data-count="25">G</span>t S -&gt; n1 &gt; n2
@@ -2795,8 +2795,8 @@ let exec_frelop stack nn (op : frelop) =
     Stack.push_bool stack res
 
 let init_local (_id, t) : Env.t' Value.t =
-  <span data-count="387">m</span>atch t with
-  | <span data-count="125">N</span>um_type I32 -&gt; I32 Int32.zero
+  <span data-count="399">m</span>atch t with
+  | <span data-count="137">N</span>um_type I32 -&gt; I32 Int32.zero
   | <span data-count="119">N</span>um_type I64 -&gt; I64 Int64.zero
   | <span data-count="83">N</span>um_type F32 -&gt; F32 Float32.zero
   | <span data-count="57">N</span>um_type F64 -&gt; F64 Float64.zero
@@ -2805,7 +2805,7 @@ let init_local (_id, t) : Env.t' Value.t =
 (* TODO move to module Env *)
 let mem_0 = 0
 
-let ( let* ) o f = <span data-count="7683931">R</span>esult.fold ~ok:f ~error:trap o
+let ( let* ) o f = <span data-count="7683943">R</span>esult.fold ~ok:f ~error:trap o
 
 let get_memory (env : Env.t) idx =
   <span data-count="926496">l</span>et* mem = Env.get_memor<span data-count="926496">y</span> env idx in
@@ -2932,18 +2932,18 @@ module State = struct
       count.instructions calls count.calls
 
   let empty_count name =
-    <span data-count="5740841">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="5740841">e</span> 0 }
+    <span data-count="5740869">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="5740869">e</span> 0 }
 
   let count_instruction state =
-    <span data-count="56728145">s</span>tate.count.instructions &lt;- state.count.instructions + 1
+    <span data-count="56728741">s</span>tate.count.instructions &lt;- state.count.instructions + 1
 
   let enter_function_count count func_name func =
-    <span data-count="5827086">l</span>et c =
+    <span data-count="5827098">l</span>et c =
       match Hashtbl.find_opt count.calls func with
-      | <span data-count="5716332">N</span>one -&gt;
+      | <span data-count="5716344">N</span>one -&gt;
         let c = empty_count func_name in
-        <span data-count="5716332">H</span>ashtbl.add count.calls func c;
-        <span data-count="5716332">c</span>
+        <span data-count="5716344">H</span>ashtbl.add count.calls func c;
+        <span data-count="5716344">c</span>
       | <span data-count="110754">S</span>ome c -&gt; c
     in
     c.enter &lt;- c.enter + 1;
@@ -2952,43 +2952,43 @@ module State = struct
   exception Result of value list
 
   let return (state : exec_state) =
-    <span data-count="136040">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="136040">h</span> state.func_rt) in
-    <span data-count="136040">m</span>atch state.return_state with
-    | <span data-count="22106">N</span>one -&gt; raise (Result args)
-    | <span data-count="113934">S</span>ome state -&gt;
+    <span data-count="136068">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="136068">h</span> state.func_rt) in
+    <span data-count="136068">m</span>atch state.return_state with
+    | <span data-count="22122">N</span>one -&gt; raise (Result args)
+    | <span data-count="113946">S</span>ome state -&gt;
       let stack = args @ state.stack in
       { state with stack }
 
   let branch (state : exec_state) n =
-    <span data-count="920281">l</span>et block_stack = Stack.drop_n state.block_stack n in
-    <span data-count="920281">m</span>atch block_stack with
-    | <span data-count="39">[</span>] -&gt; return state
-    | <span data-count="920242">b</span>lock :: block_stack_tl -&gt;
-      let block_stack = if block.is_loop then <span data-count="919558">b</span>lock_stack else <span data-count="684">b</span>lock_stack_tl in
-      let args = Stack.keep state.stack (List.lengt<span data-count="920242">h</span> block.branch_rt) in
-      <span data-count="920242">l</span>et stack = args @ block.stack in
+    <span data-count="920315">l</span>et block_stack = Stack.drop_n state.block_stack n in
+    <span data-count="920315">m</span>atch block_stack with
+    | <span data-count="46">[</span>] -&gt; return state
+    | <span data-count="920269">b</span>lock :: block_stack_tl -&gt;
+      let block_stack = if block.is_loop then <span data-count="919585">b</span>lock_stack else <span data-count="684">b</span>lock_stack_tl in
+      let args = Stack.keep state.stack (List.lengt<span data-count="920269">h</span> block.branch_rt) in
+      <span data-count="920269">l</span>et stack = args @ block.stack in
       { state with block_stack; pc = block.branch; stack }
 
   let end_block (state : exec_state) =
-    <span data-count="771848">m</span>atch state.block_stack with
-    | <span data-count="134856">[</span>] -&gt; return state
-    | <span data-count="636992">b</span>lock :: block_stack -&gt;
-      let args = Stack.keep state.stack (List.lengt<span data-count="636992">h</span> block.continue_rt) in
-      <span data-count="636992">l</span>et stack = args @ block.stack in
+    <span data-count="771878">m</span>atch state.block_stack with
+    | <span data-count="134877">[</span>] -&gt; return state
+    | <span data-count="637001">b</span>lock :: block_stack -&gt;
+      let args = Stack.keep state.stack (List.lengt<span data-count="637001">h</span> block.continue_rt) in
+      <span data-count="637001">l</span>et stack = args @ block.stack in
       { state with block_stack; pc = block.continue; stack }
 end
 
 let exec_block (state : State.exec_state) ~is_loop bt expr =
-  <span data-count="6876666">l</span>et pt, rt =
-    match bt with <span data-count="1051120">N</span>one -&gt; ([], []) | <span data-count="5825546">S</span>ome (pt, rt) -&gt; (List.ma<span data-count="5825546">p</span> snd pt, rt)
+  <span data-count="6876675">l</span>et pt, rt =
+    match bt with <span data-count="1051126">N</span>one -&gt; ([], []) | <span data-count="5825549">S</span>ome (pt, rt) -&gt; (List.ma<span data-count="5825549">p</span> snd pt, rt)
   in
   let block : State.block =
-    let branch_rt, branch = if is_loop then <span data-count="503">(</span>pt, expr) else <span data-count="6876163">(</span>rt, state.pc) in
+    let branch_rt, branch = if is_loop then <span data-count="512">(</span>pt, expr) else <span data-count="6876163">(</span>rt, state.pc) in
     { branch
     ; branch_rt
     ; continue = state.pc
     ; continue_rt = rt
-    ; stack = Stack.drop_<span data-count="6876666">n</span> state.stack (List.lengt<span data-count="6876666">h</span> pt)
+    ; stack = Stack.drop_<span data-count="6876675">n</span> state.stack (List.lengt<span data-count="6876675">h</span> pt)
     ; is_loop
     }
   in
@@ -2997,18 +2997,18 @@ let exec_block (state : State.exec_state) ~is_loop bt expr =
 type wasm_func = Simplified.func
 
 let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
-  <span data-count="5827086">L</span>og.debug1 "calling func : func %s@."
-    (Option.valu<span data-count="5827086">e</span> func.id ~default:"anonymous");
-  <span data-count="5827086">l</span>et param_type, result_type = func.type_f in
-  let args, stack = Stack.pop_n state.stack (List.lengt<span data-count="5827086">h</span> param_type) in
-  <span data-count="5827086">l</span>et return_state =
-    if return then <span data-count="5713146">s</span>tate.return_state else <span data-count="113940">S</span>ome { state with stack }
+  <span data-count="5827098">L</span>og.debug1 "calling func : func %s@."
+    (Option.valu<span data-count="5827098">e</span> func.id ~default:"anonymous");
+  <span data-count="5827098">l</span>et param_type, result_type = func.type_f in
+  let args, stack = Stack.pop_n state.stack (List.lengt<span data-count="5827098">h</span> param_type) in
+  <span data-count="5827098">l</span>et return_state =
+    if return then <span data-count="5713146">s</span>tate.return_state else <span data-count="113952">S</span>ome { state with stack }
   in
   let env = Lazy.force env in
-  <span data-count="5827086">l</span>et locals =
-    Array.of_list @@ List.re<span data-count="5827086">v</span> args @ List.ma<span data-count="5827086">p</span> init_local func.locals
+  <span data-count="5827098">l</span>et locals =
+    Array.of_list @@ List.re<span data-count="5827098">v</span> args @ List.ma<span data-count="5827098">p</span> init_local func.locals
   in
-  <span data-count="5827086">S</span>tate.
+  <span data-count="5827098">S</span>tate.
     { stack = []
     ; locals
     ; pc = func.body
@@ -3016,12 +3016,12 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
     ; func_rt = result_type
     ; return_state
     ; env
-    ; count = enter_function_coun<span data-count="5827086">t</span> state.count func.id id
+    ; count = enter_function_coun<span data-count="5827098">t</span> state.count func.id id
     }
 
 let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
-  <span data-count="5827124">m</span>atch func with
-  | <span data-count="5827086">W</span>ASM (id, func, env) -&gt; exec_func ~return ~id state env func
+  <span data-count="5827136">m</span>atch func with
+  | <span data-count="5827098">W</span>ASM (id, func, env) -&gt; exec_func ~return ~id state env func
   | <span data-count="38">E</span>xtern f -&gt;
     let stack = exec_extern_func state.stack f in
     <span data-count="38">l</span>et state = { state with stack } in
@@ -3047,27 +3047,27 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   <span data-count="801020">e</span>xec_vfunc ~return state func
 
 let exec_instr instr (state : State.exec_state) =
-  <span data-count="56728145">S</span>tate.count_instruction state;
-  <span data-count="56728145">l</span>et stack = state.stack in
+  <span data-count="56728741">S</span>tate.count_instruction state;
+  <span data-count="56728741">l</span>et stack = state.stack in
   let env = state.env in
   let locals = state.locals in
-  let st stack = <span data-count="42312613">{</span> state with stack } in
+  let st stack = <span data-count="42313124">{</span> state with stack } in
   Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-  <span data-count="56728145">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
-  <span data-count="56728145">m</span>atch instr with
+  <span data-count="56728741">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
+  <span data-count="56728741">m</span>atch instr with
   | <span data-count="1145">R</span>eturn -&gt; State.return state
   | <span data-count="206">N</span>op -&gt; state
   | <span data-count="73">U</span>nreachable -&gt; trap "unreachable"
-  | <span data-count="2891479">I</span>32_const n -&gt; st @@ Stack.push_i3<span data-count="2891479">2</span> stack n
+  | <span data-count="2891591">I</span>32_const n -&gt; st @@ Stack.push_i3<span data-count="2891591">2</span> stack n
   | <span data-count="5112876">I</span>64_const n -&gt; st @@ Stack.push_i6<span data-count="5112876">4</span> stack n
   | <span data-count="57463">F</span>32_const f -&gt; st @@ Stack.push_f3<span data-count="57463">2</span> stack f
   | <span data-count="56153">F</span>64_const f -&gt; st @@ Stack.push_f6<span data-count="56153">4</span> stack f
   | <span data-count="55">I</span>_unop (nn, op) -&gt; st @@ exec_iuno<span data-count="55">p</span> stack nn op
   | <span data-count="606">F</span>_unop (nn, op) -&gt; st @@ exec_funo<span data-count="606">p</span> stack nn op
-  | <span data-count="6736062">I</span>_binop (nn, op) -&gt; st @@ exec_ibino<span data-count="6736018">p</span> stack nn op
+  | <span data-count="6736158">I</span>_binop (nn, op) -&gt; st @@ exec_ibino<span data-count="6736114">p</span> stack nn op
   | <span data-count="77418">F</span>_binop (nn, op) -&gt; st @@ exec_fbino<span data-count="77418">p</span> stack nn op
   | <span data-count="5714409">I</span>_testop (nn, op) -&gt; st @@ exec_itesto<span data-count="5714409">p</span> stack nn op
-  | <span data-count="2296075">I</span>_relop (nn, op) -&gt; st @@ exec_irelo<span data-count="2296075">p</span> stack nn op
+  | <span data-count="2296139">I</span>_relop (nn, op) -&gt; st @@ exec_irelo<span data-count="2296139">p</span> stack nn op
   | <span data-count="50432">F</span>_relop (nn, op) -&gt; st @@ exec_frelo<span data-count="50432">p</span> stack nn op
   | <span data-count="14">I</span>_extend8_s nn -&gt; begin
     match nn with
@@ -3278,29 +3278,29 @@ let exec_instr instr (state : State.exec_state) =
     let* f = Env.get_fun<span data-count="9">c</span> env i in
     <span data-count="9">s</span>t @@ Stack.pus<span data-count="9">h</span> stack (Value.ref_fun<span data-count="9">c</span> f)
   | <span data-count="314">D</span>rop -&gt; st @@ Stack.dro<span data-count="314">p</span> stack
-  | <span data-count="17072740">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="17072740">h</span> stack locals.(i)
-  | <span data-count="1315895">L</span>ocal_set i -&gt;
+  | <span data-count="17072910">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="17072910">h</span> stack locals.(i)
+  | <span data-count="1315925">L</span>ocal_set i -&gt;
     let v, stack = Stack.pop stack in
-    <span data-count="1315895">l</span>ocals.(i) &lt;- v;
-    <span data-count="1315895">s</span>t @@ stack
+    <span data-count="1315925">l</span>ocals.(i) &lt;- v;
+    <span data-count="1315925">s</span>t @@ stack
   | <span data-count="6874591">I</span>f_else (_id, bt, e1, e2) -&gt;
     let b, stack = Stack.pop_bool stack in
     <span data-count="6874591">l</span>et state = { state with stack } in
     exec_block state ~is_loop:false bt (if b then <span data-count="580230">e</span>1 else <span data-count="6294361">e</span>2)
-  | <span data-count="24605">C</span>all i -&gt; begin
-    let* func = Env.get_fun<span data-count="24605">c</span> env i in
-    <span data-count="24605">e</span>xec_vfunc ~return:false state func
+  | <span data-count="24617">C</span>all i -&gt; begin
+    let* func = Env.get_fun<span data-count="24617">c</span> env i in
+    <span data-count="24617">e</span>xec_vfunc ~return:false state func
   end
   | <span data-count="5001499">R</span>eturn_call i -&gt; begin
     let* func = Env.get_fun<span data-count="5001499">c</span> env i in
     <span data-count="5001499">e</span>xec_vfunc ~return:true state func
   end
   | <span data-count="525281">B</span>r i -&gt; State.branch state i
-  | <span data-count="1182399">B</span>r_if i -&gt;
+  | <span data-count="1182463">B</span>r_if i -&gt;
     let b, stack = Stack.pop_bool stack in
-    <span data-count="1182399">l</span>et state = { state with stack } in
-    if b then <span data-count="394692">S</span>tate.branch state i else <span data-count="787707">s</span>tate
-  | <span data-count="503">L</span>oop (_id, bt, e) -&gt; exec_block state ~is_loop:true bt e
+    <span data-count="1182463">l</span>et state = { state with stack } in
+    if b then <span data-count="394726">S</span>tate.branch state i else <span data-count="787737">s</span>tate
+  | <span data-count="512">L</span>oop (_id, bt, e) -&gt; exec_block state ~is_loop:true bt e
   | <span data-count="1572">B</span>lock (_id, bt, e) -&gt; exec_block state ~is_loop:false bt e
   | <span data-count="39">M</span>emory_size -&gt;
     let* mem, _max = get_memor<span data-count="39">y</span> env mem_0 in
@@ -3370,10 +3370,10 @@ let exec_instr instr (state : State.exec_state) =
     <span data-count="231">l</span>et o2, stack = Stack.pop stack in
     <span data-count="231">l</span>et o1, stack = Stack.pop stack in
     <span data-count="231">s</span>t @@ Stack.pus<span data-count="231">h</span> stack (if b then <span data-count="117">o</span>1 else <span data-count="114">o</span>2)
-  | <span data-count="1910">L</span>ocal_tee i -&gt;
+  | <span data-count="1949">L</span>ocal_tee i -&gt;
     let v, stack = Stack.pop stack in
-    <span data-count="1910">l</span>ocals.(i) &lt;- v;
-    <span data-count="1910">s</span>t @@ Stack.pus<span data-count="1910">h</span> stack v
+    <span data-count="1949">l</span>ocals.(i) &lt;- v;
+    <span data-count="1949">s</span>t @@ Stack.pus<span data-count="1949">h</span> stack v
   | <span data-count="91">G</span>lobal_get i -&gt;
     let* g = Env.get_globa<span data-count="91">l</span> env i in
     <span data-count="91">s</span>t @@ Stack.pus<span data-count="91">h</span> stack g.value
@@ -3703,20 +3703,20 @@ let exec_instr instr (state : State.exec_state) =
     <span data-count="0">s</span>t @@ stack
 
 let rec loop (state : State.exec_state) =
-  <span data-count="57499993">l</span>et state =
+  <span data-count="57500619">l</span>et state =
     match state.pc with
-    | <span data-count="56728145">i</span>nstr :: pc -&gt; exec_inst<span data-count="56725205">r</span> instr { state with pc }
-    | <span data-count="771848">[</span>] -&gt;
+    | <span data-count="56728741">i</span>nstr :: pc -&gt; exec_inst<span data-count="56725797">r</span> instr { state with pc }
+    | <span data-count="771878">[</span>] -&gt;
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
-      <span data-count="771848">S</span>tate.end_bloc<span data-count="750279">k</span> state
+      <span data-count="771878">S</span>tate.end_bloc<span data-count="750297">k</span> state
   in
   loop state
 
 let exec_expr env locals stack expr bt =
-  <span data-count="24509">l</span>et count = State.empty_count (Some "start") in
-  <span data-count="24509">c</span>ount.enter &lt;- count.enter + 1;
+  <span data-count="24525">l</span>et count = State.empty_count (Some "start") in
+  <span data-count="24525">c</span>ount.enter &lt;- count.enter + 1;
   let state : State.exec_state =
-    let func_rt = match bt with <span data-count="497">N</span>one -&gt; [] | <span data-count="24012">S</span>ome rt -&gt; rt in
+    let func_rt = match bt with <span data-count="497">N</span>one -&gt; [] | <span data-count="24028">S</span>ome rt -&gt; rt in
     { stack
     ; locals
     ; env
@@ -3727,33 +3727,33 @@ let exec_expr env locals stack expr bt =
     ; count
     }
   in
-  try loo<span data-count="0">p</span> state with <span data-count="22106">S</span>tate.Result args -&gt; (args, count)
+  try loo<span data-count="0">p</span> state with <span data-count="22122">S</span>tate.Result args -&gt; (args, count)
 
 let exec_func env (func : wasm_func) args =
-  <span data-count="24012">L</span>og.debug1 "calling func : func %s@."
-    (Option.valu<span data-count="24012">e</span> func.id ~default:"anonymous");
-  <span data-count="24012">l</span>et locals =
-    Array.of_list @@ List.re<span data-count="24012">v</span> args @ List.ma<span data-count="24012">p</span> init_local func.locals
+  <span data-count="24028">L</span>og.debug1 "calling func : func %s@."
+    (Option.valu<span data-count="24028">e</span> func.id ~default:"anonymous");
+  <span data-count="24028">l</span>et locals =
+    Array.of_list @@ List.re<span data-count="24028">v</span> args @ List.ma<span data-count="24028">p</span> init_local func.locals
   in
-  <span data-count="24012">l</span>et res, count = exec_expr env locals [] func.body (Some (sn<span data-count="24012">d</span> func.type_f)) in
-  <span data-count="21643">L</span>og.profile "Exec func %s@.Instruction count: %i@."
-    (Option.valu<span data-count="21643">e</span> func.id ~default:"anonymous")
+  <span data-count="24028">l</span>et res, count = exec_expr env locals [] func.body (Some (sn<span data-count="24028">d</span> func.type_f)) in
+  <span data-count="21659">L</span>og.profile "Exec func %s@.Instruction count: %i@."
+    (Option.valu<span data-count="21659">e</span> func.id ~default:"anonymous")
     count.instructions;
-  <span data-count="21643">r</span>es
+  <span data-count="21659">r</span>es
 
 let exec_vfunc stack (func : Env.t' Value.Func.t) =
-  <span data-count="24012">m</span>atch
+  <span data-count="24028">m</span>atch
     match func with
-    | <span data-count="24012">W</span>ASM (_, func, env) -&gt; exec_fun<span data-count="21643">c</span> (Lazy.forc<span data-count="24012">e</span> env) func stack
+    | <span data-count="24028">W</span>ASM (_, func, env) -&gt; exec_fun<span data-count="21659">c</span> (Lazy.forc<span data-count="24028">e</span> env) func stack
     | <span data-count="0">E</span>xtern f -&gt; exec_extern_fun<span data-count="0">c</span> stack f
   with
-  | <span data-count="21643">r</span>esult -&gt; Ok result
+  | <span data-count="21659">r</span>esult -&gt; Ok result
   | <span data-count="2369">e</span>xception Trap msg -&gt; Error msg
   | <span data-count="0">e</span>xception Stack_overflow -&gt; Error "call stack exhausted"
 
 let module_ (module_ : Link.module_to_run) =
-  <span data-count="1308">L</span>og.debug0 "interpreting ...@\n";
-  <span data-count="1308">t</span>ry
+  <span data-count="1313">L</span>og.debug0 "interpreting ...@\n";
+  <span data-count="1313">t</span>ry
     List.iter
       (fun to_run -&gt;
         <span data-count="497">l</span>et end_stack, count =
@@ -3767,7 +3767,7 @@ let module_ (module_ : Link.module_to_run) =
         | <span data-count="0">_</span> :: _ -&gt; Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
       module_.to_run;
-    <span data-count="1274">O</span>k ()
+    <span data-count="1279">O</span>k ()
   with
   | <span data-count="34">T</span>rap msg -&gt; Error msg
   | <span data-count="0">S</span>tack_overflow -&gt; Error "call stack exhausted"

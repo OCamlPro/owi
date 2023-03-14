@@ -3614,13 +3614,13 @@ module Symbolic = struct
 
   include Make (Arg)
 
-  let symbolic v = <span data-count="6591">A</span>rg.Symbolic v
+  let symbolic v = <span data-count="6626">A</span>rg.Symbolic v
 
-  let raw v = <span data-count="38245">A</span>rg.Raw v
+  let raw v = <span data-count="38253">A</span>rg.Raw v
 
-  let bt_ind i = <span data-count="6802">A</span>rg.Bt_ind i
+  let bt_ind i = <span data-count="6806">A</span>rg.Bt_ind i
 
-  let bt_raw i t = <span data-count="7638">A</span>rg.Bt_raw (i, t)
+  let bt_raw i t = <span data-count="7643">A</span>rg.Bt_raw (i, t)
 
   type global =
     { type_ : global_type
@@ -3905,7 +3905,7 @@ end = struct
     }
 
   let fold f v acc =
-    <span data-count="10849">L</span>ist.fold_left (fun acc v -&gt; <span data-count="15891">f</span> v.index v.value acc) acc v.values
+    <span data-count="10884">L</span>ist.fold_left (fun acc v -&gt; <span data-count="15927">f</span> v.index v.value acc) acc v.values
 
   let iter f v = <span data-count="0">L</span>ist.iter (fun v -&gt; <span data-count="0">f</span> v.index v.value) v.values
 end
