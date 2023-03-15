@@ -14,8 +14,7 @@ let until_typecheck m =
 
 let until_optimize ~optimize m =
   let* m = until_typecheck m in
-  if optimize then Ok (Optimize.modul m)
-  else Ok m
+  if optimize then Ok (Optimize.modul m) else Ok m
 
 let until_link link_state ~optimize ~name m =
   let* m = until_optimize ~optimize m in

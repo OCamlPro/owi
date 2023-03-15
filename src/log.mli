@@ -14,7 +14,8 @@ val debug0 : (unit, Format.formatter, unit) format -> unit
 
 val debug1 : ('a -> unit, Format.formatter, unit) format -> 'a -> unit
 
-val debug2 : ('a -> 'b -> unit, Format.formatter, unit) format -> 'a -> 'b -> unit
+val debug2 :
+  ('a -> 'b -> unit, Format.formatter, unit) format -> 'a -> 'b -> unit
 
 (** print some debug info *)
 val debug : ('a, Format.formatter, unit) format -> 'a

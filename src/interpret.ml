@@ -4,12 +4,17 @@ module Env = Link.Env
 
 module Log : sig
   [@@@ocaml.warning "-32"]
+
   type do_not_use
+
   include module type of Log
+
   val debug : do_not_use
 end = struct
   type do_not_use = unit
+
   include Log
+
   let debug = ()
 end
 
@@ -73,60 +78,60 @@ let exec_ibinop stack nn (op : ibinop) =
     let (n1, n2), stack = Stack.pop2_i32 stack in
     Stack.push_i32 stack
       (let open Int32 in
-      match op with
-      | Add -> add n1 n2
-      | Sub -> sub n1 n2
-      | Mul -> mul n1 n2
-      | Div s -> begin
-        try
-          match s with
-          | S ->
-            if n1 = Int32.min_int && n2 = -1l then trap "integer overflow";
-            div n1 n2
-          | U -> unsigned_div n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | Rem s -> begin
-        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | And -> logand n1 n2
-      | Or -> logor n1 n2
-      | Xor -> logxor n1 n2
-      | Shl -> shl n1 n2
-      | Shr S -> shr_s n1 n2
-      | Shr U -> shr_u n1 n2
-      | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2 )
+       match op with
+       | Add -> add n1 n2
+       | Sub -> sub n1 n2
+       | Mul -> mul n1 n2
+       | Div s -> begin
+         try
+           match s with
+           | S ->
+             if n1 = Int32.min_int && n2 = -1l then trap "integer overflow";
+             div n1 n2
+           | U -> unsigned_div n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | Rem s -> begin
+         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | And -> logand n1 n2
+       | Or -> logor n1 n2
+       | Xor -> logxor n1 n2
+       | Shl -> shl n1 n2
+       | Shr S -> shr_s n1 n2
+       | Shr U -> shr_u n1 n2
+       | Rotl -> rotl n1 n2
+       | Rotr -> rotr n1 n2 )
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
       (let open Int64 in
-      match op with
-      | Add -> add n1 n2
-      | Sub -> sub n1 n2
-      | Mul -> mul n1 n2
-      | Div s -> begin
-        try
-          match s with
-          | S ->
-            if n1 = Int64.min_int && n2 = -1L then trap "integer overflow";
-            div n1 n2
-          | U -> unsigned_div n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | Rem s -> begin
-        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | And -> logand n1 n2
-      | Or -> logor n1 n2
-      | Xor -> logxor n1 n2
-      | Shl -> shl n1 n2
-      | Shr S -> shr_s n1 n2
-      | Shr U -> shr_u n1 n2
-      | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2 )
+       match op with
+       | Add -> add n1 n2
+       | Sub -> sub n1 n2
+       | Mul -> mul n1 n2
+       | Div s -> begin
+         try
+           match s with
+           | S ->
+             if n1 = Int64.min_int && n2 = -1L then trap "integer overflow";
+             div n1 n2
+           | U -> unsigned_div n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | Rem s -> begin
+         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | And -> logand n1 n2
+       | Or -> logor n1 n2
+       | Xor -> logxor n1 n2
+       | Shl -> shl n1 n2
+       | Shr S -> shr_s n1 n2
+       | Shr U -> shr_u n1 n2
+       | Rotl -> rotl n1 n2
+       | Rotr -> rotr n1 n2 )
 
 let exec_fbinop stack nn (op : fbinop) =
   match nn with
@@ -134,26 +139,26 @@ let exec_fbinop stack nn (op : fbinop) =
     let (f1, f2), stack = Stack.pop2_f32 stack in
     Stack.push_f32 stack
       (let open Float32 in
-      match op with
-      | Add -> add f1 f2
-      | Sub -> sub f1 f2
-      | Mul -> mul f1 f2
-      | Div -> div f1 f2
-      | Min -> min f1 f2
-      | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2 )
+       match op with
+       | Add -> add f1 f2
+       | Sub -> sub f1 f2
+       | Mul -> mul f1 f2
+       | Div -> div f1 f2
+       | Min -> min f1 f2
+       | Max -> max f1 f2
+       | Copysign -> copy_sign f1 f2 )
   | S64 ->
     let (f1, f2), stack = Stack.pop2_f64 stack in
     Stack.push_f64 stack
       (let open Float64 in
-      match op with
-      | Add -> add f1 f2
-      | Sub -> sub f1 f2
-      | Mul -> mul f1 f2
-      | Div -> div f1 f2
-      | Min -> min f1 f2
-      | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2 )
+       match op with
+       | Add -> add f1 f2
+       | Sub -> sub f1 f2
+       | Mul -> mul f1 f2
+       | Div -> div f1 f2
+       | Min -> min f1 f2
+       | Max -> max f1 f2
+       | Copysign -> copy_sign f1 f2 )
 
 let exec_itestop stack nn op =
   match nn with

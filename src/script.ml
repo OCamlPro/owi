@@ -143,13 +143,17 @@ let run ~with_exhaustion ~optimize script =
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
-        let* link_state = Compile.until_interpret link_state ~optimize ~name:None m in
+        let* link_state =
+          Compile.until_interpret link_state ~optimize ~name:None m
+        in
         Log.debug_on := debug_on;
         Ok link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
         incr curr_module;
-        let* m, link_state = Compile.until_link link_state ~optimize ~name:None m in
+        let* m, link_state =
+          Compile.until_link link_state ~optimize ~name:None m
+        in
         let* () = check_error_result expected (Interpret.module_ m) in
         Ok link_state
       | Assert (Assert_malformed_binary _) ->

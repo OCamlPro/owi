@@ -1105,7 +1105,9 @@ end = struct
 
   let iter f v = List.iter (fun v -> f v.index v.value) v.values
 
-  let map f v = let values = List.map f v.values in { v with values }
+  let map f v =
+    let values = List.map f v.values in
+    { v with values }
 end
 
 module Simplified = struct

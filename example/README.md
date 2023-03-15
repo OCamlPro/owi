@@ -105,7 +105,7 @@ let pure_wasm_module =
 let module_to_run =
   match pure_wasm_module with
   | Types.Symbolic.Module m :: _ -> begin
-    match Compile.until_link link_state ~name:None m with
+    match Compile.until_link link_state ~optimize:true ~name:None m with
     | Error msg -> failwith msg
     | Ok (m, _state) -> m
   end
