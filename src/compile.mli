@@ -1,8 +1,7 @@
 (** Utility functions to compile a module until a given step. *)
 
 val until_simplify :
-  optimize:bool
-  -> Types.Symbolic.modul
+  Types.Symbolic.modul
   -> (Types.Simplified.modul, string) result
 
 (** compile a module with a given link state and produce a new link state and a
