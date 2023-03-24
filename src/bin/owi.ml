@@ -1,15 +1,13 @@
 open Owi
 open Syntax
 
-let simplify_then_link_then_run file =
+let simplify_then_link_then_run ~optimize file =
   let* to_run, _link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
         | Types.Symbolic.Module m ->
-          let* m, state =
-            Compile.until_link state ~optimize:false ~name:None m
-          in
+          let* m, state = Compile.until_link state ~optimize ~name:None m in
           Ok (m :: to_run, state)
         | Types.Symbolic.Register (name, id) ->
           let* state = Link.register_module state ~name ~id in
@@ -56,7 +54,7 @@ let script =
 let main profiling debug script optimize files =
   let exec =
     if script then Script.exec ~with_exhaustion:true ~optimize
-    else simplify_then_link_then_run
+    else simplify_then_link_then_run ~optimize
   in
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;

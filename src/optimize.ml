@@ -33,18 +33,144 @@ let rec optimize_expr expr =
         optimize_expr (Value.to_instr result :: tl)
       | _ -> assert false
     end
-  (* TODO ? another binary/unary ops *)
+  | ((I32_const _ | I64_const _) as x) :: I_unop (nn, op) :: tl ->
+    let result = Interpret.exec_iunop [ Value.of_instr x ] nn op in
+    begin
+      match result with
+      | [ ((I32 _ | I64 _) as result) ] ->
+        optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((F32_const _ | F64_const _) as x) :: F_unop (nn, op) :: tl ->
+    let result = Interpret.exec_funop [ Value.of_instr x ] nn op in
+    begin
+      match result with
+      | [ ((F32 _ | F64 _) as result) ] ->
+        optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((I32_const _ | I64_const _) as x) :: I_testop (nn, op) :: tl ->
+    let result = Interpret.exec_itestop [ Value.of_instr x ] nn op in
+    begin
+      match result with
+      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((I32_const _ | I64_const _) as x)
+    :: ((I32_const _ | I64_const _) as y)
+    :: I_relop (nn, op)
+    :: tl ->
+    let result =
+      Interpret.exec_irelop [ Value.of_instr y; Value.of_instr x ] nn op
+    in
+    begin
+      match result with
+      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((F32_const _ | F64_const _) as x)
+    :: ((F32_const _ | F64_const _) as y)
+    :: F_relop (nn, op)
+    :: tl ->
+    let result =
+      Interpret.exec_frelop [ Value.of_instr y; Value.of_instr x ] nn op
+    in
+    begin
+      match result with
+      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | I32_const c :: I_extend8_s S32 :: tl ->
+    optimize_expr (I32_const (Int32.extend_s 8 c) :: tl)
+  | I64_const c :: I_extend8_s S64 :: tl ->
+    optimize_expr (I64_const (Int64.extend_s 8 c) :: tl)
+  | I32_const c :: I_extend16_s S32 :: tl ->
+    optimize_expr (I32_const (Int32.extend_s 16 c) :: tl)
+  | I64_const c :: I_extend16_s S64 :: tl ->
+    optimize_expr (I64_const (Int64.extend_s 16 c) :: tl)
+  | I64_const c :: I64_extend32_s :: tl ->
+    optimize_expr (I64_const (Int64.extend_s 32 c) :: tl)
+  | I64_const c :: I32_wrap_i64 :: tl ->
+    optimize_expr (I32_const (Convert.Int32.wrap_i64 c) :: tl)
+  | I32_const c :: I64_extend_i32 s :: tl -> begin
+    match s with
+    | S -> optimize_expr (I64_const (Convert.Int64.extend_i32_s c) :: tl)
+    | U -> optimize_expr (I64_const (Convert.Int64.extend_i32_u c) :: tl)
+  end
+  | F64_const c :: F32_demote_f64 :: tl ->
+    optimize_expr (F32_const (Convert.Float32.demote_f64 c) :: tl)
+  | F32_const c :: F64_promote_f32 :: tl ->
+    optimize_expr (F64_const (Convert.Float64.promote_f32 c) :: tl)
+  | ((F32_const _ | F64_const _) as x)
+    :: ((F32_const _ | F64_const _) as y)
+    :: (I_trunc_f (nn, nn', sx) as i_truncf)
+    :: tl -> begin
+    try
+      let result =
+        Interpret.exec_itruncf [ Value.of_instr y; Value.of_instr x ] nn nn' sx
+      in
+      begin
+        match result with
+        | [ ((I32 _ | I64 _) as result) ] ->
+          optimize_expr (Value.to_instr result :: tl)
+        | _ -> assert false
+      end
+    with Trap _ -> x :: optimize_expr (y :: i_truncf :: tl)
+  end
+  | ((F32_const _ | F64_const _) as x)
+    :: ((F32_const _ | F64_const _) as y)
+    :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
+    :: tl -> begin
+    try
+      let result =
+        Interpret.exec_itruncsatf
+          [ Value.of_instr y; Value.of_instr x ]
+          nn nn' sx
+      in
+      begin
+        match result with
+        | [ ((I32 _ | I64 _) as result) ] ->
+          optimize_expr (Value.to_instr result :: tl)
+        | _ -> assert false
+      end
+    with Trap _ -> x :: optimize_expr (y :: i_truncsatf :: tl)
+  end
+  | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
+    let result = Interpret.exec_fconverti [ Value.of_instr x ] nn nn' sx in
+    begin
+      match result with
+      | [ ((F32 _ | F64 _) as result) ] ->
+        optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((F32_const _ | F64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl ->
+    let result = Interpret.exec_ireinterpretf [ Value.of_instr x ] nn nn' in
+    begin
+      match result with
+      | [ ((I32 _ | I64 _) as result) ] ->
+        optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
+  | ((I32_const _ | I64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl ->
+    let result = Interpret.exec_freinterpreti [ Value.of_instr x ] nn nn' in
+    begin
+      match result with
+      | [ ((F32 _ | F64 _) as result) ] ->
+        optimize_expr (Value.to_instr result :: tl)
+      | _ -> assert false
+    end
   | (I32_const _ | I64_const _ | F32_const _ | F64_const _) :: Drop :: tl ->
     optimize_expr tl
   | Local_set x :: Local_get y :: tl when x = y ->
     optimize_expr (Local_tee x :: tl)
   | (Br _ as br) :: _tl -> [ br ]
-  | (I32_const c as const) :: (Br_if _ as brif) :: tl -> begin
-    match c with 0l -> optimize_expr tl | _ -> [ const; brif ]
+  | I32_const c :: Br_if l :: tl -> begin
+    match c with 0l -> optimize_expr tl | _ -> [ Br l ]
   end
   | Return :: _tl -> [ Return ]
   | (Return_call _ as rc) :: _tl -> [ rc ]
   | (Return_call_indirect _ as rci) :: _tl -> [ rci ]
+  | Ref_null _ :: Ref_is_null :: tl -> optimize_expr (I32_const 1l :: tl)
   | Nop :: tl -> optimize_expr tl
   | ((I32_const _ | I64_const _ | F32_const _ | F64_const _) as v1)
     :: ((I32_const _ | I64_const _ | F32_const _ | F64_const _) as v2)
@@ -62,6 +188,10 @@ let rec optimize_expr expr =
     | [] -> optimize_expr tl
     | oe -> Loop (n, bt, oe) :: optimize_expr tl
   end
+  | I32_const 0l :: If_else (n, bt, _e1, e2) :: tl ->
+    optimize_expr (Block (n, bt, e2) :: tl)
+  | I32_const _ :: If_else (n, bt, e1, _e2) :: tl ->
+    optimize_expr (Block (n, bt, e1) :: tl)
   | If_else (n, bt, e1, e2) :: tl -> begin
     match (optimize_expr e1, optimize_expr e2) with
     | [], [] -> Drop :: optimize_expr tl
