@@ -10,11 +10,13 @@ let pp_ok fmt = Format.fprintf fmt "%a !@." pp_green "OK"
 
 let pp_error fmt msg = Format.fprintf fmt "%a: %s !@." pp_red "FAILED" msg
 
-let test_file f =
-  Format.printf "testing file     : `%a`... " Fpath.pp f;
+let test_file ~optimize f =
+  Format.printf "testing %s: `%a`... "
+    (if optimize then "optimized file" else "file          ")
+    Fpath.pp f;
   match Owi.Parse.from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
-    match Owi.Script.exec script ~optimize:true with
+    match Owi.Script.exec script ~optimize with
     | Ok () as ok ->
       pp_ok Format.std_formatter;
       ok
@@ -29,23 +31,33 @@ let test_file f =
 
 let test_directory d =
   let count_error = ref 0 in
-  Format.printf "testing directory: `%a`@." Fpath.pp d;
+  Format.printf "testing directory     : `%a`@." Fpath.pp d;
   match Bos.OS.Dir.contents ~rel:false d with
   | Ok l ->
     List.iter
       (fun file ->
         incr count_total;
-        match test_file file with
-        | Ok () -> ()
-        | Error _e ->
-          incr count_error;
-          incr count_total_failed )
+        begin
+          match test_file ~optimize:false file with
+          | Ok () -> ()
+          | Error _e ->
+            incr count_error;
+            incr count_total_failed
+        end;
+        incr count_total;
+        begin
+          match test_file ~optimize:true file with
+          | Ok () -> ()
+          | Error _e ->
+            incr count_error;
+            incr count_total_failed
+        end )
       (List.sort compare l);
     if !count_error > 0 then
-      Error (Format.sprintf "%d test failed !" !count_error)
+      Error (Format.sprintf "%d test failed" !count_error)
     else Ok ()
   | Error (`Msg e) ->
-    Format.eprintf "error      : %s@." e;
+    pp_error Format.std_formatter e;
     Error e
 
 let () =
@@ -54,21 +66,21 @@ let () =
     match test_directory Fpath.(v "passing") with
     | Ok () -> ()
     | Error e ->
-      Format.eprintf "error            : %s@." e;
+      pp_error Format.std_formatter e;
       has_error := true
   end;
   begin
     match test_directory Fpath.(v "reference") with
     | Ok () -> ()
     | Error e ->
-      Format.eprintf "error: %s@." e;
+      pp_error Format.std_formatter e;
       has_error := true
   end;
   if Option.is_some @@ Sys.getenv_opt "OWIGC" then begin
     match test_directory Fpath.(v "gc") with
     | Ok () -> ()
     | Error e ->
-      Format.eprintf "error: %s@." e;
+      pp_error Format.std_formatter e;
       has_error := true
   end;
   Format.printf "results : %d / %d !@."
