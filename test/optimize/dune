@@ -1,0 +1,2 @@
+(cram
+  (deps ../../src/bin/owi.exe i32.wast))
