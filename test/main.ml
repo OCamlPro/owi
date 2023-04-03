@@ -21,12 +21,12 @@ let test_file ~optimize f =
       pp_ok Format.std_formatter;
       ok
     | Error msg as error ->
-      pp_error Format.std_formatter msg;
+      pp_error Format.err_formatter msg;
       error
   end
   | Error msg as e ->
     let msg = String.concat " | " @@ String.split_on_char '\n' msg in
-    pp_error Format.std_formatter msg;
+    pp_error Format.err_formatter msg;
     e
 
 let test_directory d =
@@ -57,7 +57,7 @@ let test_directory d =
       Error (Format.sprintf "%d test failed" !count_error)
     else Ok ()
   | Error (`Msg e) ->
-    pp_error Format.std_formatter e;
+    pp_error Format.err_formatter e;
     Error e
 
 let () =
@@ -66,21 +66,21 @@ let () =
     match test_directory Fpath.(v "passing") with
     | Ok () -> ()
     | Error e ->
-      pp_error Format.std_formatter e;
+      pp_error Format.err_formatter e;
       has_error := true
   end;
   begin
     match test_directory Fpath.(v "reference") with
     | Ok () -> ()
     | Error e ->
-      pp_error Format.std_formatter e;
+      pp_error Format.err_formatter e;
       has_error := true
   end;
   if Option.is_some @@ Sys.getenv_opt "OWIGC" then begin
     match test_directory Fpath.(v "gc") with
     | Ok () -> ()
     | Error e ->
-      pp_error Format.std_formatter e;
+      pp_error Format.err_formatter e;
       has_error := true
   end;
   Format.printf "results : %d / %d !@."

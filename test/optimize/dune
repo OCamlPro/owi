@@ -1,0 +1,7 @@
+(cram
+  (deps %{bin:owi}
+    binop.wast block_loop.wast br.wast convert.wast demote_promote.wast drop.wast
+    extend_wrap.wast fbinop.wast ibinop.wast if.wast ref_nop.wast
+    reinterpret.wast relop_testop.wast return.wast select.wast tee.wast
+    trunc.wast unop.wast
+  ))

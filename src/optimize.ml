@@ -101,13 +101,12 @@ let rec optimize_expr expr =
     optimize_expr (F32_const (Convert.Float32.demote_f64 c) :: tl)
   | F32_const c :: F64_promote_f32 :: tl ->
     optimize_expr (F64_const (Convert.Float64.promote_f32 c) :: tl)
-  | ((F32_const _ | F64_const _) as x)
-    :: ((F32_const _ | F64_const _) as y)
+  | ((F32_const _ | F64_const _) as c)
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
     try
       let result =
-        Interpret.exec_itruncf [ Value.of_instr y; Value.of_instr x ] nn nn' sx
+        Interpret.exec_itruncf [ Value.of_instr c ] nn nn' sx
       in
       begin
         match result with
@@ -115,17 +114,14 @@ let rec optimize_expr expr =
           optimize_expr (Value.to_instr result :: tl)
         | _ -> assert false
       end
-    with Trap _ -> x :: optimize_expr (y :: i_truncf :: tl)
+    with Trap _ -> c :: optimize_expr (i_truncf :: tl)
   end
-  | ((F32_const _ | F64_const _) as x)
-    :: ((F32_const _ | F64_const _) as y)
+  | ((F32_const _ | F64_const _) as c)
     :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
     :: tl -> begin
     try
       let result =
-        Interpret.exec_itruncsatf
-          [ Value.of_instr y; Value.of_instr x ]
-          nn nn' sx
+        Interpret.exec_itruncsatf [ Value.of_instr c ] nn nn' sx
       in
       begin
         match result with
@@ -133,7 +129,7 @@ let rec optimize_expr expr =
           optimize_expr (Value.to_instr result :: tl)
         | _ -> assert false
       end
-    with Trap _ -> x :: optimize_expr (y :: i_truncsatf :: tl)
+    with Trap _ -> c :: optimize_expr (i_truncsatf :: tl)
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
     let result = Interpret.exec_fconverti [ Value.of_instr x ] nn nn' sx in

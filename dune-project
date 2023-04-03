@@ -4,6 +4,8 @@
 
 (using mdx 0.2)
 
+(cram enable)
+
 (name owi)
 
 (license ISC)
