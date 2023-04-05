@@ -159,19 +159,19 @@ let from_lexbuf =
     MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.script
   in
   <span data-count="6">f</span>un buf -&gt;
-    <span data-count="693">l</span>et provider () =
-      <span data-count="679394">l</span>et tok = Lexer.token buf in
-      <span data-count="679213">l</span>et start, stop = Sedlexing.lexing_positions buf in
-      <span data-count="679213">(</span>tok, start, stop)
+    <span data-count="1390">l</span>et provider () =
+      <span data-count="1360169">l</span>et tok = Lexer.token buf in
+      <span data-count="1359807">l</span>et start, stop = Sedlexing.lexing_positions buf in
+      <span data-count="1359807">(</span>tok, start, stop)
     in
-    try Ok (parse<span data-count="174">r</span> provider) with
-    | <span data-count="67">M</span>enhir_parser.Error -&gt;
+    try Ok (parse<span data-count="352">r</span> provider) with
+    | <span data-count="134">M</span>enhir_parser.Error -&gt;
       let start, _stop = Sedlexing.lexing_positions buf in
-      <span data-count="67">L</span>og.debug "File %s, line %i, character %i:@." start.pos_fname
+      <span data-count="134">L</span>og.debug "File %s, line %i, character %i:@." start.pos_fname
         start.pos_lnum
         (start.pos_cnum - start.pos_bol);
-      <span data-count="67">E</span>rror "unexpected token"
-    | <span data-count="181">L</span>exer.Error (pos, msg) -&gt;
+      <span data-count="134">E</span>rror "unexpected token"
+    | <span data-count="362">L</span>exer.Error (pos, msg) -&gt;
       if !Log.debug_on then <span data-count="0">b</span>egin
         let file_line =
           let cpos = pos.pos_cnum - pos.pos_bol in
@@ -181,32 +181,32 @@ let from_lexbuf =
         let msg = Printf.sprintf "Error: Lexing error %s" msg in
         <span data-count="0">L</span>og.debu<span data-count="0">g</span> "%s\n%s\n" file_line msg
       end;
-      <span data-count="181">E</span>rror "unknown operator"
-    | <span data-count="271">F</span>ailure msg -&gt;
+      <span data-count="362">E</span>rror "unknown operator"
+    | <span data-count="542">F</span>ailure msg -&gt;
       if !Log.debug_on then <span data-count="0">b</span>egin
         let msg = Printf.sprintf "Error: Lexing error %s" msg in
         <span data-count="0">L</span>og.debu<span data-count="0">g</span> "%s\n" msg
       end;
-      <span data-count="271">E</span>rror msg
+      <span data-count="542">E</span>rror msg
 
 (** Parse a script from a string. *)
-let from_string s = <span data-count="578">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="578">g</span> s)
+let from_string s = <span data-count="1156">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1156">g</span> s)
 
 (** Parse a script from a channel. *)
 let from_channel c = <span data-count="0">f</span>rom_lexbuf (Sedlexing.Utf8.from_channe<span data-count="0">l</span> c)
 
 (** Parse a script from a file. *)
 let from_file ~filename =
-  <span data-count="115">l</span>et chan = open_in filename in
-  <span data-count="115">l</span>et result =
+  <span data-count="234">l</span>et chan = open_in filename in
+  <span data-count="234">l</span>et result =
     Fun.protect
-      ~finally:(fun () -&gt; <span data-count="115">c</span>lose_in chan)
+      ~finally:(fun () -&gt; <span data-count="234">c</span>lose_in chan)
       (fun () -&gt;
-        <span data-count="115">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-        <span data-count="115">S</span>edlexing.set_filename lb filename;
-        <span data-count="115">f</span>rom_lexbuf lb )
+        <span data-count="234">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+        <span data-count="234">S</span>edlexing.set_filename lb filename;
+        <span data-count="234">f</span>rom_lexbuf lb )
   in
-  <span data-count="115">r</span>esult
+  <span data-count="234">r</span>esult
 </code></pre>
       </div>
     </div>

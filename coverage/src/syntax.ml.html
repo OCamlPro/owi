@@ -157,56 +157,56 @@
 <a href="#L61">61</a>
 <a href="#L62">62</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="488729">m</span>atch o with <span data-count="483064">O</span>k v -&gt; f v | <span data-count="5665">E</span>rror _ as e -&gt; e
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="981511">m</span>atch o with <span data-count="970181">O</span>k v -&gt; f v | <span data-count="11330">E</span>rror _ as e -&gt; e
 
-let error v = <span data-count="1329">E</span>rror v
+let error v = <span data-count="2658">E</span>rror v
 
-let error_s format = <span data-count="1309">F</span>ormat.kasprintf error format
+let error_s format = <span data-count="2618">F</span>ormat.kasprintf error format
 
-let ok v = <span data-count="121239">O</span>k v
+let ok v = <span data-count="243870">O</span>k v
 
 let list_iter f l =
-  <span data-count="11721">l</span>et exception E of string in
+  <span data-count="23555">l</span>et exception E of string in
   try
     List.iter
-      (fun v -&gt; <span data-count="3853">m</span>atch f v with <span data-count="29">E</span>rror msg -&gt; raise (E msg) | <span data-count="3824">O</span>k () -&gt; ())
+      (fun v -&gt; <span data-count="7731">m</span>atch f v with <span data-count="58">E</span>rror msg -&gt; raise (E msg) | <span data-count="7673">O</span>k () -&gt; ())
       l;
-    <span data-count="11692">O</span>k ()
-  with <span data-count="29">E</span> msg -&gt; Error msg
+    <span data-count="23497">O</span>k ()
+  with <span data-count="58">E</span> msg -&gt; Error msg
 
 let list_map f l =
-  <span data-count="36625">l</span>et exception E of string in
+  <span data-count="73532">l</span>et exception E of string in
   try
-    o<span data-count="36237">k</span>
-    @@ List.ma<span data-count="36237">p</span> (fun v -&gt; <span data-count="52574">m</span>atch f v with <span data-count="388">E</span>rror s -&gt; raise (E s) | <span data-count="52186">O</span>k v -&gt; v) l
-  with <span data-count="388">E</span> s -&gt; Error s
+    o<span data-count="72756">k</span>
+    @@ List.ma<span data-count="72756">p</span> (fun v -&gt; <span data-count="105727">m</span>atch f v with <span data-count="776">E</span>rror s -&gt; raise (E s) | <span data-count="104951">O</span>k v -&gt; v) l
+  with <span data-count="776">E</span> s -&gt; Error s
 
 let list_fold_left f acc l =
-  <span data-count="39994">L</span>ist.fold_left
+  <span data-count="80391">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="95793">l</span>et* acc in
-      <span data-count="95176">f</span> acc v )
+      <span data-count="192550">l</span>et* acc in
+      <span data-count="191316">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =
-  <span data-count="174">l</span>et exception E of string in
+  <span data-count="348">l</span>et exception E of string in
   try
-    for i = 0 to Array.lengt<span data-count="174">h</span> a - 1 do
-      <span data-count="24810">m</span>atch f (Array.unsafe_ge<span data-count="24810">t</span> a i) with
-      | <span data-count="5">E</span>rror msg -&gt; raise (E msg)
-      | <span data-count="24805">O</span>k () -&gt; ()
+    for i = 0 to Array.lengt<span data-count="348">h</span> a - 1 do
+      <span data-count="49620">m</span>atch f (Array.unsafe_ge<span data-count="49620">t</span> a i) with
+      | <span data-count="10">E</span>rror msg -&gt; raise (E msg)
+      | <span data-count="49610">O</span>k () -&gt; ()
     done;
     Ok ()
-  with <span data-count="5">E</span> msg -&gt; Error msg
+  with <span data-count="10">E</span> msg -&gt; Error msg
 
 let array_map f a =
-  <span data-count="210">l</span>et exception E of string in
+  <span data-count="420">l</span>et exception E of string in
   try
-    o<span data-count="208">k</span>
-    @@ Array.ini<span data-count="208">t</span> (Array.lengt<span data-count="210">h</span> a) (fun i -&gt;
-         <span data-count="24826">l</span>et v = Array.get a i in
-         <span data-count="24826">m</span>atch f v with <span data-count="2">E</span>rror s -&gt; raise (E s) | <span data-count="24824">O</span>k v -&gt; v )
-  with <span data-count="2">E</span> s -&gt; Error s
+    o<span data-count="416">k</span>
+    @@ Array.ini<span data-count="416">t</span> (Array.lengt<span data-count="420">h</span> a) (fun i -&gt;
+         <span data-count="49652">l</span>et v = Array.get a i in
+         <span data-count="49652">m</span>atch f v with <span data-count="4">E</span>rror s -&gt; raise (E s) | <span data-count="49648">O</span>k v -&gt; v )
+  with <span data-count="4">E</span> s -&gt; Error s
 
 let array_fold_left f acc a =
   <span data-count="0">l</span>et exception E of string in

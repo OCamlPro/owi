@@ -714,21 +714,21 @@ let of_float = Int64.bits_of_float
 
 let to_float = Int64.float_of_bits
 
-let of_bits x = <span data-count="622">x</span>
+let of_bits x = <span data-count="1244">x</span>
 
-let to_bits x = <span data-count="1058">x</span>
+let to_bits x = <span data-count="2116">x</span>
 
-let is_inf x = <span data-count="11692">x</span> = pos_in<span data-count="8">f</span> || x = neg_in<span data-count="0">f</span>
+let is_inf x = <span data-count="23412">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
 
 let is_nan x =
-  <span data-count="1446">l</span>et xf = Int64.float_of_bits x in
-  <span data-count="1446">x</span>f &lt;&gt; xf
+  <span data-count="2892">l</span>et xf = Int64.float_of_bits x in
+  <span data-count="2892">x</span>f &lt;&gt; xf
 
 (*
  * When the result of an arithmetic operation is NaN, the most significant
  * bit of the significand field is set.
  *)
-let canonicalize_nan x = <span data-count="962">I</span>nt64.logor x pos_nan
+let canonicalize_nan x = <span data-count="1924">I</span>nt64.logor x pos_nan
 
 (*
  * When the result of a binary operation is NaN, the resulting NaN is computed
@@ -742,7 +742,7 @@ let determine_binary_nan x y =
    * when neither is NaN, we can nondeterministically pick whether to return
    * pos_nan or neg_nan.
    *)
-  <span data-count="930">l</span>et nan = if is_nan x then <span data-count="503">x</span> else <span data-count="427">i</span>f is_nan y then <span data-count="393">y</span> else <span data-count="34">p</span>os_nan in
+  <span data-count="1860">l</span>et nan = if is_nan x then <span data-count="1006">x</span> else <span data-count="854">i</span>f is_nan y then <span data-count="786">y</span> else <span data-count="68">p</span>os_nan in
   canonicalize_nan nan
 
 (*
@@ -756,137 +756,137 @@ let determine_unary_nan x =
    * operand is not NaN, we can nondeterministically pick whether to return
    * pos_nan or neg_nan.
    *)
-  <span data-count="32">l</span>et nan = if is_nan x then <span data-count="20">x</span> else <span data-count="12">p</span>os_nan in
+  <span data-count="64">l</span>et nan = if is_nan x then <span data-count="40">x</span> else <span data-count="24">p</span>os_nan in
   canonicalize_nan nan
 
 let binary x op y =
-  <span data-count="37335">l</span>et xf = to_float x in
-  <span data-count="37335">l</span>et yf = to_float y in
-  <span data-count="37335">l</span>et t = op xf yf in
-  <span data-count="37335">i</span>f t = t then <span data-count="36693">o</span>f_float t else <span data-count="642">d</span>etermine_binary_nan x y
+  <span data-count="74672">l</span>et xf = to_float x in
+  <span data-count="74672">l</span>et yf = to_float y in
+  <span data-count="74672">l</span>et t = op xf yf in
+  <span data-count="74672">i</span>f t = t then <span data-count="73388">o</span>f_float t else <span data-count="1284">d</span>etermine_binary_nan x y
 
 let unary op x =
-  <span data-count="157">l</span>et t = op (to_floa<span data-count="157">t</span> x) in
-  <span data-count="157">i</span>f t = t then <span data-count="133">o</span>f_float t else <span data-count="24">d</span>etermine_unary_nan x
+  <span data-count="314">l</span>et t = op (to_floa<span data-count="314">t</span> x) in
+  <span data-count="314">i</span>f t = t then <span data-count="266">o</span>f_float t else <span data-count="48">d</span>etermine_unary_nan x
 
 let zero = of_floa<span data-count="6">t</span> 0.0
 
-let add x y = <span data-count="12486">b</span>inary x ( +. ) y
+let add x y = <span data-count="24972">b</span>inary x ( +. ) y
 
-let sub x y = <span data-count="23418">b</span>inary x ( -. ) y
+let sub x y = <span data-count="46836">b</span>inary x ( -. ) y
 
-let mul x y = <span data-count="749">b</span>inary x ( *. ) y
+let mul x y = <span data-count="1498">b</span>inary x ( *. ) y
 
-let div x y = <span data-count="682">b</span>inary x ( /. ) y
+let div x y = <span data-count="1366">b</span>inary x ( /. ) y
 
-let sqrt x = <span data-count="106">u</span>nary Stdlib.sqrt x
+let sqrt x = <span data-count="212">u</span>nary Stdlib.sqrt x
 
-let ceil x = <span data-count="26">u</span>nary Stdlib.ceil x
+let ceil x = <span data-count="52">u</span>nary Stdlib.ceil x
 
-let floor x = <span data-count="25">u</span>nary Stdlib.floor x
+let floor x = <span data-count="50">u</span>nary Stdlib.floor x
 
 let trunc x =
-  <span data-count="22">l</span>et xf = to_float x in
+  <span data-count="44">l</span>et xf = to_float x in
   (* preserve the sign of zero *)
-  <span data-count="22">i</span>f xf = 0.0 then <span data-count="2">x</span>
+  <span data-count="44">i</span>f xf = 0.0 then <span data-count="4">x</span>
   else
     (* trunc is either ceil or floor depending on which one is toward zero *)
-    <span data-count="20">l</span>et f = if xf &lt; 0.0 then <span data-count="8">S</span>tdlib.cei<span data-count="8">l</span> xf else <span data-count="12">S</span>tdlib.floo<span data-count="12">r</span> xf in
+    <span data-count="40">l</span>et f = if xf &lt; 0.0 then <span data-count="16">S</span>tdlib.cei<span data-count="16">l</span> xf else <span data-count="24">S</span>tdlib.floo<span data-count="24">r</span> xf in
     let result = of_float f in
-    <span data-count="20">i</span>f is_nan result then <span data-count="4">d</span>etermine_unary_nan result else <span data-count="16">r</span>esult
+    <span data-count="40">i</span>f is_nan result then <span data-count="8">d</span>etermine_unary_nan result else <span data-count="32">r</span>esult
 
 let nearest x =
-  <span data-count="29">l</span>et xf = to_float x in
+  <span data-count="58">l</span>et xf = to_float x in
   (* preserve the sign of zero *)
-  <span data-count="29">i</span>f xf = 0.0 then <span data-count="2">x</span>
+  <span data-count="58">i</span>f xf = 0.0 then <span data-count="4">x</span>
   else
     (* nearest is either ceil or floor depending on which is nearest or even *)
-    <span data-count="27">l</span>et u = Stdlib.ceil xf in
-    <span data-count="27">l</span>et d = Stdlib.floor xf in
-    <span data-count="27">l</span>et um = abs_float (xf -. u) in
-    <span data-count="27">l</span>et dm = abs_float (xf -. d) in
-    <span data-count="27">l</span>et u_or_d =
-      um &lt; d<span data-count="3">m</span>
+    <span data-count="54">l</span>et u = Stdlib.ceil xf in
+    <span data-count="54">l</span>et d = Stdlib.floor xf in
+    <span data-count="54">l</span>et um = abs_float (xf -. u) in
+    <span data-count="54">l</span>et dm = abs_float (xf -. d) in
+    <span data-count="54">l</span>et u_or_d =
+      um &lt; d<span data-count="6">m</span>
       || um = dm
          &amp;&amp;
-         <span data-count="14">l</span>et h = u /. 2. in
-         Stdlib.floo<span data-count="14">r</span> h = <span data-count="7">h</span>
+         <span data-count="28">l</span>et h = u /. 2. in
+         Stdlib.floo<span data-count="28">r</span> h = <span data-count="14">h</span>
     in
-    let f = if u_or_d then <span data-count="10">u</span> else <span data-count="17">d</span> in
+    let f = if u_or_d then <span data-count="20">u</span> else <span data-count="34">d</span> in
     let result = of_float f in
-    <span data-count="27">i</span>f is_nan result then <span data-count="4">d</span>etermine_unary_nan result else <span data-count="23">r</span>esult
+    <span data-count="54">i</span>f is_nan result then <span data-count="8">d</span>etermine_unary_nan result else <span data-count="46">r</span>esult
 
 let min x y =
-  <span data-count="401">l</span>et xf = to_float x in
-  <span data-count="401">l</span>et yf = to_float y in
+  <span data-count="802">l</span>et xf = to_float x in
+  <span data-count="802">l</span>et yf = to_float y in
   (* min -0 0 is -0 *)
-  <span data-count="401">i</span>f xf = yf then <span data-count="18">I</span>nt64.logor x y
-  else <span data-count="383">i</span>f xf &lt; yf then <span data-count="120">x</span>
-  else <span data-count="263">i</span>f xf &gt; yf then <span data-count="119">y</span>
-  else <span data-count="144">d</span>etermine_binary_nan x y
+  <span data-count="802">i</span>f xf = yf then <span data-count="36">I</span>nt64.logor x y
+  else <span data-count="766">i</span>f xf &lt; yf then <span data-count="240">x</span>
+  else <span data-count="526">i</span>f xf &gt; yf then <span data-count="238">y</span>
+  else <span data-count="288">d</span>etermine_binary_nan x y
 
 let max x y =
-  <span data-count="401">l</span>et xf = to_float x in
-  <span data-count="401">l</span>et yf = to_float y in
+  <span data-count="802">l</span>et xf = to_float x in
+  <span data-count="802">l</span>et yf = to_float y in
   (* max -0 0 is 0 *)
-  <span data-count="401">i</span>f xf = yf then <span data-count="18">I</span>nt64.logand x y
-  else <span data-count="383">i</span>f xf &gt; yf then <span data-count="119">x</span>
-  else <span data-count="264">i</span>f xf &lt; yf then <span data-count="120">y</span>
-  else <span data-count="144">d</span>etermine_binary_nan x y
+  <span data-count="802">i</span>f xf = yf then <span data-count="36">I</span>nt64.logand x y
+  else <span data-count="766">i</span>f xf &gt; yf then <span data-count="238">x</span>
+  else <span data-count="528">i</span>f xf &lt; yf then <span data-count="240">y</span>
+  else <span data-count="288">d</span>etermine_binary_nan x y
 
 (* abs, neg, copysign are purely bitwise operations, even on NaN values *)
-let abs x = <span data-count="359">I</span>nt64.logand x Int64.max_int
+let abs x = <span data-count="718">I</span>nt64.logand x Int64.max_int
 
-let neg x = <span data-count="7088">I</span>nt64.logxor x Int64.min_int
+let neg x = <span data-count="14176">I</span>nt64.logxor x Int64.min_int
 
-let copy_sign x y = <span data-count="329">I</span>nt64.logor (ab<span data-count="329">s</span> x) (Int64.logan<span data-count="329">d</span> y Int64.min_int)
+let copy_sign x y = <span data-count="658">I</span>nt64.logor (ab<span data-count="658">s</span> x) (Int64.logan<span data-count="658">d</span> y Int64.min_int)
 
-let eq x y = <span data-count="490">t</span>o_floa<span data-count="490">t</span> x = to_floa<span data-count="490">t</span> y
+let eq x y = <span data-count="982">t</span>o_floa<span data-count="982">t</span> x = to_floa<span data-count="982">t</span> y
 
-let ne x y = <span data-count="623">t</span>o_floa<span data-count="623">t</span> x &lt;&gt; to_floa<span data-count="623">t</span> y
+let ne x y = <span data-count="1248">t</span>o_floa<span data-count="1248">t</span> x &lt;&gt; to_floa<span data-count="1248">t</span> y
 
-let lt x y = <span data-count="428">t</span>o_floa<span data-count="428">t</span> x &lt; to_floa<span data-count="428">t</span> y
+let lt x y = <span data-count="858">t</span>o_floa<span data-count="858">t</span> x &lt; to_floa<span data-count="858">t</span> y
 
-let gt x y = <span data-count="477">t</span>o_floa<span data-count="477">t</span> x &gt; to_floa<span data-count="477">t</span> y
+let gt x y = <span data-count="956">t</span>o_floa<span data-count="956">t</span> x &gt; to_floa<span data-count="956">t</span> y
 
-let le x y = <span data-count="22448">t</span>o_floa<span data-count="22448">t</span> x &lt;= to_floa<span data-count="22448">t</span> y
+let le x y = <span data-count="44898">t</span>o_floa<span data-count="44898">t</span> x &lt;= to_floa<span data-count="44898">t</span> y
 
-let ge x y = <span data-count="424">t</span>o_floa<span data-count="424">t</span> x &gt;= to_floa<span data-count="424">t</span> y
+let ge x y = <span data-count="850">t</span>o_floa<span data-count="850">t</span> x &gt;= to_floa<span data-count="850">t</span> y
 
 (*
  * Compare mantissa of two floats in string representation (hex or dec).
  * This is a gross hack to detect rounding during parsing of floats.
  *)
-let is_hex c = <span data-count="319421">(</span>'0' &lt;= c &amp;&amp; <span data-count="311974">c</span> &lt;= '9'<span data-count="237273">)</span> || ('A' &lt;= c &amp;&amp; <span data-count="74701">c</span> &lt;= 'F'<span data-count="53829">)</span>
+let is_hex c = <span data-count="639002">(</span>'0' &lt;= c &amp;&amp; <span data-count="624108">c</span> &lt;= '9'<span data-count="474706">)</span> || ('A' &lt;= c &amp;&amp; <span data-count="149402">c</span> &lt;= 'F'<span data-count="107658">)</span>
 
-let is_exp hex c = <span data-count="639198">c</span> = if hex then <span data-count="631338">'</span>P' else <span data-count="7860">'</span>E'
+let is_exp hex c = <span data-count="1278716">c</span> = if hex then <span data-count="1262892">'</span>P' else <span data-count="15824">'</span>E'
 
-let at_end hex s i = <span data-count="664877">i</span> = String.lengt<span data-count="664877">h</span> <span data-count="25679">s</span> || is_exp hex s.[i]
+let at_end hex s i = <span data-count="1330194">i</span> = String.lengt<span data-count="1330194">h</span> <span data-count="51478">s</span> || is_exp hex s.[i]
 
 let rec skip_non_hex s i =
   (* to skip sign, 'x', '.', '_', etc. *)
-  <span data-count="343161">i</span>f at_en<span data-count="343161">d</span> true s <span data-count="23740">i</span> || is_he<span data-count="319421">x</span> s.[i<span data-count="291102">]</span> then <span data-count="314842">i</span> else <span data-count="28319">s</span>kip_non_hex s (i + 1)
+  <span data-count="686542">i</span>f at_en<span data-count="686542">d</span> true s <span data-count="47540">i</span> || is_he<span data-count="639002">x</span> s.[i<span data-count="582364">]</span> then <span data-count="629904">i</span> else <span data-count="56638">s</span>kip_non_hex s (i + 1)
 
 let rec skip_zeroes s i =
-  <span data-count="163896">l</span>et i' = skip_non_hex s i in
-  <span data-count="163896">i</span>f at_en<span data-count="163896">d</span> true s i<span data-count="7684">'</span> || s.[i'] &lt;&gt; '0<span data-count="32994">'</span> then <span data-count="40678">i</span>' else <span data-count="123218">s</span>kip_zeroes s (i' + 1)
+  <span data-count="327852">l</span>et i' = skip_non_hex s i in
+  <span data-count="327852">i</span>f at_en<span data-count="327852">d</span> true s i<span data-count="15372">'</span> || s.[i'] &lt;&gt; '0<span data-count="66040">'</span> then <span data-count="81412">i</span>' else <span data-count="246440">s</span>kip_zeroes s (i' + 1)
 
 let rec compare_mantissa_str' hex s1 i1 s2 i2 =
-  <span data-count="75473">l</span>et i1' = skip_non_hex s1 i1 in
-  <span data-count="75473">l</span>et i2' = skip_non_hex s2 i2 in
-  <span data-count="75473">m</span>atch (at_en<span data-count="75473">d</span> hex s1 i1', at_en<span data-count="75473">d</span> hex s2 i2') with
-  | <span data-count="4634">t</span>rue, true -&gt; 0
-  | <span data-count="6538">t</span>rue, false -&gt; if at_end hex s2 (skip_zeroe<span data-count="6538">s</span> s2 i2') then <span data-count="3891">0</span> else <span data-count="2647">-</span>1
-  | <span data-count="336">f</span>alse, true -&gt; if at_end hex s1 (skip_zeroe<span data-count="336">s</span> s1 i1') then <span data-count="294">0</span> else <span data-count="42">1</span>
-  | <span data-count="63965">f</span>alse, false -&gt; (
+  <span data-count="151026">l</span>et i1' = skip_non_hex s1 i1 in
+  <span data-count="151026">l</span>et i2' = skip_non_hex s2 i2 in
+  <span data-count="151026">m</span>atch (at_en<span data-count="151026">d</span> hex s1 i1', at_en<span data-count="151026">d</span> hex s2 i2') with
+  | <span data-count="9296">t</span>rue, true -&gt; 0
+  | <span data-count="13076">t</span>rue, false -&gt; if at_end hex s2 (skip_zeroe<span data-count="13076">s</span> s2 i2') then <span data-count="7782">0</span> else <span data-count="5294">-</span>1
+  | <span data-count="672">f</span>alse, true -&gt; if at_end hex s1 (skip_zeroe<span data-count="672">s</span> s1 i1') then <span data-count="588">0</span> else <span data-count="84">1</span>
+  | <span data-count="127982">f</span>alse, false -&gt; (
     match compare s1.[i1'] s2.[i2'] with
-    | <span data-count="63789">0</span> -&gt; compare_mantissa_str' hex s1 (i1' + 1) s2 (i2' + 1)
-    | <span data-count="176">n</span> -&gt; n )
+    | <span data-count="127630">0</span> -&gt; compare_mantissa_str' hex s1 (i1' + 1) s2 (i2' + 1)
+    | <span data-count="352">n</span> -&gt; n )
 
 let compare_mantissa_str hex s1 s2 =
-  <span data-count="11684">l</span>et s1' = String.uppercase_ascii s1 in
-  <span data-count="11684">l</span>et s2' = String.uppercase_ascii s2 in
-  <span data-count="11684">c</span>ompare_mantissa_str' hex s1' (skip_zeroe<span data-count="11684">s</span> s1' 0) s2' (skip_zeroe<span data-count="11684">s</span> s2' 0)
+  <span data-count="23396">l</span>et s1' = String.uppercase_ascii s1 in
+  <span data-count="23396">l</span>et s2' = String.uppercase_ascii s2 in
+  <span data-count="23396">c</span>ompare_mantissa_str' hex s1' (skip_zeroe<span data-count="23396">s</span> s1' 0) s2' (skip_zeroe<span data-count="23396">s</span> s2' 0)
 
 (*
  * Convert a string to a float in target precision by going through
@@ -898,43 +898,43 @@ let compare_mantissa_str hex s1 s2 =
  *)
 let float_of_string_prevent_double_rounding s =
   (* First parse to a 64 bit float. *)
-  <span data-count="11692">l</span>et z = float_of_string s in
+  <span data-count="23412">l</span>et z = float_of_string s in
   (* If value is already infinite we are done. *)
-  <span data-count="11692">i</span>f abs_floa<span data-count="11692">t</span> z = 1.0 /. 0.0 then <span data-count="8">z</span>
+  <span data-count="23412">i</span>f abs_floa<span data-count="23412">t</span> z = 1.0 /. 0.0 then <span data-count="16">z</span>
   else
     (* Else, bit twiddling to see what rounding to target precision will do. *)
-    <span data-count="11684">l</span>et open Int64 in
+    <span data-count="23396">l</span>et open Int64 in
     let bits = bits_of_float z in
-    <span data-count="11684">l</span>et lsb = shift_left 1L 0 in
+    <span data-count="23396">l</span>et lsb = shift_left 1L 0 in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
-    <span data-count="11684">l</span>et tie = shift_right lsb 1 in
-    <span data-count="11684">l</span>et mask = lognot (shift_lef<span data-count="11684">t</span> (-1L) 0) in
+    <span data-count="23396">l</span>et tie = shift_right lsb 1 in
+    <span data-count="23396">l</span>et mask = lognot (shift_lef<span data-count="23396">t</span> (-1L) 0) in
     (* If we have no tie, we are good. *)
-    <span data-count="11684">i</span>f logan<span data-count="11684">d</span> bits mask &lt;&gt; tie then <span data-count="0">z</span>
+    <span data-count="23396">i</span>f logan<span data-count="23396">d</span> bits mask &lt;&gt; tie then <span data-count="0">z</span>
     else
       (* Else, define epsilon to be the value of the tie bit. *)
-      <span data-count="11684">l</span>et exp = float_of_bits (logan<span data-count="11684">d</span> bits 0xfff0_0000_0000_0000L) in
-      <span data-count="11684">l</span>et eps = float_of_bit<span data-count="11684">s</span> (logo<span data-count="11684">r</span> tie (bits_of_floa<span data-count="11684">t</span> exp)) -. exp in
+      <span data-count="23396">l</span>et exp = float_of_bits (logan<span data-count="23396">d</span> bits 0xfff0_0000_0000_0000L) in
+      <span data-count="23396">l</span>et eps = float_of_bit<span data-count="23396">s</span> (logo<span data-count="23396">r</span> tie (bits_of_floa<span data-count="23396">t</span> exp)) -. exp in
       (* Convert 64 bit float back to string to compare to input. *)
       let hex = String.contains s 'x' in
-      <span data-count="11684">l</span>et s' =
-        if not hex then <span data-count="1248">P</span>rintf.sprint<span data-count="1248">f</span> "%.*g" (String.lengt<span data-count="1248">h</span> s) z
+      <span data-count="23396">l</span>et s' =
+        if not hex then <span data-count="2524">P</span>rintf.sprint<span data-count="2524">f</span> "%.*g" (String.lengt<span data-count="2524">h</span> s) z
         else
-          <span data-count="10436">l</span>et m =
-            logor (logan<span data-count="10436">d</span> bits 0xf_ffff_ffff_ffffL) 0x10_0000_0000_0000L
+          <span data-count="20872">l</span>et m =
+            logor (logan<span data-count="20872">d</span> bits 0xf_ffff_ffff_ffffL) 0x10_0000_0000_0000L
           in
           (* Shift mantissa to match msb position in most significant hex digit *)
-          <span data-count="10436">l</span>et i = skip_zeroes (String.uppercase_asci<span data-count="10436">i</span> s) 0 in
-          <span data-count="10436">i</span>f i = String.lengt<span data-count="10436">h</span> s then <span data-count="0">P</span>rintf.sprint<span data-count="0">f</span> "%.*g" (String.lengt<span data-count="0">h</span> s) z
+          <span data-count="20872">l</span>et i = skip_zeroes (String.uppercase_asci<span data-count="20872">i</span> s) 0 in
+          <span data-count="20872">i</span>f i = String.lengt<span data-count="20872">h</span> s then <span data-count="0">P</span>rintf.sprint<span data-count="0">f</span> "%.*g" (String.lengt<span data-count="0">h</span> s) z
           else
-            <span data-count="10436">l</span>et sh =
+            <span data-count="20872">l</span>et sh =
               match s.[i] with
-              | <span data-count="8887">'</span>1' -&gt; 0
-              | <span data-count="71">'</span>2' .. '3' -&gt; 1
-              | <span data-count="20">'</span>4' .. '7' -&gt; 2
-              | <span data-count="1458">_</span> -&gt; 3
+              | <span data-count="17774">'</span>1' -&gt; 0
+              | <span data-count="142">'</span>2' .. '3' -&gt; 1
+              | <span data-count="40">'</span>4' .. '7' -&gt; 2
+              | <span data-count="2916">_</span> -&gt; 3
             in
-            Printf.sprint<span data-count="10436">f</span> "%Lx" (shift_lef<span data-count="10436">t</span> m sh)
+            Printf.sprint<span data-count="20872">f</span> "%Lx" (shift_lef<span data-count="20872">t</span> m sh)
       in
       (* - If mantissa became larger, float was rounded up to tie already;
        *   round-to-even might round up again: sub epsilon to round down.
@@ -943,78 +943,78 @@ let float_of_string_prevent_double_rounding s =
        * - If tie is not the result of prior rounding, then we are good.
        *)
       match compare_mantissa_str hex s s' with
-      | <span data-count="2754">-</span>1 -&gt; z -. eps
-      | <span data-count="111">1</span> -&gt; z +. eps
-      | <span data-count="8819">_</span> -&gt; z
+      | <span data-count="5508">-</span>1 -&gt; z -. eps
+      | <span data-count="222">1</span> -&gt; z +. eps
+      | <span data-count="17666">_</span> -&gt; z
 
 let of_signless_string s =
-  <span data-count="15445">i</span>f s = "inf" then <span data-count="1489">p</span>os_inf
-  else <span data-count="13956">i</span>f s = "nan" then <span data-count="1191">p</span>os_nan
-  else <span data-count="12765">i</span>f String.lengt<span data-count="12765">h</span> s &gt; 6 &amp;&amp; <span data-count="7796">S</span>tring.su<span data-count="7796">b</span> s 0 6 = "nan:0x" then
-    <span data-count="1073">l</span>et x = Int64.of_string (String.su<span data-count="1073">b</span> s 4 (String.lengt<span data-count="1073">h</span> s - 4)) in
-    <span data-count="1073">i</span>f x = Int64.zero then <span data-count="1">f</span>ailwith "nan payload must not be zero"
-    else <span data-count="1072">i</span>f Int64.logan<span data-count="1072">d</span> x bare_nan &lt;&gt; Int64.zero then
-      <span data-count="1">f</span>ailwith "nan payload must not overlap with exponent bits"
-    else <span data-count="1071">i</span>f x &lt; Int64.zero then
+  <span data-count="30920">i</span>f s = "inf" then <span data-count="2980">p</span>os_inf
+  else <span data-count="27940">i</span>f s = "nan" then <span data-count="2382">p</span>os_nan
+  else <span data-count="25558">i</span>f String.lengt<span data-count="25558">h</span> s &gt; 6 &amp;&amp; <span data-count="15592">S</span>tring.su<span data-count="15592">b</span> s 0 6 = "nan:0x" then
+    <span data-count="2146">l</span>et x = Int64.of_string (String.su<span data-count="2146">b</span> s 4 (String.lengt<span data-count="2146">h</span> s - 4)) in
+    <span data-count="2146">i</span>f x = Int64.zero then <span data-count="2">f</span>ailwith "nan payload must not be zero"
+    else <span data-count="2144">i</span>f Int64.logan<span data-count="2144">d</span> x bare_nan &lt;&gt; Int64.zero then
+      <span data-count="2">f</span>ailwith "nan payload must not overlap with exponent bits"
+    else <span data-count="2142">i</span>f x &lt; Int64.zero then
       <span data-count="0">f</span>ailwith "nan payload must not overlap with sign bit"
-    else <span data-count="1071">I</span>nt64.logor x bare_nan
+    else <span data-count="2142">I</span>nt64.logor x bare_nan
   else
-    <span data-count="11692">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="11692">r</span> '_' s) in
-    <span data-count="11692">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="11692">g</span> s') in
-    <span data-count="11692">i</span>f is_inf x then <span data-count="8">L</span>og.err "of_string" else <span data-count="11684">x</span>
+    <span data-count="23412">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23412">r</span> '_' s) in
+    <span data-count="23412">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23412">g</span> s') in
+    <span data-count="23412">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23396">x</span>
 
 let of_string s =
-  <span data-count="15445">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
-  else <span data-count="15445">i</span>f s.[0] = '+<span data-count="161">'</span> || s.[0] = '-<span data-count="7016">'</span> then
-    <span data-count="7177">l</span>et x = of_signless_string (String.su<span data-count="7177">b</span> s 1 (String.lengt<span data-count="7177">h</span> s - 1)) in
-    <span data-count="7173">i</span>f s.[0] = '+' then <span data-count="161">x</span> else <span data-count="7012">n</span>eg x
-  else <span data-count="8268">o</span>f_signless_string s
+  <span data-count="30920">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
+  else <span data-count="30920">i</span>f s.[0] = '+<span data-count="322">'</span> || s.[0] = '-<span data-count="14032">'</span> then
+    <span data-count="14354">l</span>et x = of_signless_string (String.su<span data-count="14354">b</span> s 1 (String.lengt<span data-count="14354">h</span> s - 1)) in
+    <span data-count="14346">i</span>f s.[0] = '+' then <span data-count="322">x</span> else <span data-count="14024">n</span>eg x
+  else <span data-count="16566">o</span>f_signless_string s
 
 (* String conversion that groups digits for readability *)
 
-let is_digit c = <span data-count="30">'</span>0' &lt;= c &amp;&amp; <span data-count="30">c</span> &lt;= '9'
+let is_digit c = <span data-count="60">'</span>0' &lt;= c &amp;&amp; <span data-count="60">c</span> &lt;= '9'
 
 let is_hex_digit c = <span data-count="0">i</span>s_digi<span data-count="0">t</span> <span data-count="0">c</span> || ('a' &lt;= c &amp;&amp; <span data-count="0">c</span> &lt;= 'f'<span data-count="0">)</span>
 
 let rec add_digits buf s i j k n =
-  <span data-count="40">i</span>f i &lt; j then <span data-count="20">b</span>egin
+  <span data-count="80">i</span>f i &lt; j then <span data-count="40">b</span>egin
     if k = 0 then <span data-count="0">B</span>uffer.add_cha<span data-count="0">r</span> buf '_';
-    <span data-count="20">B</span>uffer.add_char buf s.[i];
-    <span data-count="20">a</span>dd_digits buf s (i + 1) j ((k + n - 1) mod n) n
+    <span data-count="40">B</span>uffer.add_char buf s.[i];
+    <span data-count="40">a</span>dd_digits buf s (i + 1) j ((k + n - 1) mod n) n
   end
 
 let group_digits =
   let rec find_from_opt f s i =
-    <span data-count="90">i</span>f i = String.lengt<span data-count="90">h</span> s then <span data-count="40">N</span>one
-    else <span data-count="50">i</span>f f s.[i] then <span data-count="10">S</span>ome i
-    else <span data-count="40">f</span>ind_from_opt f s (i + 1)
+    <span data-count="180">i</span>f i = String.lengt<span data-count="180">h</span> s then <span data-count="80">N</span>one
+    else <span data-count="100">i</span>f f s.[i] then <span data-count="20">S</span>ome i
+    else <span data-count="80">f</span>ind_from_opt f s (i + 1)
   in
   fun is_digit n s -&gt;
-    <span data-count="10">l</span>et isnt_digit c = <span data-count="20">n</span>ot (is_digi<span data-count="20">t</span> c) in
+    <span data-count="20">l</span>et isnt_digit c = <span data-count="40">n</span>ot (is_digi<span data-count="40">t</span> c) in
     let len = String.length s in
-    <span data-count="10">l</span>et x = Option.value (find_from_op<span data-count="10">t</span> (( = ) 'x') s 0) ~default:0 in
-    <span data-count="10">l</span>et mant = Option.value (find_from_op<span data-count="10">t</span> is_digit s x) ~default:len in
-    <span data-count="10">l</span>et point = Option.value (find_from_op<span data-count="10">t</span> isnt_digit s mant) ~default:len in
-    <span data-count="10">l</span>et frac = Option.value (find_from_op<span data-count="10">t</span> is_digit s point) ~default:len in
-    <span data-count="10">l</span>et exp = Option.value (find_from_op<span data-count="10">t</span> isnt_digit s frac) ~default:len in
-    <span data-count="10">l</span>et buf = Buffer.create (len * (n + 1) / n) in
-    <span data-count="10">B</span>uffer.add_substring buf s 0 mant;
-    <span data-count="10">a</span>dd_digits buf s mant point (((point - mant) mod n) + n) n;
-    <span data-count="10">B</span>uffer.add_substring buf s point (frac - point);
-    <span data-count="10">a</span>dd_digits buf s frac exp n n;
-    <span data-count="10">B</span>uffer.add_substring buf s exp (len - exp);
-    <span data-count="10">B</span>uffer.contents buf
+    <span data-count="20">l</span>et x = Option.value (find_from_op<span data-count="20">t</span> (( = ) 'x') s 0) ~default:0 in
+    <span data-count="20">l</span>et mant = Option.value (find_from_op<span data-count="20">t</span> is_digit s x) ~default:len in
+    <span data-count="20">l</span>et point = Option.value (find_from_op<span data-count="20">t</span> isnt_digit s mant) ~default:len in
+    <span data-count="20">l</span>et frac = Option.value (find_from_op<span data-count="20">t</span> is_digit s point) ~default:len in
+    <span data-count="20">l</span>et exp = Option.value (find_from_op<span data-count="20">t</span> isnt_digit s frac) ~default:len in
+    <span data-count="20">l</span>et buf = Buffer.create (len * (n + 1) / n) in
+    <span data-count="20">B</span>uffer.add_substring buf s 0 mant;
+    <span data-count="20">a</span>dd_digits buf s mant point (((point - mant) mod n) + n) n;
+    <span data-count="20">B</span>uffer.add_substring buf s point (frac - point);
+    <span data-count="20">a</span>dd_digits buf s frac exp n n;
+    <span data-count="20">B</span>uffer.add_substring buf s exp (len - exp);
+    <span data-count="20">B</span>uffer.contents buf
 
 let to_string' convert is_digit n x =
-  <span data-count="10">(</span>if x &lt; Int64.zero then <span data-count="0">"</span>-" else <span data-count="10">"</span>")
+  <span data-count="20">(</span>if x &lt; Int64.zero then <span data-count="0">"</span>-" else <span data-count="20">"</span>")
   ^
   if is_nan x then
     <span data-count="0">l</span>et payload = Int64.logand (ab<span data-count="0">s</span> x) (Int64.logno<span data-count="0">t</span> bare_nan) in
     <span data-count="0">"</span>nan:0x" ^ group_digit<span data-count="0">s</span> is_hex_digit 4 (to_hex_strin<span data-count="0">g</span> payload)
   else
-    <span data-count="10">l</span>et s = convert (to_floa<span data-count="10">t</span> (ab<span data-count="10">s</span> x)) in
-    <span data-count="10">g</span>roup_digit<span data-count="10">s</span> is_digit n
-      (if s.[String.lengt<span data-count="10">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="10">s</span>)
+    <span data-count="20">l</span>et s = convert (to_floa<span data-count="20">t</span> (ab<span data-count="20">s</span> x)) in
+    <span data-count="20">g</span>roup_digit<span data-count="20">s</span> is_digit n
+      (if s.[String.lengt<span data-count="20">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="20">s</span>)
 
 let to_string = to_string<span data-count="6">'</span> (Printf.sprint<span data-count="6">f</span> "%.17g") is_digit 3
 

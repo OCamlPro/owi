@@ -393,21 +393,21 @@ exception Empty
 
 let empty = []
 
-let push s v = <span data-count="40996955">v</span> :: s
+let push s v = <span data-count="81993969">v</span> :: s
 
-let push_bool s b = <span data-count="8061027">p</span>ush s (I32 (if b then <span data-count="975773">1</span>l else <span data-count="7085254">0</span>l))
+let push_bool s b = <span data-count="16122126">p</span>ush s (I32 (if b then <span data-count="1951614">1</span>l else <span data-count="14170512">0</span>l))
 
-let push_i32 s i = <span data-count="5482723">p</span>ush s (I32 i)
+let push_i32 s i = <span data-count="10965392">p</span>ush s (I32 i)
 
-let push_i32_of_int s i = <span data-count="922828">p</span>ush_i32 s (Int32.of_in<span data-count="922828">t</span> i)
+let push_i32_of_int s i = <span data-count="1845656">p</span>ush_i32 s (Int32.of_in<span data-count="1845656">t</span> i)
 
-let push_i64 s i = <span data-count="10182573">p</span>ush s (I64 i)
+let push_i64 s i = <span data-count="20365212">p</span>ush s (I64 i)
 
-let push_i64_of_int s i = <span data-count="143">p</span>ush_i64 s (Int64.of_in<span data-count="143">t</span> i)
+let push_i64_of_int s i = <span data-count="286">p</span>ush_i64 s (Int64.of_in<span data-count="286">t</span> i)
 
-let push_f32 s f = <span data-count="97612">p</span>ush s (F32 f)
+let push_f32 s f = <span data-count="195212">p</span>ush s (F32 f)
 
-let push_f64 s f = <span data-count="95790">p</span>ush s (F64 f)
+let push_f64 s f = <span data-count="191569">p</span>ush s (F64 f)
 
 let push_as_externref s ty v = <span data-count="1">p</span>ush s (Ref (Externref (Some (E (ty, v)))))
 
@@ -418,97 +418,97 @@ let pp fmt (s : 'env t) =
     ~pp_sep:(fun fmt () -&gt; <span data-count="2">F</span>ormat.fprintf fmt " ; ")
     Value.pp fmt s
 
-let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="35146057">h</span>d :: tl -&gt; (hd, tl)
+let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70292232">h</span>d :: tl -&gt; (hd, tl)
 
-let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="320">_</span>hd :: tl -&gt; tl
+let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="583">_</span>hd :: tl -&gt; tl
 
 let pop_i32 s =
-  <span data-count="2446055">l</span>et hd, tl = pop s in
-  <span data-count="2446055">m</span>atch hd with
-  | <span data-count="2446055">I</span>32 n -&gt; (n, tl)
+  <span data-count="4892109">l</span>et hd, tl = pop s in
+  <span data-count="4892109">m</span>atch hd with
+  | <span data-count="4892109">I</span>32 n -&gt; (n, tl)
   | <span data-count="0">_</span> | <span data-count="0">(</span>exception Empty) -&gt; Log.err "invalid type (expected i32)"
 
 let pop_i32_to_int s =
-  <span data-count="1732041">l</span>et hd, tl = pop_i32 s in
-  <span data-count="1732041">(</span>Int32.to_in<span data-count="1732041">t</span> hd, tl)
+  <span data-count="3464082">l</span>et hd, tl = pop_i32 s in
+  <span data-count="3464082">(</span>Int32.to_in<span data-count="3464082">t</span> hd, tl)
 
 let pop_i32_to_char s =
-  <span data-count="122">l</span>et hd, tl = pop_i32 s in
-  <span data-count="122">(</span>Char.ch<span data-count="122">r</span> (Int32.to_in<span data-count="122">t</span> hd mod 256), tl)
+  <span data-count="244">l</span>et hd, tl = pop_i32 s in
+  <span data-count="244">(</span>Char.ch<span data-count="244">r</span> (Int32.to_in<span data-count="244">t</span> hd mod 256), tl)
 
 let pop2_i32 s =
-  <span data-count="3918848">t</span>ry
+  <span data-count="7837780">t</span>ry
     let n2, s = pop s in
-    <span data-count="3918848">l</span>et n1, tl = pop s in
-    <span data-count="3918848">m</span>atch (n1, n2) with
-    | <span data-count="3918848">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
+    <span data-count="7837780">l</span>et n1, tl = pop s in
+    <span data-count="7837780">m</span>atch (n1, n2) with
+    | <span data-count="7837780">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32)"
 
 let pop_i64 s =
-  <span data-count="5002528">t</span>ry
+  <span data-count="10005060">t</span>ry
     let hd, tl = pop s in
-    <span data-count="5002528">m</span>atch hd with
-    | <span data-count="5002528">I</span>64 n -&gt; (n, tl)
+    <span data-count="10005060">m</span>atch hd with
+    | <span data-count="10005060">I</span>64 n -&gt; (n, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
 let pop2_i64 s =
-  <span data-count="5113449">t</span>ry
+  <span data-count="10226924">t</span>ry
     let n2, s = pop s in
-    <span data-count="5113449">l</span>et n1, tl = pop s in
-    <span data-count="5113449">m</span>atch (n1, n2) with
-    | <span data-count="5113449">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
+    <span data-count="10226924">l</span>et n1, tl = pop s in
+    <span data-count="10226924">m</span>atch (n1, n2) with
+    | <span data-count="10226924">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
 let pop_f32 s =
-  <span data-count="665">t</span>ry
+  <span data-count="1330">t</span>ry
     let hd, tl = pop s in
-    <span data-count="665">m</span>atch hd with
-    | <span data-count="665">F</span>32 f -&gt; (f, tl)
+    <span data-count="1330">m</span>atch hd with
+    | <span data-count="1330">F</span>32 f -&gt; (f, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f32)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f32)"
 
 let pop2_f32 s =
-  <span data-count="64714">t</span>ry
+  <span data-count="129442">t</span>ry
     let n2, s = pop s in
-    <span data-count="64714">l</span>et n1, tl = pop s in
-    <span data-count="64714">m</span>atch (n1, n2) with
-    | <span data-count="64714">F</span>32 n1, F32 n2 -&gt; ((n1, n2), tl)
+    <span data-count="129442">l</span>et n1, tl = pop s in
+    <span data-count="129442">m</span>atch (n1, n2) with
+    | <span data-count="129442">F</span>32 n1, F32 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f32)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f32)"
 
 let pop_f64 s =
-  <span data-count="733">t</span>ry
+  <span data-count="1466">t</span>ry
     let hd, tl = pop s in
-    <span data-count="733">m</span>atch hd with
-    | <span data-count="733">F</span>64 f -&gt; (f, tl)
+    <span data-count="1466">m</span>atch hd with
+    | <span data-count="1466">F</span>64 f -&gt; (f, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f64)"
 
 let pop2_f64 s =
-  <span data-count="63136">t</span>ry
+  <span data-count="126286">t</span>ry
     let n2, s = pop s in
-    <span data-count="63136">l</span>et n1, tl = pop s in
-    <span data-count="63136">m</span>atch (n1, n2) with
-    | <span data-count="63136">F</span>64 n1, F64 n2 -&gt; ((n1, n2), tl)
+    <span data-count="126286">l</span>et n1, tl = pop s in
+    <span data-count="126286">m</span>atch (n1, n2) with
+    | <span data-count="126286">F</span>64 n1, F64 n2 -&gt; ((n1, n2), tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f64)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f64)"
 
 let pop_ref s =
-  <span data-count="3">t</span>ry
+  <span data-count="6">t</span>ry
     let hd, tl = pop s in
-    <span data-count="3">m</span>atch hd with
-    | <span data-count="3">R</span>ef _ -&gt; (hd, tl)
+    <span data-count="6">m</span>atch hd with
+    | <span data-count="6">R</span>ef _ -&gt; (hd, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected ref)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected ref)"
 
 let pop_as_ref s =
-  <span data-count="66">t</span>ry
+  <span data-count="132">t</span>ry
     let hd, tl = pop s in
-    <span data-count="66">m</span>atch hd with
-    | <span data-count="66">R</span>ef hd -&gt; (hd, tl)
+    <span data-count="132">m</span>atch hd with
+    | <span data-count="132">R</span>ef hd -&gt; (hd, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected ref)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected ref)"
 
@@ -525,30 +525,30 @@ let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected extern ref)"
 
 let pop_bool s =
-  <span data-count="8057285">t</span>ry
+  <span data-count="16114421">t</span>ry
     let hd, tl = pop s in
-    <span data-count="8057285">m</span>atch hd with
-    | <span data-count="8057285">I</span>32 n -&gt; (n &lt;&gt; 0l, tl)
+    <span data-count="16114421">m</span>atch hd with
+    | <span data-count="16114421">I</span>32 n -&gt; (n &lt;&gt; 0l, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32 (bool))"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32 (bool))"
 
 let pop_is_null s =
-  <span data-count="47">t</span>ry
+  <span data-count="94">t</span>ry
     let hd, tl = pop s in
-    <span data-count="47">m</span>atch hd with
-    | Ref (<span data-count="4">E</span>xternref None | <span data-count="34">F</span>uncref None) -&gt; (true, tl)
-    | Ref (<span data-count="2">E</span>xternref (Some _) | <span data-count="7">F</span>uncref (Some _)) -&gt; (false, tl)
+    <span data-count="94">m</span>atch hd with
+    | Ref (<span data-count="8">E</span>xternref None | <span data-count="68">F</span>uncref None) -&gt; (true, tl)
+    | Ref (<span data-count="4">E</span>xternref (Some _) | <span data-count="14">F</span>uncref (Some _)) -&gt; (false, tl)
     | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected const_null)"
   with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected const_null)"
 
 let pop_n s n =
-  <span data-count="5827098">(</span>List.filter<span data-count="5827098">i</span> (fun i _hd -&gt; <span data-count="5882059">i</span> &lt; n) s, List.filter<span data-count="5827098">i</span> (fun i _hd -&gt; <span data-count="5882059">i</span> &gt;= n) s)
+  <span data-count="11654192">(</span>List.filter<span data-count="11654192">i</span> (fun i _hd -&gt; <span data-count="11764118">i</span> &lt; n) s, List.filter<span data-count="11654192">i</span> (fun i _hd -&gt; <span data-count="11764118">i</span> &gt;= n) s)
 
-let keep s n = <span data-count="1693338">L</span>ist.filteri (fun i _hd -&gt; <span data-count="247506">i</span> &lt; n) s
+let keep s n = <span data-count="3386633">L</span>ist.filteri (fun i _hd -&gt; <span data-count="495004">i</span> &lt; n) s
 
 let rec drop_n s n =
-  <span data-count="8321990">i</span>f n = 0 then <span data-count="7796990">s</span>
-  else <span data-count="525000">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="525000">_</span> :: tl -&gt; drop_n tl (n - 1)
+  <span data-count="16643901">i</span>f n = 0 then <span data-count="15593927">s</span>
+  else <span data-count="1049974">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="1049974">_</span> :: tl -&gt; drop_n tl (n - 1)
 </code></pre>
       </div>
     </div>

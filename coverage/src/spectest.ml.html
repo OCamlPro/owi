@@ -484,17 +484,17 @@
 let extern_m : Link.extern_module =
   let fmt = Format.std_formatter in
   let print = () in
-  let print_i32 i = <span data-count="19">F</span>ormat.fprintf fmt "%li@\n%!" i in
-  let print_i64 i = <span data-count="2">F</span>ormat.fprintf fmt "%Li@\n%!" i in
-  let print_f32 f = <span data-count="4">F</span>ormat.fprintf fmt "%s@\n%!" (Float32.to_strin<span data-count="4">g</span> f) in
-  let print_f64 f = <span data-count="10">F</span>ormat.fprintf fmt "%s@\n%!" (Float64.to_strin<span data-count="10">g</span> f) in
+  let print_i32 i = <span data-count="37">F</span>ormat.fprintf fmt "%li@\n%!" i in
+  let print_i64 i = <span data-count="4">F</span>ormat.fprintf fmt "%Li@\n%!" i in
+  let print_f32 f = <span data-count="8">F</span>ormat.fprintf fmt "%s@\n%!" (Float32.to_strin<span data-count="8">g</span> f) in
+  let print_f64 f = <span data-count="20">F</span>ormat.fprintf fmt "%s@\n%!" (Float64.to_strin<span data-count="20">g</span> f) in
   let print_i32_f32 i f =
-    <span data-count="2">p</span>rint_i32 i;
-    <span data-count="2">p</span>rint_f32 f
+    <span data-count="4">p</span>rint_i32 i;
+    <span data-count="4">p</span>rint_f32 f
   in
   let print_f64_f64 f1 f2 =
-    <span data-count="2">p</span>rint_f64 f1;
-    <span data-count="2">p</span>rint_f64 f2
+    <span data-count="4">p</span>rint_f64 f1;
+    <span data-count="4">p</span>rint_f64 f2
   in
   let func = () in
   let func_in_i32 (_i : int32) = <span data-count="0">(</span>) in
