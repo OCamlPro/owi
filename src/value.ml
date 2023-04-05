@@ -115,6 +115,21 @@ type 'env t =
   | F64 of Float64.t
   | Ref of 'env ref_value
 
+let of_instr (i : Types.Simplified.instr) : _ t =
+  match i with
+  | I32_const c -> I32 c
+  | I64_const c -> I64 c
+  | F32_const c -> F32 c
+  | F64_const c -> F64 c
+  | _ -> assert false
+
+let to_instr = function
+  | I32 c -> Types.Simplified.I32_const c
+  | I64 c -> Types.Simplified.I64_const c
+  | F32 c -> Types.Simplified.F32_const c
+  | F64 c -> Types.Simplified.F64_const c
+  | _ -> assert false
+
 let pp_ref fmt = function
   | Externref _ -> Format.fprintf fmt "externref"
   | Funcref _ -> Format.fprintf fmt "funcref"

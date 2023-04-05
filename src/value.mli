@@ -62,6 +62,10 @@ type 'a t =
 
 val cast_ref : externref -> 'a Extern_ref.ty -> 'a option
 
+val of_instr : Types.Simplified.instr -> _ t
+
+val to_instr : _ t -> Types.Simplified.instr
+
 val ref_null' : Types.Simplified.heap_type -> 'a ref_value
 
 val ref_null : Types.Simplified.heap_type -> 'a t

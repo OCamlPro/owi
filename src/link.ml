@@ -222,12 +222,12 @@ module Const_interp = struct
       let (n1, n2), stack = Stack.pop2_i32 stack in
       Stack.push_i32 stack
         (let open Int32 in
-        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
+         match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       Stack.push_i64 stack
         (let open Int64 in
-        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
+         match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
 
   let exec_instr (env : env) (stack : Env.t' Stack.t) (instr : Const.instr) =
     match instr with

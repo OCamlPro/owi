@@ -4,12 +4,17 @@ module Env = Link.Env
 
 module Log : sig
   [@@@ocaml.warning "-32"]
+
   type do_not_use
+
   include module type of Log
+
   val debug : do_not_use
 end = struct
   type do_not_use = unit
+
   include Log
+
   let debug = ()
 end
 
@@ -73,60 +78,60 @@ let exec_ibinop stack nn (op : ibinop) =
     let (n1, n2), stack = Stack.pop2_i32 stack in
     Stack.push_i32 stack
       (let open Int32 in
-      match op with
-      | Add -> add n1 n2
-      | Sub -> sub n1 n2
-      | Mul -> mul n1 n2
-      | Div s -> begin
-        try
-          match s with
-          | S ->
-            if n1 = Int32.min_int && n2 = -1l then trap "integer overflow";
-            div n1 n2
-          | U -> unsigned_div n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | Rem s -> begin
-        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | And -> logand n1 n2
-      | Or -> logor n1 n2
-      | Xor -> logxor n1 n2
-      | Shl -> shl n1 n2
-      | Shr S -> shr_s n1 n2
-      | Shr U -> shr_u n1 n2
-      | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2 )
+       match op with
+       | Add -> add n1 n2
+       | Sub -> sub n1 n2
+       | Mul -> mul n1 n2
+       | Div s -> begin
+         try
+           match s with
+           | S ->
+             if n1 = Int32.min_int && n2 = -1l then trap "integer overflow";
+             div n1 n2
+           | U -> unsigned_div n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | Rem s -> begin
+         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | And -> logand n1 n2
+       | Or -> logor n1 n2
+       | Xor -> logxor n1 n2
+       | Shl -> shl n1 n2
+       | Shr S -> shr_s n1 n2
+       | Shr U -> shr_u n1 n2
+       | Rotl -> rotl n1 n2
+       | Rotr -> rotr n1 n2 )
   | S64 ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
     Stack.push_i64 stack
       (let open Int64 in
-      match op with
-      | Add -> add n1 n2
-      | Sub -> sub n1 n2
-      | Mul -> mul n1 n2
-      | Div s -> begin
-        try
-          match s with
-          | S ->
-            if n1 = Int64.min_int && n2 = -1L then trap "integer overflow";
-            div n1 n2
-          | U -> unsigned_div n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | Rem s -> begin
-        try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-        with Division_by_zero -> trap "integer divide by zero"
-      end
-      | And -> logand n1 n2
-      | Or -> logor n1 n2
-      | Xor -> logxor n1 n2
-      | Shl -> shl n1 n2
-      | Shr S -> shr_s n1 n2
-      | Shr U -> shr_u n1 n2
-      | Rotl -> rotl n1 n2
-      | Rotr -> rotr n1 n2 )
+       match op with
+       | Add -> add n1 n2
+       | Sub -> sub n1 n2
+       | Mul -> mul n1 n2
+       | Div s -> begin
+         try
+           match s with
+           | S ->
+             if n1 = Int64.min_int && n2 = -1L then trap "integer overflow";
+             div n1 n2
+           | U -> unsigned_div n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | Rem s -> begin
+         try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
+         with Division_by_zero -> trap "integer divide by zero"
+       end
+       | And -> logand n1 n2
+       | Or -> logor n1 n2
+       | Xor -> logxor n1 n2
+       | Shl -> shl n1 n2
+       | Shr S -> shr_s n1 n2
+       | Shr U -> shr_u n1 n2
+       | Rotl -> rotl n1 n2
+       | Rotr -> rotr n1 n2 )
 
 let exec_fbinop stack nn (op : fbinop) =
   match nn with
@@ -134,26 +139,26 @@ let exec_fbinop stack nn (op : fbinop) =
     let (f1, f2), stack = Stack.pop2_f32 stack in
     Stack.push_f32 stack
       (let open Float32 in
-      match op with
-      | Add -> add f1 f2
-      | Sub -> sub f1 f2
-      | Mul -> mul f1 f2
-      | Div -> div f1 f2
-      | Min -> min f1 f2
-      | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2 )
+       match op with
+       | Add -> add f1 f2
+       | Sub -> sub f1 f2
+       | Mul -> mul f1 f2
+       | Div -> div f1 f2
+       | Min -> min f1 f2
+       | Max -> max f1 f2
+       | Copysign -> copy_sign f1 f2 )
   | S64 ->
     let (f1, f2), stack = Stack.pop2_f64 stack in
     Stack.push_f64 stack
       (let open Float64 in
-      match op with
-      | Add -> add f1 f2
-      | Sub -> sub f1 f2
-      | Mul -> mul f1 f2
-      | Div -> div f1 f2
-      | Min -> min f1 f2
-      | Max -> max f1 f2
-      | Copysign -> copy_sign f1 f2 )
+       match op with
+       | Add -> add f1 f2
+       | Sub -> sub f1 f2
+       | Mul -> mul f1 f2
+       | Div -> div f1 f2
+       | Min -> min f1 f2
+       | Max -> max f1 f2
+       | Copysign -> copy_sign f1 f2 )
 
 let exec_itestop stack nn op =
   match nn with
@@ -231,6 +236,153 @@ let exec_frelop stack nn (op : frelop) =
       | Ge -> ge n1 n2
     in
     Stack.push_bool stack res
+
+let exec_itruncf stack nn nn' sx =
+  match (nn, nn') with
+  | S32, S32 -> (
+    let f, stack = Stack.pop_f32 stack in
+    Stack.push_i32 stack
+    @@
+    match sx with
+    | S -> Convert.Int32.trunc_f32_s f
+    | U -> Convert.Int32.trunc_f32_u f )
+  | S32, S64 -> (
+    let f, stack = Stack.pop_f64 stack in
+    Stack.push_i32 stack
+    @@
+    match sx with
+    | S -> Convert.Int32.trunc_f64_s f
+    | U -> Convert.Int32.trunc_f64_u f )
+  | S64, S32 -> (
+    let f, stack = Stack.pop_f32 stack in
+    Stack.push_i64 stack
+    @@
+    match sx with
+    | S -> Convert.Int64.trunc_f32_s f
+    | U -> Convert.Int64.trunc_f32_u f )
+  | S64, S64 -> (
+    let f, stack = Stack.pop_f64 stack in
+    Stack.push_i64 stack
+    @@
+    match sx with
+    | S -> Convert.Int64.trunc_f64_s f
+    | U -> Convert.Int64.trunc_f64_u f )
+
+let exec_itruncsatf stack nn nn' sx =
+  match nn with
+  | S32 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let n =
+        match sx with
+        | S -> Convert.Int32.trunc_sat_f32_s n
+        | U -> Convert.Int32.trunc_sat_f32_u n
+      in
+      Stack.push_i32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let n =
+        match sx with
+        | S -> Convert.Int32.trunc_sat_f64_s n
+        | U -> Convert.Int32.trunc_sat_f64_u n
+      in
+      Stack.push_i32 stack n
+  end
+  | S64 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let n =
+        match sx with
+        | S -> Convert.Int64.trunc_sat_f32_s n
+        | U -> Convert.Int64.trunc_sat_f32_u n
+      in
+      Stack.push_i64 stack n
+    | S64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let n =
+        match sx with
+        | S -> Convert.Int64.trunc_sat_f64_s n
+        | U -> Convert.Int64.trunc_sat_f64_u n
+      in
+      Stack.push_i64 stack n
+  end
+
+let exec_fconverti stack nn nn' sx =
+  match nn with
+  | S32 -> (
+    let open Convert.Float32 in
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      let n = if sx = S then convert_i32_s n else convert_i32_u n in
+      Stack.push_f32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = if sx = S then convert_i64_s n else convert_i64_u n in
+      Stack.push_f32 stack n )
+  | S64 -> (
+    let open Convert.Float64 in
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      let n = if sx = S then convert_i32_s n else convert_i32_u n in
+      Stack.push_f64 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = if sx = S then convert_i64_s n else convert_i64_u n in
+      Stack.push_f64 stack n )
+
+let exec_ireinterpretf stack nn nn' =
+  match nn with
+  | S32 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let n = Convert.Int32.reinterpret_f32 n in
+      Stack.push_i32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let n = Convert.Int32.reinterpret_f32 (Convert.Float32.demote_f64 n) in
+      Stack.push_i32 stack n
+  end
+  | S64 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let n = Convert.Int64.reinterpret_f64 (Convert.Float64.promote_f32 n) in
+      Stack.push_i64 stack n
+    | S64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let n = Convert.Int64.reinterpret_f64 n in
+      Stack.push_i64 stack n
+  end
+
+let exec_freinterpreti stack nn nn' =
+  match nn with
+  | S32 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      let n = Convert.Float32.reinterpret_i32 n in
+      Stack.push_f32 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = Convert.Float32.reinterpret_i32 (Int64.to_int32 n) in
+      Stack.push_f32 stack n
+  end
+  | S64 -> begin
+    match nn' with
+    | S32 ->
+      let n, stack = Stack.pop_i32 stack in
+      let n = Convert.Float64.reinterpret_i64 (Int64.of_int32 n) in
+      Stack.push_f64 stack n
+    | S64 ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = Convert.Float64.reinterpret_i64 n in
+      Stack.push_f64 stack n
+  end
 
 let init_local (_id, t) : Env.t' Value.t =
   match t with
@@ -545,81 +697,8 @@ let exec_instr instr (state : State.exec_state) =
       | U -> Convert.Int64.extend_i32_u n
     in
     st @@ Stack.push_i64 stack n
-  | I_trunc_f (n, n', s) -> (
-    st
-    @@
-    match (n, n') with
-    | S32, S32 -> (
-      let f, stack = Stack.pop_f32 stack in
-      Stack.push_i32 stack
-      @@
-      match s with
-      | S -> Convert.Int32.trunc_f32_s f
-      | U -> Convert.Int32.trunc_f32_u f )
-    | S32, S64 -> (
-      let f, stack = Stack.pop_f64 stack in
-      Stack.push_i32 stack
-      @@
-      match s with
-      | S -> Convert.Int32.trunc_f64_s f
-      | U -> Convert.Int32.trunc_f64_u f )
-    | S64, S32 -> (
-      let f, stack = Stack.pop_f32 stack in
-      Stack.push_i64 stack
-      @@
-      match s with
-      | S -> Convert.Int64.trunc_f32_s f
-      | U -> Convert.Int64.trunc_f32_u f )
-    | S64, S64 -> (
-      let f, stack = Stack.pop_f64 stack in
-      Stack.push_i64 stack
-      @@
-      match s with
-      | S -> Convert.Int64.trunc_f64_s f
-      | U -> Convert.Int64.trunc_f64_u f ) )
-  | I_trunc_sat_f (nn, nn', s) -> begin
-    st
-    @@
-    match nn with
-    | S32 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_f32 stack in
-        let n =
-          match s with
-          | S -> Convert.Int32.trunc_sat_f32_s n
-          | U -> Convert.Int32.trunc_sat_f32_u n
-        in
-        Stack.push_i32 stack n
-      | S64 ->
-        let n, stack = Stack.pop_f64 stack in
-        let n =
-          match s with
-          | S -> Convert.Int32.trunc_sat_f64_s n
-          | U -> Convert.Int32.trunc_sat_f64_u n
-        in
-        Stack.push_i32 stack n
-    end
-    | S64 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_f32 stack in
-        let n =
-          match s with
-          | S -> Convert.Int64.trunc_sat_f32_s n
-          | U -> Convert.Int64.trunc_sat_f32_u n
-        in
-        Stack.push_i64 stack n
-      | S64 ->
-        let n, stack = Stack.pop_f64 stack in
-        let n =
-          match s with
-          | S -> Convert.Int64.trunc_sat_f64_s n
-          | U -> Convert.Int64.trunc_sat_f64_u n
-        in
-        Stack.push_i64 stack n
-    end
-  end
+  | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s
+  | I_trunc_sat_f (nn, nn', s) -> st @@ exec_itruncsatf stack nn nn' s
   | F32_demote_f64 ->
     let n, stack = Stack.pop_f64 stack in
     let n = Convert.Float32.demote_f64 n in
@@ -628,86 +707,9 @@ let exec_instr instr (state : State.exec_state) =
     let n, stack = Stack.pop_f32 stack in
     let n = Convert.Float64.promote_f32 n in
     st @@ Stack.push_f64 stack n
-  | F_convert_i (n, n', s) -> (
-    st
-    @@
-    match n with
-    | S32 -> (
-      let open Convert.Float32 in
-      match n' with
-      | S32 ->
-        let n, stack = Stack.pop_i32 stack in
-        let n = if s = S then convert_i32_s n else convert_i32_u n in
-        Stack.push_f32 stack n
-      | S64 ->
-        let n, stack = Stack.pop_i64 stack in
-        let n = if s = S then convert_i64_s n else convert_i64_u n in
-        Stack.push_f32 stack n )
-    | S64 -> (
-      let open Convert.Float64 in
-      match n' with
-      | S32 ->
-        let n, stack = Stack.pop_i32 stack in
-        let n = if s = S then convert_i32_s n else convert_i32_u n in
-        Stack.push_f64 stack n
-      | S64 ->
-        let n, stack = Stack.pop_i64 stack in
-        let n = if s = S then convert_i64_s n else convert_i64_u n in
-        Stack.push_f64 stack n ) )
-  | I_reinterpret_f (nn, nn') -> begin
-    st
-    @@
-    match nn with
-    | S32 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_f32 stack in
-        let n = Convert.Int32.reinterpret_f32 n in
-        Stack.push_i32 stack n
-      | S64 ->
-        let n, stack = Stack.pop_f64 stack in
-        let n = Convert.Int32.reinterpret_f32 (Convert.Float32.demote_f64 n) in
-        Stack.push_i32 stack n
-    end
-    | S64 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_f32 stack in
-        let n = Convert.Int64.reinterpret_f64 (Convert.Float64.promote_f32 n) in
-        Stack.push_i64 stack n
-      | S64 ->
-        let n, stack = Stack.pop_f64 stack in
-        let n = Convert.Int64.reinterpret_f64 n in
-        Stack.push_i64 stack n
-    end
-  end
-  | F_reinterpret_i (nn, nn') -> begin
-    st
-    @@
-    match nn with
-    | S32 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_i32 stack in
-        let n = Convert.Float32.reinterpret_i32 n in
-        Stack.push_f32 stack n
-      | S64 ->
-        let n, stack = Stack.pop_i64 stack in
-        let n = Convert.Float32.reinterpret_i32 (Int64.to_int32 n) in
-        Stack.push_f32 stack n
-    end
-    | S64 -> begin
-      match nn' with
-      | S32 ->
-        let n, stack = Stack.pop_i32 stack in
-        let n = Convert.Float64.reinterpret_i64 (Int64.of_int32 n) in
-        Stack.push_f64 stack n
-      | S64 ->
-        let n, stack = Stack.pop_i64 stack in
-        let n = Convert.Float64.reinterpret_i64 n in
-        Stack.push_f64 stack n
-    end
-  end
+  | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
+  | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
+  | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn'
   | Ref_null t -> st @@ Stack.push stack (Value.ref_null t)
   | Ref_is_null ->
     let b, stack = Stack.pop_is_null stack in

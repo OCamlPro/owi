@@ -8,3 +8,39 @@ val exec_vfunc :
      Link.Env.t' Stack.t
   -> Link.Env.t' Value.Func.t
   -> (Link.Env.t' Stack.t, string) result
+
+val exec_iunop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.iunop -> Link.Env.t' Stack.t
+
+val exec_funop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.funop -> Link.Env.t' Stack.t
+
+val exec_ibinop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.ibinop -> Link.Env.t' Stack.t
+
+val exec_fbinop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.fbinop -> Link.Env.t' Stack.t
+
+val exec_itestop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.itestop -> Link.Env.t' Stack.t
+
+val exec_irelop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.irelop -> Link.Env.t' Stack.t
+
+val exec_frelop :
+  Link.Env.t' Stack.t -> Types.nn -> Types.frelop -> Link.Env.t' Stack.t
+
+val exec_itruncf :
+  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+
+val exec_itruncsatf :
+  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+
+val exec_fconverti :
+  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+
+val exec_ireinterpretf :
+  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t
+
+val exec_freinterpreti :
+  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t

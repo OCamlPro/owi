@@ -33,7 +33,7 @@ Given a file `test/passing/quickstart.wast` with the following content:
 
 Running the executable interpreter is as simple as:
 ```sh
-$ dune exec src/bin/owi.exe -- --debug test/passing/quickstart.wast
+$ dune exec owi -- --debug test/passing/quickstart.wast
 simplifying  ...
 typechecking ...
 linking      ...
@@ -74,7 +74,7 @@ val script : Types.Symbolic.script =
 val m : Types.Symbolic.modul =
 ...
 # let module_to_run, link_state =
-    match Compile.until_link Link.empty_state ~name:None m with
+    match Compile.until_link Link.empty_state ~optimize:false ~name:None m with
     | Ok v -> v
     | Error e -> failwith e;;
 val module_to_run : Link.module_to_run =

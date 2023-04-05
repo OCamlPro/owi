@@ -1092,6 +1092,8 @@ module Named : sig
   val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
   val iter : (int -> 'a -> unit) -> 'a t -> unit
+
+  val map : ('a indexed -> 'b indexed) -> 'a t -> 'b t
 end = struct
   type 'a t =
     { values : 'a indexed list
@@ -1102,6 +1104,10 @@ end = struct
     List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
 
   let iter f v = List.iter (fun v -> f v.index v.value) v.values
+
+  let map f v =
+    let values = List.map f v.values in
+    { v with values }
 end
 
 module Simplified = struct

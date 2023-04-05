@@ -13,6 +13,7 @@
   link
   log
   menhir_parser
+  optimize
   parse
   pp
   script
