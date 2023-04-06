@@ -123,3 +123,6 @@ $ dune exec -- ./extern.exe
 42
 13
 ```
+
+To learn more, follow the link [life_game/](./life_game/) for a more advanced example
+based on the Conway's Game of Life that links several modules from different .wast files.
