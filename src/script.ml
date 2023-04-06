@@ -163,7 +163,7 @@ let run ~with_exhaustion ~optimize script =
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug "*** assert_malformed_quote@\n";
         let* () =
-          match Parse.from_string (String.concat "\n" m) with
+          match Parse.script_from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module m ] -> (
             match Check.module_ m with
@@ -193,7 +193,7 @@ let run ~with_exhaustion ~optimize script =
         Ok link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.debug "*** assert_invalid_quote@\n";
-        let got = Parse.from_string (String.concat "\n" m) in
+        let got = Parse.script_from_string (String.concat "\n" m) in
         let* () = check_error_result expected got in
         Ok link_state
       | Assert (Assert_unlinkable (m, expected)) ->

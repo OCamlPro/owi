@@ -61,16 +61,10 @@ If you're interested in the library part of owi, here's how to get started:
 # open Owi;;
 # let filename = "test/passing/quickstart.wast";;
 val filename : string = "test/passing/quickstart.wast"
-# let script =
-    match Parse.from_file ~filename with
+# let m =
+    match Parse.module_from_file ~filename with
     | Ok script -> script
     | Error e -> failwith e;;
-val script : Types.Symbolic.script =
-...
-# let m =
-    match script with
-    | Module m :: _ -> m
-    | _ -> failwith "expected a module first";;
 val m : Types.Symbolic.modul =
 ...
 # let module_to_run, link_state =

@@ -31,19 +31,17 @@ let link_state =
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.from_file ~filename:"extern.wast" with
+  match Parse.module_from_file ~filename:"extern.wast" with
   | Error e -> failwith e
-  | Ok script -> script
+  | Ok modul -> modul
 
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run =
-  match pure_wasm_module with
-  | Types.Symbolic.Module m :: _ -> begin
-    match Compile.until_link link_state ~optimize:true ~name:None m with
-    | Error msg -> failwith msg
-    | Ok (m, _state) -> m
-  end
-  | _ -> failwith "expected a single module"
+  match
+    Compile.until_link link_state ~optimize:true ~name:None pure_wasm_module
+  with
+  | Error msg -> failwith msg
+  | Ok (m, _state) -> m
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =

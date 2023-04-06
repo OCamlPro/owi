@@ -55,6 +55,7 @@ module Owi = struct end
 %}
 
 %start <Types.Symbolic.script> script
+%start <Types.Symbolic.modul> modul
 
 %%
 
@@ -1018,7 +1019,7 @@ let module_field :=
   | ~ = memory; <>
 
 let modul :=
-  | MODULE; id = ioption(id); fields = list(par(module_field)); {
+      | LPAR; MODULE; id = ioption(id); fields = list(par(module_field)); RPAR; {
     (* TODO: handle fields_bin
     let fields_bin = String.concat "" l in *)
     let fields = List.flatten fields in
@@ -1061,14 +1062,14 @@ let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
   | ASSERT_EXHAUSTION; ~ = par(action); ~ = NAME; <Assert_exhaustion>
   | ASSERT_TRAP; ~ = par(action); ~ = NAME; <Assert_trap>
-  | ASSERT_TRAP; ~ = par(modul); ~ = NAME; <Assert_trap_module>
-  | ASSERT_MALFORMED; ~ = par(modul); ~ = NAME; <Assert_malformed>
+  | ASSERT_TRAP; ~ = modul; ~ = NAME; <Assert_trap_module>
+  | ASSERT_MALFORMED; ~ = modul; ~ = NAME; <Assert_malformed>
   | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_quote>
   | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_binary>
-  | ASSERT_INVALID; ~ = par(modul); ~ = NAME; <Assert_invalid>
+  | ASSERT_INVALID; ~ = modul; ~ = NAME; <Assert_invalid>
   | ASSERT_INVALID; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_quote>
   | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
-  | ASSERT_UNLINKABLE; ~ = par(modul); ~ = NAME; <Assert_unlinkable>
+  | ASSERT_UNLINKABLE; ~ = modul; ~ = NAME; <Assert_unlinkable>
 
 let register ==
   | REGISTER; ~ = utf8_name; ~ = option(id); <Register>
@@ -1078,7 +1079,7 @@ let action ==
   | GET; ~ = ioption(id); ~ = utf8_name; <Get>
 
 let cmd ==
-  | ~ = par(modul); <Module>
+  | ~ = modul; <Module>
   | ~ = par(module_binary); <Module>
   | ~ = par(assert_); <Assert>
   | ~ = par(register); <>

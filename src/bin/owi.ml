@@ -21,7 +21,7 @@ let run_file exec filename =
   if not @@ Sys.file_exists filename then
     error_s "file `%s` doesn't exist" filename
   else
-    let* script = Parse.from_file ~filename in
+    let* script = Parse.script_from_file ~filename in
     exec script
 
 (* Command line *)

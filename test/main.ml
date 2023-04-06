@@ -14,7 +14,7 @@ let test_file ~optimize f =
   Format.printf "testing %s: `%a`... "
     (if optimize then "optimized file" else "file          ")
     Fpath.pp f;
-  match Owi.Parse.from_file ~filename:(Fpath.to_string f) with
+  match Owi.Parse.script_from_file ~filename:(Fpath.to_string f) with
   | Ok script -> begin
     match Owi.Script.exec script ~optimize with
     | Ok () as ok ->
