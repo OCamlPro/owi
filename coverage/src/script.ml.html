@@ -731,7 +731,7 @@ let run ~with_exhaustion ~optimize script =
       | <span data-count="1156">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
         Log.debug "*** assert_malformed_quote@\n";
         <span data-count="1156">l</span>et* () =
-          match Parse.from_string (String.conca<span data-count="1156">t</span> "\n" m) with
+          match Parse.script_from_string (String.conca<span data-count="1156">t</span> "\n" m) with
           | <span data-count="1038">E</span>rror got -&gt; check_error ~expected ~got
           | <span data-count="118">O</span>k [ Module m ] -&gt; (
             match Check.module_ m with
@@ -761,7 +761,7 @@ let run ~with_exhaustion ~optimize script =
         <span data-count="2990">O</span>k link_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
         Log.debug "*** assert_invalid_quote@\n";
-        <span data-count="0">l</span>et got = Parse.from_string (String.conca<span data-count="0">t</span> "\n" m) in
+        <span data-count="0">l</span>et got = Parse.script_from_string (String.conca<span data-count="0">t</span> "\n" m) in
         <span data-count="0">l</span>et* () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">O</span>k link_state
       | <span data-count="166">A</span>ssert (Assert_unlinkable (m, expected)) -&gt;
