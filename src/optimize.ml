@@ -105,9 +105,7 @@ let rec optimize_expr expr =
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
     try
-      let result =
-        Interpret.exec_itruncf [ Value.of_instr c ] nn nn' sx
-      in
+      let result = Interpret.exec_itruncf [ Value.of_instr c ] nn nn' sx in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
@@ -120,9 +118,7 @@ let rec optimize_expr expr =
     :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
     :: tl -> begin
     try
-      let result =
-        Interpret.exec_itruncsatf [ Value.of_instr c ] nn nn' sx
-      in
+      let result = Interpret.exec_itruncsatf [ Value.of_instr c ] nn nn' sx in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
@@ -265,14 +261,14 @@ let locals_func body_expr =
   aux_expr body_expr;
   locals_hashtbl
 
-let locals_used_in_func locals nb_params body_expr =
+let locals_used_in_func locals nb_args body_expr =
   let loc_hashtbl = locals_func body_expr in
   let remove_local idx body_expr =
     let rec aux_instr instr =
       match instr with
-      | Local_get ind when nb_params <= idx && idx < ind -> Local_get (ind - 1)
-      | Local_set ind when nb_params <= idx && idx < ind -> Local_set (ind - 1)
-      | Local_tee ind when nb_params <= idx && idx < ind -> Local_tee (ind - 1)
+      | Local_get ind when ind >= idx -> Local_get (ind - 1)
+      | Local_set ind when ind >= idx -> Local_set (ind - 1)
+      | Local_tee ind when ind >= idx -> Local_tee (ind - 1)
       | Block (m, t, e) -> Block (m, t, aux_expr e)
       | Loop (m, t, e) -> Loop (m, t, aux_expr e)
       | If_else (m, t, e1, e2) -> If_else (m, t, aux_expr e1, aux_expr e2)
@@ -336,11 +332,8 @@ let locals_used_in_func locals nb_params body_expr =
     aux_expr body_expr
   in
   let loop (idx, param_l, body_expr) param : int * param list * expr =
-    match Hashtbl.find_opt loc_hashtbl idx with
-    | None ->
-      ( idx + 1
-      , (if nb_params <= idx then param_l else List.append param_l [ param ])
-      , remove_local idx body_expr )
+    match Hashtbl.find_opt loc_hashtbl (idx + nb_args) with
+    | None -> (idx + 1, param_l, remove_local (idx + nb_args) body_expr)
     | Some _ -> (idx + 1, List.append param_l [ param ], body_expr)
   in
   let _, l, b = List.fold_left loop (0, [], body_expr) locals in
@@ -349,8 +342,8 @@ let locals_used_in_func locals nb_params body_expr =
 let optimize_func func =
   let { type_f; locals; body; id } = func in
   let pt, _ = type_f in
-  let nb_params = List.length pt in
-  let locals, body = locals_used_in_func locals nb_params body in
+  let nb_args = List.length pt in
+  let locals, body = locals_used_in_func locals nb_args body in
   let body = optimize_expr body in
   { type_f; locals; body; id }
 
