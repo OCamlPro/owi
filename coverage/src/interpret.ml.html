@@ -3757,22 +3757,22 @@ let exec_vfunc stack (func : Env.t' Value.Func.t) =
   | <span data-count="4746">e</span>xception Trap msg -&gt; Error msg
   | <span data-count="0">e</span>xception Stack_overflow -&gt; Error "call stack exhausted"
 
-let module_ (module_ : Link.module_to_run) =
+let modul (modul : Link.module_to_run) =
   <span data-count="2655">L</span>og.debug0 "interpreting ...@\n";
   <span data-count="2655">t</span>ry
     List.iter
       (fun to_run -&gt;
         <span data-count="990">l</span>et end_stack, count =
-          exec_expr module_.env [||] Stack.empty to_run None
+          exec_expr modul.env [||] Stack.empty to_run None
         in
         <span data-count="922">L</span>og.profile "Exec module %s@.%a@."
-          (Option.valu<span data-count="922">e</span> module_.modul.id ~default:"anonymous")
+          (Option.valu<span data-count="922">e</span> modul.modul.id ~default:"anonymous")
           State.print_count count;
         <span data-count="922">m</span>atch end_stack with
         | <span data-count="922">[</span>] -&gt; ()
         | <span data-count="0">_</span> :: _ -&gt; Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
-      module_.to_run;
+      modul.to_run;
     <span data-count="2587">O</span>k ()
   with
   | <span data-count="68">T</span>rap msg -&gt; Error msg

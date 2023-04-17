@@ -239,7 +239,7 @@ let empty_env () =
   ; globals = false
   }
 
-let module_ m =
+let modul m =
   <span data-count="5929">l</span>et add_global =
     let seen = Hashtbl.create 512 in
     <span data-count="5929">f</span>unction
@@ -312,7 +312,7 @@ let module_ m =
       m.fields
   in
 
-  <span data-count="5867">O</span>k ()
+  <span data-count="5867">O</span>k m
 </code></pre>
       </div>
     </div>

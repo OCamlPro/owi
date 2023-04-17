@@ -722,7 +722,7 @@ let run ~with_exhaustion ~optimize script =
         <span data-count="68">l</span>et* m, link_state =
           Compile.until_lin<span data-count="68">k</span> link_state ~optimize ~name:None m
         in
-        <span data-count="68">l</span>et* () = check_error_resul<span data-count="68">t</span> expected (Interpret.module<span data-count="68">_</span> m) in
+        <span data-count="68">l</span>et* () = check_error_resul<span data-count="68">t</span> expected (Interpret.modu<span data-count="68">l</span> m) in
         <span data-count="68">O</span>k link_state
       | <span data-count="1472">A</span>ssert (Assert_malformed_binary _) -&gt;
         Log.debug "*** assert_malformed_binary@\n";
@@ -734,9 +734,9 @@ let run ~with_exhaustion ~optimize script =
           match Parse.script_from_string (String.conca<span data-count="1156">t</span> "\n" m) with
           | <span data-count="1038">E</span>rror got -&gt; check_error ~expected ~got
           | <span data-count="118">O</span>k [ Module m ] -&gt; (
-            match Check.module_ m with
+            match Check.modul m with
             | <span data-count="52">E</span>rror got -&gt; check_error ~expected ~got
-            | <span data-count="66">O</span>k () -&gt; (
+            | <span data-count="66">O</span>k m -&gt; (
               match Simplify.modul m with
               | <span data-count="66">E</span>rror got -&gt; check_error ~expected ~got
               | <span data-count="0">O</span>k _m -&gt;
