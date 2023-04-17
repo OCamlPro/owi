@@ -405,12 +405,15 @@ let err buf msg =
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
-  | bad_num | bad_id | bad_name -> err buf "unknown operator"
+  | bad_num | bad_id | bad_name ->
+    let operator = Utf8.lexeme buf in
+    err buf (Format.sprintf "unknown operator %s" operator)
   | num -> NUM (Utf8.lexeme buf)
-  | operator -> (
+  | operator -> begin
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator
-    with Not_found -> err buf "unknown operator" )
+    with Not_found -> err buf (Format.sprintf "unknown operator %s" operator)
+  end
   | ";;" ->
     single_comment buf;
     token buf
