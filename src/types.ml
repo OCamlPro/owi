@@ -104,7 +104,12 @@ module Make (M : sig
 
   type ('pt, 'rt) block_type
 
-  val pp_block_type : Format.formatter -> ('pt, 'rt) block_type -> unit
+  val pp_block_type :
+       (Format.formatter -> 'pt -> unit)
+    -> (Format.formatter -> 'rt -> unit)
+    -> Format.formatter
+    -> ('pt, 'rt) block_type
+    -> unit
 end) =
 struct
   (** Structure *)
@@ -380,17 +385,6 @@ struct
 
     let func_type _fmt (_l, _r) = failwith "TODO"
 
-    let block_type = M.pp_block_type
-
-    let block_type_opt fmt = function
-      | None -> ()
-      | Some bt -> block_type fmt bt
-
-    let limits fmt { min; max } =
-      match max with
-      | None -> Format.fprintf fmt "%d" min
-      | Some max -> Format.fprintf fmt "%d %d" min max
-
     let num_type fmt = function
       | I32 -> Format.fprintf fmt "i32"
       | I64 -> Format.fprintf fmt "i64"
@@ -418,14 +412,38 @@ struct
 
     let ref_type fmt (n, ht) = Format.fprintf fmt "%a %a" heap_type ht null n
 
+    let val_type fmt = function
+      | Num_type t -> num_type fmt t
+      | Ref_type t -> ref_type fmt t
+
+    let param fmt (id, vt) =
+      Format.fprintf fmt "(param %a %a)" id_opt id val_type vt
+
+    let param_type fmt params =
+      Format.pp_print_list
+        ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+        param fmt params
+
+    let result_ fmt vt = Format.fprintf fmt "(result %a)" val_type vt
+
+    let result_type fmt results =
+      Format.pp_print_list ~pp_sep:Format.pp_print_space result_ fmt results
+
+    let block_type fmt bt = M.pp_block_type param_type result_type fmt bt
+
+    let block_type_opt fmt = function
+      | None -> ()
+      | Some bt -> block_type fmt bt
+
+    let limits fmt { min; max } =
+      match max with
+      | None -> Format.fprintf fmt "%d" min
+      | Some max -> Format.fprintf fmt "%d %d" min max
+
     let table_type fmt (mt, rt) =
       Format.fprintf fmt "%a %a" limits mt ref_type rt
 
     let mut fmt = function Const -> () | Var -> Format.fprintf fmt "mut"
-
-    let val_type fmt = function
-      | Num_type t -> num_type fmt t
-      | Ref_type t -> ref_type fmt t
 
     let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
 
@@ -503,11 +521,6 @@ struct
     let nn fmt = function
       | S32 -> Format.fprintf fmt "32"
       | S64 -> Format.fprintf fmt "64"
-
-    let result_ fmt vt = Format.fprintf fmt "(result %a)" val_type vt
-
-    let result_type fmt results =
-      Format.pp_print_list ~pp_sep:Format.pp_print_space result_ fmt results
 
     (* TODO: when offset is 0 then do not print anything, if offset is N (memargN) then print nothing ? *)
     let memarg fmt { offset; align } =
@@ -676,14 +689,6 @@ struct
         ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
         func fmt funcs
 
-    let param fmt (id, vt) =
-      Format.fprintf fmt "(param %a %a)" id_opt id val_type vt
-
-    let param_type fmt params =
-      Format.pp_print_list
-        ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
-        param fmt params
-
     let start fmt start = Format.fprintf fmt "(start %a)" indice start
 
     let mem fmt (id, ty) =
@@ -801,9 +806,11 @@ module Symbolic = struct
       | Bt_raw of (indice option * ('pt * 'rt))
     (* the indice option is the optional typeuse, if it's some it must be equal to the func_type *)
 
-    let pp_block_type _fmt _v =
-      (* TODO *)
-      ()
+    let pp_block_type pp_param_type pp_result_type fmt v =
+      match v with
+      | Bt_ind ind -> Format.fprintf fmt "(type %a)" pp_indice ind
+      | Bt_raw (_ind, (pt, rt)) ->
+        Format.fprintf fmt "%a %a" pp_param_type pt pp_result_type rt
   end
 
   include Make (Arg)
@@ -955,7 +962,7 @@ module Symbolic = struct
       | MImport i -> import fmt i
       | MExport e -> export fmt e
 
-    let module_ fmt m =
+    let modul fmt m =
       Format.fprintf fmt "(module %a@\n  @[<v>%a@]@\n)" id_opt m.id
         (Format.pp_print_list
            ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
@@ -1021,16 +1028,16 @@ module Symbolic = struct
       | Assert_trap (a, f) ->
         Format.fprintf fmt {|(assert_trap %a "%s")|} action a f
       | Assert_trap_module (m, f) ->
-        Format.fprintf fmt {|(assert_trap_module %a "%s")|} module_ m f
+        Format.fprintf fmt {|(assert_trap_module %a "%s")|} modul m f
       | Assert_invalid (m, msg) ->
         Format.fprintf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-          module_ m msg
+          modul m msg
       | Assert_unlinkable (m, msg) ->
         Format.fprintf fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-          module_ m msg
+          modul m msg
       | Assert_malformed (m, msg) ->
         Format.fprintf fmt "(assert_malformed@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)"
-          module_ m msg
+          modul m msg
       | Assert_malformed_quote (ls, msg) ->
         Format.fprintf fmt
           "(assert_malformed_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" strings ls
@@ -1048,7 +1055,7 @@ module Symbolic = struct
           msg
 
     let cmd fmt = function
-      | Module m -> module_ fmt m
+      | Module m -> modul fmt m
       | Assert a -> assert_ fmt a
       | Register (s, name) -> register fmt (s, name)
       | Action _a -> Format.fprintf fmt "<action>"
@@ -1118,7 +1125,8 @@ module Simplified = struct
 
     type ('pt, 'rt) block_type = 'pt * 'rt
 
-    let pp_block_type _fmt _v = (* TODO *) ()
+    let pp_block_type pp_param_type pp_result_type fmt (pt, rt) =
+      Format.fprintf fmt "%a %a" pp_param_type pt pp_result_type rt
   end
 
   include Make (Arg)
@@ -1180,53 +1188,31 @@ module Simplified = struct
   module Pp = struct
     include Pp
 
-    let id fmt = Option.iter (fun id -> Format.fprintf fmt "@ %s" id)
+    let id fmt = Option.iter (fun id -> Format.fprintf fmt " $%s" id)
 
-    let func fmt (func : (func, _) runtime) =
-      match func with
-      | Local func -> begin
-        match func.id with
-        | None -> Format.fprintf fmt "local"
-        | Some id -> Format.fprintf fmt "$%s" id
-      end
+    let func fmt (f : (func, _) runtime) =
+      match f with
+      | Local f -> Format.fprintf fmt "%a" func f
       | Imported { modul; name; _ } -> Format.fprintf fmt "%s.%s" modul name
 
-    (*
-    let global fmt (g : global) =
-      Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_
-        expr g.init
-        *)
-
-    let global fmt (func : (global, _) runtime) =
-      match func with
-      | Local func -> begin
-        match func.id with
-        | None -> Format.fprintf fmt "local"
-        | Some id -> Format.fprintf fmt "$%s" id
-      end
-      | Imported { modul; name; _ } -> Format.fprintf fmt "%s.%s" modul name
-
-    let indexed f fmt indexed =
-      Format.fprintf fmt "%i: %a" indexed.index f indexed.value
+    let indexed f fmt indexed = Format.fprintf fmt "%a" f indexed.value
 
     let lst f fmt l =
-      Format.fprintf fmt "[%a]"
-        (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ", ") f)
-        l
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n") f)
+        fmt (List.rev l)
 
     let funcs fmt (funcs : _ runtime Named.t) =
       lst (indexed func) fmt funcs.values
 
-    let globals fmt (globals : _ runtime Named.t) =
-      lst (indexed global) fmt globals.values
-
     let export fmt (export : export) =
       Format.fprintf fmt "%s: %a" export.name indice export.id
 
-    let simplified_module fmt (m : modul) : unit =
-      Format.fprintf fmt
-        "@[<hov 2>(simplified_module%a@ @[<hov 2>(func %a)@]@ @[<hov 2>(global \
-         %a)@]@ @[<hov 2>(export func %a)@]@@ )@]"
-        id m.id funcs m.func globals m.global (lst export) m.exports.func
+    let start fmt = function
+      | None -> ()
+      | Some ind -> Format.fprintf fmt "(start %a)" indice ind
+
+    let modul fmt (m : modul) : unit =
+      Format.fprintf fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func
+        start m.start
   end
 end

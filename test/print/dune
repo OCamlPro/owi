@@ -1,0 +1,12 @@
+(executable
+  (name print_simplified)
+  (modules print_simplified)
+  (libraries owi))
+
+(executable
+  (name print_symbolic)
+  (modules print_symbolic)
+  (libraries owi))
+
+(cram
+  (deps print_symbolic.exe print_simplified.exe m.wast))

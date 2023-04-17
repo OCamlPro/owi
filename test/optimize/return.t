@@ -46,7 +46,7 @@ return instructions:
   stack        : [  ]
   running instr: i32.const 0
   stack        : [ i32.const 0 ]
-  running instr: return_call_indirect 0 
+  running instr: return_call_indirect 0  (result i32)
   calling func : func return
   stack        : [  ]
   running instr: i32.const 42

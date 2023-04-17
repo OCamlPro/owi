@@ -1191,22 +1191,22 @@ let exec_vfunc stack (func : Env.t' Value.Func.t) =
   | exception Trap msg -> Error msg
   | exception Stack_overflow -> Error "call stack exhausted"
 
-let module_ (module_ : Link.module_to_run) =
+let modul (modul : Link.module_to_run) =
   Log.debug0 "interpreting ...@\n";
   try
     List.iter
       (fun to_run ->
         let end_stack, count =
-          exec_expr module_.env [||] Stack.empty to_run None
+          exec_expr modul.env [||] Stack.empty to_run None
         in
         Log.profile "Exec module %s@.%a@."
-          (Option.value module_.modul.id ~default:"anonymous")
+          (Option.value modul.modul.id ~default:"anonymous")
           State.print_count count;
         match end_stack with
         | [] -> ()
         | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
-      module_.to_run;
+      modul.to_run;
     Ok ()
   with
   | Trap msg -> Error msg

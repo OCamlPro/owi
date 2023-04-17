@@ -19,7 +19,7 @@ let empty_env () =
   ; globals = false
   }
 
-let module_ m =
+let modul m =
   let add_global =
     let seen = Hashtbl.create 512 in
     function
@@ -92,4 +92,4 @@ let module_ m =
       m.fields
   in
 
-  Ok ()
+  Ok m

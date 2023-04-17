@@ -9,14 +9,14 @@ if then else instruction:
   running instr: call 0
   calling func : func start
   stack        : [  ]
-  running instr: block   <expr>
+  running instr: block   (result i32) <expr>
   stack        : [  ]
   running instr: i32.const 42
   stack        : [ i32.const 42 ]
   stack        : [ i32.const 42 ]
   running instr: drop
   stack        : [  ]
-  running instr: block   <expr>
+  running instr: block   (result i32) <expr>
   stack        : [  ]
   running instr: i32.const 24
   stack        : [ i32.const 24 ]

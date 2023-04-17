@@ -1,5 +1,8 @@
 (** Utility functions to compile a module until a given step. *)
 
+val until_check :
+    Types.Symbolic.modul -> (Types.Symbolic.modul, string) result
+
 val until_simplify :
   Types.Symbolic.modul -> (Types.Simplified.modul, string) result
 

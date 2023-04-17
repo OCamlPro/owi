@@ -154,7 +154,7 @@ let run ~with_exhaustion ~optimize script =
         let* m, link_state =
           Compile.until_link link_state ~optimize ~name:None m
         in
-        let* () = check_error_result expected (Interpret.module_ m) in
+        let* () = check_error_result expected (Interpret.modul m) in
         Ok link_state
       | Assert (Assert_malformed_binary _) ->
         Log.debug "*** assert_malformed_binary@\n";
@@ -166,9 +166,9 @@ let run ~with_exhaustion ~optimize script =
           match Parse.script_from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module m ] -> (
-            match Check.module_ m with
+            match Check.modul m with
             | Error got -> check_error ~expected ~got
-            | Ok () -> (
+            | Ok m -> (
               match Simplify.modul m with
               | Error got -> check_error ~expected ~got
               | Ok _m ->
