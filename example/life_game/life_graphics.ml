@@ -74,7 +74,7 @@ let module_to_run, link_state =
 
 (* let's run it ! First module to be interpreted *)
 let () =
-  match Interpret.module_ module_to_run with
+  match Interpret.modul module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 
@@ -94,6 +94,6 @@ let module_to_run =
 
 (* let's run it ! it will animate the game of life in a graphics window *)
 let () =
-  match Interpret.module_ module_to_run with
+  match Interpret.modul module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
