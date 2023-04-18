@@ -11,7 +11,7 @@
 (executable
  (name runweb)
  (modules runweb content)
- (libraries cohttp-lwt-unix conduit-lwt))
+ (libraries tiny_httpd))
 
 (rule
  (target content.ml)
