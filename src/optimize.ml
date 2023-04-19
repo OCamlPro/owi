@@ -155,6 +155,8 @@ let rec optimize_expr expr =
     optimize_expr tl
   | Local_set x :: Local_get y :: tl when x = y ->
     optimize_expr (Local_tee x :: tl)
+  | Local_get _ :: Drop :: tl -> optimize_expr tl
+  | Global_get _ :: Drop :: tl -> optimize_expr tl
   | (Br _ as br) :: _tl -> [ br ]
   | I32_const c :: Br_if l :: tl -> begin
     match c with 0l -> optimize_expr tl | _ -> [ Br l ]
@@ -341,10 +343,10 @@ let locals_used_in_func locals nb_args body_expr =
 
 let optimize_func func =
   let { type_f; locals; body; id } = func in
+  let body = optimize_expr body in
   let pt, _ = type_f in
   let nb_args = List.length pt in
   let locals, body = locals_used_in_func locals nb_args body in
-  let body = optimize_expr body in
   { type_f; locals; body; id }
 
 let optimize_runtime_func f =
