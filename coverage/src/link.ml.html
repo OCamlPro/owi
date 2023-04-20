@@ -1422,11 +1422,11 @@ module Env = struct
   let add_elem id elem env = <span data-count="1274">{</span> env with elem = IMap.ad<span data-count="1274">d</span> id elem env.elem }
 
   let get_global (env : t) id =
-    <span data-count="1270">m</span>atch IMap.find_opt id env.globals with
+    <span data-count="1269">m</span>atch IMap.find_opt id env.globals with
     | <span data-count="0">N</span>one -&gt;
       Log.debug "%a@." pp env;
       <span data-count="0">E</span>rror "unknown global"
-    | <span data-count="1270">S</span>ome v -&gt; Ok v
+    | <span data-count="1269">S</span>ome v -&gt; Ok v
 
   let get_memory (env : t) id =
     <span data-count="1853539">m</span>atch IMap.find_opt id env.memories with

@@ -393,7 +393,7 @@ exception Empty
 
 let empty = []
 
-let push s v = <span data-count="81993969">v</span> :: s
+let push s v = <span data-count="81993967">v</span> :: s
 
 let push_bool s b = <span data-count="16122126">p</span>ush s (I32 (if b then <span data-count="1951614">1</span>l else <span data-count="14170512">0</span>l))
 
@@ -420,7 +420,7 @@ let pp fmt (s : 'env t) =
 
 let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70292232">h</span>d :: tl -&gt; (hd, tl)
 
-let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="583">_</span>hd :: tl -&gt; tl
+let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="581">_</span>hd :: tl -&gt; tl
 
 let pop_i32 s =
   <span data-count="4892109">l</span>et hd, tl = pop s in

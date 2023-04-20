@@ -2951,17 +2951,17 @@ let exec_freinterpreti stack nn nn' =
   end
 
 let init_local (_id, t) : Env.t' Value.t =
-  <span data-count="777">m</span>atch t with
-  | <span data-count="260">N</span>um_type I32 -&gt; I32 Int32.zero
+  <span data-count="773">m</span>atch t with
+  | <span data-count="258">N</span>um_type I32 -&gt; I32 Int32.zero
   | <span data-count="236">N</span>um_type I64 -&gt; I64 Int64.zero
-  | <span data-count="164">N</span>um_type F32 -&gt; F32 Float32.zero
+  | <span data-count="162">N</span>um_type F32 -&gt; F32 Float32.zero
   | <span data-count="112">N</span>um_type F64 -&gt; F64 Float64.zero
   | <span data-count="5">R</span>ef_type (_null, rt) -&gt; Value.ref_null rt
 
 (* TODO move to module Env *)
 let mem_0 = 0
 
-let ( let* ) o f = <span data-count="15367875">R</span>esult.fold ~ok:f ~error:trap o
+let ( let* ) o f = <span data-count="15367874">R</span>esult.fold ~ok:f ~error:trap o
 
 let get_memory (env : Env.t) idx =
   <span data-count="1852992">l</span>et* mem = Env.get_memor<span data-count="1852992">y</span> env idx in
@@ -3091,7 +3091,7 @@ module State = struct
     <span data-count="11481756">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="11481756">e</span> 0 }
 
   let count_instruction state =
-    <span data-count="112669929">s</span>tate.count.instructions &lt;- state.count.instructions + 1
+    <span data-count="112669925">s</span>tate.count.instructions &lt;- state.count.instructions + 1
 
   let enter_function_count count func_name func =
     <span data-count="11654192">l</span>et c =
@@ -3203,14 +3203,14 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   <span data-count="1602040">e</span>xec_vfunc ~return state func
 
 let exec_instr instr (state : State.exec_state) =
-  <span data-count="112669929">S</span>tate.count_instruction state;
-  <span data-count="112669929">l</span>et stack = state.stack in
+  <span data-count="112669925">S</span>tate.count_instruction state;
+  <span data-count="112669925">l</span>et stack = state.stack in
   let env = state.env in
   let locals = state.locals in
-  let st stack = <span data-count="83838960">{</span> state with stack } in
+  let st stack = <span data-count="83838956">{</span> state with stack } in
   Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-  <span data-count="112669929">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
-  <span data-count="112669929">m</span>atch instr with
+  <span data-count="112669925">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
+  <span data-count="112669925">m</span>atch instr with
   | <span data-count="2290">R</span>eturn -&gt; State.return state
   | <span data-count="206">N</span>op -&gt; state
   | <span data-count="146">U</span>nreachable -&gt; trap "unreachable"
@@ -3283,8 +3283,8 @@ let exec_instr instr (state : State.exec_state) =
   | <span data-count="18">R</span>ef_func i -&gt;
     let* f = Env.get_fun<span data-count="18">c</span> env i in
     <span data-count="18">s</span>t @@ Stack.pus<span data-count="18">h</span> stack (Value.ref_fun<span data-count="18">c</span> f)
-  | <span data-count="571">D</span>rop -&gt; st @@ Stack.dro<span data-count="571">p</span> stack
-  | <span data-count="33358672">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="33358672">h</span> stack locals.(i)
+  | <span data-count="569">D</span>rop -&gt; st @@ Stack.dro<span data-count="569">p</span> stack
+  | <span data-count="33358671">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="33358671">h</span> stack locals.(i)
   | <span data-count="1844702">L</span>ocal_set i -&gt;
     let v, stack = Stack.pop stack in
     <span data-count="1844702">l</span>ocals.(i) &lt;- v;
@@ -3380,9 +3380,9 @@ let exec_instr instr (state : State.exec_state) =
     let v, stack = Stack.pop stack in
     <span data-count="791045">l</span>ocals.(i) &lt;- v;
     <span data-count="791045">s</span>t @@ Stack.pus<span data-count="791045">h</span> stack v
-  | <span data-count="182">G</span>lobal_get i -&gt;
-    let* g = Env.get_globa<span data-count="182">l</span> env i in
-    <span data-count="182">s</span>t @@ Stack.pus<span data-count="182">h</span> stack g.value
+  | <span data-count="181">G</span>lobal_get i -&gt;
+    let* g = Env.get_globa<span data-count="181">l</span> env i in
+    <span data-count="181">s</span>t @@ Stack.pus<span data-count="181">h</span> stack g.value
   | <span data-count="64">G</span>lobal_set i -&gt;
     let* global = Env.get_globa<span data-count="64">l</span> env i in
     <span data-count="64">i</span>f global.mut = Const then <span data-count="0">L</span>og.er<span data-count="0">r</span> "Can't set const global";
@@ -3709,9 +3709,9 @@ let exec_instr instr (state : State.exec_state) =
     <span data-count="0">s</span>t @@ stack
 
 let rec loop (state : State.exec_state) =
-  <span data-count="114213642">l</span>et state =
+  <span data-count="114213638">l</span>et state =
     match state.pc with
-    | <span data-count="112669929">i</span>nstr :: pc -&gt; exec_inst<span data-count="112664033">r</span> instr { state with pc }
+    | <span data-count="112669925">i</span>nstr :: pc -&gt; exec_inst<span data-count="112664029">r</span> instr { state with pc }
     | <span data-count="1543713">[</span>] -&gt;
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
       <span data-count="1543713">S</span>tate.end_bloc<span data-count="1500537">k</span> state
