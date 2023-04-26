@@ -5,8 +5,8 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $l1
+    drop
     local.get $l2
-    i32.add
     drop
   )
 
@@ -15,8 +15,6 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $l1
-    i32.const 0
-    i32.add
     drop
   )
 
@@ -25,8 +23,6 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $l2
-    i32.const 0
-    i32.add
     drop
   )
 
@@ -35,8 +31,6 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $a1
-    i32.const 0
-    i32.add
     drop
   )
 
@@ -45,8 +39,6 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $a2
-    i32.const 0
-    i32.add
     drop
   )
 
@@ -55,8 +47,6 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $a3
-    i32.const 0
-    i32.add
     drop
   )
 
@@ -65,8 +55,8 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $l2
+    drop
     local.get $a1
-    i32.add    
     drop
   )
 
@@ -75,8 +65,8 @@
     (local $l1 i32)
     (local $l2 i32)
     local.get $a1
+    drop
     local.get $a2
-    i32.add
     drop
   )
 

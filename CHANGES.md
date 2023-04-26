@@ -1,6 +1,7 @@
 ## unreleased
 
 - add an advanced example based on the Conway's Game of Life
+- add some new optimizations
 - add function to directly parse a module instead of a script
 - add a basic optimization mode
 - add a profiling mode

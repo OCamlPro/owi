@@ -19,4 +19,5 @@
   print_simplified.exe
   print_optimized.exe
   m.wast
-  locals.wast))
+  locals.wast
+  locals_drop.wast))
