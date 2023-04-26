@@ -1,4 +1,4 @@
-# owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
+# [🐌] owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
 
 [owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
 
@@ -178,3 +178,5 @@ We only list proposals that reached phase 3 at least.
 [Extended Constant Expressions]: https://github.com/WebAssembly/extended-const
 [Relaxed SIMD]: https://github.com/WebAssembly/relaxed-simd
 [JS Promise Integration]: https://github.com/WebAssembly/js-promise-integration
+
+[🐌]: https://invidious.zapashcanon.fr/watch?v=XgK9Fd8ikxk
