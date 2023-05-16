@@ -226,13 +226,13 @@ let group (modul : Symbolic.modul) : (grouped_module, string) Result.t =
       let function_type, type_checks =
         match func.type_f with
         | Bt_ind _ -> (fields.function_type, fields.type_checks)
-        | Bt_raw (id, type_) ->
+        | Bt_raw (id, typ) ->
           let type_checks =
             match id with
             | None -> fields.type_checks
-            | Some id -> (id, type_) :: fields.type_checks
+            | Some id -> (id, typ) :: fields.type_checks
           in
-          (type_ :: fields.function_type, type_checks)
+          (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
       let func = { value = Local func; index } :: fields.func in
@@ -291,7 +291,7 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 
 type assigned_module =
   { id : string option
-  ; type_ : str_type Named.t
+  ; typ : str_type Named.t
   ; global : (Symbolic.global, global_type) runtime Named.t
   ; table : (table, table_type) runtime Named.t
   ; mem : (mem, limits) runtime Named.t
@@ -350,17 +350,17 @@ end = struct
     let acc = List.fold_left assign_type empty_acc (List.rev modul.typ) in
     let assign_heap_type
       ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
-      type_ =
-      let type_ = Def_func_t (convert_func_type type_) in
-      match TypeMap.find_opt type_ all_types with
+      typ =
+      let typ = Def_func_t (convert_func_type typ) in
+      match TypeMap.find_opt typ all_types with
       | Some _id -> acc
       | None ->
         let id = last_assigned_int in
         let last_assigned_int = last_assigned_int + 1 in
-        let all_types = TypeMap.add type_ id all_types in
+        let all_types = TypeMap.add typ id all_types in
         let func_types =
-          match type_ with
-          | Def_func_t _ftype -> { index = id; value = type_ } :: func_types
+          match typ with
+          | Def_func_t _ftype -> { index = id; value = typ } :: func_types
           | Def_array_t (_mut, _storage_type) -> func_types
           | Def_struct_t _ -> func_types
         in
@@ -410,7 +410,7 @@ end = struct
     | Some _ -> Error "TODO: Simplify.check_type_id"
 
   let run (modul : grouped_module) : (assigned_module, string) Result.t =
-    let type_ = assign_types modul in
+    let typ = assign_types modul in
     let* global =
       name "global"
         ~get_name:(get_runtime_name (fun ({ id; _ } : Symbolic.global) -> id))
@@ -437,10 +437,10 @@ end = struct
     let* data =
       name "data" ~get_name:(fun (data : Symbolic.data) -> data.id) modul.data
     in
-    let* () = list_iter (check_type_id type_) modul.type_checks in
+    let* () = list_iter (check_type_id typ) modul.type_checks in
     Ok
       { id = modul.id
-      ; type_
+      ; typ
       ; global
       ; table
       ; mem
@@ -486,7 +486,7 @@ module Rewrite_indices = struct
       | Local global ->
         if imported_only then Error "unknown global"
         else
-          let mut, val_type = global.type_ in
+          let mut, val_type = global.typ in
           let val_type = convert_val_type val_type in
           Ok (mut, val_type)
     in
@@ -522,7 +522,7 @@ module Rewrite_indices = struct
     let bt_some_to_raw : Symbolic.block_type -> (block_type, string) Result.t =
       function
       | Symbolic.Arg.Bt_ind ind -> begin
-        match get "unknown type" modul.type_ (Some ind) with
+        match get "unknown type" modul.typ (Some ind) with
         | Ok { value = Def_func_t t'; _ } -> Ok t'
         | Error _ as e -> e
         | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
@@ -534,7 +534,7 @@ module Rewrite_indices = struct
         | Some ind ->
           (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
           let* t' =
-            match get "unknown type" modul.type_ (Some ind) with
+            match get "unknown type" modul.typ (Some ind) with
             | Ok { value = Def_func_t t'; _ } -> Ok t'
             | Error _ as e -> e
             | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
@@ -580,7 +580,7 @@ module Rewrite_indices = struct
     let _find_mem id = find "unknown memory" modul.mem id in
     let find_data id = find "unknown data segment" modul.data id in
     let find_elem id = find "unknown elem segment" modul.elem id in
-    let find_type id = find "unknown type" modul.type_ id in
+    let find_type id = find "unknown type" modul.typ id in
 
     let rec body (loop_count, block_ids) :
       Symbolic.instr -> (instr, string) Result.t = function
@@ -835,10 +835,10 @@ module Rewrite_indices = struct
         | Var -> Error "constant expression required"
       end
       | Array_new_canon t ->
-        let* t = find "unknown type" modul.type_ (Some t) in
+        let* t = find "unknown type" modul.typ (Some t) in
         ok @@ Array_new_canon t
       | Array_new_canon_default t ->
-        let* t = find "unknown type" modul.type_ (Some t) in
+        let* t = find "unknown type" modul.typ (Some t) in
         ok @@ Array_new_canon_default t
       | Symbolic.I31_new -> Ok I31_new
       | i ->
@@ -853,7 +853,7 @@ module Rewrite_indices = struct
     match block_type with
     | Symbolic.Arg.Bt_ind id ->
       let* t =
-        match get "unknown type" modul.type_ (Some id) with
+        match get "unknown type" modul.typ (Some id) with
         | Ok { value = Def_func_t t'; _ } -> Ok t'
         | Error _ as e -> e
         | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
@@ -864,9 +864,9 @@ module Rewrite_indices = struct
   let rewrite_global (modul : assigned_module) (global : Symbolic.global) :
     (global, string) Result.t =
     let* init = rewrite_const_expr modul global.init in
-    let mut, val_type = global.type_ in
-    let type_ = (mut, convert_val_type val_type) in
-    let global = { id = global.id; init; type_ } in
+    let mut, val_type = global.typ in
+    let typ = (mut, convert_val_type val_type) in
+    let global = { id = global.id; init; typ } in
     Ok global
 
   let rewrite_elem (modul : assigned_module) (elem : Symbolic.elem) :
@@ -881,8 +881,8 @@ module Rewrite_indices = struct
         ok @@ Elem_active (Some indice, expr)
     in
     let* init = list_map (rewrite_const_expr modul) elem.init in
-    let type_ = convert_ref_type elem.type_ in
-    let elem = { init; mode; id = elem.id; type_ } in
+    let typ = convert_ref_type elem.typ in
+    let elem = { init; mode; id = elem.id; typ } in
     Ok elem
 
   let rewrite_data (modul : assigned_module) (data : Symbolic.data) :

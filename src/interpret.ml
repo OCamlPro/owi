@@ -621,7 +621,7 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   let fun_i, stack = Stack.pop_i32_to_int state.stack in
   let state = { state with stack } in
   let* t = Env.get_table state.env tbl_i in
-  let _null, ref_kind = t.type_ in
+  let _null, ref_kind = t.typ in
   if ref_kind <> Func_ht then trap "indirect call type mismatch";
   let func =
     match t.data.(fun_i) with

@@ -9,7 +9,7 @@ let until_simplify m =
 
 let until_typecheck m =
   let* m = until_simplify m in
-  let* () = Typecheck.module_ m in
+  let* () = Typecheck.modul m in
   Ok m
 
 let until_optimize ~optimize m =

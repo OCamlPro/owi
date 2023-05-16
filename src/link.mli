@@ -20,7 +20,7 @@ module Table : sig
     { id : int
     ; label : string option
     ; limits : Types.limits
-    ; type_ : Types.Simplified.ref_type
+    ; typ : Types.Simplified.ref_type
     ; mutable data : 'env table
     }
 

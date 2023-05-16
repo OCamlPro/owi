@@ -147,7 +147,7 @@ let ref_null' = function
   | Extern_ht -> Externref None
   | _ -> failwith "TODO ref_null' Value.ml"
 
-let ref_null type_ = Ref (ref_null' type_)
+let ref_null typ = Ref (ref_null' typ)
 
 let ref_func (f : 'env Func.t) : 'env t = Ref (Funcref (Some f))
 

@@ -754,7 +754,7 @@ struct
 
     let type_def fmt (id, t) = Format.fprintf fmt "%a%a" id_opt id sub_type t
 
-    let type_ fmt l =
+    let typ fmt l =
       (* TODO: special case for empty and singleton case to avoid a big rec printing *)
       Format.fprintf fmt "%a"
         (Format.pp_print_list
@@ -824,7 +824,7 @@ module Symbolic = struct
   let bt_raw i t = Arg.Bt_raw (i, t)
 
   type global =
-    { type_ : global_type
+    { typ : global_type
     ; init : expr
     ; id : string option
     }
@@ -846,7 +846,7 @@ module Symbolic = struct
 
   type elem =
     { id : string option
-    ; type_ : ref_type
+    ; typ : ref_type
     ; init : expr list
     ; mode : elem_mode
     }
@@ -907,8 +907,8 @@ module Symbolic = struct
     include Pp
 
     let global fmt (g : global) =
-      Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_
-        expr g.init
+      Format.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.typ expr
+        g.init
 
     let symb_indice_opt fmt = function None -> () | Some i -> indice fmt i
 
@@ -944,14 +944,14 @@ module Symbolic = struct
 
     let elem fmt (e : elem) =
       Format.fprintf fmt "@[<hov 2>(elem %a %a %a %a)@]" id_opt e.id elem_mode
-        e.mode ref_type e.type_
+        e.mode ref_type e.typ
         (Format.pp_print_list
            ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
            elemexpr )
         e.init
 
     let module_field fmt = function
-      | MType t -> type_ fmt t
+      | MType t -> typ fmt t
       | MGlobal g -> global fmt g
       | MTable t -> table fmt t
       | MMem m -> mem fmt m
@@ -1146,7 +1146,7 @@ module Simplified = struct
     }
 
   type global =
-    { type_ : global_type
+    { typ : global_type
     ; init : Const.expr
     ; id : string option
     }
@@ -1168,7 +1168,7 @@ module Simplified = struct
 
   type elem =
     { id : string option
-    ; type_ : ref_type
+    ; typ : ref_type
     ; init : Const.expr list
     ; mode : elem_mode
     }

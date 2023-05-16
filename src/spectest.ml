@@ -143,22 +143,22 @@ let m =
         ; MMem (Some "memory", { min = 1; max = Some 2 })
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
         ; MGlobal
-            { type_ = (Const, Num_type I32)
+            { typ = (Const, Num_type I32)
             ; init = [ I32_const 666l ]
             ; id = Some "global_i32"
             }
         ; MGlobal
-            { type_ = (Const, Num_type I64)
+            { typ = (Const, Num_type I64)
             ; init = [ I64_const 666L ]
             ; id = Some "global_i64"
             }
         ; MGlobal
-            { type_ = (Const, Num_type F32)
+            { typ = (Const, Num_type F32)
             ; init = [ F32_const Float32.zero ]
             ; id = Some "global_f32"
             }
         ; MGlobal
-            { type_ = (Const, Num_type F64)
+            { typ = (Const, Num_type F64)
             ; init = [ F64_const Float64.zero ]
             ; id = Some "global_f64"
             }

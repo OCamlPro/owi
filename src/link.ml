@@ -46,7 +46,7 @@ module Table = struct
     { id : int
     ; label : string option
     ; limits : limits
-    ; type_ : ref_type
+    ; typ : ref_type
     ; mutable data : 'env table
     }
 
@@ -60,7 +60,7 @@ module Table = struct
     let limits, ((_null, heap_type) as ref_type) = typ in
     let null = Value.ref_null' heap_type in
     let table = Array.make limits.min null in
-    { id = fresh (); label; limits; type_ = ref_type; data = table }
+    { id = fresh (); label; limits; typ = ref_type; data = table }
 
   let update table data = table.data <- data
 end
@@ -299,7 +299,7 @@ let eval_global ls env
   match global with
   | Types.Local global ->
     let* value = Const_interp.exec_expr env global.init in
-    let mut, typ = global.type_ in
+    let mut, typ = global.typ in
     let global : global = { value; label = global.id; mut; typ } in
     Ok global
   | Imported import -> load_global ls import
@@ -363,13 +363,12 @@ let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
 
 let load_table (ls : state) (import : table_type Types.imp) :
   (table, string) Result.t =
-  let type_ : table_type = import.desc in
+  let typ : table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
-  if table_types_are_compatible type_ (t.limits, t.type_) then Ok t
+  if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else
     error_s "incompatible import type for table %s %s expected %a got %a"
-      import.modul import.name Pp.table_type type_ Pp.table_type
-      (t.limits, t.type_)
+      import.modul import.name Pp.table_type typ Pp.table_type (t.limits, t.typ)
 
 let eval_table ls (table : (_, table_type) Types.runtime) :
   (table, string) Result.t =
@@ -396,10 +395,10 @@ let func_types_are_compatible a b =
 
 let load_func (ls : state) (import : func_type Types.imp) :
   (func, string) Result.t =
-  let type_ : func_type = import.desc in
+  let typ : func_type = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.typ func in
-  if func_types_are_compatible type_ type' then Ok func
+  if func_types_are_compatible typ type' then Ok func
   else Error "incompatible import type (Link.load_func)"
 
 let eval_func ls (finished_env : Env.t') func : (func, string) Result.t =

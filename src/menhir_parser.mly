@@ -847,20 +847,20 @@ let elem_list ==
   | ~ = ref_type; l = list(elem_expr); { ref_type, l }
 
 let elem ==
-  | ELEM; id = option(id); (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_passive } ]
+  | ELEM; id = option(id); (typ, init) = elem_list; {
+    [ MElem { id; typ; init; mode = Elem_passive } ]
   }
-  | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_active (Some table_use, offset) } ]
+  | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init) = elem_list; {
+    [ MElem { id; typ; init; mode = Elem_active (Some table_use, offset) } ]
   }
-  | ELEM; id = option(id); DECLARE; (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_declarative } ]
+  | ELEM; id = option(id); DECLARE; (typ, init) = elem_list; {
+    [ MElem { id; typ; init; mode = Elem_declarative } ]
   }
-  | ELEM; id = option(id); ~ = offset; (type_, init) = elem_list; {
-    [ MElem { id; type_; init; mode = Elem_active (Some (raw 0), offset) } ]
+  | ELEM; id = option(id); ~ = offset; (typ, init) = elem_list; {
+    [ MElem { id; typ; init; mode = Elem_active (Some (raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    [ MElem { id; type_ = (Null, Func_ht); init; mode = Elem_active (Some (raw 0), offset) } ]
+    [ MElem { id; typ = (Null, Func_ht); init; mode = Elem_active (Some (raw 0), offset) } ]
   }
 
 let table ==
@@ -894,7 +894,7 @@ let table_fields :=
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = List.length (List.flatten init) in
-    [ MElem { id = None; type_ = (Null, Func_ht); init; mode = Elem_active (None, []) }
+    [ MElem { id = None; typ = (Null, Func_ht); init; mode = Elem_active (None, []) }
     ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }
 
@@ -955,8 +955,8 @@ let global ==
   }
 
 let global_fields :=
-  | type_ = global_type; init = const_expr; {
-    [ MGlobal { type_; init; id = None } ]
+  | typ = global_type; init = const_expr; {
+    [ MGlobal { typ; init; id = None } ]
   }
   | (modul, name) = inline_import; ~ = global_type; {
     [ MImport { modul; name; desc = Import_global (None, global_type) } ]
