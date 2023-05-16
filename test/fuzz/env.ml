@@ -5,34 +5,30 @@ type t =
   { next_global : int
   ; next_fun : int
   ; next_local : int
-  ; globals_i32 : string list
-  ; globals_i64 : string list
+  ; globals : (string * global_type) list
   ; funcs : (string * block_type) list
+  ; fuel : int
   }
 
 let empty =
   { next_global = 0
   ; next_fun = 0
   ; next_local = 0
-  ; globals_i32 = []
-  ; globals_i64 = []
+  ; globals = []
   ; funcs = []
+  ; fuel = Param.initial_fuel
   }
 
 let v = ref empty
 
 let reset () = v := empty
 
-let add_global_i32 () =
+let add_global typ =
   let n = !v.next_global in
   let name = Format.sprintf "g%d" n in
-  v := { !v with next_global = succ n; globals_i32 = name :: !v.globals_i32 };
-  name
-
-let add_global_i64 () =
-  let n = !v.next_global in
-  let name = Format.sprintf "g%d" n in
-  v := { !v with next_global = succ n; globals_i64 = name :: !v.globals_i64 };
+  let globals = (name, typ) :: !v.globals in
+  let next_global = succ n in
+  v := { !v with next_global; globals };
   name
 
 let add_func typ =
@@ -40,3 +36,11 @@ let add_func typ =
   let name = Format.sprintf "f%d" n in
   v := { !v with next_fun = succ n; funcs = (name, typ) :: !v.funcs };
   name
+
+let use_fuel () = v := { !v with fuel = pred !v.fuel }
+
+let has_fuel () = !v.fuel > 0
+
+let has_no_fuel () = not (has_fuel ())
+
+let refill_fuel () = v := { !v with fuel = Param.initial_fuel }
