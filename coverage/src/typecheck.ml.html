@@ -1292,10 +1292,10 @@ module Env = struct
 
   let global_get i env =
     <span data-count="206">l</span>et value = get_value_at_indice i env.globals.values in
-    <span data-count="206">l</span>et _mut, type_ =
-      match value with <span data-count="196">L</span>ocal { type_; _ } -&gt; type_ | <span data-count="10">I</span>mported t -&gt; t.desc
+    <span data-count="206">l</span>et _mut, typ =
+      match value with <span data-count="196">L</span>ocal { typ; _ } -&gt; typ | <span data-count="10">I</span>mported t -&gt; t.desc
     in
-    type_
+    typ
 
   let func_get i env =
     <span data-count="1851">l</span>et value = get_value_at_indice i env.funcs.values in
@@ -1303,8 +1303,8 @@ module Env = struct
 
   let block_type_get i env = <span data-count="51296">L</span>ist.nth env.blocks i
 
-  let table_type_get_from_module i (module_ : Simplified.modul) =
-    <span data-count="730">l</span>et value = get_value_at_indice i module_.table.values in
+  let table_type_get_from_module i (modul : Simplified.modul) =
+    <span data-count="730">l</span>et value = get_value_at_indice i modul.table.values in
     <span data-count="730">m</span>atch value with <span data-count="660">L</span>ocal table -&gt; snd (sn<span data-count="660">d</span> table) | <span data-count="70">I</span>mported t -&gt; snd t.desc
 
   let table_type_get i env =
@@ -1313,7 +1313,7 @@ module Env = struct
 
   let elem_type_get i env =
     <span data-count="212">l</span>et value = get_value_at_indice i env.elems.values in
-    <span data-count="212">v</span>alue.type_
+    <span data-count="212">v</span>alue.typ
 
   let make ~params ~locals ~globals ~funcs ~result_type ~tables ~elems ~refs =
     <span data-count="11864">l</span>et l = List.mapi (fun i v -&gt; <span data-count="7411">(</span>i, v)) (params @ locals) in
@@ -1347,7 +1347,7 @@ let itype = function <span data-count="2566">S</span>32 -&gt; i32 | <span data-c
 
 let ftype = function <span data-count="1094">S</span>32 -&gt; f32 | <span data-count="1218">S</span>64 -&gt; f64
 
-let arraytype _module_ _i =
+let arraytype _modul _i =
   (* TODO *)
   <span data-count="0">f</span>32
 
@@ -1731,12 +1731,12 @@ let typecheck_const_instr (modul : modul) refs stack = function
     <span data-count="4172">S</span>tack.push [ Ref_type Func_ht ] stack
   | <span data-count="44">G</span>lobal_get i -&gt;
     let value = get_value_at_indice i modul.global.values in
-    <span data-count="44">l</span>et* _mut, type_ =
+    <span data-count="44">l</span>et* _mut, typ =
       match value with
       | <span data-count="0">L</span>ocal _ -&gt; Error "unknown global"
       | <span data-count="44">I</span>mported t -&gt; Ok t.desc
     in
-    <span data-count="44">S</span>tack.push [ typ_of_val_typ<span data-count="44">e</span> type_ ] stack
+    <span data-count="44">S</span>tack.push [ typ_of_val_typ<span data-count="44">e</span> typ ] stack
   | <span data-count="0">I</span>_binop (t, _op) -&gt;
     let t = itype t in
     <span data-count="0">l</span>et* stack = Stack.po<span data-count="0">p</span> [ t; t ] stack in
@@ -1757,11 +1757,11 @@ let typecheck_global (modul : modul) refs
   (global : (global, global_type) runtime indexed) =
   <span data-count="1252">m</span>atch global.value with
   | <span data-count="132">I</span>mported _ -&gt; Ok ()
-  | <span data-count="1120">L</span>ocal { type_; init; _ } -&gt; (
+  | <span data-count="1120">L</span>ocal { typ; init; _ } -&gt; (
     let* real_type = typecheck_const_exp<span data-count="1120">r</span> modul refs init in
     <span data-count="1120">m</span>atch real_type with
     | <span data-count="1112">[</span> real_type ] -&gt;
-      let expected = typ_of_val_type @@ sn<span data-count="1112">d</span> type_ in
+      let expected = typ_of_val_type @@ sn<span data-count="1112">d</span> typ in
       <span data-count="1112">i</span>f expected &lt;&gt; real_type then
         <span data-count="4">e</span>rror
         @@ Format.asprint<span data-count="4">f</span> "type mismatch (typecheck_global) got %a expected %a"
@@ -1770,7 +1770,7 @@ let typecheck_global (modul : modul) refs
     | <span data-count="8">_</span>whatever -&gt; Error "type mismatch (typecheck_global wrong num)" )
 
 let typecheck_elem modul refs (elem : elem indexed) =
-  <span data-count="1466">l</span>et _null, expected_type = elem.value.type_ in
+  <span data-count="1466">l</span>et _null, expected_type = elem.value.typ in
   let* () =
     list_ite<span data-count="1466">r</span>
       (fun init -&gt;
@@ -1806,7 +1806,7 @@ let typecheck_data modul refs (data : data indexed) =
     | <span data-count="302">[</span> _t ] -&gt; Ok ()
     | <span data-count="8">_</span>whatever -&gt; Error "type mismatch (typecheck_data)" )
 
-let module_ (modul : modul) =
+let modul (modul : modul) =
   <span data-count="5429">L</span>og.debug "typechecking ...@\n";
   <span data-count="5429">l</span>et refs = Hashtbl.create 512 in
   <span data-count="5429">l</span>et* () = list_ite<span data-count="5429">r</span> (typecheck_globa<span data-count="5429">l</span> modul refs) modul.global.values in

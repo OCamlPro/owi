@@ -3540,7 +3540,7 @@ struct
 
     let type_def fmt (id, t) = <span data-count="0">F</span>ormat.fprintf fmt "%a%a" id_opt id sub_type t
 
-    let type_ fmt l =
+    let typ fmt l =
       (* TODO: special case for empty and singleton case to avoid a big rec printing *)
       <span data-count="0">F</span>ormat.fprintf fmt "%a"
         (Format.pp_print_lis<span data-count="0">t</span>
@@ -3610,7 +3610,7 @@ module Symbolic = struct
   let bt_raw i t = <span data-count="15301">A</span>rg.Bt_raw (i, t)
 
   type global =
-    { type_ : global_type
+    { typ : global_type
     ; init : expr
     ; id : string option
     }
@@ -3632,7 +3632,7 @@ module Symbolic = struct
 
   type elem =
     { id : string option
-    ; type_ : ref_type
+    ; typ : ref_type
     ; init : expr list
     ; mode : elem_mode
     }
@@ -3693,8 +3693,8 @@ module Symbolic = struct
     include Pp
 
     let global fmt (g : global) =
-      <span data-count="0">F</span>ormat.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.type_
-        expr g.init
+      <span data-count="0">F</span>ormat.fprintf fmt "(global %a %a %a)" id_opt g.id global_type g.typ expr
+        g.init
 
     let symb_indice_opt fmt = function <span data-count="0">N</span>one -&gt; () | <span data-count="0">S</span>ome i -&gt; indice fmt i
 
@@ -3730,14 +3730,14 @@ module Symbolic = struct
 
     let elem fmt (e : elem) =
       <span data-count="0">F</span>ormat.fprintf fmt "@[&lt;hov 2&gt;(elem %a %a %a %a)@]" id_opt e.id elem_mode
-        e.mode ref_type e.type_
+        e.mode ref_type e.typ
         (Format.pp_print_lis<span data-count="0">t</span>
            ~pp_sep:(fun fmt () -&gt; <span data-count="0">F</span>ormat.fprintf fmt "@\n")
            elemexpr )
         e.init
 
     let module_field fmt = function
-      | <span data-count="0">M</span>Type t -&gt; type_ fmt t
+      | <span data-count="0">M</span>Type t -&gt; typ fmt t
       | <span data-count="0">M</span>Global g -&gt; global fmt g
       | <span data-count="0">M</span>Table t -&gt; table fmt t
       | <span data-count="0">M</span>Mem m -&gt; mem fmt m
@@ -3932,7 +3932,7 @@ module Simplified = struct
     }
 
   type global =
-    { type_ : global_type
+    { typ : global_type
     ; init : Const.expr
     ; id : string option
     }
@@ -3954,7 +3954,7 @@ module Simplified = struct
 
   type elem =
     { id : string option
-    ; type_ : ref_type
+    ; typ : ref_type
     ; init : Const.expr list
     ; mode : elem_mode
     }

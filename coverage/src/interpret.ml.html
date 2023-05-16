@@ -3187,7 +3187,7 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   <span data-count="1605668">l</span>et fun_i, stack = Stack.pop_i32_to_int state.stack in
   <span data-count="1605668">l</span>et state = { state with stack } in
   let* t = Env.get_tabl<span data-count="1605668">e</span> state.env tbl_i in
-  <span data-count="1605668">l</span>et _null, ref_kind = t.type_ in
+  <span data-count="1605668">l</span>et _null, ref_kind = t.typ in
   if ref_kind &lt;&gt; Func_ht then <span data-count="0">t</span>ra<span data-count="0">p</span> "indirect call type mismatch";
   <span data-count="1605668">l</span>et func =
     match t.data.(fun_i) with

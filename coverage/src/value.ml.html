@@ -500,7 +500,7 @@ let ref_null' = function
   | <span data-count="117">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">_</span> -&gt; failwith "TODO ref_null' Value.ml"
 
-let ref_null type_ = <span data-count="153">R</span>ef (ref_null<span data-count="153">'</span> type_)
+let ref_null typ = <span data-count="153">R</span>ef (ref_null<span data-count="153">'</span> typ)
 
 let ref_func (f : 'env Func.t) : 'env t = <span data-count="18">R</span>ef (Funcref (Some f))
 
