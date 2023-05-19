@@ -11,6 +11,25 @@ let expr_always_available =
   ; pair (const Nop) (const [ S.Nothing ])
   ]
 
+let expr_available_1_any =
+  [ pair (const Drop) (const [ S.Pop ]) ]
+
+let expr_available_1_i32 =
+  [ pair B.iunop_32 (const [ S.Nothing ]) ]
+
+let expr_available_2_i32 =
+  [ pair B.ibinop_32 (const [ S.Pop ]) ]
+
+(* let expr_available_3_i32 = [] *)
+
+let expr_available_1_i64 =
+  [ pair B.iunop_64 (const [ S.Nothing ]) ]
+
+let expr_available_2_i64 =
+  [ pair B.ibinop_64 (const [ S.Pop ]) ]
+
+(* let expr_available_3_i64 = [] *)
+
 let rec expr ~block_type ~stack =
   let _pt, rt =
     match block_type with
@@ -37,7 +56,13 @@ let rec expr ~block_type ~stack =
       (* TODO: complete this *)
       match stack with
       | Num_type I32 :: Num_type I32 :: _tl ->
-        [ pair (const (I_binop (S32, Add))) (const [ S.Pop ]) ]
+        expr_available_1_any @ expr_available_1_i32 @ expr_available_2_i32
+      | Num_type I64 :: Num_type I64 :: _tl ->
+        expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
+      | Num_type I32 :: _tl ->
+        expr_available_1_any @ expr_available_1_i32
+      | Num_type I64 :: _tl ->
+        expr_available_1_any @ expr_available_1_i64
       | _ -> []
     in
     let expr_available =
@@ -56,9 +81,12 @@ let global =
   let init = [ init ] in
   MGlobal { typ; init; id }
 
+let local = B.param
+
 let func =
+  Env.reset_locals ();
   Env.refill_fuel ();
-  let locals = [] in
+  let* locals = list local in
   let* type_f = B.block_type in
   let id = Some (Env.add_func type_f) in
   let+ body = [ expr ~block_type:type_f ~stack:[] ] in
