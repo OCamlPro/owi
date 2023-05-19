@@ -15,18 +15,26 @@ let expr_available_1_any =
   [ pair (const Drop) (const [ S.Pop ]) ]
 
 let expr_available_1_i32 =
-  [ pair B.iunop_32 (const [ S.Nothing ]) ]
+  [ pair B.iunop_32 (const [ S.Nothing ])
+  ; pair B.itestop_32 (const [ S.Nothing ])
+  ]
 
 let expr_available_2_i32 =
-  [ pair B.ibinop_32 (const [ S.Pop ]) ]
+  [ pair B.ibinop_32 (const [ S.Pop ])
+  ; pair B.irelop_32 (const [ S.Pop ])
+  ]
 
 (* let expr_available_3_i32 = [] *)
 
 let expr_available_1_i64 =
-  [ pair B.iunop_64 (const [ S.Nothing ]) ]
+  [ pair B.iunop_64 (const [ S.Nothing ])
+  ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ]
 
 let expr_available_2_i64 =
-  [ pair B.ibinop_64 (const [ S.Pop ]) ]
+  [ pair B.ibinop_64 (const [ S.Pop ])
+  ; pair B.irelop_64 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
+  ]
 
 (* let expr_available_3_i64 = [] *)
 

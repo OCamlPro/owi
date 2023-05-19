@@ -5,17 +5,39 @@ open Syntax
 
 let num_type = choose [ const I32; const I64 ]
 
+let sx = choose [ const U; const S ]
+
 let val_type =
   let+ nt = [ num_type ] in
   Num_type nt
 
 let mut = choose [ const Const; const Var ]
 
-let ibinop : ibinop gen =
+let ibinop =
   choose [ const (Add : ibinop); const (Sub : ibinop); const (Mul : ibinop)]
 
-let iunop : iunop gen =
-  choose [ const (Clz : iunop); const (Ctz : iunop); const (Popcnt : iunop)]
+let iunop = choose [ const Clz; const Ctz; const Popcnt]
+
+let itestop = const Eqz
+
+let ilt =
+  let+ s = [ sx ] in
+  (Lt s : irelop)
+
+let igt =
+  let+ s = [ sx ] in
+  (Gt s : irelop)
+
+let ile =
+  let+ s = [ sx ] in
+  (Le s : irelop)
+
+let ige =
+  let+ s = [ sx ] in
+  (Ge s : irelop)
+
+let irelop =
+  choose [ const (Eq : irelop); const (Ne : irelop); ilt; igt; ile; ige ]
 
 let const_i32 =
   let+ i = [ int32 ] in
@@ -40,6 +62,22 @@ let iunop_32 =
 let iunop_64 =
   let+ uop = [ iunop ] in
   I_unop (S64, uop)
+
+let itestop_32 =
+  let+ top = [ itestop ] in
+  I_testop (S32, top)
+
+let itestop_64 =
+  let+ top = [ itestop ] in
+  I_testop (S64, top)
+
+let irelop_32 =
+  let+ rop = [ irelop ] in
+  I_relop (S32, rop)
+
+let irelop_64 =
+  let+ rop = [ irelop ] in
+  I_relop (S64, rop)
 
 let const_of_num_type = function
   | I32 -> const_i32
