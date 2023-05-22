@@ -95,8 +95,9 @@ let const_of_val_type = function
 let global_type = pair mut val_type
 
 let param =
-  let id : string option gen = const None in
-  pair id val_type
+  let* typ = val_type in
+  let name = Env.add_local typ in
+  const (Some name, typ)
 
 let block_type =
   let param_type = list param in

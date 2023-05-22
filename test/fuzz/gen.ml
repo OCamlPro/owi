@@ -38,7 +38,7 @@ let expr_available_2_i64 =
 
 (* let expr_available_3_i64 = [] *)
 
-let rec expr ~block_type ~stack =
+let rec expr ~block_type ~stack ~locals =
   let _pt, rt =
     match block_type with
     | Arg.Bt_raw (_indice, (pt, rt)) -> (pt, rt)
@@ -78,7 +78,7 @@ let rec expr ~block_type ~stack =
     in
     let* i, ops = choose expr_available in
     let stack = S.apply_stack_ops stack ops in
-    let next = expr ~block_type ~stack in
+    let next = expr ~block_type ~stack ~locals in
     let i = const i in
     list_cons i next
 
@@ -92,12 +92,12 @@ let global =
 let local = B.param
 
 let func =
-  Env.reset_locals ();
-  Env.refill_fuel ();
   let* locals = list local in
   let* type_f = B.block_type in
   let id = Some (Env.add_func type_f) in
-  let+ body = [ expr ~block_type:type_f ~stack:[] ] in
+  let+ body = [ expr ~block_type:type_f ~stack:[] ~locals ] in
+  Env.reset_locals ();
+  Env.refill_fuel ();
   MFunc { type_f; locals; body; id }
 
 let fields =
@@ -105,7 +105,7 @@ let fields =
   let start =
     let type_f = Arg.Bt_raw (None, ([], [])) in
     let id = Some "start" in
-    let+ body = [ expr ~block_type:type_f ~stack:[] ] in
+    let+ body = [ expr ~block_type:type_f ~stack:[] ~locals:[] ] in
     MFunc { type_f; locals = []; body; id }
   in
   let funcs = list_cons start (list func) in
