@@ -9,7 +9,7 @@ let expr_always_available =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair (const Nop) (const [ S.Nothing ])
-  ; pair (const Unreachable) (const [ S.Nothing ])
+  (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
 
 let expr_available_1_any =
@@ -20,6 +20,8 @@ let expr_available_1_i32 =
   ; pair B.itestop_32 (const [ S.Nothing ])
   ; pair B.extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.extend_32_i32 (const [ S.Nothing ])
+  ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ]
 
 let expr_available_2_i32 =
@@ -33,6 +35,8 @@ let expr_available_1_i64 =
   [ pair B.iunop_64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.extend_64_i64 (const [ S.Nothing ])
+  ; pair B.f32_convert_i64 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ]
 
 let expr_available_2_i64 =
@@ -41,6 +45,26 @@ let expr_available_2_i64 =
   ]
 
 (* let expr_available_3_i64 = [] *)
+
+let expr_available_1_f32 =
+  [ pair B.funop_32 (const [ S.Nothing ]) ]
+
+let expr_available_2_f32 =
+  [ pair B.fbinop_32 (const [ S.Pop ])
+  ; pair B.frelop_32 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
+  ]
+
+(* let expr_available_3_f32 = [] *)
+
+let expr_available_1_f64 =
+  [ pair B.funop_64 (const [ S.Nothing ]) ]
+
+let expr_available_2_f64 =
+  [ pair B.fbinop_64 (const [ S.Pop ])
+  ; pair B.frelop_64 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
+  ]
+
+(* let expr_available_3_f64 = [] *)
 
 let rec expr ~block_type ~stack ~locals =
   let _pt, rt =
@@ -75,6 +99,16 @@ let rec expr ~block_type ~stack ~locals =
         expr_available_1_any @ expr_available_1_i32
       | Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64
+
+      | Num_type F32 :: Num_type F32 :: _tl ->
+        expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
+      | Num_type F64 :: Num_type F64 :: _tl ->
+        expr_available_1_any @ expr_available_1_f64 @ expr_available_2_f64
+      | Num_type F32 :: _tl ->
+        expr_available_1_any @ expr_available_1_f32
+      | Num_type F64 :: _tl ->
+        expr_available_1_any @ expr_available_1_f64
+
       | _ -> []
     in
     let expr_available =
