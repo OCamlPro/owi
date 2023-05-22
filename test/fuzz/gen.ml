@@ -9,6 +9,7 @@ let expr_always_available =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair (const Nop) (const [ S.Nothing ])
+  ; pair (const Unreachable) (const [ S.Nothing ])
   ]
 
 let expr_available_1_any =
@@ -17,6 +18,8 @@ let expr_available_1_any =
 let expr_available_1_i32 =
   [ pair B.iunop_32 (const [ S.Nothing ])
   ; pair B.itestop_32 (const [ S.Nothing ])
+  ; pair B.extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.extend_32_i32 (const [ S.Nothing ])
   ]
 
 let expr_available_2_i32 =
@@ -29,6 +32,7 @@ let expr_available_2_i32 =
 let expr_available_1_i64 =
   [ pair B.iunop_64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.extend_64_i64 (const [ S.Nothing ])
   ]
 
 let expr_available_2_i64 =
