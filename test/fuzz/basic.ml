@@ -13,8 +13,25 @@ let val_type =
 
 let mut = choose [ const Const; const Var ]
 
+let div =
+  let+ s = [ sx ] in
+  (Div s : ibinop)
+
+let rem =
+  let+ s = [ sx ] in
+  (Rem s : ibinop)
+
+let shr =
+  let+ s = [ sx ] in
+  (Shr s : ibinop)
+
 let ibinop =
-  choose [ const (Add : ibinop); const (Sub : ibinop); const (Mul : ibinop)]
+  choose [
+    const (Add : ibinop); const (Sub : ibinop); const (Mul : ibinop); div; rem;
+    const (And : ibinop); const (Or : ibinop); const (Xor : ibinop);
+    const (Shl : ibinop); shr;
+    const (Rotl : ibinop); const (Rotr : ibinop)
+  ]
 
 let iunop = choose [ const Clz; const Ctz; const Popcnt]
 
@@ -78,6 +95,16 @@ let irelop_32 =
 let irelop_64 =
   let+ rop = [ irelop ] in
   I_relop (S64, rop)
+
+let extend_i32 =
+  let+ s = [ sx ] in
+  I64_extend_i32 s
+
+let extend_32_i32 =
+  choose [const (I_extend8_s S32); const (I_extend16_s S32)]
+
+let extend_64_i64 =
+  choose [const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s]
 
 let const_of_num_type = function
   | I32 -> const_i32
