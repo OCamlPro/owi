@@ -101,10 +101,69 @@ let extend_i32 =
   I64_extend_i32 s
 
 let extend_32_i32 =
-  choose [const (I_extend8_s S32); const (I_extend16_s S32)]
+  choose [ const (I_extend8_s S32); const (I_extend16_s S32) ]
 
 let extend_64_i64 =
-  choose [const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s]
+  choose [ const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s ]
+
+let funop = choose [
+    const Abs; const Neg; const Sqrt;
+    const Ceil; const Floor; const Trunc; const Nearest
+  ]
+
+let fbinop = choose [
+  const Add; const Sub; const Mul;
+  const Div; const Min; const Max; const Copysign
+]
+
+let frelop = choose [
+  const Eq; const Ne; const Lt;
+  const Gt; const Le; const Ge
+]
+
+let fbinop_32 =
+  let+ bop = [ fbinop ] in
+  F_binop (S32, bop)
+
+let fbinop_64 =
+  let+ bop = [ fbinop ] in
+  F_binop (S64, bop)
+
+let funop_32 =
+  let+ uop = [ funop ] in
+  F_unop (S32, uop)
+
+let funop_64 =
+  let+ uop = [ funop ] in
+  F_unop (S64, uop)
+
+let frelop_32 =
+  let+ rop = [ frelop ] in
+  F_relop (S32, rop)
+
+let frelop_64 =
+  let+ rop = [ frelop ] in
+  F_relop (S64, rop)
+
+(* let const_f64 =
+  let+ f = [ float ] in
+  F64_const (Owi.Float64.of_float f) *)
+
+let f32_convert_i32 =
+  let+ s = [ sx ] in
+  F_convert_i (S32, S32, s)
+
+let f32_convert_i64 =
+  let+ s = [ sx ] in
+  F_convert_i (S32, S64, s)
+
+let f64_convert_i32 =
+  let+ s = [ sx ] in
+  F_convert_i (S64, S32, s)
+
+let f64_convert_i64 =
+  let+ s = [ sx ] in
+  F_convert_i (S64, S64, s)
 
 let const_of_num_type = function
   | I32 -> const_i32
