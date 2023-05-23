@@ -130,6 +130,16 @@ let rec expr ~block_type ~stack ~locals =
     let i = const i in
     list_cons i next
 
+
+(* | If_else of string option * block_type option * expr * expr *)
+
+let if_else =
+  let* typ = B.block_type in
+  let id = None in
+  let+ expr_then = [ expr ~block_type:typ ~stack:[] ~locals:[] ] in
+  let+ expr_else = [ expr ~block_type:typ ~stack:[] ~locals:[] ] in
+  If_else (id, Some typ, expr_then, expr_else)
+
 let global =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
