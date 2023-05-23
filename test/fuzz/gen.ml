@@ -11,11 +11,10 @@ let expr_always_available =
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
-  (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
+    (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
 
-let expr_available_1_any =
-  [ pair (const Drop) (const [ S.Pop ]) ]
+let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
 let expr_available_1_i32 =
   [ pair B.iunop_32 (const [ S.Nothing ])
@@ -28,9 +27,7 @@ let expr_available_1_i32 =
   ]
 
 let expr_available_2_i32 =
-  [ pair B.ibinop_32 (const [ S.Pop ])
-  ; pair B.irelop_32 (const [ S.Pop ])
-  ]
+  [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
 
 (* let expr_available_3_i32 = [] *)
 
@@ -114,18 +111,14 @@ let rec expr ~block_type ~stack ~locals =
         expr_available_1_any @ expr_available_1_i32 @ expr_available_2_i32
       | Num_type I64 :: Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
-      | Num_type I32 :: _tl ->
-        expr_available_1_any @ expr_available_1_i32
-      | Num_type I64 :: _tl ->
-        expr_available_1_any @ expr_available_1_i64
+      | Num_type I32 :: _tl -> expr_available_1_any @ expr_available_1_i32
+      | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64
       | Num_type F32 :: Num_type F32 :: _tl ->
         expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
       | Num_type F64 :: Num_type F64 :: _tl ->
         expr_available_1_any @ expr_available_1_f64 @ expr_available_2_f64
-      | Num_type F32 :: _tl ->
-        expr_available_1_any @ expr_available_1_f32
-      | Num_type F64 :: _tl ->
-        expr_available_1_any @ expr_available_1_f64
+      | Num_type F32 :: _tl -> expr_available_1_any @ expr_available_1_f32
+      | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64
       | _ -> []
     in
     let expr_available =
@@ -139,7 +132,7 @@ let rec expr ~block_type ~stack ~locals =
 
 let global =
   let* ((_mut, t) as typ) = B.global_type in
-  let+ init = [ B.const_of_val_type t ] in
+  let+ init = B.const_of_val_type t in
   let id = Some (Env.add_global typ) in
   let init = [ init ] in
   MGlobal { typ; init; id }
@@ -150,7 +143,7 @@ let func =
   let* locals = list local in
   let* type_f = B.block_type in
   let id = Some (Env.add_func type_f) in
-  let+ body = [ expr ~block_type:type_f ~stack:[] ~locals ] in
+  let+ body = expr ~block_type:type_f ~stack:[] ~locals in
   Env.reset_locals ();
   Env.refill_fuel ();
   MFunc { type_f; locals; body; id }
@@ -160,7 +153,7 @@ let fields =
   let start =
     let type_f = Arg.Bt_raw (None, ([], [])) in
     let id = Some "start" in
-    let+ body = [ expr ~block_type:type_f ~stack:[] ~locals:[] ] in
+    let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] in
     MFunc { type_f; locals = []; body; id }
   in
   let funcs = list_cons start (list func) in
@@ -169,5 +162,5 @@ let fields =
 let modul =
   let start = MStart (Raw 0) in
   let id = Some "m" in
-  let+ fields = [ fields ] in
+  let+ fields in
   { id; fields = start :: fields }
