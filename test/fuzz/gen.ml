@@ -5,7 +5,6 @@ module S = Type_stack
 module B = Basic
 
 let expr_always_available =
-  (* TODO: complete this *)
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
@@ -16,14 +15,15 @@ let expr_always_available =
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
-let expr_available_1_i32 =
+let expr_available_1_i32 if_else expr ~locals ~stack =
   [ pair B.iunop_32 (const [ S.Nothing ])
   ; pair B.itestop_32 (const [ S.Nothing ])
-  ; pair B.extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.extend_32_i32 (const [ S.Nothing ])
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; if_else expr ~locals ~stack
   ]
 
 let expr_available_2_i32 =
@@ -82,6 +82,25 @@ let expr_available_2_f64 =
 
 (* let expr_available_3_f64 = [] *)
 
+let if_else expr ~locals ~stack =   (* TODO: finish > bug typechecking + List.rev *)
+  match stack with 
+  | Num_type I32 :: _stack -> begin
+    let rt = [] in
+    (* let* rt = list B.val_type in *)
+    let pt = [] in
+    (*let pt = stack in*) (* TODO: take only a prefix *)
+    let typ1 = (Arg.Bt_raw (None, (List.rev_map (fun t -> None, t) pt, rt))) in
+    let typ2 = (Arg.Bt_raw (None, (List.rev_map (fun t -> None, t) pt, rt))) in
+    let pt =  List.rev pt in
+    let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals in
+    let* expr_else = expr ~block_type:typ1 ~stack:pt ~locals in
+    let instr = If_else (None, Some typ2, expr_then, expr_else) in
+    let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in 
+    let rt_descr = List.map (fun t -> S.Push t) rt in
+    pair (const instr) (const (pt_descr @ rt_descr))
+  end
+  | _ -> assert false
+
 let rec expr ~block_type ~stack ~locals =
   let _pt, rt =
     match block_type with
@@ -108,10 +127,10 @@ let rec expr ~block_type ~stack ~locals =
       (* TODO: complete this *)
       match stack with
       | Num_type I32 :: Num_type I32 :: _tl ->
-        expr_available_1_any @ expr_available_1_i32 @ expr_available_2_i32
+        expr_available_1_any @ expr_available_1_i32 if_else expr ~stack ~locals  @ expr_available_2_i32
       | Num_type I64 :: Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
-      | Num_type I32 :: _tl -> expr_available_1_any @ expr_available_1_i32
+      | Num_type I32 :: _tl -> expr_available_1_any @ expr_available_1_i32 if_else expr ~stack ~locals 
       | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64
       | Num_type F32 :: Num_type F32 :: _tl ->
         expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
@@ -129,16 +148,6 @@ let rec expr ~block_type ~stack ~locals =
     let next = expr ~block_type ~stack ~locals in
     let i = const i in
     list_cons i next
-
-
-(* | If_else of string option * block_type option * expr * expr *)
-
-let if_else =
-  let* typ = B.block_type in
-  let id = None in
-  let+ expr_then = [ expr ~block_type:typ ~stack:[] ~locals:[] ] in
-  let+ expr_else = [ expr ~block_type:typ ~stack:[] ~locals:[] ] in
-  If_else (id, Some typ, expr_then, expr_else)
 
 let global =
   let* ((_mut, t) as typ) = B.global_type in
