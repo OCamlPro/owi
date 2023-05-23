@@ -1,0 +1,235 @@
+open Crowbar
+open Owi
+open Owi.Types.Symbolic
+
+let list_len l : int gen =       (* TODO : check + chg name *)
+  let len = List.length l in
+  if len = 0 then const 0 else range (List.length l)
+
+let drop : expr gen = const [ Drop ]
+
+let nop : expr gen = const [ Nop ]
+
+let ibinop : Types.ibinop gen =
+  let open Types in
+  choose [ const (Add : ibinop); const (Sub : ibinop); const (Mul : ibinop) ]
+
+let num_type : Types.num_type gen =
+  let open Types in
+  choose [ const I32; const I64; const F32; const F64 ]
+
+let mut : Types.mut gen =
+  let open Types in
+  choose [ const Const; const Var ]
+
+let val_type : val_type gen =
+  choose [ map [ num_type ] (fun nt -> Num_type nt) (* TODO add Ref_type *) ]
+
+let global_type_const_i32 : global_type gen =
+  pair mut (map [ const Types.I32 ] (fun nt -> Num_type nt))
+
+let global_type_const_i64 : global_type gen =
+  pair mut (map [ const Types.I64 ] (fun nt -> Num_type nt))
+
+let global_type_const_f32 : global_type gen =
+  pair mut (map [ const Types.F32 ] (fun nt -> Num_type nt))
+
+let global_type_const_f64 : global_type gen =
+  pair mut (map [ const Types.F64 ] (fun nt -> Num_type nt))
+
+let const_i32 : expr gen = map [ int32 ] (fun i -> [ I32_const i ])
+
+let const_i64 : expr gen = map [ int64 ] (fun i -> [ I64_const i ])
+
+(* let const_f32 : instr gen =
+     map ([float]) (fun f -> F32_const f)
+   let const_f64 : instr gen =
+     map ([float]) (fun f -> F64_const f) *)
+
+let global_get_i32 : expr gen =
+  map
+    [ list_len !Env.v.globals_i32; (*nop*) const_i32 ]    (* supp le nop car ne met pas un i32 sur la stack *)
+    (fun len (*nope*) cst ->
+      if List.length !Env.v.globals_i32 = 0 then cst      (* si pas de globals, on met une const i32 *)
+      else [ Global_get (Symbolic (List.nth !Env.v.globals_i32 len)) ] )
+
+let global_get_i64 : expr gen =
+  map
+    [ list_len !Env.v.globals_i64; const_i64 ]
+    (fun len cst ->
+      if List.length !Env.v.globals_i64 = 0 then cst
+      else [ Global_get (Symbolic (List.nth !Env.v.globals_i64 len)) ] )
+
+let local_get_i32 : expr gen =
+  map
+    [ list_len !Env.v.locals_i32; const_i32 ]
+    (fun len cst ->
+      if List.length !Env.v.locals_i32 = 0 then cst
+      else [ Local_get (Symbolic (List.nth !Env.v.locals_i32 len)) ] )
+
+let local_get_i64 : expr gen =
+  map
+    [ list_len !Env.v.locals_i64; const_i64 ]
+    (fun len cst ->
+      if List.length !Env.v.locals_i64 = 0 then cst
+      else [ Local_get (Symbolic (List.nth !Env.v.locals_i64 len)) ] )
+
+let ibinop_32 : expr gen =
+  map [ const Types.S32; ibinop ] (fun c bop -> [ I_binop (c, bop) ])
+
+let ibinop_64 : expr gen =
+  map [ const Types.S64; ibinop ] (fun c bop -> [ I_binop (c, bop) ])
+
+let binop_i32 : expr gen =
+  (* map [ expr_push_i32; expr_push_i32; ibinop_32 ] (fun a b op -> a @ b @ op) *)
+  map [ const_i32; const_i32; ibinop_32 ] (fun a b op -> a @ b @ op)
+
+let expr_push_i32 : expr gen =
+  choose
+  [ const_i32
+  ; global_get_i32
+  ; local_get_i32
+  ; binop_i32
+  ]
+
+let binop_i64 : expr gen =
+  map [ const_i64; const_i64; ibinop_64 ] (fun a b op -> a @ b @ op)
+
+let expr_push_i64 : expr gen =
+  choose
+  [ const_i64
+  ; global_get_i64
+  ; local_get_i64
+  ; binop_i64
+  ]
+
+let expr_push : expr gen = choose [ expr_push_i32; expr_push_i64 ]
+
+let pop_i32 : expr gen = drop
+
+let pop_i64 : expr gen = drop
+
+let pop : expr gen = choose [ pop_i32; pop_i64 ]
+
+let mglobal_field_const_i32 : module_field gen =
+  map [ global_type_const_i32; const_i32 ] (fun gt c ->
+    let n = Env.add_global_i32 () in
+    MGlobal { type_ = gt; init = c; id = Some n } )
+
+let mglobal_field_const_i64 : module_field gen =
+  map [ global_type_const_i64; const_i64 ] (fun gt c ->
+    let n = Env.add_global_i64 () in
+    MGlobal { type_ = gt; init = c; id = Some n } )
+
+(* let mglobal_field_const_f32 : module_field gen =
+     map ([global_type_const_f32; const_f32]) (fun gt c -> MGlobal {type_ = gt; init = [c]; id = None})
+   let mglobal_field_const_f64 : module_field gen =
+     map ([global_type_const_f64; const_f64]) (fun gt c -> MGlobal {type_ = gt; init = [c]; id = None}) *)
+
+let mglobal_field : module_field gen =
+  choose
+    [ mglobal_field_const_i32
+    ; mglobal_field_const_i64
+      (* mglobal_field_const_f32;
+         mglobal_field_const_f64; *)
+    ]
+
+let mfunc_local_i32 : param gen =
+  let open Types in
+  map [const I32] (fun c ->
+    let n = Env.add_local_i32 () in
+    (Some n, Num_type c))
+
+let mfunc_local_i64 : param gen =
+  let open Types in
+  map [const I64] (fun c ->
+    let n = Env.add_local_i64 () in
+    (Some n, Num_type c))
+
+let mfunc_local : param gen =
+  choose
+    [ mfunc_local_i32
+    ; mfunc_local_i64
+    ]
+
+let mfunc_field : Types.Symbolic.module_field gen =
+  let mfunc_args = list1 mfunc_local in
+  let results = list val_type in
+  let mfunc_locals = list mfunc_local in
+  map [ mfunc_locals; mfunc_args; results; expr_push; pop ] (fun l a _ pu po ->  (* exit return and args for typing *)
+    let type_f = Arg.Bt_raw (None, (a, [])) in   (* ([], []) // (a, r) *)
+    let n = Env.add_func type_f in
+    Env.reset_locals (); (* TODO : OK ? *)
+    MFunc { type_f; locals = l; body = pu @ po; id = Some n } )
+
+let mfunc_start_field : module_field gen =
+  map
+    [ list_len !Env.v.funcs ]
+    (fun len ->
+      (* let s, _ = List.nth !Env.v.funcs len in *)
+      let s, bt = List.nth !Env.v.funcs len in
+      match bt with
+      | Bt_raw (None, (a, _)) -> 
+          let st = List.fold_left
+            (fun acc p -> match p with
+            | (_, Num_type I32) -> I32_const 0l :: acc
+            | (_, Num_type I64) -> I64_const 0L :: acc
+            | _ -> acc
+            )
+            [] a
+          in
+          MFunc {type_f = Bt_raw (None, ([], [])); locals = []; body = st @ [Call (Symbolic s)]; id = Some "start" }
+      | _ -> assert false
+    )
+
+let mstart_field : module_field gen = const (MStart (Symbolic "start"))
+
+let modul_field : module_field gen =
+  choose
+    [ mglobal_field
+      (* mfunc_field *)
+      (* exit: specific processing *)
+      (* TODO other fields *)
+    ]
+
+let modul : Types.Symbolic.modul gen =
+  let sid = option bytes in
+  let modul_fields = list modul_field in
+  let mfunc_fields = list1 mfunc_field in
+  map
+    [ sid; mfunc_fields; mfunc_start_field; mstart_field; modul_fields ]
+    (fun _ fu fst st fi -> { id = Some "modul"; fields = fi @ fu @ (fst :: st :: []) })
+
+(* in progress *)
+
+(* let indice : indice gen =
+   choose [
+     map ([bytes]) (fun b -> Symbolic b);
+     map ([int]) (fun i -> Raw i)
+   ] *)
+
+(*
+  let nullable : nullable gen =
+    choose [const No_null; const Null]
+  
+  let heap_type : heap_type gen =
+    choose [
+      const Any_ht;
+      const None_ht;
+      const Eq_ht;
+      const I31_ht;
+      const Struct_ht;
+      const Array_ht;
+      const Func_ht;
+      const No_func_ht;
+      const Extern_ht;
+      const No_extern_ht
+      (* TODO Def_ht of indice *)    
+    ]
+  
+  let ref_type : ref_type gen =
+    pair nullable heap_type
+  
+  let global_type : global_type gen =
+    pair mut val_type
+*)
