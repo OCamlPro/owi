@@ -106,7 +106,7 @@ let irelop_64 =
 
 let i32_wrap_i64 = const I32_wrap_i64
 
-let extend_i32 =
+let i64_extend_i32 =
   let+ sx in
   I64_extend_i32 sx
 

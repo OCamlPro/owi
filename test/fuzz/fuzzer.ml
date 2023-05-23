@@ -6,14 +6,21 @@ let check_optimized m =
   let simplified =
     match Compile.until_simplify m with Error e -> failwith e | Ok m -> m
   in
+  (match Typecheck.modul simplified with
+  | Ok () -> ()
+  | Error msg -> failwith msg);
   let regular, _link_state =
     match Link.modul Link.empty_state ~name:None simplified with
     | Error e -> failwith e
     | Ok m -> m
   in
+  let optimized = Optimize.modul simplified in 
+  (match Typecheck.modul optimized with
+  | Ok () -> ()
+  | Error msg -> failwith msg);
   let optimized, _link_state =
     match
-      Optimize.modul simplified |> Link.modul Link.empty_state ~name:None
+      simplified |> Link.modul Link.empty_state ~name:None
     with
     | Error e -> failwith e
     | Ok m -> m
