@@ -8,6 +8,8 @@ let expr_always_available =
   (* TODO: complete this *)
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
+  ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
+  ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
   (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
@@ -22,6 +24,7 @@ let expr_available_1_i32 =
   ; pair B.extend_32_i32 (const [ S.Nothing ])
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
+  ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ]
 
 let expr_available_2_i32 =
@@ -34,9 +37,11 @@ let expr_available_2_i32 =
 let expr_available_1_i64 =
   [ pair B.iunop_64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i32_wrap_i64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.extend_64_i64 (const [ S.Nothing ])
   ; pair B.f32_convert_i64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
+  ; pair B.f64_reinterpret_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ]
 
 let expr_available_2_i64 =
@@ -47,7 +52,14 @@ let expr_available_2_i64 =
 (* let expr_available_3_i64 = [] *)
 
 let expr_available_1_f32 =
-  [ pair B.funop_32 (const [ S.Nothing ]) ]
+  [ pair B.funop_32 (const [ S.Nothing ])
+  ; pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i64_trunc_f32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.i32_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i64_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.f64_promote_f32 (const [ S.Pop; S.Push (Num_type F64) ])
+  ; pair B.i32_reinterpret_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+  ]
 
 let expr_available_2_f32 =
   [ pair B.fbinop_32 (const [ S.Pop ])
@@ -57,7 +69,14 @@ let expr_available_2_f32 =
 (* let expr_available_3_f32 = [] *)
 
 let expr_available_1_f64 =
-  [ pair B.funop_64 (const [ S.Nothing ]) ]
+  [ pair B.funop_64 (const [ S.Nothing ])
+  ; pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i64_trunc_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.i32_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i64_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.f32_demote_f64 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; pair B.i64_reinterpret_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+  ]
 
 let expr_available_2_f64 =
   [ pair B.fbinop_64 (const [ S.Pop ])
@@ -99,7 +118,6 @@ let rec expr ~block_type ~stack ~locals =
         expr_available_1_any @ expr_available_1_i32
       | Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64
-
       | Num_type F32 :: Num_type F32 :: _tl ->
         expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
       | Num_type F64 :: Num_type F64 :: _tl ->
@@ -108,7 +126,6 @@ let rec expr ~block_type ~stack ~locals =
         expr_available_1_any @ expr_available_1_f32
       | Num_type F64 :: _tl ->
         expr_available_1_any @ expr_available_1_f64
-
       | _ -> []
     in
     let expr_available =

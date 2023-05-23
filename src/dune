@@ -42,8 +42,6 @@
   wutf8)
  (private_modules
   convert
-  float32
-  float64
   lexer
   menhir_parser
   spectest
