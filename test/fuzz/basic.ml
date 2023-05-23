@@ -3,7 +3,7 @@ open Owi.Types
 open Owi.Types.Symbolic
 open Syntax
 
-let num_type = choose [ const I32; const I64 ]
+let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
 let sx = choose [ const U; const S ]
 
@@ -96,6 +96,8 @@ let irelop_64 =
   let+ rop = [ irelop ] in
   I_relop (S64, rop)
 
+let i32_wrap_i64 = const I32_wrap_i64
+
 let extend_i32 =
   let+ s = [ sx ] in
   I64_extend_i32 s
@@ -145,9 +147,13 @@ let frelop_64 =
   let+ rop = [ frelop ] in
   F_relop (S64, rop)
 
-(* let const_f64 =
+let const_f32 =
   let+ f = [ float ] in
-  F64_const (Owi.Float64.of_float f) *)
+  F32_const (Owi.Float32.of_float f)
+
+let const_f64 =
+  let+ f = [ float ] in
+  F64_const (Owi.Float64.of_float f)
 
 let f32_convert_i32 =
   let+ s = [ sx ] in
@@ -165,12 +171,55 @@ let f64_convert_i64 =
   let+ s = [ sx ] in
   F_convert_i (S64, S64, s)
 
+let i32_trunc_f32 =
+  let+ s = [ sx ] in
+  I_trunc_f (S32, S32, s)
+
+let i32_trunc_f64 =
+  let+ s = [ sx ] in
+  I_trunc_f (S32, S64, s)
+
+let i64_trunc_f32 =
+  let+ s = [ sx ] in
+  I_trunc_f (S64, S32, s)
+
+let i64_trunc_f64 =
+  let+ s = [ sx ] in
+  I_trunc_f (S64, S64, s)
+
+let i32_trunc_sat_f32 =
+  let+ s = [ sx ] in
+  I_trunc_sat_f (S32, S32, s)
+
+let i32_trunc_sat_f64 =
+  let+ s = [ sx ] in
+  I_trunc_sat_f (S32, S64, s)
+
+let i64_trunc_sat_f32 =
+  let+ s = [ sx ] in
+  I_trunc_sat_f (S64, S32, s)
+
+let i64_trunc_sat_f64 =
+  let+ s = [ sx ] in
+  I_trunc_sat_f (S64, S64, s)
+
+let f32_demote_f64 = const F32_demote_f64
+
+let f64_promote_f32 = const F64_promote_f32
+
+let i32_reinterpret_f32 = const (I_reinterpret_f (S32, S32))
+
+let i64_reinterpret_f64 = const (I_reinterpret_f (S64, S64))
+
+let f32_reinterpret_i32 = const (F_reinterpret_i (S32, S32))
+
+let f64_reinterpret_i64 = const (F_reinterpret_i (S64, S64))
+
 let const_of_num_type = function
   | I32 -> const_i32
   | I64 -> const_i64
-  | _ ->
-    (* TODO: complete *)
-    assert false
+  | F32 -> const_f32
+  | F64 -> const_f64
 
 let const_of_val_type = function
   | Num_type nt -> const_of_num_type nt
