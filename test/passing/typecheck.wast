@@ -39,3 +39,27 @@
     i64.const 52
   )
 )
+
+;; fuzzer bug
+
+(assert_invalid
+ (module
+   (func
+     i32.const -1
+     i64.const 0
+     i32.const 1
+     (if  (param  i32) (param  i64)
+       (then
+         f32.reinterpret_i32
+         drop
+         drop
+       )
+       (else
+         drop
+         drop
+       )
+     )
+   )
+ )
+ "type mismatch"
+)
