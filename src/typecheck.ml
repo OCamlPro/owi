@@ -321,6 +321,9 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let pt, rt = Env.func_get i env in
     let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
+  | Call_ref bt ->
+    let* stack = Stack.pop_ref stack in
+    Stack.pop_push (Some bt) stack
   | Return_call i ->
     let pt, rt = Env.func_get i env in
     let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
@@ -340,6 +343,16 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call_indirect)"
+    else Ok [ any ]
+  | Return_call_ref (pt, rt) ->
+    let* stack = Stack.pop_ref stack in
+    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
+    if
+      not
+        (Stack.equal
+           (List.rev_map typ_of_val_type rt)
+           (List.rev_map typ_of_val_type env.result_type) )
+    then Error "type mismatch (return_call_ref)"
     else Ok [ any ]
   | Data_drop _i -> Ok stack
   | Table_init (ti, ei) ->
