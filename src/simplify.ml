@@ -632,6 +632,12 @@ module Rewrite_indices = struct
         let* tbl_i = find_table (Some tbl_i) in
         let* bt = bt_some_to_raw bt in
         ok @@ Return_call_indirect (tbl_i, bt)
+      | Call_ref bt ->
+        let* bt = bt_some_to_raw bt in
+        ok @@ Call_ref bt
+      | Return_call_ref bt ->
+        let* bt = bt_some_to_raw bt in
+        ok @@ Return_call_ref bt
       | Global_set id -> begin
         let* idx, mut = find_global modul ~imported_only:false (Some id) in
         match mut with

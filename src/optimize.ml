@@ -248,6 +248,8 @@ let locals_func body_expr =
     | Return_call_indirect (_, _)
     | Call _
     | Call_indirect (_, _)
+    | Call_ref _
+    | Return_call_ref _
     | Array_get _ | Array_get_u _ | Array_new_canon _
     | Array_new_canon_data (_, _)
     | Array_new_canon_default _
@@ -319,6 +321,8 @@ let locals_used_in_func locals nb_args body_expr =
       | Return_call_indirect (_, _)
       | Call _
       | Call_indirect (_, _)
+      | Call_ref _
+      | Return_call_ref _
       | Array_get _ | Array_get_u _ | Array_new_canon _
       | Array_new_canon_data (_, _)
       | Array_new_canon_default _

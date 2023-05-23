@@ -617,6 +617,22 @@ let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
     let state = { state with stack } in
     if return then State.return state else state
 
+let call_ref ~return (state : State.exec_state) typ_i =
+  let fun_ref, stack = Stack.pop_as_ref state.stack in
+  let state = { state with stack } in
+  let func =
+    match fun_ref with
+    | exception Invalid_argument _ -> trap "undefined element"
+    | Funcref (Some f) -> f
+    | Funcref None -> trap (Printf.sprintf "calling null function reference")
+    | _ -> trap "element type error"
+  in
+  let pt, rt = Value.Func.typ func in
+  let pt', rt' = typ_i in
+  if not (rt = rt' && List.equal p_type_eq pt pt') then
+    trap "indirect call type mismatch";
+  exec_vfunc ~return state func
+
 let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   let fun_i, stack = Stack.pop_i32_to_int state.stack in
   let state = { state with stack } in
@@ -1122,6 +1138,10 @@ let exec_instr instr (state : State.exec_state) =
     call_indirect ~return:false state (tbl_i, typ_i)
   | Return_call_indirect (tbl_i, typ_i) ->
     call_indirect ~return:true state (tbl_i, typ_i)
+  | Call_ref typ_i ->
+    call_ref ~return:false state typ_i
+  | Return_call_ref typ_i ->
+    call_ref ~return:true state typ_i
   | Array_new_canon _t ->
     let len, stack = Stack.pop_i32_to_int stack in
     let _default, stack = Stack.pop stack in

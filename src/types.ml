@@ -248,8 +248,10 @@ struct
     | Return
     | Return_call of indice
     | Return_call_indirect of indice * block_type
+    | Return_call_ref of block_type
     | Call of indice
     | Call_indirect of indice * block_type
+    | Call_ref of block_type
     (* Array instructions *)
     | Array_get of indice
     | Array_get_u of indice
@@ -630,9 +632,12 @@ struct
       | Return_call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "return_call_indirect %a %a" indice tbl_id block_type
           ty_id
+      | Return_call_ref ty_id -> Format.fprintf fmt "return_call_ref %a" block_type
+          ty_id
       | Call id -> Format.fprintf fmt "call %a" indice id
       | Call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
+      | Call_ref ty_id -> Format.fprintf fmt "call_ref %a" block_type ty_id
       | Array_new_canon id -> Format.fprintf fmt "array.new_canon %a" indice id
       | Array_new_canon_data (id1, id2) ->
         Format.fprintf fmt "array.new_canon_data %a %a" indice id1 indice id2
