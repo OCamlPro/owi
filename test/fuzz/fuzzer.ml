@@ -24,14 +24,16 @@ let check_optimized m =
   | Ok (), Ok () -> true
   | Error msg1, Error msg2 when msg1 = msg2 -> true
   | Error msg1, Error msg2 ->
-    Format.ksprintf
-      failwith
-      "module and optimized module interpretations throw different errors: %s / opti: %s"
+    Format.ksprintf failwith
+      "module and optimized module interpretations throw different errors: %s \
+       / opti: %s"
       msg1 msg2
   | Error msg, Ok () ->
-    Format.ksprintf failwith "only module interpretation throws an error: %s" msg
+    Format.ksprintf failwith "only module interpretation throws an error: %s"
+      msg
   | Ok (), Error msg ->
-    Format.ksprintf failwith "only optimized module interpretation throws an error: %s" msg
+    Format.ksprintf failwith
+      "only optimized module interpretation throws an error: %s" msg
 
 let is_optimized m = Crowbar.check (check_optimized m)
 
