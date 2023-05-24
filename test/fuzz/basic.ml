@@ -247,12 +247,12 @@ let const_of_val_type = function
 
 let global_type = pair mut val_type
 
-let param =
+let param env =
   let* typ = val_type in
-  let name = Env.add_local typ in
+  let name = Env.add_local env typ in
   const (Some name, typ)
 
-let block_type =
-  let+ param_type = list param
+let block_type env =
+  let+ param_type = list (param env)
   and+ result_type = list val_type in
   Arg.Bt_raw (None, (param_type, result_type))

@@ -15,7 +15,7 @@ let expr_always_available =
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
-let expr_available_1_i32 if_else expr ~locals ~stack =
+let expr_available_1_i32 if_else expr ~locals ~stack env =
   [ pair B.iunop_32 (const [ S.Nothing ])
   ; pair B.itestop_32 (const [ S.Nothing ])
   ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
@@ -23,7 +23,7 @@ let expr_available_1_i32 if_else expr ~locals ~stack =
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
-  ; if_else expr ~locals ~stack
+  ; if_else expr ~locals ~stack env
   ]
 
 let expr_available_2_i32 =
@@ -82,33 +82,35 @@ let expr_available_2_f64 =
 
 (* let expr_available_3_f64 = [] *)
 
-let if_else expr ~locals ~stack =   (* TODO: finish > bug typechecking + List.rev *)
-  match stack with 
+let if_else expr ~locals ~stack env =
+  (* TODO: finish > bug typechecking + List.rev *)
+  match stack with
   | Num_type I32 :: _stack -> begin
     let rt = [] in
     (* let* rt = list B.val_type in *)
     let pt = [] in
-    (*let pt = stack in*) (* TODO: take only a prefix *)
-    let typ1 = (Arg.Bt_raw (None, (List.rev_map (fun t -> None, t) pt, rt))) in
-    let typ2 = (Arg.Bt_raw (None, (List.rev_map (fun t -> None, t) pt, rt))) in
-    let pt =  List.rev pt in
-    let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals in
-    let* expr_else = expr ~block_type:typ1 ~stack:pt ~locals in
+    (*let pt = stack in*)
+    (* TODO: take only a prefix *)
+    let typ1 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
+    let typ2 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
+    let pt = List.rev pt in
+    let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals env in
+    let* expr_else = expr ~block_type:typ1 ~stack:pt ~locals env in
     let instr = If_else (None, Some typ2, expr_then, expr_else) in
-    let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in 
+    let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in
     let rt_descr = List.map (fun t -> S.Push t) rt in
     pair (const instr) (const (pt_descr @ rt_descr))
   end
   | _ -> assert false
 
-let rec expr ~block_type ~stack ~locals =
+let rec expr ~block_type ~stack ~locals env =
   let _pt, rt =
     match block_type with
     | Arg.Bt_raw (_indice, (pt, rt)) -> (pt, rt)
     | _ -> assert false
   in
-  Env.use_fuel ();
-  if Env.has_no_fuel () then
+  Env.use_fuel env;
+  if Env.has_no_fuel env then
     match (rt, stack) with
     | [], [] -> const [ Nop ]
     | rt, l ->
@@ -127,10 +129,14 @@ let rec expr ~block_type ~stack ~locals =
       (* TODO: complete this *)
       match stack with
       | Num_type I32 :: Num_type I32 :: _tl ->
-        expr_available_1_any @ expr_available_1_i32 if_else expr ~stack ~locals  @ expr_available_2_i32
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
+        @ expr_available_2_i32
       | Num_type I64 :: Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
-      | Num_type I32 :: _tl -> expr_available_1_any @ expr_available_1_i32 if_else expr ~stack ~locals 
+      | Num_type I32 :: _tl ->
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
       | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64
       | Num_type F32 :: Num_type F32 :: _tl ->
         expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
@@ -145,41 +151,42 @@ let rec expr ~block_type ~stack ~locals =
     in
     let* i, ops = choose expr_available in
     let stack = S.apply_stack_ops stack ops in
-    let next = expr ~block_type ~stack ~locals in
+    let next = expr ~block_type ~stack ~locals env in
     let i = const i in
     list_cons i next
 
-let global =
+let global env =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
-  let id = Some (Env.add_global typ) in
+  let id = Some (Env.add_global env typ) in
   let init = [ init ] in
   MGlobal { typ; init; id }
 
 let local = B.param
 
-let func =
-  let* locals = list local in
-  let* type_f = B.block_type in
-  let id = Some (Env.add_func type_f) in
-  let+ body = expr ~block_type:type_f ~stack:[] ~locals in
-  Env.reset_locals ();
-  Env.refill_fuel ();
+let func env =
+  let* locals = list (local env) in
+  let* type_f = B.block_type env in
+  let id = Some (Env.add_func env type_f) in
+  let+ body = expr ~block_type:type_f ~stack:[] ~locals env in
+  Env.reset_locals env;
+  Env.refill_fuel env;
   MFunc { type_f; locals; body; id }
 
-let fields =
-  let globals = list global in
-  let start =
+let fields env =
+  let globals = list (global env) in
+  let start_code =
     let type_f = Arg.Bt_raw (None, ([], [])) in
     let id = Some "start" in
-    let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] in
+    let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] env in
     MFunc { type_f; locals = []; body; id }
   in
-  let funcs = list_cons start (list func) in
+  let start = const @@ MStart (Raw 0) in
+  let funcs = list_cons start (list_cons start_code (list (func env))) in
   list_append globals funcs
 
 let modul =
-  let start = MStart (Raw 0) in
+  let env = Env.empty () in
   let id = Some "m" in
-  let+ fields in
-  { id; fields = start :: fields }
+  let+ fields = fields env in
+  { id; fields }
