@@ -52,7 +52,6 @@ let () =
   Crowbar.add_test ~name:"Optimize fuzzing" [ Gen.modul ] (fun m ->
     incr count;
     Format.fprintf fmt "Generating new module (%d/5000)...@\n" !count;
-    Env.reset ();
     Format.fprintf fmt "%a@\n" Owi.Types.Symbolic.Pp.modul m;
     Format.pp_print_flush fmt ();
     is_optimized m )

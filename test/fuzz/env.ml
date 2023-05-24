@@ -2,16 +2,16 @@ open Owi.Types.Symbolic
 open Crowbar
 
 type t =
-  { next_global : int
-  ; next_fun : int
-  ; next_local : int
-  ; globals : (string * global_type) list
-  ; locals : param list
-  ; funcs : (string * block_type) list
-  ; fuel : int
+  { mutable next_global : int
+  ; mutable next_fun : int
+  ; mutable next_local : int
+  ; mutable globals : (string * global_type) list
+  ; mutable locals : param list
+  ; mutable funcs : (string * block_type) list
+  ; mutable fuel : int
   }
 
-let empty =
+let empty () =
   { next_global = 0
   ; next_fun = 0
   ; next_local = 0
@@ -21,38 +21,33 @@ let empty =
   ; fuel = Param.initial_fuel
   }
 
-let v = ref empty
+let reset_locals env = env.locals <- []
 
-let reset () = v := empty
-
-let reset_locals () = v := { !v with locals = [] }
-
-let add_global typ =
-  let n = !v.next_global in
+let add_global env typ =
+  let n = env.next_global in
   let name = Format.sprintf "g%d" n in
-  let globals = (name, typ) :: !v.globals in
-  let next_global = succ n in
-  v := { !v with next_global; globals };
+  env.globals <- (name, typ) :: env.globals;
+  env.next_global <- succ n;
   name
 
-let add_local typ =
-  let n = !v.next_local in
+let add_local env typ =
+  let n = env.next_local in
   let name = Format.sprintf "l%d" n in
-  let locals = (Some name, typ) :: !v.locals in
-  let next_local = succ n in
-  v := { !v with next_local; locals };
+  env.locals <- (Some name, typ) :: env.locals;
+  env.next_local <- succ n;
   name
 
-let add_func typ =
-  let n = !v.next_fun in
+let add_func env typ =
+  let n = env.next_fun in
   let name = Format.sprintf "f%d" n in
-  v := { !v with next_fun = succ n; funcs = (name, typ) :: !v.funcs };
+  env.next_fun <- succ n;
+  env.funcs <- (name, typ) :: env.funcs;
   name
 
-let use_fuel () = v := { !v with fuel = pred !v.fuel }
+let use_fuel env = env.fuel <- pred env.fuel
 
-let has_fuel () = !v.fuel > 0
+let has_fuel env = env.fuel > 0
 
-let has_no_fuel () = not (has_fuel ())
+let has_no_fuel env = not (has_fuel env)
 
-let refill_fuel () = v := { !v with fuel = Param.initial_fuel }
+let refill_fuel env = env.fuel <- Param.initial_fuel
