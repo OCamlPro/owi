@@ -4,11 +4,12 @@ open Syntax
 module S = Type_stack
 module B = Basic
 
-let expr_always_available =
+let expr_always_available _env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
+  (* ; pair (B.global_i32 env) (const [ S.Push (Num_type I32) ]) *)
   ; pair (const Nop) (const [ S.Nothing ])
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
@@ -146,10 +147,10 @@ let rec expr ~block_type ~stack ~locals env =
       | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64
       | _ -> []
     in
-    let expr_available =
-      expr_always_available @ expr_available_with_current_stack
+    let expr_available env =
+      expr_always_available env @ expr_available_with_current_stack
     in
-    let* i, ops = choose expr_available in
+    let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in
     let next = expr ~block_type ~stack ~locals env in
     let i = const i in
@@ -186,7 +187,7 @@ let fields env =
   list_append globals funcs
 
 let modul =
-  let env = Env.empty () in
   let id = Some "m" in
+  let* env = const @@ Env.empty () in
   let+ fields = fields env in
   { id; fields }
