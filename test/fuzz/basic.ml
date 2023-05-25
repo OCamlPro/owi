@@ -233,6 +233,15 @@ let f32_reinterpret_i32 = const (F_reinterpret_i (S32, S32))
 
 let f64_reinterpret_i64 = const (F_reinterpret_i (S64, S64))
 
+let global_i32 env =
+  let globals = (Env.get_globals env I32) in
+  let len = List.length globals in
+  if len = 0 then const_i32
+  else
+    let+ idx = range len in
+    let (name,(_,_)) = List.nth globals idx in
+    Global_get (Symbolic name)
+
 let const_of_num_type = function
   | I32 -> const_i32
   | I64 -> const_i64

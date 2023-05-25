@@ -44,6 +44,15 @@ let add_func env typ =
   env.funcs <- (name, typ) :: env.funcs;
   name
 
+let get_globals env typ =
+  let is_typ global =
+    let (_,(_,v)) = global in
+    match v with
+    | Num_type nt -> nt = typ
+    | Ref_type _ -> false
+  in
+  List.filter is_typ env.globals
+
 let use_fuel env = env.fuel <- pred env.fuel
 
 let has_fuel env = env.fuel > 0
