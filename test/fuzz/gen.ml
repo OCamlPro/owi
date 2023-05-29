@@ -16,6 +16,10 @@ let expr_always_available env =
   @ (B.global_i64 env)
   @ (B.global_f32 env)
   @ (B.global_f64 env)
+  @ (B.local_i32 env)
+  @ (B.local_i64 env)
+  @ (B.local_f32 env)
+  @ (B.local_f64 env)
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
@@ -29,13 +33,15 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; if_else expr ~locals ~stack env
   ]
+  @ (B.local_set_i32 env) @ (B.local_tee_i32 env)
+  @ (B.global_set_i32 env)
 
 let expr_available_2_i32 =
   [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
 
 (* let expr_available_3_i32 = [] *)
 
-let expr_available_1_i64 =
+let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i32_wrap_i64 (const [ S.Pop; S.Push (Num_type I32) ])
@@ -44,6 +50,8 @@ let expr_available_1_i64 =
   ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f64_reinterpret_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ]
+  @ (B.local_set_i64 env) @ (B.local_tee_i64 env)
+  @ (B.global_set_i64 env)
 
 let expr_available_2_i64 =
   [ pair B.ibinop_64 (const [ S.Pop ])
@@ -52,7 +60,7 @@ let expr_available_2_i64 =
 
 (* let expr_available_3_i64 = [] *)
 
-let expr_available_1_f32 =
+let expr_available_1_f32 env =
   [ pair B.funop_32 (const [ S.Nothing ])
   ; pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_f32 (const [ S.Pop; S.Push (Num_type I64) ])
@@ -61,6 +69,8 @@ let expr_available_1_f32 =
   ; pair B.f64_promote_f32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.i32_reinterpret_f32 (const [ S.Pop; S.Push (Num_type I32) ])
   ]
+  @ (B.local_set_f32 env) @ (B.local_tee_f32 env)
+  @ (B.global_set_f32 env)
 
 let expr_available_2_f32 =
   [ pair B.fbinop_32 (const [ S.Pop ])
@@ -69,7 +79,7 @@ let expr_available_2_f32 =
 
 (* let expr_available_3_f32 = [] *)
 
-let expr_available_1_f64 =
+let expr_available_1_f64 env =
   [ pair B.funop_64 (const [ S.Nothing ])
   ; pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_f64 (const [ S.Pop; S.Push (Num_type I64) ])
@@ -78,6 +88,8 @@ let expr_available_1_f64 =
   ; pair B.f32_demote_f64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.i64_reinterpret_f64 (const [ S.Pop; S.Push (Num_type I64) ])
   ]
+  @ (B.local_set_f64 env) @ (B.local_tee_f64 env)
+  @ (B.global_set_f64 env)
 
 let expr_available_2_f64 =
   [ pair B.fbinop_64 (const [ S.Pop ])
@@ -139,17 +151,17 @@ let rec expr ~block_type ~stack ~locals env =
         @ expr_available_1_i32 if_else expr ~stack ~locals env
         @ expr_available_2_i32
       | Num_type I64 :: Num_type I64 :: _tl ->
-        expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
+        expr_available_1_any @ expr_available_1_i64 env @ expr_available_2_i64
       | Num_type I32 :: _tl ->
         expr_available_1_any
         @ expr_available_1_i32 if_else expr ~stack ~locals env
-      | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64
+      | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64 env
       | Num_type F32 :: Num_type F32 :: _tl ->
-        expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
+        expr_available_1_any @ expr_available_1_f32 env @ expr_available_2_f32
       | Num_type F64 :: Num_type F64 :: _tl ->
-        expr_available_1_any @ expr_available_1_f64 @ expr_available_2_f64
-      | Num_type F32 :: _tl -> expr_available_1_any @ expr_available_1_f32
-      | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64
+        expr_available_1_any @ expr_available_1_f64 env @ expr_available_2_f64
+      | Num_type F32 :: _tl -> expr_available_1_any @ expr_available_1_f32 env
+      | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64 env
       | _ -> []
     in
     let expr_available env =
