@@ -44,12 +44,21 @@ let add_func env typ =
   env.funcs <- (name, typ) :: env.funcs;
   name
 
-let get_globals ntyp env =
+let get_globals ntyp env ~only_mut =
   let is_typ global =
-    let _, (_, v) = global in
-    match v with Num_type nt -> nt = ntyp | Ref_type _ -> false
+    let _, (m, v) = global in
+    match v with
+    | Num_type nt -> nt = ntyp && (not only_mut || (only_mut && m = Owi.Types.Var))
+    | Ref_type _ -> false
   in
   List.filter is_typ env.globals
+
+let get_locals ntyp env =
+  let is_typ local =
+    let (_, v) = local in
+    match v with Num_type nt -> nt = ntyp | Ref_type _ -> false
+  in
+  List.filter is_typ env.locals
 
 let use_fuel env = env.fuel <- pred env.fuel
 

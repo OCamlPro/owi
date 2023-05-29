@@ -236,9 +236,9 @@ let f32_reinterpret_i32 = const (F_reinterpret_i (S32, S32))
 let f64_reinterpret_i64 = const (F_reinterpret_i (S64, S64))
 
 let global ntyp env =
-  let globals = Env.get_globals ntyp env in
+  let globals = Env.get_globals ntyp env ~only_mut:false in
   List.map
-    (fun (name, (_, _)) ->
+    ( fun (name, (_, _)) ->
       pair (const (Global_get (Symbolic name))) (const [ S.Push (Num_type ntyp) ]) )
     globals
 
@@ -249,6 +249,69 @@ let global_i64 = global I64
 let global_f32 = global F32
 
 let global_f64 = global F64
+
+let global_set ntyp env =
+  let globals = Env.get_globals ntyp env ~only_mut:true in
+  List.map
+    ( fun (name, (_, _)) ->
+      pair (const (Global_set (Symbolic name))) (const [ S.Pop ]) )
+    globals
+
+let global_set_i32 = global_set I32
+
+let global_set_i64 = global_set I64
+
+let global_set_f32 = global_set F32
+
+let global_set_f64 = global_set F64
+
+let local ntyp env =
+  let locals = Env.get_locals ntyp env in
+  List.map
+    ( fun (name, _) -> match name with
+      | Some n -> pair (const (Local_get (Symbolic n))) (const [ S.Push (Num_type ntyp) ])
+      | None -> assert false )
+    locals
+
+let local_i32 = local I32
+
+let local_i64 = local I64
+
+let local_f32 = local F32
+
+let local_f64 = local F64
+
+let local_set ntyp env =
+  let locals = Env.get_locals ntyp env in
+  List.map
+    ( fun (name, _) -> match name with
+      | Some n -> pair (const (Local_set (Symbolic n))) (const [ S.Pop ])
+      | None -> assert false )
+    locals
+
+let local_set_i32 = local_set I32
+
+let local_set_i64 = local_set I64
+
+let local_set_f32 = local_set F32
+
+let local_set_f64 = local_set F64
+
+let local_tee ntyp env =
+  let locals = Env.get_locals ntyp env in
+  List.map
+    ( fun (name, _) -> match name with
+      | Some n -> pair (const (Local_tee (Symbolic n))) (const [ S.Nothing ])
+      | None -> assert false )
+    locals
+
+let local_tee_i32 = local_tee I32
+
+let local_tee_i64 = local_tee I64
+
+let local_tee_f32 = local_tee F32
+
+let local_tee_f64 = local_tee F64
 
 let const_of_num_type = function
   | I32 -> const_i32
