@@ -44,12 +44,10 @@ let add_func env typ =
   env.funcs <- (name, typ) :: env.funcs;
   name
 
-let get_globals env typ =
+let get_globals ntyp env =
   let is_typ global =
-    let (_,(_,v)) = global in
-    match v with
-    | Num_type nt -> nt = typ
-    | Ref_type _ -> false
+    let _, (_, v) = global in
+    match v with Num_type nt -> nt = ntyp | Ref_type _ -> false
   in
   List.filter is_typ env.globals
 

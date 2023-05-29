@@ -499,7 +499,10 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
     error_s "type mismatch block %a" Stack.pp_error (rt, stack)
   else
     match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
-    | None -> error_s "type mismatch (param type: prefix is %a and previous_stack is %a)" Stack.pp pt Stack.pp previous_stack
+    | None ->
+      error_s
+        "type mismatch (param type: prefix is %a and previous_stack is %a)"
+        Stack.pp pt Stack.pp previous_stack
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =

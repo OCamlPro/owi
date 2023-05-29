@@ -1,4 +1,13 @@
 (executable
  (name fuzzer)
- (modules basic crowbarplus env fuzzer gen param syntax type_stack)
+ (modules
+  basic
+  crowbarplus
+  env
+  interprets
+  fuzzer
+  gen
+  param
+  syntax
+  type_stack)
  (libraries crowbar owi))

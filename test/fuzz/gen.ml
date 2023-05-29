@@ -4,15 +4,18 @@ open Syntax
 module S = Type_stack
 module B = Basic
 
-let expr_always_available _env =
+let expr_always_available env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
-  (* ; pair (B.global_i32 env) (const [ S.Push (Num_type I32) ]) *)
   ; pair (const Nop) (const [ S.Nothing ])
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
+  @ (B.global_i32 env)
+  @ (B.global_i64 env)
+  @ (B.global_f32 env)
+  @ (B.global_f64 env)
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
@@ -90,14 +93,16 @@ let if_else expr ~locals ~stack env =
     let rt = [] in
     (* let* rt = list B.val_type in *)
     let pt = [] in
-    (*let pt = stack in*)
+    (* let pt = List.rev stack in *)
     (* TODO: take only a prefix *)
     let typ1 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
     let typ2 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
-    let pt = List.rev pt in
+    (* let typ1 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in
+       let _typ2 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in *)
+    (* let pt = List.rev pt in *)
     let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals env in
-    let* expr_else = expr ~block_type:typ1 ~stack:pt ~locals env in
-    let instr = If_else (None, Some typ2, expr_then, expr_else) in
+    let* expr_else = expr ~block_type:typ2 ~stack:pt ~locals env in
+    let instr = If_else (None, Some typ1, expr_then, expr_else) in
     let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in
     let rt_descr = List.map (fun t -> S.Push t) rt in
     pair (const instr) (const (pt_descr @ rt_descr))
@@ -188,6 +193,6 @@ let fields env =
 
 let modul =
   let id = Some "m" in
-  let* env = const @@ Env.empty () in
-  let+ fields = fields env in
+  let* env = const Env.empty in
+  let+ fields = fields (env ()) in
   { id; fields }
