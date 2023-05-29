@@ -3,6 +3,8 @@ open Owi.Types
 open Owi.Types.Symbolic
 open Syntax
 
+module S = Type_stack
+
 let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
 let sx = choose [ const U; const S ]
@@ -233,14 +235,20 @@ let f32_reinterpret_i32 = const (F_reinterpret_i (S32, S32))
 
 let f64_reinterpret_i64 = const (F_reinterpret_i (S64, S64))
 
-let global_i32 env =
-  let globals = (Env.get_globals env I32) in
-  let len = List.length globals in
-  if len = 0 then const_i32
-  else
-    let+ idx = range len in
-    let (name,(_,_)) = List.nth globals idx in
-    Global_get (Symbolic name)
+let global ntyp env =
+  let globals = Env.get_globals ntyp env in
+  List.map
+    (fun (name, (_, _)) ->
+      pair (const (Global_get (Symbolic name))) (const [ S.Push (Num_type ntyp) ]) )
+    globals
+
+let global_i32 = global I32
+
+let global_i64 = global I64
+
+let global_f32 = global F32
+
+let global_f64 = global F64
 
 let const_of_num_type = function
   | I32 -> const_i32
