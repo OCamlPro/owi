@@ -451,7 +451,9 @@ struct
 
     let mut fmt = function Const -> () | Var -> Format.fprintf fmt "mut"
 
-    let global_type fmt (m, vt) = Format.fprintf fmt "(%a %a)" mut m val_type vt
+    let global_type fmt (m, vt) = match m with
+      | Var -> Format.fprintf fmt "(mut %a)" val_type vt
+      | Const -> Format.fprintf fmt "%a" val_type vt
 
     let local fmt (id, t) =
       Format.fprintf fmt "(local %a %a)" id_opt id val_type t
