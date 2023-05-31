@@ -336,3 +336,95 @@ let block_type env =
   let+ param_type = list (param env)
   and+ result_type = list val_type in
   Arg.Bt_raw (None, (param_type, result_type))
+
+let memory_size = const Memory_size
+
+let memory_grow = const Memory_grow
+
+let memory_copy = const Memory_copy
+
+let memory_fill = const Memory_fill
+
+let memory_init = const (Memory_init (Raw 0))
+
+let memarg =
+  let* offset = range 10 in
+  let+ align = range 10 in
+  { offset; align}
+
+let i32_load_i32 =
+  let+ memarg in
+  I_load (S32, memarg)
+
+let i64_load_i32 =
+  let+ memarg in
+  I_load (S64, memarg)
+
+let f32_load_i32 =
+  let+ memarg in
+  F_load (S32, memarg)
+
+let f64_load_i32 =
+  let+ memarg in
+  F_load (S64, memarg)
+
+let i32_load8_i32 =
+  let* memarg in
+  let+ sx in
+  I_load8 (S32, sx, memarg)
+
+let i32_load16_i32 =
+  let* memarg in
+  let+ sx in
+  I_load16 (S32, sx, memarg)
+
+let i64_load8_i32 =
+  let* memarg in
+  let+ sx in
+  I_load8 (S64, sx, memarg)
+
+let i64_load16_i32 =
+  let* memarg in
+  let+ sx in
+  I_load16 (S64, sx, memarg)
+
+let i64_load32_i32 =
+  let* memarg in
+  let+ sx in
+  I64_load32 (sx, memarg)
+
+let i32_store_i32 =
+  let+ memarg in
+  I_store (S32, memarg)
+
+let i64_store_i32 =
+  let+ memarg in
+  I_store (S64, memarg)
+
+let f32_store_i32 =
+  let+ memarg in
+  F_store (S32, memarg)
+
+let f64_store_i32 =
+  let+ memarg in
+  F_store (S64, memarg)
+
+let i32_store8_i32 =
+  let+ memarg in
+  I_store8 (S32, memarg)
+
+let i64_store8_i32 =
+  let+ memarg in
+  I_store8 (S64, memarg)
+
+let i32_store16_i32 =
+  let+ memarg in
+  I_store16 (S32, memarg)
+
+let i64_store16_i32 =
+  let+ memarg in
+  I_store16 (S64, memarg)
+
+let i64_store32_i32 =
+  let+ memarg in
+  I64_store32 memarg
