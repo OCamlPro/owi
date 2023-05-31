@@ -9,6 +9,7 @@ let expr_always_available env =
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
+  ; pair B.memory_size (const [ S.Push (Num_type I32) ])
   ; pair (const Nop) (const [ S.Nothing ])
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
@@ -32,14 +33,40 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; if_else expr ~locals ~stack env
+  (* ; pair B.memory_grow (const [ S.Nothing ]) *)
+  ; pair B.i32_load_i32 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.i64_load_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.f32_load_i32 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; pair B.f64_load_i32 (const [ S.Pop; S.Push (Num_type F64) ])
+  ; pair B.i32_load8_i32 (const [ S.Nothing ])
+  ; pair B.i32_load16_i32 (const [ S.Nothing ])
+  ; pair B.i64_load8_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.i64_load16_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.i64_load32_i32 (const [ S.Pop; S.Push (Num_type I64) ])
   ]
   @ (B.local_set_i32 env) @ (B.local_tee_i32 env)
   @ (B.global_set_i32 env)
 
 let expr_available_2_i32 =
-  [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
+  [ pair B.ibinop_32 (const [ S.Pop ])
+  ; pair B.irelop_32 (const [ S.Pop ])
+  ; pair B.i32_store_i32 (const [ S.Pop; S.Pop ])
+  ; pair B.i32_store8_i32 (const [ S.Pop; S.Pop ])
+  ; pair B.i32_store16_i32 (const [ S.Pop; S.Pop ])
+  ]
 
-(* let expr_available_3_i32 = [] *)
+let expr_available_2_i64_i32 =
+  [ pair B.i64_store_i32 (const [ S.Pop; S.Pop ])
+  ; pair B.i64_store8_i32 (const [ S.Pop; S.Pop ])
+  ; pair B.i64_store16_i32 (const [ S.Pop; S.Pop ])
+  ; pair B.i64_store32_i32 (const [ S.Pop; S.Pop ])
+  ]
+
+let expr_available_3_i32 = []
+  (* [ pair B.memory_init (const [ S.Pop; S.Pop; S.Pop ])
+  ; pair B.memory_copy (const [ S.Pop; S.Pop; S.Pop ])
+  ; pair B.memory_fill (const [ S.Pop; S.Pop; S.Pop ])
+  ] *)
 
 let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
@@ -146,10 +173,21 @@ let rec expr ~block_type ~stack ~locals env =
     let expr_available_with_current_stack =
       (* TODO: complete this *)
       match stack with
+      | Num_type I32 :: Num_type I32 :: Num_type I32 :: _tl ->
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
+        @ expr_available_2_i32
+        @ expr_available_3_i32
       | Num_type I32 :: Num_type I32 :: _tl ->
         expr_available_1_any
         @ expr_available_1_i32 if_else expr ~stack ~locals env
         @ expr_available_2_i32
+      | Num_type I64 :: Num_type I32 :: _tl ->
+        expr_available_2_i64_i32
+      | Num_type F32 :: Num_type I32 :: _tl ->
+        [ pair B.f32_store_i32 (const [ S.Pop; S.Pop ]) ]
+      | Num_type F64 :: Num_type I32 :: _tl ->
+        [ pair B.f64_store_i32 (const [ S.Pop; S.Pop ]) ]
       | Num_type I64 :: Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64 env @ expr_available_2_i64
       | Num_type I32 :: _tl ->
@@ -173,6 +211,10 @@ let rec expr ~block_type ~stack ~locals env =
     let i = const i in
     list_cons i next
 
+let memory env =
+  let+ id = const @@ Env.add_memory env in
+  MMem (Some id, { min = 0; max = None})
+
 let global env =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
@@ -192,6 +234,7 @@ let func env =
   MFunc { type_f; locals; body; id }
 
 let fields env =
+  let memories = map ([memory env]) (fun m -> [m]) in (* for now, just one memory *)
   let globals = list (global env) in
   let start_code =
     let type_f = Arg.Bt_raw (None, ([], [])) in
@@ -201,7 +244,7 @@ let fields env =
   in
   let start = const @@ MStart (Raw 0) in
   let funcs = list_cons start (list_cons start_code (list (func env))) in
-  list_append globals funcs
+  list_append memories (list_append globals funcs)
 
 let modul =
   let id = Some "m" in

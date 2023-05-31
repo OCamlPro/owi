@@ -2,9 +2,11 @@ open Owi.Types.Symbolic
 open Crowbar
 
 type t =
-  { mutable next_global : int
+  { mutable next_memory : int
+  ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
+  ; mutable memories : string list
   ; mutable globals : (string * global_type) list
   ; mutable locals : param list
   ; mutable funcs : (string * block_type) list
@@ -12,9 +14,11 @@ type t =
   }
 
 let empty () =
-  { next_global = 0
+  { next_memory = 0
+  ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
+  ; memories = []
   ; globals = []
   ; locals = []
   ; funcs = []
@@ -22,6 +26,13 @@ let empty () =
   }
 
 let reset_locals env = env.locals <- []
+
+let add_memory env =
+  let n = env.next_memory in
+  let name = Format.sprintf "m%d" n in
+  env.memories <- name :: env.memories;
+  env.next_memory <- succ n;
+  name
 
 let add_global env typ =
   let n = env.next_global in
