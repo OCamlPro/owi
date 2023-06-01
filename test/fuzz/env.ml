@@ -2,10 +2,12 @@ open Owi.Types.Symbolic
 open Crowbar
 
 type t =
-  { mutable next_memory : int
+  { mutable next_data : int
+  ; mutable next_memory : int
   ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
+  ; mutable datas : string list
   ; mutable memories : string list
   ; mutable globals : (string * global_type) list
   ; mutable locals : param list
@@ -14,10 +16,12 @@ type t =
   }
 
 let empty () =
-  { next_memory = 0
+  { next_data = 0
+  ; next_memory = 0
   ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
+  ; datas = []
   ; memories = []
   ; globals = []
   ; locals = []
@@ -26,6 +30,13 @@ let empty () =
   }
 
 let reset_locals env = env.locals <- []
+
+let add_data env =
+  let n = env.next_data in
+  let name = Format.sprintf "d%d" n in
+  env.datas <- name :: env.datas;
+  env.next_data <- succ n;
+  name
 
 let add_memory env =
   let n = env.next_memory in
@@ -59,7 +70,7 @@ let get_globals ntyp env ~only_mut =
   let is_typ global =
     let _, (m, v) = global in
     match v with
-    | Num_type nt -> nt = ntyp && (not only_mut || (only_mut && m = Owi.Types.Var))
+    | Num_type nt -> nt = ntyp && (not only_mut || m = Owi.Types.Var)
     | Ref_type _ -> false
   in
   List.filter is_typ env.globals

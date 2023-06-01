@@ -13,6 +13,17 @@ let val_type =
   let+ num_type in
   Num_type num_type
 
+let symbolic =
+  let+ str = bytes in
+  (Symbolic str : indice)
+
+let raw =
+  let+ i = int in
+  (Raw i : indice)
+
+let indice =
+  choose [ symbolic; raw ]
+
 let mut = choose [ const Const; const Var ]
 
 let div =
@@ -348,83 +359,101 @@ let memory_fill = const Memory_fill
 let memory_init = const (Memory_init (Raw 0))
 
 let memarg =
-  let* offset = range 10 in
-  let+ align = range 10 in
+  let* offset = int in
+  let+ align = int in
   { offset; align}
 
-let i32_load_i32 =
+let i32_load =
   let+ memarg in
   I_load (S32, memarg)
 
-let i64_load_i32 =
+let i64_load =
   let+ memarg in
   I_load (S64, memarg)
 
-let f32_load_i32 =
+let f32_load =
   let+ memarg in
   F_load (S32, memarg)
 
-let f64_load_i32 =
+let f64_load =
   let+ memarg in
   F_load (S64, memarg)
 
-let i32_load8_i32 =
+let i32_load8 =
   let* memarg in
   let+ sx in
   I_load8 (S32, sx, memarg)
 
-let i32_load16_i32 =
+let i32_load16 =
   let* memarg in
   let+ sx in
   I_load16 (S32, sx, memarg)
 
-let i64_load8_i32 =
+let i64_load8 =
   let* memarg in
   let+ sx in
   I_load8 (S64, sx, memarg)
 
-let i64_load16_i32 =
+let i64_load16 =
   let* memarg in
   let+ sx in
   I_load16 (S64, sx, memarg)
 
-let i64_load32_i32 =
+let i64_load32 =
   let* memarg in
   let+ sx in
   I64_load32 (sx, memarg)
 
-let i32_store_i32 =
+let i32_store =
   let+ memarg in
   I_store (S32, memarg)
 
-let i64_store_i32 =
+let i64_store =
   let+ memarg in
   I_store (S64, memarg)
 
-let f32_store_i32 =
+let f32_store =
   let+ memarg in
   F_store (S32, memarg)
 
-let f64_store_i32 =
+let f64_store =
   let+ memarg in
   F_store (S64, memarg)
 
-let i32_store8_i32 =
+let i32_store8 =
   let+ memarg in
   I_store8 (S32, memarg)
 
-let i64_store8_i32 =
+let i64_store8 =
   let+ memarg in
   I_store8 (S64, memarg)
 
-let i32_store16_i32 =
+let i32_store16 =
   let+ memarg in
   I_store16 (S32, memarg)
 
-let i64_store16_i32 =
+let i64_store16 =
   let+ memarg in
   I_store16 (S64, memarg)
 
-let i64_store32_i32 =
+let i64_store32 =
   let+ memarg in
   I64_store32 memarg
+
+let data_active =
+  let* ind = option indice in   (* is full indice gen OK ? bug offset label ? *)
+  let* vt = val_type in
+  let+ inst = const_of_val_type vt in   (* only i32 ? *)
+  let exp = [ inst ] in
+  Data_active (ind, exp)
+
+let data_mode (env : Env.t) =
+  if List.length env.datas > 0 then choose [ const Data_passive; data_active ]
+  else const Data_passive
+
+let data_drop (env : Env.t) =
+  let datas = env.datas in
+  List.map
+    ( fun name ->
+      pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]) )
+    datas
