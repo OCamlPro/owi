@@ -9,23 +9,29 @@ let expr_always_available env =
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
-  ; pair B.memory_size (const [ S.Push (Num_type I32) ])
   ; pair (const Nop) (const [ S.Nothing ])
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
-  @ (B.global_i32 env)
-  @ (B.global_i64 env)
-  @ (B.global_f32 env)
-  @ (B.global_f64 env)
-  @ (B.local_i32 env)
-  @ (B.local_i64 env)
-  @ (B.local_f32 env)
-  @ (B.local_f64 env)
+  @ (B.global_i32 env) @ (B.global_i64 env) @ (B.global_f32 env) @ (B.global_f64 env)
+  @ (B.local_i32 env) @ (B.local_i64 env) @ (B.local_f32 env) @ (B.local_f64 env)
   @ (B.data_drop env)
+  @ (B.memory_size env)
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
 let expr_available_1_i32 if_else expr ~locals ~stack env =
+  let load_instr = 
+    [ pair B.i32_load (const [ S.Pop; S.Push (Num_type I32) ])
+    ; pair B.i64_load (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair B.f32_load (const [ S.Pop; S.Push (Num_type F32) ])
+    ; pair B.f64_load (const [ S.Pop; S.Push (Num_type F64) ])
+    ; pair B.i32_load8 (const [ S.Nothing ])
+    ; pair B.i32_load16 (const [ S.Nothing ])
+    ; pair B.i64_load8 (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair B.i64_load16 (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair B.i64_load32 (const [ S.Pop; S.Push (Num_type I64) ])
+    ]
+  in
   [ pair B.iunop_32 (const [ S.Nothing ])
   ; pair B.itestop_32 (const [ S.Nothing ])
   ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
@@ -34,40 +40,44 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; if_else expr ~locals ~stack env
-  ; pair B.memory_grow (const [ S.Nothing ])
-  ; pair B.i32_load (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.i64_load (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.f32_load (const [ S.Pop; S.Push (Num_type F32) ])
-  ; pair B.f64_load (const [ S.Pop; S.Push (Num_type F64) ])
-  ; pair B.i32_load8 (const [ S.Nothing ])
-  ; pair B.i32_load16 (const [ S.Nothing ])
-  ; pair B.i64_load8 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.i64_load16 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.i64_load32 (const [ S.Pop; S.Push (Num_type I64) ])
   ]
   @ (B.local_set_i32 env) @ (B.local_tee_i32 env)
   @ (B.global_set_i32 env)
+  @ (B.memory_grow env)
+  @ if B.memory_exists env then load_instr else []
 
-let expr_available_2_i32 =
+let expr_available_2_i32 (env : Env.t) =
+  let store_instr = 
+    [ pair B.i32_store (const [ S.Pop; S.Pop ])
+    ; pair B.i32_store8 (const [ S.Pop; S.Pop ])
+    ; pair B.i32_store16 (const [ S.Pop; S.Pop ])
+    ]
+  in
   [ pair B.ibinop_32 (const [ S.Pop ])
   ; pair B.irelop_32 (const [ S.Pop ])
-  ; pair B.i32_store (const [ S.Pop; S.Pop ])
-  ; pair B.i32_store8 (const [ S.Pop; S.Pop ])
-  ; pair B.i32_store16 (const [ S.Pop; S.Pop ])
   ]
+  @ if B.memory_exists env then store_instr else []
 
-let expr_available_2_i64_i32 =
+let expr_available_2_i64_i32 (env : Env.t) =
+  if B.memory_exists env then
   [ pair B.i64_store (const [ S.Pop; S.Pop ])
   ; pair B.i64_store8 (const [ S.Pop; S.Pop ])
   ; pair B.i64_store16 (const [ S.Pop; S.Pop ])
   ; pair B.i64_store32 (const [ S.Pop; S.Pop ])
-  ]
+  ] else []
 
-let expr_available_3_i32 =
-  [ (*pair B.memory_init (const [ S.Pop; S.Pop; S.Pop ])
-  ;*) pair B.memory_copy (const [ S.Pop; S.Pop; S.Pop ])
-  (* ; pair B.memory_fill (const [ S.Pop; S.Pop; S.Pop ]) *)
-  ]
+let expr_available_2_f32_i32 (env : Env.t) =
+  if B.memory_exists env then
+  [ pair B.f32_store (const [ S.Pop; S.Pop ]) ]
+  else []
+
+let expr_available_2_f64_i32 (env : Env.t) =
+  if B.memory_exists env then
+  [ pair B.f64_store (const [ S.Pop; S.Pop ]) ]
+  else []
+
+let expr_available_3_i32 env =
+  (*B.memory_init env @*) B.memory_copy env (*@ B.memory_fill env*)
 
 let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
@@ -177,18 +187,18 @@ let rec expr ~block_type ~stack ~locals env =
       | Num_type I32 :: Num_type I32 :: Num_type I32 :: _tl ->
         expr_available_1_any
         @ expr_available_1_i32 if_else expr ~stack ~locals env
-        @ expr_available_2_i32
-        @ expr_available_3_i32
+        @ expr_available_2_i32 env
+        @ expr_available_3_i32 env
       | Num_type I32 :: Num_type I32 :: _tl ->
         expr_available_1_any
         @ expr_available_1_i32 if_else expr ~stack ~locals env
-        @ expr_available_2_i32
+        @ expr_available_2_i32 env
       | Num_type I64 :: Num_type I32 :: _tl ->
-        expr_available_2_i64_i32
+        expr_available_2_i64_i32 env
       | Num_type F32 :: Num_type I32 :: _tl ->
-        [ pair B.f32_store (const [ S.Pop; S.Pop ]) ]
+        expr_available_2_f32_i32 env
       | Num_type F64 :: Num_type I32 :: _tl ->
-        [ pair B.f64_store (const [ S.Pop; S.Pop ]) ]
+        expr_available_2_f64_i32 env
       | Num_type I64 :: Num_type I64 :: _tl ->
         expr_available_1_any @ expr_available_1_i64 env @ expr_available_2_i64
       | Num_type I32 :: _tl ->
@@ -212,15 +222,18 @@ let rec expr ~block_type ~stack ~locals env =
     let i = const i in
     list_cons i next
 
-let data env =
+(* let data env =
   let* init = bytes in
   let+ mode = B.data_mode env in
   let id = Some (Env.add_data env) in
-  MData { id; init; mode}
+  MData { id; init; mode} *)
 
 let memory env =
-  let+ id = const @@ Env.add_memory env in
-  MMem (Some id, { min = 0; max = None})
+  let sup = if true then 10 else 65537 (* TODO: fix time explosion *) in
+  let* min = range sup in
+  let+ max = option (range ~min (sup-min)) in
+  let id = Some (Env.add_memory env) in
+  MMem (id, { min; max})
 
 let global env =
   let* ((_mut, t) as typ) = B.global_type in
@@ -241,8 +254,8 @@ let func env =
   MFunc { type_f; locals; body; id }
 
 let fields env =
-  let memories = map ([memory env]) (fun m -> [m]) in (* for now, just one memory *)
-  let datas = list (data env) in
+  (* let datas = list (data env) in *)
+  let* memory = option (memory env) in (* for now, max one memory: not a list, option *)
   let globals = list (global env) in
   let start_code =
     let type_f = Arg.Bt_raw (None, ([], [])) in
@@ -252,7 +265,9 @@ let fields env =
   in
   let start = const @@ MStart (Raw 0) in
   let funcs = list_cons start (list_cons start_code (list (func env))) in
-  list_append datas (list_append memories (list_append globals funcs))
+  match memory with
+  | None -> (*list_append datas*) list_append globals funcs
+  | Some mem -> (*list_append datas*) list_cons (const @@ mem) (list_append globals funcs)
 
 let modul =
   let id = Some "m" in
