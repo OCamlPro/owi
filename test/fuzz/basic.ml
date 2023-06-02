@@ -348,15 +348,34 @@ let block_type env =
   and+ result_type = list val_type in
   Arg.Bt_raw (None, (param_type, result_type))
 
-let memory_size = const Memory_size
+let memory_size (env : Env.t) =
+    List.map
+    ( fun _ -> pair (const Memory_size) (const [ S.Push (Num_type I32) ]) )
+    env.memories
 
-let memory_grow = const Memory_grow
+let memory_grow (env : Env.t) =
+  List.map
+  ( fun _ -> pair (const Memory_grow) (const [ S.Nothing ]) )
+  env.memories
 
-let memory_copy = const Memory_copy
 
-let memory_fill = const Memory_fill
+let memory_copy (env : Env.t) =
+  List.map
+  ( fun _ -> pair (const Memory_copy) (const [ S.Pop; S.Pop; S.Pop ]) )
+  env.memories
 
-let memory_init = const (Memory_init (Raw 0))
+let memory_fill (env : Env.t) =
+  List.map
+  ( fun _ -> pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ]) )
+  env.memories
+
+let memory_init (env : Env.t) =
+  List.map
+  ( fun _ -> pair (const (Memory_init (Raw 0))) (const [ S.Pop; S.Pop; S.Pop ]) )
+  env.memories
+
+let memory_exists (env : Env.t) =
+  List.length env.memories > 0
 
 let memarg =
   let* offset = int in
