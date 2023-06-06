@@ -13,17 +13,6 @@ let val_type =
   let+ num_type in
   Num_type num_type
 
-let symbolic =
-  let+ str = bytes in
-  (Symbolic str : indice)
-
-let raw =
-  let+ i = int in
-  (Raw i : indice)
-
-let indice =
-  choose [ symbolic; raw ]
-
 let mut = choose [ const Const; const Var ]
 
 let div =
@@ -279,9 +268,8 @@ let global_set_f64 = global_set F64
 let local ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    ( fun (name, _) -> match name with
-      | Some n -> pair (const (Local_get (Symbolic n))) (const [ S.Push (Num_type ntyp) ])
-      | None -> assert false )
+    ( fun (name, _) ->
+      pair (const (Local_get (Symbolic name))) (const [ S.Push (Num_type ntyp) ]) )
     locals
 
 let local_i32 = local I32
@@ -295,9 +283,8 @@ let local_f64 = local F64
 let local_set ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    ( fun (name, _) -> match name with
-      | Some n -> pair (const (Local_set (Symbolic n))) (const [ S.Pop ])
-      | None -> assert false )
+    ( fun (name, _) -> 
+      pair (const (Local_set (Symbolic name))) (const [ S.Pop ]) )
     locals
 
 let local_set_i32 = local_set I32
@@ -311,9 +298,8 @@ let local_set_f64 = local_set F64
 let local_tee ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    ( fun (name, _) -> match name with
-      | Some n -> pair (const (Local_tee (Symbolic n))) (const [ S.Nothing ])
-      | None -> assert false )
+    ( fun (name, _) ->
+      pair (const (Local_tee (Symbolic name))) (const [ S.Nothing ]) )
     locals
 
 let local_tee_i32 = local_tee I32
@@ -348,34 +334,26 @@ let block_type env =
   and+ result_type = list val_type in
   Arg.Bt_raw (None, (param_type, result_type))
 
-let memory_size (env : Env.t) =
-    List.map
-    ( fun _ -> pair (const Memory_size) (const [ S.Push (Num_type I32) ]) )
-    env.memories
+let memory_size =
+  pair (const Memory_size) (const [ S.Push (Num_type I32) ])
 
-let memory_grow (env : Env.t) =
-  List.map
-  ( fun _ -> pair (const Memory_grow) (const [ S.Nothing ]) )
-  env.memories
+let memory_grow =
+  pair (const Memory_grow) (const [ S.Nothing ])
 
+let memory_copy =
+  pair (const Memory_copy) (const [ S.Pop; S.Pop; S.Pop ])
 
-let memory_copy (env : Env.t) =
-  List.map
-  ( fun _ -> pair (const Memory_copy) (const [ S.Pop; S.Pop; S.Pop ]) )
-  env.memories
-
-let memory_fill (env : Env.t) =
-  List.map
-  ( fun _ -> pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ]) )
-  env.memories
+let memory_fill =
+  pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_init (env : Env.t) =
   List.map
-  ( fun _ -> pair (const (Memory_init (Raw 0))) (const [ S.Pop; S.Pop; S.Pop ]) )
-  env.memories
+    ( fun name ->
+      pair (const (Memory_init (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ]) )
+    env.datas
 
 let memory_exists (env : Env.t) =
-  List.length env.memories > 0
+  Option.is_some env.memory
 
 let memarg =
   let* offset = int in
@@ -459,20 +437,20 @@ let i64_store32 =
   let+ memarg in
   I64_store32 memarg
 
-let data_active =
-  let* ind = option indice in   (* is full indice gen OK ? bug offset label ? *)
-  let* vt = val_type in
-  let+ inst = const_of_val_type vt in   (* only i32 ? *)
-  let exp = [ inst ] in
-  Data_active (ind, exp)
+let data_active (env : Env.t) =
+  match env.memory with
+  | Some name ->
+    let+ inst = const_i32 in
+    let exp = [ inst ] in
+    Data_active (Some (Symbolic name), exp)
+  | None -> assert false
 
 let data_mode (env : Env.t) =
-  if List.length env.datas > 0 then choose [ const Data_passive; data_active ]
+  if memory_exists env then choose [ const Data_passive; data_active env ]
   else const Data_passive
 
 let data_drop (env : Env.t) =
-  let datas = env.datas in
   List.map
     ( fun name ->
       pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]) )
-    datas
+    env.datas

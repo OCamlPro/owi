@@ -21,7 +21,7 @@ module Owi_unoptimized : INTERPRET = struct
       | Error e -> failwith e
       | Ok () -> (
         match Link.modul Link.empty_state ~name:None simplified with
-        | Error _e as e -> e
+        | Error e -> failwith e
         | Ok (regular, _link_state) -> Interpret.modul regular ) )
 end
 
@@ -39,7 +39,7 @@ module Owi_optimized : INTERPRET = struct
       | Ok () -> (
         let simplified = Optimize.modul simplified in
         match Link.modul Link.empty_state ~name:None simplified with
-        | Error _e as e -> e
+        | Error e -> failwith e
         | Ok (regular, _link_state) -> Interpret.modul regular ) )
 end
 
