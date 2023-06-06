@@ -53,7 +53,9 @@ let pop_ui32_to_int s =
 
 let pop_i32_to_char s =
   let hd, tl = pop_i32 s in
-  (Char.chr (Int32.to_int hd mod 256), tl)
+  match Int32.unsigned_to_int hd with
+  | None -> Log.err "invalid type (expected unsigned i32)"
+  | Some n -> (Char.chr (n mod 256), tl)
 
 let pop2_i32 s =
   try
