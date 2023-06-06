@@ -32,6 +32,8 @@ val to_int64 : t -> int64
 
 val extend_s : int -> t -> t
 
+val unsigned_to_int : t -> int option
+
 (** unary operators *)
 
 val clz : t -> int

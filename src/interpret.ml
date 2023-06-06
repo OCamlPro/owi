@@ -766,7 +766,7 @@ let exec_instr instr (state : State.exec_state) =
     let* mem = get_memory_raw env mem_0 in
     let data = Link.Memory.get_data mem in
     let max_size = Link.Memory.get_limit_max mem in
-    let delta, stack = Stack.pop_i32_to_int stack in
+    let delta, stack = Stack.pop_ui32_to_int stack in
     let delta = delta * page_size in
     let old_size = Bytes.length data in
     let new_size = old_size + delta in
@@ -1138,10 +1138,8 @@ let exec_instr instr (state : State.exec_state) =
     call_indirect ~return:false state (tbl_i, typ_i)
   | Return_call_indirect (tbl_i, typ_i) ->
     call_indirect ~return:true state (tbl_i, typ_i)
-  | Call_ref typ_i ->
-    call_ref ~return:false state typ_i
-  | Return_call_ref typ_i ->
-    call_ref ~return:true state typ_i
+  | Call_ref typ_i -> call_ref ~return:false state typ_i
+  | Return_call_ref typ_i -> call_ref ~return:true state typ_i
   | Array_new_canon _t ->
     let len, stack = Stack.pop_i32_to_int stack in
     let _default, stack = Stack.pop stack in
