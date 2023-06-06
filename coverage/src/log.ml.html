@@ -76,13 +76,13 @@ let profiling_on = ref false
 let on_debug f = <span data-count="0">i</span>f !debug_on then <span data-count="0">f</span> ()
 
 let debug t =
-  <span data-count="75028">i</span>f !debug_on then <span data-count="4">F</span>ormat.eprintf t else <span data-count="75024">F</span>ormat.ifprintf Format.err_formatter t
+  <span data-count="75052">i</span>f !debug_on then <span data-count="4">F</span>ormat.eprintf t else <span data-count="75048">F</span>ormat.ifprintf Format.err_formatter t
 
-let debug0 t : unit = <span data-count="2661">i</span>f !debug_on then <span data-count="2">F</span>ormat.eprintf t
+let debug0 t : unit = <span data-count="2665">i</span>f !debug_on then <span data-count="2">F</span>ormat.eprintf t
 
-let debug1 t a : unit = <span data-count="11702276">i</span>f !debug_on then <span data-count="2">F</span>ormat.eprintf t a
+let debug1 t a : unit = <span data-count="11702278">i</span>f !debug_on then <span data-count="2">F</span>ormat.eprintf t a
 
-let debug2 t a b : unit = <span data-count="226883573">i</span>f !debug_on then <span data-count="24">F</span>ormat.eprintf t a b
+let debug2 t a b : unit = <span data-count="226883589">i</span>f !debug_on then <span data-count="24">F</span>ormat.eprintf t a b
 
 let profile t =
   <span data-count="44260">i</span>f !profiling_on then <span data-count="0">F</span>ormat.eprintf t

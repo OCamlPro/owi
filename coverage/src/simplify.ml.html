@@ -2155,7 +2155,7 @@ type opt_exports =
   }
 
 let curr_id (curr : int) (i : Symbolic.indice option) =
-  <span data-count="12059">m</span>atch i with <span data-count="7124">N</span>one -&gt; Curr (pre<span data-count="7124">d</span> curr) | <span data-count="4935">S</span>ome id -&gt; Indice id
+  <span data-count="12095">m</span>atch i with <span data-count="7126">N</span>one -&gt; Curr (pre<span data-count="7126">d</span> curr) | <span data-count="4969">S</span>ome id -&gt; Indice id
 
 type grouped_module =
   { id : string option
@@ -2177,10 +2177,10 @@ type grouped_module =
   }
 
 let imp (import : Symbolic.import) (assigned_name, desc) : 'a imp =
-  <span data-count="3454">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+  <span data-count="3476">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="5875">{</span> id
+  <span data-count="5879">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -2206,24 +2206,24 @@ type curr =
 let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
 let add_global value (fields : grouped_module) (curr : curr) =
-  <span data-count="1348">l</span>et index = curr.global in
+  <span data-count="1356">l</span>et index = curr.global in
   ( { fields with global = { index; value } :: fields.global }
-  , { curr with global = suc<span data-count="1348">c</span> curr.global } )
+  , { curr with global = suc<span data-count="1356">c</span> curr.global } )
 
 let add_table value (fields : grouped_module) (curr : curr) =
-  <span data-count="1303">l</span>et index = curr.table in
+  <span data-count="1305">l</span>et index = curr.table in
   ( { fields with table = { index; value } :: fields.table }
-  , { curr with table = suc<span data-count="1303">c</span> curr.table } )
+  , { curr with table = suc<span data-count="1305">c</span> curr.table } )
 
 let add_mem value (fields : grouped_module) (curr : curr) =
-  <span data-count="1521">l</span>et index = curr.mem in
+  <span data-count="1525">l</span>et index = curr.mem in
   ( { fields with mem = { index; value } :: fields.mem }
-  , { curr with mem = suc<span data-count="1521">c</span> curr.mem } )
+  , { curr with mem = suc<span data-count="1525">c</span> curr.mem } )
 
 let add_func value (fields : grouped_module) (curr : curr) =
-  <span data-count="3048">l</span>et index = curr.func in
+  <span data-count="3070">l</span>et index = curr.func in
   ( { fields with func = { index; value } :: fields.func }
-  , { curr with func = suc<span data-count="3048">c</span> curr.func } )
+  , { curr with func = suc<span data-count="3070">c</span> curr.func } )
 
 let add_elem value (fields : grouped_module) (curr : curr) =
   <span data-count="1512">l</span>et index = curr.elem in
@@ -2236,11 +2236,11 @@ let add_data value (fields : grouped_module) (curr : curr) =
   , { curr with data = suc<span data-count="820">c</span> curr.data } )
 
 let check_limit { min; max } =
-  <span data-count="2584">m</span>atch max with
-  | <span data-count="1228">N</span>one -&gt; Ok ()
-  | <span data-count="1356">S</span>ome max -&gt;
+  <span data-count="2590">m</span>atch max with
+  | <span data-count="1230">N</span>one -&gt; Ok ()
+  | <span data-count="1360">S</span>ome max -&gt;
     if min &gt; max then <span data-count="6">E</span>rror "size minimum must not be greater than maximum"
-    else <span data-count="1350">O</span>k ()
+    else <span data-count="1354">O</span>k ()
 
 let convert_heap_type : Symbolic.heap_type -&gt; heap_type = function
   | <span data-count="0">S</span>ymbolic.Any_ht -&gt; Any_ht
@@ -2249,7 +2249,7 @@ let convert_heap_type : Symbolic.heap_type -&gt; heap_type = function
   | <span data-count="0">I</span>31_ht -&gt; I31_ht
   | <span data-count="0">S</span>truct_ht -&gt; Struct_ht
   | <span data-count="0">A</span>rray_ht -&gt; Array_ht
-  | <span data-count="2823">F</span>unc_ht -&gt; Func_ht
+  | <span data-count="2825">F</span>unc_ht -&gt; Func_ht
   | <span data-count="0">N</span>o_func_ht -&gt; No_func_ht
   | <span data-count="340">E</span>xtern_ht -&gt; Extern_ht
   | <span data-count="0">N</span>o_extern_ht -&gt; No_extern_ht
@@ -2260,23 +2260,23 @@ let convert_heap_type : Symbolic.heap_type -&gt; heap_type = function
     Def_ht i
 
 let convert_ref_type : Symbolic.ref_type -&gt; ref_type =
- fun (null, heap_type) -&gt; <span data-count="3023">(</span>null, convert_heap_typ<span data-count="3023">e</span> heap_type)
+ fun (null, heap_type) -&gt; <span data-count="3025">(</span>null, convert_heap_typ<span data-count="3025">e</span> heap_type)
 
 let convert_val_type : Symbolic.val_type -&gt; val_type = function
-  | <span data-count="37913">S</span>ymbolic.Num_type t -&gt; Num_type t
+  | <span data-count="37945">S</span>ymbolic.Num_type t -&gt; Num_type t
   | <span data-count="250">R</span>ef_type rt -&gt; Ref_type (convert_ref_typ<span data-count="250">e</span> rt)
 
 let convert_param : Symbolic.param -&gt; param =
- fun (n, t) -&gt; <span data-count="15253">(</span>n, convert_val_typ<span data-count="15253">e</span> t)
+ fun (n, t) -&gt; <span data-count="15273">(</span>n, convert_val_typ<span data-count="15273">e</span> t)
 
 let convert_pt : Symbolic.param_type -&gt; param_type =
- fun l -&gt; <span data-count="30126">L</span>ist.map convert_param l
+ fun l -&gt; <span data-count="30152">L</span>ist.map convert_param l
 
 let convert_rt : Symbolic.result_type -&gt; result_type =
- fun l -&gt; <span data-count="30126">L</span>ist.map convert_val_type l
+ fun l -&gt; <span data-count="30152">L</span>ist.map convert_val_type l
 
 let convert_func_type : Symbolic.func_type -&gt; func_type =
- fun (pt, rt) -&gt; <span data-count="30126">(</span>convert_p<span data-count="30126">t</span> pt, convert_r<span data-count="30126">t</span> rt)
+ fun (pt, rt) -&gt; <span data-count="30152">(</span>convert_p<span data-count="30152">t</span> pt, convert_r<span data-count="30152">t</span> rt)
 
 let convert_storage_type : Symbolic.storage_type -&gt; storage_type = function
   | <span data-count="0">V</span>al_storage_t val_type -&gt; Val_storage_t (convert_val_typ<span data-count="0">e</span> val_type)
@@ -2297,73 +2297,73 @@ let convert_str : Symbolic.str_type -&gt; str_type = function
   | <span data-count="0">D</span>ef_struct_t struct_t -&gt; Def_struct_t (convert_struct_typ<span data-count="0">e</span> struct_t)
 
 let convert_table_type : Symbolic.table_type -&gt; table_type =
- fun (limits, ref_type) -&gt; <span data-count="1303">(</span>limits, convert_ref_typ<span data-count="1303">e</span> ref_type)
+ fun (limits, ref_type) -&gt; <span data-count="1305">(</span>limits, convert_ref_typ<span data-count="1305">e</span> ref_type)
 
 let group (modul : Symbolic.modul) : (grouped_module, string) Result.t =
-  <span data-count="5875">l</span>et add ((fields : grouped_module), curr) field :
+  <span data-count="5879">l</span>et add ((fields : grouped_module), curr) field :
     (grouped_module * curr, string) Result.t =
-    <span data-count="34541">m</span>atch field with
+    <span data-count="34615">m</span>atch field with
     | <span data-count="520">S</span>ymbolic.MType typ -&gt;
       let typ = typ @ fields.typ in
       ok @@ ({ fields with typ }, curr)
-    | <span data-count="1188">M</span>Global global -&gt; ok @@ add_globa<span data-count="1188">l</span> (Local global) fields curr
+    | <span data-count="1196">M</span>Global global -&gt; ok @@ add_globa<span data-count="1196">l</span> (Local global) fields curr
     | <span data-count="160">M</span>Import ({ desc = Import_global (a, (mut, val_type)); _ } as import) -&gt;
       let b = (mut, convert_val_typ<span data-count="160">e</span> val_type) in
       let imported = imp import (a, b) in
       <span data-count="160">o</span>k @@ add_globa<span data-count="160">l</span> (Imported imported) fields curr
-    | <span data-count="1022">M</span>Export { name; desc = Export_global id } -&gt;
+    | <span data-count="1030">M</span>Export { name; desc = Export_global id } -&gt;
       let id = curr_id curr.global id in
-      <span data-count="1022">l</span>et exports =
+      <span data-count="1030">l</span>et exports =
         { fields.exports with global = { name; id } :: fields.exports.global }
       in
       ok ({ fields with exports }, curr)
-    | <span data-count="1171">M</span>Table table -&gt;
+    | <span data-count="1173">M</span>Table table -&gt;
       let _, (limits, _) = table in
-      let* () = check_limi<span data-count="1171">t</span> limits in
-      <span data-count="1167">l</span>et id, table_type = table in
-      let table = (id, convert_table_typ<span data-count="1167">e</span> table_type) in
-      ok @@ add_tabl<span data-count="1167">e</span> (Local table) fields curr
+      let* () = check_limi<span data-count="1173">t</span> limits in
+      <span data-count="1169">l</span>et id, table_type = table in
+      let table = (id, convert_table_typ<span data-count="1169">e</span> table_type) in
+      ok @@ add_tabl<span data-count="1169">e</span> (Local table) fields curr
     | <span data-count="136">M</span>Import ({ desc = Import_table (id, table_type); _ } as import) -&gt;
       let table_type = convert_table_type table_type in
       <span data-count="136">l</span>et imported = imp import (id, table_type) in
       <span data-count="136">o</span>k @@ add_tabl<span data-count="136">e</span> (Imported imported) fields curr
-    | <span data-count="313">M</span>Export { name; desc = Export_table id } -&gt;
+    | <span data-count="315">M</span>Export { name; desc = Export_table id } -&gt;
       let id = curr_id curr.table id in
-      <span data-count="313">l</span>et exports =
+      <span data-count="315">l</span>et exports =
         { fields.exports with table = { name; id } :: fields.exports.table }
       in
       ok ({ fields with exports }, curr)
-    | <span data-count="1425">M</span>Mem ((_, limits) as mem) -&gt;
+    | <span data-count="1429">M</span>Mem ((_, limits) as mem) -&gt;
       let* () =
         if limits.min &gt; 65536 then
           <span data-count="6">E</span>rror "memory size must be at most 65536 pages (4GiB)"
-        else <span data-count="1419">O</span>k ()
+        else <span data-count="1423">O</span>k ()
       in
-      <span data-count="1419">l</span>et* () =
+      <span data-count="1423">l</span>et* () =
         match limits.max with
-        | <span data-count="677">S</span>ome max when max &gt; 65536 -&gt;
+        | <span data-count="679">S</span>ome max when max &gt; 65536 -&gt;
           <span data-count="6">E</span>rror "memory size must be at most 65536 pages (4GiB)"
-        | <span data-count="671">S</span>ome _ | <span data-count="742">N</span>one -&gt; Ok ()
+        | <span data-count="673">S</span>ome _ | <span data-count="744">N</span>one -&gt; Ok ()
       in
-      <span data-count="1413">l</span>et* () = check_limi<span data-count="1413">t</span> limits in
-      <span data-count="1411">o</span>k @@ add_me<span data-count="1411">m</span> (Local mem) fields curr
+      <span data-count="1417">l</span>et* () = check_limi<span data-count="1417">t</span> limits in
+      <span data-count="1415">o</span>k @@ add_me<span data-count="1415">m</span> (Local mem) fields curr
     | <span data-count="110">M</span>Import ({ desc = Import_mem (id, limits); _ } as import) -&gt;
       let imported = imp import (id, limits) in
       <span data-count="110">o</span>k @@ add_me<span data-count="110">m</span> (Imported imported) fields curr
-    | <span data-count="343">M</span>Export { name; desc = Export_mem id } -&gt;
+    | <span data-count="345">M</span>Export { name; desc = Export_mem id } -&gt;
       let id = curr_id curr.mem id in
-      <span data-count="343">l</span>et exports =
+      <span data-count="345">l</span>et exports =
         { fields.exports with mem = { name; id } :: fields.exports.mem }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="12360">M</span>Func func -&gt;
+    | <span data-count="12362">M</span>Func func -&gt;
       let function_type, type_checks =
         match func.type_f with
         | <span data-count="234">B</span>t_ind _ -&gt; (fields.function_type, fields.type_checks)
-        | <span data-count="12126">B</span>t_raw (id, typ) -&gt;
+        | <span data-count="12128">B</span>t_raw (id, typ) -&gt;
           let type_checks =
             match id with
-            | <span data-count="12106">N</span>one -&gt; fields.type_checks
+            | <span data-count="12108">N</span>one -&gt; fields.type_checks
             | <span data-count="20">S</span>ome id -&gt; (id, typ) :: fields.type_checks
           in
           (typ :: fields.function_type, type_checks)
@@ -2372,13 +2372,13 @@ let group (modul : Symbolic.modul) : (grouped_module, string) Result.t =
       let func = { value = Local func; index } :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
-        , { curr with func = suc<span data-count="12360">c</span> curr.func } )
-    | <span data-count="3048">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
+        , { curr with func = suc<span data-count="12362">c</span> curr.func } )
+    | <span data-count="3070">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
       let imported = imp import (a, b) in
-      <span data-count="3048">o</span>k @@ add_fun<span data-count="3048">c</span> (Imported imported) fields curr
-    | <span data-count="10381">M</span>Export { name; desc = Export_func id } -&gt;
+      <span data-count="3070">o</span>k @@ add_fun<span data-count="3070">c</span> (Imported imported) fields curr
+    | <span data-count="10405">M</span>Export { name; desc = Export_func id } -&gt;
       let id = curr_id curr.func id in
-      <span data-count="10381">l</span>et exports =
+      <span data-count="10405">l</span>et exports =
         { fields.exports with func = { name; id } :: fields.exports.func }
       in
       Ok ({ fields with exports }, curr)
@@ -2404,9 +2404,9 @@ let group (modul : Symbolic.modul) : (grouped_module, string) Result.t =
     | <span data-count="32">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in
   let* modul, _curr =
-    list_fold_lef<span data-count="5875">t</span> add (empty_modul<span data-count="5875">e</span> modul.id, init_curr) modul.fields
+    list_fold_lef<span data-count="5879">t</span> add (empty_modul<span data-count="5879">e</span> modul.id, init_curr) modul.fields
   in
-  <span data-count="5857">O</span>k modul
+  <span data-count="5861">O</span>k modul
 
 module StrType = struct
   type t = str_type
@@ -2448,7 +2448,7 @@ end = struct
     }
 
   let assign_types (modul : grouped_module) : str_type Named.t =
-    <span data-count="5857">l</span>et assign_type
+    <span data-count="5861">l</span>et assign_type
       { declared_types; func_types; named_types; last_assigned_int; all_types }
       (name, sub_type) : type_acc =
       <span data-count="520">l</span>et last_assigned_int, declared_types, named_types, all_types =
@@ -2481,47 +2481,47 @@ end = struct
       ; all_types = TypeMap.empty
       }
     in
-    let acc = List.fold_left assign_type empty_acc (List.re<span data-count="5857">v</span> modul.typ) in
-    <span data-count="5857">l</span>et assign_heap_type
+    let acc = List.fold_left assign_type empty_acc (List.re<span data-count="5861">v</span> modul.typ) in
+    <span data-count="5861">l</span>et assign_heap_type
       ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
       typ =
-      <span data-count="12126">l</span>et typ = Def_func_t (convert_func_typ<span data-count="12126">e</span> typ) in
+      <span data-count="12128">l</span>et typ = Def_func_t (convert_func_typ<span data-count="12128">e</span> typ) in
       match TypeMap.find_opt typ all_types with
       | <span data-count="6230">S</span>ome _id -&gt; acc
-      | <span data-count="5896">N</span>one -&gt;
+      | <span data-count="5898">N</span>one -&gt;
         let id = last_assigned_int in
         let last_assigned_int = last_assigned_int + 1 in
         let all_types = TypeMap.add typ id all_types in
-        <span data-count="5896">l</span>et func_types =
+        <span data-count="5898">l</span>et func_types =
           match typ with
-          | <span data-count="5896">D</span>ef_func_t _ftype -&gt; { index = id; value = typ } :: func_types
+          | <span data-count="5898">D</span>ef_func_t _ftype -&gt; { index = id; value = typ } :: func_types
           | <span data-count="0">D</span>ef_array_t (_mut, _storage_type) -&gt; func_types
           | <span data-count="0">D</span>ef_struct_t _ -&gt; func_types
         in
         { acc with func_types; last_assigned_int; all_types }
     in
     let acc =
-      List.fold_left assign_heap_type acc (List.re<span data-count="5857">v</span> modul.function_type)
+      List.fold_left assign_heap_type acc (List.re<span data-count="5861">v</span> modul.function_type)
     in
-    <span data-count="5857">l</span>et values = List.re<span data-count="5857">v</span> acc.declared_types @ List.re<span data-count="5857">v</span> acc.func_types in
+    <span data-count="5861">l</span>et values = List.re<span data-count="5861">v</span> acc.declared_types @ List.re<span data-count="5861">v</span> acc.func_types in
     { values; named = acc.named_types }
 
   let get_runtime_name (get_name : 'a -&gt; string option) (elt : ('a, 'b) runtime)
     : string option =
-    <span data-count="19580">m</span>atch elt with
-    | <span data-count="16126">L</span>ocal v -&gt; get_name v
-    | <span data-count="3454">I</span>mported { assigned_name; _ } -&gt; assigned_name
+    <span data-count="19618">m</span>atch elt with
+    | <span data-count="16142">L</span>ocal v -&gt; get_name v
+    | <span data-count="3476">I</span>mported { assigned_name; _ } -&gt; assigned_name
 
   let name kind ~get_name values =
-    <span data-count="35130">l</span>et assign_one (named : int StringMap.t) (elt : _ indexed) =
-      <span data-count="21912">m</span>atch get_name elt.value with
-      | <span data-count="13908">N</span>one -&gt; Ok named
-      | <span data-count="8004">S</span>ome name -&gt;
+    <span data-count="35154">l</span>et assign_one (named : int StringMap.t) (elt : _ indexed) =
+      <span data-count="21950">m</span>atch get_name elt.value with
+      | <span data-count="13912">N</span>one -&gt; Ok named
+      | <span data-count="8038">S</span>ome name -&gt;
         if StringMap.mem name named then <span data-count="6">e</span>rror_s "duplicate %s %s" kind name
-        else <span data-count="7998">o</span>k @@ StringMap.ad<span data-count="7998">d</span> name elt.index named
+        else <span data-count="8032">o</span>k @@ StringMap.ad<span data-count="8032">d</span> name elt.index named
     in
-    let* named = list_fold_lef<span data-count="35130">t</span> assign_one StringMap.empty values in
-    <span data-count="35124">O</span>k { Named.values; named }
+    let* named = list_fold_lef<span data-count="35154">t</span> assign_one StringMap.empty values in
+    <span data-count="35148">O</span>k { Named.values; named }
 
   let check_type_id (types : str_type Named.t) (check : type_check) =
     <span data-count="20">l</span>et id, func_type = check in
@@ -2544,35 +2544,35 @@ end = struct
     | <span data-count="0">S</span>ome _ -&gt; Error "TODO: Simplify.check_type_id"
 
   let run (modul : grouped_module) : (assigned_module, string) Result.t =
-    <span data-count="5857">l</span>et typ = assign_types modul in
-    <span data-count="5857">l</span>et* global =
-      nam<span data-count="5857">e</span> "global"
-        ~get_name:(get_runtime_nam<span data-count="5857">e</span> (fun ({ id; _ } : Symbolic.global) -&gt; <span data-count="1188">i</span>d))
+    <span data-count="5861">l</span>et typ = assign_types modul in
+    <span data-count="5861">l</span>et* global =
+      nam<span data-count="5861">e</span> "global"
+        ~get_name:(get_runtime_nam<span data-count="5861">e</span> (fun ({ id; _ } : Symbolic.global) -&gt; <span data-count="1196">i</span>d))
         modul.global
     in
-    <span data-count="5857">l</span>et* table =
-      nam<span data-count="5857">e</span> "table"
-        ~get_name:(get_runtime_nam<span data-count="5857">e</span> (fun ((id, _) : table) -&gt; <span data-count="1167">i</span>d))
+    <span data-count="5861">l</span>et* table =
+      nam<span data-count="5861">e</span> "table"
+        ~get_name:(get_runtime_nam<span data-count="5861">e</span> (fun ((id, _) : table) -&gt; <span data-count="1169">i</span>d))
         modul.table
     in
-    <span data-count="5857">l</span>et* mem =
-      nam<span data-count="5857">e</span> "mem"
-        ~get_name:(get_runtime_nam<span data-count="5857">e</span> (fun ((id, _) : mem) -&gt; <span data-count="1411">i</span>d))
+    <span data-count="5861">l</span>et* mem =
+      nam<span data-count="5861">e</span> "mem"
+        ~get_name:(get_runtime_nam<span data-count="5861">e</span> (fun ((id, _) : mem) -&gt; <span data-count="1415">i</span>d))
         modul.mem
     in
-    <span data-count="5857">l</span>et* func =
-      nam<span data-count="5857">e</span> "func"
-        ~get_name:(get_runtime_nam<span data-count="5857">e</span> (fun ({ id; _ } : Symbolic.func) -&gt; <span data-count="12360">i</span>d))
+    <span data-count="5861">l</span>et* func =
+      nam<span data-count="5861">e</span> "func"
+        ~get_name:(get_runtime_nam<span data-count="5861">e</span> (fun ({ id; _ } : Symbolic.func) -&gt; <span data-count="12362">i</span>d))
         modul.func
     in
-    <span data-count="5851">l</span>et* elem =
-      nam<span data-count="5851">e</span> "elem" ~get_name:(fun (elem : Symbolic.elem) -&gt; <span data-count="1512">e</span>lem.id) modul.elem
+    <span data-count="5855">l</span>et* elem =
+      nam<span data-count="5855">e</span> "elem" ~get_name:(fun (elem : Symbolic.elem) -&gt; <span data-count="1512">e</span>lem.id) modul.elem
     in
-    <span data-count="5851">l</span>et* data =
-      nam<span data-count="5851">e</span> "data" ~get_name:(fun (data : Symbolic.data) -&gt; <span data-count="820">d</span>ata.id) modul.data
+    <span data-count="5855">l</span>et* data =
+      nam<span data-count="5855">e</span> "data" ~get_name:(fun (data : Symbolic.data) -&gt; <span data-count="820">d</span>ata.id) modul.data
     in
-    <span data-count="5851">l</span>et* () = list_ite<span data-count="5851">r</span> (check_type_i<span data-count="5851">d</span> typ) modul.type_checks in
-    <span data-count="5841">O</span>k
+    <span data-count="5855">l</span>et* () = list_ite<span data-count="5855">r</span> (check_type_i<span data-count="5855">d</span> typ) modul.type_checks in
+    <span data-count="5845">O</span>k
       { id = modul.id
       ; typ
       ; global
@@ -2589,19 +2589,19 @@ end
 module Rewrite_indices = struct
   let find msg (named : 'a Named.t) (indice : Symbolic.indice option) :
     (int, string) Result.t =
-    <span data-count="15276">m</span>atch indice with
+    <span data-count="15310">m</span>atch indice with
     | <span data-count="0">N</span>one -&gt; error_s "%s" msg
-    | <span data-count="15276">S</span>ome indice -&gt; (
+    | <span data-count="15310">S</span>ome indice -&gt; (
       match indice with
       | <span data-count="5330">S</span>ymbolic.Arg.Raw i -&gt;
         (* TODO change indexed strucure for that to be more efficient *)
         if not (List.exist<span data-count="5330">s</span> (has_inde<span data-count="5330">x</span> i) named.values) then
           <span data-count="122">e</span>rror_s "%s %i" msg i
         else <span data-count="5208">O</span>k i
-      | <span data-count="9946">S</span>ymbolic name -&gt; (
+      | <span data-count="9980">S</span>ymbolic name -&gt; (
         match StringMap.find_opt name named.named with
         | <span data-count="0">N</span>one -&gt; error_s "%s %s" msg name
-        | <span data-count="9946">S</span>ome i -&gt; Ok i ) )
+        | <span data-count="9980">S</span>ome i -&gt; Ok i ) )
 
   let get msg (named : 'a Named.t) indice : ('a indexed, string) Result.t =
     <span data-count="960">l</span>et* i = fin<span data-count="960">d</span> msg named indice in
@@ -2629,7 +2629,7 @@ module Rewrite_indices = struct
   let rewrite_expr (modul : assigned_module) (locals : param list)
     (iexpr : Symbolic.expr) : (expr, string) Result.t =
     (* block_ids handling *)
-    <span data-count="12310">l</span>et block_id_to_raw (loop_count, block_ids) id =
+    <span data-count="12312">l</span>et block_id_to_raw (loop_count, block_ids) id =
       <span data-count="51560">l</span>et* id =
         match id with
         | <span data-count="352">S</span>ymbolic.Arg.Symbolic id -&gt;
@@ -2687,7 +2687,7 @@ module Rewrite_indices = struct
     in
 
     let* locals, after_last_assigned_local =
-      List.fold_lef<span data-count="12310">t</span>
+      List.fold_lef<span data-count="12312">t</span>
         (fun acc ((name, _type) : param) -&gt;
           <span data-count="7551">l</span>et* locals, next_free_int = acc in
           <span data-count="7551">m</span>atch name with
@@ -2700,7 +2700,7 @@ module Rewrite_indices = struct
         locals
     in
 
-    <span data-count="12304">l</span>et find_local = function
+    <span data-count="12306">l</span>et find_local = function
       | <span data-count="7132">S</span>ymbolic.Arg.Raw i -&gt;
         if i &gt;= after_last_assigned_local then <span data-count="38">E</span>rror "unknown local" else <span data-count="7094">O</span>k i
       | <span data-count="3782">S</span>ymbolic name -&gt; (
@@ -2717,7 +2717,7 @@ module Rewrite_indices = struct
     let find_type id = <span data-count="0">f</span>ind "unknown type" modul.typ id in
 
     let rec body (loop_count, block_ids) :
-      Symbolic.instr -&gt; (instr, string) Result.t = <span data-count="56534">f</span>unction
+      Symbolic.instr -&gt; (instr, string) Result.t = <span data-count="56542">f</span>unction
       | <span data-count="420">B</span>r_table (ids, id) -&gt;
         let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
         <span data-count="420">l</span>et* ids = array_ma<span data-count="420">p</span> block_id_to_raw ids in
@@ -2883,9 +2883,9 @@ module Rewrite_indices = struct
       | <span data-count="26">M</span>emory_size -&gt;
         if List.lengt<span data-count="26">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
         else <span data-count="24">O</span>k Memory_size
-      | <span data-count="362">M</span>emory_fill -&gt;
-        if List.lengt<span data-count="362">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
-        else <span data-count="360">O</span>k Memory_fill
+      | <span data-count="364">M</span>emory_fill -&gt;
+        if List.lengt<span data-count="364">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
+        else <span data-count="362">O</span>k Memory_fill
       | <span data-count="170">M</span>emory_grow -&gt;
         if List.lengt<span data-count="170">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
         else <span data-count="168">O</span>k Memory_grow
@@ -2927,7 +2927,7 @@ module Rewrite_indices = struct
       | <span data-count="968">F</span>_binop (nn, o) -&gt; ok @@ F_binop (nn, o)
       | <span data-count="1712">F</span>32_const f -&gt; ok @@ F32_const f
       | <span data-count="1500">F</span>64_const f -&gt; ok @@ F64_const f
-      | <span data-count="16895">I</span>32_const i -&gt; ok @@ I32_const i
+      | <span data-count="16901">I</span>32_const i -&gt; ok @@ I32_const i
       | <span data-count="1456">I</span>64_const i -&gt; ok @@ I64_const i
       | <span data-count="456">U</span>nreachable -&gt; Ok Unreachable
       | <span data-count="1416">D</span>rop -&gt; Ok Drop
@@ -2951,19 +2951,19 @@ module Rewrite_indices = struct
         <span data-count="0">O</span>k Nop
     and expr (e : Symbolic.expr) (loop_count, block_ids) :
       (expr, string) Result.t =
-      <span data-count="17002">l</span>ist_map (fun i -&gt; <span data-count="56534">b</span>ody (loop_count, block_ids) i) e
+      <span data-count="17004">l</span>ist_map (fun i -&gt; <span data-count="56542">b</span>ody (loop_count, block_ids) i) e
     in
     expr iexpr (0, [])
 
   let rewrite_const_expr (modul : assigned_module) (expr : Symbolic.expr) :
     (Const.expr, string) Result.t =
-    <span data-count="6498">l</span>et const_instr (instr : Symbolic.instr) : (Const.instr, string) Result.t =
-      <span data-count="6534">l</span>et open Const in
+    <span data-count="6506">l</span>et const_instr (instr : Symbolic.instr) : (Const.instr, string) Result.t =
+      <span data-count="6542">l</span>et open Const in
       match instr with
-      | <span data-count="1431">S</span>ymbolic.I32_const v -&gt; ok @@ I32_const v
-      | <span data-count="247">I</span>64_const v -&gt; ok @@ I64_const v
-      | <span data-count="255">F</span>32_const v -&gt; ok @@ F32_const v
-      | <span data-count="241">F</span>64_const v -&gt; ok @@ F64_const v
+      | <span data-count="1433">S</span>ymbolic.I32_const v -&gt; ok @@ I32_const v
+      | <span data-count="249">I</span>64_const v -&gt; ok @@ I64_const v
+      | <span data-count="257">F</span>32_const v -&gt; ok @@ F32_const v
+      | <span data-count="243">F</span>64_const v -&gt; ok @@ F64_const v
       | <span data-count="62">R</span>ef_null v -&gt; ok @@ Ref_null (convert_heap_typ<span data-count="62">e</span> v)
       | <span data-count="4182">R</span>ef_func f -&gt;
         let* f = fin<span data-count="4182">d</span> "unknown function" modul.func (Some f) in
@@ -2990,7 +2990,7 @@ module Rewrite_indices = struct
 
   let rewrite_block_type (modul : assigned_module)
     (block_type : Symbolic.block_type) : (block_type, string) Result.t =
-    <span data-count="15350">m</span>atch block_type with
+    <span data-count="15374">m</span>atch block_type with
     | <span data-count="256">S</span>ymbolic.Arg.Bt_ind id -&gt;
       let* t =
         match get "unknown type" modul.typ (Some id) with
@@ -2999,13 +2999,13 @@ module Rewrite_indices = struct
         | <span data-count="0">O</span>k _ -&gt; Error "TODO: Simplify.bt_some_to_raw"
       in
       <span data-count="248">O</span>k t
-    | <span data-count="15094">B</span>t_raw (_, func_type) -&gt; Ok (convert_func_typ<span data-count="15094">e</span> func_type)
+    | <span data-count="15118">B</span>t_raw (_, func_type) -&gt; Ok (convert_func_typ<span data-count="15118">e</span> func_type)
 
   let rewrite_global (modul : assigned_module) (global : Symbolic.global) :
     (global, string) Result.t =
-    <span data-count="1184">l</span>et* init = rewrite_const_exp<span data-count="1184">r</span> modul global.init in
-    <span data-count="1158">l</span>et mut, val_type = global.typ in
-    let typ = (mut, convert_val_typ<span data-count="1158">e</span> val_type) in
+    <span data-count="1192">l</span>et* init = rewrite_const_exp<span data-count="1192">r</span> modul global.init in
+    <span data-count="1166">l</span>et mut, val_type = global.typ in
+    let typ = (mut, convert_val_typ<span data-count="1166">e</span> val_type) in
     let global = { id = global.id; init; typ } in
     Ok global
 
@@ -3041,80 +3041,80 @@ module Rewrite_indices = struct
 
   let rewrite_export msg named (exports : opt_export list) :
     (export list, string) Result.t =
-    <span data-count="22944">l</span>ist_map
+    <span data-count="22960">l</span>ist_map
       (fun { name; id } -&gt;
-        <span data-count="12059">l</span>et* id =
+        <span data-count="12095">l</span>et* id =
           match id with
-          | <span data-count="7124">C</span>urr id -&gt; Ok id
-          | <span data-count="4935">I</span>ndice id -&gt; fin<span data-count="4935">d</span> msg named (Some id)
+          | <span data-count="7126">C</span>urr id -&gt; Ok id
+          | <span data-count="4969">I</span>ndice id -&gt; fin<span data-count="4969">d</span> msg named (Some id)
         in
-        <span data-count="12035">O</span>k ({ name; id } : export) )
+        <span data-count="12071">O</span>k ({ name; id } : export) )
       exports
 
   let rewrite_exports (modul : assigned_module) (exports : opt_exports) :
     (exports, string) Result.t =
-    <span data-count="5745">l</span>et* global = rewrite_expor<span data-count="5745">t</span> "unknown global" modul.global exports.global in
-    <span data-count="5739">l</span>et* mem = rewrite_expor<span data-count="5739">t</span> "unknown memory" modul.mem exports.mem in
-    <span data-count="5733">l</span>et* table = rewrite_expor<span data-count="5733">t</span> "unknown table" modul.table exports.table in
-    <span data-count="5727">l</span>et* func = rewrite_expor<span data-count="5727">t</span> "unknown function" modul.func exports.func in
-    <span data-count="5721">l</span>et e : exports = { global; mem; table; func } in
+    <span data-count="5749">l</span>et* global = rewrite_expor<span data-count="5749">t</span> "unknown global" modul.global exports.global in
+    <span data-count="5743">l</span>et* mem = rewrite_expor<span data-count="5743">t</span> "unknown memory" modul.mem exports.mem in
+    <span data-count="5737">l</span>et* table = rewrite_expor<span data-count="5737">t</span> "unknown table" modul.table exports.table in
+    <span data-count="5731">l</span>et* func = rewrite_expor<span data-count="5731">t</span> "unknown function" modul.func exports.func in
+    <span data-count="5725">l</span>et e : exports = { global; mem; table; func } in
     Ok e
 
   let rewrite_func (modul : assigned_module) (func : Symbolic.func) :
     (func, string) Result.t =
-    <span data-count="12314">l</span>et* type_f = rewrite_block_typ<span data-count="12314">e</span> modul func.type_f in
-    <span data-count="12310">l</span>et params, _ = type_f in
+    <span data-count="12316">l</span>et* type_f = rewrite_block_typ<span data-count="12316">e</span> modul func.type_f in
+    <span data-count="12312">l</span>et params, _ = type_f in
     let locals = List.map convert_param func.locals in
-    <span data-count="12310">l</span>et* body = rewrite_exp<span data-count="12310">r</span> modul (params @ locals) func.body in
-    <span data-count="12040">l</span>et func = { body; type_f; id = func.id; locals } in
+    <span data-count="12312">l</span>et* body = rewrite_exp<span data-count="12312">r</span> modul (params @ locals) func.body in
+    <span data-count="12042">l</span>et func = { body; type_f; id = func.id; locals } in
     Ok func
 
   let rewrite_import (f : 'a -&gt; ('b, string) Result.t) (import : 'a imp) :
     ('b imp, string) Result.t =
-    <span data-count="3036">l</span>et* desc = <span data-count="3036">f</span> import.desc in
-    <span data-count="3032">O</span>k { import with desc }
+    <span data-count="3058">l</span>et* desc = <span data-count="3058">f</span> import.desc in
+    <span data-count="3054">O</span>k { import with desc }
 
   let rewrite_runtime f g r =
-    <span data-count="16690">m</span>atch r with
-    | <span data-count="13498">L</span>ocal v -&gt;
-      let* v = <span data-count="13498">f</span> v in
-      <span data-count="13198">o</span>k @@ Local v
-    | <span data-count="3192">I</span>mported i -&gt;
-      let* i = <span data-count="3192">g</span> i in
-      <span data-count="3188">o</span>k @@ Imported i
+    <span data-count="16722">m</span>atch r with
+    | <span data-count="13508">L</span>ocal v -&gt;
+      let* v = <span data-count="13508">f</span> v in
+      <span data-count="13208">o</span>k @@ Local v
+    | <span data-count="3214">I</span>mported i -&gt;
+      let* i = <span data-count="3214">g</span> i in
+      <span data-count="3210">o</span>k @@ Imported i
 
   let rewrite_named f named =
-    <span data-count="23150">l</span>et* values =
-      list_ma<span data-count="23150">p</span>
+    <span data-count="23166">l</span>et* values =
+      list_ma<span data-count="23166">p</span>
         (fun ind -&gt;
-          <span data-count="19022">l</span>et* value = <span data-count="19022">f</span> ind.value in
-          <span data-count="18648">O</span>k { ind with value } )
+          <span data-count="19054">l</span>et* value = <span data-count="19054">f</span> ind.value in
+          <span data-count="18680">O</span>k { ind with value } )
         named.Named.values
     in
-    <span data-count="22776">O</span>k { named with Named.values }
+    <span data-count="22792">O</span>k { named with Named.values }
 
   let run (modul : assigned_module) : (modul, string) Result.t =
-    <span data-count="5841">l</span>et* (global : (global, global_type) runtime Named.t) =
+    <span data-count="5845">l</span>et* (global : (global, global_type) runtime Named.t) =
       let* { Named.named; values } =
-        rewrite_name<span data-count="5841">d</span> (rewrite_runtim<span data-count="5841">e</span> (rewrite_globa<span data-count="5841">l</span> modul) ok) modul.global
+        rewrite_name<span data-count="5845">d</span> (rewrite_runtim<span data-count="5845">e</span> (rewrite_globa<span data-count="5845">l</span> modul) ok) modul.global
       in
-      <span data-count="5815">l</span>et values = List.rev values in
-      <span data-count="5815">l</span>et global : (global, global_type) runtime Named.t =
+      <span data-count="5819">l</span>et values = List.rev values in
+      <span data-count="5819">l</span>et global : (global, global_type) runtime Named.t =
         { Named.named; values }
       in
       Ok global
     in
-    <span data-count="5815">l</span>et* elem = rewrite_name<span data-count="5815">d</span> (rewrite_ele<span data-count="5815">m</span> modul) modul.elem in
-    <span data-count="5773">l</span>et* data = rewrite_name<span data-count="5773">d</span> (rewrite_dat<span data-count="5773">a</span> modul) modul.data in
-    <span data-count="5745">l</span>et* exports = rewrite_export<span data-count="5745">s</span> modul modul.exports in
-    <span data-count="5721">l</span>et* func =
-      let import = rewrite_import (rewrite_block_typ<span data-count="5721">e</span> modul) in
-      <span data-count="5721">l</span>et runtime = rewrite_runtime (rewrite_fun<span data-count="5721">c</span> modul) import in
-      <span data-count="5721">r</span>ewrite_name<span data-count="5721">d</span> runtime modul.func
+    <span data-count="5819">l</span>et* elem = rewrite_name<span data-count="5819">d</span> (rewrite_ele<span data-count="5819">m</span> modul) modul.elem in
+    <span data-count="5777">l</span>et* data = rewrite_name<span data-count="5777">d</span> (rewrite_dat<span data-count="5777">a</span> modul) modul.data in
+    <span data-count="5749">l</span>et* exports = rewrite_export<span data-count="5749">s</span> modul modul.exports in
+    <span data-count="5725">l</span>et* func =
+      let import = rewrite_import (rewrite_block_typ<span data-count="5725">e</span> modul) in
+      <span data-count="5725">l</span>et runtime = rewrite_runtime (rewrite_fun<span data-count="5725">c</span> modul) import in
+      <span data-count="5725">r</span>ewrite_name<span data-count="5725">d</span> runtime modul.func
     in
-    <span data-count="5443">l</span>et* start =
+    <span data-count="5447">l</span>et* start =
       match modul.start with
-      | <span data-count="5411">N</span>one -&gt; Ok None
+      | <span data-count="5415">N</span>one -&gt; Ok None
       | <span data-count="32">S</span>ome start -&gt; (
         let* idx = fin<span data-count="32">d</span> "unknown function" func (Some start) in
         <span data-count="30">l</span>et va = List.find (has_inde<span data-count="30">x</span> idx) func.Named.values in
@@ -3128,7 +3128,7 @@ module Rewrite_indices = struct
         | <span data-count="4">_</span>, _ -&gt; Error "start function" )
     in
 
-    <span data-count="5437">l</span>et modul : modul =
+    <span data-count="5441">l</span>et modul : modul =
       { id = modul.id
       ; mem = modul.mem
       ; table = modul.table
@@ -3144,10 +3144,10 @@ module Rewrite_indices = struct
 end
 
 let modul (modul : Symbolic.modul) : (modul, string) Result.t =
-  <span data-count="5875">L</span>og.debug "simplifying  ...@\n";
-  <span data-count="5875">l</span>et* (group : grouped_module) = grou<span data-count="5875">p</span> modul in
-  <span data-count="5857">l</span>et* (assigned : assigned_module) = Assign_indicies.ru<span data-count="5857">n</span> group in
-  <span data-count="5841">R</span>ewrite_indices.run assigned
+  <span data-count="5879">L</span>og.debug "simplifying  ...@\n";
+  <span data-count="5879">l</span>et* (group : grouped_module) = grou<span data-count="5879">p</span> modul in
+  <span data-count="5861">l</span>et* (assigned : assigned_module) = Assign_indicies.ru<span data-count="5861">n</span> group in
+  <span data-count="5845">R</span>ewrite_indices.run assigned
 </code></pre>
       </div>
     </div>
