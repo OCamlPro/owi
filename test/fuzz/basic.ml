@@ -437,17 +437,15 @@ let i64_store32 =
   let+ memarg in
   I64_store32 memarg
 
-let data_active (env : Env.t) =
-  match env.memory with
-  | Some name ->
-    let+ inst = const_i32 in
-    let exp = [ inst ] in
-    Data_active (Some (Symbolic name), exp)
-  | None -> assert false
+let data_active name =
+  let+ inst = const_i32 in
+  let exp = [ inst ] in
+  Data_active (Some (Symbolic name), exp)
 
 let data_mode (env : Env.t) =
-  if memory_exists env then choose [ const Data_passive; data_active env ]
-  else const Data_passive
+  match env.memory with
+  | Some name -> choose [ const Data_passive; data_active name ]
+  | None -> const Data_passive
 
 let data_drop (env : Env.t) =
   List.map

@@ -3,6 +3,7 @@ open Crowbar
 
 type t =
   { mutable next_data : int
+  ; mutable next_memory : int
   ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
@@ -16,6 +17,7 @@ type t =
 
 let empty () =
   { next_data = 0
+  ; next_memory = 0
   ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
@@ -37,9 +39,14 @@ let add_data env =
   name
 
 let add_memory env =
-  let name = "m0" in
-  env.memory <- Some name;
-  name
+  match env.memory with
+  | None -> 
+    let n = env.next_memory in
+    let name = Format.sprintf "m%d" n in
+    env.memory <- Some name;
+    env.next_memory <- succ n;
+    name
+  | Some _ -> failwith "a memory already exists"
 
 let add_global env typ =
   let n = env.next_global in
