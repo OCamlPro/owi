@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
           persist-credentials: false
       - name: setup-ocaml
-        uses: avsm/setup-ocaml@v1
+        uses: avsm/setup-ocaml@v2
         with:
-          ocaml-version: 4.14.0
+          ocaml-compiler: "5.0"
       - name: setup-deploy
         run: |
           opam pin add . -y --no-action

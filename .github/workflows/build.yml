@@ -15,19 +15,19 @@ jobs:
           - macos-latest
           - ubuntu-latest
           # - windows-latest see #5
-        ocaml-version:
-          - 4.14.0
+        ocaml-compiler:
+          - "5.0"
         include:
           - os: ubuntu-latest
-            ocaml-version: 4.13.0
+            ocaml-compiler: "4.13"
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: setup-ocaml
-        uses: avsm/setup-ocaml@v1
+        uses: avsm/setup-ocaml@v2
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
       - name: setup
         run: |
           opam pin add . -y --no-action
