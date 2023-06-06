@@ -26,6 +26,11 @@
 
 %{
 
+open Types
+open Types.Symbolic
+
+let failwith msg = raise @@ Parse_fail msg
+
 let u32 s =
   try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
   with Failure _msg -> failwith "constant out of range"
@@ -45,9 +50,6 @@ let f64 s =
 let f32 s =
   try Float32.of_string s
   with Failure _msg -> failwith "constant out of range"
-
-open Types
-open Types.Symbolic
 
 (** Prevents ocamlc -i -short-path from infering types containing the prefix Owi,
     which makes dune think that this is a recursive dependency. *)

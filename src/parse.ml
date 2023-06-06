@@ -1,42 +1,40 @@
 (** Module providing functions to parse a wasm script from various kind of
     inputs. *)
 
-(** Parse a script from a lexing buffer. *)
-let script_from_lexbuf =
-  Log.debug "parsing...@\n";
-  let parser =
-    MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.script
+let menhir_rule_from_lexbuf rule =
+  let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
+  let print_err buf msg =
+    let pos = fst @@ Sedlexing.lexing_positions buf in
+    let file_line =
+      let cpos = pos.pos_cnum - pos.pos_bol in
+      Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
+        pos.pos_lnum cpos
+    in
+    Log.debug "%s@\n%s@\n" file_line msg
   in
   fun buf ->
+    Log.debug "parsing      ...@\n";
     let provider () =
       let tok = Lexer.token buf in
       let start, stop = Sedlexing.lexing_positions buf in
       (tok, start, stop)
     in
     try Ok (parser provider) with
-    | Menhir_parser.Error ->
-      let start, _stop = Sedlexing.lexing_positions buf in
-      Log.debug "File %s, line %i, character %i:@." start.pos_fname
-        start.pos_lnum
-        (start.pos_cnum - start.pos_bol);
-      Error "unexpected token"
-    | Lexer.Error (pos, msg) ->
-      if !Log.debug_on then begin
-        let file_line =
-          let cpos = pos.pos_cnum - pos.pos_bol in
-          Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
-            pos.pos_lnum cpos
-        in
-        let msg = Printf.sprintf "Error: Lexing error %s" msg in
-        Log.debug "%s\n%s\n" file_line msg
-      end;
-      Error "unknown operator"
-    | Failure msg ->
-      if !Log.debug_on then begin
-        let msg = Printf.sprintf "Error: Lexing error %s" msg in
-        Log.debug "%s\n" msg
-      end;
+    | Types.Parse_fail msg
+    | Lexer.Illegal_escape msg
+    | Lexer.Unknown_operator msg ->
+      print_err buf msg;
       Error msg
+    | Lexer.Unexpected_character msg ->
+      print_err buf msg;
+      Error "unknown operator"
+    | Menhir_parser.Error ->
+      let msg = "unexpected token" in
+      print_err buf msg;
+      Error msg
+
+(** Parse a script from a lexing buffer. *)
+let script_from_lexbuf = menhir_rule_from_lexbuf Menhir_parser.script
 
 (** Parse a script from a string. *)
 let script_from_string s = script_from_lexbuf (Sedlexing.Utf8.from_string s)
@@ -58,49 +56,15 @@ let script_from_file ~filename =
   result
 
 (** Parse a module from a lexing buffer. *)
-let module_from_lexbuf =
-  Log.debug "parsing...@\n";
-  let parser =
-    MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.modul
-  in
-  fun buf ->
-    let provider () =
-      let tok = Lexer.token buf in
-      let start, stop = Sedlexing.lexing_positions buf in
-      (tok, start, stop)
-    in
-    try Ok (parser provider) with
-    | Menhir_parser.Error ->
-      let start, _stop = Sedlexing.lexing_positions buf in
-      Log.debug "File %s, line %i, character %i:@." start.pos_fname
-        start.pos_lnum
-        (start.pos_cnum - start.pos_bol);
-      Error "unexpected token"
-    | Lexer.Error (pos, msg) ->
-      if !Log.debug_on then begin
-        let file_line =
-          let cpos = pos.pos_cnum - pos.pos_bol in
-          Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
-            pos.pos_lnum cpos
-        in
-        let msg = Printf.sprintf "Error: Lexing error %s" msg in
-        Log.debug "%s\n%s\n" file_line msg
-      end;
-      Error "unknown operator"
-    | Failure msg ->
-      if !Log.debug_on then begin
-        let msg = Printf.sprintf "Error: Lexing error %s" msg in
-        Log.debug "%s\n" msg
-      end;
-      Error msg
+let module_from_lexbuf = menhir_rule_from_lexbuf Menhir_parser.modul
 
-(** Parse a script from a string. *)
+(** Parse a module from a string. *)
 let module_from_string s = module_from_lexbuf (Sedlexing.Utf8.from_string s)
 
-(** Parse a script from a channel. *)
+(** Parse a module from a channel. *)
 let module_from_channel c = module_from_lexbuf (Sedlexing.Utf8.from_channel c)
 
-(** Parse a script from a file. *)
+(** Parse a module from a file. *)
 let module_from_file ~filename =
   let chan = open_in filename in
   let result =
