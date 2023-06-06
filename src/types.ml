@@ -707,8 +707,7 @@ struct
 
     let import_desc fmt : import_desc -> Unit.t = function
       | Import_func (id, t) ->
-        (* TODO: fixme *)
-        Format.fprintf fmt "%a %a" id_opt id block_type t
+        Format.fprintf fmt "(func %a %a)" id_opt id block_type t
       | Import_table (id, t) ->
         Format.fprintf fmt "(table %a %a)" id_opt id table_type t
       | Import_mem (id, t) ->
