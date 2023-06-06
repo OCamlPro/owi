@@ -387,8 +387,6 @@ struct
 
     let indice_opt fmt = function None -> () | Some i -> indice fmt i
 
-    let func_type _fmt (_l, _r) = failwith "TODO"
-
     let num_type fmt = function
       | I32 -> Format.fprintf fmt "i32"
       | I64 -> Format.fprintf fmt "i64"
@@ -433,6 +431,9 @@ struct
 
     let result_type fmt results =
       Format.pp_print_list ~pp_sep:Format.pp_print_space result_ fmt results
+
+    let func_type fmt (l, r) =
+      Format.fprintf fmt "(func %a %a)" param_type l result_type r
 
     let block_type fmt bt = M.pp_block_type param_type result_type fmt bt
 
@@ -735,16 +736,19 @@ struct
         field_type fmt
 
     let struct_field fmt ((n : string option), f) =
-      Format.fprintf fmt "%a%a" id_opt n fields f
+      Format.fprintf fmt "@\n  @[<v>(field %a%a)@]" id_opt n fields f
 
     let struct_type fmt =
-      Format.pp_print_list
-        ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
-        struct_field fmt
+      Format.fprintf fmt "(struct %a)"
+        (Format.pp_print_list
+           ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+           struct_field )
+
+    let array_type fmt = Format.fprintf fmt "(array %a)" field_type
 
     let str_type fmt = function
       | Def_struct_t t -> struct_type fmt t
-      | Def_array_t t -> field_type fmt t
+      | Def_array_t t -> array_type fmt t
       | Def_func_t t -> func_type fmt t
 
     let indices fmt ids =
@@ -757,13 +761,14 @@ struct
       | No_final -> Format.fprintf fmt "no_final"
 
     let sub_type fmt (f, ids, t) =
-      Format.fprintf fmt "%a %a %a" final f indices ids str_type t
+      Format.fprintf fmt "(sub %a %a %a)" final f indices ids str_type t
 
-    let type_def fmt (id, t) = Format.fprintf fmt "%a%a" id_opt id sub_type t
+    let type_def fmt (id, t) =
+      Format.fprintf fmt "@\n  @[<v>(type %a %a)@]" id_opt id sub_type t
 
     let typ fmt l =
       (* TODO: special case for empty and singleton case to avoid a big rec printing *)
-      Format.fprintf fmt "%a"
+      Format.fprintf fmt "(rec %a)"
         (Format.pp_print_list
            ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
            type_def )
