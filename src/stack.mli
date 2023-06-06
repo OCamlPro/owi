@@ -26,6 +26,8 @@ val pop_i32_to_char : 'a t -> char * 'a t
 
 val pop_i32_to_int : 'a t -> int * 'a t
 
+val pop_ui32_to_int : 'a t -> int * 'a t
+
 val pop2_i32 : 'a t -> (int32 * int32) * 'a t
 
 val pop_i64 : 'a t -> int64 * 'a t
