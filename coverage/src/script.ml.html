@@ -578,9 +578,9 @@ module Host_externref = struct
 end
 
 let check_error ~expected ~got =
-  <span data-count="9126">l</span>et ok =
+  <span data-count="9128">l</span>et ok =
     got = expecte<span data-count="2704">d</span>
-    || String.starts_wit<span data-count="6422">h</span> ~prefix:expected go<span data-count="6408">t</span>
+    || String.starts_wit<span data-count="6424">h</span> ~prefix:expected go<span data-count="6410">t</span>
     || got = "constant out of range"
        &amp;&amp; <span data-count="14">(</span>expected = "i32 constant out of range<span data-count="12">"</span> || expected = "i32 constant<span data-count="2">"</span><span data-count="14">)</span>
   in
@@ -589,7 +589,7 @@ let check_error ~expected ~got =
     <span data-count="0">L</span>og.debug "got     : `%s`@." got;
     <span data-count="0">E</span>rror got
   end
-  else <span data-count="9126">O</span>k ()
+  else <span data-count="9128">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="0">O</span>k _whatever -&gt;
@@ -751,14 +751,14 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="10">O</span>k link_state
-      | <span data-count="2990">A</span>ssert (Assert_invalid (m, expected)) -&gt;
+      | <span data-count="2992">A</span>ssert (Assert_invalid (m, expected)) -&gt;
         Log.debug "*** assert_invalid@\n";
-        <span data-count="2990">l</span>et* () =
+        <span data-count="2992">l</span>et* () =
           match Compile.until_link link_state ~optimize ~name:None m with
           | <span data-count="0">O</span>k _ -&gt; check_error ~expected ~got:"Ok"
-          | <span data-count="2990">E</span>rror got -&gt; check_error ~expected ~got
+          | <span data-count="2992">E</span>rror got -&gt; check_error ~expected ~got
         in
-        <span data-count="2990">O</span>k link_state
+        <span data-count="2992">O</span>k link_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
         Log.debug "*** assert_invalid_quote@\n";
         <span data-count="0">l</span>et got = Parse.script_from_string (String.conca<span data-count="0">t</span> "\n" m) in
