@@ -632,8 +632,8 @@ struct
       | Return_call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "return_call_indirect %a %a" indice tbl_id block_type
           ty_id
-      | Return_call_ref ty_id -> Format.fprintf fmt "return_call_ref %a" block_type
-          ty_id
+      | Return_call_ref ty_id ->
+        Format.fprintf fmt "return_call_ref %a" block_type ty_id
       | Call id -> Format.fprintf fmt "call %a" indice id
       | Call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
