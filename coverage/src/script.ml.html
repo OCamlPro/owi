@@ -578,9 +578,9 @@ module Host_externref = struct
 end
 
 let check_error ~expected ~got =
-  <span data-count="9128">l</span>et ok =
-    got = expecte<span data-count="2704">d</span>
-    || String.starts_wit<span data-count="6424">h</span> ~prefix:expected go<span data-count="6410">t</span>
+  <span data-count="9132">l</span>et ok =
+    got = expecte<span data-count="2358">d</span>
+    || String.starts_wit<span data-count="6774">h</span> ~prefix:expected go<span data-count="6760">t</span>
     || got = "constant out of range"
        &amp;&amp; <span data-count="14">(</span>expected = "i32 constant out of range<span data-count="12">"</span> || expected = "i32 constant<span data-count="2">"</span><span data-count="14">)</span>
   in
@@ -589,7 +589,7 @@ let check_error ~expected ~got =
     <span data-count="0">L</span>og.debug "got     : `%s`@." got;
     <span data-count="0">E</span>rror got
   end
-  else <span data-count="9128">O</span>k ()
+  else <span data-count="9132">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="0">O</span>k _whatever -&gt;
@@ -697,24 +697,24 @@ let action (link_state : Link.state) = function
     <span data-count="22">O</span>k [ global.value ]
 
 let run ~with_exhaustion ~optimize script =
-  <span data-count="233">l</span>et state =
+  <span data-count="235">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="233">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="235">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -&gt; function
-      | <span data-count="2588">T</span>ypes.Symbolic.Module m -&gt;
-        if !curr_module = 0 then <span data-count="233">L</span>og.debug_on := false;
-        <span data-count="2588">L</span>og.debug "*** module@\n";
-        <span data-count="2588">i</span>ncr curr_module;
-        <span data-count="2588">l</span>et* link_state =
-          Compile.until_interpre<span data-count="2588">t</span> link_state ~optimize ~name:None m
+      | <span data-count="2590">T</span>ypes.Symbolic.Module m -&gt;
+        if !curr_module = 0 then <span data-count="235">L</span>og.debug_on := false;
+        <span data-count="2590">L</span>og.debug "*** module@\n";
+        <span data-count="2590">i</span>ncr curr_module;
+        <span data-count="2590">l</span>et* link_state =
+          Compile.until_interpre<span data-count="2590">t</span> link_state ~optimize ~name:None m
         in
-        <span data-count="2588">L</span>og.debug_on := debug_on;
+        <span data-count="2590">L</span>og.debug_on := debug_on;
         Ok link_state
       | <span data-count="68">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
         Log.debug "*** assert_trap@\n";
@@ -728,11 +728,11 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** assert_malformed_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="1472">O</span>k link_state
-      | <span data-count="1156">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
+      | <span data-count="1160">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
         Log.debug "*** assert_malformed_quote@\n";
-        <span data-count="1156">l</span>et* () =
-          match Parse.script_from_string (String.conca<span data-count="1156">t</span> "\n" m) with
-          | <span data-count="1038">E</span>rror got -&gt; check_error ~expected ~got
+        <span data-count="1160">l</span>et* () =
+          match Parse.script_from_string (String.conca<span data-count="1160">t</span> "\n" m) with
+          | <span data-count="1042">E</span>rror got -&gt; check_error ~expected ~got
           | <span data-count="118">O</span>k [ Module m ] -&gt; (
             match Check.modul m with
             | <span data-count="52">E</span>rror got -&gt; check_error ~expected ~got
@@ -746,7 +746,7 @@ let run ~with_exhaustion ~optimize script =
             let got = "expected a single module" in
             check_error ~expected ~got
         in
-        <span data-count="1156">O</span>k link_state
+        <span data-count="1160">O</span>k link_state
       | <span data-count="10">A</span>ssert (Assert_invalid_binary _) -&gt;
         Log.debug "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
@@ -800,11 +800,11 @@ let run ~with_exhaustion ~optimize script =
           else <span data-count="30">O</span>k ()
         in
         <span data-count="30">O</span>k link_state
-      | <span data-count="281">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="233">!</span>registered = false then <span data-count="233">L</span>og.debug_on := false;
-        <span data-count="281">L</span>og.debug "*** register@\n";
-        <span data-count="281">l</span>et* state = Link.register_modul<span data-count="281">e</span> link_state ~name ~id:mod_name in
-        <span data-count="281">L</span>og.debug_on := debug_on;
+      | <span data-count="283">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="235">!</span>registered = false then <span data-count="235">L</span>og.debug_on := false;
+        <span data-count="283">L</span>og.debug "*** register@\n";
+        <span data-count="283">l</span>et* state = Link.register_modul<span data-count="283">e</span> link_state ~name ~id:mod_name in
+        <span data-count="283">L</span>og.debug_on := debug_on;
         Ok state
       | <span data-count="314">A</span>ction a -&gt;
         Log.debug "*** action@\n";
@@ -812,9 +812,9 @@ let run ~with_exhaustion ~optimize script =
         <span data-count="314">O</span>k link_state )
     state script
 
-let exec ?(with_exhaustion = <span data-count="232">f</span>alse) ~optimize script =
-  <span data-count="233">l</span>et* _link_state = ru<span data-count="233">n</span> ~with_exhaustion ~optimize script in
-  <span data-count="233">O</span>k ()
+let exec ?(with_exhaustion = <span data-count="234">f</span>alse) ~optimize script =
+  <span data-count="235">l</span>et* _link_state = ru<span data-count="235">n</span> ~with_exhaustion ~optimize script in
+  <span data-count="235">O</span>k ()
 </code></pre>
       </div>
     </div>

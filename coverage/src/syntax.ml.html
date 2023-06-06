@@ -157,35 +157,35 @@
 <a href="#L61">61</a>
 <a href="#L62">62</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="982423">m</span>atch o with <span data-count="971079">O</span>k v -&gt; f v | <span data-count="11344">E</span>rror _ as e -&gt; e
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="983061">m</span>atch o with <span data-count="971717">O</span>k v -&gt; f v | <span data-count="11344">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="2660">E</span>rror v
 
 let error_s format = <span data-count="2620">F</span>ormat.kasprintf error format
 
-let ok v = <span data-count="244104">O</span>k v
+let ok v = <span data-count="244264">O</span>k v
 
 let list_iter f l =
-  <span data-count="23579">l</span>et exception E of string in
+  <span data-count="23587">l</span>et exception E of string in
   try
     List.iter
-      (fun v -&gt; <span data-count="7739">m</span>atch f v with <span data-count="58">E</span>rror msg -&gt; raise (E msg) | <span data-count="7681">O</span>k () -&gt; ())
+      (fun v -&gt; <span data-count="7747">m</span>atch f v with <span data-count="58">E</span>rror msg -&gt; raise (E msg) | <span data-count="7689">O</span>k () -&gt; ())
       l;
-    <span data-count="23521">O</span>k ()
+    <span data-count="23529">O</span>k ()
   with <span data-count="58">E</span> msg -&gt; Error msg
 
 let list_map f l =
-  <span data-count="73596">l</span>et exception E of string in
+  <span data-count="73620">l</span>et exception E of string in
   try
-    o<span data-count="72820">k</span>
-    @@ List.ma<span data-count="72820">p</span> (fun v -&gt; <span data-count="105827">m</span>atch f v with <span data-count="776">E</span>rror s -&gt; raise (E s) | <span data-count="105051">O</span>k v -&gt; v) l
+    o<span data-count="72844">k</span>
+    @@ List.ma<span data-count="72844">p</span> (fun v -&gt; <span data-count="105899">m</span>atch f v with <span data-count="776">E</span>rror s -&gt; raise (E s) | <span data-count="105123">O</span>k v -&gt; v) l
   with <span data-count="776">E</span> s -&gt; Error s
 
 let list_fold_left f acc l =
-  <span data-count="80473">L</span>ist.fold_left
+  <span data-count="80513">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="192746">l</span>et* acc in
-      <span data-count="191508">f</span> acc v )
+      <span data-count="192906">l</span>et* acc in
+      <span data-count="191668">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =
