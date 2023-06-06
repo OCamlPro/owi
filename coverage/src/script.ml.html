@@ -599,21 +599,21 @@ let check_error_result expected = function
   | <span data-count="4980">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="48082">l</span>et* exports =
+  <span data-count="48084">l</span>et* exports =
     match mod_id with
-    | <span data-count="47876">N</span>one -&gt; begin
+    | <span data-count="47878">N</span>one -&gt; begin
       match ls.Link.last with
       | <span data-count="0">N</span>one -&gt; Error "unbound last module"
-      | <span data-count="47876">S</span>ome m -&gt; Ok m
+      | <span data-count="47878">S</span>ome m -&gt; Ok m
     end
     | <span data-count="206">S</span>ome mod_id -&gt; (
       match Link.StringMap.find mod_id ls.Link.by_id with
       | <span data-count="0">e</span>xception Not_found -&gt; error_<span data-count="0">s</span> "unbound module %s" mod_id
       | <span data-count="206">e</span>xports -&gt; Ok exports )
   in
-  <span data-count="48082">m</span>atch Link.StringMap.find f_name exports.functions with
+  <span data-count="48084">m</span>atch Link.StringMap.find f_name exports.functions with
   | <span data-count="0">e</span>xception Not_found -&gt; error_s "unbound name %s" f_name
-  | <span data-count="48082">v</span> -&gt; Ok v
+  | <span data-count="48084">v</span> -&gt; Ok v
 
 let load_global_from_module ls mod_id name =
   <span data-count="22">l</span>et* exports =
@@ -633,8 +633,8 @@ let load_global_from_module ls mod_id name =
   | <span data-count="22">v</span> -&gt; Ok v
 
 let compare_result_const result (const : 'env Value.t) =
-  <span data-count="42672">m</span>atch (result, const) with
-  | <span data-count="25592">S</span>ymbolic.Result_const (Literal (Const_I32 n)), I32 n' -&gt; n = n'
+  <span data-count="42674">m</span>atch (result, const) with
+  | <span data-count="25594">S</span>ymbolic.Result_const (Literal (Const_I32 n)), I32 n' -&gt; n = n'
   | <span data-count="1752">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; n = n'
   | <span data-count="5720">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt; n = n'
   | <span data-count="5698">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt; n = n'
@@ -680,16 +680,16 @@ let value_of_const : Types.Symbolic.const -&gt; 'env Value.t = function
     <span data-count="0">I</span>32 (Int32.of_in<span data-count="0">t</span> 666)
 
 let action (link_state : Link.state) = function
-  | <span data-count="48082">T</span>ypes.Symbolic.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="48084">T</span>ypes.Symbolic.Invoke (mod_id, f, args) -&gt; begin
     (*
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
          ~none:(fun ppf () -&gt; Format.pp_print_string ppf "")
          Format.pp_print_string )
       mod_id f Types.Symbolic.consts args;*)
-    let* f = load_func_from_modul<span data-count="48082">e</span> link_state mod_id f in
-    <span data-count="48082">l</span>et stack = List.rev_map value_of_const args in
-    <span data-count="48082">I</span>nterpret.exec_vfunc stack f
+    let* f = load_func_from_modul<span data-count="48084">e</span> link_state mod_id f in
+    <span data-count="48084">l</span>et stack = List.rev_map value_of_const args in
+    <span data-count="48084">I</span>nterpret.exec_vfunc stack f
   end
   | <span data-count="22">G</span>et (mod_id, name) -&gt;
     Log.debug "get...@\n";
@@ -697,24 +697,24 @@ let action (link_state : Link.state) = function
     <span data-count="22">O</span>k [ global.value ]
 
 let run ~with_exhaustion ~optimize script =
-  <span data-count="231">l</span>et state =
+  <span data-count="233">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="231">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="233">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -&gt; function
-      | <span data-count="2584">T</span>ypes.Symbolic.Module m -&gt;
-        if !curr_module = 0 then <span data-count="231">L</span>og.debug_on := false;
-        <span data-count="2584">L</span>og.debug "*** module@\n";
-        <span data-count="2584">i</span>ncr curr_module;
-        <span data-count="2584">l</span>et* link_state =
-          Compile.until_interpre<span data-count="2584">t</span> link_state ~optimize ~name:None m
+      | <span data-count="2588">T</span>ypes.Symbolic.Module m -&gt;
+        if !curr_module = 0 then <span data-count="233">L</span>og.debug_on := false;
+        <span data-count="2588">L</span>og.debug "*** module@\n";
+        <span data-count="2588">i</span>ncr curr_module;
+        <span data-count="2588">l</span>et* link_state =
+          Compile.until_interpre<span data-count="2588">t</span> link_state ~optimize ~name:None m
         in
-        <span data-count="2584">L</span>og.debug_on := debug_on;
+        <span data-count="2588">L</span>og.debug_on := debug_on;
         Ok link_state
       | <span data-count="68">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
         Log.debug "*** assert_trap@\n";
@@ -774,18 +774,18 @@ let run ~with_exhaustion ~optimize script =
       | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt;
         Log.debug "*** assert_malformed@\n";
         <span data-count="0">L</span>og.err "TODO"
-      | <span data-count="43044">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="43046">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.debug "*** assert_return@\n";
-        <span data-count="43044">l</span>et* stack = actio<span data-count="43044">n</span> link_state a in
-        <span data-count="43044">i</span>f
-          (not (List.compare_length<span data-count="43044">s</span> res stack = 0)<span data-count="0">)</span>
-          || not (List.for_all<span data-count="43044">2</span> compare_result_const res (List.re<span data-count="43044">v</span> stack)<span data-count="0">)</span>
+        <span data-count="43046">l</span>et* stack = actio<span data-count="43046">n</span> link_state a in
+        <span data-count="43046">i</span>f
+          (not (List.compare_length<span data-count="43046">s</span> res stack = 0)<span data-count="0">)</span>
+          || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
             (List.re<span data-count="0">v</span> stack) Types.Symbolic.Pp.results res;
           <span data-count="0">E</span>rror "Bad result"
         end
-        else <span data-count="43044">O</span>k link_state
+        else <span data-count="43046">O</span>k link_state
       | <span data-count="4746">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.debug "*** assert_trap@\n";
         <span data-count="4746">l</span>et got = action link_state a in
@@ -800,11 +800,11 @@ let run ~with_exhaustion ~optimize script =
           else <span data-count="30">O</span>k ()
         in
         <span data-count="30">O</span>k link_state
-      | <span data-count="279">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="231">!</span>registered = false then <span data-count="231">L</span>og.debug_on := false;
-        <span data-count="279">L</span>og.debug "*** register@\n";
-        <span data-count="279">l</span>et* state = Link.register_modul<span data-count="279">e</span> link_state ~name ~id:mod_name in
-        <span data-count="279">L</span>og.debug_on := debug_on;
+      | <span data-count="281">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="233">!</span>registered = false then <span data-count="233">L</span>og.debug_on := false;
+        <span data-count="281">L</span>og.debug "*** register@\n";
+        <span data-count="281">l</span>et* state = Link.register_modul<span data-count="281">e</span> link_state ~name ~id:mod_name in
+        <span data-count="281">L</span>og.debug_on := debug_on;
         Ok state
       | <span data-count="314">A</span>ction a -&gt;
         Log.debug "*** action@\n";
@@ -812,9 +812,9 @@ let run ~with_exhaustion ~optimize script =
         <span data-count="314">O</span>k link_state )
     state script
 
-let exec ?(with_exhaustion = <span data-count="230">f</span>alse) ~optimize script =
-  <span data-count="231">l</span>et* _link_state = ru<span data-count="231">n</span> ~with_exhaustion ~optimize script in
-  <span data-count="231">O</span>k ()
+let exec ?(with_exhaustion = <span data-count="232">f</span>alse) ~optimize script =
+  <span data-count="233">l</span>et* _link_state = ru<span data-count="233">n</span> ~with_exhaustion ~optimize script in
+  <span data-count="233">O</span>k ()
 </code></pre>
       </div>
     </div>

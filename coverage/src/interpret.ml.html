@@ -3009,13 +3009,13 @@ let init_local (_id, t) : Env.t' Value.t =
 (* TODO move to module Env *)
 let mem_0 = 0
 
-let ( let* ) o f = <span data-count="15367874">R</span>esult.fold ~ok:f ~error:trap o
+let ( let* ) o f = <span data-count="15367876">R</span>esult.fold ~ok:f ~error:trap o
 
 let get_memory (env : Env.t) idx =
   <span data-count="1852992">l</span>et* mem = Env.get_memor<span data-count="1852992">y</span> env idx in
   <span data-count="1852992">O</span>k Link.Memory.(get_dat<span data-count="1852992">a</span> mem, get_limit_ma<span data-count="1852992">x</span> mem)
 
-let get_memory_raw env idx = <span data-count="214">E</span>nv.get_memory env idx
+let get_memory_raw env idx = <span data-count="216">E</span>nv.get_memory env idx
 
 let exec_extern_func stack (f : Value.Func.extern_func) =
   <span data-count="69">l</span>et pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
@@ -3136,10 +3136,10 @@ module State = struct
       count.instructions calls count.calls
 
   let empty_count name =
-    <span data-count="11481756">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="11481756">e</span> 0 }
+    <span data-count="11481758">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="11481758">e</span> 0 }
 
   let count_instruction state =
-    <span data-count="112669925">s</span>tate.count.instructions &lt;- state.count.instructions + 1
+    <span data-count="112669929">s</span>tate.count.instructions &lt;- state.count.instructions + 1
 
   let enter_function_count count func_name func =
     <span data-count="11654192">l</span>et c =
@@ -3156,9 +3156,9 @@ module State = struct
   exception Result of value list
 
   let return (state : exec_state) =
-    <span data-count="272146">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="272146">h</span> state.func_rt) in
-    <span data-count="272146">m</span>atch state.return_state with
-    | <span data-count="44258">N</span>one -&gt; raise (Result args)
+    <span data-count="272148">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="272148">h</span> state.func_rt) in
+    <span data-count="272148">m</span>atch state.return_state with
+    | <span data-count="44260">N</span>one -&gt; raise (Result args)
     | <span data-count="227888">S</span>ome state -&gt;
       let stack = args @ state.stack in
       { state with stack }
@@ -3174,8 +3174,8 @@ module State = struct
       { state with block_stack; pc = block.branch; stack }
 
   let end_block (state : exec_state) =
-    <span data-count="1543713">m</span>atch state.block_stack with
-    | <span data-count="269764">[</span>] -&gt; return state
+    <span data-count="1543715">m</span>atch state.block_stack with
+    | <span data-count="269766">[</span>] -&gt; return state
     | <span data-count="1273949">b</span>lock :: block_stack -&gt;
       let args = Stack.keep state.stack (List.lengt<span data-count="1273949">h</span> block.continue_rt) in
       <span data-count="1273949">l</span>et stack = args @ block.stack in
@@ -3267,18 +3267,18 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
   <span data-count="1602040">e</span>xec_vfunc ~return state func
 
 let exec_instr instr (state : State.exec_state) =
-  <span data-count="112669925">S</span>tate.count_instruction state;
-  <span data-count="112669925">l</span>et stack = state.stack in
+  <span data-count="112669929">S</span>tate.count_instruction state;
+  <span data-count="112669929">l</span>et stack = state.stack in
   let env = state.env in
   let locals = state.locals in
-  let st stack = <span data-count="83838956">{</span> state with stack } in
+  let st stack = <span data-count="83838960">{</span> state with stack } in
   Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-  <span data-count="112669925">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
-  <span data-count="112669925">m</span>atch instr with
+  <span data-count="112669929">L</span>og.debug2 "running instr: %a@." Simplified.Pp.instr instr;
+  <span data-count="112669929">m</span>atch instr with
   | <span data-count="2290">R</span>eturn -&gt; State.return state
   | <span data-count="206">N</span>op -&gt; state
   | <span data-count="146">U</span>nreachable -&gt; trap "unreachable"
-  | <span data-count="5783065">I</span>32_const n -&gt; st @@ Stack.push_i3<span data-count="5783065">2</span> stack n
+  | <span data-count="5783067">I</span>32_const n -&gt; st @@ Stack.push_i3<span data-count="5783067">2</span> stack n
   | <span data-count="10225811">I</span>64_const n -&gt; st @@ Stack.push_i6<span data-count="10225811">4</span> stack n
   | <span data-count="114905">F</span>32_const f -&gt; st @@ Stack.push_f3<span data-count="114905">2</span> stack f
   | <span data-count="112286">F</span>64_const f -&gt; st @@ Stack.push_f6<span data-count="112286">4</span> stack f
@@ -3376,16 +3376,16 @@ let exec_instr instr (state : State.exec_state) =
     let* mem, _max = get_memor<span data-count="78">y</span> env mem_0 in
     <span data-count="78">l</span>et len = Bytes.lengt<span data-count="78">h</span> mem / page_size in
     st @@ Stack.push_i32_of_in<span data-count="78">t</span> stack len
-  | <span data-count="214">M</span>emory_grow -&gt; begin
-    let* mem = get_memory_ra<span data-count="214">w</span> env mem_0 in
-    <span data-count="214">l</span>et data = Link.Memory.get_data mem in
-    <span data-count="214">l</span>et max_size = Link.Memory.get_limit_max mem in
-    <span data-count="214">l</span>et delta, stack = Stack.pop_i32_to_int stack in
-    <span data-count="214">l</span>et delta = delta * page_size in
+  | <span data-count="216">M</span>emory_grow -&gt; begin
+    let* mem = get_memory_ra<span data-count="216">w</span> env mem_0 in
+    <span data-count="216">l</span>et data = Link.Memory.get_data mem in
+    <span data-count="216">l</span>et max_size = Link.Memory.get_limit_max mem in
+    <span data-count="216">l</span>et delta, stack = Stack.pop_ui32_to_int stack in
+    <span data-count="216">l</span>et delta = delta * page_size in
     let old_size = Bytes.length data in
-    <span data-count="214">l</span>et new_size = old_size + delta in
+    <span data-count="216">l</span>et new_size = old_size + delta in
     let too_big =
-      if Sys.word_size = 64 then <span data-count="214">n</span>ew_size &gt;= page_size * page_size
+      if Sys.word_size = 64 then <span data-count="216">n</span>ew_size &gt;= page_size * page_size
       else <span data-count="0">i</span>f Sys.word_size = 32 then
         <span data-count="0">l</span>et page_size = Int64.of_int page_size in
         <span data-count="0">l</span>et limit = Int64.mul page_size page_size in
@@ -3395,7 +3395,7 @@ let exec_instr instr (state : State.exec_state) =
     in
     st
     @@
-    if too_big then <span data-count="8">S</span>tack.push_i3<span data-count="8">2</span> stack (-1l)
+    if too_big then <span data-count="10">S</span>tack.push_i3<span data-count="10">2</span> stack (-1l)
     else <span data-count="206">b</span>egin
       match max_size with
       | <span data-count="60">S</span>ome max when new_size &gt; max * page_size -&gt; <span data-count="12">S</span>tack.push_i3<span data-count="12">2</span> stack (-1l)
@@ -3775,20 +3775,20 @@ let exec_instr instr (state : State.exec_state) =
     <span data-count="0">s</span>t @@ stack
 
 let rec loop (state : State.exec_state) =
-  <span data-count="114213638">l</span>et state =
+  <span data-count="114213644">l</span>et state =
     match state.pc with
-    | <span data-count="112669925">i</span>nstr :: pc -&gt; exec_inst<span data-count="112664029">r</span> instr { state with pc }
-    | <span data-count="1543713">[</span>] -&gt;
+    | <span data-count="112669929">i</span>nstr :: pc -&gt; exec_inst<span data-count="112664033">r</span> instr { state with pc }
+    | <span data-count="1543715">[</span>] -&gt;
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
-      <span data-count="1543713">S</span>tate.end_bloc<span data-count="1500537">k</span> state
+      <span data-count="1543715">S</span>tate.end_bloc<span data-count="1500537">k</span> state
   in
   loop state
 
 let exec_expr env locals stack expr bt =
-  <span data-count="49072">l</span>et count = State.empty_count (Some "start") in
-  <span data-count="49072">c</span>ount.enter &lt;- count.enter + 1;
+  <span data-count="49074">l</span>et count = State.empty_count (Some "start") in
+  <span data-count="49074">c</span>ount.enter &lt;- count.enter + 1;
   let state : State.exec_state =
-    let func_rt = match bt with <span data-count="990">N</span>one -&gt; [] | <span data-count="48082">S</span>ome rt -&gt; rt in
+    let func_rt = match bt with <span data-count="990">N</span>one -&gt; [] | <span data-count="48084">S</span>ome rt -&gt; rt in
     { stack
     ; locals
     ; env
@@ -3799,33 +3799,33 @@ let exec_expr env locals stack expr bt =
     ; count
     }
   in
-  try loo<span data-count="0">p</span> state with <span data-count="44258">S</span>tate.Result args -&gt; (args, count)
+  try loo<span data-count="0">p</span> state with <span data-count="44260">S</span>tate.Result args -&gt; (args, count)
 
 let exec_func env (func : wasm_func) args =
-  <span data-count="48082">L</span>og.debug1 "calling func : func %s@."
-    (Option.valu<span data-count="48082">e</span> func.id ~default:"anonymous");
-  <span data-count="48082">l</span>et locals =
-    Array.of_list @@ List.re<span data-count="48082">v</span> args @ List.ma<span data-count="48082">p</span> init_local func.locals
+  <span data-count="48084">L</span>og.debug1 "calling func : func %s@."
+    (Option.valu<span data-count="48084">e</span> func.id ~default:"anonymous");
+  <span data-count="48084">l</span>et locals =
+    Array.of_list @@ List.re<span data-count="48084">v</span> args @ List.ma<span data-count="48084">p</span> init_local func.locals
   in
-  <span data-count="48082">l</span>et res, count = exec_expr env locals [] func.body (Some (sn<span data-count="48082">d</span> func.type_f)) in
-  <span data-count="43336">L</span>og.profile "Exec func %s@.Instruction count: %i@."
-    (Option.valu<span data-count="43336">e</span> func.id ~default:"anonymous")
+  <span data-count="48084">l</span>et res, count = exec_expr env locals [] func.body (Some (sn<span data-count="48084">d</span> func.type_f)) in
+  <span data-count="43338">L</span>og.profile "Exec func %s@.Instruction count: %i@."
+    (Option.valu<span data-count="43338">e</span> func.id ~default:"anonymous")
     count.instructions;
-  <span data-count="43336">r</span>es
+  <span data-count="43338">r</span>es
 
 let exec_vfunc stack (func : Env.t' Value.Func.t) =
-  <span data-count="48082">m</span>atch
+  <span data-count="48084">m</span>atch
     match func with
-    | <span data-count="48082">W</span>ASM (_, func, env) -&gt; exec_fun<span data-count="43336">c</span> (Lazy.forc<span data-count="48082">e</span> env) func stack
+    | <span data-count="48084">W</span>ASM (_, func, env) -&gt; exec_fun<span data-count="43338">c</span> (Lazy.forc<span data-count="48084">e</span> env) func stack
     | <span data-count="0">E</span>xtern f -&gt; exec_extern_fun<span data-count="0">c</span> stack f
   with
-  | <span data-count="43336">r</span>esult -&gt; Ok result
+  | <span data-count="43338">r</span>esult -&gt; Ok result
   | <span data-count="4746">e</span>xception Trap msg -&gt; Error msg
   | <span data-count="0">e</span>xception Stack_overflow -&gt; Error "call stack exhausted"
 
 let modul (modul : Link.module_to_run) =
-  <span data-count="2655">L</span>og.debug0 "interpreting ...@\n";
-  <span data-count="2655">t</span>ry
+  <span data-count="2659">L</span>og.debug0 "interpreting ...@\n";
+  <span data-count="2659">t</span>ry
     List.iter
       (fun to_run -&gt;
         <span data-count="990">l</span>et end_stack, count =
@@ -3839,7 +3839,7 @@ let modul (modul : Link.module_to_run) =
         | <span data-count="0">_</span> :: _ -&gt; Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
       modul.to_run;
-    <span data-count="2587">O</span>k ()
+    <span data-count="2591">O</span>k ()
   with
   | <span data-count="68">T</span>rap msg -&gt; Error msg
   | <span data-count="0">S</span>tack_overflow -&gt; Error "call stack exhausted"

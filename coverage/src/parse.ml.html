@@ -285,12 +285,12 @@ let script_from_lexbuf =
     MenhirLib.Convert.Simplified.traditional2revised Menhir_parser.script
   in
   <span data-count="6">f</span>un buf -&gt;
-    <span data-count="1388">l</span>et provider () =
-      <span data-count="1360096">l</span>et tok = Lexer.token buf in
-      <span data-count="1359734">l</span>et start, stop = Sedlexing.lexing_positions buf in
-      <span data-count="1359734">(</span>tok, start, stop)
+    <span data-count="1390">l</span>et provider () =
+      <span data-count="1360162">l</span>et tok = Lexer.token buf in
+      <span data-count="1359800">l</span>et start, stop = Sedlexing.lexing_positions buf in
+      <span data-count="1359800">(</span>tok, start, stop)
     in
-    try Ok (parse<span data-count="350">r</span> provider) with
+    try Ok (parse<span data-count="352">r</span> provider) with
     | <span data-count="134">M</span>enhir_parser.Error -&gt;
       let start, _stop = Sedlexing.lexing_positions buf in
       <span data-count="134">L</span>og.debug "File %s, line %i, character %i:@." start.pos_fname
@@ -323,16 +323,16 @@ let script_from_channel c = <span data-count="0">s</span>cript_from_lexbuf (Sedl
 
 (** Parse a script from a file. *)
 let script_from_file ~filename =
-  <span data-count="232">l</span>et chan = open_in filename in
-  <span data-count="232">l</span>et result =
+  <span data-count="234">l</span>et chan = open_in filename in
+  <span data-count="234">l</span>et result =
     Fun.protect
-      ~finally:(fun () -&gt; <span data-count="232">c</span>lose_in chan)
+      ~finally:(fun () -&gt; <span data-count="234">c</span>lose_in chan)
       (fun () -&gt;
-        <span data-count="232">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-        <span data-count="232">S</span>edlexing.set_filename lb filename;
-        <span data-count="232">s</span>cript_from_lexbuf lb )
+        <span data-count="234">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+        <span data-count="234">S</span>edlexing.set_filename lb filename;
+        <span data-count="234">s</span>cript_from_lexbuf lb )
   in
-  <span data-count="232">r</span>esult
+  <span data-count="234">r</span>esult
 
 (** Parse a module from a lexing buffer. *)
 let module_from_lexbuf =
