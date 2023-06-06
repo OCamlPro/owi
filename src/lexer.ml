@@ -1,9 +1,25 @@
 open Sedlexing
 open Menhir_parser
 
-exception Error of Lexing.position * string
+exception Illegal_escape of string
 
-let mk_string s =
+exception Unknown_operator of string
+
+exception Unexpected_character of string
+
+let illegal_escape buf =
+  let tok = Utf8.lexeme buf in
+  raise @@ Illegal_escape (Printf.sprintf "illegal escape %S" tok)
+
+let unknown_operator buf =
+  let tok = Utf8.lexeme buf in
+  raise @@ Unknown_operator (Printf.sprintf "unknown operator %S" tok)
+
+let unexpected_character buf =
+  let tok = Utf8.lexeme buf in
+  raise @@ Unexpected_character (Printf.sprintf "unexpected character `%S`" tok)
+
+let mk_string buf s =
   let b = Buffer.create (String.length s) in
   let i = ref 0 in
   while !i < String.length s do
@@ -29,8 +45,13 @@ let mk_string s =
           bs.[String.length bs - 1]
         | h ->
           incr i;
-          Char.chr
-            (int_of_string ("0x" ^ String.make 1 h ^ String.make 1 s.[!i]))
+          if !i >= String.length s then illegal_escape buf;
+          let str = Format.sprintf "0x%c%c" h s.[!i] in
+          begin
+            match int_of_string_opt str with
+            | None -> illegal_escape buf
+            | Some n -> Char.chr n
+          end
     in
     Buffer.add_char b c;
     incr i
@@ -399,22 +420,14 @@ let keywords =
     |];
   tbl
 
-let err buf msg =
-  let position = fst @@ lexing_positions buf in
-  let tok = Utf8.lexeme buf in
-  raise @@ Error (position, Printf.sprintf "%s %S" msg tok)
-
 let rec token buf =
   match%sedlex buf with
   | Plus any_blank -> token buf
-  | bad_num | bad_id | bad_name ->
-    let operator = Utf8.lexeme buf in
-    err buf (Format.sprintf "unknown operator %s" operator)
+  | bad_num | bad_id | bad_name -> unknown_operator buf
   | num -> NUM (Utf8.lexeme buf)
   | operator -> begin
     let operator = Utf8.lexeme buf in
-    try Hashtbl.find keywords operator
-    with Not_found -> err buf (Format.sprintf "unknown operator %s" operator)
+    try Hashtbl.find keywords operator with Not_found -> unknown_operator buf
   end
   | ";;" ->
     single_comment buf;
@@ -434,14 +447,11 @@ let rec token buf =
   | name ->
     let name = Utf8.lexeme buf in
     let name = String.sub name 1 (String.length name - 2) in
-    let name = mk_string name in
+    let name = mk_string buf name in
     NAME name
   | eof -> EOF
   (* | "" -> EOF *)
-  | _ ->
-    let position = fst @@ lexing_positions buf in
-    let tok = Utf8.lexeme buf in
-    raise @@ Error (position, Printf.sprintf "unexpected character `%S`" tok)
+  | _ -> unexpected_character buf
 
 and comment buf =
   match%sedlex buf with

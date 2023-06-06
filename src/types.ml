@@ -1,5 +1,7 @@
 exception Trap of string
 
+exception Parse_fail of string
+
 type nonrec num_type =
   | I32
   | I64

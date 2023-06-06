@@ -1,7 +1,9 @@
 (** Module for Wasm lexing. *)
 
 (** lexing error exception *)
-exception Error of Lexing.position * string
+exception Illegal_escape of string
+exception Unknown_operator of string
+exception Unexpected_character of string
 
 (** tokenizer *)
 val token : Sedlexing.lexbuf -> Menhir_parser.token
