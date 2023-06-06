@@ -15,7 +15,7 @@ let expr_always_available env =
   @ (B.global_i32 env) @ (B.global_i64 env) @ (B.global_f32 env) @ (B.global_f64 env)
   @ (B.local_i32 env) @ (B.local_i64 env) @ (B.local_f32 env) @ (B.local_f64 env)
   @ (B.data_drop env)
-  @ (B.memory_size env)
+  @ if B.memory_exists env then [ B.memory_size ] else []
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
@@ -43,7 +43,7 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ]
   @ (B.local_set_i32 env) @ (B.local_tee_i32 env)
   @ (B.global_set_i32 env)
-  @ (B.memory_grow env)
+  @ if B.memory_exists env then [ B.memory_grow ] else []
   @ if B.memory_exists env then load_instr else []
 
 let expr_available_2_i32 (env : Env.t) =
@@ -77,7 +77,9 @@ let expr_available_2_f64_i32 (env : Env.t) =
   else []
 
 let expr_available_3_i32 env =
-  (*B.memory_init env @*) B.memory_copy env (*@ B.memory_fill env*)
+  if B.memory_exists env then [ B.memory_copy ] @ (B.memory_init env)
+  else []
+  (* TODO: B.memory_fill *)
 
 let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
@@ -222,11 +224,11 @@ let rec expr ~block_type ~stack ~locals env =
     let i = const i in
     list_cons i next
 
-(* let data env =
-  let* init = bytes in
-  let+ mode = B.data_mode env in
+let data env =
+  let* mode = B.data_mode env in
+  let+ init = (*bytes*) const "tmp" in  (* TODO: Issue #37 *)
   let id = Some (Env.add_data env) in
-  MData { id; init; mode} *)
+  MData { id; init; mode}
 
 let memory env =
   let sup = if true then 10 else 65537 (* TODO: fix time explosion *) in
@@ -254,8 +256,8 @@ let func env =
   MFunc { type_f; locals; body; id }
 
 let fields env =
-  (* let datas = list (data env) in *)
-  let* memory = option (memory env) in (* for now, max one memory: not a list, option *)
+  let* memory = option (memory env) in
+  let datas = list (data env) in
   let globals = list (global env) in
   let start_code =
     let type_f = Arg.Bt_raw (None, ([], [])) in
@@ -266,8 +268,8 @@ let fields env =
   let start = const @@ MStart (Raw 0) in
   let funcs = list_cons start (list_cons start_code (list (func env))) in
   match memory with
-  | None -> (*list_append datas*) list_append globals funcs
-  | Some mem -> (*list_append datas*) list_cons (const @@ mem) (list_append globals funcs)
+  | None -> list_append datas (list_append globals funcs)
+  | Some mem -> list_append datas (list_cons (const @@ mem) (list_append globals funcs))
 
 let modul =
   let id = Some "m" in

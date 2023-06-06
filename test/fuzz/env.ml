@@ -3,26 +3,24 @@ open Crowbar
 
 type t =
   { mutable next_data : int
-  ; mutable next_memory : int
   ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
   ; mutable datas : string list
-  ; mutable memories : string list
+  ; mutable memory : string option
   ; mutable globals : (string * global_type) list
-  ; mutable locals : param list
+  ; mutable locals : (string * val_type) list
   ; mutable funcs : (string * block_type) list
   ; mutable fuel : int
   }
 
 let empty () =
   { next_data = 0
-  ; next_memory = 0
   ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
   ; datas = []
-  ; memories = []
+  ; memory = None
   ; globals = []
   ; locals = []
   ; funcs = []
@@ -39,10 +37,8 @@ let add_data env =
   name
 
 let add_memory env =
-  let n = env.next_memory in
-  let name = Format.sprintf "m%d" n in
-  env.memories <- name :: env.memories;
-  env.next_memory <- succ n;
+  let name = "m0" in
+  env.memory <- Some name;
   name
 
 let add_global env typ =
@@ -55,7 +51,7 @@ let add_global env typ =
 let add_local env typ =
   let n = env.next_local in
   let name = Format.sprintf "l%d" n in
-  env.locals <- (Some name, typ) :: env.locals;
+  env.locals <- (name, typ) :: env.locals;
   env.next_local <- succ n;
   name
 
