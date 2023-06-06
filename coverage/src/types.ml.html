@@ -3430,8 +3430,8 @@ struct
       | <span data-count="0">R</span>eturn_call_indirect (tbl_id, ty_id) -&gt;
         Format.fprintf fmt "return_call_indirect %a %a" indice tbl_id block_type
           ty_id
-      | <span data-count="0">R</span>eturn_call_ref ty_id -&gt; Format.fprintf fmt "return_call_ref %a" block_type
-          ty_id
+      | <span data-count="0">R</span>eturn_call_ref ty_id -&gt;
+        Format.fprintf fmt "return_call_ref %a" block_type ty_id
       | <span data-count="4">C</span>all id -&gt; Format.fprintf fmt "call %a" indice id
       | <span data-count="0">C</span>all_indirect (tbl_id, ty_id) -&gt;
         Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
