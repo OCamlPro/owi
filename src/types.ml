@@ -414,7 +414,8 @@ struct
         Format.fprintf fmt ""
       | Null -> Format.fprintf fmt "null"
 
-    let ref_type fmt (n, ht) = Format.fprintf fmt "%a %a" heap_type ht null n
+    let ref_type fmt (n, ht) =
+      Format.fprintf fmt "(ref %a %a)" null n heap_type ht
 
     let val_type fmt = function
       | Num_type t -> num_type fmt t
