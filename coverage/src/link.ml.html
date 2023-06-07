@@ -1524,13 +1524,13 @@ module Const_interp = struct
     | <span data-count="24">G</span>lobal_get id -&gt;
       let* g = Env.get_globa<span data-count="24">l</span> env id in
       <span data-count="24">o</span>k @@ Stack.pus<span data-count="24">h</span> stack g.value
-    | <span data-count="0">A</span>rray_new_canon _i -&gt;
+    | <span data-count="0">A</span>rray_new _i -&gt;
       let len, stack = Stack.pop_i32_to_int stack in
       (* TODO: check type of *default* *)
       <span data-count="0">l</span>et _default, stack = Stack.pop stack in
       <span data-count="0">l</span>et a = Array.init len (fun _i -&gt; <span data-count="0">(</span>)) in
       <span data-count="0">o</span>k @@ Stack.push_arra<span data-count="0">y</span> stack a
-    | <span data-count="0">A</span>rray_new_canon_default _i -&gt;
+    | <span data-count="0">A</span>rray_new_default _i -&gt;
       let len, stack = Stack.pop_i32_to_int stack in
       <span data-count="0">l</span>et a = Array.init len (fun _i -&gt; <span data-count="0">(</span>)) in
       <span data-count="0">o</span>k @@ Stack.push_arra<span data-count="0">y</span> stack a
