@@ -642,11 +642,11 @@ struct
       | Call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
       | Call_ref ty_id -> Format.fprintf fmt "call_ref %a" block_type ty_id
-      | Array_new_canon id -> Format.fprintf fmt "array.new_canon %a" indice id
+      | Array_new_canon id -> Format.fprintf fmt "array.new %a" indice id
       | Array_new_canon_data (id1, id2) ->
-        Format.fprintf fmt "array.new_canon_data %a %a" indice id1 indice id2
+        Format.fprintf fmt "array.new_data %a %a" indice id1 indice id2
       | Array_new_canon_default id ->
-        Format.fprintf fmt "array.new_canon_default %a" indice id
+        Format.fprintf fmt "array.new_default %a" indice id
       | Array_new_canon_elem (id1, id2) ->
         Format.fprintf fmt "array.new_canon_elem %a %a" indice id1 indice id2
       | Array_new_canon_fixed (id, i) ->
@@ -662,9 +662,9 @@ struct
         Format.fprintf fmt "struct.get %a %a" indice i1 indice i2
       | Struct_get_s (i1, i2) ->
         Format.fprintf fmt "struct.get_s %a %a" indice i1 indice i2
-      | Struct_new_canon i -> Format.fprintf fmt "struct.new_canon %a" indice i
+      | Struct_new_canon i -> Format.fprintf fmt "struct.new %a" indice i
       | Struct_new_canon_default i ->
-        Format.fprintf fmt "struct.new_canon_default %a" indice i
+        Format.fprintf fmt "struct.new_default %a" indice i
       | Struct_set (i1, i2) ->
         Format.fprintf fmt "struct.set %a %a" indice i1 indice i2
       | Extern_externalize -> Format.fprintf fmt "extern.externalize"
