@@ -446,13 +446,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
   | I31_get_s | I31_get_u ->
     let* stack = Stack.pop [ i31 ] stack in
     Stack.push [ i32 ] stack
-  | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_default _
-    | Array_new_canon_elem _ | Array_new_canon_fixed _ | Array_get _
-    | Array_get_u _ | Array_set _ | Struct_get _ | Struct_get_s _ | Struct_set _
-    | Struct_new_canon _ | Struct_new_canon_default _ | Extern_externalize
-    | Extern_internalize | Ref_as_non_null | Ref_cast _ | Ref_test _
-    | Br_on_non_null _ | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _
-    | Ref_eq ) as i ->
+  | ( Array_new_data _ | Array_new _ | Array_new_default _ | Array_new_elem _
+    | Array_new_fixed _ | Array_get _ | Array_get_u _ | Array_set _
+    | Struct_get _ | Struct_get_s _ | Struct_set _ | Struct_new _
+    | Struct_new_default _ | Extern_externalize | Extern_internalize
+    | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
+    | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
     Log.debug "TODO (typecheck instr) %a" Pp.instr i;
     Ok stack
 
@@ -513,11 +512,11 @@ let typecheck_const_instr (modul : modul) refs stack = function
     let t = itype t in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
-  | Array_new_canon t ->
+  | Array_new t ->
     let t = arraytype modul t in
     let* stack = Stack.pop [ i32; t ] stack in
     Stack.push [ Ref_type Array_ht ] stack
-  | Array_new_canon_default _i -> assert false
+  | Array_new_default _i -> assert false
   | I31_new ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i31 ] stack

@@ -1140,23 +1140,22 @@ let exec_instr instr (state : State.exec_state) =
     call_indirect ~return:true state (tbl_i, typ_i)
   | Call_ref typ_i -> call_ref ~return:false state typ_i
   | Return_call_ref typ_i -> call_ref ~return:true state typ_i
-  | Array_new_canon _t ->
+  | Array_new _t ->
     let len, stack = Stack.pop_i32_to_int stack in
     let _default, stack = Stack.pop stack in
     let a = Array.init len (fun _i -> (* TODO: use default *) ()) in
     st @@ Stack.push_array stack a
-  | Array_new_canon_default _t ->
+  | Array_new_default _t ->
     let len, stack = Stack.pop_i32_to_int stack in
     let default = (* TODO: get it from t *) () in
     let a = Array.init len (fun _i -> default) in
     st @@ Stack.push_array stack a
-  | ( Array_new_canon_data _ | Array_new_canon_elem _ | Array_new_canon_fixed _
-    | Array_get _ | Array_get_u _ | Array_set _ | Array_len | I31_new
-    | I31_get_s | I31_get_u | Struct_get _ | Struct_get_s _ | Struct_set _
-    | Struct_new_canon _ | Struct_new_canon_default _ | Extern_externalize
-    | Extern_internalize | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq
-    | Br_on_cast _ | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i
-    ->
+  | ( Array_new_data _ | Array_new_elem _ | Array_new_fixed _ | Array_get _
+    | Array_get_u _ | Array_set _ | Array_len | I31_new | I31_get_s | I31_get_u
+    | Struct_get _ | Struct_get_s _ | Struct_set _ | Struct_new _
+    | Struct_new_default _ | Extern_externalize | Extern_internalize
+    | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _
+    | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i ->
     Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i;
     st @@ stack
 

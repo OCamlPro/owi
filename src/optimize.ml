@@ -248,16 +248,15 @@ let locals_func body_expr =
     | Return_call_indirect (_, _)
     | Call _
     | Call_indirect (_, _)
-    | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _
-    | Array_new_canon _
-    | Array_new_canon_data (_, _)
-    | Array_new_canon_default _
-    | Array_new_canon_elem (_, _)
-    | Array_new_canon_fixed (_, _)
+    | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _ | Array_new _
+    | Array_new_data (_, _)
+    | Array_new_default _
+    | Array_new_elem (_, _)
+    | Array_new_fixed (_, _)
     | Array_set _
     | Struct_get (_, _)
     | Struct_get_s (_, _)
-    | Struct_new_canon _ | Struct_new_canon_default _
+    | Struct_new _ | Struct_new_default _
     | Struct_set (_, _) ->
       ()
   and aux_expr expr = List.iter aux_instr expr in
@@ -321,15 +320,15 @@ let locals_used_in_func locals nb_args body_expr =
       | Call _
       | Call_indirect (_, _)
       | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _
-      | Array_new_canon _
-      | Array_new_canon_data (_, _)
-      | Array_new_canon_default _
-      | Array_new_canon_elem (_, _)
-      | Array_new_canon_fixed (_, _)
+      | Array_new _
+      | Array_new_data (_, _)
+      | Array_new_default _
+      | Array_new_elem (_, _)
+      | Array_new_fixed (_, _)
       | Array_set _
       | Struct_get (_, _)
       | Struct_get_s (_, _)
-      | Struct_new_canon _ | Struct_new_canon_default _
+      | Struct_new _ | Struct_new_default _
       | Struct_set (_, _) ->
         instr
     and aux_expr expr = List.map aux_instr expr in

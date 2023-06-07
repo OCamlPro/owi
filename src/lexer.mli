@@ -2,7 +2,9 @@
 
 (** lexing error exception *)
 exception Illegal_escape of string
+
 exception Unknown_operator of string
+
 exception Unexpected_character of string
 
 (** tokenizer *)

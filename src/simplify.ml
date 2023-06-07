@@ -761,9 +761,9 @@ module Rewrite_indices = struct
         | Some [ t ] -> ok @@ Select (Some [ convert_val_type t ])
         | Some [] | Some (_ :: _ :: _) -> Error "invalid result arity"
       end
-      | Array_new_canon_default id ->
+      | Array_new_default id ->
         let* id = find_type (Some id) in
-        ok @@ Array_new_canon_default id
+        ok @@ Array_new_default id
       | Array_set id ->
         let* id = find_type (Some id) in
         ok @@ Array_set id
@@ -807,10 +807,9 @@ module Rewrite_indices = struct
       | Extern_externalize -> Ok Extern_externalize
       | Extern_internalize -> Ok Extern_internalize
       | Ref_eq -> Ok Ref_eq
-      | ( Array_new_canon_data _ | Array_new_canon _ | Array_new_canon_elem _
-        | Array_new_canon_fixed _ | Array_get_u _ | Struct_get _
-        | Struct_get_s _ | Struct_set _ | Struct_new_canon _
-        | Struct_new_canon_default _ | Ref_cast _ | Ref_test _
+      | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
+        | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
+        | Struct_new _ | Struct_new_default _ | Ref_cast _ | Ref_test _
         | Br_on_non_null _ | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ )
         as i ->
         Log.debug "TODO (Simplify.body) %a@\n" Symbolic.Pp.instr i;
@@ -840,12 +839,12 @@ module Rewrite_indices = struct
         | Const -> ok @@ Global_get idx
         | Var -> Error "constant expression required"
       end
-      | Array_new_canon t ->
+      | Array_new t ->
         let* t = find "unknown type" modul.typ (Some t) in
-        ok @@ Array_new_canon t
-      | Array_new_canon_default t ->
+        ok @@ Array_new t
+      | Array_new_default t ->
         let* t = find "unknown type" modul.typ (Some t) in
-        ok @@ Array_new_canon_default t
+        ok @@ Array_new_default t
       | Symbolic.I31_new -> Ok I31_new
       | i ->
         error

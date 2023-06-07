@@ -258,11 +258,11 @@ struct
     | Array_get of indice
     | Array_get_u of indice
     | Array_len
-    | Array_new_canon of indice
-    | Array_new_canon_data of indice * indice
-    | Array_new_canon_default of indice
-    | Array_new_canon_elem of indice * indice
-    | Array_new_canon_fixed of indice * int
+    | Array_new of indice
+    | Array_new_data of indice * indice
+    | Array_new_default of indice
+    | Array_new_elem of indice * indice
+    | Array_new_fixed of indice * int
     | Array_set of indice
     (* I31 *)
     | I31_get_u
@@ -271,8 +271,8 @@ struct
     (* struct*)
     | Struct_get of indice * indice
     | Struct_get_s of indice * indice
-    | Struct_new_canon of indice
-    | Struct_new_canon_default of indice
+    | Struct_new of indice
+    | Struct_new_default of indice
     | Struct_set of indice * indice
     (* extern *)
     | Extern_externalize
@@ -367,8 +367,8 @@ struct
       | Ref_func of indice
       | Global_get of indice
       | I_binop of nn * ibinop
-      | Array_new_canon of indice
-      | Array_new_canon_default of indice
+      | Array_new of indice
+      | Array_new_default of indice
       | I31_new
 
     type expr = instr list
@@ -642,15 +642,15 @@ struct
       | Call_indirect (tbl_id, ty_id) ->
         Format.fprintf fmt "call_indirect %a %a" indice tbl_id block_type ty_id
       | Call_ref ty_id -> Format.fprintf fmt "call_ref %a" block_type ty_id
-      | Array_new_canon id -> Format.fprintf fmt "array.new %a" indice id
-      | Array_new_canon_data (id1, id2) ->
+      | Array_new id -> Format.fprintf fmt "array.new %a" indice id
+      | Array_new_data (id1, id2) ->
         Format.fprintf fmt "array.new_data %a %a" indice id1 indice id2
-      | Array_new_canon_default id ->
+      | Array_new_default id ->
         Format.fprintf fmt "array.new_default %a" indice id
-      | Array_new_canon_elem (id1, id2) ->
-        Format.fprintf fmt "array.new_canon_elem %a %a" indice id1 indice id2
-      | Array_new_canon_fixed (id, i) ->
-        Format.fprintf fmt "array.new_canon_fixed %a %d" indice id i
+      | Array_new_elem (id1, id2) ->
+        Format.fprintf fmt "array.new_elem %a %a" indice id1 indice id2
+      | Array_new_fixed (id, i) ->
+        Format.fprintf fmt "array.new_fixed %a %d" indice id i
       | Array_get id -> Format.fprintf fmt "array.get %a" indice id
       | Array_get_u id -> Format.fprintf fmt "array.get_u %a" indice id
       | Array_set id -> Format.fprintf fmt "array.set %a" indice id
@@ -662,8 +662,8 @@ struct
         Format.fprintf fmt "struct.get %a %a" indice i1 indice i2
       | Struct_get_s (i1, i2) ->
         Format.fprintf fmt "struct.get_s %a %a" indice i1 indice i2
-      | Struct_new_canon i -> Format.fprintf fmt "struct.new %a" indice i
-      | Struct_new_canon_default i ->
+      | Struct_new i -> Format.fprintf fmt "struct.new %a" indice i
+      | Struct_new_default i ->
         Format.fprintf fmt "struct.new_default %a" indice i
       | Struct_set (i1, i2) ->
         Format.fprintf fmt "struct.set %a %a" indice i1 indice i2
@@ -789,9 +789,8 @@ struct
         | Global_get id -> Format.fprintf fmt "global.get %a" indice id
         | Ref_null t -> Format.fprintf fmt "ref.null %a" heap_type t
         | Ref_func fid -> Format.fprintf fmt "ref.func %a" indice fid
-        | Array_new_canon _ -> Format.fprintf fmt "array.new_canon"
-        | Array_new_canon_default _ ->
-          Format.fprintf fmt "array.new_canon_default"
+        | Array_new _ -> Format.fprintf fmt "array.new"
+        | Array_new_default _ -> Format.fprintf fmt "array.new_default"
         | I31_new -> Format.fprintf fmt "i31.new"
 
       let expr fmt instrs =

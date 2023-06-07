@@ -475,15 +475,15 @@ let plain_instr :=
   | ARRAY_GET; ~ = indice; <Array_get>
   | ARRAY_GET_U; ~ = indice; <Array_get_u>
   | ARRAY_LEN; { Array_len }
-  | ARRAY_NEW_CANON; ~ = indice; <Array_new_canon>
-  | ARRAY_NEW_CANON_DATA; i1 = indice; i2 = indice; <Array_new_canon_data>
-  | ARRAY_NEW_CANON_DEFAULT; ~ = indice; <Array_new_canon_default>
-  | ARRAY_NEW_CANON_ELEM; i1 = indice; i2 = indice; <Array_new_canon_elem>
+  | ARRAY_NEW_CANON; ~ = indice; <Array_new>
+  | ARRAY_NEW_CANON_DATA; i1 = indice; i2 = indice; <Array_new_data>
+  | ARRAY_NEW_CANON_DEFAULT; ~ = indice; <Array_new_default>
+  | ARRAY_NEW_CANON_ELEM; i1 = indice; i2 = indice; <Array_new_elem>
   | ARRAY_NEW_CANON_FIXED; ~ = indice; num = NUM; {
     (* we need to convert to i32 to check it's okay *)
     let num = i32 num in
     let num = Int32.to_int num in
-    Array_new_canon_fixed (indice, num) }
+    Array_new_fixed (indice, num) }
   | ARRAY_SET; ~ = indice; <Array_set>
   | I31_NEW; { I31_new }
   (* i31 *)
@@ -492,8 +492,8 @@ let plain_instr :=
   (* struct *)
   | STRUCT_GET; i1 = indice; i2 = indice; <Struct_get>
   | STRUCT_GET_S; i1 = indice; i2 = indice; <Struct_get_s>
-  | STRUCT_NEW_CANON; ~ = indice; <Struct_new_canon>
-  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_canon_default>
+  | STRUCT_NEW_CANON; ~ = indice; <Struct_new>
+  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_default>
   | STRUCT_SET; i1 = indice; i2 = indice; <Struct_set>
   (* extern *)
   | EXTERN_EXTERNALIZE; { Extern_externalize }
