@@ -671,7 +671,7 @@ struct
       | Extern_internalize -> Format.fprintf fmt "extern.internalize"
       | Ref_as_non_null -> Format.fprintf fmt "ref.as_non_null"
       | Ref_cast (n, t) ->
-        Format.fprintf fmt "ref.cast %a %a" null n heap_type t
+        Format.fprintf fmt "ref.cast (ref %a %a)" null n heap_type t
       | Ref_test (n, t) ->
         Format.fprintf fmt "ref.test %a %a" null n heap_type t
       | Br_on_non_null id -> Format.fprintf fmt "br_on_non_null %a" indice id
@@ -728,7 +728,10 @@ struct
       | Val_storage_t t -> val_type fmt t
       | Val_packed_t t -> packed_type fmt t
 
-    let field_type fmt (m, t) = Format.fprintf fmt "%a %a" mut m storage_type t
+    let field_type fmt (m, t) =
+      match m with
+      | Const -> Format.fprintf fmt " %a" storage_type t
+      | Var -> Format.fprintf fmt "(%a %a)" mut m storage_type t
 
     let fields fmt =
       Format.pp_print_list
