@@ -608,10 +608,12 @@ struct
       | Data_drop id -> Format.fprintf fmt "data.drop %a" indice id
       | Nop -> Format.fprintf fmt "nop"
       | Unreachable -> Format.fprintf fmt "unreachable"
-      | Block (id, bt, _e) ->
-        Format.fprintf fmt "block %a %a <expr>" id_opt id block_type_opt bt
-      | Loop (id, bt, _expr) ->
-        Format.fprintf fmt "loop %a %a <expr>" id_opt id block_type_opt bt
+      | Block (id, bt, e) ->
+        Format.fprintf fmt "(block %a %a@\n  @[<v>%a@])" id_opt id
+          block_type_opt bt expr e
+      | Loop (id, bt, e) ->
+        Format.fprintf fmt "(loop %a %a@\n  @[<v>%a@])" id_opt id block_type_opt
+          bt expr e
       | If_else (id, bt, e1, e2) ->
         Format.fprintf fmt
           "(if %a %a@\n\
