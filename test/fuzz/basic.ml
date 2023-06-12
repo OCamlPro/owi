@@ -5,6 +5,12 @@ open Syntax
 
 module S = Type_stack
 
+type num_size =
+  | NS8
+  | NS16
+  | NS32
+  | NS64
+
 let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
 let sx = choose [ const U; const S ]
@@ -355,86 +361,92 @@ let memory_init (env : Env.t) =
 let memory_exists (env : Env.t) =
   Option.is_some env.memory
 
-let memarg =
-  let* offset = int in
-  let+ align = int in
+let memarg nsize =
+  let* offset = uint16 in
+  let+ align =
+    match nsize with
+    | NS8 -> const 0
+    | NS16 -> range 1
+    | NS32 -> range 2
+    | NS64 -> range 3
+  in
   { offset; align}
 
 let i32_load =
-  let+ memarg in
+  let+ memarg = memarg NS32 in
   I_load (S32, memarg)
 
 let i64_load =
-  let+ memarg in
+  let+ memarg = memarg NS64 in
   I_load (S64, memarg)
 
 let f32_load =
-  let+ memarg in
+  let+ memarg = memarg NS32 in
   F_load (S32, memarg)
 
 let f64_load =
-  let+ memarg in
+  let+ memarg = memarg NS64 in
   F_load (S64, memarg)
 
 let i32_load8 =
-  let* memarg in
+  let* memarg = memarg NS8 in
   let+ sx in
   I_load8 (S32, sx, memarg)
 
 let i32_load16 =
-  let* memarg in
+  let* memarg = memarg NS16 in
   let+ sx in
   I_load16 (S32, sx, memarg)
 
 let i64_load8 =
-  let* memarg in
+  let* memarg = memarg NS8 in
   let+ sx in
   I_load8 (S64, sx, memarg)
 
 let i64_load16 =
-  let* memarg in
+  let* memarg = memarg NS16 in
   let+ sx in
   I_load16 (S64, sx, memarg)
 
 let i64_load32 =
-  let* memarg in
+  let* memarg = memarg NS32 in
   let+ sx in
   I64_load32 (sx, memarg)
 
 let i32_store =
-  let+ memarg in
+  let+ memarg = memarg NS32 in
   I_store (S32, memarg)
 
 let i64_store =
-  let+ memarg in
+  let+ memarg = memarg NS64 in
   I_store (S64, memarg)
 
 let f32_store =
-  let+ memarg in
+  let+ memarg = memarg NS32 in
   F_store (S32, memarg)
 
 let f64_store =
-  let+ memarg in
+  let+ memarg = memarg NS64 in
   F_store (S64, memarg)
 
 let i32_store8 =
-  let+ memarg in
+  let+ memarg = memarg NS8 in
   I_store8 (S32, memarg)
 
 let i64_store8 =
-  let+ memarg in
+  let+ memarg = memarg NS8 in
   I_store8 (S64, memarg)
 
 let i32_store16 =
-  let+ memarg in
+  let+ memarg = memarg NS16 in
   I_store16 (S32, memarg)
 
 let i64_store16 =
-  let+ memarg in
+  let+ memarg = memarg NS16 in
   I_store16 (S64, memarg)
 
 let i64_store32 =
-  let+ memarg in
+  let+ memarg = memarg NS32 in
   I64_store32 memarg
 
 let data_active name =
@@ -452,3 +464,19 @@ let data_drop (env : Env.t) =
     ( fun name ->
       pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]) )
     env.datas
+
+let expr_call (env : Env.t) (stack : val_type list) =
+  let rec stack_op rt =
+    match rt with
+    | [] -> [ S.Nothing ]
+    | vt :: tl -> S.Push vt :: stack_op tl
+  in
+  List.map
+    ( fun (name, bt) ->
+      match bt with
+      | Arg.Bt_raw (_, (pt, rt) ) -> 
+        if S.is_stack_compatible stack pt then
+          pair (const (Call (Symbolic name))) (const (stack_op rt))
+        else pair (const Nop) (const [ S.Nothing ])
+      | _ -> assert false )
+    env.funcs
