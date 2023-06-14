@@ -466,17 +466,12 @@ let data_drop (env : Env.t) =
     env.datas
 
 let expr_call (env : Env.t) (stack : val_type list) =
-  let rec stack_op rt =
-    match rt with
-    | [] -> [ S.Nothing ]
-    | vt :: tl -> S.Push vt :: stack_op tl
-  in
-  List.map
+  let stack_pt = List.map (fun _ -> S.Pop) in
+  let stack_rt = List.map (fun vt -> S.Push vt) in
+  List.filter_map
     ( fun (name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt) ) -> 
-        if S.is_stack_compatible stack pt then
-          pair (const (Call (Symbolic name))) (const (stack_op rt))
-        else pair (const Nop) (const [ S.Nothing ])
-      | _ -> assert false )
+      | Arg.Bt_raw (_, (pt, rt) ) when S.is_stack_compatible stack (List.rev pt) ->
+        Some (pair (const (Call (Symbolic name))) (const (stack_pt pt @ stack_rt rt)))
+      | _ -> None )
     env.funcs

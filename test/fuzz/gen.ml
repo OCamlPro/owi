@@ -237,7 +237,7 @@ let rec expr ~block_type ~stack ~locals ~start env =
     in
     let expr_available env =
       expr_always_available env @ expr_available_with_current_stack @
-      if start then B.expr_call env stack else [] 
+      if start then B.expr_call env stack else []
     in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in
@@ -283,6 +283,9 @@ let fields env =
   let* globals = list (global env) in
   let* funcs = list (func env) in
   let+ start_code =
+    let* () = const () in
+    Env.reset_locals env;
+    Env.refill_fuel env;
     let type_f = Arg.Bt_raw (None, ([], [])) in
     let id = Some "start" in
     let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] ~start:true env in
