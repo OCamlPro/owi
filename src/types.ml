@@ -531,16 +531,18 @@ struct
       | S32 -> Format.fprintf fmt "32"
       | S64 -> Format.fprintf fmt "64"
 
-    (* TODO: when offset is 0 then do not print anything, if offset is N (memargN) then print nothing ? *)
     let memarg fmt { offset; align } =
-      let rec pow_2 n =
-        match n with
-        | 0 -> 1
-        | n when n > 0 -> 2 * pow_2 (n-1)
-        | _ -> assert false
+      let pow_2 n =
+        assert (n >= 0);
+        1 lsl n
       in
-      if offset = 0 && align = 0 then ()
-      else Format.fprintf fmt "offset=%d align=%d" offset (pow_2 align)
+      let off =
+        if offset = 0 then "" else Printf.sprintf "offset=%d" offset
+      in
+      let al =
+        Printf.sprintf "align=%d" (pow_2 align)
+      in
+      Format.fprintf fmt "%s %s" off al
 
     let rec instr fmt = function
       | I32_const i -> Format.fprintf fmt "i32.const %ld" i
