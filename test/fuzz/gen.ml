@@ -4,12 +4,13 @@ open Syntax
 module S = Type_stack
 module B = Basic
 
-let expr_always_available env =
+let expr_always_available block expr ~locals env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
+  ; block expr ~locals env
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
   @ (B.global_i32 env) @ (B.global_i64 env) @ (B.global_f32 env) @ (B.global_f64 env)
@@ -141,28 +142,33 @@ let if_else expr ~locals ~stack env =
   (* TODO: finish > bug typechecking + List.rev *)
   match stack with
   | Num_type I32 :: _stack -> begin
-    (* let rt = [] in *)
     let* rt = list B.val_type in
-    let pt = [] in
-    (* let pt = stack in *)
-    (* TODO: take only a prefix *)
-    (* let typ1 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
-    let typ2 = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in *)
-    let typ1 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in
-    let typ2 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in
-    (* let pt = List.rev pt in *)
+    let* pt = const [] in
+    (* let* pt = if List.length stack > 0 then B.stack_prefix stack else const [] in *)
+    let typ = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
-    let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals ~start:false env in
+    let* expr_then = expr ~block_type:typ ~stack:pt ~locals ~start:false env in
     env.fuel <- old_fuel / 2;
-    let* expr_else = expr ~block_type:typ2 ~stack:pt ~locals ~start:false env in
+    let* expr_else = expr ~block_type:typ ~stack:pt ~locals ~start:false env in
     env.fuel <- old_fuel / 2;
-    let instr = If_else (None, Some typ1, expr_then, expr_else) in
+    let instr = If_else (None, Some typ, expr_then, expr_else) in
     let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in
     let rt_descr = List.map (fun t -> S.Push t) rt in
     pair (const instr) (const (pt_descr @ rt_descr))
   end
   | _ -> assert false
+
+let block expr ~locals env =
+  let* rt = list B.val_type in
+  let* pt = const [] in
+  (* let* pt = if List.length stack > 0 then B.stack_prefix stack else const [] in *)
+  let typ = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
+  let* expr = expr ~block_type:typ ~stack:pt ~locals ~start:false env in
+  let instr = Block (None, Some typ, expr) in
+  let pt_descr = List.map (fun _ -> S.Pop) pt in
+  let rt_descr = List.map (fun t -> S.Push t) rt in
+  pair (const instr) (const (pt_descr @ rt_descr))
 
 let rec expr ~block_type ~stack ~locals ~start env =
   let _pt, rt =
@@ -221,7 +227,7 @@ let rec expr ~block_type ~stack ~locals ~start env =
       | _ -> []
     in
     let expr_available env =
-      expr_always_available env @ expr_available_with_current_stack @
+      expr_always_available block expr ~locals env @ expr_available_with_current_stack @
       if start then B.expr_call env stack else []
     in
     let* i, ops = choose (expr_available env) in
