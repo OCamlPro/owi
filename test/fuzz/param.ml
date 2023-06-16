@@ -1,1 +1,5 @@
-let initial_fuel = 200
+let debug = true
+
+let reference_fuzzing = false
+
+let initial_fuel = 20
