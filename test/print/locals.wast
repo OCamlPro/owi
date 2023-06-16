@@ -66,7 +66,7 @@
     (local $l2 i32)
     local.get $l2
     local.get $a1
-    i32.add    
+    i32.add
     drop
   )
 
@@ -89,7 +89,6 @@
     (call $f6 (i32.const 0) (i32.const 1) (i32.const 2))
     (call $f7 (i32.const 0) (i32.const 1) (i32.const 2))
     (call $f8 (i32.const 0) (i32.const 1) (i32.const 2))
-    drop
   )
 
   (start $start)
