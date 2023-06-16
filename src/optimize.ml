@@ -199,7 +199,7 @@ let locals_func body_expr =
   let rec aux_instr instr =
     match instr with
     | Local_get ind | Local_set ind | Local_tee ind ->
-      Hashtbl.add locals_hashtbl ind ()
+      Hashtbl.replace locals_hashtbl ind ()
     | Block (_, _, e) -> aux_expr e
     | Loop (_, _, e) -> aux_expr e
     | If_else (_, _, e1, e2) ->
@@ -263,91 +263,107 @@ let locals_func body_expr =
   aux_expr body_expr;
   locals_hashtbl
 
-let locals_used_in_func locals nb_args body_expr =
-  let loc_hashtbl = locals_func body_expr in
-  let remove_local idx body_expr =
-    let rec aux_instr instr =
-      match instr with
-      | Local_get ind when ind >= idx -> Local_get (ind - 1)
-      | Local_set ind when ind >= idx -> Local_set (ind - 1)
-      | Local_tee ind when ind >= idx -> Local_tee (ind - 1)
-      | Block (m, t, e) -> Block (m, t, aux_expr e)
-      | Loop (m, t, e) -> Loop (m, t, aux_expr e)
-      | If_else (m, t, e1, e2) -> If_else (m, t, aux_expr e1, aux_expr e2)
-      | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
-      | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size
-      | Memory_grow | Memory_fill | Memory_copy | Nop | Unreachable | Return
-      | Array_len | I31_get_u | I31_get_s | I31_new | Extern_externalize
-      | Extern_internalize | I32_const _ | I64_const _ | F32_const _
-      | F64_const _
-      | I_unop (_, _)
-      | F_unop (_, _)
-      | I_binop (_, _)
-      | F_binop (_, _)
-      | I_testop (_, _)
-      | I_relop (_, _)
-      | F_relop (_, _)
-      | I_extend8_s _ | I_extend16_s _ | I64_extend_i32 _
-      | I_trunc_f (_, _, _)
-      | I_trunc_sat_f (_, _, _)
-      | F_convert_i (_, _, _)
-      | I_reinterpret_f (_, _)
-      | F_reinterpret_i (_, _)
-      | Ref_null _ | Ref_func _
-      | Ref_cast (_, _)
-      | Ref_test (_, _)
-      | Select _ | Local_get _ | Local_set _ | Local_tee _ | Global_get _
-      | Global_set _ | Table_get _ | Table_set _ | Table_size _ | Table_grow _
-      | Table_fill _
-      | Table_copy (_, _)
-      | Table_init (_, _)
-      | Elem_drop _
-      | I_load (_, _)
-      | F_load (_, _)
-      | I_store (_, _)
-      | F_store (_, _)
-      | I_load8 (_, _, _)
-      | I_load16 (_, _, _)
-      | I64_load32 (_, _)
-      | I_store8 (_, _)
-      | I_store16 (_, _)
-      | I64_store32 _ | Memory_init _ | Data_drop _ | Br _ | Br_if _
-      | Br_table (_, _)
-      | Br_on_cast (_, _, _)
-      | Br_on_cast_fail (_, _, _)
-      | Br_on_non_null _ | Br_on_null _ | Return_call _
-      | Return_call_indirect (_, _)
-      | Call _
-      | Call_indirect (_, _)
-      | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _
-      | Array_new _
-      | Array_new_data (_, _)
-      | Array_new_default _
-      | Array_new_elem (_, _)
-      | Array_new_fixed (_, _)
-      | Array_set _
-      | Struct_get (_, _)
-      | Struct_get_s (_, _)
-      | Struct_new _ | Struct_new_default _
-      | Struct_set (_, _) ->
-        instr
-    and aux_expr expr = List.map aux_instr expr in
-    aux_expr body_expr
+let remove_local map body =
+  let new_x x = match Hashtbl.find_opt map x with None -> x | Some x -> x in
+  let rec aux_instr instr =
+    match instr with
+    | Local_get ind -> Local_get (new_x ind)
+    | Local_set ind -> Local_set (new_x ind)
+    | Local_tee ind -> Local_tee (new_x ind)
+    | Block (m, t, e) -> Block (m, t, aux_expr e)
+    | Loop (m, t, e) -> Loop (m, t, aux_expr e)
+    | If_else (m, t, e1, e2) -> If_else (m, t, aux_expr e1, aux_expr e2)
+    | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
+    | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size | Memory_grow
+    | Memory_fill | Memory_copy | Nop | Unreachable | Return | Array_len
+    | I31_get_u | I31_get_s | I31_new | Extern_externalize | Extern_internalize
+    | I32_const _ | I64_const _ | F32_const _ | F64_const _
+    | I_unop (_, _)
+    | F_unop (_, _)
+    | I_binop (_, _)
+    | F_binop (_, _)
+    | I_testop (_, _)
+    | I_relop (_, _)
+    | F_relop (_, _)
+    | I_extend8_s _ | I_extend16_s _ | I64_extend_i32 _
+    | I_trunc_f (_, _, _)
+    | I_trunc_sat_f (_, _, _)
+    | F_convert_i (_, _, _)
+    | I_reinterpret_f (_, _)
+    | F_reinterpret_i (_, _)
+    | Ref_null _ | Ref_func _
+    | Ref_cast (_, _)
+    | Ref_test (_, _)
+    | Select _ | Global_get _ | Global_set _ | Table_get _ | Table_set _
+    | Table_size _ | Table_grow _ | Table_fill _
+    | Table_copy (_, _)
+    | Table_init (_, _)
+    | Elem_drop _
+    | I_load (_, _)
+    | F_load (_, _)
+    | I_store (_, _)
+    | F_store (_, _)
+    | I_load8 (_, _, _)
+    | I_load16 (_, _, _)
+    | I64_load32 (_, _)
+    | I_store8 (_, _)
+    | I_store16 (_, _)
+    | I64_store32 _ | Memory_init _ | Data_drop _ | Br _ | Br_if _
+    | Br_table (_, _)
+    | Br_on_cast (_, _, _)
+    | Br_on_cast_fail (_, _, _)
+    | Br_on_non_null _ | Br_on_null _ | Return_call _
+    | Return_call_indirect (_, _)
+    | Call _
+    | Call_indirect (_, _)
+    | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _ | Array_new _
+    | Array_new_data (_, _)
+    | Array_new_default _
+    | Array_new_elem (_, _)
+    | Array_new_fixed (_, _)
+    | Array_set _
+    | Struct_get (_, _)
+    | Struct_get_s (_, _)
+    | Struct_new _ | Struct_new_default _
+    | Struct_set (_, _) ->
+      instr
+  and aux_expr expr = List.map aux_instr expr in
+  aux_expr body
+
+let remove_unused_locals locals nb_args body =
+  let unused_locals =
+    let used_locals = locals_func body in
+    let locals = List.mapi (fun i _x -> nb_args + i) locals in
+    List.filter (fun x -> not @@ Hashtbl.mem used_locals x) locals
   in
-  let loop (idx, param_l, body_expr) param : int * param list * expr =
-    match Hashtbl.find_opt loc_hashtbl (idx + nb_args) with
-    | None -> (idx + 1, param_l, remove_local (idx + nb_args) body_expr)
-    | Some _ -> (idx + 1, List.append param_l [ param ], body_expr)
+  let rename_map = Hashtbl.create 16 in
+  List.iteri
+    (fun j x ->
+      let name, _ = x in
+      let _x = Option.value name ~default:"anon" in
+      let count = ref 0 in
+      for i = 0 to j do
+        if List.mem (nb_args + i) unused_locals then incr count
+      done;
+      if not @@ List.mem (nb_args + j) unused_locals then begin
+        Hashtbl.replace rename_map (nb_args + j) (nb_args + j - !count)
+      end )
+    locals;
+  let locals = List.mapi (fun i x -> (nb_args + i, x)) locals in
+  let locals =
+    List.filter_map
+      (fun (i, x) -> if List.mem i unused_locals then None else Some x)
+      locals
   in
-  let _, l, b = List.fold_left loop (0, [], body_expr) locals in
-  (l, b)
+  let body = remove_local rename_map body in
+  (locals, body)
 
 let optimize_func func =
   let { type_f; locals; body; id } = func in
   let body = optimize_expr body in
   let pt, _ = type_f in
   let nb_args = List.length pt in
-  let locals, body = locals_used_in_func locals nb_args body in
+  let locals, body = remove_unused_locals locals nb_args body in
   { type_f; locals; body; id }
 
 let optimize_runtime_func f =

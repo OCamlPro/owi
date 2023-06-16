@@ -82,7 +82,6 @@ print optimized locals:
       i32.const 1
       i32.const 2
       call 7
-      drop
     )
     (start 8)
   )
