@@ -1,4 +1,4 @@
-open Crowbarplus
+open Crowbar
 open Owi.Types
 open Owi.Types.Symbolic
 open Syntax

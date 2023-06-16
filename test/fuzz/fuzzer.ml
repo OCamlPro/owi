@@ -10,10 +10,10 @@ let check_optimized m =
     let open Owi_optimized in
     of_symbolic m |> run
   in
-  (* let result_reference =
+  let result_reference () =
     let open Reference in
     of_symbolic m |> run
-  in *)
+  in
   let result1 =
     match (result_unoptimized, result_optimized) with
     | Ok (), Ok () -> true
@@ -30,13 +30,10 @@ let check_optimized m =
       Format.ksprintf failwith
         "only optimized module interpretation throws an error: %s" msg
   in
-  let result2 = true in
-  (* todo : intégrer le code de l'interprete de ref.
-     Nb. il va y avoir des bug sur le print, et donc cela va falloir voir/corriger
-      exemple : global ('mut' i32) -> enlever les ()
-  *)
-  (* let result2 =
-    match (result_unoptimized, result_reference) with
+  let result2 =
+    if not Param.reference_fuzzing then true
+    else
+    match (result_unoptimized, result_reference ()) with
     | Ok (), Ok () -> true
     | Error _msg1, Error _msg2 ->
       (* TODO: parse the output of result_reference to check that the error are the same*)
@@ -47,24 +44,12 @@ let check_optimized m =
     | Ok (), Error msg ->
       Format.ksprintf failwith
         "only reference module interpretation throws an error: %s" msg
-  in *)
+  in
   result1 && result2
 
 let is_optimized m = Crowbar.check (check_optimized m)
 
-let debug = ref false
-
-let options = [
-  "--debug", Arg.Set debug, " Debug mode (modul printing)"
-]
-
-(* let in_file_name = ref "" *)
-(* let set_file _s = print_endline "FFFFFF" *)
-
-let usage = "usage: dune exec -- ./test/fuzz/fuzzer.exe [--option]"
-
 let () =
-  Arg.parse options (fun _ -> ()) usage;
   print_newline ();
   print_endline "Owi fuzzing ...";
   let count = ref 0 in
@@ -72,6 +57,6 @@ let () =
   Crowbar.add_test ~name:"Optimize fuzzing" [ Gen.modul ] (fun m ->
     incr count;
     Format.fprintf fmt "Generating new module (%d/5000)...@\n" !count;
-    if true then Format.fprintf fmt "%a@\n" Owi.Types.Symbolic.Pp.modul m;
+    if Param.debug then Format.fprintf fmt "%a@\n" Owi.Types.Symbolic.Pp.modul m;
     Format.pp_print_flush fmt ();
     is_optimized m )

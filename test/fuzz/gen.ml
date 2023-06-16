@@ -1,4 +1,4 @@
-open Crowbarplus
+open Crowbar
 open Owi.Types.Symbolic
 open Syntax
 module S = Type_stack
@@ -139,13 +139,6 @@ let expr_available_2_f64 =
 
 let if_else expr ~locals ~stack env =
   (* TODO: finish > bug typechecking + List.rev *)
-
-  (* se comporte mieux grace au "rev" dans expr, mais pas encore ça!
-      pb avec le fuel à priori : tout passe dans le 1er
-      pt stack
-      pas sûr que pt soit bien utilisé ? jouer avec let * + ?   
-  *)
-
   match stack with
   | Num_type I32 :: _stack -> begin
     (* let rt = [] in *)
@@ -158,10 +151,12 @@ let if_else expr ~locals ~stack env =
     let typ1 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in
     let typ2 = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, rt)) in
     (* let pt = List.rev pt in *)
-    
+    let old_fuel = env.Env.fuel in
+    env.fuel <- old_fuel / 2;
     let* expr_then = expr ~block_type:typ1 ~stack:pt ~locals ~start:false env in
+    env.fuel <- old_fuel / 2;
     let* expr_else = expr ~block_type:typ2 ~stack:pt ~locals ~start:false env in
-    
+    env.fuel <- old_fuel / 2;
     let instr = If_else (None, Some typ1, expr_then, expr_else) in
     let pt_descr = S.Pop :: List.map (fun _ -> S.Pop) pt in
     let rt_descr = List.map (fun t -> S.Push t) rt in
@@ -182,26 +177,16 @@ let rec expr ~block_type ~stack ~locals ~start env =
     | rt, l ->
       (* TODO: if we have a matching prefix, keep it *)
       (* TODO: try to consume them instead of just dropping *)
-      
-      (* let* drops = const (List.map (fun _typ -> Drop) l) in
+      let* drops = const (List.map (fun _typ -> Drop) l) in
       let+ adds =
         List.fold_left
           ( fun (acc : instr list gen) typ ->
+              let* acc in
               let+ cst = B.const_of_val_type typ in
               cst :: acc
-          )
-          [] (List.rev rt)
-       in
-      drops @ adds *)
-
-      let drops = const (List.map (fun _typ -> Drop) l) in
-      let adds =
-        List.fold_left
-          (fun (acc : instr list gen) typ ->
-            list_cons (B.const_of_val_type typ) acc )
-          (const []) (List.rev rt)
+          ) (const []) (List.rev rt)
       in
-      list_append drops adds
+      drops @ adds 
   else
     let expr_available_with_current_stack =
       (* TODO: complete this *)
@@ -243,7 +228,7 @@ let rec expr ~block_type ~stack ~locals ~start env =
     let stack = S.apply_stack_ops stack ops in
     let next = expr ~block_type ~stack ~locals ~start env in
     let i = const i in
-    list_cons i next
+    map [ i; next ] List.cons
 
 let data env =
   let* mode = B.data_mode env in
