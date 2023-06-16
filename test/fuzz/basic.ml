@@ -475,3 +475,7 @@ let expr_call (env : Env.t) (stack : val_type list) =
         Some (pair (const (Call (Symbolic name))) (const (stack_pt pt @ stack_rt rt)))
       | _ -> None )
     env.funcs
+
+let stack_prefix (stack : val_type list) =
+  let+ size = range (List.length stack) in
+  List.filteri (fun i _ -> i < size) stack
