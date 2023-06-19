@@ -1,17 +1,6 @@
 (** Module to link a simplified/extern module and producing a runnable module
     along with a link state. *)
 
-(** runtime memory *)
-module Memory : sig
-  type t
-
-  val get_data : t -> bytes
-
-  val get_limit_max : t -> int option
-
-  val update_memory : t -> bytes -> unit
-end
-
 (** runtime table *)
 module Table : sig
   type 'env table = 'env Value.ref_value array

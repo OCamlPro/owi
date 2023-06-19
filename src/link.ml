@@ -4,40 +4,6 @@ open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
-let page_size = 65_536
-
-module Memory = struct
-  type t =
-    { id : int
-    ; label : string option
-    ; mutable limits : limits
-    ; mutable data : bytes
-    }
-
-  let fresh =
-    let r = ref (-1) in
-    fun () ->
-      incr r;
-      !r
-
-  let init ?label (typ : limits) : t =
-    let data = Bytes.make (page_size * typ.min) '\x00' in
-    { id = fresh (); label; limits = typ; data }
-
-  let update_memory mem data =
-    let limits =
-      { mem.limits with
-        min = max mem.limits.min (Bytes.length data / page_size)
-      }
-    in
-    mem.limits <- limits;
-    mem.data <- data
-
-  let get_data { data; _ } = data
-
-  let get_limit_max { limits; _ } = limits.max
-end
-
 module Table = struct
   (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
   type 'env table = 'env Value.ref_value array
@@ -333,9 +299,8 @@ let limit_is_included ~import ~imported =
   | Some i, Some j -> i <= j
 
 let load_memory (ls : state) (import : limits Imported.t) : Memory.t Result.t =
-  let* ({ Memory.limits = imported_limit; _ } as mem) =
-    load_from_module ls (fun (e : exports) -> e.memories) import
-  in
+  let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
+  let imported_limit = Memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
   else
     error_s "incompatible import type for memory %s %s expected %a got %a"

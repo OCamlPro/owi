@@ -399,7 +399,7 @@ let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
 let get_memory (env : Env.t) idx =
   let* mem = Env.get_memory env idx in
-  Ok Link.Memory.(get_data mem, get_limit_max mem)
+  Ok Memory.(get_data mem, get_limit_max mem)
 
 let get_memory_raw env idx = Env.get_memory env idx
 
@@ -764,8 +764,8 @@ let exec_instr instr (state : State.exec_state) =
     st @@ Stack.push_i32_of_int stack len
   | Memory_grow -> begin
     let* mem = get_memory_raw env mem_0 in
-    let data = Link.Memory.get_data mem in
-    let max_size = Link.Memory.get_limit_max mem in
+    let data = Memory.get_data mem in
+    let max_size = Memory.get_limit_max mem in
     let delta, stack = Stack.pop_ui32_to_int stack in
     let delta = delta * page_size in
     let old_size = Bytes.length data in
@@ -788,7 +788,7 @@ let exec_instr instr (state : State.exec_state) =
       | None | Some _ ->
         let new_mem = Bytes.extend data 0 delta in
         Bytes.fill new_mem old_size delta (Char.chr 0);
-        Link.Memory.update_memory mem new_mem;
+        Memory.update_memory mem new_mem;
         Stack.push_i32_of_int stack (old_size / page_size)
     end
   end

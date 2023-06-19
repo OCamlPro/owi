@@ -12,6 +12,7 @@
   int64
   interpret
   lexer
+  memory
   link
   log
   menhir_parser
