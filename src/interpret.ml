@@ -895,7 +895,7 @@ let exec_instr instr (state : State.exec_state) =
       let new_element, stack = Stack.pop_as_ref stack in
       let new_table = Array.make new_size new_element in
       Array.blit t.data 0 new_table 0 (Array.length t.data);
-      Link.Table.update t new_table;
+      Table.update t new_table;
       Stack.push_i32_of_int stack size
   | Table_fill indice ->
     let* t = Env.get_table env indice in
