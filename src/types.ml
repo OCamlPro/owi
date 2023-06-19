@@ -536,13 +536,10 @@ struct
         assert (n >= 0);
         1 lsl n
       in
-      let off =
-        if offset = 0 then "" else Printf.sprintf "offset=%d" offset
+      let off fmt offset =
+        if offset > 0 then Format.fprintf fmt "offset=%d" offset
       in
-      let al =
-        Printf.sprintf "align=%d" (pow_2 align)
-      in
-      Format.fprintf fmt "%s %s" off al
+      Format.fprintf fmt "%a align=%d" off offset (pow_2 align)
 
     let rec instr fmt = function
       | I32_const i -> Format.fprintf fmt "i32.const %ld" i

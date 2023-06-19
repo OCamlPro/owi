@@ -31,8 +31,7 @@ let check_optimized m =
         "only optimized module interpretation throws an error: %s" msg
   in
   let result2 =
-    if not Param.reference_fuzzing then true
-    else
+    not Param.reference_fuzzing ||
     match (result_unoptimized, result_reference ()) with
     | Ok (), Ok () -> true
     | Error _msg1, Error _msg2 ->
