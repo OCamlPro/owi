@@ -1,7 +1,6 @@
 open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
-
 module IMap = Map.Make (Int)
 
 type data = { mutable value : string }
@@ -39,29 +38,6 @@ let pp fmt t =
        ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
        func )
     (IMap.bindings t.functions)
-
-let empty =
-  { globals = IMap.empty
-  ; memories = IMap.empty
-  ; tables = IMap.empty
-  ; functions = IMap.empty
-  ; data = IMap.empty
-  ; elem = IMap.empty
-  }
-
-let add_global id const env =
-  { env with globals = IMap.add id const env.globals }
-
-let add_memory id mem env = { env with memories = IMap.add id mem env.memories }
-
-let add_table id table env = { env with tables = IMap.add id table env.tables }
-
-let add_func id func env =
-  { env with functions = IMap.add id func env.functions }
-
-let add_data id data env = { env with data = IMap.add id data env.data }
-
-let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
 
 let get_global (env : t) id =
   match IMap.find_opt id env.globals with
@@ -104,3 +80,34 @@ let get_elem (env : t) id =
     Log.debug "%a@." pp env;
     Error "unknown elem"
   | Some v -> Ok v
+
+module Build = struct
+  type nonrec t = t
+
+  let empty =
+    { globals = IMap.empty
+    ; memories = IMap.empty
+    ; tables = IMap.empty
+    ; functions = IMap.empty
+    ; data = IMap.empty
+    ; elem = IMap.empty
+    }
+
+  let add_global id const env =
+    { env with globals = IMap.add id const env.globals }
+
+  let add_memory id mem env =
+    { env with memories = IMap.add id mem env.memories }
+
+  let add_table id table env =
+    { env with tables = IMap.add id table env.tables }
+
+  let add_func id func env =
+    { env with functions = IMap.add id func env.functions }
+
+  let add_data id data env = { env with data = IMap.add id data env.data }
+
+  let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
+end
+
+let freeze t = t
