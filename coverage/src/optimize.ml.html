@@ -1232,19 +1232,19 @@ let optimize_func func =
   <span data-count="4637">{</span> type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  <span data-count="6160">l</span>et { value; index } = f in
+  <span data-count="6171">l</span>et { value; index } = f in
   match value with
-  | <span data-count="1523">I</span>mported _ -&gt; f
+  | <span data-count="1534">I</span>mported _ -&gt; f
   | <span data-count="4637">L</span>ocal f -&gt;
     let value = Local (optimize_fun<span data-count="4637">c</span> f) in
     { value; index }
 
-let optimize_funcs funs = <span data-count="1438">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1439">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1438">L</span>og.debug "optimizing   ...@\n";
-  <span data-count="1438">l</span>et func = optimize_funcs m.func in
-  <span data-count="1438">{</span> m with func }
+  <span data-count="1439">L</span>og.debug "optimizing   ...@\n";
+  <span data-count="1439">l</span>et func = optimize_funcs m.func in
+  <span data-count="1439">{</span> m with func }
 </code></pre>
       </div>
     </div>

@@ -79,32 +79,32 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="39734">m</span>atch o with <span data-count="9214">E</span>rror msg -&gt; Error msg | <span data-count="30520">O</span>k v -&gt; f v
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="39774">m</span>atch o with <span data-count="9226">E</span>rror msg -&gt; Error msg | <span data-count="30548">O</span>k v -&gt; f v
 
-let until_check m = <span data-count="5823">C</span>heck.modul m
+let until_check m = <span data-count="5829">C</span>heck.modul m
 
 let until_simplify m =
-  <span data-count="5823">l</span>et* m = until_chec<span data-count="5823">k</span> m in
-  <span data-count="5813">l</span>et* m = Simplify.modu<span data-count="5813">l</span> m in
-  <span data-count="5441">O</span>k m
+  <span data-count="5829">l</span>et* m = until_chec<span data-count="5829">k</span> m in
+  <span data-count="5819">l</span>et* m = Simplify.modu<span data-count="5819">l</span> m in
+  <span data-count="5447">O</span>k m
 
 let until_typecheck m =
-  <span data-count="5823">l</span>et* m = until_simplif<span data-count="5823">y</span> m in
-  <span data-count="5441">l</span>et* () = Typecheck.modu<span data-count="5441">l</span> m in
-  <span data-count="2879">O</span>k m
+  <span data-count="5829">l</span>et* m = until_simplif<span data-count="5829">y</span> m in
+  <span data-count="5447">l</span>et* () = Typecheck.modu<span data-count="5447">l</span> m in
+  <span data-count="2881">O</span>k m
 
 let until_optimize ~optimize m =
-  <span data-count="5823">l</span>et* m = until_typechec<span data-count="5823">k</span> m in
-  <span data-count="2879">i</span>f optimize then <span data-count="1438">O</span>k (Optimize.modu<span data-count="1438">l</span> m) else <span data-count="1441">O</span>k m
+  <span data-count="5829">l</span>et* m = until_typechec<span data-count="5829">k</span> m in
+  <span data-count="2881">i</span>f optimize then <span data-count="1439">O</span>k (Optimize.modu<span data-count="1439">l</span> m) else <span data-count="1442">O</span>k m
 
 let until_link link_state ~optimize ~name m =
-  <span data-count="5823">l</span>et* m = until_optimiz<span data-count="5823">e</span> ~optimize m in
-  <span data-count="2879">L</span>ink.modul link_state ~name m
+  <span data-count="5829">l</span>et* m = until_optimiz<span data-count="5829">e</span> ~optimize m in
+  <span data-count="2881">L</span>ink.modul link_state ~name m
 
 let until_interpret link_state ~optimize ~name m =
-  <span data-count="2594">l</span>et* m, link_state = until_lin<span data-count="2594">k</span> link_state ~optimize ~name m in
-  <span data-count="2594">l</span>et* () = Interpret.modu<span data-count="2594">l</span> m in
-  <span data-count="2594">O</span>k link_state
+  <span data-count="2596">l</span>et* m, link_state = until_lin<span data-count="2596">k</span> link_state ~optimize ~name m in
+  <span data-count="2596">l</span>et* () = Interpret.modu<span data-count="2596">l</span> m in
+  <span data-count="2596">O</span>k link_state
 </code></pre>
       </div>
     </div>

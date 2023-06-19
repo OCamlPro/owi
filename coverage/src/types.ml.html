@@ -3655,13 +3655,13 @@ module Symbolic = struct
 
   include Make (Arg)
 
-  let symbolic v = <span data-count="13248">A</span>rg.Symbolic v
+  let symbolic v = <span data-count="13252">A</span>rg.Symbolic v
 
-  let raw v = <span data-count="76534">A</span>rg.Raw v
+  let raw v = <span data-count="76542">A</span>rg.Raw v
 
-  let bt_ind i = <span data-count="13642">A</span>rg.Bt_ind i
+  let bt_ind i = <span data-count="13646">A</span>rg.Bt_ind i
 
-  let bt_raw i t = <span data-count="15309">A</span>rg.Bt_raw (i, t)
+  let bt_raw i t = <span data-count="15317">A</span>rg.Bt_raw (i, t)
 
   type global =
     { typ : global_type
@@ -3915,7 +3915,7 @@ type 'a indexed =
   ; value : 'a
   }
 
-let has_index idx { index; _ } = <span data-count="24982">i</span>dx = index
+let has_index idx { index; _ } = <span data-count="24990">i</span>dx = index
 
 (** the types of imported values *)
 type 'a imp =
@@ -3948,13 +3948,13 @@ end = struct
     }
 
   let fold f v acc =
-    <span data-count="22043">L</span>ist.fold_left (fun acc v -&gt; <span data-count="32266">f</span> v.index v.value acc) acc v.values
+    <span data-count="22061">L</span>ist.fold_left (fun acc v -&gt; <span data-count="32326">f</span> v.index v.value acc) acc v.values
 
   let iter f v = <span data-count="0">L</span>ist.iter (fun v -&gt; <span data-count="0">f</span> v.index v.value) v.values
 
   let map f v =
-    <span data-count="1438">l</span>et values = List.map f v.values in
-    <span data-count="1438">{</span> v with values }
+    <span data-count="1439">l</span>et values = List.map f v.values in
+    <span data-count="1439">{</span> v with values }
 end
 
 module Simplified = struct

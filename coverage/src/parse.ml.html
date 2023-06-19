@@ -201,13 +201,13 @@ let menhir_rule_from_lexbuf rule =
     Log.debug "%s@\n%s@\n" file_line msg
   in
   fun buf -&gt;
-    <span data-count="1400">L</span>og.debug "parsing      ...@\n";
-    <span data-count="1400">l</span>et provider () =
-      <span data-count="1360443">l</span>et tok = Lexer.token buf in
-      <span data-count="1360077">l</span>et start, stop = Sedlexing.lexing_positions buf in
-      <span data-count="1360077">(</span>tok, start, stop)
+    <span data-count="1402">L</span>og.debug "parsing      ...@\n";
+    <span data-count="1402">l</span>et provider () =
+      <span data-count="1360597">l</span>et tok = Lexer.token buf in
+      <span data-count="1360231">l</span>et start, stop = Sedlexing.lexing_positions buf in
+      <span data-count="1360231">(</span>tok, start, stop)
     in
-    try Ok (parse<span data-count="358">r</span> provider) with
+    try Ok (parse<span data-count="360">r</span> provider) with
     | <span data-count="542">T</span>ypes.Parse_fail msg
     | <span data-count="4">L</span>exer.Illegal_escape msg
     | <span data-count="346">L</span>exer.Unknown_operator msg -&gt;
@@ -232,16 +232,16 @@ let script_from_channel c = <span data-count="0">s</span>cript_from_lexbuf (Sedl
 
 (** Parse a script from a file. *)
 let script_from_file ~filename =
-  <span data-count="238">l</span>et chan = open_in filename in
-  <span data-count="238">l</span>et result =
+  <span data-count="240">l</span>et chan = open_in filename in
+  <span data-count="240">l</span>et result =
     Fun.protect
-      ~finally:(fun () -&gt; <span data-count="238">c</span>lose_in chan)
+      ~finally:(fun () -&gt; <span data-count="240">c</span>lose_in chan)
       (fun () -&gt;
-        <span data-count="238">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-        <span data-count="238">S</span>edlexing.set_filename lb filename;
-        <span data-count="238">s</span>cript_from_lexbuf lb )
+        <span data-count="240">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+        <span data-count="240">S</span>edlexing.set_filename lb filename;
+        <span data-count="240">s</span>cript_from_lexbuf lb )
   in
-  <span data-count="238">r</span>esult
+  <span data-count="240">r</span>esult
 
 (** Parse a module from a lexing buffer. *)
 let module_from_lexbuf = menhir_rule_from_lexbu<span data-count="6">f</span> Menhir_parser.modul
