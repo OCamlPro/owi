@@ -11,6 +11,7 @@
   fbinop.wast
   ibinop.wast
   if.wast
+  local.wast
   ref_nop.wast
   reinterpret.wast
   relop_testop.wast
