@@ -1,5 +1,5 @@
 open Types
-open Types.Simplified
+open Simplified
 open Syntax
 
 type typ =
@@ -119,7 +119,7 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : Types.Simplified.block_type option -> t -> t Result.t
+  val pop_push : Simplified.block_type option -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
@@ -152,7 +152,7 @@ end = struct
 
   let match_ref_type required got =
     match (required, got) with
-    | Types.Simplified.Any_ht, _ -> true
+    | Simplified.Any_ht, _ -> true
     | None_ht, None_ht -> true
     | Eq_ht, Eq_ht -> true
     | I31_ht, I31_ht -> true

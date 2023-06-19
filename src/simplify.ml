@@ -1,6 +1,6 @@
 open Syntax
 open Types
-open Types.Simplified
+open Simplified
 
 type type_check = Symbolic.indice * Symbolic.func_type
 

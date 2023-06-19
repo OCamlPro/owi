@@ -55,7 +55,7 @@ module Func = struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : Types.Simplified.val_type =
+  let elt_type (type t) (e : t telt) : Simplified.val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64
@@ -63,7 +63,7 @@ module Func = struct
     | F64 -> Num_type F64
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : Types.Simplified.result_type =
+  let res_type (type t) (r : t rtype) : Simplified.result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -71,17 +71,16 @@ module Func = struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> Types.Simplified.param_type =
-    function
+  let rec arg_type : type t r. (t, r) atype -> Simplified.param_type = function
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []
 
-  let extern_type (Func (arg, res)) : Types.Simplified.func_type =
+  let extern_type (Func (arg, res)) : Simplified.func_type =
     (arg_type arg, res_type res)
 
   type 'env t =
-    | WASM of int * Types.Simplified.func * 'env
+    | WASM of int * Simplified.func * 'env
     | Extern of extern_func
 
   let fresh =
@@ -115,7 +114,7 @@ type 'env t =
   | F64 of Float64.t
   | Ref of 'env ref_value
 
-let of_instr (i : Types.Simplified.instr) : _ t =
+let of_instr (i : Simplified.instr) : _ t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c
@@ -124,10 +123,10 @@ let of_instr (i : Types.Simplified.instr) : _ t =
   | _ -> assert false
 
 let to_instr = function
-  | I32 c -> Types.Simplified.I32_const c
-  | I64 c -> Types.Simplified.I64_const c
-  | F32 c -> Types.Simplified.F32_const c
-  | F64 c -> Types.Simplified.F64_const c
+  | I32 c -> Simplified.I32_const c
+  | I64 c -> Simplified.I64_const c
+  | F32 c -> Simplified.F32_const c
+  | F64 c -> Simplified.F64_const c
   | _ -> assert false
 
 let pp_ref fmt = function
@@ -138,12 +137,12 @@ let pp_ref fmt = function
 let pp fmt = function
   | I32 i -> Format.fprintf fmt "i32.const %ld" i
   | I64 i -> Format.fprintf fmt "i64.const %Ld" i
-  | F32 f -> Format.fprintf fmt "f32.const %a" Types.Simplified.Pp.f32 f
-  | F64 f -> Format.fprintf fmt "f64.const %a" Types.Simplified.Pp.f64 f
+  | F32 f -> Format.fprintf fmt "f32.const %a" Simplified.Pp.f32 f
+  | F64 f -> Format.fprintf fmt "f64.const %a" Simplified.Pp.f64 f
   | Ref r -> pp_ref fmt r
 
 let ref_null' = function
-  | Types.Simplified.Func_ht -> Funcref None
+  | Simplified.Func_ht -> Funcref None
   | Extern_ht -> Externref None
   | _ -> failwith "TODO ref_null' Value.ml"
 

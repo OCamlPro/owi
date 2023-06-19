@@ -1,5 +1,5 @@
 open Types
-open Types.Simplified
+open Simplified
 open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
@@ -293,9 +293,8 @@ let load_global (ls : state) (import : global_type Types.imp) : global Result.t
   end
   else Ok global
 
-let eval_global ls env
-  (global : (Types.Simplified.global, global_type) Types.runtime) :
-  global Result.t =
+let eval_global ls env (global : (Simplified.global, global_type) Types.runtime)
+  : global Result.t =
   match global with
   | Types.Local global ->
     let* value = Const_interp.exec_expr env global.init in
@@ -489,11 +488,10 @@ let define_elem env elem =
     elem
     (Ok (env, []))
 
-let populate_exports env (exports : Types.Simplified.exports) : exports Result.t
-    =
+let populate_exports env (exports : Simplified.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) (export : Types.Simplified.export) ->
+      (fun (acc, names) (export : Simplified.export) ->
         let* value = get_env env export.id in
         if StringSet.mem export.name names then Error "duplicate export name"
         else

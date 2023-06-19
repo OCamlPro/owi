@@ -1,3 +1,3 @@
 (** Optimize module *)
 
-val modul : Types.Simplified.modul -> Types.Simplified.modul
+val modul : Simplified.modul -> Simplified.modul

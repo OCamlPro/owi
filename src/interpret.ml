@@ -1,5 +1,5 @@
 open Types
-open Types.Simplified
+open Simplified
 module Env = Link.Env
 
 module Log : sig

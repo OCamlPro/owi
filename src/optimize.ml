@@ -1,5 +1,5 @@
 open Types
-open Types.Simplified
+open Simplified
 open Value
 
 let rec optimize_expr expr =

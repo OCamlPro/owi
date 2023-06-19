@@ -2,7 +2,7 @@
 
 val until_check : Symbolic.modul -> Symbolic.modul Result.t
 
-val until_simplify : Symbolic.modul -> Types.Simplified.modul Result.t
+val until_simplify : Symbolic.modul -> Simplified.modul Result.t
 
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)

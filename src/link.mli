@@ -20,7 +20,7 @@ module Table : sig
     { id : int
     ; label : string option
     ; limits : Types.limits
-    ; typ : Types.Simplified.ref_type
+    ; typ : Simplified.ref_type
     ; mutable data : 'env table
     }
 
@@ -33,7 +33,7 @@ module Global : sig
     { mutable value : 'env Value.t
     ; label : string option
     ; mut : Types.mut
-    ; typ : Types.Simplified.val_type
+    ; typ : Simplified.val_type
     }
 end
 
@@ -66,9 +66,9 @@ end
 
 (** runnable module *)
 type module_to_run =
-  { modul : Types.Simplified.modul
+  { modul : Simplified.modul
   ; env : Env.t
-  ; to_run : Types.Simplified.expr list
+  ; to_run : Simplified.expr list
   }
 
 module StringMap : Map.S with type key = string
@@ -99,7 +99,7 @@ val empty_state : state
 val modul :
      state
   -> name:string option
-  -> Types.Simplified.modul
+  -> Simplified.modul
   -> (module_to_run * state) Result.t
 
 (** register a module inside a link state, producing a new link state *)
