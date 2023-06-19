@@ -1531,7 +1531,7 @@ module Const_interp = struct
     | <span data-count="5846">[</span> result ] -&gt; Ok result
 end
 
-let load_from_module ls f (import : _ Types.imp) =
+let load_from_module ls f (import : _ Imported.t) =
   <span data-count="3404">m</span>atch StringMap.find import.modul ls.by_name with
   | <span data-count="0">e</span>xception Not_found -&gt; error_s "unknown module %s" import.modul
   | <span data-count="3404">e</span>xports -&gt; (
@@ -1543,7 +1543,7 @@ let load_from_module ls f (import : _ Types.imp) =
       else <span data-count="22">E</span>rror "unknown import"
     | <span data-count="3338">v</span> -&gt; Ok v )
 
-let load_global (ls : state) (import : global_type Types.imp) : global Result.t
+let load_global (ls : state) (import : global_type Imported.t) : global Result.t
     =
   <span data-count="110">l</span>et* global = load_from_modul<span data-count="110">e</span> ls (fun (e : exports) -&gt; <span data-count="110">e</span>.globals) import in
   <span data-count="94">l</span>et* () =
@@ -1557,10 +1557,10 @@ let load_global (ls : state) (import : global_type Types.imp) : global Result.t
   end
   else <span data-count="58">O</span>k global
 
-let eval_global ls env (global : (Simplified.global, global_type) Types.runtime)
-  : global Result.t =
+let eval_global ls env (global : (Simplified.global, global_type) Runtime.t) :
+  global Result.t =
   <span data-count="1210">m</span>atch global with
-  | <span data-count="1100">T</span>ypes.Local global -&gt;
+  | <span data-count="1100">L</span>ocal global -&gt;
     let* value = Const_interp.exec_exp<span data-count="1100">r</span> env global.init in
     <span data-count="1100">l</span>et mut, typ = global.typ in
     let global : global = { value; label = global.id; mut; typ } in
@@ -1568,7 +1568,7 @@ let eval_global ls env (global : (Simplified.global, global_type) Types.runtime)
   | <span data-count="110">I</span>mported import -&gt; load_global ls import
 
 let eval_globals ls env globals : Env.t Result.t =
-  <span data-count="2827">T</span>ypes.Named.fold
+  <span data-count="2827">N</span>amed.fold
     (fun id global env -&gt;
       <span data-count="1210">l</span>et* env in
       <span data-count="1210">l</span>et* global = eval_globa<span data-count="1210">l</span> ls env global in
@@ -1596,7 +1596,7 @@ let limit_is_included ~import ~imported =
   | <span data-count="4">N</span>one, Some _ -&gt; false
   | <span data-count="60">S</span>ome i, Some j -&gt; i &lt;= j
 
-let load_memory (ls : state) (import : limits Types.imp) : Memory.t Result.t =
+let load_memory (ls : state) (import : limits Imported.t) : Memory.t Result.t =
   <span data-count="106">l</span>et* ({ Memory.limits = imported_limit; _ } as mem) =
     load_from_modul<span data-count="106">e</span> ls (fun (e : exports) -&gt; <span data-count="106">e</span>.memories) import
   in
@@ -1605,13 +1605,13 @@ let load_memory (ls : state) (import : limits Types.imp) : Memory.t Result.t =
     <span data-count="12">e</span>rror_s "incompatible import type for memory %s %s expected %a got %a"
       import.modul import.name Pp.limits import.desc Pp.limits imported_limit
 
-let eval_memory ls (memory : (mem, limits) Types.runtime) : Memory.t Result.t =
+let eval_memory ls (memory : (mem, limits) Runtime.t) : Memory.t Result.t =
   <span data-count="783">m</span>atch memory with
   | <span data-count="677">L</span>ocal (label, mem_type) -&gt; ok @@ Memory.ini<span data-count="677">t</span> ?label mem_type
   | <span data-count="106">I</span>mported import -&gt; load_memory ls import
 
 let eval_memories ls env memories =
-  <span data-count="2775">T</span>ypes.Named.fold
+  <span data-count="2775">N</span>amed.fold
     (fun id mem env -&gt;
       <span data-count="783">l</span>et* env in
       <span data-count="783">l</span>et* memory = eval_memor<span data-count="783">y</span> ls mem in
@@ -1622,7 +1622,7 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   <span data-count="116">l</span>imit_is_included ~import ~imported &amp;&amp; <span data-count="104">t</span>1 = t2
 
-let load_table (ls : state) (import : table_type Types.imp) : table Result.t =
+let load_table (ls : state) (import : table_type Imported.t) : table Result.t =
   <span data-count="130">l</span>et typ : table_type = import.desc in
   let* t = load_from_modul<span data-count="130">e</span> ls (fun (e : exports) -&gt; <span data-count="130">e</span>.tables) import in
   <span data-count="116">i</span>f table_types_are_compatible typ (t.limits, t.typ) then <span data-count="100">O</span>k t
@@ -1630,13 +1630,13 @@ let load_table (ls : state) (import : table_type Types.imp) : table Result.t =
     <span data-count="16">e</span>rror_s "incompatible import type for table %s %s expected %a got %a"
       import.modul import.name Pp.table_type typ Pp.table_type (t.limits, t.typ)
 
-let eval_table ls (table : (_, table_type) Types.runtime) : table Result.t =
+let eval_table ls (table : (_, table_type) Runtime.t) : table Result.t =
   <span data-count="941">m</span>atch table with
   | <span data-count="811">L</span>ocal (label, table_type) -&gt; ok @@ Table.ini<span data-count="811">t</span> ?label table_type
   | <span data-count="130">I</span>mported import -&gt; load_table ls import
 
 let eval_tables ls env tables =
-  <span data-count="2745">T</span>ypes.Named.fold
+  <span data-count="2745">N</span>amed.fold
     (fun id table env -&gt;
       <span data-count="941">l</span>et* env in
       <span data-count="941">l</span>et* table = eval_tabl<span data-count="941">e</span> ls table in
@@ -1652,7 +1652,7 @@ let func_types_are_compatible a b =
   in
   remove_para<span data-count="3040">m</span> a = remove_para<span data-count="3040">m</span> b
 
-let load_func (ls : state) (import : func_type Types.imp) : func Result.t =
+let load_func (ls : state) (import : func_type Imported.t) : func Result.t =
   <span data-count="3058">l</span>et typ : func_type = import.desc in
   let* func = load_from_modul<span data-count="3058">e</span> ls (fun (e : exports) -&gt; <span data-count="3058">e</span>.functions) import in
   <span data-count="3040">l</span>et type' = Value.Func.typ func in
@@ -1661,11 +1661,11 @@ let load_func (ls : state) (import : func_type Types.imp) : func Result.t =
 
 let eval_func ls (finished_env : Env.t') func : func Result.t =
   <span data-count="12334">m</span>atch func with
-  | <span data-count="9276">T</span>ypes.Local func -&gt; ok @@ Value.Func.was<span data-count="9276">m</span> func finished_env
+  | <span data-count="9276">R</span>untime.Local func -&gt; ok @@ Value.Func.was<span data-count="9276">m</span> func finished_env
   | <span data-count="3058">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : Env.t') env functions =
-  <span data-count="2881">T</span>ypes.Named.fold
+  <span data-count="2881">N</span>amed.fold
     (fun id func env -&gt;
       <span data-count="12352">l</span>et* env in
       <span data-count="12334">l</span>et* func = eval_fun<span data-count="12334">c</span> ls finished_env func in
@@ -1697,7 +1697,7 @@ let active_data_expr ~offset ~length ~mem ~data =
 let get_i32 = function <span data-count="968">V</span>alue.I32 i -&gt; Ok i | <span data-count="10">_</span> -&gt; Error "type mismatch"
 
 let define_data env data =
-  <span data-count="2715">T</span>ypes.Named.fold
+  <span data-count="2715">N</span>amed.fold
     (fun id (data : Simplified.data) env_and_init -&gt;
       <span data-count="652">l</span>et* env, init = env_and_init in
       <span data-count="652">l</span>et data' : Env.data = { value = data.init } in
@@ -1718,7 +1718,7 @@ let define_data env data =
     (Ok (env, []))
 
 let define_elem env elem =
-  <span data-count="2711">T</span>ypes.Named.fold
+  <span data-count="2711">N</span>amed.fold
     (fun id (elem : elem) env_and_inits -&gt;
       <span data-count="1274">l</span>et* env, inits = env_and_inits in
       <span data-count="1274">l</span>et* init = list_ma<span data-count="1274">p</span> (Const_interp.exec_exp<span data-count="1274">r</span> env) elem.init in
