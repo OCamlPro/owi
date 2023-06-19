@@ -5,10 +5,10 @@ type 'env t =
   { id : int
   ; label : string option
   ; limits : Types.limits
-  ; typ : Types.Simplified.ref_type
+  ; typ : Simplified.ref_type
   ; mutable data : 'env table
   }
 
 val update : 'a t -> 'a table -> unit
 
-val init : ?label:string -> Types.Simplified.table_type -> 'env t
+val init : ?label:string -> Simplified.table_type -> 'env t

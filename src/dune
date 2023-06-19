@@ -17,6 +17,7 @@
   memory
   table
   global
+  link_env
   link
   log
   menhir_parser

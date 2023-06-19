@@ -1,6 +1,6 @@
 open Types
 open Simplified
-module Env = Link.Env
+module Env = Link_env
 
 module Log : sig
   [@@@ocaml.warning "-32"]
