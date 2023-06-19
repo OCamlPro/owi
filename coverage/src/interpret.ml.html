@@ -2612,7 +2612,7 @@
 </pre>
 <pre><code class="ocaml">open Types
 open Simplified
-module Env = Link.Env
+module Env = Link_env
 
 module Log : sig
   [@@@ocaml.warning "-32"]
@@ -3011,7 +3011,7 @@ let ( let* ) o f = <span data-count="15367880">R</span>esult.fold ~ok:f ~error:t
 
 let get_memory (env : Env.t) idx =
   <span data-count="1852994">l</span>et* mem = Env.get_memor<span data-count="1852994">y</span> env idx in
-  <span data-count="1852994">O</span>k Link.Memory.(get_dat<span data-count="1852994">a</span> mem, get_limit_ma<span data-count="1852994">x</span> mem)
+  <span data-count="1852994">O</span>k Memory.(get_dat<span data-count="1852994">a</span> mem, get_limit_ma<span data-count="1852994">x</span> mem)
 
 let get_memory_raw env idx = <span data-count="216">E</span>nv.get_memory env idx
 
@@ -3376,8 +3376,8 @@ let exec_instr instr (state : State.exec_state) =
     st @@ Stack.push_i32_of_in<span data-count="78">t</span> stack len
   | <span data-count="216">M</span>emory_grow -&gt; begin
     let* mem = get_memory_ra<span data-count="216">w</span> env mem_0 in
-    <span data-count="216">l</span>et data = Link.Memory.get_data mem in
-    <span data-count="216">l</span>et max_size = Link.Memory.get_limit_max mem in
+    <span data-count="216">l</span>et data = Memory.get_data mem in
+    <span data-count="216">l</span>et max_size = Memory.get_limit_max mem in
     <span data-count="216">l</span>et delta, stack = Stack.pop_ui32_to_int stack in
     <span data-count="216">l</span>et delta = delta * page_size in
     let old_size = Bytes.length data in
@@ -3400,7 +3400,7 @@ let exec_instr instr (state : State.exec_state) =
       | <span data-count="146">N</span>one | <span data-count="48">S</span>ome _ -&gt;
         let new_mem = Bytes.extend data 0 delta in
         <span data-count="194">B</span>ytes.fill new_mem old_size delta (Char.ch<span data-count="194">r</span> 0);
-        <span data-count="194">L</span>ink.Memory.update_memory mem new_mem;
+        <span data-count="194">M</span>emory.update_memory mem new_mem;
         <span data-count="194">S</span>tack.push_i32_of_in<span data-count="194">t</span> stack (old_size / page_size)
     end
   end
@@ -3507,7 +3507,7 @@ let exec_instr instr (state : State.exec_state) =
       <span data-count="54">l</span>et new_element, stack = Stack.pop_as_ref stack in
       <span data-count="54">l</span>et new_table = Array.make new_size new_element in
       <span data-count="54">A</span>rray.blit t.data 0 new_table 0 (Array.lengt<span data-count="54">h</span> t.data);
-      <span data-count="54">L</span>ink.Table.update t new_table;
+      <span data-count="54">T</span>able.update t new_table;
       <span data-count="54">S</span>tack.push_i32_of_in<span data-count="54">t</span> stack size
   | <span data-count="18">T</span>able_fill indice -&gt;
     let* t = Env.get_tabl<span data-count="18">e</span> env indice in
