@@ -16,6 +16,7 @@
   optimize
   parse
   pp
+  result
   script
   simplify
   spectest

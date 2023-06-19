@@ -5,4 +5,4 @@ val exec :
      ?with_exhaustion:bool
   -> optimize:bool
   -> Types.Symbolic.script
-  -> (unit, string) result
+  -> unit Result.t

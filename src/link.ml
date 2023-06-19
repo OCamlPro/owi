@@ -258,7 +258,7 @@ module Const_interp = struct
       (* TODO *)
       ok stack
 
-  let exec_expr env (e : Const.expr) : (Env.t' Value.t, string) Result.t =
+  let exec_expr env (e : Const.expr) : Env.t' Value.t Result.t =
     let* stack = list_fold_left (exec_instr env) Stack.empty e in
     match stack with
     | [] -> Error "type mismatch (const expr returning zero values)"
@@ -279,8 +279,8 @@ let load_from_module ls f (import : _ Types.imp) =
       else Error "unknown import"
     | v -> Ok v )
 
-let load_global (ls : state) (import : global_type Types.imp) :
-  (global, string) Result.t =
+let load_global (ls : state) (import : global_type Types.imp) : global Result.t
+    =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
@@ -295,7 +295,7 @@ let load_global (ls : state) (import : global_type Types.imp) :
 
 let eval_global ls env
   (global : (Types.Simplified.global, global_type) Types.runtime) :
-  (global, string) Result.t =
+  global Result.t =
   match global with
   | Types.Local global ->
     let* value = Const_interp.exec_expr env global.init in
@@ -304,7 +304,7 @@ let eval_global ls env
     Ok global
   | Imported import -> load_global ls import
 
-let eval_globals ls env globals : (Env.t, string) Result.t =
+let eval_globals ls env globals : Env.t Result.t =
   Types.Named.fold
     (fun id global env ->
       let* env in
@@ -333,8 +333,7 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : state) (import : limits Types.imp) :
-  (Memory.t, string) Result.t =
+let load_memory (ls : state) (import : limits Types.imp) : Memory.t Result.t =
   let* ({ Memory.limits = imported_limit; _ } as mem) =
     load_from_module ls (fun (e : exports) -> e.memories) import
   in
@@ -343,8 +342,7 @@ let load_memory (ls : state) (import : limits Types.imp) :
     error_s "incompatible import type for memory %s %s expected %a got %a"
       import.modul import.name Pp.limits import.desc Pp.limits imported_limit
 
-let eval_memory ls (memory : (mem, limits) Types.runtime) :
-  (Memory.t, string) Result.t =
+let eval_memory ls (memory : (mem, limits) Types.runtime) : Memory.t Result.t =
   match memory with
   | Local (label, mem_type) -> ok @@ Memory.init ?label mem_type
   | Imported import -> load_memory ls import
@@ -361,8 +359,7 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : state) (import : table_type Types.imp) :
-  (table, string) Result.t =
+let load_table (ls : state) (import : table_type Types.imp) : table Result.t =
   let typ : table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
@@ -370,8 +367,7 @@ let load_table (ls : state) (import : table_type Types.imp) :
     error_s "incompatible import type for table %s %s expected %a got %a"
       import.modul import.name Pp.table_type typ Pp.table_type (t.limits, t.typ)
 
-let eval_table ls (table : (_, table_type) Types.runtime) :
-  (table, string) Result.t =
+let eval_table ls (table : (_, table_type) Types.runtime) : table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Table.init ?label table_type
   | Imported import -> load_table ls import
@@ -393,15 +389,14 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : state) (import : func_type Types.imp) :
-  (func, string) Result.t =
+let load_func (ls : state) (import : func_type Types.imp) : func Result.t =
   let typ : func_type = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' = Value.Func.typ func in
   if func_types_are_compatible typ type' then Ok func
   else Error "incompatible import type (Link.load_func)"
 
-let eval_func ls (finished_env : Env.t') func : (func, string) Result.t =
+let eval_func ls (finished_env : Env.t') func : func Result.t =
   match func with
   | Types.Local func -> ok @@ Value.Func.wasm func finished_env
   | Imported import -> load_func ls import
@@ -494,8 +489,8 @@ let define_elem env elem =
     elem
     (Ok (env, []))
 
-let populate_exports env (exports : Types.Simplified.exports) :
-  (exports, string) Result.t =
+let populate_exports env (exports : Types.Simplified.exports) : exports Result.t
+    =
   let fill_exports get_env exports names =
     list_fold_left
       (fun (acc, names) (export : Types.Simplified.export) ->
@@ -586,8 +581,7 @@ let extern_module (ls : state) ~name (module_ : extern_module) =
   in
   { ls with by_name = StringMap.add name exports ls.by_name }
 
-let register_module (ls : state) ~name ~(id : string option) :
-  (state, string) Result.t =
+let register_module (ls : state) ~name ~(id : string option) : state Result.t =
   let* exports =
     match id with
     | Some id -> begin

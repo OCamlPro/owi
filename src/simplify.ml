@@ -165,9 +165,9 @@ let convert_str : Symbolic.str_type -> str_type = function
 let convert_table_type : Symbolic.table_type -> table_type =
  fun (limits, ref_type) -> (limits, convert_ref_type ref_type)
 
-let group (modul : Symbolic.modul) : (grouped_module, string) Result.t =
+let group (modul : Symbolic.modul) : grouped_module Result.t =
   let add ((fields : grouped_module), curr) field :
-    (grouped_module * curr, string) Result.t =
+    (grouped_module * curr) Result.t =
     match field with
     | Symbolic.MType typ ->
       let typ = typ @ fields.typ in
@@ -303,7 +303,7 @@ type assigned_module =
   }
 
 module Assign_indicies : sig
-  val run : grouped_module -> (assigned_module, string) Result.t
+  val run : grouped_module -> assigned_module Result.t
 end = struct
   type type_acc =
     { declared_types : str_type indexed list
@@ -409,7 +409,7 @@ end = struct
       else Ok ()
     | Some _ -> Error "TODO: Simplify.check_type_id"
 
-  let run (modul : grouped_module) : (assigned_module, string) Result.t =
+  let run (modul : grouped_module) : assigned_module Result.t =
     let typ = assign_types modul in
     let* global =
       name "global"
@@ -454,7 +454,7 @@ end
 
 module Rewrite_indices = struct
   let find msg (named : 'a Named.t) (indice : Symbolic.indice option) :
-    (int, string) Result.t =
+    int Result.t =
     match indice with
     | None -> error_s "%s" msg
     | Some indice -> (
@@ -469,7 +469,7 @@ module Rewrite_indices = struct
         | None -> error_s "%s %s" msg name
         | Some i -> Ok i ) )
 
-  let get msg (named : 'a Named.t) indice : ('a indexed, string) Result.t =
+  let get msg (named : 'a Named.t) indice : 'a indexed Result.t =
     let* i = find msg named indice in
     (* TODO change Named.t structure to make that sensible *)
     match List.nth_opt named.values i with
@@ -477,7 +477,7 @@ module Rewrite_indices = struct
     | Some v -> Ok v
 
   let find_global (modul : assigned_module) ~imported_only id :
-    (int * mut, string) Result.t =
+    (int * mut) Result.t =
     let* idx = find "unknown global" modul.global id in
     let va = List.find (has_index idx) modul.global.values in
     let* mut, _typ =
@@ -493,7 +493,7 @@ module Rewrite_indices = struct
     Ok (idx, mut)
 
   let rewrite_expr (modul : assigned_module) (locals : param list)
-    (iexpr : Symbolic.expr) : (expr, string) Result.t =
+    (iexpr : Symbolic.expr) : expr Result.t =
     (* block_ids handling *)
     let block_id_to_raw (loop_count, block_ids) id =
       let* id =
@@ -519,8 +519,7 @@ module Rewrite_indices = struct
       else Ok id
     in
 
-    let bt_some_to_raw : Symbolic.block_type -> (block_type, string) Result.t =
-      function
+    let bt_some_to_raw : Symbolic.block_type -> block_type Result.t = function
       | Symbolic.Arg.Bt_ind ind -> begin
         match get "unknown type" modul.typ (Some ind) with
         | Ok { value = Def_func_t t'; _ } -> Ok t'
@@ -543,8 +542,7 @@ module Rewrite_indices = struct
           if not ok then Error "inline function type" else Ok t )
     in
 
-    let bt_to_raw :
-      Symbolic.block_type option -> (block_type option, string) Result.t =
+    let bt_to_raw : Symbolic.block_type option -> block_type option Result.t =
       function
       | None -> Ok None
       | Some bt ->
@@ -582,8 +580,8 @@ module Rewrite_indices = struct
     let find_elem id = find "unknown elem segment" modul.elem id in
     let find_type id = find "unknown type" modul.typ id in
 
-    let rec body (loop_count, block_ids) :
-      Symbolic.instr -> (instr, string) Result.t = function
+    let rec body (loop_count, block_ids) : Symbolic.instr -> instr Result.t =
+      function
       | Br_table (ids, id) ->
         let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
         let* ids = array_map block_id_to_raw ids in
@@ -814,15 +812,14 @@ module Rewrite_indices = struct
         as i ->
         Log.debug "TODO (Simplify.body) %a@\n" Symbolic.Pp.instr i;
         Ok Nop
-    and expr (e : Symbolic.expr) (loop_count, block_ids) :
-      (expr, string) Result.t =
+    and expr (e : Symbolic.expr) (loop_count, block_ids) : expr Result.t =
       list_map (fun i -> body (loop_count, block_ids) i) e
     in
     expr iexpr (0, [])
 
   let rewrite_const_expr (modul : assigned_module) (expr : Symbolic.expr) :
-    (Const.expr, string) Result.t =
-    let const_instr (instr : Symbolic.instr) : (Const.instr, string) Result.t =
+    Const.expr Result.t =
+    let const_instr (instr : Symbolic.instr) : Const.instr Result.t =
       let open Const in
       match instr with
       | Symbolic.I32_const v -> ok @@ I32_const v
@@ -854,7 +851,7 @@ module Rewrite_indices = struct
     list_map const_instr expr
 
   let rewrite_block_type (modul : assigned_module)
-    (block_type : Symbolic.block_type) : (block_type, string) Result.t =
+    (block_type : Symbolic.block_type) : block_type Result.t =
     match block_type with
     | Symbolic.Arg.Bt_ind id ->
       let* t =
@@ -867,7 +864,7 @@ module Rewrite_indices = struct
     | Bt_raw (_, func_type) -> Ok (convert_func_type func_type)
 
   let rewrite_global (modul : assigned_module) (global : Symbolic.global) :
-    (global, string) Result.t =
+    global Result.t =
     let* init = rewrite_const_expr modul global.init in
     let mut, val_type = global.typ in
     let typ = (mut, convert_val_type val_type) in
@@ -875,7 +872,7 @@ module Rewrite_indices = struct
     Ok global
 
   let rewrite_elem (modul : assigned_module) (elem : Symbolic.elem) :
-    (elem, string) Result.t =
+    elem Result.t =
     let* (mode : elem_mode) =
       match elem.mode with
       | Elem_declarative -> Ok Elem_declarative
@@ -891,7 +888,7 @@ module Rewrite_indices = struct
     Ok elem
 
   let rewrite_data (modul : assigned_module) (data : Symbolic.data) :
-    (data, string) Result.t =
+    data Result.t =
     let* mode =
       match data.mode with
       | Data_passive -> Ok Data_passive
@@ -905,7 +902,7 @@ module Rewrite_indices = struct
     Ok data
 
   let rewrite_export msg named (exports : opt_export list) :
-    (export list, string) Result.t =
+    export list Result.t =
     list_map
       (fun { name; id } ->
         let* id =
@@ -917,7 +914,7 @@ module Rewrite_indices = struct
       exports
 
   let rewrite_exports (modul : assigned_module) (exports : opt_exports) :
-    (exports, string) Result.t =
+    exports Result.t =
     let* global = rewrite_export "unknown global" modul.global exports.global in
     let* mem = rewrite_export "unknown memory" modul.mem exports.mem in
     let* table = rewrite_export "unknown table" modul.table exports.table in
@@ -926,7 +923,7 @@ module Rewrite_indices = struct
     Ok e
 
   let rewrite_func (modul : assigned_module) (func : Symbolic.func) :
-    (func, string) Result.t =
+    func Result.t =
     let* type_f = rewrite_block_type modul func.type_f in
     let params, _ = type_f in
     let locals = List.map convert_param func.locals in
@@ -934,8 +931,8 @@ module Rewrite_indices = struct
     let func = { body; type_f; id = func.id; locals } in
     Ok func
 
-  let rewrite_import (f : 'a -> ('b, string) Result.t) (import : 'a imp) :
-    ('b imp, string) Result.t =
+  let rewrite_import (f : 'a -> 'b Result.t) (import : 'a imp) : 'b imp Result.t
+      =
     let* desc = f import.desc in
     Ok { import with desc }
 
@@ -958,7 +955,7 @@ module Rewrite_indices = struct
     in
     Ok { named with Named.values }
 
-  let run (modul : assigned_module) : (modul, string) Result.t =
+  let run (modul : assigned_module) : modul Result.t =
     let* (global : (global, global_type) runtime Named.t) =
       let* { Named.named; values } =
         rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
@@ -1008,7 +1005,7 @@ module Rewrite_indices = struct
     Ok modul
 end
 
-let modul (modul : Symbolic.modul) : (modul, string) Result.t =
+let modul (modul : Symbolic.modul) : modul Result.t =
   Log.debug "simplifying  ...@\n";
   let* (group : grouped_module) = group modul in
   let* (assigned : assigned_module) = Assign_indicies.run group in
