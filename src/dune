@@ -1,11 +1,13 @@
 (library
  (public_name owi)
  (modules
+  assigned
   check
   compile
   convert
   float32
   float64
+  grouped
   imported
   indexed
   int32
@@ -20,10 +22,10 @@
   parse
   pp
   result
+  rewrite
   runtime
   script
   simplified
-  simplify
   spectest
   stack
   string_map

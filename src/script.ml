@@ -105,7 +105,7 @@ let value_of_const : Symbolic.const -> 'env Value.t = function
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
-  | Const_null rt -> Value.ref_null (Simplify.convert_heap_type rt)
+  | Const_null rt -> Value.ref_null (Grouped.convert_heap_type rt)
   | Const_extern i -> Ref (Host_externref.value i)
   | i ->
     Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;
@@ -166,14 +166,11 @@ let run ~with_exhaustion ~optimize script =
           match Parse.script_from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module m ] -> (
-            match Check.modul m with
+            match Compile.until_simplify m with
             | Error got -> check_error ~expected ~got
-            | Ok m -> (
-              match Simplify.modul m with
-              | Error got -> check_error ~expected ~got
-              | Ok _m ->
-                let got = "Ok" in
-                check_error ~expected ~got ) )
+            | Ok _m ->
+              let got = "Ok" in
+              check_error ~expected ~got )
           | Ok _ ->
             let got = "expected a single module" in
             check_error ~expected ~got

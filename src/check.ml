@@ -20,6 +20,7 @@ let empty_env () =
   }
 
 let modul m =
+  Log.debug "checking     ...@\n";
   let add_global =
     let seen = Hashtbl.create 512 in
     function

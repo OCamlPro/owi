@@ -2,9 +2,19 @@ let ( let* ) o f = match o with Error msg -> Error msg | Ok v -> f v
 
 let until_check m = Check.modul m
 
-let until_simplify m =
+let until_group m =
   let* m = until_check m in
-  let* m = Simplify.modul m in
+  let* m = Grouped.of_symbolic m in
+  Ok m
+
+let until_assign m =
+  let* m = until_group m in
+  let* m = Assigned.of_grouped m in
+  Ok m
+
+let until_simplify m =
+  let* m = until_assign m in
+  let* m = Rewrite.modul m in
   Ok m
 
 let until_typecheck m =
