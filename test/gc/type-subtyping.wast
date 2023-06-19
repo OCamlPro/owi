@@ -337,7 +337,7 @@
   "sub type"
 )
 
-(assert_invalid 
+(assert_invalid
   (module
     (type $f0 (sub (func (param i32) (result i32))))
     (type $s0 (sub $f0 (struct)))
@@ -361,7 +361,7 @@
   "sub type"
 )
 
-(assert_invalid 
+(assert_invalid
   (module
     (type $s0 (sub (struct)))
     (type $f0 (sub $s0 (func (param i32) (result i32))))
@@ -369,7 +369,7 @@
   "sub type"
 )
 
-(assert_invalid 
+(assert_invalid
   (module
     (type $a0 (sub (array i32)))
     (type $f0 (sub $a0 (func (param i32) (result i32))))
@@ -400,4 +400,3 @@
   )
   "sub type"
 )
-
