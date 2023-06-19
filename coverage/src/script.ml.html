@@ -668,7 +668,7 @@ let compare_result_const result (const : 'env Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     <span data-count="0">f</span>alse
 
-let value_of_const : Types.Symbolic.const -&gt; 'env Value.t = function
+let value_of_const : Symbolic.const -&gt; 'env Value.t = function
   | <span data-count="20548">C</span>onst_I32 v -&gt; I32 v
   | <span data-count="2264">C</span>onst_I64 v -&gt; I64 v
   | <span data-count="23356">C</span>onst_F32 v -&gt; F32 v
@@ -680,7 +680,7 @@ let value_of_const : Types.Symbolic.const -&gt; 'env Value.t = function
     <span data-count="0">I</span>32 (Int32.of_in<span data-count="0">t</span> 666)
 
 let action (link_state : Link.state) = function
-  | <span data-count="48086">T</span>ypes.Symbolic.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="48086">S</span>ymbolic.Invoke (mod_id, f, args) -&gt; begin
     (*
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
@@ -707,7 +707,7 @@ let run ~with_exhaustion ~optimize script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -&gt; function
-      | <span data-count="2596">T</span>ypes.Symbolic.Module m -&gt;
+      | <span data-count="2596">S</span>ymbolic.Module m -&gt;
         if !curr_module = 0 then <span data-count="239">L</span>og.debug_on := false;
         <span data-count="2596">L</span>og.debug "*** module@\n";
         <span data-count="2596">i</span>ncr curr_module;
@@ -782,7 +782,7 @@ let run ~with_exhaustion ~optimize script =
           || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
-            (List.re<span data-count="0">v</span> stack) Types.Symbolic.Pp.results res;
+            (List.re<span data-count="0">v</span> stack) Symbolic.Pp.results res;
           <span data-count="0">E</span>rror "Bad result"
         end
         else <span data-count="43046">O</span>k link_state

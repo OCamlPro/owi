@@ -1441,15 +1441,15 @@ let arraytype _modul _i =
 module Stack : sig
   type t = typ list
 
-  val drop : t -&gt; (t, string) Result.t
+  val drop : t -&gt; t Result.t
 
-  val pop : t -&gt; t -&gt; (t, string) Result.t
+  val pop : t -&gt; t -&gt; t Result.t
 
-  val push : t -&gt; t -&gt; (t, string) Result.t
+  val push : t -&gt; t -&gt; t Result.t
 
-  val pop_push : Types.Simplified.block_type option -&gt; t -&gt; (t, string) Result.t
+  val pop_push : Types.Simplified.block_type option -&gt; t -&gt; t Result.t
 
-  val pop_ref : t -&gt; (t, string) Result.t
+  val pop_ref : t -&gt; t Result.t
 
   val equal : t -&gt; t -&gt; bool
 
@@ -1557,7 +1557,7 @@ end = struct
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
-  (stack, string) Result.t =
+  stack Result.t =
   <span data-count="54638">m</span>atch instr with
   | <span data-count="588">N</span>op -&gt; Ok stack
   | <span data-count="1032">D</span>rop -&gt; Stack.drop stack
@@ -1810,7 +1810,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     <span data-count="0">O</span>k stack
 
 and typecheck_expr env expr ~is_loop (block_type : func_type option)
-  ~stack:previous_stack : (stack, string) Result.t =
+  ~stack:previous_stack : stack Result.t =
   <span data-count="16318">l</span>et pt, rt =
     Option.fold ~none:([], [])
       ~some:(fun (pt, rt) -&gt;
