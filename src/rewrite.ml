@@ -35,7 +35,7 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
       if imported_only then Error "unknown global"
       else
         let mut, val_type = global.typ in
-        let val_type = Grouped.convert_val_type val_type in
+        let val_type = Simplified_types.convert_val_type None val_type in
         Ok (mut, val_type)
   in
   Ok (idx, mut)
@@ -75,7 +75,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
     end
     | Bt_raw (type_use, t) -> (
-      let t = Grouped.convert_func_type t in
+      let t = Simplified_types.convert_func_type None t in
       match type_use with
       | None -> Ok t
       | Some ind ->
@@ -86,7 +86,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
           | Error _ as e -> e
           | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
         in
-        let ok = Assigned.equal_func_types t t' in
+        let ok = Simplified_types.equal_func_types t t' in
         if not ok then Error "inline function type" else Ok t )
   in
 
@@ -304,7 +304,8 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | Select typ -> begin
       match typ with
       | None -> ok @@ Select None
-      | Some [ t ] -> ok @@ Select (Some [ Grouped.convert_val_type t ])
+      | Some [ t ] ->
+        ok @@ Select (Some [ Simplified_types.convert_val_type None t ])
       | Some [] | Some (_ :: _ :: _) -> Error "invalid result arity"
     end
     | Array_new_default id ->
@@ -323,7 +324,8 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | F_unop (nn, o) -> ok @@ F_unop (nn, o)
     | F_relop (nn, o) -> ok @@ F_relop (nn, o)
     | I32_wrap_i64 -> ok @@ I32_wrap_i64
-    | Ref_null heap_type -> ok @@ Ref_null (Grouped.convert_heap_type heap_type)
+    | Ref_null heap_type ->
+      ok @@ Ref_null (Simplified_types.convert_heap_type None heap_type)
     | F_reinterpret_i (nn, nn') -> ok @@ F_reinterpret_i (nn, nn')
     | I_reinterpret_f (nn, nn') -> ok @@ I_reinterpret_f (nn, nn')
     | I64_extend_i32 sx -> ok @@ I64_extend_i32 sx
@@ -374,7 +376,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
     | I64_const v -> ok @@ I64_const v
     | F32_const v -> ok @@ F32_const v
     | F64_const v -> ok @@ F64_const v
-    | Ref_null v -> ok @@ Ref_null (Grouped.convert_heap_type v)
+    | Ref_null v -> ok @@ Ref_null (Simplified_types.convert_heap_type None v)
     | Ref_func f ->
       let* f = find "unknown function" modul.func (Some f) in
       ok @@ Ref_func f
@@ -409,13 +411,14 @@ let rewrite_block_type (modul : Assigned.t) (block_type : Symbolic.block_type) :
       | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
     in
     Ok t
-  | Bt_raw (_, func_type) -> Ok (Grouped.convert_func_type func_type)
+  | Bt_raw (_, func_type) ->
+    Ok (Simplified_types.convert_func_type None func_type)
 
 let rewrite_global (modul : Assigned.t) (global : Symbolic.global) :
   global Result.t =
   let* init = rewrite_const_expr modul global.init in
   let mut, val_type = global.typ in
-  let typ = (mut, Grouped.convert_val_type val_type) in
+  let typ = (mut, Simplified_types.convert_val_type None val_type) in
   let global = { id = global.id; init; typ } in
   Ok global
 
@@ -430,7 +433,7 @@ let rewrite_elem (modul : Assigned.t) (elem : Symbolic.elem) : elem Result.t =
       ok @@ Elem_active (Some indice, expr)
   in
   let* init = list_map (rewrite_const_expr modul) elem.init in
-  let typ = Grouped.convert_ref_type elem.typ in
+  let typ = Simplified_types.convert_ref_type None elem.typ in
   let elem = { init; mode; id = elem.id; typ } in
   Ok elem
 
@@ -469,7 +472,7 @@ let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
 let rewrite_func (modul : Assigned.t) (func : Symbolic.func) : func Result.t =
   let* type_f = rewrite_block_type modul func.type_f in
   let params, _ = type_f in
-  let locals = List.map Grouped.convert_param func.locals in
+  let locals = List.map (Simplified_types.convert_param None) func.locals in
   let* body = rewrite_expr modul (params @ locals) func.body in
   let func = { body; type_f; id = func.id; locals } in
   Ok func

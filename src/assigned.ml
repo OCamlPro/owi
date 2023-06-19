@@ -45,7 +45,7 @@ let assign_types (modul : Grouped.t) : str_type Named.t =
     let last_assigned_int, declared_types, named_types, all_types =
       match sub_type with
       | _final, _indices, str_type ->
-        let str_type = Grouped.convert_str str_type in
+        let str_type = Simplified_types.convert_str None str_type in
         let id = last_assigned_int in
         let last_assigned_int = succ last_assigned_int in
         let declared_types =
@@ -76,7 +76,7 @@ let assign_types (modul : Grouped.t) : str_type Named.t =
   let assign_heap_type
     ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
     typ =
-    let typ = Def_func_t (Grouped.convert_func_type typ) in
+    let typ = Def_func_t (Simplified_types.convert_func_type None typ) in
     match TypeMap.find_opt typ all_types with
     | Some _id -> acc
     | None ->
@@ -128,7 +128,7 @@ let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
   match List.find_opt (fun v -> v.Indexed.index = id) types.values with
   | None -> Error "unknown type"
   | Some { value = Def_func_t func_type'; _ } ->
-    let func_type = Grouped.convert_func_type func_type in
+    let func_type = Simplified_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then
       Error "inline function type"
     else Ok ()

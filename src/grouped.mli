@@ -35,16 +35,4 @@ type t =
   ; start : Symbolic.indice option
   }
 
-val convert_param : Symbolic.param -> Simplified.param
-
-val convert_ref_type : Symbolic.ref_type -> Simplified.ref_type
-
-val convert_val_type : Symbolic.val_type -> Simplified.val_type
-
-val convert_func_type : Symbolic.func_type -> Simplified.func_type
-
-val convert_str : Symbolic.str_type -> Simplified.str_type
-
-val convert_heap_type : Symbolic.heap_type -> Simplified.heap_type
-
 val of_symbolic : Symbolic.modul -> t Result.t

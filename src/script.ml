@@ -105,7 +105,7 @@ let value_of_const : Symbolic.const -> 'env Value.t = function
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v
-  | Const_null rt -> Value.ref_null (Grouped.convert_heap_type rt)
+  | Const_null rt -> Value.ref_null (Simplified_types.convert_heap_type None rt)
   | Const_extern i -> Ref (Host_externref.value i)
   | i ->
     Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;

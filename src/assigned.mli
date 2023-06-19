@@ -12,5 +12,3 @@ type t =
   }
 
 val of_grouped : Grouped.t -> t Result.t
-
-val equal_func_types : Simplified.func_type -> Simplified.func_type -> bool

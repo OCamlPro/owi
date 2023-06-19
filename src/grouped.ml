@@ -108,63 +108,6 @@ let check_limit { min; max } =
     if min > max then Error "size minimum must not be greater than maximum"
     else Ok ()
 
-let convert_heap_type : Symbolic.heap_type -> heap_type = function
-  | Symbolic.Any_ht -> Any_ht
-  | None_ht -> None_ht
-  | Eq_ht -> Eq_ht
-  | I31_ht -> I31_ht
-  | Struct_ht -> Struct_ht
-  | Array_ht -> Array_ht
-  | Func_ht -> Func_ht
-  | No_func_ht -> No_func_ht
-  | Extern_ht -> Extern_ht
-  | No_extern_ht -> No_extern_ht
-  | Def_ht (Raw i) -> Def_ht i
-  | Def_ht (Symbolic _i) ->
-    (* TODO *)
-    let i = 42 in
-    Def_ht i
-
-let convert_ref_type : Symbolic.ref_type -> ref_type =
- fun (null, heap_type) -> (null, convert_heap_type heap_type)
-
-let convert_val_type : Symbolic.val_type -> val_type = function
-  | Symbolic.Num_type t -> Num_type t
-  | Ref_type rt -> Ref_type (convert_ref_type rt)
-
-let convert_param : Symbolic.param -> param =
- fun (n, t) -> (n, convert_val_type t)
-
-let convert_pt : Symbolic.param_type -> param_type =
- fun l -> List.map convert_param l
-
-let convert_rt : Symbolic.result_type -> result_type =
- fun l -> List.map convert_val_type l
-
-let convert_func_type : Symbolic.func_type -> func_type =
- fun (pt, rt) -> (convert_pt pt, convert_rt rt)
-
-let convert_storage_type : Symbolic.storage_type -> storage_type = function
-  | Val_storage_t val_type -> Val_storage_t (convert_val_type val_type)
-  | Val_packed_t packed_type -> Val_packed_t packed_type
-
-let convert_field_type : Symbolic.field_type -> field_type =
- fun (mut, storage_type) -> (mut, convert_storage_type storage_type)
-
-let convert_struct_field : Symbolic.struct_field -> struct_field =
- fun (id, types) -> (id, List.map convert_field_type types)
-
-let convert_struct_type : Symbolic.struct_type -> struct_type =
- fun fields -> List.map convert_struct_field fields
-
-let convert_str : Symbolic.str_type -> str_type = function
-  | Def_func_t func_t -> Def_func_t (convert_func_type func_t)
-  | Def_array_t field_t -> Def_array_t (convert_field_type field_t)
-  | Def_struct_t struct_t -> Def_struct_t (convert_struct_type struct_t)
-
-let convert_table_type : Symbolic.table_type -> table_type =
- fun (limits, ref_type) -> (limits, convert_ref_type ref_type)
-
 let of_symbolic (modul : Symbolic.modul) : t Result.t =
   Log.debug "grouping     ...@\n";
   let add ((fields : t), curr) field : (t * curr) Result.t =
@@ -174,7 +117,7 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
       ok @@ ({ fields with typ }, curr)
     | MGlobal global -> ok @@ add_global (Local global) fields curr
     | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
-      let b = (mut, convert_val_type val_type) in
+      let b = (mut, Simplified_types.convert_val_type None val_type) in
       let imported = imp import (a, b) in
       ok @@ add_global (Imported imported) fields curr
     | MExport { name; desc = Export_global id } ->
@@ -187,10 +130,10 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
       let _, (limits, _) = table in
       let* () = check_limit limits in
       let id, table_type = table in
-      let table = (id, convert_table_type table_type) in
+      let table = (id, Simplified_types.convert_table_type None table_type) in
       ok @@ add_table (Local table) fields curr
     | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
-      let table_type = convert_table_type table_type in
+      let table_type = Simplified_types.convert_table_type None table_type in
       let imported = imp import (id, table_type) in
       ok @@ add_table (Imported imported) fields curr
     | MExport { name; desc = Export_table id } ->

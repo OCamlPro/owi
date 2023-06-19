@@ -30,6 +30,7 @@
   runtime
   script
   simplified
+  simplified_types
   spectest
   stack
   string_map
