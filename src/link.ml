@@ -4,15 +4,6 @@ open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
-module Global = struct
-  type 'env t =
-    { mutable value : 'env Value.t
-    ; label : string option
-    ; mut : mut
-    ; typ : val_type
-    }
-end
-
 (* TODO efficient imap for contiguous index (array) *)
 module IMap = Map.Make (Int)
 
