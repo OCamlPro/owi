@@ -1,6 +1,7 @@
 open Crowbar
+open Crowbar.Syntax
 open Owi.Types.Symbolic
-open Syntax
+
 module S = Type_stack
 module B = Basic
 
