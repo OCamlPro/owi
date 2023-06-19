@@ -18,18 +18,18 @@
       <h2>5.88%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.12%"></span>
-      <span class="unvisited" style="bottom:25.25%"></span>
-      <span class="unvisited" style="bottom:22.22%"></span>
-      <span class="unvisited" style="bottom:21.21%"></span>
-      <span class="unvisited" style="bottom:20.20%"></span>
-      <span class="unvisited" style="bottom:17.17%"></span>
-      <span class="unvisited" style="bottom:16.16%"></span>
-      <span class="unvisited" style="bottom:13.13%"></span>
-      <span class="unvisited" style="bottom:10.10%"></span>
-      <span class="unvisited" style="bottom:7.07%"></span>
-      <span class="unvisited" style="bottom:6.06%"></span>
-      <span class="unvisited" style="bottom:3.03%"></span>
+      <span class="unvisited" style="top:11.34%"></span>
+      <span class="unvisited" style="bottom:24.74%"></span>
+      <span class="unvisited" style="bottom:21.65%"></span>
+      <span class="unvisited" style="bottom:20.62%"></span>
+      <span class="unvisited" style="bottom:19.59%"></span>
+      <span class="unvisited" style="bottom:16.49%"></span>
+      <span class="unvisited" style="bottom:15.46%"></span>
+      <span class="unvisited" style="bottom:12.37%"></span>
+      <span class="unvisited" style="bottom:9.28%"></span>
+      <span class="unvisited" style="bottom:6.19%"></span>
+      <span class="unvisited" style="bottom:5.15%"></span>
+      <span class="unvisited" style="bottom:2.06%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -39,13 +39,13 @@
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
-<a id="L6"></a><span > </span>
-<a id="L7"></a><span class="visited"> </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="unvisited"> </span>
+<a id="L11"></a><span class="unvisited"> </span>
+<a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
@@ -106,33 +106,31 @@
 <a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
-<a id="L73"></a><span > </span>
-<a id="L74"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="unvisited"> </span>
+<a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span > </span>
+<a id="L76"></a><span class="unvisited"> </span>
 <a id="L77"></a><span class="unvisited"> </span>
 <a id="L78"></a><span class="unvisited"> </span>
-<a id="L79"></a><span class="unvisited"> </span>
+<a id="L79"></a><span > </span>
 <a id="L80"></a><span > </span>
-<a id="L81"></a><span > </span>
+<a id="L81"></a><span class="unvisited"> </span>
 <a id="L82"></a><span class="unvisited"> </span>
-<a id="L83"></a><span class="unvisited"> </span>
+<a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
-<a id="L85"></a><span > </span>
-<a id="L86"></a><span class="unvisited"> </span>
+<a id="L85"></a><span class="unvisited"> </span>
+<a id="L86"></a><span > </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span > </span>
-<a id="L89"></a><span class="unvisited"> </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span > </span>
 <a id="L90"></a><span > </span>
-<a id="L91"></a><span > </span>
+<a id="L91"></a><span class="unvisited"> </span>
 <a id="L92"></a><span class="unvisited"> </span>
-<a id="L93"></a><span class="unvisited"> </span>
+<a id="L93"></a><span > </span>
 <a id="L94"></a><span > </span>
-<a id="L95"></a><span > </span>
-<a id="L96"></a><span class="unvisited"> </span>
+<a id="L95"></a><span class="unvisited"> </span>
+<a id="L96"></a><span > </span>
 <a id="L97"></a><span > </span>
-<a id="L98"></a><span > </span>
-<a id="L99"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -234,107 +232,103 @@
 <a href="#L95">95</a>
 <a href="#L96">96</a>
 <a href="#L97">97</a>
-<a href="#L98">98</a>
-<a href="#L99">99</a>
 </pre>
 <pre><code class="ocaml">open Types
 
-include struct
-  module Arg = struct
-    type indice = int
+module Arg = struct
+  type indice = int
 
-    let pp_indice fmt u = <span data-count="2">F</span>ormat.pp_print_int fmt u
+  let pp_indice fmt u = <span data-count="2">F</span>ormat.pp_print_int fmt u
 
-    type ('pt, 'rt) block_type = 'pt * 'rt
+  type ('pt, 'rt) block_type = 'pt * 'rt
 
-    let pp_block_type pp_param_type pp_result_type fmt (pt, rt) =
-      <span data-count="0">F</span>ormat.fprintf fmt "%a %a" pp_param_type pt pp_result_type rt
-  end
+  let pp_block_type pp_param_type pp_result_type fmt (pt, rt) =
+    <span data-count="0">F</span>ormat.fprintf fmt "%a %a" pp_param_type pt pp_result_type rt
+end
 
-  include Make (Arg)
+include Make (Arg)
 
-  (** named export *)
-  type export =
-    { name : string
-    ; id : int
-    }
+(** named export *)
+type export =
+  { name : string
+  ; id : int
+  }
 
-  (** named exports of a module *)
-  type exports =
-    { global : export list
-    ; mem : export list
-    ; table : export list
-    ; func : export list
-    }
+(** named exports of a module *)
+type exports =
+  { global : export list
+  ; mem : export list
+  ; table : export list
+  ; func : export list
+  }
 
-  type global =
-    { typ : global_type
-    ; init : Const.expr
-    ; id : string option
-    }
+type global =
+  { typ : global_type
+  ; init : Const.expr
+  ; id : string option
+  }
 
-  type data_mode =
-    | Data_passive
-    | Data_active of indice option * Const.expr
+type data_mode =
+  | Data_passive
+  | Data_active of indice option * Const.expr
 
-  type data =
-    { id : string option
-    ; init : string
-    ; mode : data_mode
-    }
+type data =
+  { id : string option
+  ; init : string
+  ; mode : data_mode
+  }
 
-  type elem_mode =
-    | Elem_passive
-    | Elem_active of indice option * Const.expr
-    | Elem_declarative
+type elem_mode =
+  | Elem_passive
+  | Elem_active of indice option * Const.expr
+  | Elem_declarative
 
-  type elem =
-    { id : string option
-    ; typ : ref_type
-    ; init : Const.expr list
-    ; mode : elem_mode
-    }
+type elem =
+  { id : string option
+  ; typ : ref_type
+  ; init : Const.expr list
+  ; mode : elem_mode
+  }
 
-  type modul =
-    { id : string option
-    ; global : (global, global_type) Runtime.t Named.t
-    ; table : (table, table_type) Runtime.t Named.t
-    ; mem : (mem, limits) Runtime.t Named.t
-    ; func : (func, func_type) Runtime.t Named.t
-    ; elem : elem Named.t
-    ; data : data Named.t
-    ; exports : exports
-    ; start : int option
-    }
+type modul =
+  { id : string option
+  ; global : (global, global_type) Runtime.t Named.t
+  ; table : (table, table_type) Runtime.t Named.t
+  ; mem : (mem, limits) Runtime.t Named.t
+  ; func : (func, func_type) Runtime.t Named.t
+  ; elem : elem Named.t
+  ; data : data Named.t
+  ; exports : exports
+  ; start : int option
+  }
 
-  module Pp = struct
-    include Pp
+module Pp = struct
+  include Pp
 
-    let id fmt = <span data-count="0">O</span>ption.iter (fun id -&gt; <span data-count="0">F</span>ormat.fprintf fmt " $%s" id)
+  let id fmt = <span data-count="0">O</span>ption.iter (fun id -&gt; <span data-count="0">F</span>ormat.fprintf fmt " $%s" id)
 
-    let func fmt (f : (func, _) Runtime.t) =
-      <span data-count="0">m</span>atch f with
-      | <span data-count="0">L</span>ocal f -&gt; Format.fprintf fmt "%a" func f
-      | <span data-count="0">I</span>mported { modul; name; _ } -&gt; Format.fprintf fmt "%s.%s" modul name
+  let func fmt (f : (func, _) Runtime.t) =
+    <span data-count="0">m</span>atch f with
+    | <span data-count="0">L</span>ocal f -&gt; Format.fprintf fmt "%a" func f
+    | <span data-count="0">I</span>mported { modul; name; _ } -&gt; Format.fprintf fmt "%s.%s" modul name
 
-    let lst f fmt l =
-      <span data-count="0">(</span>Format.pp_print_lis<span data-count="0">t</span> ~pp_sep:(fun fmt () -&gt; <span data-count="0">F</span>ormat.fprintf fmt "@\n") f)
-        fmt (List.re<span data-count="0">v</span> l)
+  let lst f fmt l =
+    <span data-count="0">(</span>Format.pp_print_lis<span data-count="0">t</span> ~pp_sep:(fun fmt () -&gt; <span data-count="0">F</span>ormat.fprintf fmt "@\n") f)
+      fmt (List.re<span data-count="0">v</span> l)
 
-    let funcs fmt (funcs : _ Runtime.t Named.t) =
-      <span data-count="0">l</span>st (Indexed.p<span data-count="0">p</span> func) fmt funcs.values
+  let funcs fmt (funcs : _ Runtime.t Named.t) =
+    <span data-count="0">l</span>st (Indexed.p<span data-count="0">p</span> func) fmt funcs.values
 
-    let export fmt (export : export) =
-      <span data-count="0">F</span>ormat.fprintf fmt "%s: %a" export.name indice export.id
+  let export fmt (export : export) =
+    <span data-count="0">F</span>ormat.fprintf fmt "%s: %a" export.name indice export.id
 
-    let start fmt = function
-      | <span data-count="0">N</span>one -&gt; ()
-      | <span data-count="0">S</span>ome ind -&gt; Format.fprintf fmt "(start %a)" indice ind
+  let start fmt = function
+    | <span data-count="0">N</span>one -&gt; ()
+    | <span data-count="0">S</span>ome ind -&gt; Format.fprintf fmt "(start %a)" indice ind
 
-    let modul fmt (m : modul) : unit =
-      <span data-count="0">F</span>ormat.fprintf fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func
-        start m.start
-  end
+  let modul fmt (m : modul) : unit =
+    <span data-count="0">F</span>ormat.fprintf fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func
+      start m.start
 end
 </code></pre>
       </div>

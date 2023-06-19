@@ -39,15 +39,25 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -78,14 +88,34 @@
 <a href="#L24">24</a>
 <a href="#L25">25</a>
 <a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="39774">m</span>atch o with <span data-count="9226">E</span>rror msg -&gt; Error msg | <span data-count="30548">O</span>k v -&gt; f v
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="63570">m</span>atch o with <span data-count="9520">E</span>rror msg -&gt; Error msg | <span data-count="54050">O</span>k v -&gt; f v
 
-let until_check m = <span data-count="5829">C</span>heck.modul m
+let until_check m = <span data-count="5947">C</span>heck.modul m
+
+let until_group m =
+  <span data-count="5947">l</span>et* m = until_chec<span data-count="5947">k</span> m in
+  <span data-count="5885">l</span>et* m = Grouped.of_symboli<span data-count="5885">c</span> m in
+  <span data-count="5867">O</span>k m
+
+let until_assign m =
+  <span data-count="5947">l</span>et* m = until_grou<span data-count="5947">p</span> m in
+  <span data-count="5867">l</span>et* m = Assigned.of_groupe<span data-count="5867">d</span> m in
+  <span data-count="5851">O</span>k m
 
 let until_simplify m =
-  <span data-count="5829">l</span>et* m = until_chec<span data-count="5829">k</span> m in
-  <span data-count="5819">l</span>et* m = Simplify.modu<span data-count="5819">l</span> m in
+  <span data-count="5947">l</span>et* m = until_assig<span data-count="5947">n</span> m in
+  <span data-count="5851">l</span>et* m = Rewrite.modu<span data-count="5851">l</span> m in
   <span data-count="5447">O</span>k m
 
 let until_typecheck m =
