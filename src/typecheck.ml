@@ -110,7 +110,33 @@ let arraytype _modul _i =
   (* TODO *)
   f32
 
-module Stack = struct
+module Stack : sig
+  type t = typ list
+
+  val drop : t -> (t, string) Result.t
+
+  val pop : t -> t -> (t, string) Result.t
+
+  val push : t -> t -> (t, string) Result.t
+
+  val pop_push : Types.Simplified.block_type option -> t -> (t, string) Result.t
+
+  val pop_ref : t -> (t, string) Result.t
+
+  val equal : t -> t -> bool
+
+  val match_ref_type : heap_type -> heap_type -> bool
+
+  val match_types : typ -> typ -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val pp_error : Format.formatter -> t * t -> unit
+
+  val match_prefix : prefix:t -> stack:t -> t option
+end = struct
+  type t = typ list
+
   let pp fmt (s : stack) = Format.fprintf fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
@@ -258,10 +284,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
     let* stack = Stack.pop [ i32 ] stack in
+    let stack = List.rev stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
-    let* stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
-    if not (Stack.equal stack_e1 stack_e2) then Error "type mismatch (if else)"
-    else Ok stack_e1
+    let* _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
+    Ok stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
