@@ -2,31 +2,7 @@
     along with a link state. *)
 
 (** runtime env *)
-module Env : sig
-  type t
-
-  type t' = t Lazy.t
-
-  type 'env elem = { mutable value : 'env Value.ref_value array }
-
-  type data = { mutable value : string }
-
-  val get_memory : t -> int -> Memory.t Result.t
-
-  val get_func : t -> int -> t' Value.Func.t Result.t
-
-  val get_table : t -> int -> t' Table.t Result.t
-
-  val get_elem : t -> int -> t' elem Result.t
-
-  val get_data : t -> int -> data Result.t
-
-  val get_global : t -> int -> t' Global.t Result.t
-
-  val drop_elem : 'a elem -> unit
-
-  val drop_data : data -> unit
-end
+module Env = Link_env
 
 (** runnable module *)
 type module_to_run =

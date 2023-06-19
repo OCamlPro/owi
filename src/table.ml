@@ -1,5 +1,5 @@
 open Types
-open Types.Simplified
+open Simplified
 
 (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
 type 'env table = 'env Value.ref_value array
