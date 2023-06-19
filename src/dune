@@ -15,6 +15,7 @@
   interpret
   lexer
   memory
+  table
   link
   log
   menhir_parser

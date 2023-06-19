@@ -1,21 +1,6 @@
 (** Module to link a simplified/extern module and producing a runnable module
     along with a link state. *)
 
-(** runtime table *)
-module Table : sig
-  type 'env table = 'env Value.ref_value array
-
-  type 'env t =
-    { id : int
-    ; label : string option
-    ; limits : Types.limits
-    ; typ : Simplified.ref_type
-    ; mutable data : 'env table
-    }
-
-  val update : 'a t -> 'a table -> unit
-end
-
 (** runtime global *)
 module Global : sig
   type 'env t =

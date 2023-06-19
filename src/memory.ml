@@ -1,6 +1,4 @@
 open Types
-module StringMap = Map.Make (String)
-module StringSet = Set.Make (String)
 
 let page_size = 65_536
 
