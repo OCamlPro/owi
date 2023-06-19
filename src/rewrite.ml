@@ -355,12 +355,27 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | Extern_externalize -> Ok Extern_externalize
     | Extern_internalize -> Ok Extern_internalize
     | Ref_eq -> Ok Ref_eq
+    | Br_on_cast (i, null, ht) ->
+      let* i = find_type (Some i) in
+      let ht = Simplified_types.convert_heap_type None ht in
+      ok @@ Br_on_cast (i, null, ht)
+    | Br_on_cast_fail (i, null, ht) ->
+      let* i = find_type (Some i) in
+      let ht = Simplified_types.convert_heap_type None ht in
+      ok @@ Br_on_cast_fail (i, null, ht)
+    | Struct_new_default i ->
+      let* i = find_type (Some i) in
+      ok @@ Struct_new_default i
+    | Ref_cast (null, ht) ->
+      let ht = Simplified_types.convert_heap_type None ht in
+      ok @@ Ref_cast (null, ht)
+    | Ref_test (null, ht) ->
+      let ht = Simplified_types.convert_heap_type None ht in
+      ok @@ Ref_test (null, ht)
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
-      | Struct_new _ | Struct_new_default _ | Ref_cast _ | Ref_test _
-      | Br_on_non_null _ | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ ) as
-      i ->
-      Log.debug "TODO (Simplify.body) %a@\n" Symbolic.Pp.instr i;
+      | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
+      Log.debug "TODO (Rewrite.body) %a@\n" Symbolic.Pp.instr i;
       Ok Nop
   and expr (e : Symbolic.expr) (loop_count, block_ids) : expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
