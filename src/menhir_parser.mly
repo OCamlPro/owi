@@ -27,7 +27,7 @@
 %{
 
 open Types
-open Types.Symbolic
+open Symbolic
 
 let failwith msg = raise @@ Parse_fail msg
 
@@ -56,8 +56,8 @@ let f32 s =
 module Owi = struct end
 %}
 
-%start <Types.Symbolic.script> script
-%start <Types.Symbolic.modul> modul
+%start <Symbolic.script> script
+%start <Symbolic.modul> modul
 
 %%
 

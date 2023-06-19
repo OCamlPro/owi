@@ -3,4 +3,4 @@
 val extern_m : Link.extern_module
 
 (** the spectest module *)
-val m : Types.Symbolic.cmd
+val m : Symbolic.cmd

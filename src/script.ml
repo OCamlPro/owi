@@ -100,7 +100,7 @@ let compare_result_const result (const : 'env Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Types.Symbolic.const -> 'env Value.t = function
+let value_of_const : Symbolic.const -> 'env Value.t = function
   | Const_I32 v -> I32 v
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
@@ -112,7 +112,7 @@ let value_of_const : Types.Symbolic.const -> 'env Value.t = function
     I32 (Int32.of_int 666)
 
 let action (link_state : Link.state) = function
-  | Types.Symbolic.Invoke (mod_id, f, args) -> begin
+  | Symbolic.Invoke (mod_id, f, args) -> begin
     (*
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
@@ -139,7 +139,7 @@ let run ~with_exhaustion ~optimize script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -> function
-      | Types.Symbolic.Module m ->
+      | Symbolic.Module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
@@ -214,7 +214,7 @@ let run ~with_exhaustion ~optimize script =
           || not (List.for_all2 compare_result_const res (List.rev stack))
         then begin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
-            (List.rev stack) Types.Symbolic.Pp.results res;
+            (List.rev stack) Symbolic.Pp.results res;
           Error "Bad result"
         end
         else Ok link_state

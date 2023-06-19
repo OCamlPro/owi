@@ -21,6 +21,7 @@
   simplify
   spectest
   stack
+  symbolic
   syntax
   typecheck
   types

@@ -1,4 +1,4 @@
-open Types.Symbolic
+open Symbolic
 
 let extern_m : Link.extern_module =
   let fmt = Format.std_formatter in

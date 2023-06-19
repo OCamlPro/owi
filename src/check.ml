@@ -1,4 +1,4 @@
-open Types.Symbolic
+open Symbolic
 open Syntax
 
 type env =
