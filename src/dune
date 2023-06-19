@@ -6,6 +6,8 @@
   convert
   float32
   float64
+  imported
+  indexed
   int32
   int64
   interpret
@@ -13,15 +15,18 @@
   link
   log
   menhir_parser
+  named
   optimize
   parse
   pp
   result
+  runtime
   script
   simplified
   simplify
   spectest
   stack
+  string_map
   symbolic
   syntax
   typecheck

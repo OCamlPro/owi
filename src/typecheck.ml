@@ -31,18 +31,14 @@ module Index = struct
   include M
 end
 
-let get_value_at_indice i values =
-  match List.find (fun { index; _ } -> index = i) values with
-  | { value; _ } -> value
-
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals : (global, global_type) runtime Named.t
+    ; globals : (global, global_type) Runtime.t Named.t
     ; result_type : result_type
-    ; funcs : (func, block_type) runtime Named.t
+    ; funcs : (func, block_type) Runtime.t Named.t
     ; blocks : typ list list
-    ; tables : (table, table_type) runtime Named.t
+    ; tables : (table, table_type) Runtime.t Named.t
     ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
@@ -50,28 +46,34 @@ module Env = struct
   let local_get i env = match Index.Map.find i env.locals with v -> v
 
   let global_get i env =
-    let value = get_value_at_indice i env.globals.values in
+    let value = Indexed.get_at i env.globals.values in
     let _mut, typ =
-      match value with Local { typ; _ } -> typ | Imported t -> t.desc
+      match value with Local { typ; _ } -> typ | Runtime.Imported t -> t.desc
     in
     typ
 
   let func_get i env =
-    let value = get_value_at_indice i env.funcs.values in
-    match value with Local { type_f; _ } -> type_f | Imported t -> t.desc
+    let value = Indexed.get_at i env.funcs.values in
+    match value with
+    | Local { type_f; _ } -> type_f
+    | Runtime.Imported t -> t.desc
 
   let block_type_get i env = List.nth env.blocks i
 
   let table_type_get_from_module i (modul : Simplified.modul) =
-    let value = get_value_at_indice i modul.table.values in
-    match value with Local table -> snd (snd table) | Imported t -> snd t.desc
+    let value = Indexed.get_at i modul.table.values in
+    match value with
+    | Local table -> snd (snd table)
+    | Runtime.Imported t -> snd t.desc
 
   let table_type_get i env =
-    let value = get_value_at_indice i env.tables.values in
-    match value with Local table -> snd (snd table) | Imported t -> snd t.desc
+    let value = Indexed.get_at i env.tables.values in
+    match value with
+    | Local table -> snd (snd table)
+    | Runtime.Imported t -> snd t.desc
 
   let elem_type_get i env =
-    let value = get_value_at_indice i env.elems.values in
+    let value = Indexed.get_at i env.elems.values in
     value.typ
 
   let make ~params ~locals ~globals ~funcs ~result_type ~tables ~elems ~refs =
@@ -501,7 +503,7 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
 
 let typecheck_function (modul : modul) func refs =
   match func with
-  | Imported _ -> Ok ()
+  | Runtime.Imported _ -> Ok ()
   | Local func ->
     let params, result = func.type_f in
     let env =
@@ -527,7 +529,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
   | Global_get i ->
-    let value = get_value_at_indice i modul.global.values in
+    let value = Indexed.get_at i modul.global.values in
     let* _mut, typ =
       match value with
       | Local _ -> Error "unknown global"
@@ -551,7 +553,7 @@ let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []
 
 let typecheck_global (modul : modul) refs
-  (global : (global, global_type) runtime indexed) =
+  (global : (global, global_type) Runtime.t Indexed.t) =
   match global.value with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -566,7 +568,7 @@ let typecheck_global (modul : modul) refs
       else Ok ()
     | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 
-let typecheck_elem modul refs (elem : elem indexed) =
+let typecheck_elem modul refs (elem : elem Indexed.t) =
   let _null, expected_type = elem.value.typ in
   let* () =
     list_iter
@@ -594,7 +596,7 @@ let typecheck_elem modul refs (elem : elem indexed) =
       | [ _t ] -> Ok ()
       | _whatever -> Error "type mismatch (typecheck_elem)" )
 
-let typecheck_data modul refs (data : data indexed) =
+let typecheck_data modul refs (data : data Indexed.t) =
   match data.value.mode with
   | Data_passive -> Ok ()
   | Data_active (_i, e) -> (

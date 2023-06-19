@@ -32,17 +32,17 @@ type grouped_module =
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Symbolic.global, global_type) runtime indexed list
-  ; table : (table, table_type) runtime indexed list
-  ; mem : (mem, limits) runtime indexed list
-  ; func : (Symbolic.func, Symbolic.block_type) runtime indexed list
-  ; elem : Symbolic.elem indexed list
-  ; data : Symbolic.data indexed list
+  ; global : (Symbolic.global, global_type) Runtime.t Indexed.t list
+  ; table : (table, table_type) Runtime.t Indexed.t list
+  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Indexed.t list
+  ; elem : Symbolic.elem Indexed.t list
+  ; data : Symbolic.data Indexed.t list
   ; exports : opt_exports
   ; start : Symbolic.indice option
   }
 
-let imp (import : Symbolic.import) (assigned_name, desc) : 'a imp =
+let imp (import : Symbolic.import) (assigned_name, desc) : 'a Imported.t =
   { modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
@@ -235,7 +235,7 @@ let group (modul : Symbolic.modul) : grouped_module Result.t =
           (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
-      let func = { value = Local func; index } :: fields.func in
+      let func = { Indexed.value = Runtime.Local func; index } :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
         , { curr with func = succ curr.func } )
@@ -292,10 +292,10 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 type assigned_module =
   { id : string option
   ; typ : str_type Named.t
-  ; global : (Symbolic.global, global_type) runtime Named.t
-  ; table : (table, table_type) runtime Named.t
-  ; mem : (mem, limits) runtime Named.t
-  ; func : (Symbolic.func, Symbolic.block_type) runtime Named.t
+  ; global : (Symbolic.global, global_type) Runtime.t Named.t
+  ; table : (table, table_type) Runtime.t Named.t
+  ; mem : (mem, limits) Runtime.t Named.t
+  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Named.t
   ; elem : Symbolic.elem Named.t
   ; data : Symbolic.data Named.t
   ; exports : opt_exports
@@ -306,9 +306,9 @@ module Assign_indicies : sig
   val run : grouped_module -> assigned_module Result.t
 end = struct
   type type_acc =
-    { declared_types : str_type indexed list
-    ; func_types : str_type indexed list
-    ; named_types : int StringMap.t
+    { declared_types : str_type Indexed.t list
+    ; func_types : str_type Indexed.t list
+    ; named_types : int String_map.t
     ; last_assigned_int : int
     ; all_types : int TypeMap.t
     }
@@ -324,12 +324,12 @@ end = struct
           let id = last_assigned_int in
           let last_assigned_int = succ last_assigned_int in
           let declared_types =
-            { index = id; value = str_type } :: declared_types
+            { Indexed.index = id; value = str_type } :: declared_types
           in
           let named_types =
             match name with
             | None -> named_types
-            | Some name -> StringMap.add name id named_types
+            | Some name -> String_map.add name id named_types
           in
           let all_types = TypeMap.add str_type id all_types in
           (last_assigned_int, declared_types, named_types, all_types)
@@ -342,7 +342,7 @@ end = struct
     let empty_acc =
       { declared_types = []
       ; func_types = []
-      ; named_types = StringMap.empty
+      ; named_types = String_map.empty
       ; last_assigned_int = 0
       ; all_types = TypeMap.empty
       }
@@ -360,7 +360,8 @@ end = struct
         let all_types = TypeMap.add typ id all_types in
         let func_types =
           match typ with
-          | Def_func_t _ftype -> { index = id; value = typ } :: func_types
+          | Def_func_t _ftype ->
+            { Indexed.index = id; value = typ } :: func_types
           | Def_array_t (_mut, _storage_type) -> func_types
           | Def_struct_t _ -> func_types
         in
@@ -372,21 +373,21 @@ end = struct
     let values = List.rev acc.declared_types @ List.rev acc.func_types in
     { values; named = acc.named_types }
 
-  let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) runtime)
-    : string option =
+  let get_runtime_name (get_name : 'a -> string option)
+    (elt : ('a, 'b) Runtime.t) : string option =
     match elt with
     | Local v -> get_name v
     | Imported { assigned_name; _ } -> assigned_name
 
   let name kind ~get_name values =
-    let assign_one (named : int StringMap.t) (elt : _ indexed) =
+    let assign_one (named : int String_map.t) (elt : _ Indexed.t) =
       match get_name elt.value with
       | None -> Ok named
       | Some name ->
-        if StringMap.mem name named then error_s "duplicate %s %s" kind name
-        else ok @@ StringMap.add name elt.index named
+        if String_map.mem name named then error_s "duplicate %s %s" kind name
+        else ok @@ String_map.add name elt.index named
     in
-    let* named = list_fold_left assign_one StringMap.empty values in
+    let* named = list_fold_left assign_one String_map.empty values in
     Ok { Named.values; named }
 
   let check_type_id (types : str_type Named.t) (check : type_check) =
@@ -395,12 +396,12 @@ end = struct
       match id with
       | Raw i -> Ok i
       | Symbolic name -> (
-        match StringMap.find_opt name types.named with
+        match String_map.find_opt name types.named with
         | None -> error_s "internal error: can't find type with name %s" name
         | Some t -> Ok t )
     in
     (* TODO more efficient version of that *)
-    match List.find_opt (fun v -> v.index = id) types.values with
+    match List.find_opt (fun v -> v.Indexed.index = id) types.values with
     | None -> Error "unknown type"
     | Some { value = Def_func_t func_type'; _ } ->
       let func_type = convert_func_type func_type in
@@ -460,16 +461,16 @@ module Rewrite_indices = struct
     | Some indice -> (
       match indice with
       | Symbolic.Arg.Raw i ->
-        (* TODO change indexed strucure for that to be more efficient *)
-        if not (List.exists (has_index i) named.values) then
+        (* TODO change Indexed.t strucure for that to be more efficient *)
+        if not (List.exists (Indexed.has_index i) named.values) then
           error_s "%s %i" msg i
         else Ok i
       | Symbolic name -> (
-        match StringMap.find_opt name named.named with
+        match String_map.find_opt name named.named with
         | None -> error_s "%s %s" msg name
         | Some i -> Ok i ) )
 
-  let get msg (named : 'a Named.t) indice : 'a indexed Result.t =
+  let get msg (named : 'a Named.t) indice : 'a Indexed.t Result.t =
     let* i = find msg named indice in
     (* TODO change Named.t structure to make that sensible *)
     match List.nth_opt named.values i with
@@ -479,7 +480,7 @@ module Rewrite_indices = struct
   let find_global (modul : assigned_module) ~imported_only id :
     (int * mut) Result.t =
     let* idx = find "unknown global" modul.global id in
-    let va = List.find (has_index idx) modul.global.values in
+    let va = List.find (Indexed.has_index idx) modul.global.values in
     let* mut, _typ =
       match va.value with
       | Imported imported -> Ok imported.desc
@@ -557,10 +558,10 @@ module Rewrite_indices = struct
           match name with
           | None -> Ok (locals, next_free_int + 1)
           | Some name ->
-            if StringMap.mem name locals then error_s "duplicate local %s" name
-            else Ok (StringMap.add name next_free_int locals, next_free_int + 1)
+            if String_map.mem name locals then error_s "duplicate local %s" name
+            else Ok (String_map.add name next_free_int locals, next_free_int + 1)
           )
-        (Ok (StringMap.empty, 0))
+        (Ok (String_map.empty, 0))
         locals
     in
 
@@ -568,7 +569,7 @@ module Rewrite_indices = struct
       | Symbolic.Arg.Raw i ->
         if i >= after_last_assigned_local then Error "unknown local" else Ok i
       | Symbolic name -> (
-        match StringMap.find_opt name locals with
+        match String_map.find_opt name locals with
         | None -> error_s "unknown local %s" name
         | Some id -> Ok id )
     in
@@ -931,37 +932,37 @@ module Rewrite_indices = struct
     let func = { body; type_f; id = func.id; locals } in
     Ok func
 
-  let rewrite_import (f : 'a -> 'b Result.t) (import : 'a imp) : 'b imp Result.t
-      =
+  let rewrite_import (f : 'a -> 'b Result.t) (import : 'a Imported.t) :
+    'b Imported.t Result.t =
     let* desc = f import.desc in
     Ok { import with desc }
 
   let rewrite_runtime f g r =
     match r with
-    | Local v ->
+    | Runtime.Local v ->
       let* v = f v in
-      ok @@ Local v
+      ok @@ Runtime.Local v
     | Imported i ->
       let* i = g i in
-      ok @@ Imported i
+      ok @@ Runtime.Imported i
 
   let rewrite_named f named =
     let* values =
       list_map
         (fun ind ->
-          let* value = f ind.value in
+          let* value = f ind.Indexed.value in
           Ok { ind with value } )
         named.Named.values
     in
     Ok { named with Named.values }
 
   let run (modul : assigned_module) : modul Result.t =
-    let* (global : (global, global_type) runtime Named.t) =
+    let* (global : (global, global_type) Runtime.t Named.t) =
       let* { Named.named; values } =
         rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
       in
       let values = List.rev values in
-      let global : (global, global_type) runtime Named.t =
+      let global : (global, global_type) Runtime.t Named.t =
         { Named.named; values }
       in
       Ok global
@@ -979,7 +980,7 @@ module Rewrite_indices = struct
       | None -> Ok None
       | Some start -> (
         let* idx = find "unknown function" func (Some start) in
-        let va = List.find (has_index idx) func.Named.values in
+        let va = List.find (Indexed.has_index idx) func.Named.values in
         let param_typ, result_typ =
           match va.value with
           | Local func -> func.type_f

@@ -58,10 +58,10 @@ include struct
 
   type modul =
     { id : string option
-    ; global : (global, global_type) runtime Named.t
-    ; table : (table, table_type) runtime Named.t
-    ; mem : (mem, limits) runtime Named.t
-    ; func : (func, func_type) runtime Named.t
+    ; global : (global, global_type) Runtime.t Named.t
+    ; table : (table, table_type) Runtime.t Named.t
+    ; mem : (mem, limits) Runtime.t Named.t
+    ; func : (func, func_type) Runtime.t Named.t
     ; elem : elem Named.t
     ; data : data Named.t
     ; exports : exports
@@ -73,19 +73,17 @@ include struct
 
     let id fmt = Option.iter (fun id -> Format.fprintf fmt " $%s" id)
 
-    let func fmt (f : (func, _) runtime) =
+    let func fmt (f : (func, _) Runtime.t) =
       match f with
       | Local f -> Format.fprintf fmt "%a" func f
       | Imported { modul; name; _ } -> Format.fprintf fmt "%s.%s" modul name
-
-    let indexed f fmt indexed = Format.fprintf fmt "%a" f indexed.value
 
     let lst f fmt l =
       (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n") f)
         fmt (List.rev l)
 
-    let funcs fmt (funcs : _ runtime Named.t) =
-      lst (indexed func) fmt funcs.values
+    let funcs fmt (funcs : _ Runtime.t Named.t) =
+      lst (Indexed.pp func) fmt funcs.values
 
     let export fmt (export : export) =
       Format.fprintf fmt "%s: %a" export.name indice export.id
