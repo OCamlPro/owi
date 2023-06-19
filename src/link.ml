@@ -132,7 +132,7 @@ let eval_globals ls env globals : Env.t Result.t =
     (fun id global env ->
       let* env in
       let* global = eval_global ls env global in
-      let env = Env.add_global id global env in
+      let env = Env.Build.add_global id global env in
       Ok env )
     globals (Ok env)
 
@@ -174,7 +174,7 @@ let eval_memories ls env memories =
     (fun id mem env ->
       let* env in
       let* memory = eval_memory ls mem in
-      let env = Env.add_memory id memory env in
+      let env = Env.Build.add_memory id memory env in
       Ok env )
     memories (Ok env)
 
@@ -199,7 +199,7 @@ let eval_tables ls env tables =
     (fun id table env ->
       let* env in
       let* table = eval_table ls table in
-      let env = Env.add_table id table env in
+      let env = Env.Build.add_table id table env in
       Ok env )
     tables (Ok env)
 
@@ -228,7 +228,7 @@ let eval_functions ls (finished_env : Env.t') env functions =
     (fun id func env ->
       let* env in
       let* func = eval_func ls finished_env func in
-      let env = Env.add_func id func env in
+      let env = Env.Build.add_func id func env in
       Ok env )
     functions (Ok env)
 
@@ -260,7 +260,7 @@ let define_data env data =
     (fun id (data : Simplified.data) env_and_init ->
       let* env, init = env_and_init in
       let data' : Env.data = { value = data.init } in
-      let env = Env.add_data id data' env in
+      let env = Env.Build.add_data id data' env in
       let* init =
         match data.mode with
         | Data_active (None, _) -> assert false
@@ -292,10 +292,10 @@ let define_elem env elem =
       let env =
         match elem.mode with
         | Elem_active _ | Elem_passive ->
-          Env.add_elem id { value = Array.of_list init_as_ref } env
+          Env.Build.add_elem id { value = Array.of_list init_as_ref } env
         | Elem_declarative ->
           (* Declarative element have no runtime value *)
-          Env.add_elem id { value = [||] } env
+          Env.Build.add_elem id { value = [||] } env
       in
       let* inits =
         match elem.mode with
@@ -337,7 +337,7 @@ let modul (ls : state) ~name (modul : modul) =
   let* env_and_init_active_data_and_elem =
     let rec env_and_init_active_data_and_elem =
       lazy
-        (let env = Env.empty in
+        (let env = Env.Build.empty in
          let env =
            eval_functions ls finished_env env modul.func |> raise_on_error
          in
