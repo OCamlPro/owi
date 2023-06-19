@@ -16,6 +16,7 @@
   lexer
   memory
   table
+  global
   link
   log
   menhir_parser

@@ -1,16 +1,6 @@
 (** Module to link a simplified/extern module and producing a runnable module
     along with a link state. *)
 
-(** runtime global *)
-module Global : sig
-  type 'env t =
-    { mutable value : 'env Value.t
-    ; label : string option
-    ; mut : Types.mut
-    ; typ : Simplified.val_type
-    }
-end
-
 (** runtime env *)
 module Env : sig
   type t
