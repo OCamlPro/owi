@@ -148,7 +148,7 @@ module Pp = struct
       Format.fprintf fmt "(%a %a)" symb_indice_opt i expr e
 
   let data fmt (d : data) =
-    Format.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
+    Format.fprintf fmt {|(data %a %a %S)|} id_opt d.id data_mode d.mode d.init
 
   let elem fmt (e : elem) =
     Format.fprintf fmt "@[<hov 2>(elem %a %a %a %a)@]" id_opt e.id elem_mode
