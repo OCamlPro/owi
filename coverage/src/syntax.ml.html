@@ -163,9 +163,9 @@
 <a href="#L64">64</a>
 <a href="#L65">65</a>
 </pre>
-<pre><code class="ocaml">let ( let* ) o f = <span data-count="946484">m</span>atch o with <span data-count="936624">O</span>k v -&gt; f v | <span data-count="9860">E</span>rror _ as e -&gt; e
+<pre><code class="ocaml">let ( let* ) o f = <span data-count="945177">m</span>atch o with <span data-count="935317">O</span>k v -&gt; f v | <span data-count="9860">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="217722">m</span>atch o with <span data-count="216270">O</span>k v -&gt; Ok (<span data-count="216270">f</span> v) | <span data-count="1452">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="219029">m</span>atch o with <span data-count="217577">O</span>k v -&gt; Ok (<span data-count="217577">f</span> v) | <span data-count="1452">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="2660">E</span>rror v
 

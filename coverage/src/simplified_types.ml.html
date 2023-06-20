@@ -294,12 +294,12 @@ let convert_storage_type tbl = function
   | <span data-count="0">V</span>al_packed_t packed_type -&gt; ok @@ Val_packed_t packed_type
 
 let convert_field_type tbl (mut, storage_type) =
-  <span data-count="0">l</span>et* storage_type = convert_storage_typ<span data-count="0">e</span> tbl storage_type in
-  <span data-count="0">O</span>k (mut, storage_type)
+  <span data-count="0">l</span>et+ storage_type = convert_storage_typ<span data-count="0">e</span> tbl storage_type in
+  <span data-count="0">(</span>mut, storage_type)
 
 let convert_struct_field tbl (id, types) =
-  <span data-count="0">l</span>et* types = list_ma<span data-count="0">p</span> (convert_field_typ<span data-count="0">e</span> tbl) types in
-  <span data-count="0">O</span>k (id, types)
+  <span data-count="0">l</span>et+ types = list_ma<span data-count="0">p</span> (convert_field_typ<span data-count="0">e</span> tbl) types in
+  <span data-count="0">(</span>id, types)
 
 let convert_struct_type tbl fields = <span data-count="0">l</span>ist_map (convert_struct_fiel<span data-count="0">d</span> tbl) fields
 
@@ -315,8 +315,8 @@ let convert_str tbl = function
     <span data-count="0">D</span>ef_struct_t struct_t
 
 let convert_table_type tbl (limits, ref_type) =
-  <span data-count="1307">l</span>et* ref_type = convert_ref_typ<span data-count="1307">e</span> tbl ref_type in
-  <span data-count="1307">O</span>k (limits, ref_type)
+  <span data-count="1307">l</span>et+ ref_type = convert_ref_typ<span data-count="1307">e</span> tbl ref_type in
+  <span data-count="1307">(</span>limits, ref_type)
 </code></pre>
       </div>
     </div>
