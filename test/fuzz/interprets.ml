@@ -3,13 +3,13 @@ open Owi
 module type INTERPRET = sig
   type t
 
-  val of_symbolic : Owi.Types.Symbolic.modul -> t
+  val of_symbolic : Symbolic.modul -> t
 
-  val run : t -> (unit, string) Result.t
+  val run : t -> unit Result.t
 end
 
 module Owi_unoptimized : INTERPRET = struct
-  type t = Owi.Types.Symbolic.modul
+  type t = Symbolic.modul
 
   let of_symbolic = Fun.id
 
@@ -26,7 +26,7 @@ module Owi_unoptimized : INTERPRET = struct
 end
 
 module Owi_optimized : INTERPRET = struct
-  type t = Owi.Types.Symbolic.modul
+  type t = Symbolic.modul
 
   let of_symbolic = Fun.id
 
@@ -46,7 +46,7 @@ end
 module Reference : INTERPRET = struct
   type t = string
 
-  let of_symbolic modul = Format.asprintf "%a" Owi.Types.Symbolic.Pp.modul modul
+  let of_symbolic modul = Format.asprintf "%a" Symbolic.Pp.modul modul
 
   let run modul =
     let prefix = "owi_fuzzer_official" in

@@ -31,7 +31,8 @@ let check_optimized m =
         "only optimized module interpretation throws an error: %s" msg
   in
   let result2 =
-    not Param.reference_fuzzing ||
+    (not Param.reference_fuzzing)
+    ||
     match (result_unoptimized, result_reference ()) with
     | Ok (), Ok () -> true
     | Error _msg1, Error _msg2 ->
@@ -56,6 +57,6 @@ let () =
   Crowbar.add_test ~name:"Optimize fuzzing" [ Gen.modul ] (fun m ->
     incr count;
     Format.fprintf fmt "Generating new module (%d/5000)...@\n" !count;
-    if Param.debug then Format.fprintf fmt "%a@\n" Owi.Types.Symbolic.Pp.modul m;
+    if Param.debug then Format.fprintf fmt "%a@\n" Owi.Symbolic.Pp.modul m;
     Format.pp_print_flush fmt ();
     is_optimized m )

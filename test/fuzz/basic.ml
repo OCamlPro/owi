@@ -1,7 +1,7 @@
 open Crowbar
 open Crowbar.Syntax
 open Owi.Types
-open Owi.Types.Symbolic
+open Owi.Symbolic
 module S = Type_stack
 
 type num_size =
@@ -468,8 +468,8 @@ let expr_call (env : Env.t) (stack : val_type list) =
   List.filter_map
     (fun (name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt)) when S.is_stack_compatible_1 stack (List.rev pt)
-        ->
+      | Arg.Bt_raw (_, (pt, rt))
+        when S.is_stack_compatible_1 stack (List.rev pt) ->
         Some
           (pair
              (const (Call (Symbolic name)))
@@ -483,12 +483,12 @@ let expr_br (env : Env.t) (stack : val_type list) =
   List.filter_map
     (fun (name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt)) when S.is_stack_compatible_2 stack (List.rev rt)
-        ->
+      | Arg.Bt_raw (_, (pt, rt))
+        when S.is_stack_compatible_2 stack (List.rev rt) ->
         Some
           (pair
-              (const (Br (Symbolic name)))
-              (const (stack_pt pt @ stack_rt rt)) )
+             (const (Br (Symbolic name)))
+             (const (stack_pt pt @ stack_rt rt)) )
       | _ -> None )
     env.blocks
 

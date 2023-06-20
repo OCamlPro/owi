@@ -1,4 +1,4 @@
-open Owi.Types.Symbolic
+open Owi.Symbolic
 open Crowbar
 
 type t =

@@ -1,6 +1,6 @@
 open Crowbar
 open Crowbar.Syntax
-open Owi.Types.Symbolic
+open Owi.Symbolic
 module S = Type_stack
 module B = Basic
 
@@ -137,8 +137,10 @@ let if_else expr ~locals ~stack env =
     let* rt = list B.val_type in
     (* let* pt = const [] in *)
     let* pt = B.stack_prefix stack in
-    
-    let typ = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt)) in
+
+    let typ =
+      Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt))
+    in
 
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
@@ -158,7 +160,9 @@ let block expr ~locals ~stack:_ env =
   let* rt = list B.val_type in
   let* pt = const [] in
   (* let* pt = B.stack_prefix stack in *)
-  let typ = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt)) in
+  let typ =
+    Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt))
+  in
 
   (* add_block *)
   let id = Env.add_block env typ in
@@ -228,8 +232,7 @@ let rec expr ~block_type ~stack ~locals ~start env =
     let expr_available env =
       expr_always_available block expr ~locals ~stack env
       @ expr_available_with_current_stack
-      @ if start then B.expr_call env stack else []
-      @ B.expr_br env stack
+      @ if start then B.expr_call env stack else [] @ B.expr_br env stack
     in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in
