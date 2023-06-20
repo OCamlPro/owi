@@ -1,1 +1,1 @@
-val modul : Owi.Types.Symbolic.modul Crowbar.gen
+val modul : Owi.Symbolic.modul Crowbar.gen
