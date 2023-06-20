@@ -46,12 +46,15 @@ val lognot : t -> t
 
 (** comparison operators *)
 
-val le_u : t -> t -> bool
-
+val eq : t -> t -> bool
+val ne : t -> t -> bool
+val lt : t -> t -> bool
+val gt : t -> t -> bool
 val lt_u : t -> t -> bool
-
 val gt_u : t -> t -> bool
-
+val le : t -> t -> bool
+val ge : t -> t -> bool
+val le_u : t -> t -> bool
 val ge_u : t -> t -> bool
 
 (** binary operators *)

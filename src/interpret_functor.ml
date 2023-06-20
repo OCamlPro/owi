@@ -174,82 +174,82 @@ let exec_fbinop stack nn (op : fbinop) =
        | Max -> max f1 f2
        | Copysign -> copy_sign f1 f2 )
 
-(* let exec_itestop stack nn op = *)
-(*   match nn with *)
-(*   | S32 -> *)
-(*     let n, stack = Stack.pop_i32 stack in *)
-(*     let res = match op with Eqz -> Int32.eq_const n 0l in *)
-(*     Stack.push_bool stack res *)
-(*   | S64 -> *)
-(*     let n, stack = Stack.pop_i64 stack in *)
-(*     let res = match op with Eqz -> Int64.eq_const n 0L in *)
-(*     Stack.push_bool stack res *)
+let exec_itestop stack nn op =
+  match nn with
+  | S32 ->
+    let n, stack = Stack.pop_i32 stack in
+    let res = match op with Eqz -> Int32.eq_const n 0l in
+    Stack.push_bool stack res
+  | S64 ->
+    let n, stack = Stack.pop_i64 stack in
+    let res = match op with Eqz -> Int64.eq_const n 0L in
+    Stack.push_bool stack res
 
-(* let exec_irelop stack nn (op : irelop) = *)
-(*   match nn with *)
-(*   | S32 -> *)
-(*     let (n1, n2), stack = Stack.pop2_i32 stack in *)
-(*     let res = *)
-(*       let open Int32 in *)
-(*       match op with *)
-(*       | Eq -> n1 = n2 *)
-(*       | Ne -> n1 <> n2 *)
-(*       | Lt S -> n1 < n2 *)
-(*       | Lt U -> lt_u n1 n2 *)
-(*       | Gt S -> n1 > n2 *)
-(*       | Gt U -> gt_u n1 n2 *)
-(*       | Le S -> n1 <= n2 *)
-(*       | Le U -> le_u n1 n2 *)
-(*       | Ge S -> n1 >= n2 *)
-(*       | Ge U -> ge_u n1 n2 *)
-(*     in *)
-(*     Stack.push_bool stack res *)
-(*   | S64 -> *)
-(*     let (n1, n2), stack = Stack.pop2_i64 stack in *)
-(*     let res = *)
-(*       let open Int64 in *)
-(*       match op with *)
-(*       | Eq -> n1 = n2 *)
-(*       | Ne -> n1 <> n2 *)
-(*       | Lt S -> n1 < n2 *)
-(*       | Lt U -> lt_u n1 n2 *)
-(*       | Gt S -> n1 > n2 *)
-(*       | Gt U -> gt_u n1 n2 *)
-(*       | Le S -> n1 <= n2 *)
-(*       | Le U -> le_u n1 n2 *)
-(*       | Ge S -> n1 >= n2 *)
-(*       | Ge U -> ge_u n1 n2 *)
-(*     in *)
-(*     Stack.push_bool stack res *)
+let exec_irelop stack nn (op : irelop) =
+  match nn with
+  | S32 ->
+    let (n1, n2), stack = Stack.pop2_i32 stack in
+    let res =
+      let open Int32 in
+      match op with
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt S -> lt n1 n2
+      | Lt U -> lt_u n1 n2
+      | Gt S -> gt n1 n2
+      | Gt U -> gt_u n1 n2
+      | Le S -> le n1 n2
+      | Le U -> le_u n1 n2
+      | Ge S -> ge n1 n2
+      | Ge U -> ge_u n1 n2
+    in
+    Stack.push_bool stack res
+  | S64 ->
+    let (n1, n2), stack = Stack.pop2_i64 stack in
+    let res =
+      let open Int64 in
+      match op with
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt S -> lt n1 n2
+      | Lt U -> lt_u n1 n2
+      | Gt S -> gt n1 n2
+      | Gt U -> gt_u n1 n2
+      | Le S -> le n1 n2
+      | Le U -> le_u n1 n2
+      | Ge S -> ge n1 n2
+      | Ge U -> ge_u n1 n2
+    in
+    Stack.push_bool stack res
 
-(* let exec_frelop stack nn (op : frelop) = *)
-(*   match nn with *)
-(*   | S32 -> *)
-(*     let (n1, n2), stack = Stack.pop2_f32 stack in *)
-(*     let res = *)
-(*       let open Float32 in *)
-(*       match op with *)
-(*       | Eq -> eq n1 n2 *)
-(*       | Ne -> ne n1 n2 *)
-(*       | Lt -> lt n1 n2 *)
-(*       | Gt -> gt n1 n2 *)
-(*       | Le -> le n1 n2 *)
-(*       | Ge -> ge n1 n2 *)
-(*     in *)
-(*     Stack.push_bool stack res *)
-(*   | S64 -> *)
-(*     let (n1, n2), stack = Stack.pop2_f64 stack in *)
-(*     let res = *)
-(*       let open Float64 in *)
-(*       match op with *)
-(*       | Eq -> eq n1 n2 *)
-(*       | Ne -> ne n1 n2 *)
-(*       | Lt -> lt n1 n2 *)
-(*       | Gt -> gt n1 n2 *)
-(*       | Le -> le n1 n2 *)
-(*       | Ge -> ge n1 n2 *)
-(*     in *)
-(*     Stack.push_bool stack res *)
+let exec_frelop stack nn (op : frelop) =
+  match nn with
+  | S32 ->
+    let (n1, n2), stack = Stack.pop2_f32 stack in
+    let res =
+      let open Float32 in
+      match op with
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt -> lt n1 n2
+      | Gt -> gt n1 n2
+      | Le -> le n1 n2
+      | Ge -> ge n1 n2
+    in
+    Stack.push_bool stack res
+  | S64 ->
+    let (n1, n2), stack = Stack.pop2_f64 stack in
+    let res =
+      let open Float64 in
+      match op with
+      | Eq -> eq n1 n2
+      | Ne -> ne n1 n2
+      | Lt -> lt n1 n2
+      | Gt -> gt n1 n2
+      | Le -> le n1 n2
+      | Ge -> ge n1 n2
+    in
+    Stack.push_bool stack res
 
 (* let exec_itruncf stack nn nn' sx = *)
 (*   match (nn, nn') with *)

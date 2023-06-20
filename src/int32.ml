@@ -58,6 +58,13 @@ let extend_s n x =
   let shift = 32 - n in
   shift_right (shift_left x shift) shift
 
+let eq (x: int32) y = x = y
+let ne (x: int32) y = x <> y
+let lt (x: int32) y = x < y
+let gt (x: int32) y = x > y
+let le (x: int32) y = x <= y
+let ge (x: int32) y = x >= y
+
 let lt_u x y = cmp_u x ( < ) y
 
 let le_u x y = cmp_u x ( <= ) y

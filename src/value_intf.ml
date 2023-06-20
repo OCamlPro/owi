@@ -44,6 +44,18 @@ module type Iop = sig
   val rotr : num -> num -> num
 
   val eq_const : num -> const -> vbool
+
+  val eq : num -> num -> vbool
+  val ne : num -> num -> vbool
+  val lt : num -> num -> vbool
+  val gt : num -> num -> vbool
+  val lt_u : num -> num -> vbool
+  val gt_u : num -> num -> vbool
+  val le : num -> num -> vbool
+  val ge : num -> num -> vbool
+  val le_u : num -> num -> vbool
+  val ge_u : num -> num -> vbool
+
 end
 
 module type Fop = sig
@@ -78,6 +90,13 @@ module type Fop = sig
   val max : num -> num -> num
 
   val copy_sign : num -> num -> num
+
+  val eq : num -> num -> vbool
+  val ne : num -> num -> vbool
+  val lt : num -> num -> vbool
+  val gt : num -> num -> vbool
+  val le : num -> num -> vbool
+  val ge : num -> num -> vbool
 end
 
 module type T = sig
