@@ -1,5 +1,7 @@
 let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
 
+let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
+
 let error v = Error v
 
 let error_s format = Format.kasprintf error format
@@ -22,7 +24,8 @@ let list_map f l =
     @@ List.map (fun v -> match f v with Error s -> raise (E s) | Ok v -> v) l
   with E s -> Error s
 
-let list_fold_left f acc l =
+let list_fold_left (f : 'a -> 'b -> 'a Result.t) (acc : 'a) (l : 'b list) :
+  'a Result.t =
   List.fold_left
     (fun acc v ->
       let* acc in

@@ -3,7 +3,6 @@ open Simplified
 open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
-
 module Env = Link_env
 
 type global = Env.t' Global.t

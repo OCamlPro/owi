@@ -100,16 +100,18 @@ let compare_result_const result (const : 'env Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Symbolic.const -> 'env Value.t = function
-  | Const_I32 v -> I32 v
-  | Const_I64 v -> I64 v
-  | Const_F32 v -> F32 v
-  | Const_F64 v -> F64 v
-  | Const_null rt -> Value.ref_null (Simplified_types.convert_heap_type None rt)
-  | Const_extern i -> Ref (Host_externref.value i)
+let value_of_const : Symbolic.const -> 'env Value.t Result.t = function
+  | Const_I32 v -> ok @@ Value.I32 v
+  | Const_I64 v -> ok @@ Value.I64 v
+  | Const_F32 v -> ok @@ Value.F32 v
+  | Const_F64 v -> ok @@ Value.F64 v
+  | Const_null rt ->
+    let+ rt = Simplified_types.convert_heap_type None rt in
+    Value.ref_null rt
+  | Const_extern i -> ok @@ Value.Ref (Host_externref.value i)
   | i ->
     Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;
-    I32 (Int32.of_int 666)
+    ok @@ Value.I32 (Int32.of_int 666)
 
 let action (link_state : Link.state) = function
   | Symbolic.Invoke (mod_id, f, args) -> begin
@@ -120,13 +122,14 @@ let action (link_state : Link.state) = function
          Format.pp_print_string )
       mod_id f Types.Symbolic.consts args;*)
     let* f = load_func_from_module link_state mod_id f in
-    let stack = List.rev_map value_of_const args in
+    let* stack = list_map value_of_const args in
+    let stack = List.rev stack in
     Interpret.exec_vfunc stack f
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";
-    let* global = load_global_from_module link_state mod_id name in
-    Ok [ global.value ]
+    let+ global = load_global_from_module link_state mod_id name in
+    [ global.value ]
 
 let run ~with_exhaustion ~optimize script =
   let state =
