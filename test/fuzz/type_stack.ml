@@ -14,7 +14,7 @@ let apply_stack_op stack op =
 let apply_stack_ops stack ops = List.fold_left apply_stack_op stack ops
 
 let rec is_stack_compatible stack pt =
-  match stack, pt with
+  match (stack, pt) with
   | _, [] -> true
   | [], _ -> false
-  | s :: st, (_,vt) :: pt -> s = vt && is_stack_compatible st pt
+  | s :: st, (_, vt) :: pt -> s = vt && is_stack_compatible st pt
