@@ -2,9 +2,9 @@
 
 include Stdlib.Int64
 
-let clz = Ocaml_intrinsics.Int64.count_leading_zeros
+let clz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_leading_zeros n)
 
-let ctz = Ocaml_intrinsics.Int64.count_trailing_zeros
+let ctz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_trailing_zeros n)
 
 exception Overflow
 
@@ -31,7 +31,7 @@ let popcnt =
     (* gather the bit count for every byte *)
     let x = (x + (x lsr 4)) land m4 in
     (* sum the bit counts in the top byte and shift it down *)
-    to_int ((x * h01) lsr 56)
+    ((x * h01) lsr 56)
 
 (*
    * Unsigned comparison in terms of signed comparison.
@@ -145,3 +145,5 @@ let of_string s =
   in
   require (low_int <= parsed && parsed <= high_int);
   parsed
+
+let eq_const (i:int64) j = i = j

@@ -36,11 +36,11 @@ val unsigned_to_int : t -> int option
 
 (** unary operators *)
 
-val clz : t -> int
+val clz : t -> t
 
-val ctz : t -> int
+val ctz : t -> t
 
-val popcnt : t -> int
+val popcnt : t -> t
 
 val lognot : t -> t
 
@@ -87,3 +87,5 @@ val unsigned_div : t -> t -> t
 val rem : t -> t -> t
 
 val unsigned_rem : t -> t -> t
+
+val eq_const : t -> int32 -> bool

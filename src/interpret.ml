@@ -32,14 +32,14 @@ let exec_iunop stack nn op =
       let open Int32 in
       match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
     in
-    Stack.push_i32_of_int stack res
+    Stack.push_i32 stack res
   | S64 ->
     let n, stack = Stack.pop_i64 stack in
     let res =
       let open Int64 in
       match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
     in
-    Stack.push_i64_of_int stack res
+    Stack.push_i64 stack res
 
 let exec_funop stack nn op =
   match nn with

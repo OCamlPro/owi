@@ -2,14 +2,14 @@
 
 include Stdlib.Int32
 
-let clz = Ocaml_intrinsics.Int32.count_leading_zeros
+let clz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_leading_zeros n)
 
-let ctz = Ocaml_intrinsics.Int32.count_trailing_zeros
+let ctz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
 
 (* Taken from Base https://github.com/janestreet/base *)
 let popcnt =
   let mask = 0xffff_ffffL in
-  fun [@inline] x -> Int64.popcnt (Int64.logand (Int64.of_int32 x) mask)
+  fun [@inline] x -> Stdlib.Int64.to_int32 (Int64.popcnt (Int64.logand (Int64.of_int32 x) mask))
 
 let of_int64 = Int64.to_int32
 
@@ -129,3 +129,5 @@ let of_string s =
   let parsed = sign_extend parsed in
   require (low_int <= parsed && parsed <= high_int);
   parsed
+
+let eq_const (i:int32) j = i = j
