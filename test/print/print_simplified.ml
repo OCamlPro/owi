@@ -5,7 +5,7 @@
 open Owi
 
 let m =
-  match Parse.module_from_file ~filename:Sys.argv.(1) with
+  match Parse.Module.from_file ~filename:Sys.argv.(1) with
   | Ok m -> m
   | Error msg -> failwith msg
 
@@ -15,7 +15,7 @@ let m =
 let s = Format.asprintf "%a@\n" Simplified.Pp.modul m
 
 let m =
-  match Parse.module_from_string s with Ok m -> m | Error msg -> failwith msg
+  match Parse.Module.from_string s with Ok m -> m | Error msg -> failwith msg
 
 let m =
   match Compile.until_simplify m with Ok m -> m | Error msg -> failwith msg

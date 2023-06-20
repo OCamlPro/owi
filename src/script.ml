@@ -146,27 +146,27 @@ let run ~with_exhaustion ~optimize script =
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
-        let* link_state =
+        let+ link_state =
           Compile.until_interpret link_state ~optimize ~name:None m
         in
         Log.debug_on := debug_on;
-        Ok link_state
+        link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug "*** assert_trap@\n";
         incr curr_module;
         let* m, link_state =
           Compile.until_link link_state ~optimize ~name:None m
         in
-        let* () = check_error_result expected (Interpret.modul m) in
-        Ok link_state
+        let+ () = check_error_result expected (Interpret.modul m) in
+        link_state
       | Assert (Assert_malformed_binary _) ->
         Log.debug "*** assert_malformed_binary@\n";
         (* TODO: check this when binary format is supported *)
         Ok link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug "*** assert_malformed_quote@\n";
-        let* () =
-          match Parse.script_from_string (String.concat "\n" m) with
+        let+ () =
+          match Parse.Script.from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module m ] -> (
             match Compile.until_simplify m with
@@ -174,35 +174,33 @@ let run ~with_exhaustion ~optimize script =
             | Ok _m ->
               let got = "Ok" in
               check_error ~expected ~got )
-          | Ok _ ->
-            let got = "expected a single module" in
-            check_error ~expected ~got
+          | Ok _ -> assert false
         in
-        Ok link_state
+        link_state
       | Assert (Assert_invalid_binary _) ->
         Log.debug "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
         Ok link_state
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
-        let* () =
+        let+ () =
           match Compile.until_link link_state ~optimize ~name:None m with
           | Ok _ -> check_error ~expected ~got:"Ok"
           | Error got -> check_error ~expected ~got
         in
-        Ok link_state
+        link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.debug "*** assert_invalid_quote@\n";
-        let got = Parse.script_from_string (String.concat "\n" m) in
-        let* () = check_error_result expected got in
-        Ok link_state
+        let got = Parse.Script.from_string (String.concat "\n" m) in
+        let+ () = check_error_result expected got in
+        link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.debug "*** assert_unlinkable@\n";
-        let* () =
+        let+ () =
           check_error_result expected
             (Compile.until_link link_state ~optimize ~name:None m)
         in
-        Ok link_state
+        link_state
       | Assert (Assert_malformed _) ->
         Log.debug "*** assert_malformed@\n";
         Log.err "TODO"
@@ -210,7 +208,7 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** assert_return@\n";
         let* stack = action link_state a in
         if
-          (not (List.compare_lengths res stack = 0))
+          List.compare_lengths res stack <> 0
           || not (List.for_all2 compare_result_const res (List.rev stack))
         then begin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
@@ -221,29 +219,29 @@ let run ~with_exhaustion ~optimize script =
       | Assert (Assert_trap (a, expected)) ->
         Log.debug "*** assert_trap@\n";
         let got = action link_state a in
-        let* () = check_error_result expected got in
-        Ok link_state
+        let+ () = check_error_result expected got in
+        link_state
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.debug "*** assert_exhaustion@\n";
-        let* () =
+        let+ () =
           if with_exhaustion then
             let got = action link_state a in
             check_error_result expected got
           else Ok ()
         in
-        Ok link_state
+        link_state
       | Register (name, mod_name) ->
         if !curr_module = 1 && !registered = false then Log.debug_on := false;
         Log.debug "*** register@\n";
-        let* state = Link.register_module link_state ~name ~id:mod_name in
+        let+ state = Link.register_module link_state ~name ~id:mod_name in
         Log.debug_on := debug_on;
-        Ok state
+        state
       | Action a ->
         Log.debug "*** action@\n";
-        let* _stack = action link_state a in
-        Ok link_state )
+        let+ _stack = action link_state a in
+        link_state )
     state script
 
 let exec ?(with_exhaustion = false) ~optimize script =
-  let* _link_state = run ~with_exhaustion ~optimize script in
-  Ok ()
+  let+ _link_state = run ~with_exhaustion ~optimize script in
+  ()

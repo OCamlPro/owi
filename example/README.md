@@ -97,7 +97,7 @@ let link_state =
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.module_from_file ~filename:"extern.wast" with
+  match Parse.Module.from_file ~filename:"extern.wast" with
   | Error e -> failwith e
   | Ok modul -> modul
 

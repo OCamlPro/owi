@@ -58,6 +58,7 @@ module Owi = struct end
 
 %start <Symbolic.script> script
 %start <Symbolic.modul> modul
+%start <Symbolic.modul> inline_module
 
 %%
 
@@ -1022,20 +1023,25 @@ let module_field :=
   | ~ = table; <>
   | ~ = memory; <>
 
-let modul :=
-      | LPAR; MODULE; id = ioption(id); fields = list(par(module_field)); RPAR; {
-    (* TODO: handle fields_bin
-    let fields_bin = String.concat "" l in *)
+let inline_module :=
+  | fields = list(par(module_field)); {
     let fields = List.flatten fields in
+    let id = None in
     { id; fields }
   }
 
-let module_binary :=
-  | MODULE; id = ioption(id); BINARY; fields = list(par(module_field)); _ = list(NAME); {
+let modul :=
+  | LPAR; MODULE; id = ioption(id); ~ = inline_module; RPAR; {
     (* TODO: handle fields_bin
     let fields_bin = String.concat "" l in *)
-    let fields = List.flatten fields in
-    { id; fields }
+    { inline_module with id }
+  }
+
+let module_binary :=
+  | MODULE; id = ioption(id); BINARY; ~ = inline_module; _ = list(NAME); {
+    (* TODO: handle fields_bin
+    let fields_bin = String.concat "" l in *)
+    { inline_module with id }
   }
 
 let literal_const ==
@@ -1091,9 +1097,6 @@ let cmd ==
 
 let script :=
   | ~ = nonempty_list(cmd); EOF; <>
-  | fields = nonempty_list(par(module_field)); EOF; {
-    let fields = List.flatten fields in
-    let id = None in
-    let modul = { id; fields } in
-    [ Module modul ]
+  | ~ = inline_module; EOF; {
+    [ Module inline_module ]
   }

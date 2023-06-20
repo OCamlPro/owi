@@ -1,78 +1,77 @@
 (** Module providing functions to parse a wasm script from various kind of
     inputs. *)
 
-let menhir_rule_from_lexbuf rule =
-  let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
-  let print_err buf msg =
-    let pos = fst @@ Sedlexing.lexing_positions buf in
-    let file_line =
-      let cpos = pos.pos_cnum - pos.pos_bol in
-      Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
-        pos.pos_lnum cpos
+module Make (M : sig
+  type t
+
+  val rule : (Lexing.lexbuf -> Menhir_parser.token) -> Lexing.lexbuf -> t
+end) =
+struct
+  let rule = Obj.magic M.rule
+
+  let from_lexbuf =
+    let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
+    let print_err buf msg =
+      let pos = fst @@ Sedlexing.lexing_positions buf in
+      let file_line =
+        let cpos = pos.pos_cnum - pos.pos_bol in
+        Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
+          pos.pos_lnum cpos
+      in
+      Log.debug "%s@\n%s@\n" file_line msg
     in
-    Log.debug "%s@\n%s@\n" file_line msg
-  in
-  fun buf ->
-    Log.debug "parsing      ...@\n";
-    let provider () =
-      let tok = Lexer.token buf in
-      let start, stop = Sedlexing.lexing_positions buf in
-      (tok, start, stop)
+    fun buf ->
+      Log.debug "parsing      ...@\n";
+      let provider () =
+        let tok = Lexer.token buf in
+        let start, stop = Sedlexing.lexing_positions buf in
+        (tok, start, stop)
+      in
+      try Ok (parser provider) with
+      | Types.Parse_fail msg
+      | Lexer.Illegal_escape msg
+      | Lexer.Unknown_operator msg ->
+        print_err buf msg;
+        Error msg
+      | Lexer.Unexpected_character msg ->
+        print_err buf msg;
+        Error "unknown operator"
+      | Menhir_parser.Error ->
+        let msg = "unexpected token" in
+        print_err buf msg;
+        Error msg
+
+  let from_file ~filename =
+    let chan = open_in filename in
+    let result =
+      Fun.protect
+        ~finally:(fun () -> close_in chan)
+        (fun () ->
+          let lb = Sedlexing.Utf8.from_channel chan in
+          Sedlexing.set_filename lb filename;
+          from_lexbuf lb )
     in
-    try Ok (parser provider) with
-    | Types.Parse_fail msg
-    | Lexer.Illegal_escape msg
-    | Lexer.Unknown_operator msg ->
-      print_err buf msg;
-      Error msg
-    | Lexer.Unexpected_character msg ->
-      print_err buf msg;
-      Error "unknown operator"
-    | Menhir_parser.Error ->
-      let msg = "unexpected token" in
-      print_err buf msg;
-      Error msg
+    result
 
-(** Parse a script from a lexing buffer. *)
-let script_from_lexbuf = menhir_rule_from_lexbuf Menhir_parser.script
+  let from_string s = from_lexbuf (Sedlexing.Utf8.from_string s)
 
-(** Parse a script from a string. *)
-let script_from_string s = script_from_lexbuf (Sedlexing.Utf8.from_string s)
+  let from_channel c = from_lexbuf (Sedlexing.Utf8.from_channel c)
+end
 
-(** Parse a script from a channel. *)
-let script_from_channel c = script_from_lexbuf (Sedlexing.Utf8.from_channel c)
+module Script = Make (struct
+  type t = Symbolic.script
 
-(** Parse a script from a file. *)
-let script_from_file ~filename =
-  let chan = open_in filename in
-  let result =
-    Fun.protect
-      ~finally:(fun () -> close_in chan)
-      (fun () ->
-        let lb = Sedlexing.Utf8.from_channel chan in
-        Sedlexing.set_filename lb filename;
-        script_from_lexbuf lb )
-  in
-  result
+  let rule = Menhir_parser.script
+end)
 
-(** Parse a module from a lexing buffer. *)
-let module_from_lexbuf = menhir_rule_from_lexbuf Menhir_parser.modul
+module Module = Make (struct
+  type t = Symbolic.modul
 
-(** Parse a module from a string. *)
-let module_from_string s = module_from_lexbuf (Sedlexing.Utf8.from_string s)
+  let rule = Menhir_parser.modul
+end)
 
-(** Parse a module from a channel. *)
-let module_from_channel c = module_from_lexbuf (Sedlexing.Utf8.from_channel c)
+module Inline_module = Make (struct
+  type t = Symbolic.modul
 
-(** Parse a module from a file. *)
-let module_from_file ~filename =
-  let chan = open_in filename in
-  let result =
-    Fun.protect
-      ~finally:(fun () -> close_in chan)
-      (fun () ->
-        let lb = Sedlexing.Utf8.from_channel chan in
-        Sedlexing.set_filename lb filename;
-        module_from_lexbuf lb )
-  in
-  result
+  let rule = Menhir_parser.inline_module
+end)

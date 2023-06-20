@@ -1,7 +1,7 @@
 open Owi
 
 let m =
-  match Parse.module_from_file ~filename:Sys.argv.(1) with
+  match Parse.Module.from_file ~filename:Sys.argv.(1) with
   | Ok m -> m
   | Error msg -> failwith msg
 

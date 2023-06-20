@@ -66,7 +66,7 @@ If you're interested in the library part of owi, here's how to get started:
 # let filename = "test/passing/quickstart.wast";;
 val filename : string = "test/passing/quickstart.wast"
 # let m =
-    match Parse.module_from_file ~filename with
+    match Parse.Module.from_file ~filename with
     | Ok script -> script
     | Error e -> failwith e;;
 val m : Symbolic.modul =
