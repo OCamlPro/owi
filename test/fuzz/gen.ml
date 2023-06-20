@@ -138,7 +138,7 @@ let if_else expr ~locals ~stack env =
     (* let* pt = const [] in *)
     let* pt = B.stack_prefix stack in
     let typ =
-      Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt))
+      Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
@@ -159,7 +159,7 @@ let block expr ~locals ~stack env =
   (* let* pt = const [] in *)
   let* pt = B.stack_prefix stack in
   let typ =
-    Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt))
+    Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
   let id = Env.add_block env typ in
   let* expr = expr ~block_type:typ ~stack:pt ~locals ~start:false env in
