@@ -184,8 +184,7 @@ end = struct
       equal tl (hd :: tl') || equal (Any :: tl) tl'
     | hd :: tl, hd' :: tl' -> match_types hd hd' && equal tl tl'
 
-  let ( ||| ) l r =
-    match (l, r) with None, v | v, None -> v | Some l, _r -> Some l
+  let ( ||| ) l r = match (l, r) with None, v | v, None -> v | _l, r -> r
 
   let rec match_prefix ~prefix ~stack =
     match (prefix, stack) with
@@ -214,7 +213,7 @@ end = struct
   let drop stack =
     match stack with
     | [] -> Error "type mismatch drop"
-    | Any :: _ -> Ok stack
+    | Any :: _ -> Ok [ Any ]
     | _ :: tl -> Ok tl
 
   let push t stack = ok @@ t @ stack
