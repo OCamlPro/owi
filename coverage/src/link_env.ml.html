@@ -317,32 +317,32 @@ let pp fmt t =
     (IMap.binding<span data-count="0">s</span> t.functions)
 
 let get_global (env : t) id =
-  <span data-count="1309">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="1317">m</span>atch IMap.find_opt id env.globals with
   | <span data-count="0">N</span>one -&gt;
     Log.debug "%a@." pp env;
     <span data-count="0">E</span>rror "unknown global"
-  | <span data-count="1309">S</span>ome v -&gt; Ok v
+  | <span data-count="1317">S</span>ome v -&gt; Ok v
 
 let get_memory (env : t) id =
-  <span data-count="1853553">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="1853555">m</span>atch IMap.find_opt id env.memories with
   | <span data-count="0">N</span>one -&gt;
     Log.debug "%a@." pp env;
     <span data-count="0">E</span>rror "unknown memory"
-  | <span data-count="1853553">S</span>ome v -&gt; Ok v
+  | <span data-count="1853555">S</span>ome v -&gt; Ok v
 
 let get_table (env : t) id =
-  <span data-count="1607411">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="1607413">m</span>atch IMap.find_opt id env.tables with
   | <span data-count="0">N</span>one -&gt;
     Log.debug "%a@." pp env;
     <span data-count="0">E</span>rror "unknown table"
-  | <span data-count="1607411">S</span>ome v -&gt; Ok v
+  | <span data-count="1607413">S</span>ome v -&gt; Ok v
 
 let get_func (env : t) id =
-  <span data-count="10065908">m</span>atch IMap.find_opt id env.functions with
+  <span data-count="10065930">m</span>atch IMap.find_opt id env.functions with
   | <span data-count="0">N</span>one -&gt;
     Log.debug "%a@." pp env;
     <span data-count="0">e</span>rror_s "unknown function %a" Format.pp_print_int id
-  | <span data-count="10065908">S</span>ome v -&gt; Ok v
+  | <span data-count="10065930">S</span>ome v -&gt; Ok v
 
 let get_data (env : t) id =
   <span data-count="662">m</span>atch IMap.find_opt id env.data with
@@ -371,16 +371,16 @@ module Build = struct
     }
 
   let add_global id const env =
-    <span data-count="1166">{</span> env with globals = IMap.ad<span data-count="1166">d</span> id const env.globals }
+    <span data-count="1174">{</span> env with globals = IMap.ad<span data-count="1174">d</span> id const env.globals }
 
   let add_memory id mem env =
-    <span data-count="757">{</span> env with memories = IMap.ad<span data-count="757">d</span> id mem env.memories }
+    <span data-count="759">{</span> env with memories = IMap.ad<span data-count="759">d</span> id mem env.memories }
 
   let add_table id table env =
-    <span data-count="913">{</span> env with tables = IMap.ad<span data-count="913">d</span> id table env.tables }
+    <span data-count="915">{</span> env with tables = IMap.ad<span data-count="915">d</span> id table env.tables }
 
   let add_func id func env =
-    <span data-count="12304">{</span> env with functions = IMap.ad<span data-count="12304">d</span> id func env.functions }
+    <span data-count="12328">{</span> env with functions = IMap.ad<span data-count="12328">d</span> id func env.functions }
 
   let add_data id data env = <span data-count="652">{</span> env with data = IMap.ad<span data-count="652">d</span> id data env.data }
 

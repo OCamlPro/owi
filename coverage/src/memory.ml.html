@@ -107,12 +107,12 @@ type t =
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
-    <span data-count="681">i</span>ncr r;
-    <span data-count="681">!</span>r
+    <span data-count="683">i</span>ncr r;
+    <span data-count="683">!</span>r
 
 let init ?label (typ : limits) : t =
-  <span data-count="681">l</span>et data = Bytes.make (page_size * typ.min) '\x00' in
-  <span data-count="681">{</span> id = fres<span data-count="681">h</span> (); label; limits = typ; data }
+  <span data-count="683">l</span>et data = Bytes.make (page_size * typ.min) '\x00' in
+  <span data-count="683">{</span> id = fres<span data-count="683">h</span> (); label; limits = typ; data }
 
 let update_memory mem data =
   <span data-count="194">l</span>et limits =

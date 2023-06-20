@@ -3821,8 +3821,8 @@ let exec_vfunc stack (func : Env.t' Value.Func.t) =
   | <span data-count="0">e</span>xception Stack_overflow -&gt; Error "call stack exhausted"
 
 let modul (modul : Link.module_to_run) =
-  <span data-count="2671">L</span>og.debug0 "interpreting ...@\n";
-  <span data-count="2671">t</span>ry
+  <span data-count="2675">L</span>og.debug0 "interpreting ...@\n";
+  <span data-count="2675">t</span>ry
     List.iter
       (fun to_run -&gt;
         <span data-count="990">l</span>et end_stack, count =
@@ -3836,7 +3836,7 @@ let modul (modul : Link.module_to_run) =
         | <span data-count="0">_</span> :: _ -&gt; Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack
         )
       modul.to_run;
-    <span data-count="2603">O</span>k ()
+    <span data-count="2607">O</span>k ()
   with
   | <span data-count="68">T</span>rap msg -&gt; Error msg
   | <span data-count="0">S</span>tack_overflow -&gt; Error "call stack exhausted"
