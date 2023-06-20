@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>assigned.ml &mdash; Coverage report</title>
-    <meta name="description" content="94.05% coverage in src/assigned.ml">
+    <meta name="description" content="94.51% coverage in src/assigned.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,13 @@
           <span class="dirname">src/</span>assigned.ml
         </a>
       </h1>
-      <h2>94.05%</h2>
+      <h2>94.51%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:49.44%"></span>
-      <span class="unvisited" style="bottom:30.34%"></span>
-      <span class="unvisited" style="bottom:24.16%"></span>
+      <span class="unvisited" style="top:44.63%"></span>
+      <span class="unvisited" style="top:45.20%"></span>
+      <span class="unvisited" style="bottom:29.94%"></span>
+      <span class="unvisited" style="bottom:23.73%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -70,10 +70,10 @@
 <a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span class="visited"> </span>
@@ -89,37 +89,37 @@
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span > </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
 <a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
-<a id="L72"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span class="visited"> </span>
 <a id="L76"></a><span class="visited"> </span>
 <a id="L77"></a><span > </span>
-<a id="L78"></a><span > </span>
-<a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
-<a id="L81"></a><span class="visited"> </span>
-<a id="L82"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span class="unvisited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
-<a id="L85"></a><span > </span>
-<a id="L86"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span > </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span class="visited"> </span>
-<a id="L89"></a><span class="unvisited"> </span>
-<a id="L90"></a><span class="unvisited"> </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span > </span>
 <a id="L91"></a><span > </span>
 <a id="L92"></a><span > </span>
-<a id="L93"></a><span > </span>
-<a id="L94"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
 <a id="L95"></a><span class="visited"> </span>
 <a id="L96"></a><span > </span>
 <a id="L97"></a><span class="visited"> </span>
@@ -156,7 +156,7 @@
 <a id="L128"></a><span class="visited"> </span>
 <a id="L129"></a><span class="visited"> </span>
 <a id="L130"></a><span class="visited"> </span>
-<a id="L131"></a><span > </span>
+<a id="L131"></a><span class="visited"> </span>
 <a id="L132"></a><span class="visited"> </span>
 <a id="L133"></a><span class="visited"> </span>
 <a id="L134"></a><span class="visited"> </span>
@@ -203,7 +203,6 @@
 <a id="L175"></a><span > </span>
 <a id="L176"></a><span > </span>
 <a id="L177"></a><span > </span>
-<a id="L178"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -385,7 +384,6 @@
 <a href="#L175">175</a>
 <a href="#L176">176</a>
 <a href="#L177">177</a>
-<a href="#L178">178</a>
 </pre>
 <pre><code class="ocaml">open Syntax
 open Types
@@ -427,33 +425,51 @@ type type_acc =
   ; all_types : int TypeMap.t
   }
 
-let assign_types (modul : Grouped.t) : str_type Named.t =
-  <span data-count="5867">l</span>et assign_type
-    { declared_types; func_types; named_types; last_assigned_int; all_types }
-    (name, sub_type) : type_acc =
-    <span data-count="520">l</span>et last_assigned_int, declared_types, named_types, all_types =
-      match sub_type with
-      | <span data-count="520">_</span>final, _indices, str_type -&gt;
-        let str_type = Simplified_types.convert_str None str_type in
-        <span data-count="520">l</span>et id = last_assigned_int in
-        let last_assigned_int = succ last_assigned_int in
-        <span data-count="520">l</span>et declared_types =
-          { Indexed.index = id; value = str_type } :: declared_types
-        in
-        let named_types =
-          match name with
-          | <span data-count="206">N</span>one -&gt; named_types
-          | <span data-count="314">S</span>ome name -&gt; String_map.ad<span data-count="314">d</span> name id named_types
-        in
-        let all_types = TypeMap.add str_type id all_types in
-        <span data-count="520">(</span>last_assigned_int, declared_types, named_types, all_types)
+let assign_type (acc : type_acc) (name, sub_type) : type_acc Result.t =
+  <span data-count="520">l</span>et { declared_types; func_types; named_types; last_assigned_int; all_types }
+      =
+    acc
+  in
+  let+ last_assigned_int, declared_types, named_types, all_types =
+    let _final, _indices, str_type = sub_type in
+    let+ str_type = Simplified_types.convert_st<span data-count="520">r</span> None str_type in
+    <span data-count="520">l</span>et id = last_assigned_int in
+    let last_assigned_int = succ last_assigned_int in
+    <span data-count="520">l</span>et declared_types =
+      { Indexed.index = id; value = str_type } :: declared_types
     in
-
-    (* Is there something to do/check when a type is already declared ? *)
-    { declared_types; func_types; named_types; last_assigned_int; all_types }
+    let named_types =
+      match name with
+      | <span data-count="206">N</span>one -&gt; named_types
+      | <span data-count="314">S</span>ome name -&gt; String_map.ad<span data-count="314">d</span> name id named_types
+    in
+    let all_types = TypeMap.add str_type id all_types in
+    <span data-count="520">(</span>last_assigned_int, declared_types, named_types, all_types)
   in
 
-  let empty_acc =
+  (* Is there something to do/check when a type is already declared ? *)
+  <span data-count="520">{</span> declared_types; func_types; named_types; last_assigned_int; all_types }
+
+let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
+  <span data-count="12132">l</span>et { func_types; last_assigned_int; all_types; _ } = acc in
+  let+ typ = Simplified_types.convert_func_typ<span data-count="12132">e</span> None typ in
+  <span data-count="12132">l</span>et typ = Def_func_t typ in
+  match TypeMap.find_opt typ all_types with
+  | <span data-count="6230">S</span>ome _id -&gt; acc
+  | <span data-count="5902">N</span>one -&gt;
+    let id = last_assigned_int in
+    let last_assigned_int = succ last_assigned_int in
+    <span data-count="5902">l</span>et all_types = TypeMap.add typ id all_types in
+    <span data-count="5902">l</span>et func_types =
+      match typ with
+      | <span data-count="5902">D</span>ef_func_t _ftype -&gt; { Indexed.index = id; value = typ } :: func_types
+      | <span data-count="0">D</span>ef_array_t (_mut, _storage_type) -&gt; func_types
+      | <span data-count="0">D</span>ef_struct_t _ -&gt; func_types
+    in
+    { acc with func_types; last_assigned_int; all_types }
+
+let assign_types (modul : Grouped.t) : str_type Named.t Result.t =
+  <span data-count="5867">l</span>et empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
     ; named_types = String_map.empty
@@ -461,30 +477,12 @@ let assign_types (modul : Grouped.t) : str_type Named.t =
     ; all_types = TypeMap.empty
     }
   in
-  let acc = List.fold_left assign_type empty_acc (List.re<span data-count="5867">v</span> modul.typ) in
-  <span data-count="5867">l</span>et assign_heap_type
-    ({ func_types; named_types = _; last_assigned_int; all_types; _ } as acc)
-    typ =
-    <span data-count="12132">l</span>et typ = Def_func_t (Simplified_types.convert_func_typ<span data-count="12132">e</span> None typ) in
-    match TypeMap.find_opt typ all_types with
-    | <span data-count="6230">S</span>ome _id -&gt; acc
-    | <span data-count="5902">N</span>one -&gt;
-      let id = last_assigned_int in
-      let last_assigned_int = last_assigned_int + 1 in
-      let all_types = TypeMap.add typ id all_types in
-      <span data-count="5902">l</span>et func_types =
-        match typ with
-        | <span data-count="5902">D</span>ef_func_t _ftype -&gt; { Indexed.index = id; value = typ } :: func_types
-        | <span data-count="0">D</span>ef_array_t (_mut, _storage_type) -&gt; func_types
-        | <span data-count="0">D</span>ef_struct_t _ -&gt; func_types
-      in
-      { acc with func_types; last_assigned_int; all_types }
-  in
-  let acc =
-    List.fold_left assign_heap_type acc (List.re<span data-count="5867">v</span> modul.function_type)
+  let* acc = list_fold_lef<span data-count="5867">t</span> assign_type empty_acc (List.re<span data-count="5867">v</span> modul.typ) in
+  <span data-count="5867">l</span>et+ acc =
+    list_fold_lef<span data-count="5867">t</span> assign_heap_type acc (List.re<span data-count="5867">v</span> modul.function_type)
   in
   <span data-count="5867">l</span>et values = List.re<span data-count="5867">v</span> acc.declared_types @ List.re<span data-count="5867">v</span> acc.func_types in
-  { values; named = acc.named_types }
+  { Named.values; named = acc.named_types }
 
 let get_runtime_name (get_name : 'a -&gt; string option) (elt : ('a, 'b) Runtime.t)
   : string option =
@@ -500,8 +498,8 @@ let name kind ~get_name values =
       if String_map.mem name named then <span data-count="6">e</span>rror_s "duplicate %s %s" kind name
       else <span data-count="8070">o</span>k @@ String_map.ad<span data-count="8070">d</span> name elt.index named
   in
-  let* named = list_fold_lef<span data-count="35190">t</span> assign_one String_map.empty values in
-  <span data-count="35184">O</span>k { Named.values; named }
+  let+ named = list_fold_lef<span data-count="35190">t</span> assign_one String_map.empty values in
+  <span data-count="35184">{</span> Named.values; named }
 
 let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
   <span data-count="20">l</span>et id, func_type = check in
@@ -517,7 +515,7 @@ let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
   <span data-count="20">m</span>atch List.find_opt (fun v -&gt; <span data-count="50">v</span>.Indexed.index = id) types.values with
   | <span data-count="2">N</span>one -&gt; Error "unknown type"
   | <span data-count="18">S</span>ome { value = Def_func_t func_type'; _ } -&gt;
-    let func_type = Simplified_types.convert_func_type None func_type in
+    let* func_type = Simplified_types.convert_func_typ<span data-count="18">e</span> None func_type in
     <span data-count="18">i</span>f not (equal_func_type<span data-count="18">s</span> func_type func_type') then
       <span data-count="8">E</span>rror "inline function type"
     else <span data-count="10">O</span>k ()
@@ -525,7 +523,7 @@ let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
 
 let of_grouped (modul : Grouped.t) : t Result.t =
   <span data-count="5867">L</span>og.debug "assigning    ...@\n";
-  <span data-count="5867">l</span>et typ = assign_types modul in
+  <span data-count="5867">l</span>et* typ = assign_type<span data-count="5867">s</span> modul in
   <span data-count="5867">l</span>et* global =
     nam<span data-count="5867">e</span> "global"
       ~get_name:(get_runtime_nam<span data-count="5867">e</span> (fun ({ id; _ } : Symbolic.global) -&gt; <span data-count="1204">i</span>d))
@@ -552,19 +550,18 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   <span data-count="5861">l</span>et* data =
     nam<span data-count="5861">e</span> "data" ~get_name:(fun (data : Symbolic.data) -&gt; <span data-count="820">d</span>ata.id) modul.data
   in
-  <span data-count="5861">l</span>et* () = list_ite<span data-count="5861">r</span> (check_type_i<span data-count="5861">d</span> typ) modul.type_checks in
-  <span data-count="5851">O</span>k
-    { id = modul.id
-    ; typ
-    ; global
-    ; table
-    ; mem
-    ; func
-    ; elem
-    ; data
-    ; exports = modul.exports
-    ; start = modul.start
-    }
+  <span data-count="5861">l</span>et+ () = list_ite<span data-count="5861">r</span> (check_type_i<span data-count="5861">d</span> typ) modul.type_checks in
+  <span data-count="5851">{</span> id = modul.id
+  ; typ
+  ; global
+  ; table
+  ; mem
+  ; func
+  ; elem
+  ; data
+  ; exports = modul.exports
+  ; start = modul.start
+  }
 </code></pre>
       </div>
     </div>
