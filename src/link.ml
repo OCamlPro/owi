@@ -37,7 +37,7 @@ let empty_state =
   { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
 
 module Const_interp = struct
-  type env = Env.t
+  type env = Env.Build.t
 
   let exec_ibinop stack nn (op : Const.ibinop) =
     match nn with
@@ -61,12 +61,12 @@ module Const_interp = struct
     | I_binop (nn, op) -> ok @@ exec_ibinop stack nn op
     | Ref_null t -> ok @@ Stack.push stack (Value.ref_null t)
     | Ref_func f ->
-      let* f = Env.get_func env f in
+      let* f = Env.Build.get_func env f in
       let value = Value.Ref (Funcref (Some f)) in
       ok @@ Stack.push stack value
     | Global_get id ->
-      let* g = Env.get_global env id in
-      ok @@ Stack.push stack g.value
+      let* g = Env.Build.get_const_global env id in
+      ok @@ Stack.push stack g
     | Array_new _i ->
       let len, stack = Stack.pop_i32_to_int stack in
       (* TODO: check type of *default* *)
@@ -126,7 +126,7 @@ let eval_global ls env (global : (Simplified.global, global_type) Runtime.t) :
     Ok global
   | Imported import -> load_global ls import
 
-let eval_globals ls env globals : Env.t Result.t =
+let eval_globals ls env globals : Env.Build.t Result.t =
   Named.fold
     (fun id global env ->
       let* env in
@@ -333,7 +333,7 @@ let modul (ls : state) ~name (modul : modul) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
-  let* env_and_init_active_data_and_elem =
+  let* (env, init_active_data, init_active_elem) =
     let rec env_and_init_active_data_and_elem =
       lazy
         (let env = Env.Build.empty in
@@ -355,12 +355,14 @@ let modul (ls : state) ~name (modul : modul) =
         (let env, _init_active_data, _init_active_elem =
            Lazy.force env_and_init_active_data_and_elem
          in
-         env )
+         Env.freeze env )
     in
-    Ok env_and_init_active_data_and_elem
-  in
-  let* env, init_active_data, init_active_elem =
-    try Ok (Lazy.force env_and_init_active_data_and_elem)
+    try
+      let env = Lazy.force finished_env in
+      let _env, init_active_data, init_active_elem =
+        Lazy.force env_and_init_active_data_and_elem
+      in
+      Ok (env, init_active_data, init_active_elem)
     with E msg -> Error msg
   in
   let* by_id_exports = populate_exports env modul.exports in

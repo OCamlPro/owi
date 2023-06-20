@@ -108,6 +108,14 @@ module Build = struct
   let add_data id data env = { env with data = IMap.add id data env.data }
 
   let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
+
+  let get_const_global (env : t) id =
+    let* g = get_global env id in
+    match g.mut with
+    | Const -> ok g.value
+    | Var -> Error "constant expression required"
+
+  let get_func = get_func
 end
 
 let freeze t = t

@@ -25,7 +25,7 @@ val drop_data : data -> unit
 val pp : Format.formatter -> t -> unit
 
 module Build : sig
-  type nonrec t = t
+  type t
 
   val empty : t
 
@@ -40,6 +40,10 @@ module Build : sig
   val add_data : int -> data -> t -> t
 
   val add_elem : int -> t' elem -> t -> t
+
+  val get_const_global : t -> int -> t' Value.t Result.t
+
+  val get_func : t -> int -> t' Value.Func.t Result.t
 end
 
 val freeze : Build.t -> t
