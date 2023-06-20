@@ -4,13 +4,13 @@ open Owi.Types.Symbolic
 module S = Type_stack
 module B = Basic
 
-let expr_always_available _block _expr ~locals:_ env =
+let expr_always_available block expr ~locals ~stack env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
-  (* ; block expr ~locals env *)
+  ; block expr ~locals ~stack env
     (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
   ]
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
@@ -135,6 +135,7 @@ let if_else expr ~locals ~stack env =
   match stack with
   | Num_type I32 :: stack -> begin
     let* rt = list B.val_type in
+    (* let* pt = const [] in *)
     let* pt = B.stack_prefix stack in
     
     let typ = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt)) in
@@ -153,18 +154,24 @@ let if_else expr ~locals ~stack env =
   end
   | _ -> assert false
 
-let block expr ~locals env =
+let block expr ~locals ~stack:_ env =
   let* rt = list B.val_type in
   let* pt = const [] in
-  (* let* pt = if List.length stack > 0 then B.stack_prefix stack else const [] in *)
-  let typ = Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, rt)) in
+  (* let* pt = B.stack_prefix stack in *)
+  let typ = Arg.Bt_raw (None, (List.map (fun t -> (None, t)) pt, List.rev rt)) in
+
   (* add_block *)
+  let id = Env.add_block env typ in
+
   let* expr = expr ~block_type:typ ~stack:pt ~locals ~start:false env in
+
   (* rm_block *)
-  let instr = Block (None, Some typ, expr) in
-  let pt_descr = List.map (fun _ -> S.Pop) pt in
-  let rt_descr = List.map (fun t -> S.Push t) rt in
-  pair (const instr) (const (pt_descr @ rt_descr))
+  Env.remove_block env;
+
+  let+ instr = const @@ Block (Some id, Some typ, expr)
+  and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
+  and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
+  (instr, pt_descr @ rt_descr)
 
 let rec expr ~block_type ~stack ~locals ~start env =
   let _pt, rt =
@@ -219,9 +226,10 @@ let rec expr ~block_type ~stack ~locals ~start env =
       | _ -> []
     in
     let expr_available env =
-      expr_always_available block expr ~locals env
+      expr_always_available block expr ~locals ~stack env
       @ expr_available_with_current_stack
       @ if start then B.expr_call env stack else []
+      @ B.expr_br env stack
     in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in

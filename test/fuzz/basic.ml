@@ -468,7 +468,7 @@ let expr_call (env : Env.t) (stack : val_type list) =
   List.filter_map
     (fun (name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt)) when S.is_stack_compatible stack (List.rev pt)
+      | Arg.Bt_raw (_, (pt, rt)) when S.is_stack_compatible_1 stack (List.rev pt)
         ->
         Some
           (pair
@@ -476,6 +476,21 @@ let expr_call (env : Env.t) (stack : val_type list) =
              (const (stack_pt pt @ stack_rt rt)) )
       | _ -> None )
     env.funcs
+
+let expr_br (env : Env.t) (stack : val_type list) =
+  let stack_pt = List.map (fun _ -> S.Pop) in
+  let stack_rt = List.map (fun vt -> S.Push vt) in
+  List.filter_map
+    (fun (name, bt) ->
+      match bt with
+      | Arg.Bt_raw (_, (pt, rt)) when S.is_stack_compatible_2 stack (List.rev rt)
+        ->
+        Some
+          (pair
+              (const (Br (Symbolic name)))
+              (const (stack_pt pt @ stack_rt rt)) )
+      | _ -> None )
+    env.blocks
 
 let stack_prefix (stack : val_type list) =
   match List.length stack with
