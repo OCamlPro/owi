@@ -1,19 +1,9 @@
 (** Module to define externref values in OCaml. You should look in the `example`
     directory to understand how to use this before reading the code... *)
 
-type ('a, 'b) eq = Eq : ('a, 'a) eq
+type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Extern_ref : sig
-  type 'a ty
-
-  val fresh : string -> 'a ty
-
-  val name : 'a ty -> string
-
-  val eq : 'a ty -> 'b ty -> ('a, 'b) eq option
-end
-
-type externref = E : 'a Extern_ref.ty * 'a -> externref
+type externref = E : 'a Type_id.ty * 'a -> externref
 
 module Func : sig
   type _ telt =
@@ -21,7 +11,7 @@ module Func : sig
     | I64 : Int64.t telt
     | F32 : Float32.t telt
     | F64 : Float64.t telt
-    | Externref : 'a Extern_ref.ty -> 'a telt
+    | Externref : 'a Type_id.ty -> 'a telt
 
   type _ rtype =
     | R0 : unit rtype
@@ -60,7 +50,7 @@ type 'a t =
   | F64 of Float64.t
   | Ref of 'a ref_value
 
-val cast_ref : externref -> 'a Extern_ref.ty -> 'a option
+val cast_ref : externref -> 'a Type_id.ty -> 'a option
 
 val of_instr : Simplified.instr -> _ t
 

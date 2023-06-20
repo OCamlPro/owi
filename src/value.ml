@@ -1,35 +1,4 @@
-type ('a, 'b) eq = Eq : ('a, 'a) eq
-
-module Extern_ref : sig
-  type 'a ty
-
-  val fresh : string -> 'a ty
-
-  val name : _ ty -> string
-
-  val eq : 'a ty -> 'b ty -> ('a, 'b) eq option
-end = struct
-  type _ externref_ty = ..
-
-  type 'a ty =
-    { name : string
-    ; witness : 'a externref_ty
-    ; test : 'ty. 'ty externref_ty -> ('a, 'ty) eq option
-    }
-
-  let fresh (type t) name : t ty =
-    let module M = struct
-      type _ externref_ty += T : t externref_ty
-    end in
-    let test (type a) (witness : a externref_ty) : (t, a) eq option =
-      match witness with M.T -> Some Eq | _ -> None
-    in
-    { name; test; witness = M.T }
-
-  let name { name; _ } = name
-
-  let eq a b = a.test b.witness
-end
+type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 module Func = struct
   type _ telt =
@@ -37,7 +6,7 @@ module Func = struct
     | I64 : Int64.t telt
     | F32 : Float32.t telt
     | F64 : Float64.t telt
-    | Externref : 'a Extern_ref.ty -> 'a telt
+    | Externref : 'a Type_id.ty -> 'a telt
 
   type _ rtype =
     | R0 : unit rtype
@@ -96,11 +65,11 @@ module Func = struct
     | Extern (Extern_func (t, _f)) -> extern_type t
 end
 
-type externref = E : 'a Extern_ref.ty * 'a -> externref
+type externref = E : 'a Type_id.ty * 'a -> externref
 
-let cast_ref (type r) (E (rty, r) : externref) (ty : r Extern_ref.ty) : r option
+let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option
     =
-  match Extern_ref.eq rty ty with None -> None | Some Eq -> Some r
+  match Type_id.eq rty ty with None -> None | Some Eq -> Some r
 
 type 'env ref_value =
   | Externref of externref option

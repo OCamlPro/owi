@@ -133,12 +133,12 @@ let pop_as_ref s =
     | _ -> Log.err "invalid type (expected ref)"
   with Empty -> Log.err "invalid type (expected ref)"
 
-let pop_as_externref (type ty) (ty : ty Value.Extern_ref.ty) s : ty * 'env t =
+let pop_as_externref (type ty) (ty : ty Type_id.ty) s : ty * 'env t =
   try
     let hd, tl = pop s in
     match hd with
     | Ref (Externref (Some (E (ety, hd)))) -> begin
-      match Value.Extern_ref.eq ty ety with
+      match Type_id.eq ty ety with
       | None -> Log.err "invalid type (externref)"
       | Some Eq -> (hd, tl)
     end

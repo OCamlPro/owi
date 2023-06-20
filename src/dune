@@ -13,6 +13,7 @@
   int32
   int64
   interpret
+  type_id
   lexer
   memory
   table
