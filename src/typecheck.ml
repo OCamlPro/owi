@@ -284,8 +284,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let t = Env.global_get i env in
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
+    let block_type =
+      Option.map (fun (pt, rt) -> (List.rev pt, rt)) block_type
+    in
     let* stack = Stack.pop [ i32 ] stack in
-    let stack = List.rev stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let* _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     Ok stack_e1
@@ -492,7 +494,7 @@ and typecheck_expr env expr ~is_loop (block_type : func_type option)
   in
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let* stack = list_fold_left (typecheck_instr env) (List.rev pt) expr in
+  let* stack = list_fold_left (typecheck_instr env) pt expr in
   if not (Stack.equal rt stack) then
     error_s "type mismatch block %a" Stack.pp_error (rt, stack)
   else
