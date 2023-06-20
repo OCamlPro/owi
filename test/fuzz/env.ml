@@ -7,10 +7,12 @@ type t =
   ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
+  ; mutable next_block : int
   ; mutable datas : string list
   ; mutable memory : string option
   ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
+  ; mutable blocks : (string * block_type) list
   ; mutable funcs : (string * block_type) list
   ; mutable fuel : int
   }
@@ -21,15 +23,19 @@ let empty () =
   ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
+  ; next_block = 0
   ; datas = []
   ; memory = None
   ; globals = []
   ; locals = []
+  ; blocks = []
   ; funcs = []
   ; fuel = Param.initial_fuel
   }
 
 let reset_locals env = env.locals <- []
+
+let remove_block env = env.blocks <- List.tl env.blocks
 
 let add_data env =
   let n = env.next_data in
@@ -60,6 +66,13 @@ let add_local env typ =
   let name = Format.sprintf "l%d" n in
   env.locals <- (name, typ) :: env.locals;
   env.next_local <- succ n;
+  name
+
+let add_block env typ =
+  let n = env.next_block in
+  let name = Format.sprintf "b%d" n in
+  env.blocks <- (name, typ) :: env.blocks;
+  env.next_block <- succ n;
   name
 
 let add_func env typ =
