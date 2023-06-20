@@ -884,7 +884,7 @@ open Simplified
 open Value
 
 let rec optimize_expr expr =
-  <span data-count="28069">m</span>atch expr with
+  <span data-count="28074">m</span>atch expr with
   | <span data-count="8">(</span>(<span data-count="5">I</span>32_const _ | <span data-count="3">I</span>64_const _) as x)
     :: ((<span data-count="5">I</span>32_const _ | <span data-count="3">I</span>64_const _) as y)
     :: (I_binop (nn, op) as i_binop)
@@ -1038,7 +1038,7 @@ let rec optimize_expr expr =
     <span data-count="65">o</span>ptimize_expr (Local_tee x :: tl)
   | <span data-count="1">L</span>ocal_get _ :: Drop :: tl -&gt; optimize_expr tl
   | <span data-count="1">G</span>lobal_get _ :: Drop :: tl -&gt; optimize_expr tl
-  | <span data-count="249">(</span>Br _ as br) :: _tl -&gt; [ br ]
+  | <span data-count="250">(</span>Br _ as br) :: _tl -&gt; [ br ]
   | <span data-count="78">I</span>32_const c :: Br_if l :: tl -&gt; begin
     match c with <span data-count="3">0</span>l -&gt; optimize_expr tl | <span data-count="75">_</span> -&gt; [ Br l ]
   end
@@ -1053,10 +1053,10 @@ let rec optimize_expr expr =
     :: Select _ :: tl -&gt; begin
     match c with <span data-count="1">0</span>l -&gt; optimize_expr (v2 :: tl) | <span data-count="0">_</span> -&gt; optimize_expr (v1 :: tl)
   end
-  | <span data-count="787">B</span>lock (n, bt, e) :: tl -&gt; begin
+  | <span data-count="788">B</span>lock (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
     | <span data-count="24">[</span>] -&gt; optimize_expr tl
-    | <span data-count="763">o</span>e -&gt; Block (n, bt, oe) :: optimize_exp<span data-count="763">r</span> tl
+    | <span data-count="764">o</span>e -&gt; Block (n, bt, oe) :: optimize_exp<span data-count="764">r</span> tl
   end
   | <span data-count="211">L</span>oop (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
@@ -1072,25 +1072,25 @@ let rec optimize_expr expr =
     | <span data-count="7">[</span>], [] -&gt; Drop :: optimize_exp<span data-count="7">r</span> tl
     | <span data-count="232">o</span>e1, oe2 -&gt; If_else (n, bt, oe1, oe2) :: optimize_exp<span data-count="232">r</span> tl
   end
-  | <span data-count="20133">h</span>d :: tl -&gt; hd :: optimize_exp<span data-count="20133">r</span> tl
-  | <span data-count="5521">[</span>] -&gt; []
+  | <span data-count="20135">h</span>d :: tl -&gt; hd :: optimize_exp<span data-count="20135">r</span> tl
+  | <span data-count="5522">[</span>] -&gt; []
 
 let locals_func body_expr =
-  <span data-count="4637">l</span>et locals_hashtbl = Hashtbl.create 16 in
-  <span data-count="4637">l</span>et rec aux_instr instr =
-    <span data-count="21935">m</span>atch instr with
+  <span data-count="4638">l</span>et locals_hashtbl = Hashtbl.create 16 in
+  <span data-count="4638">l</span>et rec aux_instr instr =
+    <span data-count="21939">m</span>atch instr with
     | <span data-count="3707">L</span>ocal_get ind | <span data-count="1308">L</span>ocal_set ind | <span data-count="178">L</span>ocal_tee ind -&gt;
       Hashtbl.add locals_hashtbl ind ()
-    | <span data-count="763">B</span>lock (_, _, e) -&gt; aux_expr e
+    | <span data-count="764">B</span>lock (_, _, e) -&gt; aux_expr e
     | <span data-count="204">L</span>oop (_, _, e) -&gt; aux_expr e
     | <span data-count="232">I</span>f_else (_, _, e1, e2) -&gt;
       aux_expr e1;
       <span data-count="232">a</span>ux_expr e2
     | <span data-count="1">I</span>64_extend32_s | <span data-count="14">I</span>32_wrap_i64 | <span data-count="8">F</span>32_demote_f64 | <span data-count="15">F</span>64_promote_f32
-    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="296">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="66">M</span>emory_grow
+    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="297">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="66">M</span>emory_grow
     | <span data-count="118">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="97">U</span>nreachable | <span data-count="223">R</span>eturn | <span data-count="0">A</span>rray_len
     | <span data-count="0">I</span>31_get_u | <span data-count="0">I</span>31_get_s | <span data-count="0">I</span>31_new | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
-    | <span data-count="6890">I</span>32_const _ | <span data-count="341">I</span>64_const _ | <span data-count="371">F</span>32_const _ | <span data-count="378">F</span>64_const _
+    | <span data-count="6891">I</span>32_const _ | <span data-count="341">I</span>64_const _ | <span data-count="371">F</span>32_const _ | <span data-count="378">F</span>64_const _
     | <span data-count="21">I</span>_unop (_, _)
     | <span data-count="108">F</span>_unop (_, _)
     | <span data-count="527">I</span>_binop (_, _)
@@ -1121,7 +1121,7 @@ let locals_func body_expr =
     | <span data-count="30">I</span>64_load32 (_, _)
     | <span data-count="51">I</span>_store8 (_, _)
     | <span data-count="30">I</span>_store16 (_, _)
-    | <span data-count="14">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="324">B</span>r _ | <span data-count="98">B</span>r_if _
+    | <span data-count="14">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="325">B</span>r _ | <span data-count="98">B</span>r_if _
     | <span data-count="152">B</span>r_table (_, _)
     | <span data-count="0">B</span>r_on_cast (_, _, _)
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
@@ -1140,13 +1140,13 @@ let locals_func body_expr =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       ()
-  and aux_expr expr = <span data-count="6068">L</span>ist.iter aux_instr expr in
+  and aux_expr expr = <span data-count="6070">L</span>ist.iter aux_instr expr in
   aux_expr body_expr;
-  <span data-count="4637">l</span>ocals_hashtbl
+  <span data-count="4638">l</span>ocals_hashtbl
 
 let locals_used_in_func locals nb_args body_expr =
-  <span data-count="4637">l</span>et loc_hashtbl = locals_func body_expr in
-  <span data-count="4637">l</span>et remove_local idx body_expr =
+  <span data-count="4638">l</span>et loc_hashtbl = locals_func body_expr in
+  <span data-count="4638">l</span>et remove_local idx body_expr =
     <span data-count="42">l</span>et rec aux_instr instr =
       <span data-count="69">m</span>atch instr with
       | <span data-count="11">L</span>ocal_get ind when ind &gt;= idx -&gt; <span data-count="4">L</span>ocal_get (ind - 1)
@@ -1221,30 +1221,30 @@ let locals_used_in_func locals nb_args body_expr =
     | <span data-count="1248">S</span>ome _ -&gt; (idx + 1, List.appen<span data-count="1248">d</span> param_l [ param ], body_expr)
   in
   let _, l, b = List.fold_left loop (0, [], body_expr) locals in
-  <span data-count="4637">(</span>l, b)
+  <span data-count="4638">(</span>l, b)
 
 let optimize_func func =
-  <span data-count="4637">l</span>et { type_f; locals; body; id } = func in
+  <span data-count="4638">l</span>et { type_f; locals; body; id } = func in
   let body = optimize_expr body in
-  <span data-count="4637">l</span>et pt, _ = type_f in
+  <span data-count="4638">l</span>et pt, _ = type_f in
   let nb_args = List.length pt in
-  <span data-count="4637">l</span>et locals, body = locals_used_in_func locals nb_args body in
-  <span data-count="4637">{</span> type_f; locals; body; id }
+  <span data-count="4638">l</span>et locals, body = locals_used_in_func locals nb_args body in
+  <span data-count="4638">{</span> type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  <span data-count="6171">l</span>et { Indexed.value; Indexed.index } = f in
+  <span data-count="6183">l</span>et { Indexed.value; Indexed.index } = f in
   match value with
-  | <span data-count="1534">R</span>untime.Imported _ -&gt; f
-  | <span data-count="4637">L</span>ocal f -&gt;
-    let value = Runtime.Local (optimize_fun<span data-count="4637">c</span> f) in
+  | <span data-count="1545">R</span>untime.Imported _ -&gt; f
+  | <span data-count="4638">L</span>ocal f -&gt;
+    let value = Runtime.Local (optimize_fun<span data-count="4638">c</span> f) in
     { value; index }
 
-let optimize_funcs funs = <span data-count="1439">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1441">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1439">L</span>og.debug "optimizing   ...@\n";
-  <span data-count="1439">l</span>et func = optimize_funcs m.func in
-  <span data-count="1439">{</span> m with func }
+  <span data-count="1441">L</span>og.debug "optimizing   ...@\n";
+  <span data-count="1441">l</span>et func = optimize_funcs m.func in
+  <span data-count="1441">{</span> m with func }
 </code></pre>
       </div>
     </div>

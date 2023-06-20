@@ -69,13 +69,13 @@ type 'a t =
   }
 
 let fold f v acc =
-  <span data-count="22061">L</span>ist.fold_left (fun acc v -&gt; <span data-count="32326">f</span> v.index v.value acc) acc v.values
+  <span data-count="22089">L</span>ist.fold_left (fun acc v -&gt; <span data-count="32388">f</span> v.index v.value acc) acc v.values
 
 let iter f v = <span data-count="0">L</span>ist.iter (fun v -&gt; <span data-count="0">f</span> v.index v.value) v.values
 
 let map f v =
-  <span data-count="1439">l</span>et values = List.map f v.values in
-  <span data-count="1439">{</span> v with values }
+  <span data-count="1441">l</span>et values = List.map f v.values in
+  <span data-count="1441">{</span> v with values }
 </code></pre>
       </div>
     </div>

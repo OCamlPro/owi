@@ -407,28 +407,28 @@ module Func = struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : Simplified.val_type =
-    <span data-count="2980">m</span>atch e with
-    | <span data-count="1511">I</span>32 -&gt; Num_type I32
-    | <span data-count="243">I</span>64 -&gt; Num_type I64
-    | <span data-count="486">F</span>32 -&gt; Num_type F32
-    | <span data-count="737">F</span>64 -&gt; Num_type F64
+    <span data-count="3004">m</span>atch e with
+    | <span data-count="1523">I</span>32 -&gt; Num_type I32
+    | <span data-count="245">I</span>64 -&gt; Num_type I64
+    | <span data-count="490">F</span>32 -&gt; Num_type F32
+    | <span data-count="743">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : Simplified.result_type =
-    <span data-count="2736">m</span>atch r with
-    | <span data-count="2256">R</span>0 -&gt; []
-    | <span data-count="480">R</span>1 a -&gt; [ elt_typ<span data-count="480">e</span> a ]
+    <span data-count="2758">m</span>atch r with
+    | <span data-count="2274">R</span>0 -&gt; []
+    | <span data-count="484">R</span>1 a -&gt; [ elt_typ<span data-count="484">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; Simplified.param_type = function
-    | <span data-count="2500">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2500">e</span> hd) :: arg_typ<span data-count="2500">e</span> tl
+    | <span data-count="2520">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2520">e</span> hd) :: arg_typ<span data-count="2520">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="2736">R</span>es -&gt; []
+    | <span data-count="2758">R</span>es -&gt; []
 
   let extern_type (Func (arg, res)) : Simplified.func_type =
-    <span data-count="2736">(</span>arg_typ<span data-count="2736">e</span> arg, res_typ<span data-count="2736">e</span> res)
+    <span data-count="2758">(</span>arg_typ<span data-count="2758">e</span> arg, res_typ<span data-count="2758">e</span> res)
 
   type 'env t =
     | WASM of int * Simplified.func * 'env
@@ -437,14 +437,14 @@ module Func = struct
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="9276">i</span>ncr r;
-      <span data-count="9276">!</span>r
+      <span data-count="9278">i</span>ncr r;
+      <span data-count="9278">!</span>r
 
-  let wasm func env : 'env t = <span data-count="9276">W</span>ASM (fres<span data-count="9276">h</span> (), func, env)
+  let wasm func env : 'env t = <span data-count="9278">W</span>ASM (fres<span data-count="9278">h</span> (), func, env)
 
   let typ = function
     | <span data-count="1602378">W</span>ASM (_, func, _env) -&gt; func.type_f
-    | <span data-count="2736">E</span>xtern (Extern_func (t, _f)) -&gt; extern_type t
+    | <span data-count="2758">E</span>xtern (Extern_func (t, _f)) -&gt; extern_type t
 end
 
 type externref = E : 'a Extern_ref.ty * 'a -&gt; externref
@@ -493,7 +493,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref fmt r
 
 let ref_null' = function
-  | <span data-count="847">S</span>implified.Func_ht -&gt; Funcref None
+  | <span data-count="849">S</span>implified.Func_ht -&gt; Funcref None
   | <span data-count="117">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">_</span> -&gt; failwith "TODO ref_null' Value.ml"
 
