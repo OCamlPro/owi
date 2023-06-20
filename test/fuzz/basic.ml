@@ -469,7 +469,7 @@ let expr_call (env : Env.t) (stack : val_type list) =
     (fun (name, bt) ->
       match bt with
       | Arg.Bt_raw (_, (pt, rt))
-        when S.is_stack_compatible_1 stack (List.rev pt) ->
+        when S.is_stack_compatible_param stack (List.rev pt) ->
         Some
           (pair
              (const (Call (Symbolic name)))
@@ -484,7 +484,7 @@ let expr_br (env : Env.t) (stack : val_type list) =
     (fun (name, bt) ->
       match bt with
       | Arg.Bt_raw (_, (pt, rt))
-        when S.is_stack_compatible_2 stack (List.rev rt) ->
+        when S.is_stack_compatible stack (List.rev rt) ->
         Some
           (pair
              (const (Br (Symbolic name)))

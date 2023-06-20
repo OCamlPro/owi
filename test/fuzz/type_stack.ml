@@ -13,14 +13,12 @@ let apply_stack_op stack op =
 
 let apply_stack_ops stack ops = List.fold_left apply_stack_op stack ops
 
-let rec is_stack_compatible_1 stack pt =
-  match (stack, pt) with
+let rec is_stack_compatible st1 st2 =
+  match (st1, st2) with
   | _, [] -> true
   | [], _ -> false
-  | s :: st, (_, vt) :: pt -> s = vt && is_stack_compatible_1 st pt
+  | s1 :: st1, s2 :: st2 -> s1 = s2 && is_stack_compatible st1 st2
 
-let rec is_stack_compatible_2 st vt =
-  match (st, vt) with
-  | _, [] -> true
-  | [], _ -> false
-  | s :: st, v :: vt -> s = v && is_stack_compatible_2 st vt
+let is_stack_compatible_param stack pt =
+  let s = List.map (fun p -> snd p) pt in
+  is_stack_compatible stack s
