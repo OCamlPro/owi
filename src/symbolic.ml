@@ -145,7 +145,7 @@ module Pp = struct
   let data_mode fmt = function
     | Data_passive -> ()
     | Data_active (i, e) ->
-      Format.fprintf fmt "(%a %a)" symb_indice_opt i expr e
+      Format.fprintf fmt "(memory %a) (offset %a)" symb_indice_opt i expr e
 
   let data fmt (d : data) =
     Format.fprintf fmt {|(data %a %a %S)|} id_opt d.id data_mode d.mode d.init
