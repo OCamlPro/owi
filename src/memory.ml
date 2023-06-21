@@ -31,3 +31,18 @@ let get_data { data; _ } = data
 let get_limit_max { limits; _ } = limits.max
 
 let get_limits { limits; _ } = limits
+
+let store_8 mem ~addr n =
+  let addr = Int32.to_int addr in
+  let n = Int32.to_int n in
+  Bytes.set_int8 mem.data addr n
+
+let load_8_s mem addr =
+  let addr = Int32.to_int addr in
+  Int32.of_int @@ Bytes.get_int8 mem.data addr
+
+let load_8_u mem addr =
+  let addr = Int32.to_int addr in
+  Int32.of_int @@ Bytes.get_uint8 mem.data addr
+
+let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
