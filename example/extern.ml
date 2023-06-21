@@ -3,7 +3,7 @@ open Owi
 (* an extern module that will be linked with a wasm module *)
 let extern_module : Link.extern_module =
   (* some custom functions *)
-  let rint : int32 ref Value.Extern_ref.ty = Value.Extern_ref.fresh "int ref" in
+  let rint : int32 ref Type_id.ty = Type_id.fresh "int ref" in
   let fresh i = ref i in
   let set r (i : int32) = r := i in
   let get r : int32 = !r in
