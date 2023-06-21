@@ -30,3 +30,17 @@ module V : Value_intf.T = struct
   module F32 = Float32
   module F64 = Float64
 end
+
+(* module P : Interpret_functor_intf.P = struct *)
+(*   type vbool = bool *)
+
+(*   type int32 = Int32.t *)
+
+(*   type int64 = Int64.t *)
+
+(*   type float32 = Float32.t *)
+
+(*   type float64 = Float64.t *)
+
+(*   module V *)
+(* end *)
