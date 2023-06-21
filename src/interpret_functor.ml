@@ -13,6 +13,7 @@ module Int64 = P.Value.I64
 module Float32 = P.Value.F32
 module Float64 = P.Value.F64
 module Stack = Stack_functor.Make(P.Value)
+module Choice = P.Choice
 
 module Log : sig
   [@@@ocaml.warning "-32"]
@@ -398,24 +399,26 @@ let exec_frelop stack nn (op : frelop) =
 (*       Stack.push_f64 stack n *)
 (*   end *)
 
-(* let init_local (_id, t) : Env.t' Value.t = *)
-(*   match t with *)
-(*   | Num_type I32 -> I32 Int32.zero *)
-(*   | Num_type I64 -> I64 Int64.zero *)
-(*   | Num_type F32 -> F32 Float32.zero *)
-(*   | Num_type F64 -> F64 Float64.zero *)
-(*   | Ref_type (_null, rt) -> Value.ref_null rt *)
+let init_local (_id, t) : P.Env.t' P.Value.t =
+  match t with
+  | Num_type I32 -> I32 Int32.zero
+  | Num_type I64 -> I64 Int64.zero
+  | Num_type F32 -> F32 Float32.zero
+  | Num_type F64 -> F64 Float64.zero
+  | Ref_type (_null, rt) -> P.Value.ref_null rt
 
-(* (\* TODO move to module Env *\) *)
-(* let mem_0 = 0 *)
+(* TODO move to module Env *)
+let mem_0 = 0
 
-(* let ( let* ) o f = Result.fold ~ok:f ~error:trap o *)
+let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
-(* let get_memory (env : Env.t) idx = *)
-(*   let* mem = Env.get_memory env idx in *)
+(* let get_memory (env : P.Env.t) idx = *)
+(*   let* mem = P.Env.get_memory env idx in *)
 (*   Ok Memory.(get_data mem, get_limit_max mem) *)
 
-(* let get_memory_raw env idx = Env.get_memory env idx *)
+(* let get_memory_raw env idx = P.Env.get_memory env idx *)
+
+let exec_extern_func _stack (_f : Value.Func.extern_func) = failwith "TOuDOUx"
 
 (* let exec_extern_func stack (f : Value.Func.extern_func) = *)
 (*   let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t = *)
@@ -473,155 +476,155 @@ let exec_frelop stack nn (op : frelop) =
 (*   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) -> *)
 (*     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4 *)
 
-(* module State = struct *)
-(*   type stack = Env.t' Stack.t *)
+module State = struct
+  type stack = P.Env.t' Stack.t
 
-(*   type value = Env.t' Value.t *)
+  type value = P.Env.t' P.Value.t
 
-(*   type locals = value array *)
+  type locals = value array
 
-(*   type pc = instr list *)
+  type pc = instr list
 
-(*   type block = *)
-(*     { branch : pc *)
-(*     ; branch_rt : result_type *)
-(*     ; continue : pc *)
-(*     ; continue_rt : result_type *)
-(*     ; stack : stack *)
-(*     ; is_loop : bool *)
-(*     } *)
+  type block =
+    { branch : pc
+    ; branch_rt : result_type
+    ; continue : pc
+    ; continue_rt : result_type
+    ; stack : stack
+    ; is_loop : bool
+    }
 
-(*   type block_stack = block list *)
+  type block_stack = block list
 
-(*   type count = *)
-(*     { name : string option *)
-(*     ; mutable enter : int *)
-(*     ; mutable instructions : int *)
-(*     ; calls : (indice, count) Hashtbl.t *)
-(*     } *)
+  type count =
+    { name : string option
+    ; mutable enter : int
+    ; mutable instructions : int
+    ; calls : (indice, count) Hashtbl.t
+    }
 
-(*   type exec_state = *)
-(*     { return_state : exec_state option *)
-(*     ; stack : stack *)
-(*     ; locals : locals *)
-(*     ; pc : pc *)
-(*     ; block_stack : block_stack *)
-(*     ; func_rt : result_type *)
-(*     ; env : Env.t *)
-(*     ; count : count *)
-(*     } *)
+  type exec_state =
+    { return_state : exec_state option
+    ; stack : stack
+    ; locals : locals
+    ; pc : pc
+    ; block_stack : block_stack
+    ; func_rt : result_type
+    ; env : P.Env.t
+    ; count : count
+    }
 
-(*   let rec print_count ppf count = *)
-(*     let calls ppf tbl = *)
-(*       let l = *)
-(*         List.sort (fun (id1, _) (id2, _) -> compare id1 id2) *)
-(*         @@ List.of_seq @@ Hashtbl.to_seq tbl *)
-(*       in *)
-(*       match l with *)
-(*       | [] -> () *)
-(*       | _ :: _ -> *)
-(*         Format.fprintf ppf "@ @[<v 2>calls@ %a@]" *)
-(*           (Format.pp_print_list *)
-(*              ~pp_sep:(fun ppf () -> Format.fprintf ppf "@ ") *)
-(*              (fun ppf (id, count) -> *)
-(*                let name ppf = function *)
-(*                  | None -> () *)
-(*                  | Some name -> Format.fprintf ppf " %s" name *)
-(*                in *)
-(*                Format.fprintf ppf "@[<v 2>id %i%a@ %a@]" id name count.name *)
-(*                  print_count count ) ) *)
-(*           l *)
-(*     in *)
-(*     Format.fprintf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter *)
-(*       count.instructions calls count.calls *)
+  let rec print_count ppf count =
+    let calls ppf tbl =
+      let l =
+        List.sort (fun (id1, _) (id2, _) -> compare id1 id2)
+        @@ List.of_seq @@ Hashtbl.to_seq tbl
+      in
+      match l with
+      | [] -> ()
+      | _ :: _ ->
+        Format.fprintf ppf "@ @[<v 2>calls@ %a@]"
+          (Format.pp_print_list
+             ~pp_sep:(fun ppf () -> Format.fprintf ppf "@ ")
+             (fun ppf (id, count) ->
+               let name ppf = function
+                 | None -> ()
+                 | Some name -> Format.fprintf ppf " %s" name
+               in
+               Format.fprintf ppf "@[<v 2>id %i%a@ %a@]" id name count.name
+                 print_count count ) )
+          l
+    in
+    Format.fprintf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter
+      count.instructions calls count.calls
 
-(*   let empty_count name = *)
-(*     { name; enter = 0; instructions = 0; calls = Hashtbl.create 0 } *)
+  let empty_count name =
+    { name; enter = 0; instructions = 0; calls = Hashtbl.create 0 }
 
-(*   let count_instruction state = *)
-(*     state.count.instructions <- state.count.instructions + 1 *)
+  let count_instruction state =
+    state.count.instructions <- state.count.instructions + 1
 
-(*   let enter_function_count count func_name func = *)
-(*     let c = *)
-(*       match Hashtbl.find_opt count.calls func with *)
-(*       | None -> *)
-(*         let c = empty_count func_name in *)
-(*         Hashtbl.add count.calls func c; *)
-(*         c *)
-(*       | Some c -> c *)
-(*     in *)
-(*     c.enter <- c.enter + 1; *)
-(*     c *)
+  let enter_function_count count func_name func =
+    let c =
+      match Hashtbl.find_opt count.calls func with
+      | None ->
+        let c = empty_count func_name in
+        Hashtbl.add count.calls func c;
+        c
+      | Some c -> c
+    in
+    c.enter <- c.enter + 1;
+    c
 
-(*   exception Result of value list *)
+  exception Result of value list
 
-(*   let return (state : exec_state) = *)
-(*     let args = Stack.keep state.stack (List.length state.func_rt) in *)
-(*     match state.return_state with *)
-(*     | None -> raise (Result args) *)
-(*     | Some state -> *)
-(*       let stack = args @ state.stack in *)
-(*       { state with stack } *)
+  let return (state : exec_state) =
+    let args = Stack.keep state.stack (List.length state.func_rt) in
+    match state.return_state with
+    | None -> raise (Result args)
+    | Some state ->
+      let stack = args @ state.stack in
+      Choice.return { state with stack }
 
-(*   let branch (state : exec_state) n = *)
-(*     let block_stack = Stack.drop_n state.block_stack n in *)
-(*     match block_stack with *)
-(*     | [] -> return state *)
-(*     | block :: block_stack_tl -> *)
-(*       let block_stack = if block.is_loop then block_stack else block_stack_tl in *)
-(*       let args = Stack.keep state.stack (List.length block.branch_rt) in *)
-(*       let stack = args @ block.stack in *)
-(*       { state with block_stack; pc = block.branch; stack } *)
+  let branch (state : exec_state) n =
+    let block_stack = Stack.drop_n state.block_stack n in
+    match block_stack with
+    | [] -> return state
+    | block :: block_stack_tl ->
+      let block_stack = if block.is_loop then block_stack else block_stack_tl in
+      let args = Stack.keep state.stack (List.length block.branch_rt) in
+      let stack = args @ block.stack in
+      Choice.return { state with block_stack; pc = block.branch; stack }
 
-(*   let end_block (state : exec_state) = *)
-(*     match state.block_stack with *)
-(*     | [] -> return state *)
-(*     | block :: block_stack -> *)
-(*       let args = Stack.keep state.stack (List.length block.continue_rt) in *)
-(*       let stack = args @ block.stack in *)
-(*       { state with block_stack; pc = block.continue; stack } *)
-(* end *)
+  let end_block (state : exec_state) =
+    match state.block_stack with
+    | [] -> return state
+    | block :: block_stack ->
+      let args = Stack.keep state.stack (List.length block.continue_rt) in
+      let stack = args @ block.stack in
+      Choice.return { state with block_stack; pc = block.continue; stack }
+end
 
-(* let exec_block (state : State.exec_state) ~is_loop bt expr = *)
-(*   let pt, rt = *)
-(*     match bt with None -> ([], []) | Some (pt, rt) -> (List.map snd pt, rt) *)
-(*   in *)
-(*   let block : State.block = *)
-(*     let branch_rt, branch = if is_loop then (pt, expr) else (rt, state.pc) in *)
-(*     { branch *)
-(*     ; branch_rt *)
-(*     ; continue = state.pc *)
-(*     ; continue_rt = rt *)
-(*     ; stack = Stack.drop_n state.stack (List.length pt) *)
-(*     ; is_loop *)
-(*     } *)
-(*   in *)
-(*   { state with pc = expr; block_stack = block :: state.block_stack } *)
+let exec_block (state : State.exec_state) ~is_loop bt expr =
+  let pt, rt =
+    match bt with None -> ([], []) | Some (pt, rt) -> (List.map snd pt, rt)
+  in
+  let block : State.block =
+    let branch_rt, branch = if is_loop then (pt, expr) else (rt, state.pc) in
+    { branch
+    ; branch_rt
+    ; continue = state.pc
+    ; continue_rt = rt
+    ; stack = Stack.drop_n state.stack (List.length pt)
+    ; is_loop
+    }
+  in
+  Choice.return { state with pc = expr; block_stack = block :: state.block_stack }
 
-(* type wasm_func = Simplified.func *)
+type wasm_func = Simplified.func
 
-(* let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) = *)
-(*   Log.debug1 "calling func : func %s@." *)
-(*     (Option.value func.id ~default:"anonymous"); *)
-(*   let param_type, result_type = func.type_f in *)
-(*   let args, stack = Stack.pop_n state.stack (List.length param_type) in *)
-(*   let return_state = *)
-(*     if return then state.return_state else Some { state with stack } *)
-(*   in *)
-(*   let env = Lazy.force env in *)
-(*   let locals = *)
-(*     Array.of_list @@ List.rev args @ List.map init_local func.locals *)
-(*   in *)
-(*   State. *)
-(*     { stack = [] *)
-(*     ; locals *)
-(*     ; pc = func.body *)
-(*     ; block_stack = [] *)
-(*     ; func_rt = result_type *)
-(*     ; return_state *)
-(*     ; env *)
-(*     ; count = enter_function_count state.count func.id id *)
-(*     } *)
+let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
+  Log.debug1 "calling func : func %s@."
+    (Option.value func.id ~default:"anonymous");
+  let param_type, result_type = func.type_f in
+  let args, stack = Stack.pop_n state.stack (List.length param_type) in
+  let return_state =
+    if return then state.return_state else Some { state with stack }
+  in
+  let env = Lazy.force env in
+  let locals =
+    Array.of_list @@ List.rev args @ List.map init_local func.locals
+  in
+  State.
+    { stack = []
+    ; locals
+    ; pc = func.body
+    ; block_stack = []
+    ; func_rt = result_type
+    ; return_state
+    ; env
+    ; count = enter_function_count state.count func.id id
+    }
 
 (* let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) = *)
 (*   match func with *)
@@ -647,6 +650,8 @@ let exec_frelop stack nn (op : frelop) =
 (*     trap "indirect call type mismatch"; *)
 (*   exec_vfunc ~return state func *)
 
+let call_indirect ~return:_ (_state : State.exec_state) (_tbl_i, _typ_i) =
+  failwith "tout DUR"
 (* let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) = *)
 (*   let fun_i, stack = Stack.pop_i32_to_int state.stack in *)
 (*   let state = { state with stack } in *)
@@ -666,29 +671,29 @@ let exec_frelop stack nn (op : frelop) =
 (*     trap "indirect call type mismatch"; *)
 (*   exec_vfunc ~return state func *)
 
-(* let exec_instr instr (state : State.exec_state) = *)
-(*   State.count_instruction state; *)
-(*   let stack = state.stack in *)
-(*   let env = state.env in *)
-(*   let locals = state.locals in *)
-(*   let st stack = { state with stack } in *)
-(*   Log.debug2 "stack        : [ %a ]@." Stack.pp stack; *)
-(*   Log.debug2 "running instr: %a@." Simplified.Pp.instr instr; *)
-(*   match instr with *)
-(*   | Return -> State.return state *)
-(*   | Nop -> state *)
-(*   | Unreachable -> trap "unreachable" *)
-(*   | I32_const n -> st @@ Stack.push_i32 stack n *)
-(*   | I64_const n -> st @@ Stack.push_i64 stack n *)
-(*   | F32_const f -> st @@ Stack.push_f32 stack f *)
-(*   | F64_const f -> st @@ Stack.push_f64 stack f *)
-(*   | I_unop (nn, op) -> st @@ exec_iunop stack nn op *)
-(*   | F_unop (nn, op) -> st @@ exec_funop stack nn op *)
-(*   | I_binop (nn, op) -> st @@ exec_ibinop stack nn op *)
-(*   | F_binop (nn, op) -> st @@ exec_fbinop stack nn op *)
-(*   | I_testop (nn, op) -> st @@ exec_itestop stack nn op *)
-(*   | I_relop (nn, op) -> st @@ exec_irelop stack nn op *)
-(*   | F_relop (nn, op) -> st @@ exec_frelop stack nn op *)
+let exec_instr instr (state : State.exec_state) : State.exec_state Choice.t =
+  State.count_instruction state;
+  let stack = state.stack in
+  let env = state.env in
+  let locals = state.locals in
+  let st stack = Choice.return { state with stack } in
+  Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
+  Log.debug2 "running instr: %a@." Simplified.Pp.instr instr;
+  match instr with
+  | Return -> State.return state
+  | Nop -> Choice.return state
+  | Unreachable -> trap "unreachable"
+  | I32_const n -> st @@ Stack.push_const_i32 stack n
+  | I64_const n -> st @@ Stack.push_const_i64 stack n
+  | F32_const f -> st @@ Stack.push_const_f32 stack f
+  | F64_const f -> st @@ Stack.push_const_f64 stack f
+  | I_unop (nn, op) -> st @@ exec_iunop stack nn op
+  | F_unop (nn, op) -> st @@ exec_funop stack nn op
+  | I_binop (nn, op) -> st @@ exec_ibinop stack nn op
+  | F_binop (nn, op) -> st @@ exec_fbinop stack nn op
+  | I_testop (nn, op) -> st @@ exec_itestop stack nn op
+  | I_relop (nn, op) -> st @@ exec_irelop stack nn op
+  | F_relop (nn, op) -> st @@ exec_frelop stack nn op
 (*   | I_extend8_s nn -> begin *)
 (*     match nn with *)
 (*     | S32 -> *)
@@ -740,19 +745,19 @@ let exec_frelop stack nn (op : frelop) =
 (*   | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s *)
 (*   | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn' *)
 (*   | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn' *)
-(*   | Ref_null t -> st @@ Stack.push stack (Value.ref_null t) *)
+  | Ref_null t -> st @@ Stack.push stack (P.Value.ref_null t)
 (*   | Ref_is_null -> *)
 (*     let b, stack = Stack.pop_is_null stack in *)
 (*     st @@ Stack.push_bool stack b *)
 (*   | Ref_func i -> *)
 (*     let* f = Env.get_func env i in *)
 (*     st @@ Stack.push stack (Value.ref_func f) *)
-(*   | Drop -> st @@ Stack.drop stack *)
-(*   | Local_get i -> st @@ Stack.push stack locals.(i) *)
-(*   | Local_set i -> *)
-(*     let v, stack = Stack.pop stack in *)
-(*     locals.(i) <- v; *)
-(*     st @@ stack *)
+  | Drop -> st @@ Stack.drop stack
+  | Local_get i -> st @@ Stack.push stack locals.(i)
+  | Local_set i ->
+    let v, stack = Stack.pop stack in
+    locals.(i) <- v;
+    st @@ stack
 (*   | If_else (_id, bt, e1, e2) -> *)
 (*     let b, stack = Stack.pop_bool stack in *)
 (*     let state = { state with stack } in *)
@@ -765,17 +770,19 @@ let exec_frelop stack nn (op : frelop) =
 (*     let* func = Env.get_func env i in *)
 (*     exec_vfunc ~return:true state func *)
 (*   end *)
-(*   | Br i -> State.branch state i *)
+  | Br i -> State.branch state i
 (*   | Br_if i -> *)
 (*     let b, stack = Stack.pop_bool stack in *)
 (*     let state = { state with stack } in *)
 (*     if b then State.branch state i else state *)
-(*   | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e *)
-(*   | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e *)
-(*   | Memory_size -> *)
-(*     let* mem, _max = get_memory env mem_0 in *)
-(*     let len = Bytes.length mem / page_size in *)
-(*     st @@ Stack.push_i32_of_int stack len *)
+  | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
+  | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
+  | Memory_size ->
+    let* mem = P.Env.get_memory env mem_0 in
+    (* let* mem, _max = get_memory env mem_0 in *)
+    (* let len = Bytes.length mem / page_size in *)
+    let len = P.Memory.size_in_pages mem in
+    st @@ Stack.push_i32 stack len
 (*   | Memory_grow -> begin *)
 (*     let* mem = get_memory_raw env mem_0 in *)
 (*     let data = Memory.get_data mem in *)
@@ -840,36 +847,36 @@ let exec_frelop stack nn (op : frelop) =
 (*     let o2, stack = Stack.pop stack in *)
 (*     let o1, stack = Stack.pop stack in *)
 (*     st @@ Stack.push stack (if b then o1 else o2) *)
-(*   | Local_tee i -> *)
-(*     let v, stack = Stack.pop stack in *)
-(*     locals.(i) <- v; *)
-(*     st @@ Stack.push stack v *)
-(*   | Global_get i -> *)
-(*     let* g = Env.get_global env i in *)
-(*     st @@ Stack.push stack g.value *)
-(*   | Global_set i -> *)
-(*     let* global = Env.get_global env i in *)
-(*     if global.mut = Const then Log.err "Can't set const global"; *)
-(*     let v, stack = *)
-(*       match global.typ with *)
-(*       | Ref_type _rt -> Stack.pop_ref stack *)
-(*       | Num_type nt -> ( *)
-(*         match nt with *)
-(*         | I32 -> *)
-(*           let v, stack = Stack.pop_i32 stack in *)
-(*           (I32 v, stack) *)
-(*         | I64 -> *)
-(*           let v, stack = Stack.pop_i64 stack in *)
-(*           (I64 v, stack) *)
-(*         | F32 -> *)
-(*           let v, stack = Stack.pop_f32 stack in *)
-(*           (F32 v, stack) *)
-(*         | F64 -> *)
-(*           let v, stack = Stack.pop_f64 stack in *)
-(*           (F64 v, stack) ) *)
-(*     in *)
-(*     global.value <- v; *)
-(*     st @@ stack *)
+  | Local_tee i ->
+    let v, stack = Stack.pop stack in
+    locals.(i) <- v;
+    st @@ Stack.push stack v
+  | Global_get i ->
+    let* g = P.Env.get_global env i in
+    st @@ Stack.push stack (P.Global.value g)
+  | Global_set i ->
+    let* global = P.Env.get_global env i in
+    if P.Global.mut global = Const then Log.err "Can't set const global";
+    let v, stack =
+      match P.Global.typ global with
+      | Ref_type _rt -> Stack.pop_ref stack
+      | Num_type nt -> (
+        match nt with
+        | I32 ->
+          let v, stack = Stack.pop_i32 stack in
+          (I32 v, stack)
+        | I64 ->
+          let v, stack = Stack.pop_i64 stack in
+          (I64 v, stack)
+        | F32 ->
+          let v, stack = Stack.pop_f32 stack in
+          (F32 v, stack)
+        | F64 ->
+          let v, stack = Stack.pop_f64 stack in
+          (F64 v, stack) )
+    in
+    P.Global.set_value global v;
+    st @@ stack
 (*   | Table_get indice -> *)
 (*     let* t = Env.get_table env indice in *)
 (*     let indice, stack = Stack.pop_i32_to_int stack in *)
@@ -972,10 +979,10 @@ let exec_frelop stack nn (op : frelop) =
 (*       with Invalid_argument _ -> trap "out of bounds table access" *)
 (*     end; *)
 (*     st @@ stack *)
-(*   | Elem_drop i -> *)
-(*     let* elem = Env.get_elem env i in *)
-(*     Env.drop_elem elem; *)
-(*     st @@ stack *)
+  | Elem_drop i ->
+    let* elem = P.Env.get_elem env i in
+    P.Env.drop_elem elem;
+    st @@ stack
 (*   | I_load16 (nn, sx, { offset; _ }) -> ( *)
 (*     let* mem, _max = get_memory env mem_0 in *)
 (*     let pos, stack = Stack.pop_i32_to_int stack in *)
@@ -990,22 +997,62 @@ let exec_frelop stack nn (op : frelop) =
 (*     match nn with *)
 (*     | S32 -> Stack.push_i32_of_int stack res *)
 (*     | S64 -> Stack.push_i64_of_int stack res ) *)
-(*   | I_load (nn, { offset; _ }) -> ( *)
-(*     let* mem, _max = get_memory env mem_0 in *)
-(*     let pos, stack = Stack.pop_i32_to_int stack in *)
-(*     st *)
-(*     @@ *)
-(*     match nn with *)
-(*     | S32 -> *)
-(*       if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then *)
-(*         trap "out of bounds memory access"; *)
-(*       let res = Bytes.get_int32_le mem (pos + offset) in *)
-(*       Stack.push_i32 stack res *)
-(*     | S64 -> *)
-(*       if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then *)
-(*         trap "out of bounds memory access"; *)
-(*       let res = Bytes.get_int64_le mem (pos + offset) in *)
-(*       Stack.push_i64 stack res ) *)
+  | I_load8 (nn, sx, { offset; _ }) -> (
+      let* mem = P.Env.get_memory env mem_0 in
+      let pos, stack = Stack.pop_i32 stack in
+      (* if Bytes.length mem < pos + offset + 1 || offset < 0 || pos < 0 then *)
+      (*   trap "out of bounds memory access"; *)
+      (* TODO check bounds *)
+      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+      let addr = P.Value.I32.add pos offset in
+      let res =
+        (if sx = S then P.Memory.load_8_s else P.Memory.load_8_u) mem addr
+      in
+      st @@
+      match nn with
+      | S32 -> Stack.push_i32 stack res
+      | S64 -> Stack.push_i64 stack (P.Value.I64.of_int32 res)
+    )
+
+  | I_store8 (nn, { offset; _ }) -> (
+      let* mem = P.Env.get_memory env mem_0 in
+      let n, stack =
+        match nn with
+        | S32 ->
+          let n, stack = Stack.pop_i32 stack in
+          (n, stack)
+        | S64 ->
+          let n, stack = Stack.pop_i64 stack in
+          (Int64.to_int32 n, stack)
+      in
+      let pos, stack = Stack.pop_i32 stack in
+      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+      let addr = P.Value.I32.add pos offset in
+
+      (* if Bytes.length mem < offset + 1 || pos < 0 then *)
+      (*   trap "out of bounds memory access"; *)
+      (* TODO bound check *)
+      P.Memory.store_8 mem ~addr n;
+      (* Thread memory ? *)
+      st @@ stack
+    )
+
+  (* | I_load (nn, { offset; _ }) -> ( *)
+  (*   let* mem, _max = get_memory env mem_0 in *)
+  (*   let pos, stack = Stack.pop_i32_to_int stack in *)
+  (*   st *)
+  (*   @@ *)
+  (*   match nn with *)
+  (*   | S32 -> *)
+  (*     if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then *)
+  (*       trap "out of bounds memory access"; *)
+  (*     let res = Bytes.get_int32_le mem (pos + offset) in *)
+  (*     Stack.push_i32 stack res *)
+  (*   | S64 -> *)
+  (*     if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then *)
+  (*       trap "out of bounds memory access"; *)
+  (*     let res = Bytes.get_int64_le mem (pos + offset) in *)
+  (*     Stack.push_i64 stack res ) *)
 (*   | F_load (nn, { offset; _ }) -> ( *)
 (*     let* mem, _max = get_memory env mem_0 in *)
 (*     let pos, stack = Stack.pop_i32_to_int stack in *)
@@ -1137,10 +1184,10 @@ let exec_frelop stack nn (op : frelop) =
 (*       trap "out of bounds memory access"; *)
 (*     Bytes.set_int32_le mem offset n; *)
 (*     st @@ stack *)
-(*   | Data_drop i -> *)
-(*     let* data = Env.get_data env i in *)
-(*     Env.drop_data data; *)
-(*     st @@ stack *)
+  | Data_drop i ->
+    let* data = P.Env.get_data env i in
+    P.Env.drop_data data;
+    st @@ stack
 (*   | Br_table (inds, i) -> *)
 (*     let target, stack = Stack.pop_i32_to_int stack in *)
 (*     let target = *)
@@ -1172,6 +1219,9 @@ let exec_frelop stack nn (op : frelop) =
 (*     | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i -> *)
 (*     Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i; *)
 (*     st @@ stack *)
+  | i ->
+    let msg = Format.asprintf "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i in
+    failwith msg
 
 (* let rec loop (state : State.exec_state) = *)
 (*   let state = *)

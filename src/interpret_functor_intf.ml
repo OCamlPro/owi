@@ -1,5 +1,60 @@
 module type P = sig
-  include Runtime_intf.Env
+  type t
+
+  type env
+  type memory
+  type func
+  type table
+  type 'env elem
+  type data
+  type 'env global
+
+  module Choice : sig
+    type 'a t
+    val return : 'a -> 'a t
+    val bind : 'a t -> ('a -> 'b t) -> 'b t
+  end
+
+  module Value : Value_intf.T
+  module Global : sig
+    type 'env t = 'env global
+    val value : 'env global -> 'env Value.t
+    val set_value : 'env global -> 'env Value.t -> unit
+    val mut : 'env global -> Types.mut
+    val typ : 'env global -> Simplified.val_type
+  end
+
+  module Memory : sig
+    type t = memory
+
+    val load_8_s : t -> Value.int32 -> Value.int32
+    val load_8_u : t -> Value.int32 -> Value.int32
+
+    val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit
+
+    (* val get_data : t -> bytes *)
+    val size_in_pages : t -> Value.int32
+    val get_limit_max : t -> int option
+    val get_limits : t -> Types.limits
+    (* val update_memory : t -> bytes -> unit *)
+  end
+
+  module Env : sig
+    type t = env
+    type t' = t Lazy.t
+
+    val get_memory : t -> int -> Memory.t Result.t
+    (* val get_func : t -> int -> t' Value.Func.t Result.t *)
+    val get_table : t -> int -> t' Table.t Result.t
+    val get_elem : t -> int -> t' elem Result.t
+    val get_data : t -> int -> data Result.t
+    val get_global : t -> int -> t' Global.t Result.t
+    val drop_elem : 'a elem -> unit
+    val drop_data : data -> unit
+
+    val pp : Format.formatter -> t -> unit
+
+  end
 end
 
 module type S = sig

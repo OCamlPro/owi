@@ -63,6 +63,8 @@ module type Fop = sig
 
   type vbool
 
+  val zero : num
+
   val abs : num -> num
 
   val neg : num -> num
@@ -128,6 +130,8 @@ module type T = sig
   val const_f64 : Float64.t -> float64
   (* TODO ref *)
 
+  val ref_null : Simplified.heap_type -> 'a t
+
   val pp : Format.formatter -> 'a t -> unit
 
   module Bool : sig
@@ -135,11 +139,15 @@ module type T = sig
     val int32 : vbool -> int32
   end
 
-  module I32 :
-    Iop with type num := int32 and type vbool := vbool and type const := Int32.t
+  module I32 : sig
+    include Iop with type num := int32 and type vbool := vbool and type const := Int32.t
+  end
 
-  module I64 :
-    Iop with type num := int64 and type vbool := vbool and type const := Int64.t
+  module I64 : sig
+    include Iop with type num := int64 and type vbool := vbool and type const := Int64.t
+    val of_int32 : int32 -> int64
+    val to_int32 : int64 -> int32
+  end
 
   module F32 : Fop with type num := float32 and type vbool := vbool
 
