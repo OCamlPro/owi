@@ -50,7 +50,7 @@
   value
   wutf8)
  (private_modules convert lexer menhir_parser spectest stack wutf8)
- (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)
+ (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)
  (preprocess
   (pps sedlex.ppx))
  (instrumentation

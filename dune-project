@@ -58,3 +58,7 @@
    (and
     :with-test
     (>= "2.1")))))
+
+(package
+ (name encoding)
+ (depends (ocaml (>= "4.14.0")) dune (z3 (= "4.11.2")) core ppx_inline_test))

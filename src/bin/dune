@@ -1,4 +1,5 @@
 (executable
  (public_name owi)
  (modules owi)
+ (package owi)
  (libraries sedlex owi cmdliner))
