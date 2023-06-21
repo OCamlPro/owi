@@ -5,38 +5,10 @@ type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
-module Func : sig
-  type _ telt =
-    | I32 : Int32.t telt
-    | I64 : Int64.t telt
-    | F32 : Float32.t telt
-    | F64 : Float64.t telt
-    | Externref : 'a Type_id.ty -> 'a telt
-
-  type _ rtype =
-    | R0 : unit rtype
-    | R1 : 'a telt -> 'a rtype
-    | R2 : 'a telt * 'b telt -> ('a * 'b) rtype
-    | R3 : 'a telt * 'b telt * 'c telt -> ('a * 'b * 'c) rtype
-    | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
-
-  type (_, _) atype =
-    | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-    | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-    | Res : ('r, 'r) atype
-
-  type _ func_type = Func : ('f, 'r) atype * 'r rtype -> 'f func_type
-
-  type extern_func = Extern_func : 'a func_type * 'a -> extern_func
-
-  type 'a t =
-    | WASM of int * Simplified.func * 'a
-    | Extern of extern_func
-
-  val typ : 'a t -> Simplified.func_type
-
-  val wasm : Simplified.func -> 'a -> 'a t
-end
+module Func : Func_intf.T with type int32 := Int32.t
+                           and type int64 := Int64.t
+                           and type float32 := Float32.t
+                           and type float64 := Float64.t
 
 type 'env ref_value =
   | Externref of externref option

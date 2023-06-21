@@ -12,6 +12,7 @@
   indexed
   int32
   int64
+  func_intf
   interpret
   interpret_functor
   value_intf

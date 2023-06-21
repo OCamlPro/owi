@@ -18,6 +18,10 @@ module type P = sig
     val select : vbool -> bool t
   end
 
+  module Func : sig
+    
+  end
+
   module Value : Value_intf.T with type vbool = vbool
   module Global : sig
     type 'env t = 'env global
