@@ -186,47 +186,48 @@ module Symbolic = struct
     type num = Expr.t
     type vbool = Expr.t
 
-    let zero = mk_f32 0l
+    let zero = mk_f32 0l 
 
-    let abs _ = assert false
+    let abs x = FloatingPoint.mk_abs x `F32Type 
 
-    let neg _ = assert false
+    let neg x = FloatingPoint.mk_neg x `F32Type
+  
+    let sqrt x = FloatingPoint.mk_sqrt x `F32Type
 
-    let sqrt _ = assert false
+    let ceil _ = assert false 
 
-    let ceil _ = assert false
+    let floor _ = assert false 
 
-    let floor _ = assert false
+    let trunc _ = assert false 
 
-    let trunc _ = assert false
+    let nearest x = FloatingPoint.mk_nearest x `F32Type
+    
+    let add x y = FloatingPoint.mk_add x y `F32Type
 
-    let nearest _ = assert false
+    let sub x y = FloatingPoint.mk_sub x y `F32Type
 
-    let add _ = assert false
+    let mul x y = FloatingPoint.mk_mul x y `F32Type
 
-    let sub _ = assert false
+    let div x y = FloatingPoint.mk_div x y `F32Type
+    
+    let min x y = FloatingPoint.mk_min x y `F32Type
 
-    let mul _ = assert false
+    let max x y = FloatingPoint.mk_max x y `F32Type
 
-    let div _ = assert false
+    let copy_sign _ _ = assert false
 
-    let min _ = assert false
+    let eq x y = FloatingPoint.mk_eq x y `F32Type
 
-    let max _ = assert false
+    let ne x y = FloatingPoint.mk_ne x y `F32Type
 
-    let copy_sign _ = assert false
+    let lt x y = FloatingPoint.mk_lt x y `F32Type
 
-    let eq _ = assert false
+    let gt x y = FloatingPoint.mk_gt x y `F32Type
+    
+    let le x y = FloatingPoint.mk_le x y `F32Type
 
-    let ne _ = assert false
+    let ge x y = FloatingPoint.mk_ge x y `F32Type
 
-    let lt _ = assert false
-
-    let gt _ = assert false
-
-    let le _ = assert false
-
-    let ge _ = assert false
   end
 
   module F64 = struct
@@ -235,45 +236,45 @@ module Symbolic = struct
 
     let zero = mk_f64 0L
 
-    let abs _ = assert false
+    let abs x = FloatingPoint.mk_abs x `F64Type 
 
-    let neg _ = assert false
+    let neg x = FloatingPoint.mk_neg x `F64Type
+  
+    let sqrt x = FloatingPoint.mk_sqrt x `F64Type
 
-    let sqrt _ = assert false
+    let ceil _ = assert false 
 
-    let ceil _ = assert false
+    let floor _ = assert false 
 
-    let floor _ = assert false
+    let trunc _ = assert false 
 
-    let trunc _ = assert false
+    let nearest x = FloatingPoint.mk_nearest x `F64Type
+    
+    let add x y = FloatingPoint.mk_add x y `F64Type
 
-    let nearest _ = assert false
+    let sub x y = FloatingPoint.mk_sub x y `F64Type
 
-    let add _ = assert false
+    let mul x y = FloatingPoint.mk_mul x y `F64Type
 
-    let sub _ = assert false
+    let div x y = FloatingPoint.mk_div x y `F64Type
+    
+    let min x y = FloatingPoint.mk_min x y `F64Type
 
-    let mul _ = assert false
+    let max x y = FloatingPoint.mk_max x y `F64Type
 
-    let div _ = assert false
+    let copy_sign _ _ = assert false
 
-    let min _ = assert false
+    let eq x y = FloatingPoint.mk_eq x y `F64Type
 
-    let max _ = assert false
+    let ne x y = FloatingPoint.mk_ne x y `F64Type
 
-    let copy_sign _ = assert false
+    let lt x y = FloatingPoint.mk_lt x y `F64Type
 
-    let eq _ = assert false
+    let gt x y = FloatingPoint.mk_gt x y `F64Type
+    
+    let le x y = FloatingPoint.mk_le x y `F64Type
 
-    let ne _ = assert false
-
-    let lt _ = assert false
-
-    let gt _ = assert false
-
-    let le _ = assert false
-
-    let ge _ = assert false
+    let ge x y = FloatingPoint.mk_ge x y `F64Type
   end
 end
 
