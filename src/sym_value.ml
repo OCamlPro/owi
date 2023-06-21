@@ -43,7 +43,36 @@ module Symbolic = struct
     let not = Boolean.mk_not 
     let int32 v = Boolean.mk_ite v (mk_i32 0l) (mk_i32 1l)
   end
+
+  module I32 = struct 
+    type num = Expr 
+    type vbool = Expr 
+    type const = Int64.t
+  end
+
+  module I64 = struct 
+    type num = Expr 
+    type vbool = Expr 
+    type const = Int64.t
+  end
+
+
+
+  module F32 = struct 
+    type num = Expr 
+    type vbool = Expr 
+  end
+
+  module F64 = struct 
+    type num = Expr 
+    type vbool = Expr 
+  end
+
+
+
 end
+
+
 
 module Test : Value_intf.T = Symbolic
 
