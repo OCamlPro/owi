@@ -42,7 +42,7 @@ module Symbolic = struct
   module Bool = struct
     let not = Boolean.mk_not 
     let int32 v = Boolean.mk_ite v (mk_i32 0l) (mk_i32 1l)
-    let or_ = Boolean.mk_or 
+    let or_ = Boolean.mk_or
     let and_ = Boolean.mk_and
   end
 

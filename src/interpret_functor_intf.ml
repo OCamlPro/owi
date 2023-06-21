@@ -74,18 +74,25 @@ module type P = sig
 
     val load_8_u : t -> Value.int32 -> Value.int32
 
+    val load_16_s : t -> Value.int32 -> Value.int32
+
+    val load_16_u : t -> Value.int32 -> Value.int32
+
+    val load_32 : t -> Value.int32 -> Value.int32
+
+    val load_64 : t -> Value.int32 -> Value.int64
+
     val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit
 
-    (* val get_data : t -> bytes *)
+    val store_16 : t -> addr:Value.int32 -> Value.int32 -> unit
+
+    val store_32 : t -> addr:Value.int32 -> Value.int32 -> unit
+
+    val store_64 : t -> addr:Value.int32 -> Value.int64 -> unit
 
     val size : t -> Value.int32
 
     val size_in_pages : t -> Value.int32
-
-    val get_limit_max : t -> int option
-
-    val get_limits : t -> Types.limits
-    (* val update_memory : t -> bytes -> unit *)
   end
 
   module Env : sig
