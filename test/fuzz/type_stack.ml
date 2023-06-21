@@ -1,8 +1,11 @@
 open Owi.Symbolic
 
+type elem = val_type
+
 type stack_op =
   | Pop
-  | Push of val_type
+  | Push of elem
+  | Whatever of elem list
   | Nothing
 
 let apply_stack_op stack op =
@@ -10,6 +13,7 @@ let apply_stack_op stack op =
   | Pop -> begin match stack with [] -> assert false | _hd :: tl -> tl end
   | Push t -> t :: stack
   | Nothing -> stack
+  | Whatever stack -> stack
 
 let apply_stack_ops stack ops = List.fold_left apply_stack_op stack ops
 

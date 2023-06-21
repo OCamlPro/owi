@@ -11,7 +11,7 @@ let expr_always_available block expr ~locals ~stack env =
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
   ; block expr ~locals ~stack env
-    (* ; pair (const Unreachable) (const [ S.Nothing ]) TODO: check  *)
+  ; B.unreachable
   ]
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
   @ B.local_i32 env @ B.local_i64 env @ B.local_f32 env @ B.local_f64 env
