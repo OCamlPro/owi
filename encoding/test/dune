@@ -1,0 +1,16 @@
+(library
+ (name unit_tests)
+ (modules
+  test_int
+  test_real
+  test_f32
+  test_bool
+  test_str
+  test_batch
+  test_optimizer
+  test_axiom
+  test_parser)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test ppx_expect))
+ (libraries encoding))

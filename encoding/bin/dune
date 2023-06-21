@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (libraries core core_unix.command_unix core_unix.filename_unix encoding)
+ (preprocess
+  (pps ppx_jane)))
