@@ -9,13 +9,16 @@ module type P = sig
   type data
   type 'env global
 
+  type vbool
+
   module Choice : sig
     type 'a t
     val return : 'a -> 'a t
     val bind : 'a t -> ('a -> 'b t) -> 'b t
+    val select : vbool -> bool t
   end
 
-  module Value : Value_intf.T
+  module Value : Value_intf.T with type vbool = vbool
   module Global : sig
     type 'env t = 'env global
     val value : 'env global -> 'env Value.t

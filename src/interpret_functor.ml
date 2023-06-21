@@ -15,6 +15,11 @@ module Float64 = P.Value.F64
 module Stack = Stack_functor.Make(P.Value)
 module Choice = P.Choice
 
+let (let/) = Choice.bind
+let pop_choice stack =
+  let b, stack = Stack.pop_bool stack in
+  Choice.bind (Choice.select b) (fun b -> Choice.return (b, stack))
+
 module Log : sig
   [@@@ocaml.warning "-32"]
 
@@ -758,10 +763,10 @@ let exec_instr instr (state : State.exec_state) : State.exec_state Choice.t =
     let v, stack = Stack.pop stack in
     locals.(i) <- v;
     st @@ stack
-(*   | If_else (_id, bt, e1, e2) -> *)
-(*     let b, stack = Stack.pop_bool stack in *)
-(*     let state = { state with stack } in *)
-(*     exec_block state ~is_loop:false bt (if b then e1 else e2) *)
+  | If_else (_id, bt, e1, e2) ->
+    let/ (b, stack) = pop_choice stack in
+    let state = { state with stack } in
+    exec_block state ~is_loop:false bt (if b then e1 else e2)
 (*   | Call i -> begin *)
 (*     let* func = Env.get_func env i in *)
 (*     exec_vfunc ~return:false state func *)
@@ -771,10 +776,12 @@ let exec_instr instr (state : State.exec_state) : State.exec_state Choice.t =
 (*     exec_vfunc ~return:true state func *)
 (*   end *)
   | Br i -> State.branch state i
-(*   | Br_if i -> *)
-(*     let b, stack = Stack.pop_bool stack in *)
-(*     let state = { state with stack } in *)
-(*     if b then State.branch state i else state *)
+  | Br_if i ->
+    let/ (b, stack) = pop_choice stack in
+    let state = { state with stack } in
+    if b then
+      State.branch state i else
+      Choice.return state
   | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
   | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
   | Memory_size ->
