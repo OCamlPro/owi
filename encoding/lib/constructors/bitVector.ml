@@ -124,6 +124,26 @@ let mk_shr_s (e1 : expr) (e2 : expr) (t : num_type) : expr =
   in
   Binop (op, e1, e2)
 
+let mk_rotl (e1 : expr) (e2 : expr) (t : num_type) : expr =
+  let op =
+    match t with
+    | `I32Type -> I32 I32.Rotl
+    | `I64Type -> I64 I64.Rotl
+    | _ ->
+        raise (Error ("mk_rotl: invalid type '" ^ string_of_num_type t ^ "'"))
+  in
+  Binop (op, e1, e2)
+
+let mk_rotr (e1 : expr) (e2 : expr) (t : num_type) : expr =
+  let op =
+    match t with
+    | `I32Type -> I32 I32.Rotr
+    | `I64Type -> I64 I64.Rotr
+    | _ ->
+        raise (Error ("mk_rotr: invalid type '" ^ string_of_num_type t ^ "'"))
+  in
+  Binop (op, e1, e2)
+
 let mk_and (e1 : expr) (e2 : expr) (t : num_type) : expr =
   let op =
     match t with

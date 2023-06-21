@@ -65,6 +65,7 @@ module I32Op = struct
       | Shl -> shl
       | ShrU -> shr_s
       | ShrS -> shr_u
+      | Rotl | Rotr -> assert false
     in
     fun v1 v2 -> to_value (f (of_value 1 v1) (of_value 2 v2))
 
@@ -139,6 +140,7 @@ module I64Op = struct
       | Shl -> shl
       | ShrU -> shr_s
       | ShrS -> shr_u
+      | Rotl | Rotr -> assert false
     in
     fun v1 v2 -> to_value (f (of_value 1 v1) (of_value 2 v2))
 

@@ -42,6 +42,12 @@ val mk_shr_u : expr -> expr -> num_type -> expr
 val mk_shr_s : expr -> expr -> num_type -> expr
 (** [mk_shr_u i1 i2] create an expression representing unsigned [i1 >> i2]. *)
 
+val mk_rotl : expr -> expr -> num_type -> expr
+(** [mk_rotl i1 i2] create an expression representing [rotl i1 i2]. *)
+
+val mk_rotr : expr -> expr -> num_type -> expr
+(** [mk_rotr i1 i2] create an expression representing [rotr i1 i2]. *)
+
 val mk_and : expr -> expr -> num_type -> expr
 (** [mk_and i1 i2] create an expression representing unsigned [i1 & i2]. *)
 

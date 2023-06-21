@@ -272,6 +272,7 @@ module I32Z3Op = struct
       | ShrU -> BitVector.mk_lshr ctx
       | RemS -> BitVector.mk_srem ctx
       | RemU -> BitVector.mk_urem ctx
+      | Rotl | Rotr -> failwith "z3_mappings: rotl|rotr not implemented!"
     in
     op' e1 e2
 
@@ -295,12 +296,13 @@ module I32Z3Op = struct
   let encode_cvtop (op : cvtop) (e : Expr.expr) : Expr.expr =
     let op' =
       match op with
+      | WrapI64 -> BitVector.mk_extract ctx 31 0
       | TruncSF32 -> fun f -> FloatingPoint.mk_to_sbv ctx rtz f 32
       | TruncUF32 -> fun f -> FloatingPoint.mk_to_ubv ctx rtz f 32
       | TruncSF64 -> fun f -> FloatingPoint.mk_to_sbv ctx rtz f 32
       | TruncUF64 -> fun f -> FloatingPoint.mk_to_ubv ctx rtz f 32
       | ReinterpretFloat -> FloatingPoint.mk_to_ieee_bv ctx
-      | WrapI64 | ExtendSI32 | ExtendUI32 -> assert false
+      | ExtendSI32 | ExtendUI32 -> assert false
     in
     op' e
 
@@ -340,6 +342,7 @@ module I64Z3Op = struct
       | ShrU -> BitVector.mk_lshr ctx
       | RemS -> BitVector.mk_srem ctx
       | RemU -> BitVector.mk_urem ctx
+      | Rotl | Rotr -> failwith "z3_mappings: rotl|rotr not implemented!"
     in
     op' e1 e2
 
