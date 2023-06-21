@@ -61,6 +61,41 @@ module Symbolic = struct
   module F32 = struct 
     type num = Expr 
     type vbool = Expr 
+
+(*
+    
+  val add : num -> num -> num
+
+  val sub : num -> num -> num
+
+  val mul : num -> num -> num
+
+  val div : num -> num -> num
+
+  val min : num -> num -> num
+
+*)
+
+    let zero = mk_f32 0l 
+
+    let abs x = FloatingPoint.mk_abs x `F32Type 
+
+    let neg x = FloatingPoint.mk_neg x `F32Type
+  
+    let sqrt x = FloatingPoint.mk_sqrt x `F32Type
+
+    let ceil _ = assert false 
+    
+    let foor _ = assert false 
+
+    let trunc _ = assert false 
+
+    let nearest _ = assert false 
+    
+    
+
+
+
   end
 
   module F64 = struct 
