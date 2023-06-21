@@ -16,6 +16,10 @@ module type P = sig
   type 'env global
 
   type vbool
+  type int32
+  type int64
+  type float32
+  type float64
 
   module Choice : sig
     type 'a t
@@ -27,9 +31,17 @@ module type P = sig
     val select : vbool -> bool t
   end
 
-  module Func : sig end
+  module Func : Func_intf.T
+    with type int32 := int32
+     and type int64 := int64
+     and type float32 := float32
+     and type float64 := float64
 
   module Value : Value_intf.T with type vbool = vbool
+                               and type int32 = int32
+     and type int64 = int64
+     and type float32 = float32
+     and type float64 = float64
 
   module Global : sig
     type 'env t = 'env global
