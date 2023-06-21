@@ -37,6 +37,19 @@ let store_8 mem ~addr n =
   let n = Int32.to_int n in
   Bytes.set_int8 mem.data addr n
 
+let store_16 mem ~addr n =
+  let addr = Int32.to_int addr in
+  let n = Int32.to_int n in
+  Bytes.set_int16_le mem.data addr n
+
+let store_32 mem ~addr n =
+  let addr = Int32.to_int addr in
+  Bytes.set_int32_le mem.data addr n
+
+let store_64 mem ~addr n =
+  let addr = Int32.to_int addr in
+  Bytes.set_int64_le mem.data addr n
+
 let load_8_s mem addr =
   let addr = Int32.to_int addr in
   Int32.of_int @@ Bytes.get_int8 mem.data addr
@@ -44,6 +57,22 @@ let load_8_s mem addr =
 let load_8_u mem addr =
   let addr = Int32.to_int addr in
   Int32.of_int @@ Bytes.get_uint8 mem.data addr
+
+let load_16_s mem addr =
+  let addr = Int32.to_int addr in
+  Int32.of_int @@ Bytes.get_int16_le mem.data addr
+
+let load_16_u mem addr =
+  let addr = Int32.to_int addr in
+  Int32.of_int @@ Bytes.get_uint16_le mem.data addr
+
+let load_32 mem addr =
+  let addr = Int32.to_int addr in
+  Bytes.get_int32_le mem.data addr
+
+let load_64 mem addr =
+  let addr = Int32.to_int addr in
+  Bytes.get_int64_le mem.data addr
 
 let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
 
