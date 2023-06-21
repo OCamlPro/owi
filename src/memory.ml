@@ -74,6 +74,9 @@ let load_64 mem addr =
   let addr = Int32.to_int addr in
   Bytes.get_int64_le mem.data addr
 
+let create _ = failwith "TODO"
+let grow _ = failwith "TODO"
+
 let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
 
 let size mem = Int32.of_int @@ Bytes.length mem.data

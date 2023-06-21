@@ -1,5 +1,40 @@
-type trap =
-  | Out_of_bound_memory_access
+type trap = Out_of_bound_memory_access
+
+module type Memory = sig
+  type int32
+
+  type int64
+
+  type t
+
+  val load_8_s : t -> int32 -> int32
+
+  val load_8_u : t -> int32 -> int32
+
+  val load_16_s : t -> int32 -> int32
+
+  val load_16_u : t -> int32 -> int32
+
+  val load_32 : t -> int32 -> int32
+
+  val load_64 : t -> int32 -> int64
+
+  val store_8 : t -> addr:int32 -> int32 -> unit
+
+  val store_16 : t -> addr:int32 -> int32 -> unit
+
+  val store_32 : t -> addr:int32 -> int32 -> unit
+
+  val store_64 : t -> addr:int32 -> int64 -> unit
+
+  val create : Int32.t -> t
+
+  val grow : t -> int32 -> t
+
+  val size : t -> int32
+
+  val size_in_pages : t -> int32
+end
 
 module type P = sig
   type t
@@ -67,33 +102,8 @@ module type P = sig
     val typ : 'env global -> Simplified.val_type
   end
 
-  module Memory : sig
-    type t = memory
-
-    val load_8_s : t -> Value.int32 -> Value.int32
-
-    val load_8_u : t -> Value.int32 -> Value.int32
-
-    val load_16_s : t -> Value.int32 -> Value.int32
-
-    val load_16_u : t -> Value.int32 -> Value.int32
-
-    val load_32 : t -> Value.int32 -> Value.int32
-
-    val load_64 : t -> Value.int32 -> Value.int64
-
-    val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit
-
-    val store_16 : t -> addr:Value.int32 -> Value.int32 -> unit
-
-    val store_32 : t -> addr:Value.int32 -> Value.int32 -> unit
-
-    val store_64 : t -> addr:Value.int32 -> Value.int64 -> unit
-
-    val size : t -> Value.int32
-
-    val size_in_pages : t -> Value.int32
-  end
+  module Memory :
+    Memory with type t = memory and type int32 := int32 and type int64 := int64
 
   module Env : sig
     type t = env
