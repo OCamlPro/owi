@@ -43,7 +43,7 @@ module V :
   module F64 = Float64
 end
 
-module P = struct
+module P : Interpret_functor_intf.P = struct
   type toremove = unit
 
   type t = toremove
@@ -88,19 +88,3 @@ module P = struct
   module Memory = Memory
   module Env = Link.Env
 end
-
-module P' : Interpret_functor_intf.P = P
-
-(* module P : Interpret_functor_intf.P = struct *)
-(*   type vbool = bool *)
-
-(*   type int32 = Int32.t *)
-
-(*   type int64 = Int64.t *)
-
-(*   type float32 = Float32.t *)
-
-(*   type float64 = Float64.t *)
-
-(*   module V *)
-(* end *)
