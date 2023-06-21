@@ -1,6 +1,7 @@
 (library
  (public_name owi)
  (modules
+  sym_value
   assigned
   check
   compile
