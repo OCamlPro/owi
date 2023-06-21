@@ -80,7 +80,8 @@ module type P = sig
 
     val get_memory : t -> int -> Memory.t Result.t
 
-    (* val get_func : t -> int -> t' Value.Func.t Result.t *)
+    val get_func : t -> int -> t' Func.t Result.t
+
     val get_table : t -> int -> t' Table.t Result.t
 
     val get_elem : t -> int -> t' elem Result.t

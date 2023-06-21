@@ -10,6 +10,7 @@ module Make (P : Intf.P) : Intf.S = struct
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
   module Float64 = P.Value.F64
+  module Func = P.Func
   module Stack = Stack_functor.Make (P.Value)
   module Choice = P.Choice
 
@@ -633,29 +634,32 @@ module Make (P : Intf.P) : Intf.S = struct
       ; count = enter_function_count state.count func.id id
       }
 
-  (* let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) = *)
-  (*   match func with *)
-  (*   | WASM (id, func, env) -> exec_func ~return ~id state env func *)
-  (*   | Extern f -> *)
-  (*     let stack = exec_extern_func state.stack f in *)
-  (*     let state = { state with stack } in *)
-  (*     if return then State.return state else state *)
+  let exec_vfunc ~return (state : State.exec_state) (func : P.Env.t' Func.t) =
+    match func with
+    | WASM (id, func, env) -> exec_func ~return ~id state env func
+    | Extern _f ->
+      failwith "TODO extern func"
+      (* let stack = exec_extern_func state.stack f in *)
+      (* let state = { state with stack } in *)
+      (* if return then State.return state else state *)
 
-  (* let call_ref ~return (state : State.exec_state) typ_i = *)
-  (*   let fun_ref, stack = Stack.pop_as_ref state.stack in *)
-  (*   let state = { state with stack } in *)
-  (*   let func = *)
-  (*     match fun_ref with *)
-  (*     | exception Invalid_argument _ -> trap "undefined element" *)
-  (*     | Funcref (Some f) -> f *)
-  (*     | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
-  (*     | _ -> trap "element type error" *)
-  (*   in *)
-  (*   let pt, rt = Value.Func.typ func in *)
-  (*   let pt', rt' = typ_i in *)
-  (*   if not (rt = rt' && List.equal p_type_eq pt pt') then *)
-  (*     trap "indirect call type mismatch"; *)
-  (*   exec_vfunc ~return state func *)
+  let call_ref ~return (state : State.exec_state) typ_i =
+    ignore (return, state, typ_i);
+    failwith "TODO call_ref"
+    (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
+    (* let state = { state with stack } in *)
+    (* let func = *)
+    (*   match fun_ref with *)
+    (*   | exception Invalid_argument _ -> trap "undefined element" *)
+    (*   | Funcref (Some f) -> f *)
+    (*   | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
+    (*   | _ -> trap "element type error" *)
+    (* in *)
+    (* let pt, rt = Value.Func.typ func in *)
+    (* let pt', rt' = typ_i in *)
+    (* if not (rt = rt' && List.equal p_type_eq pt pt') then *)
+    (*   trap "indirect call type mismatch"; *)
+    (* exec_vfunc ~return state func *)
 
   let call_indirect ~return:_ (_state : State.exec_state) (_tbl_i, _typ_i) =
     failwith "tout DUR"
@@ -769,14 +773,14 @@ module Make (P : Intf.P) : Intf.S = struct
       let/ b, stack = pop_choice stack in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
-    (*   | Call i -> begin *)
-    (*     let* func = Env.get_func env i in *)
-    (*     exec_vfunc ~return:false state func *)
-    (*   end *)
-    (*   | Return_call i -> begin *)
-    (*     let* func = Env.get_func env i in *)
-    (*     exec_vfunc ~return:true state func *)
-    (*   end *)
+    | Call i -> begin
+        let* func = P.Env.get_func env i in
+        Choice.return @@ exec_vfunc ~return:false state func
+      end
+    | Return_call i -> begin
+        let* func = P.Env.get_func env i in
+        Choice.return @@ exec_vfunc ~return:true state func
+      end
     | Br i -> State.branch state i
     | Br_if i ->
       let/ b, stack = pop_choice stack in
