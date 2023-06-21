@@ -5,7 +5,9 @@ open Simplified
 module Env = Link.Env
 module Intf = Interpret_functor_intf
 
-module Make (P : Intf.P) : Intf.S = struct
+module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
+    and type module_to_run := P.Module_to_run.t
+= struct
   module Int32 = P.Value.I32
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
@@ -17,8 +19,10 @@ module Make (P : Intf.P) : Intf.S = struct
   module Memory = P.Memory
 
   module Int32_infix = struct
-    let (<) = Int32.lt
-    let (+) = Int32.add
+    let ( < ) = Int32.lt
+
+    let ( + ) = Int32.add
+
     let const = P.Value.const_i32
   end
 
@@ -569,15 +573,17 @@ module Make (P : Intf.P) : Intf.S = struct
       c.enter <- c.enter + 1;
       c
 
-    exception Result of value list
+    type instr_result =
+      | Return of value list
+      | Continue of exec_state
 
     let return (state : exec_state) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> raise (Result args)
+      | None -> Choice.return (Return args)
       | Some state ->
         let stack = args @ state.stack in
-        Choice.return { state with stack }
+        Choice.return (Continue { state with stack })
 
     let branch (state : exec_state) n =
       let block_stack = Stack.drop_n state.block_stack n in
@@ -589,7 +595,8 @@ module Make (P : Intf.P) : Intf.S = struct
         in
         let args = Stack.keep state.stack (List.length block.branch_rt) in
         let stack = args @ block.stack in
-        Choice.return { state with block_stack; pc = block.branch; stack }
+        Choice.return
+          (Continue { state with block_stack; pc = block.branch; stack })
 
     let end_block (state : exec_state) =
       match state.block_stack with
@@ -597,7 +604,8 @@ module Make (P : Intf.P) : Intf.S = struct
       | block :: block_stack ->
         let args = Stack.keep state.stack (List.length block.continue_rt) in
         let stack = args @ block.stack in
-        Choice.return { state with block_stack; pc = block.continue; stack }
+        Choice.return
+          (Continue { state with block_stack; pc = block.continue; stack })
   end
 
   let exec_block (state : State.exec_state) ~is_loop bt expr =
@@ -615,7 +623,8 @@ module Make (P : Intf.P) : Intf.S = struct
       }
     in
     Choice.return
-      { state with pc = expr; block_stack = block :: state.block_stack }
+      (State.Continue
+         { state with pc = expr; block_stack = block :: state.block_stack } )
 
   type wasm_func = Simplified.func
 
@@ -645,29 +654,28 @@ module Make (P : Intf.P) : Intf.S = struct
   let exec_vfunc ~return (state : State.exec_state) (func : P.Env.t' Func.t) =
     match func with
     | WASM (id, func, env) -> exec_func ~return ~id state env func
-    | Extern _f ->
-      failwith "TODO extern func"
-      (* let stack = exec_extern_func state.stack f in *)
-      (* let state = { state with stack } in *)
-      (* if return then State.return state else state *)
+    | Extern _f -> failwith "TODO extern func"
+  (* let stack = exec_extern_func state.stack f in *)
+  (* let state = { state with stack } in *)
+  (* if return then State.return state else state *)
 
   let call_ref ~return (state : State.exec_state) typ_i =
     ignore (return, state, typ_i);
     failwith "TODO call_ref"
-    (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
-    (* let state = { state with stack } in *)
-    (* let func = *)
-    (*   match fun_ref with *)
-    (*   | exception Invalid_argument _ -> trap "undefined element" *)
-    (*   | Funcref (Some f) -> f *)
-    (*   | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
-    (*   | _ -> trap "element type error" *)
-    (* in *)
-    (* let pt, rt = Value.Func.typ func in *)
-    (* let pt', rt' = typ_i in *)
-    (* if not (rt = rt' && List.equal p_type_eq pt pt') then *)
-    (*   trap "indirect call type mismatch"; *)
-    (* exec_vfunc ~return state func *)
+  (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
+  (* let state = { state with stack } in *)
+  (* let func = *)
+  (*   match fun_ref with *)
+  (*   | exception Invalid_argument _ -> trap "undefined element" *)
+  (*   | Funcref (Some f) -> f *)
+  (*   | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
+  (*   | _ -> trap "element type error" *)
+  (* in *)
+  (* let pt, rt = Value.Func.typ func in *)
+  (* let pt', rt' = typ_i in *)
+  (* if not (rt = rt' && List.equal p_type_eq pt pt') then *)
+  (*   trap "indirect call type mismatch"; *)
+  (* exec_vfunc ~return state func *)
 
   let call_indirect ~return:_ (_state : State.exec_state) (_tbl_i, _typ_i) =
     failwith "tout DUR"
@@ -690,17 +698,18 @@ module Make (P : Intf.P) : Intf.S = struct
   (*     trap "indirect call type mismatch"; *)
   (*   exec_vfunc ~return state func *)
 
-  let exec_instr instr (state : State.exec_state) : State.exec_state Choice.t =
+  let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
+      =
     State.count_instruction state;
     let stack = state.stack in
     let env = state.env in
     let locals = state.locals in
-    let st stack = Choice.return { state with stack } in
+    let st stack = Choice.return (State.Continue { state with stack }) in
     Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
     Log.debug2 "running instr: %a@." Simplified.Pp.instr instr;
     match instr with
     | Return -> State.return state
-    | Nop -> Choice.return state
+    | Nop -> Choice.return (State.Continue state)
     | Unreachable -> trap "unreachable"
     | I32_const n -> st @@ Stack.push_const_i32 stack n
     | I64_const n -> st @@ Stack.push_const_i64 stack n
@@ -782,18 +791,18 @@ module Make (P : Intf.P) : Intf.S = struct
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-        let* func = P.Env.get_func env i in
-        Choice.return @@ exec_vfunc ~return:false state func
-      end
+      let* func = P.Env.get_func env i in
+      Choice.return @@ State.Continue (exec_vfunc ~return:false state func)
+    end
     | Return_call i -> begin
-        let* func = P.Env.get_func env i in
-        Choice.return @@ exec_vfunc ~return:true state func
-      end
+      let* func = P.Env.get_func env i in
+      Choice.return @@ State.Continue (exec_vfunc ~return:true state func)
+    end
     | Br i -> State.branch state i
     | Br_if i ->
       let/ b, stack = pop_choice stack in
       let state = { state with stack } in
-      if b then State.branch state i else Choice.return state
+      if b then State.branch state i else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
     | Memory_size ->
@@ -1019,16 +1028,16 @@ module Make (P : Intf.P) : Intf.S = struct
     | I_load8 (nn, sx, { offset; _ }) -> (
       let* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
-      if offset < 0 then
-        trap "out of bounds memory access";
+      if offset < 0 then trap "out of bounds memory access";
       let out_of_bound =
         P.Value.Bool.or_
-          Int32_infix.((Memory.size mem) < pos + (const (Stdlib.Int32.of_int offset)) + const 1l)
+          Int32_infix.(
+            Memory.size mem
+            < pos + const (Stdlib.Int32.of_int offset) + const 1l )
           Int32_infix.(pos < const 0l)
       in
       let/ out_of_bound = Choice.select out_of_bound in
-      if out_of_bound then
-        Choice.trap Out_of_bound_memory_access
+      if out_of_bound then Choice.trap Out_of_bound_memory_access
       else
         let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
         let addr = P.Value.I32.add pos offset in
@@ -1250,32 +1259,38 @@ module Make (P : Intf.P) : Intf.S = struct
       in
       failwith msg
 
-  (* let rec loop (state : State.exec_state) = *)
-  (*   let state = *)
-  (*     match state.pc with *)
-  (*     | instr :: pc -> exec_instr instr { state with pc } *)
-  (*     | [] -> *)
-  (*       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack; *)
-  (*       State.end_block state *)
-  (*   in *)
-  (*   loop state *)
+  let rec loop (state : State.exec_state) =
+    match state.pc with
+    | instr :: pc -> begin
+        let/ state = exec_instr instr { state with pc } in
+        match state with
+        | State.Continue state -> loop state
+        | State.Return res -> Choice.return res
+      end
+    | [] ->
+      Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
+      let/ state = State.end_block state in
+      match state with
+      | State.Continue state -> loop state
+      | State.Return res -> Choice.return res
 
-  (* let exec_expr env locals stack expr bt = *)
-  (*   let count = State.empty_count (Some "start") in *)
-  (*   count.enter <- count.enter + 1; *)
-  (*   let state : State.exec_state = *)
-  (*     let func_rt = match bt with None -> [] | Some rt -> rt in *)
-  (*     { stack *)
-  (*     ; locals *)
-  (*     ; env *)
-  (*     ; func_rt *)
-  (*     ; block_stack = [] *)
-  (*     ; pc = expr *)
-  (*     ; return_state = None *)
-  (*     ; count *)
-  (*     } *)
-  (*   in *)
-  (*   try loop state with State.Result args -> (args, count) *)
+  let exec_expr env locals stack expr bt =
+    let count = State.empty_count (Some "start") in
+    count.enter <- count.enter + 1;
+    let state : State.exec_state =
+      let func_rt = match bt with None -> [] | Some rt -> rt in
+      { stack
+      ; locals
+      ; env
+      ; func_rt
+      ; block_stack = []
+      ; pc = expr
+      ; return_state = None
+      ; count
+      }
+    in
+    let/ state = loop state in
+    Choice.return (state, count)
 
   (* let exec_func env (func : wasm_func) args = *)
   (*   Log.debug1 "calling func : func %s@." *)
@@ -1299,24 +1314,30 @@ module Make (P : Intf.P) : Intf.S = struct
   (*   | exception Trap msg -> Error msg *)
   (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
-  (* let modul (modul : Link.module_to_run) = *)
-  (*   Log.debug0 "interpreting ...@\n"; *)
-  (*   try *)
-  (*     List.iter *)
-  (*       (fun to_run -> *)
-  (*         let end_stack, count = *)
-  (*           exec_expr modul.env [||] Stack.empty to_run None *)
-  (*         in *)
-  (*         Log.profile "Exec module %s@.%a@." *)
-  (*           (Option.value modul.modul.id ~default:"anonymous") *)
-  (*           State.print_count count; *)
-  (*         match end_stack with *)
-  (*         | [] -> () *)
-  (*         | _ :: _ -> Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack *)
-  (*         ) *)
-  (*       modul.to_run; *)
-  (*     Ok () *)
-  (*   with *)
-  (*   | Trap msg -> Error msg *)
-  (*   | Stack_overflow -> Error "call stack exhausted" *)
+  let modul (modul : P.Module_to_run.t) =
+    Log.debug0 "interpreting ...@\n";
+    let/ () =
+      List.fold_left (fun u to_run ->
+          let/ () = u in
+          let/ end_stack, count =
+            let env = P.Module_to_run.env modul in
+            exec_expr env [||] Stack.empty to_run None
+          in
+          Log.profile "Exec module %s@.%a@."
+            (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")
+            State.print_count count;
+          match end_stack with
+          | [] -> Choice.return ()
+          | _ :: _ ->
+            Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
+            assert false
+        )
+        (Choice.return ())
+        (P.Module_to_run.to_run modul)
+    in
+    Choice.return (Ok ())
+    (* TODO error handling *)
+    (* with *)
+    (* | Trap msg -> Error msg *)
+    (* | Stack_overflow -> Error "call stack exhausted" *)
 end

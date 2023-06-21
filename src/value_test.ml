@@ -91,4 +91,13 @@ module P : Interpret_functor_intf.P = struct
   module Global = Global
   module Memory = Memory
   module Env = Link.Env
+
+  module Module_to_run = struct
+    (** runnable module *)
+    type t = Link.module_to_run
+    let env (t : Link.module_to_run) = t.env
+    let modul (t : Link.module_to_run) = t.modul
+    let to_run (t : Link.module_to_run) = t.to_run
+  end
+
 end
