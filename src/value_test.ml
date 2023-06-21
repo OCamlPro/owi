@@ -30,6 +30,10 @@ module V :
   module Bool = struct
     let not = not
 
+    let and_ = (&&)
+
+    let or_ = (||)
+
     let int32 = function true -> 1l | false -> 0l
   end
 

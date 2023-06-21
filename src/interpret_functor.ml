@@ -13,6 +13,14 @@ module Make (P : Intf.P) : Intf.S = struct
   module Func = P.Func
   module Stack = Stack_functor.Make (P.Value)
   module Choice = P.Choice
+  module Global = P.Global
+  module Memory = P.Memory
+
+  module Int32_infix = struct
+    let (<) = Int32.lt
+    let (+) = Int32.add
+    let const = P.Value.const_i32
+  end
 
   let ( let/ ) = Choice.bind
 
@@ -853,11 +861,11 @@ module Make (P : Intf.P) : Intf.S = struct
     (*     ( try Bytes.blit_string data.value src_pos mem dst_pos len *)
     (*       with Invalid_argument _ -> trap "out of bounds memory access" ); *)
     (*     st @@ stack *)
-    (*   | Select _t -> *)
-    (*     let b, stack = Stack.pop_bool stack in *)
-    (*     let o2, stack = Stack.pop stack in *)
-    (*     let o1, stack = Stack.pop stack in *)
-    (*     st @@ Stack.push stack (if b then o1 else o2) *)
+    | Select _t ->
+      let/ b, stack = pop_choice stack in
+      let o2, stack = Stack.pop stack in
+      let o1, stack = Stack.pop stack in
+      st @@ Stack.push stack (if b then o1 else o2)
     | Local_tee i ->
       let v, stack = Stack.pop stack in
       locals.(i) <- v;
@@ -1011,19 +1019,27 @@ module Make (P : Intf.P) : Intf.S = struct
     | I_load8 (nn, sx, { offset; _ }) -> (
       let* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
-      (* if Bytes.length mem < pos + offset + 1 || offset < 0 || pos < 0 then *)
-      (*   trap "out of bounds memory access"; *)
-      (* TODO check bounds *)
-      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
-      let addr = P.Value.I32.add pos offset in
-      let res =
-        (if sx = S then P.Memory.load_8_s else P.Memory.load_8_u) mem addr
+      if offset < 0 then
+        trap "out of bounds memory access";
+      let out_of_bound =
+        P.Value.Bool.or_
+          Int32_infix.((Memory.size mem) < pos + (const (Stdlib.Int32.of_int offset)) + const 1l)
+          Int32_infix.(pos < const 0l)
       in
-      st
-      @@
-      match nn with
-      | S32 -> Stack.push_i32 stack res
-      | S64 -> Stack.push_i64 stack (P.Value.I64.of_int32 res) )
+      let/ out_of_bound = Choice.select out_of_bound in
+      if out_of_bound then
+        Choice.trap Out_of_bound_memory_access
+      else
+        let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+        let addr = P.Value.I32.add pos offset in
+        let res =
+          (if sx = S then P.Memory.load_8_s else P.Memory.load_8_u) mem addr
+        in
+        st
+        @@
+        match nn with
+        | S32 -> Stack.push_i32 stack res
+        | S64 -> Stack.push_i64 stack (P.Value.I64.of_int32 res) )
     | I_store8 (nn, { offset; _ }) ->
       let* mem = P.Env.get_memory env mem_0 in
       let n, stack =

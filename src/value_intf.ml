@@ -150,6 +150,9 @@ module type T = sig
   module Bool : sig
     val not : vbool -> vbool
 
+    val or_ : vbool -> vbool -> vbool
+    val and_ : vbool -> vbool -> vbool
+
     val int32 : vbool -> int32
   end
 

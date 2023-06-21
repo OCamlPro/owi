@@ -1,3 +1,6 @@
+type trap =
+  | Out_of_bound_memory_access
+
 module type P = sig
   type t
 
@@ -33,6 +36,8 @@ module type P = sig
     val bind : 'a t -> ('a -> 'b t) -> 'b t
 
     val select : vbool -> bool t
+
+    val trap : trap -> 'a t
   end
 
   module Func :
@@ -72,6 +77,9 @@ module type P = sig
     val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit
 
     (* val get_data : t -> bytes *)
+
+    val size : t -> Value.int32
+
     val size_in_pages : t -> Value.int32
 
     val get_limit_max : t -> int option
