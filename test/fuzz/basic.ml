@@ -477,18 +477,23 @@ let expr_call (env : Env.t) (stack : val_type list) =
       | _ -> None )
     env.funcs
 
+let random_stack =
+  let+ l_vt = list val_type in
+  [ S.Whatever l_vt ]
+
+let unreachable =
+  pair (const Unreachable) random_stack
+
 let expr_br (env : Env.t) (stack : val_type list) =
-  let stack_pt = List.map (fun _ -> S.Pop) in
-  let stack_rt = List.map (fun vt -> S.Push vt) in
   List.filter_map
     (fun (name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt))
+      | Arg.Bt_raw (_, (_pt, rt))
         when S.is_stack_compatible stack (List.rev rt) ->
         Some
           (pair
              (const (Br (Symbolic name)))
-             (const (stack_pt pt @ stack_rt rt)) )
+             random_stack )
       | _ -> None )
     env.blocks
 
