@@ -26,6 +26,13 @@ let update_memory mem data =
   mem.limits <- limits;
   mem.data <- data
 
+let grow mem delta =
+  let delta = Int32.to_int delta in
+  let old_size = Bytes.length mem.data in
+  let new_mem = Bytes.extend mem.data 0 delta in
+  Bytes.fill new_mem old_size delta (Char.chr 0);
+  update_memory mem new_mem
+
 let get_data { data; _ } = data
 
 let get_limit_max { limits; _ } = limits.max
@@ -73,9 +80,6 @@ let load_32 mem addr =
 let load_64 mem addr =
   let addr = Int32.to_int addr in
   Bytes.get_int64_le mem.data addr
-
-let create _ = failwith "TODO"
-let grow _ = failwith "TODO"
 
 let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
 

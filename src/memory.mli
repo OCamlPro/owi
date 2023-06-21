@@ -28,9 +28,7 @@ val store_16 : t -> addr:int32 -> int32 -> unit
 val store_32 : t -> addr:int32 -> int32 -> unit
 val store_64 : t -> addr:int32 -> int64 -> unit
 
-val create : int32 -> t
-
-val grow : t -> int32 -> t
+val grow : t -> int32 -> unit
 
 val size_in_pages : t -> int32
 

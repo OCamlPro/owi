@@ -1,6 +1,6 @@
 type trap = Out_of_bound_memory_access
 
-module type Memory = sig
+module type Memory_data = sig
   type int32
 
   type int64
@@ -102,8 +102,35 @@ module type P = sig
     val typ : 'env global -> Simplified.val_type
   end
 
-  module Memory :
-    Memory with type t = memory and type int32 := int32 and type int64 := int64
+  module Memory : sig
+    type t
+
+    val load_8_s : t -> int32 -> int32
+
+    val load_8_u : t -> int32 -> int32
+
+    val load_16_s : t -> int32 -> int32
+
+    val load_16_u : t -> int32 -> int32
+
+    val load_32 : t -> int32 -> int32
+
+    val load_64 : t -> int32 -> int64
+
+    val store_8 : t -> addr:int32 -> int32 -> unit
+
+    val store_16 : t -> addr:int32 -> int32 -> unit
+
+    val store_32 : t -> addr:int32 -> int32 -> unit
+
+    val store_64 : t -> addr:int32 -> int64 -> unit
+
+    val grow : t -> int32 -> unit
+
+    val size : t -> int32
+
+    val size_in_pages : t -> int32
+  end
 
   module Env : sig
     type t = env

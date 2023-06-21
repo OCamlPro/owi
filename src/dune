@@ -26,6 +26,7 @@
   stack_functor
   lexer
   memory
+  memory_limits
   table
   global
   link_env
