@@ -80,6 +80,10 @@ module P : Interpret_functor_intf.P = struct
     let bind = ( |> )
 
     let select = Fun.id
+
+    let trap : Interpret_functor_intf.trap -> 'a t = function
+      | Out_of_bound_memory_access ->
+        raise (Types.Trap "out of bounds memory access")
   end
 
   module Func = Value.Func

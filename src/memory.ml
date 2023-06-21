@@ -46,3 +46,5 @@ let load_8_u mem addr =
   Int32.of_int @@ Bytes.get_uint8 mem.data addr
 
 let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
+
+let size mem = Int32.of_int @@ Bytes.length mem.data

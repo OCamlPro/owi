@@ -18,3 +18,5 @@ val load_8_u : t -> int32 -> int32
 val store_8 : t -> addr:int32 -> int32 -> unit
 
 val size_in_pages : t -> int32
+
+val size : t -> int32
