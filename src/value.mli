@@ -5,10 +5,12 @@ type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
-module Func : Func_intf.T with type int32 := Int32.t
-                           and type int64 := Int64.t
-                           and type float32 := Float32.t
-                           and type float64 := Float64.t
+module Func :
+  Func_intf.T
+    with type int32 := Int32.t
+     and type int64 := Int64.t
+     and type float32 := Float32.t
+     and type float64 := Float64.t
 
 type 'env ref_value =
   | Externref of externref option

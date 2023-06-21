@@ -333,7 +333,7 @@ let modul (ls : state) ~name (modul : modul) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
-  let* (env, init_active_data, init_active_elem) =
+  let* env, init_active_data, init_active_elem =
     let rec env_and_init_active_data_and_elem =
       lazy
         (let env = Env.Build.empty in

@@ -46,16 +46,24 @@ module type Iop = sig
   val eq_const : num -> const -> vbool
 
   val eq : num -> num -> vbool
-  val ne : num -> num -> vbool
-  val lt : num -> num -> vbool
-  val gt : num -> num -> vbool
-  val lt_u : num -> num -> vbool
-  val gt_u : num -> num -> vbool
-  val le : num -> num -> vbool
-  val ge : num -> num -> vbool
-  val le_u : num -> num -> vbool
-  val ge_u : num -> num -> vbool
 
+  val ne : num -> num -> vbool
+
+  val lt : num -> num -> vbool
+
+  val gt : num -> num -> vbool
+
+  val lt_u : num -> num -> vbool
+
+  val gt_u : num -> num -> vbool
+
+  val le : num -> num -> vbool
+
+  val ge : num -> num -> vbool
+
+  val le_u : num -> num -> vbool
+
+  val ge_u : num -> num -> vbool
 end
 
 module type Fop = sig
@@ -94,10 +102,15 @@ module type Fop = sig
   val copy_sign : num -> num -> num
 
   val eq : num -> num -> vbool
+
   val ne : num -> num -> vbool
+
   val lt : num -> num -> vbool
+
   val gt : num -> num -> vbool
+
   val le : num -> num -> vbool
+
   val ge : num -> num -> vbool
 end
 
@@ -136,16 +149,27 @@ module type T = sig
 
   module Bool : sig
     val not : vbool -> vbool
+
     val int32 : vbool -> int32
   end
 
   module I32 : sig
-    include Iop with type num := int32 and type vbool := vbool and type const := Int32.t
+    include
+      Iop
+        with type num := int32
+         and type vbool := vbool
+         and type const := Int32.t
   end
 
   module I64 : sig
-    include Iop with type num := int64 and type vbool := vbool and type const := Int64.t
+    include
+      Iop
+        with type num := int64
+         and type vbool := vbool
+         and type const := Int64.t
+
     val of_int32 : int32 -> int64
+
     val to_int32 : int64 -> int32
   end
 

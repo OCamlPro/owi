@@ -67,8 +67,7 @@ end
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
-let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option
-    =
+let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option =
   match Type_id.eq rty ty with None -> None | Some Eq -> Some r
 
 type 'env ref_value =

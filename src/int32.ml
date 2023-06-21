@@ -9,7 +9,8 @@ let ctz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
 (* Taken from Base https://github.com/janestreet/base *)
 let popcnt =
   let mask = 0xffff_ffffL in
-  fun [@inline] x -> Stdlib.Int64.to_int32 (Int64.popcnt (Int64.logand (Int64.of_int32 x) mask))
+  fun [@inline] x ->
+    Stdlib.Int64.to_int32 (Int64.popcnt (Int64.logand (Int64.of_int32 x) mask))
 
 let of_int64 = Int64.to_int32
 
@@ -58,12 +59,17 @@ let extend_s n x =
   let shift = 32 - n in
   shift_right (shift_left x shift) shift
 
-let eq (x: int32) y = x = y
-let ne (x: int32) y = x <> y
-let lt (x: int32) y = x < y
-let gt (x: int32) y = x > y
-let le (x: int32) y = x <= y
-let ge (x: int32) y = x >= y
+let eq (x : int32) y = x = y
+
+let ne (x : int32) y = x <> y
+
+let lt (x : int32) y = x < y
+
+let gt (x : int32) y = x > y
+
+let le (x : int32) y = x <= y
+
+let ge (x : int32) y = x >= y
 
 let lt_u x y = cmp_u x ( < ) y
 
@@ -137,4 +143,4 @@ let of_string s =
   require (low_int <= parsed && parsed <= high_int);
   parsed
 
-let eq_const (i:int32) j = i = j
+let eq_const (i : int32) j = i = j

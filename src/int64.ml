@@ -31,7 +31,7 @@ let popcnt =
     (* gather the bit count for every byte *)
     let x = (x + (x lsr 4)) land m4 in
     (* sum the bit counts in the top byte and shift it down *)
-    ((x * h01) lsr 56)
+    (x * h01) lsr 56
 
 (*
    * Unsigned comparison in terms of signed comparison.
@@ -85,12 +85,17 @@ let extend_s n x =
   let shift = 64 - n in
   shift_right (shift_left x shift) shift
 
-let eq (x: int64) y = x = y
-let ne (x: int64) y = x <> y
-let lt (x: int64) y = x < y
-let gt (x: int64) y = x > y
-let le (x: int64) y = x <= y
-let ge (x: int64) y = x >= y
+let eq (x : int64) y = x = y
+
+let ne (x : int64) y = x <> y
+
+let lt (x : int64) y = x < y
+
+let gt (x : int64) y = x > y
+
+let le (x : int64) y = x <= y
+
+let ge (x : int64) y = x >= y
 
 let lt_u x y = cmp_u x ( < ) y
 
@@ -153,4 +158,4 @@ let of_string s =
   require (low_int <= parsed && parsed <= high_int);
   parsed
 
-let eq_const (i:int64) j = i = j
+let eq_const (i : int64) j = i = j
