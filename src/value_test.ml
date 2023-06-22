@@ -37,10 +37,25 @@ module V :
     let int32 = function true -> 1l | false -> 0l
   end
 
-  module I32 = Int32
-  module I64 = Int64
-  module F32 = Float32
-  module F64 = Float64
+  module I32 = struct
+    include Int32
+    include Convert.Int32
+  end
+
+  module I64 = struct
+    include Int64
+    include Convert.Int64
+  end
+
+  module F32 = struct
+    include Float32
+    include Convert.Float32
+  end
+
+  module F64 = struct
+    include Float64
+    include Convert.Float64
+  end
 end
 
 module P = struct

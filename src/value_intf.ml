@@ -5,6 +5,10 @@ module type Iop = sig
 
   type vbool
 
+  type float32
+
+  type float64
+
   val zero : num
 
   val clz : num -> num
@@ -64,6 +68,14 @@ module type Iop = sig
   val le_u : num -> num -> vbool
 
   val ge_u : num -> num -> vbool
+
+  val trunc_f32_s : float32 -> num
+
+  val trunc_f32_u : float32 -> num
+
+  val trunc_f64_s : float64 -> num
+
+  val trunc_f64_u : float64 -> num
 end
 
 module type Fop = sig
@@ -151,10 +163,15 @@ module type T = sig
     val not : vbool -> vbool
 
     val or_ : vbool -> vbool -> vbool
+
     val and_ : vbool -> vbool -> vbool
 
     val int32 : vbool -> int32
   end
+
+  module F32 : Fop with type num := float32 and type vbool := vbool
+
+  module F64 : Fop with type num := float64 and type vbool := vbool
 
   module I32 : sig
     include
@@ -162,6 +179,8 @@ module type T = sig
         with type num := int32
          and type vbool := vbool
          and type const := Int32.t
+         and type float32 := float32
+         and type float64 := float64
   end
 
   module I64 : sig
@@ -170,13 +189,11 @@ module type T = sig
         with type num := int64
          and type vbool := vbool
          and type const := Int64.t
+         and type float32 := float32
+         and type float64 := float64
 
     val of_int32 : int32 -> int64
 
     val to_int32 : int64 -> int32
   end
-
-  module F32 : Fop with type num := float32 and type vbool := vbool
-
-  module F64 : Fop with type num := float64 and type vbool := vbool
 end

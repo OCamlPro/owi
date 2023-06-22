@@ -295,36 +295,32 @@ module Make (P : Intf.P) :
       in
       Stack.push_bool stack res
 
-  (* let exec_itruncf stack nn nn' sx = *)
-  (*   match (nn, nn') with *)
-  (*   | S32, S32 -> ( *)
-  (*     let f, stack = Stack.pop_f32 stack in *)
-  (*     Stack.push_i32 stack *)
-  (*     @@ *)
-  (*     match sx with *)
-  (*     | S -> Convert.Int32.trunc_f32_s f *)
-  (*     | U -> Convert.Int32.trunc_f32_u f ) *)
-  (*   | S32, S64 -> ( *)
-  (*     let f, stack = Stack.pop_f64 stack in *)
-  (*     Stack.push_i32 stack *)
-  (*     @@ *)
-  (*     match sx with *)
-  (*     | S -> Convert.Int32.trunc_f64_s f *)
-  (*     | U -> Convert.Int32.trunc_f64_u f ) *)
-  (*   | S64, S32 -> ( *)
-  (*     let f, stack = Stack.pop_f32 stack in *)
-  (*     Stack.push_i64 stack *)
-  (*     @@ *)
-  (*     match sx with *)
-  (*     | S -> Convert.Int64.trunc_f32_s f *)
-  (*     | U -> Convert.Int64.trunc_f32_u f ) *)
-  (*   | S64, S64 -> ( *)
-  (*     let f, stack = Stack.pop_f64 stack in *)
-  (*     Stack.push_i64 stack *)
-  (*     @@ *)
-  (*     match sx with *)
-  (*     | S -> Convert.Int64.trunc_f64_s f *)
-  (*     | U -> Convert.Int64.trunc_f64_u f ) *)
+  let exec_itruncf stack nn nn' sx =
+    match (nn, nn') with
+    | S32, S32 ->
+      let f, stack = Stack.pop_f32 stack in
+      let res =
+        match sx with S -> Int32.trunc_f32_s f | U -> Int32.trunc_f32_u f
+      in
+      Stack.push_i32 stack res
+    | S32, S64 ->
+      let f, stack = Stack.pop_f64 stack in
+      let res =
+        match sx with S -> Int32.trunc_f64_s f | U -> Int32.trunc_f64_u f
+      in
+      Stack.push_i32 stack res
+    | S64, S32 ->
+      let f, stack = Stack.pop_f32 stack in
+      let res =
+        match sx with S -> Int64.trunc_f32_s f | U -> Int64.trunc_f32_u f
+      in
+      Stack.push_i64 stack res
+    | S64, S64 ->
+      let f, stack = Stack.pop_f64 stack in
+      let res =
+        match sx with S -> Int64.trunc_f64_s f | U -> Int64.trunc_f64_u f
+      in
+      Stack.push_i64 stack res
 
   (* let exec_itruncsatf stack nn nn' sx = *)
   (*   match nn with *)
@@ -782,7 +778,7 @@ module Make (P : Intf.P) :
     (*       | U -> Convert.Int64.extend_i32_u n *)
     (*     in *)
     (*     st @@ Stack.push_i64 stack n *)
-    (*   | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s *)
+    | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s
     (*   | I_trunc_sat_f (nn, nn', s) -> st @@ exec_itruncsatf stack nn nn' s *)
     (*   | F32_demote_f64 -> *)
     (*     let n, stack = Stack.pop_f64 stack in *)

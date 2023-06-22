@@ -1,6 +1,5 @@
 module Symbolic = struct
-  open Encoding 
-
+  open Encoding
   module Expr = Expression
 
   type vbool = Expr.t
@@ -23,8 +22,11 @@ module Symbolic = struct
     | Ref of 'a ref_value
 
   let mk_i32 x = Expr.Val (Value.Num (Types.I32 x))
+
   let mk_i64 x = Expr.Val (Value.Num (Types.I64 x))
+
   let mk_f32 x = Expr.Val (Value.Num (Types.F32 x))
+
   let mk_f64 x = Expr.Val (Value.Num (Types.F64 x))
 
   let const_i32 (i : Int32.t) : int32 = mk_i32 i
@@ -40,16 +42,25 @@ module Symbolic = struct
   let pp _ _ = failwith "TODO"
 
   module Bool = struct
-    let not = Boolean.mk_not 
+    let not = Boolean.mk_not
+
     let int32 v = Boolean.mk_ite v (mk_i32 0l) (mk_i32 1l)
+
     let or_ = Boolean.mk_or
+
     let and_ = Boolean.mk_and
   end
 
   module I32 = struct
     type num = Expr.t
+
     type vbool = Expr.t
+
     type const = Int64.t
+
+    type nonrec float32 = float32
+
+    type nonrec float64 = float64
 
     let zero = mk_i32 0l
 
@@ -110,12 +121,26 @@ module Symbolic = struct
     let le_u e1 e2 = BitVector.mk_le_u e1 e2 `I32Type
 
     let ge_u e1 e2 = BitVector.mk_ge_u e1 e2 `I32Type
+
+    let trunc_f32_s _ = assert false
+
+    let trunc_f32_u _ = assert false
+
+    let trunc_f64_s _ = assert false
+
+    let trunc_f64_u _ = assert false
   end
 
   module I64 = struct
     type num = Expr.t
+
     type vbool = Expr.t
+
     type const = Int64.t
+
+    type nonrec float32 = float32
+
+    type nonrec float64 = float64
 
     let zero = mk_i64 0L
 
@@ -179,29 +204,38 @@ module Symbolic = struct
 
     let of_int32 e = Expr.Cvtop (Types.I64 Types.I32.ExtendSI32, e)
 
-    let to_int32 e = Expr.Cvtop (Types.I32 Types.I32.WrapI64 , e)
+    let to_int32 e = Expr.Cvtop (Types.I32 Types.I32.WrapI64, e)
+
+    let trunc_f32_s _ = assert false
+
+    let trunc_f32_u _ = assert false
+
+    let trunc_f64_s _ = assert false
+
+    let trunc_f64_u _ = assert false
   end
 
   module F32 = struct
     type num = Expr.t
+
     type vbool = Expr.t
 
-    let zero = mk_f32 0l 
+    let zero = mk_f32 0l
 
-    let abs x = FloatingPoint.mk_abs x `F32Type 
+    let abs x = FloatingPoint.mk_abs x `F32Type
 
     let neg x = FloatingPoint.mk_neg x `F32Type
-  
+
     let sqrt x = FloatingPoint.mk_sqrt x `F32Type
 
-    let ceil _ = assert false 
+    let ceil _ = assert false
 
-    let floor _ = assert false 
+    let floor _ = assert false
 
-    let trunc _ = assert false 
+    let trunc _ = assert false
 
     let nearest x = FloatingPoint.mk_nearest x `F32Type
-    
+
     let add x y = FloatingPoint.mk_add x y `F32Type
 
     let sub x y = FloatingPoint.mk_sub x y `F32Type
@@ -209,7 +243,7 @@ module Symbolic = struct
     let mul x y = FloatingPoint.mk_mul x y `F32Type
 
     let div x y = FloatingPoint.mk_div x y `F32Type
-    
+
     let min x y = FloatingPoint.mk_min x y `F32Type
 
     let max x y = FloatingPoint.mk_max x y `F32Type
@@ -223,33 +257,33 @@ module Symbolic = struct
     let lt x y = FloatingPoint.mk_lt x y `F32Type
 
     let gt x y = FloatingPoint.mk_gt x y `F32Type
-    
+
     let le x y = FloatingPoint.mk_le x y `F32Type
 
     let ge x y = FloatingPoint.mk_ge x y `F32Type
-
   end
 
   module F64 = struct
     type num = Expr.t
+
     type vbool = Expr.t
 
     let zero = mk_f64 0L
 
-    let abs x = FloatingPoint.mk_abs x `F64Type 
+    let abs x = FloatingPoint.mk_abs x `F64Type
 
     let neg x = FloatingPoint.mk_neg x `F64Type
-  
+
     let sqrt x = FloatingPoint.mk_sqrt x `F64Type
 
-    let ceil _ = assert false 
+    let ceil _ = assert false
 
-    let floor _ = assert false 
+    let floor _ = assert false
 
-    let trunc _ = assert false 
+    let trunc _ = assert false
 
     let nearest x = FloatingPoint.mk_nearest x `F64Type
-    
+
     let add x y = FloatingPoint.mk_add x y `F64Type
 
     let sub x y = FloatingPoint.mk_sub x y `F64Type
@@ -257,7 +291,7 @@ module Symbolic = struct
     let mul x y = FloatingPoint.mk_mul x y `F64Type
 
     let div x y = FloatingPoint.mk_div x y `F64Type
-    
+
     let min x y = FloatingPoint.mk_min x y `F64Type
 
     let max x y = FloatingPoint.mk_max x y `F64Type
@@ -271,7 +305,7 @@ module Symbolic = struct
     let lt x y = FloatingPoint.mk_lt x y `F64Type
 
     let gt x y = FloatingPoint.mk_gt x y `F64Type
-    
+
     let le x y = FloatingPoint.mk_le x y `F64Type
 
     let ge x y = FloatingPoint.mk_ge x y `F64Type
