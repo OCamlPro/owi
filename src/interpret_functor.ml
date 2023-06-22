@@ -20,6 +20,7 @@ module Make (P : Intf.P) :
   module Choice = P.Choice
   module Global = P.Global
   module Memory = P.Memory
+  module Env = P.Env
 
   module Int32_infix = struct
     let ( < ) = Int32.lt
@@ -453,63 +454,65 @@ module Make (P : Intf.P) :
 
   let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
-  let exec_extern_func _stack (_f : Value.Func.extern_func) = failwith "TOuDOUx"
+  type extern_func = Extern_func.extern_func
 
-  (* let exec_extern_func stack (f : Value.Func.extern_func) = *)
-  (*   let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t = *)
-  (*     match arg with *)
-  (*     | I32 -> Stack.pop_i32 stack *)
-  (*     | I64 -> Stack.pop_i64 stack *)
-  (*     | F32 -> Stack.pop_f32 stack *)
-  (*     | F64 -> Stack.pop_f64 stack *)
-  (*     | Externref ety -> Stack.pop_as_externref ety stack *)
-  (*   in *)
-  (*   let rec split_args : *)
-  (*     type f r. *)
-  (*     Env.t' Stack.t -> (f, r) Value.Func.atype -> Env.t' Stack.t * Env.t' Stack.t *)
-  (*       = *)
-  (*    fun stack ty -> *)
-  (*     let[@local] split_one_arg args = *)
-  (*       let elt, stack = Stack.pop stack in *)
-  (*       let elts, stack = split_args stack args in *)
-  (*       (elt :: elts, stack) *)
-  (*     in *)
-  (*     match ty with *)
-  (*     | Value.Func.Arg (_, args) -> split_one_arg args *)
-  (*     | NArg (_, _, args) -> split_one_arg args *)
-  (*     | Res -> ([], stack) *)
-  (*   in *)
-  (*   let rec apply : type f r. Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r *)
-  (*       = *)
-  (*    fun stack ty f -> *)
-  (*     match ty with *)
-  (*     | Value.Func.Arg (arg, args) -> *)
-  (*       let v, stack = pop_arg stack arg in *)
-  (*       apply stack args (f v) *)
-  (*     | NArg (_, arg, args) -> *)
-  (*       let v, stack = pop_arg stack arg in *)
-  (*       apply stack args (f v) *)
-  (*     | Res -> f *)
-  (*   in *)
-  (*   let (Extern_func (Func (atype, rtype), func)) = f in *)
-  (*   let args, stack = split_args stack atype in *)
-  (*   let r = apply (List.rev args) atype func in *)
-  (*   let push_val (type ty) (arg : ty Value.Func.telt) (v : ty) stack = *)
-  (*     match arg with *)
-  (*     | I32 -> Stack.push_i32 stack v *)
-  (*     | I64 -> Stack.push_i64 stack v *)
-  (*     | F32 -> Stack.push_f32 stack v *)
-  (*     | F64 -> Stack.push_f64 stack v *)
-  (*     | Externref ty -> Stack.push_as_externref stack ty v *)
-  (*   in *)
-  (*   match (rtype, r) with *)
-  (*   | R0, () -> stack *)
-  (*   | R1 t1, v1 -> push_val t1 v1 stack *)
-  (*   | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2 *)
-  (*   | R3 (t1, t2, t3), (v1, v2, v3) -> *)
-  (*     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 *)
-  (*   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) -> *)
-  (*     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4 *)
+  let exec_extern_func stack (f : extern_func) =
+    let pop_arg (type ty) stack (arg : ty Extern_func.telt) : ty * Stack.t =
+      match arg with
+      | I32 -> Stack.pop_i32 stack
+      | I64 -> Stack.pop_i64 stack
+      | F32 -> Stack.pop_f32 stack
+      | F64 -> Stack.pop_f64 stack
+      | Externref _ety ->
+        failwith "TODO"
+        (* Stack.pop_as_externref ety stack *)
+    in
+    let rec split_args :
+      type f r.
+      Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t
+        =
+     fun stack ty ->
+      let[@local] split_one_arg args =
+        let elt, stack = Stack.pop stack in
+        let elts, stack = split_args stack args in
+        (elt :: elts, stack)
+      in
+      match ty with
+      | Extern_func.Arg (_, args) -> split_one_arg args
+      | NArg (_, _, args) -> split_one_arg args
+      | Res -> ([], stack)
+    in
+    let rec apply : type f r. Stack.t -> (f, r) Extern_func.atype -> f -> r
+        =
+     fun stack ty f ->
+      match ty with
+      | Extern_func.Arg (arg, args) ->
+        let v, stack = pop_arg stack arg in
+        apply stack args (f v)
+      | NArg (_, arg, args) ->
+        let v, stack = pop_arg stack arg in
+        apply stack args (f v)
+      | Res -> f
+    in
+    let (Extern_func.Extern_func (Func (atype, rtype), func)) = f in
+    let args, stack = split_args stack atype in
+    let r = apply (List.rev args) atype func in
+    let push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
+      match arg with
+      | I32 -> Stack.push_i32 stack v
+      | I64 -> Stack.push_i64 stack v
+      | F32 -> Stack.push_f32 stack v
+      | F64 -> Stack.push_f64 stack v
+      | Externref ty -> Stack.push_as_externref stack ty v
+    in
+    match (rtype, r) with
+    | R0, () -> stack
+    | R1 t1, v1 -> push_val t1 v1 stack
+    | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
+    | R3 (t1, t2, t3), (v1, v2, v3) ->
+      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
+    | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
+      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
   module State = struct
     type stack = Stack.t
@@ -599,15 +602,15 @@ module Make (P : Intf.P) :
     let return (state : exec_state) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> Choice.return (Return args)
+      | None -> Return args
       | Some state ->
         let stack = args @ state.stack in
-        Choice.return (Continue { state with stack })
+        Continue { state with stack }
 
     let branch (state : exec_state) n =
       let block_stack = Stack.drop_n state.block_stack n in
       match block_stack with
-      | [] -> return state
+      | [] -> Choice.return (return state)
       | block :: block_stack_tl ->
         let block_stack =
           if block.is_loop then block_stack else block_stack_tl
@@ -619,7 +622,7 @@ module Make (P : Intf.P) :
 
     let end_block (state : exec_state) =
       match state.block_stack with
-      | [] -> return state
+      | [] -> Choice.return (return state)
       | block :: block_stack ->
         let args = Stack.keep state.stack (List.length block.continue_rt) in
         let stack = args @ block.stack in
@@ -670,13 +673,17 @@ module Make (P : Intf.P) :
       ; count = enter_function_count state.count func.id id
       }
 
-  let exec_vfunc ~return (state : State.exec_state)
-    (func : Func_intf.t) =
+  let exec_vfunc ~return (state : State.exec_state) (func : Func_intf.t) =
     match func with
     | WASM (id, func, env_id) ->
       let env = Env_id.get env_id state.envs in
-      exec_func ~return ~id state env func
-    | Extern _f -> failwith "TODO extern func"
+      State.Continue (exec_func ~return ~id state env func)
+    | Extern f ->
+      let f = Env.get_extern_func state.env f in
+      let stack = exec_extern_func state.stack f in
+      let state = { state with stack } in
+      if return then State.return state else State.Continue state
+
   (* let stack = exec_extern_func state.stack f in *)
   (* let state = { state with stack } in *)
   (* if return then State.return state else state *)
@@ -730,7 +737,7 @@ module Make (P : Intf.P) :
     Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
     Log.debug2 "running instr: %a@." Simplified.Pp.instr instr;
     match instr with
-    | Return -> State.return state
+    | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
     | Unreachable -> trap "unreachable"
     | I32_const n -> st @@ Stack.push_const_i32 stack n
@@ -814,11 +821,11 @@ module Make (P : Intf.P) :
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
       let* func = P.Env.get_func env i in
-      Choice.return @@ State.Continue (exec_vfunc ~return:false state func)
+      Choice.return @@ exec_vfunc ~return:false state func
     end
     | Return_call i -> begin
       let* func = P.Env.get_func env i in
-      Choice.return @@ State.Continue (exec_vfunc ~return:true state func)
+      Choice.return @@ exec_vfunc ~return:true state func
     end
     | Br i -> State.branch state i
     | Br_if i ->

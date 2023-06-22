@@ -131,6 +131,8 @@ module P = struct
 
     let get_global = Link_env.get_global
 
+    let get_extern_func = Link_env.get_extern_func
+
     let drop_elem = Link_env.drop_elem
 
     let drop_data = Link_env.drop_data

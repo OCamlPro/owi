@@ -139,11 +139,9 @@ module P = struct
 
     let get_memory _ = assert false
 
-    let get_func t id =
-      let* func = Link_env.get_func t id in
-      match func with
-      | WASM (id, f, env) -> Ok (Func_intf.WASM (id, f, env))
-      | Extern _ -> assert false
+    let get_func = Link_env.get_func
+
+    let get_extern_func = Link_env.get_extern_func
 
     let get_table _ = assert false
 
