@@ -784,14 +784,14 @@ module Make (P : Intf.P) :
     (*     st @@ Stack.push_i64 stack n *)
     | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s
     | I_trunc_sat_f (nn, nn', s) -> st @@ exec_itruncsatf stack nn nn' s
-    (*   | F32_demote_f64 -> *)
-    (*     let n, stack = Stack.pop_f64 stack in *)
-    (*     let n = Convert.Float32.demote_f64 n in *)
-    (*     st @@ Stack.push_f32 stack n *)
-    (*   | F64_promote_f32 -> *)
-    (*     let n, stack = Stack.pop_f32 stack in *)
-    (*     let n = Convert.Float64.promote_f32 n in *)
-    (*     st @@ Stack.push_f64 stack n *)
+    | F32_demote_f64 ->
+      let n, stack = Stack.pop_f64 stack in
+      let n = Float32.demote_f64 n in
+      st @@ Stack.push_f32 stack n
+    | F64_promote_f32 ->
+      let n, stack = Stack.pop_f32 stack in
+      let n = Float64.promote_f32 n in
+      st @@ Stack.push_f64 stack n
     | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
     | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
     (*   | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn' *)
@@ -1350,7 +1350,7 @@ module Make (P : Intf.P) :
     let/ thread =
       List.fold_left
         (fun thread to_run ->
-          let/ thread = thread in
+          let/ thread in
           let/ (thread, end_stack), count =
             let env = P.Module_to_run.env modul in
             exec_expr thread env [||] Stack.empty to_run None
