@@ -1,6 +1,8 @@
 (library
  (public_name owi)
  (modules
+  func_id
+  intf
   const_interp
   sym_value
   sym_state
