@@ -32,6 +32,7 @@ type 'f state =
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
+  ; envs : Env.t Env_id.collection
   }
 
 (** the empty link state *)

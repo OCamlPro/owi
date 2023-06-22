@@ -30,6 +30,7 @@ type 'f state =
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
+  ; envs : Env.t Env_id.collection
   }
 
 type 'extern_func extern_module = { functions : (string * 'extern_func) list }
@@ -39,6 +40,7 @@ let empty_state =
   ; by_id = StringMap.empty
   ; last = None
   ; collection = Func_id.empty
+  ; envs = Env_id.empty
   }
 
 let load_from_module ls f (import : _ Imported.t) =
@@ -290,37 +292,38 @@ let modul (ls : 'f state) ~name (modul : modul) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
-  let* env, init_active_data, init_active_elem =
-    let rec env_and_init_active_data_and_elem =
-      lazy
-        (let env = Env.Build.empty in
-         let env =
-           eval_functions ls finished_env env modul.func |> raise_on_error
-         in
-         let env = eval_globals ls env modul.global |> raise_on_error in
-         let env = eval_memories ls env modul.mem |> raise_on_error in
-         let env = eval_tables ls env modul.table |> raise_on_error in
-         let env, init_active_data =
-           define_data env modul.data |> raise_on_error
-         in
-         let env, init_active_elem =
-           define_elem env modul.elem |> raise_on_error
-         in
-         (env, init_active_data, init_active_elem) )
-    and finished_env =
-      lazy
-        (let env, _init_active_data, _init_active_elem =
-           Lazy.force env_and_init_active_data_and_elem
-         in
-         Env.freeze env ls.collection )
-    in
-    try
-      let env = Lazy.force finished_env in
-      let _env, init_active_data, init_active_elem =
-        Lazy.force env_and_init_active_data_and_elem
+  let* envs, (env, init_active_data, init_active_elem) =
+    Env_id.with_fresh_id (fun _env_id ->
+      let rec env_and_init_active_data_and_elem =
+        lazy
+          (let env = Env.Build.empty in
+           let env =
+             eval_functions ls finished_env env modul.func |> raise_on_error
+           in
+           let env = eval_globals ls env modul.global |> raise_on_error in
+           let env = eval_memories ls env modul.mem |> raise_on_error in
+           let env = eval_tables ls env modul.table |> raise_on_error in
+           let env, init_active_data =
+             define_data env modul.data |> raise_on_error
+           in
+           let env, init_active_elem =
+             define_elem env modul.elem |> raise_on_error
+           in
+           (env, init_active_data, init_active_elem) )
+      and finished_env =
+        lazy
+          (let env, _init_active_data, _init_active_elem =
+             Lazy.force env_and_init_active_data_and_elem
+           in
+           Env.freeze env ls.collection )
       in
-      Ok (env, init_active_data, init_active_elem)
-    with E msg -> Error msg
+      try
+        let env = Lazy.force finished_env in
+        let _env, init_active_data, init_active_elem =
+          Lazy.force env_and_init_active_data_and_elem
+        in
+        Ok (env, (env, init_active_data, init_active_elem))
+      with E msg -> Error msg ) ls.envs
   in
   let* by_id_exports = populate_exports env modul.exports in
   let by_id =
@@ -339,8 +342,12 @@ let modul (ls : 'f state) ~name (modul : modul) =
   let module_to_run = { modul; env; to_run } in
   Ok
     ( module_to_run
-    , { by_id; by_name; last = Some by_id_exports; collection = ls.collection }
-    )
+    , { by_id
+      ; by_name
+      ; last = Some by_id_exports
+      ; collection = ls.collection
+      ; envs
+      } )
 
 let extern_module (ls : 'f state) ~name ~(func_typ : 'f -> Simplified.func_type)
   (module_ : 'f extern_module) =

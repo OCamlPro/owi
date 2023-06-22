@@ -1,6 +1,7 @@
 (library
  (public_name owi)
  (modules
+  env_id
   func_id
   intf
   const_interp
