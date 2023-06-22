@@ -1,6 +1,6 @@
 open Value
 
-type 'env t = 'env Value.t list
+type t = Value.t list
 
 exception Empty
 
@@ -26,7 +26,7 @@ let push_as_externref s ty v = push s (Ref (Externref (Some (E (ty, v)))))
 
 let push_array s a = push s (Ref (Arrayref (Some a)))
 
-let pp fmt (s : 'env t) =
+let pp fmt (s : t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
     Value.pp fmt s
@@ -133,7 +133,7 @@ let pop_as_ref s =
     | _ -> Log.err "invalid type (expected ref)"
   with Empty -> Log.err "invalid type (expected ref)"
 
-let pop_as_externref (type ty) (ty : ty Type_id.ty) s : ty * 'env t =
+let pop_as_externref (type ty) (ty : ty Type_id.ty) s : ty * t =
   try
     let hd, tl = pop s in
     match hd with

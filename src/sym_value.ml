@@ -12,14 +12,14 @@ module Symbolic = struct
 
   type float64 = Expr.t
 
-  type 'a ref_value = unit
+  type ref_value = unit
 
-  type 'a t =
+  type t =
     | I32 of int32
     | I64 of int64
     | F32 of float32
     | F64 of float64
-    | Ref of 'a ref_value
+    | Ref of ref_value
 
   let mk_i32 x = Expr.Val (Value.Num (Types.I32 x))
 

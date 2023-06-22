@@ -2,16 +2,16 @@ open Stack_intf
 
 module Make (V : Value) :
   Stack_intf.S
-    with type 'a value := 'a V.t
+    with type value := V.t
      and type vbool := V.vbool
      and type int32 := V.int32
      and type int64 := V.int64
      and type float32 := V.float32
      and type float64 := V.float64
-     and type 'a ref_value := 'a V.ref_value = struct
+     and type ref_value := V.ref_value = struct
   open V
 
-  type 'env t = 'env V.t list
+  type t = V.t list
 
   exception Empty
 
@@ -53,7 +53,7 @@ module Make (V : Value) :
     failwith "TODO"
   (* push s (Ref (Arrayref (Some a))) *)
 
-  let pp fmt (s : 'env t) =
+  let pp fmt (s : t) =
     Format.pp_print_list
       ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
       V.pp fmt s

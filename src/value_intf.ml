@@ -159,14 +159,14 @@ module type T = sig
 
   type float64
 
-  type 'a ref_value
+  type ref_value
 
-  type 'a t =
+  type t =
     | I32 of int32
     | I64 of int64
     | F32 of float32
     | F64 of float64
-    | Ref of 'a ref_value
+    | Ref of ref_value
 
   val const_i32 : Int32.t -> int32
 
@@ -177,9 +177,9 @@ module type T = sig
   val const_f64 : Float64.t -> float64
   (* TODO ref *)
 
-  val ref_null : Simplified.heap_type -> 'a t
+  val ref_null : Simplified.heap_type -> t
 
-  val pp : Format.formatter -> 'a t -> unit
+  val pp : Format.formatter -> t -> unit
 
   module Bool : sig
     val not : vbool -> vbool

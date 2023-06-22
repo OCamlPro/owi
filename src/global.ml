@@ -1,5 +1,5 @@
 type 'env t =
-  { mutable value : 'env Value.t
+  { mutable value : Value.t
   ; label : string option
   ; mut : Types.mut
   ; typ : Simplified.val_type

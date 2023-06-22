@@ -2,7 +2,7 @@ type t
 
 type t' = Env_id.t
 
-type 'env elem = { mutable value : 'env Value.ref_value array }
+type 'env elem = { mutable value : Value.ref_value array }
 
 type data = { mutable value : string }
 
@@ -47,7 +47,7 @@ module Build : sig
 
   val add_elem : int -> t' elem -> t -> t
 
-  val get_const_global : t -> int -> t' Value.t Result.t
+  val get_const_global : t -> int -> Value.t Result.t
 
   val get_func : t -> int -> func Result.t
 end
@@ -65,7 +65,7 @@ module type T = sig
 
   type t' = t Lazy.t
 
-  type 'env elem = { mutable value : 'env Value.ref_value array }
+  type 'env elem = { mutable value : Value.ref_value array }
 
   type data = { mutable value : string }
 

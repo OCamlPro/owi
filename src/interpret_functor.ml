@@ -109,7 +109,7 @@ module Make (P : Intf.P) :
       in
       Stack.push_f64 stack res
 
-  let exec_ibinop (stack : 'a Stack.t) nn (op : ibinop) : 'a Stack.t Choice.t =
+  let exec_ibinop (stack : Stack.t) nn (op : ibinop) : Stack.t Choice.t =
     match nn with
     | S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
@@ -440,7 +440,7 @@ module Make (P : Intf.P) :
         Stack.push_f64 stack n
     end
 
-  let init_local (_id, t) : P.Env.t' P.Value.t =
+  let init_local (_id, t) : P.Value.t =
     match t with
     | Num_type I32 -> I32 Int32.zero
     | Num_type I64 -> I64 Int64.zero
@@ -512,9 +512,9 @@ module Make (P : Intf.P) :
   (*     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4 *)
 
   module State = struct
-    type stack = P.Env.t' Stack.t
+    type stack = Stack.t
 
-    type value = P.Env.t' P.Value.t
+    type value = P.Value.t
 
     type locals = value array
 

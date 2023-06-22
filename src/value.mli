@@ -19,30 +19,30 @@ module Func :
      and type float32 := Float32.t
      and type float64 := Float64.t
 
-type 'env ref_value =
+type ref_value =
   | Externref of externref option
   | Funcref of Func_intf.t option
   | Arrayref of unit array option
 
-type 'a t =
+type t =
   | I32 of Int32.t
   | I64 of Int64.t
   | F32 of Float32.t
   | F64 of Float64.t
-  | Ref of 'a ref_value
+  | Ref of ref_value
 
 val cast_ref : externref -> 'a Type_id.ty -> 'a option
 
-val of_instr : Simplified.instr -> _ t
+val of_instr : Simplified.instr -> t
 
-val to_instr : _ t -> Simplified.instr
+val to_instr : t -> Simplified.instr
 
-val ref_null' : Simplified.heap_type -> 'a ref_value
+val ref_null' : Simplified.heap_type -> ref_value
 
-val ref_null : Simplified.heap_type -> 'a t
+val ref_null : Simplified.heap_type -> t
 
-val ref_func : Func.t -> 'env t
+val ref_func : Func.t -> t
 
-val is_ref_null : 'a ref_value -> bool
+val is_ref_null : ref_value -> bool
 
-val pp : Format.formatter -> 'a t -> unit
+val pp : Format.formatter -> t -> unit

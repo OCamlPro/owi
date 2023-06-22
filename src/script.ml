@@ -64,7 +64,7 @@ let load_global_from_module ls mod_id name =
   | exception Not_found -> error_s "unbound name %s" name
   | v -> Ok v
 
-let compare_result_const result (const : 'env Value.t) =
+let compare_result_const result (const : Value.t) =
   match (result, const) with
   | Symbolic.Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
@@ -100,7 +100,7 @@ let compare_result_const result (const : 'env Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Symbolic.const -> 'env Value.t Result.t = function
+let value_of_const : Symbolic.const ->Value.t Result.t = function
   | Const_I32 v -> ok @@ Value.I32 v
   | Const_I64 v -> ok @@ Value.I64 v
   | Const_F32 v -> ok @@ Value.F32 v

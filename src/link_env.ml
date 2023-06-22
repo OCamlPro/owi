@@ -7,7 +7,7 @@ type data = { mutable value : string }
 
 let drop_data data = data.value <- ""
 
-type 'env elem = { mutable value : 'env Value.ref_value array }
+type 'env elem = { mutable value : Value.ref_value array }
 
 let drop_elem elem = elem.value <- [||]
 
@@ -158,7 +158,7 @@ module type T = sig
 
   type t' = t Lazy.t
 
-  type 'env elem = { mutable value : 'env Value.ref_value array }
+  type 'env elem = { mutable value : Value.ref_value array }
 
   type data = { mutable value : string }
 

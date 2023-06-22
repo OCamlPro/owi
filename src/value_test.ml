@@ -5,8 +5,8 @@ module V :
      and type int64 = Int64.t
      and type float32 = Float32.t
      and type float64 = Float64.t
-     and type 'a ref_value = 'a Value.ref_value
-     and type 'a t = 'a Value.t = struct
+     and type ref_value = Value.ref_value
+     and type t = Value.t = struct
   type vbool = bool
 
   type int32 = Int32.t

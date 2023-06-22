@@ -102,9 +102,9 @@ module type P = sig
   module Global : sig
     type 'env t = 'env global
 
-    val value : 'env global -> 'env Value.t
+    val value : 'env global -> Value.t
 
-    val set_value : 'env global -> 'env Value.t -> unit
+    val set_value : 'env global -> Value.t -> unit
 
     val mut : 'env global -> Types.mut
 
@@ -114,9 +114,9 @@ module type P = sig
   module Table : sig
     type 'env t = 'env table
 
-    val get : 'env t -> int32 -> 'env Value.ref_value
+    val get : 'env t -> int32 -> Value.ref_value
 
-    val set : 'env t -> int32 -> 'env Value.ref_value -> unit
+    val set : 'env t -> int32 -> Value.ref_value -> unit
 
     val size : 'env t -> int32
   end

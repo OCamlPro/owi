@@ -5,44 +5,44 @@ val modul : Link.envs -> Link.module_to_run -> unit Result.t
 
 (** interpret a function with a given input stack and produce a new stack*)
 val exec_vfunc :
-     Link.Env.t' Stack.t
+     Stack.t
   -> Link.envs
   -> Link.extern_func
   -> Value.Func.t
-  -> Link.Env.t' Stack.t Result.t
+  -> Stack.t Result.t
 
 val exec_iunop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.iunop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.iunop -> Stack.t
 
 val exec_funop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.funop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.funop -> Stack.t
 
 val exec_ibinop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.ibinop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.ibinop -> Stack.t
 
 val exec_fbinop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.fbinop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.fbinop -> Stack.t
 
 val exec_itestop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.itestop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.itestop -> Stack.t
 
 val exec_irelop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.irelop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.irelop -> Stack.t
 
 val exec_frelop :
-  Link.Env.t' Stack.t -> Types.nn -> Types.frelop -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.frelop -> Stack.t
 
 val exec_itruncf :
-  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.nn -> Types.sx -> Stack.t
 
 val exec_itruncsatf :
-  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.nn -> Types.sx -> Stack.t
 
 val exec_fconverti :
-  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Types.sx -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.nn -> Types.sx -> Stack.t
 
 val exec_ireinterpretf :
-  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.nn -> Stack.t
 
 val exec_freinterpreti :
-  Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t
+  Stack.t -> Types.nn -> Types.nn -> Stack.t

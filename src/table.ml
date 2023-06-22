@@ -2,7 +2,7 @@ open Types
 open Simplified
 
 (* TODO: Value.ref_value array, gadt to constraint to the right ref_type ? *)
-type 'env table = 'env Value.ref_value array
+type 'env table = Value.ref_value array
 
 type 'env t =
   { id : int

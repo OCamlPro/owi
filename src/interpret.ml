@@ -384,7 +384,7 @@ let exec_freinterpreti stack nn nn' =
       Stack.push_f64 stack n
   end
 
-let init_local (_id, t) : Env.t' Value.t =
+let init_local (_id, t) : Value.t =
   match t with
   | Num_type I32 -> I32 Int32.zero
   | Num_type I64 -> I64 Int64.zero
@@ -404,7 +404,7 @@ let get_memory (env : Env.t) idx =
 let get_memory_raw env idx = Env.get_memory env idx
 
 let exec_extern_func stack (f : Value.Func.extern_func) =
-  let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Env.t' Stack.t =
+  let pop_arg (type ty) stack (arg : ty Value.Func.telt) : ty * Stack.t =
     match arg with
     | I32 -> Stack.pop_i32 stack
     | I64 -> Stack.pop_i64 stack
@@ -414,7 +414,7 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
   in
   let rec split_args :
     type f r.
-    Env.t' Stack.t -> (f, r) Value.Func.atype -> Env.t' Stack.t * Env.t' Stack.t
+    Stack.t -> (f, r) Value.Func.atype -> Stack.t * Stack.t
       =
    fun stack ty ->
     let[@local] split_one_arg args =
@@ -427,7 +427,7 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | NArg (_, _, args) -> split_one_arg args
     | Res -> ([], stack)
   in
-  let rec apply : type f r. Env.t' Stack.t -> (f, r) Value.Func.atype -> f -> r
+  let rec apply : type f r. Stack.t -> (f, r) Value.Func.atype -> f -> r
       =
    fun stack ty f ->
     match ty with
@@ -460,9 +460,9 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
 module State = struct
-  type stack = Env.t' Stack.t
+  type stack = Stack.t
 
-  type value = Env.t' Value.t
+  type value = Value.t
 
   type locals = value array
 

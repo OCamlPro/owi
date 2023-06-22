@@ -87,19 +87,19 @@ type externref = E : 'a Type_id.ty * 'a -> externref
 let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option =
   match Type_id.eq rty ty with None -> None | Some Eq -> Some r
 
-type 'env ref_value =
+type ref_value =
   | Externref of externref option
   | Funcref of Func_intf.t option
   | Arrayref of unit Array.t option
 
-type 'env t =
+type t =
   | I32 of Int32.t
   | I64 of Int64.t
   | F32 of Float32.t
   | F64 of Float64.t
-  | Ref of 'env ref_value
+  | Ref of ref_value
 
-let of_instr (i : Simplified.instr) : _ t =
+let of_instr (i : Simplified.instr) : t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c
@@ -133,6 +133,6 @@ let ref_null' = function
 
 let ref_null typ = Ref (ref_null' typ)
 
-let ref_func (f : Func.t) : 'env t = Ref (Funcref (Some f))
+let ref_func (f : Func.t) : t = Ref (Funcref (Some f))
 
 let is_ref_null = function Funcref None | Externref None -> true | _ -> false
