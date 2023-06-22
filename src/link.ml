@@ -351,7 +351,7 @@ let modul (ls : 'f state) ~name (modul : modul) =
       ; envs
       } )
 
-let extern_module (ls : 'f state) ~name ~(func_typ : 'f -> Simplified.func_type)
+let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> Simplified.func_type)
   (module_ : 'f extern_module) =
   let functions, collection =
     List.fold_left
@@ -376,6 +376,9 @@ let extern_module (ls : 'f state) ~name ~(func_typ : 'f -> Simplified.func_type)
     }
   in
   { ls with by_name = StringMap.add name exports ls.by_name; collection }
+
+let extern_module ls ~name module_ =
+  extern_module' ls ~name ~func_typ:Value.Func.extern_type module_
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =

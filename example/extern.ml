@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Link.extern_module =
+let extern_module : Value.Func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type_id.ty = Type_id.fresh "int ref" in
   let fresh i = ref i in
@@ -27,7 +27,8 @@ let extern_module : Link.extern_module =
 
 (* a link state that contains our custom module, available under the name `sausage` *)
 let link_state =
-  Link.extern_module Link.empty_state ~name:"sausage" extern_module
+  Link.extern_module Link.empty_state ~name:"sausage"
+    extern_module
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
@@ -45,6 +46,6 @@ let module_to_run =
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.modul module_to_run with
+  match Interpret.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()

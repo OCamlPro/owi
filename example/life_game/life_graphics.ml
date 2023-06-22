@@ -4,7 +4,7 @@ open Owi
 let () = Random.self_init ()
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Link.extern_module =
+let extern_module : Value.Func.extern_func Link.extern_module =
   (* some custom functions *)
   let x = ref 0 in
   let y = ref 0 in
@@ -74,7 +74,7 @@ let module_to_run, link_state =
 
 (* let's run it ! First module to be interpreted *)
 let () =
-  match Interpret.modul module_to_run with
+  match Interpret.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 
@@ -94,6 +94,6 @@ let module_to_run =
 
 (* let's run it ! it will animate the game of life in a graphics window *)
 let () =
-  match Interpret.modul module_to_run with
+  match Interpret.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()

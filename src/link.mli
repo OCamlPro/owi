@@ -57,11 +57,17 @@ type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 
 (** register an extern module with a given link state, producing a new link
     state *)
-val extern_module :
+val extern_module' :
      'f state
   -> name:string
   -> func_typ:('f -> Simplified.func_type)
   -> 'f extern_module
   -> 'f state
+
+val extern_module :
+  Value.Func.extern_func state
+  -> name:string
+  -> Value.Func.extern_func extern_module
+  -> Value.Func.extern_func state
 
 type extern_func = Value.Func.extern_func Func_id.collection

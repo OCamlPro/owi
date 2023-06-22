@@ -134,7 +134,6 @@ let action (link_state : Value.Func.extern_func Link.state) = function
 let run ~with_exhaustion ~optimize script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
-      ~func_typ:Value.Func.extern_type
       Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
