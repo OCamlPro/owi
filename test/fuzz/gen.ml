@@ -44,6 +44,7 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ]
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
   @ if B.memory_exists env then B.memory_grow :: load_instr else []
+  @ B.expr_br_if env stack
 
 let expr_available_2_i32 (env : Env.t) =
   let store_instr =
