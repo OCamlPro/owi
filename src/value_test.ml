@@ -63,8 +63,6 @@ end
 module P = struct
   type thread = unit
 
-  type env = Link.Env.t
-
   type memory = Memory.t
 
   type func = Value.Func.t
@@ -88,6 +86,8 @@ module P = struct
   type float64 = Float64.t
 
   type extern_func = Value.Func.extern_func
+
+  type env = extern_func Link.Env.t
 
   module Choice = struct
     type 'a t = 'a
@@ -115,17 +115,38 @@ module P = struct
   module Global = Global
   module Table = Table
   module Memory = Memory
-  module Env = Link.Env
+
+  module Env = struct
+    type t = env
+
+    let get_memory = Link_env.get_memory
+
+    let get_func = Link_env.get_func
+
+    let get_table = Link_env.get_table
+
+    let get_elem = Link_env.get_elem
+
+    let get_data = Link_env.get_data
+
+    let get_global = Link_env.get_global
+
+    let drop_elem = Link_env.drop_elem
+
+    let drop_data = Link_env.drop_data
+
+    let pp = Link_env.pp
+  end
 
   module Module_to_run = struct
     (** runnable module *)
-    type t = Link.module_to_run
+    type t = extern_func Link.module_to_run
 
-    let env (t : Link.module_to_run) = t.env
+    let env (t : extern_func Link.module_to_run) = t.env
 
-    let modul (t : Link.module_to_run) = t.modul
+    let modul (t : extern_func Link.module_to_run) = t.modul
 
-    let to_run (t : Link.module_to_run) = t.to_run
+    let to_run (t : extern_func Link.module_to_run) = t.to_run
   end
 end
 

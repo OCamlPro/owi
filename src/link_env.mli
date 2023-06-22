@@ -1,4 +1,4 @@
-type t
+type 'ext t
 
 type t' = Env_id.t
 
@@ -8,27 +8,27 @@ type data = { mutable value : string }
 
 type func := Func_intf.t
 
-val get_memory : t -> int -> Memory.t Result.t
+val get_memory : _ t -> int -> Memory.t Result.t
 
-val get_func : t -> int -> func Result.t
+val get_func : _ t -> int -> func Result.t
 
-val get_table : t -> int -> Table.t Result.t
+val get_table : _ t -> int -> Table.t Result.t
 
-val get_elem : t -> int -> elem Result.t
+val get_elem : _ t -> int -> elem Result.t
 
-val get_data : t -> int -> data Result.t
+val get_data : _ t -> int -> data Result.t
 
-val get_global : t -> int -> Global.t Result.t
+val get_global : _ t -> int -> Global.t Result.t
 
 val drop_elem : elem -> unit
 
 val drop_data : data -> unit
 
-val get_extern_func : t -> Func_id.t -> Value.Func.extern_func
+val get_extern_func : 'ext t -> Func_id.t -> 'ext
 
-val get_func_typ : t -> func -> Simplified.func_type
+val get_func_typ : _ t -> func -> Simplified.func_type
 
-val pp : Format.formatter -> t -> unit
+val pp : Format.formatter -> _ t -> unit
 
 module Build : sig
   type t
@@ -54,7 +54,7 @@ end
 
 type extern_funcs = Value.Func.extern_func Func_id.collection
 
-val freeze : Build.t -> extern_funcs -> t
+val freeze : Build.t -> 'ext Func_id.collection -> 'ext t
 
 module type T = sig
   module V : Intf.V

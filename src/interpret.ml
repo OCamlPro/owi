@@ -2,6 +2,9 @@ open Types
 open Simplified
 module Env = Link_env
 
+type extern_func = Value.Func.extern_func
+type env = extern_func Env.t
+
 module Log : sig
   [@@@ocaml.warning "-32"]
 
@@ -397,7 +400,7 @@ let mem_0 = 0
 
 let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
-let get_memory (env : Env.t) idx =
+let get_memory (env : _ Env.t) idx =
   let* mem = Env.get_memory env idx in
   Ok Memory.(get_data mem, get_limit_max mem)
 
@@ -493,9 +496,9 @@ module State = struct
     ; pc : pc
     ; block_stack : block_stack
     ; func_rt : result_type
-    ; env : Env.t
+    ; env : env
     ; count : count
-    ; envs : Env.t Env_id.collection
+    ; envs : env Env_id.collection
     }
 
   let rec print_count ppf count =
@@ -1216,7 +1219,7 @@ let exec_vfunc stack envs collection (func : Func_intf.t) =
   | exception Trap msg -> Error msg
   | exception Stack_overflow -> Error "call stack exhausted"
 
-let modul envs (modul : Link.module_to_run) =
+let modul envs (modul : extern_func Link.module_to_run) =
   Log.debug0 "interpreting ...@\n";
   try
     List.iter

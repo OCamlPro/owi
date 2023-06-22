@@ -9,8 +9,6 @@ module P = struct
     include Sym_value.Symbolic
   end
 
-  type env = Link_env.t
-
   type memory = unit
 
   type table = unit
@@ -73,6 +71,8 @@ module P = struct
   module Extern_func = Def_value.Make_extern_func (Value)
 
   type extern_func = Extern_func.extern_func
+
+  type env = extern_func Link_env.t
 
   type func = Def_value.Func.t
 
@@ -178,5 +178,5 @@ end
 
 module P' : Interpret_functor_intf.P = P
 
-let convert_module_to_run (m : Link.module_to_run) =
+let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }

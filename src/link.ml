@@ -19,20 +19,22 @@ type exports =
   ; defined_names : StringSet.t
   }
 
-type module_to_run =
+type 'f module_to_run =
   { modul : modul
-  ; env : Env.t
+  ; env : 'f Env.t
   ; to_run : expr list
   }
 
-type envs = Env.t Env_id.collection
+type 'f envs = 'f Env.t Env_id.collection
+
+type fenvs = Value.Func.extern_func Env.t Env_id.collection
 
 type 'f state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
-  ; envs : envs
+  ; envs : 'f envs
   }
 
 type 'extern_func extern_module = { functions : (string * 'extern_func) list }

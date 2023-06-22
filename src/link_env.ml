@@ -15,14 +15,14 @@ type extern_funcs = Value.Func.extern_func Func_id.collection
 
 type t' = Env_id.t
 
-type t =
+type 'ext t =
   { globals : Global.t IMap.t
   ; memories : Memory.t IMap.t
   ; tables : Table.t IMap.t
   ; functions : Func_intf.t IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
-  ; extern_funcs : extern_funcs
+  ; extern_funcs : 'ext Func_id.collection
   }
 
 let pp fmt t =
@@ -42,42 +42,42 @@ let pp fmt t =
        func )
     (IMap.bindings t.functions)
 
-let get_global (env : t) id =
+let get_global (env : _ t) id =
   match IMap.find_opt id env.globals with
   | None ->
     Log.debug "%a@." pp env;
     Error "unknown global"
   | Some v -> Ok v
 
-let get_memory (env : t) id =
+let get_memory (env : _ t) id =
   match IMap.find_opt id env.memories with
   | None ->
     Log.debug "%a@." pp env;
     Error "unknown memory"
   | Some v -> Ok v
 
-let get_table (env : t) id =
+let get_table (env : _ t) id =
   match IMap.find_opt id env.tables with
   | None ->
     Log.debug "%a@." pp env;
     Error "unknown table"
   | Some v -> Ok v
 
-let get_func (env : t) id =
+let get_func (env : _ t) id =
   match IMap.find_opt id env.functions with
   | None ->
     Log.debug "%a@." pp env;
     error_s "unknown function %a" Format.pp_print_int id
   | Some v -> Ok v
 
-let get_data (env : t) id =
+let get_data (env : _ t) id =
   match IMap.find_opt id env.data with
   | None ->
     Log.debug "%a@." pp env;
     Error "unknown data"
   | Some v -> Ok v
 
-let get_elem (env : t) id =
+let get_elem (env : _ t) id =
   match IMap.find_opt id env.elem with
   | None ->
     Log.debug "%a@." pp env;

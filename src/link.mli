@@ -5,9 +5,9 @@
 module Env = Link_env
 
 (** runnable module *)
-type module_to_run =
+type 'f module_to_run =
   { modul : Simplified.modul
-  ; env : Env.t
+  ; env : 'f Env.t
   ; to_run : Simplified.expr list
   }
 
@@ -26,7 +26,9 @@ type exports =
   ; defined_names : StringSet.t
   }
 
-type envs = Env.t Env_id.collection
+type 'ext envs = 'ext Env.t Env_id.collection
+
+type fenvs = Value.Func.extern_func Env.t Env_id.collection
 
 (** link state *)
 type 'f state =
@@ -34,7 +36,7 @@ type 'f state =
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
-  ; envs : envs
+  ; envs : 'f envs
   }
 
 (** the empty link state *)
@@ -43,10 +45,10 @@ val empty_state : 'f state
 (** link a module with a given link state, producing a runnable module and a new
     link state *)
 val modul :
-     Value.Func.extern_func state
+     'f state
   -> name:string option
   -> Simplified.modul
-  -> (module_to_run * Value.Func.extern_func state) Result.t
+  -> ('f module_to_run * 'f state) Result.t
 
 (** register a module inside a link state, producing a new link state *)
 val register_module :
