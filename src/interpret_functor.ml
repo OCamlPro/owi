@@ -9,7 +9,8 @@ module Make (P : Intf.P) :
   Intf.S
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
-     and type thread := P.thread = struct
+     and type thread := P.thread
+     and type env := P.env = struct
   module Int32 = P.Value.I32
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
@@ -546,6 +547,7 @@ module Make (P : Intf.P) :
       ; func_rt : result_type
       ; env : P.Env.t
       ; count : count
+      ; envs : P.Env.t Env_id.collection
       }
 
     let rec print_count ppf count =
@@ -653,7 +655,6 @@ module Make (P : Intf.P) :
     let return_state =
       if return then state.return_state else Some { state with stack }
     in
-    let env = Lazy.force env in
     let locals =
       Array.of_list @@ List.rev args @ List.map init_local func.locals
     in
@@ -665,13 +666,16 @@ module Make (P : Intf.P) :
       ; func_rt = result_type
       ; return_state
       ; env
+      ; envs = state.envs
       ; count = enter_function_count state.count func.id id
       }
 
   let exec_vfunc ~return (state : State.exec_state)
     (func : (P.Env.t', Func_id.t) Func_intf.t) =
     match func with
-    | WASM (id, func, env) -> exec_func ~return ~id state env func
+    | WASM (id, func, env_id) ->
+      let env = Env_id.get env_id state.envs in
+      exec_func ~return ~id state env func
     | Extern _f -> failwith "TODO extern func"
   (* let stack = exec_extern_func state.stack f in *)
   (* let state = { state with stack } in *)
@@ -1278,7 +1282,7 @@ module Make (P : Intf.P) :
       | State.Continue state -> loop state
       | State.Return res -> Choice.return res )
 
-  let exec_expr env locals stack expr bt =
+  let exec_expr envs env locals stack expr bt =
     let count = State.empty_count (Some "start") in
     count.enter <- count.enter + 1;
     let state : State.exec_state =
@@ -1286,6 +1290,7 @@ module Make (P : Intf.P) :
       { stack
       ; locals
       ; env
+      ; envs
       ; func_rt
       ; block_stack = []
       ; pc = expr
@@ -1318,7 +1323,7 @@ module Make (P : Intf.P) :
   (*   | exception Trap msg -> Error msg *)
   (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
-  let modul (modul : P.Module_to_run.t) =
+  let modul envs (modul : P.Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
     let/ () =
       List.fold_left
@@ -1326,7 +1331,7 @@ module Make (P : Intf.P) :
           let/ () = u in
           let/ end_stack, count =
             let env = P.Module_to_run.env modul in
-            exec_expr env [||] Stack.empty to_run None
+            exec_expr envs env [||] Stack.empty to_run None
           in
           Log.profile "Exec module %s@.%a@."
             (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")

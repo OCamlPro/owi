@@ -135,7 +135,7 @@ module P = struct
   module Env = struct
     type t = env
 
-    type t' = t Lazy.t
+    type t' = Env_id.t
 
     let get_memory _ = assert false
 

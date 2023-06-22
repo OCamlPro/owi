@@ -124,7 +124,7 @@ let action (link_state : Value.Func.extern_func Link.state) = function
     let* f = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
-    Interpret.exec_vfunc stack link_state.collection f
+    Interpret.exec_vfunc stack link_state.envs link_state.collection f
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";
@@ -158,7 +158,7 @@ let run ~with_exhaustion ~optimize script =
         let* m, link_state =
           Compile.until_link link_state ~optimize ~name:None m
         in
-        let+ () = check_error_result expected (Interpret.modul m) in
+        let+ () = check_error_result expected (Interpret.modul link_state.envs m) in
         link_state
       | Assert (Assert_malformed_binary _) ->
         Log.debug "*** assert_malformed_binary@\n";

@@ -5,14 +5,14 @@ module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 module Env = Link_env
 
-type global = Env.t' Global.t
+type global = Env_id.t Global.t
 
-type table = Env.t' Table.t
+type table = Env_id.t Table.t
 
-type func = (Env.t', Func_id.t) Value.Func.t
+type func = (Env_id.t, Func_id.t) Value.Func.t
 
 type exports =
-  { globals : Env.t' Global.t StringMap.t
+  { globals : Env_id.t Global.t StringMap.t
   ; memories : Memory.t StringMap.t
   ; tables : table StringMap.t
   ; functions : func StringMap.t
@@ -25,12 +25,14 @@ type module_to_run =
   ; to_run : expr list
   }
 
+type envs = Env.t Env_id.collection
+
 type 'f state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
-  ; envs : Env.t Env_id.collection
+  ; envs : envs
   }
 
 type 'extern_func extern_module = { functions : (string * 'extern_func) list }
@@ -293,12 +295,12 @@ let modul (ls : 'f state) ~name (modul : modul) =
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
   let* envs, (env, init_active_data, init_active_elem) =
-    Env_id.with_fresh_id (fun _env_id ->
+    Env_id.with_fresh_id (fun env_id ->
       let rec env_and_init_active_data_and_elem =
         lazy
           (let env = Env.Build.empty in
            let env =
-             eval_functions ls finished_env env modul.func |> raise_on_error
+             eval_functions ls env_id env modul.func |> raise_on_error
            in
            let env = eval_globals ls env modul.global |> raise_on_error in
            let env = eval_memories ls env modul.mem |> raise_on_error in

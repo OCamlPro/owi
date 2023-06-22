@@ -1,11 +1,12 @@
 (** Module to interpret a linked module. *)
 
 (** interpret a module *)
-val modul : Link.module_to_run -> unit Result.t
+val modul : Link.envs -> Link.module_to_run -> unit Result.t
 
 (** interpret a function with a given input stack and produce a new stack*)
 val exec_vfunc :
      Link.Env.t' Stack.t
+  -> Link.envs
   -> Link.extern_func
   -> (Link.Env.t', Func_id.t) Value.Func.t
   -> Link.Env.t' Stack.t Result.t

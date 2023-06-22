@@ -26,13 +26,15 @@ type exports =
   ; defined_names : StringSet.t
   }
 
+type envs = Env.t Env_id.collection
+
 (** link state *)
 type 'f state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
   ; collection : 'f Func_id.collection
-  ; envs : Env.t Env_id.collection
+  ; envs : envs
   }
 
 (** the empty link state *)

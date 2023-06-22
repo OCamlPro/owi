@@ -20,7 +20,7 @@ let exec_ibinop stack nn (op : Const.ibinop) =
       (let open Int64 in
        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
 
-let exec_instr (env : env) (stack : Env.t' Stack.t) (instr : Const.instr) =
+let exec_instr (env : env) (stack : Env_id.t Stack.t) (instr : Const.instr) =
   match instr with
   | I32_const n -> ok @@ Stack.push_i32 stack n
   | I64_const n -> ok @@ Stack.push_i64 stack n
@@ -49,7 +49,7 @@ let exec_instr (env : env) (stack : Env.t' Stack.t) (instr : Const.instr) =
     (* TODO *)
     ok stack
 
-let exec_expr env (e : Const.expr) : Env.t' Value.t Result.t =
+let exec_expr env (e : Const.expr) : Env_id.t Value.t Result.t =
   let* stack = list_fold_left (exec_instr env) Stack.empty e in
   match stack with
   | [] -> Error "type mismatch (const expr returning zero values)"

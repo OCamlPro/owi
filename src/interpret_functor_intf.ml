@@ -154,7 +154,7 @@ module type P = sig
   module Env : sig
     type t = env
 
-    type t' = t Lazy.t
+    type t' = Env_id.t
 
     val get_memory : t -> int -> Memory.t Result.t
 
@@ -191,12 +191,14 @@ module type S = sig
   (** Module to interpret a linked module. *)
   type thread
 
+  type env
+
   type 'a choice
 
   type module_to_run
 
   (** interpret a module *)
-  val modul : module_to_run -> (unit, 'a) result choice
+  val modul : env Env_id.collection -> module_to_run -> (unit, 'a) result choice
 
   (* (\** interpret a function with a given input stack and produce a new stack*\) *)
   (* val exec_vfunc : *)

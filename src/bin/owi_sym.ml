@@ -2,7 +2,7 @@ open Owi
 open Syntax
 
 let simplify_then_link_then_run ~optimize pc file =
-  let* to_run, _link_state =
+  let* to_run, link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
@@ -17,7 +17,7 @@ let simplify_then_link_then_run ~optimize pc file =
       ([], Link.empty_state) file
   in
   let f pc to_run =
-    let c = Interpret2.S.modul to_run in
+    let c = (Interpret2.S.modul link_state.envs) to_run in
     match c pc with
     | Ok (), pc -> Ok pc
     | Error _, _ -> assert false

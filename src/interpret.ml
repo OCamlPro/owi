@@ -495,6 +495,7 @@ module State = struct
     ; func_rt : result_type
     ; env : Env.t
     ; count : count
+    ; envs : Env.t Env_id.collection
     }
 
   let rec print_count ppf count =
@@ -594,7 +595,6 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
   let return_state =
     if return then state.return_state else Some { state with stack }
   in
-  let env = Lazy.force env in
   let locals =
     Array.of_list @@ List.rev args @ List.map init_local func.locals
   in
@@ -606,12 +606,15 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
     ; func_rt = result_type
     ; return_state
     ; env
+    ; envs = state.envs
     ; count = enter_function_count state.count func.id id
     }
 
 let exec_vfunc ~return (state : State.exec_state) (func : (Env.t', Func_id.t) Value.Func.t) =
   match func with
-  | WASM (id, func, env) -> exec_func ~return ~id state env func
+  | WASM (id, func, env_id) ->
+    let env = Env_id.get env_id state.envs in
+    exec_func ~return ~id state env func
   | Extern f ->
     let f = Env.get_extern_func state.env f in
     let stack = exec_extern_func state.stack f in
@@ -1170,7 +1173,7 @@ let rec loop (state : State.exec_state) =
   in
   loop state
 
-let exec_expr env locals stack expr bt =
+let exec_expr envs env locals stack expr bt =
   let count = State.empty_count (Some "start") in
   count.enter <- count.enter + 1;
   let state : State.exec_state =
@@ -1178,6 +1181,7 @@ let exec_expr env locals stack expr bt =
     { stack
     ; locals
     ; env
+    ; envs
     ; func_rt
     ; block_stack = []
     ; pc = expr
@@ -1187,22 +1191,23 @@ let exec_expr env locals stack expr bt =
   in
   try loop state with State.Result args -> (args, count)
 
-let exec_func env (func : wasm_func) args =
+let exec_func envs (env_id : Env_id.t) (func : wasm_func) args =
   Log.debug1 "calling func : func %s@."
     (Option.value func.id ~default:"anonymous");
   let locals =
     Array.of_list @@ List.rev args @ List.map init_local func.locals
   in
-  let res, count = exec_expr env locals [] func.body (Some (snd func.type_f)) in
+  let env = Env_id.get env_id envs in
+  let res, count = exec_expr envs env locals [] func.body (Some (snd func.type_f)) in
   Log.profile "Exec func %s@.Instruction count: %i@."
     (Option.value func.id ~default:"anonymous")
     count.instructions;
   res
 
-let exec_vfunc stack collection (func : (Env.t', Func_id.t) Func_intf.t) =
+let exec_vfunc stack envs collection (func : (Env.t', Func_id.t) Func_intf.t) =
   match
     match func with
-    | WASM (_, func, env) -> exec_func (Lazy.force env) func stack
+    | WASM (_, func, env) -> exec_func envs env func stack
     | Extern f ->
       let f = Func_id.get f collection in
       exec_extern_func stack f
@@ -1211,13 +1216,13 @@ let exec_vfunc stack collection (func : (Env.t', Func_id.t) Func_intf.t) =
   | exception Trap msg -> Error msg
   | exception Stack_overflow -> Error "call stack exhausted"
 
-let modul (modul : Link.module_to_run) =
+let modul envs (modul : Link.module_to_run) =
   Log.debug0 "interpreting ...@\n";
   try
     List.iter
       (fun to_run ->
         let end_stack, count =
-          exec_expr modul.env [||] Stack.empty to_run None
+          exec_expr envs modul.env [||] Stack.empty to_run None
         in
         Log.profile "Exec module %s@.%a@."
           (Option.value modul.modul.id ~default:"anonymous")
