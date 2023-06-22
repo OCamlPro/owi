@@ -1,7 +1,27 @@
 open Owi
 open Syntax
 
+let extern_module : Sym_state.P.extern_func Link.extern_module =
+  let print_i32 (i : Sym_value.Symbolic.int32) =
+    Printf.printf "%s\n%!" (Encoding.Expression.to_string i)
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "i32"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), print_i32) )
+    ]
+  in
+  { functions }
+
 let simplify_then_link_then_run ~optimize pc file =
+  let link_state = Link.empty_state in
+  let link_state =
+    Link.extern_module' link_state
+      ~name:"print"
+      ~func_typ:Sym_state.P.Extern_func.extern_type
+      extern_module
+  in
   let* to_run, link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
@@ -14,17 +34,13 @@ let simplify_then_link_then_run ~optimize pc file =
           let* state = Link.register_module state ~name ~id in
           Ok (to_run, state)
         | _ -> Ok acc )
-      ([], Link.empty_state) file
+      ([], link_state) file
   in
   let f pc to_run =
     let c = (Interpret2.S.modul link_state.envs) to_run in
-    match c pc with
-    | Ok (), pc -> Ok pc
-    | Error _, _ -> assert false
+    match c pc with Ok (), pc -> Ok pc | Error _, _ -> assert false
   in
-  list_fold_left f
-    pc
-    (List.rev to_run)
+  list_fold_left f pc (List.rev to_run)
 
 let run_file ~optimize pc filename =
   if not @@ Sys.file_exists filename then
@@ -67,8 +83,7 @@ let main profiling debug _script optimize files =
   let result = list_fold_left (run_file ~optimize) pc files in
   match result with
   | Ok pc ->
-    List.iter (fun c ->
-        print_endline (Encoding.Expression.to_string c)) pc
+    List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) pc
   | Error e ->
     Format.eprintf "%s@." e;
     exit 1
