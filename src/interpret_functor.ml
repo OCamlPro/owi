@@ -389,30 +389,30 @@ module Make (P : Intf.P) :
         let n = if sx = S then convert_i64_s n else convert_i64_u n in
         Stack.push_f64 stack n )
 
-  (* let exec_ireinterpretf stack nn nn' = *)
-  (*   match nn with *)
-  (*   | S32 -> begin *)
-  (*     match nn' with *)
-  (*     | S32 -> *)
-  (*       let n, stack = Stack.pop_f32 stack in *)
-  (*       let n = Convert.Int32.reinterpret_f32 n in *)
-  (*       Stack.push_i32 stack n *)
-  (*     | S64 -> *)
-  (*       let n, stack = Stack.pop_f64 stack in *)
-  (*       let n = Convert.Int32.reinterpret_f32 (Convert.Float32.demote_f64 n) in *)
-  (*       Stack.push_i32 stack n *)
-  (*   end *)
-  (*   | S64 -> begin *)
-  (*     match nn' with *)
-  (*     | S32 -> *)
-  (*       let n, stack = Stack.pop_f32 stack in *)
-  (*       let n = Convert.Int64.reinterpret_f64 (Convert.Float64.promote_f32 n) in *)
-  (*       Stack.push_i64 stack n *)
-  (*     | S64 -> *)
-  (*       let n, stack = Stack.pop_f64 stack in *)
-  (*       let n = Convert.Int64.reinterpret_f64 n in *)
-  (*       Stack.push_i64 stack n *)
-  (*   end *)
+  let exec_ireinterpretf stack nn nn' =
+    match nn with
+    | S32 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        let n = Int32.reinterpret_f32 n in
+        Stack.push_i32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        let n = Int32.reinterpret_f32 (Float32.demote_f64 n) in
+        Stack.push_i32 stack n
+    end
+    | S64 -> begin
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_f32 stack in
+        let n = Int64.reinterpret_f64 (Float64.promote_f32 n) in
+        Stack.push_i64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_f64 stack in
+        let n = Int64.reinterpret_f64 n in
+        Stack.push_i64 stack n
+    end
 
   (* let exec_freinterpreti stack nn nn' = *)
   (*   match nn with *)
@@ -793,7 +793,7 @@ module Make (P : Intf.P) :
     (*     let n = Convert.Float64.promote_f32 n in *)
     (*     st @@ Stack.push_f64 stack n *)
     | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
-    (*   | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn' *)
+    | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
     (*   | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn' *)
     | Ref_null t -> st @@ Stack.push stack (P.Value.ref_null t)
     (*   | Ref_is_null -> *)

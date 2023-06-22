@@ -189,19 +189,27 @@ module type T = sig
     val int32 : vbool -> int32
   end
 
-  module F32 :
-    Fop
-      with type num := float32
-       and type vbool := vbool
-       and type int32 := int32
-       and type int64 := int64
+  module F32 : sig
+    include
+      Fop
+        with type num := float32
+         and type vbool := vbool
+         and type int32 := int32
+         and type int64 := int64
 
-  module F64 :
-    Fop
-      with type num := float64
-       and type vbool := vbool
-       and type int32 := int32
-       and type int64 := int64
+    val demote_f64 : float64 -> float32
+  end
+
+  module F64 : sig
+    include
+      Fop
+        with type num := float64
+         and type vbool := vbool
+         and type int32 := int32
+         and type int64 := int64
+
+    val promote_f32 : float32 -> float64
+  end
 
   module I32 : sig
     include
@@ -213,6 +221,8 @@ module type T = sig
          and type float64 := float64
 
     val to_bool : int32 -> vbool
+
+    val reinterpret_f32 : float32 -> int32
   end
 
   module I64 : sig
@@ -227,5 +237,7 @@ module type T = sig
     val of_int32 : int32 -> int64
 
     val to_int32 : int64 -> int32
+
+    val reinterpret_f64 : float64 -> int64
   end
 end

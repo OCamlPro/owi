@@ -43,17 +43,19 @@ module Symbolic = struct
 
   module Bool = struct
     let not = Boolean.mk_not
+
     let or_ = Boolean.mk_or
+
     let and_ = Boolean.mk_and
 
     let int32 = function
-      | Expr.Val (Bool b) -> if b then (mk_i32 0l) else (mk_i32 1l)
+      | Expr.Val (Bool b) -> if b then mk_i32 0l else mk_i32 1l
       | e -> Boolean.mk_ite e (mk_i32 0l) (mk_i32 1l)
-
   end
 
   module I32 = struct
     open Expr
+
     type num = Expr.t
 
     type vbool = Expr.t
@@ -69,17 +71,17 @@ module Symbolic = struct
       | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
       | e' -> Unop (op, e')
 
-    let binop op e1 e2  =
+    let binop op e1 e2 =
       match (e1, e2) with
       | Val (Num i1), Val (Num i2) ->
-          Val (Num (Eval_numeric.eval_binop op i1 i2))
+        Val (Num (Eval_numeric.eval_binop op i1 i2))
       | Val (Bool _), Val (Bool _) -> assert false
       | e1', e2' -> Binop (op, e1', e2')
 
-    let relop op e1 e2  =
+    let relop op e1 e2 =
       match (e1, e2) with
       | Val (Num i1), Val (Num i2) ->
-          Val (Bool (Eval_numeric.eval_relop op i1 i2))
+        Val (Bool (Eval_numeric.eval_relop op i1 i2))
       | e1', e2' -> Relop (op, e1', e2')
 
     let zero = mk_i32 0l
@@ -159,10 +161,13 @@ module Symbolic = struct
     let trunc_sat_f64_s _ = assert false
 
     let trunc_sat_f64_u _ = assert false
+
+    let reinterpret_f32 _ = assert false
   end
 
   module I64 = struct
     open Expr
+
     type num = Expr.t
 
     type vbool = Expr.t
@@ -178,17 +183,17 @@ module Symbolic = struct
       | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
       | e' -> Unop (op, e')
 
-    let binop op e1 e2  =
+    let binop op e1 e2 =
       match (e1, e2) with
       | Val (Num i1), Val (Num i2) ->
-          Val (Num (Eval_numeric.eval_binop op i1 i2))
+        Val (Num (Eval_numeric.eval_binop op i1 i2))
       | Val (Bool _), Val (Bool _) -> assert false
       | e1', e2' -> Binop (op, e1', e2')
 
-    let relop op e1 e2  =
+    let relop op e1 e2 =
       match (e1, e2) with
       | Val (Num i1), Val (Num i2) ->
-          Val (Bool (Eval_numeric.eval_relop op i1 i2))
+        Val (Bool (Eval_numeric.eval_relop op i1 i2))
       | e1', e2' -> Relop (op, e1', e2')
 
     let zero = mk_i64 0L
@@ -270,6 +275,8 @@ module Symbolic = struct
     let trunc_sat_f64_s _ = assert false
 
     let trunc_sat_f64_u _ = assert false
+
+    let reinterpret_f64 _ = assert false
   end
 
   module F32 = struct
@@ -330,6 +337,8 @@ module Symbolic = struct
     let convert_i64_s _ = assert false
 
     let convert_i64_u _ = assert false
+
+    let demote_f64 _ = assert false
   end
 
   module F64 = struct
@@ -390,6 +399,8 @@ module Symbolic = struct
     let convert_i64_s _ = assert false
 
     let convert_i64_u _ = assert false
+
+    let promote_f32 _ = assert false
   end
 end
 
