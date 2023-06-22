@@ -163,6 +163,10 @@ module Symbolic = struct
     let trunc_sat_f64_u _ = assert false
 
     let reinterpret_f32 _ = assert false
+
+    let wrap_i64 _ = assert false
+
+    let extend_s _ = assert false
   end
 
   module I64 = struct
@@ -277,6 +281,12 @@ module Symbolic = struct
     let trunc_sat_f64_u _ = assert false
 
     let reinterpret_f64 _ = assert false
+
+    let extend_s _ = assert false
+
+    let extend_i32_s _ = assert false
+
+    let extend_i32_u _ = assert false
   end
 
   module F32 = struct

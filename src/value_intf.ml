@@ -84,6 +84,8 @@ module type Iop = sig
   val trunc_sat_f64_s : float64 -> num
 
   val trunc_sat_f64_u : float64 -> num
+
+  val extend_s : int -> num -> num
 end
 
 module type Fop = sig
@@ -227,6 +229,8 @@ module type T = sig
     val to_bool : int32 -> vbool
 
     val reinterpret_f32 : float32 -> int32
+
+    val wrap_i64 : int64 -> int32
   end
 
   module I64 : sig
@@ -243,5 +247,9 @@ module type T = sig
     val to_int32 : int64 -> int32
 
     val reinterpret_f64 : float64 -> int64
+
+    val extend_i32_s : int32 -> int64
+
+    val extend_i32_u : int32 -> int64
   end
 end

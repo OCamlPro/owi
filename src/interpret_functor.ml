@@ -744,44 +744,42 @@ module Make (P : Intf.P) :
     | I_testop (nn, op) -> st @@ exec_itestop stack nn op
     | I_relop (nn, op) -> st @@ exec_irelop stack nn op
     | F_relop (nn, op) -> st @@ exec_frelop stack nn op
-    (*   | I_extend8_s nn -> begin *)
-    (*     match nn with *)
-    (*     | S32 -> *)
-    (*       let n, stack = Stack.pop_i32 stack in *)
-    (*       let n = Int32.extend_s 8 n in *)
-    (*       st @@ Stack.push_i32 stack n *)
-    (*     | S64 -> *)
-    (*       let n, stack = Stack.pop_i64 stack in *)
-    (*       let n = Int64.extend_s 8 n in *)
-    (*       st @@ Stack.push_i64 stack n *)
-    (*   end *)
-    (*   | I_extend16_s nn -> begin *)
-    (*     match nn with *)
-    (*     | S32 -> *)
-    (*       let n, stack = Stack.pop_i32 stack in *)
-    (*       let n = Int32.extend_s 16 n in *)
-    (*       st @@ Stack.push_i32 stack n *)
-    (*     | S64 -> *)
-    (*       let n, stack = Stack.pop_i64 stack in *)
-    (*       let n = Int64.extend_s 16 n in *)
-    (*       st @@ Stack.push_i64 stack n *)
-    (*   end *)
-    (*   | I64_extend32_s -> *)
-    (*     let n, stack = Stack.pop_i64 stack in *)
-    (*     let n = Int64.extend_s 32 n in *)
-    (*     st @@ Stack.push_i64 stack n *)
-    (*   | I32_wrap_i64 -> *)
-    (*     let n, stack = Stack.pop_i64 stack in *)
-    (*     let n = Convert.Int32.wrap_i64 n in *)
-    (*     st @@ Stack.push_i32 stack n *)
-    (*   | I64_extend_i32 s -> *)
-    (*     let n, stack = Stack.pop_i32 stack in *)
-    (*     let n = *)
-    (*       match s with *)
-    (*       | S -> Convert.Int64.extend_i32_s n *)
-    (*       | U -> Convert.Int64.extend_i32_u n *)
-    (*     in *)
-    (*     st @@ Stack.push_i64 stack n *)
+    | I_extend8_s nn -> begin
+      match nn with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n = Int32.extend_s 8 n in
+        st @@ Stack.push_i32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n = Int64.extend_s 8 n in
+        st @@ Stack.push_i64 stack n
+    end
+    | I_extend16_s nn -> begin
+      match nn with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n = Int32.extend_s 16 n in
+        st @@ Stack.push_i32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n = Int64.extend_s 16 n in
+        st @@ Stack.push_i64 stack n
+    end
+    | I64_extend32_s ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = Int64.extend_s 32 n in
+      st @@ Stack.push_i64 stack n
+    | I32_wrap_i64 ->
+      let n, stack = Stack.pop_i64 stack in
+      let n = Int32.wrap_i64 n in
+      st @@ Stack.push_i32 stack n
+    | I64_extend_i32 s ->
+      let n, stack = Stack.pop_i32 stack in
+      let n =
+        match s with S -> Int64.extend_i32_s n | U -> Int64.extend_i32_u n
+      in
+      st @@ Stack.push_i64 stack n
     | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s
     | I_trunc_sat_f (nn, nn', s) -> st @@ exec_itruncsatf stack nn nn' s
     | F32_demote_f64 ->
