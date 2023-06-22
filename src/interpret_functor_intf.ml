@@ -72,6 +72,8 @@ module type P = sig
 
     val select : vbool -> bool t
 
+    val select_i32 : int32 -> Int32.t t
+
     val trap : trap -> 'a t
   end
 
@@ -100,6 +102,14 @@ module type P = sig
     val mut : 'env global -> Types.mut
 
     val typ : 'env global -> Simplified.val_type
+  end
+
+  module Table : sig
+    type 'env t = 'env table
+
+    val get : 'env t -> int32 -> 'env Value.ref_value
+    val set : 'env t -> int32 -> 'env Value.ref_value -> unit
+    val size : 'env t -> int32
   end
 
   module Memory : sig

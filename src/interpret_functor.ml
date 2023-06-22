@@ -429,12 +429,6 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
 
   let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
-  (* let get_memory (env : P.Env.t) idx = *)
-  (*   let* mem = P.Env.get_memory env idx in *)
-  (*   Ok Memory.(get_data mem, get_limit_max mem) *)
-
-  (* let get_memory_raw env idx = P.Env.get_memory env idx *)
-
   let exec_extern_func _stack (_f : Value.Func.extern_func) = failwith "TOuDOUx"
 
   (* let exec_extern_func stack (f : Value.Func.extern_func) = *)

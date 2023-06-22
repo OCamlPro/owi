@@ -30,9 +30,9 @@ module V :
   module Bool = struct
     let not = not
 
-    let and_ = (&&)
+    let and_ = ( && )
 
-    let or_ = (||)
+    let or_ = ( || )
 
     let int32 = function true -> 1l | false -> 0l
   end
@@ -43,7 +43,7 @@ module V :
   module F64 = Float64
 end
 
-module P : Interpret_functor_intf.P = struct
+module P = struct
   type toremove = unit
 
   type t = toremove
@@ -80,6 +80,7 @@ module P : Interpret_functor_intf.P = struct
     let bind = ( |> )
 
     let select = Fun.id
+    let select_i32 = Fun.id
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
       | Out_of_bound_memory_access ->
@@ -89,15 +90,20 @@ module P : Interpret_functor_intf.P = struct
   module Func = Value.Func
   module Value = V
   module Global = Global
+  module Table = Table
   module Memory = Memory
   module Env = Link.Env
 
   module Module_to_run = struct
     (** runnable module *)
     type t = Link.module_to_run
+
     let env (t : Link.module_to_run) = t.env
+
     let modul (t : Link.module_to_run) = t.modul
+
     let to_run (t : Link.module_to_run) = t.to_run
   end
-
 end
+
+module P' : Interpret_functor_intf.P = P
