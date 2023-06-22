@@ -8,7 +8,8 @@ module Intf = Interpret_functor_intf
 module Make (P : Intf.P) :
   Intf.S
     with type 'a choice := 'a P.Choice.t
-     and type module_to_run := P.Module_to_run.t = struct
+     and type module_to_run := P.Module_to_run.t
+     and type thread := P.t = struct
   module Int32 = P.Value.I32
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
@@ -545,6 +546,7 @@ module Make (P : Intf.P) :
       ; func_rt : result_type
       ; env : P.Env.t
       ; count : count
+      ; thread : P.t
       }
 
     let rec print_count ppf count =
@@ -590,13 +592,13 @@ module Make (P : Intf.P) :
       c
 
     type instr_result =
-      | Return of value list
+      | Return of P.t * value list
       | Continue of exec_state
 
     let return (state : exec_state) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> Choice.return (Return args)
+      | None -> Choice.return (Return (state.thread, args))
       | Some state ->
         let stack = args @ state.stack in
         Choice.return (Continue { state with stack })
@@ -665,9 +667,11 @@ module Make (P : Intf.P) :
       ; return_state
       ; env
       ; count = enter_function_count state.count func.id id
+      ; thread = state.thread
       }
 
-  let exec_vfunc ~return (state : State.exec_state) (func : (P.Env.t', P.extern_func) Func_intf.t) =
+  let exec_vfunc ~return (state : State.exec_state)
+    (func : (P.Env.t', P.extern_func) Func_intf.t) =
     match func with
     | WASM (id, func, env) -> exec_func ~return ~id state env func
     | Extern _f -> failwith "TODO extern func"
@@ -923,15 +927,23 @@ module Make (P : Intf.P) :
       in
       P.Global.set_value global v;
       st @@ stack
-    (*   | Table_get indice -> *)
-    (*     let* t = Env.get_table env indice in *)
-    (*     let indice, stack = Stack.pop_i32_to_int stack in *)
+    (* | Table_get indice -> *)
+    (*   let* t = P.Env.get_table env indice in *)
+    (*   let indice, stack = Stack.pop_i32 stack in *)
+    (*   let size = Table.size t in *)
+    (*   let v = Table.get t indice in *)
+    (*   (\* TODO bound check *\) *)
+    (*   st @@ Stack.push stack (P.Value.Ref v) *)
+
+    (* let/ indice = Choice.select_i32 indice in *)
+    (*     let indice = Stdlib.Int32.to_int indice in *)
     (*     let v = *)
     (*       match t.data.(indice) with *)
     (*       | exception Invalid_argument _ -> trap "out of bounds table access" *)
     (*       | v -> v *)
     (*     in *)
-    (*     st @@ Stack.push stack (Ref v) *)
+    (*     st @@ Stack.push stack (P.Value.Ref v) *)
+
     (*   | Table_set indice -> *)
     (*     let* t = Env.get_table env indice in *)
     (*     let v, stack = Stack.pop_as_ref stack in *)
@@ -1283,16 +1295,16 @@ module Make (P : Intf.P) :
       let/ state = exec_instr instr { state with pc } in
       match state with
       | State.Continue state -> loop state
-      | State.Return res -> Choice.return res
+      | State.Return (thread, res) -> Choice.return (thread, res)
     end
     | [] -> (
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
       let/ state = State.end_block state in
       match state with
       | State.Continue state -> loop state
-      | State.Return res -> Choice.return res )
+      | State.Return (thread, res) -> Choice.return (thread, res) )
 
-  let exec_expr env locals stack expr bt =
+  let exec_expr thread env locals stack expr bt =
     let count = State.empty_count (Some "start") in
     count.enter <- count.enter + 1;
     let state : State.exec_state =
@@ -1305,6 +1317,7 @@ module Make (P : Intf.P) :
       ; pc = expr
       ; return_state = None
       ; count
+      ; thread
       }
     in
     let/ state = loop state in
@@ -1332,28 +1345,28 @@ module Make (P : Intf.P) :
   (*   | exception Trap msg -> Error msg *)
   (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
-  let modul (modul : P.Module_to_run.t) =
+  let modul thread (modul : P.Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
-    let/ () =
+    let/ thread =
       List.fold_left
-        (fun u to_run ->
-          let/ () = u in
-          let/ end_stack, count =
+        (fun thread to_run ->
+          let/ thread = thread in
+          let/ (thread, end_stack), count =
             let env = P.Module_to_run.env modul in
-            exec_expr env [||] Stack.empty to_run None
+            exec_expr thread env [||] Stack.empty to_run None
           in
           Log.profile "Exec module %s@.%a@."
             (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")
             State.print_count count;
           match end_stack with
-          | [] -> Choice.return ()
+          | [] -> Choice.return thread
           | _ :: _ ->
             Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
             assert false )
-        (Choice.return ())
+        (Choice.return thread)
         (P.Module_to_run.to_run modul)
     in
-    Choice.return (Ok ())
+    Choice.return (Ok thread)
   (* TODO error handling *)
   (* with *)
   (* | Trap msg -> Error msg *)

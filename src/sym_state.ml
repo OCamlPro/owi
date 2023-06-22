@@ -5,9 +5,7 @@ let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 module Def_value = Value
 
 module P = struct
-  type toremove = unit
-
-  type t = toremove
+  type t = unit
 
   module Value = struct
     include Sym_value.Symbolic

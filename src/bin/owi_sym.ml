@@ -16,8 +16,8 @@ let simplify_then_link_then_run ~optimize file =
         | _ -> Ok acc )
       ([], Link.empty_state) file
   in
-  let interp_modul = Interpret2.S.modul in
-  list_iter interp_modul (List.rev to_run)
+  let state : Sym_state.P.t = () in
+  list_fold_left Interpret2.S.modul state (List.rev to_run)
 
 let run_file exec filename =
   if not @@ Sys.file_exists filename then

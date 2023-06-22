@@ -187,12 +187,14 @@ end
 
 module type S = sig
   (** Module to interpret a linked module. *)
+  type thread
+
   type 'a choice
 
   type module_to_run
 
   (** interpret a module *)
-  val modul : module_to_run -> (unit, 'a) result choice
+  val modul : thread -> module_to_run -> (thread, 'a) result choice
 
   (* (\** interpret a function with a given input stack and produce a new stack*\) *)
   (* val exec_vfunc : *)
