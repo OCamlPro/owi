@@ -462,10 +462,9 @@ let data_drop (env : Env.t) =
     (fun name -> pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]))
     env.datas
 
-let expr_call (env : Env.t) (stack : val_type list) name =
+let expr_call (env : Env.t) (stack : val_type list) =
   let stack_pt = List.map (fun _ -> S.Pop) in
   let stack_rt = List.map (fun vt -> S.Push vt) in
-  let funcs = Env.get_funcs_before name env in
   List.filter_map
     (fun (name, bt) ->
       match bt with
@@ -476,7 +475,7 @@ let expr_call (env : Env.t) (stack : val_type list) name =
              (const (Call (Symbolic name)))
              (const (stack_pt pt @ stack_rt rt)) )
       | _ -> None )
-    funcs
+    env.funcs
 
 let random_stack =
   let+ l_vt = list val_type in
