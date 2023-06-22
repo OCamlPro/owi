@@ -1,4 +1,7 @@
-type trap = Out_of_bound_memory_access
+type trap =
+  | Out_of_bound_memory_access
+  | Integer_overflow
+  | Integer_divide_by_zero
 
 module type Memory_data = sig
   type int32
@@ -108,7 +111,9 @@ module type P = sig
     type 'env t = 'env table
 
     val get : 'env t -> int32 -> 'env Value.ref_value
+
     val set : 'env t -> int32 -> 'env Value.ref_value -> unit
+
     val size : 'env t -> int32
   end
 
@@ -169,8 +174,11 @@ module type P = sig
   module Module_to_run : sig
     (** runnable module *)
     type t
+
     val env : t -> env
+
     val to_run : t -> Simplified.expr list
+
     val modul : t -> Simplified.modul
   end
 end
@@ -178,6 +186,7 @@ end
 module type S = sig
   (** Module to interpret a linked module. *)
   type 'a choice
+
   type module_to_run
 
   (** interpret a module *)

@@ -5,9 +5,10 @@ open Simplified
 module Env = Link.Env
 module Intf = Interpret_functor_intf
 
-module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
-    and type module_to_run := P.Module_to_run.t
-= struct
+module Make (P : Intf.P) :
+  Intf.S
+    with type 'a choice := 'a P.Choice.t
+     and type module_to_run := P.Module_to_run.t = struct
   module Int32 = P.Value.I32
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
@@ -22,6 +23,10 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
     let ( < ) = Int32.lt
 
     let ( + ) = Int32.add
+
+    let ( - ) = Int32.sub
+
+    let ( ~- ) x = P.Value.const_i32 0l - x
 
     let const = P.Value.const_i32
   end
@@ -102,68 +107,89 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
       in
       Stack.push_f64 stack res
 
-  let exec_ibinop stack nn (op : ibinop) =
+  let exec_ibinop (stack : 'a Stack.t) nn (op : ibinop) : 'a Stack.t Choice.t =
     match nn with
     | S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      Stack.push_i32 stack
-        (let open Int32 in
-         match op with
-         | Add -> add n1 n2
-         | Sub -> sub n1 n2
-         | Mul -> mul n1 n2
-         | Div s -> begin
-           try
-             match s with
-             | S ->
-               failwith "TODO div_s_32"
-               (* if n1 = Int32.min_int && n2 = -1l then trap "integer overflow"; *)
-               (* div n1 n2 *)
-             | U -> unsigned_div n1 n2
-           with Division_by_zero -> trap "integer divide by zero"
-         end
-         | Rem s -> begin
-           try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-           with Division_by_zero -> trap "integer divide by zero"
-         end
-         | And -> logand n1 n2
-         | Or -> logor n1 n2
-         | Xor -> logxor n1 n2
-         | Shl -> shl n1 n2
-         | Shr S -> shr_s n1 n2
-         | Shr U -> shr_u n1 n2
-         | Rotl -> rotl n1 n2
-         | Rotr -> rotr n1 n2 )
+      let/ res =
+        let open Int32 in
+        match op with
+        | Add -> Choice.return @@ add n1 n2
+        | Sub -> Choice.return @@ sub n1 n2
+        | Mul -> Choice.return @@ mul n1 n2
+        | Div s -> begin
+          try
+            match s with
+            | S ->
+              let/ overflow =
+                Choice.select
+                @@ Int32_infix.(
+                     P.Value.Bool.and_
+                       (eq n1 (P.Value.const_i32 Stdlib.Int32.min_int))
+                       (eq n2 ~-(P.Value.const_i32 1l)) )
+              in
+              if overflow then Choice.trap Integer_overflow
+              else Choice.return @@ div n1 n2
+            | U -> Choice.return @@ unsigned_div n1 n2
+          with Division_by_zero -> Choice.trap Integer_divide_by_zero
+        end
+        | Rem s -> begin
+          try
+            match s with
+            | S -> Choice.return @@ rem n1 n2
+            | U -> Choice.return @@ unsigned_rem n1 n2
+          with Division_by_zero -> Choice.trap Integer_divide_by_zero
+        end
+        | And -> Choice.return @@ logand n1 n2
+        | Or -> Choice.return @@ logor n1 n2
+        | Xor -> Choice.return @@ logxor n1 n2
+        | Shl -> Choice.return @@ shl n1 n2
+        | Shr S -> Choice.return @@ shr_s n1 n2
+        | Shr U -> Choice.return @@ shr_u n1 n2
+        | Rotl -> Choice.return @@ rotl n1 n2
+        | Rotr -> Choice.return @@ rotr n1 n2
+      in
+      Choice.return @@ Stack.push_i32 stack res
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
-      Stack.push_i64 stack
-        (let open Int64 in
-         match op with
-         | Add -> add n1 n2
-         | Sub -> sub n1 n2
-         | Mul -> mul n1 n2
-         | Div s -> begin
-           try
-             match s with
-             | S ->
-               failwith "TODO div_s_64"
-               (* if n1 = Int64.min_int && n2 = -1L then trap "integer overflow"; *)
-               (* div n1 n2 *)
-             | U -> unsigned_div n1 n2
-           with Division_by_zero -> trap "integer divide by zero"
-         end
-         | Rem s -> begin
-           try match s with S -> rem n1 n2 | U -> unsigned_rem n1 n2
-           with Division_by_zero -> trap "integer divide by zero"
-         end
-         | And -> logand n1 n2
-         | Or -> logor n1 n2
-         | Xor -> logxor n1 n2
-         | Shl -> shl n1 n2
-         | Shr S -> shr_s n1 n2
-         | Shr U -> shr_u n1 n2
-         | Rotl -> rotl n1 n2
-         | Rotr -> rotr n1 n2 )
+      let/ res =
+        let open Int64 in
+        match op with
+        | Add -> Choice.return @@ add n1 n2
+        | Sub -> Choice.return @@ sub n1 n2
+        | Mul -> Choice.return @@ mul n1 n2
+        | Div s -> begin
+          try
+            match s with
+            | S ->
+              let/ overflow =
+                Choice.select
+                @@ P.Value.Bool.and_
+                     (eq n1 (P.Value.const_i64 Stdlib.Int64.min_int))
+                     (eq n2 (sub (P.Value.const_i64 0L) (P.Value.const_i64 1L)))
+              in
+              if overflow then Choice.trap Integer_overflow
+              else Choice.return @@ div n1 n2
+            | U -> Choice.return @@ unsigned_div n1 n2
+          with Division_by_zero -> Choice.trap Integer_divide_by_zero
+        end
+        | Rem s -> begin
+          try
+            match s with
+            | S -> Choice.return @@ rem n1 n2
+            | U -> Choice.return @@ unsigned_rem n1 n2
+          with Division_by_zero -> Choice.trap Integer_divide_by_zero
+        end
+        | And -> Choice.return @@ logand n1 n2
+        | Or -> Choice.return @@ logor n1 n2
+        | Xor -> Choice.return @@ logxor n1 n2
+        | Shl -> Choice.return @@ shl n1 n2
+        | Shr S -> Choice.return @@ shr_s n1 n2
+        | Shr U -> Choice.return @@ shr_u n1 n2
+        | Rotl -> Choice.return @@ rotl n1 n2
+        | Rotr -> Choice.return @@ rotr n1 n2
+      in
+      Choice.return @@ Stack.push_i64 stack res
 
   let exec_fbinop stack nn (op : fbinop) =
     match nn with
@@ -711,7 +737,9 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
     | F64_const f -> st @@ Stack.push_const_f64 stack f
     | I_unop (nn, op) -> st @@ exec_iunop stack nn op
     | F_unop (nn, op) -> st @@ exec_funop stack nn op
-    | I_binop (nn, op) -> st @@ exec_ibinop stack nn op
+    | I_binop (nn, op) ->
+      let/ stack = exec_ibinop stack nn op in
+      st stack
     | F_binop (nn, op) -> st @@ exec_fbinop stack nn op
     | I_testop (nn, op) -> st @@ exec_itestop stack nn op
     | I_relop (nn, op) -> st @@ exec_irelop stack nn op
@@ -1256,17 +1284,17 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
   let rec loop (state : State.exec_state) =
     match state.pc with
     | instr :: pc -> begin
-        let/ state = exec_instr instr { state with pc } in
-        match state with
-        | State.Continue state -> loop state
-        | State.Return res -> Choice.return res
-      end
-    | [] ->
+      let/ state = exec_instr instr { state with pc } in
+      match state with
+      | State.Continue state -> loop state
+      | State.Return res -> Choice.return res
+    end
+    | [] -> (
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
       let/ state = State.end_block state in
       match state with
       | State.Continue state -> loop state
-      | State.Return res -> Choice.return res
+      | State.Return res -> Choice.return res )
 
   let exec_expr env locals stack expr bt =
     let count = State.empty_count (Some "start") in
@@ -1311,7 +1339,8 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
   let modul (modul : P.Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
     let/ () =
-      List.fold_left (fun u to_run ->
+      List.fold_left
+        (fun u to_run ->
           let/ () = u in
           let/ end_stack, count =
             let env = P.Module_to_run.env modul in
@@ -1324,14 +1353,13 @@ module Make (P : Intf.P) : Intf.S with type 'a choice := 'a P.Choice.t
           | [] -> Choice.return ()
           | _ :: _ ->
             Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
-            assert false
-        )
+            assert false )
         (Choice.return ())
         (P.Module_to_run.to_run modul)
     in
     Choice.return (Ok ())
-    (* TODO error handling *)
-    (* with *)
-    (* | Trap msg -> Error msg *)
-    (* | Stack_overflow -> Error "call stack exhausted" *)
+  (* TODO error handling *)
+  (* with *)
+  (* | Trap msg -> Error msg *)
+  (* | Stack_overflow -> Error "call stack exhausted" *)
 end

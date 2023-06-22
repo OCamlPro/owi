@@ -1,4 +1,5 @@
 let trap msg = raise (Types.Trap msg)
+
 let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
 module Def_value = Value
@@ -57,6 +58,9 @@ module P = struct
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
       | Out_of_bound_memory_access -> assert false
+      | Integer_overflow -> assert false
+      | Integer_divide_by_zero -> assert false
+
     (* raise (Types.Trap "out of bounds memory access") *)
   end
 
