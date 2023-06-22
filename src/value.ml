@@ -1,11 +1,11 @@
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Func = struct
+module Make_func(V : Func_intf.Value_types) = struct
   type _ telt =
-    | I32 : Int32.t telt
-    | I64 : Int64.t telt
-    | F32 : Float32.t telt
-    | F64 : Float64.t telt
+    | I32 : V.int32 telt
+    | I64 : V.int64 telt
+    | F32 : V.float32 telt
+    | F64 : V.float64 telt
     | Externref : 'a Type_id.ty -> 'a telt
 
   type _ rtype =
@@ -64,6 +64,20 @@ module Func = struct
     | WASM (_, func, _env) -> func.type_f
     | Extern (Extern_func (t, _f)) -> extern_type t
 end
+
+module Concrete_value_types = struct
+  type int32 = Int32.t
+
+  type int64 = Int64.t
+
+  type float32 = Float32.t
+
+  type float64 = Float64.t
+
+  type vbool = bool
+end
+
+module Func = Make_func(Concrete_value_types)
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 

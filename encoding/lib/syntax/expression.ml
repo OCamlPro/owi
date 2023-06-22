@@ -349,6 +349,19 @@ let rec simplify ?(extract = true) (e : expr) : expr =
   match e with
   | Val v -> Val v
   | SymPtr (base, offset) -> SymPtr (base, simplify offset)
+  | Triop (Bool ITE, cond, e1, e2) -> (
+      let cond = simplify cond in
+      match cond with
+      | Val (Num (I32 0l)) -> simplify e2
+      | Val (Num (I32 _)) -> simplify e1
+      | Val (Bool b) -> if b then simplify e1 else simplify e2
+      | _ -> Triop (Bool ITE, cond, e1, e2))
+  | Unop (Bool Not, e) -> (
+      match simplify e with
+      | Val (Num (I32 0l)) -> Val (Num (I32 1l))
+      | Val (Num (I32 _)) -> Val (Num (I32 0l))
+      | Val (Bool b) -> Val (Bool (not b))
+      | e -> Unop (Bool Not, e))
   | Binop (I32 op, e1, e2) -> (
       let e1' = simplify e1 and e2' = simplify e2 in
       match (e1', e2') with

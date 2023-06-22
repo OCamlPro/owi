@@ -2,6 +2,7 @@
  (public_name owi)
  (modules
   sym_value
+  sym_state
   assigned
   check
   compile
