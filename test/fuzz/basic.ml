@@ -477,6 +477,19 @@ let expr_call (env : Env.t) (stack : val_type list) =
       | _ -> None )
     env.funcs
 
+let expr_br_if (env : Env.t) (stack : val_type list) =
+  List.filter_map
+    (fun (name, bt) ->
+      match bt with
+      | Arg.Bt_raw (_, (_pt, rt))
+        when S.is_stack_compatible (List.tl stack) (List.rev rt) ->
+        Some
+          (pair
+             (const (Br_if (Symbolic name)))
+             (const [ S.Pop ]) )
+      | _ -> None )
+    env.blocks
+
 let random_stack =
   let+ l_vt = list val_type in
   [ S.Whatever l_vt ]
