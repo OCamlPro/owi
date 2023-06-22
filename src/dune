@@ -1,6 +1,7 @@
 (library
  (public_name owi)
  (modules
+  const_interp
   sym_value
   sym_state
   assigned
