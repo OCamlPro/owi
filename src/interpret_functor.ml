@@ -13,7 +13,7 @@ module Make (P : Intf.P) :
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
   module Float64 = P.Value.F64
-  module Func = P.Func
+  module Extern_func = P.Extern_func
   module Stack = Stack_functor.Make (P.Value)
   module Choice = P.Choice
   module Global = P.Global
@@ -667,7 +667,7 @@ module Make (P : Intf.P) :
       ; count = enter_function_count state.count func.id id
       }
 
-  let exec_vfunc ~return (state : State.exec_state) (func : P.Env.t' Func.t) =
+  let exec_vfunc ~return (state : State.exec_state) (func : (P.Env.t', P.extern_func) Func_intf.t) =
     match func with
     | WASM (id, func, env) -> exec_func ~return ~id state env func
     | Extern _f -> failwith "TODO extern func"

@@ -10,7 +10,7 @@ module type Value_types = sig
   type vbool
 end
 
-module type T = sig
+module type T_Extern_func = sig
   type int32
 
   type int64
@@ -42,11 +42,19 @@ module type T = sig
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  type 'a t =
-    | WASM of int * Simplified.func * 'a
-    | Extern of extern_func
+  val extern_type : _ func_type -> Simplified.func_type
+end
 
-  val typ : 'a t -> Simplified.func_type
+type ('env, 'extern) t =
+  | WASM of int * Simplified.func * 'env
+  | Extern of 'extern
 
-  val wasm : Simplified.func -> 'a -> 'a t
+module type T = sig
+  include T_Extern_func
+
+  type nonrec ('env, 'extern) t = ('env, 'extern) t
+
+  val typ : ('env, extern_func) t -> Simplified.func_type
+
+  val wasm : Simplified.func -> 'env -> ('env, 'b) t
 end

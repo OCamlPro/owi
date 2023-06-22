@@ -15,7 +15,7 @@ type t =
   { globals : t' Global.t IMap.t
   ; memories : Memory.t IMap.t
   ; tables : t' Table.t IMap.t
-  ; functions : t' Value.Func.t IMap.t
+  ; functions : (t', Value.Func.extern_func) Value.Func.t IMap.t
   ; data : data IMap.t
   ; elem : t' elem IMap.t
   }
@@ -26,7 +26,7 @@ let pp fmt t =
   let global fmt (id, (global : 'a Global.t)) =
     Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
   in
-  let func fmt (id, (_func : 'a Value.Func.t)) =
+  let func fmt (id, (_func : ('a, 'b) Value.Func.t)) =
     Format.fprintf fmt "%a -> func" Format.pp_print_int id
   in
   Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"

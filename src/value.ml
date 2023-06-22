@@ -1,6 +1,6 @@
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Make_func(V : Func_intf.Value_types) = struct
+module Make_extern_func(V : Func_intf.Value_types) = struct
   type _ telt =
     | I32 : V.int32 telt
     | I64 : V.int64 telt
@@ -48,9 +48,7 @@ module Make_func(V : Func_intf.Value_types) = struct
   let extern_type (Func (arg, res)) : Simplified.func_type =
     (arg_type arg, res_type res)
 
-  type 'env t =
-    | WASM of int * Simplified.func * 'env
-    | Extern of extern_func
+  type ('env, 'extern) t = ('env, 'extern) Func_intf.t
 
   let fresh =
     let r = ref (-1) in
@@ -58,10 +56,10 @@ module Make_func(V : Func_intf.Value_types) = struct
       incr r;
       !r
 
-  let wasm func env : 'env t = WASM (fresh (), func, env)
+  let wasm func env : ('env, 'ext) t = WASM (fresh (), func, env)
 
   let typ = function
-    | WASM (_, func, _env) -> func.type_f
+    | Func_intf.WASM (_, func, _env) -> func.type_f
     | Extern (Extern_func (t, _f)) -> extern_type t
 end
 
@@ -77,7 +75,9 @@ module Concrete_value_types = struct
   type vbool = bool
 end
 
-module Func = Make_func(Concrete_value_types)
+module Func = struct
+  include Make_extern_func(Concrete_value_types)
+end
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
@@ -86,7 +86,7 @@ let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option =
 
 type 'env ref_value =
   | Externref of externref option
-  | Funcref of 'env Func.t option
+  | Funcref of ('env, Func.extern_func) Func.t option
   | Arrayref of unit Array.t option
 
 type 'env t =
@@ -130,6 +130,6 @@ let ref_null' = function
 
 let ref_null typ = Ref (ref_null' typ)
 
-let ref_func (f : 'env Func.t) : 'env t = Ref (Funcref (Some f))
+let ref_func (f : ('env, Func.extern_func) Func.t) : 'env t = Ref (Funcref (Some f))
 
 let is_ref_null = function Funcref None | Externref None -> true | _ -> false

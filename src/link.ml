@@ -9,7 +9,7 @@ type global = Env.t' Global.t
 
 type table = Env.t' Table.t
 
-type func = Env.t' Value.Func.t
+type func = (Env.t', Value.Func.extern_func) Value.Func.t
 
 type exports =
   { globals : Env.t' Global.t StringMap.t
@@ -331,7 +331,7 @@ let modul (ls : state) ~name (modul : modul) =
 let extern_module (ls : state) ~name (module_ : extern_module) =
   let functions =
     StringMap.map
-      (fun f -> Value.Func.Extern f)
+      (fun f -> Func_intf.Extern f)
       (StringMap.of_seq (List.to_seq module_.functions))
   in
   let defined_names =

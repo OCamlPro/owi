@@ -20,7 +20,7 @@ type exports =
   { globals : Env.t' Global.t StringMap.t
   ; memories : Memory.t StringMap.t
   ; tables : Env.t' Table.t StringMap.t
-  ; functions : Env.t' Value.Func.t StringMap.t
+  ; functions : (Env.t', Value.Func.extern_func) Value.Func.t StringMap.t
   ; defined_names : StringSet.t
   }
 

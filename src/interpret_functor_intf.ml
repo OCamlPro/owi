@@ -66,6 +66,8 @@ module type P = sig
 
   type float64
 
+  type extern_func
+
   module Choice : sig
     type 'a t
 
@@ -80,8 +82,8 @@ module type P = sig
     val trap : trap -> 'a t
   end
 
-  module Func :
-    Func_intf.T
+  module Extern_func :
+    Func_intf.T_Extern_func
       with type int32 := int32
        and type int64 := int64
        and type float32 := float32
@@ -154,7 +156,7 @@ module type P = sig
 
     val get_memory : t -> int -> Memory.t Result.t
 
-    val get_func : t -> int -> t' Func.t Result.t
+    val get_func : t -> int -> (t', extern_func) Func_intf.t Result.t
 
     val get_table : t -> int -> t' Table.t Result.t
 

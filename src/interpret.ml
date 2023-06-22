@@ -609,7 +609,7 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
     ; count = enter_function_count state.count func.id id
     }
 
-let exec_vfunc ~return (state : State.exec_state) (func : Env.t' Value.Func.t) =
+let exec_vfunc ~return (state : State.exec_state) (func : (Env.t', Value.Func.extern_func) Value.Func.t) =
   match func with
   | WASM (id, func, env) -> exec_func ~return ~id state env func
   | Extern f ->
@@ -1198,7 +1198,7 @@ let exec_func env (func : wasm_func) args =
     count.instructions;
   res
 
-let exec_vfunc stack (func : Env.t' Value.Func.t) =
+let exec_vfunc stack (func : (Env.t', Value.Func.extern_func) Func_intf.t) =
   match
     match func with
     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack

@@ -67,7 +67,7 @@ module P = struct
 
   type memory = Memory.t
 
-  type 'env func = 'env Value.Func.t
+  type 'env func = ('env, Value.Func.extern_func) Value.Func.t
 
   type 'env table = 'env Table.t
 
@@ -86,6 +86,8 @@ module P = struct
   type float32 = Float32.t
 
   type float64 = Float64.t
+
+  type extern_func = Value.Func.extern_func
 
   module Choice = struct
     type 'a t = 'a
@@ -106,7 +108,7 @@ module P = struct
       | Integer_divide_by_zero -> trap "integer divide by zero"
   end
 
-  module Func = Value.Func
+  module Extern_func = Value.Func
   module Value = V
   module Global = Global
   module Table = Table

@@ -13,8 +13,6 @@ module P = struct
     include Sym_value.Symbolic
   end
 
-  type 'env func = 'env Def_value.Func.t
-
   type env = Link_env.t
 
   type memory = unit
@@ -64,7 +62,15 @@ module P = struct
     (* raise (Types.Trap "out of bounds memory access") *)
   end
 
-  module Func = Def_value.Make_func (Value)
+  module Extern_func = Def_value.Make_extern_func (Value)
+
+  type extern_func = Extern_func.extern_func
+
+  type 'env func = ('env, extern_func) Def_value.Func.t
+
+  module Func = struct
+      include Extern_func
+  end
 
   module Global = struct
     type 'env t = 'env global
@@ -128,7 +134,7 @@ module P = struct
     let get_func t id =
       let* func = Link_env.get_func t id in
       match func with
-      | WASM (id, f, env) -> Ok (Func.WASM (id, f, env))
+      | WASM (id, f, env) -> Ok (Func_intf.WASM (id, f, env))
       | Extern _ -> assert false
 
     let get_table _ = assert false

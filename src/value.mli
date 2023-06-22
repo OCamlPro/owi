@@ -5,8 +5,8 @@ type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
-module Make_func(V : Func_intf.Value_types) :
-  Func_intf.T
+module Make_extern_func(V : Func_intf.Value_types) :
+  Func_intf.T_Extern_func
     with type int32 := V.int32
      and type int64 := V.int64
      and type float32 := V.float32
@@ -21,7 +21,7 @@ module Func :
 
 type 'env ref_value =
   | Externref of externref option
-  | Funcref of 'env Func.t option
+  | Funcref of ('env, Func.extern_func) Func.t option
   | Arrayref of unit array option
 
 type 'a t =
@@ -41,7 +41,7 @@ val ref_null' : Simplified.heap_type -> 'a ref_value
 
 val ref_null : Simplified.heap_type -> 'a t
 
-val ref_func : 'a Func.t -> 'a t
+val ref_func : ('a, Func.extern_func) Func.t -> 'a t
 
 val is_ref_null : 'a ref_value -> bool
 

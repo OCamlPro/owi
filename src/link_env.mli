@@ -8,7 +8,7 @@ type data = { mutable value : string }
 
 val get_memory : t -> int -> Memory.t Result.t
 
-val get_func : t -> int -> t' Value.Func.t Result.t
+val get_func : t -> int -> (t', Value.Func.extern_func) Value.Func.t Result.t
 
 val get_table : t -> int -> t' Table.t Result.t
 
@@ -35,7 +35,7 @@ module Build : sig
 
   val add_table : int -> t' Table.t -> t -> t
 
-  val add_func : int -> t' Value.Func.t -> t -> t
+  val add_func : int -> (t', Value.Func.extern_func) Value.Func.t -> t -> t
 
   val add_data : int -> data -> t -> t
 
@@ -43,7 +43,7 @@ module Build : sig
 
   val get_const_global : t -> int -> t' Value.t Result.t
 
-  val get_func : t -> int -> t' Value.Func.t Result.t
+  val get_func : t -> int -> (t', Value.Func.extern_func) Value.Func.t Result.t
 end
 
 val freeze : Build.t -> t
