@@ -5,8 +5,6 @@ let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 module Def_value = Value
 
 module P = struct
-  type t = unit
-
   module Value = struct
     include Sym_value.Symbolic
   end
@@ -33,24 +31,36 @@ module P = struct
 
   type float64 = Value.float64
 
+  type thread = Value.vbool list
+
   module Choice = struct
-    type 'a t = 'a
+    type 'a t = thread -> ('a * thread)
 
-    let return = Fun.id
+    let return (v: 'a) : 'a t = (fun t -> v, t)
 
-    let bind = ( |> )
+    let bind (v : 'a t) (f : 'a -> 'b t) : 'b t =
+      (fun t ->
+         let r, t = v t in
+         (f r) t)
 
-    let select (sym_bool : vbool) =
+    let select (sym_bool : vbool) : bool t =
+      fun t ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
-      match sym_bool with
-      | Val (Bool b) -> b
-      | Val (Num (I32 0l)) -> false
-      | Val (Num (I32 _)) -> true
-      | _ ->
-        Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
-        assert false
+      let r =
+        match sym_bool with
+        | Val (Bool b) -> b
+        | Val (Num (I32 0l)) -> false
+        | Val (Num (I32 _)) -> true
+        | _ ->
+          Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
+          assert false
+      in
+      let pc = Encoding.Expression.Val (Bool r) in
+      r, pc :: t
 
     let select_i32 _sym_int = assert false
+
+    let get : thread t = (fun t -> t, t)
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
       | Out_of_bound_memory_access -> assert false
@@ -147,7 +157,7 @@ module P = struct
 
     let drop_data _ = assert false
 
-    let pp _ = assert false
+    let pp _ _ = ()
   end
 
   module Module_to_run = struct

@@ -1,7 +1,7 @@
 open Owi
 open Syntax
 
-let simplify_then_link_then_run ~optimize file =
+let simplify_then_link_then_run ~optimize pc file =
   let* to_run, _link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
@@ -16,15 +16,22 @@ let simplify_then_link_then_run ~optimize file =
         | _ -> Ok acc )
       ([], Link.empty_state) file
   in
-  let state : Sym_state.P.t = () in
-  list_fold_left Interpret2.S.modul state (List.rev to_run)
+  let f pc to_run =
+    let c = Interpret2.S.modul to_run in
+    match c pc with
+    | Ok (), pc -> Ok pc
+    | Error _, _ -> assert false
+  in
+  list_fold_left f
+    pc
+    (List.rev to_run)
 
-let run_file exec filename =
+let run_file ~optimize pc filename =
   if not @@ Sys.file_exists filename then
     error_s "file `%s` doesn't exist" filename
   else
     let* script = Parse.Script.from_file ~filename in
-    exec script
+    simplify_then_link_then_run ~optimize pc script
 
 (* Command line *)
 
@@ -54,13 +61,14 @@ let script =
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
 let main profiling debug _script optimize files =
-  let exec = simplify_then_link_then_run ~optimize
-  in
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let result = list_iter (run_file exec) files in
+  let pc = [] in
+  let result = list_fold_left (run_file ~optimize) pc files in
   match result with
-  | Ok () -> ()
+  | Ok pc ->
+    List.iter (fun c ->
+        print_endline (Encoding.Expression.to_string c)) pc
   | Error e ->
     Format.eprintf "%s@." e;
     exit 1

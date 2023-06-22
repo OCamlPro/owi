@@ -60,9 +60,7 @@ module V :
 end
 
 module P = struct
-  type toremove = unit
-
-  type t = toremove
+  type thread = unit
 
   type env = Link.Env.t
 
@@ -97,9 +95,11 @@ module P = struct
 
     let bind = ( |> )
 
-    let select = Fun.id
+    let select b = b
 
-    let select_i32 = Fun.id
+    let select_i32 i = i
+
+    let get = ()
 
     let trap msg = raise (Types.Trap msg)
 

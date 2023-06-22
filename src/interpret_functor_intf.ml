@@ -40,7 +40,7 @@ module type Memory_data = sig
 end
 
 module type P = sig
-  type t
+  type thread
 
   type env
 
@@ -74,6 +74,8 @@ module type P = sig
     val return : 'a -> 'a t
 
     val bind : 'a t -> ('a -> 'b t) -> 'b t
+
+    val get : thread t
 
     val select : vbool -> bool t
 
@@ -194,7 +196,7 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul : thread -> module_to_run -> (thread, 'a) result choice
+  val modul : module_to_run -> (unit, 'a) result choice
 
   (* (\** interpret a function with a given input stack and produce a new stack*\) *)
   (* val exec_vfunc : *)

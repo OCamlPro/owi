@@ -39,7 +39,16 @@ module Symbolic = struct
 
   let ref_null _ = assert false
 
-  let pp _ _ = failwith "TODO"
+  let pp ppf v =
+    let e = match v with
+    | I32 e -> e
+    | I64 e -> e
+    | F32 e -> e
+    | F64 e -> e
+    | Ref _ -> assert false
+    in
+    Format.fprintf ppf "%s" (Encoding.Expression.to_string e)
+
 
   module Bool = struct
     let not = Boolean.mk_not

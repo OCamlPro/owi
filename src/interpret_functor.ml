@@ -9,7 +9,7 @@ module Make (P : Intf.P) :
   Intf.S
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
-     and type thread := P.t = struct
+     and type thread := P.thread = struct
   module Int32 = P.Value.I32
   module Int64 = P.Value.I64
   module Float32 = P.Value.F32
@@ -546,7 +546,6 @@ module Make (P : Intf.P) :
       ; func_rt : result_type
       ; env : P.Env.t
       ; count : count
-      ; thread : P.t
       }
 
     let rec print_count ppf count =
@@ -592,13 +591,13 @@ module Make (P : Intf.P) :
       c
 
     type instr_result =
-      | Return of P.t * value list
+      | Return of value list
       | Continue of exec_state
 
     let return (state : exec_state) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> Choice.return (Return (state.thread, args))
+      | None -> Choice.return (Return args)
       | Some state ->
         let stack = args @ state.stack in
         Choice.return (Continue { state with stack })
@@ -667,7 +666,6 @@ module Make (P : Intf.P) :
       ; return_state
       ; env
       ; count = enter_function_count state.count func.id id
-      ; thread = state.thread
       }
 
   let exec_vfunc ~return (state : State.exec_state)
@@ -1293,16 +1291,16 @@ module Make (P : Intf.P) :
       let/ state = exec_instr instr { state with pc } in
       match state with
       | State.Continue state -> loop state
-      | State.Return (thread, res) -> Choice.return (thread, res)
+      | State.Return res -> Choice.return res
     end
     | [] -> (
       Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
       let/ state = State.end_block state in
       match state with
       | State.Continue state -> loop state
-      | State.Return (thread, res) -> Choice.return (thread, res) )
+      | State.Return res -> Choice.return res )
 
-  let exec_expr thread env locals stack expr bt =
+  let exec_expr env locals stack expr bt =
     let count = State.empty_count (Some "start") in
     count.enter <- count.enter + 1;
     let state : State.exec_state =
@@ -1315,7 +1313,6 @@ module Make (P : Intf.P) :
       ; pc = expr
       ; return_state = None
       ; count
-      ; thread
       }
     in
     let/ state = loop state in
@@ -1343,28 +1340,28 @@ module Make (P : Intf.P) :
   (*   | exception Trap msg -> Error msg *)
   (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
-  let modul thread (modul : P.Module_to_run.t) =
+  let modul (modul : P.Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
-    let/ thread =
+    let/ () =
       List.fold_left
-        (fun thread to_run ->
-          let/ thread in
-          let/ (thread, end_stack), count =
+        (fun u to_run ->
+          let/ () = u in
+          let/ end_stack, count =
             let env = P.Module_to_run.env modul in
-            exec_expr thread env [||] Stack.empty to_run None
+            exec_expr env [||] Stack.empty to_run None
           in
           Log.profile "Exec module %s@.%a@."
             (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")
             State.print_count count;
           match end_stack with
-          | [] -> Choice.return thread
+          | [] -> Choice.return ()
           | _ :: _ ->
             Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
             assert false )
-        (Choice.return thread)
+        (Choice.return ())
         (P.Module_to_run.to_run modul)
     in
-    Choice.return (Ok thread)
+    Choice.return (Ok ())
   (* TODO error handling *)
   (* with *)
   (* | Trap msg -> Error msg *)
