@@ -98,14 +98,6 @@ let get_locals ntyp env =
   in
   List.filter is_typ env.locals
 
-let get_funcs_before name env =
-  let rec get_list l =
-    match l with
-    | [] -> env.funcs
-    | hd :: tl -> if fst hd = name then tl else get_list tl
-  in
-  get_list env.funcs
-
 let use_fuel env = env.fuel <- pred env.fuel
 
 let has_fuel env = env.fuel > 0
