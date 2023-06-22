@@ -277,6 +277,10 @@ module Symbolic = struct
 
     type vbool = Expr.t
 
+    type nonrec int32 = int32
+
+    type nonrec int64 = int64
+
     let zero = mk_f32 0l
 
     let abs x = FloatingPoint.mk_abs x `F32Type
@@ -318,12 +322,24 @@ module Symbolic = struct
     let le x y = FloatingPoint.mk_le x y `F32Type
 
     let ge x y = FloatingPoint.mk_ge x y `F32Type
+
+    let convert_i32_s _ = assert false
+
+    let convert_i32_u _ = assert false
+
+    let convert_i64_s _ = assert false
+
+    let convert_i64_u _ = assert false
   end
 
   module F64 = struct
     type num = Expr.t
 
     type vbool = Expr.t
+
+    type nonrec int32 = int32
+
+    type nonrec int64 = int64
 
     let zero = mk_f64 0L
 
@@ -366,6 +382,14 @@ module Symbolic = struct
     let le x y = FloatingPoint.mk_le x y `F64Type
 
     let ge x y = FloatingPoint.mk_ge x y `F64Type
+
+    let convert_i32_s _ = assert false
+
+    let convert_i32_u _ = assert false
+
+    let convert_i64_s _ = assert false
+
+    let convert_i64_u _ = assert false
   end
 end
 

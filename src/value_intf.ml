@@ -91,6 +91,10 @@ module type Fop = sig
 
   type vbool
 
+  type int32
+
+  type int64
+
   val zero : num
 
   val abs : num -> num
@@ -132,6 +136,14 @@ module type Fop = sig
   val le : num -> num -> vbool
 
   val ge : num -> num -> vbool
+
+  val convert_i32_s : int32 -> num
+
+  val convert_i32_u : int32 -> num
+
+  val convert_i64_s : int64 -> num
+
+  val convert_i64_u : int64 -> num
 end
 
 module type T = sig
@@ -177,9 +189,19 @@ module type T = sig
     val int32 : vbool -> int32
   end
 
-  module F32 : Fop with type num := float32 and type vbool := vbool
+  module F32 :
+    Fop
+      with type num := float32
+       and type vbool := vbool
+       and type int32 := int32
+       and type int64 := int64
 
-  module F64 : Fop with type num := float64 and type vbool := vbool
+  module F64 :
+    Fop
+      with type num := float64
+       and type vbool := vbool
+       and type int32 := int32
+       and type int64 := int64
 
   module I32 : sig
     include

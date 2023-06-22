@@ -363,30 +363,30 @@ module Make (P : Intf.P) :
         Stack.push_i64 stack n
     end
 
-  (* let exec_fconverti stack nn nn' sx = *)
-  (*   match nn with *)
-  (*   | S32 -> ( *)
-  (*     let open Convert.Float32 in *)
-  (*     match nn' with *)
-  (*     | S32 -> *)
-  (*       let n, stack = Stack.pop_i32 stack in *)
-  (*       let n = if sx = S then convert_i32_s n else convert_i32_u n in *)
-  (*       Stack.push_f32 stack n *)
-  (*     | S64 -> *)
-  (*       let n, stack = Stack.pop_i64 stack in *)
-  (*       let n = if sx = S then convert_i64_s n else convert_i64_u n in *)
-  (*       Stack.push_f32 stack n ) *)
-  (*   | S64 -> ( *)
-  (*     let open Convert.Float64 in *)
-  (*     match nn' with *)
-  (*     | S32 -> *)
-  (*       let n, stack = Stack.pop_i32 stack in *)
-  (*       let n = if sx = S then convert_i32_s n else convert_i32_u n in *)
-  (*       Stack.push_f64 stack n *)
-  (*     | S64 -> *)
-  (*       let n, stack = Stack.pop_i64 stack in *)
-  (*       let n = if sx = S then convert_i64_s n else convert_i64_u n in *)
-  (*       Stack.push_f64 stack n ) *)
+  let exec_fconverti stack nn nn' sx =
+    match nn with
+    | S32 -> (
+      let open Float32 in
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n = if sx = S then convert_i32_s n else convert_i32_u n in
+        Stack.push_f32 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n = if sx = S then convert_i64_s n else convert_i64_u n in
+        Stack.push_f32 stack n )
+    | S64 -> (
+      let open Float64 in
+      match nn' with
+      | S32 ->
+        let n, stack = Stack.pop_i32 stack in
+        let n = if sx = S then convert_i32_s n else convert_i32_u n in
+        Stack.push_f64 stack n
+      | S64 ->
+        let n, stack = Stack.pop_i64 stack in
+        let n = if sx = S then convert_i64_s n else convert_i64_u n in
+        Stack.push_f64 stack n )
 
   (* let exec_ireinterpretf stack nn nn' = *)
   (*   match nn with *)
@@ -788,7 +788,7 @@ module Make (P : Intf.P) :
     (*     let n, stack = Stack.pop_f32 stack in *)
     (*     let n = Convert.Float64.promote_f32 n in *)
     (*     st @@ Stack.push_f64 stack n *)
-    (*   | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s *)
+    | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
     (*   | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn' *)
     (*   | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn' *)
     | Ref_null t -> st @@ Stack.push stack (P.Value.ref_null t)
