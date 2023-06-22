@@ -13,13 +13,13 @@ module P = struct
 
   type memory = unit
 
-  type 'env table = unit
+  type table = unit
 
-  type 'env elem = unit
+  type elem = unit
 
   type data = unit
 
-  type 'env global = unit
+  type global = unit
 
   type vbool = Value.vbool
 
@@ -34,17 +34,17 @@ module P = struct
   type thread = Value.vbool list
 
   module Choice = struct
-    type 'a t = thread -> ('a * thread)
+    type 'a t = thread -> 'a * thread
 
-    let return (v: 'a) : 'a t = (fun t -> v, t)
+    let return (v : 'a) : 'a t = fun t -> (v, t)
 
     let bind (v : 'a t) (f : 'a -> 'b t) : 'b t =
-      (fun t ->
-         let r, t = v t in
-         (f r) t)
+     fun t ->
+      let r, t = v t in
+      (f r) t
 
     let select (sym_bool : vbool) : bool t =
-      fun t ->
+     fun t ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       let r =
         match sym_bool with
@@ -56,11 +56,11 @@ module P = struct
           assert false
       in
       let pc = Encoding.Expression.Val (Bool r) in
-      r, pc :: t
+      (r, pc :: t)
 
     let select_i32 _sym_int = assert false
 
-    let get : thread t = (fun t -> t, t)
+    let get : thread t = fun t -> (t, t)
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
       | Out_of_bound_memory_access -> assert false
@@ -77,11 +77,11 @@ module P = struct
   type func = Def_value.Func.t
 
   module Func = struct
-      include Extern_func
+    include Extern_func
   end
 
   module Global = struct
-    type 'env t = 'env global
+    type t = global
 
     let value _ = assert false
 
@@ -93,7 +93,7 @@ module P = struct
   end
 
   module Table = struct
-    type 'env t = 'env table
+    type t = table
 
     let get _ = assert false
 

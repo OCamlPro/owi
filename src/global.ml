@@ -1,4 +1,4 @@
-type 'env t =
+type t =
   { mutable value : Value.t
   ; label : string option
   ; mut : Types.mut

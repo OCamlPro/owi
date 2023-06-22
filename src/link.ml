@@ -5,14 +5,14 @@ module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 module Env = Link_env
 
-type global = Env_id.t Global.t
+type global = Global.t
 
-type table = Env_id.t Table.t
+type table = Table.t
 
 type func = Value.Func.t
 
 type exports =
-  { globals : Env_id.t Global.t StringMap.t
+  { globals : global StringMap.t
   ; memories : Memory.t StringMap.t
   ; tables : table StringMap.t
   ; functions : func StringMap.t

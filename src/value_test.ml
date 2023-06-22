@@ -40,6 +40,7 @@ module V :
   module I32 = struct
     include Int32
     include Convert.Int32
+
     let to_bool i = not (Int32.eq_const i 0l)
   end
 
@@ -68,13 +69,13 @@ module P = struct
 
   type func = Value.Func.t
 
-  type 'env table = 'env Table.t
+  type table = Table.t
 
-  type 'env elem = 'env Link.Env.elem
+  type elem = Link.Env.elem
 
   type data = Link.Env.data
 
-  type 'env global = 'env Global.t
+  type global = Global.t
 
   type vbool = Bool.t
 

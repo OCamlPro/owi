@@ -19,9 +19,9 @@ type func := Func_intf.t
 
 (** runtime exported items *)
 type exports =
-  { globals : Env.t' Global.t StringMap.t
+  { globals : Global.t StringMap.t
   ; memories : Memory.t StringMap.t
-  ; tables : Env.t' Table.t StringMap.t
+  ; tables : Table.t StringMap.t
   ; functions : func StringMap.t
   ; defined_names : StringSet.t
   }

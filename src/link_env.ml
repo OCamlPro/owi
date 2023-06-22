@@ -7,7 +7,7 @@ type data = { mutable value : string }
 
 let drop_data data = data.value <- ""
 
-type 'env elem = { mutable value : Value.ref_value array }
+type elem = { mutable value : Value.ref_value array }
 
 let drop_elem elem = elem.value <- [||]
 
@@ -16,17 +16,17 @@ type extern_funcs = Value.Func.extern_func Func_id.collection
 type t' = Env_id.t
 
 type t =
-  { globals : t' Global.t IMap.t
+  { globals : Global.t IMap.t
   ; memories : Memory.t IMap.t
-  ; tables : t' Table.t IMap.t
+  ; tables : Table.t IMap.t
   ; functions : Func_intf.t IMap.t
   ; data : data IMap.t
-  ; elem : t' elem IMap.t
+  ; elem : elem IMap.t
   ; extern_funcs : extern_funcs
   }
 
 let pp fmt t =
-  let global fmt (id, (global : 'a Global.t)) =
+  let global fmt (id, (global : Global.t)) =
     Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
   in
   let func fmt (id, (_func : Value.Func.t)) =
@@ -94,12 +94,12 @@ let get_func_typ env f =
 
 module Build = struct
   type t =
-    { globals : t' Global.t IMap.t
+    { globals : Global.t IMap.t
     ; memories : Memory.t IMap.t
-    ; tables : t' Table.t IMap.t
+    ; tables : Table.t IMap.t
     ; functions : Func_intf.t IMap.t
     ; data : data IMap.t
-    ; elem : t' elem IMap.t
+    ; elem : elem IMap.t
     }
 
   let empty =
@@ -158,7 +158,7 @@ module type T = sig
 
   type t' = t Lazy.t
 
-  type 'env elem = { mutable value : Value.ref_value array }
+  type elem = { mutable value : Value.ref_value array }
 
   type data = { mutable value : string }
 
@@ -168,15 +168,15 @@ module type T = sig
 
   val get_func : t -> int -> func Result.t
 
-  val get_table : t -> int -> t' Table.t Result.t
+  val get_table : t -> int -> Table.t Result.t
 
-  val get_elem : t -> int -> t' elem Result.t
+  val get_elem : t -> int -> elem Result.t
 
   val get_data : t -> int -> data Result.t
 
-  val get_global : t -> int -> t' Global.t Result.t
+  val get_global : t -> int -> Global.t Result.t
 
-  val drop_elem : 'a elem -> unit
+  val drop_elem : elem -> unit
 
   val drop_data : data -> unit
 

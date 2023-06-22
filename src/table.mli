@@ -1,18 +1,20 @@
 (** runtime table *)
-type 'env table = Value.ref_value array
+type table = Value.ref_value array
 
-type 'env t =
+type t =
   { id : int
   ; label : string option
   ; limits : Types.limits
   ; typ : Simplified.ref_type
-  ; mutable data : 'env table
+  ; mutable data : table
   }
 
-val get : 'env t -> int32 -> Value.ref_value
-val set : 'env t -> int32 -> Value.ref_value -> unit
-val size : 'env t -> int32
+val get : t -> int32 -> Value.ref_value
 
-val update : 'a t -> 'a table -> unit
+val set : t -> int32 -> Value.ref_value -> unit
 
-val init : ?label:string -> Simplified.table_type -> 'env t
+val size : t -> int32
+
+val update : t -> table -> unit
+
+val init : ?label:string -> Simplified.table_type -> t

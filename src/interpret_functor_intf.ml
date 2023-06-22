@@ -48,13 +48,13 @@ module type P = sig
 
   type func
 
-  type 'env table
+  type table
 
-  type 'env elem
+  type elem
 
   type data
 
-  type 'env global
+  type global
 
   type vbool
 
@@ -100,25 +100,25 @@ module type P = sig
        and type float64 = float64
 
   module Global : sig
-    type 'env t = 'env global
+    type t = global
 
-    val value : 'env global -> Value.t
+    val value : global -> Value.t
 
-    val set_value : 'env global -> Value.t -> unit
+    val set_value : global -> Value.t -> unit
 
-    val mut : 'env global -> Types.mut
+    val mut : global -> Types.mut
 
-    val typ : 'env global -> Simplified.val_type
+    val typ : global -> Simplified.val_type
   end
 
   module Table : sig
-    type 'env t = 'env table
+    type t = table
 
-    val get : 'env t -> int32 -> Value.ref_value
+    val get : t -> int32 -> Value.ref_value
 
-    val set : 'env t -> int32 -> Value.ref_value -> unit
+    val set : t -> int32 -> Value.ref_value -> unit
 
-    val size : 'env t -> int32
+    val size : t -> int32
   end
 
   module Memory : sig
@@ -160,15 +160,15 @@ module type P = sig
 
     val get_func : t -> int -> Func_intf.t Result.t
 
-    val get_table : t -> int -> t' Table.t Result.t
+    val get_table : t -> int -> Table.t Result.t
 
-    val get_elem : t -> int -> t' elem Result.t
+    val get_elem : t -> int -> elem Result.t
 
     val get_data : t -> int -> data Result.t
 
-    val get_global : t -> int -> t' Global.t Result.t
+    val get_global : t -> int -> Global.t Result.t
 
-    val drop_elem : 'a elem -> unit
+    val drop_elem : elem -> unit
 
     val drop_data : data -> unit
 

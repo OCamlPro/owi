@@ -1,15 +1,15 @@
 (** runtime global *)
-type 'env t =
+type t =
   { mutable value : Value.t
   ; label : string option
   ; mut : Types.mut
   ; typ : Simplified.val_type
   }
 
-val value : 'env t -> Value.t
+val value : t -> Value.t
 
-val set_value : 'env t -> Value.t -> unit
+val set_value : t -> Value.t -> unit
 
-val typ : 'env t -> Simplified.val_type
+val typ : t -> Simplified.val_type
 
-val mut : 'env t -> Types.mut
+val mut : t -> Types.mut
