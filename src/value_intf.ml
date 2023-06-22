@@ -76,6 +76,14 @@ module type Iop = sig
   val trunc_f64_s : float64 -> num
 
   val trunc_f64_u : float64 -> num
+
+  val trunc_sat_f32_s : float32 -> num
+
+  val trunc_sat_f32_u : float32 -> num
+
+  val trunc_sat_f64_s : float64 -> num
+
+  val trunc_sat_f64_u : float64 -> num
 end
 
 module type Fop = sig
