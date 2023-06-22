@@ -11,13 +11,16 @@ type 'env elem = { mutable value : 'env Value.ref_value array }
 
 let drop_elem elem = elem.value <- [||]
 
+type extern_funcs = Value.Func.extern_func Func_id.collection
+
 type t =
   { globals : t' Global.t IMap.t
   ; memories : Memory.t IMap.t
   ; tables : t' Table.t IMap.t
-  ; functions : (t', Value.Func.extern_func) Value.Func.t IMap.t
+  ; functions : (t', Func_id.t) Func_intf.t IMap.t
   ; data : data IMap.t
   ; elem : t' elem IMap.t
+  ; extern_funcs : extern_funcs
   }
 
 and t' = t lazy_t
@@ -81,8 +84,23 @@ let get_elem (env : t) id =
     Error "unknown elem"
   | Some v -> Ok v
 
+let get_extern_func env id = Func_id.get id env.extern_funcs
+
+let get_func_typ env f =
+  match f with
+  | Func_intf.WASM (_, func, _) -> func.type_f
+  | Extern id ->
+    Func_id.get_typ id env.extern_funcs
+
 module Build = struct
-  type nonrec t = t
+  type t =
+    { globals : t' Global.t IMap.t
+    ; memories : Memory.t IMap.t
+    ; tables : t' Table.t IMap.t
+    ; functions : (t', Func_id.t) Func_intf.t IMap.t
+    ; data : data IMap.t
+    ; elem : t' elem IMap.t
+    }
 
   let empty =
     { globals = IMap.empty
@@ -109,13 +127,27 @@ module Build = struct
 
   let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
 
+  let get_global (env : t) id =
+    match IMap.find_opt id env.globals with
+    | None ->
+      (* Log.debug "%a@." pp env; *)
+      Error "unknown global"
+    | Some v -> Ok v
+
   let get_const_global (env : t) id =
     let* g = get_global env id in
     match g.mut with
     | Const -> ok g.value
     | Var -> Error "constant expression required"
 
-  let get_func = get_func
+  let get_func (env : t) id =
+    match IMap.find_opt id env.functions with
+    | None ->
+      (* Log.debug "%a@." pp env; *)
+      error_s "unknown function %a" Format.pp_print_int id
+    | Some v -> Ok v
+
 end
 
-let freeze t = t
+let freeze (Build.{ globals; memories; tables; functions; data; elem }) extern_funcs =
+  { globals; memories; tables; functions; data; elem; extern_funcs }

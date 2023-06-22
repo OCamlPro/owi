@@ -6,7 +6,8 @@ val modul : Link.module_to_run -> unit Result.t
 (** interpret a function with a given input stack and produce a new stack*)
 val exec_vfunc :
      Link.Env.t' Stack.t
-  -> (Link.Env.t', Value.Func.extern_func) Value.Func.t
+  -> Link.extern_func
+  -> (Link.Env.t', Func_id.t) Value.Func.t
   -> Link.Env.t' Stack.t Result.t
 
 val exec_iunop :

@@ -669,7 +669,7 @@ module Make (P : Intf.P) :
       }
 
   let exec_vfunc ~return (state : State.exec_state)
-    (func : (P.Env.t', P.extern_func) Func_intf.t) =
+    (func : (P.Env.t', Func_id.t) Func_intf.t) =
     match func with
     | WASM (id, func, env) -> exec_func ~return ~id state env func
     | Extern _f -> failwith "TODO extern func"

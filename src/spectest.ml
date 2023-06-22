@@ -1,6 +1,8 @@
 open Symbolic
 
-let extern_m : Link.extern_module =
+type extern_module = Value.Func.extern_func Link.extern_module
+
+let extern_m : extern_module =
   let fmt = Format.std_formatter in
   let print = () in
   let print_i32 i = Format.fprintf fmt "%li@\n%!" i in

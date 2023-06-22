@@ -15,39 +15,50 @@ module StringMap : Map.S with type key = string
 
 module StringSet : Set.S
 
+type func := (Env.t', Func_id.t) Func_intf.t
+
 (** runtime exported items *)
 type exports =
   { globals : Env.t' Global.t StringMap.t
   ; memories : Memory.t StringMap.t
   ; tables : Env.t' Table.t StringMap.t
-  ; functions : (Env.t', Value.Func.extern_func) Value.Func.t StringMap.t
+  ; functions : func StringMap.t
   ; defined_names : StringSet.t
   }
 
 (** link state *)
-type state =
+type 'f state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
+  ; collection : 'f Func_id.collection
   }
 
 (** the empty link state *)
-val empty_state : state
+val empty_state : 'f state
 
 (** link a module with a given link state, producing a runnable module and a new
     link state *)
 val modul :
-     state
+     Value.Func.extern_func state
   -> name:string option
   -> Simplified.modul
-  -> (module_to_run * state) Result.t
+  -> (module_to_run * Value.Func.extern_func state) Result.t
 
 (** register a module inside a link state, producing a new link state *)
-val register_module : state -> name:string -> id:string option -> state Result.t
+val register_module :
+  'f state -> name:string -> id:string option -> 'f state Result.t
 
 (** extern modules *)
-type extern_module = { functions : (string * Value.Func.extern_func) list }
+type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 
 (** register an extern module with a given link state, producing a new link
     state *)
-val extern_module : state -> name:string -> extern_module -> state
+val extern_module :
+     'f state
+  -> name:string
+  -> func_typ:('f -> Simplified.func_type)
+  -> 'f extern_module
+  -> 'f state
+
+type extern_func = Value.Func.extern_func Func_id.collection

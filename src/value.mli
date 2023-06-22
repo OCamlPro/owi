@@ -21,7 +21,7 @@ module Func :
 
 type 'env ref_value =
   | Externref of externref option
-  | Funcref of ('env, Func.extern_func) Func.t option
+  | Funcref of ('env, Func_id.t) Func_intf.t option
   | Arrayref of unit array option
 
 type 'a t =
@@ -41,7 +41,7 @@ val ref_null' : Simplified.heap_type -> 'a ref_value
 
 val ref_null : Simplified.heap_type -> 'a t
 
-val ref_func : ('a, Func.extern_func) Func.t -> 'a t
+val ref_func : ('env, Func_id.t) Func.t -> 'env t
 
 val is_ref_null : 'a ref_value -> bool
 

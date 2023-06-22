@@ -609,10 +609,11 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
     ; count = enter_function_count state.count func.id id
     }
 
-let exec_vfunc ~return (state : State.exec_state) (func : (Env.t', Value.Func.extern_func) Value.Func.t) =
+let exec_vfunc ~return (state : State.exec_state) (func : (Env.t', Func_id.t) Value.Func.t) =
   match func with
   | WASM (id, func, env) -> exec_func ~return ~id state env func
   | Extern f ->
+    let f = Env.get_extern_func state.env f in
     let stack = exec_extern_func state.stack f in
     let state = { state with stack } in
     if return then State.return state else state
@@ -627,7 +628,7 @@ let call_ref ~return (state : State.exec_state) typ_i =
     | Funcref None -> trap (Printf.sprintf "calling null function reference")
     | _ -> trap "element type error"
   in
-  let pt, rt = Value.Func.typ func in
+  let pt, rt = Env.get_func_typ state.env func in
   let pt', rt' = typ_i in
   if not (rt = rt' && List.equal p_type_eq pt pt') then
     trap "indirect call type mismatch";
@@ -646,7 +647,7 @@ let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
     | Funcref None -> trap (Printf.sprintf "uninitialized element %i" fun_i)
     | _ -> trap "element type error"
   in
-  let pt, rt = Value.Func.typ func in
+  let pt, rt = Env.get_func_typ state.env func in
   let pt', rt' = typ_i in
   if not (rt = rt' && List.equal p_type_eq pt pt') then
     trap "indirect call type mismatch";
@@ -1198,11 +1199,13 @@ let exec_func env (func : wasm_func) args =
     count.instructions;
   res
 
-let exec_vfunc stack (func : (Env.t', Value.Func.extern_func) Func_intf.t) =
+let exec_vfunc stack collection (func : (Env.t', Func_id.t) Func_intf.t) =
   match
     match func with
     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack
-    | Extern f -> exec_extern_func stack f
+    | Extern f ->
+      let f = Func_id.get f collection in
+      exec_extern_func stack f
   with
   | result -> Ok result
   | exception Trap msg -> Error msg

@@ -7,17 +7,17 @@ val until_simplify : Symbolic.modul -> Simplified.modul Result.t
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)
 val until_link :
-     Link.state
+     Value.Func.extern_func Link.state
   -> optimize:bool
   -> name:string option
   -> Symbolic.modul
-  -> (Link.module_to_run * Link.state) Result.t
+  -> (Link.module_to_run * Value.Func.extern_func Link.state) Result.t
 
 (** compile and interpret a module with a given link state and produce a new
     link state *)
 val until_interpret :
-     Link.state
+     Value.Func.extern_func Link.state
   -> optimize:bool
   -> name:string option
   -> Symbolic.modul
-  -> Link.state Result.t
+  -> Value.Func.extern_func Link.state Result.t

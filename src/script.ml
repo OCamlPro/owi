@@ -113,7 +113,7 @@ let value_of_const : Symbolic.const -> 'env Value.t Result.t = function
     Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;
     ok @@ Value.I32 (Int32.of_int 666)
 
-let action (link_state : Link.state) = function
+let action (link_state : Value.Func.extern_func Link.state) = function
   | Symbolic.Invoke (mod_id, f, args) -> begin
     (*
     Log.debug "invoke %a %s %a...@\n"
@@ -124,7 +124,7 @@ let action (link_state : Link.state) = function
     let* f = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
-    Interpret.exec_vfunc stack f
+    Interpret.exec_vfunc stack link_state.collection f
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";
@@ -134,6 +134,7 @@ let action (link_state : Link.state) = function
 let run ~with_exhaustion ~optimize script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
+      ~func_typ:Value.Func.extern_type
       Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
@@ -141,7 +142,7 @@ let run ~with_exhaustion ~optimize script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : Link.state) -> function
+    (fun (link_state : Value.Func.extern_func Link.state) -> function
       | Symbolic.Module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";

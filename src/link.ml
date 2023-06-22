@@ -9,7 +9,7 @@ type global = Env.t' Global.t
 
 type table = Env.t' Table.t
 
-type func = (Env.t', Value.Func.extern_func) Value.Func.t
+type func = (Env.t', Func_id.t) Value.Func.t
 
 type exports =
   { globals : Env.t' Global.t StringMap.t
@@ -25,16 +25,21 @@ type module_to_run =
   ; to_run : expr list
   }
 
-type state =
+type 'f state =
   { by_name : exports StringMap.t
   ; by_id : exports StringMap.t
   ; last : exports option
+  ; collection : 'f Func_id.collection
   }
 
-type extern_module = { functions : (string * Value.Func.extern_func) list }
+type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 
 let empty_state =
-  { by_name = StringMap.empty; by_id = StringMap.empty; last = None }
+  { by_name = StringMap.empty
+  ; by_id = StringMap.empty
+  ; last = None
+  ; collection = Func_id.empty
+  }
 
 let load_from_module ls f (import : _ Imported.t) =
   match StringMap.find import.modul ls.by_name with
@@ -48,8 +53,8 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error "unknown import"
     | v -> Ok v )
 
-let load_global (ls : state) (import : global_type Imported.t) : global Result.t
-    =
+let load_global (ls : 'f state) (import : global_type Imported.t) :
+  global Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
@@ -101,7 +106,8 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : state) (import : limits Imported.t) : Memory.t Result.t =
+let load_memory (ls : 'f state) (import : limits Imported.t) : Memory.t Result.t
+    =
   let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
   let imported_limit = Memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
@@ -126,7 +132,8 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : state) (import : table_type Imported.t) : table Result.t =
+let load_table (ls : 'f state) (import : table_type Imported.t) : table Result.t
+    =
   let typ : table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
@@ -156,10 +163,14 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : state) (import : func_type Imported.t) : func Result.t =
+let load_func (ls : 'f state) (import : func_type Imported.t) : func Result.t =
   let typ : func_type = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
-  let type' = Value.Func.typ func in
+  let type' =
+    match func with
+    | Func_intf.WASM (_, func, _) -> func.type_f
+    | Extern func_id -> Func_id.get_typ func_id ls.collection
+  in
   if func_types_are_compatible typ type' then Ok func
   else Error "incompatible import type (Link.load_func)"
 
@@ -275,7 +286,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
   let* functions, names = fill_exports Env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let modul (ls : state) ~name (modul : modul) =
+let modul (ls : 'f state) ~name (modul : modul) =
   Log.debug "linking      ...@\n";
   let exception E of string in
   let raise_on_error = function Ok v -> v | Error msg -> raise (E msg) in
@@ -301,7 +312,7 @@ let modul (ls : state) ~name (modul : modul) =
         (let env, _init_active_data, _init_active_elem =
            Lazy.force env_and_init_active_data_and_elem
          in
-         Env.freeze env )
+         Env.freeze env ls.collection )
     in
     try
       let env = Lazy.force finished_env in
@@ -326,14 +337,22 @@ let modul (ls : state) ~name (modul : modul) =
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
   let module_to_run = { modul; env; to_run } in
-  Ok (module_to_run, { by_id; by_name; last = Some by_id_exports })
+  Ok
+    ( module_to_run
+    , { by_id; by_name; last = Some by_id_exports; collection = ls.collection }
+    )
 
-let extern_module (ls : state) ~name (module_ : extern_module) =
-  let functions =
-    StringMap.map
-      (fun f -> Func_intf.Extern f)
-      (StringMap.of_seq (List.to_seq module_.functions))
+let extern_module (ls : 'f state) ~name ~(func_typ : 'f -> Simplified.func_type)
+  (module_ : 'f extern_module) =
+  let functions, collection =
+    List.fold_left
+      (fun (functions, collection) (name, func) ->
+        let typ = func_typ func in
+        let id, collection = Func_id.add func typ collection in
+        ((name, Func_intf.Extern id) :: functions, collection) )
+      ([], ls.collection) module_.functions
   in
+  let functions = StringMap.of_seq (List.to_seq functions) in
   let defined_names =
     StringMap.fold
       (fun name _ set -> StringSet.add name set)
@@ -347,9 +366,10 @@ let extern_module (ls : state) ~name (module_ : extern_module) =
     ; defined_names
     }
   in
-  { ls with by_name = StringMap.add name exports ls.by_name }
+  { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
-let register_module (ls : state) ~name ~(id : string option) : state Result.t =
+let register_module (ls : 'f state) ~name ~(id : string option) :
+  'f state Result.t =
   let* exports =
     match id with
     | Some id -> begin
@@ -363,3 +383,5 @@ let register_module (ls : state) ~name ~(id : string option) : state Result.t =
       | None -> Error "No previous module to register" )
   in
   Ok { ls with by_name = StringMap.add name exports ls.by_name }
+
+type extern_func = Value.Func.extern_func Func_id.collection
