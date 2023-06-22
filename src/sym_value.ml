@@ -339,6 +339,8 @@ module Symbolic = struct
     let convert_i64_u _ = assert false
 
     let demote_f64 _ = assert false
+
+    let reinterpret_i32 _ = assert false
   end
 
   module F64 = struct
@@ -401,6 +403,8 @@ module Symbolic = struct
     let convert_i64_u _ = assert false
 
     let promote_f32 _ = assert false
+
+    let reinterpret_i64 _ = assert false
   end
 end
 

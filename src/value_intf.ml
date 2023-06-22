@@ -198,6 +198,8 @@ module type T = sig
          and type int64 := int64
 
     val demote_f64 : float64 -> float32
+
+    val reinterpret_i32 : int32 -> float32
   end
 
   module F64 : sig
@@ -209,6 +211,8 @@ module type T = sig
          and type int64 := int64
 
     val promote_f32 : float32 -> float64
+
+    val reinterpret_i64 : int64 -> float64
   end
 
   module I32 : sig
