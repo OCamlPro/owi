@@ -58,8 +58,8 @@ module Symbolic = struct
     let and_ = Boolean.mk_and
 
     let int32 = function
-      | Expr.Val (Bool b) -> if b then mk_i32 0l else mk_i32 1l
-      | e -> Boolean.mk_ite e (mk_i32 0l) (mk_i32 1l)
+      | Expr.Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
+      | e -> Boolean.mk_ite e (mk_i32 1l) (mk_i32 0l)
   end
 
   module I32 = struct
