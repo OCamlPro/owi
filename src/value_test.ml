@@ -40,6 +40,7 @@ module V :
   module I32 = struct
     include Int32
     include Convert.Int32
+    let to_bool i = not (Int32.eq_const i 0l)
   end
 
   module I64 = struct

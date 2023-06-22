@@ -45,7 +45,7 @@
   script
   simplified
   simplified_types
-  sym_memory
+  ;sym_memory
   spectest
   stack
   string_map

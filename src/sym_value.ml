@@ -43,15 +43,17 @@ module Symbolic = struct
 
   module Bool = struct
     let not = Boolean.mk_not
-
-    let int32 v = Boolean.mk_ite v (mk_i32 0l) (mk_i32 1l)
-
     let or_ = Boolean.mk_or
-
     let and_ = Boolean.mk_and
+
+    let int32 = function
+      | Expr.Val (Bool b) -> if b then (mk_i32 0l) else (mk_i32 1l)
+      | e -> Boolean.mk_ite e (mk_i32 0l) (mk_i32 1l)
+
   end
 
   module I32 = struct
+    open Expr
     type num = Expr.t
 
     type vbool = Expr.t
@@ -62,65 +64,85 @@ module Symbolic = struct
 
     type nonrec float64 = float64
 
+    let unop op e =
+      match e with
+      | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
+      | e' -> Unop (op, e')
+
+    let binop op e1 e2  =
+      match (e1, e2) with
+      | Val (Num i1), Val (Num i2) ->
+          Val (Num (Eval_numeric.eval_binop op i1 i2))
+      | Val (Bool _), Val (Bool _) -> assert false
+      | e1', e2' -> Binop (op, e1', e2')
+
+    let relop op e1 e2  =
+      match (e1, e2) with
+      | Val (Num i1), Val (Num i2) ->
+          Val (Bool (Eval_numeric.eval_relop op i1 i2))
+      | e1', e2' -> Relop (op, e1', e2')
+
     let zero = mk_i32 0l
 
-    let clz e = BitVector.mk_clz e `I32Type
+    let clz e = unop (I32 Clz) e
 
     let ctz _ = failwith "i32_ctz: TODO"
 
     let popcnt _ = failwith "i32_popcnt: TODO"
 
-    let add e1 e2 = BitVector.mk_add e1 e2 `I32Type
+    let add e1 e2 = binop (I32 Add) e1 e2
 
-    let sub e1 e2 = BitVector.mk_sub e1 e2 `I32Type
+    let sub e1 e2 = binop (I32 Sub) e1 e2
 
-    let mul e1 e2 = BitVector.mk_mul e1 e2 `I32Type
+    let mul e1 e2 = binop (I32 Mul) e1 e2
 
-    let div e1 e2 = BitVector.mk_div_s e1 e2 `I32Type
+    let div e1 e2 = binop (I32 DivS) e1 e2
 
-    let unsigned_div e1 e2 = BitVector.mk_div_u e1 e2 `I32Type
+    let unsigned_div e1 e2 = binop (I32 DivU) e1 e2
 
-    let rem e1 e2 = BitVector.mk_rem_s e1 e2 `I32Type
+    let rem e1 e2 = binop (I32 RemS) e1 e2
 
-    let unsigned_rem e1 e2 = BitVector.mk_rem_u e1 e2 `I32Type
+    let unsigned_rem e1 e2 = binop (I32 RemU) e1 e2
 
-    let logand e1 e2 = BitVector.mk_and e1 e2 `I32Type
+    let logand e1 e2 = binop (I32 And) e1 e2
 
-    let logor e1 e2 = BitVector.mk_or e1 e2 `I32Type
+    let logor e1 e2 = binop (I32 Or) e1 e2
 
-    let logxor e1 e2 = BitVector.mk_xor e1 e2 `I32Type
+    let logxor e1 e2 = binop (I32 Xor) e1 e2
 
-    let shl e1 e2 = BitVector.mk_shl e1 e2 `I32Type
+    let shl e1 e2 = binop (I32 Shl) e1 e2
 
-    let shr_s e1 e2 = BitVector.mk_shr_s e1 e2 `I32Type
+    let shr_s e1 e2 = binop (I32 ShrS) e1 e2
 
-    let shr_u e1 e2 = BitVector.mk_shr_u e1 e2 `I32Type
+    let shr_u e1 e2 = binop (I32 ShrU) e1 e2
 
-    let rotl e1 e2 = BitVector.mk_rotl e1 e2 `I32Type
+    let rotl e1 e2 = binop (I32 Rotl) e1 e2
 
-    let rotr e1 e2 = BitVector.mk_rotr e1 e2 `I32Type
+    let rotr e1 e2 = binop (I32 Rotr) e1 e2
 
-    let eq_const e c = BitVector.mk_eq e (mk_i32 c) `I32Type
+    let eq_const e c = relop (I32 Eq) e (Val (Num (I32 c)))
 
-    let eq e1 e2 = BitVector.mk_eq e1 e2 `I32Type
+    let eq e1 e2 = relop (I32 Eq) e1 e2
 
-    let ne e1 e2 = BitVector.mk_ne e1 e2 `I32Type
+    let ne e1 e2 = relop (I32 Ne) e1 e2
 
-    let lt e1 e2 = BitVector.mk_lt_s e1 e2 `I32Type
+    let lt e1 e2 = relop (I32 LtS) e1 e2
 
-    let gt e1 e2 = BitVector.mk_gt_s e1 e2 `I32Type
+    let gt e1 e2 = relop (I32 GtS) e1 e2
 
-    let lt_u e1 e2 = BitVector.mk_lt_u e1 e2 `I32Type
+    let lt_u e1 e2 = relop (I32 LtU) e1 e2
 
-    let gt_u e1 e2 = BitVector.mk_gt_u e1 e2 `I32Type
+    let gt_u e1 e2 = relop (I32 GtU) e1 e2
 
-    let le e1 e2 = BitVector.mk_le_s e1 e2 `I32Type
+    let le e1 e2 = relop (I32 LeS) e1 e2
 
-    let ge e1 e2 = BitVector.mk_ge_s e1 e2 `I32Type
+    let ge e1 e2 = relop (I32 GeS) e1 e2
 
-    let le_u e1 e2 = BitVector.mk_le_u e1 e2 `I32Type
+    let le_u e1 e2 = relop (I32 LeU) e1 e2
 
-    let ge_u e1 e2 = BitVector.mk_ge_u e1 e2 `I32Type
+    let ge_u e1 e2 = relop (I32 GeU) e1 e2
+
+    let to_bool e = relop (I32 Ne) e (mk_i32 0l)
 
     let trunc_f32_s _ = assert false
 
@@ -140,6 +162,7 @@ module Symbolic = struct
   end
 
   module I64 = struct
+    open Expr
     type num = Expr.t
 
     type vbool = Expr.t
@@ -150,65 +173,83 @@ module Symbolic = struct
 
     type nonrec float64 = float64
 
+    let unop op e =
+      match e with
+      | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
+      | e' -> Unop (op, e')
+
+    let binop op e1 e2  =
+      match (e1, e2) with
+      | Val (Num i1), Val (Num i2) ->
+          Val (Num (Eval_numeric.eval_binop op i1 i2))
+      | Val (Bool _), Val (Bool _) -> assert false
+      | e1', e2' -> Binop (op, e1', e2')
+
+    let relop op e1 e2  =
+      match (e1, e2) with
+      | Val (Num i1), Val (Num i2) ->
+          Val (Bool (Eval_numeric.eval_relop op i1 i2))
+      | e1', e2' -> Relop (op, e1', e2')
+
     let zero = mk_i64 0L
 
-    let clz e = BitVector.mk_clz e `I64Type
+    let clz e = unop (I64 Clz) e
 
     let ctz _ = failwith "i64_ctz: TODO"
 
     let popcnt _ = failwith "i64_popcnt: TODO"
 
-    let add e1 e2 = BitVector.mk_add e1 e2 `I64Type
+    let add e1 e2 = binop (I64 Add) e1 e2
 
-    let sub e1 e2 = BitVector.mk_sub e1 e2 `I64Type
+    let sub e1 e2 = binop (I64 Sub) e1 e2
 
-    let mul e1 e2 = BitVector.mk_mul e1 e2 `I64Type
+    let mul e1 e2 = binop (I64 Mul) e1 e2
 
-    let div e1 e2 = BitVector.mk_div_s e1 e2 `I64Type
+    let div e1 e2 = binop (I64 DivS) e1 e2
 
-    let unsigned_div e1 e2 = BitVector.mk_div_u e1 e2 `I64Type
+    let unsigned_div e1 e2 = binop (I64 DivU) e1 e2
 
-    let rem e1 e2 = BitVector.mk_rem_s e1 e2 `I64Type
+    let rem e1 e2 = binop (I64 RemS) e1 e2
 
-    let unsigned_rem e1 e2 = BitVector.mk_rem_u e1 e2 `I64Type
+    let unsigned_rem e1 e2 = binop (I64 RemU) e1 e2
 
-    let logand e1 e2 = BitVector.mk_and e1 e2 `I64Type
+    let logand e1 e2 = binop (I64 And) e1 e2
 
-    let logor e1 e2 = BitVector.mk_or e1 e2 `I64Type
+    let logor e1 e2 = binop (I64 Or) e1 e2
 
-    let logxor e1 e2 = BitVector.mk_xor e1 e2 `I64Type
+    let logxor e1 e2 = binop (I64 Xor) e1 e2
 
-    let shl e1 e2 = BitVector.mk_shl e1 e2 `I64Type
+    let shl e1 e2 = binop (I64 Shl) e1 e2
 
-    let shr_s e1 e2 = BitVector.mk_shr_s e1 e2 `I64Type
+    let shr_s e1 e2 = binop (I64 ShrS) e1 e2
 
-    let shr_u e1 e2 = BitVector.mk_shr_u e1 e2 `I64Type
+    let shr_u e1 e2 = binop (I64 ShrU) e1 e2
 
-    let rotl e1 e2 = BitVector.mk_rotl e1 e2 `I64Type
+    let rotl e1 e2 = binop (I64 Rotl) e1 e2
 
-    let rotr e1 e2 = BitVector.mk_rotr e1 e2 `I64Type
+    let rotr e1 e2 = binop (I64 Rotr) e1 e2
 
-    let eq_const e c = BitVector.mk_eq e (mk_i64 c) `I64Type
+    let eq_const e c = relop (I64 Eq) e (Val (Num (I64 c)))
 
-    let eq e1 e2 = BitVector.mk_eq e1 e2 `I64Type
+    let eq e1 e2 = relop (I64 Eq) e1 e2
 
-    let ne e1 e2 = BitVector.mk_ne e1 e2 `I64Type
+    let ne e1 e2 = relop (I64 Ne) e1 e2
 
-    let lt e1 e2 = BitVector.mk_lt_s e1 e2 `I64Type
+    let lt e1 e2 = relop (I64 LtS) e1 e2
 
-    let gt e1 e2 = BitVector.mk_gt_s e1 e2 `I64Type
+    let gt e1 e2 = relop (I64 GtS) e1 e2
 
-    let lt_u e1 e2 = BitVector.mk_lt_u e1 e2 `I64Type
+    let lt_u e1 e2 = relop (I64 LtU) e1 e2
 
-    let gt_u e1 e2 = BitVector.mk_gt_u e1 e2 `I64Type
+    let gt_u e1 e2 = relop (I64 GtU) e1 e2
 
-    let le e1 e2 = BitVector.mk_le_s e1 e2 `I64Type
+    let le e1 e2 = relop (I64 LeS) e1 e2
 
-    let ge e1 e2 = BitVector.mk_ge_s e1 e2 `I64Type
+    let ge e1 e2 = relop (I64 GeS) e1 e2
 
-    let le_u e1 e2 = BitVector.mk_le_u e1 e2 `I64Type
+    let le_u e1 e2 = relop (I64 LeU) e1 e2
 
-    let ge_u e1 e2 = BitVector.mk_ge_u e1 e2 `I64Type
+    let ge_u e1 e2 = relop (I64 GeU) e1 e2
 
     let of_int32 e = Expr.Cvtop (Types.I64 Types.I32.ExtendSI32, e)
 

@@ -189,6 +189,8 @@ module type T = sig
          and type const := Int32.t
          and type float32 := float32
          and type float64 := float64
+
+    val to_bool : int32 -> vbool
   end
 
   module I64 : sig
