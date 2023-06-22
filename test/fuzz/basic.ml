@@ -478,11 +478,14 @@ let expr_call (env : Env.t) (stack : val_type list) =
     env.funcs
 
 let expr_br_if (env : Env.t) (stack : val_type list) =
+  match stack with
+  | [] -> []
+  | _hd::tl ->
   List.filter_map
     (fun (name, bt) ->
       match bt with
       | Arg.Bt_raw (_, (_pt, rt))
-        when S.is_stack_compatible (List.tl stack) (List.rev rt) ->
+        when S.is_stack_compatible tl (List.rev rt) ->
         Some
           (pair
              (const (Br_if (Symbolic name)))
