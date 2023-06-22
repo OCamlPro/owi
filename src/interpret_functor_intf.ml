@@ -46,7 +46,7 @@ module type P = sig
 
   type memory
 
-  type 'env func
+  type func
 
   type 'env table
 
@@ -158,7 +158,7 @@ module type P = sig
 
     val get_memory : t -> int -> Memory.t Result.t
 
-    val get_func : t -> int -> (t', Func_id.t) Func_intf.t Result.t
+    val get_func : t -> int -> Func_intf.t Result.t
 
     val get_table : t -> int -> t' Table.t Result.t
 

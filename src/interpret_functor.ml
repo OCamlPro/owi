@@ -671,7 +671,7 @@ module Make (P : Intf.P) :
       }
 
   let exec_vfunc ~return (state : State.exec_state)
-    (func : (P.Env.t', Func_id.t) Func_intf.t) =
+    (func : Func_intf.t) =
     match func with
     | WASM (id, func, env_id) ->
       let env = Env_id.get env_id state.envs in

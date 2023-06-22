@@ -19,7 +19,7 @@ type t =
   { globals : t' Global.t IMap.t
   ; memories : Memory.t IMap.t
   ; tables : t' Table.t IMap.t
-  ; functions : (t', Func_id.t) Func_intf.t IMap.t
+  ; functions : Func_intf.t IMap.t
   ; data : data IMap.t
   ; elem : t' elem IMap.t
   ; extern_funcs : extern_funcs
@@ -29,7 +29,7 @@ let pp fmt t =
   let global fmt (id, (global : 'a Global.t)) =
     Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
   in
-  let func fmt (id, (_func : ('a, 'b) Value.Func.t)) =
+  let func fmt (id, (_func : Value.Func.t)) =
     Format.fprintf fmt "%a -> func" Format.pp_print_int id
   in
   Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
@@ -97,7 +97,7 @@ module Build = struct
     { globals : t' Global.t IMap.t
     ; memories : Memory.t IMap.t
     ; tables : t' Table.t IMap.t
-    ; functions : (t', Func_id.t) Func_intf.t IMap.t
+    ; functions : Func_intf.t IMap.t
     ; data : data IMap.t
     ; elem : t' elem IMap.t
     }
@@ -162,7 +162,7 @@ module type T = sig
 
   type data = { mutable value : string }
 
-  type func := (t', Func_id.t) Func_intf.t
+  type func := Func_intf.t
 
   val get_memory : t -> int -> Memory.t Result.t
 

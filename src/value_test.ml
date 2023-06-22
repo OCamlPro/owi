@@ -66,7 +66,7 @@ module P = struct
 
   type memory = Memory.t
 
-  type 'env func = ('env, Value.Func.extern_func) Value.Func.t
+  type func = Value.Func.t
 
   type 'env table = 'env Table.t
 

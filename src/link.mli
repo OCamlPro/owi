@@ -15,7 +15,7 @@ module StringMap : Map.S with type key = string
 
 module StringSet : Set.S
 
-type func := (Env.t', Func_id.t) Func_intf.t
+type func := Func_intf.t
 
 (** runtime exported items *)
 type exports =

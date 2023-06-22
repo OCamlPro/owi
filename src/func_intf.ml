@@ -46,16 +46,16 @@ module type T_Extern_func = sig
   val extern_type : extern_func -> Simplified.func_type
 end
 
-type ('env, 'extern) t =
+type t =
   | WASM of int * Simplified.func * Env_id.t
   | Extern of Func_id.t
 
 module type T = sig
   include T_Extern_func
 
-  type nonrec ('env, 'extern) t = ('env, 'extern) t
+  type nonrec t = t
 
   (* val typ : ('env, extern_func) t -> Simplified.func_type *)
 
-  val wasm : Simplified.func -> Env_id.t -> (Env_id.t, 'b) t
+  val wasm : Simplified.func -> Env_id.t -> t
 end

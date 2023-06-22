@@ -8,7 +8,7 @@ val exec_vfunc :
      Link.Env.t' Stack.t
   -> Link.envs
   -> Link.extern_func
-  -> (Link.Env.t', Func_id.t) Value.Func.t
+  -> Value.Func.t
   -> Link.Env.t' Stack.t Result.t
 
 val exec_iunop :

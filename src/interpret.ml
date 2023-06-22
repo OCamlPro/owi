@@ -610,7 +610,7 @@ let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
     ; count = enter_function_count state.count func.id id
     }
 
-let exec_vfunc ~return (state : State.exec_state) (func : (Env.t', Func_id.t) Value.Func.t) =
+let exec_vfunc ~return (state : State.exec_state) (func : Value.Func.t) =
   match func with
   | WASM (id, func, env_id) ->
     let env = Env_id.get env_id state.envs in
@@ -1204,7 +1204,7 @@ let exec_func envs (env_id : Env_id.t) (func : wasm_func) args =
     count.instructions;
   res
 
-let exec_vfunc stack envs collection (func : (Env.t', Func_id.t) Func_intf.t) =
+let exec_vfunc stack envs collection (func : Func_intf.t) =
   match
     match func with
     | WASM (_, func, env) -> exec_func envs env func stack

@@ -9,7 +9,7 @@ type global = Env_id.t Global.t
 
 type table = Env_id.t Table.t
 
-type func = (Env_id.t, Func_id.t) Value.Func.t
+type func = Value.Func.t
 
 type exports =
   { globals : Env_id.t Global.t StringMap.t

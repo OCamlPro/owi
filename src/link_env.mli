@@ -6,7 +6,7 @@ type 'env elem = { mutable value : 'env Value.ref_value array }
 
 type data = { mutable value : string }
 
-type func := (t', Func_id.t) Func_intf.t
+type func := Func_intf.t
 
 val get_memory : t -> int -> Memory.t Result.t
 
@@ -32,8 +32,6 @@ val pp : Format.formatter -> t -> unit
 
 module Build : sig
   type t
-
-  type func := (t', Func_id.t) Func_intf.t
 
   val empty : t
 
@@ -70,8 +68,6 @@ module type T = sig
   type 'env elem = { mutable value : 'env Value.ref_value array }
 
   type data = { mutable value : string }
-
-  type func := (t', Func_id.t) Func_intf.t
 
   val get_memory : t -> int -> Memory.t Result.t
 

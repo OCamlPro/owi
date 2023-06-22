@@ -74,7 +74,7 @@ module P = struct
 
   type extern_func = Extern_func.extern_func
 
-  type 'env func = ('env, extern_func) Def_value.Func.t
+  type func = Def_value.Func.t
 
   module Func = struct
       include Extern_func
