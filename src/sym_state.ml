@@ -31,7 +31,11 @@ module P = struct
 
   type float64 = Value.float64
 
-  type thread = Batch.t * Value.vbool list
+  type thread = {
+    solver :  Batch.t;
+    pc : Value.vbool list;
+    mem : memory
+  }
 
   module Choice_once = struct
     type 'a t = thread -> 'a * thread
@@ -44,7 +48,7 @@ module P = struct
       (f r) t
 
     let select (sym_bool : vbool) : bool t =
-     fun ((solver, path_condition) as pc) ->
+      fun ({solver; pc = path_condition; mem} as pc) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
       | Val (Bool b) -> (b, pc)
@@ -61,7 +65,7 @@ module P = struct
             else assert false
         in
         Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
-        (value, (solver, path_condition))
+        (value, { solver; pc = path_condition; mem})
 
     let select_i32 _sym_int = assert false
 
@@ -87,7 +91,7 @@ module P = struct
       List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
 
     let select (sym_bool : vbool) : bool t =
-     fun ((solver, path_condition) as pc) ->
+      fun ({solver; pc = path_condition; mem} as pc) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
       | Val (Bool b) -> [b, pc]
@@ -95,14 +99,14 @@ module P = struct
       | _ ->
         let cases =
           if Batch.check_sat solver (sym_bool :: path_condition) then
-            [true, (solver, sym_bool :: path_condition)]
+            [true, { solver; pc = sym_bool :: path_condition; mem }]
           else
             []
         in
         let cases =
           let no = Value.Bool.not sym_bool in
           if Batch.check_sat solver (no :: path_condition) then
-              (false, (solver, no :: path_condition)) :: cases
+            (false, { solver; pc = no :: path_condition; mem }) :: cases
           else cases
         in
         (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
