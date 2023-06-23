@@ -1252,19 +1252,21 @@ module Make (P : Intf.P) :
       let* data = P.Env.get_data env i in
       P.Env.drop_data data;
       st @@ stack
-    (*   | Br_table (inds, i) -> *)
-    (*     let target, stack = Stack.pop_i32_to_int stack in *)
-    (*     let target = *)
-    (*       if target < 0 || target >= Array.length inds then i else inds.(target) *)
-    (*     in *)
-    (*     let state = { state with stack } in *)
-    (*     State.branch state target *)
-    (*   | Call_indirect (tbl_i, typ_i) -> *)
-    (*     call_indirect ~return:false state (tbl_i, typ_i) *)
-    (*   | Return_call_indirect (tbl_i, typ_i) -> *)
-    (*     call_indirect ~return:true state (tbl_i, typ_i) *)
-    (*   | Call_ref typ_i -> call_ref ~return:false state typ_i *)
-    (*   | Return_call_ref typ_i -> call_ref ~return:true state typ_i *)
+    | Br_table (inds, i) ->
+      let target, stack = Stack.pop_i32 stack in
+      let/ target = Choice.select_i32 target in
+      let target = Stdlib.Int32.to_int target in
+      let target =
+        if target < 0 || target >= Array.length inds then i else inds.(target)
+      in
+      let state = { state with stack } in
+      State.branch state target
+      | Call_indirect (tbl_i, typ_i) ->
+        call_indirect ~return:false state (tbl_i, typ_i)
+      | Return_call_indirect (tbl_i, typ_i) ->
+        call_indirect ~return:true state (tbl_i, typ_i)
+      | Call_ref typ_i -> call_ref ~return:false state typ_i
+      | Return_call_ref typ_i -> call_ref ~return:true state typ_i
     (*   | Array_new _t -> *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let _default, stack = Stack.pop stack in *)
