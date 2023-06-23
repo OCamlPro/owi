@@ -40,15 +40,15 @@ module Symbolic = struct
   let ref_null _ = assert false
 
   let pp ppf v =
-    let e = match v with
-    | I32 e -> e
-    | I64 e -> e
-    | F32 e -> e
-    | F64 e -> e
-    | Ref _ -> assert false
+    let e =
+      match v with
+      | I32 e -> e
+      | I64 e -> e
+      | F32 e -> e
+      | F64 e -> e
+      | Ref _ -> assert false
     in
     Format.fprintf ppf "%s" (Encoding.Expression.to_string e)
-
 
   module Bool = struct
     let not = Boolean.mk_not
@@ -153,7 +153,15 @@ module Symbolic = struct
 
     let ge_u e1 e2 = relop (I32 GeU) e1 e2
 
-    let to_bool e = relop (I32 Ne) e (mk_i32 0l)
+    let to_bool (e : vbool) =
+      match e with
+      | Expr.Triop
+          ( Bool Encoding.Types.B.ITE
+          , cond
+          , Val (Num (I32 1l))
+          , Val (Num (I32 0l)) ) ->
+        cond
+      | e -> relop (I32 Ne) e (mk_i32 0l)
 
     let trunc_f32_s _ = assert false
 

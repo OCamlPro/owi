@@ -1,7 +1,7 @@
 open Owi
 open Syntax
 
-let extern_module : Sym_state.P.extern_func Link.extern_module =
+let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   let print_i32 (i : Sym_value.Symbolic.int32) =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i)
   in
@@ -14,13 +14,27 @@ let extern_module : Sym_state.P.extern_func Link.extern_module =
   in
   { functions }
 
+let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
+  let symbolic_i32 (_i : Sym_value.Symbolic.int32) : Sym_value.Symbolic.int32 =
+    Encoding.Expression.mk_symbol_s `I32Type "x"
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "i32"
+      , Sym_state.P.Extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), symbolic_i32))
+    ]
+  in
+  { functions }
+
 let simplify_then_link_then_run ~optimize pc file =
   let link_state = Link.empty_state in
   let link_state =
-    Link.extern_module' link_state
-      ~name:"print"
-      ~func_typ:Sym_state.P.Extern_func.extern_type
-      extern_module
+    Link.extern_module' link_state ~name:"print"
+      ~func_typ:Sym_state.P.Extern_func.extern_type print_extern_module
+  in
+  let link_state =
+    Link.extern_module' link_state ~name:"symbolic"
+      ~func_typ:Sym_state.P.Extern_func.extern_type symbolic_extern_module
   in
   let* to_run, link_state =
     list_fold_left
