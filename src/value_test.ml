@@ -105,7 +105,7 @@ module P = struct
     let trap msg = raise (Types.Trap msg)
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
-      | Out_of_bound_memory_access -> trap "out of bounds memory access"
+      | Out_of_bounds_memory_access -> trap "out of bounds memory access"
       | Integer_overflow -> trap "integer overflow"
       | Integer_divide_by_zero -> trap "integer divide by zero"
       | Unreachable -> trap "unreachable"

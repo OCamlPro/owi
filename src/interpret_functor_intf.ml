@@ -1,5 +1,5 @@
 type trap =
-  | Out_of_bound_memory_access
+  | Out_of_bounds_memory_access
   | Integer_overflow
   | Integer_divide_by_zero
   | Unreachable

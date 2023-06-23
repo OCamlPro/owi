@@ -31,11 +31,11 @@ module P = struct
 
   type float64 = Value.float64
 
-  type thread = {
-    solver :  Batch.t;
-    pc : Value.vbool list;
-    mem : memory
-  }
+  type thread =
+    { solver : Batch.t
+    ; pc : Value.vbool list
+    ; mem : memory
+    }
 
   module Choice_once = struct
     type 'a t = thread -> 'a * thread
@@ -48,7 +48,7 @@ module P = struct
       (f r) t
 
     let select (sym_bool : vbool) : bool t =
-      fun ({solver; pc = path_condition; mem} as pc) ->
+     fun ({ solver; pc = path_condition; mem } as pc) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
       | Val (Bool b) -> (b, pc)
@@ -65,14 +65,14 @@ module P = struct
             else assert false
         in
         Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
-        (value, { solver; pc = path_condition; mem})
+        (value, { solver; pc = path_condition; mem })
 
     let select_i32 _sym_int = assert false
 
     let get : thread t = fun t -> (t, t)
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
-      | Out_of_bound_memory_access -> assert false
+      | Out_of_bounds_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
       | Unreachable -> assert false
@@ -91,17 +91,16 @@ module P = struct
       List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
 
     let select (sym_bool : vbool) : bool t =
-      fun ({solver; pc = path_condition; mem} as pc) ->
+     fun ({ solver; pc = path_condition; mem } as pc) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
-      | Val (Bool b) -> [b, pc]
+      | Val (Bool b) -> [ (b, pc) ]
       | Val (Num (I32 _)) -> assert false
       | _ ->
         let cases =
           if Batch.check_sat solver (sym_bool :: path_condition) then
-            [true, { solver; pc = sym_bool :: path_condition; mem }]
-          else
-            []
+            [ (true, { solver; pc = sym_bool :: path_condition; mem }) ]
+          else []
         in
         let cases =
           let no = Value.Bool.not sym_bool in
@@ -123,13 +122,13 @@ module P = struct
 
     let select_i32 _sym_int = assert false
 
-    let get : thread t = fun t -> [t, t]
+    let get : thread t = fun t -> [ (t, t) ]
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
-      | Out_of_bound_memory_access -> assert false
+      | Out_of_bounds_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
-      | Unreachable -> (fun _ -> [])
+      | Unreachable -> fun _ -> []
 
     (* raise (Types.Trap "out of bounds memory access") *)
   end
