@@ -739,7 +739,7 @@ module Make (P : Intf.P) :
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
-    | Unreachable -> trap "unreachable"
+    | Unreachable -> Choice.trap Unreachable
     | I32_const n -> st @@ Stack.push_const_i32 stack n
     | I64_const n -> st @@ Stack.push_const_i64 stack n
     | F32_const f -> st @@ Stack.push_const_f32 stack f

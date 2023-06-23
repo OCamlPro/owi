@@ -108,6 +108,7 @@ module P = struct
       | Out_of_bound_memory_access -> trap "out of bounds memory access"
       | Integer_overflow -> trap "integer overflow"
       | Integer_divide_by_zero -> trap "integer divide by zero"
+      | Unreachable -> trap "unreachable"
   end
 
   module Extern_func = Value.Func

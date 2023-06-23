@@ -71,6 +71,7 @@ module P = struct
       | Out_of_bound_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
+      | Unreachable -> assert false
 
     (* raise (Types.Trap "out of bounds memory access") *)
   end
@@ -116,6 +117,7 @@ module P = struct
       | Out_of_bound_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
+      | Unreachable -> (fun _ -> [])
 
     (* raise (Types.Trap "out of bounds memory access") *)
   end

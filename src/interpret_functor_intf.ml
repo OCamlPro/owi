@@ -2,6 +2,7 @@ type trap =
   | Out_of_bound_memory_access
   | Integer_overflow
   | Integer_divide_by_zero
+  | Unreachable
 
 module type Memory_data = sig
   type int32
