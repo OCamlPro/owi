@@ -1,49 +1,73 @@
+exception Timeout
+
 let () = Random.self_init ()
+
+let timeout_call_run (run : 'a -> unit Owi.Result.t) (m : 'a) =
+  let () = Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Timeout)) in
+  let (_ : Unix.interval_timer_status) =
+    Unix.setitimer Unix.ITIMER_REAL { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
+  in
+  try Some (run m) with
+  | Timeout -> None
 
 let check_optimized m =
   let open Interprets in
   let result_unoptimized =
     let open Owi_unoptimized in
-    of_symbolic m |> run
+    timeout_call_run run (of_symbolic m)
   in
   let result_optimized =
     let open Owi_optimized in
-    of_symbolic m |> run
+    timeout_call_run run (of_symbolic m)
   in
   let result_reference () =
     let open Reference in
-    of_symbolic m |> run
+    timeout_call_run run (of_symbolic m)
   in
   let result1 =
     match (result_unoptimized, result_optimized) with
-    | Ok (), Ok () -> true
-    | Error msg1, Error msg2 when msg1 = msg2 -> true
-    | Error msg1, Error msg2 ->
+    | None, None -> print_endline "Timeout!"; true
+    | Some Ok (), Some Ok () -> true
+    | Some Error msg1, Some Error msg2 when msg1 = msg2 -> true
+    | Some Error msg1, Some Error msg2 ->
       Format.ksprintf failwith
         "unoptimized module and optimized module interpretations throw \
          different errors: %s / opti: %s"
         msg1 msg2
-    | Error msg, Ok () ->
+    | Some Error msg, Some Ok () ->
       Format.ksprintf failwith
         "only unoptimized module interpretation throws an error: %s" msg
-    | Ok (), Error msg ->
+    | Some Ok (), Some Error msg ->
       Format.ksprintf failwith
         "only optimized module interpretation throws an error: %s" msg
+    | None, Some _ -> 
+      Format.ksprintf failwith
+        "only unoptimized module interpretation throws a timeout error"
+    | Some _, None ->
+      Format.ksprintf failwith
+        "only optimized module interpretation throws a timeout error"
   in
   let result2 =
     (not Param.reference_fuzzing)
     ||
     match (result_unoptimized, result_reference ()) with
-    | Ok (), Ok () -> true
-    | Error _msg1, Error _msg2 ->
+    | None, None -> print_endline "Timeout!"; true
+    | Some Ok (), Some Ok () -> true
+    | Some Error _msg1, Some Error _msg2 ->
       (* TODO: parse the output of result_reference to check that the error are the same*)
       true
-    | Error msg, Ok () ->
+    | Some Error msg, Some Ok () ->
       Format.ksprintf failwith
         "only unoptimized module interpretation throws an error: %s" msg
-    | Ok (), Error msg ->
+    | Some Ok (), Some Error msg ->
       Format.ksprintf failwith
         "only reference module interpretation throws an error: %s" msg
+    | None, Some _ -> 
+      Format.ksprintf failwith
+        "only unoptimized module interpretation throws a timeout error"
+    | Some _, None ->
+      Format.ksprintf failwith
+        "only optimized module interpretation throws a timeout error"
   in
   result1 && result2
 
