@@ -150,6 +150,8 @@ module type Fop = sig
   val convert_i64_u : int64 -> num
 
   val of_bits : same_size_int -> num
+
+  val to_bits : num -> same_size_int
 end
 
 module type T = sig

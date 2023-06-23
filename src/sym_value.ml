@@ -372,6 +372,8 @@ module Symbolic = struct
     let reinterpret_i32 _ = assert false
 
     let of_bits _ = assert false
+
+    let to_bits _ = assert false
   end
 
   module F64 = struct
@@ -440,6 +442,8 @@ module Symbolic = struct
     let reinterpret_i64 _ = assert false
 
     let of_bits _ = assert false
+
+    let to_bits _ = assert false
   end
 end
 
