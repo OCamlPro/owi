@@ -111,6 +111,14 @@ module P = struct
         in
         (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
         (* (value, (solver, path_condition)) *)
+        let cases =
+          match cases with
+          | [] | [ _ ] -> cases
+          | lst ->
+              List.map (fun (b, r) ->
+                (b, { r with mem = Sym_memory.Memory.clone r.mem }))
+                lst
+        in
         cases
 
     let select_i32 _sym_int = assert false

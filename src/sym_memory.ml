@@ -23,6 +23,8 @@ module Memory = struct
   let size (m : t) : int32 =
   Val (Num (I32 (Int32.of_int (Hashtbl.length m.map))))
 
+  let clone (m : t) : t =  { map = Hashtbl.create 0; parent = Some m }
+
   let size_in_pages (m : t) : int32 = size m
 
   let concretize_addr (a : int32) : Int32.t =
