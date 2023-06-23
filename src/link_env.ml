@@ -89,8 +89,7 @@ let get_extern_func env id = Func_id.get id env.extern_funcs
 let get_func_typ env f =
   match f with
   | Func_intf.WASM (_, func, _) -> func.type_f
-  | Extern id ->
-    Func_id.get_typ id env.extern_funcs
+  | Extern id -> Func_id.get_typ id env.extern_funcs
 
 module Build = struct
   type t =
@@ -146,7 +145,6 @@ module Build = struct
       (* Log.debug "%a@." pp env; *)
       error_s "unknown function %a" Format.pp_print_int id
     | Some v -> Ok v
-
 end
 
 module type T = sig
@@ -193,10 +191,14 @@ module type P = sig
   module V : Intf.V
 
   val const_i32 : Int32.t -> V.int32
+
   val const_i64 : Int64.t -> V.int64
+
   val const_f32 : Float32.t -> V.float32
+
   val const_f64 : Float64.t -> V.float64
 end
 
-let freeze (Build.{ globals; memories; tables; functions; data; elem }) extern_funcs =
+let freeze Build.{ globals; memories; tables; functions; data; elem }
+  extern_funcs =
   { globals; memories; tables; functions; data; elem; extern_funcs }

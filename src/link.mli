@@ -67,7 +67,7 @@ val extern_module' :
   -> 'f state
 
 val extern_module :
-  Value.Func.extern_func state
+     Value.Func.extern_func state
   -> name:string
   -> Value.Func.extern_func extern_module
   -> Value.Func.extern_func state
