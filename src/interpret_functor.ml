@@ -519,7 +519,22 @@ module Make (P : Intf.P) :
 
     type value = P.Value.t
 
-    type locals = value array
+    module Locals : sig
+      type t
+      val of_list : value list -> t
+      val get : t -> int -> value
+      val set : t -> int -> value -> t
+    end = struct
+      type t = value array
+      let of_list = Array.of_list
+      let get t i = t.(i)
+      let set t i v =
+        let locals = Array.copy t in
+        locals.(i) <- v;
+        locals
+    end
+
+    type locals = Locals.t
 
     type pc = instr list
 
@@ -659,7 +674,7 @@ module Make (P : Intf.P) :
       if return then state.return_state else Some { state with stack }
     in
     let locals =
-      Array.of_list @@ List.rev args @ List.map init_local func.locals
+      State.Locals.of_list @@ List.rev args @ List.map init_local func.locals
     in
     State.
       { stack = []
@@ -810,11 +825,11 @@ module Make (P : Intf.P) :
     (*     let* f = Env.get_func env i in *)
     (*     st @@ Stack.push stack (Value.ref_func f) *)
     | Drop -> st @@ Stack.drop stack
-    | Local_get i -> st @@ Stack.push stack locals.(i)
+    | Local_get i -> st @@ Stack.push stack (State.Locals.get locals i)
     | Local_set i ->
       let v, stack = Stack.pop stack in
-      locals.(i) <- v;
-      st @@ stack
+      let locals = State.Locals.set locals i v in
+      Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
       let/ b, stack = pop_choice stack in
       let state = { state with stack } in
@@ -906,8 +921,9 @@ module Make (P : Intf.P) :
       st @@ Stack.push stack (if b then o1 else o2)
     | Local_tee i ->
       let v, stack = Stack.pop stack in
-      locals.(i) <- v;
-      st @@ Stack.push stack v
+      let locals = State.Locals.set locals i v in
+      let stack = Stack.push stack v in
+      Choice.return (State.Continue { state with locals; stack })
     | Global_get i ->
       let* g = P.Env.get_global env i in
       st @@ Stack.push stack (P.Global.value g)
@@ -1338,7 +1354,7 @@ module Make (P : Intf.P) :
           let/ () = u in
           let/ end_stack, count =
             let env = P.Module_to_run.env modul in
-            exec_expr envs env [||] Stack.empty to_run None
+            exec_expr envs env (State.Locals.of_list []) Stack.empty to_run None
           in
           Log.profile "Exec module %s@.%a@."
             (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")
