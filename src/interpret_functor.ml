@@ -16,7 +16,7 @@ module Make (P : Intf.P) :
   module Float32 = P.Value.F32
   module Float64 = P.Value.F64
   module Extern_func = P.Extern_func
-  module Stack = Stack_functor.Make (P.Value)
+  module Stack = Stack_functor.Make (P.Value) [@@inlined hint]
   module Choice = P.Choice
   module Global = P.Global
   module Memory = P.Memory

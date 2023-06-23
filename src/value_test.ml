@@ -92,13 +92,13 @@ module P = struct
   module Choice = struct
     type 'a t = 'a
 
-    let return = Fun.id
+    let return x = x [@@inline]
 
-    let bind = ( |> )
+    let bind x f = f x [@@inline]
 
-    let select b = b
+    let select b = b [@@inline]
 
-    let select_i32 i = i
+    let select_i32 i = i [@@inline]
 
     let get = ()
 
