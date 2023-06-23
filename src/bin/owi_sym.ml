@@ -14,14 +14,26 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   in
   { functions }
 
+let names = [| "plop"; "foo"; "bar" |]
+
 let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let symbolic_i32 (_i : Sym_value.Symbolic.int32) : Sym_value.Symbolic.int32 =
-    Encoding.Expression.mk_symbol_s `I32Type "x"
+  let symbolic_i32 (i : Sym_value.Symbolic.int32) : Sym_value.Symbolic.int32 =
+    let name =
+      match i with
+      | Encoding.Expression.Val (Num (I32 i)) -> begin
+        match names.(Int32.to_int i) with exception _ -> "x" | name -> name
+      end
+      | _ ->
+        failwith
+          (Printf.sprintf "Symbolic name %s" (Encoding.Expression.to_string i))
+    in
+    Encoding.Expression.mk_symbol_s `I32Type name
   in
   (* we need to describe their types *)
   let functions =
     [ ( "i32"
-      , Sym_state.P.Extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), symbolic_i32))
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ]
   in
   { functions }
