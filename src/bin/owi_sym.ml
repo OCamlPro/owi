@@ -17,6 +17,7 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
 let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
+  let counter = ref 0 in
   let symbolic_i32 (i : Sym_value.Symbolic.int32) : Sym_value.Symbolic.int32 =
     let name =
       match i with
@@ -27,7 +28,9 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
         failwith
           (Printf.sprintf "Symbolic name %s" (Encoding.Expression.to_string i))
     in
-    Encoding.Expression.mk_symbol_s `I32Type name
+    incr counter;
+    Encoding.Expression.mk_symbol_s `I32Type
+      (Printf.sprintf "%s_%i" name !counter)
   in
   (* we need to describe their types *)
   let functions =
@@ -64,16 +67,27 @@ let simplify_then_link_then_run ~optimize pc file =
   in
   let f pc to_run =
     let c = (Interpret2.S.modul link_state.envs) to_run in
-    match c pc with Ok (), pc -> Ok pc | Error _, _ -> assert false
+    let results = List.flatten @@ List.map c pc in
+    let results =
+      List.map (function Ok (), t -> t | Error _, _ -> assert false) results
+    in
+    Ok results
   in
-  list_fold_left f pc (List.rev to_run)
+  list_fold_left f [ pc ] (List.rev to_run)
 
-let run_file ~optimize pc filename =
+let run_file ~optimize (pc : _ list) filename =
   if not @@ Sys.file_exists filename then
     error_s "file `%s` doesn't exist" filename
   else
     let* script = Parse.Script.from_file ~filename in
-    simplify_then_link_then_run ~optimize pc script
+    Ok
+      ( List.flatten
+      @@ List.map
+           (fun pc ->
+             match simplify_then_link_then_run ~optimize pc script with
+             | Ok v -> v
+             | Error _ -> [] )
+           pc )
 
 (* Command line *)
 
@@ -105,11 +119,15 @@ let script =
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let pc = [] in
+  let solver = Encoding.Batch.create () in
+  let pc = [ (solver, []) ] in
   let result = list_fold_left (run_file ~optimize) pc files in
   match result with
-  | Ok pc ->
-    List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) pc
+  | Ok results ->
+    List.iter (fun (_solver, pc) ->
+        Format.printf "PATH CONDITION:@.";
+        List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) pc)
+      results
   | Error e ->
     Format.eprintf "%s@." e;
     exit 1

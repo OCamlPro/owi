@@ -1,3 +1,5 @@
+module Batch = Encoding.Batch
+
 let trap msg = raise (Types.Trap msg)
 
 let ( let* ) o f = Result.fold ~ok:f ~error:trap o
@@ -29,9 +31,9 @@ module P = struct
 
   type float64 = Value.float64
 
-  type thread = Value.vbool list
+  type thread = Batch.t * Value.vbool list
 
-  module Choice = struct
+  module Choice_once = struct
     type 'a t = thread -> 'a * thread
 
     let return (v : 'a) : 'a t = fun t -> (v, t)
@@ -42,19 +44,24 @@ module P = struct
       (f r) t
 
     let select (sym_bool : vbool) : bool t =
-     fun t ->
+     fun ((solver, path_condition) as pc) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
-      let r =
-        match sym_bool with
-        | Val (Bool b) -> b
-        | Val (Num (I32 0l)) -> false
-        | Val (Num (I32 _)) -> true
-        | _ ->
-          Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
-          assert false
-      in
-      let pc = Encoding.Expression.Val (Bool r) in
-      (r, pc :: t)
+      match sym_bool with
+      | Val (Bool b) -> (b, pc)
+      | Val (Num (I32 0l)) -> (false, pc)
+      | Val (Num (I32 _)) -> (true, pc)
+      | _ ->
+        let value, path_condition =
+          if Batch.check_sat solver (sym_bool :: path_condition) then
+            (true, sym_bool :: path_condition)
+          else
+            let no = Value.Bool.not sym_bool in
+            if Batch.check_sat solver (no :: path_condition) then
+              (false, no :: path_condition)
+            else assert false
+        in
+        Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
+        (value, (solver, path_condition))
 
     let select_i32 _sym_int = assert false
 
@@ -68,6 +75,52 @@ module P = struct
     (* raise (Types.Trap "out of bounds memory access") *)
   end
 
+  module Choice_list = struct
+    type 'a t = thread -> ('a * thread) list
+
+    let return (v : 'a) : 'a t = fun t -> [ (v, t) ]
+
+    let bind (v : 'a t) (f : 'a -> 'b t) : 'b t =
+     fun t ->
+      let lst = v t in
+      List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
+
+    let select (sym_bool : vbool) : bool t =
+     fun ((solver, path_condition) as pc) ->
+      let sym_bool = Encoding.Expression.simplify sym_bool in
+      match sym_bool with
+      | Val (Bool b) -> [b, pc]
+      | Val (Num (I32 _)) -> assert false
+      | _ ->
+        let cases =
+          if Batch.check_sat solver (sym_bool :: path_condition) then
+            [true, (solver, sym_bool :: path_condition)]
+          else
+            []
+        in
+        let cases =
+          let no = Value.Bool.not sym_bool in
+          if Batch.check_sat solver (no :: path_condition) then
+              (false, (solver, no :: path_condition)) :: cases
+          else cases
+        in
+        (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
+        (* (value, (solver, path_condition)) *)
+        cases
+
+    let select_i32 _sym_int = assert false
+
+    let get : thread t = fun t -> [t, t]
+
+    let trap : Interpret_functor_intf.trap -> 'a t = function
+      | Out_of_bound_memory_access -> assert false
+      | Integer_overflow -> assert false
+      | Integer_divide_by_zero -> assert false
+
+    (* raise (Types.Trap "out of bounds memory access") *)
+  end
+
+  module Choice = Choice_list
   module Extern_func = Def_value.Make_extern_func (Value)
 
   type extern_func = Extern_func.extern_func
