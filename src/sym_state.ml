@@ -11,7 +11,7 @@ module P = struct
     include Sym_value.Symbolic
   end
 
-  type memory = unit
+  type memory = Sym_memory.Memory.t
 
   type table = unit
 
@@ -160,9 +160,9 @@ module P = struct
   module Memory = struct
     type t = memory
 
-    let load_8_s _ = assert false
+    let load_8_s m a = Sym_memory.Memory.load_8_s m a
 
-    let load_8_u _ = assert false
+    let load_8_u m a = Sym_memory.Memory.load_8_u m a
 
     let load_16_s _ = assert false
 
@@ -172,7 +172,7 @@ module P = struct
 
     let load_64 _ = assert false
 
-    let store_8 _ = assert false
+    let store_8 m ~addr v = Sym_memory.Memory.store_8 m ~addr v
 
     let store_16 _ = assert false
 
@@ -182,7 +182,7 @@ module P = struct
 
     let grow _ = assert false
 
-    let size _ = assert false
+    let size _ = Value.const_i32 1000l
 
     let size_in_pages _ = assert false
   end
@@ -192,7 +192,7 @@ module P = struct
 
     type t' = Env_id.t
 
-    let get_memory _ = assert false
+    let get_memory _ _ = Ok Sym_memory.mem
 
     let get_func = Link_env.get_func
 
