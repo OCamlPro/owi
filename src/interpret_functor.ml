@@ -1170,26 +1170,42 @@ module Make (P : Intf.P) :
             let res = Memory.load_64 mem (P.Value.I32.add pos offset) in
             st @@ Stack.push_i64 stack res
       end
-    (*
-      | F_load (nn, { offset; _ }) -> (
+    | F_load (nn, { offset; _ }) ->
       let* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
-      st
-      @@
-      match nn with
-      | S32 ->
-        if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then
-          trap "out of bounds memory access";
-        let res = Bytes.get_int32_le mem (pos + offset) in
-        let res = Float32.of_bits res in
-        Stack.push_f32 stack res
-      | S64 ->
-        if Bytes.length mem < pos + offset + 8 || offset < 0 || pos < 0 then
-          trap "out of bounds memory access";
-        let res = Bytes.get_int64_le mem (pos + offset) in
-        let res = Float64.of_bits res in
-        Stack.push_f64 stack res )
-        *)
+      let memory_length = Memory.size mem in
+      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+      let addr = P.Value.I32.add pos offset in
+      let out_of_bounds =
+        P.Value.Bool.or_
+          Int32_infix.(offset < const 0l)
+          Int32_infix.(pos < const 0l)
+      in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+      else begin
+        match nn with
+        | S32 ->
+          let out_of_bounds =
+            P.Value.I32.(lt_u memory_length (add addr (P.Value.const_i32 4l)))
+          in
+          let/ out_of_bounds = Choice.select out_of_bounds in
+          if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+          else
+            let res = Memory.load_32 mem addr in
+            let res = P.Value.F32.of_bits res in
+            st @@ Stack.push_f32 stack res
+        | S64 ->
+          let out_of_bounds =
+            P.Value.I32.(lt_u memory_length (add addr (P.Value.const_i32 8l)))
+          in
+          let/ out_of_bounds = Choice.select out_of_bounds in
+          if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+          else
+            let res = Memory.load_64 mem addr in
+            let res = P.Value.F64.of_bits res in
+            st @@ Stack.push_f64 stack res
+      end
     (*   | I_store (nn, { offset; _ }) -> ( *)
     (*     let* mem, _max = get_memory env mem_0 in *)
     (*     st *)

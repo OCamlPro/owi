@@ -315,6 +315,8 @@ module Symbolic = struct
 
     type nonrec int64 = int64
 
+    type same_size_int = int32
+
     let zero = mk_f32 0l
 
     let abs x = FloatingPoint.mk_abs x `F32Type
@@ -368,6 +370,8 @@ module Symbolic = struct
     let demote_f64 _ = assert false
 
     let reinterpret_i32 _ = assert false
+
+    let of_bits _ = assert false
   end
 
   module F64 = struct
@@ -378,6 +382,8 @@ module Symbolic = struct
     type nonrec int32 = int32
 
     type nonrec int64 = int64
+
+    type same_size_int = int64
 
     let zero = mk_f64 0L
 
@@ -432,6 +438,8 @@ module Symbolic = struct
     let promote_f32 _ = assert false
 
     let reinterpret_i64 _ = assert false
+
+    let of_bits _ = assert false
   end
 end
 

@@ -97,6 +97,8 @@ module type Fop = sig
 
   type int64
 
+  type same_size_int
+
   val zero : num
 
   val abs : num -> num
@@ -146,6 +148,8 @@ module type Fop = sig
   val convert_i64_s : int64 -> num
 
   val convert_i64_u : int64 -> num
+
+  val of_bits : same_size_int -> num
 end
 
 module type T = sig
@@ -198,6 +202,7 @@ module type T = sig
          and type vbool := vbool
          and type int32 := int32
          and type int64 := int64
+         and type same_size_int := int32
 
     val demote_f64 : float64 -> float32
 
@@ -211,6 +216,7 @@ module type T = sig
          and type vbool := vbool
          and type int32 := int32
          and type int64 := int64
+         and type same_size_int := int64
 
     val promote_f32 : float32 -> float64
 
