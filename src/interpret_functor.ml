@@ -1333,16 +1333,25 @@ module Make (P : Intf.P) :
         Memory.store_16 mem ~addr n;
         st stack
       end
-    (*   | I64_store32 { offset; _ } -> *)
-    (*     let* mem, _max = get_memory env mem_0 in *)
-    (*     let n, stack = Stack.pop_i64 stack in *)
-    (*     let n = Int64.to_int32 n in *)
-    (*     let pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     let offset = offset + pos in *)
-    (*     if Bytes.length mem < offset + 4 || pos < 0 then *)
-    (*       trap "out of bounds memory access"; *)
-    (*     Bytes.set_int32_le mem offset n; *)
-    (*     st @@ stack *)
+    | I64_store32 { offset; _ } ->
+      let* mem = P.Env.get_memory env mem_0 in
+      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+      let memory_length = Memory.size mem in
+      let n, stack = Stack.pop_i64 stack in
+      let n = Int64.to_int32 n in
+      let pos, stack = Stack.pop_i32 stack in
+      let addr = P.Value.I32.add pos offset in
+      let out_of_bounds =
+        P.Value.Bool.or_
+          Int32_infix.(pos < const 0l)
+          P.Value.I32.(lt_u memory_length (add addr (P.Value.const_i32 4l)))
+      in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+      else begin
+        Memory.store_32 mem ~addr n;
+        st stack
+      end
     | Data_drop i ->
       let* data = P.Env.get_data env i in
       P.Env.drop_data data;
