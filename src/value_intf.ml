@@ -185,6 +185,8 @@ module type T = sig
 
   val ref_null : Simplified.heap_type -> t
 
+  val ref_is_null : ref_value -> vbool
+
   val pp : Format.formatter -> t -> unit
 
   module Bool : sig

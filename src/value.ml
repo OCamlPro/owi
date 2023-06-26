@@ -135,4 +135,4 @@ let ref_null typ = Ref (ref_null' typ)
 
 let ref_func (f : Func.t) : t = Ref (Funcref (Some f))
 
-let is_ref_null = function Funcref None | Externref None -> true | _ -> false
+let ref_is_null = function Funcref None | Externref None -> true | _ -> false
