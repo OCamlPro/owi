@@ -27,5 +27,7 @@ let init ?label (typ : table_type) : t =
 let update table data = table.data <- data
 
 let get t i = t.data.(Int32.to_int i)
+
 let set t i v = t.data.(Int32.to_int i) <- v
+
 let size t = Int32.of_int @@ Array.length t.data

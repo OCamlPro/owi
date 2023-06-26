@@ -4,7 +4,6 @@ let ( let+ ) o f = Option.map f o
 
 module Memory = struct
   module Expr = Encoding.Expression
-
   open Expr
 
   type int32 = Expr.t
@@ -21,16 +20,16 @@ module Memory = struct
   let grow m _size = m
 
   let size (m : t) : int32 =
-  Val (Num (I32 (Int32.of_int (Hashtbl.length m.map))))
+    Val (Num (I32 (Int32.of_int (Hashtbl.length m.map))))
 
-  let clone (m : t) : t =  { map = Hashtbl.create 0; parent = Some m }
+  let clone (m : t) : t = { map = Hashtbl.create 0; parent = Some m }
 
   let size_in_pages (m : t) : int32 = size m
 
   let concretize_addr (a : int32) : Int32.t =
     match a with Val (Num (I32 a')) -> a' | _ -> assert false
 
-  let rec load_byte_rec (a : Int32.t) (m: t) : Expr.t Option.t =
+  let rec load_byte_rec (a : Int32.t) (m : t) : Expr.t Option.t =
     match Hashtbl.find_opt m.map a with
     | Some b -> Some b
     | None -> Option.bind m.parent (load_byte_rec a)
@@ -39,9 +38,9 @@ module Memory = struct
     match load_byte_rec (concretize_addr a) m with
     | None -> Val (Num (I32 0l))
     | Some n -> (
-        match n with
-        | Val (Num (I32 n)) -> Val (Num (I32 (Int32.extend_s 8 n)))
-        | e -> Extract (Val (Num (I64 0L)), 3, 0) ++ e)
+      match n with
+      | Val (Num (I32 n)) -> Val (Num (I32 (Int32.extend_s 8 n)))
+      | e -> Extract (Val (Num (I64 0L)), 3, 0) ++ e )
 
   let load_8_u (mem : t) (a : Expr.t) : Expr.t =
     (* Wrong *)
@@ -66,12 +65,13 @@ module Memory = struct
 
   let storen (m : t) ~(addr : int32) (v : int32) (n : int) : unit =
     let a0 = concretize_addr addr in
-    for i=0 to (n - 1) do
-      Hashtbl.replace m.map (Int32.add a0 (Int32.of_int i))
+    for i = 0 to n - 1 do
+      Hashtbl.replace m.map
+        (Int32.add a0 (Int32.of_int i))
         (Extract (v, i + 1, i))
     done
 
-  let store_8 (m: t) ~(addr : int32) (v : int32) : unit = storen m ~addr v 1
+  let store_8 (m : t) ~(addr : int32) (v : int32) : unit = storen m ~addr v 1
 
   let store_16 (m : t) ~(addr : int32) (v : int32) : unit = storen m ~addr v 2
 

@@ -27,8 +27,7 @@ let extern_module : Value.Func.extern_func Link.extern_module =
 
 (* a link state that contains our custom module, available under the name `sausage` *)
 let link_state =
-  Link.extern_module Link.empty_state ~name:"sausage"
-    extern_module
+  Link.extern_module Link.empty_state ~name:"sausage" extern_module
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =

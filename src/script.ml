@@ -100,7 +100,7 @@ let compare_result_const result (const : Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Symbolic.const ->Value.t Result.t = function
+let value_of_const : Symbolic.const -> Value.t Result.t = function
   | Const_I32 v -> ok @@ Value.I32 v
   | Const_I64 v -> ok @@ Value.I64 v
   | Const_F32 v -> ok @@ Value.F32 v
@@ -157,7 +157,9 @@ let run ~with_exhaustion ~optimize script =
         let* m, link_state =
           Compile.until_link link_state ~optimize ~name:None m
         in
-        let+ () = check_error_result expected (Interpret.modul link_state.envs m) in
+        let+ () =
+          check_error_result expected (Interpret.modul link_state.envs m)
+        in
         link_state
       | Assert (Assert_malformed_binary _) ->
         Log.debug "*** assert_malformed_binary@\n";

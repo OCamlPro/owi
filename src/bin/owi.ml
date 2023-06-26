@@ -17,10 +17,7 @@ let simplify_then_link_then_run ~optimize file =
         | _ -> Ok acc )
       ([], Link.empty_state) file
   in
-  let interp_modul =
-    if test then (Interpret2.I.modul)
-    else Interpret.modul
-  in
+  let interp_modul = if test then Interpret2.I.modul else Interpret.modul in
   list_iter (interp_modul link_state.envs) (List.rev to_run)
 
 let run_file exec filename =

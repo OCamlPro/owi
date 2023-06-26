@@ -17,5 +17,4 @@ let with_fresh_id f c =
 
 let get i c = IMap.find i c.c
 
-let pp ppf i =
-  Format.fprintf ppf "f_%i" i
+let pp ppf i = Format.fprintf ppf "f_%i" i

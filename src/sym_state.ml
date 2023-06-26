@@ -114,9 +114,9 @@ module P = struct
           match cases with
           | [] | [ _ ] -> cases
           | lst ->
-              List.map (fun (b, r) ->
-                (b, { r with mem = Sym_memory.Memory.clone r.mem }))
-                lst
+            List.map
+              (fun (b, r) -> (b, { r with mem = Sym_memory.Memory.clone r.mem }))
+              lst
         in
         cases
 

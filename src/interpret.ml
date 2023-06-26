@@ -3,6 +3,7 @@ open Simplified
 module Env = Link_env
 
 type extern_func = Value.Func.extern_func
+
 type env = extern_func Env.t
 
 module Log : sig
@@ -416,9 +417,7 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | Externref ety -> Stack.pop_as_externref ety stack
   in
   let rec split_args :
-    type f r.
-    Stack.t -> (f, r) Value.Func.atype -> Stack.t * Stack.t
-      =
+    type f r. Stack.t -> (f, r) Value.Func.atype -> Stack.t * Stack.t =
    fun stack ty ->
     let[@local] split_one_arg args =
       let elt, stack = Stack.pop stack in
@@ -430,8 +429,7 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | NArg (_, _, args) -> split_one_arg args
     | Res -> ([], stack)
   in
-  let rec apply : type f r. Stack.t -> (f, r) Value.Func.atype -> f -> r
-      =
+  let rec apply : type f r. Stack.t -> (f, r) Value.Func.atype -> f -> r =
    fun stack ty f ->
     match ty with
     | Value.Func.Arg (arg, args) ->
@@ -1201,7 +1199,9 @@ let exec_func envs (env_id : Env_id.t) (func : wasm_func) args =
     Array.of_list @@ List.rev args @ List.map init_local func.locals
   in
   let env = Env_id.get env_id envs in
-  let res, count = exec_expr envs env locals [] func.body (Some (snd func.type_f)) in
+  let res, count =
+    exec_expr envs env locals [] func.body (Some (snd func.type_f))
+  in
   Log.profile "Exec func %s@.Instruction count: %i@."
     (Option.value func.id ~default:"anonymous")
     count.instructions;

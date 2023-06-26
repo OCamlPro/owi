@@ -176,7 +176,7 @@ module Make (V : Value) :
     try
       let hd, tl = pop s in
       match hd with
-      | I32 n -> (V.I32.to_bool n), tl
+      | I32 n -> (V.I32.to_bool n, tl)
       | _ -> Log.err "invalid type (expected i32 (bool))"
     with Empty -> Log.err "invalid type (expected i32 (bool))"
 

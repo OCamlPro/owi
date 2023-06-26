@@ -120,14 +120,16 @@ let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Encoding.Batch.create () in
-  let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.mem} ] in
+  let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.mem } ] in
   let result = list_fold_left (run_file ~optimize) pc files in
   match result with
   | Ok results ->
-    List.iter (fun thread ->
+    List.iter
+      (fun thread ->
         Format.printf "PATH CONDITION:@.";
-        List.iter (fun c -> print_endline (Encoding.Expression.to_string c))
-          thread.Sym_state.P.pc)
+        List.iter
+          (fun c -> print_endline (Encoding.Expression.to_string c))
+          thread.Sym_state.P.pc )
       results
   | Error e ->
     Format.eprintf "%s@." e;

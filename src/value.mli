@@ -5,7 +5,7 @@ type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 type externref = E : 'a Type_id.ty * 'a -> externref
 
-module Make_extern_func(V : Func_intf.Value_types) :
+module Make_extern_func (V : Func_intf.Value_types) :
   Func_intf.T_Extern_func
     with type int32 := V.int32
      and type int64 := V.int64

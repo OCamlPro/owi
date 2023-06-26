@@ -1,6 +1,6 @@
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Make_extern_func(V : Func_intf.Value_types) = struct
+module Make_extern_func (V : Func_intf.Value_types) = struct
   type _ telt =
     | I32 : V.int32 telt
     | I64 : V.int64 telt
@@ -79,7 +79,7 @@ module Concrete_value_types = struct
 end
 
 module Func = struct
-  include Make_extern_func(Concrete_value_types)
+  include Make_extern_func (Concrete_value_types)
 end
 
 type externref = E : 'a Type_id.ty * 'a -> externref

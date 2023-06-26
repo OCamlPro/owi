@@ -16,8 +16,7 @@ module Make (M : Interpret_functor_intf.Memory_data) = struct
       incr r;
       !r
 
-  let update_memory mem data =
-    mem.data <- data
+  let update_memory mem data = mem.data <- data
 
   let get_limit_max { limits; _ } = limits.max
 
@@ -53,5 +52,4 @@ module Make (M : Interpret_functor_intf.Memory_data) = struct
     (* in *)
     (* mem.limits <- limits; *)
     t.data <- data
-
 end
