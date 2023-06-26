@@ -1134,7 +1134,7 @@ module Make (P : Intf.P) :
       else begin
         P.Memory.store_8 mem ~addr n;
         (* Thread memory ? *)
-        st @@ stack
+        st stack
       end
     | I_load (nn, { offset; _ }) ->
       let* mem = P.Env.get_memory env mem_0 in
@@ -1276,20 +1276,38 @@ module Make (P : Intf.P) :
           Memory.store_64 mem ~addr (Float64.to_bits n);
           st stack
         end )
-    (*   | I64_load32 (sx, { offset; _ }) -> *)
-    (*     let* mem, _max = get_memory env mem_0 in *)
-    (*     let pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     if Bytes.length mem < pos + offset + 4 || offset < 0 || pos < 0 then *)
-    (*       trap "out of bounds memory access"; *)
-    (*     let res = Bytes.get_int32_le mem (pos + offset) in *)
-    (*     if sx = S || Sys.word_size = 32 then *)
-    (*       let res = Int64.of_int32 res in *)
-    (*       st @@ Stack.push_i64 stack res *)
-    (*     else if Sys.word_size = 64 then *)
-    (*       let res = Int32.to_int res in *)
-    (*       let res = Int.(logand res (sub (shift_left 1 32) 1)) in *)
-    (*       st @@ Stack.push_i64_of_int stack res *)
-    (*     else Log.err "unsupported word size" *)
+    | I64_load32 (sx, { offset; _ }) ->
+      let* mem = P.Env.get_memory env mem_0 in
+      let offset = P.Value.const_i32 (Stdlib.Int32.of_int offset) in
+
+      let memory_length = Memory.size mem in
+      let pos, stack = Stack.pop_i32 stack in
+      let addr = P.Value.I32.add pos offset in
+      let out_of_bounds =
+        P.Value.Bool.or_
+          Int32_infix.(offset < const 0l)
+          (P.Value.Bool.or_
+             Int32_infix.(pos < const 0l)
+             P.Value.I32.(lt_u memory_length (add addr (P.Value.const_i32 4l))) )
+      in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+      else begin
+        let res = Memory.load_32 mem addr in
+        if sx = S || Sys.word_size = 32 then
+          let res = Int64.of_int32 res in
+          st @@ Stack.push_i64 stack res
+        else if Sys.word_size = 64 then
+          let res =
+            P.Value.I32.(
+              logand res
+                (sub
+                   (shl (P.Value.const_i32 1l) (P.Value.const_i32 32l))
+                   (P.Value.const_i32 1l) ) )
+          in
+          st @@ Stack.push_i64 stack (P.Value.I64.of_int32 res)
+        else Log.err "unsupported word size"
+      end
     (*   | I_store16 (nn, { offset; _ }) -> *)
     (*     let* mem, _max = get_memory env mem_0 in *)
     (*     let n, stack = *)
