@@ -820,10 +820,10 @@ module Make (P : Intf.P) :
     | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
     | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn'
     | Ref_null t -> st @@ Stack.push stack (P.Value.ref_null t)
-    (*   | Ref_is_null -> *)
+    | Ref_is_null -> assert false
     (*     let b, stack = Stack.pop_is_null stack in *)
     (*     st @@ Stack.push_bool stack b *)
-    (*   | Ref_func i -> *)
+    | Ref_func _i -> assert false
     (*     let* f = Env.get_func env i in *)
     (*     st @@ Stack.push stack (Value.ref_func f) *)
     | Drop -> st @@ Stack.drop stack
@@ -855,7 +855,8 @@ module Make (P : Intf.P) :
       let* mem = P.Env.get_memory env mem_0 in
       let len = P.Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
-    (*   | Memory_grow -> begin *)
+    | Memory_grow -> assert false
+    (* begin *)
     (*     let* mem = get_memory_raw env mem_0 in *)
     (*     let data = Memory.get_data mem in *)
     (*     let max_size = Memory.get_limit_max mem in *)
@@ -885,7 +886,7 @@ module Make (P : Intf.P) :
     (*         Stack.push_i32_of_int stack (old_size / page_size) *)
     (*     end *)
     (*   end *)
-    (*   | Memory_fill -> *)
+    | Memory_fill -> assert false
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let c, stack = Stack.pop_i32_to_char stack in *)
     (*     let pos, stack = Stack.pop_i32_to_int stack in *)
@@ -894,8 +895,8 @@ module Make (P : Intf.P) :
     (*       try Bytes.fill mem pos len c *)
     (*       with Invalid_argument _ -> trap "out of bounds memory access" *)
     (*     end; *)
-    (*     st @@ stack *)
-    (*   | Memory_copy -> *)
+    (*     st stack *)
+    | Memory_copy -> assert false
     (*     let* mem, _max = get_memory env mem_0 in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let src_pos, stack = Stack.pop_i32_to_int stack in *)
@@ -904,8 +905,8 @@ module Make (P : Intf.P) :
     (*       try Bytes.blit mem src_pos mem dst_pos len *)
     (*       with Invalid_argument _ -> trap "out of bounds memory access" *)
     (*     end; *)
-    (*     st @@ stack *)
-    (*   | Memory_init i -> *)
+    (*     st stack *)
+    | Memory_init _i -> assert false
     (*     let* mem, _max = get_memory env mem_0 in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let src_pos, stack = Stack.pop_i32_to_int stack in *)
@@ -913,7 +914,7 @@ module Make (P : Intf.P) :
     (*     let* data = Env.get_data env i in *)
     (*     ( try Bytes.blit_string data.value src_pos mem dst_pos len *)
     (*       with Invalid_argument _ -> trap "out of bounds memory access" ); *)
-    (*     st @@ stack *)
+    (*     st stack *)
     | Select _t ->
       let/ b, stack = pop_choice stack in
       let o2, stack = Stack.pop stack in
@@ -949,8 +950,8 @@ module Make (P : Intf.P) :
             (F64 v, stack) )
       in
       P.Global.set_value global v;
-      st @@ stack
-    (* | Table_get indice -> *)
+      st stack
+    | Table_get _indice -> assert false
     (*   let* t = P.Env.get_table env indice in *)
     (*   let indice, stack = Stack.pop_i32 stack in *)
     (*   let size = Table.size t in *)
@@ -966,8 +967,7 @@ module Make (P : Intf.P) :
     (*       | v -> v *)
     (*     in *)
     (*     st @@ Stack.push stack (P.Value.Ref v) *)
-
-    (*   | Table_set indice -> *)
+    | Table_set _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     let v, stack = Stack.pop_as_ref stack in *)
     (*     let indice, stack = Stack.pop_i32_to_int stack in *)
@@ -975,11 +975,11 @@ module Make (P : Intf.P) :
     (*       try t.data.(indice) <- v *)
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*     end; *)
-    (*     st @@ stack *)
-    (*   | Table_size indice -> *)
+    (*     st stack *)
+    | Table_size _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     st @@ Stack.push_i32_of_int stack (Array.length t.data) *)
-    (*   | Table_grow indice -> *)
+    | Table_grow _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     let size = Array.length t.data in *)
     (*     let delta, stack = Stack.pop_i32_to_int stack in *)
@@ -999,7 +999,7 @@ module Make (P : Intf.P) :
     (*       Array.blit t.data 0 new_table 0 (Array.length t.data); *)
     (*       Table.update t new_table; *)
     (*       Stack.push_i32_of_int stack size *)
-    (*   | Table_fill indice -> *)
+    | Table_fill _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let x, stack = Stack.pop_as_ref stack in *)
@@ -1008,8 +1008,9 @@ module Make (P : Intf.P) :
     (*       try Array.fill t.data pos len x *)
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*     end; *)
-    (*     st @@ stack *)
-    (*   | Table_copy (ti_dst, ti_src) -> begin *)
+    (*     st stack *)
+    | Table_copy (_ti_dst, _ti_src) -> assert false
+    (* begin *)
     (*     let* t_src = Env.get_table env ti_src in *)
     (*     let* t_dst = Env.get_table env ti_dst in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
@@ -1027,7 +1028,7 @@ module Make (P : Intf.P) :
     (*         stack *)
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*   end *)
-    (*   | Table_init (t_i, e_i) -> *)
+    | Table_init (_t_i, _e_i) -> assert false
     (*     let* t = Env.get_table env t_i in *)
     (*     let* elem = Env.get_elem env e_i in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
@@ -1059,11 +1060,11 @@ module Make (P : Intf.P) :
     (*         done *)
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*     end; *)
-    (*     st @@ stack *)
+    (*     st stack *)
     | Elem_drop i ->
       let* elem = P.Env.get_elem env i in
       P.Env.drop_elem elem;
-      st @@ stack
+      st stack
     | I_load16 (nn, sx, { offset; _ }) -> (
       let* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
@@ -1355,7 +1356,7 @@ module Make (P : Intf.P) :
     | Data_drop i ->
       let* data = P.Env.get_data env i in
       P.Env.drop_data data;
-      st @@ stack
+      st stack
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let/ target = Choice.select_i32 target in
@@ -1371,16 +1372,21 @@ module Make (P : Intf.P) :
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
-    (*   | Array_new _t -> *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let _default, stack = Stack.pop stack in *)
-    (*     let a = Array.init len (fun _i -> (\* TODO: use default *\) ()) in *)
-    (*     st @@ Stack.push_array stack a *)
-    (*   | Array_new_default _t -> *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let default = (\* TODO: get it from t *\) () in *)
-    (*     let a = Array.init len (fun _i -> default) in *)
-    (*     st @@ Stack.push_array stack a *)
+    | Array_new _t ->
+      let len, stack = Stack.pop_i32 stack in
+      let/ len = Choice.select_i32 len in
+      let _default, stack = Stack.pop stack in
+      let a =
+        Array.init (Stdlib.Int32.to_int len) (fun _i ->
+          (* TODO: use default *) () )
+      in
+      st @@ Stack.push_array stack a
+    | Array_new_default _t ->
+      let len, stack = Stack.pop_i32 stack in
+      let/ len = Choice.select_i32 len in
+      let default = (* TODO: get it from t *) () in
+      let a = Array.init (Stdlib.Int32.to_int len) (fun _i -> default) in
+      st @@ Stack.push_array stack a
     | ( Array_new_data _ | Array_new_elem _ | Array_new_fixed _ | Array_get _
       | Array_get_u _ | Array_set _ | Array_len | I31_new | I31_get_s
       | I31_get_u | Struct_get _ | Struct_get_s _ | Struct_set _ | Struct_new _
@@ -1388,13 +1394,7 @@ module Make (P : Intf.P) :
       | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _
       | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i ->
       Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i;
-      st @@ stack
-    | i ->
-      let msg =
-        Format.asprintf "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr
-          i
-      in
-      failwith msg
+      st stack
 
   let rec loop (state : State.exec_state) =
     match state.pc with
