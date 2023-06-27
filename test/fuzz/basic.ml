@@ -477,22 +477,22 @@ let expr_call (env : Env.t) (stack : val_type list) =
       | _ -> None )
     env.funcs
 
-let expr_br_if (env : Env.t) (stack : val_type list) (is_block : bool) =
+let expr_br_if (env : Env.t) (stack : val_type list) (bkind : Env.block_kind) =
   match stack with
   | [] -> []
   | _hd::tl ->
-    let blocks_type = if is_block then env.blocks else env.loops in
     List.filter_map
-      (fun (name, bt) ->
+      (fun (_, name, bt) ->
         match bt with
         | Arg.Bt_raw (_, (pt, rt)) when
-          if is_block then S.is_stack_compatible tl (List.rev rt)
-          else S.is_stack_compatible_param tl (List.rev pt) ->
-            Some ( pair
+          match bkind with
+          | Env.Block -> S.is_stack_compatible tl (List.rev rt)
+          | Env.Loop -> S.is_stack_compatible_param tl (List.rev pt)
+          -> Some ( pair
               (const (Br_if (Symbolic name)))
               (const [ S.Pop ]) )
         | _ -> None )
-        blocks_type
+      (Env.get_blocks env bkind)
 
 let random_stack =
   let+ l_vt = list val_type in
@@ -501,20 +501,19 @@ let random_stack =
 let unreachable =
   pair (const Unreachable) random_stack
 
-let expr_br (env : Env.t) (stack : val_type list) (is_block : bool) =
-  let blocks_type = if is_block then env.blocks else env.loops in
+let expr_br (env : Env.t) (stack : val_type list) (bkind : Env.block_kind) =
   List.filter_map
-    (fun (name, bt) ->
+    (fun (_, name, bt) ->
       match bt with
       | Arg.Bt_raw (_, (pt, rt)) when
-        if is_block then S.is_stack_compatible stack (List.rev rt)
-        else S.is_stack_compatible_param stack (List.rev pt) ->
-        Some
-          (pair
+        match bkind with
+        | Env.Block -> S.is_stack_compatible stack (List.rev rt)
+        | Env.Loop -> S.is_stack_compatible_param stack (List.rev pt)
+        -> Some ( pair
              (const (Br (Symbolic name)))
              random_stack )
       | _ -> None )
-      blocks_type
+    (Env.get_blocks env bkind)
 
 let stack_prefix (stack : val_type list) =
   match List.length stack with

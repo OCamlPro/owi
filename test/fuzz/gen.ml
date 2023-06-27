@@ -4,14 +4,14 @@ open Owi.Symbolic
 module S = Type_stack
 module B = Basic
 
-let expr_always_available block loop expr ~locals ~stack env =
+let expr_always_available block expr ~locals ~stack env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
-  ; block expr ~locals ~stack env
-  ; loop expr ~locals ~stack env
+  ; block Env.Block expr ~locals ~stack env
+  ; block Env.Loop expr ~locals ~stack env
   ; B.unreachable
   ]
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
@@ -45,8 +45,8 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ]
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
   @ if B.memory_exists env then B.memory_grow :: load_instr else []
-  @ B.expr_br_if env stack true
-  @ B.expr_br_if env stack false
+  @ B.expr_br_if env stack Env.Block
+  @ B.expr_br_if env stack Env.Loop
 
 let expr_available_2_i32 (env : Env.t) =
   let store_instr =
@@ -136,9 +136,10 @@ let expr_available_2_f64 =
 let if_else expr ~locals ~stack env =
   (* TODO: finish > bug typechecking + List.rev *)
   match stack with
-  | Num_type I32 :: stack -> begin
+  | Num_type I32 :: _stack -> begin
     let* rt = list B.val_type in
-    let* pt = B.stack_prefix stack in
+    (* let* pt = B.stack_prefix stack in *)
+    let* pt = const [] in
     let typ =
       Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
@@ -156,30 +157,19 @@ let if_else expr ~locals ~stack env =
   end
   | _ -> assert false
 
-let block expr ~locals ~stack env =
+let block block_kind expr ~locals ~stack env =
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
     Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
-  let id = Env.add_block env typ in
+  let id = Env.add_block env typ block_kind in
   let* expr = expr ~block_type:typ ~stack:pt ~locals env in
   Env.remove_block env;
-  let+ instr = const @@ Block (Some id, Some typ, expr)
-  and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
-  and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
-  (instr, pt_descr @ rt_descr)
-
-let loop expr ~locals ~stack env =
-  let* rt = list B.val_type in
-  let* pt = B.stack_prefix stack in
-  let typ =
-    Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
-  in
-  let id = Env.add_loop env typ in
-  let* expr = expr ~block_type:typ ~stack:pt ~locals env in
-  Env.remove_loop env;
-  let+ instr = const @@ Loop (Some id, Some typ, expr)
+  let+ instr = const @@
+    match block_kind with
+    | Block -> Block (Some id, Some typ, expr)
+    | Loop -> Loop (Some id, Some typ, expr)
   and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
@@ -237,11 +227,11 @@ let rec expr ~block_type ~stack ~locals env =
       | _ -> []
     in
     let expr_available env =
-      expr_always_available block loop expr ~locals ~stack env
+      expr_always_available block expr ~locals ~stack env
       @ expr_available_with_current_stack
       @ B.expr_call env stack
-      @ B.expr_br env stack true
-      @ B.expr_br env stack false
+      @ B.expr_br env stack Env.Block
+      @ B.expr_br env stack Env.Loop
     in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in

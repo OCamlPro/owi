@@ -1,6 +1,10 @@
 open Owi.Symbolic
 open Crowbar
 
+type block_kind =
+  | Block
+  | Loop
+
 type t =
   { mutable next_data : int
   ; mutable next_memory : int
@@ -8,13 +12,11 @@ type t =
   ; mutable next_fun : int
   ; mutable next_local : int
   ; mutable next_block : int
-  ; mutable next_loop : int
   ; mutable datas : string list
   ; mutable memory : string option
   ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
-  ; mutable blocks : (string * block_type) list
-  ; mutable loops : (string * block_type) list
+  ; mutable blocks : (block_kind * string * block_type) list
   ; mutable funcs : (string * block_type) list
   ; mutable fuel : int
   }
@@ -26,13 +28,11 @@ let empty () =
   ; next_fun = 0
   ; next_local = 0
   ; next_block = 0
-  ; next_loop = 0
   ; datas = []
   ; memory = None
   ; globals = []
   ; locals = []
   ; blocks = []
-  ; loops = []
   ; funcs = []
   ; fuel = Param.initial_fuel
   }
@@ -41,7 +41,8 @@ let reset_locals env = env.locals <- []
 
 let remove_block env = env.blocks <- List.tl env.blocks
 
-let remove_loop env = env.loops <- List.tl env.loops
+let get_blocks env bkind =
+  List.filter (fun (bk, _, _) -> bk = bkind) env.blocks
 
 let add_data env =
   let n = env.next_data in
@@ -74,18 +75,11 @@ let add_local env typ =
   env.next_local <- succ n;
   name
 
-let add_block env typ =
+let add_block env typ bkind =
   let n = env.next_block in
   let name = Format.sprintf "b%d" n in
-  env.blocks <- (name, typ) :: env.blocks;
+  env.blocks <- (bkind, name, typ) :: env.blocks;
   env.next_block <- succ n;
-  name
-
-let add_loop env typ =
-  let n = env.next_loop in
-  let name = Format.sprintf "lo%d" n in
-  env.loops <- (name, typ) :: env.loops;
-  env.next_loop <- succ n;
   name
 
 let add_func env typ =
