@@ -2,31 +2,36 @@ exception Timeout
 
 let () = Random.self_init ()
 
-let timeout_call_run (run : 'a -> unit Owi.Result.t) (m : 'a) =
+let timeout_count = ref 0
+
+let timeout_call_run (run : unit -> 'a ) =
   let () = Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Timeout)) in
   let (_ : Unix.interval_timer_status) =
     Unix.setitimer Unix.ITIMER_REAL { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
   in
-  try Some (run m) with
+  try Some (run ()) with
   | Timeout -> None
 
 let check_optimized m =
   let open Interprets in
   let result_unoptimized =
     let open Owi_unoptimized in
-    timeout_call_run run (of_symbolic m)
+    let m = of_symbolic m in
+    timeout_call_run (fun () -> run m)
   in
   let result_optimized =
     let open Owi_optimized in
-    timeout_call_run run (of_symbolic m)
+    let m = of_symbolic m in
+    timeout_call_run (fun () -> run m)
   in
   let result_reference () =
     let open Reference in
-    timeout_call_run run (of_symbolic m)
+    let m = of_symbolic m in
+    timeout_call_run (fun () -> run m)
   in
   let result1 =
     match (result_unoptimized, result_optimized) with
-    | None, None -> print_endline "Timeout!"; true
+    | None, None -> incr timeout_count; print_endline "Timeout!"; true
     | Some Ok (), Some Ok () -> true
     | Some Error msg1, Some Error msg2 when msg1 = msg2 -> true
     | Some Error msg1, Some Error msg2 ->
@@ -51,7 +56,7 @@ let check_optimized m =
     (not Param.reference_fuzzing)
     ||
     match (result_unoptimized, result_reference ()) with
-    | None, None -> print_endline "Timeout!"; true
+    | None, None -> true
     | Some Ok (), Some Ok () -> true
     | Some Error _msg1, Some Error _msg2 ->
       (* TODO: parse the output of result_reference to check that the error are the same*)
@@ -80,7 +85,9 @@ let () =
   let fmt = Format.err_formatter in
   Crowbar.add_test ~name:"Optimize fuzzing" [ Gen.modul ] (fun m ->
     incr count;
-    Format.fprintf fmt "Generating new module (%d/5000)...@\n" !count;
+    Format.fprintf fmt
+      "Generating new module (%d/5000 including %d timeouts)...@\n"
+      !count !timeout_count;
     if Param.debug then Format.fprintf fmt "%a@\n" Owi.Symbolic.Pp.modul m;
     Format.pp_print_flush fmt ();
-    is_optimized m )
+    is_optimized m );
