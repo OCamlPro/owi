@@ -462,6 +462,8 @@ let data_drop (env : Env.t) =
     (fun name -> pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]))
     env.datas
 
+let block_kind = choose [ const Env.Block; const Env.Loop(*; const Env.Func*) ]
+
 let expr_call (env : Env.t) (stack : val_type list) =
   let stack_pt = List.map (fun _ -> S.Pop) in
   let stack_rt = List.map (fun vt -> S.Push vt) in
@@ -477,20 +479,24 @@ let expr_call (env : Env.t) (stack : val_type list) =
       | _ -> None )
     env.funcs
 
-let expr_br_if (env : Env.t) (stack : val_type list) (bkind : Env.block_kind) =
+let expr_br_if (env : Env.t) (stack : val_type list) =
+  let+ bkind = block_kind in
   match stack with
   | [] -> []
   | _hd::tl ->
     List.filter_map
       (fun (_, name, bt) ->
         match bt with
-        | Arg.Bt_raw (_, (pt, rt)) when
-          match bkind with
+        | Arg.Bt_raw (_, (pt, rt)) ->
+          let is_stack_compatible = match bkind with
           | Env.Block -> S.is_stack_compatible tl (List.rev rt)
           | Env.Loop -> S.is_stack_compatible_param tl (List.rev pt)
-          -> Some ( pair
-              (const (Br_if (Symbolic name)))
-              (const [ S.Pop ]) )
+          in
+          if not is_stack_compatible then None
+          else Some (Br (Symbolic name), [ S.Pop ])
+          (* else Some (pair
+          (const (Br (Symbolic name)))
+          (const [ S.Pop ]) ) *)
         | _ -> None )
       (Env.get_blocks env bkind)
 
@@ -501,17 +507,19 @@ let random_stack =
 let unreachable =
   pair (const Unreachable) random_stack
 
-let expr_br (env : Env.t) (stack : val_type list) (bkind : Env.block_kind) =
+let expr_br (env : Env.t) (stack : val_type list) =
+  let* bkind = block_kind in
+  let+ random_stack in
   List.filter_map
     (fun (_, name, bt) ->
       match bt with
-      | Arg.Bt_raw (_, (pt, rt)) when
-        match bkind with
+      | Arg.Bt_raw (_, (pt, rt)) ->
+        let is_stack_compatible = match bkind with
         | Env.Block -> S.is_stack_compatible stack (List.rev rt)
         | Env.Loop -> S.is_stack_compatible_param stack (List.rev pt)
-        -> Some ( pair
-             (const (Br (Symbolic name)))
-             random_stack )
+        in
+        if not is_stack_compatible then None
+        else Some (Br (Symbolic name), random_stack)
       | _ -> None )
     (Env.get_blocks env bkind)
 
