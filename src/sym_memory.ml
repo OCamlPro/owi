@@ -46,8 +46,8 @@ module M = struct
   let concat a b offset =
     match (a, b) with
     | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
-        let offset = Int32.of_int @@ (offset * 8) in
-        Val (Num (I32 (Int32.logor (Int32.shl i1 offset) i2)))
+      let offset = Int32.of_int @@ (offset * 8) in
+      Val (Num (I32 (Int32.logor (Int32.shl i1 offset) i2)))
     | a', b' -> Concat (a', b')
 
   let loadn m a n : int32 =
@@ -110,6 +110,8 @@ module M = struct
   let store_32 m ~addr v = storen m ~addr v 4
 
   let store_64 m ~addr v = storen m ~addr v 8
+
+  let get_limit_max _ = assert false
 end
 
 module M' : Intf.Memory_data = M

@@ -148,6 +148,8 @@ module type P = sig
     val size : t -> int32
 
     val size_in_pages : t -> int32
+
+    val get_limit_max : t -> int64 option
   end
 
   module Env : sig

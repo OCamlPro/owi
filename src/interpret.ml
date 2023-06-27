@@ -789,7 +789,10 @@ let exec_instr instr (state : State.exec_state) =
     if too_big then Stack.push_i32 stack (-1l)
     else begin
       match max_size with
-      | Some max when new_size > max * page_size -> Stack.push_i32 stack (-1l)
+      | Some max
+        when let max = Int64.to_int max in
+             new_size > max * page_size ->
+        Stack.push_i32 stack (-1l)
       | None | Some _ ->
         let new_mem = Bytes.extend data 0 delta in
         Bytes.fill new_mem old_size delta (Char.chr 0);

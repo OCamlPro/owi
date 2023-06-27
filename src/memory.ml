@@ -35,7 +35,7 @@ let grow mem delta =
 
 let get_data { data; _ } = data
 
-let get_limit_max { limits; _ } = limits.max
+let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
 
 let get_limits { limits; _ } = limits
 
