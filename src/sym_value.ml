@@ -39,6 +39,8 @@ module Symbolic = struct
 
   let ref_null _ = assert false
 
+  let ref_func _ = assert false
+
   let ref_is_null _ = assert false
 
   let pp ppf v =

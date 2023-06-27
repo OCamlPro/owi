@@ -824,9 +824,9 @@ module Make (P : Intf.P) :
       let r, stack = Stack.pop_as_ref stack in
       let is_null = P.Value.ref_is_null r in
       st @@ Stack.push_bool stack is_null
-    | Ref_func _i -> assert false
-    (*     let* f = Env.get_func env i in *)
-    (*     st @@ Stack.push stack (Value.ref_func f) *)
+    | Ref_func i ->
+      let* f = Env.get_func env i in
+      st @@ Stack.push stack (P.Value.ref_func f)
     | Drop -> st @@ Stack.drop stack
     | Local_get i -> st @@ Stack.push stack (State.Locals.get locals i)
     | Local_set i ->
