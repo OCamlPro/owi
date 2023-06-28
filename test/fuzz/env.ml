@@ -41,8 +41,7 @@ let reset_locals env = env.locals <- []
 
 let remove_block env = env.blocks <- List.tl env.blocks
 
-let get_blocks env bkind =
-  List.filter (fun (bk, _, _) -> bk = bkind) env.blocks
+let get_blocks env = env.blocks
 
 let add_data env =
   let n = env.next_data in
