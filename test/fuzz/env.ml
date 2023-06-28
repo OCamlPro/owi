@@ -1,9 +1,9 @@
 open Owi.Symbolic
-open Crowbar
 
 type block_kind =
   | Block
   | Loop
+  | Func
 
 type t =
   { mutable next_data : int

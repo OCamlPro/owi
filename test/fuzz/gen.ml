@@ -133,23 +133,22 @@ let expr_available_2_f64 =
 (* let expr_available_3_f64 = [] *)
 
 let if_else expr ~locals ~stack env =
-  (* TODO: finish > bug typechecking + List.rev *)
   match stack with
   | Num_type I32 :: _stack -> begin
     let* rt = list B.val_type in
-    (* let* pt = B.stack_prefix stack in *)
-    let* pt = const [] in
+    let* pt = B.stack_prefix (List.tl stack) in
     let typ =
       Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
+    let id = Env.add_block env typ Env.Block in   (* same behavior as block *)
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
     let* expr_then = expr ~block_type:typ ~stack:pt ~locals env in
     env.fuel <- old_fuel / 2;
     let* expr_else = expr ~block_type:typ ~stack:pt ~locals env in
     env.fuel <- old_fuel / 2;
-
-    let+ instr = const @@ If_else (None, Some typ, expr_then, expr_else)
+    Env.remove_block env;
+    let+ instr = const @@ If_else (Some id, Some typ, expr_then, expr_else)
     and+ pt_descr = const @@ (S.Pop :: List.map (fun _ -> S.Pop) pt)
     and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
     (instr, pt_descr @ rt_descr)
@@ -169,8 +168,9 @@ let block block_kind expr ~locals ~stack env =
     const
     @@
     match block_kind with
-    | Block -> Block (Some id, Some typ, expr)
-    | Loop -> Loop (Some id, Some typ, expr)
+    | Env.Block -> Block (Some id, Some typ, expr)
+    | Env.Loop -> Loop (Some id, Some typ, expr)
+    | Env.Func -> assert false
   and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
@@ -267,7 +267,9 @@ let func env =
   Env.refill_fuel env;
   let* locals = list (local env) in
   let* type_f = B.block_type env in
+  let _ = Env.add_block env type_f Env.Func in
   let+ body = expr ~block_type:type_f ~stack:[] ~locals env in
+  Env.remove_block env;
   let id = Some (Env.add_func env type_f) in
   MFunc { type_f; locals; body; id }
 

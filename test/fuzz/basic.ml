@@ -462,7 +462,7 @@ let data_drop (env : Env.t) =
     (fun name -> pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]))
     env.datas
 
-let block_kind = choose [ const Env.Block; const Env.Loop (*; const Env.Func*) ]
+let block_kind = choose [ const Env.Block; const Env.Loop; const Env.Func ]
 
 let expr_call (env : Env.t) (stack : val_type list) =
   let stack_pt = List.map (fun _ -> S.Pop) in
@@ -490,11 +490,16 @@ let expr_br_if (env : Env.t) (stack : val_type list) =
         | Arg.Bt_raw (_, (pt, rt)) ->
           let is_stack_compatible =
             match bk with
-            | Env.Block -> S.is_stack_compatible tl (List.rev rt)
+            | Env.Block | Env.Func -> S.is_stack_compatible tl (List.rev rt)
             | Env.Loop -> S.is_stack_compatible_param tl (List.rev pt)
           in
           if not is_stack_compatible then None
-          else Some (pair (const (Br (Symbolic name))) (const [ S.Pop ]))
+          else 
+            let i = match bk with
+            | Env.Block | Env.Loop -> const @@ Br_if (Symbolic name)
+            | Env.Func -> const @@ Br_if (Raw ((List.length blocs) - 1))
+            in
+            Some ( pair i (const [ S.Pop ]) )
         | _ -> None )
       blocs
 
@@ -512,14 +517,16 @@ let expr_br (env : Env.t) (stack : val_type list) =
       | Arg.Bt_raw (_, (pt, rt)) ->
         let is_stack_compatible =
           match bk with
-          | Env.Block -> S.is_stack_compatible stack (List.rev rt)
+          | Env.Block | Env.Func -> S.is_stack_compatible stack (List.rev rt)
           | Env.Loop -> S.is_stack_compatible_param stack (List.rev pt)
         in
         if not is_stack_compatible then None
         else
-          Some
-            (let i = const @@ Br (Symbolic name) in
-             pair i random_stack )
+          let i = match bk with
+          | Env.Block | Env.Loop -> const @@ Br (Symbolic name)
+          | Env.Func -> const @@ Br (Raw ((List.length blocs) - 1))
+          in
+          Some ( pair i random_stack )
       | _ -> None )
     blocs
 
