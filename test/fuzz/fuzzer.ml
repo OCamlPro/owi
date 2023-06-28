@@ -36,21 +36,26 @@ let check_optimized m =
     | Some Error msg1, Some Error msg2 when msg1 = msg2 -> true
     | Some Error msg1, Some Error msg2 ->
       Format.ksprintf failwith
-        "unoptimized module and optimized module interpretations throw \
+        "[Owi unoptimized and optimized comparaison] \
+         unoptimized module and optimized module interpretations throw \
          different errors: %s / opti: %s"
         msg1 msg2
     | Some Error msg, Some Ok () ->
       Format.ksprintf failwith
-        "only unoptimized module interpretation throws an error: %s" msg
+        "[Owi unoptimized and optimized comparaison] \
+         only unoptimized module interpretation throws an error: %s" msg
     | Some Ok (), Some Error msg ->
       Format.ksprintf failwith
-        "only optimized module interpretation throws an error: %s" msg
+        "[Owi unoptimized and optimized comparaison] \
+         only optimized module interpretation throws an error: %s" msg
     | None, Some _ -> 
       Format.ksprintf failwith
-        "only unoptimized module interpretation throws a timeout error"
+        "[Owi unoptimized and optimized comparaison] \
+         only unoptimized module interpretation throws a timeout error"
     | Some _, None ->
       Format.ksprintf failwith
-        "only optimized module interpretation throws a timeout error"
+        "[Owi unoptimized and optimized comparaison] \
+         only optimized module interpretation throws a timeout error"
   in
   let result2 =
     (not Param.reference_fuzzing)
@@ -63,16 +68,20 @@ let check_optimized m =
       true
     | Some Error msg, Some Ok () ->
       Format.ksprintf failwith
-        "only unoptimized module interpretation throws an error: %s" msg
+        "[Reference and Owi interpreters comparaison] \
+         only unoptimized module interpretation throws an error: %s" msg
     | Some Ok (), Some Error msg ->
       Format.ksprintf failwith
-        "only reference module interpretation throws an error: %s" msg
+        "[Reference and Owi interpreters comparaison] \
+         only reference module interpretation throws an error: %s" msg
     | None, Some _ -> 
       Format.ksprintf failwith
-        "only unoptimized module interpretation throws a timeout error"
+        "[Reference and Owi interpreters comparaison] \
+         only unoptimized module interpretation throws a timeout error"
     | Some _, None ->
       Format.ksprintf failwith
-        "only optimized module interpretation throws a timeout error"
+        "[Reference and Owi interpreters comparaison] \
+         only optimized module interpretation throws a timeout error"
   in
   result1 && result2
 
