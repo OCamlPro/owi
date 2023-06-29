@@ -267,7 +267,7 @@ let func env =
   Env.refill_fuel env;
   let* locals = list (local env) in
   let* type_f = B.block_type env in
-  let _ = Env.add_block env type_f Env.Func in
+  let (_name : string) = Env.add_block env type_f Env.Func in
   let+ body = expr ~block_type:type_f ~stack:[] ~locals env in
   Env.remove_block env;
   let id = Some (Env.add_func env type_f) in
