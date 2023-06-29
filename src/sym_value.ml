@@ -1,5 +1,6 @@
 module S = struct
   open Encoding
+  open Encoding.Expression
   module Expr = Encoding.Expression
 
   type vbool = Expr.t
@@ -21,13 +22,13 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let mk_i32 x = Expr.Val (Value.Num (Types.I32 x))
+  let mk_i32 x = Val (Num (I32 x))
 
-  let mk_i64 x = Expr.Val (Value.Num (Types.I64 x))
+  let mk_i64 x = Val (Num (I64 x))
 
-  let mk_f32 x = Expr.Val (Value.Num (Types.F32 x))
+  let mk_f32 x = Val (Num (F32 x))
 
-  let mk_f64 x = Expr.Val (Value.Num (Types.F64 x))
+  let mk_f64 x = Val (Num (F64 x))
 
   let const_i32 (i : Int32.t) : int32 = mk_i32 i
 
@@ -36,6 +37,22 @@ module S = struct
   let const_f32 (f : Float32.t) : float32 = mk_f32 (Float32.to_bits f)
 
   let const_f64 (f : Float64.t) : float64 = mk_f64 (Float64.to_bits f)
+
+  let unop op e =
+    match e with
+    | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
+    | e' -> Unop (op, e')
+
+  let binop op e1 e2 =
+    match (e1, e2) with
+    | Val (Num i1), Val (Num i2) -> Val (Num (Eval_numeric.eval_binop op i1 i2))
+    | Val (Bool _), Val (Bool _) -> assert false
+    | e1', e2' -> Binop (op, e1', e2')
+
+  let relop op e1 e2 =
+    match (e1, e2) with
+    | Val (Num i1), Val (Num i2) -> Val (Bool (Eval_numeric.eval_relop op i1 i2))
+    | e1', e2' -> Relop (op, e1', e2')
 
   let ref_null _ = assert false
 
@@ -79,24 +96,6 @@ module S = struct
     type nonrec float32 = float32
 
     type nonrec float64 = float64
-
-    let unop op e =
-      match e with
-      | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
-      | e' -> Unop (op, e')
-
-    let binop op e1 e2 =
-      match (e1, e2) with
-      | Val (Num i1), Val (Num i2) ->
-        Val (Num (Eval_numeric.eval_binop op i1 i2))
-      | Val (Bool _), Val (Bool _) -> assert false
-      | e1', e2' -> Binop (op, e1', e2')
-
-    let relop op e1 e2 =
-      match (e1, e2) with
-      | Val (Num i1), Val (Num i2) ->
-        Val (Bool (Eval_numeric.eval_relop op i1 i2))
-      | e1', e2' -> Relop (op, e1', e2')
 
     let zero = mk_i32 0l
 
@@ -201,24 +200,6 @@ module S = struct
 
     type nonrec float64 = float64
 
-    let unop op e =
-      match e with
-      | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
-      | e' -> Unop (op, e')
-
-    let binop op e1 e2 =
-      match (e1, e2) with
-      | Val (Num i1), Val (Num i2) ->
-        Val (Num (Eval_numeric.eval_binop op i1 i2))
-      | Val (Bool _), Val (Bool _) -> assert false
-      | e1', e2' -> Binop (op, e1', e2')
-
-    let relop op e1 e2 =
-      match (e1, e2) with
-      | Val (Num i1), Val (Num i2) ->
-        Val (Bool (Eval_numeric.eval_relop op i1 i2))
-      | e1', e2' -> Relop (op, e1', e2')
-
     let zero = mk_i64 0L
 
     let clz e = unop (I64 Clz) e
@@ -321,45 +302,45 @@ module S = struct
 
     let zero = mk_f32 0l
 
-    let abs x = FloatingPoint.mk_abs x `F32Type
+    let abs x = unop (F32 Abs) x
 
-    let neg x = FloatingPoint.mk_neg x `F32Type
+    let neg x = unop (F32 Neg) x
 
-    let sqrt x = FloatingPoint.mk_sqrt x `F32Type
+    let sqrt x = unop (F32 Sqrt) x
 
-    let ceil _ = assert false
+    let ceil x = unop (F32 Ceil) x
 
-    let floor _ = assert false
+    let floor x = unop (F32 Floor) x
 
     let trunc _ = assert false
 
-    let nearest x = FloatingPoint.mk_nearest x `F32Type
+    let nearest x = unop (F32 Nearest) x
 
-    let add x y = FloatingPoint.mk_add x y `F32Type
+    let add x y = binop (F32 Add) x y
 
-    let sub x y = FloatingPoint.mk_sub x y `F32Type
+    let sub x y = binop (F32 Sub) x y
 
-    let mul x y = FloatingPoint.mk_mul x y `F32Type
+    let mul x y = binop (F32 Mul) x y
 
-    let div x y = FloatingPoint.mk_div x y `F32Type
+    let div x y = binop (F32 Div) x y
 
-    let min x y = FloatingPoint.mk_min x y `F32Type
+    let min x y = binop (F32 Min) x y
 
-    let max x y = FloatingPoint.mk_max x y `F32Type
+    let max x y = binop (F32 Max) x y
 
     let copy_sign _ _ = assert false
 
-    let eq x y = FloatingPoint.mk_eq x y `F32Type
+    let eq x y = relop (F32 Eq) x y
 
-    let ne x y = FloatingPoint.mk_ne x y `F32Type
+    let ne x y = relop (F32 Ne) x y
 
-    let lt x y = FloatingPoint.mk_lt x y `F32Type
+    let lt x y = relop (F32 Lt) x y
 
-    let gt x y = FloatingPoint.mk_gt x y `F32Type
+    let gt x y = relop (F32 Gt) x y
 
-    let le x y = FloatingPoint.mk_le x y `F32Type
+    let le x y = relop (F32 Le) x y
 
-    let ge x y = FloatingPoint.mk_ge x y `F32Type
+    let ge x y = relop (F32 Ge) x y
 
     let convert_i32_s _ = assert false
 
@@ -391,45 +372,45 @@ module S = struct
 
     let zero = mk_f64 0L
 
-    let abs x = FloatingPoint.mk_abs x `F64Type
+    let abs x = unop (F64 Abs) x
 
-    let neg x = FloatingPoint.mk_neg x `F64Type
+    let neg x = unop (F64 Neg) x
 
-    let sqrt x = FloatingPoint.mk_sqrt x `F64Type
+    let sqrt x = unop (F64 Sqrt) x
 
-    let ceil _ = assert false
+    let ceil x = unop (F64 Ceil) x
 
-    let floor _ = assert false
+    let floor x = unop (F64 Floor) x
 
-    let trunc _ = assert false
+    let trunc _x = assert false
 
-    let nearest x = FloatingPoint.mk_nearest x `F64Type
+    let nearest x = unop (F64 Nearest) x
 
-    let add x y = FloatingPoint.mk_add x y `F64Type
+    let add x y = binop (F64 Add) x y
 
-    let sub x y = FloatingPoint.mk_sub x y `F64Type
+    let sub x y = binop (F64 Sub) x y
 
-    let mul x y = FloatingPoint.mk_mul x y `F64Type
+    let mul x y = binop (F64 Mul) x y
 
-    let div x y = FloatingPoint.mk_div x y `F64Type
+    let div x y = binop (F64 Div) x y
 
-    let min x y = FloatingPoint.mk_min x y `F64Type
+    let min x y = binop (F64 Min) x y
 
-    let max x y = FloatingPoint.mk_max x y `F64Type
+    let max x y = binop (F64 Max) x y
 
     let copy_sign _ _ = assert false
 
-    let eq x y = FloatingPoint.mk_eq x y `F64Type
+    let eq x y = relop (F64 Eq) x y
 
-    let ne x y = FloatingPoint.mk_ne x y `F64Type
+    let ne x y = relop (F64 Ne) x y
 
-    let lt x y = FloatingPoint.mk_lt x y `F64Type
+    let lt x y = relop (F64 Lt) x y
 
-    let gt x y = FloatingPoint.mk_gt x y `F64Type
+    let gt x y = relop (F64 Gt) x y
 
-    let le x y = FloatingPoint.mk_le x y `F64Type
+    let le x y = relop (F64 Le) x y
 
-    let ge x y = FloatingPoint.mk_ge x y `F64Type
+    let ge x y = relop (F64 Ge) x y
 
     let convert_i32_s _ = assert false
 
