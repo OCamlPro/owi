@@ -2,7 +2,7 @@ open Owi
 open Syntax
 
 let print_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let print_i32 (i : Sym_value.Symbolic.int32) =
+  let print_i32 (i : Sym_value.S.int32) =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i)
   in
   (* we need to describe their types *)
@@ -18,7 +18,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
   let counter = ref 0 in
-  let symbolic_i32 (i : Sym_value.Symbolic.int32) : Sym_value.Symbolic.int32 =
+  let symbolic_i32 (i : Sym_value.S.int32) : Sym_value.S.int32 =
     let name =
       match i with
       | Encoding.Expression.Val (Num (I32 i)) -> begin
@@ -120,7 +120,7 @@ let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Encoding.Batch.create () in
-  let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.mem } ] in
+  let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.memory } ] in
   let result = list_fold_left (run_file ~optimize) pc files in
   match result with
   | Ok results ->

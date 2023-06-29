@@ -1,6 +1,6 @@
-module Symbolic = struct
+module S = struct
   open Encoding
-  module Expr = Expression
+  module Expr = Encoding.Expression
 
   type vbool = Expr.t
 
@@ -52,7 +52,7 @@ module Symbolic = struct
       | F64 e -> e
       | Ref _ -> assert false
     in
-    Format.fprintf ppf "%s" (Encoding.Expression.to_string e)
+    Format.fprintf ppf "%s" (Expr.to_string e)
 
   module Bool = struct
     let not = Boolean.mk_not
@@ -451,4 +451,4 @@ module Symbolic = struct
   end
 end
 
-module Test : Value_intf.T = Symbolic
+module S' : Value_intf.T = S

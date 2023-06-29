@@ -8,10 +8,10 @@ module Def_value = Value
 
 module P = struct
   module Value = struct
-    include Sym_value.Symbolic
+    include Sym_value.S
   end
 
-  type memory = Sym_memory.Memory.t
+  type memory = Sym_memory.M.t
 
   type table = unit
 
@@ -115,7 +115,7 @@ module P = struct
           | [] | [ _ ] -> cases
           | lst ->
             List.map
-              (fun (b, r) -> (b, { r with mem = Sym_memory.Memory.clone r.mem }))
+              (fun (b, r) -> (b, { r with mem = Sym_memory.M.clone r.mem }))
               lst
         in
         cases
@@ -169,33 +169,7 @@ module P = struct
   end
 
   module Memory = struct
-    type t = memory
-
-    let load_8_s m a = Sym_memory.Memory.load_8_s m a
-
-    let load_8_u m a = Sym_memory.Memory.load_8_u m a
-
-    let load_16_s _ = assert false
-
-    let load_16_u _ = assert false
-
-    let load_32 _ = assert false
-
-    let load_64 _ = assert false
-
-    let store_8 m ~addr v = Sym_memory.Memory.store_8 m ~addr v
-
-    let store_16 _ = assert false
-
-    let store_32 _ = assert false
-
-    let store_64 _ = assert false
-
-    let grow _ = assert false
-
-    let size _ = Value.const_i32 1000l
-
-    let size_in_pages _ = assert false
+    include Sym_memory.M
   end
 
   module Env = struct
@@ -203,7 +177,7 @@ module P = struct
 
     type t' = Env_id.t
 
-    let get_memory _ _ = Ok Sym_memory.mem
+    let get_memory _ _ = Ok Sym_memory.memory
 
     let get_func = Link_env.get_func
 
