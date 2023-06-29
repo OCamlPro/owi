@@ -6,6 +6,8 @@ module type INTERPRET = sig
   val of_symbolic : Symbolic.modul -> t
 
   val run : t -> unit Result.t
+
+  val name : string
 end
 
 module Owi_unoptimized : INTERPRET = struct
@@ -23,6 +25,8 @@ module Owi_unoptimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, _link_state) -> Interpret.modul regular ) )
+
+  let name = "owi"
 end
 
 module Owi_optimized : INTERPRET = struct
@@ -41,6 +45,8 @@ module Owi_optimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, _link_state) -> Interpret.modul regular ) )
+
+  let name = "owi+optimize"
 end
 
 module Reference : INTERPRET = struct
@@ -56,9 +62,11 @@ module Reference : INTERPRET = struct
     let fmt = Format.formatter_of_out_channel chan in
     Format.pp_print_string fmt modul;
     close_out chan;
-    let n = Sys.command @@ Format.sprintf "officialwasm %s" tmp_file in
+    let n = Sys.command @@ Format.sprintf "wasm %s" tmp_file in
     match n with
     | 0 -> Ok ()
     | 42 -> Error "trap"
     | n -> failwith (Format.sprintf "error %d" n)
+
+  let name = "reference"
 end
