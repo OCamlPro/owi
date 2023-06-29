@@ -63,7 +63,8 @@ module S = struct
 
     let int32 = function
       | Expr.Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
-      | e -> Boolean.mk_ite e (mk_i32 1l) (mk_i32 0l)
+      | Expr.Cvtop (I32 ToBool, e) -> e
+      | e -> Expr.Cvtop (I32 OfBool, e)
   end
 
   module I32 = struct
@@ -159,13 +160,10 @@ module S = struct
 
     let to_bool (e : vbool) =
       match e with
-      | Expr.Triop
-          ( Bool Encoding.Types.B.ITE
-          , cond
-          , Val (Num (I32 1l))
-          , Val (Num (I32 0l)) ) ->
-        cond
-      | e -> relop (I32 Ne) e (mk_i32 0l)
+      | Expr.Val (Num (I32 i)) ->
+        Val (Bool (if Int32.ne i 0l then true else false))
+      | Expr.Cvtop (I32 OfBool, cond) -> cond
+      | e -> Expr.Cvtop (I32 ToBool, e)
 
     let trunc_f32_s _ = assert false
 
