@@ -1,4 +1,4 @@
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 pin-depends: [
-  [ "encoding" "git+https://github.com/wasp-platform/encoding"]
+  [ "encoding.dev" "git+https://github.com/wasp-platform/encoding"]
 ]
