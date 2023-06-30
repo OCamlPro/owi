@@ -441,7 +441,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let* stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
     let* stack = Stack.pop jt stack in
-    Stack.push (List.rev jt) stack
+    Stack.push jt stack
   | Br_table (branches, i) ->
     let* stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
