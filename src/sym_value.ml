@@ -1,6 +1,35 @@
+open Encoding
+open Expression
+
+let ( let* ) o f = Option.bind o f
+
+let return = Option.some
+
+let mk_i32 x = Val (Num (I32 x))
+
+let mk_i64 x = Val (Num (I64 x))
+
+let mk_f32 x = Val (Num (F32 x))
+
+let mk_f64 x = Val (Num (F64 x))
+
+let unop op e =
+  match e with
+  | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
+  | e' -> Unop (op, e')
+
+let binop op e1 e2 =
+  match (e1, e2) with
+  | Val (Num i1), Val (Num i2) -> Val (Num (Eval_numeric.eval_binop op i1 i2))
+  | Val (Bool _), Val (Bool _) -> assert false
+  | e1', e2' -> Binop (op, e1', e2')
+
+let relop op e1 e2 =
+  match (e1, e2) with
+  | Val (Num i1), Val (Num i2) -> Val (Bool (Eval_numeric.eval_relop op i1 i2))
+  | e1', e2' -> Relop (op, e1', e2')
+
 module S = struct
-  open Encoding
-  open Encoding.Expression
   module Expr = Encoding.Expression
 
   type vbool = Expr.t
@@ -22,14 +51,6 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let mk_i32 x = Val (Num (I32 x))
-
-  let mk_i64 x = Val (Num (I64 x))
-
-  let mk_f32 x = Val (Num (F32 x))
-
-  let mk_f64 x = Val (Num (F64 x))
-
   let const_i32 (i : Int32.t) : int32 = mk_i32 i
 
   let const_i64 (i : Int64.t) : int64 = mk_i64 i
@@ -37,22 +58,6 @@ module S = struct
   let const_f32 (f : Float32.t) : float32 = mk_f32 (Float32.to_bits f)
 
   let const_f64 (f : Float64.t) : float64 = mk_f64 (Float64.to_bits f)
-
-  let unop op e =
-    match e with
-    | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
-    | e' -> Unop (op, e')
-
-  let binop op e1 e2 =
-    match (e1, e2) with
-    | Val (Num i1), Val (Num i2) -> Val (Num (Eval_numeric.eval_binop op i1 i2))
-    | Val (Bool _), Val (Bool _) -> assert false
-    | e1', e2' -> Binop (op, e1', e2')
-
-  let relop op e1 e2 =
-    match (e1, e2) with
-    | Val (Num i1), Val (Num i2) -> Val (Bool (Eval_numeric.eval_relop op i1 i2))
-    | e1', e2' -> Relop (op, e1', e2')
 
   let ref_null _ = assert false
 
@@ -72,16 +77,34 @@ module S = struct
     Format.fprintf ppf "%s" (Expr.to_string e)
 
   module Bool = struct
-    let not = Boolean.mk_not
+    let to_bool = function Val (Bool b) -> Some b | _ -> None
 
-    let or_ = Boolean.mk_or
+    let not e =
+      let e' =
+        let* b = to_bool e in
+        return (Val (Bool (not b)))
+      in
+      Option.value e' ~default:(Boolean.mk_not e)
 
-    let and_ = Boolean.mk_and
+    let or_ e1 e2 =
+      let e' =
+        let* b1 = to_bool e1 in
+        let* b2 = to_bool e2 in
+        return (Val (Bool (b1 || b2)))
+      in Option.value e' ~default:(Boolean.mk_or e1 e2)
+
+    let and_ e1 e2 =
+      let e' =
+        let* b1 = to_bool e1 in
+        let* b2 = to_bool e2 in
+        return (Val (Bool (b1 || b2)))
+      in
+      Option.value e' ~default:(Boolean.mk_and e1 e2)
 
     let int32 = function
-      | Expr.Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
-      | Expr.Cvtop (I32 ToBool, e) -> e
-      | e -> Expr.Cvtop (I32 OfBool, e)
+      | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
+      | Cvtop (I32 ToBool, e) -> e
+      | e -> Cvtop (I32 OfBool, e)
   end
 
   module I32 = struct
