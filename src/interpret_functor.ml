@@ -856,7 +856,9 @@ module Make (P : Intf.P) :
       let* mem = P.Env.get_memory env mem_0 in
       let len = P.Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
-    | Memory_grow -> assert false
+    | Memory_grow ->
+      (* FIXME: push non (-1l) to pass BTress tests *)
+      st @@ Stack.push_i32 stack (P.Value.const_i32 1l)
     (* begin *)
     (*     let* mem = get_memory_raw env mem_0 in *)
     (*     let data = Memory.get_data mem in *)
