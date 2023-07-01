@@ -147,6 +147,8 @@ module type P = sig
 
     val fill : t -> int32 -> int32 -> int32 -> vbool
 
+    val blit : t -> int32 -> int32 -> int32 -> vbool
+
     val size : t -> int32
 
     val size_in_pages : t -> int32

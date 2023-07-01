@@ -42,6 +42,15 @@ let fill mem pos len c =
     false
   with Invalid_argument _ -> true
 
+let blit mem src_pos dst_pos len =
+  let src_pos = Int32.to_int src_pos in
+  let dst_pos = Int32.to_int dst_pos in
+  let len = Int32.to_int len in
+  try
+    Bytes.blit mem.data src_pos mem.data dst_pos len;
+    false
+  with Invalid_argument _ -> true
+
 let get_data { data; _ } = data
 
 let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
