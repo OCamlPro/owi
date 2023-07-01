@@ -903,15 +903,19 @@ module Make (P : Intf.P) :
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
-    | Memory_init _i -> assert false
-    (*     let* mem, _max = get_memory env mem_0 in *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let src_pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     let dst_pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     let* data = Env.get_data env i in *)
-    (*     ( try Bytes.blit_string data.value src_pos mem dst_pos len *)
-    (*       with Invalid_argument _ -> trap "out of bounds memory access" ); *)
-    (*     st stack *)
+    | Memory_init i ->
+      let* _mem = P.Env.get_memory env mem_0 in
+      let _len, stack = Stack.pop_i32 stack in
+      let _src_pos, stack = Stack.pop_i32 stack in
+      let _dst_pos, stack = Stack.pop_i32 stack in
+      let* _data = Env.get_data env i in
+      let out_of_bounds =
+        assert false
+        (* P.Memory.blit_string data.value src_pos mem dst_pos len *)
+      in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+      else st stack
     | Select _t ->
       let/ b, stack = pop_choice stack in
       let o2, stack = Stack.pop stack in
