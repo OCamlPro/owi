@@ -691,6 +691,18 @@ module Make (P : Intf.P) :
       ; count = enter_function_count state.count func.id id
       }
 
+  (* let exec_func env (func : wasm_func) args = *)
+  (*   Log.debug1 "calling func : func %s@." *)
+  (*     (Option.value func.id ~default:"anonymous"); *)
+  (*   let locals = *)
+  (*     Array.of_list @@ List.rev args @ List.map init_local func.locals *)
+  (*   in *)
+  (*   let res, count = exec_expr env locals [] func.body (Some (snd func.type_f)) in *)
+  (*   Log.profile "Exec func %s@.Instruction count: %i@." *)
+  (*     (Option.value func.id ~default:"anonymous") *)
+  (*     count.instructions; *)
+  (*   res *)
+
   let exec_vfunc ~return (state : State.exec_state) (func : Func_intf.t) =
     match func with
     | WASM (id, func, env_id) ->
@@ -705,6 +717,16 @@ module Make (P : Intf.P) :
   (* let stack = exec_extern_func state.stack f in *)
   (* let state = { state with stack } in *)
   (* if return then State.return state else state *)
+
+  (* let exec_vfunc stack (func : Env.t' Value.Func.t) = *)
+  (*   match *)
+  (*     match func with *)
+  (*     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack *)
+  (*     | Extern f -> exec_extern_func stack f *)
+  (*   with *)
+  (*   | result -> Ok result *)
+  (*   | exception Trap msg -> Error msg *)
+  (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
   let call_ref ~return (state : State.exec_state) typ_i =
     ignore (return, state, typ_i);
@@ -968,15 +990,13 @@ module Make (P : Intf.P) :
     (*       | v -> v *)
     (*     in *)
     (*     st @@ Stack.push stack (Ref v) *)
-    | Table_set _indice -> assert false
-    (*     let* t = Env.get_table env indice in *)
-    (*     let v, stack = Stack.pop_as_ref stack in *)
-    (*     let indice, stack = Stack.pop_i32_to_int stack in *)
-    (*     begin *)
-    (*       try t.data.(indice) <- v *)
-    (*       with Invalid_argument _ -> trap "out of bounds table access" *)
-    (*     end; *)
-    (*     st stack *)
+    | Table_set indice ->
+      let* _t = Env.get_table env indice in
+      let _v, stack = Stack.pop_as_ref stack in
+      let _indice, stack = Stack.pop_i32 stack in
+      let out_of_bounds = assert false (* P.Env.Table.set t indice v *) in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_table_access else st stack
     | Table_size _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     st @@ Stack.push_i32_of_int stack (Array.length t.data) *)
@@ -1424,28 +1444,6 @@ module Make (P : Intf.P) :
     in
     let/ state = loop state in
     Choice.return (state, count)
-
-  (* let exec_func env (func : wasm_func) args = *)
-  (*   Log.debug1 "calling func : func %s@." *)
-  (*     (Option.value func.id ~default:"anonymous"); *)
-  (*   let locals = *)
-  (*     Array.of_list @@ List.rev args @ List.map init_local func.locals *)
-  (*   in *)
-  (*   let res, count = exec_expr env locals [] func.body (Some (snd func.type_f)) in *)
-  (*   Log.profile "Exec func %s@.Instruction count: %i@." *)
-  (*     (Option.value func.id ~default:"anonymous") *)
-  (*     count.instructions; *)
-  (*   res *)
-
-  (* let exec_vfunc stack (func : Env.t' Value.Func.t) = *)
-  (*   match *)
-  (*     match func with *)
-  (*     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack *)
-  (*     | Extern f -> exec_extern_func stack f *)
-  (*   with *)
-  (*   | result -> Ok result *)
-  (*   | exception Trap msg -> Error msg *)
-  (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
   let modul envs (modul : P.Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";

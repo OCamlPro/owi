@@ -72,6 +72,7 @@ module P = struct
     let get : thread t = fun t -> (t, t)
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
+      | Out_of_bounds_table_access -> assert false
       | Out_of_bounds_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
@@ -125,6 +126,7 @@ module P = struct
     let get : thread t = fun t -> [ (t, t) ]
 
     let trap : Interpret_functor_intf.trap -> 'a t = function
+      | Out_of_bounds_table_access -> assert false
       | Out_of_bounds_memory_access -> assert false
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
