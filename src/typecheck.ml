@@ -284,9 +284,6 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let t = Env.global_get i env in
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
-    let block_type =
-      Option.map (fun (pt, rt) -> (List.rev pt, rt)) block_type
-    in
     let* stack = Stack.pop [ i32 ] stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let* _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
