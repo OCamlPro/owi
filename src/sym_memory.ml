@@ -27,6 +27,8 @@ module M = struct
 
   let grow _m _size = assert false
 
+  let fill _ = assert false
+
   let size m = Val (Num (I32 m.size))
 
   let clone m = { map = Hashtbl.create 0; parent = Some m; size = m.size }

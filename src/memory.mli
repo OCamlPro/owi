@@ -33,6 +33,8 @@ val store_64 : t -> addr:int32 -> int64 -> unit
 
 val grow : t -> int32 -> unit
 
+val fill : t -> int32 -> int32 -> int32 -> bool
+
 val size_in_pages : t -> int32
 
 val size : t -> int32

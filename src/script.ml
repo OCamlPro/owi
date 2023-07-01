@@ -121,10 +121,12 @@ let action (link_state : Value.Func.extern_func Link.state) = function
          ~none:(fun ppf () -> Format.pp_print_string ppf "")
          Format.pp_print_string )
       mod_id f Types.Symbolic.consts args;*)
-    let* f = load_func_from_module link_state mod_id f in
+    let* _f = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
-    let stack = List.rev stack in
-    Interpret.exec_vfunc stack link_state.envs link_state.collection f
+    let _stack = List.rev stack in
+
+    assert false
+    (* Interpret2.I.exec_vfunc stack link_state.envs link_state.collection f *)
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";
@@ -158,7 +160,7 @@ let run ~with_exhaustion ~optimize script =
           Compile.until_link link_state ~optimize ~name:None m
         in
         let+ () =
-          check_error_result expected (Interpret.modul link_state.envs m)
+          check_error_result expected (Interpret2.I.modul link_state.envs m)
         in
         link_state
       | Assert (Assert_malformed_binary _) ->

@@ -145,6 +145,8 @@ module type P = sig
 
     val grow : t -> int32 -> unit
 
+    val fill : t -> int32 -> int32 -> int32 -> vbool
+
     val size : t -> int32
 
     val size_in_pages : t -> int32
@@ -201,11 +203,15 @@ module type S = sig
   (** interpret a module *)
   val modul : env Env_id.collection -> module_to_run -> (unit, 'a) result choice
 
-  (* (\** interpret a function with a given input stack and produce a new stack*\) *)
-  (* val exec_vfunc : *)
-  (*      Link.Env.t' Stack.t *)
-  (*   -> Link.Env.t' Value.Func.t *)
-  (*   -> (Link.Env.t' Stack.t, string) result *)
+  module State : sig
+    type exec_state
+
+    type instr_result
+  end
+
+  (** interpret a function with a given input stack and produce a new stack *)
+  val exec_vfunc :
+    return:bool -> State.exec_state -> Func_intf.t -> State.instr_result
 
   (* val exec_iunop : *)
   (*   Link.Env.t' Stack.t -> Types.nn -> Types.iunop -> Link.Env.t' Stack.t *)

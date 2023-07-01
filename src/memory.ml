@@ -33,6 +33,15 @@ let grow mem delta =
   Bytes.fill new_mem old_size delta (Char.chr 0);
   update_memory mem new_mem
 
+let fill mem pos len c =
+  let pos = Int32.to_int pos in
+  let len = Int32.to_int len in
+  let c = Int32.to_int c |> Char.chr in
+  try
+    Bytes.fill mem.data pos len c;
+    false
+  with Invalid_argument _ -> true
+
 let get_data { data; _ } = data
 
 let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max

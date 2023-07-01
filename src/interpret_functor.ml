@@ -885,16 +885,15 @@ module Make (P : Intf.P) :
         Stack.push_i32 stack I64.(to_int32 @@ div old_size page_size)
       end
     end
-    | Memory_fill -> assert false
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let c, stack = Stack.pop_i32_to_char stack in *)
-    (*     let pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     let* mem, _max = get_memory env mem_0 in *)
-    (*     begin *)
-    (*       try Bytes.fill mem pos len c *)
-    (*       with Invalid_argument _ -> trap "out of bounds memory access" *)
-    (*     end; *)
-    (*     st stack *)
+    | Memory_fill ->
+      let len, stack = Stack.pop_i32 stack in
+      let c, stack = Stack.pop_i32 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* mem = P.Env.get_memory env mem_0 in
+      let out_of_bounds = P.Memory.fill mem pos len c in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_memory_access
+      else st stack
     | Memory_copy -> assert false
     (*     let* mem, _max = get_memory env mem_0 in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
