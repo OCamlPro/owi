@@ -1,7 +1,11 @@
-let debug = true
+let debug = false
 
-let reference_fuzzing = false
+let optimize_fuzzing = false
 
-let initial_fuel = 20
+let reference_fuzzing = true
 
-let max_time_execution = 0.01 (* seconds *)
+let initial_fuel = 100
+
+let allow_partial_timeout = true
+
+let max_time_execution = 0.001 (* seconds *)

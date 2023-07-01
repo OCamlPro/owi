@@ -1,5 +1,7 @@
 open Owi
 
+exception Timeout
+
 module type INTERPRET = sig
   type t
 
@@ -9,6 +11,24 @@ module type INTERPRET = sig
 
   val name : string
 end
+
+let unset () = Sys.set_signal Sys.sigalrm Sys.Signal_ignore
+
+let set =
+  let raise n = if n = -2 then raise Timeout in
+  fun () ->
+    Sys.set_signal Sys.sigalrm (Sys.Signal_handle raise);
+    ignore
+    @@ ( Unix.setitimer Unix.ITIMER_REAL
+           { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
+         : Unix.interval_timer_status )
+
+let timeout_call_run (run : unit -> 'a Result.t) : 'a Result.t =
+  try
+    Fun.protect ~finally:unset (fun () ->
+      set ();
+      try run () with Timeout -> Error "timeout" )
+  with Timeout -> Error "timeout"
 
 module Owi_unoptimized : INTERPRET = struct
   type t = Symbolic.modul
@@ -24,7 +44,8 @@ module Owi_unoptimized : INTERPRET = struct
       | Ok () -> (
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
-        | Ok (regular, _link_state) -> Interpret.modul regular ) )
+        | Ok (regular, _link_state) ->
+          timeout_call_run (fun () -> Interpret.modul regular) ) )
 
   let name = "owi"
 end
@@ -44,7 +65,8 @@ module Owi_optimized : INTERPRET = struct
         let simplified = Optimize.modul simplified in
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
-        | Ok (regular, _link_state) -> Interpret.modul regular ) )
+        | Ok (regular, _link_state) ->
+          timeout_call_run (fun () -> Interpret.modul regular) ) )
 
   let name = "owi+optimize"
 end
@@ -62,10 +84,14 @@ module Reference : INTERPRET = struct
     let fmt = Format.formatter_of_out_channel chan in
     Format.pp_print_string fmt modul;
     close_out chan;
-    let n = Sys.command @@ Format.sprintf "wasm %s" tmp_file in
+    let n =
+      Sys.command
+      @@ Format.sprintf "timeout %fs wasm %s" Param.max_time_execution tmp_file
+    in
     match n with
     | 0 -> Ok ()
     | 42 -> Error "trap"
+    | 124 -> Error "timeout"
     | n -> failwith (Format.sprintf "error %d" n)
 
   let name = "reference"
