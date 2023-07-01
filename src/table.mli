@@ -11,7 +11,7 @@ type t =
 
 val get : t -> int32 -> Value.ref_value
 
-val set : t -> int32 -> Value.ref_value -> unit
+val set : t -> int32 -> Value.ref_value -> bool
 
 val size : t -> int32
 

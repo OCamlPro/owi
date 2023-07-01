@@ -991,15 +991,16 @@ module Make (P : Intf.P) :
     (*     in *)
     (*     st @@ Stack.push stack (Ref v) *)
     | Table_set indice ->
-      let* _t = Env.get_table env indice in
-      let _v, stack = Stack.pop_as_ref stack in
-      let _indice, stack = Stack.pop_i32 stack in
-      let out_of_bounds = assert false (* P.Env.Table.set t indice v *) in
+      let* t = Env.get_table env indice in
+      let v, stack = Stack.pop_as_ref stack in
+      let indice, stack = Stack.pop_i32 stack in
+      let out_of_bounds = P.Table.set t indice v in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access else st stack
-    | Table_size _indice -> assert false
-    (*     let* t = Env.get_table env indice in *)
-    (*     st @@ Stack.push_i32_of_int stack (Array.length t.data) *)
+    | Table_size indice ->
+      let* t = Env.get_table env indice in
+      let len = P.Table.size t in
+      st @@ Stack.push_i32 stack len
     | Table_grow _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     let size = Array.length t.data in *)

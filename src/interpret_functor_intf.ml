@@ -116,7 +116,7 @@ module type P = sig
 
     val get : t -> int32 -> Value.ref_value
 
-    val set : t -> int32 -> Value.ref_value -> unit
+    val set : t -> int32 -> Value.ref_value -> vbool
 
     val size : t -> int32
   end

@@ -28,6 +28,10 @@ let update table data = table.data <- data
 
 let get t i = t.data.(Int32.to_int i)
 
-let set t i v = t.data.(Int32.to_int i) <- v
+let set t i v =
+  try
+    t.data.(Int32.to_int i) <- v;
+    false
+  with Invalid_argument _ -> true
 
 let size t = Int32.of_int @@ Array.length t.data
