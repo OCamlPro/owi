@@ -80,26 +80,21 @@ module S = struct
     let to_bool = function Val (Bool b) -> Some b | _ -> None
 
     let not e =
-      let e' =
-        let* b = to_bool e in
-        return (Val (Bool (not b)))
-      in
-      Option.value e' ~default:(Boolean.mk_not e)
+      Option.value ~default:(Boolean.mk_not e)
+      @@ let* b = to_bool e in
+         return (Val (Bool (not b)))
 
     let or_ e1 e2 =
-      let e' =
-        let* b1 = to_bool e1 in
-        let* b2 = to_bool e2 in
-        return (Val (Bool (b1 || b2)))
-      in Option.value e' ~default:(Boolean.mk_or e1 e2)
+      Option.value ~default:(Boolean.mk_or e1 e2)
+      @@ let* b1 = to_bool e1 in
+         let* b2 = to_bool e2 in
+         return (Val (Bool (b1 || b2)))
 
     let and_ e1 e2 =
-      let e' =
-        let* b1 = to_bool e1 in
-        let* b2 = to_bool e2 in
-        return (Val (Bool (b1 || b2)))
-      in
-      Option.value e' ~default:(Boolean.mk_and e1 e2)
+      Option.value ~default:(Boolean.mk_and e1 e2)
+      @@ let* b1 = to_bool e1 in
+         let* b2 = to_bool e2 in
+         return (Val (Bool (b1 && b2)))
 
     let int32 = function
       | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
