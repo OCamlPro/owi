@@ -660,7 +660,7 @@ let expr_aux ==
     let bt = match pt, rt with
     | [], [] -> bt
     | pt, rt ->
-      let pt = List.rev_map (fun t -> None, t) pt in
+      let pt = List.map (fun t -> None, t) pt in
       let raw = pt, rt in
       begin match bt with
       | Some (Arg.Bt_ind type_use) -> Some (bt_raw (Some type_use) raw)
