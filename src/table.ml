@@ -29,9 +29,11 @@ let update table data = table.data <- data
 let get t i = t.data.(Int32.to_int i)
 
 let set t i v =
-  try
-    t.data.(Int32.to_int i) <- v;
+  let i = Int32.to_int i in
+  if i < 0 || i >= Array.length t.data then true
+  else begin
+    t.data.(i) <- v;
     false
-  with Invalid_argument _ -> true
+  end
 
 let size t = Int32.of_int @@ Array.length t.data

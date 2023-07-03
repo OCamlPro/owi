@@ -37,19 +37,25 @@ let fill mem pos len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
   let c = Int32.to_int c |> Char.chr in
-  try
+  if pos < 0 || pos + len >= Bytes.length mem.data then true
+  else begin
     Bytes.fill mem.data pos len c;
     false
-  with Invalid_argument _ -> true
+  end
 
 let blit mem src_pos dst_pos len =
   let src_pos = Int32.to_int src_pos in
   let dst_pos = Int32.to_int dst_pos in
   let len = Int32.to_int len in
-  try
+  if
+    src_pos < 0 || dst_pos < 0
+    || src_pos + len <= Bytes.length mem.data
+    || dst_pos + len <= Bytes.length mem.data
+  then true
+  else begin
     Bytes.blit mem.data src_pos mem.data dst_pos len;
     false
-  with Invalid_argument _ -> true
+  end
 
 let get_data { data; _ } = data
 
