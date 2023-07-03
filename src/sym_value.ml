@@ -15,19 +15,24 @@ let mk_f64 x = Val (Num (F64 x))
 
 let unop op e =
   match e with
-  | Val (Num i) -> Val (Num (Eval_numeric.eval_unop op i))
-  | e' -> Unop (op, e')
+  | Val (Num n) -> Val (Num (Eval_numeric.eval_unop op n))
+  | _ -> Unop (op, e)
 
 let binop op e1 e2 =
   match (e1, e2) with
-  | Val (Num i1), Val (Num i2) -> Val (Num (Eval_numeric.eval_binop op i1 i2))
+  | Val (Num n1), Val (Num n2) -> Val (Num (Eval_numeric.eval_binop op n1 n2))
   | Val (Bool _), Val (Bool _) -> assert false
-  | e1', e2' -> Binop (op, e1', e2')
+  | _ -> Binop (op, e1, e2)
 
 let relop op e1 e2 =
   match (e1, e2) with
-  | Val (Num i1), Val (Num i2) -> Val (Bool (Eval_numeric.eval_relop op i1 i2))
-  | e1', e2' -> Relop (op, e1', e2')
+  | Val (Num n1), Val (Num n2) -> Val (Bool (Eval_numeric.eval_relop op n1 n2))
+  | _ -> Relop (op, e1, e2)
+
+let cvtop op e =
+  match e with
+  | Val (Num n) -> Val (Num (Eval_numeric.eval_cvtop op n))
+  | _ -> Cvtop (op, e)
 
 module S = struct
   module Expr = Encoding.Expression
@@ -77,23 +82,23 @@ module S = struct
     Format.fprintf ppf "%s" (Expr.to_string e)
 
   module Bool = struct
-    let to_bool = function Val (Bool b) -> Some b | _ -> None
+    let of_val = function Val (Bool b) -> Some b | _ -> None
 
     let not e =
       Option.value ~default:(Boolean.mk_not e)
-      @@ let* b = to_bool e in
+      @@ let* b = of_val e in
          return (Val (Bool (not b)))
 
     let or_ e1 e2 =
       Option.value ~default:(Boolean.mk_or e1 e2)
-      @@ let* b1 = to_bool e1 in
-         let* b2 = to_bool e2 in
+      @@ let* b1 = of_val e1 in
+         let* b2 = of_val e2 in
          return (Val (Bool (b1 || b2)))
 
     let and_ e1 e2 =
       Option.value ~default:(Boolean.mk_and e1 e2)
-      @@ let* b1 = to_bool e1 in
-         let* b2 = to_bool e2 in
+      @@ let* b1 = of_val e1 in
+         let* b2 = of_val e2 in
          return (Val (Bool (b1 && b2)))
 
     let int32 = function
@@ -278,9 +283,9 @@ module S = struct
 
     let ge_u e1 e2 = relop (I64 GeU) e1 e2
 
-    let of_int32 e = Expr.Cvtop (Types.I64 Types.I32.ExtendSI32, e)
+    let of_int32 e = cvtop (I64 ExtendSI32) e
 
-    let to_int32 e = Expr.Cvtop (Types.I32 Types.I32.WrapI64, e)
+    let to_int32 e = cvtop (I32 WrapI64) e
 
     let trunc_f32_s _ = assert false
 
