@@ -895,7 +895,7 @@ module Make (P : Intf.P) :
           I64.(ge_u new_size (mul page_size page_size))
           ( match max_size with
           | Some max -> I64.(lt new_size (mul max page_size))
-          | None -> (* TODO *) Obj.magic false )
+          | None -> I64.(ne (const_i64 0L) (const_i64 0L)) )
       in
       let/ too_big = Choice.select too_big in
       st
