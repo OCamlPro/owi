@@ -34,7 +34,7 @@ module type Memory_data = sig
 
   val create : Int32.t -> t
 
-  val grow : t -> int32 -> t
+  val grow : t -> int32 -> unit
 
   val size : t -> int32
 
