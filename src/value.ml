@@ -1,6 +1,9 @@
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Make_extern_func (V : Func_intf.Value_types) = struct
+module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) = struct
+
+  type 'a m = 'a M.t
+
   type _ telt =
     | I32 : V.int32 telt
     | I64 : V.int64 telt
@@ -21,7 +24,7 @@ module Make_extern_func (V : Func_intf.Value_types) = struct
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | Res : ('r, 'r) atype
 
-  type _ func_type = Func : ('f, 'r) atype * 'r rtype -> 'f func_type
+  type _ func_type = Func : ('f, 'r m) atype * 'r rtype -> 'f func_type
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
@@ -80,8 +83,12 @@ module Concrete_value_types = struct
   type vbool = bool
 end
 
+module Id_monad = struct
+  type 'a t = 'a
+end
+
 module Func = struct
-  include Make_extern_func (Concrete_value_types)
+  include Make_extern_func (Concrete_value_types)(Id_monad)
 end
 
 type externref = E : 'a Type_id.ty * 'a -> externref

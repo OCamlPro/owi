@@ -487,8 +487,7 @@ module Make (P : Intf.P) :
       | Extern_func.Arg (arg, args) ->
         let v, stack = pop_arg stack arg in
         apply stack args (f v)
-      | UArg args ->
-        apply stack args (f ())
+      | UArg args -> apply stack args (f ())
       | NArg (_, arg, args) ->
         let v, stack = pop_arg stack arg in
         apply stack args (f v)
@@ -505,14 +504,19 @@ module Make (P : Intf.P) :
       | F64 -> Stack.push_f64 stack v
       | Externref ty -> Stack.push_as_externref stack ty v
     in
-    match (rtype, r) with
-    | R0, () -> stack
-    | R1 t1, v1 -> push_val t1 v1 stack
-    | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
-    | R3 (t1, t2, t3), (v1, v2, v3) ->
-      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
-    | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
-      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
+    let/ r in
+    let stack =
+      match (rtype, r) with
+      | R0, () -> stack
+      | R1 t1, v1 -> push_val t1 v1 stack
+      | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
+      | R3 (t1, t2, t3), (v1, v2, v3) ->
+        push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
+      | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
+        push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
+        |> push_val t4 v4
+    in
+    Choice.return stack
 
   module State = struct
     type stack = Stack.t
@@ -710,12 +714,13 @@ module Make (P : Intf.P) :
     match func with
     | WASM (id, func, env_id) ->
       let env = Env_id.get env_id state.envs in
-      State.Continue (exec_func ~return ~id state env func)
+      Choice.return (State.Continue (exec_func ~return ~id state env func))
     | Extern f ->
       let f = Env.get_extern_func state.env f in
-      let stack = exec_extern_func state.stack f in
+      let/ stack = exec_extern_func state.stack f in
       let state = { state with stack } in
-      if return then State.return state else State.Continue state
+      if return then Choice.return (State.return state)
+      else Choice.return (State.Continue state)
 
   (* let stack = exec_extern_func state.stack f in *)
   (* let state = { state with stack } in *)
@@ -865,11 +870,11 @@ module Make (P : Intf.P) :
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
       let* func = P.Env.get_func env i in
-      Choice.return @@ exec_vfunc ~return:false state func
+      exec_vfunc ~return:false state func
     end
     | Return_call i -> begin
       let* func = P.Env.get_func env i in
-      Choice.return @@ exec_vfunc ~return:true state func
+      exec_vfunc ~return:true state func
     end
     | Br i -> State.branch state i
     | Br_if i ->

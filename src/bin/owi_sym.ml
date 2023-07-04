@@ -1,9 +1,12 @@
 open Owi
 open Syntax
 
+module Choice = Sym_state.P.Choice
+
 let print_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let print_i32 (i : Sym_value.S.int32) =
-    Printf.printf "%s\n%!" (Encoding.Expression.to_string i)
+  let print_i32 (i : Sym_value.S.int32) : unit Choice.t =
+    Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
+    Choice.return ()
   in
   (* we need to describe their types *)
   let functions =
@@ -14,11 +17,26 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   in
   { functions }
 
+let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
+  let positive_i32 (i : Sym_value.S.int32) : unit Choice.t =
+   fun thread ->
+     let c = Sym_value.S.I32.ge i (Sym_value.S.I32.zero) in
+     [(), { thread with pc = c :: thread.pc } ]
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "positive_i32"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), positive_i32) )
+    ]
+  in
+  { functions }
+
 let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
   let counter = ref 0 in
-  let symbolic_i32 (i : Sym_value.S.int32) : Sym_value.S.int32 =
+  let symbolic_i32 (i : Sym_value.S.int32) : Sym_value.S.int32 Choice.t =
     let name =
       match i with
       | Encoding.Expression.Val (Num (I32 i)) -> begin
@@ -29,8 +47,11 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
           (Printf.sprintf "Symbolic name %s" (Encoding.Expression.to_string i))
     in
     incr counter;
-    Encoding.Expression.mk_symbol_s `I32Type
-      (Printf.sprintf "%s_%i" name !counter)
+    let r =
+      Encoding.Expression.mk_symbol_s `I32Type
+        (Printf.sprintf "%s_%i" name !counter)
+    in
+    Choice.return r
   in
   (* we need to describe their types *)
   let functions =
@@ -46,6 +67,10 @@ let simplify_then_link_then_run ~optimize pc file =
   let link_state =
     Link.extern_module' link_state ~name:"print"
       ~func_typ:Sym_state.P.Extern_func.extern_type print_extern_module
+  in
+  let link_state =
+    Link.extern_module' link_state ~name:"assert"
+      ~func_typ:Sym_state.P.Extern_func.extern_type assert_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"

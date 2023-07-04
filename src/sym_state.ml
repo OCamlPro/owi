@@ -136,7 +136,7 @@ module P = struct
   end
 
   module Choice = Choice_list
-  module Extern_func = Def_value.Make_extern_func (Value)
+  module Extern_func = Def_value.Make_extern_func (Value)(Choice)
 
   type extern_func = Extern_func.extern_func
 

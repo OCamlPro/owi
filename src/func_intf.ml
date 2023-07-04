@@ -10,6 +10,10 @@ module type Value_types = sig
   type vbool
 end
 
+module type Monad_type = sig
+  type 'a t
+end
+
 module type T_Extern_func = sig
   type int32
 
@@ -18,6 +22,8 @@ module type T_Extern_func = sig
   type float32
 
   type float64
+
+  type 'a m
 
   type _ telt =
     | I32 : int32 telt
@@ -39,7 +45,7 @@ module type T_Extern_func = sig
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | Res : ('r, 'r) atype
 
-  type _ func_type = Func : ('f, 'r) atype * 'r rtype -> 'f func_type
+  type _ func_type = Func : ('f, 'r m) atype * 'r rtype -> 'f func_type
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 

@@ -90,6 +90,7 @@ module type P = sig
        and type int64 := int64
        and type float32 := float32
        and type float64 := float64
+       and type 'a m := 'a Choice.t
 
   module Value :
     Value_intf.T
@@ -214,7 +215,7 @@ module type S = sig
 
   (** interpret a function with a given input stack and produce a new stack *)
   val exec_vfunc :
-    return:bool -> State.exec_state -> Func_intf.t -> State.instr_result
+    return:bool -> State.exec_state -> Func_intf.t -> State.instr_result choice
 
   (* val exec_iunop : *)
   (*   Link.Env.t' Stack.t -> Types.nn -> Types.iunop -> Link.Env.t' Stack.t *)
