@@ -252,6 +252,26 @@ let memory env =
   let id = Some (Env.add_memory env) in
   MMem (id, { min; max })
 
+let typ env =
+  let+ styp = B.sub_type in
+  let id = Some (Env.add_type env styp) in
+  MType [ (id, styp) ]
+
+(*
+TODO: MElem
+type elem =
+  { id : string option
+  ; typ : ref_type
+  ; init : expr list
+  ; mode : elem_mode
+  }
+*)
+
+let table env =
+  let+ typ = B.table_type in
+  let id = Some (Env.add_table env typ) in
+  MTable (id, typ)
+
 let global env =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
@@ -276,6 +296,8 @@ let func env =
 let fields env =
   let* memory = option (memory env) in
   let* datas = list (data env) in
+  let* types = list (typ env) in
+  let* tables = list (table env) in
   let* globals = list (global env) in
   let* funcs = list (func env) in
   let+ start_code =
@@ -290,8 +312,8 @@ let fields env =
   let start = MStart (Raw 0) in
   let funcs = start :: start_code :: funcs in
   match memory with
-  | None -> datas @ globals @ funcs
-  | Some mem -> datas @ [ mem ] @ globals @ funcs
+  | None -> datas @ types @ tables @ globals @ funcs
+  | Some mem -> datas @ [ mem ] @ types @ tables @ globals @ funcs
 
 let modul =
   let id = Some "m" in

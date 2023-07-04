@@ -8,12 +8,18 @@ type block_kind =
 type t =
   { mutable next_data : int
   ; mutable next_memory : int
+  ; mutable next_type : int
+  ; mutable next_elem : int
+  ; mutable next_table : int
   ; mutable next_global : int
   ; mutable next_fun : int
   ; mutable next_local : int
   ; mutable next_block : int
   ; mutable datas : string list
   ; mutable memory : string option
+  ; mutable types : sub_type list
+  ; mutable elems : ref_type list
+  ; mutable tables : (string * table_type) list
   ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
   ; mutable blocks : (block_kind * string * block_type) list
@@ -24,12 +30,18 @@ type t =
 let empty () =
   { next_data = 0
   ; next_memory = 0
+  ; next_type = 0
+  ; next_elem = 0
+  ; next_table = 0
   ; next_global = 0
   ; next_fun = 0
   ; next_local = 0
   ; next_block = 0
   ; datas = []
   ; memory = None
+  ; types = []
+  ; elems = []
+  ; tables = []
   ; globals = []
   ; locals = []
   ; blocks = []
@@ -59,6 +71,27 @@ let add_memory env =
     env.next_memory <- succ n;
     name
   | Some _ -> failwith "a memory already exists"
+
+let add_type env typ =
+  let n = env.next_type in
+  let name = Format.sprintf "ty%d" n in
+  env.types <- typ :: env.types;
+  env.next_type <- succ n;
+  name
+
+let add_elem env typ =
+  let n = env.next_elem in
+  let name = Format.sprintf "e%d" n in
+  env.elems <- typ :: env.elems;
+  env.next_elem <- succ n;
+  name
+
+let add_table env typ =
+  let n = env.next_table in
+  let name = Format.sprintf "t%d" n in
+  env.tables <- (name, typ) :: env.tables;
+  env.next_table <- succ n;
+  name
 
 let add_global env typ =
   let n = env.next_global in
