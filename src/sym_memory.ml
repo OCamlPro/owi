@@ -20,36 +20,28 @@ module M = struct
   type t =
     { data : (Int32.t, Expr.t) Hashtbl.t
     ; parent : t Option.t
-    ; mutable limits : Types.limits
+    ; mutable size : int
     }
 
   let create size =
-    let limits = Types.{ min = Int32.to_int size; max = None } in
-    { data = Hashtbl.create 128; parent = None; limits }
+    { data = Hashtbl.create 128; parent = None; size = Int32.to_int size }
 
-  let concretize a =
-    print_endline (Expr.to_string a);
-    match a with Val (Num (I32 i)) -> i | _ -> assert false
+  let concretize a = match a with Val (Num (I32 i)) -> i | _ -> assert false
 
   let grow m delta =
     let delta = Int32.to_int @@ concretize delta in
-    let old_size = m.limits.min in
-    let limits =
-      { m.limits with min = max m.limits.min (old_size + delta) }
-    in
-    m.limits <- limits
+    let old_size = m.size * page_size in
+    m.size <- max m.size ((old_size + delta) / page_size)
 
   let fill _ = assert false
 
   let blit _ = assert false
 
-  let size { limits; _ } =
-    Value.const_i32 @@ Int32.of_int @@ (limits.min * page_size)
+  let size { size; _ } = Value.const_i32 @@ Int32.of_int @@ (size * page_size)
 
-  let size_in_pages { limits; _ } =
-    Value.const_i32 @@ Int32.of_int @@ limits.min
+  let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size
 
-  let clone m = { data = Hashtbl.create 0; parent = Some m; limits = m.limits }
+  let clone m = { data = Hashtbl.create 0; parent = Some m; size = m.size }
 
   let rec load_byte_opt a m =
     match Hashtbl.find_opt m.data a with
@@ -65,7 +57,8 @@ module M = struct
       Value.const_i32 (Int32.logor (Int32.shl i1 offset) i2)
     | Extract (e1, h, m1), Extract (e2, m2, l) when m1 = m2 && Expr.equal e1 e2
       ->
-      Extract (e1, h, l)
+      let n = Encoding.Types.size (Expr.type_of e1) in
+      if n = h - l then e1 else Extract (e1, h, l)
     | a', b' -> Concat (a', b')
 
   let loadn m a n : int32 =
@@ -129,10 +122,9 @@ module M = struct
 
   let store_64 m ~addr v = storen m ~addr v 8
 
-  let get_limit_max { limits; _ } =
-    Option.map (fun i -> Value.const_i64 @@ Int64.of_int i) limits.max
+  let get_limit_max _m = None (* TODO *)
 end
 
 module M' : Intf.Memory_data = M
 
-let memory = M.create @@ Int32.of_int 2
+let memory = M.create 2l
