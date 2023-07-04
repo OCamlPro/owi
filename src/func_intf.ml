@@ -34,6 +34,7 @@ module type T_Extern_func = sig
     | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
   type (_, _) atype =
+    | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
     | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | Res : ('r, 'r) atype

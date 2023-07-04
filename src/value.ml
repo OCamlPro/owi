@@ -16,6 +16,7 @@ module Make_extern_func (V : Func_intf.Value_types) = struct
     | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
   type (_, _) atype =
+    | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
     | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | Res : ('r, 'r) atype
@@ -41,6 +42,7 @@ module Make_extern_func (V : Func_intf.Value_types) = struct
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
   let rec arg_type : type t r. (t, r) atype -> Simplified.param_type = function
+    | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []

@@ -477,6 +477,7 @@ module Make (P : Intf.P) :
       in
       match ty with
       | Extern_func.Arg (_, args) -> split_one_arg args
+      | UArg args -> split_one_arg args
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
@@ -486,6 +487,8 @@ module Make (P : Intf.P) :
       | Extern_func.Arg (arg, args) ->
         let v, stack = pop_arg stack arg in
         apply stack args (f v)
+      | UArg args ->
+        apply stack args (f ())
       | NArg (_, arg, args) ->
         let v, stack = pop_arg stack arg in
         apply stack args (f v)

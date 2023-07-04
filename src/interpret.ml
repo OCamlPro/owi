@@ -426,6 +426,7 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     in
     match ty with
     | Value.Func.Arg (_, args) -> split_one_arg args
+    | UArg args -> split_one_arg args
     | NArg (_, _, args) -> split_one_arg args
     | Res -> ([], stack)
   in
@@ -435,6 +436,8 @@ let exec_extern_func stack (f : Value.Func.extern_func) =
     | Value.Func.Arg (arg, args) ->
       let v, stack = pop_arg stack arg in
       apply stack args (f v)
+    | UArg args ->
+      apply stack args (f ())
     | NArg (_, arg, args) ->
       let v, stack = pop_arg stack arg in
       apply stack args (f v)
