@@ -12,13 +12,56 @@ type num_size =
 
 let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
+let packed_type = choose [ const I8; const I16 ]
+
+let nullable = choose [ const No_null; const Null ]
+
+let heap_type = const Func_ht
+(* TODO: complete this - Extern_ht and others *)
+
+let ref_type = pair nullable heap_type
+
+let limits =
+  let sup = if true then 10 else 100000 (* TODO: fix max size ? *) in
+  let* min = range sup in
+  let+ max = option (range ~min (sup - min)) in
+  { min; max }
+
+let table_type = pair limits ref_type
+
+let final = choose [ const No_final; const Final ]
+
+let elem_mode = const Elem_declarative (* for functions *)
+(* TODO: complete Elem_active / Elem_passive *)
+
 let sx = choose [ const U; const S ]
 
 let val_type =
   let+ num_type in
   Num_type num_type
 
+let param = pair (const (None : string option)) val_type
+
+let func_type = pair (list param) (list val_type)
+
+let str_type =
+  let+ func_type in
+  Def_func_t func_type
+(* TODO: complete Def_struct_t / Def_array_t *)
+
+let sub_type = map [ final; str_type ] (fun f st -> (f, ([] : indice list), st))
+
 let mut = choose [ const Const; const Var ]
+
+let val_storage_t =
+  let+ val_type in
+  Val_storage_t val_type
+
+let val_packed_t =
+  let+ packed_type in
+  Val_packed_t packed_type
+
+let storage_type = choose [ val_storage_t; val_packed_t ]
 
 let div =
   let+ sx in
