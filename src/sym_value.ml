@@ -182,10 +182,10 @@ module S = struct
 
     let to_bool (e : vbool) =
       match e with
-      | Expr.Val (Num (I32 i)) ->
+      | Val (Num (I32 i)) ->
         Val (Bool (if Int32.ne i 0l then true else false))
-      | Expr.Cvtop (I32 OfBool, cond) -> cond
-      | e -> Expr.Cvtop (I32 ToBool, e)
+      | Cvtop (I32 OfBool, cond) -> cond
+      | e -> Cvtop (I32 ToBool, e)
 
     let trunc_f32_s _ = assert false
 

@@ -9,6 +9,7 @@ let return x = Option.Some x
 
 module M = struct
   module Expr = Encoding.Expression
+  module Types = Encoding.Types
   open Expr
 
   let page_size = 65_536
@@ -26,10 +27,11 @@ module M = struct
   let create size =
     { data = Hashtbl.create 128; parent = None; size = Int32.to_int size }
 
-  let concretize a = match a with Val (Num (I32 i)) -> i | _ -> assert false
+  let concretize_i32 a =
+    match a with Val (Num (I32 i)) -> i | _ -> assert false
 
   let grow m delta =
-    let delta = Int32.to_int @@ concretize delta in
+    let delta = Int32.to_int @@ concretize_i32 delta in
     let old_size = m.size * page_size in
     m.size <- max m.size ((old_size + delta) / page_size)
 
@@ -57,9 +59,8 @@ module M = struct
       Value.const_i32 (Int32.logor (Int32.shl i1 offset) i2)
     | Extract (e1, h, m1), Extract (e2, m2, l) when m1 = m2 && Expr.equal e1 e2
       ->
-      let n = Encoding.Types.size (Expr.type_of e1) in
-      if n = h - l then e1 else Extract (e1, h, l)
-    | a', b' -> Concat (a', b')
+      if h - l = Types.size (Expr.type_of e1) then e1 else Extract (e1, h, l)
+    | _ -> Concat (a, b)
 
   let loadn m a n : int32 =
     let rec loop addr n i v =
@@ -73,26 +74,26 @@ module M = struct
     loop a n 1 v0
 
   let load_8_s m a =
-    match loadn m (concretize a) 1 with
+    match loadn m (concretize_i32 a) 1 with
     | Val (Num (I32 i8)) -> Value.const_i32 (Int32.extend_s 8 i8)
     | e -> Binop (I32 ExtendS, Value.const_i32 24l, e)
 
   let load_8_u m a =
-    match loadn m (concretize a) 1 with
+    match loadn m (concretize_i32 a) 1 with
     | Val (Num (I32 _)) as i8 -> i8
     | e -> Binop (I32 ExtendU, Value.const_i32 24l, e)
 
   let load_16_s m a =
-    match loadn m (concretize a) 2 with
+    match loadn m (concretize_i32 a) 2 with
     | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
     | e -> Binop (I32 ExtendS, Value.const_i32 16l, e)
 
   let load_16_u m a =
-    match loadn m (concretize a) 2 with
+    match loadn m (concretize_i32 a) 2 with
     | Val (Num (I32 _)) as i16 -> i16
     | e -> Binop (I32 ExtendU, Value.const_i32 16l, e)
 
-  let load_32 m a = loadn m (concretize a) 4
+  let load_32 m a = loadn m (concretize_i32 a) 4
 
   let load_64 _m _a = assert false
 
@@ -107,7 +108,7 @@ module M = struct
     | v' -> Extract (v', h, l)
 
   let storen m ~addr v n =
-    let a0 = concretize addr in
+    let a0 = concretize_i32 addr in
     for i = 0 to n - 1 do
       let addr' = Int32.add a0 (Int32.of_int i)
       and v' = extract v (i + 1) i in

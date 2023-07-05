@@ -48,12 +48,12 @@ module P = struct
       (f r) t
 
     let select (sym_bool : vbool) : bool t =
-     fun ({ solver; pc = path_condition; mem } as pc) ->
+     fun ({ solver; pc = path_condition; _ } as state) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
-      | Val (Bool b) -> (b, pc)
-      | Val (Num (I32 0l)) -> (false, pc)
-      | Val (Num (I32 _)) -> (true, pc)
+      | Val (Bool b) -> (b, state)
+      | Val (Num (I32 0l)) -> (false, state)
+      | Val (Num (I32 _)) -> (true, state)
       | _ ->
         let value, path_condition =
           if Batch.check_sat solver (sym_bool :: path_condition) then
@@ -65,7 +65,7 @@ module P = struct
             else assert false
         in
         Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
-        (value, { solver; pc = path_condition; mem })
+        (value, { state with pc = path_condition })
 
     let select_i32 _sym_int = assert false
 
@@ -92,34 +92,32 @@ module P = struct
       List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
 
     let select (sym_bool : vbool) : bool t =
-     fun ({ solver; pc = path_condition; mem } as pc) ->
+     fun ({ solver; pc = path_condition; _ } as state) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
-      | Val (Bool b) -> [ (b, pc) ]
+      | Val (Bool b) -> [ (b, state) ]
       | Val (Num (I32 _)) -> assert false
-      | _ ->
+      | _ -> (
         let cases =
           if Batch.check_sat solver (sym_bool :: path_condition) then
-            [ (true, { solver; pc = sym_bool :: path_condition; mem }) ]
+            [ (true, { state with pc = sym_bool :: path_condition }) ]
           else []
         in
         let cases =
           let no = Value.Bool.not sym_bool in
           if Batch.check_sat solver (no :: path_condition) then
-            (false, { solver; pc = no :: path_condition; mem }) :: cases
+            (false, { state with pc = no :: path_condition }) :: cases
           else cases
         in
         (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
         (* (value, (solver, path_condition)) *)
-        let cases =
-          match cases with
-          | [] | [ _ ] -> cases
-          | lst ->
-            List.map
-              (fun (b, r) -> (b, { r with mem = Sym_memory.M.clone r.mem }))
-              lst
-        in
-        cases
+        match cases with
+        | [] | [ _ ] -> cases
+        | _ ->
+          List.map
+            (fun (b, state) ->
+              (b, { state with mem = Sym_memory.M.clone state.mem }) )
+            cases )
 
     let select_i32 _sym_int = assert false
 
