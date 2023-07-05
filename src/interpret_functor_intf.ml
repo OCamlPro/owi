@@ -161,7 +161,7 @@ module type P = sig
   module Env : sig
     type t = env
 
-    val get_memory : t -> int -> Memory.t Result.t
+    val get_memory : t -> int -> Memory.t Choice.t Result.t
 
     val get_func : t -> int -> Func_intf.t Result.t
 

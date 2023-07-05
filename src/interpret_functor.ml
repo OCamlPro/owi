@@ -455,6 +455,12 @@ module Make (P : Intf.P) :
 
   let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
+  let ( let/* ) o f =
+    match o with
+    | Error e -> trap e
+    | Ok o ->
+      Choice.bind o f
+
   type extern_func = Extern_func.extern_func
 
   let exec_extern_func stack (f : extern_func) =
@@ -884,11 +890,11 @@ module Make (P : Intf.P) :
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
     | Memory_size ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let len = P.Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
     | Memory_grow -> begin
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let old_size = I64.of_int32 @@ P.Memory.size mem in
       let max_size = P.Memory.get_limit_max mem in
       let delta, stack =
@@ -919,13 +925,13 @@ module Make (P : Intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let out_of_bounds = P.Memory.fill mem pos len c in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_copy ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src_pos, stack = Stack.pop_i32 stack in
       let dst_pos, stack = Stack.pop_i32 stack in
@@ -934,7 +940,7 @@ module Make (P : Intf.P) :
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_init i ->
-      let* _mem = P.Env.get_memory env mem_0 in
+      let/* _mem = P.Env.get_memory env mem_0 in
       let _len, stack = Stack.pop_i32 stack in
       let _src_pos, stack = Stack.pop_i32 stack in
       let _dst_pos, stack = Stack.pop_i32 stack in
@@ -1096,7 +1102,7 @@ module Make (P : Intf.P) :
       P.Env.drop_elem elem;
       st stack
     | I_load16 (nn, sx, { offset; _ }) -> (
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       if offset < 0 then Choice.trap Out_of_bounds_memory_access
       else
@@ -1119,7 +1125,7 @@ module Make (P : Intf.P) :
           | S32 -> Stack.push_i32 stack res
           | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_load8 (nn, sx, { offset; _ }) -> (
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       if offset < 0 then Choice.trap Out_of_bounds_memory_access
       else
@@ -1142,7 +1148,7 @@ module Make (P : Intf.P) :
           | S32 -> Stack.push_i32 stack res
           | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_store8 (nn, { offset; _ }) ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let n, stack =
         match nn with
         | S32 ->
@@ -1168,7 +1174,7 @@ module Make (P : Intf.P) :
         st stack
       end
     | I_load (nn, { offset; _ }) ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let memory_length = Memory.size mem in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
@@ -1200,7 +1206,7 @@ module Make (P : Intf.P) :
             st @@ Stack.push_i64 stack res
       end
     | F_load (nn, { offset; _ }) ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let memory_length = Memory.size mem in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
@@ -1234,7 +1240,7 @@ module Make (P : Intf.P) :
             st @@ Stack.push_f64 stack res
       end
     | I_store (nn, { offset; _ }) -> (
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let memory_length = Memory.size mem in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
       match nn with
@@ -1269,7 +1275,7 @@ module Make (P : Intf.P) :
           st stack
         end )
     | F_store (nn, { offset; _ }) -> (
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let memory_length = Memory.size mem in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
       match nn with
@@ -1304,7 +1310,7 @@ module Make (P : Intf.P) :
           st stack
         end )
     | I64_load32 (sx, { offset; _ }) ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let pos, stack = Stack.pop_i32 stack in
@@ -1333,7 +1339,7 @@ module Make (P : Intf.P) :
         else Log.err "unsupported word size"
       end
     | I_store16 (nn, { offset; _ }) ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let n, stack =
@@ -1359,7 +1365,7 @@ module Make (P : Intf.P) :
         st stack
       end
     | I64_store32 { offset; _ } ->
-      let* mem = P.Env.get_memory env mem_0 in
+      let/* mem = P.Env.get_memory env mem_0 in
       let offset = const_i32 (Stdlib.Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let n, stack = Stack.pop_i64 stack in

@@ -179,7 +179,7 @@ module P = struct
 
     type t' = Env_id.t
 
-    let get_memory _ _ = Ok Sym_memory.memory
+    let get_memory _env _ = Ok (fun t -> [t.mem, t])
 
     let get_func = Link_env.get_func
 
