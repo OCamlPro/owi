@@ -96,3 +96,21 @@ module Reference : INTERPRET = struct
 
   let name = "reference"
 end
+
+module Reference_ast : INTERPRET = struct
+  type t = Wasm.Script.command
+
+  let of_symbolic modul =
+    match Compile.until_simplify modul with
+    | Error e -> failwith e
+    | Ok simplified -> (
+      match Typecheck.modul simplified with
+      | Error e -> failwith e
+      | Ok () -> To_reference.modul simplified )
+
+  let run (modul : t) =
+    Wasm.Run.run_command modul;
+    Ok ()
+
+  let name = "reference+ast"
+end

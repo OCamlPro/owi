@@ -36,12 +36,13 @@
   string_map
   symbolic
   syntax
+  to_reference
   typecheck
   types
   value
   wutf8)
  (private_modules convert lexer menhir_parser spectest stack wutf8)
- (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)
+ (libraries integers menhirLib ocaml_intrinsics ppxlib sedlex uutf wasm)
  (preprocess
   (pps sedlex.ppx))
  (instrumentation

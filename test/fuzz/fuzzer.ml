@@ -75,7 +75,12 @@ let check_optimized m =
       compare (module Owi_unoptimized) (module Reference) m
     else true
   in
-  result1 && result2
+  let result3 =
+    if Param.reference_ast_fuzzing then
+      compare (module Owi_unoptimized) (module Reference_ast) m
+    else true
+  in
+  result1 && result2 && result3
 
 let gen = Crowbar.with_printer Owi.Symbolic.Pp.modul Gen.modul
 

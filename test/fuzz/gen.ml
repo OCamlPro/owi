@@ -140,7 +140,8 @@ let if_else expr ~locals ~stack env =
     let typ =
       Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
-    let id = Env.add_block env typ Env.Block in   (* same behavior as block *)
+    let id = Env.add_block env typ Env.Block in
+    (* same behavior as block *)
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
     let* expr_then = expr ~block_type:typ ~stack:pt ~locals env in
@@ -238,7 +239,7 @@ let rec expr ~block_type ~stack ~locals env =
     let i = const i in
     map [ i; next ] List.cons
 
-let data env =
+let _data env =
   let* mode = B.data_mode env in
   let+ init = (*bytes*) const "tmp" in
   (* TODO: Issue #37 *)
@@ -295,7 +296,7 @@ let func env =
 
 let fields env =
   let* memory = option (memory env) in
-  let* datas = list (data env) in
+  let* datas = const [] (* list (data env) *) in
   let* types = list (typ env) in
   let* tables = list (table env) in
   let* globals = list (global env) in
