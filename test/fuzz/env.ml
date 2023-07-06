@@ -18,7 +18,7 @@ type t =
   ; mutable datas : string list
   ; mutable memory : string option
   ; mutable types : sub_type list
-  ; mutable elems : ref_type list
+  ; mutable elems : (string * ref_type) list
   ; mutable tables : (string * table_type) list
   ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
@@ -82,7 +82,7 @@ let add_type env typ =
 let add_elem env typ =
   let n = env.next_elem in
   let name = Format.sprintf "e%d" n in
-  env.elems <- typ :: env.elems;
+  env.elems <- (name, typ) :: env.elems;
   env.next_elem <- succ n;
   name
 
