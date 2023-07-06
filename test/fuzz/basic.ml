@@ -29,10 +29,16 @@ let limits =
 
 let table_type = pair limits ref_type
 
-let final = choose [ const No_final; const Final ]
+let final = const Final
+(* TODO: complete No_final *)
 
-let elem_mode = const Elem_declarative (* for functions *)
-(* TODO: complete Elem_active / Elem_passive *)
+let elem_active =
+  let* ind = const (None : indice option) in
+  let+ expr = const [] in
+  Elem_active (ind,expr)
+
+let elem_mode = const Elem_passive
+(* TODO: complete Elem_declarative - elem_active *)
 
 let sx = choose [ const U; const S ]
 
@@ -49,7 +55,10 @@ let str_type =
   Def_func_t func_type
 (* TODO: complete Def_struct_t / Def_array_t *)
 
-let sub_type = map [ final; str_type ] (fun f st -> (f, ([] : indice list), st))
+let sub_type = 
+  let* final in
+  let+ str_type in
+  (final, ([] : indice list), str_type)
 
 let mut = choose [ const Const; const Var ]
 

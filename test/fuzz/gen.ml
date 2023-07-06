@@ -4,14 +4,14 @@ open Owi.Symbolic
 module S = Type_stack
 module B = Basic
 
-let expr_always_available block expr ~locals ~stack env =
+let expr_always_available block loop expr ~locals ~stack env =
   [ pair B.const_i32 (const [ S.Push (Num_type I32) ])
   ; pair B.const_i64 (const [ S.Push (Num_type I64) ])
   ; pair B.const_f32 (const [ S.Push (Num_type F32) ])
   ; pair B.const_f64 (const [ S.Push (Num_type F64) ])
   ; pair (const Nop) (const [ S.Nothing ])
-  ; block Env.Block expr ~locals ~stack env
-  ; block Env.Loop expr ~locals ~stack env
+  ; block expr ~locals ~stack env
+  ; loop expr ~locals ~stack env
   ; B.unreachable
   ]
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
@@ -155,22 +155,30 @@ let if_else expr ~locals ~stack env =
   end
   | _ -> assert false
 
-let block block_kind expr ~locals ~stack env =
+let block expr ~locals ~stack env =
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
     Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
-  let id = Env.add_block env typ block_kind in
+  let id = Env.add_block env typ Env.Block in
   let* expr = expr ~block_type:typ ~stack:pt ~locals env in
   Env.remove_block env;
-  let+ instr =
-    const
-    @@
-    match block_kind with
-    | Env.Block -> Block (Some id, Some typ, expr)
-    | Env.Loop -> Loop (Some id, Some typ, expr)
-    | Env.Func -> assert false
+  let+ instr = const @@ Block (Some id, Some typ, expr)
+  and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
+  and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
+  (instr, pt_descr @ rt_descr)
+
+let loop expr ~locals ~stack env =
+  let* rt = list B.val_type in
+  let* pt = B.stack_prefix stack in
+  let typ =
+    Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
+  in
+  let id = Env.add_block env typ Env.Loop in
+  let* expr = expr ~block_type:typ ~stack:pt ~locals env in
+  Env.remove_block env;
+  let+ instr = const @@ Loop (Some id, Some typ, expr)
   and+ pt_descr = const @@ List.map (fun _ -> S.Pop) pt
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
@@ -228,7 +236,7 @@ let rec expr ~block_type ~stack ~locals env =
       | _ -> []
     in
     let expr_available env =
-      expr_always_available block expr ~locals ~stack env
+      expr_always_available block loop expr ~locals ~stack env
       @ expr_available_with_current_stack @ B.expr_call env stack
       @ B.expr_br env stack
     in
@@ -257,15 +265,11 @@ let typ env =
   let id = Some (Env.add_type env styp) in
   MType [ (id, styp) ]
 
-(*
-TODO: MElem
-type elem =
-  { id : string option
-  ; typ : ref_type
-  ; init : expr list
-  ; mode : elem_mode
-  }
-*)
+let elem env =
+  let* typ = B.ref_type in
+  let+ mode = B.elem_mode in
+  let id = Some (Env.add_elem env typ) in
+  MElem ({ id; typ; init = []; mode })
 
 let table env =
   let+ typ = B.table_type in
@@ -297,6 +301,7 @@ let fields env =
   let* memory = option (memory env) in
   let* datas = list (data env) in
   let* types = list (typ env) in
+  let* elems = list (elem env) in
   let* tables = list (table env) in
   let* globals = list (global env) in
   let* funcs = list (func env) in
@@ -312,8 +317,8 @@ let fields env =
   let start = MStart (Raw 0) in
   let funcs = start :: start_code :: funcs in
   match memory with
-  | None -> datas @ types @ tables @ globals @ funcs
-  | Some mem -> datas @ [ mem ] @ types @ tables @ globals @ funcs
+  | None -> datas @ types @ elems @ tables @ globals @ funcs
+  | Some mem -> datas @ [ mem ] @ types @ elems @ tables @ globals @ funcs
 
 let modul =
   let id = Some "m" in
