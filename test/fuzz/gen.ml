@@ -16,8 +16,9 @@ let expr_always_available block loop expr ~locals ~stack env =
   ]
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
   @ B.local_i32 env @ B.local_i64 env @ B.local_f32 env @ B.local_f64 env
-  @ B.data_drop env
+  @ B.data_drop env @ B.elem_drop env
   @ if B.memory_exists env then [ B.memory_size ] else []
+  @ B.table_size env
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
@@ -46,6 +47,7 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
   @ (if B.memory_exists env then B.memory_grow :: load_instr else [])
   @ B.expr_br_if env stack
+  @ B.table_get env
 
 let expr_available_2_i32 (env : Env.t) =
   let store_instr =
@@ -76,6 +78,8 @@ let expr_available_2_f64_i32 (env : Env.t) =
 
 let expr_available_3_i32 env =
   if B.memory_exists env then [ B.memory_copy ] @ B.memory_init env else []
+  (* @ B.table_init env *)
+  (* @ B.table_copy env *)
 (* TODO: B.memory_fill *)
 
 let expr_available_1_i64 env =
@@ -218,6 +222,9 @@ let rec expr ~block_type ~stack ~locals env =
         expr_available_1_any
         @ expr_available_1_i32 if_else expr ~stack ~locals env
         @ expr_available_2_i32 env
+      | Num_type I32 :: Ref_type (_, Func_ht) :: Num_type I32 :: _tl -> B.table_fill env
+      | Num_type I32 :: Ref_type (_, Func_ht) :: _tl -> B.table_grow env
+      | Ref_type (_, Func_ht) :: Num_type I32 :: _tl -> B.table_set env
       | Num_type I64 :: Num_type I32 :: _tl -> expr_available_2_i64_i32 env
       | Num_type F32 :: Num_type I32 :: _tl -> expr_available_2_f32_i32 env
       | Num_type F64 :: Num_type I32 :: _tl -> expr_available_2_f64_i32 env

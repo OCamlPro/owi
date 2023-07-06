@@ -514,6 +514,56 @@ let data_drop (env : Env.t) =
     (fun name -> pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]))
     env.datas
 
+let elem_drop (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Elem_drop (Symbolic name))) (const [ S.Nothing ]))
+    env.elems
+
+let table_init (env : Env.t) =
+  List.flatten @@
+  List.map
+    (fun (name_x, _) -> 
+      List.map (fun (name_y, _) -> pair (const (Table_init (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ]))
+      env.tables
+    )
+    env.tables
+(* TODO: to be continued > add constraint between table $name_x and $name_y *)
+
+let table_copy (env : Env.t) =
+  List.flatten @@
+  List.map
+    (fun (name_x, _) -> 
+      List.map (fun (name_y, _) -> pair (const (Table_copy (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ]))
+      env.tables
+    )
+    env.tables
+(* TODO: to be continued > add constraint between table $name_x and $name_y *)
+
+let table_size (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Table_size (Symbolic name))) (const [ S.Push (Num_type I32) ]))
+    env.tables
+
+let table_grow (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Table_grow (Symbolic name))) (const [ S.Pop; S.Pop; S.Push (Num_type I32) ]))
+    env.tables
+
+let table_fill (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Table_fill (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ]))
+    env.tables
+
+let table_set (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Table_set (Symbolic name))) (const [ S.Pop; S.Pop ]))
+    env.tables
+
+let table_get (env : Env.t) =
+  List.map
+    (fun (name, _) -> pair (const (Table_get (Symbolic name))) (const [ S.Pop; S.Push (Ref_type (No_null, Func_ht)) ]))
+    env.tables
+
 let block_kind = choose [ const Env.Block; const Env.Loop; const Env.Func ]
 
 let expr_call (env : Env.t) (stack : val_type list) =
