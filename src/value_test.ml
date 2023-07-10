@@ -118,6 +118,12 @@ module P = struct
   module Table = Table
   module Memory = Memory
 
+  module Data = struct
+    type t = data
+
+    let value data = data.Link_env.value
+  end
+
   module Env = struct
     type t = env
 

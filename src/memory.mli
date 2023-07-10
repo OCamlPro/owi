@@ -35,6 +35,7 @@ val grow : t -> int32 -> unit
 
 val fill : t -> int32 -> int32 -> int32 -> bool
 val blit : t -> int32 -> int32 -> int32 -> bool
+val blit_string : t -> string -> src:int32 -> dst:int32 -> len:int32 -> bool
 
 val size_in_pages : t -> int32
 

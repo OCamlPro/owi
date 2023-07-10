@@ -166,6 +166,12 @@ module P = struct
     include Sym_memory.M
   end
 
+  module Data = struct
+    type t = data
+
+    let value _ = assert false
+  end
+
   module Env = struct
     type t = env
 

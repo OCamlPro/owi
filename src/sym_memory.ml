@@ -39,6 +39,8 @@ module M = struct
 
   let blit _ = assert false
 
+  let blit_string _ = assert false
+
   let size { size; _ } = Value.const_i32 @@ Int32.of_int @@ (size * page_size)
 
   let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size

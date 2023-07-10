@@ -151,11 +151,20 @@ module type P = sig
 
     val blit : t -> int32 -> int32 -> int32 -> vbool
 
+    val blit_string :
+      t -> string -> src:int32 -> dst:int32 -> len:int32 -> vbool
+
     val size : t -> int32
 
     val size_in_pages : t -> int32
 
     val get_limit_max : t -> int64 option
+  end
+
+  module Data : sig
+    type t = data
+
+    val value : t -> string
   end
 
   module Env : sig

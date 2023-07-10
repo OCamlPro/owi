@@ -2,11 +2,9 @@
 
 open Types
 open Simplified
-module Env = Link.Env
-module Intf = Interpret_functor_intf
 
-module Make (P : Intf.P) :
-  Intf.S
+module Make (P : Interpret_functor_intf.P) :
+  Interpret_functor_intf.S
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
@@ -910,15 +908,13 @@ module Make (P : Intf.P) :
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_init i ->
-      let/* _mem = P.Env.get_memory env mem_0 in
-      let _len, stack = Stack.pop_i32 stack in
-      let _src_pos, stack = Stack.pop_i32 stack in
-      let _dst_pos, stack = Stack.pop_i32 stack in
-      let* _data = Env.get_data env i in
-      let out_of_bounds =
-        assert false
-        (* P.Memory.blit_string data.value src_pos mem dst_pos len *)
-      in
+      let/* mem = P.Env.get_memory env mem_0 in
+      let len, stack = Stack.pop_i32 stack in
+      let src, stack = Stack.pop_i32 stack in
+      let dst, stack = Stack.pop_i32 stack in
+      let* data = Env.get_data env i in
+      let data = P.Data.value data in
+      let out_of_bounds = P.Memory.blit_string mem data ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack

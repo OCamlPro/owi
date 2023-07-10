@@ -57,6 +57,20 @@ let blit mem src_pos dst_pos len =
     false
   end
 
+let blit_string mem str ~src ~dst ~len =
+  let src = Int32.to_int src in
+  let dst = Int32.to_int dst in
+  let len = Int32.to_int len in
+  if
+    src < 0 || dst < 0
+    || src + len <= String.length str
+    || dst + len <= Bytes.length mem.data
+  then true
+  else begin
+    Bytes.blit_string str src mem.data dst len;
+    false
+  end
+
 let get_data { data; _ } = data
 
 let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
