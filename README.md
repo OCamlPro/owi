@@ -81,7 +81,7 @@ val link_state : Link.state =
 ...
 # let () =
     Log.debug_on := true;
-    match Interpret.modul module_to_run with
+    match Interpret.I.modul module_to_run with
     | Ok () -> ()
     | Error e -> failwith e;;
 interpreting ...

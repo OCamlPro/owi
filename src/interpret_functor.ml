@@ -9,24 +9,19 @@ module Make (P : Interpret_functor_intf.P) :
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
      and type env := P.env = struct
-  open P.Value
-  module Int32 = I32
-  module Int64 = I64
-  module Float32 = F32
-  module Float64 = F64
-  module Extern_func = P.Extern_func
-  module Stack = Stack_functor.Make (P.Value) [@@inlined hint]
-  module Choice = P.Choice
-  module Global = P.Global
-  module Memory = P.Memory
-  module Env = P.Env
+  open P
+  open Value
+
+  type value = t
+
+  module Stack = Stack_functor.Make (Value) [@@inlined hint]
 
   module Int32_infix = struct
-    let ( < ) = Int32.lt
+    let ( < ) = I32.lt
 
-    let ( + ) = Int32.add
+    let ( + ) = I32.add
 
-    let ( - ) = Int32.sub
+    let ( - ) = I32.sub
 
     let ( ~- ) x = const_i32 0l - x
 
@@ -66,14 +61,14 @@ module Make (P : Interpret_functor_intf.P) :
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
       let res =
-        let open Int32 in
+        let open I32 in
         match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
       in
       Stack.push_i32 stack res
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
       let res =
-        let open Int64 in
+        let open I64 in
         match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
       in
       Stack.push_i64 stack res
@@ -81,7 +76,7 @@ module Make (P : Interpret_functor_intf.P) :
   let exec_funop stack nn op =
     match nn with
     | S32 ->
-      let open Float32 in
+      let open F32 in
       let f, stack = Stack.pop_f32 stack in
       let res =
         match op with
@@ -95,7 +90,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       Stack.push_f32 stack res
     | S64 ->
-      let open Float64 in
+      let open F64 in
       let f, stack = Stack.pop_f64 stack in
       let res =
         match op with
@@ -114,7 +109,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let/ res =
-        let open Int32 in
+        let open I32 in
         match op with
         | Add -> Choice.return @@ add n1 n2
         | Sub -> Choice.return @@ sub n1 n2
@@ -127,7 +122,7 @@ module Make (P : Interpret_functor_intf.P) :
                 Choice.select
                 @@ Int32_infix.(
                      Bool.and_
-                       (eq n1 (const_i32 Stdlib.Int32.min_int))
+                       (eq n1 (const_i32 Int32.min_int))
                        (eq n2 ~-(const_i32 1l)) )
               in
               if overflow then Choice.trap Integer_overflow
@@ -155,7 +150,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let/ res =
-        let open Int64 in
+        let open I64 in
         match op with
         | Add -> Choice.return @@ add n1 n2
         | Sub -> Choice.return @@ sub n1 n2
@@ -167,7 +162,7 @@ module Make (P : Interpret_functor_intf.P) :
               let/ overflow =
                 Choice.select
                 @@ Bool.and_
-                     (eq n1 (const_i64 Stdlib.Int64.min_int))
+                     (eq n1 (const_i64 Int64.min_int))
                      (eq n2 (sub (const_i64 0L) (const_i64 1L)))
               in
               if overflow then Choice.trap Integer_overflow
@@ -198,7 +193,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S32 ->
       let (f1, f2), stack = Stack.pop2_f32 stack in
       Stack.push_f32 stack
-        (let open Float32 in
+        (let open F32 in
          match op with
          | Add -> add f1 f2
          | Sub -> sub f1 f2
@@ -210,7 +205,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S64 ->
       let (f1, f2), stack = Stack.pop2_f64 stack in
       Stack.push_f64 stack
-        (let open Float64 in
+        (let open F64 in
          match op with
          | Add -> add f1 f2
          | Sub -> sub f1 f2
@@ -224,11 +219,11 @@ module Make (P : Interpret_functor_intf.P) :
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
-      let res = match op with Eqz -> Int32.eq_const n 0l in
+      let res = match op with Eqz -> I32.eq_const n 0l in
       Stack.push_bool stack res
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
-      let res = match op with Eqz -> Int64.eq_const n 0L in
+      let res = match op with Eqz -> I64.eq_const n 0L in
       Stack.push_bool stack res
 
   let exec_irelop stack nn (op : irelop) =
@@ -236,7 +231,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let res =
-        let open Int32 in
+        let open I32 in
         match op with
         | Eq -> eq n1 n2
         | Ne -> ne n1 n2
@@ -253,7 +248,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let res =
-        let open Int64 in
+        let open I64 in
         match op with
         | Eq -> eq n1 n2
         | Ne -> ne n1 n2
@@ -273,7 +268,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S32 ->
       let (n1, n2), stack = Stack.pop2_f32 stack in
       let res =
-        let open Float32 in
+        let open F32 in
         match op with
         | Eq -> eq n1 n2
         | Ne -> ne n1 n2
@@ -286,7 +281,7 @@ module Make (P : Interpret_functor_intf.P) :
     | S64 ->
       let (n1, n2), stack = Stack.pop2_f64 stack in
       let res =
-        let open Float64 in
+        let open F64 in
         match op with
         | Eq -> eq n1 n2
         | Ne -> ne n1 n2
@@ -302,25 +297,25 @@ module Make (P : Interpret_functor_intf.P) :
     | S32, S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res =
-        match sx with S -> Int32.trunc_f32_s f | U -> Int32.trunc_f32_u f
+        match sx with S -> I32.trunc_f32_s f | U -> I32.trunc_f32_u f
       in
       Stack.push_i32 stack res
     | S32, S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res =
-        match sx with S -> Int32.trunc_f64_s f | U -> Int32.trunc_f64_u f
+        match sx with S -> I32.trunc_f64_s f | U -> I32.trunc_f64_u f
       in
       Stack.push_i32 stack res
     | S64, S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res =
-        match sx with S -> Int64.trunc_f32_s f | U -> Int64.trunc_f32_u f
+        match sx with S -> I64.trunc_f32_s f | U -> I64.trunc_f32_u f
       in
       Stack.push_i64 stack res
     | S64, S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res =
-        match sx with S -> Int64.trunc_f64_s f | U -> Int64.trunc_f64_u f
+        match sx with S -> I64.trunc_f64_s f | U -> I64.trunc_f64_u f
       in
       Stack.push_i64 stack res
 
@@ -332,16 +327,16 @@ module Make (P : Interpret_functor_intf.P) :
         let n, stack = Stack.pop_f32 stack in
         let n =
           match sx with
-          | S -> Int32.trunc_sat_f32_s n
-          | U -> Int32.trunc_sat_f32_u n
+          | S -> I32.trunc_sat_f32_s n
+          | U -> I32.trunc_sat_f32_u n
         in
         Stack.push_i32 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let n =
           match sx with
-          | S -> Int32.trunc_sat_f64_s n
-          | U -> Int32.trunc_sat_f64_u n
+          | S -> I32.trunc_sat_f64_s n
+          | U -> I32.trunc_sat_f64_u n
         in
         Stack.push_i32 stack n
     end
@@ -351,16 +346,16 @@ module Make (P : Interpret_functor_intf.P) :
         let n, stack = Stack.pop_f32 stack in
         let n =
           match sx with
-          | S -> Int64.trunc_sat_f32_s n
-          | U -> Int64.trunc_sat_f32_u n
+          | S -> I64.trunc_sat_f32_s n
+          | U -> I64.trunc_sat_f32_u n
         in
         Stack.push_i64 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let n =
           match sx with
-          | S -> Int64.trunc_sat_f64_s n
-          | U -> Int64.trunc_sat_f64_u n
+          | S -> I64.trunc_sat_f64_s n
+          | U -> I64.trunc_sat_f64_u n
         in
         Stack.push_i64 stack n
     end
@@ -368,7 +363,7 @@ module Make (P : Interpret_functor_intf.P) :
   let exec_fconverti stack nn nn' sx =
     match nn with
     | S32 -> (
-      let open Float32 in
+      let open F32 in
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
@@ -379,7 +374,7 @@ module Make (P : Interpret_functor_intf.P) :
         let n = if sx = S then convert_i64_s n else convert_i64_u n in
         Stack.push_f32 stack n )
     | S64 -> (
-      let open Float64 in
+      let open F64 in
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
@@ -396,22 +391,22 @@ module Make (P : Interpret_functor_intf.P) :
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_f32 stack in
-        let n = Int32.reinterpret_f32 n in
+        let n = I32.reinterpret_f32 n in
         Stack.push_i32 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
-        let n = Int32.reinterpret_f32 (Float32.demote_f64 n) in
+        let n = I32.reinterpret_f32 (F32.demote_f64 n) in
         Stack.push_i32 stack n
     end
     | S64 -> begin
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_f32 stack in
-        let n = Int64.reinterpret_f64 (Float64.promote_f32 n) in
+        let n = I64.reinterpret_f64 (F64.promote_f32 n) in
         Stack.push_i64 stack n
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
-        let n = Int64.reinterpret_f64 n in
+        let n = I64.reinterpret_f64 n in
         Stack.push_i64 stack n
     end
 
@@ -421,31 +416,31 @@ module Make (P : Interpret_functor_intf.P) :
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = Float32.reinterpret_i32 n in
+        let n = F32.reinterpret_i32 n in
         Stack.push_f32 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = Float32.reinterpret_i32 (Int64.to_int32 n) in
+        let n = F32.reinterpret_i32 (I64.to_int32 n) in
         Stack.push_f32 stack n
     end
     | S64 -> begin
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = Float64.reinterpret_i64 (Int64.of_int32 n) in
+        let n = F64.reinterpret_i64 (I64.of_int32 n) in
         Stack.push_f64 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = Float64.reinterpret_i64 n in
+        let n = F64.reinterpret_i64 n in
         Stack.push_f64 stack n
     end
 
-  let init_local (_id, t) : t =
+  let init_local (_id, t) : value =
     match t with
-    | Num_type I32 -> I32 Int32.zero
-    | Num_type I64 -> I64 Int64.zero
-    | Num_type F32 -> F32 Float32.zero
-    | Num_type F64 -> F64 Float64.zero
+    | Num_type I32 -> I32 I32.zero
+    | Num_type I64 -> I64 I64.zero
+    | Num_type F32 -> F32 F32.zero
+    | Num_type F64 -> F64 F64.zero
     | Ref_type (_null, rt) -> ref_null rt
 
   (* TODO move to module Env *)
@@ -573,9 +568,26 @@ module Make (P : Interpret_functor_intf.P) :
       ; pc : pc
       ; block_stack : block_stack
       ; func_rt : result_type
-      ; env : P.Env.t
+      ; env : Env.t
       ; count : count
-      ; envs : P.Env.t Env_id.collection
+      ; envs : Env.t Env_id.collection
+      }
+
+    let empty_exec_state ~locals ~env =
+      { return_state = None
+      ; stack = []
+      ; locals = Locals.of_list locals
+      ; pc = []
+      ; block_stack = []
+      ; func_rt = []
+      ; env
+      ; count =
+          { name = None
+          ; enter = 0
+          ; instructions = 0
+          ; calls = Hashtbl.create 512
+          }
+      ; envs = Env_id.empty
       }
 
     let rec print_count ppf count =
@@ -722,7 +734,7 @@ module Make (P : Interpret_functor_intf.P) :
   (*   | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
   (*   | _ -> trap "element type error" *)
   (* in *)
-  (* let pt, rt = Value.Func.typ func in *)
+  (* let pt, rt = Func.typ func in *)
   (* let pt', rt' = typ_i in *)
   (* if not (rt = rt' && List.equal p_type_eq pt pt') then *)
   (*   trap "indirect call type mismatch"; *)
@@ -743,7 +755,7 @@ module Make (P : Interpret_functor_intf.P) :
   (*     | Funcref None -> trap (Printf.sprintf "uninitialized element %i" fun_i) *)
   (*     | _ -> trap "element type error" *)
   (*   in *)
-  (*   let pt, rt = Value.Func.typ func in *)
+  (*   let pt, rt = Func.typ func in *)
   (*   let pt', rt' = typ_i in *)
   (*   if not (rt = rt' && List.equal p_type_eq pt pt') then *)
   (*     trap "indirect call type mismatch"; *)
@@ -779,47 +791,47 @@ module Make (P : Interpret_functor_intf.P) :
       match nn with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = Int32.extend_s 8 n in
+        let n = I32.extend_s 8 n in
         st @@ Stack.push_i32 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = Int64.extend_s 8 n in
+        let n = I64.extend_s 8 n in
         st @@ Stack.push_i64 stack n
     end
     | I_extend16_s nn -> begin
       match nn with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = Int32.extend_s 16 n in
+        let n = I32.extend_s 16 n in
         st @@ Stack.push_i32 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = Int64.extend_s 16 n in
+        let n = I64.extend_s 16 n in
         st @@ Stack.push_i64 stack n
     end
     | I64_extend32_s ->
       let n, stack = Stack.pop_i64 stack in
-      let n = Int64.extend_s 32 n in
+      let n = I64.extend_s 32 n in
       st @@ Stack.push_i64 stack n
     | I32_wrap_i64 ->
       let n, stack = Stack.pop_i64 stack in
-      let n = Int32.wrap_i64 n in
+      let n = I32.wrap_i64 n in
       st @@ Stack.push_i32 stack n
     | I64_extend_i32 s ->
       let n, stack = Stack.pop_i32 stack in
       let n =
-        match s with S -> Int64.extend_i32_s n | U -> Int64.extend_i32_u n
+        match s with S -> I64.extend_i32_s n | U -> I64.extend_i32_u n
       in
       st @@ Stack.push_i64 stack n
     | I_trunc_f (nn, nn', s) -> st @@ exec_itruncf stack nn nn' s
     | I_trunc_sat_f (nn, nn', s) -> st @@ exec_itruncsatf stack nn nn' s
     | F32_demote_f64 ->
       let n, stack = Stack.pop_f64 stack in
-      let n = Float32.demote_f64 n in
+      let n = F32.demote_f64 n in
       st @@ Stack.push_f32 stack n
     | F64_promote_f32 ->
       let n, stack = Stack.pop_f32 stack in
-      let n = Float64.promote_f32 n in
+      let n = F64.promote_f32 n in
       st @@ Stack.push_f64 stack n
     | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
     | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
@@ -843,11 +855,11 @@ module Make (P : Interpret_functor_intf.P) :
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-      let* func = P.Env.get_func env i in
+      let* func = Env.get_func env i in
       exec_vfunc ~return:false state func
     end
     | Return_call i -> begin
-      let* func = P.Env.get_func env i in
+      let* func = Env.get_func env i in
       exec_vfunc ~return:true state func
     end
     | Br i -> State.branch state i
@@ -858,18 +870,18 @@ module Make (P : Interpret_functor_intf.P) :
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
     | Memory_size ->
-      let/* mem = P.Env.get_memory env mem_0 in
-      let len = P.Memory.size_in_pages mem in
+      let/* mem = Env.get_memory env mem_0 in
+      let len = Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
     | Memory_grow -> begin
-      let/* mem = P.Env.get_memory env mem_0 in
-      let old_size = I64.of_int32 @@ P.Memory.size mem in
-      let max_size = P.Memory.get_limit_max mem in
+      let/* mem = Env.get_memory env mem_0 in
+      let old_size = I64.of_int32 @@ Memory.size mem in
+      let max_size = Memory.get_limit_max mem in
       let delta, stack =
         (* TODO: convert to unsigned *)
         Stack.pop_i32 stack
       in
-      let page_size = const_i64 @@ Stdlib.Int64.of_int page_size in
+      let page_size = const_i64 @@ Int64.of_int page_size in
       let delta = I64.(mul (of_int32 delta) page_size) in
       let new_size = I64.(add old_size delta) in
       let too_big =
@@ -893,28 +905,28 @@ module Make (P : Interpret_functor_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let/* mem = P.Env.get_memory env mem_0 in
-      let out_of_bounds = P.Memory.fill mem pos len c in
+      let/* mem = Env.get_memory env mem_0 in
+      let out_of_bounds = Memory.fill mem pos len c in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_copy ->
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src_pos, stack = Stack.pop_i32 stack in
       let dst_pos, stack = Stack.pop_i32 stack in
-      let out_of_bounds = P.Memory.blit mem src_pos dst_pos len in
+      let out_of_bounds = Memory.blit mem src_pos dst_pos len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_init i ->
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* data = Env.get_data env i in
-      let data = P.Data.value data in
-      let out_of_bounds = P.Memory.blit_string mem data ~src ~dst ~len in
+      let data = Data.value data in
+      let out_of_bounds = Memory.blit_string mem data ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
@@ -929,13 +941,13 @@ module Make (P : Interpret_functor_intf.P) :
       let stack = Stack.push stack v in
       Choice.return (State.Continue { state with locals; stack })
     | Global_get i ->
-      let* g = P.Env.get_global env i in
-      st @@ Stack.push stack (P.Global.value g)
+      let* g = Env.get_global env i in
+      st @@ Stack.push stack (Global.value g)
     | Global_set i ->
-      let* global = P.Env.get_global env i in
-      if P.Global.mut global = Const then Log.err "Can't set const global";
+      let* global = Env.get_global env i in
+      if Global.mut global = Const then Log.err "Can't set const global";
       let v, stack =
-        match P.Global.typ global with
+        match Global.typ global with
         | Ref_type _rt -> Stack.pop_ref stack
         | Num_type nt -> (
           match nt with
@@ -952,10 +964,10 @@ module Make (P : Interpret_functor_intf.P) :
             let v, stack = Stack.pop_f64 stack in
             (F64 v, stack) )
       in
-      P.Global.set_value global v;
+      Global.set_value global v;
       st stack
     | Table_get _indice -> assert false
-    (*   let* t = P.Env.get_table env indice in *)
+    (*   let* t = Env.get_table env indice in *)
     (*   let indice, stack = Stack.pop_i32 stack in *)
     (*   let size = Table.size t in *)
     (*   let v = Table.get t indice in *)
@@ -963,7 +975,7 @@ module Make (P : Interpret_functor_intf.P) :
     (*   st @@ Stack.push stack (Ref v) *)
 
     (* let/ indice = Choice.select_i32 indice in *)
-    (*     let indice = Stdlib.Int32.to_int indice in *)
+    (*     let indice = Int32.to_int indice in *)
     (*     let v = *)
     (*       match t.data.(indice) with *)
     (*       | exception Invalid_argument _ -> trap "out of bounds table access" *)
@@ -974,12 +986,12 @@ module Make (P : Interpret_functor_intf.P) :
       let* t = Env.get_table env indice in
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
-      let out_of_bounds = P.Table.set t indice v in
+      let out_of_bounds = Table.set t indice v in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access else st stack
     | Table_size indice ->
       let* t = Env.get_table env indice in
-      let len = P.Table.size t in
+      let len = Table.size t in
       st @@ Stack.push_i32 stack len
     | Table_grow _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
@@ -1064,15 +1076,15 @@ module Make (P : Interpret_functor_intf.P) :
     (*     end; *)
     (*     st stack *)
     | Elem_drop i ->
-      let* elem = P.Env.get_elem env i in
-      P.Env.drop_elem elem;
+      let* elem = Env.get_elem env i in
+      Env.drop_elem elem;
       st stack
     | I_load16 (nn, sx, { offset; _ }) -> (
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       if offset < 0 then Choice.trap Out_of_bounds_memory_access
       else
-        let offset = const_i32 @@ Stdlib.Int32.of_int offset in
+        let offset = const_i32 @@ Int32.of_int offset in
         let out_of_bounds =
           Bool.or_
             Int32_infix.(Memory.size mem < pos + offset + const 2l)
@@ -1083,7 +1095,7 @@ module Make (P : Interpret_functor_intf.P) :
         else
           let addr = I32.add pos offset in
           let res =
-            (if sx = S then P.Memory.load_16_s else P.Memory.load_16_u) mem addr
+            (if sx = S then Memory.load_16_s else Memory.load_16_u) mem addr
           in
           st
           @@
@@ -1091,11 +1103,11 @@ module Make (P : Interpret_functor_intf.P) :
           | S32 -> Stack.push_i32 stack res
           | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_load8 (nn, sx, { offset; _ }) -> (
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       if offset < 0 then Choice.trap Out_of_bounds_memory_access
       else
-        let offset = const_i32 @@ Stdlib.Int32.of_int offset in
+        let offset = const_i32 @@ Int32.of_int offset in
         let addr = I32.add pos offset in
         let out_of_bounds =
           Bool.or_
@@ -1106,7 +1118,7 @@ module Make (P : Interpret_functor_intf.P) :
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else
           let res =
-            (if sx = S then P.Memory.load_8_s else P.Memory.load_8_u) mem addr
+            (if sx = S then Memory.load_8_s else Memory.load_8_u) mem addr
           in
           st
           @@
@@ -1114,7 +1126,7 @@ module Make (P : Interpret_functor_intf.P) :
           | S32 -> Stack.push_i32 stack res
           | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_store8 (nn, { offset; _ }) ->
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let n, stack =
         match nn with
         | S32 ->
@@ -1122,10 +1134,10 @@ module Make (P : Interpret_functor_intf.P) :
           (n, stack)
         | S64 ->
           let n, stack = Stack.pop_i64 stack in
-          (Int64.to_int32 n, stack)
+          (I64.to_int32 n, stack)
       in
       let pos, stack = Stack.pop_i32 stack in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let offset = const_i32 (Int32.of_int offset) in
       let addr = I32.add pos offset in
       let out_of_bounds =
         Bool.or_
@@ -1135,15 +1147,15 @@ module Make (P : Interpret_functor_intf.P) :
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
-        P.Memory.store_8 mem ~addr n;
+        Memory.store_8 mem ~addr n;
         (* Thread memory ? *)
         st stack
       end
     | I_load (nn, { offset; _ }) ->
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let memory_length = Memory.size mem in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let offset = const_i32 (Int32.of_int offset) in
       let addr = I32.add pos offset in
       let out_of_bounds =
         Bool.or_ Int32_infix.(offset < const 0l) Int32_infix.(pos < const 0l)
@@ -1172,10 +1184,10 @@ module Make (P : Interpret_functor_intf.P) :
             st @@ Stack.push_i64 stack res
       end
     | F_load (nn, { offset; _ }) ->
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let memory_length = Memory.size mem in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let offset = const_i32 (Int32.of_int offset) in
       let addr = I32.add pos offset in
       let out_of_bounds =
         Bool.or_ Int32_infix.(offset < const 0l) Int32_infix.(pos < const 0l)
@@ -1206,9 +1218,9 @@ module Make (P : Interpret_functor_intf.P) :
             st @@ Stack.push_f64 stack res
       end
     | I_store (nn, { offset; _ }) -> (
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let memory_length = Memory.size mem in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let offset = const_i32 (Int32.of_int offset) in
       match nn with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
@@ -1241,9 +1253,9 @@ module Make (P : Interpret_functor_intf.P) :
           st stack
         end )
     | F_store (nn, { offset; _ }) -> (
-      let/* mem = P.Env.get_memory env mem_0 in
+      let/* mem = Env.get_memory env mem_0 in
       let memory_length = Memory.size mem in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let offset = const_i32 (Int32.of_int offset) in
       match nn with
       | S32 ->
         let n, stack = Stack.pop_f32 stack in
@@ -1257,7 +1269,7 @@ module Make (P : Interpret_functor_intf.P) :
         let/ out_of_bounds = Choice.select out_of_bounds in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
-          Memory.store_32 mem ~addr (Float32.to_bits n);
+          Memory.store_32 mem ~addr (F32.to_bits n);
           st stack
         end
       | S64 ->
@@ -1272,12 +1284,12 @@ module Make (P : Interpret_functor_intf.P) :
         let/ out_of_bounds = Choice.select out_of_bounds in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
-          Memory.store_64 mem ~addr (Float64.to_bits n);
+          Memory.store_64 mem ~addr (F64.to_bits n);
           st stack
         end )
     | I64_load32 (sx, { offset; _ }) ->
-      let/* mem = P.Env.get_memory env mem_0 in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let/* mem = Env.get_memory env mem_0 in
+      let offset = const_i32 (Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let pos, stack = Stack.pop_i32 stack in
       let addr = I32.add pos offset in
@@ -1293,7 +1305,7 @@ module Make (P : Interpret_functor_intf.P) :
       else begin
         let res = Memory.load_32 mem addr in
         if sx = S || Sys.word_size = 32 then
-          let res = Int64.of_int32 res in
+          let res = I64.of_int32 res in
           st @@ Stack.push_i64 stack res
         else if Sys.word_size = 64 then
           let res =
@@ -1305,8 +1317,8 @@ module Make (P : Interpret_functor_intf.P) :
         else Log.err "unsupported word size"
       end
     | I_store16 (nn, { offset; _ }) ->
-      let/* mem = P.Env.get_memory env mem_0 in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let/* mem = Env.get_memory env mem_0 in
+      let offset = const_i32 (Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let n, stack =
         match nn with
@@ -1331,11 +1343,11 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     | I64_store32 { offset; _ } ->
-      let/* mem = P.Env.get_memory env mem_0 in
-      let offset = const_i32 (Stdlib.Int32.of_int offset) in
+      let/* mem = Env.get_memory env mem_0 in
+      let offset = const_i32 (Int32.of_int offset) in
       let memory_length = Memory.size mem in
       let n, stack = Stack.pop_i64 stack in
-      let n = Int64.to_int32 n in
+      let n = I64.to_int32 n in
       let pos, stack = Stack.pop_i32 stack in
       let addr = I32.add pos offset in
       let out_of_bounds =
@@ -1350,13 +1362,13 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     | Data_drop i ->
-      let* data = P.Env.get_data env i in
-      P.Env.drop_data data;
+      let* data = Env.get_data env i in
+      Env.drop_data data;
       st stack
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let/ target = Choice.select_i32 target in
-      let target = Stdlib.Int32.to_int target in
+      let target = Int32.to_int target in
       let target =
         if target < 0 || target >= Array.length inds then i else inds.(target)
       in
@@ -1373,15 +1385,14 @@ module Make (P : Interpret_functor_intf.P) :
       let/ len = Choice.select_i32 len in
       let _default, stack = Stack.pop stack in
       let a =
-        Array.init (Stdlib.Int32.to_int len) (fun _i ->
-          (* TODO: use default *) () )
+        Array.init (Int32.to_int len) (fun _i -> (* TODO: use default *) ())
       in
       st @@ Stack.push_array stack a
     | Array_new_default _t ->
       let len, stack = Stack.pop_i32 stack in
       let/ len = Choice.select_i32 len in
       let default = (* TODO: get it from t *) () in
-      let a = Array.init (Stdlib.Int32.to_int len) (fun _i -> default) in
+      let a = Array.init (Int32.to_int len) (fun _i -> default) in
       st @@ Stack.push_array stack a
     | ( Array_new_data _ | Array_new_elem _ | Array_new_fixed _ | Array_get _
       | Array_get_u _ | Array_set _ | Array_len | I31_new | I31_get_s
@@ -1426,18 +1437,18 @@ module Make (P : Interpret_functor_intf.P) :
     let/ state = loop state in
     Choice.return (state, count)
 
-  let modul envs (modul : P.Module_to_run.t) =
+  let modul envs (modul : Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
     let/ () =
       List.fold_left
         (fun u to_run ->
           let/ () = u in
           let/ end_stack, count =
-            let env = P.Module_to_run.env modul in
+            let env = Module_to_run.env modul in
             exec_expr envs env (State.Locals.of_list []) Stack.empty to_run None
           in
           Log.profile "Exec module %s@.%a@."
-            (Option.value (P.Module_to_run.modul modul).id ~default:"anonymous")
+            (Option.value (Module_to_run.modul modul).id ~default:"anonymous")
             State.print_count count;
           match end_stack with
           | [] -> Choice.return ()
@@ -1445,7 +1456,7 @@ module Make (P : Interpret_functor_intf.P) :
             Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
             assert false )
         (Choice.return ())
-        (P.Module_to_run.to_run modul)
+        (Module_to_run.to_run modul)
     in
     Choice.return (Ok ())
   (* TODO error handling *)

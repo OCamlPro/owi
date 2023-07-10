@@ -20,7 +20,6 @@
   int64
   func_intf
   interpret
-  interpret2
   interpret_functor
   value_intf
   value_test
@@ -54,6 +53,7 @@
   string_map
   symbolic
   syntax
+  trap
   typecheck
   types
   value

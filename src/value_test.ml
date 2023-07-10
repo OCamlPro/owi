@@ -104,7 +104,7 @@ module P = struct
 
     let trap msg = raise (Types.Trap msg)
 
-    let trap : Interpret_functor_intf.trap -> 'a t = function
+    let trap : Trap.t -> 'a t = function
       | Out_of_bounds_table_access -> trap "out of bounds table access"
       | Out_of_bounds_memory_access -> trap "out of bounds memory access"
       | Integer_overflow -> trap "integer overflow"
@@ -159,5 +159,3 @@ module P = struct
     let to_run (t : extern_func Link.module_to_run) = t.to_run
   end
 end
-
-module P' : Interpret_functor_intf.P = P

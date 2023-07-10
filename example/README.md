@@ -111,7 +111,7 @@ let module_to_run =
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.modul module_to_run with
+  match Interpret.I.modul module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 ```

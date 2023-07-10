@@ -1,6 +1,5 @@
 open Owi
 open Syntax
-
 module Choice = Sym_state.P.Choice
 
 let print_extern_module : Sym_state.P.extern_func Link.extern_module =
@@ -20,8 +19,8 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
 let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
   let positive_i32 (i : Sym_value.S.int32) : unit Choice.t =
    fun thread ->
-     let c = Sym_value.S.I32.ge i (Sym_value.S.I32.zero) in
-     [(), { thread with pc = c :: thread.pc } ]
+    let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
+    [ ((), { thread with pc = c :: thread.pc }) ]
   in
   (* we need to describe their types *)
   let functions =
@@ -91,7 +90,7 @@ let simplify_then_link_then_run ~optimize pc file =
       ([], link_state) file
   in
   let f pc to_run =
-    let c = (Interpret2.S.modul link_state.envs) to_run in
+    let c = (Interpret.S.modul link_state.envs) to_run in
     let results = List.flatten @@ List.map c pc in
     let results =
       List.map (function Ok (), t -> t | Error _, _ -> assert false) results

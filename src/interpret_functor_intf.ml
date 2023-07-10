@@ -1,10 +1,3 @@
-type trap =
-  | Out_of_bounds_table_access
-  | Out_of_bounds_memory_access
-  | Integer_overflow
-  | Integer_divide_by_zero
-  | Unreachable
-
 module type Memory_data = sig
   type int32
 
@@ -81,7 +74,7 @@ module type P = sig
 
     val select_i32 : int32 -> Int32.t t
 
-    val trap : trap -> 'a t
+    val trap : Trap.t -> 'a t
   end
 
   module Extern_func :
@@ -216,61 +209,47 @@ module type S = sig
   (** interpret a module *)
   val modul : env Env_id.collection -> module_to_run -> (unit, 'a) result choice
 
+  type value
+
   module State : sig
     type exec_state
 
     type instr_result
+
+    type stack
+
+    val empty_exec_state : locals:value list -> env:env -> exec_state
   end
 
   (** interpret a function with a given input stack and produce a new stack *)
   val exec_vfunc :
     return:bool -> State.exec_state -> Func_intf.t -> State.instr_result choice
 
-  (* val exec_iunop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.iunop -> Link.Env.t' Stack.t *)
+  val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
 
-  (* val exec_funop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.funop -> Link.Env.t' Stack.t *)
+  val exec_funop : State.stack -> Types.nn -> Types.funop -> State.stack
 
-  (* val exec_ibinop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.ibinop -> Link.Env.t' Stack.t *)
+  val exec_ibinop :
+    State.stack -> Types.nn -> Types.ibinop -> State.stack choice
 
-  (* val exec_fbinop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.fbinop -> Link.Env.t' Stack.t *)
+  val exec_fbinop : State.stack -> Types.nn -> Types.fbinop -> State.stack
 
-  (* val exec_itestop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.itestop -> Link.Env.t' Stack.t *)
+  val exec_itestop : State.stack -> Types.nn -> Types.itestop -> State.stack
 
-  (* val exec_irelop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.irelop -> Link.Env.t' Stack.t *)
+  val exec_irelop : State.stack -> Types.nn -> Types.irelop -> State.stack
 
-  (* val exec_frelop : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.frelop -> Link.Env.t' Stack.t *)
+  val exec_frelop : State.stack -> Types.nn -> Types.frelop -> State.stack
 
-  (* val exec_itruncf : *)
-  (*      Link.Env.t' Stack.t *)
-  (*   -> Types.nn *)
-  (*   -> Types.nn *)
-  (*   -> Types.sx *)
-  (*   -> Link.Env.t' Stack.t *)
+  val exec_itruncf :
+    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
 
-  (* val exec_itruncsatf : *)
-  (*      Link.Env.t' Stack.t *)
-  (*   -> Types.nn *)
-  (*   -> Types.nn *)
-  (*   -> Types.sx *)
-  (*   -> Link.Env.t' Stack.t *)
+  val exec_itruncsatf :
+    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
 
-  (* val exec_fconverti : *)
-  (*      Link.Env.t' Stack.t *)
-  (*   -> Types.nn *)
-  (*   -> Types.nn *)
-  (*   -> Types.sx *)
-  (*   -> Link.Env.t' Stack.t *)
+  val exec_fconverti :
+    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
 
-  (* val exec_ireinterpretf : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t *)
+  val exec_ireinterpretf : State.stack -> Types.nn -> Types.nn -> State.stack
 
-  (* val exec_freinterpreti : *)
-  (*   Link.Env.t' Stack.t -> Types.nn -> Types.nn -> Link.Env.t' Stack.t *)
+  val exec_freinterpreti : State.stack -> Types.nn -> Types.nn -> State.stack
 end

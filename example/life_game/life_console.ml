@@ -62,7 +62,7 @@ let module_to_run, link_state =
 
 (* let's run it ! First module to be interpreted *)
 let () =
-  match Interpret.modul link_state.envs module_to_run with
+  match Interpret.I.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 
@@ -82,6 +82,6 @@ let module_to_run =
 
 (* let's run it ! it will animate the game of life in console *)
 let () =
-  match Interpret.modul link_state.envs module_to_run with
+  match Interpret.I.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
