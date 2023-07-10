@@ -522,22 +522,25 @@ let elem_drop (env : Env.t) =
 let table_init (env : Env.t) =
   List.flatten @@
   List.map
-    (fun (name_x, _) -> 
-      List.map (fun (name_y, _) -> pair (const (Table_init (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ]))
-      env.tables
+    (fun (name_t, _) -> 
+      List.map (fun (name_e, _) ->
+        pair
+          (const (Table_init (Symbolic name_t, Symbolic name_e) ))
+          (const [ S.Pop; S.Pop; S.Pop ]) )
+      env.elems
     )
     env.tables
-(* TODO: to be continued > add constraint between table $name_x and $name_y *)
 
 let table_copy (env : Env.t) =
   List.flatten @@
   List.map
-    (fun (name_x, _) -> 
-      List.map (fun (name_y, _) -> pair (const (Table_copy (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ]))
+    (fun (name_x, (_lim_x, rt_x)) -> 
+      List.map (fun (name_y, (_lim_y, rt_y)) ->
+        if rt_x = rt_y then pair (const (Table_copy (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ])
+        else pair (const (Nop)) (const [ S.Nothing ]))
       env.tables
     )
     env.tables
-(* TODO: to be continued > add constraint between table $name_x and $name_y *)
 
 let table_size (env : Env.t) =
   List.map
