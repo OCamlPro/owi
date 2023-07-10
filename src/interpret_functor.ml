@@ -455,11 +455,7 @@ module Make (P : Intf.P) :
 
   let ( let* ) o f = Result.fold ~ok:f ~error:trap o
 
-  let ( let/* ) o f =
-    match o with
-    | Error e -> trap e
-    | Ok o ->
-      Choice.bind o f
+  let ( let/* ) o f = match o with Error e -> trap e | Ok o -> Choice.bind o f
 
   type extern_func = Extern_func.extern_func
 
@@ -704,18 +700,6 @@ module Make (P : Intf.P) :
       ; count = enter_function_count state.count func.id id
       }
 
-  (* let exec_func env (func : wasm_func) args = *)
-  (*   Log.debug1 "calling func : func %s@." *)
-  (*     (Option.value func.id ~default:"anonymous"); *)
-  (*   let locals = *)
-  (*     Array.of_list @@ List.rev args @ List.map init_local func.locals *)
-  (*   in *)
-  (*   let res, count = exec_expr env locals [] func.body (Some (snd func.type_f)) in *)
-  (*   Log.profile "Exec func %s@.Instruction count: %i@." *)
-  (*     (Option.value func.id ~default:"anonymous") *)
-  (*     count.instructions; *)
-  (*   res *)
-
   let exec_vfunc ~return (state : State.exec_state) (func : Func_intf.t) =
     match func with
     | WASM (id, func, env_id) ->
@@ -727,20 +711,6 @@ module Make (P : Intf.P) :
       let state = { state with stack } in
       if return then Choice.return (State.return state)
       else Choice.return (State.Continue state)
-
-  (* let stack = exec_extern_func state.stack f in *)
-  (* let state = { state with stack } in *)
-  (* if return then State.return state else state *)
-
-  (* let exec_vfunc stack (func : Env.t' Value.Func.t) = *)
-  (*   match *)
-  (*     match func with *)
-  (*     | WASM (_, func, env) -> exec_func (Lazy.force env) func stack *)
-  (*     | Extern f -> exec_extern_func stack f *)
-  (*   with *)
-  (*   | result -> Ok result *)
-  (*   | exception Trap msg -> Error msg *)
-  (*   | exception Stack_overflow -> Error "call stack exhausted" *)
 
   let call_ref ~return (state : State.exec_state) typ_i =
     ignore (return, state, typ_i);

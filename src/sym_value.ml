@@ -3,6 +3,8 @@ open Expression
 
 let ( let* ) o f = Option.bind o f
 
+let ( let+ ) o f = Option.map f o
+
 let return = Option.some
 
 let mk_i32 x = Val (Num (I32 x))
@@ -79,27 +81,27 @@ module S = struct
       | F64 e -> e
       | Ref _ -> assert false
     in
-    Format.fprintf ppf "%s" (Expr.to_string e)
+    Format.pp_print_string ppf (Expr.to_string e)
 
   module Bool = struct
     let of_val = function Val (Bool b) -> Some b | _ -> None
 
     let not e =
       Option.value ~default:(Boolean.mk_not e)
-      @@ let* b = of_val e in
-         return (Val (Bool (not b)))
+      @@ let+ b = of_val e in
+         Val (Bool (not b))
 
     let or_ e1 e2 =
       Option.value ~default:(Boolean.mk_or e1 e2)
       @@ let* b1 = of_val e1 in
-         let* b2 = of_val e2 in
-         return (Val (Bool (b1 || b2)))
+         let+ b2 = of_val e2 in
+         Val (Bool (b1 || b2))
 
     let and_ e1 e2 =
       Option.value ~default:(Boolean.mk_and e1 e2)
       @@ let* b1 = of_val e1 in
-         let* b2 = of_val e2 in
-         return (Val (Bool (b1 && b2)))
+         let+ b2 = of_val e2 in
+         Val (Bool (b1 && b2))
 
     let int32 = function
       | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
@@ -182,8 +184,7 @@ module S = struct
 
     let to_bool (e : vbool) =
       match e with
-      | Val (Num (I32 i)) ->
-        Val (Bool (if Int32.ne i 0l then true else false))
+      | Val (Num (I32 i)) -> Val (Bool (Int32.ne i 0l))
       | Cvtop (I32 OfBool, cond) -> cond
       | e -> Cvtop (I32 ToBool, e)
 

@@ -110,8 +110,8 @@ module M = struct
   let storen m ~addr v n =
     let a0 = concretize_i32 addr in
     for i = 0 to n - 1 do
-      let addr' = Int32.add a0 (Int32.of_int i)
-      and v' = extract v (i + 1) i in
+      let addr' = Int32.add a0 (Int32.of_int i) in
+      let v' = extract v (i + 1) i in
       Hashtbl.replace m.data addr' v'
     done
 

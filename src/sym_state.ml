@@ -1,9 +1,4 @@
 module Batch = Encoding.Batch
-
-let trap msg = raise (Types.Trap msg)
-
-let ( let* ) o f = Result.fold ~ok:f ~error:trap o
-
 module Def_value = Value
 
 module P = struct
@@ -64,7 +59,7 @@ module P = struct
               (false, no :: path_condition)
             else assert false
         in
-        Format.printf "%s@." (Encoding.Expression.to_string sym_bool);
+        Log.debug1 "%s@." (Encoding.Expression.to_string sym_bool);
         (value, { state with pc = path_condition })
 
     let select_i32 _sym_int = assert false
@@ -77,8 +72,6 @@ module P = struct
       | Integer_overflow -> assert false
       | Integer_divide_by_zero -> assert false
       | Unreachable -> assert false
-
-    (* raise (Types.Trap "out of bounds memory access") *)
   end
 
   module Choice_list = struct
@@ -109,10 +102,10 @@ module P = struct
             (false, { state with pc = no :: path_condition }) :: cases
           else cases
         in
-        (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
+        (* Log.debug1 "%s@." (Encoding.Expression.to_string sym_bool); *)
         (* (value, (solver, path_condition)) *)
         match cases with
-        | [ v, _ ] -> [v, state]
+        | [ (v, _) ] -> [ (v, state) ]
         | [] -> []
         | _ ->
           List.map
@@ -135,7 +128,7 @@ module P = struct
   end
 
   module Choice = Choice_list
-  module Extern_func = Def_value.Make_extern_func (Value)(Choice)
+  module Extern_func = Def_value.Make_extern_func (Value) (Choice)
 
   type extern_func = Extern_func.extern_func
 
@@ -178,7 +171,7 @@ module P = struct
 
     type t' = Env_id.t
 
-    let get_memory _env _ = Ok (fun t -> [t.mem, t])
+    let get_memory _env _ = Ok (fun t -> [ (t.mem, t) ])
 
     let get_func = Link_env.get_func
 
