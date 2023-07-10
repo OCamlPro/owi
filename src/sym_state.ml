@@ -112,7 +112,8 @@ module P = struct
         (* Format.printf "%s@." (Encoding.Expression.to_string sym_bool); *)
         (* (value, (solver, path_condition)) *)
         match cases with
-        | [] | [ _ ] -> cases
+        | [ v, _ ] -> [v, state]
+        | [] -> []
         | _ ->
           List.map
             (fun (b, state) ->
