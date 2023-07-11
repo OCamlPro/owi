@@ -1,9 +1,12 @@
 open Owi
 open Syntax
+
+module Value = Sym_value.S
 module Choice = Sym_state.P.Choice
+module Solver = Sym_state.Solver
 
 let print_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let print_i32 (i : Sym_value.S.int32) : unit Choice.t =
+  let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
     Choice.return ()
   in
@@ -17,7 +20,7 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   { functions }
 
 let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let positive_i32 (i : Sym_value.S.int32) : unit Choice.t =
+  let positive_i32 (i : Value.int32) : unit Choice.t =
    fun thread ->
     let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
     [ ((), { thread with pc = c :: thread.pc }) ]
@@ -35,7 +38,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
   let counter = ref 0 in
-  let symbolic_i32 (i : Sym_value.S.int32) : Sym_value.S.int32 Choice.t =
+  let symbolic_i32 (i : Value.int32) : Sym_value.S.int32 Choice.t =
     let name =
       match i with
       | Encoding.Expression.Val (Num (I32 i)) -> begin
@@ -143,7 +146,7 @@ let script =
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let solver = Encoding.Batch.create () in
+  let solver = Solver.create () in
   let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.memory } ] in
   let result = list_fold_left (run_file ~optimize) pc files in
   match result with
@@ -154,7 +157,8 @@ let main profiling debug _script optimize files =
         List.iter
           (fun c -> print_endline (Encoding.Expression.to_string c))
           thread.Sym_state.P.pc )
-      results
+      results;
+    Format.printf "Solver: %f@." !Solver.solver_time
   | Error e ->
     Format.eprintf "%s@." e;
     exit 1

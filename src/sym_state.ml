@@ -1,4 +1,4 @@
-module Batch = Encoding.Batch
+module Solver = Encoding.Incremental.Make (Encoding.Z3_mappings)
 module Def_value = Value
 
 module P = struct
@@ -27,7 +27,7 @@ module P = struct
   type float64 = Value.float64
 
   type thread =
-    { solver : Batch.t
+    { solver : Solver.t
     ; pc : Value.vbool list
     ; mem : memory
     }
@@ -51,11 +51,11 @@ module P = struct
       | Val (Num (I32 _)) -> (true, state)
       | _ ->
         let value, path_condition =
-          if Batch.check_sat solver (sym_bool :: path_condition) then
+          if Solver.check solver (sym_bool :: path_condition) then
             (true, sym_bool :: path_condition)
           else
             let no = Value.Bool.not sym_bool in
-            if Batch.check_sat solver (no :: path_condition) then
+            if Solver.check solver (no :: path_condition) then
               (false, no :: path_condition)
             else assert false
         in
@@ -85,33 +85,30 @@ module P = struct
       List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
 
     let select (sym_bool : vbool) : bool t =
-     fun ({ solver; pc = path_condition; _ } as state) ->
+     fun ({ solver; pc; mem } as state) ->
       let sym_bool = Encoding.Expression.simplify sym_bool in
       match sym_bool with
       | Val (Bool b) -> [ (b, state) ]
       | Val (Num (I32 _)) -> assert false
       | _ -> (
-        let cases =
-          if Batch.check_sat solver (sym_bool :: path_condition) then
-            [ (true, { state with pc = sym_bool :: path_condition }) ]
-          else []
-        in
-        let cases =
-          let no = Value.Bool.not sym_bool in
-          if Batch.check_sat solver (no :: path_condition) then
-            (false, { state with pc = no :: path_condition }) :: cases
-          else cases
-        in
-        (* Log.debug1 "%s@." (Encoding.Expression.to_string sym_bool); *)
-        (* (value, (solver, path_condition)) *)
-        match cases with
-        | [ (v, _) ] -> [ (v, state) ]
-        | [] -> []
-        | _ ->
-          List.map
-            (fun (b, state) ->
-              (b, { state with mem = Sym_memory.M.clone state.mem }) )
-            cases )
+        let no = Value.Bool.not sym_bool in
+        let sat_true = Solver.check solver [ sym_bool ] in
+        let sat_false = Solver.check solver [ no ] in
+        match (sat_true, sat_false) with
+        | false, false -> []
+        | true, false -> [ (true, state) ]
+        | false, true -> [ (false, state) ]
+        | true, true ->
+          let solver' = Solver.clone solver in
+          Solver.add solver sym_bool;
+          Solver.add solver' no;
+          let state1 =
+            { state with pc = sym_bool :: pc; mem = Sym_memory.M.clone mem }
+          in
+          let state2 =
+            { solver = solver'; pc = no :: pc; mem = Sym_memory.M.clone mem }
+          in
+          [ (true, state1); (false, state2) ] )
 
     let select_i32 _sym_int = assert false
 
