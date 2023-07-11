@@ -32,14 +32,6 @@ let table_type = pair limits ref_type
 let final = const Final
 (* TODO: complete No_final *)
 
-let elem_active =
-  let* ind = const (None : indice option) in
-  let+ expr = const [] in
-  Elem_active (ind,expr)
-
-let elem_mode = const Elem_passive
-(* TODO: complete Elem_declarative - elem_active *)
-
 let sx = choose [ const U; const S ]
 
 let val_type =
@@ -383,6 +375,17 @@ let const_of_val_type = function
     assert false
 
 let global_type = pair mut val_type
+
+let elem_active (env : Env.t) =
+  List.map
+    ( fun (name, _) ->
+      let* ind = const (Some (symbolic name)) in
+      let+ instr = const_i32 in
+      Elem_active (ind,[instr]) )
+    env.tables
+
+let elem_mode (env : Env.t) = choose (const Elem_passive :: elem_active env)
+(* TODO: complete Elem_declarative - elem_active *)
 
 let param env =
   let* typ = val_type in

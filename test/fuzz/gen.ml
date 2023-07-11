@@ -272,7 +272,7 @@ let typ env =
 
 let elem env =
   let* typ = B.ref_type in
-  let+ mode = B.elem_mode in
+  let+ mode = B.elem_mode env in
   let id = Some (Env.add_elem env typ) in
   MElem ({ id; typ; init = []; mode })
 
@@ -306,8 +306,8 @@ let fields env =
   let* memory = option (memory env) in
   let* datas = list (data env) in
   let* types = list (typ env) in
-  let* elems = list (elem env) in
   let* tables = list (table env) in
+  let* elems = list (elem env) in
   let* globals = list (global env) in
   let* funcs = list (func env) in
   let+ start_code =
