@@ -1,4 +1,4 @@
-module Solver = Encoding.Incremental.Make (Encoding.Z3_mappings)
+module Solver = Encoding.Batch.Make (Encoding.Z3_mappings)
 module Def_value = Value
 
 module P = struct
@@ -51,11 +51,11 @@ module P = struct
       | Val (Num (I32 _)) -> (true, state)
       | _ ->
         let value, path_condition =
-          if Solver.check solver (sym_bool :: path_condition) then
+          if Solver.check_sat solver (sym_bool :: path_condition) then
             (true, sym_bool :: path_condition)
           else
             let no = Value.Bool.not sym_bool in
-            if Solver.check solver (no :: path_condition) then
+            if Solver.check_sat solver (no :: path_condition) then
               (false, no :: path_condition)
             else assert false
         in
@@ -92,21 +92,18 @@ module P = struct
       | Val (Num (I32 _)) -> assert false
       | _ -> (
         let no = Value.Bool.not sym_bool in
-        let sat_true = Solver.check solver [ sym_bool ] in
-        let sat_false = Solver.check solver [ no ] in
+        let sat_true = Solver.check_sat solver (sym_bool :: pc) in
+        let sat_false = Solver.check_sat solver (no :: pc) in
         match (sat_true, sat_false) with
         | false, false -> []
         | true, false -> [ (true, state) ]
         | false, true -> [ (false, state) ]
         | true, true ->
-          let solver' = Solver.clone solver in
-          Solver.add solver sym_bool;
-          Solver.add solver' no;
           let state1 =
             { state with pc = sym_bool :: pc; mem = Sym_memory.M.clone mem }
           in
           let state2 =
-            { solver = solver'; pc = no :: pc; mem = Sym_memory.M.clone mem }
+            { state with pc = no :: pc; mem = Sym_memory.M.clone mem }
           in
           [ (true, state1); (false, state2) ] )
 
