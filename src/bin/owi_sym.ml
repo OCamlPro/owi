@@ -54,11 +54,39 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
     in
     Choice.return r
   in
+  let symbol_i32 () : Value.int32 Choice.t = assert false in
+  let assume_i32 (_i : Value.int32) : unit Choice.t = assert false in
+  let assert_i32 (_i : Value.int32) : unit Choice.t = assert false in
   (* we need to describe their types *)
   let functions =
     [ ( "i32"
       , Sym_state.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
+    ; ( "i32_symbol"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), symbol_i32) )
+    ; ( "assume"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assume_i32) )
+    ; ( "assert"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assert_i32) )
+    ]
+  in
+  { functions }
+
+let summaries_extern_module : Sym_state.P.extern_func Link.extern_module =
+  let alloc (_base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
+    assert false
+  in
+  let dealloc (_base : Value.int32) : unit Choice.t = assert false in
+  let functions =
+    [ ( "alloc"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
+    ; ( "dealloc"
+      , Sym_state.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
+      )
     ]
   in
   { functions }
@@ -77,6 +105,10 @@ let simplify_then_link_then_run ~optimize pc file =
     Link.extern_module' link_state ~name:"symbolic"
       ~func_typ:Sym_state.P.Extern_func.extern_type symbolic_extern_module
   in
+  let link_state =
+    Link.extern_module' link_state ~name:"summaries"
+      ~func_typ:Sym_state.P.Extern_func.extern_type summaries_extern_module
+  in
   let* to_run, link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
@@ -89,7 +121,7 @@ let simplify_then_link_then_run ~optimize pc file =
           in
           let fields =
             if has_start then m.fields
-            else m.fields @ [ MStart (Symbolic "_start") ]
+            else MStart (Symbolic "_start") :: m.fields
           in
           let m = { m with fields } in
           let* m, state = Compile.until_link state ~optimize ~name:None m in
