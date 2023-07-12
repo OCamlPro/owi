@@ -83,6 +83,9 @@ let simplify_then_link_then_run ~optimize pc file =
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
         | Symbolic.Module m ->
+          let m =
+            { m with fields = m.fields @ [ MStart (Symbolic "_start") ] }
+          in
           let* m, state = Compile.until_link state ~optimize ~name:None m in
           let m = Sym_state.convert_module_to_run m in
           Ok (m :: to_run, state)
