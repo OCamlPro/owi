@@ -87,21 +87,30 @@ module S = struct
     let of_val = function Val (Bool b) -> Some b | _ -> None
 
     let not e =
-      Option.value ~default:(Boolean.mk_not e)
-      @@ let+ b = of_val e in
-         Val (Bool (not b))
+      match e with
+      | Unop (Bool Not, cond) -> cond
+      | _ ->
+        Option.value ~default:(Boolean.mk_not e)
+        @@ let+ b = of_val e in
+           Val (Bool (not b))
 
     let or_ e1 e2 =
-      Option.value ~default:(Boolean.mk_or e1 e2)
-      @@ let* b1 = of_val e1 in
-         let+ b2 = of_val e2 in
-         Val (Bool (b1 || b2))
+      match of_val e1, of_val e2 with
+      | Some b1, Some b2 -> Val (Bool (b1 || b2))
+      | Some false, _ -> e2
+      | _, Some false -> e1
+      | Some true, _
+      | _, Some true -> Val (Bool true)
+      | _ -> Boolean.mk_or e1 e2
 
     let and_ e1 e2 =
-      Option.value ~default:(Boolean.mk_and e1 e2)
-      @@ let* b1 = of_val e1 in
-         let+ b2 = of_val e2 in
-         Val (Bool (b1 && b2))
+      match of_val e1, of_val e2 with
+      | Some b1, Some b2 -> Val (Bool (b1 && b2))
+      | Some true, _ -> e2
+      | _, Some true -> e1
+      | Some false, _
+      | _, Some false -> Val (Bool false)
+      | _ -> Boolean.mk_and e1 e2
 
     let int32 = function
       | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
@@ -144,9 +153,25 @@ module S = struct
 
     let unsigned_rem e1 e2 = binop (I32 RemU) e1 e2
 
-    let logand e1 e2 = binop (I32 And) e1 e2
+    let boolify e =
+      match e with
+      | Val (Num (I32 i)) -> Some (Val (Bool (Int32.ne i 0l)))
+      | Cvtop (I32 OfBool, cond) -> Some cond
+      | _ -> None
 
-    let logor e1 e2 = binop (I32 Or) e1 e2
+    let logand e1 e2 =
+      match boolify e1, boolify e2 with
+      | Some b1, Some b2 ->
+        Bool.int32 (Bool.and_ b1 b2)
+      | _ ->
+        binop (I32 And) e1 e2
+
+    let logor e1 e2 =
+      match boolify e1, boolify e2 with
+      | Some b1, Some b2 ->
+        Bool.int32 (Bool.or_ b1 b2)
+      | _ ->
+        binop (I32 Or) e1 e2
 
     let logxor e1 e2 = binop (I32 Xor) e1 e2
 
@@ -160,7 +185,16 @@ module S = struct
 
     let rotr e1 e2 = binop (I32 Rotr) e1 e2
 
-    let eq_const e c = relop (I32 Eq) e (Val (Num (I32 c)))
+    let eq_const e c =
+      match e with
+      | Cvtop (I32 OfBool, cond) ->
+        begin match c with
+          | 0l -> Bool.not cond
+          | 1l -> cond
+          | _ -> Val (Bool false)
+        end
+      | _ ->
+        relop (I32 Eq) e (Val (Num (I32 c)))
 
     let eq e1 e2 = relop (I32 Eq) e1 e2
 
