@@ -196,25 +196,65 @@ module S = struct
       | _ ->
         relop (I32 Eq) e (Val (Num (I32 c)))
 
-    let eq e1 e2 = relop (I32 Eq) e1 e2
+    let eq e1 e2 =
+      if e1 == e2 then
+        Val (Bool true)
+      else
+        relop (I32 Eq) e1 e2
 
-    let ne e1 e2 = relop (I32 Ne) e1 e2
+    let ne e1 e2 =
+      if e1 == e2 then
+        Val (Bool false)
+      else
+        relop (I32 Ne) e1 e2
 
-    let lt e1 e2 = relop (I32 LtS) e1 e2
+    let lt e1 e2 =
+      if e1 == e2 then
+        Val (Bool false)
+      else
+        relop (I32 LtS) e1 e2
 
-    let gt e1 e2 = relop (I32 GtS) e1 e2
+    let gt e1 e2 =
+      if e1 == e2 then
+        Val (Bool false)
+      else
+        relop (I32 GtS) e1 e2
 
-    let lt_u e1 e2 = relop (I32 LtU) e1 e2
+    let lt_u e1 e2 =
+      if e1 == e2 then
+        Val (Bool false)
+      else
+        relop (I32 LtU) e1 e2
 
-    let gt_u e1 e2 = relop (I32 GtU) e1 e2
+    let gt_u e1 e2 =
+      if e1 == e2 then
+        Val (Bool false)
+      else
+        relop (I32 GtU) e1 e2
 
-    let le e1 e2 = relop (I32 LeS) e1 e2
+    let le e1 e2 =
+      if e1 == e2 then
+        Val (Bool true)
+      else
+        relop (I32 LeS) e1 e2
 
-    let ge e1 e2 = relop (I32 GeS) e1 e2
+    let ge e1 e2 =
+      if e1 == e2 then
+        Val (Bool true)
+      else
+        relop (I32 GeS) e1 e2
 
-    let le_u e1 e2 = relop (I32 LeU) e1 e2
+    let le_u e1 e2 =
+      if e1 == e2 then
+        Val (Bool true)
+      else
+        relop (I32 LeU) e1 e2
 
-    let ge_u e1 e2 = relop (I32 GeU) e1 e2
+    let ge_u e1 e2 =
+      if e1 == e2 then
+        Val (Bool true)
+      else
+        relop (I32 GeU) e1 e2
 
     let to_bool (e : vbool) =
       match e with
