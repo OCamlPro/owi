@@ -12,7 +12,7 @@ module P = struct
 
   type elem = unit
 
-  type data = unit
+  type data = Link.Env.data
 
   type global = unit
 
@@ -163,7 +163,7 @@ module P = struct
   module Data = struct
     type t = data
 
-    let value _ = assert false
+    let value data = data.Link_env.value
   end
 
   module Env = struct
