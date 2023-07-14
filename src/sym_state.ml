@@ -184,7 +184,7 @@ module P = struct
 
     let get_elem _ = assert false
 
-    let get_data _ = assert false
+    let get_data = Link_env.get_data
 
     let get_global _ = assert false
 
