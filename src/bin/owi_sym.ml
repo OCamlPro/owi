@@ -198,8 +198,7 @@ let main profiling debug _script optimize files =
         List.iter
           (fun c -> print_endline (Encoding.Expression.to_string c))
           thread.Sym_state.P.pc )
-      results;
-    Format.printf "Solver: %f@." !Solver.solver_time
+      results
   | Error e ->
     Format.eprintf "%s@." e;
     exit 1
