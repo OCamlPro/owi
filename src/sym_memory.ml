@@ -35,15 +35,32 @@ module M = struct
     let old_size = m.size * page_size in
     m.size <- max m.size ((old_size + delta) / page_size)
 
+  let size { size; _ } = Value.const_i32 @@ Int32.of_int @@ (size * page_size)
+
+  let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size
+
   let fill _ = assert false
 
   let blit _ = assert false
 
-  let blit_string _ = assert false
-
-  let size { size; _ } = Value.const_i32 @@ Int32.of_int @@ (size * page_size)
-
-  let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size
+  let blit_string m str ~src ~dst ~len =
+    (* Always concrete? *)
+    let src = Int32.to_int @@ concretize_i32 src in
+    let dst = Int32.to_int @@ concretize_i32 dst in
+    let len = Int32.to_int @@ concretize_i32 len in
+    if
+      src < 0 || dst < 0
+      || src + len > String.length str
+      || dst + len > m.size * page_size
+    then Val (Bool true)
+    else begin
+      for i = 0 to len - 1 do
+        let byte = Int32.of_int @@ Char.code @@ String.get str (src + i) in
+        let dst = Int32.of_int (dst + i) in
+        Hashtbl.replace m.data dst (Value.const_i32 byte)
+      done;
+      Val (Bool false)
+    end
 
   let clone m = { data = Hashtbl.create 0; parent = Some m; size = m.size }
 

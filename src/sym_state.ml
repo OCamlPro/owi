@@ -190,7 +190,7 @@ module P = struct
 
     let drop_elem _ = assert false
 
-    let drop_data _ = assert false
+    let drop_data = Link_env.drop_data
 
     let pp _ _ = ()
   end
