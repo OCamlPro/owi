@@ -37,39 +37,33 @@ let fill mem pos len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
   let c = Int32.to_int c |> Char.chr in
-  if pos < 0 || pos + len >= Bytes.length mem.data then true
-  else begin
-    Bytes.fill mem.data pos len c;
-    false
-  end
+  pos < 0
+  || pos + len > Bytes.length mem.data
+  ||
+  ( Bytes.fill mem.data pos len c;
+    false )
 
-let blit mem src_pos dst_pos len =
-  let src_pos = Int32.to_int src_pos in
-  let dst_pos = Int32.to_int dst_pos in
+let blit mem src dst len =
+  let src = Int32.to_int src in
+  let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  if
-    src_pos < 0 || dst_pos < 0
-    || src_pos + len <= Bytes.length mem.data
-    || dst_pos + len <= Bytes.length mem.data
-  then true
-  else begin
-    Bytes.blit mem.data src_pos mem.data dst_pos len;
-    false
-  end
+  src < 0 || dst < 0
+  || src + len > Bytes.length mem.data
+  || dst + len > Bytes.length mem.data
+  ||
+  ( Bytes.blit mem.data src mem.data dst len;
+    false )
 
 let blit_string mem str ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  if
-    src < 0 || dst < 0
-    || src + len <= String.length str
-    || dst + len <= Bytes.length mem.data
-  then true
-  else begin
-    Bytes.blit_string str src mem.data dst len;
-    false
-  end
+  src < 0 || dst < 0
+  || src + len > String.length str
+  || dst + len > Bytes.length mem.data
+  ||
+  ( Bytes.blit_string str src mem.data dst len;
+    false )
 
 let get_data { data; _ } = data
 
