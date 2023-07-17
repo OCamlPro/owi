@@ -81,8 +81,13 @@ module P = struct
 
     let bind (v : 'a t) (f : 'a -> 'b t) : 'b t =
      fun t ->
-      let lst = v t in
-      List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
+       let lst = v t in
+       match lst with
+       | [] -> []
+       | [r, t] ->
+         (f r) t
+       | _ ->
+         List.flatten @@ List.map (fun (r, t) -> (f r) t) lst
 
     let select (sym_bool : vbool) : bool t =
      fun ({ solver; pc; mem } as state) ->
