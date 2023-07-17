@@ -19,6 +19,7 @@
   int32
   int64
   func_intf
+  choice_monad_intf
   interpret
   interpret_functor
   value_intf

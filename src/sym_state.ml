@@ -112,8 +112,6 @@ module P = struct
 
     let select_i32 _sym_int = assert false
 
-    let get : thread t = fun t -> [ (t, t) ]
-
     let trap : Trap.t -> 'a t = function
       | Out_of_bounds_table_access -> assert false
       | Out_of_bounds_memory_access -> assert false

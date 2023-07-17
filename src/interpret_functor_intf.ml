@@ -61,21 +61,15 @@ module type P = sig
 
   type float64
 
-  module Choice : sig
-    type 'a t
+  module Value :
+    Value_intf.T
+      with type vbool = vbool
+       and type int32 = int32
+       and type int64 = int64
+       and type float32 = float32
+       and type float64 = float64
 
-    val return : 'a -> 'a t
-
-    val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-    val get : thread t
-
-    val select : vbool -> bool t
-
-    val select_i32 : int32 -> Int32.t t
-
-    val trap : Trap.t -> 'a t
-  end
+  module Choice : Choice_monad_intf.Base with module V := Value
 
   module Extern_func :
     Func_intf.T_Extern_func
@@ -84,14 +78,6 @@ module type P = sig
        and type float32 := float32
        and type float64 := float64
        and type 'a m := 'a Choice.t
-
-  module Value :
-    Value_intf.T
-      with type vbool = vbool
-       and type int32 = int32
-       and type int64 = int64
-       and type float32 = float32
-       and type float64 = float64
 
   module Global : sig
     type t = global
