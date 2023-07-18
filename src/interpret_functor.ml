@@ -973,22 +973,15 @@ module Make (P : Interpret_functor_intf.P) :
       in
       Global.set_value global v;
       st stack
-    | Table_get _indice -> assert false
-    (*   let* t = Env.get_table env indice in *)
-    (*   let indice, stack = Stack.pop_i32 stack in *)
-    (*   let size = Table.size t in *)
-    (*   let v = Table.get t indice in *)
-    (*   (\* TODO bound check *\) *)
-    (*   st @@ Stack.push stack (Ref v) *)
-
-    (* let/ indice = Choice.select_i32 indice in *)
-    (*     let indice = Int32.to_int indice in *)
-    (*     let v = *)
-    (*       match t.data.(indice) with *)
-    (*       | exception Invalid_argument _ -> trap "out of bounds table access" *)
-    (*       | v -> v *)
-    (*     in *)
-    (*     st @@ Stack.push stack (Ref v) *)
+    | Table_get i ->
+      let/* t = Env.get_table env i in
+      let i, stack = Stack.pop_i32 stack in
+      let/ i = Choice.select_i32 i in
+      let i = Int32.to_int i in
+      let v = Table.get t i in
+      let size = Table.size t in
+      if i < 0 || i >= size then Choice.trap Out_of_bounds_table_access
+      else st @@ Stack.push stack (Ref v)
     | Table_set indice ->
       let* t = Env.get_table env indice in
       let/ t in
@@ -1003,8 +996,7 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     | Table_size indice ->
-      let* t = Env.get_table env indice in
-      let/ t in
+      let/* t = Env.get_table env indice in
       let len = Table.size t in
       st @@ Stack.push_i32 stack (Value.const_i32 (Int32.of_int len))
     | Table_grow _indice -> assert false
