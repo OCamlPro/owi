@@ -20,9 +20,8 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
 
 let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
   let positive_i32 (i : Value.int32) : unit Choice.t =
-   fun thread ->
     let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
-    [ ((), { thread with pc = c :: thread.pc }) ]
+    Choice_monad.List.add_pc c
   in
   (* we need to describe their types *)
   let functions =
@@ -63,8 +62,8 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
       , Sym_state.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i32_symbol"
-      , Sym_state.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol_i32) )
+      , Sym_state.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+      )
     ; ( "assume"
       , Sym_state.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
@@ -91,7 +90,11 @@ let summaries_extern_module : Sym_state.P.extern_func Link.extern_module =
   in
   { functions }
 
-let simplify_then_link_then_run ~optimize pc file =
+let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
+  'b Result.t Choice.t =
+  match t with Error e -> Choice.return (Error e) | Ok x -> f x
+
+let simplify_then_link_then_run ~optimize (pc : unit Result.t Choice.t) file =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"print"
@@ -109,7 +112,7 @@ let simplify_then_link_then_run ~optimize pc file =
     Link.extern_module' link_state ~name:"summaries"
       ~func_typ:Sym_state.P.Extern_func.extern_type summaries_extern_module
   in
-  let* to_run, link_state =
+  let*/ to_run, link_state =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
@@ -133,29 +136,22 @@ let simplify_then_link_then_run ~optimize pc file =
         | _ -> Ok acc )
       ([], link_state) file
   in
-  let f pc to_run =
+  let f (pc : (unit, _) result Choice.t) to_run =
     let c = (Interpret.S.modul link_state.envs) to_run in
-    let results = List.flatten @@ List.map c pc in
     let results =
-      List.map (function Ok (), t -> t | Error _, _ -> assert false) results
+      Choice.bind pc (fun r ->
+        match r with Error _ -> Choice.return r | Ok () -> c )
     in
-    Ok results
+    results
   in
-  list_fold_left f [ pc ] (List.rev to_run)
+  List.fold_left f pc (List.rev to_run)
 
-let run_file ~optimize (pc : _ list) filename =
+let run_file ~optimize (pc : unit Result.t Choice.t) filename =
   if not @@ Sys.file_exists filename then
-    error_s "file `%s` doesn't exist" filename
+    Choice.return (error_s "file `%s` doesn't exist" filename)
   else
-    let* script = Parse.Script.from_file ~filename in
-    Ok
-      ( List.flatten
-      @@ List.map
-           (fun pc ->
-             match simplify_then_link_then_run ~optimize pc script with
-             | Ok v -> v
-             | Error _ -> [] )
-           pc )
+    let*/ script = Parse.Script.from_file ~filename in
+    simplify_then_link_then_run ~optimize pc script
 
 (* Command line *)
 
@@ -188,20 +184,22 @@ let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Solver.create () in
-  let pc = [ Sym_state.P.{ solver; pc = []; mem = Sym_memory.memory } ] in
-  let result = list_fold_left (run_file ~optimize) pc files in
-  match result with
-  | Ok results ->
-    List.iter
-      (fun thread ->
-        Format.printf "PATH CONDITION:@.";
-        List.iter
-          (fun c -> print_endline (Encoding.Expression.to_string c))
-          thread.Sym_state.P.pc )
-      results
-  | Error e ->
-    Format.eprintf "%s@." e;
-    exit 1
+  let pc = Choice.return (Ok ()) in
+  let result = List.fold_left (run_file ~optimize) pc files in
+  let thread : Thread.t = { solver; pc = []; mem = Sym_memory.memory } in
+  let results = Choice.run result thread in
+  List.iter
+    (fun (result, thread) ->
+      Format.printf "PATH CONDITION:@.";
+      List.iter
+        (fun c -> print_endline (Encoding.Expression.to_string c))
+        (Thread.pc thread);
+      match result with
+      | Ok () -> ()
+      | Error e ->
+        Format.eprintf "%s@." e;
+        exit 1 )
+    results
 
 let cli =
   let open Cmdliner in

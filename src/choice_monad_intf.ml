@@ -15,6 +15,12 @@ module type Base = sig
     val trap : Trap.t -> 'a t
 end
 
-module type S = sig
+module type Complete = sig
   include Base
+
+  type thread
+
+  val with_thread : (thread -> 'b) -> 'b t
+  val add_pc : V.vbool -> unit t
+  val run : 'a t -> thread -> ('a * thread) list
 end

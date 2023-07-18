@@ -19,7 +19,9 @@
   int32
   int64
   func_intf
+  thread
   choice_monad_intf
+  choice_monad
   interpret
   interpret_functor
   value_intf
