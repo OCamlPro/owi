@@ -116,6 +116,7 @@ module Explicit = struct
     | Retv : 'a -> 'a t
     | Bind : 'a t * ('a -> 'b t) -> 'b t
     | Choice : vbool -> bool t
+    | Trap : Trap.t -> 'a t
 
   let return (v : 'a) : 'a t = Retv v [@@inline]
 
@@ -123,6 +124,7 @@ module Explicit = struct
    fun v f ->
     match v with
     | Empty -> Empty
+    | Trap t -> Trap t
     | Retv v -> f v
     | Ret _ | Choice _ -> Bind (v, f)
     | Bind _ -> Bind (v, f)
@@ -139,40 +141,56 @@ module Explicit = struct
 
   let select (cond : vbool) : bool t =
     match cond with Val (Bool b) -> Retv b | _ -> Choice cond
-  [@@inline]
+    [@@inline]
 
   let select_i32 _ = assert false
 
-  let trap : Trap.t -> 'a t = function
-    | Out_of_bounds_table_access -> assert false
-    | Out_of_bounds_memory_access -> assert false
-    | Integer_overflow -> assert false
-    | Integer_divide_by_zero -> assert false
-    | Unreachable -> Empty
+  let trap : Trap.t -> 'a t = fun t -> Trap t
 
   let with_thread (f : thread -> 'b) : 'b t = Ret (St (fun t -> (f t, t)))
     [@@inline]
 
   let add_pc (c : Sym_value.S.vbool) : unit t =
     Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
-  [@@inline]
+    [@@inline]
 
   let rec run : type a. a t -> thread -> (a * thread) Seq.t =
    fun v t ->
     match v with
     | Empty -> Seq.empty
+    | Trap _t -> Seq.empty (* TODO do something useful with the trap *)
     | Retv v -> Seq.return (v, t)
     | Ret (St f) -> Seq.return (f t)
     | Bind (v, f) -> Seq.flat_map (fun (v, t) -> run (f v) t) (run v t)
     | Choice cond -> List.to_seq (eval_choice cond t)
+
+  let rec run_up_to : type a. depth:int -> a t -> thread -> (a * thread) Seq.t =
+   fun ~depth v t ->
+    match v with
+    | Empty -> Seq.empty
+    | Trap _t -> Seq.empty (* TODO do something useful with the trap *)
+    | Retv v -> Seq.return (v, t)
+    | Ret (St f) -> Seq.return (f t)
+    | Bind (v, f) -> begin
+      match v with
+      | Choice _ when depth <= 0 -> Seq.empty
+      | _ ->
+        Seq.flat_map
+          (fun (v, t) -> run (f v) t)
+          (run_up_to ~depth:(depth - 1) v t)
+    end
+    | Choice cond -> List.to_seq (eval_choice cond t)
 end
 
-module type T = Choice_monad_intf.Complete
+module type T =
+  Choice_monad_intf.Complete
     with type thread := Thread.t
      and module V := Sym_value.S
 
 let list = (module List : T)
+
 let seq = (module Seq : T)
+
 let explicit = (module Explicit : T)
 
-let choices = [list; seq; explicit]
+let choices = [ list; seq; explicit ]
