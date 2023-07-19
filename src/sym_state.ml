@@ -99,17 +99,19 @@ module P = struct
       | Ok orig_table ->
         let f (t : thread) =
           let tables = Thread.tables t in
-          Sym_table.get_table orig_table tables i
+          Sym_table.get_table (Link_env.id env) orig_table tables i
         in
         Ok (Choice.with_thread f)
 
-    let get_elem _ = assert false
+    let get_elem env i = Link_env.get_elem env i
 
     let get_data = Link_env.get_data
 
     let get_global _ = assert false
 
-    let drop_elem _ = assert false
+    let drop_elem _ =
+      (* TODO ? *)
+      ()
 
     let drop_data = Link_env.drop_data
 
