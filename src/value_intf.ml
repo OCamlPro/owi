@@ -192,6 +192,8 @@ module type T = sig
   val pp : Format.formatter -> t -> unit
 
   module Bool : sig
+    val const : bool -> vbool
+
     val not : vbool -> vbool
 
     val or_ : vbool -> vbool -> vbool

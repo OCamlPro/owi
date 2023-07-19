@@ -28,6 +28,8 @@ module V :
   include Value
 
   module Bool = struct
+    let const c = c
+
     let not = not
 
     let and_ = ( && )

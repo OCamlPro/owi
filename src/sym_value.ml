@@ -86,6 +86,8 @@ module S = struct
   module Bool = struct
     let of_val = function Val (Bool b) -> Some b | _ -> None
 
+    let const b = Val (Bool b)
+
     let not e =
       match e with
       | Unop (Bool Not, cond) -> cond
