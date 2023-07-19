@@ -54,7 +54,8 @@ module List = struct
 
   let select (sym_bool : vbool) : bool t = eval_choice sym_bool
 
-  let select_i32 _sym_int = assert false
+  let select_i32 (i : Sym_value.S.int32) : int32 t =
+    match i with Val (Num (I32 v)) -> return v | _ -> assert false
 
   let trap : Trap.t -> 'a t = function
     | Out_of_bounds_table_access -> assert false
@@ -92,7 +93,8 @@ module Seq = struct
   let select (sym_bool : vbool) : bool t =
    fun state -> List.to_seq (eval_choice sym_bool state)
 
-  let select_i32 _sym_int = assert false
+  let select_i32 (i : Sym_value.S.int32) : int32 t =
+    match i with Val (Num (I32 v)) -> return v | _ -> assert false
 
   let trap : Trap.t -> 'a t = function
     | Out_of_bounds_table_access -> assert false
@@ -154,7 +156,8 @@ module Explicit = struct
     match cond with Val (Bool b) -> Retv b | _ -> Choice cond
     [@@inline]
 
-  let select_i32 _ = assert false
+  let select_i32 (i : Sym_value.S.int32) : int32 t =
+    match i with Val (Num (I32 v)) -> Retv v | _ -> assert false
 
   let trap : Trap.t -> 'a t = fun t -> Trap t
 
