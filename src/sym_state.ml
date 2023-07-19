@@ -8,9 +8,9 @@ module P = struct
 
   type memory = Sym_memory.M.t
 
-  type table = unit
+  type table = Value.ref_value array
 
-  type elem = unit
+  type elem = Link.Env.elem
 
   type data = Link.Env.data
 
@@ -29,7 +29,6 @@ module P = struct
   type thread = Thread.t
 
   module Choice = Choice_monad.Explicit
-
   module Extern_func = Def_value.Make_extern_func (Value) (Choice)
 
   type extern_func = Extern_func.extern_func
@@ -57,11 +56,22 @@ module P = struct
   module Table = struct
     type t = table
 
-    let get _ = assert false
+    let get t i = t.(i)
 
-    let set _ = assert false
+    let set t i v = t.(i) <- v
 
-    let size _ = assert false
+    let size t = Array.length t
+  end
+
+  module Elem = struct
+    type t = elem
+
+    let get (elem : t) i : Value.ref_value =
+      match elem.value.(i) with
+      | Funcref f -> Funcref f
+      | _ -> assert false
+
+    let size (elem : t) = Array.length elem.value
   end
 
   module Memory = struct

@@ -26,14 +26,8 @@ let init ?label (typ : table_type) : t =
 
 let update table data = table.data <- data
 
-let get t i = t.data.(Int32.to_int i)
+let get t i = t.data.(i)
 
-let set t i v =
-  let i = Int32.to_int i in
-  if i < 0 || i >= Array.length t.data then true
-  else begin
-    t.data.(i) <- v;
-    false
-  end
+let set t i v = t.data.(i) <- v
 
-let size t = Int32.of_int @@ Array.length t.data
+let size t = Array.length t.data

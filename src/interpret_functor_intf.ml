@@ -94,11 +94,11 @@ module type P = sig
   module Table : sig
     type t = table
 
-    val get : t -> int32 -> Value.ref_value
+    val get : t -> int -> Value.ref_value
 
-    val set : t -> int32 -> Value.ref_value -> vbool
+    val set : t -> int -> Value.ref_value -> unit
 
-    val size : t -> int32
+    val size : t -> int
   end
 
   module Memory : sig
@@ -146,6 +146,14 @@ module type P = sig
     val value : t -> string
   end
 
+  module Elem : sig
+    type t = elem
+
+    val get : t -> int -> Value.ref_value
+
+    val size : t -> int
+  end
+
   module Env : sig
     type t = env
 
@@ -153,7 +161,7 @@ module type P = sig
 
     val get_func : t -> int -> Func_intf.t Result.t
 
-    val get_table : t -> int -> Table.t Result.t
+    val get_table : t -> int -> Table.t Choice.t Result.t
 
     val get_elem : t -> int -> elem Result.t
 

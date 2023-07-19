@@ -49,7 +49,8 @@ module S = struct
 
   type float64 = Expr.t
 
-  type ref_value = unit
+  type ref_value =
+    | Funcref of Func_intf.t option
 
   type t =
     | I32 of int32
@@ -68,7 +69,7 @@ module S = struct
 
   let ref_null _ = assert false
 
-  let ref_func _ = assert false
+  let ref_func f : t = Ref (Funcref (Some f))
 
   let ref_is_null _ = assert false
 

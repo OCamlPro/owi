@@ -9,11 +9,11 @@ type t =
   ; mutable data : table
   }
 
-val get : t -> int32 -> Value.ref_value
+val get : t -> int -> Value.ref_value
 
-val set : t -> int32 -> Value.ref_value -> bool
+val set : t -> int -> Value.ref_value -> unit
 
-val size : t -> int32
+val size : t -> int
 
 val update : t -> table -> unit
 

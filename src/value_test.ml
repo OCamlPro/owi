@@ -120,6 +120,14 @@ module P = struct
   module Table = Table
   module Memory = Memory
 
+  module Elem = struct
+    type t = elem
+
+    let get (e : t) i = e.value.(i)
+
+    let size (e : t) = Array.length e.value
+  end
+
   module Data = struct
     type t = data
 

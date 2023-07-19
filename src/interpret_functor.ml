@@ -19,6 +19,8 @@ module Make (P : Interpret_functor_intf.P) :
   module Int32_infix = struct
     let ( < ) = I32.lt
 
+    let ( > ) = I32.gt
+
     let ( + ) = I32.add
 
     let ( - ) = I32.sub
@@ -49,6 +51,12 @@ module Make (P : Interpret_functor_intf.P) :
 
     let debug = ()
   end
+
+  let or__ l =
+    match l with
+    | [] -> Bool.const true
+    | h :: t ->
+      List.fold_left Bool.or_ h t
 
   let page_size = 65_536
 
@@ -984,15 +992,22 @@ module Make (P : Interpret_functor_intf.P) :
     (*     st @@ Stack.push stack (Ref v) *)
     | Table_set indice ->
       let* t = Env.get_table env indice in
+      let/ t in
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
-      let out_of_bounds = Table.set t indice v in
-      let/ out_of_bounds = Choice.select out_of_bounds in
-      if out_of_bounds then Choice.trap Out_of_bounds_table_access else st stack
+      let/ indice = Choice.select_i32 indice in
+      let indice = Int32.to_int indice in
+      if indice < 0 || indice >= Table.size t then
+        Choice.trap Out_of_bounds_table_access
+      else begin
+        Table.set t indice v;
+        st stack
+      end
     | Table_size indice ->
       let* t = Env.get_table env indice in
+      let/ t in
       let len = Table.size t in
-      st @@ Stack.push_i32 stack len
+      st @@ Stack.push_i32 stack (Value.const_i32 (Int32.of_int len))
     | Table_grow _indice -> assert false
     (*     let* t = Env.get_table env indice in *)
     (*     let size = Array.length t.data in *)
@@ -1042,39 +1057,49 @@ module Make (P : Interpret_functor_intf.P) :
     (*         stack *)
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*   end *)
-    | Table_init (_t_i, _e_i) -> assert false
-    (*     let* t = Env.get_table env t_i in *)
-    (*     let* elem = Env.get_elem env e_i in *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let pos_x, stack = Stack.pop_i32_to_int stack in *)
-    (*     let pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     (\* TODO: this is dumb, why do we have to fail even when len = 0 ? *)
-    (*      * I don't remember where exactly but somewhere else it's the opposite: *)
-    (*      * if len is 0 then we do not fail... *)
-    (*      * if it wasn't needed, the following check would be useless *)
-    (*      * as the next one would take care of it *)
-    (*      * (or maybe not because we don't want to fail *)
-    (*      * in the middle of the loop but still...)*\) *)
-    (*     if *)
-    (*       pos_x + len > Array.length elem.value *)
-    (*       || pos + len > Array.length t.data *)
-    (*       || 0 > len *)
-    (*     then trap "out of bounds table access"; *)
-    (*     begin *)
-    (*       try *)
-    (*         for i = 0 to len - 1 do *)
-    (*           let idx = pos_x + i in *)
-    (*           if idx < 0 || idx >= Array.length elem.value then *)
-    (*             trap "out of bounds table access"; *)
-    (*           let x = elem.value.(idx) in *)
-    (*           let idx = pos + i in *)
-    (*           if idx < 0 || idx >= Array.length t.data then *)
-    (*             trap "out of bounds table access"; *)
-    (*           Array.set t.data idx x *)
-    (*         done *)
-    (*       with Invalid_argument _ -> trap "out of bounds table access" *)
-    (*     end; *)
-    (*     st stack *)
+    | Table_init (t_i, e_i) -> begin
+      let* t = Env.get_table env t_i in
+      let* elem = Env.get_elem env e_i in
+      let/ t in
+      let len, stack = Stack.pop_i32 stack in
+      let pos_x, stack = Stack.pop_i32 stack in
+      let pos, stack = Stack.pop_i32 stack in
+
+      let table_size = Table.size t in
+      let elem_len = Elem.size elem in
+      let out_of_bounds =
+        or__
+          Int32_infix.[
+            pos_x + len > const (Int32.of_int elem_len);
+            pos + len > const (Int32.of_int table_size);
+        (* TODO: this is dumb, why do we have to fail even when len = 0 ?
+         * I don't remember where exactly but somewhere else it's the opposite:
+         * if len is 0 then we do not fail...
+         * if it wasn't needed, the following check would be useless
+         * as the next one would take care of it
+         * (or maybe not because we don't want to fail
+         * in the middle of the loop but still...)*)
+            Int32_infix.(const 0l > len);
+            Int32_infix.(const 0l > pos);
+            Int32_infix.(const 0l > pos_x);
+          ]
+      in
+      let/ out_of_bounds = Choice.select out_of_bounds in
+      if out_of_bounds then Choice.trap Out_of_bounds_table_access
+      else begin
+        let/ len = Choice.select_i32 len in
+        let/ pos_x = Choice.select_i32 pos_x in
+        let/ pos = Choice.select_i32 pos in
+        let len = Int32.to_int len in
+        let pos_x = Int32.to_int pos_x in
+        let pos = Int32.to_int pos in
+        for i = 0 to len - 1 do
+          let elt = Elem.get elem (pos_x + i) in
+          Table.set t (pos + i) elt;
+        done;
+        st stack
+      end
+    end
     | Elem_drop i ->
       let* elem = Env.get_elem env i in
       Env.drop_elem elem;
