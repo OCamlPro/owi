@@ -23,6 +23,7 @@ type 'ext t =
   ; data : data IMap.t
   ; elem : elem IMap.t
   ; extern_funcs : 'ext Func_id.collection
+  ; id : Env_id.t
   }
 
 let pp fmt t =
@@ -41,6 +42,8 @@ let pp fmt t =
        ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
        func )
     (IMap.bindings t.functions)
+
+let id (env : _ t) = env.id
 
 let get_global (env : _ t) id =
   match IMap.find_opt id env.globals with
@@ -199,6 +202,6 @@ module type P = sig
   val const_f64 : Float64.t -> V.float64
 end
 
-let freeze Build.{ globals; memories; tables; functions; data; elem }
+let freeze id Build.{ globals; memories; tables; functions; data; elem }
   extern_funcs =
-  { globals; memories; tables; functions; data; elem; extern_funcs }
+  { id; globals; memories; tables; functions; data; elem; extern_funcs }

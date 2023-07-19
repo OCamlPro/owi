@@ -28,6 +28,8 @@ val get_extern_func : 'ext t -> Func_id.t -> 'ext
 
 val get_func_typ : _ t -> func -> Simplified.func_type
 
+val id : _ t -> Env_id.t
+
 val pp : Format.formatter -> _ t -> unit
 
 module Build : sig
@@ -54,7 +56,7 @@ end
 
 type extern_funcs = Value.Func.extern_func Func_id.collection
 
-val freeze : Build.t -> 'ext Func_id.collection -> 'ext t
+val freeze : t' -> Build.t -> 'ext Func_id.collection -> 'ext t
 
 module type T = sig
   module V : Intf.V

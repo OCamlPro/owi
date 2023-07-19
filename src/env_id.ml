@@ -18,3 +18,10 @@ let with_fresh_id f c =
 let get i c = IMap.find i c.c
 
 let pp ppf i = Format.fprintf ppf "f_%i" i
+
+module Map = IMap
+
+module Tbl = Hashtbl.Make (struct
+  include Int
+  let hash x = x
+end)

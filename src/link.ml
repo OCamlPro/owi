@@ -304,7 +304,7 @@ let modul (ls : 'f state) ~name (modul : modul) =
         let* env = eval_tables ls env modul.table in
         let* env, init_active_data = define_data env modul.data in
         let+ env, init_active_elem = define_elem env modul.elem in
-        let finished_env = Env.freeze env ls.collection in
+        let finished_env = Env.freeze env_id env ls.collection in
         (finished_env, (finished_env, init_active_data, init_active_elem)) )
       ls.envs
   in
