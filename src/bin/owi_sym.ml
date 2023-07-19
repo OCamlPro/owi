@@ -2,7 +2,7 @@ open Owi
 open Syntax
 module Value = Sym_value.S
 module Choice = Sym_state.P.Choice
-module Solver = Sym_state.Solver
+module Solver = Thread.Solver
 
 let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
@@ -199,7 +199,14 @@ let main profiling debug _script optimize files =
       | Error e ->
         Format.eprintf "%s@." e;
         exit 1 )
-    results
+    results;
+  let time = !Thread.Solver.solver_time in
+  let count = !Thread.Solver.solver_count in
+  Format.printf "@.";
+  Format.printf "Solver time %fs@." time;
+  Format.printf "      calls %i@." count;
+  Format.printf "  mean time %fms@." (1000. *. time /. float count);
+  ()
 
 let cli =
   let open Cmdliner in
