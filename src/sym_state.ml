@@ -28,7 +28,7 @@ module P = struct
 
   type thread = Thread.t
 
-  module Choice = Choice_monad.List
+  module Choice = Choice_monad.Explicit
 
   module Extern_func = Def_value.Make_extern_func (Value) (Choice)
 
