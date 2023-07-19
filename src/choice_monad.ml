@@ -4,6 +4,7 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   let solver = Thread.solver state in
   let pc = Thread.pc state in
   let mem = Thread.mem state in
+  let tables = Thread.tables state in
   let sym_bool = Encoding.Expression.simplify sym_bool in
   match sym_bool with
   | Val (Bool b) -> [ (b, state) ]
@@ -19,9 +20,19 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
     | true, true ->
       Format.printf "CHOICE: %s@." (Encoding.Expression.to_string sym_bool);
       let state1 =
-        { state with pc = sym_bool :: pc; mem = Sym_memory.M.clone mem }
+        { state with
+          pc = sym_bool :: pc
+        ; mem = Sym_memory.M.clone mem
+        ; tables = Sym_table.clone tables
+        }
       in
-      let state2 = { state with pc = no :: pc; mem = Sym_memory.M.clone mem } in
+      let state2 =
+        { state with
+          pc = no :: pc
+        ; mem = Sym_memory.M.clone mem
+        ; tables = Sym_table.clone tables
+        }
+      in
       [ (true, state1); (false, state2) ] )
 
 module List = struct

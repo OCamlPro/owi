@@ -183,10 +183,9 @@ let script =
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let solver = Solver.create () in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~optimize) pc files in
-  let thread : Thread.t = { solver; pc = []; mem = Sym_memory.memory } in
+  let thread : Thread.t = Thread.create () in
   let results = Choice.run result thread in
   Seq.iter
     (fun (result, thread) ->

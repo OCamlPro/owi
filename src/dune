@@ -51,6 +51,7 @@
   simplified
   simplified_types
   sym_memory
+  sym_table
   spectest
   stack
   string_map

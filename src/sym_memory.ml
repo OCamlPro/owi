@@ -146,5 +146,3 @@ module M = struct
 end
 
 module M' : Intf.Memory_data = M
-
-let memory = M.create 2l

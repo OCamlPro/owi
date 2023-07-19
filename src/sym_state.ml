@@ -8,7 +8,7 @@ module P = struct
 
   type memory = Sym_memory.M.t
 
-  type table = Value.ref_value array
+  type table = Sym_table.table
 
   type elem = Link.Env.elem
 
@@ -67,9 +67,7 @@ module P = struct
     type t = elem
 
     let get (elem : t) i : Value.ref_value =
-      match elem.value.(i) with
-      | Funcref f -> Funcref f
-      | _ -> assert false
+      match elem.value.(i) with Funcref f -> Funcref f | _ -> assert false
 
     let size (elem : t) = Array.length elem.value
   end
@@ -95,7 +93,15 @@ module P = struct
 
     let get_extern_func = Link_env.get_extern_func
 
-    let get_table _ = assert false
+    let get_table (env : t) i : Table.t Choice.t Result.t =
+      match Link_env.get_table env i with
+      | Error _ as e -> e
+      | Ok orig_table ->
+        let f (t : thread) =
+          let tables = Thread.tables t in
+          Sym_table.get_table orig_table tables i
+        in
+        Ok (Choice.with_thread f)
 
     let get_elem _ = assert false
 
