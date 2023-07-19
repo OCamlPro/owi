@@ -22,5 +22,5 @@ module type Complete = sig
 
   val with_thread : (thread -> 'b) -> 'b t
   val add_pc : V.vbool -> unit t
-  val run : 'a t -> thread -> ('a * thread) list
+  val run : 'a t -> thread -> ('a * thread) Seq.t
 end

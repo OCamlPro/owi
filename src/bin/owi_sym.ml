@@ -21,7 +21,7 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
 let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
   let positive_i32 (i : Value.int32) : unit Choice.t =
     let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
-    Choice_monad.List.add_pc c
+    Choice.add_pc c
   in
   (* we need to describe their types *)
   let functions =
@@ -188,7 +188,7 @@ let main profiling debug _script optimize files =
   let result = List.fold_left (run_file ~optimize) pc files in
   let thread : Thread.t = { solver; pc = []; mem = Sym_memory.memory } in
   let results = Choice.run result thread in
-  List.iter
+  Seq.iter
     (fun (result, thread) ->
       Format.printf "PATH CONDITION:@.";
       List.iter

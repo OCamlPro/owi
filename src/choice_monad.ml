@@ -61,7 +61,7 @@ module List = struct
    fun t -> [ ((), { t with pc = c :: t.pc }) ]
 
   let run (v : 'a t) (thread : thread) =
-    v thread
+    List.to_seq (v thread)
 end
 
 module Test_list :
