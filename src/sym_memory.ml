@@ -146,3 +146,43 @@ module M = struct
 end
 
 module M' : Intf.Memory_data = M
+
+module ITbl = Hashtbl.Make (struct
+  include Int
+
+  let hash x = x
+end)
+
+type memories = M.t ITbl.t Env_id.Tbl.t
+
+let init () = Env_id.Tbl.create 0
+
+let clone (memories : memories) : memories =
+  let s = Env_id.Tbl.to_seq memories in
+  Env_id.Tbl.of_seq
+  @@ Seq.map
+       (fun (i, t) ->
+         let s = ITbl.to_seq t in
+         (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, M.clone a)) s) )
+       s
+
+let convert (orig_mem : Memory.t) : M.t =
+  let s = Memory.size_in_pages orig_mem in
+  M.create s
+
+let get_env env_id memories =
+  match Env_id.Tbl.find_opt memories env_id with
+  | Some env -> env
+  | None ->
+    let t = ITbl.create 0 in
+    Env_id.Tbl.add memories env_id t;
+    t
+
+let get_memory env_id (orig_memory : Memory.t) (memories : memories) g_id =
+  let env = get_env env_id memories in
+  match ITbl.find_opt env g_id with
+  | Some t -> t
+  | None ->
+    let t = convert orig_memory in
+    ITbl.add env g_id t;
+    t

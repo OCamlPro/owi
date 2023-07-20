@@ -87,7 +87,15 @@ module P = struct
 
     type t' = Env_id.t
 
-    let get_memory _env _ = Ok (Choice.with_thread Thread.mem)
+    let get_memory env id =
+      match Link_env.get_memory env id with
+      | Error _ as e -> e
+      | Ok orig_mem ->
+        let f (t : thread) =
+          let memories = Thread.memories t in
+          Sym_memory.get_memory (Link_env.id env) orig_mem memories id
+        in
+        Ok (Choice.with_thread f)
 
     let get_func = Link_env.get_func
 
