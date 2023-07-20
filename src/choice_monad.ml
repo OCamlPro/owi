@@ -14,8 +14,8 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   | Val (Num (I32 _)) -> assert false
   | _ -> (
     let no = Sym_value.S.Bool.not sym_bool in
-    let sat_true = Thread.Solver.check_sat solver (sym_bool :: pc) in
-    let sat_false = Thread.Solver.check_sat solver (no :: pc) in
+    let sat_true = Thread.Solver.check solver (sym_bool :: pc) in
+    let sat_false = Thread.Solver.check solver (no :: pc) in
     match (sat_true, sat_false) with
     | false, false -> []
     | true, false -> [ (true, state) ]
