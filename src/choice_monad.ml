@@ -1,3 +1,5 @@
+open Choice_monad_intf
+
 type vbool = Sym_value.S.vbool
 
 let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
@@ -181,6 +183,25 @@ module Explicit = struct
     | Bind (v, f) -> Seq.flat_map (fun (v, t) -> run (f v) t) (run v t)
     | Choice cond -> List.to_seq (eval_choice cond t)
 
+  let rec run_and_trap : type a. a t -> thread -> (a eval * thread) Seq.t =
+   fun v t ->
+    match v with
+    | Empty -> Seq.empty
+    | Trap tr -> Seq.return (ETrap tr, t)
+    | Retv v -> Seq.return (EVal v, t)
+    | Ret (St f) ->
+      let v, t = f t in
+      Seq.return (EVal v, t)
+    | Bind (v, f) ->
+      Seq.flat_map
+        (fun (v, t) ->
+          match v with
+          | ETrap tr -> Seq.return (ETrap tr, t)
+          | EVal v -> run_and_trap (f v) t )
+        (run_and_trap v t)
+    | Choice cond ->
+      List.to_seq (List.map (fun (v, t) -> (EVal v, t)) (eval_choice cond t))
+
   let rec run_up_to : type a. depth:int -> a t -> thread -> (a * thread) Seq.t =
    fun ~depth v t ->
     match v with
@@ -201,6 +222,10 @@ end
 
 module type T =
   Choice_monad_intf.Complete
+    with type thread := Thread.t
+     and module V := Sym_value.S
+
+module type T_trap = Choice_monad_intf.Complete_with_trap
     with type thread := Thread.t
      and module V := Sym_value.S
 

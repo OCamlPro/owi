@@ -108,12 +108,7 @@ module P = struct
 
     let trap msg = raise (Types.Trap msg)
 
-    let trap : Trap.t -> 'a t = function
-      | Out_of_bounds_table_access -> trap "out of bounds table access"
-      | Out_of_bounds_memory_access -> trap "out of bounds memory access"
-      | Integer_overflow -> trap "integer overflow"
-      | Integer_divide_by_zero -> trap "integer divide by zero"
-      | Unreachable -> trap "unreachable"
+    let trap : Trap.t -> 'a t = fun tr -> trap (Trap.to_string tr)
   end
 
   module Extern_func = Value.Func

@@ -186,7 +186,7 @@ let main profiling debug _script optimize files =
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Choice.run result thread in
+  let results = Choice.run_and_trap result thread in
   Seq.iter
     (fun (result, thread) ->
       Format.printf "PATH CONDITION:@.";
@@ -194,8 +194,10 @@ let main profiling debug _script optimize files =
         (fun c -> print_endline (Encoding.Expression.to_string c))
         (Thread.pc thread);
       match result with
-      | Ok () -> ()
-      | Error e ->
+      | Choice_monad_intf.EVal Ok () -> ()
+      | ETrap tr ->
+        Format.printf "TRAP: %s@." (Trap.to_string tr)
+      | EVal Error e ->
         Format.eprintf "%s@." e;
         exit 1 )
     results;

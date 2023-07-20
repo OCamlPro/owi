@@ -24,3 +24,14 @@ module type Complete = sig
   val add_pc : V.vbool -> unit t
   val run : 'a t -> thread -> ('a * thread) Seq.t
 end
+
+
+type 'a eval =
+  | EVal of 'a
+  | ETrap of Trap.t
+
+module type Complete_with_trap = sig
+  include Complete
+
+  val run_and_trap : 'a t -> thread -> ('a eval * thread) Seq.t
+end
