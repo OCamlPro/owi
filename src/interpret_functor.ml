@@ -19,7 +19,11 @@ module Make (P : Interpret_functor_intf.P) :
   module Int32_infix = struct
     let ( < ) = I32.lt
 
+    let ( <= ) = I32.le
+
     let ( > ) = I32.gt
+
+    let ( >= ) = I32.ge
 
     let ( + ) = I32.add
 
@@ -28,6 +32,8 @@ module Make (P : Interpret_functor_intf.P) :
     let ( ~- ) x = const_i32 0l - x
 
     let const = const_i32
+
+    let consti i = const_i32 (Int32.of_int i)
   end
 
   let ( let/ ) = Choice.bind
@@ -727,6 +733,13 @@ module Make (P : Interpret_functor_intf.P) :
       if return then Choice.return (State.return state)
       else Choice.return (State.Continue state)
 
+  let func_type (state : State.exec_state) (f : Func_intf.t) =
+    match f with
+    | WASM (_, func, _) -> func.type_f
+    | Extern f ->
+      let f = Env.get_extern_func state.env f in
+      Extern_func.extern_type f
+
   let call_ref ~return (state : State.exec_state) typ_i =
     ignore (return, state, typ_i);
     failwith "TODO call_ref"
@@ -745,26 +758,34 @@ module Make (P : Interpret_functor_intf.P) :
   (*   trap "indirect call type mismatch"; *)
   (* exec_vfunc ~return state func *)
 
-  let call_indirect ~return:_ (_state : State.exec_state) (_tbl_i, _typ_i) =
-    failwith "tout DUR"
-  (* let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) = *)
-  (*   let fun_i, stack = Stack.pop_i32_to_int state.stack in *)
-  (*   let state = { state with stack } in *)
-  (*   let* t = Env.get_table state.env tbl_i in *)
-  (*   let _null, ref_kind = t.typ in *)
-  (*   if ref_kind <> Func_ht then trap "indirect call type mismatch"; *)
-  (*   let func = *)
-  (*     match t.data.(fun_i) with *)
-  (*     | exception Invalid_argument _ -> trap "undefined element" (\* fails here *\) *)
-  (*     | Funcref (Some f) -> f *)
-  (*     | Funcref None -> trap (Printf.sprintf "uninitialized element %i" fun_i) *)
-  (*     | _ -> trap "element type error" *)
-  (*   in *)
-  (*   let pt, rt = Func.typ func in *)
-  (*   let pt', rt' = typ_i in *)
-  (*   if not (rt = rt' && List.equal p_type_eq pt pt') then *)
-  (*     trap "indirect call type mismatch"; *)
-  (*   exec_vfunc ~return state func *)
+  let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
+    let fun_i, stack = Stack.pop_i32 state.stack in
+    let state = { state with stack } in
+    let* t = Env.get_table state.env tbl_i in
+    let/ t in
+    let _null, ref_kind = Table.typ t in
+    if ref_kind <> Func_ht then
+      (* Should be caught by the type checker *)
+      trap "indirect call type mismatch";
+    let size = Table.size t in
+    let out_of_bound =
+      Int32_infix.(Bool.or_ (fun_i < const 0l) (consti size <= fun_i))
+    in
+    let/ out_of_bound = Choice.select out_of_bound in
+    if out_of_bound then Choice.trap Undefined_element
+    else
+      let/ fun_i = Choice.select_i32 fun_i in
+      let fun_i = Int32.to_int fun_i in
+      let f_ref = Table.get t fun_i in
+      match Value.Ref.get_func f_ref with
+      | Null -> Choice.trap (Uninitialized_element fun_i)
+      | Type_mismatch -> Choice.trap Element_type_error
+      | Ref_value func ->
+        let pt, rt = func_type state func in
+        let pt', rt' = typ_i in
+        if not (rt = rt' && List.equal p_type_eq pt pt') then
+          Choice.trap Indirect_call_type_mismatch
+        else exec_vfunc ~return state func
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =

@@ -61,6 +61,10 @@ module P = struct
     let set t i v = t.(i) <- v
 
     let size t = Array.length t
+
+    let typ _t =
+      (* TODO add type to table *)
+      (Types.Null, Simplified.Func_ht)
   end
 
   module Elem = struct

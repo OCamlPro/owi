@@ -154,6 +154,11 @@ module type Fop = sig
   val to_bits : num -> same_size_int
 end
 
+type 'a get_ref =
+  | Null
+  | Ref_value of 'a
+  | Type_mismatch
+
 module type T = sig
   type vbool
 
@@ -190,6 +195,10 @@ module type T = sig
   val ref_is_null : ref_value -> vbool
 
   val pp : Format.formatter -> t -> unit
+
+  module Ref : sig
+    val get_func : ref_value -> Func_intf.t get_ref
+  end
 
   module Bool : sig
     val const : bool -> vbool

@@ -99,6 +99,8 @@ module type P = sig
     val set : t -> int -> Value.ref_value -> unit
 
     val size : t -> int
+
+    val typ : t -> Simplified.ref_type
   end
 
   module Memory : sig

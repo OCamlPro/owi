@@ -63,11 +63,8 @@ module List = struct
     match i with Val (Num (I32 v)) -> return v | _ -> assert false
 
   let trap : Trap.t -> 'a t = function
-    | Out_of_bounds_table_access -> assert false
-    | Out_of_bounds_memory_access -> assert false
-    | Integer_overflow -> assert false
-    | Integer_divide_by_zero -> assert false
     | Unreachable -> fun _ -> []
+    | _ -> assert false
 
   (* raise (Types.Trap "out of bounds memory access") *)
 
@@ -102,11 +99,8 @@ module Seq = struct
     match i with Val (Num (I32 v)) -> return v | _ -> assert false
 
   let trap : Trap.t -> 'a t = function
-    | Out_of_bounds_table_access -> assert false
-    | Out_of_bounds_memory_access -> assert false
-    | Integer_overflow -> assert false
-    | Integer_divide_by_zero -> assert false
     | Unreachable -> fun _ -> Seq.empty
+    | _ -> assert false
 
   (* raise (Types.Trap "out of bounds memory access") *)
 

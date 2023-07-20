@@ -31,3 +31,5 @@ let get t i = t.data.(i)
 let set t i v = t.data.(i) <- v
 
 let size t = Array.length t.data
+
+let typ t = t.typ

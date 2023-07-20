@@ -15,6 +15,8 @@ val set : t -> int -> Value.ref_value -> unit
 
 val size : t -> int
 
+val typ : t -> Simplified.ref_type
+
 val update : t -> table -> unit
 
 val init : ?label:string -> Simplified.table_type -> t

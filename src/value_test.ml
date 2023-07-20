@@ -27,6 +27,14 @@ module V :
 
   include Value
 
+  module Ref = struct
+    let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
+      match r with
+      | Funcref Some f -> Ref_value f
+      | Funcref None -> Null
+      | _ -> Type_mismatch
+  end
+
   module Bool = struct
     let const c = c
 

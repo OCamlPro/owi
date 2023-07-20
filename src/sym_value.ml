@@ -67,11 +67,13 @@ module S = struct
 
   let const_f64 (f : Float64.t) : float64 = mk_f64 (Float64.to_bits f)
 
-  let ref_null _ = assert false
+  let ref_null _ty = Ref (Funcref None)
 
   let ref_func f : t = Ref (Funcref (Some f))
 
-  let ref_is_null _ = assert false
+  let ref_is_null = function
+    | Funcref Some _ -> Val (Bool false)
+    | Funcref None -> Val (Bool true)
 
   let pp ppf v =
     let e =
@@ -83,6 +85,13 @@ module S = struct
       | Ref _ -> assert false
     in
     Format.pp_print_string ppf (Expr.to_string e)
+
+  module Ref = struct
+    let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
+      match r with
+      | Funcref Some f -> Ref_value f
+      | Funcref None -> Null
+  end
 
   module Bool = struct
     let of_val = function Val (Bool b) -> Some b | _ -> None
