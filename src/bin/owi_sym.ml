@@ -23,11 +23,18 @@ let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
     let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
     Choice.add_pc c
   in
+  let assert_i32 (i : Value.int32) : unit Choice.t =
+    let c = Sym_value.S.I32.to_bool i in
+    Choice.add_pc c
+  in
   (* we need to describe their types *)
   let functions =
     [ ( "positive_i32"
       , Sym_state.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), positive_i32) )
+          (Func (Arg (I32, Res), R0), positive_i32) );
+    ( "i32"
+      , Sym_state.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assert_i32) )
     ]
   in
   { functions }
