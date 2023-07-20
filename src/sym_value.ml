@@ -267,13 +267,13 @@ module S = struct
       | Cvtop (I32 OfBool, cond) -> cond
       | e -> Cvtop (I32 ToBool, e)
 
-    let trunc_f32_s _ = assert false
+    let trunc_f32_s x = cvtop (I32 TruncSF32) x
 
-    let trunc_f32_u _ = assert false
+    let trunc_f32_u x = cvtop (I32 TruncUF32) x
 
-    let trunc_f64_s _ = assert false
+    let trunc_f64_s x = cvtop (I32 TruncSF64) x
 
-    let trunc_f64_u _ = assert false
+    let trunc_f64_u x = cvtop (I32 TruncUF64) x
 
     let trunc_sat_f32_s _ = assert false
 
@@ -283,9 +283,9 @@ module S = struct
 
     let trunc_sat_f64_u _ = assert false
 
-    let reinterpret_f32 _ = assert false
+    let reinterpret_f32 x = cvtop (I32 ReinterpretFloat) x
 
-    let wrap_i64 _ = assert false
+    let wrap_i64 x = cvtop (I32 WrapI64) x
 
     let extend_s _ = assert false
   end
@@ -367,13 +367,13 @@ module S = struct
 
     let to_int32 e = cvtop (I32 WrapI64) e
 
-    let trunc_f32_s _ = assert false
+    let trunc_f32_s x = cvtop (I64 TruncSF32) x
 
-    let trunc_f32_u _ = assert false
+    let trunc_f32_u x = cvtop (I64 TruncUF32) x
 
-    let trunc_f64_s _ = assert false
+    let trunc_f64_s x = cvtop (I64 TruncSF64) x
 
-    let trunc_f64_u _ = assert false
+    let trunc_f64_u x = cvtop (I64 TruncUF64) x
 
     let trunc_sat_f32_s _ = assert false
 
@@ -383,13 +383,13 @@ module S = struct
 
     let trunc_sat_f64_u _ = assert false
 
-    let reinterpret_f64 _ = assert false
+    let reinterpret_f64 x = cvtop (I64 ReinterpretFloat) x
 
     let extend_s _ = assert false
 
-    let extend_i32_s _ = assert false
+    let extend_i32_s x = cvtop (I64 ExtendSI32) x
 
-    let extend_i32_u _ = assert false
+    let extend_i32_u x = cvtop (I64 ExtendUI32) x
   end
 
   module F32 = struct
@@ -445,21 +445,22 @@ module S = struct
 
     let ge x y = relop (F32 Ge) x y
 
-    let convert_i32_s _ = assert false
+    let convert_i32_s x = cvtop (F32 ConvertSI32) x
 
-    let convert_i32_u _ = assert false
+    let convert_i32_u x = cvtop (F32 ConvertUI32) x
 
-    let convert_i64_s _ = assert false
+    let convert_i64_s x = cvtop (F32 ConvertSI64) x
 
-    let convert_i64_u _ = assert false
+    let convert_i64_u x = cvtop (F32 ConvertUI64) x
 
-    let demote_f64 _ = assert false
+    let demote_f64 x = cvtop (F32 DemoteF64) x
 
-    let reinterpret_i32 _ = assert false
+    let reinterpret_i32 x = cvtop (F32 ReinterpretInt) x
 
-    let of_bits _ = assert false
+    let of_bits x = cvtop (F32 ReinterpretInt) x
 
-    let to_bits _ = assert false
+    let to_bits x = cvtop (I32 ReinterpretFloat) x
+
   end
 
   module F64 = struct
@@ -515,21 +516,21 @@ module S = struct
 
     let ge x y = relop (F64 Ge) x y
 
-    let convert_i32_s _ = assert false
+    let convert_i32_s x = cvtop (F64 ConvertSI32) x
 
-    let convert_i32_u _ = assert false
+    let convert_i32_u x = cvtop (F64 ConvertUI32) x
 
-    let convert_i64_s _ = assert false
+    let convert_i64_s x = cvtop (F64 ConvertSI64) x
 
-    let convert_i64_u _ = assert false
+    let convert_i64_u x = cvtop (F64 ConvertUI64) x
 
-    let promote_f32 _ = assert false
+    let promote_f32 x = cvtop (F64 PromoteF32) x
 
-    let reinterpret_i64 _ = assert false
+    let reinterpret_i64 x = cvtop (F64 ReinterpretInt) x
 
-    let of_bits _ = assert false
+    let of_bits x = cvtop (F64 ReinterpretInt) x
 
-    let to_bits _ = assert false
+    let to_bits x = cvtop (I64 ReinterpretFloat) x
   end
 end
 
