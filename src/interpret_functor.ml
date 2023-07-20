@@ -53,10 +53,7 @@ module Make (P : Interpret_functor_intf.P) :
   end
 
   let or__ l =
-    match l with
-    | [] -> Bool.const true
-    | h :: t ->
-      List.fold_left Bool.or_ h t
+    match l with [] -> Bool.const true | h :: t -> List.fold_left Bool.or_ h t
 
   let page_size = 65_536
 
@@ -1071,20 +1068,20 @@ module Make (P : Interpret_functor_intf.P) :
       let elem_len = Elem.size elem in
       let out_of_bounds =
         or__
-          Int32_infix.[
-            pos_x + len > const (Int32.of_int elem_len);
-            pos + len > const (Int32.of_int table_size);
-        (* TODO: this is dumb, why do we have to fail even when len = 0 ?
-         * I don't remember where exactly but somewhere else it's the opposite:
-         * if len is 0 then we do not fail...
-         * if it wasn't needed, the following check would be useless
-         * as the next one would take care of it
-         * (or maybe not because we don't want to fail
-         * in the middle of the loop but still...)*)
-            Int32_infix.(const 0l > len);
-            Int32_infix.(const 0l > pos);
-            Int32_infix.(const 0l > pos_x);
-          ]
+          Int32_infix.
+            [ pos_x + len > const (Int32.of_int elem_len)
+            ; pos + len > const (Int32.of_int table_size)
+            ; (* TODO: this is dumb, why do we have to fail even when len = 0 ?
+               * I don't remember where exactly but somewhere else it's the opposite:
+               * if len is 0 then we do not fail...
+               * if it wasn't needed, the following check would be useless
+               * as the next one would take care of it
+               * (or maybe not because we don't want to fail
+               * in the middle of the loop but still...)*)
+              Int32_infix.(const 0l > len)
+            ; Int32_infix.(const 0l > pos)
+            ; Int32_infix.(const 0l > pos_x)
+            ]
       in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
@@ -1097,7 +1094,7 @@ module Make (P : Interpret_functor_intf.P) :
         let pos = Int32.to_int pos in
         for i = 0 to len - 1 do
           let elt = Elem.get elem (pos_x + i) in
-          Table.set t (pos + i) elt;
+          Table.set t (pos + i) elt
         done;
         st stack
       end
