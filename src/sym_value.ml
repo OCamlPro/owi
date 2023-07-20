@@ -119,6 +119,8 @@ module S = struct
       | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
       | Cvtop (I32 ToBool, e) -> e
       | e -> Cvtop (I32 OfBool, e)
+
+    let pp ppf (e : vbool) = Format.pp_print_string ppf (Expr.to_string e)
   end
 
   module I32 = struct

@@ -201,6 +201,8 @@ module type T = sig
     val and_ : vbool -> vbool -> vbool
 
     val int32 : vbool -> int32
+
+    val pp : Format.formatter -> vbool -> unit
   end
 
   module F32 : sig

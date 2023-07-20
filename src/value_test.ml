@@ -37,6 +37,8 @@ module V :
     let or_ = ( || )
 
     let int32 = function true -> 1l | false -> 0l
+
+    let pp = Format.pp_print_bool
   end
 
   module I32 = struct
