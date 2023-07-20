@@ -14,7 +14,7 @@ module P = struct
 
   type data = Link.Env.data
 
-  type global = unit
+  type global = Sym_global.global
 
   type vbool = Value.vbool
 
@@ -44,13 +44,13 @@ module P = struct
   module Global = struct
     type t = global
 
-    let value _ = assert false
+    let value (v : t) = v.value
 
-    let set_value _ = assert false
+    let set_value (v : t) x = v.value <- x
 
-    let mut _ = assert false
+    let mut (v : t) = v.orig.mut
 
-    let typ _ = assert false
+    let typ (v : t) = v.orig.typ
   end
 
   module Table = struct
@@ -107,7 +107,15 @@ module P = struct
 
     let get_data = Link_env.get_data
 
-    let get_global _ = assert false
+    let get_global (env : t) i : Global.t Choice.t Result.t =
+      match Link_env.get_global env i with
+      | Error _ as e -> e
+      | Ok orig_global ->
+        let f (t : thread) =
+          let globals = Thread.globals t in
+          Sym_global.get_global (Link_env.id env) orig_global globals i
+        in
+        Ok (Choice.with_thread f)
 
     let drop_elem _ =
       (* TODO ? *)

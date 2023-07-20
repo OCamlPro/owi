@@ -950,9 +950,11 @@ module Make (P : Interpret_functor_intf.P) :
       Choice.return (State.Continue { state with locals; stack })
     | Global_get i ->
       let* g = Env.get_global env i in
+      let/ g in
       st @@ Stack.push stack (Global.value g)
     | Global_set i ->
       let* global = Env.get_global env i in
+      let/ global in
       if Global.mut global = Const then Log.err "Can't set const global";
       let v, stack =
         match Global.typ global with

@@ -167,7 +167,7 @@ module type P = sig
 
     val get_data : t -> int -> data Result.t
 
-    val get_global : t -> int -> Global.t Result.t
+    val get_global : t -> int -> Global.t Choice.t Result.t
 
     val get_extern_func : t -> Func_id.t -> Extern_func.extern_func
 

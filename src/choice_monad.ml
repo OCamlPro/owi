@@ -5,6 +5,7 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   let pc = Thread.pc state in
   let mem = Thread.mem state in
   let tables = Thread.tables state in
+  let globals = Thread.globals state in
   let sym_bool = Encoding.Expression.simplify sym_bool in
   match sym_bool with
   | Val (Bool b) -> [ (b, state) ]
@@ -19,18 +20,20 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
     | false, true -> [ (false, state) ]
     | true, true ->
       Format.printf "CHOICE: %s@." (Encoding.Expression.to_string sym_bool);
-      let state1 =
-        { state with
-          pc = sym_bool :: pc
+      let state1 : Thread.t =
+        { solver
+        ; pc = sym_bool :: pc
         ; mem = Sym_memory.M.clone mem
         ; tables = Sym_table.clone tables
+        ; globals = Sym_global.clone globals
         }
       in
-      let state2 =
-        { state with
-          pc = no :: pc
+      let state2 : Thread.t =
+        { solver
+        ; pc = no :: pc
         ; mem = Sym_memory.M.clone mem
         ; tables = Sym_table.clone tables
+        ; globals = Sym_global.clone globals
         }
       in
       [ (true, state1); (false, state2) ] )
