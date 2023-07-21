@@ -20,15 +20,19 @@ module type Complete = sig
 
   type thread
 
+  val assertion : V.vbool -> unit t
+
   val with_thread : (thread -> 'b) -> 'b t
   val add_pc : V.vbool -> unit t
   val run : 'a t -> thread -> ('a * thread) Seq.t
 end
 
+type assertion = string
 
 type 'a eval =
   | EVal of 'a
   | ETrap of Trap.t
+  | EAssert of assertion
 
 module type Complete_with_trap = sig
   include Complete

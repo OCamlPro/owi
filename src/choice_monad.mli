@@ -1,3 +1,5 @@
+exception Assertion of Choice_monad_intf.assertion * Thread.t
+
 module type T = Choice_monad_intf.Complete
     with type thread := Thread.t
      and module V := Sym_value.S

@@ -60,9 +60,22 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
     in
     Choice.return r
   in
-  let symbol_i32 () : Value.int32 Choice.t = assert false in
-  let assume_i32 (_i : Value.int32) : unit Choice.t = assert false in
-  let assert_i32 (_i : Value.int32) : unit Choice.t = assert false in
+  let symbol_i32 () : Value.int32 Choice.t =
+    incr counter;
+    let r =
+      Encoding.Expression.mk_symbol_s `I32Type
+        (Printf.sprintf "symbol_%i" !counter)
+    in
+    Choice.return r
+  in
+  let assume_i32 (i : Value.int32) : unit Choice.t =
+    let c = Sym_value.S.I32.to_bool i in
+    Choice.add_pc c
+  in
+  let assert_i32 (i : Value.int32) : unit Choice.t =
+    let c = Sym_value.S.I32.to_bool i in
+    Choice.assertion c
+  in
   (* we need to describe their types *)
   let functions =
     [ ( "i32"
@@ -187,6 +200,13 @@ let script =
   let doc = "run as a reference test suite script" in
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
+let get_model thread =
+  assert(Thread.Solver.check (Thread.solver thread) (Thread.pc thread));
+  match Thread.Solver.model (Thread.solver thread) with
+  | None -> assert false
+  | Some model ->
+    Encoding.Model.to_string model
+
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -202,6 +222,9 @@ let main profiling debug _script optimize files =
         (Thread.pc thread);
       match result with
       | Choice_monad_intf.EVal Ok () -> ()
+      | EAssert assertion ->
+        let model = get_model thread in
+        Format.printf "Assert failure: %s@.Model:@.%s" assertion model
       | ETrap tr ->
         Format.printf "TRAP: %s@." (Trap.to_string tr)
       | EVal Error e ->

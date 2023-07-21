@@ -3,6 +3,22 @@ open Choice_monad_intf
 type vbool = Sym_value.S.vbool
 type vint32 = Sym_value.S.int32
 
+exception Assertion of assertion * Thread.t
+
+let check (sym_bool : vbool) (state : Thread.t) : bool =
+  let solver = Thread.solver state in
+  let pc = Thread.pc state in
+  let no = Sym_value.S.Bool.not sym_bool in
+  let check = no :: pc in
+  Format.printf "CHECK:@.";
+  List.iter
+    (fun c -> print_endline (Encoding.Expression.to_string c))
+    (check);
+  let r = Thread.Solver.check solver check in
+  let msg = if r then "KO" else "OK" in
+  Format.printf "/CHECK %s@." msg;
+  not r
+
 let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   let solver = Thread.solver state in
   let pc = Thread.pc state in
@@ -141,6 +157,10 @@ module List = struct
   let add_pc (c : Sym_value.S.vbool) : unit t =
    fun t -> [ ((), { t with pc = c :: t.pc }) ]
 
+  let assertion c = fun t ->
+    if check c t then [(), t]
+    else raise (Assertion (Encoding.Expression.to_string c, t))
+
   let run (v : 'a t) (thread : thread) = List.to_seq (v thread)
 end
 
@@ -170,6 +190,10 @@ module Seq = struct
     | Unreachable -> fun _ -> Seq.empty
     | _ -> assert false
 
+  let assertion c = fun t ->
+    if check c t then Seq.return ((), t)
+    else raise (Assertion (Encoding.Expression.to_string c, t))
+
   (* raise (Types.Trap "out of bounds memory access") *)
 
   let with_thread (f : thread -> 'b) : 'b t = fun t -> Seq.return (f t, t)
@@ -195,6 +219,7 @@ module Explicit = struct
     | Ret : 'a st -> 'a t
     | Retv : 'a -> 'a t
     | Bind : 'a t * ('a -> 'b t) -> 'b t
+    | Assert : vbool -> unit t
     | Choice : vbool -> bool t
     | Choice_i32 : vint32 -> int32 t
     | Trap : Trap.t -> 'a t
@@ -207,6 +232,7 @@ module Explicit = struct
     | Empty -> Empty
     | Trap t -> Trap t
     | Retv v -> f v
+    | Assert _
     | Ret _ | Choice _ | Choice_i32 _ -> Bind (v, f)
     | Bind _ -> Bind (v, f)
    [@@inline]
@@ -234,7 +260,10 @@ module Explicit = struct
 
   let add_pc (c : Sym_value.S.vbool) : unit t =
     Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
-    [@@inline]
+  [@@inline]
+
+  let assertion c : unit t =
+    Assert c
 
   let rec run : type a. a t -> thread -> (a * thread) Seq.t =
    fun v t ->
@@ -244,6 +273,9 @@ module Explicit = struct
     | Retv v -> Seq.return (v, t)
     | Ret (St f) -> Seq.return (f t)
     | Bind (v, f) -> Seq.flat_map (fun (v, t) -> run (f v) t) (run v t)
+    | Assert c ->
+      if check c t then Seq.return ((), t)
+      else raise (Assertion (Encoding.Expression.to_string c, t))
     | Choice cond -> List.to_seq (eval_choice cond t)
     | Choice_i32 i -> List.to_seq (eval_choice_i32 i t)
 
@@ -260,9 +292,13 @@ module Explicit = struct
       Seq.flat_map
         (fun (v, t) ->
           match v with
+          | EAssert f -> Seq.return (EAssert f, t)
           | ETrap tr -> Seq.return (ETrap tr, t)
           | EVal v -> run_and_trap (f v) t )
         (run_and_trap v t)
+    | Assert c ->
+      if check c t then Seq.return (EVal (), t)
+      else Seq.return (EAssert (Encoding.Expression.to_string c), t)
     | Choice cond ->
       List.to_seq (List.map (fun (v, t) -> (EVal v, t)) (eval_choice cond t))
     | Choice_i32 i ->
@@ -283,6 +319,9 @@ module Explicit = struct
           (fun (v, t) -> run (f v) t)
           (run_up_to ~depth:(depth - 1) v t)
     end
+    | Assert c ->
+      if check c t then Seq.return ((), t)
+      else raise (Assertion (Encoding.Expression.to_string c, t))
     | Choice cond -> List.to_seq (eval_choice cond t)
     | Choice_i32 i -> List.to_seq (eval_choice_i32 i t)
 end
