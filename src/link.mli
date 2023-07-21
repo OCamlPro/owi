@@ -33,8 +33,8 @@ type fenvs = Value.Func.extern_func Env.t Env_id.collection
 (** link state *)
 type 'f state =
   { by_name : exports StringMap.t
-  ; by_id : exports StringMap.t
-  ; last : exports option
+  ; by_id : (exports * Env_id.t) StringMap.t
+  ; last : (exports * Env_id.t) option
   ; collection : 'f Func_id.collection
   ; envs : 'f envs
   }

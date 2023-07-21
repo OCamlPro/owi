@@ -31,7 +31,7 @@ let check_error_result expected = function
   | Error got -> check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
-  let* exports =
+  let* exports, env_id =
     match mod_id with
     | None -> begin
       match ls.Link.last with
@@ -45,7 +45,7 @@ let load_func_from_module ls mod_id f_name =
   in
   match Link.StringMap.find f_name exports.functions with
   | exception Not_found -> error_s "unbound name %s" f_name
-  | v -> Ok v
+  | v -> Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   let* exports =
@@ -53,12 +53,12 @@ let load_global_from_module ls mod_id name =
     | None -> begin
       match ls.Link.last with
       | None -> Error "unbound last module"
-      | Some m -> Ok m
+      | Some (m, _env_id) -> Ok m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
       | exception Not_found -> error_s "unbound module %s" mod_id
-      | exports -> Ok exports )
+      | exports, _env_id -> Ok exports )
   in
   match Link.StringMap.find name exports.globals with
   | exception Not_found -> error_s "unbound name %s" name
@@ -120,17 +120,12 @@ let action (link_state : Value.Func.extern_func Link.state) = function
          ~none:(fun ppf () -> Format.pp_print_string ppf "")
          Format.pp_print_string )
       mod_id f Symbolic.Pp.consts args;
-    let* _f = load_func_from_module link_state mod_id f in
+    let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
-    let _stack = List.rev stack in
-    let _return = false in
-    assert false
-    (*
-    let state =
-      Interpret.I.State.empty_exec_state ~locals:stack ~env:link_state
-    in
-    Interpret.I.exec_vfunc ~return state f
-    *)
+    let stack = List.rev stack in
+    Ok
+      (Interpret.I.exec_vfunc_from_outside ~locals:stack ~env:env_id
+         ~envs:link_state.envs f )
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";

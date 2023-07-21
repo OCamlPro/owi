@@ -8,7 +8,8 @@ module Make (P : Interpret_functor_intf.P) :
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
-     and type env := P.env = struct
+     and type env := P.env
+     and type value = P.Value.t = struct
   open P
   open Value
 
@@ -584,7 +585,7 @@ module Make (P : Interpret_functor_intf.P) :
       ; envs : Env.t Env_id.collection
       }
 
-    let empty_exec_state ~locals ~env =
+    let empty_exec_state ~locals ~env ~envs =
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
@@ -598,7 +599,7 @@ module Make (P : Interpret_functor_intf.P) :
           ; instructions = 0
           ; calls = Hashtbl.create 512
           }
-      ; envs = Env_id.empty
+      ; envs
       }
 
     let rec print_count ppf count =
@@ -1500,4 +1501,14 @@ module Make (P : Interpret_functor_intf.P) :
   (* with *)
   (* | Trap msg -> Error msg *)
   (* | Stack_overflow -> Error "call stack exhausted" *)
+
+  let exec_vfunc_from_outside ~locals ~env ~envs func =
+    let env = Env_id.get env envs in
+    let exec_state = State.empty_exec_state ~locals ~env ~envs in
+    let/ state = exec_vfunc ~return:false exec_state func in
+    match state with
+    | Return res -> Choice.return res
+    | Continue state ->
+      loop state
+
 end

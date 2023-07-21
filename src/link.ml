@@ -31,8 +31,8 @@ type fenvs = Value.Func.extern_func Env.t Env_id.collection
 
 type 'f state =
   { by_name : exports StringMap.t
-  ; by_id : exports StringMap.t
-  ; last : exports option
+  ; by_id : (exports * Env_id.t) StringMap.t
+  ; last : (exports * Env_id.t) option
   ; collection : 'f Func_id.collection
   ; envs : 'f envs
   }
@@ -312,7 +312,8 @@ let modul (ls : 'f state) ~name (modul : modul) =
   let by_id =
     match modul.id with
     | None -> ls.by_id
-    | Some id -> StringMap.add id by_id_exports ls.by_id
+    | Some id ->
+      StringMap.add id (by_id_exports, (Env.id env)) ls.by_id
   in
   let by_name =
     match name with
@@ -327,7 +328,7 @@ let modul (ls : 'f state) ~name (modul : modul) =
     ( module_to_run
     , { by_id
       ; by_name
-      ; last = Some by_id_exports
+      ; last = Some (by_id_exports, Env.id env)
       ; collection = ls.collection
       ; envs
       } )
@@ -363,7 +364,7 @@ let extern_module ls ~name module_ =
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =
-  let* exports =
+  let* exports, _env_id =
     match id with
     | Some id -> begin
       match StringMap.find_opt id ls.by_id with

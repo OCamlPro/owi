@@ -208,18 +208,12 @@ module type S = sig
   type value
 
   module State : sig
-    type exec_state
-
-    type instr_result
-
     type stack
-
-    val empty_exec_state : locals:value list -> env:env -> exec_state
   end
 
   (** interpret a function with a given input stack and produce a new stack *)
-  val exec_vfunc :
-    return:bool -> State.exec_state -> Func_intf.t -> State.instr_result choice
+  val exec_vfunc_from_outside :
+    locals:value list -> env:Env_id.t -> envs:env Env_id.collection -> Func_intf.t -> value list choice
 
   val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
 
