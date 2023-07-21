@@ -484,7 +484,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       match ty with
       | Extern_func.Arg (_, args) -> split_one_arg args
-      | UArg args -> split_one_arg args
+      | UArg args -> split_args stack args
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
