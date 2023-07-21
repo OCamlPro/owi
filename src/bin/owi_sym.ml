@@ -142,8 +142,15 @@ let simplify_then_link_then_run ~optimize (pc : unit Result.t Choice.t) file =
               (function Symbolic.MStart _ -> true | _ -> false)
               m.fields
           in
+          let has_start_id_function =
+            List.exists
+              (function
+                | Symbolic.MFunc { id = Some "_start"; _ } -> true | _ -> false
+                )
+              m.fields
+          in
           let fields =
-            if has_start then m.fields
+            if has_start || not has_start_id_function then m.fields
             else MStart (Symbolic "_start") :: m.fields
           in
           let m = { m with fields } in
