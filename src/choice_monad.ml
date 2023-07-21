@@ -9,15 +9,19 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   let solver = Thread.solver state in
   let pc = Thread.pc state in
   let no = Sym_value.S.Bool.not sym_bool in
-  let check = no :: pc in
-  Format.printf "CHECK:@.";
-  List.iter
-    (fun c -> print_endline (Encoding.Expression.to_string c))
-    (check);
-  let r = Thread.Solver.check solver check in
-  let msg = if r then "KO" else "OK" in
-  Format.printf "/CHECK %s@." msg;
-  not r
+  let no = Encoding.Expression.simplify no in
+  match no with
+  | Val (Bool no) -> not no
+  | _ ->
+    let check = no :: pc in
+    Format.printf "CHECK:@.";
+    List.iter
+      (fun c -> print_endline (Encoding.Expression.to_string c))
+      (check);
+    let r = Thread.Solver.check solver check in
+    let msg = if r then "KO" else "OK" in
+    Format.printf "/CHECK %s@." msg;
+    not r
 
 let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   let solver = Thread.solver state in
