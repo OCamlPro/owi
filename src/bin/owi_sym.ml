@@ -95,10 +95,10 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
   { functions }
 
 let summaries_extern_module : Sym_state.P.extern_func Link.extern_module =
-  let alloc (_base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
-    assert false
+  let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
+    Choice.return base
   in
-  let dealloc (_base : Value.int32) : unit Choice.t = assert false in
+  let dealloc (_base : Value.int32) : unit Choice.t = Choice.return () in
   let functions =
     [ ( "alloc"
       , Sym_state.P.Extern_func.Extern_func
