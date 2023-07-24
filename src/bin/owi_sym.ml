@@ -31,8 +31,8 @@ let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
   let functions =
     [ ( "positive_i32"
       , Sym_state.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), positive_i32) );
-    ( "i32"
+          (Func (Arg (I32, Res), R0), positive_i32) )
+    ; ( "i32"
       , Sym_state.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assert_i32) )
     ]
@@ -208,11 +208,12 @@ let script =
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
 let get_model thread =
-  assert(Thread.Solver.check (Thread.solver thread) (Thread.pc thread));
+  assert (Thread.Solver.check (Thread.solver thread) (Thread.pc thread));
   match Thread.Solver.model (Thread.solver thread) with
   | None -> assert false
-  | Some model ->
-    Encoding.Model.to_string model
+  | Some model -> Encoding.Model.to_string model
+
+let stop_at_first_failure = true
 
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
@@ -221,23 +222,40 @@ let main profiling debug _script optimize files =
   let result = List.fold_left (run_file ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run_and_trap result thread in
-  Seq.iter
-    (fun (result, thread) ->
-      Format.printf "PATH CONDITION:@.";
-      List.iter
-        (fun c -> print_endline (Encoding.Expression.to_string c))
-        (Thread.pc thread);
-      match result with
-      | Choice_monad_intf.EVal Ok () -> ()
-      | EAssert assertion ->
-        let model = get_model thread in
-        Format.printf "Assert failure: %s@.Model:@.%s" assertion model
-      | ETrap tr ->
-        Format.printf "TRAP: %s@." (Trap.to_string tr)
-      | EVal Error e ->
-        Format.eprintf "%s@." e;
-        exit 1 )
-    results;
+  let failing =
+    Seq.filter_map
+      (fun (result, thread) ->
+        Format.printf "PATH CONDITION:@.";
+        List.iter
+          (fun c -> print_endline (Encoding.Expression.to_string c))
+          (Thread.pc thread);
+        match result with
+        | Choice_monad_intf.EVal (Ok ()) -> None
+        | EAssert assertion ->
+          Format.printf "Assert failure: %s@." assertion;
+          let model = get_model thread in
+          Format.printf "Model:@.%s@." model;
+          Some thread
+        | ETrap tr ->
+          Format.printf "TRAP: %s@." (Trap.to_string tr);
+          let model = get_model thread in
+          Format.printf "Model:@.%s@." model;
+          Some thread
+        | EVal (Error e) ->
+          Format.eprintf "%s@." e;
+          exit 1 )
+      results
+  in
+  let () =
+    if stop_at_first_failure then
+      match failing () with
+      | Nil -> Format.printf "All OK@."
+      | Cons (_thread, _) -> Format.printf "Reached problem!@."
+    else
+      let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
+      if failures = 0 then Format.printf "All OK@."
+      else Format.printf "Reached %i problems!@." failures
+  in
   let time = !Thread.Solver.solver_time in
   let count = !Thread.Solver.solver_count in
   Format.printf "@.";
