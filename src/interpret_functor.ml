@@ -1477,38 +1477,49 @@ module Make (P : Interpret_functor_intf.P) :
 
   let modul envs (modul : Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
-    let/ () =
-      List.fold_left
-        (fun u to_run ->
-          let/ () = u in
-          let/ end_stack, count =
-            let env = Module_to_run.env modul in
-            exec_expr envs env (State.Locals.of_list []) Stack.empty to_run None
-          in
-          Log.profile "Exec module %s@.%a@."
-            (Option.value (Module_to_run.modul modul).id ~default:"anonymous")
-            State.print_count count;
-          match end_stack with
-          | [] -> Choice.return ()
-          | _ :: _ ->
-            Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
-            assert false )
-        (Choice.return ())
-        (Module_to_run.to_run modul)
-    in
-    Choice.return (Ok ())
-  (* TODO error handling *)
-  (* with *)
-  (* | Trap msg -> Error msg *)
-  (* | Stack_overflow -> Error "call stack exhausted" *)
+
+    try
+      begin
+        let/ () =
+          List.fold_left
+            (fun u to_run ->
+              let/ () = u in
+              let/ end_stack, count =
+                let env = Module_to_run.env modul in
+                exec_expr envs env (State.Locals.of_list []) Stack.empty to_run
+                  None
+              in
+              Log.profile "Exec module %s@.%a@."
+                (Option.value (Module_to_run.modul modul).id
+                   ~default:"anonymous" )
+                State.print_count count;
+              match end_stack with
+              | [] -> Choice.return ()
+              | _ :: _ ->
+                Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
+                assert false )
+            (Choice.return ())
+            (Module_to_run.to_run modul)
+        in
+        Choice.return (Ok ())
+      end
+    with
+    | Trap msg -> Choice.return (Error msg)
+    | Stack_overflow -> Choice.return (Error "call stack exhausted")
 
   let exec_vfunc_from_outside ~locals ~env ~envs func =
     let env = Env_id.get env envs in
     let exec_state = State.empty_exec_state ~locals ~env ~envs in
-    let/ state = exec_vfunc ~return:false exec_state func in
-    match state with
-    | Return res -> Choice.return res
-    | Continue state ->
-      loop state
-
+    try
+      begin
+        let/ state = exec_vfunc ~return:true exec_state func in
+        match state with
+        | State.Return res -> Choice.return (Ok res)
+        | State.Continue state ->
+          let/ res = loop state in
+          Choice.return (Ok res)
+      end
+    with
+    | Trap msg -> Choice.return (Error msg)
+    | Stack_overflow -> Choice.return (Error "call stack exhausted")
 end

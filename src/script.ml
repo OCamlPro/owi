@@ -123,9 +123,8 @@ let action (link_state : Value.Func.extern_func Link.state) = function
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
-    Ok
-      (Interpret.I.exec_vfunc_from_outside ~locals:stack ~env:env_id
-         ~envs:link_state.envs f )
+    Interpret.I.exec_vfunc_from_outside ~locals:stack ~env:env_id
+      ~envs:link_state.envs f
   end
   | Get (mod_id, name) ->
     Log.debug "get...@\n";

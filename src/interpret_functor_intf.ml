@@ -203,7 +203,8 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul : env Env_id.collection -> module_to_run -> (unit, 'a) result choice
+  val modul :
+    env Env_id.collection -> module_to_run -> (unit, string) result choice
 
   type value
 
@@ -213,7 +214,11 @@ module type S = sig
 
   (** interpret a function with a given input stack and produce a new stack *)
   val exec_vfunc_from_outside :
-    locals:value list -> env:Env_id.t -> envs:env Env_id.collection -> Func_intf.t -> value list choice
+       locals:value list
+    -> env:Env_id.t
+    -> envs:env Env_id.collection
+    -> Func_intf.t
+    -> value list Result.t choice
 
   val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
 
