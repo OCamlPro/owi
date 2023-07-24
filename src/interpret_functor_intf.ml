@@ -167,7 +167,7 @@ module type P = sig
 
     val get_elem : t -> int -> elem Result.t
 
-    val get_data : t -> int -> data Result.t
+    val get_data : t -> int -> data Choice.t
 
     val get_global : t -> int -> Global.t Choice.t Result.t
 

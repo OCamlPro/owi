@@ -117,7 +117,10 @@ module P = struct
 
     let get_elem env i = Link_env.get_elem env i
 
-    let get_data = Link_env.get_data
+    let get_data env n =
+      match Link_env.get_data env n with
+      | Ok data -> Choice.return data
+      | Error _ -> assert false
 
     let get_global (env : t) i : Global.t Choice.t Result.t =
       match Link_env.get_global env i with

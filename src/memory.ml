@@ -36,12 +36,12 @@ let grow mem delta =
 let fill mem pos len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
-  let c = Int32.to_int c |> Char.chr in
   pos < 0
   || pos + len > Bytes.length mem.data
   ||
-  ( Bytes.fill mem.data pos len c;
-    false )
+  let c = Int32.to_int c |> Char.chr in
+  Bytes.fill mem.data pos len c;
+  false
 
 let blit mem src dst len =
   let src = Int32.to_int src in
@@ -55,11 +55,12 @@ let blit mem src dst len =
     false )
 
 let blit_string mem str ~src ~dst ~len =
+  let str_len = String.length str in
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
   src < 0 || dst < 0
-  || src + len > String.length str
+  || src + len > str_len
   || dst + len > Bytes.length mem.data
   ||
   ( Bytes.blit_string str src mem.data dst len;

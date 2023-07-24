@@ -531,7 +531,7 @@ module Make (P : Interpret_functor_intf.P) :
     type value = t
 
     module Locals : sig
-      type t
+      type t = value array
 
       val of_list : value list -> t
 
@@ -951,7 +951,7 @@ module Make (P : Interpret_functor_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let* data = Env.get_data env i in
+      let/ data = Env.get_data env i in
       let data = Data.value data in
       let out_of_bounds = Memory.blit_string mem data ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
@@ -1400,7 +1400,7 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     | Data_drop i ->
-      let* data = Env.get_data env i in
+      let/ data = Env.get_data env i in
       Env.drop_data data;
       st stack
     | Br_table (inds, i) ->
@@ -1512,7 +1512,31 @@ module Make (P : Interpret_functor_intf.P) :
     let exec_state = State.empty_exec_state ~locals ~env ~envs in
     try
       begin
-        let/ state = exec_vfunc ~return:true exec_state func in
+        let/ state =
+          match func with
+          | Func_intf.WASM (id, func, env_id) ->
+            let env = Env_id.get env_id exec_state.State.envs in
+            let stack = locals in
+            let locals =
+              ( Array.to_list exec_state.locals
+              |> List.map (function
+                   | I32 _ -> (None, Num_type I32)
+                   | I64 _ -> (None, Num_type I64)
+                   | F32 _ -> (None, Num_type F32)
+                   | F64 _ -> (None, Num_type F64)
+                   | Ref _ -> assert false ) )
+              @ func.locals
+            in
+            let func = { func with locals } in
+            let state = State.{ exec_state with stack } in
+            Choice.return
+              (State.Continue (exec_func ~return:true ~id state env func))
+          | Extern f ->
+            let f = Env.get_extern_func exec_state.env f in
+            let/ stack = exec_extern_func exec_state.stack f in
+            let state = State.{ exec_state with stack } in
+            Choice.return (State.return state)
+        in
         match state with
         | State.Return res -> Choice.return (Ok res)
         | State.Continue state ->

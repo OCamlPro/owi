@@ -30,7 +30,7 @@ module V :
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
       match r with
-      | Funcref Some f -> Ref_value f
+      | Funcref (Some f) -> Ref_value f
       | Funcref None -> Null
       | _ -> Type_mismatch
   end
@@ -150,7 +150,10 @@ module P = struct
 
     let get_elem = Link_env.get_elem
 
-    let get_data = Link_env.get_data
+    let get_data env n =
+      match Link_env.get_data env n with
+      | Ok data -> Choice.return data
+      | Error _ -> Choice.trap Trap.Out_of_bounds_memory_access
 
     let get_global = Link_env.get_global
 
