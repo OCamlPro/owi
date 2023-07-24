@@ -523,27 +523,37 @@ let elem_drop (env : Env.t) =
     env.elems
 
 let table_init (env : Env.t) =
-  List.flatten @@
-  List.map
-    (fun (name_t, _) -> 
-      List.map (fun (name_e, _) ->
-        pair
-          (const (Table_init (Symbolic name_t, Symbolic name_e) ))
-          (const [ S.Pop; S.Pop; S.Pop ]) )
-      env.elems
-    )
-    env.tables
+  match env.tables, env.elems with
+  | [], _ | _, [] -> []
+  | tables, elems ->
+    let tables = List.map const tables in
+    let elems = List.map const elems in
+    let instr =
+      let* (name_t, _) = choose tables in
+      let* (name_e, _) = choose elems in
+      pair
+        (const (Table_init (Symbolic name_t, Symbolic name_e) ))
+        (const [ S.Pop; S.Pop; S.Pop ])
+    in
+    [ instr ]
 
 let table_copy (env : Env.t) =
-  List.flatten @@
-  List.map
-    (fun (name_x, (_lim_x, rt_x)) -> 
-      List.map (fun (name_y, (_lim_y, rt_y)) ->
-        if rt_x = rt_y then pair (const (Table_copy (Symbolic name_x, Symbolic name_y) )) (const [ S.Pop; S.Pop; S.Pop ])
-        else pair (const (Nop)) (const [ S.Nothing ]))
-      env.tables
-    )
-    env.tables
+  match env.tables with
+  | [] -> []
+  | tables ->
+    let tables = List.map const tables in
+    let instr =
+      let* (name_x, (_lim_x, rt_x)) = choose tables in
+      let* (name_y, (_lim_y, rt_y)) = choose tables in
+      if rt_x = rt_y then 
+        pair
+          (const ( Table_copy(
+            Symbolic name_x,
+            Symbolic name_y)))
+          (const [S.Pop; S.Pop; S.Pop])
+      else pair (const (Nop)) (const [ S.Nothing ])
+    in
+    [ instr ]
 
 let table_size (env : Env.t) =
   List.map
