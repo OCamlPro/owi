@@ -1517,17 +1517,6 @@ module Make (P : Interpret_functor_intf.P) :
           | Func_intf.WASM (id, func, env_id) ->
             let env = Env_id.get env_id exec_state.State.envs in
             let stack = locals in
-            let locals =
-              ( Array.to_list exec_state.locals
-              |> List.map (function
-                   | I32 _ -> (None, Num_type I32)
-                   | I64 _ -> (None, Num_type I64)
-                   | F32 _ -> (None, Num_type F32)
-                   | F64 _ -> (None, Num_type F64)
-                   | Ref _ -> assert false ) )
-              @ func.locals
-            in
-            let func = { func with locals } in
             let state = State.{ exec_state with stack } in
             Choice.return
               (State.Continue (exec_func ~return:true ~id state env func))
