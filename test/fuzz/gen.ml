@@ -77,8 +77,12 @@ let expr_available_2_f64_i32 (env : Env.t) =
   else []
 
 let expr_available_3_i32 env =
-  if B.memory_exists env then [ B.memory_copy; B.memory_fill ] @ B.memory_init env else []
-  @ B.table_init env @ B.table_copy env
+  let mem_expr =
+    if B.memory_exists env then [ B.memory_copy; B.memory_fill ] @ B.memory_init env
+    else []
+  in
+  let table_expr = B.table_init env @ B.table_copy env in
+  mem_expr @ table_expr
 
 let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
