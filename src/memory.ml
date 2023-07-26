@@ -33,17 +33,16 @@ let grow mem delta =
   Bytes.fill new_mem old_size delta (Char.chr 0);
   update_memory mem new_mem
 
-let fill mem pos len c =
+let fill mem ~pos ~len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
-  pos < 0
+  pos < 0 || len < 0
   || pos + len > Bytes.length mem.data
   ||
-  let c = Int32.to_int c mod 256 |> Char.chr in
-  Bytes.fill mem.data pos len c;
-  false
+  ( Bytes.fill mem.data pos len c;
+    false )
 
-let blit mem src dst len =
+let blit mem ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in

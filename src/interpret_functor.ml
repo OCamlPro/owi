@@ -933,16 +933,22 @@ module Make (P : Interpret_functor_intf.P) :
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let/* mem = Env.get_memory env mem_0 in
-      let out_of_bounds = Memory.fill mem pos len c in
+      let/ c = Choice.select_i32 c in
+      let c =
+        let c = Int32.to_int c in
+        let c = Int.abs c mod 256 in
+        Char.chr c
+      in
+      let out_of_bounds = Memory.fill mem ~pos ~len c in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_copy ->
       let/* mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
-      let src_pos, stack = Stack.pop_i32 stack in
-      let dst_pos, stack = Stack.pop_i32 stack in
-      let out_of_bounds = Memory.blit mem src_pos dst_pos len in
+      let src, stack = Stack.pop_i32 stack in
+      let dst, stack = Stack.pop_i32 stack in
+      let out_of_bounds = Memory.blit mem ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
@@ -1021,7 +1027,9 @@ module Make (P : Interpret_functor_intf.P) :
       let/* t = Env.get_table env indice in
       let len = Table.size t in
       st @@ Stack.push_i32 stack (Value.const_i32 (Int32.of_int len))
-    | Table_grow _indice -> assert false
+    | Table_grow _indice ->
+      (* TODO *)
+      st stack
     (*     let* t = Env.get_table env indice in *)
     (*     let size = Array.length t.data in *)
     (*     let delta, stack = Stack.pop_i32_to_int stack in *)
@@ -1041,7 +1049,9 @@ module Make (P : Interpret_functor_intf.P) :
     (*       Array.blit t.data 0 new_table 0 (Array.length t.data); *)
     (*       Table.update t new_table; *)
     (*       Stack.push_i32_of_int stack size *)
-    | Table_fill _indice -> assert false
+    | Table_fill _indice ->
+      (* TODO *)
+      st stack
     (*     let* t = Env.get_table env indice in *)
     (*     let len, stack = Stack.pop_i32_to_int stack in *)
     (*     let x, stack = Stack.pop_as_ref stack in *)
@@ -1051,7 +1061,9 @@ module Make (P : Interpret_functor_intf.P) :
     (*       with Invalid_argument _ -> trap "out of bounds table access" *)
     (*     end; *)
     (*     st stack *)
-    | Table_copy (_ti_dst, _ti_src) -> assert false
+    | Table_copy (_ti_dst, _ti_src) ->
+      (* TODO *)
+      st stack
     (* begin *)
     (*     let* t_src = Env.get_table env ti_src in *)
     (*     let* t_dst = Env.get_table env ti_dst in *)

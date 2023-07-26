@@ -128,9 +128,9 @@ module type P = sig
 
     val grow : t -> int32 -> unit
 
-    val fill : t -> int32 -> int32 -> int32 -> vbool
+    val fill : t -> pos:int32 -> len:int32 -> char -> vbool
 
-    val blit : t -> int32 -> int32 -> int32 -> vbool
+    val blit : t -> src:int32 -> dst:int32 -> len:int32 -> vbool
 
     val blit_string :
       t -> string -> src:int32 -> dst:int32 -> len:int32 -> vbool
