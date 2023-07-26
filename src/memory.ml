@@ -39,7 +39,7 @@ let fill mem pos len c =
   pos < 0
   || pos + len > Bytes.length mem.data
   ||
-  let c = Int32.to_int c |> Char.chr in
+  let c = Int32.to_int c mod 256 |> Char.chr in
   Bytes.fill mem.data pos len c;
   false
 

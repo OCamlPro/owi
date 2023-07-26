@@ -1123,10 +1123,15 @@ module Make (P : Interpret_functor_intf.P) :
       if offset < 0 then Choice.trap Out_of_bounds_memory_access
       else
         let offset = const_i32 @@ Int32.of_int offset in
+        let addr = I32.add pos offset in
         let out_of_bounds =
           Bool.or_
-            Int32_infix.(Memory.size mem < pos + offset + const 2l)
-            Int32_infix.(pos < const 0l)
+            Int32_infix.(offset < const 0l)
+            (Bool.or_
+               Int32_infix.(Memory.size mem < addr + const 2l)
+               (Bool.or_
+                  Int32_infix.(pos < const 0l)
+                  Int32_infix.(addr < const 0l) ) )
         in
         let/ out_of_bounds = Choice.select out_of_bounds in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -1149,8 +1154,12 @@ module Make (P : Interpret_functor_intf.P) :
         let addr = I32.add pos offset in
         let out_of_bounds =
           Bool.or_
-            Int32_infix.(Memory.size mem < addr + const 1l)
-            Int32_infix.(pos < const 0l)
+            Int32_infix.(offset < const 0l)
+            (Bool.or_
+               Int32_infix.(Memory.size mem < addr + const 1l)
+               (Bool.or_
+                  Int32_infix.(pos < const 0l)
+                  Int32_infix.(addr < const 0l) ) )
         in
         let/ out_of_bounds = Choice.select out_of_bounds in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -1179,8 +1188,12 @@ module Make (P : Interpret_functor_intf.P) :
       let addr = I32.add pos offset in
       let out_of_bounds =
         Bool.or_
-          Int32_infix.(Memory.size mem < addr + const 1l)
-          Int32_infix.(pos < const 0l)
+          Int32_infix.(offset < const 0l)
+          (Bool.or_
+             Int32_infix.(Memory.size mem < addr + const 1l)
+             (Bool.or_
+                Int32_infix.(pos < const 0l)
+                Int32_infix.(addr < const 0l) ) )
       in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -1196,7 +1209,9 @@ module Make (P : Interpret_functor_intf.P) :
       let offset = const_i32 (Int32.of_int offset) in
       let addr = I32.add pos offset in
       let out_of_bounds =
-        Bool.or_ Int32_infix.(offset < const 0l) Int32_infix.(pos < const 0l)
+        Bool.or_
+          Int32_infix.(offset < const 0l)
+          (Bool.or_ Int32_infix.(pos < const 0l) Int32_infix.(addr < const 0l))
       in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
