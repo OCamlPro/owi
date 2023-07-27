@@ -681,13 +681,13 @@ end
 
 include Make (Arg)
 
-let symbolic v = <span data-count="13260">A</span>rg.Symbolic v
+let symbolic v = <span data-count="13264">A</span>rg.Symbolic v
 
-let raw v = <span data-count="76546">A</span>rg.Raw v
+let raw v = <span data-count="76548">A</span>rg.Raw v
 
-let bt_ind i = <span data-count="13650">A</span>rg.Bt_ind i
+let bt_ind i = <span data-count="13652">A</span>rg.Bt_ind i
 
-let bt_raw i t = <span data-count="15323">A</span>rg.Bt_raw (i, t)
+let bt_raw i t = <span data-count="15327">A</span>rg.Bt_raw (i, t)
 
 type global =
   { typ : global_type
@@ -802,10 +802,10 @@ module Pp = struct
   let data_mode fmt = function
     | <span data-count="0">D</span>ata_passive -&gt; ()
     | <span data-count="0">D</span>ata_active (i, e) -&gt;
-      Format.fprintf fmt "(%a %a)" symb_indice_opt i expr e
+      Format.fprintf fmt "(memory %a) (offset %a)" symb_indice_opt i expr e
 
   let data fmt (d : data) =
-    <span data-count="0">F</span>ormat.fprintf fmt {|(data %a %S)|} data_mode d.mode d.init
+    <span data-count="0">F</span>ormat.fprintf fmt {|(data %a %a %S)|} id_opt d.id data_mode d.mode d.init
 
   let elem fmt (e : elem) =
     <span data-count="0">F</span>ormat.fprintf fmt "@[&lt;hov 2&gt;(elem %a %a %a %a)@]" id_opt e.id elem_mode

@@ -695,24 +695,24 @@ let action (link_state : Link.state) = function
     <span data-count="22">[</span> global.value ]
 
 let run ~with_exhaustion ~optimize script =
-  <span data-count="243">l</span>et state =
+  <span data-count="245">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="243">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="245">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Link.state) -&gt; function
-      | <span data-count="2604">S</span>ymbolic.Module m -&gt;
-        if !curr_module = 0 then <span data-count="243">L</span>og.debug_on := false;
-        <span data-count="2604">L</span>og.debug "*** module@\n";
-        <span data-count="2604">i</span>ncr curr_module;
-        <span data-count="2604">l</span>et+ link_state =
-          Compile.until_interpre<span data-count="2604">t</span> link_state ~optimize ~name:None m
+      | <span data-count="2608">S</span>ymbolic.Module m -&gt;
+        if !curr_module = 0 then <span data-count="245">L</span>og.debug_on := false;
+        <span data-count="2608">L</span>og.debug "*** module@\n";
+        <span data-count="2608">i</span>ncr curr_module;
+        <span data-count="2608">l</span>et+ link_state =
+          Compile.until_interpre<span data-count="2608">t</span> link_state ~optimize ~name:None m
         in
-        <span data-count="2604">L</span>og.debug_on := debug_on;
+        <span data-count="2608">L</span>og.debug_on := debug_on;
         link_state
       | <span data-count="68">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
         Log.debug "*** assert_trap@\n";
@@ -793,11 +793,11 @@ let run ~with_exhaustion ~optimize script =
           else <span data-count="30">O</span>k ()
         in
         <span data-count="30">l</span>ink_state
-      | <span data-count="291">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="243">!</span>registered = false then <span data-count="243">L</span>og.debug_on := false;
-        <span data-count="291">L</span>og.debug "*** register@\n";
-        <span data-count="291">l</span>et+ state = Link.register_modul<span data-count="291">e</span> link_state ~name ~id:mod_name in
-        <span data-count="291">L</span>og.debug_on := debug_on;
+      | <span data-count="293">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="245">!</span>registered = false then <span data-count="245">L</span>og.debug_on := false;
+        <span data-count="293">L</span>og.debug "*** register@\n";
+        <span data-count="293">l</span>et+ state = Link.register_modul<span data-count="293">e</span> link_state ~name ~id:mod_name in
+        <span data-count="293">L</span>og.debug_on := debug_on;
         state
       | <span data-count="314">A</span>ction a -&gt;
         Log.debug "*** action@\n";
@@ -805,9 +805,9 @@ let run ~with_exhaustion ~optimize script =
         <span data-count="314">l</span>ink_state )
     state script
 
-let exec ?(with_exhaustion = <span data-count="242">f</span>alse) ~optimize script =
-  <span data-count="243">l</span>et+ _link_state = ru<span data-count="243">n</span> ~with_exhaustion ~optimize script in
-  <span data-count="243">(</span>)
+let exec ?(with_exhaustion = <span data-count="244">f</span>alse) ~optimize script =
+  <span data-count="245">l</span>et+ _link_state = ru<span data-count="245">n</span> ~with_exhaustion ~optimize script in
+  <span data-count="245">(</span>)
 </code></pre>
       </div>
     </div>

@@ -1226,19 +1226,19 @@ open Simplified
 
 let find msg (named : 'a Named.t) (indice : Symbolic.indice option) :
   int Result.t =
-  <span data-count="15416">m</span>atch indice with
+  <span data-count="15450">m</span>atch indice with
   | <span data-count="0">N</span>one -&gt; error_s "%s" msg
-  | <span data-count="15416">S</span>ome indice -&gt; (
+  | <span data-count="15450">S</span>ome indice -&gt; (
     match indice with
     | <span data-count="5334">S</span>ymbolic.Arg.Raw i -&gt;
       (* TODO change Indexed.t strucure for that to be more efficient *)
       if not (List.exist<span data-count="5334">s</span> (Indexed.has_inde<span data-count="5334">x</span> i) named.values) then
         <span data-count="122">e</span>rror_s "%s %i" msg i
       else <span data-count="5212">O</span>k i
-    | <span data-count="10082">S</span>ymbolic name -&gt; (
+    | <span data-count="10116">S</span>ymbolic name -&gt; (
       match String_map.find_opt name named.named with
       | <span data-count="0">N</span>one -&gt; error_s "%s %s" msg name
-      | <span data-count="10082">S</span>ome i -&gt; Ok i ) )
+      | <span data-count="10116">S</span>ome i -&gt; Ok i ) )
 
 let get msg (named : 'a Named.t) indice : 'a Indexed.t Result.t =
   <span data-count="960">l</span>et* i = fin<span data-count="960">d</span> msg named indice in
@@ -1265,28 +1265,28 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
 let rewrite_expr (modul : Assigned.t) (locals : param list)
   (iexpr : Symbolic.expr) : expr Result.t =
   (* block_ids handling *)
-  <span data-count="12320">l</span>et block_id_to_raw (loop_count, block_ids) id =
-    <span data-count="51562">l</span>et* id =
+  <span data-count="12322">l</span>et block_id_to_raw (loop_count, block_ids) id =
+    <span data-count="51566">l</span>et* id =
       match id with
-      | <span data-count="354">S</span>ymbolic.Arg.Symbolic id -&gt;
+      | <span data-count="358">S</span>ymbolic.Arg.Symbolic id -&gt;
         let pos = ref (-1) in
         begin
           try
             List.iter<span data-count="4">i</span>
               (fun i n -&gt;
-                <span data-count="910">i</span>f n = Some id then <span data-count="350">b</span>egin
+                <span data-count="914">i</span>f n = Some id then <span data-count="354">b</span>egin
                   pos := i;
                   raise Exit
                 end )
               block_ids
-          with <span data-count="350">E</span>xit -&gt; ()
+          with <span data-count="354">E</span>xit -&gt; ()
         end;
-        if !pos = -1 then <span data-count="4">E</span>rror "unknown label" else <span data-count="350">O</span>k !pos
+        if !pos = -1 then <span data-count="4">E</span>rror "unknown label" else <span data-count="354">O</span>k !pos
       | <span data-count="51208">R</span>aw id -&gt; Ok id
     in
     (* this is &gt; and not &gt;= because you can `br 0` without any block to target the function *)
-    <span data-count="51558">i</span>f id &gt; List.lengt<span data-count="51558">h</span> block_ids + loop_count then <span data-count="28">E</span>rror "unknown label"
-    else <span data-count="51530">O</span>k id
+    <span data-count="51562">i</span>f id &gt; List.lengt<span data-count="51562">h</span> block_ids + loop_count then <span data-count="28">E</span>rror "unknown label"
+    else <span data-count="51534">O</span>k id
   in
 
   let bt_some_to_raw : Symbolic.block_type -&gt; block_type Result.t = function
@@ -1296,10 +1296,10 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       | <span data-count="8">E</span>rror _ as e -&gt; e
       | <span data-count="0">O</span>k _ -&gt; Error "TODO: Simplify.bt_some_to_raw"
     end
-    | <span data-count="2374">B</span>t_raw (type_use, t) -&gt; (
-      let* t = Simplified_types.convert_func_typ<span data-count="2374">e</span> None t in
-      <span data-count="2374">m</span>atch type_use with
-      | <span data-count="2312">N</span>one -&gt; Ok t
+    | <span data-count="2376">B</span>t_raw (type_use, t) -&gt; (
+      let* t = Simplified_types.convert_func_typ<span data-count="2376">e</span> None t in
+      <span data-count="2376">m</span>atch type_use with
+      | <span data-count="2314">N</span>one -&gt; Ok t
       | <span data-count="62">S</span>ome ind -&gt;
         (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
         let* t' =
@@ -1315,13 +1315,13 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
   let bt_to_raw : Symbolic.block_type option -&gt; block_type option Result.t =
     function
     | <span data-count="1566">N</span>one -&gt; Ok None
-    | <span data-count="2280">S</span>ome bt -&gt;
-      let* raw = bt_some_to_ra<span data-count="2280">w</span> bt in
-      <span data-count="2256">O</span>k (Some raw)
+    | <span data-count="2282">S</span>ome bt -&gt;
+      let* raw = bt_some_to_ra<span data-count="2282">w</span> bt in
+      <span data-count="2258">O</span>k (Some raw)
   in
 
   let* locals, after_last_assigned_local =
-    List.fold_lef<span data-count="12320">t</span>
+    List.fold_lef<span data-count="12322">t</span>
       (fun acc ((name, _type) : param) -&gt;
         <span data-count="7551">l</span>et* locals, next_free_int = acc in
         <span data-count="7551">m</span>atch name with
@@ -1334,7 +1334,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       locals
   in
 
-  <span data-count="12314">l</span>et find_local = function
+  <span data-count="12316">l</span>et find_local = function
     | <span data-count="7132">S</span>ymbolic.Arg.Raw i -&gt;
       if i &gt;= after_last_assigned_local then <span data-count="38">E</span>rror "unknown local" else <span data-count="7094">O</span>k i
     | <span data-count="3782">S</span>ymbolic name -&gt; (
@@ -1351,18 +1351,18 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
   let find_type id = <span data-count="0">f</span>ind "unknown type" modul.typ id in
 
   let rec body (loop_count, block_ids) : Symbolic.instr -&gt; instr Result.t =
-    <span data-count="56606">f</span>unction
+    <span data-count="56626">f</span>unction
     | <span data-count="420">B</span>r_table (ids, id) -&gt;
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       <span data-count="420">l</span>et* ids = array_ma<span data-count="420">p</span> block_id_to_raw ids in
       <span data-count="416">l</span>et* id = block_id_to_ra<span data-count="416">w</span> id in
       <span data-count="402">o</span>k @@ Br_table (ids, id)
-    | <span data-count="480">B</span>r_if id -&gt;
-      let* id = block_id_to_ra<span data-count="480">w</span> (loop_count, block_ids) id in
-      <span data-count="474">o</span>k @@ Br_if id
-    | <span data-count="1014">B</span>r id -&gt;
-      let* id = block_id_to_ra<span data-count="1014">w</span> (loop_count, block_ids) id in
-      <span data-count="1006">o</span>k @@ Br id
+    | <span data-count="482">B</span>r_if id -&gt;
+      let* id = block_id_to_ra<span data-count="482">w</span> (loop_count, block_ids) id in
+      <span data-count="476">o</span>k @@ Br_if id
+    | <span data-count="1016">B</span>r id -&gt;
+      let* id = block_id_to_ra<span data-count="1016">w</span> (loop_count, block_ids) id in
+      <span data-count="1008">o</span>k @@ Br id
     | <span data-count="1829">C</span>all id -&gt;
       let* id = find_fun<span data-count="1829">c</span> (Some id) in
       <span data-count="1823">o</span>k @@ Call id
@@ -1388,10 +1388,10 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       let* bt = bt_to_ra<span data-count="590">w</span> bt in
       <span data-count="582">l</span>et* e = exp<span data-count="582">r</span> e (loop_count + 1, id :: block_ids) in
       <span data-count="582">o</span>k @@ Loop (id, bt, e)
-    | <span data-count="2356">B</span>lock (id, bt, e) -&gt;
-      let* bt = bt_to_ra<span data-count="2356">w</span> bt in
-      <span data-count="2348">l</span>et* e = exp<span data-count="2348">r</span> e (loop_count, id :: block_ids) in
-      <span data-count="2320">o</span>k @@ Block (id, bt, e)
+    | <span data-count="2358">B</span>lock (id, bt, e) -&gt;
+      let* bt = bt_to_ra<span data-count="2358">w</span> bt in
+      <span data-count="2350">l</span>et* e = exp<span data-count="2350">r</span> e (loop_count, id :: block_ids) in
+      <span data-count="2322">o</span>k @@ Block (id, bt, e)
     | <span data-count="640">C</span>all_indirect (tbl_i, bt) -&gt;
       let* tbl_i = find_tabl<span data-count="640">e</span> (Some tbl_i) in
       <span data-count="638">l</span>et* bt = bt_some_to_ra<span data-count="638">w</span> bt in
@@ -1564,11 +1564,11 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | <span data-count="22">R</span>ef_is_null -&gt; Ok Ref_is_null
     | <span data-count="968">F</span>_binop (nn, o) -&gt; ok @@ F_binop (nn, o)
     | <span data-count="1714">F</span>32_const f -&gt; ok @@ F32_const f
-    | <span data-count="1502">F</span>64_const f -&gt; ok @@ F64_const f
-    | <span data-count="16913">I</span>32_const i -&gt; ok @@ I32_const i
+    | <span data-count="1506">F</span>64_const f -&gt; ok @@ F64_const f
+    | <span data-count="16919">I</span>32_const i -&gt; ok @@ I32_const i
     | <span data-count="1462">I</span>64_const i -&gt; ok @@ I64_const i
     | <span data-count="456">U</span>nreachable -&gt; Ok Unreachable
-    | <span data-count="1438">D</span>rop -&gt; Ok Drop
+    | <span data-count="1442">D</span>rop -&gt; Ok Drop
     | <span data-count="598">N</span>op -&gt; Ok Nop
     | <span data-count="600">R</span>eturn -&gt; Ok Return
     | <span data-count="0">I</span>31_new -&gt; Ok I31_new
@@ -1602,19 +1602,19 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       Log.debug "TODO (Rewrite.body) %a@\n" Symbolic.Pp.instr i;
       <span data-count="0">O</span>k Nop
   and expr (e : Symbolic.expr) (loop_count, block_ids) : expr Result.t =
-    <span data-count="17028">l</span>ist_map (fun i -&gt; <span data-count="56606">b</span>ody (loop_count, block_ids) i) e
+    <span data-count="17032">l</span>ist_map (fun i -&gt; <span data-count="56626">b</span>ody (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
 
 let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
   Const.expr Result.t =
-  <span data-count="6530">l</span>et const_instr (instr : Symbolic.instr) : Const.instr Result.t =
-    <span data-count="6566">l</span>et open Const in
+  <span data-count="6538">l</span>et const_instr (instr : Symbolic.instr) : Const.instr Result.t =
+    <span data-count="6574">l</span>et open Const in
     match instr with
-    | <span data-count="1439">S</span>ymbolic.I32_const v -&gt; ok @@ I32_const v
-    | <span data-count="255">I</span>64_const v -&gt; ok @@ I64_const v
-    | <span data-count="263">F</span>32_const v -&gt; ok @@ F32_const v
-    | <span data-count="249">F</span>64_const v -&gt; ok @@ F64_const v
+    | <span data-count="1441">S</span>ymbolic.I32_const v -&gt; ok @@ I32_const v
+    | <span data-count="257">I</span>64_const v -&gt; ok @@ I64_const v
+    | <span data-count="265">F</span>32_const v -&gt; ok @@ F32_const v
+    | <span data-count="251">F</span>64_const v -&gt; ok @@ F64_const v
     | <span data-count="62">R</span>ef_null v -&gt;
       let+ v = Simplified_types.convert_heap_typ<span data-count="62">e</span> None v in
       <span data-count="62">R</span>ef_null v
@@ -1643,21 +1643,21 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
 
 let rewrite_block_type (modul : Assigned.t) (block_type : Symbolic.block_type) :
   block_type Result.t =
-  <span data-count="15448">m</span>atch block_type with
+  <span data-count="15472">m</span>atch block_type with
   | <span data-count="256">S</span>ymbolic.Arg.Bt_ind id -&gt; begin
     match get "unknown type" modul.typ (Some id) with
     | <span data-count="248">O</span>k { value = Def_func_t t'; _ } -&gt; Ok t'
     | <span data-count="8">E</span>rror _ as e -&gt; e
     | <span data-count="0">O</span>k _ -&gt; Error "TODO: Simplify.bt_some_to_raw"
   end
-  | <span data-count="15192">B</span>t_raw (_, func_type) -&gt; Simplified_types.convert_func_type None func_type
+  | <span data-count="15216">B</span>t_raw (_, func_type) -&gt; Simplified_types.convert_func_type None func_type
 
 let rewrite_global (modul : Assigned.t) (global : Symbolic.global) :
   global Result.t =
-  <span data-count="1216">l</span>et* init = rewrite_const_exp<span data-count="1216">r</span> modul global.init in
-  <span data-count="1190">l</span>et mut, val_type = global.typ in
-  let+ val_type = Simplified_types.convert_val_typ<span data-count="1190">e</span> None val_type in
-  <span data-count="1190">l</span>et typ = (mut, val_type) in
+  <span data-count="1224">l</span>et* init = rewrite_const_exp<span data-count="1224">r</span> modul global.init in
+  <span data-count="1198">l</span>et mut, val_type = global.typ in
+  let+ val_type = Simplified_types.convert_val_typ<span data-count="1198">e</span> None val_type in
+  <span data-count="1198">l</span>et typ = (mut, val_type) in
   { id = global.id; init; typ }
 
 let rewrite_elem (modul : Assigned.t) (elem : Symbolic.elem) : elem Result.t =
@@ -1687,76 +1687,76 @@ let rewrite_data (modul : Assigned.t) (data : Symbolic.data) : data Result.t =
 
 let rewrite_export msg named (exports : Grouped.opt_export list) :
   export list Result.t =
-  <span data-count="23016">l</span>ist_map
+  <span data-count="23032">l</span>ist_map
     (fun { Grouped.name; id } -&gt;
-      <span data-count="12197">l</span>et+ id =
-        match id with <span data-count="7126">C</span>urr id -&gt; Ok id | <span data-count="5071">I</span>ndice id -&gt; fin<span data-count="5071">d</span> msg named (Some id)
+      <span data-count="12231">l</span>et+ id =
+        match id with <span data-count="7126">C</span>urr id -&gt; Ok id | <span data-count="5105">I</span>ndice id -&gt; fin<span data-count="5105">d</span> msg named (Some id)
       in
-      <span data-count="12173">{</span> name; id } )
+      <span data-count="12207">{</span> name; id } )
     exports
 
 let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
   exports Result.t =
-  <span data-count="5763">l</span>et* global = rewrite_expor<span data-count="5763">t</span> "unknown global" modul.global exports.global in
-  <span data-count="5757">l</span>et* mem = rewrite_expor<span data-count="5757">t</span> "unknown memory" modul.mem exports.mem in
-  <span data-count="5751">l</span>et* table = rewrite_expor<span data-count="5751">t</span> "unknown table" modul.table exports.table in
-  <span data-count="5745">l</span>et+ func = rewrite_expor<span data-count="5745">t</span> "unknown function" modul.func exports.func in
-  <span data-count="5739">{</span> global; mem; table; func }
+  <span data-count="5767">l</span>et* global = rewrite_expor<span data-count="5767">t</span> "unknown global" modul.global exports.global in
+  <span data-count="5761">l</span>et* mem = rewrite_expor<span data-count="5761">t</span> "unknown memory" modul.mem exports.mem in
+  <span data-count="5755">l</span>et* table = rewrite_expor<span data-count="5755">t</span> "unknown table" modul.table exports.table in
+  <span data-count="5749">l</span>et+ func = rewrite_expor<span data-count="5749">t</span> "unknown function" modul.func exports.func in
+  <span data-count="5743">{</span> global; mem; table; func }
 
 let rewrite_func (modul : Assigned.t) (func : Symbolic.func) : func Result.t =
-  <span data-count="12324">l</span>et* type_f = rewrite_block_typ<span data-count="12324">e</span> modul func.type_f in
-  <span data-count="12320">l</span>et params, _ = type_f in
-  let* locals = list_ma<span data-count="12320">p</span> (Simplified_types.convert_para<span data-count="12320">m</span> None) func.locals in
-  <span data-count="12320">l</span>et+ body = rewrite_exp<span data-count="12320">r</span> modul (params @ locals) func.body in
-  <span data-count="12050">{</span> body; type_f; id = func.id; locals }
+  <span data-count="12326">l</span>et* type_f = rewrite_block_typ<span data-count="12326">e</span> modul func.type_f in
+  <span data-count="12322">l</span>et params, _ = type_f in
+  let* locals = list_ma<span data-count="12322">p</span> (Simplified_types.convert_para<span data-count="12322">m</span> None) func.locals in
+  <span data-count="12322">l</span>et+ body = rewrite_exp<span data-count="12322">r</span> modul (params @ locals) func.body in
+  <span data-count="12052">{</span> body; type_f; id = func.id; locals }
 
 let rewrite_import (f : 'a -&gt; 'b Result.t) (import : 'a Imported.t) :
   'b Imported.t Result.t =
-  <span data-count="3124">l</span>et+ desc = <span data-count="3124">f</span> import.desc in
-  <span data-count="3120">{</span> import with desc }
+  <span data-count="3146">l</span>et+ desc = <span data-count="3146">f</span> import.desc in
+  <span data-count="3142">{</span> import with desc }
 
 let rewrite_runtime f g r =
-  <span data-count="16820">m</span>atch r with
-  | <span data-count="13540">R</span>untime.Local v -&gt;
-    let+ v = <span data-count="13540">f</span> v in
-    <span data-count="13240">R</span>untime.Local v
-  | <span data-count="3280">I</span>mported i -&gt;
-    let+ i = <span data-count="3280">g</span> i in
-    <span data-count="3276">R</span>untime.Imported i
+  <span data-count="16852">m</span>atch r with
+  | <span data-count="13550">R</span>untime.Local v -&gt;
+    let+ v = <span data-count="13550">f</span> v in
+    <span data-count="13250">R</span>untime.Local v
+  | <span data-count="3302">I</span>mported i -&gt;
+    let+ i = <span data-count="3302">g</span> i in
+    <span data-count="3298">R</span>untime.Imported i
 
 let rewrite_named f named =
-  <span data-count="23222">l</span>et+ values =
-    list_ma<span data-count="23222">p</span>
+  <span data-count="23238">l</span>et+ values =
+    list_ma<span data-count="23238">p</span>
       (fun ind -&gt;
-        <span data-count="19152">l</span>et+ value = <span data-count="19152">f</span> ind.Indexed.value in
-        <span data-count="18778">{</span> ind with value } )
+        <span data-count="19184">l</span>et+ value = <span data-count="19184">f</span> ind.Indexed.value in
+        <span data-count="18810">{</span> ind with value } )
       named.Named.values
   in
-  <span data-count="22848">{</span> named with Named.values }
+  <span data-count="22864">{</span> named with Named.values }
 
 let modul (modul : Assigned.t) : modul Result.t =
-  <span data-count="5859">L</span>og.debug "rewriting    ...@\n";
-  <span data-count="5859">l</span>et* (global : (global, global_type) Runtime.t Named.t) =
+  <span data-count="5863">L</span>og.debug "rewriting    ...@\n";
+  <span data-count="5863">l</span>et* (global : (global, global_type) Runtime.t Named.t) =
     let* { Named.named; values } =
-      rewrite_name<span data-count="5859">d</span> (rewrite_runtim<span data-count="5859">e</span> (rewrite_globa<span data-count="5859">l</span> modul) ok) modul.global
+      rewrite_name<span data-count="5863">d</span> (rewrite_runtim<span data-count="5863">e</span> (rewrite_globa<span data-count="5863">l</span> modul) ok) modul.global
     in
-    <span data-count="5833">l</span>et values = List.rev values in
-    <span data-count="5833">l</span>et global : (global, global_type) Runtime.t Named.t =
+    <span data-count="5837">l</span>et values = List.rev values in
+    <span data-count="5837">l</span>et global : (global, global_type) Runtime.t Named.t =
       { Named.named; values }
     in
     Ok global
   in
-  <span data-count="5833">l</span>et* elem = rewrite_name<span data-count="5833">d</span> (rewrite_ele<span data-count="5833">m</span> modul) modul.elem in
-  <span data-count="5791">l</span>et* data = rewrite_name<span data-count="5791">d</span> (rewrite_dat<span data-count="5791">a</span> modul) modul.data in
-  <span data-count="5763">l</span>et* exports = rewrite_export<span data-count="5763">s</span> modul modul.exports in
-  <span data-count="5739">l</span>et* func =
-    let import = rewrite_import (rewrite_block_typ<span data-count="5739">e</span> modul) in
-    <span data-count="5739">l</span>et runtime = rewrite_runtime (rewrite_fun<span data-count="5739">c</span> modul) import in
-    <span data-count="5739">r</span>ewrite_name<span data-count="5739">d</span> runtime modul.func
+  <span data-count="5837">l</span>et* elem = rewrite_name<span data-count="5837">d</span> (rewrite_ele<span data-count="5837">m</span> modul) modul.elem in
+  <span data-count="5795">l</span>et* data = rewrite_name<span data-count="5795">d</span> (rewrite_dat<span data-count="5795">a</span> modul) modul.data in
+  <span data-count="5767">l</span>et* exports = rewrite_export<span data-count="5767">s</span> modul modul.exports in
+  <span data-count="5743">l</span>et* func =
+    let import = rewrite_import (rewrite_block_typ<span data-count="5743">e</span> modul) in
+    <span data-count="5743">l</span>et runtime = rewrite_runtime (rewrite_fun<span data-count="5743">c</span> modul) import in
+    <span data-count="5743">r</span>ewrite_name<span data-count="5743">d</span> runtime modul.func
   in
-  <span data-count="5461">l</span>et+ start =
+  <span data-count="5465">l</span>et+ start =
     match modul.start with
-    | <span data-count="5425">N</span>one -&gt; Ok None
+    | <span data-count="5429">N</span>one -&gt; Ok None
     | <span data-count="36">S</span>ome start -&gt; (
       let* idx = fin<span data-count="36">d</span> "unknown function" func (Some start) in
       <span data-count="34">l</span>et va = List.find (Indexed.has_inde<span data-count="34">x</span> idx) func.Named.values in
@@ -1770,7 +1770,7 @@ let modul (modul : Assigned.t) : modul Result.t =
       | <span data-count="4">_</span>, _ -&gt; Error "start function" )
   in
 
-  <span data-count="5455">l</span>et modul : modul =
+  <span data-count="5459">l</span>et modul : modul =
     { id = modul.id
     ; mem = modul.mem
     ; table = modul.table

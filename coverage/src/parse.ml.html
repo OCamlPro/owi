@@ -205,13 +205,13 @@ struct
       Log.debug "%s@\n%s@\n" file_line msg
     in
     fun buf -&gt;
-      <span data-count="1406">L</span>og.debug "parsing      ...@\n";
-      <span data-count="1406">l</span>et provider () =
-        <span data-count="1360737">l</span>et tok = Lexer.token buf in
-        <span data-count="1360371">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1360371">(</span>tok, start, stop)
+      <span data-count="1408">L</span>og.debug "parsing      ...@\n";
+      <span data-count="1408">l</span>et provider () =
+        <span data-count="1360807">l</span>et tok = Lexer.token buf in
+        <span data-count="1360441">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1360441">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="364">r</span> provider) with
+      try Ok (parse<span data-count="366">r</span> provider) with
       | <span data-count="542">T</span>ypes.Parse_fail msg
       | <span data-count="4">L</span>exer.Illegal_escape msg
       | <span data-count="346">L</span>exer.Unknown_operator msg -&gt;
@@ -226,16 +226,16 @@ struct
         <span data-count="134">E</span>rror msg
 
   let from_file ~filename =
-    <span data-count="246">l</span>et chan = open_in filename in
-    <span data-count="246">l</span>et result =
+    <span data-count="248">l</span>et chan = open_in filename in
+    <span data-count="248">l</span>et result =
       Fun.protect
-        ~finally:(fun () -&gt; <span data-count="246">c</span>lose_in chan)
+        ~finally:(fun () -&gt; <span data-count="248">c</span>lose_in chan)
         (fun () -&gt;
-          <span data-count="246">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="246">S</span>edlexing.set_filename lb filename;
-          <span data-count="246">f</span>rom_lexbuf lb )
+          <span data-count="248">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="248">S</span>edlexing.set_filename lb filename;
+          <span data-count="248">f</span>rom_lexbuf lb )
     in
-    <span data-count="246">r</span>esult
+    <span data-count="248">r</span>esult
 
   let from_string s = <span data-count="1160">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1160">g</span> s)
 
