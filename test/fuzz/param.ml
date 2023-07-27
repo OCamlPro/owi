@@ -1,6 +1,9 @@
-let debug = false
+(* TODO: OCaml Arg module could not be used (conflict with crowbar)
+https://github.com/OCamlPro/owi/pull/28#discussion_r1231983824 *)
 
-let optimize_fuzzing = false
+let debug = true
+
+let optimize_fuzzing = true
 
 let reference_fuzzing = true
 

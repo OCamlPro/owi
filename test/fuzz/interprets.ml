@@ -93,6 +93,7 @@ module Reference : INTERPRET = struct
     | 42 -> Error "trap"
     | 124 -> Error "timeout"
     | n -> failwith (Format.sprintf "error %d" n)
+    (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"
 end
