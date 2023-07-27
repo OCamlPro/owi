@@ -246,7 +246,9 @@ let rec expr ~block_type ~stack ~locals env =
     in
     let expr_available env =
       expr_always_available block loop expr ~locals ~stack env
-      @ expr_available_with_current_stack @ B.expr_call env stack
+      @ expr_available_with_current_stack
+      @ B.expr_call env stack
+      (* TODO: Function calls can be improved: recursive calls are not processed *)
       @ B.expr_br env stack
     in
     let* i, ops = choose (expr_available env) in
@@ -263,7 +265,8 @@ let data env =
   MData { id; init; mode }
 
 let memory env =
-  let sup = if true then 10 else 65537 (* TODO: fix time explosion *) in
+  (* TODO: fix time explosion https://github.com/OCamlPro/owi/pull/28#discussion_r1212835761 *)
+  let sup = if true then 10 else 65537 in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
   let id = Some (Env.add_memory env) in

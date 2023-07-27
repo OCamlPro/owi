@@ -552,6 +552,8 @@ let table_copy (env : Env.t) =
             Symbolic name_y)))
           (const [S.Pop; S.Pop; S.Pop])
       else pair (const (Nop)) (const [ S.Nothing ])
+      (* TODO: avoid if ... then ... else pair (const (Nop)) (const [ S.Nothing ])
+      https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
     in
     [ instr ]
 
