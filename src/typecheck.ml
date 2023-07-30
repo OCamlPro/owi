@@ -347,9 +347,13 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let pt, rt = Env.func_get i env in
     let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
-  | Call_ref bt ->
+  | Call_ref _t ->
     let* stack = Stack.pop_ref stack in
-    Stack.pop_push (Some bt) stack
+    (* TODO:
+       let bt = Env.type_get t env in
+         Stack.pop_push (Some bt) stack
+    *)
+    Ok stack
   | Return_call i ->
     let pt, rt = Env.func_get i env in
     let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
