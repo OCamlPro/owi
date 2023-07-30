@@ -406,6 +406,19 @@ struct
       | No_extern_ht -> Format.fprintf fmt "noextern"
       | Def_ht i -> Format.fprintf fmt "%a" indice i
 
+    let heap_type_short fmt = function
+      | Any_ht -> Format.fprintf fmt "anyref"
+      | None_ht -> Format.fprintf fmt "(ref none)"
+      | Eq_ht -> Format.fprintf fmt "eqref"
+      | I31_ht -> Format.fprintf fmt "i31ref"
+      | Struct_ht -> Format.fprintf fmt "(ref struct)"
+      | Array_ht -> Format.fprintf fmt "(ref array)"
+      | Func_ht -> Format.fprintf fmt "funcref"
+      | No_func_ht -> Format.fprintf fmt "nofunc"
+      | Extern_ht -> Format.fprintf fmt "externref"
+      | No_extern_ht -> Format.fprintf fmt "(ref noextern)"
+      | Def_ht i -> Format.fprintf fmt "(ref %a)" indice i
+
     let null fmt = function
       | No_null ->
         (* TODO: no notation to enforce nonnull ? *)
@@ -413,7 +426,9 @@ struct
       | Null -> Format.fprintf fmt "null"
 
     let ref_type fmt (n, ht) =
-      Format.fprintf fmt "(ref %a %a)" null n heap_type ht
+      match n with
+      | No_null -> Format.fprintf fmt "%a" heap_type_short ht
+      | Null -> Format.fprintf fmt "(ref null %a)" heap_type ht
 
     let val_type fmt = function
       | Num_type t -> num_type fmt t
@@ -781,12 +796,15 @@ struct
       Format.fprintf fmt "@\n  @[<v>(type %a %a)@]" id_opt id sub_type t
 
     let typ fmt l =
-      (* TODO: special case for empty and singleton case to avoid a big rec printing *)
-      Format.fprintf fmt "(rec %a)"
-        (Format.pp_print_list
-           ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
-           type_def )
-        l
+      match l with
+      | [] -> ()
+      | [ t ] -> type_def fmt t
+      | l ->
+        Format.fprintf fmt "(rec %a)"
+          (Format.pp_print_list
+             ~pp_sep:(fun fmt () -> Format.fprintf fmt " ")
+             type_def )
+          l
 
     module Pp_const = struct
       let ibinop fmt : Const.ibinop -> Unit.t = function
