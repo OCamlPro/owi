@@ -178,9 +178,9 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       let* tbl_i = find_table (Some tbl_i) in
       let* bt = bt_some_to_raw bt in
       ok @@ Return_call_indirect (tbl_i, bt)
-    | Call_ref bt ->
-      let* bt = bt_some_to_raw bt in
-      ok @@ Call_ref bt
+    | Call_ref t ->
+      let* t = find_type (Some t) in
+      ok @@ Call_ref t
     | Return_call_ref bt ->
       let* bt = bt_some_to_raw bt in
       ok @@ Return_call_ref bt
