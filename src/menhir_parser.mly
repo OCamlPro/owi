@@ -245,7 +245,7 @@ let plain_instr :=
   | DROP; { Drop }
   | BR; ~ = indice; <Br>
   | BR_IF; ~ = indice; <Br_if>
-  | BR_ON_CAST; ~ = indice; ~ = null_opt; ~ = heap_type; <Br_on_cast>
+  | BR_ON_CAST; ~ = indice; null_opt1 = null_opt; ht1 = heap_type; null_opt2 = null_opt; ht2 = heap_type;  { Br_on_cast (indice, (null_opt1, ht1), (null_opt2, ht2))}
   | BR_ON_CAST_FAIL; ~ = indice; ~ = null_opt; ~ = heap_type; <Br_on_cast_fail>
   | BR_ON_NON_NULL; ~ = indice; <Br_on_non_null>
   | BR_ON_NULL; ~ = indice; <Br_on_null>

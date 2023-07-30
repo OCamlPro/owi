@@ -357,10 +357,11 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | Extern_externalize -> Ok Extern_externalize
     | Extern_internalize -> Ok Extern_internalize
     | Ref_eq -> Ok Ref_eq
-    | Br_on_cast (i, null, ht) ->
+    | Br_on_cast (i, t1, t2) ->
       let* i = find_type (Some i) in
-      let+ ht = Simplified_types.convert_heap_type None ht in
-      Br_on_cast (i, null, ht)
+      let* t1 = Simplified_types.convert_ref_type None t1 in
+      let+ t2 = Simplified_types.convert_ref_type None t2 in
+      Br_on_cast (i, t1, t2)
     | Br_on_cast_fail (i, null, ht) ->
       let* i = find_type (Some i) in
       let+ ht = Simplified_types.convert_heap_type None ht in
