@@ -244,7 +244,7 @@ struct
     | Br of indice
     | Br_if of indice
     | Br_table of indice array * indice
-    | Br_on_cast of indice * nullable * heap_type
+    | Br_on_cast of indice * ref_type * ref_type
     | Br_on_cast_fail of indice * nullable * heap_type
     | Br_on_non_null of indice
     | Br_on_null of indice
@@ -686,8 +686,9 @@ struct
         Format.fprintf fmt "ref.test %a %a" null n heap_type t
       | Br_on_non_null id -> Format.fprintf fmt "br_on_non_null %a" indice id
       | Br_on_null id -> Format.fprintf fmt "br_on_null %a" indice id
-      | Br_on_cast (id, n, t) ->
-        Format.fprintf fmt "br_on_cast %a %a %a" indice id null n heap_type t
+      | Br_on_cast (id, t1, t2) ->
+        Format.fprintf fmt "br_on_cast %a %a %a" indice id ref_type t1 ref_type
+          t2
       | Br_on_cast_fail (id, n, t) ->
         Format.fprintf fmt "br_on_cast_fail %a %a %a" indice id null n heap_type
           t
