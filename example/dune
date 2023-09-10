@@ -5,6 +5,7 @@
 (mdx
  (libraries owi)
  (deps
+  %{bin:owi}
   (file extern.exe)
   (file extern.ml)
   (file extern.wast)

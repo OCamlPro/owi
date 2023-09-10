@@ -9,6 +9,7 @@ module Make (P : Interpret_functor_intf.P) :
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
      and type env := P.env
+     and type State.stack := P.Value.t list
      and type value = P.Value.t = struct
   open P
   open Value

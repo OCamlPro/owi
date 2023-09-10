@@ -1,13 +1,7 @@
 open Simplified
-module Value = Value_test
-
-let optimize_expr = Fun.id
-
-(*
-
 open Types
 
-let rec optimize_expr expr = expr
+let rec optimize_expr expr =
   match expr with
   | ((I32_const _ | I64_const _) as x)
     :: ((I32_const _ | I64_const _) as y)
@@ -198,7 +192,6 @@ let rec optimize_expr expr = expr
   end
   | hd :: tl -> hd :: optimize_expr tl
   | [] -> []
-  *)
 
 let locals_func body_expr =
   let locals_hashtbl = Hashtbl.create 16 in

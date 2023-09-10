@@ -75,13 +75,13 @@ val m : Symbolic.modul =
     match Compile.until_link Link.empty_state ~optimize:false ~name:None m with
     | Ok v -> v
     | Error e -> failwith e;;
-val module_to_run : Link.module_to_run =
+val module_to_run : '_weak1 Link.module_to_run =
 ...
-val link_state : Link.state =
+val link_state : '_weak1 Link.state =
 ...
 # let () =
     Log.debug_on := true;
-    match Interpret.I.modul module_to_run with
+    match Interpret.I.modul link_state.envs module_to_run with
     | Ok () -> ()
     | Error e -> failwith e;;
 interpreting ...

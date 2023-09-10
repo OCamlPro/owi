@@ -67,9 +67,9 @@ You can define the various required external functions in OCaml like this :
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Link.extern_module =
+let extern_module : Value.Func.extern_func Link.extern_module =
   (* some custom functions *)
-  let rint : int32 ref Value.Extern_ref.ty = Value.Extern_ref.fresh "int ref" in
+  let rint : int32 ref Type_id.ty = Type_id.fresh "int ref" in
   let fresh i = ref i in
   let set r (i : int32) = r := i in
   let get r : int32 = !r in
@@ -111,7 +111,7 @@ let module_to_run =
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.I.modul module_to_run with
+  match Interpret.I.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 ```
