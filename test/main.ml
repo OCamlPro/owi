@@ -14,20 +14,23 @@ let test_file ~optimize f =
   Format.printf "testing %s: `%a`... "
     (if optimize then "optimized file" else "file          ")
     Fpath.pp f;
-  match Owi.Parse.Script.from_file ~filename:(Fpath.to_string f) with
-  | Ok script -> begin
-    match Owi.Script.exec script ~optimize with
-    | Ok () as ok ->
-      pp_ok Format.std_formatter;
-      ok
-    | Error msg as error ->
+  try
+    match Owi.Parse.Script.from_file ~filename:(Fpath.to_string f) with
+    | Ok script -> begin
+      match Owi.Script.exec script ~optimize with
+      | Ok () as ok ->
+        pp_ok Format.std_formatter;
+        ok
+      | Error msg as error ->
+        pp_error Format.err_formatter msg;
+        error
+    end
+    | Error msg as e ->
+      let msg = String.concat " | " @@ String.split_on_char '\n' msg in
       pp_error Format.err_formatter msg;
-      error
-  end
-  | Error msg as e ->
-    let msg = String.concat " | " @@ String.split_on_char '\n' msg in
-    pp_error Format.err_formatter msg;
-    e
+      e
+  with e ->
+    Error (Format.sprintf "unhandled exceptiond: `%s`" (Printexc.to_string e))
 
 let test_directory d =
   let count_error = ref 0 in
