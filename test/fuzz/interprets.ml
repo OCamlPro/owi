@@ -45,7 +45,7 @@ module Owi_unoptimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, _link_state) ->
-          timeout_call_run (fun () -> Interpret.modul regular) ) )
+          timeout_call_run (fun () -> Interpret.I.modul regular) ) )
 
   let name = "owi"
 end
@@ -66,7 +66,7 @@ module Owi_optimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, _link_state) ->
-          timeout_call_run (fun () -> Interpret.modul regular) ) )
+          timeout_call_run (fun () -> Interpret.I.modul regular) ) )
 
   let name = "owi+optimize"
 end
@@ -93,7 +93,7 @@ module Reference : INTERPRET = struct
     | 42 -> Error "trap"
     | 124 -> Error "timeout"
     | n -> failwith (Format.sprintf "error %d" n)
-    (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
+  (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"
 end

@@ -47,7 +47,7 @@ let str_type =
   Def_func_t func_type
 (* TODO: complete Def_struct_t / Def_array_t *)
 
-let sub_type = 
+let sub_type =
   let* final in
   let+ str_type in
   (final, ([] : indice list), str_type)
@@ -378,10 +378,10 @@ let global_type = pair mut val_type
 
 let elem_active (env : Env.t) =
   List.map
-    ( fun (name, _) ->
+    (fun (name, _) ->
       let* ind = const (Some (symbolic name)) in
       let+ instr = const_i32 in
-      Elem_active (ind,[instr]) )
+      Elem_active (ind, [ instr ]) )
     env.tables
 
 let elem_mode (env : Env.t) = choose (const Elem_passive :: elem_active env)
@@ -519,20 +519,21 @@ let data_drop (env : Env.t) =
 
 let elem_drop (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Elem_drop (Symbolic name))) (const [ S.Nothing ]))
+    (fun (name, _) ->
+      pair (const (Elem_drop (Symbolic name))) (const [ S.Nothing ]) )
     env.elems
 
 let table_init (env : Env.t) =
-  match env.tables, env.elems with
+  match (env.tables, env.elems) with
   | [], _ | _, [] -> []
   | tables, elems ->
     let tables = List.map const tables in
     let elems = List.map const elems in
     let instr =
-      let* (name_t, _) = choose tables in
-      let* (name_e, _) = choose elems in
+      let* name_t, _ = choose tables in
+      let* name_e, _ = choose elems in
       pair
-        (const (Table_init (Symbolic name_t, Symbolic name_e) ))
+        (const (Table_init (Symbolic name_t, Symbolic name_e)))
         (const [ S.Pop; S.Pop; S.Pop ])
     in
     [ instr ]
@@ -543,43 +544,53 @@ let table_copy (env : Env.t) =
   | tables ->
     let tables = List.map const tables in
     let instr =
-      let* (name_x, (_lim_x, rt_x)) = choose tables in
-      let* (name_y, (_lim_y, rt_y)) = choose tables in
-      if rt_x = rt_y then 
+      let* name_x, (_lim_x, rt_x) = choose tables in
+      let* name_y, (_lim_y, rt_y) = choose tables in
+      if rt_x = rt_y then
         pair
-          (const ( Table_copy(
-            Symbolic name_x,
-            Symbolic name_y)))
-          (const [S.Pop; S.Pop; S.Pop])
-      else pair (const (Nop)) (const [ S.Nothing ])
+          (const (Table_copy (Symbolic name_x, Symbolic name_y)))
+          (const [ S.Pop; S.Pop; S.Pop ])
+      else pair (const Nop) (const [ S.Nothing ])
       (* TODO: avoid if ... then ... else pair (const (Nop)) (const [ S.Nothing ])
-      https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
+         https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
     in
     [ instr ]
 
 let table_size (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Table_size (Symbolic name))) (const [ S.Push (Num_type I32) ]))
+    (fun (name, _) ->
+      pair
+        (const (Table_size (Symbolic name)))
+        (const [ S.Push (Num_type I32) ]) )
     env.tables
 
 let table_grow (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Table_grow (Symbolic name))) (const [ S.Pop; S.Pop; S.Push (Num_type I32) ]))
+    (fun (name, _) ->
+      pair
+        (const (Table_grow (Symbolic name)))
+        (const [ S.Pop; S.Pop; S.Push (Num_type I32) ]) )
     env.tables
 
 let table_fill (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Table_fill (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ]))
+    (fun (name, _) ->
+      pair (const (Table_fill (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ])
+      )
     env.tables
 
 let table_set (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Table_set (Symbolic name))) (const [ S.Pop; S.Pop ]))
+    (fun (name, _) ->
+      pair (const (Table_set (Symbolic name))) (const [ S.Pop; S.Pop ]) )
     env.tables
 
 let table_get (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Table_get (Symbolic name))) (const [ S.Pop; S.Push (Ref_type (No_null, Func_ht)) ]))
+    (fun (name, _) ->
+      pair
+        (const (Table_get (Symbolic name)))
+        (const [ S.Pop; S.Push (Ref_type (No_null, Func_ht)) ]) )
     env.tables
 
 let block_kind = choose [ const Env.Block; const Env.Loop; const Env.Func ]
@@ -614,12 +625,13 @@ let expr_br_if (env : Env.t) (stack : val_type list) =
             | Env.Loop -> S.is_stack_compatible_param tl (List.rev pt)
           in
           if not is_stack_compatible then None
-          else 
-            let i = match bk with
-            | Env.Block | Env.Loop -> const @@ Br_if (Symbolic name)
-            | Env.Func -> const @@ Br_if (Raw ((List.length blocs) - 1))
+          else
+            let i =
+              match bk with
+              | Env.Block | Env.Loop -> const @@ Br_if (Symbolic name)
+              | Env.Func -> const @@ Br_if (Raw (List.length blocs - 1))
             in
-            Some ( pair i (const [ S.Pop ]) )
+            Some (pair i (const [ S.Pop ]))
         | _ -> None )
       blocs
 
@@ -642,11 +654,12 @@ let expr_br (env : Env.t) (stack : val_type list) =
         in
         if not is_stack_compatible then None
         else
-          let i = match bk with
-          | Env.Block | Env.Loop -> const @@ Br (Symbolic name)
-          | Env.Func -> const @@ Br (Raw ((List.length blocs) - 1))
+          let i =
+            match bk with
+            | Env.Block | Env.Loop -> const @@ Br (Symbolic name)
+            | Env.Func -> const @@ Br (Raw (List.length blocs - 1))
           in
-          Some ( pair i random_stack )
+          Some (pair i random_stack)
       | _ -> None )
     blocs
 

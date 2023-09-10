@@ -45,11 +45,10 @@ module Make (M : Interpret_functor_intf.Memory_data) = struct
   let create label limits size =
     { id = fresh (); label; limits; data = M.create size }
 
-  let grow t size =
-    M.grow t.data size
-    (* let limits = *)
-    (*   { mem.limits with min = max mem.limits.min (size / page_size) } *)
-    (* in *)
-    (* mem.limits <- limits; *)
-    (* t.data <- data *)
+  let grow t size = M.grow t.data size
+  (* let limits = *)
+  (*   { mem.limits with min = max mem.limits.min (size / page_size) } *)
+  (* in *)
+  (* mem.limits <- limits; *)
+  (* t.data <- data *)
 end

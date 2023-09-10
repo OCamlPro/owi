@@ -49,8 +49,7 @@ module S = struct
 
   type float64 = Expr.t
 
-  type ref_value =
-    | Funcref of Func_intf.t option
+  type ref_value = Funcref of Func_intf.t option
 
   type t =
     | I32 of int32
@@ -72,7 +71,7 @@ module S = struct
   let ref_func f : t = Ref (Funcref (Some f))
 
   let ref_is_null = function
-    | Funcref Some _ -> Val (Bool false)
+    | Funcref (Some _) -> Val (Bool false)
     | Funcref None -> Val (Bool true)
 
   let pp ppf v =
@@ -88,9 +87,7 @@ module S = struct
 
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-      match r with
-      | Funcref Some f -> Ref_value f
-      | Funcref None -> Null
+      match r with Funcref (Some f) -> Ref_value f | Funcref None -> Null
   end
 
   module Bool = struct
@@ -107,21 +104,19 @@ module S = struct
            Val (Bool (not b))
 
     let or_ e1 e2 =
-      match of_val e1, of_val e2 with
+      match (of_val e1, of_val e2) with
       | Some b1, Some b2 -> Val (Bool (b1 || b2))
       | Some false, _ -> e2
       | _, Some false -> e1
-      | Some true, _
-      | _, Some true -> Val (Bool true)
+      | Some true, _ | _, Some true -> Val (Bool true)
       | _ -> Boolean.mk_or e1 e2
 
     let and_ e1 e2 =
-      match of_val e1, of_val e2 with
+      match (of_val e1, of_val e2) with
       | Some b1, Some b2 -> Val (Bool (b1 && b2))
       | Some true, _ -> e2
       | _, Some true -> e1
-      | Some false, _
-      | _, Some false -> Val (Bool false)
+      | Some false, _ | _, Some false -> Val (Bool false)
       | _ -> Boolean.mk_and e1 e2
 
     let int32 = function
@@ -174,18 +169,14 @@ module S = struct
       | _ -> None
 
     let logand e1 e2 =
-      match boolify e1, boolify e2 with
-      | Some b1, Some b2 ->
-        Bool.int32 (Bool.and_ b1 b2)
-      | _ ->
-        binop (I32 And) e1 e2
+      match (boolify e1, boolify e2) with
+      | Some b1, Some b2 -> Bool.int32 (Bool.and_ b1 b2)
+      | _ -> binop (I32 And) e1 e2
 
     let logor e1 e2 =
-      match boolify e1, boolify e2 with
-      | Some b1, Some b2 ->
-        Bool.int32 (Bool.or_ b1 b2)
-      | _ ->
-        binop (I32 Or) e1 e2
+      match (boolify e1, boolify e2) with
+      | Some b1, Some b2 -> Bool.int32 (Bool.or_ b1 b2)
+      | _ -> binop (I32 Or) e1 e2
 
     let logxor e1 e2 = binop (I32 Xor) e1 e2
 
@@ -201,74 +192,32 @@ module S = struct
 
     let eq_const e c =
       match e with
-      | Cvtop (I32 OfBool, cond) ->
-        begin match c with
-          | 0l -> Bool.not cond
-          | 1l -> cond
-          | _ -> Val (Bool false)
-        end
-      | _ ->
-        relop (I32 Eq) e (Val (Num (I32 c)))
+      | Cvtop (I32 OfBool, cond) -> begin
+        match c with 0l -> Bool.not cond | 1l -> cond | _ -> Val (Bool false)
+      end
+      | _ -> relop (I32 Eq) e (Val (Num (I32 c)))
 
-    let eq e1 e2 =
-      if e1 == e2 then
-        Val (Bool true)
-      else
-        relop (I32 Eq) e1 e2
+    let eq e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 Eq) e1 e2
 
-    let ne e1 e2 =
-      if e1 == e2 then
-        Val (Bool false)
-      else
-        relop (I32 Ne) e1 e2
+    let ne e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 Ne) e1 e2
 
-    let lt e1 e2 =
-      if e1 == e2 then
-        Val (Bool false)
-      else
-        relop (I32 LtS) e1 e2
+    let lt e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 LtS) e1 e2
 
-    let gt e1 e2 =
-      if e1 == e2 then
-        Val (Bool false)
-      else
-        relop (I32 GtS) e1 e2
+    let gt e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 GtS) e1 e2
 
     let lt_u e1 e2 =
-      if e1 == e2 then
-        Val (Bool false)
-      else
-        relop (I32 LtU) e1 e2
+      if e1 == e2 then Val (Bool false) else relop (I32 LtU) e1 e2
 
     let gt_u e1 e2 =
-      if e1 == e2 then
-        Val (Bool false)
-      else
-        relop (I32 GtU) e1 e2
+      if e1 == e2 then Val (Bool false) else relop (I32 GtU) e1 e2
 
-    let le e1 e2 =
-      if e1 == e2 then
-        Val (Bool true)
-      else
-        relop (I32 LeS) e1 e2
+    let le e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 LeS) e1 e2
 
-    let ge e1 e2 =
-      if e1 == e2 then
-        Val (Bool true)
-      else
-        relop (I32 GeS) e1 e2
+    let ge e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 GeS) e1 e2
 
-    let le_u e1 e2 =
-      if e1 == e2 then
-        Val (Bool true)
-      else
-        relop (I32 LeU) e1 e2
+    let le_u e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 LeU) e1 e2
 
-    let ge_u e1 e2 =
-      if e1 == e2 then
-        Val (Bool true)
-      else
-        relop (I32 GeU) e1 e2
+    let ge_u e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 GeU) e1 e2
 
     let to_bool (e : vbool) =
       match e with
@@ -469,7 +418,6 @@ module S = struct
     let of_bits x = cvtop (F32 ReinterpretInt) x
 
     let to_bits x = cvtop (I32 ReinterpretFloat) x
-
   end
 
   module F64 = struct

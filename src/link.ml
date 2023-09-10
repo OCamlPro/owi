@@ -312,8 +312,7 @@ let modul (ls : 'f state) ~name (modul : modul) =
   let by_id =
     match modul.id with
     | None -> ls.by_id
-    | Some id ->
-      StringMap.add id (by_id_exports, (Env.id env)) ls.by_id
+    | Some id -> StringMap.add id (by_id_exports, Env.id env) ls.by_id
   in
   let by_name =
     match name with

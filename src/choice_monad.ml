@@ -1,6 +1,7 @@
 open Choice_monad_intf
 
 type vbool = Sym_value.S.vbool
+
 type vint32 = Sym_value.S.int32
 
 exception Assertion of assertion * Thread.t
@@ -15,9 +16,7 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   | _ ->
     let check = no :: pc in
     Format.printf "CHECK:@.";
-    List.iter
-      (fun c -> print_endline (Encoding.Expression.to_string c))
-      (check);
+    List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) check;
     let r = Thread.Solver.check solver check in
     let msg = if r then "KO" else "OK" in
     Format.printf "/CHECK %s@." msg;
@@ -64,18 +63,20 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
 let fix_symbol (e : Encoding.Expression.t) pc =
   let open Encoding in
   match e with
-  | Symbol sym -> pc, sym
+  | Symbol sym -> (pc, sym)
   | _ ->
     let sym = Symbol.mk_symbol `I32Type "choice_i32" in
     let assign = Expression.Relop (I32 Eq, Symbol sym, e) in
-    assign :: pc, sym
+    (assign :: pc, sym)
 
-let clone_if_needed ~orig_pc (cases : (int32 * Thread.t) list) : (int32 * Thread.t) list =
+let clone_if_needed ~orig_pc (cases : (int32 * Thread.t) list) :
+  (int32 * Thread.t) list =
   match cases with
   | [] -> []
-  | [i, state] -> [i, { state with pc = orig_pc }]
+  | [ (i, state) ] -> [ (i, { state with pc = orig_pc }) ]
   | _ :: _ :: _ ->
-    List.map (fun (i, state) ->
+    List.map
+      (fun (i, state) ->
         let solver = Thread.solver state in
         let pc = Thread.pc state in
         let memories = Thread.memories state in
@@ -89,13 +90,14 @@ let clone_if_needed ~orig_pc (cases : (int32 * Thread.t) list) : (int32 * Thread
           ; globals = Sym_global.clone globals
           }
         in
-        i, state)
+        (i, state) )
       cases
 
 let not_value sym value =
   Encoding.Expression.Relop (I32 Ne, Symbol sym, Val (Num (I32 value)))
 
-let eval_choice_i32 (sym_int : vint32) (state : Thread.t) : (int32 * Thread.t) list =
+let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
+  (int32 * Thread.t) list =
   let module Solver = Thread.Solver in
   let solver = Thread.solver state in
   let pc = Thread.pc state in
@@ -103,27 +105,27 @@ let eval_choice_i32 (sym_int : vint32) (state : Thread.t) : (int32 * Thread.t) l
   let orig_pc = pc in
   let pc, sym = fix_symbol sym_int pc in
   match sym_int with
-  | Val (Num (I32 i)) -> [ i, state ]
+  | Val (Num (I32 i)) -> [ (i, state) ]
   | _ ->
     let rec find_values values =
       let additionnal = List.map (not_value sym) values in
       if not (Solver.check solver (additionnal @ pc)) then []
       else begin
-        let model = Solver.model ~symbols:[sym] solver in
+        let model = Solver.model ~symbols:[ sym ] solver in
         match model with
         | None -> assert false (* ? *)
-        | Some model ->
+        | Some model -> (
           let desc = Encoding.Model.to_string model in
           Format.printf "Model:@.%s@." desc;
           let v = Encoding.Model.evaluate model sym in
           match v with
           | None -> assert false (* ? *)
-          | Some (Num I32 i as v) -> begin
-              let cond = Encoding.Expression.Relop (I32 Eq, Symbol sym, Val v) in
-              let case = (i, { state with pc = cond :: pc }) in
-              case :: find_values (i :: values)
-            end
-          | Some _ -> assert false
+          | Some (Num (I32 i) as v) -> begin
+            let cond = Encoding.Expression.Relop (I32 Eq, Symbol sym, Val v) in
+            let case = (i, { state with pc = cond :: pc }) in
+            case :: find_values (i :: values)
+          end
+          | Some _ -> assert false )
       end
     in
     let cases = find_values [] in
@@ -161,8 +163,8 @@ module List = struct
   let add_pc (c : Sym_value.S.vbool) : unit t =
    fun t -> [ ((), { t with pc = c :: t.pc }) ]
 
-  let assertion c = fun t ->
-    if check c t then [(), t]
+  let assertion c t =
+    if check c t then [ ((), t) ]
     else raise (Assertion (Encoding.Expression.to_string c, t))
 
   let run (v : 'a t) (thread : thread) = List.to_seq (v thread)
@@ -188,13 +190,13 @@ module Seq = struct
    fun state -> List.to_seq (eval_choice sym_bool state)
 
   let select_i32 (i : Sym_value.S.int32) : int32 t =
-    fun state -> List.to_seq (eval_choice_i32 i state)
+   fun state -> List.to_seq (eval_choice_i32 i state)
 
   let trap : Trap.t -> 'a t = function
     | Unreachable -> fun _ -> Seq.empty
     | _ -> assert false
 
-  let assertion c = fun t ->
+  let assertion c t =
     if check c t then Seq.return ((), t)
     else raise (Assertion (Encoding.Expression.to_string c, t))
 
@@ -236,8 +238,7 @@ module Explicit = struct
     | Empty -> Empty
     | Trap t -> Trap t
     | Retv v -> f v
-    | Assert _
-    | Ret _ | Choice _ | Choice_i32 _ -> Bind (v, f)
+    | Assert _ | Ret _ | Choice _ | Choice_i32 _ -> Bind (v, f)
     | Bind _ -> Bind (v, f)
    [@@inline]
 
@@ -264,10 +265,9 @@ module Explicit = struct
 
   let add_pc (c : Sym_value.S.vbool) : unit t =
     Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
-  [@@inline]
+    [@@inline]
 
-  let assertion c : unit t =
-    Assert c
+  let assertion c : unit t = Assert c
 
   let rec run : type a. a t -> thread -> (a * thread) Seq.t =
    fun v t ->
@@ -335,7 +335,8 @@ module type T =
     with type thread := Thread.t
      and module V := Sym_value.S
 
-module type T_trap = Choice_monad_intf.Complete_with_trap
+module type T_trap =
+  Choice_monad_intf.Complete_with_trap
     with type thread := Thread.t
      and module V := Sym_value.S
 

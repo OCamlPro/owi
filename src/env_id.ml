@@ -23,5 +23,6 @@ module Map = IMap
 
 module Tbl = Hashtbl.Make (struct
   include Int
+
   let hash x = x
 end)

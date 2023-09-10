@@ -1,7 +1,7 @@
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
-module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) = struct
-
+module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =
+struct
   type 'a m = 'a M.t
 
   type _ telt =
@@ -88,7 +88,7 @@ module Id_monad = struct
 end
 
 module Func = struct
-  include Make_extern_func (Concrete_value_types)(Id_monad)
+  include Make_extern_func (Concrete_value_types) (Id_monad)
 end
 
 type externref = E : 'a Type_id.ty * 'a -> externref
