@@ -328,6 +328,67 @@ module Explicit = struct
       else raise (Assertion (Encoding.Expression.to_string c, t))
     | Choice cond -> List.to_seq (eval_choice cond t)
     | Choice_i32 i -> List.to_seq (eval_choice_i32 i t)
+
+  type 'a cont = {
+    k : thread -> 'a -> unit
+  } [@@unboxed]
+
+  type hold = H : thread * 'a t * 'a cont -> hold
+
+  let step (type v) thread (t : v t) cont q qt =
+    match t with
+    | Empty -> ()
+    | Retv v -> cont.k thread v
+    | Ret (St f) ->
+      let v, thread = f thread in
+      cont.k thread v
+    | Trap t ->
+      Queue.push (ETrap t, thread) qt
+    | Assert c ->
+      if check c thread then cont.k thread ()
+      else
+        let assertion = Encoding.Expression.to_string c in
+        Queue.push (EAssert assertion, thread) qt
+    | Bind (v, f) ->
+      let k thread v =
+        let r = f v in
+        Queue.push (H (thread, r, cont)) q
+      in
+      Queue.push (H (thread, v, { k })) q
+    | Choice cond ->
+      let cases = eval_choice cond thread in
+      List.iter (fun (case, thread) -> cont.k thread case) cases
+    | Choice_i32 i ->
+      let cases = eval_choice_i32 i thread in
+      List.iter (fun (case, thread) -> cont.k thread case) cases
+
+  let init thread t =
+    let q = Queue.create () in
+    let qt = Queue.create () in
+    let k thread v =
+      Queue.push (EVal v, thread) qt
+    in
+    Queue.push (H (thread, t, { k })) q;
+    q, qt
+
+  let rec sequify q qt : 'a Seq.t = fun () ->
+    while Queue.is_empty qt && not (Queue.is_empty q) do
+      let H (thread, t, cont) = Queue.pop q in
+      step thread t cont q qt
+    done;
+    if Queue.is_empty qt then
+      Nil
+    else
+      let first = Queue.pop qt in
+      let head = Queue.to_seq qt in
+      let tail = sequify q qt in
+      Cons (first, Seq.append head tail)
+
+  let () = ignore run_and_trap
+  let run_and_trap : type a. a t -> thread -> (a eval * thread) Seq.t = fun t thread ->
+    let q, qt = init thread t in
+    sequify q qt
+
 end
 
 module type T =
