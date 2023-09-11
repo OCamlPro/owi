@@ -335,7 +335,8 @@ module Explicit = struct
 
   type hold = H : thread * 'a t * 'a cont -> hold
 
-  let step (type v) thread (t : v t) cont q qt =
+  let rec step : type v. thread -> v t -> v cont -> _ -> _ -> unit =
+    fun thread t cont q qt ->
     match t with
     | Empty -> ()
     | Retv v -> cont.k thread v
@@ -354,7 +355,7 @@ module Explicit = struct
         let r = f v in
         Queue.push (H (thread, r, cont)) q
       in
-      Queue.push (H (thread, v, { k })) q
+      step thread v { k } q qt
     | Choice cond ->
       let cases = eval_choice cond thread in
       List.iter (fun (case, thread) -> cont.k thread case) cases
