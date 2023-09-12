@@ -124,6 +124,12 @@ module S = struct
       | Cvtop (I32 ToBool, e) -> e
       | e -> Cvtop (I32 OfBool, e)
 
+    let select_expr c ~if_true ~if_false =
+      match of_val c with
+      | Some true -> if_true
+      | Some false -> if_false
+      | None -> Boolean.mk_ite c if_true if_false
+
     let pp ppf (e : vbool) = Format.pp_print_string ppf (Expr.to_string e)
   end
 

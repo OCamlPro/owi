@@ -31,6 +31,22 @@ module P = struct
   module Choice = Choice_monad.Explicit
   module Extern_func = Def_value.Make_extern_func (Value) (Choice)
 
+  let select (c : vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
+    Value.t Choice.t =
+    match (if_true, if_false) with
+    | I32 if_true, I32 if_false ->
+      Choice.return (Value.I32 (Value.Bool.select_expr c ~if_true ~if_false))
+    | I64 if_true, I64 if_false ->
+      Choice.return (Value.I64 (Value.Bool.select_expr c ~if_true ~if_false))
+    | F32 if_true, F32 if_false ->
+      Choice.return (Value.F32 (Value.Bool.select_expr c ~if_true ~if_false))
+    | F64 if_true, F64 if_false ->
+      Choice.return (Value.F64 (Value.Bool.select_expr c ~if_true ~if_false))
+    | Ref _, Ref _ ->
+      Choice.bind (Choice.select c) (fun b ->
+        if b then Choice.return if_true else Choice.return if_false )
+    | _, _ -> assert false
+
   type extern_func = Extern_func.extern_func
 
   type env = extern_func Link_env.t

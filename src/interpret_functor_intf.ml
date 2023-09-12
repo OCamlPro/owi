@@ -71,6 +71,8 @@ module type P = sig
 
   module Choice : Choice_monad_intf.Base with module V := Value
 
+  val select : vbool -> if_true:Value.t -> if_false:Value.t -> Value.t Choice.t
+
   module Extern_func :
     Func_intf.T_Extern_func
       with type int32 := int32

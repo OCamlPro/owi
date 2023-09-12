@@ -3,6 +3,8 @@
 open Types
 open Simplified
 
+let use_ite_for_select = true
+
 module Make (P : Interpret_functor_intf.P) :
   Interpret_functor_intf.S
     with type 'a choice := 'a P.Choice.t
@@ -965,10 +967,19 @@ module Make (P : Interpret_functor_intf.P) :
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Select _t ->
-      let/ b, stack = pop_choice stack in
-      let o2, stack = Stack.pop stack in
-      let o1, stack = Stack.pop stack in
-      st @@ Stack.push stack (if b then o1 else o2)
+      if use_ite_for_select then begin
+        let b, stack = Stack.pop_bool stack in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        let/ res = P.select b ~if_true:o1 ~if_false:o2 in
+        st @@ Stack.push stack res
+      end
+      else begin
+        let/ b, stack = pop_choice stack in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        st @@ Stack.push stack (if b then o1 else o2)
+      end
     | Local_tee i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
