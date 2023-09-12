@@ -1472,7 +1472,7 @@ module Make (P : Interpret_functor_intf.P) :
       let a = Array.init (Int32.to_int len) (fun _i -> default) in
       st @@ Stack.push_array stack a
     | ( Array_new_data _ | Array_new_elem _ | Array_new_fixed _ | Array_get _
-      | Array_get_u _ | Array_set _ | Array_len | I31_new | I31_get_s
+      | Array_get_u _ | Array_set _ | Array_len | Ref_i31 | I31_get_s
       | I31_get_u | Struct_get _ | Struct_get_s _ | Struct_set _ | Struct_new _
       | Struct_new_default _ | Extern_externalize | Extern_internalize
       | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _

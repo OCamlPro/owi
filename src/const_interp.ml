@@ -45,7 +45,7 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
     let len, stack = Stack.pop_i32_to_int stack in
     let a = Array.init len (fun _i -> ()) in
     ok @@ Stack.push_array stack a
-  | I31_new ->
+  | Ref_i31 ->
     (* TODO *)
     ok stack
 

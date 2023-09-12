@@ -194,6 +194,7 @@ struct
     (* Reference instructions *)
     | Ref_null of heap_type
     | Ref_is_null
+    | Ref_i31
     | Ref_func of indice
     | Ref_as_non_null
     | Ref_cast of nullable * heap_type
@@ -267,7 +268,6 @@ struct
     (* I31 *)
     | I31_get_u
     | I31_get_s
-    | I31_new
     (* struct*)
     | Struct_get of indice * indice
     | Struct_get_s of indice * indice
@@ -369,7 +369,7 @@ struct
       | I_binop of nn * ibinop
       | Array_new of indice
       | Array_new_default of indice
-      | I31_new
+      | Ref_i31
 
     type expr = instr list
   end
@@ -665,7 +665,7 @@ struct
       | Array_get_u id -> Format.fprintf fmt "array.get_u %a" indice id
       | Array_set id -> Format.fprintf fmt "array.set %a" indice id
       | Array_len -> Format.fprintf fmt "array.len"
-      | I31_new -> Format.fprintf fmt "i31.new"
+      | Ref_i31 -> Format.fprintf fmt "ref.i31"
       | I31_get_s -> Format.fprintf fmt "i31.get_s"
       | I31_get_u -> Format.fprintf fmt "i31.get_u"
       | Struct_get (i1, i2) ->
@@ -804,7 +804,7 @@ struct
         | Ref_func fid -> Format.fprintf fmt "ref.func %a" indice fid
         | Array_new _ -> Format.fprintf fmt "array.new"
         | Array_new_default _ -> Format.fprintf fmt "array.new_default"
-        | I31_new -> Format.fprintf fmt "i31.new"
+        | Ref_i31 -> Format.fprintf fmt "ref.i31"
 
       let expr fmt instrs =
         Format.pp_print_list

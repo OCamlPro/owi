@@ -238,7 +238,6 @@ let keywords =
      ; ("i31", I31)
      ; ("i31.get_s", I31_GET_S)
      ; ("i31.get_u", I31_GET_U)
-     ; ("i31.new", I31_NEW)
      ; ("i32", I32)
      ; ("i32.add", I32_ADD)
      ; ("i32.and", I32_AND)

@@ -207,7 +207,7 @@ let locals_func body_expr =
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
     | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size | Memory_grow
     | Memory_fill | Memory_copy | Nop | Unreachable | Return | Array_len
-    | I31_get_u | I31_get_s | I31_new | Extern_externalize | Extern_internalize
+    | I31_get_u | I31_get_s | Ref_i31 | Extern_externalize | Extern_internalize
     | I32_const _ | I64_const _ | F32_const _ | F64_const _
     | I_unop (_, _)
     | F_unop (_, _)
@@ -275,7 +275,7 @@ let remove_local map body =
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
     | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size | Memory_grow
     | Memory_fill | Memory_copy | Nop | Unreachable | Return | Array_len
-    | I31_get_u | I31_get_s | I31_new | Extern_externalize | Extern_internalize
+    | I31_get_u | I31_get_s | Ref_i31 | Extern_externalize | Extern_internalize
     | I32_const _ | I64_const _ | F32_const _ | F64_const _
     | I_unop (_, _)
     | F_unop (_, _)

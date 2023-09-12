@@ -466,7 +466,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     (* TODO: fixme, Something is not right *)
     let* stack = Stack.pop [ Something ] stack in
     Stack.push [ i32 ] stack
-  | I31_new ->
+  | Ref_i31 ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i31 ] stack
   | I31_get_s | I31_get_u ->
@@ -546,7 +546,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
     let* stack = Stack.pop [ i32; t ] stack in
     Stack.push [ Ref_type Array_ht ] stack
   | Array_new_default _i -> assert false
-  | I31_new ->
+  | Ref_i31 ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i31 ] stack
 

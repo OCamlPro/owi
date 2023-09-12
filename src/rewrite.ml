@@ -349,7 +349,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | Drop -> Ok Drop
     | Nop -> Ok Nop
     | Return -> Ok Return
-    | I31_new -> Ok I31_new
+    | Ref_i31 -> Ok Ref_i31
     | I31_get_s -> Ok I31_get_s
     | I31_get_u -> Ok I31_get_u
     | Array_len -> Ok Array_len
@@ -411,7 +411,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
     | Array_new_default t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new_default t
-    | Symbolic.I31_new -> Ok I31_new
+    | Symbolic.Ref_i31 -> Ok Ref_i31
     | i ->
       error
       @@ Format.asprintf "constant expression required, got %a"
