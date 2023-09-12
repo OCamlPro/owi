@@ -9,7 +9,7 @@ authors: [
   "Léo Andrès <contact@ndrs.fr>"
   "Pierre Chambart <pierre.chambart@ocamlpro.com>"
 ]
-license: "ISC"
+license: "AGPL-3.0-or-later"
 tags: ["owi" "ocaml" "webassembly" "wasm" "interpreter" "compiler"]
 homepage: "https://github.com/ocamlpro/owi"
 bug-reports: "https://github.com/ocamlpro/owi/issues"

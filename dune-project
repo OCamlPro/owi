@@ -8,7 +8,7 @@
 
 (name owi)
 
-(license ISC)
+(license AGPL-3.0-or-later)
 
 (authors
  "Léo Andrès <contact@ndrs.fr>"
