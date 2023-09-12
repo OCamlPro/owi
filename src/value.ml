@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 type ('a, 'b) eq = ('a, 'b) Type_id.eq
 
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =

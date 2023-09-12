@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 let ( let* ) o f = match o with Error msg -> Error msg | Ok v -> f v
 
 let until_check m = Check.modul m

@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
 
 let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
