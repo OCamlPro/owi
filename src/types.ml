@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 exception Trap of string
 
 exception Parse_fail of string

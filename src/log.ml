@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 let debug_on = ref false
 
 let profiling_on = ref false
