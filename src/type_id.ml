@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 type ('a, 'b) eq = Eq : ('a, 'a) eq
 
 type _ externref_ty = ..

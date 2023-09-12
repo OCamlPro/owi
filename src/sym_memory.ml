@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021 Léo Andrès *)
+(* Copyright © 2021 Pierre Chambart *)
+
 module Intf = Interpret_functor_intf
 module Value = Sym_value.S
 
