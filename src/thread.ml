@@ -1,7 +1,11 @@
 module Solver = Encoding.Batch.Make (Encoding.Z3_mappings)
 
+type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
+
+type solver = S : 'a solver_module * 'a -> solver
+
 type t =
-  { solver : Solver.t
+  { solver : solver
   ; pc : Sym_value.S.vbool list
   ; memories : Sym_memory.memories
   ; tables : Sym_table.tables
@@ -18,8 +22,10 @@ let tables t = t.tables
 
 let globals t = t.globals
 
+let solver_mod : Solver.t solver_module = (module Solver)
+
 let create () =
-  let solver = Solver.create () in
+  let solver = S (solver_mod, (Solver.create ())) in
   { solver
   ; pc = []
   ; memories = Sym_memory.init ()

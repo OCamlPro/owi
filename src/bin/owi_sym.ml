@@ -207,9 +207,9 @@ let script =
   let doc = "run as a reference test suite script" in
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
-let get_model thread =
-  assert (Thread.Solver.check (Thread.solver thread) (Thread.pc thread));
-  match Thread.Solver.model (Thread.solver thread) with
+let get_model (solver : Thread.Solver.t) thread =
+  assert (Thread.Solver.check solver (Thread.pc thread));
+  match Thread.Solver.model solver with
   | None -> assert false
   | Some model -> Encoding.Model.to_string model
 
@@ -218,6 +218,7 @@ let stop_at_first_failure = true
 let main profiling debug _script optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
+  let solver = Thread.Solver.create () in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
@@ -233,12 +234,12 @@ let main profiling debug _script optimize files =
         | Choice_monad_intf.EVal (Ok ()) -> None
         | EAssert assertion ->
           Format.printf "Assert failure: %s@." assertion;
-          let model = get_model thread in
+          let model = get_model solver thread in
           Format.printf "Model:@.%s@." model;
           Some thread
         | ETrap tr ->
           Format.printf "TRAP: %s@." (Trap.to_string tr);
-          let model = get_model thread in
+          let model = get_model solver thread in
           Format.printf "Model:@.%s@." model;
           Some thread
         | EVal (Error e) ->

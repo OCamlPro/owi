@@ -7,7 +7,7 @@ type vint32 = Sym_value.S.int32
 exception Assertion of assertion * Thread.t
 
 let check (sym_bool : vbool) (state : Thread.t) : bool =
-  let solver = Thread.solver state in
+  let (S (solver_module, solver)) = Thread.solver state in
   let pc = Thread.pc state in
   let no = Sym_value.S.Bool.not sym_bool in
   let no = Encoding.Expression.simplify no in
@@ -17,13 +17,14 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
     let check = no :: pc in
     Format.printf "CHECK:@.";
     List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) check;
-    let r = Thread.Solver.check solver check in
+    let module Solver = (val solver_module) in
+    let r = Solver.check solver check in
     let msg = if r then "KO" else "OK" in
     Format.printf "/CHECK %s@." msg;
     not r
 
 let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
-  let solver = Thread.solver state in
+  let (S (solver_module, s) as solver) = Thread.solver state in
   let pc = Thread.pc state in
   let memories = Thread.memories state in
   let tables = Thread.tables state in
@@ -34,8 +35,9 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   | Val (Num (I32 _)) -> assert false
   | _ -> (
     let no = Sym_value.S.Bool.not sym_bool in
-    let sat_true = Thread.Solver.check solver (sym_bool :: pc) in
-    let sat_false = Thread.Solver.check solver (no :: pc) in
+    let module Solver = (val solver_module) in
+    let sat_true = Solver.check s (sym_bool :: pc) in
+    let sat_false = Solver.check s (no :: pc) in
     match (sat_true, sat_false) with
     | false, false -> []
     | true, false -> [ (true, state) ]
@@ -98,8 +100,7 @@ let not_value sym value =
 
 let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
   (int32 * Thread.t) list =
-  let module Solver = Thread.Solver in
-  let solver = Thread.solver state in
+  let (S (solver_module, solver)) = Thread.solver state in
   let pc = Thread.pc state in
   let sym_int = Encoding.Expression.simplify sym_int in
   let orig_pc = pc in
@@ -107,6 +108,7 @@ let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
   match sym_int with
   | Val (Num (I32 i)) -> [ (i, state) ]
   | _ ->
+    let module Solver = (val solver_module) in
     let rec find_values values =
       let additionnal = List.map (not_value sym) values in
       if not (Solver.check solver (additionnal @ pc)) then []
@@ -333,6 +335,189 @@ module Explicit = struct
 
   type hold = H : thread * 'a t * 'a cont -> hold
 
+  module WQ = struct
+    type 'a t =
+      { mutex : Mutex.t
+      ; cond : Condition.t
+      ; queue : 'a Queue.t
+      ; mutable producers : int
+      }
+
+    let take_as_producer q =
+      Mutex.lock q.mutex;
+      q.producers <- q.producers - 1;
+      (* Format.printf "TAKE COUNT %i@." q.producers; *)
+      let r =
+        try
+          while Queue.is_empty q.queue do
+            if q.producers = 0 then raise Exit;
+            Condition.wait q.cond q.mutex
+          done;
+          let v = Queue.pop q.queue in
+          q.producers <- q.producers + 1;
+          Some v
+        with Exit ->
+          (* Format.printf "@.@.TAKE EXIT@.@."; *)
+          Condition.broadcast q.cond;
+          None
+      in
+      Mutex.unlock q.mutex;
+      r
+
+    let take_as_consumer q =
+      Mutex.lock q.mutex;
+      let r =
+        try
+          while Queue.is_empty q.queue do
+            if q.producers = 0 then raise Exit;
+            Condition.wait q.cond q.mutex
+          done;
+          let v = Queue.pop q.queue in
+          Some v
+        with Exit -> None
+      in
+      Mutex.unlock q.mutex;
+      r
+
+    let rec read_as_seq (q : 'a t) : 'a Seq.t =
+     fun () ->
+      match take_as_consumer q with
+      | None -> Nil
+      | Some v -> Cons (v, read_as_seq q)
+
+    let produce (q : 'a t) (f : 'a -> unit) =
+      let rec loop () =
+        match take_as_producer q with
+        | None -> ()
+        | Some v ->
+          f v;
+          loop ()
+      in
+      Mutex.lock q.mutex;
+      q.producers <- q.producers + 1;
+      Mutex.unlock q.mutex;
+      loop ()
+
+    let push v q =
+      Mutex.lock q.mutex;
+      let was_empty = Queue.is_empty q.queue in
+      Queue.push v q.queue;
+      if was_empty then Condition.broadcast q.cond;
+      Mutex.unlock q.mutex
+
+    let with_produce q f =
+      Mutex.lock q.mutex;
+      q.producers <- q.producers + 1;
+      Mutex.unlock q.mutex;
+      f ();
+      Mutex.lock q.mutex;
+      q.producers <- q.producers - 1;
+      if q.producers = 0 then Condition.broadcast q.cond;
+      Mutex.unlock q.mutex
+
+    let init () =
+      { mutex = Mutex.create ()
+      ; cond = Condition.create ()
+      ; queue = Queue.create ()
+      ; producers = 0
+      }
+  end
+
+  module MT = struct
+    type 'a global_state =
+      { w : hold WQ.t (* work *)
+      ; r : ('a eval * thread) WQ.t (* results *)
+      }
+
+    type 'a local_state =
+      { solver : Thread.solver
+      ; mutable next : hold option
+      ; global : 'a global_state
+      }
+
+    let local_push st v =
+      match st.next with
+      | None -> st.next <- Some v
+      | Some _ -> WQ.push v st.global.w
+
+    let rec step : type v. thread -> v t -> v cont -> _ -> unit =
+     fun thread t cont st ->
+      match t with
+      | Empty -> ()
+      | Retv v -> cont.k thread v
+      | Ret (St f) ->
+        let v, thread = f thread in
+        cont.k thread v
+      | Trap t -> WQ.push (ETrap t, thread) st.global.r
+      | Assert c ->
+        if check c { thread with solver = st.solver } then cont.k thread ()
+        else
+          let assertion = Encoding.Expression.to_string c in
+          WQ.push (EAssert assertion, thread) st.global.r
+      | Bind (v, f) ->
+        let k thread v =
+          let r = f v in
+          local_push st (H (thread, r, cont))
+        in
+        step thread v { k } st
+      | Choice cond ->
+        let cases = eval_choice cond { thread with solver = st.solver } in
+        List.iter (fun (case, thread) -> cont.k thread case) cases
+      | Choice_i32 i ->
+        let cases = eval_choice_i32 i { thread with solver = st.solver } in
+        List.iter (fun (case, thread) -> cont.k thread case) cases
+
+    let init_global () =
+      let w = WQ.init () in
+      let r = WQ.init () in
+      { w; r }
+
+    let push_first_work g thread t =
+      let k thread v = WQ.push (EVal v, thread) g.r in
+      WQ.push (H (thread, t, { k })) g.w
+
+    let spawn_producer i global =
+      let module Mapping = Encoding.Z3_mappings.Fresh.Make () in
+      let module Batch = Encoding.Batch.Make (Mapping) in
+      let solver = Batch.create () in
+      let solver : Thread.solver = S ((module Batch), solver) in
+      let st = { solver; next = None; global } in
+      let rec producer (H (thread, t, cont)) =
+        let thread = { thread with solver } in
+        step thread t cont st;
+        match st.next with
+        | Some h ->
+          st.next <- None;
+          producer h
+        | None -> ()
+      in
+      Domain.spawn (fun () ->
+        WQ.with_produce global.r (fun () ->
+          WQ.produce global.w producer;
+          ignore i (* Format.printf "@.@.PRODUCER END %i@.@." i; *) ) )
+
+    let worker_threads_count = 4
+
+    let rec loop_and_do (s : 'a Seq.t) f : 'a Seq.t =
+     fun () ->
+      match s () with
+      | Cons (s, t) -> Cons (s, loop_and_do t f)
+      | Nil ->
+        (* Format.printf "@.@.End of stream@.@."; *)
+        f ();
+        Nil
+
+    let run_and_trap : type a. a t -> thread -> (a eval * thread) Seq.t =
+     fun (t : a t) (thread : thread) ->
+      let global = init_global () in
+      push_first_work global thread t;
+      let producers =
+        List.init worker_threads_count (fun i -> spawn_producer i global)
+      in
+      loop_and_do (WQ.read_as_seq global.r) (fun () ->
+        List.iter Domain.join producers )
+  end
+
   let rec step : type v. thread -> v t -> v cont -> _ -> _ -> unit =
    fun thread t cont q qt ->
     match t with
@@ -386,6 +571,12 @@ module Explicit = struct
    fun t thread ->
     let q, qt = init thread t in
     sequify q qt
+
+  let () = ignore MT.run_and_trap
+
+  let () = ignore run_and_trap
+
+  let run_and_trap = MT.run_and_trap
 end
 
 module type T =
