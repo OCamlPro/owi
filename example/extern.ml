@@ -36,12 +36,12 @@ let pure_wasm_module =
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `sausage` *)
-let module_to_run =
+let module_to_run, link_state =
   match
     Compile.until_link link_state ~optimize:true ~name:None pure_wasm_module
   with
   | Error msg -> failwith msg
-  | Ok (m, _state) -> m
+  | Ok v -> v
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
