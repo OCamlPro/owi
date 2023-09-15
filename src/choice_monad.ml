@@ -433,11 +433,17 @@ module Explicit = struct
       ; r : ('a eval * thread) WQ.t (* results *)
       }
 
-    type 'a local_state =
+    and 'a local_state =
       { solver : Thread.solver
       ; mutable next : hold option
       ; global : 'a global_state
-      }
+    }
+
+    and e_local_state = E_st : 'a local_state -> e_local_state [@@unboxed]
+
+    and 'a cont = { k : thread -> e_local_state -> 'a -> unit } [@@unboxed]
+
+    and hold = H : thread * 'a t * 'a cont -> hold
 
     let local_push st v =
       match st.next with
@@ -448,28 +454,28 @@ module Explicit = struct
      fun thread t cont st ->
       match t with
       | Empty -> ()
-      | Retv v -> cont.k thread v
+      | Retv v -> cont.k thread (E_st st) v
       | Ret (St f) ->
         let v, thread = f thread in
-        cont.k thread v
+        cont.k thread (E_st st) v
       | Trap t -> WQ.push (ETrap t, thread) st.global.r
       | Assert c ->
-        if check c { thread with solver = st.solver } then cont.k thread ()
+        if check c { thread with solver = st.solver } then cont.k thread (E_st st) ()
         else
           let assertion = Encoding.Expression.to_string c in
           WQ.push (EAssert assertion, thread) st.global.r
       | Bind (v, f) ->
-        let k thread v =
+        let k thread (E_st st) v =
           let r = f v in
           local_push st (H (thread, r, cont))
         in
         step thread v { k } st
       | Choice cond ->
         let cases = eval_choice cond { thread with solver = st.solver } in
-        List.iter (fun (case, thread) -> cont.k thread case) cases
+        List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
       | Choice_i32 i ->
         let cases = eval_choice_i32 i { thread with solver = st.solver } in
-        List.iter (fun (case, thread) -> cont.k thread case) cases
+        List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
 
     let init_global () =
       let w = WQ.init () in
@@ -477,7 +483,7 @@ module Explicit = struct
       { w; r }
 
     let push_first_work g thread t =
-      let k thread v = WQ.push (EVal v, thread) g.r in
+      let k thread _st v = WQ.push (EVal v, thread) g.r in
       WQ.push (H (thread, t, { k })) g.w
 
     let spawn_producer i global =
