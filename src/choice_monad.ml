@@ -437,7 +437,7 @@ module Explicit = struct
       { solver : Thread.solver
       ; mutable next : hold option
       ; global : 'a global_state
-    }
+      }
 
     and e_local_state = E_st : 'a local_state -> e_local_state [@@unboxed]
 
@@ -460,7 +460,8 @@ module Explicit = struct
         cont.k thread (E_st st) v
       | Trap t -> WQ.push (ETrap t, thread) st.global.r
       | Assert c ->
-        if check c { thread with solver = st.solver } then cont.k thread (E_st st) ()
+        if check c { thread with solver = st.solver } then
+          cont.k thread (E_st st) ()
         else
           let assertion = Encoding.Expression.to_string c in
           WQ.push (EAssert assertion, thread) st.global.r
