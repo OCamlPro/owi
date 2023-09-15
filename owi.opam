@@ -27,6 +27,9 @@ depends: [
   "odoc" {with-doc}
   "bos" {with-test}
   "mdx" {with-test & >= "2.1"}
+  "crowbar" {with-test}
+  "graphics" {dev}
+  "tiny_httpd" {dev}
 ]
 build: [
   ["dune" "subst"] {dev}
