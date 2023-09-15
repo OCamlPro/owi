@@ -1387,18 +1387,17 @@ module Make (P : Interpret_functor_intf.P) :
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
-        let res = Memory.load_32 mem addr in
-        if sx = S || Sys.word_size = 32 then
-          let res = I64.of_int32 res in
-          st @@ Stack.push_i64 stack res
-        else if Sys.word_size = 64 then
-          let res =
-            I32.(
-              logand res
-                (sub (shl (const_i32 1l) (const_i32 32l)) (const_i32 1l)) )
-          in
-          st @@ Stack.push_i64 stack (I64.of_int32 res)
-        else Log.err "unsupported word size"
+        let res = I64.of_int32 @@ Memory.load_32 mem addr in
+        let res =
+          match sx with
+          | S -> res
+          | U ->
+            let open I64 in
+            let a = shl (const_i64 1L) (const_i64 32L) in
+            let b = sub a (const_i64 1L) in
+            logand res b
+        in
+        st @@ Stack.push_i64 stack res
       end
     | I_store16 (nn, { offset; _ }) ->
       let/* mem = Env.get_memory env mem_0 in
