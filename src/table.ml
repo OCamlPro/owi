@@ -37,3 +37,11 @@ let set t i v = t.data.(i) <- v
 let size t = Array.length t.data
 
 let typ t = t.typ
+
+let max_size t = t.limits.max
+
+let grow t new_size x =
+  let new_size = Int32.to_int new_size in
+  let new_table = Array.make new_size x in
+  Array.blit t.data 0 new_table 0 (Array.length t.data);
+  update t new_table

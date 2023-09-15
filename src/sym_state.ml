@@ -85,6 +85,10 @@ module P = struct
     let typ _t =
       (* TODO add type to table *)
       (Types.Null, Simplified.Func_ht)
+
+    let max_size _t = assert false
+
+    let grow _t _new_size _x = assert false
   end
 
   module Elem = struct

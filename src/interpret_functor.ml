@@ -1046,28 +1046,27 @@ module Make (P : Interpret_functor_intf.P) :
       let/* t = Env.get_table env indice in
       let len = Table.size t in
       st @@ Stack.push_i32 stack (Value.const_i32 (Int32.of_int len))
-    | Table_grow _indice ->
-      (* TODO *)
-      st stack
-    (*     let* t = Env.get_table env indice in *)
-    (*     let size = Array.length t.data in *)
-    (*     let delta, stack = Stack.pop_i32_to_int stack in *)
-    (*     let new_size = size + delta in *)
-    (*     let allowed = *)
-    (*       Option.value t.limits.max ~default:Int.max_int >= new_size *)
-    (*       && new_size >= 0 && new_size >= size *)
-    (*     in *)
-    (*     st *)
-    (*     @@ *)
-    (*     if not allowed then *)
-    (*       let stack = Stack.drop stack in *)
-    (*       Stack.push_i32_of_int stack (-1) *)
-    (*     else *)
-    (*       let new_element, stack = Stack.pop_as_ref stack in *)
-    (*       let new_table = Array.make new_size new_element in *)
-    (*       Array.blit t.data 0 new_table 0 (Array.length t.data); *)
-    (*       Table.update t new_table; *)
-    (*       Stack.push_i32_of_int stack size *)
+    | Table_grow indice ->
+      let/* t = Env.get_table env indice in
+      let size = const_i32 @@ Int32.of_int @@ Table.size t in
+      let delta, stack = Stack.pop_i32 stack in
+      let new_size = I32.(add size delta) in
+      let allowed =
+        ( match Table.max_size t with
+        | None -> true
+        | Some max -> const_i32 (Int32.of_int max) >= new_size )
+        && new_size >= const_i32 0l
+        && new_size >= size
+      in
+      st
+      @@
+      if not allowed then
+        let stack = Stack.drop stack in
+        Stack.push_i32_of_int stack (-1)
+      else
+        let new_element, stack = Stack.pop_as_ref stack in
+        Table.grow t new_size new_element;
+        Stack.push_i32 stack size
     | Table_fill _indice ->
       (* TODO *)
       st stack

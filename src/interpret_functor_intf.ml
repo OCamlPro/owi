@@ -107,6 +107,10 @@ module type P = sig
     val size : t -> int
 
     val typ : t -> Simplified.ref_type
+
+    val max_size : t -> int option
+
+    val grow : t -> int32 -> Value.ref_value -> unit
   end
 
   module Memory : sig
