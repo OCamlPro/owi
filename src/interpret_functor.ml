@@ -922,8 +922,10 @@ module Make (P : Interpret_functor_intf.P) :
         Bool.or_
           I64.(ge_u new_size (mul page_size page_size))
           ( match max_size with
-          | Some max -> I64.(lt new_size (mul max page_size))
-          | None -> I64.(ne (const_i64 0L) (const_i64 0L)) )
+          | Some max -> I64.(gt new_size (mul max page_size))
+          | None ->
+            (* TODO: replace by false... *)
+            I64.(ne (const_i64 0L) (const_i64 0L)) )
       in
       let/ too_big = Choice.select too_big in
       st
@@ -932,7 +934,8 @@ module Make (P : Interpret_functor_intf.P) :
         Stack.push_i32 stack I32.(sub (const_i32 0l) (const_i32 1l))
       else begin
         Memory.grow mem (I64.to_int32 delta);
-        Stack.push_i32 stack I64.(to_int32 @@ div old_size page_size)
+        let res = I64.(to_int32 @@ div old_size page_size) in
+        Stack.push_i32 stack res
       end
     end
     | Memory_fill ->
