@@ -123,8 +123,7 @@ module P = struct
     let trap : Trap.t -> 'a t = fun tr -> trap (Trap.to_string tr)
   end
 
-  let select cond ~if_true ~if_false =
-    if cond then if_true else if_false
+  let select cond ~if_true ~if_false = if cond then if_true else if_false
   [@@inline]
 
   module Extern_func = Value.Func

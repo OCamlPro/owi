@@ -246,7 +246,7 @@ module Explicit = struct
     | Retv v -> f v
     | Assert _ | Ret _ | Choice _ | Choice_i32 _ -> Bind (v, f)
     | Bind _ -> Bind (v, f)
-   [@@inline]
+  [@@inline]
 
   (* let rec bind : type a b. a t -> (a -> b t) -> b t =
    *  fun v f ->
@@ -259,7 +259,7 @@ module Explicit = struct
 
   let select (cond : vbool) : bool t =
     match cond with Val (Bool b) -> Retv b | _ -> Choice cond
-    [@@inline]
+  [@@inline]
 
   let select_i32 (i : Sym_value.S.int32) : int32 t =
     match i with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
@@ -267,11 +267,11 @@ module Explicit = struct
   let trap : Trap.t -> 'a t = fun t -> Trap t
 
   let with_thread (f : thread -> 'b) : 'b t = Ret (St (fun t -> (f t, t)))
-    [@@inline]
+  [@@inline]
 
   let add_pc (c : Sym_value.S.vbool) : unit t =
     Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
-    [@@inline]
+  [@@inline]
 
   let assertion c : unit t = Assert c
 

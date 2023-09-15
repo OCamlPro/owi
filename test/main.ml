@@ -8,7 +8,7 @@ let pp_red fmt s = Format.fprintf fmt "\x1b[31m%s\x1b[0m" s
 
 let pp_green fmt s = Format.fprintf fmt "\x1b[32m%s\x1b[0m" s
 
-let pp_ok () = Format.fprintf fmt  "%a !@." pp_green "OK"
+let pp_ok () = Format.fprintf fmt "%a !@." pp_green "OK"
 
 let pp_error msg = Format.fprintf fmt "%a: %s !@." pp_red "FAILED" msg
 
