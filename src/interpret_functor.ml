@@ -1072,24 +1072,36 @@ module Make (P : Interpret_functor_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
-      (* TODO: out of bounds check *)
-      Table.fill t pos len x;
-      st stack
+      let out_of_bounds =
+        len < const_i32 0l
+        || pos < const_i32 0l
+        || I32.(add pos len) > const_i32 @@ Int32.of_int (Table.size t)
+      in
+      if out_of_bounds then Choice.trap Out_of_bounds_table_access
+      else begin
+        Table.fill t pos len x;
+        st stack
+      end
     | Table_copy (ti_dst, ti_src) -> begin
       let/* t_src = Env.get_table env ti_src in
       let/* t_dst = Env.get_table env ti_dst in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      (* TODO: out of bounds *)
-      (*
-      if
-        src + len > Array.length t_src.data
-        || dst + len > Array.length t_dst.data
-      then trap "out of bounds table access";
-      *)
-      if len <> const_i32 0l then Table.copy ~t_src ~t_dst ~src ~dst ~len;
-      st stack
+      let out_of_bounds =
+        let t_src_len = Table.size t_src in
+        let t_dst_len = Table.size t_dst in
+        I32.(add src len) > const_i32 @@ Int32.of_int t_src_len
+        || I32.(add dst len) > const_i32 @@ Int32.of_int t_dst_len
+        || len < const_i32 0l
+        || src < const_i32 0l
+        || dst < const_i32 0l
+      in
+      if out_of_bounds then Choice.trap Out_of_bounds_table_access
+      else begin
+        if len <> const_i32 0l then Table.copy ~t_src ~t_dst ~src ~dst ~len;
+        st stack
+      end
     end
     | Table_init (t_i, e_i) -> begin
       let* t = Env.get_table env t_i in
