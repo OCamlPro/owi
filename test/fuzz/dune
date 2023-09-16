@@ -1,4 +1,4 @@
-(executable
+(test
  (name fuzzer)
  (modules basic env interprets fuzzer gen param type_stack)
  (libraries crowbar owi))

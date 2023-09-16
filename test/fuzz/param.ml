@@ -1,11 +1,11 @@
 (* TODO: OCaml Arg module could not be used (conflict with crowbar)
    https://github.com/OCamlPro/owi/pull/28#discussion_r1231983824 *)
 
-let debug = true
+let debug = false
 
 let optimize_fuzzing = true
 
-let reference_fuzzing = true
+let reference_fuzzing = false
 
 let initial_fuel = 100
 
