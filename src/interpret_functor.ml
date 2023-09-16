@@ -1025,10 +1025,11 @@ module Make (P : Interpret_functor_intf.P) :
       let i, stack = Stack.pop_i32 stack in
       let/ i = Choice.select_i32 i in
       let i = Int32.to_int i in
-      let v = Table.get t i in
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap Out_of_bounds_table_access
-      else st @@ Stack.push stack (Ref v)
+      else
+        let v = Table.get t i in
+        st @@ Stack.push stack (Ref v)
     | Table_set indice ->
       let* t = Env.get_table env indice in
       let/ t in
