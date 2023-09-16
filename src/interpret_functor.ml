@@ -1075,27 +1075,22 @@ module Make (P : Interpret_functor_intf.P) :
       (* TODO: out of bounds check *)
       Table.fill t pos len x;
       st stack
-    | Table_copy (_ti_dst, _ti_src) ->
-      (* TODO *)
+    | Table_copy (ti_dst, ti_src) -> begin
+      let/* t_src = Env.get_table env ti_src in
+      let/* t_dst = Env.get_table env ti_dst in
+      let len, stack = Stack.pop_i32 stack in
+      let src, stack = Stack.pop_i32 stack in
+      let dst, stack = Stack.pop_i32 stack in
+      (* TODO: out of bounds *)
+      (*
+      if
+        src + len > Array.length t_src.data
+        || dst + len > Array.length t_dst.data
+      then trap "out of bounds table access";
+      *)
+      if len <> const_i32 0l then Table.copy ~t_src ~t_dst ~src ~dst ~len;
       st stack
-    (* begin *)
-    (*     let* t_src = Env.get_table env ti_src in *)
-    (*     let* t_dst = Env.get_table env ti_dst in *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let src, stack = Stack.pop_i32_to_int stack in *)
-    (*     let dst, stack = Stack.pop_i32_to_int stack in *)
-    (*     if *)
-    (*       src + len > Array.length t_src.data || dst + len > Array.length t_dst.data *)
-    (*     then trap "out of bounds table access"; *)
-    (*     st *)
-    (*     @@ *)
-    (*     if len = 0 then stack *)
-    (*     else *)
-    (*       try *)
-    (*         Array.blit t_src.data src t_dst.data dst len; *)
-    (*         stack *)
-    (*       with Invalid_argument _ -> trap "out of bounds table access" *)
-    (*   end *)
+    end
     | Table_init (t_i, e_i) -> begin
       let* t = Env.get_table env t_i in
       let* elem = Env.get_elem env e_i in

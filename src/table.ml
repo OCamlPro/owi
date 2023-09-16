@@ -50,3 +50,9 @@ let fill t pos len x =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
   Array.fill t.data pos len x
+
+let copy ~t_src ~t_dst ~src ~dst ~len =
+  let src = Int32.to_int src in
+  let dst = Int32.to_int dst in
+  let len = Int32.to_int len in
+  Array.blit t_src.data src t_dst.data dst len

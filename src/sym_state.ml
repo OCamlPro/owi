@@ -91,6 +91,8 @@ module P = struct
     let grow _t _new_size _x = assert false
 
     let fill _t _pos _len _x = assert false
+
+    let copy ~t_src:_ ~t_dst:_ ~src:_ ~dst:_ ~len:_ = assert false
   end
 
   module Elem = struct

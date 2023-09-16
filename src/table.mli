@@ -26,3 +26,5 @@ val max_size : t -> int option
 val grow : t -> int32 -> Value.ref_value -> unit
 
 val fill : t -> int32 -> int32 -> Value.ref_value -> unit
+
+val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
