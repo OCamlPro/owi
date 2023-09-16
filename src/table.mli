@@ -24,3 +24,5 @@ val init : ?label:string -> Simplified.table_type -> t
 val max_size : t -> int option
 
 val grow : t -> int32 -> Value.ref_value -> unit
+
+val fill : t -> int32 -> int32 -> Value.ref_value -> unit

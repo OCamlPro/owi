@@ -45,3 +45,8 @@ let grow t new_size x =
   let new_table = Array.make new_size x in
   Array.blit t.data 0 new_table 0 (Array.length t.data);
   update t new_table
+
+let fill t pos len x =
+  let pos = Int32.to_int pos in
+  let len = Int32.to_int len in
+  Array.fill t.data pos len x

@@ -111,6 +111,8 @@ module type P = sig
     val max_size : t -> int option
 
     val grow : t -> int32 -> Value.ref_value -> unit
+
+    val fill : t -> int32 -> int32 -> Value.ref_value -> unit
   end
 
   module Memory : sig

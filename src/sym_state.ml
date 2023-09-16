@@ -89,6 +89,8 @@ module P = struct
     let max_size _t = assert false
 
     let grow _t _new_size _x = assert false
+
+    let fill _t _pos _len _x = assert false
   end
 
   module Elem = struct

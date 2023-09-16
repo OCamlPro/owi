@@ -1067,18 +1067,14 @@ module Make (P : Interpret_functor_intf.P) :
         let new_element, stack = Stack.pop_as_ref stack in
         Table.grow t new_size new_element;
         Stack.push_i32 stack size
-    | Table_fill _indice ->
-      (* TODO *)
+    | Table_fill indice ->
+      let/* t = Env.get_table env indice in
+      let len, stack = Stack.pop_i32 stack in
+      let x, stack = Stack.pop_as_ref stack in
+      let pos, stack = Stack.pop_i32 stack in
+      (* TODO: out of bounds check *)
+      Table.fill t pos len x;
       st stack
-    (*     let* t = Env.get_table env indice in *)
-    (*     let len, stack = Stack.pop_i32_to_int stack in *)
-    (*     let x, stack = Stack.pop_as_ref stack in *)
-    (*     let pos, stack = Stack.pop_i32_to_int stack in *)
-    (*     begin *)
-    (*       try Array.fill t.data pos len x *)
-    (*       with Invalid_argument _ -> trap "out of bounds table access" *)
-    (*     end; *)
-    (*     st stack *)
     | Table_copy (_ti_dst, _ti_src) ->
       (* TODO *)
       st stack
