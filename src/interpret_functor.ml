@@ -1192,13 +1192,14 @@ module Make (P : Interpret_functor_intf.P) :
         let offset = const_i32 @@ Int32.of_int offset in
         let addr = I32.add pos offset in
         let out_of_bounds =
-          Bool.or_
-            Int32_infix.(offset < const 0l)
-            (Bool.or_
-               Int32_infix.(Memory.size mem < addr + const 1l)
-               (Bool.or_
-                  Int32_infix.(pos < const 0l)
-                  Int32_infix.(addr < const 0l) ) )
+          Int32_infix.(
+            Bool.or_
+              (offset < const 0l)
+              (Bool.or_
+                 (Memory.size mem < addr + const 1l)
+                 (Bool.or_
+                    (pos < const 0l)
+                    (Bool.or_ (addr + const 1l < const 0l) (addr < const 0l)) ) ) )
         in
         let/ out_of_bounds = Choice.select out_of_bounds in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -1226,13 +1227,14 @@ module Make (P : Interpret_functor_intf.P) :
       let offset = const_i32 (Int32.of_int offset) in
       let addr = I32.add pos offset in
       let out_of_bounds =
-        Bool.or_
-          Int32_infix.(offset < const 0l)
-          (Bool.or_
-             Int32_infix.(Memory.size mem < addr + const 1l)
-             (Bool.or_
-                Int32_infix.(pos < const 0l)
-                Int32_infix.(addr < const 0l) ) )
+        Int32_infix.(
+          Bool.or_
+            (offset < const 0l)
+            (Bool.or_
+               (Memory.size mem < addr + const 1l)
+               (Bool.or_
+                  (pos < const 0l)
+                  (Bool.or_ (addr + const 1l < const 0l) (addr < const 0l)) ) ) )
       in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
