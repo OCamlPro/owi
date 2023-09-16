@@ -949,6 +949,7 @@ module Make (P : Interpret_functor_intf.P) :
         let c = Int.abs c mod 256 in
         Char.chr c
       in
+      (* TODO: move out of bonds check here ! *)
       let out_of_bounds = Memory.fill mem ~pos ~len c in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -958,6 +959,7 @@ module Make (P : Interpret_functor_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
+      (* TODO: move out of bonds check here ! *)
       let out_of_bounds = Memory.blit mem ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -969,6 +971,7 @@ module Make (P : Interpret_functor_intf.P) :
       let dst, stack = Stack.pop_i32 stack in
       let/ data = Env.get_data env i in
       let data = Data.value data in
+      (* TODO: move out of bonds check here ! *)
       let out_of_bounds = Memory.blit_string mem data ~src ~dst ~len in
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
