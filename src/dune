@@ -43,7 +43,6 @@
   named
   optimize
   parse
-  pp
   result
   rewrite
   runtime
