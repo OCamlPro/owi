@@ -104,7 +104,7 @@ let compare_result_const result (const : Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Text.const -> Value_test.V.t Result.t = function
+let value_of_const : Text.const -> Concrete.V.t Result.t = function
   | Const_I32 v -> ok @@ Value.I32 v
   | Const_I64 v -> ok @@ Value.I64 v
   | Const_F32 v -> ok @@ Value.F32 v

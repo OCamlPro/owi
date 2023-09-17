@@ -2,5 +2,5 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module I = Interpret_functor.Make (Value_test.P) [@@inlined hint]
+module I = Interpret_functor.Make (Concrete.P) [@@inlined hint]
 module S = Interpret_functor.Make (Sym_state.P) [@@inlined hint]

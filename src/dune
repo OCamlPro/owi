@@ -10,6 +10,7 @@
   assigned
   check
   compile
+  concrete
   convert
   float32
   float64
@@ -25,7 +26,6 @@
   interpret
   interpret_functor
   value_intf
-  value_test
   interpret_functor_intf
   runtime_intf
   stack_intf
