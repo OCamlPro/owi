@@ -5,12 +5,6 @@
 module Intf = Interpret_functor_intf
 module Value = Sym_value.S
 
-let ( let* ) o f = Option.bind o f
-
-let ( let+ ) o f = Option.map f o
-
-let return x = Option.Some x
-
 module M = struct
   module Expr = Encoding.Expression
   module Types = Encoding.Types

@@ -34,7 +34,7 @@ let grow mem delta =
   let delta = Int32.to_int delta in
   let old_size = Bytes.length mem.data in
   let new_mem = Bytes.extend mem.data 0 delta in
-  Bytes.fill new_mem old_size delta (Char.chr 0);
+  Bytes.unsafe_fill new_mem old_size delta (Char.chr 0);
   update_memory mem new_mem
 
 let fill mem ~pos ~len c =
@@ -43,18 +43,19 @@ let fill mem ~pos ~len c =
   pos < 0 || len < 0
   || pos + len > Bytes.length mem.data
   ||
-  ( Bytes.fill mem.data pos len c;
+  ( Bytes.unsafe_fill mem.data pos len c;
     false )
 
 let blit mem ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
+  let data_len = Bytes.length mem.data in
   src < 0 || dst < 0 || len < 0
-  || src + len > Bytes.length mem.data
-  || dst + len > Bytes.length mem.data
+  || src + len > data_len
+  || dst + len > data_len
   ||
-  ( Bytes.blit mem.data src mem.data dst len;
+  ( Bytes.unsafe_blit mem.data src mem.data dst len;
     false )
 
 let blit_string mem str ~src ~dst ~len =
@@ -66,7 +67,7 @@ let blit_string mem str ~src ~dst ~len =
   || src + len > str_len
   || dst + len > Bytes.length mem.data
   ||
-  ( Bytes.blit_string str src mem.data dst len;
+  ( Bytes.unsafe_blit_string str src mem.data dst len;
     false )
 
 let get_data { data; _ } = data
