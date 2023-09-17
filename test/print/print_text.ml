@@ -11,11 +11,11 @@ let m =
 
 let m = match Compile.until_check m with Ok m -> m | Error msg -> failwith msg
 
-let s = Format.asprintf "%a@\n" Symbolic.Pp.modul m
+let s = Format.asprintf "%a@\n" Text.Pp.modul m
 
 let m =
   match Parse.Module.from_string s with Ok m -> m | Error msg -> failwith msg
 
 let m = match Compile.until_check m with Ok m -> m | Error msg -> failwith msg
 
-let () = Format.printf "%a@\n" Symbolic.Pp.modul m
+let () = Format.printf "%a@\n" Text.Pp.modul m

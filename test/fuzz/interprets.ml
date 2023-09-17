@@ -5,7 +5,7 @@ exception Timeout
 module type INTERPRET = sig
   type t
 
-  val of_symbolic : Symbolic.modul -> t
+  val of_symbolic : Text.modul -> t
 
   val run : t -> unit Result.t
 
@@ -31,7 +31,7 @@ let timeout_call_run (run : unit -> 'a Result.t) : 'a Result.t =
   with Timeout -> Error "timeout"
 
 module Owi_unoptimized : INTERPRET = struct
-  type t = Symbolic.modul
+  type t = Text.modul
 
   let of_symbolic = Fun.id
 
@@ -52,7 +52,7 @@ module Owi_unoptimized : INTERPRET = struct
 end
 
 module Owi_optimized : INTERPRET = struct
-  type t = Symbolic.modul
+  type t = Text.modul
 
   let of_symbolic = Fun.id
 
@@ -76,7 +76,7 @@ end
 module Reference : INTERPRET = struct
   type t = string
 
-  let of_symbolic modul = Format.asprintf "%a" Symbolic.Pp.modul modul
+  let of_symbolic modul = Format.asprintf "%a" Text.Pp.modul modul
 
   let run modul =
     let prefix = "owi_fuzzer_official" in

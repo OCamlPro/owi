@@ -54,8 +54,8 @@
   spectest
   stack
   string_map
-  symbolic
   syntax
+  text
   trap
   typecheck
   types

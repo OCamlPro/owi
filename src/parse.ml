@@ -63,19 +63,19 @@ struct
 end
 
 module Script = Make (struct
-  type t = Symbolic.script
+  type t = Text.script
 
   let rule = Menhir_parser.script
 end)
 
 module Module = Make (struct
-  type t = Symbolic.modul
+  type t = Text.modul
 
   let rule = Menhir_parser.modul
 end)
 
 module Inline_module = Make (struct
-  type t = Symbolic.modul
+  type t = Text.modul
 
   let rule = Menhir_parser.inline_module
 end)

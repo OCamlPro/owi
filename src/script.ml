@@ -70,7 +70,7 @@ let load_global_from_module ls mod_id name =
 
 let compare_result_const result (const : Value.t) =
   match (result, const) with
-  | Symbolic.Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
+  | Text.Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
   | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
   | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
@@ -104,7 +104,7 @@ let compare_result_const result (const : Value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Symbolic.const -> Value_test.V.t Result.t = function
+let value_of_const : Text.const -> Value_test.V.t Result.t = function
   | Const_I32 v -> ok @@ Value.I32 v
   | Const_I64 v -> ok @@ Value.I64 v
   | Const_F32 v -> ok @@ Value.F32 v
@@ -114,16 +114,16 @@ let value_of_const : Symbolic.const -> Value_test.V.t Result.t = function
     Value.ref_null rt
   | Const_extern i -> ok @@ Value.Ref (Host_externref.value i)
   | i ->
-    Log.debug "TODO (Script.value_of_const) %a@\n" Symbolic.Pp.const i;
+    Log.debug "TODO (Script.value_of_const) %a@\n" Text.Pp.const i;
     ok @@ Value.I32 (Int32.of_int 666)
 
 let action (link_state : Value.Func.extern_func Link.state) = function
-  | Symbolic.Invoke (mod_id, f, args) -> begin
+  | Text.Invoke (mod_id, f, args) -> begin
     Log.debug "invoke %a %s %a...@\n"
       (Format.pp_print_option
          ~none:(fun ppf () -> Format.pp_print_string ppf "")
          Format.pp_print_string )
-      mod_id f Symbolic.Pp.consts args;
+      mod_id f Text.Pp.consts args;
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
@@ -146,7 +146,7 @@ let run ~with_exhaustion ~optimize script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Value.Func.extern_func Link.state) -> function
-      | Symbolic.Module m ->
+      | Text.Module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug "*** module@\n";
         incr curr_module;
@@ -218,7 +218,7 @@ let run ~with_exhaustion ~optimize script =
           || not (List.for_all2 compare_result_const res (List.rev stack))
         then begin
           Format.eprintf "got:      %a@.expected: %a@." Stack.pp
-            (List.rev stack) Symbolic.Pp.results res;
+            (List.rev stack) Text.Pp.results res;
           Error "Bad result"
         end
         else Ok link_state

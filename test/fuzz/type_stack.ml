@@ -1,4 +1,4 @@
-open Owi.Symbolic
+open Owi.Text
 
 type elem = val_type
 

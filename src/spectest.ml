@@ -2,7 +2,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Symbolic
+open Text
 
 type extern_module = Value.Func.extern_func Link.extern_module
 
@@ -168,64 +168,49 @@ let m =
             ; init = [ F64_const Float64.zero ]
             ; id = Some "global_f64"
             }
-        ; MExport { name = "func"; desc = Export_func (Some (Symbolic "func")) }
+        ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
         ; MExport
-            { name = "func-i32"
-            ; desc = Export_func (Some (Symbolic "func-i32"))
-            }
+            { name = "func-i32"; desc = Export_func (Some (Text "func-i32")) }
         ; MExport
-            { name = "func->i32"
-            ; desc = Export_func (Some (Symbolic "func->i32"))
-            }
+            { name = "func->i32"; desc = Export_func (Some (Text "func->i32")) }
         ; MExport
             { name = "func-i32->i32"
-            ; desc = Export_func (Some (Symbolic "func-i32->i32"))
+            ; desc = Export_func (Some (Text "func-i32->i32"))
             }
+        ; MExport { name = "memory"; desc = Export_mem (Some (Text "memory")) }
+        ; MExport { name = "table"; desc = Export_table (Some (Text "table")) }
+        ; MExport { name = "print"; desc = Export_func (Some (Text "print")) }
         ; MExport
-            { name = "memory"; desc = Export_mem (Some (Symbolic "memory")) }
+            { name = "print_i32"; desc = Export_func (Some (Text "print_i32")) }
         ; MExport
-            { name = "table"; desc = Export_table (Some (Symbolic "table")) }
+            { name = "print_f32"; desc = Export_func (Some (Text "print_f32")) }
         ; MExport
-            { name = "print"; desc = Export_func (Some (Symbolic "print")) }
+            { name = "print_i64"; desc = Export_func (Some (Text "print_i64")) }
         ; MExport
-            { name = "print_i32"
-            ; desc = Export_func (Some (Symbolic "print_i32"))
-            }
-        ; MExport
-            { name = "print_f32"
-            ; desc = Export_func (Some (Symbolic "print_f32"))
-            }
-        ; MExport
-            { name = "print_i64"
-            ; desc = Export_func (Some (Symbolic "print_i64"))
-            }
-        ; MExport
-            { name = "print_f64"
-            ; desc = Export_func (Some (Symbolic "print_f64"))
-            }
+            { name = "print_f64"; desc = Export_func (Some (Text "print_f64")) }
         ; MExport
             { name = "print_i32_f32"
-            ; desc = Export_func (Some (Symbolic "print_i32_f32"))
+            ; desc = Export_func (Some (Text "print_i32_f32"))
             }
         ; MExport
             { name = "print_f64_f64"
-            ; desc = Export_func (Some (Symbolic "print_f64_f64"))
+            ; desc = Export_func (Some (Text "print_f64_f64"))
             }
         ; MExport
             { name = "global_i32"
-            ; desc = Export_global (Some (Symbolic "global_i32"))
+            ; desc = Export_global (Some (Text "global_i32"))
             }
         ; MExport
             { name = "global_i64"
-            ; desc = Export_global (Some (Symbolic "global_i64"))
+            ; desc = Export_global (Some (Text "global_i64"))
             }
         ; MExport
             { name = "global_f32"
-            ; desc = Export_global (Some (Symbolic "global_f32"))
+            ; desc = Export_global (Some (Text "global_f32"))
             }
         ; MExport
             { name = "global_f64"
-            ; desc = Export_global (Some (Symbolic "global_f64"))
+            ; desc = Export_global (Some (Text "global_f64"))
             }
         ]
     }

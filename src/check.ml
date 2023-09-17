@@ -2,7 +2,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Symbolic
+open Text
 open Syntax
 
 type env =

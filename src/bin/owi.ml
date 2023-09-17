@@ -6,10 +6,10 @@ let simplify_then_link_then_run ~optimize file =
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
-        | Symbolic.Module m ->
+        | Text.Module m ->
           let* m, state = Compile.until_link state ~optimize ~name:None m in
           Ok (m :: to_run, state)
-        | Symbolic.Register (name, id) ->
+        | Text.Register (name, id) ->
           let* state = Link.register_module state ~name ~id in
           Ok (to_run, state)
         | _ -> Ok acc )

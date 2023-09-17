@@ -15,7 +15,7 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function
-  | Symbolic.Any_ht -> Ok Any_ht
+  | Text.Any_ht -> Ok Any_ht
   | None_ht -> Ok None_ht
   | Eq_ht -> Ok Eq_ht
   | I31_ht -> Ok I31_ht
@@ -26,7 +26,7 @@ let convert_heap_type tbl = function
   | Extern_ht -> Ok Extern_ht
   | No_extern_ht -> Ok No_extern_ht
   | Def_ht (Raw i) -> ok @@ Def_ht i
-  | Def_ht (Symbolic i) -> begin
+  | Def_ht (Text i) -> begin
     match tbl with
     | None -> error_s "unknown type %s (no table)" i
     | Some tbl -> begin
@@ -41,7 +41,7 @@ let convert_ref_type tbl (null, heap_type) =
   (null, heap_type)
 
 let convert_val_type tbl = function
-  | Symbolic.Num_type t -> ok @@ Num_type t
+  | Text.Num_type t -> ok @@ Num_type t
   | Ref_type rt ->
     let+ rt = convert_ref_type tbl rt in
     Ref_type rt
@@ -60,7 +60,7 @@ let convert_func_type tbl (pt, rt) =
   (pt, rt)
 
 let convert_storage_type tbl = function
-  | Symbolic.Val_storage_t val_type ->
+  | Text.Val_storage_t val_type ->
     let+ val_type = convert_val_type tbl val_type in
     Val_storage_t val_type
   | Val_packed_t packed_type -> ok @@ Val_packed_t packed_type
@@ -76,7 +76,7 @@ let convert_struct_field tbl (id, types) =
 let convert_struct_type tbl fields = list_map (convert_struct_field tbl) fields
 
 let convert_str tbl = function
-  | Symbolic.Def_func_t func_t ->
+  | Text.Def_func_t func_t ->
     let+ func_t = convert_func_type tbl func_t in
     Def_func_t func_t
   | Def_array_t field_t ->

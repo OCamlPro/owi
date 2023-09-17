@@ -6,11 +6,11 @@ open Syntax
 open Types
 open Simplified
 
-type type_check = Symbolic.indice * Symbolic.func_type
+type type_check = Text.indice * Text.func_type
 
 type opt_ind =
   | Curr of int
-  | Indice of Symbolic.indice
+  | Indice of Text.indice
 
 type opt_export =
   { name : string
@@ -24,29 +24,29 @@ type opt_exports =
   ; func : opt_export list
   }
 
-let curr_id (curr : int) (i : Symbolic.indice option) =
+let curr_id (curr : int) (i : Text.indice option) =
   match i with None -> Curr (pred curr) | Some id -> Indice id
 
 type t =
   { id : string option
-  ; typ : Symbolic.type_def list
-  ; function_type : Symbolic.func_type list
+  ; typ : Text.type_def list
+  ; function_type : Text.func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Symbolic.global, global_type) Runtime.t Indexed.t list
+  ; global : (Text.global, global_type) Runtime.t Indexed.t list
   ; table : (table, table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Indexed.t list
-  ; elem : Symbolic.elem Indexed.t list
-  ; data : Symbolic.data Indexed.t list
+  ; func : (Text.func, Text.block_type) Runtime.t Indexed.t list
+  ; elem : Text.elem Indexed.t list
+  ; data : Text.data Indexed.t list
   ; exports : opt_exports
-  ; start : Symbolic.indice option
+  ; start : Text.indice option
   }
 
-let imp (import : Symbolic.import) (assigned_name, desc) : 'a Imported.t =
+let imp (import : Text.import) (assigned_name, desc) : 'a Imported.t =
   { modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
@@ -112,11 +112,11 @@ let check_limit { min; max } =
     if min > max then Error "size minimum must not be greater than maximum"
     else Ok ()
 
-let of_symbolic (modul : Symbolic.modul) : t Result.t =
+let of_symbolic (modul : Text.modul) : t Result.t =
   Log.debug "grouping     ...@\n";
   let add ((fields : t), curr) field : (t * curr) Result.t =
     match field with
-    | Symbolic.MType typ ->
+    | Text.MType typ ->
       let typ = typ @ fields.typ in
       ok @@ ({ fields with typ }, curr)
     | MGlobal global -> ok @@ add_global (Local global) fields curr
@@ -201,7 +201,7 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
     | MElem elem ->
       let mode =
         match elem.mode with
-        | (Symbolic.Elem_passive | Elem_declarative) as mode -> mode
+        | (Text.Elem_passive | Elem_declarative) as mode -> mode
         | Elem_active (id, expr) ->
           let id = Option.value id ~default:(Raw (curr.table - 1)) in
           Elem_active (Some id, expr)
@@ -210,12 +210,12 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
     | MData data ->
       let mode =
         match data.mode with
-        | Data_passive -> Symbolic.Data_passive
+        | Data_passive -> Text.Data_passive
         | Data_active (id, expr) ->
           let id = Option.value id ~default:(Raw (curr.mem - 1)) in
           Data_active (Some id, expr)
       in
-      let data : Symbolic.data = { id = data.id; init = data.init; mode } in
+      let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_data data fields curr
     | MStart start -> Ok ({ fields with start = Some start }, curr)
   in

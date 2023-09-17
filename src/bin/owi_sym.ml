@@ -51,7 +51,7 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
       end
       | _ ->
         failwith
-          (Printf.sprintf "Symbolic name %s" (Encoding.Expression.to_string i))
+          (Printf.sprintf "Text name %s" (Encoding.Expression.to_string i))
     in
     incr counter;
     let r =
@@ -137,22 +137,19 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
     list_fold_left
       (fun ((to_run, state) as acc) instruction ->
         match instruction with
-        | Symbolic.Module m ->
+        | Text.Module m ->
           let has_start =
-            List.exists
-              (function Symbolic.MStart _ -> true | _ -> false)
-              m.fields
+            List.exists (function Text.MStart _ -> true | _ -> false) m.fields
           in
           let has_start_id_function =
             List.exists
               (function
-                | Symbolic.MFunc { id = Some "_start"; _ } -> true | _ -> false
-                )
+                | Text.MFunc { id = Some "_start"; _ } -> true | _ -> false )
               m.fields
           in
           let fields =
             if has_start || not has_start_id_function then m.fields
-            else MStart (Symbolic "_start") :: m.fields
+            else MStart (Text "_start") :: m.fields
           in
           let m = { m with fields } in
           let* m, state =
@@ -160,7 +157,7 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
           in
           let m = Sym_state.convert_module_to_run m in
           Ok (m :: to_run, state)
-        | Symbolic.Register (name, id) ->
+        | Text.Register (name, id) ->
           let* state = Link.register_module state ~name ~id in
           Ok (to_run, state)
         | _ -> Ok acc )

@@ -69,7 +69,7 @@ val filename : string = "test/passing/quickstart.wast"
     match Parse.Module.from_file ~filename with
     | Ok script -> script
     | Error e -> failwith e;;
-val m : Symbolic.modul =
+val m : Text.modul =
 ...
 # let module_to_run, link_state =
     match Compile.until_link Link.empty_state ~optimize:false ~name:None m with

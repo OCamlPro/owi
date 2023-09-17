@@ -6,13 +6,13 @@ open Types
 
 module Arg = struct
   type indice =
-    | Symbolic of string
+    | Text of string
     | Raw of int
 
   let pp_indice fmt = function
     | Raw u -> Format.pp_print_int fmt u
     (* TODO: this is the id function that should be factored out *)
-    | Symbolic i -> Format.fprintf fmt "$%s" i
+    | Text i -> Format.fprintf fmt "$%s" i
 
   type ('pt, 'rt) block_type =
     | Bt_ind of indice
@@ -28,7 +28,7 @@ end
 
 include Make (Arg)
 
-let symbolic v = Arg.Symbolic v
+let symbolic v = Arg.Text v
 
 let raw v = Arg.Raw v
 

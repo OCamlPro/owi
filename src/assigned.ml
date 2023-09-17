@@ -24,14 +24,14 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 type t =
   { id : string option
   ; typ : str_type Named.t
-  ; global : (Symbolic.global, global_type) Runtime.t Named.t
+  ; global : (Text.global, global_type) Runtime.t Named.t
   ; table : (table, table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Named.t
-  ; elem : Symbolic.elem Named.t
-  ; data : Symbolic.data Named.t
+  ; func : (Text.func, Text.block_type) Runtime.t Named.t
+  ; elem : Text.elem Named.t
+  ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
-  ; start : Symbolic.indice option
+  ; start : Text.indice option
   }
 
 type type_acc =
@@ -123,7 +123,7 @@ let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
   let* id =
     match id with
     | Raw i -> Ok i
-    | Symbolic name -> (
+    | Text name -> (
       match String_map.find_opt name types.named with
       | None -> error_s "internal error: can't find type with name %s" name
       | Some t -> Ok t )
@@ -143,7 +143,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   let* typ = assign_types modul in
   let* global =
     name "global"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Symbolic.global) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.global) -> id))
       modul.global
   in
   let* table =
@@ -158,14 +158,14 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* func =
     name "func"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Symbolic.func) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.func) -> id))
       modul.func
   in
   let* elem =
-    name "elem" ~get_name:(fun (elem : Symbolic.elem) -> elem.id) modul.elem
+    name "elem" ~get_name:(fun (elem : Text.elem) -> elem.id) modul.elem
   in
   let* data =
-    name "data" ~get_name:(fun (data : Symbolic.data) -> data.id) modul.data
+    name "data" ~get_name:(fun (data : Text.data) -> data.id) modul.data
   in
   let+ () = list_iter (check_type_id typ) modul.type_checks in
   { id = modul.id

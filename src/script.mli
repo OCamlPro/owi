@@ -2,4 +2,4 @@
 
 (** execute a Wasm script *)
 val exec :
-  ?with_exhaustion:bool -> optimize:bool -> Symbolic.script -> unit Result.t
+  ?with_exhaustion:bool -> optimize:bool -> Text.script -> unit Result.t

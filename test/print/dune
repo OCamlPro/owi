@@ -4,8 +4,8 @@
  (libraries owi))
 
 (executable
- (name print_symbolic)
- (modules print_symbolic)
+ (name print_text)
+ (modules print_text)
  (libraries owi))
 
 (executable
@@ -15,7 +15,7 @@
 
 (cram
  (deps
-  print_symbolic.exe
+  print_text.exe
   print_simplified.exe
   print_optimized.exe
   m.wast

@@ -1,7 +1,7 @@
 open Crowbar
 open Crowbar.Syntax
 open Owi.Types
-open Owi.Symbolic
+open Owi.Text
 module S = Type_stack
 
 type num_size =
@@ -288,9 +288,8 @@ let global ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:false in
   List.map
     (fun (name, (_, _)) ->
-      pair
-        (const (Global_get (Symbolic name)))
-        (const [ S.Push (Num_type ntyp) ]) )
+      pair (const (Global_get (Text name))) (const [ S.Push (Num_type ntyp) ])
+      )
     globals
 
 let global_i32 = global I32
@@ -305,7 +304,7 @@ let global_set ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:true in
   List.map
     (fun (name, (_, _)) ->
-      pair (const (Global_set (Symbolic name))) (const [ S.Pop ]) )
+      pair (const (Global_set (Text name))) (const [ S.Pop ]) )
     globals
 
 let global_set_i32 = global_set I32
@@ -320,9 +319,7 @@ let local ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
     (fun (name, _) ->
-      pair
-        (const (Local_get (Symbolic name)))
-        (const [ S.Push (Num_type ntyp) ]) )
+      pair (const (Local_get (Text name))) (const [ S.Push (Num_type ntyp) ]) )
     locals
 
 let local_i32 = local I32
@@ -336,7 +333,7 @@ let local_f64 = local F64
 let local_set ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    (fun (name, _) -> pair (const (Local_set (Symbolic name))) (const [ S.Pop ]))
+    (fun (name, _) -> pair (const (Local_set (Text name))) (const [ S.Pop ]))
     locals
 
 let local_set_i32 = local_set I32
@@ -350,8 +347,7 @@ let local_set_f64 = local_set F64
 let local_tee ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    (fun (name, _) ->
-      pair (const (Local_tee (Symbolic name))) (const [ S.Nothing ]) )
+    (fun (name, _) -> pair (const (Local_tee (Text name))) (const [ S.Nothing ]))
     locals
 
 let local_tee_i32 = local_tee I32
@@ -408,8 +404,7 @@ let memory_fill = pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ])
 let memory_init (env : Env.t) =
   List.map
     (fun name ->
-      pair (const (Memory_init (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ])
-      )
+      pair (const (Memory_init (Text name))) (const [ S.Pop; S.Pop; S.Pop ]) )
     env.datas
 
 let memory_exists (env : Env.t) = Option.is_some env.memory
@@ -505,7 +500,7 @@ let i64_store32 =
 let data_active name =
   let+ inst = const_i32 in
   let exp = [ inst ] in
-  Data_active (Some (Symbolic name), exp)
+  Data_active (Some (Text name), exp)
 
 let data_mode (env : Env.t) =
   match env.memory with
@@ -514,13 +509,12 @@ let data_mode (env : Env.t) =
 
 let data_drop (env : Env.t) =
   List.map
-    (fun name -> pair (const (Data_drop (Symbolic name))) (const [ S.Nothing ]))
+    (fun name -> pair (const (Data_drop (Text name))) (const [ S.Nothing ]))
     env.datas
 
 let elem_drop (env : Env.t) =
   List.map
-    (fun (name, _) ->
-      pair (const (Elem_drop (Symbolic name))) (const [ S.Nothing ]) )
+    (fun (name, _) -> pair (const (Elem_drop (Text name))) (const [ S.Nothing ]))
     env.elems
 
 let table_init (env : Env.t) =
@@ -533,7 +527,7 @@ let table_init (env : Env.t) =
       let* name_t, _ = choose tables in
       let* name_e, _ = choose elems in
       pair
-        (const (Table_init (Symbolic name_t, Symbolic name_e)))
+        (const (Table_init (Text name_t, Text name_e)))
         (const [ S.Pop; S.Pop; S.Pop ])
     in
     [ instr ]
@@ -548,7 +542,7 @@ let table_copy (env : Env.t) =
       let* name_y, (_lim_y, rt_y) = choose tables in
       if rt_x = rt_y then
         pair
-          (const (Table_copy (Symbolic name_x, Symbolic name_y)))
+          (const (Table_copy (Text name_x, Text name_y)))
           (const [ S.Pop; S.Pop; S.Pop ])
       else pair (const Nop) (const [ S.Nothing ])
       (* TODO: avoid if ... then ... else pair (const (Nop)) (const [ S.Nothing ])
@@ -559,37 +553,34 @@ let table_copy (env : Env.t) =
 let table_size (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair
-        (const (Table_size (Symbolic name)))
-        (const [ S.Push (Num_type I32) ]) )
+      pair (const (Table_size (Text name))) (const [ S.Push (Num_type I32) ]) )
     env.tables
 
 let table_grow (env : Env.t) =
   List.map
     (fun (name, _) ->
       pair
-        (const (Table_grow (Symbolic name)))
+        (const (Table_grow (Text name)))
         (const [ S.Pop; S.Pop; S.Push (Num_type I32) ]) )
     env.tables
 
 let table_fill (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair (const (Table_fill (Symbolic name))) (const [ S.Pop; S.Pop; S.Pop ])
-      )
+      pair (const (Table_fill (Text name))) (const [ S.Pop; S.Pop; S.Pop ]) )
     env.tables
 
 let table_set (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair (const (Table_set (Symbolic name))) (const [ S.Pop; S.Pop ]) )
+      pair (const (Table_set (Text name))) (const [ S.Pop; S.Pop ]) )
     env.tables
 
 let table_get (env : Env.t) =
   List.map
     (fun (name, _) ->
       pair
-        (const (Table_get (Symbolic name)))
+        (const (Table_get (Text name)))
         (const [ S.Pop; S.Push (Ref_type (No_null, Func_ht)) ]) )
     env.tables
 
@@ -604,9 +595,7 @@ let expr_call (env : Env.t) (stack : val_type list) =
       | Arg.Bt_raw (_, (pt, rt))
         when S.is_stack_compatible_param stack (List.rev pt) ->
         Some
-          (pair
-             (const (Call (Symbolic name)))
-             (const (stack_pt pt @ stack_rt rt)) )
+          (pair (const (Call (Text name))) (const (stack_pt pt @ stack_rt rt)))
       | _ -> None )
     env.funcs
 
@@ -628,7 +617,7 @@ let expr_br_if (env : Env.t) (stack : val_type list) =
           else
             let i =
               match bk with
-              | Env.Block | Env.Loop -> const @@ Br_if (Symbolic name)
+              | Env.Block | Env.Loop -> const @@ Br_if (Text name)
               | Env.Func -> const @@ Br_if (Raw (List.length blocs - 1))
             in
             Some (pair i (const [ S.Pop ]))
@@ -656,7 +645,7 @@ let expr_br (env : Env.t) (stack : val_type list) =
         else
           let i =
             match bk with
-            | Env.Block | Env.Loop -> const @@ Br (Symbolic name)
+            | Env.Block | Env.Loop -> const @@ Br (Text name)
             | Env.Func -> const @@ Br (Raw (List.length blocs - 1))
           in
           Some (pair i random_stack)

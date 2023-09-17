@@ -6,18 +6,17 @@ open Syntax
 open Types
 open Simplified
 
-let find msg (named : 'a Named.t) (indice : Symbolic.indice option) :
-  int Result.t =
+let find msg (named : 'a Named.t) (indice : Text.indice option) : int Result.t =
   match indice with
   | None -> error_s "%s" msg
   | Some indice -> (
     match indice with
-    | Symbolic.Arg.Raw i ->
+    | Text.Arg.Raw i ->
       (* TODO change Indexed.t strucure for that to be more efficient *)
       if not (List.exists (Indexed.has_index i) named.values) then
         error_s "%s %i" msg i
       else Ok i
-    | Symbolic name -> (
+    | Text name -> (
       match String_map.find_opt name named.named with
       | None -> error_s "%s %s" msg name
       | Some i -> Ok i ) )
@@ -44,13 +43,13 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
   in
   (idx, mut)
 
-let rewrite_expr (modul : Assigned.t) (locals : param list)
-  (iexpr : Symbolic.expr) : expr Result.t =
+let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
+  : expr Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
       match id with
-      | Symbolic.Arg.Symbolic id ->
+      | Text.Arg.Text id ->
         let pos = ref (-1) in
         begin
           try
@@ -71,8 +70,8 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     else Ok id
   in
 
-  let bt_some_to_raw : Symbolic.block_type -> block_type Result.t = function
-    | Symbolic.Arg.Bt_ind ind -> begin
+  let bt_some_to_raw : Text.block_type -> block_type Result.t = function
+    | Text.Arg.Bt_ind ind -> begin
       let* v = get "unknown type" modul.typ (Some ind) in
       match Indexed.get v with
       | Def_func_t t' -> Ok t'
@@ -94,7 +93,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
         if not ok then Error "inline function type" else Ok t )
   in
 
-  let bt_to_raw : Symbolic.block_type option -> block_type option Result.t =
+  let bt_to_raw : Text.block_type option -> block_type option Result.t =
     function
     | None -> Ok None
     | Some bt ->
@@ -117,9 +116,9 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
   in
 
   let find_local = function
-    | Symbolic.Arg.Raw i ->
+    | Text.Arg.Raw i ->
       if i >= after_last_assigned_local then Error "unknown local" else Ok i
-    | Symbolic name -> (
+    | Text name -> (
       match String_map.find_opt name locals with
       | None -> error_s "unknown local %s" name
       | Some id -> Ok id )
@@ -132,8 +131,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
   let find_elem id = find "unknown elem segment" modul.elem id in
   let find_type id = find "unknown type" modul.typ id in
 
-  let rec body (loop_count, block_ids) : Symbolic.instr -> instr Result.t =
-    function
+  let rec body (loop_count, block_ids) : Text.instr -> instr Result.t = function
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -382,19 +380,19 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
       | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug "TODO (Rewrite.body) %a@\n" Symbolic.Pp.instr i;
+      Log.debug "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
       Ok Nop
-  and expr (e : Symbolic.expr) (loop_count, block_ids) : expr Result.t =
+  and expr (e : Text.expr) (loop_count, block_ids) : expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
 
-let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
+let rewrite_const_expr (modul : Assigned.t) (expr : Text.expr) :
   Const.expr Result.t =
-  let const_instr (instr : Symbolic.instr) : Const.instr Result.t =
+  let const_instr (instr : Text.instr) : Const.instr Result.t =
     let open Const in
     match instr with
-    | Symbolic.I32_const v -> ok @@ I32_const v
+    | Text.I32_const v -> ok @@ I32_const v
     | I64_const v -> ok @@ I64_const v
     | F32_const v -> ok @@ F32_const v
     | F64_const v -> ok @@ F64_const v
@@ -416,18 +414,17 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Symbolic.expr) :
     | Array_new_default t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new_default t
-    | Symbolic.Ref_i31 -> Ok Ref_i31
+    | Text.Ref_i31 -> Ok Ref_i31
     | i ->
       error
-      @@ Format.asprintf "constant expression required, got %a"
-           Symbolic.Pp.instr i
+      @@ Format.asprintf "constant expression required, got %a" Text.Pp.instr i
   in
   list_map const_instr expr
 
-let rewrite_block_type (modul : Assigned.t) (block_type : Symbolic.block_type) :
+let rewrite_block_type (modul : Assigned.t) (block_type : Text.block_type) :
   block_type Result.t =
   match block_type with
-  | Symbolic.Arg.Bt_ind id -> begin
+  | Text.Arg.Bt_ind id -> begin
     let* v = get "unknown type" modul.typ (Some id) in
     match Indexed.get v with
     | Def_func_t t' -> Ok t'
@@ -435,15 +432,15 @@ let rewrite_block_type (modul : Assigned.t) (block_type : Symbolic.block_type) :
   end
   | Bt_raw (_, func_type) -> Simplified_types.convert_func_type None func_type
 
-let rewrite_global (modul : Assigned.t) (global : Symbolic.global) :
-  global Result.t =
+let rewrite_global (modul : Assigned.t) (global : Text.global) : global Result.t
+    =
   let* init = rewrite_const_expr modul global.init in
   let mut, val_type = global.typ in
   let+ val_type = Simplified_types.convert_val_type None val_type in
   let typ = (mut, val_type) in
   { id = global.id; init; typ }
 
-let rewrite_elem (modul : Assigned.t) (elem : Symbolic.elem) : elem Result.t =
+let rewrite_elem (modul : Assigned.t) (elem : Text.elem) : elem Result.t =
   let* (mode : elem_mode) =
     match elem.mode with
     | Elem_declarative -> Ok Elem_declarative
@@ -457,7 +454,7 @@ let rewrite_elem (modul : Assigned.t) (elem : Symbolic.elem) : elem Result.t =
   let+ typ = Simplified_types.convert_ref_type None elem.typ in
   { init; mode; id = elem.id; typ }
 
-let rewrite_data (modul : Assigned.t) (data : Symbolic.data) : data Result.t =
+let rewrite_data (modul : Assigned.t) (data : Text.data) : data Result.t =
   let+ mode =
     match data.mode with
     | Data_passive -> Ok Data_passive
@@ -486,7 +483,7 @@ let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
   let+ func = rewrite_export "unknown function" modul.func exports.func in
   { global; mem; table; func }
 
-let rewrite_func (modul : Assigned.t) (func : Symbolic.func) : func Result.t =
+let rewrite_func (modul : Assigned.t) (func : Text.func) : func Result.t =
   let* type_f = rewrite_block_type modul func.type_f in
   let params, _ = type_f in
   let* locals = list_map (Simplified_types.convert_param None) func.locals in

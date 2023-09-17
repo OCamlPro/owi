@@ -1,6 +1,6 @@
 type opt_ind =
   | Curr of int
-  | Indice of Symbolic.indice
+  | Indice of Text.indice
 
 type opt_export =
   { name : string
@@ -14,25 +14,25 @@ type opt_exports =
   ; func : opt_export list
   }
 
-type type_check = Symbolic.indice * Symbolic.func_type
+type type_check = Text.indice * Text.func_type
 
 type t =
   { id : string option
-  ; typ : Symbolic.type_def list
-  ; function_type : Symbolic.func_type list
+  ; typ : Text.type_def list
+  ; function_type : Text.func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Symbolic.global, Simplified.global_type) Runtime.t Indexed.t list
+  ; global : (Text.global, Simplified.global_type) Runtime.t Indexed.t list
   ; table : (Simplified.table, Simplified.table_type) Runtime.t Indexed.t list
   ; mem : (Types.mem, Types.limits) Runtime.t Indexed.t list
-  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Indexed.t list
-  ; elem : Symbolic.elem Indexed.t list
-  ; data : Symbolic.data Indexed.t list
+  ; func : (Text.func, Text.block_type) Runtime.t Indexed.t list
+  ; elem : Text.elem Indexed.t list
+  ; data : Text.data Indexed.t list
   ; exports : opt_exports
-  ; start : Symbolic.indice option
+  ; start : Text.indice option
   }
 
-val of_symbolic : Symbolic.modul -> t Result.t
+val of_symbolic : Text.modul -> t Result.t

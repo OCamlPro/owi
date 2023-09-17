@@ -27,7 +27,7 @@
 %{
 
 open Types
-open Symbolic
+open Text
 
 let failwith msg = raise @@ Parse_fail msg
 
@@ -56,9 +56,9 @@ let f32 s =
 module Owi = struct end
 %}
 
-%start <Symbolic.script> script
-%start <Symbolic.modul> modul
-%start <Symbolic.modul> inline_module
+%start <Text.script> script
+%start <Text.modul> modul
+%start <Text.modul> inline_module
 
 %%
 
