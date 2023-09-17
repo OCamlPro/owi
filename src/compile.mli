@@ -7,7 +7,8 @@ val until_simplify : Symbolic.modul -> Simplified.modul Result.t
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)
 val until_link :
-     'f Link.state
+     ?unsafe:bool
+  -> 'f Link.state
   -> optimize:bool
   -> name:string option
   -> Symbolic.modul

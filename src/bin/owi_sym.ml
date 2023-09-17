@@ -114,7 +114,8 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
 
-let simplify_then_link_then_run ~optimize (pc : unit Result.t Choice.t) file =
+let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
+  file =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"print"
@@ -154,7 +155,9 @@ let simplify_then_link_then_run ~optimize (pc : unit Result.t Choice.t) file =
             else MStart (Symbolic "_start") :: m.fields
           in
           let m = { m with fields } in
-          let* m, state = Compile.until_link state ~optimize ~name:None m in
+          let* m, state =
+            Compile.until_link ~unsafe state ~optimize ~name:None m
+          in
           let m = Sym_state.convert_module_to_run m in
           Ok (m :: to_run, state)
         | Symbolic.Register (name, id) ->
@@ -173,12 +176,12 @@ let simplify_then_link_then_run ~optimize (pc : unit Result.t Choice.t) file =
   in
   List.fold_left f pc (List.rev to_run)
 
-let run_file ~optimize (pc : unit Result.t Choice.t) filename =
+let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
   if not @@ Sys.file_exists filename then
     Choice.return (error_s "file `%s` doesn't exist" filename)
   else
     let*/ script = Parse.Script.from_file ~filename in
-    simplify_then_link_then_run ~optimize pc script
+    simplify_then_link_then_run ~unsafe ~optimize pc script
 
 (* Command line *)
 
@@ -207,6 +210,10 @@ let script =
   let doc = "run as a reference test suite script" in
   Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
 
+let unsafe =
+  let doc = "skip typechecking pass" in
+  Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
+
 let get_model (solver : Thread.Solver.t) thread =
   assert (Thread.Solver.check solver (Thread.pc thread));
   match Thread.Solver.model solver with
@@ -215,12 +222,12 @@ let get_model (solver : Thread.Solver.t) thread =
 
 let stop_at_first_failure = true
 
-let main profiling debug _script optimize files =
+let main profiling debug _script unsafe optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Thread.Solver.create () in
   let pc = Choice.return (Ok ()) in
-  let result = List.fold_left (run_file ~optimize) pc files in
+  let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run_and_trap result thread in
   let failing =
@@ -270,7 +277,8 @@ let cli =
   let doc = "OCaml WebAssembly Interpreter" in
   let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
   let info = Cmd.info "owi" ~version:"%%VERSION%%" ~doc ~man in
-  Cmd.v info Term.(const main $ profiling $ debug $ script $ optimize $ files)
+  Cmd.v info
+    Term.(const main $ profiling $ debug $ script $ unsafe $ optimize $ files)
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 

@@ -21,17 +21,19 @@ let until_simplify m =
   let* m = Rewrite.modul m in
   Ok m
 
-let until_typecheck m =
+let until_typecheck ?(unsafe = false) m =
   let* m = until_simplify m in
-  let* () = Typecheck.modul m in
-  Ok m
+  if unsafe then Ok m
+  else
+    let* () = Typecheck.modul m in
+    Ok m
 
-let until_optimize ~optimize m =
-  let* m = until_typecheck m in
+let until_optimize ?unsafe ~optimize m =
+  let* m = until_typecheck ?unsafe m in
   if optimize then Ok (Optimize.modul m) else Ok m
 
-let until_link link_state ~optimize ~name m =
-  let* m = until_optimize ~optimize m in
+let until_link ?unsafe link_state ~optimize ~name m =
+  let* m = until_optimize ?unsafe ~optimize m in
   Link.modul link_state ~name m
 
 let until_interpret link_state ~optimize ~name m =
