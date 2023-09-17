@@ -13,12 +13,14 @@ let rec optimize_expr expr =
     :: tl -> begin
     try
       let result =
-        Interpret.I.exec_ibinop [ Value.of_instr y; Value.of_instr x ] nn op
+        Interpret.I.exec_ibinop
+          [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
+          nn op
       in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Value.to_instr result :: tl)
+          optimize_expr (Concrete_value.to_instr result :: tl)
         | _ -> assert false
       end
     with Trap _ -> x :: optimize_expr (y :: i_binop :: tl)
@@ -28,35 +30,38 @@ let rec optimize_expr expr =
     :: F_binop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_fbinop [ Value.of_instr y; Value.of_instr x ] nn op
+      Interpret.I.exec_fbinop
+        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
+        nn op
     in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_unop (nn, op) :: tl ->
-    let result = Interpret.I.exec_iunop [ Value.of_instr x ] nn op in
+    let result = Interpret.I.exec_iunop [ Concrete_value.of_instr x ] nn op in
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: F_unop (nn, op) :: tl ->
-    let result = Interpret.I.exec_funop [ Value.of_instr x ] nn op in
+    let result = Interpret.I.exec_funop [ Concrete_value.of_instr x ] nn op in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_testop (nn, op) :: tl ->
-    let result = Interpret.I.exec_itestop [ Value.of_instr x ] nn op in
+    let result = Interpret.I.exec_itestop [ Concrete_value.of_instr x ] nn op in
     begin
       match result with
-      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | [ (I32 _ as result) ] ->
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x)
@@ -64,11 +69,14 @@ let rec optimize_expr expr =
     :: I_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_irelop [ Value.of_instr y; Value.of_instr x ] nn op
+      Interpret.I.exec_irelop
+        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
+        nn op
     in
     begin
       match result with
-      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | [ (I32 _ as result) ] ->
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x)
@@ -76,11 +84,14 @@ let rec optimize_expr expr =
     :: F_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_frelop [ Value.of_instr y; Value.of_instr x ] nn op
+      Interpret.I.exec_frelop
+        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
+        nn op
     in
     begin
       match result with
-      | [ (I32 _ as result) ] -> optimize_expr (Value.to_instr result :: tl)
+      | [ (I32 _ as result) ] ->
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | I32_const c :: I_extend8_s S32 :: tl ->
@@ -108,11 +119,13 @@ let rec optimize_expr expr =
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
     try
-      let result = Interpret.I.exec_itruncf [ Value.of_instr c ] nn nn' sx in
+      let result =
+        Interpret.I.exec_itruncf [ Concrete_value.of_instr c ] nn nn' sx
+      in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Value.to_instr result :: tl)
+          optimize_expr (Concrete_value.to_instr result :: tl)
         | _ -> assert false
       end
     with Trap _ -> c :: optimize_expr (i_truncf :: tl)
@@ -121,37 +134,45 @@ let rec optimize_expr expr =
     :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
     :: tl -> begin
     try
-      let result = Interpret.I.exec_itruncsatf [ Value.of_instr c ] nn nn' sx in
+      let result =
+        Interpret.I.exec_itruncsatf [ Concrete_value.of_instr c ] nn nn' sx
+      in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Value.to_instr result :: tl)
+          optimize_expr (Concrete_value.to_instr result :: tl)
         | _ -> assert false
       end
     with Trap _ -> c :: optimize_expr (i_truncsatf :: tl)
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
-    let result = Interpret.I.exec_fconverti [ Value.of_instr x ] nn nn' sx in
+    let result =
+      Interpret.I.exec_fconverti [ Concrete_value.of_instr x ] nn nn' sx
+    in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl ->
-    let result = Interpret.I.exec_ireinterpretf [ Value.of_instr x ] nn nn' in
+    let result =
+      Interpret.I.exec_ireinterpretf [ Concrete_value.of_instr x ] nn nn'
+    in
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl ->
-    let result = Interpret.I.exec_freinterpreti [ Value.of_instr x ] nn nn' in
+    let result =
+      Interpret.I.exec_freinterpreti [ Concrete_value.of_instr x ] nn nn'
+    in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Value.to_instr result :: tl)
+        optimize_expr (Concrete_value.to_instr result :: tl)
       | _ -> assert false
     end
   | (I32_const _ | I64_const _ | F32_const _ | F64_const _) :: Drop :: tl ->

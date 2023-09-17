@@ -1,43 +1,37 @@
 (library
  (public_name owi)
  (modules
-  env_id
-  func_id
-  intf
-  const_interp
-  sym_value
-  symbolic
   assigned
   check
+  choice_monad
+  choice_monad_intf
   compile
   concrete
+  concrete_global
+  concrete_memory
+  concrete_table
+  concrete_value
+  const_interp
   convert
+  env_id
   float32
   float64
+  func_id
+  func_intf
   grouped
   imported
   indexed
   int32
   int64
-  func_intf
-  thread
-  choice_monad_intf
-  choice_monad
   interpret
   interpret_functor
-  value_intf
   interpret_functor_intf
-  runtime_intf
-  stack_intf
-  stack_functor
+  intf
   lexer
-  memory
-  memory_limits
-  table
-  global
-  link_env
   link
+  link_env
   log
+  memory_limits
   menhir_parser
   named
   optimize
@@ -45,21 +39,27 @@
   result
   rewrite
   runtime
+  runtime_intf
   script
   simplified
   simplified_types
-  sym_memory
-  sym_table
-  sym_global
+  symbolic
+  symbolic_global
+  symbolic_memory
+  symbolic_table
+  symbolic_value
   spectest
   stack
+  stack_functor
+  stack_intf
   string_map
   syntax
   text
+  thread
   trap
   typecheck
   types
-  value
+  value_intf
   wutf8)
  (private_modules convert lexer menhir_parser spectest stack wutf8)
  (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)

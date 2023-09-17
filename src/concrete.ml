@@ -9,8 +9,8 @@ module V :
      and type int64 = Int64.t
      and type float32 = Float32.t
      and type float64 = Float64.t
-     and type ref_value = Value.ref_value
-     and type t = Value.t = struct
+     and type ref_value = Concrete_value.ref_value
+     and type t = Concrete_value.t = struct
   type vbool = bool
 
   type int32 = Int32.t
@@ -29,7 +29,7 @@ module V :
 
   let const_f64 x = x
 
-  include Value
+  include Concrete_value
 
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
@@ -77,11 +77,17 @@ module V :
 end
 
 module P = struct
+  module Extern_func = Concrete_value.Func
+  module Value = V
+  module Global = Concrete_global
+  module Table = Concrete_table
+  module Memory = Concrete_memory
+
   type thread = unit
 
   type memory = Memory.t
 
-  type func = Value.Func.t
+  type func = Concrete_value.Func.t
 
   type table = Table.t
 
@@ -89,7 +95,7 @@ module P = struct
 
   type data = Link.Env.data
 
-  type global = Global.t
+  type global = Concrete_global.t
 
   type vbool = Bool.t
 
@@ -101,7 +107,7 @@ module P = struct
 
   type float64 = Float64.t
 
-  type extern_func = Value.Func.extern_func
+  type extern_func = Concrete_value.Func.extern_func
 
   type env = extern_func Link.Env.t
 
@@ -125,12 +131,6 @@ module P = struct
 
   let select cond ~if_true ~if_false = if cond then if_true else if_false
   [@@inline]
-
-  module Extern_func = Value.Func
-  module Value = V
-  module Global = Global
-  module Table = Table
-  module Memory = Memory
 
   module Elem = struct
     type t = elem

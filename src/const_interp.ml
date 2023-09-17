@@ -31,10 +31,10 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
   | F32_const f -> ok @@ Stack.push_f32 stack f
   | F64_const f -> ok @@ Stack.push_f64 stack f
   | I_binop (nn, op) -> ok @@ exec_ibinop stack nn op
-  | Ref_null t -> ok @@ Stack.push stack (Value.ref_null t)
+  | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
   | Ref_func f ->
     let* f = Env.Build.get_func env f in
-    let value = Value.Ref (Funcref (Some f)) in
+    let value = Concrete_value.Ref (Funcref (Some f)) in
     ok @@ Stack.push stack value
   | Global_get id ->
     let* g = Env.Build.get_const_global env id in
@@ -53,7 +53,7 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
     (* TODO *)
     ok stack
 
-let exec_expr env (e : Const.expr) : Value.t Result.t =
+let exec_expr env (e : Const.expr) : Concrete_value.t Result.t =
   let* stack = list_fold_left (exec_instr env) Stack.empty e in
   match stack with
   | [] -> Error "type mismatch (const expr returning zero values)"

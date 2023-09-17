@@ -19,16 +19,16 @@ type func := Func_intf.t
 
 (** runtime exported items *)
 type exports =
-  { globals : Global.t StringMap.t
-  ; memories : Memory.t StringMap.t
-  ; tables : Table.t StringMap.t
+  { globals : Concrete_global.t StringMap.t
+  ; memories : Concrete_memory.t StringMap.t
+  ; tables : Concrete_table.t StringMap.t
   ; functions : func StringMap.t
   ; defined_names : StringSet.t
   }
 
 type 'ext envs = 'ext Env.t Env_id.collection
 
-type fenvs = Value.Func.extern_func Env.t Env_id.collection
+type fenvs = Concrete_value.Func.extern_func Env.t Env_id.collection
 
 (** link state *)
 type 'f state =
@@ -67,9 +67,9 @@ val extern_module' :
   -> 'f state
 
 val extern_module :
-     Value.Func.extern_func state
+     Concrete_value.Func.extern_func state
   -> name:string
-  -> Value.Func.extern_func extern_module
-  -> Value.Func.extern_func state
+  -> Concrete_value.Func.extern_func extern_module
+  -> Concrete_value.Func.extern_func state
 
-type extern_func = Value.Func.extern_func Func_id.collection
+type extern_func = Concrete_value.Func.extern_func Func_id.collection

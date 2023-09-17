@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Value.Func.extern_func Link.extern_module =
+let extern_module : Concrete_value.Func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
   let fresh i = ref i in
@@ -11,16 +11,17 @@ let extern_module : Value.Func.extern_func Link.extern_module =
   (* we need to describe their types *)
   let functions =
     [ ( "print_i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ; ( "fresh"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
     ; ( "set_i32r"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
     ; ( "get_i32r"
-      , Value.Func.Extern_func (Func (Arg (Externref rint, Res), R1 I32), get)
-      )
+      , Concrete_value.Func.Extern_func
+          (Func (Arg (Externref rint, Res), R1 I32), get) )
     ]
   in
   { functions }

@@ -3,7 +3,7 @@ open Owi
 let () = Random.self_init ()
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Value.Func.extern_func Link.extern_module =
+let extern_module : Concrete_value.Func.extern_func Link.extern_module =
   (* some custom functions *)
   let str_buffer = Buffer.create 16 in
   let height (_ : int32) : int32 = 45l in
@@ -25,18 +25,28 @@ let extern_module : Value.Func.extern_func Link.extern_module =
   let init_window (_ : int32) = () in
   (* we need to describe their types *)
   let functions =
-    [ ("height", Value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), height))
-    ; ("width", Value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), width))
-    ; ("sleep", Value.Func.Extern_func (Func (Arg (I32, Res), R0), sleep))
-    ; ("newline", Value.Func.Extern_func (Func (Arg (I32, Res), R0), newline))
+    [ ( "height"
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), height)
+      )
+    ; ( "width"
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), width)
+      )
+    ; ( "sleep"
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), sleep) )
+    ; ( "newline"
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), newline) )
     ; ( "cell_print"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), cell_print) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), cell_print)
+      )
     ; ( "clear_screen"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), clear_screen) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), clear_screen)
+      )
     ; ( "rand_val"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), rand_val) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R1 I32), rand_val)
+      )
     ; ( "init_window"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), init_window) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), init_window)
+      )
     ]
   in
   { functions }

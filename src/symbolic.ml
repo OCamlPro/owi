@@ -2,23 +2,23 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module Def_value = Value
+module Def_value = Concrete_value
 module Solver = Thread.Solver
 
 module P = struct
   module Value = struct
-    include Sym_value.S
+    include Symbolic_value.S
   end
 
-  type memory = Sym_memory.M.t
+  type memory = Symbolic_memory.M.t
 
-  type table = Sym_table.table
+  type table = Symbolic_table.table
 
   type elem = Link.Env.elem
 
   type data = Link.Env.data
 
-  type global = Sym_global.global
+  type global = Symbolic_global.global
 
   type vbool = Value.vbool
 
@@ -105,7 +105,7 @@ module P = struct
   end
 
   module Memory = struct
-    include Sym_memory.M
+    include Symbolic_memory.M
   end
 
   module Data = struct
@@ -125,7 +125,7 @@ module P = struct
       | Ok orig_mem ->
         let f (t : thread) =
           let memories = Thread.memories t in
-          Sym_memory.get_memory (Link_env.id env) orig_mem memories id
+          Symbolic_memory.get_memory (Link_env.id env) orig_mem memories id
         in
         Ok (Choice.with_thread f)
 
@@ -139,7 +139,7 @@ module P = struct
       | Ok orig_table ->
         let f (t : thread) =
           let tables = Thread.tables t in
-          Sym_table.get_table (Link_env.id env) orig_table tables i
+          Symbolic_table.get_table (Link_env.id env) orig_table tables i
         in
         Ok (Choice.with_thread f)
 
@@ -156,7 +156,7 @@ module P = struct
       | Ok orig_global ->
         let f (t : thread) =
           let globals = Thread.globals t in
-          Sym_global.get_global (Link_env.id env) orig_global globals i
+          Symbolic_global.get_global (Link_env.id env) orig_global globals i
         in
         Ok (Choice.with_thread f)
 

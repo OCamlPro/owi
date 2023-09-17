@@ -17,8 +17,8 @@ val until_link :
 (** compile and interpret a module with a given link state and produce a new
     link state *)
 val until_interpret :
-     Value.Func.extern_func Link.state
+     Concrete_value.Func.extern_func Link.state
   -> optimize:bool
   -> name:string option
   -> Text.modul
-  -> Value.Func.extern_func Link.state Result.t
+  -> Concrete_value.Func.extern_func Link.state Result.t

@@ -2,9 +2,9 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Value
+open Concrete_value
 
-type t = Value.t list
+type t = Concrete_value.t list
 
 exception Empty
 
@@ -33,7 +33,7 @@ let push_array s a = push s (Ref (Arrayref (Some a)))
 let pp fmt (s : t) =
   Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
-    Value.pp fmt s
+    Concrete_value.pp fmt s
 
 let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 

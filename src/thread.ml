@@ -10,10 +10,10 @@ type solver = S : 'a solver_module * 'a -> solver
 
 type t =
   { solver : solver
-  ; pc : Sym_value.S.vbool list
-  ; memories : Sym_memory.memories
-  ; tables : Sym_table.tables
-  ; globals : Sym_global.globals
+  ; pc : Symbolic_value.S.vbool list
+  ; memories : Symbolic_memory.memories
+  ; tables : Symbolic_table.tables
+  ; globals : Symbolic_global.globals
   }
 
 let solver t = t.solver
@@ -32,7 +32,7 @@ let create () =
   let solver = S (solver_mod, Solver.create ()) in
   { solver
   ; pc = []
-  ; memories = Sym_memory.init ()
-  ; tables = Sym_table.init ()
-  ; globals = Sym_global.init ()
+  ; memories = Symbolic_memory.init ()
+  ; tables = Symbolic_table.init ()
+  ; globals = Symbolic_global.init ()
   }

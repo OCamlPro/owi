@@ -4,16 +4,16 @@
 
 open Choice_monad_intf
 
-type vbool = Sym_value.S.vbool
+type vbool = Symbolic_value.S.vbool
 
-type vint32 = Sym_value.S.int32
+type vint32 = Symbolic_value.S.int32
 
 exception Assertion of assertion * Thread.t
 
 let check (sym_bool : vbool) (state : Thread.t) : bool =
   let (S (solver_module, solver)) = Thread.solver state in
   let pc = Thread.pc state in
-  let no = Sym_value.S.Bool.not sym_bool in
+  let no = Symbolic_value.S.Bool.not sym_bool in
   let no = Encoding.Expression.simplify no in
   match no with
   | Val (Bool no) -> not no
@@ -38,7 +38,7 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   | Val (Bool b) -> [ (b, state) ]
   | Val (Num (I32 _)) -> assert false
   | _ -> (
-    let no = Sym_value.S.Bool.not sym_bool in
+    let no = Symbolic_value.S.Bool.not sym_bool in
     let module Solver = (val solver_module) in
     let sat_true = Solver.check s (sym_bool :: pc) in
     let sat_false = Solver.check s (no :: pc) in
@@ -51,17 +51,17 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
       let state1 : Thread.t =
         { solver
         ; pc = sym_bool :: pc
-        ; memories = Sym_memory.clone memories
-        ; tables = Sym_table.clone tables
-        ; globals = Sym_global.clone globals
+        ; memories = Symbolic_memory.clone memories
+        ; tables = Symbolic_table.clone tables
+        ; globals = Symbolic_global.clone globals
         }
       in
       let state2 : Thread.t =
         { solver
         ; pc = no :: pc
-        ; memories = Sym_memory.clone memories
-        ; tables = Sym_table.clone tables
-        ; globals = Sym_global.clone globals
+        ; memories = Symbolic_memory.clone memories
+        ; tables = Symbolic_table.clone tables
+        ; globals = Symbolic_global.clone globals
         }
       in
       [ (true, state1); (false, state2) ] )
@@ -91,9 +91,9 @@ let clone_if_needed ~orig_pc (cases : (int32 * Thread.t) list) :
         let state : Thread.t =
           { solver
           ; pc
-          ; memories = Sym_memory.clone memories
-          ; tables = Sym_table.clone tables
-          ; globals = Sym_global.clone globals
+          ; memories = Symbolic_memory.clone memories
+          ; tables = Symbolic_table.clone tables
+          ; globals = Symbolic_global.clone globals
           }
         in
         (i, state) )
@@ -138,7 +138,7 @@ let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
     clone_if_needed ~orig_pc cases
 
 module List = struct
-  type vbool = Sym_value.S.vbool
+  type vbool = Symbolic_value.S.vbool
 
   type thread = Thread.t
 
@@ -156,7 +156,7 @@ module List = struct
 
   let select (sym_bool : vbool) : bool t = eval_choice sym_bool
 
-  let select_i32 (i : Sym_value.S.int32) : int32 t = eval_choice_i32 i
+  let select_i32 (i : Symbolic_value.S.int32) : int32 t = eval_choice_i32 i
 
   let trap : Trap.t -> 'a t = function
     | Unreachable -> fun _ -> []
@@ -166,7 +166,7 @@ module List = struct
 
   let with_thread (f : thread -> 'b) : 'b t = fun t -> [ (f t, t) ]
 
-  let add_pc (c : Sym_value.S.vbool) : unit t =
+  let add_pc (c : Symbolic_value.S.vbool) : unit t =
    fun t -> [ ((), { t with pc = c :: t.pc }) ]
 
   let assertion c t =
@@ -179,7 +179,7 @@ end
 module Seq = struct
   module List = Stdlib.List
 
-  type vbool = Sym_value.S.vbool
+  type vbool = Symbolic_value.S.vbool
 
   type thread = Thread.t
 
@@ -195,7 +195,7 @@ module Seq = struct
   let select (sym_bool : vbool) : bool t =
    fun state -> List.to_seq (eval_choice sym_bool state)
 
-  let select_i32 (i : Sym_value.S.int32) : int32 t =
+  let select_i32 (i : Symbolic_value.S.int32) : int32 t =
    fun state -> List.to_seq (eval_choice_i32 i state)
 
   let trap : Trap.t -> 'a t = function
@@ -210,7 +210,7 @@ module Seq = struct
 
   let with_thread (f : thread -> 'b) : 'b t = fun t -> Seq.return (f t, t)
 
-  let add_pc (c : Sym_value.S.vbool) : unit t =
+  let add_pc (c : Symbolic_value.S.vbool) : unit t =
    fun t -> Seq.return ((), { t with pc = c :: t.pc })
 
   let run (v : 'a t) (thread : thread) = v thread
@@ -220,7 +220,7 @@ module Explicit = struct
   module List = Stdlib.List
   module Seq = Stdlib.Seq
 
-  type vbool = Sym_value.S.vbool
+  type vbool = Symbolic_value.S.vbool
 
   type thread = Thread.t
 
@@ -261,7 +261,7 @@ module Explicit = struct
     match cond with Val (Bool b) -> Retv b | _ -> Choice cond
   [@@inline]
 
-  let select_i32 (i : Sym_value.S.int32) : int32 t =
+  let select_i32 (i : Symbolic_value.S.int32) : int32 t =
     match i with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
 
   let trap : Trap.t -> 'a t = fun t -> Trap t
@@ -269,7 +269,7 @@ module Explicit = struct
   let with_thread (f : thread -> 'b) : 'b t = Ret (St (fun t -> (f t, t)))
   [@@inline]
 
-  let add_pc (c : Sym_value.S.vbool) : unit t =
+  let add_pc (c : Symbolic_value.S.vbool) : unit t =
     Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
   [@@inline]
 
@@ -593,12 +593,12 @@ end
 module type T =
   Choice_monad_intf.Complete
     with type thread := Thread.t
-     and module V := Sym_value.S
+     and module V := Symbolic_value.S
 
 module type T_trap =
   Choice_monad_intf.Complete_with_trap
     with type thread := Thread.t
-     and module V := Sym_value.S
+     and module V := Symbolic_value.S
 
 let list = (module List : T)
 

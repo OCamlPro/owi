@@ -1,6 +1,6 @@
 (** runtime stack module *)
 
-type t = Value.t list
+type t = Concrete_value.t list
 
 val empty : t
 
@@ -12,7 +12,7 @@ val drop : t -> t
 
 val drop_n : 'a list -> int -> 'a list
 
-val pop : t -> Value.t * t
+val pop : t -> Concrete_value.t * t
 
 val pop_n : t -> int -> t * t
 
@@ -42,17 +42,17 @@ val pop_f64 : t -> Float64.t * t
 
 val pop2_f64 : t -> (Float64.t * Float64.t) * t
 
-val pop_ref : t -> Value.t * t
+val pop_ref : t -> Concrete_value.t * t
 
 val pop_is_null : t -> bool * t
 
-val pop_as_ref : t -> Value.ref_value * t
+val pop_as_ref : t -> Concrete_value.ref_value * t
 
 val pop_as_externref : 'a Type.Id.t -> t -> 'a * t
 
 (** push operations *)
 
-val push : t -> Value.t -> t
+val push : t -> Concrete_value.t -> t
 
 val push_bool : t -> bool -> t
 

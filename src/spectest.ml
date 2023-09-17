@@ -4,7 +4,7 @@
 
 open Text
 
-type extern_module = Value.Func.extern_func Link.extern_module
+type extern_module = Concrete_value.Func.extern_func Link.extern_module
 
 let extern_m : extern_module =
   let fmt = Format.std_formatter in
@@ -27,27 +27,33 @@ let extern_m : extern_module =
   let func_in_i32_out_i32 (_i : int32) = 1l in
 
   let functions =
-    [ ("print", Value.Func.Extern_func (Func (Res, R0), print))
+    [ ("print", Concrete_value.Func.Extern_func (Func (Res, R0), print))
     ; ( "print_i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ; ( "print_i64"
-      , Value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64)
+      )
     ; ( "print_f32"
-      , Value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32)
+      )
     ; ( "print_f64"
-      , Value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64) )
+      , Concrete_value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64)
+      )
     ; ( "print_i32_f32"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
     ; ( "print_f64_f64"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
-    ; ("func", Value.Func.Extern_func (Func (Res, R0), func))
+    ; ("func", Concrete_value.Func.Extern_func (Func (Res, R0), func))
     ; ( "func-i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32) )
-    ; ("func->i32", Value.Func.Extern_func (Func (Res, R1 I32), func_out_i32))
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32)
+      )
+    ; ( "func->i32"
+      , Concrete_value.Func.Extern_func (Func (Res, R1 I32), func_out_i32) )
     ; ( "func-i32->i32"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
     ]
   in

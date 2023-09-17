@@ -3,12 +3,12 @@ exception Assertion of Choice_monad_intf.assertion * Thread.t
 module type T =
   Choice_monad_intf.Complete
     with type thread := Thread.t
-     and module V := Sym_value.S
+     and module V := Symbolic_value.S
 
 module type T_trap =
   Choice_monad_intf.Complete_with_trap
     with type thread := Thread.t
-     and module V := Sym_value.S
+     and module V := Symbolic_value.S
 
 module List : T
 

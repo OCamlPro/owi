@@ -9,15 +9,15 @@ module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 module Env = Link_env
 
-type global = Global.t
+type global = Concrete_global.t
 
-type table = Table.t
+type table = Concrete_table.t
 
-type func = Value.Func.t
+type func = Concrete_value.Func.t
 
 type exports =
   { globals : global StringMap.t
-  ; memories : Memory.t StringMap.t
+  ; memories : Concrete_memory.t StringMap.t
   ; tables : table StringMap.t
   ; functions : func StringMap.t
   ; defined_names : StringSet.t
@@ -31,7 +31,7 @@ type 'f module_to_run =
 
 type 'f envs = 'f Env.t Env_id.collection
 
-type fenvs = Value.Func.extern_func Env.t Env_id.collection
+type fenvs = Concrete_value.Func.extern_func Env.t Env_id.collection
 
 type 'f state =
   { by_name : exports StringMap.t
@@ -116,18 +116,19 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : 'f state) (import : limits Imported.t) : Memory.t Result.t
-    =
+let load_memory (ls : 'f state) (import : limits Imported.t) :
+  Concrete_memory.t Result.t =
   let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
-  let imported_limit = Memory.get_limits mem in
+  let imported_limit = Concrete_memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
   else
     error_s "incompatible import type for memory %s %s expected %a got %a"
       import.modul import.name Pp.limits import.desc Pp.limits imported_limit
 
-let eval_memory ls (memory : (mem, limits) Runtime.t) : Memory.t Result.t =
+let eval_memory ls (memory : (mem, limits) Runtime.t) :
+  Concrete_memory.t Result.t =
   match memory with
-  | Local (label, mem_type) -> ok @@ Memory.init ?label mem_type
+  | Local (label, mem_type) -> ok @@ Concrete_memory.init ?label mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
@@ -153,7 +154,7 @@ let load_table (ls : 'f state) (import : table_type Imported.t) : table Result.t
 
 let eval_table ls (table : (_, table_type) Runtime.t) : table Result.t =
   match table with
-  | Local (label, table_type) -> ok @@ Table.init ?label table_type
+  | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
@@ -186,7 +187,7 @@ let load_func (ls : 'f state) (import : func_type Imported.t) : func Result.t =
 
 let eval_func ls (finished_env : Env.t') func : func Result.t =
   match func with
-  | Runtime.Local func -> ok @@ Value.Func.wasm func finished_env
+  | Runtime.Local func -> ok @@ Concrete_value.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Env.t') env functions =
@@ -219,7 +220,9 @@ let active_data_expr ~offset ~length ~mem ~data =
       ; Data_drop data
       ]
 
-let get_i32 = function Value.I32 i -> Ok i | _ -> Error "type mismatch"
+let get_i32 = function
+  | Concrete_value.I32 i -> Ok i
+  | _ -> Error "type mismatch"
 
 let define_data env data =
   Named.fold
@@ -251,7 +254,7 @@ let define_elem env elem =
         list_map
           (fun v ->
             match v with
-            | Value.Ref v -> Ok v
+            | Concrete_value.Ref v -> Ok v
             | _ -> Error "constant expression required" )
           init
       in
@@ -363,7 +366,7 @@ let extern_module' (ls : 'f state) ~name
   { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
 let extern_module ls ~name module_ =
-  extern_module' ls ~name ~func_typ:Value.Func.extern_type module_
+  extern_module' ls ~name ~func_typ:Concrete_value.Func.extern_type module_
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =
@@ -381,4 +384,4 @@ let register_module (ls : 'f state) ~name ~(id : string option) :
   in
   Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
-type extern_func = Value.Func.extern_func Func_id.collection
+type extern_func = Concrete_value.Func.extern_func Func_id.collection

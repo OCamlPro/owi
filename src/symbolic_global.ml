@@ -9,8 +9,8 @@ module ITbl = Hashtbl.Make (struct
 end)
 
 type global =
-  { mutable value : Sym_value.S.t
-  ; orig : Global.t
+  { mutable value : Symbolic_value.S.t
+  ; orig : Concrete_global.t
   }
 
 type globals = global ITbl.t Env_id.Tbl.t
@@ -28,17 +28,17 @@ let clone (globals : globals) : globals =
          (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, global_copy a)) s) )
        s
 
-let convert_values (v : Value.t) : Sym_value.S.t =
+let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   (* TODO share various versions *)
   match v with
-  | I32 v -> I32 (Sym_value.S.const_i32 v)
-  | I64 v -> I64 (Sym_value.S.const_i64 v)
-  | F32 v -> F32 (Sym_value.S.const_f32 v)
-  | F64 v -> F64 (Sym_value.S.const_f64 v)
+  | I32 v -> I32 (Symbolic_value.S.const_i32 v)
+  | I64 v -> I64 (Symbolic_value.S.const_i64 v)
+  | F32 v -> F32 (Symbolic_value.S.const_f32 v)
+  | F64 v -> F64 (Symbolic_value.S.const_f64 v)
   | Ref (Funcref f) -> Ref (Funcref f)
   | Ref _ -> assert false
 
-let convert (orig_global : Global.t) : global =
+let convert (orig_global : Concrete_global.t) : global =
   { value = convert_values orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
@@ -49,7 +49,8 @@ let get_env env_id tables =
     Env_id.Tbl.add tables env_id t;
     t
 
-let get_global env_id (orig_global : Global.t) (tables : globals) g_id =
+let get_global env_id (orig_global : Concrete_global.t) (tables : globals) g_id
+    =
   let env = get_env env_id tables in
   match ITbl.find_opt env g_id with
   | Some t -> t

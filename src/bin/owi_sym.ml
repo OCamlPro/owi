@@ -1,6 +1,6 @@
 open Owi
 open Syntax
-module Value = Sym_value.S
+module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
 
@@ -20,11 +20,11 @@ let print_extern_module : Symbolic.P.extern_func Link.extern_module =
 
 let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
   let positive_i32 (i : Value.int32) : unit Choice.t =
-    let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
+    let c = Value.I32.ge i Value.I32.zero in
     Choice.add_pc c
   in
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    let c = Sym_value.S.I32.to_bool i in
+    let c = Value.I32.to_bool i in
     Choice.add_pc c
   in
   (* we need to describe their types *)
@@ -43,7 +43,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let counter = ref 0 in
-  let symbolic_i32 (i : Value.int32) : Sym_value.S.int32 Choice.t =
+  let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     let name =
       match i with
       | Encoding.Expression.Val (Num (I32 i)) -> begin
@@ -69,11 +69,11 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
-    let c = Sym_value.S.I32.to_bool i in
+    let c = Value.I32.to_bool i in
     Choice.add_pc c
   in
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    let c = Sym_value.S.I32.to_bool i in
+    let c = Value.I32.to_bool i in
     Choice.assertion c
   in
   (* we need to describe their types *)

@@ -11,18 +11,18 @@ type data = { mutable value : string }
 
 let drop_data data = data.value <- ""
 
-type elem = { mutable value : Value.ref_value array }
+type elem = { mutable value : Concrete_value.ref_value array }
 
 let drop_elem elem = elem.value <- [||]
 
-type extern_funcs = Value.Func.extern_func Func_id.collection
+type extern_funcs = Concrete_value.Func.extern_func Func_id.collection
 
 type t' = Env_id.t
 
 type 'ext t =
-  { globals : Global.t IMap.t
-  ; memories : Memory.t IMap.t
-  ; tables : Table.t IMap.t
+  { globals : Concrete_global.t IMap.t
+  ; memories : Concrete_memory.t IMap.t
+  ; tables : Concrete_table.t IMap.t
   ; functions : Func_intf.t IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
@@ -31,10 +31,11 @@ type 'ext t =
   }
 
 let pp fmt t =
-  let global fmt (id, (global : Global.t)) =
-    Format.fprintf fmt "%a -> %a" Format.pp_print_int id Value.pp global.value
+  let global fmt (id, (global : Concrete_global.t)) =
+    Format.fprintf fmt "%a -> %a" Format.pp_print_int id Concrete_value.pp
+      global.value
   in
-  let func fmt (id, (_func : Value.Func.t)) =
+  let func fmt (id, (_func : Concrete_value.Func.t)) =
     Format.fprintf fmt "%a -> func" Format.pp_print_int id
   in
   Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
@@ -100,9 +101,9 @@ let get_func_typ env f =
 
 module Build = struct
   type t =
-    { globals : Global.t IMap.t
-    ; memories : Memory.t IMap.t
-    ; tables : Table.t IMap.t
+    { globals : Concrete_global.t IMap.t
+    ; memories : Concrete_memory.t IMap.t
+    ; tables : Concrete_table.t IMap.t
     ; functions : Func_intf.t IMap.t
     ; data : data IMap.t
     ; elem : elem IMap.t
@@ -163,29 +164,29 @@ module type T = sig
 
   type t' = t Lazy.t
 
-  type elem = { mutable value : Value.ref_value array }
+  type elem = { mutable value : Concrete_value.ref_value array }
 
   type data = { mutable value : string }
 
   type func := Func_intf.t
 
-  val get_memory : t -> int -> Memory.t Result.t
+  val get_memory : t -> int -> Concrete_memory.t Result.t
 
   val get_func : t -> int -> func Result.t
 
-  val get_table : t -> int -> Table.t Result.t
+  val get_table : t -> int -> Concrete_table.t Result.t
 
   val get_elem : t -> int -> elem Result.t
 
   val get_data : t -> int -> data Result.t
 
-  val get_global : t -> int -> Global.t Result.t
+  val get_global : t -> int -> Concrete_global.t Result.t
 
   val drop_elem : elem -> unit
 
   val drop_data : data -> unit
 
-  val get_extern_func : t -> Func_id.t -> Value.Func.extern_func
+  val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
 
   val get_func_typ : t -> func -> Simplified.func_type
 

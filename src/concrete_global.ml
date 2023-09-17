@@ -3,7 +3,7 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 type t =
-  { mutable value : Value.t
+  { mutable value : Concrete_value.t
   ; label : string option
   ; mut : Types.mut
   ; typ : Simplified.val_type

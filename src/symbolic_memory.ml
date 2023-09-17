@@ -3,7 +3,7 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 module Intf = Interpret_functor_intf
-module Value = Sym_value.S
+module Value = Symbolic_value.S
 
 module M = struct
   module Expr = Encoding.Expression
@@ -164,8 +164,8 @@ let clone (memories : memories) : memories =
          (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, M.clone a)) s) )
        s
 
-let convert (orig_mem : Memory.t) : M.t =
-  let s = Memory.size_in_pages orig_mem in
+let convert (orig_mem : Concrete_memory.t) : M.t =
+  let s = Concrete_memory.size_in_pages orig_mem in
   M.create s
 
 let get_env env_id memories =
@@ -176,7 +176,8 @@ let get_env env_id memories =
     Env_id.Tbl.add memories env_id t;
     t
 
-let get_memory env_id (orig_memory : Memory.t) (memories : memories) g_id =
+let get_memory env_id (orig_memory : Concrete_memory.t) (memories : memories)
+  g_id =
   let env = get_env env_id memories in
   match ITbl.find_opt env g_id with
   | Some t -> t

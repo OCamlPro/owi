@@ -8,7 +8,7 @@ module ITbl = Hashtbl.Make (struct
   let hash x = x
 end)
 
-type table = Sym_value.S.ref_value array
+type table = Symbolic_value.S.ref_value array
 
 type tables = table ITbl.t Env_id.Tbl.t
 
@@ -23,10 +23,11 @@ let clone (tables : tables) : tables =
          (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, Array.copy a)) s) )
        s
 
-let convert_ref_values (v : Value.ref_value) : Sym_value.S.ref_value =
+let convert_ref_values (v : Concrete_value.ref_value) :
+  Symbolic_value.S.ref_value =
   match v with Funcref f -> Funcref f | _ -> assert false
 
-let convert (orig_table : Table.t) : table =
+let convert (orig_table : Concrete_table.t) : table =
   Array.map convert_ref_values orig_table.data
 
 let get_env env_id tables =
@@ -37,7 +38,7 @@ let get_env env_id tables =
     Env_id.Tbl.add tables env_id t;
     t
 
-let get_table env_id (orig_table : Table.t) (tables : tables) t_id =
+let get_table env_id (orig_table : Concrete_table.t) (tables : tables) t_id =
   let env = get_env env_id tables in
   match ITbl.find_opt env t_id with
   | Some t -> t
