@@ -1,10 +1,10 @@
 open Owi
 open Syntax
 module Value = Sym_value.S
-module Choice = Sym_state.P.Choice
+module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
 
-let print_extern_module : Sym_state.P.extern_func Link.extern_module =
+let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
     Choice.return ()
@@ -12,13 +12,13 @@ let print_extern_module : Sym_state.P.extern_func Link.extern_module =
   (* we need to describe their types *)
   let functions =
     [ ( "i32"
-      , Sym_state.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), print_i32) )
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ]
   in
   { functions }
 
-let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
+let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
   let positive_i32 (i : Value.int32) : unit Choice.t =
     let c = Sym_value.S.I32.ge i Sym_value.S.I32.zero in
     Choice.add_pc c
@@ -30,10 +30,10 @@ let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
   (* we need to describe their types *)
   let functions =
     [ ( "positive_i32"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), positive_i32) )
     ; ( "i32"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assert_i32) )
     ]
   in
@@ -41,7 +41,7 @@ let assert_extern_module : Sym_state.P.extern_func Link.extern_module =
 
 let names = [| "plop"; "foo"; "bar" |]
 
-let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
+let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let counter = ref 0 in
   let symbolic_i32 (i : Value.int32) : Sym_value.S.int32 Choice.t =
     let name =
@@ -79,32 +79,32 @@ let symbolic_extern_module : Sym_state.P.extern_func Link.extern_module =
   (* we need to describe their types *)
   let functions =
     [ ( "i32"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i32_symbol"
-      , Sym_state.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
       )
     ; ( "assume"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
     ; ( "assert"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assert_i32) )
     ]
   in
   { functions }
 
-let summaries_extern_module : Sym_state.P.extern_func Link.extern_module =
+let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
   let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
     Choice.return base
   in
   let dealloc (_base : Value.int32) : unit Choice.t = Choice.return () in
   let functions =
     [ ( "alloc"
-      , Sym_state.P.Extern_func.Extern_func
+      , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
     ; ( "dealloc"
-      , Sym_state.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
       )
     ]
   in
@@ -119,19 +119,19 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"print"
-      ~func_typ:Sym_state.P.Extern_func.extern_type print_extern_module
+      ~func_typ:Symbolic.P.Extern_func.extern_type print_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"assert"
-      ~func_typ:Sym_state.P.Extern_func.extern_type assert_extern_module
+      ~func_typ:Symbolic.P.Extern_func.extern_type assert_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Sym_state.P.Extern_func.extern_type symbolic_extern_module
+      ~func_typ:Symbolic.P.Extern_func.extern_type symbolic_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Sym_state.P.Extern_func.extern_type summaries_extern_module
+      ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
   in
   let*/ to_run, link_state =
     list_fold_left
@@ -155,7 +155,7 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
           let* m, state =
             Compile.until_link ~unsafe state ~optimize ~name:None m
           in
-          let m = Sym_state.convert_module_to_run m in
+          let m = Symbolic.convert_module_to_run m in
           Ok (m :: to_run, state)
         | Text.Register (name, id) ->
           let* state = Link.register_module state ~name ~id in

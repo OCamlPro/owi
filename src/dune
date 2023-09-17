@@ -6,7 +6,7 @@
   intf
   const_interp
   sym_value
-  sym_state
+  symbolic
   assigned
   check
   compile
