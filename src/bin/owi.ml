@@ -15,7 +15,7 @@ let simplify_then_link_then_run ~optimize file =
         | _ -> Ok acc )
       ([], Link.empty_state) file
   in
-  list_iter (Interpret.I.modul link_state.envs) (List.rev to_run)
+  list_iter (Interpret.Concrete.modul link_state.envs) (List.rev to_run)
 
 let run_file exec filename =
   if not @@ Sys.file_exists filename then

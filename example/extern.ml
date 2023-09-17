@@ -46,6 +46,6 @@ let module_to_run, link_state =
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.I.modul link_state.envs module_to_run with
+  match Interpret.Concrete.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()

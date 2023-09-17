@@ -81,7 +81,7 @@ val link_state : '_weak1 Link.state =
 ...
 # let () =
     Log.debug_on := true;
-    match Interpret.I.modul link_state.envs module_to_run with
+    match Interpret.Concrete.modul link_state.envs module_to_run with
     | Ok () -> ()
     | Error e -> failwith e;;
 interpreting ...

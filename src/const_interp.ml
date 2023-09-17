@@ -8,7 +8,7 @@ open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 module Env = Link_env
-module Stack = Stack_functor.Make (V) [@@inlined hint]
+module Stack = Stack.Make (V) [@@inlined hint]
 
 type env = Env.Build.t
 

@@ -45,8 +45,8 @@ module Owi_unoptimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, link_state) ->
-          timeout_call_run (fun () -> Interpret.I.modul link_state.envs regular)
-        ) )
+          timeout_call_run (fun () ->
+            Interpret.Concrete.modul link_state.envs regular ) ) )
 
   let name = "owi"
 end
@@ -67,8 +67,8 @@ module Owi_optimized : INTERPRET = struct
         match Link.modul Link.empty_state ~name:None simplified with
         | Error e -> failwith e
         | Ok (regular, link_state) ->
-          timeout_call_run (fun () -> Interpret.I.modul link_state.envs regular)
-        ) )
+          timeout_call_run (fun () ->
+            Interpret.Concrete.modul link_state.envs regular ) ) )
 
   let name = "owi+optimize"
 end

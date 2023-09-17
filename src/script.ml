@@ -4,7 +4,7 @@
 
 open Types
 open Syntax
-module Stack = Stack_functor.Make (V) [@@inlined hint]
+module Stack = Stack.Make (V) [@@inlined hint]
 
 module Host_externref = struct
   type t = int
@@ -128,7 +128,7 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
-    Interpret.I.exec_vfunc_from_outside ~locals:stack ~env:env_id
+    Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
       ~envs:link_state.envs f
   end
   | Get (mod_id, name) ->
@@ -163,7 +163,8 @@ let run ~with_exhaustion ~optimize script =
           Compile.until_link link_state ~optimize ~name:None m
         in
         let+ () =
-          check_error_result expected (Interpret.I.modul link_state.envs m)
+          check_error_result expected
+            (Interpret.Concrete.modul link_state.envs m)
         in
         link_state
       | Assert (Assert_malformed_binary _) ->

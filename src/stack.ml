@@ -2,10 +2,96 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Stack_intf
+module type S = sig
+  type vbool
 
-module Make (V : Value) :
-  Stack_intf.S
+  type int32
+
+  type int64
+
+  type float32
+
+  type float64
+
+  type ref_value
+
+  type value
+
+  type t = value list
+
+  val empty : t
+
+  val pp : Format.formatter -> t -> unit
+
+  (** pop operations *)
+
+  val drop : t -> t
+
+  val drop_n : 'a list -> int -> 'a list
+
+  val pop : t -> value * t
+
+  val pop_n : t -> int -> t * t
+
+  val keep : t -> int -> t
+
+  val pop_bool : t -> vbool * t
+
+  val pop_i32 : t -> int32 * t
+
+  val pop2_i32 : t -> (int32 * int32) * t
+
+  val pop_i64 : t -> int64 * t
+
+  val pop2_i64 : t -> (int64 * int64) * t
+
+  val pop_f32 : t -> float32 * t
+
+  val pop2_f32 : t -> (float32 * float32) * t
+
+  val pop_f64 : t -> float64 * t
+
+  val pop2_f64 : t -> (float64 * float64) * t
+
+  val pop_ref : t -> value * t
+
+  val pop_as_ref : t -> ref_value * t
+
+  (** push operations *)
+
+  val push : t -> value -> t
+
+  val push_const_bool : t -> Stdlib.Bool.t -> t
+
+  val push_bool : t -> vbool -> t
+
+  val push_i32 : t -> int32 -> t
+
+  val push_const_i32 : t -> Int32.t -> t
+
+  val push_i32_of_int : t -> int -> t
+
+  val push_i64 : t -> int64 -> t
+
+  val push_const_i64 : t -> Int64.t -> t
+
+  val push_i64_of_int : t -> int -> t
+
+  val push_f32 : t -> float32 -> t
+
+  val push_const_f32 : t -> Float32.t -> t
+
+  val push_f64 : t -> float64 -> t
+
+  val push_const_f64 : t -> Float64.t -> t
+
+  val push_as_externref : t -> 'b Type.Id.t -> 'b -> t
+
+  val push_array : t -> unit Array.t -> t
+end
+
+module Make (V : Value_intf.T) :
+  S
     with type value := V.t
      and type vbool := V.vbool
      and type int32 := V.int32
@@ -71,22 +157,6 @@ module Make (V : Value) :
     match hd with
     | I32 n -> (n, tl)
     | _ | (exception Empty) -> Log.err "invalid type (expected i32)"
-
-  (* let pop_i32_to_int s = *)
-  (*   let hd, tl = pop_i32 s in *)
-  (*   (Int32.to_int hd, tl) *)
-
-  (* let pop_ui32_to_int s = *)
-  (*   let hd, tl = pop_i32 s in *)
-  (*   match Int32.unsigned_to_int hd with *)
-  (*   | None -> Log.err "invalid type (expected unsigned i32)" *)
-  (*   | Some hd -> (hd, tl) *)
-
-  (* let pop_i32_to_char s = *)
-  (*   let hd, tl = pop_i32 s in *)
-  (*   match Int32.unsigned_to_int hd with *)
-  (*   | None -> Log.err "invalid type (expected unsigned i32)" *)
-  (*   | Some n -> (Char.chr (n mod 256), tl) *)
 
   let pop2_i32 s =
     try
@@ -164,18 +234,6 @@ module Make (V : Value) :
       | _ -> Log.err "invalid type (expected ref)"
     with Empty -> Log.err "invalid type (expected ref)"
 
-  (* let pop_as_externref (type ty) (ty : ty Type_id.ty) s : ty * 'env t = *)
-  (*   try *)
-  (*     let hd, tl = pop s in *)
-  (*     match hd with *)
-  (*     | Ref (Externref (Some (E (ety, hd)))) -> begin *)
-  (*       match Type_id.eq ty ety with *)
-  (*       | None -> Log.err "invalid type (externref)" *)
-  (*       | Some Eq -> (hd, tl) *)
-  (*     end *)
-  (*     | _ -> Log.err "invalid type (expected extern ref)" *)
-  (*   with Empty -> Log.err "invalid type (expected extern ref)" *)
-
   let pop_bool s =
     try
       let hd, tl = pop s in
@@ -183,15 +241,6 @@ module Make (V : Value) :
       | I32 n -> (V.I32.to_bool n, tl)
       | _ -> Log.err "invalid type (expected i32 (bool))"
     with Empty -> Log.err "invalid type (expected i32 (bool))"
-
-  (* let pop_is_null s = *)
-  (*   try *)
-  (*     let hd, tl = pop s in *)
-  (*     match hd with *)
-  (*     | Ref (Externref None | Funcref None) -> (true, tl) *)
-  (*     | Ref (Externref (Some _) | Funcref (Some _)) -> (false, tl) *)
-  (*     | _ -> Log.err "invalid type (expected const_null)" *)
-  (*   with Empty -> Log.err "invalid type (expected const_null)" *)
 
   let pop_n s n =
     (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)

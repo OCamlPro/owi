@@ -13,7 +13,7 @@ let rec optimize_expr expr =
     :: tl -> begin
     try
       let result =
-        Interpret.I.exec_ibinop
+        Interpret.Concrete.exec_ibinop
           [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
           nn op
       in
@@ -30,7 +30,7 @@ let rec optimize_expr expr =
     :: F_binop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_fbinop
+      Interpret.Concrete.exec_fbinop
         [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
         nn op
     in
@@ -41,7 +41,9 @@ let rec optimize_expr expr =
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_unop (nn, op) :: tl ->
-    let result = Interpret.I.exec_iunop [ Concrete_value.of_instr x ] nn op in
+    let result =
+      Interpret.Concrete.exec_iunop [ Concrete_value.of_instr x ] nn op
+    in
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
@@ -49,7 +51,9 @@ let rec optimize_expr expr =
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: F_unop (nn, op) :: tl ->
-    let result = Interpret.I.exec_funop [ Concrete_value.of_instr x ] nn op in
+    let result =
+      Interpret.Concrete.exec_funop [ Concrete_value.of_instr x ] nn op
+    in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
@@ -57,7 +61,9 @@ let rec optimize_expr expr =
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_testop (nn, op) :: tl ->
-    let result = Interpret.I.exec_itestop [ Concrete_value.of_instr x ] nn op in
+    let result =
+      Interpret.Concrete.exec_itestop [ Concrete_value.of_instr x ] nn op
+    in
     begin
       match result with
       | [ (I32 _ as result) ] ->
@@ -69,7 +75,7 @@ let rec optimize_expr expr =
     :: I_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_irelop
+      Interpret.Concrete.exec_irelop
         [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
         nn op
     in
@@ -84,7 +90,7 @@ let rec optimize_expr expr =
     :: F_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.I.exec_frelop
+      Interpret.Concrete.exec_frelop
         [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
         nn op
     in
@@ -120,7 +126,7 @@ let rec optimize_expr expr =
     :: tl -> begin
     try
       let result =
-        Interpret.I.exec_itruncf [ Concrete_value.of_instr c ] nn nn' sx
+        Interpret.Concrete.exec_itruncf [ Concrete_value.of_instr c ] nn nn' sx
       in
       begin
         match result with
@@ -135,7 +141,9 @@ let rec optimize_expr expr =
     :: tl -> begin
     try
       let result =
-        Interpret.I.exec_itruncsatf [ Concrete_value.of_instr c ] nn nn' sx
+        Interpret.Concrete.exec_itruncsatf
+          [ Concrete_value.of_instr c ]
+          nn nn' sx
       in
       begin
         match result with
@@ -147,7 +155,7 @@ let rec optimize_expr expr =
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
     let result =
-      Interpret.I.exec_fconverti [ Concrete_value.of_instr x ] nn nn' sx
+      Interpret.Concrete.exec_fconverti [ Concrete_value.of_instr x ] nn nn' sx
     in
     begin
       match result with
@@ -157,7 +165,7 @@ let rec optimize_expr expr =
     end
   | ((F32_const _ | F64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl ->
     let result =
-      Interpret.I.exec_ireinterpretf [ Concrete_value.of_instr x ] nn nn'
+      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_instr x ] nn nn'
     in
     begin
       match result with
@@ -167,7 +175,7 @@ let rec optimize_expr expr =
     end
   | ((I32_const _ | I64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl ->
     let result =
-      Interpret.I.exec_freinterpreti [ Concrete_value.of_instr x ] nn nn'
+      Interpret.Concrete.exec_freinterpreti [ Concrete_value.of_instr x ] nn nn'
     in
     begin
       match result with

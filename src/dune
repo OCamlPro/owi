@@ -24,7 +24,7 @@
   int32
   int64
   interpret
-  interpret_functor
+  interpret
   interpret_functor_intf
   intf
   lexer
@@ -49,8 +49,7 @@
   symbolic_table
   symbolic_value
   spectest
-  stack_functor
-  stack_intf
+  stack
   string_map
   syntax
   text

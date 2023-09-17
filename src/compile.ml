@@ -38,5 +38,5 @@ let until_link ?unsafe link_state ~optimize ~name m =
 
 let until_interpret link_state ~optimize ~name m =
   let* m, link_state = until_link link_state ~optimize ~name m in
-  let* () = Interpret.I.modul link_state.envs m in
+  let* () = Interpret.Concrete.modul link_state.envs m in
   Ok link_state
