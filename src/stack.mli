@@ -48,7 +48,7 @@ val pop_is_null : t -> bool * t
 
 val pop_as_ref : t -> Value.ref_value * t
 
-val pop_as_externref : 'a Type_id.ty -> t -> 'a * t
+val pop_as_externref : 'a Type.Id.t -> t -> 'a * t
 
 (** push operations *)
 
@@ -68,6 +68,6 @@ val push_f32 : t -> Float32.t -> t
 
 val push_f64 : t -> Float64.t -> t
 
-val push_as_externref : t -> 'b Type_id.ty -> 'b -> t
+val push_as_externref : t -> 'b Type.Id.t -> 'b -> t
 
 val push_array : t -> unit Array.t -> t

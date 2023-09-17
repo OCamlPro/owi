@@ -8,7 +8,7 @@ open Syntax
 module Host_externref = struct
   type t = int
 
-  let ty : t Type_id.ty = Type_id.fresh "host"
+  let ty : t Type.Id.t = Type.Id.make ()
 
   let value i = Value.Externref (Some (Value.E (ty, i)))
 end

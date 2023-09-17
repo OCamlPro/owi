@@ -11,7 +11,7 @@ struct
     | I64 : V.int64 telt
     | F32 : V.float32 telt
     | F64 : V.float64 telt
-    | Externref : 'a Type_id.ty -> 'a telt
+    | Externref : 'a Type.Id.t -> 'a telt
 
   type _ rtype =
     | R0 : unit rtype
@@ -93,10 +93,10 @@ module Func = struct
   include Make_extern_func (Concrete_value_types) (Id_monad)
 end
 
-type externref = E : 'a Type_id.ty * 'a -> externref
+type externref = E : 'a Type.Id.t * 'a -> externref
 
-let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option =
-  match Type_id.eq rty ty with None -> None | Some Equal -> Some r
+let cast_ref (type r) (E (rty, r) : externref) (ty : r Type.Id.t) : r option =
+  match Type.Id.provably_equal rty ty with None -> None | Some Equal -> Some r
 
 type ref_value =
   | Externref of externref option

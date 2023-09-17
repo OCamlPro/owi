@@ -34,7 +34,7 @@ module type T_Extern_func = sig
     | I64 : int64 telt
     | F32 : float32 telt
     | F64 : float64 telt
-    | Externref : 'a Type_id.ty -> 'a telt
+    | Externref : 'a Type.Id.t -> 'a telt
 
   type _ rtype =
     | R0 : unit rtype

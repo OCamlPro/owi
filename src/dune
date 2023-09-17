@@ -28,7 +28,6 @@
   value_test
   interpret_functor_intf
   runtime_intf
-  type_id
   stack_intf
   stack_functor
   lexer

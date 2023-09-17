@@ -1,7 +1,7 @@
 (** Module to define externref values in OCaml. You should look in the `example`
     directory to understand how to use this before reading the code... *)
 
-type externref = E : 'a Type_id.ty * 'a -> externref
+type externref = E : 'a Type.Id.t * 'a -> externref
 
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) :
   Func_intf.T_Extern_func
@@ -31,7 +31,7 @@ type t =
   | F64 of Float64.t
   | Ref of ref_value
 
-val cast_ref : externref -> 'a Type_id.ty -> 'a option
+val cast_ref : externref -> 'a Type.Id.t -> 'a option
 
 val of_instr : Simplified.instr -> t
 

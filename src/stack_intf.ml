@@ -67,7 +67,7 @@ module type S = sig
 
   val pop_as_ref : t -> ref_value * t
 
-  (* val pop_as_externref : 'a Type_id.ty -> 'b t -> 'a * 'b t *)
+  (* val pop_as_externref : 'a Type.Id.t -> 'b t -> 'a * 'b t *)
 
   (** push operations *)
 
@@ -97,7 +97,7 @@ module type S = sig
 
   val push_const_f64 : t -> Float64.t -> t
 
-  val push_as_externref : t -> 'b Type_id.ty -> 'b -> t
+  val push_as_externref : t -> 'b Type.Id.t -> 'b -> t
 
   val push_array : t -> unit Array.t -> t
 end
