@@ -1,8 +1,8 @@
 (** Utility functions to compile a module until a given step. *)
 
-val until_check : Symbolic.modul -> Symbolic.modul Result.t
+val until_check : ?unsafe:bool -> Symbolic.modul -> Symbolic.modul Result.t
 
-val until_simplify : Symbolic.modul -> Simplified.modul Result.t
+val until_simplify : ?unsafe:bool -> Symbolic.modul -> Simplified.modul Result.t
 
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)
