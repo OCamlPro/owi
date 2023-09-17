@@ -144,7 +144,7 @@ let pop_as_externref (type ty) (ty : ty Type_id.ty) s : ty * t =
     | Ref (Externref (Some (E (ety, hd)))) -> begin
       match Type_id.eq ty ety with
       | None -> Log.err "invalid type (externref)"
-      | Some Eq -> (hd, tl)
+      | Some Equal -> (hd, tl)
     end
     | _ -> Log.err "invalid type (expected extern ref)"
   with Empty -> Log.err "invalid type (expected extern ref)"

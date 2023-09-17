@@ -2,8 +2,6 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-type ('a, 'b) eq = ('a, 'b) Type_id.eq
-
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =
 struct
   type 'a m = 'a M.t
@@ -98,7 +96,7 @@ end
 type externref = E : 'a Type_id.ty * 'a -> externref
 
 let cast_ref (type r) (E (rty, r) : externref) (ty : r Type_id.ty) : r option =
-  match Type_id.eq rty ty with None -> None | Some Eq -> Some r
+  match Type_id.eq rty ty with None -> None | Some Equal -> Some r
 
 type ref_value =
   | Externref of externref option

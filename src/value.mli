@@ -1,8 +1,6 @@
 (** Module to define externref values in OCaml. You should look in the `example`
     directory to understand how to use this before reading the code... *)
 
-type ('a, 'b) eq = ('a, 'b) Type_id.eq
-
 type externref = E : 'a Type_id.ty * 'a -> externref
 
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) :
