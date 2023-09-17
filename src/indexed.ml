@@ -7,10 +7,25 @@ type 'a t =
   ; value : 'a
   }
 
+let get v = v.value
+
+let get_index v = v.index
+
+let bind v f = f v.value
+
+let map f v = { index = v.index; value = f v.value }
+
+let return index value = { index; value }
+
 let has_index idx { index; _ } = idx = index
 
-let get_at i values =
+let get_at_exn i values =
   let { value; _ } = List.find (has_index i) values in
   value
+
+let get_at i values =
+  match List.find_opt (has_index i) values with
+  | None -> None
+  | Some { value; _ } -> Some value
 
 let pp f fmt v = Format.fprintf fmt "%a" f v.value

@@ -52,9 +52,7 @@ let assign_type (acc : type_acc) (name, sub_type) : type_acc Result.t =
     let+ str_type = Simplified_types.convert_str None str_type in
     let id = last_assigned_int in
     let last_assigned_int = succ last_assigned_int in
-    let declared_types =
-      { Indexed.index = id; value = str_type } :: declared_types
-    in
+    let declared_types = Indexed.return id str_type :: declared_types in
     let named_types =
       match name with
       | None -> named_types
@@ -79,7 +77,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     let all_types = TypeMap.add typ id all_types in
     let func_types =
       match typ with
-      | Def_func_t _ftype -> { Indexed.index = id; value = typ } :: func_types
+      | Def_func_t _ftype -> Indexed.return id typ :: func_types
       | Def_array_t (_mut, _storage_type) -> func_types
       | Def_struct_t _ -> func_types
     in
@@ -109,11 +107,13 @@ let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Runtime.t)
 
 let name kind ~get_name values =
   let assign_one (named : int String_map.t) (elt : _ Indexed.t) =
-    match get_name elt.value with
+    let elt_v = Indexed.get elt in
+    match get_name elt_v with
     | None -> Ok named
     | Some name ->
+      let index = Indexed.get_index elt in
       if String_map.mem name named then error_s "duplicate %s %s" kind name
-      else ok @@ String_map.add name elt.index named
+      else ok @@ String_map.add name index named
   in
   let+ named = list_fold_left assign_one String_map.empty values in
   { Named.values; named }
@@ -129,9 +129,9 @@ let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
       | Some t -> Ok t )
   in
   (* TODO more efficient version of that *)
-  match List.find_opt (fun v -> v.Indexed.index = id) types.values with
+  match Indexed.get_at id types.values with
   | None -> Error "unknown type"
-  | Some { value = Def_func_t func_type'; _ } ->
+  | Some (Def_func_t func_type') ->
     let* func_type = Simplified_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then
       Error "inline function type"

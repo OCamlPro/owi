@@ -33,7 +33,7 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
   let* idx = find "unknown global" modul.global id in
   let va = List.find (Indexed.has_index idx) modul.global.values in
   let+ mut, _typ =
-    match va.value with
+    match Indexed.get va with
     | Imported imported -> Ok imported.desc
     | Local global ->
       if imported_only then Error "unknown global"
@@ -73,10 +73,10 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
 
   let bt_some_to_raw : Symbolic.block_type -> block_type Result.t = function
     | Symbolic.Arg.Bt_ind ind -> begin
-      match get "unknown type" modul.typ (Some ind) with
-      | Ok { value = Def_func_t t'; _ } -> Ok t'
-      | Error _ as e -> e
-      | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+      let* v = get "unknown type" modul.typ (Some ind) in
+      match Indexed.get v with
+      | Def_func_t t' -> Ok t'
+      | _ -> Error "TODO: Simplify.bt_some_to_raw"
     end
     | Bt_raw (type_use, t) -> (
       let* t = Simplified_types.convert_func_type None t in
@@ -85,10 +85,10 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
       | Some ind ->
         (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
         let* t' =
-          match get "unknown type" modul.typ (Some ind) with
-          | Ok { value = Def_func_t t'; _ } -> Ok t'
-          | Error _ as e -> e
-          | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+          let* v = get "unknown type" modul.typ (Some ind) in
+          match Indexed.get v with
+          | Def_func_t t' -> Ok t'
+          | _ -> Error "TODO: Simplify.bt_some_to_raw"
         in
         let ok = Simplified_types.equal_func_types t t' in
         if not ok then Error "inline function type" else Ok t )
@@ -98,8 +98,8 @@ let rewrite_expr (modul : Assigned.t) (locals : param list)
     function
     | None -> Ok None
     | Some bt ->
-      let* raw = bt_some_to_raw bt in
-      Ok (Some raw)
+      let+ raw = bt_some_to_raw bt in
+      Some raw
   in
 
   let* locals, after_last_assigned_local =
@@ -428,10 +428,10 @@ let rewrite_block_type (modul : Assigned.t) (block_type : Symbolic.block_type) :
   block_type Result.t =
   match block_type with
   | Symbolic.Arg.Bt_ind id -> begin
-    match get "unknown type" modul.typ (Some id) with
-    | Ok { value = Def_func_t t'; _ } -> Ok t'
-    | Error _ as e -> e
-    | Ok _ -> Error "TODO: Simplify.bt_some_to_raw"
+    let* v = get "unknown type" modul.typ (Some id) in
+    match Indexed.get v with
+    | Def_func_t t' -> Ok t'
+    | _ -> Error "TODO: Simplify.bt_some_to_raw"
   end
   | Bt_raw (_, func_type) -> Simplified_types.convert_func_type None func_type
 
@@ -511,8 +511,10 @@ let rewrite_named f named =
   let+ values =
     list_map
       (fun ind ->
-        let+ value = f ind.Indexed.value in
-        { ind with value } )
+        let index = Indexed.get_index ind in
+        let value = Indexed.get ind in
+        let+ value = f value in
+        Indexed.return index value )
       named.Named.values
   in
   { named with Named.values }
@@ -544,7 +546,7 @@ let modul (modul : Assigned.t) : modul Result.t =
       let* idx = find "unknown function" func (Some start) in
       let va = List.find (Indexed.has_index idx) func.Named.values in
       let param_typ, result_typ =
-        match va.value with
+        match Indexed.get va with
         | Local func -> func.type_f
         | Imported imported -> imported.desc
       in

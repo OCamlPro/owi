@@ -50,14 +50,14 @@ module Env = struct
   let local_get i env = match Index.Map.find i env.locals with v -> v
 
   let global_get i env =
-    let value = Indexed.get_at i env.globals.values in
+    let value = Indexed.get_at_exn i env.globals.values in
     let _mut, typ =
       match value with Local { typ; _ } -> typ | Runtime.Imported t -> t.desc
     in
     typ
 
   let func_get i env =
-    let value = Indexed.get_at i env.funcs.values in
+    let value = Indexed.get_at_exn i env.funcs.values in
     match value with
     | Local { type_f; _ } -> type_f
     | Runtime.Imported t -> t.desc
@@ -65,19 +65,19 @@ module Env = struct
   let block_type_get i env = List.nth env.blocks i
 
   let table_type_get_from_module i (modul : Simplified.modul) =
-    let value = Indexed.get_at i modul.table.values in
+    let value = Indexed.get_at_exn i modul.table.values in
     match value with
     | Local table -> snd (snd table)
     | Runtime.Imported t -> snd t.desc
 
   let table_type_get i env =
-    let value = Indexed.get_at i env.tables.values in
+    let value = Indexed.get_at_exn i env.tables.values in
     match value with
     | Local table -> snd (snd table)
     | Runtime.Imported t -> snd t.desc
 
   let elem_type_get i env =
-    let value = Indexed.get_at i env.elems.values in
+    let value = Indexed.get_at_exn i env.elems.values in
     value.typ
 
   let make ~params ~locals ~globals ~funcs ~result_type ~tables ~elems ~refs =
@@ -538,7 +538,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
   | Global_get i ->
-    let value = Indexed.get_at i modul.global.values in
+    let value = Indexed.get_at_exn i modul.global.values in
     let* _mut, typ =
       match value with
       | Local _ -> Error "unknown global"
@@ -563,7 +563,7 @@ let typecheck_const_expr (modul : modul) refs =
 
 let typecheck_global (modul : modul) refs
   (global : (global, global_type) Runtime.t Indexed.t) =
-  match global.value with
+  match Indexed.get global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
     let* real_type = typecheck_const_expr modul refs init in
@@ -578,7 +578,8 @@ let typecheck_global (modul : modul) refs
     | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 
 let typecheck_elem modul refs (elem : elem Indexed.t) =
-  let _null, expected_type = elem.value.typ in
+  let elem = Indexed.get elem in
+  let _null, expected_type = elem.typ in
   let* () =
     list_iter
       (fun init ->
@@ -589,9 +590,9 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
             Error "type mismatch (typecheck_elem)"
           else Ok ()
         | _whatever -> Error "type mismatch (typecheck_elem wrong num)" )
-      elem.value.init
+      elem.init
   in
-  match elem.value.mode with
+  match elem.mode with
   | Elem_passive | Elem_declarative -> Ok ()
   | Elem_active (None, _e) -> assert false
   | Elem_active (Some tbl_i, e) -> (
@@ -606,7 +607,8 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
       | _whatever -> Error "type mismatch (typecheck_elem)" )
 
 let typecheck_data modul refs (data : data Indexed.t) =
-  match data.value.mode with
+  let data = Indexed.get data in
+  match data.mode with
   | Data_passive -> Ok ()
   | Data_active (_i, e) -> (
     let* t = typecheck_const_expr modul refs e in

@@ -370,12 +370,11 @@ let optimize_func func =
   { type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  let { Indexed.value; Indexed.index } = f in
-  match value with
-  | Runtime.Imported _ -> f
-  | Local f ->
-    let value = Runtime.Local (optimize_func f) in
-    { value; index }
+  Indexed.map
+    (function
+      | Runtime.Imported _ as f -> f
+      | Local f -> Runtime.Local (optimize_func f) )
+    f
 
 let optimize_funcs funs = Named.map optimize_runtime_func funs
 

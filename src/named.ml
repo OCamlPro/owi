@@ -2,8 +2,6 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Indexed
-
 (** named values (fields) *)
 type 'a t =
   { values : 'a Indexed.t list
@@ -11,9 +9,12 @@ type 'a t =
   }
 
 let fold f v acc =
-  List.fold_left (fun acc v -> f v.index v.value acc) acc v.values
+  List.fold_left
+    (fun acc v -> f (Indexed.get_index v) (Indexed.get v) acc)
+    acc v.values
 
-let iter f v = List.iter (fun v -> f v.index v.value) v.values
+let iter f v =
+  List.iter (fun v -> f (Indexed.get_index v) (Indexed.get v)) v.values
 
 let map f v =
   let values = List.map f v.values in

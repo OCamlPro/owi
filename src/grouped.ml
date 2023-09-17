@@ -77,32 +77,32 @@ let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
 let add_global value (fields : t) (curr : curr) =
   let index = curr.global in
-  ( { fields with global = { index; value } :: fields.global }
+  ( { fields with global = Indexed.return index value :: fields.global }
   , { curr with global = succ curr.global } )
 
 let add_table value (fields : t) (curr : curr) =
   let index = curr.table in
-  ( { fields with table = { index; value } :: fields.table }
+  ( { fields with table = Indexed.return index value :: fields.table }
   , { curr with table = succ curr.table } )
 
 let add_mem value (fields : t) (curr : curr) =
   let index = curr.mem in
-  ( { fields with mem = { index; value } :: fields.mem }
+  ( { fields with mem = Indexed.return index value :: fields.mem }
   , { curr with mem = succ curr.mem } )
 
 let add_func value (fields : t) (curr : curr) =
   let index = curr.func in
-  ( { fields with func = { index; value } :: fields.func }
+  ( { fields with func = Indexed.return index value :: fields.func }
   , { curr with func = succ curr.func } )
 
 let add_elem value (fields : t) (curr : curr) =
   let index = curr.elem in
-  ( { fields with elem = { index; value } :: fields.elem }
+  ( { fields with elem = Indexed.return index value :: fields.elem }
   , { curr with elem = succ curr.elem } )
 
 let add_data value (fields : t) (curr : curr) =
   let index = curr.data in
-  ( { fields with data = { index; value } :: fields.data }
+  ( { fields with data = Indexed.return index value :: fields.data }
   , { curr with data = succ curr.data } )
 
 let check_limit { min; max } =
@@ -184,7 +184,8 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
           (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
-      let func = { Indexed.value = Runtime.Local func; index } :: fields.func in
+      let value = Runtime.Local func in
+      let func = Indexed.return index value :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
         , { curr with func = succ curr.func } )
