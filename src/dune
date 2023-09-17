@@ -49,7 +49,6 @@
   symbolic_table
   symbolic_value
   spectest
-  stack
   stack_functor
   stack_intf
   string_map
@@ -60,8 +59,9 @@
   typecheck
   types
   value_intf
+  v
   wutf8)
- (private_modules convert lexer menhir_parser spectest stack wutf8)
+ (private_modules convert lexer menhir_parser spectest wutf8)
  (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)
  (preprocess
   (pps sedlex.ppx))

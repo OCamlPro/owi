@@ -8,6 +8,7 @@ open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 module Env = Link_env
+module Stack = Stack_functor.Make (V) [@@inlined hint]
 
 type env = Env.Build.t
 
@@ -40,13 +41,15 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
     let* g = Env.Build.get_const_global env id in
     ok @@ Stack.push stack g
   | Array_new _i ->
-    let len, stack = Stack.pop_i32_to_int stack in
+    let len, stack = Stack.pop_i32 stack in
+    let len = Int32.to_int len in
     (* TODO: check type of *default* *)
     let _default, stack = Stack.pop stack in
     let a = Array.init len (fun _i -> ()) in
     ok @@ Stack.push_array stack a
   | Array_new_default _i ->
-    let len, stack = Stack.pop_i32_to_int stack in
+    let len, stack = Stack.pop_i32 stack in
+    let len = Int32.to_int len in
     let a = Array.init len (fun _i -> ()) in
     ok @@ Stack.push_array stack a
   | Ref_i31 ->

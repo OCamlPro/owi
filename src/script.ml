@@ -4,6 +4,7 @@
 
 open Types
 open Syntax
+module Stack = Stack_functor.Make (V) [@@inlined hint]
 
 module Host_externref = struct
   type t = int
