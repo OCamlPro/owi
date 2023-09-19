@@ -44,8 +44,6 @@ module Make (P : Interpret_functor_intf.P) :
     let consti i = const_i32 (Int32.of_int i)
   end
 
-  let ( let/ ) = Choice.bind
-
   let pop_choice stack =
     let b, stack = Stack.pop_bool stack in
     Choice.bind (Choice.select b) (fun b -> Choice.return (b, stack))
@@ -74,6 +72,12 @@ module Make (P : Interpret_functor_intf.P) :
   let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
   let trap msg = raise (Trap msg)
+
+  let ( let* ) o f = Result.fold ~ok:f ~error:trap o
+
+  let ( let/ ) = Choice.bind
+
+  let ( let/* ) o f = match o with Error e -> trap e | Ok o -> Choice.bind o f
 
   let exec_iunop stack nn op =
     match nn with
@@ -465,21 +469,22 @@ module Make (P : Interpret_functor_intf.P) :
   (* TODO move to module Env *)
   let mem_0 = 0
 
-  let ( let* ) o f = Result.fold ~ok:f ~error:trap o
-
-  let ( let/* ) o f = match o with Error e -> trap e | Ok o -> Choice.bind o f
-
   type extern_func = Extern_func.extern_func
 
   let exec_extern_func stack (f : extern_func) =
-    let pop_arg (type ty) stack (arg : ty Extern_func.telt) : ty * Stack.t =
+    let pop_arg (type ty) stack (arg : ty Extern_func.telt) :
+      (ty * Stack.t) Choice.t =
       match arg with
-      | I32 -> Stack.pop_i32 stack
-      | I64 -> Stack.pop_i64 stack
-      | F32 -> Stack.pop_f32 stack
-      | F64 -> Stack.pop_f64 stack
-      | Externref _ety -> failwith "TODO"
-      (* Stack.pop_as_externref ety stack *)
+      | I32 -> Choice.return @@ Stack.pop_i32 stack
+      | I64 -> Choice.return @@ Stack.pop_i64 stack
+      | F32 -> Choice.return @@ Stack.pop_f32 stack
+      | F64 -> Choice.return @@ Stack.pop_f64 stack
+      | Externref ety -> (
+        let v, stack = Stack.pop_as_ref stack in
+        match Value.Ref.get_externref v ety with
+        | Ref_value v -> Choice.return @@ (v, stack)
+        | Type_mismatch -> Choice.trap Trap.Extern_call_arg_type_mismatch
+        | Null -> Choice.trap Trap.Extern_call_null_arg )
     in
     let rec split_args :
       type f r. Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t =
@@ -495,21 +500,22 @@ module Make (P : Interpret_functor_intf.P) :
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
-    let rec apply : type f r. Stack.t -> (f, r) Extern_func.atype -> f -> r =
+    let rec apply :
+      type f r. Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
      fun stack ty f ->
       match ty with
       | Extern_func.Arg (arg, args) ->
-        let v, stack = pop_arg stack arg in
+        let/ v, stack = pop_arg stack arg in
         apply stack args (f v)
       | UArg args -> apply stack args (f ())
       | NArg (_, arg, args) ->
-        let v, stack = pop_arg stack arg in
+        let/ v, stack = pop_arg stack arg in
         apply stack args (f v)
-      | Res -> f
+      | Res -> Choice.return f
     in
     let (Extern_func.Extern_func (Func (atype, rtype), func)) = f in
     let args, stack = split_args stack atype in
-    let r = apply (List.rev args) atype func in
+    let/ r = apply (List.rev args) atype func in
     let push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
       match arg with
       | I32 -> Stack.push_i32 stack v

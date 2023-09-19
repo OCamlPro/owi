@@ -30,6 +30,15 @@ include (
         | Funcref (Some f) -> Ref_value f
         | Funcref None -> Null
         | _ -> Type_mismatch
+
+      let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
+        t Value_intf.get_ref =
+        match r with
+        | Externref (Some (E (ety, v))) -> (
+          match Type.Id.provably_equal t ety with
+          | None -> assert false
+          | Some Equal -> Ref_value v )
+        | _ -> assert false
     end
 
     module Bool = struct

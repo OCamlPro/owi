@@ -202,6 +202,8 @@ module type T = sig
 
   module Ref : sig
     val get_func : ref_value -> Func_intf.t get_ref
+
+    val get_externref : ref_value -> 'a Type.Id.t -> 'a get_ref
   end
 
   module Bool : sig

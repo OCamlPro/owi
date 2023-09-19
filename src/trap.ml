@@ -12,6 +12,8 @@ type t =
   | Element_type_error
   | Unreachable
   | Indirect_call_type_mismatch
+  | Extern_call_arg_type_mismatch
+  | Extern_call_null_arg
 
 let to_string = function
   | Out_of_bounds_table_access -> "out of bounds table access"
@@ -24,3 +26,5 @@ let to_string = function
   | Element_type_error -> "element_type_error"
   | Unreachable -> "unreachable"
   | Indirect_call_type_mismatch -> "indirect call type mismatch"
+  | Extern_call_arg_type_mismatch -> "extern call arg type mismatch"
+  | Extern_call_null_arg -> "extern call null arg"
