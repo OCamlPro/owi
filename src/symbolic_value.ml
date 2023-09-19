@@ -92,6 +92,8 @@ module S = struct
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
       match r with Funcref (Some f) -> Ref_value f | Funcref None -> Null
+
+    let get_externref _ = assert false
   end
 
   module Bool = struct
