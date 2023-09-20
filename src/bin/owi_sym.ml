@@ -68,6 +68,30 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     in
     Choice.return r
   in
+  let symbol_i64 () : Value.int64 Choice.t =
+    incr counter;
+    let r =
+      Encoding.Expression.mk_symbol_s `I64Type
+        (Printf.sprintf "symbol_%i" !counter)
+    in
+    Choice.return r
+  in
+  let symbol_f32 () : Value.float32 Choice.t =
+    incr counter;
+    let r =
+      Encoding.Expression.mk_symbol_s `F32Type
+        (Printf.sprintf "symbol_%i" !counter)
+    in
+    Choice.return r
+  in
+  let symbol_f64 () : Value.float64 Choice.t =
+    incr counter;
+    let r =
+      Encoding.Expression.mk_symbol_s `F64Type
+        (Printf.sprintf "symbol_%i" !counter)
+    in
+    Choice.return r
+  in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
     Choice.add_pc c
@@ -84,6 +108,15 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
       )
+    ; ( "i64_symbol"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
+      )
+    ; ( "f32_symbol"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
+      )
+    ; ( "f64_symbol"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
@@ -99,6 +132,10 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
     Choice.return base
   in
   let dealloc (_base : Value.int32) : unit Choice.t = Choice.return () in
+  let is_symbolic (_a : Value.int32) (_n : Value.int32) : Value.int32 Choice.t =
+    (* TODO: load n bytes from address a and check if it's a Val *)
+    Choice.return @@ Value.const_i32 0l
+  in
   let functions =
     [ ( "alloc"
       , Symbolic.P.Extern_func.Extern_func
@@ -106,6 +143,9 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
     ; ( "dealloc"
       , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
       )
+    ; ( "is_symbolic"
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Arg (I32, Res)), R1 I32), is_symbolic) )
     ]
   in
   { functions }
