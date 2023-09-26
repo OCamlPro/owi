@@ -84,9 +84,8 @@ module P = struct
     let get_elem = Link_env.get_elem
 
     let get_data env n =
-      match Link_env.get_data env n with
-      | Ok data -> Choice.return data
-      | Error _ -> Choice.trap Trap.Out_of_bounds_memory_access
+      let data = Link_env.get_data env n in
+      Choice.return data
 
     let get_global = Link_env.get_global
 

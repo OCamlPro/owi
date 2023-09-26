@@ -50,47 +50,17 @@ let pp fmt t =
 
 let id (env : _ t) = env.id
 
-let get_global (env : _ t) id =
-  match IMap.find_opt id env.globals with
-  | None ->
-    Log.debug "%a@." pp env;
-    Error "unknown global"
-  | Some v -> Ok v
+let get_global (env : _ t) id = IMap.find id env.globals
 
-let get_memory (env : _ t) id =
-  match IMap.find_opt id env.memories with
-  | None ->
-    Log.debug "%a@." pp env;
-    Error "unknown memory"
-  | Some v -> Ok v
+let get_memory (env : _ t) id = IMap.find id env.memories
 
-let get_table (env : _ t) id =
-  match IMap.find_opt id env.tables with
-  | None ->
-    Log.debug "%a@." pp env;
-    Error "unknown table"
-  | Some v -> Ok v
+let get_table (env : _ t) id = IMap.find id env.tables
 
-let get_func (env : _ t) id =
-  match IMap.find_opt id env.functions with
-  | None ->
-    Log.debug "%a@." pp env;
-    error_s "unknown function %a" Format.pp_print_int id
-  | Some v -> Ok v
+let get_func (env : _ t) id = IMap.find id env.functions
 
-let get_data (env : _ t) id =
-  match IMap.find_opt id env.data with
-  | None ->
-    Log.debug "%a@." pp env;
-    Error "unknown data"
-  | Some v -> Ok v
+let get_data (env : _ t) id = IMap.find id env.data
 
-let get_elem (env : _ t) id =
-  match IMap.find_opt id env.elem with
-  | None ->
-    Log.debug "%a@." pp env;
-    Error "unknown elem"
-  | Some v -> Ok v
+let get_elem (env : _ t) id = IMap.find id env.elem
 
 let get_extern_func env id = Func_id.get id env.extern_funcs
 

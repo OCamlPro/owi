@@ -120,45 +120,38 @@ module P = struct
     type t' = Env_id.t
 
     let get_memory env id =
-      match Link_env.get_memory env id with
-      | Error _ as e -> e
-      | Ok orig_mem ->
-        let f (t : thread) =
-          let memories = Thread.memories t in
-          Symbolic_memory.get_memory (Link_env.id env) orig_mem memories id
-        in
-        Ok (Choice.with_thread f)
+      let orig_mem = Link_env.get_memory env id in
+      let f (t : thread) =
+        let memories = Thread.memories t in
+        Symbolic_memory.get_memory (Link_env.id env) orig_mem memories id
+      in
+      Choice.with_thread f
 
     let get_func = Link_env.get_func
 
     let get_extern_func = Link_env.get_extern_func
 
-    let get_table (env : t) i : Table.t Choice.t Result.t =
-      match Link_env.get_table env i with
-      | Error _ as e -> e
-      | Ok orig_table ->
-        let f (t : thread) =
-          let tables = Thread.tables t in
-          Symbolic_table.get_table (Link_env.id env) orig_table tables i
-        in
-        Ok (Choice.with_thread f)
+    let get_table (env : t) i : Table.t Choice.t =
+      let orig_table = Link_env.get_table env i in
+      let f (t : thread) =
+        let tables = Thread.tables t in
+        Symbolic_table.get_table (Link_env.id env) orig_table tables i
+      in
+      Choice.with_thread f
 
     let get_elem env i = Link_env.get_elem env i
 
     let get_data env n =
-      match Link_env.get_data env n with
-      | Ok data -> Choice.return data
-      | Error _ -> assert false
+      let data = Link_env.get_data env n in
+      Choice.return data
 
-    let get_global (env : t) i : Global.t Choice.t Result.t =
-      match Link_env.get_global env i with
-      | Error _ as e -> e
-      | Ok orig_global ->
-        let f (t : thread) =
-          let globals = Thread.globals t in
-          Symbolic_global.get_global (Link_env.id env) orig_global globals i
-        in
-        Ok (Choice.with_thread f)
+    let get_global (env : t) i : Global.t Choice.t =
+      let orig_global = Link_env.get_global env i in
+      let f (t : thread) =
+        let globals = Thread.globals t in
+        Symbolic_global.get_global (Link_env.id env) orig_global globals i
+      in
+      Choice.with_thread f
 
     let drop_elem _ =
       (* TODO ? *)

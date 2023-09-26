@@ -173,17 +173,17 @@ module type P = sig
   module Env : sig
     type t = env
 
-    val get_memory : t -> int -> Memory.t Choice.t Result.t
+    val get_memory : t -> int -> Memory.t Choice.t
 
-    val get_func : t -> int -> Func_intf.t Result.t
+    val get_func : t -> int -> Func_intf.t
 
-    val get_table : t -> int -> Table.t Choice.t Result.t
+    val get_table : t -> int -> Table.t Choice.t
 
-    val get_elem : t -> int -> elem Result.t
+    val get_elem : t -> int -> elem
 
     val get_data : t -> int -> data Choice.t
 
-    val get_global : t -> int -> Global.t Choice.t Result.t
+    val get_global : t -> int -> Global.t Choice.t
 
     val get_extern_func : t -> Func_id.t -> Extern_func.extern_func
 
