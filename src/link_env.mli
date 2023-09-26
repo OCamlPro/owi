@@ -8,17 +8,17 @@ type data = { mutable value : string }
 
 type func := Func_intf.t
 
-val get_memory : _ t -> int -> Concrete_memory.t Result.t
+val get_memory : _ t -> int -> Concrete_memory.t
 
-val get_func : _ t -> int -> func Result.t
+val get_func : _ t -> int -> func
 
-val get_table : _ t -> int -> Concrete_table.t Result.t
+val get_table : _ t -> int -> Concrete_table.t
 
-val get_elem : _ t -> int -> elem Result.t
+val get_elem : _ t -> int -> elem
 
-val get_data : _ t -> int -> data Result.t
+val get_data : _ t -> int -> data
 
-val get_global : _ t -> int -> Concrete_global.t Result.t
+val get_global : _ t -> int -> Concrete_global.t
 
 val drop_elem : elem -> unit
 

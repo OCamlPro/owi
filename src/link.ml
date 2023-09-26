@@ -284,7 +284,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
       (fun (acc, names) (export : Simplified.export) ->
-        let* value = get_env env export.id in
+        let value = get_env env export.id in
         if StringSet.mem export.name names then Error "duplicate export name"
         else
           Ok
