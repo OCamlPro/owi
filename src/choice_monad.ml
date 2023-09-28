@@ -167,7 +167,10 @@ module List = struct
   let with_thread (f : thread -> 'b) : 'b t = fun t -> [ (f t, t) ]
 
   let add_pc (c : Symbolic_value.S.vbool) : unit t =
-   fun t -> [ ((), { t with pc = c :: t.pc }) ]
+   fun t ->
+    match c with
+    | Val (Bool b) -> if b then [ ((), t) ] else []
+    | _ -> [ ((), { t with pc = c :: t.pc }) ]
 
   let assertion c t =
     if check c t then [ ((), t) ]
@@ -211,7 +214,10 @@ module Seq = struct
   let with_thread (f : thread -> 'b) : 'b t = fun t -> Seq.return (f t, t)
 
   let add_pc (c : Symbolic_value.S.vbool) : unit t =
-   fun t -> Seq.return ((), { t with pc = c :: t.pc })
+   fun t ->
+    match c with
+    | Val (Bool b) -> if b then Seq.return ((), t) else Seq.empty
+    | _ -> Seq.return ((), { t with pc = c :: t.pc })
 
   let run (v : 'a t) (thread : thread) = v thread
 end
@@ -270,7 +276,9 @@ module Explicit = struct
   [@@inline]
 
   let add_pc (c : Symbolic_value.S.vbool) : unit t =
-    Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
+    match c with
+    | Val (Bool b) -> if b then Retv () else Empty
+    | _ -> Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
   [@@inline]
 
   let assertion c : unit t = Assert c
