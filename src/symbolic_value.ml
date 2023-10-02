@@ -174,9 +174,22 @@ module S = struct
 
     let unsigned_rem e1 e2 = binop (I32 RemU) e1 e2
 
-    let logand e1 e2 = binop (I32 And) e1 e2
+    let boolify e =
+      match e with
+      | Val (Num (I32 0l)) -> Some (Val (Bool false))
+      | Val (Num (I32 1l)) -> Some (Val (Bool true))
+      | Cvtop (I32 OfBool, cond) -> Some cond
+      | _ -> None
 
-    let logor e1 e2 = binop (I32 Or) e1 e2
+    let logand e1 e2 =
+      match (boolify e1, boolify e2) with
+      | Some b1, Some b2 -> Bool.int32 (Bool.and_ b1 b2)
+      | _ -> binop (I32 And) e1 e2
+
+    let logor e1 e2 =
+      match (boolify e1, boolify e2) with
+      | Some b1, Some b2 -> Bool.int32 (Bool.or_ b1 b2)
+      | _ -> binop (I32 Or) e1 e2
 
     let logxor e1 e2 = binop (I32 Xor) e1 e2
 
