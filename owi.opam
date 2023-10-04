@@ -30,6 +30,7 @@ depends: [
   "crowbar" {with-test}
   "graphics" {dev}
   "tiny_httpd" {dev}
+  "encoding"
 ]
 build: [
   ["dune" "subst"] {dev}

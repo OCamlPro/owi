@@ -60,4 +60,5 @@
     (>= "2.1")))
   (crowbar :with-test)
   (graphics :dev)
-  (tiny_httpd :dev)))
+  (tiny_httpd :dev)
+  encoding))
