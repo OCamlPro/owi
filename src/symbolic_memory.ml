@@ -33,7 +33,7 @@ module M = struct
     let old_size = m.size * page_size in
     m.size <- max m.size ((old_size + delta) / page_size)
 
-  let size { size; _ } = Value.const_i32 @@ Int32.of_int @@ (size * page_size)
+  let size { size; _ } = Value.const_i32 @@ Int32.of_int (size * page_size)
 
   let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size
 
@@ -69,23 +69,34 @@ module M = struct
 
   let load_byte m a = Option.value (load_byte_opt a m) ~default:Value.I32.zero
 
-  let concat a b offset =
-    match (a, b) with
+  let concat ~msb ~lsb offset =
+    assert (offset > 0 && offset <= 8);
+    match (msb, lsb) with
     | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
-      let offset = Int32.of_int @@ (offset * 8) in
-      Value.const_i32 (Int32.logor (Int32.shl i1 offset) i2)
+      let offset = offset * 8 in
+      if offset < 32 then
+        Value.const_i32 Int32.(logor (shl i1 (of_int offset)) i2)
+      else
+        let i1' = Int64.of_int32 i1 in
+        let i2' = Int64.of_int32 i2 in
+        Value.const_i64 Int64.(logor (shl i1' (of_int offset)) i2')
+    | Val (Num (I32 i1)), Val (Num (I64 i2)) ->
+      let offset = Int64.of_int (offset * 8) in
+      Value.const_i64 Int64.(logor (shl (of_int32 i1) offset) i2)
     | Extract (e1, h, m1), Extract (e2, m2, l) when m1 = m2 && Expr.equal e1 e2
-      ->
-      if h - l = Types.size (Expr.type_of e1) then e1 else Extract (e1, h, l)
-    | _ -> Concat (a, b)
+      -> (
+      match Expr.type_of e1 with
+      | Some t -> if h - l = Types.size t then e1 else Extract (e1, h, l)
+      | _ -> Extract (e1, h, l) )
+    | _ -> Concat (msb, lsb)
 
   let loadn m a n : int32 =
-    let rec loop addr n i v =
-      if i = n then v
+    let rec loop addr size i acc =
+      if i = size then acc
       else
-        let addr' = Int32.add addr @@ Int32.of_int i in
+        let addr' = Int32.(add addr (of_int i)) in
         let byte = load_byte m addr' in
-        loop addr n (i + 1) (concat byte v i)
+        loop addr size (i + 1) (concat i ~msb:byte ~lsb:acc)
     in
     let v0 = load_byte m a in
     loop a n 1 v0
