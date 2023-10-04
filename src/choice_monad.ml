@@ -353,6 +353,7 @@ module Explicit = struct
       ; cond : Condition.t
       ; queue : 'a Queue.t
       ; mutable producers : int
+      ; mutable failed : bool
       }
 
     let take_as_producer q =
@@ -362,7 +363,7 @@ module Explicit = struct
       let r =
         try
           while Queue.is_empty q.queue do
-            if q.producers = 0 then raise Exit;
+            if q.producers = 0 || q.failed then raise Exit;
             Condition.wait q.cond q.mutex
           done;
           let v = Queue.pop q.queue in
@@ -381,7 +382,7 @@ module Explicit = struct
       let r =
         try
           while Queue.is_empty q.queue do
-            if q.producers = 0 then raise Exit;
+            if q.producers = 0 || q.failed then raise Exit;
             Condition.wait q.cond q.mutex
           done;
           let v = Queue.pop q.queue in
@@ -417,21 +418,33 @@ module Explicit = struct
       if was_empty then Condition.broadcast q.cond;
       Mutex.unlock q.mutex
 
+    let fail q =
+      Mutex.lock q.mutex;
+      q.failed <- true;
+      Condition.broadcast q.cond;
+      Mutex.unlock q.mutex
+
     let with_produce q f =
       Mutex.lock q.mutex;
       q.producers <- q.producers + 1;
       Mutex.unlock q.mutex;
-      f ();
-      Mutex.lock q.mutex;
-      q.producers <- q.producers - 1;
-      if q.producers = 0 then Condition.broadcast q.cond;
-      Mutex.unlock q.mutex
+      match f () with
+      | () ->
+         Mutex.lock q.mutex;
+         q.producers <- q.producers - 1;
+         if q.producers = 0 then Condition.broadcast q.cond;
+         Mutex.unlock q.mutex
+      | exception e ->
+         let bt = Printexc.get_raw_backtrace () in
+         fail q;
+         Printexc.raise_with_backtrace e bt
 
     let init () =
       { mutex = Mutex.create ()
       ; cond = Condition.create ()
       ; queue = Queue.create ()
       ; producers = 0
+      ; failed = false
       }
   end
 
