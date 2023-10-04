@@ -112,7 +112,7 @@ module M = struct
 
   let load_32 m a = loadn m (concretize_i32 a) 4
 
-  let load_64 _m _a = assert false
+  let load_64 m a = loadn m (concretize_i32 a) 8
 
   let extract v h l =
     match v with
