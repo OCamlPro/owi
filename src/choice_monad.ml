@@ -174,7 +174,10 @@ module List = struct
 
   let assertion c t =
     if check c t then [ ((), t) ]
-    else raise (Assertion (Encoding.Expression.to_string c, t))
+    else
+      let no = Symbolic_value.S.Bool.not c in
+      let t = { t with pc = no :: t.pc } in
+      raise (Assertion (Encoding.Expression.to_string c, t))
 
   let run (v : 'a t) (thread : thread) = List.to_seq (v thread)
 end
@@ -207,7 +210,10 @@ module Seq = struct
 
   let assertion c t =
     if check c t then Seq.return ((), t)
-    else raise (Assertion (Encoding.Expression.to_string c, t))
+    else
+      let no = Symbolic_value.S.Bool.not c in
+      let t = { t with pc = no :: t.pc } in
+      raise (Assertion (Encoding.Expression.to_string c, t))
 
   (* raise (Types.Trap "out of bounds memory access") *)
 
@@ -293,7 +299,10 @@ module Explicit = struct
     | Bind (v, f) -> Seq.flat_map (fun (v, t) -> run (f v) t) (run v t)
     | Assert c ->
       if check c t then Seq.return ((), t)
-      else raise (Assertion (Encoding.Expression.to_string c, t))
+      else
+        let no = Symbolic_value.S.Bool.not c in
+        let t = { t with pc = no :: t.pc } in
+        raise (Assertion (Encoding.Expression.to_string c, t))
     | Choice cond -> List.to_seq (eval_choice cond t)
     | Choice_i32 i -> List.to_seq (eval_choice_i32 i t)
 
@@ -316,7 +325,10 @@ module Explicit = struct
         (run_and_trap v t)
     | Assert c ->
       if check c t then Seq.return (EVal (), t)
-      else Seq.return (EAssert (Encoding.Expression.to_string c), t)
+      else
+        let no = Symbolic_value.S.Bool.not c in
+        let t = { t with pc = no :: t.pc } in
+        Seq.return (EAssert (Encoding.Expression.to_string c), t)
     | Choice cond ->
       List.to_seq (List.map (fun (v, t) -> (EVal v, t)) (eval_choice cond t))
     | Choice_i32 i ->
@@ -339,7 +351,10 @@ module Explicit = struct
     end
     | Assert c ->
       if check c t then Seq.return ((), t)
-      else raise (Assertion (Encoding.Expression.to_string c, t))
+      else
+        let no = Symbolic_value.S.Bool.not c in
+        let t = { t with pc = no :: t.pc } in
+        raise (Assertion (Encoding.Expression.to_string c, t))
     | Choice cond -> List.to_seq (eval_choice cond t)
     | Choice_i32 i -> List.to_seq (eval_choice_i32 i t)
 
@@ -485,6 +500,8 @@ module Explicit = struct
           cont.k thread (E_st st) ()
         else
           let assertion = Encoding.Expression.to_string c in
+          let no = Symbolic_value.S.Bool.not c in
+          let thread = { thread with pc = no :: thread.pc } in
           WQ.push (EAssert assertion, thread) st.global.r
       | Bind (v, f) ->
         let k thread (E_st st) v =
@@ -562,6 +579,8 @@ module Explicit = struct
     | Assert c ->
       if check c thread then cont.k thread ()
       else
+        let no = Symbolic_value.S.Bool.not c in
+        let thread = { thread with pc = no :: thread.pc } in
         let assertion = Encoding.Expression.to_string c in
         Queue.push (EAssert assertion, thread) qt
     | Bind (v, f) ->
