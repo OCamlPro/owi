@@ -15,7 +15,7 @@ homepage: "https://github.com/ocamlpro/owi"
 bug-reports: "https://github.com/ocamlpro/owi/issues"
 depends: [
   "dune" {>= "3.0"}
-  "ocaml" {>= "4.13"}
+  "ocaml" {>= "5.1"}
   "integers" {>= "0.5.1"}
   "cmdliner"
   "sedlex"

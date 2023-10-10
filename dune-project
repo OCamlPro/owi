@@ -31,7 +31,7 @@
   (owi ocaml webassembly wasm interpreter compiler))
  (depends
   (ocaml
-   (>= 4.13))
+   (>= 5.1))
   (integers
    (>= 0.5.1))
   cmdliner
