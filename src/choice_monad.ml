@@ -439,10 +439,11 @@ module Explicit = struct
       Condition.broadcast q.cond;
       Mutex.unlock q.mutex
 
-    let with_produce q f =
+    let with_produce q f ~started =
       Mutex.lock q.mutex;
       q.producers <- q.producers + 1;
       Mutex.unlock q.mutex;
+      started ();
       match f () with
       | () ->
          Mutex.lock q.mutex;
@@ -463,10 +464,35 @@ module Explicit = struct
       }
   end
 
+  module Counter = struct
+    type t =
+      { mutable c : int
+      ; mutex : Mutex.t
+      ; cond : Condition.t
+      }
+
+    let incr t =
+      Mutex.lock t.mutex;
+      t.c <- t.c + 1;
+      Condition.broadcast t.cond;
+      Mutex.unlock t.mutex
+
+    let wait_n t n =
+      Mutex.lock t.mutex;
+      while t.c < n do
+        Condition.wait t.cond t.mutex
+      done;
+      Mutex.unlock t.mutex
+
+    let create () =
+      { c = 0; mutex = Mutex.create (); cond = Condition.create () }
+  end
+
   module MT = struct
     type 'a global_state =
       { w : hold WQ.t (* work *)
       ; r : ('a eval * thread) WQ.t (* results *)
+      ; start_counter : Counter.t
       }
 
     and 'a local_state =
@@ -519,7 +545,8 @@ module Explicit = struct
     let init_global () =
       let w = WQ.init () in
       let r = WQ.init () in
-      { w; r }
+      let start_counter = Counter.create () in
+      { w; r; start_counter }
 
     let push_first_work g thread t =
       let k thread _st v = WQ.push (EVal v, thread) g.r in
@@ -541,9 +568,11 @@ module Explicit = struct
         | None -> ()
       in
       Domain.spawn (fun () ->
-        WQ.with_produce global.r (fun () ->
-          WQ.produce global.w producer;
-          ignore i (* Format.printf "@.@.PRODUCER END %i@.@." i; *) ) )
+          WQ.with_produce global.r
+            ~started:(fun () -> Counter.incr global.start_counter)
+            (fun () ->
+              WQ.produce global.w producer;
+              ignore i (* Format.printf "@.@.PRODUCER END %i@.@." i; *) ) )
 
     let worker_threads_count = 4
 
@@ -563,6 +592,7 @@ module Explicit = struct
       let producers =
         List.init worker_threads_count (fun i -> spawn_producer i global)
       in
+      Counter.wait_n global.start_counter worker_threads_count;
       loop_and_do (WQ.read_as_seq global.r) (fun () ->
         List.iter Domain.join producers )
   end
