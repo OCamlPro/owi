@@ -196,6 +196,8 @@ module type T = sig
 
   val ref_func : Func_intf.t -> t
 
+  val ref_externref : 'a Type.Id.t -> 'a -> t
+
   val ref_is_null : ref_value -> vbool
 
   val pp : Format.formatter -> t -> unit

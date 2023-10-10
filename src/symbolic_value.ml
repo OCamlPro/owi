@@ -53,7 +53,11 @@ module S = struct
 
   type float64 = Expr.t
 
-  type ref_value = Funcref of Func_intf.t option
+  type externref = Concrete_value.externref
+
+  type ref_value =
+    | Funcref of Func_intf.t option
+    | Externref of externref option
 
   type t =
     | I32 of int32
@@ -74,9 +78,11 @@ module S = struct
 
   let ref_func f : t = Ref (Funcref (Some f))
 
+  let ref_externref t v : t = Ref (Externref (Some (E (t, v))))
+
   let ref_is_null = function
-    | Funcref (Some _) -> Val (Bool false)
-    | Funcref None -> Val (Bool true)
+    | Funcref (Some _) | Externref (Some _) -> Val (Bool false)
+    | Funcref None | Externref None -> Val (Bool true)
 
   let pp ppf v =
     let e =
@@ -91,9 +97,19 @@ module S = struct
 
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-      match r with Funcref (Some f) -> Ref_value f | Funcref None -> Null
+      match r with
+      | Funcref (Some f) -> Ref_value f
+      | Funcref None -> Null
+      | Externref _ -> Type_mismatch
 
-    let get_externref _ = assert false
+    let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
+      t Value_intf.get_ref =
+      match r with
+      | Externref (Some (E (ety, v))) -> (
+          match Type.Id.provably_equal t ety with
+          | None -> assert false
+          | Some Equal -> Ref_value v )
+      | _ -> assert false
   end
 
   module Bool = struct

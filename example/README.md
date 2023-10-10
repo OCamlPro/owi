@@ -67,7 +67,7 @@ You can define the various required external functions in OCaml like this :
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Value.Func.extern_func Link.extern_module =
+let extern_module : Concrete_value.Func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
   let fresh i = ref i in
@@ -77,16 +77,17 @@ let extern_module : Value.Func.extern_func Link.extern_module =
   (* we need to describe their types *)
   let functions =
     [ ( "print_i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ; ( "fresh"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
     ; ( "set_i32r"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
     ; ( "get_i32r"
-      , Value.Func.Extern_func (Func (Arg (Externref rint, Res), R1 I32), get)
-      )
+      , Concrete_value.Func.Extern_func
+          (Func (Arg (Externref rint, Res), R1 I32), get) )
     ]
   in
   { functions }
@@ -107,11 +108,11 @@ let module_to_run, link_state =
     Compile.until_link link_state ~optimize:true ~name:None pure_wasm_module
   with
   | Error msg -> failwith msg
-  | Ok (m, link_state) -> m
+  | Ok v -> v
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.I.modul link_state.envs module_to_run with
+  match Interpret.Concrete.modul link_state.envs module_to_run with
   | Error msg -> failwith msg
   | Ok () -> ()
 ```

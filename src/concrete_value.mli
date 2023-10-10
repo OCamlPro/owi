@@ -43,6 +43,8 @@ val ref_null : Simplified.heap_type -> t
 
 val ref_func : Func.t -> t
 
+val ref_externref : 'a Type.Id.t -> 'a -> t
+
 val ref_is_null : ref_value -> bool
 
 val pp : Format.formatter -> t -> unit
