@@ -54,14 +54,15 @@
   syntax
   text
   thread
+  tracing
   trap
   typecheck
   types
   value_intf
   v
   wutf8)
- (private_modules convert lexer menhir_parser spectest wutf8)
- (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf)
+ (private_modules convert lexer menhir_parser spectest wutf8 tracing)
+ (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf runtime_events)
  (preprocess
   (pps sedlex.ppx))
  (instrumentation

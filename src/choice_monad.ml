@@ -22,7 +22,9 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
     Format.printf "CHECK:@.";
     List.iter (fun c -> print_endline (Encoding.Expression.to_string c)) check;
     let module Solver = (val solver_module) in
-    let r = Solver.check solver check in
+    let r =
+      Tracing.with_ev Tracing.check (fun () -> Solver.check solver check)
+    in
     let msg = if r then "KO" else "OK" in
     Format.printf "/CHECK %s@." msg;
     not r
@@ -40,8 +42,14 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
   | _ -> (
     let no = Symbolic_value.S.Bool.not sym_bool in
     let module Solver = (val solver_module) in
-    let sat_true = Solver.check s (sym_bool :: pc) in
-    let sat_false = Solver.check s (no :: pc) in
+    let sat_true =
+      Tracing.with_ev Tracing.check_true (fun () ->
+          Solver.check s (sym_bool :: pc))
+    in
+    let sat_false =
+      Tracing.with_ev Tracing.check_false (fun () ->
+          Solver.check s (no :: pc))
+    in
     match (sat_true, sat_false) with
     | false, false -> []
     | true, false -> [ (true, state) ]
@@ -115,9 +123,16 @@ let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
     let module Solver = (val solver_module) in
     let rec find_values values =
       let additionnal = List.map (not_value sym) values in
-      if not (Solver.check solver (additionnal @ pc)) then []
+      if
+        not
+          (Tracing.with_ev Tracing.check (fun () ->
+               Solver.check solver (additionnal @ pc) ) )
+      then []
       else begin
-        let model = Solver.model ~symbols:[ sym ] solver in
+        let model =
+          Tracing.with_ev Tracing.model (fun () ->
+              Solver.model ~symbols:[ sym ] solver )
+        in
         match model with
         | None -> assert false (* ? *)
         | Some model -> (
