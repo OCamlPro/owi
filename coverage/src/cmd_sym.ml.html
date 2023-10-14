@@ -918,14 +918,14 @@ let get_model (solver : Thread.Solver.t) thread =
 
 let stop_at_first_failure = true
 
-let cmd profiling debug unsafe optimize files =
+let cmd profiling debug unsafe optimize workers files =
   <span data-count="0">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
   <span data-count="0">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
   <span data-count="0">l</span>et solver = Thread.Solver.create () in
   <span data-count="0">l</span>et pc = Choice.return (Ok ()) in
   <span data-count="0">l</span>et result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   <span data-count="0">l</span>et thread : Thread.t = Thread.creat<span data-count="0">e</span> () in
-  let results = Choice.run_and_trap result thread in
+  let results = Choice.run_and_trap ~workers result thread in
   <span data-count="0">l</span>et failing =
     Seq.filter_map
       (fun (result, thread) -&gt;
@@ -936,7 +936,7 @@ let cmd profiling debug unsafe optimize files =
         <span data-count="0">m</span>atch result with
         | <span data-count="0">C</span>hoice_monad_intf.EVal (Ok ()) -&gt; None
         | <span data-count="0">E</span>Assert assertion -&gt;
-          Format.printf "Assert failure: %s@." assertion;
+          Format.printf "Assert failure: %a@." Encoding.Expression.pp assertion;
           <span data-count="0">l</span>et model = get_model solver thread in
           <span data-count="0">F</span>ormat.printf "Model:@.%s@." model;
           <span data-count="0">S</span>ome thread

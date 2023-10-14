@@ -66,8 +66,6 @@
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -116,8 +114,6 @@
 <a href="#L42">42</a>
 <a href="#L43">43</a>
 <a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -153,17 +149,15 @@ module type Complete = sig
   val run : 'a t -&gt; thread -&gt; ('a * thread) Seq.t
 end
 
-type assertion = string
-
 type 'a eval =
   | EVal of 'a
   | ETrap of Trap.t
-  | EAssert of assertion
+  | EAssert of Encoding.Expression.expr
 
 module type Complete_with_trap = sig
   include Complete
 
-  val run_and_trap : 'a t -&gt; thread -&gt; ('a eval * thread) Seq.t
+  val run_and_trap : workers:int -&gt; 'a t -&gt; thread -&gt; ('a eval * thread) Seq.t
 end
 </code></pre>
       </div>
