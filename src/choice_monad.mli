@@ -1,4 +1,4 @@
-exception Assertion of Choice_monad_intf.assertion * Thread.t
+exception Assertion of Encoding.Expression.expr * Thread.t
 
 module type T =
   Choice_monad_intf.Complete
@@ -10,14 +10,16 @@ module type T_trap =
     with type thread := Thread.t
      and module V := Symbolic_value.S
 
-module List : T
+module CList : T
 
-module Seq : T
+module CSeq : T
 
 module Explicit : sig
   include T_trap
 
-  val run_up_to : depth:int -> 'a t -> Thread.t -> ('a * Thread.t) Stdlib.Seq.t
+  val run_up_to : depth:int -> 'a t -> Thread.t -> ('a * Thread.t) Seq.t
 end
+
+module MT : T_trap
 
 val choices : (module T) list

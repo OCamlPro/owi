@@ -36,3 +36,9 @@ let create () =
   ; tables = Symbolic_table.init ()
   ; globals = Symbolic_global.init ()
   }
+
+let clone { solver; pc; memories; tables; globals } =
+  let memories = Symbolic_memory.clone memories in
+  let tables = Symbolic_table.clone tables in
+  let globals = Symbolic_global.clone globals in
+  { solver; pc; memories; tables; globals }

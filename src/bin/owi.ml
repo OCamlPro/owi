@@ -29,6 +29,10 @@ let unsafe =
   let doc = "skip typechecking pass" in
   Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
 
+let workers =
+  let doc = "number of workers for symbolic execution" in
+  Cmdliner.Arg.(value & opt int 4 & info [ "workers"; "w" ] ~doc)
+
 let copts_t = Cmdliner.Term.(const [])
 
 let sdocs = Cmdliner.Manpage.s_common_options
@@ -68,7 +72,9 @@ let sym_cmd =
     Cmd.info "sym" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+    Term.(
+      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
+      $ files )
 
 let cli =
   let open Cmdliner in

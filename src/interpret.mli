@@ -40,5 +40,5 @@ module Symbolic : sig
   val modul :
        Symbolic.P.env Env_id.collection
     -> Symbolic.P.Module_to_run.t
-    -> unit Result.t Choice_monad.Explicit.t
+    -> unit Result.t Symbolic.P.Choice.t
 end

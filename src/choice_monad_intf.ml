@@ -32,15 +32,13 @@ module type Complete = sig
   val run : 'a t -> thread -> ('a * thread) Seq.t
 end
 
-type assertion = string
-
 type 'a eval =
   | EVal of 'a
   | ETrap of Trap.t
-  | EAssert of assertion
+  | EAssert of Encoding.Expression.expr
 
 module type Complete_with_trap = sig
   include Complete
 
-  val run_and_trap : 'a t -> thread -> ('a eval * thread) Seq.t
+  val run_and_trap : workers:int -> 'a t -> thread -> ('a eval * thread) Seq.t
 end
