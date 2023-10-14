@@ -36,7 +36,7 @@ module Owi_unoptimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    match Compile.until_simplify modul with
+    match Compile.until_simplify ~unsafe:false modul with
     | Error e -> failwith e
     | Ok simplified -> (
       match Typecheck.modul simplified with
@@ -57,7 +57,7 @@ module Owi_optimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    match Compile.until_simplify modul with
+    match Compile.until_simplify ~unsafe:false modul with
     | Error e -> failwith e
     | Ok simplified -> (
       match Typecheck.modul simplified with

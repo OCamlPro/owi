@@ -3,9 +3,3 @@
  (modules owi)
  (package owi)
  (libraries sedlex owi cmdliner))
-
-(executable
- (public_name owi_sym)
- (modules owi_sym)
- (package owi)
- (libraries sedlex owi cmdliner))

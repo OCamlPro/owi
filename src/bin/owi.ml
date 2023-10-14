@@ -1,30 +1,8 @@
 open Owi
-open Syntax
 
-let simplify_then_link_then_run ~optimize file =
-  let* to_run, link_state =
-    list_fold_left
-      (fun ((to_run, state) as acc) instruction ->
-        match instruction with
-        | Text.Module m ->
-          let* m, state = Compile.until_link state ~optimize ~name:None m in
-          Ok (m :: to_run, state)
-        | Text.Register (name, id) ->
-          let* state = Link.register_module state ~name ~id in
-          Ok (to_run, state)
-        | _ -> Ok acc )
-      ([], Link.empty_state) file
-  in
-  list_iter (Interpret.Concrete.modul link_state.envs) (List.rev to_run)
-
-let run_file exec filename =
-  if not @@ Sys.file_exists filename then
-    error_s "file `%s` doesn't exist" filename
-  else
-    let* script = Parse.Script.from_file ~filename in
-    exec script
-
-(* Command line *)
+let debug =
+  let doc = "debug mode" in
+  Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
 let files =
   let doc = "source files" in
@@ -35,9 +13,9 @@ let files =
         (list ~sep:' ' (conv (parse, Format.pp_print_string)))
         [] (info [] ~doc) )
 
-let debug =
-  let doc = "debug mode" in
-  Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
+let no_exhaustion =
+  let doc = "no exhaustion tests" in
+  Cmdliner.Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
 
 let optimize =
   let doc = "optimize mode" in
@@ -47,30 +25,61 @@ let profiling =
   let doc = "profiling mode" in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
-let script =
-  let doc = "run as a reference test suite script" in
-  Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
+let unsafe =
+  let doc = "skip typechecking pass" in
+  Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
 
-let main profiling debug script optimize files =
-  let exec =
-    if script then Script.exec ~with_exhaustion:true ~optimize
-    else simplify_then_link_then_run ~optimize
+let copts_t = Cmdliner.Term.(const [])
+
+let sdocs = Cmdliner.Manpage.s_common_options
+
+let shared_man =
+  [ `S Cmdliner.Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
+
+let version = "%%VERSION%%"
+
+let run_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Run the concrete interpreter" in
+    let man = [] @ shared_man in
+    Cmd.info "run" ~version ~doc ~sdocs ~man
   in
-  if profiling then Log.profiling_on := true;
-  if debug then Log.debug_on := true;
-  let result = list_iter (run_file exec) files in
-  match result with
-  | Ok () -> ()
-  | Error e ->
-    Format.eprintf "%s@." e;
-    exit 1
+  Cmd.v info
+    Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+
+let script_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Run a reference test suite script" in
+    let man = [] @ shared_man in
+    Cmd.info "script" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info
+    Term.(
+      const Cmd_script.cmd $ profiling $ debug $ optimize $ files
+      $ no_exhaustion )
+
+let sym_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Run the symbolic interpreter" in
+    let man = [] @ shared_man in
+    Cmd.info "sym" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info
+    Term.(const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ files)
 
 let cli =
   let open Cmdliner in
-  let doc = "OCaml WebAssembly Interpreter" in
-  let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
-  let info = Cmd.info "owi" ~version:"%%VERSION%%" ~doc ~man in
-  Cmd.v info Term.(const main $ profiling $ debug $ script $ optimize $ files)
+  let info =
+    let doc = "OCaml WebAssembly Interpreter" in
+    let sdocs = Manpage.s_common_options in
+    let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
+    Cmd.info "owi" ~version ~doc ~sdocs ~man
+  in
+  let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
+  Cmd.group info ~default [ run_cmd; script_cmd; sym_cmd ]
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 

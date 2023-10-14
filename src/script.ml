@@ -136,7 +136,9 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
     let+ global = load_global_from_module link_state mod_id name in
     [ global.value ]
 
-let run ~with_exhaustion ~optimize script =
+let unsafe = false
+
+let run ~no_exhaustion ~optimize script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
@@ -152,7 +154,7 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** module@\n";
         incr curr_module;
         let+ link_state =
-          Compile.until_interpret link_state ~optimize ~name:None m
+          Compile.until_interpret link_state ~unsafe ~optimize ~name:None m
         in
         Log.debug_on := debug_on;
         link_state
@@ -160,7 +162,7 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** assert_trap@\n";
         incr curr_module;
         let* m, link_state =
-          Compile.until_link link_state ~optimize ~name:None m
+          Compile.until_link link_state ~unsafe ~optimize ~name:None m
         in
         let+ () =
           check_error_result expected
@@ -177,7 +179,7 @@ let run ~with_exhaustion ~optimize script =
           match Parse.Script.from_string (String.concat "\n" m) with
           | Error got -> check_error ~expected ~got
           | Ok [ Module m ] -> (
-            match Compile.until_simplify m with
+            match Compile.until_simplify ~unsafe m with
             | Error got -> check_error ~expected ~got
             | Ok _m ->
               let got = "Ok" in
@@ -192,7 +194,9 @@ let run ~with_exhaustion ~optimize script =
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug "*** assert_invalid@\n";
         let+ () =
-          match Compile.until_link link_state ~optimize ~name:None m with
+          match
+            Compile.until_link link_state ~unsafe ~optimize ~name:None m
+          with
           | Ok _ -> check_error ~expected ~got:"Ok"
           | Error got -> check_error ~expected ~got
         in
@@ -206,7 +210,7 @@ let run ~with_exhaustion ~optimize script =
         Log.debug "*** assert_unlinkable@\n";
         let+ () =
           check_error_result expected
-            (Compile.until_link link_state ~optimize ~name:None m)
+            (Compile.until_link link_state ~unsafe ~optimize ~name:None m)
         in
         link_state
       | Assert (Assert_malformed _) ->
@@ -232,10 +236,10 @@ let run ~with_exhaustion ~optimize script =
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.debug "*** assert_exhaustion@\n";
         let+ () =
-          if with_exhaustion then
+          if no_exhaustion then Ok ()
+          else
             let got = action link_state a in
             check_error_result expected got
-          else Ok ()
         in
         link_state
       | Register (name, mod_name) ->
@@ -250,6 +254,6 @@ let run ~with_exhaustion ~optimize script =
         link_state )
     state script
 
-let exec ?(with_exhaustion = false) ~optimize script =
-  let+ _link_state = run ~with_exhaustion ~optimize script in
+let exec ~no_exhaustion ~optimize script =
+  let+ _link_state = run ~no_exhaustion ~optimize script in
   ()

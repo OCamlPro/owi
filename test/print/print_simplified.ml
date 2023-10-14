@@ -10,7 +10,9 @@ let m =
   | Error msg -> failwith msg
 
 let m =
-  match Compile.until_simplify m with Ok m -> m | Error msg -> failwith msg
+  match Compile.until_simplify ~unsafe:false m with
+  | Ok m -> m
+  | Error msg -> failwith msg
 
 let s = Format.asprintf "%a@\n" Simplified.Pp.modul m
 
@@ -18,6 +20,8 @@ let m =
   match Parse.Module.from_string s with Ok m -> m | Error msg -> failwith msg
 
 let m =
-  match Compile.until_simplify m with Ok m -> m | Error msg -> failwith msg
+  match Compile.until_simplify ~unsafe:false m with
+  | Ok m -> m
+  | Error msg -> failwith msg
 
 let () = Format.printf "%a@\n" Simplified.Pp.modul m

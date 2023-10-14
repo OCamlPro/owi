@@ -6,6 +6,8 @@ let m =
   | Error msg -> failwith msg
 
 let m =
-  match Compile.until_simplify m with Ok m -> m | Error msg -> failwith msg
+  match Compile.until_simplify ~unsafe:false m with
+  | Ok m -> m
+  | Error msg -> failwith msg
 
 let () = Format.printf "%a@\n" Simplified.Pp.modul (Optimize.modul m)

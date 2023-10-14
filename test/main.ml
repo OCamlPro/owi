@@ -19,7 +19,7 @@ let test_file ~optimize f =
   try
     match Owi.Parse.Script.from_file ~filename:(Fpath.to_string f) with
     | Ok script -> begin
-      match Owi.Script.exec script ~optimize with
+      match Owi.Script.exec script ~optimize ~no_exhaustion:true with
       | Ok () as ok ->
         pp_ok ();
         ok
