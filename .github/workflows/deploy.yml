@@ -13,9 +13,9 @@ jobs:
           submodules: recursive
           persist-credentials: false
       - name: setup-ocaml
-        uses: avsm/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: "5.0"
+          ocaml-compiler: "5.1"
       - name: setup-deploy
         run: |
           opam pin add . -y --no-action
