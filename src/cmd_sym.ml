@@ -227,14 +227,14 @@ let get_model (solver : Thread.Solver.t) thread =
 
 let stop_at_first_failure = true
 
-let cmd profiling debug unsafe optimize files =
+let cmd profiling debug unsafe optimize workers files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Thread.Solver.create () in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Choice.run_and_trap result thread in
+  let results = Choice.run_and_trap ~workers result thread in
   let failing =
     Seq.filter_map
       (fun (result, thread) ->
@@ -245,7 +245,7 @@ let cmd profiling debug unsafe optimize files =
         match result with
         | Choice_monad_intf.EVal (Ok ()) -> None
         | EAssert assertion ->
-          Format.printf "Assert failure: %s@." assertion;
+          Format.printf "Assert failure: %a@." Encoding.Expression.pp assertion;
           let model = get_model solver thread in
           Format.printf "Model:@.%s@." model;
           Some thread
