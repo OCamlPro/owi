@@ -101,32 +101,32 @@
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span class="visited"> </span>
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span class="visited"> </span>
-<a id="L85"></a><span > </span>
+<a id="L85"></a><span class="visited"> </span>
 <a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
 <a id="L88"></a><span > </span>
 <a id="L89"></a><span class="visited"> </span>
-<a id="L90"></a><span > </span>
+<a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span > </span>
 <a id="L93"></a><span > </span>
 <a id="L94"></a><span class="visited"> </span>
-<a id="L95"></a><span > </span>
+<a id="L95"></a><span class="visited"> </span>
 <a id="L96"></a><span class="visited"> </span>
 <a id="L97"></a><span > </span>
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span class="visited"> </span>
-<a id="L100"></a><span > </span>
+<a id="L100"></a><span class="visited"> </span>
 <a id="L101"></a><span class="visited"> </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
 <a id="L104"></a><span class="visited"> </span>
-<a id="L105"></a><span > </span>
+<a id="L105"></a><span class="visited"> </span>
 <a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
@@ -209,43 +209,44 @@
 <a id="L185"></a><span > </span>
 <a id="L186"></a><span > </span>
 <a id="L187"></a><span > </span>
-<a id="L188"></a><span > </span>
+<a id="L188"></a><span class="visited"> </span>
 <a id="L189"></a><span > </span>
-<a id="L190"></a><span class="visited"> </span>
+<a id="L190"></a><span > </span>
 <a id="L191"></a><span class="visited"> </span>
-<a id="L192"></a><span > </span>
-<a id="L193"></a><span class="visited"> </span>
+<a id="L192"></a><span class="visited"> </span>
+<a id="L193"></a><span > </span>
 <a id="L194"></a><span class="visited"> </span>
-<a id="L195"></a><span > </span>
-<a id="L196"></a><span class="visited"> </span>
-<a id="L197"></a><span > </span>
+<a id="L195"></a><span class="visited"> </span>
+<a id="L196"></a><span > </span>
+<a id="L197"></a><span class="visited"> </span>
 <a id="L198"></a><span > </span>
 <a id="L199"></a><span > </span>
-<a id="L200"></a><span class="visited"> </span>
-<a id="L201"></a><span > </span>
+<a id="L200"></a><span > </span>
+<a id="L201"></a><span class="visited"> </span>
 <a id="L202"></a><span > </span>
-<a id="L203"></a><span class="visited"> </span>
+<a id="L203"></a><span > </span>
 <a id="L204"></a><span class="visited"> </span>
-<a id="L205"></a><span > </span>
-<a id="L206"></a><span class="visited"> </span>
-<a id="L207"></a><span > </span>
-<a id="L208"></a><span class="visited"> </span>
+<a id="L205"></a><span class="visited"> </span>
+<a id="L206"></a><span > </span>
+<a id="L207"></a><span class="visited"> </span>
+<a id="L208"></a><span > </span>
 <a id="L209"></a><span class="visited"> </span>
-<a id="L210"></a><span > </span>
+<a id="L210"></a><span class="visited"> </span>
 <a id="L211"></a><span > </span>
-<a id="L212"></a><span class="visited"> </span>
+<a id="L212"></a><span > </span>
 <a id="L213"></a><span class="visited"> </span>
-<a id="L214"></a><span > </span>
-<a id="L215"></a><span class="visited"> </span>
-<a id="L216"></a><span > </span>
+<a id="L214"></a><span class="visited"> </span>
+<a id="L215"></a><span > </span>
+<a id="L216"></a><span class="visited"> </span>
 <a id="L217"></a><span > </span>
-<a id="L218"></a><span class="visited"> </span>
+<a id="L218"></a><span > </span>
 <a id="L219"></a><span class="visited"> </span>
-<a id="L220"></a><span > </span>
+<a id="L220"></a><span class="visited"> </span>
 <a id="L221"></a><span > </span>
-<a id="L222"></a><span class="visited"> </span>
-<a id="L223"></a><span > </span>
-<a id="L224"></a><span class="visited"> </span>
+<a id="L222"></a><span > </span>
+<a id="L223"></a><span class="visited"> </span>
+<a id="L224"></a><span > </span>
+<a id="L225"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -474,6 +475,7 @@
 <a href="#L222">222</a>
 <a href="#L223">223</a>
 <a href="#L224">224</a>
+<a href="#L225">225</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -483,11 +485,11 @@ open Syntax
 open Types
 open Simplified
 
-type type_check = Symbolic.indice * Symbolic.func_type
+type type_check = Text.indice * Text.func_type
 
 type opt_ind =
   | Curr of int
-  | Indice of Symbolic.indice
+  | Indice of Text.indice
 
 type opt_export =
   { name : string
@@ -501,29 +503,29 @@ type opt_exports =
   ; func : opt_export list
   }
 
-let curr_id (curr : int) (i : Symbolic.indice option) =
+let curr_id (curr : int) (i : Text.indice option) =
   <span data-count="12231">m</span>atch i with <span data-count="7126">N</span>one -&gt; Curr (pre<span data-count="7126">d</span> curr) | <span data-count="5105">S</span>ome id -&gt; Indice id
 
 type t =
   { id : string option
-  ; typ : Symbolic.type_def list
-  ; function_type : Symbolic.func_type list
+  ; typ : Text.type_def list
+  ; function_type : Text.func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Symbolic.global, global_type) Runtime.t Indexed.t list
+  ; global : (Text.global, global_type) Runtime.t Indexed.t list
   ; table : (table, table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (Symbolic.func, Symbolic.block_type) Runtime.t Indexed.t list
-  ; elem : Symbolic.elem Indexed.t list
-  ; data : Symbolic.data Indexed.t list
+  ; func : (Text.func, Text.block_type) Runtime.t Indexed.t list
+  ; elem : Text.elem Indexed.t list
+  ; data : Text.data Indexed.t list
   ; exports : opt_exports
-  ; start : Symbolic.indice option
+  ; start : Text.indice option
   }
 
-let imp (import : Symbolic.import) (assigned_name, desc) : 'a Imported.t =
+let imp (import : Text.import) (assigned_name, desc) : 'a Imported.t =
   <span data-count="3564">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
@@ -554,32 +556,32 @@ let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
 let add_global value (fields : t) (curr : curr) =
   <span data-count="1388">l</span>et index = curr.global in
-  ( { fields with global = { index; value } :: fields.global }
+  ( { fields with global = Indexed.retur<span data-count="1388">n</span> index value :: fields.global }
   , { curr with global = suc<span data-count="1388">c</span> curr.global } )
 
 let add_table value (fields : t) (curr : curr) =
   <span data-count="1313">l</span>et index = curr.table in
-  ( { fields with table = { index; value } :: fields.table }
+  ( { fields with table = Indexed.retur<span data-count="1313">n</span> index value :: fields.table }
   , { curr with table = suc<span data-count="1313">c</span> curr.table } )
 
 let add_mem value (fields : t) (curr : curr) =
   <span data-count="1535">l</span>et index = curr.mem in
-  ( { fields with mem = { index; value } :: fields.mem }
+  ( { fields with mem = Indexed.retur<span data-count="1535">n</span> index value :: fields.mem }
   , { curr with mem = suc<span data-count="1535">c</span> curr.mem } )
 
 let add_func value (fields : t) (curr : curr) =
   <span data-count="3158">l</span>et index = curr.func in
-  ( { fields with func = { index; value } :: fields.func }
+  ( { fields with func = Indexed.retur<span data-count="3158">n</span> index value :: fields.func }
   , { curr with func = suc<span data-count="3158">c</span> curr.func } )
 
 let add_elem value (fields : t) (curr : curr) =
   <span data-count="1512">l</span>et index = curr.elem in
-  ( { fields with elem = { index; value } :: fields.elem }
+  ( { fields with elem = Indexed.retur<span data-count="1512">n</span> index value :: fields.elem }
   , { curr with elem = suc<span data-count="1512">c</span> curr.elem } )
 
 let add_data value (fields : t) (curr : curr) =
   <span data-count="820">l</span>et index = curr.data in
-  ( { fields with data = { index; value } :: fields.data }
+  ( { fields with data = Indexed.retur<span data-count="820">n</span> index value :: fields.data }
   , { curr with data = suc<span data-count="820">c</span> curr.data } )
 
 let check_limit { min; max } =
@@ -589,11 +591,11 @@ let check_limit { min; max } =
     if min &gt; max then <span data-count="6">E</span>rror "size minimum must not be greater than maximum"
     else <span data-count="1370">O</span>k ()
 
-let of_symbolic (modul : Symbolic.modul) : t Result.t =
+let of_symbolic (modul : Text.modul) : t Result.t =
   <span data-count="5897">L</span>og.debug "grouping     ...@\n";
   <span data-count="5897">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
     <span data-count="34903">m</span>atch field with
-    | <span data-count="520">S</span>ymbolic.MType typ -&gt;
+    | <span data-count="520">T</span>ext.MType typ -&gt;
       let typ = typ @ fields.typ in
       ok @@ ({ fields with typ }, curr)
     | <span data-count="1228">M</span>Global global -&gt; ok @@ add_globa<span data-count="1228">l</span> (Local global) fields curr
@@ -661,7 +663,8 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
           (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
-      let func = { Indexed.value = Runtime.Local func; index } :: fields.func in
+      let value = Runtime.Local func in
+      let func = Indexed.retur<span data-count="12372">n</span> index value :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
         , { curr with func = suc<span data-count="12372">c</span> curr.func } )
@@ -677,7 +680,7 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
     | <span data-count="1512">M</span>Elem elem -&gt;
       let mode =
         match elem.mode with
-        | (<span data-count="704">S</span>ymbolic.Elem_passive | <span data-count="28">E</span>lem_declarative) as mode -&gt; mode
+        | (<span data-count="704">T</span>ext.Elem_passive | <span data-count="28">E</span>lem_declarative) as mode -&gt; mode
         | <span data-count="780">E</span>lem_active (id, expr) -&gt;
           let id = Option.value id ~default:(Raw (curr.table - 1)) in
           <span data-count="780">E</span>lem_active (Some id, expr)
@@ -686,12 +689,12 @@ let of_symbolic (modul : Symbolic.modul) : t Result.t =
     | <span data-count="820">M</span>Data data -&gt;
       let mode =
         match data.mode with
-        | <span data-count="482">D</span>ata_passive -&gt; Symbolic.Data_passive
+        | <span data-count="482">D</span>ata_passive -&gt; Text.Data_passive
         | <span data-count="338">D</span>ata_active (id, expr) -&gt;
           let id = Option.value id ~default:(Raw (curr.mem - 1)) in
           <span data-count="338">D</span>ata_active (Some id, expr)
       in
-      let data : Symbolic.data = { id = data.id; init = data.init; mode } in
+      let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_dat<span data-count="820">a</span> data fields curr
     | <span data-count="36">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in

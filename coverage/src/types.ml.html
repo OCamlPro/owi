@@ -2154,6 +2154,7 @@ struct
     (* Reference instructions *)
     | Ref_null of heap_type
     | Ref_is_null
+    | Ref_i31
     | Ref_func of indice
     | Ref_as_non_null
     | Ref_cast of nullable * heap_type
@@ -2227,7 +2228,6 @@ struct
     (* I31 *)
     | I31_get_u
     | I31_get_s
-    | I31_new
     (* struct*)
     | Struct_get of indice * indice
     | Struct_get_s of indice * indice
@@ -2329,7 +2329,7 @@ struct
       | I_binop of nn * ibinop
       | Array_new of indice
       | Array_new_default of indice
-      | I31_new
+      | Ref_i31
 
     type expr = instr list
   end
@@ -2640,7 +2640,7 @@ struct
       | <span data-count="0">A</span>rray_get_u id -&gt; Format.fprintf fmt "array.get_u %a" indice id
       | <span data-count="0">A</span>rray_set id -&gt; Format.fprintf fmt "array.set %a" indice id
       | <span data-count="0">A</span>rray_len -&gt; Format.fprintf fmt "array.len"
-      | <span data-count="0">I</span>31_new -&gt; Format.fprintf fmt "i31.new"
+      | <span data-count="0">R</span>ef_i31 -&gt; Format.fprintf fmt "ref.i31"
       | <span data-count="0">I</span>31_get_s -&gt; Format.fprintf fmt "i31.get_s"
       | <span data-count="0">I</span>31_get_u -&gt; Format.fprintf fmt "i31.get_u"
       | <span data-count="0">S</span>truct_get (i1, i2) -&gt;
@@ -2783,7 +2783,7 @@ struct
         | <span data-count="0">R</span>ef_func fid -&gt; Format.fprintf fmt "ref.func %a" indice fid
         | <span data-count="0">A</span>rray_new _ -&gt; Format.fprintf fmt "array.new"
         | <span data-count="0">A</span>rray_new_default _ -&gt; Format.fprintf fmt "array.new_default"
-        | <span data-count="0">I</span>31_new -&gt; Format.fprintf fmt "i31.new"
+        | <span data-count="0">R</span>ef_i31 -&gt; Format.fprintf fmt "ref.i31"
 
       let expr fmt instrs =
         <span data-count="0">F</span>ormat.pp_print_list

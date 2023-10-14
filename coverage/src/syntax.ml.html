@@ -175,15 +175,15 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-let ( let* ) o f = <span data-count="934507">m</span>atch o with <span data-count="924647">O</span>k v -&gt; f v | <span data-count="9860">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="935529">m</span>atch o with <span data-count="925331">O</span>k v -&gt; f v | <span data-count="10198">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="232381">m</span>atch o with <span data-count="230929">O</span>k v -&gt; Ok (<span data-count="230929">f</span> v) | <span data-count="1452">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="237386">m</span>atch o with <span data-count="235904">O</span>k v -&gt; Ok (<span data-count="235904">f</span> v) | <span data-count="1482">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="2712">E</span>rror v
 
 let error_s format = <span data-count="2672">F</span>ormat.kasprintf error format
 
-let ok v = <span data-count="451242">O</span>k v
+let ok v = <span data-count="451266">O</span>k v
 
 let list_iter f l =
   <span data-count="23675">l</span>et exception E of string in

@@ -18,8 +18,8 @@
       <h2>83.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:10.04%"></span>
-      <span class="unvisited" style="top:10.92%"></span>
+      <span class="unvisited" style="top:11.26%"></span>
+      <span class="unvisited" style="top:12.16%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -33,24 +33,24 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
@@ -246,13 +246,6 @@
 <a id="L220"></a><span > </span>
 <a id="L221"></a><span > </span>
 <a id="L222"></a><span > </span>
-<a id="L223"></a><span > </span>
-<a id="L224"></a><span > </span>
-<a id="L225"></a><span > </span>
-<a id="L226"></a><span > </span>
-<a id="L227"></a><span > </span>
-<a id="L228"></a><span > </span>
-<a id="L229"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -479,21 +472,16 @@
 <a href="#L220">220</a>
 <a href="#L221">221</a>
 <a href="#L222">222</a>
-<a href="#L223">223</a>
-<a href="#L224">224</a>
-<a href="#L225">225</a>
-<a href="#L226">226</a>
-<a href="#L227">227</a>
-<a href="#L228">228</a>
-<a href="#L229">229</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Symbolic
+open Text
 
-let extern_m : Link.extern_module =
+type extern_module = Concrete_value.Func.extern_func Link.extern_module
+
+let extern_m : extern_module =
   let fmt = Format.std_formatter in
   let print = () in
   let print_i32 i = <span data-count="37">F</span>ormat.fprintf fmt "%li@\n%!" i in
@@ -514,27 +502,33 @@ let extern_m : Link.extern_module =
   let func_in_i32_out_i32 (_i : int32) = <span data-count="0">1</span>l in
 
   let functions =
-    [ ("print", Value.Func.Extern_func (Func (Res, R0), print))
+    [ ("print", Concrete_value.Func.Extern_func (Func (Res, R0), print))
     ; ( "print_i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ; ( "print_i64"
-      , Value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64) )
+      , Concrete_value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64)
+      )
     ; ( "print_f32"
-      , Value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32) )
+      , Concrete_value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32)
+      )
     ; ( "print_f64"
-      , Value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64) )
+      , Concrete_value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64)
+      )
     ; ( "print_i32_f32"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
     ; ( "print_f64_f64"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
-    ; ("func", Value.Func.Extern_func (Func (Res, R0), func))
+    ; ("func", Concrete_value.Func.Extern_func (Func (Res, R0), func))
     ; ( "func-i32"
-      , Value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32) )
-    ; ("func-&gt;i32", Value.Func.Extern_func (Func (Res, R1 I32), func_out_i32))
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32)
+      )
+    ; ( "func-&gt;i32"
+      , Concrete_value.Func.Extern_func (Func (Res, R1 I32), func_out_i32) )
     ; ( "func-i32-&gt;i32"
-      , Value.Func.Extern_func
+      , Concrete_value.Func.Extern_func
           (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
     ]
   in
@@ -655,64 +649,49 @@ let m =
             ; init = [ F64_const Float64.zero ]
             ; id = Some "global_f64"
             }
-        ; MExport { name = "func"; desc = Export_func (Some (Symbolic "func")) }
+        ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
         ; MExport
-            { name = "func-i32"
-            ; desc = Export_func (Some (Symbolic "func-i32"))
-            }
+            { name = "func-i32"; desc = Export_func (Some (Text "func-i32")) }
         ; MExport
-            { name = "func-&gt;i32"
-            ; desc = Export_func (Some (Symbolic "func-&gt;i32"))
-            }
+            { name = "func-&gt;i32"; desc = Export_func (Some (Text "func-&gt;i32")) }
         ; MExport
             { name = "func-i32-&gt;i32"
-            ; desc = Export_func (Some (Symbolic "func-i32-&gt;i32"))
+            ; desc = Export_func (Some (Text "func-i32-&gt;i32"))
             }
+        ; MExport { name = "memory"; desc = Export_mem (Some (Text "memory")) }
+        ; MExport { name = "table"; desc = Export_table (Some (Text "table")) }
+        ; MExport { name = "print"; desc = Export_func (Some (Text "print")) }
         ; MExport
-            { name = "memory"; desc = Export_mem (Some (Symbolic "memory")) }
+            { name = "print_i32"; desc = Export_func (Some (Text "print_i32")) }
         ; MExport
-            { name = "table"; desc = Export_table (Some (Symbolic "table")) }
+            { name = "print_f32"; desc = Export_func (Some (Text "print_f32")) }
         ; MExport
-            { name = "print"; desc = Export_func (Some (Symbolic "print")) }
+            { name = "print_i64"; desc = Export_func (Some (Text "print_i64")) }
         ; MExport
-            { name = "print_i32"
-            ; desc = Export_func (Some (Symbolic "print_i32"))
-            }
-        ; MExport
-            { name = "print_f32"
-            ; desc = Export_func (Some (Symbolic "print_f32"))
-            }
-        ; MExport
-            { name = "print_i64"
-            ; desc = Export_func (Some (Symbolic "print_i64"))
-            }
-        ; MExport
-            { name = "print_f64"
-            ; desc = Export_func (Some (Symbolic "print_f64"))
-            }
+            { name = "print_f64"; desc = Export_func (Some (Text "print_f64")) }
         ; MExport
             { name = "print_i32_f32"
-            ; desc = Export_func (Some (Symbolic "print_i32_f32"))
+            ; desc = Export_func (Some (Text "print_i32_f32"))
             }
         ; MExport
             { name = "print_f64_f64"
-            ; desc = Export_func (Some (Symbolic "print_f64_f64"))
+            ; desc = Export_func (Some (Text "print_f64_f64"))
             }
         ; MExport
             { name = "global_i32"
-            ; desc = Export_global (Some (Symbolic "global_i32"))
+            ; desc = Export_global (Some (Text "global_i32"))
             }
         ; MExport
             { name = "global_i64"
-            ; desc = Export_global (Some (Symbolic "global_i64"))
+            ; desc = Export_global (Some (Text "global_i64"))
             }
         ; MExport
             { name = "global_f32"
-            ; desc = Export_global (Some (Symbolic "global_f32"))
+            ; desc = Export_global (Some (Text "global_f32"))
             }
         ; MExport
             { name = "global_f64"
-            ; desc = Export_global (Some (Symbolic "global_f64"))
+            ; desc = Export_global (Some (Text "global_f64"))
             }
         ]
     }

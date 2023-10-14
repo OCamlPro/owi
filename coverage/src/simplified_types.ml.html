@@ -255,7 +255,7 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function
-  | <span data-count="0">S</span>ymbolic.Any_ht -&gt; Ok Any_ht
+  | <span data-count="0">T</span>ext.Any_ht -&gt; Ok Any_ht
   | <span data-count="0">N</span>one_ht -&gt; Ok None_ht
   | <span data-count="0">E</span>q_ht -&gt; Ok Eq_ht
   | <span data-count="0">I</span>31_ht -&gt; Ok I31_ht
@@ -266,7 +266,7 @@ let convert_heap_type tbl = function
   | <span data-count="340">E</span>xtern_ht -&gt; Ok Extern_ht
   | <span data-count="0">N</span>o_extern_ht -&gt; Ok No_extern_ht
   | <span data-count="0">D</span>ef_ht (Raw i) -&gt; ok @@ Def_ht i
-  | <span data-count="0">D</span>ef_ht (Symbolic i) -&gt; begin
+  | <span data-count="0">D</span>ef_ht (Text i) -&gt; begin
     match tbl with
     | <span data-count="0">N</span>one -&gt; error_s "unknown type %s (no table)" i
     | <span data-count="0">S</span>ome tbl -&gt; begin
@@ -281,7 +281,7 @@ let convert_ref_type tbl (null, heap_type) =
   <span data-count="3033">(</span>null, heap_type)
 
 let convert_val_type tbl = function
-  | <span data-count="38091">S</span>ymbolic.Num_type t -&gt; ok @@ Num_type t
+  | <span data-count="38091">T</span>ext.Num_type t -&gt; ok @@ Num_type t
   | <span data-count="250">R</span>ef_type rt -&gt;
     let+ rt = convert_ref_typ<span data-count="250">e</span> tbl rt in
     <span data-count="250">R</span>ef_type rt
@@ -300,7 +300,7 @@ let convert_func_type tbl (pt, rt) =
   <span data-count="30268">(</span>pt, rt)
 
 let convert_storage_type tbl = function
-  | <span data-count="0">S</span>ymbolic.Val_storage_t val_type -&gt;
+  | <span data-count="0">T</span>ext.Val_storage_t val_type -&gt;
     let+ val_type = convert_val_typ<span data-count="0">e</span> tbl val_type in
     <span data-count="0">V</span>al_storage_t val_type
   | <span data-count="0">V</span>al_packed_t packed_type -&gt; ok @@ Val_packed_t packed_type
@@ -316,7 +316,7 @@ let convert_struct_field tbl (id, types) =
 let convert_struct_type tbl fields = <span data-count="0">l</span>ist_map (convert_struct_fiel<span data-count="0">d</span> tbl) fields
 
 let convert_str tbl = function
-  | <span data-count="520">S</span>ymbolic.Def_func_t func_t -&gt;
+  | <span data-count="520">T</span>ext.Def_func_t func_t -&gt;
     let+ func_t = convert_func_typ<span data-count="520">e</span> tbl func_t in
     <span data-count="520">D</span>ef_func_t func_t
   | <span data-count="0">D</span>ef_array_t field_t -&gt;
