@@ -1,5 +1,5 @@
 return instructions:
-  $ dune exec -- owi --debug --optimize return.wast
+  $ dune exec -- owi run --debug --optimize return.wast
   parsing      ...
   checking     ...
   grouping     ...
@@ -60,4 +60,3 @@ return instructions:
   running instr: drop
   stack        : [  ]
   stack        : [  ]
-

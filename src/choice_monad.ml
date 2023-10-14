@@ -44,11 +44,10 @@ let eval_choice (sym_bool : vbool) (state : Thread.t) : (bool * Thread.t) list =
     let module Solver = (val solver_module) in
     let sat_true =
       Tracing.with_ev Tracing.check_true (fun () ->
-          Solver.check s (sym_bool :: pc))
+        Solver.check s (sym_bool :: pc) )
     in
     let sat_false =
-      Tracing.with_ev Tracing.check_false (fun () ->
-          Solver.check s (no :: pc))
+      Tracing.with_ev Tracing.check_false (fun () -> Solver.check s (no :: pc))
     in
     match (sat_true, sat_false) with
     | false, false -> []
@@ -126,12 +125,12 @@ let eval_choice_i32 (sym_int : vint32) (state : Thread.t) :
       if
         not
           (Tracing.with_ev Tracing.check (fun () ->
-               Solver.check solver (additionnal @ pc) ) )
+             Solver.check solver (additionnal @ pc) ) )
       then []
       else begin
         let model =
           Tracing.with_ev Tracing.model (fun () ->
-              Solver.model ~symbols:[ sym ] solver )
+            Solver.model ~symbols:[ sym ] solver )
         in
         match model with
         | None -> assert false (* ? *)
@@ -461,14 +460,14 @@ module Explicit = struct
       started ();
       match f () with
       | () ->
-         Mutex.lock q.mutex;
-         q.producers <- q.producers - 1;
-         if q.producers = 0 then Condition.broadcast q.cond;
-         Mutex.unlock q.mutex
+        Mutex.lock q.mutex;
+        q.producers <- q.producers - 1;
+        if q.producers = 0 then Condition.broadcast q.cond;
+        Mutex.unlock q.mutex
       | exception e ->
-         let bt = Printexc.get_raw_backtrace () in
-         fail q;
-         Printexc.raise_with_backtrace e bt
+        let bt = Printexc.get_raw_backtrace () in
+        fail q;
+        Printexc.raise_with_backtrace e bt
 
     let init () =
       { mutex = Mutex.create ()
@@ -583,11 +582,11 @@ module Explicit = struct
         | None -> ()
       in
       Domain.spawn (fun () ->
-          WQ.with_produce global.r
-            ~started:(fun () -> Counter.incr global.start_counter)
-            (fun () ->
-              WQ.produce global.w producer;
-              ignore i (* Format.printf "@.@.PRODUCER END %i@.@." i; *) ) )
+        WQ.with_produce global.r
+          ~started:(fun () -> Counter.incr global.start_counter)
+          (fun () ->
+            WQ.produce global.w producer;
+            ignore i (* Format.printf "@.@.PRODUCER END %i@.@." i; *) ) )
 
     let worker_threads_count = 4
 

@@ -1,4 +1,3 @@
-open Owi
 open Syntax
 module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
@@ -220,37 +219,6 @@ let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
     let*/ script = Parse.Script.from_file ~filename in
     simplify_then_link_then_run ~unsafe ~optimize pc script
 
-(* Command line *)
-
-let files =
-  let doc = "source files" in
-  let parse s = Ok s in
-  Cmdliner.Arg.(
-    value
-    & pos 0
-        (list ~sep:' ' (conv (parse, Format.pp_print_string)))
-        [] (info [] ~doc) )
-
-let debug =
-  let doc = "debug mode" in
-  Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
-
-let optimize =
-  let doc = "optimize mode" in
-  Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
-
-let profiling =
-  let doc = "profiling mode" in
-  Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
-
-let script =
-  let doc = "run as a reference test suite script" in
-  Cmdliner.Arg.(value & flag & info [ "script"; "s" ] ~doc)
-
-let unsafe =
-  let doc = "skip typechecking pass" in
-  Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
-
 let get_model (solver : Thread.Solver.t) thread =
   assert (Thread.Solver.check solver (Thread.pc thread));
   match Thread.Solver.model solver with
@@ -259,7 +227,7 @@ let get_model (solver : Thread.Solver.t) thread =
 
 let stop_at_first_failure = true
 
-let main profiling debug _script unsafe optimize files =
+let cmd profiling debug unsafe optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let solver = Thread.Solver.create () in
@@ -308,15 +276,3 @@ let main profiling debug _script unsafe optimize files =
   Format.printf "      calls %i@." count;
   Format.printf "  mean time %fms@." (1000. *. time /. float count);
   ()
-
-let cli =
-  let open Cmdliner in
-  let doc = "OCaml WebAssembly Interpreter" in
-  let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
-  let info = Cmd.info "owi" ~version:"%%VERSION%%" ~doc ~man in
-  Cmd.v info
-    Term.(const main $ profiling $ debug $ script $ unsafe $ optimize $ files)
-
-let main () = exit @@ Cmdliner.Cmd.eval cli
-
-let () = main ()

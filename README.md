@@ -33,7 +33,7 @@ Given a file `test/passing/quickstart.wast` with the following content:
 
 Running the executable interpreter is as simple as:
 ```sh
-$ dune exec owi -- --debug test/passing/quickstart.wast
+$ dune exec owi -- run --debug test/passing/quickstart.wast
 parsing      ...
 checking     ...
 grouping     ...
@@ -57,7 +57,7 @@ stack        : [  ]
 stack        : [  ]
 ```
 
-You can also pass the `--script` flag to run the file as a [reference test suite script]. This will allow you to add constructs like assertions and will also link the [spectest module], which provides function for e.g. printing.
+If you want to run the file as a [reference test suite script], you can use the `script` command instead of the `run` one. This will allow you to add constructs like assertions and will also link the [spectest module], which provides function for e.g. printing.
 
 If you're interested in the library part of owi, here's how to get started:
 
@@ -72,7 +72,7 @@ val filename : string = "test/passing/quickstart.wast"
 val m : Text.modul =
 ...
 # let module_to_run, link_state =
-    match Compile.until_link Link.empty_state ~optimize:false ~name:None m with
+    match Compile.until_link Link.empty_state ~unsafe:false ~optimize:false ~name:None m with
     | Ok v -> v
     | Error e -> failwith e;;
 val module_to_run : '_weak1 Link.module_to_run =

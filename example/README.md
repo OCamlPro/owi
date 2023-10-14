@@ -16,7 +16,7 @@ Given the following `print.wast` file:
 You can print the value thanks to the `print_i32` function imported from the `spectest` module:
 
 ```sh
-$ dune exec owi -- ./print.wast --script
+$ dune exec owi -- script ./print.wast
 42
 ```
 
@@ -105,7 +105,8 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run, link_state =
   match
-    Compile.until_link link_state ~optimize:true ~name:None pure_wasm_module
+    Compile.until_link link_state ~unsafe:false ~optimize:true ~name:None
+      pure_wasm_module
   with
   | Error msg -> failwith msg
   | Ok v -> v

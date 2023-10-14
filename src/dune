@@ -5,6 +5,9 @@
   check
   choice_monad
   choice_monad_intf
+  cmd_run
+  cmd_script
+  cmd_sym
   compile
   concrete
   concrete_global
@@ -62,7 +65,15 @@
   v
   wutf8)
  (private_modules convert lexer menhir_parser spectest wutf8 tracing)
- (libraries encoding integers menhirLib ocaml_intrinsics ppxlib sedlex uutf runtime_events)
+ (libraries
+  encoding
+  integers
+  menhirLib
+  ocaml_intrinsics
+  ppxlib
+  sedlex
+  uutf
+  runtime_events)
  (preprocess
   (pps sedlex.ppx))
  (instrumentation

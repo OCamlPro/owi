@@ -106,9 +106,9 @@ module S = struct
       t Value_intf.get_ref =
       match r with
       | Externref (Some (E (ety, v))) -> (
-          match Type.Id.provably_equal t ety with
-          | None -> assert false
-          | Some Equal -> Ref_value v )
+        match Type.Id.provably_equal t ety with
+        | None -> assert false
+        | Some Equal -> Ref_value v )
       | _ -> assert false
   end
 
