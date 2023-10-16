@@ -18,7 +18,7 @@
     (local $x i32)
     (i32.const 123)
     (call $print_i32)
-    (local.set $x (call $gen_i32 (i32.const 1)))
+    (local.set $x (call $gen_i32 (i32.const 42)))
     (if (i32.lt_s (i32.const 5) (local.get $x)) (then
       unreachable
     ))
