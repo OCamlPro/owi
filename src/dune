@@ -5,6 +5,7 @@
   check
   choice_monad
   choice_monad_intf
+  cmd_opt
   cmd_run
   cmd_script
   cmd_sym

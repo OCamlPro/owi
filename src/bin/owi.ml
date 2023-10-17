@@ -4,6 +4,10 @@ let debug =
   let doc = "debug mode" in
   Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
+let file =
+  let doc = "source file" in
+  Cmdliner.Arg.(required & pos ~rev:true 0 (some string) None & info [] ~doc)
+
 let files =
   let doc = "source files" in
   let parse s = Ok s in
@@ -41,6 +45,15 @@ let shared_man =
   [ `S Cmdliner.Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
 
 let version = "%%VERSION%%"
+
+let opt_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Optimize a module" in
+    let man = [] @ shared_man in
+    Cmd.info "opt" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ file)
 
 let run_cmd =
   let open Cmdliner in
@@ -85,7 +98,7 @@ let cli =
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
   let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
-  Cmd.group info ~default [ run_cmd; script_cmd; sym_cmd ]
+  Cmd.group info ~default [ opt_cmd; run_cmd; script_cmd; sym_cmd ]
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 

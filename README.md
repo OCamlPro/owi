@@ -156,17 +156,17 @@ PATH CONDITION:
 (i32.lt_s (i32 5) x_1)
 TRAP: unreachable
 CHOICE: (i32.gt_s (i32 1) x_1)
-CHOICE: (i32.eq x_1 (i32 1))
 Model:
 (model
 (x_1 i32 (i32 6))
 )
 Reached problem!
 
-x_1
-Solver time 0.003568s
+Solver time 0.002983s
       calls 1
-  mean time 3.568000ms
+  mean time 2.983000ms
+CHOICE: (i32.eq x_1 (i32 1))
+x_1
 ```
 
 ## Supported proposals

@@ -1,88 +1,50 @@
 unused local variables:
-  $ dune exec -- owi run --debug --optimize local.wast
-  parsing      ...
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  optimizing   ...
-  linking      ...
-  interpreting ...
-  stack        : [  ]
-  running instr: call 7
-  calling func : func start
-  stack        : [  ]
-  running instr: call 0
-  calling func : func f0
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 1
-  calling func : func f1
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 2
-  calling func : func f2
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 3
-  calling func : func f3
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 4
-  calling func : func f12
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 1
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 5
-  calling func : func f23
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 1
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 6
-  calling func : func f023
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 0
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 1
-  stack        : [  ]
-  running instr: i32.const 0
-  stack        : [ i32.const 0 ]
-  running instr: local.set 2
-  stack        : [  ]
-  stack        : [  ]
-  stack        : [  ]
+  $ dune exec -- owi opt local.wast
+  (module
+    (func $f0   (local  i32)
+      i32.const 0
+      local.set 0
+    )
+    (func $f1   (local  i32)
+      i32.const 0
+      local.set 0
+    )
+    (func $f2   (local  i32)
+      i32.const 0
+      local.set 0
+    )
+    (func $f3   (local  i32)
+      i32.const 0
+      local.set 0
+    )
+    (func $f12   (local  i32) (local  i32)
+      i32.const 0
+      local.set 0
+      i32.const 0
+      local.set 1
+    )
+    (func $f23   (local  i32) (local  i32)
+      i32.const 0
+      local.set 0
+      i32.const 0
+      local.set 1
+    )
+    (func $f023   (local  i32) (local  i32) (local  i32)
+      i32.const 0
+      local.set 0
+      i32.const 0
+      local.set 1
+      i32.const 0
+      local.set 2
+    )
+    (func $start   
+      call 0
+      call 1
+      call 2
+      call 3
+      call 4
+      call 5
+      call 6
+    )
+    (start 7)
+  )

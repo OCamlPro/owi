@@ -1,26 +1,12 @@
 set get tee simplification:
-  $ dune exec -- owi run --debug --optimize tee.wast
-  parsing      ...
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  optimizing   ...
-  linking      ...
-  interpreting ...
-  stack        : [  ]
-  running instr: call 0
-  calling func : func start
-  stack        : [  ]
-  running instr: i32.const 41
-  stack        : [ i32.const 41 ]
-  running instr: local.tee 0
-  stack        : [ i32.const 41 ]
-  running instr: i32.const 1
-  stack        : [ i32.const 1 ; i32.const 41 ]
-  running instr: i32.add
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
+  $ dune exec -- owi opt tee.wast
+  (module
+    (func $start   (local $x i32)
+      i32.const 41
+      local.tee 0
+      i32.const 1
+      i32.add
+      drop
+    )
+    (start 0)
+  )

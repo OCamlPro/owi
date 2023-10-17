@@ -1,28 +1,16 @@
 br instructions:
-  $ dune exec -- owi run --debug --optimize br.wast
-  parsing      ...
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  optimizing   ...
-  linking      ...
-  interpreting ...
-  stack        : [  ]
-  running instr: call 2
-  calling func : func start
-  stack        : [  ]
-  running instr: call 0
-  calling func : func br
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: br 0
-  stack        : [  ]
-  running instr: call 1
-  calling func : func br_if
-  stack        : [  ]
-  running instr: br 0
-  stack        : [  ]
-  stack        : [  ]
+  $ dune exec -- owi opt br.wast
+  (module
+    (func $br   
+      i32.const 42
+      br 0
+    )
+    (func $br_if   
+      br 0
+    )
+    (func $start   
+      call 0
+      call 1
+    )
+    (start 2)
+  )

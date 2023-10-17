@@ -22,18 +22,17 @@ let simplify_then_link_then_run ~unsafe ~optimize file =
   in
   list_iter (Interpret.Concrete.modul link_state.envs) (List.rev to_run)
 
-let run_file exec filename =
+let run_file ~unsafe ~optimize filename =
   if not @@ Sys.file_exists filename then
     error_s "file `%s` doesn't exist" filename
   else
     let* script = Parse.Script.from_file ~filename in
-    exec script
+    simplify_then_link_then_run ~unsafe ~optimize script
 
 let cmd profiling debug unsafe optimize files =
-  let exec = simplify_then_link_then_run ~unsafe ~optimize in
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let result = list_iter (run_file exec) files in
+  let result = list_iter (run_file ~unsafe ~optimize) files in
   match result with
   | Ok () -> ()
   | Error e ->

@@ -1,88 +1,15 @@
 **.trunc_** **.trunc_sat_** instructions:
-  $ dune exec -- owi run --debug --optimize trunc.wast
-  parsing      ...
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  optimizing   ...
-  linking      ...
-  interpreting ...
-  stack        : [  ]
-  running instr: call 2
-  calling func : func start
-  stack        : [  ]
-  running instr: call 0
-  calling func : func trunc
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
-  running instr: call 1
-  calling func : func trunc_sat
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  running instr: i64.const 42
-  stack        : [ i64.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
-  stack        : [  ]
+  $ dune exec -- owi opt trunc.wast
+  (module
+    (func $trunc   
+      
+    )
+    (func $trunc_sat   
+      
+    )
+    (func $start   
+      call 0
+      call 1
+    )
+    (start 2)
+  )

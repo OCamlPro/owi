@@ -5,7 +5,7 @@
 open Simplified
 open Types
 
-let rec optimize_expr expr =
+let rec optimize_expr expr : bool * instr list =
   match expr with
   | ((I32_const _ | I64_const _) as x)
     :: ((I32_const _ | I64_const _) as y)
@@ -20,10 +20,15 @@ let rec optimize_expr expr =
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Concrete_value.to_instr result :: tl)
+          let _has_changed, e =
+            optimize_expr (Concrete_value.to_instr result :: tl)
+          in
+          (true, e)
         | _ -> assert false
       end
-    with Trap _ -> x :: optimize_expr (y :: i_binop :: tl)
+    with Trap _ ->
+      let has_changed, e = optimize_expr (y :: i_binop :: tl) in
+      (has_changed, x :: e)
   end
   | ((F32_const _ | F64_const _) as x)
     :: ((F32_const _ | F64_const _) as y)
@@ -37,7 +42,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_unop (nn, op) :: tl ->
@@ -47,7 +55,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: F_unop (nn, op) :: tl ->
@@ -57,7 +68,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_testop (nn, op) :: tl ->
@@ -67,7 +81,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x)
@@ -82,7 +99,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x)
@@ -97,30 +117,60 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | I32_const c :: I_extend8_s S32 :: tl ->
-    optimize_expr (I32_const (Int32.extend_s 8 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I32_const (Int32.extend_s 8 c) :: tl)
+    in
+    (true, e)
   | I64_const c :: I_extend8_s S64 :: tl ->
-    optimize_expr (I64_const (Int64.extend_s 8 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I64_const (Int64.extend_s 8 c) :: tl)
+    in
+    (true, e)
   | I32_const c :: I_extend16_s S32 :: tl ->
-    optimize_expr (I32_const (Int32.extend_s 16 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I32_const (Int32.extend_s 16 c) :: tl)
+    in
+    (true, e)
   | I64_const c :: I_extend16_s S64 :: tl ->
-    optimize_expr (I64_const (Int64.extend_s 16 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I64_const (Int64.extend_s 16 c) :: tl)
+    in
+    (true, e)
   | I64_const c :: I64_extend32_s :: tl ->
-    optimize_expr (I64_const (Int64.extend_s 32 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I64_const (Int64.extend_s 32 c) :: tl)
+    in
+    (true, e)
   | I64_const c :: I32_wrap_i64 :: tl ->
-    optimize_expr (I32_const (Convert.Int32.wrap_i64 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (I32_const (Convert.Int32.wrap_i64 c) :: tl)
+    in
+    (true, e)
   | I32_const c :: I64_extend_i32 s :: tl -> begin
-    match s with
-    | S -> optimize_expr (I64_const (Convert.Int64.extend_i32_s c) :: tl)
-    | U -> optimize_expr (I64_const (Convert.Int64.extend_i32_u c) :: tl)
+    let _has_changed, e =
+      match s with
+      | S -> optimize_expr (I64_const (Convert.Int64.extend_i32_s c) :: tl)
+      | U -> optimize_expr (I64_const (Convert.Int64.extend_i32_u c) :: tl)
+    in
+    (true, e)
   end
   | F64_const c :: F32_demote_f64 :: tl ->
-    optimize_expr (F32_const (Convert.Float32.demote_f64 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (F32_const (Convert.Float32.demote_f64 c) :: tl)
+    in
+    (true, e)
   | F32_const c :: F64_promote_f32 :: tl ->
-    optimize_expr (F64_const (Convert.Float64.promote_f32 c) :: tl)
+    let _has_changed, e =
+      optimize_expr (F64_const (Convert.Float64.promote_f32 c) :: tl)
+    in
+    (true, e)
   | ((F32_const _ | F64_const _) as c)
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
@@ -131,10 +181,15 @@ let rec optimize_expr expr =
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Concrete_value.to_instr result :: tl)
+          let _has_changed, e =
+            optimize_expr (Concrete_value.to_instr result :: tl)
+          in
+          (true, e)
         | _ -> assert false
       end
-    with Trap _ -> c :: optimize_expr (i_truncf :: tl)
+    with Trap _ ->
+      let has_changed, e = optimize_expr (i_truncf :: tl) in
+      (has_changed, c :: e)
   end
   | ((F32_const _ | F64_const _) as c)
     :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
@@ -148,10 +203,15 @@ let rec optimize_expr expr =
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          optimize_expr (Concrete_value.to_instr result :: tl)
+          let _has_changed, e =
+            optimize_expr (Concrete_value.to_instr result :: tl)
+          in
+          (true, e)
         | _ -> assert false
       end
-    with Trap _ -> c :: optimize_expr (i_truncsatf :: tl)
+    with Trap _ ->
+      let has_changed, e = optimize_expr (i_truncsatf :: tl) in
+      (has_changed, c :: e)
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
     let result =
@@ -160,7 +220,10 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl ->
@@ -180,51 +243,92 @@ let rec optimize_expr expr =
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        let _has_changed, e =
+          optimize_expr (Concrete_value.to_instr result :: tl)
+        in
+        (true, e)
       | _ -> assert false
     end
   | (I32_const _ | I64_const _ | F32_const _ | F64_const _) :: Drop :: tl ->
-    optimize_expr tl
+    let _has_changed, e = optimize_expr tl in
+    (true, e)
   | Local_set x :: Local_get y :: tl when x = y ->
-    optimize_expr (Local_tee x :: tl)
-  | Local_get _ :: Drop :: tl -> optimize_expr tl
-  | Global_get _ :: Drop :: tl -> optimize_expr tl
-  | (Br _ as br) :: _tl -> [ br ]
+    let _has_changed, e = optimize_expr (Local_tee x :: tl) in
+    (true, e)
+  | Local_get _ :: Drop :: tl ->
+    let _has_changed, e = optimize_expr tl in
+    (true, e)
+  | Global_get _ :: Drop :: tl ->
+    let _has_changed, e = optimize_expr tl in
+    (true, e)
+  | (Br _ as br) :: _ :: _ -> (true, [ br ])
   | I32_const c :: Br_if l :: tl -> begin
-    match c with 0l -> optimize_expr tl | _ -> [ Br l ]
+    match c with
+    | 0l ->
+      let _has_changed, e = optimize_expr tl in
+      (true, e)
+    | _ -> (true, [ Br l ])
   end
-  | Return :: _tl -> [ Return ]
-  | (Return_call _ as rc) :: _tl -> [ rc ]
-  | (Return_call_indirect _ as rci) :: _tl -> [ rci ]
-  | Ref_null _ :: Ref_is_null :: tl -> optimize_expr (I32_const 1l :: tl)
-  | Nop :: tl -> optimize_expr tl
+  | Return :: _ :: _ -> (true, [ Return ])
+  | (Return_call _ as rc) :: _ :: _ -> (true, [ rc ])
+  | (Return_call_indirect _ as rci) :: _ :: _ -> (true, [ rci ])
+  | Ref_null _ :: Ref_is_null :: tl ->
+    let _has_changed, e = optimize_expr (I32_const 1l :: tl) in
+    (true, e)
+  | Nop :: tl ->
+    let _has_changed, e = optimize_expr tl in
+    (true, e)
   | ((I32_const _ | I64_const _ | F32_const _ | F64_const _) as v1)
     :: ((I32_const _ | I64_const _ | F32_const _ | F64_const _) as v2)
     :: I32_const c
     :: Select _ :: tl -> begin
-    match c with 0l -> optimize_expr (v2 :: tl) | _ -> optimize_expr (v1 :: tl)
+    let _has_changed, e =
+      match c with
+      | 0l -> optimize_expr (v2 :: tl)
+      | _ -> optimize_expr (v1 :: tl)
+    in
+    (true, e)
   end
   | Block (n, bt, e) :: tl -> begin
     match optimize_expr e with
-    | [] -> optimize_expr tl
-    | oe -> Block (n, bt, oe) :: optimize_expr tl
+    | has_changed, [] ->
+      let has_changed', e = optimize_expr tl in
+      (has_changed || has_changed', e)
+    | has_changed, oe ->
+      let has_changed', e = optimize_expr tl in
+      (has_changed || has_changed', Block (n, bt, oe) :: e)
   end
   | Loop (n, bt, e) :: tl -> begin
     match optimize_expr e with
-    | [] -> optimize_expr tl
-    | oe -> Loop (n, bt, oe) :: optimize_expr tl
+    | has_changed, [] ->
+      let has_changed', e = optimize_expr tl in
+      (has_changed || has_changed', e)
+    | has_changed, oe ->
+      let has_changed', e = optimize_expr tl in
+      (has_changed || has_changed', Loop (n, bt, oe) :: e)
   end
   | I32_const 0l :: If_else (n, bt, _e1, e2) :: tl ->
-    optimize_expr (Block (n, bt, e2) :: tl)
+    let _has_changed, e = optimize_expr (Block (n, bt, e2) :: tl) in
+    (true, e)
   | I32_const _ :: If_else (n, bt, e1, _e2) :: tl ->
-    optimize_expr (Block (n, bt, e1) :: tl)
+    let _has_changed, e = optimize_expr (Block (n, bt, e1) :: tl) in
+    (true, e)
   | If_else (n, bt, e1, e2) :: tl -> begin
-    match (optimize_expr e1, optimize_expr e2) with
-    | [], [] -> Drop :: optimize_expr tl
-    | oe1, oe2 -> If_else (n, bt, oe1, oe2) :: optimize_expr tl
+    let has_changed1, e1 = optimize_expr e1 in
+    let has_changed2, e2 = optimize_expr e2 in
+    match (e1, e2) with
+    | [], [] ->
+      let _has_changed, e = optimize_expr tl in
+      (true, Drop :: e)
+    | oe1, oe2 ->
+      let has_changed', e = optimize_expr tl in
+      ( has_changed1 || has_changed2 || has_changed'
+      , If_else (n, bt, oe1, oe2) :: e )
   end
-  | hd :: tl -> hd :: optimize_expr tl
-  | [] -> []
+  | hd :: tl ->
+    let has_changed, e = optimize_expr tl in
+    (has_changed, hd :: e)
+  | [] -> (false, [])
 
 let locals_func body_expr =
   let locals_hashtbl = Hashtbl.create 16 in
@@ -392,7 +496,15 @@ let remove_unused_locals locals nb_args body =
 
 let optimize_func func =
   let { type_f; locals; body; id } = func in
-  let body = optimize_expr body in
+  let rec loop has_changed e =
+    if not has_changed then
+      (* TODO: it should be enough to return e directly, but doing one more call to optimize_expr seems to perform more optimizations... *)
+      snd @@ optimize_expr e
+    else
+      let has_changed, e = optimize_expr e in
+      loop has_changed e
+  in
+  let body = loop true body in
   let pt, _ = type_f in
   let nb_args = List.length pt in
   let locals, body = remove_unused_locals locals nb_args body in
