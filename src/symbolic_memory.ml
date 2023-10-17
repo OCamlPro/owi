@@ -71,6 +71,14 @@ module M = struct
 
   let concat ~msb ~lsb offset =
     assert (offset > 0 && offset <= 8);
+    let merge_extracts (e1, h, m1) (e2, m2, l) =
+      if not (m1 = m2 && Expr.equal e1 e2) then
+        Expr.(Extract (e1, h, m1) ++ Extract (e2, m2, l))
+      else
+        match Expr.type_of e1 with
+        | Some t when h - l = Types.size t -> e1
+        | None | Some _ -> Extract (e1, h, l)
+    in
     match (msb, lsb) with
     | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
       let offset = offset * 8 in
@@ -83,11 +91,10 @@ module M = struct
     | Val (Num (I32 i1)), Val (Num (I64 i2)) ->
       let offset = Int64.of_int (offset * 8) in
       Value.const_i64 Int64.(logor (shl (of_int32 i1) offset) i2)
-    | Extract (e1, h, m1), Extract (e2, m2, l) when m1 = m2 && Expr.equal e1 e2
-      -> (
-      match Expr.type_of e1 with
-      | Some t -> if h - l = Types.size t then e1 else Extract (e1, h, l)
-      | _ -> Extract (e1, h, l) )
+    | Extract (e1, h, m1), Extract (e2, m2, l) ->
+      merge_extracts (e1, h, m1) (e2, m2, l)
+    | Extract (e1, h, m1), Concat (Extract (e2, m2, l), e3) ->
+      Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3)
     | _ -> Concat (msb, lsb)
 
   let loadn m a n : int32 =
@@ -125,21 +132,21 @@ module M = struct
 
   let load_64 m a = loadn m (concretize_i32 a) 8
 
-  let extract v h l =
+  let extract v pos =
     match v with
     | Val (Num (I32 i)) ->
-      let i' = Int32.(logand 0xffl @@ shr_s i @@ of_int (l * 8)) in
+      let i' = Int32.(logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
       Value.const_i32 i'
     | Val (Num (I64 i)) ->
-      let i' = Int64.(logand 0xffL @@ shr_s i @@ of_int (l * 8)) in
+      let i' = Int64.(logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
       Value.const_i32 (Int32.of_int64 i')
-    | v' -> Extract (v', h, l)
+    | v' -> Extract (v', pos + 1, pos)
 
   let storen m ~addr v n =
     let a0 = concretize_i32 addr in
     for i = 0 to n - 1 do
       let addr' = Int32.add a0 (Int32.of_int i) in
-      let v' = extract v (i + 1) i in
+      let v' = extract v i in
       Hashtbl.replace m.data addr' v'
     done
 
