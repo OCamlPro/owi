@@ -93,7 +93,7 @@ module S = struct
       | F64 e -> e
       | Ref _ -> assert false
     in
-    Format.pp_print_string ppf (Expr.to_string e)
+    Expr.pp ppf e
 
   module Ref = struct
     let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
