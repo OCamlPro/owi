@@ -219,9 +219,11 @@ let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
     let*/ script = Parse.Script.from_file ~filename in
     simplify_then_link_then_run ~unsafe ~optimize pc script
 
-let get_model (solver : Thread.Solver.t) thread =
-  assert (Thread.Solver.check solver (Thread.pc thread));
-  match Thread.Solver.model solver with
+let get_model thread =
+  let (S (solver_mod, solver)) = Thread.solver thread in
+  let module Solver = (val solver_mod) in
+  assert (Solver.check solver (Thread.pc thread));
+  match Solver.model solver with
   | None -> assert false
   | Some model -> Encoding.Model.to_string model
 
