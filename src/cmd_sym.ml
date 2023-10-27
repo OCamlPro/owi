@@ -224,13 +224,9 @@ let get_model thread =
   let (S (solver_mod, solver)) = Thread.solver thread in
   let module Solver = (val solver_mod) in
   assert (Solver.check solver (Thread.pc thread));
-  match Solver.model solver with
-  | None -> assert false
-  | Some model -> model
+  match Solver.model solver with None -> assert false | Some model -> model
 
-let stop_at_first_failure = true
-
-let cmd profiling debug unsafe optimize workers files =
+let cmd profiling debug unsafe optimize workers no_stop_at_failure files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let pc = Choice.return (Ok ()) in
@@ -261,14 +257,14 @@ let cmd profiling debug unsafe optimize workers files =
       results
   in
   let () =
-    if stop_at_first_failure then
-      match failing () with
-      | Nil -> Format.printf "All OK@."
-      | Cons (_thread, _) -> Format.printf "Reached problem!@."
-    else
+    if no_stop_at_failure then
       let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
       if failures = 0 then Format.printf "All OK@."
       else Format.printf "Reached %i problems!@." failures
+    else
+      match failing () with
+      | Nil -> Format.printf "All OK@."
+      | Cons (_thread, _) -> Format.printf "Reached problem!@."
   in
   let time = !Thread.Solver.solver_time in
   let count = !Thread.Solver.solver_count in
