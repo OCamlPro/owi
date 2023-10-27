@@ -21,6 +21,10 @@ let no_exhaustion =
   let doc = "no exhaustion tests" in
   Cmdliner.Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
 
+let no_stop_at_failure =
+  let doc = "do not stop when a program failure is encountered" in
+  Cmdliner.Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
+
 let optimize =
   let doc = "optimize mode" in
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
@@ -87,7 +91,7 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ files )
+      $ no_stop_at_failure $ files )
 
 let cli =
   let open Cmdliner in
