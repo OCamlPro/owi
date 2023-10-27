@@ -1,4 +1,5 @@
 open Syntax
+module Expr = Encoding.Expression
 module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
@@ -225,14 +226,13 @@ let get_model thread =
   assert (Solver.check solver (Thread.pc thread));
   match Solver.model solver with
   | None -> assert false
-  | Some model -> Encoding.Model.to_string model
+  | Some model -> model
 
 let stop_at_first_failure = true
 
 let cmd profiling debug unsafe optimize workers files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let solver = Thread.Solver.create () in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
@@ -240,22 +240,21 @@ let cmd profiling debug unsafe optimize workers files =
   let failing =
     Seq.filter_map
       (fun (result, thread) ->
+        let pc = Thread.pc thread in
         Format.printf "PATH CONDITION:@.";
-        List.iter
-          (fun c -> print_endline (Encoding.Expression.to_string c))
-          (Thread.pc thread);
+        Format.printf "%a@." Expr.pp_list pc;
         match result with
         | Choice_monad_intf.EVal (Ok ()) -> None
         | EAssert assertion ->
-          Format.printf "Assert failure: %a@." Encoding.Expression.pp assertion;
-          let model = get_model solver thread in
-          Format.printf "Model:@.%s@." model;
-          Some thread
+          Format.printf "Assert failure: %a@." Expr.pp assertion;
+          let model = get_model thread in
+          Format.printf "Model:@.%a@." Encoding.Model.pp model;
+          Some pc
         | ETrap tr ->
           Format.printf "TRAP: %s@." (Trap.to_string tr);
-          let model = get_model solver thread in
-          Format.printf "Model:@.%s@." model;
-          Some thread
+          let model = get_model thread in
+          Format.printf "Model:@.%a@." Encoding.Model.pp model;
+          Some pc
         | EVal (Error e) ->
           Format.eprintf "%s@." e;
           exit 1 )
