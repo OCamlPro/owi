@@ -41,6 +41,10 @@ let workers =
   let doc = "number of workers for symbolic execution" in
   Cmdliner.Arg.(value & opt int 4 & info [ "workers"; "w" ] ~doc)
 
+let testsuite =
+  let doc = "path to the testsuite directory" in
+  Cmdliner.Arg.(value & opt string "test-suite" & info [ "test-suite" ] ~doc)
+
 let copts_t = Cmdliner.Term.(const [])
 
 let sdocs = Cmdliner.Manpage.s_common_options
@@ -91,7 +95,7 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ files )
+      $ no_stop_at_failure $ testsuite $ files )
 
 let cli =
   let open Cmdliner in

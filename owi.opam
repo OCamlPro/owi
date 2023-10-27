@@ -31,6 +31,7 @@ depends: [
   "graphics" {dev}
   "tiny_httpd" {dev}
   "encoding"
+  "xmlm"
 ]
 build: [
   ["dune" "subst"] {dev}

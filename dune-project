@@ -61,4 +61,5 @@
   (crowbar :with-test)
   (graphics :dev)
   (tiny_httpd :dev)
-  encoding))
+  encoding
+  xmlm))

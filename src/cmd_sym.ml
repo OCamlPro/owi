@@ -4,6 +4,8 @@ module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
 
+let ( >>| ) lst f = List.map f lst
+
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
@@ -220,16 +222,45 @@ let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
     let*/ script = Parse.Script.from_file ~filename in
     simplify_then_link_then_run ~unsafe ~optimize pc script
 
-let get_model thread =
-  let (S (solver_mod, solver)) = Thread.solver thread in
-  let module Solver = (val solver_mod) in
-  assert (Solver.check solver (Thread.pc thread));
+let get_model solver pc =
+  assert (Solver.check solver pc);
   match Solver.model solver with None -> assert false | Some model -> model
 
-let cmd profiling debug unsafe optimize workers no_stop_at_failure files =
+let safe_mkdir dir =
+  if not @@ Sys.file_exists dir then
+    assert (0 = Sys.command @@ Format.sprintf "mkdir -p \"%s\"" dir)
+
+let out_testcase ~dst is_err inputs =
+  let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  let tag ?(atts = []) name = (("", name), atts) in
+  let atts = if is_err then Some [ (("", "coversError"), "true") ] else None in
+  let input v = `El (tag "input", [ `Data (Encoding.Value.to_string v) ]) in
+  let testcase = `El (tag ?atts "testcase", inputs >>| input) in
+  let dtd =
+    "<!DOCTYPE testcase PUBLIC \"+//IDN sosy-lab.org//DTD test-format testcase \
+     1.1//EN\" \"https://sosy-lab.org/test-format/testcase-1.1.dtd\">"
+  in
+  Xmlm.output o (`Dtd (Some dtd));
+  Xmlm.output_tree Fun.id o testcase
+
+let write_testcase =
+  let cnt = ref 0 in
+  fun dst is_err inputs ->
+    incr cnt;
+    let testcase = Format.sprintf "testcase-%d.xml" !cnt in
+    let testcase_path = Filename.concat dst testcase in
+    let out_chan = open_out testcase_path in
+    Fun.protect
+      ~finally:(fun () -> close_out out_chan)
+      (fun () -> out_testcase ~dst:(`Channel out_chan) is_err inputs)
+
+let cmd profiling debug unsafe optimize workers no_stop_at_failure testsuite
+  files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
+  safe_mkdir testsuite;
   let pc = Choice.return (Ok ()) in
+  let solver = Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run_and_trap ~workers result thread in
@@ -239,21 +270,25 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure files =
         let pc = Thread.pc thread in
         Format.printf "PATH CONDITION:@.";
         Format.printf "%a@." Expr.pp_list pc;
-        match result with
-        | Choice_monad_intf.EVal (Ok ()) -> None
-        | EAssert assertion ->
-          Format.printf "Assert failure: %a@." Expr.pp assertion;
-          let model = get_model thread in
-          Format.printf "Model:@.%a@." Encoding.Model.pp model;
-          Some pc
-        | ETrap tr ->
-          Format.printf "TRAP: %s@." (Trap.to_string tr);
-          let model = get_model thread in
-          Format.printf "Model:@.%a@." Encoding.Model.pp model;
-          Some pc
-        | EVal (Error e) ->
-          Format.eprintf "%s@." e;
-          exit 1 )
+        let model = get_model solver pc in
+        let result =
+          match result with
+          | Choice_monad_intf.EVal (Ok ()) -> None
+          | EAssert assertion ->
+            Format.printf "Assert failure: %a@." Expr.pp assertion;
+            Format.printf "Model:@.%a@." Encoding.Model.pp model;
+            Some pc
+          | ETrap tr ->
+            Format.printf "TRAP: %s@." (Trap.to_string tr);
+            Format.printf "Model:@.%a@." Encoding.Model.pp model;
+            Some pc
+          | EVal (Error e) ->
+            Format.eprintf "%s@." e;
+            exit 1
+        in
+        let inputs = Encoding.Model.get_bindings model >>| snd in
+        write_testcase testsuite (Option.is_some result) inputs;
+        result )
       results
   in
   let () =

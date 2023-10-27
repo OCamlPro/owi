@@ -74,7 +74,8 @@
   ppxlib
   sedlex
   uutf
-  runtime_events)
+  runtime_events
+  xmlm)
  (preprocess
   (pps sedlex.ppx))
  (instrumentation
