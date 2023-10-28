@@ -230,12 +230,12 @@ let safe_mkdir dir =
   if not @@ Sys.file_exists dir then
     assert (0 = Sys.command @@ Format.sprintf "mkdir -p \"%s\"" dir)
 
-let out_testcase ~dst is_err inputs =
+let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag ?(atts = []) name = (("", name), atts) in
-  let atts = if is_err then Some [ (("", "coversError"), "true") ] else None in
+  let atts = if err then Some [ (("", "coversError"), "true") ] else None in
   let input v = `El (tag "input", [ `Data (Encoding.Value.to_string v) ]) in
-  let testcase = `El (tag ?atts "testcase", inputs >>| input) in
+  let testcase = `El (tag ?atts "testcase", testcase >>| input) in
   let dtd =
     "<!DOCTYPE testcase PUBLIC \"+//IDN sosy-lab.org//DTD test-format testcase \
      1.1//EN\" \"https://sosy-lab.org/test-format/testcase-1.1.dtd\">"
@@ -245,20 +245,20 @@ let out_testcase ~dst is_err inputs =
 
 let write_testcase =
   let cnt = ref 0 in
-  fun dst is_err inputs ->
+  fun ~dir ~err testcase ->
     incr cnt;
-    let testcase = Format.sprintf "testcase-%d.xml" !cnt in
-    let testcase_path = Filename.concat dst testcase in
-    let out_chan = open_out testcase_path in
+    let name = Format.sprintf "testcase-%d.xml" !cnt in
+    let path = Filename.concat dir name in
+    let out_chan = open_out path in
     Fun.protect
       ~finally:(fun () -> close_out out_chan)
-      (fun () -> out_testcase ~dst:(`Channel out_chan) is_err inputs)
+      (fun () -> out_testcase ~dst:(`Channel out_chan) ~err testcase)
 
-let cmd profiling debug unsafe optimize workers no_stop_at_failure testsuite
+let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  safe_mkdir testsuite;
+  safe_mkdir workspace;
   let pc = Choice.return (Ok ()) in
   let solver = Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
@@ -286,8 +286,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure testsuite
             Format.eprintf "%s@." e;
             exit 1
         in
-        let inputs = Encoding.Model.get_bindings model >>| snd in
-        write_testcase testsuite (Option.is_some result) inputs;
+        let testcase = Encoding.Model.get_bindings model >>| snd in
+        write_testcase ~dir:workspace ~err:(Option.is_some result) testcase;
         result )
       results
   in
