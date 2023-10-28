@@ -226,9 +226,15 @@ let get_model solver pc =
   assert (Solver.check solver pc);
   match Solver.model solver with None -> assert false | Some model -> model
 
-let safe_mkdir dir =
-  if not @@ Sys.file_exists dir then
-    assert (0 = Sys.command @@ Format.sprintf "mkdir -p \"%s\"" dir)
+let mkdir_p_exn dir =
+  let rec get_intermediate_dirs d acc =
+    if Sys.file_exists d then acc
+    else get_intermediate_dirs (Filename.dirname d) (d :: acc)
+  in
+  if Sys.file_exists dir then ()
+  else
+    let intermediate_dirs = get_intermediate_dirs dir [] in
+    List.iter (fun d -> Sys.mkdir d 0o755) intermediate_dirs
 
 let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
@@ -258,7 +264,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  safe_mkdir workspace;
+  mkdir_p_exn workspace;
   let pc = Choice.return (Ok ()) in
   let solver = Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
