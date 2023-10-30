@@ -231,7 +231,8 @@ let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag ?(atts = []) name = (("", name), atts) in
   let atts = if err then Some [ (("", "coversError"), "true") ] else None in
-  let input v = `El (tag "input", [ `Data (Encoding.Value.to_string v) ]) in
+  let to_string v = Format.asprintf "%a" Encoding.Value.pp_num v in
+  let input v = `El (tag "input", [ `Data (to_string v) ]) in
   let testcase = `El (tag ?atts "testcase", testcase >>| input) in
   let dtd =
     "<!DOCTYPE testcase PUBLIC \"+//IDN sosy-lab.org//DTD test-format testcase \
