@@ -6,6 +6,8 @@ module Solver = Thread.Solver
 
 let ( >>| ) lst f = List.map f lst
 
+let ( let/ ) = Choice.bind
+
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
@@ -44,54 +46,43 @@ let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
 let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
-  let counter = ref 0 in
+  let sprintf = Printf.sprintf in
+  let next_sym_id () : int Choice.t =
+    let/ cnt = Choice.with_thread Thread.sym_cnt in
+    let v = !cnt in
+    incr cnt;
+    Choice.return v
+  in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     let name =
       match i with
-      | Encoding.Expression.Val (Num (I32 i)) -> begin
+      | Expr.Val (Num (I32 i)) -> begin
         match names.(Int32.to_int i) with exception _ -> "x" | name -> name
       end
-      | _ ->
-        failwith
-          (Printf.sprintf "Text name %s" (Encoding.Expression.to_string i))
+      | _ -> failwith (sprintf "Text name %s" (Expr.to_string i))
     in
-    incr counter;
-    let r =
-      Encoding.Expression.mk_symbol_s `I32Type
-        (Printf.sprintf "%s_%i" name !counter)
-    in
+    let/ id = next_sym_id () in
+    let r = Expr.mk_symbol_s `I32Type (sprintf "%s_%i" name id) in
     Choice.return r
   in
   let symbol_i32 () : Value.int32 Choice.t =
-    incr counter;
-    let r =
-      Encoding.Expression.mk_symbol_s `I32Type
-        (Printf.sprintf "symbol_%i" !counter)
-    in
+    let/ id = next_sym_id () in
+    let r = Expr.mk_symbol_s `I32Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_i64 () : Value.int64 Choice.t =
-    incr counter;
-    let r =
-      Encoding.Expression.mk_symbol_s `I64Type
-        (Printf.sprintf "symbol_%i" !counter)
-    in
+    let/ id = next_sym_id () in
+    let r = Expr.mk_symbol_s `I64Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_f32 () : Value.float32 Choice.t =
-    incr counter;
-    let r =
-      Encoding.Expression.mk_symbol_s `F32Type
-        (Printf.sprintf "symbol_%i" !counter)
-    in
+    let/ id = next_sym_id () in
+    let r = Expr.mk_symbol_s `F32Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_f64 () : Value.float64 Choice.t =
-    incr counter;
-    let r =
-      Encoding.Expression.mk_symbol_s `F64Type
-        (Printf.sprintf "symbol_%i" !counter)
-    in
+    let/ id = next_sym_id () in
+    let r = Expr.mk_symbol_s `F64Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
