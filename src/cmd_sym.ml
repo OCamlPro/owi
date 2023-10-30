@@ -283,7 +283,12 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
             Format.eprintf "%s@." e;
             exit 1
         in
-        let testcase = Encoding.Model.get_bindings model >>| snd in
+        let testcase =
+          List.sort
+            (fun (x1, _) (x2, _) -> compare x1 x2)
+            (Encoding.Model.get_bindings model)
+          >>| snd
+        in
         write_testcase ~dir:workspace ~err:(Option.is_some result) testcase;
         result )
       results
