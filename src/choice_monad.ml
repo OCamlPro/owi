@@ -28,7 +28,7 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
     let msg = if r then "KO" else "OK" in
-    Format.printf "/CHECK %s@." msg;
+    Format.printf "@./CHECK %s@." msg;
     not r
 
 module Make (M : sig
