@@ -59,7 +59,7 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
       | Expr.Val (Num (I32 i)) -> begin
         match names.(Int32.to_int i) with exception _ -> "x" | name -> name
       end
-      | _ -> failwith (sprintf "Text name %s" (Expr.to_string i))
+      | _ -> Format.kasprintf failwith "Text name %a" Expr.pp i
     in
     let/ id = next_sym_id () in
     let r = Expr.mk_symbol_s `I32Type (sprintf "%s_%i" name id) in
@@ -222,10 +222,8 @@ let mkdir_p_exn dir =
     if Sys.file_exists d then acc
     else get_intermediate_dirs (Filename.dirname d) (d :: acc)
   in
-  if Sys.file_exists dir then ()
-  else
-    let intermediate_dirs = get_intermediate_dirs dir [] in
-    List.iter (fun d -> Sys.mkdir d 0o755) intermediate_dirs
+  let intermediate_dirs = get_intermediate_dirs dir [] in
+  List.iter (fun d -> Sys.mkdir d 0o755) intermediate_dirs
 
 let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
@@ -235,8 +233,7 @@ let out_testcase ~dst ~err testcase =
   let input v = `El (tag "input", [ `Data (to_string v) ]) in
   let testcase = `El (tag ?atts "testcase", testcase >>| input) in
   let dtd =
-    "<!DOCTYPE testcase PUBLIC \"+//IDN sosy-lab.org//DTD test-format testcase \
-     1.1//EN\" \"https://sosy-lab.org/test-format/testcase-1.1.dtd\">"
+    {|<!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd">|}
   in
   Xmlm.output o (`Dtd (Some dtd));
   Xmlm.output_tree Fun.id o testcase
