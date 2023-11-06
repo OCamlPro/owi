@@ -58,24 +58,9 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     let r = Expr.mk_symbol_s `I32Type (sprintf "%s_%i" name id) in
     Choice.return r
   in
-  let symbol_i32 () : Value.int32 Choice.t =
+  let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s `I32Type (sprintf "symbol_%i" id) in
-    Choice.return r
-  in
-  let symbol_i64 () : Value.int64 Choice.t =
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s `I64Type (sprintf "symbol_%i" id) in
-    Choice.return r
-  in
-  let symbol_f32 () : Value.float32 Choice.t =
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s `F32Type (sprintf "symbol_%i" id) in
-    Choice.return r
-  in
-  let symbol_f64 () : Value.float64 Choice.t =
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s `F64Type (sprintf "symbol_%i" id) in
+    let r = Expr.mk_symbol_s ty (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
@@ -92,17 +77,17 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i32_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-      )
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), symbol `I32Type) )
     ; ( "i64_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-      )
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 I64), symbol `I64Type) )
     ; ( "f32_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-      )
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 F32), symbol `F32Type) )
     ; ( "f64_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-      )
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 F64), symbol `F64Type) )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
