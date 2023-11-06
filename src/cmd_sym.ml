@@ -4,8 +4,6 @@ module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
 
-let ( >>| ) lst f = List.map f lst
-
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
@@ -209,7 +207,7 @@ let out_testcase ~dst ~err testcase =
   let atts = if err then Some [ (("", "coversError"), "true") ] else None in
   let to_string v = Format.asprintf "%a" Encoding.Value.pp_num v in
   let input v = `El (tag "input", [ `Data (to_string v) ]) in
-  let testcase = `El (tag ?atts "testcase", testcase >>| input) in
+  let testcase = `El (tag ?atts "testcase", List.map input testcase) in
   let dtd =
     {|<!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd">|}
   in
@@ -241,8 +239,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
     Seq.filter_map
       (fun (result, thread) ->
         let pc = Thread.pc thread in
-        Format.printf "PATH CONDITION:@.";
-        Format.printf "%a@." Expr.pp_list pc;
+        Format.printf "PATH CONDITION:@.%a@." Expr.pp_list pc;
         let model = get_model solver pc in
         let result =
           match result with
@@ -263,7 +260,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
           List.sort
             (fun (x1, _) (x2, _) -> compare x1 x2)
             (Encoding.Model.get_bindings model)
-          >>| snd
+          |> List.map snd
         in
         write_testcase ~dir:workspace ~err:(Option.is_some result) testcase;
         result )
