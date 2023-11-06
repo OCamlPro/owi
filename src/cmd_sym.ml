@@ -6,8 +6,6 @@ module Solver = Thread.Solver
 
 let ( >>| ) lst f = List.map f lst
 
-let ( let/ ) = Choice.bind
-
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
@@ -47,12 +45,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sprintf = Printf.sprintf in
-  let next_sym_id () : int Choice.t =
-    let/ cnt = Choice.with_thread Thread.sym_cnt in
-    let v = !cnt in
-    incr cnt;
-    Choice.return v
-  in
+  let sym_cnt = Atomic.make 0 in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     let name =
       match i with
@@ -61,27 +54,27 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
       end
       | _ -> Format.kasprintf failwith "Text name %a" Expr.pp i
     in
-    let/ id = next_sym_id () in
+    let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol_s `I32Type (sprintf "%s_%i" name id) in
     Choice.return r
   in
   let symbol_i32 () : Value.int32 Choice.t =
-    let/ id = next_sym_id () in
+    let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol_s `I32Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_i64 () : Value.int64 Choice.t =
-    let/ id = next_sym_id () in
+    let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol_s `I64Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_f32 () : Value.float32 Choice.t =
-    let/ id = next_sym_id () in
+    let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol_s `F32Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let symbol_f64 () : Value.float64 Choice.t =
-    let/ id = next_sym_id () in
+    let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol_s `F64Type (sprintf "symbol_%i" id) in
     Choice.return r
   in
