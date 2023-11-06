@@ -52,8 +52,8 @@ let array_map f a =
   try
     ok
     @@ Array.init (Array.length a) (fun i ->
-         let v = Array.get a i in
-         match f v with Error s -> raise (E s) | Ok v -> v )
+           let v = Array.get a i in
+           match f v with Error s -> raise (E s) | Ok v -> v )
   with E s -> Error s
 
 let array_fold_left f acc a =

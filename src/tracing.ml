@@ -25,4 +25,4 @@ let model =
 let with_ev ev f =
   Runtime_events.User.write ev Runtime_events.Type.Begin;
   Fun.protect f ~finally:(fun () ->
-    Runtime_events.User.write ev Runtime_events.Type.End )
+      Runtime_events.User.write ev Runtime_events.Type.End )

@@ -48,7 +48,7 @@ module P = struct
       Choice.return (Value.F64 (Value.Bool.select_expr c ~if_true ~if_false))
     | Ref _, Ref _ ->
       Choice.bind (Choice.select c) (fun b ->
-        if b then Choice.return if_true else Choice.return if_false )
+          if b then Choice.return if_true else Choice.return if_false )
     | _, _ -> assert false
 
   type extern_func = Extern_func.extern_func
