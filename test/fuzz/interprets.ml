@@ -26,8 +26,8 @@ let set =
 let timeout_call_run (run : unit -> 'a Result.t) : 'a Result.t =
   try
     Fun.protect ~finally:unset (fun () ->
-      set ();
-      try run () with Timeout -> Error "timeout" )
+        set ();
+        try run () with Timeout -> Error "timeout" )
   with Timeout -> Error "timeout"
 
 module Owi_unoptimized : INTERPRET = struct
@@ -46,7 +46,7 @@ module Owi_unoptimized : INTERPRET = struct
         | Error e -> failwith e
         | Ok (regular, link_state) ->
           timeout_call_run (fun () ->
-            Interpret.Concrete.modul link_state.envs regular ) ) )
+              Interpret.Concrete.modul link_state.envs regular ) ) )
 
   let name = "owi"
 end
@@ -68,7 +68,7 @@ module Owi_optimized : INTERPRET = struct
         | Error e -> failwith e
         | Ok (regular, link_state) ->
           timeout_call_run (fun () ->
-            Interpret.Concrete.modul link_state.envs regular ) ) )
+              Interpret.Concrete.modul link_state.envs regular ) ) )
 
   let name = "owi+optimize"
 end

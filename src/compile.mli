@@ -4,7 +4,8 @@ val until_check : unsafe:bool -> Text.modul -> Text.modul Result.t
 
 val until_simplify : unsafe:bool -> Text.modul -> Simplified.modul Result.t
 
-val until_optimize : unsafe:bool -> optimize:bool -> Text.modul -> Simplified.modul Result.t
+val until_optimize :
+  unsafe:bool -> optimize:bool -> Text.modul -> Simplified.modul Result.t
 
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)

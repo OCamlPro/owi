@@ -573,9 +573,9 @@ module MT = struct
       | None -> ()
     in
     Domain.spawn (fun () ->
-      WQ.with_produce global.r
-        ~started:(fun () -> Counter.incr global.start_counter)
-        (fun () -> WQ.produce global.w producer) )
+        WQ.with_produce global.r
+          ~started:(fun () -> Counter.incr global.start_counter)
+          (fun () -> WQ.produce global.w producer) )
 
   let rec loop_and_do (s : 'a Seq.t) f : 'a Seq.t =
    fun () ->
@@ -595,7 +595,7 @@ module MT = struct
     let producers = List.init workers (fun i -> spawn_producer i global) in
     Counter.wait_n global.start_counter workers;
     loop_and_do (WQ.read_as_seq global.r) (fun () ->
-      List.iter Domain.join producers )
+        List.iter Domain.join producers )
 end
 
 module type T =

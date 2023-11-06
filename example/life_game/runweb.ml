@@ -6,9 +6,9 @@ let asset_loader path =
 let () =
   let server = S.create ~port:8000 () in
   S.add_route_handler ~meth:`GET server S.Route.return (fun _req ->
-    S.Response.make_string
-      ~headers:[ ("Content-Type", "text/html") ]
-      (Ok (asset_loader "index.html")) );
+      S.Response.make_string
+        ~headers:[ ("Content-Type", "text/html") ]
+        (Ok (asset_loader "index.html")) );
 
   S.add_route_handler ~meth:`GET server
     S.Route.(exact "life_browser.js" @/ return)
