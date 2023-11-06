@@ -4,6 +4,11 @@ module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
 
+(* TODO: make this a CLI flag *)
+let print_solver_time = false
+
+let print_path_condition = false
+
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
     Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
@@ -239,21 +244,22 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
     Seq.filter_map
       (fun (result, thread) ->
         let pc = Thread.pc thread in
-        Format.printf "PATH CONDITION:@.%a@." Expr.pp_list pc;
+        if print_path_condition then
+          Format.printf "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
         let model = get_model solver pc in
         let result =
           match result with
           | Choice_monad_intf.EVal (Ok ()) -> None
           | EAssert assertion ->
-            Format.printf "Assert failure: %a@." Expr.pp assertion;
-            Format.printf "Model:@.%a@." Encoding.Model.pp model;
+            Format.printf "Assert failure: %a@\n" Expr.pp assertion;
+            Format.printf "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
             Some pc
           | ETrap tr ->
-            Format.printf "TRAP: %s@." (Trap.to_string tr);
-            Format.printf "Model:@.%a@." Encoding.Model.pp model;
+            Format.printf "Trap: %s@\n" (Trap.to_string tr);
+            Format.printf "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
             Some pc
           | EVal (Error e) ->
-            Format.eprintf "%s@." e;
+            Format.eprintf "Error: %s@\n" e;
             exit 1
         in
         let testcase =
@@ -269,17 +275,18 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   let () =
     if no_stop_at_failure then
       let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
-      if failures = 0 then Format.printf "All OK@."
-      else Format.printf "Reached %i problems!@." failures
+      if failures = 0 then Format.printf "All OK@\n"
+      else Format.printf "Reached %i problems!@\n" failures
     else
       match failing () with
-      | Nil -> Format.printf "All OK@."
-      | Cons (_thread, _) -> Format.printf "Reached problem!@."
+      | Nil -> Format.printf "All OK@\n"
+      | Cons (_thread, _) -> Format.printf "Reached problem!@\n"
   in
   let time = !Thread.Solver.solver_time in
   let count = !Thread.Solver.solver_count in
-  Format.printf "@.";
-  Format.printf "Solver time %fs@." time;
-  Format.printf "      calls %i@." count;
-  Format.printf "  mean time %fms@." (1000. *. time /. float count);
-  ()
+  if print_solver_time then begin
+    Format.printf "@\n";
+    Format.printf "Solver time %fs@\n" time;
+    Format.printf "      calls %i@\n" count;
+    Format.printf "  mean time %fms@\n" (1000. *. time /. float count)
+  end

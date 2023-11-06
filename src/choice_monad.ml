@@ -31,6 +31,9 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
     Format.printf "@./CHECK %s@." msg;
     not r
 
+(* TODO: make this a CLI flag ? *)
+let print_choice = false
+
 module Make (M : sig
   type 'a t
 
@@ -71,7 +74,8 @@ struct
       | false, false -> M.empty
       | true, false | false, true -> M.return (sat_true, state)
       | true, true ->
-        Format.printf "CHOICE: %a@." Encoding.Expression.pp e;
+        if print_choice then
+          Format.printf "CHOICE: %a@." Encoding.Expression.pp e;
         let state1 = Thread.clone { state with pc = with_e } in
         let state2 = Thread.clone { state with pc = with_not_e } in
         M.cons (true, state1) (M.return (false, state2)) )
