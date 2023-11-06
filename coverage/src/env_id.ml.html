@@ -109,12 +109,12 @@ type 'a collection =
 let empty = { c = IMap.empty; last = 0 }
 
 let with_fresh_id f c =
-  <span data-count="2893">l</span>et open Syntax in
+  <span data-count="2894">l</span>et open Syntax in
   let last = c.last in
-  let* e, r = <span data-count="2893">f</span> last in
-  <span data-count="2717">O</span>k ({ c = IMap.ad<span data-count="2717">d</span> c.last e c.c; last = c.last + 1 }, r)
+  let* e, r = <span data-count="2894">f</span> last in
+  <span data-count="2718">O</span>k ({ c = IMap.ad<span data-count="2718">d</span> c.last e c.c; last = c.last + 1 }, r)
 
-let get i c = <span data-count="11750364">I</span>Map.find i c.c
+let get i c = <span data-count="11750365">I</span>Map.find i c.c
 
 let pp ppf i = <span data-count="0">F</span>ormat.fprintf ppf "f_%i" i
 

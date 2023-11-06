@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_value.ml &mdash; Coverage report</title>
-    <meta name="description" content="62.69% coverage in src/concrete_value.ml">
+    <meta name="description" content="64.18% coverage in src/concrete_value.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,12 @@
           <span class="dirname">src/</span>concrete_value.ml
         </a>
       </h1>
-      <h2>62.69%</h2>
+      <h2>64.18%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:29.61%"></span>
       <span class="unvisited" style="top:30.26%"></span>
       <span class="unvisited" style="top:30.92%"></span>
-      <span class="unvisited" style="top:32.89%"></span>
       <span class="unvisited" style="top:34.21%"></span>
       <span class="some-visited" style="bottom:34.87%"></span>
       <span class="unvisited" style="bottom:15.13%"></span>
@@ -85,7 +84,7 @@
 <a id="L47"></a><span class="unvisited"> </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
-<a id="L50"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span class="unvisited"> </span>
 <a id="L53"></a><span class="visited"> </span>
@@ -378,42 +377,42 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : Simplified.val_type =
-    <span data-count="2955">m</span>atch e with
-    | <span data-count="1478">I</span>32 -&gt; Num_type I32
-    | <span data-count="245">I</span>64 -&gt; Num_type I64
-    | <span data-count="490">F</span>32 -&gt; Num_type F32
-    | <span data-count="739">F</span>64 -&gt; Num_type F64
+    <span data-count="2973">m</span>atch e with
+    | <span data-count="1493">I</span>32 -&gt; Num_type I32
+    | <span data-count="246">I</span>64 -&gt; Num_type I64
+    | <span data-count="491">F</span>32 -&gt; Num_type F32
+    | <span data-count="740">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : Simplified.result_type =
-    <span data-count="2707">m</span>atch r with
-    | <span data-count="2215">R</span>0 -&gt; []
-    | <span data-count="492">R</span>1 a -&gt; [ elt_typ<span data-count="492">e</span> a ]
+    <span data-count="2720">m</span>atch r with
+    | <span data-count="2221">R</span>0 -&gt; []
+    | <span data-count="499">R</span>1 a -&gt; [ elt_typ<span data-count="499">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; Simplified.param_type = function
-    | <span data-count="0">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="2463">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2463">e</span> hd) :: arg_typ<span data-count="2463">e</span> tl
+    | <span data-count="4">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="2474">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2474">e</span> hd) :: arg_typ<span data-count="2474">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="2707">R</span>es -&gt; []
+    | <span data-count="2720">R</span>es -&gt; []
 
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
   let extern_type (Extern_func (Func (arg, res), _)) : Simplified.func_type =
-    <span data-count="2707">(</span>arg_typ<span data-count="2707">e</span> arg, res_typ<span data-count="2707">e</span> res)
+    <span data-count="2720">(</span>arg_typ<span data-count="2720">e</span> arg, res_typ<span data-count="2720">e</span> res)
 
   type t = Func_intf.t
 
   let fresh =
     let r = ref (-1) in
     fun () -&gt;
-      <span data-count="9282">i</span>ncr r;
-      <span data-count="9282">!</span>r
+      <span data-count="9283">i</span>ncr r;
+      <span data-count="9283">!</span>r
 
-  let wasm func env : t = <span data-count="9282">W</span>ASM (fres<span data-count="9282">h</span> (), func, env)
+  let wasm func env : t = <span data-count="9283">W</span>ASM (fres<span data-count="9283">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -458,18 +457,18 @@ type t =
   | Ref of ref_value
 
 let of_instr (i : Simplified.instr) : t =
-  <span data-count="173">m</span>atch i with
-  | <span data-count="33">I</span>32_const c -&gt; I32 c
-  | <span data-count="29">I</span>64_const c -&gt; I64 c
-  | <span data-count="56">F</span>32_const c -&gt; F32 c
-  | <span data-count="55">F</span>64_const c -&gt; F64 c
+  <span data-count="255">m</span>atch i with
+  | <span data-count="103">I</span>32_const c -&gt; I32 c
+  | <span data-count="33">I</span>64_const c -&gt; I64 c
+  | <span data-count="60">F</span>32_const c -&gt; F32 c
+  | <span data-count="59">F</span>64_const c -&gt; F64 c
   | _ -&gt; assert false
 
 let to_instr = function
-  | <span data-count="71">I</span>32 c -&gt; Simplified.I32_const c
+  | <span data-count="104">I</span>32 c -&gt; Simplified.I32_const c
   | <span data-count="32">I</span>64 c -&gt; Simplified.I64_const c
-  | <span data-count="7">F</span>32 c -&gt; Simplified.F32_const c
-  | <span data-count="7">F</span>64 c -&gt; Simplified.F64_const c
+  | <span data-count="9">F</span>32 c -&gt; Simplified.F32_const c
+  | <span data-count="9">F</span>64 c -&gt; Simplified.F64_const c
   | _ -&gt; assert false
 
 let pp_ref fmt = function

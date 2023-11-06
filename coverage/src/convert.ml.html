@@ -718,8 +718,8 @@ module MFloat32 = struct
   type t = Float32.t
 
   let demote_f64 x =
-    <span data-count="174">l</span>et xf = Float64.to_float x in
-    <span data-count="174">i</span>f xf = xf then <span data-count="162">F</span>loat32.of_float xf
+    <span data-count="175">l</span>et xf = Float64.to_float x in
+    <span data-count="175">i</span>f xf = xf then <span data-count="163">F</span>loat32.of_float xf
     else
       <span data-count="12">l</span>et nan64bits = Float64.to_bits x in
       <span data-count="12">l</span>et sign_field =

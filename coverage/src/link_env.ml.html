@@ -456,7 +456,7 @@ let pp fmt t =
        func )
     (IMap.binding<span data-count="0">s</span> t.functions)
 
-let id (env : _ t) = <span data-count="3009">e</span>nv.id
+let id (env : _ t) = <span data-count="3010">e</span>nv.id
 
 let get_global (env : _ t) id = <span data-count="1301">I</span>Map.find id env.globals
 
@@ -464,13 +464,13 @@ let get_memory (env : _ t) id = <span data-count="1853557">I</span>Map.find id e
 
 let get_table (env : _ t) id = <span data-count="1607415">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10062202">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10062204">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="662">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1432">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="77">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="78">F</span>unc_id.get id env.extern_funcs
 
 let get_func_typ env f =
   <span data-count="0">m</span>atch f with
@@ -506,7 +506,7 @@ module Build = struct
     <span data-count="917">{</span> env with tables = IMap.ad<span data-count="917">d</span> id table env.tables }
 
   let add_func id func env =
-    <span data-count="12352">{</span> env with functions = IMap.ad<span data-count="12352">d</span> id func env.functions }
+    <span data-count="12354">{</span> env with functions = IMap.ad<span data-count="12354">d</span> id func env.functions }
 
   let add_data id data env = <span data-count="652">{</span> env with data = IMap.ad<span data-count="652">d</span> id data env.data }
 
@@ -587,7 +587,7 @@ end
 
 let freeze id Build.{ globals; memories; tables; functions; data; elem }
   extern_funcs =
-  <span data-count="2717">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="2718">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>
