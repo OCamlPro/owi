@@ -14,7 +14,6 @@ type t =
   ; memories : Symbolic_memory.memories
   ; tables : Symbolic_table.tables
   ; globals : Symbolic_global.globals
-  ; sym_cnt : int ref
   }
 
 let solver t = t.solver
@@ -27,8 +26,6 @@ let tables t = t.tables
 
 let globals t = t.globals
 
-let sym_cnt t = t.sym_cnt
-
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
@@ -38,12 +35,10 @@ let create () =
   ; memories = Symbolic_memory.init ()
   ; tables = Symbolic_table.init ()
   ; globals = Symbolic_global.init ()
-  ; sym_cnt = ref 0
   }
 
-let clone { solver; pc; memories; tables; globals; sym_cnt } =
+let clone { solver; pc; memories; tables; globals } =
   let memories = Symbolic_memory.clone memories in
   let tables = Symbolic_table.clone tables in
   let globals = Symbolic_global.clone globals in
-  let sym_cnt = ref !sym_cnt in
-  { solver; pc; memories; tables; globals; sym_cnt }
+  { solver; pc; memories; tables; globals }
