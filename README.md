@@ -108,40 +108,18 @@ For more, have a look at the [example] folder, at the [documentation] or at the 
 
 The interpreter can also be used in symbolic mode. This allows to find which input values are leading to a trap.
 
-Given a file `test/mini_test.wast` with the following content:
+Given a file `test/sym/mini_test.wast` with the following content:
 
-<!-- $MDX file=test/mini_test.wast -->
+<!-- $MDX file=test/sym/mini_test.wast -->
 ```wast
 (module
-  (import "print" "i32" (func $print_i32 (param i32)))
   (import "symbolic" "i32" (func $gen_i32 (param i32) (result i32)))
-  (func $factR (export "fact") (param $n i32) (result i32)
-    local.get $n
-    local.get $n
-    i32.const 1
-    i32.eq
-    br_if 0
-    i32.const 1
-    i32.sub
-    call $factR
-    local.get $n
-    i32.mul
-  )
 
-  (func $start
-    (local $x i32)
-    (i32.const 123)
-    (call $print_i32)
+  (func $start (local $x i32)
     (local.set $x (call $gen_i32 (i32.const 42)))
     (if (i32.lt_s (i32.const 5) (local.get $x)) (then
       unreachable
-    ))
-    (if (i32.gt_s (i32.const 1) (local.get $x)) (then
-      unreachable
-    ))
-    (local.get $x)
-    (call $factR)
-    (call $print_i32))
+    )))
 
   (start $start)
 )
@@ -149,24 +127,12 @@ Given a file `test/mini_test.wast` with the following content:
 
 You can run the symbolic interpreter through the `sym` command:
 ```sh
-$ dune exec owi -- sym test/mini_test.wast
-(i32 123)
-CHOICE: (i32.lt_s (i32 5) x_1)
-PATH CONDITION:
-(i32.lt_s (i32 5) x_1)
-TRAP: unreachable
-CHOICE: (i32.gt_s (i32 1) x_1)
+$ dune exec owi -- sym test/sym/mini_test.wast
+Trap: unreachable
 Model:
-(model
-(x_1 i32 (i32 6))
-)
+  (model
+    (x_0 i32 (i32 6)))
 Reached problem!
-
-Solver time 0.002983s
-      calls 1
-  mean time 2.983000ms
-CHOICE: (i32.eq x_1 (i32 1))
-x_1
 ```
 
 ## Supported proposals
