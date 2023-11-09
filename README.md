@@ -1,6 +1,6 @@
-# [🐌] owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
+# [🐌] Owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
 
-[owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
+[Owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
 
 ## Installation
 
@@ -61,7 +61,7 @@ stack        : [  ]
 
 If you want to run the file as a [reference test suite script], you can use the `script` command instead of the `run` one. This will allow you to add constructs like assertions and will also link the [spectest module], which provides function for e.g. printing.
 
-If you're interested in the library part of owi, here's how to get started:
+If you're interested in the library part of Owi, here's how to get started:
 
 ```ocaml
 # open Owi;;
@@ -137,7 +137,7 @@ Reached problem!
 
 ## Supported proposals
 
-The 🐌 status means the proposal is not applicable to owi.
+The 🐌 status means the proposal is not applicable to Owi.
 
 ### Adopted proposals
 
@@ -216,7 +216,7 @@ See [LICENSE].
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [OCaml]: https://ocaml.org
 [opam]: https://opam.ocaml.org
-[owi]: https://ocamlpro.github.io/owi
+[Owi]: https://ocamlpro.github.io/owi
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [spectest module]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#spectest-host-module
 [WebAssembly]: https://webassembly.org
