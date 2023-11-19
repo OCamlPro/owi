@@ -1,5 +1,6 @@
 open Syntax
-module Expr = Encoding.Expression
+module E = Encoding
+module Expr = E.Expr
 module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
@@ -11,7 +12,7 @@ let print_path_condition = false
 
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
-    Printf.printf "%s\n%!" (Encoding.Expression.to_string i);
+    Printf.printf "%s\n%!" (Expr.to_string i);
     Choice.return ()
   in
   (* we need to describe their types *)
@@ -51,19 +52,21 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     let name =
-      match i with
+      match i.e with
       | Expr.Val (Num (I32 i)) -> begin
         match names.(Int32.to_int i) with exception _ -> "x" | name -> name
       end
       | _ -> Format.kasprintf failwith "Text name %a" Expr.pp i
     in
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s `I32Type (sprintf "%s_%i" name id) in
+    let r =
+      E.(Expr.mk_symbol Symbol.(sprintf "%s_%i" name id @: Ty_bitv S32))
+    in
     Choice.return r
   in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol_s ty (sprintf "symbol_%i" id) in
+    let r = E.(Expr.mk_symbol Symbol.(sprintf "symbol_%i" id @: ty)) in
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
@@ -81,16 +84,16 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol `I32Type) )
+          (Func (UArg Res, R1 I32), symbol (Ty_bitv S32)) )
     ; ( "i64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I64), symbol `I64Type) )
+          (Func (UArg Res, R1 I64), symbol (Ty_bitv S64)) )
     ; ( "f32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F32), symbol `F32Type) )
+          (Func (UArg Res, R1 F32), symbol (Ty_fp S32)) )
     ; ( "f64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F64), symbol `F64Type) )
+          (Func (UArg Res, R1 F64), symbol (Ty_fp S64)) )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )

@@ -3,7 +3,8 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Encoding
-open Expression
+open Ty
+open Expr
 
 let ( let* ) o f = Option.bind o f
 
@@ -11,38 +12,37 @@ let ( let+ ) o f = Option.map f o
 
 let return = Option.some
 
-let mk_i32 x = Val (Num (I32 x))
+let mk_i32 x = Val (Num (I32 x)) @: Ty_bitv S32
 
-let mk_i64 x = Val (Num (I64 x))
+let mk_i64 x = Val (Num (I64 x)) @: Ty_bitv S64
 
-let mk_f32 x = Val (Num (F32 x))
+let mk_f32 x = Val (Num (F32 x)) @: Ty_fp S32
 
-let mk_f64 x = Val (Num (F64 x))
+let mk_f64 x = Val (Num (F64 x)) @: Ty_fp S64
 
-let unop op e =
-  match e with
-  | Val (Num n) -> Val (Num (Eval_numeric.eval_unop op n))
-  | _ -> Unop (op, e)
+let unop ty op e =
+  match e.e with
+  | Val (Num n) -> Val (Num (Eval_numeric.eval_unop ty op n)) @: e.ty
+  | _ -> Unop (op, e) @: ty
 
-let binop op e1 e2 =
-  match (e1, e2) with
-  | Val (Num n1), Val (Num n2) -> Val (Num (Eval_numeric.eval_binop op n1 n2))
-  | Val (Bool _), Val (Bool _) -> assert false
-  | _ -> Binop (op, e1, e2)
+let binop ty op e1 e2 =
+  match (e1.e, e2.e) with
+  | Val (Num n1), Val (Num n2) ->
+    Val (Num (Eval_numeric.eval_binop ty op n1 n2)) @: ty
+  | _ -> Binop (op, e1, e2) @: ty
 
-let relop op e1 e2 =
-  match (e1, e2) with
-  | Val (Num n1), Val (Num n2) -> Val (Bool (Eval_numeric.eval_relop op n1 n2))
-  | _ -> Relop (op, e1, e2)
+let relop ty op e1 e2 =
+  match (e1.e, e2.e) with
+  | Val (Num n1), Val (Num n2) ->
+    Val (if Eval_numeric.eval_relop ty op n1 n2 then True else False) @: ty
+  | _ -> Relop (op, e1, e2) @: ty
 
-let cvtop op e =
-  match e with
-  | Val (Num n) -> Val (Num (Eval_numeric.eval_cvtop op n))
-  | _ -> Cvtop (op, e)
+let cvtop ty op e =
+  match e.e with
+  | Val (Num n) -> Val (Num (Eval_numeric.eval_cvtop ty op n)) @: ty
+  | _ -> Cvtop (op, e) @: ty
 
 module S = struct
-  module Expr = Encoding.Expression
-
   type vbool = Expr.t
 
   type int32 = Expr.t
@@ -81,8 +81,8 @@ module S = struct
   let ref_externref t v : t = Ref (Externref (Some (E (t, v))))
 
   let ref_is_null = function
-    | Funcref (Some _) | Externref (Some _) -> Val (Bool false)
-    | Funcref None | Externref None -> Val (Bool true)
+    | Funcref (Some _) | Externref (Some _) -> Val False @: Ty_bool
+    | Funcref None | Externref None -> Val True @: Ty_bool
 
   let pp ppf v =
     let e =
@@ -113,44 +113,49 @@ module S = struct
   end
 
   module Bool = struct
-    let of_val = function Val (Bool b) -> Some b | _ -> None
+    let of_val = function
+      | Val True -> Some true
+      | Val False -> Some false
+      | _ -> None
 
-    let const b = Val (Bool b)
+    let const b = Val (if b then True else False) @: Ty_bool
 
     let not e =
-      match e with
-      | Unop (Bool Not, cond) -> cond
+      match e.e with
+      | Unop (Not, cond) -> cond
       | _ ->
-        Option.value ~default:(Boolean.mk_not e)
-        @@ let+ b = of_val e in
-           Val (Bool (not b))
+        Option.value ~default:(Unop (Not, e) @: Ty_bool)
+        @@ let+ b = of_val e.e in
+           const (not b)
 
     let or_ e1 e2 =
-      match (of_val e1, of_val e2) with
-      | Some b1, Some b2 -> Val (Bool (b1 || b2))
+      match (of_val e1.e, of_val e2.e) with
+      | Some b1, Some b2 -> const (b1 || b2)
       | Some false, _ -> e2
       | _, Some false -> e1
-      | Some true, _ | _, Some true -> Val (Bool true)
-      | _ -> Boolean.mk_or e1 e2
+      | Some true, _ | _, Some true -> const true
+      | _ -> Binop (Or, e1, e2) @: Ty_bool
 
     let and_ e1 e2 =
-      match (of_val e1, of_val e2) with
-      | Some b1, Some b2 -> Val (Bool (b1 && b2))
+      match (of_val e1.e, of_val e2.e) with
+      | Some b1, Some b2 -> const (b1 && b2)
       | Some true, _ -> e2
       | _, Some true -> e1
-      | Some false, _ | _, Some false -> Val (Bool false)
-      | _ -> Boolean.mk_and e1 e2
+      | Some false, _ | _, Some false -> const false
+      | _ -> Binop (And, e1, e2) @: Ty_bool
 
-    let int32 = function
-      | Val (Bool b) -> if b then mk_i32 1l else mk_i32 0l
-      | Cvtop (I32 ToBool, e) -> e
-      | e -> Cvtop (I32 OfBool, e)
+    let int32 e =
+      match e.e with
+      | Val True -> mk_i32 1l
+      | Val False -> mk_i32 0l
+      | Cvtop (ToBool, e') when e'.ty = Ty_bitv S32 -> e'
+      | _ -> Cvtop (OfBool, e) @: Ty_bitv S32
 
     let select_expr c ~if_true ~if_false =
-      match of_val c with
+      match of_val c.e with
       | Some true -> if_true
       | Some false -> if_false
-      | None -> Boolean.mk_ite c if_true if_false
+      | None -> Triop (Ite, c, if_true, if_false) @: Ty_bool
 
     let pp ppf (e : vbool) = Format.pp_string ppf (Expr.to_string e)
   end
@@ -168,99 +173,99 @@ module S = struct
 
     type nonrec float64 = float64
 
+    let ty = Ty_bitv S32
+
     let zero = mk_i32 0l
 
-    let clz e = unop (I32 Clz) e
+    let clz e = unop ty Clz e
 
     let ctz _ = failwith "i32_ctz: TODO"
 
     let popcnt _ = failwith "i32_popcnt: TODO"
 
-    let add e1 e2 = binop (I32 Add) e1 e2
+    let add e1 e2 = binop ty Add e1 e2
 
-    let sub e1 e2 = binop (I32 Sub) e1 e2
+    let sub e1 e2 = binop ty Sub e1 e2
 
-    let mul e1 e2 = binop (I32 Mul) e1 e2
+    let mul e1 e2 = binop ty Mul e1 e2
 
-    let div e1 e2 = binop (I32 DivS) e1 e2
+    let div e1 e2 = binop ty Div e1 e2
 
-    let unsigned_div e1 e2 = binop (I32 DivU) e1 e2
+    let unsigned_div e1 e2 = binop ty DivU e1 e2
 
-    let rem e1 e2 = binop (I32 RemS) e1 e2
+    let rem e1 e2 = binop ty Rem e1 e2
 
-    let unsigned_rem e1 e2 = binop (I32 RemU) e1 e2
+    let unsigned_rem e1 e2 = binop ty RemU e1 e2
 
     let boolify e =
-      match e with
-      | Val (Num (I32 0l)) -> Some (Val (Bool false))
-      | Val (Num (I32 1l)) -> Some (Val (Bool true))
-      | Cvtop (I32 OfBool, cond) -> Some cond
+      match e.e with
+      | Val (Num (I32 0l)) -> Some (Bool.const false)
+      | Val (Num (I32 1l)) -> Some (Bool.const true)
+      | Cvtop (OfBool, cond) -> Some cond
       | _ -> None
 
     let logand e1 e2 =
       match (boolify e1, boolify e2) with
       | Some b1, Some b2 -> Bool.int32 (Bool.and_ b1 b2)
-      | _ -> binop (I32 And) e1 e2
+      | _ -> binop ty And e1 e2
 
     let logor e1 e2 =
       match (boolify e1, boolify e2) with
       | Some b1, Some b2 -> Bool.int32 (Bool.or_ b1 b2)
-      | _ -> binop (I32 Or) e1 e2
+      | _ -> binop ty Or e1 e2
 
-    let logxor e1 e2 = binop (I32 Xor) e1 e2
+    let logxor e1 e2 = binop ty Xor e1 e2
 
-    let shl e1 e2 = binop (I32 Shl) e1 e2
+    let shl e1 e2 = binop ty Shl e1 e2
 
-    let shr_s e1 e2 = binop (I32 ShrS) e1 e2
+    let shr_s e1 e2 = binop ty ShrA e1 e2
 
-    let shr_u e1 e2 = binop (I32 ShrU) e1 e2
+    let shr_u e1 e2 = binop ty ShrL e1 e2
 
-    let rotl e1 e2 = binop (I32 Rotl) e1 e2
+    let rotl e1 e2 = binop ty Rotl e1 e2
 
-    let rotr e1 e2 = binop (I32 Rotr) e1 e2
+    let rotr e1 e2 = binop ty Rotr e1 e2
 
     let eq_const e c =
-      match e with
-      | Cvtop (I32 OfBool, cond) -> begin
-        match c with 0l -> Bool.not cond | 1l -> cond | _ -> Val (Bool false)
+      match e.e with
+      | Cvtop (OfBool, cond) -> begin
+        match c with 0l -> Bool.not cond | 1l -> cond | _ -> Bool.const false
       end
-      | _ -> relop (I32 Eq) e (Val (Num (I32 c)))
+      | _ -> relop ty Eq e (mk_i32 c)
 
-    let eq e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 Eq) e1 e2
+    let eq e1 e2 = if e1 == e2 then Bool.const true else relop ty Eq e1 e2
 
-    let ne e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 Ne) e1 e2
+    let ne e1 e2 = if e1 == e2 then Bool.const false else relop ty Ne e1 e2
 
-    let lt e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 LtS) e1 e2
+    let lt e1 e2 = if e1 == e2 then Bool.const false else relop ty Lt e1 e2
 
-    let gt e1 e2 = if e1 == e2 then Val (Bool false) else relop (I32 GtS) e1 e2
+    let gt e1 e2 = if e1 == e2 then Bool.const false else relop ty Gt e1 e2
 
-    let lt_u e1 e2 =
-      if e1 == e2 then Val (Bool false) else relop (I32 LtU) e1 e2
+    let lt_u e1 e2 = if e1 == e2 then Bool.const false else relop ty LtU e1 e2
 
-    let gt_u e1 e2 =
-      if e1 == e2 then Val (Bool false) else relop (I32 GtU) e1 e2
+    let gt_u e1 e2 = if e1 == e2 then Bool.const false else relop ty GtU e1 e2
 
-    let le e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 LeS) e1 e2
+    let le e1 e2 = if e1 == e2 then Bool.const true else relop ty Le e1 e2
 
-    let ge e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 GeS) e1 e2
+    let ge e1 e2 = if e1 == e2 then Bool.const true else relop ty Ge e1 e2
 
-    let le_u e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 LeU) e1 e2
+    let le_u e1 e2 = if e1 == e2 then Bool.const true else relop ty LeU e1 e2
 
-    let ge_u e1 e2 = if e1 == e2 then Val (Bool true) else relop (I32 GeU) e1 e2
+    let ge_u e1 e2 = if e1 == e2 then Bool.const true else relop ty GeU e1 e2
 
     let to_bool (e : vbool) =
-      match e with
-      | Val (Num (I32 i)) -> Val (Bool (Int32.ne i 0l))
-      | Cvtop (I32 OfBool, cond) -> cond
-      | e -> Cvtop (I32 ToBool, e)
+      match e.e with
+      | Val (Num (I32 i)) -> Bool.const @@ Int32.ne i 0l
+      | Cvtop (OfBool, cond) -> cond
+      | _ -> Cvtop (ToBool, e) @: ty
 
-    let trunc_f32_s x = cvtop (I32 TruncSF32) x
+    let trunc_f32_s x = cvtop ty TruncSF32 x
 
-    let trunc_f32_u x = cvtop (I32 TruncUF32) x
+    let trunc_f32_u x = cvtop ty TruncUF32 x
 
-    let trunc_f64_s x = cvtop (I32 TruncSF64) x
+    let trunc_f64_s x = cvtop ty TruncSF64 x
 
-    let trunc_f64_u x = cvtop (I32 TruncUF64) x
+    let trunc_f64_u x = cvtop ty TruncUF64 x
 
     let trunc_sat_f32_s _ = assert false
 
@@ -270,16 +275,14 @@ module S = struct
 
     let trunc_sat_f64_u _ = assert false
 
-    let reinterpret_f32 x = cvtop (I32 ReinterpretFloat) x
+    let reinterpret_f32 x = cvtop ty Reinterpret_float x
 
-    let wrap_i64 x = cvtop (I32 WrapI64) x
+    let wrap_i64 x = cvtop ty WrapI64 x
 
     let extend_s _ = assert false
   end
 
   module I64 = struct
-    open Expr
-
     type num = Expr.t
 
     type vbool = Expr.t
@@ -290,77 +293,79 @@ module S = struct
 
     type nonrec float64 = float64
 
+    let ty = Ty_bitv S64
+
     let zero = mk_i64 0L
 
-    let clz e = unop (I64 Clz) e
+    let clz e = unop ty Clz e
 
     let ctz _ = failwith "i64_ctz: TODO"
 
     let popcnt _ = failwith "i64_popcnt: TODO"
 
-    let add e1 e2 = binop (I64 Add) e1 e2
+    let add e1 e2 = binop ty Add e1 e2
 
-    let sub e1 e2 = binop (I64 Sub) e1 e2
+    let sub e1 e2 = binop ty Sub e1 e2
 
-    let mul e1 e2 = binop (I64 Mul) e1 e2
+    let mul e1 e2 = binop ty Mul e1 e2
 
-    let div e1 e2 = binop (I64 DivS) e1 e2
+    let div e1 e2 = binop ty Div e1 e2
 
-    let unsigned_div e1 e2 = binop (I64 DivU) e1 e2
+    let unsigned_div e1 e2 = binop ty DivU e1 e2
 
-    let rem e1 e2 = binop (I64 RemS) e1 e2
+    let rem e1 e2 = binop ty Rem e1 e2
 
-    let unsigned_rem e1 e2 = binop (I64 RemU) e1 e2
+    let unsigned_rem e1 e2 = binop ty RemU e1 e2
 
-    let logand e1 e2 = binop (I64 And) e1 e2
+    let logand e1 e2 = binop ty And e1 e2
 
-    let logor e1 e2 = binop (I64 Or) e1 e2
+    let logor e1 e2 = binop ty Or e1 e2
 
-    let logxor e1 e2 = binop (I64 Xor) e1 e2
+    let logxor e1 e2 = binop ty Xor e1 e2
 
-    let shl e1 e2 = binop (I64 Shl) e1 e2
+    let shl e1 e2 = binop ty Shl e1 e2
 
-    let shr_s e1 e2 = binop (I64 ShrS) e1 e2
+    let shr_s e1 e2 = binop ty ShrA e1 e2
 
-    let shr_u e1 e2 = binop (I64 ShrU) e1 e2
+    let shr_u e1 e2 = binop ty ShrL e1 e2
 
-    let rotl e1 e2 = binop (I64 Rotl) e1 e2
+    let rotl e1 e2 = binop ty Rotl e1 e2
 
-    let rotr e1 e2 = binop (I64 Rotr) e1 e2
+    let rotr e1 e2 = binop ty Rotr e1 e2
 
-    let eq_const e c = relop (I64 Eq) e (Val (Num (I64 c)))
+    let eq_const e c = relop ty Eq e (mk_i64 c)
 
-    let eq e1 e2 = relop (I64 Eq) e1 e2
+    let eq e1 e2 = relop ty Eq e1 e2
 
-    let ne e1 e2 = relop (I64 Ne) e1 e2
+    let ne e1 e2 = relop ty Ne e1 e2
 
-    let lt e1 e2 = relop (I64 LtS) e1 e2
+    let lt e1 e2 = relop ty Lt e1 e2
 
-    let gt e1 e2 = relop (I64 GtS) e1 e2
+    let gt e1 e2 = relop ty Gt e1 e2
 
-    let lt_u e1 e2 = relop (I64 LtU) e1 e2
+    let lt_u e1 e2 = relop ty LtU e1 e2
 
-    let gt_u e1 e2 = relop (I64 GtU) e1 e2
+    let gt_u e1 e2 = relop ty GtU e1 e2
 
-    let le e1 e2 = relop (I64 LeS) e1 e2
+    let le e1 e2 = relop ty Le e1 e2
 
-    let ge e1 e2 = relop (I64 GeS) e1 e2
+    let ge e1 e2 = relop ty Ge e1 e2
 
-    let le_u e1 e2 = relop (I64 LeU) e1 e2
+    let le_u e1 e2 = relop ty LeU e1 e2
 
-    let ge_u e1 e2 = relop (I64 GeU) e1 e2
+    let ge_u e1 e2 = relop ty GeU e1 e2
 
-    let of_int32 e = cvtop (I64 ExtendSI32) e
+    let of_int32 e = cvtop ty (ExtS 32) e
 
-    let to_int32 e = cvtop (I32 WrapI64) e
+    let to_int32 e = cvtop (Ty_bitv S32) WrapI64 e
 
-    let trunc_f32_s x = cvtop (I64 TruncSF32) x
+    let trunc_f32_s x = cvtop ty TruncSF32 x
 
-    let trunc_f32_u x = cvtop (I64 TruncUF32) x
+    let trunc_f32_u x = cvtop ty TruncUF32 x
 
-    let trunc_f64_s x = cvtop (I64 TruncSF64) x
+    let trunc_f64_s x = cvtop ty TruncSF64 x
 
-    let trunc_f64_u x = cvtop (I64 TruncUF64) x
+    let trunc_f64_u x = cvtop ty TruncUF64 x
 
     let trunc_sat_f32_s _ = assert false
 
@@ -370,13 +375,13 @@ module S = struct
 
     let trunc_sat_f64_u _ = assert false
 
-    let reinterpret_f64 x = cvtop (I64 ReinterpretFloat) x
+    let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
     let extend_s _ = assert false
 
-    let extend_i32_s x = cvtop (I64 ExtendSI32) x
+    let extend_i32_s x = cvtop ty (ExtS 32) x
 
-    let extend_i32_u x = cvtop (I64 ExtendUI32) x
+    let extend_i32_u x = cvtop ty (ExtU 32) x
   end
 
   module F32 = struct
@@ -390,63 +395,65 @@ module S = struct
 
     type same_size_int = int32
 
+    let ty = Ty_fp S32
+
     let zero = mk_f32 0l
 
-    let abs x = unop (F32 Abs) x
+    let abs x = unop ty Abs x
 
-    let neg x = unop (F32 Neg) x
+    let neg x = unop ty Neg x
 
-    let sqrt x = unop (F32 Sqrt) x
+    let sqrt x = unop ty Sqrt x
 
-    let ceil x = unop (F32 Ceil) x
+    let ceil x = unop ty Ceil x
 
-    let floor x = unop (F32 Floor) x
+    let floor x = unop ty Floor x
 
     let trunc _ = assert false
 
-    let nearest x = unop (F32 Nearest) x
+    let nearest x = unop ty Nearest x
 
-    let add x y = binop (F32 Add) x y
+    let add x y = binop ty Add x y
 
-    let sub x y = binop (F32 Sub) x y
+    let sub x y = binop ty Sub x y
 
-    let mul x y = binop (F32 Mul) x y
+    let mul x y = binop ty Mul x y
 
-    let div x y = binop (F32 Div) x y
+    let div x y = binop ty Div x y
 
-    let min x y = binop (F32 Min) x y
+    let min x y = binop ty Min x y
 
-    let max x y = binop (F32 Max) x y
+    let max x y = binop ty Max x y
 
     let copy_sign _ _ = assert false
 
-    let eq x y = relop (F32 Eq) x y
+    let eq x y = relop ty Eq x y
 
-    let ne x y = relop (F32 Ne) x y
+    let ne x y = relop ty Ne x y
 
-    let lt x y = relop (F32 Lt) x y
+    let lt x y = relop ty Lt x y
 
-    let gt x y = relop (F32 Gt) x y
+    let gt x y = relop ty Gt x y
 
-    let le x y = relop (F32 Le) x y
+    let le x y = relop ty Le x y
 
-    let ge x y = relop (F32 Ge) x y
+    let ge x y = relop ty Ge x y
 
-    let convert_i32_s x = cvtop (F32 ConvertSI32) x
+    let convert_i32_s x = cvtop ty ConvertSI32 x
 
-    let convert_i32_u x = cvtop (F32 ConvertUI32) x
+    let convert_i32_u x = cvtop ty ConvertUI32 x
 
-    let convert_i64_s x = cvtop (F32 ConvertSI64) x
+    let convert_i64_s x = cvtop ty ConvertSI64 x
 
-    let convert_i64_u x = cvtop (F32 ConvertUI64) x
+    let convert_i64_u x = cvtop ty ConvertUI64 x
 
-    let demote_f64 x = cvtop (F32 DemoteF64) x
+    let demote_f64 x = cvtop ty DemoteF64 x
 
-    let reinterpret_i32 x = cvtop (F32 ReinterpretInt) x
+    let reinterpret_i32 x = cvtop ty Reinterpret_int x
 
-    let of_bits x = cvtop (F32 ReinterpretInt) x
+    let of_bits x = cvtop ty Reinterpret_int x
 
-    let to_bits x = cvtop (I32 ReinterpretFloat) x
+    let to_bits x = cvtop (Ty_bitv S32) Reinterpret_float x
   end
 
   module F64 = struct
@@ -460,63 +467,65 @@ module S = struct
 
     type same_size_int = int64
 
+    let ty = Ty_fp S64
+
     let zero = mk_f64 0L
 
-    let abs x = unop (F64 Abs) x
+    let abs x = unop ty Abs x
 
-    let neg x = unop (F64 Neg) x
+    let neg x = unop ty Neg x
 
-    let sqrt x = unop (F64 Sqrt) x
+    let sqrt x = unop ty Sqrt x
 
-    let ceil x = unop (F64 Ceil) x
+    let ceil x = unop ty Ceil x
 
-    let floor x = unop (F64 Floor) x
+    let floor x = unop ty Floor x
 
     let trunc _x = assert false
 
-    let nearest x = unop (F64 Nearest) x
+    let nearest x = unop ty Nearest x
 
-    let add x y = binop (F64 Add) x y
+    let add x y = binop ty Add x y
 
-    let sub x y = binop (F64 Sub) x y
+    let sub x y = binop ty Sub x y
 
-    let mul x y = binop (F64 Mul) x y
+    let mul x y = binop ty Mul x y
 
-    let div x y = binop (F64 Div) x y
+    let div x y = binop ty Div x y
 
-    let min x y = binop (F64 Min) x y
+    let min x y = binop ty Min x y
 
-    let max x y = binop (F64 Max) x y
+    let max x y = binop ty Max x y
 
     let copy_sign _ _ = assert false
 
-    let eq x y = relop (F64 Eq) x y
+    let eq x y = relop ty Eq x y
 
-    let ne x y = relop (F64 Ne) x y
+    let ne x y = relop ty Ne x y
 
-    let lt x y = relop (F64 Lt) x y
+    let lt x y = relop ty Lt x y
 
-    let gt x y = relop (F64 Gt) x y
+    let gt x y = relop ty Gt x y
 
-    let le x y = relop (F64 Le) x y
+    let le x y = relop ty Le x y
 
-    let ge x y = relop (F64 Ge) x y
+    let ge x y = relop ty Ge x y
 
-    let convert_i32_s x = cvtop (F64 ConvertSI32) x
+    let convert_i32_s x = cvtop ty ConvertSI32 x
 
-    let convert_i32_u x = cvtop (F64 ConvertUI32) x
+    let convert_i32_u x = cvtop ty ConvertUI32 x
 
-    let convert_i64_s x = cvtop (F64 ConvertSI64) x
+    let convert_i64_s x = cvtop ty ConvertSI64 x
 
-    let convert_i64_u x = cvtop (F64 ConvertUI64) x
+    let convert_i64_u x = cvtop ty ConvertUI64 x
 
-    let promote_f32 x = cvtop (F64 PromoteF32) x
+    let promote_f32 x = cvtop ty PromoteF32 x
 
-    let reinterpret_i64 x = cvtop (F64 ReinterpretInt) x
+    let reinterpret_i64 x = cvtop ty Reinterpret_int x
 
-    let of_bits x = cvtop (F64 ReinterpretInt) x
+    let of_bits x = cvtop ty Reinterpret_int x
 
-    let to_bits x = cvtop (I64 ReinterpretFloat) x
+    let to_bits x = cvtop (Ty_bitv S64) Reinterpret_float x
   end
 end
 
