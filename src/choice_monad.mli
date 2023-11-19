@@ -1,4 +1,4 @@
-exception Assertion of Encoding.Expression.expr * Thread.t
+exception Assertion of Encoding.Expr.t * Thread.t
 
 module type T =
   Choice_monad_intf.Complete

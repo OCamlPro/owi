@@ -6,8 +6,8 @@ module Intf = Interpret_functor_intf
 module Value = Symbolic_value.S
 
 module M = struct
-  module Expr = Encoding.Expression
-  module Types = Encoding.Types
+  module Expr = Encoding.Expr
+  module Ty = Encoding.Ty
   open Expr
 
   let page_size = 65_536
@@ -29,7 +29,7 @@ module M = struct
     match a with Val (Num (I32 i)) -> i | _ -> assert false
 
   let grow m delta =
-    let delta = Int32.to_int @@ concretize_i32 delta in
+    let delta = Int32.to_int @@ concretize_i32 delta.e in
     let old_size = m.size * page_size in
     m.size <- max m.size ((old_size + delta) / page_size)
 
@@ -43,21 +43,21 @@ module M = struct
 
   let blit_string m str ~src ~dst ~len =
     (* Always concrete? *)
-    let src = Int32.to_int @@ concretize_i32 src in
-    let dst = Int32.to_int @@ concretize_i32 dst in
-    let len = Int32.to_int @@ concretize_i32 len in
+    let src = Int32.to_int @@ concretize_i32 src.e in
+    let dst = Int32.to_int @@ concretize_i32 dst.e in
+    let len = Int32.to_int @@ concretize_i32 len.e in
     if
       src < 0 || dst < 0
       || src + len > String.length str
       || dst + len > m.size * page_size
-    then Val (Bool true)
+    then Value.Bool.const true
     else begin
       for i = 0 to len - 1 do
         let byte = Int32.of_int @@ Char.code @@ String.get str (src + i) in
         let dst = Int32.of_int (dst + i) in
         Hashtbl.replace m.data dst (Value.const_i32 byte)
       done;
-      Val (Bool false)
+      Value.Bool.const false
     end
 
   let clone m = { data = Hashtbl.create 0; parent = Some m; size = m.size }
@@ -73,13 +73,13 @@ module M = struct
     assert (offset > 0 && offset <= 8);
     let merge_extracts (e1, h, m1) (e2, m2, l) =
       if not (m1 = m2 && Expr.equal e1 e2) then
-        Expr.(Extract (e1, h, m1) ++ Extract (e2, m2, l))
-      else
-        match Expr.type_of e1 with
-        | Some t when h - l = Types.size t -> e1
-        | None | Some _ -> Extract (e1, h, l)
+        Expr.(
+          Concat (Extract (e1, h, m1) @: e1.ty, Extract (e2, m2, l) @: e1.ty)
+          @: e1.ty )
+      else if h - l = Ty.size e1.ty then e1
+      else Extract (e1, h, l) @: e1.ty
     in
-    match (msb, lsb) with
+    match (msb.e, lsb.e) with
     | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
       let offset = offset * 8 in
       if offset < 32 then
@@ -93,9 +93,12 @@ module M = struct
       Value.const_i64 Int64.(logor (shl (of_int32 i1) offset) i2)
     | Extract (e1, h, m1), Extract (e2, m2, l) ->
       merge_extracts (e1, h, m1) (e2, m2, l)
-    | Extract (e1, h, m1), Concat (Extract (e2, m2, l), e3) ->
-      Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3)
-    | _ -> Concat (msb, lsb)
+    | Extract (e1, h, m1), Concat ({ e = Extract (e2, m2, l); _ }, e3) ->
+      let ty: Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
+      Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3) @: ty
+    | _ ->
+      let ty: Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
+      Concat (msb, lsb) @: ty
 
   let loadn m a n : int32 =
     let rec loop addr size i acc =
@@ -109,41 +112,45 @@ module M = struct
     loop a n 1 v0
 
   let load_8_s m a =
-    match loadn m (concretize_i32 a) 1 with
+    let v = loadn m (concretize_i32 a.e) 1 in
+    match v.e with
     | Val (Num (I32 i8)) -> Value.const_i32 (Int32.extend_s 8 i8)
-    | e -> Binop (I32 ExtendS, Value.const_i32 24l, e)
+    | _ -> Cvtop (ExtS 24, v) @: Ty_bitv S32
 
   let load_8_u m a =
-    match loadn m (concretize_i32 a) 1 with
-    | Val (Num (I32 _)) as i8 -> i8
-    | e -> Binop (I32 ExtendU, Value.const_i32 24l, e)
+    let v = loadn m (concretize_i32 a.e) 1 in
+    match v.e with
+    | Val (Num (I32 _)) -> v
+    | _ -> Cvtop (ExtU 24, v) @: Ty_bitv S32
 
   let load_16_s m a =
-    match loadn m (concretize_i32 a) 2 with
+    let v = loadn m (concretize_i32 a.e) 2 in
+    match v.e with
     | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
-    | e -> Binop (I32 ExtendS, Value.const_i32 16l, e)
+    | _ -> Cvtop (ExtS 16, v) @: Ty_bitv S32
 
   let load_16_u m a =
-    match loadn m (concretize_i32 a) 2 with
-    | Val (Num (I32 _)) as i16 -> i16
-    | e -> Binop (I32 ExtendU, Value.const_i32 16l, e)
+    let v = loadn m (concretize_i32 a.e) 2 in
+    match v.e with
+    | Val (Num (I32 _)) -> v
+    | _ -> Cvtop (ExtU 16, v) @: Ty_bitv S32
 
-  let load_32 m a = loadn m (concretize_i32 a) 4
+  let load_32 m a = loadn m (concretize_i32 a.e) 4
 
-  let load_64 m a = loadn m (concretize_i32 a) 8
+  let load_64 m a = loadn m (concretize_i32 a.e) 8
 
   let extract v pos =
-    match v with
+    match v.e with
     | Val (Num (I32 i)) ->
       let i' = Int32.(logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
       Value.const_i32 i'
     | Val (Num (I64 i)) ->
       let i' = Int64.(logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
       Value.const_i32 (Int32.of_int64 i')
-    | v' -> Extract (v', pos + 1, pos)
+    | _ -> Extract (v, pos + 1, pos) @: Ty_bitv S8
 
   let storen m ~addr v n =
-    let a0 = concretize_i32 addr in
+    let a0 = concretize_i32 addr.e in
     for i = 0 to n - 1 do
       let addr' = Int32.add a0 (Int32.of_int i) in
       let v' = extract v i in

@@ -35,7 +35,7 @@ end
 type 'a eval =
   | EVal of 'a
   | ETrap of Trap.t
-  | EAssert of Encoding.Expression.expr
+  | EAssert of Encoding.Expr.t
 
 module type Complete_with_trap = sig
   include Complete

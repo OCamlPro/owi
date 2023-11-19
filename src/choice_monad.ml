@@ -2,6 +2,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Encoding
 open Choice_monad_intf
 
 type vbool = Symbolic_value.S.vbool
@@ -10,19 +11,20 @@ type thread = Thread.t
 
 type vint32 = Symbolic_value.S.int32
 
-exception Assertion of Encoding.Expression.t * Thread.t
+exception Assertion of Expr.t * Thread.t
 
 let check (sym_bool : vbool) (state : Thread.t) : bool =
   let (S (solver_module, solver)) = Thread.solver state in
   let pc = Thread.pc state in
   let no = Symbolic_value.S.Bool.not sym_bool in
-  let no = Encoding.Expression.simplify no in
-  match no with
-  | Val (Bool no) -> not no
+  let no = Expr.simplify no in
+  match no.e with
+  | Val True -> false
+  | Val False -> true
   | _ ->
     let check = no :: pc in
     Format.printf "CHECK:@.%a"
-      (Format.pp_list ~pp_sep:Format.pp_print_newline Encoding.Expression.pp)
+      (Format.pp_list ~pp_sep:Format.pp_print_newline Expr.pp)
       check;
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
@@ -60,32 +62,32 @@ struct
   type 'a t = thread -> ('a * thread) M.t
 
   let select b ({ Thread.pc; solver = S (solver_module, s); _ } as state) =
-    match Encoding.Expression.simplify b with
-    | Val (Bool b) -> M.return (b, state)
+    let v = Expr.simplify b in
+    match v.e with
+    | Val True -> M.return (true, state)
+    | Val False -> M.return (false, state)
     | Val (Num (I32 _)) -> assert false
-    | e -> (
+    | _ -> (
       let module Solver = (val solver_module) in
-      let with_e = e :: pc in
-      let with_not_e = Symbolic_value.S.Bool.not e :: pc in
-      let sat_true = Solver.check s with_e in
-      let sat_false = Solver.check s with_not_e in
+      let with_v = v :: pc in
+      let with_not_v = Symbolic_value.S.Bool.not v :: pc in
+      let sat_true = Solver.check s with_v in
+      let sat_false = Solver.check s with_not_v in
       match (sat_true, sat_false) with
       | false, false -> M.empty
       | true, false | false, true -> M.return (sat_true, state)
       | true, true ->
-        if print_choice then
-          Format.printf "CHOICE: %a@." Encoding.Expression.pp e;
-        let state1 = Thread.clone { state with pc = with_e } in
-        let state2 = Thread.clone { state with pc = with_not_e } in
+        if print_choice then Format.printf "CHOICE: %a@." Expr.pp v;
+        let state1 = Thread.clone { state with pc = with_v } in
+        let state2 = Thread.clone { state with pc = with_not_v } in
         M.cons (true, state1) (M.return (false, state2)) )
 
-  let fix_symbol (e : Encoding.Expression.t) pc =
-    let open Encoding in
-    match e with
+  let fix_symbol (e : Expr.t) pc =
+    match e.e with
     | Symbol sym -> (pc, sym)
     | _ ->
-      let sym = Symbol.mk_symbol `I32Type "choice_i32" in
-      let assign = Expression.Relop (I32 Eq, Symbol sym, e) in
+      let sym = Symbol.("choice_i32" @: Ty_bitv S32) in
+      let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
       (assign :: pc, sym)
 
   let clone_if_needed ~orig_pc cases =
@@ -102,15 +104,16 @@ struct
         cases
 
   let not_value sym value =
-    Encoding.Expression.Relop (I32 Ne, Symbol sym, Val (Num (I32 value)))
+    Expr.(
+      Relop (Ne, mk_symbol sym, Symbolic_value.S.const_i32 value) @: Ty_bitv S32 )
 
   let select_i32 (sym_int : vint32) (state : Thread.t) =
     let (S (solver_module, solver)) = Thread.solver state in
     let pc = Thread.pc state in
-    let sym_int = Encoding.Expression.simplify sym_int in
+    let sym_int = Expr.simplify sym_int in
     let orig_pc = pc in
     let pc, sym = fix_symbol sym_int pc in
-    match sym_int with
+    match sym_int.e with
     | Val (Num (I32 i)) -> M.return (i, state)
     | _ ->
       let module Solver = (val solver_module) in
@@ -122,13 +125,14 @@ struct
           match model with
           | None -> assert false (* ? *)
           | Some model -> (
-            Format.printf "Model:@.%a@." Encoding.Model.pp model;
-            let v = Encoding.Model.evaluate model sym in
+            Format.printf "Model:@.%a@." Model.pp model;
+            let v = Model.evaluate model sym in
             match v with
             | None -> assert false (* ? *)
             | Some (Num (I32 i) as v) -> begin
               let cond =
-                Encoding.Expression.Relop (I32 Eq, Symbol sym, Val v)
+                Expr.(
+                  Relop (Eq, mk_symbol sym, Val v @: Ty_bitv S32) @: Ty_bitv S32 )
               in
               let pc = cond :: pc in
               let case = (i, { state with pc }) in
@@ -148,9 +152,9 @@ struct
   let with_thread f t = M.return (f t, t)
 
   let add_pc c t =
-    match c with
-    | Encoding.Expression.Val (Bool b) ->
-      if b then M.return ((), t) else M.empty
+    match c.Expr.e with
+    | Expr.Val True -> M.return ((), t)
+    | Expr.Val False -> M.empty
     | _ ->
       let pc = c :: t.Thread.pc in
       let t = { t with pc } in
@@ -217,11 +221,14 @@ module Common_sausage = struct
   [@@inline]
 
   let select (cond : vbool) : bool t =
-    match cond with Val (Bool b) -> Retv b | _ -> Choice cond
+    match cond.e with
+    | Val True -> Retv true
+    | Val False -> Retv false
+    | _ -> Choice cond
   [@@inline]
 
   let select_i32 (i : Symbolic_value.S.int32) : int32 t =
-    match i with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
+    match i.e with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
 
   let trap : Trap.t -> 'a t = fun t -> Trap t
 
@@ -229,8 +236,9 @@ module Common_sausage = struct
   [@@inline]
 
   let add_pc (c : Symbolic_value.S.vbool) : unit t =
-    match c with
-    | Val (Bool b) -> if b then Retv () else Empty
+    match c.e with
+    | Val True -> Retv ()
+    | Val False -> Empty
     | _ -> Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
   [@@inline]
 
@@ -561,8 +569,8 @@ module MT = struct
     WQ.push (H (thread, t, { k })) g.w
 
   let spawn_producer _i global =
-    let module Mapping = Encoding.Z3_mappings.Fresh.Make () in
-    let module Batch = Encoding.Batch.Make (Mapping) in
+    let module Mapping = Z3_mappings.Fresh.Make () in
+    let module Batch = Batch.Make (Mapping) in
     let solver = Batch.create () in
     let solver : Thread.solver = S ((module Batch), solver) in
     let st = { solver; next = None; global } in
