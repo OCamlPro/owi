@@ -1,3 +1,5 @@
+open Types
+
 type 'ext t
 
 type t' = Env_id.t
@@ -26,7 +28,7 @@ val drop_data : data -> unit
 
 val get_extern_func : 'ext t -> Func_id.t -> 'ext
 
-val get_func_typ : _ t -> func -> Simplified.func_type
+val get_func_typ : _ t -> func -> simplified func_type
 
 val id : _ t -> Env_id.t
 
@@ -89,7 +91,7 @@ module type T = sig
 
   val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
 
-  val get_func_typ : t -> func -> Simplified.func_type
+  val get_func_typ : t -> func -> simplified func_type
 
   val pp : Format.formatter -> t -> unit
 

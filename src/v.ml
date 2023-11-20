@@ -52,7 +52,7 @@ include (
 
       let int32 = function true -> 1l | false -> 0l
 
-      let pp = Format.pp_print_bool
+      let pp = Format.pp_bool
     end
 
     module I32 = struct

@@ -2,10 +2,11 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
 open Syntax
-open Simplified
 
-let equal_func_types (a : func_type) (b : func_type) : bool =
+let equal_func_types (a : simplified func_type) (b : simplified func_type) :
+  bool =
   let remove_param (pt, rt) =
     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
     (pt, rt)
@@ -15,24 +16,17 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function
-  | Text.Any_ht -> Ok Any_ht
-  | None_ht -> Ok None_ht
-  | Eq_ht -> Ok Eq_ht
-  | I31_ht -> Ok I31_ht
-  | Struct_ht -> Ok Struct_ht
-  | Array_ht -> Ok Array_ht
-  | Func_ht -> Ok Func_ht
-  | No_func_ht -> Ok No_func_ht
-  | Extern_ht -> Ok Extern_ht
-  | No_extern_ht -> Ok No_extern_ht
-  | Def_ht (Raw i) -> ok @@ Def_ht i
+  | ( Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht | Func_ht
+    | No_func_ht | Extern_ht | No_extern_ht
+    | Def_ht (Raw _) ) as t ->
+    Ok t
   | Def_ht (Text i) -> begin
     match tbl with
     | None -> error_s "unknown type %s (no table)" i
     | Some tbl -> begin
       match Hashtbl.find_opt tbl i with
       | None -> error_s "unknown type %s (not found in table)" i
-      | Some i -> ok @@ Def_ht i
+      | Some i -> ok @@ Def_ht (Raw i)
     end
   end
 
@@ -40,8 +34,9 @@ let convert_ref_type tbl (null, heap_type) =
   let+ heap_type = convert_heap_type tbl heap_type in
   (null, heap_type)
 
-let convert_val_type tbl = function
-  | Text.Num_type t -> ok @@ Num_type t
+let convert_val_type tbl : text val_type -> simplified val_type Result.t =
+  function
+  | Num_type _t as t -> Ok t
   | Ref_type rt ->
     let+ rt = convert_ref_type tbl rt in
     Ref_type rt
@@ -60,10 +55,10 @@ let convert_func_type tbl (pt, rt) =
   (pt, rt)
 
 let convert_storage_type tbl = function
-  | Text.Val_storage_t val_type ->
+  | Val_storage_t val_type ->
     let+ val_type = convert_val_type tbl val_type in
     Val_storage_t val_type
-  | Val_packed_t packed_type -> ok @@ Val_packed_t packed_type
+  | Val_packed_t _packed_type as t -> Ok t
 
 let convert_field_type tbl (mut, storage_type) =
   let+ storage_type = convert_storage_type tbl storage_type in
@@ -76,7 +71,7 @@ let convert_struct_field tbl (id, types) =
 let convert_struct_type tbl fields = list_map (convert_struct_field tbl) fields
 
 let convert_str tbl = function
-  | Text.Def_func_t func_t ->
+  | Def_func_t func_t ->
     let+ func_t = convert_func_type tbl func_t in
     Def_func_t func_t
   | Def_array_t field_t ->

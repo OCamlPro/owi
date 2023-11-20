@@ -2,6 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =
 struct
   type 'a m = 'a M.t
@@ -30,7 +32,7 @@ struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : Simplified.val_type =
+  let elt_type (type t) (e : t telt) : simplified val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64
@@ -38,7 +40,7 @@ struct
     | F64 -> Num_type F64
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : Simplified.result_type =
+  let res_type (type t) (r : t rtype) : simplified result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -46,7 +48,7 @@ struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> Simplified.param_type = function
+  let rec arg_type : type t r. (t, r) atype -> simplified param_type = function
     | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
@@ -55,7 +57,8 @@ struct
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
-  let extern_type (Extern_func (Func (arg, res), _)) : Simplified.func_type =
+  let extern_type (Extern_func (Func (arg, res), _)) :
+    simplified Types.func_type =
     (arg_type arg, res_type res)
 
   type t = Func_intf.t
@@ -110,7 +113,7 @@ type t =
   | F64 of Float64.t
   | Ref of ref_value
 
-let of_instr (i : Simplified.instr) : t =
+let of_instr (i : simplified instr) : t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c
@@ -119,10 +122,10 @@ let of_instr (i : Simplified.instr) : t =
   | _ -> assert false
 
 let to_instr = function
-  | I32 c -> Simplified.I32_const c
-  | I64 c -> Simplified.I64_const c
-  | F32 c -> Simplified.F32_const c
-  | F64 c -> Simplified.F64_const c
+  | I32 c -> I32_const c
+  | I64 c -> I64_const c
+  | F32 c -> F32_const c
+  | F64 c -> F64_const c
   | _ -> assert false
 
 let pp_ref fmt = function
@@ -133,12 +136,12 @@ let pp_ref fmt = function
 let pp fmt = function
   | I32 i -> Format.fprintf fmt "i32.const %ld" i
   | I64 i -> Format.fprintf fmt "i64.const %Ld" i
-  | F32 f -> Format.fprintf fmt "f32.const %a" Simplified.Pp.f32 f
-  | F64 f -> Format.fprintf fmt "f64.const %a" Simplified.Pp.f64 f
+  | F32 f -> Format.fprintf fmt "f32.const %a" Float32.pp f
+  | F64 f -> Format.fprintf fmt "f64.const %a" Float64.pp f
   | Ref r -> pp_ref fmt r
 
 let ref_null' = function
-  | Simplified.Func_ht -> Funcref None
+  | Func_ht -> Funcref None
   | Extern_ht -> Externref None
   | _ -> failwith "TODO ref_null' Value.ml"
 

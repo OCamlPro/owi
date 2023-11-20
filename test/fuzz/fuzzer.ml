@@ -1,3 +1,5 @@
+open Owi
+
 let () = Random.self_init ()
 
 let timeout_count = ref 0
@@ -9,7 +11,7 @@ let compare (module I1 : Interprets.INTERPRET)
   if Param.debug then begin
     Format.eprintf "comparing %s and %s@\n    @[<v>" I1.name I2.name;
     Format.eprintf "running %s@\n" I1.name;
-    Format.pp_print_flush Format.err_formatter ()
+    Format.pp_flush Format.err_formatter ()
   end;
   let r1 =
     let m = I1.of_symbolic m in
@@ -85,6 +87,6 @@ let () =
       if Param.debug then Format.eprintf "%a@\n" Owi.Text.Pp.modul m;
       Format.eprintf "test module %d [got %d timeouts...]@\n@[<v>" !global_count
         !timeout_count;
-      Format.pp_print_flush Format.err_formatter ();
+      Format.pp_flush Format.err_formatter ();
       Crowbar.check (check_optimized m);
       Format.eprintf "@]" )

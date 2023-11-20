@@ -2,12 +2,14 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 type t = int
 
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * Simplified.func_type) IMap.t
+  { c : ('a * simplified func_type) IMap.t
   ; last : int
   }
 

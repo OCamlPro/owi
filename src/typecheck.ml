@@ -5,26 +5,25 @@
 open Types
 open Simplified
 open Syntax
+open Format
 
 type typ =
   | Num_type of num_type
-  | Ref_type of heap_type
+  | Ref_type of simplified heap_type
   | Any
   | Something
 
 let pp_typ fmt = function
-  | Num_type t -> Pp.num_type fmt t
-  | Ref_type t -> Pp.heap_type fmt t
-  | Any -> Format.fprintf fmt "any"
-  | Something -> Format.fprintf fmt "something"
+  | Num_type t -> pp_num_type fmt t
+  | Ref_type t -> pp_heap_type fmt t
+  | Any -> pp_string fmt "any"
+  | Something -> pp_string fmt "something"
 
 let pp_typ_list fmt l =
-  Format.pp_print_list
-    ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
-    pp_typ fmt l
+  pp_list ~pp_sep:(fun fmt () -> pp_string fmt " ") pp_typ fmt l
 
 let typ_of_val_type = function
-  | Simplified.Ref_type (_null, t) -> Ref_type t
+  | Types.Ref_type (_null, t) -> Ref_type t
   | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -38,11 +37,12 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals : (global, global_type) Runtime.t Named.t
-    ; result_type : result_type
-    ; funcs : (func, block_type) Runtime.t Named.t
+    ; globals : (global, simplified global_type) Runtime.t Named.t
+    ; result_type : simplified result_type
+    ; funcs :
+        (simplified func, (simplified, simplified) block_type) Runtime.t Named.t
     ; blocks : typ list list
-    ; tables : (table, table_type) Runtime.t Named.t
+    ; tables : (simplified table, simplified table_type) Runtime.t Named.t
     ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
@@ -59,8 +59,12 @@ module Env = struct
   let func_get i env =
     let value = Indexed.get_at_exn i env.funcs.values in
     match value with
-    | Local { type_f; _ } -> type_f
-    | Runtime.Imported t -> t.desc
+    | Local { type_f; _ } ->
+      let (Bt_raw ((None | Some _), t)) = type_f in
+      t
+    | Runtime.Imported t ->
+      let (Bt_raw ((None | Some _), t)) = t.desc in
+      t
 
   let block_type_get i env = List.nth env.blocks i
 
@@ -125,28 +129,28 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : Simplified.block_type option -> t -> t Result.t
+  val pop_push : (simplified, simplified) block_type option -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
   val equal : t -> t -> bool
 
-  val match_ref_type : heap_type -> heap_type -> bool
+  val match_ref_type : simplified heap_type -> simplified heap_type -> bool
 
   val match_types : typ -> typ -> bool
 
-  val pp : Format.formatter -> t -> unit
+  val pp : formatter -> t -> unit
 
-  val pp_error : Format.formatter -> t * t -> unit
+  val pp_error : formatter -> t * t -> unit
 
   val match_prefix : prefix:t -> stack:t -> t option
 end = struct
   type t = typ list
 
-  let pp fmt (s : stack) = Format.fprintf fmt "[%a]" pp_typ_list s
+  let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
-    Format.fprintf fmt "requires %a but stack has %a" pp expected pp got
+    fprintf fmt "requires %a but stack has %a" pp expected pp got
 
   let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
@@ -158,7 +162,7 @@ end = struct
 
   let match_ref_type required got =
     match (required, got) with
-    | Simplified.Any_ht, _ -> true
+    | Any_ht, _ -> true
     | None_ht, None_ht -> true
     | Eq_ht, Eq_ht -> true
     | I31_ht, I31_ht -> true
@@ -222,10 +226,10 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push bt stack =
+  let pop_push (bt : (simplified, simplified) block_type option) stack =
     match bt with
     | None -> Ok stack
-    | Some (pt, rt) ->
+    | Some (Bt_raw ((None | Some _), (pt, rt))) ->
       let pt, rt =
         (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
       in
@@ -233,7 +237,7 @@ end = struct
       push rt stack
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
+let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
   stack Result.t =
   match instr with
   | Nop -> Ok stack
@@ -275,16 +279,17 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     let t = ftype nn in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ i32 ] stack
-  | Local_get i -> Stack.push [ Env.local_get i env ] stack
-  | Local_set i ->
+  | Local_get (Raw i) -> Stack.push [ Env.local_get i env ] stack
+  | Local_set (Raw i) ->
     let t = Env.local_get i env in
     Stack.pop [ t ] stack
-  | Local_tee i ->
+  | Local_tee (Raw i) ->
     let t = Env.local_get i env in
     let* stack = Stack.pop [ t ] stack in
     Stack.push [ t ] stack
-  | Global_get i -> Stack.push [ typ_of_val_type @@ Env.global_get i env ] stack
-  | Global_set i ->
+  | Global_get (Raw i) ->
+    Stack.push [ typ_of_val_type @@ Env.global_get i env ] stack
+  | Global_set (Raw i) ->
     let t = Env.global_get i env in
     Stack.pop [ typ_of_val_type t ] stack
   | If_else (_id, block_type, e1, e2) ->
@@ -347,7 +352,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
   | Call_indirect (_, bt) ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.pop_push (Some bt) stack
-  | Call i ->
+  | Call (Raw i) ->
     let pt, rt = Env.func_get i env in
     let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
@@ -358,7 +363,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
          Stack.pop_push (Some bt) stack
     *)
     Ok stack
-  | Return_call i ->
+  | Return_call (Raw i) ->
     let pt, rt = Env.func_get i env in
     let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
@@ -368,7 +373,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call)"
     else Ok [ any ]
-  | Return_call_indirect (_, (pt, rt)) ->
+  | Return_call_indirect (_, Bt_raw ((None | Some _), (pt, rt))) ->
     let* stack = Stack.pop [ i32 ] stack in
     let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
@@ -378,7 +383,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call_indirect)"
     else Ok [ any ]
-  | Return_call_ref (pt, rt) ->
+  | Return_call_ref (Bt_raw ((None | Some _), (pt, rt))) ->
     let* stack = Stack.pop_ref stack in
     let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
@@ -389,21 +394,21 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     then Error "type mismatch (return_call_ref)"
     else Ok [ any ]
   | Data_drop _i -> Ok stack
-  | Table_init (ti, ei) ->
+  | Table_init (Raw ti, Raw ei) ->
     let table_typ = Env.table_type_get ti env in
     let elem_typ = Env.elem_type_get ei env in
     if not @@ Stack.match_ref_type (snd table_typ) (snd elem_typ) then
       Error "type mismatch (table_init)"
     else Stack.pop [ i32; i32; i32 ] stack
-  | Table_copy (i, i') ->
+  | Table_copy (Raw i, Raw i') ->
     let typ = Env.table_type_get i env in
     let typ' = Env.table_type_get i' env in
     if typ <> typ' then Error "type mismatch (table_copy)"
     else Stack.pop [ i32; i32; i32 ] stack
-  | Table_fill i ->
+  | Table_fill (Raw i) ->
     let _null, t = Env.table_type_get i env in
     Stack.pop [ i32; Ref_type t; i32 ] stack
-  | Table_grow i ->
+  | Table_grow (Raw i) ->
     let _null, t = Env.table_type_get i env in
     let* stack = Stack.pop [ i32; Ref_type t ] stack in
     Stack.push [ i32 ] stack
@@ -435,25 +440,25 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
         let* stack = Stack.pop t stack in
         Stack.push t stack
     end
-  | Ref_func i ->
+  | Ref_func (Raw i) ->
     if not @@ Hashtbl.mem env.refs i then Error "undeclared function reference"
     else Stack.push [ Ref_type Func_ht ] stack
-  | Br i ->
+  | Br (Raw i) ->
     let jt = Env.block_type_get i env in
     let* _stack = Stack.pop jt stack in
     Ok [ any ]
-  | Br_if i ->
+  | Br_if (Raw i) ->
     let* stack = Stack.pop [ i32 ] stack in
     let jt = Env.block_type_get i env in
     let* stack = Stack.pop jt stack in
     Stack.push jt stack
-  | Br_table (branches, i) ->
+  | Br_table (branches, Raw i) ->
     let* stack = Stack.pop [ i32 ] stack in
     let default_jt = Env.block_type_get i env in
     let* _stack = Stack.pop default_jt stack in
     let* () =
       array_iter
-        (fun i ->
+        (fun (Raw i : simplified indice) ->
           let jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
             Error "type mismatch (br table)"
@@ -463,11 +468,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
         branches
     in
     Ok [ any ]
-  | Table_get i ->
+  | Table_get (Raw i) ->
     let _null, t = Env.table_type_get i env in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ Ref_type t ] stack
-  | Table_set i ->
+  | Table_set (Raw i) ->
     let _null, t = Env.table_type_get i env in
     Stack.pop [ Ref_type t; i32 ] stack
   | Array_len ->
@@ -486,15 +491,18 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : instr) :
     | Struct_new_default _ | Extern_externalize | Extern_internalize
     | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
     | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
-    Log.debug "TODO (typecheck instr) %a" Pp.instr i;
+    Log.debug "TODO (typecheck instr) %a" Types.Pp.instr i;
     Ok stack
 
-and typecheck_expr env expr ~is_loop (block_type : func_type option)
+and typecheck_expr env expr ~is_loop
+  (block_type : (simplified, simplified) block_type option)
   ~stack:previous_stack : stack Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (pt, rt) ->
-        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
+      ~some:(fun
+          (Bt_raw ((None | Some _), (pt, rt)) :
+            (simplified, simplified) block_type )
+        -> (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
   let jump_type = if is_loop then pt else rt in
@@ -514,30 +522,32 @@ let typecheck_function (modul : modul) func refs =
   match func with
   | Runtime.Imported _ -> Ok ()
   | Local func ->
-    let params, result = func.type_f in
+    let (Bt_raw ((None | Some _), (params, result))) = func.type_f in
     let env =
       Env.make ~params ~funcs:modul.func ~locals:func.locals
         ~globals:modul.global ~result_type:result ~tables:modul.table
         ~elems:modul.elem ~refs
     in
     let* stack =
-      typecheck_expr env func.body ~is_loop:false (Some ([], result)) ~stack:[]
+      typecheck_expr env func.body ~is_loop:false
+        (Some (Bt_raw (None, ([], result))))
+        ~stack:[]
     in
-    let required = List.rev_map typ_of_val_type (snd func.type_f) in
+    let required = List.rev_map typ_of_val_type result in
     if not @@ Stack.equal required stack then
       error_s "type mismatch func %a" Stack.pp_error (required, stack)
     else Ok ()
 
 let typecheck_const_instr (modul : modul) refs stack = function
-  | Simplified.Const.I32_const _ -> Stack.push [ i32 ] stack
+  | Const.I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
   | Ref_null t -> Stack.push [ Ref_type t ] stack
-  | Ref_func i ->
+  | Ref_func (Raw i) ->
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
-  | Global_get i ->
+  | Global_get (Raw i) ->
     let value = Indexed.get_at_exn i modul.global.values in
     let* _mut, typ =
       match value with
@@ -562,7 +572,7 @@ let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []
 
 let typecheck_global (modul : modul) refs
-  (global : (global, global_type) Runtime.t Indexed.t) =
+  (global : (global, simplified global_type) Runtime.t Indexed.t) =
   match Indexed.get global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -572,8 +582,8 @@ let typecheck_global (modul : modul) refs
       let expected = typ_of_val_type @@ snd typ in
       if expected <> real_type then
         error
-        @@ Format.asprintf "type mismatch (typecheck_global) got %a expected %a"
-             pp_typ real_type pp_typ expected
+        @@ asprintf "type mismatch (typecheck_global) got %a expected %a" pp_typ
+             real_type pp_typ expected
       else Ok ()
     | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
 

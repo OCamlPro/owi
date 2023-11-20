@@ -2,6 +2,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
 module Def_value = Concrete_value
 module Solver = Thread.Solver
 
@@ -14,9 +15,9 @@ module P = struct
 
   type table = Symbolic_table.table
 
-  type elem = Link.Env.elem
+  type elem = Link_env.elem
 
-  type data = Link.Env.data
+  type data = Link_env.data
 
   type global = Symbolic_global.global
 
@@ -84,7 +85,7 @@ module P = struct
 
     let typ _t =
       (* TODO add type to table *)
-      (Types.Null, Simplified.Func_ht)
+      (Null, Func_ht)
 
     let max_size _t = assert false
 
@@ -167,7 +168,7 @@ module P = struct
     type t =
       { modul : Simplified.modul
       ; env : Env.t
-      ; to_run : Simplified.expr list
+      ; to_run : simplified expr list
       }
 
     let env (t : t) = t.env

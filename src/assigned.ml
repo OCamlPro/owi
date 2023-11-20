@@ -2,19 +2,19 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Syntax
 open Types
-open Simplified
+open Syntax
 
 module StrType = struct
-  type t = str_type
+  type t = simplified str_type
 
   let compare = compare
 end
 
 module TypeMap = Map.Make (StrType)
 
-let equal_func_types (a : func_type) (b : func_type) : bool =
+let equal_func_types (a : simplified func_type) (b : simplified func_type) :
+  bool =
   let remove_param (pt, rt) =
     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
     (pt, rt)
@@ -23,20 +23,20 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 
 type t =
   { id : string option
-  ; typ : str_type Named.t
-  ; global : (Text.global, global_type) Runtime.t Named.t
-  ; table : (table, table_type) Runtime.t Named.t
+  ; typ : simplified str_type Named.t
+  ; global : (Text.global, simplified global_type) Runtime.t Named.t
+  ; table : (simplified table, simplified table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (Text.func, Text.block_type) Runtime.t Named.t
+  ; func : (text func, (text, text) block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
   ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
-  ; start : Text.indice option
+  ; start : text indice option
   }
 
 type type_acc =
-  { declared_types : str_type Indexed.t list
-  ; func_types : str_type Indexed.t list
+  { declared_types : simplified str_type Indexed.t list
+  ; func_types : simplified str_type Indexed.t list
   ; named_types : int String_map.t
   ; last_assigned_int : int
   ; all_types : int TypeMap.t
@@ -83,7 +83,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : str_type Named.t Result.t =
+let assign_types (modul : Grouped.t) : simplified str_type Named.t Result.t =
   let empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -118,7 +118,8 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   { Named.values; named }
 
-let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
+let check_type_id (types : simplified str_type Named.t)
+  (check : Grouped.type_check) =
   let id, func_type = check in
   let* id =
     match id with
@@ -148,7 +149,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* table =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : table) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : simplified table) -> id))
       modul.table
   in
   let* mem =
@@ -158,7 +159,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* func =
     name "func"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.func) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : text func) -> id))
       modul.func
   in
   let* elem =

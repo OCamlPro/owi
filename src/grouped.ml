@@ -2,15 +2,14 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Syntax
 open Types
-open Simplified
+open Syntax
 
-type type_check = Text.indice * Text.func_type
+type type_check = text indice * text func_type
 
 type opt_ind =
   | Curr of int
-  | Indice of Text.indice
+  | Indice of text indice
 
 type opt_export =
   { name : string
@@ -24,29 +23,29 @@ type opt_exports =
   ; func : opt_export list
   }
 
-let curr_id (curr : int) (i : Text.indice option) =
+let curr_id (curr : int) (i : text indice option) =
   match i with None -> Curr (pred curr) | Some id -> Indice id
 
 type t =
   { id : string option
-  ; typ : Text.type_def list
-  ; function_type : Text.func_type list
+  ; typ : text type_def list
+  ; function_type : text func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Text.global, global_type) Runtime.t Indexed.t list
-  ; table : (table, table_type) Runtime.t Indexed.t list
+  ; global : (Text.global, simplified global_type) Runtime.t Indexed.t list
+  ; table : (simplified table, simplified table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (Text.func, Text.block_type) Runtime.t Indexed.t list
+  ; func : (text func, (text, text) block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
   ; data : Text.data Indexed.t list
   ; exports : opt_exports
-  ; start : Text.indice option
+  ; start : text indice option
   }
 
-let imp (import : Text.import) (assigned_name, desc) : 'a Imported.t =
+let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
   { modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
@@ -190,7 +189,7 @@ let of_symbolic (modul : Text.modul) : t Result.t =
         ( { fields with func; function_type; type_checks }
         , { curr with func = succ curr.func } )
     | MImport ({ desc = Import_func (a, b); _ } as import) ->
-      let imported = imp import (a, b) in
+      let imported : (text, text) block_type Imported.t = imp import (a, b) in
       ok @@ add_func (Imported imported) fields curr
     | MExport { name; desc = Export_func id } ->
       let id = curr_id curr.func id in
@@ -219,7 +218,7 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       ok @@ add_data data fields curr
     | MStart start -> Ok ({ fields with start = Some start }, curr)
   in
-  let* modul, _curr =
+  let+ modul, _curr =
     list_fold_left add (empty_module modul.id, init_curr) modul.fields
   in
-  Ok modul
+  modul

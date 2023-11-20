@@ -105,7 +105,7 @@ let compare_result_const result (const : Concrete_value.t) =
     Log.debug "TODO (Script.compare_result_const)@\n";
     false
 
-let value_of_const : Text.const -> V.t Result.t = function
+let value_of_const : text const -> V.t Result.t = function
   | Const_I32 v -> ok @@ Concrete_value.I32 v
   | Const_I64 v -> ok @@ Concrete_value.I64 v
   | Const_F32 v -> ok @@ Concrete_value.F32 v
@@ -121,9 +121,7 @@ let value_of_const : Text.const -> V.t Result.t = function
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
     Log.debug "invoke %a %s %a...@\n"
-      (Format.pp_print_option
-         ~none:(fun ppf () -> Format.pp_print_string ppf "")
-         Format.pp_print_string )
+      (Format.pp_option ~none:Format.pp_nothing Format.pp_string)
       mod_id f Text.Pp.consts args;
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in

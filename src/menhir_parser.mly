@@ -51,9 +51,6 @@ let f32 s =
   try Float32.of_string s
   with Failure _msg -> failwith "constant out of range"
 
-(** Prevents ocamlc -i -short-path from infering types containing the prefix Owi,
-    which makes dune think that this is a recursive dependency. *)
-module Owi = struct end
 %}
 
 %start <Text.script> script
@@ -110,8 +107,8 @@ let ref_type ==
   | NULL_EXTERN_REF; { Null, No_extern_ht }
 
 let packed_type :=
-  | I8; {I8}
-  | I16; {I16}
+  | I8; { I8 }
+  | I16; { I16 }
 
 let val_type :=
   | ~ = num_type; <Num_type>
@@ -191,11 +188,6 @@ let type_use ==
   | ~ = par(preceded(TYPE, indice)); <>
 
 (* Immediates *)
-
-(*
-let num ==
-  | ~ = NUM; <>
-*)
 
 (* var *)
 let indice ==
@@ -663,8 +655,8 @@ let expr_aux ==
       let pt = List.map (fun t -> None, t) pt in
       let raw = pt, rt in
       begin match bt with
-      | Some (Arg.Bt_ind type_use) -> Some (bt_raw (Some type_use) raw)
-      | Some (Arg.Bt_raw _) -> failwith "unexpected Bt_raw"
+      | Some (Bt_ind type_use) -> Some (bt_raw (Some type_use) raw)
+      | Some (Bt_raw _) -> failwith "unexpected Bt_raw"
       | None -> Some (bt_raw None raw)
       end
     in
@@ -757,11 +749,14 @@ let func ==
       | MImport i ->
         begin match i.desc with
         | Import_func (_id, ft) -> MImport { i with desc = Import_func (id, ft) }
-        | _ -> assert false
+        | Import_global _ | Import_mem _ | Import_table _ -> assert false
         end
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | MData _ | MElem _ | MGlobal _ | MStart _ | MType _ | MTable _ | MMem _ as field -> begin
+        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        assert false
+      end
     ) func_fields
   }
 
@@ -877,9 +872,12 @@ let table ==
     | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }
     | MImport i -> begin match i.desc with
       | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
-      | _whatever -> assert false
+      | Import_func _ | Import_global _ | Import_mem _ -> assert false
     end
-    | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+    | MMem _ | MData _ | MStart _ | MFunc _ | MGlobal _ | MType _ as field -> begin
+      Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+      assert false
+    end
   ) table_fields
 }
 
@@ -921,9 +919,12 @@ let memory ==
       | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
       | MImport i -> begin match i.desc with
         | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
-        | _whatever -> assert false
+        | Import_table _ | Import_func _ | Import_global _ -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | MElem _ | MType _ | MTable _ | MFunc _ | MGlobal _ | MStart _ as field -> begin
+        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        assert false
+      end
     ) memory_fields
   }
 
@@ -953,9 +954,12 @@ let global ==
       | MImport i ->
         begin match i.desc with
         | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
-        | _ -> assert false
+        | Import_mem _ | Import_table _ | Import_func _ -> assert false
         end
-      | _field -> (Format.eprintf "got invalid field: `%a`@." Pp.module_field _field; assert false)
+      | MStart _ | MFunc _ | MData _ | MElem _ | MMem _ | MTable _ | MType _ as field -> begin
+        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        assert false
+      end
     ) global_fields
   }
 

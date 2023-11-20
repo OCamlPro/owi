@@ -2,9 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
 open Syntax
-module StringMap = Map.Make (String)
-module StringSet = Set.Make (String)
 module IMap = Map.Make (Int)
 
 type data = { mutable value : string }
@@ -13,7 +12,7 @@ let drop_data data = data.value <- ""
 
 type elem = { mutable value : Concrete_value.ref_value array }
 
-let drop_elem elem = elem.value <- [||]
+let drop_elem (elem : elem) = elem.value <- [||]
 
 type extern_funcs = Concrete_value.Func.extern_func Func_id.collection
 
@@ -32,20 +31,15 @@ type 'ext t =
 
 let pp fmt t =
   let global fmt (id, (global : Concrete_global.t)) =
-    Format.fprintf fmt "%a -> %a" Format.pp_print_int id Concrete_value.pp
-      global.value
+    Format.pp fmt "%a -> %a" Format.pp_int id Concrete_value.pp global.value
   in
   let func fmt (id, (_func : Concrete_value.Func.t)) =
-    Format.fprintf fmt "%a -> func" Format.pp_print_int id
+    Format.pp fmt "%a -> func" Format.pp_print_int id
   in
   Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
-    (Format.pp_print_list
-       ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
-       global )
+    (Format.pp_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") global)
     (IMap.bindings t.globals)
-    (Format.pp_print_list
-       ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
-       func )
+    (Format.pp_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") func)
     (IMap.bindings t.functions)
 
 let id (env : _ t) = env.id
@@ -66,7 +60,9 @@ let get_extern_func env id = Func_id.get id env.extern_funcs
 
 let get_func_typ env f =
   match f with
-  | Func_intf.WASM (_, func, _) -> func.type_f
+  | Func_intf.WASM (_, func, _) ->
+    let (Bt_raw ((None | Some _), t)) = func.type_f in
+    t
   | Extern id -> Func_id.get_typ id env.extern_funcs
 
 module Build = struct
@@ -88,21 +84,21 @@ module Build = struct
     ; elem = IMap.empty
     }
 
-  let add_global id const env =
+  let add_global id const (env : t) =
     { env with globals = IMap.add id const env.globals }
 
-  let add_memory id mem env =
+  let add_memory id mem (env : t) =
     { env with memories = IMap.add id mem env.memories }
 
-  let add_table id table env =
+  let add_table id table (env : t) =
     { env with tables = IMap.add id table env.tables }
 
-  let add_func id func env =
+  let add_func id func (env : t) =
     { env with functions = IMap.add id func env.functions }
 
-  let add_data id data env = { env with data = IMap.add id data env.data }
+  let add_data id data (env : t) = { env with data = IMap.add id data env.data }
 
-  let add_elem id elem env = { env with elem = IMap.add id elem env.elem }
+  let add_elem id elem (env : t) = { env with elem = IMap.add id elem env.elem }
 
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
@@ -121,7 +117,7 @@ module Build = struct
     match IMap.find_opt id env.functions with
     | None ->
       (* Log.debug "%a@." pp env; *)
-      error_s "unknown function %a" Format.pp_print_int id
+      error_s "unknown function %a" Format.pp_int id
     | Some v -> Ok v
 end
 
@@ -158,7 +154,7 @@ module type T = sig
 
   val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
 
-  val get_func_typ : t -> func -> Simplified.func_type
+  val get_func_typ : t -> func -> simplified func_type
 
   val pp : Format.formatter -> t -> unit
 
@@ -177,6 +173,6 @@ module type P = sig
   val const_f64 : Float64.t -> V.float64
 end
 
-let freeze id Build.{ globals; memories; tables; functions; data; elem }
+let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
   { id; globals; memories; tables; functions; data; elem; extern_funcs }

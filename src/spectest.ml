@@ -2,17 +2,19 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Text
+open Types
+open Concrete_value.Func
 
 type extern_module = Concrete_value.Func.extern_func Link.extern_module
 
-let extern_m : extern_module =
+let extern_m =
+  let pp = Format.pp in
   let fmt = Format.std_formatter in
   let print = () in
-  let print_i32 i = Format.fprintf fmt "%li@\n%!" i in
-  let print_i64 i = Format.fprintf fmt "%Li@\n%!" i in
-  let print_f32 f = Format.fprintf fmt "%s@\n%!" (Float32.to_string f) in
-  let print_f64 f = Format.fprintf fmt "%s@\n%!" (Float64.to_string f) in
+  let print_i32 i = pp fmt "%li@\n%!" i in
+  let print_i64 i = pp fmt "%Li@\n%!" i in
+  let print_f32 f = pp fmt "%a@\n%!" Float32.pp f in
+  let print_f64 f = pp fmt "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
     print_i32 i;
     print_f32 f
@@ -27,41 +29,28 @@ let extern_m : extern_module =
   let func_in_i32_out_i32 (_i : int32) = 1l in
 
   let functions =
-    [ ("print", Concrete_value.Func.Extern_func (Func (Res, R0), print))
-    ; ( "print_i32"
-      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
-      )
-    ; ( "print_i64"
-      , Concrete_value.Func.Extern_func (Func (Arg (I64, Res), R0), print_i64)
-      )
-    ; ( "print_f32"
-      , Concrete_value.Func.Extern_func (Func (Arg (F32, Res), R0), print_f32)
-      )
-    ; ( "print_f64"
-      , Concrete_value.Func.Extern_func (Func (Arg (F64, Res), R0), print_f64)
-      )
+    [ ("print", Extern_func (Func (Res, R0), print))
+    ; ("print_i32", Extern_func (Func (Arg (I32, Res), R0), print_i32))
+    ; ("print_i64", Extern_func (Func (Arg (I64, Res), R0), print_i64))
+    ; ("print_f32", Extern_func (Func (Arg (F32, Res), R0), print_f32))
+    ; ("print_f64", Extern_func (Func (Arg (F64, Res), R0), print_f64))
     ; ( "print_i32_f32"
-      , Concrete_value.Func.Extern_func
-          (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
+      , Extern_func (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
     ; ( "print_f64_f64"
-      , Concrete_value.Func.Extern_func
-          (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
-    ; ("func", Concrete_value.Func.Extern_func (Func (Res, R0), func))
-    ; ( "func-i32"
-      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32)
-      )
-    ; ( "func->i32"
-      , Concrete_value.Func.Extern_func (Func (Res, R1 I32), func_out_i32) )
+      , Extern_func (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
+    ; ("func", Extern_func (Func (Res, R0), func))
+    ; ("func-i32", Extern_func (Func (Arg (I32, Res), R0), func_in_i32))
+    ; ("func->i32", Extern_func (Func (Res, R1 I32), func_out_i32))
     ; ( "func-i32->i32"
-      , Concrete_value.Func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
+      , Extern_func (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
     ]
   in
 
-  { functions }
+  { Link.functions }
 
 let m =
-  Module
+  let open Text in
+  Text.Module
     { id = Some "spectest"
     ; fields =
         [ MImport

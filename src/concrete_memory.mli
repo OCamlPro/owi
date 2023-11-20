@@ -7,7 +7,7 @@ val get_limit_max : t -> int64 option
 
 val get_limits : t -> Types.limits
 
-val init : ?label:string -> Types.limits -> t
+val init : Types.limits -> t
 
 val update_memory : t -> bytes -> unit
 

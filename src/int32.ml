@@ -24,7 +24,8 @@ let cmp_u x op y = op (add x min_int) (add y min_int)
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  Int64.to_int32 @@ Int64.(shift_right (shift_left (Int64.of_int32 x) 32) 32)
+  Int64.to_int32
+  @@ Int64.shift_right (Int64.shift_left (Int64.of_int32 x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being

@@ -22,8 +22,7 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   | _ ->
     let check = no :: pc in
     Format.printf "CHECK:@.%a"
-      (Format.pp_print_list ~pp_sep:Format.pp_print_newline
-         Encoding.Expression.pp )
+      (Format.pp_list ~pp_sep:Format.pp_print_newline Encoding.Expression.pp)
       check;
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in

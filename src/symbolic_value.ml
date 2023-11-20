@@ -152,7 +152,7 @@ module S = struct
       | Some false -> if_false
       | None -> Boolean.mk_ite c if_true if_false
 
-    let pp ppf (e : vbool) = Format.pp_print_string ppf (Expr.to_string e)
+    let pp ppf (e : vbool) = Format.pp_string ppf (Expr.to_string e)
   end
 
   module I32 = struct

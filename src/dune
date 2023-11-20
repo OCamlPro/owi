@@ -20,6 +20,7 @@
   env_id
   float32
   float64
+  format
   func_id
   func_intf
   grouped
@@ -85,3 +86,8 @@
 (menhir
  (flags --table)
  (modules menhir_parser))
+
+(env
+ (_
+  (flags
+   (-w +a-4-40-41-42-44-45-70-73 -warn-error +a))))
