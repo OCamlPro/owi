@@ -105,6 +105,7 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   { functions }
 
 let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
+  let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in
   let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
     Choice.return base
   in
@@ -120,6 +121,7 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
     ; ( "dealloc"
       , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
       )
+    ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ; ( "is_symbolic"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Arg (I32, Res)), R1 I32), is_symbolic) )
