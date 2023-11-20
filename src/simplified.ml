@@ -2,20 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Format
 open Types
-
-module Arg = struct
-  type indice = int
-
-  let pp_indice fmt u = Format.pp_print_int fmt u
-
-  type ('pt, 'rt) block_type = 'pt * 'rt
-
-  let pp_block_type pp_param_type pp_result_type fmt (pt, rt) =
-    Format.fprintf fmt "%a %a" pp_param_type pt pp_result_type rt
-end
-
-include Make (Arg)
 
 (** named export *)
 type export =
@@ -32,14 +20,14 @@ type exports =
   }
 
 type global =
-  { typ : global_type
-  ; init : Const.expr
+  { typ : simplified global_type
+  ; init : simplified Const.expr
   ; id : string option
   }
 
 type data_mode =
   | Data_passive
-  | Data_active of indice option * Const.expr
+  | Data_active of int option * simplified Const.expr
 
 type data =
   { id : string option
@@ -49,22 +37,24 @@ type data =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of indice option * Const.expr
+  | Elem_active of int option * simplified Const.expr
   | Elem_declarative
 
 type elem =
   { id : string option
-  ; typ : ref_type
-  ; init : Const.expr list
+  ; typ : simplified ref_type
+  ; init : simplified Const.expr list
   ; mode : elem_mode
   }
 
 type modul =
   { id : string option
-  ; global : (global, global_type) Runtime.t Named.t
-  ; table : (table, table_type) Runtime.t Named.t
+  ; global : (global, simplified global_type) Runtime.t Named.t
+  ; table : (simplified table, simplified table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (func, func_type) Runtime.t Named.t
+  ; func :
+      (simplified func, (simplified, simplified) block_type) Runtime.t Named.t
+      (* TODO: switch to func_type *)
   ; elem : elem Named.t
   ; data : data Named.t
   ; exports : exports
@@ -72,30 +62,21 @@ type modul =
   }
 
 module Pp = struct
-  include Pp
+  let id fmt = Option.iter (fun id -> pp fmt " $%s" id)
 
-  let id fmt = Option.iter (fun id -> Format.fprintf fmt " $%s" id)
-
-  let func fmt (f : (func, _) Runtime.t) =
-    match f with
-    | Local f -> Format.fprintf fmt "%a" func f
-    | Imported { modul; name; _ } -> Format.fprintf fmt "%s.%s" modul name
+  let func fmt = function
+    | Runtime.Local f -> Types.Pp.func fmt f
+    | Runtime.Imported { Imported.modul; name; _ } -> pp fmt "%s.%s" modul name
 
   let lst f fmt l =
-    (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n") f)
-      fmt (List.rev l)
+    (pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") f) fmt (List.rev l)
 
-  let funcs fmt (funcs : _ Runtime.t Named.t) =
-    lst (Indexed.pp func) fmt funcs.values
+  let funcs fmt funcs = lst (Indexed.pp func) fmt funcs.Named.values
 
-  let export fmt (export : export) =
-    Format.fprintf fmt "%s: %a" export.name indice export.id
+  let export fmt (export : export) = pp fmt "%s: %d" export.name export.id
 
-  let start fmt = function
-    | None -> ()
-    | Some ind -> Format.fprintf fmt "(start %a)" indice ind
+  let start fmt = function None -> () | Some ind -> pp fmt "(start %d)" ind
 
   let modul fmt (m : modul) : unit =
-    Format.fprintf fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func
-      start m.start
+    pp fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func start m.start
 end

@@ -560,13 +560,13 @@ module Make (P : Interpret_functor_intf.P) :
 
     type locals = Locals.t
 
-    type pc = instr list
+    type pc = simplified instr list
 
     type block =
       { branch : pc
-      ; branch_rt : result_type
+      ; branch_rt : simplified result_type
       ; continue : pc
-      ; continue_rt : result_type
+      ; continue_rt : simplified result_type
       ; stack : stack
       ; is_loop : bool
       }
@@ -577,7 +577,7 @@ module Make (P : Interpret_functor_intf.P) :
       { name : string option
       ; mutable enter : int
       ; mutable instructions : int
-      ; calls : (indice, count) Hashtbl.t
+      ; calls : (simplified indice, count) Hashtbl.t
       }
 
     type exec_state =
@@ -586,7 +586,7 @@ module Make (P : Interpret_functor_intf.P) :
       ; locals : locals
       ; pc : pc
       ; block_stack : block_stack
-      ; func_rt : result_type
+      ; func_rt : simplified result_type
       ; env : Env.t
       ; count : count
       ; envs : Env.t Env_id.collection
@@ -619,9 +619,9 @@ module Make (P : Interpret_functor_intf.P) :
         | [] -> ()
         | _ :: _ ->
           Format.fprintf ppf "@ @[<v 2>calls@ %a@]"
-            (Format.pp_print_list
+            (Format.pp_list
                ~pp_sep:(fun ppf () -> Format.fprintf ppf "@ ")
-               (fun ppf (id, count) ->
+               (fun ppf ((Raw id : simplified indice), count) ->
                  let name ppf = function
                    | None -> ()
                    | Some name -> Format.fprintf ppf " %s" name
@@ -686,9 +686,12 @@ module Make (P : Interpret_functor_intf.P) :
           (Continue { state with block_stack; pc = block.continue; stack })
   end
 
-  let exec_block (state : State.exec_state) ~is_loop bt expr =
+  let exec_block (state : State.exec_state) ~is_loop
+    (bt : (simplified, simplified) block_type option) expr =
     let pt, rt =
-      match bt with None -> ([], []) | Some (pt, rt) -> (List.map snd pt, rt)
+      match bt with
+      | None -> ([], [])
+      | Some (Bt_raw ((None | Some _), (pt, rt))) -> (List.map snd pt, rt)
     in
     let block : State.block =
       let branch_rt, branch = if is_loop then (pt, expr) else (rt, state.pc) in
@@ -704,12 +707,11 @@ module Make (P : Interpret_functor_intf.P) :
       (State.Continue
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
-  type wasm_func = Simplified.func
-
-  let exec_func ~return ~id (state : State.exec_state) env (func : wasm_func) =
+  let exec_func ~return ~id (state : State.exec_state) env
+    (func : simplified Types.func) =
     Log.debug1 "calling func : func %s@."
       (Option.value func.id ~default:"anonymous");
-    let param_type, result_type = func.type_f in
+    let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
     let args, stack = Stack.pop_n state.stack (List.length param_type) in
     let return_state =
       if return then state.return_state else Some { state with stack }
@@ -733,6 +735,7 @@ module Make (P : Interpret_functor_intf.P) :
     match func with
     | WASM (id, func, env_id) ->
       let env = Env_id.get env_id state.envs in
+      let id = Raw id in
       Choice.return (State.Continue (exec_func ~return ~id state env func))
     | Extern f ->
       let f = Env.get_extern_func state.env f in
@@ -743,7 +746,9 @@ module Make (P : Interpret_functor_intf.P) :
 
   let func_type (state : State.exec_state) (f : Func_intf.t) =
     match f with
-    | WASM (_, func, _) -> func.type_f
+    | WASM (_, func, _) ->
+      let (Bt_raw ((None | Some _), t)) = func.type_f in
+      t
     | Extern f ->
       let f = Env.get_extern_func state.env f in
       Extern_func.extern_type f
@@ -766,7 +771,10 @@ module Make (P : Interpret_functor_intf.P) :
   (*   trap "indirect call type mismatch"; *)
   (* exec_vfunc ~return state func *)
 
-  let call_indirect ~return (state : State.exec_state) (tbl_i, typ_i) =
+  let call_indirect ~return (state : State.exec_state)
+    ( tbl_i
+    , (Bt_raw ((None | Some _), typ_i) : (simplified, simplified) block_type) )
+      =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let/ t = Env.get_table state.env tbl_i in
@@ -801,7 +809,7 @@ module Make (P : Interpret_functor_intf.P) :
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
     Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-    Log.debug2 "running instr: %a@." Simplified.Pp.instr instr;
+    Log.debug2 "running instr: %a@." Types.Pp.instr instr;
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
@@ -873,12 +881,12 @@ module Make (P : Interpret_functor_intf.P) :
       let r, stack = Stack.pop_as_ref stack in
       let is_null = ref_is_null r in
       st @@ Stack.push_bool stack is_null
-    | Ref_func i ->
+    | Ref_func (Raw i) ->
       let f = Env.get_func env i in
       st @@ Stack.push stack (ref_func f)
     | Drop -> st @@ Stack.drop stack
-    | Local_get i -> st @@ Stack.push stack (State.Locals.get locals i)
-    | Local_set i ->
+    | Local_get (Raw i) -> st @@ Stack.push stack (State.Locals.get locals i)
+    | Local_set (Raw i) ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       Choice.return (State.Continue { state with locals; stack })
@@ -886,16 +894,16 @@ module Make (P : Interpret_functor_intf.P) :
       let/ b, stack = pop_choice stack in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
-    | Call i -> begin
+    | Call (Raw i) -> begin
       let func = Env.get_func env i in
       exec_vfunc ~return:false state func
     end
-    | Return_call i -> begin
+    | Return_call (Raw i) -> begin
       let func = Env.get_func env i in
       exec_vfunc ~return:true state func
     end
-    | Br i -> State.branch state i
-    | Br_if i ->
+    | Br (Raw i) -> State.branch state i
+    | Br_if (Raw i) ->
       let/ b, stack = pop_choice stack in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
@@ -964,7 +972,7 @@ module Make (P : Interpret_functor_intf.P) :
       let/ out_of_bounds = Choice.select out_of_bounds in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
-    | Memory_init i ->
+    | Memory_init (Raw i) ->
       let/ mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
@@ -990,15 +998,15 @@ module Make (P : Interpret_functor_intf.P) :
         let o1, stack = Stack.pop stack in
         st @@ Stack.push stack (if b then o1 else o2)
       end
-    | Local_tee i ->
+    | Local_tee (Raw i) ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       let stack = Stack.push stack v in
       Choice.return (State.Continue { state with locals; stack })
-    | Global_get i ->
+    | Global_get (Raw i) ->
       let/ g = Env.get_global env i in
       st @@ Stack.push stack (Global.value g)
-    | Global_set i ->
+    | Global_set (Raw i) ->
       let/ global = Env.get_global env i in
       if Global.mut global = Const then Log.err "Can't set const global";
       let v, stack =
@@ -1021,7 +1029,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       Global.set_value global v;
       st stack
-    | Table_get i ->
+    | Table_get (Raw i) ->
       let/ t = Env.get_table env i in
       let i, stack = Stack.pop_i32 stack in
       let/ i = Choice.select_i32 i in
@@ -1031,7 +1039,7 @@ module Make (P : Interpret_functor_intf.P) :
       else
         let v = Table.get t i in
         st @@ Stack.push stack (Ref v)
-    | Table_set indice ->
+    | Table_set (Raw indice) ->
       let/ t = Env.get_table env indice in
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
@@ -1043,11 +1051,11 @@ module Make (P : Interpret_functor_intf.P) :
         Table.set t indice v;
         st stack
       end
-    | Table_size indice ->
+    | Table_size (Raw indice) ->
       let/ t = Env.get_table env indice in
       let len = Table.size t in
       st @@ Stack.push_i32 stack (Value.const_i32 (Int32.of_int len))
-    | Table_grow indice ->
+    | Table_grow (Raw indice) ->
       let/ t = Env.get_table env indice in
       let size = const_i32 @@ Int32.of_int @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
@@ -1068,7 +1076,7 @@ module Make (P : Interpret_functor_intf.P) :
         let new_element, stack = Stack.pop_as_ref stack in
         Table.grow t new_size new_element;
         Stack.push_i32 stack size
-    | Table_fill indice ->
+    | Table_fill (Raw indice) ->
       let/ t = Env.get_table env indice in
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
@@ -1083,7 +1091,7 @@ module Make (P : Interpret_functor_intf.P) :
         Table.fill t pos len x;
         st stack
       end
-    | Table_copy (ti_dst, ti_src) -> begin
+    | Table_copy (Raw ti_dst, Raw ti_src) -> begin
       let/ t_src = Env.get_table env ti_src in
       let/ t_dst = Env.get_table env ti_dst in
       let len, stack = Stack.pop_i32 stack in
@@ -1104,7 +1112,7 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     end
-    | Table_init (t_i, e_i) -> begin
+    | Table_init (Raw t_i, Raw e_i) -> begin
       let/ t = Env.get_table env t_i in
       let elem = Env.get_elem env e_i in
       let len, stack = Stack.pop_i32 stack in
@@ -1146,7 +1154,7 @@ module Make (P : Interpret_functor_intf.P) :
         st stack
       end
     end
-    | Elem_drop i ->
+    | Elem_drop (Raw i) ->
       let elem = Env.get_elem env i in
       Env.drop_elem elem;
       st stack
@@ -1448,22 +1456,25 @@ module Make (P : Interpret_functor_intf.P) :
         Memory.store_32 mem ~addr n;
         st stack
       end
-    | Data_drop i ->
+    | Data_drop (Raw i) ->
       let/ data = Env.get_data env i in
       Env.drop_data data;
       st stack
-    | Br_table (inds, i) ->
+    | Br_table (inds, Raw i) ->
       let target, stack = Stack.pop_i32 stack in
       let/ target = Choice.select_i32 target in
       let target = Int32.to_int target in
       let target =
-        if target < 0 || target >= Array.length inds then i else inds.(target)
+        if target < 0 || target >= Array.length inds then i
+        else
+          let (Raw i) = inds.(target) in
+          i
       in
       let state = { state with stack } in
       State.branch state target
-    | Call_indirect (tbl_i, typ_i) ->
+    | Call_indirect (Raw tbl_i, typ_i) ->
       call_indirect ~return:false state (tbl_i, typ_i)
-    | Return_call_indirect (tbl_i, typ_i) ->
+    | Return_call_indirect (Raw tbl_i, typ_i) ->
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
@@ -1487,7 +1498,7 @@ module Make (P : Interpret_functor_intf.P) :
       | Struct_new_default _ | Extern_externalize | Extern_internalize
       | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _
       | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Simplified.Pp.instr i;
+      Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Types.Pp.instr i;
       st stack
 
   let rec loop (state : State.exec_state) =
@@ -1567,6 +1578,7 @@ module Make (P : Interpret_functor_intf.P) :
             let env = Env_id.get env_id exec_state.State.envs in
             let stack = locals in
             let state = State.{ exec_state with stack } in
+            let id = Raw id in
             Choice.return
               (State.Continue (exec_func ~return:true ~id state env func))
           | Extern f ->

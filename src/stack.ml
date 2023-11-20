@@ -141,9 +141,7 @@ module Make (V : Value_intf.T) :
   (* push s (Ref (Arrayref (Some a))) *)
 
   let pp fmt (s : t) =
-    Format.pp_print_list
-      ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ")
-      V.pp fmt s
+    Format.pp_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " ; ") V.pp fmt s
 
   let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 

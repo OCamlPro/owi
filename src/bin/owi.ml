@@ -13,9 +13,7 @@ let files =
   let parse s = Ok s in
   Cmdliner.Arg.(
     value
-    & pos 0
-        (list ~sep:' ' (conv (parse, Format.pp_print_string)))
-        [] (info [] ~doc) )
+    & pos 0 (list ~sep:' ' (conv (parse, Format.pp_string))) [] (info [] ~doc) )
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in

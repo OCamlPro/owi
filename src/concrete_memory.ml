@@ -7,21 +7,13 @@ open Types
 let page_size = 65_536
 
 type t =
-  { id : int
-  ; label : string option
-  ; mutable limits : limits
+  { mutable limits : limits
   ; mutable data : bytes
   }
 
-let fresh =
-  let r = ref (-1) in
-  fun () ->
-    incr r;
-    !r
-
-let init ?label (typ : limits) : t =
-  let data = Bytes.make (page_size * typ.min) '\x00' in
-  { id = fresh (); label; limits = typ; data }
+let init limits : t =
+  let data = Bytes.make (page_size * limits.min) '\x00' in
+  { limits; data }
 
 let update_memory mem data =
   let limits =

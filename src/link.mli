@@ -2,13 +2,14 @@
     along with a link state. *)
 
 (** runtime env *)
-module Env = Link_env
+
+open Types
 
 (** runnable module *)
 type 'f module_to_run =
   { modul : Simplified.modul
-  ; env : 'f Env.t
-  ; to_run : Simplified.expr list
+  ; env : 'f Link_env.t
+  ; to_run : simplified expr list
   }
 
 module StringMap : Map.S with type key = string
@@ -26,9 +27,9 @@ type exports =
   ; defined_names : StringSet.t
   }
 
-type 'ext envs = 'ext Env.t Env_id.collection
+type 'ext envs = 'ext Link_env.t Env_id.collection
 
-type fenvs = Concrete_value.Func.extern_func Env.t Env_id.collection
+type fenvs = Concrete_value.Func.extern_func Link_env.t Env_id.collection
 
 (** link state *)
 type 'f state =
@@ -62,7 +63,7 @@ type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 val extern_module' :
      'f state
   -> name:string
-  -> func_typ:('f -> Simplified.func_type)
+  -> func_typ:('f -> simplified func_type)
   -> 'f extern_module
   -> 'f state
 

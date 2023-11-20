@@ -2,6 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 module type Iop = sig
   type num
 
@@ -192,7 +194,7 @@ module type T = sig
   val const_f64 : Float64.t -> float64
   (* TODO ref *)
 
-  val ref_null : Simplified.heap_type -> t
+  val ref_null : simplified heap_type -> t
 
   val ref_func : Func_intf.t -> t
 

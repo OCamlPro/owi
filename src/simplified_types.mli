@@ -1,18 +1,20 @@
+open Types
+
 type tbl = (string, int) Hashtbl.t Option.t
 
-val equal_func_types : Simplified.func_type -> Simplified.func_type -> bool
+val equal_func_types : simplified func_type -> simplified func_type -> bool
 
-val convert_val_type : tbl -> Text.val_type -> Simplified.val_type Result.t
+val convert_val_type : tbl -> text val_type -> simplified val_type Result.t
 
-val convert_heap_type : tbl -> Text.heap_type -> Simplified.heap_type Result.t
+val convert_heap_type : tbl -> text heap_type -> simplified heap_type Result.t
 
-val convert_func_type : tbl -> Text.func_type -> Simplified.func_type Result.t
+val convert_func_type : tbl -> text func_type -> simplified func_type Result.t
 
-val convert_ref_type : tbl -> Text.ref_type -> Simplified.ref_type Result.t
+val convert_ref_type : tbl -> text ref_type -> simplified ref_type Result.t
 
-val convert_param : tbl -> Text.param -> Simplified.param Result.t
+val convert_param : tbl -> text param -> simplified param Result.t
 
 val convert_table_type :
-  tbl -> Text.table_type -> Simplified.table_type Result.t
+  tbl -> text table_type -> simplified table_type Result.t
 
-val convert_str : tbl -> Text.str_type -> Simplified.str_type Result.t
+val convert_str : tbl -> text str_type -> simplified str_type Result.t

@@ -1,5 +1,6 @@
 open Crowbar
 open Crowbar.Syntax
+open Owi.Types
 open Owi.Text
 module S = Type_stack
 module B = Basic
@@ -143,7 +144,7 @@ let if_else expr ~locals ~stack env =
     let* rt = list B.val_type in
     let* pt = B.stack_prefix (List.tl stack) in
     let typ =
-      Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
+      Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
     let id = Env.add_block env typ Env.Block in
     (* same behavior as block *)
@@ -165,7 +166,7 @@ let block expr ~locals ~stack env =
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
-    Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
+    Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
   let id = Env.add_block env typ Env.Block in
   let* expr = expr ~block_type:typ ~stack:pt ~locals env in
@@ -179,7 +180,7 @@ let loop expr ~locals ~stack env =
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
-    Arg.Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
+    Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
   let id = Env.add_block env typ Env.Loop in
   let* expr = expr ~block_type:typ ~stack:pt ~locals env in
@@ -192,7 +193,7 @@ let loop expr ~locals ~stack env =
 let rec expr ~block_type ~stack ~locals env =
   let _pt, rt =
     match block_type with
-    | Arg.Bt_raw (_indice, (pt, rt)) -> (pt, rt)
+    | Bt_raw (_indice, (pt, rt)) -> (pt, rt)
     | _ -> assert false
   in
   Env.use_fuel env;
@@ -205,7 +206,7 @@ let rec expr ~block_type ~stack ~locals env =
       let* drops = const (List.map (fun _typ -> Drop) l) in
       let+ adds =
         List.fold_left
-          (fun (acc : instr list gen) typ ->
+          (fun (acc : text instr list gen) typ ->
             let* acc in
             let+ cst = B.const_of_val_type typ in
             cst :: acc )
@@ -321,7 +322,7 @@ let fields env =
     let* () = const () in
     Env.reset_locals env;
     Env.refill_fuel env;
-    let type_f = Arg.Bt_raw (None, ([], [])) in
+    let type_f = Bt_raw (None, ([], [])) in
     let id = Some "start" in
     let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] env in
     MFunc { type_f; locals = []; body; id }

@@ -17,9 +17,9 @@ module P = struct
 
   type table = Table.t
 
-  type elem = Link.Env.elem
+  type elem = Link_env.elem
 
-  type data = Link.Env.data
+  type data = Link_env.data
 
   type global = Concrete_global.t
 
@@ -35,7 +35,7 @@ module P = struct
 
   type extern_func = Concrete_value.Func.extern_func
 
-  type env = extern_func Link.Env.t
+  type env = extern_func Link_env.t
 
   module Choice = struct
     type 'a t = 'a

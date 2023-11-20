@@ -2,6 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 module type Memory_data = sig
   type int32
 
@@ -94,7 +96,7 @@ module type P = sig
 
     val mut : global -> Types.mut
 
-    val typ : global -> Simplified.val_type
+    val typ : global -> simplified val_type
   end
 
   module Table : sig
@@ -106,7 +108,7 @@ module type P = sig
 
     val size : t -> int
 
-    val typ : t -> Simplified.ref_type
+    val typ : t -> simplified ref_type
 
     val max_size : t -> int option
 
@@ -200,7 +202,7 @@ module type P = sig
 
     val env : t -> env
 
-    val to_run : t -> Simplified.expr list
+    val to_run : t -> simplified expr list
 
     val modul : t -> Simplified.modul
   end

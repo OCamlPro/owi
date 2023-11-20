@@ -2,6 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 module type Value_types = sig
   type int32
 
@@ -54,11 +56,11 @@ module type T_Extern_func = sig
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
   (* val extern_type : _ func_type -> Simplified.func_type *)
-  val extern_type : extern_func -> Simplified.func_type
+  val extern_type : extern_func -> simplified Types.func_type
 end
 
 type t =
-  | WASM of int * Simplified.func * Env_id.t
+  | WASM of int * simplified func * Env_id.t
   | Extern of Func_id.t
 
 module type T = sig
@@ -68,5 +70,5 @@ module type T = sig
 
   (* val typ : ('env, extern_func) t -> Simplified.func_type *)
 
-  val wasm : Simplified.func -> Env_id.t -> t
+  val wasm : simplified func -> Env_id.t -> t
 end

@@ -3,7 +3,6 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Types
-open Simplified
 
 (* TODO: Concrete_value.ref_value array, gadt to constraint to the right ref_type ? *)
 type table = Concrete_value.ref_value array
@@ -12,7 +11,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : limits
-  ; typ : ref_type
+  ; typ : simplified ref_type
   ; mutable data : table
   }
 
@@ -22,7 +21,7 @@ let fresh =
     incr r;
     !r
 
-let init ?label (typ : table_type) : t =
+let init ?label (typ : simplified table_type) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
   let table = Array.make limits.min null in

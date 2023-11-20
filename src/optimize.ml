@@ -5,7 +5,7 @@
 open Simplified
 open Types
 
-let rec optimize_expr expr : bool * instr list =
+let rec optimize_expr expr : bool * simplified instr list =
   match expr with
   | ((I32_const _ | I64_const _) as x)
     :: ((I32_const _ | I64_const _) as y)
@@ -330,9 +330,9 @@ let rec optimize_expr expr : bool * instr list =
     (has_changed, hd :: e)
   | [] -> (false, [])
 
-let locals_func body_expr =
+let locals_func (body_expr : simplified expr) =
   let locals_hashtbl = Hashtbl.create 16 in
-  let rec aux_instr instr =
+  let rec aux_instr (instr : simplified instr) =
     match instr with
     | Local_get ind | Local_set ind | Local_tee ind ->
       Hashtbl.replace locals_hashtbl ind ()
@@ -400,8 +400,11 @@ let locals_func body_expr =
   locals_hashtbl
 
 let remove_local map body =
-  let new_x x = match Hashtbl.find_opt map x with None -> x | Some x -> x in
-  let rec aux_instr instr =
+  let new_x (Raw x : simplified indice) =
+    let x = match Hashtbl.find_opt map x with None -> x | Some x -> x in
+    Raw x
+  in
+  let rec aux_instr (instr : simplified instr) : simplified instr =
     match instr with
     | Local_get ind -> Local_get (new_x ind)
     | Local_set ind -> Local_set (new_x ind)
@@ -469,7 +472,7 @@ let remove_local map body =
 let remove_unused_locals locals nb_args body =
   let unused_locals =
     let used_locals = locals_func body in
-    let locals = List.mapi (fun i _x -> nb_args + i) locals in
+    let locals = List.mapi (fun i _x -> Raw (nb_args + i)) locals in
     List.filter (fun x -> not @@ Hashtbl.mem used_locals x) locals
   in
   let rename_map = Hashtbl.create 16 in
@@ -479,22 +482,22 @@ let remove_unused_locals locals nb_args body =
       let _x = Option.value name ~default:"anon" in
       let count = ref 0 in
       for i = 0 to j do
-        if List.mem (nb_args + i) unused_locals then incr count
+        if List.mem (Raw (nb_args + i)) unused_locals then incr count
       done;
-      if not @@ List.mem (nb_args + j) unused_locals then begin
+      if not @@ List.mem (Raw (nb_args + j)) unused_locals then begin
         Hashtbl.replace rename_map (nb_args + j) (nb_args + j - !count)
       end )
     locals;
   let locals = List.mapi (fun i x -> (nb_args + i, x)) locals in
   let locals =
     List.filter_map
-      (fun (i, x) -> if List.mem i unused_locals then None else Some x)
+      (fun (i, x) -> if List.mem (Raw i) unused_locals then None else Some x)
       locals
   in
   let body = remove_local rename_map body in
   (locals, body)
 
-let optimize_func func =
+let optimize_func (func : simplified func) =
   let { type_f; locals; body; id } = func in
   let rec loop has_changed e =
     if not has_changed then
@@ -505,7 +508,7 @@ let optimize_func func =
       loop has_changed e
   in
   let body = loop true body in
-  let pt, _ = type_f in
+  let (Bt_raw ((None | Some _), (pt, _))) = type_f in
   let nb_args = List.length pt in
   let locals, body = remove_unused_locals locals nb_args body in
   { type_f; locals; body; id }

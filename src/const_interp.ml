@@ -3,14 +3,8 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Types
-open Simplified
 open Syntax
-module StringMap = Map.Make (String)
-module StringSet = Set.Make (String)
-module Env = Link_env
 module Stack = Stack.Make (V) [@@inlined hint]
-
-type env = Env.Build.t
 
 let exec_ibinop stack nn (op : Const.ibinop) =
   match nn with
@@ -25,7 +19,7 @@ let exec_ibinop stack nn (op : Const.ibinop) =
       (let open Int64 in
        match op with Add -> add n1 n2 | Sub -> sub n1 n2 | Mul -> mul n1 n2 )
 
-let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
+let exec_instr env stack (instr : simplified Const.instr) =
   match instr with
   | I32_const n -> ok @@ Stack.push_i32 stack n
   | I64_const n -> ok @@ Stack.push_i64 stack n
@@ -33,12 +27,12 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
   | F64_const f -> ok @@ Stack.push_f64 stack f
   | I_binop (nn, op) -> ok @@ exec_ibinop stack nn op
   | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
-  | Ref_func f ->
-    let* f = Env.Build.get_func env f in
+  | Ref_func (Raw f) ->
+    let* f = Link_env.Build.get_func env f in
     let value = Concrete_value.Ref (Funcref (Some f)) in
     ok @@ Stack.push stack value
-  | Global_get id ->
-    let* g = Env.Build.get_const_global env id in
+  | Global_get (Raw id) ->
+    let* g = Link_env.Build.get_const_global env id in
     ok @@ Stack.push stack g
   | Array_new _i ->
     let len, stack = Stack.pop_i32 stack in
@@ -56,7 +50,7 @@ let exec_instr (env : env) (stack : Stack.t) (instr : Const.instr) =
     (* TODO *)
     ok stack
 
-let exec_expr env (e : Const.expr) : Concrete_value.t Result.t =
+let exec_expr env (e : simplified Const.expr) : Concrete_value.t Result.t =
   let* stack = list_fold_left (exec_instr env) Stack.empty e in
   match stack with
   | [] -> Error "type mismatch (const expr returning zero values)"

@@ -325,3 +325,5 @@ let to_string = to_string' (Printf.sprintf "%.17g") is_digit 3
 let to_hex_string x =
   if is_inf x then to_string x
   else to_string' (Printf.sprintf "%h") is_hex_digit 4 x
+
+let pp fmt v = Format.fprintf fmt "%s" (to_string v)

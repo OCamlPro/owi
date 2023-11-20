@@ -2,11 +2,13 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 type t =
   { mutable value : Concrete_value.t
   ; label : string option
-  ; mut : Types.mut
-  ; typ : Simplified.val_type
+  ; mut : mut
+  ; typ : simplified val_type
   }
 
 let value g = g.value

@@ -3,11 +3,9 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Types
-open Simplified
 open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
-module Env = Link_env
 
 type global = Concrete_global.t
 
@@ -24,14 +22,14 @@ type exports =
   }
 
 type 'f module_to_run =
-  { modul : modul
-  ; env : 'f Env.t
-  ; to_run : expr list
+  { modul : Simplified.modul
+  ; env : 'f Link_env.t
+  ; to_run : simplified expr list
   }
 
-type 'f envs = 'f Env.t Env_id.collection
+type 'f envs = 'f Link_env.t Env_id.collection
 
-type fenvs = Concrete_value.Func.extern_func Env.t Env_id.collection
+type fenvs = Concrete_value.Func.extern_func Link_env.t Env_id.collection
 
 type 'f state =
   { by_name : exports StringMap.t
@@ -63,7 +61,7 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error "unknown import"
     | v -> Ok v )
 
-let load_global (ls : 'f state) (import : global_type Imported.t) :
+let load_global (ls : 'f state) (import : simplified global_type Imported.t) :
   global Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
@@ -77,7 +75,8 @@ let load_global (ls : 'f state) (import : global_type Imported.t) :
   end
   else Ok global
 
-let eval_global ls env (global : (Simplified.global, global_type) Runtime.t) :
+let eval_global ls env
+  (global : (Simplified.global, simplified global_type) Runtime.t) :
   global Result.t =
   match global with
   | Local global ->
@@ -87,17 +86,17 @@ let eval_global ls env (global : (Simplified.global, global_type) Runtime.t) :
     Ok global
   | Imported import -> load_global ls import
 
-let eval_globals ls env globals : Env.Build.t Result.t =
+let eval_globals ls env globals : Link_env.Build.t Result.t =
   Named.fold
     (fun id global env ->
       let* env in
       let* global = eval_global ls env global in
-      let env = Env.Build.add_global id global env in
+      let env = Link_env.Build.add_global id global env in
       Ok env )
     globals (Ok env)
 
 (*
-let eval_in_data (env : Env.t) (data : _ data') : (int, value) data' =
+let eval_in_data (env : Link_env.t) (data : _ data') : (int, value) data' =
   let mode =
     match data.mode with
     | Data_passive -> Data_passive
@@ -128,7 +127,7 @@ let load_memory (ls : 'f state) (import : limits Imported.t) :
 let eval_memory ls (memory : (mem, limits) Runtime.t) :
   Concrete_memory.t Result.t =
   match memory with
-  | Local (label, mem_type) -> ok @@ Concrete_memory.init ?label mem_type
+  | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
@@ -136,23 +135,25 @@ let eval_memories ls env memories =
     (fun id mem env ->
       let* env in
       let* memory = eval_memory ls mem in
-      let env = Env.Build.add_memory id memory env in
+      let env = Link_env.Build.add_memory id memory env in
       Ok env )
     memories (Ok env)
 
-let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
+let table_types_are_compatible (import, (t1 : simplified ref_type))
+  (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : 'f state) (import : table_type Imported.t) : table Result.t
-    =
-  let typ : table_type = import.desc in
+let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
+  table Result.t =
+  let typ : simplified table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else
     error_s "incompatible import type for table %s %s expected %a got %a"
       import.modul import.name Pp.table_type typ Pp.table_type (t.limits, t.typ)
 
-let eval_table ls (table : (_, table_type) Runtime.t) : table Result.t =
+let eval_table ls (table : (_, simplified table_type) Runtime.t) :
+  table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
@@ -162,7 +163,7 @@ let eval_tables ls env tables =
     (fun id table env ->
       let* env in
       let* table = eval_table ls table in
-      let env = Env.Build.add_table id table env in
+      let env = Link_env.Build.add_table id table env in
       Ok env )
     tables (Ok env)
 
@@ -174,28 +175,31 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : 'f state) (import : func_type Imported.t) : func Result.t =
-  let typ : func_type = import.desc in
+let load_func (ls : 'f state)
+  (import : (simplified, simplified) block_type Imported.t) : func Result.t =
+  let (Bt_raw ((None | Some _), typ)) = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' =
     match func with
-    | Func_intf.WASM (_, func, _) -> func.type_f
+    | Func_intf.WASM (_, func, _) ->
+      let (Bt_raw ((None | Some _), t)) = func.type_f in
+      t
     | Extern func_id -> Func_id.get_typ func_id ls.collection
   in
   if func_types_are_compatible typ type' then Ok func
   else Error "incompatible import type (Link.load_func)"
 
-let eval_func ls (finished_env : Env.t') func : func Result.t =
+let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   match func with
   | Runtime.Local func -> ok @@ Concrete_value.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
-let eval_functions ls (finished_env : Env.t') env functions =
+let eval_functions ls (finished_env : Link_env.t') env functions =
   Named.fold
     (fun id func env ->
       let* env in
       let* func = eval_func ls finished_env func in
-      let env = Env.Build.add_func id func env in
+      let env = Link_env.Build.add_func id func env in
       Ok env )
     functions (Ok env)
 
@@ -203,8 +207,8 @@ let active_elem_expr ~offset ~length ~table ~elem =
   [ I32_const offset
   ; I32_const 0l
   ; I32_const length
-  ; Table_init (table, elem)
-  ; Elem_drop elem
+  ; Table_init (Raw table, Raw elem)
+  ; Elem_drop (Raw elem)
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
@@ -228,8 +232,8 @@ let define_data env data =
   Named.fold
     (fun id (data : Simplified.data) env_and_init ->
       let* env, init = env_and_init in
-      let data' : Env.data = { value = data.init } in
-      let env = Env.Build.add_data id data' env in
+      let data' : Link_env.data = { value = data.init } in
+      let env = Link_env.Build.add_data id data' env in
       let* init =
         match data.mode with
         | Data_active (None, _) -> assert false
@@ -237,6 +241,7 @@ let define_data env data =
           let* offset = Const_interp.exec_expr env offset in
           let length = Int32.of_int @@ String.length data.init in
           let* offset = get_i32 offset in
+          let id = Raw id in
           let* v = active_data_expr ~offset ~length ~mem ~data:id in
           ok @@ (v :: init)
         | Data_passive -> Ok init
@@ -247,7 +252,7 @@ let define_data env data =
 
 let define_elem env elem =
   Named.fold
-    (fun id (elem : elem) env_and_inits ->
+    (fun id (elem : Simplified.elem) env_and_inits ->
       let* env, inits = env_and_inits in
       let* init = list_map (Const_interp.exec_expr env) elem.init in
       let* init_as_ref =
@@ -261,10 +266,10 @@ let define_elem env elem =
       let env =
         match elem.mode with
         | Elem_active _ | Elem_passive ->
-          Env.Build.add_elem id { value = Array.of_list init_as_ref } env
+          Link_env.Build.add_elem id { value = Array.of_list init_as_ref } env
         | Elem_declarative ->
           (* Declarative element have no runtime value *)
-          Env.Build.add_elem id { value = [||] } env
+          Link_env.Build.add_elem id { value = [||] } env
       in
       let* inits =
         match elem.mode with
@@ -293,25 +298,25 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
       (StringMap.empty, names) exports
   in
   let names = StringSet.empty in
-  let* globals, names = fill_exports Env.get_global exports.global names in
-  let* memories, names = fill_exports Env.get_memory exports.mem names in
-  let* tables, names = fill_exports Env.get_table exports.table names in
-  let* functions, names = fill_exports Env.get_func exports.func names in
+  let* globals, names = fill_exports Link_env.get_global exports.global names in
+  let* memories, names = fill_exports Link_env.get_memory exports.mem names in
+  let* tables, names = fill_exports Link_env.get_table exports.table names in
+  let* functions, names = fill_exports Link_env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let modul (ls : 'f state) ~name (modul : modul) =
+let modul (ls : 'f state) ~name (modul : Simplified.modul) =
   Log.debug "linking      ...@\n";
   let* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_id
       (fun env_id ->
-        let env = Env.Build.empty in
+        let env = Link_env.Build.empty in
         let* env = eval_functions ls env_id env modul.func in
         let* env = eval_globals ls env modul.global in
         let* env = eval_memories ls env modul.mem in
         let* env = eval_tables ls env modul.table in
         let* env, init_active_data = define_data env modul.data in
         let+ env, init_active_elem = define_elem env modul.elem in
-        let finished_env = Env.freeze env_id env ls.collection in
+        let finished_env = Link_env.freeze env_id env ls.collection in
         (finished_env, (finished_env, init_active_data, init_active_elem)) )
       ls.envs
   in
@@ -319,14 +324,16 @@ let modul (ls : 'f state) ~name (modul : modul) =
   let by_id =
     match modul.id with
     | None -> ls.by_id
-    | Some id -> StringMap.add id (by_id_exports, Env.id env) ls.by_id
+    | Some id -> StringMap.add id (by_id_exports, Link_env.id env) ls.by_id
   in
   let by_name =
     match name with
     | None -> ls.by_name
     | Some name -> StringMap.add name by_id_exports ls.by_name
   in
-  let start = Option.map (fun start_id -> [ Call start_id ]) modul.start in
+  let start =
+    Option.map (fun start_id -> [ Call (Raw start_id) ]) modul.start
+  in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
   let module_to_run = { modul; env; to_run } in
@@ -334,13 +341,13 @@ let modul (ls : 'f state) ~name (modul : modul) =
     ( module_to_run
     , { by_id
       ; by_name
-      ; last = Some (by_id_exports, Env.id env)
+      ; last = Some (by_id_exports, Link_env.id env)
       ; collection = ls.collection
       ; envs
       } )
 
 let extern_module' (ls : 'f state) ~name
-  ~(func_typ : 'f -> Simplified.func_type) (module_ : 'f extern_module) =
+  ~(func_typ : 'f -> simplified func_type) (module_ : 'f extern_module) =
   let functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) ->
@@ -365,8 +372,8 @@ let extern_module' (ls : 'f state) ~name
   in
   { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
-let extern_module ls ~name module_ =
-  extern_module' ls ~name ~func_typ:Concrete_value.Func.extern_type module_
+let extern_module ls ~name modul =
+  extern_module' ls ~name ~func_typ:Concrete_value.Func.extern_type modul
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =

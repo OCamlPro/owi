@@ -2,34 +2,34 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Syntax
 open Types
-open Simplified
+open Syntax
 
-let find msg (named : 'a Named.t) (indice : Text.indice option) : int Result.t =
+let find msg (named : 'a Named.t) (indice : text indice option) :
+  simplified indice Result.t =
   match indice with
   | None -> error_s "%s" msg
   | Some indice -> (
     match indice with
-    | Text.Arg.Raw i ->
+    | Raw i as indice ->
       (* TODO change Indexed.t strucure for that to be more efficient *)
       if not (List.exists (Indexed.has_index i) named.values) then
         error_s "%s %i" msg i
-      else Ok i
+      else Ok indice
     | Text name -> (
       match String_map.find_opt name named.named with
       | None -> error_s "%s %s" msg name
-      | Some i -> Ok i ) )
+      | Some i -> Ok (Raw i) ) )
 
 let get msg (named : 'a Named.t) indice : 'a Indexed.t Result.t =
-  let* i = find msg named indice in
+  let* (Raw i) = find msg named indice in
   (* TODO change Named.t structure to make that sensible *)
   match List.nth_opt named.values i with
   | None -> error_s "%s" msg
   | Some v -> Ok v
 
 let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
-  let* idx = find "unknown global" modul.global id in
+  let* (Raw idx) = find "unknown global" modul.global id in
   let va = List.find (Indexed.has_index idx) modul.global.values in
   let+ mut, _typ =
     match Indexed.get va with
@@ -43,13 +43,13 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
   in
   (idx, mut)
 
-let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
-  : expr Result.t =
+let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
+  (iexpr : text expr) : simplified expr Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
       match id with
-      | Text.Arg.Text id ->
+      | Text id ->
         let pos = ref (-1) in
         begin
           try
@@ -67,20 +67,22 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
     if id > List.length block_ids + loop_count then Error "unknown label"
-    else Ok id
+    else Ok (Raw id)
   in
 
-  let bt_some_to_raw : Text.block_type -> block_type Result.t = function
-    | Text.Arg.Bt_ind ind -> begin
+  let bt_some_to_raw :
+    (text, text) block_type -> (simplified, simplified) block_type Result.t =
+    function
+    | Bt_ind ind -> begin
       let* v = get "unknown type" modul.typ (Some ind) in
       match Indexed.get v with
-      | Def_func_t t' -> Ok t'
+      | Def_func_t t' -> Ok (Bt_raw (None, t'))
       | _ -> Error "TODO: Simplify.bt_some_to_raw"
     end
     | Bt_raw (type_use, t) -> (
       let* t = Simplified_types.convert_func_type None t in
       match type_use with
-      | None -> Ok t
+      | None -> Ok (Bt_raw (None, t))
       | Some ind ->
         (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
         let* t' =
@@ -90,11 +92,12 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
           | _ -> Error "TODO: Simplify.bt_some_to_raw"
         in
         let ok = Simplified_types.equal_func_types t t' in
-        if not ok then Error "inline function type" else Ok t )
+        if not ok then Error "inline function type" else Ok (Bt_raw (None, t)) )
   in
 
-  let bt_to_raw : Text.block_type option -> block_type option Result.t =
-    function
+  let bt_to_raw :
+       (text, text) block_type option
+    -> (simplified, simplified) block_type option Result.t = function
     | None -> Ok None
     | Some bt ->
       let+ raw = bt_some_to_raw bt in
@@ -103,7 +106,7 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
 
   let* locals, after_last_assigned_local =
     List.fold_left
-      (fun acc ((name, _type) : param) ->
+      (fun acc ((name, _type) : simplified param) ->
         let* locals, next_free_int = acc in
         match name with
         | None -> Ok (locals, next_free_int + 1)
@@ -116,12 +119,12 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
   in
 
   let find_local = function
-    | Text.Arg.Raw i ->
-      if i >= after_last_assigned_local then Error "unknown local" else Ok i
+    | Raw i as id ->
+      if i >= after_last_assigned_local then Error "unknown local" else Ok id
     | Text name -> (
       match String_map.find_opt name locals with
       | None -> error_s "unknown local %s" name
-      | Some id -> Ok id )
+      | Some id -> Ok (Raw id) )
   in
 
   let find_table id = find "unknown table" modul.table id in
@@ -131,7 +134,8 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
   let find_elem id = find "unknown elem segment" modul.elem id in
   let find_type id = find "unknown type" modul.typ id in
 
-  let rec body (loop_count, block_ids) : Text.instr -> instr Result.t = function
+  let rec body (loop_count, block_ids) : text instr -> simplified instr Result.t
+      = function
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -190,11 +194,11 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
       let* idx, mut = find_global modul ~imported_only:false (Some id) in
       match mut with
       | Const -> Error "global is immutable"
-      | Var -> ok @@ Global_set idx
+      | Var -> ok @@ Global_set (Raw idx)
     end
     | Global_get id ->
       let* idx, _mut = find_global modul ~imported_only:false (Some id) in
-      ok @@ Global_get idx
+      ok @@ Global_get (Raw idx)
     | Ref_func id ->
       let* id = find_func (Some id) in
       ok @@ Ref_func id
@@ -320,45 +324,9 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
     | Array_get id ->
       let* id = find_type (Some id) in
       ok @@ Array_set id
-    | I_unop (nn, o) -> ok @@ I_unop (nn, o)
-    | I_binop (nn, o) -> ok @@ I_binop (nn, o)
-    | I_testop (nn, o) -> ok @@ I_testop (nn, o)
-    | I_relop (nn, o) -> ok @@ I_relop (nn, o)
-    | F_unop (nn, o) -> ok @@ F_unop (nn, o)
-    | F_relop (nn, o) -> ok @@ F_relop (nn, o)
-    | I32_wrap_i64 -> ok @@ I32_wrap_i64
     | Ref_null heap_type ->
       let+ t = Simplified_types.convert_heap_type None heap_type in
       Ref_null t
-    | F_reinterpret_i (nn, nn') -> ok @@ F_reinterpret_i (nn, nn')
-    | I_reinterpret_f (nn, nn') -> ok @@ I_reinterpret_f (nn, nn')
-    | I64_extend_i32 sx -> ok @@ I64_extend_i32 sx
-    | I64_extend32_s -> ok @@ I64_extend32_s
-    | F32_demote_f64 -> ok @@ F32_demote_f64
-    | I_extend8_s nn -> ok @@ I_extend8_s nn
-    | I_extend16_s nn -> ok @@ I_extend16_s nn
-    | F64_promote_f32 -> ok @@ F64_promote_f32
-    | F_convert_i (nn, nn', sx) -> ok @@ F_convert_i (nn, nn', sx)
-    | I_trunc_f (nn, nn', sx) -> ok @@ I_trunc_f (nn, nn', sx)
-    | I_trunc_sat_f (nn, nn', sx) -> ok @@ I_trunc_sat_f (nn, nn', sx)
-    | Ref_is_null -> Ok Ref_is_null
-    | F_binop (nn, o) -> ok @@ F_binop (nn, o)
-    | F32_const f -> ok @@ F32_const f
-    | F64_const f -> ok @@ F64_const f
-    | I32_const i -> ok @@ I32_const i
-    | I64_const i -> ok @@ I64_const i
-    | Unreachable -> Ok Unreachable
-    | Drop -> Ok Drop
-    | Nop -> Ok Nop
-    | Return -> Ok Return
-    | Ref_i31 -> Ok Ref_i31
-    | I31_get_s -> Ok I31_get_s
-    | I31_get_u -> Ok I31_get_u
-    | Array_len -> Ok Array_len
-    | Ref_as_non_null -> Ok Ref_as_non_null
-    | Extern_externalize -> Ok Extern_externalize
-    | Extern_internalize -> Ok Extern_internalize
-    | Ref_eq -> Ok Ref_eq
     | Br_on_cast (i, t1, t2) ->
       let* i = find_type (Some i) in
       let* t1 = Simplified_types.convert_ref_type None t1 in
@@ -377,22 +345,31 @@ let rewrite_expr (modul : Assigned.t) (locals : param list) (iexpr : Text.expr)
     | Ref_test (null, ht) ->
       let+ ht = Simplified_types.convert_heap_type None ht in
       Ref_test (null, ht)
+    | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
+      | I32_wrap_i64 | F_reinterpret_i _ | I_reinterpret_f _ | I64_extend_i32 _
+      | I64_extend32_s | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
+      | F64_promote_f32 | F_convert_i _ | I_trunc_f _ | I_trunc_sat_f _
+      | Ref_is_null | F_binop _ | F32_const _ | F64_const _ | I32_const _
+      | I64_const _ | Unreachable | Drop | Nop | Return | Ref_i31 | I31_get_s
+      | I31_get_u | Array_len | Ref_as_non_null | Extern_externalize
+      | Extern_internalize | Ref_eq ) as i ->
+      Ok i
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
       | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
       Log.debug "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
       Ok Nop
-  and expr (e : Text.expr) (loop_count, block_ids) : expr Result.t =
+  and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
 
-let rewrite_const_expr (modul : Assigned.t) (expr : Text.expr) :
-  Const.expr Result.t =
-  let const_instr (instr : Text.instr) : Const.instr Result.t =
+let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
+  simplified Const.expr Result.t =
+  let const_instr (instr : text instr) : simplified Const.instr Result.t =
     let open Const in
     match instr with
-    | Text.I32_const v -> ok @@ I32_const v
+    | I32_const v -> ok @@ I32_const v
     | I64_const v -> ok @@ I64_const v
     | F32_const v -> ok @@ F32_const v
     | F64_const v -> ok @@ F64_const v
@@ -405,7 +382,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Text.expr) :
     | Global_get id -> begin
       let* idx, mut = find_global modul ~imported_only:true (Some id) in
       match mut with
-      | Const -> ok @@ Global_get idx
+      | Const -> ok @@ Global_get (Raw idx)
       | Var -> Error "constant expression required"
     end
     | Array_new t ->
@@ -414,78 +391,88 @@ let rewrite_const_expr (modul : Assigned.t) (expr : Text.expr) :
     | Array_new_default t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new_default t
-    | Text.Ref_i31 -> Ok Ref_i31
+    | Ref_i31 -> Ok Ref_i31
     | i ->
       error
       @@ Format.asprintf "constant expression required, got %a" Text.Pp.instr i
   in
   list_map const_instr expr
 
-let rewrite_block_type (modul : Assigned.t) (block_type : Text.block_type) :
-  block_type Result.t =
+let rewrite_block_type (modul : Assigned.t)
+  (block_type : (text, text) block_type) :
+  (simplified, simplified) block_type Result.t =
   match block_type with
-  | Text.Arg.Bt_ind id -> begin
+  | Bt_ind id -> begin
     let* v = get "unknown type" modul.typ (Some id) in
     match Indexed.get v with
-    | Def_func_t t' -> Ok t'
+    | Def_func_t t' -> Ok (Bt_raw (None, t'))
     | _ -> Error "TODO: Simplify.bt_some_to_raw"
   end
-  | Bt_raw (_, func_type) -> Simplified_types.convert_func_type None func_type
+  | Bt_raw (_, func_type) ->
+    let* t = Simplified_types.convert_func_type None func_type in
+    Ok (Bt_raw (None, t))
 
-let rewrite_global (modul : Assigned.t) (global : Text.global) : global Result.t
-    =
+let rewrite_global (modul : Assigned.t) (global : Text.global) :
+  Simplified.global Result.t =
   let* init = rewrite_const_expr modul global.init in
   let mut, val_type = global.typ in
   let+ val_type = Simplified_types.convert_val_type None val_type in
   let typ = (mut, val_type) in
-  { id = global.id; init; typ }
+  { Simplified.id = global.id; init; typ }
 
-let rewrite_elem (modul : Assigned.t) (elem : Text.elem) : elem Result.t =
-  let* (mode : elem_mode) =
+let rewrite_elem (modul : Assigned.t) (elem : Text.elem) :
+  Simplified.elem Result.t =
+  let* (mode : Simplified.elem_mode) =
     match elem.mode with
-    | Elem_declarative -> Ok Elem_declarative
+    | Elem_declarative -> Ok Simplified.Elem_declarative
     | Elem_passive -> Ok Elem_passive
     | Elem_active (indice, expr) ->
-      let* indice = find "unknown table" modul.table indice in
+      let* (Raw indice) = find "unknown table" modul.table indice in
       let+ expr = rewrite_const_expr modul expr in
-      Elem_active (Some indice, expr)
+      Simplified.Elem_active (Some indice, expr)
   in
   let* init = list_map (rewrite_const_expr modul) elem.init in
   let+ typ = Simplified_types.convert_ref_type None elem.typ in
-  { init; mode; id = elem.id; typ }
+  { Simplified.init; mode; id = elem.id; typ }
 
-let rewrite_data (modul : Assigned.t) (data : Text.data) : data Result.t =
+let rewrite_data (modul : Assigned.t) (data : Text.data) :
+  Simplified.data Result.t =
   let+ mode =
     match data.mode with
-    | Data_passive -> Ok Data_passive
+    | Data_passive -> Ok Simplified.Data_passive
     | Data_active (indice, expr) ->
-      let* indice = find "unknown memory" modul.mem indice in
+      let* (Raw indice) = find "unknown memory" modul.mem indice in
       let* expr = rewrite_const_expr modul expr in
-      ok @@ Data_active (Some indice, expr)
+      ok @@ Simplified.Data_active (Some indice, expr)
   in
-  { mode; id = data.id; init = data.init }
+  { Simplified.mode; id = data.id; init = data.init }
 
 let rewrite_export msg named (exports : Grouped.opt_export list) :
-  export list Result.t =
+  Simplified.export list Result.t =
   list_map
     (fun { Grouped.name; id } ->
       let+ id =
-        match id with Curr id -> Ok id | Indice id -> find msg named (Some id)
+        match id with
+        | Curr id -> Ok id
+        | Indice id ->
+          let+ (Raw id) = find msg named (Some id) in
+          id
       in
-      { name; id } )
+      { Simplified.name; id } )
     exports
 
 let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
-  exports Result.t =
+  Simplified.exports Result.t =
   let* global = rewrite_export "unknown global" modul.global exports.global in
   let* mem = rewrite_export "unknown memory" modul.mem exports.mem in
   let* table = rewrite_export "unknown table" modul.table exports.table in
   let+ func = rewrite_export "unknown function" modul.func exports.func in
-  { global; mem; table; func }
+  { Simplified.global; mem; table; func }
 
-let rewrite_func (modul : Assigned.t) (func : Text.func) : func Result.t =
+let rewrite_func (modul : Assigned.t) (func : text func) :
+  simplified func Result.t =
   let* type_f = rewrite_block_type modul func.type_f in
-  let params, _ = type_f in
+  let (Bt_raw ((None | Some _), (params, _))) = type_f in
   let* locals = list_map (Simplified_types.convert_param None) func.locals in
   let+ body = rewrite_expr modul (params @ locals) func.body in
   { body; type_f; id = func.id; locals }
@@ -516,14 +503,15 @@ let rewrite_named f named =
   in
   { named with Named.values }
 
-let modul (modul : Assigned.t) : modul Result.t =
+let modul (modul : Assigned.t) : Simplified.modul Result.t =
   Log.debug "rewriting    ...@\n";
-  let* (global : (global, global_type) Runtime.t Named.t) =
+  let* (global : (Simplified.global, simplified global_type) Runtime.t Named.t)
+      =
     let* { Named.named; values } =
       rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
     in
     let values = List.rev values in
-    let global : (global, global_type) Runtime.t Named.t =
+    let global : (Simplified.global, simplified global_type) Runtime.t Named.t =
       { Named.named; values }
     in
     Ok global
@@ -531,7 +519,9 @@ let modul (modul : Assigned.t) : modul Result.t =
   let* elem = rewrite_named (rewrite_elem modul) modul.elem in
   let* data = rewrite_named (rewrite_data modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
-  let* func =
+  let* (func :
+         (simplified func, (simplified, simplified) block_type) Runtime.t
+         Named.t ) =
     let import = rewrite_import (rewrite_block_type modul) in
     let runtime = rewrite_runtime (rewrite_func modul) import in
     rewrite_named runtime modul.func
@@ -540,19 +530,23 @@ let modul (modul : Assigned.t) : modul Result.t =
     match modul.start with
     | None -> Ok None
     | Some start -> (
-      let* idx = find "unknown function" func (Some start) in
+      let* (Raw idx) = find "unknown function" func (Some start) in
       let va = List.find (Indexed.has_index idx) func.Named.values in
       let param_typ, result_typ =
         match Indexed.get va with
-        | Local func -> func.type_f
-        | Imported imported -> imported.desc
+        | Local func ->
+          let (Bt_raw ((None | Some _), t)) = func.type_f in
+          t
+        | Imported imported ->
+          let (Bt_raw ((None | Some _), t)) = imported.desc in
+          t
       in
       match (param_typ, result_typ) with
       | [], [] -> Ok (Some idx)
       | _, _ -> Error "start function" )
   in
 
-  let modul : modul =
+  let modul : Simplified.modul =
     { id = modul.id
     ; mem = modul.mem
     ; table = modul.table

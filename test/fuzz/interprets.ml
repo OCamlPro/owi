@@ -84,7 +84,7 @@ module Reference : INTERPRET = struct
     let tmp_file = Filename.temp_file prefix suffix in
     let chan = open_out tmp_file in
     let fmt = Format.formatter_of_out_channel chan in
-    Format.pp_print_string fmt modul;
+    Format.pp_string fmt modul;
     close_out chan;
     let n =
       Sys.command
