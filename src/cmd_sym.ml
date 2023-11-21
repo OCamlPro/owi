@@ -1,6 +1,5 @@
 open Syntax
-module E = Encoding
-module Expr = E.Expr
+module Expr = Encoding.Expr
 module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
 module Solver = Thread.Solver
@@ -50,6 +49,7 @@ let names = [| "plop"; "foo"; "bar" |]
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sprintf = Printf.sprintf in
   let sym_cnt = Atomic.make 0 in
+  let mk_symbol = Encoding.Symbol.mk_symbol in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     let name =
       match i.e with
@@ -60,13 +60,13 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     in
     let id = Atomic.fetch_and_add sym_cnt 1 in
     let r =
-      E.(Expr.mk_symbol Symbol.(sprintf "%s_%i" name id @: Ty_bitv S32))
+      Expr.mk_symbol @@ mk_symbol (Ty_bitv S32) (sprintf "%s_%i" name id)
     in
     Choice.return r
   in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = E.(Expr.mk_symbol Symbol.(sprintf "symbol_%i" id @: ty)) in
+    let r = Expr.mk_symbol @@ mk_symbol ty (sprintf "symbol_%i" id) in
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
