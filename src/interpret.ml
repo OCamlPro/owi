@@ -687,7 +687,7 @@ module Make (P : Interpret_functor_intf.P) :
   end
 
   let exec_block (state : State.exec_state) ~is_loop
-    (bt : (simplified, simplified) block_type option) expr =
+    (bt : simplified block_type option) expr =
     let pt, rt =
       match bt with
       | None -> ([], [])
@@ -772,9 +772,7 @@ module Make (P : Interpret_functor_intf.P) :
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~return (state : State.exec_state)
-    ( tbl_i
-    , (Bt_raw ((None | Some _), typ_i) : (simplified, simplified) block_type) )
-      =
+    (tbl_i, (Bt_raw ((None | Some _), typ_i) : simplified block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let/ t = Env.get_table state.env tbl_i in

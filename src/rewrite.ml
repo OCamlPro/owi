@@ -70,8 +70,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     else Ok (Raw id)
   in
 
-  let bt_some_to_raw :
-    (text, text) block_type -> (simplified, simplified) block_type Result.t =
+  let bt_some_to_raw : text block_type -> simplified block_type Result.t =
     function
     | Bt_ind ind -> begin
       let* v = get "unknown type" modul.typ (Some ind) in
@@ -96,8 +95,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   in
 
   let bt_to_raw :
-       (text, text) block_type option
-    -> (simplified, simplified) block_type option Result.t = function
+    text block_type option -> simplified block_type option Result.t = function
     | None -> Ok None
     | Some bt ->
       let+ raw = bt_some_to_raw bt in
@@ -398,9 +396,8 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
   in
   list_map const_instr expr
 
-let rewrite_block_type (modul : Assigned.t)
-  (block_type : (text, text) block_type) :
-  (simplified, simplified) block_type Result.t =
+let rewrite_block_type (modul : Assigned.t) (block_type : text block_type) :
+  simplified block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
     let* v = get "unknown type" modul.typ (Some id) in
@@ -519,9 +516,7 @@ let modul (modul : Assigned.t) : Simplified.modul Result.t =
   let* elem = rewrite_named (rewrite_elem modul) modul.elem in
   let* data = rewrite_named (rewrite_data modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
-  let* (func :
-         (simplified func, (simplified, simplified) block_type) Runtime.t
-         Named.t ) =
+  let* (func : (simplified func, simplified block_type) Runtime.t Named.t) =
     let import = rewrite_import (rewrite_block_type modul) in
     let runtime = rewrite_runtime (rewrite_func modul) import in
     rewrite_named runtime modul.func

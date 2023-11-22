@@ -38,7 +38,7 @@ type t =
   ; global : (Text.global, simplified global_type) Runtime.t Indexed.t list
   ; table : (simplified table, simplified table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (text func, (text, text) block_type) Runtime.t Indexed.t list
+  ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
   ; data : Text.data Indexed.t list
   ; exports : opt_exports
@@ -189,7 +189,7 @@ let of_symbolic (modul : Text.modul) : t Result.t =
         ( { fields with func; function_type; type_checks }
         , { curr with func = succ curr.func } )
     | MImport ({ desc = Import_func (a, b); _ } as import) ->
-      let imported : (text, text) block_type Imported.t = imp import (a, b) in
+      let imported : text block_type Imported.t = imp import (a, b) in
       ok @@ add_func (Imported imported) fields curr
     | MExport { name; desc = Export_func id } ->
       let id = curr_id curr.func id in

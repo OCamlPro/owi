@@ -52,8 +52,7 @@ type modul =
   ; global : (global, simplified global_type) Runtime.t Named.t
   ; table : (simplified table, simplified table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func :
-      (simplified func, (simplified, simplified) block_type) Runtime.t Named.t
+  ; func : (simplified func, simplified block_type) Runtime.t Named.t
       (* TODO: switch to func_type *)
   ; elem : elem Named.t
   ; data : data Named.t

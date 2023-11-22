@@ -94,10 +94,10 @@ module M = struct
     | Extract (e1, h, m1), Extract (e2, m2, l) ->
       merge_extracts (e1, h, m1) (e2, m2, l)
     | Extract (e1, h, m1), Concat ({ e = Extract (e2, m2, l); _ }, e3) ->
-      let ty: Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
+      let ty : Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
       Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3) @: ty
     | _ ->
-      let ty: Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
+      let ty : Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
       Concat (msb, lsb) @: ty
 
   let loadn m a n : int32 =
