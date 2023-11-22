@@ -30,7 +30,7 @@ type t =
   ; global : (Text.global, simplified global_type) Runtime.t Indexed.t list
   ; table : (simplified table, simplified table_type) Runtime.t Indexed.t list
   ; mem : (mem, Types.limits) Runtime.t Indexed.t list
-  ; func : (text func, (text, text) block_type) Runtime.t Indexed.t list
+  ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
   ; data : Text.data Indexed.t list
   ; exports : opt_exports

@@ -22,8 +22,8 @@ type t =
   ; mutable tables : (string * text table_type) list
   ; mutable globals : (string * text global_type) list
   ; mutable locals : (string * text val_type) list
-  ; mutable blocks : (block_kind * string * (text, text) block_type) list
-  ; mutable funcs : (string * (text, text) block_type) list
+  ; mutable blocks : (block_kind * string * text block_type) list
+  ; mutable funcs : (string * text block_type) list
   ; mutable fuel : int
   }
 

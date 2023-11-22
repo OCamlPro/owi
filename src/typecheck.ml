@@ -39,8 +39,7 @@ module Env = struct
     { locals : typ Index.Map.t
     ; globals : (global, simplified global_type) Runtime.t Named.t
     ; result_type : simplified result_type
-    ; funcs :
-        (simplified func, (simplified, simplified) block_type) Runtime.t Named.t
+    ; funcs : (simplified func, simplified block_type) Runtime.t Named.t
     ; blocks : typ list list
     ; tables : (simplified table, simplified table_type) Runtime.t Named.t
     ; elems : elem Named.t
@@ -129,7 +128,7 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : (simplified, simplified) block_type option -> t -> t Result.t
+  val pop_push : simplified block_type option -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
@@ -226,7 +225,7 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push (bt : (simplified, simplified) block_type option) stack =
+  let pop_push (bt : simplified block_type option) stack =
     match bt with
     | None -> Ok stack
     | Some (Bt_raw ((None | Some _), (pt, rt))) ->
@@ -494,15 +493,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     Log.debug "TODO (typecheck instr) %a" Types.Pp.instr i;
     Ok stack
 
-and typecheck_expr env expr ~is_loop
-  (block_type : (simplified, simplified) block_type option)
+and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
   ~stack:previous_stack : stack Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun
-          (Bt_raw ((None | Some _), (pt, rt)) :
-            (simplified, simplified) block_type )
-        -> (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
+      ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : simplified block_type) ->
+        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
   let jump_type = if is_loop then pt else rt in

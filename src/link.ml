@@ -175,8 +175,8 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : 'f state)
-  (import : (simplified, simplified) block_type Imported.t) : func Result.t =
+let load_func (ls : 'f state) (import : simplified block_type Imported.t) :
+  func Result.t =
   let (Bt_raw ((None | Some _), typ)) = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' =

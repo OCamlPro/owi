@@ -227,13 +227,13 @@ let pp_result_ fmt vt = pp fmt "(result %a)" pp_val_type vt
 let pp_result_type fmt results = pp_list ~pp_sep:pp_space pp_result_ fmt results
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
-type ('a, _) block_type =
-  | Bt_ind : 'a indice -> ('a, < with_ind_bt ; .. >) block_type
+type 'a block_type =
+  | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
   | Bt_raw :
       ('a indice option * ('a param_type * 'a result_type))
-      -> ('a, < .. >) block_type
+      -> (< .. > as 'a) block_type
 
-let pp_block_type (type kind) fmt : (kind, kind) block_type -> unit = function
+let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pp fmt "(type %a)" pp_indice ind
   | Bt_raw (_ind, (pt, rt)) -> pp fmt "%a %a" pp_param_type pt pp_result_type rt
 
@@ -328,9 +328,9 @@ type 'a instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * ('a, 'a) block_type option * 'a expr
-  | Loop of string option * ('a, 'a) block_type option * 'a expr
-  | If_else of string option * ('a, 'a) block_type option * 'a expr * 'a expr
+  | Block of string option * 'a block_type option * 'a expr
+  | Loop of string option * 'a block_type option * 'a expr
+  | If_else of string option * 'a block_type option * 'a expr * 'a expr
   | Br of 'a indice
   | Br_if of 'a indice
   | Br_table of 'a indice array * 'a indice
@@ -340,10 +340,10 @@ type 'a instr =
   | Br_on_null of 'a indice
   | Return
   | Return_call of 'a indice
-  | Return_call_indirect of 'a indice * ('a, 'a) block_type
-  | Return_call_ref of ('a, 'a) block_type
+  | Return_call_indirect of 'a indice * 'a block_type
+  | Return_call_ref of 'a block_type
   | Call of 'a indice
-  | Call_indirect of 'a indice * ('a, 'a) block_type
+  | Call_indirect of 'a indice * 'a block_type
   | Call_ref of 'a indice
   (* Array instructions *)
   | Array_get of 'a indice
@@ -373,7 +373,7 @@ and 'a expr = 'a instr list
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =
-  { type_f : ('a, 'a) block_type
+  { type_f : 'a block_type
   ; locals : 'a param list
   ; body : 'a expr
   ; id : string option
@@ -386,7 +386,7 @@ type 'a table = string option * 'a table_type
 (* Modules *)
 
 type 'a import_desc =
-  | Import_func of string option * ('a, 'a) block_type
+  | Import_func of string option * 'a block_type
   | Import_table of string option * 'a table_type
   | Import_mem of string option * limits
   | Import_global of string option * 'a global_type
