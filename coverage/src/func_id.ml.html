@@ -38,17 +38,19 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -79,23 +81,27 @@
 <a href="#L24">24</a>
 <a href="#L25">25</a>
 <a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
+
+open Types
 
 type t = int
 
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * Simplified.func_type) IMap.t
+  { c : ('a * simplified func_type) IMap.t
   ; last : int
   }
 
 let empty = { c = IMap.empty; last = 0 }
 
-let add f t c = <span data-count="2712">(</span>c.last, { c = IMap.ad<span data-count="2712">d</span> c.last (f, t) c.c; last = c.last + 1 })
+let add f t c = <span data-count="2713">(</span>c.last, { c = IMap.ad<span data-count="2713">d</span> c.last (f, t) c.c; last = c.last + 1 })
 
 let get i c =
   <span data-count="78">l</span>et v, _ = IMap.find i c.c in

@@ -18,10 +18,10 @@
       <h2>94.68%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:44.75%"></span>
-      <span class="unvisited" style="top:45.30%"></span>
-      <span class="unvisited" style="bottom:29.28%"></span>
-      <span class="unvisited" style="bottom:23.20%"></span>
+      <span class="unvisited" style="top:44.51%"></span>
+      <span class="unvisited" style="top:45.05%"></span>
+      <span class="unvisited" style="bottom:29.12%"></span>
+      <span class="unvisited" style="bottom:23.08%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -147,57 +147,57 @@
 <a id="L119"></a><span class="visited"> </span>
 <a id="L120"></a><span > </span>
 <a id="L121"></a><span > </span>
-<a id="L122"></a><span class="visited"> </span>
-<a id="L123"></a><span > </span>
+<a id="L122"></a><span > </span>
+<a id="L123"></a><span class="visited"> </span>
 <a id="L124"></a><span > </span>
-<a id="L125"></a><span class="visited"> </span>
+<a id="L125"></a><span > </span>
 <a id="L126"></a><span class="visited"> </span>
-<a id="L127"></a><span > </span>
-<a id="L128"></a><span class="unvisited"> </span>
-<a id="L129"></a><span class="visited"> </span>
-<a id="L130"></a><span > </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span class="unvisited"> </span>
+<a id="L130"></a><span class="visited"> </span>
 <a id="L131"></a><span > </span>
-<a id="L132"></a><span class="visited"> </span>
+<a id="L132"></a><span > </span>
 <a id="L133"></a><span class="visited"> </span>
 <a id="L134"></a><span class="visited"> </span>
 <a id="L135"></a><span class="visited"> </span>
 <a id="L136"></a><span class="visited"> </span>
 <a id="L137"></a><span class="visited"> </span>
 <a id="L138"></a><span class="visited"> </span>
-<a id="L139"></a><span class="unvisited"> </span>
-<a id="L140"></a><span > </span>
+<a id="L139"></a><span class="visited"> </span>
+<a id="L140"></a><span class="unvisited"> </span>
 <a id="L141"></a><span > </span>
-<a id="L142"></a><span class="visited"> </span>
+<a id="L142"></a><span > </span>
 <a id="L143"></a><span class="visited"> </span>
 <a id="L144"></a><span class="visited"> </span>
 <a id="L145"></a><span class="visited"> </span>
 <a id="L146"></a><span class="visited"> </span>
-<a id="L147"></a><span > </span>
+<a id="L147"></a><span class="visited"> </span>
 <a id="L148"></a><span > </span>
-<a id="L149"></a><span class="visited"> </span>
+<a id="L149"></a><span > </span>
 <a id="L150"></a><span class="visited"> </span>
 <a id="L151"></a><span class="visited"> </span>
-<a id="L152"></a><span > </span>
+<a id="L152"></a><span class="visited"> </span>
 <a id="L153"></a><span > </span>
-<a id="L154"></a><span class="visited"> </span>
+<a id="L154"></a><span > </span>
 <a id="L155"></a><span class="visited"> </span>
 <a id="L156"></a><span class="visited"> </span>
-<a id="L157"></a><span > </span>
+<a id="L157"></a><span class="visited"> </span>
 <a id="L158"></a><span > </span>
-<a id="L159"></a><span class="visited"> </span>
+<a id="L159"></a><span > </span>
 <a id="L160"></a><span class="visited"> </span>
 <a id="L161"></a><span class="visited"> </span>
-<a id="L162"></a><span > </span>
+<a id="L162"></a><span class="visited"> </span>
 <a id="L163"></a><span > </span>
-<a id="L164"></a><span class="visited"> </span>
+<a id="L164"></a><span > </span>
 <a id="L165"></a><span class="visited"> </span>
-<a id="L166"></a><span > </span>
-<a id="L167"></a><span class="visited"> </span>
+<a id="L166"></a><span class="visited"> </span>
+<a id="L167"></a><span > </span>
 <a id="L168"></a><span class="visited"> </span>
-<a id="L169"></a><span > </span>
-<a id="L170"></a><span class="visited"> </span>
+<a id="L169"></a><span class="visited"> </span>
+<a id="L170"></a><span > </span>
 <a id="L171"></a><span class="visited"> </span>
-<a id="L172"></a><span > </span>
+<a id="L172"></a><span class="visited"> </span>
 <a id="L173"></a><span > </span>
 <a id="L174"></a><span > </span>
 <a id="L175"></a><span > </span>
@@ -207,6 +207,7 @@
 <a id="L179"></a><span > </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span > </span>
+<a id="L182"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -392,24 +393,25 @@
 <a href="#L179">179</a>
 <a href="#L180">180</a>
 <a href="#L181">181</a>
+<a href="#L182">182</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Syntax
 open Types
-open Simplified
+open Syntax
 
 module StrType = struct
-  type t = str_type
+  type t = simplified str_type
 
   let compare = compare
 end
 
 module TypeMap = Map.Make (StrType)
 
-let equal_func_types (a : func_type) (b : func_type) : bool =
+let equal_func_types (a : simplified func_type) (b : simplified func_type) :
+  bool =
   <span data-count="18">l</span>et remove_param (pt, rt) =
     <span data-count="36">l</span>et pt = List.map (fun (_id, vt) -&gt; <span data-count="32">(</span>None, vt)) pt in
     <span data-count="36">(</span>pt, rt)
@@ -418,20 +420,20 @@ let equal_func_types (a : func_type) (b : func_type) : bool =
 
 type t =
   { id : string option
-  ; typ : str_type Named.t
-  ; global : (Text.global, global_type) Runtime.t Named.t
-  ; table : (table, table_type) Runtime.t Named.t
+  ; typ : simplified str_type Named.t
+  ; global : (Text.global, simplified global_type) Runtime.t Named.t
+  ; table : (simplified table, simplified table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (Text.func, Text.block_type) Runtime.t Named.t
+  ; func : (text func, text block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
   ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
-  ; start : Text.indice option
+  ; start : text indice option
   }
 
 type type_acc =
-  { declared_types : str_type Indexed.t list
-  ; func_types : str_type Indexed.t list
+  { declared_types : simplified str_type Indexed.t list
+  ; func_types : simplified str_type Indexed.t list
   ; named_types : int String_map.t
   ; last_assigned_int : int
   ; all_types : int TypeMap.t
@@ -478,7 +480,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : str_type Named.t Result.t =
+let assign_types (modul : Grouped.t) : simplified str_type Named.t Result.t =
   <span data-count="5880">l</span>et empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -513,7 +515,8 @@ let name kind ~get_name values =
   let+ named = list_fold_lef<span data-count="35268">t</span> assign_one String_map.empty values in
   <span data-count="35262">{</span> Named.values; named }
 
-let check_type_id (types : str_type Named.t) (check : Grouped.type_check) =
+let check_type_id (types : simplified str_type Named.t)
+  (check : Grouped.type_check) =
   <span data-count="20">l</span>et id, func_type = check in
   let* id =
     match id with
@@ -543,7 +546,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   <span data-count="5880">l</span>et* table =
     nam<span data-count="5880">e</span> "table"
-      ~get_name:(get_runtime_nam<span data-count="5880">e</span> (fun ((id, _) : table) -&gt; <span data-count="1177">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="5880">e</span> (fun ((id, _) : simplified table) -&gt; <span data-count="1177">i</span>d))
       modul.table
   in
   <span data-count="5880">l</span>et* mem =
@@ -553,7 +556,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   <span data-count="5880">l</span>et* func =
     nam<span data-count="5880">e</span> "func"
-      ~get_name:(get_runtime_nam<span data-count="5880">e</span> (fun ({ id; _ } : Text.func) -&gt; <span data-count="12373">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="5880">e</span> (fun ({ id; _ } : text func) -&gt; <span data-count="12373">i</span>d))
       modul.func
   in
   <span data-count="5874">l</span>et* elem =

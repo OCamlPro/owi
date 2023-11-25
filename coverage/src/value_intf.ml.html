@@ -310,6 +310,8 @@
 <a id="L286"></a><span > </span>
 <a id="L287"></a><span > </span>
 <a id="L288"></a><span > </span>
+<a id="L289"></a><span > </span>
+<a id="L290"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -602,10 +604,14 @@
 <a href="#L286">286</a>
 <a href="#L287">287</a>
 <a href="#L288">288</a>
+<a href="#L289">289</a>
+<a href="#L290">290</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
+
+open Types
 
 module type Iop = sig
   type num
@@ -797,7 +803,7 @@ module type T = sig
   val const_f64 : Float64.t -&gt; float64
   (* TODO ref *)
 
-  val ref_null : Simplified.heap_type -&gt; t
+  val ref_null : simplified heap_type -&gt; t
 
   val ref_func : Func_intf.t -&gt; t
 

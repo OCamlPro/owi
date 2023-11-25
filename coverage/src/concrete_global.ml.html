@@ -33,13 +33,15 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -62,16 +64,20 @@
 <a href="#L16">16</a>
 <a href="#L17">17</a>
 <a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Types
+
 type t =
   { mutable value : Concrete_value.t
   ; label : string option
-  ; mut : Types.mut
-  ; typ : Simplified.val_type
+  ; mut : mut
+  ; typ : simplified val_type
   }
 
 let value g = <span data-count="181">g</span>.value

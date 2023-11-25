@@ -286,6 +286,8 @@
 <a id="L262"></a><span > </span>
 <a id="L263"></a><span > </span>
 <a id="L264"></a><span > </span>
+<a id="L265"></a><span > </span>
+<a id="L266"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -554,10 +556,14 @@
 <a href="#L262">262</a>
 <a href="#L263">263</a>
 <a href="#L264">264</a>
+<a href="#L265">265</a>
+<a href="#L266">266</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
+
+open Types
 
 module type Memory_data = sig
   type int32
@@ -651,7 +657,7 @@ module type P = sig
 
     val mut : global -&gt; Types.mut
 
-    val typ : global -&gt; Simplified.val_type
+    val typ : global -&gt; simplified val_type
   end
 
   module Table : sig
@@ -663,7 +669,7 @@ module type P = sig
 
     val size : t -&gt; int
 
-    val typ : t -&gt; Simplified.ref_type
+    val typ : t -&gt; simplified ref_type
 
     val max_size : t -&gt; int option
 
@@ -757,7 +763,7 @@ module type P = sig
 
     val env : t -&gt; env
 
-    val to_run : t -&gt; Simplified.expr list
+    val to_run : t -&gt; simplified expr list
 
     val modul : t -&gt; Simplified.modul
   end
