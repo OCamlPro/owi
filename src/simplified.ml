@@ -67,8 +67,7 @@ module Pp = struct
     | Runtime.Local f -> Types.Pp.func fmt f
     | Runtime.Imported { Imported.modul; name; _ } -> pp fmt "%s.%s" modul name
 
-  let lst f fmt l =
-    (pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") f) fmt (List.rev l)
+  let lst f fmt l = (pp_list ~pp_sep:pp_newline f) fmt (List.rev l)
 
   let funcs fmt funcs = lst (Indexed.pp func) fmt funcs.Named.values
 

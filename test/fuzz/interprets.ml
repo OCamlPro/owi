@@ -83,18 +83,18 @@ module Reference : INTERPRET = struct
     let suffix = ".wast" in
     let tmp_file = Filename.temp_file prefix suffix in
     let chan = open_out tmp_file in
-    let fmt = Format.formatter_of_out_channel chan in
+    let fmt = Stdlib.Format.formatter_of_out_channel chan in
     Format.pp_string fmt modul;
     close_out chan;
     let n =
-      Sys.command
-      @@ Format.sprintf "timeout %fs wasm %s" Param.max_time_execution tmp_file
+      Format.kasprintf Sys.command "timeout %fs wasm %s"
+        Param.max_time_execution tmp_file
     in
     match n with
     | 0 -> Ok ()
     | 42 -> Error "trap"
     | 124 -> Error "timeout"
-    | n -> failwith (Format.sprintf "error %d" n)
+    | n -> Format.kasprintf failwith "error %d" n
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"

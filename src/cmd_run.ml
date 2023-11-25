@@ -36,5 +36,5 @@ let cmd profiling debug unsafe optimize files =
   match result with
   | Ok () -> ()
   | Error e ->
-    Format.eprintf "%s@." e;
+    Format.pp_err "%s@\n" e;
     exit 1

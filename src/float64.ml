@@ -309,6 +309,7 @@ let group_digits =
     Buffer.add_substring buf s exp (len - exp);
     Buffer.contents buf
 
+(* TODO: convert all the following to a proper use of Format and stop concatenating strings *)
 let to_string' convert is_digit n x =
   (if x < Int64.zero then "-" else "")
   ^
@@ -326,4 +327,4 @@ let to_hex_string x =
   if is_inf x then to_string x
   else to_string' (Printf.sprintf "%h") is_hex_digit 4 x
 
-let pp fmt v = Format.fprintf fmt "%s" (to_string v)
+let pp fmt v = Format.pp_string fmt (to_string v)

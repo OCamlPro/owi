@@ -121,13 +121,8 @@ let name kind ~get_name values =
 let check_type_id (types : simplified str_type Named.t)
   (check : Grouped.type_check) =
   let id, func_type = check in
-  let* id =
-    match id with
-    | Raw i -> Ok i
-    | Text name -> (
-      match String_map.find_opt name types.named with
-      | None -> error_s "internal error: can't find type with name %s" name
-      | Some t -> Ok t )
+  let id =
+    match id with Raw i -> i | Text name -> String_map.find name types.named
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with
@@ -137,10 +132,10 @@ let check_type_id (types : simplified str_type Named.t)
     if not (equal_func_types func_type func_type') then
       Error "inline function type"
     else Ok ()
-  | Some _ -> Error "TODO: Simplify.check_type_id"
+  | Some _ -> assert false
 
 let of_grouped (modul : Grouped.t) : t Result.t =
-  Log.debug "assigning    ...@\n";
+  Log.debug0 "assigning    ...@\n";
   let* typ = assign_types modul in
   let* global =
     name "global"

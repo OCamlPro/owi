@@ -355,7 +355,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
       | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
+      Log.debug2 "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
       Ok Nop
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
@@ -501,7 +501,7 @@ let rewrite_named f named =
   { named with Named.values }
 
 let modul (modul : Assigned.t) : Simplified.modul Result.t =
-  Log.debug "rewriting    ...@\n";
+  Log.debug0 "rewriting    ...@\n";
   let* (global : (Simplified.global, simplified global_type) Runtime.t Named.t)
       =
     let* { Named.named; values } =

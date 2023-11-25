@@ -55,7 +55,7 @@ let load_from_module ls f (import : _ Imported.t) =
   | exports -> (
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
-      Log.debug "unknown import %s" import.name;
+      Log.debug1 "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
         Error "incompatible import type (Link.load_from_module)"
       else Error "unknown import"
@@ -305,7 +305,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
   Ok { globals; memories; tables; functions; defined_names = names }
 
 let modul (ls : 'f state) ~name (modul : Simplified.modul) =
-  Log.debug "linking      ...@\n";
+  Log.debug0 "linking      ...@\n";
   let* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_id
       (fun env_id ->

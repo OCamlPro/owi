@@ -217,8 +217,7 @@ let pp_param fmt (id, vt) = pp fmt "(param %a %a)" pp_id_opt id pp_val_type vt
 
 type nonrec 'a param_type = 'a param list
 
-let pp_param_type fmt params =
-  pp_list ~pp_sep:(fun fmt () -> pp fmt " ") pp_param fmt params
+let pp_param_type fmt params = pp_list ~pp_sep:pp_space pp_param fmt params
 
 type nonrec 'a result_type = 'a val_type list
 
@@ -482,8 +481,7 @@ module Const = struct
       | Array_new_default _ -> pp fmt "array.new_default"
       | Ref_i31 -> pp fmt "ref.i31"
 
-    let expr fmt instrs =
-      pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") instr fmt instrs
+    let expr fmt instrs = pp_list ~pp_sep:pp_newline instr fmt instrs
   end
 end
 
@@ -666,7 +664,7 @@ module Pp = struct
     | Br_if id -> pp fmt "br_if %a" pp_indice id
     | Br_table (ids, id) ->
       pp fmt "br_table %a %a"
-        (pp_list ~pp_sep:(fun fmt () -> pp fmt " ") pp_indice)
+        (pp_list ~pp_sep:pp_space pp_indice)
         (Array.to_list ids) pp_indice id
     | Return -> pp fmt "return"
     | Return_call id -> pp fmt "return_call %a" pp_indice id
@@ -712,8 +710,7 @@ module Pp = struct
         t
     | Ref_eq -> pp fmt "ref.eq"
 
-  and expr fmt instrs =
-    pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") instr fmt instrs
+  and expr fmt instrs = pp_list ~pp_sep:pp_newline instr fmt instrs
 
   let func : type kind. formatter -> kind func -> unit =
    fun fmt f ->
@@ -722,7 +719,7 @@ module Pp = struct
       f.type_f locals f.locals expr f.body
 
   let funcs fmt (funcs : 'a func list) =
-    pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") func fmt funcs
+    pp_list ~pp_sep:pp_newline func fmt funcs
 
   let start fmt start = pp fmt "(start %a)" pp_indice start
 
@@ -752,14 +749,13 @@ module Pp = struct
     | Const -> pp fmt " %a" storage_type t
     | Var -> pp fmt "(%a %a)" mut m storage_type t
 
-  let fields fmt = pp_list ~pp_sep:(fun fmt () -> pp fmt " ") field_type fmt
+  let fields fmt = pp_list ~pp_sep:pp_space field_type fmt
 
   let struct_field fmt ((n : string option), f) =
     pp fmt "@\n  @[<v>(field %a%a)@]" pp_id_opt n fields f
 
   let struct_type fmt =
-    pp fmt "(struct %a)"
-      (pp_list ~pp_sep:(fun fmt () -> pp fmt " ") struct_field)
+    pp fmt "(struct %a)" (pp_list ~pp_sep:pp_space struct_field)
 
   let array_type fmt = pp fmt "(array %a)" field_type
 
@@ -768,8 +764,7 @@ module Pp = struct
     | Def_array_t t -> array_type fmt t
     | Def_func_t t -> func_type fmt t
 
-  let indices fmt ids =
-    pp_list ~pp_sep:(fun fmt () -> pp fmt " ") pp_indice fmt ids
+  let indices fmt ids = pp_list ~pp_sep:pp_space pp_indice fmt ids
 
   let final fmt = function
     | Final -> pp fmt "final"
@@ -785,6 +780,5 @@ module Pp = struct
     match l with
     | [] -> ()
     | [ t ] -> type_def fmt t
-    | l ->
-      pp fmt "(rec %a)" (pp_list ~pp_sep:(fun fmt () -> pp fmt " ") type_def) l
+    | l -> pp fmt "(rec %a)" (pp_list ~pp_sep:pp_space type_def) l
 end

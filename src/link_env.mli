@@ -28,11 +28,7 @@ val drop_data : data -> unit
 
 val get_extern_func : 'ext t -> Func_id.t -> 'ext
 
-val get_func_typ : _ t -> func -> simplified func_type
-
 val id : _ t -> Env_id.t
-
-val pp : Format.formatter -> _ t -> unit
 
 module Build : sig
   type t

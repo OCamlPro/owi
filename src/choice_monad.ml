@@ -23,13 +23,13 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   | Val False -> true
   | _ ->
     let check = no :: pc in
-    Format.printf "CHECK:@.%a"
-      (Format.pp_list ~pp_sep:Format.pp_print_newline Expr.pp)
+    Format.pp_std "CHECK:@.%a"
+      (Format.pp_list ~pp_sep:Format.pp_newline Expr.pp)
       check;
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
     let msg = if r then "KO" else "OK" in
-    Format.printf "@./CHECK %s@." msg;
+    Format.pp_std "@./CHECK %s@." msg;
     not r
 
 (* TODO: make this a CLI flag ? *)
@@ -77,7 +77,7 @@ struct
       | false, false -> M.empty
       | true, false | false, true -> M.return (sat_true, state)
       | true, true ->
-        if print_choice then Format.printf "CHOICE: %a@." Expr.pp v;
+        if print_choice then Format.pp_std "CHOICE: %a@." Expr.pp v;
         let state1 = Thread.clone { state with pc = with_v } in
         let state2 = Thread.clone { state with pc = with_not_v } in
         M.cons (true, state1) (M.return (false, state2)) )
@@ -125,7 +125,7 @@ struct
           match model with
           | None -> assert false (* ? *)
           | Some model -> (
-            Format.printf "Model:@.%a@." Model.pp model;
+            Format.pp_std "Model:@.%a@." Model.pp model;
             let v = Model.evaluate model sym in
             match v with
             | None -> assert false (* ? *)
@@ -390,7 +390,7 @@ module WQ = struct
   let take_as_producer q =
     Mutex.lock q.mutex;
     q.producers <- q.producers - 1;
-    (* Format.printf "TAKE COUNT %i@." q.producers; *)
+    (* Format.pp_std "TAKE COUNT %i@." q.producers; *)
     let r =
       try
         while Queue.is_empty q.queue do
@@ -401,7 +401,7 @@ module WQ = struct
         q.producers <- q.producers + 1;
         Some v
       with Exit ->
-        (* Format.printf "@.@.TAKE EXIT@.@."; *)
+        (* Format.pp_std "@.@.TAKE EXIT@.@."; *)
         Condition.broadcast q.cond;
         None
     in

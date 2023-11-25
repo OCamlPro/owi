@@ -8,16 +8,10 @@
  (modules print_text)
  (libraries owi))
 
-(executable
- (name print_optimized)
- (modules print_optimized)
- (libraries owi))
-
 (cram
  (deps
   print_text.exe
   print_simplified.exe
-  print_optimized.exe
   m.wast
   locals.wast
   locals_drop.wast))

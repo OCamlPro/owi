@@ -3,6 +3,7 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Types
+open Format
 
 module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =
 struct
@@ -64,7 +65,7 @@ struct
   type t = Func_intf.t
 
   let fresh =
-    let r = ref (-1) in
+    let r = ref ~-1 in
     fun () ->
       incr r;
       !r
@@ -76,24 +77,23 @@ struct
   (*   | Extern (Extern_func (t, _f)) -> extern_type t *)
 end
 
-module Concrete_value_types = struct
-  type int32 = Int32.t
-
-  type int64 = Int64.t
-
-  type float32 = Float32.t
-
-  type float64 = Float64.t
-
-  type vbool = bool
-end
-
-module Id_monad = struct
-  type 'a t = 'a
-end
-
 module Func = struct
-  include Make_extern_func (Concrete_value_types) (Id_monad)
+  include
+    Make_extern_func
+      (struct
+        type int32 = Int32.t
+
+        type int64 = Int64.t
+
+        type float32 = Float32.t
+
+        type float64 = Float64.t
+
+        type vbool = bool
+      end)
+      (struct
+        type 'a t = 'a
+      end)
 end
 
 type externref = E : 'a Type.Id.t * 'a -> externref
@@ -106,6 +106,11 @@ type ref_value =
   | Funcref of Func_intf.t option
   | Arrayref of unit Array.t option
 
+let pp_ref_value fmt = function
+  | Externref _ -> pp fmt "externref"
+  | Funcref _ -> pp fmt "funcref"
+  | Arrayref _ -> pp fmt "array"
+
 type t =
   | I32 of Int32.t
   | I64 of Int64.t
@@ -113,6 +118,7 @@ type t =
   | F64 of Float64.t
   | Ref of ref_value
 
+(* TODO: make a new kind of instr for this *)
 let of_instr (i : simplified instr) : t =
   match i with
   | I32_const c -> I32 c
@@ -126,24 +132,22 @@ let to_instr = function
   | I64 c -> I64_const c
   | F32 c -> F32_const c
   | F64 c -> F64_const c
-  | _ -> assert false
-
-let pp_ref fmt = function
-  | Externref _ -> Format.fprintf fmt "externref"
-  | Funcref _ -> Format.fprintf fmt "funcref"
-  | Arrayref _ -> Format.fprintf fmt "array"
+  | Ref _ -> assert false
 
 let pp fmt = function
-  | I32 i -> Format.fprintf fmt "i32.const %ld" i
-  | I64 i -> Format.fprintf fmt "i64.const %Ld" i
-  | F32 f -> Format.fprintf fmt "f32.const %a" Float32.pp f
-  | F64 f -> Format.fprintf fmt "f64.const %a" Float64.pp f
-  | Ref r -> pp_ref fmt r
+  | I32 i -> pp fmt "i32.const %ld" i
+  | I64 i -> pp fmt "i64.const %Ld" i
+  | F32 f -> pp fmt "f32.const %a" Float32.pp f
+  | F64 f -> pp fmt "f64.const %a" Float64.pp f
+  | Ref r -> pp_ref_value fmt r
 
 let ref_null' = function
   | Func_ht -> Funcref None
   | Extern_ht -> Externref None
-  | _ -> failwith "TODO ref_null' Value.ml"
+  | Array_ht -> Arrayref None
+  | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht
+  | Def_ht _ ->
+    assert false
 
 let ref_null typ = Ref (ref_null' typ)
 
@@ -152,4 +156,6 @@ let ref_func (f : Func.t) : t = Ref (Funcref (Some f))
 let ref_externref (type x) (t : x Type.Id.t) (v : x) : t =
   Ref (Externref (Some (E (t, v))))
 
-let ref_is_null = function Funcref None | Externref None -> true | _ -> false
+let ref_is_null = function
+  | Funcref None | Externref None | Arrayref None -> true
+  | Funcref (Some _) | Externref (Some _) | Arrayref (Some _) -> false

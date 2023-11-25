@@ -22,10 +22,10 @@ struct
         Printf.sprintf "File \"%s\", line %i, character %i:" pos.pos_fname
           pos.pos_lnum cpos
       in
-      Log.debug "%s@\n%s@\n" file_line msg
+      Log.debug2 "%s@\n%s@\n" file_line msg
     in
     fun buf ->
-      Log.debug "parsing      ...@\n";
+      Log.debug0 "parsing      ...@\n";
       let provider () =
         let tok = Lexer.token buf in
         let start, stop = Sedlexing.lexing_positions buf in

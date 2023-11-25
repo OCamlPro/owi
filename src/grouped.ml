@@ -112,7 +112,7 @@ let check_limit { min; max } =
     else Ok ()
 
 let of_symbolic (modul : Text.modul) : t Result.t =
-  Log.debug "grouping     ...@\n";
+  Log.debug0 "grouping     ...@\n";
   let add ((fields : t), curr) field : (t * curr) Result.t =
     match field with
     | Text.MType typ ->

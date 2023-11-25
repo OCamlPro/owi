@@ -4,26 +4,23 @@
 
 type t = int
 
-module IMap = Map.Make (Int)
+module Map = Map.Make (Int)
 
 type 'a collection =
-  { c : 'a IMap.t
+  { c : 'a Map.t
   ; last : int
   }
 
-let empty = { c = IMap.empty; last = 0 }
+let empty = { c = Map.empty; last = 0 }
 
-let with_fresh_id f c =
+let with_fresh_id f { c; last } =
   let open Syntax in
-  let last = c.last in
-  let* e, r = f last in
-  Ok ({ c = IMap.add c.last e c.c; last = c.last + 1 }, r)
+  let+ e, r = f last in
+  let c = Map.add last e c in
+  let last = succ last in
+  ({ c; last }, r)
 
-let get i c = IMap.find i c.c
-
-let pp ppf i = Format.fprintf ppf "f_%i" i
-
-module Map = IMap
+let get i c = Map.find i c.c
 
 module Tbl = Hashtbl.Make (struct
   include Int

@@ -13,9 +13,6 @@ let fold f v acc =
     (fun acc v -> f (Indexed.get_index v) (Indexed.get v) acc)
     acc v.values
 
-let iter f v =
-  List.iter (fun v -> f (Indexed.get_index v) (Indexed.get v)) v.values
-
 let map f v =
   let values = List.map f v.values in
   { v with values }

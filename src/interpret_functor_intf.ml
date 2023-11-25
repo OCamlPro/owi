@@ -192,8 +192,6 @@ module type P = sig
     val drop_elem : elem -> unit
 
     val drop_data : data -> unit
-
-    val pp : Format.formatter -> t -> unit
   end
 
   module Module_to_run : sig

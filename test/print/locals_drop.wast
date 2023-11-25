@@ -79,7 +79,6 @@
     (call $f6 (i32.const 0) (i32.const 1) (i32.const 2))
     (call $f7 (i32.const 0) (i32.const 1) (i32.const 2))
     (call $f8 (i32.const 0) (i32.const 1) (i32.const 2))
-    drop
   )
 
   (start $start)

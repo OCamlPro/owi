@@ -4,8 +4,6 @@ val get : 'a t -> 'a
 
 val get_index : 'a t -> int
 
-val bind : 'a t -> ('a -> 'b t) -> 'b t
-
 val map : ('a -> 'b) -> 'a t -> 'b t
 
 val return : int -> 'a -> 'a t

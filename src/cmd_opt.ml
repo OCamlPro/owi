@@ -14,7 +14,7 @@ let optimize_file ~unsafe filename =
 let cmd debug unsafe (file : string) =
   if debug then Log.debug_on := true;
   match optimize_file ~unsafe file with
-  | Ok modul -> Format.printf "%a@\n" Simplified.Pp.modul modul
+  | Ok modul -> Format.pp_std "%a@\n" Simplified.Pp.modul modul
   | Error e ->
-    Format.eprintf "%s@." e;
+    Format.pp_err "%s@." e;
     exit 1

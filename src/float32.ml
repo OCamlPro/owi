@@ -309,6 +309,7 @@ let group_digits =
     Buffer.add_substring buf s exp (len - exp);
     Buffer.contents buf
 
+(* TODO: convert all the following to a proper use of Format and stop concatenating strings *)
 let to_string' convert is_digit n x =
   (if x < Int32.zero then "-" else "")
   ^
@@ -322,4 +323,4 @@ let to_string' convert is_digit n x =
 
 let to_string = to_string' (Printf.sprintf "%.17g") is_digit 3
 
-let pp fmt v = Format.fprintf fmt "%s" (to_string v)
+let pp fmt v = Format.pp_string fmt (to_string v)

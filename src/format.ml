@@ -2,6 +2,10 @@ include Stdlib.Format
 
 let pp = fprintf
 
+let pp_err = eprintf
+
+let pp_std = printf
+
 let pp_nothing _fmt () = ()
 
 let pp_list = pp_print_list
@@ -18,6 +22,8 @@ let pp_bool = pp_print_bool
 
 let pp_flush = pp_print_flush
 
-let pp_space fmt () = pp fmt " "
+let pp_space fmt () = pp_string fmt " "
+
+let pp_newline fmt () = pp fmt "@\n"
 
 let pp_int = pp_print_int

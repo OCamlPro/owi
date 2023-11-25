@@ -15,7 +15,9 @@ type 'a collection =
 
 let empty = { c = IMap.empty; last = 0 }
 
-let add f t c = (c.last, { c = IMap.add c.last (f, t) c.c; last = c.last + 1 })
+let add f t { last; c } =
+  let c = IMap.add last (f, t) c in
+  (last, { c; last = succ last })
 
 let get i c =
   let v, _ = IMap.find i c.c in
@@ -24,5 +26,3 @@ let get i c =
 let get_typ i c =
   let _, t = IMap.find i c.c in
   t
-
-let pp ppf i = Format.fprintf ppf "f_%i" i

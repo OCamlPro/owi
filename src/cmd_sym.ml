@@ -11,7 +11,7 @@ let print_path_condition = false
 
 let print_extern_module : Symbolic.P.extern_func Link.extern_module =
   let print_i32 (i : Value.int32) : unit Choice.t =
-    Printf.printf "%s\n%!" (Expr.to_string i);
+    Format.pp_std "%s@\n" (Expr.to_string i);
     Choice.return ()
   in
   (* we need to describe their types *)
@@ -47,7 +47,6 @@ let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
 let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
-  let sprintf = Printf.sprintf in
   let sym_cnt = Atomic.make 0 in
   let mk_symbol = Encoding.Symbol.mk_symbol in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
@@ -60,13 +59,13 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     in
     let id = Atomic.fetch_and_add sym_cnt 1 in
     let r =
-      Expr.mk_symbol @@ mk_symbol (Ty_bitv S32) (sprintf "%s_%i" name id)
+      Expr.mk_symbol @@ mk_symbol (Ty_bitv S32) (Format.sprintf "%s_%i" name id)
     in
     Choice.return r
   in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol @@ mk_symbol ty (sprintf "symbol_%i" id) in
+    let r = Expr.mk_symbol @@ mk_symbol ty (Format.sprintf "symbol_%i" id) in
     Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
@@ -250,21 +249,21 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
       (fun (result, thread) ->
         let pc = Thread.pc thread in
         if print_path_condition then
-          Format.printf "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
+          Format.pp_std "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
         let model = get_model solver pc in
         let result =
           match result with
           | Choice_monad_intf.EVal (Ok ()) -> None
           | EAssert assertion ->
-            Format.printf "Assert failure: %a@\n" Expr.pp assertion;
-            Format.printf "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
+            Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
+            Format.pp_std "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
             Some pc
           | ETrap tr ->
-            Format.printf "Trap: %s@\n" (Trap.to_string tr);
-            Format.printf "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
+            Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
+            Format.pp_std "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
             Some pc
           | EVal (Error e) ->
-            Format.eprintf "Error: %s@\n" e;
+            Format.pp_err "Error: %s@\n" e;
             exit 1
         in
         let testcase =
@@ -280,18 +279,18 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   let () =
     if no_stop_at_failure then
       let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
-      if failures = 0 then Format.printf "All OK@\n"
-      else Format.printf "Reached %i problems!@\n" failures
+      if failures = 0 then Format.pp_std "All OK@\n"
+      else Format.pp_err "Reached %i problems!@\n" failures
     else
       match failing () with
-      | Nil -> Format.printf "All OK@\n"
-      | Cons (_thread, _) -> Format.printf "Reached problem!@\n"
+      | Nil -> Format.pp_std "All OK@\n"
+      | Cons (_thread, _) -> Format.pp_err "Reached problem!@\n"
   in
   let time = !Thread.Solver.solver_time in
   let count = !Thread.Solver.solver_count in
   if print_solver_time then begin
-    Format.printf "@\n";
-    Format.printf "Solver time %fs@\n" time;
-    Format.printf "      calls %i@\n" count;
-    Format.printf "  mean time %fms@\n" (1000. *. time /. float count)
+    Format.pp_std "@\n";
+    Format.pp_std "Solver time %fs@\n" time;
+    Format.pp_std "      calls %i@\n" count;
+    Format.pp_std "  mean time %fms@\n" (1000. *. time /. float count)
   end

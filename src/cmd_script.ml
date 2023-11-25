@@ -19,5 +19,5 @@ let cmd profiling debug optimize files no_exhaustion =
   match result with
   | Ok () -> ()
   | Error e ->
-    Format.eprintf "%s@." e;
+    Format.pp_err "%s@." e;
     exit 1

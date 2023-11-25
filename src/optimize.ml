@@ -523,6 +523,6 @@ let optimize_runtime_func f =
 let optimize_funcs funs = Named.map optimize_runtime_func funs
 
 let modul m =
-  Log.debug "optimizing   ...@\n";
+  Log.debug0 "optimizing   ...@\n";
   let func = optimize_funcs m.func in
   { m with func }

@@ -24,4 +24,4 @@ let m =
   | Ok m -> m
   | Error msg -> failwith msg
 
-let () = Format.printf "%a@\n" Simplified.Pp.modul m
+let () = Format.pp_std "%a@\n" Simplified.Pp.modul m

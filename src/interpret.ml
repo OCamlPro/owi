@@ -618,20 +618,20 @@ module Make (P : Interpret_functor_intf.P) :
         match l with
         | [] -> ()
         | _ :: _ ->
-          Format.fprintf ppf "@ @[<v 2>calls@ %a@]"
+          Format.pp ppf "@ @[<v 2>calls@ %a@]"
             (Format.pp_list
-               ~pp_sep:(fun ppf () -> Format.fprintf ppf "@ ")
+               ~pp_sep:(fun ppf () -> Format.pp ppf "@ ")
                (fun ppf ((Raw id : simplified indice), count) ->
                  let name ppf = function
                    | None -> ()
-                   | Some name -> Format.fprintf ppf " %s" name
+                   | Some name -> Format.pp ppf " %s" name
                  in
-                 Format.fprintf ppf "@[<v 2>id %i%a@ %a@]" id name count.name
+                 Format.pp ppf "@[<v 2>id %i%a@ %a@]" id name count.name
                    print_count count ) )
             l
       in
-      Format.fprintf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter
-        count.instructions calls count.calls
+      Format.pp ppf "@[<v>enter %i@ intrs %i%a@]" count.enter count.instructions
+        calls count.calls
 
     let empty_count name =
       { name; enter = 0; instructions = 0; calls = Hashtbl.create 0 }
@@ -1547,14 +1547,14 @@ module Make (P : Interpret_functor_intf.P) :
                 exec_expr envs env (State.Locals.of_list []) Stack.empty to_run
                   None
               in
-              Log.profile "Exec module %s@.%a@."
+              Log.profile3 "Exec module %s@.%a@."
                 (Option.value (Module_to_run.modul modul).id
                    ~default:"anonymous" )
                 State.print_count count;
               match end_stack with
               | [] -> Choice.return ()
               | _ :: _ ->
-                Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
+                Format.pp_err "non empty stack@\n%a@." Stack.pp end_stack;
                 assert false )
             (Choice.return ())
             (Module_to_run.to_run modul)

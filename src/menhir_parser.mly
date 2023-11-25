@@ -754,7 +754,7 @@ let func ==
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
       | MData _ | MElem _ | MGlobal _ | MStart _ | MType _ | MTable _ | MMem _ as field -> begin
-        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        Format.pp_err "got invalid field: `%a`@." Pp.module_field field;
         assert false
       end
     ) func_fields
@@ -875,7 +875,7 @@ let table ==
       | Import_func _ | Import_global _ | Import_mem _ -> assert false
     end
     | MMem _ | MData _ | MStart _ | MFunc _ | MGlobal _ | MType _ as field -> begin
-      Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+      Format.pp_err "got invalid field: `%a`@." Pp.module_field field;
       assert false
     end
   ) table_fields
@@ -922,7 +922,7 @@ let memory ==
         | Import_table _ | Import_func _ | Import_global _ -> assert false
         end
       | MElem _ | MType _ | MTable _ | MFunc _ | MGlobal _ | MStart _ as field -> begin
-        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        Format.pp_err "got invalid field: `%a`@." Pp.module_field field;
         assert false
       end
     ) memory_fields
@@ -957,7 +957,7 @@ let global ==
         | Import_mem _ | Import_table _ | Import_func _ -> assert false
         end
       | MStart _ | MFunc _ | MData _ | MElem _ | MMem _ | MTable _ | MType _ as field -> begin
-        Format.eprintf "got invalid field: `%a`@." Pp.module_field field;
+        Format.pp_err "got invalid field: `%a`@." Pp.module_field field;
         assert false
       end
     ) global_fields

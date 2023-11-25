@@ -2,19 +2,18 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Format
 open Types
 open Concrete_value.Func
 
-type extern_module = Concrete_value.Func.extern_func Link.extern_module
+type extern_module = extern_func Link.extern_module
 
 let extern_m =
-  let pp = Format.pp in
-  let fmt = Format.std_formatter in
   let print = () in
-  let print_i32 i = pp fmt "%li@\n%!" i in
-  let print_i64 i = pp fmt "%Li@\n%!" i in
-  let print_f32 f = pp fmt "%a@\n%!" Float32.pp f in
-  let print_f64 f = pp fmt "%a@\n%!" Float64.pp f in
+  let print_i32 i = pp_std "%li@\n%!" i in
+  let print_i64 i = pp_std "%Li@\n%!" i in
+  let print_f32 f = pp_std "%a@\n%!" Float32.pp f in
+  let print_f64 f = pp_std "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
     print_i32 i;
     print_f32 f

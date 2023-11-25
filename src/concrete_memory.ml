@@ -62,8 +62,6 @@ let blit_string mem str ~src ~dst ~len =
   ( Bytes.unsafe_blit_string str src mem.data dst len;
     false )
 
-let get_data { data; _ } = data
-
 let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
 
 let get_limits { limits; _ } = limits

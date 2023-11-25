@@ -131,7 +131,7 @@ module Pp = struct
   let elem fmt (e : elem) =
     pp fmt "@[<hov 2>(elem %a %a %a %a)@]" pp_id_opt e.id elem_mode e.mode
       pp_ref_type e.typ
-      (pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") elemexpr)
+      (pp_list ~pp_sep:pp_newline elemexpr)
       e.init
 
   let module_field fmt = function
@@ -148,7 +148,7 @@ module Pp = struct
 
   let modul fmt (m : modul) =
     pp fmt "(module %a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
-      (pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") module_field)
+      (pp_list ~pp_sep:pp_newline module_field)
       m.fields
 
   let register fmt (s, _name) = pp fmt "(register %s)" s
@@ -223,5 +223,5 @@ module Pp = struct
     | Register (s, name) -> register fmt (s, name)
     | Action _a -> pp fmt "<action>"
 
-  let file fmt l = pp_list ~pp_sep:(fun fmt () -> pp fmt "@\n") cmd fmt l
+  let file fmt l = pp_list ~pp_sep:pp_newline cmd fmt l
 end

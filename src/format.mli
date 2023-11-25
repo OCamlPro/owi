@@ -1,6 +1,10 @@
-include module type of Stdlib.Format
+type formatter = Stdlib.Format.formatter
 
 val pp : formatter -> ('a, formatter, unit) format -> 'a
+
+val pp_err : ('a, formatter, unit) format -> 'a
+
+val pp_std : ('a, formatter, unit) format -> 'a
 
 val pp_nothing : formatter -> unit -> unit
 
@@ -42,3 +46,11 @@ val pp_option :
   -> formatter
   -> 'a option
   -> unit
+
+val pp_newline : formatter -> unit -> unit
+
+val sprintf : ('a, unit, string) format -> 'a
+
+val asprintf : ('a, formatter, unit, string) format4 -> 'a
+
+val kasprintf : (string -> 'a) -> ('b, formatter, unit, 'a) format4 -> 'b

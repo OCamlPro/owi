@@ -94,8 +94,6 @@ module P = struct
     let drop_elem = Link_env.drop_elem
 
     let drop_data = Link_env.drop_data
-
-    let pp = Link_env.pp
   end
 
   module Module_to_run = struct

@@ -36,7 +36,6 @@
   link
   link_env
   log
-  memory_limits
   menhir_parser
   named
   optimize

@@ -19,8 +19,7 @@ let pp_typ fmt = function
   | Any -> pp_string fmt "any"
   | Something -> pp_string fmt "something"
 
-let pp_typ_list fmt l =
-  pp_list ~pp_sep:(fun fmt () -> pp_string fmt " ") pp_typ fmt l
+let pp_typ_list fmt l = pp_list ~pp_sep:pp_space pp_typ fmt l
 
 let typ_of_val_type = function
   | Types.Ref_type (_null, t) -> Ref_type t
@@ -149,7 +148,7 @@ end = struct
   let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
-    fprintf fmt "requires %a but stack has %a" pp expected pp got
+    Format.pp fmt "requires %a but stack has %a" pp expected pp got
 
   let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
@@ -490,8 +489,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     | Struct_new_default _ | Extern_externalize | Extern_internalize
     | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
     | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
-    Log.debug "TODO (typecheck instr) %a" Types.Pp.instr i;
-    Ok stack
+    Log.debug2 "TODO (typecheck instr) %a" Types.Pp.instr i;
+    assert false
 
 and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
   ~stack:previous_stack : stack Result.t =
@@ -623,7 +622,7 @@ let typecheck_data modul refs (data : data Indexed.t) =
     | _whatever -> Error "type mismatch (typecheck_data)" )
 
 let modul (modul : modul) =
-  Log.debug "typechecking ...@\n";
+  Log.debug0 "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
   let* () = list_iter (typecheck_global modul refs) modul.global.values in
   let* () = list_iter (typecheck_elem modul refs) modul.elem.values in

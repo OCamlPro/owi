@@ -29,19 +29,6 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let pp fmt t =
-  let global fmt (id, (global : Concrete_global.t)) =
-    Format.pp fmt "%a -> %a" Format.pp_int id Concrete_value.pp global.value
-  in
-  let func fmt (id, (_func : Concrete_value.Func.t)) =
-    Format.pp fmt "%a -> func" Format.pp_print_int id
-  in
-  Format.fprintf fmt "@[<hov 2>{@ (globals %a)@ (functions %a)@ }@]"
-    (Format.pp_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") global)
-    (IMap.bindings t.globals)
-    (Format.pp_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") func)
-    (IMap.bindings t.functions)
-
 let id (env : _ t) = env.id
 
 let get_global (env : _ t) id = IMap.find id env.globals
@@ -57,13 +44,6 @@ let get_data (env : _ t) id = IMap.find id env.data
 let get_elem (env : _ t) id = IMap.find id env.elem
 
 let get_extern_func env id = Func_id.get id env.extern_funcs
-
-let get_func_typ env f =
-  match f with
-  | Func_intf.WASM (_, func, _) ->
-    let (Bt_raw ((None | Some _), t)) = func.type_f in
-    t
-  | Extern id -> Func_id.get_typ id env.extern_funcs
 
 module Build = struct
   type t =
@@ -103,7 +83,7 @@ module Build = struct
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
     | None ->
-      (* Log.debug "%a@." pp env; *)
+      (* Log.debug2 "%a@." pp env; *)
       Error "unknown global"
     | Some v -> Ok v
 
@@ -116,7 +96,7 @@ module Build = struct
   let get_func (env : t) id =
     match IMap.find_opt id env.functions with
     | None ->
-      (* Log.debug "%a@." pp env; *)
+      (* Log.debug2 "%a@." pp env; *)
       error_s "unknown function %a" Format.pp_int id
     | Some v -> Ok v
 end
