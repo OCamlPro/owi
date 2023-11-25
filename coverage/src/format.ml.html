@@ -18,8 +18,8 @@
       <h2>33.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:25.93%"></span>
-      <span class="unvisited" style="bottom:7.41%"></span>
+      <span class="unvisited" style="top:31.03%"></span>
+      <span class="unvisited" style="bottom:6.90%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,9 +30,9 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span class="unvisited"> </span>
+<a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span > </span>
+<a id="L9"></a><span class="unvisited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
@@ -46,11 +46,13 @@
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -82,11 +84,15 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">include Stdlib.Format
 
 let pp = fprintf
+
 let pp_err = eprintf
+
 let pp_std = printf
 
 let pp_nothing _fmt () = <span data-count="0">(</span>)

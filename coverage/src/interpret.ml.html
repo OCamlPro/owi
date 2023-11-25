@@ -3950,8 +3950,8 @@ module Make (P : Interpret_functor_intf.P) :
                    print_count count ) )
             l
       in
-      Format.pp ppf "@[&lt;v&gt;enter %i@ intrs %i%a@]" count.enter
-        count.instructions calls count.calls
+      Format.pp ppf "@[&lt;v&gt;enter %i@ intrs %i%a@]" count.enter count.instructions
+        calls count.calls
 
     let empty_count name =
       <span data-count="11481762">{</span> name; enter = 0; instructions = 0; calls = Hashtbl.creat<span data-count="11481762">e</span> 0 }

@@ -54,7 +54,7 @@
       <span class="some-visited" style="bottom:14.01%"></span>
       <span class="some-visited" style="bottom:13.62%"></span>
       <span class="unvisited" style="bottom:13.23%"></span>
-      <span class="unvisited" style="bottom:12.45%"></span>
+      <span class="unvisited" style="bottom:12.84%"></span>
       <span class="unvisited" style="bottom:12.06%"></span>
       <span class="unvisited" style="bottom:7.00%"></span>
       <span class="unvisited" style="bottom:6.61%"></span>
@@ -285,8 +285,8 @@
 <a id="L221"></a><span class="some-visited"> </span>
 <a id="L222"></a><span class="some-visited"> </span>
 <a id="L223"></a><span class="unvisited"> </span>
-<a id="L224"></a><span > </span>
-<a id="L225"></a><span class="unvisited"> </span>
+<a id="L224"></a><span class="unvisited"> </span>
+<a id="L225"></a><span > </span>
 <a id="L226"></a><span class="unvisited"> </span>
 <a id="L227"></a><span > </span>
 <a id="L228"></a><span class="visited"> </span>
@@ -804,8 +804,8 @@ let run ~no_exhaustion ~optimize script =
           List.compare_length<span data-count="43046">s</span> res stack &lt;&gt; <span data-count="0">0</span>
           || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
-          Format.pp_err "got:      %a@.expected: %a@." Stack.pp
-            (List.re<span data-count="0">v</span> stack) Text.Pp.results res;
+          Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.re<span data-count="0">v</span> stack)
+            Text.Pp.results res;
           <span data-count="0">E</span>rror "Bad result"
         end
         else <span data-count="43046">O</span>k link_state

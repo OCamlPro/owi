@@ -18,14 +18,14 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:20.99%"></span>
-      <span class="unvisited" style="bottom:17.28%"></span>
-      <span class="unvisited" style="bottom:16.05%"></span>
-      <span class="unvisited" style="bottom:12.35%"></span>
-      <span class="unvisited" style="bottom:9.88%"></span>
-      <span class="unvisited" style="bottom:7.41%"></span>
-      <span class="unvisited" style="bottom:4.94%"></span>
-      <span class="unvisited" style="bottom:1.23%"></span>
+      <span class="unvisited" style="bottom:20.00%"></span>
+      <span class="unvisited" style="bottom:16.25%"></span>
+      <span class="unvisited" style="bottom:15.00%"></span>
+      <span class="unvisited" style="bottom:12.50%"></span>
+      <span class="unvisited" style="bottom:10.00%"></span>
+      <span class="unvisited" style="bottom:7.50%"></span>
+      <span class="unvisited" style="bottom:5.00%"></span>
+      <span class="unvisited" style="bottom:1.25%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -99,18 +99,17 @@
 <a id="L67"></a><span class="unvisited"> </span>
 <a id="L68"></a><span class="unvisited"> </span>
 <a id="L69"></a><span > </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span class="unvisited"> </span>
-<a id="L72"></a><span > </span>
-<a id="L73"></a><span class="unvisited"> </span>
-<a id="L74"></a><span > </span>
-<a id="L75"></a><span class="unvisited"> </span>
-<a id="L76"></a><span > </span>
-<a id="L77"></a><span class="unvisited"> </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="unvisited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
-<a id="L79"></a><span > </span>
-<a id="L80"></a><span class="unvisited"> </span>
-<a id="L81"></a><span > </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -195,7 +194,6 @@
 <a href="#L78">78</a>
 <a href="#L79">79</a>
 <a href="#L80">80</a>
-<a href="#L81">81</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -266,8 +264,7 @@ module Pp = struct
     | <span data-count="0">R</span>untime.Local f -&gt; Types.Pp.func fmt f
     | <span data-count="0">R</span>untime.Imported { Imported.modul; name; _ } -&gt; pp fmt "%s.%s" modul name
 
-  let lst f fmt l =
-    <span data-count="0">(</span>pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline f) fmt (List.re<span data-count="0">v</span> l)
+  let lst f fmt l = <span data-count="0">(</span>pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline f) fmt (List.re<span data-count="0">v</span> l)
 
   let funcs fmt funcs = <span data-count="0">l</span>st (Indexed.p<span data-count="0">p</span> func) fmt funcs.Named.values
 

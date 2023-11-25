@@ -18,15 +18,15 @@
       <h2>36.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:47.83%"></span>
-      <span class="unvisited" style="bottom:43.48%"></span>
-      <span class="some-visited" style="bottom:39.13%"></span>
-      <span class="unvisited" style="bottom:30.43%"></span>
-      <span class="unvisited" style="bottom:26.09%"></span>
-      <span class="unvisited" style="bottom:21.74%"></span>
-      <span class="some-visited" style="bottom:17.39%"></span>
-      <span class="unvisited" style="bottom:13.04%"></span>
-      <span class="unvisited" style="bottom:8.70%"></span>
+      <span class="unvisited" style="top:44.12%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="some-visited" style="bottom:44.12%"></span>
+      <span class="unvisited" style="bottom:38.24%"></span>
+      <span class="unvisited" style="bottom:32.35%"></span>
+      <span class="unvisited" style="bottom:26.47%"></span>
+      <span class="some-visited" style="bottom:20.59%"></span>
+      <span class="unvisited" style="bottom:14.71%"></span>
+      <span class="unvisited" style="bottom:5.88%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -40,20 +40,31 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span class="visited"> </span>
-<a id="L10"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="unvisited"> </span>
-<a id="L13"></a><span class="unvisited"> </span>
-<a id="L14"></a><span class="some-visited"> </span>
-<a id="L15"></a><span > </span>
-<a id="L16"></a><span class="unvisited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span class="unvisited"> </span>
-<a id="L18"></a><span class="unvisited"> </span>
+<a id="L18"></a><span > </span>
 <a id="L19"></a><span class="some-visited"> </span>
-<a id="L20"></a><span class="unvisited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span class="unvisited"> </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="some-visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -81,6 +92,17 @@
 <a href="#L21">21</a>
 <a href="#L22">22</a>
 <a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -91,18 +113,29 @@ let debug_on = ref false
 let profiling_on = ref false
 
 let debug0 t : unit = <span data-count="94423">i</span>f !debug_on then <span data-count="9">F</span>ormat.pp_err t
+
 let debug1 t a : unit = <span data-count="11702345">i</span>f !debug_on then <span data-count="2">F</span>ormat.pp_err t a
+
 let debug2 t a b : unit = <span data-count="226884348">i</span>f !debug_on then <span data-count="24">F</span>ormat.pp_err t a b
+
 let debug3 t a b c : unit = <span data-count="0">i</span>f !debug_on then <span data-count="0">F</span>ormat.pp_err t a b c
+
 let debug4 t a b c d : unit = <span data-count="0">i</span>f !debug_on then <span data-count="0">F</span>ormat.pp_err t a b c d
-let debug5 t a b c d e: unit = <span data-count="48086">i</span>f !debug_on then <span data-count="0">F</span>ormat.pp_err t a b c d e
+
+let debug5 t a b c d e : unit = <span data-count="48086">i</span>f !debug_on then <span data-count="0">F</span>ormat.pp_err t a b c d e
 
 let profile0 t : unit = <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t
+
 let profile1 t a : unit = <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a
+
 let profile2 t a b : unit = <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a b
+
 let profile3 t a b c : unit = <span data-count="923">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a b c
+
 let profile4 t a b c d : unit = <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a b c d
-let profile5 t a b c d e: unit = <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a b c d e
+
+let profile5 t a b c d e : unit =
+  <span data-count="0">i</span>f !profiling_on then <span data-count="0">F</span>ormat.pp_err t a b c d e
 
 let err f = <span data-count="48">F</span>ormat.kasprintf failwith f
 </code></pre>
