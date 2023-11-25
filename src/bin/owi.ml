@@ -52,6 +52,19 @@ let shared_man =
 
 let version = "%%VERSION%%"
 
+let fmt_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Format a module" in
+    let man = [] @ shared_man in
+    Cmd.info "fmt" ~version ~doc ~sdocs ~man
+  in
+  let inplace =
+    let doc = "Format in-place, overwriting input file" in
+    Cmdliner.Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
+  in
+  Cmd.v info Term.(const Cmd_fmt.cmd $ debug $ unsafe $ inplace $ file)
+
 let opt_cmd =
   let open Cmdliner in
   let info =
@@ -104,7 +117,7 @@ let cli =
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
   let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
-  Cmd.group info ~default [ opt_cmd; run_cmd; script_cmd; sym_cmd ]
+  Cmd.group info ~default [ fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd ]
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 
