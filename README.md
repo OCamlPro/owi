@@ -1,4 +1,4 @@
-# [🐌] Owi [![build status](https://github.com/ocamlpro/owi/workflows/build/badge.svg)](https://github.com/ocamlpro/owi/actions) [![coverage percentage](https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg)](https://ocamlpro.github.io/owi/coverage/)
+# [🐌] Owi [![build-badge]][build status] [![coverage-badge]][coverage percentage]
 
 [Owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
 
@@ -208,10 +208,14 @@ See [LICENSE].
 
 [CHANGELOG]: ./CHANGES.md
 [dune-project]: ./dune-project
-[example]: ./example/
+[example]: ./example
 [LICENSE]: ./LICENSE.md
-[test suite]: ./test/
+[test suite]: ./test
 
+[build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build.yml/badge.svg
+[build status]: https://github.com/ocamlpro/owi/actions
+[coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
+[coverage percentage]: https://ocamlpro.github.io/owi/coverage
 [documentation]: https://ocamlpro.github.io/owi/api/owi
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [OCaml]: https://ocaml.org
