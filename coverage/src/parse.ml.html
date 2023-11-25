@@ -214,10 +214,10 @@ struct
         Printf.sprint<span data-count="1042">f</span> "File \"%s\", line %i, character %i:" pos.pos_fname
           pos.pos_lnum cpos
       in
-      Log.debug "%s@\n%s@\n" file_line msg
+      Log.debug2 "%s@\n%s@\n" file_line msg
     in
     fun buf -&gt;
-      <span data-count="1409">L</span>og.debug "parsing      ...@\n";
+      <span data-count="1409">L</span>og.debug0 "parsing      ...@\n";
       <span data-count="1409">l</span>et provider () =
         <span data-count="1360871">l</span>et tok = Lexer.token buf in
         <span data-count="1360505">l</span>et start, stop = Sedlexing.lexing_positions buf in

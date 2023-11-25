@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>script.ml &mdash; Coverage report</title>
-    <meta name="description" content="75.00% coverage in src/script.ml">
+    <meta name="description" content="75.41% coverage in src/script.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>script.ml
         </a>
       </h1>
-      <h2>75.00%</h2>
+      <h2>75.41%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:9.34%"></span>
@@ -605,16 +605,16 @@ let check_error ~expected ~got =
        &amp;&amp; <span data-count="14">(</span>expected = "i32 constant out of range<span data-count="12">"</span> || expected = "i32 constant<span data-count="2">"</span><span data-count="14">)</span>
   in
   if not ok then <span data-count="0">b</span>egin
-    Log.debug "expected: `%s`@." expected;
-    <span data-count="0">L</span>og.debug "got     : `%s`@." got;
+    Log.debug1 "expected: `%s`@." expected;
+    <span data-count="0">L</span>og.debug1 "got     : `%s`@." got;
     <span data-count="0">E</span>rror got
   end
   else <span data-count="9138">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="0">O</span>k _whatever -&gt;
-    Log.debug "expected: `%s`@." expected;
-    <span data-count="0">L</span>og.debug "got     :  Ok@.";
+    Log.debug1 "expected: `%s`@." expected;
+    <span data-count="0">L</span>og.debug0 "got     :  Ok@.";
     <span data-count="0">e</span>rror_s "expected Error (%S) but got Ok" expected
   | <span data-count="4982">E</span>rror got -&gt; check_error ~expected ~got
 
@@ -685,8 +685,8 @@ let compare_result_const result (const : Concrete_value.t) =
   | <span data-count="0">R</span>esult_const (Literal (Const_host _)), _ -&gt;
     false
   | <span data-count="0">_</span> -&gt;
-    Log.debug "TODO (Script.compare_result_const)@\n";
-    <span data-count="0">f</span>alse
+    Log.debug0 "TODO (Script.compare_result_const)@\n";
+    <span data-count="0">a</span>ssert false
 
 let value_of_const : text const -&gt; V.t Result.t = function
   | <span data-count="20548">C</span>onst_I32 v -&gt; ok @@ Concrete_value.I32 v
@@ -698,12 +698,12 @@ let value_of_const : text const -&gt; V.t Result.t = function
     <span data-count="28">C</span>oncrete_value.ref_null rt
   | <span data-count="62">C</span>onst_extern i -&gt; ok @@ Concrete_value.Ref (Host_externref.valu<span data-count="62">e</span> i)
   | <span data-count="0">i</span> -&gt;
-    Log.debug "TODO (Script.value_of_const) %a@\n" Text.Pp.const i;
-    <span data-count="0">o</span>k @@ Concrete_value.I32 (Int32.of_in<span data-count="0">t</span> 666)
+    Log.debug2 "TODO (Script.value_of_const) %a@\n" Text.Pp.const i;
+    <span data-count="0">a</span>ssert false
 
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
   | <span data-count="48086">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
-    Log.debug "invoke %a %s %a...@\n"
+    Log.debug5 "invoke %a %s %a...@\n"
       (Format.pp_optio<span data-count="48086">n</span> ~none:Format.pp_nothing Format.pp_string)
       mod_id f Text.Pp.consts args;
     <span data-count="48086">l</span>et* f, env_id = load_func_from_modul<span data-count="48086">e</span> link_state mod_id f in
@@ -713,7 +713,7 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
       ~envs:link_state.envs f
   end
   | <span data-count="22">G</span>et (mod_id, name) -&gt;
-    Log.debug "get...@\n";
+    Log.debug0 "get...@\n";
     <span data-count="22">l</span>et+ global = load_global_from_modul<span data-count="22">e</span> link_state mod_id name in
     <span data-count="22">[</span> global.value ]
 
@@ -732,7 +732,7 @@ let run ~no_exhaustion ~optimize script =
     (fun (link_state : Concrete_value.Func.extern_func Link.state) -&gt; function
       | <span data-count="2608">T</span>ext.Module m -&gt;
         if !curr_module = 0 then <span data-count="245">L</span>og.debug_on := false;
-        <span data-count="2608">L</span>og.debug "*** module@\n";
+        <span data-count="2608">L</span>og.debug0 "*** module@\n";
         <span data-count="2608">i</span>ncr curr_module;
         <span data-count="2608">l</span>et+ link_state =
           Compile.until_interpre<span data-count="2608">t</span> link_state ~unsafe ~optimize ~name:None m
@@ -740,7 +740,7 @@ let run ~no_exhaustion ~optimize script =
         <span data-count="2608">L</span>og.debug_on := debug_on;
         link_state
       | <span data-count="68">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
-        Log.debug "*** assert_trap@\n";
+        Log.debug0 "*** assert_trap@\n";
         <span data-count="68">i</span>ncr curr_module;
         <span data-count="68">l</span>et* m, link_state =
           Compile.until_lin<span data-count="68">k</span> link_state ~unsafe ~optimize ~name:None m
@@ -751,11 +751,11 @@ let run ~no_exhaustion ~optimize script =
         in
         <span data-count="68">l</span>ink_state
       | <span data-count="1472">A</span>ssert (Assert_malformed_binary _) -&gt;
-        Log.debug "*** assert_malformed_binary@\n";
+        Log.debug0 "*** assert_malformed_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="1472">O</span>k link_state
       | <span data-count="1160">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
-        Log.debug "*** assert_malformed_quote@\n";
+        Log.debug0 "*** assert_malformed_quote@\n";
         <span data-count="1160">l</span>et+ () =
           match Parse.Script.from_string (String.conca<span data-count="1160">t</span> "\n" m) with
           | <span data-count="1042">E</span>rror got -&gt; check_error ~expected ~got
@@ -769,11 +769,11 @@ let run ~no_exhaustion ~optimize script =
         in
         <span data-count="1160">l</span>ink_state
       | <span data-count="10">A</span>ssert (Assert_invalid_binary _) -&gt;
-        Log.debug "*** assert_invalid_binary@\n";
+        Log.debug0 "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="10">O</span>k link_state
       | <span data-count="2996">A</span>ssert (Assert_invalid (m, expected)) -&gt;
-        Log.debug "*** assert_invalid@\n";
+        Log.debug0 "*** assert_invalid@\n";
         <span data-count="2996">l</span>et+ () =
           match
             Compile.until_link link_state ~unsafe ~optimize ~name:None m
@@ -783,39 +783,39 @@ let run ~no_exhaustion ~optimize script =
         in
         <span data-count="2996">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
-        Log.debug "*** assert_invalid_quote@\n";
+        Log.debug0 "*** assert_invalid_quote@\n";
         <span data-count="0">l</span>et got = Parse.Script.from_string (String.conca<span data-count="0">t</span> "\n" m) in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">l</span>ink_state
       | <span data-count="166">A</span>ssert (Assert_unlinkable (m, expected)) -&gt;
-        Log.debug "*** assert_unlinkable@\n";
+        Log.debug0 "*** assert_unlinkable@\n";
         <span data-count="166">l</span>et+ () =
           check_error_resul<span data-count="166">t</span> expected
             (Compile.until_lin<span data-count="166">k</span> link_state ~unsafe ~optimize ~name:None m)
         in
         <span data-count="166">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt;
-        Log.debug "*** assert_malformed@\n";
+        Log.debug0 "*** assert_malformed@\n";
         <span data-count="0">L</span>og.err "TODO"
       | <span data-count="43046">A</span>ssert (Assert_return (a, res)) -&gt;
-        Log.debug "*** assert_return@\n";
+        Log.debug0 "*** assert_return@\n";
         <span data-count="43046">l</span>et* stack = actio<span data-count="43046">n</span> link_state a in
         <span data-count="43046">i</span>f
           List.compare_length<span data-count="43046">s</span> res stack &lt;&gt; <span data-count="0">0</span>
           || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
-          Format.eprintf "got:      %a@.expected: %a@." Stack.pp
+          Format.pp_err "got:      %a@.expected: %a@." Stack.pp
             (List.re<span data-count="0">v</span> stack) Text.Pp.results res;
           <span data-count="0">E</span>rror "Bad result"
         end
         else <span data-count="43046">O</span>k link_state
       | <span data-count="4748">A</span>ssert (Assert_trap (a, expected)) -&gt;
-        Log.debug "*** assert_trap@\n";
+        Log.debug0 "*** assert_trap@\n";
         <span data-count="4748">l</span>et got = action link_state a in
         <span data-count="4748">l</span>et+ () = check_error_resul<span data-count="4748">t</span> expected got in
         <span data-count="4748">l</span>ink_state
       | <span data-count="30">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
-        Log.debug "*** assert_exhaustion@\n";
+        Log.debug0 "*** assert_exhaustion@\n";
         <span data-count="30">l</span>et+ () =
           if no_exhaustion then <span data-count="30">O</span>k ()
           else
@@ -825,12 +825,12 @@ let run ~no_exhaustion ~optimize script =
         <span data-count="30">l</span>ink_state
       | <span data-count="293">R</span>egister (name, mod_name) -&gt;
         if !curr_module = 1 &amp;&amp; <span data-count="245">!</span>registered = false then <span data-count="245">L</span>og.debug_on := false;
-        <span data-count="293">L</span>og.debug "*** register@\n";
+        <span data-count="293">L</span>og.debug0 "*** register@\n";
         <span data-count="293">l</span>et+ state = Link.register_modul<span data-count="293">e</span> link_state ~name ~id:mod_name in
         <span data-count="293">L</span>og.debug_on := debug_on;
         state
       | <span data-count="314">A</span>ction a -&gt;
-        Log.debug "*** action@\n";
+        Log.debug0 "*** action@\n";
         <span data-count="314">l</span>et+ _stack = actio<span data-count="314">n</span> link_state a in
         <span data-count="314">l</span>ink_state )
     state script

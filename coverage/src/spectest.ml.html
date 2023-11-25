@@ -18,8 +18,8 @@
       <h2>80.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.80%"></span>
-      <span class="unvisited" style="top:13.74%"></span>
+      <span class="unvisited" style="top:12.38%"></span>
+      <span class="unvisited" style="top:13.33%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -36,23 +36,23 @@
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="unvisited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
@@ -234,7 +234,6 @@
 <a id="L208"></a><span > </span>
 <a id="L209"></a><span > </span>
 <a id="L210"></a><span > </span>
-<a id="L211"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -449,25 +448,23 @@
 <a href="#L208">208</a>
 <a href="#L209">209</a>
 <a href="#L210">210</a>
-<a href="#L211">211</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Format
 open Types
 open Concrete_value.Func
 
-type extern_module = Concrete_value.Func.extern_func Link.extern_module
+type extern_module = extern_func Link.extern_module
 
 let extern_m =
-  let pp = Format.pp in
-  let fmt = Format.std_formatter in
   let print = () in
-  let print_i32 i = <span data-count="37">p</span>p fmt "%li@\n%!" i in
-  let print_i64 i = <span data-count="4">p</span>p fmt "%Li@\n%!" i in
-  let print_f32 f = <span data-count="8">p</span>p fmt "%a@\n%!" Float32.pp f in
-  let print_f64 f = <span data-count="20">p</span>p fmt "%a@\n%!" Float64.pp f in
+  let print_i32 i = <span data-count="37">p</span>p_std "%li@\n%!" i in
+  let print_i64 i = <span data-count="4">p</span>p_std "%Li@\n%!" i in
+  let print_f32 f = <span data-count="8">p</span>p_std "%a@\n%!" Float32.pp f in
+  let print_f64 f = <span data-count="20">p</span>p_std "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
     <span data-count="4">p</span>rint_i32 i;
     <span data-count="4">p</span>rint_f32 f

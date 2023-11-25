@@ -18,18 +18,18 @@
       <h2>91.84%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:7.69%"></span>
-      <span class="some-visited" style="bottom:36.31%"></span>
-      <span class="some-visited" style="bottom:28.62%"></span>
-      <span class="unvisited" style="bottom:27.08%"></span>
-      <span class="unvisited" style="bottom:26.46%"></span>
-      <span class="unvisited" style="bottom:19.08%"></span>
-      <span class="some-visited" style="bottom:16.62%"></span>
-      <span class="unvisited" style="bottom:13.54%"></span>
-      <span class="unvisited" style="bottom:12.31%"></span>
-      <span class="some-visited" style="bottom:3.69%"></span>
-      <span class="unvisited" style="bottom:2.77%"></span>
-      <span class="unvisited" style="bottom:2.46%"></span>
+      <span class="some-visited" style="top:7.67%"></span>
+      <span class="some-visited" style="bottom:36.50%"></span>
+      <span class="some-visited" style="bottom:28.83%"></span>
+      <span class="unvisited" style="bottom:27.30%"></span>
+      <span class="unvisited" style="bottom:26.69%"></span>
+      <span class="unvisited" style="bottom:19.33%"></span>
+      <span class="some-visited" style="bottom:16.87%"></span>
+      <span class="unvisited" style="bottom:13.80%"></span>
+      <span class="unvisited" style="bottom:12.58%"></span>
+      <span class="some-visited" style="bottom:3.68%"></span>
+      <span class="unvisited" style="bottom:2.76%"></span>
+      <span class="unvisited" style="bottom:2.45%"></span>
       <span class="some-visited" style="bottom:1.23%"></span>
     </div>
     <div id="report">
@@ -347,19 +347,20 @@
 <a id="L310"></a><span class="visited"> </span>
 <a id="L311"></a><span > </span>
 <a id="L312"></a><span > </span>
-<a id="L313"></a><span class="some-visited"> </span>
-<a id="L314"></a><span > </span>
+<a id="L313"></a><span > </span>
+<a id="L314"></a><span class="some-visited"> </span>
 <a id="L315"></a><span > </span>
-<a id="L316"></a><span class="unvisited"> </span>
+<a id="L316"></a><span > </span>
 <a id="L317"></a><span class="unvisited"> </span>
-<a id="L318"></a><span > </span>
-<a id="L319"></a><span class="visited"> </span>
+<a id="L318"></a><span class="unvisited"> </span>
+<a id="L319"></a><span > </span>
 <a id="L320"></a><span class="visited"> </span>
-<a id="L321"></a><span class="some-visited"> </span>
-<a id="L322"></a><span > </span>
-<a id="L323"></a><span class="visited"> </span>
-<a id="L324"></a><span > </span>
-<a id="L325"></a><span class="visited"> </span>
+<a id="L321"></a><span class="visited"> </span>
+<a id="L322"></a><span class="some-visited"> </span>
+<a id="L323"></a><span > </span>
+<a id="L324"></a><span class="visited"> </span>
+<a id="L325"></a><span > </span>
+<a id="L326"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -689,6 +690,7 @@
 <a href="#L323">323</a>
 <a href="#L324">324</a>
 <a href="#L325">325</a>
+<a href="#L326">326</a>
 </pre>
 <pre><code class="ocaml">(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
 
@@ -1001,6 +1003,7 @@ let group_digits =
     <span data-count="8">B</span>uffer.add_substring buf s exp (len - exp);
     <span data-count="8">B</span>uffer.contents buf
 
+(* TODO: convert all the following to a proper use of Format and stop concatenating strings *)
 let to_string' convert is_digit n x =
   <span data-count="8">(</span>if x &lt; Int32.zero then <span data-count="0">"</span>-" else <span data-count="8">"</span>")
   ^
@@ -1014,7 +1017,7 @@ let to_string' convert is_digit n x =
 
 let to_string = to_string<span data-count="7">'</span> (Printf.sprint<span data-count="7">f</span> "%.17g") is_digit 3
 
-let pp fmt v = <span data-count="8">F</span>ormat.fprintf fmt "%s" (to_strin<span data-count="8">g</span> v)
+let pp fmt v = <span data-count="8">F</span>ormat.pp_string fmt (to_strin<span data-count="8">g</span> v)
 </code></pre>
       </div>
     </div>

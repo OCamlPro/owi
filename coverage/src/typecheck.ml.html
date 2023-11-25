@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>typecheck.ml &mdash; Coverage report</title>
-    <meta name="description" content="82.89% coverage in src/typecheck.ml">
+    <meta name="description" content="82.86% coverage in src/typecheck.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>typecheck.ml
         </a>
       </h1>
-      <h2>82.89%</h2>
+      <h2>82.86%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.54%"></span>
@@ -1387,7 +1387,7 @@ let pp_typ fmt = function
   | <span data-count="6">S</span>omething -&gt; pp_string fmt "something"
 
 let pp_typ_list fmt l =
-  <span data-count="4944">p</span>p_list ~pp_sep:(fun fmt () -&gt; <span data-count="3056">p</span>p_string fmt " ") pp_typ fmt l
+  <span data-count="4944">p</span>p_list ~pp_sep:pp_space pp_typ fmt l
 
 let typ_of_val_type = function
   | <span data-count="187">T</span>ypes.Ref_type (_null, t) -&gt; Ref_type t
@@ -1516,7 +1516,7 @@ end = struct
   let pp fmt (s : stack) = <span data-count="4944">p</span>p fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
-    <span data-count="2400">f</span>printf fmt "requires %a but stack has %a" pp expected pp got
+    <span data-count="2400">F</span>ormat.pp fmt "requires %a but stack has %a" pp expected pp got
 
   let match_num_type (required : num_type) (got : num_type) =
     <span data-count="44486">m</span>atch (required, got) with
@@ -1857,8 +1857,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     | <span data-count="0">S</span>truct_new_default _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
     | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_cast _ | <span data-count="0">R</span>ef_test _ | <span data-count="0">B</span>r_on_non_null _
     | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_cast _ | <span data-count="0">B</span>r_on_cast_fail _ | <span data-count="0">R</span>ef_eq ) as i -&gt;
-    Log.debug "TODO (typecheck instr) %a" Types.Pp.instr i;
-    <span data-count="0">O</span>k stack
+    Log.debug2 "TODO (typecheck instr) %a" Types.Pp.instr i;
+    <span data-count="0">a</span>ssert false
 
 and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
   ~stack:previous_stack : stack Result.t =
@@ -1990,7 +1990,7 @@ let typecheck_data modul refs (data : data Indexed.t) =
     | <span data-count="8">_</span>whatever -&gt; Error "type mismatch (typecheck_data)" )
 
 let modul (modul : modul) =
-  <span data-count="5460">L</span>og.debug "typechecking ...@\n";
+  <span data-count="5460">L</span>og.debug0 "typechecking ...@\n";
   <span data-count="5460">l</span>et refs = Hashtbl.create 512 in
   <span data-count="5460">l</span>et* () = list_ite<span data-count="5460">r</span> (typecheck_globa<span data-count="5460">l</span> modul refs) modul.global.values in
   <span data-count="5448">l</span>et* () = list_ite<span data-count="5448">r</span> (typecheck_ele<span data-count="5448">m</span> modul refs) modul.elem.values in

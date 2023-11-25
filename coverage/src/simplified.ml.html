@@ -267,7 +267,7 @@ module Pp = struct
     | <span data-count="0">R</span>untime.Imported { Imported.modul; name; _ } -&gt; pp fmt "%s.%s" modul name
 
   let lst f fmt l =
-    <span data-count="0">(</span>pp_lis<span data-count="0">t</span> ~pp_sep:(fun fmt () -&gt; <span data-count="0">p</span>p fmt "@\n") f) fmt (List.re<span data-count="0">v</span> l)
+    <span data-count="0">(</span>pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline f) fmt (List.re<span data-count="0">v</span> l)
 
   let funcs fmt funcs = <span data-count="0">l</span>st (Indexed.p<span data-count="0">p</span> func) fmt funcs.Named.values
 

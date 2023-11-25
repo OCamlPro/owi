@@ -1487,13 +1487,13 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   | <span data-count="0">V</span>al False -&gt; true
   | <span data-count="0">_</span> -&gt;
     let check = no :: pc in
-    Format.printf "CHECK:@.%a"
-      (Format.pp_lis<span data-count="0">t</span> ~pp_sep:Format.pp_print_newline Expr.pp)
+    Format.pp_std "CHECK:@.%a"
+      (Format.pp_lis<span data-count="0">t</span> ~pp_sep:Format.pp_newline Expr.pp)
       check;
     <span data-count="0">l</span>et module Solver = (val solver_module) in
     let r = Solver.check solver check in
     <span data-count="0">l</span>et msg = if r then <span data-count="0">"</span>KO" else <span data-count="0">"</span>OK" in
-    Format.printf "@./CHECK %s@." msg;
+    Format.pp_std "@./CHECK %s@." msg;
     <span data-count="0">n</span>ot r
 
 (* TODO: make this a CLI flag ? *)
@@ -1541,7 +1541,7 @@ struct
       | <span data-count="0">f</span>alse, false -&gt; M.empty
       | <span data-count="0">t</span>rue, false | <span data-count="0">f</span>alse, true -&gt; M.return (sat_true, state)
       | <span data-count="1">t</span>rue, true -&gt;
-        if print_choice then <span data-count="0">F</span>ormat.print<span data-count="0">f</span> "CHOICE: %a@." Expr.pp v;
+        if print_choice then <span data-count="0">F</span>ormat.pp_st<span data-count="0">d</span> "CHOICE: %a@." Expr.pp v;
         <span data-count="1">l</span>et state1 = Thread.clone { state with pc = with_v } in
         <span data-count="1">l</span>et state2 = Thread.clone { state with pc = with_not_v } in
         <span data-count="1">M</span>.cons (true, state1) (M.retur<span data-count="1">n</span> (false, state2)) )
@@ -1589,7 +1589,7 @@ struct
           <span data-count="0">m</span>atch model with
           | None -&gt; assert false (* ? *)
           | <span data-count="0">S</span>ome model -&gt; (
-            Format.printf "Model:@.%a@." Model.pp model;
+            Format.pp_std "Model:@.%a@." Model.pp model;
             <span data-count="0">l</span>et v = Model.evaluate model sym in
             <span data-count="0">m</span>atch v with
             | None -&gt; assert false (* ? *)
@@ -1854,18 +1854,18 @@ module WQ = struct
   let take_as_producer q =
     <span data-count="6">M</span>utex.lock q.mutex;
     <span data-count="6">q</span>.producers &lt;- q.producers - 1;
-    (* Format.printf "TAKE COUNT %i@." q.producers; *)
+    (* Format.pp_std "TAKE COUNT %i@." q.producers; *)
     let r =
       try
-        while Queue.is_empt<span data-count="9">y</span> q.queue do
-          <span data-count="7">i</span>f q.producers = <span data-count="4">0</span> || q.faile<span data-count="0">d</span> then <span data-count="4">r</span>aise Exit;
-          <span data-count="3">C</span>ondition.wai<span data-count="3">t</span> q.cond q.mutex
+        while Queue.is_empt<span data-count="8">y</span> q.queue do
+          <span data-count="6">i</span>f q.producers = <span data-count="4">0</span> || q.faile<span data-count="0">d</span> then <span data-count="4">r</span>aise Exit;
+          <span data-count="2">C</span>ondition.wai<span data-count="2">t</span> q.cond q.mutex
         done;
         let v = Queue.pop q.queue in
         <span data-count="2">q</span>.producers &lt;- q.producers + 1;
         Some v
       with <span data-count="4">E</span>xit -&gt;
-        (* Format.printf "@.@.TAKE EXIT@.@."; *)
+        (* Format.pp_std "@.@.TAKE EXIT@.@."; *)
         Condition.broadcast q.cond;
         <span data-count="4">N</span>one
     in
@@ -1928,7 +1928,7 @@ module WQ = struct
     | <span data-count="4">(</span>) -&gt;
       Mutex.lock q.mutex;
       <span data-count="4">q</span>.producers &lt;- q.producers - 1;
-      if q.producers = 0 then <span data-count="2">C</span>ondition.broadcas<span data-count="2">t</span> q.cond;
+      if q.producers = 0 then <span data-count="3">C</span>ondition.broadcas<span data-count="3">t</span> q.cond;
       <span data-count="4">M</span>utex.unlock q.mutex
     | <span data-count="0">e</span>xception e -&gt;
       let bt = Printexc.get_raw_backtrace () in

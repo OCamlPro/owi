@@ -99,7 +99,7 @@ let cmd profiling debug optimize files no_exhaustion =
   <span data-count="1">m</span>atch result with
   | <span data-count="1">O</span>k () -&gt; ()
   | <span data-count="0">E</span>rror e -&gt;
-    Format.eprintf "%s@." e;
+    Format.pp_err "%s@." e;
     <span data-count="0">e</span>xit 1
 </code></pre>
       </div>

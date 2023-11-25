@@ -1703,7 +1703,7 @@ let optimize_runtime_func f =
 let optimize_funcs funs = <span data-count="1445">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1445">L</span>og.debug "optimizing   ...@\n";
+  <span data-count="1445">L</span>og.debug0 "optimizing   ...@\n";
   <span data-count="1445">l</span>et func = optimize_funcs m.func in
   <span data-count="1445">{</span> m with func }
 </code></pre>

@@ -1558,7 +1558,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | ( <span data-count="0">A</span>rray_new_data _ | <span data-count="0">A</span>rray_new _ | <span data-count="0">A</span>rray_new_elem _ | <span data-count="0">A</span>rray_new_fixed _
       | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">S</span>truct_get _ | <span data-count="0">S</span>truct_get_s _ | <span data-count="0">S</span>truct_set _
       | <span data-count="0">S</span>truct_new _ | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ ) as i -&gt;
-      Log.debug "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
+      Log.debug2 "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
       <span data-count="0">O</span>k Nop
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
     <span data-count="17035">l</span>ist_map (fun i -&gt; <span data-count="56634">b</span>ody (loop_count, block_ids) i) e
@@ -1704,7 +1704,7 @@ let rewrite_named f named =
   <span data-count="22868">{</span> named with Named.values }
 
 let modul (modul : Assigned.t) : Simplified.modul Result.t =
-  <span data-count="5864">L</span>og.debug "rewriting    ...@\n";
+  <span data-count="5864">L</span>og.debug0 "rewriting    ...@\n";
   <span data-count="5864">l</span>et* (global : (Simplified.global, simplified global_type) Runtime.t Named.t)
       =
     let* { Named.named; values } =

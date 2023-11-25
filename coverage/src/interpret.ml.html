@@ -3938,19 +3938,19 @@ module Make (P : Interpret_functor_intf.P) :
         <span data-count="0">m</span>atch l with
         | <span data-count="0">[</span>] -&gt; ()
         | <span data-count="0">_</span> :: _ -&gt;
-          Format.fprintf ppf "@ @[&lt;v 2&gt;calls@ %a@]"
+          Format.pp ppf "@ @[&lt;v 2&gt;calls@ %a@]"
             (Format.pp_lis<span data-count="0">t</span>
-               ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf "@ ")
+               ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.pp ppf "@ ")
                (fun ppf ((Raw id : simplified indice), count) -&gt;
                  <span data-count="0">l</span>et name ppf = function
                    | <span data-count="0">N</span>one -&gt; ()
-                   | <span data-count="0">S</span>ome name -&gt; Format.fprintf ppf " %s" name
+                   | <span data-count="0">S</span>ome name -&gt; Format.pp ppf " %s" name
                  in
-                 Format.fprintf ppf "@[&lt;v 2&gt;id %i%a@ %a@]" id name count.name
+                 Format.pp ppf "@[&lt;v 2&gt;id %i%a@ %a@]" id name count.name
                    print_count count ) )
             l
       in
-      Format.fprintf ppf "@[&lt;v&gt;enter %i@ intrs %i%a@]" count.enter
+      Format.pp ppf "@[&lt;v&gt;enter %i@ intrs %i%a@]" count.enter
         count.instructions calls count.calls
 
     let empty_count name =
@@ -4867,14 +4867,14 @@ module Make (P : Interpret_functor_intf.P) :
                 <span data-count="991">e</span>xec_exp<span data-count="923">r</span> envs env (State.Locals.of_lis<span data-count="991">t</span> []) Stack.empty to_run
                   None
               in
-              <span data-count="923">L</span>og.profile "Exec module %s@.%a@."
+              <span data-count="923">L</span>og.profile3 "Exec module %s@.%a@."
                 (Option.valu<span data-count="923">e</span> (Module_to_run.modu<span data-count="923">l</span> modul).id
                    ~default:"anonymous" )
                 State.print_count count;
               <span data-count="923">m</span>atch end_stack with
               | <span data-count="923">[</span>] -&gt; Choice.return ()
               | <span data-count="0">_</span> :: _ -&gt;
-                Format.eprintf "non empty stack@\n%a@." Stack.pp end_stack;
+                Format.pp_err "non empty stack@\n%a@." Stack.pp end_stack;
                 <span data-count="0">a</span>ssert false )
             (Choice.retur<span data-count="2680">n</span> ())
             (Module_to_run.to_ru<span data-count="2680">n</span> modul)

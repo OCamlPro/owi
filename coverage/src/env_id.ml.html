@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>env_id.ml &mdash; Coverage report</title>
-    <meta name="description" content="71.43% coverage in src/env_id.ml">
+    <meta name="description" content="85.71% coverage in src/env_id.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,10 @@
           <span class="dirname">src/</span>env_id.ml
         </a>
       </h1>
-      <h2>71.43%</h2>
+      <h2>85.71%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:25.00%"></span>
-      <span class="unvisited" style="bottom:3.12%"></span>
+      <span class="unvisited" style="bottom:3.45%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -41,21 +40,18 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span class="unvisited"> </span>
-<a id="L32"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -89,9 +85,6 @@
 <a href="#L27">27</a>
 <a href="#L28">28</a>
 <a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -99,26 +92,23 @@
 
 type t = int
 
-module IMap = Map.Make (Int)
+module Map = Map.Make (Int)
 
 type 'a collection =
-  { c : 'a IMap.t
+  { c : 'a Map.t
   ; last : int
   }
 
-let empty = { c = IMap.empty; last = 0 }
+let empty = { c = Map.empty; last = 0 }
 
-let with_fresh_id f c =
+let with_fresh_id f { c; last } =
   <span data-count="2894">l</span>et open Syntax in
-  let last = c.last in
-  let* e, r = <span data-count="2894">f</span> last in
-  <span data-count="2718">O</span>k ({ c = IMap.ad<span data-count="2718">d</span> c.last e c.c; last = c.last + 1 }, r)
+  let+ e, r = <span data-count="2894">f</span> last in
+  <span data-count="2718">l</span>et c = Map.add last e c in
+  <span data-count="2718">l</span>et last = succ last in
+  <span data-count="2718">(</span>{ c ; last}, r)
 
-let get i c = <span data-count="11750365">I</span>Map.find i c.c
-
-let pp ppf i = <span data-count="0">F</span>ormat.fprintf ppf "f_%i" i
-
-module Map = IMap
+let get i c = <span data-count="11750365">M</span>ap.find i c.c
 
 module Tbl = Hashtbl.Make (struct
   include Int

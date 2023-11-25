@@ -18,17 +18,17 @@
       <h2>91.28%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:7.60%"></span>
-      <span class="some-visited" style="bottom:34.04%"></span>
-      <span class="some-visited" style="bottom:29.48%"></span>
-      <span class="unvisited" style="bottom:20.06%"></span>
-      <span class="some-visited" style="bottom:17.63%"></span>
-      <span class="unvisited" style="bottom:14.59%"></span>
-      <span class="unvisited" style="bottom:13.37%"></span>
-      <span class="some-visited" style="bottom:4.86%"></span>
-      <span class="unvisited" style="bottom:3.95%"></span>
-      <span class="unvisited" style="bottom:3.65%"></span>
-      <span class="some-visited" style="bottom:2.43%"></span>
+      <span class="some-visited" style="top:7.58%"></span>
+      <span class="some-visited" style="bottom:34.24%"></span>
+      <span class="some-visited" style="bottom:29.70%"></span>
+      <span class="unvisited" style="bottom:20.30%"></span>
+      <span class="some-visited" style="bottom:17.88%"></span>
+      <span class="unvisited" style="bottom:14.85%"></span>
+      <span class="unvisited" style="bottom:13.64%"></span>
+      <span class="some-visited" style="bottom:4.85%"></span>
+      <span class="unvisited" style="bottom:3.94%"></span>
+      <span class="unvisited" style="bottom:3.64%"></span>
+      <span class="some-visited" style="bottom:2.42%"></span>
       <span class="unvisited" style="bottom:0.91%"></span>
       <span class="unvisited" style="bottom:0.61%"></span>
     </div>
@@ -347,23 +347,24 @@
 <a id="L310"></a><span class="visited"> </span>
 <a id="L311"></a><span > </span>
 <a id="L312"></a><span > </span>
-<a id="L313"></a><span class="some-visited"> </span>
-<a id="L314"></a><span > </span>
+<a id="L313"></a><span > </span>
+<a id="L314"></a><span class="some-visited"> </span>
 <a id="L315"></a><span > </span>
-<a id="L316"></a><span class="unvisited"> </span>
+<a id="L316"></a><span > </span>
 <a id="L317"></a><span class="unvisited"> </span>
-<a id="L318"></a><span > </span>
-<a id="L319"></a><span class="visited"> </span>
+<a id="L318"></a><span class="unvisited"> </span>
+<a id="L319"></a><span > </span>
 <a id="L320"></a><span class="visited"> </span>
-<a id="L321"></a><span class="some-visited"> </span>
-<a id="L322"></a><span > </span>
-<a id="L323"></a><span class="visited"> </span>
-<a id="L324"></a><span > </span>
+<a id="L321"></a><span class="visited"> </span>
+<a id="L322"></a><span class="some-visited"> </span>
+<a id="L323"></a><span > </span>
+<a id="L324"></a><span class="visited"> </span>
 <a id="L325"></a><span > </span>
-<a id="L326"></a><span class="unvisited"> </span>
+<a id="L326"></a><span > </span>
 <a id="L327"></a><span class="unvisited"> </span>
-<a id="L328"></a><span > </span>
-<a id="L329"></a><span class="visited"> </span>
+<a id="L328"></a><span class="unvisited"> </span>
+<a id="L329"></a><span > </span>
+<a id="L330"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -697,6 +698,7 @@
 <a href="#L327">327</a>
 <a href="#L328">328</a>
 <a href="#L329">329</a>
+<a href="#L330">330</a>
 </pre>
 <pre><code class="ocaml">(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
 
@@ -1009,6 +1011,7 @@ let group_digits =
     <span data-count="20">B</span>uffer.add_substring buf s exp (len - exp);
     <span data-count="20">B</span>uffer.contents buf
 
+(* TODO: convert all the following to a proper use of Format and stop concatenating strings *)
 let to_string' convert is_digit n x =
   <span data-count="20">(</span>if x &lt; Int64.zero then <span data-count="0">"</span>-" else <span data-count="20">"</span>")
   ^
@@ -1026,7 +1029,7 @@ let to_hex_string x =
   <span data-count="0">i</span>f is_inf x then <span data-count="0">t</span>o_string x
   else <span data-count="0">t</span>o_string' (Printf.sprint<span data-count="0">f</span> "%h") is_hex_digit 4 x
 
-let pp fmt v = <span data-count="20">F</span>ormat.fprintf fmt "%s" (to_strin<span data-count="20">g</span> v)
+let pp fmt v = <span data-count="20">F</span>ormat.pp_string fmt (to_strin<span data-count="20">g</span> v)
 </code></pre>
       </div>
     </div>
