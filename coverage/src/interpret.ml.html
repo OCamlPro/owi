@@ -4127,7 +4127,7 @@ module Make (P : Interpret_functor_intf.P) :
     let locals = state.locals in
     let st stack = <span data-count="81203071">C</span>hoice.return (State.Continue { state with stack }) in
     Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-    <span data-count="112669794">L</span>og.debug2 "running instr: %a@." Types.Pp.instr instr;
+    <span data-count="112669794">L</span>og.debug2 "running instr: %a@." Types.pp_instr instr;
     <span data-count="112669794">m</span>atch instr with
     | <span data-count="2290">R</span>eturn -&gt; Choice.return (State.retur<span data-count="2290">n</span> state)
     | <span data-count="206">N</span>op -&gt; Choice.return (State.Continue state)
@@ -4816,7 +4816,7 @@ module Make (P : Interpret_functor_intf.P) :
       | <span data-count="0">S</span>truct_new_default _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
       | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_cast _ | <span data-count="0">R</span>ef_test _ | <span data-count="0">R</span>ef_eq | <span data-count="0">B</span>r_on_cast _
       | <span data-count="0">B</span>r_on_cast_fail _ | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ ) as i -&gt;
-      Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Types.Pp.instr i;
+      Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Types.pp_instr i;
       <span data-count="0">s</span>t stack
 
   let rec loop (state : State.exec_state) =

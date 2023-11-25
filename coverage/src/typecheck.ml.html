@@ -1854,7 +1854,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     | <span data-count="0">S</span>truct_new_default _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
     | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_cast _ | <span data-count="0">R</span>ef_test _ | <span data-count="0">B</span>r_on_non_null _
     | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_cast _ | <span data-count="0">B</span>r_on_cast_fail _ | <span data-count="0">R</span>ef_eq ) as i -&gt;
-    Log.debug2 "TODO (typecheck instr) %a" Types.Pp.instr i;
+    Log.debug2 "TODO (typecheck instr) %a" pp_instr i;
     <span data-count="0">a</span>ssert false
 
 and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)

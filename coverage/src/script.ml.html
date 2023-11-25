@@ -698,14 +698,14 @@ let value_of_const : text const -&gt; V.t Result.t = function
     <span data-count="28">C</span>oncrete_value.ref_null rt
   | <span data-count="62">C</span>onst_extern i -&gt; ok @@ Concrete_value.Ref (Host_externref.valu<span data-count="62">e</span> i)
   | <span data-count="0">i</span> -&gt;
-    Log.debug2 "TODO (Script.value_of_const) %a@\n" Text.Pp.const i;
+    Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
     <span data-count="0">a</span>ssert false
 
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
   | <span data-count="48086">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
     Log.debug5 "invoke %a %s %a...@\n"
       (Format.pp_optio<span data-count="48086">n</span> ~none:Format.pp_nothing Format.pp_string)
-      mod_id f Text.Pp.consts args;
+      mod_id f Types.pp_consts args;
     <span data-count="48086">l</span>et* f, env_id = load_func_from_modul<span data-count="48086">e</span> link_state mod_id f in
     <span data-count="48086">l</span>et* stack = list_ma<span data-count="48086">p</span> value_of_const args in
     <span data-count="48086">l</span>et stack = List.rev stack in
@@ -805,7 +805,7 @@ let run ~no_exhaustion ~optimize script =
           || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.re<span data-count="0">v</span> stack)
-            Text.Pp.results res;
+            Text.pp_results res;
           <span data-count="0">E</span>rror "Bad result"
         end
         else <span data-count="43046">O</span>k link_state
