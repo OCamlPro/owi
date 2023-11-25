@@ -489,7 +489,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     | Struct_new_default _ | Extern_externalize | Extern_internalize
     | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
     | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
-    Log.debug2 "TODO (typecheck instr) %a" Types.Pp.instr i;
+    Log.debug2 "TODO (typecheck instr) %a" pp_instr i;
     assert false
 
 and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)

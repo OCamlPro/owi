@@ -355,7 +355,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
       | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug2 "TODO (Rewrite.body) %a@\n" Text.Pp.instr i;
+      Log.debug2 "TODO (Rewrite.body) %a@\n" pp_instr i;
       Ok Nop
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
@@ -391,8 +391,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
       Array_new_default t
     | Ref_i31 -> Ok Ref_i31
     | i ->
-      error
-      @@ Format.asprintf "constant expression required, got %a" Text.Pp.instr i
+      error @@ Format.asprintf "constant expression required, got %a" pp_instr i
   in
   list_map const_instr expr
 

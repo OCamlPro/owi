@@ -79,12 +79,12 @@ let check_optimized m =
   in
   result1 && result2
 
-let gen = Crowbar.with_printer Owi.Text.Pp.modul Gen.modul
+let gen = Crowbar.with_printer Owi.Text.pp_modul Gen.modul
 
 let () =
   Crowbar.add_test ~name:"fuzzing" [ gen ] (fun m ->
       incr global_count;
-      if Param.debug then Format.pp_err "%a@\n" Owi.Text.Pp.modul m;
+      if Param.debug then Format.pp_err "%a@\n" Owi.Text.pp_modul m;
       Format.pp_err "test module %d [got %d timeouts...]@\n@[<v>" !global_count
         !timeout_count;
       Format.pp_flush Stdlib.Format.err_formatter ();

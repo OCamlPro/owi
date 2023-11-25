@@ -76,7 +76,7 @@ end
 module Reference : INTERPRET = struct
   type t = string
 
-  let of_symbolic modul = Format.asprintf "%a" Text.Pp.modul modul
+  let of_symbolic modul = Format.asprintf "%a" Text.pp_modul modul
 
   let run modul =
     let prefix = "owi_fuzzer_official" in

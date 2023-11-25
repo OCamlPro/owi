@@ -64,7 +64,7 @@ module Pp = struct
   let id fmt = Option.iter (fun id -> pp fmt " $%s" id)
 
   let func fmt = function
-    | Runtime.Local f -> Types.Pp.func fmt f
+    | Runtime.Local f -> pp_func fmt f
     | Runtime.Imported { Imported.modul; name; _ } -> pp fmt "%s.%s" modul name
 
   let lst f fmt l = (pp_list ~pp_sep:pp_newline f) fmt (List.rev l)

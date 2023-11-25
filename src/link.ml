@@ -122,7 +122,7 @@ let load_memory (ls : 'f state) (import : limits Imported.t) :
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
   else
     error_s "incompatible import type for memory %s %s expected %a got %a"
-      import.modul import.name Pp.limits import.desc Pp.limits imported_limit
+      import.modul import.name pp_limits import.desc pp_limits imported_limit
 
 let eval_memory ls (memory : (mem, limits) Runtime.t) :
   Concrete_memory.t Result.t =
@@ -150,7 +150,7 @@ let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else
     error_s "incompatible import type for table %s %s expected %a got %a"
-      import.modul import.name Pp.table_type typ Pp.table_type (t.limits, t.typ)
+      import.modul import.name pp_table_type typ pp_table_type (t.limits, t.typ)
 
 let eval_table ls (table : (_, simplified table_type) Runtime.t) :
   table Result.t =

@@ -115,14 +115,14 @@ let value_of_const : text const -> V.t Result.t = function
     Concrete_value.ref_null rt
   | Const_extern i -> ok @@ Concrete_value.Ref (Host_externref.value i)
   | i ->
-    Log.debug2 "TODO (Script.value_of_const) %a@\n" Text.Pp.const i;
+    Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
     assert false
 
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
     Log.debug5 "invoke %a %s %a...@\n"
       (Format.pp_option ~none:Format.pp_nothing Format.pp_string)
-      mod_id f Text.Pp.consts args;
+      mod_id f Types.pp_consts args;
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
@@ -222,7 +222,7 @@ let run ~no_exhaustion ~optimize script =
           || not (List.for_all2 compare_result_const res (List.rev stack))
         then begin
           Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.rev stack)
-            Text.Pp.results res;
+            Text.pp_results res;
           Error "Bad result"
         end
         else Ok link_state
