@@ -18,6 +18,6 @@ let pp_bool = pp_print_bool
 
 let pp_flush = pp_print_flush
 
-let pp_space = pp_print_space
+let pp_space fmt () = pp fmt " "
 
 let pp_int = pp_print_int
