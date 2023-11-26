@@ -34,7 +34,11 @@ type _ indice =
 
 let pp_id fmt id = pp fmt "$%s" id
 
-let pp_id_opt fmt = function None -> () | Some i -> pp_id fmt i
+let pp_id_opt fmt = function
+  | None -> ()
+  | Some i ->
+    pp fmt " ";
+    pp_id fmt i
 
 let pp_indice (type kind) fmt : kind indice -> unit = function
   | Raw u -> pp_int fmt u
@@ -224,7 +228,7 @@ let pp_limits fmt { min; max } =
 
 type nonrec mem = string option * limits
 
-let pp_mem fmt (id, ty) = pp fmt "(memory %a %a)" pp_id_opt id pp_limits ty
+let pp_mem fmt (id, ty) = pp fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 
 type nonrec final =
   | Final
@@ -294,7 +298,7 @@ let pp_val_type fmt = function
 
 type nonrec 'a param = string option * 'a val_type
 
-let pp_param fmt (id, vt) = pp fmt "(param %a %a)" pp_id_opt id pp_val_type vt
+let pp_param fmt (id, vt) = pp fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
 type nonrec 'a param_type = 'a param list
 
@@ -537,14 +541,14 @@ let rec pp_instr fmt = function
   | Nop -> pp fmt "nop"
   | Unreachable -> pp fmt "unreachable"
   | Block (id, bt, e) ->
-    pp fmt "(block %a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+    pp fmt "(block%a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
       pp_expr e
   | Loop (id, bt, e) ->
-    pp fmt "(loop %a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
-      pp_expr e
+    pp fmt "(loop%a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
+      e
   | If_else (id, bt, e1, e2) ->
     pp fmt
-      "(if %a %a@\n\
+      "(if%a %a@\n\
       \  @[<v>(then@\n\
       \  @[<v>%a@]@\n\
        )@\n\
@@ -613,15 +617,15 @@ type 'a func =
   ; id : string option
   }
 
-let pp_local fmt (id, t) = pp fmt "(local %a %a)" pp_id_opt id pp_val_type t
+let pp_local fmt (id, t) = pp fmt "(local%a %a)" pp_id_opt id pp_val_type t
 
 let pp_locals fmt locals = pp_list ~pp_sep:pp_space pp_local fmt locals
 
 let pp_func : type kind. formatter -> kind func -> unit =
  fun fmt f ->
   (* TODO: typeuse ? *)
-  pp fmt "(func %a %a %a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type
-    f.type_f pp_locals f.locals pp_expr f.body
+  pp fmt "(func%a %a %a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
+    pp_locals f.locals pp_expr f.body
 
 let pp_funcs fmt (funcs : 'a func list) =
   pp_list ~pp_sep:pp_newline pp_func fmt funcs
@@ -630,7 +634,7 @@ let pp_funcs fmt (funcs : 'a func list) =
 
 type 'a table = string option * 'a table_type
 
-let pp_table fmt (id, ty) = pp fmt "(table %a %a)" pp_id_opt id pp_table_type ty
+let pp_table fmt (id, ty) = pp fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
 (* Modules *)
 
@@ -641,11 +645,11 @@ type 'a import_desc =
   | Import_global of string option * 'a global_type
 
 let import_desc fmt : 'a import_desc -> Unit.t = function
-  | Import_func (id, t) -> pp fmt "(func %a %a)" pp_id_opt id pp_block_type t
-  | Import_table (id, t) -> pp fmt "(table %a %a)" pp_id_opt id pp_table_type t
-  | Import_mem (id, t) -> pp fmt "(memory %a %a)" pp_id_opt id pp_limits t
+  | Import_func (id, t) -> pp fmt "(func%a %a)" pp_id_opt id pp_block_type t
+  | Import_table (id, t) -> pp fmt "(table%a %a)" pp_id_opt id pp_table_type t
+  | Import_mem (id, t) -> pp fmt "(memory%a %a)" pp_id_opt id pp_limits t
   | Import_global (id, t) ->
-    pp fmt "(global %a %a)" pp_id_opt id pp_global_type t
+    pp fmt "(global%a %a)" pp_id_opt id pp_global_type t
 
 type 'a import =
   { modul : string
@@ -697,7 +701,7 @@ type 'a struct_field = string option * 'a field_type list
 let pp_fields fmt = pp_list ~pp_sep:pp_space pp_field_type fmt
 
 let pp_struct_field fmt ((n : string option), f) =
-  pp fmt "@\n  @[<v>(field %a%a)@]" pp_id_opt n pp_fields f
+  pp fmt "@\n  @[<v>(field%a%a)@]" pp_id_opt n pp_fields f
 
 type 'a struct_type = 'a struct_field list
 
@@ -724,7 +728,7 @@ let pp_sub_type fmt (f, ids, t) =
 type 'a type_def = string option * 'a sub_type
 
 let pp_type_def fmt (id, t) =
-  pp fmt "@\n  @[<v>(type %a %a)@]" pp_id_opt id pp_sub_type t
+  pp fmt "@\n  @[<v>(type%a %a)@]" pp_id_opt id pp_sub_type t
 
 type 'a rec_type = 'a type_def list
 

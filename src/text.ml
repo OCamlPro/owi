@@ -20,7 +20,7 @@ type global =
   }
 
 let pp_global fmt (g : global) =
-  pp fmt "(global %a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
+  pp fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
 
 type data_mode =
   | Data_passive
@@ -38,7 +38,7 @@ type data =
   }
 
 let pp_data fmt (d : data) =
-  pp fmt {|(data %a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
+  pp fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
 
 type elem_mode =
   | Elem_passive
@@ -63,7 +63,7 @@ type elem =
 let pp_elem_expr fmt e = pp fmt "(item %a)" pp_expr e
 
 let pp_elem fmt (e : elem) =
-  pp fmt "@[<hov 2>(elem %a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
+  pp fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
     pp_ref_type e.typ
     (pp_list ~pp_sep:pp_newline pp_elem_expr)
     e.init
@@ -98,7 +98,7 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  pp fmt "(module %a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
+  pp fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
     (pp_list ~pp_sep:pp_newline pp_module_field)
     m.fields
 
@@ -108,7 +108,7 @@ type action =
 
 let pp_action fmt = function
   | Invoke (mod_name, name, c) ->
-    pp fmt "(invoke %a %s %a)" pp_id_opt mod_name name pp_consts c
+    pp fmt "(invoke%a %s %a)" pp_id_opt mod_name name pp_consts c
   | Get _ -> pp fmt "<action_get TODO>"
 
 type result_const =
