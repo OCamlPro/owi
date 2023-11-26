@@ -688,7 +688,7 @@ type 'a export =
   }
 
 let pp_export fmt (e : text export) =
-  pp fmt "(export %a %a)" pp_string e.name pp_export_desc e.desc
+  pp fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
 type 'a storage_type =
   | Val_storage_t of 'a val_type
