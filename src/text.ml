@@ -108,7 +108,7 @@ type action =
 
 let pp_action fmt = function
   | Invoke (mod_name, name, c) ->
-    pp fmt "(invoke%a %s %a)" pp_id_opt mod_name name pp_consts c
+    pp fmt {|(invoke%a "%s" %a)|} pp_id_opt mod_name name pp_consts c
   | Get _ -> pp fmt "<action_get TODO>"
 
 type result_const =
