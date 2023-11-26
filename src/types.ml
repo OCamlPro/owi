@@ -763,17 +763,17 @@ type 'a const =
   | Const_struct
 
 let pp_const fmt = function
-  | Const_I32 i -> pp fmt "i32.const %ld" i
-  | Const_I64 i -> pp fmt "i64.const %Ld" i
-  | Const_F32 f -> pp fmt "f32.const %a" Float32.pp f
-  | Const_F64 f -> pp fmt "f64.const %a" Float64.pp f
-  | Const_null rt -> pp fmt "ref.null %a" pp_heap_type rt
-  | Const_host i -> pp fmt "ref.host %d" i
-  | Const_extern i -> pp fmt "ref.extern %d" i
+  | Const_I32 i -> pp fmt "(i32.const %ld)" i
+  | Const_I64 i -> pp fmt "(i64.const %Ld)" i
+  | Const_F32 f -> pp fmt "(f32.const %a)" Float32.pp f
+  | Const_F64 f -> pp fmt "(f64.const %a)" Float64.pp f
+  | Const_null rt -> pp fmt "(ref.null %a)" pp_heap_type rt
+  | Const_host i -> pp fmt "(ref.host %d)" i
+  | Const_extern i -> pp fmt "(ref.extern %d)" i
   | Const_array -> pp fmt "ref.array"
   | Const_eq -> pp fmt "ref.eq"
   | Const_i31 -> pp fmt "ref.i31"
   | Const_struct -> pp fmt "ref.struct"
 
 let pp_consts fmt c =
-  pp_list ~pp_sep:pp_space (fun fmt c -> pp fmt "(%a)" pp_const c) fmt c
+  pp_list ~pp_sep:pp_space (fun fmt c -> pp fmt "%a" pp_const c) fmt c
