@@ -63,8 +63,6 @@ module type T = sig
 
   type t
 
-  type t' = t Lazy.t
-
   type elem = { mutable value : Concrete_value.ref_value array }
 
   type data = { mutable value : string }
