@@ -15,7 +15,6 @@
   concrete_memory
   concrete_table
   concrete_value
-  const_interp
   convert
   env_id
   float32

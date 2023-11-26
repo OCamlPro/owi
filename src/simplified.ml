@@ -20,14 +20,15 @@ type exports =
   }
 
 type global =
-  { typ : simplified global_type
-  ; init : simplified Const.expr
+  { typ : simplified global_type (* TODO: init : simplified+const expr*)
+  ; init : simplified expr
   ; id : string option
   }
 
 type data_mode =
   | Data_passive
-  | Data_active of int option * simplified Const.expr
+  (* TODO: Data_active simplified+const expr*)
+  | Data_active of int option * simplified expr
 
 type data =
   { id : string option
@@ -37,13 +38,14 @@ type data =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of int option * simplified Const.expr
+  (* TODO: Elem_active simplified+const expr*)
+  | Elem_active of int option * simplified expr
   | Elem_declarative
 
 type elem =
   { id : string option
-  ; typ : simplified ref_type
-  ; init : simplified Const.expr list
+  ; typ : simplified ref_type (* TODO: init : simplified+const expr*)
+  ; init : simplified expr list
   ; mode : elem_mode
   }
 

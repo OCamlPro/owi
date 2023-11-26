@@ -534,7 +534,7 @@ let typecheck_function (modul : modul) func refs =
     else Ok ()
 
 let typecheck_const_instr (modul : modul) refs stack = function
-  | Const.I32_const _ -> Stack.push [ i32 ] stack
+  | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
@@ -562,6 +562,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
   | Ref_i31 ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i31 ] stack
+  | _ -> assert false
 
 let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []

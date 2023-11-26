@@ -362,34 +362,31 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   in
   expr iexpr (0, [])
 
+(* TODO: simplified+const expr/list *)
 let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
-  simplified Const.expr Result.t =
-  let const_instr (instr : text instr) : simplified Const.instr Result.t =
-    let open Const in
+  simplified expr Result.t =
+  let const_instr (instr : text instr) : simplified instr Result.t =
     match instr with
-    | I32_const v -> ok @@ I32_const v
-    | I64_const v -> ok @@ I64_const v
-    | F32_const v -> ok @@ F32_const v
-    | F64_const v -> ok @@ F64_const v
-    | Ref_null v ->
-      let+ v = Simplified_types.convert_heap_type None v in
-      Ref_null v
-    | Ref_func f ->
-      let+ f = find "unknown function" modul.func (Some f) in
-      Ref_func f
     | Global_get id -> begin
       let* idx, mut = find_global modul ~imported_only:true (Some id) in
       match mut with
       | Const -> ok @@ Global_get (Raw idx)
       | Var -> Error "constant expression required"
     end
+    | Ref_null v ->
+      let+ v = Simplified_types.convert_heap_type None v in
+      Ref_null v
+    | Ref_func f ->
+      let+ f = find "unknown function" modul.func (Some f) in
+      Ref_func f
     | Array_new t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new t
     | Array_new_default t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new_default t
-    | Ref_i31 -> Ok Ref_i31
+    | (I32_const _ | I64_const _ | F32_const _ | F64_const _ | Ref_i31) as i ->
+      Ok i
     | i ->
       error @@ Format.asprintf "constant expression required, got %a" pp_instr i
   in
