@@ -1857,9 +1857,9 @@ module WQ = struct
     (* Format.pp_std "TAKE COUNT %i@." q.producers; *)
     let r =
       try
-        while Queue.is_empt<span data-count="9">y</span> q.queue do
-          <span data-count="7">i</span>f q.producers = <span data-count="4">0</span> || q.faile<span data-count="0">d</span> then <span data-count="4">r</span>aise Exit;
-          <span data-count="3">C</span>ondition.wai<span data-count="3">t</span> q.cond q.mutex
+        while Queue.is_empt<span data-count="7">y</span> q.queue do
+          <span data-count="5">i</span>f q.producers = <span data-count="4">0</span> || q.faile<span data-count="0">d</span> then <span data-count="4">r</span>aise Exit;
+          <span data-count="1">C</span>ondition.wai<span data-count="1">t</span> q.cond q.mutex
         done;
         let v = Queue.pop q.queue in
         <span data-count="2">q</span>.producers &lt;- q.producers + 1;
@@ -1928,7 +1928,7 @@ module WQ = struct
     | <span data-count="4">(</span>) -&gt;
       Mutex.lock q.mutex;
       <span data-count="4">q</span>.producers &lt;- q.producers - 1;
-      if q.producers = 0 then <span data-count="2">C</span>ondition.broadcas<span data-count="2">t</span> q.cond;
+      if q.producers = 0 then <span data-count="3">C</span>ondition.broadcas<span data-count="3">t</span> q.cond;
       <span data-count="4">M</span>utex.unlock q.mutex
     | <span data-count="0">e</span>xception e -&gt;
       let bt = Printexc.get_raw_backtrace () in
