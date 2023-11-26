@@ -310,6 +310,14 @@ let pp_result_ fmt vt = pp fmt "(result %a)" pp_val_type vt
 
 let pp_result_type fmt results = pp_list ~pp_sep:pp_space pp_result_ fmt results
 
+(* wrap printer to print a space before a non empty list *)
+(* TODO or make it an optional arg of pp_list? *)
+let with_space_before printer fmt l =
+  begin
+    match l with [] -> () | _l -> pp fmt " "
+  end;
+  printer fmt l
+
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
   | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
@@ -319,7 +327,12 @@ type 'a block_type =
 
 let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pp fmt "(type %a)" pp_indice ind
-  | Bt_raw (_ind, (pt, rt)) -> pp fmt "%a %a" pp_param_type pt pp_result_type rt
+  | Bt_raw (_ind, (pt, rt)) ->
+    pp fmt "%a%a"
+      (with_space_before pp_param_type)
+      pt
+      (with_space_before pp_result_type)
+      rt
 
 let pp_block_type_opt fmt = function
   | None -> ()
@@ -328,7 +341,11 @@ let pp_block_type_opt fmt = function
 type nonrec 'a func_type = 'a param_type * 'a result_type
 
 let pp_func_type fmt (params, results) =
-  pp fmt "(func %a %a)" pp_param_type params pp_result_type results
+  pp fmt "(func%a%a)"
+    (with_space_before pp_param_type)
+    params
+    (with_space_before pp_result_type)
+    results
 
 type nonrec 'a table_type = limits * 'a ref_type
 
@@ -624,7 +641,7 @@ let pp_locals fmt locals = pp_list ~pp_sep:pp_space pp_local fmt locals
 let pp_func : type kind. formatter -> kind func -> unit =
  fun fmt f ->
   (* TODO: typeuse ? *)
-  pp fmt "(func%a %a %a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
+  pp fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
     pp_locals f.locals pp_expr f.body
 
 let pp_funcs fmt (funcs : 'a func list) =
