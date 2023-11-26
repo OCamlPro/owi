@@ -633,7 +633,8 @@ let pp_func : type kind. formatter -> kind func -> unit =
  fun fmt f ->
   (* TODO: typeuse ? *)
   pp fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
-    pp_locals f.locals pp_expr f.body
+    (with_space_list pp_locals)
+    f.locals pp_expr f.body
 
 let pp_funcs fmt (funcs : 'a func list) =
   pp_list ~pp_sep:pp_newline pp_func fmt funcs
