@@ -562,9 +562,13 @@ let rec pp_instr fmt = function
     pp fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
       e
   | If_else (id, bt, e1, e2) ->
-    pp fmt
-      "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)@\n(else@\n  @[<v>%a@]@\n)@]@\n)"
-      pp_id_opt id pp_block_type_opt bt pp_expr e1 pp_expr e2
+    let pp_else fmt e =
+      match e with
+      | [] -> ()
+      | e -> pp fmt "@\n(else@\n  @[<v>%a@]@\n)" pp_expr e
+    in
+    pp fmt "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)%a@]@\n)" pp_id_opt id
+      pp_block_type_opt bt pp_expr e1 pp_else e2
   | Br id -> pp fmt "br %a" pp_indice id
   | Br_if id -> pp fmt "br_if %a" pp_indice id
   | Br_table (ids, id) ->
