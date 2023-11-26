@@ -312,10 +312,8 @@ let pp_result_type fmt results = pp_list ~pp_sep:pp_space pp_result_ fmt results
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
-let with_space_before printer fmt l =
-  begin
-    match l with [] -> () | _l -> pp fmt " "
-  end;
+let with_space_list printer fmt l =
+  (match l with [] -> () | _l -> pp fmt " ");
   printer fmt l
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
@@ -329,9 +327,9 @@ let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pp fmt "(type %a)" pp_indice ind
   | Bt_raw (_ind, (pt, rt)) ->
     pp fmt "%a%a"
-      (with_space_before pp_param_type)
+      (with_space_list pp_param_type)
       pt
-      (with_space_before pp_result_type)
+      (with_space_list pp_result_type)
       rt
 
 let pp_block_type_opt fmt = function
@@ -342,9 +340,9 @@ type nonrec 'a func_type = 'a param_type * 'a result_type
 
 let pp_func_type fmt (params, results) =
   pp fmt "(func%a%a)"
-    (with_space_before pp_param_type)
+    (with_space_list pp_param_type)
     params
-    (with_space_before pp_result_type)
+    (with_space_list pp_result_type)
     results
 
 type nonrec 'a table_type = limits * 'a ref_type
@@ -558,21 +556,14 @@ let rec pp_instr fmt = function
   | Nop -> pp fmt "nop"
   | Unreachable -> pp fmt "unreachable"
   | Block (id, bt, e) ->
-    pp fmt "(block%a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
-      pp_expr e
+    pp fmt "(block%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
+      e
   | Loop (id, bt, e) ->
-    pp fmt "(loop%a %a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
+    pp fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
       e
   | If_else (id, bt, e1, e2) ->
     pp fmt
-      "(if%a %a@\n\
-      \  @[<v>(then@\n\
-      \  @[<v>%a@]@\n\
-       )@\n\
-       (else@\n\
-      \  @[<v>%a@]@\n\
-       )@]@\n\
-       )"
+      "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)@\n(else@\n  @[<v>%a@]@\n)@]@\n)"
       pp_id_opt id pp_block_type_opt bt pp_expr e1 pp_expr e2
   | Br id -> pp fmt "br %a" pp_indice id
   | Br_if id -> pp fmt "br_if %a" pp_indice id
