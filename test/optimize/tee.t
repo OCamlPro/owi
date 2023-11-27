@@ -1,7 +1,7 @@
 set get tee simplification:
   $ dune exec -- owi opt tee.wast
   (module
-    (func $start   (local $x i32)
+    (func $start (local $x i32)
       i32.const 41
       local.tee 0
       i32.const 1

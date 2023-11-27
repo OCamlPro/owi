@@ -1,18 +1,18 @@
 return instructions:
   $ dune exec -- owi opt return.wast
   (module
-    (func $return  (result i32) 
+    (func $return (result i32)
       i32.const 42
       return
     )
-    (func $return_call  (result i32) 
+    (func $return_call (result i32)
       return_call 0
     )
-    (func $return_call_indirect  (result i32) 
+    (func $return_call_indirect (result i32)
       i32.const 0
       return_call_indirect 0  (result i32)
     )
-    (func $start   
+    (func $start
       call 0
       drop
       call 1

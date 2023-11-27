@@ -1,13 +1,13 @@
 i**.extend_** i32.wrap_i64 instructions:
   $ dune exec -- owi opt extend_wrap.wast
   (module
-    (func $extend   
+    (func $extend
       
     )
-    (func $wrap   
+    (func $wrap
       
     )
-    (func $start   
+    (func $start
       call 0
       call 1
     )

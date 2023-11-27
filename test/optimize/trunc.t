@@ -1,13 +1,13 @@
 **.trunc_** **.trunc_sat_** instructions:
   $ dune exec -- owi opt trunc.wast
   (module
-    (func $trunc   
+    (func $trunc
       
     )
-    (func $trunc_sat   
+    (func $trunc_sat
       
     )
-    (func $start   
+    (func $start
       call 0
       call 1
     )
