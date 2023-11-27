@@ -499,7 +499,7 @@ type global =
   }
 
 let pp_global fmt (g : global) =
-  <span data-count="0">p</span>p fmt "(global %a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
+  <span data-count="0">p</span>p fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
 
 type data_mode =
   | Data_passive
@@ -517,7 +517,7 @@ type data =
   }
 
 let pp_data fmt (d : data) =
-  <span data-count="0">p</span>p fmt {|(data %a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
+  <span data-count="0">p</span>p fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
 
 type elem_mode =
   | Elem_passive
@@ -542,7 +542,7 @@ type elem =
 let pp_elem_expr fmt e = <span data-count="0">p</span>p fmt "(item %a)" pp_expr e
 
 let pp_elem fmt (e : elem) =
-  <span data-count="0">p</span>p fmt "@[&lt;hov 2&gt;(elem %a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
+  <span data-count="0">p</span>p fmt "@[&lt;hov 2&gt;(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
     pp_ref_type e.typ
     (pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline pp_elem_expr)
     e.init
@@ -577,7 +577,7 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="0">p</span>p fmt "(module %a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
+  <span data-count="0">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
     (pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline pp_module_field)
     m.fields
 
@@ -587,7 +587,7 @@ type action =
 
 let pp_action fmt = function
   | <span data-count="0">I</span>nvoke (mod_name, name, c) -&gt;
-    pp fmt "(invoke %a %s %a)" pp_id_opt mod_name name pp_consts c
+    pp fmt {|(invoke%a "%s" %a)|} pp_id_opt mod_name name pp_consts c
   | <span data-count="0">G</span>et _ -&gt; pp fmt "&lt;action_get TODO&gt;"
 
 type result_const =
