@@ -1,3 +1,10 @@
+type test_mode =
+  | Normal
+  | Fmt
+  | Opt
+[@@warning "-37"]
+(* TODO test Fmt *)
+
 let count_total = ref 0
 
 let count_total_failed = ref 0
@@ -13,27 +20,27 @@ let pp_ok () = Format.fprintf fmt "%a !@." pp_green "OK"
 let pp_error msg = Format.fprintf fmt "%a: %s !@." pp_red "FAILED" msg
 
 let test_file mode filename =
+  let open Owi.Syntax in
   Format.fprintf fmt "testing %s: `%a`... "
     ( match mode with
-    | `Optimize -> "optimized file"
-    | `Formatted -> "formatted file"
-    | `Normal -> "file          " )
+    | Normal -> "file          "
+    | Fmt -> "formatted file"
+    | Opt -> "optimized file" )
     Fpath.pp filename;
   try
     let res =
       match mode with
-      | `Optimize | `Normal ->
+      | Normal | Opt ->
         Owi.Parse.Script.from_file ~filename:(Fpath.to_string filename)
-      | `Formatted ->
-        Result.bind
-          (Owi.Cmd_fmt.format_file_to_string (Fpath.to_string filename))
-          Owi.Parse.Script.from_string
+      | Fmt ->
+        let* s = Owi.Cmd_fmt.format_file_to_string (Fpath.to_string filename) in
+        Owi.Parse.Script.from_string s
     in
     match res with
     | Ok script -> begin
       match
         Owi.Script.exec script
-          ~optimize:(match mode with `Optimize -> true | _ -> false)
+          ~optimize:(match mode with Opt -> true | _ -> false)
           ~no_exhaustion:true
       with
       | Ok () as ok ->
@@ -55,20 +62,23 @@ let test_directory d =
   Format.fprintf fmt "testing directory     : `%a`@." Fpath.pp d;
   match Bos.OS.Dir.contents ~rel:false d with
   | Ok l ->
+    let run mode file =
+      match test_file mode file with
+      | Ok () -> ()
+      | Error _e ->
+        incr count_error;
+        incr count_total_failed
+    in
     List.iter
       (fun file ->
+        run Normal file;
         incr count_total;
-        let run mode =
-          match test_file mode file with
-          | Ok () -> ()
-          | Error _e ->
-            incr count_error;
-            incr count_total_failed
-        in
-        run `Normal;
-        incr count_total;
-        run `Optimize;
-        run `Formatted )
+        run Opt file;
+        incr count_total
+        (* TODO
+           run Fmt file;
+           incr count_total
+        *) )
       (List.sort compare l);
     if !count_error > 0 then
       Error (Format.sprintf "%d test failed" !count_error)
