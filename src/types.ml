@@ -12,24 +12,28 @@ type yes = Yes
 
 type no = No
 
-(* IR parameters *)
-type with_string_indices = < string_indices : yes >
-
-type without_string_indices = < string_indices : no >
-
-type with_ind_bt = < raw_bt : yes >
-
-type without_ind_bt = < raw_bt : no >
+type saucisse = A : (< string_id : no; raw_bt : no; .. >) -> saucisse
 
 (* various IR *)
-type text = < with_string_indices ; with_ind_bt >
+type text =
+  < string_id : yes
+  ; raw_bt : yes
+  ; dynexpr : yes >
 
-type simplified = < without_string_indices ; without_ind_bt >
+type simplified =
+  < string_id : no
+  ; raw_bt : no
+  ; dynexpr : yes >
+
+type simplified_const =
+  < string_id : no
+  ; raw_bt : no
+  ; dynexpr : no >
 
 (* identifiers *)
 
 type _ indice =
-  | Text : string -> < with_string_indices ; .. > indice
+  | Text : string -> < string_id : yes ; .. > indice
   | Raw : int -> < .. > indice
 
 let pp_id fmt id = pp fmt "$%s" id
@@ -308,10 +312,10 @@ let pp_result_type fmt results = pp_list ~pp_sep:pp_space pp_result_ fmt results
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
-  | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
+  | Bt_ind : 'a indice -> (< raw_bt : yes ; .. > as 'a) block_type
   | Bt_raw :
       ('a indice option * ('a param_type * 'a result_type))
-      -> (< .. > as 'a) block_type
+      -> saucisse block_type
 
 let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pp fmt "(type %a)" pp_indice ind
@@ -331,7 +335,7 @@ type nonrec 'a table_type = limits * 'a ref_type
 let pp_table_type fmt (limits, ref_type) =
   pp fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
-type nonrec 'a global_type = mut * 'a val_type
+type 'a global_type = mut *  'a val_type
 
 let pp_global_type fmt (mut, val_type) =
   match mut with
@@ -352,120 +356,111 @@ type 'a instr =
        }
 
      and instr_desc =*)
-  (* Numeric Instructions *)
-  | I32_const of Int32.t
-  | I64_const of Int64.t
-  | F32_const of Float32.t
-  | F64_const of Float64.t
-  | I_unop of nn * iunop
-  | F_unop of nn * funop
-  | I_binop of nn * ibinop
-  | F_binop of nn * fbinop
-  | I_testop of nn * itestop
-  | I_relop of nn * irelop
-  | F_relop of nn * frelop
-  | I_extend8_s of nn
-  | I_extend16_s of nn
-  | I64_extend32_s
-  | I32_wrap_i64
-  | I64_extend_i32 of sx
-  | I_trunc_f of nn * nn * sx
-  | I_trunc_sat_f of nn * nn * sx
-  | F32_demote_f64
-  | F64_promote_f32
-  | F_convert_i of nn * nn * sx
-  | I_reinterpret_f of nn * nn
-  | F_reinterpret_i of nn * nn
-  (* Reference instructions *)
-  | Ref_null of 'a heap_type
-  | Ref_is_null
-  | Ref_i31
-  | Ref_func of 'a indice
-  | Ref_as_non_null
-  | Ref_cast of nullable * 'a heap_type
-  | Ref_test of nullable * 'a heap_type
-  | Ref_eq
-  (* Parametric instructions *)
-  | Drop
-  | Select of 'a val_type list option
-  (* Variable instructions *)
-  | Local_get of 'a indice
-  | Local_set of 'a indice
-  | Local_tee of 'a indice
-  | Global_get of 'a indice
-  | Global_set of 'a indice
-  (* Table instructions *)
-  | Table_get of 'a indice
-  | Table_set of 'a indice
-  | Table_size of 'a indice
-  | Table_grow of 'a indice
-  | Table_fill of 'a indice
-  | Table_copy of 'a indice * 'a indice
-  | Table_init of 'a indice * 'a indice
-  | Elem_drop of 'a indice
-  (* Memory instructions *)
-  | I_load of nn * memarg
-  | F_load of nn * memarg
-  | I_store of nn * memarg
-  | F_store of nn * memarg
-  | I_load8 of nn * sx * memarg
-  | I_load16 of nn * sx * memarg
-  | I64_load32 of sx * memarg
-  | I_store8 of nn * memarg
-  | I_store16 of nn * memarg
-  | I64_store32 of memarg
-  | Memory_size
-  | Memory_grow
-  | Memory_fill
-  | Memory_copy
-  | Memory_init of 'a indice
-  | Data_drop of 'a indice
-  (* Control instructions *)
-  | Nop
-  | Unreachable
-  | Block of string option * 'a block_type option * 'a expr
-  | Loop of string option * 'a block_type option * 'a expr
-  | If_else of string option * 'a block_type option * 'a expr * 'a expr
-  | Br of 'a indice
-  | Br_if of 'a indice
-  | Br_table of 'a indice array * 'a indice
-  | Br_on_cast of 'a indice * 'a ref_type * 'a ref_type
-  | Br_on_cast_fail of 'a indice * nullable * 'a heap_type
-  | Br_on_non_null of 'a indice
-  | Br_on_null of 'a indice
-  | Return
-  | Return_call of 'a indice
-  | Return_call_indirect of 'a indice * 'a block_type
-  | Return_call_ref of 'a block_type
-  | Call of 'a indice
-  | Call_indirect of 'a indice * 'a block_type
-  | Call_ref of 'a indice
-  (* Array instructions *)
-  | Array_get of 'a indice
-  | Array_get_u of 'a indice
-  | Array_len
-  | Array_new of 'a indice
-  | Array_new_data of 'a indice * 'a indice
-  | Array_new_default of 'a indice
-  | Array_new_elem of 'a indice * 'a indice
-  | Array_new_fixed of 'a indice * int
-  | Array_set of 'a indice
-  (* I31 *)
-  | I31_get_u
-  | I31_get_s
-  (* struct*)
-  | Struct_get of 'a indice * 'a indice
-  | Struct_get_s of 'a indice * 'a indice
-  | Struct_new of 'a indice
-  | Struct_new_default of 'a indice
-  | Struct_set of 'a indice * 'a indice
-  (* extern *)
-  | Extern_externalize
-  | Extern_internalize
+  (* constant expr *)
+  | I32_const : Int32.t -> (< .. > as 'a) instr
+  | I64_const : Int64.t -> (< .. > as 'a) instr
+  | F32_const : Float32.t -> (< .. > as 'a) instr
+  | F64_const : Float64.t -> (< .. > as 'a) instr
+  | I_binop : nn * ibinop -> (< .. > as 'a) instr
+  | Global_get : 'a indice -> (< .. > as 'a) instr
+  | Ref_null : 'a heap_type -> (< .. > as 'a) instr
+  | Ref_func : 'a indice -> (< .. > as 'a) instr
+  | Ref_i31 : (< .. > as 'a) instr
+  | Array_new : 'a indice -> (< .. > as 'a) instr
+  | Array_new_default : 'a indice -> (< .. > as 'a) instr
+  (* dyn expr *)
+  | I_unop : nn * iunop -> (< dynexpr : yes; .. > as 'a) instr
+  | F_unop : nn * funop -> (< dynexpr : yes; .. > as 'a) instr
+  | F_binop : nn * fbinop -> (< dynexpr : yes; .. > as 'a) instr
+  | I_testop : nn * itestop -> (< dynexpr : yes; .. > as 'a) instr
+  | I_relop : nn * irelop -> (< dynexpr : yes; .. > as 'a) instr
+  | F_relop : nn * frelop -> (< dynexpr : yes; .. > as 'a) instr
+  | I_extend8_s : nn -> (< dynexpr : yes; .. > as 'a) instr
+  | I_extend16_s : nn -> (< dynexpr : yes; .. > as 'a) instr
+  | I64_extend32_s : (< dynexpr : yes; .. > as 'a) instr
+  | I32_wrap_i64 : (< dynexpr : yes; .. > as 'a) instr
+  | I64_extend_i32 : sx -> (< dynexpr : yes; .. > as 'a) instr
+  | I_trunc_f : nn * nn * sx -> (< dynexpr : yes; .. > as 'a) instr
+  | I_trunc_sat_f : nn * nn * sx -> (< dynexpr : yes; .. > as 'a) instr
+  | F32_demote_f64 : (< dynexpr : yes; .. > as 'a) instr
+  | F64_promote_f32 : (< dynexpr : yes; .. > as 'a) instr
+  | F_convert_i : nn * nn * sx -> (< dynexpr : yes; .. > as 'a) instr
+  | I_reinterpret_f : nn * nn -> (< dynexpr : yes; .. > as 'a) instr
+  | F_reinterpret_i : nn * nn -> (< dynexpr : yes; .. > as 'a) instr
+  | Ref_is_null : (< dynexpr : yes; .. > as 'a) instr
+  | Ref_as_non_null : (< dynexpr : yes; .. > as 'a) instr
+  | Ref_cast : nullable * 'a heap_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Ref_test : nullable * 'a heap_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Ref_eq : (< dynexpr : yes; .. > as 'a) instr
+  | Drop : (< dynexpr : yes; .. > as 'a) instr
+  | Select : 'a val_type list option -> (< dynexpr : yes; .. > as 'a) instr
+  | Local_get : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Local_set : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Local_tee : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Global_set : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_get : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_set : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_size : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_grow : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_fill : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_copy : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Table_init : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Elem_drop : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | I_load : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | F_load : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I_store : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | F_store : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I_load8 : nn * sx * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I_load16 : nn * sx * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I64_load32 : sx * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I_store8 : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I_store16 : nn * memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | I64_store32 : memarg -> (< dynexpr : yes; .. > as 'a) instr
+  | Memory_size : (< dynexpr : yes; .. > as 'a) instr
+  | Memory_grow : (< dynexpr : yes; .. > as 'a) instr
+  | Memory_fill : (< dynexpr : yes; .. > as 'a) instr
+  | Memory_copy : (< dynexpr : yes; .. > as 'a) instr
+  | Memory_init : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Data_drop : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Nop : (< dynexpr : yes; .. > as 'a) instr
+  | Unreachable : (< dynexpr : yes; .. > as 'a) instr
+  | Block : string option * 'a block_type option * 'a expr -> (< dynexpr : yes; .. > as 'a) instr
+  | Loop : string option * 'a block_type option * 'a expr -> (< dynexpr : yes; .. > as 'a) instr
+  | If_else : string option * 'a block_type option * 'a expr * 'a expr -> (< dynexpr : yes; .. > as 'a) instr
+  | Br : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_if : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_table : 'a indice array * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_on_cast : 'a indice * 'a ref_type * 'a ref_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_on_cast_fail : 'a indice * nullable * 'a heap_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_on_non_null : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Br_on_null : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Return : (< dynexpr : yes; .. > as 'a) instr
+  | Return_call : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Return_call_indirect : 'a indice * 'a block_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Return_call_ref : 'a block_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Call : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Call_indirect : 'a indice * 'a block_type -> (< dynexpr : yes; .. > as 'a) instr
+  | Call_ref : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_get : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_get_u : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_len : (< dynexpr : yes; .. > as 'a) instr
+  | Array_new_data : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_new_elem : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_new_fixed : 'a indice * int -> (< dynexpr : yes; .. > as 'a) instr
+  | Array_set : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | I31_get_u : (< dynexpr : yes; .. > as 'a) instr
+  | I31_get_s : (< dynexpr : yes; .. > as 'a) instr
+  | Struct_get : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Struct_get_s : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Struct_new : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Struct_new_default : 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Struct_set : 'a indice * 'a indice -> (< dynexpr : yes; .. > as 'a) instr
+  | Extern_externalize : (< dynexpr : yes; .. > as 'a) instr
+  | Extern_internalize : (< dynexpr : yes; .. > as 'a) instr
 
 and 'a expr = 'a instr list
 
-let rec pp_instr fmt = function
+let rec pp_instr : type kind. formatter -> kind instr -> unit = fun fmt -> function
   | I32_const i -> pp fmt "i32.const %ld" i
   | I64_const i -> pp fmt "i64.const %Ld" i
   | F32_const f -> pp fmt "f32.const %a" Float32.pp f
@@ -602,7 +597,7 @@ let rec pp_instr fmt = function
     pp fmt "br_on_cast_fail %a %a %a" pp_indice id pp_nullable n pp_heap_type t
   | Ref_eq -> pp fmt "ref.eq"
 
-and pp_expr fmt instrs = pp_list ~pp_sep:pp_newline pp_instr fmt instrs
+and pp_expr : type kind. formatter -> kind expr -> unit = fun fmt expr -> pp_list ~pp_sep:pp_newline pp_instr fmt expr
 
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)

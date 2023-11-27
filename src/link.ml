@@ -7,17 +7,11 @@ open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
-type global = Concrete_global.t
-
-type table = Concrete_table.t
-
-type func = Concrete_value.Func.t
-
 type exports =
-  { globals : global StringMap.t
+  { globals : Concrete_global.t StringMap.t
   ; memories : Concrete_memory.t StringMap.t
-  ; tables : table StringMap.t
-  ; functions : func StringMap.t
+  ; tables : Concrete_table.t StringMap.t
+  ; functions : Concrete_value.Func.t StringMap.t
   ; defined_names : StringSet.t
   }
 
@@ -61,8 +55,8 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error "unknown import"
     | v -> Ok v )
 
-let load_global (ls : 'f state) (import : simplified global_type Imported.t) :
-  global Result.t =
+let load_global (ls : 'f state) (import : saucisse global_type Imported.t) :
+  Concrete_global.t Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
@@ -101,7 +95,7 @@ module Eval_const = struct
          | _ -> assert false )
 
   (* TODO: simplified+const instr *)
-  let instr env stack instr =
+  let instr env stack (instr : simplified_const instr) =
     match instr with
     | I32_const n -> ok @@ Stack.push_i32 stack n
     | I64_const n -> ok @@ Stack.push_i64 stack n
@@ -131,7 +125,6 @@ module Eval_const = struct
     | Ref_i31 ->
       (* TODO *)
       ok stack
-    | _ -> assert false
 
   (* TODO: simplified+const expr *)
   let expr env e : Concrete_value.t Result.t =
@@ -144,13 +137,12 @@ module Eval_const = struct
 end
 
 let eval_global ls env
-  (global : (Simplified.global, simplified global_type) Runtime.t) :
-  global Result.t =
+  (global : (Simplified.global, saucisse global_type) Runtime.t) : Concrete_global.t Result.t =
   match global with
   | Local global ->
     let* value = Eval_const.expr env global.init in
     let mut, typ = global.typ in
-    let global : global = { value; label = global.id; mut; typ } in
+    let global : Concrete_global.t = { value; label = global.id; mut; typ } in
     Ok global
   | Imported import -> load_global ls import
 
@@ -212,7 +204,7 @@ let table_types_are_compatible (import, (t1 : simplified ref_type))
   limit_is_included ~import ~imported && t1 = t2
 
 let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
-  table Result.t =
+  Concrete_table.t Result.t =
   let typ : simplified table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
@@ -221,7 +213,7 @@ let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
       import.modul import.name pp_table_type typ pp_table_type (t.limits, t.typ)
 
 let eval_table ls (table : (_, simplified table_type) Runtime.t) :
-  table Result.t =
+  Concrete_table.t Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
@@ -244,7 +236,7 @@ let func_types_are_compatible a b =
   remove_param a = remove_param b
 
 let load_func (ls : 'f state) (import : simplified block_type Imported.t) :
-  func Result.t =
+  Concrete_value.Func.t Result.t =
   let (Bt_raw ((None | Some _), typ)) = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' =
@@ -257,7 +249,7 @@ let load_func (ls : 'f state) (import : simplified block_type Imported.t) :
   if func_types_are_compatible typ type' then Ok func
   else Error "incompatible import type (Link.load_func)"
 
-let eval_func ls (finished_env : Link_env.t') func : func Result.t =
+let eval_func ls (finished_env : Link_env.t') func : Concrete_value.Func.t Result.t =
   match func with
   | Runtime.Local func -> ok @@ Concrete_value.Func.wasm func finished_env
   | Imported import -> load_func ls import

@@ -35,13 +35,13 @@ type t =
 
 val cast_ref : externref -> 'a Type.Id.t -> 'a option
 
-val of_instr : simplified instr -> t
+val of_instr : simplified_const instr -> t
 
 val to_instr : t -> simplified instr
 
 val ref_null' : simplified heap_type -> ref_value
 
-val ref_null : simplified heap_type -> t
+val ref_null : _ heap_type -> t
 
 val ref_func : Func.t -> t
 

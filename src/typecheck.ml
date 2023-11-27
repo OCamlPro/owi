@@ -9,7 +9,7 @@ open Format
 
 type typ =
   | Num_type of num_type
-  | Ref_type of simplified heap_type
+  | Ref_type of saucisse heap_type
   | Any
   | Something
 
@@ -36,11 +36,11 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals : (global, simplified global_type) Runtime.t Named.t
-    ; result_type : simplified result_type
-    ; funcs : (simplified func, simplified block_type) Runtime.t Named.t
+    ; globals : (global, saucisse global_type) Runtime.t Named.t
+    ; result_type : saucisse result_type
+    ; funcs : (saucisse func, saucisse block_type) Runtime.t Named.t
     ; blocks : typ list list
-    ; tables : (simplified table, simplified table_type) Runtime.t Named.t
+    ; tables : (saucisse table, saucisse table_type) Runtime.t Named.t
     ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
@@ -58,10 +58,10 @@ module Env = struct
     let value = Indexed.get_at_exn i env.funcs.values in
     match value with
     | Local { type_f; _ } ->
-      let (Bt_raw ((None | Some _), t)) = type_f in
+      let ( (Bt_raw ((None | Some _), t))) = type_f in
       t
     | Runtime.Imported t ->
-      let (Bt_raw ((None | Some _), t)) = t.desc in
+      let ( (Bt_raw ((None | Some _), t))) = t.desc in
       t
 
   let block_type_get i env = List.nth env.blocks i
@@ -94,10 +94,6 @@ module Env = struct
     { locals; globals; result_type; funcs; tables; elems; blocks = []; refs }
 end
 
-type env = Env.t
-
-type stack = typ list
-
 let i32 = Num_type I32
 
 let i64 = Num_type I64
@@ -119,33 +115,33 @@ let arraytype _modul _i =
   f32
 
 module Stack : sig
-  type t = typ list
+  type 'a t = 'a typ list
 
-  val drop : t -> t Result.t
+  val drop : 'a t -> 'a t Result.t
 
-  val pop : t -> t -> t Result.t
+  val pop : 'a t -> 'a t -> 'a t Result.t
 
-  val push : t -> t -> t Result.t
+  val push : 'a t -> 'a t -> 'a t Result.t
 
-  val pop_push : simplified block_type option -> t -> t Result.t
+  val pop_push : (< raw_bt : no; .. > as 'a) block_type option -> 'a t -> 'a t Result.t
 
-  val pop_ref : t -> t Result.t
+  val pop_ref : 'a t -> 'a t Result.t
 
-  val equal : t -> t -> bool
+  val equal : 'a t -> 'a t -> bool
 
-  val match_ref_type : simplified heap_type -> simplified heap_type -> bool
+  val match_ref_type : 'a heap_type -> 'a heap_type -> bool
 
-  val match_types : typ -> typ -> bool
+  val match_types : 'a typ -> 'a typ -> bool
 
-  val pp : formatter -> t -> unit
+  val pp : formatter -> 'a t -> unit
 
-  val pp_error : formatter -> t * t -> unit
+  val pp_error : formatter -> 'a t * 'a t -> unit
 
-  val match_prefix : prefix:t -> stack:t -> t option
+  val match_prefix : prefix:'a t -> stack:'a t -> 'a t option
 end = struct
-  type t = typ list
+  type 'a t = 'a typ list
 
-  let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
+  let pp fmt s = pp fmt "[%a]" pp_typ_list s
 
   let pp_error fmt (expected, got) =
     Format.pp fmt "requires %a but stack has %a" pp expected pp got
@@ -224,7 +220,7 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push (bt : simplified block_type option) stack =
+  let pop_push (bt : < raw_bt : no; .. > block_type option) stack =
     match bt with
     | None -> Ok stack
     | Some (Bt_raw ((None | Some _), (pt, rt))) ->
@@ -235,8 +231,8 @@ end = struct
       push rt stack
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
-  stack Result.t =
+let rec typecheck_instr (env : 'a Env.t) stack (instr : 'a instr) :
+  'a Stack.t Result.t =
   match instr with
   | Nop -> Ok stack
   | Drop -> Stack.drop stack
@@ -493,7 +489,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     assert false
 
 and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
-  ~stack:previous_stack : stack Result.t =
+  ~stack:previous_stack : 'a Stack.t Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
       ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : simplified block_type) ->
@@ -533,7 +529,7 @@ let typecheck_function (modul : modul) func refs =
       error_s "type mismatch func %a" Stack.pp_error (required, stack)
     else Ok ()
 
-let typecheck_const_instr (modul : modul) refs stack = function
+let typecheck_const_instr (modul : modul) refs (stack : simplified_const Stack.t) : simplified_const instr -> simplified_const Stack.t Result.t = function
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
@@ -549,7 +545,8 @@ let typecheck_const_instr (modul : modul) refs stack = function
       | Local _ -> Error "unknown global"
       | Imported t -> Ok t.desc
     in
-    Stack.push [ typ_of_val_type typ ] stack
+    let t : simplified_const typ = typ_of_val_type typ in
+    Stack.push [ t ] stack
   | I_binop (t, _op) ->
     let t = itype t in
     let* stack = Stack.pop [ t; t ] stack in
@@ -564,18 +561,19 @@ let typecheck_const_instr (modul : modul) refs stack = function
     Stack.push [ i31 ] stack
   | _ -> assert false
 
-let typecheck_const_expr (modul : modul) refs =
-  list_fold_left (typecheck_const_instr modul refs) []
+let typecheck_const_expr (modul : modul) refs e : simplified_const Stack.t Result.t  =
+  list_fold_left (typecheck_const_instr modul refs) [] e
 
 let typecheck_global (modul : modul) refs
-  (global : (global, simplified global_type) Runtime.t Indexed.t) =
+  (global : (global, simplified_const global_type) Runtime.t Indexed.t) =
   match Indexed.get global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
     let* real_type = typecheck_const_expr modul refs init in
     match real_type with
     | [ real_type ] ->
-      let expected = typ_of_val_type @@ snd typ in
+        let typ : simplified_const val_type = snd typ in
+      let expected : simplified_const typ = typ_of_val_type typ in
       if expected <> real_type then
         error
         @@ asprintf "type mismatch (typecheck_global) got %a expected %a" pp_typ
@@ -585,7 +583,7 @@ let typecheck_global (modul : modul) refs
 
 let typecheck_elem modul refs (elem : elem Indexed.t) =
   let elem = Indexed.get elem in
-  let _null, expected_type = elem.typ in
+  let _null, (expected_type : simplified_const ref_type) = elem.typ in
   let* () =
     list_iter
       (fun init ->

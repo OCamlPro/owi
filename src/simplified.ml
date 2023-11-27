@@ -20,15 +20,14 @@ type exports =
   }
 
 type global =
-  { typ : simplified global_type (* TODO: init : simplified+const expr*)
-  ; init : simplified expr
+  { typ : saucisse global_type
+  ; init : simplified_const expr
   ; id : string option
   }
 
 type data_mode =
   | Data_passive
-  (* TODO: Data_active simplified+const expr*)
-  | Data_active of int option * simplified expr
+  | Data_active of int option * simplified_const expr
 
 type data =
   { id : string option
@@ -38,14 +37,13 @@ type data =
 
 type elem_mode =
   | Elem_passive
-  (* TODO: Elem_active simplified+const expr*)
-  | Elem_active of int option * simplified expr
+  | Elem_active of int option * simplified_const expr
   | Elem_declarative
 
 type elem =
   { id : string option
-  ; typ : simplified ref_type (* TODO: init : simplified+const expr*)
-  ; init : simplified expr list
+  ; typ : < string_id : no; raw_bt : no > ref_type
+  ; init : simplified_const expr list
   ; mode : elem_mode
   }
 
@@ -54,8 +52,8 @@ type modul =
   ; global : (global, simplified global_type) Runtime.t Named.t
   ; table : (simplified table, simplified table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (simplified func, simplified block_type) Runtime.t Named.t
-      (* TODO: switch to func_type *)
+  ; (* TODO: switch to func_type *)
+  func : (simplified func, simplified block_type) Runtime.t Named.t
   ; elem : elem Named.t
   ; data : data Named.t
   ; exports : exports

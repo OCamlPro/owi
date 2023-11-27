@@ -6,7 +6,7 @@ open Types
 open Syntax
 
 let find msg (named : 'a Named.t) (indice : text indice option) :
-  simplified indice Result.t =
+  < string_id : no ; .. > indice Result.t =
   match indice with
   | None -> error_s "%s" msg
   | Some indice -> (
@@ -364,8 +364,8 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
 
 (* TODO: simplified+const expr/list *)
 let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
-  simplified expr Result.t =
-  let const_instr (instr : text instr) : simplified instr Result.t =
+  simplified_const expr Result.t =
+  let const_instr (instr : text instr) : simplified_const instr Result.t =
     match instr with
     | Global_get id -> begin
       let* idx, mut = find_global modul ~imported_only:true (Some id) in
