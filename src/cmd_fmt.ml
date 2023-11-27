@@ -30,3 +30,8 @@ let cmd inplace (file : string) =
           let fmt = Stdlib.Format.formatter_of_out_channel chan in
           Format.pp fmt "%a@\n" pp () )
     else Format.pp_std "%a@\n" pp ()
+
+let format_file_to_string (file : string) =
+  match get_printer file with
+  | Error _ as e -> e
+  | Ok pp -> Ok (Format.asprintf "%a@\n" pp ())
