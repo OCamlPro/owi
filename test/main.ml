@@ -12,14 +12,30 @@ let pp_ok () = Format.fprintf fmt "%a !@." pp_green "OK"
 
 let pp_error msg = Format.fprintf fmt "%a: %s !@." pp_red "FAILED" msg
 
-let test_file ~optimize f =
+let test_file mode filename =
   Format.fprintf fmt "testing %s: `%a`... "
-    (if optimize then "optimized file" else "file          ")
-    Fpath.pp f;
+    ( match mode with
+    | `Optimize -> "optimized file"
+    | `Formatted -> "formatted file"
+    | `Normal -> "file          " )
+    Fpath.pp filename;
   try
-    match Owi.Parse.Script.from_file ~filename:(Fpath.to_string f) with
+    let res =
+      match mode with
+      | `Optimize | `Normal ->
+        Owi.Parse.Script.from_file ~filename:(Fpath.to_string filename)
+      | `Formatted ->
+        Result.bind
+          (Owi.Cmd_fmt.format_file_to_string (Fpath.to_string filename))
+          Owi.Parse.Script.from_string
+    in
+    match res with
     | Ok script -> begin
-      match Owi.Script.exec script ~optimize ~no_exhaustion:true with
+      match
+        Owi.Script.exec script
+          ~optimize:(match mode with `Optimize -> true | _ -> false)
+          ~no_exhaustion:true
+      with
       | Ok () as ok ->
         pp_ok ();
         ok
@@ -42,21 +58,17 @@ let test_directory d =
     List.iter
       (fun file ->
         incr count_total;
-        begin
-          match test_file ~optimize:false file with
+        let run mode =
+          match test_file mode file with
           | Ok () -> ()
           | Error _e ->
             incr count_error;
             incr count_total_failed
-        end;
+        in
+        run `Normal;
         incr count_total;
-        begin
-          match test_file ~optimize:true file with
-          | Ok () -> ()
-          | Error _e ->
-            incr count_error;
-            incr count_total_failed
-        end )
+        run `Optimize;
+        run `Formatted )
       (List.sort compare l);
     if !count_error > 0 then
       Error (Format.sprintf "%d test failed" !count_error)
