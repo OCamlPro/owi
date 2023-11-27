@@ -34,11 +34,7 @@ type _ indice =
 
 let pp_id fmt id = pp fmt "$%s" id
 
-let pp_id_opt fmt = function
-  | None -> ()
-  | Some i ->
-    pp fmt " ";
-    pp_id fmt i
+let pp_id_opt fmt = function None -> () | Some i -> pp fmt " %a" pp_id i
 
 let pp_indice (type kind) fmt : kind indice -> unit = function
   | Raw u -> pp_int fmt u
@@ -313,8 +309,7 @@ let pp_result_type fmt results = pp_list ~pp_sep:pp_space pp_result_ fmt results
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
 let with_space_list printer fmt l =
-  (match l with [] -> () | _l -> pp fmt " ");
-  printer fmt l
+  match l with [] -> () | _l -> pp fmt " %a" printer l
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
@@ -779,5 +774,4 @@ let pp_const fmt = function
   | Const_i31 -> pp fmt "ref.i31"
   | Const_struct -> pp fmt "ref.struct"
 
-let pp_consts fmt c =
-  pp_list ~pp_sep:pp_space (fun fmt c -> pp fmt "%a" pp_const c) fmt c
+let pp_consts fmt c = pp_list ~pp_sep:pp_space pp_const fmt c

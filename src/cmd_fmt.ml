@@ -1,6 +1,4 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021 Léo Andrès *)
-(* Copyright © 2021 Pierre Chambart *)
 
 open Syntax
 
@@ -9,8 +7,7 @@ let read_script filename =
     error_s "file `%s` doesn't exist" filename
   else Parse.Script.from_file ~filename
 
-let cmd debug _unsafe inplace (file : string) =
-  if debug then Log.debug_on := true;
+let cmd inplace (file : string) =
   match read_script file with
   | Ok script ->
     if inplace then
