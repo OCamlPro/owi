@@ -1,7 +1,7 @@
 select instruction:
   $ dune exec -- owi opt select.wast
   (module
-    (func $start   
+    (func $start
       
     )
     (start 0)

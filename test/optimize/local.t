@@ -1,35 +1,35 @@
 unused local variables:
   $ dune exec -- owi opt local.wast
   (module
-    (func $f0   (local  i32)
+    (func $f0 (local i32)
       i32.const 0
       local.set 0
     )
-    (func $f1   (local  i32)
+    (func $f1 (local i32)
       i32.const 0
       local.set 0
     )
-    (func $f2   (local  i32)
+    (func $f2 (local i32)
       i32.const 0
       local.set 0
     )
-    (func $f3   (local  i32)
+    (func $f3 (local i32)
       i32.const 0
       local.set 0
     )
-    (func $f12   (local  i32) (local  i32)
-      i32.const 0
-      local.set 0
-      i32.const 0
-      local.set 1
-    )
-    (func $f23   (local  i32) (local  i32)
+    (func $f12 (local i32) (local i32)
       i32.const 0
       local.set 0
       i32.const 0
       local.set 1
     )
-    (func $f023   (local  i32) (local  i32) (local  i32)
+    (func $f23 (local i32) (local i32)
+      i32.const 0
+      local.set 0
+      i32.const 0
+      local.set 1
+    )
+    (func $f023 (local i32) (local i32) (local i32)
       i32.const 0
       local.set 0
       i32.const 0
@@ -37,7 +37,7 @@ unused local variables:
       i32.const 0
       local.set 2
     )
-    (func $start   
+    (func $start
       call 0
       call 1
       call 2

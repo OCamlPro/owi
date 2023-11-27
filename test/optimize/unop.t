@@ -1,16 +1,16 @@
 unop () instructions:
   $ dune exec -- owi opt unop.wast
   (module
-    (func $iunop   
+    (func $iunop
       
     )
-    (func $f32unop   
+    (func $f32unop
       
     )
-    (func $f64unop   
+    (func $f64unop
       
     )
-    (func $start   
+    (func $start
       call 0
       call 1
       call 2
