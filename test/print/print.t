@@ -1,5 +1,5 @@
 print symbolic:
-  $ dune exec -- ./print_text.exe m.wast
+  $ dune exec owi -- fmt m.wast
   (module
     (func $f (param $x i32) (param $y i32) (result i32)
       local.get $x

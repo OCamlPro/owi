@@ -3,15 +3,5 @@
  (modules print_simplified)
  (libraries owi))
 
-(executable
- (name print_text)
- (modules print_text)
- (libraries owi))
-
 (cram
- (deps
-  print_text.exe
-  print_simplified.exe
-  m.wast
-  locals.wast
-  locals_drop.wast))
+ (deps print_simplified.exe m.wast locals.wast locals_drop.wast))
