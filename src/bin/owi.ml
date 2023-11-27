@@ -55,7 +55,7 @@ let version = "%%VERSION%%"
 let fmt_cmd =
   let open Cmdliner in
   let info =
-    let doc = "Format a module" in
+    let doc = "Format a .wat or .wast file" in
     let man = [] @ shared_man in
     Cmd.info "fmt" ~version ~doc ~sdocs ~man
   in
@@ -63,7 +63,7 @@ let fmt_cmd =
     let doc = "Format in-place, overwriting input file" in
     Cmdliner.Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
   in
-  Cmd.v info Term.(const Cmd_fmt.cmd $ debug $ unsafe $ inplace $ file)
+  Cmd.v info Term.(const Cmd_fmt.cmd $ inplace $ file)
 
 let opt_cmd =
   let open Cmdliner in
