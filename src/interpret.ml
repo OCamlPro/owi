@@ -1190,6 +1190,7 @@ module Make (P : Interpret_functor_intf.P) :
         Bool.or_ I32.(offset < const 0l)
         @@ Bool.or_ I32.(Memory.size mem < addr + const 2l)
         @@ Bool.or_ I32.(pos < const 0l)
+        @@ Bool.or_ I32.(addr + const 2l < const 0l)
         @@ I32.(addr < const 0l)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
