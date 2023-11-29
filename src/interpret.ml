@@ -57,7 +57,7 @@ module Make (P : Interpret_functor_intf.P) :
 
     let ( * ) = mul
 
-    let ( /) = div
+    let ( / ) = div
 
     let ( ~- ) x = const_i32 0l - x
 
@@ -175,9 +175,7 @@ module Make (P : Interpret_functor_intf.P) :
           try
             match s with
             | S ->
-              let> overflow =
-                Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l)
-              in
+              let> overflow = Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l) in
               if overflow then Choice.trap Integer_overflow
               else Choice.return @@ div n1 n2
             | U -> Choice.return @@ unsigned_div n1 n2
@@ -959,7 +957,7 @@ module Make (P : Interpret_functor_intf.P) :
         @@ Bool.or_ I64.(ge_u new_size (page_size * page_size))
         @@
         match max_size with
-        | Some max -> I64.(new_size > (max * page_size))
+        | Some max -> I64.(new_size > max * page_size)
         | None ->
           (* TODO: replace by false... *)
           I64.(const_i64 0L <> const_i64 0L)
@@ -969,7 +967,7 @@ module Make (P : Interpret_functor_intf.P) :
       if too_big then Stack.push_i32 stack I32.(sub (const 0l) (const 1l))
       else begin
         Memory.grow mem I64.(to_int32 delta);
-        let res = I64.(to_int32 @@ old_size / page_size) in
+        let res = I64.(to_int32 @@ (old_size / page_size)) in
         Stack.push_i32 stack res
       end
     end
@@ -1413,7 +1411,7 @@ module Make (P : Interpret_functor_intf.P) :
             (n, stack)
           | S64 ->
             let n, stack = Stack.pop_i64 stack in
-            I64.to_int32 n, stack
+            (I64.to_int32 n, stack)
         in
         let pos, stack = Stack.pop_i32 stack in
         let addr = I32.(pos + offset) in
