@@ -210,6 +210,10 @@ See [CHANGELOG].
 
 See [LICENSE].
 
+### Fundings
+
+This project was funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] programme. See [Owi project on NLnet].
+
 [CHANGELOG]: ./CHANGES.md
 [dune-project]: ./dune-project
 [example]: ./example
@@ -222,9 +226,13 @@ See [LICENSE].
 [coverage percentage]: https://ocamlpro.github.io/owi/coverage
 [documentation]: https://ocamlpro.github.io/owi/api/owi
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
+[Next Generation Internet]: https://ngi.eu
+[NLnet]: https://nlnet.nl
+[NGI0 Core]: https://nlnet.nl/core
 [OCaml]: https://ocaml.org
 [opam]: https://opam.ocaml.org
 [Owi]: https://ocamlpro.github.io/owi
+[Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [spectest module]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#spectest-host-module
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
