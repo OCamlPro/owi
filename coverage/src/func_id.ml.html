@@ -101,16 +101,16 @@ type 'a collection =
 let empty = { c = IMap.empty; last = 0 }
 
 let add f t { last; c } =
-  <span data-count="2713">l</span>et c = IMap.add last (f, t) c in
-  <span data-count="2713">(</span>last, { c; last = suc<span data-count="2713">c</span> last })
+  <span data-count="2735">l</span>et c = IMap.add last (f, t) c in
+  <span data-count="2735">(</span>last, { c; last = suc<span data-count="2735">c</span> last })
 
 let get i c =
   <span data-count="78">l</span>et v, _ = IMap.find i c.c in
   <span data-count="78">v</span>
 
 let get_typ i c =
-  <span data-count="2795">l</span>et _, t = IMap.find i c.c in
-  <span data-count="2795">t</span>
+  <span data-count="2817">l</span>et _, t = IMap.find i c.c in
+  <span data-count="2817">t</span>
 </code></pre>
       </div>
     </div>

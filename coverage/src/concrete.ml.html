@@ -287,19 +287,19 @@ module P = struct
   module Choice = struct
     type 'a t = 'a
 
-    let return x = <span data-count="157415723">x</span> [@@inline]
+    let return x = <span data-count="157415750">x</span> [@@inline]
 
-    let bind x f = <span data-count="182012288">f</span> x [@@inline]
+    let bind x f = <span data-count="182012321">f</span> x [@@inline]
 
-    let select b = <span data-count="19577487">b</span> [@@inline]
+    let select b = <span data-count="19577491">b</span> [@@inline]
 
     let select_i32 i = <span data-count="1608796">i</span> [@@inline]
 
     let get = ()
 
-    let trap msg = <span data-count="4674">r</span>aise (Types.Trap msg)
+    let trap msg = <span data-count="4676">r</span>aise (Types.Trap msg)
 
-    let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4674">t</span>rap (Trap.to_strin<span data-count="4674">g</span> tr)
+    let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4676">t</span>rap (Trap.to_strin<span data-count="4676">g</span> tr)
   end
 
   let select cond ~if_true ~if_false = <span data-count="462">i</span>f cond then <span data-count="234">i</span>f_true else <span data-count="228">i</span>f_false
@@ -331,8 +331,8 @@ module P = struct
     let get_elem = Link_env.get_elem
 
     let get_data env n =
-      <span data-count="662">l</span>et data = Link_env.get_data env n in
-      <span data-count="662">C</span>hoice.return data
+      <span data-count="664">l</span>et data = Link_env.get_data env n in
+      <span data-count="664">C</span>hoice.return data
 
     let get_global = Link_env.get_global
 
@@ -351,7 +351,7 @@ module P = struct
 
     let modul (t : extern_func Link.module_to_run) = <span data-count="922">t</span>.modul
 
-    let to_run (t : extern_func Link.module_to_run) = <span data-count="2679">t</span>.to_run
+    let to_run (t : extern_func Link.module_to_run) = <span data-count="2683">t</span>.to_run
   end
 end
 </code></pre>

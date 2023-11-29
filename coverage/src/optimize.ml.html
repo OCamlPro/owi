@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>optimize.ml &mdash; Coverage report</title>
-    <meta name="description" content="71.60% coverage in src/optimize.ml">
+    <meta name="description" content="73.63% coverage in src/optimize.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,11 @@
           <span class="dirname">src/</span>optimize.ml
         </a>
       </h1>
-      <h2>71.60%</h2>
+      <h2>73.63%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:9.66%"></span>
       <span class="some-visited" style="top:10.80%"></span>
-      <span class="some-visited" style="top:12.12%"></span>
-      <span class="some-visited" style="top:13.26%"></span>
       <span class="unvisited" style="top:23.86%"></span>
       <span class="unvisited" style="top:24.24%"></span>
       <span class="unvisited" style="top:24.62%"></span>
@@ -54,12 +52,8 @@
       <span class="unvisited" style="top:35.42%"></span>
       <span class="unvisited" style="top:35.98%"></span>
       <span class="unvisited" style="top:36.36%"></span>
-      <span class="unvisited" style="top:36.74%"></span>
-      <span class="unvisited" style="top:37.88%"></span>
-      <span class="unvisited" style="top:38.45%"></span>
-      <span class="unvisited" style="top:38.83%"></span>
-      <span class="unvisited" style="top:39.20%"></span>
-      <span class="unvisited" style="top:39.58%"></span>
+      <span class="some-visited" style="top:36.74%"></span>
+      <span class="some-visited" style="top:38.83%"></span>
       <span class="unvisited" style="top:40.15%"></span>
       <span class="unvisited" style="top:40.53%"></span>
       <span class="unvisited" style="top:40.91%"></span>
@@ -180,13 +174,13 @@
 <a id="L61"></a><span class="visited"> </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="some-visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span class="visited"> </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span > </span>
-<a id="L70"></a><span class="some-visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
@@ -310,22 +304,22 @@
 <a id="L191"></a><span > </span>
 <a id="L192"></a><span class="unvisited"> </span>
 <a id="L193"></a><span > </span>
-<a id="L194"></a><span class="unvisited"> </span>
+<a id="L194"></a><span class="some-visited"> </span>
 <a id="L195"></a><span > </span>
 <a id="L196"></a><span > </span>
 <a id="L197"></a><span > </span>
 <a id="L198"></a><span > </span>
 <a id="L199"></a><span > </span>
-<a id="L200"></a><span class="unvisited"> </span>
+<a id="L200"></a><span class="visited"> </span>
 <a id="L201"></a><span > </span>
 <a id="L202"></a><span > </span>
-<a id="L203"></a><span class="unvisited"> </span>
+<a id="L203"></a><span class="visited"> </span>
 <a id="L204"></a><span > </span>
-<a id="L205"></a><span class="unvisited"> </span>
+<a id="L205"></a><span class="some-visited"> </span>
 <a id="L206"></a><span > </span>
-<a id="L207"></a><span class="unvisited"> </span>
+<a id="L207"></a><span class="visited"> </span>
 <a id="L208"></a><span > </span>
-<a id="L209"></a><span class="unvisited"> </span>
+<a id="L209"></a><span class="visited"> </span>
 <a id="L210"></a><span > </span>
 <a id="L211"></a><span > </span>
 <a id="L212"></a><span class="unvisited"> </span>
@@ -1186,7 +1180,7 @@ open Simplified
 open Types
 
 let rec optimize_expr expr : bool * simplified instr list =
-  <span data-count="59838">m</span>atch expr with
+  <span data-count="59909">m</span>atch expr with
   | <span data-count="45">(</span>(<span data-count="40">I</span>32_const _ | <span data-count="5">I</span>64_const _) as x)
     :: ((<span data-count="40">I</span>32_const _ | <span data-count="5">I</span>64_const _) as y)
     :: (I_binop (nn, op) as i_binop)
@@ -1241,17 +1235,17 @@ let rec optimize_expr expr : bool * simplified instr list =
         <span data-count="1">(</span>true, e)
       | _ -&gt; assert false
     end
-  | <span data-count="1">(</span>(<span data-count="1">F</span>32_const _ | <span data-count="0">F</span>64_const _) as x) :: F_unop (nn, op) :: tl -&gt;
+  | <span data-count="2">(</span>(<span data-count="1">F</span>32_const _ | <span data-count="1">F</span>64_const _) as x) :: F_unop (nn, op) :: tl -&gt;
     let result =
-      Interpret.Concrete.exec_funop [ Concrete_value.of_inst<span data-count="1">r</span> x ] nn op
+      Interpret.Concrete.exec_funop [ Concrete_value.of_inst<span data-count="2">r</span> x ] nn op
     in
-    <span data-count="1">b</span>egin
+    <span data-count="2">b</span>egin
       match result with
-      | <span data-count="1">[</span> ((<span data-count="1">F</span>32 _ | <span data-count="0">F</span>64 _) as result) ] -&gt;
+      | <span data-count="2">[</span> ((<span data-count="1">F</span>32 _ | <span data-count="1">F</span>64 _) as result) ] -&gt;
         let _has_changed, e =
-          optimize_expr (Concrete_value.to_inst<span data-count="1">r</span> result :: tl)
+          optimize_expr (Concrete_value.to_inst<span data-count="2">r</span> result :: tl)
         in
-        <span data-count="1">(</span>true, e)
+        <span data-count="2">(</span>true, e)
       | _ -&gt; assert false
     end
   | <span data-count="4">(</span>(<span data-count="2">I</span>32_const _ | <span data-count="2">I</span>64_const _) as x) :: I_testop (nn, op) :: tl -&gt;
@@ -1371,22 +1365,22 @@ let rec optimize_expr expr : bool * simplified instr list =
       let has_changed, e = optimize_expr (i_truncf :: tl) in
       <span data-count="0">(</span>has_changed, c :: e)
   end
-  | <span data-count="0">(</span>(<span data-count="0">F</span>32_const _ | <span data-count="0">F</span>64_const _) as c)
+  | <span data-count="1">(</span>(<span data-count="0">F</span>32_const _ | <span data-count="1">F</span>64_const _) as c)
     :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
     :: tl -&gt; begin
     try
       let result =
         Interpret.Concrete.exec_itruncsatf
-          [ Concrete_value.of_inst<span data-count="0">r</span> c ]
+          [ Concrete_value.of_inst<span data-count="1">r</span> c ]
           nn nn' sx
       in
-      <span data-count="0">b</span>egin
+      <span data-count="1">b</span>egin
         match result with
-        | <span data-count="0">[</span> ((<span data-count="0">I</span>32 _ | <span data-count="0">I</span>64 _) as result) ] -&gt;
+        | <span data-count="1">[</span> ((<span data-count="1">I</span>32 _ | <span data-count="0">I</span>64 _) as result) ] -&gt;
           let _has_changed, e =
-            optimize_expr (Concrete_value.to_inst<span data-count="0">r</span> result :: tl)
+            optimize_expr (Concrete_value.to_inst<span data-count="1">r</span> result :: tl)
           in
-          <span data-count="0">(</span>true, e)
+          <span data-count="1">(</span>true, e)
         | _ -&gt; assert false
       end
     with <span data-count="0">T</span>rap _ -&gt;
@@ -1406,14 +1400,14 @@ let rec optimize_expr expr : bool * simplified instr list =
         <span data-count="0">(</span>true, e)
       | _ -&gt; assert false
     end
-  | <span data-count="62">(</span>(<span data-count="31">F</span>32_const _ | <span data-count="31">F</span>64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl -&gt;
+  | <span data-count="63">(</span>(<span data-count="32">F</span>32_const _ | <span data-count="31">F</span>64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl -&gt;
     let result =
-      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_inst<span data-count="62">r</span> x ] nn nn'
+      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_inst<span data-count="63">r</span> x ] nn nn'
     in
-    <span data-count="62">b</span>egin
+    <span data-count="63">b</span>egin
       match result with
-      | <span data-count="62">[</span> ((<span data-count="31">I</span>32 _ | <span data-count="31">I</span>64 _) as result) ] -&gt;
-        optimize_expr (Concrete_value.to_inst<span data-count="62">r</span> result :: tl)
+      | <span data-count="63">[</span> ((<span data-count="32">I</span>32 _ | <span data-count="31">I</span>64 _) as result) ] -&gt;
+        optimize_expr (Concrete_value.to_inst<span data-count="63">r</span> result :: tl)
       | _ -&gt; assert false
     end
   | <span data-count="1">(</span>(<span data-count="0">I</span>32_const _ | <span data-count="1">I</span>64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl -&gt;
@@ -1441,7 +1435,7 @@ let rec optimize_expr expr : bool * simplified instr list =
   | <span data-count="1">G</span>lobal_get _ :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
     <span data-count="1">(</span>true, e)
-  | <span data-count="109">(</span>Br _ as br) :: _ :: _ -&gt; (true, [ br ])
+  | <span data-count="110">(</span>Br _ as br) :: _ :: _ -&gt; (true, [ br ])
   | <span data-count="79">I</span>32_const c :: Br_if l :: tl -&gt; begin
     match c with
     | <span data-count="4">0</span>l -&gt;
@@ -1455,9 +1449,9 @@ let rec optimize_expr expr : bool * simplified instr list =
   | <span data-count="0">R</span>ef_null _ :: Ref_is_null :: tl -&gt;
     let _has_changed, e = optimize_expr (I32_const 1l :: tl) in
     <span data-count="0">(</span>true, e)
-  | <span data-count="207">N</span>op :: tl -&gt;
+  | <span data-count="210">N</span>op :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
-    <span data-count="207">(</span>true, e)
+    <span data-count="210">(</span>true, e)
   | <span data-count="1">(</span>(<span data-count="1">I</span>32_const _ | <span data-count="0">I</span>64_const _ | <span data-count="0">F</span>32_const _ | <span data-count="0">F</span>64_const _) as v1)
     :: ((<span data-count="1">I</span>32_const _ | <span data-count="0">I</span>64_const _ | <span data-count="0">F</span>32_const _ | <span data-count="0">F</span>64_const _) as v2)
     :: I32_const c
@@ -1469,23 +1463,23 @@ let rec optimize_expr expr : bool * simplified instr list =
     in
     (true, e)
   end
-  | <span data-count="1927">B</span>lock (n, bt, e) :: tl -&gt; begin
+  | <span data-count="1930">B</span>lock (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
     | <span data-count="25">h</span>as_changed, [] -&gt;
       let has_changed', e = optimize_expr tl in
       <span data-count="25">(</span>has_change<span data-count="1">d</span> || has_changed<span data-count="16">'</span>, e)
-    | <span data-count="1902">h</span>as_changed, oe -&gt;
+    | <span data-count="1905">h</span>as_changed, oe -&gt;
       let has_changed', e = optimize_expr tl in
-      <span data-count="1902">(</span>has_change<span data-count="282">d</span> || has_changed<span data-count="58">'</span>, Block (n, bt, oe) :: e)
+      <span data-count="1905">(</span>has_change<span data-count="283">d</span> || has_changed<span data-count="58">'</span>, Block (n, bt, oe) :: e)
   end
-  | <span data-count="480">L</span>oop (n, bt, e) :: tl -&gt; begin
+  | <span data-count="486">L</span>oop (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
     | <span data-count="7">h</span>as_changed, [] -&gt;
       let has_changed', e = optimize_expr tl in
       <span data-count="7">(</span>has_change<span data-count="1">d</span> || has_changed<span data-count="0">'</span>, e)
-    | <span data-count="473">h</span>as_changed, oe -&gt;
+    | <span data-count="479">h</span>as_changed, oe -&gt;
       let has_changed', e = optimize_expr tl in
-      <span data-count="473">(</span>has_change<span data-count="37">d</span> || has_changed<span data-count="18">'</span>, Loop (n, bt, oe) :: e)
+      <span data-count="479">(</span>has_change<span data-count="39">d</span> || has_changed<span data-count="18">'</span>, Loop (n, bt, oe) :: e)
   end
   | <span data-count="31">I</span>32_const 0l :: If_else (n, bt, _e1, e2) :: tl -&gt;
     let _has_changed, e = optimize_expr (Block (n, bt, e2) :: tl) in
@@ -1505,27 +1499,27 @@ let rec optimize_expr expr : bool * simplified instr list =
       <span data-count="488">(</span> has_changed<span data-count="8">1</span> || has_changed<span data-count="3">2</span> || has_changed<span data-count="2">'</span>
       , If_else (n, bt, oe1, oe2) :: e )
   end
-  | <span data-count="43052">h</span>d :: tl -&gt;
+  | <span data-count="43096">h</span>d :: tl -&gt;
     let has_changed, e = optimize_expr tl in
-    <span data-count="43052">(</span>has_changed, hd :: e)
-  | <span data-count="12995">[</span>] -&gt; (false, [])
+    <span data-count="43096">(</span>has_changed, hd :: e)
+  | <span data-count="13006">[</span>] -&gt; (false, [])
 
 let locals_func (body_expr : simplified expr) =
-  <span data-count="4640">l</span>et locals_hashtbl = Hashtbl.create 16 in
-  <span data-count="4640">l</span>et rec aux_instr (instr : simplified instr) =
-    <span data-count="21834">m</span>atch instr with
+  <span data-count="4641">l</span>et locals_hashtbl = Hashtbl.create 16 in
+  <span data-count="4641">l</span>et rec aux_instr (instr : simplified instr) =
+    <span data-count="21852">m</span>atch instr with
     | <span data-count="3698">L</span>ocal_get ind | <span data-count="1308">L</span>ocal_set ind | <span data-count="178">L</span>ocal_tee ind -&gt;
       Hashtbl.replace locals_hashtbl ind ()
-    | <span data-count="765">B</span>lock (_, _, e) -&gt; aux_expr e
-    | <span data-count="204">L</span>oop (_, _, e) -&gt; aux_expr e
+    | <span data-count="766">B</span>lock (_, _, e) -&gt; aux_expr e
+    | <span data-count="206">L</span>oop (_, _, e) -&gt; aux_expr e
     | <span data-count="232">I</span>f_else (_, _, e1, e2) -&gt;
       aux_expr e1;
       <span data-count="232">a</span>ux_expr e2
     | <span data-count="1">I</span>64_extend32_s | <span data-count="14">I</span>32_wrap_i64 | <span data-count="8">F</span>32_demote_f64 | <span data-count="15">F</span>64_promote_f32
-    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="280">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="66">M</span>emory_grow
-    | <span data-count="118">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="97">U</span>nreachable | <span data-count="223">R</span>eturn | <span data-count="0">A</span>rray_len
+    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="281">D</span>rop | <span data-count="11">M</span>emory_size | <span data-count="66">M</span>emory_grow
+    | <span data-count="118">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="99">U</span>nreachable | <span data-count="223">R</span>eturn | <span data-count="0">A</span>rray_len
     | <span data-count="0">I</span>31_get_u | <span data-count="0">I</span>31_get_s | <span data-count="0">R</span>ef_i31 | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
-    | <span data-count="6851">I</span>32_const _ | <span data-count="341">I</span>64_const _ | <span data-count="370">F</span>32_const _ | <span data-count="375">F</span>64_const _
+    | <span data-count="6853">I</span>32_const _ | <span data-count="342">I</span>64_const _ | <span data-count="370">F</span>32_const _ | <span data-count="377">F</span>64_const _
     | <span data-count="21">I</span>_unop (_, _)
     | <span data-count="108">F</span>_unop (_, _)
     | <span data-count="494">I</span>_binop (_, _)
@@ -1542,7 +1536,7 @@ let locals_func (body_expr : simplified expr) =
     | <span data-count="11">R</span>ef_null _ | <span data-count="16">R</span>ef_func _
     | <span data-count="0">R</span>ef_cast (_, _)
     | <span data-count="0">R</span>ef_test (_, _)
-    | <span data-count="120">S</span>elect _ | <span data-count="63">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
+    | <span data-count="120">S</span>elect _ | <span data-count="64">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
     | <span data-count="5">T</span>able_size _ | <span data-count="9">T</span>able_grow _ | <span data-count="1">T</span>able_fill _
     | <span data-count="60">T</span>able_copy (_, _)
     | <span data-count="40">T</span>able_init (_, _)
@@ -1552,11 +1546,11 @@ let locals_func (body_expr : simplified expr) =
     | <span data-count="1140">I</span>_store (_, _)
     | <span data-count="39">F</span>_store (_, _)
     | <span data-count="123">I</span>_load8 (_, _, _)
-    | <span data-count="56">I</span>_load16 (_, _, _)
+    | <span data-count="57">I</span>_load16 (_, _, _)
     | <span data-count="30">I</span>64_load32 (_, _)
     | <span data-count="51">I</span>_store8 (_, _)
     | <span data-count="30">I</span>_store16 (_, _)
-    | <span data-count="14">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="326">B</span>r _ | <span data-count="98">B</span>r_if _
+    | <span data-count="15">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="11">D</span>ata_drop _ | <span data-count="327">B</span>r _ | <span data-count="98">B</span>r_if _
     | <span data-count="152">B</span>r_table (_, _)
     | <span data-count="0">B</span>r_on_cast (_, _, _)
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
@@ -1575,28 +1569,28 @@ let locals_func (body_expr : simplified expr) =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       ()
-  and aux_expr expr = <span data-count="6073">L</span>ist.iter aux_instr expr in
+  and aux_expr expr = <span data-count="6077">L</span>ist.iter aux_instr expr in
   aux_expr body_expr;
-  <span data-count="4640">l</span>ocals_hashtbl
+  <span data-count="4641">l</span>ocals_hashtbl
 
 let remove_local map body =
-  <span data-count="4640">l</span>et new_x (Raw x : simplified indice) =
+  <span data-count="4641">l</span>et new_x (Raw x : simplified indice) =
     <span data-count="5184">l</span>et x = match Hashtbl.find_opt map x with <span data-count="2487">N</span>one -&gt; x | <span data-count="2697">S</span>ome x -&gt; x in
     Raw x
   in
   let rec aux_instr (instr : simplified instr) : simplified instr =
-    <span data-count="21834">m</span>atch instr with
+    <span data-count="21852">m</span>atch instr with
     | <span data-count="3698">L</span>ocal_get ind -&gt; Local_get (new_<span data-count="3698">x</span> ind)
     | <span data-count="1308">L</span>ocal_set ind -&gt; Local_set (new_<span data-count="1308">x</span> ind)
     | <span data-count="178">L</span>ocal_tee ind -&gt; Local_tee (new_<span data-count="178">x</span> ind)
-    | <span data-count="765">B</span>lock (m, t, e) -&gt; Block (m, t, aux_exp<span data-count="765">r</span> e)
-    | <span data-count="204">L</span>oop (m, t, e) -&gt; Loop (m, t, aux_exp<span data-count="204">r</span> e)
+    | <span data-count="766">B</span>lock (m, t, e) -&gt; Block (m, t, aux_exp<span data-count="766">r</span> e)
+    | <span data-count="206">L</span>oop (m, t, e) -&gt; Loop (m, t, aux_exp<span data-count="206">r</span> e)
     | <span data-count="232">I</span>f_else (m, t, e1, e2) -&gt; If_else (m, t, aux_exp<span data-count="232">r</span> e1, aux_exp<span data-count="232">r</span> e2)
     | <span data-count="1">I</span>64_extend32_s | <span data-count="14">I</span>32_wrap_i64 | <span data-count="8">F</span>32_demote_f64 | <span data-count="15">F</span>64_promote_f32
-    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="280">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="66">M</span>emory_grow
-    | <span data-count="118">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="97">U</span>nreachable | <span data-count="223">R</span>eturn | <span data-count="0">A</span>rray_len
+    | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="281">D</span>rop | <span data-count="11">M</span>emory_size | <span data-count="66">M</span>emory_grow
+    | <span data-count="118">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="99">U</span>nreachable | <span data-count="223">R</span>eturn | <span data-count="0">A</span>rray_len
     | <span data-count="0">I</span>31_get_u | <span data-count="0">I</span>31_get_s | <span data-count="0">R</span>ef_i31 | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
-    | <span data-count="6851">I</span>32_const _ | <span data-count="341">I</span>64_const _ | <span data-count="370">F</span>32_const _ | <span data-count="375">F</span>64_const _
+    | <span data-count="6853">I</span>32_const _ | <span data-count="342">I</span>64_const _ | <span data-count="370">F</span>32_const _ | <span data-count="377">F</span>64_const _
     | <span data-count="21">I</span>_unop (_, _)
     | <span data-count="108">F</span>_unop (_, _)
     | <span data-count="494">I</span>_binop (_, _)
@@ -1613,7 +1607,7 @@ let remove_local map body =
     | <span data-count="11">R</span>ef_null _ | <span data-count="16">R</span>ef_func _
     | <span data-count="0">R</span>ef_cast (_, _)
     | <span data-count="0">R</span>ef_test (_, _)
-    | <span data-count="120">S</span>elect _ | <span data-count="63">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
+    | <span data-count="120">S</span>elect _ | <span data-count="64">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
     | <span data-count="5">T</span>able_size _ | <span data-count="9">T</span>able_grow _ | <span data-count="1">T</span>able_fill _
     | <span data-count="60">T</span>able_copy (_, _)
     | <span data-count="40">T</span>able_init (_, _)
@@ -1623,11 +1617,11 @@ let remove_local map body =
     | <span data-count="1140">I</span>_store (_, _)
     | <span data-count="39">F</span>_store (_, _)
     | <span data-count="123">I</span>_load8 (_, _, _)
-    | <span data-count="56">I</span>_load16 (_, _, _)
+    | <span data-count="57">I</span>_load16 (_, _, _)
     | <span data-count="30">I</span>64_load32 (_, _)
     | <span data-count="51">I</span>_store8 (_, _)
     | <span data-count="30">I</span>_store16 (_, _)
-    | <span data-count="14">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="326">B</span>r _ | <span data-count="98">B</span>r_if _
+    | <span data-count="15">I</span>64_store32 _ | <span data-count="29">M</span>emory_init _ | <span data-count="11">D</span>ata_drop _ | <span data-count="327">B</span>r _ | <span data-count="98">B</span>r_if _
     | <span data-count="152">B</span>r_table (_, _)
     | <span data-count="0">B</span>r_on_cast (_, _, _)
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
@@ -1646,17 +1640,17 @@ let remove_local map body =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       instr
-  and aux_expr expr = <span data-count="6073">L</span>ist.map aux_instr expr in
+  and aux_expr expr = <span data-count="6077">L</span>ist.map aux_instr expr in
   aux_expr body
 
 let remove_unused_locals locals nb_args body =
-  <span data-count="4640">l</span>et unused_locals =
+  <span data-count="4641">l</span>et unused_locals =
     let used_locals = locals_func body in
-    <span data-count="4640">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1290">R</span>aw (nb_args + i)) locals in
-    <span data-count="4640">L</span>ist.filte<span data-count="4640">r</span> (fun x -&gt; <span data-count="1290">n</span>ot @@ Hashtbl.me<span data-count="1290">m</span> used_locals x) locals
+    <span data-count="4641">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1290">R</span>aw (nb_args + i)) locals in
+    <span data-count="4641">L</span>ist.filte<span data-count="4641">r</span> (fun x -&gt; <span data-count="1290">n</span>ot @@ Hashtbl.me<span data-count="1290">m</span> used_locals x) locals
   in
   let rename_map = Hashtbl.create 16 in
-  <span data-count="4640">L</span>ist.iteri
+  <span data-count="4641">L</span>ist.iteri
     (fun j x -&gt;
       <span data-count="1290">l</span>et name, _ = x in
       let _x = Option.value name ~default:"anon" in
@@ -1668,44 +1662,44 @@ let remove_unused_locals locals nb_args body =
         Hashtbl.replace rename_map (nb_args + j) (nb_args + j - !count)
       end )
     locals;
-  <span data-count="4640">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1290">(</span>nb_args + i, x)) locals in
-  <span data-count="4640">l</span>et locals =
+  <span data-count="4641">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1290">(</span>nb_args + i, x)) locals in
+  <span data-count="4641">l</span>et locals =
     List.filter_map
       (fun (i, x) -&gt; <span data-count="1290">i</span>f List.mem (Raw i) unused_locals then <span data-count="42">N</span>one else <span data-count="1248">S</span>ome x)
       locals
   in
-  <span data-count="4640">l</span>et body = remove_local rename_map body in
-  <span data-count="4640">(</span>locals, body)
+  <span data-count="4641">l</span>et body = remove_local rename_map body in
+  <span data-count="4641">(</span>locals, body)
 
 let optimize_func (func : simplified func) =
-  <span data-count="4640">l</span>et { type_f; locals; body; id } = func in
+  <span data-count="4641">l</span>et { type_f; locals; body; id } = func in
   let rec loop has_changed e =
-    <span data-count="9837">i</span>f not has_changed then
+    <span data-count="9840">i</span>f not has_changed then
       (* TODO: it should be enough to return e directly, but doing one more call to optimize_expr seems to perform more optimizations... *)
-      <span data-count="4640">s</span>nd @@ optimize_exp<span data-count="4640">r</span> e
+      <span data-count="4641">s</span>nd @@ optimize_exp<span data-count="4641">r</span> e
     else
-      <span data-count="5197">l</span>et has_changed, e = optimize_expr e in
-      <span data-count="5197">l</span>oop has_changed e
+      <span data-count="5199">l</span>et has_changed, e = optimize_expr e in
+      <span data-count="5199">l</span>oop has_changed e
   in
   let body = loop true body in
-  <span data-count="4640">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
+  <span data-count="4641">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
   let nb_args = List.length pt in
-  <span data-count="4640">l</span>et locals, body = remove_unused_locals locals nb_args body in
-  <span data-count="4640">{</span> type_f; locals; body; id }
+  <span data-count="4641">l</span>et locals, body = remove_unused_locals locals nb_args body in
+  <span data-count="4641">{</span> type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  <span data-count="6207">I</span>ndexed.map
+  <span data-count="6219">I</span>ndexed.map
     (function
-      | <span data-count="1567">R</span>untime.Imported _ as f -&gt; f
-      | <span data-count="4640">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4640">c</span> f) )
+      | <span data-count="1578">R</span>untime.Imported _ as f -&gt; f
+      | <span data-count="4641">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4641">c</span> f) )
     f
 
-let optimize_funcs funs = <span data-count="1445">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1447">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1445">L</span>og.debug0 "optimizing   ...@\n";
-  <span data-count="1445">l</span>et func = optimize_funcs m.func in
-  <span data-count="1445">{</span> m with func }
+  <span data-count="1447">L</span>og.debug0 "optimizing   ...@\n";
+  <span data-count="1447">l</span>et func = optimize_funcs m.func in
+  <span data-count="1447">{</span> m with func }
 </code></pre>
       </div>
     </div>

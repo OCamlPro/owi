@@ -614,11 +614,11 @@ module MInt32 = struct
       else <span data-count="26">I</span>nt64.(to_int32 (of_floa<span data-count="26">t</span> xf))
 
   let trunc_sat_f64_s x =
-    <span data-count="44">i</span>f Float64.ne x x then <span data-count="8">0</span>l
+    <span data-count="46">i</span>f Float64.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="36">l</span>et xf = Float64.to_float x in
-      <span data-count="36">i</span>f xf &lt; Int32.(to_floa<span data-count="36">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
-      else <span data-count="32">i</span>f xf &gt;= -<span data-count="32">.</span>Int32.(to_floa<span data-count="32">t</span> min_int) then <span data-count="4">I</span>nt32.max_int
+      <span data-count="38">l</span>et xf = Float64.to_float x in
+      <span data-count="38">i</span>f xf &lt; Int32.(to_floa<span data-count="38">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
+      else <span data-count="34">i</span>f xf &gt;= -<span data-count="34">.</span>Int32.(to_floa<span data-count="34">t</span> min_int) then <span data-count="6">I</span>nt32.max_int
       else <span data-count="28">I</span>nt32.of_float xf
 
   let trunc_sat_f64_u x =

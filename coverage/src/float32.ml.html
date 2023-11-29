@@ -714,9 +714,9 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1240">x</span>
 
-let to_bits x = <span data-count="2120">x</span>
+let to_bits x = <span data-count="2121">x</span>
 
-let is_inf x = <span data-count="23304">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
+let is_inf x = <span data-count="23314">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
 
 let is_nan x =
   <span data-count="2878">l</span>et xf = Int32.float_of_bits x in
@@ -896,19 +896,19 @@ let compare_mantissa_str hex s1 s2 =
  *)
 let float_of_string_prevent_double_rounding s =
   (* First parse to a 64 bit float. *)
-  <span data-count="23304">l</span>et z = float_of_string s in
+  <span data-count="23314">l</span>et z = float_of_string s in
   (* If value is already infinite we are done. *)
-  <span data-count="23304">i</span>f abs_floa<span data-count="23304">t</span> z = 1.0 /. 0.0 then <span data-count="0">z</span>
+  <span data-count="23314">i</span>f abs_floa<span data-count="23314">t</span> z = 1.0 /. 0.0 then <span data-count="0">z</span>
   else
     (* Else, bit twiddling to see what rounding to target precision will do. *)
-    <span data-count="23304">l</span>et open Int64 in
+    <span data-count="23314">l</span>et open Int64 in
     let bits = bits_of_float z in
-    <span data-count="23304">l</span>et lsb = shift_left 1L 29 in
+    <span data-count="23314">l</span>et lsb = shift_left 1L 29 in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
-    <span data-count="23304">l</span>et tie = shift_right lsb 1 in
-    <span data-count="23304">l</span>et mask = lognot (shift_lef<span data-count="23304">t</span> (-1L) 29) in
+    <span data-count="23314">l</span>et tie = shift_right lsb 1 in
+    <span data-count="23314">l</span>et mask = lognot (shift_lef<span data-count="23314">t</span> (-1L) 29) in
     (* If we have no tie, we are good. *)
-    <span data-count="23304">i</span>f logan<span data-count="23304">d</span> bits mask &lt;&gt; tie then <span data-count="23176">z</span>
+    <span data-count="23314">i</span>f logan<span data-count="23314">d</span> bits mask &lt;&gt; tie then <span data-count="23186">z</span>
     else
       (* Else, define epsilon to be the value of the tie bit. *)
       <span data-count="128">l</span>et exp = float_of_bits (logan<span data-count="128">d</span> bits 0xfff0_0000_0000_0000L) in
@@ -946,9 +946,9 @@ let float_of_string_prevent_double_rounding s =
       | <span data-count="56">_</span> -&gt; z
 
 let of_signless_string s =
-  <span data-count="30830">i</span>f s = "inf" then <span data-count="2992">p</span>os_inf
-  else <span data-count="27838">i</span>f s = "nan" then <span data-count="2382">p</span>os_nan
-  else <span data-count="25456">i</span>f String.lengt<span data-count="25456">h</span> s &gt; 6 &amp;&amp; <span data-count="15190">S</span>tring.su<span data-count="15190">b</span> s 0 6 = "nan:0x" then
+  <span data-count="30840">i</span>f s = "inf" then <span data-count="2992">p</span>os_inf
+  else <span data-count="27848">i</span>f s = "nan" then <span data-count="2382">p</span>os_nan
+  else <span data-count="25466">i</span>f String.lengt<span data-count="25466">h</span> s &gt; 6 &amp;&amp; <span data-count="15190">S</span>tring.su<span data-count="15190">b</span> s 0 6 = "nan:0x" then
     <span data-count="2152">l</span>et x = Int32.of_string (String.su<span data-count="2152">b</span> s 4 (String.lengt<span data-count="2152">h</span> s - 4)) in
     <span data-count="2152">i</span>f x = Int32.zero then <span data-count="2">f</span>ailwith "nan payload must not be zero"
     else <span data-count="2150">i</span>f Int32.logan<span data-count="2150">d</span> x bare_nan &lt;&gt; Int32.zero then
@@ -957,16 +957,16 @@ let of_signless_string s =
       <span data-count="0">f</span>ailwith "nan payload must not overlap with sign bit"
     else <span data-count="2148">I</span>nt32.logor x bare_nan
   else
-    <span data-count="23304">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23304">r</span> '_' s) in
-    <span data-count="23304">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23304">g</span> s') in
-    <span data-count="23304">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23288">x</span>
+    <span data-count="23314">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23314">r</span> '_' s) in
+    <span data-count="23314">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23314">g</span> s') in
+    <span data-count="23314">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23298">x</span>
 
 let of_string s =
-  <span data-count="30830">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
-  else <span data-count="30830">i</span>f s.[0] = '+<span data-count="298">'</span> || s.[0] = '-<span data-count="13932">'</span> then
+  <span data-count="30840">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
+  else <span data-count="30840">i</span>f s.[0] = '+<span data-count="298">'</span> || s.[0] = '-<span data-count="13932">'</span> then
     <span data-count="14230">l</span>et x = of_signless_string (String.su<span data-count="14230">b</span> s 1 (String.lengt<span data-count="14230">h</span> s - 1)) in
     <span data-count="14222">i</span>f s.[0] = '+' then <span data-count="298">x</span> else <span data-count="13924">n</span>eg x
-  else <span data-count="16600">o</span>f_signless_string s
+  else <span data-count="16610">o</span>f_signless_string s
 
 (* String conversion that groups digits for readability *)
 
