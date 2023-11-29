@@ -1432,59 +1432,59 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
     | <span data-count="286">I</span>_load8 (nn, sx, memarg) -&gt;
       if List.lengt<span data-count="286">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
-      else <span data-count="284">i</span>f memarg.align &gt;= 1 then
+      else <span data-count="284">i</span>f memarg.align &gt;= 1l then
         <span data-count="16">E</span>rror "alignment must not be larger than natural"
       else <span data-count="268">O</span>k (I_load8 (nn, sx, memarg))
     | <span data-count="126">I</span>_store8 (nn, memarg) -&gt;
       if List.lengt<span data-count="126">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
-      else <span data-count="124">i</span>f memarg.align &gt;= 1 then
+      else <span data-count="124">i</span>f memarg.align &gt;= 1l then
         <span data-count="4">E</span>rror "alignment must not be larger than natural"
       else <span data-count="120">o</span>k @@ I_store8 (nn, memarg)
     | <span data-count="144">I</span>_load16 (nn, sx, memarg) -&gt;
       if List.lengt<span data-count="144">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
-      else <span data-count="144">i</span>f memarg.align &gt;= 2 then
+      else <span data-count="144">i</span>f memarg.align &gt;= 2l then
         <span data-count="16">E</span>rror "alignment must not be larger than natural"
       else <span data-count="128">o</span>k @@ I_load16 (nn, sx, memarg)
     | <span data-count="84">I</span>_store16 (nn, memarg) -&gt;
       if List.lengt<span data-count="84">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
-      else <span data-count="84">i</span>f memarg.align &gt;= 2 then
+      else <span data-count="84">i</span>f memarg.align &gt;= 2l then
         <span data-count="4">E</span>rror "alignment must not be larger than natural"
       else <span data-count="80">o</span>k @@ I_store16 (nn, memarg)
     | <span data-count="76">I</span>64_load32 (nn, memarg) -&gt;
       if List.lengt<span data-count="76">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
-      else <span data-count="76">i</span>f memarg.align &gt;= 4 then
+      else <span data-count="76">i</span>f memarg.align &gt;= 4l then
         <span data-count="8">E</span>rror "alignment must not be larger than natural"
       else <span data-count="68">o</span>k @@ I64_load32 (nn, memarg)
     | <span data-count="36">I</span>64_store32 memarg -&gt;
       if List.lengt<span data-count="36">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
-      else <span data-count="36">i</span>f memarg.align &gt;= 4 then
+      else <span data-count="36">i</span>f memarg.align &gt;= 4l then
         <span data-count="2">E</span>rror "alignment must not be larger than natural"
       else <span data-count="34">o</span>k @@ I64_store32 memarg
     | <span data-count="2388">I</span>_load (nn, memarg) -&gt;
       if List.lengt<span data-count="2388">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
       else
-        <span data-count="2388">l</span>et max_allowed = match nn with <span data-count="232">S</span>32 -&gt; 4 | <span data-count="2156">S</span>64 -&gt; 8 in
+        <span data-count="2388">l</span>et max_allowed = match nn with <span data-count="232">S</span>32 -&gt; 4l | <span data-count="2156">S</span>64 -&gt; 8l in
         if memarg.align &gt;= max_allowed then
           <span data-count="8">E</span>rror "alignment must not be larger than natural"
         else <span data-count="2380">o</span>k @@ I_load (nn, memarg)
     | <span data-count="154">F</span>_load (nn, memarg) -&gt;
       if List.lengt<span data-count="154">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
       else
-        <span data-count="152">l</span>et max_allowed = match nn with <span data-count="78">S</span>32 -&gt; 4 | <span data-count="74">S</span>64 -&gt; 8 in
+        <span data-count="152">l</span>et max_allowed = match nn with <span data-count="78">S</span>32 -&gt; 4l | <span data-count="74">S</span>64 -&gt; 8l in
         if memarg.align &gt;= max_allowed then
           <span data-count="8">E</span>rror "alignment must not be larger than natural"
         else <span data-count="144">o</span>k @@ F_load (nn, memarg)
     | <span data-count="100">F</span>_store (nn, memarg) -&gt;
       if List.lengt<span data-count="100">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
       else
-        <span data-count="98">l</span>et max_allowed = match nn with <span data-count="44">S</span>32 -&gt; 4 | <span data-count="54">S</span>64 -&gt; 8 in
+        <span data-count="98">l</span>et max_allowed = match nn with <span data-count="44">S</span>32 -&gt; 4l | <span data-count="54">S</span>64 -&gt; 8l in
         if memarg.align &gt;= max_allowed then
           <span data-count="4">E</span>rror "alignment must not be larger than natural"
         else <span data-count="94">o</span>k @@ F_store (nn, memarg)
     | <span data-count="2370">I</span>_store (nn, memarg) -&gt;
       if List.lengt<span data-count="2370">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
       else
-        <span data-count="2370">l</span>et max_allowed = match nn with <span data-count="204">S</span>32 -&gt; 4 | <span data-count="2166">S</span>64 -&gt; 8 in
+        <span data-count="2370">l</span>et max_allowed = match nn with <span data-count="204">S</span>32 -&gt; 4l | <span data-count="2166">S</span>64 -&gt; 8l in
         if memarg.align &gt;= max_allowed then
           <span data-count="4">E</span>rror "alignment must not be larger than natural"
         else <span data-count="2366">o</span>k @@ I_store (nn, memarg)
