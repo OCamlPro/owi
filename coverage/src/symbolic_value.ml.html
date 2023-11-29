@@ -1315,9 +1315,9 @@ let ( let+ ) o f = <span data-count="1">O</span>ption.map f o
 
 let return = Option.some
 
-let mk_i32 x = <span data-count="9">V</span>al (Num (I32 x)) @: Ty_bitv S32
+let mk_i32 x = <span data-count="16">V</span>al (Num (I32 x)) @: Ty_bitv S32
 
-let mk_i64 x = <span data-count="14">V</span>al (Num (I64 x)) @: Ty_bitv S64
+let mk_i64 x = <span data-count="21">V</span>al (Num (I64 x)) @: Ty_bitv S64
 
 let mk_f32 x = <span data-count="7">V</span>al (Num (F32 x)) @: Ty_fp S32
 
@@ -1369,9 +1369,9 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let const_i32 (i : Int32.t) : int32 = <span data-count="2">m</span>k_i32 i
+  let const_i32 (i : Int32.t) : int32 = <span data-count="9">m</span>k_i32 i
 
-  let const_i64 (i : Int64.t) : int64 = <span data-count="7">m</span>k_i64 i
+  let const_i64 (i : Int64.t) : int64 = <span data-count="14">m</span>k_i64 i
 
   let const_f32 (f : Float32.t) : float32 = <span data-count="0">m</span>k_f32 (Float32.to_bit<span data-count="0">s</span> f)
 
