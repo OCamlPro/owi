@@ -9,22 +9,6 @@ open Simplified
 
 let use_ite_for_select = true
 
-module Log : sig
-  [@@@ocaml.warning "-32"]
-
-  type do_not_use
-
-  include module type of Log
-
-  val debug : do_not_use
-end = struct
-  type do_not_use = unit
-
-  include Log
-
-  let debug = ()
-end
-
 module Make (P : Interpret_functor_intf.P) :
   Interpret_functor_intf.S
     with type 'a choice := 'a P.Choice.t
@@ -97,9 +81,6 @@ module Make (P : Interpret_functor_intf.P) :
   let pop_choice stack =
     let b, stack = Stack.pop_bool stack in
     Choice.bind (Choice.select b) (fun b -> Choice.return (b, stack))
-
-  let or__ l =
-    match l with [] -> Bool.const true | h :: t -> List.fold_left Bool.or_ h t
 
   let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
@@ -1144,21 +1125,18 @@ module Make (P : Interpret_functor_intf.P) :
       let table_size = Table.size t in
       let elem_len = Elem.size elem in
       let> out_of_bounds =
-        or__
-          I32.
-            [ pos_x + len > consti elem_len
-            ; pos + len > consti table_size
-            ; (* TODO: this is dumb, why do we have to fail even when len = 0 ?
-               * I don't remember where exactly but somewhere else it's the opposite:
-               * if len is 0 then we do not fail...
-               * if it wasn't needed, the following check would be useless
-               * as the next one would take care of it
-               * (or maybe not because we don't want to fail
-               * in the middle of the loop but still...)*)
-              I32.(const 0l > len)
-            ; I32.(const 0l > pos)
-            ; I32.(const 0l > pos_x)
-            ]
+        Bool.or_ I32.(pos_x + len > consti elem_len)
+        @@ Bool.or_ I32.(pos + len > consti table_size)
+        (* TODO: this is dumb, why do we have to fail even when len = 0 ?
+           * I don't remember where exactly but somewhere else it's the opposite:
+           * if len is 0 then we do not fail...
+           * if it wasn't needed, the following check would be useless
+           * as the next one would take care of it
+           * (or maybe not because we don't want to fail
+           * in the middle of the loop but still...)*)
+        @@ Bool.or_ I32.(const 0l > len)
+        @@ Bool.or_ I32.(const 0l > pos)
+        @@ I32.(const 0l > pos_x)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
