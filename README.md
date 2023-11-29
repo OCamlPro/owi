@@ -175,6 +175,10 @@ We only list proposals that reached phase 3 at least.
 
 ## About
 
+### Talks
+
+A [video of our talk] at the Wasm Research Day 2023 is available. It was organized by the [WebAssembly Research Center] and hosted in Google Munich. We explain how we bring symbolic execution to Owi and how it is implemented.
+
 ### Spelling and pronunciation
 
 Although the name Owi comes from an acronym (OCaml WebAssembly Interpreter), it must be written as a proper noun and only the first letter must be capitalized. It is possible to write the name in full lowercase when referring to the opam package or to the name of the binary.
@@ -223,7 +227,9 @@ See [LICENSE].
 [Owi]: https://ocamlpro.github.io/owi
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [spectest module]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#spectest-host-module
+[video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [WebAssembly]: https://webassembly.org
+[WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
 
 [Import/Export of Mutable Globals]: https://github.com/WebAssembly/mutable-global
 [Non-trapping float-to-int conversions]: https://github.com/WebAssembly/nontrapping-float-to-int-conversions
