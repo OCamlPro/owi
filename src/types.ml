@@ -201,18 +201,20 @@ let frelop fmt : frelop -> Unit.t = function
   | Ge -> pp fmt "ge"
 
 type nonrec memarg =
-  { offset : int
-  ; align : int
+  { offset : Int32.t
+  ; align : Int32.t
   }
 
 let pp_memarg =
   let pow_2 n =
-    assert (n >= 0);
-    1 lsl n
+    assert (n >= 0l);
+    Int32.shl 1l n
   in
   fun fmt { offset; align } ->
-    let pp_offset fmt offset = if offset > 0 then pp fmt "offset=%d " offset in
-    pp fmt "%aalign=%d" pp_offset offset (pow_2 align)
+    let pp_offset fmt offset =
+      if offset > 0l then pp fmt "offset=%ld " offset
+    in
+    pp fmt "%aalign=%ld" pp_offset offset (pow_2 align)
 
 type nonrec limits =
   { min : int

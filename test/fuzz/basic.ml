@@ -415,7 +415,8 @@ let memory_init (env : Env.t) =
 let memory_exists (env : Env.t) = Option.is_some env.memory
 
 let memarg nsize =
-  let* offset = uint16 in
+  let* offset = int32 in
+  let offset = if offset < 0l then Int32.sub 0l offset else offset in
   let+ align =
     match nsize with
     | NS8 -> const 0
@@ -423,6 +424,7 @@ let memarg nsize =
     | NS32 -> range 2
     | NS64 -> range 3
   in
+  let align = Int32.of_int align in
   { offset; align }
 
 let i32_load : text instr gen =

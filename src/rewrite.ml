@@ -237,59 +237,59 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
     | I_load8 (nn, sx, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 1 then
+      else if memarg.align >= 1l then
         Error "alignment must not be larger than natural"
       else Ok (I_load8 (nn, sx, memarg))
     | I_store8 (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 1 then
+      else if memarg.align >= 1l then
         Error "alignment must not be larger than natural"
       else ok @@ I_store8 (nn, memarg)
     | I_load16 (nn, sx, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 2 then
+      else if memarg.align >= 2l then
         Error "alignment must not be larger than natural"
       else ok @@ I_load16 (nn, sx, memarg)
     | I_store16 (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 2 then
+      else if memarg.align >= 2l then
         Error "alignment must not be larger than natural"
       else ok @@ I_store16 (nn, memarg)
     | I64_load32 (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 4 then
+      else if memarg.align >= 4l then
         Error "alignment must not be larger than natural"
       else ok @@ I64_load32 (nn, memarg)
     | I64_store32 memarg ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 4 then
+      else if memarg.align >= 4l then
         Error "alignment must not be larger than natural"
       else ok @@ I64_store32 memarg
     | I_load (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
       else
-        let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
+        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
         if memarg.align >= max_allowed then
           Error "alignment must not be larger than natural"
         else ok @@ I_load (nn, memarg)
     | F_load (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
       else
-        let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
+        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
         if memarg.align >= max_allowed then
           Error "alignment must not be larger than natural"
         else ok @@ F_load (nn, memarg)
     | F_store (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
       else
-        let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
+        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
         if memarg.align >= max_allowed then
           Error "alignment must not be larger than natural"
         else ok @@ F_store (nn, memarg)
     | I_store (nn, memarg) ->
       if List.length modul.mem.values < 1 then Error "unknown memory 0"
       else
-        let max_allowed = match nn with S32 -> 4 | S64 -> 8 in
+        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
         if memarg.align >= max_allowed then
           Error "alignment must not be larger than natural"
         else ok @@ I_store (nn, memarg)
