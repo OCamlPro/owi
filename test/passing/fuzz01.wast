@@ -3,8 +3,7 @@
       (memory $m0 4 6)
       (table $t0 5 funcref)
       (global $g0 i64 i64.const -5833796675884788010)
-      (start 0)
-      (func $start
+      (func $f (export "f")
         i64.const -7005356104961843280
         f64.const 4.203_333_479_845_560_9e+168
         i32.trunc_sat_f64_s
@@ -124,3 +123,5 @@
         nop
       )
     )
+
+(assert_trap (invoke "f") "out of bounds memory access")
