@@ -177,7 +177,8 @@ We only list proposals that reached phase 3 at least.
 
 ### Talks
 
-A [video of our talk] at the Wasm Research Day 2023 is available. It was organized by the [WebAssembly Research Center] and hosted in Google Munich. We explain how we bring symbolic execution to Owi and how it is implemented.
+- [september 2023]: [ICFP OCaml track]
+- [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] and hosted in Google Munich
 
 ### Spelling and pronunciation
 
@@ -226,14 +227,17 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [coverage percentage]: https://ocamlpro.github.io/owi/coverage
 [documentation]: https://ocamlpro.github.io/owi/api/owi
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
+[ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
 [Next Generation Internet]: https://ngi.eu
 [NLnet]: https://nlnet.nl
 [NGI0 Core]: https://nlnet.nl/core
 [OCaml]: https://ocaml.org
+[october 2023]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [opam]: https://opam.ocaml.org
 [Owi]: https://ocamlpro.github.io/owi
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
+[september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
 [spectest module]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#spectest-host-module
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [WebAssembly]: https://webassembly.org
