@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_sym.ml &mdash; Coverage report</title>
-    <meta name="description" content="62.80% coverage in src/cmd_sym.ml">
+    <meta name="description" content="61.59% coverage in src/cmd_sym.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>cmd_sym.ml
         </a>
       </h1>
-      <h2>62.80%</h2>
+      <h2>61.59%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:4.73%"></span>
@@ -47,9 +47,11 @@
       <span class="unvisited" style="bottom:38.85%"></span>
       <span class="some-visited" style="bottom:36.49%"></span>
       <span class="unvisited" style="bottom:33.78%"></span>
+      <span class="some-visited" style="bottom:27.03%"></span>
       <span class="some-visited" style="bottom:19.26%"></span>
       <span class="some-visited" style="bottom:18.92%"></span>
       <span class="unvisited" style="bottom:14.86%"></span>
+      <span class="unvisited" style="bottom:13.51%"></span>
       <span class="unvisited" style="bottom:13.18%"></span>
       <span class="unvisited" style="bottom:12.50%"></span>
       <span class="unvisited" style="bottom:12.16%"></span>
@@ -283,7 +285,7 @@
 <a id="L213"></a><span > </span>
 <a id="L214"></a><span class="visited"> </span>
 <a id="L215"></a><span class="visited"> </span>
-<a id="L216"></a><span class="visited"> </span>
+<a id="L216"></a><span class="some-visited"> </span>
 <a id="L217"></a><span class="visited"> </span>
 <a id="L218"></a><span class="visited"> </span>
 <a id="L219"></a><span class="visited"> </span>
@@ -323,7 +325,7 @@
 <a id="L253"></a><span class="visited"> </span>
 <a id="L254"></a><span class="visited"> </span>
 <a id="L255"></a><span > </span>
-<a id="L256"></a><span class="visited"> </span>
+<a id="L256"></a><span class="unvisited"> </span>
 <a id="L257"></a><span class="unvisited"> </span>
 <a id="L258"></a><span > </span>
 <a id="L259"></a><span class="unvisited"> </span>
@@ -866,8 +868,8 @@ let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
     <span data-count="1">s</span>implify_then_link_then_run ~unsafe ~optimize pc script
 
 let get_model solver pc =
-  <span data-count="2">a</span>ssert <span data-count="2">(</span>Solver.chec<span data-count="2">k</span> solver pc);
-  match Solver.model solver with None -&gt; assert false | <span data-count="2">S</span>ome model -&gt; model
+  <span data-count="1">a</span>ssert <span data-count="1">(</span>Solver.chec<span data-count="1">k</span> solver pc);
+  match Solver.model solver with None -&gt; assert false | <span data-count="1">S</span>ome model -&gt; model
 
 let mkdir_p_exn dir =
   <span data-count="1">l</span>et rec get_intermediate_dirs d acc =
@@ -878,28 +880,28 @@ let mkdir_p_exn dir =
   <span data-count="1">L</span>ist.iter (fun d -&gt; <span data-count="1">S</span>ys.mkdir d 0o755) intermediate_dirs
 
 let out_testcase ~dst ~err testcase =
-  <span data-count="2">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="2">l</span>et tag ?(atts = <span data-count="3">[</span>]) name = <span data-count="4">(</span>("", name), atts) in
-  let atts = if err then <span data-count="1">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1">N</span>one in
-  let to_string v = <span data-count="2">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
-  let input v = <span data-count="2">`</span>El (ta<span data-count="2">g</span> "input", [ `Data (to_strin<span data-count="2">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="2">g</span> ?atts "testcase", List.ma<span data-count="2">p</span> input testcase) in
+  <span data-count="1">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="1">l</span>et tag ?(atts = <span data-count="1">[</span>]) name = <span data-count="2">(</span>("", name), atts) in
+  let atts = if err then <span data-count="1">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="0">N</span>one in
+  let to_string v = <span data-count="1">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
+  let input v = <span data-count="1">`</span>El (ta<span data-count="1">g</span> "input", [ `Data (to_strin<span data-count="1">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="1">g</span> ?atts "testcase", List.ma<span data-count="1">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="2">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="1">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir ~err testcase -&gt;
-    <span data-count="2">i</span>ncr cnt;
-    <span data-count="2">l</span>et name = Format.sprintf "testcase-%d.xml" !cnt in
-    <span data-count="2">l</span>et path = Filename.concat dir name in
-    <span data-count="2">l</span>et out_chan = open_out path in
-    <span data-count="2">F</span>un.protect
-      ~finally:(fun () -&gt; <span data-count="2">c</span>lose_out out_chan)
-      (fun () -&gt; <span data-count="2">o</span>ut_testcase ~dst:(`Channel out_chan) ~err testcase)
+    <span data-count="1">i</span>ncr cnt;
+    <span data-count="1">l</span>et name = Format.sprintf "testcase-%d.xml" !cnt in
+    <span data-count="1">l</span>et path = Filename.concat dir name in
+    <span data-count="1">l</span>et out_chan = open_out path in
+    <span data-count="1">F</span>un.protect
+      ~finally:(fun () -&gt; <span data-count="1">c</span>lose_out out_chan)
+      (fun () -&gt; <span data-count="1">o</span>ut_testcase ~dst:(`Channel out_chan) ~err testcase)
 
 let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   files =
@@ -914,13 +916,13 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   <span data-count="1">l</span>et failing =
     Seq.filter_map
       (fun (result, thread) -&gt;
-        <span data-count="2">l</span>et pc = Thread.pc thread in
-        <span data-count="2">i</span>f print_path_condition then
+        <span data-count="1">l</span>et pc = Thread.pc thread in
+        <span data-count="1">i</span>f print_path_condition then
           <span data-count="0">F</span>ormat.pp_st<span data-count="0">d</span> "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
-        <span data-count="2">l</span>et model = get_model solver pc in
-        <span data-count="2">l</span>et result =
+        <span data-count="1">l</span>et model = get_model solver pc in
+        <span data-count="1">l</span>et result =
           match result with
-          | <span data-count="1">C</span>hoice_monad_intf.EVal (Ok ()) -&gt; None
+          | <span data-count="0">C</span>hoice_monad_intf.EVal (Ok ()) -&gt; None
           | <span data-count="0">E</span>Assert assertion -&gt;
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
             <span data-count="0">F</span>ormat.pp_std "Model:@\n  @[&lt;v&gt;%a@]@\n" Encoding.Model.pp model;
@@ -936,11 +938,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
         let testcase =
           List.sort
             (fun (x1, _) (x2, _) -&gt; <span data-count="0">c</span>ompare x1 x2)
-            (Encoding.Model.get_binding<span data-count="2">s</span> model)
-          |&gt; <span data-count="2">L</span>ist.map snd
+            (Encoding.Model.get_binding<span data-count="1">s</span> model)
+          |&gt; <span data-count="1">L</span>ist.map snd
         in
-        <span data-count="2">w</span>rite_testcase ~dir:workspace ~err:(Option.is_som<span data-count="2">e</span> result) testcase;
-        <span data-count="2">r</span>esult )
+        <span data-count="1">w</span>rite_testcase ~dir:workspace ~err:(Option.is_som<span data-count="1">e</span> result) testcase;
+        <span data-count="1">r</span>esult )
       results
   in
   <span data-count="1">l</span>et () =
