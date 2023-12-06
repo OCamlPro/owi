@@ -65,9 +65,9 @@ module M = struct
     then Value.Bool.const true
     else begin
       for i = 0 to len - 1 do
-        let byte = Int32.of_int @@ Char.code @@ String.get str (src + i) in
+        let byte = Char.code @@ String.get str (src + i) in
         let dst = Int32.of_int (dst + i) in
-        Hashtbl.replace m.data dst (Value.const_i32 byte)
+        Hashtbl.replace m.data dst (Val (Num (I8 byte)) @: Ty_bitv S8)
       done;
       Value.Bool.const false
     end
@@ -84,7 +84,7 @@ module M = struct
     | Some b -> Some b
     | None -> Option.bind m.parent (load_byte_opt a)
 
-  let load_byte m a = Option.value (load_byte_opt a m) ~default:Value.I32.zero
+  let load_byte m a = Option.value (load_byte_opt a m) ~default:(Val (Num (I8 0)) @: Ty_bitv S8)
 
   let merge_extracts (e1, h, m1) (e2, m2, l) =
     if not (m1 = m2 && Expr.equal e1 e2) then
@@ -97,17 +97,19 @@ module M = struct
   let concat ~msb ~lsb offset =
     assert (offset > 0 && offset <= 8);
     match (msb.e, lsb.e) with
-    | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
+    | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
+      Value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
+    | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
       let offset = offset * 8 in
       if offset < 32 then
-        Value.const_i32 Int32.(logor (shl i1 (of_int offset)) i2)
+        Value.const_i32 Int32.(logor (shl (of_int i1) (of_int offset)) i2)
       else
-        let i1' = Int64.of_int32 i1 in
+        let i1' = Int64.of_int i1 in
         let i2' = Int64.of_int32 i2 in
         Value.const_i64 Int64.(logor (shl i1' (of_int offset)) i2')
-    | Val (Num (I32 i1)), Val (Num (I64 i2)) ->
+    | Val (Num (I8 i1)), Val (Num (I64 i2)) ->
       let offset = Int64.of_int (offset * 8) in
-      Value.const_i64 Int64.(logor (shl (of_int32 i1) offset) i2)
+      Value.const_i64 Int64.(logor (shl (of_int i1) offset) i2)
     | Extract (e1, h, m1), Extract (e2, m2, l) ->
       merge_extracts (e1, h, m1) (e2, m2, l)
     | Extract (e1, h, m1), Concat ({ e = Extract (e2, m2, l); _ }, e3) ->
@@ -147,13 +149,13 @@ module M = struct
   let load_8_s m a =
     let v = loadn m (calculate_address m a) 1 in
     match v.e with
-    | Val (Num (I32 i8)) -> Value.const_i32 (Int32.extend_s 8 i8)
+    | Val (Num (I8 i8)) -> Value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
     | _ -> Cvtop (ExtS 24, v) @: Ty_bitv S32
 
   let load_8_u m a =
     let v = loadn m (calculate_address m a) 1 in
     match v.e with
-    | Val (Num (I32 _)) -> v
+    | Val (Num (I8 i)) -> Value.const_i32 (Int32.of_int i)
     | _ -> Cvtop (ExtU 24, v) @: Ty_bitv S32
 
   let load_16_s m a =
@@ -175,11 +177,15 @@ module M = struct
   let extract v pos =
     match v.e with
     | Val (Num (I32 i)) ->
-      let i' = Int32.(logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-      Value.const_i32 i'
+      let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
+      Val (Num (I8 i')) @: Ty_bitv S8
     | Val (Num (I64 i)) ->
-      let i' = Int64.(logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-      Value.const_i32 (Int32.of_int64 i')
+      let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
+      Val (Num (I8 i')) @: Ty_bitv S8
+    | Cvtop (ExtU 24, { e = Symbol s; ty })
+    | Cvtop (ExtS 24, { e = Symbol s; ty })
+      when ty = Ty_bitv S8 ->
+      Symbol s @: ty
     | _ -> Extract (v, pos + 1, pos) @: Ty_bitv S8
 
   let storen m ~addr v n =
