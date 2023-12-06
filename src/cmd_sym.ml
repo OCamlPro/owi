@@ -104,26 +104,45 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   { functions }
 
 let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
+  let open Expr in
+  let i32 v = match v.e with Val (Num (I32 v)) -> v | _ -> assert false in
+  let ptr v = match v.e with Ptr (b, _) -> b | _ -> assert false in
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in
-  let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
-    Choice.return base
+  let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
+    let base : int32 = i32 base in
+    Choice.with_thread (fun t ->
+        let memories = Thread.memories t in
+        Env_id.Tbl.iter
+          (fun _ tbl ->
+            Symbolic_memory.ITbl.iter
+              (fun _ (m : Symbolic_memory.M.t) ->
+                Hashtbl.replace m.chunks base size )
+              tbl )
+          memories;
+        Ptr (base, Value.const_i32 0l) @: Ty_bitv S32 )
   in
-  let dealloc (_base : Value.int32) : unit Choice.t = Choice.return () in
-  let is_symbolic (_a : Value.int32) (_n : Value.int32) : Value.int32 Choice.t =
-    (* TODO: load n bytes from address a and check if it's a Val *)
-    Choice.return @@ Value.const_i32 0l
+  let free (p : Value.int32) : unit Choice.t =
+    let base = ptr p in
+    Choice.with_thread (fun t ->
+        let memories = Thread.memories t in
+        Env_id.Tbl.iter
+          (fun _ tbl ->
+            Symbolic_memory.ITbl.iter
+              (fun _ (m : Symbolic_memory.M.t) ->
+                if not (Hashtbl.mem m.chunks base) then
+                  (* Raise trap here instead *)
+                  failwith "Memory leak use after free";
+                Hashtbl.remove m.chunks base )
+              tbl )
+          memories )
   in
   let functions =
     [ ( "alloc"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
     ; ( "dealloc"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), dealloc)
-      )
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
     ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
-    ; ( "is_symbolic"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), is_symbolic) )
     ]
   in
   { functions }

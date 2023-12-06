@@ -6,8 +6,6 @@ open Encoding
 open Ty
 open Expr
 
-let ( let* ) o f = Option.bind o f
-
 let ( let+ ) o f = Option.map f o
 
 let return = Option.some
@@ -29,12 +27,21 @@ let binop ty op e1 e2 =
   match (e1.e, e2.e) with
   | Val (Num n1), Val (Num n2) ->
     Val (Num (Eval_numeric.eval_binop ty op n1 n2)) @: ty
+  | Ptr _, _ | _, Ptr _ ->
+    (* Does pointer arithmetic *)
+    Expr.simplify @@ (Binop (op, e1, e2) @: Ty_bitv S32)
   | _ -> Binop (op, e1, e2) @: ty
 
 let relop ty op e1 e2 =
   match (e1.e, e2.e) with
   | Val (Num n1), Val (Num n2) ->
     Val (if Eval_numeric.eval_relop ty op n1 n2 then True else False) @: ty
+  | Val (Num n), Ptr (b, { e = Val (Num o); _ }) ->
+    let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
+    Val (if Eval_numeric.eval_relop ty op n base then True else False) @: ty
+  | Ptr (b, { e = Val (Num o); _ }), Val (Num n) ->
+    let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
+    Val (if Eval_numeric.eval_relop ty op base n then True else False) @: ty
   | _ -> Relop (op, e1, e2) @: ty
 
 let cvtop ty op e =

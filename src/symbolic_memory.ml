@@ -20,16 +20,28 @@ module M = struct
     { data : (Int32.t, Expr.t) Hashtbl.t
     ; parent : t Option.t
     ; mutable size : int
+    ; chunks : (Int32.t, Expr.t) Hashtbl.t
     }
 
   let create size =
-    { data = Hashtbl.create 128; parent = None; size = Int32.to_int size }
+    { data = Hashtbl.create 128
+    ; parent = None
+    ; size = Int32.to_int size
+    ; chunks = Hashtbl.create 0
+    }
 
-  let concretize_i32 a =
-    match a with Val (Num (I32 i)) -> i | _ -> assert false
+  let i32 v =
+    match v.e with
+    | Val (Num (I32 i)) -> i
+    | _ ->
+      Format.kasprintf failwith "Unsupported symbolic value reasoning over '%a'"
+        Expr.pp v
 
   let grow m delta =
-    let delta = Int32.to_int @@ concretize_i32 delta.e in
+    let delta =
+      match delta.e with Val (Num (I32 i)) -> i | _ -> assert false
+    in
+    let delta = Int32.to_int delta in
     let old_size = m.size * page_size in
     m.size <- max m.size ((old_size + delta) / page_size)
 
@@ -43,9 +55,9 @@ module M = struct
 
   let blit_string m str ~src ~dst ~len =
     (* Always concrete? *)
-    let src = Int32.to_int @@ concretize_i32 src.e in
-    let dst = Int32.to_int @@ concretize_i32 dst.e in
-    let len = Int32.to_int @@ concretize_i32 len.e in
+    let src = Int32.to_int @@ i32 src in
+    let dst = Int32.to_int @@ i32 dst in
+    let len = Int32.to_int @@ i32 len in
     if
       src < 0 || dst < 0
       || src + len > String.length str
@@ -60,7 +72,12 @@ module M = struct
       Value.Bool.const false
     end
 
-  let clone m = { data = Hashtbl.create 0; parent = Some m; size = m.size }
+  let clone m =
+    { data = Hashtbl.create 0
+    ; parent = Some m
+    ; size = m.size
+    ; chunks = Hashtbl.copy m.chunks (* TODO: we can make this lazy as well *)
+    }
 
   let rec load_byte_opt a m =
     match Hashtbl.find_opt m.data a with
@@ -69,16 +86,16 @@ module M = struct
 
   let load_byte m a = Option.value (load_byte_opt a m) ~default:Value.I32.zero
 
+  let merge_extracts (e1, h, m1) (e2, m2, l) =
+    if not (m1 = m2 && Expr.equal e1 e2) then
+      Expr.(
+        Concat (Extract (e1, h, m1) @: e1.ty, Extract (e2, m2, l) @: e1.ty)
+        @: e1.ty )
+    else if h - l = Ty.size e1.ty then e1
+    else Extract (e1, h, l) @: e1.ty
+
   let concat ~msb ~lsb offset =
     assert (offset > 0 && offset <= 8);
-    let merge_extracts (e1, h, m1) (e2, m2, l) =
-      if not (m1 = m2 && Expr.equal e1 e2) then
-        Expr.(
-          Concat (Extract (e1, h, m1) @: e1.ty, Extract (e2, m2, l) @: e1.ty)
-          @: e1.ty )
-      else if h - l = Ty.size e1.ty then e1
-      else Extract (e1, h, l) @: e1.ty
-    in
     match (msb.e, lsb.e) with
     | Val (Num (I32 i1)), Val (Num (I32 i2)) ->
       let offset = offset * 8 in
@@ -111,33 +128,49 @@ module M = struct
     let v0 = load_byte m a in
     loop a n 1 v0
 
+  (* TODO: *)
+  (* 1. Let pointers have symbolic offsets *)
+  (* 2. Let addresses have symbolic values *)
+  let calculate_address m (a : int32) : Int32.t =
+    match a.e with
+    | Val (Num (I32 i)) -> i
+    | Ptr (base, offset) -> (
+      match Hashtbl.find_opt m.chunks base with
+      | None -> failwith "Memory leak use after free"
+      | Some size ->
+        let ptr = Int32.add base (i32 offset) in
+        if ptr < base || ptr > Int32.add base (i32 size) then
+          failwith "Heap buffer overflow"
+        else ptr )
+    | _ -> Format.kasprintf failwith "Cannot calculate address of: %a" Expr.pp a
+
   let load_8_s m a =
-    let v = loadn m (concretize_i32 a.e) 1 in
+    let v = loadn m (calculate_address m a) 1 in
     match v.e with
     | Val (Num (I32 i8)) -> Value.const_i32 (Int32.extend_s 8 i8)
     | _ -> Cvtop (ExtS 24, v) @: Ty_bitv S32
 
   let load_8_u m a =
-    let v = loadn m (concretize_i32 a.e) 1 in
+    let v = loadn m (calculate_address m a) 1 in
     match v.e with
     | Val (Num (I32 _)) -> v
     | _ -> Cvtop (ExtU 24, v) @: Ty_bitv S32
 
   let load_16_s m a =
-    let v = loadn m (concretize_i32 a.e) 2 in
+    let v = loadn m (calculate_address m a) 2 in
     match v.e with
     | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
     | _ -> Cvtop (ExtS 16, v) @: Ty_bitv S32
 
   let load_16_u m a =
-    let v = loadn m (concretize_i32 a.e) 2 in
+    let v = loadn m (calculate_address m a) 2 in
     match v.e with
     | Val (Num (I32 _)) -> v
     | _ -> Cvtop (ExtU 16, v) @: Ty_bitv S32
 
-  let load_32 m a = loadn m (concretize_i32 a.e) 4
+  let load_32 m a = loadn m (calculate_address m a) 4
 
-  let load_64 m a = loadn m (concretize_i32 a.e) 8
+  let load_64 m a = loadn m (calculate_address m a) 8
 
   let extract v pos =
     match v.e with
@@ -150,7 +183,7 @@ module M = struct
     | _ -> Extract (v, pos + 1, pos) @: Ty_bitv S8
 
   let storen m ~addr v n =
-    let a0 = concretize_i32 addr.e in
+    let a0 = calculate_address m addr in
     for i = 0 to n - 1 do
       let addr' = Int32.add a0 (Int32.of_int i) in
       let v' = extract v i in
