@@ -66,7 +66,9 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol @@ mk_symbol ty (Format.sprintf "symbol_%i" id) in
-    Choice.return r
+    match ty with
+    | Ty_bitv S8 -> Choice.return @@ Expr.(Cvtop (ExtU 24, r) @: Ty_bitv S32)
+    | _ -> Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
@@ -81,6 +83,9 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     [ ( "i32"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
+    ; ( "i8_symbol"
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), symbol (Ty_bitv S8)) )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func
           (Func (UArg Res, R1 I32), symbol (Ty_bitv S32)) )
