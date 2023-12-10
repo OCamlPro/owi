@@ -1171,7 +1171,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
-        let res =
+        let* res =
           (if sx = S then Memory.load_16_s else Memory.load_16_u) mem addr
         in
         st
@@ -1193,7 +1193,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
-        let res =
+        let* res =
           (if sx = S then Memory.load_8_s else Memory.load_8_u) mem addr
         in
         st
@@ -1224,7 +1224,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
-        Memory.store_8 mem ~addr n;
+        let* () = Memory.store_8 mem ~addr n in
         (* Thread memory ? *)
         st stack
       end
@@ -1246,13 +1246,13 @@ module Make (P : Interpret_functor_intf.P) :
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 4l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
-            let res = Memory.load_32 mem addr in
+            let* res = Memory.load_32 mem addr in
             st @@ Stack.push_i32 stack res
         | S64 ->
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 8l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
-            let res = Memory.load_64 mem addr in
+            let* res = Memory.load_64 mem addr in
             st @@ Stack.push_i64 stack res
       end
     | F_load (nn, { offset; _ }) ->
@@ -1271,14 +1271,14 @@ module Make (P : Interpret_functor_intf.P) :
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 4l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
-            let res = Memory.load_32 mem addr in
+            let* res = Memory.load_32 mem addr in
             let res = F32.of_bits res in
             st @@ Stack.push_f32 stack res
         | S64 ->
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 8l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
-            let res = Memory.load_64 mem addr in
+            let* res = Memory.load_64 mem addr in
             let res = F64.of_bits res in
             st @@ Stack.push_f64 stack res
       end
@@ -1300,7 +1300,7 @@ module Make (P : Interpret_functor_intf.P) :
           in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else begin
-            Memory.store_32 mem ~addr n;
+            let* () = Memory.store_32 mem ~addr n in
             st stack
           end
         | S64 ->
@@ -1313,7 +1313,7 @@ module Make (P : Interpret_functor_intf.P) :
           in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else begin
-            Memory.store_64 mem ~addr n;
+            let* () = Memory.store_64 mem ~addr n in
             st stack
           end )
     | F_store (nn, { offset; _ }) -> (
@@ -1334,7 +1334,7 @@ module Make (P : Interpret_functor_intf.P) :
           in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else begin
-            Memory.store_32 mem ~addr (F32.to_bits n);
+            let* () = Memory.store_32 mem ~addr (F32.to_bits n) in
             st stack
           end
         | S64 ->
@@ -1347,7 +1347,7 @@ module Make (P : Interpret_functor_intf.P) :
           in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else begin
-            Memory.store_64 mem ~addr (F64.to_bits n);
+            let* () = Memory.store_64 mem ~addr (F64.to_bits n) in
             st stack
           end )
     | I64_load32 (sx, { offset; _ }) ->
@@ -1363,7 +1363,8 @@ module Make (P : Interpret_functor_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
-        let res = I64.of_int32 @@ Memory.load_32 mem addr in
+        let* res = Memory.load_32 mem addr in
+        let res = I64.of_int32 res in
         let res =
           match sx with
           | S -> res
@@ -1400,7 +1401,7 @@ module Make (P : Interpret_functor_intf.P) :
         in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
-          Memory.store_16 mem ~addr n;
+          let* () = Memory.store_16 mem ~addr n in
           st stack
         end
     | I64_store32 { offset; _ } ->
@@ -1418,7 +1419,7 @@ module Make (P : Interpret_functor_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
-        Memory.store_32 mem ~addr n;
+        let* () = Memory.store_32 mem ~addr n in
         st stack
       end
     | Data_drop (Raw i) ->

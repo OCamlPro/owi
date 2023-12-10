@@ -122,25 +122,25 @@ module type P = sig
   module Memory : sig
     type t
 
-    val load_8_s : t -> int32 -> int32
+    val load_8_s : t -> int32 -> int32 Choice.t
 
-    val load_8_u : t -> int32 -> int32
+    val load_8_u : t -> int32 -> int32 Choice.t
 
-    val load_16_s : t -> int32 -> int32
+    val load_16_s : t -> int32 -> int32 Choice.t
 
-    val load_16_u : t -> int32 -> int32
+    val load_16_u : t -> int32 -> int32 Choice.t
 
-    val load_32 : t -> int32 -> int32
+    val load_32 : t -> int32 -> int32 Choice.t
 
-    val load_64 : t -> int32 -> int64
+    val load_64 : t -> int32 -> int64 Choice.t
 
-    val store_8 : t -> addr:int32 -> int32 -> unit
+    val store_8 : t -> addr:int32 -> int32 -> unit Choice.t
 
-    val store_16 : t -> addr:int32 -> int32 -> unit
+    val store_16 : t -> addr:int32 -> int32 -> unit Choice.t
 
-    val store_32 : t -> addr:int32 -> int32 -> unit
+    val store_32 : t -> addr:int32 -> int32 -> unit Choice.t
 
-    val store_64 : t -> addr:int32 -> int64 -> unit
+    val store_64 : t -> addr:int32 -> int64 -> unit Choice.t
 
     val grow : t -> int32 -> unit
 

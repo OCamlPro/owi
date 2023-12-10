@@ -106,7 +106,47 @@ module P = struct
   end
 
   module Memory = struct
-    include Symbolic_memory.M
+    module M = Symbolic_memory.M
+
+    type t = M.t
+
+    let return_or_trap = function
+      | Ok v -> Choice.return v
+      | Error t -> Choice.trap t
+
+    let load_8_s m a = return_or_trap @@ M.load_8_s m a
+
+    let load_8_u m a = return_or_trap @@ M.load_8_s m a
+
+    let load_16_s m a = return_or_trap @@ M.load_8_s m a
+
+    let load_16_u m a = return_or_trap @@ M.load_8_s m a
+
+    let load_32 m a = return_or_trap @@ M.load_8_s m a
+
+    let load_64 m a = return_or_trap @@ M.load_8_s m a
+
+    let store_8 m ~addr v = return_or_trap @@ M.store_8 m ~addr v
+
+    let store_16 m ~addr v = return_or_trap @@ M.store_16 m ~addr v
+
+    let store_32 m ~addr v = return_or_trap @@ M.store_32 m ~addr v
+
+    let store_64 m ~addr v = return_or_trap @@ M.store_64 m ~addr v
+
+    let grow = M.grow
+
+    let fill = M.fill
+
+    let blit = M.blit
+
+    let blit_string = M.blit_string
+
+    let size = M.size
+
+    let size_in_pages = M.size_in_pages
+
+    let get_limit_max = M.get_limit_max
   end
 
   module Data = struct

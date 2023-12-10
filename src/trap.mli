@@ -10,5 +10,6 @@ type t =
   | Indirect_call_type_mismatch
   | Extern_call_arg_type_mismatch
   | Extern_call_null_arg
+  | Memory_leak_use_after_free
 
 val to_string : t -> string
