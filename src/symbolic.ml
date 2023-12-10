@@ -116,15 +116,15 @@ module P = struct
 
     let load_8_s m a = return_or_trap @@ M.load_8_s m a
 
-    let load_8_u m a = return_or_trap @@ M.load_8_s m a
+    let load_8_u m a = return_or_trap @@ M.load_8_u m a
 
-    let load_16_s m a = return_or_trap @@ M.load_8_s m a
+    let load_16_s m a = return_or_trap @@ M.load_16_s m a
 
-    let load_16_u m a = return_or_trap @@ M.load_8_s m a
+    let load_16_u m a = return_or_trap @@ M.load_16_u m a
 
-    let load_32 m a = return_or_trap @@ M.load_8_s m a
+    let load_32 m a = return_or_trap @@ M.load_32 m a
 
-    let load_64 m a = return_or_trap @@ M.load_8_s m a
+    let load_64 m a = return_or_trap @@ M.load_64 m a
 
     let store_8 m ~addr v = return_or_trap @@ M.store_8 m ~addr v
 
