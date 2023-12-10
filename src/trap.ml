@@ -15,6 +15,7 @@ type t =
   | Extern_call_arg_type_mismatch
   | Extern_call_null_arg
   | Memory_leak_use_after_free
+  | Memory_heap_buffer_overflow
 
 let to_string = function
   | Out_of_bounds_table_access -> "out of bounds table access"
@@ -30,3 +31,4 @@ let to_string = function
   | Extern_call_arg_type_mismatch -> "extern call arg type mismatch"
   | Extern_call_null_arg -> "extern call null arg"
   | Memory_leak_use_after_free -> "memory leak use after free"
+  | Memory_heap_buffer_overflow -> "memory heap buffer overflow"

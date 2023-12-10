@@ -136,7 +136,7 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
               (fun _ (m : Symbolic_memory.M.t) ->
                 if not (Hashtbl.mem m.chunks base) then
                   (* TODO: trap instead? *)
-                  failwith "Memory leak use after free";
+                  failwith "Memory leak double free";
                 Hashtbl.remove m.chunks base )
               tbl )
           memories )

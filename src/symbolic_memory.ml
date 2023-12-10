@@ -145,7 +145,7 @@ module M = struct
       | Some size ->
         let ptr = Int32.add base (i32 offset) in
         if ptr < base || ptr > Int32.add base (i32 size) then
-          Error Trap.Out_of_bounds_memory_access
+          Error Trap.Memory_heap_buffer_overflow
         else Ok ptr )
     | _ -> Format.kasprintf failwith "Cannot calculate address of: %a" Expr.pp a
 
