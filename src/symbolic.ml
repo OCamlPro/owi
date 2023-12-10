@@ -106,47 +106,31 @@ module P = struct
   end
 
   module Memory = struct
-    module M = Symbolic_memory.M
-
-    type t = M.t
+    include Symbolic_memory.M
 
     let return_or_trap = function
       | Ok v -> Choice.return v
       | Error t -> Choice.trap t
 
-    let load_8_s m a = return_or_trap @@ M.load_8_s m a
+    let load_8_s m a = return_or_trap @@ load_8_s m a
 
-    let load_8_u m a = return_or_trap @@ M.load_8_u m a
+    let load_8_u m a = return_or_trap @@ load_8_u m a
 
-    let load_16_s m a = return_or_trap @@ M.load_16_s m a
+    let load_16_s m a = return_or_trap @@ load_16_s m a
 
-    let load_16_u m a = return_or_trap @@ M.load_16_u m a
+    let load_16_u m a = return_or_trap @@ load_16_u m a
 
-    let load_32 m a = return_or_trap @@ M.load_32 m a
+    let load_32 m a = return_or_trap @@ load_32 m a
 
-    let load_64 m a = return_or_trap @@ M.load_64 m a
+    let load_64 m a = return_or_trap @@ load_64 m a
 
-    let store_8 m ~addr v = return_or_trap @@ M.store_8 m ~addr v
+    let store_8 m ~addr v = return_or_trap @@ store_8 m ~addr v
 
-    let store_16 m ~addr v = return_or_trap @@ M.store_16 m ~addr v
+    let store_16 m ~addr v = return_or_trap @@ store_16 m ~addr v
 
-    let store_32 m ~addr v = return_or_trap @@ M.store_32 m ~addr v
+    let store_32 m ~addr v = return_or_trap @@ store_32 m ~addr v
 
-    let store_64 m ~addr v = return_or_trap @@ M.store_64 m ~addr v
-
-    let grow = M.grow
-
-    let fill = M.fill
-
-    let blit = M.blit
-
-    let blit_string = M.blit_string
-
-    let size = M.size
-
-    let size_in_pages = M.size_in_pages
-
-    let get_limit_max = M.get_limit_max
+    let store_64 m ~addr v = return_or_trap @@ store_64 m ~addr v
   end
 
   module Data = struct
