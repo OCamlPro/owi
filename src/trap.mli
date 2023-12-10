@@ -11,5 +11,6 @@ type t =
   | Extern_call_arg_type_mismatch
   | Extern_call_null_arg
   | Memory_leak_use_after_free
+  | Memory_heap_buffer_overflow
 
 val to_string : t -> string
