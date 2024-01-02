@@ -679,25 +679,25 @@ module type P = sig
   module Memory : sig
     type t
 
-    val load_8_s : t -&gt; int32 -&gt; int32
+    val load_8_s : t -&gt; int32 -&gt; int32 Choice.t
 
-    val load_8_u : t -&gt; int32 -&gt; int32
+    val load_8_u : t -&gt; int32 -&gt; int32 Choice.t
 
-    val load_16_s : t -&gt; int32 -&gt; int32
+    val load_16_s : t -&gt; int32 -&gt; int32 Choice.t
 
-    val load_16_u : t -&gt; int32 -&gt; int32
+    val load_16_u : t -&gt; int32 -&gt; int32 Choice.t
 
-    val load_32 : t -&gt; int32 -&gt; int32
+    val load_32 : t -&gt; int32 -&gt; int32 Choice.t
 
-    val load_64 : t -&gt; int32 -&gt; int64
+    val load_64 : t -&gt; int32 -&gt; int64 Choice.t
 
-    val store_8 : t -&gt; addr:int32 -&gt; int32 -&gt; unit
+    val store_8 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
 
-    val store_16 : t -&gt; addr:int32 -&gt; int32 -&gt; unit
+    val store_16 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
 
-    val store_32 : t -&gt; addr:int32 -&gt; int32 -&gt; unit
+    val store_32 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
 
-    val store_64 : t -&gt; addr:int32 -&gt; int64 -&gt; unit
+    val store_64 : t -&gt; addr:int32 -&gt; int64 -&gt; unit Choice.t
 
     val grow : t -&gt; int32 -&gt; unit
 

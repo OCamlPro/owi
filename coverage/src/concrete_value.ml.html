@@ -400,8 +400,8 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : simplified val_type =
-    <span data-count="2997">m</span>atch e with
-    | <span data-count="1505">I</span>32 -&gt; Num_type I32
+    <span data-count="2995">m</span>atch e with
+    | <span data-count="1503">I</span>32 -&gt; Num_type I32
     | <span data-count="248">I</span>64 -&gt; Num_type I64
     | <span data-count="495">F</span>32 -&gt; Num_type F32
     | <span data-count="746">F</span>64 -&gt; Num_type F64
@@ -416,8 +416,8 @@ struct
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; simplified param_type = function
-    | <span data-count="5">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="2494">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2494">e</span> hd) :: arg_typ<span data-count="2494">e</span> tl
+    | <span data-count="6">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="2492">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2492">e</span> hd) :: arg_typ<span data-count="2492">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
     | <span data-count="2743">R</span>es -&gt; []
 
