@@ -44,25 +44,9 @@ let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
   in
   { functions }
 
-let names = [| "plop"; "foo"; "bar" |]
-
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
   let mk_symbol = Encoding.Symbol.mk_symbol in
-  let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
-    let name =
-      match i.e with
-      | Expr.Val (Num (I32 i)) -> begin
-        match names.(Int32.to_int i) with exception _ -> "x" | name -> name
-      end
-      | _ -> Format.kasprintf failwith "Text name %a" Expr.pp i
-    in
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r =
-      Expr.mk_symbol @@ mk_symbol (Ty_bitv S32) (Format.sprintf "%s_%i" name id)
-    in
-    Choice.return r
-  in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
     let r = Expr.mk_symbol @@ mk_symbol ty (Format.sprintf "symbol_%i" id) in
@@ -80,10 +64,7 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   in
   (* we need to describe their types *)
   let functions =
-    [ ( "i32"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
-    ; ( "i8_symbol"
+    [ ( "i8_symbol"
       , Symbolic.P.Extern_func.Extern_func
           (Func (UArg Res, R1 I32), symbol (Ty_bitv S8)) )
     ; ( "i32_symbol"
