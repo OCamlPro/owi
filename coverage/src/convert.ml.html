@@ -561,73 +561,73 @@
 module MInt32 = struct
   type t = int32
 
-  let wrap_i64 x = <span data-count="126">I</span>nt64.to_int32 x
+  let wrap_i64 x = <span data-count="127">I</span>nt64.to_int32 x
 
   let trunc_f32_s x =
-    <span data-count="60">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="61">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="50">l</span>et xf = Float32.to_float x in
-      <span data-count="50">i</span>f xf &gt;= -<span data-count="50">.</span>Int32.(to_floa<span data-count="50">t</span> min_int<span data-count="4">)</span> || xf &lt; Int32.(to_floa<span data-count="46">t</span> min_int<span data-count="4">)</span> then
+      <span data-count="51">l</span>et xf = Float32.to_float x in
+      <span data-count="51">i</span>f xf &gt;= -<span data-count="51">.</span>Int32.(to_floa<span data-count="51">t</span> min_int<span data-count="4">)</span> || xf &lt; Int32.(to_floa<span data-count="47">t</span> min_int<span data-count="4">)</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="42">I</span>nt32.of_float xf
+      else <span data-count="43">I</span>nt32.of_float xf
 
   let trunc_f32_u x =
-    <span data-count="58">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="59">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="48">l</span>et xf = Float32.to_float x in
-      <span data-count="48">i</span>f xf &gt;= -<span data-count="48">.</span>Int32.(to_floa<span data-count="48">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
+      <span data-count="49">l</span>et xf = Float32.to_float x in
+      <span data-count="49">i</span>f xf &gt;= -<span data-count="49">.</span>Int32.(to_floa<span data-count="49">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="40">I</span>nt64.(to_int32 (of_floa<span data-count="40">t</span> xf))
+      else <span data-count="41">I</span>nt64.(to_int32 (of_floa<span data-count="41">t</span> xf))
 
   let trunc_f64_s x =
-    <span data-count="58">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="59">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="48">l</span>et xf = Float64.to_float x in
-      <span data-count="48">i</span>f
-        xf &gt;= -<span data-count="48">.</span>Int32.(to_floa<span data-count="48">t</span> min_int<span data-count="4">)</span>
-        || xf &lt;= Int32.(to_floa<span data-count="44">t</span> min_int) -. 1.<span data-count="4">0</span>
+      <span data-count="49">l</span>et xf = Float64.to_float x in
+      <span data-count="49">i</span>f
+        xf &gt;= -<span data-count="49">.</span>Int32.(to_floa<span data-count="49">t</span> min_int<span data-count="4">)</span>
+        || xf &lt;= Int32.(to_floa<span data-count="45">t</span> min_int) -. 1.<span data-count="4">0</span>
       then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="40">I</span>nt32.of_float xf
+      else <span data-count="41">I</span>nt32.of_float xf
 
   let trunc_f64_u x =
-    <span data-count="64">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="65">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="54">l</span>et xf = Float64.to_float x in
-      <span data-count="54">i</span>f xf &gt;= -<span data-count="54">.</span>Int32.(to_floa<span data-count="54">t</span> min_int) *. 2.<span data-count="10">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
+      <span data-count="55">l</span>et xf = Float64.to_float x in
+      <span data-count="55">i</span>f xf &gt;= -<span data-count="55">.</span>Int32.(to_floa<span data-count="55">t</span> min_int) *. 2.<span data-count="10">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
         <span data-count="14">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="40">I</span>nt64.(to_int32 (of_floa<span data-count="40">t</span> xf))
+      else <span data-count="41">I</span>nt64.(to_int32 (of_floa<span data-count="41">t</span> xf))
 
   let trunc_sat_f32_s x =
-    <span data-count="44">i</span>f Float32.ne x x then <span data-count="8">0</span>l
+    <span data-count="45">i</span>f Float32.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="36">l</span>et xf = Float32.to_float x in
-      <span data-count="36">i</span>f xf &lt; Int32.(to_floa<span data-count="36">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
-      else <span data-count="32">i</span>f xf &gt;= -<span data-count="32">.</span>Int32.(to_floa<span data-count="32">t</span> min_int) then <span data-count="4">I</span>nt32.max_int
-      else <span data-count="28">I</span>nt32.of_float xf
+      <span data-count="37">l</span>et xf = Float32.to_float x in
+      <span data-count="37">i</span>f xf &lt; Int32.(to_floa<span data-count="37">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
+      else <span data-count="33">i</span>f xf &gt;= -<span data-count="33">.</span>Int32.(to_floa<span data-count="33">t</span> min_int) then <span data-count="4">I</span>nt32.max_int
+      else <span data-count="29">I</span>nt32.of_float xf
 
   let trunc_sat_f32_u x =
-    <span data-count="42">i</span>f Float32.ne x x then <span data-count="8">0</span>l
+    <span data-count="43">i</span>f Float32.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="34">l</span>et xf = Float32.to_float x in
-      <span data-count="34">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>l
-      else <span data-count="30">i</span>f xf &gt;= -<span data-count="30">.</span>Int32.(to_floa<span data-count="30">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1l
-      else <span data-count="26">I</span>nt64.(to_int32 (of_floa<span data-count="26">t</span> xf))
+      <span data-count="35">l</span>et xf = Float32.to_float x in
+      <span data-count="35">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>l
+      else <span data-count="31">i</span>f xf &gt;= -<span data-count="31">.</span>Int32.(to_floa<span data-count="31">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1l
+      else <span data-count="27">I</span>nt64.(to_int32 (of_floa<span data-count="27">t</span> xf))
 
   let trunc_sat_f64_s x =
-    <span data-count="46">i</span>f Float64.ne x x then <span data-count="8">0</span>l
+    <span data-count="47">i</span>f Float64.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="38">l</span>et xf = Float64.to_float x in
-      <span data-count="38">i</span>f xf &lt; Int32.(to_floa<span data-count="38">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
-      else <span data-count="34">i</span>f xf &gt;= -<span data-count="34">.</span>Int32.(to_floa<span data-count="34">t</span> min_int) then <span data-count="6">I</span>nt32.max_int
-      else <span data-count="28">I</span>nt32.of_float xf
+      <span data-count="39">l</span>et xf = Float64.to_float x in
+      <span data-count="39">i</span>f xf &lt; Int32.(to_floa<span data-count="39">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
+      else <span data-count="35">i</span>f xf &gt;= -<span data-count="35">.</span>Int32.(to_floa<span data-count="35">t</span> min_int) then <span data-count="6">I</span>nt32.max_int
+      else <span data-count="29">I</span>nt32.of_float xf
 
   let trunc_sat_f64_u x =
-    <span data-count="50">i</span>f Float64.ne x x then <span data-count="8">0</span>l
+    <span data-count="51">i</span>f Float64.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="42">l</span>et xf = Float64.to_float x in
-      <span data-count="42">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>l
-      else <span data-count="38">i</span>f xf &gt;= -<span data-count="38">.</span>Int32.(to_floa<span data-count="38">t</span> min_int) *. 2.0 then <span data-count="10">-</span>1l
-      else <span data-count="28">I</span>nt64.(to_int32 (of_floa<span data-count="28">t</span> xf))
+      <span data-count="43">l</span>et xf = Float64.to_float x in
+      <span data-count="43">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>l
+      else <span data-count="39">i</span>f xf &gt;= -<span data-count="39">.</span>Int32.(to_floa<span data-count="39">t</span> min_int) *. 2.0 then <span data-count="10">-</span>1l
+      else <span data-count="29">I</span>nt64.(to_int32 (of_floa<span data-count="29">t</span> xf))
 
   let reinterpret_f32 = Float32.to_bits
 end
@@ -635,81 +635,81 @@ end
 module MInt64 = struct
   type t = int64
 
-  let extend_i32_s x = <span data-count="20">I</span>nt64.of_int32 x
+  let extend_i32_s x = <span data-count="21">I</span>nt64.of_int32 x
 
-  let extend_i32_u x = <span data-count="102">I</span>nt64.logand (Int64.of_int3<span data-count="102">2</span> x) 0x0000_0000_ffff_ffffL
+  let extend_i32_u x = <span data-count="103">I</span>nt64.logand (Int64.of_int3<span data-count="103">2</span> x) 0x0000_0000_ffff_ffffL
 
   let trunc_f32_s x =
-    <span data-count="58">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="59">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="48">l</span>et xf = Float32.to_float x in
-      <span data-count="48">i</span>f xf &gt;= -<span data-count="48">.</span>Int64.(to_floa<span data-count="48">t</span> min_int<span data-count="4">)</span> || xf &lt; Int64.(to_floa<span data-count="44">t</span> min_int<span data-count="4">)</span> then
+      <span data-count="49">l</span>et xf = Float32.to_float x in
+      <span data-count="49">i</span>f xf &gt;= -<span data-count="49">.</span>Int64.(to_floa<span data-count="49">t</span> min_int<span data-count="4">)</span> || xf &lt; Int64.(to_floa<span data-count="45">t</span> min_int<span data-count="4">)</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="40">I</span>nt64.of_float xf
+      else <span data-count="41">I</span>nt64.of_float xf
 
   let trunc_f32_u x =
-    <span data-count="48">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="49">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="38">l</span>et xf = Float32.to_float x in
-      <span data-count="38">i</span>f xf &gt;= -<span data-count="38">.</span>Int64.(to_floa<span data-count="38">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
+      <span data-count="39">l</span>et xf = Float32.to_float x in
+      <span data-count="39">i</span>f xf &gt;= -<span data-count="39">.</span>Int64.(to_floa<span data-count="39">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="30">i</span>f xf &gt;= -<span data-count="30">.</span>Int64.(to_floa<span data-count="30">t</span> min_int) then
+      else <span data-count="31">i</span>f xf &gt;= -<span data-count="31">.</span>Int64.(to_floa<span data-count="31">t</span> min_int) then
         <span data-count="2">I</span>nt64.(logxor (of_floa<span data-count="2">t</span> (xf -. 0x1p63)) min_int)
-      else <span data-count="28">I</span>nt64.of_float xf
+      else <span data-count="29">I</span>nt64.of_float xf
 
   let trunc_f64_s x =
-    <span data-count="68">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="69">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="58">l</span>et xf = Float64.to_float x in
-      <span data-count="58">i</span>f xf &gt;= -<span data-count="58">.</span>Int64.(to_floa<span data-count="58">t</span> min_int<span data-count="4">)</span> || xf &lt; Int64.(to_floa<span data-count="54">t</span> min_int<span data-count="4">)</span> then
+      <span data-count="59">l</span>et xf = Float64.to_float x in
+      <span data-count="59">i</span>f xf &gt;= -<span data-count="59">.</span>Int64.(to_floa<span data-count="59">t</span> min_int<span data-count="4">)</span> || xf &lt; Int64.(to_floa<span data-count="55">t</span> min_int<span data-count="4">)</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="50">I</span>nt64.of_float xf
+      else <span data-count="51">I</span>nt64.of_float xf
 
   let trunc_f64_u x =
-    <span data-count="62">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="63">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
     else
-      <span data-count="52">l</span>et xf = Float64.to_float x in
-      <span data-count="52">i</span>f xf &gt;= -<span data-count="52">.</span>Int64.(to_floa<span data-count="52">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
+      <span data-count="53">l</span>et xf = Float64.to_float x in
+      <span data-count="53">i</span>f xf &gt;= -<span data-count="53">.</span>Int64.(to_floa<span data-count="53">t</span> min_int) *. 2.<span data-count="4">0</span> || xf &lt;= -1.<span data-count="4">0</span> then
         <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="44">i</span>f xf &gt;= -<span data-count="44">.</span>Int64.(to_floa<span data-count="44">t</span> min_int) then
+      else <span data-count="45">i</span>f xf &gt;= -<span data-count="45">.</span>Int64.(to_floa<span data-count="45">t</span> min_int) then
         <span data-count="6">I</span>nt64.(logxor (of_floa<span data-count="6">t</span> (xf -. 0x1p63)) min_int)
-      else <span data-count="38">I</span>nt64.of_float xf
+      else <span data-count="39">I</span>nt64.of_float xf
 
   let trunc_sat_f32_s x =
-    <span data-count="48">i</span>f Float32.ne x x then <span data-count="8">0</span>L
+    <span data-count="49">i</span>f Float32.ne x x then <span data-count="8">0</span>L
     else
-      <span data-count="40">l</span>et xf = Float32.to_float x in
-      <span data-count="40">i</span>f xf &lt; Int64.(to_floa<span data-count="40">t</span> min_int) then <span data-count="4">I</span>nt64.min_int
-      else <span data-count="36">i</span>f xf &gt;= -<span data-count="36">.</span>Int64.(to_floa<span data-count="36">t</span> min_int) then <span data-count="4">I</span>nt64.max_int
-      else <span data-count="32">I</span>nt64.of_float xf
+      <span data-count="41">l</span>et xf = Float32.to_float x in
+      <span data-count="41">i</span>f xf &lt; Int64.(to_floa<span data-count="41">t</span> min_int) then <span data-count="4">I</span>nt64.min_int
+      else <span data-count="37">i</span>f xf &gt;= -<span data-count="37">.</span>Int64.(to_floa<span data-count="37">t</span> min_int) then <span data-count="4">I</span>nt64.max_int
+      else <span data-count="33">I</span>nt64.of_float xf
 
   let trunc_sat_f32_u x =
-    <span data-count="38">i</span>f Float32.ne x x then <span data-count="8">0</span>L
+    <span data-count="39">i</span>f Float32.ne x x then <span data-count="8">0</span>L
     else
-      <span data-count="30">l</span>et xf = Float32.to_float x in
-      <span data-count="30">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>L
-      else <span data-count="26">i</span>f xf &gt;= -<span data-count="26">.</span>Int64.(to_floa<span data-count="26">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1L
-      else <span data-count="22">i</span>f xf &gt;= -<span data-count="22">.</span>Int64.(to_floa<span data-count="22">t</span> min_int) then
+      <span data-count="31">l</span>et xf = Float32.to_float x in
+      <span data-count="31">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>L
+      else <span data-count="27">i</span>f xf &gt;= -<span data-count="27">.</span>Int64.(to_floa<span data-count="27">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1L
+      else <span data-count="23">i</span>f xf &gt;= -<span data-count="23">.</span>Int64.(to_floa<span data-count="23">t</span> min_int) then
         <span data-count="2">I</span>nt64.(logxor (of_floa<span data-count="2">t</span> (xf -. 9223372036854775808.0)) min_int)
-      else <span data-count="20">I</span>nt64.of_float xf
+      else <span data-count="21">I</span>nt64.of_float xf
 
   let trunc_sat_f64_s x =
-    <span data-count="48">i</span>f Float64.ne x x then <span data-count="8">0</span>L
+    <span data-count="49">i</span>f Float64.ne x x then <span data-count="8">0</span>L
     else
-      <span data-count="40">l</span>et xf = Float64.to_float x in
-      <span data-count="40">i</span>f xf &lt; Int64.(to_floa<span data-count="40">t</span> min_int) then <span data-count="4">I</span>nt64.min_int
-      else <span data-count="36">i</span>f xf &gt;= -<span data-count="36">.</span>Int64.(to_floa<span data-count="36">t</span> min_int) then <span data-count="4">I</span>nt64.max_int
-      else <span data-count="32">I</span>nt64.of_float xf
+      <span data-count="41">l</span>et xf = Float64.to_float x in
+      <span data-count="41">i</span>f xf &lt; Int64.(to_floa<span data-count="41">t</span> min_int) then <span data-count="4">I</span>nt64.min_int
+      else <span data-count="37">i</span>f xf &gt;= -<span data-count="37">.</span>Int64.(to_floa<span data-count="37">t</span> min_int) then <span data-count="4">I</span>nt64.max_int
+      else <span data-count="33">I</span>nt64.of_float xf
 
   let trunc_sat_f64_u x =
-    <span data-count="46">i</span>f Float64.ne x x then <span data-count="8">0</span>L
+    <span data-count="47">i</span>f Float64.ne x x then <span data-count="8">0</span>L
     else
-      <span data-count="38">l</span>et xf = Float64.to_float x in
-      <span data-count="38">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>L
-      else <span data-count="34">i</span>f xf &gt;= -<span data-count="34">.</span>Int64.(to_floa<span data-count="34">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1L
-      else <span data-count="30">i</span>f xf &gt;= -<span data-count="30">.</span>Int64.(to_floa<span data-count="30">t</span> min_int) then
+      <span data-count="39">l</span>et xf = Float64.to_float x in
+      <span data-count="39">i</span>f xf &lt;= -1.0 then <span data-count="4">0</span>L
+      else <span data-count="35">i</span>f xf &gt;= -<span data-count="35">.</span>Int64.(to_floa<span data-count="35">t</span> min_int) *. 2.0 then <span data-count="4">-</span>1L
+      else <span data-count="31">i</span>f xf &gt;= -<span data-count="31">.</span>Int64.(to_floa<span data-count="31">t</span> min_int) then
         <span data-count="4">I</span>nt64.(logxor (of_floa<span data-count="4">t</span> (xf -. 9223372036854775808.0)) min_int)
-      else <span data-count="26">I</span>nt64.of_float xf
+      else <span data-count="27">I</span>nt64.of_float xf
 
   let reinterpret_f64 = Float64.to_bits
 end
@@ -718,8 +718,8 @@ module MFloat32 = struct
   type t = Float32.t
 
   let demote_f64 x =
-    <span data-count="175">l</span>et xf = Float64.to_float x in
-    <span data-count="175">i</span>f xf = xf then <span data-count="163">F</span>loat32.of_float xf
+    <span data-count="176">l</span>et xf = Float64.to_float x in
+    <span data-count="176">i</span>f xf = xf then <span data-count="164">F</span>loat32.of_float xf
     else
       <span data-count="12">l</span>et nan64bits = Float64.to_bits x in
       <span data-count="12">l</span>et sign_field =
@@ -732,7 +732,7 @@ module MFloat32 = struct
       <span data-count="12">l</span>et nan32bits = Int32.logor 0x7fc0_0000l (MInt32.wrap_i6<span data-count="12">4</span> fields) in
       <span data-count="12">F</span>loat32.of_bits nan32bits
 
-  let convert_i32_s x = <span data-count="44">F</span>loat32.of_float (Int32.to_floa<span data-count="44">t</span> x)
+  let convert_i32_s x = <span data-count="45">F</span>loat32.of_float (Int32.to_floa<span data-count="45">t</span> x)
 
   (*
    * Similar to convert_i64_u below, the high half of the i32 range are beyond
@@ -740,9 +740,9 @@ module MFloat32 = struct
    * the least significant bit to round correctly.
    *)
   let convert_i32_u x =
-    <span data-count="42">F</span>loat32.of_float
+    <span data-count="43">F</span>loat32.of_float
       Int32.(
-        if x &gt;= zero then <span data-count="22">t</span>o_floa<span data-count="22">t</span> x
+        if x &gt;= zero then <span data-count="23">t</span>o_floa<span data-count="23">t</span> x
         else <span data-count="20">t</span>o_floa<span data-count="20">t</span> (logo<span data-count="20">r</span> (shift_right_logica<span data-count="20">l</span> x 1) (logan<span data-count="20">d</span> x 1l)) *. 2.0 )
 
   (*
@@ -752,17 +752,17 @@ module MFloat32 = struct
    * bits in the least significant bit, such that rounding still is correct.
    *)
   let convert_i64_s (x : int64) =
-    <span data-count="36">F</span>loat32.of_float
+    <span data-count="37">F</span>loat32.of_float
       Int64.(
-        if ab<span data-count="36">s</span> x &lt; 0x10_0000_0000_0000L then <span data-count="26">t</span>o_floa<span data-count="26">t</span> x
+        if ab<span data-count="37">s</span> x &lt; 0x10_0000_0000_0000L then <span data-count="27">t</span>o_floa<span data-count="27">t</span> x
         else
           <span data-count="10">l</span>et r = if logan<span data-count="10">d</span> x 0xfffL = 0L then <span data-count="0">0</span>L else <span data-count="10">1</span>L in
           to_floa<span data-count="10">t</span> (logo<span data-count="10">r</span> (shift_righ<span data-count="10">t</span> x 12) r) *. 0x1p12 )
 
   let convert_i64_u x =
-    <span data-count="30">F</span>loat32.of_float
+    <span data-count="31">F</span>loat32.of_float
       Int64.(
-        if lt_u x 0x10_0000_0000_0000L then <span data-count="14">t</span>o_floa<span data-count="14">t</span> x
+        if lt_u x 0x10_0000_0000_0000L then <span data-count="15">t</span>o_floa<span data-count="15">t</span> x
         else
           <span data-count="16">l</span>et r = if logan<span data-count="16">d</span> x 0xfffL = 0L then <span data-count="2">0</span>L else <span data-count="14">1</span>L in
           to_floa<span data-count="16">t</span> (logo<span data-count="16">r</span> (shift_right_logica<span data-count="16">l</span> x 12) r) *. 0x1p12 )
@@ -774,8 +774,8 @@ module MFloat64 = struct
   type t = Float64.t
 
   let promote_f32 x =
-    <span data-count="116">l</span>et xf = Float32.to_float x in
-    <span data-count="116">i</span>f xf = xf then <span data-count="104">F</span>loat64.of_float xf
+    <span data-count="117">l</span>et xf = Float32.to_float x in
+    <span data-count="117">i</span>f xf = xf then <span data-count="105">F</span>loat64.of_float xf
     else
       <span data-count="12">l</span>et nan32bits = MInt64.extend_i32_u (Float32.to_bit<span data-count="12">s</span> x) in
       <span data-count="12">l</span>et sign_field =
@@ -788,7 +788,7 @@ module MFloat64 = struct
       <span data-count="12">l</span>et nan64bits = Int64.logor 0x7ff8_0000_0000_0000L fields in
       <span data-count="12">F</span>loat64.of_bits nan64bits
 
-  let convert_i32_s x = <span data-count="28">F</span>loat64.of_float (Int32.to_floa<span data-count="28">t</span> x)
+  let convert_i32_s x = <span data-count="29">F</span>loat64.of_float (Int32.to_floa<span data-count="29">t</span> x)
 
   (*
    * Unlike the other convert_u functions, the high half of the i32 range is
@@ -796,10 +796,10 @@ module MFloat64 = struct
    * shift. Instead, we can use int64 signed arithmetic.
    *)
   let convert_i32_u x =
-    <span data-count="26">F</span>loat64.of_float
-      Int64.(to_floa<span data-count="26">t</span> (logan<span data-count="26">d</span> (of_int3<span data-count="26">2</span> x) 0x0000_0000_ffff_ffffL))
+    <span data-count="27">F</span>loat64.of_float
+      Int64.(to_floa<span data-count="27">t</span> (logan<span data-count="27">d</span> (of_int3<span data-count="27">2</span> x) 0x0000_0000_ffff_ffffL))
 
-  let convert_i64_s x = <span data-count="38">F</span>loat64.of_float (Int64.to_floa<span data-count="38">t</span> x)
+  let convert_i64_s x = <span data-count="39">F</span>loat64.of_float (Int64.to_floa<span data-count="39">t</span> x)
 
   (*
    * Values in the low half of the int64 range can be converted with a signed
@@ -808,9 +808,9 @@ module MFloat64 = struct
    * bit to round correctly, do a conversion, and then scale it back up.
    *)
   let convert_i64_u x =
-    <span data-count="64">F</span>loat64.of_float
+    <span data-count="65">F</span>loat64.of_float
       Int64.(
-        if x &gt;= zero then <span data-count="44">t</span>o_floa<span data-count="44">t</span> x
+        if x &gt;= zero then <span data-count="45">t</span>o_floa<span data-count="45">t</span> x
         else <span data-count="20">t</span>o_floa<span data-count="20">t</span> (logo<span data-count="20">r</span> (shift_right_logica<span data-count="20">l</span> x 1) (logan<span data-count="20">d</span> x 1L)) *. 2.0 )
 
   let reinterpret_i64 = Float64.of_bits

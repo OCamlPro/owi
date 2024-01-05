@@ -800,7 +800,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
-  <span data-count="5">l</span>et mk_symbol = Encoding.Symbol.mk_symbol in
+  <span data-count="27">l</span>et mk_symbol = Encoding.Symbol.mk_symbol in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     <span data-count="1">l</span>et name =
       match i.e with
@@ -837,19 +837,19 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i8_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbo<span data-count="5">l</span> (Ty_bitv S8)) )
+          (Func (UArg Res, R1 I32), symbo<span data-count="27">l</span> (Ty_bitv S8)) )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbo<span data-count="5">l</span> (Ty_bitv S32)) )
+          (Func (UArg Res, R1 I32), symbo<span data-count="27">l</span> (Ty_bitv S32)) )
     ; ( "i64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I64), symbo<span data-count="5">l</span> (Ty_bitv S64)) )
+          (Func (UArg Res, R1 I64), symbo<span data-count="27">l</span> (Ty_bitv S64)) )
     ; ( "f32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F32), symbo<span data-count="5">l</span> (Ty_fp S32)) )
+          (Func (UArg Res, R1 F32), symbo<span data-count="27">l</span> (Ty_fp S32)) )
     ; ( "f64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F64), symbo<span data-count="5">l</span> (Ty_fp S64)) )
+          (Func (UArg Res, R1 F64), symbo<span data-count="27">l</span> (Ty_fp S64)) )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )

@@ -1335,13 +1335,13 @@ let ( let+ ) o f = <span data-count="1">O</span>ption.map f o
 
 let return = Option.some
 
-let mk_i32 x = <span data-count="16">V</span>al (Num (I32 x)) @: Ty_bitv S32
+let mk_i32 x = <span data-count="62">V</span>al (Num (I32 x)) @: Ty_bitv S32
 
-let mk_i64 x = <span data-count="21">V</span>al (Num (I64 x)) @: Ty_bitv S64
+let mk_i64 x = <span data-count="90">V</span>al (Num (I64 x)) @: Ty_bitv S64
 
-let mk_f32 x = <span data-count="7">V</span>al (Num (F32 x)) @: Ty_fp S32
+let mk_f32 x = <span data-count="30">V</span>al (Num (F32 x)) @: Ty_fp S32
 
-let mk_f64 x = <span data-count="7">V</span>al (Num (F64 x)) @: Ty_fp S64
+let mk_f64 x = <span data-count="30">V</span>al (Num (F64 x)) @: Ty_fp S64
 
 let unop ty op e =
   <span data-count="0">m</span>atch e.e with
@@ -1399,9 +1399,9 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let const_i32 (i : Int32.t) : int32 = <span data-count="9">m</span>k_i32 i
+  let const_i32 (i : Int32.t) : int32 = <span data-count="32">m</span>k_i32 i
 
-  let const_i64 (i : Int64.t) : int64 = <span data-count="14">m</span>k_i64 i
+  let const_i64 (i : Int64.t) : int64 = <span data-count="60">m</span>k_i64 i
 
   let const_f32 (f : Float32.t) : float32 = <span data-count="0">m</span>k_f32 (Float32.to_bit<span data-count="0">s</span> f)
 
@@ -1508,7 +1508,7 @@ module S = struct
 
     let ty = Ty_bitv S32
 
-    let zero = mk_i3<span data-count="7">2</span> 0l
+    let zero = mk_i3<span data-count="30">2</span> 0l
 
     let clz e = <span data-count="0">u</span>nop ty Clz e
 
@@ -1628,7 +1628,7 @@ module S = struct
 
     let ty = Ty_bitv S64
 
-    let zero = mk_i6<span data-count="7">4</span> 0L
+    let zero = mk_i6<span data-count="30">4</span> 0L
 
     let clz e = <span data-count="0">u</span>nop ty Clz e
 
@@ -1730,7 +1730,7 @@ module S = struct
 
     let ty = Ty_fp S32
 
-    let zero = mk_f3<span data-count="7">2</span> 0l
+    let zero = mk_f3<span data-count="30">2</span> 0l
 
     let abs x = <span data-count="0">u</span>nop ty Abs x
 
@@ -1802,7 +1802,7 @@ module S = struct
 
     let ty = Ty_fp S64
 
-    let zero = mk_f6<span data-count="7">4</span> 0L
+    let zero = mk_f6<span data-count="30">4</span> 0L
 
     let abs x = <span data-count="0">u</span>nop ty Abs x
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>text.ml &mdash; Coverage report</title>
-    <meta name="description" content="6.78% coverage in src/text.ml">
+    <meta name="description" content="16.95% coverage in src/text.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>text.ml
         </a>
       </h1>
-      <h2>6.78%</h2>
+      <h2>16.95%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:11.56%"></span>
@@ -34,14 +34,10 @@
       <span class="unvisited" style="top:42.71%"></span>
       <span class="unvisited" style="top:43.22%"></span>
       <span class="unvisited" style="top:43.72%"></span>
-      <span class="unvisited" style="top:44.22%"></span>
       <span class="unvisited" style="top:44.72%"></span>
       <span class="unvisited" style="top:45.23%"></span>
-      <span class="unvisited" style="top:45.73%"></span>
       <span class="unvisited" style="top:46.23%"></span>
       <span class="unvisited" style="top:46.73%"></span>
-      <span class="unvisited" style="bottom:49.25%"></span>
-      <span class="unvisited" style="bottom:48.74%"></span>
       <span class="unvisited" style="bottom:44.72%"></span>
       <span class="unvisited" style="bottom:43.72%"></span>
       <span class="unvisited" style="bottom:39.70%"></span>
@@ -65,11 +61,9 @@
       <span class="unvisited" style="bottom:12.56%"></span>
       <span class="unvisited" style="bottom:11.06%"></span>
       <span class="unvisited" style="bottom:8.04%"></span>
-      <span class="unvisited" style="bottom:3.52%"></span>
       <span class="unvisited" style="bottom:3.02%"></span>
       <span class="unvisited" style="bottom:2.51%"></span>
       <span class="unvisited" style="bottom:2.01%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -161,10 +155,10 @@
 <a id="L85"></a><span class="unvisited"> </span>
 <a id="L86"></a><span class="unvisited"> </span>
 <a id="L87"></a><span class="unvisited"> </span>
-<a id="L88"></a><span class="unvisited"> </span>
+<a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span class="unvisited"> </span>
 <a id="L90"></a><span class="unvisited"> </span>
-<a id="L91"></a><span class="unvisited"> </span>
+<a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span class="unvisited"> </span>
 <a id="L93"></a><span class="unvisited"> </span>
 <a id="L94"></a><span > </span>
@@ -174,8 +168,8 @@
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span > </span>
 <a id="L100"></a><span > </span>
-<a id="L101"></a><span class="unvisited"> </span>
-<a id="L102"></a><span class="unvisited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
 <a id="L103"></a><span > </span>
 <a id="L104"></a><span > </span>
 <a id="L105"></a><span > </span>
@@ -265,14 +259,14 @@
 <a id="L189"></a><span > </span>
 <a id="L190"></a><span > </span>
 <a id="L191"></a><span > </span>
-<a id="L192"></a><span class="unvisited"> </span>
+<a id="L192"></a><span class="visited"> </span>
 <a id="L193"></a><span class="unvisited"> </span>
 <a id="L194"></a><span class="unvisited"> </span>
 <a id="L195"></a><span class="unvisited"> </span>
 <a id="L196"></a><span > </span>
 <a id="L197"></a><span > </span>
 <a id="L198"></a><span > </span>
-<a id="L199"></a><span class="unvisited"> </span>
+<a id="L199"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -484,13 +478,13 @@
 open Format
 open Types
 
-let symbolic v = <span data-count="13353">T</span>ext v
+let symbolic v = <span data-count="13535">T</span>ext v
 
-let raw v = <span data-count="76551">R</span>aw v
+let raw v = <span data-count="76642">R</span>aw v
 
-let bt_ind i = <span data-count="13655">B</span>t_ind i
+let bt_ind i = <span data-count="13731">B</span>t_ind i
 
-let bt_raw i t = <span data-count="15331">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="15404">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
@@ -564,10 +558,10 @@ let pp_module_field fmt = function
   | <span data-count="0">M</span>Global g -&gt; pp_global fmt g
   | <span data-count="0">M</span>Table t -&gt; pp_table fmt t
   | <span data-count="0">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="0">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="2">M</span>Func f -&gt; pp_func fmt f
   | <span data-count="0">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="0">M</span>Data d -&gt; pp_data fmt d
-  | <span data-count="0">M</span>Start s -&gt; pp_start fmt s
+  | <span data-count="1">M</span>Start s -&gt; pp_start fmt s
   | <span data-count="0">M</span>Import i -&gt; pp_import fmt i
   | <span data-count="0">M</span>Export e -&gt; pp_export fmt e
 
@@ -577,8 +571,8 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="0">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
-    (pp_lis<span data-count="0">t</span> ~pp_sep:pp_newline pp_module_field)
+  <span data-count="1">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
+    (pp_lis<span data-count="1">t</span> ~pp_sep:pp_newline pp_module_field)
     m.fields
 
 type action =
@@ -668,14 +662,14 @@ type cmd =
   | Action of action
 
 let pp_cmd fmt = function
-  | <span data-count="0">M</span>odule m -&gt; pp_modul fmt m
+  | <span data-count="1">M</span>odule m -&gt; pp_modul fmt m
   | <span data-count="0">A</span>ssert a -&gt; pp_assertion fmt a
   | <span data-count="0">R</span>egister (s, name) -&gt; pp_register fmt (s, name)
   | <span data-count="0">A</span>ction _a -&gt; pp fmt "&lt;action&gt;"
 
 type script = cmd list
 
-let pp_script fmt l = <span data-count="0">p</span>p_list ~pp_sep:pp_newline pp_cmd fmt l
+let pp_script fmt l = <span data-count="1">p</span>p_list ~pp_sep:pp_newline pp_cmd fmt l
 </code></pre>
       </div>
     </div>

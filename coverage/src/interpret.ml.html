@@ -3300,11 +3300,11 @@ module Make (P : Interpret_functor_intf.P) :
 
     let ( / ) = div
 
-    let ( ~- ) x = <span data-count="74">c</span>onst_i3<span data-count="74">2</span> 0l - x
+    let ( ~- ) x = <span data-count="75">c</span>onst_i3<span data-count="75">2</span> 0l - x
 
     let ( &lt;&gt; ) = ne
 
-    let min_int = const_i3<span data-count="14">2</span> Int32.min_int
+    let min_int = const_i3<span data-count="60">2</span> Int32.min_int
   end
 
   module I64 = struct
@@ -3330,10 +3330,10 @@ module Make (P : Interpret_functor_intf.P) :
 
     let ( &lt;&gt; ) = ne
 
-    let min_int = const_i6<span data-count="14">4</span> Int64.min_int
+    let min_int = const_i6<span data-count="60">4</span> Int64.min_int
   end
 
-  let page_size = const_i6<span data-count="14">4</span> 65_536L
+  let page_size = const_i6<span data-count="60">4</span> 65_536L
 
   let pop_choice stack =
     <span data-count="16113960">l</span>et b, stack = Stack.pop_bool stack in
@@ -3344,382 +3344,382 @@ module Make (P : Interpret_functor_intf.P) :
   let ( let* ) = Choice.bind
 
   let ( let&gt; ) v f =
-    <span data-count="3463532">l</span>et* v = Choice.selec<span data-count="3463532">t</span> v in
-    <span data-count="3463532">f</span> v
+    <span data-count="3463534">l</span>et* v = Choice.selec<span data-count="3463534">t</span> v in
+    <span data-count="3463534">f</span> v
 
   let const = const_i32
 
   let consti i = <span data-count="1607620">c</span>onst_i32 (Int32.of_in<span data-count="1607620">t</span> i)
 
   let exec_iunop stack nn op =
-    <span data-count="110">m</span>atch nn with
-    | <span data-count="66">S</span>32 -&gt;
+    <span data-count="116">m</span>atch nn with
+    | <span data-count="69">S</span>32 -&gt;
       let n, stack = Stack.pop_i32 stack in
-      <span data-count="66">l</span>et res =
+      <span data-count="69">l</span>et res =
         let open I32 in
-        match op with <span data-count="22">C</span>lz -&gt; cl<span data-count="22">z</span> n | <span data-count="28">C</span>tz -&gt; ct<span data-count="28">z</span> n | <span data-count="16">P</span>opcnt -&gt; popcn<span data-count="16">t</span> n
+        match op with <span data-count="23">C</span>lz -&gt; cl<span data-count="23">z</span> n | <span data-count="29">C</span>tz -&gt; ct<span data-count="29">z</span> n | <span data-count="17">P</span>opcnt -&gt; popcn<span data-count="17">t</span> n
       in
       Stack.push_i32 stack res
-    | <span data-count="44">S</span>64 -&gt;
+    | <span data-count="47">S</span>64 -&gt;
       let n, stack = Stack.pop_i64 stack in
-      <span data-count="44">l</span>et res =
+      <span data-count="47">l</span>et res =
         let open I64 in
-        match op with <span data-count="16">C</span>lz -&gt; cl<span data-count="16">z</span> n | <span data-count="12">C</span>tz -&gt; ct<span data-count="12">z</span> n | <span data-count="16">P</span>opcnt -&gt; popcn<span data-count="16">t</span> n
+        match op with <span data-count="17">C</span>lz -&gt; cl<span data-count="17">z</span> n | <span data-count="13">C</span>tz -&gt; ct<span data-count="13">z</span> n | <span data-count="17">P</span>opcnt -&gt; popcn<span data-count="17">t</span> n
       in
       Stack.push_i64 stack res
 
   let exec_funop stack nn op =
-    <span data-count="1213">m</span>atch nn with
-    | <span data-count="604">S</span>32 -&gt;
+    <span data-count="1227">m</span>atch nn with
+    | <span data-count="611">S</span>32 -&gt;
       let open F32 in
       let f, stack = Stack.pop_f32 stack in
-      <span data-count="604">l</span>et res =
-        match op with
-        | <span data-count="40">A</span>bs -&gt; ab<span data-count="40">s</span> f
-        | <span data-count="154">N</span>eg -&gt; ne<span data-count="154">g</span> f
-        | <span data-count="206">S</span>qrt -&gt; sqr<span data-count="206">t</span> f
-        | <span data-count="52">C</span>eil -&gt; cei<span data-count="52">l</span> f
-        | <span data-count="50">F</span>loor -&gt; floo<span data-count="50">r</span> f
-        | <span data-count="44">T</span>runc -&gt; trun<span data-count="44">c</span> f
-        | <span data-count="58">N</span>earest -&gt; neares<span data-count="58">t</span> f
-      in
-      Stack.push_f32 stack res
-    | <span data-count="609">S</span>64 -&gt;
-      let open F64 in
-      let f, stack = Stack.pop_f64 stack in
-      <span data-count="609">l</span>et res =
+      <span data-count="611">l</span>et res =
         match op with
         | <span data-count="41">A</span>bs -&gt; ab<span data-count="41">s</span> f
-        | <span data-count="152">N</span>eg -&gt; ne<span data-count="152">g</span> f
-        | <span data-count="212">S</span>qrt -&gt; sqr<span data-count="212">t</span> f
-        | <span data-count="52">C</span>eil -&gt; cei<span data-count="52">l</span> f
-        | <span data-count="50">F</span>loor -&gt; floo<span data-count="50">r</span> f
-        | <span data-count="44">T</span>runc -&gt; trun<span data-count="44">c</span> f
-        | <span data-count="58">N</span>earest -&gt; neares<span data-count="58">t</span> f
+        | <span data-count="155">N</span>eg -&gt; ne<span data-count="155">g</span> f
+        | <span data-count="207">S</span>qrt -&gt; sqr<span data-count="207">t</span> f
+        | <span data-count="53">C</span>eil -&gt; cei<span data-count="53">l</span> f
+        | <span data-count="51">F</span>loor -&gt; floo<span data-count="51">r</span> f
+        | <span data-count="45">T</span>runc -&gt; trun<span data-count="45">c</span> f
+        | <span data-count="59">N</span>earest -&gt; neares<span data-count="59">t</span> f
+      in
+      Stack.push_f32 stack res
+    | <span data-count="616">S</span>64 -&gt;
+      let open F64 in
+      let f, stack = Stack.pop_f64 stack in
+      <span data-count="616">l</span>et res =
+        match op with
+        | <span data-count="42">A</span>bs -&gt; ab<span data-count="42">s</span> f
+        | <span data-count="153">N</span>eg -&gt; ne<span data-count="153">g</span> f
+        | <span data-count="213">S</span>qrt -&gt; sqr<span data-count="213">t</span> f
+        | <span data-count="53">C</span>eil -&gt; cei<span data-count="53">l</span> f
+        | <span data-count="51">F</span>loor -&gt; floo<span data-count="51">r</span> f
+        | <span data-count="45">T</span>runc -&gt; trun<span data-count="45">c</span> f
+        | <span data-count="59">N</span>earest -&gt; neares<span data-count="59">t</span> f
       in
       Stack.push_f64 stack res
 
   let exec_ibinop (stack : Stack.t) nn (op : ibinop) : Stack.t Choice.t =
-    <span data-count="13472389">m</span>atch nn with
-    | <span data-count="3334235">S</span>32 -&gt;
+    <span data-count="13472425">m</span>atch nn with
+    | <span data-count="3334253">S</span>32 -&gt;
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      <span data-count="3334235">l</span>et* res =
+      <span data-count="3334253">l</span>et* res =
         let open I32 in
         match op with
-        | <span data-count="1862895">A</span>dd -&gt; Choice.retur<span data-count="1862895">n</span> @@ ad<span data-count="1862895">d</span> n1 n2
-        | <span data-count="1469784">S</span>ub -&gt; Choice.retur<span data-count="1469784">n</span> @@ su<span data-count="1469784">b</span> n1 n2
-        | <span data-count="400">M</span>ul -&gt; Choice.retur<span data-count="400">n</span> @@ mu<span data-count="400">l</span> n1 n2
-        | <span data-count="138">D</span>iv s -&gt; begin
+        | <span data-count="1862899">A</span>dd -&gt; Choice.retur<span data-count="1862899">n</span> @@ ad<span data-count="1862899">d</span> n1 n2
+        | <span data-count="1469785">S</span>ub -&gt; Choice.retur<span data-count="1469785">n</span> @@ su<span data-count="1469785">b</span> n1 n2
+        | <span data-count="401">M</span>ul -&gt; Choice.retur<span data-count="401">n</span> @@ mu<span data-count="401">l</span> n1 n2
+        | <span data-count="140">D</span>iv s -&gt; begin
           try
             match s with
-            | <span data-count="74">S</span> -&gt;
-              let&gt; overflow = Bool.and_ (e<span data-count="74">q</span> n1 min_int<span data-count="74">)</span> @@ e<span data-count="74">q</span> n2 ~<span data-count="74">-</span>(cons<span data-count="74">t</span> 1l) in
-              <span data-count="74">i</span>f overflow then <span data-count="6">C</span>hoice.trap Integer_overflow
-              else <span data-count="68">C</span>hoice.return @@ di<span data-count="52">v</span> n1 n2
-            | <span data-count="64">U</span> -&gt; Choice.retur<span data-count="50">n</span> @@ unsigned_di<span data-count="50">v</span> n1 n2
+            | <span data-count="75">S</span> -&gt;
+              let&gt; overflow = Bool.and_ (e<span data-count="75">q</span> n1 min_int<span data-count="75">)</span> @@ e<span data-count="75">q</span> n2 ~<span data-count="75">-</span>(cons<span data-count="75">t</span> 1l) in
+              <span data-count="75">i</span>f overflow then <span data-count="6">C</span>hoice.trap Integer_overflow
+              else <span data-count="69">C</span>hoice.return @@ di<span data-count="53">v</span> n1 n2
+            | <span data-count="65">U</span> -&gt; Choice.retur<span data-count="51">n</span> @@ unsigned_di<span data-count="51">v</span> n1 n2
           with <span data-count="30">D</span>ivision_by_zero -&gt; Choice.tra<span data-count="0">p</span> Integer_divide_by_zero
         end
-        | <span data-count="114">R</span>em s -&gt; begin
+        | <span data-count="116">R</span>em s -&gt; begin
           try
             match s with
-            | <span data-count="60">S</span> -&gt; Choice.retur<span data-count="52">n</span> @@ re<span data-count="52">m</span> n1 n2
-            | <span data-count="54">U</span> -&gt; Choice.retur<span data-count="46">n</span> @@ unsigned_re<span data-count="46">m</span> n1 n2
+            | <span data-count="61">S</span> -&gt; Choice.retur<span data-count="53">n</span> @@ re<span data-count="53">m</span> n1 n2
+            | <span data-count="55">U</span> -&gt; Choice.retur<span data-count="47">n</span> @@ unsigned_re<span data-count="47">m</span> n1 n2
           with <span data-count="16">D</span>ivision_by_zero -&gt; Choice.tra<span data-count="0">p</span> Integer_divide_by_zero
         end
-        | <span data-count="82">A</span>nd -&gt; Choice.retur<span data-count="82">n</span> @@ logan<span data-count="82">d</span> n1 n2
-        | <span data-count="228">O</span>r -&gt; Choice.retur<span data-count="228">n</span> @@ logo<span data-count="228">r</span> n1 n2
-        | <span data-count="22">X</span>or -&gt; Choice.retur<span data-count="22">n</span> @@ logxo<span data-count="22">r</span> n1 n2
-        | <span data-count="216">S</span>hl -&gt; Choice.retur<span data-count="216">n</span> @@ sh<span data-count="216">l</span> n1 n2
-        | <span data-count="40">S</span>hr S -&gt; Choice.retur<span data-count="40">n</span> @@ shr_<span data-count="40">s</span> n1 n2
-        | <span data-count="264">S</span>hr U -&gt; Choice.retur<span data-count="264">n</span> @@ shr_<span data-count="264">u</span> n1 n2
-        | <span data-count="26">R</span>otl -&gt; Choice.retur<span data-count="26">n</span> @@ rot<span data-count="26">l</span> n1 n2
-        | <span data-count="26">R</span>otr -&gt; Choice.retur<span data-count="26">n</span> @@ rot<span data-count="26">r</span> n1 n2
+        | <span data-count="83">A</span>nd -&gt; Choice.retur<span data-count="83">n</span> @@ logan<span data-count="83">d</span> n1 n2
+        | <span data-count="229">O</span>r -&gt; Choice.retur<span data-count="229">n</span> @@ logo<span data-count="229">r</span> n1 n2
+        | <span data-count="23">X</span>or -&gt; Choice.retur<span data-count="23">n</span> @@ logxo<span data-count="23">r</span> n1 n2
+        | <span data-count="217">S</span>hl -&gt; Choice.retur<span data-count="217">n</span> @@ sh<span data-count="217">l</span> n1 n2
+        | <span data-count="41">S</span>hr S -&gt; Choice.retur<span data-count="41">n</span> @@ shr_<span data-count="41">s</span> n1 n2
+        | <span data-count="265">S</span>hr U -&gt; Choice.retur<span data-count="265">n</span> @@ shr_<span data-count="265">u</span> n1 n2
+        | <span data-count="27">R</span>otl -&gt; Choice.retur<span data-count="27">n</span> @@ rot<span data-count="27">l</span> n1 n2
+        | <span data-count="27">R</span>otr -&gt; Choice.retur<span data-count="27">n</span> @@ rot<span data-count="27">r</span> n1 n2
       in
-      <span data-count="3334183">C</span>hoice.return @@ Stack.push_i3<span data-count="3334183">2</span> stack res
-    | <span data-count="10138154">S</span>64 -&gt;
+      <span data-count="3334201">C</span>hoice.return @@ Stack.push_i3<span data-count="3334201">2</span> stack res
+    | <span data-count="10138172">S</span>64 -&gt;
       let (n1, n2), stack = Stack.pop2_i64 stack in
-      <span data-count="10138154">l</span>et* res =
+      <span data-count="10138172">l</span>et* res =
         let open I64 in
         match op with
-        | <span data-count="44118">A</span>dd -&gt; Choice.retur<span data-count="44118">n</span> @@ ad<span data-count="44118">d</span> n1 n2
-        | <span data-count="10092542">S</span>ub -&gt; Choice.retur<span data-count="10092542">n</span> @@ su<span data-count="10092542">b</span> n1 n2
-        | <span data-count="956">M</span>ul -&gt; Choice.retur<span data-count="956">n</span> @@ mu<span data-count="956">l</span> n1 n2
-        | <span data-count="134">D</span>iv s -&gt; begin
+        | <span data-count="44119">A</span>dd -&gt; Choice.retur<span data-count="44119">n</span> @@ ad<span data-count="44119">d</span> n1 n2
+        | <span data-count="10092543">S</span>ub -&gt; Choice.retur<span data-count="10092543">n</span> @@ su<span data-count="10092543">b</span> n1 n2
+        | <span data-count="960">M</span>ul -&gt; Choice.retur<span data-count="960">n</span> @@ mu<span data-count="960">l</span> n1 n2
+        | <span data-count="136">D</span>iv s -&gt; begin
           try
             match s with
-            | <span data-count="74">S</span> -&gt;
+            | <span data-count="75">S</span> -&gt;
               let&gt; overflow =
-                Bool.and_ (e<span data-count="74">q</span> n1 min_int<span data-count="74">)</span>
-                @@ e<span data-count="74">q</span> n2 (su<span data-count="74">b</span> (const_i6<span data-count="74">4</span> 0L) (const_i6<span data-count="74">4</span> 1L))
+                Bool.and_ (e<span data-count="75">q</span> n1 min_int<span data-count="75">)</span>
+                @@ e<span data-count="75">q</span> n2 (su<span data-count="75">b</span> (const_i6<span data-count="75">4</span> 0L) (const_i6<span data-count="75">4</span> 1L))
               in
-              <span data-count="74">i</span>f overflow then <span data-count="6">C</span>hoice.trap Integer_overflow
-              else <span data-count="68">C</span>hoice.return @@ di<span data-count="52">v</span> n1 n2
-            | <span data-count="60">U</span> -&gt; Choice.retur<span data-count="46">n</span> @@ unsigned_di<span data-count="46">v</span> n1 n2
+              <span data-count="75">i</span>f overflow then <span data-count="6">C</span>hoice.trap Integer_overflow
+              else <span data-count="69">C</span>hoice.return @@ di<span data-count="53">v</span> n1 n2
+            | <span data-count="61">U</span> -&gt; Choice.retur<span data-count="47">n</span> @@ unsigned_di<span data-count="47">v</span> n1 n2
           with <span data-count="30">D</span>ivision_by_zero -&gt; Choice.tra<span data-count="0">p</span> Integer_divide_by_zero
         end
-        | <span data-count="110">R</span>em s -&gt; begin
+        | <span data-count="112">R</span>em s -&gt; begin
           try
             match s with
-            | <span data-count="60">S</span> -&gt; Choice.retur<span data-count="52">n</span> @@ re<span data-count="52">m</span> n1 n2
-            | <span data-count="50">U</span> -&gt; Choice.retur<span data-count="42">n</span> @@ unsigned_re<span data-count="42">m</span> n1 n2
+            | <span data-count="61">S</span> -&gt; Choice.retur<span data-count="53">n</span> @@ re<span data-count="53">m</span> n1 n2
+            | <span data-count="51">U</span> -&gt; Choice.retur<span data-count="43">n</span> @@ unsigned_re<span data-count="43">m</span> n1 n2
           with <span data-count="16">D</span>ivision_by_zero -&gt; Choice.tra<span data-count="0">p</span> Integer_divide_by_zero
         end
-        | <span data-count="42">A</span>nd -&gt; Choice.retur<span data-count="42">n</span> @@ logan<span data-count="42">d</span> n1 n2
-        | <span data-count="34">O</span>r -&gt; Choice.retur<span data-count="34">n</span> @@ logo<span data-count="34">r</span> n1 n2
-        | <span data-count="22">X</span>or -&gt; Choice.retur<span data-count="22">n</span> @@ logxo<span data-count="22">r</span> n1 n2
-        | <span data-count="48">S</span>hl -&gt; Choice.retur<span data-count="48">n</span> @@ sh<span data-count="48">l</span> n1 n2
-        | <span data-count="40">S</span>hr S -&gt; Choice.retur<span data-count="40">n</span> @@ shr_<span data-count="40">s</span> n1 n2
-        | <span data-count="56">S</span>hr U -&gt; Choice.retur<span data-count="56">n</span> @@ shr_<span data-count="56">u</span> n1 n2
-        | <span data-count="26">R</span>otl -&gt; Choice.retur<span data-count="26">n</span> @@ rot<span data-count="26">l</span> n1 n2
-        | <span data-count="26">R</span>otr -&gt; Choice.retur<span data-count="26">n</span> @@ rot<span data-count="26">r</span> n1 n2
+        | <span data-count="43">A</span>nd -&gt; Choice.retur<span data-count="43">n</span> @@ logan<span data-count="43">d</span> n1 n2
+        | <span data-count="35">O</span>r -&gt; Choice.retur<span data-count="35">n</span> @@ logo<span data-count="35">r</span> n1 n2
+        | <span data-count="23">X</span>or -&gt; Choice.retur<span data-count="23">n</span> @@ logxo<span data-count="23">r</span> n1 n2
+        | <span data-count="49">S</span>hl -&gt; Choice.retur<span data-count="49">n</span> @@ sh<span data-count="49">l</span> n1 n2
+        | <span data-count="41">S</span>hr S -&gt; Choice.retur<span data-count="41">n</span> @@ shr_<span data-count="41">s</span> n1 n2
+        | <span data-count="57">S</span>hr U -&gt; Choice.retur<span data-count="57">n</span> @@ shr_<span data-count="57">u</span> n1 n2
+        | <span data-count="27">R</span>otl -&gt; Choice.retur<span data-count="27">n</span> @@ rot<span data-count="27">l</span> n1 n2
+        | <span data-count="27">R</span>otr -&gt; Choice.retur<span data-count="27">n</span> @@ rot<span data-count="27">r</span> n1 n2
       in
-      <span data-count="10138102">C</span>hoice.return @@ Stack.push_i6<span data-count="10138102">4</span> stack res
+      <span data-count="10138120">C</span>hoice.return @@ Stack.push_i6<span data-count="10138120">4</span> stack res
 
   let exec_fbinop stack nn (op : fbinop) =
-    <span data-count="154840">m</span>atch nn with
-    | <span data-count="77906">S</span>32 -&gt;
+    <span data-count="154860">m</span>atch nn with
+    | <span data-count="77916">S</span>32 -&gt;
       let (f1, f2), stack = Stack.pop2_f32 stack in
-      <span data-count="77906">S</span>tack.push_f32 stack
+      <span data-count="77916">S</span>tack.push_f32 stack
         (let open F32 in
          match op with
-         | <span data-count="25414">A</span>dd -&gt; ad<span data-count="25414">d</span> f1 f2
-         | <span data-count="47734">S</span>ub -&gt; su<span data-count="47734">b</span> f1 f2
-         | <span data-count="1260">M</span>ul -&gt; mu<span data-count="1260">l</span> f1 f2
-         | <span data-count="1236">D</span>iv -&gt; di<span data-count="1236">v</span> f1 f2
-         | <span data-count="802">M</span>in -&gt; mi<span data-count="802">n</span> f1 f2
-         | <span data-count="802">M</span>ax -&gt; ma<span data-count="802">x</span> f1 f2
-         | <span data-count="658">C</span>opysign -&gt; copy_sig<span data-count="658">n</span> f1 f2 )
-    | <span data-count="76934">S</span>64 -&gt;
+         | <span data-count="25418">A</span>dd -&gt; ad<span data-count="25418">d</span> f1 f2
+         | <span data-count="47735">S</span>ub -&gt; su<span data-count="47735">b</span> f1 f2
+         | <span data-count="1261">M</span>ul -&gt; mu<span data-count="1261">l</span> f1 f2
+         | <span data-count="1237">D</span>iv -&gt; di<span data-count="1237">v</span> f1 f2
+         | <span data-count="803">M</span>in -&gt; mi<span data-count="803">n</span> f1 f2
+         | <span data-count="803">M</span>ax -&gt; ma<span data-count="803">x</span> f1 f2
+         | <span data-count="659">C</span>opysign -&gt; copy_sig<span data-count="659">n</span> f1 f2 )
+    | <span data-count="76944">S</span>64 -&gt;
       let (f1, f2), stack = Stack.pop2_f64 stack in
-      <span data-count="76934">S</span>tack.push_f64 stack
+      <span data-count="76944">S</span>tack.push_f64 stack
         (let open F64 in
          match op with
-         | <span data-count="24972">A</span>dd -&gt; ad<span data-count="24972">d</span> f1 f2
-         | <span data-count="46836">S</span>ub -&gt; su<span data-count="46836">b</span> f1 f2
-         | <span data-count="1498">M</span>ul -&gt; mu<span data-count="1498">l</span> f1 f2
-         | <span data-count="1366">D</span>iv -&gt; di<span data-count="1366">v</span> f1 f2
-         | <span data-count="802">M</span>in -&gt; mi<span data-count="802">n</span> f1 f2
-         | <span data-count="802">M</span>ax -&gt; ma<span data-count="802">x</span> f1 f2
-         | <span data-count="658">C</span>opysign -&gt; copy_sig<span data-count="658">n</span> f1 f2 )
+         | <span data-count="24973">A</span>dd -&gt; ad<span data-count="24973">d</span> f1 f2
+         | <span data-count="46837">S</span>ub -&gt; su<span data-count="46837">b</span> f1 f2
+         | <span data-count="1502">M</span>ul -&gt; mu<span data-count="1502">l</span> f1 f2
+         | <span data-count="1367">D</span>iv -&gt; di<span data-count="1367">v</span> f1 f2
+         | <span data-count="803">M</span>in -&gt; mi<span data-count="803">n</span> f1 f2
+         | <span data-count="803">M</span>ax -&gt; ma<span data-count="803">x</span> f1 f2
+         | <span data-count="659">C</span>opysign -&gt; copy_sig<span data-count="659">n</span> f1 f2 )
 
   let exec_itestop stack nn op =
-    <span data-count="11428826">m</span>atch nn with
-    | <span data-count="1424438">S</span>32 -&gt;
+    <span data-count="11428828">m</span>atch nn with
+    | <span data-count="1424439">S</span>32 -&gt;
       let n, stack = Stack.pop_i32 stack in
-      <span data-count="1424438">l</span>et res = match op with <span data-count="1424438">E</span>qz -&gt; I32.eq_cons<span data-count="1424438">t</span> n 0l in
+      <span data-count="1424439">l</span>et res = match op with <span data-count="1424439">E</span>qz -&gt; I32.eq_cons<span data-count="1424439">t</span> n 0l in
       Stack.push_bool stack res
-    | <span data-count="10004388">S</span>64 -&gt;
+    | <span data-count="10004389">S</span>64 -&gt;
       let n, stack = Stack.pop_i64 stack in
-      <span data-count="10004388">l</span>et res = match op with <span data-count="10004388">E</span>qz -&gt; I64.eq_cons<span data-count="10004388">t</span> n 0L in
+      <span data-count="10004389">l</span>et res = match op with <span data-count="10004389">E</span>qz -&gt; I64.eq_cons<span data-count="10004389">t</span> n 0L in
       Stack.push_bool stack res
 
   let exec_irelop stack nn (op : irelop) =
-    <span data-count="4592319">m</span>atch nn with
-    | <span data-count="4503547">S</span>32 -&gt;
+    <span data-count="4592339">m</span>atch nn with
+    | <span data-count="4503557">S</span>32 -&gt;
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      <span data-count="4503547">l</span>et res =
+      <span data-count="4503557">l</span>et res =
         let open I32 in
         match op with
-        | <span data-count="2098246">E</span>q -&gt; e<span data-count="2098246">q</span> n1 n2
-        | <span data-count="786554">N</span>e -&gt; n<span data-count="786554">e</span> n1 n2
-        | <span data-count="1415">L</span>t S -&gt; l<span data-count="1415">t</span> n1 n2
-        | <span data-count="86">L</span>t U -&gt; lt_<span data-count="86">u</span> n1 n2
-        | <span data-count="52">G</span>t S -&gt; g<span data-count="52">t</span> n1 n2
-        | <span data-count="42">G</span>t U -&gt; gt_<span data-count="42">u</span> n1 n2
-        | <span data-count="44">L</span>e S -&gt; l<span data-count="44">e</span> n1 n2
-        | <span data-count="830552">L</span>e U -&gt; le_<span data-count="830552">u</span> n1 n2
-        | <span data-count="32">G</span>e S -&gt; g<span data-count="32">e</span> n1 n2
-        | <span data-count="786524">G</span>e U -&gt; ge_<span data-count="786524">u</span> n1 n2
+        | <span data-count="2098247">E</span>q -&gt; e<span data-count="2098247">q</span> n1 n2
+        | <span data-count="786555">N</span>e -&gt; n<span data-count="786555">e</span> n1 n2
+        | <span data-count="1416">L</span>t S -&gt; l<span data-count="1416">t</span> n1 n2
+        | <span data-count="87">L</span>t U -&gt; lt_<span data-count="87">u</span> n1 n2
+        | <span data-count="53">G</span>t S -&gt; g<span data-count="53">t</span> n1 n2
+        | <span data-count="43">G</span>t U -&gt; gt_<span data-count="43">u</span> n1 n2
+        | <span data-count="45">L</span>e S -&gt; l<span data-count="45">e</span> n1 n2
+        | <span data-count="830553">L</span>e U -&gt; le_<span data-count="830553">u</span> n1 n2
+        | <span data-count="33">G</span>e S -&gt; g<span data-count="33">e</span> n1 n2
+        | <span data-count="786525">G</span>e U -&gt; ge_<span data-count="786525">u</span> n1 n2
       in
       Stack.push_bool stack res
-    | <span data-count="88772">S</span>64 -&gt;
+    | <span data-count="88782">S</span>64 -&gt;
       let (n1, n2), stack = Stack.pop2_i64 stack in
-      <span data-count="88772">l</span>et res =
+      <span data-count="88782">l</span>et res =
         let open I64 in
         match op with
-        | <span data-count="396">E</span>q -&gt; e<span data-count="396">q</span> n1 n2
-        | <span data-count="32">N</span>e -&gt; n<span data-count="32">e</span> n1 n2
-        | <span data-count="36">L</span>t S -&gt; l<span data-count="36">t</span> n1 n2
-        | <span data-count="62">L</span>t U -&gt; lt_<span data-count="62">u</span> n1 n2
-        | <span data-count="80">G</span>t S -&gt; g<span data-count="80">t</span> n1 n2
-        | <span data-count="146">G</span>t U -&gt; gt_<span data-count="146">u</span> n1 n2
-        | <span data-count="32">L</span>e S -&gt; l<span data-count="32">e</span> n1 n2
-        | <span data-count="87924">L</span>e U -&gt; le_<span data-count="87924">u</span> n1 n2
-        | <span data-count="32">G</span>e S -&gt; g<span data-count="32">e</span> n1 n2
-        | <span data-count="32">G</span>e U -&gt; ge_<span data-count="32">u</span> n1 n2
+        | <span data-count="397">E</span>q -&gt; e<span data-count="397">q</span> n1 n2
+        | <span data-count="33">N</span>e -&gt; n<span data-count="33">e</span> n1 n2
+        | <span data-count="37">L</span>t S -&gt; l<span data-count="37">t</span> n1 n2
+        | <span data-count="63">L</span>t U -&gt; lt_<span data-count="63">u</span> n1 n2
+        | <span data-count="81">G</span>t S -&gt; g<span data-count="81">t</span> n1 n2
+        | <span data-count="147">G</span>t U -&gt; gt_<span data-count="147">u</span> n1 n2
+        | <span data-count="33">L</span>e S -&gt; l<span data-count="33">e</span> n1 n2
+        | <span data-count="87925">L</span>e U -&gt; le_<span data-count="87925">u</span> n1 n2
+        | <span data-count="33">G</span>e S -&gt; g<span data-count="33">e</span> n1 n2
+        | <span data-count="33">G</span>e U -&gt; ge_<span data-count="33">u</span> n1 n2
       in
       Stack.push_bool stack res
 
   let exec_frelop stack nn (op : frelop) =
-    <span data-count="100888">m</span>atch nn with
-    | <span data-count="51536">S</span>32 -&gt;
+    <span data-count="100900">m</span>atch nn with
+    | <span data-count="51542">S</span>32 -&gt;
       let (n1, n2), stack = Stack.pop2_f32 stack in
-      <span data-count="51536">l</span>et res =
+      <span data-count="51542">l</span>et res =
         let open F32 in
         match op with
-        | <span data-count="2132">E</span>q -&gt; e<span data-count="2132">q</span> n1 n2
-        | <span data-count="808">N</span>e -&gt; n<span data-count="808">e</span> n1 n2
-        | <span data-count="1930">L</span>t -&gt; l<span data-count="1930">t</span> n1 n2
-        | <span data-count="918">G</span>t -&gt; g<span data-count="918">t</span> n1 n2
-        | <span data-count="44898">L</span>e -&gt; l<span data-count="44898">e</span> n1 n2
-        | <span data-count="850">G</span>e -&gt; g<span data-count="850">e</span> n1 n2
+        | <span data-count="2133">E</span>q -&gt; e<span data-count="2133">q</span> n1 n2
+        | <span data-count="809">N</span>e -&gt; n<span data-count="809">e</span> n1 n2
+        | <span data-count="1931">L</span>t -&gt; l<span data-count="1931">t</span> n1 n2
+        | <span data-count="919">G</span>t -&gt; g<span data-count="919">t</span> n1 n2
+        | <span data-count="44899">L</span>e -&gt; l<span data-count="44899">e</span> n1 n2
+        | <span data-count="851">G</span>e -&gt; g<span data-count="851">e</span> n1 n2
       in
       Stack.push_bool stack res
-    | <span data-count="49352">S</span>64 -&gt;
+    | <span data-count="49358">S</span>64 -&gt;
       let (n1, n2), stack = Stack.pop2_f64 stack in
-      <span data-count="49352">l</span>et res =
+      <span data-count="49358">l</span>et res =
         let open F64 in
         match op with
-        | <span data-count="982">E</span>q -&gt; e<span data-count="982">q</span> n1 n2
-        | <span data-count="808">N</span>e -&gt; n<span data-count="808">e</span> n1 n2
-        | <span data-count="858">L</span>t -&gt; l<span data-count="858">t</span> n1 n2
-        | <span data-count="956">G</span>t -&gt; g<span data-count="956">t</span> n1 n2
-        | <span data-count="44898">L</span>e -&gt; l<span data-count="44898">e</span> n1 n2
-        | <span data-count="850">G</span>e -&gt; g<span data-count="850">e</span> n1 n2
+        | <span data-count="983">E</span>q -&gt; e<span data-count="983">q</span> n1 n2
+        | <span data-count="809">N</span>e -&gt; n<span data-count="809">e</span> n1 n2
+        | <span data-count="859">L</span>t -&gt; l<span data-count="859">t</span> n1 n2
+        | <span data-count="957">G</span>t -&gt; g<span data-count="957">t</span> n1 n2
+        | <span data-count="44899">L</span>e -&gt; l<span data-count="44899">e</span> n1 n2
+        | <span data-count="851">G</span>e -&gt; g<span data-count="851">e</span> n1 n2
       in
       Stack.push_bool stack res
 
   let exec_itruncf stack nn nn' sx =
-    <span data-count="476">m</span>atch (nn, nn') with
-    | <span data-count="118">S</span>32, S32 -&gt;
+    <span data-count="484">m</span>atch (nn, nn') with
+    | <span data-count="120">S</span>32, S32 -&gt;
       let f, stack = Stack.pop_f32 stack in
-      <span data-count="118">l</span>et res =
-        match sx with <span data-count="60">S</span> -&gt; I32.trunc_f32_<span data-count="42">s</span> f | <span data-count="58">U</span> -&gt; I32.trunc_f32_<span data-count="40">u</span> f
+      <span data-count="120">l</span>et res =
+        match sx with <span data-count="61">S</span> -&gt; I32.trunc_f32_<span data-count="43">s</span> f | <span data-count="59">U</span> -&gt; I32.trunc_f32_<span data-count="41">u</span> f
       in
       Stack.push_i32 stack res
-    | <span data-count="122">S</span>32, S64 -&gt;
+    | <span data-count="124">S</span>32, S64 -&gt;
       let f, stack = Stack.pop_f64 stack in
-      <span data-count="122">l</span>et res =
-        match sx with <span data-count="58">S</span> -&gt; I32.trunc_f64_<span data-count="40">s</span> f | <span data-count="64">U</span> -&gt; I32.trunc_f64_<span data-count="40">u</span> f
+      <span data-count="124">l</span>et res =
+        match sx with <span data-count="59">S</span> -&gt; I32.trunc_f64_<span data-count="41">s</span> f | <span data-count="65">U</span> -&gt; I32.trunc_f64_<span data-count="41">u</span> f
       in
       Stack.push_i32 stack res
-    | <span data-count="106">S</span>64, S32 -&gt;
+    | <span data-count="108">S</span>64, S32 -&gt;
       let f, stack = Stack.pop_f32 stack in
-      <span data-count="106">l</span>et res =
-        match sx with <span data-count="58">S</span> -&gt; I64.trunc_f32_<span data-count="40">s</span> f | <span data-count="48">U</span> -&gt; I64.trunc_f32_<span data-count="30">u</span> f
+      <span data-count="108">l</span>et res =
+        match sx with <span data-count="59">S</span> -&gt; I64.trunc_f32_<span data-count="41">s</span> f | <span data-count="49">U</span> -&gt; I64.trunc_f32_<span data-count="31">u</span> f
       in
       Stack.push_i64 stack res
-    | <span data-count="130">S</span>64, S64 -&gt;
+    | <span data-count="132">S</span>64, S64 -&gt;
       let f, stack = Stack.pop_f64 stack in
-      <span data-count="130">l</span>et res =
-        match sx with <span data-count="68">S</span> -&gt; I64.trunc_f64_<span data-count="50">s</span> f | <span data-count="62">U</span> -&gt; I64.trunc_f64_<span data-count="44">u</span> f
+      <span data-count="132">l</span>et res =
+        match sx with <span data-count="69">S</span> -&gt; I64.trunc_f64_<span data-count="51">s</span> f | <span data-count="63">U</span> -&gt; I64.trunc_f64_<span data-count="45">u</span> f
       in
       Stack.push_i64 stack res
 
   let exec_itruncsatf stack nn nn' sx =
-    <span data-count="362">m</span>atch nn with
-    | <span data-count="182">S</span>32 -&gt; begin
+    <span data-count="370">m</span>atch nn with
+    | <span data-count="186">S</span>32 -&gt; begin
       match nn' with
-      | <span data-count="86">S</span>32 -&gt;
+      | <span data-count="88">S</span>32 -&gt;
         let n, stack = Stack.pop_f32 stack in
-        <span data-count="86">l</span>et n =
+        <span data-count="88">l</span>et n =
           match sx with
-          | <span data-count="44">S</span> -&gt; I32.trunc_sat_f32_<span data-count="44">s</span> n
-          | <span data-count="42">U</span> -&gt; I32.trunc_sat_f32_<span data-count="42">u</span> n
+          | <span data-count="45">S</span> -&gt; I32.trunc_sat_f32_<span data-count="45">s</span> n
+          | <span data-count="43">U</span> -&gt; I32.trunc_sat_f32_<span data-count="43">u</span> n
         in
         Stack.push_i32 stack n
+      | <span data-count="98">S</span>64 -&gt;
+        let n, stack = Stack.pop_f64 stack in
+        <span data-count="98">l</span>et n =
+          match sx with
+          | <span data-count="47">S</span> -&gt; I32.trunc_sat_f64_<span data-count="47">s</span> n
+          | <span data-count="51">U</span> -&gt; I32.trunc_sat_f64_<span data-count="51">u</span> n
+        in
+        Stack.push_i32 stack n
+    end
+    | <span data-count="184">S</span>64 -&gt; begin
+      match nn' with
+      | <span data-count="88">S</span>32 -&gt;
+        let n, stack = Stack.pop_f32 stack in
+        <span data-count="88">l</span>et n =
+          match sx with
+          | <span data-count="49">S</span> -&gt; I64.trunc_sat_f32_<span data-count="49">s</span> n
+          | <span data-count="39">U</span> -&gt; I64.trunc_sat_f32_<span data-count="39">u</span> n
+        in
+        Stack.push_i64 stack n
       | <span data-count="96">S</span>64 -&gt;
         let n, stack = Stack.pop_f64 stack in
         <span data-count="96">l</span>et n =
           match sx with
-          | <span data-count="46">S</span> -&gt; I32.trunc_sat_f64_<span data-count="46">s</span> n
-          | <span data-count="50">U</span> -&gt; I32.trunc_sat_f64_<span data-count="50">u</span> n
-        in
-        Stack.push_i32 stack n
-    end
-    | <span data-count="180">S</span>64 -&gt; begin
-      match nn' with
-      | <span data-count="86">S</span>32 -&gt;
-        let n, stack = Stack.pop_f32 stack in
-        <span data-count="86">l</span>et n =
-          match sx with
-          | <span data-count="48">S</span> -&gt; I64.trunc_sat_f32_<span data-count="48">s</span> n
-          | <span data-count="38">U</span> -&gt; I64.trunc_sat_f32_<span data-count="38">u</span> n
-        in
-        Stack.push_i64 stack n
-      | <span data-count="94">S</span>64 -&gt;
-        let n, stack = Stack.pop_f64 stack in
-        <span data-count="94">l</span>et n =
-          match sx with
-          | <span data-count="48">S</span> -&gt; I64.trunc_sat_f64_<span data-count="48">s</span> n
-          | <span data-count="46">U</span> -&gt; I64.trunc_sat_f64_<span data-count="46">u</span> n
+          | <span data-count="49">S</span> -&gt; I64.trunc_sat_f64_<span data-count="49">s</span> n
+          | <span data-count="47">U</span> -&gt; I64.trunc_sat_f64_<span data-count="47">u</span> n
         in
         Stack.push_i64 stack n
     end
 
   let exec_fconverti stack nn nn' sx =
-    <span data-count="308">m</span>atch nn with
-    | <span data-count="152">S</span>32 -&gt; (
+    <span data-count="316">m</span>atch nn with
+    | <span data-count="156">S</span>32 -&gt; (
       let open F32 in
       match nn' with
-      | <span data-count="86">S</span>32 -&gt;
+      | <span data-count="88">S</span>32 -&gt;
         let n, stack = Stack.pop_i32 stack in
-        <span data-count="86">l</span>et n = if sx = S then <span data-count="44">c</span>onvert_i32_<span data-count="44">s</span> n else <span data-count="42">c</span>onvert_i32_<span data-count="42">u</span> n in
+        <span data-count="88">l</span>et n = if sx = S then <span data-count="45">c</span>onvert_i32_<span data-count="45">s</span> n else <span data-count="43">c</span>onvert_i32_<span data-count="43">u</span> n in
         Stack.push_f32 stack n
-      | <span data-count="66">S</span>64 -&gt;
+      | <span data-count="68">S</span>64 -&gt;
         let n, stack = Stack.pop_i64 stack in
-        <span data-count="66">l</span>et n = if sx = S then <span data-count="36">c</span>onvert_i64_<span data-count="36">s</span> n else <span data-count="30">c</span>onvert_i64_<span data-count="30">u</span> n in
+        <span data-count="68">l</span>et n = if sx = S then <span data-count="37">c</span>onvert_i64_<span data-count="37">s</span> n else <span data-count="31">c</span>onvert_i64_<span data-count="31">u</span> n in
         Stack.push_f32 stack n )
-    | <span data-count="156">S</span>64 -&gt; (
+    | <span data-count="160">S</span>64 -&gt; (
       let open F64 in
       match nn' with
-      | <span data-count="54">S</span>32 -&gt;
+      | <span data-count="56">S</span>32 -&gt;
         let n, stack = Stack.pop_i32 stack in
-        <span data-count="54">l</span>et n = if sx = S then <span data-count="28">c</span>onvert_i32_<span data-count="28">s</span> n else <span data-count="26">c</span>onvert_i32_<span data-count="26">u</span> n in
+        <span data-count="56">l</span>et n = if sx = S then <span data-count="29">c</span>onvert_i32_<span data-count="29">s</span> n else <span data-count="27">c</span>onvert_i32_<span data-count="27">u</span> n in
         Stack.push_f64 stack n
-      | <span data-count="102">S</span>64 -&gt;
+      | <span data-count="104">S</span>64 -&gt;
         let n, stack = Stack.pop_i64 stack in
-        <span data-count="102">l</span>et n = if sx = S then <span data-count="38">c</span>onvert_i64_<span data-count="38">s</span> n else <span data-count="64">c</span>onvert_i64_<span data-count="64">u</span> n in
+        <span data-count="104">l</span>et n = if sx = S then <span data-count="39">c</span>onvert_i64_<span data-count="39">s</span> n else <span data-count="65">c</span>onvert_i64_<span data-count="65">u</span> n in
         Stack.push_f64 stack n )
 
   let exec_ireinterpretf stack nn nn' =
-    <span data-count="267">m</span>atch nn with
-    | <span data-count="135">S</span>32 -&gt; begin
+    <span data-count="269">m</span>atch nn with
+    | <span data-count="136">S</span>32 -&gt; begin
       match nn' with
-      | <span data-count="135">S</span>32 -&gt;
+      | <span data-count="136">S</span>32 -&gt;
         let n, stack = Stack.pop_f32 stack in
-        <span data-count="135">l</span>et n = I32.reinterpret_f32 n in
-        <span data-count="135">S</span>tack.push_i32 stack n
+        <span data-count="136">l</span>et n = I32.reinterpret_f32 n in
+        <span data-count="136">S</span>tack.push_i32 stack n
       | <span data-count="0">S</span>64 -&gt;
         let n, stack = Stack.pop_f64 stack in
         <span data-count="0">l</span>et n = I32.reinterpret_f32 (F32.demote_f6<span data-count="0">4</span> n) in
         <span data-count="0">S</span>tack.push_i32 stack n
     end
-    | <span data-count="132">S</span>64 -&gt; begin
+    | <span data-count="133">S</span>64 -&gt; begin
       match nn' with
       | <span data-count="0">S</span>32 -&gt;
         let n, stack = Stack.pop_f32 stack in
         <span data-count="0">l</span>et n = I64.reinterpret_f64 (F64.promote_f3<span data-count="0">2</span> n) in
         <span data-count="0">S</span>tack.push_i64 stack n
-      | <span data-count="132">S</span>64 -&gt;
+      | <span data-count="133">S</span>64 -&gt;
         let n, stack = Stack.pop_f64 stack in
-        <span data-count="132">l</span>et n = I64.reinterpret_f64 n in
-        <span data-count="132">S</span>tack.push_i64 stack n
+        <span data-count="133">l</span>et n = I64.reinterpret_f64 n in
+        <span data-count="133">S</span>tack.push_i64 stack n
     end
 
   let exec_freinterpreti stack nn nn' =
-    <span data-count="156">m</span>atch nn with
-    | <span data-count="78">S</span>32 -&gt; begin
+    <span data-count="158">m</span>atch nn with
+    | <span data-count="79">S</span>32 -&gt; begin
       match nn' with
-      | <span data-count="78">S</span>32 -&gt;
+      | <span data-count="79">S</span>32 -&gt;
         let n, stack = Stack.pop_i32 stack in
-        <span data-count="78">l</span>et n = F32.reinterpret_i32 n in
-        <span data-count="78">S</span>tack.push_f32 stack n
+        <span data-count="79">l</span>et n = F32.reinterpret_i32 n in
+        <span data-count="79">S</span>tack.push_f32 stack n
       | <span data-count="0">S</span>64 -&gt;
         let n, stack = Stack.pop_i64 stack in
         <span data-count="0">l</span>et n = F32.reinterpret_i32 (I64.to_int3<span data-count="0">2</span> n) in
         <span data-count="0">S</span>tack.push_f32 stack n
     end
-    | <span data-count="78">S</span>64 -&gt; begin
+    | <span data-count="79">S</span>64 -&gt; begin
       match nn' with
       | <span data-count="0">S</span>32 -&gt;
         let n, stack = Stack.pop_i32 stack in
         <span data-count="0">l</span>et n = F64.reinterpret_i64 (I64.of_int3<span data-count="0">2</span> n) in
         <span data-count="0">S</span>tack.push_f64 stack n
-      | <span data-count="78">S</span>64 -&gt;
+      | <span data-count="79">S</span>64 -&gt;
         let n, stack = Stack.pop_i64 stack in
-        <span data-count="78">l</span>et n = F64.reinterpret_i64 n in
-        <span data-count="78">S</span>tack.push_f64 stack n
+        <span data-count="79">l</span>et n = F64.reinterpret_i64 n in
+        <span data-count="79">S</span>tack.push_f64 stack n
     end
 
   let init_local (_id, t) : value =

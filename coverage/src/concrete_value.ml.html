@@ -431,7 +431,7 @@ struct
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="14">-</span>1 in
+    let r = ref ~<span data-count="60">-</span>1 in
     fun () -&gt;
       <span data-count="9285">i</span>ncr r;
       <span data-count="9285">!</span>r
@@ -486,18 +486,18 @@ type t =
 
 (* TODO: make a new kind of instr for this *)
 let of_instr (i : simplified instr) : t =
-  <span data-count="258">m</span>atch i with
-  | <span data-count="103">I</span>32_const c -&gt; I32 c
-  | <span data-count="33">I</span>64_const c -&gt; I64 c
-  | <span data-count="61">F</span>32_const c -&gt; F32 c
-  | <span data-count="61">F</span>64_const c -&gt; F64 c
+  <span data-count="484">m</span>atch i with
+  | <span data-count="168">I</span>32_const c -&gt; I32 c
+  | <span data-count="98">I</span>64_const c -&gt; I64 c
+  | <span data-count="109">F</span>32_const c -&gt; F32 c
+  | <span data-count="109">F</span>64_const c -&gt; F64 c
   | _ -&gt; assert false
 
 let to_instr = function
-  | <span data-count="106">I</span>32 c -&gt; I32_const c
-  | <span data-count="32">I</span>64 c -&gt; I64_const c
-  | <span data-count="9">F</span>32 c -&gt; F32_const c
-  | <span data-count="10">F</span>64 c -&gt; F64_const c
+  | <span data-count="170">I</span>32 c -&gt; I32_const c
+  | <span data-count="62">I</span>64 c -&gt; I64_const c
+  | <span data-count="31">F</span>32 c -&gt; F32_const c
+  | <span data-count="32">F</span>64 c -&gt; F64_const c
   | Ref _ -&gt; assert false
 
 let pp fmt = function
