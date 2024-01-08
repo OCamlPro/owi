@@ -37,7 +37,7 @@ let unsafe =
 
 let workers =
   let doc = "number of workers for symbolic execution" in
-  Cmdliner.Arg.(value & opt int 4 & info [ "workers"; "w" ] ~doc)
+  Cmdliner.Arg.(value & opt int (Domain.recommended_domain_count ()) & info [ "workers"; "w" ] ~doc)
 
 let workspace =
   let doc = "path to the workspace directory" in
