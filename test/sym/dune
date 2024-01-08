@@ -2,4 +2,5 @@
  (deps
   %{bin:owi}
   mini_test.wast
+  assume.wast
  ))
