@@ -9,37 +9,16 @@ let print_solver_time = false
 
 let print_path_condition = false
 
-let print_extern_module : Symbolic.P.extern_func Link.extern_module =
-  let print_i32 (i : Value.int32) : unit Choice.t =
-    Format.pp_std "%s@\n" (Expr.to_string i);
-    Choice.return ()
-  in
-  (* we need to describe their types *)
-  let functions =
-    [ ( "i32"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
-      )
-    ]
-  in
-  { functions }
-
-let assert_extern_module : Symbolic.P.extern_func Link.extern_module =
-  let positive_i32 (i : Value.int32) : unit Choice.t =
+let assume_extern_module : Symbolic.P.extern_func Link.extern_module =
+  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.ge i Value.I32.zero in
     Choice.add_pc c
   in
-  let assert_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.to_bool i in
-    Choice.add_pc c
-  in
   (* we need to describe their types *)
   let functions =
-    [ ( "positive_i32"
+    [ ( "assume_positive_i32"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), positive_i32) )
-    ; ( "i32"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assert_i32) )
+          (Func (Arg (I32, Res), R0), assume_positive_i32) )
     ]
   in
   { functions }
@@ -149,12 +128,8 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
   file =
   let link_state = Link.empty_state in
   let link_state =
-    Link.extern_module' link_state ~name:"print"
-      ~func_typ:Symbolic.P.Extern_func.extern_type print_extern_module
-  in
-  let link_state =
-    Link.extern_module' link_state ~name:"assert"
-      ~func_typ:Symbolic.P.Extern_func.extern_type assert_extern_module
+    Link.extern_module' link_state ~name:"assume"
+      ~func_typ:Symbolic.P.Extern_func.extern_type assume_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
