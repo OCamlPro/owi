@@ -1,4 +1,4 @@
-not exists file (exists_not.wast instead of not_exists.wast):
-  $ dune exec owi -- sym exists_not.wast
-  Error: file `exists_not.wast` doesn't exist
+file doesn't exist:
+  $ dune exec owi -- sym not_exists.wast
+  Error: file `not_exists.wast` doesn't exist
   [1]

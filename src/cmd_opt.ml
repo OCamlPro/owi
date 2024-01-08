@@ -6,7 +6,7 @@ open Syntax
 
 let optimize_file ~unsafe filename =
   if not @@ Sys.file_exists filename then
-    error_s "Error: file `%s` doesn't exist" filename
+    error_s "file `%s` doesn't exist" filename
   else
     let* modul = Parse.Module.from_file ~filename in
     Compile.until_optimize ~unsafe ~optimize:true modul
