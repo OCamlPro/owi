@@ -2,5 +2,4 @@
  (deps
   %{bin:owi}
   mini_test.wast
-  not_exists.wast
  ))

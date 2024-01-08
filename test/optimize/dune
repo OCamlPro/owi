@@ -12,7 +12,6 @@
   ibinop.wast
   if.wast
   local.wast
-  not_exists.wast
   ref_nop.wast
   reinterpret.wast
   relop_testop.wast
