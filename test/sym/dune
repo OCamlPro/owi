@@ -7,4 +7,8 @@
   binop_i64.wast
   binop_f32.wast
   binop_f64.wast
+  unop_i32.wast
+  unop_i64.wast
+  unop_f32.wast
+  unop_f64.wast
  ))
