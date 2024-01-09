@@ -1,7 +1,7 @@
 (module
   (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
   (import "symbolic" "assume" (func $assume_i32 (param i32)))
-  (import "symbolic" "assume_positive" (func $positive_i32 (param i32)))
+  (import "symbolic" "assume_positive_i32" (func $positive_i32 (param i32)))
   (import "symbolic" "assert" (func $assert_i32 (param i32)))
 
   (func $start
