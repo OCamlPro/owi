@@ -3,25 +3,20 @@
 
   (func $start
     (local $x f64)
-    (local $res f64)
     
     (local.set $x (call $f64_symbol))
 
-    (local.set $res (f64.add (local.get $x) (f64.const 42)))
-    (if (f64.eq (local.get $res) (f64.const 0))
-      (then unreachable))
+    (f64.eq (f64.add (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
 
-    (local.set $res (f64.sub (local.get $x) (f64.const 42)))
-    (if (f64.eq (local.get $res) (f64.const 0))
-      (then unreachable))
+    (f64.eq (f64.sub (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
 
-    (local.set $res (f64.mul (local.get $x) (f64.const 42)))
-    (if (f64.eq (local.get $res) (f64.const 0))
-      (then unreachable))
+    (f64.eq (f64.mul (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
 
-    (local.set $res (f64.div (local.get $x) (f64.const 42)))
-    (if (f64.eq (local.get $res) (f64.const 0))
-      (then unreachable)))
+    (f64.eq (f64.div (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable)))
 
   (start $start)
 )
