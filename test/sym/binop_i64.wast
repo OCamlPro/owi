@@ -22,7 +22,15 @@
     i64.eqz
     (if (then unreachable))
 
+    (i64.rem_u (i64.const 42) (local.get $x))
+    i64.eqz
+    (if (then unreachable))
+
     (i64.div_s (local.get $x) (i64.const 42))
+    i64.eqz
+    (if (then unreachable))
+
+    (i64.rem_s (i64.const 42) (local.get $x))
     i64.eqz
     (if (then unreachable)))
 

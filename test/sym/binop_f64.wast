@@ -16,6 +16,15 @@
     (if (then unreachable))
 
     (f64.eq (f64.div (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
+
+    (f64.eq (f64.min (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
+
+    (f64.eq (f64.max (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
+
+    (f64.eq (f64.copysign (local.get $x) (f64.const 42)) (f64.const 0))
     (if (then unreachable)))
 
   (start $start)

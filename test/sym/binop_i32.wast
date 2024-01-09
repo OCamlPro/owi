@@ -22,7 +22,15 @@
     i32.eqz
     (if (then unreachable))
 
+    (i32.rem_u (i32.const 42) (local.get $x))
+    i32.eqz
+    (if (then unreachable))
+
     (i32.div_s (local.get $x) (i32.const 42))
+    i32.eqz
+    (if (then unreachable))
+
+    (i32.rem_s (i32.const 42) (local.get $x))
     i32.eqz
     (if (then unreachable)))
 
