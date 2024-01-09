@@ -9,20 +9,6 @@ let print_solver_time = false
 
 let print_path_condition = false
 
-let assume_extern_module : Symbolic.P.extern_func Link.extern_module =
-  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.ge i Value.I32.zero in
-    Choice.add_pc c
-  in
-  (* we need to describe their types *)
-  let functions =
-    [ ( "assume_positive_i32"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_positive_i32) )
-    ]
-  in
-  { functions }
-
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
   let mk_symbol = Encoding.Symbol.mk_symbol in
@@ -35,6 +21,10 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
+    Choice.add_pc c
+  in
+  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
+    let c = Value.I32.ge i Value.I32.zero in
     Choice.add_pc c
   in
   let assert_i32 (i : Value.int32) : unit Choice.t =
@@ -61,6 +51,9 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
+    ; ( "assume_positive"
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assume_positive_i32) )
     ; ( "assert"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assert_i32) )
@@ -127,10 +120,6 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
 let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
   file =
   let link_state = Link.empty_state in
-  let link_state =
-    Link.extern_module' link_state ~name:"assume"
-      ~func_typ:Symbolic.P.Extern_func.extern_type assume_extern_module
-  in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
       ~func_typ:Symbolic.P.Extern_func.extern_type symbolic_extern_module
