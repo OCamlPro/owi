@@ -21,7 +21,8 @@ let check sym_bool thread =
     (*
     Format.pp_std "CHECK:@.%a"
       (Format.pp_list ~pp_sep:Format.pp_newline Expr.pp)
-      check; *)
+      check;
+    *)
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
     (*

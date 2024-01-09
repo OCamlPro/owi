@@ -51,7 +51,7 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
-    ; ( "assume_positive"
+    ; ( "assume_positive_i32"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_positive_i32) )
     ; ( "assert"
