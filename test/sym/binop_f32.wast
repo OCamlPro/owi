@@ -6,6 +6,18 @@
     
     (local.set $x (call $f32_symbol))
 
+    (f32.le (local.get $x) (f32.const -100))
+    (if (then unreachable))
+
+    (f32.lt (local.get $x) (f32.const -100))
+    (if (then unreachable))
+
+    (f32.ge (local.get $x) (f32.const 100))
+    (if (then unreachable))
+
+    (f32.gt (local.get $x) (f32.const 100))
+    (if (then unreachable))
+
     (f32.eq (f32.add (local.get $x) (f32.const 42)) (f32.const 0))
     (if (then unreachable))
 
@@ -24,7 +36,11 @@
     (f32.eq (f32.max (local.get $x) (f32.const 42)) (f32.const 0))
     (if (then unreachable))
 
-    (f32.eq (f32.copysign (local.get $x) (f32.const 42)) (f32.const 0))
+    ;; File "src/symbolic_value.ml", line 436, characters 24-30: Assertion failed
+    ;; (f32.eq (f32.copysign (local.get $x) (f32.const 42)) (f32.const 0))
+    ;; (if (then unreachable))
+
+    (f32.ne (local.get $x) (f32.const 42))
     (if (then unreachable)))
 
   (start $start)
