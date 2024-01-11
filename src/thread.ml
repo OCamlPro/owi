@@ -2,7 +2,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module Solver = Encoding.Batch.Make (Encoding.Z3_mappings)
+module Solver = Encoding.Solver.Batch (Encoding.Z3_mappings)
 
 type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
 
@@ -29,7 +29,7 @@ let globals t = t.globals
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
-  let solver = S (solver_mod, Solver.create ()) in
+  let solver = S (solver_mod, Solver.create ~logic:QF_BVFP ()) in
   { solver
   ; pc = []
   ; memories = Symbolic_memory.init ()

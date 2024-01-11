@@ -112,28 +112,25 @@ struct
     let pc = Thread.pc state in
     let sym_int = Expr.simplify sym_int in
     let orig_pc = pc in
-    let pc, sym = fix_symbol sym_int pc in
+    let pc, symbol = fix_symbol sym_int pc in
     match sym_int.e with
     | Val (Num (I32 i)) -> M.return (i, state)
     | _ ->
       let module Solver = (val solver_module) in
       let rec find_values values =
-        let additionnal = M.to_list @@ M.map (not_value sym) values in
+        let additionnal = M.to_list @@ M.map (not_value symbol) values in
         if not (Solver.check solver (additionnal @ pc)) then M.empty
         else begin
-          let model = Solver.model ~symbols:[ sym ] solver in
+          let model = Solver.model ~symbols:[ symbol ] solver in
           match model with
           | None -> assert false (* ? *)
           | Some model -> (
             Format.pp_std "Model:@.%a@." Model.pp model;
-            let v = Model.evaluate model sym in
+            let v = Model.evaluate model symbol in
             match v with
             | None -> assert false (* ? *)
-            | Some (Num (I32 i) as v) -> begin
-              let cond =
-                Expr.(
-                  Relop (Eq, mk_symbol sym, Val v @: Ty_bitv S32) @: Ty_bitv S32 )
-              in
+            | Some (Num (I32 i)) -> begin
+              let cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
               let pc = cond :: pc in
               let case = (i, { state with pc }) in
               M.cons case (find_values (M.cons i values))
@@ -570,8 +567,8 @@ module MT = struct
 
   let spawn_producer _i global =
     let module Mapping = Z3_mappings.Fresh.Make () in
-    let module Batch = Batch.Make (Mapping) in
-    let solver = Batch.create () in
+    let module Batch = Solver.Batch (Mapping) in
+    let solver = Batch.create ~logic:QF_BVFP () in
     let solver : Thread.solver = S ((module Batch), solver) in
     let st = { solver; next = None; global } in
     let rec producer (H (thread, t, cont)) =
