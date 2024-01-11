@@ -1612,7 +1612,7 @@ module S = struct
 
     let wrap_i64 x = <span data-count="0">c</span>vtop ty WrapI64 x
 
-    let extend_s _ = <span data-count="0">a</span>ssert false
+    let extend_s n x = <span data-count="0">c</span>vtop ty (ExtS n) x
   end
 
   module I64 = struct
@@ -1710,7 +1710,7 @@ module S = struct
 
     let reinterpret_f64 x = <span data-count="0">c</span>vtop ty Reinterpret_float x
 
-    let extend_s _ = <span data-count="0">a</span>ssert false
+    let extend_s n x = <span data-count="0">c</span>vtop ty (ExtS n) x
 
     let extend_i32_s x = <span data-count="0">c</span>vtop ty (ExtS 32) x
 

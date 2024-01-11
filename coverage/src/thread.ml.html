@@ -123,7 +123,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module Solver = Encoding.Batch.Make (Encoding.Z3_mappings)
+module Solver = Encoding.Solver.Batch (Encoding.Z3_mappings)
 
 type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
 
@@ -150,7 +150,7 @@ let globals t = <span data-count="0">t</span>.globals
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
-  <span data-count="1">l</span>et solver = S (solver_mod, Solver.creat<span data-count="1">e</span> ()) in
+  <span data-count="1">l</span>et solver = S (solver_mod, Solver.creat<span data-count="1">e</span> ~logic:QF_BVFP ()) in
   { solver
   ; pc = []
   ; memories = Symbolic_memory.ini<span data-count="1">t</span> ()
