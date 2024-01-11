@@ -287,7 +287,7 @@ module S = struct
 
     let wrap_i64 x = cvtop ty WrapI64 x
 
-    let extend_s _ = assert false
+    let extend_s n x = cvtop ty (ExtS n) x
   end
 
   module I64 = struct
@@ -385,7 +385,7 @@ module S = struct
 
     let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
-    let extend_s _ = assert false
+    let extend_s n x = cvtop ty (ExtS n) x
 
     let extend_i32_s x = cvtop ty (ExtS 32) x
 
