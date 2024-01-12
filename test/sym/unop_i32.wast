@@ -1,19 +1,35 @@
 (module
   (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
+  (import "symbolic" "i64_symbol" (func $i64_symbol (result i64)))
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
   (func $start
     (local $x i32)
+    (local $y i64)
     (local $i f32)
     (local $j f64)
 
     (local.set $x (call $i32_symbol))
+    (local.set $y (call $i64_symbol))
     (local.set $i (call $f32_symbol))
     (local.set $j (call $f64_symbol))
 
     (i32.eqz (local.get $x))
     (if (then unreachable))
+
+    (i32.eq (i32.const 42) (i32.wrap_i64 (local.get $y)))
+    (if (then unreachable))
+
+    (i32.eq (i32.const 42) (i32.reinterpret_f32 (local.get $i)))
+    (if (then unreachable))
+
+    ;;  owi: internal error, uncaught exception:
+    ;;    Z3.Error("Sorts (_ BitVec 32) and (_ BitVec 48) are incompatible")
+    ;; (i32.eq (i32.const 21) (i32.extend8_s (local.get $x)))
+    ;; (if (then unreachable))
+    ;; (i32.eq (i32.const 24) (i32.extend16_s (local.get $x)))
+    ;; (if (then unreachable))
 
     (i32.ge_u (i32.const 0) (i32.trunc_f32_u (local.get $i)))
     (if (then unreachable))

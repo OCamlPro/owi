@@ -15,10 +15,22 @@
     (local.set $i (call $i32_symbol))
     (local.set $j (call $i64_symbol))
 
+    (f64.eq (f64.const 42) (f64.reinterpret_i64 (local.get $j)))
+    (if (then unreachable))
+
+    (f64.eq (f64.ceil (local.get $x)) (f64.const 123))
+    (if (then unreachable))
+
+    (f64.eq (f64.floor (local.get $x)) (f64.const 123))
+    (if (then unreachable))
+
     (f64.ge (f64.abs (local.get $x)) (f64.const 42))
     (if (then unreachable))
 
     (f64.le (f64.neg (local.get $x)) (f64.const 42))
+    (if (then unreachable))
+
+    (f64.eq (f64.nearest (local.get $x)) (f64.const 123))
     (if (then unreachable))
 
     (f64.eq (f64.promote_f32 (local.get $y)) (f64.const 2))
