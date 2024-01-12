@@ -6,11 +6,13 @@
 
   (func $start
     (local $x i32)
+    (local $y i32)
     (local.set $x (call $i32_symbol))
+    (local.set $y (call $i32_symbol))
     (call $assume_i32 (local.get $x))
-    (call $positive_i32 (local.get $x))
-    (call $assert_i32 (local.get $x))
-    (if (i32.gt_s (i32.const 0) (local.get $x))
+    (call $positive_i32 (local.get $y))
+    (call $assert_i32 (local.get $y))
+    (if (i32.gt_s (local.get $x) (local.get $y))
       (then unreachable)))
 
   (start $start)
