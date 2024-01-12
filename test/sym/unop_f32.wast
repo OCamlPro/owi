@@ -15,10 +15,31 @@
     (local.set $i (call $i32_symbol))
     (local.set $j (call $i64_symbol))
 
+    (f32.eq (f32.const 42) (f32.reinterpret_i32 (local.get $i)))
+    (if (then unreachable))
+
+    (f32.eq (f32.ceil (local.get $x)) (f32.const 123))
+    (if (then unreachable))
+
+    (f32.eq (f32.floor (local.get $x)) (f32.const 123))
+    (if (then unreachable))
+
     (f32.ge (f32.abs (local.get $x)) (f32.const 42))
     (if (then unreachable))
 
     (f32.le (f32.neg (local.get $x)) (f32.const 42))
+    (if (then unreachable))
+
+    ;; owi: internal error, uncaught exception:
+    ;;  File "src/symbolic_value.ml", line 420, characters 18-24: Assertion failed
+    ;; (f32.eq (f32.trunc (local.get $x)) (f32.const 123))
+    ;; (if (then unreachable))
+
+    ;; very long computation
+    ;; (f32.eq (f32.sqrt (local.get $x)) (f32.const 0))
+    ;; (if (then unreachable))
+
+    (f32.eq (f32.nearest (local.get $x)) (f32.const 123))
     (if (then unreachable))
 
     (f32.eq (f32.demote_f64 (local.get $y)) (f32.const 2))
@@ -35,12 +56,6 @@
 
     (f32.eq (f32.convert_i64_u (local.get $j)) (f32.const 1))
     (if (then unreachable))
-
-    ;; File "lib/z3_mappings.ml", line 408, characters 32-38: Assertion failed
-    ;; (f32.ge (f32.ceil (local.get $x)) (f32.const 42))
-    ;; (if (then unreachable))
-    ;; (f32.le (f32.floor (local.get $x)) (f32.const 42))
-    ;; (if (then unreachable))
   )
 
   (start $start)
