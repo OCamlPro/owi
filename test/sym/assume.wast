@@ -9,11 +9,13 @@
     (local $y i32)
     (local.set $x (call $i32_symbol))
     (local.set $y (call $i32_symbol))
-    (call $assume_i32 (local.get $x))
-    (call $positive_i32 (local.get $y))
-    (call $assert_i32 (local.get $y))
-    (if (i32.gt_s (local.get $x) (local.get $y))
-      (then unreachable)))
+    (call $positive_i32 (local.get $x)) ;; x >= 0
+    (call $assume_i32 (i32.gt_s (local.get $y) (i32.const 0))) ;; (y > 0) > 0
+    (if (i32.le_s (i32.add (local.get $x) (local.get $y)) (i32.const 0)) ;; x + y <= 0
+      (then unreachable))   ;; possible if i32 overflow
+    ;; Alternatively (x + y > 0)
+    (call $assert_i32 (i32.gt_s (i32.add (local.get $x) (local.get $y)) (i32.const 0)))
+  )
 
   (start $start)
 )
