@@ -99,7 +99,7 @@ Are you able to recognize the program now?
 ## Man page
 
 ```sh
-$ dune exec owi -- fmt --help
+$ dune exec owi -- fmt --help=plain
 OWI-FMT(1)                        Owi Manual                        OWI-FMT(1)
 
 NAME

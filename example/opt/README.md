@@ -364,7 +364,7 @@ $ dune exec -- owi opt useless.wat
 ## Man page
 
 ```sh
-$ dune exec owi -- opt --help
+$ dune exec owi -- opt --help=plain
 OWI-OPT(1)                        Owi Manual                        OWI-OPT(1)
 
 NAME

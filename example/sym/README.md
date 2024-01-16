@@ -41,7 +41,7 @@ TODO
 ## Man page
 
 ```sh
-$ dune exec owi -- sym --help
+$ dune exec owi -- sym --help=plain
 OWI-SYM(1)                        Owi Manual                        OWI-SYM(1)
 
 NAME

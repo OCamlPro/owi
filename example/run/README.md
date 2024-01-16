@@ -53,7 +53,7 @@ stack        : [  ]
 ## Man page
 
 ```sh
-$ dune exec owi -- run --help
+$ dune exec owi -- run --help=plain
 OWI-RUN(1)                        Owi Manual                        OWI-RUN(1)
 
 NAME
