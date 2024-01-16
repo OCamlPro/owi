@@ -9,6 +9,7 @@
   binop_f64.wast
   global.wast
   memory.wast
+  table.wast
   unop_i32.wast
   unop_i64.wast
   unop_f32.wast
