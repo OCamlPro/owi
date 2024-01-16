@@ -11,7 +11,7 @@ let () =
       let n =
         Format.ksprintf Sys.command
           "clang -emit-llvm -g -O3 -ffreestanding --target=wasm32 -c -m32 \
-           -Iinclude -Wno-parentheses-equality -Wno-attributes \
+           -Iinclude -Wno-parentheses-equality -Wall -Wno-attributes \
            -Wno-return-type -Wno-int-conversion \
            -Wno-incompatible-pointer-types \
            -Wno-incompatible-function-pointer-types -Wno-pointer-sign \

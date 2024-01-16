@@ -1,3 +1,3 @@
-extern int main();
+extern int main(void);
 
-void _start() { main(); }
+void _start(void) { main(); }

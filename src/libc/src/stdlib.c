@@ -17,7 +17,7 @@ owi_abort(void);
 __attribute__((import_module("summaries"), import_name("exit"))) void
 owi_exit(int);
 
-void abort() { owi_abort(); }
+void abort(void) { owi_abort(); }
 void exit(int status) { owi_exit(status); }
 
 extern unsigned char __heap_base;
@@ -317,7 +317,7 @@ unsigned long long int strtoull(const char *ptr, char **endptr, int base) {
     }
     ++nptr;
   }
-  if ((nptr == orig)) { /* no conversion done */
+  if (nptr == orig) { /* no conversion done */
     nptr = ptr;
     errno = EINVAL;
     v = 0;
@@ -405,4 +405,4 @@ void qsort(void *base, size_t nmemb, size_t size,
 int posix_memalign(void **memptr, size_t alignment, size_t size) { return 0; }
 
 // TODO: OWI external
-char getchar() { return ' '; }
+char getchar(void) { return ' '; }
