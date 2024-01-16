@@ -17,7 +17,7 @@
 ## Man page
 
 ```sh
-$ dune exec -- owi --help
+$ dune exec -- owi --help=plain
 OWI(1)                            Owi Manual                            OWI(1)
 
 NAME

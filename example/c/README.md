@@ -90,7 +90,7 @@ Exercise: can you find another "root" of the polynomial ? :-)
 ## Man page
 
 ```sh
-$ dune exec owi -- c --help
+$ dune exec owi -- c --help=plain
 OWI-C(1)                          Owi Manual                          OWI-C(1)
 
 NAME
