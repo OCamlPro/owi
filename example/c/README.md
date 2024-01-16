@@ -5,7 +5,7 @@
 Given the following `poly.c` file:
 
 <!-- $MDX file=poly.c -->
-```wast
+```c
 #include <owi.h>
 
 int main() {
@@ -44,7 +44,7 @@ Indeed, `1` is a root of the polynomial and thus it is expected to be equal to `
 We can do so by assuming that `x` is not equal to any of these with the function `owi_assume(bool)`:
 
 <!-- $MDX file=poly2.c -->
-```wast
+```c
 #include <owi.h>
 
 int main() {
