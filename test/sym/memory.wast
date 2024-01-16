@@ -4,7 +4,8 @@
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
-  (memory 1)
+  (memory $m 1)
+  (data $d (memory $m) (offset i32.const 99) "str_data")
 
   (func $mem_set_i32_8 (param $idx i32) (param $val i32)
     local.get $idx
@@ -61,6 +62,12 @@
   )
 
   (func $start
+    i32.const 1
+    memory.grow
+    drop
+    (if (i32.eqz (memory.size))
+      (then unreachable))
+
     (call $mem_set_i32_8 (i32.const 0) (call $i32_symbol))
     (call $mem_set_i32_16 (i32.const 4) (call $i32_symbol))
     (call $mem_set_i32 (i32.const 8) (call $i32_symbol))
