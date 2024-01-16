@@ -3,5 +3,5 @@
  (modules owi)
  (package owi)
  (libraries sedlex owi cmdliner)
-  (instrumentation
+ (instrumentation
   (backend bisect_ppx)))

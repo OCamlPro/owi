@@ -1,10 +1,13 @@
 (lang dune 3.0)
 
 (using menhir 2.1)
-
+(using dune_site 0.1)
 (using mdx 0.2)
+(using directory-targets 0.1)
 
 (cram enable)
+
+(generate_opam_files true)
 
 (name owi)
 
@@ -12,14 +15,13 @@
 
 (authors
  "Léo Andrès <contact@ndrs.fr>"
- "Pierre Chambart <pierre.chambart@ocamlpro.com>")
+ "Pierre Chambart <pierre.chambart@ocamlpro.com>"
+ "Filipe Marques")
 
 (maintainers "Léo Andrès <contact@ndrs.fr>")
 
 (source
  (github ocamlpro/owi))
-
-(generate_opam_files true)
 
 (package
  (name owi)
@@ -62,4 +64,5 @@
   (graphics :dev)
   (tiny_httpd :dev)
   (encoding (>= 0.0.3))
-  xmlm))
+  xmlm)
+ (sites (share pyc) (share binc) (share libc)))

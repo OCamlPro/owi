@@ -1,0 +1,36 @@
+(install
+ (package owi)
+ (section
+  (site
+   (owi libc)))
+ (files
+  (netinet/in.h as netinet/in.h)
+  (sys/cdefs.h as sys/cdefs.h)
+  (sys/param.h as sys/param.h)
+  (sys/resource.h as sys/resource.h)
+  (sys/time.h as sys/time.h)
+  (sys/types.h as sys/types.h)
+  alloca.h
+  assert.h
+  ctype.h
+  endian.h
+  errno.h
+  fcntl.h
+  inttypes.h
+  limits.h
+  math.h
+  pthread.h
+  sched.h
+  setjmp.h
+  signal.h
+  stdarg-cruft.h
+  stdarg.h
+  stdbool.h
+  stddef.h
+  stdint.h
+  stdio.h
+  stdlib.h
+  string.h
+  time.h
+  unistd.h
+  owi.h))
