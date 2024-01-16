@@ -259,7 +259,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
-[spectest module]: https://github.com/webassembly/spec/blob/main/interpreter/readme.md#spectest-host-module
+[spectest module]: https://github.com/WebAssembly/spec/tree/main/interpreter#scripts
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [Wasm specification tests]: https://github.com/webassembly/spec/blob/main/interpreter/readme.md#spectest-host-module
 [WebAssembly]: https://webassembly.org
