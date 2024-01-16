@@ -6,7 +6,7 @@
 - [`owi fmt`]: a formatter for Wasm;
 - [`owi opt`]: an optimizer for Wasm;
 - [`owi run`]: a concrete Wasm interpreter;
-- [`owi script`]: an interpreter for [Wasm specification tests];
+- [`owi script`]: an interpreter for [Wasm scripts];
 - [`owi sym`]: a symbolic Wasm interpreter.
 
 It also provides an [OCaml library] which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
@@ -142,9 +142,8 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
-[spectest module]: https://github.com/WebAssembly/spec/tree/main/interpreter#scripts
+[Wasm scripts]: https://github.com/WebAssembly/spec/tree/main/interpreter#scripts
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
-[Wasm specification tests]: https://github.com/webassembly/spec/blob/main/interpreter/readme.md#spectest-host-module
 [WebAssembly]: https://webassembly.org
 [WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
 
