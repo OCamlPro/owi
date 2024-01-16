@@ -9,7 +9,11 @@
 - [`owi script`]: an interpreter for [Wasm specification tests];
 - [`owi sym`]: a symbolic Wasm interpreter.
 
-It also provides an OCaml library which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
+It also provides an [OCaml library] which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
+
+We also have [a fuzzer] that is able to generate random *valid* Wasm programs. For now it has not been made available as a subcommand so you'll have to hack the code a little bit to play with it.
+
+⚠️ For now, the optimizer and the formatter are quite experimental. The optimizer is well tested but only performs basic optimizations in an inefficient way. The formatter is mainly used for debugging purpose and is probably incorrect on some cases.
 
 ## Installation
 
@@ -33,127 +37,6 @@ $ cd owi
 $ opam install . --deps-only
 $ dune build -p owi @install
 $ dune install
-```
-
-## Quickstart
-
-### Concrete interpretation
-
-Given a file `test/passing/quickstart.wast` with the following content:
-
-<!-- $MDX file=test/passing/quickstart.wast -->
-```wast
-(module $quickstart
-  (func $f
-    i32.const 24
-    i32.const 24
-    i32.add
-    drop
-  )
-  (start $f)
-)
-```
-
-Running the executable interpreter is as simple as:
-```sh
-$ dune exec owi -- run --debug test/passing/quickstart.wast
-parsing      ...
-checking     ...
-grouping     ...
-assigning    ...
-rewriting    ...
-typechecking ...
-linking      ...
-interpreting ...
-stack        : [  ]
-running instr: call 0
-calling func : func f
-stack        : [  ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ; i32.const 24 ]
-running instr: i32.add
-stack        : [ i32.const 48 ]
-running instr: drop
-stack        : [  ]
-stack        : [  ]
-```
-
-If you want to run the file as a [reference test suite script], you can use the `script` command instead of the `run` one. This will allow you to add constructs like assertions and will also link the [spectest module], which provides function for e.g. printing.
-
-If you're interested in the library part of Owi, here's how to get started:
-
-```ocaml
-# open Owi;;
-# let filename = "test/passing/quickstart.wast";;
-val filename : string = "test/passing/quickstart.wast"
-# let m =
-    match Parse.Module.from_file ~filename with
-    | Ok script -> script
-    | Error e -> failwith e;;
-val m : Text.modul =
-...
-# let module_to_run, link_state =
-    match Compile.until_link Link.empty_state ~unsafe:false ~optimize:false ~name:None m with
-    | Ok v -> v
-    | Error e -> failwith e;;
-val module_to_run : '_weak1 Link.module_to_run =
-...
-val link_state : '_weak1 Link.state =
-...
-# let () =
-    Log.debug_on := true;
-    match Interpret.Concrete.modul link_state.envs module_to_run with
-    | Ok () -> ()
-    | Error e -> failwith e;;
-interpreting ...
-stack        : [  ]
-running instr: call 0
-calling func : func f
-stack        : [  ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ; i32.const 24 ]
-running instr: i32.add
-stack        : [ i32.const 48 ]
-running instr: drop
-stack        : [  ]
-stack        : [  ]
-```
-
-For more, have a look at the [example] folder, at the [documentation] or at the [test suite].
-
-### Symbolic interpretation
-
-The interpreter can also be used in symbolic mode. This allows to find which input values are leading to a trap.
-
-Given a file `test/sym/mini_test.wast` with the following content:
-
-<!-- $MDX file=test/sym/mini_test.wast -->
-```wast
-(module
-  (import "symbolic" "i32" (func $gen_i32 (param i32) (result i32)))
-
-  (func $start (local $x i32)
-    (local.set $x (call $gen_i32 (i32.const 42)))
-    (if (i32.lt_s (i32.const 5) (local.get $x)) (then
-      unreachable
-    )))
-
-  (start $start)
-)
-```
-
-You can run the symbolic interpreter through the `sym` command:
-```sh
-$ dune exec owi -- sym test/sym/mini_test.wast
-Trap: unreachable
-Model:
-  (model
-    (x_0 i32 (i32 6)))
-Reached problem!
 ```
 
 ## Supported proposals
@@ -295,5 +178,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [`owi script`]: ./example/script
 [`owi sym`]: ./example/sym
 [import OCaml functions in a Wasm module]: ./example/define_host_function
+[OCaml library]: ./example/lib
+[a fuzzer]: ./test/fuzz
 
 [🐌]: https://invidious.zapashcanon.fr/watch?v=XgK9Fd8ikxk

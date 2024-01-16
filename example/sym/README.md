@@ -1,5 +1,43 @@
 # Symbolic interpreter
 
+## Basic example
+
+The symbolic interpreter allows to define *symbolic variables* whose values is considered to be any possible value. Then, we collect informations during the execution and when an error is reached, we try to see if there's a possible value for all the symbolic variables by taking all our informations into account.
+
+In the following file, we define `x` as a symbolic variable. Then if `5 < x`, we fail.
+
+<!-- $MDX file=mini.wat -->
+```wat
+(module
+  (import "symbolic" "i32" (func $gen_i32 (param i32) (result i32)))
+
+  (func $start (local $x i32)
+    (local.set $x (call $gen_i32 (i32.const 42)))
+    (if (i32.lt_s (i32.const 5) (local.get $x)) (then
+      unreachable
+    )))
+
+  (start $start)
+)
+```
+
+Let's see if owi is able to find a value for `x` that lead to an error:
+
+```sh
+$ dune exec owi -- sym ./mini.wat
+Trap: unreachable
+Model:
+  (model
+    (x_0 i32 (i32 6)))
+Reached problem!
+```
+
+Indeed, if `x` is equal to `6` then, the `unreachable` instruction will be reached.
+
+## Complicated example
+
+TODO
+
 ## Man page
 
 ```sh
