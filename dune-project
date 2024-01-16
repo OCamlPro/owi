@@ -55,7 +55,7 @@
     (>= "0.1")
     :dev))
   (odoc :with-doc)
-  (bos :with-test)
+  bos
   (mdx
    (and
     :with-test
@@ -65,5 +65,8 @@
   (tiny_httpd :dev)
   (encoding (>= 0.0.3))
   sha
-  xmlm)
+  xmlm
+  pyml
+  re2
+  dune-site)
  (sites (share pyc) (share binc) (share libc)))

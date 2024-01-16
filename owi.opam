@@ -26,7 +26,7 @@ depends: [
   "bisect_ppx" {with-test & >= "2.5" & dev}
   "ocb" {with-test & >= "0.1" & dev}
   "odoc" {with-doc}
-  "bos" {with-test}
+  "bos"
   "mdx" {with-test & >= "2.1"}
   "crowbar" {with-test}
   "graphics" {dev}
@@ -34,6 +34,9 @@ depends: [
   "encoding" {>= "0.0.3"}
   "sha"
   "xmlm"
+  "pyml"
+  "re2"
+  "dune-site"
 ]
 build: [
   ["dune" "subst"] {dev}
