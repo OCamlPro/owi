@@ -365,8 +365,6 @@ $ dune exec -- owi opt useless.wat
 
 ```sh
 $ dune exec owi -- opt --help=plain
-OWI-OPT(1)                        Owi Manual                        OWI-OPT(1)
-
 NAME
        owi-opt - Optimize a module
 
@@ -382,8 +380,8 @@ OPTIONS
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
-           Show  this  help  in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the  format  is  pager  or  plain
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
 
        --version
@@ -406,5 +404,4 @@ BUGS
 SEE ALSO
        owi(1)
 
-Owi 11VERSION11                                                     OWI-OPT(1)
 ```
