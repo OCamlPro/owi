@@ -42,8 +42,6 @@ TODO
 
 ```sh
 $ dune exec owi -- sym --help=plain
-OWI-SYM(1)                        Owi Manual                        OWI-SYM(1)
-
 NAME
        owi-sym - Run the symbolic interpreter
 
@@ -74,8 +72,8 @@ OPTIONS
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
-           Show  this  help  in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the  format  is  pager  or  plain
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
 
        --version
@@ -98,5 +96,4 @@ BUGS
 SEE ALSO
        owi(1)
 
-Owi 11VERSION11                                                     OWI-SYM(1)
 ```

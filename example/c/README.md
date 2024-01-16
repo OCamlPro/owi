@@ -91,10 +91,9 @@ Exercise: can you find another "root" of the polynomial ? :-)
 
 ```sh
 $ dune exec owi -- c --help=plain
-OWI-C(1)                          Owi Manual                          OWI-C(1)
-
 NAME
-       owi-c - Compile a C file to Wasm and run the symbolic interpreter on it
+       owi-c - Compile a C file to Wasm and run the symbolic interpreter on
+       it
 
 SYNOPSIS
        owi c [OPTION]… [ARG]…
@@ -126,8 +125,8 @@ OPTIONS
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
-           Show  this  help  in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the  format  is  pager  or  plain
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
 
        --version
@@ -150,5 +149,4 @@ BUGS
 SEE ALSO
        owi(1)
 
-Owi 11VERSION11                                                       OWI-C(1)
 ```
