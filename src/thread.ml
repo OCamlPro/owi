@@ -29,7 +29,7 @@ let globals t = t.globals
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
-  let solver = S (solver_mod, Solver.create ~logic:QF_BVFP ()) in
+  let solver = S (solver_mod, Solver.create ~logic:QF_BV ()) in
   { solver
   ; pc = []
   ; memories = Symbolic_memory.init ()

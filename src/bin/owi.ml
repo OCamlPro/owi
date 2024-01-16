@@ -10,10 +10,7 @@ let file =
 
 let files =
   let doc = "source files" in
-  let parse s = Ok s in
-  Cmdliner.Arg.(
-    value
-    & pos 0 (list ~sep:' ' (conv (parse, Format.pp_string))) [] (info [] ~doc) )
+  Cmdliner.Arg.(value & pos_all non_dir_file [] (info [] ~doc))
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in
@@ -37,7 +34,10 @@ let unsafe =
 
 let workers =
   let doc = "number of workers for symbolic execution" in
-  Cmdliner.Arg.(value & opt int (Domain.recommended_domain_count ()) & info [ "workers"; "w" ] ~doc)
+  Cmdliner.Arg.(
+    value
+    & opt int (Domain.recommended_domain_count ())
+    & info [ "workers"; "w" ] ~doc )
 
 let workspace =
   let doc = "path to the workspace directory" in
@@ -51,6 +51,44 @@ let shared_man =
   [ `S Cmdliner.Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
 
 let version = "%%VERSION%%"
+
+let c_cmd =
+  let open Cmdliner in
+  let info =
+    let doc =
+      "Compile a C file to Wasm and run the symbolic interpreter on it"
+    in
+    let man = [] @ shared_man in
+    Cmd.info "c" ~version ~doc ~sdocs ~man
+  in
+  let arch =
+    let doc = "data model" in
+    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
+  in
+  let property =
+    let doc = "property file" in
+    Arg.(value & opt (some string) None & info [ "property"; "p" ] ~doc)
+  in
+  let includes =
+    let doc = "headers path" in
+    Arg.(value & opt_all dir [] & info [ "I" ] ~doc)
+  in
+  let opt_lvl =
+    let doc = "specify which optimization level to use" in
+    Arg.(value & opt string "0" & info [ "O" ] ~doc)
+  in
+  let testcomp =
+    let doc = "test-comp mode" in
+    Arg.(value & flag & info [ "testcomp" ] ~doc)
+  in
+  let output =
+    let doc = "write results to dir" in
+    Arg.(value & opt string "owi-out" & info [ "output"; "o" ] ~doc)
+  in
+  Cmd.v info
+    Term.(
+      const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
+      $ opt_lvl $ includes $ files )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -117,7 +155,8 @@ let cli =
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
   let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
-  Cmd.group info ~default [ fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd ]
+  Cmd.group info ~default
+    [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd ]
 
 let main () = exit @@ Cmdliner.Cmd.eval cli
 

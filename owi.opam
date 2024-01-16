@@ -8,6 +8,7 @@ maintainer: ["Léo Andrès <contact@ndrs.fr>"]
 authors: [
   "Léo Andrès <contact@ndrs.fr>"
   "Pierre Chambart <pierre.chambart@ocamlpro.com>"
+  "Filipe Marques"
 ]
 license: "AGPL-3.0-or-later"
 tags: ["owi" "ocaml" "webassembly" "wasm" "interpreter" "compiler"]
@@ -42,10 +43,15 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
+depexts: [
+  ["llvm" "clang" "lld" "wabt"]  {os-family = "debian"}
+]

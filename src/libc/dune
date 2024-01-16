@@ -1,0 +1,131 @@
+(executable
+ (name script)
+ (modules script))
+
+(rule
+ (target libc.wasm)
+ (deps
+  assert_fail.o
+  stdlib.o
+  ctype.o
+  stdout.o
+  errno.o
+  strchr.o
+  math.o
+  strcmp.o
+  memccpy.o
+  strcpy.o
+  memchr.o
+  strdup.o
+  memcmp.o
+  strerror.o
+  memcpy.o
+  strftime.o
+  memmove.o
+  strlen.o
+  memset.o
+  strncmp.o
+  netinet_in.o
+  strncpy.o
+  owi.o
+  strrchr.o
+  pthread.o
+  strstr.o
+  setjmp.o
+  sys_resources.o
+  start.o
+  test-comp.o
+  stderr.o
+  time.o
+  stdio.o
+  unistd.o)
+ (action
+  (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
+
+(rule
+ (targets
+  assert_fail.o
+  stdlib.o
+  ctype.o
+  stdout.o
+  errno.o
+  strchr.o
+  math.o
+  strcmp.o
+  memccpy.o
+  strcpy.o
+  memchr.o
+  strdup.o
+  memcmp.o
+  strerror.o
+  memcpy.o
+  strftime.o
+  memmove.o
+  strlen.o
+  memset.o
+  strncmp.o
+  netinet_in.o
+  strncpy.o
+  owi.o
+  strrchr.o
+  pthread.o
+  strstr.o
+  setjmp.o
+  sys_resources.o
+  start.o
+  test-comp.o
+  stderr.o
+  time.o
+  stdio.o
+  unistd.o)
+ (deps
+  src/assert_fail.c
+  src/stdlib.c
+  src/ctype.c
+  src/stdout.c
+  src/errno.c
+  src/strchr.c
+  src/math.c
+  src/strcmp.c
+  src/memccpy.c
+  src/strcpy.c
+  src/memchr.c
+  src/strdup.c
+  src/memcmp.c
+  src/strerror.c
+  src/memcpy.c
+  src/strftime.c
+  src/memmove.c
+  src/strlen.c
+  src/memset.c
+  src/strncmp.c
+  src/netinet_in.c
+  src/strncpy.c
+  src/owi.c
+  src/strrchr.c
+  src/pthread.c
+  src/strstr.c
+  src/setjmp.c
+  src/sys_resources.c
+  src/start.c
+  src/test-comp.c
+  src/stderr.c
+  src/time.c
+  src/stdio.c
+  src/unistd.c)
+ (action
+  (run ./script.exe %{deps})))
+
+(install
+ (package owi)
+ (section
+  (site
+   (owi binc)))
+ (files libc.wasm))
+
+(install
+ (package owi)
+ (section
+  (site
+   (owi pyc)))
+ (files instrumentor.py))
