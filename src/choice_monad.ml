@@ -581,9 +581,14 @@ module MT = struct
       | None -> ()
     in
     Domain.spawn (fun () ->
-        WQ.with_produce global.r
-          ~started:(fun () -> Counter.incr global.start_counter)
-          (fun () -> WQ.produce global.w producer) )
+        try
+          WQ.with_produce global.r
+            ~started:(fun () -> Counter.incr global.start_counter)
+            (fun () -> WQ.produce global.w producer)
+        with e ->
+          let bt = Printexc.get_raw_backtrace () in
+          WQ.fail global.w;
+          Printexc.raise_with_backtrace e bt )
 
   let rec loop_and_do (s : 'a Seq.t) f : 'a Seq.t =
    fun () ->
