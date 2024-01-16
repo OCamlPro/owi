@@ -8,6 +8,5 @@
   %{bin:owi}
   (file extern.exe)
   (file extern.ml)
-  (file extern.wast)
-  (file print.wast))
+  (file extern.wat))
  (files README.md))

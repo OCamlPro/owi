@@ -1,5 +1,0 @@
-(rule
- (deps ../life.wast)
- (targets life.wasm)
- (action
-  (run %{bin:wat2wasm} ../life.wast)))
