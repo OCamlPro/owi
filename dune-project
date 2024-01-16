@@ -64,5 +64,6 @@
   (graphics :dev)
   (tiny_httpd :dev)
   (encoding (>= 0.0.3))
+  sha
   xmlm)
  (sites (share pyc) (share binc) (share libc)))
