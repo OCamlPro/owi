@@ -16,7 +16,7 @@
 (authors
  "Léo Andrès <contact@ndrs.fr>"
  "Pierre Chambart <pierre.chambart@ocamlpro.com>"
- "Filipe Marques")
+ "Filipe Marques <filipe.s.marques@tecnico.ulisboa.pt>")
 
 (maintainers "Léo Andrès <contact@ndrs.fr>")
 
