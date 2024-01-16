@@ -1,6 +1,15 @@
 # [🐌] Owi [![build-badge]][build status] [![coverage-badge]][coverage percentage]
 
-[Owi] is an [OCaml] toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
+[Owi] is a toolchain to work with WebAssembly. It is written in [OCaml]. It provides a binary with many subcommands:
+
+- [`owi c`]: a bug finding tool for C code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
+- [`owi fmt`]: a formatter for Wasm;
+- [`owi opt`]: an optimizer for Wasm;
+- [`owi run`]: a concrete Wasm interpreter;
+- [`owi script`]: an interpreter for [Wasm specification tests];
+- [`owi sym`]: a symbolic Wasm interpreter.
+
+It also provides an OCaml library which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
 
 ## Installation
 
@@ -250,8 +259,9 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
-[spectest module]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#spectest-host-module
+[spectest module]: https://github.com/webassembly/spec/blob/main/interpreter/readme.md#spectest-host-module
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
+[Wasm specification tests]: https://github.com/webassembly/spec/blob/main/interpreter/readme.md#spectest-host-module
 [WebAssembly]: https://webassembly.org
 [WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
 
@@ -277,5 +287,13 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [Extended Constant Expressions]: https://github.com/WebAssembly/extended-const
 [Relaxed SIMD]: https://github.com/WebAssembly/relaxed-simd
 [JS Promise Integration]: https://github.com/WebAssembly/js-promise-integration
+
+[`owi c`]: ./example/c
+[`owi fmt`]: ./example/fmt
+[`owi opt`]: ./example/opt
+[`owi run`]: ./example/run
+[`owi script`]: ./example/script
+[`owi sym`]: ./example/sym
+[import OCaml functions in a Wasm module]: ./example/define_host_function
 
 [🐌]: https://invidious.zapashcanon.fr/watch?v=XgK9Fd8ikxk

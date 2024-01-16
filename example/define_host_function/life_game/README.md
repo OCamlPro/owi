@@ -4,7 +4,7 @@ This example is a [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%2
 3 outputs are proposed (console, [OCaml Graphics](https://github.com/ocaml/graphics) and HTML/JavaScript),
 each one using the same WebAssembly modules.
 
-## Console et OCaml Graphics
+## Console and OCaml Graphics
 
 Console and Graphics implementations use *external functions* technique as the
 [standard example](../). Here are the command lines to run in this directory to execute the programs:
@@ -12,9 +12,9 @@ Console and Graphics implementations use *external functions* technique as the
 * Console  mode: `dune exec -- ./life_graphics.exe`
 * Graphics mode: `dune exec -- ./life_console.exe`
 
-Several modules (defined in `life.wast` and `life_loop.wast` files) are linked.
+Several modules (defined in `life.wat` and `life_loop.wat` files) are linked.
 
-**Why are two `.wast` files required ?**
+**Why are two `.wat` files required ?**
 
 Because, in JavaScript, the `Sleep` function uses the
 [Promise system](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
@@ -30,7 +30,7 @@ Here is a standard example of a wasm module called in a web page using the
 [JavaScript API](https://webassembly.org/getting-started/js-api/).
 
 First of all, a compiled version of the WebAssembly module is needed, obtained by the
-command line `wat2wasm life.wast`. wat2wasm is part of the
+command line `wat2wasm life.wat`. wat2wasm is part of the
 [WABT: The WebAssembly Binary Toolkit](https://github.com/WebAssembly/wabt).
 
 As in OCaml in the previous contexts, external functions are defined in the environment execution

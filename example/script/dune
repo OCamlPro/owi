@@ -1,0 +1,6 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file print.wast))
+ (files README.md))

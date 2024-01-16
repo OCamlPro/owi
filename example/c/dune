@@ -1,0 +1,7 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file poly.c)
+  (file poly2.c))
+ (files README.md))

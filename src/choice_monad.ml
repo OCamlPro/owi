@@ -23,13 +23,16 @@ let check (sym_bool : vbool) (state : Thread.t) : bool =
   | Val False -> true
   | _ ->
     let check = no :: pc in
+    (*
     Format.pp_std "CHECK:@.%a"
       (Format.pp_list ~pp_sep:Format.pp_newline Expr.pp)
-      check;
+      check; *)
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
+    (*
     let msg = if r then "KO" else "OK" in
     Format.pp_std "@./CHECK %s@." msg;
+    *)
     not r
 
 (* TODO: make this a CLI flag ? *)

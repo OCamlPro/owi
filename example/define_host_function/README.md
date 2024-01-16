@@ -1,31 +1,9 @@
-# Examples
+# Using and defining external functions (host functions)
 
-## Using the `spectest` module
+Given the following `extern.wat` file:
 
-Given the following `print.wast` file:
-
-<!-- $MDX file=print.wast -->
-```wast
-(module
-  (func $print_i32 (import "spectest" "print_i32") (param i32))
-  (func $main (call $print_i32 (i32.const 42)))
-  (start $main)
-)
-```
-
-You can print the value thanks to the `print_i32` function imported from the `spectest` module:
-
-```sh
-$ dune exec owi -- script ./print.wast
-42
-```
-
-## Using and defining external functions (host functions)
-
-Given the following `extern.wast` file:
-
-<!-- $MDX file=extern.wast -->
-```wast
+<!-- $MDX file=extern.wat -->
+```wat
 (module $extern
 
   (import "sausage" "fresh"
@@ -98,7 +76,7 @@ let link_state =
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.Module.from_file ~filename:"extern.wast" with
+  match Parse.Module.from_file ~filename:"extern.wat" with
   | Error e -> failwith e
   | Ok modul -> modul
 
@@ -126,5 +104,7 @@ $ dune exec -- ./extern.exe
 13
 ```
 
-To learn more, follow the link [life_game/](./life_game/) for a more advanced example
-based on the Conway's Game of Life that links several modules from different .wast files.
+To learn more, see our advanced [Game of Live] example
+based on the famous cellular automaton by Conway. It show how to link several modules from different `.wat` files.
+
+[Game of Life]: ./life_game
