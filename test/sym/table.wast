@@ -18,7 +18,7 @@
     (call_indirect
       $t
       (type $type)
-      (i32.const 0)
+      (call $i32_symbol)
     )
     drop
   )
