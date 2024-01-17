@@ -4,6 +4,8 @@
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
+  (import "symbolic" "assume_positive_i32" (func $positive_i32 (param i32)))
+
   (memory $m 1)
   (data $d (memory $m) (offset i32.const 99) "str_data")
 
@@ -62,10 +64,17 @@
   )
 
   (func $start
-    i32.const 1
+    (local $s i32)
+    (local.set $s (call $i32_symbol))
+    (call $positive_i32 (local.get $s))
+    (local.get $s)
+    drop
+    ;; owi: internal error, uncaught exception:
+    ;;  Failure("Unsupported symbolic value reasoning over \"(i32.wrap_i64 (i64.mul (i64.extend_i32_s symbol_0) (i64 65536)))\"")
+    i32.const 1   ;; instead of local.get $s
     memory.grow
     drop
-    (if (i32.eqz (memory.size))
+    (if (i32.le_u (memory.size) (i32.const 1))
       (then unreachable))
 
     (call $mem_set_i32_8 (i32.const 0) (call $i32_symbol))
