@@ -24,24 +24,29 @@ extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;
 
 void *malloc(size_t size) {
-  unsigned int r = bump_pointer;
-  /* for (int i = 0; i < size; ++i) */
-  /*   *((unsigned char *)bump_pointer + i) = 'i'; */
-  bump_pointer += size;
-  return (void *)owi_malloc(r, size);
+  unsigned int start;
+  unsigned int closest_pow2 = 1 << (sizeof(size_t)*8 - (__builtin_clz(size) + 1));
+  unsigned int align = (closest_pow2 <= 16) ? closest_pow2 : 16;
+  unsigned int off_align = bump_pointer % align;
+  if ( off_align == 0 ) {
+    start = bump_pointer;
+  }
+  else {
+    start = bump_pointer + (align - off_align);
+  }
+  bump_pointer = size + start;
+  return (void *)owi_malloc(start, size);
 }
 
 void *alloca(size_t size) { return malloc(size); }
 
 void *calloc(size_t nmemb, size_t size) {
-  unsigned int r = bump_pointer;
-  /* for (int i = 0; i < nmemb * size; ++i) */
-  /*   *((unsigned int *)(bump_pointer + i)) = 0; */
-  bump_pointer += (nmemb * size);
-  return (void *)owi_malloc(r, nmemb * size);
+  // TODO: correctly handle overflow on multiplication
+  return malloc(nmemb * size);
 }
 
 void *realloc(void *ptr, size_t size) {
+  // TODO: fix
   owi_free(ptr);
   return (void *)owi_malloc(ptr, size);
 }
