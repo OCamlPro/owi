@@ -570,8 +570,8 @@ let rec pp_instr fmt = function
   | Br_if id -> pp fmt "br_if %a" pp_indice id
   | Br_table (ids, id) ->
     pp fmt "br_table %a %a"
-      (pp_list ~pp_sep:pp_space pp_indice)
-      (Array.to_list ids) pp_indice id
+      (pp_array ~pp_sep:pp_space pp_indice)
+      ids pp_indice id
   | Return -> pp fmt "return"
   | Return_call id -> pp fmt "return_call %a" pp_indice id
   | Return_call_indirect (tbl_id, ty_id) ->
