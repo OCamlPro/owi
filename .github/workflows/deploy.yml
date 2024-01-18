@@ -29,6 +29,7 @@ jobs:
           mv _build/default/_doc/_html doc/api
       - name: coverage
         run: |
+          opam exec -- dune build @install
           BISECT_FILE=$(pwd)/bisect opam exec -- dune runtest --force --instrument-with bisect_ppx
           opam exec -- bisect-ppx-report html -o doc/coverage
       - name: coverage-badge
