@@ -1,6 +1,4 @@
 (mdx
  (libraries owi)
- (deps
-  %{bin:owi}
-  quickstart.wat)
+ (deps %{bin:owi} quickstart.wat)
  (files README.md))
