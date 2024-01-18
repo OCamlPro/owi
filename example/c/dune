@@ -3,5 +3,6 @@
  (deps
   %{bin:owi}
   (file poly.c)
-  (file poly2.c))
+  (file poly2.c)
+  (package owi))
  (files README.md))
