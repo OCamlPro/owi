@@ -64,19 +64,6 @@
   )
 
   (func $start
-    (local $s i32)
-    (local.set $s (call $i32_symbol))
-    (call $positive_i32 (local.get $s))
-    (local.get $s)
-    drop
-    ;; owi: internal error, uncaught exception:
-    ;;  Failure("Unsupported symbolic value reasoning over \"(i32.wrap_i64 (i64.mul (i64.extend_i32_s symbol_0) (i64 65536)))\"")
-    i32.const 1   ;; instead of local.get $s
-    memory.grow
-    drop
-    (if (i32.le_u (memory.size) (i32.const 1))
-      (then unreachable))
-
     (call $mem_set_i32_8 (i32.const 0) (call $i32_symbol))
     (call $mem_set_i32_16 (i32.const 4) (call $i32_symbol))
     (call $mem_set_i32 (i32.const 8) (call $i32_symbol))
