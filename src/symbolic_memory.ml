@@ -41,7 +41,9 @@ module M = struct
     let old_size = Value.I32.mul m.size page_size in
     let new_size = Value.I32.(div (add old_size delta) page_size) in
     m.size <-
-      Triop (Ite, Value.I32.gt new_size m.size, new_size, m.size) @: Ty_bool
+      Value.Bool.select_expr
+        (Value.I32.gt new_size m.size)
+        ~if_true:new_size ~if_false:m.size
 
   let size { size; _ } = Value.I32.mul size page_size
 
