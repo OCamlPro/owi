@@ -8,16 +8,6 @@ open Expr
 
 let ( let+ ) o f = Option.map f o
 
-let return = Option.some
-
-let mk_i32 x = Val (Num (I32 x)) @: Ty_bitv S32
-
-let mk_i64 x = Val (Num (I64 x)) @: Ty_bitv S64
-
-let mk_f32 x = Val (Num (F32 x)) @: Ty_fp S32
-
-let mk_f64 x = Val (Num (F64 x)) @: Ty_fp S64
-
 let unop ty op e =
   match e.e with
   | Val (Num n) -> Val (Num (Eval_numeric.eval_unop ty op n)) @: e.ty
@@ -74,13 +64,15 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let const_i32 (i : Int32.t) : int32 = mk_i32 i
+  let const_i32 (i : Int32.t) : int32 = Val (Num (I32 i)) @: Ty_bitv S32
 
-  let const_i64 (i : Int64.t) : int64 = mk_i64 i
+  let const_i64 (i : Int64.t) : int64 = Val (Num (I64 i)) @: Ty_bitv S64
 
-  let const_f32 (f : Float32.t) : float32 = mk_f32 (Float32.to_bits f)
+  let const_f32 (f : Float32.t) : float32 =
+    Val (Num (F32 (Float32.to_bits f))) @: Ty_fp S32
 
-  let const_f64 (f : Float64.t) : float64 = mk_f64 (Float64.to_bits f)
+  let const_f64 (f : Float64.t) : float64 =
+    Val (Num (F64 (Float64.to_bits f))) @: Ty_fp S64
 
   let ref_null _ty = Ref (Funcref None)
 
@@ -154,8 +146,8 @@ module S = struct
 
     let int32 e =
       match e.e with
-      | Val True -> mk_i32 1l
-      | Val False -> mk_i32 0l
+      | Val True -> const_i32 1l
+      | Val False -> const_i32 0l
       | Cvtop (ToBool, e') when e'.ty = Ty_bitv S32 -> e'
       | _ -> Cvtop (OfBool, e) @: Ty_bitv S32
 
@@ -181,7 +173,7 @@ module S = struct
 
     let ty = Ty_bitv S32
 
-    let zero = mk_i32 0l
+    let zero = const_i32 0l
 
     let clz e = unop ty Clz e
 
@@ -237,7 +229,7 @@ module S = struct
       | Cvtop (OfBool, cond) -> begin
         match c with 0l -> Bool.not cond | 1l -> cond | _ -> Bool.const false
       end
-      | _ -> relop ty Eq e (mk_i32 c)
+      | _ -> relop ty Eq e (const_i32 c)
 
     let eq e1 e2 = if e1 == e2 then Bool.const true else relop ty Eq e1 e2
 
@@ -301,7 +293,7 @@ module S = struct
 
     let ty = Ty_bitv S64
 
-    let zero = mk_i64 0L
+    let zero = const_i64 0L
 
     let clz e = unop ty Clz e
 
@@ -339,7 +331,7 @@ module S = struct
 
     let rotr e1 e2 = binop ty Rotr e1 e2
 
-    let eq_const e c = relop ty Eq e (mk_i64 c)
+    let eq_const e c = relop ty Eq e (const_i64 c)
 
     let eq e1 e2 = relop ty Eq e1 e2
 
@@ -403,7 +395,7 @@ module S = struct
 
     let ty = Ty_fp S32
 
-    let zero = mk_f32 0l
+    let zero = const_f32 Float32.zero
 
     let abs x = unop ty Abs x
 
@@ -475,7 +467,7 @@ module S = struct
 
     let ty = Ty_fp S64
 
-    let zero = mk_f64 0L
+    let zero = const_f64 Float64.zero
 
     let abs x = unop ty Abs x
 
