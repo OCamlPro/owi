@@ -128,7 +128,9 @@ struct
           match model with
           | None -> assert false (* ? *)
           | Some model -> (
+            (*
             Format.pp_std "Model:@.%a@." Model.pp model;
+            *)
             let v = Model.evaluate model symbol in
             match v with
             | None -> assert false (* ? *)
