@@ -5,12 +5,11 @@
     (elem $f)
   )
 
-  (type $type (func (param i32) (result i32)))
+  (type $type (func (param i32)))
 
-  (func $f (param $x i32) (result i32)
+  (func $f (param $x i32)
     (if (i32.eqz (local.get $x))
       (then unreachable))
-    local.get $x
   )
 
   (func $start
@@ -20,7 +19,6 @@
       (type $type)
       (call $i32_symbol)
     )
-    drop
   )
 
   (start $start)
