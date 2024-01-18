@@ -122,36 +122,36 @@
 open Syntax
 
 let simplify_then_link_then_run ~unsafe ~optimize file =
-  <span data-count="1">l</span>et* to_run, link_state =
-    list_fold_lef<span data-count="1">t</span>
+  <span data-count="2">l</span>et* to_run, link_state =
+    list_fold_lef<span data-count="2">t</span>
       (fun ((to_run, state) as acc) instruction -&gt;
-        <span data-count="1">m</span>atch instruction with
-        | <span data-count="1">T</span>ext.Module m -&gt;
+        <span data-count="2">m</span>atch instruction with
+        | <span data-count="2">T</span>ext.Module m -&gt;
           let* m, state =
-            Compile.until_lin<span data-count="1">k</span> state ~unsafe ~optimize ~name:None m
+            Compile.until_lin<span data-count="2">k</span> state ~unsafe ~optimize ~name:None m
           in
-          <span data-count="1">O</span>k (m :: to_run, state)
+          <span data-count="2">O</span>k (m :: to_run, state)
         | <span data-count="0">T</span>ext.Register (name, id) -&gt;
           let* state = Link.register_modul<span data-count="0">e</span> state ~name ~id in
           <span data-count="0">O</span>k (to_run, state)
         | <span data-count="0">_</span> -&gt; Ok acc )
       ([], Link.empty_state) file
   in
-  <span data-count="1">l</span>ist_iter (Interpret.Concrete.modu<span data-count="1">l</span> link_state.envs) (List.re<span data-count="1">v</span> to_run)
+  <span data-count="2">l</span>ist_iter (Interpret.Concrete.modu<span data-count="2">l</span> link_state.envs) (List.re<span data-count="2">v</span> to_run)
 
 let run_file ~unsafe ~optimize filename =
-  <span data-count="1">i</span>f not @@ Sys.file_exist<span data-count="1">s</span> filename then
+  <span data-count="2">i</span>f not @@ Sys.file_exist<span data-count="2">s</span> filename then
     <span data-count="0">e</span>rror_s "file `%s` doesn't exist" filename
   else
-    <span data-count="1">l</span>et* script = Parse.Script.from_file ~filename in
-    <span data-count="1">s</span>implify_then_link_then_run ~unsafe ~optimize script
+    <span data-count="2">l</span>et* script = Parse.Script.from_file ~filename in
+    <span data-count="2">s</span>implify_then_link_then_run ~unsafe ~optimize script
 
 let cmd profiling debug unsafe optimize files =
-  <span data-count="1">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="1">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
-  <span data-count="1">l</span>et result = list_iter (run_file ~unsafe ~optimize) files in
-  <span data-count="1">m</span>atch result with
-  | <span data-count="1">O</span>k () -&gt; ()
+  <span data-count="2">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="2">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
+  <span data-count="2">l</span>et result = list_iter (run_file ~unsafe ~optimize) files in
+  <span data-count="2">m</span>atch result with
+  | <span data-count="2">O</span>k () -&gt; ()
   | <span data-count="0">E</span>rror e -&gt;
     Format.pp_err "%s@\n" e;
     <span data-count="0">e</span>xit 1

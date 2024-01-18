@@ -117,39 +117,39 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-let ( let* ) o f = <span data-count="63973">m</span>atch o with <span data-count="9520">E</span>rror msg -&gt; Error msg | <span data-count="54453">O</span>k v -&gt; f v
+let ( let* ) o f = <span data-count="64012">m</span>atch o with <span data-count="9520">E</span>rror msg -&gt; Error msg | <span data-count="54492">O</span>k v -&gt; f v
 
-let until_check ~unsafe m = <span data-count="5987">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="5987">C</span>heck.modul m
+let until_check ~unsafe m = <span data-count="5991">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="5991">C</span>heck.modul m
 
 let until_group ~unsafe m =
-  <span data-count="5987">l</span>et* m = until_chec<span data-count="5987">k</span> ~unsafe m in
-  <span data-count="5925">l</span>et* m = Grouped.of_symboli<span data-count="5925">c</span> m in
-  <span data-count="5907">O</span>k m
+  <span data-count="5991">l</span>et* m = until_chec<span data-count="5991">k</span> ~unsafe m in
+  <span data-count="5929">l</span>et* m = Grouped.of_symboli<span data-count="5929">c</span> m in
+  <span data-count="5911">O</span>k m
 
 let until_assign ~unsafe m =
-  <span data-count="5987">l</span>et* m = until_grou<span data-count="5987">p</span> ~unsafe m in
-  <span data-count="5907">l</span>et* m = Assigned.of_groupe<span data-count="5907">d</span> m in
-  <span data-count="5891">O</span>k m
+  <span data-count="5991">l</span>et* m = until_grou<span data-count="5991">p</span> ~unsafe m in
+  <span data-count="5911">l</span>et* m = Assigned.of_groupe<span data-count="5911">d</span> m in
+  <span data-count="5895">O</span>k m
 
 let until_simplify ~unsafe m =
-  <span data-count="5987">l</span>et* m = until_assig<span data-count="5987">n</span> ~unsafe m in
-  <span data-count="5891">l</span>et* m = Rewrite.modu<span data-count="5891">l</span> m in
-  <span data-count="5487">O</span>k m
+  <span data-count="5991">l</span>et* m = until_assig<span data-count="5991">n</span> ~unsafe m in
+  <span data-count="5895">l</span>et* m = Rewrite.modu<span data-count="5895">l</span> m in
+  <span data-count="5491">O</span>k m
 
 let until_typecheck ~unsafe m =
-  <span data-count="5867">l</span>et* m = until_simplif<span data-count="5867">y</span> ~unsafe m in
-  <span data-count="5485">i</span>f unsafe then <span data-count="0">O</span>k m
+  <span data-count="5871">l</span>et* m = until_simplif<span data-count="5871">y</span> ~unsafe m in
+  <span data-count="5489">i</span>f unsafe then <span data-count="0">O</span>k m
   else
-    <span data-count="5485">l</span>et* () = Typecheck.modu<span data-count="5485">l</span> m in
-    <span data-count="2919">O</span>k m
+    <span data-count="5489">l</span>et* () = Typecheck.modu<span data-count="5489">l</span> m in
+    <span data-count="2923">O</span>k m
 
 let until_optimize ~unsafe ~optimize m =
-  <span data-count="5867">l</span>et* m = until_typechec<span data-count="5867">k</span> ~unsafe m in
-  <span data-count="2919">i</span>f optimize then <span data-count="1468">O</span>k (Optimize.modu<span data-count="1468">l</span> m) else <span data-count="1451">O</span>k m
+  <span data-count="5871">l</span>et* m = until_typechec<span data-count="5871">k</span> ~unsafe m in
+  <span data-count="2923">i</span>f optimize then <span data-count="1469">O</span>k (Optimize.modu<span data-count="1469">l</span> m) else <span data-count="1454">O</span>k m
 
 let until_link ~unsafe link_state ~optimize ~name m =
-  <span data-count="5846">l</span>et* m = until_optimiz<span data-count="5846">e</span> ~unsafe ~optimize m in
-  <span data-count="2898">L</span>ink.modul link_state ~name m
+  <span data-count="5849">l</span>et* m = until_optimiz<span data-count="5849">e</span> ~unsafe ~optimize m in
+  <span data-count="2901">L</span>ink.modul link_state ~name m
 
 let until_interpret link_state ~unsafe ~optimize ~name m =
   <span data-count="2612">l</span>et* m, link_state = until_lin<span data-count="2612">k</span> link_state ~unsafe ~optimize ~name m in

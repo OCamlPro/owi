@@ -153,7 +153,7 @@ type table = Symbolic_value.S.ref_value array
 
 type tables = table ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="1">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="3">E</span>nv_id.Tbl.create 0
 
 let clone (tables : tables) : tables =
   <span data-count="2">l</span>et s = Env_id.Tbl.to_seq tables in

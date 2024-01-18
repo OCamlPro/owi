@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_global.ml &mdash; Coverage report</title>
-    <meta name="description" content="11.43% coverage in src/symbolic_global.ml">
+    <meta name="description" content="60.00% coverage in src/symbolic_global.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,31 +15,16 @@
           <span class="dirname">src/</span>symbolic_global.ml
         </a>
       </h1>
-      <h2>11.43%</h2>
+      <h2>60.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:13.33%"></span>
       <span class="unvisited" style="top:33.33%"></span>
       <span class="unvisited" style="top:45.00%"></span>
       <span class="unvisited" style="top:46.67%"></span>
-      <span class="unvisited" style="bottom:45.00%"></span>
-      <span class="unvisited" style="bottom:43.33%"></span>
       <span class="unvisited" style="bottom:41.67%"></span>
       <span class="unvisited" style="bottom:40.00%"></span>
       <span class="unvisited" style="bottom:38.33%"></span>
       <span class="unvisited" style="bottom:36.67%"></span>
-      <span class="unvisited" style="bottom:30.00%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
-      <span class="unvisited" style="bottom:23.33%"></span>
-      <span class="unvisited" style="bottom:21.67%"></span>
-      <span class="unvisited" style="bottom:18.33%"></span>
-      <span class="unvisited" style="bottom:16.67%"></span>
-      <span class="unvisited" style="bottom:10.00%"></span>
-      <span class="unvisited" style="bottom:8.33%"></span>
-      <span class="unvisited" style="bottom:6.67%"></span>
-      <span class="unvisited" style="bottom:5.00%"></span>
-      <span class="unvisited" style="bottom:1.67%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -51,7 +36,7 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="unvisited"> </span>
+<a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
@@ -76,8 +61,8 @@
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span class="unvisited"> </span>
-<a id="L34"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span class="unvisited"> </span>
 <a id="L36"></a><span class="unvisited"> </span>
 <a id="L37"></a><span class="unvisited"> </span>
@@ -85,25 +70,25 @@
 <a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
-<a id="L42"></a><span class="unvisited"> </span>
+<a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="unvisited"> </span>
-<a id="L46"></a><span class="unvisited"> </span>
-<a id="L47"></a><span class="unvisited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span class="unvisited"> </span>
-<a id="L50"></a><span class="unvisited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="unvisited"> </span>
-<a id="L55"></a><span class="unvisited"> </span>
-<a id="L56"></a><span class="unvisited"> </span>
-<a id="L57"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span class="unvisited"> </span>
-<a id="L60"></a><span class="unvisited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -176,7 +161,7 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="0">x</span>
+  let hash x = <span data-count="6">x</span>
 end)
 
 type global =
@@ -186,7 +171,7 @@ type global =
 
 type globals = global ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="1">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="3">E</span>nv_id.Tbl.create 0
 
 let global_copy r = <span data-count="0">{</span> r with value = r.value }
 
@@ -201,8 +186,8 @@ let clone (globals : globals) : globals =
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   (* TODO share various versions *)
-  <span data-count="0">m</span>atch v with
-  | <span data-count="0">I</span>32 v -&gt; I32 (Symbolic_value.S.const_i3<span data-count="0">2</span> v)
+  <span data-count="2">m</span>atch v with
+  | <span data-count="2">I</span>32 v -&gt; I32 (Symbolic_value.S.const_i3<span data-count="2">2</span> v)
   | <span data-count="0">I</span>64 v -&gt; I64 (Symbolic_value.S.const_i6<span data-count="0">4</span> v)
   | <span data-count="0">F</span>32 v -&gt; F32 (Symbolic_value.S.const_f3<span data-count="0">2</span> v)
   | <span data-count="0">F</span>64 v -&gt; F64 (Symbolic_value.S.const_f6<span data-count="0">4</span> v)
@@ -210,25 +195,25 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   | Ref _ -&gt; assert false
 
 let convert (orig_global : Concrete_global.t) : global =
-  <span data-count="0">{</span> value = convert_value<span data-count="0">s</span> orig_global.value; orig = orig_global }
+  <span data-count="2">{</span> value = convert_value<span data-count="2">s</span> orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
-  <span data-count="0">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="0">S</span>ome env -&gt; env
-  | <span data-count="0">N</span>one -&gt;
+  <span data-count="4">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="2">S</span>ome env -&gt; env
+  | <span data-count="2">N</span>one -&gt;
     let t = ITbl.create 0 in
-    <span data-count="0">E</span>nv_id.Tbl.add tables env_id t;
-    <span data-count="0">t</span>
+    <span data-count="2">E</span>nv_id.Tbl.add tables env_id t;
+    <span data-count="2">t</span>
 
 let get_global env_id (orig_global : Concrete_global.t) (tables : globals) g_id
     =
-  <span data-count="0">l</span>et env = get_env env_id tables in
-  <span data-count="0">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="0">S</span>ome t -&gt; t
-  | <span data-count="0">N</span>one -&gt;
+  <span data-count="4">l</span>et env = get_env env_id tables in
+  <span data-count="4">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="2">S</span>ome t -&gt; t
+  | <span data-count="2">N</span>one -&gt;
     let t = convert orig_global in
-    <span data-count="0">I</span>Tbl.add env g_id t;
-    <span data-count="0">t</span>
+    <span data-count="2">I</span>Tbl.add env g_id t;
+    <span data-count="2">t</span>
 </code></pre>
       </div>
     </div>

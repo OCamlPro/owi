@@ -373,21 +373,21 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let id (env : _ t) = <span data-count="3018">e</span>nv.id
+let id (env : _ t) = <span data-count="3073">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="1311">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="1315">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="1853565">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="1853614">I</span>Map.find id env.memories
 
 let get_table (env : _ t) id = <span data-count="1607417">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10062228">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10062249">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="664">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1432">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="78">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="85">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
@@ -409,16 +409,16 @@ module Build = struct
     }
 
   let add_global id const (env : t) =
-    <span data-count="1192">{</span> env with globals = IMap.ad<span data-count="1192">d</span> id const env.globals }
+    <span data-count="1194">{</span> env with globals = IMap.ad<span data-count="1194">d</span> id const env.globals }
 
   let add_memory id mem (env : t) =
-    <span data-count="765">{</span> env with memories = IMap.ad<span data-count="765">d</span> id mem env.memories }
+    <span data-count="767">{</span> env with memories = IMap.ad<span data-count="767">d</span> id mem env.memories }
 
   let add_table id table (env : t) =
-    <span data-count="921">{</span> env with tables = IMap.ad<span data-count="921">d</span> id table env.tables }
+    <span data-count="923">{</span> env with tables = IMap.ad<span data-count="923">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="12378">{</span> env with functions = IMap.ad<span data-count="12378">d</span> id func env.functions }
+    <span data-count="12393">{</span> env with functions = IMap.ad<span data-count="12393">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="654">{</span> env with data = IMap.ad<span data-count="654">d</span> id data env.data }
 
@@ -497,7 +497,7 @@ end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="2722">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="2725">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>

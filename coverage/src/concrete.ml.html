@@ -287,11 +287,11 @@ module P = struct
   module Choice = struct
     type 'a t = 'a
 
-    let return x = <span data-count="157415822">x</span> [@@inline]
+    let return x = <span data-count="157415896">x</span> [@@inline]
 
-    let bind x f = <span data-count="183863873">f</span> x [@@inline]
+    let bind x f = <span data-count="183863918">f</span> x [@@inline]
 
-    let select b = <span data-count="19577493">b</span> [@@inline]
+    let select b = <span data-count="19577495">b</span> [@@inline]
 
     let select_i32 i = <span data-count="1608796">i</span> [@@inline]
 
@@ -347,11 +347,11 @@ module P = struct
     (** runnable module *)
     type t = extern_func Link.module_to_run
 
-    let env (t : extern_func Link.module_to_run) = <span data-count="990">t</span>.env
+    let env (t : extern_func Link.module_to_run) = <span data-count="991">t</span>.env
 
-    let modul (t : extern_func Link.module_to_run) = <span data-count="922">t</span>.modul
+    let modul (t : extern_func Link.module_to_run) = <span data-count="923">t</span>.modul
 
-    let to_run (t : extern_func Link.module_to_run) = <span data-count="2683">t</span>.to_run
+    let to_run (t : extern_func Link.module_to_run) = <span data-count="2684">t</span>.to_run
   end
 end
 </code></pre>
