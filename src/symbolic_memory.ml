@@ -12,23 +12,23 @@ module M = struct
   module Ty = Encoding.Ty
   open Expr
 
-  let page_size = 65_536
+  let page_size = Value.const_i32 65_536l
 
-  type int32 = Expr.t
+  type int32 = Value.int32
 
-  type int64 = Expr.t
+  type int64 = Value.int64
 
   type t =
-    { data : (Int32.t, Expr.t) Hashtbl.t
-    ; parent : t Option.t
-    ; mutable size : int
-    ; chunks : (Int32.t, Expr.t) Hashtbl.t
+    { data : (Int32.t, int32) Hashtbl.t
+    ; parent : t option
+    ; mutable size : int32
+    ; chunks : (Int32.t, int32) Hashtbl.t
     }
 
   let create size =
     { data = Hashtbl.create 128
     ; parent = None
-    ; size = Int32.to_int size
+    ; size = Value.const_i32 size
     ; chunks = Hashtbl.create 16
     }
 
@@ -38,27 +38,30 @@ module M = struct
     | _ -> Log.err {|Unsupported symbolic value reasoning over "%a"|} Expr.pp v
 
   let grow m delta =
-    let delta = Int32.to_int @@ i32 delta in
-    let old_size = m.size * page_size in
-    m.size <- max m.size ((old_size + delta) / page_size)
+    let old_size = Value.I32.mul m.size page_size in
+    let new_size = Value.I32.(div (add old_size delta) page_size) in
+    m.size <-
+      Triop (Ite, Value.I32.gt new_size old_size, new_size, old_size) @: Ty_bool
 
-  let size { size; _ } = Value.const_i32 @@ Int32.of_int (size * page_size)
+  let size { size; _ } = Value.I32.mul size page_size
 
-  let size_in_pages { size; _ } = Value.const_i32 @@ Int32.of_int @@ size
+  let size_in_pages { size; _ } = size
 
   let fill _ = assert false
 
   let blit _ = assert false
 
   let blit_string m str ~src ~dst ~len =
-    (* Always concrete? *)
+    (* This function is only used in memory init so everything will be concrete *)
+    let str_len = String.length str in
+    let mem_len = Int32.(to_int (i32 m.size) * to_int (i32 page_size)) in
     let src = Int32.to_int @@ i32 src in
     let dst = Int32.to_int @@ i32 dst in
     let len = Int32.to_int @@ i32 len in
     if
-      src < 0 || dst < 0
-      || src + len > String.length str
-      || dst + len > m.size * page_size
+      src < 0 || dst < 0 || len < 0
+      || src + len > str_len
+      || dst + len > mem_len
     then Value.Bool.const true
     else begin
       for i = 0 to len - 1 do
