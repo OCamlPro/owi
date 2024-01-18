@@ -157,7 +157,7 @@ module S = struct
       | Some false -> if_false
       | None -> Triop (Ite, c, if_true, if_false) @: Ty_bool
 
-    let pp ppf (e : vbool) = Format.pp_string ppf (Expr.to_string e)
+    let pp ppf (e : vbool) = Expr.pp ppf e
   end
 
   module I32 = struct
