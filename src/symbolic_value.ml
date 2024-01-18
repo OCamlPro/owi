@@ -169,8 +169,6 @@ module S = struct
   end
 
   module I32 = struct
-    open Expr
-
     type num = Expr.t
 
     type vbool = Expr.t
