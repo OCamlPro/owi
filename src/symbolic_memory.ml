@@ -93,13 +93,14 @@ module M = struct
       | None -> Val (Num (I8 0)) @: Ty_bitv S8
       | Some parent -> load_byte parent a )
 
+  (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
   let merge_extracts (e1, h, m1) (e2, m2, l) =
-    if m1 <> m2 && not (Expr.equal e1 e2) then
+    if m1 = m2 && Expr.equal e1 e2 then
+      if h - l = Ty.size e1.ty then e1 else Extract (e1, h, l) @: e1.ty
+    else
       Expr.(
         Concat (Extract (e1, h, m1) @: e1.ty, Extract (e2, m2, l) @: e1.ty)
         @: e1.ty )
-    else if h - l = Ty.size e1.ty then e1
-    else Extract (e1, h, l) @: e1.ty
 
   let concat ~msb ~lsb offset =
     assert (offset > 0 && offset <= 8);
