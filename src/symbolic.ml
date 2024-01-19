@@ -119,8 +119,6 @@ module P = struct
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert (Solver.check solver @@ Thread.pc thread);
             let concrete_offest = Solver.get_value solver offset in
-            Format.pp_std "Concretise: %a = %a@." Expr.pp offset Expr.pp
-              concrete_offest;
             let cond = Relop (Eq, offset, concrete_offest) @: a.ty in
             (* TODO: this should go to the pc *)
             Solver.add solver [ cond ];
@@ -129,8 +127,6 @@ module P = struct
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert (Solver.check solver @@ Thread.pc thread);
             let concrete_addr = Solver.get_value solver a in
-            Format.pp_std "Concretise: %a = %a@." Expr.pp a Expr.pp
-              concrete_addr;
             let cond = Relop (Eq, a, concrete_addr) @: a.ty in
             (* TODO: this should go to the pc *)
             Solver.add solver [ cond ];
