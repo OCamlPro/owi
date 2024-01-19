@@ -4,7 +4,9 @@
   mini_test.wast
   assume.wast
   binop_i32.wast
+  binop_i32-2.wast
   binop_i64.wast
+  binop_i64-2.wast
   binop_f32.wast
   binop_f64.wast
   global.wast

@@ -37,6 +37,39 @@ binop i32:
     (model
       (symbol_0 i32 (i32 -46)))
   Reached 9 problems!
+binop i32 (2):
+  $ dune exec owi -- sym binop_i32-2.wast --no-stop-at-failure
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_2 i32 (i32 -65))
+      (symbol_1 i32 (i32 -65)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_2 i32 (i32 0))
+      (symbol_1 i32 (i32 1)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_2 i32 (i32 0))
+      (symbol_1 i32 (i32 0))
+      (symbol_3 i32 (i32 0)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_0 i32 (i32 2))
+      (symbol_2 i32 (i32 0))
+      (symbol_1 i32 (i32 0))
+      (symbol_3 i32 (i32 2)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_0 i32 (i32 -2147483618))
+      (symbol_2 i32 (i32 0))
+      (symbol_1 i32 (i32 0))
+      (symbol_3 i32 (i32 -2147483648)))
+  Reached 5 problems!
 binop i64:
   $ dune exec owi -- sym binop_i64.wast --no-stop-at-failure
   Trap: unreachable
@@ -76,6 +109,39 @@ binop i64:
     (model
       (symbol_0 i64 (i64 -99)))
   Reached 9 problems!
+binop i64 (2):
+  $ dune exec owi -- sym binop_i64-2.wast --no-stop-at-failure
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_1 i64 (i64 0))
+      (symbol_2 i64 (i64 0)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_1 i64 (i64 -1))
+      (symbol_2 i64 (i64 -1)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_1 i64 (i64 -1))
+      (symbol_2 i64 (i64 -2))
+      (symbol_3 i64 (i64 0)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_1 i64 (i64 -2))
+      (symbol_0 i64 (i64 -9223372036854775808))
+      (symbol_2 i64 (i64 -1))
+      (symbol_3 i64 (i64 4611686018427387904)))
+  Trap: unreachable
+  Model:
+    (model
+      (symbol_1 i64 (i64 -2))
+      (symbol_0 i64 (i64 -9223372036854775804))
+      (symbol_2 i64 (i64 -1))
+      (symbol_3 i64 (i64 -4611686018427387904)))
+  Reached 5 problems!
 binop f32:
   $ dune exec owi -- sym binop_f32.wast --no-stop-at-failure
   Trap: unreachable
