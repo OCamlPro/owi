@@ -1959,7 +1959,7 @@ module Counter = struct
   let wait_n t n =
     <span data-count="3">M</span>utex.lock t.mutex;
     <span data-count="3">w</span>hile t.c &lt; n do
-      <span data-count="4">C</span>ondition.wai<span data-count="4">t</span> t.cond t.mutex
+      <span data-count="3">C</span>ondition.wai<span data-count="3">t</span> t.cond t.mutex
     done;
     Mutex.unlock t.mutex
 
