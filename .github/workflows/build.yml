@@ -35,6 +35,8 @@ jobs:
           opam install -y ./*.opam --deps-only --with-test
           opam upgrade --fixup
       - name: build
-        run: opam exec -- dune build @install
+        run: |
+          export PATH="/usr/local/opt/llvm/bin:$PATH" # macossucks
+          opam exec -- dune build @install
       - name: test
         run: opam exec -- dune runtest
