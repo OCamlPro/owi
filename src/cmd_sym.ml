@@ -113,12 +113,12 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
   let i32 v =
     match v.e with
     | Val (Num (I32 v)) -> v
-    | _ -> Log.err {|Unable to cast int32 of "%a"|} Expr.pp v
+    | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
   in
   let ptr v =
     match v.e with
     | Ptr (b, _) -> b
-    | _ -> Log.err {|Unable to fetch pointer base of "%a"|} Expr.pp v
+    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
   in
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in
   let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
