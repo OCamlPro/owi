@@ -138,57 +138,33 @@ module M = struct
     let v0 = load_byte m a in
     loop a n 1 v0
 
-  (* TODO: *)
-  (* 1. Let pointers have symbolic offsets *)
-  (* 2. Let addresses have symbolic values *)
-  let calculate_address m (a : int32) : (Int32.t, Trap.t) Stdlib.Result.t =
-    match a.e with
-    | Val (Num (I32 i)) -> Ok i
-    | Ptr (base, offset) -> (
-      match Hashtbl.find m.chunks base with
-      | exception Not_found -> Error Trap.Memory_leak_use_after_free
-      | size ->
-        let ptr = Int32.add base (i32 offset) in
-        if ptr < base || ptr > Int32.add base (i32 size) then
-          Error Trap.Memory_heap_buffer_overflow
-        else Ok ptr )
-    | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
-
-  let load_8_s m a =
-    let+ a = calculate_address m a in
-    let v = loadn m a 1 in
+  let load_8_s m (a : int32) =
+    let v = loadn m (i32 a) 1 in
     match v.e with
     | Val (Num (I8 i8)) -> Value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
     | _ -> Cvtop (ExtS 24, v) @: Ty_bitv S32
 
-  let load_8_u m a =
-    let+ a = calculate_address m a in
-    let v = loadn m a 1 in
+  let load_8_u m (a : int32) =
+    let v = loadn m (i32 a) 1 in
     match v.e with
     | Val (Num (I8 i)) -> Value.const_i32 (Int32.of_int i)
     | _ -> Cvtop (ExtU 24, v) @: Ty_bitv S32
 
-  let load_16_s m a =
-    let+ a = calculate_address m a in
-    let v = loadn m a 2 in
+  let load_16_s m (a : int32) =
+    let v = loadn m (i32 a) 2 in
     match v.e with
     | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
     | _ -> Cvtop (ExtS 16, v) @: Ty_bitv S32
 
-  let load_16_u m a =
-    let+ a = calculate_address m a in
-    let v = loadn m a 2 in
+  let load_16_u m (a : int32) =
+    let v = loadn m (i32 a) 2 in
     match v.e with
     | Val (Num (I32 _)) -> v
     | _ -> Cvtop (ExtU 16, v) @: Ty_bitv S32
 
-  let load_32 m a =
-    let+ a = calculate_address m a in
-    loadn m a 4
+  let load_32 m (a : int32) = loadn m (i32 a) 4
 
-  let load_64 m a =
-    let+ a = calculate_address m a in
-    loadn m a 8
+  let load_64 m (a : int32) = loadn m (i32 a) 8
 
   let extract v pos =
     match v.e with
@@ -204,20 +180,20 @@ module M = struct
     | _ -> Extract (v, pos + 1, pos) @: Ty_bitv S8
 
   let storen m ~addr v n =
-    let+ a0 = calculate_address m addr in
+    let a0 = i32 addr in
     for i = 0 to n - 1 do
       let addr' = Int32.add a0 (Int32.of_int i) in
       let v' = extract v i in
       Hashtbl.replace m.data addr' v'
     done
 
-  let store_8 m ~addr v = storen m ~addr v 1
+  let store_8 m ~(addr : int32) v = storen m ~addr v 1
 
-  let store_16 m ~addr v = storen m ~addr v 2
+  let store_16 m ~(addr : int32) v = storen m ~addr v 2
 
-  let store_32 m ~addr v = storen m ~addr v 4
+  let store_32 m ~(addr : int32) v = storen m ~addr v 4
 
-  let store_64 m ~addr v = storen m ~addr v 8
+  let store_64 m ~(addr : int32) v = storen m ~addr v 8
 
   let get_limit_max _m = None (* TODO *)
 end
