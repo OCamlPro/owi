@@ -1,0 +1,8 @@
+(rule
+ (alias runtest)
+ (deps
+  malloc_aligned.c
+  %{bin:owi}
+  (package owi))
+ (action
+  (run dune exec owi -- c ./malloc_aligned.c)))
