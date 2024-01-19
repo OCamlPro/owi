@@ -277,7 +277,9 @@ module S = struct
 
     let wrap_i64 x = cvtop ty WrapI64 x
 
-    let extend_s n x = cvtop ty (ExtS n) x
+    (* FIXME: This is probably wrong? *)
+    let extend_s n x =
+      cvtop ty (ExtS (32 - n)) (Extract (x, n / 8, 0) @: Ty_bitv S32)
   end
 
   module I64 = struct
@@ -375,7 +377,9 @@ module S = struct
 
     let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
-    let extend_s n x = cvtop ty (ExtS n) x
+    (* FIXME: This is probably wrong? *)
+    let extend_s n x =
+      cvtop ty (ExtS (64 - n)) (Extract (x, n / 8, 0) @: Ty_bitv S64)
 
     let extend_i32_s x = cvtop ty (ExtS 32) x
 
