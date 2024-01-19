@@ -30,6 +30,15 @@
     (f64.le (f64.neg (local.get $x)) (f64.const 42))
     (if (then unreachable))
 
+    ;; owi: internal error, uncaught exception:
+    ;;  File "src/symbolic_value.ml", line 420, characters 18-24: Assertion failed
+    ;; (f64.eq (f64.trunc (local.get $x)) (f64.const 123))
+    ;; (if (then unreachable))
+
+    ;; very long computation
+    ;; (f64.eq (f64.sqrt (local.get $x)) (f64.const 0))
+    ;; (if (then unreachable))
+
     (f64.eq (f64.nearest (local.get $x)) (f64.const 123))
     (if (then unreachable))
 
