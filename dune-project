@@ -55,6 +55,7 @@
     (>= "0.1")
     :dev))
   (odoc :with-doc)
+  (crunch :dev)
   bos
   (mdx
    (and
