@@ -108,29 +108,87 @@ module P = struct
   module Memory = struct
     include Symbolic_memory.M
 
-    let return_or_trap = function
-      | Ok v -> Choice.return v
-      | Error t -> Choice.trap t
+    let concretise a =
+      let open Expr in
+      Choice.with_thread (fun thread ->
+          let (S (solver_mod, solver)) = Thread.solver thread in
+          let module Solver = (val solver_mod) in
+          match a.e with
+          | Val _ | Ptr (_, { e = Val _; _ }) -> a
+          | Ptr (base, offset) ->
+            (* TODO: can we remove this check? We should be in a SAT branch *)
+            assert (Solver.check solver @@ Thread.pc thread);
+            let concrete_offest = Solver.get_value solver offset in
+            Format.pp_std "Concretise: %a = %a@." Expr.pp offset Expr.pp
+              concrete_offest;
+            let cond = Relop (Eq, offset, concrete_offest) @: a.ty in
+            (* TODO: this should go to the pc *)
+            Solver.add solver [ cond ];
+            Ptr (base, concrete_offest) @: a.ty
+          | _ ->
+            (* TODO: can we remove this check? We should be in a SAT branch *)
+            assert (Solver.check solver @@ Thread.pc thread);
+            let concrete_addr = Solver.get_value solver a in
+            Format.pp_std "Concretise: %a = %a@." Expr.pp a Expr.pp
+              concrete_addr;
+            let cond = Relop (Eq, a, concrete_addr) @: a.ty in
+            (* TODO: this should go to the pc *)
+            Solver.add solver [ cond ];
+            concrete_addr )
 
-    let load_8_s m a = return_or_trap @@ load_8_s m a
+    (* TODO: *)
+    (* 1. Let pointers have symbolic offsets *)
+    (* 2. Let addresses have symbolic values *)
+    let check_within_bounds m (a : int32) =
+      Choice.with_thread (fun thread ->
+          let pc = Thread.pc thread in
+          let (S (solver_mod, solver)) = Thread.solver thread in
+          let module Solver = (val solver_mod) in
+          match a.e with
+          | Val (Num (I32 _)) -> Ok a
+          | Ptr (base, offset) -> (
+            match Hashtbl.find m.chunks base with
+            | exception Not_found -> Error Trap.Memory_leak_use_after_free
+            | size ->
+              let ptr = Int32.add base (i32 offset) in
+              let upper_bound =
+                Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
+              in
+              if ptr < base || Solver.check solver (upper_bound :: pc) then
+                Error Trap.Memory_heap_buffer_overflow
+              else Ok (Value.const_i32 ptr) )
+          | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a )
 
-    let load_8_u m a = return_or_trap @@ load_8_u m a
+    let with_concrete (m : memory) (a : int32) (f : memory -> int32 -> 'a) :
+      'a Choice.t =
+      Choice.bind (concretise a) (fun addr ->
+          Choice.bind (check_within_bounds m addr) (function
+            | Ok a -> Choice.return @@ f m a
+            | Error t -> Choice.trap t ) )
 
-    let load_16_s m a = return_or_trap @@ load_16_s m a
+    let load_8_s m a = with_concrete m a load_8_s
 
-    let load_16_u m a = return_or_trap @@ load_16_u m a
+    let load_8_u m a = with_concrete m a load_8_u
 
-    let load_32 m a = return_or_trap @@ load_32 m a
+    let load_16_s m a = with_concrete m a load_16_s
 
-    let load_64 m a = return_or_trap @@ load_64 m a
+    let load_16_u m a = with_concrete m a load_16_u
 
-    let store_8 m ~addr v = return_or_trap @@ store_8 m ~addr v
+    let load_32 m a = with_concrete m a load_32
 
-    let store_16 m ~addr v = return_or_trap @@ store_16 m ~addr v
+    let load_64 m a = with_concrete m a load_64
 
-    let store_32 m ~addr v = return_or_trap @@ store_32 m ~addr v
+    let store_8 m ~addr v =
+      with_concrete m addr (fun m addr -> store_8 m ~addr v)
 
-    let store_64 m ~addr v = return_or_trap @@ store_64 m ~addr v
+    let store_16 m ~addr v =
+      with_concrete m addr (fun m addr -> store_16 m ~addr v)
+
+    let store_32 m ~addr v =
+      with_concrete m addr (fun m addr -> store_32 m ~addr v)
+
+    let store_64 m ~addr v =
+      with_concrete m addr (fun m addr -> store_64 m ~addr v)
   end
 
   module Data = struct
