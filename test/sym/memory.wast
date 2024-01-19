@@ -4,8 +4,6 @@
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
-  (import "symbolic" "assume_positive_i32" (func $positive_i32 (param i32)))
-
   (memory $m 1)
   (data $d (memory $m) (offset i32.const 99) "str_data")
 
