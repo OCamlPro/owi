@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>choice_monad.ml &mdash; Coverage report</title>
-    <meta name="description" content="40.12% coverage in src/choice_monad.ml">
+    <meta name="description" content="40.70% coverage in src/choice_monad.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>choice_monad.ml
         </a>
       </h1>
-      <h2>40.12%</h2>
+      <h2>40.70%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:3.45%"></span>
@@ -155,7 +155,6 @@
       <span class="unvisited" style="bottom:40.50%"></span>
       <span class="unvisited" style="bottom:40.35%"></span>
       <span class="some-visited" style="bottom:37.36%"></span>
-      <span class="unvisited" style="bottom:37.21%"></span>
       <span class="unvisited" style="bottom:34.38%"></span>
       <span class="unvisited" style="bottom:34.22%"></span>
       <span class="unvisited" style="bottom:33.59%"></span>
@@ -579,7 +578,7 @@
 <a id="L397"></a><span > </span>
 <a id="L398"></a><span class="visited"> </span>
 <a id="L399"></a><span class="some-visited"> </span>
-<a id="L400"></a><span class="unvisited"> </span>
+<a id="L400"></a><span class="visited"> </span>
 <a id="L401"></a><span > </span>
 <a id="L402"></a><span > </span>
 <a id="L403"></a><span class="visited"> </span>
@@ -1856,9 +1855,9 @@ module WQ = struct
     (* Format.pp_std "TAKE COUNT %i@." q.producers; *)
     let r =
       try
-        while Queue.is_empt<span data-count="16">y</span> q.queue do
-          <span data-count="12">i</span>f q.producers = <span data-count="12">0</span> || q.faile<span data-count="0">d</span> then <span data-count="12">r</span>aise Exit;
-          <span data-count="0">C</span>ondition.wai<span data-count="0">t</span> q.cond q.mutex
+        while Queue.is_empt<span data-count="19">y</span> q.queue do
+          <span data-count="15">i</span>f q.producers = <span data-count="12">0</span> || q.faile<span data-count="0">d</span> then <span data-count="12">r</span>aise Exit;
+          <span data-count="3">C</span>ondition.wai<span data-count="3">t</span> q.cond q.mutex
         done;
         let v = Queue.pop q.queue in
         <span data-count="4">q</span>.producers &lt;- q.producers + 1;
@@ -1927,7 +1926,7 @@ module WQ = struct
     | <span data-count="12">(</span>) -&gt;
       Mutex.lock q.mutex;
       <span data-count="12">q</span>.producers &lt;- q.producers - 1;
-      if q.producers = 0 then <span data-count="12">C</span>ondition.broadcas<span data-count="12">t</span> q.cond;
+      if q.producers = 0 then <span data-count="9">C</span>ondition.broadcas<span data-count="9">t</span> q.cond;
       <span data-count="12">M</span>utex.unlock q.mutex
     | <span data-count="0">e</span>xception e -&gt;
       let bt = Printexc.get_raw_backtrace () in
