@@ -4,6 +4,7 @@
 void *owi_malloc(void *base, unsigned int size);
 void owi_free(void *);
 
+char owi_i8(void);
 int owi_i32(void);
 long long owi_i64(void);
 float owi_f32(void);
