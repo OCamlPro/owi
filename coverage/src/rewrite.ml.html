@@ -1242,7 +1242,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   (iexpr : text expr) : simplified expr Result.t =
   (* block_ids handling *)
   <span data-count="12415">l</span>et block_id_to_raw (loop_count, block_ids) id =
-    <span data-count="51669">l</span>et* id =
+    <span data-count="51649">l</span>et* id =
       match id with
       | <span data-count="414">T</span>ext id -&gt;
         let pos = ref (-1) in
@@ -1258,11 +1258,11 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
           with <span data-count="410">E</span>xit -&gt; ()
         end;
         if !pos = -1 then <span data-count="4">E</span>rror "unknown label" else <span data-count="410">O</span>k !pos
-      | <span data-count="51255">R</span>aw id -&gt; Ok id
+      | <span data-count="51235">R</span>aw id -&gt; Ok id
     in
     (* this is &gt; and not &gt;= because you can `br 0` without any block to target the function *)
-    <span data-count="51665">i</span>f id &gt; List.lengt<span data-count="51665">h</span> block_ids + loop_count then <span data-count="28">E</span>rror "unknown label"
-    else <span data-count="51637">O</span>k (Raw id)
+    <span data-count="51645">i</span>f id &gt; List.lengt<span data-count="51645">h</span> block_ids + loop_count then <span data-count="28">E</span>rror "unknown label"
+    else <span data-count="51617">O</span>k (Raw id)
   in
 
   let bt_some_to_raw : text block_type -&gt; simplified block_type Result.t =
@@ -1291,7 +1291,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
 
   let bt_to_raw :
     text block_type option -&gt; simplified block_type option Result.t = function
-    | <span data-count="1606">N</span>one -&gt; Ok None
+    | <span data-count="1608">N</span>one -&gt; Ok None
     | <span data-count="2284">S</span>ome bt -&gt;
       let+ raw = bt_some_to_ra<span data-count="2284">w</span> bt in
       <span data-count="2260">S</span>ome raw
@@ -1312,8 +1312,8 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   in
 
   <span data-count="12409">l</span>et find_local = function
-    | <span data-count="7262">R</span>aw i as id -&gt;
-      if i &gt;= after_last_assigned_local then <span data-count="38">E</span>rror "unknown local" else <span data-count="7224">O</span>k id
+    | <span data-count="7265">R</span>aw i as id -&gt;
+      if i &gt;= after_last_assigned_local then <span data-count="38">E</span>rror "unknown local" else <span data-count="7227">O</span>k id
     | <span data-count="3811">T</span>ext name -&gt; (
       match String_map.find_opt name locals with
       | <span data-count="0">N</span>one -&gt; error_s "unknown local %s" name
@@ -1328,15 +1328,15 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   let find_type id = <span data-count="0">f</span>ind "unknown type" modul.typ id in
 
   let rec body (loop_count, block_ids) : text instr -&gt; simplified instr Result.t
-      = <span data-count="58726">f</span>unction
-    | <span data-count="421">B</span>r_table (ids, id) -&gt;
+      = <span data-count="58770">f</span>unction
+    | <span data-count="420">B</span>r_table (ids, id) -&gt;
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
-      <span data-count="421">l</span>et* ids = array_ma<span data-count="421">p</span> block_id_to_raw ids in
-      <span data-count="417">l</span>et* id = block_id_to_ra<span data-count="417">w</span> id in
-      <span data-count="403">o</span>k @@ Br_table (ids, id)
-    | <span data-count="496">B</span>r_if id -&gt;
-      let* id = block_id_to_ra<span data-count="496">w</span> (loop_count, block_ids) id in
-      <span data-count="490">o</span>k @@ Br_if id
+      <span data-count="420">l</span>et* ids = array_ma<span data-count="420">p</span> block_id_to_raw ids in
+      <span data-count="416">l</span>et* id = block_id_to_ra<span data-count="416">w</span> id in
+      <span data-count="402">o</span>k @@ Br_table (ids, id)
+    | <span data-count="500">B</span>r_if id -&gt;
+      let* id = block_id_to_ra<span data-count="500">w</span> (loop_count, block_ids) id in
+      <span data-count="494">o</span>k @@ Br_if id
     | <span data-count="1081">B</span>r id -&gt;
       let* id = block_id_to_ra<span data-count="1081">w</span> (loop_count, block_ids) id in
       <span data-count="1073">o</span>k @@ Br id
@@ -1349,12 +1349,12 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | <span data-count="2894">L</span>ocal_set id -&gt;
       let* id = find_loca<span data-count="2894">l</span> id in
       <span data-count="2882">o</span>k @@ Local_set id
-    | <span data-count="7851">L</span>ocal_get id -&gt;
-      let* id = find_loca<span data-count="7851">l</span> id in
-      <span data-count="7837">o</span>k @@ Local_get id
-    | <span data-count="328">L</span>ocal_tee id -&gt;
-      let* id = find_loca<span data-count="328">l</span> id in
-      <span data-count="316">o</span>k @@ Local_tee id
+    | <span data-count="7855">L</span>ocal_get id -&gt;
+      let* id = find_loca<span data-count="7855">l</span> id in
+      <span data-count="7841">o</span>k @@ Local_get id
+    | <span data-count="327">L</span>ocal_tee id -&gt;
+      let* id = find_loca<span data-count="327">l</span> id in
+      <span data-count="315">o</span>k @@ Local_tee id
     | <span data-count="905">I</span>f_else (id, bt, e1, e2) -&gt;
       let* bt = bt_to_ra<span data-count="905">w</span> bt in
       <span data-count="897">l</span>et block_ids = id :: block_ids in
@@ -1365,10 +1365,10 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       let* bt = bt_to_ra<span data-count="597">w</span> bt in
       <span data-count="589">l</span>et* e = exp<span data-count="589">r</span> e (loop_count + 1, id :: block_ids) in
       <span data-count="589">o</span>k @@ Loop (id, bt, e)
-    | <span data-count="2388">B</span>lock (id, bt, e) -&gt;
-      let* bt = bt_to_ra<span data-count="2388">w</span> bt in
-      <span data-count="2380">l</span>et* e = exp<span data-count="2380">r</span> e (loop_count, id :: block_ids) in
-      <span data-count="2352">o</span>k @@ Block (id, bt, e)
+    | <span data-count="2390">B</span>lock (id, bt, e) -&gt;
+      let* bt = bt_to_ra<span data-count="2390">w</span> bt in
+      <span data-count="2382">l</span>et* e = exp<span data-count="2382">r</span> e (loop_count, id :: block_ids) in
+      <span data-count="2354">o</span>k @@ Block (id, bt, e)
     | <span data-count="640">C</span>all_indirect (tbl_i, bt) -&gt;
       let* tbl_i = find_tabl<span data-count="640">e</span> (Some tbl_i) in
       <span data-count="638">l</span>et* bt = bt_some_to_ra<span data-count="638">w</span> bt in
@@ -1430,16 +1430,16 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       let* id = find_ele<span data-count="28">m</span> (Some id) in
       <span data-count="24">o</span>k @@ Elem_drop id
     (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
-    | <span data-count="290">I</span>_load8 (nn, sx, memarg) -&gt;
-      if List.lengt<span data-count="290">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
-      else <span data-count="288">i</span>f memarg.align &gt;= 1l then
+    | <span data-count="294">I</span>_load8 (nn, sx, memarg) -&gt;
+      if List.lengt<span data-count="294">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
+      else <span data-count="292">i</span>f memarg.align &gt;= 1l then
         <span data-count="16">E</span>rror "alignment must not be larger than natural"
-      else <span data-count="272">O</span>k (I_load8 (nn, sx, memarg))
-    | <span data-count="129">I</span>_store8 (nn, memarg) -&gt;
-      if List.lengt<span data-count="129">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
-      else <span data-count="127">i</span>f memarg.align &gt;= 1l then
+      else <span data-count="276">O</span>k (I_load8 (nn, sx, memarg))
+    | <span data-count="130">I</span>_store8 (nn, memarg) -&gt;
+      if List.lengt<span data-count="130">h</span> modul.mem.values &lt; 1 then <span data-count="2">E</span>rror "unknown memory 0"
+      else <span data-count="128">i</span>f memarg.align &gt;= 1l then
         <span data-count="4">E</span>rror "alignment must not be larger than natural"
-      else <span data-count="123">o</span>k @@ I_store8 (nn, memarg)
+      else <span data-count="124">o</span>k @@ I_store8 (nn, memarg)
     | <span data-count="146">I</span>_load16 (nn, sx, memarg) -&gt;
       if List.lengt<span data-count="146">h</span> modul.mem.values &lt; 1 then <span data-count="0">E</span>rror "unknown memory 0"
       else <span data-count="146">i</span>f memarg.align &gt;= 2l then
@@ -1538,12 +1538,12 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | <span data-count="0">R</span>ef_test (null, ht) -&gt;
       let+ ht = Simplified_types.convert_heap_typ<span data-count="0">e</span> None ht in
       <span data-count="0">R</span>ef_test (null, ht)
-    | ( <span data-count="122">I</span>_unop _ | <span data-count="1387">I</span>_binop _ | <span data-count="337">I</span>_testop _ | <span data-count="533">I</span>_relop _ | <span data-count="334">F</span>_unop _ | <span data-count="360">F</span>_relop _
+    | ( <span data-count="122">I</span>_unop _ | <span data-count="1398">I</span>_binop _ | <span data-count="341">I</span>_testop _ | <span data-count="536">I</span>_relop _ | <span data-count="334">F</span>_unop _ | <span data-count="360">F</span>_relop _
       | <span data-count="39">I</span>32_wrap_i64 | <span data-count="64">F</span>_reinterpret_i _ | <span data-count="178">I</span>_reinterpret_f _ | <span data-count="32">I</span>64_extend_i32 _
       | <span data-count="3">I</span>64_extend32_s | <span data-count="21">F</span>32_demote_f64 | <span data-count="6">I</span>_extend8_s _ | <span data-count="6">I</span>_extend16_s _
       | <span data-count="33">F</span>64_promote_f32 | <span data-count="140">F</span>_convert_i _ | <span data-count="108">I</span>_trunc_f _ | <span data-count="26">I</span>_trunc_sat_f _
-      | <span data-count="23">R</span>ef_is_null | <span data-count="1002">F</span>_binop _ | <span data-count="1792">F</span>32_const _ | <span data-count="1586">F</span>64_const _ | <span data-count="17399">I</span>32_const _
-      | <span data-count="1576">I</span>64_const _ | <span data-count="475">U</span>nreachable | <span data-count="1901">D</span>rop | <span data-count="625">N</span>op | <span data-count="601">R</span>eturn | <span data-count="0">R</span>ef_i31 | <span data-count="0">I</span>31_get_s
+      | <span data-count="23">R</span>ef_is_null | <span data-count="1002">F</span>_binop _ | <span data-count="1792">F</span>32_const _ | <span data-count="1586">F</span>64_const _ | <span data-count="17413">I</span>32_const _
+      | <span data-count="1576">I</span>64_const _ | <span data-count="475">U</span>nreachable | <span data-count="1900">D</span>rop | <span data-count="625">N</span>op | <span data-count="601">R</span>eturn | <span data-count="0">R</span>ef_i31 | <span data-count="0">I</span>31_get_s
       | <span data-count="0">I</span>31_get_u | <span data-count="0">A</span>rray_len | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">E</span>xtern_externalize
       | <span data-count="0">E</span>xtern_internalize | <span data-count="0">R</span>ef_eq ) as i -&gt;
       Ok i
@@ -1553,7 +1553,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       Log.debug2 "TODO (Rewrite.body) %a@\n" pp_instr i;
       <span data-count="0">O</span>k Nop
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
-    <span data-count="17172">l</span>ist_map (fun i -&gt; <span data-count="58726">b</span>ody (loop_count, block_ids) i) e
+    <span data-count="17174">l</span>ist_map (fun i -&gt; <span data-count="58770">b</span>ody (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
 
