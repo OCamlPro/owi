@@ -6,8 +6,7 @@
   c_share
   c_share_site
   check
-  choice_monad
-  choice_monad_intf
+  choice_intf
   cmd_c
   cmd_fmt
   cmd_opt
@@ -16,6 +15,7 @@
   cmd_sym
   compile
   concrete
+  concrete_choice
   concrete_global
   concrete_memory
   concrete_table
@@ -52,6 +52,7 @@
   simplified
   simplified_types
   symbolic
+  symbolic_choice
   symbolic_global
   symbolic_memory
   symbolic_table

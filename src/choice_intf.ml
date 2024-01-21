@@ -16,6 +16,8 @@ module type Base = sig
   val select_i32 : V.int32 -> Int32.t t
 
   val trap : Trap.t -> 'a t
+
+  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 end
 
 module type Complete = sig

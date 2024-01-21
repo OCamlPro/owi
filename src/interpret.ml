@@ -19,9 +19,7 @@ module Make (P : Interpret_functor_intf.P) :
      and type value = P.Value.t = struct
   open P
   open Value
-
-  type value = t
-
+  open Choice
   module Stack = Stack.Make (Value) [@@inlined hint]
 
   module I32 = struct
@@ -83,8 +81,6 @@ module Make (P : Interpret_functor_intf.P) :
     Choice.bind (Choice.select b) (fun b -> Choice.return (b, stack))
 
   let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
-
-  let ( let* ) = Choice.bind
 
   let ( let> ) v f =
     let* v = Choice.select v in
@@ -465,7 +461,7 @@ module Make (P : Interpret_functor_intf.P) :
         Stack.push_f64 stack n
     end
 
-  let init_local (_id, t) : value =
+  let init_local (_id, t) : Value.t =
     match t with
     | Num_type I32 -> I32 I32.zero
     | Num_type I64 -> I64 I64.zero
@@ -548,7 +544,7 @@ module Make (P : Interpret_functor_intf.P) :
   module State = struct
     type stack = Stack.t
 
-    type value = t
+    type value = Value.t
 
     module Locals : sig
       type t = value array
@@ -563,15 +559,13 @@ module Make (P : Interpret_functor_intf.P) :
 
       let of_list = Array.of_list
 
-      let get t i = t.(i)
+      let get t i = Array.unsafe_get t i
 
       let set t i v =
         let locals = Array.copy t in
-        locals.(i) <- v;
+        Array.unsafe_set locals i v;
         locals
     end
-
-    type locals = Locals.t
 
     type pc = simplified instr list
 
@@ -596,7 +590,7 @@ module Make (P : Interpret_functor_intf.P) :
     type exec_state =
       { return_state : exec_state option
       ; stack : stack
-      ; locals : locals
+      ; locals : Locals.t
       ; pc : pc
       ; block_stack : block_stack
       ; func_rt : simplified result_type
@@ -1562,6 +1556,8 @@ module Make (P : Interpret_functor_intf.P) :
     with
     | Trap msg -> Choice.return (Error msg)
     | Stack_overflow -> Choice.return (Error "call stack exhausted")
+
+  type value = Value.t
 end
 
 module Concrete = Make (Concrete.P) [@@inlined hint]
