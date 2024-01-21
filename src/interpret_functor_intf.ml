@@ -75,7 +75,7 @@ module type P = sig
        and type float32 = float32
        and type float64 = float64
 
-  module Choice : Choice_monad_intf.Base with module V := Value
+  module Choice : Choice_intf.Base with module V := Value
 
   val select : vbool -> if_true:Value.t -> if_false:Value.t -> Value.t Choice.t
 

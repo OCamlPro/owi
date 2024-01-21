@@ -285,7 +285,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
         let model = get_model solver pc in
         let result =
           match result with
-          | Choice_monad_intf.EVal (Ok ()) -> None
+          | Choice_intf.EVal (Ok ()) -> None
           | EAssert assertion ->
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
             Format.pp_std "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;

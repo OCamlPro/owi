@@ -37,25 +37,10 @@ module P = struct
 
   type env = extern_func Link_env.t
 
-  module Choice = struct
-    type 'a t = 'a
+  module Choice = Concrete_choice
 
-    let return x = x [@@inline]
-
-    let bind x f = f x [@@inline]
-
-    let select b = b [@@inline]
-
-    let select_i32 i = i [@@inline]
-
-    let get = ()
-
-    let trap msg = raise (Types.Trap msg)
-
-    let trap : Trap.t -> 'a t = fun tr -> trap (Trap.to_string tr)
-  end
-
-  let select cond ~if_true ~if_false = if cond then if_true else if_false
+  let select cond ~if_true ~if_false =
+    if cond then Choice.return if_true else Choice.return if_false
   [@@inline]
 
   module Elem = struct
