@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_sym.ml &mdash; Coverage report</title>
-    <meta name="description" content="63.64% coverage in src/cmd_sym.ml">
+    <meta name="description" content="65.24% coverage in src/cmd_sym.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>cmd_sym.ml
         </a>
       </h1>
-      <h2>63.64%</h2>
+      <h2>65.24%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:4.27%"></span>
@@ -61,11 +61,9 @@
       <span class="unvisited" style="bottom:13.41%"></span>
       <span class="unvisited" style="bottom:9.45%"></span>
       <span class="unvisited" style="bottom:8.84%"></span>
-      <span class="unvisited" style="bottom:7.62%"></span>
       <span class="unvisited" style="bottom:4.57%"></span>
       <span class="unvisited" style="bottom:4.27%"></span>
       <span class="unvisited" style="bottom:3.96%"></span>
-      <span class="unvisited" style="bottom:3.05%"></span>
       <span class="unvisited" style="bottom:1.52%"></span>
       <span class="unvisited" style="bottom:0.91%"></span>
       <span class="unvisited" style="bottom:0.61%"></span>
@@ -376,7 +374,7 @@
 <a id="L300"></a><span > </span>
 <a id="L301"></a><span > </span>
 <a id="L302"></a><span > </span>
-<a id="L303"></a><span class="unvisited"> </span>
+<a id="L303"></a><span class="visited"> </span>
 <a id="L304"></a><span class="visited"> </span>
 <a id="L305"></a><span class="visited"> </span>
 <a id="L306"></a><span > </span>
@@ -391,7 +389,7 @@
 <a id="L315"></a><span class="unvisited"> </span>
 <a id="L316"></a><span > </span>
 <a id="L317"></a><span class="visited"> </span>
-<a id="L318"></a><span class="unvisited"> </span>
+<a id="L318"></a><span class="visited"> </span>
 <a id="L319"></a><span class="visited"> </span>
 <a id="L320"></a><span > </span>
 <a id="L321"></a><span > </span>
@@ -785,7 +783,7 @@ let names = [| "plop"; "foo"; "bar" |]
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
-  <span data-count="51">l</span>et mk_symbol = Encoding.Symbol.mk_symbol in
+  <span data-count="53">l</span>et mk_symbol = Encoding.Symbol.mk_symbol in
   let symbolic_i32 (i : Value.int32) : Value.int32 Choice.t =
     <span data-count="1">l</span>et name =
       match i.e with
@@ -801,11 +799,11 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
     <span data-count="1">C</span>hoice.return r
   in
   let symbol ty () : Value.int32 Choice.t =
-    <span data-count="2">l</span>et id = Atomic.fetch_and_add sym_cnt 1 in
-    <span data-count="2">l</span>et r = Expr.mk_symbol @@ mk_symbo<span data-count="2">l</span> ty (Format.sprint<span data-count="2">f</span> "symbol_%i" id) in
-    <span data-count="2">m</span>atch ty with
+    <span data-count="30">l</span>et id = Atomic.fetch_and_add sym_cnt 1 in
+    <span data-count="30">l</span>et r = Expr.mk_symbol @@ mk_symbo<span data-count="30">l</span> ty (Format.sprint<span data-count="30">f</span> "symbol_%i" id) in
+    <span data-count="30">m</span>atch ty with
     | <span data-count="0">T</span>y_bitv S8 -&gt; Choice.return @@ Expr.(Cvtop (ExtU 24, r) @<span data-count="0">:</span> Ty_bitv S32)
-    | <span data-count="2">_</span> -&gt; Choice.return r
+    | <span data-count="30">_</span> -&gt; Choice.return r
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     <span data-count="3">l</span>et c = Value.I32.to_bool i in
@@ -822,19 +820,19 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
           (Func (Arg (I32, Res), R1 I32), symbolic_i32) )
     ; ( "i8_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbo<span data-count="51">l</span> (Ty_bitv S8)) )
+          (Func (UArg Res, R1 I32), symbo<span data-count="53">l</span> (Ty_bitv S8)) )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbo<span data-count="51">l</span> (Ty_bitv S32)) )
+          (Func (UArg Res, R1 I32), symbo<span data-count="53">l</span> (Ty_bitv S32)) )
     ; ( "i64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I64), symbo<span data-count="51">l</span> (Ty_bitv S64)) )
+          (Func (UArg Res, R1 I64), symbo<span data-count="53">l</span> (Ty_bitv S64)) )
     ; ( "f32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F32), symbo<span data-count="51">l</span> (Ty_fp S32)) )
+          (Func (UArg Res, R1 F32), symbo<span data-count="53">l</span> (Ty_fp S32)) )
     ; ( "f64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F64), symbo<span data-count="51">l</span> (Ty_fp S64)) )
+          (Func (UArg Res, R1 F64), symbo<span data-count="53">l</span> (Ty_fp S64)) )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
@@ -899,130 +897,130 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
 
 let ( let*/ ) (t : 'a Result.t) (f : 'a -&gt; 'b Result.t Choice.t) :
   'b Result.t Choice.t =
-  <span data-count="6">m</span>atch t with <span data-count="0">E</span>rror e -&gt; Choice.return (Error e) | <span data-count="6">O</span>k x -&gt; f x
+  <span data-count="8">m</span>atch t with <span data-count="0">E</span>rror e -&gt; Choice.return (Error e) | <span data-count="8">O</span>k x -&gt; f x
 
 let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
   file =
-  <span data-count="3">l</span>et link_state = Link.empty_state in
+  <span data-count="4">l</span>et link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"print"
       ~func_typ:Symbolic.P.Extern_func.extern_type print_extern_module
   in
-  <span data-count="3">l</span>et link_state =
+  <span data-count="4">l</span>et link_state =
     Link.extern_module' link_state ~name:"assert"
       ~func_typ:Symbolic.P.Extern_func.extern_type assert_extern_module
   in
-  <span data-count="3">l</span>et link_state =
+  <span data-count="4">l</span>et link_state =
     Link.extern_module' link_state ~name:"symbolic"
       ~func_typ:Symbolic.P.Extern_func.extern_type symbolic_extern_module
   in
-  <span data-count="3">l</span>et link_state =
+  <span data-count="4">l</span>et link_state =
     Link.extern_module' link_state ~name:"summaries"
       ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
   in
-  <span data-count="3">l</span>et*/ to_run, link_state =
-    list_fold_lef<span data-count="3">t</span>
+  <span data-count="4">l</span>et*/ to_run, link_state =
+    list_fold_lef<span data-count="4">t</span>
       (fun ((to_run, state) as acc) instruction -&gt;
-        <span data-count="3">m</span>atch instruction with
-        | <span data-count="3">T</span>ext.Module m -&gt;
+        <span data-count="4">m</span>atch instruction with
+        | <span data-count="4">T</span>ext.Module m -&gt;
           let has_start =
-            List.exists (function <span data-count="1">T</span>ext.MStart _ -&gt; true | <span data-count="32">_</span> -&gt; false) m.fields
+            List.exists (function <span data-count="1">T</span>ext.MStart _ -&gt; true | <span data-count="47">_</span> -&gt; false) m.fields
           in
-          <span data-count="3">l</span>et has_start_id_function =
+          <span data-count="4">l</span>et has_start_id_function =
             List.exists
               (function
-                | <span data-count="2">T</span>ext.MFunc { id = Some "_start"; _ } -&gt; true | <span data-count="21">_</span> -&gt; false )
+                | <span data-count="3">T</span>ext.MFunc { id = Some "_start"; _ } -&gt; true | <span data-count="29">_</span> -&gt; false )
               m.fields
           in
-          <span data-count="3">l</span>et fields =
+          <span data-count="4">l</span>et fields =
             if has_star<span data-count="1">t</span> || not has_start_id_functio<span data-count="0">n</span> then <span data-count="1">m</span>.fields
-            else <span data-count="2">M</span>Start (Text "_start") :: m.fields
+            else <span data-count="3">M</span>Start (Text "_start") :: m.fields
           in
           let m = { m with fields } in
           let* m, state =
-            Compile.until_lin<span data-count="3">k</span> ~unsafe state ~optimize ~name:None m
+            Compile.until_lin<span data-count="4">k</span> ~unsafe state ~optimize ~name:None m
           in
-          <span data-count="3">l</span>et m = Symbolic.convert_module_to_run m in
-          <span data-count="3">O</span>k (m :: to_run, state)
+          <span data-count="4">l</span>et m = Symbolic.convert_module_to_run m in
+          <span data-count="4">O</span>k (m :: to_run, state)
         | <span data-count="0">T</span>ext.Register (name, id) -&gt;
           let* state = Link.register_modul<span data-count="0">e</span> state ~name ~id in
           <span data-count="0">O</span>k (to_run, state)
         | <span data-count="0">_</span> -&gt; Ok acc )
       ([], link_state) file
   in
-  <span data-count="3">l</span>et f (pc : (unit, _) result Choice.t) to_run =
-    <span data-count="3">l</span>et c = (Interpret.Symbolic.modu<span data-count="3">l</span> link_state.envs) to_run in
-    <span data-count="3">l</span>et results =
+  <span data-count="4">l</span>et f (pc : (unit, _) result Choice.t) to_run =
+    <span data-count="4">l</span>et c = (Interpret.Symbolic.modu<span data-count="4">l</span> link_state.envs) to_run in
+    <span data-count="4">l</span>et results =
       Choice.bind pc (fun r -&gt;
-          <span data-count="3">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="3">O</span>k () -&gt; c )
+          <span data-count="4">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="4">O</span>k () -&gt; c )
     in
-    <span data-count="3">r</span>esults
+    <span data-count="4">r</span>esults
   in
-  List.fold_left f pc (List.re<span data-count="3">v</span> to_run)
+  List.fold_left f pc (List.re<span data-count="4">v</span> to_run)
 
 let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
-  <span data-count="3">i</span>f not @@ Sys.file_exist<span data-count="3">s</span> filename then
+  <span data-count="4">i</span>f not @@ Sys.file_exist<span data-count="4">s</span> filename then
     <span data-count="0">C</span>hoice.return (error_<span data-count="0">s</span> "file `%s` doesn't exist" filename)
   else
-    <span data-count="3">l</span>et*/ script = Parse.Script.from_file ~filename in
-    <span data-count="3">s</span>implify_then_link_then_run ~unsafe ~optimize pc script
+    <span data-count="4">l</span>et*/ script = Parse.Script.from_file ~filename in
+    <span data-count="4">s</span>implify_then_link_then_run ~unsafe ~optimize pc script
 
 let get_model solver pc =
-  <span data-count="4">a</span>ssert <span data-count="4">(</span>Solver.chec<span data-count="4">k</span> solver pc);
-  match Solver.model solver with None -&gt; assert false | <span data-count="4">S</span>ome model -&gt; model
+  <span data-count="259">a</span>ssert <span data-count="259">(</span>Solver.chec<span data-count="259">k</span> solver pc);
+  match Solver.model solver with None -&gt; assert false | <span data-count="259">S</span>ome model -&gt; model
 
 let mkdir_p_exn dir =
-  <span data-count="3">l</span>et rec get_intermediate_dirs d acc =
-    <span data-count="4">i</span>f Sys.file_exists d then <span data-count="3">a</span>cc
+  <span data-count="4">l</span>et rec get_intermediate_dirs d acc =
+    <span data-count="5">i</span>f Sys.file_exists d then <span data-count="4">a</span>cc
     else <span data-count="1">g</span>et_intermediate_dirs (Filename.dirnam<span data-count="1">e</span> d) (d :: acc)
   in
   let intermediate_dirs = get_intermediate_dirs dir [] in
-  <span data-count="3">L</span>ist.iter (fun d -&gt; <span data-count="1">S</span>ys.mkdir d 0o755) intermediate_dirs
+  <span data-count="4">L</span>ist.iter (fun d -&gt; <span data-count="1">S</span>ys.mkdir d 0o755) intermediate_dirs
 
 let out_testcase ~dst ~err testcase =
-  <span data-count="4">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="4">l</span>et tag ?(atts = <span data-count="5">[</span>]) name = <span data-count="8">(</span>("", name), atts) in
-  let atts = if err then <span data-count="3">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1">N</span>one in
-  let to_string v = <span data-count="4">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
-  let input v = <span data-count="4">`</span>El (ta<span data-count="4">g</span> "input", [ `Data (to_strin<span data-count="4">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="4">g</span> ?atts "testcase", List.ma<span data-count="4">p</span> input testcase) in
+  <span data-count="259">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="259">l</span>et tag ?(atts = <span data-count="771">[</span>]) name = <span data-count="774">(</span>("", name), atts) in
+  let atts = if err then <span data-count="3">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="256">N</span>one in
+  let to_string v = <span data-count="515">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
+  let input v = <span data-count="515">`</span>El (ta<span data-count="515">g</span> "input", [ `Data (to_strin<span data-count="515">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="259">g</span> ?atts "testcase", List.ma<span data-count="259">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="4">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="259">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir ~err testcase -&gt;
-    <span data-count="4">i</span>ncr cnt;
-    <span data-count="4">l</span>et name = Format.sprintf "testcase-%d.xml" !cnt in
-    <span data-count="4">l</span>et path = Filename.concat dir name in
-    <span data-count="4">l</span>et out_chan = open_out path in
-    <span data-count="4">F</span>un.protect
-      ~finally:(fun () -&gt; <span data-count="4">c</span>lose_out out_chan)
-      (fun () -&gt; <span data-count="4">o</span>ut_testcase ~dst:(`Channel out_chan) ~err testcase)
+    <span data-count="259">i</span>ncr cnt;
+    <span data-count="259">l</span>et name = Format.sprintf "testcase-%d.xml" !cnt in
+    <span data-count="259">l</span>et path = Filename.concat dir name in
+    <span data-count="259">l</span>et out_chan = open_out path in
+    <span data-count="259">F</span>un.protect
+      ~finally:(fun () -&gt; <span data-count="259">c</span>lose_out out_chan)
+      (fun () -&gt; <span data-count="259">o</span>ut_testcase ~dst:(`Channel out_chan) ~err testcase)
 
 let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   files =
-  <span data-count="3">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="3">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
-  <span data-count="3">m</span>kdir_p_exn workspace;
-  <span data-count="3">l</span>et pc = Choice.return (Ok ()) in
-  <span data-count="3">l</span>et solver = Solver.create () in
-  <span data-count="3">l</span>et result = List.fold_left (run_file ~unsafe ~optimize) pc files in
-  <span data-count="3">l</span>et thread : Thread.t = Thread.creat<span data-count="3">e</span> () in
+  <span data-count="4">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="4">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
+  <span data-count="4">m</span>kdir_p_exn workspace;
+  <span data-count="4">l</span>et pc = Choice.return (Ok ()) in
+  <span data-count="4">l</span>et solver = Solver.create () in
+  <span data-count="4">l</span>et result = List.fold_left (run_file ~unsafe ~optimize) pc files in
+  <span data-count="4">l</span>et thread : Thread.t = Thread.creat<span data-count="4">e</span> () in
   let results = Choice.run_and_trap ~workers result thread in
-  <span data-count="3">l</span>et failing =
+  <span data-count="4">l</span>et failing =
     Seq.filter_map
       (fun (result, thread) -&gt;
-        <span data-count="4">l</span>et pc = Thread.pc thread in
-        <span data-count="4">i</span>f print_path_condition then
+        <span data-count="259">l</span>et pc = Thread.pc thread in
+        <span data-count="259">i</span>f print_path_condition then
           <span data-count="0">F</span>ormat.pp_st<span data-count="0">d</span> "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
-        <span data-count="4">l</span>et model = get_model solver pc in
-        <span data-count="4">l</span>et result =
+        <span data-count="259">l</span>et model = get_model solver pc in
+        <span data-count="259">l</span>et result =
           match result with
-          | <span data-count="1">C</span>hoice_intf.EVal (Ok ()) -&gt; None
+          | <span data-count="256">C</span>hoice_intf.EVal (Ok ()) -&gt; None
           | <span data-count="2">E</span>Assert assertion -&gt;
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
             <span data-count="2">F</span>ormat.pp_std "Model:@\n  @[&lt;v&gt;%a@]@\n" Encoding.Model.pp model;
@@ -1037,22 +1035,22 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
         in
         let testcase =
           List.sort
-            (fun (x1, _) (x2, _) -&gt; <span data-count="0">c</span>ompare x1 x2)
-            (Encoding.Model.get_binding<span data-count="4">s</span> model)
-          |&gt; <span data-count="4">L</span>ist.map snd
+            (fun (x1, _) (x2, _) -&gt; <span data-count="256">c</span>ompare x1 x2)
+            (Encoding.Model.get_binding<span data-count="259">s</span> model)
+          |&gt; <span data-count="259">L</span>ist.map snd
         in
-        <span data-count="4">w</span>rite_testcase ~dir:workspace ~err:(Option.is_som<span data-count="4">e</span> result) testcase;
-        <span data-count="4">r</span>esult )
+        <span data-count="259">w</span>rite_testcase ~dir:workspace ~err:(Option.is_som<span data-count="259">e</span> result) testcase;
+        <span data-count="259">r</span>esult )
       results
   in
-  <span data-count="3">l</span>et () =
+  <span data-count="4">l</span>et () =
     if no_stop_at_failure then
       <span data-count="0">l</span>et failures = Seq.fold_left (fun n _ -&gt; <span data-count="0">s</span>ucc n) 0 failing in
       <span data-count="0">i</span>f failures = 0 then <span data-count="0">F</span>ormat.pp_st<span data-count="0">d</span> "All OK@\n"
       else <span data-count="0">F</span>ormat.pp_er<span data-count="0">r</span> "Reached %i problems!@\n" failures
     else
-      <span data-count="3">m</span>atch failing () with
-      | <span data-count="0">N</span>il -&gt; Format.pp_st<span data-count="0">d</span> "All OK@\n"
+      <span data-count="4">m</span>atch failing () with
+      | <span data-count="1">N</span>il -&gt; Format.pp_st<span data-count="1">d</span> "All OK@\n"
       | <span data-count="3">C</span>ons (_thread, _) -&gt; Format.pp_er<span data-count="3">r</span> "Reached problem!@\n"
   in
   let time = !Thread.Solver.solver_time in
