@@ -129,21 +129,18 @@ int main (void) {
     old_x = x;
     old_y = y;
 
-    switch (program[i]) {
-      case 'w':
-        y--;
-        break;
-      case 's':
-        y++;
-        break;
-      case 'a':
-        x--;
-        break;
-      case 'd':
-        x++;
-        break;
-      default:
-        return 1;
+    char c = program[i];
+
+    if (c == 'w') {
+      y--;
+    } else if (c == 's') {
+      y++;
+    } else if (c == 'a') {
+      x--;
+    } else if (c == 'd') {
+      x++;
+    } else {
+      return 1;
     }
 
     if (maze[y][x] == '#') {
@@ -168,7 +165,22 @@ int main (void) {
 
 ```sh
 $ dune exec owi -- c ./maze.c
-All OK
+Assert failure: false
+Model:
+  (model
+    (symbol_6 i32 (i32 100))
+    (symbol_0 i32 (i32 115))
+    (symbol_10 i32 (i32 100))
+    (symbol_8 i32 (i32 115))
+    (symbol_9 i32 (i32 100))
+    (symbol_2 i32 (i32 100))
+    (symbol_1 i32 (i32 100))
+    (symbol_7 i32 (i32 100))
+    (symbol_3 i32 (i32 119))
+    (symbol_4 i32 (i32 100))
+    (symbol_5 i32 (i32 100))
+    (symbol_11 i32 (i32 119)))
+Reached problem!
 ```
 
 ## Man page
