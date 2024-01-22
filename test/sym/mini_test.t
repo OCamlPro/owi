@@ -3,5 +3,5 @@ mini test:
   Trap: unreachable
   Model:
     (model
-      (symbol_0 i32 (i32 6)))
+      (symbol_0 (i32 6)))
   Reached problem!
