@@ -10,6 +10,7 @@
   binop_f32.wat
   binop_f64.wat
   global.wat
+  grow.wat
   memory.wat
   table.wat
   unop_i32.wat

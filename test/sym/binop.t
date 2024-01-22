@@ -65,7 +65,7 @@ binop i32 (2):
   Trap: unreachable
   Model:
     (model
-      (symbol_0 i32 (i32 -2147483618))
+      (symbol_0 i32 (i32 1073741855))
       (symbol_2 i32 (i32 0))
       (symbol_1 i32 (i32 0))
       (symbol_3 i32 (i32 -2147483648)))
