@@ -1,8 +1,6 @@
-(test
- (name main)
- (modules main)
- (deps
-  (source_tree reference)
-  (source_tree passing)
-  (source_tree gc))
- (libraries bos owi))
+(cram
+  (deps
+    %{bin:owi}
+    (source_tree reference)
+    (source_tree passing)
+    (source_tree gc)))
