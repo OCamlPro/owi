@@ -610,7 +610,7 @@ module Intf = Interpret_functor_intf
 module Value = Symbolic_value.S
 
 (* TODO: use Syntax module *)
-let ( let+ ) v f = <span data-count="4100">S</span>tdlib.Result.map f v
+let ( let+ ) v f = <span data-count="4491">S</span>tdlib.Result.map f v
 
 module M = struct
   module Expr = Encoding.Expr
@@ -647,7 +647,7 @@ module M = struct
     <span data-count="0">l</span>et old_size = m.size * page_size in
     m.size &lt;- ma<span data-count="0">x</span> m.size ((old_size + delta) / page_size)
 
-  let size { size; _ } = <span data-count="4103">V</span>alue.const_i32 @@ Int32.of_in<span data-count="4103">t</span> (size * page_size)
+  let size { size; _ } = <span data-count="4490">V</span>alue.const_i32 @@ Int32.of_in<span data-count="4490">t</span> (size * page_size)
 
   let size_in_pages { size; _ } = <span data-count="0">V</span>alue.const_i32 @@ Int32.of_in<span data-count="0">t</span> @@ size
 
@@ -675,10 +675,10 @@ module M = struct
     end
 
   let clone m =
-    <span data-count="484">{</span> data = Hashtbl.creat<span data-count="484">e</span> 16
+    <span data-count="522">{</span> data = Hashtbl.creat<span data-count="522">e</span> 16
     ; parent = Some m
     ; size = m.size
-    ; chunks = Hashtbl.cop<span data-count="484">y</span> m.chunks (* TODO: we can make this lazy as well *)
+    ; chunks = Hashtbl.cop<span data-count="522">y</span> m.chunks (* TODO: we can make this lazy as well *)
     }
 
   let rec load_byte_opt a m =
@@ -687,11 +687,11 @@ module M = struct
     | <span data-count="0">N</span>one -&gt; Option.bind m.parent (load_byte_op<span data-count="0">t</span> a)
 
   let rec load_byte { parent; data; _ } a =
-    <span data-count="48556">t</span>ry Hashtbl.fin<span data-count="10501">d</span> data a
-    with <span data-count="38074">N</span>ot_found -&gt; (
+    <span data-count="54395">t</span>ry Hashtbl.fin<span data-count="11522">d</span> data a
+    with <span data-count="42876">N</span>ot_found -&gt; (
       match parent with
       | <span data-count="0">N</span>one -&gt; Val (Num (I8 0)) @: Ty_bitv S8
-      | <span data-count="38067">S</span>ome parent -&gt; load_byte parent a )
+      | <span data-count="42876">S</span>ome parent -&gt; load_byte parent a )
 
   let merge_extracts (e1, h, m1) (e2, m2, l) =
     <span data-count="63">i</span>f m1 &lt;&gt; m2 &amp;&amp; <span data-count="0">n</span>ot (Expr.equa<span data-count="0">l</span> e1 e2) then
@@ -702,14 +702,14 @@ module M = struct
     else <span data-count="42">E</span>xtract (e1, h, l) @: e1.ty
 
   let concat ~msb ~lsb offset =
-    <span data-count="7261">a</span>ssert <span data-count="7260">(</span>offset &gt; 0 &amp;&amp; <span data-count="7261">o</span>ffset &lt;= 8);
+    <span data-count="7968">a</span>ssert <span data-count="7968">(</span>offset &gt; 0 &amp;&amp; <span data-count="7968">o</span>ffset &lt;= 8);
     match (msb.e, lsb.e) with
-    | <span data-count="2399">V</span>al (Num (I8 i1)), Val (Num (I8 i2)) -&gt;
-      Value.const_i32 Int32.(logo<span data-count="2400">r</span> (sh<span data-count="2400">l</span> (of_in<span data-count="2399">t</span> i1) 8l) (of_in<span data-count="2399">t</span> i2))
-    | <span data-count="4800">V</span>al (Num (I8 i1)), Val (Num (I32 i2)) -&gt;
+    | <span data-count="2635">V</span>al (Num (I8 i1)), Val (Num (I8 i2)) -&gt;
+      Value.const_i32 Int32.(logo<span data-count="2635">r</span> (sh<span data-count="2635">l</span> (of_in<span data-count="2635">t</span> i1) 8l) (of_in<span data-count="2635">t</span> i2))
+    | <span data-count="5270">V</span>al (Num (I8 i1)), Val (Num (I32 i2)) -&gt;
       let offset = offset * 8 in
       if offset &lt; 32 then
-        <span data-count="4800">V</span>alue.const_i32 Int32.(logo<span data-count="4799">r</span> (sh<span data-count="4798">l</span> (of_in<span data-count="4799">t</span> i1) (of_in<span data-count="4800">t</span> offset)) i2)
+        <span data-count="5270">V</span>alue.const_i32 Int32.(logo<span data-count="5270">r</span> (sh<span data-count="5270">l</span> (of_in<span data-count="5270">t</span> i1) (of_in<span data-count="5270">t</span> offset)) i2)
       else
         <span data-count="0">l</span>et i1' = Int64.of_int i1 in
         <span data-count="0">l</span>et i2' = Int64.of_int32 i2 in
@@ -727,22 +727,22 @@ module M = struct
       Concat (msb, lsb) @: ty
 
   let loadn m a n : int32 =
-    <span data-count="3240">l</span>et rec loop addr size i acc =
-      <span data-count="10502">i</span>f i = size then <span data-count="3240">a</span>cc
+    <span data-count="3554">l</span>et rec loop addr size i acc =
+      <span data-count="11522">i</span>f i = size then <span data-count="3554">a</span>cc
       else
-        <span data-count="7260">l</span>et addr' = Int32.(ad<span data-count="7260">d</span> addr (of_in<span data-count="7262">t</span> i)) in
+        <span data-count="7968">l</span>et addr' = Int32.(ad<span data-count="7968">d</span> addr (of_in<span data-count="7968">t</span> i)) in
         let byte = load_byte m addr' in
-        <span data-count="7261">l</span>oop addr size (i + 1) (conca<span data-count="7263">t</span> i ~msb:byte ~lsb:acc)
+        <span data-count="7968">l</span>oop addr size (i + 1) (conca<span data-count="7968">t</span> i ~msb:byte ~lsb:acc)
     in
     let v0 = load_byte m a in
-    <span data-count="3240">l</span>oop a n 1 v0
+    <span data-count="3554">l</span>oop a n 1 v0
 
   (* TODO: *)
   (* 1. Let pointers have symbolic offsets *)
   (* 2. Let addresses have symbolic values *)
   let calculate_address m (a : int32) : (Int32.t, Trap.t) Stdlib.Result.t =
-    <span data-count="4103">m</span>atch a.e with
-    | <span data-count="4101">V</span>al (Num (I32 i)) -&gt; Ok i
+    <span data-count="4491">m</span>atch a.e with
+    | <span data-count="4491">V</span>al (Num (I32 i)) -&gt; Ok i
     | <span data-count="0">P</span>tr (base, offset) -&gt; (
       match Hashtbl.find m.chunks base with
       | <span data-count="0">e</span>xception Not_found -&gt; Error Trap.Memory_leak_use_after_free
@@ -761,11 +761,11 @@ module M = struct
     | <span data-count="0">_</span> -&gt; Cvtop (ExtS 24, v) @: Ty_bitv S32
 
   let load_8_u m a =
-    <span data-count="818">l</span>et+ a = calculate_addres<span data-count="818">s</span> m a in
-    <span data-count="819">l</span>et v = loadn m a 1 in
-    <span data-count="819">m</span>atch v.e with
-    | <span data-count="511">V</span>al (Num (I8 i)) -&gt; Value.const_i32 (Int32.of_in<span data-count="511">t</span> i)
-    | <span data-count="308">_</span> -&gt; Cvtop (ExtU 24, v) @: Ty_bitv S32
+    <span data-count="898">l</span>et+ a = calculate_addres<span data-count="898">s</span> m a in
+    <span data-count="898">l</span>et v = loadn m a 1 in
+    <span data-count="898">m</span>atch v.e with
+    | <span data-count="566">V</span>al (Num (I8 i)) -&gt; Value.const_i32 (Int32.of_in<span data-count="566">t</span> i)
+    | <span data-count="332">_</span> -&gt; Cvtop (ExtU 24, v) @: Ty_bitv S32
 
   let load_16_s m a =
     <span data-count="0">l</span>et+ a = calculate_addres<span data-count="0">s</span> m a in
@@ -782,17 +782,17 @@ module M = struct
     | <span data-count="0">_</span> -&gt; Cvtop (ExtU 16, v) @: Ty_bitv S32
 
   let load_32 m a =
-    <span data-count="2421">l</span>et+ a = calculate_addres<span data-count="2420">s</span> m a in
-    <span data-count="2421">l</span>oadn m a 4
+    <span data-count="2656">l</span>et+ a = calculate_addres<span data-count="2656">s</span> m a in
+    <span data-count="2656">l</span>oadn m a 4
 
   let load_64 m a =
     <span data-count="0">l</span>et+ a = calculate_addres<span data-count="0">s</span> m a in
     <span data-count="0">l</span>oadn m a 8
 
   let extract v pos =
-    <span data-count="2987">m</span>atch v.e with
-    | <span data-count="2864">V</span>al (Num (I32 i)) -&gt;
-      let i' = Int32.(to_in<span data-count="2864">t</span> @@ logand 0xff<span data-count="2864">l</span> @@ shr_s <span data-count="2864">i</span> @@ of_in<span data-count="2862">t</span> (pos * 8)) in
+    <span data-count="3256">m</span>atch v.e with
+    | <span data-count="3128">V</span>al (Num (I32 i)) -&gt;
+      let i' = Int32.(to_in<span data-count="3128">t</span> @@ logand 0xff<span data-count="3128">l</span> @@ shr_s <span data-count="3128">i</span> @@ of_in<span data-count="3128">t</span> (pos * 8)) in
       Val (Num (I8 i')) @: Ty_bitv S8
     | <span data-count="0">V</span>al (Num (I64 i)) -&gt;
       let i' = Int64.(to_in<span data-count="0">t</span> @@ logand 0xff<span data-count="0">L</span> @@ shr_s <span data-count="0">i</span> @@ of_in<span data-count="0">t</span> (pos * 8)) in
@@ -800,21 +800,21 @@ module M = struct
     | <span data-count="0">C</span>vtop (ExtU 24, ({ e = Symbol _; ty = Ty_bitv S8 } as sym))
     | <span data-count="0">C</span>vtop (ExtS 24, ({ e = Symbol _; ty = Ty_bitv S8 } as sym)) -&gt;
       sym
-    | <span data-count="123">_</span> -&gt; Extract (v, pos + 1, pos) @: Ty_bitv S8
+    | <span data-count="128">_</span> -&gt; Extract (v, pos + 1, pos) @: Ty_bitv S8
 
   let storen m ~addr v n =
-    <span data-count="863">l</span>et+ a0 = calculate_addres<span data-count="863">s</span> m addr in
-    <span data-count="863">f</span>or i = 0 to n - 1 do
-      <span data-count="2987">l</span>et addr' = Int32.add a0 (Int32.of_in<span data-count="2985">t</span> i) in
-      <span data-count="2985">l</span>et v' = extract v i in
-      <span data-count="2986">H</span>ashtbl.replac<span data-count="2985">e</span> m.data addr' v'
+    <span data-count="937">l</span>et+ a0 = calculate_addres<span data-count="937">s</span> m addr in
+    <span data-count="937">f</span>or i = 0 to n - 1 do
+      <span data-count="3256">l</span>et addr' = Int32.add a0 (Int32.of_in<span data-count="3256">t</span> i) in
+      <span data-count="3256">l</span>et v' = extract v i in
+      <span data-count="3256">H</span>ashtbl.replac<span data-count="3256">e</span> m.data addr' v'
     done
 
-  let store_8 m ~addr v = <span data-count="154">s</span>toren m ~addr v 1
+  let store_8 m ~addr v = <span data-count="164">s</span>toren m ~addr v 1
 
   let store_16 m ~addr v = <span data-count="0">s</span>toren m ~addr v 2
 
-  let store_32 m ~addr v = <span data-count="709">s</span>toren m ~addr v 4
+  let store_32 m ~addr v = <span data-count="773">s</span>toren m ~addr v 4
 
   let store_64 m ~addr v = <span data-count="0">s</span>toren m ~addr v 8
 
@@ -824,7 +824,7 @@ end
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="4591">x</span>
+  let hash x = <span data-count="5016">x</span>
 end)
 
 type memories = M.t ITbl.t Env_id.Tbl.t
@@ -832,12 +832,12 @@ type memories = M.t ITbl.t Env_id.Tbl.t
 let init () = <span data-count="4">E</span>nv_id.Tbl.create 0
 
 let clone (memories : memories) : memories =
-  <span data-count="486">l</span>et s = Env_id.Tbl.to_seq memories in
-  <span data-count="486">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="486">p</span>
+  <span data-count="524">l</span>et s = Env_id.Tbl.to_seq memories in
+  <span data-count="524">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="524">p</span>
        (fun (i, t) -&gt;
-         <span data-count="484">l</span>et s = ITbl.to_seq t in
-         <span data-count="484">(</span>i, ITbl.of_se<span data-count="484">q</span> @@ Seq.ma<span data-count="484">p</span> (fun (i, a) -&gt; <span data-count="484">(</span>i, M.clon<span data-count="484">e</span> a)) s) )
+         <span data-count="522">l</span>et s = ITbl.to_seq t in
+         <span data-count="522">(</span>i, ITbl.of_se<span data-count="522">q</span> @@ Seq.ma<span data-count="522">p</span> (fun (i, a) -&gt; <span data-count="522">(</span>i, M.clon<span data-count="522">e</span> a)) s) )
        s
 
 let convert (orig_mem : Concrete_memory.t) : M.t =
@@ -845,8 +845,8 @@ let convert (orig_mem : Concrete_memory.t) : M.t =
   <span data-count="3">M</span>.create s
 
 let get_env env_id memories =
-  <span data-count="4104">m</span>atch Env_id.Tbl.find_opt memories env_id with
-  | <span data-count="4101">S</span>ome env -&gt; env
+  <span data-count="4492">m</span>atch Env_id.Tbl.find_opt memories env_id with
+  | <span data-count="4489">S</span>ome env -&gt; env
   | <span data-count="3">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="3">E</span>nv_id.Tbl.add memories env_id t;
@@ -854,9 +854,9 @@ let get_env env_id memories =
 
 let get_memory env_id (orig_memory : Concrete_memory.t) (memories : memories)
   g_id =
-  <span data-count="4104">l</span>et env = get_env env_id memories in
-  <span data-count="4104">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="4101">S</span>ome t -&gt; t
+  <span data-count="4492">l</span>et env = get_env env_id memories in
+  <span data-count="4492">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="4488">S</span>ome t -&gt; t
   | <span data-count="3">N</span>one -&gt;
     let t = convert orig_memory in
     <span data-count="3">I</span>Tbl.add env g_id t;
