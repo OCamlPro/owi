@@ -28,6 +28,7 @@ depends: [
   "odoc" {with-doc}
   "crunch" {dev}
   "bos"
+  "encoding"
   "mdx" {with-test & >= "2.1"}
   "crowbar" {with-test}
   "graphics" {dev}
@@ -61,6 +62,6 @@ depexts: [
   ["llvm" "wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
-  [ "encoding" "git+https://github.com/formalsec/encoding#ffc569da6bbe60256cdba8dd4d7a59dc2efa1102"]
+  [ "encoding.dev" "git+https://github.com/formalsec/encoding"]
 ]
 
