@@ -30,12 +30,10 @@
     (i32.eqz (i32.shr_u (local.get $z) (local.get $w)))
     (if (then unreachable))
 
-    ;; owi: internal error, uncaught exception:
-    ;;  Failure("z3_mappings: rotl|rotr not implemented!")
-    ;; (i32.eqz (i32.rotl (local.get $z) (local.get $w)))
-    ;; (if (then unreachable))
-    ;; (i32.eqz (i32.rotr (local.get $z) (local.get $w)))
-    ;; (if (then unreachable))
+    (i32.eqz (i32.rotl (local.get $z) (local.get $w)))
+    (if (then unreachable))
+    (i32.eqz (i32.rotr (local.get $z) (local.get $w)))
+    (if (then unreachable))
   )
 
   (start $start)

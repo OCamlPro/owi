@@ -66,7 +66,7 @@ memory stuff:
       (symbol_2 i32 (i32 -2147483642))
       (symbol_1 i32 (i32 0))
       (symbol_6 i64 (i64 4611686018427387904))
-      (symbol_7 f32 (f32 12.000000))
+      (symbol_7 f32 (f32 12.))
       (symbol_5 i64 (i64 1073741824))
       (symbol_3 i64 (i64 64)))
   Trap: unreachable
@@ -76,9 +76,9 @@ memory stuff:
       (symbol_0 i32 (i32 0))
       (symbol_2 i32 (i32 -2147483642))
       (symbol_1 i32 (i32 0))
-      (symbol_8 f64 (f64 0.000000))
+      (symbol_8 f64 (f64 0.))
       (symbol_6 i64 (i64 4611686018427387904))
-      (symbol_7 f32 (f32 0.000000))
+      (symbol_7 f32 (f32 5.87747175411e-39))
       (symbol_5 i64 (i64 1073741824))
       (symbol_3 i64 (i64 64)))
   Reached 11 problems!
