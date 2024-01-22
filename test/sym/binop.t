@@ -65,7 +65,7 @@ binop i32 (2):
   Trap: unreachable
   Model:
     (model
-      (symbol_0 i32 (i32 1073741855))
+      (symbol_0 i32 (i32 -2147483618))
       (symbol_2 i32 (i32 0))
       (symbol_1 i32 (i32 0))
       (symbol_3 i32 (i32 -2147483648)))
@@ -138,69 +138,69 @@ binop i64 (2):
   Model:
     (model
       (symbol_1 i64 (i64 -2))
-      (symbol_0 i64 (i64 -9223372036854775808))
+      (symbol_0 i64 (i64 -9223372036854775804))
       (symbol_2 i64 (i64 -1))
-      (symbol_3 i64 (i64 -9223372036854775808)))
+      (symbol_3 i64 (i64 -4611686018427387904)))
   Reached 5 problems!
 binop f32:
   $ dune exec owi -- sym binop_f32.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 -200.000015)))
+      (symbol_0 f32 (f32 -200.000015259)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 200.000015)))
+      (symbol_0 f32 (f32 200.000015259)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 -42.000000)))
+      (symbol_0 f32 (f32 -42.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 42.000000)))
+      (symbol_0 f32 (f32 42.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 0.000000)))
+      (symbol_0 f32 (f32 0.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 0.000000)))
+      (symbol_0 f32 (f32 1.12103877146e-44)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f32 (f32 -64.005882)))
+      (symbol_0 f32 (f32 -64.0058822632)))
   Reached 7 problems!
 binop f64:
   $ dune exec owi -- sym binop_f64.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 -200.000000)))
+      (symbol_0 f64 (f64 -200.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 200.000000)))
+      (symbol_0 f64 (f64 200.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 -42.000000)))
+      (symbol_0 f64 (f64 -42.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 42.000000)))
+      (symbol_0 f64 (f64 42.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 -0.000000)))
+      (symbol_0 f64 (f64 -0.)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 0.000000)))
+      (symbol_0 f64 (f64 4.94065645841e-323)))
   Trap: unreachable
   Model:
     (model
-      (symbol_0 f64 (f64 0.000000)))
+      (symbol_0 f64 (f64 1.48302076647e-309)))
   Reached 7 problems!
