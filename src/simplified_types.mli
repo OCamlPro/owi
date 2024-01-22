@@ -6,7 +6,7 @@ val equal_func_types : simplified func_type -> simplified func_type -> bool
 
 val convert_val_type : tbl -> text val_type -> simplified val_type Result.t
 
-val convert_heap_type : tbl -> text heap_type -> simplified heap_type Result.t
+val convert_heap_type : tbl -> < string_id : yes; .. > heap_type -> < string_id : no ; .. > heap_type Result.t
 
 val convert_func_type : tbl -> text func_type -> simplified func_type Result.t
 

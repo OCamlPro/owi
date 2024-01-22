@@ -96,7 +96,7 @@ module type P = sig
 
     val mut : global -> Types.mut
 
-    val typ : global -> simplified val_type
+    val typ : global -> saucisse val_type
   end
 
   module Table : sig

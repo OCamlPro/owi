@@ -77,6 +77,7 @@ struct
   (*   | Extern (Extern_func (t, _f)) -> extern_type t *)
 end
 
+(* TODO: move this to a concrete_func.ml module *)
 module Func = struct
   include
     Make_extern_func
@@ -119,7 +120,7 @@ type t =
   | Ref of ref_value
 
 (* TODO: make a new kind of instr for this *)
-let of_instr (i : simplified instr) : t =
+let of_instr (i : simplified_const instr) : t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c
