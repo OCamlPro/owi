@@ -1,4 +1,6 @@
 file doesn't exist:
   $ dune exec owi -- sym not_exists.wat
-  Error: file `not_exists.wat` doesn't exist
-  [1]
+  owi: no 'not_exists.wat' file
+  Usage: owi sym [OPTION]… [ARG]…
+  Try 'owi sym --help' or 'owi --help' for more information.
+  [124]

@@ -1,8 +1,5 @@
 table stuff:
   $ dune exec owi -- sym table.wat --no-stop-at-failure
-  Model:
-  (model
-    (symbol_1 i32 (i32 0)))
   Trap: undefined element
   Model:
     (model
