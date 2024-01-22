@@ -35,7 +35,7 @@ $ dune exec owi -- c ./poly.c
 ...
 Model:
   (model
-    (symbol_0 i32 (i32 1)))
+    (symbol_0 (i32 1)))
 Reached problem!
 ```
 
@@ -77,7 +77,7 @@ $ dune exec owi -- c ./poly2.c
 ...
 Model:
   (model
-    (symbol_0 i32 (i32 -2147483644)))
+    (symbol_0 (i32 -2147483644)))
 Reached problem!
 ```
 
@@ -168,18 +168,18 @@ $ dune exec owi -- c ./maze.c
 Assert failure: false
 Model:
   (model
-    (symbol_6 i32 (i32 100))
-    (symbol_0 i32 (i32 115))
-    (symbol_10 i32 (i32 100))
-    (symbol_8 i32 (i32 115))
-    (symbol_9 i32 (i32 100))
-    (symbol_2 i32 (i32 100))
-    (symbol_1 i32 (i32 100))
-    (symbol_7 i32 (i32 100))
-    (symbol_3 i32 (i32 119))
-    (symbol_4 i32 (i32 100))
-    (symbol_5 i32 (i32 100))
-    (symbol_11 i32 (i32 119)))
+    (symbol_0 (i32 115))
+    (symbol_1 (i32 100))
+    (symbol_10 (i32 100))
+    (symbol_11 (i32 119))
+    (symbol_2 (i32 100))
+    (symbol_3 (i32 119))
+    (symbol_4 (i32 100))
+    (symbol_5 (i32 100))
+    (symbol_6 (i32 100))
+    (symbol_7 (i32 100))
+    (symbol_8 (i32 115))
+    (symbol_9 (i32 100)))
 Reached problem!
 ```
 
