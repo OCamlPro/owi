@@ -57,6 +57,7 @@
   (odoc :with-doc)
   (crunch :dev)
   bos
+  encoding
   (mdx
    (and
     :with-test
