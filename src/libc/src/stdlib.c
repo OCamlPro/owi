@@ -24,15 +24,13 @@ extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;
 
 void *malloc(size_t size) {
-  unsigned int start;
+  unsigned int start = bump_pointer;
   unsigned int closest_pow2 = 1 << (sizeof(size_t)*8 - (__builtin_clz(size) + 1));
   unsigned int align = (closest_pow2 <= 16) ? closest_pow2 : 16;
   unsigned int off_align = bump_pointer % align;
-  if ( off_align == 0 ) {
-    start = bump_pointer;
-  }
-  else {
-    start = bump_pointer + (align - off_align);
+
+  if ( off_align != 0 ) {
+    start += (align - off_align);
   }
   bump_pointer = size + start;
   return (void *)owi_malloc(start, size);
