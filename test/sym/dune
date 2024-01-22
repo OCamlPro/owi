@@ -15,5 +15,4 @@
   unop_i32.wat
   unop_i64.wat
   unop_f32.wat
-  unop_f64.wat
- ))
+  unop_f64.wat))
