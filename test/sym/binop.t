@@ -138,9 +138,9 @@ binop i64 (2):
   Model:
     (model
       (symbol_1 i64 (i64 -2))
-      (symbol_0 i64 (i64 -9223372036854775804))
+      (symbol_0 i64 (i64 -9223372036854775808))
       (symbol_2 i64 (i64 -1))
-      (symbol_3 i64 (i64 -4611686018427387904)))
+      (symbol_3 i64 (i64 -9223372036854775808)))
   Reached 5 problems!
 binop f32:
   $ dune exec owi -- sym binop_f32.wat --no-stop-at-failure
