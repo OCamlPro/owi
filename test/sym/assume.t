@@ -1,5 +1,5 @@
 symbolic extern module (assume and assert test):
-  $ dune exec owi -- sym assume.wast
+  $ dune exec owi -- sym assume.wat
   Trap: unreachable
   Model:
     (model

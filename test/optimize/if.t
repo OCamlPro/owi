@@ -1,5 +1,5 @@
 if then else instruction:
-  $ dune exec -- owi opt if.wast
+  $ dune exec -- owi opt if.wat
   (module
     (func $start
       (block (result i32)

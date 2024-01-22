@@ -1,5 +1,5 @@
 table stuff:
-  $ dune exec owi -- sym table.wast --no-stop-at-failure
+  $ dune exec owi -- sym table.wat --no-stop-at-failure
   Model:
   (model
     (symbol_1 i32 (i32 0)))

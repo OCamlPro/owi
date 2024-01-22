@@ -1,5 +1,5 @@
 **.trunc_** **.trunc_sat_** instructions:
-  $ dune exec -- owi opt trunc.wast
+  $ dune exec -- owi opt trunc.wat
   (module
     (func $trunc
       

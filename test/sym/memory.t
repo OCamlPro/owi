@@ -1,5 +1,5 @@
 memory stuff:
-  $ dune exec owi -- sym memory.wast --no-stop-at-failure
+  $ dune exec owi -- sym memory.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model

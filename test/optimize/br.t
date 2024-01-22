@@ -1,5 +1,5 @@
 br instructions:
-  $ dune exec -- owi opt br.wast
+  $ dune exec -- owi opt br.wat
   (module
     (func $br
       i32.const 42

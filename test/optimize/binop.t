@@ -1,5 +1,5 @@
 binary operations instructions:
-  $ dune exec -- owi opt binop.wast
+  $ dune exec -- owi opt binop.wat
   (module
     (func $i32binop
       
