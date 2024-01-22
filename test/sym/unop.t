@@ -159,7 +159,7 @@ unop f32:
   Trap: unreachable
   Model:
     (model
-      (symbol_1 f64 (f64 -0.000000))
+      (symbol_1 f64 (f64 nan))
       (symbol_2 i32 (i32 32768))
       (symbol_0 f32 (f32 nan))
       (symbol_3 i64 (i64 1)))

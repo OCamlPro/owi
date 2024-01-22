@@ -4,10 +4,6 @@ let debug =
   let doc = "debug mode" in
   Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
-let file =
-  let doc = "source file" in
-  Cmdliner.Arg.(required & pos ~rev:true 0 (some string) None & info [] ~doc)
-
 let files =
   let doc = "source files" in
   Cmdliner.Arg.(value & pos_all non_dir_file [] (info [] ~doc))
@@ -101,7 +97,7 @@ let fmt_cmd =
     let doc = "Format in-place, overwriting input file" in
     Cmdliner.Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
   in
-  Cmd.v info Term.(const Cmd_fmt.cmd $ inplace $ file)
+  Cmd.v info Term.(const Cmd_fmt.cmd $ inplace $ files)
 
 let opt_cmd =
   let open Cmdliner in
@@ -110,7 +106,7 @@ let opt_cmd =
     let man = [] @ shared_man in
     Cmd.info "opt" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ file)
+  Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ files)
 
 let run_cmd =
   let open Cmdliner in

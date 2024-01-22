@@ -369,7 +369,7 @@ NAME
        owi-opt - Optimize a module
 
 SYNOPSIS
-       owi opt [--debug] [--unsafe] [OPTION]… ARG
+       owi opt [--debug] [--unsafe] [OPTION]… [ARG]…
 
 OPTIONS
        -d, --debug
