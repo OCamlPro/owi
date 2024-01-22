@@ -1,5 +1,5 @@
 mini test:
-  $ dune exec owi -- sym mini_test.wast
+  $ dune exec owi -- sym mini_test.wat
   Trap: unreachable
   Model:
     (model

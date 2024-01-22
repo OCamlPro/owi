@@ -4,4 +4,4 @@
  (libraries owi))
 
 (cram
- (deps print_simplified.exe m.wast locals.wast locals_drop.wast))
+ (deps print_simplified.exe m.wat locals.wat locals_drop.wat))

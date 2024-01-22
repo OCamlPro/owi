@@ -1,5 +1,5 @@
 print symbolic:
-  $ dune exec owi -- fmt m.wast
+  $ dune exec owi -- fmt m.wat
   (module
     (func $f (param $x i32) (param $y i32) (result i32)
       local.get $x
@@ -15,7 +15,7 @@ print symbolic:
     (start $start)
   )
 print simplified:
-  $ dune exec -- ./print_simplified.exe m.wast
+  $ dune exec -- ./print_simplified.exe m.wat
   (module
     (func $f (param $x i32) (param $y i32) (result i32)
       local.get 0

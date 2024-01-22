@@ -1,5 +1,5 @@
 select instruction:
-  $ dune exec -- owi opt select.wast
+  $ dune exec -- owi opt select.wat
   (module
     (func $start
       

@@ -1,5 +1,5 @@
 binop i32:
-  $ dune exec owi -- sym binop_i32.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_i32.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
@@ -38,7 +38,7 @@ binop i32:
       (symbol_0 i32 (i32 -46)))
   Reached 9 problems!
 binop i32 (2):
-  $ dune exec owi -- sym binop_i32-2.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_i32-2.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
@@ -71,7 +71,7 @@ binop i32 (2):
       (symbol_3 i32 (i32 -2147483648)))
   Reached 5 problems!
 binop i64:
-  $ dune exec owi -- sym binop_i64.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_i64.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
@@ -110,7 +110,7 @@ binop i64:
       (symbol_0 i64 (i64 -99)))
   Reached 9 problems!
 binop i64 (2):
-  $ dune exec owi -- sym binop_i64-2.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_i64-2.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
@@ -143,7 +143,7 @@ binop i64 (2):
       (symbol_3 i64 (i64 -4611686018427387904)))
   Reached 5 problems!
 binop f32:
-  $ dune exec owi -- sym binop_f32.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_f32.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
@@ -174,7 +174,7 @@ binop f32:
       (symbol_0 f32 (f32 -64.005882)))
   Reached 7 problems!
 binop f64:
-  $ dune exec owi -- sym binop_f64.wast --no-stop-at-failure
+  $ dune exec owi -- sym binop_f64.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model

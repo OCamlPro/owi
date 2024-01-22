@@ -1,5 +1,5 @@
 **.eq eqz lt gt ...  instructions:
-  $ dune exec -- owi opt relop_testop.wast
+  $ dune exec -- owi opt relop_testop.wat
   (module
     (func $i32relop
       

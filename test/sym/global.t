@@ -1,5 +1,5 @@
 global vars stuff:
-  $ dune exec owi -- sym global.wast --no-stop-at-failure
+  $ dune exec owi -- sym global.wat --no-stop-at-failure
   Trap: unreachable
   Model:
     (model
