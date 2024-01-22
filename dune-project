@@ -64,7 +64,6 @@
   (crowbar :with-test)
   (graphics :dev)
   (tiny_httpd :dev)
-  (encoding (>= 0.0.3))
   sha
   xmlm
   pyml
