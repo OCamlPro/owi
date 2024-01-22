@@ -104,7 +104,7 @@ NAME
        owi-fmt - Format a .wat or .wast file
 
 SYNOPSIS
-       owi fmt [--inplace] [OPTION]… ARG
+       owi fmt [--inplace] [OPTION]… [ARG]…
 
 OPTIONS
        -i, --inplace

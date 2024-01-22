@@ -1,1 +1,1 @@
-val cmd : bool -> bool -> string -> unit
+val cmd : bool -> bool -> string list -> unit

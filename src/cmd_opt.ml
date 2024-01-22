@@ -11,10 +11,12 @@ let optimize_file ~unsafe filename =
     let* modul = Parse.Module.from_file ~filename in
     Compile.until_optimize ~unsafe ~optimize:true modul
 
-let cmd debug unsafe (file : string) =
+let cmd_one debug unsafe file =
   if debug then Log.debug_on := true;
   match optimize_file ~unsafe file with
   | Ok modul -> Format.pp_std "%a@\n" Simplified.Pp.modul modul
   | Error e ->
     Format.pp_err "%s@." e;
     exit 1
+
+let cmd debug unsafe files = List.iter (cmd_one debug unsafe) files

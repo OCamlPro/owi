@@ -3,7 +3,6 @@
  (modules main)
  (deps
   (source_tree reference)
-  (source_tree failing)
   (source_tree passing)
   (source_tree gc))
  (libraries bos owi))

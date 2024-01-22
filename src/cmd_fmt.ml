@@ -16,7 +16,7 @@ let get_printer filename =
       fun fmt () -> Text.pp_script fmt v
     | _ -> error_s "unsupported file extension"
 
-let cmd inplace (file : string) =
+let cmd_one inplace file =
   match get_printer file with
   | Error e ->
     Format.pp_err "%s@." e;
@@ -30,6 +30,8 @@ let cmd inplace (file : string) =
           let fmt = Stdlib.Format.formatter_of_out_channel chan in
           Format.pp fmt "%a@\n" pp () )
     else Format.pp_std "%a@\n" pp ()
+
+let cmd inplace files = List.iter (cmd_one inplace) files
 
 let format_file_to_string (file : string) =
   let+ pp = get_printer file in
