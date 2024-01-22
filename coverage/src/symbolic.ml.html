@@ -550,11 +550,11 @@ module P = struct
 
     let value (v : t) = <span data-count="3">v</span>.value
 
-    let set_value (v : t) x = <span data-count="259">v</span>.value &lt;- x
+    let set_value (v : t) x = <span data-count="234">v</span>.value &lt;- x
 
-    let mut (v : t) = <span data-count="259">v</span>.orig.mut
+    let mut (v : t) = <span data-count="234">v</span>.orig.mut
 
-    let typ (v : t) = <span data-count="259">v</span>.orig.typ
+    let typ (v : t) = <span data-count="234">v</span>.orig.typ
   end
 
   module Table = struct
@@ -592,26 +592,26 @@ module P = struct
     include Symbolic_memory.M
 
     let return_or_trap = function
-      | <span data-count="4491">O</span>k v -&gt; Choice.return v
+      | <span data-count="4036">O</span>k v -&gt; Choice.return v
       | <span data-count="0">E</span>rror t -&gt; Choice.trap t
 
     let load_8_s m a = <span data-count="0">r</span>eturn_or_trap @@ load_8_<span data-count="0">s</span> m a
 
-    let load_8_u m a = <span data-count="898">r</span>eturn_or_trap @@ load_8_<span data-count="898">u</span> m a
+    let load_8_u m a = <span data-count="804">r</span>eturn_or_trap @@ load_8_<span data-count="804">u</span> m a
 
     let load_16_s m a = <span data-count="0">r</span>eturn_or_trap @@ load_16_<span data-count="0">s</span> m a
 
     let load_16_u m a = <span data-count="0">r</span>eturn_or_trap @@ load_16_<span data-count="0">u</span> m a
 
-    let load_32 m a = <span data-count="2656">r</span>eturn_or_trap @@ load_3<span data-count="2656">2</span> m a
+    let load_32 m a = <span data-count="2386">r</span>eturn_or_trap @@ load_3<span data-count="2386">2</span> m a
 
     let load_64 m a = <span data-count="0">r</span>eturn_or_trap @@ load_6<span data-count="0">4</span> m a
 
-    let store_8 m ~addr v = <span data-count="164">r</span>eturn_or_trap @@ store_<span data-count="164">8</span> m ~addr v
+    let store_8 m ~addr v = <span data-count="148">r</span>eturn_or_trap @@ store_<span data-count="148">8</span> m ~addr v
 
     let store_16 m ~addr v = <span data-count="0">r</span>eturn_or_trap @@ store_1<span data-count="0">6</span> m ~addr v
 
-    let store_32 m ~addr v = <span data-count="773">r</span>eturn_or_trap @@ store_3<span data-count="773">2</span> m ~addr v
+    let store_32 m ~addr v = <span data-count="699">r</span>eturn_or_trap @@ store_3<span data-count="698">2</span> m ~addr v
 
     let store_64 m ~addr v = <span data-count="0">r</span>eturn_or_trap @@ store_6<span data-count="0">4</span> m ~addr v
   end
@@ -628,10 +628,10 @@ module P = struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="4492">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="4492">l</span>et f (t : thread) =
-        <span data-count="4492">l</span>et memories = Thread.memories t in
-        <span data-count="4492">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="4492">d</span> env) orig_mem memories id
+      <span data-count="4037">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="4038">l</span>et f (t : thread) =
+        <span data-count="4036">l</span>et memories = Thread.memories t in
+        <span data-count="4037">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="4037">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -654,10 +654,10 @@ module P = struct
       <span data-count="2">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="262">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="262">l</span>et f (t : thread) =
-        <span data-count="262">l</span>et globals = Thread.globals t in
-        <span data-count="262">S</span>ymbolic_global.get_global (Link_env.i<span data-count="262">d</span> env) orig_global globals i
+      <span data-count="237">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="237">l</span>et f (t : thread) =
+        <span data-count="237">l</span>et globals = Thread.globals t in
+        <span data-count="237">S</span>ymbolic_global.get_global (Link_env.i<span data-count="237">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -680,7 +680,7 @@ module P = struct
 
     let env (t : t) = <span data-count="5">t</span>.env
 
-    let modul (t : t) = <span data-count="258">t</span>.modul
+    let modul (t : t) = <span data-count="233">t</span>.modul
 
     let to_run (t : t) = <span data-count="4">t</span>.to_run
   end
