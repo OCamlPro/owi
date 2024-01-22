@@ -32,7 +32,6 @@ depends: [
   "crowbar" {with-test}
   "graphics" {dev}
   "tiny_httpd" {dev}
-  "encoding" {>= "0.0.3"}
   "sha"
   "xmlm"
   "pyml"
@@ -62,6 +61,6 @@ depexts: [
   ["llvm" "wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
-  [ "encoding" "git+https://github.com/formalsec/encoding"]
+  [ "encoding" "git+https://github.com/formalsec/encoding#ffc569da6bbe60256cdba8dd4d7a59dc2efa1102"]
 ]
 
