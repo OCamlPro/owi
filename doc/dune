@@ -3,4 +3,6 @@
  (mld_files index))
 
 (env
-  (_ (odoc (warnings fatal))))
+ (_
+  (odoc
+   (warnings fatal))))
