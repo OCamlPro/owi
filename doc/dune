@@ -1,3 +1,6 @@
 (documentation
  (package owi)
  (mld_files index))
+
+(env
+  (_ (odoc (warnings fatal))))

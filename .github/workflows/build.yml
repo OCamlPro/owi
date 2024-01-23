@@ -32,7 +32,7 @@ jobs:
         run: |
           opam pin add . -y --no-action
           opam depext -y owi
-          opam install -y ./*.opam --deps-only --with-test
+          opam install -y ./*.opam --deps-only --with-test --with-doc
           opam upgrade --fixup
       - name: build
         run: |
@@ -42,3 +42,7 @@ jobs:
         run: |
           export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
           opam exec -- dune runtest
+      - name: doc
+        run: |
+          ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt
+          $(exit $(wc -l output.txt | cut -d " " -f1))
