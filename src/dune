@@ -45,7 +45,6 @@
   result
   rewrite
   runtime
-  runtime_intf
   script
   simplified
   simplified_types
