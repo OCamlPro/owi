@@ -102,7 +102,6 @@ module Build = struct
 end
 
 module type T = sig
-  module V : Intf.V
 
   type extern_func
 
@@ -140,7 +139,6 @@ module type T = sig
 end
 
 module type P = sig
-  module V : Intf.V
 
   val const_i32 : Int32.t -> V.int32
 

@@ -33,9 +33,7 @@
   int32
   int64
   interpret
-  interpret
   interpret_functor_intf
-  intf
   lexer
   link
   link_env
