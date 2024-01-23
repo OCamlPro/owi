@@ -9,8 +9,8 @@ open Simplified
 
 let use_ite_for_select = true
 
-module Make (P : Interpret_functor_intf.P) :
-  Interpret_functor_intf.S
+module Make (P : Interpret_intf.P) :
+  Interpret_intf.S
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
