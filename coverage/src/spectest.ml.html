@@ -461,17 +461,17 @@ type extern_module = extern_func Link.extern_module
 
 let extern_m =
   let print = () in
-  let print_i32 i = <span data-count="37">p</span>p_std "%li@\n%!" i in
+  let print_i32 i = <span data-count="30">p</span>p_std "%li@\n%!" i in
   let print_i64 i = <span data-count="4">p</span>p_std "%Li@\n%!" i in
-  let print_f32 f = <span data-count="8">p</span>p_std "%a@\n%!" Float32.pp f in
-  let print_f64 f = <span data-count="20">p</span>p_std "%a@\n%!" Float64.pp f in
+  let print_f32 f = <span data-count="6">p</span>p_std "%a@\n%!" Float32.pp f in
+  let print_f64 f = <span data-count="15">p</span>p_std "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
-    <span data-count="4">p</span>rint_i32 i;
-    <span data-count="4">p</span>rint_f32 f
+    <span data-count="3">p</span>rint_i32 i;
+    <span data-count="3">p</span>rint_f32 f
   in
   let print_f64_f64 f1 f2 =
-    <span data-count="4">p</span>rint_f64 f1;
-    <span data-count="4">p</span>rint_f64 f2
+    <span data-count="3">p</span>rint_f64 f1;
+    <span data-count="3">p</span>rint_f64 f2
   in
   let func = () in
   let func_in_i32 (_i : int32) = <span data-count="0">(</span>) in

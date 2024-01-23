@@ -591,8 +591,8 @@ let check_dependencies () =
     }
 
 let pre_patterns : (Re2.t * string) array =
-  Array.ma<span data-count="53">p</span>
-    (fun (regex, template) -&gt; <span data-count="53">(</span>Re2.create_ex<span data-count="53">n</span> regex, template))
+  Array.ma<span data-count="288">p</span>
+    (fun (regex, template) -&gt; <span data-count="288">(</span>Re2.create_ex<span data-count="288">n</span> regex, template))
     [| ( "void\\s+reach_error\\(\\)\\s*\\{.*\\}"
        , "void reach_error() { owi_assert(0); }" )
        (* ugly: Hack to solve duplicate errors on compilation *)

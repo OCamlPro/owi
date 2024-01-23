@@ -207,7 +207,7 @@ struct
 
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
-    <span data-count="159">l</span>et print_err buf msg =
+    <span data-count="864">l</span>et print_err buf msg =
       <span data-count="1042">l</span>et pos = fst @@ Sedlexing.lexing_position<span data-count="1042">s</span> buf in
       <span data-count="1042">l</span>et file_line =
         let cpos = pos.pos_cnum - pos.pos_bol in
@@ -217,39 +217,39 @@ struct
       Log.debug2 "%s@\n%s@\n" file_line msg
     in
     fun buf -&gt;
-      <span data-count="1441">L</span>og.debug0 "parsing      ...@\n";
-      <span data-count="1441">l</span>et provider () =
-        <span data-count="1366515">l</span>et tok = Lexer.token buf in
-        <span data-count="1366149">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1366149">(</span>tok, start, stop)
+      <span data-count="1424">L</span>og.debug0 "parsing      ...@\n";
+      <span data-count="1424">l</span>et provider () =
+        <span data-count="1379550">l</span>et tok = Lexer.token buf in
+        <span data-count="1379186">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1379186">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="399">r</span> provider) with
+      try Ok (parse<span data-count="382">r</span> provider) with
       | <span data-count="542">T</span>ypes.Parse_fail msg
-      | <span data-count="4">L</span>exer.Illegal_escape msg
+      | <span data-count="2">L</span>exer.Illegal_escape msg
       | <span data-count="346">L</span>exer.Unknown_operator msg -&gt;
         print_err buf msg;
-        <span data-count="892">E</span>rror msg
+        <span data-count="890">E</span>rror msg
       | <span data-count="16">L</span>exer.Unexpected_character msg -&gt;
         print_err buf msg;
         <span data-count="16">E</span>rror "unknown operator"
-      | <span data-count="134">M</span>enhir_parser.Error -&gt;
+      | <span data-count="136">M</span>enhir_parser.Error -&gt;
         let msg = "unexpected token" in
         print_err buf msg;
-        <span data-count="134">E</span>rror msg
+        <span data-count="136">E</span>rror msg
 
   let from_file ~filename =
-    <span data-count="280">l</span>et chan = open_in filename in
-    <span data-count="280">l</span>et result =
+    <span data-count="264">l</span>et chan = open_in filename in
+    <span data-count="264">l</span>et result =
       Fun.protect
-        ~finally:(fun () -&gt; <span data-count="280">c</span>lose_in chan)
+        ~finally:(fun () -&gt; <span data-count="264">c</span>lose_in chan)
         (fun () -&gt;
-          <span data-count="280">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="280">S</span>edlexing.set_filename lb filename;
-          <span data-count="280">f</span>rom_lexbuf lb )
+          <span data-count="264">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="264">S</span>edlexing.set_filename lb filename;
+          <span data-count="264">f</span>rom_lexbuf lb )
     in
-    <span data-count="280">r</span>esult
+    <span data-count="264">r</span>esult
 
-  let from_string s = <span data-count="1161">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1161">g</span> s)
+  let from_string s = <span data-count="1160">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1160">g</span> s)
 
   let from_channel c = <span data-count="0">f</span>rom_lexbuf (Sedlexing.Utf8.from_channe<span data-count="0">l</span> c)
 end

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>script.ml &mdash; Coverage report</title>
-    <meta name="description" content="75.41% coverage in src/script.ml">
+    <meta name="description" content="79.23% coverage in src/script.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,9 @@
           <span class="dirname">src/</span>script.ml
         </a>
       </h1>
-      <h2>75.41%</h2>
+      <h2>79.23%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:9.34%"></span>
-      <span class="unvisited" style="top:10.12%"></span>
-      <span class="unvisited" style="top:10.51%"></span>
       <span class="unvisited" style="top:12.45%"></span>
       <span class="unvisited" style="top:13.23%"></span>
       <span class="unvisited" style="top:13.62%"></span>
@@ -39,12 +36,8 @@
       <span class="unvisited" style="top:38.91%"></span>
       <span class="unvisited" style="top:39.30%"></span>
       <span class="unvisited" style="top:39.69%"></span>
-      <span class="unvisited" style="top:40.47%"></span>
-      <span class="unvisited" style="top:41.25%"></span>
       <span class="unvisited" style="top:45.53%"></span>
       <span class="unvisited" style="top:46.30%"></span>
-      <span class="unvisited" style="bottom:29.18%"></span>
-      <span class="unvisited" style="bottom:22.96%"></span>
       <span class="unvisited" style="bottom:21.40%"></span>
       <span class="unvisited" style="bottom:20.62%"></span>
       <span class="unvisited" style="bottom:20.23%"></span>
@@ -85,10 +78,10 @@
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span class="unvisited"> </span>
+<a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span > </span>
-<a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
@@ -165,9 +158,9 @@
 <a id="L101"></a><span class="unvisited"> </span>
 <a id="L102"></a><span class="unvisited"> </span>
 <a id="L103"></a><span > </span>
-<a id="L104"></a><span class="unvisited"> </span>
+<a id="L104"></a><span class="visited"> </span>
 <a id="L105"></a><span > </span>
-<a id="L106"></a><span class="unvisited"> </span>
+<a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
 <a id="L109"></a><span class="visited"> </span>
@@ -243,7 +236,7 @@
 <a id="L179"></a><span class="visited"> </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span class="visited"> </span>
-<a id="L182"></a><span class="unvisited"> </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span > </span>
 <a id="L184"></a><span > </span>
 <a id="L185"></a><span > </span>
@@ -259,7 +252,7 @@
 <a id="L195"></a><span > </span>
 <a id="L196"></a><span > </span>
 <a id="L197"></a><span > </span>
-<a id="L198"></a><span class="unvisited"> </span>
+<a id="L198"></a><span class="visited"> </span>
 <a id="L199"></a><span class="visited"> </span>
 <a id="L200"></a><span > </span>
 <a id="L201"></a><span class="visited"> </span>
@@ -592,48 +585,48 @@ module Stack = Stack.Make (V) [@@inlined hint]
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="53">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="288">e</span> ()
 
   let value i = <span data-count="62">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
 
 let check_error ~expected ~got =
-  <span data-count="9140">l</span>et ok =
-    got = expecte<span data-count="2362">d</span>
-    || String.starts_wit<span data-count="6778">h</span> ~prefix:expected go<span data-count="6764">t</span>
+  <span data-count="9122">l</span>et ok =
+    got = expecte<span data-count="2349">d</span>
+    || String.starts_wit<span data-count="6773">h</span> ~prefix:expected go<span data-count="6757">t</span>
     || got = "constant out of range"
        &amp;&amp; <span data-count="14">(</span>expected = "i32 constant out of range<span data-count="12">"</span> || expected = "i32 constant<span data-count="2">"</span><span data-count="14">)</span>
   in
-  if not ok then <span data-count="0">b</span>egin
+  if not ok then <span data-count="2">b</span>egin
     Log.debug1 "expected: `%s`@." expected;
-    <span data-count="0">L</span>og.debug1 "got     : `%s`@." got;
-    <span data-count="0">E</span>rror got
+    <span data-count="2">L</span>og.debug1 "got     : `%s`@." got;
+    <span data-count="2">E</span>rror got
   end
-  else <span data-count="9140">O</span>k ()
+  else <span data-count="9120">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="0">O</span>k _whatever -&gt;
     Log.debug1 "expected: `%s`@." expected;
     <span data-count="0">L</span>og.debug0 "got     :  Ok@.";
     <span data-count="0">e</span>rror_s "expected Error (%S) but got Ok" expected
-  | <span data-count="4984">E</span>rror got -&gt; check_error ~expected ~got
+  | <span data-count="4970">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="48088">l</span>et* exports, env_id =
+  <span data-count="47981">l</span>et* exports, env_id =
     match mod_id with
-    | <span data-count="47882">N</span>one -&gt; begin
+    | <span data-count="47781">N</span>one -&gt; begin
       match ls.Link.last with
       | <span data-count="0">N</span>one -&gt; Error "unbound last module"
-      | <span data-count="47882">S</span>ome m -&gt; Ok m
+      | <span data-count="47781">S</span>ome m -&gt; Ok m
     end
-    | <span data-count="206">S</span>ome mod_id -&gt; (
+    | <span data-count="200">S</span>ome mod_id -&gt; (
       match Link.StringMap.find mod_id ls.Link.by_id with
       | <span data-count="0">e</span>xception Not_found -&gt; error_<span data-count="0">s</span> "unbound module %s" mod_id
-      | <span data-count="206">e</span>xports -&gt; Ok exports )
+      | <span data-count="200">e</span>xports -&gt; Ok exports )
   in
-  <span data-count="48088">m</span>atch Link.StringMap.find f_name exports.functions with
+  <span data-count="47981">m</span>atch Link.StringMap.find f_name exports.functions with
   | <span data-count="0">e</span>xception Not_found -&gt; error_s "unbound name %s" f_name
-  | <span data-count="48088">v</span> -&gt; Ok (v, env_id)
+  | <span data-count="47981">v</span> -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   <span data-count="22">l</span>et* exports =
@@ -653,11 +646,11 @@ let load_global_from_module ls mod_id name =
   | <span data-count="22">v</span> -&gt; Ok v
 
 let compare_result_const result (const : Concrete_value.t) =
-  <span data-count="42674">m</span>atch (result, const) with
-  | <span data-count="25594">T</span>ext.Result_const (Literal (Const_I32 n)), I32 n' -&gt; n = n'
+  <span data-count="42587">m</span>atch (result, const) with
+  | <span data-count="25509">T</span>ext.Result_const (Literal (Const_I32 n)), I32 n' -&gt; n = n'
   | <span data-count="1752">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; n = n'
-  | <span data-count="5720">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt; n = n'
-  | <span data-count="5698">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt; n = n'
+  | <span data-count="5718">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt; n = n'
+  | <span data-count="5697">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt; n = n'
   | <span data-count="14">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Funcref None) -&gt; true
   | <span data-count="46">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Externref None) -&gt; true
   | <span data-count="62">R</span>esult_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -&gt; begin
@@ -684,13 +677,13 @@ let compare_result_const result (const : Concrete_value.t) =
   | <span data-count="0">R</span>esult_const (Literal (Const_null _)), _
   | <span data-count="0">R</span>esult_const (Literal (Const_host _)), _ -&gt;
     false
-  | <span data-count="0">_</span> -&gt;
+  | <span data-count="1">_</span> -&gt;
     Log.debug0 "TODO (Script.compare_result_const)@\n";
-    <span data-count="0">a</span>ssert false
+    <span data-count="1">a</span>ssert false
 
 let value_of_const : text const -&gt; V.t Result.t = function
-  | <span data-count="20548">C</span>onst_I32 v -&gt; ok @@ Concrete_value.I32 v
-  | <span data-count="2264">C</span>onst_I64 v -&gt; ok @@ Concrete_value.I64 v
+  | <span data-count="20457">C</span>onst_I32 v -&gt; ok @@ Concrete_value.I32 v
+  | <span data-count="2263">C</span>onst_I64 v -&gt; ok @@ Concrete_value.I64 v
   | <span data-count="23356">C</span>onst_F32 v -&gt; ok @@ Concrete_value.F32 v
   | <span data-count="23688">C</span>onst_F64 v -&gt; ok @@ Concrete_value.F64 v
   | <span data-count="28">C</span>onst_null rt -&gt;
@@ -702,14 +695,14 @@ let value_of_const : text const -&gt; V.t Result.t = function
     <span data-count="0">a</span>ssert false
 
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
-  | <span data-count="48088">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="47981">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
     Log.debug5 "invoke %a %s %a...@\n"
-      (Format.pp_optio<span data-count="48088">n</span> ~none:Format.pp_nothing Format.pp_string)
+      (Format.pp_optio<span data-count="47981">n</span> ~none:Format.pp_nothing Format.pp_string)
       mod_id f Types.pp_consts args;
-    <span data-count="48088">l</span>et* f, env_id = load_func_from_modul<span data-count="48088">e</span> link_state mod_id f in
-    <span data-count="48088">l</span>et* stack = list_ma<span data-count="48088">p</span> value_of_const args in
-    <span data-count="48088">l</span>et stack = List.rev stack in
-    <span data-count="48088">I</span>nterpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
+    <span data-count="47981">l</span>et* f, env_id = load_func_from_modul<span data-count="47981">e</span> link_state mod_id f in
+    <span data-count="47981">l</span>et* stack = list_ma<span data-count="47981">p</span> value_of_const args in
+    <span data-count="47981">l</span>et stack = List.rev stack in
+    <span data-count="47981">I</span>nterpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
       ~envs:link_state.envs f
   end
   | <span data-count="22">G</span>et (mod_id, name) -&gt;
@@ -720,24 +713,24 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
 let unsafe = false
 
 let run ~no_exhaustion ~optimize script =
-  <span data-count="247">l</span>et state =
+  <span data-count="226">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="247">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="226">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_value.Func.extern_func Link.state) -&gt; function
-      | <span data-count="2612">T</span>ext.Module m -&gt;
-        if !curr_module = 0 then <span data-count="247">L</span>og.debug_on := false;
-        <span data-count="2612">L</span>og.debug0 "*** module@\n";
-        <span data-count="2612">i</span>ncr curr_module;
-        <span data-count="2612">l</span>et+ link_state =
-          Compile.until_interpre<span data-count="2612">t</span> link_state ~unsafe ~optimize ~name:None m
+      | <span data-count="2550">T</span>ext.Module m -&gt;
+        if !curr_module = 0 then <span data-count="226">L</span>og.debug_on := false;
+        <span data-count="2550">L</span>og.debug0 "*** module@\n";
+        <span data-count="2550">i</span>ncr curr_module;
+        <span data-count="2550">l</span>et+ link_state =
+          Compile.until_interpre<span data-count="2546">t</span> link_state ~unsafe ~optimize ~name:None m
         in
-        <span data-count="2612">L</span>og.debug_on := debug_on;
+        <span data-count="2543">L</span>og.debug_on := debug_on;
         link_state
       | <span data-count="68">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
         Log.debug0 "*** assert_trap@\n";
@@ -754,34 +747,34 @@ let run ~no_exhaustion ~optimize script =
         Log.debug0 "*** assert_malformed_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="1472">O</span>k link_state
-      | <span data-count="1160">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
+      | <span data-count="1159">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
         Log.debug0 "*** assert_malformed_quote@\n";
-        <span data-count="1160">l</span>et+ () =
-          match Parse.Script.from_string (String.conca<span data-count="1160">t</span> "\n" m) with
-          | <span data-count="1042">E</span>rror got -&gt; check_error ~expected ~got
-          | <span data-count="118">O</span>k [ Module m ] -&gt; (
+        <span data-count="1159">l</span>et+ () =
+          match Parse.Script.from_string (String.conca<span data-count="1159">t</span> "\n" m) with
+          | <span data-count="1040">E</span>rror got -&gt; check_error ~expected ~got
+          | <span data-count="119">O</span>k [ Module m ] -&gt; (
             match Compile.until_simplify ~unsafe m with
             | <span data-count="118">E</span>rror got -&gt; check_error ~expected ~got
-            | <span data-count="0">O</span>k _m -&gt;
+            | <span data-count="1">O</span>k _m -&gt;
               let got = "Ok" in
               check_error ~expected ~got )
           | Ok _ -&gt; assert false
         in
-        <span data-count="1160">l</span>ink_state
+        <span data-count="1158">l</span>ink_state
       | <span data-count="10">A</span>ssert (Assert_invalid_binary _) -&gt;
         Log.debug0 "*** assert_invalid_binary@\n";
         (* TODO: check this when binary format is supported *)
         <span data-count="10">O</span>k link_state
-      | <span data-count="2996">A</span>ssert (Assert_invalid (m, expected)) -&gt;
+      | <span data-count="2993">A</span>ssert (Assert_invalid (m, expected)) -&gt;
         Log.debug0 "*** assert_invalid@\n";
-        <span data-count="2996">l</span>et+ () =
+        <span data-count="2993">l</span>et+ () =
           match
             Compile.until_link link_state ~unsafe ~optimize ~name:None m
           with
-          | <span data-count="0">O</span>k _ -&gt; check_error ~expected ~got:"Ok"
-          | <span data-count="2996">E</span>rror got -&gt; check_error ~expected ~got
+          | <span data-count="1">O</span>k _ -&gt; check_error ~expected ~got:"Ok"
+          | <span data-count="2992">E</span>rror got -&gt; check_error ~expected ~got
         in
-        <span data-count="2996">l</span>ink_state
+        <span data-count="2992">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
         Log.debug0 "*** assert_invalid_quote@\n";
         <span data-count="0">l</span>et got = Parse.Script.from_string (String.conca<span data-count="0">t</span> "\n" m) in
@@ -797,23 +790,23 @@ let run ~no_exhaustion ~optimize script =
       | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt;
         Log.debug0 "*** assert_malformed@\n";
         <span data-count="0">L</span>og.err "TODO"
-      | <span data-count="43046">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="42955">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.debug0 "*** assert_return@\n";
-        <span data-count="43046">l</span>et* stack = actio<span data-count="43046">n</span> link_state a in
-        <span data-count="43046">i</span>f
-          List.compare_length<span data-count="43046">s</span> res stack &lt;&gt; <span data-count="0">0</span>
-          || not (List.for_all<span data-count="43046">2</span> compare_result_const res (List.re<span data-count="43046">v</span> stack)<span data-count="0">)</span>
+        <span data-count="42955">l</span>et* stack = actio<span data-count="42955">n</span> link_state a in
+        <span data-count="42955">i</span>f
+          List.compare_length<span data-count="42955">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+          || not (List.for_all<span data-count="42954">2</span> compare_result_const res (List.re<span data-count="42955">v</span> stack)<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.re<span data-count="0">v</span> stack)
             Text.pp_results res;
           <span data-count="0">E</span>rror "Bad result"
         end
-        else <span data-count="43046">O</span>k link_state
-      | <span data-count="4750">A</span>ssert (Assert_trap (a, expected)) -&gt;
+        else <span data-count="42954">O</span>k link_state
+      | <span data-count="4736">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.debug0 "*** assert_trap@\n";
-        <span data-count="4750">l</span>et got = action link_state a in
-        <span data-count="4750">l</span>et+ () = check_error_resul<span data-count="4750">t</span> expected got in
-        <span data-count="4750">l</span>ink_state
+        <span data-count="4736">l</span>et got = action link_state a in
+        <span data-count="4736">l</span>et+ () = check_error_resul<span data-count="4736">t</span> expected got in
+        <span data-count="4736">l</span>ink_state
       | <span data-count="30">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
         Log.debug0 "*** assert_exhaustion@\n";
         <span data-count="30">l</span>et+ () =
@@ -823,21 +816,21 @@ let run ~no_exhaustion ~optimize script =
             <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
         in
         <span data-count="30">l</span>ink_state
-      | <span data-count="295">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="247">!</span>registered = false then <span data-count="247">L</span>og.debug_on := false;
-        <span data-count="295">L</span>og.debug0 "*** register@\n";
-        <span data-count="295">l</span>et+ state = Link.register_modul<span data-count="295">e</span> link_state ~name ~id:mod_name in
-        <span data-count="295">L</span>og.debug_on := debug_on;
+      | <span data-count="268">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="226">!</span>registered = false then <span data-count="226">L</span>og.debug_on := false;
+        <span data-count="268">L</span>og.debug0 "*** register@\n";
+        <span data-count="268">l</span>et+ state = Link.register_modul<span data-count="268">e</span> link_state ~name ~id:mod_name in
+        <span data-count="268">L</span>og.debug_on := debug_on;
         state
-      | <span data-count="314">A</span>ction a -&gt;
+      | <span data-count="312">A</span>ction a -&gt;
         Log.debug0 "*** action@\n";
-        <span data-count="314">l</span>et+ _stack = actio<span data-count="314">n</span> link_state a in
-        <span data-count="314">l</span>ink_state )
+        <span data-count="312">l</span>et+ _stack = actio<span data-count="312">n</span> link_state a in
+        <span data-count="312">l</span>ink_state )
     state script
 
 let exec ~no_exhaustion ~optimize script =
-  <span data-count="247">l</span>et+ _link_state = ru<span data-count="247">n</span> ~no_exhaustion ~optimize script in
-  <span data-count="247">(</span>)
+  <span data-count="226">l</span>et+ _link_state = ru<span data-count="221">n</span> ~no_exhaustion ~optimize script in
+  <span data-count="216">(</span>)
 </code></pre>
       </div>
     </div>

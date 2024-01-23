@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic.ml &mdash; Coverage report</title>
-    <meta name="description" content="36.52% coverage in src/symbolic.ml">
+    <meta name="description" content="48.70% coverage in src/symbolic.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>symbolic.ml
         </a>
       </h1>
-      <h2>36.52%</h2>
+      <h2>48.70%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:15.59%"></span>
@@ -30,16 +30,10 @@
       <span class="unvisited" style="top:19.01%"></span>
       <span class="unvisited" style="top:19.39%"></span>
       <span class="unvisited" style="top:19.77%"></span>
-      <span class="unvisited" style="top:30.42%"></span>
-      <span class="unvisited" style="top:31.18%"></span>
-      <span class="unvisited" style="top:31.94%"></span>
-      <span class="unvisited" style="top:33.46%"></span>
       <span class="unvisited" style="top:34.22%"></span>
       <span class="unvisited" style="top:34.98%"></span>
       <span class="unvisited" style="top:35.74%"></span>
       <span class="unvisited" style="top:36.50%"></span>
-      <span class="unvisited" style="top:39.16%"></span>
-      <span class="unvisited" style="top:39.92%"></span>
       <span class="some-visited" style="top:44.49%"></span>
       <span class="unvisited" style="top:44.87%"></span>
       <span class="unvisited" style="top:45.63%"></span>
@@ -68,12 +62,6 @@
       <span class="unvisited" style="bottom:33.46%"></span>
       <span class="unvisited" style="bottom:31.18%"></span>
       <span class="unvisited" style="bottom:28.90%"></span>
-      <span class="unvisited" style="bottom:18.63%"></span>
-      <span class="unvisited" style="bottom:18.25%"></span>
-      <span class="unvisited" style="bottom:17.87%"></span>
-      <span class="unvisited" style="bottom:17.49%"></span>
-      <span class="unvisited" style="bottom:15.97%"></span>
-      <span class="unvisited" style="bottom:9.89%"></span>
       <span class="unvisited" style="bottom:8.37%"></span>
     </div>
     <div id="report">
@@ -158,15 +146,15 @@
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span > </span>
-<a id="L80"></a><span class="unvisited"> </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span > </span>
-<a id="L82"></a><span class="unvisited"> </span>
+<a id="L82"></a><span class="visited"> </span>
 <a id="L83"></a><span > </span>
-<a id="L84"></a><span class="unvisited"> </span>
+<a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span class="unvisited"> </span>
+<a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span > </span>
 <a id="L90"></a><span class="unvisited"> </span>
 <a id="L91"></a><span > </span>
@@ -181,9 +169,9 @@
 <a id="L100"></a><span > </span>
 <a id="L101"></a><span > </span>
 <a id="L102"></a><span > </span>
-<a id="L103"></a><span class="unvisited"> </span>
+<a id="L103"></a><span class="visited"> </span>
 <a id="L104"></a><span > </span>
-<a id="L105"></a><span class="unvisited"> </span>
+<a id="L105"></a><span class="visited"> </span>
 <a id="L106"></a><span > </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
@@ -292,14 +280,14 @@
 <a id="L211"></a><span > </span>
 <a id="L212"></a><span > </span>
 <a id="L213"></a><span > </span>
-<a id="L214"></a><span class="unvisited"> </span>
-<a id="L215"></a><span class="unvisited"> </span>
-<a id="L216"></a><span class="unvisited"> </span>
-<a id="L217"></a><span class="unvisited"> </span>
+<a id="L214"></a><span class="visited"> </span>
+<a id="L215"></a><span class="visited"> </span>
+<a id="L216"></a><span class="visited"> </span>
+<a id="L217"></a><span class="visited"> </span>
 <a id="L218"></a><span > </span>
 <a id="L219"></a><span > </span>
 <a id="L220"></a><span > </span>
-<a id="L221"></a><span class="unvisited"> </span>
+<a id="L221"></a><span class="visited"> </span>
 <a id="L222"></a><span > </span>
 <a id="L223"></a><span > </span>
 <a id="L224"></a><span class="visited"> </span>
@@ -315,7 +303,7 @@
 <a id="L234"></a><span > </span>
 <a id="L235"></a><span > </span>
 <a id="L236"></a><span > </span>
-<a id="L237"></a><span class="unvisited"> </span>
+<a id="L237"></a><span class="visited"> </span>
 <a id="L238"></a><span > </span>
 <a id="L239"></a><span > </span>
 <a id="L240"></a><span > </span>
@@ -679,25 +667,25 @@ module P = struct
 
     let value (v : t) = <span data-count="3">v</span>.value
 
-    let set_value (v : t) x = <span data-count="194">v</span>.value &lt;- x
+    let set_value (v : t) x = <span data-count="212">v</span>.value &lt;- x
 
-    let mut (v : t) = <span data-count="194">v</span>.orig.mut
+    let mut (v : t) = <span data-count="212">v</span>.orig.mut
 
-    let typ (v : t) = <span data-count="194">v</span>.orig.typ
+    let typ (v : t) = <span data-count="212">v</span>.orig.typ
   end
 
   module Table = struct
     type t = table
 
-    let get t i = <span data-count="0">t</span>.(i)
+    let get t i = <span data-count="1">t</span>.(i)
 
-    let set t i v = <span data-count="0">t</span>.(i) &lt;- v
+    let set t i v = <span data-count="1">t</span>.(i) &lt;- v
 
-    let size t = <span data-count="0">A</span>rray.length t
+    let size t = <span data-count="2">A</span>rray.length t
 
     let typ _t =
       (* TODO add type to table *)
-      <span data-count="0">(</span>Null, Func_ht)
+      <span data-count="1">(</span>Null, Func_ht)
 
     let max_size _t = <span data-count="0">a</span>ssert false
 
@@ -712,21 +700,21 @@ module P = struct
     type t = elem
 
     let get (elem : t) i : Value.ref_value =
-      <span data-count="0">m</span>atch elem.value.(i) with <span data-count="0">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
+      <span data-count="1">m</span>atch elem.value.(i) with <span data-count="1">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
 
-    let size (elem : t) = <span data-count="0">A</span>rray.length elem.value
+    let size (elem : t) = <span data-count="1">A</span>rray.length elem.value
   end
 
   module Memory = struct
     include Symbolic_memory.M
 
     let concretise a =
-      <span data-count="3428">l</span>et open Expr in
+      <span data-count="3689">l</span>et open Expr in
       Choice.with_thread (fun thread -&gt;
-          <span data-count="3426">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="3426">l</span>et module Solver = (val solver_mod) in
+          <span data-count="3689">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="3690">l</span>et module Solver = (val solver_mod) in
           match a.e with
-          | <span data-count="3427">V</span>al _ | <span data-count="0">P</span>tr (_, { e = Val _; _ }) -&gt; a
+          | <span data-count="3690">V</span>al _ | <span data-count="0">P</span>tr (_, { e = Val _; _ }) -&gt; a
           | <span data-count="0">P</span>tr (base, offset) -&gt;
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert <span data-count="0">(</span>Solver.check solve<span data-count="0">r</span> @@ Thread.p<span data-count="0">c</span> thread);
@@ -748,12 +736,12 @@ module P = struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m (a : int32) =
-      <span data-count="3427">C</span>hoice.with_thread (fun thread -&gt;
-          <span data-count="3427">l</span>et pc = Thread.pc thread in
-          <span data-count="3428">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="3428">l</span>et module Solver = (val solver_mod) in
+      <span data-count="3690">C</span>hoice.with_thread (fun thread -&gt;
+          <span data-count="3689">l</span>et pc = Thread.pc thread in
+          <span data-count="3689">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="3689">l</span>et module Solver = (val solver_mod) in
           match a.e with
-          | <span data-count="3427">V</span>al (Num (I32 _)) -&gt; Ok a
+          | <span data-count="3689">V</span>al (Num (I32 _)) -&gt; Ok a
           | <span data-count="0">P</span>tr (base, offset) -&gt; (
             match Hashtbl.find m.chunks base with
             | <span data-count="0">e</span>xception Not_found -&gt; Error Trap.Memory_leak_use_after_free
@@ -769,31 +757,31 @@ module P = struct
 
     let with_concrete (m : memory) (a : int32) (f : memory -&gt; int32 -&gt; 'a) :
       'a Choice.t =
-      <span data-count="3428">C</span>hoice.bind (concretis<span data-count="3428">e</span> a) (fun addr -&gt;
-          <span data-count="3426">C</span>hoice.bind (check_within_bound<span data-count="3427">s</span> m addr) (function
-            | <span data-count="3427">O</span>k a -&gt; Choice.return @@ <span data-count="3428">f</span> m a
+      <span data-count="3689">C</span>hoice.bind (concretis<span data-count="3689">e</span> a) (fun addr -&gt;
+          <span data-count="3689">C</span>hoice.bind (check_within_bound<span data-count="3689">s</span> m addr) (function
+            | <span data-count="3689">O</span>k a -&gt; Choice.return @@ <span data-count="3688">f</span> m a
             | <span data-count="0">E</span>rror t -&gt; Choice.trap t ) )
 
     let load_8_s m a = <span data-count="0">w</span>ith_concrete m a load_8_s
 
-    let load_8_u m a = <span data-count="676">w</span>ith_concrete m a load_8_u
+    let load_8_u m a = <span data-count="731">w</span>ith_concrete m a load_8_u
 
     let load_16_s m a = <span data-count="0">w</span>ith_concrete m a load_16_s
 
     let load_16_u m a = <span data-count="0">w</span>ith_concrete m a load_16_u
 
-    let load_32 m a = <span data-count="2021">w</span>ith_concrete m a load_32
+    let load_32 m a = <span data-count="2177">w</span>ith_concrete m a load_32
 
     let load_64 m a = <span data-count="0">w</span>ith_concrete m a load_64
 
     let store_8 m ~addr v =
-      <span data-count="134">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="134">s</span>tore_8 m ~addr v)
+      <span data-count="139">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="139">s</span>tore_8 m ~addr v)
 
     let store_16 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_16 m ~addr v)
 
     let store_32 m ~addr v =
-      <span data-count="597">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="597">s</span>tore_32 m ~addr v)
+      <span data-count="642">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="642">s</span>tore_32 m ~addr v)
 
     let store_64 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_64 m ~addr v)
@@ -811,10 +799,10 @@ module P = struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="3430">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="3429">l</span>et f (t : thread) =
-        <span data-count="3430">l</span>et memories = Thread.memories t in
-        <span data-count="3429">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="3430">d</span> env) orig_mem memories id
+      <span data-count="3691">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="3691">l</span>et f (t : thread) =
+        <span data-count="3691">l</span>et memories = Thread.memories t in
+        <span data-count="3691">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="3691">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -823,30 +811,30 @@ module P = struct
     let get_extern_func = Link_env.get_extern_func
 
     let get_table (env : t) i : Table.t Choice.t =
-      <span data-count="0">l</span>et orig_table = Link_env.get_table env i in
-      <span data-count="0">l</span>et f (t : thread) =
-        <span data-count="0">l</span>et tables = Thread.tables t in
-        <span data-count="0">S</span>ymbolic_table.get_table (Link_env.i<span data-count="0">d</span> env) orig_table tables i
+      <span data-count="2">l</span>et orig_table = Link_env.get_table env i in
+      <span data-count="2">l</span>et f (t : thread) =
+        <span data-count="2">l</span>et tables = Thread.tables t in
+        <span data-count="2">S</span>ymbolic_table.get_table (Link_env.i<span data-count="2">d</span> env) orig_table tables i
       in
       Choice.with_thread f
 
-    let get_elem env i = <span data-count="0">L</span>ink_env.get_elem env i
+    let get_elem env i = <span data-count="2">L</span>ink_env.get_elem env i
 
     let get_data env n =
       <span data-count="2">l</span>et data = Link_env.get_data env n in
       <span data-count="2">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="197">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="197">l</span>et f (t : thread) =
-        <span data-count="197">l</span>et globals = Thread.globals t in
-        <span data-count="197">S</span>ymbolic_global.get_global (Link_env.i<span data-count="197">d</span> env) orig_global globals i
+      <span data-count="215">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="215">l</span>et f (t : thread) =
+        <span data-count="215">l</span>et globals = Thread.globals t in
+        <span data-count="215">S</span>ymbolic_global.get_global (Link_env.i<span data-count="215">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
     let drop_elem _ =
       (* TODO ? *)
-      <span data-count="0">(</span>)
+      <span data-count="1">(</span>)
 
     let drop_data = Link_env.drop_data
 
@@ -861,18 +849,18 @@ module P = struct
       ; to_run : simplified expr list
       }
 
-    let env (t : t) = <span data-count="5">t</span>.env
+    let env (t : t) = <span data-count="9">t</span>.env
 
-    let modul (t : t) = <span data-count="193">t</span>.modul
+    let modul (t : t) = <span data-count="215">t</span>.modul
 
-    let to_run (t : t) = <span data-count="4">t</span>.to_run
+    let to_run (t : t) = <span data-count="7">t</span>.to_run
   end
 end
 
-module P' : Interpret_functor_intf.P = P
+module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  <span data-count="4">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  <span data-count="7">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
 </code></pre>
       </div>
     </div>

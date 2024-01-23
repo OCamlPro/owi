@@ -1,8 +1,12 @@
 {0 owi}
 
-{{:https://github.com/ocamlpro/owi} owi} is an {{:https://ocaml.org} OCaml} toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.
+{{:https://github.com/ocamlpro/owi} owi} is a toolchain to work with WebAssembly. It is written in {{:https://ocaml.org} OCaml}.
 
-To get started, have a look at the {{:https://github.com/OCamlPro/owi#quickstart} quickstart} section of the README.
+Owi provides many tools: a formatter, an optimizer, a concrete interpreter, a script interpreter and a symbolic interpreter. It also allows to do bug finding on C code by compiling it to Wasm and running the symbolic interpreter.
+
+To get started, have a look at the {{:https://github.com/OCamlPro/owi} README} which contains pointers to general documentation and examples.
+
+Here you will only find the API documentation which is written towards people using the OCaml library directly or people trying to understand the code of Owi such as its developpers. :-)
 
 {1:api API}
 
@@ -11,28 +15,74 @@ Owi.Parse
 Owi.Types
 Owi.Compile
 Owi.Check
-Owi.Simplify
 Owi.Typecheck
+Owi.Optimize
 Owi.Link
 Owi.Log
 Owi.Interpret
 Owi.Script
-Owi.Pp
-Owi.Value
 }
 
 {1:private_api Private API}
 
-You shouldn't have to use any of these modules, they're used internally only.
+You shouldn't have to use any of these modules, they're used internally only. Nonetheless, some modules should maybe move to the public API, open an issue on the repository if you believe a mistake has been done.
 
 {!modules:
+Owi.Assigned
+Owi.C_instrumentor
+Owi.C_share
+Owi.C_share_site
+Owi.Choice_intf
+Owi.Cmd_c
+Owi.Cmd_fmt
+Owi.Cmd_opt
+Owi.Cmd_run
+Owi.Cmd_script
+Owi.Cmd_sym
+Owi.Concrete
+Owi.Concrete_choice
+Owi.Concrete_global
+Owi.Concrete_memory
+Owi.Concrete_table
+Owi.Concrete_value
 Owi.Convert
+Owi.Env_id
 Owi.Float32
 Owi.Float64
+Owi.Format
+Owi.Func_id
+Owi.Func_intf
+Owi.Grouped
+Owi.Imported
+Owi.Indexed
 Owi.Int32
 Owi.Int64
+Owi.Interpret_intf
 Owi.Lexer
+Owi.Link_env
 Owi.Menhir_parser
+Owi.Named
+Owi.Result
+Owi.Rewrite
+Owi.Runtime
+Owi.Simplified
+Owi.Simplified_types
+Owi.Symbolic
+Owi.Symbolic_choice
+Owi.Symbolic_global
+Owi.Symbolic_memory
+Owi.Symbolic_table
+Owi.Symbolic_value
 Owi.Spectest
+Owi.Stack
+Owi.String_map
+Owi.Syntax
+Owi.Text
+Owi.Thread
+Owi.Tracing
+Owi.Trap
+Owi.Typecheck
+Owi.Value_intf
+Owi.V
 Owi.Wutf8
 }

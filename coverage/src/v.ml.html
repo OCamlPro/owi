@@ -219,21 +219,21 @@ include (
 
     type float64 = Float64.t
 
-    let const_i32 x = <span data-count="21951693">x</span>
+    let const_i32 x = <span data-count="21949616">x</span>
 
-    let const_i64 x = <span data-count="10226757">x</span>
+    let const_i64 x = <span data-count="10227213">x</span>
 
-    let const_f32 x = <span data-count="114903">x</span>
+    let const_f32 x = <span data-count="114900">x</span>
 
-    let const_f64 x = <span data-count="112283">x</span>
+    let const_f64 x = <span data-count="112280">x</span>
 
     include Concrete_value
 
     module Ref = struct
       let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-        <span data-count="1605606">m</span>atch r with
-        | <span data-count="1602074">F</span>uncref (Some f) -&gt; Ref_value f
-        | <span data-count="3532">F</span>uncref None -&gt; Null
+        <span data-count="1605592">m</span>atch r with
+        | <span data-count="1602061">F</span>uncref (Some f) -&gt; Ref_value f
+        | <span data-count="3531">F</span>uncref None -&gt; Null
         | <span data-count="0">_</span> -&gt; Type_mismatch
 
       let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
@@ -255,7 +255,7 @@ include (
 
       let or_ = ( || )
 
-      let int32 = function <span data-count="1951632">t</span>rue -&gt; 1l | <span data-count="14170528">f</span>alse -&gt; 0l
+      let int32 = function <span data-count="1951218">t</span>rue -&gt; 1l | <span data-count="14170107">f</span>alse -&gt; 0l
 
       let pp = Format.pp_bool
     end
@@ -264,7 +264,7 @@ include (
       include Int32
       include Convert.Int32
 
-      let to_bool i = <span data-count="16114421">I</span>nt32.ne i 0l
+      let to_bool i = <span data-count="16113621">I</span>nt32.ne i 0l
     end
 
     module I64 = struct

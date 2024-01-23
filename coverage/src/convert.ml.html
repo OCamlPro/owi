@@ -614,11 +614,11 @@ module MInt32 = struct
       else <span data-count="27">I</span>nt64.(to_int32 (of_floa<span data-count="27">t</span> xf))
 
   let trunc_sat_f64_s x =
-    <span data-count="47">i</span>f Float64.ne x x then <span data-count="8">0</span>l
+    <span data-count="46">i</span>f Float64.ne x x then <span data-count="8">0</span>l
     else
-      <span data-count="39">l</span>et xf = Float64.to_float x in
-      <span data-count="39">i</span>f xf &lt; Int32.(to_floa<span data-count="39">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
-      else <span data-count="35">i</span>f xf &gt;= -<span data-count="35">.</span>Int32.(to_floa<span data-count="35">t</span> min_int) then <span data-count="6">I</span>nt32.max_int
+      <span data-count="38">l</span>et xf = Float64.to_float x in
+      <span data-count="38">i</span>f xf &lt; Int32.(to_floa<span data-count="38">t</span> min_int) then <span data-count="4">I</span>nt32.min_int
+      else <span data-count="34">i</span>f xf &gt;= -<span data-count="34">.</span>Int32.(to_floa<span data-count="34">t</span> min_int) then <span data-count="5">I</span>nt32.max_int
       else <span data-count="29">I</span>nt32.of_float xf
 
   let trunc_sat_f64_u x =
@@ -718,8 +718,8 @@ module MFloat32 = struct
   type t = Float32.t
 
   let demote_f64 x =
-    <span data-count="176">l</span>et xf = Float64.to_float x in
-    <span data-count="176">i</span>f xf = xf then <span data-count="164">F</span>loat32.of_float xf
+    <span data-count="175">l</span>et xf = Float64.to_float x in
+    <span data-count="175">i</span>f xf = xf then <span data-count="163">F</span>loat32.of_float xf
     else
       <span data-count="12">l</span>et nan64bits = Float64.to_bits x in
       <span data-count="12">l</span>et sign_field =
@@ -732,7 +732,7 @@ module MFloat32 = struct
       <span data-count="12">l</span>et nan32bits = Int32.logor 0x7fc0_0000l (MInt32.wrap_i6<span data-count="12">4</span> fields) in
       <span data-count="12">F</span>loat32.of_bits nan32bits
 
-  let convert_i32_s x = <span data-count="45">F</span>loat32.of_float (Int32.to_floa<span data-count="45">t</span> x)
+  let convert_i32_s x = <span data-count="44">F</span>loat32.of_float (Int32.to_floa<span data-count="44">t</span> x)
 
   (*
    * Similar to convert_i64_u below, the high half of the i32 range are beyond
@@ -799,7 +799,7 @@ module MFloat64 = struct
     <span data-count="27">F</span>loat64.of_float
       Int64.(to_floa<span data-count="27">t</span> (logan<span data-count="27">d</span> (of_int3<span data-count="27">2</span> x) 0x0000_0000_ffff_ffffL))
 
-  let convert_i64_s x = <span data-count="39">F</span>loat64.of_float (Int64.to_floa<span data-count="39">t</span> x)
+  let convert_i64_s x = <span data-count="38">F</span>loat64.of_float (Int64.to_floa<span data-count="38">t</span> x)
 
   (*
    * Values in the low half of the int64 range can be converted with a signed

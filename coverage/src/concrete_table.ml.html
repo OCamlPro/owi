@@ -161,24 +161,24 @@ type t =
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
-    <span data-count="824">i</span>ncr r;
-    <span data-count="824">!</span>r
+    <span data-count="796">i</span>ncr r;
+    <span data-count="796">!</span>r
 
 let init ?label (typ : simplified table_type) : t =
-  <span data-count="824">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="796">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
-  <span data-count="824">l</span>et table = Array.make limits.min null in
-  <span data-count="824">{</span> id = fres<span data-count="824">h</span> (); label; limits; typ = ref_type; data = table }
+  <span data-count="796">l</span>et table = Array.make limits.min null in
+  <span data-count="796">{</span> id = fres<span data-count="796">h</span> (); label; limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="54">t</span>able.data &lt;- data
 
-let get t i = <span data-count="1605790">t</span>.data.(i)
+let get t i = <span data-count="1605776">t</span>.data.(i)
 
-let set t i v = <span data-count="2336">t</span>.data.(i) &lt;- v
+let set t i v = <span data-count="2320">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="1607090">A</span>rray.length t.data
+let size t = <span data-count="1607064">A</span>rray.length t.data
 
-let typ t = <span data-count="1605668">t</span>.typ
+let typ t = <span data-count="1605651">t</span>.typ
 
 let max_size t = <span data-count="66">t</span>.limits.max
 

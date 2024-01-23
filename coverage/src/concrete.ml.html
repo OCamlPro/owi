@@ -263,15 +263,15 @@ module P = struct
   module Elem = struct
     type t = elem
 
-    let get (e : t) i = <span data-count="2298">e</span>.value.(i)
+    let get (e : t) i = <span data-count="2282">e</span>.value.(i)
 
-    let size (e : t) = <span data-count="770">A</span>rray.length e.value
+    let size (e : t) = <span data-count="761">A</span>rray.length e.value
   end
 
   module Data = struct
     type t = data
 
-    let value data = <span data-count="384">d</span>ata.Link_env.value
+    let value data = <span data-count="376">d</span>ata.Link_env.value
   end
 
   module Env = struct
@@ -286,8 +286,8 @@ module P = struct
     let get_elem = Link_env.get_elem
 
     let get_data env n =
-      <span data-count="664">l</span>et data = Link_env.get_data env n in
-      <span data-count="664">C</span>hoice.return data
+      <span data-count="654">l</span>et data = Link_env.get_data env n in
+      <span data-count="654">C</span>hoice.return data
 
     let get_global = Link_env.get_global
 
@@ -302,11 +302,11 @@ module P = struct
     (** runnable module *)
     type t = extern_func Link.module_to_run
 
-    let env (t : extern_func Link.module_to_run) = <span data-count="991">t</span>.env
+    let env (t : extern_func Link.module_to_run) = <span data-count="978">t</span>.env
 
-    let modul (t : extern_func Link.module_to_run) = <span data-count="923">t</span>.modul
+    let modul (t : extern_func Link.module_to_run) = <span data-count="910">t</span>.modul
 
-    let to_run (t : extern_func Link.module_to_run) = <span data-count="2684">t</span>.to_run
+    let to_run (t : extern_func Link.module_to_run) = <span data-count="2615">t</span>.to_run
   end
 end
 </code></pre>

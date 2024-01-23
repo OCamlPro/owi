@@ -400,43 +400,43 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : simplified val_type =
-    <span data-count="3043">m</span>atch e with
-    | <span data-count="1542">I</span>32 -&gt; Num_type I32
-    | <span data-count="251">I</span>64 -&gt; Num_type I64
-    | <span data-count="498">F</span>32 -&gt; Num_type F32
-    | <span data-count="749">F</span>64 -&gt; Num_type F64
+    <span data-count="2809">m</span>atch e with
+    | <span data-count="1426">I</span>32 -&gt; Num_type I32
+    | <span data-count="233">I</span>64 -&gt; Num_type I64
+    | <span data-count="459">F</span>32 -&gt; Num_type F32
+    | <span data-count="688">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : simplified result_type =
-    <span data-count="2785">m</span>atch r with
-    | <span data-count="2261">R</span>0 -&gt; []
-    | <span data-count="524">R</span>1 a -&gt; [ elt_typ<span data-count="524">e</span> a ]
+    <span data-count="2573">m</span>atch r with
+    | <span data-count="2077">R</span>0 -&gt; []
+    | <span data-count="496">R</span>1 a -&gt; [ elt_typ<span data-count="496">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; simplified param_type = function
-    | <span data-count="24">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="2519">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2519">e</span> hd) :: arg_typ<span data-count="2519">e</span> tl
+    | <span data-count="42">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="2313">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2313">e</span> hd) :: arg_typ<span data-count="2313">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="2785">R</span>es -&gt; []
+    | <span data-count="2573">R</span>es -&gt; []
 
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
   let extern_type (Extern_func (Func (arg, res), _)) :
     simplified Types.func_type =
-    <span data-count="2785">(</span>arg_typ<span data-count="2785">e</span> arg, res_typ<span data-count="2785">e</span> res)
+    <span data-count="2573">(</span>arg_typ<span data-count="2573">e</span> arg, res_typ<span data-count="2573">e</span> res)
 
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="106">-</span>1 in
+    let r = ref ~<span data-count="576">-</span>1 in
     fun () -&gt;
-      <span data-count="9299">i</span>ncr r;
-      <span data-count="9299">!</span>r
+      <span data-count="9223">i</span>ncr r;
+      <span data-count="9223">!</span>r
 
-  let wasm func env : t = <span data-count="9299">W</span>ASM (fres<span data-count="9299">h</span> (), func, env)
+  let wasm func env : t = <span data-count="9223">W</span>ASM (fres<span data-count="9223">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -486,18 +486,18 @@ type t =
 
 (* TODO: make a new kind of instr for this *)
 let of_instr (i : simplified instr) : t =
-  <span data-count="572">m</span>atch i with
-  | <span data-count="198">I</span>32_const c -&gt; I32 c
-  | <span data-count="128">I</span>64_const c -&gt; I64 c
-  | <span data-count="123">F</span>32_const c -&gt; F32 c
-  | <span data-count="123">F</span>64_const c -&gt; F64 c
+  <span data-count="415">m</span>atch i with
+  | <span data-count="103">I</span>32_const c -&gt; I32 c
+  | <span data-count="98">I</span>64_const c -&gt; I64 c
+  | <span data-count="107">F</span>32_const c -&gt; F32 c
+  | <span data-count="107">F</span>64_const c -&gt; F64 c
   | _ -&gt; assert false
 
 let to_instr = function
-  | <span data-count="185">I</span>32 c -&gt; I32_const c
+  | <span data-count="114">I</span>32 c -&gt; I32_const c
   | <span data-count="77">I</span>64 c -&gt; I64_const c
-  | <span data-count="38">F</span>32 c -&gt; F32_const c
-  | <span data-count="39">F</span>64 c -&gt; F64_const c
+  | <span data-count="36">F</span>32 c -&gt; F32_const c
+  | <span data-count="37">F</span>64 c -&gt; F64_const c
   | Ref _ -&gt; assert false
 
 let pp fmt = function
@@ -508,14 +508,14 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
 let ref_null' = function
-  | <span data-count="860">F</span>unc_ht -&gt; Funcref None
+  | <span data-count="831">F</span>unc_ht -&gt; Funcref None
   | <span data-count="117">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">A</span>rray_ht -&gt; Arrayref None
   | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht
   | Def_ht _ -&gt;
     assert false
 
-let ref_null typ = <span data-count="153">R</span>ef (ref_null<span data-count="153">'</span> typ)
+let ref_null typ = <span data-count="152">R</span>ef (ref_null<span data-count="152">'</span> typ)
 
 let ref_func (f : Func.t) : t = <span data-count="18">R</span>ef (Funcref (Some f))
 

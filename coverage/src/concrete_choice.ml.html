@@ -75,21 +75,21 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157416358">x</span> [@@inline]
+let return x = <span data-count="157403909">x</span> [@@inline]
 
-let bind x f = <span data-count="183863918">f</span> x [@@inline]
+let bind x f = <span data-count="183850282">f</span> x [@@inline]
 
 let ( let* ) = bind
 
-let select b = <span data-count="19577495">b</span> [@@inline]
+let select b = <span data-count="19576423">b</span> [@@inline]
 
-let select_i32 i = <span data-count="1608796">i</span> [@@inline]
+let select_i32 i = <span data-count="1608754">i</span> [@@inline]
 
 let get = ()
 
-let trap msg = <span data-count="4676">r</span>aise (Types.Trap msg)
+let trap msg = <span data-count="4654">r</span>aise (Types.Trap msg)
 
-let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4676">t</span>rap (Trap.to_strin<span data-count="4676">g</span> tr)
+let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4654">t</span>rap (Trap.to_strin<span data-count="4654">g</span> tr)
 </code></pre>
       </div>
     </div>

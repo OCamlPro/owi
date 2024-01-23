@@ -659,31 +659,31 @@ module Make (V : Value_intf.T) :
 
   let empty = []
 
-  let push s v = <span data-count="82011202">v</span> :: s
+  let push s v = <span data-count="82006121">v</span> :: s
 
   let push_const_bool s b = <span data-count="0">p</span>ush s (I32 (V.const_i3<span data-count="0">2</span> (if b then <span data-count="0">1</span>l else <span data-count="0">0</span>l)))
 
-  let push_bool s b = <span data-count="16124034">p</span>ush s (I32 (V.Bool.int3<span data-count="16124034">2</span> b))
+  let push_bool s b = <span data-count="16123311">p</span>ush s (I32 (V.Bool.int3<span data-count="16123311">2</span> b))
 
-  let push_const_i32 s i = <span data-count="5787858">p</span>ush s (I32 (V.const_i3<span data-count="5787858">2</span> i))
+  let push_const_i32 s i = <span data-count="5786480">p</span>ush s (I32 (V.const_i3<span data-count="5786480">2</span> i))
 
-  let push_i32 s i = <span data-count="5189364">p</span>ush s (I32 i)
+  let push_i32 s i = <span data-count="5188416">p</span>ush s (I32 i)
 
   let push_i32_of_int s i = <span data-count="12">p</span>ush_const_i32 s (Int32.of_in<span data-count="12">t</span> i)
 
-  let push_const_i64 s i = <span data-count="10225813">p</span>ush s (I64 (V.const_i6<span data-count="10225813">4</span> i))
+  let push_const_i64 s i = <span data-count="10225808">p</span>ush s (I64 (V.const_i6<span data-count="10225808">4</span> i))
 
-  let push_i64 s i = <span data-count="10139464">p</span>ush s (I64 i)
+  let push_i64 s i = <span data-count="10139442">p</span>ush s (I64 i)
 
   let push_i64_of_int s i = <span data-count="0">p</span>ush_const_i64 s (Int64.of_in<span data-count="0">t</span> i)
 
-  let push_const_f32 s f = <span data-count="114903">p</span>ush s (F32 (V.const_f3<span data-count="114903">2</span> f))
+  let push_const_f32 s f = <span data-count="114900">p</span>ush s (F32 (V.const_f3<span data-count="114900">2</span> f))
 
-  let push_f32 s f = <span data-count="80352">p</span>ush s (F32 f)
+  let push_f32 s f = <span data-count="80328">p</span>ush s (F32 f)
 
-  let push_const_f64 s f = <span data-count="112283">p</span>ush s (F64 (V.const_f6<span data-count="112283">4</span> f))
+  let push_const_f64 s f = <span data-count="112280">p</span>ush s (F64 (V.const_f6<span data-count="112280">4</span> f))
 
-  let push_f64 s f = <span data-count="79329">p</span>ush s (F64 f)
+  let push_f64 s f = <span data-count="79304">p</span>ush s (F64 f)
 
   let push_as_externref s ty v = <span data-count="1">p</span>ush s (V.ref_externre<span data-count="1">f</span> ty v)
 
@@ -695,73 +695,73 @@ module Make (V : Value_intf.T) :
   let pp fmt (s : t) =
     <span data-count="14">F</span>ormat.pp_list ~pp_sep:(fun fmt () -&gt; <span data-count="2">F</span>ormat.pp_string fmt " ; ") V.pp fmt s
 
-  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70309421">h</span>d :: tl -&gt; (hd, tl)
+  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70305101">h</span>d :: tl -&gt; (hd, tl)
 
-  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="735">_</span>hd :: tl -&gt; tl
+  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="745">_</span>hd :: tl -&gt; tl
 
   let pop_i32 s =
-    <span data-count="4897421">l</span>et hd, tl = pop s in
-    <span data-count="4897420">m</span>atch hd with
-    | <span data-count="4897420">I</span>32 n -&gt; (n, tl)
+    <span data-count="4897440">l</span>et hd, tl = pop s in
+    <span data-count="4897440">m</span>atch hd with
+    | <span data-count="4897440">I</span>32 n -&gt; (n, tl)
     | <span data-count="0">_</span> | <span data-count="0">(</span>exception Empty) -&gt; Log.err "invalid type (expected i32)"
 
   let pop2_i32 s =
-    <span data-count="7843020">t</span>ry
+    <span data-count="7841325">t</span>ry
       let n2, s = pop s in
-      <span data-count="7843020">l</span>et n1, tl = pop s in
-      <span data-count="7843020">m</span>atch (n1, n2) with
-      | <span data-count="7843020">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
+      <span data-count="7841325">l</span>et n1, tl = pop s in
+      <span data-count="7841325">m</span>atch (n1, n2) with
+      | <span data-count="7841325">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32)"
 
   let pop_i64 s =
-    <span data-count="10005071">t</span>ry
+    <span data-count="10005067">t</span>ry
       let hd, tl = pop s in
-      <span data-count="10005071">m</span>atch hd with
-      | <span data-count="10005071">I</span>64 n -&gt; (n, tl)
+      <span data-count="10005067">m</span>atch hd with
+      | <span data-count="10005067">I</span>64 n -&gt; (n, tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
   let pop2_i64 s =
-    <span data-count="10226969">t</span>ry
+    <span data-count="10226953">t</span>ry
       let n2, s = pop s in
-      <span data-count="10226969">l</span>et n1, tl = pop s in
-      <span data-count="10226969">m</span>atch (n1, n2) with
-      | <span data-count="10226969">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
+      <span data-count="10226953">l</span>et n1, tl = pop s in
+      <span data-count="10226953">m</span>atch (n1, n2) with
+      | <span data-count="10226953">I</span>64 n1, I64 n2 -&gt; ((n1, n2), tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i64)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i64)"
 
   let pop_f32 s =
-    <span data-count="1347">t</span>ry
+    <span data-count="1343">t</span>ry
       let hd, tl = pop s in
-      <span data-count="1347">m</span>atch hd with
-      | <span data-count="1347">F</span>32 f -&gt; (f, tl)
+      <span data-count="1343">m</span>atch hd with
+      | <span data-count="1343">F</span>32 f -&gt; (f, tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f32)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f32)"
 
   let pop2_f32 s =
-    <span data-count="129465">t</span>ry
+    <span data-count="129458">t</span>ry
       let n2, s = pop s in
-      <span data-count="129465">l</span>et n1, tl = pop s in
-      <span data-count="129465">m</span>atch (n1, n2) with
-      | <span data-count="129465">F</span>32 n1, F32 n2 -&gt; ((n1, n2), tl)
+      <span data-count="129458">l</span>et n1, tl = pop s in
+      <span data-count="129458">m</span>atch (n1, n2) with
+      | <span data-count="129458">F</span>32 n1, F32 n2 -&gt; ((n1, n2), tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f32)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f32)"
 
   let pop_f64 s =
-    <span data-count="1485">t</span>ry
+    <span data-count="1478">t</span>ry
       let hd, tl = pop s in
-      <span data-count="1485">m</span>atch hd with
-      | <span data-count="1485">F</span>64 f -&gt; (f, tl)
+      <span data-count="1478">m</span>atch hd with
+      | <span data-count="1478">F</span>64 f -&gt; (f, tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f64)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f64)"
 
   let pop2_f64 s =
-    <span data-count="126309">t</span>ry
+    <span data-count="126301">t</span>ry
       let n2, s = pop s in
-      <span data-count="126309">l</span>et n1, tl = pop s in
-      <span data-count="126309">m</span>atch (n1, n2) with
-      | <span data-count="126309">F</span>64 n1, F64 n2 -&gt; ((n1, n2), tl)
+      <span data-count="126301">l</span>et n1, tl = pop s in
+      <span data-count="126301">m</span>atch (n1, n2) with
+      | <span data-count="126301">F</span>64 n1, F64 n2 -&gt; ((n1, n2), tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected f64)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected f64)"
 
@@ -782,21 +782,21 @@ module Make (V : Value_intf.T) :
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected ref)"
 
   let pop_bool s =
-    <span data-count="16115359">t</span>ry
+    <span data-count="16114615">t</span>ry
       let hd, tl = pop s in
-      <span data-count="16115359">m</span>atch hd with
-      | <span data-count="16115358">I</span>32 n -&gt; (V.I32.to_boo<span data-count="16115358">l</span> n, tl)
+      <span data-count="16114615">m</span>atch hd with
+      | <span data-count="16114615">I</span>32 n -&gt; (V.I32.to_boo<span data-count="16114615">l</span> n, tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32 (bool))"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32 (bool))"
 
   let pop_n s n =
-    <span data-count="11702324">(</span>List.filter<span data-count="11702324">i</span> (fun i _hd -&gt; <span data-count="11834072">i</span> &lt; n) s, List.filter<span data-count="11702324">i</span> (fun i _hd -&gt; <span data-count="11834072">i</span> &gt;= n) s)
+    <span data-count="11701551">(</span>List.filter<span data-count="11701551">i</span> (fun i _hd -&gt; <span data-count="11832983">i</span> &lt; n) s, List.filter<span data-count="11701551">i</span> (fun i _hd -&gt; <span data-count="11832983">i</span> &gt;= n) s)
 
-  let keep s n = <span data-count="3388642">L</span>ist.filteri (fun i _hd -&gt; <span data-count="495227">i</span> &lt; n) s
+  let keep s n = <span data-count="3387555">L</span>ist.filteri (fun i _hd -&gt; <span data-count="494472">i</span> &lt; n) s
 
   let rec drop_n s n =
-    <span data-count="16646927">i</span>f n = 0 then <span data-count="15596033">s</span>
-    else <span data-count="1050894">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="1050894">_</span> :: tl -&gt; drop_n tl (n - 1)
+    <span data-count="16646330">i</span>f n = 0 then <span data-count="15595382">s</span>
+    else <span data-count="1050948">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="1050948">_</span> :: tl -&gt; drop_n tl (n - 1)
 end
 </code></pre>
       </div>

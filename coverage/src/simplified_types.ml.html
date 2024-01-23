@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>simplified_types.ml &mdash; Coverage report</title>
-    <meta name="description" content="52.24% coverage in src/simplified_types.ml">
+    <meta name="description" content="95.52% coverage in src/simplified_types.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,32 +15,12 @@
           <span class="dirname">src/</span>simplified_types.ml
         </a>
       </h1>
-      <h2>52.24%</h2>
+      <h2>95.52%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:22.09%"></span>
-      <span class="some-visited" style="top:23.26%"></span>
-      <span class="unvisited" style="top:24.42%"></span>
-      <span class="unvisited" style="top:26.74%"></span>
-      <span class="unvisited" style="top:29.07%"></span>
       <span class="unvisited" style="top:30.23%"></span>
       <span class="unvisited" style="top:32.56%"></span>
       <span class="unvisited" style="top:33.72%"></span>
-      <span class="unvisited" style="bottom:32.56%"></span>
-      <span class="unvisited" style="bottom:31.40%"></span>
-      <span class="unvisited" style="bottom:30.23%"></span>
-      <span class="unvisited" style="bottom:29.07%"></span>
-      <span class="unvisited" style="bottom:25.58%"></span>
-      <span class="unvisited" style="bottom:24.42%"></span>
-      <span class="unvisited" style="bottom:20.93%"></span>
-      <span class="unvisited" style="bottom:19.77%"></span>
-      <span class="unvisited" style="bottom:17.44%"></span>
-      <span class="unvisited" style="bottom:10.47%"></span>
-      <span class="unvisited" style="bottom:9.30%"></span>
-      <span class="unvisited" style="bottom:8.14%"></span>
-      <span class="unvisited" style="bottom:6.98%"></span>
-      <span class="unvisited" style="bottom:5.81%"></span>
-      <span class="unvisited" style="bottom:4.65%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -63,13 +43,13 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span class="some-visited"> </span>
-<a id="L20"></a><span class="some-visited"> </span>
-<a id="L21"></a><span class="unvisited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="unvisited"> </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="unvisited"> </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span class="unvisited"> </span>
@@ -102,31 +82,31 @@
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
-<a id="L58"></a><span class="unvisited"> </span>
-<a id="L59"></a><span class="unvisited"> </span>
-<a id="L60"></a><span class="unvisited"> </span>
-<a id="L61"></a><span class="unvisited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="unvisited"> </span>
-<a id="L65"></a><span class="unvisited"> </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
 <a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
-<a id="L68"></a><span class="unvisited"> </span>
-<a id="L69"></a><span class="unvisited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
 <a id="L70"></a><span > </span>
-<a id="L71"></a><span class="unvisited"> </span>
+<a id="L71"></a><span class="visited"> </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span class="visited"> </span>
 <a id="L76"></a><span class="visited"> </span>
-<a id="L77"></a><span class="unvisited"> </span>
-<a id="L78"></a><span class="unvisited"> </span>
-<a id="L79"></a><span class="unvisited"> </span>
-<a id="L80"></a><span class="unvisited"> </span>
-<a id="L81"></a><span class="unvisited"> </span>
-<a id="L82"></a><span class="unvisited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span class="visited"> </span>
@@ -240,13 +220,13 @@ let equal_func_types (a : simplified func_type) (b : simplified func_type) :
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function
-  | ( <span data-count="1">A</span>ny_ht | <span data-count="0">N</span>one_ht | <span data-count="0">E</span>q_ht | <span data-count="0">I</span>31_ht | <span data-count="0">S</span>truct_ht | <span data-count="0">A</span>rray_ht | <span data-count="2842">F</span>unc_ht
-    | <span data-count="0">N</span>o_func_ht | <span data-count="340">E</span>xtern_ht | <span data-count="0">N</span>o_extern_ht
-    | <span data-count="0">D</span>ef_ht (Raw _) ) as t -&gt;
+  | ( <span data-count="23">A</span>ny_ht | <span data-count="4">N</span>one_ht | <span data-count="4">E</span>q_ht | <span data-count="17">I</span>31_ht | <span data-count="9">S</span>truct_ht | <span data-count="5">A</span>rray_ht | <span data-count="2812">F</span>unc_ht
+    | <span data-count="2">N</span>o_func_ht | <span data-count="357">E</span>xtern_ht | <span data-count="2">N</span>o_extern_ht
+    | <span data-count="6">D</span>ef_ht (Raw _) ) as t -&gt;
     Ok t
-  | <span data-count="0">D</span>ef_ht (Text i) -&gt; begin
+  | <span data-count="3">D</span>ef_ht (Text i) -&gt; begin
     match tbl with
-    | <span data-count="0">N</span>one -&gt; error_s "unknown type %s (no table)" i
+    | <span data-count="3">N</span>one -&gt; error_s "unknown type %s (no table)" i
     | <span data-count="0">S</span>ome tbl -&gt; begin
       match Hashtbl.find_opt tbl i with
       | <span data-count="0">N</span>one -&gt; error_s "unknown type %s (not found in table)" i
@@ -255,59 +235,59 @@ let convert_heap_type tbl = function
   end
 
 let convert_ref_type tbl (null, heap_type) =
-  <span data-count="3042">l</span>et+ heap_type = convert_heap_typ<span data-count="3042">e</span> tbl heap_type in
-  <span data-count="3042">(</span>null, heap_type)
+  <span data-count="3057">l</span>et+ heap_type = convert_heap_typ<span data-count="3057">e</span> tbl heap_type in
+  <span data-count="3054">(</span>null, heap_type)
 
 let convert_val_type tbl : text val_type -&gt; simplified val_type Result.t =
-  <span data-count="47691">f</span>unction
-  | <span data-count="38367">N</span>um_type _t as t -&gt; Ok t
-  | <span data-count="250">R</span>ef_type rt -&gt;
-    let+ rt = convert_ref_typ<span data-count="250">e</span> tbl rt in
-    <span data-count="250">R</span>ef_type rt
+  <span data-count="47139">f</span>unction
+  | <span data-count="37985">N</span>um_type _t as t -&gt; Ok t
+  | <span data-count="293">R</span>ef_type rt -&gt;
+    let+ rt = convert_ref_typ<span data-count="293">e</span> tbl rt in
+    <span data-count="290">R</span>ef_type rt
 
 let convert_param tbl (n, t) =
-  <span data-count="15568">l</span>et+ t = convert_val_typ<span data-count="15568">e</span> tbl t in
-  <span data-count="15568">(</span>n, t)
+  <span data-count="15348">l</span>et+ t = convert_val_typ<span data-count="15348">e</span> tbl t in
+  <span data-count="15347">(</span>n, t)
 
-let convert_pt tbl l = <span data-count="30489">l</span>ist_map (convert_para<span data-count="30489">m</span> tbl) l
+let convert_pt tbl l = <span data-count="30199">l</span>ist_map (convert_para<span data-count="30199">m</span> tbl) l
 
-let convert_rt tbl l = <span data-count="30489">l</span>ist_map (convert_val_typ<span data-count="30489">e</span> tbl) l
+let convert_rt tbl l = <span data-count="30198">l</span>ist_map (convert_val_typ<span data-count="30198">e</span> tbl) l
 
 let convert_func_type tbl (pt, rt) =
-  <span data-count="30489">l</span>et* pt = convert_p<span data-count="30489">t</span> tbl pt in
-  <span data-count="30489">l</span>et+ rt = convert_r<span data-count="30489">t</span> tbl rt in
-  <span data-count="30489">(</span>pt, rt)
+  <span data-count="30199">l</span>et* pt = convert_p<span data-count="30199">t</span> tbl pt in
+  <span data-count="30198">l</span>et+ rt = convert_r<span data-count="30198">t</span> tbl rt in
+  <span data-count="30198">(</span>pt, rt)
 
 let convert_storage_type tbl = function
-  | <span data-count="0">V</span>al_storage_t val_type -&gt;
-    let+ val_type = convert_val_typ<span data-count="0">e</span> tbl val_type in
-    <span data-count="0">V</span>al_storage_t val_type
-  | <span data-count="0">V</span>al_packed_t _packed_type as t -&gt; Ok t
+  | <span data-count="44">V</span>al_storage_t val_type -&gt;
+    let+ val_type = convert_val_typ<span data-count="44">e</span> tbl val_type in
+    <span data-count="43">V</span>al_storage_t val_type
+  | <span data-count="16">V</span>al_packed_t _packed_type as t -&gt; Ok t
 
 let convert_field_type tbl (mut, storage_type) =
-  <span data-count="0">l</span>et+ storage_type = convert_storage_typ<span data-count="0">e</span> tbl storage_type in
-  <span data-count="0">(</span>mut, storage_type)
+  <span data-count="60">l</span>et+ storage_type = convert_storage_typ<span data-count="60">e</span> tbl storage_type in
+  <span data-count="59">(</span>mut, storage_type)
 
 let convert_struct_field tbl (id, types) =
-  <span data-count="0">l</span>et+ types = list_ma<span data-count="0">p</span> (convert_field_typ<span data-count="0">e</span> tbl) types in
-  <span data-count="0">(</span>id, types)
+  <span data-count="18">l</span>et+ types = list_ma<span data-count="18">p</span> (convert_field_typ<span data-count="18">e</span> tbl) types in
+  <span data-count="18">(</span>id, types)
 
-let convert_struct_type tbl fields = <span data-count="0">l</span>ist_map (convert_struct_fiel<span data-count="0">d</span> tbl) fields
+let convert_struct_type tbl fields = <span data-count="18">l</span>ist_map (convert_struct_fiel<span data-count="18">d</span> tbl) fields
 
 let convert_str tbl = function
-  | <span data-count="530">D</span>ef_func_t func_t -&gt;
-    let+ func_t = convert_func_typ<span data-count="530">e</span> tbl func_t in
-    <span data-count="530">D</span>ef_func_t func_t
-  | <span data-count="0">D</span>ef_array_t field_t -&gt;
-    let+ field_t = convert_field_typ<span data-count="0">e</span> tbl field_t in
-    <span data-count="0">D</span>ef_array_t field_t
-  | <span data-count="0">D</span>ef_struct_t struct_t -&gt;
-    let+ struct_t = convert_struct_typ<span data-count="0">e</span> tbl struct_t in
-    <span data-count="0">D</span>ef_struct_t struct_t
+  | <span data-count="541">D</span>ef_func_t func_t -&gt;
+    let+ func_t = convert_func_typ<span data-count="541">e</span> tbl func_t in
+    <span data-count="541">D</span>ef_func_t func_t
+  | <span data-count="29">D</span>ef_array_t field_t -&gt;
+    let+ field_t = convert_field_typ<span data-count="29">e</span> tbl field_t in
+    <span data-count="28">D</span>ef_array_t field_t
+  | <span data-count="18">D</span>ef_struct_t struct_t -&gt;
+    let+ struct_t = convert_struct_typ<span data-count="18">e</span> tbl struct_t in
+    <span data-count="18">D</span>ef_struct_t struct_t
 
 let convert_table_type tbl (limits, ref_type) =
-  <span data-count="1321">l</span>et+ ref_type = convert_ref_typ<span data-count="1321">e</span> tbl ref_type in
-  <span data-count="1321">(</span>limits, ref_type)
+  <span data-count="1298">l</span>et+ ref_type = convert_ref_typ<span data-count="1298">e</span> tbl ref_type in
+  <span data-count="1298">(</span>limits, ref_type)
 </code></pre>
       </div>
     </div>
