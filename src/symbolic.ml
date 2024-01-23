@@ -257,7 +257,7 @@ module P = struct
   end
 end
 
-module P' : Interpret_functor_intf.P = P
+module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
