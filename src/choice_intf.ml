@@ -20,7 +20,7 @@ module type Base = sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 end
 
-module type Complete = sig
+module type Complete_without_run = sig
   include Base
 
   type thread
@@ -30,6 +30,10 @@ module type Complete = sig
   val with_thread : (thread -> 'b) -> 'b t
 
   val add_pc : V.vbool -> unit t
+end
+
+module type Complete = sig
+  include Complete_without_run
 
   val run : 'a t -> thread -> ('a * thread) Seq.t
 end
