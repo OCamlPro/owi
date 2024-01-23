@@ -6,7 +6,30 @@ open Types
 open Hc
 module Solver = Thread.Solver
 
-module P = struct
+module type Thread = sig
+  type t
+
+  type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
+
+  type solver = S : 'a solver_module * 'a -> solver
+
+  val memories : t -> Symbolic_memory.memories
+
+  val tables : t -> Symbolic_table.tables
+
+  val globals : t -> Symbolic_global.globals
+
+  val solver : t -> solver
+
+  val pc : t -> Symbolic_value.S.vbool list
+end
+
+module MakeP
+    (Thread : Thread)
+    (Choice_monad : Choice_intf.Complete_without_run
+                      with module V := Symbolic_value.S
+                       and type thread := Thread.t) =
+struct
   module Value = Symbolic_value.S
 
   type memory = Symbolic_memory.M.t
@@ -31,7 +54,7 @@ module P = struct
 
   type thread = Thread.t
 
-  module Choice = Symbolic_choice.MT
+  module Choice = Choice_monad
   module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
 
   let select (c : vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
@@ -251,6 +274,11 @@ module P = struct
 
     let to_run (t : t) = t.to_run
   end
+end
+
+module P = struct
+  include MakeP (Thread) (Symbolic_choice.MT) [@@inlined hint]
+  module Choice = Symbolic_choice.MT
 end
 
 module P' : Interpret_intf.P = P
