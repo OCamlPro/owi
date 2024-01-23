@@ -4,4 +4,4 @@
  (libraries owi))
 
 (cram
- (deps print_simplified.exe m.wat locals.wat locals_drop.wat))
+ (deps %{bin:owi} print_simplified.exe m.wat locals.wat locals_drop.wat))
