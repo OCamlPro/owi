@@ -37,6 +37,7 @@ Model:
   (model
     (symbol_0 (i32 1)))
 Reached problem!
+[1]
 ```
 
 Indeed, `1` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
@@ -79,6 +80,7 @@ Model:
   (model
     (symbol_0 (i32 -2147483644)))
 Reached problem!
+[1]
 ```
 
 And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
@@ -181,6 +183,7 @@ Model:
     (symbol_8 (i32 115))
     (symbol_9 (i32 100)))
 Reached problem!
+[1]
 ```
 
 ## Man page

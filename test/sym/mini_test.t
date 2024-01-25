@@ -5,3 +5,4 @@ mini test:
     (model
       (symbol_0 (i32 6)))
   Reached problem!
+  [1]
