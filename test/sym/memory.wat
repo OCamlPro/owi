@@ -61,7 +61,29 @@
     f64.store
   )
 
+  (func $i32 (param $a i32)
+    (if (i32.eqz (local.get $a))
+      (then unreachable))
+  )
+
+  (func $i64 (param $a i64)
+    (if (i64.eqz (local.get $a))
+      (then unreachable))
+  )
+
+  (func $f32 (param $a f32)
+    (if (f32.eq (local.get $a) (f32.const 0))
+      (then unreachable))
+  )
+
+  (func $f64 (param $a f64)
+    (if (f64.eq (local.get $a) (f64.const 0))
+      (then unreachable))
+  )
+
   (func $start
+    ;; objective: check that interactions with memory are ok
+
     (call $mem_set_i32_8 (i32.const 0) (call $i32_symbol))
     (call $mem_set_i32_16 (i32.const 4) (call $i32_symbol))
     (call $mem_set_i32 (i32.const 8) (call $i32_symbol))
@@ -75,51 +97,21 @@
 
     (call $mem_set_f64 (i32.const 48) (call $f64_symbol))
 
+    ;; 'unreachable' when argument (typ.load...) is equal to 0
+    ;; in memory.t, only one model symbol is equal to 0
+    (call $i32 (i32.load8_s (i32.const 0)))
+    (call $i32 (i32.load16_s (i32.const 4)))
+    (call $i32 (i32.load (i32.const 8)))
 
-    (if (i32.lt_s (i32.const 5) (i32.load8_s (i32.const 0)))
-      (then unreachable))
+    (call $i64 (i64.load8_u (i32.const 12)))
+    (call $i64 (i64.load16_u (i32.const 20)))
+    (call $i64 (i64.load32_u (i32.const 28)))
+    (call $i64 (i64.load (i32.const 36)))
 
-    (if (i32.lt_u (i32.const 5) (i32.load8_u (i32.const 0)))
-      (then unreachable))
+    (call $f32 (f32.load (i32.const 44)))
 
-    (if (i32.lt_s (i32.const 5) (i32.load16_s (i32.const 4)))
-      (then unreachable))
-
-    (if (i32.lt_u (i32.const 5) (i32.load16_u (i32.const 4)))
-      (then unreachable))
-
-    (if (i32.lt_s (i32.const 5) (i32.load (i32.const 8)))
-      (then unreachable))
-
-
-    (if (i64.gt_s (i64.const 5) (i64.load8_s (i32.const 12)))
-      (then unreachable))
-
-    (if (i64.gt_u (i64.const 5) (i64.load8_u (i32.const 12)))
-      (then unreachable))
-
-    (if (i64.gt_s (i64.const 5) (i64.load16_s (i32.const 20)))
-      (then unreachable))
-
-    (if (i64.gt_u (i64.const 5) (i64.load16_u (i32.const 20)))
-      (then unreachable))
-
-    (if (i64.gt_s (i64.const 5) (i64.load32_s (i32.const 28)))
-      (then unreachable))
-
-    (if (i64.gt_u (i64.const 5) (i64.load32_u (i32.const 28)))
-      (then unreachable))
-
-    (if (i64.gt_s (i64.const 5) (i64.load (i32.const 36)))
-      (then unreachable))
-
-
-    (if (f32.lt (f32.const 5) (f32.load (i32.const 44)))
-      (then unreachable))
-
-
-    (if (f64.gt (f64.const 5) (f64.load (i32.const 48)))
-      (then unreachable)))
+    (call $f64 (f64.load (i32.const 48)))
+  )
 
   (start $start)
 )
