@@ -6,3 +6,4 @@ symbolic extern module (assume and assert test):
       (symbol_0 (i32 571440828))
       (symbol_1 (i32 1744863297)))
   Reached 1 problems!
+  [1]

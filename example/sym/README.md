@@ -30,6 +30,7 @@ Model:
   (model
     (symbol_0 (i32 6)))
 Reached problem!
+[1]
 ```
 
 Indeed, if `x` is equal to `6` then, the `unreachable` instruction will be reached.

@@ -253,15 +253,15 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
         result )
       results
   in
-  let () =
+  let had_failures =
     if no_stop_at_failure then
       let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
-      if failures = 0 then Format.pp_std "All OK@\n"
-      else Format.pp_err "Reached %i problems!@\n" failures
+      if failures = 0 then begin Format.pp_std "All OK@\n"; false end
+      else begin Format.pp_err "Reached %i problems!@\n" failures; true end
     else
       match failing () with
-      | Nil -> Format.pp_std "All OK@\n"
-      | Cons (_thread, _) -> Format.pp_err "Reached problem!@\n"
+      | Nil -> Format.pp_std "All OK@\n"; false
+      | Cons (_thread, _) -> Format.pp_err "Reached problem!@\n"; true
   in
   let time = !Thread.Solver.solver_time in
   let count = !Thread.Solver.solver_count in
@@ -270,4 +270,5 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
     Format.pp_std "Solver time %fs@\n" time;
     Format.pp_std "      calls %i@\n" count;
     Format.pp_std "  mean time %fms@\n" (1000. *. time /. float count)
-  end
+  end;
+  if had_failures then exit 1
