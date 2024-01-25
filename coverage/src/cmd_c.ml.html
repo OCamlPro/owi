@@ -41,10 +41,10 @@
       <span class="some-visited" style="top:48.33%"></span>
       <span class="unvisited" style="bottom:32.08%"></span>
       <span class="some-visited" style="bottom:27.08%"></span>
+      <span class="unvisited" style="bottom:25.83%"></span>
       <span class="some-visited" style="bottom:20.83%"></span>
       <span class="some-visited" style="bottom:7.08%"></span>
-      <span class="unvisited" style="bottom:0.83%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
+      <span class="unvisited" style="bottom:0.42%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -226,7 +226,7 @@
 <a id="L175"></a><span class="some-visited"> </span>
 <a id="L176"></a><span class="visited"> </span>
 <a id="L177"></a><span class="visited"> </span>
-<a id="L178"></a><span class="visited"> </span>
+<a id="L178"></a><span class="unvisited"> </span>
 <a id="L179"></a><span > </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span class="visited"> </span>
@@ -286,9 +286,9 @@
 <a id="L235"></a><span class="visited"> </span>
 <a id="L236"></a><span class="visited"> </span>
 <a id="L237"></a><span > </span>
-<a id="L238"></a><span class="unvisited"> </span>
-<a id="L239"></a><span class="visited"> </span>
-<a id="L240"></a><span class="unvisited"> </span>
+<a id="L238"></a><span class="visited"> </span>
+<a id="L239"></a><span class="unvisited"> </span>
+<a id="L240"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -711,7 +711,7 @@ let run ~workspace ~workers module_ =
   <span data-count="3">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "running %a" Fpath.pp module_);
   <span data-count="3">l</span>et workspace = Fpath.(workspace / "test-suite") in
   let* () = OS.Cmd.ru<span data-count="3">n</span> @@ ow<span data-count="3">i</span> ~workspace ~workers [] module_ in
-  <span data-count="3">O</span>k 0
+  <span data-count="0">O</span>k 0
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } =
   <span data-count="3">F</span>ormat.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
@@ -771,9 +771,9 @@ let cmd debug arch property testcomp output workers opt_lvl includes files =
     <span data-count="3">l</span>et* () = metadat<span data-count="3">a</span> ~workspace arch property files in
     <span data-count="3">r</span>un ~workspace ~workers module_
   in
-  match Logs.on_error_msg ~level:Logs.Error ~use:(fun _ -&gt; <span data-count="0">1</span>) res with
-  | <span data-count="3">0</span> -&gt; ()
-  | <span data-count="0">n</span> -&gt; exit n
+  match Logs.on_error_msg ~level:Logs.Error ~use:(fun _ -&gt; <span data-count="3">1</span>) res with
+  | <span data-count="0">0</span> -&gt; ()
+  | <span data-count="3">n</span> -&gt; exit n
 </code></pre>
       </div>
     </div>
