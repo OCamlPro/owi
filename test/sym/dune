@@ -12,6 +12,7 @@
   ; binop_f64.wat
   div_i32.wat
   div_i64.wat
+  div_f32.wat
   global.wat
   grow.wat
   memory.wat
