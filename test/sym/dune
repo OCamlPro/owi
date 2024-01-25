@@ -13,11 +13,12 @@
   div_i32.wat
   div_i64.wat
   global.wat
-  ; grow.wat
-  ; memory.wat
+  grow.wat
+  memory.wat
   mini_test.wat
   mul_i32.wat
   mul_i64.wat
+  store.wat
   sub_i32.wat
   sub_i64.wat
   table.wat
