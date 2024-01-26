@@ -1,3 +1,2 @@
 (cram
- (deps
-  %{bin:owi}))
+ (deps %{bin:owi}))
