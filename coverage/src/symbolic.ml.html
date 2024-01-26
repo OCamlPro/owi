@@ -667,11 +667,11 @@ module P = struct
 
     let value (v : t) = <span data-count="3">v</span>.value
 
-    let set_value (v : t) x = <span data-count="208">v</span>.value &lt;- x
+    let set_value (v : t) x = <span data-count="223">v</span>.value &lt;- x
 
-    let mut (v : t) = <span data-count="208">v</span>.orig.mut
+    let mut (v : t) = <span data-count="223">v</span>.orig.mut
 
-    let typ (v : t) = <span data-count="208">v</span>.orig.typ
+    let typ (v : t) = <span data-count="223">v</span>.orig.typ
   end
 
   module Table = struct
@@ -709,12 +709,12 @@ module P = struct
     include Symbolic_memory.M
 
     let concretise a =
-      <span data-count="3661">l</span>et open Expr in
+      <span data-count="3900">l</span>et open Expr in
       Choice.with_thread (fun thread -&gt;
-          <span data-count="3661">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="3661">l</span>et module Solver = (val solver_mod) in
+          <span data-count="3900">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="3900">l</span>et module Solver = (val solver_mod) in
           match a.e with
-          | <span data-count="3660">V</span>al _ | <span data-count="0">P</span>tr (_, { e = Val _; _ }) -&gt; a
+          | <span data-count="3899">V</span>al _ | <span data-count="0">P</span>tr (_, { e = Val _; _ }) -&gt; a
           | <span data-count="0">P</span>tr (base, offset) -&gt;
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert <span data-count="0">(</span>Solver.check solve<span data-count="0">r</span> @@ Thread.p<span data-count="0">c</span> thread);
@@ -736,12 +736,12 @@ module P = struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m (a : int32) =
-      <span data-count="3660">C</span>hoice.with_thread (fun thread -&gt;
-          <span data-count="3661">l</span>et pc = Thread.pc thread in
-          <span data-count="3661">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="3661">l</span>et module Solver = (val solver_mod) in
+      <span data-count="3899">C</span>hoice.with_thread (fun thread -&gt;
+          <span data-count="3900">l</span>et pc = Thread.pc thread in
+          <span data-count="3900">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="3900">l</span>et module Solver = (val solver_mod) in
           match a.e with
-          | <span data-count="3661">V</span>al (Num (I32 _)) -&gt; Ok a
+          | <span data-count="3900">V</span>al (Num (I32 _)) -&gt; Ok a
           | <span data-count="0">P</span>tr (base, offset) -&gt; (
             match Hashtbl.find m.chunks base with
             | <span data-count="0">e</span>xception Not_found -&gt; Error Trap.Memory_leak_use_after_free
@@ -757,31 +757,31 @@ module P = struct
 
     let with_concrete (m : memory) (a : int32) (f : memory -&gt; int32 -&gt; 'a) :
       'a Choice.t =
-      <span data-count="3661">C</span>hoice.bind (concretis<span data-count="3661">e</span> a) (fun addr -&gt;
-          <span data-count="3661">C</span>hoice.bind (check_within_bound<span data-count="3660">s</span> m addr) (function
-            | <span data-count="3661">O</span>k a -&gt; Choice.return @@ <span data-count="3659">f</span> m a
+      <span data-count="3900">C</span>hoice.bind (concretis<span data-count="3900">e</span> a) (fun addr -&gt;
+          <span data-count="3898">C</span>hoice.bind (check_within_bound<span data-count="3898">s</span> m addr) (function
+            | <span data-count="3900">O</span>k a -&gt; Choice.return @@ <span data-count="3899">f</span> m a
             | <span data-count="0">E</span>rror t -&gt; Choice.trap t ) )
 
     let load_8_s m a = <span data-count="0">w</span>ith_concrete m a load_8_s
 
-    let load_8_u m a = <span data-count="727">w</span>ith_concrete m a load_8_u
+    let load_8_u m a = <span data-count="774">w</span>ith_concrete m a load_8_u
 
     let load_16_s m a = <span data-count="0">w</span>ith_concrete m a load_16_s
 
     let load_16_u m a = <span data-count="0">w</span>ith_concrete m a load_16_u
 
-    let load_32 m a = <span data-count="2159">w</span>ith_concrete m a load_32
+    let load_32 m a = <span data-count="2303">w</span>ith_concrete m a load_32
 
     let load_64 m a = <span data-count="0">w</span>ith_concrete m a load_64
 
     let store_8 m ~addr v =
-      <span data-count="139">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="139">s</span>tore_8 m ~addr v)
+      <span data-count="147">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="147">s</span>tore_8 m ~addr v)
 
     let store_16 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_16 m ~addr v)
 
     let store_32 m ~addr v =
-      <span data-count="636">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="635">s</span>tore_32 m ~addr v)
+      <span data-count="676">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="676">s</span>tore_32 m ~addr v)
 
     let store_64 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_64 m ~addr v)
@@ -799,10 +799,10 @@ module P = struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="3662">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="3662">l</span>et f (t : thread) =
-        <span data-count="3662">l</span>et memories = Thread.memories t in
-        <span data-count="3662">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="3662">d</span> env) orig_mem memories id
+      <span data-count="3901">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="3901">l</span>et f (t : thread) =
+        <span data-count="3899">l</span>et memories = Thread.memories t in
+        <span data-count="3901">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="3900">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -825,10 +825,10 @@ module P = struct
       <span data-count="2">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="211">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="211">l</span>et f (t : thread) =
-        <span data-count="211">l</span>et globals = Thread.globals t in
-        <span data-count="211">S</span>ymbolic_global.get_global (Link_env.i<span data-count="211">d</span> env) orig_global globals i
+      <span data-count="226">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="226">l</span>et f (t : thread) =
+        <span data-count="226">l</span>et globals = Thread.globals t in
+        <span data-count="226">S</span>ymbolic_global.get_global (Link_env.i<span data-count="226">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -851,7 +851,7 @@ module P = struct
 
     let env (t : t) = <span data-count="9">t</span>.env
 
-    let modul (t : t) = <span data-count="211">t</span>.modul
+    let modul (t : t) = <span data-count="226">t</span>.modul
 
     let to_run (t : t) = <span data-count="7">t</span>.to_run
   end
