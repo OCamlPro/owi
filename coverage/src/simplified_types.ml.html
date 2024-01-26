@@ -220,7 +220,7 @@ let equal_func_types (a : simplified func_type) (b : simplified func_type) :
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function
-  | ( <span data-count="23">A</span>ny_ht | <span data-count="4">N</span>one_ht | <span data-count="4">E</span>q_ht | <span data-count="17">I</span>31_ht | <span data-count="9">S</span>truct_ht | <span data-count="5">A</span>rray_ht | <span data-count="2812">F</span>unc_ht
+  | ( <span data-count="23">A</span>ny_ht | <span data-count="4">N</span>one_ht | <span data-count="4">E</span>q_ht | <span data-count="17">I</span>31_ht | <span data-count="9">S</span>truct_ht | <span data-count="5">A</span>rray_ht | <span data-count="2813">F</span>unc_ht
     | <span data-count="2">N</span>o_func_ht | <span data-count="357">E</span>xtern_ht | <span data-count="2">N</span>o_extern_ht
     | <span data-count="6">D</span>ef_ht (Raw _) ) as t -&gt;
     Ok t
@@ -235,28 +235,28 @@ let convert_heap_type tbl = function
   end
 
 let convert_ref_type tbl (null, heap_type) =
-  <span data-count="3057">l</span>et+ heap_type = convert_heap_typ<span data-count="3057">e</span> tbl heap_type in
-  <span data-count="3054">(</span>null, heap_type)
+  <span data-count="3058">l</span>et+ heap_type = convert_heap_typ<span data-count="3058">e</span> tbl heap_type in
+  <span data-count="3055">(</span>null, heap_type)
 
 let convert_val_type tbl : text val_type -&gt; simplified val_type Result.t =
-  <span data-count="47139">f</span>unction
-  | <span data-count="37985">N</span>um_type _t as t -&gt; Ok t
+  <span data-count="47193">f</span>unction
+  | <span data-count="38031">N</span>um_type _t as t -&gt; Ok t
   | <span data-count="293">R</span>ef_type rt -&gt;
     let+ rt = convert_ref_typ<span data-count="293">e</span> tbl rt in
     <span data-count="290">R</span>ef_type rt
 
 let convert_param tbl (n, t) =
-  <span data-count="15348">l</span>et+ t = convert_val_typ<span data-count="15348">e</span> tbl t in
-  <span data-count="15347">(</span>n, t)
+  <span data-count="15372">l</span>et+ t = convert_val_typ<span data-count="15372">e</span> tbl t in
+  <span data-count="15371">(</span>n, t)
 
-let convert_pt tbl l = <span data-count="30199">l</span>ist_map (convert_para<span data-count="30199">m</span> tbl) l
+let convert_pt tbl l = <span data-count="30222">l</span>ist_map (convert_para<span data-count="30222">m</span> tbl) l
 
-let convert_rt tbl l = <span data-count="30198">l</span>ist_map (convert_val_typ<span data-count="30198">e</span> tbl) l
+let convert_rt tbl l = <span data-count="30221">l</span>ist_map (convert_val_typ<span data-count="30221">e</span> tbl) l
 
 let convert_func_type tbl (pt, rt) =
-  <span data-count="30199">l</span>et* pt = convert_p<span data-count="30199">t</span> tbl pt in
-  <span data-count="30198">l</span>et+ rt = convert_r<span data-count="30198">t</span> tbl rt in
-  <span data-count="30198">(</span>pt, rt)
+  <span data-count="30222">l</span>et* pt = convert_p<span data-count="30222">t</span> tbl pt in
+  <span data-count="30221">l</span>et+ rt = convert_r<span data-count="30221">t</span> tbl rt in
+  <span data-count="30221">(</span>pt, rt)
 
 let convert_storage_type tbl = function
   | <span data-count="44">V</span>al_storage_t val_type -&gt;
@@ -275,9 +275,9 @@ let convert_struct_field tbl (id, types) =
 let convert_struct_type tbl fields = <span data-count="18">l</span>ist_map (convert_struct_fiel<span data-count="18">d</span> tbl) fields
 
 let convert_str tbl = function
-  | <span data-count="541">D</span>ef_func_t func_t -&gt;
-    let+ func_t = convert_func_typ<span data-count="541">e</span> tbl func_t in
-    <span data-count="541">D</span>ef_func_t func_t
+  | <span data-count="546">D</span>ef_func_t func_t -&gt;
+    let+ func_t = convert_func_typ<span data-count="546">e</span> tbl func_t in
+    <span data-count="546">D</span>ef_func_t func_t
   | <span data-count="29">D</span>ef_array_t field_t -&gt;
     let+ field_t = convert_field_typ<span data-count="29">e</span> tbl field_t in
     <span data-count="28">D</span>ef_array_t field_t
@@ -286,8 +286,8 @@ let convert_str tbl = function
     <span data-count="18">D</span>ef_struct_t struct_t
 
 let convert_table_type tbl (limits, ref_type) =
-  <span data-count="1298">l</span>et+ ref_type = convert_ref_typ<span data-count="1298">e</span> tbl ref_type in
-  <span data-count="1298">(</span>limits, ref_type)
+  <span data-count="1299">l</span>et+ ref_type = convert_ref_typ<span data-count="1299">e</span> tbl ref_type in
+  <span data-count="1299">(</span>limits, ref_type)
 </code></pre>
       </div>
     </div>

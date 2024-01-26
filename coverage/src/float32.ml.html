@@ -700,13 +700,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Printf.sprint<span data-count="288">f</span> "%lx"
+let to_hex_string = Printf.sprint<span data-count="290">f</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="288">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="290">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="288">t</span> (-<span data-count="288">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="290">t</span> (-<span data-count="290">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -714,7 +714,7 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1241">x</span>
 
-let to_bits x = <span data-count="2409">x</span>
+let to_bits x = <span data-count="2411">x</span>
 
 let is_inf x = <span data-count="23389">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
 
@@ -767,7 +767,7 @@ let unary op x =
   <span data-count="310">l</span>et t = op (to_floa<span data-count="310">t</span> x) in
   <span data-count="310">i</span>f t = t then <span data-count="266">o</span>f_float t else <span data-count="44">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="288">t</span> 0.0
+let zero = of_floa<span data-count="290">t</span> 0.0
 
 let add x y = <span data-count="25419">b</span>inary x ( +. ) y
 
@@ -1015,7 +1015,7 @@ let to_string' convert is_digit n x =
     <span data-count="6">g</span>roup_digit<span data-count="6">s</span> is_digit n
       (if s.[String.lengt<span data-count="6">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="6">s</span>)
 
-let to_string = to_string<span data-count="288">'</span> (Printf.sprint<span data-count="288">f</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="290">'</span> (Printf.sprint<span data-count="290">f</span> "%.17g") is_digit 3
 
 let pp fmt v = <span data-count="6">F</span>ormat.pp_string fmt (to_strin<span data-count="6">g</span> v)
 </code></pre>

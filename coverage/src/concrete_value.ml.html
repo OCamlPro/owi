@@ -400,43 +400,43 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : simplified val_type =
-    <span data-count="2809">m</span>atch e with
-    | <span data-count="1426">I</span>32 -&gt; Num_type I32
-    | <span data-count="233">I</span>64 -&gt; Num_type I64
-    | <span data-count="459">F</span>32 -&gt; Num_type F32
-    | <span data-count="688">F</span>64 -&gt; Num_type F64
+    <span data-count="2821">m</span>atch e with
+    | <span data-count="1435">I</span>32 -&gt; Num_type I32
+    | <span data-count="234">I</span>64 -&gt; Num_type I64
+    | <span data-count="460">F</span>32 -&gt; Num_type F32
+    | <span data-count="689">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : simplified result_type =
-    <span data-count="2573">m</span>atch r with
-    | <span data-count="2077">R</span>0 -&gt; []
-    | <span data-count="496">R</span>1 a -&gt; [ elt_typ<span data-count="496">e</span> a ]
+    <span data-count="2584">m</span>atch r with
+    | <span data-count="2082">R</span>0 -&gt; []
+    | <span data-count="502">R</span>1 a -&gt; [ elt_typ<span data-count="502">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; simplified param_type = function
-    | <span data-count="42">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="2313">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2313">e</span> hd) :: arg_typ<span data-count="2313">e</span> tl
+    | <span data-count="48">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="2319">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2319">e</span> hd) :: arg_typ<span data-count="2319">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="2573">R</span>es -&gt; []
+    | <span data-count="2584">R</span>es -&gt; []
 
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
   let extern_type (Extern_func (Func (arg, res), _)) :
     simplified Types.func_type =
-    <span data-count="2573">(</span>arg_typ<span data-count="2573">e</span> arg, res_typ<span data-count="2573">e</span> res)
+    <span data-count="2584">(</span>arg_typ<span data-count="2584">e</span> arg, res_typ<span data-count="2584">e</span> res)
 
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="576">-</span>1 in
+    let r = ref ~<span data-count="580">-</span>1 in
     fun () -&gt;
-      <span data-count="9223">i</span>ncr r;
-      <span data-count="9223">!</span>r
+      <span data-count="9231">i</span>ncr r;
+      <span data-count="9231">!</span>r
 
-  let wasm func env : t = <span data-count="9223">W</span>ASM (fres<span data-count="9223">h</span> (), func, env)
+  let wasm func env : t = <span data-count="9231">W</span>ASM (fres<span data-count="9231">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -508,7 +508,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
 let ref_null' = function
-  | <span data-count="831">F</span>unc_ht -&gt; Funcref None
+  | <span data-count="832">F</span>unc_ht -&gt; Funcref None
   | <span data-count="117">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">A</span>rray_ht -&gt; Arrayref None
   | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht

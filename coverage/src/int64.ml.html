@@ -391,7 +391,7 @@ let popcnt =
 (*
    * Unsigned comparison in terms of signed comparison.
    *)
-let cmp_u x op y = <span data-count="142376">o</span>p (ad<span data-count="142376">d</span> x min_int) (ad<span data-count="142376">d</span> y min_int)
+let cmp_u x op y = <span data-count="142378">o</span>p (ad<span data-count="142378">d</span> x min_int) (ad<span data-count="142378">d</span> y min_int)
 
 (*
  * Unsigned division and remainder in terms of signed division; algorithm from
@@ -399,22 +399,22 @@ let cmp_u x op y = <span data-count="142376">o</span>p (ad<span data-count="1423
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  <span data-count="288">i</span>f d = zero then <span data-count="0">r</span>aise Division_by_zero
+  <span data-count="290">i</span>f d = zero then <span data-count="0">r</span>aise Division_by_zero
   else
-    <span data-count="288">l</span>et t = shift_right d 63 in
-    <span data-count="288">l</span>et n' = logand n (logno<span data-count="288">t</span> t) in
-    <span data-count="288">l</span>et q = shift_left (di<span data-count="288">v</span> (shift_right_logica<span data-count="288">l</span> n' 1) d) 1 in
-    <span data-count="288">l</span>et r = sub n (mu<span data-count="288">l</span> q d) in
-    <span data-count="288">i</span>f cmp_u r ( &lt; ) d then <span data-count="0">(</span>q, r) else <span data-count="288">(</span>ad<span data-count="288">d</span> q one, su<span data-count="288">b</span> r d)
+    <span data-count="290">l</span>et t = shift_right d 63 in
+    <span data-count="290">l</span>et n' = logand n (logno<span data-count="290">t</span> t) in
+    <span data-count="290">l</span>et q = shift_left (di<span data-count="290">v</span> (shift_right_logica<span data-count="290">l</span> n' 1) d) 1 in
+    <span data-count="290">l</span>et r = sub n (mu<span data-count="290">l</span> q d) in
+    <span data-count="290">i</span>f cmp_u r ( &lt; ) d then <span data-count="0">(</span>q, r) else <span data-count="290">(</span>ad<span data-count="290">d</span> q one, su<span data-count="290">b</span> r d)
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |bitwidth|-bits int. *)
-let low_int = shift_lef<span data-count="288">t</span> minus_one 63
+let low_int = shift_lef<span data-count="290">t</span> minus_one 63
 
 (* The largest signed |bitwidth|-bits int. *)
-let high_int = logxo<span data-count="288">r</span> low_int minus_one
+let high_int = logxo<span data-count="290">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
 let shift f x y = <span data-count="45072">f</span> x (to_in<span data-count="45072">t</span> (logan<span data-count="45072">d</span> y (of_in<span data-count="45072">t</span> 63)))
@@ -474,7 +474,7 @@ let hex_digit = function
   | <span data-count="402">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="402">e</span> c - Char.cod<span data-count="402">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper, max_lower = divrem_<span data-count="288">u</span> minus_one 10L
+let max_upper, max_lower = divrem_<span data-count="290">u</span> minus_one 10L
 
 let of_string s =
   <span data-count="7849">l</span>et len = String.length s in

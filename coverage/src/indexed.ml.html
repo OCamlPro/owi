@@ -94,24 +94,24 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="77521">v</span>.value
+let get v = <span data-count="77594">v</span>.value
 
-let get_index v = <span data-count="58793">v</span>.index
+let get_index v = <span data-count="58849">v</span>.index
 
 let map f v = <span data-count="5844">{</span> index = v.index; value = <span data-count="5844">f</span> v.value }
 
-let return index value = <span data-count="46926">{</span> index; value }
+let return index value = <span data-count="46961">{</span> index; value }
 
-let has_index idx { index; _ } = <span data-count="167348">i</span>dx = index
+let has_index idx { index; _ } = <span data-count="167490">i</span>dx = index
 
 let get_at_exn i values =
-  <span data-count="3692">l</span>et { value; _ } = List.find (has_inde<span data-count="3692">x</span> i) values in
-  <span data-count="3692">v</span>alue
+  <span data-count="3713">l</span>et { value; _ } = List.find (has_inde<span data-count="3713">x</span> i) values in
+  <span data-count="3713">v</span>alue
 
 let get_at i values =
-  <span data-count="30">m</span>atch List.find_opt (has_inde<span data-count="30">x</span> i) values with
+  <span data-count="36">m</span>atch List.find_opt (has_inde<span data-count="36">x</span> i) values with
   | <span data-count="2">N</span>one -&gt; None
-  | <span data-count="28">S</span>ome { value; _ } -&gt; Some value
+  | <span data-count="34">S</span>ome { value; _ } -&gt; Some value
 
 let pp f fmt v = <span data-count="76">f</span> fmt v.value
 </code></pre>

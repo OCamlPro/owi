@@ -101,18 +101,18 @@ type 'a collection =
 let empty = { c = Map.empty; last = 0 }
 
 let with_fresh_id f { c; last } =
-  <span data-count="2837">l</span>et open Syntax in
-  let+ e, r = <span data-count="2837">f</span> last in
-  <span data-count="2661">l</span>et c = Map.add last e c in
-  <span data-count="2661">l</span>et last = succ last in
-  <span data-count="2661">(</span>{ c; last }, r)
+  <span data-count="2838">l</span>et open Syntax in
+  let+ e, r = <span data-count="2838">f</span> last in
+  <span data-count="2662">l</span>et c = Map.add last e c in
+  <span data-count="2662">l</span>et last = succ last in
+  <span data-count="2662">(</span>{ c; last }, r)
 
-let get i c = <span data-count="11749532">M</span>ap.find i c.c
+let get i c = <span data-count="11774099">M</span>ap.find i c.c
 
 module Tbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="5052">x</span>
+  let hash x = <span data-count="88192">x</span>
 end)
 </code></pre>
       </div>

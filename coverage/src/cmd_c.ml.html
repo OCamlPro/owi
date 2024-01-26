@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_c.ml &mdash; Coverage report</title>
-    <meta name="description" content="82.38% coverage in src/cmd_c.ml">
+    <meta name="description" content="83.33% coverage in src/cmd_c.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/</span>cmd_c.ml
         </a>
       </h1>
-      <h2>82.38%</h2>
+      <h2>83.33%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:4.17%"></span>
@@ -41,10 +41,8 @@
       <span class="some-visited" style="top:48.33%"></span>
       <span class="unvisited" style="bottom:32.08%"></span>
       <span class="some-visited" style="bottom:27.08%"></span>
-      <span class="unvisited" style="bottom:25.83%"></span>
       <span class="some-visited" style="bottom:20.83%"></span>
       <span class="some-visited" style="bottom:7.08%"></span>
-      <span class="unvisited" style="bottom:0.42%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -226,7 +224,7 @@
 <a id="L175"></a><span class="some-visited"> </span>
 <a id="L176"></a><span class="visited"> </span>
 <a id="L177"></a><span class="visited"> </span>
-<a id="L178"></a><span class="unvisited"> </span>
+<a id="L178"></a><span class="visited"> </span>
 <a id="L179"></a><span > </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span class="visited"> </span>
@@ -287,7 +285,7 @@
 <a id="L236"></a><span class="visited"> </span>
 <a id="L237"></a><span > </span>
 <a id="L238"></a><span class="visited"> </span>
-<a id="L239"></a><span class="unvisited"> </span>
+<a id="L239"></a><span class="visited"> </span>
 <a id="L240"></a><span class="visited"> </span>
 </pre>
       </div>
@@ -539,11 +537,11 @@
 let ( let* ) = Result.bind
 
 let list_map f lst =
-  <span data-count="6">l</span>et exception E of Rresult.R.msg in
+  <span data-count="8">l</span>et exception E of Rresult.R.msg in
   try
     Ok
-      (List.ma<span data-count="6">p</span>
-         (fun x -&gt; <span data-count="6">m</span>atch f x with <span data-count="6">O</span>k x' -&gt; x' | <span data-count="0">E</span>rror e -&gt; raise (E e))
+      (List.ma<span data-count="8">p</span>
+         (fun x -&gt; <span data-count="8">m</span>atch f x with <span data-count="8">O</span>k x' -&gt; x' | <span data-count="0">E</span>rror e -&gt; raise (E e))
          lst )
   with <span data-count="0">E</span> e -&gt; Error e
 
@@ -561,38 +559,38 @@ type metadata =
   ; files : string list
   }
 
-let clang bin ~flags ~out file = <span data-count="3">C</span>md.(bin %<span data-count="3">%</span> flags <span data-count="3">%</span> "-o" <span data-count="3">%</span> <span data-count="3">p</span> out % <span data-count="3">p</span> file)
+let clang bin ~flags ~out file = <span data-count="4">C</span>md.(bin %<span data-count="4">%</span> flags <span data-count="4">%</span> "-o" <span data-count="4">%</span> <span data-count="4">p</span> out % <span data-count="4">p</span> file)
 
-let opt bin file = <span data-count="3">C</span>md.(bin <span data-count="3">%</span> "-O1" <span data-count="3">%</span> "-o" <span data-count="3">%</span> <span data-count="3">p</span> file % <span data-count="3">p</span> file)
+let opt bin file = <span data-count="4">C</span>md.(bin <span data-count="4">%</span> "-O1" <span data-count="4">%</span> "-o" <span data-count="4">%</span> <span data-count="4">p</span> file % <span data-count="4">p</span> file)
 
 let llc bin ~bc ~obj =
-  <span data-count="3">l</span>et flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
-  <span data-count="3">C</span>md.(bin %<span data-count="3">%</span> flags <span data-count="3">%</span> <span data-count="3">p</span> obj % <span data-count="3">p</span> bc)
+  <span data-count="4">l</span>et flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
+  <span data-count="4">C</span>md.(bin %<span data-count="4">%</span> flags <span data-count="4">%</span> <span data-count="4">p</span> obj % <span data-count="4">p</span> bc)
 
 let ld bin ~flags ~out files =
-  <span data-count="3">l</span>et libc = C_share.get_libc () |&gt; <span data-count="3">O</span>ption.get in
-  <span data-count="3">l</span>et files = List.fold_left (fun acc f -&gt; <span data-count="3">C</span>md.(acc % <span data-count="3">p</span> f)) Cmd.empty files in
-  <span data-count="3">C</span>md.(bin %<span data-count="3">%</span> flags <span data-count="3">%</span> "-o" <span data-count="3">%</span> <span data-count="3">p</span> out %<span data-count="3">%</span> files % libc)
+  <span data-count="4">l</span>et libc = C_share.get_libc () |&gt; <span data-count="4">O</span>ption.get in
+  <span data-count="4">l</span>et files = List.fold_left (fun acc f -&gt; <span data-count="4">C</span>md.(acc % <span data-count="4">p</span> f)) Cmd.empty files in
+  <span data-count="4">C</span>md.(bin %<span data-count="4">%</span> flags <span data-count="4">%</span> "-o" <span data-count="4">%</span> <span data-count="4">p</span> out %<span data-count="4">%</span> files % libc)
 
-let wasm2wat bin0 ~out bin = <span data-count="3">C</span>md.(bin0 <span data-count="3">%</span> "-o" <span data-count="3">%</span> <span data-count="3">p</span> out % <span data-count="3">p</span> bin)
+let wasm2wat bin0 ~out bin = <span data-count="4">C</span>md.(bin0 <span data-count="4">%</span> "-o" <span data-count="4">%</span> <span data-count="4">p</span> out % <span data-count="4">p</span> bin)
 
 let check_dependencies () =
-  <span data-count="3">l</span>et* clang_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "clang" in
-  <span data-count="3">l</span>et* opt_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "opt" in
-  <span data-count="3">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "llc" in
-  <span data-count="3">l</span>et* ld_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "wasm-ld" in
-  <span data-count="3">l</span>et* wasm2wat_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "wasm2wat" in
-  <span data-count="3">O</span>k
-    { clang = clan<span data-count="3">g</span> clang_bin
-    ; opt = op<span data-count="3">t</span> opt_bin
-    ; llc = ll<span data-count="3">c</span> llc_bin
-    ; ld = l<span data-count="3">d</span> ld_bin
-    ; wasm2wat = wasm2wa<span data-count="3">t</span> wasm2wat_bin
+  <span data-count="4">l</span>et* clang_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "clang" in
+  <span data-count="4">l</span>et* opt_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "opt" in
+  <span data-count="4">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "llc" in
+  <span data-count="4">l</span>et* ld_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "wasm-ld" in
+  <span data-count="4">l</span>et* wasm2wat_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "wasm2wat" in
+  <span data-count="4">O</span>k
+    { clang = clan<span data-count="4">g</span> clang_bin
+    ; opt = op<span data-count="4">t</span> opt_bin
+    ; llc = ll<span data-count="4">c</span> llc_bin
+    ; ld = l<span data-count="4">d</span> ld_bin
+    ; wasm2wat = wasm2wa<span data-count="4">t</span> wasm2wat_bin
     }
 
 let pre_patterns : (Re2.t * string) array =
-  Array.ma<span data-count="288">p</span>
-    (fun (regex, template) -&gt; <span data-count="288">(</span>Re2.create_ex<span data-count="288">n</span> regex, template))
+  Array.ma<span data-count="290">p</span>
+    (fun (regex, template) -&gt; <span data-count="290">(</span>Re2.create_ex<span data-count="290">n</span> regex, template))
     [| ( "void\\s+reach_error\\(\\)\\s*\\{.*\\}"
        , "void reach_error() { owi_assert(0); }" )
        (* ugly: Hack to solve duplicate errors on compilation *)
@@ -621,15 +619,15 @@ let patch ~(src : Fpath.t) ~(dst : Fpath.t) =
   <span data-count="0">O</span>k ()
 
 let copy ~src ~dst =
-  <span data-count="3">l</span>et* data = OS.File.rea<span data-count="3">d</span> src in
-  <span data-count="3">l</span>et* () = OS.File.writ<span data-count="3">e</span> dst data in
-  <span data-count="3">O</span>k dst
+  <span data-count="4">l</span>et* data = OS.File.rea<span data-count="4">d</span> src in
+  <span data-count="4">l</span>et* () = OS.File.writ<span data-count="4">e</span> dst data in
+  <span data-count="4">O</span>k dst
 
 let instrument_file ?(skip = <span data-count="0">f</span>alse) ~(includes : string list)
   ~(workspace : Fpath.t) (file : string) =
-  <span data-count="3">l</span>et file = Fpath.v file in
-  <span data-count="3">l</span>et dst = Fpath.(workspace /<span data-count="3">/</span> bas<span data-count="3">e</span> (file -<span data-count="3">+</span> ".c")) in
-  if skip then <span data-count="3">c</span>opy ~src:file ~dst
+  <span data-count="4">l</span>et file = Fpath.v file in
+  <span data-count="4">l</span>et dst = Fpath.(workspace /<span data-count="4">/</span> bas<span data-count="4">e</span> (file -<span data-count="4">+</span> ".c")) in
+  if skip then <span data-count="4">c</span>opy ~src:file ~dst
   else <span data-count="0">b</span>egin
     Logs.app (fun m -&gt; <span data-count="0">m</span> "instrumenting %a" Fpath.pp file);
     <span data-count="0">l</span>et* () = patch ~src:file ~dst in
@@ -649,10 +647,10 @@ let instrument_file ?(skip = <span data-count="0">f</span>alse) ~(includes : str
 
 let compile ~(deps : deps) ~(includes : string list) ~(opt_lvl : string)
   (file : Fpath.t) =
-  <span data-count="3">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "compiling %a" Fpath.pp file);
-  <span data-count="3">l</span>et cflags =
+  <span data-count="4">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "compiling %a" Fpath.pp file);
+  <span data-count="4">l</span>et cflags =
     let includes = Cmd.of_list ~slip:"-I" includes in
-    <span data-count="3">l</span>et warnings =
+    <span data-count="4">l</span>et warnings =
       Cmd.of_list
         [ "-Wno-int-conversion"
         ; "-Wno-pointer-sign"
@@ -663,82 +661,82 @@ let compile ~(deps : deps) ~(includes : string list) ~(opt_lvl : string)
         ; "-Wno-incompatible-pointer-types"
         ]
     in
-    <span data-count="3">C</span>md.(
-      of_lis<span data-count="3">t</span>
+    <span data-count="4">C</span>md.(
+      of_lis<span data-count="4">t</span>
         [ "-O" ^ opt_lvl; "-g"; "-emit-llvm"; "--target=wasm32"; "-m32"; "-c" ]
-      %<span data-count="3">%</span> warnings %<span data-count="3">%</span> includes )
+      %<span data-count="4">%</span> warnings %<span data-count="4">%</span> includes )
   in
-  let bc = Fpath.(file -<span data-count="3">+</span> ".bc") in
-  let obj = Fpath.(file -<span data-count="3">+</span> ".o") in
-  let* () = OS.Cmd.ru<span data-count="3">n</span> @@ deps.clan<span data-count="3">g</span> ~flags:cflags ~out:bc file in
-  <span data-count="3">l</span>et* () = OS.Cmd.ru<span data-count="3">n</span> @@ deps.op<span data-count="3">t</span> bc in
-  <span data-count="3">l</span>et* () = OS.Cmd.ru<span data-count="3">n</span> @@ deps.llc ~bc ~obj in
-  <span data-count="3">O</span>k obj
+  let bc = Fpath.(file -<span data-count="4">+</span> ".bc") in
+  let obj = Fpath.(file -<span data-count="4">+</span> ".o") in
+  let* () = OS.Cmd.ru<span data-count="4">n</span> @@ deps.clan<span data-count="4">g</span> ~flags:cflags ~out:bc file in
+  <span data-count="4">l</span>et* () = OS.Cmd.ru<span data-count="4">n</span> @@ deps.op<span data-count="4">t</span> bc in
+  <span data-count="4">l</span>et* () = OS.Cmd.ru<span data-count="4">n</span> @@ deps.llc ~bc ~obj in
+  <span data-count="4">O</span>k obj
 
 let link ~deps ~workspace (files : Fpath.t list) =
-  <span data-count="3">l</span>et ldflags ~entry =
-    <span data-count="3">l</span>et stack_size = 8 * (1024 * 1024) in
+  <span data-count="4">l</span>et ldflags ~entry =
+    <span data-count="4">l</span>et stack_size = 8 * (1024 * 1024) in
     Cmd.(
       of_list
-        [ "-z"; "stack-size=" ^ string_of_in<span data-count="3">t</span> stack_size; "--export=" ^ entry ] )
+        [ "-z"; "stack-size=" ^ string_of_in<span data-count="4">t</span> stack_size; "--export=" ^ entry ] )
   in
   let wasm = Fpath.(workspace / "a.out.wasm") in
   let wat = Fpath.(workspace / "a.out.wat") in
   let* () =
-    OS.Cmd.ru<span data-count="3">n</span> @@ deps.l<span data-count="3">d</span> ~flags:(ldflags ~entry:"_start") ~out:wasm files
+    OS.Cmd.ru<span data-count="4">n</span> @@ deps.l<span data-count="4">d</span> ~flags:(ldflags ~entry:"_start") ~out:wasm files
   in
-  <span data-count="3">l</span>et* () = OS.Cmd.ru<span data-count="3">n</span> @@ deps.wasm2wa<span data-count="3">t</span> ~out:wat wasm in
-  <span data-count="3">O</span>k wat
+  <span data-count="4">l</span>et* () = OS.Cmd.ru<span data-count="4">n</span> @@ deps.wasm2wa<span data-count="4">t</span> ~out:wat wasm in
+  <span data-count="4">O</span>k wat
 
 let cleanup dir =
-  <span data-count="3">O</span>S.Path.fold ~elements:`Files
+  <span data-count="4">O</span>S.Path.fold ~elements:`Files
     (fun path _acc -&gt;
-      <span data-count="19">i</span>f not @@ Fpath.has_ex<span data-count="19">t</span> ".wat" path then
-        <span data-count="16">m</span>atch OS.Path.delete path with
-        | <span data-count="16">O</span>k () -&gt; ()
+      <span data-count="24">i</span>f not @@ Fpath.has_ex<span data-count="24">t</span> ".wat" path then
+        <span data-count="20">m</span>atch OS.Path.delete path with
+        | <span data-count="20">O</span>k () -&gt; ()
         | <span data-count="0">E</span>rror (`Msg e) -&gt; Logs.warn (fun m -&gt; <span data-count="0">m</span> "%s" e) )
     () [ dir ]
-  |&gt; <span data-count="3">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id
+  |&gt; <span data-count="4">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id
 
 let owi ~workspace ~workers flags module_ =
-  <span data-count="3">l</span>et flags = Cmd.of_list flags in
-  <span data-count="3">l</span>et w = string_of_int workers in
-  <span data-count="3">C</span>md.(
-    <span data-count="3">v</span> "owi" <span data-count="3">%</span> "sym" <span data-count="3">%</span> "-w" <span data-count="3">%</span> w <span data-count="3">%</span> "--workspace" %<span data-count="3">%</span> flags <span data-count="3">%</span> <span data-count="3">p</span> workspace
-    % <span data-count="3">p</span> module_ )
+  <span data-count="4">l</span>et flags = Cmd.of_list flags in
+  <span data-count="4">l</span>et w = string_of_int workers in
+  <span data-count="4">C</span>md.(
+    <span data-count="4">v</span> "owi" <span data-count="4">%</span> "sym" <span data-count="4">%</span> "-w" <span data-count="4">%</span> w <span data-count="4">%</span> "--workspace" %<span data-count="4">%</span> flags <span data-count="4">%</span> <span data-count="4">p</span> workspace
+    % <span data-count="4">p</span> module_ )
 
 let run ~workspace ~workers module_ =
-  <span data-count="3">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "running %a" Fpath.pp module_);
-  <span data-count="3">l</span>et workspace = Fpath.(workspace / "test-suite") in
-  let* () = OS.Cmd.ru<span data-count="3">n</span> @@ ow<span data-count="3">i</span> ~workspace ~workers [] module_ in
-  <span data-count="0">O</span>k 0
+  <span data-count="4">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "running %a" Fpath.pp module_);
+  <span data-count="4">l</span>et workspace = Fpath.(workspace / "test-suite") in
+  let* () = OS.Cmd.ru<span data-count="4">n</span> @@ ow<span data-count="4">i</span> ~workspace ~workers [] module_ in
+  <span data-count="1">O</span>k 0
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } =
-  <span data-count="3">F</span>ormat.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
+  <span data-count="4">F</span>ormat.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
 let metadata ~workspace arch property files =
-  <span data-count="3">l</span>et out_metadata chan { arch; property; files } =
-    <span data-count="3">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
-    <span data-count="3">l</span>et tag n = <span data-count="27">(</span>("", n), []) in
-    let el n d = <span data-count="24">`</span>El (ta<span data-count="24">g</span> n, [ `Data d ]) in
+  <span data-count="4">l</span>et out_metadata chan { arch; property; files } =
+    <span data-count="4">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
+    <span data-count="4">l</span>et tag n = <span data-count="36">(</span>("", n), []) in
+    let el n d = <span data-count="32">`</span>El (ta<span data-count="32">g</span> n, [ `Data d ]) in
     let* spec =
-      match property with <span data-count="3">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> @@ Fpath.<span data-count="0">v</span> f
+      match property with <span data-count="4">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> @@ Fpath.<span data-count="0">v</span> f
     in
-    <span data-count="3">l</span>et file = String.concat " " files in
-    <span data-count="3">l</span>et hash = List.fold_left (fun _ f -&gt; <span data-count="3">S</span>ha256.file f) Sha256.zero files in
-    <span data-count="3">l</span>et time = Unix.time () |&gt; <span data-count="3">U</span>nix.localtime in
-    <span data-count="3">l</span>et test_metadata =
+    <span data-count="4">l</span>et file = String.concat " " files in
+    <span data-count="4">l</span>et hash = List.fold_left (fun _ f -&gt; <span data-count="4">S</span>ha256.file f) Sha256.zero files in
+    <span data-count="4">l</span>et time = Unix.time () |&gt; <span data-count="4">U</span>nix.localtime in
+    <span data-count="4">l</span>et test_metadata =
       `El
-        ( ta<span data-count="3">g</span> "test-metadata"
-        , [ e<span data-count="3">l</span> "sourcecodelang" "C"
-          ; e<span data-count="3">l</span> "producer" "owic"
-          ; e<span data-count="3">l</span> "specification" (String.tri<span data-count="3">m</span> spec)
-          ; e<span data-count="3">l</span> "programfile" file
-          ; e<span data-count="3">l</span> "programhash" (Sha256.to_he<span data-count="3">x</span> hash)
-          ; e<span data-count="3">l</span> "entryfunction" "main"
-          ; e<span data-count="3">l</span> "architecture" (Format.sprint<span data-count="3">f</span> "%dbit" arch)
-          ; e<span data-count="3">l</span> "creationtime" (Format.asprint<span data-count="3">f</span> "%a" pp_tm time)
+        ( ta<span data-count="4">g</span> "test-metadata"
+        , [ e<span data-count="4">l</span> "sourcecodelang" "C"
+          ; e<span data-count="4">l</span> "producer" "owic"
+          ; e<span data-count="4">l</span> "specification" (String.tri<span data-count="4">m</span> spec)
+          ; e<span data-count="4">l</span> "programfile" file
+          ; e<span data-count="4">l</span> "programhash" (Sha256.to_he<span data-count="4">x</span> hash)
+          ; e<span data-count="4">l</span> "entryfunction" "main"
+          ; e<span data-count="4">l</span> "architecture" (Format.sprint<span data-count="4">f</span> "%dbit" arch)
+          ; e<span data-count="4">l</span> "creationtime" (Format.asprint<span data-count="4">f</span> "%a" pp_tm time)
           ] )
     in
     let dtd =
@@ -747,32 +745,32 @@ let metadata ~workspace arch property files =
        \"https://sosy-lab.org/test-format/test-metadata-1.1.dtd\"&gt;"
     in
     Xmlm.output o (`Dtd (Some dtd));
-    <span data-count="3">X</span>mlm.output_tree Fun.id o test_metadata;
-    <span data-count="3">O</span>k ()
+    <span data-count="4">X</span>mlm.output_tree Fun.id o test_metadata;
+    <span data-count="4">O</span>k ()
   in
   let fpath = Fpath.(workspace / "test-suite" / "metadata.xml") in
-  let* _ = OS.Dir.creat<span data-count="3">e</span> ~path:true (Fpath.paren<span data-count="3">t</span> fpath) in
-  <span data-count="3">l</span>et* res = OS.File.with_o<span data-count="3">c</span> fpath out_metadata { arch; property; files } in
-  <span data-count="3">r</span>es
+  let* _ = OS.Dir.creat<span data-count="4">e</span> ~path:true (Fpath.paren<span data-count="4">t</span> fpath) in
+  <span data-count="4">l</span>et* res = OS.File.with_o<span data-count="4">c</span> fpath out_metadata { arch; property; files } in
+  <span data-count="4">r</span>es
 
 let cmd debug arch property testcomp output workers opt_lvl includes files =
-  <span data-count="3">i</span>f debug then <span data-count="0">L</span>ogs.set_leve<span data-count="0">l</span> (Some Debug);
-  <span data-count="3">l</span>et workspace = Fpath.v output in
-  <span data-count="3">l</span>et includes = C_share.lib_location @ includes in
+  <span data-count="4">i</span>f debug then <span data-count="0">L</span>ogs.set_leve<span data-count="0">l</span> (Some Debug);
+  <span data-count="4">l</span>et workspace = Fpath.v output in
+  <span data-count="4">l</span>et includes = C_share.lib_location @ includes in
   let res =
-    let* deps = check_dependencie<span data-count="3">s</span> () in
-    <span data-count="3">l</span>et* _ = OS.Dir.creat<span data-count="3">e</span> ~path:true workspace in
+    let* deps = check_dependencie<span data-count="4">s</span> () in
+    <span data-count="4">l</span>et* _ = OS.Dir.creat<span data-count="4">e</span> ~path:true workspace in
     (* skip instrumentation if not in test-comp mode *)
-    <span data-count="3">l</span>et skip = not testcomp in
-    let* nfiles = list_ma<span data-count="3">p</span> (instrument_file ~skip ~includes ~workspace) files in
-    <span data-count="3">l</span>et* objects = list_ma<span data-count="3">p</span> (compile ~deps ~includes ~opt_lvl) nfiles in
-    <span data-count="3">l</span>et* module_ = lin<span data-count="3">k</span> ~deps ~workspace objects in
-    <span data-count="3">c</span>leanup workspace;
-    <span data-count="3">l</span>et* () = metadat<span data-count="3">a</span> ~workspace arch property files in
-    <span data-count="3">r</span>un ~workspace ~workers module_
+    <span data-count="4">l</span>et skip = not testcomp in
+    let* nfiles = list_ma<span data-count="4">p</span> (instrument_file ~skip ~includes ~workspace) files in
+    <span data-count="4">l</span>et* objects = list_ma<span data-count="4">p</span> (compile ~deps ~includes ~opt_lvl) nfiles in
+    <span data-count="4">l</span>et* module_ = lin<span data-count="4">k</span> ~deps ~workspace objects in
+    <span data-count="4">c</span>leanup workspace;
+    <span data-count="4">l</span>et* () = metadat<span data-count="4">a</span> ~workspace arch property files in
+    <span data-count="4">r</span>un ~workspace ~workers module_
   in
   match Logs.on_error_msg ~level:Logs.Error ~use:(fun _ -&gt; <span data-count="3">1</span>) res with
-  | <span data-count="0">0</span> -&gt; ()
+  | <span data-count="1">0</span> -&gt; ()
   | <span data-count="3">n</span> -&gt; exit n
 </code></pre>
       </div>

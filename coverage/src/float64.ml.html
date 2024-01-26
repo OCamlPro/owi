@@ -708,13 +708,13 @@ let neg_nan = 0xfff8_0000_0000_0000L
 
 let bare_nan = 0x7ff0_0000_0000_0000L
 
-let to_hex_string = Printf.sprint<span data-count="288">f</span> "%Lx"
+let to_hex_string = Printf.sprint<span data-count="290">f</span> "%Lx"
 
 type t = Int64.t
 
-let pos_inf = Int64.bits_of_floa<span data-count="288">t</span> (1.0 /. 0.0)
+let pos_inf = Int64.bits_of_floa<span data-count="290">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int64.bits_of_floa<span data-count="288">t</span> (-<span data-count="288">.</span>(1.0 /. 0.0))
+let neg_inf = Int64.bits_of_floa<span data-count="290">t</span> (-<span data-count="290">.</span>(1.0 /. 0.0))
 
 let of_float = Int64.bits_of_float
 
@@ -722,7 +722,7 @@ let to_float = Int64.float_of_bits
 
 let of_bits x = <span data-count="1245">x</span>
 
-let to_bits x = <span data-count="2405">x</span>
+let to_bits x = <span data-count="2407">x</span>
 
 let is_inf x = <span data-count="23478">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
 
@@ -775,7 +775,7 @@ let unary op x =
   <span data-count="317">l</span>et t = op (to_floa<span data-count="317">t</span> x) in
   <span data-count="317">i</span>f t = t then <span data-count="269">o</span>f_float t else <span data-count="48">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="288">t</span> 0.0
+let zero = of_floa<span data-count="290">t</span> 0.0
 
 let add x y = <span data-count="24973">b</span>inary x ( +. ) y
 
@@ -1023,7 +1023,7 @@ let to_string' convert is_digit n x =
     <span data-count="15">g</span>roup_digit<span data-count="15">s</span> is_digit n
       (if s.[String.lengt<span data-count="15">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="15">s</span>)
 
-let to_string = to_string<span data-count="288">'</span> (Printf.sprint<span data-count="288">f</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="290">'</span> (Printf.sprint<span data-count="290">f</span> "%.17g") is_digit 3
 
 let to_hex_string x =
   <span data-count="0">i</span>f is_inf x then <span data-count="0">t</span>o_string x

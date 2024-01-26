@@ -161,14 +161,14 @@ type t =
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
-    <span data-count="796">i</span>ncr r;
-    <span data-count="796">!</span>r
+    <span data-count="797">i</span>ncr r;
+    <span data-count="797">!</span>r
 
 let init ?label (typ : simplified table_type) : t =
-  <span data-count="796">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="797">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
-  <span data-count="796">l</span>et table = Array.make limits.min null in
-  <span data-count="796">{</span> id = fres<span data-count="796">h</span> (); label; limits; typ = ref_type; data = table }
+  <span data-count="797">l</span>et table = Array.make limits.min null in
+  <span data-count="797">{</span> id = fres<span data-count="797">h</span> (); label; limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="54">t</span>able.data &lt;- data
 
