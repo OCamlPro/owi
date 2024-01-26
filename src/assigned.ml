@@ -13,9 +13,10 @@ end
 
 module TypeMap = Map.Make (StrType)
 
-let equal_func_types (a : simplified func_type) (b : simplified func_type) :
+let equal_func_types (a      :       simplified func_type) (b : simplified func_type) :
   bool =
-  let remove_param (pt, rt) =
+  let remove_param (     
+       pt, rt) =
     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
     (pt, rt)
   in
