@@ -47,12 +47,12 @@
   (bisect_ppx
    (and
     :with-test
-    (>= "2.5")
+    (>= 2.5)
     :dev))
   (ocb
    (and
     :with-test
-    (>= "0.1")
+    (>= 0.1)
     :dev))
   (odoc :with-doc)
   (crunch :dev)
@@ -61,7 +61,7 @@
   (mdx
    (and
     :with-test
-    (>= "2.1")))
+    (>= 2.1)))
   (crowbar :with-test)
   (graphics :dev)
   (tiny_httpd :dev)
@@ -70,5 +70,6 @@
   xmlm
   pyml
   re2
+  (hc (>= 0.3))
   dune-site)
  (sites (share pyc) (share binc) (share libc)))

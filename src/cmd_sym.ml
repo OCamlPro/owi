@@ -2,7 +2,7 @@ open Syntax
 module Expr = Encoding.Expr
 module Value = Symbolic_value.S
 module Choice = Symbolic.P.Choice
-module Solver = Thread.Solver
+open Hc
 
 (* TODO: make this a CLI flag *)
 let print_solver_time = false
@@ -64,12 +64,12 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
 let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
   let open Expr in
   let i32 v =
-    match v.e with
+    match v.node.e with
     | Val (Num (I32 v)) -> v
     | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
   in
   let ptr v =
-    match v.e with
+    match v.node.e with
     | Ptr (b, _) -> b
     | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
   in
@@ -176,8 +176,10 @@ let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
     simplify_then_link_then_run ~unsafe ~optimize pc script
 
 let get_model solver pc =
-  assert (Solver.check solver pc);
-  match Solver.model solver with None -> assert false | Some model -> model
+  assert (Thread.Solver.check solver pc);
+  match Thread.Solver.model solver with
+  | None -> assert false
+  | Some model -> model
 
 let mkdir_p_exn dir =
   let rec get_intermediate_dirs d acc =
@@ -217,7 +219,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
   if debug then Log.debug_on := true;
   mkdir_p_exn workspace;
   let pc = Choice.return (Ok ()) in
-  let solver = Solver.create () in
+  let solver = Thread.Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run_and_trap ~workers result thread in

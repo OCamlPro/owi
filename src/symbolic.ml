@@ -3,13 +3,11 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Types
-module Def_value = Concrete_value
+open Hc
 module Solver = Thread.Solver
 
 module P = struct
-  module Value = struct
-    include Symbolic_value.S
-  end
+  module Value = Symbolic_value.S
 
   type memory = Symbolic_memory.M.t
 
@@ -34,7 +32,7 @@ module P = struct
   type thread = Thread.t
 
   module Choice = Symbolic_choice.MT
-  module Extern_func = Def_value.Make_extern_func (Value) (Choice)
+  module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
 
   let select (c : vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
@@ -56,11 +54,9 @@ module P = struct
 
   type env = extern_func Link_env.t
 
-  type func = Def_value.Func.t
+  type func = Concrete_value.Func.t
 
-  module Func = struct
-    include Extern_func
-  end
+  module Func = Extern_func
 
   module Global = struct
     type t = global
@@ -113,21 +109,21 @@ module P = struct
       Choice.with_thread (fun thread ->
           let (S (solver_mod, solver)) = Thread.solver thread in
           let module Solver = (val solver_mod) in
-          match a.e with
-          | Val _ | Ptr (_, { e = Val _; _ }) -> a
+          match a.node.e with
+          | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> a
           | Ptr (base, offset) ->
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert (Solver.check solver @@ Thread.pc thread);
             let concrete_offest = Solver.get_value solver offset in
-            let cond = Relop (Eq, offset, concrete_offest) @: a.ty in
+            let cond = Relop (Eq, offset, concrete_offest) @: a.node.ty in
             (* TODO: this should go to the pc *)
             Solver.add solver [ cond ];
-            Ptr (base, concrete_offest) @: a.ty
+            Ptr (base, concrete_offest) @: a.node.ty
           | _ ->
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert (Solver.check solver @@ Thread.pc thread);
             let concrete_addr = Solver.get_value solver a in
-            let cond = Relop (Eq, a, concrete_addr) @: a.ty in
+            let cond = Relop (Eq, a, concrete_addr) @: a.node.ty in
             (* TODO: this should go to the pc *)
             Solver.add solver [ cond ];
             concrete_addr )
@@ -140,7 +136,7 @@ module P = struct
           let pc = Thread.pc thread in
           let (S (solver_mod, solver)) = Thread.solver thread in
           let module Solver = (val solver_mod) in
-          match a.e with
+          match a.node.e with
           | Val (Num (I32 _)) -> Ok a
           | Ptr (base, offset) -> (
             match Hashtbl.find m.chunks base with
