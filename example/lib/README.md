@@ -7,7 +7,7 @@ Given a file `quickstart.wat`, here's how to parse and run this file:
 ```ocaml
 # open Owi;;
 # let filename = Fpath.v "quickstart.wat";;
-val filename : string = "quickstart.wat"
+val filename : Fpath.t = <abstr>
 # let m =
     match Parse.Module.from_file filename with
     | Ok script -> script
