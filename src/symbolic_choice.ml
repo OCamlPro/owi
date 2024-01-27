@@ -5,6 +5,7 @@
 open Encoding
 open Choice_intf
 open Symbolic_value
+open Hc
 
 exception Assertion of Expr.t * Thread.t
 
@@ -13,7 +14,7 @@ let check sym_bool thread =
   let pc = Thread.pc thread in
   let no = S.Bool.not sym_bool in
   let no = Expr.simplify no in
-  match no.e with
+  match no.node.e with
   | Val True -> false
   | Val False -> true
   | _ ->
@@ -59,7 +60,7 @@ end = struct
 
   let select b ({ Thread.pc; solver = S (solver_module, s); _ } as thread) =
     let v = Expr.simplify b in
-    match v.e with
+    match v.node.e with
     | Val True -> M.return (true, thread)
     | Val False -> M.return (false, thread)
     | Val (Num (I32 _)) -> assert false
@@ -79,7 +80,7 @@ end = struct
         M.cons (true, thread1) (M.return (false, thread2)) )
 
   let fix_symbol (e : Expr.t) pc =
-    match e.e with
+    match e.node.e with
     | Symbol sym -> (pc, sym)
     | _ ->
       let sym = Symbol.("choice_i32" @: Ty_bitv S32) in
@@ -108,7 +109,7 @@ end = struct
     let sym_int = Expr.simplify sym_int in
     let orig_pc = pc in
     let pc, symbol = fix_symbol sym_int pc in
-    match sym_int.e with
+    match sym_int.node.e with
     | Val (Num (I32 i)) -> M.return (i, thread)
     | _ ->
       let module Solver = (val solver_module) in
@@ -309,21 +310,21 @@ module MT = struct
   let ( let* ) = bind
 
   let select (cond : S.vbool) =
-    match cond.e with
+    match cond.node.e with
     | Val True -> Retv true
     | Val False -> Retv false
     | _ -> Choice cond
   [@@inline]
 
   let select_i32 (i : S.int32) =
-    match i.e with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
+    match i.node.e with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
 
   let trap t = Trap t
 
   let with_thread f = Ret (St (fun t -> (f t, t))) [@@inline]
 
   let add_pc (c : S.vbool) =
-    match c.e with
+    match c.node.e with
     | Val True -> Retv ()
     | Val False -> Empty
     | _ -> Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
