@@ -6,30 +6,16 @@ let debug =
 
 let existing_non_dir_file =
   let parse s =
-    match Sys.file_exists s with
-    | true -> begin
-      if not (Sys.is_directory s) then begin
-        match Fpath.of_string s with
-        | Ok v -> `Ok v
-        | Error (`Msg s) -> `Error s
-      end
-      else `Error (Format.sprintf "'%s' is a directory" s)
-    end
-    | false -> `Error (Format.sprintf "no file '%s'" s)
+    let path = Fpath.v s in
+    match Bos.OS.File.exists path with
+    | Ok true -> `Ok path
+    | Ok false -> `Error (Format.asprintf "no file '%a'" Fpath.pp path)
+    | Error (`Msg s) -> `Error s
   in
   (parse, Fpath.pp)
 
 let dir_file =
-  let parse s =
-    match Sys.file_exists s with
-    | true -> begin
-      if Sys.is_directory s then begin
-        `Ok (Fpath.v s)
-      end
-      else `Error (Format.sprintf "'%s' is not a directory" s)
-    end
-    | false -> `Ok (Fpath.v s)
-  in
+  let parse s = `Ok (Fpath.v s) in
   (parse, Fpath.pp)
 
 let files =
@@ -97,7 +83,7 @@ let c_cmd =
   in
   let includes =
     let doc = "headers path" in
-    Arg.(value & opt_all dir [] & info [ "I" ] ~doc)
+    Arg.(value & opt_all dir_file [] & info [ "I" ] ~doc)
   in
   let opt_lvl =
     let doc = "specify which optimization level to use" in

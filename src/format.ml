@@ -8,6 +8,8 @@ let pp_std = printf
 
 let pp_nothing _fmt () = ()
 
+let pp_char = pp_print_char
+
 let pp_list = pp_print_list
 
 let pp_array = pp_print_array

@@ -178,17 +178,6 @@ let get_model solver pc =
   | None -> assert false
   | Some model -> model
 
-let mkdir_p_exn (dir : Fpath.t) =
-  let rec get_intermediate_dirs (d : Fpath.t) acc =
-    if Sys.file_exists (Fpath.to_string d) then acc
-    else
-      get_intermediate_dirs
-        (Fpath.normalize d |> Fpath.split_base |> fst)
-        (d :: acc)
-  in
-  let intermediate_dirs = get_intermediate_dirs dir [] in
-  List.iter (fun d -> Sys.mkdir (Fpath.to_string d) 0o755) intermediate_dirs
-
 let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag ?(atts = []) name = (("", name), atts) in
@@ -220,7 +209,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure
   (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  mkdir_p_exn workspace;
+  begin
+    match Bos.OS.Dir.create ~path:true ~mode:0o755 workspace with
+    | Ok true | Ok false -> ()
+    | Error (`Msg msg) -> failwith msg
+  end;
   let pc = Choice.return (Ok ()) in
   let solver = Thread.Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in

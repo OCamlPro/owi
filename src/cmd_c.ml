@@ -38,7 +38,7 @@ let llc bin ~bc ~obj =
 let ld bin ~flags ~out files =
   let libc = C_share.get_libc () |> Option.get in
   let files = List.fold_left (fun acc f -> Cmd.(acc % p f)) Cmd.empty files in
-  Cmd.(bin %% flags % "-o" % p out %% files % libc)
+  Cmd.(bin %% flags % "-o" % p out %% files % p libc)
 
 let wasm2wat bin0 ~out bin = Cmd.(bin0 % "-o" % p out % p bin)
 
@@ -70,7 +70,7 @@ let patch_with_regex ~patterns (data : string) : string =
     (fun data (regex, template) -> Re2.rewrite_exn regex ~template data)
     data patterns
 
-let patch ~(src : Fpath.t) ~(dst : Fpath.t) =
+let patch ~src ~dst =
   let* data = OS.File.read src in
   let data = patch_with_regex ~patterns:pre_patterns data in
   let data =
@@ -90,19 +90,24 @@ let copy ~src ~dst =
   let* () = OS.File.write dst data in
   Ok dst
 
-let instrument_file ?(skip = false) ~(includes : string list)
-  ~(workspace : Fpath.t) (file : Fpath.t) =
+let instrument_file ?(skip = false) ~includes ~workspace file =
   let dst = Fpath.(workspace // base (file -+ ".c")) in
   if skip then copy ~src:file ~dst
   else begin
     Logs.app (fun m -> m "instrumenting %a" Fpath.pp file);
     let* () = patch ~src:file ~dst in
-    let pypath = String.concat ":" C_share.py_location in
+    let pypath =
+      Format.asprintf "%a"
+        (Format.pp_list
+           ~pp_sep:(fun fmt () -> Format.pp_char fmt ':')
+           Fpath.pp )
+        C_share.py_location
+    in
     let* () = OS.Env.set_var "PYTHONPATH" (Some pypath) in
     begin
       try
         Py.initialize ();
-        C_instrumentor.instrument (Fpath.to_string dst) includes;
+        C_instrumentor.instrument dst includes;
         Py.finalize ()
       with Py.E (errtype, errvalue) ->
         let pp = Py.Object.format in
@@ -111,11 +116,10 @@ let instrument_file ?(skip = false) ~(includes : string list)
     Ok dst
   end
 
-let compile ~(deps : deps) ~(includes : string list) ~(opt_lvl : string)
-  (file : Fpath.t) =
+let compile ~deps ~includes ~opt_lvl file =
   Logs.app (fun m -> m "compiling %a" Fpath.pp file);
   let cflags =
-    let includes = Cmd.of_list ~slip:"-I" includes in
+    let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
     let warnings =
       Cmd.of_list
         [ "-Wno-int-conversion"
@@ -139,7 +143,7 @@ let compile ~(deps : deps) ~(includes : string list) ~(opt_lvl : string)
   let* () = OS.Cmd.run @@ deps.llc ~bc ~obj in
   Ok obj
 
-let link ~deps ~workspace (files : Fpath.t list) =
+let link ~deps ~workspace files =
   let ldflags ~entry =
     let stack_size = 8 * (1024 * 1024) in
     Cmd.(
@@ -168,7 +172,7 @@ let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } =
   Format.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
-let metadata ~workspace arch property (files : Fpath.t list) =
+let metadata ~workspace arch property files =
   let out_metadata chan { arch; property; files } =
     let o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
     let tag n = (("", n), []) in
@@ -208,8 +212,8 @@ let metadata ~workspace arch property (files : Fpath.t list) =
   let* res = OS.File.with_oc fpath out_metadata { arch; property; files } in
   res
 
-let cmd debug arch property testcomp workspace workers opt_lvl includes
-  (files : Fpath.t list) profiling unsafe optimize no_stop_at_failure =
+let cmd debug arch property testcomp workspace workers opt_lvl includes files
+  profiling unsafe optimize no_stop_at_failure =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
@@ -227,8 +231,8 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
     workspace files
 
-let cmd debug arch property testcomp workspace workers opt_lvl includes
-  (files : Fpath.t list) profiling unsafe optimize no_stop_at_failure =
+let cmd debug arch property testcomp workspace workers opt_lvl includes files
+  profiling unsafe optimize no_stop_at_failure =
   let res =
     cmd debug arch property testcomp workspace workers opt_lvl includes files
       profiling unsafe optimize no_stop_at_failure

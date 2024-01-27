@@ -12,6 +12,8 @@ val pp_space : formatter -> unit -> unit
 
 val pp_bool : formatter -> bool -> unit
 
+val pp_char : formatter -> char -> unit
+
 val pp_int : formatter -> int -> unit
 
 val pp_flush : formatter -> unit -> unit
