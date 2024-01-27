@@ -5,11 +5,8 @@
 open Syntax
 
 let run_file exec filename =
-  if not @@ Sys.file_exists filename then
-    error_s "file `%s` doesn't exist" filename
-  else
-    let* script = Parse.Script.from_file ~filename in
-    exec script
+  let* script = Parse.Script.from_file filename in
+  exec script
 
 let cmd profiling debug optimize files no_exhaustion =
   let exec = Script.exec ~no_exhaustion ~optimize in

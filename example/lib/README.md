@@ -6,10 +6,10 @@ Given a file `quickstart.wat`, here's how to parse and run this file:
 
 ```ocaml
 # open Owi;;
-# let filename = "quickstart.wat";;
+# let filename = Fpath.v "quickstart.wat";;
 val filename : string = "quickstart.wat"
 # let m =
-    match Parse.Module.from_file ~filename with
+    match Parse.Module.from_file filename with
     | Ok script -> script
     | Error e -> failwith e;;
 val m : Text.modul =

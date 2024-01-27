@@ -11,10 +11,8 @@ module Make (M : sig
   val rule : (Lexing.lexbuf -> Menhir_parser.token) -> Lexing.lexbuf -> t
 end) =
 struct
-  let rule = Obj.magic M.rule
-
   let from_lexbuf =
-    let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
+    let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
     let print_err buf msg =
       let pos = fst @@ Sedlexing.lexing_positions buf in
       let file_line =
@@ -45,17 +43,17 @@ struct
         print_err buf msg;
         Error msg
 
-  let from_file ~filename =
-    let chan = open_in filename in
-    let result =
-      Fun.protect
-        ~finally:(fun () -> close_in chan)
-        (fun () ->
+  let from_file filename =
+    match
+      Bos.OS.File.with_ic filename
+        (fun chan () ->
           let lb = Sedlexing.Utf8.from_channel chan in
-          Sedlexing.set_filename lb filename;
+          Sedlexing.set_filename lb (Fpath.to_string filename);
           from_lexbuf lb )
-    in
-    result
+        ()
+    with
+    | Ok v -> v
+    | Error (`Msg e) -> Error e
 
   let from_string s = from_lexbuf (Sedlexing.Utf8.from_string s)
 

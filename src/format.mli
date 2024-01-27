@@ -51,6 +51,8 @@ val pp_newline : formatter -> unit -> unit
 
 val sprintf : ('a, unit, string) format -> 'a
 
+val ksprintf : (string -> 'a) -> ('b, unit, string, 'a) format4 -> 'b
+
 val asprintf : ('a, formatter, unit, string) format4 -> 'a
 
 val kasprintf : (string -> 'a) -> ('b, formatter, unit, 'a) format4 -> 'b

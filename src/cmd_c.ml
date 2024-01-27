@@ -2,6 +2,8 @@ open Bos
 
 let ( let* ) = Result.bind
 
+let ( let+ ) o f = Result.map f o
+
 let list_map f lst =
   let exception E of Rresult.R.msg in
   try
@@ -22,7 +24,7 @@ type deps =
 type metadata =
   { arch : int
   ; property : string option
-  ; files : string list
+  ; files : Fpath.t list
   }
 
 let clang bin ~flags ~out file = Cmd.(bin %% flags % "-o" % p out % p file)
@@ -81,8 +83,7 @@ let patch ~(src : Fpath.t) ~(dst : Fpath.t) =
       ; data
       ]
   in
-  let* () = OS.File.write dst data in
-  Ok ()
+  OS.File.write dst data
 
 let copy ~src ~dst =
   let* data = OS.File.read src in
@@ -90,8 +91,7 @@ let copy ~src ~dst =
   Ok dst
 
 let instrument_file ?(skip = false) ~(includes : string list)
-  ~(workspace : Fpath.t) (file : string) =
-  let file = Fpath.v file in
+  ~(workspace : Fpath.t) (file : Fpath.t) =
   let dst = Fpath.(workspace // base (file -+ ".c")) in
   if skip then copy ~src:file ~dst
   else begin
@@ -164,24 +164,11 @@ let cleanup dir =
     () [ dir ]
   |> Logs.on_error_msg ~level:Logs.Warning ~use:Fun.id
 
-let owi ~workspace ~workers flags module_ =
-  let flags = Cmd.of_list flags in
-  let w = string_of_int workers in
-  Cmd.(
-    v "owi" % "sym" % "-w" % w % "--workspace" %% flags % p workspace
-    % p module_ )
-
-let run ~workspace ~workers module_ =
-  Logs.app (fun m -> m "running %a" Fpath.pp module_);
-  let workspace = Fpath.(workspace / "test-suite") in
-  let* () = OS.Cmd.run @@ owi ~workspace ~workers [] module_ in
-  Ok 0
-
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } =
   Format.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
-let metadata ~workspace arch property files =
+let metadata ~workspace arch property (files : Fpath.t list) =
   let out_metadata chan { arch; property; files } =
     let o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
     let tag n = (("", n), []) in
@@ -189,8 +176,12 @@ let metadata ~workspace arch property files =
     let* spec =
       match property with None -> Ok "" | Some f -> OS.File.read @@ Fpath.v f
     in
-    let file = String.concat " " files in
-    let hash = List.fold_left (fun _ f -> Sha256.file f) Sha256.zero files in
+    let file = String.concat " " (List.map Fpath.to_string files) in
+    let hash =
+      List.fold_left
+        (fun _ f -> Sha256.file (Fpath.to_string f))
+        Sha256.zero files
+    in
     let time = Unix.time () |> Unix.localtime in
     let test_metadata =
       `El
@@ -206,35 +197,40 @@ let metadata ~workspace arch property files =
           ] )
     in
     let dtd =
-      "<!DOCTYPE test-metadata PUBLIC \"+//IDN sosy-lab.org//DTD test-format \
-       test-metadata 1.1//EN\" \
-       \"https://sosy-lab.org/test-format/test-metadata-1.1.dtd\">"
+      {xml|<!DOCTYPE test-metadata PUBLIC "+//IDN sosy-lab.org//DTD test-format test-metadata 1.1//EN" "https://sosy-lab.org/test-format/test-metadata-1.1.dtd">|xml}
     in
     Xmlm.output o (`Dtd (Some dtd));
     Xmlm.output_tree Fun.id o test_metadata;
     Ok ()
   in
   let fpath = Fpath.(workspace / "test-suite" / "metadata.xml") in
-  let* _ = OS.Dir.create ~path:true (Fpath.parent fpath) in
+  let* (_exists : bool) = OS.Dir.create ~path:true (Fpath.parent fpath) in
   let* res = OS.File.with_oc fpath out_metadata { arch; property; files } in
   res
 
-let cmd debug arch property testcomp output workers opt_lvl includes files =
+let cmd debug arch property testcomp workspace workers opt_lvl includes
+  (files : Fpath.t list) profiling unsafe optimize no_stop_at_failure =
   if debug then Logs.set_level (Some Debug);
-  let workspace = Fpath.v output in
+  let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
+  let* deps = check_dependencies () in
+  let* (_exists : bool) = OS.Dir.create ~path:true workspace in
+  (* skip instrumentation if not in test-comp mode *)
+  let skip = not testcomp in
+  let* nfiles = list_map (instrument_file ~skip ~includes ~workspace) files in
+  let* objects = list_map (compile ~deps ~includes ~opt_lvl) nfiles in
+  let* module_ = link ~deps ~workspace objects in
+  cleanup workspace;
+  let+ () = metadata ~workspace arch property files in
+  let files = [ module_ ] in
+  let workspace = Fpath.(workspace / "test-suite") in
+  Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
+    workspace files
+
+let cmd debug arch property testcomp workspace workers opt_lvl includes
+  (files : Fpath.t list) profiling unsafe optimize no_stop_at_failure =
   let res =
-    let* deps = check_dependencies () in
-    let* _ = OS.Dir.create ~path:true workspace in
-    (* skip instrumentation if not in test-comp mode *)
-    let skip = not testcomp in
-    let* nfiles = list_map (instrument_file ~skip ~includes ~workspace) files in
-    let* objects = list_map (compile ~deps ~includes ~opt_lvl) nfiles in
-    let* module_ = link ~deps ~workspace objects in
-    cleanup workspace;
-    let* () = metadata ~workspace arch property files in
-    run ~workspace ~workers module_
+    cmd debug arch property testcomp workspace workers opt_lvl includes files
+      profiling unsafe optimize no_stop_at_failure
   in
-  match Logs.on_error_msg ~level:Logs.Error ~use:(fun _ -> 1) res with
-  | 0 -> ()
-  | n -> exit n
+  match res with Ok () -> () | Error (`Msg e) -> failwith e
