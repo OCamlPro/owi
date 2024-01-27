@@ -6,7 +6,7 @@ val cmd :
   -> string
   -> int
   -> string
-  -> string list
+  -> Fpath.t list
   -> Fpath.t list
   -> bool
   -> bool

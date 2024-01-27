@@ -1,1 +1,1 @@
-val instrument : string -> string list -> unit
+val instrument : Fpath.t -> Fpath.t list -> unit
