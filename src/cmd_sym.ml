@@ -168,12 +168,9 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
   in
   List.fold_left f pc (List.rev to_run)
 
-let run_file ~unsafe ~optimize (pc : unit Result.t Choice.t) filename =
-  if not @@ Sys.file_exists filename then
-    Choice.return (error_s "file `%s` doesn't exist" filename)
-  else
-    let*/ script = Parse.Script.from_file ~filename in
-    simplify_then_link_then_run ~unsafe ~optimize pc script
+let run_file ~unsafe ~optimize pc filename =
+  let*/ script = Parse.Script.from_file filename in
+  simplify_then_link_then_run ~unsafe ~optimize pc script
 
 let get_model solver pc =
   assert (Thread.Solver.check solver pc);
@@ -181,13 +178,16 @@ let get_model solver pc =
   | None -> assert false
   | Some model -> model
 
-let mkdir_p_exn dir =
-  let rec get_intermediate_dirs d acc =
-    if Sys.file_exists d then acc
-    else get_intermediate_dirs (Filename.dirname d) (d :: acc)
+let mkdir_p_exn (dir : Fpath.t) =
+  let rec get_intermediate_dirs (d : Fpath.t) acc =
+    if Sys.file_exists (Fpath.to_string d) then acc
+    else
+      get_intermediate_dirs
+        (Fpath.normalize d |> Fpath.split_base |> fst)
+        (d :: acc)
   in
   let intermediate_dirs = get_intermediate_dirs dir [] in
-  List.iter (fun d -> Sys.mkdir d 0o755) intermediate_dirs
+  List.iter (fun d -> Sys.mkdir (Fpath.to_string d) 0o755) intermediate_dirs
 
 let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
@@ -206,15 +206,18 @@ let write_testcase =
   let cnt = ref 0 in
   fun ~dir ~err testcase ->
     incr cnt;
-    let name = Format.sprintf "testcase-%d.xml" !cnt in
-    let path = Filename.concat dir name in
-    let out_chan = open_out path in
-    Fun.protect
-      ~finally:(fun () -> close_out out_chan)
-      (fun () -> out_testcase ~dst:(`Channel out_chan) ~err testcase)
+    let name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
+    let path = Fpath.append dir name in
+    match
+      Bos.OS.File.with_oc path
+        (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) ~err testcase))
+        ()
+    with
+    | Ok (Ok ()) -> ()
+    | Ok (Error (`Msg e)) | Error (`Msg e) -> failwith e
 
-let cmd profiling debug unsafe optimize workers no_stop_at_failure workspace
-  files =
+let cmd profiling debug unsafe optimize workers no_stop_at_failure
+  (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   mkdir_p_exn workspace;

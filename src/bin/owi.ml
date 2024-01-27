@@ -4,9 +4,38 @@ let debug =
   let doc = "debug mode" in
   Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
+let existing_non_dir_file =
+  let parse s =
+    match Sys.file_exists s with
+    | true -> begin
+      if not (Sys.is_directory s) then begin
+        match Fpath.of_string s with
+        | Ok v -> `Ok v
+        | Error (`Msg s) -> `Error s
+      end
+      else `Error (Format.sprintf "'%s' is a directory" s)
+    end
+    | false -> `Error (Format.sprintf "no file '%s'" s)
+  in
+  (parse, Fpath.pp)
+
+let dir_file =
+  let parse s =
+    match Sys.file_exists s with
+    | true -> begin
+      if Sys.is_directory s then begin
+        `Ok (Fpath.v s)
+      end
+      else `Error (Format.sprintf "'%s' is not a directory" s)
+    end
+    | false -> `Ok (Fpath.v s)
+  in
+  (parse, Fpath.pp)
+
 let files =
   let doc = "source files" in
-  Cmdliner.Arg.(value & pos_all non_dir_file [] (info [] ~doc))
+  let f = existing_non_dir_file in
+  Cmdliner.Arg.(value & pos_all f [] (info [] ~doc))
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in
@@ -37,7 +66,8 @@ let workers =
 
 let workspace =
   let doc = "path to the workspace directory" in
-  Cmdliner.Arg.(value & opt string "owi-out" & info [ "workspace" ] ~doc)
+  Cmdliner.Arg.(
+    value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
 
 let copts_t = Cmdliner.Term.(const [])
 
@@ -63,7 +93,7 @@ let c_cmd =
   in
   let property =
     let doc = "property file" in
-    Arg.(value & opt (some string) None & info [ "property"; "p" ] ~doc)
+    Arg.(value & opt (some string) None & info [ "property" ] ~doc)
   in
   let includes =
     let doc = "headers path" in
@@ -84,7 +114,8 @@ let c_cmd =
   Cmd.v info
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
-      $ opt_lvl $ includes $ files )
+      $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
+      $ no_stop_at_failure )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -154,6 +185,8 @@ let cli =
   Cmd.group info ~default
     [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd ]
 
-let main () = exit @@ Cmdliner.Cmd.eval cli
+let main () = Cmdliner.Cmd.eval cli
 
-let () = main ()
+let exit_code = main ()
+
+let () = exit exit_code

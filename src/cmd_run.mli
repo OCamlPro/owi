@@ -1,1 +1,1 @@
-val cmd : bool -> bool -> bool -> bool -> string list -> unit
+val cmd : bool -> bool -> bool -> bool -> Fpath.t list -> unit

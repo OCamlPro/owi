@@ -9,7 +9,7 @@ module Script : sig
   val from_channel : in_channel -> Text.script Result.t
 
   (** Parse a script from a file. *)
-  val from_file : filename:string -> Text.script Result.t
+  val from_file : Fpath.t -> Text.script Result.t
 end
 
 module Module : sig
@@ -20,7 +20,7 @@ module Module : sig
   val from_channel : in_channel -> Text.modul Result.t
 
   (** Parse a module from a file. *)
-  val from_file : filename:string -> Text.modul Result.t
+  val from_file : Fpath.t -> Text.modul Result.t
 end
 
 module Inline_module : sig
@@ -31,5 +31,5 @@ module Inline_module : sig
   val from_channel : in_channel -> Text.modul Result.t
 
   (** Parse an inline module from a file. *)
-  val from_file : filename:string -> Text.modul Result.t
+  val from_file : Fpath.t -> Text.modul Result.t
 end

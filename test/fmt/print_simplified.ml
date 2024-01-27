@@ -4,8 +4,10 @@
 
 open Owi
 
+let filename = Fpath.v Sys.argv.(1)
+
 let m =
-  match Parse.Module.from_file ~filename:Sys.argv.(1) with
+  match Parse.Module.from_file filename with
   | Ok m -> m
   | Error msg -> failwith msg
 

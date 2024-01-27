@@ -57,7 +57,7 @@ let link_state =
 
 (* first pure wasm module refering to `life_ext` *)
 let pure_wasm_module_1 =
-  match Parse.Module.from_file ~filename:"life.wat" with
+  match Parse.Module.from_file (Fpath.v "life.wat") with
   | Error msg -> failwith msg
   | Ok modul -> modul
 
@@ -78,7 +78,7 @@ let () =
 
 (* second pure wasm module refering to `life_ext` *)
 let pure_wasm_module_2 =
-  match Parse.Module.from_file ~filename:"life_loop.wat" with
+  match Parse.Module.from_file (Fpath.v "life_loop.wat") with
   | Error msg -> failwith msg
   | Ok modul -> modul
 
