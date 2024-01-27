@@ -207,17 +207,29 @@ OPTIONS
        -m VAL, --arch=VAL (absent=32)
            data model
 
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
        -o VAL, --output=VAL (absent=owi-out)
            write results to dir
 
        -O VAL (absent=0)
            specify which optimization level to use
 
-       -p VAL, --property=VAL
+       --optimize
+           optimize mode
+
+       -p, --profiling
+           profiling mode
+
+       --property=VAL
            property file
 
        --testcomp
            test-comp mode
+
+       -u, --unsafe
+           skip typechecking pass
 
        -w VAL, --workers=VAL (absent=4)
            number of workers for symbolic execution
