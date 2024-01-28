@@ -64,7 +64,10 @@ module Env = struct
       let (Bt_raw ((None | Some _), t)) = t.desc in
       t
 
-  let block_type_get i env = List.nth env.blocks i
+  let block_type_get i env =
+    match List.nth_opt env.blocks i with
+    | None -> Format.ksprintf Result.error "unknown label %d" i
+    | Some bt -> Ok bt
 
   let table_type_get_from_module i (modul : Simplified.modul) =
     let value = Indexed.get_at_exn i modul.table.values in
@@ -442,22 +445,22 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     if not @@ Hashtbl.mem env.refs i then Error "undeclared function reference"
     else Stack.push [ Ref_type Func_ht ] stack
   | Br (Raw i) ->
-    let jt = Env.block_type_get i env in
+    let* jt = Env.block_type_get i env in
     let* _stack = Stack.pop jt stack in
     Ok [ any ]
   | Br_if (Raw i) ->
     let* stack = Stack.pop [ i32 ] stack in
-    let jt = Env.block_type_get i env in
+    let* jt = Env.block_type_get i env in
     let* stack = Stack.pop jt stack in
     Stack.push jt stack
   | Br_table (branches, Raw i) ->
     let* stack = Stack.pop [ i32 ] stack in
-    let default_jt = Env.block_type_get i env in
+    let* default_jt = Env.block_type_get i env in
     let* _stack = Stack.pop default_jt stack in
     let* () =
       array_iter
         (fun (Raw i : simplified indice) ->
-          let jt = Env.block_type_get i env in
+          let* jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
             Error "type mismatch (br table)"
           else

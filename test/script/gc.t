@@ -12,11 +12,11 @@
   [1]
   $ dune exec owi -- script --no-exhaustion gc/extern.wast
   owi: internal error, uncaught exception:
-       File "src/typecheck.ml", line 493, characters 4-10: Assertion failed
-       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 493, characters 4-16
+       File "src/typecheck.ml", line 496, characters 4-10: Assertion failed
+       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 496, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 505, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 527, characters 6-112
+       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 508, characters 15-59
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 530, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.until_typecheck in file "src/compile.ml", line 28, characters 14-31
        Called from Owi__Compile.until_optimize in file "src/compile.ml", line 32, characters 11-36
@@ -49,11 +49,11 @@
   [125]
   $ dune exec owi -- script --no-exhaustion gc/ref_cast.wast
   owi: internal error, uncaught exception:
-       File "src/typecheck.ml", line 493, characters 4-10: Assertion failed
-       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 493, characters 4-16
+       File "src/typecheck.ml", line 496, characters 4-10: Assertion failed
+       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 496, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 505, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 527, characters 6-112
+       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 508, characters 15-59
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 530, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.until_typecheck in file "src/compile.ml", line 28, characters 14-31
        Called from Owi__Compile.until_optimize in file "src/compile.ml", line 32, characters 11-36
@@ -71,11 +71,11 @@
   [125]
   $ dune exec owi -- script --no-exhaustion gc/ref_eq.wast
   owi: internal error, uncaught exception:
-       File "src/typecheck.ml", line 493, characters 4-10: Assertion failed
-       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 493, characters 4-16
+       File "src/typecheck.ml", line 496, characters 4-10: Assertion failed
+       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 496, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 505, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 527, characters 6-112
+       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 508, characters 15-59
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 530, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.until_typecheck in file "src/compile.ml", line 28, characters 14-31
        Called from Owi__Compile.until_optimize in file "src/compile.ml", line 32, characters 11-36
@@ -93,11 +93,11 @@
   [125]
   $ dune exec owi -- script --no-exhaustion gc/ref_test.wast
   owi: internal error, uncaught exception:
-       File "src/typecheck.ml", line 493, characters 4-10: Assertion failed
-       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 493, characters 4-16
+       File "src/typecheck.ml", line 496, characters 4-10: Assertion failed
+       Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck.ml", line 496, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 505, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 527, characters 6-112
+       Called from Owi__Typecheck.typecheck_expr in file "src/typecheck.ml", line 508, characters 15-59
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck.ml", line 530, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.until_typecheck in file "src/compile.ml", line 28, characters 14-31
        Called from Owi__Compile.until_optimize in file "src/compile.ml", line 32, characters 11-36
