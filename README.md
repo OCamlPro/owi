@@ -7,7 +7,8 @@
 - [`owi opt`]: an optimizer for Wasm;
 - [`owi run`]: a concrete Wasm interpreter;
 - [`owi script`]: an interpreter for [Wasm scripts];
-- [`owi sym`]: a symbolic Wasm interpreter.
+- [`owi sym`]: a symbolic Wasm interpreter;
+- [`owi validate`]: a validator for Wasm modules.
 
 It also provides an [OCaml library] which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
 
@@ -170,14 +171,15 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [Relaxed SIMD]: https://github.com/WebAssembly/relaxed-simd
 [JS Promise Integration]: https://github.com/WebAssembly/js-promise-integration
 
-[`owi c`]: ./example/c
-[`owi fmt`]: ./example/fmt
-[`owi opt`]: ./example/opt
-[`owi run`]: ./example/run
-[`owi script`]: ./example/script
-[`owi sym`]: ./example/sym
-[import OCaml functions in a Wasm module]: ./example/define_host_function
-[OCaml library]: ./example/lib
-[a fuzzer]: ./test/fuzz
+[`owi c`]: example/c
+[`owi fmt`]: example/fmt
+[`owi opt`]: example/opt
+[`owi run`]: example/run
+[`owi script`]: example/script
+[`owi sym`]: example/sym
+[`owi validate`]: example/validate
+[import OCaml functions in a Wasm module]: example/define_host_function
+[OCaml library]: example/lib
+[a fuzzer]: test/fuzz
 
 [🐌]: https://invidious.zapashcanon.fr/watch?v=XgK9Fd8ikxk

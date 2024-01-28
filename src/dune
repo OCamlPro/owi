@@ -13,6 +13,7 @@
   cmd_run
   cmd_script
   cmd_sym
+  cmd_validate
   compile
   concrete
   concrete_choice

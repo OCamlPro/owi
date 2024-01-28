@@ -8,6 +8,7 @@
 - [`owi run`]
 - [`owi script`]
 - [`owi sym`]
+- [`owi validate`]
 
 ## Owi library
 
@@ -43,6 +44,9 @@ COMMANDS
        sym [OPTION]… [ARG]…
            Run the symbolic interpreter
 
+       validate [--debug] [OPTION]… [ARG]…
+           Validate a module
+
 COMMON OPTIONS
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
@@ -74,5 +78,6 @@ BUGS
 [`owi run`]: ./run
 [`owi script`]: ./script
 [`owi sym`]: ./sym
+[`owi validate`]: ./validate
 [import OCaml functions in a Wasm module]: ./define_host_function
 [OCaml library]: ./lib

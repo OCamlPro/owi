@@ -4,6 +4,8 @@ val until_check : unsafe:bool -> Text.modul -> Text.modul Result.t
 
 val until_simplify : unsafe:bool -> Text.modul -> Simplified.modul Result.t
 
+val until_typecheck : unsafe:bool -> Text.modul -> Simplified.modul Result.t
+
 val until_optimize :
   unsafe:bool -> optimize:bool -> Text.modul -> Simplified.modul Result.t
 
