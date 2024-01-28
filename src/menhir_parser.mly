@@ -1027,25 +1027,30 @@ let module_field :=
   | ~ = table; <>
   | ~ = memory; <>
 
-let inline_module :=
+let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
     { id; fields }
   }
 
+let inline_module :=
+  | inline_module = inline_module_inner; EOF; {
+    inline_module
+  }
+
 let modul :=
-  | LPAR; MODULE; id = ioption(id); ~ = inline_module; RPAR; {
+  | LPAR; MODULE; id = ioption(id); ~ = inline_module_inner; RPAR; {
     (* TODO: handle fields_bin
     let fields_bin = String.concat "" l in *)
-    { inline_module with id }
+    { inline_module_inner with id }
   }
 
 let module_binary :=
-  | MODULE; id = ioption(id); BINARY; ~ = inline_module; _ = list(NAME); {
+  | MODULE; id = ioption(id); BINARY; ~ = inline_module_inner; _ = list(NAME); {
     (* TODO: handle fields_bin
     let fields_bin = String.concat "" l in *)
-    { inline_module with id }
+    { inline_module_inner with id }
   }
 
 let literal_const ==
@@ -1101,6 +1106,6 @@ let cmd ==
 
 let script :=
   | ~ = nonempty_list(cmd); EOF; <>
-  | ~ = inline_module; EOF; {
-    [ Module inline_module ]
+  | ~ = inline_module_inner; EOF; {
+    [ Module inline_module_inner ]
   }
