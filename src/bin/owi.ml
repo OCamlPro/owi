@@ -135,6 +135,15 @@ let run_cmd =
   Cmd.v info
     Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
 
+let validate_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Validate a module" in
+    let man = [] @ shared_man in
+    Cmd.info "validate" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ files)
+
 let script_cmd =
   let open Cmdliner in
   let info =
@@ -169,7 +178,7 @@ let cli =
   in
   let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
   Cmd.group info ~default
-    [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd ]
+    [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd; validate_cmd ]
 
 let main () = Cmdliner.Cmd.eval cli
 
