@@ -526,7 +526,7 @@ let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
   <span data-count="3352">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="5872">{</span> id
+  <span data-count="5870">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -589,9 +589,9 @@ let check_limit { min; max } =
     else <span data-count="1335">O</span>k ()
 
 let of_symbolic (modul : Text.modul) : t Result.t =
-  <span data-count="5872">L</span>og.debug0 "grouping     ...@\n";
-  <span data-count="5872">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
-    <span data-count="34485">m</span>atch field with
+  <span data-count="5870">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="5870">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
+    <span data-count="34481">m</span>atch field with
     | <span data-count="596">T</span>ext.MType typ -&gt;
       let typ = typ @ fields.typ in
       ok @@ ({ fields with typ }, curr)
@@ -647,24 +647,24 @@ let of_symbolic (modul : Text.modul) : t Result.t =
         { fields.exports with mem = { name; id } :: fields.exports.mem }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="12461">M</span>Func func -&gt;
+    | <span data-count="12459">M</span>Func func -&gt;
       let function_type, type_checks =
         match func.type_f with
         | <span data-count="236">B</span>t_ind _ -&gt; (fields.function_type, fields.type_checks)
-        | <span data-count="12225">B</span>t_raw (id, typ) -&gt;
+        | <span data-count="12223">B</span>t_raw (id, typ) -&gt;
           let type_checks =
             match id with
-            | <span data-count="12189">N</span>one -&gt; fields.type_checks
+            | <span data-count="12187">N</span>one -&gt; fields.type_checks
             | <span data-count="36">S</span>ome id -&gt; (id, typ) :: fields.type_checks
           in
           (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
       let value = Runtime.Local func in
-      let func = Indexed.retur<span data-count="12461">n</span> index value :: fields.func in
+      let func = Indexed.retur<span data-count="12459">n</span> index value :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
-        , { curr with func = suc<span data-count="12461">c</span> curr.func } )
+        , { curr with func = suc<span data-count="12459">c</span> curr.func } )
     | <span data-count="2947">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
       let imported : text block_type Imported.t = im<span data-count="2947">p</span> import (a, b) in
       ok @@ add_fun<span data-count="2947">c</span> (Imported imported) fields curr
@@ -693,12 +693,12 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       in
       let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_dat<span data-count="821">a</span> data fields curr
-    | <span data-count="66">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
+    | <span data-count="64">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in
   let+ modul, _curr =
-    list_fold_lef<span data-count="5872">t</span> add (empty_modul<span data-count="5872">e</span> modul.id, init_curr) modul.fields
+    list_fold_lef<span data-count="5870">t</span> add (empty_modul<span data-count="5870">e</span> modul.id, init_curr) modul.fields
   in
-  <span data-count="5854">m</span>odul
+  <span data-count="5852">m</span>odul
 </code></pre>
       </div>
     </div>
