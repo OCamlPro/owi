@@ -36,18 +36,21 @@ int main (void) {
     old_x = x;
     old_y = y;
 
-    char c = program[i];
-
-    if (c == 'w') {
-      y--;
-    } else if (c == 's') {
-      y++;
-    } else if (c == 'a') {
-      x--;
-    } else if (c == 'd') {
-      x++;
-    } else {
-      return 1;
+    switch (program[i]) {
+      case 'w':
+        y--;
+        break;
+      case 's':
+        y++;
+        break;
+      case 'a':
+        x--;
+        break;
+      case 'd':
+        x++;
+        break;
+      default:
+        return 1;
     }
 
     if (maze[y][x] == '#') {
