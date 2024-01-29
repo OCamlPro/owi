@@ -1422,13 +1422,18 @@ module Make (P : Interpret_intf.P) :
       st stack
     | Br_table (inds, Raw i) ->
       let target, stack = Stack.pop_i32 stack in
-      let* target = Choice.select_i32 target in
-      let target = Int32.to_int target in
-      let target =
-        if target < 0 || target >= Array.length inds then i
+      let> out =
+        Bool.or_
+          I32.(target < const 0l)
+          I32.(target >= const (Int32.of_int (Array.length inds)))
+      in
+      let* target =
+        if out then return i
         else
+          let* target = Choice.select_i32 target in
+          let target = Int32.to_int target in
           let (Raw i) = inds.(target) in
-          i
+          return i
       in
       let state = { state with stack } in
       State.branch state target
