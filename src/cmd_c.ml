@@ -183,9 +183,13 @@ let metadata ~workspace arch property files =
     let file = String.concat " " (List.map Fpath.to_string files) in
     let hash =
       List.fold_left
-        (fun _ f -> Sha256.file (Fpath.to_string f))
-        Sha256.zero files
+        (fun context file ->
+          match Bos.OS.File.read file with
+          | Error (`Msg msg) -> failwith msg
+          | Ok str -> Digestif.SHA256.feed_string context str )
+        Digestif.SHA256.empty files
     in
+    let hash = Digestif.SHA256.to_hex (Digestif.SHA256.get hash) in
     let time = Unix.time () |> Unix.localtime in
     let test_metadata =
       `El
@@ -194,7 +198,7 @@ let metadata ~workspace arch property files =
           ; el "producer" "owic"
           ; el "specification" (String.trim spec)
           ; el "programfile" file
-          ; el "programhash" (Sha256.to_hex hash)
+          ; el "programhash" hash
           ; el "entryfunction" "main"
           ; el "architecture" (Format.sprintf "%dbit" arch)
           ; el "creationtime" (Format.asprintf "%a" pp_tm time)

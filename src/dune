@@ -71,6 +71,7 @@
  (private_modules convert lexer menhir_parser spectest wutf8 tracing)
  (libraries
   bos
+  digestif
   dune-site
   encoding
   hc
@@ -80,7 +81,6 @@
   ppxlib
   pyml
   re2
-  sha
   sedlex
   uutf
   runtime_events
