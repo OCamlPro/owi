@@ -3,6 +3,8 @@
   %{bin:owi}
   add_i32.wat
   add_i64.wat
+  add_f32.wat
+  add_f64.wat
   assume.wat
   ; binop_i32.wat
   ; binop_i32-2.wat
@@ -13,18 +15,23 @@
   div_i32.wat
   div_i64.wat
   div_f32.wat
+  div_f64.wat
   global.wat
   grow.wat
   memory.wat
   mini_test.wat
   mul_i32.wat
   mul_i64.wat
+  mul_f32.wat
+  mul_f64.wat
   store.wat
   sub_i32.wat
   sub_i64.wat
+  sub_f32.wat
+  sub_f64.wat
   table.wat
   ; unop_i32.wat
   ; unop_i64.wat
   ; unop_f32.wat
   ; unop_f64.wat
- ))
+  ))

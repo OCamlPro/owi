@@ -9,9 +9,9 @@
     (local.set $x (call $f32_symbol))
     (local.set $y (call $f32_symbol))
 
-    (call $assert_i32 (f32.eq   ;; False when x/y is NaN (because NaN != Nan)
-      (f32.div (local.get $x) (local.get $y))
-      (f32.div (local.get $x) (local.get $y))))
+    (call $assert_i32 (f32.eq ;; False when x+y is NaN (because NaN != Nan)
+      (f32.add (local.get $x) (local.get $y))
+      (f32.add (local.get $x) (local.get $y))))
   )
 
   (start $start)
