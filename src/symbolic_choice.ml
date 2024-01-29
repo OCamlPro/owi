@@ -79,11 +79,17 @@ end = struct
         let thread2 = Thread.clone { thread with pc = with_not_v } in
         M.cons (true, thread1) (M.return (false, thread2)) )
 
+  let fresh_symbol_count = ref 0
+  let fresh_symbol name =
+    let n = !fresh_symbol_count in
+    incr fresh_symbol_count;
+    Printf.sprintf "%s_%i" name n
+
   let fix_symbol (e : Expr.t) pc =
     match e.node.e with
     | Symbol sym -> (pc, sym)
     | _ ->
-      let sym = Symbol.("choice_i32" @: Ty_bitv S32) in
+      let sym = Symbol.(fresh_symbol "choice_i32" @: Ty_bitv S32) in
       let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
       (assign :: pc, sym)
 
