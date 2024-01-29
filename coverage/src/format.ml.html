@@ -18,7 +18,7 @@
       <h2>66.67%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:31.03%"></span>
+      <span class="unvisited" style="top:29.03%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -47,11 +47,13 @@
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -85,6 +87,8 @@
 <a href="#L27">27</a>
 <a href="#L28">28</a>
 <a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
 </pre>
 <pre><code class="ocaml">include Stdlib.Format
 
@@ -95,6 +99,8 @@ let pp_err = eprintf
 let pp_std = printf
 
 let pp_nothing _fmt () = <span data-count="0">(</span>)
+
+let pp_char = pp_print_char
 
 let pp_list = pp_print_list
 

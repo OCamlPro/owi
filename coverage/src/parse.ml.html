@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>parse.ml &mdash; Coverage report</title>
-    <meta name="description" content="93.33% coverage in src/parse.ml">
+    <meta name="description" content="90.00% coverage in src/parse.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,11 @@
           <span class="dirname">src/</span>parse.ml
         </a>
       </h1>
-      <h2>93.33%</h2>
+      <h2>90.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:23.46%"></span>
+      <span class="unvisited" style="bottom:29.11%"></span>
+      <span class="unvisited" style="bottom:24.05%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -38,53 +39,53 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span class="visited"> </span>
-<a id="L31"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span class="visited"> </span>
-<a id="L36"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span > </span>
-<a id="L39"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
 <a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
 <a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span class="visited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span > </span>
-<a id="L60"></a><span class="visited"> </span>
+<a id="L60"></a><span class="unvisited"> </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span class="unvisited"> </span>
+<a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
@@ -102,8 +103,6 @@
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span > </span>
-<a id="L80"></a><span > </span>
-<a id="L81"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -187,8 +186,6 @@
 <a href="#L77">77</a>
 <a href="#L78">78</a>
 <a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -203,11 +200,9 @@ module Make (M : sig
   val rule : (Lexing.lexbuf -&gt; Menhir_parser.token) -&gt; Lexing.lexbuf -&gt; t
 end) =
 struct
-  let rule = Obj.magic M.rule
-
   let from_lexbuf =
-    let parser = MenhirLib.Convert.Simplified.traditional2revised rule in
-    <span data-count="870">l</span>et print_err buf msg =
+    let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
+    <span data-count="858">l</span>et print_err buf msg =
       <span data-count="1042">l</span>et pos = fst @@ Sedlexing.lexing_position<span data-count="1042">s</span> buf in
       <span data-count="1042">l</span>et file_line =
         let cpos = pos.pos_cnum - pos.pos_bol in
@@ -237,17 +232,17 @@ struct
         print_err buf msg;
         <span data-count="136">E</span>rror msg
 
-  let from_file ~filename =
-    <span data-count="265">l</span>et chan = open_in filename in
-    <span data-count="265">l</span>et result =
-      Fun.protect
-        ~finally:(fun () -&gt; <span data-count="265">c</span>lose_in chan)
-        (fun () -&gt;
+  let from_file filename =
+    <span data-count="265">m</span>atch
+      Bos.OS.File.with_ic filename
+        (fun chan () -&gt;
           <span data-count="265">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="265">S</span>edlexing.set_filename lb filename;
+          <span data-count="265">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="265">g</span> filename);
           <span data-count="265">f</span>rom_lexbuf lb )
-    in
-    <span data-count="265">r</span>esult
+        ()
+    with
+    | <span data-count="265">O</span>k v -&gt; v
+    | <span data-count="0">E</span>rror (`Msg e) -&gt; Error e
 
   let from_string s = <span data-count="1160">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1160">g</span> s)
 

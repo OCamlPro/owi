@@ -625,9 +625,9 @@ module P = struct
 
   let select (c : vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
-    <span data-count="16384">m</span>atch (if_true, if_false) with
-    | <span data-count="16381">I</span>32 if_true, I32 if_false -&gt;
-      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="16366">r</span> c ~if_true ~if_false))
+    <span data-count="16378">m</span>atch (if_true, if_false) with
+    | <span data-count="16375">I</span>32 if_true, I32 if_false -&gt;
+      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="16346">r</span> c ~if_true ~if_false))
     | <span data-count="0">I</span>64 if_true, I64 if_false -&gt;
       Choice.return (Value.I64 (Value.Bool.select_exp<span data-count="0">r</span> c ~if_true ~if_false))
     | <span data-count="0">F</span>32 if_true, F32 if_false -&gt;
@@ -652,11 +652,11 @@ module P = struct
 
     let value (v : t) = <span data-count="5">v</span>.value
 
-    let set_value (v : t) x = <span data-count="209">v</span>.value &lt;- x
+    let set_value (v : t) x = <span data-count="240">v</span>.value &lt;- x
 
-    let mut (v : t) = <span data-count="209">v</span>.orig.mut
+    let mut (v : t) = <span data-count="240">v</span>.orig.mut
 
-    let typ (v : t) = <span data-count="209">v</span>.orig.typ
+    let typ (v : t) = <span data-count="240">v</span>.orig.typ
   end
 
   module Table = struct
@@ -694,12 +694,12 @@ module P = struct
     include Symbolic_memory.M
 
     let concretise a =
-      <span data-count="86039">l</span>et open Expr in
+      <span data-count="86488">l</span>et open Expr in
       Choice.with_thread (fun thread -&gt;
-          <span data-count="86025">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="86001">l</span>et module Solver = (val solver_mod) in
+          <span data-count="86474">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="86482">l</span>et module Solver = (val solver_mod) in
           match a.node.e with
-          | <span data-count="86046">V</span>al _ | <span data-count="0">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; a
+          | <span data-count="86493">V</span>al _ | <span data-count="0">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; a
           | <span data-count="0">P</span>tr (base, offset) -&gt;
             (* TODO: can we remove this check? We should be in a SAT branch *)
             assert <span data-count="0">(</span>Solver.check solve<span data-count="0">r</span> @@ Thread.p<span data-count="0">c</span> thread);
@@ -721,12 +721,12 @@ module P = struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m (a : int32) =
-      <span data-count="86048">C</span>hoice.with_thread (fun thread -&gt;
-          <span data-count="86055">l</span>et pc = Thread.pc thread in
-          <span data-count="86049">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
-          <span data-count="86036">l</span>et module Solver = (val solver_mod) in
+      <span data-count="86515">C</span>hoice.with_thread (fun thread -&gt;
+          <span data-count="86535">l</span>et pc = Thread.pc thread in
+          <span data-count="86528">l</span>et (S (solver_mod, solver)) = Thread.solver thread in
+          <span data-count="86506">l</span>et module Solver = (val solver_mod) in
           match a.node.e with
-          | <span data-count="86045">V</span>al (Num (I32 _)) -&gt; Ok a
+          | <span data-count="86489">V</span>al (Num (I32 _)) -&gt; Ok a
           | <span data-count="0">P</span>tr (base, offset) -&gt; (
             match Hashtbl.find m.chunks base with
             | <span data-count="0">e</span>xception Not_found -&gt; Error Trap.Memory_leak_use_after_free
@@ -742,31 +742,31 @@ module P = struct
 
     let with_concrete (m : memory) (a : int32) (f : memory -&gt; int32 -&gt; 'a) :
       'a Choice.t =
-      <span data-count="86052">C</span>hoice.bind (concretis<span data-count="86017">e</span> a) (fun addr -&gt;
-          <span data-count="86055">C</span>hoice.bind (check_within_bound<span data-count="86028">s</span> m addr) (function
-            | <span data-count="86043">O</span>k a -&gt; Choice.return @@ <span data-count="86025">f</span> m a
+      <span data-count="86498">C</span>hoice.bind (concretis<span data-count="86453">e</span> a) (fun addr -&gt;
+          <span data-count="86502">C</span>hoice.bind (check_within_bound<span data-count="86455">s</span> m addr) (function
+            | <span data-count="86472">O</span>k a -&gt; Choice.return @@ <span data-count="86579">f</span> m a
             | <span data-count="0">E</span>rror t -&gt; Choice.trap t ) )
 
     let load_8_s m a = <span data-count="0">w</span>ith_concrete m a load_8_s
 
-    let load_8_u m a = <span data-count="656">w</span>ith_concrete m a load_8_u
+    let load_8_u m a = <span data-count="765">w</span>ith_concrete m a load_8_u
 
     let load_16_s m a = <span data-count="0">w</span>ith_concrete m a load_16_s
 
     let load_16_u m a = <span data-count="0">w</span>ith_concrete m a load_16_u
 
-    let load_32 m a = <span data-count="59892">w</span>ith_concrete m a load_32
+    let load_32 m a = <span data-count="60170">w</span>ith_concrete m a load_32
 
     let load_64 m a = <span data-count="0">w</span>ith_concrete m a load_64
 
     let store_8 m ~addr v =
-      <span data-count="128">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="128">s</span>tore_8 m ~addr v)
+      <span data-count="144">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="144">s</span>tore_8 m ~addr v)
 
     let store_16 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_16 m ~addr v)
 
     let store_32 m ~addr v =
-      <span data-count="25396">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="25389">s</span>tore_32 m ~addr v)
+      <span data-count="25466">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="25448">s</span>tore_32 m ~addr v)
 
     let store_64 m ~addr v =
       <span data-count="0">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="0">s</span>tore_64 m ~addr v)
@@ -784,10 +784,10 @@ module P = struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="86042">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="86020">l</span>et f (t : thread) =
-        <span data-count="86050">l</span>et memories = Thread.memories t in
-        <span data-count="86041">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="86037">d</span> env) orig_mem memories id
+      <span data-count="86557">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="86522">l</span>et f (t : thread) =
+        <span data-count="86528">l</span>et memories = Thread.memories t in
+        <span data-count="86509">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="86481">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -810,10 +810,10 @@ module P = struct
       <span data-count="4">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="214">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="213">l</span>et f (t : thread) =
-        <span data-count="213">l</span>et globals = Thread.globals t in
-        <span data-count="214">S</span>ymbolic_global.get_global (Link_env.i<span data-count="214">d</span> env) orig_global globals i
+      <span data-count="245">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="245">l</span>et f (t : thread) =
+        <span data-count="245">l</span>et globals = Thread.globals t in
+        <span data-count="245">S</span>ymbolic_global.get_global (Link_env.i<span data-count="245">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -836,7 +836,7 @@ module P = struct
 
     let env (t : t) = <span data-count="11">t</span>.env
 
-    let modul (t : t) = <span data-count="203">t</span>.modul
+    let modul (t : t) = <span data-count="234">t</span>.modul
 
     let to_run (t : t) = <span data-count="8">t</span>.to_run
   end
