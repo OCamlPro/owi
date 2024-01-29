@@ -66,7 +66,7 @@
   (graphics :dev)
   (tiny_httpd :dev)
   (ocamlformat :dev)
-  sha
+  digestif
   xmlm
   pyml
   re2
