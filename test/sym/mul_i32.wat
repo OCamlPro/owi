@@ -12,7 +12,7 @@
 
     (call $assume_positive_i32 (local.get $x))  ;; x >= 0
     (call $assume_positive_i32 (local.get $y))  ;; y >= 0
-    (call $assert_i32                           ;; x * y >= 0
+    (call $assert_i32                           ;; x * y >= 0 (false when overflow)
       (i32.ge_s (i32.mul (local.get $x) (local.get $y)) (i32.const 0)))
   )
 

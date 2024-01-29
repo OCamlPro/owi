@@ -12,7 +12,7 @@
 
     (call $assume_i32
       (i64.ge_s (local.get $y) (i64.const 0)))  ;; y >= 0
-    (call $assert_i32                           ;; x >= x - y
+    (call $assert_i32                           ;; x >= x - y (false when overflow)
       (i64.ge_s (local.get $x) (i64.sub (local.get $x) (local.get $y))))
   )
 

@@ -10,9 +10,9 @@
     (local.set $x (call $i32_symbol))
     (local.set $y (call $i32_symbol))
 
-    (call $assume_positive_i32 (local.get $x))  ;; x >= 0
-    (call $assume_positive_i32 (local.get $y))  ;; y >= 0
-    (call $assert_i32                           ;; x + y >= 0 (== 0 =< x + y)
+    (call $assume_positive_i32 (local.get $x))  ;; 0 <= x
+    (call $assume_positive_i32 (local.get $y))  ;; 0 <= y
+    (call $assert_i32                           ;; 0 <= x + y (false when overflow)
       (i32.le_s (i32.const 0) (i32.add (local.get $x) (local.get $y))))
   )
 

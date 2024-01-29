@@ -3,46 +3,47 @@
   (import "symbolic" "i64_symbol" (func $i64_symbol (result i64)))
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
+  (import "symbolic" "assume" (func $assume_i32 (param i32)))
+  (import "symbolic" "assert" (func $assert_i32 (param i32)))
 
-  (global $w (mut i32) (i32.const 0))
-  (global $x (mut i64) (i64.const 0))
-  (global $y (mut f32) (f32.const 0))
-  (global $z (mut f64) (f64.const 0))
-
-  (func $i32 (param $a i32)
-    (if (i32.eqz (local.get $a))
-      (then unreachable))
-  )
-
-  (func $i64 (param $a i64)
-    (if (i64.eqz (local.get $a))
-      (then unreachable))
-  )
-
-  (func $f32 (param $a f32)
-    (if (f32.eq (local.get $a) (f32.const 0))
-      (then unreachable))
-  )
-
-  (func $f64 (param $a f64)
-    (if (f64.eq (local.get $a) (f64.const 0))
-      (then unreachable))
-  )
+  (global $x (mut i32) (i32.const 0))
+  (global $y (mut i64) (i64.const 0))
+  (global $i (mut f32) (f32.const 0))
+  (global $j (mut f64) (f64.const 0))
 
   (func $start
-    ;; objective: check that interactions with globals are ok
+    ;; Objective: storing something in a global and then reading it should give the same value
 
-    (global.set $w (call $i32_symbol))
-    (global.set $x (call $i64_symbol))
-    (global.set $y (call $f32_symbol))
-    (global.set $z (call $f64_symbol))
+    (local $x i32)
+    (local $y i64)
+    (local $i f32)
+    (local $j f64)
 
-    ;; 'unreachable' when argument is equal to 0
-    ;; in global.t, only one model symbol is equal to 0
-    (call $i32 (global.get $w))
-    (call $i64 (global.get $x)) ;; (symbol_0) w != 0
-    (call $f32 (global.get $y)) ;; (symbol_0) w != 0 AND (symbol_1) x != 0
-    (call $f64 (global.get $z)) ;; (symbol_0) w != 0 AND (symbol_1) x != 0 AND (symbol_2) y != 0
+    (local.set $x (call $i32_symbol))
+    (local.set $y (call $i64_symbol))
+    (local.set $i (call $f32_symbol))
+    (local.set $j (call $f64_symbol))
+
+    (global.set $x (local.get $x))
+    (global.set $y (local.get $y))
+    (call $assert_i32 (i32.eq (global.get $x) (local.get $x)))
+    (call $assert_i32 (i64.eq (global.get $y) (local.get $y)))
+
+    ;; In float numbers context, avoid Nan
+
+    (call $assume_i32   ;; 0 < i < 42
+      (i32.and
+        (f32.gt (local.get $i) (f32.const 0))
+        (f32.lt (local.get $i) (f32.const 42))))
+    (global.set $i (local.get $i))
+    (call $assert_i32 (f32.eq (global.get $i) (local.get $i)))
+
+    (call $assume_i32   ;; 0 < j < 42
+      (i32.and
+        (f64.gt (local.get $j) (f64.const 0))
+        (f64.lt (local.get $j) (f64.const 42))))
+    (global.set $j (local.get $j))
+    (call $assert_i32 (f64.eq (global.get $j) (local.get $j)))
   )
 
   (start $start)
