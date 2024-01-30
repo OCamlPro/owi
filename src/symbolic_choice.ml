@@ -79,17 +79,12 @@ end = struct
         let thread2 = Thread.clone { thread with pc = with_not_v } in
         M.cons (true, thread1) (M.return (false, thread2)) )
 
-  let fresh_symbol_count = ref 0
-  let fresh_symbol name =
-    let n = !fresh_symbol_count in
-    incr fresh_symbol_count;
-    Printf.sprintf "%s_%i" name n
-
-  let fix_symbol (e : Expr.t) pc =
+  let fix_symbol (e : Expr.t) ~pc ~choices =
     match e.node.e with
     | Symbol sym -> (pc, sym)
     | _ ->
-      let sym = Symbol.(fresh_symbol "choice_i32" @: Ty_bitv S32) in
+      let symbol_name = Format.sprintf "choice_i32_%i" choices in
+      let sym = Symbol.(symbol_name @: Ty_bitv S32) in
       let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
       (assign :: pc, sym)
 
@@ -114,7 +109,7 @@ end = struct
     let pc = Thread.pc thread in
     let sym_int = Expr.simplify sym_int in
     let orig_pc = pc in
-    let pc, symbol = fix_symbol sym_int pc in
+    let pc, symbol = fix_symbol sym_int ~pc ~choices:(thread.choices) in
     match sym_int.node.e with
     | Val (Num (I32 i)) -> M.return (i, thread)
     | _ ->
@@ -136,7 +131,7 @@ end = struct
             | Some (Num (I32 i)) -> begin
               let cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
               let pc = cond :: pc in
-              let case = (i, { thread with pc }) in
+              let case = (i, { thread with pc; choices = thread.choices + 1 }) in
               M.cons case (find_values (M.cons i values))
             end
             | Some _ -> assert false )
