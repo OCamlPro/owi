@@ -68,6 +68,10 @@
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -118,6 +122,10 @@
 <a href="#L44">44</a>
 <a href="#L45">45</a>
 <a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -141,7 +149,7 @@ module type Base = sig
   val ( let* ) : 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t
 end
 
-module type Complete = sig
+module type Complete_without_run = sig
   include Base
 
   type thread
@@ -151,6 +159,10 @@ module type Complete = sig
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
 
   val add_pc : V.vbool -&gt; unit t
+end
+
+module type Complete = sig
+  include Complete_without_run
 
   val run : 'a t -&gt; thread -&gt; ('a * thread) Seq.t
 end
