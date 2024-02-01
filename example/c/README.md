@@ -231,8 +231,10 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=4)
-           number of workers for symbolic execution
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to a
+           machine-specific value given by the OCaml
+           Domain.recommended_domain_count function.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
