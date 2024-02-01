@@ -44,11 +44,14 @@ let unsafe =
   Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
 
 let workers =
-  let doc = "number of workers for symbolic execution" in
+  let doc =
+    "number of workers for symbolic execution. Defaults to a machine-specific \
+     value given by the OCaml Domain.recommended_domain_count function."
+  in
   Cmdliner.Arg.(
     value
     & opt int (Domain.recommended_domain_count ())
-    & info [ "workers"; "w" ] ~doc )
+    & info [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
   let doc = "path to the workspace directory" in
