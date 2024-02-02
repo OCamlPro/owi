@@ -40,32 +40,34 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span > </span>
-<a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span class="visited"> </span>
-<a id="L36"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span > </span>
-<a id="L39"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
 <a id="L40"></a><span > </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -114,6 +116,8 @@
 <a href="#L42">42</a>
 <a href="#L43">43</a>
 <a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -127,38 +131,40 @@ type solver = S : 'a solver_module * 'a -&gt; solver
 
 type t =
   { solver : solver
+  ; choices : int
   ; pc : Symbolic_value.S.vbool list
   ; memories : Symbolic_memory.memories
   ; tables : Symbolic_table.tables
   ; globals : Symbolic_global.globals
   }
 
-let solver t = <span data-count="181902">t</span>.solver
+let solver t = <span data-count="185515">t</span>.solver
 
-let pc t = <span data-count="95188">t</span>.pc
+let pc t = <span data-count="97562">t</span>.pc
 
-let memories t = <span data-count="95001">t</span>.memories
+let memories t = <span data-count="96797">t</span>.memories
 
 let tables t = <span data-count="2">t</span>.tables
 
-let globals t = <span data-count="267">t</span>.globals
+let globals t = <span data-count="1379">t</span>.globals
 
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
   <span data-count="8">l</span>et solver = S (solver_mod, Solver.creat<span data-count="8">e</span> ~logic:QF_BVFP ()) in
   { solver
+  ; choices = 0
   ; pc = []
   ; memories = Symbolic_memory.ini<span data-count="8">t</span> ()
   ; tables = Symbolic_table.ini<span data-count="8">t</span> ()
   ; globals = Symbolic_global.ini<span data-count="8">t</span> ()
   }
 
-let clone { solver; pc; memories; tables; globals } =
-  <span data-count="518">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="518">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="518">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="518">{</span> solver; pc; memories; tables; globals }
+let clone { solver; choices; pc; memories; tables; globals } =
+  <span data-count="1501">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="1501">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="1501">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="1501">{</span> solver; choices; pc; memories; tables; globals }
 </code></pre>
       </div>
     </div>
