@@ -109,7 +109,7 @@ end = struct
     let pc = Thread.pc thread in
     let sym_int = Expr.simplify sym_int in
     let orig_pc = pc in
-    let pc, symbol = fix_symbol sym_int ~pc ~choices:(thread.choices) in
+    let pc, symbol = fix_symbol sym_int ~pc ~choices:thread.choices in
     match sym_int.node.e with
     | Val (Num (I32 i)) -> M.return (i, thread)
     | _ ->
@@ -131,7 +131,9 @@ end = struct
             | Some (Num (I32 i)) -> begin
               let cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
               let pc = cond :: pc in
-              let case = (i, { thread with pc; choices = thread.choices + 1 }) in
+              let case =
+                (i, { thread with pc; choices = thread.choices + 1 })
+              in
               M.cons case (find_values (M.cons i values))
             end
             | Some _ -> assert false )

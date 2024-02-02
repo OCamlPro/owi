@@ -173,6 +173,18 @@ $ dune exec owi -- c ./maze.c
 Assert failure: false
 Model:
   (model
+    (choice_i32_0 (i32 18))
+    (choice_i32_1 (i32 3))
+    (choice_i32_10 (i32 3))
+    (choice_i32_11 (i32 22))
+    (choice_i32_2 (i32 3))
+    (choice_i32_3 (i32 22))
+    (choice_i32_4 (i32 3))
+    (choice_i32_5 (i32 3))
+    (choice_i32_6 (i32 3))
+    (choice_i32_7 (i32 3))
+    (choice_i32_8 (i32 18))
+    (choice_i32_9 (i32 3))
     (symbol_0 (i32 115))
     (symbol_1 (i32 100))
     (symbol_10 (i32 100))
