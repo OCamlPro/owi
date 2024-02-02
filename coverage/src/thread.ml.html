@@ -138,15 +138,15 @@ type t =
   ; globals : Symbolic_global.globals
   }
 
-let solver t = <span data-count="185515">t</span>.solver
+let solver t = <span data-count="185307">t</span>.solver
 
-let pc t = <span data-count="97562">t</span>.pc
+let pc t = <span data-count="97431">t</span>.pc
 
-let memories t = <span data-count="96797">t</span>.memories
+let memories t = <span data-count="96707">t</span>.memories
 
 let tables t = <span data-count="2">t</span>.tables
 
-let globals t = <span data-count="1379">t</span>.globals
+let globals t = <span data-count="1392">t</span>.globals
 
 let solver_mod : Solver.t solver_module = (module Solver)
 
@@ -161,10 +161,10 @@ let create () =
   }
 
 let clone { solver; choices; pc; memories; tables; globals } =
-  <span data-count="1501">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="1501">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="1501">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="1501">{</span> solver; choices; pc; memories; tables; globals }
+  <span data-count="1524">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="1524">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="1524">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="1524">{</span> solver; choices; pc; memories; tables; globals }
 </code></pre>
       </div>
     </div>
