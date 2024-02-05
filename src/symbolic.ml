@@ -155,31 +155,34 @@ struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m (a : int32) =
-      Choice.with_thread (fun thread ->
-          let pc = Thread.pc thread in
-          let (S (solver_mod, solver)) = Thread.solver thread in
-          let module Solver = (val solver_mod) in
-          match a.node.e with
-          | Val (Num (I32 _)) -> Ok a
-          | Ptr (base, offset) -> (
-            match Hashtbl.find m.chunks base with
-            | exception Not_found -> Error Trap.Memory_leak_use_after_free
-            | size ->
-              let ptr = Int32.add base (i32 offset) in
-              let upper_bound =
-                Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
-              in
-              if ptr < base || Solver.check solver (upper_bound :: pc) then
-                Error Trap.Memory_heap_buffer_overflow
-              else Ok (Value.const_i32 ptr) )
-          | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a )
+      let cond =
+        match a.node.e with
+        | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
+        | Ptr (base, offset) -> (
+          match Hashtbl.find m.chunks base with
+          | exception Not_found -> Error Trap.Memory_leak_use_after_free
+          | size ->
+            let ptr = Int32.add base (i32 offset) in
+            let upper_bound =
+              Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
+            in
+            Ok
+              ( Value.Bool.(or_ (const (ptr < base)) upper_bound)
+              , Value.const_i32 ptr ) )
+        | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
+      in
+      match cond with
+      | Error t -> Choice.trap t
+      | Ok (cond, ptr) ->
+        Choice.bind (Choice.select cond) (fun out_of_bounds ->
+            if out_of_bounds then Choice.trap Trap.Memory_heap_buffer_overflow
+            else Choice.return ptr )
 
     let with_concrete (m : memory) (a : int32) (f : memory -> int32 -> 'a) :
       'a Choice.t =
       Choice.bind (concretise a) (fun addr ->
-          Choice.bind (check_within_bounds m addr) (function
-            | Ok a -> Choice.return @@ f m a
-            | Error t -> Choice.trap t ) )
+          Choice.bind (check_within_bounds m addr) (fun ptr ->
+              Choice.return @@ f m ptr ) )
 
     let load_8_s m a = with_concrete m a load_8_s
 
