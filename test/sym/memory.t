@@ -12,6 +12,7 @@ memory stuff:
   Trap: out of bounds memory access
   Model:
     (model
-      (symbol_0 (i32 -11)))
+      (symbol_0 (i32 -11))
+      (symbol_1 (i32 0)))
   Reached problem!
   [1]

@@ -3,6 +3,7 @@ table stuff:
   Trap: undefined element
   Model:
     (model
+      (symbol_0 (i32 0))
       (symbol_1 (i32 -2147483648)))
   Trap: unreachable
   Model:
