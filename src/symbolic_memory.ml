@@ -81,11 +81,6 @@ module M = struct
     ; chunks = Hashtbl.copy m.chunks (* TODO: we can make this lazy as well *)
     }
 
-  let rec load_byte_opt a m =
-    match Hashtbl.find_opt m.data a with
-    | Some b -> Some b
-    | None -> Option.bind m.parent (load_byte_opt a)
-
   let rec load_byte { parent; data; _ } a =
     try Hashtbl.find data a
     with Not_found -> (
