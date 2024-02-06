@@ -11,13 +11,15 @@ let print_path_condition = false
 
 let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
-  let mk_symbol = Encoding.Symbol.mk_symbol in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let r = Expr.mk_symbol @@ mk_symbol ty (Format.sprintf "symbol_%i" id) in
-    match ty with
-    | Ty_bitv S8 -> Choice.return @@ Expr.(Cvtop (ExtU 24, r) @: Ty_bitv S32)
-    | _ -> Choice.return r
+    let sym = Format.kasprintf (Encoding.Symbol.mk_symbol ty) "symbol_%d" id in
+    let sym_expr = Expr.mk_symbol sym in
+    Choice.with_thread (fun thread ->
+        thread.symbol_set <- sym :: thread.symbol_set;
+        match ty with
+        | Ty_bitv S8 -> Expr.(Cvtop (ExtU 24, sym_expr) @: Ty_bitv S32)
+        | _ -> sym_expr )
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
@@ -172,9 +174,9 @@ let run_file ~unsafe ~optimize pc filename =
   let*/ script = Parse.Script.from_file filename in
   simplify_then_link_then_run ~unsafe ~optimize pc script
 
-let get_model solver pc =
+let get_model ~symbols solver pc =
   assert (Thread.Solver.check solver pc);
-  match Thread.Solver.model solver with
+  match Thread.Solver.model ~symbols solver with
   | None -> assert false
   | Some model -> model
 
@@ -225,7 +227,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         let pc = Thread.pc thread in
         if print_path_condition then
           Format.pp_std "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
-        let model = get_model solver pc in
+        let symbols = thread.symbol_set in
+        let model = get_model ~symbols solver pc in
         let result =
           match result with
           | Choice_intf.EVal (Ok ()) -> None
