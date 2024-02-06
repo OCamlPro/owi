@@ -16,6 +16,9 @@ int main() {
   owi_assume(x != 2);
   owi_assume(x != 4);
 
+  // Make model output deterministic
+  owi_assume(x > -2147483646);
+
   owi_assert(poly != 0);
 
   return 0;

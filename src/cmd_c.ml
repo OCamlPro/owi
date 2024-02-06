@@ -217,7 +217,7 @@ let metadata ~workspace arch property files =
   res
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure =
+  profiling unsafe optimize no_stop_at_failure no_values =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
@@ -233,12 +233,12 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes files
   let files = [ module_ ] in
   let workspace = Fpath.(workspace / "test-suite") in
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
-    workspace files
+    no_values workspace files
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure =
+  profiling unsafe optimize no_stop_at_failure no_values =
   let res =
     cmd debug arch property testcomp workspace workers opt_lvl includes files
-      profiling unsafe optimize no_stop_at_failure
+      profiling unsafe optimize no_stop_at_failure no_values
   in
   match res with Ok () -> () | Error (`Msg e) -> failwith e

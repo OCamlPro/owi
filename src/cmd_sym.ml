@@ -205,7 +205,7 @@ let write_testcase =
     | Ok (Ok ()) -> ()
     | Ok (Error (`Msg e)) | Error (`Msg e) -> failwith e
 
-let cmd profiling debug unsafe optimize workers no_stop_at_failure
+let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -231,23 +231,29 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure
           | Choice_intf.EVal (Ok ()) -> None
           | EAssert assertion ->
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
-            Format.pp_std "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
+            Format.pp_std "Model:@\n  @[<v>%a@]@\n"
+              (Encoding.Model.pp ~no_values)
+              model;
             Some pc
           | ETrap tr ->
             Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
-            Format.pp_std "Model:@\n  @[<v>%a@]@\n" Encoding.Model.pp model;
+            Format.pp_std "Model:@\n  @[<v>%a@]@\n"
+              (Encoding.Model.pp ~no_values)
+              model;
             Some pc
           | EVal (Error e) ->
             Format.pp_err "Error: %s@\n" e;
             exit 1
         in
-        let testcase =
-          List.sort
-            (fun (x1, _) (x2, _) -> compare x1 x2)
-            (Encoding.Model.get_bindings model)
-          |> List.map snd
-        in
-        write_testcase ~dir:workspace ~err:(Option.is_some result) testcase;
+        ( if not no_values then
+            let testcase =
+              List.sort
+                (fun (x1, _) (x2, _) -> compare x1 x2)
+                (Encoding.Model.get_bindings model)
+              |> List.map snd
+            in
+            write_testcase ~dir:workspace ~err:(Option.is_some result) testcase
+        );
         result )
       results
   in
