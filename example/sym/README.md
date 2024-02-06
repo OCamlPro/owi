@@ -56,6 +56,9 @@ OPTIONS
        --no-stop-at-failure
            do not stop when a program failure is encountered
 
+       --no-value
+           do not display a value for each symbol
+
        --optimize
            optimize mode
 

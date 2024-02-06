@@ -1,9 +1,9 @@
 symbolic extern module (assume and assert test):
-  $ dune exec owi -- sym assume.wat --no-stop-at-failure
+  $ dune exec owi -- sym assume.wat --no-stop-at-failure --no-value
   Trap: unreachable
   Model:
     (model
-      (symbol_0 (i32 571440828))
-      (symbol_1 (i32 1744863297)))
+      (symbol_0 i32)
+      (symbol_1 i32))
   Reached 1 problems!
   [1]

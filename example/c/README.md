@@ -64,6 +64,9 @@ int main() {
   owi_assume(x != 2);
   owi_assume(x != 4);
 
+  // Make model output deterministic
+  owi_assume(x > -2147483646);
+
   owi_assert(poly != 0);
 
   return 0;
@@ -224,6 +227,9 @@ OPTIONS
 
        --no-stop-at-failure
            do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
 
        -o VAL, --output=VAL (absent=owi-out)
            write results to dir

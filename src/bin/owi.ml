@@ -31,6 +31,10 @@ let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
   Cmdliner.Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
 
+let no_values =
+  let doc = "do not display a value for each symbol" in
+  Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
+
 let optimize =
   let doc = "optimize mode" in
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
@@ -104,7 +108,7 @@ let c_cmd =
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure )
+      $ no_stop_at_failure $ no_values )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -169,7 +173,7 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ workspace $ files )
+      $ no_stop_at_failure $ no_values $ workspace $ files )
 
 let cli =
   let open Cmdliner in
