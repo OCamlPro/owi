@@ -1,8 +1,8 @@
 (module
   (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
 
-  (func $start (local $x f32)
-
+  (func $start
+    (local $x f32)
     (local.set $x (call $f32_symbol))
 
     (f32.le (local.get $x) (f32.const -100))
@@ -35,7 +35,7 @@
     (f32.eq (f32.max (local.get $x) (f32.const 42)) (f32.const 0))
     (if (then unreachable))
 
-    ;; File "src/symbolic_value.ml", line 436, characters 24-30: Assertion failed
+    ;; File "src/symbolic_value.ml", Assertion failed
     ;; (f32.eq (f32.copysign (local.get $x) (f32.const 42)) (f32.const 0))
     ;; (if (then unreachable))
 

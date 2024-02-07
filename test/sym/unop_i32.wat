@@ -5,91 +5,87 @@
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
   (func $start
-    (local $x i32)
-    (local $y i64)
-    (local $i f32)
-    (local $j f64)
+    (local $i32 i32)
+    (local $i64 i64)
+    (local $f32 f32)
+    (local $f64 f64)
 
-    (local.set $x (call $i32_symbol))
-    (local.set $y (call $i64_symbol))
-    (local.set $i (call $f32_symbol))
-    (local.set $j (call $f64_symbol))
+    (local.set $i32 (call $i32_symbol))
+    (local.set $i64 (call $i64_symbol))
+    (local.set $f32 (call $f32_symbol))
+    (local.set $f64 (call $f64_symbol))
 
-    (i32.eqz (local.get $x))
+    (i32.eqz (local.get $i32))
     (if (then unreachable))
 
-    (i32.eq (i32.const 42) (i32.wrap_i64 (local.get $y)))
+    (i32.eq (i32.const 42) (i32.wrap_i64 (local.get $i64)))
     (if (then unreachable))
 
-    (i32.eq (i32.const 42) (i32.reinterpret_f32 (local.get $i)))
+    (i32.eq (i32.const 42) (i32.reinterpret_f32 (local.get $f32)))
     (if (then unreachable))
 
-    ;;  owi: internal error, uncaught exception:
-    ;;    Z3.Error("Sorts (_ BitVec 32) and (_ BitVec 48) are incompatible")
-    ;; (i32.eq (i32.const 21) (i32.extend8_s (local.get $x)))
-    ;; (if (then unreachable))
-    ;; (i32.eq (i32.const 24) (i32.extend16_s (local.get $x)))
-    ;; (if (then unreachable))
-
-    (i32.ge_u (i32.const 0) (i32.trunc_f32_u (local.get $i)))
-    (if (then unreachable))
-    
-    (i32.ge_s (i32.const 0) (i32.trunc_f32_s (local.get $i)))
+    (i32.eq (i32.const 21) (i32.extend8_s (local.get $i32)))
     (if (then unreachable))
 
-    (i32.le_u (i32.const 100) (i32.trunc_f32_u (local.get $i)))
+    (i32.eq (i32.const 24) (i32.extend16_s (local.get $i32)))
+    (if (then unreachable))
+
+    (i32.ge_u (i32.const 0) (i32.trunc_f32_u (local.get $f32)))
     (if (then unreachable))
     
-    (i32.le_s (i32.const 100) (i32.trunc_f32_s (local.get $i)))
+    (i32.ge_s (i32.const 0) (i32.trunc_f32_s (local.get $f32)))
     (if (then unreachable))
 
-    (i32.lt_u (i32.const 0) (i32.trunc_f32_u (local.get $i)))
-    (if (then unreachable))
-
-    (i32.lt_s (i32.const 0) (i32.trunc_f32_s (local.get $i)))
-    (if (then unreachable))
-
-    (i32.gt_u (i32.const 100) (i32.trunc_f32_u (local.get $i)))
-    (if (then unreachable))
-
-    (i32.gt_s (i32.const 100) (i32.trunc_f32_s (local.get $i)))
-    (if (then unreachable))
-
-    (i32.ge_u (i32.const 0) (i32.trunc_f64_u (local.get $j)))
+    (i32.le_u (i32.const 100) (i32.trunc_f32_u (local.get $f32)))
     (if (then unreachable))
     
-    (i32.ge_s (i32.const 0) (i32.trunc_f64_s (local.get $j)))
+    (i32.le_s (i32.const 100) (i32.trunc_f32_s (local.get $f32)))
     (if (then unreachable))
 
-    (i32.le_u (i32.const 100) (i32.trunc_f64_u (local.get $j)))
+    (i32.lt_u (i32.const 0) (i32.trunc_f32_u (local.get $f32)))
+    (if (then unreachable))
+
+    (i32.lt_s (i32.const 0) (i32.trunc_f32_s (local.get $f32)))
+    (if (then unreachable))
+
+    (i32.gt_u (i32.const 100) (i32.trunc_f32_u (local.get $f32)))
+    (if (then unreachable))
+
+    (i32.gt_s (i32.const 100) (i32.trunc_f32_s (local.get $f32)))
+    (if (then unreachable))
+
+    (i32.ge_u (i32.const 0) (i32.trunc_f64_u (local.get $f64)))
     (if (then unreachable))
     
-    (i32.le_s (i32.const 100) (i32.trunc_f64_s (local.get $j)))
+    (i32.ge_s (i32.const 0) (i32.trunc_f64_s (local.get $f64)))
     (if (then unreachable))
 
-    (i32.lt_u (i32.const 0) (i32.trunc_f64_u (local.get $j)))
+    (i32.le_u (i32.const 100) (i32.trunc_f64_u (local.get $f64)))
+    (if (then unreachable))
+    
+    (i32.le_s (i32.const 100) (i32.trunc_f64_s (local.get $f64)))
     (if (then unreachable))
 
-    (i32.lt_s (i32.const 0) (i32.trunc_f64_s (local.get $j)))
+    (i32.lt_u (i32.const 0) (i32.trunc_f64_u (local.get $f64)))
     (if (then unreachable))
 
-    (i32.gt_u (i32.const 100) (i32.trunc_f64_u (local.get $j)))
+    (i32.lt_s (i32.const 0) (i32.trunc_f64_s (local.get $f64)))
     (if (then unreachable))
 
-    (i32.gt_s (i32.const 100) (i32.trunc_f64_s (local.get $j)))
+    (i32.gt_u (i32.const 100) (i32.trunc_f64_u (local.get $f64)))
     (if (then unreachable))
 
-    ;; Memo "lib/z3_mappings.ml" (to be implemented)
-    ;; Clz not supported yet
-    ;; (i32.ge_s (i32.const 2) (i32.clz (local.get $x)) )
-    ;; (if (then unreachable))
-    ;; Ctz: TODO
-    ;; (i32.ge_s (i32.const 2) (i32.ctz (local.get $x)) )
-    ;; (if (then unreachable))
-    ;; Popcnt: TODO
-    ;; (i32.ge_s (i32.const 2) (i32.popcnt (local.get $x)) )
-    ;; (if (then unreachable))
+    (i32.gt_s (i32.const 100) (i32.trunc_f64_s (local.get $f64)))
+    (if (then unreachable))
 
+    (i32.ge_s (i32.const 42) (i32.clz (local.get $i32)))
+    (if (then unreachable))
+
+    (i32.ge_s (i32.const 42) (i32.ctz (local.get $i32)))
+    (if (then unreachable))
+
+    (i32.ge_s (i32.const 42) (i32.popcnt (local.get $i32)))
+    (if (then unreachable))
   )
 
   (start $start)
