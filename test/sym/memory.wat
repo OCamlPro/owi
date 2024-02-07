@@ -9,17 +9,17 @@
   (memory $m 1)
   (data $d (memory $m) (offset i32.const 99) "str_data")
 
-  ;; (func $mem_set_i32_8 (param $idx i32) (param $val i32)
-  ;;   local.get $idx
-  ;;   local.get $val
-  ;;   i32.store8
-  ;; )
+  (func $mem_set_i32_8 (param $idx i32) (param $val i32)
+    local.get $idx
+    local.get $val
+    i32.store8
+  )
 
-  ;; (func $mem_set_i32_16 (param $idx i32) (param $val i32)
-  ;;   local.get $idx
-  ;;   local.get $val
-  ;;   i32.store16
-  ;; )
+  (func $mem_set_i32_16 (param $idx i32) (param $val i32)
+    local.get $idx
+    local.get $val
+    i32.store16
+  )
 
   (func $mem_set_i32 (param $idx i32) (param $val i32)
     local.get $idx
@@ -27,23 +27,23 @@
     i32.store
   )
 
-  ;; (func $mem_set_i64_8 (param $idx i32) (param $val i64)
-  ;;   local.get $idx
-  ;;   local.get $val
-  ;;   i64.store8
-  ;; )
+  (func $mem_set_i64_8 (param $idx i32) (param $val i64)
+    local.get $idx
+    local.get $val
+    i64.store8
+  )
 
-  ;; (func $mem_set_i64_16 (param $idx i32) (param $val i64)
-  ;;   local.get $idx
-  ;;   local.get $val
-  ;;   i64.store16
-  ;; )
+  (func $mem_set_i64_16 (param $idx i32) (param $val i64)
+    local.get $idx
+    local.get $val
+    i64.store16
+  )
 
-  ;; (func $mem_set_i64_32 (param $idx i32) (param $val i64)
-  ;;   local.get $idx
-  ;;   local.get $val
-  ;;   i64.store32
-  ;; )
+  (func $mem_set_i64_32 (param $idx i32) (param $val i64)
+    local.get $idx
+    local.get $val
+    i64.store32
+  )
 
   (func $mem_set_i64 (param $idx i32) (param $val i64)
     local.get $idx
@@ -82,21 +82,46 @@
     (call $assert_i32 (i32.eq (i32.load (i32.const 0)) (local.get $i32)))
     (call $assert_i32 (i64.eq (i64.load (i32.const 4)) (local.get $i64)))
 
+    (call $assume_i32   ;; 0 < i32 < 42
+      (i32.and
+        (i32.gt_u (local.get $i32) (i32.const 0))
+        (i32.lt_u (local.get $i32) (i32.const 42))))
+    (call $mem_set_i32_8 (i32.const 12) (local.get $i32))
+    (call $assert_i32 (i32.eq (i32.load8_u (i32.const 12)) (local.get $i32)))
+    (call $assert_i32 (i32.eq (i32.load8_s (i32.const 12)) (local.get $i32)))
+    (call $mem_set_i32_16 (i32.const 16) (local.get $i32))
+    (call $assert_i32 (i32.eq (i32.load16_u (i32.const 16)) (local.get $i32)))
+    (call $assert_i32 (i32.eq (i32.load16_s (i32.const 16)) (local.get $i32)))
+
+    (call $assume_i32   ;; 0 < i64 < 42
+      (i32.and
+        (i64.gt_u (local.get $i64) (i64.const 0))
+        (i64.lt_u (local.get $i64) (i64.const 42))))
+    (call $mem_set_i64_8 (i32.const 20) (local.get $i64))
+    (call $assert_i32 (i64.eq (i64.load8_u (i32.const 20)) (local.get $i64)))
+    (call $assert_i32 (i64.eq (i64.load8_s (i32.const 20)) (local.get $i64)))
+    (call $mem_set_i64_16 (i32.const 28) (local.get $i64))
+    (call $assert_i32 (i64.eq (i64.load16_u (i32.const 28)) (local.get $i64)))
+    (call $assert_i32 (i64.eq (i64.load16_s (i32.const 28)) (local.get $i64)))
+    (call $mem_set_i64_32 (i32.const 36) (local.get $i64))
+    (call $assert_i32 (i64.eq (i64.load32_u (i32.const 36)) (local.get $i64)))
+    (call $assert_i32 (i64.eq (i64.load32_s (i32.const 36)) (local.get $i64)))
+
     ;; In float numbers context, avoid Nan
 
     (call $assume_i32   ;; 0 < f32 < 42
       (i32.and
         (f32.gt (local.get $f32) (f32.const 0))
         (f32.lt (local.get $f32) (f32.const 42))))
-    (call $mem_set_f32 (i32.const 12) (local.get $f32))
-    (call $assert_i32 (f32.eq (f32.load (i32.const 12)) (local.get $f32)))
+    (call $mem_set_f32 (i32.const 44) (local.get $f32))
+    (call $assert_i32 (f32.eq (f32.load (i32.const 44)) (local.get $f32)))
 
     (call $assume_i32   ;; 0 < f64 < 42
       (i32.and
         (f64.gt (local.get $f64) (f64.const 0))
         (f64.lt (local.get $f64) (f64.const 42))))
-    (call $mem_set_f64 (i32.const 16) (local.get $f64))
-    (call $assert_i32 (f64.eq (f64.load (i32.const 16)) (local.get $f64)))
+    (call $mem_set_f64 (i32.const 48) (local.get $f64))
+    (call $assert_i32 (f64.eq (f64.load (i32.const 48)) (local.get $f64)))
   )
 
   (start $start)
