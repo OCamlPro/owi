@@ -6,12 +6,12 @@
   add_f32.wat
   add_f64.wat
   assume.wat
-  ; binop_i32.wat
-  ; binop_i32-2.wat
-  ; binop_i64.wat
-  ; binop_i64-2.wat
-  ; binop_f32.wat
-  ; binop_f64.wat
+  binop_i32.wat
+  binop_i32-2.wat
+  binop_i64.wat
+  binop_i64-2.wat
+  binop_f32.wat
+  binop_f64.wat
   div_i32.wat
   div_i64.wat
   div_f32.wat
@@ -30,8 +30,7 @@
   sub_f32.wat
   sub_f64.wat
   table.wat
-  ; unop_i32.wat
-  ; unop_i64.wat
-  ; unop_f32.wat
-  ; unop_f64.wat
-  ))
+  unop_i32.wat
+  unop_i64.wat
+  unop_f32.wat
+  unop_f64.wat))

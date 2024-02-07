@@ -32,6 +32,7 @@
 
     (i32.eqz (i32.rotl (local.get $z) (local.get $w)))
     (if (then unreachable))
+
     (i32.eqz (i32.rotr (local.get $z) (local.get $w)))
     (if (then unreachable))
   )

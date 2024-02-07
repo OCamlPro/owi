@@ -1,8 +1,8 @@
 (module
   (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
 
-  (func $start (local $x f64)
-
+  (func $start
+    (local $x f64)
     (local.set $x (call $f64_symbol))
 
     (f64.le (local.get $x) (f64.const -100))
@@ -35,7 +35,7 @@
     (f64.eq (f64.max (local.get $x) (f64.const 42)) (f64.const 0))
     (if (then unreachable))
 
-    ;; File "src/symbolic_value.ml", line 508, characters 24-30: Assertion failed
+    ;; File "src/symbolic_value.ml", Assertion failed
     ;; (f64.eq (f64.copysign (local.get $x) (f64.const 42)) (f64.const 0))
     ;; (if (then unreachable))
 

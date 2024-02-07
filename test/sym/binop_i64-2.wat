@@ -30,12 +30,11 @@
     (i64.eqz (i64.shr_u (local.get $z) (local.get $w)))
     (if (then unreachable))
 
-    ;; owi: internal error, uncaught exception:
-    ;;  Failure("z3_mappings: rotl|rotr not implemented!")
-    ;; (i64.eqz (i64.rotl (local.get $z) (local.get $w)))
-    ;; (if (then unreachable))
-    ;; (i64.eqz (i64.rotr (local.get $z) (local.get $w)))
-    ;; (if (then unreachable))
+    (i64.eqz (i64.rotl (local.get $z) (local.get $w)))
+    (if (then unreachable))
+
+    (i64.eqz (i64.rotr (local.get $z) (local.get $w)))
+    (if (then unreachable))
   )
 
   (start $start)
