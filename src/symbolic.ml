@@ -286,5 +286,13 @@ end
 
 module P' : Interpret_intf.P = P
 
+module M = struct
+  include MakeP (Thread) (Symbolic_choice.Minimalist) [@@inlined hint]
+  module Choice = Symbolic_choice.Minimalist
+end
+
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+
+let convert_module_to_run_minimalist (m : 'f Link.module_to_run) =
+  M.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }

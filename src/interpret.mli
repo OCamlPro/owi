@@ -36,9 +36,16 @@ module Concrete : sig
   val exec_freinterpreti : V.t list -> Types.nn -> Types.nn -> V.t list
 end
 
-module Symbolic : sig
+module SymbolicP : sig
   val modul :
        Symbolic.P.env Env_id.collection
     -> Symbolic.P.Module_to_run.t
     -> unit Result.t Symbolic.P.Choice.t
+end
+
+module SymbolicM : sig
+  val modul :
+       Symbolic.M.env Env_id.collection
+    -> Symbolic.M.Module_to_run.t
+    -> unit Result.t Symbolic.M.Choice.t
 end
