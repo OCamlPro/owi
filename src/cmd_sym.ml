@@ -225,6 +225,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure
         let pc = Thread.pc thread in
         if print_path_condition then
           Format.pp_std "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
+        Thread.Solver.reset solver;
         let model = get_model solver pc in
         let result =
           match result with
