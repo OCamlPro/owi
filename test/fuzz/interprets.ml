@@ -1,4 +1,5 @@
 open Owi
+open Syntax
 
 exception Timeout
 
@@ -36,17 +37,13 @@ module Owi_unoptimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    match Compile.until_simplify ~unsafe:false modul with
-    | Error e -> failwith e
-    | Ok simplified -> (
-      match Typecheck.modul simplified with
-      | Error e -> failwith e
-      | Ok () -> (
-        match Link.modul Link.empty_state ~name:None simplified with
-        | Error e -> failwith e
-        | Ok (regular, link_state) ->
-          timeout_call_run (fun () ->
-              Interpret.Concrete.modul link_state.envs regular ) ) )
+    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* () = Typecheck.modul simplified in
+    let* regular, link_state =
+      Link.modul Link.empty_state ~name:None simplified
+    in
+    timeout_call_run (fun () ->
+        Interpret.Concrete.modul link_state.envs regular )
 
   let name = "owi"
 end
@@ -57,20 +54,40 @@ module Owi_optimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    match Compile.until_simplify ~unsafe:false modul with
-    | Error e -> failwith e
-    | Ok simplified -> (
-      match Typecheck.modul simplified with
-      | Error e -> failwith e
-      | Ok () -> (
-        let simplified = Optimize.modul simplified in
-        match Link.modul Link.empty_state ~name:None simplified with
-        | Error e -> failwith e
-        | Ok (regular, link_state) ->
-          timeout_call_run (fun () ->
-              Interpret.Concrete.modul link_state.envs regular ) ) )
+    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* () = Typecheck.modul simplified in
+    let simplified = Optimize.modul simplified in
+    let* regular, link_state =
+      Link.modul Link.empty_state ~name:None simplified
+    in
+    timeout_call_run (fun () ->
+        Interpret.Concrete.modul link_state.envs regular )
 
   let name = "owi+optimize"
+end
+
+module Owi_symbolic : INTERPRET = struct
+  type t = Text.modul
+
+  let of_symbolic = Fun.id
+
+  let run modul =
+    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* () = Typecheck.modul simplified in
+    let* regular, link_state =
+      Link.modul Link.empty_state ~name:None simplified
+    in
+    let regular = Symbolic.convert_module_to_run_minimalist regular in
+    timeout_call_run (fun () ->
+        let c = Interpret.SymbolicM.modul link_state.envs regular in
+        let init_thread : Thread.t = Thread.create () in
+        let res, _ = Symbolic_choice.Minimalist.run_minimalist c init_thread in
+        match res with
+        | Ok res -> res
+        | Error (Trap _t) -> Result.error "symbolic trap"
+        | Error Assert_fail -> Result.error "symbolic assert_fail" )
+
+  let name = "owi_symbolic"
 end
 
 module Reference : INTERPRET = struct

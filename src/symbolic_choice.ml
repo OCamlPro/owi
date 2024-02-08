@@ -144,6 +144,53 @@ end = struct
 end
 [@@inline]
 
+module Minimalist = struct
+  type err =
+    | Assert_fail
+    | Trap of Trap.t
+
+  type 'a t = M of (Thread.t -> ('a, err) Stdlib.Result.t * Thread.t)
+  [@@unboxed]
+
+  let return v = M (fun t -> (Ok v, t))
+
+  let run_minimalist (M v) st = v st
+
+  let bind v f =
+    M
+      (fun init_s ->
+        let v_final, tmp_st = run_minimalist v init_s in
+        match v_final with
+        | Ok v_final -> run_minimalist (f v_final) tmp_st
+        | Error _ as e -> (e, tmp_st) )
+
+  let ( let* ) = bind
+
+  let select (vb : S.vbool) =
+    let v = Expr.simplify vb in
+    match v.node.e with
+    | Val True -> return true
+    | Val False -> return false
+    | _ -> Format.kasprintf failwith "%a" Expr.pp v
+
+  let select_i32 (i : S.int32) =
+    let v = Expr.simplify i in
+    match v.node.e with Val (Num (I32 i)) -> return i | _ -> assert false
+
+  let trap t = M (fun th -> (Error (Trap t), th))
+
+  let assertion (vb : S.vbool) =
+    let v = Expr.simplify vb in
+    match v.node.e with
+    | Val True -> return ()
+    | Val False -> M (fun th -> (Error Assert_fail, th))
+    | _ -> assert false
+
+  let with_thread f = M (fun st -> (Ok (f st), st))
+
+  let add_pc (_vb : S.vbool) = return ()
+end
+
 module CList = Make (struct
   include List
 

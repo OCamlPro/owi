@@ -1566,4 +1566,5 @@ module Make (P : Interpret_intf.P) :
 end
 
 module Concrete = Make (Concrete.P) [@@inlined hint]
-module Symbolic = Make (Symbolic.P) [@@inlined hint]
+module SymbolicP = Make (Symbolic.P) [@@inlined hint]
+module SymbolicM = Make (Symbolic.M) [@@inlined hint]

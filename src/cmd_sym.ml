@@ -161,7 +161,7 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
       ([], link_state) file
   in
   let f (pc : (unit, _) result Choice.t) to_run =
-    let c = (Interpret.Symbolic.modul link_state.envs) to_run in
+    let c = (Interpret.SymbolicP.modul link_state.envs) to_run in
     let results =
       Choice.bind pc (fun r ->
           match r with Error _ -> Choice.return r | Ok () -> c )
