@@ -175,7 +175,7 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-let ( let* ) o f = <span data-count="994091">m</span>atch o with <span data-count="983893">O</span>k v -&gt; f v | <span data-count="10198">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="994104">m</span>atch o with <span data-count="983906">O</span>k v -&gt; f v | <span data-count="10198">E</span>rror _ as e -&gt; e
 
 let ( let+ ) o f = <span data-count="250590">m</span>atch o with <span data-count="248862">O</span>k v -&gt; Ok (<span data-count="248862">f</span> v) | <span data-count="1728">E</span>rror _ as e -&gt; e
 
@@ -183,7 +183,7 @@ let error v = <span data-count="2713">E</span>rror v
 
 let error_s format = <span data-count="2673">F</span>ormat.kasprintf error format
 
-let ok v = <span data-count="386572">O</span>k v
+let ok v = <span data-count="386582">O</span>k v
 
 let list_iter f l =
   <span data-count="23869">l</span>et exception E of string in
@@ -198,15 +198,15 @@ let list_map f l =
   <span data-count="194881">l</span>et exception E of string in
   try
     o<span data-count="194103">k</span>
-    @@ List.ma<span data-count="194103">p</span> (fun v -&gt; <span data-count="214776">m</span>atch f v with <span data-count="778">E</span>rror s -&gt; raise (E s) | <span data-count="213998">O</span>k v -&gt; v) l
+    @@ List.ma<span data-count="194103">p</span> (fun v -&gt; <span data-count="214783">m</span>atch f v with <span data-count="778">E</span>rror s -&gt; raise (E s) | <span data-count="214005">O</span>k v -&gt; v) l
   with <span data-count="778">E</span> s -&gt; Error s
 
 let list_fold_left (f : 'a -&gt; 'b -&gt; 'a Result.t) (acc : 'a) (l : 'b list) :
   'a Result.t =
   <span data-count="92341">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="207726">l</span>et* acc in
-      <span data-count="206303">f</span> acc v )
+      <span data-count="207733">l</span>et* acc in
+      <span data-count="206310">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =

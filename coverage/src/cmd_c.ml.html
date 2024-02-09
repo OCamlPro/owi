@@ -761,7 +761,7 @@ let metadata ~workspace arch property files =
   <span data-count="4">r</span>es
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure =
+  profiling unsafe optimize no_stop_at_failure no_values =
   <span data-count="4">i</span>f debug then <span data-count="0">L</span>ogs.set_leve<span data-count="0">l</span> (Some Debug);
   <span data-count="4">l</span>et workspace = Fpath.v workspace in
   <span data-count="4">l</span>et includes = C_share.lib_location @ includes in
@@ -777,13 +777,13 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes files
   <span data-count="4">l</span>et files = [ module_ ] in
   let workspace = Fpath.(workspace / "test-suite") in
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
-    workspace files
+    no_values workspace files
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure =
+  profiling unsafe optimize no_stop_at_failure no_values =
   <span data-count="4">l</span>et res =
     cmd debug arch property testcomp workspace workers opt_lvl includes files
-      profiling unsafe optimize no_stop_at_failure
+      profiling unsafe optimize no_stop_at_failure no_values
   in
   <span data-count="1">m</span>atch res with <span data-count="1">O</span>k () -&gt; () | <span data-count="0">E</span>rror (`Msg e) -&gt; failwith e
 </code></pre>

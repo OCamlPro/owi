@@ -1232,26 +1232,26 @@ open Ty
 open Expr
 open Hc
 
-let ( let+ ) o f = <span data-count="8294">O</span>ption.map f o
+let ( let+ ) o f = <span data-count="8283">O</span>ption.map f o
 
 let unop ty op e =
-  <span data-count="8169">m</span>atch e.node.e with
-  | <span data-count="8169">V</span>al (Num n) -&gt; Val (Num (Eval_numeric.eval_uno<span data-count="8183">p</span> ty op n)) @: e.node.ty
+  <span data-count="8149">m</span>atch e.node.e with
+  | <span data-count="8154">V</span>al (Num n) -&gt; Val (Num (Eval_numeric.eval_uno<span data-count="8181">p</span> ty op n)) @: e.node.ty
   | <span data-count="0">_</span> -&gt; Unop (op, e) @: ty
 
 let binop ty op e1 e2 =
-  <span data-count="346580">m</span>atch (e1.node.e, e2.node.e) with
-  | <span data-count="338296">V</span>al (Num n1), Val (Num n2) -&gt;
-    Val (Num (Eval_numeric.eval_bino<span data-count="338304">p</span> ty op n1 n2)) @: ty
-  | <span data-count="8173">P</span>tr _, _ | <span data-count="0">_</span>, Ptr _ -&gt;
+  <span data-count="345688">m</span>atch (e1.node.e, e2.node.e) with
+  | <span data-count="337398">V</span>al (Num n1), Val (Num n2) -&gt;
+    Val (Num (Eval_numeric.eval_bino<span data-count="337482">p</span> ty op n1 n2)) @: ty
+  | <span data-count="8163">P</span>tr _, _ | <span data-count="0">_</span>, Ptr _ -&gt;
     (* Does pointer arithmetic *)
     Expr.simplify @@ Binop (op, e1, e2) @<span data-count="8183">:</span> Ty_bitv S32
-  | <span data-count="116">_</span> -&gt; Binop (op, e1, e2) @: ty
+  | <span data-count="114">_</span> -&gt; Binop (op, e1, e2) @: ty
 
 let relop ty op e1 e2 =
-  <span data-count="355585">m</span>atch (e1.node.e, e2.node.e) with
-  | <span data-count="355178">V</span>al (Num n1), Val (Num n2) -&gt;
-    Val (if Eval_numeric.eval_relop ty op n1 n2 then <span data-count="17502">T</span>rue else <span data-count="337875">F</span>alse) @: ty
+  <span data-count="354756">m</span>atch (e1.node.e, e2.node.e) with
+  | <span data-count="354311">V</span>al (Num n1), Val (Num n2) -&gt;
+    Val (if Eval_numeric.eval_relop ty op n1 n2 then <span data-count="17463">T</span>rue else <span data-count="337098">F</span>alse) @: ty
   | <span data-count="0">V</span>al (Num n), Ptr (b, { node = { e = Val (Num o); _ }; _ }) -&gt;
     let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
     <span data-count="0">V</span>al (if Eval_numeric.eval_relop ty op n base then <span data-count="0">T</span>rue else <span data-count="0">F</span>alse) @: ty
@@ -1259,7 +1259,7 @@ let relop ty op e1 e2 =
     let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
     <span data-count="0">l</span>et b = Eval_numeric.eval_relop ty op base n in
     <span data-count="0">V</span>al (if b then <span data-count="0">T</span>rue else <span data-count="0">F</span>alse) @: ty
-  | <span data-count="267">_</span> -&gt; Relop (op, e1, e2) @: ty
+  | <span data-count="262">_</span> -&gt; Relop (op, e1, e2) @: ty
 
 let cvtop ty op e =
   <span data-count="8">m</span>atch e.node.e with
@@ -1290,7 +1290,7 @@ module S = struct
     | F64 of float64
     | Ref of ref_value
 
-  let const_i32 (i : Int32.t) : int32 = <span data-count="831970">V</span>al (Num (I32 i)) @: Ty_bitv S32
+  let const_i32 (i : Int32.t) : int32 = <span data-count="829423">V</span>al (Num (I32 i)) @: Ty_bitv S32
 
   let const_i64 (i : Int64.t) : int64 = <span data-count="949">V</span>al (Num (I64 i)) @: Ty_bitv S64
 
@@ -1340,47 +1340,47 @@ module S = struct
 
   module Bool = struct
     let of_val = function
-      | <span data-count="58457">V</span>al True -&gt; Some true
-      | <span data-count="322696">V</span>al False -&gt; Some false
-      | <span data-count="287">_</span> -&gt; None
+      | <span data-count="58385">V</span>al True -&gt; Some true
+      | <span data-count="321847">V</span>al False -&gt; Some false
+      | <span data-count="282">_</span> -&gt; None
 
-    let const b = <span data-count="394666">V</span>al (if b then <span data-count="92372">T</span>rue else <span data-count="302282">F</span>alse) @: Ty_bool
+    let const b = <span data-count="393740">V</span>al (if b then <span data-count="92219">T</span>rue else <span data-count="301484">F</span>alse) @: Ty_bool
 
     let not e =
-      <span data-count="8316">m</span>atch e.node.e with
+      <span data-count="8308">m</span>atch e.node.e with
       | <span data-count="8">U</span>nop (Not, cond) -&gt; cond
-      | <span data-count="8302">e</span>' -&gt;
-        Option.value ~default:(Unop (Not, e) @<span data-count="8309">:</span> Ty_bool)
-        @@ let+ b = of_va<span data-count="8295">l</span> e' in
-           <span data-count="8188">c</span>onst (not b)
+      | <span data-count="8287">e</span>' -&gt;
+        Option.value ~default:(Unop (Not, e) @<span data-count="8301">:</span> Ty_bool)
+        @@ let+ b = of_va<span data-count="8286">l</span> e' in
+           <span data-count="8165">c</span>onst (not b)
 
     let or_ e1 e2 =
-      <span data-count="152858">m</span>atch (of_va<span data-count="152793">l</span> e1.node.e, of_va<span data-count="152767">l</span> e2.node.e) with
-      | <span data-count="152732">S</span>ome b1, Some b2 -&gt; const (b<span data-count="0">1</span> || b<span data-count="0">2</span>)
+      <span data-count="152472">m</span>atch (of_va<span data-count="152396">l</span> e1.node.e, of_va<span data-count="152352">l</span> e2.node.e) with
+      | <span data-count="152326">S</span>ome b1, Some b2 -&gt; const (b<span data-count="0">1</span> || b<span data-count="0">2</span>)
       | <span data-count="0">S</span>ome false, _ -&gt; e2
       | <span data-count="3">_</span>, Some false -&gt; e1
       | <span data-count="0">S</span>ome true, _ | <span data-count="0">_</span>, Some true -&gt; const true
-      | <span data-count="67">_</span> -&gt; Binop (Or, e1, e2) @: Ty_bool
+      | <span data-count="65">_</span> -&gt; Binop (Or, e1, e2) @: Ty_bool
 
     let and_ e1 e2 =
-      <span data-count="25663">m</span>atch (of_va<span data-count="25614">l</span> e1.node.e, of_va<span data-count="25616">l</span> e2.node.e) with
-      | <span data-count="25621">S</span>ome b1, Some b2 -&gt; const (b1 &amp;&amp; <span data-count="16927">b</span>2)
+      <span data-count="25622">m</span>atch (of_va<span data-count="25563">l</span> e1.node.e, of_va<span data-count="25547">l</span> e2.node.e) with
+      | <span data-count="25583">S</span>ome b1, Some b2 -&gt; const (b1 &amp;&amp; <span data-count="16900">b</span>2)
       | <span data-count="0">S</span>ome true, _ -&gt; e2
-      | <span data-count="15">_</span>, Some true -&gt; e1
+      | <span data-count="16">_</span>, Some true -&gt; e1
       | <span data-count="0">S</span>ome false, _ | <span data-count="0">_</span>, Some false -&gt; const false
       | <span data-count="6">_</span> -&gt; Binop (And, e1, e2) @: Ty_bool
 
     let int32 e =
-      <span data-count="77050">m</span>atch e.node.e with
-      | <span data-count="42658">V</span>al True -&gt; const_i32 1l
-      | <span data-count="34195">V</span>al False -&gt; const_i32 0l
+      <span data-count="76875">m</span>atch e.node.e with
+      | <span data-count="42580">V</span>al True -&gt; const_i32 1l
+      | <span data-count="34114">V</span>al False -&gt; const_i32 0l
       | <span data-count="0">C</span>vtop (ToBool, ({ node = { ty = Ty_bitv S32; _ }; _ } as e')) -&gt; e'
       | <span data-count="147">_</span> -&gt; Cvtop (OfBool, e) @: Ty_bitv S32
 
     let select_expr c ~if_true ~if_false =
-      <span data-count="16367">m</span>atch of_val c.node.e with
-      | <span data-count="7767">S</span>ome true -&gt; if_true
-      | <span data-count="8591">S</span>ome false -&gt; if_false
+      <span data-count="16362">m</span>atch of_val c.node.e with
+      | <span data-count="7764">S</span>ome true -&gt; if_true
+      | <span data-count="8579">S</span>ome false -&gt; if_false
       | <span data-count="1">N</span>one -&gt; Triop (Ite, c, if_true, if_false) @: Ty_bool
 
     let pp ppf (e : vbool) = <span data-count="0">E</span>xpr.pp ppf e
@@ -1401,37 +1401,37 @@ module S = struct
 
     let zero = const_i3<span data-count="312">2</span> 0l
 
-    let clz e = <span data-count="8183">u</span>nop ty Clz e
+    let clz e = <span data-count="8165">u</span>nop ty Clz e
 
     let ctz _ = <span data-count="0">f</span>ailwith "i32_ctz: TODO"
 
     let popcnt _ = <span data-count="0">f</span>ailwith "i32_popcnt: TODO"
 
-    let add e1 e2 = <span data-count="214889">b</span>inop ty Add e1 e2
+    let add e1 e2 = <span data-count="214322">b</span>inop ty Add e1 e2
 
-    let sub e1 e2 = <span data-count="8199">b</span>inop ty Sub e1 e2
+    let sub e1 e2 = <span data-count="8198">b</span>inop ty Sub e1 e2
 
-    let mul e1 e2 = <span data-count="89510">b</span>inop ty Mul e1 e2
+    let mul e1 e2 = <span data-count="89347">b</span>inop ty Mul e1 e2
 
     let div e1 e2 = <span data-count="2">b</span>inop ty Div e1 e2
 
     let unsigned_div e1 e2 = <span data-count="0">b</span>inop ty DivU e1 e2
 
-    let rem e1 e2 = <span data-count="8180">b</span>inop ty Rem e1 e2
+    let rem e1 e2 = <span data-count="8179">b</span>inop ty Rem e1 e2
 
     let unsigned_rem e1 e2 = <span data-count="0">b</span>inop ty RemU e1 e2
 
     let boolify e =
-      <span data-count="67621">m</span>atch e.node.e with
-      | <span data-count="8688">V</span>al (Num (I32 0l)) -&gt; Some (Bool.cons<span data-count="8714">t</span> false)
-      | <span data-count="42579">V</span>al (Num (I32 1l)) -&gt; Some (Bool.cons<span data-count="42614">t</span> true)
-      | <span data-count="23">C</span>vtop (OfBool, cond) -&gt; Some cond
-      | <span data-count="16335">_</span> -&gt; None
+      <span data-count="67491">m</span>atch e.node.e with
+      | <span data-count="8669">V</span>al (Num (I32 0l)) -&gt; Some (Bool.cons<span data-count="8697">t</span> false)
+      | <span data-count="42516">V</span>al (Num (I32 1l)) -&gt; Some (Bool.cons<span data-count="42567">t</span> true)
+      | <span data-count="24">C</span>vtop (OfBool, cond) -&gt; Some cond
+      | <span data-count="16313">_</span> -&gt; None
 
     let logand e1 e2 =
-      <span data-count="33810">m</span>atch (boolif<span data-count="33849">y</span> e1, boolif<span data-count="33832">y</span> e2) with
-      | <span data-count="25642">S</span>ome b1, Some b2 -&gt; Bool.int32 (Bool.and<span data-count="25665">_</span> b1 b2)
-      | <span data-count="8178">_</span> -&gt; binop ty And e1 e2
+      <span data-count="33737">m</span>atch (boolif<span data-count="33797">y</span> e1, boolif<span data-count="33795">y</span> e2) with
+      | <span data-count="25576">S</span>ome b1, Some b2 -&gt; Bool.int32 (Bool.and<span data-count="25608">_</span> b1 b2)
+      | <span data-count="8179">_</span> -&gt; binop ty And e1 e2
 
     let logor e1 e2 =
       <span data-count="0">m</span>atch (boolif<span data-count="0">y</span> e1, boolif<span data-count="0">y</span> e2) with
@@ -1440,47 +1440,47 @@ module S = struct
 
     let logxor e1 e2 = <span data-count="0">b</span>inop ty Xor e1 e2
 
-    let shl e1 e2 = <span data-count="8860">b</span>inop ty Shl e1 e2
+    let shl e1 e2 = <span data-count="8839">b</span>inop ty Shl e1 e2
 
-    let shr_s e1 e2 = <span data-count="538">b</span>inop ty ShrA e1 e2
+    let shr_s e1 e2 = <span data-count="519">b</span>inop ty ShrA e1 e2
 
-    let shr_u e1 e2 = <span data-count="8188">b</span>inop ty ShrL e1 e2
+    let shr_u e1 e2 = <span data-count="8185">b</span>inop ty ShrL e1 e2
 
     let rotl e1 e2 = <span data-count="0">b</span>inop ty Rotl e1 e2
 
     let rotr e1 e2 = <span data-count="0">b</span>inop ty Rotr e1 e2
 
     let eq_const e c =
-      <span data-count="17428">m</span>atch e.node.e with
+      <span data-count="17381">m</span>atch e.node.e with
       | <span data-count="8">C</span>vtop (OfBool, cond) -&gt; begin
         match c with <span data-count="8">0</span>l -&gt; Bool.not cond | <span data-count="0">1</span>l -&gt; cond | <span data-count="0">_</span> -&gt; Bool.const false
       end
-      | <span data-count="17409">_</span> -&gt; relop ty Eq e (const_i3<span data-count="17457">2</span> c)
+      | <span data-count="17362">_</span> -&gt; relop ty Eq e (const_i3<span data-count="17427">2</span> c)
 
-    let eq e1 e2 = <span data-count="8751">i</span>f e1 == e2 then <span data-count="8253">B</span>ool.const true else <span data-count="491">r</span>elop ty Eq e1 e2
+    let eq e1 e2 = <span data-count="8732">i</span>f e1 == e2 then <span data-count="8257">B</span>ool.const true else <span data-count="475">r</span>elop ty Eq e1 e2
 
-    let ne e1 e2 = <span data-count="251">i</span>f e1 == e2 then <span data-count="56">B</span>ool.const false else <span data-count="195">r</span>elop ty Ne e1 e2
+    let ne e1 e2 = <span data-count="243">i</span>f e1 == e2 then <span data-count="54">B</span>ool.const false else <span data-count="189">r</span>elop ty Ne e1 e2
 
-    let lt e1 e2 = <span data-count="258469">i</span>f e1 == e2 then <span data-count="17566">B</span>ool.const false else <span data-count="240782">r</span>elop ty Lt e1 e2
+    let lt e1 e2 = <span data-count="257893">i</span>f e1 == e2 then <span data-count="17533">B</span>ool.const false else <span data-count="240305">r</span>elop ty Lt e1 e2
 
-    let gt e1 e2 = <span data-count="18">i</span>f e1 == e2 then <span data-count="5">B</span>ool.const false else <span data-count="13">r</span>elop ty Gt e1 e2
+    let gt e1 e2 = <span data-count="19">i</span>f e1 == e2 then <span data-count="5">B</span>ool.const false else <span data-count="14">r</span>elop ty Gt e1 e2
 
-    let lt_u e1 e2 = <span data-count="96569">i</span>f e1 == e2 then <span data-count="128">B</span>ool.const false else <span data-count="96434">r</span>elop ty LtU e1 e2
+    let lt_u e1 e2 = <span data-count="96374">i</span>f e1 == e2 then <span data-count="128">B</span>ool.const false else <span data-count="96247">r</span>elop ty LtU e1 e2
 
-    let gt_u e1 e2 = <span data-count="64">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const false else <span data-count="64">r</span>elop ty GtU e1 e2
+    let gt_u e1 e2 = <span data-count="62">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const false else <span data-count="62">r</span>elop ty GtU e1 e2
 
     let le e1 e2 = <span data-count="3">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const true else <span data-count="3">r</span>elop ty Le e1 e2
 
-    let ge e1 e2 = <span data-count="74">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const true else <span data-count="74">r</span>elop ty Ge e1 e2
+    let ge e1 e2 = <span data-count="72">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const true else <span data-count="72">r</span>elop ty Ge e1 e2
 
     let le_u e1 e2 = <span data-count="0">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const true else <span data-count="0">r</span>elop ty LeU e1 e2
 
     let ge_u e1 e2 = <span data-count="0">i</span>f e1 == e2 then <span data-count="0">B</span>ool.const true else <span data-count="0">r</span>elop ty GeU e1 e2
 
     let to_bool (e : vbool) =
-      <span data-count="42000">m</span>atch e.node.e with
-      | <span data-count="41933">V</span>al (Num (I32 i)) -&gt; Bool.const @@ Int32.n<span data-count="41970">e</span> i 0l
-      | <span data-count="52">C</span>vtop (OfBool, cond) -&gt; cond
+      <span data-count="41905">m</span>atch e.node.e with
+      | <span data-count="41844">V</span>al (Num (I32 i)) -&gt; Bool.const @@ Int32.n<span data-count="41911">e</span> i 0l
+      | <span data-count="53">C</span>vtop (OfBool, cond) -&gt; cond
       | <span data-count="0">_</span> -&gt; Cvtop (ToBool, e) @: ty
 
     let trunc_f32_s x = <span data-count="0">c</span>vtop ty TruncSF32 x
