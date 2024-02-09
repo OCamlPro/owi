@@ -63,23 +63,23 @@
 <a href="#L16">16</a>
 <a href="#L17">17</a>
 </pre>
-<pre><code class="ocaml">let py_location = List.ma<span data-count="312">p</span> Fpath.v C_share_site.Sites.pyc
+<pre><code class="ocaml">let py_location = List.ma<span data-count="473">p</span> Fpath.v C_share_site.Sites.pyc
 
-let bin_location = List.ma<span data-count="312">p</span> Fpath.v C_share_site.Sites.binc
+let bin_location = List.ma<span data-count="473">p</span> Fpath.v C_share_site.Sites.binc
 
-let lib_location = List.ma<span data-count="312">p</span> Fpath.v C_share_site.Sites.libc
+let lib_location = List.ma<span data-count="473">p</span> Fpath.v C_share_site.Sites.libc
 
 let find location file =
-  <span data-count="4">L</span>ist.find_map
+  <span data-count="165">L</span>ist.find_map
     (fun dir -&gt;
-      <span data-count="4">l</span>et filename = Fpath.append dir file in
-      <span data-count="4">m</span>atch Bos.OS.File.exists filename with
-      | <span data-count="4">O</span>k true -&gt; Some filename
+      <span data-count="165">l</span>et filename = Fpath.append dir file in
+      <span data-count="165">m</span>atch Bos.OS.File.exists filename with
+      | <span data-count="165">O</span>k true -&gt; Some filename
       | <span data-count="0">O</span>k false -&gt; None
       | <span data-count="0">E</span>rror (`Msg msg) -&gt; failwith msg )
     location
 
-let get_libc () = <span data-count="4">f</span>ind bin_location (Fpath.<span data-count="4">v</span> "libc.wasm")
+let get_libc () = <span data-count="165">f</span>ind bin_location (Fpath.<span data-count="165">v</span> "libc.wasm")
 </code></pre>
       </div>
     </div>

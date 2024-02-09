@@ -155,7 +155,7 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="3035">x</span>
+  let hash x = <span data-count="26160">x</span>
 end)
 
 type global =
@@ -165,23 +165,23 @@ type global =
 
 type globals = global ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="28">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="189">E</span>nv_id.Tbl.create 0
 
-let global_copy r = <span data-count="1568">{</span> r with value = r.value }
+let global_copy r = <span data-count="2924">{</span> r with value = r.value }
 
 let clone (globals : globals) : globals =
-  <span data-count="1585">l</span>et s = Env_id.Tbl.to_seq globals in
-  <span data-count="1585">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="1585">p</span>
+  <span data-count="2942">l</span>et s = Env_id.Tbl.to_seq globals in
+  <span data-count="2942">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="2942">p</span>
        (fun (i, t) -&gt;
-         <span data-count="1568">l</span>et s = ITbl.to_seq t in
-         <span data-count="1568">(</span>i, ITbl.of_se<span data-count="1568">q</span> @@ Seq.ma<span data-count="1568">p</span> (fun (i, a) -&gt; <span data-count="1568">(</span>i, global_cop<span data-count="1568">y</span> a)) s) )
+         <span data-count="2924">l</span>et s = ITbl.to_seq t in
+         <span data-count="2924">(</span>i, ITbl.of_se<span data-count="2924">q</span> @@ Seq.ma<span data-count="2924">p</span> (fun (i, a) -&gt; <span data-count="2924">(</span>i, global_cop<span data-count="2924">y</span> a)) s) )
        s
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   (* TODO share various versions *)
-  <span data-count="8">m</span>atch v with
-  | <span data-count="5">I</span>32 v -&gt; I32 (Symbolic_value.S.const_i3<span data-count="5">2</span> v)
+  <span data-count="169">m</span>atch v with
+  | <span data-count="166">I</span>32 v -&gt; I32 (Symbolic_value.S.const_i3<span data-count="166">2</span> v)
   | <span data-count="1">I</span>64 v -&gt; I64 (Symbolic_value.S.const_i6<span data-count="1">4</span> v)
   | <span data-count="1">F</span>32 v -&gt; F32 (Symbolic_value.S.const_f3<span data-count="1">2</span> v)
   | <span data-count="1">F</span>64 v -&gt; F64 (Symbolic_value.S.const_f6<span data-count="1">4</span> v)
@@ -189,25 +189,25 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   | Ref _ -&gt; assert false
 
 let convert (orig_global : Concrete_global.t) : global =
-  <span data-count="8">{</span> value = convert_value<span data-count="8">s</span> orig_global.value; orig = orig_global }
+  <span data-count="169">{</span> value = convert_value<span data-count="169">s</span> orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
-  <span data-count="1459">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="1454">S</span>ome env -&gt; env
-  | <span data-count="5">N</span>one -&gt;
+  <span data-count="23059">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="22899">S</span>ome env -&gt; env
+  | <span data-count="166">N</span>one -&gt;
     let t = ITbl.create 0 in
-    <span data-count="5">E</span>nv_id.Tbl.add tables env_id t;
-    <span data-count="5">t</span>
+    <span data-count="166">E</span>nv_id.Tbl.add tables env_id t;
+    <span data-count="166">t</span>
 
 let get_global env_id (orig_global : Concrete_global.t) (tables : globals) g_id
     =
-  <span data-count="1459">l</span>et env = get_env env_id tables in
-  <span data-count="1459">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="1451">S</span>ome t -&gt; t
-  | <span data-count="8">N</span>one -&gt;
+  <span data-count="23058">l</span>et env = get_env env_id tables in
+  <span data-count="23065">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="22897">S</span>ome t -&gt; t
+  | <span data-count="169">N</span>one -&gt;
     let t = convert orig_global in
-    <span data-count="8">I</span>Tbl.add env g_id t;
-    <span data-count="8">t</span>
+    <span data-count="169">I</span>Tbl.add env g_id t;
+    <span data-count="169">t</span>
 </code></pre>
       </div>
     </div>
