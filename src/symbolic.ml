@@ -26,7 +26,7 @@ end
 
 module MakeP
     (Thread : Thread)
-    (Choice_monad : Choice_intf.Complete_without_run
+    (Choice_monad : Choice_intf.Complete
                       with module V := Symbolic_value.S
                        and type thread := Thread.t) =
 struct
@@ -69,8 +69,9 @@ struct
     | F64 if_true, F64 if_false ->
       Choice.return (Value.F64 (Value.Bool.select_expr c ~if_true ~if_false))
     | Ref _, Ref _ ->
-      Choice.bind (Choice.select c) (fun b ->
-          if b then Choice.return if_true else Choice.return if_false )
+      let open Choice in
+      let* b = select c in
+      return @@ if b then if_true else if_false
     | _, _ -> assert false
 
   type extern_func = Extern_func.extern_func
@@ -174,15 +175,17 @@ struct
       match cond with
       | Error t -> Choice.trap t
       | Ok (cond, ptr) ->
-        Choice.bind (Choice.select cond) (fun out_of_bounds ->
-            if out_of_bounds then Choice.trap Trap.Memory_heap_buffer_overflow
-            else Choice.return ptr )
+        let open Choice in
+        let* out_of_bounds = select cond in
+        if out_of_bounds then trap Trap.Memory_heap_buffer_overflow
+        else return ptr
 
     let with_concrete (m : memory) (a : int32) (f : memory -> int32 -> 'a) :
       'a Choice.t =
-      Choice.bind (concretise a) (fun addr ->
-          Choice.bind (check_within_bounds m addr) (fun ptr ->
-              Choice.return @@ f m ptr ) )
+      let open Choice in
+      let* addr = concretise a in
+      let+ ptr = check_within_bounds m addr in
+      f m ptr
 
     let load_8_s m a = with_concrete m a load_8_s
 
@@ -280,11 +283,9 @@ struct
 end
 
 module P = struct
-  include MakeP (Thread) (Symbolic_choice.MT) [@@inlined hint]
-  module Choice = Symbolic_choice.MT
+  include MakeP (Thread) (Symbolic_choice.Multicore) [@@inlined hint]
+  module Choice = Symbolic_choice.Multicore
 end
-
-module P' : Interpret_intf.P = P
 
 module M = struct
   include MakeP (Thread) (Symbolic_choice.Minimalist) [@@inlined hint]

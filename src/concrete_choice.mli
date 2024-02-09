@@ -3,9 +3,13 @@ type 'a t = 'a
 
 val return : 'a -> 'a t
 
-val bind : 'a t -> ('a -> 'b) -> 'b
+val bind : 'a t -> ('a -> 'b t) -> 'b t
 
-val ( let* ) : 'a t -> ('a -> 'b) -> 'b
+val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
+
+val map : 'a t -> ('a -> 'b) -> 'b t
+
+val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
 val select : bool -> bool t
 

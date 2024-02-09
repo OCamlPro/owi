@@ -3,7 +3,6 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Encoding
-open Choice_intf
 open Symbolic_value
 open Hc
 
@@ -19,130 +18,84 @@ let check sym_bool thread =
   | Val False -> true
   | _ ->
     let check = no :: pc in
-    (*
-    Format.pp_std "CHECK:@.%a"
-      (Format.pp_list ~pp_sep:Format.pp_newline Expr.pp)
-      check;
-    *)
     let module Solver = (val solver_module) in
     let r = Solver.check solver check in
-    (*
-    let msg = if r then "KO" else "OK" in
-    Format.pp_std "@./CHECK %s@." msg;
-    *)
     not r
 
-(* TODO: make this a CLI flag ? *)
-let print_choice = false
+let list_select b ({ Thread.pc; solver = S (solver_module, s); _ } as thread) =
+  let v = Expr.simplify b in
+  match v.node.e with
+  | Val True -> [ (true, thread) ]
+  | Val False -> [ (false, thread) ]
+  | Val (Num (I32 _)) -> assert false
+  | _ -> (
+    let module Solver = (val solver_module) in
+    let with_v = v :: pc in
+    let with_not_v = S.Bool.not v :: pc in
+    let sat_true = Solver.check s with_v in
+    let sat_false = Solver.check s with_not_v in
+    match (sat_true, sat_false) with
+    | false, false -> []
+    | true, false | false, true -> [ (sat_true, thread) ]
+    | true, true ->
+      let thread1 = Thread.clone { thread with pc = with_v } in
+      let thread2 = Thread.clone { thread with pc = with_not_v } in
+      [ (true, thread1); (false, thread2) ] )
 
-module Make (M : sig
-  type 'a t
+let fix_symbol (e : Expr.t) ~pc ~choices =
+  match e.node.e with
+  | Symbol sym -> (pc, sym)
+  | _ ->
+    let symbol_name = Format.sprintf "choice_i32_%i" choices in
+    let sym = Symbol.(symbol_name @: Ty_bitv S32) in
+    let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
+    (assign :: pc, sym)
 
-  val return : 'a -> 'a t
+let clone_if_needed ~orig_pc cases =
+  match cases with
+  | [ (i, thread) ] -> [ (i, { thread with Thread.pc = orig_pc }) ]
+  | cases ->
+    List.map
+      (fun (i, thread) ->
+        let thread = Thread.clone thread in
+        (i, thread) )
+      cases
 
-  val empty : 'a t
+let not_value sym value =
+  Expr.(Relop (Ne, mk_symbol sym, S.const_i32 value) @: Ty_bitv S32)
 
-  val length : 'a t -> int
-
-  val hd : 'a t -> 'a
-
-  val cons : 'a -> 'a t -> 'a t
-
-  val map : ('a -> 'b) -> 'a t -> 'b t
-
-  val to_list : 'a t -> 'a list
-end) : sig
-  val select : Encoding.Expr.t -> Thread.t -> (bool * Thread.t) M.t
-
-  val select_i32 : S.int32 -> Thread.t -> (int32 * Thread.t) M.t
-end = struct
-  include M
-
-  let select b ({ Thread.pc; solver = S (solver_module, s); _ } as thread) =
-    let v = Expr.simplify b in
-    match v.node.e with
-    | Val True -> M.return (true, thread)
-    | Val False -> M.return (false, thread)
-    | Val (Num (I32 _)) -> assert false
-    | _ -> (
-      let module Solver = (val solver_module) in
-      let with_v = v :: pc in
-      let with_not_v = S.Bool.not v :: pc in
-      let sat_true = Solver.check s with_v in
-      let sat_false = Solver.check s with_not_v in
-      match (sat_true, sat_false) with
-      | false, false -> M.empty
-      | true, false | false, true -> M.return (sat_true, thread)
-      | true, true ->
-        if print_choice then Format.pp_std "CHOICE: %a@." Expr.pp v;
-        let thread1 = Thread.clone { thread with pc = with_v } in
-        let thread2 = Thread.clone { thread with pc = with_not_v } in
-        M.cons (true, thread1) (M.return (false, thread2)) )
-
-  let fix_symbol (e : Expr.t) ~pc ~choices =
-    match e.node.e with
-    | Symbol sym -> (pc, sym)
-    | _ ->
-      let symbol_name = Format.sprintf "choice_i32_%i" choices in
-      let sym = Symbol.(symbol_name @: Ty_bitv S32) in
-      let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
-      (assign :: pc, sym)
-
-  let clone_if_needed ~orig_pc cases =
-    match M.length cases with
-    | 0 -> cases
-    | 1 ->
-      let i, thread = M.hd cases in
-      M.return (i, { thread with Thread.pc = orig_pc })
-    | _n ->
-      M.map
-        (fun (i, thread) ->
-          let thread = Thread.clone thread in
-          (i, thread) )
-        cases
-
-  let not_value sym value =
-    Expr.(Relop (Ne, mk_symbol sym, S.const_i32 value) @: Ty_bitv S32)
-
-  let select_i32 sym_int thread =
-    let (S (solver_module, solver)) = Thread.solver thread in
-    let pc = Thread.pc thread in
-    let sym_int = Expr.simplify sym_int in
-    let orig_pc = pc in
-    let pc, symbol = fix_symbol sym_int ~pc ~choices:thread.choices in
-    match sym_int.node.e with
-    | Val (Num (I32 i)) -> M.return (i, thread)
-    | _ ->
-      let module Solver = (val solver_module) in
-      let rec find_values values =
-        let additionnal = M.to_list @@ M.map (not_value symbol) values in
-        if not (Solver.check solver (additionnal @ pc)) then M.empty
-        else begin
-          let model = Solver.model ~symbols:[ symbol ] solver in
-          match model with
+let list_select_i32 sym_int thread =
+  let (S (solver_module, solver)) = Thread.solver thread in
+  let pc = Thread.pc thread in
+  let sym_int = Expr.simplify sym_int in
+  let orig_pc = pc in
+  let pc, symbol = fix_symbol sym_int ~pc ~choices:thread.choices in
+  match sym_int.node.e with
+  | Val (Num (I32 i)) -> [ (i, thread) ]
+  | _ ->
+    let module Solver = (val solver_module) in
+    let rec find_values values =
+      let additionnal = List.map (not_value symbol) values in
+      if not (Solver.check solver (additionnal @ pc)) then []
+      else begin
+        let model = Solver.model ~symbols:[ symbol ] solver in
+        match model with
+        | None -> assert false (* ? *)
+        | Some model -> (
+          let v = Model.evaluate model symbol in
+          match v with
           | None -> assert false (* ? *)
-          | Some model -> (
-            (*
-            Format.pp_std "Model:@.%a@." Model.pp model;
-            *)
-            let v = Model.evaluate model symbol in
-            match v with
-            | None -> assert false (* ? *)
-            | Some (Num (I32 i)) -> begin
-              let cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
-              let pc = cond :: pc in
-              let case =
-                (i, { thread with pc; choices = thread.choices + 1 })
-              in
-              M.cons case (find_values (M.cons i values))
-            end
-            | Some _ -> assert false )
-        end
-      in
-      let cases = find_values M.empty in
-      clone_if_needed ~orig_pc cases
-end
-[@@inline]
+          | Some (Num (I32 i)) -> begin
+            let cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
+            let pc = cond :: pc in
+            let case = (i, { thread with pc; choices = thread.choices + 1 }) in
+            case :: find_values (i :: values)
+          end
+          | Some _ -> assert false )
+      end
+    in
+    let cases = find_values [] in
+    clone_if_needed ~orig_pc cases
 
 module Minimalist = struct
   type err =
@@ -152,19 +105,27 @@ module Minimalist = struct
   type 'a t = M of (Thread.t -> ('a, err) Stdlib.Result.t * Thread.t)
   [@@unboxed]
 
+  type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
+
   let return v = M (fun t -> (Ok v, t))
 
-  let run_minimalist (M v) st = v st
+  let run (M v) st : _ run_result = v st
 
   let bind v f =
     M
       (fun init_s ->
-        let v_final, tmp_st = run_minimalist v init_s in
+        let v_final, tmp_st = run v init_s in
         match v_final with
-        | Ok v_final -> run_minimalist (f v_final) tmp_st
+        | Ok v_final -> run (f v_final) tmp_st
         | Error _ as e -> (e, tmp_st) )
 
   let ( let* ) = bind
+
+  let map v f =
+    let* v in
+    return (f v)
+
+  let ( let+ ) = map
 
   let select (vb : S.vbool) =
     let v = Expr.simplify vb in
@@ -189,25 +150,9 @@ module Minimalist = struct
   let with_thread f = M (fun st -> (Ok (f st), st))
 
   let add_pc (_vb : S.vbool) = return ()
+
+  let run ~workers:_ = run
 end
-
-module CList = Make (struct
-  include List
-
-  let return v = [ v ]
-
-  let empty = []
-
-  let to_list = Fun.id
-end)
-
-module CSeq = Make (struct
-  include Seq
-
-  let hd s = Seq.uncons s |> Option.get |> fst
-
-  let to_list = List.of_seq
-end)
 
 module WQ = struct
   type 'a t =
@@ -332,7 +277,7 @@ module Counter = struct
   let create () = { c = 0; mutex = Mutex.create (); cond = Condition.create () }
 end
 
-module MT = struct
+module Multicore = struct
   type 'a st = St of (Thread.t -> 'a * Thread.t) [@@unboxed]
 
   type 'a t =
@@ -345,6 +290,13 @@ module MT = struct
     | Choice_i32 : S.int32 -> int32 t
     | Trap : Trap.t -> 'a t
 
+  type 'a eval =
+    | EVal of 'a
+    | ETrap of Trap.t
+    | EAssert of Encoding.Expr.t
+
+  type 'a run_result = ('a eval * Thread.t) Seq.t
+
   let return v = Retv v [@@inline]
 
   let bind : type a b. a t -> (a -> b t) -> b t =
@@ -353,11 +305,16 @@ module MT = struct
     | Empty -> Empty
     | Trap t -> Trap t
     | Retv v -> f v
-    | Assert _ | Ret _ | Choice _ | Choice_i32 _ -> Bind (v, f)
-    | Bind _ -> Bind (v, f)
+    | Assert _ | Ret _ | Choice _ | Choice_i32 _ | Bind _ -> Bind (v, f)
   [@@inline]
 
   let ( let* ) = bind
+
+  let map v f =
+    let* v in
+    return (f v)
+
+  let ( let+ ) = map
 
   let select (cond : S.vbool) =
     match cond.node.e with
@@ -428,10 +385,10 @@ module MT = struct
       in
       step thread v { k } st
     | Choice cond ->
-      let cases = CList.select cond { thread with solver = st.solver } in
+      let cases = list_select cond { thread with solver = st.solver } in
       List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
     | Choice_i32 i ->
-      let cases = CList.select_i32 i { thread with solver = st.solver } in
+      let cases = list_select_i32 i { thread with solver = st.solver } in
       List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
 
   let init_global () =
@@ -477,24 +434,7 @@ module MT = struct
       f ();
       Nil
 
-  let rec run : type a. a t -> Thread.t -> (a * Thread.t) Seq.t =
-   fun v t ->
-    match v with
-    | Empty -> Seq.empty
-    | Trap _t -> Seq.empty (* TODO do something useful with the trap *)
-    | Retv v -> Seq.return (v, t)
-    | Ret (St f) -> Seq.return (f t)
-    | Bind (v, f) -> Seq.flat_map (fun (v, t) -> run (f v) t) (run v t)
-    | Assert c ->
-      if check c t then Seq.return ((), t)
-      else
-        let no = S.Bool.not c in
-        let t = { t with pc = no :: t.pc } in
-        raise (Assertion (c, t))
-    | Choice cond -> CSeq.select cond t
-    | Choice_i32 i -> CSeq.select_i32 i t
-
-  let run_and_trap ~workers t thread =
+  let run ~workers t thread =
     let global = init_global () in
     push_first_work global thread t;
     let producers = Array.init workers (spawn_producer global) in
