@@ -1,0 +1,7 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  (source_tree include)
+  (source_tree src)
+  (source_tree testsuite)))
