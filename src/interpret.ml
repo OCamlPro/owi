@@ -78,12 +78,13 @@ module Make (P : Interpret_intf.P) :
 
   let pop_choice stack =
     let b, stack = Stack.pop_bool stack in
-    Choice.bind (Choice.select b) (fun b -> Choice.return (b, stack))
+    let* b = select b in
+    return (b, stack)
 
   let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
 
   let ( let> ) v f =
-    let* v = Choice.select v in
+    let* v = select v in
     f v
 
   let const = const_i32
@@ -142,7 +143,7 @@ module Make (P : Interpret_intf.P) :
     match nn with
     | S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      let* res =
+      let+ res =
         let open I32 in
         match op with
         | Add -> Choice.return @@ add n1 n2
@@ -174,10 +175,10 @@ module Make (P : Interpret_intf.P) :
         | Rotl -> Choice.return @@ rotl n1 n2
         | Rotr -> Choice.return @@ rotr n1 n2
       in
-      Choice.return @@ Stack.push_i32 stack res
+      Stack.push_i32 stack res
     | S64 ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
-      let* res =
+      let+ res =
         let open I64 in
         match op with
         | Add -> Choice.return @@ add n1 n2
@@ -212,7 +213,7 @@ module Make (P : Interpret_intf.P) :
         | Rotl -> Choice.return @@ rotl n1 n2
         | Rotr -> Choice.return @@ rotr n1 n2
       in
-      Choice.return @@ Stack.push_i64 stack res
+      Stack.push_i64 stack res
 
   let exec_fbinop stack nn (op : fbinop) =
     match nn with
@@ -527,19 +528,15 @@ module Make (P : Interpret_intf.P) :
       | F64 -> Stack.push_f64 stack v
       | Externref ty -> Stack.push_as_externref stack ty v
     in
-    let* r in
-    let stack =
-      match (rtype, r) with
-      | R0, () -> stack
-      | R1 t1, v1 -> push_val t1 v1 stack
-      | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
-      | R3 (t1, t2, t3), (v1, v2, v3) ->
-        push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
-      | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
-        push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
-        |> push_val t4 v4
-    in
-    Choice.return stack
+    let+ r in
+    match (rtype, r) with
+    | R0, () -> stack
+    | R1 t1, v1 -> push_val t1 v1 stack
+    | R2 (t1, t2), (v1, v2) -> push_val t1 v1 stack |> push_val t2 v2
+    | R3 (t1, t2, t3), (v1, v2, v3) ->
+      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3
+    | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
+      push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
   module State = struct
     type stack = Stack.t
@@ -746,10 +743,9 @@ module Make (P : Interpret_intf.P) :
       Choice.return (State.Continue (exec_func ~return ~id state env func))
     | Extern f ->
       let f = Env.get_extern_func state.env f in
-      let* stack = exec_extern_func state.stack f in
+      let+ stack = exec_extern_func state.stack f in
       let state = { state with stack } in
-      if return then Choice.return (State.return state)
-      else Choice.return (State.Continue state)
+      if return then State.return state else State.Continue state
 
   let func_type (state : State.exec_state) (f : Func_intf.t) =
     match f with
@@ -1430,10 +1426,10 @@ module Make (P : Interpret_intf.P) :
       let* target =
         if out then return i
         else
-          let* target = Choice.select_i32 target in
+          let+ target = Choice.select_i32 target in
           let target = Int32.to_int target in
           let (Raw i) = inds.(target) in
-          return i
+          i
       in
       let state = { state with stack } in
       State.branch state target
@@ -1497,19 +1493,19 @@ module Make (P : Interpret_intf.P) :
       ; count
       }
     in
-    let* state = loop state in
-    Choice.return (state, count)
+    let+ state = loop state in
+    (state, count)
 
   let modul envs (modul : Module_to_run.t) =
     Log.debug0 "interpreting ...@\n";
 
     try
       begin
-        let* () =
+        let+ () =
           List.fold_left
             (fun u to_run ->
               let* () = u in
-              let* end_stack, count =
+              let+ end_stack, count =
                 let env = Module_to_run.env modul in
                 exec_expr envs env (State.Locals.of_list []) Stack.empty to_run
                   None
@@ -1519,14 +1515,14 @@ module Make (P : Interpret_intf.P) :
                    ~default:"anonymous" )
                 State.print_count count;
               match end_stack with
-              | [] -> Choice.return ()
+              | [] -> ()
               | _ :: _ ->
                 Format.pp_err "non empty stack@\n%a@." Stack.pp end_stack;
                 assert false )
             (Choice.return ())
             (Module_to_run.to_run modul)
         in
-        Choice.return (Ok ())
+        Ok ()
       end
     with
     | Trap msg -> Choice.return (Error msg)
@@ -1548,15 +1544,15 @@ module Make (P : Interpret_intf.P) :
               (State.Continue (exec_func ~return:true ~id state env func))
           | Extern f ->
             let f = Env.get_extern_func exec_state.env f in
-            let* stack = exec_extern_func exec_state.stack f in
+            let+ stack = exec_extern_func exec_state.stack f in
             let state = State.{ exec_state with stack } in
-            Choice.return (State.return state)
+            State.return state
         in
         match state with
         | State.Return res -> Choice.return (Ok res)
         | State.Continue state ->
-          let* res = loop state in
-          Choice.return (Ok res)
+          let+ res = loop state in
+          Ok res
       end
     with
     | Trap msg -> Choice.return (Error msg)

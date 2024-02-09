@@ -220,7 +220,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let solver = Thread.Solver.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Choice.run_and_trap ~workers result thread in
+  let results = Choice.run ~workers result thread in
   let failing =
     Seq.filter_map
       (fun (result, thread) ->
@@ -231,7 +231,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         let model = get_model ~symbols solver pc in
         let result =
           match result with
-          | Choice_intf.EVal (Ok ()) -> None
+          | Symbolic_choice.Multicore.EVal (Ok ()) -> None
           | EAssert assertion ->
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
             Format.pp_std "Model:@\n  @[<v>%a@]@\n"

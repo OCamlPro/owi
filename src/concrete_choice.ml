@@ -10,6 +10,13 @@ let bind x f = f x [@@inline]
 
 let ( let* ) = bind
 
+let map v f =
+  let* v in
+  return (f v)
+[@@inline]
+
+let ( let+ ) = map
+
 let select b = b [@@inline]
 
 let select_i32 i = i [@@inline]

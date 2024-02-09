@@ -71,6 +71,8 @@ module Owi_symbolic : INTERPRET = struct
 
   let of_symbolic = Fun.id
 
+  let dummy_workers_count = 42
+
   let run modul =
     let* simplified = Compile.until_simplify ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
@@ -81,7 +83,10 @@ module Owi_symbolic : INTERPRET = struct
     timeout_call_run (fun () ->
         let c = Interpret.SymbolicM.modul link_state.envs regular in
         let init_thread : Thread.t = Thread.create () in
-        let res, _ = Symbolic_choice.Minimalist.run_minimalist c init_thread in
+        let res, _ =
+          Symbolic_choice.Minimalist.run ~workers:dummy_workers_count c
+            init_thread
+        in
         match res with
         | Ok res -> res
         | Error (Trap _t) -> Result.error "symbolic trap"
