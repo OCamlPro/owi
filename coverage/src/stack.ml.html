@@ -659,15 +659,15 @@ module Make (V : Value_intf.T) :
 
   let empty = []
 
-  let push s v = <span data-count="82574523">v</span> :: s
+  let push s v = <span data-count="82575530">v</span> :: s
 
   let push_const_bool s b = <span data-count="0">p</span>ush s (I32 (V.const_i3<span data-count="0">2</span> (if b then <span data-count="0">1</span>l else <span data-count="0">0</span>l)))
 
-  let push_bool s b = <span data-count="16172632">p</span>ush s (I32 (V.Bool.int3<span data-count="16172692">2</span> b))
+  let push_bool s b = <span data-count="16172699">p</span>ush s (I32 (V.Bool.int3<span data-count="16172754">2</span> b))
 
-  let push_const_i32 s i = <span data-count="5911835">p</span>ush s (I32 (V.const_i3<span data-count="5911949">2</span> i))
+  let push_const_i32 s i = <span data-count="5912100">p</span>ush s (I32 (V.const_i3<span data-count="5912189">2</span> i))
 
-  let push_i32 s i = <span data-count="5363821">p</span>ush s (I32 i)
+  let push_i32 s i = <span data-count="5364153">p</span>ush s (I32 i)
 
   let push_i32_of_int s i = <span data-count="12">p</span>ush_const_i32 s (Int32.of_in<span data-count="12">t</span> i)
 
@@ -695,22 +695,22 @@ module Make (V : Value_intf.T) :
   let pp fmt (s : t) =
     <span data-count="14">F</span>ormat.pp_list ~pp_sep:(fun fmt () -&gt; <span data-count="2">F</span>ormat.pp_string fmt " ; ") V.pp fmt s
 
-  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70863591">h</span>d :: tl -&gt; (hd, tl)
+  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="70864759">h</span>d :: tl -&gt; (hd, tl)
 
-  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="1999">_</span>hd :: tl -&gt; tl
+  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="2039">_</span>hd :: tl -&gt; tl
 
   let pop_i32 s =
-    <span data-count="5058949">l</span>et hd, tl = pop s in
-    <span data-count="5058788">m</span>atch hd with
-    | <span data-count="5058878">I</span>32 n -&gt; (n, tl)
+    <span data-count="5059319">l</span>et hd, tl = pop s in
+    <span data-count="5059211">m</span>atch hd with
+    | <span data-count="5059301">I</span>32 n -&gt; (n, tl)
     | <span data-count="0">_</span> | <span data-count="0">(</span>exception Empty) -&gt; Log.err "invalid type (expected i32)"
 
   let pop2_i32 s =
-    <span data-count="7973854">t</span>ry
+    <span data-count="7974165">t</span>ry
       let n2, s = pop s in
-      <span data-count="7973815">l</span>et n1, tl = pop s in
-      <span data-count="7973759">m</span>atch (n1, n2) with
-      | <span data-count="7973769">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
+      <span data-count="7974130">l</span>et n1, tl = pop s in
+      <span data-count="7974085">m</span>atch (n1, n2) with
+      | <span data-count="7974105">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32)"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32)"
 
@@ -782,21 +782,21 @@ module Make (V : Value_intf.T) :
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected ref)"
 
   let pop_bool s =
-    <span data-count="16147376">t</span>ry
+    <span data-count="16147435">t</span>ry
       let hd, tl = pop s in
-      <span data-count="16147311">m</span>atch hd with
-      | <span data-count="16147329">I</span>32 n -&gt; (V.I32.to_boo<span data-count="16147454">l</span> n, tl)
+      <span data-count="16147370">m</span>atch hd with
+      | <span data-count="16147382">I</span>32 n -&gt; (V.I32.to_boo<span data-count="16147480">l</span> n, tl)
       | <span data-count="0">_</span> -&gt; Log.er<span data-count="0">r</span> "invalid type (expected i32 (bool))"
     with <span data-count="0">E</span>mpty -&gt; Log.err "invalid type (expected i32 (bool))"
 
   let pop_n s n =
-    <span data-count="11726021">(</span>List.filter<span data-count="11726085">i</span> (fun i _hd -&gt; <span data-count="11873794">i</span> &lt; n) s, List.filter<span data-count="11726078">i</span> (fun i _hd -&gt; <span data-count="11873741">i</span> &gt;= n) s)
+    <span data-count="11726040">(</span>List.filter<span data-count="11726114">i</span> (fun i _hd -&gt; <span data-count="11873827">i</span> &lt; n) s, List.filter<span data-count="11726104">i</span> (fun i _hd -&gt; <span data-count="11873778">i</span> &gt;= n) s)
 
-  let keep s n = <span data-count="3442408">L</span>ist.filteri (fun i _hd -&gt; <span data-count="511988">i</span> &lt; n) s
+  let keep s n = <span data-count="3442643">L</span>ist.filteri (fun i _hd -&gt; <span data-count="512038">i</span> &lt; n) s
 
   let rec drop_n s n =
-    <span data-count="16691005">i</span>f n = 0 then <span data-count="15630942">s</span>
-    else <span data-count="1060086">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="1060084">_</span> :: tl -&gt; drop_n tl (n - 1)
+    <span data-count="16691444">i</span>f n = 0 then <span data-count="15631116">s</span>
+    else <span data-count="1060349">m</span>atch s with <span data-count="0">[</span>] -&gt; invalid_arg "drop_n" | <span data-count="1060346">_</span> :: tl -&gt; drop_n tl (n - 1)
 end
 </code></pre>
       </div>
