@@ -1,5 +1,5 @@
 table stuff:
-  $ dune exec owi -- sym table.wat --no-stop-at-failure
+  $ dune exec owi -- sym table.wat --no-stop-at-failure -w1
   Trap: undefined element
   Model:
     (model
