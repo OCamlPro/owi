@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build:
     strategy:
@@ -23,11 +24,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+          opam-depext: true
+          opam-pin: true
+          allow-prerelease-opam: true
       - name: setup
         run: |
           opam pin add . -y --no-action
