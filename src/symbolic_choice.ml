@@ -2,14 +2,14 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
+open Solver
 open Encoding
 open Symbolic_value
 open Hc
 
 exception Assertion of Expr.t * Thread.t
 
-let check sym_bool thread =
-  let (S (solver_module, solver)) = Thread.solver thread in
+let check sym_bool thread (S (solver_module, solver)) =
   let pc = Thread.pc thread in
   let no = S.Bool.not sym_bool in
   let no = Expr.simplify no in
@@ -22,7 +22,7 @@ let check sym_bool thread =
     let r = Solver.check solver check in
     not r
 
-let list_select b ({ Thread.pc; solver = S (solver_module, s); _ } as thread) =
+let list_select b ({ Thread.pc; _ } as thread) (S (solver_module, s)) =
   let v = Expr.simplify b in
   match v.node.e with
   | Val True -> [ (true, thread) ]
@@ -64,8 +64,7 @@ let clone_if_needed ~orig_pc cases =
 let not_value sym value =
   Expr.(Relop (Ne, mk_symbol sym, S.const_i32 value) @: Ty_bitv S32)
 
-let list_select_i32 sym_int thread =
-  let (S (solver_module, solver)) = Thread.solver thread in
+let list_select_i32 sym_int thread (S (solver_module, solver)) =
   let pc = Thread.pc thread in
   let sym_int = Expr.simplify sym_int in
   let orig_pc = pc in
@@ -102,21 +101,21 @@ module Minimalist = struct
     | Assert_fail
     | Trap of Trap.t
 
-  type 'a t = M of (Thread.t -> ('a, err) Stdlib.Result.t * Thread.t)
+  type 'a t = M of (Thread.t -> solver -> ('a, err) Stdlib.Result.t * Thread.t)
   [@@unboxed]
 
   type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
 
-  let return v = M (fun t -> (Ok v, t))
+  let return v = M (fun t _sol -> (Ok v, t))
 
-  let run (M v) st : _ run_result = v st
+  let run (M v) st s : _ run_result = v st s
 
   let bind v f =
     M
-      (fun init_s ->
-        let v_final, tmp_st = run v init_s in
+      (fun init_s sol ->
+        let v_final, tmp_st = run v init_s sol in
         match v_final with
-        | Ok v_final -> run (f v_final) tmp_st
+        | Ok v_final -> run (f v_final) tmp_st sol
         | Error _ as e -> (e, tmp_st) )
 
   let ( let* ) = bind
@@ -138,20 +137,24 @@ module Minimalist = struct
     let v = Expr.simplify i in
     match v.node.e with Val (Num (I32 i)) -> return i | _ -> assert false
 
-  let trap t = M (fun th -> (Error (Trap t), th))
+  let trap t = M (fun th _sol -> (Error (Trap t), th))
 
   let assertion (vb : S.vbool) =
     let v = Expr.simplify vb in
     match v.node.e with
     | Val True -> return ()
-    | Val False -> M (fun th -> (Error Assert_fail, th))
+    | Val False -> M (fun th _sol -> (Error Assert_fail, th))
     | _ -> assert false
 
-  let with_thread f = M (fun st -> (Ok (f st), st))
+  let with_thread f = M (fun st _sol -> (Ok (f st), st))
+
+  let thread = M (fun st _sol -> (Ok st, st))
+
+  let solver = M (fun st sol -> (Ok sol, st))
 
   let add_pc (_vb : S.vbool) = return ()
 
-  let run ~workers:_ = run
+  let run ~workers:_ t thread = run t thread (fresh_solver ())
 end
 
 module WQ = struct
@@ -278,7 +281,7 @@ module Counter = struct
 end
 
 module Multicore = struct
-  type 'a st = St of (Thread.t -> 'a * Thread.t) [@@unboxed]
+  type 'a st = St of (Thread.t -> solver -> 'a * Thread.t) [@@unboxed]
 
   type 'a t =
     | Empty : 'a t
@@ -328,13 +331,17 @@ module Multicore = struct
 
   let trap t = Trap t
 
-  let with_thread f = Ret (St (fun t -> (f t, t))) [@@inline]
+  let with_thread f = Ret (St (fun t _sol -> (f t, t))) [@@inline]
+
+  let thread = Ret (St (fun t _sol -> (t, t)))
+
+  let solver = Ret (St (fun t sol -> (sol, t)))
 
   let add_pc (c : S.vbool) =
     match c.node.e with
     | Val True -> Retv ()
     | Val False -> Empty
-    | _ -> Ret (St (fun t -> ((), { t with pc = c :: t.pc })))
+    | _ -> Ret (St (fun t _sol -> ((), { t with pc = c :: t.pc })))
   [@@inline]
 
   let assertion c = Assert c
@@ -346,7 +353,7 @@ module Multicore = struct
     }
 
   and 'a local_state =
-    { solver : Thread.solver
+    { solver : solver
     ; mutable next : hold option
     ; global : 'a global_state
     }
@@ -368,12 +375,11 @@ module Multicore = struct
     | Empty -> ()
     | Retv v -> cont.k thread (E_st st) v
     | Ret (St f) ->
-      let v, thread = f thread in
+      let v, thread = f thread st.solver in
       cont.k thread (E_st st) v
     | Trap t -> WQ.push (ETrap t, thread) st.global.r
     | Assert c ->
-      if check c { thread with solver = st.solver } then
-        cont.k thread (E_st st) ()
+      if check c thread st.solver then cont.k thread (E_st st) ()
       else
         let no = S.Bool.not c in
         let thread = { thread with pc = no :: thread.pc } in
@@ -385,10 +391,10 @@ module Multicore = struct
       in
       step thread v { k } st
     | Choice cond ->
-      let cases = list_select cond { thread with solver = st.solver } in
+      let cases = list_select cond thread st.solver in
       List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
     | Choice_i32 i ->
-      let cases = list_select_i32 i { thread with solver = st.solver } in
+      let cases = list_select_i32 i thread st.solver in
       List.iter (fun (case, thread) -> cont.k thread (E_st st) case) cases
 
   let init_global () =
@@ -402,13 +408,9 @@ module Multicore = struct
     WQ.push (H (thread, t, { k })) g.w
 
   let spawn_producer global _i =
-    let module Mapping = Z3_mappings.Fresh.Make () in
-    let module Batch = Solver.Batch (Mapping) in
-    let solver = Batch.create ~logic:QF_BVFP () in
-    let solver : Thread.solver = S ((module Batch), solver) in
+    let solver = fresh_solver () in
     let st = { solver; next = None; global } in
     let rec producer (H (thread, t, cont)) =
-      let thread = { thread with solver } in
       step thread t cont st;
       match st.next with
       | Some h ->

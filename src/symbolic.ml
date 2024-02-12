@@ -4,22 +4,17 @@
 
 open Types
 open Hc
-module Solver = Thread.Solver
+open Solver
+module Solver = Solver.Z3Batch
 
 module type Thread = sig
   type t
-
-  type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
-
-  type solver = S : 'a solver_module * 'a -> solver
 
   val memories : t -> Symbolic_memory.memories
 
   val tables : t -> Symbolic_table.tables
 
   val globals : t -> Symbolic_global.globals
-
-  val solver : t -> solver
 
   val pc : t -> Symbolic_value.S.vbool list
 end
@@ -129,28 +124,29 @@ struct
     include Symbolic_memory.M
 
     let concretise a =
+      let open Choice in
       let open Expr in
-      Choice.with_thread (fun thread ->
-          let (S (solver_mod, solver)) = Thread.solver thread in
-          let module Solver = (val solver_mod) in
-          match a.node.e with
-          | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> a
-          | Ptr (base, offset) ->
-            (* TODO: can we remove this check? We should be in a SAT branch *)
-            assert (Solver.check solver @@ Thread.pc thread);
-            let concrete_offest = Solver.get_value solver offset in
-            let cond = Relop (Eq, offset, concrete_offest) @: a.node.ty in
-            (* TODO: this should go to the pc *)
-            Solver.add solver [ cond ];
-            Ptr (base, concrete_offest) @: a.node.ty
-          | _ ->
-            (* TODO: can we remove this check? We should be in a SAT branch *)
-            assert (Solver.check solver @@ Thread.pc thread);
-            let concrete_addr = Solver.get_value solver a in
-            let cond = Relop (Eq, a, concrete_addr) @: a.node.ty in
-            (* TODO: this should go to the pc *)
-            Solver.add solver [ cond ];
-            concrete_addr )
+      let* thread in
+      let+ (S (solver_mod, solver)) = solver in
+      let module Solver = (val solver_mod) in
+      match a.node.e with
+      | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> a
+      | Ptr (base, offset) ->
+        (* TODO: can we remove this check? We should be in a SAT branch *)
+        assert (Solver.check solver @@ Thread.pc thread);
+        let concrete_offest = Solver.get_value solver offset in
+        let cond = Relop (Eq, offset, concrete_offest) @: a.node.ty in
+        (* TODO: this should go to the pc *)
+        Solver.add solver [ cond ];
+        Ptr (base, concrete_offest) @: a.node.ty
+      | _ ->
+        (* TODO: can we remove this check? We should be in a SAT branch *)
+        assert (Solver.check solver @@ Thread.pc thread);
+        let concrete_addr = Solver.get_value solver a in
+        let cond = Relop (Eq, a, concrete_addr) @: a.node.ty in
+        (* TODO: this should go to the pc *)
+        Solver.add solver [ cond ];
+        concrete_addr
 
     (* TODO: *)
     (* 1. Let pointers have symbolic offsets *)
