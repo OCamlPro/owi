@@ -63,6 +63,10 @@
 <a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -108,6 +112,10 @@
 <a href="#L39">39</a>
 <a href="#L40">40</a>
 <a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -145,6 +153,10 @@ module type Complete = sig
   val assertion : V.vbool -&gt; unit t
 
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
+
+  val solver : Solver.solver t
+
+  val thread : thread t
 
   val add_pc : V.vbool -&gt; unit t
 

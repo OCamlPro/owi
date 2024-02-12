@@ -365,21 +365,21 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let id (env : _ t) = <span data-count="312488">e</span>nv.id
+let id (env : _ t) = <span data-count="312169">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="24253">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="24252">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="2135467">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="2135122">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1611840">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1611838">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10126855">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10126834">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="984">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1738">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="23788">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="23789">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
