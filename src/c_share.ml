@@ -14,4 +14,4 @@ let find location file =
       | Error (`Msg msg) -> failwith msg )
     location
 
-let get_libc () = find bin_location (Fpath.v "libc.wasm")
+let libc = Option.get @@ find bin_location (Fpath.v "libc.wasm")

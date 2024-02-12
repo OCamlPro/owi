@@ -18,23 +18,22 @@ let cmd_one inplace file =
   | Error e ->
     Format.pp_err "%s@." e;
     exit 1
-  | Ok pp -> (
-    match
-      if inplace then
+  | Ok pp ->
+    if inplace then
+      let* res =
         Bos.OS.File.with_oc file
           (fun chan () ->
             let fmt = Stdlib.Format.formatter_of_out_channel chan in
             Ok (Format.pp fmt "%a@\n" pp ()) )
           ()
-      else Ok (Ok (Format.pp_std "%a@\n" pp ()))
-    with
-    | Ok (Ok ()) -> Ok ()
-    | Ok (Error (`Msg e)) | Error (`Msg e) -> Error e )
+      in
+      res
+    else Ok (Format.pp_std "%a@\n" pp ())
 
 let cmd inplace files =
   match list_iter (cmd_one inplace) files with
   | Ok () -> ()
-  | Error e -> failwith e
+  | Error (`Msg e) -> failwith e
 
 let format_file_to_string file =
   let+ pp = get_printer file in

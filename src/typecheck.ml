@@ -117,9 +117,7 @@ let itype = function S32 -> i32 | S64 -> i64
 
 let ftype = function S32 -> f32 | S64 -> f64
 
-let arraytype _modul _i =
-  (* TODO *)
-  f32
+let arraytype _modul _i = (* TODO *) assert false
 
 module Stack : sig
   type t = typ list
@@ -130,7 +128,7 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : simplified block_type option -> t -> t Result.t
+  val pop_push : simplified block_type -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
@@ -198,11 +196,6 @@ end = struct
   let rec match_prefix ~prefix ~stack =
     match (prefix, stack) with
     | [], stack -> Some stack
-    | Any :: tl, [] -> match_prefix ~prefix:tl ~stack:[]
-    | Any :: tl, Any :: tl' ->
-      match_prefix ~prefix:tl ~stack ||| match_prefix ~prefix ~stack:tl'
-    | Any :: tl, _hd :: tl' ->
-      match_prefix ~prefix ~stack:tl' ||| match_prefix ~prefix:tl ~stack
     | _hd :: _tl, [] -> None
     | _hd :: tl, Any :: tl' ->
       match_prefix ~prefix ~stack:tl' ||| match_prefix ~prefix:tl ~stack
@@ -227,15 +220,10 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push (bt : simplified block_type option) stack =
-    match bt with
-    | None -> Ok stack
-    | Some (Bt_raw ((None | Some _), (pt, rt))) ->
-      let pt, rt =
-        (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt)
-      in
-      let* stack = pop pt stack in
-      push rt stack
+  let pop_push (Bt_raw ((None | Some _), (pt, rt))) stack =
+    let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
+    let* stack = pop pt stack in
+    push rt stack
 end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
@@ -244,10 +232,10 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
   | Nop -> Ok stack
   | Drop -> Stack.drop stack
   | Return ->
-    let* _stack =
+    let+ _stack =
       Stack.pop (List.rev_map typ_of_val_type env.result_type) stack
     in
-    Ok [ any ]
+    [ any ]
   | Unreachable -> Ok [ any ]
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
@@ -296,8 +284,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
   | If_else (_id, block_type, e1, e2) ->
     let* stack = Stack.pop [ i32 ] stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
-    let* _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
-    Ok stack_e1
+    let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
+    stack_e1
   | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
@@ -352,48 +340,51 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
   | Call_indirect (_, bt) ->
     let* stack = Stack.pop [ i32 ] stack in
-    Stack.pop_push (Some bt) stack
+    Stack.pop_push bt stack
   | Call (Raw i) ->
     let pt, rt = Env.func_get i env in
     let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
   | Call_ref _t ->
-    let* stack = Stack.pop_ref stack in
+    let+ stack = Stack.pop_ref stack in
     (* TODO:
        let bt = Env.type_get t env in
          Stack.pop_push (Some bt) stack
     *)
-    Ok stack
+    stack
   | Return_call (Raw i) ->
     let pt, rt = Env.func_get i env in
-    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
       not
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call)"
-    else Ok [ any ]
+    else
+      let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
+      [ any ]
   | Return_call_indirect (_, Bt_raw ((None | Some _), (pt, rt))) ->
-    let* stack = Stack.pop [ i32 ] stack in
-    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
       not
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call_indirect)"
-    else Ok [ any ]
+    else
+      let* stack = Stack.pop [ i32 ] stack in
+      let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
+      [ any ]
   | Return_call_ref (Bt_raw ((None | Some _), (pt, rt))) ->
-    let* stack = Stack.pop_ref stack in
-    let* _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     if
       not
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
     then Error "type mismatch (return_call_ref)"
-    else Ok [ any ]
+    else
+      let* stack = Stack.pop_ref stack in
+      let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
+      [ any ]
   | Data_drop _i -> Ok stack
   | Table_init (Raw ti, Raw ei) ->
     let table_typ = Env.table_type_get ti env in
@@ -424,12 +415,8 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     begin
       match t with
       | None -> begin
-        let* () =
-          match stack with
-          | Ref_type _ :: _tl -> Error "type mismatch (select implicit)"
-          | _ -> Ok ()
-        in
         match stack with
+        | Ref_type _ :: _tl -> Error "type mismatch (select implicit)"
         | Any :: _ -> Ok [ Something; Any ]
         | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
         | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)

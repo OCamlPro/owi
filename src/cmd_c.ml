@@ -1,17 +1,5 @@
 open Bos
-
-let ( let* ) = Result.bind
-
-let ( let+ ) o f = Result.map f o
-
-let list_map f lst =
-  let exception E of Rresult.R.msg in
-  try
-    Ok
-      (List.map
-         (fun x -> match f x with Ok x' -> x' | Error e -> raise (E e))
-         lst )
-  with E e -> Error e
+open Syntax
 
 type deps =
   { clang : flags:Cmd.t -> out:Fpath.t -> Fpath.t -> Cmd.t
@@ -36,9 +24,8 @@ let llc bin ~bc ~obj =
   Cmd.(bin %% flags % p obj % p bc)
 
 let ld bin ~flags ~out files =
-  let libc = C_share.get_libc () |> Option.get in
   let files = List.fold_left (fun acc f -> Cmd.(acc % p f)) Cmd.empty files in
-  Cmd.(bin %% flags % "-o" % p out %% files % p libc)
+  Cmd.(bin %% flags % "-o" % p out %% files % p C_share.libc)
 
 let wasm2wat bin0 ~out bin = Cmd.(bin0 % "-o" % p out % p bin)
 
@@ -87,8 +74,8 @@ let patch ~src ~dst =
 
 let copy ~src ~dst =
   let* data = OS.File.read src in
-  let* () = OS.File.write dst data in
-  Ok dst
+  let+ () = OS.File.write dst data in
+  dst
 
 let instrument_file ?(skip = false) ~includes ~workspace file =
   let dst = Fpath.(workspace // base (file -+ ".c")) in
@@ -103,7 +90,7 @@ let instrument_file ?(skip = false) ~includes ~workspace file =
            Fpath.pp )
         C_share.py_location
     in
-    let* () = OS.Env.set_var "PYTHONPATH" (Some pypath) in
+    let+ () = OS.Env.set_var "PYTHONPATH" (Some pypath) in
     begin
       try
         Py.initialize ();
@@ -113,7 +100,7 @@ let instrument_file ?(skip = false) ~includes ~workspace file =
         let pp = Py.Object.format in
         Logs.warn (fun m -> m "instrumentor: %a: %a" pp errtype pp errvalue)
     end;
-    Ok dst
+    dst
   end
 
 let compile ~deps ~includes ~opt_lvl file =
@@ -140,8 +127,8 @@ let compile ~deps ~includes ~opt_lvl file =
   let obj = Fpath.(file -+ ".o") in
   let* () = OS.Cmd.run @@ deps.clang ~flags:cflags ~out:bc file in
   let* () = OS.Cmd.run @@ deps.opt bc in
-  let* () = OS.Cmd.run @@ deps.llc ~bc ~obj in
-  Ok obj
+  let+ () = OS.Cmd.run @@ deps.llc ~bc ~obj in
+  obj
 
 let link ~deps ~workspace files =
   let ldflags ~entry =
@@ -224,7 +211,7 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes files
   let* deps = check_dependencies () in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   (* skip instrumentation if not in test-comp mode *)
-  let skip = not testcomp in
+  let skip = (not testcomp) || Sys.getenv_opt "RUNNER_OS" = Some "macOS" in
   let* nfiles = list_map (instrument_file ~skip ~includes ~workspace) files in
   let* objects = list_map (compile ~deps ~includes ~opt_lvl) nfiles in
   let* module_ = link ~deps ~workspace objects in
