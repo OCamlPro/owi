@@ -2,23 +2,14 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module Solver = Encoding.Solver.Batch (Encoding.Z3_mappings)
-
-type 'a solver_module = (module Encoding.Solver_intf.S with type t = 'a)
-
-type solver = S : 'a solver_module * 'a -> solver
-
 type t =
-  { solver : solver
-  ; choices : int
+  { choices : int
   ; mutable symbol_set : Encoding.Symbol.t list
   ; pc : Symbolic_value.S.vbool list
   ; memories : Symbolic_memory.memories
   ; tables : Symbolic_table.tables
   ; globals : Symbolic_global.globals
   }
-
-let solver t = t.solver
 
 let pc t = t.pc
 
@@ -28,12 +19,8 @@ let tables t = t.tables
 
 let globals t = t.globals
 
-let solver_mod : Solver.t solver_module = (module Solver)
-
 let create () =
-  let solver = S (solver_mod, Solver.create ~logic:QF_BVFP ()) in
-  { solver
-  ; choices = 0
+  { choices = 0
   ; symbol_set = []
   ; pc = []
   ; memories = Symbolic_memory.init ()
@@ -41,8 +28,8 @@ let create () =
   ; globals = Symbolic_global.init ()
   }
 
-let clone { solver; choices; symbol_set; pc; memories; tables; globals } =
+let clone { choices; symbol_set; pc; memories; tables; globals } =
   let memories = Symbolic_memory.clone memories in
   let tables = Symbolic_table.clone tables in
   let globals = Symbolic_global.clone globals in
-  { solver; choices; symbol_set; pc; memories; tables; globals }
+  { choices; symbol_set; pc; memories; tables; globals }

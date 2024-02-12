@@ -35,6 +35,10 @@ module type Complete = sig
 
   val with_thread : (thread -> 'b) -> 'b t
 
+  val solver : Solver.solver t
+
+  val thread : thread t
+
   val add_pc : V.vbool -> unit t
 
   val run : workers:int -> 'a t -> thread -> 'a run_result

@@ -175,8 +175,8 @@ let run_file ~unsafe ~optimize pc filename =
   simplify_then_link_then_run ~unsafe ~optimize pc script
 
 let get_model ~symbols solver pc =
-  assert (Thread.Solver.check solver pc);
-  match Thread.Solver.model ~symbols solver with
+  assert (Solver.Z3Batch.check solver pc);
+  match Solver.Z3Batch.model ~symbols solver with
   | None -> assert false
   | Some model -> model
 
@@ -217,7 +217,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     | Error (`Msg msg) -> failwith msg
   end;
   let pc = Choice.return (Ok ()) in
-  let solver = Thread.Solver.create () in
+  let solver = Solver.Z3Batch.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run ~workers result thread in
@@ -280,8 +280,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         Format.pp_err "Reached problem!@\n";
         true
   in
-  let time = !Thread.Solver.solver_time in
-  let count = !Thread.Solver.solver_count in
+  let time = !Solver.Z3Batch.solver_time in
+  let count = !Solver.Z3Batch.solver_count in
   if print_solver_time then begin
     Format.pp_std "@\n";
     Format.pp_std "Solver time %fs@\n" time;

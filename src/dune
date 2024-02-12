@@ -49,6 +49,7 @@
   script
   simplified
   simplified_types
+  solver
   symbolic
   symbolic_choice
   symbolic_global
