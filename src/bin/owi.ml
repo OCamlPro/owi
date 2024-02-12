@@ -183,7 +183,7 @@ let cli =
     let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
-  let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
+  let default = Term.(ret (const (fun _ -> `Help (`Plain, None)) $ copts_t)) in
   Cmd.group info ~default
     [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd; validate_cmd ]
 

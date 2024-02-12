@@ -50,7 +50,7 @@ let modul m =
       else Ok (Hashtbl.add seen id ())
   in
 
-  let* (_env : env) =
+  let+ (_env : env) =
     List.fold_left
       (fun env field ->
         let* env in
@@ -69,16 +69,15 @@ let modul m =
             match i.desc with
             | Import_mem (id, _) ->
               let* () = add_memory id in
-              if env.memory || env.imported_memory then
-                Error "multiple memories"
+              if env.imported_memory then Error "multiple memories"
               else Ok { env with imported_memory = true }
             | Import_func _ -> Ok env
             | Import_global (id, _) ->
-              let* () = add_global id in
-              Ok env
+              let+ () = add_global id in
+              env
             | Import_table (id, _) ->
-              let* () = add_table id in
-              Ok env
+              let+ () = add_table id in
+              env
           end
         | MData _d -> Ok env
         | MElem _e -> Ok env
@@ -88,13 +87,13 @@ let modul m =
           else Ok { env with memory = true }
         | MType _t -> Ok env
         | MGlobal { id; _ } ->
-          let* () = add_global id in
-          Ok { env with globals = true }
+          let+ () = add_global id in
+          { env with globals = true }
         | MTable (id, _) ->
-          let* () = add_table id in
-          Ok { env with tables = true } )
+          let+ () = add_table id in
+          { env with tables = true } )
       (Ok (empty_env ()))
       m.fields
   in
 
-  Ok m
+  m
