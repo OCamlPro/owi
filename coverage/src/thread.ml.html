@@ -143,34 +143,34 @@ type t =
   ; globals : Symbolic_global.globals
   }
 
-let solver t = <span data-count="291443">t</span>.solver
+let solver t = <span data-count="291396">t</span>.solver
 
-let pc t = <span data-count="10738">t</span>.pc
+let pc t = <span data-count="10879">t</span>.pc
 
-let memories t = <span data-count="294225">t</span>.memories
+let memories t = <span data-count="294194">t</span>.memories
 
-let tables t = <span data-count="4475">t</span>.tables
+let tables t = <span data-count="4471">t</span>.tables
 
-let globals t = <span data-count="23060">t</span>.globals
+let globals t = <span data-count="23028">t</span>.globals
 
 let solver_mod : Solver.t solver_module = (module Solver)
 
 let create () =
-  <span data-count="189">l</span>et solver = S (solver_mod, Solver.creat<span data-count="189">e</span> ~logic:QF_BVFP ()) in
+  <span data-count="199">l</span>et solver = S (solver_mod, Solver.creat<span data-count="199">e</span> ~logic:QF_BVFP ()) in
   { solver
   ; choices = 0
   ; symbol_set = []
   ; pc = []
-  ; memories = Symbolic_memory.ini<span data-count="189">t</span> ()
-  ; tables = Symbolic_table.ini<span data-count="189">t</span> ()
-  ; globals = Symbolic_global.ini<span data-count="189">t</span> ()
+  ; memories = Symbolic_memory.ini<span data-count="199">t</span> ()
+  ; tables = Symbolic_table.ini<span data-count="199">t</span> ()
+  ; globals = Symbolic_global.ini<span data-count="199">t</span> ()
   }
 
 let clone { solver; choices; symbol_set; pc; memories; tables; globals } =
-  <span data-count="2940">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="2940">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="2940">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="2940">{</span> solver; choices; symbol_set; pc; memories; tables; globals }
+  <span data-count="3063">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="3063">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="3063">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="3063">{</span> solver; choices; symbol_set; pc; memories; tables; globals }
 </code></pre>
       </div>
     </div>

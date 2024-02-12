@@ -523,10 +523,10 @@ type t =
   }
 
 let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
-  <span data-count="4116">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+  <span data-count="4138">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="6054">{</span> id
+  <span data-count="6064">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -567,9 +567,9 @@ let add_mem value (fields : t) (curr : curr) =
   , { curr with mem = suc<span data-count="1677">c</span> curr.mem } )
 
 let add_func value (fields : t) (curr : curr) =
-  <span data-count="3711">l</span>et index = curr.func in
-  ( { fields with func = Indexed.retur<span data-count="3711">n</span> index value :: fields.func }
-  , { curr with func = suc<span data-count="3711">c</span> curr.func } )
+  <span data-count="3733">l</span>et index = curr.func in
+  ( { fields with func = Indexed.retur<span data-count="3733">n</span> index value :: fields.func }
+  , { curr with func = suc<span data-count="3733">c</span> curr.func } )
 
 let add_elem value (fields : t) (curr : curr) =
   <span data-count="1679">l</span>et index = curr.elem in
@@ -589,9 +589,9 @@ let check_limit { min; max } =
     else <span data-count="1496">O</span>k ()
 
 let of_symbolic (modul : Text.modul) : t Result.t =
-  <span data-count="6054">L</span>og.debug0 "grouping     ...@\n";
-  <span data-count="6054">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
-    <span data-count="41661">m</span>atch field with
+  <span data-count="6064">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="6064">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
+    <span data-count="41708">m</span>atch field with
     | <span data-count="1707">T</span>ext.MType typ -&gt;
       let typ = typ @ fields.typ in
       ok @@ ({ fields with typ }, curr)
@@ -647,27 +647,27 @@ let of_symbolic (modul : Text.modul) : t Result.t =
         { fields.exports with mem = { name; id } :: fields.exports.mem }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="16445">M</span>Func func -&gt;
+    | <span data-count="16460">M</span>Func func -&gt;
       let function_type, type_checks =
         match func.type_f with
         | <span data-count="637">B</span>t_ind _ -&gt; (fields.function_type, fields.type_checks)
-        | <span data-count="15808">B</span>t_raw (id, typ) -&gt;
+        | <span data-count="15823">B</span>t_raw (id, typ) -&gt;
           let type_checks =
             match id with
-            | <span data-count="12215">N</span>one -&gt; fields.type_checks
+            | <span data-count="12230">N</span>one -&gt; fields.type_checks
             | <span data-count="3593">S</span>ome id -&gt; (id, typ) :: fields.type_checks
           in
           (typ :: fields.function_type, type_checks)
       in
       let index = curr.func in
       let value = Runtime.Local func in
-      let func = Indexed.retur<span data-count="16445">n</span> index value :: fields.func in
+      let func = Indexed.retur<span data-count="16460">n</span> index value :: fields.func in
       Ok
         ( { fields with func; function_type; type_checks }
-        , { curr with func = suc<span data-count="16445">c</span> curr.func } )
-    | <span data-count="3711">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
-      let imported : text block_type Imported.t = im<span data-count="3711">p</span> import (a, b) in
-      ok @@ add_fun<span data-count="3711">c</span> (Imported imported) fields curr
+        , { curr with func = suc<span data-count="16460">c</span> curr.func } )
+    | <span data-count="3733">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
+      let imported : text block_type Imported.t = im<span data-count="3733">p</span> import (a, b) in
+      ok @@ add_fun<span data-count="3733">c</span> (Imported imported) fields curr
     | <span data-count="10439">M</span>Export { name; desc = Export_func id } -&gt;
       let id = curr_id curr.func id in
       <span data-count="10439">l</span>et exports =
@@ -693,12 +693,12 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       in
       let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_dat<span data-count="984">a</span> data fields curr
-    | <span data-count="247">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
+    | <span data-count="257">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in
   let+ modul, _curr =
-    list_fold_lef<span data-count="6054">t</span> add (empty_modul<span data-count="6054">e</span> modul.id, init_curr) modul.fields
+    list_fold_lef<span data-count="6064">t</span> add (empty_modul<span data-count="6064">e</span> modul.id, init_curr) modul.fields
   in
-  <span data-count="6036">m</span>odul
+  <span data-count="6046">m</span>odul
 </code></pre>
       </div>
     </div>
