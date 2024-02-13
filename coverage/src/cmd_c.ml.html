@@ -705,9 +705,9 @@ let link ~deps ~workspace files =
 let cleanup dir =
   <span data-count="165">O</span>S.Path.fold ~elements:`Files
     (fun path _acc -&gt;
-      <span data-count="2845">i</span>f not @@ Fpath.has_ex<span data-count="2845">t</span> ".wat" path then
-        <span data-count="2680">m</span>atch OS.Path.delete path with
-        | <span data-count="2680">O</span>k () -&gt; ()
+      <span data-count="2846">i</span>f not @@ Fpath.has_ex<span data-count="2846">t</span> ".wat" path then
+        <span data-count="2681">m</span>atch OS.Path.delete path with
+        | <span data-count="2681">O</span>k () -&gt; ()
         | <span data-count="0">E</span>rror (`Msg e) -&gt; Logs.warn (fun m -&gt; <span data-count="0">m</span> "%s" e) )
     () [ dir ]
   |&gt; <span data-count="165">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id
