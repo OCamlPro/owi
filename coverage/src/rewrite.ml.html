@@ -1275,7 +1275,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
 
   let bt_to_raw :
     text block_type option -&gt; simplified block_type option Result.t = function
-    | <span data-count="7652">N</span>one -&gt; Ok None
+    | <span data-count="7654">N</span>one -&gt; Ok None
     | <span data-count="2276">S</span>ome bt -&gt;
       let+ raw = bt_some_to_ra<span data-count="2276">w</span> bt in
       <span data-count="2252">S</span>ome raw
@@ -1298,10 +1298,10 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   <span data-count="16365">l</span>et find_local = function
     | <span data-count="65882">R</span>aw i as id -&gt;
       if i &gt;= after_last_assigned_local then <span data-count="38">E</span>rror "unknown local" else <span data-count="65844">O</span>k id
-    | <span data-count="4152">T</span>ext name -&gt; (
+    | <span data-count="4154">T</span>ext name -&gt; (
       match String_map.find_opt name locals with
       | <span data-count="0">N</span>one -&gt; error_s "unknown local %s" name
-      | <span data-count="4152">S</span>ome id -&gt; Ok (Raw id) )
+      | <span data-count="4154">S</span>ome id -&gt; Ok (Raw id) )
   in
 
   let find_table id = <span data-count="2606">f</span>ind "unknown table" modul.table id in
@@ -1312,7 +1312,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
   let find_type id = <span data-count="11">f</span>ind "unknown type" modul.typ id in
 
   let rec body (loop_count, block_ids) : text instr -&gt; simplified instr Result.t
-      = <span data-count="257310">f</span>unction
+      = <span data-count="257322">f</span>unction
     | <span data-count="421">B</span>r_table (ids, id) -&gt;
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       <span data-count="421">l</span>et* ids = array_ma<span data-count="421">p</span> block_id_to_raw ids in
@@ -1333,18 +1333,18 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | <span data-count="5820">L</span>ocal_set id -&gt;
       let* id = find_loca<span data-count="5820">l</span> id in
       <span data-count="5808">o</span>k @@ Local_set id
-    | <span data-count="58954">L</span>ocal_get id -&gt;
-      let* id = find_loca<span data-count="58954">l</span> id in
-      <span data-count="58940">o</span>k @@ Local_get id
+    | <span data-count="58956">L</span>ocal_get id -&gt;
+      let* id = find_loca<span data-count="58956">l</span> id in
+      <span data-count="58942">o</span>k @@ Local_get id
     | <span data-count="5260">L</span>ocal_tee id -&gt;
       let* id = find_loca<span data-count="5260">l</span> id in
       <span data-count="5248">o</span>k @@ Local_tee id
-    | <span data-count="1034">I</span>f_else (id, bt, e1, e2) -&gt;
-      let* bt = bt_to_ra<span data-count="1034">w</span> bt in
-      <span data-count="1026">l</span>et block_ids = id :: block_ids in
-      let* e1 = exp<span data-count="1026">r</span> e1 (loop_count, block_ids) in
-      <span data-count="1026">l</span>et* e2 = exp<span data-count="1026">r</span> e2 (loop_count, block_ids) in
-      <span data-count="1026">o</span>k @@ If_else (id, bt, e1, e2)
+    | <span data-count="1036">I</span>f_else (id, bt, e1, e2) -&gt;
+      let* bt = bt_to_ra<span data-count="1036">w</span> bt in
+      <span data-count="1028">l</span>et block_ids = id :: block_ids in
+      let* e1 = exp<span data-count="1028">r</span> e1 (loop_count, block_ids) in
+      <span data-count="1028">l</span>et* e2 = exp<span data-count="1028">r</span> e2 (loop_count, block_ids) in
+      <span data-count="1028">o</span>k @@ If_else (id, bt, e1, e2)
     | <span data-count="1228">L</span>oop (id, bt, e) -&gt;
       let* bt = bt_to_ra<span data-count="1228">w</span> bt in
       <span data-count="1220">l</span>et* e = exp<span data-count="1220">r</span> e (loop_count + 1, id :: block_ids) in
@@ -1522,12 +1522,12 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | <span data-count="17">R</span>ef_test (null, ht) -&gt;
       let+ ht = Simplified_types.convert_heap_typ<span data-count="17">e</span> None ht in
       <span data-count="17">R</span>ef_test (null, ht)
-    | ( <span data-count="449">I</span>_unop _ | <span data-count="19423">I</span>_binop _ | <span data-count="3038">I</span>_testop _ | <span data-count="4546">I</span>_relop _ | <span data-count="342">F</span>_unop _ | <span data-count="516">F</span>_relop _
+    | ( <span data-count="449">I</span>_unop _ | <span data-count="19423">I</span>_binop _ | <span data-count="3038">I</span>_testop _ | <span data-count="4546">I</span>_relop _ | <span data-count="344">F</span>_unop _ | <span data-count="518">F</span>_relop _
       | <span data-count="38">I</span>32_wrap_i64 | <span data-count="65">F</span>_reinterpret_i _ | <span data-count="179">I</span>_reinterpret_f _ | <span data-count="33">I</span>64_extend_i32 _
       | <span data-count="4">I</span>64_extend32_s | <span data-count="21">F</span>32_demote_f64 | <span data-count="8">I</span>_extend8_s _ | <span data-count="8">I</span>_extend16_s _
       | <span data-count="34">F</span>64_promote_f32 | <span data-count="195">F</span>_convert_i _ | <span data-count="162">I</span>_trunc_f _ | <span data-count="25">I</span>_trunc_sat_f _
-      | <span data-count="26">R</span>ef_is_null | <span data-count="1053">F</span>_binop _ | <span data-count="1931">F</span>32_const _ | <span data-count="1591">F</span>64_const _ | <span data-count="45698">I</span>32_const _
-      | <span data-count="1602">I</span>64_const _ | <span data-count="604">U</span>nreachable | <span data-count="3863">D</span>rop | <span data-count="615">N</span>op | <span data-count="578">R</span>eturn | <span data-count="10">R</span>ef_i31 | <span data-count="1">I</span>31_get_s
+      | <span data-count="26">R</span>ef_is_null | <span data-count="1053">F</span>_binop _ | <span data-count="1932">F</span>32_const _ | <span data-count="1592">F</span>64_const _ | <span data-count="45698">I</span>32_const _
+      | <span data-count="1602">I</span>64_const _ | <span data-count="606">U</span>nreachable | <span data-count="3863">D</span>rop | <span data-count="615">N</span>op | <span data-count="578">R</span>eturn | <span data-count="10">R</span>ef_i31 | <span data-count="1">I</span>31_get_s
       | <span data-count="5">I</span>31_get_u | <span data-count="0">A</span>rray_len | <span data-count="1">R</span>ef_as_non_null | <span data-count="6">E</span>xtern_externalize
       | <span data-count="6">E</span>xtern_internalize | <span data-count="1">R</span>ef_eq ) as i -&gt;
       Ok i
@@ -1537,7 +1537,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       Log.debug2 "TODO (Rewrite.body) %a@\n" pp_instr i;
       <span data-count="0">O</span>k Nop
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
-    <span data-count="27295">l</span>ist_map (fun i -&gt; <span data-count="257310">b</span>ody (loop_count, block_ids) i) e
+    <span data-count="27299">l</span>ist_map (fun i -&gt; <span data-count="257322">b</span>ody (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
 

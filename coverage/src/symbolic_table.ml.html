@@ -130,7 +130,7 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="5979">x</span>
+  let hash x = <span data-count="5978">x</span>
 end)
 
 type table = Symbolic_value.S.ref_value array
@@ -140,12 +140,12 @@ type tables = table ITbl.t Env_id.Tbl.t
 let init () = <span data-count="199">E</span>nv_id.Tbl.create 0
 
 let clone (tables : tables) : tables =
-  <span data-count="3086">l</span>et s = Env_id.Tbl.to_seq tables in
-  <span data-count="3086">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="3086">p</span>
+  <span data-count="3217">l</span>et s = Env_id.Tbl.to_seq tables in
+  <span data-count="3217">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="3217">p</span>
        (fun (i, t) -&gt;
-         <span data-count="1348">l</span>et s = ITbl.to_seq t in
-         <span data-count="1348">(</span>i, ITbl.of_se<span data-count="1348">q</span> @@ Seq.ma<span data-count="1348">p</span> (fun (i, a) -&gt; <span data-count="1348">(</span>i, Array.cop<span data-count="1348">y</span> a)) s) )
+         <span data-count="1354">l</span>et s = ITbl.to_seq t in
+         <span data-count="1354">(</span>i, ITbl.of_se<span data-count="1354">q</span> @@ Seq.ma<span data-count="1354">p</span> (fun (i, a) -&gt; <span data-count="1354">(</span>i, Array.cop<span data-count="1354">y</span> a)) s) )
        s
 
 let convert_ref_values (v : Concrete_value.ref_value) :
@@ -156,17 +156,17 @@ let convert (orig_table : Concrete_table.t) : table =
   <span data-count="162">A</span>rray.map convert_ref_values orig_table.data
 
 let get_env env_id tables =
-  <span data-count="4469">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="4307">S</span>ome env -&gt; env
+  <span data-count="4462">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="4300">S</span>ome env -&gt; env
   | <span data-count="162">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="162">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="162">t</span>
 
 let get_table env_id (orig_table : Concrete_table.t) (tables : tables) t_id =
-  <span data-count="4469">l</span>et env = get_env env_id tables in
-  <span data-count="4469">m</span>atch ITbl.find_opt env t_id with
-  | <span data-count="4307">S</span>ome t -&gt; t
+  <span data-count="4462">l</span>et env = get_env env_id tables in
+  <span data-count="4462">m</span>atch ITbl.find_opt env t_id with
+  | <span data-count="4300">S</span>ome t -&gt; t
   | <span data-count="162">N</span>one -&gt;
     let t = convert orig_table in
     <span data-count="162">I</span>Tbl.add env t_id t;
