@@ -22,9 +22,8 @@ jobs:
           allow-prerelease-opam: true
       - name: setup-deploy
         run: |
-          opam depext -y owi
           opam install -y ./*.opam --deps-only --with-test --with-doc
-          opam upgrade --fixup
+          opam install -y ./*.opam --deps-only --with-test --with-doc
           touch doc/.nojekyll
       - name: api
         run: |
