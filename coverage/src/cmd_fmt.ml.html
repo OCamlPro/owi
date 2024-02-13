@@ -127,22 +127,22 @@
 open Syntax
 
 let get_printer filename =
-  <span data-count="2">l</span>et ext = Fpath.get_ext filename in
-  <span data-count="2">m</span>atch ext with
-  | <span data-count="2">"</span>.wat" -&gt;
-    let+ v = Parse.Module.from_fil<span data-count="2">e</span> filename in
-    <span data-count="2">f</span>un fmt () -&gt; <span data-count="2">T</span>ext.pp_modul fmt v
+  <span data-count="1">l</span>et ext = Fpath.get_ext filename in
+  <span data-count="1">m</span>atch ext with
+  | <span data-count="1">"</span>.wat" -&gt;
+    let+ v = Parse.Module.from_fil<span data-count="1">e</span> filename in
+    <span data-count="1">f</span>un fmt () -&gt; <span data-count="1">T</span>ext.pp_modul fmt v
   | <span data-count="0">"</span>.wast" -&gt;
     let+ v = Parse.Script.from_fil<span data-count="0">e</span> filename in
     <span data-count="0">f</span>un fmt () -&gt; <span data-count="0">T</span>ext.pp_script fmt v
   | <span data-count="0">_</span> -&gt; error_s "unsupported file extension"
 
 let cmd_one inplace file =
-  <span data-count="2">m</span>atch get_printer file with
+  <span data-count="1">m</span>atch get_printer file with
   | <span data-count="0">E</span>rror e -&gt;
     Format.pp_err "%s@." e;
     <span data-count="0">e</span>xit 1
-  | <span data-count="2">O</span>k pp -&gt; (
+  | <span data-count="1">O</span>k pp -&gt; (
     match
       if inplace then
         <span data-count="0">B</span>os.OS.File.with_o<span data-count="0">c</span> file
@@ -150,14 +150,14 @@ let cmd_one inplace file =
             <span data-count="0">l</span>et fmt = Stdlib.Format.formatter_of_out_channel chan in
             <span data-count="0">O</span>k (Format.p<span data-count="0">p</span> fmt "%a@\n" pp ()) )
           ()
-      else <span data-count="2">O</span>k (Ok (Format.pp_st<span data-count="2">d</span> "%a@\n" pp ()))
+      else <span data-count="1">O</span>k (Ok (Format.pp_st<span data-count="1">d</span> "%a@\n" pp ()))
     with
-    | <span data-count="2">O</span>k (Ok ()) -&gt; Ok ()
+    | <span data-count="1">O</span>k (Ok ()) -&gt; Ok ()
     | <span data-count="0">O</span>k (Error (`Msg e)) | <span data-count="0">E</span>rror (`Msg e) -&gt; Error e )
 
 let cmd inplace files =
-  <span data-count="2">m</span>atch list_iter (cmd_on<span data-count="2">e</span> inplace) files with
-  | <span data-count="2">O</span>k () -&gt; ()
+  <span data-count="1">m</span>atch list_iter (cmd_on<span data-count="1">e</span> inplace) files with
+  | <span data-count="1">O</span>k () -&gt; ()
   | <span data-count="0">E</span>rror e -&gt; failwith e
 
 let format_file_to_string file =
