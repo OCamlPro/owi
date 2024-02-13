@@ -40,16 +40,16 @@ jobs:
           opam upgrade --fixup
       - name: build
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" || true # macossucks
+          ! command -v brew || export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
           opam exec -- dune build @install
       - name: test
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" || true # macossucks
+          ! command -v brew || export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
           opam exec -- dune runtest
-      - name: doc
+      - name: lint-doc
         run: |
           ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt
           $(exit $(wc -l output.txt | cut -d " " -f1))
-      - name: fmt
+      - name: lint-fmt
         run: |
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
