@@ -25,6 +25,15 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: cache
+        id: cache-opam
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-opam
+        with:
+          path: |
+            ~/work/owi/owi/_opam/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.opam') }}
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v2
         with:
@@ -33,7 +42,11 @@ jobs:
           opam-depext: true
           opam-pin: true
           allow-prerelease-opam: true
+      - name: depext
+        run: |
+          opam depext -y owi
       - name: setup
+        if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam install -y ./*.opam --deps-only --with-test --with-doc
       - name: build
