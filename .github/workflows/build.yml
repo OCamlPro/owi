@@ -41,11 +41,11 @@ jobs:
           opam upgrade --fixup
       - name: build
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" || true # macossucks
           opam exec -- dune build @install
       - name: test
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" || true # macossucks
           opam exec -- dune runtest
       - name: doc
         run: |
