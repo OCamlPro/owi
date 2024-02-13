@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -16,9 +16,12 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "5.1"
+          dune-cache: true
+          opam-depext: true
+          opam-pin: true
+          allow-prerelease-opam: true
       - name: setup-deploy
         run: |
-          opam pin add . -y --no-action
           opam depext -y owi
           opam install -y ./*.opam --deps-only --with-test --with-doc
           opam upgrade --fixup
