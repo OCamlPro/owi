@@ -12,6 +12,15 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
+     - name: cache
+        id: cache-opam
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-opam
+        with:
+          path: |
+            ~/work/owi/owi/_opam/
+          key: ${{ runner.os }}-deploy-${{ env.cache-name }}-${{ hashFiles('**/*.opam') }}
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v2
         with:
@@ -20,13 +29,16 @@ jobs:
           opam-depext: true
           opam-pin: true
           allow-prerelease-opam: true
+      - name: depext
+        run: |
+          opam depext -y owi
       - name: setup-deploy
+        if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam install -y ./*.opam --deps-only --with-test --with-doc
-          opam install -y ./*.opam --deps-only --with-test --with-doc
-          touch doc/.nojekyll
       - name: api
         run: |
+          touch doc/.nojekyll
           opam exec -- dune build @doc
           mv _build/default/_doc/_html doc/api
       - name: coverage
