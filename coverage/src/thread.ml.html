@@ -110,13 +110,13 @@ type t =
   ; globals : Symbolic_global.globals
   }
 
-let pc t = <span data-count="10902">t</span>.pc
+let pc t = <span data-count="10911">t</span>.pc
 
-let memories t = <span data-count="294335">t</span>.memories
+let memories t = <span data-count="294541">t</span>.memories
 
-let tables t = <span data-count="4462">t</span>.tables
+let tables t = <span data-count="4478">t</span>.tables
 
-let globals t = <span data-count="23133">t</span>.globals
+let globals t = <span data-count="23102">t</span>.globals
 
 let create () =
   <span data-count="199">{</span> choices = 0
@@ -128,10 +128,10 @@ let create () =
   }
 
 let clone { choices; symbol_set; pc; memories; tables; globals } =
-  <span data-count="3217">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="3217">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="3217">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="3217">{</span> choices; symbol_set; pc; memories; tables; globals }
+  <span data-count="3146">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="3146">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="3146">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="3146">{</span> choices; symbol_set; pc; memories; tables; globals }
 </code></pre>
       </div>
     </div>
