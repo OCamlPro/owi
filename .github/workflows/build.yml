@@ -35,9 +35,7 @@ jobs:
           allow-prerelease-opam: true
       - name: setup
         run: |
-          opam depext -y owi
           opam install -y ./*.opam --deps-only --with-test --with-doc
-          opam upgrade --fixup
       - name: build
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
