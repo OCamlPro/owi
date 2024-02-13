@@ -412,7 +412,7 @@ module S = struct
 
     let floor x = unop ty Floor x
 
-    let trunc _ = assert false
+    let trunc x = unop ty Trunc x
 
     let nearest x = unop ty Nearest x
 
@@ -484,7 +484,7 @@ module S = struct
 
     let floor x = unop ty Floor x
 
-    let trunc _x = assert false
+    let trunc x = unop ty Trunc x
 
     let nearest x = unop ty Nearest x
 

@@ -30,10 +30,8 @@
     (f32.le (f32.neg (local.get $f32)) (f32.const 42))
     (if (then unreachable))
 
-    ;; owi: internal error, uncaught exception:
-    ;;  File "src/symbolic_value.ml", line 420, characters 18-24: Assertion failed
-    ;; (f32.eq (f32.trunc (local.get $f32)) (f32.const 123))
-    ;; (if (then unreachable))
+    (f32.eq (f32.trunc (local.get $f32)) (f32.const 123))
+    (if (then unreachable))
 
     ;; very long computation
     ;; (f32.eq (f32.sqrt (local.get $f32)) (f32.const 0))
