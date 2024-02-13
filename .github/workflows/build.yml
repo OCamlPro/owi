@@ -40,11 +40,15 @@ jobs:
           opam upgrade --fixup
       - name: build
         run: |
-          ! command -v brew || export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          fi
           opam exec -- dune build @install
       - name: test
         run: |
-          ! command -v brew || export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          fi
           opam exec -- dune runtest
       - name: lint-doc
         run: |
