@@ -75,18 +75,18 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  <span data-count="21">l</span>et* modul = Parse.Module.from_fil<span data-count="21">e</span> filename in
-  <span data-count="21">C</span>ompile.until_optimize ~unsafe ~optimize:true modul
+  <span data-count="22">l</span>et* modul = Parse.Module.from_fil<span data-count="22">e</span> filename in
+  <span data-count="22">C</span>ompile.until_optimize ~unsafe ~optimize:true modul
 
 let cmd_one debug unsafe file =
-  <span data-count="21">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
-  <span data-count="21">m</span>atch optimize_file ~unsafe file with
-  | <span data-count="21">O</span>k modul -&gt; Format.pp_std "%a@\n" Simplified.Pp.modul modul
+  <span data-count="22">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
+  <span data-count="22">m</span>atch optimize_file ~unsafe file with
+  | <span data-count="22">O</span>k modul -&gt; Format.pp_std "%a@\n" Simplified.Pp.modul modul
   | <span data-count="0">E</span>rror e -&gt;
     Format.pp_err "%s@." e;
     <span data-count="0">e</span>xit 1
 
-let cmd debug unsafe files = <span data-count="21">L</span>ist.iter (cmd_on<span data-count="21">e</span> debug unsafe) files
+let cmd debug unsafe files = <span data-count="22">L</span>ist.iter (cmd_on<span data-count="22">e</span> debug unsafe) files
 </code></pre>
       </div>
     </div>

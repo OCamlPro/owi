@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>c_instrumentor.ml &mdash; Coverage report</title>
-    <meta name="description" content="0.00% coverage in src/c_instrumentor.ml">
+    <meta name="description" content="25.00% coverage in src/c_instrumentor.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,10 @@
           <span class="dirname">src/</span>c_instrumentor.ml
         </a>
       </h1>
-      <h2>0.00%</h2>
+      <h2>25.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:5.26%"></span>
-      <span class="unvisited" style="top:15.79%"></span>
-      <span class="unvisited" style="top:31.58%"></span>
+      <span class="some-visited" style="top:31.58%"></span>
       <span class="unvisited" style="top:36.84%"></span>
       <span class="unvisited" style="top:42.11%"></span>
       <span class="unvisited" style="bottom:47.37%"></span>
@@ -31,12 +29,12 @@
     <div id="report">
       <div id="lines-layer">
         <pre>
-<a id="L1"></a><span class="unvisited"> </span>
+<a id="L1"></a><span class="visited"> </span>
 <a id="L2"></a><span > </span>
-<a id="L3"></a><span class="unvisited"> </span>
+<a id="L3"></a><span class="visited"> </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
-<a id="L6"></a><span class="unvisited"> </span>
+<a id="L6"></a><span class="some-visited"> </span>
 <a id="L7"></a><span class="unvisited"> </span>
 <a id="L8"></a><span class="unvisited"> </span>
 <a id="L9"></a><span > </span>
@@ -74,12 +72,12 @@
 <a href="#L18">18</a>
 <a href="#L19">19</a>
 </pre>
-<pre><code class="ocaml">let py_module = lazy <span data-count="0">(</span>Py.Import.import_module "instrumentor")
+<pre><code class="ocaml">let py_module = lazy <span data-count="1">(</span>Py.Import.import_module "instrumentor")
 
-let import_module () = <span data-count="0">L</span>azy.force py_module
+let import_module () = <span data-count="1">L</span>azy.force py_module
 
 let instrument file includes =
-  <span data-count="0">l</span>et callable = Py.Module.get (import_modul<span data-count="0">e</span> ()) "instrument" in
+  <span data-count="1">l</span>et callable = Py.Module.get (import_modul<span data-count="0">e</span> ()) "instrument" in
   <span data-count="0">l</span>et kwargs =
     [ ("file", Py.String.of_strin<span data-count="0">g</span> @@ Fpath.to_strin<span data-count="0">g</span> file)
     ; ( "includes"

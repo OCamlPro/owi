@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>check.ml &mdash; Coverage report</title>
-    <meta name="description" content="98.57% coverage in src/check.ml">
+    <meta name="description" content="100.00% coverage in src/check.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,9 @@
           <span class="dirname">src/</span>check.ml
         </a>
       </h1>
-      <h2>98.57%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:28.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -94,7 +93,7 @@
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span class="visited"> </span>
-<a id="L72"></a><span class="some-visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span class="visited"> </span>
@@ -103,8 +102,8 @@
 <a id="L78"></a><span class="visited"> </span>
 <a id="L79"></a><span class="visited"> </span>
 <a id="L80"></a><span class="visited"> </span>
-<a id="L81"></a><span class="visited"> </span>
-<a id="L82"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="visited"> </span>
 <a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span class="visited"> </span>
@@ -118,115 +117,113 @@
 <a id="L93"></a><span class="visited"> </span>
 <a id="L94"></a><span class="visited"> </span>
 <a id="L95"></a><span class="visited"> </span>
-<a id="L96"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
 <a id="L97"></a><span > </span>
 <a id="L98"></a><span > </span>
-<a id="L99"></a><span > </span>
-<a id="L100"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">  1</a>
-<a href="#L2">  2</a>
-<a href="#L3">  3</a>
-<a href="#L4">  4</a>
-<a href="#L5">  5</a>
-<a href="#L6">  6</a>
-<a href="#L7">  7</a>
-<a href="#L8">  8</a>
-<a href="#L9">  9</a>
-<a href="#L10"> 10</a>
-<a href="#L11"> 11</a>
-<a href="#L12"> 12</a>
-<a href="#L13"> 13</a>
-<a href="#L14"> 14</a>
-<a href="#L15"> 15</a>
-<a href="#L16"> 16</a>
-<a href="#L17"> 17</a>
-<a href="#L18"> 18</a>
-<a href="#L19"> 19</a>
-<a href="#L20"> 20</a>
-<a href="#L21"> 21</a>
-<a href="#L22"> 22</a>
-<a href="#L23"> 23</a>
-<a href="#L24"> 24</a>
-<a href="#L25"> 25</a>
-<a href="#L26"> 26</a>
-<a href="#L27"> 27</a>
-<a href="#L28"> 28</a>
-<a href="#L29"> 29</a>
-<a href="#L30"> 30</a>
-<a href="#L31"> 31</a>
-<a href="#L32"> 32</a>
-<a href="#L33"> 33</a>
-<a href="#L34"> 34</a>
-<a href="#L35"> 35</a>
-<a href="#L36"> 36</a>
-<a href="#L37"> 37</a>
-<a href="#L38"> 38</a>
-<a href="#L39"> 39</a>
-<a href="#L40"> 40</a>
-<a href="#L41"> 41</a>
-<a href="#L42"> 42</a>
-<a href="#L43"> 43</a>
-<a href="#L44"> 44</a>
-<a href="#L45"> 45</a>
-<a href="#L46"> 46</a>
-<a href="#L47"> 47</a>
-<a href="#L48"> 48</a>
-<a href="#L49"> 49</a>
-<a href="#L50"> 50</a>
-<a href="#L51"> 51</a>
-<a href="#L52"> 52</a>
-<a href="#L53"> 53</a>
-<a href="#L54"> 54</a>
-<a href="#L55"> 55</a>
-<a href="#L56"> 56</a>
-<a href="#L57"> 57</a>
-<a href="#L58"> 58</a>
-<a href="#L59"> 59</a>
-<a href="#L60"> 60</a>
-<a href="#L61"> 61</a>
-<a href="#L62"> 62</a>
-<a href="#L63"> 63</a>
-<a href="#L64"> 64</a>
-<a href="#L65"> 65</a>
-<a href="#L66"> 66</a>
-<a href="#L67"> 67</a>
-<a href="#L68"> 68</a>
-<a href="#L69"> 69</a>
-<a href="#L70"> 70</a>
-<a href="#L71"> 71</a>
-<a href="#L72"> 72</a>
-<a href="#L73"> 73</a>
-<a href="#L74"> 74</a>
-<a href="#L75"> 75</a>
-<a href="#L76"> 76</a>
-<a href="#L77"> 77</a>
-<a href="#L78"> 78</a>
-<a href="#L79"> 79</a>
-<a href="#L80"> 80</a>
-<a href="#L81"> 81</a>
-<a href="#L82"> 82</a>
-<a href="#L83"> 83</a>
-<a href="#L84"> 84</a>
-<a href="#L85"> 85</a>
-<a href="#L86"> 86</a>
-<a href="#L87"> 87</a>
-<a href="#L88"> 88</a>
-<a href="#L89"> 89</a>
-<a href="#L90"> 90</a>
-<a href="#L91"> 91</a>
-<a href="#L92"> 92</a>
-<a href="#L93"> 93</a>
-<a href="#L94"> 94</a>
-<a href="#L95"> 95</a>
-<a href="#L96"> 96</a>
-<a href="#L97"> 97</a>
-<a href="#L98"> 98</a>
-<a href="#L99"> 99</a>
-<a href="#L100">100</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
+<a href="#L95">95</a>
+<a href="#L96">96</a>
+<a href="#L97">97</a>
+<a href="#L98">98</a>
+<a href="#L99">99</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -245,7 +242,7 @@ type env =
   }
 
 let empty_env () =
-  <span data-count="6113">{</span> start = false
+  <span data-count="6127">{</span> start = false
   ; memory = false
   ; imported_memory = false
   ; funcs = false
@@ -254,80 +251,79 @@ let empty_env () =
   }
 
 let modul m =
-  <span data-count="6113">L</span>og.debug0 "checking     ...@\n";
-  <span data-count="6113">l</span>et add_global =
+  <span data-count="6127">L</span>og.debug0 "checking     ...@\n";
+  <span data-count="6127">l</span>et add_global =
     let seen = Hashtbl.create 512 in
-    <span data-count="6113">f</span>unction
+    <span data-count="6127">f</span>unction
     | <span data-count="288">N</span>one -&gt; Ok ()
-    | <span data-count="1231">S</span>ome id -&gt;
+    | <span data-count="1239">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="6">e</span>rror_s "duplicate global %s" id
-      else <span data-count="1225">O</span>k (Hashtbl.replac<span data-count="1225">e</span> seen id ())
+      else <span data-count="1233">O</span>k (Hashtbl.replac<span data-count="1233">e</span> seen id ())
   in
   let add_table =
     let seen = Hashtbl.create 512 in
-    <span data-count="6113">f</span>unction
-    | <span data-count="811">N</span>one -&gt; Ok ()
-    | <span data-count="669">S</span>ome id -&gt;
+    <span data-count="6127">f</span>unction
+    | <span data-count="815">N</span>one -&gt; Ok ()
+    | <span data-count="670">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="6">e</span>rror_s "duplicate table %s" id
-      else <span data-count="663">O</span>k (Hashtbl.replac<span data-count="663">e</span> seen id ())
+      else <span data-count="664">O</span>k (Hashtbl.replac<span data-count="664">e</span> seen id ())
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
-    <span data-count="6113">f</span>unction
-    | <span data-count="1471">N</span>one -&gt; Ok ()
-    | <span data-count="256">S</span>ome id -&gt;
+    <span data-count="6127">f</span>unction
+    | <span data-count="1475">N</span>one -&gt; Ok ()
+    | <span data-count="257">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="6">e</span>rror_s "duplicate memory %s" id
-      else <span data-count="250">O</span>k (Hashtbl.ad<span data-count="250">d</span> seen id ())
+      else <span data-count="251">O</span>k (Hashtbl.ad<span data-count="251">d</span> seen id ())
   in
 
-  let* (_env : env) =
-    List.fold_lef<span data-count="6113">t</span>
+  let+ (_env : env) =
+    List.fold_lef<span data-count="6127">t</span>
       (fun env field -&gt;
-        <span data-count="41726">l</span>et* env in
-        <span data-count="41726">m</span>atch field with
-        | <span data-count="12204">M</span>Export _e -&gt; Ok env
-        | <span data-count="16446">M</span>Func _f -&gt; Ok { env with funcs = true }
-        | <span data-count="249">M</span>Start _start -&gt;
+        <span data-count="41851">l</span>et* env in
+        <span data-count="41851">m</span>atch field with
+        | <span data-count="12229">M</span>Export _e -&gt; Ok env
+        | <span data-count="16476">M</span>Func _f -&gt; Ok { env with funcs = true }
+        | <span data-count="262">M</span>Start _start -&gt;
           if env.start then <span data-count="2">E</span>rror "multiple start sections"
-          else <span data-count="247">O</span>k { env with start = true }
-        | <span data-count="4172">M</span>Import i -&gt;
+          else <span data-count="260">O</span>k { env with start = true }
+        | <span data-count="4198">M</span>Import i -&gt;
           if env.funcs then <span data-count="8">E</span>rror "import after function"
-          else <span data-count="4164">i</span>f env.memory then <span data-count="8">E</span>rror "import after memory"
-          else <span data-count="4156">i</span>f env.tables then <span data-count="8">E</span>rror "import after table"
-          else <span data-count="4148">i</span>f env.globals then <span data-count="8">E</span>rror "import after global"
-          else <span data-count="4140">b</span>egin
+          else <span data-count="4190">i</span>f env.memory then <span data-count="8">E</span>rror "import after memory"
+          else <span data-count="4182">i</span>f env.tables then <span data-count="8">E</span>rror "import after table"
+          else <span data-count="4174">i</span>f env.globals then <span data-count="8">E</span>rror "import after global"
+          else <span data-count="4166">b</span>egin
             match i.desc with
             | <span data-count="124">I</span>mport_mem (id, _) -&gt;
               let* () = add_memor<span data-count="124">y</span> id in
-              <span data-count="122">i</span>f env.memor<span data-count="0">y</span> || env.imported_memor<span data-count="2">y</span> then
-                <span data-count="2">E</span>rror "multiple memories"
+              <span data-count="122">i</span>f env.imported_memory then <span data-count="2">E</span>rror "multiple memories"
               else <span data-count="120">O</span>k { env with imported_memory = true }
-            | <span data-count="3709">I</span>mport_func _ -&gt; Ok env
+            | <span data-count="3735">I</span>mport_func _ -&gt; Ok env
             | <span data-count="166">I</span>mport_global (id, _) -&gt;
-              let* () = add_globa<span data-count="166">l</span> id in
-              <span data-count="164">O</span>k env
+              let+ () = add_globa<span data-count="166">l</span> id in
+              <span data-count="164">e</span>nv
             | <span data-count="141">I</span>mport_table (id, _) -&gt;
-              let* () = add_tabl<span data-count="141">e</span> id in
-              <span data-count="139">O</span>k env
+              let+ () = add_tabl<span data-count="141">e</span> id in
+              <span data-count="139">e</span>nv
           end
-        | <span data-count="983">M</span>Data _d -&gt; Ok env
+        | <span data-count="984">M</span>Data _d -&gt; Ok env
         | <span data-count="1679">M</span>Elem _e -&gt; Ok env
-        | <span data-count="1603">M</span>Mem (id, _) -&gt;
-          let* () = add_memor<span data-count="1603">y</span> id in
-          <span data-count="1599">i</span>f env.memor<span data-count="4">y</span> || env.imported_memor<span data-count="4">y</span> then <span data-count="8">E</span>rror "multiple memories"
-          else <span data-count="1591">O</span>k { env with memory = true }
-        | <span data-count="1698">M</span>Type _t -&gt; Ok env
-        | <span data-count="1353">M</span>Global { id; _ } -&gt;
-          let* () = add_globa<span data-count="1353">l</span> id in
-          <span data-count="1349">O</span>k { env with globals = true }
-        | <span data-count="1339">M</span>Table (id, _) -&gt;
-          let* () = add_tabl<span data-count="1339">e</span> id in
-          <span data-count="1335">O</span>k { env with tables = true } )
-      (Ok (empty_en<span data-count="6113">v</span> ()))
+        | <span data-count="1608">M</span>Mem (id, _) -&gt;
+          let* () = add_memor<span data-count="1608">y</span> id in
+          <span data-count="1604">i</span>f env.memor<span data-count="4">y</span> || env.imported_memor<span data-count="4">y</span> then <span data-count="8">E</span>rror "multiple memories"
+          else <span data-count="1596">O</span>k { env with memory = true }
+        | <span data-count="1710">M</span>Type _t -&gt; Ok env
+        | <span data-count="1361">M</span>Global { id; _ } -&gt;
+          let+ () = add_globa<span data-count="1361">l</span> id in
+          <span data-count="1357">{</span> env with globals = true }
+        | <span data-count="1344">M</span>Table (id, _) -&gt;
+          let+ () = add_tabl<span data-count="1344">e</span> id in
+          <span data-count="1340">{</span> env with tables = true } )
+      (Ok (empty_en<span data-count="6127">v</span> ()))
       m.fields
   in
 
-  <span data-count="6051">O</span>k m
+  <span data-count="6065">m</span>
 </code></pre>
       </div>
     </div>

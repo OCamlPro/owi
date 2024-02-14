@@ -62,10 +62,10 @@ module Z3Batch = Encoding.Solver.Batch (Encoding.Z3_mappings)
 let solver_mod : Z3Batch.t solver_module = (module Z3Batch)
 
 let fresh_solver () =
-  <span data-count="777">l</span>et module Mapping = Encoding.Z3_mappings.Fresh.Make () in
+  <span data-count="797">l</span>et module Mapping = Encoding.Z3_mappings.Fresh.Make () in
   let module Batch = Encoding.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="777">S</span> ((module Batch), solver)
+  <span data-count="797">S</span> ((module Batch), solver)
 </code></pre>
       </div>
     </div>
