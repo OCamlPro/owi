@@ -59,31 +59,19 @@ struct
   module Memory = struct
     include Symbolic_memory
 
-    let concretise a =
+    let concretise (a : Encoding.Expr.t) : Encoding.Expr.t Choice.t =
       let open Choice in
-      let open Encoding.Expr in
-      let* thread in
-      let+ (S (solver_mod, solver)) = solver in
-      let module Solver = (val solver_mod) in
-      let open Hc in
+      let open Encoding in
       match a.node.e with
-      | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> a
+      (* Avoid unecessary re-hashconsing and allocation when the value
+         is already concrete. *)
+      | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> return a
       | Ptr (base, offset) ->
-        (* TODO: can we remove this check? We should be in a SAT branch *)
-        assert (Solver.check solver @@ Thread.pc thread);
-        let concrete_offest = Solver.get_value solver offset in
-        let cond = Relop (Eq, offset, concrete_offest) @: a.node.ty in
-        (* TODO: this should go to the pc *)
-        Solver.add solver [ cond ];
-        Ptr (base, concrete_offest) @: a.node.ty
+        let+ offset = select_i32 offset in
+        Expr.(Ptr (base, Symbolic_value.const_i32 offset) @: Ty_bitv S32)
       | _ ->
-        (* TODO: can we remove this check? We should be in a SAT branch *)
-        assert (Solver.check solver @@ Thread.pc thread);
-        let concrete_addr = Solver.get_value solver a in
-        let cond = Relop (Eq, a, concrete_addr) @: a.node.ty in
-        (* TODO: this should go to the pc *)
-        Solver.add solver [ cond ];
-        concrete_addr
+        let+ v = select_i32 a in
+        Symbolic_value.const_i32 v
 
     (* TODO: *)
     (* 1. Let pointers have symbolic offsets *)

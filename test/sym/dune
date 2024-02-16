@@ -19,6 +19,7 @@
   global.wat
   grow.wat
   memory.wat
+  memory2.wat
   mini_test.wat
   mul_i32.wat
   mul_i64.wat
