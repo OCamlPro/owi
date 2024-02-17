@@ -5,5 +5,5 @@ symbolic extern module (assume and assert test):
     (model
       (symbol_0 i32)
       (symbol_1 i32))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]

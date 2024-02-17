@@ -9,7 +9,7 @@ Pqueue tests:
       (symbol_3 i32)
       (symbol_4 i32)
       (symbol_5 i32))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]
   $ owi c -I include src/pqueue.c src/common.c src/utils.c testsuite/pqueue/pqueue_test_pop.c --no-value
   Trap: memory heap buffer overflow
@@ -24,5 +24,5 @@ Pqueue tests:
       (symbol_6 i32)
       (symbol_7 i32)
       (symbol_8 i32))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]

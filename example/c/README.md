@@ -36,7 +36,7 @@ $ dune exec owi -- c ./poly.c
 Model:
   (model
     (symbol_0 (i32 1)))
-found a bug while performing symbolic execution!
+Reached problem!
 [13]
 ```
 
@@ -82,7 +82,7 @@ $ dune exec owi -- c ./poly2.c
 Model:
   (model
     (symbol_0 (i32 -2147483644)))
-found a bug while performing symbolic execution!
+Reached problem!
 [13]
 ```
 
@@ -204,7 +204,7 @@ Model:
     (symbol_7 (i32 100))
     (symbol_8 (i32 119))
     (symbol_9 (i32 119)))
-found a bug while performing symbolic execution!
+Reached problem!
 [13]
 ```
 

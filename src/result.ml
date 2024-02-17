@@ -17,7 +17,7 @@ type err =
   | `Duplicate_local of string
   | `Duplicate_memory of string
   | `Duplicate_table of string
-  | `Found_bug
+  | `Found_bug of int
   | `Global_is_immutable
   | `Illegal_escape of string
   | `Import_after_function
@@ -74,7 +74,9 @@ let err_to_string = function
   | `Duplicate_local id -> Format.sprintf "duplicate local %s" id
   | `Duplicate_memory id -> Format.sprintf "duplicate memory %s" id
   | `Duplicate_table id -> Format.sprintf "duplicate table %s" id
-  | `Found_bug -> "found a bug while performing symbolic execution!"
+  | `Found_bug n ->
+    if n > 1 then Format.sprintf "Reached %d problems!" n
+    else Format.sprintf "Reached problem!"
   | `Global_is_immutable -> "global is immutable"
   | `Illegal_escape txt -> Format.sprintf "illegal escape %S" txt
   | `Import_after_function -> "import after function"
