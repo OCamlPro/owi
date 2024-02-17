@@ -6,14 +6,9 @@ open Syntax
 
 let validate filename =
   let* modul = Parse.Module.from_file filename in
-  let* _modul = Compile.until_typecheck ~unsafe:false modul in
-  Ok ()
+  let+ _modul = Compile.until_typecheck ~unsafe:false modul in
+  ()
 
 let cmd debug files =
   if debug then Log.debug_on := true;
-  let result = list_iter validate files in
-  match result with
-  | Ok () -> ()
-  | Error e ->
-    Format.pp_err "%s@\n" e;
-    exit 1
+  list_iter validate files

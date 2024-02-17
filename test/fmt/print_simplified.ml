@@ -9,21 +9,23 @@ let filename = Fpath.v Sys.argv.(1)
 let m =
   match Parse.Module.from_file filename with
   | Ok m -> m
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
 
 let m =
   match Compile.until_simplify ~unsafe:false m with
   | Ok m -> m
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
 
 let s = Format.asprintf "%a@\n" Simplified.Pp.modul m
 
 let m =
-  match Parse.Module.from_string s with Ok m -> m | Error msg -> failwith msg
+  match Parse.Module.from_string s with
+  | Ok m -> m
+  | Error e -> Result.failwith e
 
 let m =
   match Compile.until_simplify ~unsafe:false m with
   | Ok m -> m
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
 
 let () = Format.pp_std "%a@\n" Simplified.Pp.modul m

@@ -200,8 +200,7 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul :
-    env Env_id.collection -> module_to_run -> (unit, string) result choice
+  val modul : env Env_id.collection -> module_to_run -> unit Result.t choice
 
   type value
 

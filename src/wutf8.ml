@@ -30,7 +30,7 @@ let check_utf8 s =
   let decoder = decoder ~encoding:`UTF_8 (`String s) in
   let rec loop () =
     match decode decoder with
-    | `Malformed _s -> Error "malformed UTF-8 encoding"
+    | `Malformed s -> Error (`Malformed_utf8_encoding s)
     | `Await -> assert false
     | `End -> Ok ()
     | `Uchar _ -> loop ()

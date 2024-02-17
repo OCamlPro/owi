@@ -1525,8 +1525,8 @@ module Make (P : Interpret_intf.P) :
         Ok ()
       end
     with
-    | Trap msg -> Choice.return (Error msg)
-    | Stack_overflow -> Choice.return (Error "call stack exhausted")
+    | Trap msg -> Choice.return (Error (`Msg msg))
+    | Stack_overflow -> Choice.return (Error `Call_stack_exhausted)
 
   let exec_vfunc_from_outside ~locals ~env ~envs func =
     let env = Env_id.get env envs in
@@ -1555,8 +1555,8 @@ module Make (P : Interpret_intf.P) :
           Ok res
       end
     with
-    | Trap msg -> Choice.return (Error msg)
-    | Stack_overflow -> Choice.return (Error "call stack exhausted")
+    | Trap msg -> Choice.return (Error (`Msg msg))
+    | Stack_overflow -> Choice.return (Error `Call_stack_exhausted)
 
   type value = Value.t
 end

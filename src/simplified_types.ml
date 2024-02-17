@@ -22,10 +22,10 @@ let convert_heap_type tbl = function
     Ok t
   | Def_ht (Text i) -> begin
     match tbl with
-    | None -> error_s "unknown type %s (no table)" i
+    | None -> Error `Unknown_type
     | Some tbl -> begin
       match Hashtbl.find_opt tbl i with
-      | None -> error_s "unknown type %s (not found in table)" i
+      | None -> Error `Unknown_type
       | Some i -> ok @@ Def_ht (Raw i)
     end
   end

@@ -65,7 +65,7 @@ let utf8_name ==
   | name = NAME; {
     match Wutf8.check_utf8 name with
     | Ok () -> name
-    | Error msg -> failwith msg
+    | Error _msg -> failwith "malformed UTF-8 encoding"
   }
 
 let par(X) ==

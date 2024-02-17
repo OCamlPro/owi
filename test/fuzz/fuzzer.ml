@@ -27,41 +27,47 @@ let compare (module I1 : Interprets.INTERPRET)
   Format.pp_err "@]";
   match (r1, r2) with
   | Ok (), Ok () -> true
-  | Error "timeout", Error "timeout" ->
+  | Error `Timeout, Error `Timeout ->
     incr timeout_count;
     true
-  | Error "timeout", Ok () ->
+  | Error `Timeout, Ok () ->
     Param.allow_partial_timeout
     ||
     ( Format.pp_err "timeout for `%s` but not for `%s`" I1.name I2.name;
       false )
-  | Ok (), Error "timeout" ->
+  | Ok (), Error `Timeout ->
     Param.allow_partial_timeout
     ||
     ( Format.pp_err "timeout for `%s` but not for `%s`" I2.name I1.name;
       false )
-  | Error "timeout", Error msg ->
+  | Error `Timeout, Error msg ->
+    let msg = Owi.Result.err_to_string msg in
     Param.allow_partial_timeout
     ||
     ( Format.pp_err "timeout for `%s` but error `%s` for `%s`" I1.name msg
         I2.name;
       false )
-  | Error msg, Error "timeout" ->
+  | Error msg, Error `Timeout ->
+    let msg = Owi.Result.err_to_string msg in
     Param.allow_partial_timeout
     ||
     ( Format.pp_err "timeout for `%s` but error `%s` for `%s`" I2.name msg
         I1.name;
       false )
   | Error msg1, Error msg2 ->
+    let msg1 = Owi.Result.err_to_string msg1 in
+    let msg2 = Owi.Result.err_to_string msg2 in
     true (* TODO: fixme *) || msg1 = msg2
     ||
     ( Format.pp_err "`%s` gave error `%s` but `%s` gave error `%s`" I1.name msg1
         I2.name msg2;
       false )
   | Ok (), Error msg ->
+    let msg = Owi.Result.err_to_string msg in
     Format.pp_err "`%s` was OK but `%s` gave error `%s`" I1.name I2.name msg;
     false
   | Error msg, Ok () ->
+    let msg = Owi.Result.err_to_string msg in
     Format.pp_err "`%s` was OK but `%s` gave error `%s`" I2.name I1.name msg;
     false
 

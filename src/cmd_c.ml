@@ -15,21 +15,22 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let clang bin ~flags ~out file = Cmd.(bin %% flags % "-o" % p out % p file)
+let clang bin ~flags ~out file : Bos.Cmd.t =
+  Cmd.(bin %% flags % "-o" % p out % p file)
 
-let opt bin file = Cmd.(bin % "-O1" % "-o" % p file % p file)
+let opt bin file : Bos.Cmd.t = Cmd.(bin % "-O1" % "-o" % p file % p file)
 
-let llc bin ~bc ~obj =
+let llc bin ~bc ~obj : Bos.Cmd.t =
   let flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
   Cmd.(bin %% flags % p obj % p bc)
 
-let ld bin ~flags ~out files =
+let ld bin ~flags ~out files : Bos.Cmd.t =
   let files = List.fold_left (fun acc f -> Cmd.(acc % p f)) Cmd.empty files in
   Cmd.(bin %% flags % "-o" % p out %% files % p C_share.libc)
 
-let wasm2wat bin0 ~out bin = Cmd.(bin0 % "-o" % p out % p bin)
+let wasm2wat bin0 ~out bin : Bos.Cmd.t = Cmd.(bin0 % "-o" % p out % p bin)
 
-let check_dependencies () =
+let check_dependencies () : deps Result.t =
   let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
   let* opt_bin = OS.Cmd.resolve @@ Cmd.v "opt" in
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
@@ -57,7 +58,7 @@ let patch_with_regex ~patterns (data : string) : string =
     (fun data (regex, template) -> Re2.rewrite_exn regex ~template data)
     data patterns
 
-let patch ~src ~dst =
+let patch ~src ~dst : unit Result.t =
   let* data = OS.File.read src in
   let data = patch_with_regex ~patterns:pre_patterns data in
   let data =
@@ -72,12 +73,13 @@ let patch ~src ~dst =
   in
   OS.File.write dst data
 
-let copy ~src ~dst =
+let copy ~src ~dst : Fpath.t Result.t =
   let* data = OS.File.read src in
   let+ () = OS.File.write dst data in
   dst
 
-let instrument_file ?(skip = false) ~includes ~workspace file =
+let instrument_file ?(skip = false) ~includes ~workspace file : Fpath.t Result.t
+    =
   let dst = Fpath.(workspace // base (file -+ ".c")) in
   if skip then copy ~src:file ~dst
   else begin
@@ -103,7 +105,7 @@ let instrument_file ?(skip = false) ~includes ~workspace file =
     dst
   end
 
-let compile ~deps ~includes ~opt_lvl file =
+let compile ~deps ~includes ~opt_lvl file : Fpath.t Result.t =
   Logs.app (fun m -> m "compiling %a" Fpath.pp file);
   let cflags =
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
@@ -130,7 +132,7 @@ let compile ~deps ~includes ~opt_lvl file =
   let+ () = OS.Cmd.run @@ deps.llc ~bc ~obj in
   obj
 
-let link ~deps ~workspace files =
+let link ~deps ~workspace files : Fpath.t Result.t =
   let ldflags ~entry =
     let stack_size = 8 * (1024 * 1024) in
     Cmd.(
@@ -142,10 +144,10 @@ let link ~deps ~workspace files =
   let* () =
     OS.Cmd.run @@ deps.ld ~flags:(ldflags ~entry:"_start") ~out:wasm files
   in
-  let* () = OS.Cmd.run @@ deps.wasm2wat ~out:wat wasm in
-  Ok wat
+  let+ () = OS.Cmd.run @@ deps.wasm2wat ~out:wat wasm in
+  wat
 
-let cleanup dir =
+let cleanup dir : unit =
   OS.Path.fold ~elements:`Files
     (fun path _acc ->
       if not @@ Fpath.has_ext ".wat" path then
@@ -155,11 +157,12 @@ let cleanup dir =
     () [ dir ]
   |> Logs.on_error_msg ~level:Logs.Warning ~use:Fun.id
 
-let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } =
+let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
+  unit =
   Format.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
-let metadata ~workspace arch property files =
+let metadata ~workspace arch property files : unit Result.t =
   let out_metadata chan { arch; property; files } =
     let o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
     let tag n = (("", n), []) in
@@ -204,28 +207,24 @@ let metadata ~workspace arch property files =
   res
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure no_values =
+  profiling unsafe optimize no_stop_at_failure no_values : unit Result.t =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
-  let* deps = check_dependencies () in
+  let* (deps : deps) = check_dependencies () in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   (* skip instrumentation if not in test-comp mode *)
   let skip = (not testcomp) || Sys.getenv_opt "RUNNER_OS" = Some "macOS" in
-  let* nfiles = list_map (instrument_file ~skip ~includes ~workspace) files in
-  let* objects = list_map (compile ~deps ~includes ~opt_lvl) nfiles in
+  let* (nfiles : Fpath.t list) =
+    list_map (instrument_file ~skip ~includes ~workspace) files
+  in
+  let* (objects : Fpath.t list) =
+    list_map (compile ~deps ~includes ~opt_lvl) nfiles
+  in
   let* module_ = link ~deps ~workspace objects in
   cleanup workspace;
-  let+ () = metadata ~workspace arch property files in
+  let* () = metadata ~workspace arch property files in
   let files = [ module_ ] in
   let workspace = Fpath.(workspace / "test-suite") in
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
     no_values workspace files
-
-let cmd debug arch property testcomp workspace workers opt_lvl includes files
-  profiling unsafe optimize no_stop_at_failure no_values =
-  let res =
-    cmd debug arch property testcomp workspace workers opt_lvl includes files
-      profiling unsafe optimize no_stop_at_failure no_values
-  in
-  match res with Ok () -> () | Error (`Msg e) -> failwith e

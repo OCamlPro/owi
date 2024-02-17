@@ -242,9 +242,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
               (Encoding.Model.pp ~no_values)
               model;
             Some pc
-          | EVal (Error e) ->
-            Format.pp_err "Error: %s@\n" e;
-            exit 1
+          | EVal (Error e) -> Result.failwith e
         in
         ( if not no_values then
             let testcase =
@@ -286,4 +284,4 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     Format.pp_std "      calls %i@\n" count;
     Format.pp_std "  mean time %fms@\n" (1000. *. time /. float count)
   end;
-  if had_failures then exit 1
+  if had_failures then Error `Found_bug else Ok ()
