@@ -9,7 +9,7 @@ module Minimalist : sig
     Choice_intf.Complete
       with type thread := Thread.t
        and type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
-       and module V := Symbolic_value.S
+       and module V := Symbolic_value
 end
 
 module Multicore : sig
@@ -22,5 +22,5 @@ module Multicore : sig
     Choice_intf.Complete
       with type thread := Thread.t
        and type 'a run_result = ('a eval * Thread.t) Seq.t
-       and module V := Symbolic_value.S
+       and module V := Symbolic_value
 end

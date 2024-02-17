@@ -1,6 +1,6 @@
 open Syntax
 module Expr = Encoding.Expr
-module Value = Symbolic_value.S
+module Value = Symbolic_value
 module Choice = Symbolic.P.Choice
 open Hc
 

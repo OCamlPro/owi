@@ -12,6 +12,6 @@ val typ : t -> Types.simplified Types.val_type
 
 val mut : t -> Types.mut
 
-val value : t -> Symbolic_value.S.t
+val value : t -> Symbolic_value.t
 
-val set_value : t -> Symbolic_value.S.t -> unit
+val set_value : t -> Symbolic_value.t -> unit

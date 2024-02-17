@@ -8,7 +8,7 @@ module ITbl = Hashtbl.Make (struct
   let hash x = x
 end)
 
-type t = Symbolic_value.S.ref_value array
+type t = Symbolic_value.ref_value array
 
 type collection = t ITbl.t Env_id.Tbl.t
 
@@ -24,8 +24,8 @@ let clone collection =
          (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, Array.copy a)) s) )
        s
 
-let convert_ref_values (v : Concrete_value.ref_value) :
-  Symbolic_value.S.ref_value =
+let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
+    =
   match v with Funcref f -> Funcref f | _ -> assert false
 
 let convert (orig_table : Concrete_table.t) =

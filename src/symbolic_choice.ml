@@ -11,7 +11,7 @@ exception Assertion of Expr.t * Thread.t
 
 let check sym_bool thread (S (solver_module, solver)) =
   let pc = Thread.pc thread in
-  let no = S.Bool.not sym_bool in
+  let no = Bool.not sym_bool in
   let no = Expr.simplify no in
   match no.node.e with
   | Val True -> false
@@ -31,7 +31,7 @@ let list_select b ({ Thread.pc; _ } as thread) (S (solver_module, s)) =
   | _ -> (
     let module Solver = (val solver_module) in
     let with_v = v :: pc in
-    let with_not_v = S.Bool.not v :: pc in
+    let with_not_v = Bool.not v :: pc in
     let sat_true = Solver.check s with_v in
     let sat_false = Solver.check s with_not_v in
     match (sat_true, sat_false) with
@@ -62,7 +62,7 @@ let clone_if_needed ~orig_pc cases =
       cases
 
 let not_value sym value =
-  Expr.(Relop (Ne, mk_symbol sym, S.const_i32 value) @: Ty_bitv S32)
+  Expr.(Relop (Ne, mk_symbol sym, const_i32 value) @: Ty_bitv S32)
 
 let list_select_i32 sym_int thread (S (solver_module, solver)) =
   let pc = Thread.pc thread in
@@ -126,20 +126,20 @@ module Minimalist = struct
 
   let ( let+ ) = map
 
-  let select (vb : S.vbool) =
+  let select (vb : vbool) =
     let v = Expr.simplify vb in
     match v.node.e with
     | Val True -> return true
     | Val False -> return false
     | _ -> Format.kasprintf failwith "%a" Expr.pp v
 
-  let select_i32 (i : S.int32) =
+  let select_i32 (i : int32) =
     let v = Expr.simplify i in
     match v.node.e with Val (Num (I32 i)) -> return i | _ -> assert false
 
   let trap t = M (fun th _sol -> (Error (Trap t), th))
 
-  let assertion (vb : S.vbool) =
+  let assertion (vb : vbool) =
     let v = Expr.simplify vb in
     match v.node.e with
     | Val True -> return ()
@@ -152,7 +152,7 @@ module Minimalist = struct
 
   let solver = M (fun st sol -> (Ok sol, st))
 
-  let add_pc (_vb : S.vbool) = return ()
+  let add_pc (_vb : vbool) = return ()
 
   let run ~workers:_ t thread = run t thread (fresh_solver ())
 end
@@ -288,9 +288,9 @@ module Multicore = struct
     | Ret : 'a st -> 'a t
     | Retv : 'a -> 'a t
     | Bind : 'a t * ('a -> 'b t) -> 'b t
-    | Assert : S.vbool -> unit t
-    | Choice : S.vbool -> bool t
-    | Choice_i32 : S.int32 -> int32 t
+    | Assert : vbool -> unit t
+    | Choice : vbool -> bool t
+    | Choice_i32 : int32 -> Stdlib.Int32.t t
     | Trap : Trap.t -> 'a t
 
   type 'a eval =
@@ -319,14 +319,14 @@ module Multicore = struct
 
   let ( let+ ) = map
 
-  let select (cond : S.vbool) =
+  let select (cond : vbool) =
     match cond.node.e with
     | Val True -> Retv true
     | Val False -> Retv false
     | _ -> Choice cond
   [@@inline]
 
-  let select_i32 (i : S.int32) =
+  let select_i32 (i : int32) =
     match i.node.e with Val (Num (I32 v)) -> Retv v | _ -> Choice_i32 i
 
   let trap t = Trap t
@@ -337,7 +337,7 @@ module Multicore = struct
 
   let solver = Ret (St (fun t sol -> (sol, t)))
 
-  let add_pc (c : S.vbool) =
+  let add_pc (c : vbool) =
     match c.node.e with
     | Val True -> Retv ()
     | Val False -> Empty
@@ -381,7 +381,7 @@ module Multicore = struct
     | Assert c ->
       if check c thread st.solver then cont.k thread (E_st st) ()
       else
-        let no = S.Bool.not c in
+        let no = Bool.not c in
         let thread = { thread with pc = no :: thread.pc } in
         WQ.push (EAssert c, thread) st.global.r
     | Bind (v, f) ->
