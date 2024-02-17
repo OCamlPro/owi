@@ -183,12 +183,17 @@ let cli =
     let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
-  let default = Term.(ret (const (fun _ -> `Help (`Plain, None)) $ copts_t)) in
+  let default =
+    Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
+  in
   Cmd.group info ~default
     [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd; validate_cmd ]
 
-let main () = Cmdliner.Cmd.eval cli
-
-let exit_code = main ()
+let exit_code =
+  let open Cmdliner.Cmd.Exit in
+  match Cmdliner.Cmd.eval_value cli with
+  | Ok (`Help | `Version | `Ok ()) -> ok
+  | Error e -> (
+    match e with `Term -> 122 | `Parse -> cli_error | `Exn -> internal_error )
 
 let () = exit exit_code
