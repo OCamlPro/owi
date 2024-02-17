@@ -10,5 +10,5 @@ table stuff:
     (model
       (symbol_0 (i32 0))
       (symbol_1 (i32 -2147483648)))
-  found a bug while performing symbolic execution!
+  Reached 2 problems!
   [13]

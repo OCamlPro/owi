@@ -3,5 +3,5 @@
   Model:
     (model
       (symbol_0 (i32 0)))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]

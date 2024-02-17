@@ -4,7 +4,7 @@ Bug-triggering tests:
   Model:
     (model
       (symbol_0 (i32 8)))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]
   $ owi c -I include src/list.c src/common.c src/utils.c testsuite/list_test_zipIterAdd.c --no-value
   Assert failure: false
@@ -21,5 +21,5 @@ Bug-triggering tests:
       (symbol_7 i32)
       (symbol_8 i32)
       (symbol_9 i32))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]

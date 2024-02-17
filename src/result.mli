@@ -13,7 +13,7 @@ type err =
   | `Duplicate_local of string
   | `Duplicate_memory of string
   | `Duplicate_table of string
-  | `Found_bug
+  | `Found_bug of int
   | `Global_is_immutable
   | `Illegal_escape of string
   | `Import_after_function

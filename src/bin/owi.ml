@@ -212,7 +212,7 @@ let exit_code =
       | `Duplicate_local _id -> 10
       | `Duplicate_memory _id -> 11
       | `Duplicate_table _id -> 12
-      | `Found_bug -> 13
+      | `Found_bug _count -> 13
       | `Global_is_immutable -> 14
       | `Illegal_escape _txt -> 15
       | `Import_after_function -> 16

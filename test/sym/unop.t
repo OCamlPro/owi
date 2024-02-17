@@ -70,7 +70,7 @@ unop i32:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  found a bug while performing symbolic execution!
+  Reached 10 problems!
   [13]
 unop i64:
   $ dune exec owi -- sym unop_i64.wat --no-stop-at-failure --no-value
@@ -158,7 +158,7 @@ unop i64:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  found a bug while performing symbolic execution!
+  Reached 12 problems!
   [13]
 unop f32:
   $ dune exec owi -- sym unop_f32.wat --no-stop-at-failure --no-value
@@ -232,7 +232,7 @@ unop f32:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  found a bug while performing symbolic execution!
+  Reached 10 problems!
   [13]
 unop f64:
   $ dune exec owi -- sym unop_f64.wat --no-stop-at-failure --no-value
@@ -306,5 +306,5 @@ unop f64:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  found a bug while performing symbolic execution!
+  Reached 10 problems!
   [13]

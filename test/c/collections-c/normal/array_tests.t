@@ -33,7 +33,7 @@ Array tests:
       (symbol_1 (i32 0))
       (symbol_2 (i32 0))
       (symbol_3 (i32 0)))
-  found a bug while performing symbolic execution!
+  Reached problem!
   [13]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_reverse.c
   All OK

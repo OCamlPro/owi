@@ -249,15 +249,15 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         (Encoding.Model.pp ~no_values)
         model
   in
-  let rec loop had_failures = function
-    | [] -> had_failures
+  let rec print_and_count_failures count = function
+    | [] -> count
     | hd :: tl ->
       print_bug hd;
-      let had_failures = true in
-      if no_stop_at_failure then loop had_failures tl else had_failures
+      let count = succ count in
+      if no_stop_at_failure then print_and_count_failures count tl else count
   in
-  let had_failures = loop false failing in
-  if had_failures then Error `Found_bug
+  let count = print_and_count_failures 0 failing in
+  if count > 0 then Error (`Found_bug count)
   else begin
     Format.pp_std "All OK";
     Ok ()
