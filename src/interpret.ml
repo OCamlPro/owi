@@ -758,7 +758,8 @@ module Make (P : Interpret_intf.P) :
 
   let call_ref ~return (state : State.exec_state) typ_i =
     ignore (return, state, typ_i);
-    failwith "TODO call_ref"
+    (* TODO *)
+    assert false
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
   (* let state = { state with stack } in *)
   (* let func = *)

@@ -171,12 +171,12 @@ let metadata ~workspace arch property files : unit Result.t =
       match property with None -> Ok "" | Some f -> OS.File.read @@ Fpath.v f
     in
     let file = String.concat " " (List.map Fpath.to_string files) in
-    let hash =
-      List.fold_left
+    let* hash =
+      list_fold_left
         (fun context file ->
           match Bos.OS.File.read file with
-          | Error (`Msg msg) -> failwith msg
-          | Ok str -> Digestif.SHA256.feed_string context str )
+          | Error (`Msg msg) -> Error (`Msg msg)
+          | Ok str -> Ok (Digestif.SHA256.feed_string context str) )
         Digestif.SHA256.empty files
     in
     let hash = Digestif.SHA256.to_hex (Digestif.SHA256.get hash) in

@@ -202,49 +202,50 @@ let write_testcase =
         (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) ~err testcase))
         ()
     with
-    | Ok (Ok ()) -> ()
-    | Ok (Error (`Msg e)) | Error (`Msg e) -> failwith e
+    | Ok (Ok ()) -> Ok ()
+    | Ok (Error (`Msg e)) | Error (`Msg e) -> Error (`Msg e)
 
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  begin
+  let* () =
     match Bos.OS.Dir.create ~path:true ~mode:0o755 workspace with
-    | Ok true | Ok false -> ()
-    | Error (`Msg msg) -> failwith msg
-  end;
+    | Ok true | Ok false -> Ok ()
+    | Error (`Msg msg) -> Error (`Msg msg)
+  in
   let pc = Choice.return (Ok ()) in
   let solver = Solver.Z3Batch.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run ~workers result thread in
-  let failing =
-    Seq.filter_map
+  let* failing =
+    list_map
       (fun (result, thread) ->
         let pc = Thread.pc thread in
         if print_path_condition then
           Format.pp_std "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
         let symbols = thread.symbol_set in
         let model = get_model ~symbols solver pc in
-        let result =
+        let* result =
           match result with
-          | Symbolic_choice.Multicore.EVal (Ok ()) -> None
+          | Symbolic_choice.Multicore.EVal (Ok ()) -> Ok None
           | EAssert assertion ->
             Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
             Format.pp_std "Model:@\n  @[<v>%a@]@\n"
               (Encoding.Model.pp ~no_values)
               model;
-            Some pc
+            Ok (Some pc)
           | ETrap tr ->
             Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
             Format.pp_std "Model:@\n  @[<v>%a@]@\n"
               (Encoding.Model.pp ~no_values)
               model;
-            Some pc
-          | EVal (Error e) -> Result.failwith e
+            Ok (Some pc)
+          | EVal (Error e) -> Error e
         in
-        ( if not no_values then
+        let* () =
+          if not no_values then
             let testcase =
               List.sort
                 (fun (x1, _) (x2, _) -> compare x1 x2)
@@ -252,13 +253,19 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
               |> List.map snd
             in
             write_testcase ~dir:workspace ~err:(Option.is_some result) testcase
-        );
-        result )
-      results
+          else Ok ()
+        in
+        Ok result )
+      (List.of_seq results)
+  in
+  let failing =
+    List.fold_left
+      (fun acc -> function None -> acc | Some v -> v :: acc)
+      [] failing
   in
   let had_failures =
     if no_stop_at_failure then
-      let failures = Seq.fold_left (fun n _ -> succ n) 0 failing in
+      let failures = List.fold_left (fun n _ -> succ n) 0 failing in
       if failures = 0 then begin
         Format.pp_std "All OK@\n";
         false
@@ -268,11 +275,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         true
       end
     else
-      match failing () with
-      | Nil ->
+      match failing with
+      | [] ->
         Format.pp_std "All OK@\n";
         false
-      | Cons (_thread, _) ->
+      | _l ->
         Format.pp_err "Reached problem!@\n";
         true
   in

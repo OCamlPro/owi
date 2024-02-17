@@ -1,3 +1,5 @@
+open Syntax
+
 let py_location = List.map Fpath.v C_share_site.Sites.pyc
 
 let bin_location = List.map Fpath.v C_share_site.Sites.binc
@@ -5,13 +7,17 @@ let bin_location = List.map Fpath.v C_share_site.Sites.binc
 let lib_location = List.map Fpath.v C_share_site.Sites.libc
 
 let find location file =
-  List.find_map
-    (fun dir ->
-      let filename = Fpath.append dir file in
-      match Bos.OS.File.exists filename with
-      | Ok true -> Some filename
-      | Ok false -> None
-      | Error (`Msg msg) -> failwith msg )
-    location
+  let* l =
+    list_map
+      (fun dir ->
+        let filename = Fpath.append dir file in
+        match Bos.OS.File.exists filename with
+        | Ok true -> Ok (Some filename)
+        | Ok false -> Ok None
+        | Error (`Msg msg) -> Error (`Msg msg) )
+      location
+  in
+  Ok (List.find (function None -> false | Some _filename -> true) l)
 
-let libc = Option.get @@ find bin_location (Fpath.v "libc.wasm")
+let libc =
+  Option.get @@ Result.get_ok @@ find bin_location (Fpath.v "libc.wasm")
