@@ -167,9 +167,13 @@ module I32 = struct
 
   let clz e = unop ty Clz e
 
-  let ctz _ = failwith "i32_ctz: TODO"
+  let ctz _ =
+    (* TODO *)
+    assert false
 
-  let popcnt _ = failwith "i32_popcnt: TODO"
+  let popcnt _ =
+    (* TODO *)
+    assert false
 
   let add e1 e2 = binop ty Add e1 e2
 
@@ -279,9 +283,13 @@ module I64 = struct
 
   let clz e = unop ty Clz e
 
-  let ctz _ = failwith "i64_ctz: TODO"
+  let ctz _ =
+    (* TODO *)
+    assert false
 
-  let popcnt _ = failwith "i64_popcnt: TODO"
+  let popcnt _ =
+    (* TODO *)
+    assert false
 
   let add e1 e2 = binop ty Add e1 e2
 

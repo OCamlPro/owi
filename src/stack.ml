@@ -127,10 +127,7 @@ module Make (V : Value_intf.T) :
 
   let push_as_externref s ty v = push s (V.ref_externref ty v)
 
-  let push_array s a =
-    ignore (s, a);
-    failwith "TODO"
-  (* push s (Ref (Arrayref (Some a))) *)
+  let push_array _ _ = assert false
 
   let pp fmt (s : t) =
     Format.pp_list ~pp_sep:(fun fmt () -> Format.pp_string fmt " ; ") V.pp fmt s
