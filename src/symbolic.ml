@@ -10,11 +10,11 @@ module Solver = Solver.Z3Batch
 module type Thread = sig
   type t
 
-  val memories : t -> Symbolic_memory.memories
+  val memories : t -> Symbolic_memory.collection
 
-  val tables : t -> Symbolic_table.tables
+  val tables : t -> Symbolic_table.collection
 
-  val globals : t -> Symbolic_global.globals
+  val globals : t -> Symbolic_global.collection
 
   val pc : t -> Symbolic_value.S.vbool list
 end
@@ -27,32 +27,12 @@ module MakeP
 struct
   module Value = Symbolic_value.S
 
-  type memory = Symbolic_memory.M.t
-
-  type table = Symbolic_table.table
-
-  type elem = Link_env.elem
-
-  type data = Link_env.data
-
-  type global = Symbolic_global.global
-
-  type vbool = Value.vbool
-
-  type int32 = Value.int32
-
-  type int64 = Value.int64
-
-  type float32 = Value.float32
-
-  type float64 = Value.float64
-
   type thread = Thread.t
 
   module Choice = Choice_monad
   module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
 
-  let select (c : vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
+  let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->
@@ -69,50 +49,11 @@ struct
       return @@ if b then if_true else if_false
     | _, _ -> assert false
 
-  type extern_func = Extern_func.extern_func
-
-  type env = extern_func Link_env.t
-
-  type func = Concrete_value.Func.t
-
-  module Func = Extern_func
-
-  module Global = struct
-    type t = global
-
-    let value (v : t) = v.value
-
-    let set_value (v : t) x = v.value <- x
-
-    let mut (v : t) = v.orig.mut
-
-    let typ (v : t) = v.orig.typ
-  end
-
-  module Table = struct
-    type t = table
-
-    let get t i = t.(i)
-
-    let set t i v = t.(i) <- v
-
-    let size t = Array.length t
-
-    let typ _t =
-      (* TODO add type to table *)
-      (Null, Func_ht)
-
-    let max_size _t = assert false
-
-    let grow _t _new_size _x = assert false
-
-    let fill _t _pos _len _x = assert false
-
-    let copy ~t_src:_ ~t_dst:_ ~src:_ ~dst:_ ~len:_ = assert false
-  end
+  module Global = Symbolic_global
+  module Table = Symbolic_table
 
   module Elem = struct
-    type t = elem
+    type t = Link_env.elem
 
     let get (elem : t) i : Value.ref_value =
       match elem.value.(i) with Funcref f -> Funcref f | _ -> assert false
@@ -121,11 +62,11 @@ struct
   end
 
   module Memory = struct
-    include Symbolic_memory.M
+    include Symbolic_memory
 
     let concretise a =
       let open Choice in
-      let open Expr in
+      let open Encoding.Expr in
       let* thread in
       let+ (S (solver_mod, solver)) = solver in
       let module Solver = (val solver_mod) in
@@ -151,24 +92,8 @@ struct
     (* TODO: *)
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
-    let check_within_bounds m (a : int32) =
-      let cond =
-        match a.node.e with
-        | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
-        | Ptr (base, offset) -> (
-          match Hashtbl.find m.chunks base with
-          | exception Not_found -> Error Trap.Memory_leak_use_after_free
-          | size ->
-            let ptr = Int32.add base (i32 offset) in
-            let upper_bound =
-              Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
-            in
-            Ok
-              ( Value.Bool.(or_ (const (ptr < base)) upper_bound)
-              , Value.const_i32 ptr ) )
-        | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
-      in
-      match cond with
+    let check_within_bounds m a =
+      match check_within_bounds m a with
       | Error t -> Choice.trap t
       | Ok (cond, ptr) ->
         let open Choice in
@@ -176,8 +101,7 @@ struct
         if out_of_bounds then trap Trap.Memory_heap_buffer_overflow
         else return ptr
 
-    let with_concrete (m : memory) (a : int32) (f : memory -> int32 -> 'a) :
-      'a Choice.t =
+    let with_concrete (m : t) a f : 'a Choice.t =
       let open Choice in
       let* addr = concretise a in
       let+ ptr = check_within_bounds m addr in
@@ -209,13 +133,13 @@ struct
   end
 
   module Data = struct
-    type t = data
+    type t = Link_env.data
 
     let value data = data.Link_env.value
   end
 
   module Env = struct
-    type t = env
+    type t = Extern_func.extern_func Link_env.t
 
     type t' = Env_id.t
 
@@ -255,11 +179,9 @@ struct
 
     let drop_elem _ =
       (* TODO ? *)
-      ()
+      assert false
 
     let drop_data = Link_env.drop_data
-
-    let pp _ _ = ()
   end
 
   module Module_to_run = struct

@@ -14,7 +14,7 @@ module Make (P : Interpret_intf.P) :
     with type 'a choice := 'a P.Choice.t
      and type module_to_run := P.Module_to_run.t
      and type thread := P.thread
-     and type env := P.env
+     and type env := P.Env.t
      and type State.stack := P.Value.t list
      and type value = P.Value.t = struct
   open P
@@ -1561,6 +1561,6 @@ module Make (P : Interpret_intf.P) :
   type value = Value.t
 end
 
-module Concrete = Make (Concrete.P) [@@inlined hint]
+module Concrete = Make (Concrete) [@@inlined hint]
 module SymbolicP = Make (Symbolic.P) [@@inlined hint]
 module SymbolicM = Make (Symbolic.M) [@@inlined hint]

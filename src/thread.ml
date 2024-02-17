@@ -6,9 +6,9 @@ type t =
   { choices : int
   ; mutable symbol_set : Encoding.Symbol.t list
   ; pc : Symbolic_value.S.vbool list
-  ; memories : Symbolic_memory.memories
-  ; tables : Symbolic_table.tables
-  ; globals : Symbolic_global.globals
+  ; memories : Symbolic_memory.collection
+  ; tables : Symbolic_table.collection
+  ; globals : Symbolic_global.collection
   }
 
 let pc t = t.pc

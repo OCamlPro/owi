@@ -1,13 +1,13 @@
 module Concrete : sig
   val modul :
-       Concrete.P.env Env_id.collection
-    -> Concrete.P.Module_to_run.t
+       Concrete.Env.t Env_id.collection
+    -> Concrete.Module_to_run.t
     -> unit Result.t
 
   val exec_vfunc_from_outside :
        locals:V.t list
     -> env:Link_env.t'
-    -> envs:Concrete.P.env Env_id.collection
+    -> envs:Concrete.Env.t Env_id.collection
     -> Func_intf.t
     -> V.t list Result.t
 
@@ -38,14 +38,14 @@ end
 
 module SymbolicP : sig
   val modul :
-       Symbolic.P.env Env_id.collection
+       Symbolic.P.Env.t Env_id.collection
     -> Symbolic.P.Module_to_run.t
     -> unit Result.t Symbolic.P.Choice.t
 end
 
 module SymbolicM : sig
   val modul :
-       Symbolic.M.env Env_id.collection
+       Symbolic.M.Env.t Env_id.collection
     -> Symbolic.M.Module_to_run.t
     -> unit Result.t Symbolic.M.Choice.t
 end

@@ -1,20 +1,4 @@
-(* TODO: make this abstract *)
-type 'a t = 'a
+(* TODO: type 'a t should be abstract, run will be needed for this *)
+include Choice_intf.Base with type 'a t = 'a and module V := V
 
-val return : 'a -> 'a t
-
-val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-
-val map : 'a t -> ('a -> 'b) -> 'b t
-
-val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
-
-val select : bool -> bool t
-
-val select_i32 : int32 -> int32 t
-
-val get : unit
-
-val trap : Trap.t -> 'a t
+val run : 'a t -> 'a

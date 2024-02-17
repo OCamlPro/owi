@@ -8,19 +8,20 @@ module ITbl = Hashtbl.Make (struct
   let hash x = x
 end)
 
-type global =
+type t =
   { mutable value : Symbolic_value.S.t
   ; orig : Concrete_global.t
   }
 
-type globals = global ITbl.t Env_id.Tbl.t
+type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = Env_id.Tbl.create 0
 
 let global_copy r = { r with value = r.value }
 
-let clone (globals : globals) : globals =
-  let s = Env_id.Tbl.to_seq globals in
+let clone collection =
+  (* TODO: this is ugly and should be rewritten... *)
+  let s = Env_id.Tbl.to_seq collection in
   Env_id.Tbl.of_seq
   @@ Seq.map
        (fun (i, t) ->
@@ -38,7 +39,7 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
   | Ref (Funcref f) -> Ref (Funcref f)
   | Ref _ -> assert false
 
-let convert (orig_global : Concrete_global.t) : global =
+let convert (orig_global : Concrete_global.t) : t =
   { value = convert_values orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
@@ -49,12 +50,19 @@ let get_env env_id tables =
     Env_id.Tbl.add tables env_id t;
     t
 
-let get_global env_id (orig_global : Concrete_global.t) (tables : globals) g_id
-    =
-  let env = get_env env_id tables in
+let get_global env_id (orig_global : Concrete_global.t) collection g_id =
+  let env = get_env env_id collection in
   match ITbl.find_opt env g_id with
   | Some t -> t
   | None ->
     let t = convert orig_global in
     ITbl.add env g_id t;
     t
+
+let value v = v.value
+
+let set_value v x = v.value <- x
+
+let mut v = v.orig.mut
+
+let typ v = v.orig.typ
