@@ -36,7 +36,6 @@ binop i32:
   Model:
     (model
       (symbol_0 i32))
-  Reached 9 problems!
   found a bug while performing symbolic execution!
   [13]
 binop i32 (2):
@@ -76,7 +75,6 @@ binop i32 (2):
       (symbol_1 i32)
       (symbol_2 i32)
       (symbol_3 i32))
-  Reached 5 problems!
   found a bug while performing symbolic execution!
   [13]
 binop i64:
@@ -117,7 +115,6 @@ binop i64:
   Model:
     (model
       (symbol_0 i64))
-  Reached 9 problems!
   found a bug while performing symbolic execution!
   [13]
 binop i64 (2):
@@ -157,7 +154,6 @@ binop i64 (2):
       (symbol_1 i64)
       (symbol_2 i64)
       (symbol_3 i64))
-  Reached 5 problems!
   found a bug while performing symbolic execution!
   [13]
 binop f32:
@@ -190,7 +186,6 @@ binop f32:
   Model:
     (model
       (symbol_0 f32))
-  Reached 7 problems!
   found a bug while performing symbolic execution!
   [13]
 binop f64:
@@ -223,6 +218,5 @@ binop f64:
   Model:
     (model
       (symbol_0 f64))
-  Reached 7 problems!
   found a bug while performing symbolic execution!
   [13]

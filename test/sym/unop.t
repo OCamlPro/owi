@@ -70,7 +70,6 @@ unop i32:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  Reached 10 problems!
   found a bug while performing symbolic execution!
   [13]
 unop i64:
@@ -159,7 +158,6 @@ unop i64:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  Reached 12 problems!
   found a bug while performing symbolic execution!
   [13]
 unop f32:
@@ -234,7 +232,6 @@ unop f32:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  Reached 10 problems!
   found a bug while performing symbolic execution!
   [13]
 unop f64:
@@ -309,6 +306,5 @@ unop f64:
       (symbol_1 i64)
       (symbol_2 f32)
       (symbol_3 f64))
-  Reached 10 problems!
   found a bug while performing symbolic execution!
   [13]

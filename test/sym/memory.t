@@ -6,7 +6,6 @@ memory stuff:
   Model:
     (model
       (symbol_0 (i32 1)))
-  Reached 1 problems!
   found a bug while performing symbolic execution!
   [13]
   $ dune exec owi -- sym store.wat
@@ -15,6 +14,5 @@ memory stuff:
     (model
       (symbol_0 (i32 -11))
       (symbol_1 (i32 0)))
-  Reached problem!
   found a bug while performing symbolic execution!
   [13]
