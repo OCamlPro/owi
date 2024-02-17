@@ -2,11 +2,6 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Types
-open Hc
-open Solver
-module Solver = Solver.Z3Batch
-
 module type Thread = sig
   type t
 
@@ -21,15 +16,15 @@ end
 
 module MakeP
     (Thread : Thread)
-    (Choice_monad : Choice_intf.Complete
-                      with module V := Symbolic_value
-                       and type thread := Thread.t) =
+    (Choice : Choice_intf.Complete
+                with module V := Symbolic_value
+                 and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
 
   type thread = Thread.t
 
-  module Choice = Choice_monad
+  module Choice = Choice
   module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
 
   let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
@@ -45,8 +40,8 @@ struct
       Choice.return (Value.F64 (Value.Bool.select_expr c ~if_true ~if_false))
     | Ref _, Ref _ ->
       let open Choice in
-      let* b = select c in
-      return @@ if b then if_true else if_false
+      let+ b = select c in
+      if b then if_true else if_false
     | _, _ -> assert false
 
   module Global = Symbolic_global
@@ -70,6 +65,7 @@ struct
       let* thread in
       let+ (S (solver_mod, solver)) = solver in
       let module Solver = (val solver_mod) in
+      let open Hc in
       match a.node.e with
       | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> a
       | Ptr (base, offset) ->
@@ -189,7 +185,7 @@ struct
     type t =
       { modul : Simplified.modul
       ; env : Env.t
-      ; to_run : simplified expr list
+      ; to_run : Types.simplified Types.expr list
       }
 
     let env (t : t) = t.env
