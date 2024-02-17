@@ -22,8 +22,8 @@ Running the validator is as simple as:
 
 ```sh
 $ dune exec owi -- validate ./type_error.wat
-type mismatch (pop) requires [i32 i32] but stack has [i32]
-[1]
+type mismatch (pop)
+[35]
 ```
 
 You can also print a more detailed trace with the `--debug` option:
@@ -36,8 +36,8 @@ grouping     ...
 assigning    ...
 rewriting    ...
 typechecking ...
-type mismatch (pop) requires [i32 i32] but stack has [i32]
-[1]
+type mismatch (pop)
+[35]
 ```
 
 ## Man page

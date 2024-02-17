@@ -11,4 +11,5 @@ table stuff:
       (symbol_0 (i32 0))
       (symbol_1 (i32 0)))
   Reached 2 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
