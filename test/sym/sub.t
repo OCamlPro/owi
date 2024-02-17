@@ -5,7 +5,6 @@ sub binop:
     (model
       (symbol_0 i32)
       (symbol_1 i32))
-  Reached problem!
   found a bug while performing symbolic execution!
   [13]
   $ dune exec owi -- sym sub_i64.wat --no-value
@@ -14,7 +13,6 @@ sub binop:
     (model
       (symbol_0 i64)
       (symbol_1 i64))
-  Reached problem!
   found a bug while performing symbolic execution!
   [13]
   $ dune exec owi -- sym sub_f32.wat --no-value
@@ -23,7 +21,6 @@ sub binop:
     (model
       (symbol_0 f32)
       (symbol_1 f32))
-  Reached problem!
   found a bug while performing symbolic execution!
   [13]
   $ dune exec owi -- sym sub_f64.wat --no-value
@@ -32,6 +29,5 @@ sub binop:
     (model
       (symbol_0 f64)
       (symbol_1 f64))
-  Reached problem!
   found a bug while performing symbolic execution!
   [13]
