@@ -142,14 +142,14 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
             else MStart (Text "_start") :: m.fields
           in
           let m = { m with fields } in
-          let* m, state =
+          let+ m, state =
             Compile.until_link ~unsafe state ~optimize ~name:None m
           in
           let m = Symbolic.convert_module_to_run m in
-          Ok (m :: to_run, state)
+          (m :: to_run, state)
         | Text.Register (name, id) ->
-          let* state = Link.register_module state ~name ~id in
-          Ok (to_run, state)
+          let+ state = Link.register_module state ~name ~id in
+          (to_run, state)
         | _ -> Ok acc )
       ([], link_state) file
   in
@@ -192,13 +192,12 @@ let write_testcase =
     incr cnt;
     let name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
     let path = Fpath.append dir name in
-    match
+    let* res =
       Bos.OS.File.with_oc path
         (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) ~err testcase))
         ()
-    with
-    | Ok (Ok ()) -> Ok ()
-    | Ok (Error (`Msg e)) | Error (`Msg e) -> Error (`Msg e)
+    in
+    res
 
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (workspace : Fpath.t) files =
@@ -215,36 +214,28 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let thread : Thread.t = Thread.create () in
   let results = Choice.run ~workers result thread in
   let* failing =
-    list_map
-      (fun (result, thread) ->
+    list_fold_left
+      (fun failing (result, thread) ->
         let pc = Thread.pc thread in
         let symbols = thread.symbol_set in
         let model = get_model ~symbols solver pc in
-        let* result =
+        let* result, err =
           match result with
-          | Symbolic_choice.Multicore.EVal (Ok ()) -> Ok None
-          | EAssert assertion -> Ok (Some (`EAssert (assertion, model)))
-          | ETrap tr -> Ok (Some (`ETrap (tr, model)))
+          | Symbolic_choice.Multicore.EVal (Ok ()) -> Ok (failing, false)
+          | EAssert assertion ->
+            Ok (`EAssert (assertion, model) :: failing, true)
+          | ETrap tr -> Ok (`ETrap (tr, model) :: failing, true)
           | EVal (Error e) -> Error e
         in
-        let+ () =
-          if not no_values then
-            let testcase =
-              List.sort
-                (fun (x1, _) (x2, _) -> compare x1 x2)
-                (Encoding.Model.get_bindings model)
-              |> List.map snd
-            in
-            write_testcase ~dir:workspace ~err:(Option.is_some result) testcase
-          else Ok ()
-        in
-        result )
-      (List.of_seq results)
-  in
-  let failing =
-    List.fold_left
-      (fun acc -> function None -> acc | Some v -> v :: acc)
-      [] failing
+        if not no_values then
+          let testcase =
+            List.sort compare (Encoding.Model.get_bindings model)
+            |> List.map snd
+          in
+          let+ () = write_testcase ~dir:workspace ~err testcase in
+          result
+        else Ok result )
+      [] (List.of_seq results)
   in
   let print_bug = function
     | `ETrap (tr, model) ->
