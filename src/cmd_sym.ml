@@ -4,11 +4,6 @@ module Value = Symbolic_value
 module Choice = Symbolic.P.Choice
 open Hc
 
-(* TODO: make this a CLI flag *)
-let print_solver_time = false
-
-let print_path_condition = false
-
 let symbolic_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
@@ -223,28 +218,16 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     list_map
       (fun (result, thread) ->
         let pc = Thread.pc thread in
-        if print_path_condition then
-          Format.pp_std "PATH CONDITION:@\n%a@\n" Expr.pp_list pc;
         let symbols = thread.symbol_set in
         let model = get_model ~symbols solver pc in
         let* result =
           match result with
           | Symbolic_choice.Multicore.EVal (Ok ()) -> Ok None
-          | EAssert assertion ->
-            Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
-            Format.pp_std "Model:@\n  @[<v>%a@]@\n"
-              (Encoding.Model.pp ~no_values)
-              model;
-            Ok (Some pc)
-          | ETrap tr ->
-            Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
-            Format.pp_std "Model:@\n  @[<v>%a@]@\n"
-              (Encoding.Model.pp ~no_values)
-              model;
-            Ok (Some pc)
+          | EAssert assertion -> Ok (Some (`EAssert (assertion, model)))
+          | ETrap tr -> Ok (Some (`ETrap (tr, model)))
           | EVal (Error e) -> Error e
         in
-        let* () =
+        let+ () =
           if not no_values then
             let testcase =
               List.sort
@@ -255,7 +238,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
             write_testcase ~dir:workspace ~err:(Option.is_some result) testcase
           else Ok ()
         in
-        Ok result )
+        result )
       (List.of_seq results)
   in
   let failing =
@@ -263,32 +246,28 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       (fun acc -> function None -> acc | Some v -> v :: acc)
       [] failing
   in
-  let had_failures =
-    if no_stop_at_failure then
-      let failures = List.fold_left (fun n _ -> succ n) 0 failing in
-      if failures = 0 then begin
-        Format.pp_std "All OK@\n";
-        false
-      end
-      else begin
-        Format.pp_err "Reached %i problems!@\n" failures;
-        true
-      end
-    else
-      match failing with
-      | [] ->
-        Format.pp_std "All OK@\n";
-        false
-      | _l ->
-        Format.pp_err "Reached problem!@\n";
-        true
+  let print_bug = function
+    | `ETrap (tr, model) ->
+      Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
+      Format.pp_std "Model:@\n  @[<v>%a@]@\n"
+        (Encoding.Model.pp ~no_values)
+        model
+    | `EAssert (assertion, model) ->
+      Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
+      Format.pp_std "Model:@\n  @[<v>%a@]@\n"
+        (Encoding.Model.pp ~no_values)
+        model
   in
-  let time = !Solver.Z3Batch.solver_time in
-  let count = !Solver.Z3Batch.solver_count in
-  if print_solver_time then begin
-    Format.pp_std "@\n";
-    Format.pp_std "Solver time %fs@\n" time;
-    Format.pp_std "      calls %i@\n" count;
-    Format.pp_std "  mean time %fms@\n" (1000. *. time /. float count)
-  end;
-  if had_failures then Error `Found_bug else Ok ()
+  let rec loop had_failures = function
+    | [] -> had_failures
+    | hd :: tl ->
+      print_bug hd;
+      let had_failures = true in
+      if no_stop_at_failure then loop had_failures tl else had_failures
+  in
+  let had_failures = loop false failing in
+  if had_failures then Error `Found_bug
+  else begin
+    Format.pp_std "All OK";
+    Ok ()
+  end
