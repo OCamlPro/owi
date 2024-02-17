@@ -9,7 +9,8 @@ let print_solver_time = false
 
 let print_path_condition = false
 
-let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
+let symbolic_extern_module :
+  Symbolic.P.Extern_func.extern_func Link.extern_module =
   let sym_cnt = Atomic.make 0 in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
@@ -63,7 +64,8 @@ let symbolic_extern_module : Symbolic.P.extern_func Link.extern_module =
   in
   { functions }
 
-let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
+let summaries_extern_module :
+  Symbolic.P.Extern_func.extern_func Link.extern_module =
   let open Expr in
   let i32 v =
     match v.node.e with
@@ -80,11 +82,11 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
     let base : int32 = i32 base in
     Choice.with_thread (fun t ->
         let memories = Thread.memories t in
-        Env_id.Tbl.iter
-          (fun _ tbl ->
+        Symbolic_memory.iter
+          (fun tbl ->
             Symbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.M.t) ->
-                Hashtbl.replace m.chunks base size )
+              (fun _ (m : Symbolic_memory.t) ->
+                Symbolic_memory.replace_size m base size )
               tbl )
           memories;
         Ptr (base, Value.const_i32 0l) @: Ty_bitv S32 )
@@ -93,14 +95,10 @@ let summaries_extern_module : Symbolic.P.extern_func Link.extern_module =
     let base = ptr p in
     Choice.with_thread (fun t ->
         let memories = Thread.memories t in
-        Env_id.Tbl.iter
-          (fun _ tbl ->
+        Symbolic_memory.iter
+          (fun tbl ->
             Symbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.M.t) ->
-                if not (Hashtbl.mem m.chunks base) then
-                  (* TODO: trap instead? *)
-                  failwith "Memory leak double free";
-                Hashtbl.remove m.chunks base )
+              (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base)
               tbl )
           memories )
   in

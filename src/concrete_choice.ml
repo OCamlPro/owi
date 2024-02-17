@@ -21,8 +21,8 @@ let select b = b [@@inline]
 
 let select_i32 i = i [@@inline]
 
-let get = ()
-
 let trap msg = raise (Types.Trap msg)
 
 let trap : Trap.t -> 'a t = fun tr -> trap (Trap.to_string tr)
+
+let run = Fun.id

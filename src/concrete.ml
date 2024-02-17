@@ -2,93 +2,65 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module P = struct
-  module Extern_func = Concrete_value.Func
-  module Value = V
-  module Global = Concrete_global
-  module Table = Concrete_table
-  module Memory = Concrete_memory
+module Extern_func = Concrete_value.Func
+module Value = V
+module Global = Concrete_global
+module Table = Concrete_table
+module Memory = Concrete_memory
 
-  type thread = unit
+type thread = unit
 
-  type memory = Memory.t
+module Choice = Concrete_choice
 
-  type func = Concrete_value.Func.t
+let select cond ~if_true ~if_false =
+  if cond then Choice.return if_true else Choice.return if_false
+[@@inline]
 
-  type table = Table.t
+module Elem = struct
+  type t = Link_env.elem
 
-  type elem = Link_env.elem
+  let get (e : t) i = e.value.(i)
 
-  type data = Link_env.data
+  let size (e : t) = Array.length e.value
+end
 
-  type global = Concrete_global.t
+module Data = struct
+  type t = Link_env.data
 
-  type vbool = Bool.t
+  let value data = data.Link_env.value
+end
 
-  type int32 = Int32.t
+module Env = struct
+  type t = Concrete_value.Func.extern_func Link_env.t
 
-  type int64 = Int64.t
+  let get_memory = Link_env.get_memory
 
-  type float32 = Float32.t
+  let get_func = Link_env.get_func
 
-  type float64 = Float64.t
+  let get_table = Link_env.get_table
 
-  type extern_func = Concrete_value.Func.extern_func
+  let get_elem = Link_env.get_elem
 
-  type env = extern_func Link_env.t
+  let get_data env n =
+    let data = Link_env.get_data env n in
+    Choice.return data
 
-  module Choice = Concrete_choice
+  let get_global = Link_env.get_global
 
-  let select cond ~if_true ~if_false =
-    if cond then Choice.return if_true else Choice.return if_false
-  [@@inline]
+  let get_extern_func = Link_env.get_extern_func
 
-  module Elem = struct
-    type t = elem
+  let drop_elem = Link_env.drop_elem
 
-    let get (e : t) i = e.value.(i)
+  let drop_data = Link_env.drop_data
+end
 
-    let size (e : t) = Array.length e.value
-  end
+module Module_to_run = struct
+  (** runnable module *)
+  type t = Concrete_value.Func.extern_func Link.module_to_run
 
-  module Data = struct
-    type t = data
+  let env (t : Concrete_value.Func.extern_func Link.module_to_run) = t.env
 
-    let value data = data.Link_env.value
-  end
+  let modul (t : Concrete_value.Func.extern_func Link.module_to_run) = t.modul
 
-  module Env = struct
-    type t = env
-
-    let get_memory = Link_env.get_memory
-
-    let get_func = Link_env.get_func
-
-    let get_table = Link_env.get_table
-
-    let get_elem = Link_env.get_elem
-
-    let get_data env n =
-      let data = Link_env.get_data env n in
-      Choice.return data
-
-    let get_global = Link_env.get_global
-
-    let get_extern_func = Link_env.get_extern_func
-
-    let drop_elem = Link_env.drop_elem
-
-    let drop_data = Link_env.drop_data
-  end
-
-  module Module_to_run = struct
-    (** runnable module *)
-    type t = extern_func Link.module_to_run
-
-    let env (t : extern_func Link.module_to_run) = t.env
-
-    let modul (t : extern_func Link.module_to_run) = t.modul
-
-    let to_run (t : extern_func Link.module_to_run) = t.to_run
-  end
+  let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = t.to_run
 end
