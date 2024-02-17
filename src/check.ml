@@ -30,7 +30,7 @@ let modul m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then error_s "duplicate global %s" id
+      if Hashtbl.mem seen id then Error (`Duplicate_global id)
       else Ok (Hashtbl.replace seen id ())
   in
   let add_table =
@@ -38,7 +38,7 @@ let modul m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then error_s "duplicate table %s" id
+      if Hashtbl.mem seen id then Error (`Duplicate_table id)
       else Ok (Hashtbl.replace seen id ())
   in
   let add_memory =
@@ -46,7 +46,7 @@ let modul m =
     function
     | None -> Ok ()
     | Some id ->
-      if Hashtbl.mem seen id then error_s "duplicate memory %s" id
+      if Hashtbl.mem seen id then Error (`Duplicate_memory id)
       else Ok (Hashtbl.add seen id ())
   in
 
@@ -58,18 +58,18 @@ let modul m =
         | MExport _e -> Ok env
         | MFunc _f -> Ok { env with funcs = true }
         | MStart _start ->
-          if env.start then Error "multiple start sections"
+          if env.start then Error `Multiple_start_sections
           else Ok { env with start = true }
         | MImport i ->
-          if env.funcs then Error "import after function"
-          else if env.memory then Error "import after memory"
-          else if env.tables then Error "import after table"
-          else if env.globals then Error "import after global"
+          if env.funcs then Error `Import_after_function
+          else if env.memory then Error `Import_after_memory
+          else if env.tables then Error `Import_after_table
+          else if env.globals then Error `Import_after_global
           else begin
             match i.desc with
             | Import_mem (id, _) ->
               let* () = add_memory id in
-              if env.imported_memory then Error "multiple memories"
+              if env.imported_memory then Error `Multiple_memories
               else Ok { env with imported_memory = true }
             | Import_func _ -> Ok env
             | Import_global (id, _) ->
@@ -83,7 +83,7 @@ let modul m =
         | MElem _e -> Ok env
         | MMem (id, _) ->
           let* () = add_memory id in
-          if env.memory || env.imported_memory then Error "multiple memories"
+          if env.memory || env.imported_memory then Error `Multiple_memories
           else Ok { env with memory = true }
         | MType _t -> Ok env
         | MGlobal { id; _ } ->

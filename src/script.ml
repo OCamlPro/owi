@@ -14,25 +14,22 @@ module Host_externref = struct
   let value i = Concrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
 
-let check_error ~expected ~got =
+let check_error ~expected ~got : unit Result.t =
   let ok =
-    got = expected
-    || String.starts_with ~prefix:expected got
-    || got = "constant out of range"
+    Result.err_to_string got = expected
+    || String.starts_with ~prefix:expected (Result.err_to_string got)
+    || ( got = `Constant_out_of_range
+       || got = `Msg "constant out of range"
+       || got = `Parse_fail "constant out of range" )
        && (expected = "i32 constant out of range" || expected = "i32 constant")
   in
   if not ok then begin
-    Log.debug1 "expected: `%s`@." expected;
-    Log.debug1 "got     : `%s`@." got;
     Error got
   end
   else Ok ()
 
 let check_error_result expected = function
-  | Ok _whatever ->
-    Log.debug1 "expected: `%s`@." expected;
-    Log.debug0 "got     :  Ok@.";
-    error_s "expected Error (%S) but got Ok" expected
+  | Ok _whatever -> Error (`Did_not_fail_but_expected expected)
   | Error got -> check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
@@ -40,16 +37,16 @@ let load_func_from_module ls mod_id f_name =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Error "unbound last module"
+      | None -> Error `Unbound_last_module
       | Some m -> Ok m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> error_s "unbound module %s" mod_id
+      | exception Not_found -> Error (`Unbound_module mod_id)
       | exports -> Ok exports )
   in
   match Link.StringMap.find f_name exports.functions with
-  | exception Not_found -> error_s "unbound name %s" f_name
+  | exception Not_found -> Error (`Unbound_name f_name)
   | v -> Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
@@ -57,16 +54,16 @@ let load_global_from_module ls mod_id name =
     match mod_id with
     | None -> begin
       match ls.Link.last with
-      | None -> Error "unbound last module"
+      | None -> Error `Unbound_last_module
       | Some (m, _env_id) -> Ok m
     end
     | Some mod_id -> (
       match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> error_s "unbound module %s" mod_id
+      | exception Not_found -> Error (`Unbound_module mod_id)
       | exports, _env_id -> Ok exports )
   in
   match Link.StringMap.find name exports.globals with
-  | exception Not_found -> error_s "unbound name %s" name
+  | exception Not_found -> Error (`Unbound_name name)
   | v -> Ok v
 
 let compare_result_const result (const : Concrete_value.t) =
@@ -180,7 +177,7 @@ let run ~no_exhaustion ~optimize script =
             match Compile.until_simplify ~unsafe m with
             | Error got -> check_error ~expected ~got
             | Ok _m ->
-              let got = "Ok" in
+              let got = `No_error in
               check_error ~expected ~got )
           | Ok _ -> assert false
         in
@@ -195,7 +192,7 @@ let run ~no_exhaustion ~optimize script =
           match
             Compile.until_link link_state ~unsafe ~optimize ~name:None m
           with
-          | Ok _ -> check_error ~expected ~got:"Ok"
+          | Ok _ -> check_error ~expected ~got:`No_error
           | Error got -> check_error ~expected ~got
         in
         link_state
@@ -223,7 +220,7 @@ let run ~no_exhaustion ~optimize script =
         then begin
           Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.rev stack)
             Text.pp_results res;
-          Error "Bad result"
+          Error `Bad_result
         end
         else Ok link_state
       | Assert (Assert_trap (a, expected)) ->

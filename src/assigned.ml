@@ -112,7 +112,8 @@ let name kind ~get_name values =
     | None -> Ok named
     | Some name ->
       let index = Indexed.get_index elt in
-      if String_map.mem name named then error_s "duplicate %s %s" kind name
+      if String_map.mem name named then
+        Error (`Msg (Format.sprintf "duplicate %s %s" kind name))
       else ok @@ String_map.add name index named
   in
   let+ named = list_fold_left assign_one String_map.empty values in
@@ -126,11 +127,11 @@ let check_type_id (types : simplified str_type Named.t)
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with
-  | None -> Error "unknown type"
+  | None -> Error `Unknown_type
   | Some (Def_func_t func_type') ->
     let* func_type = Simplified_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then
-      Error "inline function type"
+      Error `Inline_function_type
     else Ok ()
   | Some _ -> assert false
 

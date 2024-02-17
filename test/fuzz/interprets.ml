@@ -24,12 +24,12 @@ let set =
            { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
          : Unix.interval_timer_status )
 
-let timeout_call_run (run : unit -> 'a Result.t) : 'a Result.t =
+let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
   try
     Fun.protect ~finally:unset (fun () ->
         set ();
-        try run () with Timeout -> Error "timeout" )
-  with Timeout -> Error "timeout"
+        try run () with Timeout -> Error `Timeout )
+  with Timeout -> Error `Timeout
 
 module Owi_unoptimized : INTERPRET = struct
   type t = Text.modul
@@ -73,7 +73,7 @@ module Owi_symbolic : INTERPRET = struct
 
   let dummy_workers_count = 42
 
-  let run modul =
+  let run modul : unit Result.t =
     let* simplified = Compile.until_simplify ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let* regular, link_state =
@@ -89,8 +89,8 @@ module Owi_symbolic : INTERPRET = struct
         in
         match res with
         | Ok res -> res
-        | Error (Trap _t) -> Result.error "symbolic trap"
-        | Error Assert_fail -> Result.error "symbolic assert_fail" )
+        | Error (Trap t) -> Error (`Trap t)
+        | Error Assert_fail -> Error `Assert_failure )
 
   let name = "owi_symbolic"
 end
@@ -100,7 +100,7 @@ module Reference : INTERPRET = struct
 
   let of_symbolic modul = Format.asprintf "%a" Text.pp_modul modul
 
-  let run modul =
+  let run modul : unit Result.t =
     let prefix = "owi_fuzzer_official" in
     let suffix = ".wast" in
     let tmp_file = Filename.temp_file prefix suffix in
@@ -114,9 +114,11 @@ module Reference : INTERPRET = struct
     in
     match n with
     | 0 -> Ok ()
-    | 42 -> Error "trap"
-    | 124 -> Error "timeout"
-    | n -> Format.kasprintf failwith "error %d" n
+    | 42 ->
+      (* TODO: fix this *)
+      Error (`Trap Trap.Out_of_bounds_memory_access)
+    | 124 -> Error `Timeout
+    | n -> Error (`Msg (Format.sprintf "error %d" n))
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"

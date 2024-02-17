@@ -66,7 +66,7 @@ module Env = struct
 
   let block_type_get i env =
     match List.nth_opt env.blocks i with
-    | None -> Format.ksprintf Result.error "unknown label %d" i
+    | None -> Error `Unknown_label
     | Some bt -> Ok bt
 
   let table_type_get_from_module i (modul : Simplified.modul) =
@@ -138,18 +138,13 @@ module Stack : sig
 
   val match_types : typ -> typ -> bool
 
-  val pp : formatter -> t -> unit
-
-  val pp_error : formatter -> t * t -> unit
+  val _pp : formatter -> t -> unit
 
   val match_prefix : prefix:t -> stack:t -> t option
 end = struct
   type t = typ list
 
-  let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
-
-  let pp_error fmt (expected, got) =
-    Format.pp fmt "requires %a but stack has %a" pp expected pp got
+  let _pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
 
   let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
@@ -204,17 +199,17 @@ end = struct
 
   let pop required stack =
     match match_prefix ~prefix:required ~stack with
-    | None -> error_s "type mismatch (pop) %a" pp_error (required, stack)
+    | None -> Error (`Type_mismatch "pop")
     | Some stack -> Ok stack
 
   let pop_ref = function
     | (Something | Ref_type _) :: tl -> Ok tl
     | Any :: _ as stack -> Ok stack
-    | _ -> Error "type mismatch (pop_ref)"
+    | _ -> Error (`Type_mismatch "pop_ref")
 
   let drop stack =
     match stack with
-    | [] -> Error "type mismatch drop"
+    | [] -> Error (`Type_mismatch "drop")
     | Any :: _ -> Ok [ Any ]
     | _ :: tl -> Ok tl
 
@@ -359,7 +354,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Error "type mismatch (return_call)"
+    then Error (`Type_mismatch "return_call")
     else
       let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
       [ any ]
@@ -369,7 +364,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Error "type mismatch (return_call_indirect)"
+    then Error (`Type_mismatch "return_call_indirect")
     else
       let* stack = Stack.pop [ i32 ] stack in
       let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
@@ -380,7 +375,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
         (Stack.equal
            (List.rev_map typ_of_val_type rt)
            (List.rev_map typ_of_val_type env.result_type) )
-    then Error "type mismatch (return_call_ref)"
+    then Error (`Type_mismatch "return_call_ref")
     else
       let* stack = Stack.pop_ref stack in
       let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
@@ -390,12 +385,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     let table_typ = Env.table_type_get ti env in
     let elem_typ = Env.elem_type_get ei env in
     if not @@ Stack.match_ref_type (snd table_typ) (snd elem_typ) then
-      Error "type mismatch (table_init)"
+      Error (`Type_mismatch "table_init")
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_copy (Raw i, Raw i') ->
     let typ = Env.table_type_get i env in
     let typ' = Env.table_type_get i' env in
-    if typ <> typ' then Error "type mismatch (table_copy)"
+    if typ <> typ' then Error (`Type_mismatch "table_copy")
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_fill (Raw i) ->
     let _null, t = Env.table_type_get i env in
@@ -416,11 +411,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
       match t with
       | None -> begin
         match stack with
-        | Ref_type _ :: _tl -> Error "type mismatch (select implicit)"
+        | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
         | Any :: _ -> Ok [ Something; Any ]
         | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
         | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
-        | _ -> error_s "type mismatch (select) %a" Stack.pp stack
+        | _ -> Error (`Type_mismatch "select")
       end
       | Some t ->
         let t = List.map typ_of_val_type t in
@@ -429,7 +424,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
         Stack.push t stack
     end
   | Ref_func (Raw i) ->
-    if not @@ Hashtbl.mem env.refs i then Error "undeclared function reference"
+    if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference
     else Stack.push [ Ref_type Func_ht ] stack
   | Br (Raw i) ->
     let* jt = Env.block_type_get i env in
@@ -449,7 +444,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
         (fun (Raw i : simplified indice) ->
           let* jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
-            Error "type mismatch (br table)"
+            Error (`Type_mismatch "br_table")
           else
             let* _stack = Stack.pop jt stack in
             Ok () )
@@ -493,14 +488,10 @@ and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
   let* stack = list_fold_left (typecheck_instr env) pt expr in
-  if not (Stack.equal rt stack) then
-    error_s "type mismatch block %a" Stack.pp_error (rt, stack)
+  if not (Stack.equal rt stack) then Error (`Type_mismatch "typecheck_expr 1")
   else
     match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
-    | None ->
-      error_s
-        "type mismatch (param type: prefix is %a and previous_stack is %a)"
-        Stack.pp pt Stack.pp previous_stack
+    | None -> Error (`Type_mismatch "typecheck_expr 2")
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =
@@ -520,7 +511,7 @@ let typecheck_function (modul : modul) func refs =
     in
     let required = List.rev_map typ_of_val_type result in
     if not @@ Stack.equal required stack then
-      error_s "type mismatch func %a" Stack.pp_error (required, stack)
+      Error (`Type_mismatch "typecheck_function")
     else Ok ()
 
 let typecheck_const_instr (modul : modul) refs stack = function
@@ -536,7 +527,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
     let value = Indexed.get_at_exn i modul.global.values in
     let* _mut, typ =
       match value with
-      | Local _ -> Error "unknown global"
+      | Local _ -> Error `Unknown_global
       | Imported t -> Ok t.desc
     in
     Stack.push [ typ_of_val_type typ ] stack
@@ -566,12 +557,9 @@ let typecheck_global (modul : modul) refs
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd typ in
-      if expected <> real_type then
-        error
-        @@ asprintf "type mismatch (typecheck_global) got %a expected %a" pp_typ
-             real_type pp_typ expected
+      if expected <> real_type then Error (`Type_mismatch "typecheck global 1")
       else Ok ()
-    | _whatever -> Error "type mismatch (typecheck_global wrong num)" )
+    | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
 let typecheck_elem modul refs (elem : elem Indexed.t) =
   let elem = Indexed.get elem in
@@ -583,9 +571,9 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
         match real_type with
         | [ real_type ] ->
           if Ref_type expected_type <> real_type then
-            Error "type mismatch (typecheck_elem)"
+            Error (`Type_mismatch "typecheck_elem 1")
           else Ok ()
-        | _whatever -> Error "type mismatch (typecheck_elem wrong num)" )
+        | _whatever -> Error (`Type_mismatch "typecheck elem 2") )
       elem.init
   in
   match elem.mode with
@@ -593,14 +581,15 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
   | Elem_active (None, _e) -> assert false
   | Elem_active (Some tbl_i, e) -> (
     let _null, tbl_type = Env.table_type_get_from_module tbl_i modul in
-    if tbl_type <> expected_type then Error "type mismatch (elem_active)"
+    if tbl_type <> expected_type then Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
-        if t <> tbl_type then Error "type mismatch (elem_active bis)" else Ok ()
+        if t <> tbl_type then Error (`Type_mismatch "typecheck_elem 4")
+        else Ok ()
       | [ _t ] -> Ok ()
-      | _whatever -> Error "type mismatch (typecheck_elem)" )
+      | _whatever -> Error (`Type_mismatch "typecheck_elem 5") )
 
 let typecheck_data modul refs (data : data Indexed.t) =
   let data = Indexed.get data in
@@ -610,7 +599,7 @@ let typecheck_data modul refs (data : data Indexed.t) =
     let* t = typecheck_const_expr modul refs e in
     match t with
     | [ _t ] -> Ok ()
-    | _whatever -> Error "type mismatch (typecheck_data)" )
+    | _whatever -> Error (`Type_mismatch "typecheck_data") )
 
 let modul (modul : modul) =
   Log.debug0 "typechecking ...@\n";

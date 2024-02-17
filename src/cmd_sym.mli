@@ -8,4 +8,4 @@ val cmd :
   -> bool
   -> Fpath.t
   -> Fpath.t list
-  -> unit
+  -> unit Result.t

@@ -15,9 +15,4 @@ let run_file ~unsafe ~optimize filename =
 let cmd profiling debug unsafe optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let result = list_iter (run_file ~unsafe ~optimize) files in
-  match result with
-  | Ok () -> ()
-  | Error e ->
-    Format.pp_err "%s@\n" e;
-    exit 1
+  list_iter (run_file ~unsafe ~optimize) files

@@ -13,4 +13,4 @@ val cmd :
   -> bool
   -> bool
   -> bool
-  -> unit
+  -> unit Result.t

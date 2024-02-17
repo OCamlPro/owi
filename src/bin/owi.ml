@@ -192,7 +192,66 @@ let cli =
 let exit_code =
   let open Cmdliner.Cmd.Exit in
   match Cmdliner.Cmd.eval_value cli with
-  | Ok (`Help | `Version | `Ok ()) -> ok
+  | Ok (`Help | `Version) -> ok
+  | Ok (`Ok result) -> begin
+    match result with
+    | Ok () -> ok
+    | Error e -> begin
+      Format.pp_err "%s" (Result.err_to_string e);
+      match e with
+      | `No_error -> ok
+      | `Alignment_too_large -> 1
+      | `Assert_failure -> 2
+      | `Bad_result -> 3
+      | `Call_stack_exhausted -> 4
+      | `Constant_expression_required -> 5
+      | `Constant_out_of_range -> 6
+      | `Did_not_fail_but_expected _ -> 7
+      | `Duplicate_export_name -> 8
+      | `Duplicate_global _id -> 9
+      | `Duplicate_local _id -> 10
+      | `Duplicate_memory _id -> 11
+      | `Duplicate_table _id -> 12
+      | `Found_bug -> 13
+      | `Global_is_immutable -> 14
+      | `Illegal_escape _txt -> 15
+      | `Import_after_function -> 16
+      | `Import_after_global -> 17
+      | `Import_after_memory -> 18
+      | `Import_after_table -> 19
+      | `Incompatible_import_type -> 20
+      | `Inline_function_type -> 21
+      | `Invalid_result_arity -> 22
+      | `Lexer_unknown_operator _op -> 23
+      | `Malformed_utf8_encoding _txt -> 24
+      | `Memory_size_too_large -> 25
+      | `Msg _msg -> 26
+      | `Multiple_memories -> 27
+      | `Multiple_start_sections -> 28
+      | `Parse_fail _txt -> 30
+      | `Size_minimum_greater_than_maximum -> 31
+      | `Start_function -> 32
+      | `Timeout -> 33
+      | `Trap _t -> 34
+      | `Type_mismatch _msg -> 35
+      | `Unbound_last_module -> 36
+      | `Unbound_module _id -> 37
+      | `Unbound_name _id -> 38
+      | `Undeclared_function_reference -> 39
+      | `Unexpected_token -> 40
+      | `Unknown_function _id -> 41
+      | `Unknown_global -> 42
+      | `Unknown_import -> 43
+      | `Unknown_label -> 44
+      | `Unknown_local _id -> 45
+      | `Unknown_memory _id -> 46
+      | `Unknown_module _id -> 47
+      | `Unknown_operator -> 48
+      | `Unknown_type -> 49
+      | `Unsupported_file_extension _ext -> 50
+      | `Wrong_memory_id _id -> 51
+    end
+  end
   | Error e -> (
     match e with `Term -> 122 | `Parse -> cli_error | `Exn -> internal_error )
 

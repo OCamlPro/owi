@@ -108,8 +108,7 @@ let check_limit { min; max } =
   match max with
   | None -> Ok ()
   | Some max ->
-    if min > max then Error "size minimum must not be greater than maximum"
-    else Ok ()
+    if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
 
 let of_symbolic (modul : Text.modul) : t Result.t =
   Log.debug0 "grouping     ...@\n";
@@ -149,14 +148,11 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       ok ({ fields with exports }, curr)
     | MMem ((_, limits) as mem) ->
       let* () =
-        if limits.min > 65536 then
-          Error "memory size must be at most 65536 pages (4GiB)"
-        else Ok ()
+        if limits.min > 65536 then Error `Memory_size_too_large else Ok ()
       in
       let* () =
         match limits.max with
-        | Some max when max > 65536 ->
-          Error "memory size must be at most 65536 pages (4GiB)"
+        | Some max when max > 65536 -> Error `Memory_size_too_large
         | Some _ | None -> Ok ()
       in
       let* () = check_limit limits in

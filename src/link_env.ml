@@ -82,22 +82,18 @@ module Build = struct
 
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
-    | None ->
-      (* Log.debug2 "%a@." pp env; *)
-      Error "unknown global"
+    | None -> Error `Unknown_global
     | Some v -> Ok v
 
   let get_const_global (env : t) id =
     let* g = get_global env id in
     match g.mut with
     | Const -> ok g.value
-    | Var -> Error "constant expression required"
+    | Var -> Error `Constant_expression_required
 
   let get_func (env : t) id =
     match IMap.find_opt id env.functions with
-    | None ->
-      (* Log.debug2 "%a@." pp env; *)
-      error_s "unknown function %a" Format.pp_int id
+    | None -> Error (`Unknown_function id)
     | Some v -> Ok v
 end
 

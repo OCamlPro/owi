@@ -12,9 +12,4 @@ let cmd profiling debug optimize files no_exhaustion =
   let exec = Script.exec ~no_exhaustion ~optimize in
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let result = list_iter (run_file exec) files in
-  match result with
-  | Ok () -> ()
-  | Error e ->
-    Format.pp_err "%s@." e;
-    exit 1
+  list_iter (run_file exec) files

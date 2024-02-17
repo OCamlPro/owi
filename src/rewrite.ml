@@ -8,24 +8,24 @@ open Syntax
 let find msg (named : 'a Named.t) (indice : text indice option) :
   simplified indice Result.t =
   match indice with
-  | None -> error_s "%s" msg
+  | None -> Error (`Msg msg)
   | Some indice -> (
     match indice with
     | Raw i as indice ->
       (* TODO change Indexed.t strucure for that to be more efficient *)
       if not (List.exists (Indexed.has_index i) named.values) then
-        error_s "%s %i" msg i
+        Error (`Msg (Format.sprintf "%s %i" msg i))
       else Ok indice
     | Text name -> (
       match String_map.find_opt name named.named with
-      | None -> error_s "%s %s" msg name
+      | None -> Error (`Msg (Format.sprintf "%s %s" msg name))
       | Some i -> Ok (Raw i) ) )
 
 let get msg (named : 'a Named.t) indice : 'a Indexed.t Result.t =
   let* (Raw i) = find msg named indice in
   (* TODO change Named.t structure to make that sensible *)
   match List.nth_opt named.values i with
-  | None -> error_s "%s" msg
+  | None -> Error (`Msg msg)
   | Some v -> Ok v
 
 let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
@@ -35,7 +35,7 @@ let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
     match Indexed.get va with
     | Imported imported -> Ok imported.desc
     | Local global ->
-      if imported_only then Error "unknown global"
+      if imported_only then Error `Unknown_global
       else
         let mut, val_type = global.typ in
         let+ val_type = Simplified_types.convert_val_type None val_type in
@@ -62,11 +62,11 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
               block_ids
           with Exit -> ()
         end;
-        if !pos = -1 then Error "unknown label" else Ok !pos
+        if !pos = -1 then Error `Unknown_label else Ok !pos
       | Raw id -> Ok id
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
-    if id > List.length block_ids + loop_count then Error "unknown label"
+    if id > List.length block_ids + loop_count then Error `Unknown_label
     else Ok (Raw id)
   in
 
@@ -76,7 +76,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       let* v = get "unknown type" modul.typ (Some ind) in
       match Indexed.get v with
       | Def_func_t t' -> Ok (Bt_raw (None, t'))
-      | _ -> Error "TODO: Simplify.bt_some_to_raw"
+      | _ -> assert false
     end
     | Bt_raw (type_use, t) -> (
       let* t = Simplified_types.convert_func_type None t in
@@ -86,12 +86,10 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
         (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
         let* t' =
           let* v = get "unknown type" modul.typ (Some ind) in
-          match Indexed.get v with
-          | Def_func_t t' -> Ok t'
-          | _ -> Error "TODO: Simplify.bt_some_to_raw"
+          match Indexed.get v with Def_func_t t' -> Ok t' | _ -> assert false
         in
         let ok = Simplified_types.equal_func_types t t' in
-        if not ok then Error "inline function type" else Ok (Bt_raw (None, t)) )
+        if not ok then Error `Inline_function_type else Ok (Bt_raw (None, t)) )
   in
 
   let bt_to_raw :
@@ -109,7 +107,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
         match name with
         | None -> Ok (locals, next_free_int + 1)
         | Some name ->
-          if String_map.mem name locals then error_s "duplicate local %s" name
+          if String_map.mem name locals then Error (`Duplicate_local name)
           else Ok (String_map.add name next_free_int locals, next_free_int + 1)
         )
       (Ok (String_map.empty, 0))
@@ -118,10 +116,12 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
 
   let find_local = function
     | Raw i as id ->
-      if i >= after_last_assigned_local then Error "unknown local" else Ok id
+      if i >= after_last_assigned_local then
+        Error (`Unknown_local (string_of_int i))
+      else Ok id
     | Text name -> (
       match String_map.find_opt name locals with
-      | None -> error_s "unknown local %s" name
+      | None -> Error (`Unknown_local name)
       | Some id -> Ok (Raw id) )
   in
 
@@ -191,7 +191,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
     | Global_set id -> begin
       let* idx, mut = find_global modul ~imported_only:false (Some id) in
       match mut with
-      | Const -> Error "global is immutable"
+      | Const -> Error `Global_is_immutable
       | Var -> ok @@ Global_set (Raw idx)
     end
     | Global_get id ->
@@ -224,7 +224,7 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       let* table' = find_table (Some i') in
       ok @@ Table_copy (table, table')
     | Memory_init id ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else
         let* id = find_data (Some id) in
         ok @@ Memory_init id
@@ -236,82 +236,63 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       ok @@ Elem_drop id
     (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
     | I_load8 (nn, sx, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 1l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 1l then Error `Alignment_too_large
       else Ok (I_load8 (nn, sx, memarg))
     | I_store8 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 1l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 1l then Error `Alignment_too_large
       else ok @@ I_store8 (nn, memarg)
     | I_load16 (nn, sx, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 2l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 2l then Error `Alignment_too_large
       else ok @@ I_load16 (nn, sx, memarg)
     | I_store16 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 2l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 2l then Error `Alignment_too_large
       else ok @@ I_store16 (nn, memarg)
     | I64_load32 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 4l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 4l then Error `Alignment_too_large
       else ok @@ I64_load32 (nn, memarg)
     | I64_store32 memarg ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else if memarg.align >= 4l then
-        Error "alignment must not be larger than natural"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else if memarg.align >= 4l then Error `Alignment_too_large
       else ok @@ I64_store32 memarg
     | I_load (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else
         let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then
-          Error "alignment must not be larger than natural"
+        if memarg.align >= max_allowed then Error `Alignment_too_large
         else ok @@ I_load (nn, memarg)
     | F_load (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else
         let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then
-          Error "alignment must not be larger than natural"
+        if memarg.align >= max_allowed then Error `Alignment_too_large
         else ok @@ F_load (nn, memarg)
     | F_store (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else
         let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then
-          Error "alignment must not be larger than natural"
+        if memarg.align >= max_allowed then Error `Alignment_too_large
         else ok @@ F_store (nn, memarg)
     | I_store (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else
         let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then
-          Error "alignment must not be larger than natural"
+        if memarg.align >= max_allowed then Error `Alignment_too_large
         else ok @@ I_store (nn, memarg)
-    | Memory_copy ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else Ok Memory_copy
-    | Memory_size ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else Ok Memory_size
-    | Memory_fill ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else Ok Memory_fill
-    | Memory_grow ->
-      if List.length modul.mem.values < 1 then Error "unknown memory 0"
-      else Ok Memory_grow
+    | (Memory_copy | Memory_size | Memory_fill | Memory_grow) as i ->
+      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
+      else Ok i
     | Select typ -> begin
       match typ with
       | None -> ok @@ Select None
       | Some [ t ] ->
         let+ t = Simplified_types.convert_val_type None t in
         Select (Some [ t ])
-      | Some [] | Some (_ :: _ :: _) -> Error "invalid result arity"
+      | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
     end
     | Array_new_default id ->
       let* id = find_type (Some id) in
@@ -354,9 +335,8 @@ let rewrite_expr (modul : Assigned.t) (locals : simplified param list)
       Ok i
     | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
       | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
-      | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug2 "TODO (Rewrite.body) %a@\n" pp_instr i;
-      Ok Nop
+      | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as _i ->
+      assert false
   and expr (e : text expr) (loop_count, block_ids) : simplified expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
   in
@@ -371,7 +351,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
       let* idx, mut = find_global modul ~imported_only:true (Some id) in
       match mut with
       | Const -> ok @@ Global_get (Raw idx)
-      | Var -> Error "constant expression required"
+      | Var -> Error `Constant_expression_required
     end
     | Ref_null v ->
       let+ v = Simplified_types.convert_heap_type None v in
@@ -387,8 +367,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
       Array_new_default t
     | (I32_const _ | I64_const _ | F32_const _ | F64_const _ | Ref_i31) as i ->
       Ok i
-    | i ->
-      error @@ Format.asprintf "constant expression required, got %a" pp_instr i
+    | _i -> Error `Constant_expression_required
   in
   list_map const_instr expr
 
@@ -399,7 +378,7 @@ let rewrite_block_type (modul : Assigned.t) (block_type : text block_type) :
     let* v = get "unknown type" modul.typ (Some id) in
     match Indexed.get v with
     | Def_func_t t' -> Ok (Bt_raw (None, t'))
-    | _ -> Error "TODO: Simplify.bt_some_to_raw"
+    | _ -> assert false
   end
   | Bt_raw (_, func_type) ->
     let* t = Simplified_types.convert_func_type None func_type in
@@ -534,7 +513,7 @@ let modul (modul : Assigned.t) : Simplified.modul Result.t =
       in
       match (param_typ, result_typ) with
       | [], [] -> Ok (Some idx)
-      | _, _ -> Error "start function" )
+      | _, _ -> Error `Start_function )
   in
 
   let modul : Simplified.modul =

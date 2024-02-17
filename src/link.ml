@@ -51,14 +51,13 @@ let empty_state =
 
 let load_from_module ls f (import : _ Imported.t) =
   match StringMap.find import.modul ls.by_name with
-  | exception Not_found -> error_s "unknown module %s" import.modul
+  | exception Not_found -> Error (`Unknown_module import.modul)
   | exports -> (
     match StringMap.find import.name (f exports) with
     | exception Not_found ->
-      Log.debug1 "unknown import %s" import.name;
       if StringSet.mem import.name exports.defined_names then
-        Error "incompatible import type (Link.load_from_module)"
-      else Error "unknown import"
+        Error `Incompatible_import_type
+      else Error `Unknown_import
     | v -> Ok v )
 
 let load_global (ls : 'f state) (import : simplified global_type Imported.t) :
@@ -66,12 +65,11 @@ let load_global (ls : 'f state) (import : simplified global_type Imported.t) :
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
-    | Var, Const | Const, Var ->
-      Error "incompatible import type (Link.load_global)"
+    | Var, Const | Const, Var -> Error `Incompatible_import_type
     | Const, Const | Var, Var -> Ok ()
   in
   if snd import.desc <> global.typ then begin
-    Error "incompatible import type (Link.load_global bis)"
+    Error `Incompatible_import_type
   end
   else Ok global
 
@@ -137,9 +135,9 @@ module Eval_const = struct
   let expr env e : Concrete_value.t Result.t =
     let* stack = list_fold_left (instr env) Stack.empty e in
     match stack with
-    | [] -> Error "type mismatch (const expr returning zero values)"
+    | [] -> Error (`Type_mismatch "const expr returning zero values")
     | _ :: _ :: _ ->
-      error_s "type mismatch (const expr returning more than one value)"
+      Error (`Type_mismatch "const expr returning more than one value")
     | [ result ] -> Ok result
 end
 
@@ -188,9 +186,7 @@ let load_memory (ls : 'f state) (import : limits Imported.t) :
   let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
   let imported_limit = Concrete_memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
-  else
-    error_s "incompatible import type for memory %s %s expected %a got %a"
-      import.modul import.name pp_limits import.desc pp_limits imported_limit
+  else Error `Incompatible_import_type
 
 let eval_memory ls (memory : (mem, limits) Runtime.t) :
   Concrete_memory.t Result.t =
@@ -216,9 +212,7 @@ let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
   let typ : simplified table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
-  else
-    error_s "incompatible import type for table %s %s expected %a got %a"
-      import.modul import.name pp_table_type typ pp_table_type (t.limits, t.typ)
+  else Error `Incompatible_import_type
 
 let eval_table ls (table : (_, simplified table_type) Runtime.t) :
   table Result.t =
@@ -255,7 +249,7 @@ let load_func (ls : 'f state) (import : simplified block_type Imported.t) :
     | Extern func_id -> Func_id.get_typ func_id ls.collection
   in
   if func_types_are_compatible typ type' then Ok func
-  else Error "incompatible import type (Link.load_func)"
+  else Error `Incompatible_import_type
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   match func with
@@ -280,9 +274,7 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  if mem <> 0 then begin
-    error_s "wrong memory id: %i@." mem
-  end
+  if mem <> 0 then Error (`Wrong_memory_id mem)
   else
     Ok
       [ I32_const offset
@@ -294,7 +286,7 @@ let active_data_expr ~offset ~length ~mem ~data =
 
 let get_i32 = function
   | Concrete_value.I32 i -> Ok i
-  | _ -> Error "type mismatch"
+  | _ -> Error (`Type_mismatch "get_i32")
 
 let define_data env data =
   Named.fold
@@ -328,7 +320,7 @@ let define_elem env elem =
           (fun v ->
             match v with
             | Concrete_value.Ref v -> Ok v
-            | _ -> Error "constant expression required" )
+            | _ -> Error `Constant_expression_required )
           init
       in
       let env =
@@ -358,7 +350,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
     list_fold_left
       (fun (acc, names) (export : Simplified.export) ->
         let value = get_env env export.id in
-        if StringSet.mem export.name names then Error "duplicate export name"
+        if StringSet.mem export.name names then Error `Duplicate_export_name
         else
           Ok
             ( StringMap.add export.name value acc
@@ -449,13 +441,11 @@ let register_module (ls : 'f state) ~name ~(id : string option) :
     match id with
     | Some id -> begin
       match StringMap.find_opt id ls.by_id with
-      | None -> error_s "Unbound module id %s" id
+      | None -> Error (`Unbound_module id)
       | Some e -> Ok e
     end
     | None -> (
-      match ls.last with
-      | Some e -> Ok e
-      | None -> Error "No previous module to register" )
+      match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
   in
   Ok { ls with by_name = StringMap.add name exports ls.by_name }
 

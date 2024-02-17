@@ -70,7 +70,7 @@ let link_state =
 (* first pure wasm module refering to `life_ext` *)
 let pure_wasm_module_1 =
   match Parse.Module.from_file (Fpath.v "life.wat") with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok modul -> modul
 
 (* our first pure wasm module, linked with `life_ext` *)
@@ -79,19 +79,19 @@ let module_to_run, link_state =
     Compile.until_link link_state ~unsafe:false ~optimize:true
       ~name:(Some "life") pure_wasm_module_1
   with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok (m, state) -> (m, state)
 
 (* let's run it ! First module to be interpreted *)
 let () =
   match Interpret.Concrete.modul link_state.envs module_to_run with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok () -> ()
 
 (* second pure wasm module refering to `life_ext` *)
 let pure_wasm_module_2 =
   match Parse.Module.from_file (Fpath.v "life_loop.wat") with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok modul -> modul
 
 (* our second pure wasm module, linked with `life_ext` and `life` interpreted before *)
@@ -100,11 +100,11 @@ let module_to_run =
     Compile.until_link link_state ~unsafe:false ~optimize:true ~name:None
       pure_wasm_module_2
   with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok (m, _state) -> m
 
 (* let's run it ! it will animate the game of life in a graphics window *)
 let () =
   match Interpret.Concrete.modul link_state.envs module_to_run with
-  | Error msg -> failwith msg
+  | Error e -> Result.failwith e
   | Ok () -> ()

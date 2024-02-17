@@ -11,13 +11,11 @@ let get_printer filename =
   | ".wast" ->
     let+ v = Parse.Script.from_file filename in
     fun fmt () -> Text.pp_script fmt v
-  | _ -> error_s "unsupported file extension"
+  | ext -> Error (`Unsupported_file_extension ext)
 
 let cmd_one inplace file =
   match get_printer file with
-  | Error e ->
-    Format.pp_err "%s@." e;
-    exit 1
+  | Error _e as e -> e
   | Ok pp ->
     if inplace then
       let* res =
@@ -30,10 +28,7 @@ let cmd_one inplace file =
       res
     else Ok (Format.pp_std "%a@\n" pp ())
 
-let cmd inplace files =
-  match list_iter (cmd_one inplace) files with
-  | Ok () -> ()
-  | Error (`Msg e) -> failwith e
+let cmd inplace files = list_iter (cmd_one inplace) files
 
 let format_file_to_string file =
   let+ pp = get_printer file in
