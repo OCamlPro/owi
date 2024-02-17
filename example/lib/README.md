@@ -11,13 +11,13 @@ val filename : Fpath.t = <abstr>
 # let m =
     match Parse.Module.from_file filename with
     | Ok script -> script
-    | Error e -> failwith e;;
+    | Error e -> Result.failwith e;;
 val m : Text.modul =
 ...
 # let module_to_run, link_state =
     match Compile.until_link Link.empty_state ~unsafe:false ~optimize:false ~name:None m with
     | Ok v -> v
-    | Error e -> failwith e;;
+    | Error e -> Result.failwith e;;
 val module_to_run : '_weak1 Link.module_to_run =
 ...
 val link_state : '_weak1 Link.state =
@@ -26,7 +26,7 @@ val link_state : '_weak1 Link.state =
     Log.debug_on := true;
     match Interpret.Concrete.modul link_state.envs module_to_run with
     | Ok () -> ()
-    | Error e -> failwith e;;
+    | Error e -> Result.failwith e;;
 interpreting ...
 stack        : [  ]
 running instr: call 0

@@ -37,7 +37,8 @@ binop i32:
     (model
       (symbol_0 i32))
   Reached 9 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 binop i32 (2):
   $ dune exec owi -- sym binop_i32-2.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -76,7 +77,8 @@ binop i32 (2):
       (symbol_2 i32)
       (symbol_3 i32))
   Reached 5 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 binop i64:
   $ dune exec owi -- sym binop_i64.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -116,7 +118,8 @@ binop i64:
     (model
       (symbol_0 i64))
   Reached 9 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 binop i64 (2):
   $ dune exec owi -- sym binop_i64-2.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -155,7 +158,8 @@ binop i64 (2):
       (symbol_2 i64)
       (symbol_3 i64))
   Reached 5 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 binop f32:
   $ dune exec owi -- sym binop_f32.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -187,7 +191,8 @@ binop f32:
     (model
       (symbol_0 f32))
   Reached 7 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 binop f64:
   $ dune exec owi -- sym binop_f64.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -219,4 +224,5 @@ binop f64:
     (model
       (symbol_0 f64))
   Reached 7 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]

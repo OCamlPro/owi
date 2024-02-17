@@ -71,7 +71,8 @@ unop i32:
       (symbol_2 f32)
       (symbol_3 f64))
   Reached 10 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 unop i64:
   $ dune exec owi -- sym unop_i64.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -159,7 +160,8 @@ unop i64:
       (symbol_2 f32)
       (symbol_3 f64))
   Reached 12 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 unop f32:
   $ dune exec owi -- sym unop_f32.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -233,7 +235,8 @@ unop f32:
       (symbol_2 f32)
       (symbol_3 f64))
   Reached 10 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
 unop f64:
   $ dune exec owi -- sym unop_f64.wat --no-stop-at-failure --no-value
   Trap: unreachable
@@ -307,4 +310,5 @@ unop f64:
       (symbol_2 f32)
       (symbol_3 f64))
   Reached 10 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]

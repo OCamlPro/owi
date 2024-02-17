@@ -7,7 +7,8 @@ memory stuff:
     (model
       (symbol_0 (i32 1)))
   Reached 1 problems!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
   $ dune exec owi -- sym store.wat
   Trap: out of bounds memory access
   Model:
@@ -15,4 +16,5 @@ memory stuff:
       (symbol_0 (i32 -11))
       (symbol_1 (i32 0)))
   Reached problem!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]

@@ -5,4 +5,5 @@ mini test:
     (model
       (symbol_0 (i32 6)))
   Reached problem!
-  [1]
+  found a bug while performing symbolic execution!
+  [13]
