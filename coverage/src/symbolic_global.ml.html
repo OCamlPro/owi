@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_global.ml &mdash; Coverage report</title>
-    <meta name="description" content="97.14% coverage in src/symbolic_global.ml">
+    <meta name="description" content="97.44% coverage in src/symbolic_global.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,10 @@
           <span class="dirname">src/</span>symbolic_global.ml
         </a>
       </h1>
-      <h2>97.14%</h2>
+      <h2>97.44%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:36.67%"></span>
+      <span class="unvisited" style="bottom:42.65%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -45,35 +45,35 @@
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
 <a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span class="unvisited"> </span>
-<a id="L39"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span > </span>
-<a id="L49"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
@@ -83,6 +83,14 @@
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -147,6 +155,14 @@
 <a href="#L58">58</a>
 <a href="#L59">59</a>
 <a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -155,59 +171,67 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="26152">x</span>
+  let hash x = <span data-count="26129">x</span>
 end)
 
-type global =
-  { mutable value : Symbolic_value.S.t
+type t =
+  { mutable value : Symbolic_value.t
   ; orig : Concrete_global.t
   }
 
-type globals = global ITbl.t Env_id.Tbl.t
+type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = <span data-count="200">E</span>nv_id.Tbl.create 0
 
-let global_copy r = <span data-count="2926">{</span> r with value = r.value }
+let global_copy r = <span data-count="2916">{</span> r with value = r.value }
 
-let clone (globals : globals) : globals =
-  <span data-count="3100">l</span>et s = Env_id.Tbl.to_seq globals in
-  <span data-count="3100">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="3100">p</span>
+let clone collection =
+  (* TODO: this is ugly and should be rewritten... *)
+  <span data-count="3090">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="3090">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="3090">p</span>
        (fun (i, t) -&gt;
-         <span data-count="2926">l</span>et s = ITbl.to_seq t in
-         <span data-count="2926">(</span>i, ITbl.of_se<span data-count="2926">q</span> @@ Seq.ma<span data-count="2926">p</span> (fun (i, a) -&gt; <span data-count="2926">(</span>i, global_cop<span data-count="2926">y</span> a)) s) )
+         <span data-count="2916">l</span>et s = ITbl.to_seq t in
+         <span data-count="2916">(</span>i, ITbl.of_se<span data-count="2916">q</span> @@ Seq.ma<span data-count="2916">p</span> (fun (i, a) -&gt; <span data-count="2916">(</span>i, global_cop<span data-count="2916">y</span> a)) s) )
        s
 
-let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
+let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   (* TODO share various versions *)
   <span data-count="170">m</span>atch v with
-  | <span data-count="167">I</span>32 v -&gt; I32 (Symbolic_value.S.const_i3<span data-count="167">2</span> v)
-  | <span data-count="1">I</span>64 v -&gt; I64 (Symbolic_value.S.const_i6<span data-count="1">4</span> v)
-  | <span data-count="1">F</span>32 v -&gt; F32 (Symbolic_value.S.const_f3<span data-count="1">2</span> v)
-  | <span data-count="1">F</span>64 v -&gt; F64 (Symbolic_value.S.const_f6<span data-count="1">4</span> v)
+  | <span data-count="167">I</span>32 v -&gt; I32 (Symbolic_value.const_i3<span data-count="167">2</span> v)
+  | <span data-count="1">I</span>64 v -&gt; I64 (Symbolic_value.const_i6<span data-count="1">4</span> v)
+  | <span data-count="1">F</span>32 v -&gt; F32 (Symbolic_value.const_f3<span data-count="1">2</span> v)
+  | <span data-count="1">F</span>64 v -&gt; F64 (Symbolic_value.const_f6<span data-count="1">4</span> v)
   | <span data-count="0">R</span>ef (Funcref f) -&gt; Ref (Funcref f)
   | Ref _ -&gt; assert false
 
-let convert (orig_global : Concrete_global.t) : global =
+let convert (orig_global : Concrete_global.t) : t =
   <span data-count="170">{</span> value = convert_value<span data-count="170">s</span> orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
-  <span data-count="23056">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="22890">S</span>ome env -&gt; env
+  <span data-count="23041">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="22878">S</span>ome env -&gt; env
   | <span data-count="167">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="167">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="167">t</span>
 
-let get_global env_id (orig_global : Concrete_global.t) (tables : globals) g_id
-    =
-  <span data-count="23054">l</span>et env = get_env env_id tables in
-  <span data-count="23056">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="22886">S</span>ome t -&gt; t
+let get_global env_id (orig_global : Concrete_global.t) collection g_id =
+  <span data-count="23043">l</span>et env = get_env env_id collection in
+  <span data-count="23044">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="22874">S</span>ome t -&gt; t
   | <span data-count="170">N</span>one -&gt;
     let t = convert orig_global in
     <span data-count="170">I</span>Tbl.add env g_id t;
     <span data-count="170">t</span>
+
+let value v = <span data-count="9022">v</span>.value
+
+let set_value v x = <span data-count="14023">v</span>.value &lt;- x
+
+let mut v = <span data-count="14021">v</span>.orig.mut
+
+let typ v = <span data-count="14021">v</span>.orig.typ
 </code></pre>
       </div>
     </div>

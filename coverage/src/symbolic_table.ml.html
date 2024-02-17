@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_table.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/symbolic_table.ml">
+    <meta name="description" content="87.88% coverage in src/symbolic_table.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,13 @@
           <span class="dirname">src/</span>symbolic_table.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>87.88%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:8.96%"></span>
+      <span class="unvisited" style="bottom:5.97%"></span>
+      <span class="unvisited" style="bottom:2.99%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -39,37 +43,56 @@
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
 <a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span class="visited"> </span>
-<a id="L46"></a><span > </span>
-<a id="L47"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
 <a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="unvisited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -122,6 +145,25 @@
 <a href="#L46">46</a>
 <a href="#L47">47</a>
 <a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -130,47 +172,66 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="5998">x</span>
+  let hash x = <span data-count="5984">x</span>
 end)
 
-type table = Symbolic_value.S.ref_value array
+type t = Symbolic_value.ref_value array
 
-type tables = table ITbl.t Env_id.Tbl.t
+type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = <span data-count="200">E</span>nv_id.Tbl.create 0
 
-let clone (tables : tables) : tables =
-  <span data-count="3100">l</span>et s = Env_id.Tbl.to_seq tables in
-  <span data-count="3100">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="3100">p</span>
+let clone collection =
+  (* TODO: this is ugly and should be rewritten *)
+  <span data-count="3090">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="3090">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="3090">p</span>
        (fun (i, t) -&gt;
-         <span data-count="1364">l</span>et s = ITbl.to_seq t in
-         <span data-count="1364">(</span>i, ITbl.of_se<span data-count="1364">q</span> @@ Seq.ma<span data-count="1364">p</span> (fun (i, a) -&gt; <span data-count="1364">(</span>i, Array.cop<span data-count="1364">y</span> a)) s) )
+         <span data-count="1352">l</span>et s = ITbl.to_seq t in
+         <span data-count="1352">(</span>i, ITbl.of_se<span data-count="1352">q</span> @@ Seq.ma<span data-count="1352">p</span> (fun (i, a) -&gt; <span data-count="1352">(</span>i, Array.cop<span data-count="1352">y</span> a)) s) )
        s
 
-let convert_ref_values (v : Concrete_value.ref_value) :
-  Symbolic_value.S.ref_value =
+let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
+    =
   <span data-count="695">m</span>atch v with <span data-count="695">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
 
-let convert (orig_table : Concrete_table.t) : table =
+let convert (orig_table : Concrete_table.t) =
   <span data-count="162">A</span>rray.map convert_ref_values orig_table.data
 
 let get_env env_id tables =
-  <span data-count="4471">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="4310">S</span>ome env -&gt; env
+  <span data-count="4470">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="4308">S</span>ome env -&gt; env
   | <span data-count="162">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="162">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="162">t</span>
 
-let get_table env_id (orig_table : Concrete_table.t) (tables : tables) t_id =
-  <span data-count="4472">l</span>et env = get_env env_id tables in
-  <span data-count="4472">m</span>atch ITbl.find_opt env t_id with
-  | <span data-count="4310">S</span>ome t -&gt; t
+let get_table env_id (orig_table : Concrete_table.t) collection t_id =
+  <span data-count="4470">l</span>et env = get_env env_id collection in
+  <span data-count="4470">m</span>atch ITbl.find_opt env t_id with
+  | <span data-count="4308">S</span>ome t -&gt; t
   | <span data-count="162">N</span>one -&gt;
     let t = convert orig_table in
     <span data-count="162">I</span>Tbl.add env t_id t;
     <span data-count="162">t</span>
+
+let get t i = <span data-count="4308">t</span>.(i)
+
+let set t i v = <span data-count="534">t</span>.(i) &lt;- v
+
+let size t = <span data-count="4470">A</span>rray.length t
+
+let typ _t =
+  (* TODO: add type to table *)
+  <span data-count="4308">(</span>Types.Null, Types.Func_ht)
+
+let max_size _t = <span data-count="0">a</span>ssert false
+
+let grow _t _new_size _x = <span data-count="0">a</span>ssert false
+
+let fill _t _pos _len _x = <span data-count="0">a</span>ssert false
+
+let copy ~t_src:_ ~t_dst:_ ~src:_ ~dst:_ ~len:_ = <span data-count="0">a</span>ssert false
 </code></pre>
       </div>
     </div>

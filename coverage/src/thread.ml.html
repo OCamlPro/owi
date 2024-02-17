@@ -104,19 +104,19 @@
 type t =
   { choices : int
   ; mutable symbol_set : Encoding.Symbol.t list
-  ; pc : Symbolic_value.S.vbool list
-  ; memories : Symbolic_memory.memories
-  ; tables : Symbolic_table.tables
-  ; globals : Symbolic_global.globals
+  ; pc : Symbolic_value.vbool list
+  ; memories : Symbolic_memory.collection
+  ; tables : Symbolic_table.collection
+  ; globals : Symbolic_global.collection
   }
 
-let pc t = <span data-count="10901">t</span>.pc
+let pc t = <span data-count="10908">t</span>.pc
 
-let memories t = <span data-count="294110">t</span>.memories
+let memories t = <span data-count="293952">t</span>.memories
 
-let tables t = <span data-count="4472">t</span>.tables
+let tables t = <span data-count="4470">t</span>.tables
 
-let globals t = <span data-count="23049">t</span>.globals
+let globals t = <span data-count="23043">t</span>.globals
 
 let create () =
   <span data-count="200">{</span> choices = 0
@@ -128,10 +128,10 @@ let create () =
   }
 
 let clone { choices; symbol_set; pc; memories; tables; globals } =
-  <span data-count="3098">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="3098">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="3098">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="3098">{</span> choices; symbol_set; pc; memories; tables; globals }
+  <span data-count="3090">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="3090">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="3090">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="3090">{</span> choices; symbol_set; pc; memories; tables; globals }
 </code></pre>
       </div>
     </div>

@@ -269,23 +269,6 @@
 <a id="L245"></a><span > </span>
 <a id="L246"></a><span > </span>
 <a id="L247"></a><span > </span>
-<a id="L248"></a><span > </span>
-<a id="L249"></a><span > </span>
-<a id="L250"></a><span > </span>
-<a id="L251"></a><span > </span>
-<a id="L252"></a><span > </span>
-<a id="L253"></a><span > </span>
-<a id="L254"></a><span > </span>
-<a id="L255"></a><span > </span>
-<a id="L256"></a><span > </span>
-<a id="L257"></a><span > </span>
-<a id="L258"></a><span > </span>
-<a id="L259"></a><span > </span>
-<a id="L260"></a><span > </span>
-<a id="L261"></a><span > </span>
-<a id="L262"></a><span > </span>
-<a id="L263"></a><span > </span>
-<a id="L264"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -537,23 +520,6 @@
 <a href="#L245">245</a>
 <a href="#L246">246</a>
 <a href="#L247">247</a>
-<a href="#L248">248</a>
-<a href="#L249">249</a>
-<a href="#L250">250</a>
-<a href="#L251">251</a>
-<a href="#L252">252</a>
-<a href="#L253">253</a>
-<a href="#L254">254</a>
-<a href="#L255">255</a>
-<a href="#L256">256</a>
-<a href="#L257">257</a>
-<a href="#L258">258</a>
-<a href="#L259">259</a>
-<a href="#L260">260</a>
-<a href="#L261">261</a>
-<a href="#L262">262</a>
-<a href="#L263">263</a>
-<a href="#L264">264</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -600,64 +566,35 @@ end
 module type P = sig
   type thread
 
-  type env
-
-  type memory
-
-  type func
-
-  type table
-
-  type elem
-
-  type data
-
-  type global
-
-  type vbool
-
-  type int32
-
-  type int64
-
-  type float32
-
-  type float64
-
-  module Value :
-    Value_intf.T
-      with type vbool = vbool
-       and type int32 = int32
-       and type int64 = int64
-       and type float32 = float32
-       and type float64 = float64
+  module Value : Value_intf.T
 
   module Choice : Choice_intf.Base with module V := Value
 
-  val select : vbool -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t Choice.t
+  val select :
+    Value.vbool -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t Choice.t
 
   module Extern_func :
     Func_intf.T_Extern_func
-      with type int32 := int32
-       and type int64 := int64
-       and type float32 := float32
-       and type float64 := float64
+      with type int32 := Value.int32
+       and type int64 := Value.int64
+       and type float32 := Value.float32
+       and type float64 := Value.float64
        and type 'a m := 'a Choice.t
 
   module Global : sig
-    type t = global
+    type t
 
-    val value : global -&gt; Value.t
+    val value : t -&gt; Value.t
 
-    val set_value : global -&gt; Value.t -&gt; unit
+    val set_value : t -&gt; Value.t -&gt; unit
 
-    val mut : global -&gt; Types.mut
+    val mut : t -&gt; Types.mut
 
-    val typ : global -&gt; simplified val_type
+    val typ : t -&gt; simplified val_type
   end
 
   module Table : sig
-    type t = table
+    type t
 
     val get : t -&gt; int -&gt; Value.ref_value
 
@@ -669,60 +606,72 @@ module type P = sig
 
     val max_size : t -&gt; int option
 
-    val grow : t -&gt; int32 -&gt; Value.ref_value -&gt; unit
+    val grow : t -&gt; Value.int32 -&gt; Value.ref_value -&gt; unit
 
-    val fill : t -&gt; int32 -&gt; int32 -&gt; Value.ref_value -&gt; unit
+    val fill : t -&gt; Value.int32 -&gt; Value.int32 -&gt; Value.ref_value -&gt; unit
 
-    val copy : t_src:t -&gt; t_dst:t -&gt; src:int32 -&gt; dst:int32 -&gt; len:int32 -&gt; unit
+    val copy :
+         t_src:t
+      -&gt; t_dst:t
+      -&gt; src:Value.int32
+      -&gt; dst:Value.int32
+      -&gt; len:Value.int32
+      -&gt; unit
   end
 
   module Memory : sig
     type t
 
-    val load_8_s : t -&gt; int32 -&gt; int32 Choice.t
+    val load_8_s : t -&gt; Value.int32 -&gt; Value.int32 Choice.t
 
-    val load_8_u : t -&gt; int32 -&gt; int32 Choice.t
+    val load_8_u : t -&gt; Value.int32 -&gt; Value.int32 Choice.t
 
-    val load_16_s : t -&gt; int32 -&gt; int32 Choice.t
+    val load_16_s : t -&gt; Value.int32 -&gt; Value.int32 Choice.t
 
-    val load_16_u : t -&gt; int32 -&gt; int32 Choice.t
+    val load_16_u : t -&gt; Value.int32 -&gt; Value.int32 Choice.t
 
-    val load_32 : t -&gt; int32 -&gt; int32 Choice.t
+    val load_32 : t -&gt; Value.int32 -&gt; Value.int32 Choice.t
 
-    val load_64 : t -&gt; int32 -&gt; int64 Choice.t
+    val load_64 : t -&gt; Value.int32 -&gt; Value.int64 Choice.t
 
-    val store_8 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
+    val store_8 : t -&gt; addr:Value.int32 -&gt; Value.int32 -&gt; unit Choice.t
 
-    val store_16 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
+    val store_16 : t -&gt; addr:Value.int32 -&gt; Value.int32 -&gt; unit Choice.t
 
-    val store_32 : t -&gt; addr:int32 -&gt; int32 -&gt; unit Choice.t
+    val store_32 : t -&gt; addr:Value.int32 -&gt; Value.int32 -&gt; unit Choice.t
 
-    val store_64 : t -&gt; addr:int32 -&gt; int64 -&gt; unit Choice.t
+    val store_64 : t -&gt; addr:Value.int32 -&gt; Value.int64 -&gt; unit Choice.t
 
-    val grow : t -&gt; int32 -&gt; unit
+    val grow : t -&gt; Value.int32 -&gt; unit
 
-    val fill : t -&gt; pos:int32 -&gt; len:int32 -&gt; char -&gt; vbool
+    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; Value.vbool
 
-    val blit : t -&gt; src:int32 -&gt; dst:int32 -&gt; len:int32 -&gt; vbool
+    val blit :
+      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; Value.vbool
 
     val blit_string :
-      t -&gt; string -&gt; src:int32 -&gt; dst:int32 -&gt; len:int32 -&gt; vbool
+         t
+      -&gt; string
+      -&gt; src:Value.int32
+      -&gt; dst:Value.int32
+      -&gt; len:Value.int32
+      -&gt; Value.vbool
 
-    val size : t -&gt; int32
+    val size : t -&gt; Value.int32
 
-    val size_in_pages : t -&gt; int32
+    val size_in_pages : t -&gt; Value.int32
 
-    val get_limit_max : t -&gt; int64 option
+    val get_limit_max : t -&gt; Value.int64 option
   end
 
   module Data : sig
-    type t = data
+    type t
 
     val value : t -&gt; string
   end
 
   module Elem : sig
-    type t = elem
+    type t
 
     val get : t -&gt; int -&gt; Value.ref_value
 
@@ -730,7 +679,7 @@ module type P = sig
   end
 
   module Env : sig
-    type t = env
+    type t
 
     val get_memory : t -&gt; int -&gt; Memory.t Choice.t
 
@@ -738,24 +687,24 @@ module type P = sig
 
     val get_table : t -&gt; int -&gt; Table.t Choice.t
 
-    val get_elem : t -&gt; int -&gt; elem
+    val get_elem : t -&gt; int -&gt; Elem.t
 
-    val get_data : t -&gt; int -&gt; data Choice.t
+    val get_data : t -&gt; int -&gt; Data.t Choice.t
 
     val get_global : t -&gt; int -&gt; Global.t Choice.t
 
     val get_extern_func : t -&gt; Func_id.t -&gt; Extern_func.extern_func
 
-    val drop_elem : elem -&gt; unit
+    val drop_elem : Elem.t -&gt; unit
 
-    val drop_data : data -&gt; unit
+    val drop_data : Data.t -&gt; unit
   end
 
   module Module_to_run : sig
     (** runnable module *)
     type t
 
-    val env : t -&gt; env
+    val env : t -&gt; Env.t
 
     val to_run : t -&gt; simplified expr list
 

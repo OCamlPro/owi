@@ -37,21 +37,21 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
@@ -64,58 +64,30 @@
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
-<a id="L43"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
-<a id="L61"></a><span > </span>
+<a id="L61"></a><span class="visited"> </span>
 <a id="L62"></a><span > </span>
-<a id="L63"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
 <a id="L64"></a><span > </span>
-<a id="L65"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span > </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span > </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
-<a id="L72"></a><span class="visited"> </span>
-<a id="L73"></a><span class="visited"> </span>
-<a id="L74"></a><span > </span>
-<a id="L75"></a><span > </span>
-<a id="L76"></a><span > </span>
-<a id="L77"></a><span > </span>
-<a id="L78"></a><span > </span>
-<a id="L79"></a><span > </span>
-<a id="L80"></a><span > </span>
-<a id="L81"></a><span > </span>
-<a id="L82"></a><span > </span>
-<a id="L83"></a><span > </span>
-<a id="L84"></a><span > </span>
-<a id="L85"></a><span > </span>
-<a id="L86"></a><span > </span>
-<a id="L87"></a><span > </span>
-<a id="L88"></a><span class="visited"> </span>
-<a id="L89"></a><span > </span>
-<a id="L90"></a><span class="visited"> </span>
-<a id="L91"></a><span > </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span > </span>
-<a id="L94"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -186,128 +158,72 @@
 <a href="#L64">64</a>
 <a href="#L65">65</a>
 <a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
-<a href="#L88">88</a>
-<a href="#L89">89</a>
-<a href="#L90">90</a>
-<a href="#L91">91</a>
-<a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-module P = struct
-  module Extern_func = Concrete_value.Func
-  module Value = V
-  module Global = Concrete_global
-  module Table = Concrete_table
-  module Memory = Concrete_memory
+module Extern_func = Concrete_value.Func
+module Value = V
+module Global = Concrete_global
+module Table = Concrete_table
+module Memory = Concrete_memory
 
-  type thread = unit
+type thread = unit
 
-  type memory = Memory.t
+module Choice = Concrete_choice
 
-  type func = Concrete_value.Func.t
+let select cond ~if_true ~if_false =
+  <span data-count="462">i</span>f cond then <span data-count="234">C</span>hoice.return if_true else <span data-count="228">C</span>hoice.return if_false
+[@@inline]
 
-  type table = Table.t
+module Elem = struct
+  type t = Link_env.elem
 
-  type elem = Link_env.elem
+  let get (e : t) i = <span data-count="2282">e</span>.value.(i)
 
-  type data = Link_env.data
+  let size (e : t) = <span data-count="761">A</span>rray.length e.value
+end
 
-  type global = Concrete_global.t
+module Data = struct
+  type t = Link_env.data
 
-  type vbool = Bool.t
+  let value data = <span data-count="376">d</span>ata.Link_env.value
+end
 
-  type int32 = Int32.t
+module Env = struct
+  type t = Concrete_value.Func.extern_func Link_env.t
 
-  type int64 = Int64.t
+  let get_memory = Link_env.get_memory
 
-  type float32 = Float32.t
+  let get_func = Link_env.get_func
 
-  type float64 = Float64.t
+  let get_table = Link_env.get_table
 
-  type extern_func = Concrete_value.Func.extern_func
+  let get_elem = Link_env.get_elem
 
-  type env = extern_func Link_env.t
+  let get_data env n =
+    <span data-count="654">l</span>et data = Link_env.get_data env n in
+    <span data-count="654">C</span>hoice.return data
 
-  module Choice = Concrete_choice
+  let get_global = Link_env.get_global
 
-  let select cond ~if_true ~if_false =
-    <span data-count="462">i</span>f cond then <span data-count="234">C</span>hoice.return if_true else <span data-count="228">C</span>hoice.return if_false
-  [@@inline]
+  let get_extern_func = Link_env.get_extern_func
 
-  module Elem = struct
-    type t = elem
+  let drop_elem = Link_env.drop_elem
 
-    let get (e : t) i = <span data-count="2282">e</span>.value.(i)
+  let drop_data = Link_env.drop_data
+end
 
-    let size (e : t) = <span data-count="761">A</span>rray.length e.value
-  end
+module Module_to_run = struct
+  (** runnable module *)
+  type t = Concrete_value.Func.extern_func Link.module_to_run
 
-  module Data = struct
-    type t = data
+  let env (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="978">t</span>.env
 
-    let value data = <span data-count="376">d</span>ata.Link_env.value
-  end
+  let modul (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="910">t</span>.modul
 
-  module Env = struct
-    type t = env
-
-    let get_memory = Link_env.get_memory
-
-    let get_func = Link_env.get_func
-
-    let get_table = Link_env.get_table
-
-    let get_elem = Link_env.get_elem
-
-    let get_data env n =
-      <span data-count="654">l</span>et data = Link_env.get_data env n in
-      <span data-count="654">C</span>hoice.return data
-
-    let get_global = Link_env.get_global
-
-    let get_extern_func = Link_env.get_extern_func
-
-    let drop_elem = Link_env.drop_elem
-
-    let drop_data = Link_env.drop_data
-  end
-
-  module Module_to_run = struct
-    (** runnable module *)
-    type t = extern_func Link.module_to_run
-
-    let env (t : extern_func Link.module_to_run) = <span data-count="978">t</span>.env
-
-    let modul (t : extern_func Link.module_to_run) = <span data-count="910">t</span>.modul
-
-    let to_run (t : extern_func Link.module_to_run) = <span data-count="2615">t</span>.to_run
-  end
+  let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="2615">t</span>.to_run
 end
 </code></pre>
       </div>
