@@ -1,13 +1,13 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
-module Value = Symbolic_value.S
+module Value = Symbolic_value
 module Expr = Encoding.Expr
 module Ty = Encoding.Ty
 open Expr
 open Hc
 
-let page_size = Symbolic_value.S.const_i32 65_536l
+let page_size = Symbolic_value.const_i32 65_536l
 
 type t =
   { data : (Int32.t, Value.int32) Hashtbl.t

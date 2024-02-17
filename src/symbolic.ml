@@ -16,16 +16,16 @@ module type Thread = sig
 
   val globals : t -> Symbolic_global.collection
 
-  val pc : t -> Symbolic_value.S.vbool list
+  val pc : t -> Symbolic_value.vbool list
 end
 
 module MakeP
     (Thread : Thread)
     (Choice_monad : Choice_intf.Complete
-                      with module V := Symbolic_value.S
+                      with module V := Symbolic_value
                        and type thread := Thread.t) =
 struct
-  module Value = Symbolic_value.S
+  module Value = Symbolic_value
 
   type thread = Thread.t
 
@@ -178,8 +178,8 @@ struct
       Choice.with_thread f
 
     let drop_elem _ =
-      (* TODO ? *)
-      assert false
+      (* TODO *)
+      ()
 
     let drop_data = Link_env.drop_data
   end

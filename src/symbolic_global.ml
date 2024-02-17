@@ -9,7 +9,7 @@ module ITbl = Hashtbl.Make (struct
 end)
 
 type t =
-  { mutable value : Symbolic_value.S.t
+  { mutable value : Symbolic_value.t
   ; orig : Concrete_global.t
   }
 
@@ -29,13 +29,13 @@ let clone collection =
          (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, global_copy a)) s) )
        s
 
-let convert_values (v : Concrete_value.t) : Symbolic_value.S.t =
+let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   (* TODO share various versions *)
   match v with
-  | I32 v -> I32 (Symbolic_value.S.const_i32 v)
-  | I64 v -> I64 (Symbolic_value.S.const_i64 v)
-  | F32 v -> F32 (Symbolic_value.S.const_f32 v)
-  | F64 v -> F64 (Symbolic_value.S.const_f64 v)
+  | I32 v -> I32 (Symbolic_value.const_i32 v)
+  | I64 v -> I64 (Symbolic_value.const_i64 v)
+  | F32 v -> F32 (Symbolic_value.const_f32 v)
+  | F64 v -> F64 (Symbolic_value.const_f64 v)
   | Ref (Funcref f) -> Ref (Funcref f)
   | Ref _ -> assert false
 

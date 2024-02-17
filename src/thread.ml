@@ -5,7 +5,7 @@
 type t =
   { choices : int
   ; mutable symbol_set : Encoding.Symbol.t list
-  ; pc : Symbolic_value.S.vbool list
+  ; pc : Symbolic_value.vbool list
   ; memories : Symbolic_memory.collection
   ; tables : Symbolic_table.collection
   ; globals : Symbolic_global.collection

@@ -11,23 +11,23 @@ val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t
 val check_within_bounds :
      t
   -> Encoding.Expr.t
-  -> (Encoding.Expr.t * Symbolic_value.S.int32, Trap.t) result
+  -> (Encoding.Expr.t * Symbolic_value.int32, Trap.t) result
 
 val replace_size : t -> Int32.t -> Encoding.Expr.t -> unit
 
 val free : t -> Int32.t -> unit
 
-val load_8_s : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_8_s : t -> Encoding.Expr.t -> Symbolic_value.int32
 
-val load_8_u : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_8_u : t -> Encoding.Expr.t -> Symbolic_value.int32
 
-val load_16_s : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_16_s : t -> Encoding.Expr.t -> Symbolic_value.int32
 
-val load_16_u : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_16_u : t -> Encoding.Expr.t -> Symbolic_value.int32
 
-val load_32 : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_32 : t -> Encoding.Expr.t -> Symbolic_value.int32
 
-val load_64 : t -> Encoding.Expr.t -> Symbolic_value.S.int32
+val load_64 : t -> Encoding.Expr.t -> Symbolic_value.int32
 
 val store_8 : t -> addr:Encoding.Expr.t -> Encoding.Expr.t -> unit
 
