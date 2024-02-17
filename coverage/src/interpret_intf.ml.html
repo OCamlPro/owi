@@ -268,7 +268,6 @@
 <a id="L244"></a><span > </span>
 <a id="L245"></a><span > </span>
 <a id="L246"></a><span > </span>
-<a id="L247"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -519,7 +518,6 @@
 <a href="#L244">244</a>
 <a href="#L245">245</a>
 <a href="#L246">246</a>
-<a href="#L247">247</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -723,8 +721,7 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul :
-    env Env_id.collection -&gt; module_to_run -&gt; (unit, string) result choice
+  val modul : env Env_id.collection -&gt; module_to_run -&gt; unit Result.t choice
 
   type value
 

@@ -18,9 +18,9 @@
       <h2>91.18%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:44.08%"></span>
-      <span class="unvisited" style="bottom:38.16%"></span>
-      <span class="unvisited" style="bottom:35.53%"></span>
+      <span class="unvisited" style="bottom:42.57%"></span>
+      <span class="unvisited" style="bottom:37.84%"></span>
+      <span class="unvisited" style="bottom:35.14%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -110,22 +110,22 @@
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span class="unvisited"> </span>
-<a id="L86"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span class="visited"> </span>
-<a id="L89"></a><span > </span>
-<a id="L90"></a><span > </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span class="visited"> </span>
-<a id="L94"></a><span class="unvisited"> </span>
-<a id="L95"></a><span > </span>
-<a id="L96"></a><span > </span>
+<a id="L92"></a><span class="unvisited"> </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span class="unvisited"> </span>
 <a id="L97"></a><span class="visited"> </span>
-<a id="L98"></a><span class="unvisited"> </span>
+<a id="L98"></a><span > </span>
 <a id="L99"></a><span > </span>
 <a id="L100"></a><span > </span>
-<a id="L101"></a><span class="visited"> </span>
+<a id="L101"></a><span > </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
 <a id="L104"></a><span > </span>
@@ -172,11 +172,7 @@
 <a id="L145"></a><span > </span>
 <a id="L146"></a><span > </span>
 <a id="L147"></a><span > </span>
-<a id="L148"></a><span > </span>
-<a id="L149"></a><span > </span>
-<a id="L150"></a><span > </span>
-<a id="L151"></a><span > </span>
-<a id="L152"></a><span class="visited"> </span>
+<a id="L148"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -329,10 +325,6 @@
 <a href="#L146">146</a>
 <a href="#L147">147</a>
 <a href="#L148">148</a>
-<a href="#L149">149</a>
-<a href="#L150">150</a>
-<a href="#L151">151</a>
-<a href="#L152">152</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -365,21 +357,21 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let id (env : _ t) = <span data-count="312288">e</span>nv.id
+let id (env : _ t) = <span data-count="317963">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="24270">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="24878">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="2135297">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="2140261">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1611839">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1611944">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10126893">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10127148">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="984">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1738">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="23795">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="23875">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
@@ -418,22 +410,18 @@ module Build = struct
 
   let get_global (env : t) id =
     <span data-count="24">m</span>atch IMap.find_opt id env.globals with
-    | <span data-count="0">N</span>one -&gt;
-      (* Log.debug2 "%a@." pp env; *)
-      Error "unknown global"
+    | <span data-count="0">N</span>one -&gt; Error `Unknown_global
     | <span data-count="24">S</span>ome v -&gt; Ok v
 
   let get_const_global (env : t) id =
     <span data-count="24">l</span>et* g = get_globa<span data-count="24">l</span> env id in
     <span data-count="24">m</span>atch g.mut with
     | <span data-count="24">C</span>onst -&gt; ok g.value
-    | <span data-count="0">V</span>ar -&gt; Error "constant expression required"
+    | <span data-count="0">V</span>ar -&gt; Error `Constant_expression_required
 
   let get_func (env : t) id =
     <span data-count="4269">m</span>atch IMap.find_opt id env.functions with
-    | <span data-count="0">N</span>one -&gt;
-      (* Log.debug2 "%a@." pp env; *)
-      error_s "unknown function %a" Format.pp_int id
+    | <span data-count="0">N</span>one -&gt; Error (`Unknown_function id)
     | <span data-count="4269">S</span>ome v -&gt; Ok v
 end
 

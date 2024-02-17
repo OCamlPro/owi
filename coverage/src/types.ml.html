@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>types.ml &mdash; Coverage report</title>
-    <meta name="description" content="45.96% coverage in src/types.ml">
+    <meta name="description" content="43.51% coverage in src/types.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,16 +15,20 @@
           <span class="dirname">src/</span>types.ml
         </a>
       </h1>
-      <h2>45.96%</h2>
+      <h2>43.51%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:5.49%"></span>
+      <span class="unvisited" style="top:7.02%"></span>
+      <span class="unvisited" style="top:7.15%"></span>
+      <span class="unvisited" style="top:7.28%"></span>
       <span class="unvisited" style="top:8.17%"></span>
       <span class="unvisited" style="top:8.56%"></span>
       <span class="unvisited" style="top:9.32%"></span>
       <span class="unvisited" style="top:10.09%"></span>
       <span class="some-visited" style="top:10.86%"></span>
       <span class="unvisited" style="top:14.43%"></span>
+      <span class="unvisited" style="top:14.56%"></span>
       <span class="unvisited" style="top:14.69%"></span>
       <span class="unvisited" style="top:14.81%"></span>
       <span class="unvisited" style="top:14.94%"></span>
@@ -53,6 +57,7 @@
       <span class="unvisited" style="top:33.33%"></span>
       <span class="unvisited" style="top:33.46%"></span>
       <span class="unvisited" style="top:33.72%"></span>
+      <span class="unvisited" style="top:33.84%"></span>
       <span class="unvisited" style="top:33.97%"></span>
       <span class="unvisited" style="top:34.10%"></span>
       <span class="unvisited" style="top:34.48%"></span>
@@ -70,6 +75,7 @@
       <span class="unvisited" style="top:37.68%"></span>
       <span class="unvisited" style="top:45.34%"></span>
       <span class="unvisited" style="bottom:37.68%"></span>
+      <span class="unvisited" style="bottom:37.42%"></span>
       <span class="unvisited" style="bottom:37.16%"></span>
       <span class="unvisited" style="bottom:36.78%"></span>
       <span class="unvisited" style="bottom:36.40%"></span>
@@ -106,6 +112,7 @@
       <span class="unvisited" style="bottom:29.76%"></span>
       <span class="unvisited" style="bottom:29.63%"></span>
       <span class="unvisited" style="bottom:29.50%"></span>
+      <span class="unvisited" style="bottom:29.37%"></span>
       <span class="unvisited" style="bottom:26.05%"></span>
       <span class="unvisited" style="bottom:25.54%"></span>
       <span class="unvisited" style="bottom:25.42%"></span>
@@ -226,9 +233,9 @@
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
-<a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="unvisited"> </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
@@ -285,7 +292,7 @@
 <a id="L111"></a><span > </span>
 <a id="L112"></a><span > </span>
 <a id="L113"></a><span class="unvisited"> </span>
-<a id="L114"></a><span class="visited"> </span>
+<a id="L114"></a><span class="unvisited"> </span>
 <a id="L115"></a><span class="unvisited"> </span>
 <a id="L116"></a><span class="unvisited"> </span>
 <a id="L117"></a><span class="unvisited"> </span>
@@ -436,7 +443,7 @@
 <a id="L262"></a><span class="unvisited"> </span>
 <a id="L263"></a><span class="visited"> </span>
 <a id="L264"></a><span class="unvisited"> </span>
-<a id="L265"></a><span class="visited"> </span>
+<a id="L265"></a><span class="unvisited"> </span>
 <a id="L266"></a><span class="unvisited"> </span>
 <a id="L267"></a><span class="unvisited"> </span>
 <a id="L268"></a><span > </span>
@@ -661,7 +668,7 @@
 <a id="L487"></a><span class="visited"> </span>
 <a id="L488"></a><span class="unvisited"> </span>
 <a id="L489"></a><span class="visited"> </span>
-<a id="L490"></a><span class="visited"> </span>
+<a id="L490"></a><span class="unvisited"> </span>
 <a id="L491"></a><span class="visited"> </span>
 <a id="L492"></a><span class="unvisited"> </span>
 <a id="L493"></a><span class="visited"> </span>
@@ -724,7 +731,7 @@
 <a id="L550"></a><span class="unvisited"> </span>
 <a id="L551"></a><span class="unvisited"> </span>
 <a id="L552"></a><span class="unvisited"> </span>
-<a id="L553"></a><span class="visited"> </span>
+<a id="L553"></a><span class="unvisited"> </span>
 <a id="L554"></a><span class="visited"> </span>
 <a id="L555"></a><span class="visited"> </span>
 <a id="L556"></a><span > </span>
@@ -1777,13 +1784,13 @@ type _ indice =
   | Text : string -&gt; &lt; with_string_indices ; .. &gt; indice
   | Raw : int -&gt; &lt; .. &gt; indice
 
-let pp_id fmt id = <span data-count="351">p</span>p fmt "$%s" id
+let pp_id fmt id = <span data-count="349">p</span>p fmt "$%s" id
 
 let pp_id_opt fmt = function <span data-count="597">N</span>one -&gt; () | <span data-count="263">S</span>ome i -&gt; pp fmt " %a" pp_id i
 
-let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="205">f</span>unction
-  | <span data-count="117">R</span>aw u -&gt; pp_int fmt u
-  | <span data-count="88">T</span>ext i -&gt; pp_id fmt i
+let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="201">f</span>unction
+  | <span data-count="115">R</span>aw u -&gt; pp_int fmt u
+  | <span data-count="86">T</span>ext i -&gt; pp_id fmt i
 
 let pp_indice_opt fmt = function <span data-count="31">N</span>one -&gt; () | <span data-count="0">S</span>ome i -&gt; pp_indice fmt i
 
@@ -1796,10 +1803,10 @@ type nonrec num_type =
   | F64
 
 let pp_num_type fmt = function
-  | <span data-count="4319">I</span>32 -&gt; pp fmt "i32"
-  | <span data-count="981">I</span>64 -&gt; pp fmt "i64"
-  | <span data-count="1010">F</span>32 -&gt; pp fmt "f32"
-  | <span data-count="714">F</span>64 -&gt; pp fmt "f64"
+  | <span data-count="236">I</span>32 -&gt; pp fmt "i32"
+  | <span data-count="0">I</span>64 -&gt; pp fmt "i64"
+  | <span data-count="0">F</span>32 -&gt; pp fmt "f32"
+  | <span data-count="0">F</span>64 -&gt; pp fmt "f64"
 
 type nullable =
   | No_null
@@ -1827,7 +1834,7 @@ type nonrec nn =
   | S32
   | S64
 
-let pp_nn fmt = function <span data-count="161">S</span>32 -&gt; pp fmt "32" | <span data-count="0">S</span>64 -&gt; pp fmt "64"
+let pp_nn fmt = function <span data-count="147">S</span>32 -&gt; pp fmt "32" | <span data-count="0">S</span>64 -&gt; pp fmt "64"
 
 type nonrec sx =
   | U
@@ -1842,7 +1849,7 @@ type nonrec iunop =
 
 let pp_iunop fmt = function
   | <span data-count="2">C</span>lz -&gt; pp fmt "clz"
-  | <span data-count="10">C</span>tz -&gt; pp fmt "ctz"
+  | <span data-count="2">C</span>tz -&gt; pp fmt "ctz"
   | <span data-count="2">P</span>opcnt -&gt; pp fmt "popcnt"
 
 type nonrec funop =
@@ -1856,7 +1863,7 @@ type nonrec funop =
 
 let pp_funop fmt = function
   | <span data-count="0">A</span>bs -&gt; pp fmt "abs"
-  | <span data-count="4">N</span>eg -&gt; pp fmt "neg"
+  | <span data-count="0">N</span>eg -&gt; pp fmt "neg"
   | <span data-count="0">S</span>qrt -&gt; pp fmt "sqrt"
   | <span data-count="0">C</span>eil -&gt; pp fmt "ceil"
   | <span data-count="0">F</span>loor -&gt; pp fmt "floor"
@@ -1878,7 +1885,7 @@ type nonrec ibinop =
   | Rotr
 
 let pp_ibinop fmt = function
-  | <span data-count="56">(</span>Add : ibinop) -&gt; pp fmt "add"
+  | <span data-count="54">(</span>Add : ibinop) -&gt; pp fmt "add"
   | <span data-count="4">S</span>ub -&gt; pp fmt "sub"
   | <span data-count="5">M</span>ul -&gt; pp fmt "mul"
   | <span data-count="4">D</span>iv s -&gt; pp fmt "div_%a" pp_sx s
@@ -1967,7 +1974,7 @@ type nonrec limits =
   }
 
 let pp_limits fmt { min; max } =
-  <span data-count="69">m</span>atch max with <span data-count="36">N</span>one -&gt; pp fmt "%d" min | <span data-count="33">S</span>ome max -&gt; pp fmt "%d %d" min max
+  <span data-count="13">m</span>atch max with <span data-count="10">N</span>one -&gt; pp fmt "%d" min | <span data-count="3">S</span>ome max -&gt; pp fmt "%d %d" min max
 
 type nonrec mem = string option * limits
 
@@ -2005,9 +2012,9 @@ let pp_heap_type fmt = function
   | <span data-count="0">I</span>31_ht -&gt; pp fmt "i31"
   | <span data-count="0">S</span>truct_ht -&gt; pp fmt "struct"
   | <span data-count="0">A</span>rray_ht -&gt; pp fmt "array"
-  | <span data-count="50">F</span>unc_ht -&gt; pp fmt "func"
+  | <span data-count="6">F</span>unc_ht -&gt; pp fmt "func"
   | <span data-count="0">N</span>o_func_ht -&gt; pp fmt "nofunc"
-  | <span data-count="68">E</span>xtern_ht -&gt; pp fmt "extern"
+  | <span data-count="0">E</span>xtern_ht -&gt; pp fmt "extern"
   | <span data-count="0">N</span>o_extern_ht -&gt; pp fmt "noextern"
   | <span data-count="0">D</span>ef_ht i -&gt; pp fmt "%a" pp_indice i
 
@@ -2027,9 +2034,9 @@ let pp_heap_type_short fmt = function
 type nonrec 'a ref_type = nullable * 'a heap_type
 
 let pp_ref_type fmt (n, ht) =
-  <span data-count="38">m</span>atch n with
+  <span data-count="6">m</span>atch n with
   | <span data-count="0">N</span>o_null -&gt; pp fmt "%a" pp_heap_type_short ht
-  | <span data-count="38">N</span>ull -&gt; pp fmt "(ref null %a)" pp_heap_type ht
+  | <span data-count="6">N</span>ull -&gt; pp fmt "(ref null %a)" pp_heap_type ht
 
 type nonrec 'a val_type =
   | Num_type of num_type
@@ -2090,7 +2097,7 @@ let pp_func_type fmt (params, results) =
 type nonrec 'a table_type = limits * 'a ref_type
 
 let pp_table_type fmt (limits, ref_type) =
-  <span data-count="35">p</span>p fmt "%a %a" pp_limits limits pp_ref_type ref_type
+  <span data-count="3">p</span>p fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
 type nonrec 'a global_type = mut * 'a val_type
 
@@ -2231,9 +2238,9 @@ let rec pp_instr fmt = function
   | <span data-count="29">I</span>64_const i -&gt; pp fmt "i64.const %Ld" i
   | <span data-count="25">F</span>32_const f -&gt; pp fmt "f32.const %a" Float32.pp f
   | <span data-count="0">F</span>64_const f -&gt; pp fmt "f64.const %a" Float64.pp f
-  | <span data-count="14">I</span>_unop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_iunop op
-  | <span data-count="4">F</span>_unop (n, op) -&gt; pp fmt "f%a.%a" pp_nn n pp_funop op
-  | <span data-count="89">I</span>_binop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_ibinop op
+  | <span data-count="6">I</span>_unop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_iunop op
+  | <span data-count="0">F</span>_unop (n, op) -&gt; pp fmt "f%a.%a" pp_nn n pp_funop op
+  | <span data-count="87">I</span>_binop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_ibinop op
   | <span data-count="0">F</span>_binop (n, op) -&gt; pp fmt "f%a.%a" pp_nn n pp_fbinop op
   | <span data-count="21">I</span>_testop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_itestop op
   | <span data-count="22">I</span>_relop (n, op) -&gt; pp fmt "i%a.%a" pp_nn n pp_irelop op
@@ -2262,7 +2269,7 @@ let rec pp_instr fmt = function
     | <span data-count="0">S</span>ome vt -&gt; pp fmt "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
   end
-  | <span data-count="94">L</span>ocal_get id -&gt; pp fmt "local.get %a" pp_indice id
+  | <span data-count="92">L</span>ocal_get id -&gt; pp fmt "local.get %a" pp_indice id
   | <span data-count="14">L</span>ocal_set id -&gt; pp fmt "local.set %a" pp_indice id
   | <span data-count="4">L</span>ocal_tee id -&gt; pp fmt "local.tee %a" pp_indice id
   | <span data-count="3">G</span>lobal_get id -&gt; pp fmt "global.get %a" pp_indice id
@@ -2295,7 +2302,7 @@ let rec pp_instr fmt = function
   | <span data-count="0">M</span>emory_copy -&gt; pp fmt "memory.copy"
   | <span data-count="0">M</span>emory_init id -&gt; pp fmt "memory.init %a" pp_indice id
   | <span data-count="0">D</span>ata_drop id -&gt; pp fmt "data.drop %a" pp_indice id
-  | <span data-count="18">N</span>op -&gt; pp fmt "nop"
+  | <span data-count="0">N</span>op -&gt; pp fmt "nop"
   | <span data-count="1">U</span>nreachable -&gt; pp fmt "unreachable"
   | <span data-count="17">B</span>lock (id, bt, e) -&gt;
     pp fmt "(block%a%a@\n  @[&lt;v&gt;%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
@@ -2322,7 +2329,7 @@ let rec pp_instr fmt = function
   | <span data-count="1">R</span>eturn_call_indirect (tbl_id, ty_id) -&gt;
     pp fmt "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">R</span>eturn_call_ref ty_id -&gt; pp fmt "return_call_ref %a" pp_block_type ty_id
-  | <span data-count="63">C</span>all id -&gt; pp fmt "call %a" pp_indice id
+  | <span data-count="61">C</span>all id -&gt; pp fmt "call %a" pp_indice id
   | <span data-count="3">C</span>all_indirect (tbl_id, ty_id) -&gt;
     pp fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">C</span>all_ref ty_id -&gt; pp fmt "call_ref %a" pp_indice ty_id

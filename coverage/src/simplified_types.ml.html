@@ -226,10 +226,10 @@ let convert_heap_type tbl = function
     Ok t
   | <span data-count="3">D</span>ef_ht (Text i) -&gt; begin
     match tbl with
-    | <span data-count="3">N</span>one -&gt; error_s "unknown type %s (no table)" i
+    | <span data-count="3">N</span>one -&gt; Error `Unknown_type
     | <span data-count="0">S</span>ome tbl -&gt; begin
       match Hashtbl.find_opt tbl i with
-      | <span data-count="0">N</span>one -&gt; error_s "unknown type %s (not found in table)" i
+      | <span data-count="0">N</span>one -&gt; Error `Unknown_type
       | <span data-count="0">S</span>ome i -&gt; ok @@ Def_ht (Raw i)
     end
   end

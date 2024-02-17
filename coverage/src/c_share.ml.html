@@ -18,29 +18,36 @@
       <h2>83.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:23.53%"></span>
-      <span class="unvisited" style="bottom:17.65%"></span>
+      <span class="unvisited" style="bottom:30.43%"></span>
+      <span class="unvisited" style="bottom:26.09%"></span>
+      <span class="some-visited" style="bottom:13.04%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
         <pre>
-<a id="L1"></a><span class="visited"> </span>
+<a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span class="visited"> </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span class="visited"> </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="unvisited"> </span>
-<a id="L14"></a><span class="unvisited"> </span>
-<a id="L15"></a><span > </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="some-visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -62,24 +69,36 @@
 <a href="#L15">15</a>
 <a href="#L16">16</a>
 <a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
 </pre>
-<pre><code class="ocaml">let py_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.pyc
+<pre><code class="ocaml">open Syntax
+
+let py_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.pyc
 
 let bin_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.binc
 
 let lib_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.libc
 
 let find location file =
-  <span data-count="487">L</span>ist.find_map
-    (fun dir -&gt;
-      <span data-count="487">l</span>et filename = Fpath.append dir file in
-      <span data-count="487">m</span>atch Bos.OS.File.exists filename with
-      | <span data-count="487">O</span>k true -&gt; Some filename
-      | <span data-count="0">O</span>k false -&gt; None
-      | <span data-count="0">E</span>rror (`Msg msg) -&gt; failwith msg )
-    location
+  <span data-count="487">l</span>et* l =
+    list_ma<span data-count="487">p</span>
+      (fun dir -&gt;
+        <span data-count="487">l</span>et filename = Fpath.append dir file in
+        <span data-count="487">m</span>atch Bos.OS.File.exists filename with
+        | <span data-count="487">O</span>k true -&gt; Ok (Some filename)
+        | <span data-count="0">O</span>k false -&gt; Ok None
+        | <span data-count="0">E</span>rror (`Msg msg) -&gt; Error (`Msg msg) )
+      location
+  in
+  <span data-count="487">O</span>k (List.fin<span data-count="487">d</span> (function <span data-count="0">N</span>one -&gt; false | <span data-count="487">S</span>ome _filename -&gt; true) l)
 
-let libc = Option.ge<span data-count="487">t</span> @@ fin<span data-count="487">d</span> bin_location (Fpath.<span data-count="487">v</span> "libc.wasm")
+let libc =
+  Option.ge<span data-count="487">t</span> @@ Result.get_o<span data-count="487">k</span> @@ fin<span data-count="487">d</span> bin_location (Fpath.<span data-count="487">v</span> "libc.wasm")
 </code></pre>
       </div>
     </div>
