@@ -488,20 +488,20 @@ let assign_types (modul : Grouped.t) : simplified str_type Named.t Result.t =
 
 let get_runtime_name (get_name : 'a -&gt; string option) (elt : ('a, 'b) Runtime.t)
   : string option =
-  <span data-count="24830">m</span>atch elt with
+  <span data-count="24832">m</span>atch elt with
   | <span data-count="20690">L</span>ocal v -&gt; get_name v
-  | <span data-count="4140">I</span>mported { assigned_name; _ } -&gt; assigned_name
+  | <span data-count="4142">I</span>mported { assigned_name; _ } -&gt; assigned_name
 
 let name kind ~get_name values =
   <span data-count="36258">l</span>et assign_one (named : int String_map.t) (elt : _ Indexed.t) =
-    <span data-count="27488">l</span>et elt_v = Indexed.get elt in
-    <span data-count="27488">m</span>atch get_name elt_v with
-    | <span data-count="14402">N</span>one -&gt; Ok named
-    | <span data-count="13086">S</span>ome name -&gt;
+    <span data-count="27491">l</span>et elt_v = Indexed.get elt in
+    <span data-count="27491">m</span>atch get_name elt_v with
+    | <span data-count="14403">N</span>one -&gt; Ok named
+    | <span data-count="13088">S</span>ome name -&gt;
       let index = Indexed.get_index elt in
-      <span data-count="13086">i</span>f String_map.mem name named then
+      <span data-count="13088">i</span>f String_map.mem name named then
         <span data-count="6">E</span>rror (`Msg (Format.sprint<span data-count="6">f</span> "duplicate %s %s" kind name))
-      else <span data-count="13080">o</span>k @@ String_map.ad<span data-count="13080">d</span> name index named
+      else <span data-count="13082">o</span>k @@ String_map.ad<span data-count="13082">d</span> name index named
   in
   let+ named = list_fold_lef<span data-count="36258">t</span> assign_one String_map.empty values in
   <span data-count="36252">{</span> Named.values; named }
@@ -549,7 +549,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     nam<span data-count="6039">e</span> "elem" ~get_name:(fun (elem : Text.elem) -&gt; <span data-count="1674">e</span>lem.id) modul.elem
   in
   <span data-count="6039">l</span>et* data =
-    nam<span data-count="6039">e</span> "data" ~get_name:(fun (data : Text.data) -&gt; <span data-count="984">d</span>ata.id) modul.data
+    nam<span data-count="6039">e</span> "data" ~get_name:(fun (data : Text.data) -&gt; <span data-count="985">d</span>ata.id) modul.data
   in
   <span data-count="6039">l</span>et+ () = list_ite<span data-count="6039">r</span> (check_type_i<span data-count="6039">d</span> typ) modul.type_checks in
   <span data-count="6029">{</span> id = modul.id

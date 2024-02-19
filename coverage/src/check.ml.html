@@ -280,25 +280,25 @@ let modul m =
   let+ (_env : env) =
     List.fold_lef<span data-count="6127">t</span>
       (fun env field -&gt;
-        <span data-count="41851">l</span>et* env in
-        <span data-count="41851">m</span>atch field with
+        <span data-count="41854">l</span>et* env in
+        <span data-count="41854">m</span>atch field with
         | <span data-count="12229">M</span>Export _e -&gt; Ok env
         | <span data-count="16476">M</span>Func _f -&gt; Ok { env with funcs = true }
         | <span data-count="262">M</span>Start _start -&gt;
           if env.start then <span data-count="2">E</span>rror `Multiple_start_sections
           else <span data-count="260">O</span>k { env with start = true }
-        | <span data-count="4198">M</span>Import i -&gt;
+        | <span data-count="4200">M</span>Import i -&gt;
           if env.funcs then <span data-count="8">E</span>rror `Import_after_function
-          else <span data-count="4190">i</span>f env.memory then <span data-count="8">E</span>rror `Import_after_memory
-          else <span data-count="4182">i</span>f env.tables then <span data-count="8">E</span>rror `Import_after_table
-          else <span data-count="4174">i</span>f env.globals then <span data-count="8">E</span>rror `Import_after_global
-          else <span data-count="4166">b</span>egin
+          else <span data-count="4192">i</span>f env.memory then <span data-count="8">E</span>rror `Import_after_memory
+          else <span data-count="4184">i</span>f env.tables then <span data-count="8">E</span>rror `Import_after_table
+          else <span data-count="4176">i</span>f env.globals then <span data-count="8">E</span>rror `Import_after_global
+          else <span data-count="4168">b</span>egin
             match i.desc with
             | <span data-count="124">I</span>mport_mem (id, _) -&gt;
               let* () = add_memor<span data-count="124">y</span> id in
               <span data-count="122">i</span>f env.imported_memory then <span data-count="2">E</span>rror `Multiple_memories
               else <span data-count="120">O</span>k { env with imported_memory = true }
-            | <span data-count="3735">I</span>mport_func _ -&gt; Ok env
+            | <span data-count="3737">I</span>mport_func _ -&gt; Ok env
             | <span data-count="166">I</span>mport_global (id, _) -&gt;
               let+ () = add_globa<span data-count="166">l</span> id in
               <span data-count="164">e</span>nv
@@ -306,7 +306,7 @@ let modul m =
               let+ () = add_tabl<span data-count="141">e</span> id in
               <span data-count="139">e</span>nv
           end
-        | <span data-count="984">M</span>Data _d -&gt; Ok env
+        | <span data-count="985">M</span>Data _d -&gt; Ok env
         | <span data-count="1679">M</span>Elem _e -&gt; Ok env
         | <span data-count="1608">M</span>Mem (id, _) -&gt;
           let* () = add_memor<span data-count="1608">y</span> id in

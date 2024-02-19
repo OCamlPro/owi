@@ -172,9 +172,9 @@ struct
     <span data-count="1461">f</span>un buf -&gt;
       <span data-count="1622">L</span>og.debug0 "parsing      ...@\n";
       <span data-count="1622">l</span>et provider () =
-        <span data-count="1951041">l</span>et tok = Lexer.token buf in
-        <span data-count="1950677">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1950677">(</span>tok, start, stop)
+        <span data-count="1951122">l</span>et tok = Lexer.token buf in
+        <span data-count="1950758">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1950758">(</span>tok, start, stop)
       in
       try Ok (parse<span data-count="580">r</span> provider) with
       | <span data-count="542">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)

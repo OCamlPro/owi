@@ -75,7 +75,7 @@ type 'a t =
 
 let fold f v acc =
   <span data-count="23129">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="42337">f</span> (Indexed.get_inde<span data-count="42337">x</span> v) (Indexed.ge<span data-count="42337">t</span> v) acc)
+    (fun acc v -&gt; <span data-count="42342">f</span> (Indexed.get_inde<span data-count="42342">x</span> v) (Indexed.ge<span data-count="42342">t</span> v) acc)
     acc v.values
 
 let map f v =

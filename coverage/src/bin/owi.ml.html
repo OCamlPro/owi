@@ -789,10 +789,10 @@ let exit_code =
   | Ok (<span data-count="8">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
   | <span data-count="454">O</span>k (`Ok result) -&gt; begin
     match result with
-    | <span data-count="403">O</span>k () -&gt; ok
-    | <span data-count="51">E</span>rror e -&gt; begin
-      Format.pp_err "%s" (Result.err_to_strin<span data-count="51">g</span> e);
-      <span data-count="51">m</span>atch e with
+    | <span data-count="404">O</span>k () -&gt; ok
+    | <span data-count="50">E</span>rror e -&gt; begin
+      Format.pp_err "%s" (Result.err_to_strin<span data-count="50">g</span> e);
+      <span data-count="50">m</span>atch e with
       | <span data-count="2">`</span>No_error -&gt; ok
       | <span data-count="0">`</span>Alignment_too_large -&gt; 1
       | <span data-count="0">`</span>Assert_failure -&gt; 2
@@ -806,7 +806,7 @@ let exit_code =
       | <span data-count="0">`</span>Duplicate_local _id -&gt; 10
       | <span data-count="0">`</span>Duplicate_memory _id -&gt; 11
       | <span data-count="0">`</span>Duplicate_table _id -&gt; 12
-      | <span data-count="41">`</span>Found_bug _count -&gt; 13
+      | <span data-count="40">`</span>Found_bug _count -&gt; 13
       | <span data-count="0">`</span>Global_is_immutable -&gt; 14
       | <span data-count="0">`</span>Illegal_escape _txt -&gt; 15
       | <span data-count="0">`</span>Import_after_function -&gt; 16
