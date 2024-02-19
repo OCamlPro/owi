@@ -650,9 +650,9 @@ let link ~deps ~workspace files : Fpath.t Result.t =
 let cleanup dir : unit =
   <span data-count="166">O</span>S.Path.fold ~elements:`Files
     (fun path _acc -&gt;
-      <span data-count="2858">i</span>f not @@ Fpath.has_ex<span data-count="2858">t</span> ".wat" path then
-        <span data-count="2692">m</span>atch OS.Path.delete path with
-        | <span data-count="2692">O</span>k () -&gt; ()
+      <span data-count="2861">i</span>f not @@ Fpath.has_ex<span data-count="2861">t</span> ".wat" path then
+        <span data-count="2695">m</span>atch OS.Path.delete path with
+        | <span data-count="2695">O</span>k () -&gt; ()
         | <span data-count="0">E</span>rror (`Msg e) -&gt; Logs.warn (fun m -&gt; <span data-count="0">m</span> "%s" e) )
     () [ dir ]
   |&gt; <span data-count="166">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id

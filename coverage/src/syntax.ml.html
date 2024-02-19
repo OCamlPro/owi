@@ -221,9 +221,9 @@
 
 open Stdlib.Result
 
-let ( let* ) o f = <span data-count="1511414">m</span>atch o with <span data-count="1501459">O</span>k v -&gt; f v | <span data-count="9955">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="1511451">m</span>atch o with <span data-count="1501496">O</span>k v -&gt; f v | <span data-count="9955">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="336251">m</span>atch o with <span data-count="334282">O</span>k v -&gt; Ok (<span data-count="334282">f</span> v) | <span data-count="1969">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="336254">m</span>atch o with <span data-count="334285">O</span>k v -&gt; Ok (<span data-count="334285">f</span> v) | <span data-count="1969">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="0">E</span>rror v
 
@@ -262,8 +262,8 @@ let list_map f l =
 let list_fold_left f acc l =
   <span data-count="107325">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="429074">l</span>et* acc in
-      <span data-count="427651">f</span> acc v )
+      <span data-count="429091">l</span>et* acc in
+      <span data-count="427668">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =
