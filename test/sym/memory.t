@@ -8,14 +8,12 @@ memory stuff:
       (symbol_0 (i32 1)))
   Reached problem!
   [13]
-# Deactivated because it is currently an enumeration of all i32s with the forced concretization
-#  $ dune exec owi -- sym store.wat
-#  Trap: out of bounds memory access
-#  Model:
-#    (model
-#      (symbol_0 (i32 -11))
-#      (symbol_1 (i32 0)))
-#  Reached problem!
-#  [1]
+  $ dune exec owi -- sym store.wat
+  Trap: out of bounds memory access
+  Model:
+    (model
+      (symbol_0 (i32 2146549760)))
+  Reached problem!
+  [13]
   $ dune exec owi -- sym memory2.wat
   All OK
