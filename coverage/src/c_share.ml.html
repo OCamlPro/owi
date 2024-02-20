@@ -78,27 +78,27 @@
 </pre>
 <pre><code class="ocaml">open Syntax
 
-let py_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.pyc
+let py_location = List.ma<span data-count="458">p</span> Fpath.v C_share_site.Sites.pyc
 
-let bin_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.binc
+let bin_location = List.ma<span data-count="458">p</span> Fpath.v C_share_site.Sites.binc
 
-let lib_location = List.ma<span data-count="487">p</span> Fpath.v C_share_site.Sites.libc
+let lib_location = List.ma<span data-count="458">p</span> Fpath.v C_share_site.Sites.libc
 
 let find location file =
-  <span data-count="487">l</span>et* l =
-    list_ma<span data-count="487">p</span>
+  <span data-count="458">l</span>et* l =
+    list_ma<span data-count="458">p</span>
       (fun dir -&gt;
-        <span data-count="487">l</span>et filename = Fpath.append dir file in
-        <span data-count="487">m</span>atch Bos.OS.File.exists filename with
-        | <span data-count="487">O</span>k true -&gt; Ok (Some filename)
+        <span data-count="458">l</span>et filename = Fpath.append dir file in
+        <span data-count="458">m</span>atch Bos.OS.File.exists filename with
+        | <span data-count="458">O</span>k true -&gt; Ok (Some filename)
         | <span data-count="0">O</span>k false -&gt; Ok None
         | <span data-count="0">E</span>rror (`Msg msg) -&gt; Error (`Msg msg) )
       location
   in
-  <span data-count="487">O</span>k (List.fin<span data-count="487">d</span> (function <span data-count="0">N</span>one -&gt; false | <span data-count="487">S</span>ome _filename -&gt; true) l)
+  <span data-count="458">O</span>k (List.fin<span data-count="458">d</span> (function <span data-count="0">N</span>one -&gt; false | <span data-count="458">S</span>ome _filename -&gt; true) l)
 
 let libc =
-  Option.ge<span data-count="487">t</span> @@ Result.get_o<span data-count="487">k</span> @@ fin<span data-count="487">d</span> bin_location (Fpath.<span data-count="487">v</span> "libc.wasm")
+  Option.ge<span data-count="458">t</span> @@ Result.get_o<span data-count="458">k</span> @@ fin<span data-count="458">d</span> bin_location (Fpath.<span data-count="458">v</span> "libc.wasm")
 </code></pre>
       </div>
     </div>
