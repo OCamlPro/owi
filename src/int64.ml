@@ -6,8 +6,6 @@ let clz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_leading_zeros n)
 
 let ctz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_trailing_zeros n)
 
-exception Overflow
-
 (* Taken from Base: https://github.com/janestreet/base *)
 let popcnt =
   let ( + ) = add in

@@ -2,8 +2,6 @@
 
 type t = int64
 
-exception Overflow
-
 val min_int : t
 
 val max_int : t

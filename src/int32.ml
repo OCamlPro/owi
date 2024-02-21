@@ -16,8 +16,6 @@ let of_int64 = Int64.to_int32
 
 let to_int64 = Int64.of_int32
 
-exception Overflow
-
 (* Unsigned comparison in terms of signed comparison. *)
 let cmp_u x op y = op (add x min_int) (add y min_int)
 
