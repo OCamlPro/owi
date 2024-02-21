@@ -12,6 +12,8 @@
   binop_i64-2.wat
   binop_f32.wat
   binop_f64.wat
+  copysign_f32.wat
+  copysign_f64.wat
   div_i32.wat
   div_i64.wat
   div_f32.wat
