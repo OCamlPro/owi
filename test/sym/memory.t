@@ -8,11 +8,11 @@ memory stuff:
       (symbol_0 (i32 1)))
   Reached problem!
   [13]
-  $ dune exec owi -- sym store.wat
+  $ dune exec owi -- sym store.wat --no-value
   Trap: out of bounds memory access
   Model:
     (model
-      (symbol_0 (i32 2146549760)))
+      (symbol_0 i32))
   Reached problem!
   [13]
   $ dune exec owi -- sym memory2.wat
