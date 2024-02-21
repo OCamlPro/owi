@@ -516,37 +516,37 @@ type metadata =
   }
 
 let clang bin ~flags ~out file : Bos.Cmd.t =
-  <span data-count="658">C</span>md.(bin %<span data-count="658">%</span> flags <span data-count="658">%</span> "-o" <span data-count="658">%</span> <span data-count="658">p</span> out % <span data-count="658">p</span> file)
+  <span data-count="661">C</span>md.(bin %<span data-count="661">%</span> flags <span data-count="661">%</span> "-o" <span data-count="661">%</span> <span data-count="661">p</span> out % <span data-count="661">p</span> file)
 
-let opt bin file : Bos.Cmd.t = <span data-count="658">C</span>md.(bin <span data-count="658">%</span> "-O1" <span data-count="658">%</span> "-o" <span data-count="658">%</span> <span data-count="658">p</span> file % <span data-count="658">p</span> file)
+let opt bin file : Bos.Cmd.t = <span data-count="661">C</span>md.(bin <span data-count="661">%</span> "-O1" <span data-count="661">%</span> "-o" <span data-count="661">%</span> <span data-count="661">p</span> file % <span data-count="661">p</span> file)
 
 let llc bin ~bc ~obj : Bos.Cmd.t =
-  <span data-count="658">l</span>et flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
-  <span data-count="658">C</span>md.(bin %<span data-count="658">%</span> flags <span data-count="658">%</span> <span data-count="658">p</span> obj % <span data-count="658">p</span> bc)
+  <span data-count="661">l</span>et flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
+  <span data-count="661">C</span>md.(bin %<span data-count="661">%</span> flags <span data-count="661">%</span> <span data-count="661">p</span> obj % <span data-count="661">p</span> bc)
 
 let ld bin ~flags ~out files : Bos.Cmd.t =
-  <span data-count="163">l</span>et files = List.fold_left (fun acc f -&gt; <span data-count="658">C</span>md.(acc % <span data-count="658">p</span> f)) Cmd.empty files in
-  <span data-count="163">C</span>md.(bin %<span data-count="163">%</span> flags <span data-count="163">%</span> "-o" <span data-count="163">%</span> <span data-count="163">p</span> out %<span data-count="163">%</span> files % <span data-count="163">p</span> C_share.libc)
+  <span data-count="166">l</span>et files = List.fold_left (fun acc f -&gt; <span data-count="661">C</span>md.(acc % <span data-count="661">p</span> f)) Cmd.empty files in
+  <span data-count="166">C</span>md.(bin %<span data-count="166">%</span> flags <span data-count="166">%</span> "-o" <span data-count="166">%</span> <span data-count="166">p</span> out %<span data-count="166">%</span> files % <span data-count="166">p</span> C_share.libc)
 
-let wasm2wat bin0 ~out bin : Bos.Cmd.t = <span data-count="163">C</span>md.(bin0 <span data-count="163">%</span> "-o" <span data-count="163">%</span> <span data-count="163">p</span> out % <span data-count="163">p</span> bin)
+let wasm2wat bin0 ~out bin : Bos.Cmd.t = <span data-count="166">C</span>md.(bin0 <span data-count="166">%</span> "-o" <span data-count="166">%</span> <span data-count="166">p</span> out % <span data-count="166">p</span> bin)
 
 let check_dependencies () : deps Result.t =
-  <span data-count="163">l</span>et* clang_bin = OS.Cmd.resolv<span data-count="163">e</span> @@ Cmd.<span data-count="163">v</span> "clang" in
-  <span data-count="163">l</span>et* opt_bin = OS.Cmd.resolv<span data-count="163">e</span> @@ Cmd.<span data-count="163">v</span> "opt" in
-  <span data-count="163">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="163">e</span> @@ Cmd.<span data-count="163">v</span> "llc" in
-  <span data-count="163">l</span>et* ld_bin = OS.Cmd.resolv<span data-count="163">e</span> @@ Cmd.<span data-count="163">v</span> "wasm-ld" in
-  <span data-count="163">l</span>et* wasm2wat_bin = OS.Cmd.resolv<span data-count="163">e</span> @@ Cmd.<span data-count="163">v</span> "wasm2wat" in
-  <span data-count="163">O</span>k
-    { clang = clan<span data-count="163">g</span> clang_bin
-    ; opt = op<span data-count="163">t</span> opt_bin
-    ; llc = ll<span data-count="163">c</span> llc_bin
-    ; ld = l<span data-count="163">d</span> ld_bin
-    ; wasm2wat = wasm2wa<span data-count="163">t</span> wasm2wat_bin
+  <span data-count="166">l</span>et* clang_bin = OS.Cmd.resolv<span data-count="166">e</span> @@ Cmd.<span data-count="166">v</span> "clang" in
+  <span data-count="166">l</span>et* opt_bin = OS.Cmd.resolv<span data-count="166">e</span> @@ Cmd.<span data-count="166">v</span> "opt" in
+  <span data-count="166">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="166">e</span> @@ Cmd.<span data-count="166">v</span> "llc" in
+  <span data-count="166">l</span>et* ld_bin = OS.Cmd.resolv<span data-count="166">e</span> @@ Cmd.<span data-count="166">v</span> "wasm-ld" in
+  <span data-count="166">l</span>et* wasm2wat_bin = OS.Cmd.resolv<span data-count="166">e</span> @@ Cmd.<span data-count="166">v</span> "wasm2wat" in
+  <span data-count="166">O</span>k
+    { clang = clan<span data-count="166">g</span> clang_bin
+    ; opt = op<span data-count="166">t</span> opt_bin
+    ; llc = ll<span data-count="166">c</span> llc_bin
+    ; ld = l<span data-count="166">d</span> ld_bin
+    ; wasm2wat = wasm2wa<span data-count="166">t</span> wasm2wat_bin
     }
 
 let pre_patterns : (Re2.t * string) array =
-  Array.ma<span data-count="458">p</span>
-    (fun (regex, template) -&gt; <span data-count="458">(</span>Re2.create_ex<span data-count="458">n</span> regex, template))
+  Array.ma<span data-count="489">p</span>
+    (fun (regex, template) -&gt; <span data-count="489">(</span>Re2.create_ex<span data-count="489">n</span> regex, template))
     [| ( "void\\s+reach_error\\(\\)\\s*\\{.*\\}"
        , "void reach_error() { owi_assert(0); }" )
        (* ugly: Hack to solve duplicate errors on compilation *)
@@ -574,14 +574,14 @@ let patch ~src ~dst : unit Result.t =
   <span data-count="1">O</span>S.File.write dst data
 
 let copy ~src ~dst : Fpath.t Result.t =
-  <span data-count="657">l</span>et* data = OS.File.rea<span data-count="657">d</span> src in
-  <span data-count="657">l</span>et+ () = OS.File.writ<span data-count="657">e</span> dst data in
-  <span data-count="657">d</span>st
+  <span data-count="660">l</span>et* data = OS.File.rea<span data-count="660">d</span> src in
+  <span data-count="660">l</span>et+ () = OS.File.writ<span data-count="660">e</span> dst data in
+  <span data-count="660">d</span>st
 
 let instrument_file ?(skip = <span data-count="0">f</span>alse) ~includes ~workspace file : Fpath.t Result.t
     =
-  <span data-count="658">l</span>et dst = Fpath.(workspace /<span data-count="658">/</span> bas<span data-count="658">e</span> (file -<span data-count="658">+</span> ".c")) in
-  if skip then <span data-count="657">c</span>opy ~src:file ~dst
+  <span data-count="661">l</span>et dst = Fpath.(workspace /<span data-count="661">/</span> bas<span data-count="661">e</span> (file -<span data-count="661">+</span> ".c")) in
+  if skip then <span data-count="660">c</span>opy ~src:file ~dst
   else <span data-count="1">b</span>egin
     Logs.app (fun m -&gt; <span data-count="0">m</span> "instrumenting %a" Fpath.pp file);
     <span data-count="1">l</span>et* () = patch ~src:file ~dst in
@@ -606,10 +606,10 @@ let instrument_file ?(skip = <span data-count="0">f</span>alse) ~includes ~works
   end
 
 let compile ~deps ~includes ~opt_lvl file : Fpath.t Result.t =
-  <span data-count="658">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "compiling %a" Fpath.pp file);
-  <span data-count="658">l</span>et cflags =
-    let includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="658">p</span> Fpath.to_string includes) in
-    <span data-count="658">l</span>et warnings =
+  <span data-count="661">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "compiling %a" Fpath.pp file);
+  <span data-count="661">l</span>et cflags =
+    let includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="661">p</span> Fpath.to_string includes) in
+    <span data-count="661">l</span>et warnings =
       Cmd.of_list
         [ "-Wno-int-conversion"
         ; "-Wno-pointer-sign"
@@ -620,111 +620,111 @@ let compile ~deps ~includes ~opt_lvl file : Fpath.t Result.t =
         ; "-Wno-incompatible-pointer-types"
         ]
     in
-    <span data-count="658">C</span>md.(
-      of_lis<span data-count="658">t</span>
+    <span data-count="661">C</span>md.(
+      of_lis<span data-count="661">t</span>
         [ "-O" ^ opt_lvl; "-g"; "-emit-llvm"; "--target=wasm32"; "-m32"; "-c" ]
-      %<span data-count="658">%</span> warnings %<span data-count="658">%</span> includes )
+      %<span data-count="661">%</span> warnings %<span data-count="661">%</span> includes )
   in
-  let bc = Fpath.(file -<span data-count="658">+</span> ".bc") in
-  let obj = Fpath.(file -<span data-count="658">+</span> ".o") in
-  let* () = OS.Cmd.ru<span data-count="658">n</span> @@ deps.clan<span data-count="658">g</span> ~flags:cflags ~out:bc file in
-  <span data-count="658">l</span>et* () = OS.Cmd.ru<span data-count="658">n</span> @@ deps.op<span data-count="658">t</span> bc in
-  <span data-count="658">l</span>et+ () = OS.Cmd.ru<span data-count="658">n</span> @@ deps.llc ~bc ~obj in
-  <span data-count="658">o</span>bj
+  let bc = Fpath.(file -<span data-count="661">+</span> ".bc") in
+  let obj = Fpath.(file -<span data-count="661">+</span> ".o") in
+  let* () = OS.Cmd.ru<span data-count="661">n</span> @@ deps.clan<span data-count="661">g</span> ~flags:cflags ~out:bc file in
+  <span data-count="661">l</span>et* () = OS.Cmd.ru<span data-count="661">n</span> @@ deps.op<span data-count="661">t</span> bc in
+  <span data-count="661">l</span>et+ () = OS.Cmd.ru<span data-count="661">n</span> @@ deps.llc ~bc ~obj in
+  <span data-count="661">o</span>bj
 
 let link ~deps ~workspace files : Fpath.t Result.t =
-  <span data-count="163">l</span>et ldflags ~entry =
-    <span data-count="163">l</span>et stack_size = 8 * (1024 * 1024) in
+  <span data-count="166">l</span>et ldflags ~entry =
+    <span data-count="166">l</span>et stack_size = 8 * (1024 * 1024) in
     Cmd.(
       of_list
-        [ "-z"; "stack-size=" ^ string_of_in<span data-count="163">t</span> stack_size; "--export=" ^ entry ] )
+        [ "-z"; "stack-size=" ^ string_of_in<span data-count="166">t</span> stack_size; "--export=" ^ entry ] )
   in
   let wasm = Fpath.(workspace / "a.out.wasm") in
   let wat = Fpath.(workspace / "a.out.wat") in
   let* () =
-    OS.Cmd.ru<span data-count="163">n</span> @@ deps.l<span data-count="163">d</span> ~flags:(ldflags ~entry:"_start") ~out:wasm files
+    OS.Cmd.ru<span data-count="166">n</span> @@ deps.l<span data-count="166">d</span> ~flags:(ldflags ~entry:"_start") ~out:wasm files
   in
-  <span data-count="163">l</span>et+ () = OS.Cmd.ru<span data-count="163">n</span> @@ deps.wasm2wa<span data-count="163">t</span> ~out:wat wasm in
-  <span data-count="163">w</span>at
+  <span data-count="166">l</span>et+ () = OS.Cmd.ru<span data-count="166">n</span> @@ deps.wasm2wa<span data-count="166">t</span> ~out:wat wasm in
+  <span data-count="166">w</span>at
 
 let cleanup dir : unit =
-  <span data-count="163">O</span>S.Path.fold ~elements:`Files
+  <span data-count="166">O</span>S.Path.fold ~elements:`Files
     (fun path _acc -&gt;
-      <span data-count="2840">i</span>f not @@ Fpath.has_ex<span data-count="2840">t</span> ".wat" path then
-        <span data-count="2677">m</span>atch OS.Path.delete path with
-        | <span data-count="2677">O</span>k () -&gt; ()
+      <span data-count="2861">i</span>f not @@ Fpath.has_ex<span data-count="2861">t</span> ".wat" path then
+        <span data-count="2695">m</span>atch OS.Path.delete path with
+        | <span data-count="2695">O</span>k () -&gt; ()
         | <span data-count="0">E</span>rror (`Msg e) -&gt; Logs.warn (fun m -&gt; <span data-count="0">m</span> "%s" e) )
     () [ dir ]
-  |&gt; <span data-count="163">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id
+  |&gt; <span data-count="166">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
   unit =
-  <span data-count="163">F</span>ormat.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
+  <span data-count="166">F</span>ormat.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
 let metadata ~workspace arch property files : unit Result.t =
-  <span data-count="163">l</span>et out_metadata chan { arch; property; files } =
-    <span data-count="163">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
-    <span data-count="163">l</span>et tag n = <span data-count="1467">(</span>("", n), []) in
-    let el n d = <span data-count="1304">`</span>El (ta<span data-count="1304">g</span> n, [ `Data d ]) in
+  <span data-count="166">l</span>et out_metadata chan { arch; property; files } =
+    <span data-count="166">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
+    <span data-count="166">l</span>et tag n = <span data-count="1494">(</span>("", n), []) in
+    let el n d = <span data-count="1328">`</span>El (ta<span data-count="1328">g</span> n, [ `Data d ]) in
     let* spec =
-      match property with <span data-count="163">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> @@ Fpath.<span data-count="0">v</span> f
+      match property with <span data-count="166">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> @@ Fpath.<span data-count="0">v</span> f
     in
-    <span data-count="163">l</span>et file = String.concat " " (List.ma<span data-count="163">p</span> Fpath.to_string files) in
-    <span data-count="163">l</span>et* hash =
-      list_fold_lef<span data-count="163">t</span>
+    <span data-count="166">l</span>et file = String.concat " " (List.ma<span data-count="166">p</span> Fpath.to_string files) in
+    <span data-count="166">l</span>et* hash =
+      list_fold_lef<span data-count="166">t</span>
         (fun context file -&gt;
-          <span data-count="658">m</span>atch Bos.OS.File.read file with
+          <span data-count="661">m</span>atch Bos.OS.File.read file with
           | <span data-count="0">E</span>rror (`Msg msg) -&gt; Error (`Msg msg)
-          | <span data-count="658">O</span>k str -&gt; Ok (Digestif.SHA256.feed_strin<span data-count="658">g</span> context str) )
+          | <span data-count="661">O</span>k str -&gt; Ok (Digestif.SHA256.feed_strin<span data-count="661">g</span> context str) )
         Digestif.SHA256.empty files
     in
-    <span data-count="163">l</span>et hash = Digestif.SHA256.to_hex (Digestif.SHA256.ge<span data-count="163">t</span> hash) in
-    <span data-count="163">l</span>et time = Unix.time () |&gt; <span data-count="163">U</span>nix.localtime in
-    <span data-count="163">l</span>et test_metadata =
+    <span data-count="166">l</span>et hash = Digestif.SHA256.to_hex (Digestif.SHA256.ge<span data-count="166">t</span> hash) in
+    <span data-count="166">l</span>et time = Unix.time () |&gt; <span data-count="166">U</span>nix.localtime in
+    <span data-count="166">l</span>et test_metadata =
       `El
-        ( ta<span data-count="163">g</span> "test-metadata"
-        , [ e<span data-count="163">l</span> "sourcecodelang" "C"
-          ; e<span data-count="163">l</span> "producer" "owic"
-          ; e<span data-count="163">l</span> "specification" (String.tri<span data-count="163">m</span> spec)
-          ; e<span data-count="163">l</span> "programfile" file
-          ; e<span data-count="163">l</span> "programhash" hash
-          ; e<span data-count="163">l</span> "entryfunction" "main"
-          ; e<span data-count="163">l</span> "architecture" (Format.sprint<span data-count="163">f</span> "%dbit" arch)
-          ; e<span data-count="163">l</span> "creationtime" (Format.asprint<span data-count="163">f</span> "%a" pp_tm time)
+        ( ta<span data-count="166">g</span> "test-metadata"
+        , [ e<span data-count="166">l</span> "sourcecodelang" "C"
+          ; e<span data-count="166">l</span> "producer" "owic"
+          ; e<span data-count="166">l</span> "specification" (String.tri<span data-count="166">m</span> spec)
+          ; e<span data-count="166">l</span> "programfile" file
+          ; e<span data-count="166">l</span> "programhash" hash
+          ; e<span data-count="166">l</span> "entryfunction" "main"
+          ; e<span data-count="166">l</span> "architecture" (Format.sprint<span data-count="166">f</span> "%dbit" arch)
+          ; e<span data-count="166">l</span> "creationtime" (Format.asprint<span data-count="166">f</span> "%a" pp_tm time)
           ] )
     in
     let dtd =
       {xml|&lt;!DOCTYPE test-metadata PUBLIC "+//IDN sosy-lab.org//DTD test-format test-metadata 1.1//EN" "https://sosy-lab.org/test-format/test-metadata-1.1.dtd"&gt;|xml}
     in
     Xmlm.output o (`Dtd (Some dtd));
-    <span data-count="163">X</span>mlm.output_tree Fun.id o test_metadata;
-    <span data-count="163">O</span>k ()
+    <span data-count="166">X</span>mlm.output_tree Fun.id o test_metadata;
+    <span data-count="166">O</span>k ()
   in
   let fpath = Fpath.(workspace / "test-suite" / "metadata.xml") in
-  let* (_exists : bool) = OS.Dir.creat<span data-count="163">e</span> ~path:true (Fpath.paren<span data-count="163">t</span> fpath) in
-  <span data-count="163">l</span>et* res = OS.File.with_o<span data-count="163">c</span> fpath out_metadata { arch; property; files } in
-  <span data-count="163">r</span>es
+  let* (_exists : bool) = OS.Dir.creat<span data-count="166">e</span> ~path:true (Fpath.paren<span data-count="166">t</span> fpath) in
+  <span data-count="166">l</span>et* res = OS.File.with_o<span data-count="166">c</span> fpath out_metadata { arch; property; files } in
+  <span data-count="166">r</span>es
 
 let cmd debug arch property testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values : unit Result.t =
-  <span data-count="163">i</span>f debug then <span data-count="0">L</span>ogs.set_leve<span data-count="0">l</span> (Some Debug);
-  <span data-count="163">l</span>et workspace = Fpath.v workspace in
-  <span data-count="163">l</span>et includes = C_share.lib_location @ includes in
-  let* (deps : deps) = check_dependencie<span data-count="163">s</span> () in
-  <span data-count="163">l</span>et* (_exists : bool) = OS.Dir.creat<span data-count="163">e</span> ~path:true workspace in
+  <span data-count="166">i</span>f debug then <span data-count="0">L</span>ogs.set_leve<span data-count="0">l</span> (Some Debug);
+  <span data-count="166">l</span>et workspace = Fpath.v workspace in
+  <span data-count="166">l</span>et includes = C_share.lib_location @ includes in
+  let* (deps : deps) = check_dependencie<span data-count="166">s</span> () in
+  <span data-count="166">l</span>et* (_exists : bool) = OS.Dir.creat<span data-count="166">e</span> ~path:true workspace in
   (* skip instrumentation if not in test-comp mode *)
-  <span data-count="163">l</span>et skip = (not testcomp<span data-count="162">)</span> || Sys.getenv_op<span data-count="1">t</span> "RUNNER_OS" = Some "macOS<span data-count="0">"</span> in
+  <span data-count="166">l</span>et skip = (not testcomp<span data-count="165">)</span> || Sys.getenv_op<span data-count="1">t</span> "RUNNER_OS" = Some "macOS<span data-count="0">"</span> in
   let* (nfiles : Fpath.t list) =
-    list_ma<span data-count="163">p</span> (instrument_file ~skip ~includes ~workspace) files
+    list_ma<span data-count="166">p</span> (instrument_file ~skip ~includes ~workspace) files
   in
-  <span data-count="163">l</span>et* (objects : Fpath.t list) =
-    list_ma<span data-count="163">p</span> (compile ~deps ~includes ~opt_lvl) nfiles
+  <span data-count="166">l</span>et* (objects : Fpath.t list) =
+    list_ma<span data-count="166">p</span> (compile ~deps ~includes ~opt_lvl) nfiles
   in
-  <span data-count="163">l</span>et* module_ = lin<span data-count="163">k</span> ~deps ~workspace objects in
-  <span data-count="163">c</span>leanup workspace;
-  <span data-count="163">l</span>et* () = metadat<span data-count="163">a</span> ~workspace arch property files in
-  <span data-count="163">l</span>et files = [ module_ ] in
+  <span data-count="166">l</span>et* module_ = lin<span data-count="166">k</span> ~deps ~workspace objects in
+  <span data-count="166">c</span>leanup workspace;
+  <span data-count="166">l</span>et* () = metadat<span data-count="166">a</span> ~workspace arch property files in
+  <span data-count="166">l</span>et files = [ module_ ] in
   let workspace = Fpath.(workspace / "test-suite") in
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
     no_values workspace files

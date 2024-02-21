@@ -172,58 +172,58 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="11740">x</span>
+  let hash x = <span data-count="11773">x</span>
 end)
 
 type t = Symbolic_value.ref_value array
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="196">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="202">E</span>nv_id.Tbl.create 0
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten *)
-  <span data-count="7331">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="7331">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="7330">p</span>
+  <span data-count="11101">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="11099">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="11098">p</span>
        (fun (i, t) -&gt;
-         <span data-count="7002">l</span>et s = ITbl.to_seq t in
-         <span data-count="6999">(</span>i, ITbl.of_se<span data-count="7002">q</span> @@ Seq.ma<span data-count="6997">p</span> (fun (i, a) -&gt; <span data-count="7003">(</span>i, Array.cop<span data-count="7003">y</span> a)) s) )
+         <span data-count="7026">l</span>et s = ITbl.to_seq t in
+         <span data-count="7025">(</span>i, ITbl.of_se<span data-count="7026">q</span> @@ Seq.ma<span data-count="7025">p</span> (fun (i, a) -&gt; <span data-count="7026">(</span>i, Array.cop<span data-count="7026">y</span> a)) s) )
        s
 
 let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
     =
-  <span data-count="695">m</span>atch v with <span data-count="695">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
+  <span data-count="701">m</span>atch v with <span data-count="701">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
 
 let convert (orig_table : Concrete_table.t) =
-  <span data-count="162">A</span>rray.map convert_ref_values orig_table.data
+  <span data-count="163">A</span>rray.map convert_ref_values orig_table.data
 
 let get_env env_id tables =
-  <span data-count="4576">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="4415">S</span>ome env -&gt; env
-  | <span data-count="162">N</span>one -&gt;
+  <span data-count="4584">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="4421">S</span>ome env -&gt; env
+  | <span data-count="163">N</span>one -&gt;
     let t = ITbl.create 0 in
-    <span data-count="162">E</span>nv_id.Tbl.add tables env_id t;
-    <span data-count="162">t</span>
+    <span data-count="163">E</span>nv_id.Tbl.add tables env_id t;
+    <span data-count="163">t</span>
 
 let get_table env_id (orig_table : Concrete_table.t) collection t_id =
-  <span data-count="4576">l</span>et env = get_env env_id collection in
-  <span data-count="4577">m</span>atch ITbl.find_opt env t_id with
-  | <span data-count="4413">S</span>ome t -&gt; t
-  | <span data-count="162">N</span>one -&gt;
+  <span data-count="4584">l</span>et env = get_env env_id collection in
+  <span data-count="4584">m</span>atch ITbl.find_opt env t_id with
+  | <span data-count="4421">S</span>ome t -&gt; t
+  | <span data-count="163">N</span>one -&gt;
     let t = convert orig_table in
-    <span data-count="162">I</span>Tbl.add env t_id t;
-    <span data-count="162">t</span>
+    <span data-count="163">I</span>Tbl.add env t_id t;
+    <span data-count="163">t</span>
 
-let get t i = <span data-count="4414">t</span>.(i)
+let get t i = <span data-count="4421">t</span>.(i)
 
-let set t i v = <span data-count="534">t</span>.(i) &lt;- v
+let set t i v = <span data-count="540">t</span>.(i) &lt;- v
 
-let size t = <span data-count="4577">A</span>rray.length t
+let size t = <span data-count="4584">A</span>rray.length t
 
 let typ _t =
   (* TODO: add type to table *)
-  <span data-count="4415">(</span>Types.Null, Types.Func_ht)
+  <span data-count="4416">(</span>Types.Null, Types.Func_ht)
 
 let max_size _t = <span data-count="0">a</span>ssert false
 
