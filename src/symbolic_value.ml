@@ -405,8 +405,6 @@ module F32 = struct
 
   let max x y = binop ty Max x y
 
-  let copy_sign _ _ = assert false
-
   let eq x y = relop ty Eq x y
 
   let ne x y = relop ty Ne x y
@@ -434,6 +432,11 @@ module F32 = struct
   let of_bits x = cvtop ty Reinterpret_int x
 
   let to_bits x = cvtop (Ty_bitv S32) Reinterpret_float x
+
+  let copy_sign x y =
+    let xi = to_bits (abs x) in
+    let yi = to_bits y in
+    of_bits @@ I32.logor xi (I32.logand yi (const_i32 Int32.min_int))
 end
 
 module F64 = struct
@@ -467,8 +470,6 @@ module F64 = struct
 
   let max x y = binop ty Max x y
 
-  let copy_sign _ _ = assert false
-
   let eq x y = relop ty Eq x y
 
   let ne x y = relop ty Ne x y
@@ -496,4 +497,9 @@ module F64 = struct
   let of_bits x = cvtop ty Reinterpret_int x
 
   let to_bits x = cvtop (Ty_bitv S64) Reinterpret_float x
+
+  let copy_sign x y =
+    let xi = to_bits (abs x) in
+    let yi = to_bits y in
+    of_bits @@ I64.logor xi (I64.logand yi (const_i64 Int64.min_int))
 end
