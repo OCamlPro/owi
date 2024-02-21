@@ -16,6 +16,7 @@
   div_i64.wat
   div_f32.wat
   div_f64.wat
+  div_zero.wat
   global.wat
   grow.wat
   memory.wat

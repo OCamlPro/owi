@@ -45,6 +45,10 @@ module Make (P : Interpret_intf.P) :
 
     let ( <> ) = ne
 
+    let ( = ) = eq
+
+    let eqz v = v = zero
+
     let min_int = const_i32 Int32.min_int
   end
 
@@ -70,6 +74,10 @@ module Make (P : Interpret_intf.P) :
     let ( ~- ) x = const_i64 0L - x
 
     let ( <> ) = ne
+
+    let ( = ) = eq
+
+    let eqz v = v = zero
 
     let min_int = const_i64 Int64.min_int
   end
@@ -150,21 +158,23 @@ module Make (P : Interpret_intf.P) :
         | Sub -> Choice.return @@ sub n1 n2
         | Mul -> Choice.return @@ mul n1 n2
         | Div s -> begin
-          try
+          let> cond = eqz n2 in
+          if cond then Choice.trap Integer_divide_by_zero
+          else
             match s with
             | S ->
               let> overflow = Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l) in
               if overflow then Choice.trap Integer_overflow
               else Choice.return @@ div n1 n2
             | U -> Choice.return @@ unsigned_div n1 n2
-          with Division_by_zero -> Choice.trap Integer_divide_by_zero
         end
         | Rem s -> begin
-          try
+          let> cond = eqz n2 in
+          if cond then Choice.trap Integer_divide_by_zero
+          else
             match s with
             | S -> Choice.return @@ rem n1 n2
             | U -> Choice.return @@ unsigned_rem n1 n2
-          with Division_by_zero -> Choice.trap Integer_divide_by_zero
         end
         | And -> Choice.return @@ logand n1 n2
         | Or -> Choice.return @@ logor n1 n2
@@ -185,7 +195,9 @@ module Make (P : Interpret_intf.P) :
         | Sub -> Choice.return @@ sub n1 n2
         | Mul -> Choice.return @@ mul n1 n2
         | Div s -> begin
-          try
+          let> cond = eqz n2 in
+          if cond then Choice.trap Integer_divide_by_zero
+          else
             match s with
             | S ->
               let> overflow =
@@ -195,14 +207,14 @@ module Make (P : Interpret_intf.P) :
               if overflow then Choice.trap Integer_overflow
               else Choice.return @@ div n1 n2
             | U -> Choice.return @@ unsigned_div n1 n2
-          with Division_by_zero -> Choice.trap Integer_divide_by_zero
         end
         | Rem s -> begin
-          try
+          let> cond = eqz n2 in
+          if cond then Choice.trap Integer_divide_by_zero
+          else
             match s with
             | S -> Choice.return @@ rem n1 n2
             | U -> Choice.return @@ unsigned_rem n1 n2
-          with Division_by_zero -> Choice.trap Integer_divide_by_zero
         end
         | And -> Choice.return @@ logand n1 n2
         | Or -> Choice.return @@ logor n1 n2
