@@ -35,9 +35,8 @@
     (f64.eq (f64.max (local.get $x) (f64.const 42)) (f64.const 0))
     (if (then unreachable))
 
-    ;; File "src/symbolic_value.ml", Assertion failed
-    ;; (f64.eq (f64.copysign (local.get $x) (f64.const 42)) (f64.const 0))
-    ;; (if (then unreachable))
+    (f64.eq (f64.copysign (local.get $x) (f64.const 42)) (f64.const 0))
+    (if (then unreachable))
 
     (f64.ne (local.get $x) (f64.const 42))
     (if (then unreachable)))
