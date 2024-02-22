@@ -113,7 +113,7 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
 
 let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
-  file =
+  (m : Text.modul) =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
@@ -124,48 +124,32 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
       ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
   in
   let*/ to_run, link_state =
-    list_fold_left
-      (fun ((to_run, state) as acc) instruction ->
-        match instruction with
-        | Text.Module m ->
-          let has_start =
-            List.exists (function Text.MStart _ -> true | _ -> false) m.fields
-          in
-          let has_start_id_function =
-            List.exists
-              (function
-                | Text.MFunc { id = Some "_start"; _ } -> true | _ -> false )
-              m.fields
-          in
-          let fields =
-            if has_start || not has_start_id_function then m.fields
-            else MStart (Text "_start") :: m.fields
-          in
-          let m = { m with fields } in
-          let+ m, state =
-            Compile.until_link ~unsafe state ~optimize ~name:None m
-          in
-          let m = Symbolic.convert_module_to_run m in
-          (m :: to_run, state)
-        | Text.Register (name, id) ->
-          let+ state = Link.register_module state ~name ~id in
-          (to_run, state)
-        | _ -> Ok acc )
-      ([], link_state) file
-  in
-  let f (pc : (unit, _) result Choice.t) to_run =
-    let c = (Interpret.SymbolicP.modul link_state.envs) to_run in
-    let results =
-      Choice.bind pc (fun r ->
-          match r with Error _ -> Choice.return r | Ok () -> c )
+    let has_start =
+      List.exists (function Text.MStart _ -> true | _ -> false) m.fields
     in
-    results
+    let has_start_id_function =
+      List.exists
+        (function Text.MFunc { id = Some "_start"; _ } -> true | _ -> false)
+        m.fields
+    in
+    let fields =
+      if has_start || not has_start_id_function then m.fields
+      else MStart (Text "_start") :: m.fields
+    in
+    let m = { m with fields } in
+    let+ m, state =
+      Compile.until_link ~unsafe link_state ~optimize ~name:None m
+    in
+    let m = Symbolic.convert_module_to_run m in
+    (m, state)
   in
-  List.fold_left f pc (List.rev to_run)
+  let c = (Interpret.SymbolicP.modul link_state.envs) to_run in
+  Choice.bind pc (fun r ->
+      match r with Error _ -> Choice.return r | Ok () -> c )
 
 let run_file ~unsafe ~optimize pc filename =
-  let*/ script = Parse.Script.from_file filename in
-  simplify_then_link_then_run ~unsafe ~optimize pc script
+  let*/ m0dule = Parse.Module.from_file filename in
+  simplify_then_link_then_run ~unsafe ~optimize pc m0dule
 
 let get_model ~symbols solver pc =
   assert (Solver.Z3Batch.check solver pc);
