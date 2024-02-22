@@ -66,14 +66,14 @@
 open Syntax
 
 let run_file exec filename =
-  <span data-count="228">l</span>et* script = Parse.Script.from_fil<span data-count="228">e</span> filename in
-  <span data-count="226">e</span>xec script
+  <span data-count="227">l</span>et* script = Parse.Script.from_fil<span data-count="227">e</span> filename in
+  <span data-count="225">e</span>xec script
 
 let cmd profiling debug optimize files no_exhaustion =
-  <span data-count="228">l</span>et exec = Script.exec ~no_exhaustion ~optimize in
+  <span data-count="227">l</span>et exec = Script.exec ~no_exhaustion ~optimize in
   if profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="228">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
-  <span data-count="228">l</span>ist_iter (run_fil<span data-count="228">e</span> exec) files
+  <span data-count="227">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
+  <span data-count="227">l</span>ist_iter (run_fil<span data-count="227">e</span> exec) files
 </code></pre>
       </div>
     </div>

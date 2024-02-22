@@ -596,13 +596,13 @@
 
 let debug =
   let doc = "debug mode" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "debug"; "d" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "debug"; "d" ] ~doc)
 
 let existing_non_dir_file =
   let parse s =
-    <span data-count="964">l</span>et path = Fpath.v s in
-    <span data-count="964">m</span>atch Bos.OS.File.exists path with
-    | <span data-count="957">O</span>k true -&gt; `Ok path
+    <span data-count="960">l</span>et path = Fpath.v s in
+    <span data-count="960">m</span>atch Bos.OS.File.exists path with
+    | <span data-count="953">O</span>k true -&gt; `Ok path
     | <span data-count="7">O</span>k false -&gt; `Error (Format.asprint<span data-count="7">f</span> "no file '%a'" Fpath.pp path)
     | <span data-count="0">E</span>rror (`Msg s) -&gt; `Error s
   in
@@ -615,31 +615,31 @@ let dir_file =
 let files =
   let doc = "source files" in
   let f = existing_non_dir_file in
-  Cmdliner.Arg.(value &amp; <span data-count="477">p</span>os_al<span data-count="477">l</span> f [] (inf<span data-count="477">o</span> [] ~doc))
+  Cmdliner.Arg.(value &amp; <span data-count="470">p</span>os_al<span data-count="470">l</span> f [] (inf<span data-count="470">o</span> [] ~doc))
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "no-exhaustion" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "no-exhaustion" ] ~doc)
 
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "no-stop-at-failure" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "no-stop-at-failure" ] ~doc)
 
 let no_values =
   let doc = "do not display a value for each symbol" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "no-value" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "no-value" ] ~doc)
 
 let optimize =
   let doc = "optimize mode" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "optimize" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "optimize" ] ~doc)
 
 let profiling =
   let doc = "profiling mode" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "profiling"; "p" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "profiling"; "p" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in
-  Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "unsafe"; "u" ] ~doc)
+  Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "unsafe"; "u" ] ~doc)
 
 let workers =
   let doc =
@@ -648,15 +648,15 @@ let workers =
   in
   Cmdliner.Arg.(
     value
-    &amp; <span data-count="477">o</span>p<span data-count="477">t</span> int (Domain.recommended_domain_coun<span data-count="477">t</span> ())
-    &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "workers"; "w" ] ~doc ~absent:"n" )
+    &amp; <span data-count="470">o</span>p<span data-count="470">t</span> int (Domain.recommended_domain_coun<span data-count="470">t</span> ())
+    &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
   let doc = "path to the workspace directory" in
   Cmdliner.Arg.(
-    value &amp; <span data-count="477">o</span>p<span data-count="477">t</span> dir_file (Fpath.<span data-count="477">v</span> "owi-out") &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "workspace" ] ~doc )
+    value &amp; <span data-count="470">o</span>p<span data-count="470">t</span> dir_file (Fpath.<span data-count="470">v</span> "owi-out") &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "workspace" ] ~doc )
 
-let copts_t = Cmdliner.Term.(cons<span data-count="477">t</span> [])
+let copts_t = Cmdliner.Term.(cons<span data-count="470">t</span> [])
 
 let sdocs = Cmdliner.Manpage.s_common_options
 
@@ -672,102 +672,102 @@ let c_cmd =
       "Compile a C file to Wasm and run the symbolic interpreter on it"
     in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "c" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "c" ~version ~doc ~sdocs ~man
   in
   let arch =
     let doc = "data model" in
-    Arg.(value &amp; <span data-count="477">o</span>p<span data-count="477">t</span> int 32 &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "arch"; "m" ] ~doc)
+    Arg.(value &amp; <span data-count="470">o</span>p<span data-count="470">t</span> int 32 &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "arch"; "m" ] ~doc)
   in
   let property =
     let doc = "property file" in
-    Arg.(value &amp; <span data-count="477">o</span>p<span data-count="477">t</span> (som<span data-count="477">e</span> string) None &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "property" ] ~doc)
+    Arg.(value &amp; <span data-count="470">o</span>p<span data-count="470">t</span> (som<span data-count="470">e</span> string) None &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "property" ] ~doc)
   in
   let includes =
     let doc = "headers path" in
-    Arg.(value &amp; <span data-count="477">o</span>pt_al<span data-count="477">l</span> dir_file [] &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "I" ] ~doc)
+    Arg.(value &amp; <span data-count="470">o</span>pt_al<span data-count="470">l</span> dir_file [] &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "I" ] ~doc)
   in
   let opt_lvl =
     let doc = "specify which optimization level to use" in
-    Arg.(value &amp; <span data-count="477">o</span>p<span data-count="477">t</span> string "0" &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "O" ] ~doc)
+    Arg.(value &amp; <span data-count="470">o</span>p<span data-count="470">t</span> string "0" &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "O" ] ~doc)
   in
   let testcomp =
     let doc = "test-comp mode" in
-    Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "testcomp" ] ~doc)
+    Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "testcomp" ] ~doc)
   in
   let output =
     let doc = "write results to dir" in
-    Arg.(value &amp; <span data-count="477">o</span>p<span data-count="477">t</span> string "owi-out" &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "output"; "o" ] ~doc)
+    Arg.(value &amp; <span data-count="470">o</span>p<span data-count="470">t</span> string "owi-out" &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "output"; "o" ] ~doc)
   in
-  Cmd.<span data-count="477">v</span> info
+  Cmd.<span data-count="470">v</span> info
     Term.(
-      cons<span data-count="477">t</span> Cmd_c.cmd <span data-count="477">$</span> debug <span data-count="477">$</span> arch <span data-count="477">$</span> property <span data-count="477">$</span> testcomp <span data-count="477">$</span> output <span data-count="477">$</span> workers
-      <span data-count="477">$</span> opt_lvl <span data-count="477">$</span> includes <span data-count="477">$</span> files <span data-count="477">$</span> profiling <span data-count="477">$</span> unsafe <span data-count="477">$</span> optimize
-      <span data-count="477">$</span> no_stop_at_failure <span data-count="477">$</span> no_values )
+      cons<span data-count="470">t</span> Cmd_c.cmd <span data-count="470">$</span> debug <span data-count="470">$</span> arch <span data-count="470">$</span> property <span data-count="470">$</span> testcomp <span data-count="470">$</span> output <span data-count="470">$</span> workers
+      <span data-count="470">$</span> opt_lvl <span data-count="470">$</span> includes <span data-count="470">$</span> files <span data-count="470">$</span> profiling <span data-count="470">$</span> unsafe <span data-count="470">$</span> optimize
+      <span data-count="470">$</span> no_stop_at_failure <span data-count="470">$</span> no_values )
 
 let fmt_cmd =
   let open Cmdliner in
   let info =
     let doc = "Format a .wat or .wast file" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "fmt" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "fmt" ~version ~doc ~sdocs ~man
   in
   let inplace =
     let doc = "Format in-place, overwriting input file" in
-    Cmdliner.Arg.(value &amp; <span data-count="477">f</span>lag &amp; <span data-count="477">i</span>nf<span data-count="477">o</span> [ "inplace"; "i" ] ~doc)
+    Cmdliner.Arg.(value &amp; <span data-count="470">f</span>lag &amp; <span data-count="470">i</span>nf<span data-count="470">o</span> [ "inplace"; "i" ] ~doc)
   in
-  Cmd.<span data-count="477">v</span> info Term.(cons<span data-count="477">t</span> Cmd_fmt.cmd <span data-count="477">$</span> inplace <span data-count="477">$</span> files)
+  Cmd.<span data-count="470">v</span> info Term.(cons<span data-count="470">t</span> Cmd_fmt.cmd <span data-count="470">$</span> inplace <span data-count="470">$</span> files)
 
 let opt_cmd =
   let open Cmdliner in
   let info =
     let doc = "Optimize a module" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "opt" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "opt" ~version ~doc ~sdocs ~man
   in
-  Cmd.<span data-count="477">v</span> info Term.(cons<span data-count="477">t</span> Cmd_opt.cmd <span data-count="477">$</span> debug <span data-count="477">$</span> unsafe <span data-count="477">$</span> files)
+  Cmd.<span data-count="470">v</span> info Term.(cons<span data-count="470">t</span> Cmd_opt.cmd <span data-count="470">$</span> debug <span data-count="470">$</span> unsafe <span data-count="470">$</span> files)
 
 let run_cmd =
   let open Cmdliner in
   let info =
     let doc = "Run the concrete interpreter" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "run" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "run" ~version ~doc ~sdocs ~man
   in
-  Cmd.<span data-count="477">v</span> info
-    Term.(cons<span data-count="477">t</span> Cmd_run.cmd <span data-count="477">$</span> profiling <span data-count="477">$</span> debug <span data-count="477">$</span> unsafe <span data-count="477">$</span> optimize <span data-count="477">$</span> files)
+  Cmd.<span data-count="470">v</span> info
+    Term.(cons<span data-count="470">t</span> Cmd_run.cmd <span data-count="470">$</span> profiling <span data-count="470">$</span> debug <span data-count="470">$</span> unsafe <span data-count="470">$</span> optimize <span data-count="470">$</span> files)
 
 let validate_cmd =
   let open Cmdliner in
   let info =
     let doc = "Validate a module" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "validate" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "validate" ~version ~doc ~sdocs ~man
   in
-  Cmd.<span data-count="477">v</span> info Term.(cons<span data-count="477">t</span> Cmd_validate.cmd <span data-count="477">$</span> debug <span data-count="477">$</span> files)
+  Cmd.<span data-count="470">v</span> info Term.(cons<span data-count="470">t</span> Cmd_validate.cmd <span data-count="470">$</span> debug <span data-count="470">$</span> files)
 
 let script_cmd =
   let open Cmdliner in
   let info =
     let doc = "Run a reference test suite script" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "script" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "script" ~version ~doc ~sdocs ~man
   in
-  Cmd.<span data-count="477">v</span> info
+  Cmd.<span data-count="470">v</span> info
     Term.(
-      cons<span data-count="477">t</span> Cmd_script.cmd <span data-count="477">$</span> profiling <span data-count="477">$</span> debug <span data-count="477">$</span> optimize <span data-count="477">$</span> files
-      <span data-count="477">$</span> no_exhaustion )
+      cons<span data-count="470">t</span> Cmd_script.cmd <span data-count="470">$</span> profiling <span data-count="470">$</span> debug <span data-count="470">$</span> optimize <span data-count="470">$</span> files
+      <span data-count="470">$</span> no_exhaustion )
 
 let sym_cmd =
   let open Cmdliner in
   let info =
     let doc = "Run the symbolic interpreter" in
     let man = [] @ shared_man in
-    Cmd.inf<span data-count="477">o</span> "sym" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "sym" ~version ~doc ~sdocs ~man
   in
-  Cmd.<span data-count="477">v</span> info
+  Cmd.<span data-count="470">v</span> info
     Term.(
-      cons<span data-count="477">t</span> Cmd_sym.cmd <span data-count="477">$</span> profiling <span data-count="477">$</span> debug <span data-count="477">$</span> unsafe <span data-count="477">$</span> optimize <span data-count="477">$</span> workers
-      <span data-count="477">$</span> no_stop_at_failure <span data-count="477">$</span> no_values <span data-count="477">$</span> workspace <span data-count="477">$</span> files )
+      cons<span data-count="470">t</span> Cmd_sym.cmd <span data-count="470">$</span> profiling <span data-count="470">$</span> debug <span data-count="470">$</span> unsafe <span data-count="470">$</span> optimize <span data-count="470">$</span> workers
+      <span data-count="470">$</span> no_stop_at_failure <span data-count="470">$</span> no_values <span data-count="470">$</span> workspace <span data-count="470">$</span> files )
 
 let cli =
   let open Cmdliner in
@@ -775,21 +775,21 @@ let cli =
     let doc = "OCaml WebAssembly Interpreter" in
     let sdocs = Manpage.s_common_options in
     let man = [ `S Manpage.s_bugs; `P "Email them to &lt;contact@ndrs.fr&gt;." ] in
-    Cmd.inf<span data-count="477">o</span> "owi" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="470">o</span> "owi" ~version ~doc ~sdocs ~man
   in
   let default =
-    Term.(re<span data-count="477">t</span> (cons<span data-count="477">t</span> (fun (_ : _ list) -&gt; <span data-count="1">`</span>Help (`Plain, None)) <span data-count="477">$</span> copts_t))
+    Term.(re<span data-count="470">t</span> (cons<span data-count="470">t</span> (fun (_ : _ list) -&gt; <span data-count="1">`</span>Help (`Plain, None)) <span data-count="470">$</span> copts_t))
   in
-  Cmd.grou<span data-count="477">p</span> info ~default
+  Cmd.grou<span data-count="470">p</span> info ~default
     [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd; validate_cmd ]
 
 let exit_code =
   let open Cmdliner.Cmd.Exit in
   match Cmdliner.Cmd.eval_value cli with
-  | Ok (<span data-count="8">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
-  | <span data-count="457">O</span>k (`Ok result) -&gt; begin
+  | Ok (<span data-count="5">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
+  | <span data-count="453">O</span>k (`Ok result) -&gt; begin
     match result with
-    | <span data-count="405">O</span>k () -&gt; ok
+    | <span data-count="401">O</span>k () -&gt; ok
     | <span data-count="52">E</span>rror e -&gt; begin
       Format.pp_err "%s" (Result.err_to_strin<span data-count="52">g</span> e);
       <span data-count="52">m</span>atch e with
