@@ -598,8 +598,8 @@ let symbolic_extern_module :
     <span data-count="6">C</span>hoice.add_pc c
   in
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="9610">l</span>et c = Value.I32.to_bool i in
-    <span data-count="9622">C</span>hoice.assertion c
+    <span data-count="9584">l</span>et c = Value.I32.to_bool i in
+    <span data-count="9620">C</span>hoice.assertion c
   in
   (* we need to describe their types *)
   let functions =
@@ -635,37 +635,37 @@ let summaries_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
   let open Expr in
   let i32 v =
-    <span data-count="9865">m</span>atch v.node.e with
-    | <span data-count="9889">V</span>al (Num (I32 v)) -&gt; v
+    <span data-count="9815">m</span>atch v.node.e with
+    | <span data-count="9864">V</span>al (Num (I32 v)) -&gt; v
     | <span data-count="0">_</span> -&gt; Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
   in
   let ptr v =
-    <span data-count="2459">m</span>atch v.node.e with
-    | <span data-count="2459">P</span>tr (b, _) -&gt; b
+    <span data-count="2460">m</span>atch v.node.e with
+    | <span data-count="2460">P</span>tr (b, _) -&gt; b
     | <span data-count="0">_</span> -&gt; Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
   in
   let abort () : unit Choice.t = <span data-count="0">C</span>hoice.add_pc @@ Value.Bool.cons<span data-count="0">t</span> false in
   let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9865">l</span>et base : int32 = i3<span data-count="9889">2</span> base in
+    <span data-count="9824">l</span>et base : int32 = i3<span data-count="9860">2</span> base in
     Choice.with_thread (fun t -&gt;
-        <span data-count="9887">l</span>et memories = Thread.memories t in
-        <span data-count="9863">S</span>ymbolic_memory.iter
+        <span data-count="9852">l</span>et memories = Thread.memories t in
+        <span data-count="9808">S</span>ymbolic_memory.iter
           (fun tbl -&gt;
-            <span data-count="9888">S</span>ymbolic_memory.ITbl.iter
+            <span data-count="9886">S</span>ymbolic_memory.ITbl.iter
               (fun _ (m : Symbolic_memory.t) -&gt;
-                <span data-count="9877">S</span>ymbolic_memory.replace_size m base size )
+                <span data-count="9833">S</span>ymbolic_memory.replace_size m base size )
               tbl )
           memories;
-        <span data-count="9899">P</span>tr (base, Value.const_i3<span data-count="9893">2</span> 0l) @: Ty_bitv S32 )
+        <span data-count="9899">P</span>tr (base, Value.const_i3<span data-count="9884">2</span> 0l) @: Ty_bitv S32 )
   in
   let free (p : Value.int32) : unit Choice.t =
-    <span data-count="2459">l</span>et base = ptr p in
-    <span data-count="2458">C</span>hoice.with_thread (fun t -&gt;
-        <span data-count="2459">l</span>et memories = Thread.memories t in
-        <span data-count="2458">S</span>ymbolic_memory.iter
+    <span data-count="2460">l</span>et base = ptr p in
+    <span data-count="2460">C</span>hoice.with_thread (fun t -&gt;
+        <span data-count="2460">l</span>et memories = Thread.memories t in
+        <span data-count="2460">S</span>ymbolic_memory.iter
           (fun tbl -&gt;
-            <span data-count="2457">S</span>ymbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.t) -&gt; <span data-count="2459">S</span>ymbolic_memory.free m base)
+            <span data-count="2460">S</span>ymbolic_memory.ITbl.iter
+              (fun _ (m : Symbolic_memory.t) -&gt; <span data-count="2460">S</span>ymbolic_memory.free m base)
               tbl )
           memories )
   in

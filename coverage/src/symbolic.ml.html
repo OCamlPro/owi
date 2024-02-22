@@ -474,9 +474,9 @@ struct
 
   let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
-    <span data-count="19789">m</span>atch (if_true, if_false) with
-    | <span data-count="19777">I</span>32 if_true, I32 if_false -&gt;
-      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="19749">r</span> c ~if_true ~if_false))
+    <span data-count="19769">m</span>atch (if_true, if_false) with
+    | <span data-count="19745">I</span>32 if_true, I32 if_false -&gt;
+      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="19730">r</span> c ~if_true ~if_false))
     | <span data-count="0">I</span>64 if_true, I64 if_false -&gt;
       Choice.return (Value.I64 (Value.Bool.select_exp<span data-count="0">r</span> c ~if_true ~if_false))
     | <span data-count="0">F</span>32 if_true, F32 if_false -&gt;
@@ -505,12 +505,12 @@ struct
     include Symbolic_memory
 
     let concretise (a : Encoding.Expr.t) : Encoding.Expr.t Choice.t =
-      <span data-count="286476">l</span>et open Choice in
+      <span data-count="286427">l</span>et open Choice in
       let open Encoding in
       match a.node.e with
       (* Avoid unecessary re-hashconsing and allocation when the value
          is already concrete. *)
-      | <span data-count="238225">V</span>al _ | <span data-count="48248">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; return a
+      | <span data-count="238163">V</span>al _ | <span data-count="48246">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; return a
       | <span data-count="0">P</span>tr (base, offset) -&gt;
         let+ offset = select_i3<span data-count="0">2</span> offset in
         <span data-count="0">E</span>xpr.(Ptr (base, Symbolic_value.const_i3<span data-count="0">2</span> offset) @: Ty_bitv S32)
@@ -522,29 +522,29 @@ struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m a =
-      <span data-count="286547">m</span>atch check_within_bounds m a with
+      <span data-count="286546">m</span>atch check_within_bounds m a with
       | <span data-count="0">E</span>rror t -&gt; Choice.trap t
-      | <span data-count="286589">O</span>k (cond, ptr) -&gt;
+      | <span data-count="286557">O</span>k (cond, ptr) -&gt;
         let open Choice in
-        let* out_of_bounds = selec<span data-count="286525">t</span> cond in
-        <span data-count="286550">i</span>f out_of_bounds then <span data-count="5">t</span>rap Trap.Memory_heap_buffer_overflow
-        else <span data-count="286532">r</span>eturn ptr
+        let* out_of_bounds = selec<span data-count="286454">t</span> cond in
+        <span data-count="286493">i</span>f out_of_bounds then <span data-count="5">t</span>rap Trap.Memory_heap_buffer_overflow
+        else <span data-count="286456">r</span>eturn ptr
 
     let with_concrete (m : t) a f : 'a Choice.t =
-      <span data-count="286485">l</span>et open Choice in
-      let* addr = concretis<span data-count="286434">e</span> a in
-      <span data-count="286539">l</span>et+ ptr = check_within_bound<span data-count="286511">s</span> m addr in
-      <span data-count="286533">f</span> m ptr
+      <span data-count="286454">l</span>et open Choice in
+      let* addr = concretis<span data-count="286370">e</span> a in
+      <span data-count="286536">l</span>et+ ptr = check_within_bound<span data-count="286451">s</span> m addr in
+      <span data-count="286467">f</span> m ptr
 
     let load_8_s m a = <span data-count="648">w</span>ith_concrete m a load_8_s
 
-    let load_8_u m a = <span data-count="4633">w</span>ith_concrete m a load_8_u
+    let load_8_u m a = <span data-count="4632">w</span>ith_concrete m a load_8_u
 
     let load_16_s m a = <span data-count="2">w</span>ith_concrete m a load_16_s
 
     let load_16_u m a = <span data-count="2">w</span>ith_concrete m a load_16_u
 
-    let load_32 m a = <span data-count="197055">w</span>ith_concrete m a load_32
+    let load_32 m a = <span data-count="197032">w</span>ith_concrete m a load_32
 
     let load_64 m a = <span data-count="2">w</span>ith_concrete m a load_64
 
@@ -555,7 +555,7 @@ struct
       <span data-count="2">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="2">s</span>tore_16 m ~addr v)
 
     let store_32 m ~addr v =
-      <span data-count="80230">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="80229">s</span>tore_32 m ~addr v)
+      <span data-count="80202">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="80211">s</span>tore_32 m ~addr v)
 
     let store_64 m ~addr v =
       <span data-count="17">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="17">s</span>tore_64 m ~addr v)
@@ -573,10 +573,10 @@ struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="286671">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="286649">l</span>et f (t : thread) =
-        <span data-count="286683">l</span>et memories = Thread.memories t in
-        <span data-count="286634">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="286632">d</span> env) orig_mem memories id
+      <span data-count="286412">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="286575">l</span>et f (t : thread) =
+        <span data-count="286602">l</span>et memories = Thread.memories t in
+        <span data-count="286559">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="286564">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -600,9 +600,9 @@ struct
 
     let get_global (env : t) i : Global.t Choice.t =
       <span data-count="23661">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="23659">l</span>et f (t : thread) =
-        <span data-count="23658">l</span>et globals = Thread.globals t in
-        <span data-count="23659">S</span>ymbolic_global.get_global (Link_env.i<span data-count="23657">d</span> env) orig_global globals i
+      <span data-count="23655">l</span>et f (t : thread) =
+        <span data-count="23656">l</span>et globals = Thread.globals t in
+        <span data-count="23661">S</span>ymbolic_global.get_global (Link_env.i<span data-count="23658">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -623,7 +623,7 @@ struct
 
     let env (t : t) = <span data-count="536">t</span>.env
 
-    let modul (t : t) = <span data-count="2595">t</span>.modul
+    let modul (t : t) = <span data-count="2591">t</span>.modul
 
     let to_run (t : t) = <span data-count="202">t</span>.to_run
   end
