@@ -179,16 +179,16 @@ type t = Symbolic_value.ref_value array
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="202">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="203">E</span>nv_id.Tbl.create 0
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten *)
-  <span data-count="11101">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="11099">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="11099">p</span>
+  <span data-count="11110">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="11108">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="11108">p</span>
        (fun (i, t) -&gt;
          <span data-count="7026">l</span>et s = ITbl.to_seq t in
-         <span data-count="7026">(</span>i, ITbl.of_se<span data-count="7026">q</span> @@ Seq.ma<span data-count="7026">p</span> (fun (i, a) -&gt; <span data-count="7026">(</span>i, Array.cop<span data-count="7026">y</span> a)) s) )
+         <span data-count="7025">(</span>i, ITbl.of_se<span data-count="7026">q</span> @@ Seq.ma<span data-count="7025">p</span> (fun (i, a) -&gt; <span data-count="7025">(</span>i, Array.cop<span data-count="7026">y</span> a)) s) )
        s
 
 let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
@@ -200,7 +200,7 @@ let convert (orig_table : Concrete_table.t) =
 
 let get_env env_id tables =
   <span data-count="4584">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="4421">S</span>ome env -&gt; env
+  | <span data-count="4420">S</span>ome env -&gt; env
   | <span data-count="163">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="163">E</span>nv_id.Tbl.add tables env_id t;

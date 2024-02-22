@@ -700,13 +700,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Printf.sprint<span data-count="489">f</span> "%lx"
+let to_hex_string = Printf.sprint<span data-count="490">f</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="489">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="490">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="489">t</span> (-<span data-count="489">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="490">t</span> (-<span data-count="490">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -714,9 +714,9 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1241">x</span>
 
-let to_bits x = <span data-count="2773">x</span>
+let to_bits x = <span data-count="2778">x</span>
 
-let is_inf x = <span data-count="23579">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
+let is_inf x = <span data-count="23583">x</span> = pos_in<span data-count="16">f</span> || x = neg_in<span data-count="0">f</span>
 
 let is_nan x =
   <span data-count="2903">l</span>et xf = Int32.float_of_bits x in
@@ -767,7 +767,7 @@ let unary op x =
   <span data-count="310">l</span>et t = op (to_floa<span data-count="310">t</span> x) in
   <span data-count="310">i</span>f t = t then <span data-count="266">o</span>f_float t else <span data-count="44">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="489">t</span> 0.0
+let zero = of_floa<span data-count="490">t</span> 0.0
 
 let add x y = <span data-count="25419">b</span>inary x ( +. ) y
 
@@ -835,7 +835,7 @@ let max x y =
 (* abs, neg, copysign are purely bitwise operations, even on NaN values *)
 let abs x = <span data-count="732">I</span>nt32.logand x Int32.max_int
 
-let neg x = <span data-count="14084">I</span>nt32.logxor x Int32.min_int
+let neg x = <span data-count="14085">I</span>nt32.logxor x Int32.min_int
 
 let copy_sign x y = <span data-count="660">I</span>nt32.logor (ab<span data-count="660">s</span> x) (Int32.logan<span data-count="660">d</span> y Int32.min_int)
 
@@ -896,19 +896,19 @@ let compare_mantissa_str hex s1 s2 =
  *)
 let float_of_string_prevent_double_rounding s =
   (* First parse to a 64 bit float. *)
-  <span data-count="23579">l</span>et z = float_of_string s in
+  <span data-count="23583">l</span>et z = float_of_string s in
   (* If value is already infinite we are done. *)
-  <span data-count="23579">i</span>f abs_floa<span data-count="23579">t</span> z = 1.0 /. 0.0 then <span data-count="0">z</span>
+  <span data-count="23583">i</span>f abs_floa<span data-count="23583">t</span> z = 1.0 /. 0.0 then <span data-count="0">z</span>
   else
     (* Else, bit twiddling to see what rounding to target precision will do. *)
-    <span data-count="23579">l</span>et open Int64 in
+    <span data-count="23583">l</span>et open Int64 in
     let bits = bits_of_float z in
-    <span data-count="23579">l</span>et lsb = shift_left 1L 29 in
+    <span data-count="23583">l</span>et lsb = shift_left 1L 29 in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
-    <span data-count="23579">l</span>et tie = shift_right lsb 1 in
-    <span data-count="23579">l</span>et mask = lognot (shift_lef<span data-count="23579">t</span> (-1L) 29) in
+    <span data-count="23583">l</span>et tie = shift_right lsb 1 in
+    <span data-count="23583">l</span>et mask = lognot (shift_lef<span data-count="23583">t</span> (-1L) 29) in
     (* If we have no tie, we are good. *)
-    <span data-count="23579">i</span>f logan<span data-count="23579">d</span> bits mask &lt;&gt; tie then <span data-count="23451">z</span>
+    <span data-count="23583">i</span>f logan<span data-count="23583">d</span> bits mask &lt;&gt; tie then <span data-count="23455">z</span>
     else
       (* Else, define epsilon to be the value of the tie bit. *)
       <span data-count="128">l</span>et exp = float_of_bits (logan<span data-count="128">d</span> bits 0xfff0_0000_0000_0000L) in
@@ -946,9 +946,9 @@ let float_of_string_prevent_double_rounding s =
       | <span data-count="56">_</span> -&gt; z
 
 let of_signless_string s =
-  <span data-count="31104">i</span>f s = "inf" then <span data-count="2991">p</span>os_inf
-  else <span data-count="28113">i</span>f s = "nan" then <span data-count="2382">p</span>os_nan
-  else <span data-count="25731">i</span>f String.lengt<span data-count="25731">h</span> s &gt; 6 &amp;&amp; <span data-count="15216">S</span>tring.su<span data-count="15216">b</span> s 0 6 = "nan:0x" then
+  <span data-count="31108">i</span>f s = "inf" then <span data-count="2991">p</span>os_inf
+  else <span data-count="28117">i</span>f s = "nan" then <span data-count="2382">p</span>os_nan
+  else <span data-count="25735">i</span>f String.lengt<span data-count="25735">h</span> s &gt; 6 &amp;&amp; <span data-count="15216">S</span>tring.su<span data-count="15216">b</span> s 0 6 = "nan:0x" then
     <span data-count="2152">l</span>et x = Int32.of_string (String.su<span data-count="2152">b</span> s 4 (String.lengt<span data-count="2152">h</span> s - 4)) in
     <span data-count="2152">i</span>f x = Int32.zero then <span data-count="2">f</span>ailwith "nan payload must not be zero"
     else <span data-count="2150">i</span>f Int32.logan<span data-count="2150">d</span> x bare_nan &lt;&gt; Int32.zero then
@@ -957,16 +957,16 @@ let of_signless_string s =
       <span data-count="0">f</span>ailwith "nan payload must not overlap with sign bit"
     else <span data-count="2148">I</span>nt32.logor x bare_nan
   else
-    <span data-count="23579">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23579">r</span> '_' s) in
-    <span data-count="23579">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23579">g</span> s') in
-    <span data-count="23579">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23563">x</span>
+    <span data-count="23583">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23583">r</span> '_' s) in
+    <span data-count="23583">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23583">g</span> s') in
+    <span data-count="23583">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23567">x</span>
 
 let of_string s =
-  <span data-count="31104">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
-  else <span data-count="31104">i</span>f s.[0] = '+<span data-count="298">'</span> || s.[0] = '-<span data-count="13937">'</span> then
-    <span data-count="14235">l</span>et x = of_signless_string (String.su<span data-count="14235">b</span> s 1 (String.lengt<span data-count="14235">h</span> s - 1)) in
-    <span data-count="14227">i</span>f s.[0] = '+' then <span data-count="298">x</span> else <span data-count="13929">n</span>eg x
-  else <span data-count="16869">o</span>f_signless_string s
+  <span data-count="31108">i</span>f s = "" then <span data-count="0">L</span>og.err "of_string"
+  else <span data-count="31108">i</span>f s.[0] = '+<span data-count="298">'</span> || s.[0] = '-<span data-count="13938">'</span> then
+    <span data-count="14236">l</span>et x = of_signless_string (String.su<span data-count="14236">b</span> s 1 (String.lengt<span data-count="14236">h</span> s - 1)) in
+    <span data-count="14228">i</span>f s.[0] = '+' then <span data-count="298">x</span> else <span data-count="13930">n</span>eg x
+  else <span data-count="16872">o</span>f_signless_string s
 
 (* String conversion that groups digits for readability *)
 
@@ -1015,7 +1015,7 @@ let to_string' convert is_digit n x =
     <span data-count="31">g</span>roup_digit<span data-count="31">s</span> is_digit n
       (if s.[String.lengt<span data-count="31">h</span> s - 1] = '.' then <span data-count="0">s</span> ^ "0" else <span data-count="31">s</span>)
 
-let to_string = to_string<span data-count="489">'</span> (Printf.sprint<span data-count="489">f</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="490">'</span> (Printf.sprint<span data-count="490">f</span> "%.17g") is_digit 3
 
 let pp fmt v = <span data-count="31">F</span>ormat.pp_string fmt (to_strin<span data-count="31">g</span> v)
 </code></pre>
