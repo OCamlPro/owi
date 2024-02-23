@@ -1073,15 +1073,15 @@ module Make (P : Interpret_intf.P) :
         && new_size >= const 0l
         && new_size >= size
       in
-      st
-      @@
+
       if not allowed then
         let stack = Stack.drop stack in
-        Stack.push_i32_of_int stack (-1)
+        st @@ Stack.push_i32_of_int stack (-1)
       else
         let new_element, stack = Stack.pop_as_ref stack in
+        let* new_size = Choice.select_i32 new_size in
         Table.grow t new_size new_element;
-        Stack.push_i32 stack size
+        st @@ Stack.push_i32 stack size
     | Table_fill (Raw indice) ->
       let* t = Env.get_table env indice in
       let len, stack = Stack.pop_i32 stack in
@@ -1094,6 +1094,8 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
+        let* pos = Choice.select_i32 pos in
+        let* len = Choice.select_i32 len in
         Table.fill t pos len x;
         st stack
       end
@@ -1114,7 +1116,15 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
-        if len <> const 0l then Table.copy ~t_src ~t_dst ~src ~dst ~len;
+        let* () =
+          if len <> const 0l then begin
+            let* src = Choice.select_i32 src in
+            let* dst = Choice.select_i32 dst in
+            let+ len = Choice.select_i32 len in
+            Table.copy ~t_src ~t_dst ~src ~dst ~len
+          end
+          else return ()
+        in
         st stack
       end
     end
