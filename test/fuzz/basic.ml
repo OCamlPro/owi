@@ -87,9 +87,9 @@ let ibinop =
     ; const (Xor : ibinop)
     ; const (Shl : ibinop)
     ; shr
-    ; const (Rotl : ibinop)
-    ; const (Rotr : ibinop)
     ]
+
+let ibinop_rot = choose [ const (Rotl : ibinop); const (Rotr : ibinop) ]
 
 let iunop = choose [ const Clz; const Ctz; const Popcnt ]
 
@@ -130,6 +130,14 @@ let ibinop_64 : text instr gen =
   let+ ibinop in
   I_binop (S64, ibinop)
 
+let ibinop_rot_32 : text instr gen =
+  let+ ibinop_rot in
+  I_binop (S32, ibinop_rot)
+
+let ibinop_rot_64 : text instr gen =
+  let+ ibinop_rot in
+  I_binop (S64, ibinop_rot)
+
 let iunop_32 : text instr gen =
   let+ iunop in
   I_unop (S32, iunop)
@@ -169,14 +177,9 @@ let extend_64_i64 : text instr gen =
 
 let funop =
   choose
-    [ const Abs
-    ; const Neg
-    ; const Sqrt
-    ; const Ceil
-    ; const Floor
-    ; const Trunc
-    ; const Nearest
-    ]
+    [ const Abs; const Neg; const Sqrt; const Ceil; const Floor; const Nearest ]
+
+let funop_trunc = const Trunc
 
 let fbinop =
   choose
@@ -207,6 +210,14 @@ let funop_32 : text instr gen =
 let funop_64 : text instr gen =
   let+ funop in
   F_unop (S64, funop)
+
+let funop_trunc_32 : text instr gen =
+  let+ funop_trunc in
+  F_unop (S32, funop_trunc)
+
+let funop_trunc_64 : text instr gen =
+  let+ funop_trunc in
+  F_unop (S64, funop_trunc)
 
 let frelop_32 : text instr gen =
   let+ frelop in
