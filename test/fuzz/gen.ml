@@ -380,6 +380,6 @@ let fields env =
 let modul conf =
   let open Crowbar.Syntax in
   let id = Some "m" in
-  let* env = const (Env.empty conf) in
-  let+ fields = fields env in
+  let* env = const Env.empty in
+  let+ fields = fields (env conf) in
   { id; fields }
