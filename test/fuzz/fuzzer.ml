@@ -71,28 +71,35 @@ let compare (module I1 : Interprets.INTERPRET)
     Format.pp_err "`%s` was OK but `%s` gave error `%s`" I2.name I1.name msg;
     false
 
-let check_optimized m =
-  let open Interprets in
-  let result1 =
-    if Param.optimize_fuzzing then
-      compare (module Owi_unoptimized) (module Owi_optimized) m
-    else true
-  in
-  let result2 =
-    if Param.reference_fuzzing then
-      compare (module Owi_unoptimized) (module Reference) m
-    else true
-  in
-  result1 && result2
+let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
+  m =
+  compare (module I1) (module I2) m
 
-let gen = Crowbar.with_printer Owi.Text.pp_modul Gen.modul
-
-let () =
-  Crowbar.add_test ~name:"fuzzing" [ gen ] (fun m ->
+let add_test name gen (module I1 : Interprets.INTERPRET)
+  (module I2 : Interprets.INTERPRET) =
+  Crowbar.add_test ~name [ gen ] (fun m ->
       incr global_count;
       if Param.debug then Format.pp_err "%a@\n" Owi.Text.pp_modul m;
       Format.pp_err "test module %d [got %d timeouts...]@\n@[<v>" !global_count
         !timeout_count;
       Format.pp_flush Stdlib.Format.err_formatter ();
-      Crowbar.check (check_optimized m);
+      Crowbar.check (check (module I1) (module I2) m);
       Format.pp_err "@]" )
+
+let gen (conf : Cond.fuzz_conf) =
+  Crowbar.with_printer Owi.Text.pp_modul (Gen.modul conf)
+
+let () =
+  let open Interprets in
+  if Param.optimize_fuzzing then
+    add_test "optimize_fuzzing" (gen Cond.Concrete)
+      (module Owi_unoptimized)
+      (module Owi_optimized);
+  if Param.reference_fuzzing then
+    add_test "reference_fuzzing" (gen Cond.Concrete)
+      (module Owi_unoptimized)
+      (module Reference);
+  if Param.symbolic_fuzzing then
+    add_test "symbolic_fuzzing" (gen Cond.Symbolic)
+      (module Owi_unoptimized)
+      (module Owi_symbolic)
