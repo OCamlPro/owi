@@ -7,8 +7,10 @@ let optimize_fuzzing = true
 
 let reference_fuzzing = false
 
+let symbolic_fuzzing = true
+
 let initial_fuel = 100
 
 let allow_partial_timeout = true
 
-let max_time_execution = 0.001 (* seconds *)
+let max_time_execution = 0.01 (* seconds *)
