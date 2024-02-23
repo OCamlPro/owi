@@ -1,5 +1,9 @@
 open Owi.Types
 
+type conf =
+  | Symbolic
+  | Concrete
+
 type block_kind =
   | Block
   | Loop
@@ -25,9 +29,10 @@ type t =
   ; mutable blocks : (block_kind * string * text block_type) list
   ; mutable funcs : (string * text block_type) list
   ; mutable fuel : int
+  ; conf : conf
   }
 
-let empty () =
+let empty conf =
   { next_data = 0
   ; next_memory = 0
   ; next_type = 0
@@ -47,6 +52,7 @@ let empty () =
   ; blocks = []
   ; funcs = []
   ; fuel = Param.initial_fuel
+  ; conf
   }
 
 let reset_locals env = env.locals <- []
