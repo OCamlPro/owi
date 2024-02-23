@@ -86,20 +86,20 @@ let add_test name gen (module I1 : Interprets.INTERPRET)
       Crowbar.check (check (module I1) (module I2) m);
       Format.pp_err "@]" )
 
-let gen (conf : Cond.fuzz_conf) =
+let gen (conf : Env.conf) =
   Crowbar.with_printer Owi.Text.pp_modul (Gen.modul conf)
 
 let () =
   let open Interprets in
   if Param.optimize_fuzzing then
-    add_test "optimize_fuzzing" (gen Cond.Concrete)
+    add_test "optimize_fuzzing" (gen Env.Concrete)
       (module Owi_unoptimized)
       (module Owi_optimized);
   if Param.reference_fuzzing then
-    add_test "reference_fuzzing" (gen Cond.Concrete)
+    add_test "reference_fuzzing" (gen Env.Concrete)
       (module Owi_unoptimized)
       (module Reference);
   if Param.symbolic_fuzzing then
-    add_test "symbolic_fuzzing" (gen Cond.Symbolic)
+    add_test "symbolic_fuzzing" (gen Env.Symbolic)
       (module Owi_unoptimized)
       (module Owi_symbolic)
