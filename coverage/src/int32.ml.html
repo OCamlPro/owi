@@ -343,8 +343,8 @@ let cmp_u x op y = <span data-count="1917182">o</span>p (ad<span data-count="191
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="379069">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="379066">t</span> (Int64.shift_lef<span data-count="379062">t</span> (Int64.of_int3<span data-count="379089">2</span> x) 32) 32
+  <span data-count="379195">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="379226">t</span> (Int64.shift_lef<span data-count="379224">t</span> (Int64.of_int3<span data-count="379255">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
@@ -356,11 +356,11 @@ let low_int = shift_lef<span data-count="490">t</span> minus_one 31
 let high_int = logxo<span data-count="490">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="577924">f</span> x (to_in<span data-count="577833">t</span> (logan<span data-count="577811">d</span> y 31l))
+let shift f x y = <span data-count="578064">f</span> x (to_in<span data-count="577942">t</span> (logan<span data-count="577939">d</span> y 31l))
 
-let shl x y = <span data-count="339454">s</span>x (shif<span data-count="339313">t</span> shift_left x y)
+let shl x y = <span data-count="339547">s</span>x (shif<span data-count="339458">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="198767">s</span>hift shift_right x y
+let shr_s x y = <span data-count="198800">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="39730">s</span>x (shif<span data-count="39730">t</span> shift_right_logical x y)
 
@@ -381,7 +381,7 @@ let extend_s n x =
 
 let eq (x : int32) y = <span data-count="2098590">x</span> = y
 
-let ne (x : int32) y = <span data-count="16966355">x</span> &lt;&gt; y
+let ne (x : int32) y = <span data-count="16966377">x</span> &lt;&gt; y
 
 let lt (x : int32) y = <span data-count="10855105">x</span> &lt; y
 
