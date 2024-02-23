@@ -406,12 +406,7 @@ let fields env fuzz_conf =
   in
   let* datas = list (data env) in
   let* types = list (typ env) in
-  let* tables =
-    (* No table management in symbolic context.
-       TODO: When implementation will be more advanced,
-       reactivate and refine instruction by instruction (not_symbolic operator). *)
-    match fuzz_conf with Concrete -> list (table env) | Symbolic -> const []
-  in
+  let* tables = list (table env) in
   let* elems = list (elem env) in
   let* globals = list (global env) in
   let* funcs = list (func env fuzz_conf) in
