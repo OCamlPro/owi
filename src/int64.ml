@@ -68,16 +68,13 @@ let shr_s x y = shift shift_right x y
 
 let shr_u x y = shift shift_right_logical x y
 
-(* We must mask the count to implement rotates via shifts. *)
-let clamp_rotate_count n = to_int (logand n (of_int 63))
-
 let rotl x y =
-  let n = clamp_rotate_count y in
-  logor (shl x (of_int n)) (shr_u x (of_int (64 - n)))
+  let n = logand y 63L in
+  logor (shl x n) (shr_u x (sub 64L n))
 
 let rotr x y =
-  let n = clamp_rotate_count y in
-  logor (shr_u x (of_int n)) (shl x (of_int (64 - n)))
+  let n = logand y 63L in
+  logor (shr_u x n) (shl x (sub 64L n))
 
 let extend_s n x =
   let shift = 64 - n in
