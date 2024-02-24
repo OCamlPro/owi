@@ -262,12 +262,6 @@
 <a id="L238"></a><span > </span>
 <a id="L239"></a><span > </span>
 <a id="L240"></a><span > </span>
-<a id="L241"></a><span > </span>
-<a id="L242"></a><span > </span>
-<a id="L243"></a><span > </span>
-<a id="L244"></a><span > </span>
-<a id="L245"></a><span > </span>
-<a id="L246"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -512,12 +506,6 @@
 <a href="#L238">238</a>
 <a href="#L239">239</a>
 <a href="#L240">240</a>
-<a href="#L241">241</a>
-<a href="#L242">242</a>
-<a href="#L243">243</a>
-<a href="#L244">244</a>
-<a href="#L245">245</a>
-<a href="#L246">246</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -604,17 +592,11 @@ module type P = sig
 
     val max_size : t -&gt; int option
 
-    val grow : t -&gt; Value.int32 -&gt; Value.ref_value -&gt; unit
+    val grow : t -&gt; int32 -&gt; Value.ref_value -&gt; unit
 
-    val fill : t -&gt; Value.int32 -&gt; Value.int32 -&gt; Value.ref_value -&gt; unit
+    val fill : t -&gt; int32 -&gt; int32 -&gt; Value.ref_value -&gt; unit
 
-    val copy :
-         t_src:t
-      -&gt; t_dst:t
-      -&gt; src:Value.int32
-      -&gt; dst:Value.int32
-      -&gt; len:Value.int32
-      -&gt; unit
+    val copy : t_src:t -&gt; t_dst:t -&gt; src:int32 -&gt; dst:int32 -&gt; len:int32 -&gt; unit
   end
 
   module Memory : sig

@@ -89,22 +89,22 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157404525">x</span> [@@inline]
+let return x = <span data-count="157404607">x</span> [@@inline]
 
-let bind x f = <span data-count="183851664">f</span> x [@@inline]
+let bind x f = <span data-count="183852010">f</span> x [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="13519148">l</span>et* v in
-  <span data-count="13519148">r</span>eturn (<span data-count="13519148">f</span> v)
+  <span data-count="13519210">l</span>et* v in
+  <span data-count="13519210">r</span>eturn (<span data-count="13519210">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
 
 let select b = <span data-count="19577511">b</span> [@@inline]
 
-let select_i32 i = <span data-count="1608432">i</span> [@@inline]
+let select_i32 i = <span data-count="1608696">i</span> [@@inline]
 
 let trap msg = <span data-count="4654">r</span>aise (Types.Trap msg)
 
