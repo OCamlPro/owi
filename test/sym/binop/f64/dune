@@ -1,0 +1,16 @@
+(cram
+ (deps
+  %{bin:owi}
+  f64_add.wat
+  f64_copysign.wat
+  f64_div.wat
+  f64_eq.wat
+  f64_ge.wat
+  f64_gt.wat
+  f64_le.wat
+  f64_lt.wat
+  f64_max.wat
+  f64_min.wat
+  f64_mul.wat
+  f64_ne.wat
+  f64_sub.wat))

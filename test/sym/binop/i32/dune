@@ -1,0 +1,24 @@
+(cram
+ (deps
+  %{bin:owi}
+  i32_add.wat
+  i32_and.wat
+  i32_div_s.wat
+  i32_div_u.wat
+  i32_eq.wat
+  i32_ge_s.wat
+  i32_gt_s.wat
+  i32_le_s.wat
+  i32_lt_s.wat
+  i32_mul.wat
+  i32_ne.wat
+  i32_or.wat
+  i32_rem_s.wat
+  i32_rem_u.wat
+  i32_rotl.wat
+  i32_rotr.wat
+  i32_shl.wat
+  i32_shr_s.wat
+  i32_shr_u.wat
+  i32_sub.wat
+  i32_xor.wat))

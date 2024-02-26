@@ -1,0 +1,26 @@
+(cram
+ (deps
+  %{bin:owi}
+  i32_clz.wat
+  i32_ctz.wat
+  i32_eqz.wat
+  i32_extend8_s.wat
+  i32_extend16_s.wat
+  i32_popcnt.wat
+  i32_reinterpret_f32.wat
+  i32_trunc_f32_s_ge_s.wat
+  i32_trunc_f32_s_gt_s.wat
+  i32_trunc_f32_s_le_s.wat
+  i32_trunc_f32_s_lt_s.wat
+  i32_trunc_f32_u_ge_u.wat
+  i32_trunc_f32_u_gt_u.wat
+  i32_trunc_f32_u_le_u.wat
+  i32_trunc_f32_u_lt_u.wat
+  i32_trunc_f64_s_ge_s.wat
+  i32_trunc_f64_s_gt_s.wat
+  i32_trunc_f64_s_le_s.wat
+  i32_trunc_f64_s_lt_s.wat
+  i32_trunc_f64_u_ge_u.wat
+  i32_trunc_f64_u_gt_u.wat
+  i32_trunc_f64_u_le_u.wat
+  i32_trunc_f64_u_lt_u.wat))
