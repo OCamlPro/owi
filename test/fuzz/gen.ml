@@ -1,4 +1,5 @@
 open Crowbar
+open Crowbar.Syntax
 open Owi.Types
 open Owi.Text
 module S = Type_stack
@@ -35,19 +36,18 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
     ; pair B.i64_load32 (const [ S.Pop; S.Push (Num_type I64) ])
     ]
   in
-  [ pair B.extend_32_i32 (const [ S.Nothing ])
-  ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.iunop_32 (const [ S.Nothing ])
-  ; if_else expr ~locals ~stack env
+  [ pair B.iunop_32 (const [ S.Nothing ])
   ; pair B.itestop_32 (const [ S.Nothing ])
+  ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.extend_32_i32 (const [ S.Nothing ])
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
+  ; if_else expr ~locals ~stack env
   ]
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
-  @
-  if B.memory_exists env then [ B.memory_grow ] @ load_instr
-  else [] @ B.expr_br_if env stack @ B.table_get env
+  @ (if B.memory_exists env then B.memory_grow :: load_instr else [])
+  @ B.expr_br_if env stack @ B.table_get env
 
 let expr_available_2_i32 (env : Env.t) =
   let store_instr =
@@ -56,10 +56,7 @@ let expr_available_2_i32 (env : Env.t) =
     ; pair B.i32_store16 (const [ S.Pop; S.Pop ])
     ]
   in
-  [ pair B.ibinop_rot_32 (const [ S.Pop ])
-  ; pair B.ibinop_32 (const [ S.Pop ])
-  ; pair B.irelop_32 (const [ S.Pop ])
-  ]
+  [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
   @ if B.memory_exists env then store_instr else []
 
 let expr_available_2_i64_i32 (env : Env.t) =
@@ -90,9 +87,9 @@ let expr_available_3_i32 env =
 
 let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
-  ; pair B.extend_64_i64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i32_wrap_i64 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.extend_64_i64 (const [ S.Nothing ])
   ; pair B.f32_convert_i64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f64_reinterpret_i64 (const [ S.Pop; S.Push (Num_type F64) ])
@@ -100,22 +97,20 @@ let expr_available_1_i64 env =
   @ B.local_set_i64 env @ B.local_tee_i64 env @ B.global_set_i64 env
 
 let expr_available_2_i64 =
-  [ pair B.ibinop_rot_64 (const [ S.Pop ])
-  ; pair B.ibinop_64 (const [ S.Pop ])
+  [ pair B.ibinop_64 (const [ S.Pop ])
   ; pair B.irelop_64 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
   ]
 
 (* let expr_available_3_i64 = [] *)
 
 let expr_available_1_f32 env =
-  [ pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+  [ pair B.funop_32 (const [ S.Nothing ])
+  ; pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_f32 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.i32_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.f64_promote_f32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.i32_reinterpret_f32 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.funop_trunc_32 (const [ S.Nothing ])
-  ; pair B.funop_32 (const [ S.Nothing ])
   ]
   @ B.local_set_f32 env @ B.local_tee_f32 env @ B.global_set_f32 env
 
@@ -127,27 +122,24 @@ let expr_available_2_f32 =
 (* let expr_available_3_f32 = [] *)
 
 let expr_available_1_f64 env =
-  [ pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
+  [ pair B.funop_64 (const [ S.Nothing ])
+  ; pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_f64 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.i32_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i64_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I64) ])
   ; pair B.f32_demote_f64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.i64_reinterpret_f64 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.funop_trunc_64 (const [ S.Nothing ])
-  ; pair B.funop_64 (const [ S.Nothing ])
   ]
   @ B.local_set_f64 env @ B.local_tee_f64 env @ B.global_set_f64 env
 
 let expr_available_2_f64 =
   [ pair B.fbinop_64 (const [ S.Pop ])
-  ; pair B.fbinop_64 (const [ S.Pop ])
   ; pair B.frelop_64 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
   ]
 
 (* let expr_available_3_f64 = [] *)
 
 let if_else expr ~locals ~stack env =
-  let open Crowbar.Syntax in
   match stack with
   | Num_type I32 :: stack -> begin
     let* rt = list B.val_type in
@@ -172,7 +164,6 @@ let if_else expr ~locals ~stack env =
   | _ -> assert false
 
 let block expr ~locals ~stack env =
-  let open Crowbar.Syntax in
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
@@ -187,7 +178,6 @@ let block expr ~locals ~stack env =
   (instr, pt_descr @ rt_descr)
 
 let loop expr ~locals ~stack env =
-  let open Crowbar.Syntax in
   let* rt = list B.val_type in
   let* pt = B.stack_prefix stack in
   let typ =
@@ -209,7 +199,6 @@ let rec expr ~block_type ~stack ~locals env =
   in
   Env.use_fuel env;
   if Env.has_no_fuel env then
-    let open Crowbar.Syntax in
     match (rt, stack) with
     | [], [] -> const [ Nop ]
     | rt, l ->
@@ -226,61 +215,44 @@ let rec expr ~block_type ~stack ~locals env =
       in
       drops @ adds
   else
-    let expr_available_2_i32 = expr_available_2_i32 env in
-    let expr_available_2_i64_i32 = expr_available_2_i64_i32 env in
-    let expr_available_2_f32_i32 = expr_available_2_f32_i32 env in
-    let expr_available_2_f64_i32 = expr_available_2_f64_i32 env in
-    let expr_available_3_i32 = expr_available_3_i32 env in
-    let expr_available_1_i64 = expr_available_1_i64 env in
-    let expr_available_1_f32 = expr_available_1_f32 env in
-    let expr_available_1_f64 = expr_available_1_f64 env in
-    let expr_always_available =
-      expr_always_available block loop expr ~locals ~stack env
-    in
     let expr_available_with_current_stack =
       (* TODO: complete this *)
       match stack with
       | Num_type I32 :: Num_type I32 :: Num_type I32 :: _tl ->
-        let expr_available_1_i32 =
-          expr_available_1_i32 if_else expr ~stack ~locals env
-        in
-        expr_available_1_any @ expr_available_1_i32 @ expr_available_2_i32
-        @ expr_available_3_i32
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
+        @ expr_available_2_i32 env @ expr_available_3_i32 env
       | Num_type I32 :: Num_type I32 :: _tl ->
-        let expr_available_1_i32 =
-          expr_available_1_i32 if_else expr ~stack ~locals env
-        in
-        expr_available_1_any @ expr_available_1_i32 @ expr_available_2_i32
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
+        @ expr_available_2_i32 env
       | Num_type I32 :: Ref_type (_, Func_ht) :: Num_type I32 :: _tl ->
         B.table_fill env
       | Num_type I32 :: Ref_type (_, Func_ht) :: _tl -> B.table_grow env
       | Ref_type (_, Func_ht) :: Num_type I32 :: _tl -> B.table_set env
-      | Num_type I64 :: Num_type I32 :: _tl -> expr_available_2_i64_i32
-      | Num_type F32 :: Num_type I32 :: _tl -> expr_available_2_f32_i32
-      | Num_type F64 :: Num_type I32 :: _tl -> expr_available_2_f64_i32
+      | Num_type I64 :: Num_type I32 :: _tl -> expr_available_2_i64_i32 env
+      | Num_type F32 :: Num_type I32 :: _tl -> expr_available_2_f32_i32 env
+      | Num_type F64 :: Num_type I32 :: _tl -> expr_available_2_f64_i32 env
       | Num_type I64 :: Num_type I64 :: _tl ->
-        expr_available_1_any @ expr_available_1_i64 @ expr_available_2_i64
+        expr_available_1_any @ expr_available_1_i64 env @ expr_available_2_i64
       | Num_type I32 :: _tl ->
-        let expr_available_1_i32 =
-          expr_available_1_i32 if_else expr ~stack ~locals env
-        in
-        expr_available_1_any @ expr_available_1_i32
-      | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64
+        expr_available_1_any
+        @ expr_available_1_i32 if_else expr ~stack ~locals env
+      | Num_type I64 :: _tl -> expr_available_1_any @ expr_available_1_i64 env
       | Num_type F32 :: Num_type F32 :: _tl ->
-        expr_available_1_any @ expr_available_1_f32 @ expr_available_2_f32
+        expr_available_1_any @ expr_available_1_f32 env @ expr_available_2_f32
       | Num_type F64 :: Num_type F64 :: _tl ->
-        expr_available_1_any @ expr_available_1_f64 @ expr_available_2_f64
-      | Num_type F32 :: _tl -> expr_available_1_any @ expr_available_1_f32
-      | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64
+        expr_available_1_any @ expr_available_1_f64 env @ expr_available_2_f64
+      | Num_type F32 :: _tl -> expr_available_1_any @ expr_available_1_f32 env
+      | Num_type F64 :: _tl -> expr_available_1_any @ expr_available_1_f64 env
       | _ -> []
     in
     let expr_available env =
-      expr_always_available @ expr_available_with_current_stack
-      @ B.expr_call env stack
+      expr_always_available block loop expr ~locals ~stack env
+      @ expr_available_with_current_stack @ B.expr_call env stack
       (* TODO: Function calls can be improved: recursive calls are not processed *)
       @ B.expr_br env stack
     in
-    let open Crowbar.Syntax in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in
     let* next = expr ~block_type ~stack ~locals env in
@@ -288,7 +260,6 @@ let rec expr ~block_type ~stack ~locals env =
     i :: next
 
 let data env =
-  let open Crowbar.Syntax in
   let* mode = B.data_mode env in
   let+ init = (*bytes*) const "tmp" in
   (* TODO: Issue #37 *)
@@ -296,7 +267,6 @@ let data env =
   MData { id; init; mode }
 
 let memory env =
-  let open Crowbar.Syntax in
   (* TODO: fix time explosion https://github.com/OCamlPro/owi/pull/28#discussion_r1212835761 *)
   let sup = if true then 10 else 65537 in
   let* min = range sup in
@@ -305,26 +275,22 @@ let memory env =
   MMem (id, { min; max })
 
 let typ env =
-  let open Crowbar.Syntax in
   let+ styp = B.sub_type in
   let id = Some (Env.add_type env styp) in
   MType [ (id, styp) ]
 
 let elem env =
-  let open Crowbar.Syntax in
   let* typ = B.ref_type in
   let+ mode = B.elem_mode env in
   let id = Some (Env.add_elem env typ) in
   MElem { id; typ; init = []; mode }
 
 let table env =
-  let open Crowbar.Syntax in
   let+ typ = B.table_type in
   let id = Some (Env.add_table env typ) in
   MTable (id, typ)
 
 let global env =
-  let open Crowbar.Syntax in
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
   let id = Some (Env.add_global env typ) in
@@ -334,7 +300,6 @@ let global env =
 let local = B.param
 
 let func env =
-  let open Crowbar.Syntax in
   let* () = const () in
   Env.reset_locals env;
   Env.refill_fuel env;
@@ -347,7 +312,6 @@ let func env =
   MFunc { type_f; locals; body; id }
 
 let fields env =
-  let open Crowbar.Syntax in
   let* memory =
     (* No memory management in symbolic context.
        TODO: When implementation will be more advanced,
@@ -378,7 +342,6 @@ let fields env =
   | Some mem -> datas @ [ mem ] @ types @ elems @ tables @ globals @ funcs
 
 let modul conf =
-  let open Crowbar.Syntax in
   let id = Some "m" in
   let* env = const Env.empty in
   let+ fields = fields (env conf) in
