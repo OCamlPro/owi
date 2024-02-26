@@ -1,0 +1,2 @@
+(cram
+ (deps %{bin:owi} bad.ext func.wat globals.wat loop.wat mem.wat rec.wat))

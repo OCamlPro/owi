@@ -1,2 +1,9 @@
 (cram
- (deps %{bin:owi} done.wasm from_c.c m.wasm locals.wasm locals_drop.wasm))
+ (deps
+  %{bin:owi}
+  bad.ext
+  done.wasm
+  from_c.c
+  m.wasm
+  locals.wasm
+  locals_drop.wasm))

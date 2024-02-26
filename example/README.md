@@ -11,6 +11,7 @@
 - [`owi sym`]
 - [`owi validate`]
 - [`owi wasm2wat`]
+- [`owi wat2wasm`]
 
 ## Owi library
 
@@ -53,8 +54,12 @@ COMMANDS
            Validate a module
 
        wasm2wat [OPTION]… [ARG]…
-           Generate a text format file (.wat) file from a binary format file
+           Generate a text format file (.wat) from a binary format file
            (.wasm)
+
+       wat2wasm [OPTION]… [ARG]…
+           Generate a binary format file (.wasm) from a text format file
+           (.wat)
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -90,5 +95,6 @@ BUGS
 [`owi sym`]: ./sym
 [`owi validate`]: ./validate
 [`owi wasm2wat`]: ./wasm2wat
+[`owi wat2wasm`]: ./wat2wasm
 [import OCaml functions in a Wasm module]: ./define_host_function
 [OCaml library]: ./lib

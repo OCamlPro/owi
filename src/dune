@@ -8,6 +8,7 @@
   binary_parser
   binary_to_text
   binary_types
+  binary_encoder
   c_share_site
   check
   choice_intf
@@ -21,6 +22,7 @@
   cmd_conc
   cmd_validate
   cmd_wasm2wat
+  cmd_wat2wasm
   compile
   concolic
   concolic_choice

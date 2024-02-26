@@ -221,13 +221,24 @@ let wasm2wat_cmd =
   let open Cmdliner in
   let info =
     let doc =
-      "Generate a text format file (.wat) file from a binary format file \
-       (.wasm)"
+      "Generate a text format file (.wat) from a binary format file (.wasm)"
     in
     let man = [] @ shared_man in
     Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
   in
   Cmd.v info Term.(const Cmd_wasm2wat.cmd $ files)
+
+let wat2wasm_cmd =
+  let open Cmdliner in
+  let info =
+    let doc =
+      "Generate a binary format file (.wasm) from a text format file (.wat)"
+    in
+    let man = [] @ shared_man in
+    Cmd.info "wat2wasm" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info
+    Term.(const Cmd_wat2wasm.cmd $ profiling $ debug $ unsafe $ optimize $ files)
 
 let cli =
   let open Cmdliner in
@@ -250,6 +261,7 @@ let cli =
     ; conc_cmd
     ; validate_cmd
     ; wasm2wat_cmd
+    ; wat2wasm_cmd
     ]
 
 let exit_code =

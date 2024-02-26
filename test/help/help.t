@@ -32,8 +32,12 @@ no subcommand should print help
              Validate a module
   
          wasm2wat [OPTION]… [ARG]…
-             Generate a text format file (.wat) file from a binary format file
+             Generate a text format file (.wat) from a binary format file
              (.wasm)
+  
+         wat2wasm [OPTION]… [ARG]…
+             Generate a binary format file (.wasm) from a text format file
+             (.wat)
   
   COMMON OPTIONS
          --help[=FMT] (default=auto)
