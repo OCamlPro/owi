@@ -11,6 +11,6 @@ let cmd_one file =
     let* m = Parse.Binary.Module.from_file file in
     let m = Binary_to_text.modul m in
     Ok (Format.pp_std "%a@\n" Text.pp_modul m)
-  | ext -> Error (`Msg (Format.sprintf "invalid extension: `%s`" ext))
+  | ext -> Error (`Unsupported_file_extension ext)
 
 let cmd files = list_iter cmd_one files

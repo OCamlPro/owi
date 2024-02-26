@@ -8,6 +8,7 @@
 - add `owi conc` subcommands and `owi c --concolic`: concolic mode
 - start benchmarking against test-comp
 - fix handling of `select` and `call_indirect` in the text format
+- add `owi wat2wasm` subcommand
 
 ## 0.2 - 2024-04-24
 

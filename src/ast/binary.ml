@@ -50,6 +50,7 @@ type elem =
 
 type modul =
   { id : string option
+  ; types : binary str_type Named.t
   ; global : (global, binary global_type) Runtime.t Named.t
   ; table : (binary table, binary table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
@@ -63,6 +64,7 @@ type modul =
 
 let empty_modul =
   { id = None
+  ; types = Named.empty
   ; global = Named.empty
   ; table = Named.empty
   ; mem = Named.empty

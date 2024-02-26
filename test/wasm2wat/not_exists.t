@@ -3,3 +3,6 @@
   Usage: owi wasm2wat [OPTION]… [ARG]…
   Try 'owi wasm2wat --help' or 'owi --help' for more information.
   [124]
+  $ owi wasm2wat bad.ext
+  unsupported file_extension ".ext"
+  [50]

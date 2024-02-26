@@ -22,8 +22,8 @@ $ owi wasm2wat ./42.wasm
 ```sh
 $ owi wasm2wat --help=plain
 NAME
-       owi-wasm2wat - Generate a text format file (.wat) file from a binary
-       format file (.wasm)
+       owi-wasm2wat - Generate a text format file (.wat) from a binary format
+       file (.wasm)
 
 SYNOPSIS
        owi wasm2wat [OPTION]… [ARG]…

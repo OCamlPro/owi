@@ -201,7 +201,10 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 
 let from_start = function None -> [] | Some n -> [ MStart (Raw n) ]
 
-let modul { Binary.id; global; table; mem; func; elem; data; start; exports } =
+let modul
+  { Binary.id; types; global; table; mem; func; elem; data; start; exports } =
+  ignore types;
+  (* TODO: @Léo *)
   let fields =
     from_global global @ from_table table @ from_mem mem @ from_func func
     @ from_elem elem @ from_data data @ from_exports exports @ from_start start

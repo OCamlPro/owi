@@ -519,6 +519,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
     { id = modul.id
     ; mem = modul.mem
     ; table = modul.table
+    ; types = Named.empty (* TODO: @Pierre *)
     ; global
     ; elem
     ; data

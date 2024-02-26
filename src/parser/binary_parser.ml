@@ -931,7 +931,7 @@ let sections_iterate (input : Input.t) =
   let* type_section, input =
     section_parse input ~expected_id:'\x01' [] (vector read_type)
   in
-  let type_section = Array.of_list type_section in
+  let type_section_array = Array.of_list type_section in
 
   (* Custom *)
   let* _custom_sections', input = parse_many_custom_section input in
@@ -976,7 +976,7 @@ let sections_iterate (input : Input.t) =
   (* Globals *)
   let* global_section, input =
     section_parse input ~expected_id:'\x06' []
-      (vector_no_id (read_global type_section))
+      (vector_no_id (read_global type_section_array))
   in
 
   (* Custom *)
@@ -1006,7 +1006,7 @@ let sections_iterate (input : Input.t) =
   (* Elements *)
   let* element_section, input =
     section_parse input ~expected_id:'\x09' []
-    @@ vector_no_id (read_element type_section)
+    @@ vector_no_id (read_element type_section_array)
   in
 
   (* Custom *)
@@ -1027,7 +1027,7 @@ let sections_iterate (input : Input.t) =
   (* Code *)
   let* code_section, input =
     section_parse input ~expected_id:'\x0A' []
-      (vector_no_id (read_code type_section))
+      (vector_no_id (read_code type_section_array))
   in
 
   let* () =
@@ -1043,7 +1043,7 @@ let sections_iterate (input : Input.t) =
   (* Data *)
   let+ data_section, input =
     section_parse input ~expected_id:'\x0B' []
-      (vector_no_id (read_data type_section memory_section))
+      (vector_no_id (read_data type_section_array memory_section))
   in
 
   let* () =
@@ -1074,6 +1074,18 @@ let sections_iterate (input : Input.t) =
   in
 
   let indexed_of_list l = List.mapi Indexed.return l in
+
+  (* Types *)
+  let types =
+    let typs =
+      List.map
+        (fun (Bt_raw (_ind, (params, results)) : binary block_type) ->
+          Def_func_t (params, results) )
+        type_section
+    in
+    let values = indexed_of_list typs in
+    { Named.values; named = String_map.empty }
+  in
 
   (* Memories *)
   let mem =
@@ -1114,7 +1126,8 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Runtime.Local
-            { type_f = type_section.(typeidx); locals; body; id = None } )
+            { type_f = type_section_array.(typeidx); locals; body; id = None }
+          )
         function_section code_section
     in
     let imported =
@@ -1126,7 +1139,7 @@ let sections_iterate (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = type_section.(typeidx)
+                 ; desc = type_section_array.(typeidx)
                  }
           | _not_a_function_import -> None )
         import_section
@@ -1198,6 +1211,7 @@ let sections_iterate (input : Input.t) =
   in
 
   { id = None
+  ; types
   ; global
   ; mem
   ; elem
