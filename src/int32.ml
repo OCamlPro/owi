@@ -2,7 +2,9 @@
 
 include Stdlib.Int32
 
-let clz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_leading_zeros n)
+let clz =
+  Some
+    (fun n -> Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_leading_zeros n))
 
 let ctz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
 

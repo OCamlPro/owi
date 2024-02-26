@@ -34,7 +34,7 @@ val unsigned_to_int : t -> int option
 
 (** unary operators *)
 
-val clz : t -> t
+val clz : (t -> t) option
 
 val ctz : t -> t
 

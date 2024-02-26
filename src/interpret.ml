@@ -99,20 +99,62 @@ module Make (P : Interpret_intf.P) :
 
   let consti i = const_i32 (Int32.of_int i)
 
+  let clz_impl_32 n =
+    let rec aux (lb : int) ub =
+      if ub = lb + 1 then return (const_i32 (Int32.of_int (32 - ub)))
+      else begin
+        let mid = (lb + ub) / 2 in
+        let two_pow_mid = Int32.shl 1l (Int32.of_int mid) in
+        let> cond = I32.(lt_u n (const_i32 two_pow_mid)) in
+        if cond then aux lb mid else aux mid ub
+      end
+    in
+    let> cond = I32.(eqz n) in
+    if cond then return @@ const_i32 32l else aux 0 32
+
+  let clz_impl_64 n =
+    let rec aux (lb : int) ub =
+      if ub = lb + 1 then return (const_i64 (Int64.of_int (64 - ub)))
+      else begin
+        let mid = (lb + ub) / 2 in
+        let two_pow_mid = Int64.shl 1L (Int64.of_int mid) in
+        (* Could be more efficient with a shift right mid, to bench *)
+        let> cond = I64.(lt_u n (const_i64 two_pow_mid)) in
+        if cond then aux lb mid else aux mid ub
+      end
+    in
+    let> cond = I64.(eqz n) in
+    if cond then return @@ const_i64 64L else aux 0 64
+
+  let with_choosing_default_impl f ch_f =
+    match f with
+    | Some f -> fun n -> Choice.return (f n)
+    | None -> fun n -> ch_f n
+
   let exec_iunop stack nn op =
     match nn with
     | S32 ->
       let n, stack = Stack.pop_i32 stack in
-      let res =
+      let+ res =
         let open I32 in
-        match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
+        match op with
+        | Clz ->
+          let clz = with_choosing_default_impl clz clz_impl_32 in
+          clz n
+        | Ctz -> Choice.return @@ ctz n
+        | Popcnt -> Choice.return @@ popcnt n
       in
       Stack.push_i32 stack res
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
-      let res =
+      let+ res =
         let open I64 in
-        match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
+        match op with
+        | Clz ->
+          let clz = with_choosing_default_impl clz clz_impl_64 in
+          clz n
+        | Ctz -> Choice.return @@ ctz n
+        | Popcnt -> Choice.return @@ popcnt n
       in
       Stack.push_i64 stack res
 
@@ -831,7 +873,9 @@ module Make (P : Interpret_intf.P) :
     | I64_const n -> st @@ Stack.push_const_i64 stack n
     | F32_const f -> st @@ Stack.push_const_f32 stack f
     | F64_const f -> st @@ Stack.push_const_f64 stack f
-    | I_unop (nn, op) -> st @@ exec_iunop stack nn op
+    | I_unop (nn, op) ->
+      let* stack = exec_iunop stack nn op in
+      st stack
     | F_unop (nn, op) -> st @@ exec_funop stack nn op
     | I_binop (nn, op) ->
       let* stack = exec_ibinop stack nn op in
