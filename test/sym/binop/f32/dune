@@ -1,0 +1,16 @@
+(cram
+ (deps
+  %{bin:owi}
+  f32_add.wat
+  f32_copysign.wat
+  f32_div.wat
+  f32_eq.wat
+  f32_ge.wat
+  f32_gt.wat
+  f32_le.wat
+  f32_lt.wat
+  f32_max.wat
+  f32_min.wat
+  f32_mul.wat
+  f32_ne.wat
+  f32_sub.wat))

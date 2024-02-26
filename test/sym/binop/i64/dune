@@ -1,0 +1,24 @@
+(cram
+ (deps
+  %{bin:owi}
+  i64_add.wat
+  i64_and.wat
+  i64_div_s.wat
+  i64_div_u.wat
+  i64_eq.wat
+  i64_ge_s.wat
+  i64_gt_s.wat
+  i64_le_s.wat
+  i64_lt_s.wat
+  i64_mul.wat
+  i64_ne.wat
+  i64_or.wat
+  i64_rem_s.wat
+  i64_rem_u.wat
+  i64_rotl.wat
+  i64_rotr.wat
+  i64_shl.wat
+  i64_shr_s.wat
+  i64_shr_u.wat
+  i64_sub.wat
+  i64_xor.wat))
