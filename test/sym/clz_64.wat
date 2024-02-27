@@ -44,6 +44,19 @@
         (call $countLeadingZeros (local.get $n))
         (i64.clz (local.get $n))
     ))
+
+    (call $assert (i64.eq
+        (i64.ctz (local.get $n))
+        ;; Implem of ctz using clz 
+        ;; from hacker's delight p107
+        (i64.sub 
+          (i64.const 64) 
+          (i64.clz ( i64.and
+            (i64.xor (local.get $n) (i64.const -1))
+            (i64.sub (local.get $n) (i64.const 1))
+        ))
+        )
+    ))
   )
 
 

@@ -6,7 +6,10 @@ let clz =
   Some
     (fun n -> Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_leading_zeros n))
 
-let ctz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
+let ctz =
+  Some
+    (fun n ->
+      Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n) )
 
 (* Taken from Base https://github.com/janestreet/base *)
 let popcnt =

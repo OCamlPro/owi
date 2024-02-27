@@ -36,7 +36,7 @@ val unsigned_to_int : t -> int option
 
 val clz : (t -> t) option
 
-val ctz : t -> t
+val ctz : (t -> t) option
 
 val popcnt : t -> t
 

@@ -44,6 +44,19 @@
         (call $countLeadingZeros (local.get $n))
         (i32.clz (local.get $n))
     ))
+
+    (call $assert (i32.eq
+        (i32.ctz (local.get $n))
+        ;; Implem of ctz using clz 
+        ;; from hacker's delight p107
+        (i32.sub 
+          (i32.const 32) 
+          (i32.clz ( i32.and
+            (i32.xor (local.get $n) (i32.const -1))
+            (i32.sub (local.get $n) (i32.const 1))
+        ))
+        )
+    ))
   )
 
 

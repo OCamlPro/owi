@@ -167,9 +167,7 @@ module I32 = struct
 
   let clz = None
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz = None
 
   let popcnt _ =
     (* TODO *)
@@ -283,9 +281,7 @@ module I64 = struct
 
   let clz = None
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz = None
 
   let popcnt _ =
     (* TODO *)

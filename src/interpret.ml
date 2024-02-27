@@ -126,6 +126,32 @@ module Make (P : Interpret_intf.P) :
     let> cond = I64.(eqz n) in
     if cond then return @@ const_i64 64L else aux 0 64
 
+  let ctz_impl_32 n =
+    let rec aux (lb : int) ub =
+      if ub = lb + 1 then return (const_i32 (Int32.of_int lb))
+      else begin
+        let mid = (lb + ub) / 2 in
+        let two_pow_mid = Int32.shl 1l (Int32.of_int mid) in
+        let> cond = I32.(eqz @@ rem n (const_i32 two_pow_mid)) in
+        if cond then aux mid ub else aux lb mid
+      end
+    in
+    let> cond = I32.(eqz n) in
+    if cond then return @@ const_i32 32l else aux 0 32
+
+  let ctz_impl_64 n =
+    let rec aux (lb : int) ub =
+      if ub = lb + 1 then return (const_i64 (Int64.of_int lb))
+      else begin
+        let mid = (lb + ub) / 2 in
+        let two_pow_mid = Int64.shl 1L (Int64.of_int mid) in
+        let> cond = I64.(eqz @@ rem n (const_i64 two_pow_mid)) in
+        if cond then aux mid ub else aux lb mid
+      end
+    in
+    let> cond = I64.(eqz n) in
+    if cond then return @@ const_i64 64L else aux 0 64
+
   let with_choosing_default_impl f ch_f =
     match f with
     | Some f -> fun n -> Choice.return (f n)
@@ -141,7 +167,9 @@ module Make (P : Interpret_intf.P) :
         | Clz ->
           let clz = with_choosing_default_impl clz clz_impl_32 in
           clz n
-        | Ctz -> Choice.return @@ ctz n
+        | Ctz ->
+          let ctz = with_choosing_default_impl ctz ctz_impl_32 in
+          ctz n
         | Popcnt -> Choice.return @@ popcnt n
       in
       Stack.push_i32 stack res
@@ -153,7 +181,9 @@ module Make (P : Interpret_intf.P) :
         | Clz ->
           let clz = with_choosing_default_impl clz clz_impl_64 in
           clz n
-        | Ctz -> Choice.return @@ ctz n
+        | Ctz ->
+          let ctz = with_choosing_default_impl ctz ctz_impl_64 in
+          ctz n
         | Popcnt -> Choice.return @@ popcnt n
       in
       Stack.push_i64 stack res

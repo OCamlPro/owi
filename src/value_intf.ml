@@ -19,7 +19,7 @@ module type Iop = sig
 
   val clz : (num -> num) option
 
-  val ctz : num -> num
+  val ctz : (num -> num) option
 
   val popcnt : num -> num
 
