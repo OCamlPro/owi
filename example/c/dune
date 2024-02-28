@@ -4,5 +4,6 @@
   %{bin:owi}
   (file poly.c)
   (file poly2.c)
+  (file dobble.c)
   (package owi))
  (files README.md))
