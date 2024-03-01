@@ -35,7 +35,7 @@ $ owi c ./poly.c -w1
 ...
 Model:
   (model
-    (symbol_0 (i32 2)))
+    (symbol_0 (i32 4)))
 Reached problem!
 [13]
 ```
@@ -318,7 +318,8 @@ OPTIONS
            optimize mode
 
        -p, --profiling
-           profiling mode
+           profiling mode (including solver statistics display in the context
+           of symbolic execution)
 
        --property=VAL
            property file
@@ -333,9 +334,8 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to a
-           machine-specific value given by the OCaml
-           Domain.recommended_domain_count function.
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
