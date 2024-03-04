@@ -3,7 +3,7 @@
  (libraries owi))
 
 (mdx
- (libraries owi)
+ (libraries owi fpath)
  (deps
   %{bin:owi}
   (file extern.exe)
