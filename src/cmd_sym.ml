@@ -188,9 +188,11 @@ let write_testcase =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  (workspace : Fpath.t) files =
+  deterministic_result_order (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
+  (* deterministic_result_order implies no_stop_at_failure *)
+  let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let* () =
     match Bos.OS.Dir.create ~path:true ~mode:0o755 workspace with
     | Ok true | Ok false -> Ok ()
@@ -245,6 +247,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       if (not is_err) || no_stop_at_failure then
         print_and_count_failures count_acc tl
       else Ok count_acc
+  in
+  let results =
+    if deterministic_result_order then
+      List.to_seq @@ List.sort compare @@ List.of_seq results
+    else results
   in
   let* count = print_and_count_failures 0 results in
   if count > 0 then Error (`Found_bug count)

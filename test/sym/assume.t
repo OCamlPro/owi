@@ -1,5 +1,5 @@
 symbolic extern module (assume and assert test):
-  $ dune exec owi -- sym assume.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym assume.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model

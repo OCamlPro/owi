@@ -35,6 +35,13 @@ let no_values =
   let doc = "do not display a value for each symbol" in
   Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
 
+let deterministic_result_order =
+  let doc =
+    "Guarantee a fixed deterministic order of found failures. This implies \
+     --no-stop-at-failure."
+  in
+  Cmdliner.Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
+
 let optimize =
   let doc = "optimize mode" in
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
@@ -108,7 +115,7 @@ let c_cmd =
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -173,7 +180,8 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ workspace $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
+      $ files )
 
 let cli =
   let open Cmdliner in

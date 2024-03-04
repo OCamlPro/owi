@@ -1,5 +1,5 @@
 binop i32:
-  $ dune exec owi -- sym binop_i32.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_i32.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model
@@ -39,7 +39,7 @@ binop i32:
   Reached 9 problems!
   [13]
 binop i32 (2):
-  $ dune exec owi -- sym binop_i32-2.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_i32-2.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model
@@ -78,7 +78,7 @@ binop i32 (2):
   Reached 5 problems!
   [13]
 binop i64:
-  $ dune exec owi -- sym binop_i64.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_i64.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model
@@ -118,7 +118,7 @@ binop i64:
   Reached 9 problems!
   [13]
 binop i64 (2):
-  $ dune exec owi -- sym binop_i64-2.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_i64-2.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model
@@ -157,7 +157,7 @@ binop i64 (2):
   Reached 5 problems!
   [13]
 binop f32:
-  $ dune exec owi -- sym binop_f32.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_f32.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model
@@ -189,7 +189,7 @@ binop f32:
   Reached 7 problems!
   [13]
 binop f64:
-  $ dune exec owi -- sym binop_f64.wat --no-stop-at-failure --no-value
+  $ dune exec owi -- sym binop_f64.wat --no-value --deterministic-result-order
   Trap: unreachable
   Model:
     (model

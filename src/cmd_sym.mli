@@ -6,6 +6,7 @@ val cmd :
   -> int
   -> bool
   -> bool
+  -> bool
   -> Fpath.t
   -> Fpath.t list
   -> unit Result.t
