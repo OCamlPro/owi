@@ -31,16 +31,16 @@ We are defining one symbolic variable `x` using the function `owi_i32(void)`. Th
 Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
-$ dune exec owi -- c ./poly.c
+$ dune exec owi -- c ./poly.c -w1
 ...
 Model:
   (model
-    (symbol_0 (i32 1)))
+    (symbol_0 (i32 2)))
 Reached problem!
 [13]
 ```
 
-Indeed, `1` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
+Indeed, `2` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
 
 We can do so by assuming that `x` is not equal to any of these with the function `owi_assume(bool)`:
 
