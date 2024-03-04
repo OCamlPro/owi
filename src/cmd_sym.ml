@@ -183,6 +183,10 @@ let write_testcase =
     in
     res
 
+(* NB: This function propagates potential errors (Result.err) occurring
+   during evaluation (OS, syntax error, etc.), except for Trap and Assert,
+   which are handled here. Most of the computations are done in the Result
+   monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (workspace : Fpath.t) files =
   if profiling then Log.profiling_on := true;
@@ -197,50 +201,52 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run ~workers result thread in
-  let* failing =
-    list_fold_left
-      (fun failing (result, thread) ->
-        let pc = Thread.pc thread in
-        let symbols = thread.symbol_set in
-        let model = get_model ~symbols solver pc in
-        let* result, err =
-          match result with
-          | Symbolic_choice.Multicore.EVal (Ok ()) -> Ok (failing, false)
-          | EAssert assertion ->
-            Ok (`EAssert (assertion, model) :: failing, true)
-          | ETrap tr -> Ok (`ETrap (tr, model) :: failing, true)
-          | EVal (Error e) -> Error e
-        in
+  let print_bug = function
+    | `ETrap (tr, model) ->
+      Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
+      Format.pp_std "Model:@\n  @[<v>%a@]@."
+        (Encoding.Model.pp ~no_values)
+        model
+    | `EAssert (assertion, model) ->
+      Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
+      Format.pp_std "Model:@\n  @[<v>%a@]@."
+        (Encoding.Model.pp ~no_values)
+        model
+  in
+  let rec print_and_count_failures count_acc results =
+    match results () with
+    | Seq.Nil -> Ok count_acc
+    | Seq.Cons ((result, thread), tl) ->
+      let pc = Thread.pc thread in
+      let symbols = thread.symbol_set in
+      let model = get_model ~symbols solver pc in
+      let* is_err =
+        let open Symbolic_choice.Multicore in
+        match result with
+        | EAssert assertion ->
+          print_bug (`EAssert (assertion, model));
+          Ok true
+        | ETrap tr ->
+          print_bug (`ETrap (tr, model));
+          Ok true
+        | EVal (Ok ()) -> Ok false
+        | EVal (Error e) -> Error e
+      in
+      let count_acc = if is_err then succ count_acc else count_acc in
+      let* () =
         if not no_values then
           let testcase =
             List.sort compare (Encoding.Model.get_bindings model)
             |> List.map snd
           in
-          let+ () = write_testcase ~dir:workspace ~err testcase in
-          result
-        else Ok result )
-      [] (List.of_seq results)
+          write_testcase ~dir:workspace ~err:is_err testcase
+        else Ok ()
+      in
+      if (not is_err) || no_stop_at_failure then
+        print_and_count_failures count_acc tl
+      else Ok count_acc
   in
-  let print_bug = function
-    | `ETrap (tr, model) ->
-      Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
-      Format.pp_std "Model:@\n  @[<v>%a@]@\n"
-        (Encoding.Model.pp ~no_values)
-        model
-    | `EAssert (assertion, model) ->
-      Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
-      Format.pp_std "Model:@\n  @[<v>%a@]@\n"
-        (Encoding.Model.pp ~no_values)
-        model
-  in
-  let rec print_and_count_failures count = function
-    | [] -> count
-    | hd :: tl ->
-      print_bug hd;
-      let count = succ count in
-      if no_stop_at_failure then print_and_count_failures count tl else count
-  in
-  let count = print_and_count_failures 0 failing in
+  let* count = print_and_count_failures 0 results in
   if count > 0 then Error (`Found_bug count)
   else begin
     Format.pp_std "All OK";

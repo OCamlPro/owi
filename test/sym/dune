@@ -33,6 +33,7 @@
   sub_i64.wat
   sub_f32.wat
   sub_f64.wat
+  syntax_error.wat
   table.wat
   unop_i32.wat
   unop_i64.wat

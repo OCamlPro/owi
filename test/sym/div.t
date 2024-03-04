@@ -1,11 +1,11 @@
 div binop:
   $ dune exec owi -- sym div_i32.wat --no-value --no-stop-at-failure -w1
-  Trap: integer overflow
+  Trap: integer divide by zero
   Model:
     (model
       (symbol_0 i32)
       (symbol_1 i32))
-  Trap: integer divide by zero
+  Trap: integer overflow
   Model:
     (model
       (symbol_0 i32)
@@ -13,12 +13,12 @@ div binop:
   Reached 2 problems!
   [13]
   $ dune exec owi -- sym div_i64.wat --no-value --no-stop-at-failure -w1
-  Trap: integer overflow
+  Trap: integer divide by zero
   Model:
     (model
       (symbol_0 i64)
       (symbol_1 i64))
-  Trap: integer divide by zero
+  Trap: integer overflow
   Model:
     (model
       (symbol_0 i64)
@@ -45,13 +45,8 @@ div binop:
   Trap: integer divide by zero
   Model:
     (model
-      (symbol_0 (i32 3))
-      (symbol_6 (i64 0)))
-  Trap: integer divide by zero
-  Model:
-    (model
-      (symbol_0 (i32 2))
-      (symbol_3 (i64 0)))
+      (symbol_0 (i32 0))
+      (symbol_1 (i32 0)))
   Trap: integer divide by zero
   Model:
     (model
@@ -60,7 +55,12 @@ div binop:
   Trap: integer divide by zero
   Model:
     (model
-      (symbol_0 (i32 0))
-      (symbol_1 (i32 0)))
+      (symbol_0 (i32 2))
+      (symbol_3 (i64 0)))
+  Trap: integer divide by zero
+  Model:
+    (model
+      (symbol_0 (i32 3))
+      (symbol_6 (i64 0)))
   Reached 4 problems!
   [13]
