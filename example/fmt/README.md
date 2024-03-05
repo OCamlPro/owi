@@ -42,7 +42,7 @@ i32.lt_s
 Owi will format it like this:
 
 ```sh
-$ dune exec -- owi fmt horrible.wat
+$ owi fmt horrible.wat
 (module
   (memory 10)
   (func $f (param $n i32) (result i32)
@@ -99,7 +99,7 @@ Are you able to recognize the program now?
 ## Man page
 
 ```sh
-$ dune exec owi -- fmt --help=plain
+$ owi fmt --help=plain
 NAME
        owi-fmt - Format a .wat or .wast file
 

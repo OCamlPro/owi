@@ -1,2 +1,2 @@
 inplace:
-  $ dune exec owi -- fmt --inplace done.wat
+  $ owi fmt --inplace done.wat

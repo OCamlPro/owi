@@ -21,7 +21,7 @@ Given a file `type_error.wat` with the following content:
 Running the validator is as simple as:
 
 ```sh
-$ dune exec owi -- validate ./type_error.wat
+$ owi validate ./type_error.wat
 type mismatch (pop)
 [35]
 ```
@@ -29,7 +29,7 @@ type mismatch (pop)
 You can also print a more detailed trace with the `--debug` option:
 
 ```sh
-$ dune exec owi -- validate ./type_error.wat --debug
+$ owi validate ./type_error.wat --debug
 parsing      ...
 checking     ...
 grouping     ...
@@ -43,7 +43,7 @@ type mismatch (pop)
 ## Man page
 
 ```sh
-$ dune exec owi -- validate --help=plain
+$ owi validate --help=plain
 NAME
        owi-validate - Validate a module
 

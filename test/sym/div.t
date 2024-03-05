@@ -1,5 +1,5 @@
 div binop:
-  $ dune exec owi -- sym div_i32.wat --no-value --deterministic-result-order -w1
+  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1
   Trap: integer overflow
   Model:
     (model
@@ -12,7 +12,7 @@ div binop:
       (symbol_1 i32))
   Reached 2 problems!
   [13]
-  $ dune exec owi -- sym div_i64.wat --no-value --deterministic-result-order -w1
+  $ owi sym div_i64.wat --no-value --deterministic-result-order -w1
   Trap: integer overflow
   Model:
     (model
@@ -25,7 +25,7 @@ div binop:
       (symbol_1 i64))
   Reached 2 problems!
   [13]
-  $ dune exec owi -- sym div_f32.wat --no-value --deterministic-result-order -w1
+  $ owi sym div_f32.wat --no-value --deterministic-result-order -w1
   Assert failure: (f32.eq (f32.div symbol_0 symbol_1) (f32.div symbol_0 symbol_1))
   Model:
     (model
@@ -33,7 +33,7 @@ div binop:
       (symbol_1 f32))
   Reached problem!
   [13]
-  $ dune exec owi -- sym div_f64.wat --no-value --deterministic-result-order -w1
+  $ owi sym div_f64.wat --no-value --deterministic-result-order -w1
   Assert failure: (f64.eq (f64.div symbol_0 symbol_1) (f64.div symbol_0 symbol_1))
   Model:
     (model
@@ -41,7 +41,7 @@ div binop:
       (symbol_1 f64))
   Reached problem!
   [13]
-  $ dune exec owi -- sym div_zero.wat --deterministic-result-order -w1
+  $ owi sym div_zero.wat --deterministic-result-order -w1
   Trap: integer divide by zero
   Model:
     (model

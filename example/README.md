@@ -18,7 +18,7 @@
 ## Man page
 
 ```sh
-$ dune exec -- owi --help=plain
+$ owi --help=plain
 NAME
        owi - OCaml WebAssembly Interpreter
 

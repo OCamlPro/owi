@@ -337,7 +337,7 @@ Given the useless program `useless.wat`:
 Owi is able to get rid of most of the code:
 
 ```sh
-$ dune exec -- owi opt useless.wat
+$ owi opt useless.wat
 (module
   (func $i32binop
 
@@ -364,7 +364,7 @@ $ dune exec -- owi opt useless.wat
 ## Man page
 
 ```sh
-$ dune exec owi -- opt --help=plain
+$ owi opt --help=plain
 NAME
        owi-opt - Optimize a module
 

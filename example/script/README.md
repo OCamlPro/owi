@@ -14,6 +14,6 @@ Given the following `print.wast` file:
 You can print the value thanks to the `print_i32` function imported from the `spectest` module:
 
 ```sh
-$ dune exec owi -- script ./print.wast
+$ owi script ./print.wast
 42
 ```

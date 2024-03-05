@@ -24,7 +24,7 @@ In the following file, we define `x` as a symbolic variable. Then if `5 < x`, we
 Let's see if owi is able to find a value for `x` that lead to an error:
 
 ```sh
-$ dune exec owi -- sym ./mini.wat
+$ owi sym ./mini.wat
 Trap: unreachable
 Model:
   (model
@@ -42,7 +42,7 @@ TODO
 ## Man page
 
 ```sh
-$ dune exec owi -- sym --help=plain
+$ owi sym --help=plain
 NAME
        owi-sym - Run the symbolic interpreter
 

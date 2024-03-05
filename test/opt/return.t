@@ -1,5 +1,5 @@
 return instructions:
-  $ dune exec -- owi opt return.wat
+  $ owi opt return.wat
   (module
     (func $return (result i32)
       i32.const 42

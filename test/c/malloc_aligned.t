@@ -1,2 +1,2 @@
-  $ dune exec owi -- c ./malloc_aligned.c
+  $ owi c ./malloc_aligned.c
   All OK

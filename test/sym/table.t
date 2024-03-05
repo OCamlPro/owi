@@ -1,5 +1,5 @@
 table stuff:
-  $ dune exec owi -- sym table.wat --deterministic-result-order
+  $ owi sym table.wat --deterministic-result-order
   Trap: undefined element
   Model:
     (model

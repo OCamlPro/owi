@@ -1,5 +1,5 @@
 print script:
-  $ dune exec owi -- fmt script.wast
+  $ owi fmt script.wast
   (module
     (func (param $x i32) (param $y i32) (result i32)
       local.get $x
