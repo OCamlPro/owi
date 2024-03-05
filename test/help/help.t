@@ -1,5 +1,5 @@
 no subcommand should print help
-  $ dune exec -- owi
+  $ owi
   NAME
          owi - OCaml WebAssembly Interpreter
   

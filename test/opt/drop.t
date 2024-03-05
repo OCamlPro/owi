@@ -1,5 +1,5 @@
 drop instruction:
-  $ dune exec -- owi opt drop.wat
+  $ owi opt drop.wat
   (module
     (func $start
       call 1

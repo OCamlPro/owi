@@ -1,5 +1,5 @@
 block loop instructions:
-  $ dune exec -- owi opt block_loop.wat
+  $ owi opt block_loop.wat
   (module
     (func $start
       

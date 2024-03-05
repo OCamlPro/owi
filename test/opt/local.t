@@ -1,5 +1,5 @@
 unused local variables:
-  $ dune exec -- owi opt local.wat
+  $ owi opt local.wat
   (module
     (func $f0 (local i32)
       i32.const 0

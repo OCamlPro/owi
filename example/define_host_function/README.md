@@ -99,7 +99,7 @@ let () =
 You'll get the expected result:
 
 ```sh
-$ dune exec -- ./extern.exe
+$ ./extern.exe
 42
 13
 ```

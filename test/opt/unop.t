@@ -1,5 +1,5 @@
 unop () instructions:
-  $ dune exec -- owi opt unop.wat
+  $ owi opt unop.wat
   (module
     (func $iunop
       

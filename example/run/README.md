@@ -20,13 +20,13 @@ Given a file `42.wat` with the following content:
 Running the interpreter is as simple as:
 
 ```sh
-$ dune exec owi -- run ./42.wat
+$ owi run ./42.wat
 ```
 
 Nothing is happening, so you can add the `--debug` option to print an execution trace:
 
 ```sh
-$ dune exec owi -- run ./42.wat --debug
+$ owi run ./42.wat --debug
 parsing      ...
 checking     ...
 grouping     ...
@@ -53,7 +53,7 @@ stack        : [  ]
 ## Man page
 
 ```sh
-$ dune exec owi -- run --help=plain
+$ owi run --help=plain
 NAME
        owi-run - Run the concrete interpreter
 

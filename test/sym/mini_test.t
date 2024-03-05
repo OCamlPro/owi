@@ -1,5 +1,5 @@
 mini test:
-  $ dune exec owi -- sym mini_test.wat --deterministic-result-order
+  $ owi sym mini_test.wat --deterministic-result-order
   Trap: unreachable
   Model:
     (model

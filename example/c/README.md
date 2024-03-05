@@ -31,7 +31,7 @@ We are defining one symbolic variable `x` using the function `owi_i32(void)`. Th
 Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
-$ dune exec owi -- c ./poly.c -w1
+$ owi c ./poly.c -w1
 ...
 Model:
   (model
@@ -77,7 +77,7 @@ Let's run owi on this new input:
 
 
 ```sh
-$ dune exec owi -- c ./poly2.c
+$ owi c ./poly2.c
 ...
 Model:
   (model
@@ -172,7 +172,7 @@ int main (void) {
 ```
 
 ```sh
-$ dune exec owi -- c ./maze.c
+$ owi c ./maze.c
 Assert failure: false
 Model:
   (model
@@ -211,7 +211,7 @@ Reached problem!
 ## Man page
 
 ```sh
-$ dune exec owi -- c --help=plain
+$ owi c --help=plain
 NAME
        owi-c - Compile a C file to Wasm and run the symbolic interpreter on
        it
