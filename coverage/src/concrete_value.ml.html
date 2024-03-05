@@ -431,12 +431,12 @@ struct
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="1473">-</span>1 in
+    let r = ref ~<span data-count="1467">-</span>1 in
     fun () -&gt;
-      <span data-count="13243">i</span>ncr r;
-      <span data-count="13243">!</span>r
+      <span data-count="13242">i</span>ncr r;
+      <span data-count="13242">!</span>r
 
-  let wasm func env : t = <span data-count="13243">W</span>ASM (fres<span data-count="13243">h</span> (), func, env)
+  let wasm func env : t = <span data-count="13242">W</span>ASM (fres<span data-count="13242">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -501,7 +501,7 @@ let to_instr = function
   | Ref _ -&gt; assert false
 
 let pp fmt = function
-  | <span data-count="8">I</span>32 i -&gt; pp fmt "i32.const %ld" i
+  | <span data-count="4">I</span>32 i -&gt; pp fmt "i32.const %ld" i
   | <span data-count="0">I</span>64 i -&gt; pp fmt "i64.const %Ld" i
   | <span data-count="0">F</span>32 f -&gt; pp fmt "f32.const %a" Float32.pp f
   | <span data-count="0">F</span>64 f -&gt; pp fmt "f64.const %a" Float64.pp f
