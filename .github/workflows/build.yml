@@ -44,11 +44,11 @@ jobs:
           allow-prerelease-opam: true
       - name: depext
         run: |
-          opam install -y ./*.opam --depext-only --with-test --with-doc
+          opam install . --depext-only --with-test --with-doc
       - name: setup
         if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
-          opam install -y ./*.opam --deps-only --with-test --with-doc
+          opam install . --deps-only --with-test --with-doc
       - name: build
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
