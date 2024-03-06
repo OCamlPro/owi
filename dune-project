@@ -40,6 +40,7 @@
    (>= 0.5.1))
   cmdliner
   conf-clang
+  conf-llvm
   sedlex
   (menhir
    (and

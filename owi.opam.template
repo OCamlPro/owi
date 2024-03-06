@@ -1,7 +1,7 @@
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 depexts: [
-  ["llvm" "lld" "wabt"]  {os-family = "debian"}
-  ["llvm" "wabt"]  {os-family = "homebrew"}
+  ["lld" "wabt"]  {os-family = "debian"}
+  ["wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
   [ "encoding.dev" "git+https://github.com/formalsec/encoding"]
