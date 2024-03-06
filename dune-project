@@ -39,6 +39,7 @@
   (integers
    (>= 0.5.1))
   cmdliner
+  conf-clang
   sedlex
   (menhir
    (and
