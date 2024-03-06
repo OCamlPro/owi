@@ -21,6 +21,7 @@ depends: [
   "ocaml" {>= "5.1"}
   "integers" {>= "0.5.1"}
   "cmdliner"
+  "conf-clang"
   "sedlex"
   "menhir" {build & >= "20220210"}
   "ocaml_intrinsics"
@@ -62,7 +63,7 @@ build: [
 dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 depexts: [
-  ["llvm" "clang" "lld" "wabt"]  {os-family = "debian"}
+  ["llvm" "lld" "wabt"]  {os-family = "debian"}
   ["llvm" "wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
