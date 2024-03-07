@@ -83,13 +83,13 @@ let pure_wasm_module_2 =
   | Ok modul -> modul
 
 (* our second pure wasm module, linked with `life_ext` and `life` interpreted before *)
-let module_to_run =
+let module_to_run, link_state =
   match
     Compile.until_link link_state ~unsafe:false ~optimize:true ~name:None
       pure_wasm_module_2
   with
   | Error e -> Result.failwith e
-  | Ok (m, _state) -> m
+  | Ok (m, state) -> (m, state)
 
 (* let's run it ! it will animate the game of life in console *)
 let () =
