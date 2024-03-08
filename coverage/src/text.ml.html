@@ -456,13 +456,13 @@
 open Format
 open Types
 
-let symbolic v = <span data-count="33416">T</span>ext v
+let symbolic v = <span data-count="33386">T</span>ext v
 
-let raw v = <span data-count="154393">R</span>aw v
+let raw v = <span data-count="154385">R</span>aw v
 
-let bt_ind i = <span data-count="20413">B</span>t_ind i
+let bt_ind i = <span data-count="20405">B</span>t_ind i
 
-let bt_raw i t = <span data-count="19372">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="19362">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
@@ -535,8 +535,8 @@ let pp_module_field fmt = function
   | <span data-count="3">M</span>Type t -&gt; pp_rec_type fmt t
   | <span data-count="3">M</span>Global g -&gt; pp_global fmt g
   | <span data-count="3">M</span>Table t -&gt; pp_table fmt t
-  | <span data-count="10">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="125">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="9">M</span>Mem m -&gt; pp_mem fmt m
+  | <span data-count="124">M</span>Func f -&gt; pp_func fmt f
   | <span data-count="3">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="0">M</span>Data d -&gt; pp_data fmt d
   | <span data-count="2">M</span>Start s -&gt; pp_start fmt s
@@ -549,8 +549,8 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="87">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
-    (pp_lis<span data-count="87">t</span> ~pp_sep:pp_newline pp_module_field)
+  <span data-count="86">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
+    (pp_lis<span data-count="86">t</span> ~pp_sep:pp_newline pp_module_field)
     m.fields
 
 type action =

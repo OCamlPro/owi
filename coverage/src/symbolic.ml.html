@@ -474,9 +474,9 @@ struct
 
   let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
-    <span data-count="19760">m</span>atch (if_true, if_false) with
-    | <span data-count="19741">I</span>32 if_true, I32 if_false -&gt;
-      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="19672">r</span> c ~if_true ~if_false))
+    <span data-count="19684">m</span>atch (if_true, if_false) with
+    | <span data-count="19615">I</span>32 if_true, I32 if_false -&gt;
+      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="19501">r</span> c ~if_true ~if_false))
     | <span data-count="0">I</span>64 if_true, I64 if_false -&gt;
       Choice.return (Value.I64 (Value.Bool.select_exp<span data-count="0">r</span> c ~if_true ~if_false))
     | <span data-count="0">F</span>32 if_true, F32 if_false -&gt;
@@ -505,12 +505,12 @@ struct
     include Symbolic_memory
 
     let concretise (a : Encoding.Expr.t) : Encoding.Expr.t Choice.t =
-      <span data-count="283732">l</span>et open Choice in
+      <span data-count="283077">l</span>et open Choice in
       let open Encoding in
       match a.node.e with
       (* Avoid unecessary re-hashconsing and allocation when the value
          is already concrete. *)
-      | <span data-count="236095">V</span>al _ | <span data-count="47641">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; return a
+      | <span data-count="235555">V</span>al _ | <span data-count="47579">P</span>tr (_, { node = { e = Val _; _ }; _ }) -&gt; return a
       | <span data-count="0">P</span>tr (base, offset) -&gt;
         let+ offset = select_i3<span data-count="0">2</span> offset in
         <span data-count="0">E</span>xpr.(Ptr (base, Symbolic_value.const_i3<span data-count="0">2</span> offset) @: Ty_bitv S32)
@@ -522,40 +522,40 @@ struct
     (* 1. Let pointers have symbolic offsets *)
     (* 2. Let addresses have symbolic values *)
     let check_within_bounds m a =
-      <span data-count="283922">m</span>atch check_within_bounds m a with
+      <span data-count="283127">m</span>atch check_within_bounds m a with
       | <span data-count="0">E</span>rror t -&gt; Choice.trap t
-      | <span data-count="283972">O</span>k (cond, ptr) -&gt;
+      | <span data-count="282984">O</span>k (cond, ptr) -&gt;
         let open Choice in
-        let* out_of_bounds = selec<span data-count="283780">t</span> cond in
-        <span data-count="283875">i</span>f out_of_bounds then <span data-count="5">t</span>rap Trap.Memory_heap_buffer_overflow
-        else <span data-count="283874">r</span>eturn ptr
+        let* out_of_bounds = selec<span data-count="282288">t</span> cond in
+        <span data-count="282810">i</span>f out_of_bounds then <span data-count="5">t</span>rap Trap.Memory_heap_buffer_overflow
+        else <span data-count="282838">r</span>eturn ptr
 
     let with_concrete (m : t) a f : 'a Choice.t =
-      <span data-count="283761">l</span>et open Choice in
-      let* addr = concretis<span data-count="283754">e</span> a in
-      <span data-count="283908">l</span>et+ ptr = check_within_bound<span data-count="283780">s</span> m addr in
-      <span data-count="283854">f</span> m ptr
+      <span data-count="283191">l</span>et open Choice in
+      let* addr = concretis<span data-count="282712">e</span> a in
+      <span data-count="283053">l</span>et+ ptr = check_within_bound<span data-count="282392">s</span> m addr in
+      <span data-count="282844">f</span> m ptr
 
-    let load_8_s m a = <span data-count="643">w</span>ith_concrete m a load_8_s
+    let load_8_s m a = <span data-count="642">w</span>ith_concrete m a load_8_s
 
-    let load_8_u m a = <span data-count="4567">w</span>ith_concrete m a load_8_u
+    let load_8_u m a = <span data-count="4561">w</span>ith_concrete m a load_8_u
 
     let load_16_s m a = <span data-count="2">w</span>ith_concrete m a load_16_s
 
     let load_16_u m a = <span data-count="2">w</span>ith_concrete m a load_16_u
 
-    let load_32 m a = <span data-count="195179">w</span>ith_concrete m a load_32
+    let load_32 m a = <span data-count="194287">w</span>ith_concrete m a load_32
 
     let load_64 m a = <span data-count="2">w</span>ith_concrete m a load_64
 
     let store_8 m ~addr v =
-      <span data-count="3908">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="3908">s</span>tore_8 m ~addr v)
+      <span data-count="3907">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="3907">s</span>tore_8 m ~addr v)
 
     let store_16 m ~addr v =
       <span data-count="2">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="2">s</span>tore_16 m ~addr v)
 
     let store_32 m ~addr v =
-      <span data-count="79633">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="79615">s</span>tore_32 m ~addr v)
+      <span data-count="79508">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="79426">s</span>tore_32 m ~addr v)
 
     let store_64 m ~addr v =
       <span data-count="17">w</span>ith_concrete m addr (fun m addr -&gt; <span data-count="17">s</span>tore_64 m ~addr v)
@@ -573,10 +573,10 @@ struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="284101">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="284116">l</span>et f (t : thread) =
-        <span data-count="284072">l</span>et memories = Thread.memories t in
-        <span data-count="284019">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="284029">d</span> env) orig_mem memories id
+      <span data-count="283659">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="283574">l</span>et f (t : thread) =
+        <span data-count="283337">l</span>et memories = Thread.memories t in
+        <span data-count="283173">S</span>ymbolic_memory.get_memory (Link_env.i<span data-count="283336">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -586,9 +586,9 @@ struct
 
     let get_table (env : t) i : Table.t Choice.t =
       <span data-count="4497">l</span>et orig_table = Link_env.get_table env i in
-      <span data-count="4497">l</span>et f (t : thread) =
-        <span data-count="4497">l</span>et tables = Thread.tables t in
-        <span data-count="4497">S</span>ymbolic_table.get_table (Link_env.i<span data-count="4497">d</span> env) orig_table tables i
+      <span data-count="4499">l</span>et f (t : thread) =
+        <span data-count="4499">l</span>et tables = Thread.tables t in
+        <span data-count="4499">S</span>ymbolic_table.get_table (Link_env.i<span data-count="4497">d</span> env) orig_table tables i
       in
       Choice.with_thread f
 
@@ -599,10 +599,10 @@ struct
       <span data-count="332">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="23470">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="23467">l</span>et f (t : thread) =
-        <span data-count="23471">l</span>et globals = Thread.globals t in
-        <span data-count="23471">S</span>ymbolic_global.get_global (Link_env.i<span data-count="23472">d</span> env) orig_global globals i
+      <span data-count="23461">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="23458">l</span>et f (t : thread) =
+        <span data-count="23457">l</span>et globals = Thread.globals t in
+        <span data-count="23455">S</span>ymbolic_global.get_global (Link_env.i<span data-count="23456">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -621,11 +621,11 @@ struct
       ; to_run : Types.simplified Types.expr list
       }
 
-    let env (t : t) = <span data-count="532">t</span>.env
+    let env (t : t) = <span data-count="531">t</span>.env
 
-    let modul (t : t) = <span data-count="2582">t</span>.modul
+    let modul (t : t) = <span data-count="2581">t</span>.modul
 
-    let to_run (t : t) = <span data-count="203">t</span>.to_run
+    let to_run (t : t) = <span data-count="202">t</span>.to_run
   end
 end
 
@@ -640,7 +640,7 @@ module M = struct
 end
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  <span data-count="203">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  <span data-count="202">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
 
 let convert_module_to_run_minimalist (m : 'f Link.module_to_run) =
   <span data-count="0">M</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
