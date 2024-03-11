@@ -9,6 +9,9 @@ type t =
   ; memories : Symbolic_memory.collection
   ; tables : Symbolic_table.collection
   ; globals : Symbolic_global.collection
+      (** Breadcrumbs represent the list of choices that were made so far. They
+          identify one given symbolic execution trace. *)
+  ; breadcrumbs : int32 list
   }
 
 let pc t = t.pc
@@ -19,6 +22,8 @@ let tables t = t.tables
 
 let globals t = t.globals
 
+let breadcrumbs t = t.breadcrumbs
+
 let create () =
   { choices = 0
   ; symbol_set = []
@@ -26,10 +31,11 @@ let create () =
   ; memories = Symbolic_memory.init ()
   ; tables = Symbolic_table.init ()
   ; globals = Symbolic_global.init ()
+  ; breadcrumbs = []
   }
 
-let clone { choices; symbol_set; pc; memories; tables; globals } =
+let clone { choices; symbol_set; pc; memories; tables; globals; breadcrumbs } =
   let memories = Symbolic_memory.clone memories in
   let tables = Symbolic_table.clone tables in
   let globals = Symbolic_global.clone globals in
-  { choices; symbol_set; pc; memories; tables; globals }
+  { choices; symbol_set; pc; memories; tables; globals; breadcrumbs }

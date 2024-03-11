@@ -250,7 +250,13 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   in
   let results =
     if deterministic_result_order then
-      List.to_seq @@ List.sort compare @@ List.of_seq results
+      results
+      |> Seq.map (function (_, th) as x ->
+           (x, List.rev @@ Thread.breadcrumbs th) )
+      |> List.of_seq
+      |> List.sort (fun (_, bc1) (_, bc2) ->
+             List.compare Stdlib.Int32.compare bc1 bc2 )
+      |> List.to_seq |> Seq.map fst
     else results
   in
   let* count = print_and_count_failures 0 results in
