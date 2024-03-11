@@ -13,7 +13,7 @@ type 'a collection =
 
 let empty = { c = Map.empty; last = 0 }
 
-let with_fresh_id f { c; last } =
+let with_fresh_id { c; last } f : _ Result.t =
   let open Syntax in
   let+ e, r = f last in
   let c = Map.add last e c in

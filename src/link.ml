@@ -367,8 +367,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
 let modul (ls : 'f state) ~name (modul : Simplified.modul) =
   Log.debug0 "linking      ...@\n";
   let* envs, (env, init_active_data, init_active_elem) =
-    Env_id.with_fresh_id
-      (fun env_id ->
+    Env_id.with_fresh_id ls.envs (fun env_id ->
         let env = Link_env.Build.empty in
         let* env = eval_functions ls env_id env modul.func in
         let* env = eval_globals ls env modul.global in
@@ -378,8 +377,8 @@ let modul (ls : 'f state) ~name (modul : Simplified.modul) =
         let+ env, init_active_elem = define_elem env modul.elem in
         let finished_env = Link_env.freeze env_id env ls.collection in
         (finished_env, (finished_env, init_active_data, init_active_elem)) )
-      ls.envs
   in
+
   let* by_id_exports = populate_exports env modul.exports in
   let by_id =
     match modul.id with
