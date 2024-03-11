@@ -465,6 +465,9 @@ module Multicore = struct
       set_thread new_thread
   [@@inline]
 
+  let add_breadcrumb crumb =
+    modify_thread (fun t -> { t with breadcrumbs = crumb :: t.breadcrumbs })
+
   (*
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
@@ -511,11 +514,13 @@ module Multicore = struct
     | _ ->
       let true_branch =
         let* () = add_pc v in
+        let* () = add_breadcrumb 1l in
         let+ () = check_reachability in
         true
       in
       let false_branch =
         let* () = add_pc (Symbolic_value.Bool.not v) in
+        let* () = add_breadcrumb 0l in
         let+ () = check_reachability in
         false
       in
@@ -556,6 +561,7 @@ module Multicore = struct
           Expr.Bitv.I32.(Expr.mk_symbol symbol != v i)
         in
         let this_val_branch =
+          let* () = add_breadcrumb i in
           let+ () = add_pc this_value_cond in
           i
         in
