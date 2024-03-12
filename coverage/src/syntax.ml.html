@@ -221,49 +221,49 @@
 
 open Stdlib.Result
 
-let ( let* ) o f = <span data-count="1507970">m</span>atch o with <span data-count="1498021">O</span>k v -&gt; f v | <span data-count="9949">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="1508463">m</span>atch o with <span data-count="1498506">O</span>k v -&gt; f v | <span data-count="9957">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="333930">m</span>atch o with <span data-count="331963">O</span>k v -&gt; Ok (<span data-count="331963">f</span> v) | <span data-count="1967">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="334241">m</span>atch o with <span data-count="332272">O</span>k v -&gt; Ok (<span data-count="332272">f</span> v) | <span data-count="1969">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="0">E</span>rror v
 
 let error_s format = <span data-count="0">F</span>ormat.kasprintf error format
 
-let ok v = <span data-count="757124">O</span>k v
+let ok v = <span data-count="757376">O</span>k v
 
 let list_iter f l =
-  <span data-count="24719">l</span>et err = ref None in
+  <span data-count="24757">l</span>et err = ref None in
   try
     List.iter
       (fun v -&gt;
-        <span data-count="12558">m</span>atch f v with
-        | <span data-count="66">E</span>rror _e as e -&gt;
+        <span data-count="12568">m</span>atch f v with
+        | <span data-count="68">E</span>rror _e as e -&gt;
           err := Some e;
           raise Exit
-        | <span data-count="12487">O</span>k () -&gt; () )
+        | <span data-count="12495">O</span>k () -&gt; () )
       l;
-    <span data-count="24648">O</span>k ()
-  with <span data-count="66">E</span>xit -&gt; Option.get !err
+    <span data-count="24684">O</span>k ()
+  with <span data-count="68">E</span>xit -&gt; Option.get !err
 
 let list_map f l =
-  <span data-count="236388">l</span>et err = ref None in
+  <span data-count="236543">l</span>et err = ref None in
   try
-    o<span data-count="235610">k</span>
-    @@ List.ma<span data-count="235610">p</span>
+    o<span data-count="235765">k</span>
+    @@ List.ma<span data-count="235765">p</span>
          (fun v -&gt;
-           <span data-count="452190">m</span>atch f v with
+           <span data-count="452298">m</span>atch f v with
            | <span data-count="778">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="451412">O</span>k v -&gt; v )
+           | <span data-count="451520">O</span>k v -&gt; v )
          l
   with <span data-count="778">E</span>xit -&gt; Option.get !err
 
 let list_fold_left f acc l =
-  <span data-count="106893">L</span>ist.fold_left
+  <span data-count="107007">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="426559">l</span>et* acc in
-      <span data-count="425138">f</span> acc v )
+      <span data-count="426701">l</span>et* acc in
+      <span data-count="425278">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =
