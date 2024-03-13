@@ -28,7 +28,7 @@
 (package
  (name owi)
  (synopsis
-  "OCaml toolchain to work with WebAssembly, including and interpreter")
+  "OCaml toolchain to work with WebAssembly, including an interpreter")
  (description
   "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
  (tags
