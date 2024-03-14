@@ -357,21 +357,21 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let id (env : _ t) = <span data-count="314742">e</span>nv.id
+let id (env : _ t) = <span data-count="314911">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="24608">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="24678">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="2137333">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="2137437">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1611875">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1611863">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10126836">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10126943">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="986">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1740">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="23843">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="23812">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
@@ -402,7 +402,7 @@ module Build = struct
     <span data-count="1059">{</span> env with tables = IMap.ad<span data-count="1059">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="16906">{</span> env with functions = IMap.ad<span data-count="16906">d</span> id func env.functions }
+    <span data-count="16901">{</span> env with functions = IMap.ad<span data-count="16901">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="817">{</span> env with data = IMap.ad<span data-count="817">d</span> id data env.data }
 
@@ -473,7 +473,7 @@ end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="2858">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="2857">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>

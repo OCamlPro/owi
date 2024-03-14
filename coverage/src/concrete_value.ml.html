@@ -400,43 +400,43 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : simplified val_type =
-    <span data-count="5168">m</span>atch e with
-    | <span data-count="3194">I</span>32 -&gt; Num_type I32
+    <span data-count="5161">m</span>atch e with
+    | <span data-count="3190">I</span>32 -&gt; Num_type I32
     | <span data-count="429">I</span>64 -&gt; Num_type I64
     | <span data-count="655">F</span>32 -&gt; Num_type F32
     | <span data-count="884">F</span>64 -&gt; Num_type F64
-    | <span data-count="6">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
+    | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : simplified result_type =
-    <span data-count="4733">m</span>atch r with
-    | <span data-count="3059">R</span>0 -&gt; []
-    | <span data-count="1674">R</span>1 a -&gt; [ elt_typ<span data-count="1674">e</span> a ]
+    <span data-count="4729">m</span>atch r with
+    | <span data-count="3057">R</span>0 -&gt; []
+    | <span data-count="1672">R</span>1 a -&gt; [ elt_typ<span data-count="1672">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; simplified param_type = function
     | <span data-count="1218">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="3494">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="3494">e</span> hd) :: arg_typ<span data-count="3494">e</span> tl
+    | <span data-count="3489">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="3489">e</span> hd) :: arg_typ<span data-count="3489">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="4733">R</span>es -&gt; []
+    | <span data-count="4729">R</span>es -&gt; []
 
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
   let extern_type (Extern_func (Func (arg, res), _)) :
     simplified Types.func_type =
-    <span data-count="4733">(</span>arg_typ<span data-count="4733">e</span> arg, res_typ<span data-count="4733">e</span> res)
+    <span data-count="4729">(</span>arg_typ<span data-count="4729">e</span> arg, res_typ<span data-count="4729">e</span> res)
 
   type t = Func_intf.t
 
   let fresh =
     let r = ref ~<span data-count="1473">-</span>1 in
     fun () -&gt;
-      <span data-count="13243">i</span>ncr r;
-      <span data-count="13243">!</span>r
+      <span data-count="13242">i</span>ncr r;
+      <span data-count="13242">!</span>r
 
-  let wasm func env : t = <span data-count="13243">W</span>ASM (fres<span data-count="13243">h</span> (), func, env)
+  let wasm func env : t = <span data-count="13242">W</span>ASM (fres<span data-count="13242">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -509,18 +509,18 @@ let pp fmt = function
 
 let ref_null' = function
   | <span data-count="995">F</span>unc_ht -&gt; Funcref None
-  | <span data-count="118">E</span>xtern_ht -&gt; Externref None
+  | <span data-count="117">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">A</span>rray_ht -&gt; Arrayref None
   | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht
   | Def_ht _ -&gt;
     assert false
 
-let ref_null typ = <span data-count="153">R</span>ef (ref_null<span data-count="153">'</span> typ)
+let ref_null typ = <span data-count="152">R</span>ef (ref_null<span data-count="152">'</span> typ)
 
 let ref_func (f : Func.t) : t = <span data-count="18">R</span>ef (Funcref (Some f))
 
 let ref_externref (type x) (t : x Type.Id.t) (v : x) : t =
-  <span data-count="2">R</span>ef (Externref (Some (E (t, v))))
+  <span data-count="1">R</span>ef (Externref (Some (E (t, v))))
 
 let ref_is_null = function
   | <span data-count="68">F</span>uncref None | <span data-count="8">E</span>xternref None | <span data-count="0">A</span>rrayref None -&gt; true

@@ -74,13 +74,13 @@ type 'a t =
   }
 
 let fold f v acc =
-  <span data-count="23157">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="42393">f</span> (Indexed.get_inde<span data-count="42393">x</span> v) (Indexed.ge<span data-count="42393">t</span> v) acc)
+  <span data-count="23150">L</span>ist.fold_left
+    (fun acc v -&gt; <span data-count="42383">f</span> (Indexed.get_inde<span data-count="42383">x</span> v) (Indexed.ge<span data-count="42383">t</span> v) acc)
     acc v.values
 
 let map f v =
-  <span data-count="1388">l</span>et values = List.map f v.values in
-  <span data-count="1388">{</span> v with values }
+  <span data-count="1387">l</span>et values = List.map f v.values in
+  <span data-count="1387">{</span> v with values }
 </code></pre>
       </div>
     </div>
