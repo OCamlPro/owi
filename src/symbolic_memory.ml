@@ -5,7 +5,6 @@ module Value = Symbolic_value
 module Expr = Encoding.Expr
 module Ty = Encoding.Ty
 open Expr
-open Hc
 
 let page_size = Symbolic_value.const_i32 65_536l
 
@@ -24,7 +23,7 @@ let create size =
   }
 
 let i32 v =
-  match v.node.e with
+  match view v with
   | Val (Num (I32 i)) -> i
   | _ -> Log.err {|Unsupported symbolic value reasoning over "%a"|} Expr.pp v
 
@@ -57,7 +56,7 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
-      Hashtbl.replace m.data dst (Val (Num (I8 byte)) @: Ty_bitv S8)
+      Hashtbl.replace m.data dst (make (Val (Num (I8 byte))))
     done;
     Value.Bool.const false
   end
@@ -73,19 +72,19 @@ let rec load_byte { parent; data; _ } a =
   try Hashtbl.find data a
   with Not_found -> (
     match parent with
-    | None -> Val (Num (I8 0)) @: Ty_bitv S8
+    | None -> make (Val (Num (I8 0)))
     | Some parent -> load_byte parent a )
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
 let merge_extracts (e1, h, m1) (e2, m2, l) =
-  let ty = e1.node.ty in
+  let ty = Expr.ty e1 in
   if m1 = m2 && Expr.equal e1 e2 then
-    if h - l = Ty.size ty then e1 else Extract (e1, h, l) @: ty
-  else Expr.(Concat (Extract (e1, h, m1) @: ty, Extract (e2, m2, l) @: ty) @: ty)
+    if h - l = Ty.size ty then e1 else make (Extract (e1, h, l))
+  else make (Concat (make (Extract (e1, h, m1)), make (Extract (e2, m2, l))))
 
 let concat ~msb ~lsb offset =
   assert (offset > 0 && offset <= 8);
-  match (msb.node.e, lsb.node.e) with
+  match (view msb, view lsb) with
   | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
     Value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
   | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
@@ -101,13 +100,9 @@ let concat ~msb ~lsb offset =
     Value.const_i64 Int64.(logor (shl (of_int i1) offset) i2)
   | Extract (e1, h, m1), Extract (e2, m2, l) ->
     merge_extracts (e1, h, m1) (e2, m2, l)
-  | ( Extract (e1, h, m1)
-    , Concat ({ node = { e = Extract (e2, m2, l); _ }; _ }, e3) ) ->
-    let ty : Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
-    Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3) @: ty
-  | _ ->
-    let ty : Ty.t = if offset >= 4 then Ty_bitv S64 else Ty_bitv S32 in
-    Concat (msb, lsb) @: ty
+  | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
+    make (Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3))
+  | _ -> make (Concat (msb, lsb))
 
 let loadn m a n =
   let rec loop addr size i acc =
@@ -122,44 +117,45 @@ let loadn m a n =
 
 let load_8_s m a =
   let v = loadn m (i32 a) 1 in
-  match v.node.e with
+  match view v with
   | Val (Num (I8 i8)) -> Value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
-  | _ -> Cvtop (ExtS 24, v) @: Ty_bitv S32
+  | _ -> make (Cvtop (Ty_bitv 32, ExtS 24, v))
 
 let load_8_u m a =
   let v = loadn m (i32 a) 1 in
-  match v.node.e with
+  match view v with
   | Val (Num (I8 i)) -> Value.const_i32 (Int32.of_int i)
-  | _ -> Cvtop (ExtU 24, v) @: Ty_bitv S32
+  | _ -> make (Cvtop (Ty_bitv 32, ExtU 24, v))
 
 let load_16_s m a =
   let v = loadn m (i32 a) 2 in
-  match v.node.e with
+  match view v with
   | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
-  | _ -> Cvtop (ExtS 16, v) @: Ty_bitv S32
+  | _ -> make (Cvtop (Ty_bitv 32, ExtS 16, v))
 
 let load_16_u m a =
   let v = loadn m (i32 a) 2 in
-  match v.node.e with
+  match view v with
   | Val (Num (I32 _)) -> v
-  | _ -> Cvtop (ExtU 16, v) @: Ty_bitv S32
+  | _ -> make (Cvtop (Ty_bitv 32, ExtU 16, v))
 
 let load_32 m a = loadn m (i32 a) 4
 
 let load_64 m a = loadn m (i32 a) 8
 
 let extract v pos =
-  match v.node.e with
+  match view v with
   | Val (Num (I32 i)) ->
     let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-    Val (Num (I8 i')) @: Ty_bitv S8
+    make (Val (Num (I8 i')))
   | Val (Num (I64 i)) ->
     let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-    Val (Num (I8 i')) @: Ty_bitv S8
-  | Cvtop (ExtU 24, ({ node = { e = Symbol _; ty = Ty_bitv S8 }; _ } as sym))
-  | Cvtop (ExtS 24, ({ node = { e = Symbol _; ty = Ty_bitv S8 }; _ } as sym)) ->
+    make (Val (Num (I8 i')))
+  | Cvtop (_, ExtU 24, ({ node = Symbol _; _ } as sym))
+  | Cvtop (_, ExtS 24, ({ node = Symbol _; _ } as sym))
+    when ty sym = Ty_bitv 8 ->
     sym
-  | _ -> Extract (v, pos + 1, pos) @: Ty_bitv S8
+  | _ -> make (Extract (v, pos + 1, pos))
 
 let storen m ~addr v n =
   let a0 = i32 addr in
@@ -180,7 +176,7 @@ let store_64 m ~addr v = storen m ~addr v 8
 let get_limit_max _m = None (* TODO *)
 
 let check_within_bounds m a =
-  match a.node.e with
+  match view a with
   | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
   | Ptr (base, offset) -> (
     match Hashtbl.find m.chunks base with

@@ -67,6 +67,6 @@ depexts: [
   ["llvm" "wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
-  [ "encoding.dev" "git+https://github.com/formalsec/encoding#2792eaebfce8857cdad39a4b4887cdf2732fe623"]
+  [ "encoding.dev" "git+https://github.com/formalsec/encoding#f5ed5da47acfb89d8af70899149ad147a2e5fdf0"]
 ]
 

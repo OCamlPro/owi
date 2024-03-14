@@ -62,20 +62,17 @@ struct
     let concretise (a : Encoding.Expr.t) : Encoding.Expr.t Choice.t =
       let open Choice in
       let open Encoding in
-      match a.node.e with
+      match Expr.view a with
       (* Avoid unecessary re-hashconsing and allocation when the value
          is already concrete. *)
-      | Val _ | Ptr (_, { node = { e = Val _; _ }; _ }) -> return a
+      | Val _ | Ptr (_, { node = Val _; _ }) -> return a
       | Ptr (base, offset) ->
         let+ offset = select_i32 offset in
-        Expr.(Ptr (base, Symbolic_value.const_i32 offset) @: Ty_bitv S32)
+        Expr.make (Ptr (base, Symbolic_value.const_i32 offset))
       | _ ->
         let+ v = select_i32 a in
         Symbolic_value.const_i32 v
 
-    (* TODO: *)
-    (* 1. Let pointers have symbolic offsets *)
-    (* 2. Let addresses have symbolic values *)
     let check_within_bounds m a =
       match check_within_bounds m a with
       | Error t -> Choice.trap t

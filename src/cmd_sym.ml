@@ -2,7 +2,6 @@ open Syntax
 module Expr = Encoding.Expr
 module Value = Symbolic_value
 module Choice = Symbolic.P.Choice
-open Hc
 
 let symbolic_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
@@ -14,7 +13,7 @@ let symbolic_extern_module :
     Choice.with_thread (fun thread ->
         thread.symbol_set <- sym :: thread.symbol_set;
         match ty with
-        | Ty_bitv S8 -> Expr.(Cvtop (ExtU 24, sym_expr) @: Ty_bitv S32)
+        | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, ExtU 24, sym_expr))
         | _ -> sym_expr )
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
@@ -33,19 +32,19 @@ let symbolic_extern_module :
   let functions =
     [ ( "i8_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol (Ty_bitv S8)) )
+          (Func (UArg Res, R1 I32), symbol (Ty_bitv 8)) )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol (Ty_bitv S32)) )
+          (Func (UArg Res, R1 I32), symbol (Ty_bitv 32)) )
     ; ( "i64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I64), symbol (Ty_bitv S64)) )
+          (Func (UArg Res, R1 I64), symbol (Ty_bitv 64)) )
     ; ( "f32_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F32), symbol (Ty_fp S32)) )
+          (Func (UArg Res, R1 F32), symbol (Ty_fp 32)) )
     ; ( "f64_symbol"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F64), symbol (Ty_fp S64)) )
+          (Func (UArg Res, R1 F64), symbol (Ty_fp 64)) )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
@@ -63,12 +62,12 @@ let summaries_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
   let open Expr in
   let i32 v =
-    match v.node.e with
+    match view v with
     | Val (Num (I32 v)) -> v
     | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
   in
   let ptr v =
-    match v.node.e with
+    match view v with
     | Ptr (b, _) -> b
     | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
   in
@@ -84,7 +83,7 @@ let summaries_extern_module :
                 Symbolic_memory.replace_size m base size )
               tbl )
           memories;
-        Ptr (base, Value.const_i32 0l) @: Ty_bitv S32 )
+        Expr.make (Ptr (base, Value.const_i32 0l)) )
   in
   let free (p : Value.int32) : unit Choice.t =
     let base = ptr p in
