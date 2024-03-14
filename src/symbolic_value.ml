@@ -5,41 +5,6 @@
 open Encoding
 open Ty
 open Expr
-open Hc
-
-let ( let+ ) o f = Option.map f o
-
-let unop ty op e =
-  match e.node.e with
-  | Val (Num n) -> Val (Num (Eval_numeric.eval_unop ty op n)) @: e.node.ty
-  | _ -> Unop (op, e) @: ty
-
-let binop ty op e1 e2 =
-  match (e1.node.e, e2.node.e) with
-  | Val (Num n1), Val (Num n2) ->
-    Val (Num (Eval_numeric.eval_binop ty op n1 n2)) @: ty
-  | Ptr _, _ | _, Ptr _ ->
-    (* Does pointer arithmetic *)
-    Expr.simplify @@ Binop (op, e1, e2) @: Ty_bitv S32
-  | _ -> Binop (op, e1, e2) @: ty
-
-let relop ty op e1 e2 =
-  match (e1.node.e, e2.node.e) with
-  | Val (Num n1), Val (Num n2) ->
-    Val (if Eval_numeric.eval_relop ty op n1 n2 then True else False) @: ty
-  | Val (Num n), Ptr (b, { node = { e = Val (Num o); _ }; _ }) ->
-    let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
-    Val (if Eval_numeric.eval_relop ty op n base then True else False) @: ty
-  | Ptr (b, { node = { e = Val (Num o); _ }; _ }), Val (Num n) ->
-    let base = Eval_numeric.eval_binop (Ty_bitv S32) Add (I32 b) o in
-    let b = Eval_numeric.eval_relop ty op base n in
-    Val (if b then True else False) @: ty
-  | _ -> Relop (op, e1, e2) @: ty
-
-let cvtop ty op e =
-  match e.node.e with
-  | Val (Num n) -> Val (Num (Eval_numeric.eval_cvtop ty op n)) @: ty
-  | _ -> Cvtop (op, e) @: ty
 
 type vbool = Expr.t
 
@@ -64,15 +29,15 @@ type t =
   | F64 of float64
   | Ref of ref_value
 
-let const_i32 (i : Int32.t) : int32 = Val (Num (I32 i)) @: Ty_bitv S32
+let const_i32 (i : Int32.t) : int32 = make (Val (Num (I32 i)))
 
-let const_i64 (i : Int64.t) : int64 = Val (Num (I64 i)) @: Ty_bitv S64
+let const_i64 (i : Int64.t) : int64 = make (Val (Num (I64 i)))
 
 let const_f32 (f : Float32.t) : float32 =
-  Val (Num (F32 (Float32.to_bits f))) @: Ty_fp S32
+  make (Val (Num (F32 (Float32.to_bits f))))
 
 let const_f64 (f : Float64.t) : float64 =
-  Val (Num (F64 (Float64.to_bits f))) @: Ty_fp S64
+  make (Val (Num (F64 (Float64.to_bits f))))
 
 let ref_null _ty = Ref (Funcref None)
 
@@ -81,8 +46,8 @@ let ref_func f : t = Ref (Funcref (Some f))
 let ref_externref t v : t = Ref (Externref (Some (E (t, v))))
 
 let ref_is_null = function
-  | Funcref (Some _) | Externref (Some _) -> Val False @: Ty_bool
-  | Funcref None | Externref None -> Val True @: Ty_bool
+  | Funcref (Some _) | Externref (Some _) -> make (Val False)
+  | Funcref None | Externref None -> make (Val True)
 
 let pp ppf v =
   let e =
@@ -113,63 +78,34 @@ module Ref = struct
 end
 
 module Bool = struct
-  let of_val = function
-    | Val True -> Some true
-    | Val False -> Some false
-    | _ -> None
+  let const b = Bool.v b
 
-  let const b = Val (if b then True else False) @: Ty_bool
+  let not e = Bool.not e
 
-  let not e =
-    match e.node.e with
-    | Unop (Not, cond) -> cond
-    | e' ->
-      Option.value ~default:(Unop (Not, e) @: Ty_bool)
-      @@ let+ b = of_val e' in
-         const (not b)
+  let or_ e1 e2 = Bool.or_ e1 e2
 
-  let or_ e1 e2 =
-    match (of_val e1.node.e, of_val e2.node.e) with
-    | Some b1, Some b2 -> const (b1 || b2)
-    | Some false, _ -> e2
-    | _, Some false -> e1
-    | Some true, _ | _, Some true -> const true
-    | _ -> Binop (Or, e1, e2) @: Ty_bool
-
-  let and_ e1 e2 =
-    match (of_val e1.node.e, of_val e2.node.e) with
-    | Some b1, Some b2 -> const (b1 && b2)
-    | Some true, _ -> e2
-    | _, Some true -> e1
-    | Some false, _ | _, Some false -> const false
-    | _ -> Binop (And, e1, e2) @: Ty_bool
+  let and_ e1 e2 = Bool.and_ e1 e2
 
   let int32 e =
-    match e.node.e with
+    match view e with
     | Val True -> const_i32 1l
     | Val False -> const_i32 0l
-    | Cvtop (ToBool, ({ node = { ty = Ty_bitv S32; _ }; _ } as e')) -> e'
-    | _ -> Cvtop (OfBool, e) @: Ty_bitv S32
+    | Cvtop (Ty_bitv 32, ToBool, e') -> e'
+    | _ -> make (Cvtop (Ty_bitv 32, OfBool, e))
 
-  let select_expr c ~if_true ~if_false =
-    match of_val c.node.e with
-    | Some true -> if_true
-    | Some false -> if_false
-    | None -> Triop (Ite, c, if_true, if_false) @: Ty_bool
+  let select_expr c ~if_true ~if_false = Bool.ite c if_true if_false
 
   let pp ppf (e : vbool) = Expr.pp ppf e
 end
 
 module I32 = struct
-  let ty = Ty_bitv S32
+  let ty = Ty_bitv 32
 
   let zero = const_i32 0l
 
   let clz e = unop ty Clz e
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz e = unop ty Ctz e
 
   let popcnt _ =
     (* TODO *)
@@ -190,10 +126,10 @@ module I32 = struct
   let unsigned_rem e1 e2 = binop ty RemU e1 e2
 
   let boolify e =
-    match e.node.e with
+    match view e with
     | Val (Num (I32 0l)) -> Some (Bool.const false)
     | Val (Num (I32 1l)) -> Some (Bool.const true)
-    | Cvtop (OfBool, cond) -> Some cond
+    | Cvtop (_, OfBool, cond) -> Some cond
     | _ -> None
 
   let logand e1 e2 =
@@ -219,8 +155,8 @@ module I32 = struct
   let rotr e1 e2 = binop ty Rotr e1 e2
 
   let eq_const e c =
-    match e.node.e with
-    | Cvtop (OfBool, cond) -> begin
+    match view e with
+    | Cvtop (_, OfBool, cond) -> begin
       match c with 0l -> Bool.not cond | 1l -> cond | _ -> Bool.const false
     end
     | _ -> relop ty Eq e (const_i32 c)
@@ -246,10 +182,10 @@ module I32 = struct
   let ge_u e1 e2 = if e1 == e2 then Bool.const true else relop ty GeU e1 e2
 
   let to_bool (e : vbool) =
-    match e.node.e with
+    match view e with
     | Val (Num (I32 i)) -> Bool.const @@ Int32.ne i 0l
-    | Cvtop (OfBool, cond) -> cond
-    | _ -> Cvtop (ToBool, e) @: ty
+    | Cvtop (_, OfBool, cond) -> cond
+    | _ -> make (Cvtop (ty, ToBool, e))
 
   let trunc_f32_s x = cvtop ty TruncSF32 x
 
@@ -272,20 +208,17 @@ module I32 = struct
   let wrap_i64 x = cvtop ty WrapI64 x
 
   (* FIXME: This is probably wrong? *)
-  let extend_s n x =
-    cvtop ty (ExtS (32 - n)) (Extract (x, n / 8, 0) @: Ty_bitv S32)
+  let extend_s n x = cvtop ty (ExtS (32 - n)) (make (Extract (x, n / 8, 0)))
 end
 
 module I64 = struct
-  let ty = Ty_bitv S64
+  let ty = Ty_bitv 64
 
   let zero = const_i64 0L
 
   let clz e = unop ty Clz e
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz e = unop ty Ctz e
 
   let popcnt _ =
     (* TODO *)
@@ -345,7 +278,7 @@ module I64 = struct
 
   let of_int32 e = cvtop ty (ExtS 32) e
 
-  let to_int32 e = cvtop (Ty_bitv S32) WrapI64 e
+  let to_int32 e = cvtop (Ty_bitv 32) WrapI64 e
 
   let trunc_f32_s x = cvtop ty TruncSF32 x
 
@@ -367,7 +300,7 @@ module I64 = struct
 
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
-    cvtop ty (ExtS (64 - n)) (Extract (x, n / 8, 0) @: Ty_bitv S64)
+    cvtop ty (ExtS (64 - n)) (make (Extract (x, n / 8, 0)))
 
   let extend_i32_s x = cvtop ty (ExtS 32) x
 
@@ -375,7 +308,7 @@ module I64 = struct
 end
 
 module F32 = struct
-  let ty = Ty_fp S32
+  let ty = Ty_fp 32
 
   let zero = const_f32 Float32.zero
 
@@ -431,7 +364,7 @@ module F32 = struct
 
   let of_bits x = cvtop ty Reinterpret_int x
 
-  let to_bits x = cvtop (Ty_bitv S32) Reinterpret_float x
+  let to_bits x = cvtop (Ty_bitv 32) Reinterpret_float x
 
   let copy_sign x y =
     let xi = to_bits (abs x) in
@@ -440,7 +373,7 @@ module F32 = struct
 end
 
 module F64 = struct
-  let ty = Ty_fp S64
+  let ty = Ty_fp 64
 
   let zero = const_f64 Float64.zero
 
@@ -496,7 +429,7 @@ module F64 = struct
 
   let of_bits x = cvtop ty Reinterpret_int x
 
-  let to_bits x = cvtop (Ty_bitv S64) Reinterpret_float x
+  let to_bits x = cvtop (Ty_bitv 64) Reinterpret_float x
 
   let copy_sign x y =
     let xi = to_bits (abs x) in

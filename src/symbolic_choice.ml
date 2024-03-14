@@ -5,7 +5,6 @@
 open Solver
 open Encoding
 open Symbolic_value
-open Hc
 
 exception Assertion of Expr.t * Thread.t
 
@@ -41,20 +40,20 @@ module Minimalist = struct
 
   let select (vb : vbool) =
     let v = Expr.simplify vb in
-    match v.node.e with
+    match Expr.view v with
     | Val True -> return true
     | Val False -> return false
     | _ -> Format.kasprintf failwith "%a" Expr.pp v
 
   let select_i32 (i : int32) =
     let v = Expr.simplify i in
-    match v.node.e with Val (Num (I32 i)) -> return i | _ -> assert false
+    match Expr.view v with Val (Num (I32 i)) -> return i | _ -> assert false
 
   let trap t = M (fun th _sol -> (Error (Trap t), th))
 
   let assertion (vb : vbool) =
     let v = Expr.simplify vb in
-    match v.node.e with
+    match Expr.view v with
     | Val True -> return ()
     | Val False -> M (fun th _sol -> (Error Assert_fail, th))
     | _ -> assert false
@@ -450,13 +449,13 @@ module Multicore = struct
 
   (*
     We can now use CoreImpl only through its exposed signature which
-    maintains all invariants.  
+    maintains all invariants.
   *)
 
   include CoreImpl
 
   let add_pc (c : vbool) =
-    match c.node.e with
+    match Expr.view c with
     | Val True -> return ()
     | Val False -> stop
     | _ ->
@@ -507,7 +506,7 @@ module Multicore = struct
 
   let select (cond : Symbolic_value.vbool) =
     let v = Expr.simplify cond in
-    match v.node.e with
+    match Expr.view v with
     | Val True -> return true
     | Val False -> return false
     | Val (Num (I32 _)) -> failwith "unreachable (type error)"
@@ -529,19 +528,19 @@ module Multicore = struct
 
   let summary_symbol (e : Expr.t) =
     let* thread in
-    match e.node.e with
+    match Expr.view e with
     | Symbol sym -> return (None, sym)
     | _ ->
       let choices = thread.choices in
       let symbol_name = Format.sprintf "choice_i32_%i" choices in
       let+ () = modify_thread (fun t -> { t with choices = choices + 1 }) in
-      let sym = Symbol.(symbol_name @: Ty_bitv S32) in
-      let assign = Expr.(Relop (Eq, mk_symbol sym, e) @: Ty_bitv S32) in
+      let sym = Symbol.(symbol_name @: Ty_bitv 32) in
+      let assign = Expr.(make (Relop (Ty_bitv 32, Eq, mk_symbol sym, e))) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =
     let sym_int = Expr.simplify i in
-    match sym_int.node.e with
+    match Expr.view sym_int with
     | Val (Num (I32 i)) -> return i
     | _ ->
       let* assign, symbol = summary_symbol sym_int in
