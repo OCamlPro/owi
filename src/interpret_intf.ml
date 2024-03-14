@@ -210,7 +210,7 @@ module type S = sig
     -> Func_intf.t
     -> value list Result.t choice
 
-  val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
+  val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack choice
 
   val exec_funop : State.stack -> Types.nn -> Types.funop -> State.stack
 

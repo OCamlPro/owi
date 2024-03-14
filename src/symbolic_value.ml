@@ -165,11 +165,9 @@ module I32 = struct
 
   let zero = const_i32 0l
 
-  let clz e = unop ty Clz e
+  let clz = None
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz = None
 
   let popcnt _ =
     (* TODO *)
@@ -281,11 +279,9 @@ module I64 = struct
 
   let zero = const_i64 0L
 
-  let clz e = unop ty Clz e
+  let clz = None
 
-  let ctz _ =
-    (* TODO *)
-    assert false
+  let ctz = None
 
   let popcnt _ =
     (* TODO *)

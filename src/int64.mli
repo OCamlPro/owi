@@ -34,9 +34,9 @@ val extend_s : int -> t -> t
 
 val abs : t -> t
 
-val clz : t -> t
+val clz : (t -> t) option
 
-val ctz : t -> t
+val ctz : (t -> t) option
 
 val popcnt : t -> t
 
