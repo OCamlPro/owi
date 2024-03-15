@@ -62,6 +62,18 @@ type modul =
   ; start : int option
   }
 
+let empty_modul =
+  { id = None
+  ; global = Named.empty
+  ; table = Named.empty
+  ; mem = Named.empty
+  ; func = Named.empty
+  ; elem = Named.empty
+  ; data = Named.empty
+  ; exports = { global = []; mem = []; table = []; func = [] }
+  ; start = None
+  }
+
 module Pp = struct
   let id fmt = Option.iter (fun id -> pp fmt " $%s" id)
 
