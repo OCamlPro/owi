@@ -40,3 +40,14 @@ let until_interpret link_state ~unsafe ~optimize ~name m =
   let* m, link_state = until_link link_state ~unsafe ~optimize ~name m in
   let* () = Interpret.Concrete.modul link_state.envs m in
   Ok link_state
+
+let simplified_interpret link_state ~unsafe ~name m =
+  let* m =
+    if unsafe then Ok m
+    else
+      let* () = Typecheck.modul m in
+      Ok m
+  in
+  let* m, link_state = Link.modul link_state ~name m in
+  let* () = Interpret.Concrete.modul link_state.envs m in
+  Ok link_state

@@ -4,13 +4,25 @@
 
 open Syntax
 
-let run_file ~unsafe ~optimize filename =
+let run_wat_file ~unsafe ~optimize filename =
   let* modul = Parse.Module.from_file filename in
   let name = None in
   let+ (_state : Concrete_value.Func.extern_func Link.state) =
     Compile.until_interpret Link.empty_state ~unsafe ~optimize ~name modul
   in
   ()
+
+let run_wasm_file ~unsafe filename =
+  let* modul = Binary_deserializer.from_file filename in
+  let name = None in
+  let+ (_state : Concrete_value.Func.extern_func Link.state) =
+    Compile.simplified_interpret Link.empty_state ~unsafe ~name modul
+  in
+  ()
+
+let run_file ~unsafe ~optimize filename =
+  if Fpath.has_ext "wasm" filename then run_wasm_file ~unsafe filename
+  else run_wat_file ~unsafe ~optimize filename
 
 let cmd profiling debug unsafe optimize files =
   if profiling then Log.profiling_on := true;

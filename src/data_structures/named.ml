@@ -8,6 +8,8 @@ type 'a t =
   ; named : int String_map.t
   }
 
+let empty = { values = []; named = String_map.empty }
+
 let fold f v acc =
   List.fold_left
     (fun acc v -> f (Indexed.get_index v) (Indexed.get v) acc)
