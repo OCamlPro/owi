@@ -299,8 +299,7 @@ module I64 = struct
   let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
   (* FIXME: This is probably wrong? *)
-  let extend_s n x =
-    cvtop ty (ExtS (64 - n)) (make (Extract (x, n / 8, 0)))
+  let extend_s n x = cvtop ty (ExtS (64 - n)) (make (Extract (x, n / 8, 0)))
 
   let extend_i32_s x = cvtop ty (ExtS 32) x
 
