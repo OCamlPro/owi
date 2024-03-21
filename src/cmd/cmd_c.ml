@@ -1,5 +1,6 @@
 open Bos
-open Syntax
+open Owi
+open Owi.Syntax
 
 type deps =
   { clang : flags:Cmd.t -> out:Fpath.t -> Fpath.t -> Cmd.t

@@ -1,4 +1,5 @@
 open Owi
+open Owi_cmd
 
 let debug =
   let doc = "debug mode" in

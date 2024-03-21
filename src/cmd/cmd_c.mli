@@ -14,4 +14,4 @@ val cmd :
   -> bool
   -> bool
   -> bool
-  -> unit Result.t
+  -> unit Owi.Result.t

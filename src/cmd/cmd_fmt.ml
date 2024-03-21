@@ -1,6 +1,7 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 
-open Syntax
+open Owi
+open Owi.Syntax
 
 let get_printer filename =
   let ext = Fpath.get_ext filename in

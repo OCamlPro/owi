@@ -1,4 +1,5 @@
-open Syntax
+open Owi
+open Owi.Syntax
 module Expr = Encoding.Expr
 module Value = Symbolic_value
 module Choice = Symbolic.P.Choice

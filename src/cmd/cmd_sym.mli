@@ -9,4 +9,4 @@ val cmd :
   -> bool
   -> Fpath.t
   -> Fpath.t list
-  -> unit Result.t
+  -> unit Owi.Result.t

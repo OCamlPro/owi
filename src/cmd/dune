@@ -1,0 +1,19 @@
+(library
+ (name owi_cmd)
+ (libraries
+  bos
+  digestif
+  dune-site
+  encoding
+  hc
+  integers
+  menhirLib
+  ocaml_intrinsics
+  owi
+  ppxlib
+  pyml
+  re2
+  sedlex
+  uutf
+  runtime_events
+  xmlm))

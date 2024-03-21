@@ -2,7 +2,8 @@
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-open Syntax
+open Owi
+open Owi.Syntax
 
 let run_file exec filename =
   let* script = Parse.Script.from_file filename in

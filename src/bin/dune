@@ -2,6 +2,6 @@
  (public_name owi)
  (modules owi)
  (package owi)
- (libraries sedlex owi cmdliner)
+ (libraries sedlex owi cmdliner owi_cmd)
  (instrumentation
   (backend bisect_ppx)))

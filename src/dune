@@ -7,13 +7,6 @@
   c_share_site
   check
   choice_intf
-  cmd_c
-  cmd_fmt
-  cmd_opt
-  cmd_run
-  cmd_script
-  cmd_sym
-  cmd_validate
   compile
   concrete
   concrete_choice
