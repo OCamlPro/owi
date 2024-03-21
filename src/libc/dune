@@ -1,3 +1,5 @@
+(include_subdirs no)
+
 (executable
  (name script)
  (modules script))
