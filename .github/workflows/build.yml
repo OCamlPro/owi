@@ -68,3 +68,6 @@ jobs:
       - name: lint-fmt
         run: |
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
+      - name: lint-fresh-opam-file
+        run: |
+          git diff --exit-code owi.opam || (echo "⚠️ please run \`dune build\`, commit the changes to owi.opam, and then try again" && exit 1)
