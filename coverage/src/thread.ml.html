@@ -35,28 +35,34 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span class="visited"> </span>
-<a id="L35"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -96,6 +102,12 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 <a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
@@ -108,15 +120,20 @@ type t =
   ; memories : Symbolic_memory.collection
   ; tables : Symbolic_table.collection
   ; globals : Symbolic_global.collection
+      (** Breadcrumbs represent the list of choices that were made so far. They
+          identify one given symbolic execution trace. *)
+  ; breadcrumbs : int32 list
   }
 
-let pc t = <span data-count="1348">t</span>.pc
+let pc t = <span data-count="1345">t</span>.pc
 
-let memories t = <span data-count="296156">t</span>.memories
+let memories t = <span data-count="296261">t</span>.memories
 
-let tables t = <span data-count="4494">t</span>.tables
+let tables t = <span data-count="4501">t</span>.tables
 
-let globals t = <span data-count="23453">t</span>.globals
+let globals t = <span data-count="23427">t</span>.globals
+
+let breadcrumbs t = <span data-count="165">t</span>.breadcrumbs
 
 let create () =
   <span data-count="204">{</span> choices = 0
@@ -125,13 +142,14 @@ let create () =
   ; memories = Symbolic_memory.ini<span data-count="204">t</span> ()
   ; tables = Symbolic_table.ini<span data-count="204">t</span> ()
   ; globals = Symbolic_global.ini<span data-count="204">t</span> ()
+  ; breadcrumbs = []
   }
 
-let clone { choices; symbol_set; pc; memories; tables; globals } =
-  <span data-count="10961">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="10959">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="10959">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="10962">{</span> choices; symbol_set; pc; memories; tables; globals }
+let clone { choices; symbol_set; pc; memories; tables; globals; breadcrumbs } =
+  <span data-count="9217">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="9218">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="9218">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="9217">{</span> choices; symbol_set; pc; memories; tables; globals; breadcrumbs }
 </code></pre>
       </div>
     </div>
