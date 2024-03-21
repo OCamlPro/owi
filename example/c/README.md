@@ -249,7 +249,8 @@ OPTIONS
            optimize mode
 
        -p, --profiling
-           profiling mode
+           profiling mode (including solver statistics display in the context
+           of symbolic execution)
 
        --property=VAL
            property file
