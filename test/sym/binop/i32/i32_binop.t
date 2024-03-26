@@ -96,15 +96,15 @@ i32:
       (symbol_0 (i32 -1)))
   Reached 2 problems!
   [13]
-  $ owi sym i32_rem_u.wat --no-stop-at-failure
-  Trap: integer divide by zero
-  Model:
-    (model
-      (symbol_0 (i32 0)))
+  $ owi sym i32_rem_u.wat --no-stop-at-failure --deterministic-result-order
   Trap: unreachable
   Model:
     (model
       (symbol_0 (i32 1)))
+  Trap: integer divide by zero
+  Model:
+    (model
+      (symbol_0 (i32 0)))
   Reached 2 problems!
   [13]
   $ owi sym i32_rotl.wat --no-stop-at-failure
