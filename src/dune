@@ -94,10 +94,6 @@
   (backend bisect_ppx --exclusions src/bisect.exclude)
   (deps bisect.exclude)))
 
-(menhir
- (flags --table)
- (modules menhir_parser))
-
 (env
  (_
   (flags
