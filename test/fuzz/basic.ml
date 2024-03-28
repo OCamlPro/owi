@@ -91,7 +91,11 @@ let ibinop =
     ; const (Rotr : ibinop)
     ]
 
-let iunop = choose [ const Clz; const Ctz; const Popcnt ]
+(* TODO :
+   temp comment for symbolic context "const Popcnt"
+   iunop_popcnt_32 / iunop_popcnt_64 in concrete contexte
+*)
+let iunop = choose [ const Clz; const Ctz (*; const Popcnt*) ]
 
 let itestop = const Eqz
 
@@ -137,6 +141,16 @@ let iunop_32 : text instr gen =
 let iunop_64 : text instr gen =
   let+ iunop in
   I_unop (S64, iunop)
+
+(* TODO: check comment above *)
+let iunop_popcnt_32 : text instr gen =
+  let+ popcnt = const Popcnt in
+  I_unop (S32, popcnt)
+
+(* TODO: check comment above *)
+let iunop_popcnt_64 : text instr gen =
+  let+ popcnt = const Popcnt in
+  I_unop (S64, popcnt)
 
 let itestop_32 : text instr gen =
   let+ itestop in

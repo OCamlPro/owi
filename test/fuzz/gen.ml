@@ -18,7 +18,8 @@ let expr_always_available block loop expr ~locals ~stack env =
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
   @ B.local_i32 env @ B.local_i64 env @ B.local_f32 env @ B.local_f64 env
   @ B.data_drop env @ B.elem_drop env
-  @ if B.memory_exists env then [ B.memory_size ] else [] @ B.table_size env
+  @ (if B.memory_exists env then [ B.memory_size ] else [])
+  @ B.table_size env
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
@@ -36,14 +37,18 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
     ]
   in
   [ pair B.iunop_32 (const [ S.Nothing ])
+  ; if_else expr ~locals ~stack env
   ; pair B.itestop_32 (const [ S.Nothing ])
-  ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.extend_32_i32 (const [ S.Nothing ])
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
-  ; if_else expr ~locals ~stack env
   ]
+  @ ( if env.Env.conf = Concrete then
+        [ pair B.extend_32_i32 (const [ S.Nothing ])
+        ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
+        ; pair B.iunop_popcnt_32 (const [ S.Nothing ])
+        ]
+      else [] )
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
   @ (if B.memory_exists env then B.memory_grow :: load_instr else [])
   @ B.expr_br_if env stack @ B.table_get env
@@ -88,11 +93,16 @@ let expr_available_1_i64 env =
   [ pair B.iunop_64 (const [ S.Nothing ])
   ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i32_wrap_i64 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.extend_64_i64 (const [ S.Nothing ])
   ; pair B.f32_convert_i64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f64_reinterpret_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ]
+  @ ( if env.Env.conf = Concrete then
+        [ pair B.iunop_popcnt_64 (const [ S.Nothing ]) ]
+      else [] )
+  @ ( if env.Env.conf = Concrete then
+        [ pair B.extend_64_i64 (const [ S.Nothing ]) ]
+      else [] )
   @ B.local_set_i64 env @ B.local_tee_i64 env @ B.global_set_i64 env
 
 let expr_available_2_i64 =
@@ -103,14 +113,17 @@ let expr_available_2_i64 =
 (* let expr_available_3_i64 = [] *)
 
 let expr_available_1_f32 env =
-  [ pair B.funop_32 (const [ S.Nothing ])
-  ; pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.i64_trunc_f32 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.i32_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.i64_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.f64_promote_f32 (const [ S.Pop; S.Push (Num_type F64) ])
+  [ pair B.f64_promote_f32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.i32_reinterpret_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+  ; pair B.funop_32 (const [ S.Nothing ])
   ]
+  @ ( if env.Env.conf = Concrete then
+        [ pair B.i32_trunc_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+        ; pair B.i64_trunc_f32 (const [ S.Pop; S.Push (Num_type I64) ])
+        ; pair B.i32_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I32) ])
+        ; pair B.i64_trunc_sat_f32 (const [ S.Pop; S.Push (Num_type I64) ])
+        ]
+      else [] )
   @ B.local_set_f32 env @ B.local_tee_f32 env @ B.global_set_f32 env
 
 let expr_available_2_f32 =
@@ -121,14 +134,17 @@ let expr_available_2_f32 =
 (* let expr_available_3_f32 = [] *)
 
 let expr_available_1_f64 env =
-  [ pair B.funop_64 (const [ S.Nothing ])
-  ; pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.i64_trunc_f64 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.i32_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.i64_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.f32_demote_f64 (const [ S.Pop; S.Push (Num_type F32) ])
+  [ pair B.f32_demote_f64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.i64_reinterpret_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+  ; pair B.funop_64 (const [ S.Nothing ])
   ]
+  @ ( if env.Env.conf = Concrete then
+        [ pair B.i32_trunc_f64 (const [ S.Pop; S.Push (Num_type I32) ])
+        ; pair B.i64_trunc_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+        ; pair B.i32_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I32) ])
+        ; pair B.i64_trunc_sat_f64 (const [ S.Pop; S.Push (Num_type I64) ])
+        ]
+      else [] )
   @ B.local_set_f64 env @ B.local_tee_f64 env @ B.global_set_f64 env
 
 let expr_available_2_f64 =
@@ -140,9 +156,9 @@ let expr_available_2_f64 =
 
 let if_else expr ~locals ~stack env =
   match stack with
-  | Num_type I32 :: _stack -> begin
+  | Num_type I32 :: stack -> begin
     let* rt = list B.val_type in
-    let* pt = B.stack_prefix (List.tl stack) in
+    let* pt = B.stack_prefix stack in
     let typ =
       Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
@@ -254,9 +270,9 @@ let rec expr ~block_type ~stack ~locals env =
     in
     let* i, ops = choose (expr_available env) in
     let stack = S.apply_stack_ops stack ops in
-    let next = expr ~block_type ~stack ~locals env in
-    let i = const i in
-    map [ i; next ] List.cons
+    let* next = expr ~block_type ~stack ~locals env in
+    let+ i = const i in
+    i :: next
 
 let data env =
   let* mode = B.data_mode env in
@@ -311,7 +327,14 @@ let func env =
   MFunc { type_f; locals; body; id }
 
 let fields env =
-  let* memory = option (memory env) in
+  let* memory =
+    (* No memory management in symbolic context.
+       TODO: When implementation will be more advanced,
+       reactivate and refine instruction by instruction (not_symbolic operator). *)
+    match env.Env.conf with
+    | Concrete -> option (memory env)
+    | Symbolic -> const None
+  in
   let* datas = list (data env) in
   let* types = list (typ env) in
   let* tables = list (table env) in
@@ -333,8 +356,8 @@ let fields env =
   | None -> datas @ types @ elems @ tables @ globals @ funcs
   | Some mem -> datas @ [ mem ] @ types @ elems @ tables @ globals @ funcs
 
-let modul =
+let modul conf =
   let id = Some "m" in
   let* env = const Env.empty in
-  let+ fields = fields (env ()) in
+  let+ fields = fields (env conf) in
   { id; fields }
