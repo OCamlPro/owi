@@ -3,6 +3,8 @@ type 'a t =
   ; named : int String_map.t
   }
 
+val empty : 'a t
+
 val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
 val map : ('a Indexed.t -> 'b Indexed.t) -> 'a t -> 'b t

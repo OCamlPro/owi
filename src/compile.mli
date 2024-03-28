@@ -28,3 +28,11 @@ val until_interpret :
   -> name:string option
   -> Text.modul
   -> Concrete_value.Func.extern_func Link.state Result.t
+
+(** same as until_interpret but directly from a simplified modul *)
+val simplified_interpret :
+     Concrete_value.Func.extern_func Link.state
+  -> unsafe:bool
+  -> name:string option
+  -> Simplified.modul
+  -> Concrete_value.Func.extern_func Link.state Result.t
