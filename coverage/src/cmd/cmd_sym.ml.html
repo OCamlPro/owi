@@ -595,8 +595,8 @@ let symbolic_extern_module :
     <span data-count="6">C</span>hoice.add_pc c
   in
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="9589">l</span>et c = Value.I32.to_bool i in
-    <span data-count="9596">C</span>hoice.assertion c
+    <span data-count="9581">l</span>et c = Value.I32.to_bool i in
+    <span data-count="9584">C</span>hoice.assertion c
   in
   (* we need to describe their types *)
   let functions =
@@ -632,37 +632,37 @@ let summaries_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
   let open Expr in
   let i32 v =
-    <span data-count="9859">m</span>atch view v with
-    | <span data-count="9856">V</span>al (Num (I32 v)) -&gt; v
+    <span data-count="9869">m</span>atch view v with
+    | <span data-count="9868">V</span>al (Num (I32 v)) -&gt; v
     | <span data-count="0">_</span> -&gt; Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
   in
   let ptr v =
-    <span data-count="2450">m</span>atch view v with
-    | <span data-count="2450">P</span>tr (b, _) -&gt; b
+    <span data-count="2437">m</span>atch view v with
+    | <span data-count="2437">P</span>tr (b, _) -&gt; b
     | <span data-count="0">_</span> -&gt; Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
   in
   let abort () : unit Choice.t = <span data-count="0">C</span>hoice.add_pc @@ Value.Bool.cons<span data-count="0">t</span> false in
   let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9871">l</span>et base : int32 = i3<span data-count="9868">2</span> base in
+    <span data-count="9878">l</span>et base : int32 = i3<span data-count="9864">2</span> base in
     Choice.with_thread (fun t -&gt;
-        <span data-count="9866">l</span>et memories = Thread.memories t in
-        <span data-count="9853">S</span>ymbolic_memory.iter
+        <span data-count="9860">l</span>et memories = Thread.memories t in
+        <span data-count="9860">S</span>ymbolic_memory.iter
           (fun tbl -&gt;
-            <span data-count="9879">S</span>ymbolic_memory.ITbl.iter
+            <span data-count="9870">S</span>ymbolic_memory.ITbl.iter
               (fun _ (m : Symbolic_memory.t) -&gt;
-                <span data-count="9864">S</span>ymbolic_memory.replace_size m base size )
+                <span data-count="9867">S</span>ymbolic_memory.replace_size m base size )
               tbl )
           memories;
-        <span data-count="9896">E</span>xpr.make (Ptr (base, Value.const_i3<span data-count="9895">2</span> 0l)) )
+        <span data-count="9880">E</span>xpr.make (Ptr (base, Value.const_i3<span data-count="9877">2</span> 0l)) )
   in
   let free (p : Value.int32) : unit Choice.t =
-    <span data-count="2450">l</span>et base = ptr p in
-    <span data-count="2450">C</span>hoice.with_thread (fun t -&gt;
-        <span data-count="2450">l</span>et memories = Thread.memories t in
-        <span data-count="2450">S</span>ymbolic_memory.iter
+    <span data-count="2437">l</span>et base = ptr p in
+    <span data-count="2437">C</span>hoice.with_thread (fun t -&gt;
+        <span data-count="2437">l</span>et memories = Thread.memories t in
+        <span data-count="2437">S</span>ymbolic_memory.iter
           (fun tbl -&gt;
-            <span data-count="2450">S</span>ymbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.t) -&gt; <span data-count="2450">S</span>ymbolic_memory.free m base)
+            <span data-count="2437">S</span>ymbolic_memory.ITbl.iter
+              (fun _ (m : Symbolic_memory.t) -&gt; <span data-count="2437">S</span>ymbolic_memory.free m base)
               tbl )
           memories )
   in
@@ -721,36 +721,36 @@ let run_file ~unsafe ~optimize pc filename =
   <span data-count="332">s</span>implify_then_link_then_run ~unsafe ~optimize pc m0dule
 
 let get_model ~symbols solver pc =
-  <span data-count="1416">a</span>ssert <span data-count="1416">(</span>Solver.Z3Batch.chec<span data-count="1416">k</span> solver pc);
+  <span data-count="1455">a</span>ssert <span data-count="1455">(</span>Solver.Z3Batch.chec<span data-count="1455">k</span> solver pc);
   match Solver.Z3Batch.model ~symbols solver with
   | None -&gt; assert false
-  | <span data-count="1416">S</span>ome model -&gt; model
+  | <span data-count="1455">S</span>ome model -&gt; model
 
 let out_testcase ~dst ~err testcase =
-  <span data-count="1215">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="1215">l</span>et tag ?(atts = <span data-count="21007">[</span>]) name = <span data-count="21091">(</span>("", name), atts) in
-  let atts = if err then <span data-count="84">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1131">N</span>one in
-  let to_string v = <span data-count="19876">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
-  let input v = <span data-count="19876">`</span>El (ta<span data-count="19876">g</span> "input", [ `Data (to_strin<span data-count="19876">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="1215">g</span> ?atts "testcase", List.ma<span data-count="1215">p</span> input testcase) in
+  <span data-count="1254">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="1254">l</span>et tag ?(atts = <span data-count="22135">[</span>]) name = <span data-count="22219">(</span>("", name), atts) in
+  let atts = if err then <span data-count="84">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1170">N</span>one in
+  let to_string v = <span data-count="20965">F</span>ormat.asprintf "%a" Encoding.Value.pp_num v in
+  let input v = <span data-count="20965">`</span>El (ta<span data-count="20965">g</span> "input", [ `Data (to_strin<span data-count="20965">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="1254">g</span> ?atts "testcase", List.ma<span data-count="1254">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="1215">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="1254">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir ~err testcase -&gt;
-    <span data-count="1215">i</span>ncr cnt;
-    <span data-count="1215">l</span>et name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="1215">l</span>et path = Fpath.append dir name in
-    <span data-count="1215">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="1215">c</span> path
-        (fun chan () -&gt; <span data-count="1215">O</span>k (out_testcas<span data-count="1215">e</span> ~dst:(`Channel chan) ~err testcase))
+    <span data-count="1254">i</span>ncr cnt;
+    <span data-count="1254">l</span>et name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="1254">l</span>et path = Fpath.append dir name in
+    <span data-count="1254">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="1254">c</span> path
+        (fun chan () -&gt; <span data-count="1254">O</span>k (out_testcas<span data-count="1254">e</span> ~dst:(`Channel chan) ~err testcase))
         ()
     in
-    <span data-count="1215">r</span>es
+    <span data-count="1254">r</span>es
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
@@ -785,13 +785,13 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         model
   in
   let rec print_and_count_failures count_acc results =
-    <span data-count="1738">m</span>atch results () with
+    <span data-count="1777">m</span>atch results () with
     | <span data-count="322">S</span>eq.Nil -&gt; Ok count_acc
-    | <span data-count="1416">S</span>eq.Cons ((result, thread), tl) -&gt;
+    | <span data-count="1455">S</span>eq.Cons ((result, thread), tl) -&gt;
       let pc = Thread.pc thread in
-      <span data-count="1416">l</span>et symbols = thread.symbol_set in
+      <span data-count="1455">l</span>et symbols = thread.symbol_set in
       let model = get_model ~symbols solver pc in
-      <span data-count="1416">l</span>et* is_err =
+      <span data-count="1455">l</span>et* is_err =
         let open Symbolic_choice.Multicore in
         match result with
         | <span data-count="20">E</span>Assert assertion -&gt;
@@ -800,21 +800,21 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
         | <span data-count="159">E</span>Trap tr -&gt;
           print_bug (`ETrap (tr, model));
           <span data-count="159">O</span>k true
-        | <span data-count="1236">E</span>Val (Ok ()) -&gt; Ok false
+        | <span data-count="1275">E</span>Val (Ok ()) -&gt; Ok false
         | <span data-count="1">E</span>Val (Error e) -&gt; Error e
       in
-      <span data-count="1415">l</span>et count_acc = if is_err then <span data-count="179">s</span>uc<span data-count="179">c</span> count_acc else <span data-count="1236">c</span>ount_acc in
+      <span data-count="1454">l</span>et count_acc = if is_err then <span data-count="179">s</span>uc<span data-count="179">c</span> count_acc else <span data-count="1275">c</span>ount_acc in
       let* () =
         if not no_values then
-          <span data-count="1215">l</span>et testcase =
-            List.sort compare (Encoding.Model.get_binding<span data-count="1215">s</span> model)
-            |&gt; <span data-count="1215">L</span>ist.map snd
+          <span data-count="1254">l</span>et testcase =
+            List.sort compare (Encoding.Model.get_binding<span data-count="1254">s</span> model)
+            |&gt; <span data-count="1254">L</span>ist.map snd
           in
-          <span data-count="1215">w</span>rite_testcas<span data-count="1215">e</span> ~dir:workspace ~err:is_err testcase
+          <span data-count="1254">w</span>rite_testcas<span data-count="1254">e</span> ~dir:workspace ~err:is_err testcase
         else <span data-count="200">O</span>k ()
       in
-      <span data-count="1415">i</span>f (not is_err<span data-count="1236">)</span> || no_stop_at_failur<span data-count="169">e</span> then
-        <span data-count="1405">p</span>rint_and_count_failures count_acc tl
+      <span data-count="1454">i</span>f (not is_err<span data-count="1275">)</span> || no_stop_at_failur<span data-count="169">e</span> then
+        <span data-count="1444">p</span>rint_and_count_failures count_acc tl
       else <span data-count="10">O</span>k count_acc
   in
   let results =
