@@ -1,2 +1,2 @@
-file "src/menhir_parser.ml"
-file "src/lexer.ml"
+file "src/lexpar/menhir_parser.ml"
+file "src/lexpar/lexer.ml"
