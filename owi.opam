@@ -68,5 +68,5 @@ depexts: [
 ]
 pin-depends: [
   [ "encoding.dev" "git+https://github.com/formalsec/encoding#f5ed5da47acfb89d8af70899149ad147a2e5fdf0"]
+  [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
 ]
-
