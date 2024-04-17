@@ -98,8 +98,8 @@ See [CHANGELOG].
 ### License
 
     Owi
-    Copyright (C) 2021 Léo Andrès
-    Copyright (C) 2021 Pierre Chambart
+    Copyright (C) 2021-2024 OCamlPro 
+    Written by Léo Andrès and Pierre Chambart
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by

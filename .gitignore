@@ -1,3 +1,8 @@
-_build
-_coverage
+_*
 owi-out
+*~
+headers-cc.txt
+headers-ml.txt
+.header-check-more
+check-headers.undo
+owi.install
