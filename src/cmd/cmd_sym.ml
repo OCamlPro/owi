@@ -1,5 +1,5 @@
 open Syntax
-module Expr = Encoding.Expr
+module Expr = Smtml.Expr
 module Value = Symbolic_value
 module Choice = Symbolic.P.Choice
 
@@ -8,12 +8,12 @@ let symbolic_extern_module :
   let sym_cnt = Atomic.make 0 in
   let symbol ty () : Value.int32 Choice.t =
     let id = Atomic.fetch_and_add sym_cnt 1 in
-    let sym = Format.kasprintf (Encoding.Symbol.mk_symbol ty) "symbol_%d" id in
+    let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
     let sym_expr = Expr.mk_symbol sym in
     Choice.with_thread (fun thread ->
         thread.symbol_set <- sym :: thread.symbol_set;
         match ty with
-        | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, ExtU 24, sym_expr))
+        | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
         | _ -> sym_expr )
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
@@ -151,7 +151,7 @@ let run_file ~unsafe ~optimize pc filename =
   simplify_then_link_then_run ~unsafe ~optimize pc m0dule
 
 let get_model ~symbols solver pc =
-  assert (Solver.Z3Batch.check solver pc);
+  assert (`Sat = Solver.Z3Batch.check solver pc);
   match Solver.Z3Batch.model ~symbols solver with
   | None -> assert false
   | Some model -> model
@@ -160,7 +160,7 @@ let out_testcase ~dst ~err testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag ?(atts = []) name = (("", name), atts) in
   let atts = if err then Some [ (("", "coversError"), "true") ] else None in
-  let to_string v = Format.asprintf "%a" Encoding.Value.pp_num v in
+  let to_string v = Format.asprintf "%a" Smtml.Value.pp_num v in
   let input v = `El (tag "input", [ `Data (to_string v) ]) in
   let testcase = `El (tag ?atts "testcase", List.map input testcase) in
   let dtd =
@@ -205,14 +205,10 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let print_bug = function
     | `ETrap (tr, model) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
-      Format.pp_std "Model:@\n  @[<v>%a@]@."
-        (Encoding.Model.pp ~no_values)
-        model
+      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
     | `EAssert (assertion, model) ->
       Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
-      Format.pp_std "Model:@\n  @[<v>%a@]@."
-        (Encoding.Model.pp ~no_values)
-        model
+      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
   in
   let rec print_and_count_failures count_acc results =
     match results () with
@@ -237,8 +233,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       let* () =
         if not no_values then
           let testcase =
-            List.sort compare (Encoding.Model.get_bindings model)
-            |> List.map snd
+            List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
           in
           write_testcase ~dir:workspace ~err:is_err testcase
         else Ok ()
