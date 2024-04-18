@@ -3,7 +3,7 @@
 (* Copyright © 2021 Pierre Chambart *)
 
 open Solver
-open Encoding
+open Smtml
 open Symbolic_value
 
 exception Assertion of Expr.t * Thread.t
@@ -197,7 +197,7 @@ module Multicore = struct
     type 'a eval =
       | EVal of 'a
       | ETrap of Trap.t
-      | EAssert of Encoding.Expr.t
+      | EAssert of Expr.t
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
@@ -359,7 +359,7 @@ module Multicore = struct
       type 'a eval =
         | EVal of 'a
         | ETrap of Trap.t
-        | EAssert of Encoding.Expr.t
+        | EAssert of Expr.t
 
       type 'a t = 'a eval M.t
 
@@ -476,17 +476,18 @@ module Multicore = struct
     let* (S (solver_module, s)) = solver in
     let module Solver = (val solver_module) in
     let* thread in
-    let sat = Solver.check s thread.pc in
-    if sat then return () else stop
+    match Solver.check s thread.pc with
+    | `Sat -> return ()
+    | `Unsat | `Unknown -> stop
 
   let get_model symbol =
     let* () = yield in
     let* (S (solver_module, s)) = solver in
     let module Solver = (val solver_module) in
     let+ thread in
-    let sat = Solver.check s thread.pc in
-    if not sat then None
-    else begin
+    match Solver.check s thread.pc with
+    | `Unsat | `Unknown -> None
+    | `Sat -> begin
       let model = Solver.model ~symbols:[ symbol ] s in
       match model with
       | None ->
@@ -535,7 +536,7 @@ module Multicore = struct
       let symbol_name = Format.sprintf "choice_i32_%i" choices in
       let+ () = modify_thread (fun t -> { t with choices = choices + 1 }) in
       let sym = Symbol.(symbol_name @: Ty_bitv 32) in
-      let assign = Expr.(make (Relop (Ty_bitv 32, Eq, mk_symbol sym, e))) in
+      let assign = Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =

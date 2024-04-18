@@ -4,7 +4,7 @@
 
 type t =
   { choices : int
-  ; mutable symbol_set : Encoding.Symbol.t list
+  ; mutable symbol_set : Smtml.Symbol.t list
   ; pc : Symbolic_value.vbool list
   ; memories : Symbolic_memory.collection
   ; tables : Symbolic_table.collection

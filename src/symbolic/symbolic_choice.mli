@@ -1,4 +1,4 @@
-exception Assertion of Encoding.Expr.t * Thread.t
+exception Assertion of Smtml.Expr.t * Thread.t
 
 module Minimalist : sig
   type err = private
@@ -16,7 +16,7 @@ module Multicore : sig
   type 'a eval =
     | EVal of 'a
     | ETrap of Trap.t
-    | EAssert of Encoding.Expr.t
+    | EAssert of Smtml.Expr.t
 
   include
     Choice_intf.Complete

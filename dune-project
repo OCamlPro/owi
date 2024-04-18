@@ -60,7 +60,7 @@
   (odoc :with-doc)
   (crunch :dev)
   bos
-  encoding
+  smtml
   (mdx
    (and
     :with-test

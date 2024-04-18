@@ -59,9 +59,9 @@ struct
   module Memory = struct
     include Symbolic_memory
 
-    let concretise (a : Encoding.Expr.t) : Encoding.Expr.t Choice.t =
+    let concretise (a : Smtml.Expr.t) : Smtml.Expr.t Choice.t =
       let open Choice in
-      let open Encoding in
+      let open Smtml in
       match Expr.view a with
       (* Avoid unecessary re-hashconsing and allocation when the value
          is already concrete. *)
