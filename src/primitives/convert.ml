@@ -1,4 +1,10 @@
-(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+(* SPDX-License-Identifier: Apache-2.0 *)
+(* Copyright 2017 WebAssembly Community Group participants *)
+(* This file is originally from the WebAssembly reference interpreter available at https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Modified by the Owi programmers *)
 
 module MInt32 = struct
   type t = int32

@@ -98,8 +98,7 @@ See [CHANGELOG].
 ### License
 
     Owi
-    Copyright (C) 2021 Léo Andrès
-    Copyright (C) 2021 Pierre Chambart
+    Copyright (C) 2021-2024 OCamlPro
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -115,6 +114,10 @@ See [CHANGELOG].
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 See [LICENSE].
+
+A few files have been taken from the WebAssembly reference interpreter. They are licensed under the Apache License 2.0 and have a different copyright which is stated in the header of the files.
+
+Some code has been taken from the `base` library from Jane Street. It is licensed under the MIT License and have a different copyright which is stated in the header of the files.
 
 ### Fundings
 

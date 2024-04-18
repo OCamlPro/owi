@@ -1,4 +1,14 @@
-(* Taken and modified from https://github.com/WebAssembly/spec/tree/main/interpreter *)
+(* SPDX-License-Identifier: Apache-2.0 *)
+(* Copyright 2017 WebAssembly Community Group participants *)
+(* This file is originally from the WebAssembly reference interpreter available at https://github.com/WebAssembly/spec/tree/main/interpreter *)
+
+(* SPDX-License-Identifier: MIT *)
+(* Copyright (c) 2016--2024 Jane Street Group, LLC <opensource-contacts@janestreet.com> *)
+(* The code of the `popcnt` function is originally from the `base` library available at https://github.com/janestreet/base *)
+
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Modified by the Owi programmers *)
 
 include Stdlib.Int32
 
@@ -6,7 +16,7 @@ let clz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_leading_zeros n)
 
 let ctz n = Stdlib.Int32.of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
 
-(* Taken from Base https://github.com/janestreet/base *)
+(* Taken from Base *)
 let popcnt =
   let mask = 0xffff_ffffL in
   fun [@inline] x ->
