@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
 type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 
 type solver = S : ('a solver_module * 'a) -> solver [@@unboxed]

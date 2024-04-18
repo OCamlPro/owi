@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
 let () =
   if Array.length Sys.argv < 2 then
     Format.ksprintf failwith "usage: %s <C files>" Sys.argv.(0)
