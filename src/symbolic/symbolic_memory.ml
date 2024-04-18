@@ -1,9 +1,29 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021 Léo Andrès *)
-(* Copyright © 2021 Pierre Chambart *)
+(*****************************************************************************)
+(*                                                                           *)
+(*  Owi                                                                      *)
+(*                                                                           *)
+(*  Copyright (C) 2021-2024 OCamlPro                                         *)
+(*                                                                           *)
+(*  SPDX-License-Identifier: AGPL-3.0-or-later                               *)
+(*                                                                           *)
+(*  This program is free software: you can redistribute it and/or modify     *)
+(*  it under the terms of the GNU Affero General Public License as published *)
+(*  by the Free Software Foundation, either version 3 of the License, or     *)
+(*  (at your option) any later version.                                      *)
+(*                                                                           *)
+(*  This program is distributed in the hope that it will be useful,          *)
+(*  but WITHOUT ANY WARRANTY; without even the implied warranty of           *)
+(*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *)
+(*  GNU Affero General Public License for more details.                      *)
+(*                                                                           *)
+(*  You should have received a copy of the GNU Affero General Public License *)
+(*  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *)
+(*                                                                           *)
+(*****************************************************************************)
+
 module Value = Symbolic_value
-module Expr = Encoding.Expr
-module Ty = Encoding.Ty
+module Expr = Smtml.Expr
+module Ty = Smtml.Ty
 open Expr
 
 let page_size = Symbolic_value.const_i32 65_536l
@@ -119,25 +139,25 @@ let load_8_s m a =
   let v = loadn m (i32 a) 1 in
   match view v with
   | Val (Num (I8 i8)) -> Value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
-  | _ -> make (Cvtop (Ty_bitv 32, ExtS 24, v))
+  | _ -> cvtop (Ty_bitv 32) (Sign_extend 24) v
 
 let load_8_u m a =
   let v = loadn m (i32 a) 1 in
   match view v with
   | Val (Num (I8 i)) -> Value.const_i32 (Int32.of_int i)
-  | _ -> make (Cvtop (Ty_bitv 32, ExtU 24, v))
+  | _ -> cvtop (Ty_bitv 32) (Zero_extend 24) v
 
 let load_16_s m a =
   let v = loadn m (i32 a) 2 in
   match view v with
   | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
-  | _ -> make (Cvtop (Ty_bitv 32, ExtS 16, v))
+  | _ -> cvtop (Ty_bitv 32) (Sign_extend 16) v
 
 let load_16_u m a =
   let v = loadn m (i32 a) 2 in
   match view v with
   | Val (Num (I32 _)) -> v
-  | _ -> make (Cvtop (Ty_bitv 32, ExtU 16, v))
+  | _ -> cvtop (Ty_bitv 32) (Zero_extend 16) v
 
 let load_32 m a = loadn m (i32 a) 4
 
@@ -147,12 +167,12 @@ let extract v pos =
   match view v with
   | Val (Num (I32 i)) ->
     let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-    make (Val (Num (I8 i')))
+    value (Num (I8 i'))
   | Val (Num (I64 i)) ->
     let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-    make (Val (Num (I8 i')))
-  | Cvtop (_, ExtU 24, ({ node = Symbol _; _ } as sym))
-  | Cvtop (_, ExtS 24, ({ node = Symbol _; _ } as sym))
+    value (Num (I8 i'))
+  | Cvtop (_, Zero_extend 24, ({ node = Symbol _; _ } as sym))
+  | Cvtop (_, Sign_extend 24, ({ node = Symbol _; _ } as sym))
     when ty sym = Ty_bitv 8 ->
     sym
   | _ -> make (Extract (v, pos + 1, pos))

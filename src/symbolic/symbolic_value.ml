@@ -1,8 +1,27 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021 Léo Andrès *)
-(* Copyright © 2021 Pierre Chambart *)
+(*****************************************************************************)
+(*                                                                           *)
+(*  Owi                                                                      *)
+(*                                                                           *)
+(*  Copyright (C) 2021-2024 OCamlPro                                         *)
+(*                                                                           *)
+(*  SPDX-License-Identifier: AGPL-3.0-or-later                               *)
+(*                                                                           *)
+(*  This program is free software: you can redistribute it and/or modify     *)
+(*  it under the terms of the GNU Affero General Public License as published *)
+(*  by the Free Software Foundation, either version 3 of the License, or     *)
+(*  (at your option) any later version.                                      *)
+(*                                                                           *)
+(*  This program is distributed in the hope that it will be useful,          *)
+(*  but WITHOUT ANY WARRANTY; without even the implied warranty of           *)
+(*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *)
+(*  GNU Affero General Public License for more details.                      *)
+(*                                                                           *)
+(*  You should have received a copy of the GNU Affero General Public License *)
+(*  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *)
+(*                                                                           *)
+(*****************************************************************************)
 
-open Encoding
+open Smtml
 open Ty
 open Expr
 
@@ -29,15 +48,13 @@ type t =
   | F64 of float64
   | Ref of ref_value
 
-let const_i32 (i : Int32.t) : int32 = make (Val (Num (I32 i)))
+let const_i32 (i : Int32.t) : int32 = value (Num (I32 i))
 
-let const_i64 (i : Int64.t) : int64 = make (Val (Num (I64 i)))
+let const_i64 (i : Int64.t) : int64 = value (Num (I64 i))
 
-let const_f32 (f : Float32.t) : float32 =
-  make (Val (Num (F32 (Float32.to_bits f))))
+let const_f32 (f : Float32.t) : float32 = value (Num (F32 (Float32.to_bits f)))
 
-let const_f64 (f : Float64.t) : float64 =
-  make (Val (Num (F64 (Float64.to_bits f))))
+let const_f64 (f : Float64.t) : float64 = value (Num (F64 (Float64.to_bits f)))
 
 let ref_null _ty = Ref (Funcref None)
 
@@ -46,8 +63,8 @@ let ref_func f : t = Ref (Funcref (Some f))
 let ref_externref t v : t = Ref (Externref (Some (E (t, v))))
 
 let ref_is_null = function
-  | Funcref (Some _) | Externref (Some _) -> make (Val False)
-  | Funcref None | Externref None -> make (Val True)
+  | Funcref (Some _) | Externref (Some _) -> value False
+  | Funcref None | Externref None -> value True
 
 let pp ppf v =
   let e =
@@ -159,11 +176,11 @@ module I32 = struct
     | Cvtop (_, OfBool, cond) -> begin
       match c with 0l -> Bool.not cond | 1l -> cond | _ -> Bool.const false
     end
-    | _ -> relop ty Eq e (const_i32 c)
+    | _ -> relop Ty_bool Eq e (const_i32 c)
 
-  let eq e1 e2 = if e1 == e2 then Bool.const true else relop ty Eq e1 e2
+  let eq e1 e2 = if e1 == e2 then Bool.const true else relop Ty_bool Eq e1 e2
 
-  let ne e1 e2 = if e1 == e2 then Bool.const false else relop ty Ne e1 e2
+  let ne e1 e2 = if e1 == e2 then Bool.const false else relop Ty_bool Ne e1 e2
 
   let lt e1 e2 = if e1 == e2 then Bool.const false else relop ty Lt e1 e2
 
@@ -208,7 +225,8 @@ module I32 = struct
   let wrap_i64 x = cvtop ty WrapI64 x
 
   (* FIXME: This is probably wrong? *)
-  let extend_s n x = cvtop ty (ExtS (32 - n)) (make (Extract (x, n / 8, 0)))
+  let extend_s n x =
+    cvtop ty (Sign_extend (32 - n)) (make (Extract (x, n / 8, 0)))
 end
 
 module I64 = struct
@@ -254,11 +272,11 @@ module I64 = struct
 
   let rotr e1 e2 = binop ty Rotr e1 e2
 
-  let eq_const e c = relop ty Eq e (const_i64 c)
+  let eq_const e c = relop Ty_bool Eq e (const_i64 c)
 
-  let eq e1 e2 = relop ty Eq e1 e2
+  let eq e1 e2 = relop Ty_bool Eq e1 e2
 
-  let ne e1 e2 = relop ty Ne e1 e2
+  let ne e1 e2 = relop Ty_bool Ne e1 e2
 
   let lt e1 e2 = relop ty Lt e1 e2
 
@@ -276,7 +294,7 @@ module I64 = struct
 
   let ge_u e1 e2 = relop ty GeU e1 e2
 
-  let of_int32 e = cvtop ty (ExtS 32) e
+  let of_int32 e = cvtop ty (Sign_extend 32) e
 
   let to_int32 e = cvtop (Ty_bitv 32) WrapI64 e
 
@@ -299,11 +317,12 @@ module I64 = struct
   let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
   (* FIXME: This is probably wrong? *)
-  let extend_s n x = cvtop ty (ExtS (64 - n)) (make (Extract (x, n / 8, 0)))
+  let extend_s n x =
+    cvtop ty (Sign_extend (64 - n)) (make (Extract (x, n / 8, 0)))
 
-  let extend_i32_s x = cvtop ty (ExtS 32) x
+  let extend_i32_s x = cvtop ty (Sign_extend 32) x
 
-  let extend_i32_u x = cvtop ty (ExtU 32) x
+  let extend_i32_u x = cvtop ty (Zero_extend 32) x
 end
 
 module F32 = struct

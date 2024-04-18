@@ -1,9 +1,28 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021 Léo Andrès *)
-(* Copyright © 2021 Pierre Chambart *)
+(*****************************************************************************)
+(*                                                                           *)
+(*  Owi                                                                      *)
+(*                                                                           *)
+(*  Copyright (C) 2021-2024 OCamlPro                                         *)
+(*                                                                           *)
+(*  SPDX-License-Identifier: AGPL-3.0-or-later                               *)
+(*                                                                           *)
+(*  This program is free software: you can redistribute it and/or modify     *)
+(*  it under the terms of the GNU Affero General Public License as published *)
+(*  by the Free Software Foundation, either version 3 of the License, or     *)
+(*  (at your option) any later version.                                      *)
+(*                                                                           *)
+(*  This program is distributed in the hope that it will be useful,          *)
+(*  but WITHOUT ANY WARRANTY; without even the implied warranty of           *)
+(*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *)
+(*  GNU Affero General Public License for more details.                      *)
+(*                                                                           *)
+(*  You should have received a copy of the GNU Affero General Public License *)
+(*  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *)
+(*                                                                           *)
+(*****************************************************************************)
 
 open Solver
-open Encoding
+open Smtml
 open Symbolic_value
 
 exception Assertion of Expr.t * Thread.t
@@ -197,7 +216,7 @@ module Multicore = struct
     type 'a eval =
       | EVal of 'a
       | ETrap of Trap.t
-      | EAssert of Encoding.Expr.t
+      | EAssert of Expr.t
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
@@ -359,7 +378,7 @@ module Multicore = struct
       type 'a eval =
         | EVal of 'a
         | ETrap of Trap.t
-        | EAssert of Encoding.Expr.t
+        | EAssert of Expr.t
 
       type 'a t = 'a eval M.t
 
@@ -476,17 +495,18 @@ module Multicore = struct
     let* (S (solver_module, s)) = solver in
     let module Solver = (val solver_module) in
     let* thread in
-    let sat = Solver.check s thread.pc in
-    if sat then return () else stop
+    match Solver.check s thread.pc with
+    | `Sat -> return ()
+    | `Unsat | `Unknown -> stop
 
   let get_model symbol =
     let* () = yield in
     let* (S (solver_module, s)) = solver in
     let module Solver = (val solver_module) in
     let+ thread in
-    let sat = Solver.check s thread.pc in
-    if not sat then None
-    else begin
+    match Solver.check s thread.pc with
+    | `Unsat | `Unknown -> None
+    | `Sat -> begin
       let model = Solver.model ~symbols:[ symbol ] s in
       match model with
       | None ->
@@ -535,7 +555,7 @@ module Multicore = struct
       let symbol_name = Format.sprintf "choice_i32_%i" choices in
       let+ () = modify_thread (fun t -> { t with choices = choices + 1 }) in
       let sym = Symbol.(symbol_name @: Ty_bitv 32) in
-      let assign = Expr.(make (Relop (Ty_bitv 32, Eq, mk_symbol sym, e))) in
+      let assign = Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =

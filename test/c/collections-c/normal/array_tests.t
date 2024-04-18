@@ -26,7 +26,7 @@ Array tests:
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_removeAt.c
   All OK
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_replaceAt.c
-  Assert failure: (i32.ne symbol_3 symbol_2)
+  Assert failure: (bool.ne symbol_3 symbol_2)
   Model:
     (model
       (symbol_0 (i32 0))
