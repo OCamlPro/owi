@@ -13,6 +13,8 @@ val with_fresh_id :
 
 val get : t -> 'a collection -> 'a
 
+val map : ('a -> 'b) -> 'a collection -> 'b collection
+
 module Map : Map.S with type key = t
 
 module Tbl : Hashtbl.S with type key = t

@@ -1587,3 +1587,4 @@ end
 module Concrete = Make (Concrete) [@@inlined hint]
 module SymbolicP = Make (Symbolic.P) [@@inlined hint]
 module SymbolicM = Make (Symbolic.M) [@@inlined hint]
+module Concolic = Make (Concolic.P) [@@inlined hint]
