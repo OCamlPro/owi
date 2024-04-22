@@ -53,3 +53,10 @@ module SymbolicM : sig
     -> Symbolic.M.Module_to_run.t
     -> unit Result.t Symbolic.M.Choice.t
 end
+
+module Concolic : sig
+  val modul :
+       Concolic.P.Env.t Env_id.collection
+    -> Concolic.P.Module_to_run.t
+    -> unit Result.t Concolic.P.Choice.t
+end

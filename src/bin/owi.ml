@@ -187,6 +187,19 @@ let sym_cmd =
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
       $ files )
 
+let conc_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Run the concolic interpreter" in
+    let man = [] @ shared_man in
+    Cmd.info "conc" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info
+    Term.(
+      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
+      $ files )
+
 let wasm2wat_cmd =
   let open Cmdliner in
   let info =
@@ -217,6 +230,7 @@ let cli =
     ; run_cmd
     ; script_cmd
     ; sym_cmd
+    ; conc_cmd
     ; validate_cmd
     ; wasm2wat_cmd
     ]

@@ -18,6 +18,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   type float64 = (C.float64, S.float64) cs
 
+  (* TODO: Probably beter not to have a different value for both,
+     there are no good reason for that right now *)
   type ref_value = (C.ref_value, S.ref_value) cs
 
   type t =
@@ -28,6 +30,32 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     | Ref of ref_value
 
   let pair c s = { c; s }
+
+  (* Bof... *)
+  let value_pair (c : C.t) (s : S.t) =
+    match c, s with
+    | I32 c, I32 s -> I32 { c; s }
+    | I64 c, I64 s -> I64 { c; s }
+    | F32 c, F32 s -> F32 { c; s }
+    | F64 c, F64 s -> F64 { c; s }
+    | Ref c, Ref s -> Ref { c; s }
+    | _, _ -> assert false
+
+  let concrete_value (cs : t) : C.t =
+    match cs with
+    | I32 cs -> I32 cs.c
+    | I64 cs -> I64 cs.c
+    | F32 cs -> F32 cs.c
+    | F64 cs -> F64 cs.c
+    | Ref cs -> Ref cs.c
+
+  let symbolic_value (cs : t) : S.t =
+    match cs with
+    | I32 cs -> I32 cs.s
+    | I64 cs -> I64 cs.s
+    | F32 cs -> F32 cs.s
+    | F64 cs -> F64 cs.s
+    | Ref cs -> Ref cs.s
 
   let f_pair_1 fc fs cs = { c = fc cs.c; s = fs cs.s } [@@inline always]
 
@@ -420,7 +448,9 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
   end
 end
 
-module V :
+module V = T_pair (Concrete.Value) (Symbolic_value)
+
+module V' :
   Value_intf.T
     with type vbool = (Concrete.Value.vbool, Symbolic_value.vbool) cs
      and type int32 = (Concrete.Value.int32, Symbolic_value.int32) cs
@@ -429,4 +459,4 @@ module V :
      and type float64 = (Concrete.Value.float64, Symbolic_value.float64) cs
      and type ref_value =
       (Concrete.Value.ref_value, Symbolic_value.ref_value) cs =
-  T_pair (Concrete.Value) (Symbolic_value)
+  V

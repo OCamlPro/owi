@@ -22,6 +22,8 @@ let with_fresh_id f { c; last } =
 
 let get i c = Map.find i c.c
 
+let map f c = { c with c = Map.map f c.c }
+
 module Tbl = Hashtbl.Make (struct
   include Int
 
