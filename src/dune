@@ -59,6 +59,7 @@
   symbolic_memory
   symbolic_table
   symbolic_value
+  concolic_value
   spectest
   stack
   string_map
