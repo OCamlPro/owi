@@ -22,6 +22,9 @@ let pp_pc_elt fmt = function
 let pp_pc fmt pc =
   List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
 
+let pp_assignments fmt assignments =
+  List.iter (fun (sym, v) -> Format.pp fmt "  %a : %li@\n" Smtml.Symbol.pp sym v) assignments
+
 let pc_elt_to_expr = function
   | Select (c, v) ->
     Some (if v then c else Smtml.Expr.Bool.not c)
@@ -39,13 +42,15 @@ type pc = pc_elt list
 type thread = {
   pc : pc;
   symbols : int;
-  symbols_value : (Smtml.Symbol.t * Smtml.Expr.t) list
+  symbols_value : (Smtml.Symbol.t * Int32.t) list;
+  preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
 }
 
-let init_thread = {
+let init_thread preallocated_values = {
   symbols = 0;
   pc = [];
   symbols_value = [];
+  preallocated_values
 }
 
 type 'a run_result = ('a, err) Stdlib.Result.t * thread
@@ -112,11 +117,14 @@ let with_new_symbol ty f =
   M (fun st ->
       let id = st.symbols + 1 in
       let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
-      let expr, v = f sym in
+      let value = Hashtbl.find_opt st.preallocated_values sym in
+      let expr, v = f sym value in
       let st =
         { st with
           symbols = st.symbols + 1;
           symbols_value = (sym, expr) :: st.symbols_value } in
       (Ok v, st))
 
-let run (M v) : _ run_result = v init_thread
+let run' (M v) : _ run_result = v (init_thread (Hashtbl.create 0))
+
+let run preallocated_values (M v) : _ run_result = v (init_thread preallocated_values)
