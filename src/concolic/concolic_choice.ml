@@ -1,9 +1,43 @@
 type err =
   | Assert_fail (* TODO add assertion (will be needed by the environment functions *)
   | Trap of Trap.t
+  | Assume_fail of Symbolic_value.vbool
+
+type pc_elt =
+  | Select of Symbolic_value.vbool * bool
+  | Select_i32 of Symbolic_value.int32 * int32
+  | Assume of Symbolic_value.vbool
+  | Assert of Symbolic_value.vbool
+
+let pp_pc_elt fmt = function
+  | Select (c, v) ->
+    Format.pp fmt "Select(%a, %b)" Smtml.Expr.pp c v
+  | Select_i32 (c, v) ->
+    Format.pp fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
+  | Assume c ->
+    Format.pp fmt "Assume(%a)" Smtml.Expr.pp c
+  | Assert c ->
+    Format.pp fmt "Assert(%a)" Smtml.Expr.pp c
+
+let pp_pc fmt pc =
+  List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
+
+let pc_elt_to_expr = function
+  | Select (c, v) ->
+    Some (if v then c else Smtml.Expr.Bool.not c)
+  | Select_i32 (c, n) ->
+    Some (Smtml.Expr.Bitv.I32.(c = v n))
+  | Assume c ->
+    Some c
+  | Assert _ ->
+    None
+
+let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
+
+type pc = pc_elt list
 
 type thread = {
-  pc : Symbolic_value.vbool list;
+  pc : pc;
   symbols : int;
   symbols_value : (Smtml.Symbol.t * Smtml.Expr.t) list
 }
@@ -44,18 +78,31 @@ let add_pc (st : thread) c = { st with pc = c :: st.pc }
 
 let select (vb : Concolic_value.V.vbool) =
   let r = vb.c in
-  let cond =
-    if r then vb.s
-    else Smtml.Expr.Bool.not vb.s
-  in
+  let cond = Select (vb.s, r) in
   M (fun st -> (Ok r, add_pc st cond))
 [@@inline]
 
 let select_i32 (i : Concolic_value.V.int32) =
   let r = i.c in
-  let expr = Smtml.Expr.Bitv.I32.(i.s = v i.c) in
+  let expr = Select_i32 (i.s, i.c) in
   M (fun st -> (Ok r, add_pc st expr))
 [@@inline]
+
+let assume (vb : Concolic_value.V.vbool) =
+  let assume_pc = Assume vb.s in
+  let r = vb.c in
+  if r then
+    M (fun st -> (Ok (), add_pc st assume_pc))
+  else
+    M (fun st -> (Error (Assume_fail vb.s), st))
+
+let assertion (vb : Concolic_value.V.vbool) =
+  let assert_pc = Assert vb.s in
+  let r = vb.c in
+  if r then
+    M (fun st -> (Ok (), add_pc st assert_pc))
+  else
+    M (fun st -> (Error (Assume_fail vb.s), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
 
