@@ -57,7 +57,7 @@ let load_from_module ls f (import : _ Imported.t) =
     | exception Not_found ->
       if StringSet.mem import.name exports.defined_names then
         Error `Incompatible_import_type
-      else Error `Unknown_import
+      else Error (`Unknown_import (import.modul, import.name))
     | v -> Ok v )
 
 let load_global (ls : 'f state) (import : binary global_type Imported.t) :

@@ -48,7 +48,7 @@ type err =
   | `Unexpected_token
   | `Unknown_function of int
   | `Unknown_global
-  | `Unknown_import
+  | `Unknown_import of string * string
   | `Unknown_label
   | `Unknown_local of string
   | `Unknown_memory of int
