@@ -14,20 +14,20 @@ let symbolic_extern_module :
         let n =
           match forced_value with
           | None -> Random.bits32 ()
-          | Some v ->
+          | Some v -> (
             match v with
             | Int i -> Int32.of_int i
             | Num (I32 n) -> n
             | _ ->
               Format.pp_err "Wrong type of forced value %a@." Smtml.Value.pp v;
-              Random.bits32 ()
+              Random.bits32 () )
         in
         let sym_expr =
           match ty with
           | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
           | _ -> sym_expr
         in
-        n, Value.pair n sym_expr )
+        (n, Value.pair n sym_expr) )
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
@@ -58,15 +58,15 @@ let symbolic_extern_module :
       (* ; ( "f64_symbol" *)
       (*   , Symbolic.P.Extern_func.Extern_func *)
       (*       (Func (UArg Res, R1 F64), symbol (Ty_fp 64)) ) *)
-      ; ( "assume"
-        , Concolic.P.Extern_func.Extern_func
-            (Func (Arg (I32, Res), R0), assume_i32) )
-      ; ( "assume_positive_i32"
-        , Concolic.P.Extern_func.Extern_func
-            (Func (Arg (I32, Res), R0), assume_positive_i32) )
-      ; ( "assert"
-        , Concolic.P.Extern_func.Extern_func
-            (Func (Arg (I32, Res), R0), assert_i32) )
+    ; ( "assume"
+      , Concolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assume_i32) )
+    ; ( "assume_positive_i32"
+      , Concolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assume_positive_i32) )
+    ; ( "assert"
+      , Concolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), assert_i32) )
     ]
   in
   { functions }
@@ -122,9 +122,7 @@ let summaries_extern_module :
 let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   Choice.bind t (fun t ->
-      match t with
-      | Error e -> Choice.return (Error e)
-      | Ok x -> f x)
+      match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
 let simplify_then_link ~unsafe ~optimize link_state (m : Text.modul) =
   let has_start =
@@ -144,7 +142,7 @@ let simplify_then_link ~unsafe ~optimize link_state (m : Text.modul) =
     Compile.until_link ~unsafe link_state ~optimize ~name:None m
   in
   let module_to_run = Concolic.convert_module_to_run m in
-  link_state, module_to_run
+  (link_state, module_to_run)
 
 let simplify_then_link_files ~unsafe ~optimize filenames =
   let link_state = Link.empty_state in
@@ -156,15 +154,19 @@ let simplify_then_link_files ~unsafe ~optimize filenames =
     Link.extern_module' link_state ~name:"summaries"
       ~func_typ:Concolic.P.Extern_func.extern_type summaries_extern_module
   in
-  let+ (link_state, modules_to_run) =
-    List.fold_left (fun (acc : (_ * _) Result.t) filename ->
-        let* (link_state, modules_to_run) = acc in
+  let+ link_state, modules_to_run =
+    List.fold_left
+      (fun (acc : (_ * _) Result.t) filename ->
+        let* link_state, modules_to_run = acc in
         let* m0dule = Parse.Module.from_file filename in
-        let+ link_state, module_to_run = simplify_then_link ~unsafe ~optimize link_state m0dule in
-        link_state, module_to_run :: modules_to_run)
-      (Ok (link_state, [])) filenames
+        let+ link_state, module_to_run =
+          simplify_then_link ~unsafe ~optimize link_state m0dule
+        in
+        (link_state, module_to_run :: modules_to_run) )
+      (Ok (link_state, []))
+      filenames
   in
-  link_state, List.rev modules_to_run
+  (link_state, List.rev modules_to_run)
 
 let run_modules_to_run (link_state : _ Link.state) modules_to_run =
   let link_state_envs =
@@ -173,9 +175,10 @@ let run_modules_to_run (link_state : _ Link.state) modules_to_run =
     *)
     Env_id.map Concolic.convert_env link_state.envs
   in
-  List.fold_left (fun (acc:unit Result.t Concolic.P.Choice.t) to_run ->
+  List.fold_left
+    (fun (acc : unit Result.t Concolic.P.Choice.t) to_run ->
       let** () = acc in
-      (Interpret.Concolic.modul link_state_envs) to_run)
+      (Interpret.Concolic.modul link_state_envs) to_run )
     (Choice.return (Ok ())) modules_to_run
 
 let get_model (* ~symbols *) solver pc =
@@ -193,46 +196,54 @@ type end_of_trace =
   | Trap of Trap.t
   | Normal
 
-type trace = {
-  assignments : assignments;
-  remaining_pc : Concolic_choice.pc_elt list;
-  end_of_trace : end_of_trace;
-}
+type trace =
+  { assignments : assignments
+  ; remaining_pc : Concolic_choice.pc_elt list
+  ; end_of_trace : end_of_trace
+  }
 
-module IMap = Map.Make(Stdlib.Int32)
+module IMap = Map.Make (Stdlib.Int32)
 
 type node =
-  | Select of { cond : Smtml.Expr.t; if_true : eval_tree; if_false : eval_tree }
-  | Select_i32 of { value : Smtml.Expr.t; branches : eval_tree IMap.t }
-  | Assume of { cond : Smtml.Expr.t; cont : eval_tree }
-  | Assert of { cond : Smtml.Expr.t; cont : eval_tree; mutable disproved : assignments option }
+  | Select of
+      { cond : Smtml.Expr.t
+      ; if_true : eval_tree
+      ; if_false : eval_tree
+      }
+  | Select_i32 of
+      { value : Smtml.Expr.t
+      ; branches : eval_tree IMap.t
+      }
+  | Assume of
+      { cond : Smtml.Expr.t
+      ; cont : eval_tree
+      }
+  | Assert of
+      { cond : Smtml.Expr.t
+      ; cont : eval_tree
+      ; mutable disproved : assignments option
+      }
   | Unreachable
   | Not_explored
 
 and eval_tree =
-  { mutable node : node;
-    pc : Concolic_choice.pc;
-    mutable ends : (end_of_trace * assignments) list }
+  { mutable node : node
+  ; pc : Concolic_choice.pc
+  ; mutable ends : (end_of_trace * assignments) list
+  }
 
-let fresh_tree pc =
-  { node = Not_explored; pc; ends = [] }
+let fresh_tree pc = { node = Not_explored; pc; ends = [] }
 
 let new_node pc (head : Concolic_choice.pc_elt) : node =
   match head with
   | Select (cond, _) ->
     Select { cond; if_true = fresh_tree pc; if_false = fresh_tree pc }
-  | Select_i32 ( value, _) ->
-    Select_i32 { value; branches = IMap.empty }
-  | Assume cond ->
-    Assume { cond; cont = fresh_tree pc }
-  | Assert cond ->
-    Assert { cond; cont = fresh_tree pc; disproved = None }
+  | Select_i32 (value, _) -> Select_i32 { value; branches = IMap.empty }
+  | Assume cond -> Assume { cond; cont = fresh_tree pc }
+  | Assert cond -> Assert { cond; cont = fresh_tree pc; disproved = None }
 
 let try_initialize pc node head =
-  match node.node with
-  | Not_explored ->
-    node.node <- new_node pc head
-  | _ -> ()
+  match node.node with Not_explored -> node.node <- new_node pc head | _ -> ()
 
 let check = true
 
@@ -241,29 +252,27 @@ let rec add_trace pc node (trace : trace) =
   | [] -> begin
     node.ends <- (trace.end_of_trace, trace.assignments) :: node.ends;
     match trace.end_of_trace with
-    | Trap Unreachable ->
-      begin match node.node with
-        | Not_explored -> node.node <- Unreachable
-        | Unreachable -> ()
-        | _ -> assert false
-      end
+    | Trap Unreachable -> begin
+      match node.node with
+      | Not_explored -> node.node <- Unreachable
+      | Unreachable -> ()
+      | _ -> assert false
+    end
     | _ -> ()
   end
-  | head_of_trace :: tail_of_trace ->
+  | head_of_trace :: tail_of_trace -> (
     try_initialize pc node head_of_trace;
     let pc = head_of_trace :: pc in
-    match node.node, head_of_trace with
+    match (node.node, head_of_trace) with
     | Not_explored, _ -> assert false
     | Unreachable, _ -> assert false
     | Select { cond; if_true; if_false }, Select (cond', v) ->
-      if check then assert(Smtml.Expr.equal cond cond');
-      let branch =
-        if v then if_true else if_false
-      in
+      if check then assert (Smtml.Expr.equal cond cond');
+      let branch = if v then if_true else if_false in
       add_trace pc branch { trace with remaining_pc = tail_of_trace }
     | _, Select _ | Select _, _ -> assert false
     | Select_i32 { value; branches }, Select_i32 (value', v) ->
-      if check then assert(Smtml.Expr.equal value value');
+      if check then assert (Smtml.Expr.equal value value');
       let branch =
         match IMap.find_opt v branches with
         | None ->
@@ -275,24 +284,27 @@ let rec add_trace pc node (trace : trace) =
       add_trace pc branch { trace with remaining_pc = tail_of_trace }
     | _, Select_i32 _ | Select_i32 _, _ -> assert false
     | Assume { cond; cont }, Assume cond' ->
-      if check then assert(Smtml.Expr.equal cond cond');
+      if check then assert (Smtml.Expr.equal cond cond');
       add_trace pc cont { trace with remaining_pc = tail_of_trace }
     | _, Assume _ | Assume _, _ -> assert false
     | Assert ({ cond; cont; disproved = _ } as assert_), Assert cond' ->
-      if check then assert(Smtml.Expr.equal cond cond');
-      begin match tail_of_trace, trace.end_of_trace with
+      if check then assert (Smtml.Expr.equal cond cond');
+      begin
+        match (tail_of_trace, trace.end_of_trace) with
         | [], Assert_fail -> assert_.disproved <- Some trace.assignments
         | _ -> ()
       end;
-      add_trace pc cont { trace with remaining_pc = tail_of_trace }
+      add_trace pc cont { trace with remaining_pc = tail_of_trace } )
+
 let add_trace tree trace = add_trace [] tree trace
 
 let run_once tree link_state modules_to_run forced_values =
   let result = run_modules_to_run link_state modules_to_run in
-  let (result, Choice.{ pc; symbols = _; symbols_value; preallocated_values = _ } as r) =
-    let forced_values = match forced_values with
-      | None -> Hashtbl.create 0
-      | Some v -> v
+  let ( ( result
+        , Choice.{ pc; symbols = _; symbols_value; preallocated_values = _ } )
+        as r ) =
+    let forced_values =
+      match forced_values with None -> Hashtbl.create 0 | Some v -> v
     in
     Choice.run forced_values result
   in
@@ -304,7 +316,9 @@ let run_once tree link_state modules_to_run forced_values =
     | Error Assert_fail -> Assert_fail
     | Error (Assume_fail _c) -> Assume_fail
   in
-  let trace = { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace } in
+  let trace =
+    { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
+  in
   let () =
     Format.pp_std "Add trace:@\n";
     Format.pp_std "%a@\n" Concolic_choice.pp_pc trace.remaining_pc
@@ -316,8 +330,7 @@ let run_once tree link_state modules_to_run forced_values =
 let rec find_node_to_run tree =
   match tree.node with
   | Not_explored ->
-    Format.pp_std "Try unexplored@.%a@.@."
-      Concolic_choice.pp_pc tree.pc;
+    Format.pp_std "Try unexplored@.%a@.@." Concolic_choice.pp_pc tree.pc;
     Some tree.pc
   | Select { cond = _; if_true; if_false } ->
     let b = Random.bool () in
@@ -325,30 +338,24 @@ let rec find_node_to_run tree =
     let tree = if b then if_true else if_false in
     find_node_to_run tree
   | Select_i32 _ -> failwith "TODO"
-  | Assume { cond = _; cont } ->
-    find_node_to_run cont
+  | Assume { cond = _; cont } -> find_node_to_run cont
   | Assert { cond; cont = _; disproved = None } ->
-    let pc : Concolic_choice.pc =
-      Select (cond, false) :: tree.pc
-    in
-    Format.pp_std "Try Assert@.%a@.@."
-      Concolic_choice.pp_pc pc;
+    let pc : Concolic_choice.pc = Select (cond, false) :: tree.pc in
+    Format.pp_std "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
     Some pc
-  | Assert { cond = _; cont; disproved = Some _ } ->
-    find_node_to_run cont
+  | Assert { cond = _; cont; disproved = Some _ } -> find_node_to_run cont
   | Unreachable ->
-    Format.pp_std "Unreachable (Retry)@.%a@."
-      Concolic_choice.pp_pc tree.pc;
+    Format.pp_std "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
     None
 
 let pc_model solver pc =
   let expr = Concolic_choice.pc_to_exprs pc in
   match Solver.Z3Batch.check solver expr with
   | `Unsat | `Unknown -> None
-  | `Sat ->
+  | `Sat -> (
     match Solver.Z3Batch.model solver with
     | None -> assert false
-    | Some model -> Some model
+    | Some model -> Some model )
 
 let find_model_to_run solver tree =
   match find_node_to_run tree with
@@ -362,11 +369,12 @@ let launch solver tree link_state modules_to_run =
       None
     else
       match find_model_to_run solver tree with
-      | None -> find_model (n-1)
+      | None -> find_model (n - 1)
       | Some m ->
         let () =
           Format.pp_std "Found something to run %a@."
-            (fun ppf v -> Smtml.Model.pp ppf v) m
+            (fun ppf v -> Smtml.Model.pp ppf v)
+            m
         in
         Some m
   in
@@ -378,28 +386,25 @@ let launch solver tree link_state modules_to_run =
   and run_model model count =
     let r, thread = run_once tree link_state modules_to_run model in
     match r with
-    | Ok Ok () -> loop (count - 1)
+    | Ok (Ok ()) -> loop (count - 1)
     | Ok (Error e) -> Result.failwith e
     | Error (Assume_fail c) -> begin
       Format.pp_std "Assume_fail: %a@\n" Smtml.Expr.pp c;
-      Format.pp_std "Assignments:@\n%a@\n" Concolic_choice.pp_assignments thread.symbols_value;
+      Format.pp_std "Assignments:@\n%a@\n" Concolic_choice.pp_assignments
+        thread.symbols_value;
       Format.pp_std "Retry !@\n";
       match pc_model solver thread.pc with
       | None ->
         Format.pp_err "Can't satisfy assume !@\n";
         loop (count - 1)
-      | Some model ->
-        run_model (Some model) (count - 1)
+      | Some model -> run_model (Some model) (count - 1)
     end
-    | Error (Trap trap) ->
-      Some (`Trap trap, thread)
-    | Error Assert_fail ->
-      Some (`Assert_fail, thread)
+    | Error (Trap trap) -> Some (`Trap trap, thread)
+    | Error Assert_fail -> Some (`Assert_fail, thread)
   in
   loop 10
 
 (* TODO ICI: avec ce modèle, préparer un truc que symbol va pouvoir utiliser pour donner les valeurs de l'exécution *)
-
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
@@ -430,7 +435,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (*   | Error (`Msg msg) -> Error (`Msg msg) *)
   (* in *)
   let solver = Solver.Z3Batch.create () in
-  let* link_state, modules_to_run = simplify_then_link_files ~unsafe ~optimize files in
+  let* link_state, modules_to_run =
+    simplify_then_link_files ~unsafe ~optimize files
+  in
   let tree = fresh_tree [] in
   let result = launch solver tree link_state modules_to_run in
 
@@ -440,14 +447,15 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   in
   let print_values symbols_value =
     Format.pp_std "Assignments:@\n";
-    List.iter (fun (s, v) -> Format.pp_std "  %a: %li" Smtml.Symbol.pp s v) symbols_value;
+    List.iter
+      (fun (s, v) -> Format.pp_std "  %a: %li" Smtml.Symbol.pp s v)
+      symbols_value;
     Format.pp_std "@\n"
   in
 
   let () =
     match result with
-    | None ->
-      Format.pp_std "OK@\n"
+    | None -> Format.pp_std "OK@\n"
     | Some (`Trap trap, thread) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string trap);
       print_pc thread.pc;

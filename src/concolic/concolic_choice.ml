@@ -1,5 +1,6 @@
 type err =
-  | Assert_fail (* TODO add assertion (will be needed by the environment functions *)
+  | Assert_fail
+    (* TODO add assertion (will be needed by the environment functions *)
   | Trap of Trap.t
   | Assume_fail of Symbolic_value.vbool
 
@@ -10,48 +11,37 @@ type pc_elt =
   | Assert of Symbolic_value.vbool
 
 let pp_pc_elt fmt = function
-  | Select (c, v) ->
-    Format.pp fmt "Select(%a, %b)" Smtml.Expr.pp c v
-  | Select_i32 (c, v) ->
-    Format.pp fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
-  | Assume c ->
-    Format.pp fmt "Assume(%a)" Smtml.Expr.pp c
-  | Assert c ->
-    Format.pp fmt "Assert(%a)" Smtml.Expr.pp c
+  | Select (c, v) -> Format.pp fmt "Select(%a, %b)" Smtml.Expr.pp c v
+  | Select_i32 (c, v) -> Format.pp fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
+  | Assume c -> Format.pp fmt "Assume(%a)" Smtml.Expr.pp c
+  | Assert c -> Format.pp fmt "Assert(%a)" Smtml.Expr.pp c
 
-let pp_pc fmt pc =
-  List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
+let pp_pc fmt pc = List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
 
 let pp_assignments fmt assignments =
-  List.iter (fun (sym, v) -> Format.pp fmt "  %a : %li@\n" Smtml.Symbol.pp sym v) assignments
+  List.iter
+    (fun (sym, v) -> Format.pp fmt "  %a : %li@\n" Smtml.Symbol.pp sym v)
+    assignments
 
 let pc_elt_to_expr = function
-  | Select (c, v) ->
-    Some (if v then c else Smtml.Expr.Bool.not c)
-  | Select_i32 (c, n) ->
-    Some (Smtml.Expr.Bitv.I32.(c = v n))
-  | Assume c ->
-    Some c
-  | Assert _ ->
-    None
+  | Select (c, v) -> Some (if v then c else Smtml.Expr.Bool.not c)
+  | Select_i32 (c, n) -> Some Smtml.Expr.Bitv.I32.(c = v n)
+  | Assume c -> Some c
+  | Assert _ -> None
 
 let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
 
 type pc = pc_elt list
 
-type thread = {
-  pc : pc;
-  symbols : int;
-  symbols_value : (Smtml.Symbol.t * Int32.t) list;
-  preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
-}
+type thread =
+  { pc : pc
+  ; symbols : int
+  ; symbols_value : (Smtml.Symbol.t * Int32.t) list
+  ; preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
+  }
 
-let init_thread preallocated_values = {
-  symbols = 0;
-  pc = [];
-  symbols_value = [];
-  preallocated_values
-}
+let init_thread preallocated_values =
+  { symbols = 0; pc = []; symbols_value = []; preallocated_values }
 
 type 'a run_result = ('a, err) Stdlib.Result.t * thread
 
@@ -96,35 +86,35 @@ let select_i32 (i : Concolic_value.V.int32) =
 let assume (vb : Concolic_value.V.vbool) =
   let assume_pc = Assume vb.s in
   let r = vb.c in
-  if r then
-    M (fun st -> (Ok (), add_pc st assume_pc))
-  else
-    M (fun st -> (Error (Assume_fail vb.s), st))
+  if r then M (fun st -> (Ok (), add_pc st assume_pc))
+  else M (fun st -> (Error (Assume_fail vb.s), st))
 
 let assertion (vb : Concolic_value.V.vbool) =
   let assert_pc = Assert vb.s in
   let r = vb.c in
-  if r then
-    M (fun st -> (Ok (), add_pc st assert_pc))
-  else
-    M (fun st -> (Error (Assume_fail vb.s), st))
+  if r then M (fun st -> (Ok (), add_pc st assert_pc))
+  else M (fun st -> (Error (Assume_fail vb.s), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
 
 let with_thread f = M (fun st -> (Ok (f st), st))
 
 let with_new_symbol ty f =
-  M (fun st ->
+  M
+    (fun st ->
       let id = st.symbols + 1 in
       let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
       let value = Hashtbl.find_opt st.preallocated_values sym in
       let expr, v = f sym value in
       let st =
         { st with
-          symbols = st.symbols + 1;
-          symbols_value = (sym, expr) :: st.symbols_value } in
-      (Ok v, st))
+          symbols = st.symbols + 1
+        ; symbols_value = (sym, expr) :: st.symbols_value
+        }
+      in
+      (Ok v, st) )
 
 let run' (M v) : _ run_result = v (init_thread (Hashtbl.create 0))
 
-let run preallocated_values (M v) : _ run_result = v (init_thread preallocated_values)
+let run preallocated_values (M v) : _ run_result =
+  v (init_thread preallocated_values)
