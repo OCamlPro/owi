@@ -115,11 +115,15 @@ let c_cmd =
     let doc = "write results to dir" in
     Arg.(value & opt string "owi-out" & info [ "output"; "o" ] ~doc)
   in
+  let concolic =
+    let doc = "concolic mode" in
+    Arg.(value & flag & info [ "concolic" ] ~doc)
+  in
   Cmd.v info
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values $ deterministic_result_order )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic )
 
 let fmt_cmd =
   let open Cmdliner in
