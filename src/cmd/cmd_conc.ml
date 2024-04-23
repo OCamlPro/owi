@@ -337,7 +337,16 @@ let rec find_node_to_run tree =
     Format.pp_std "Select bool %b@." b;
     let tree = if b then if_true else if_false in
     find_node_to_run tree
-  | Select_i32 _ -> failwith "TODO"
+  | Select_i32 { value = _; branches } ->
+    (* TODO: better ! *)
+    let branches = IMap.bindings branches in
+    let n = List.length branches in
+    if n = 0 then None
+    else
+      let i = Random.int n in
+      let () = Format.pp_std "Select_i32 %i@." i in
+      let _, branch = List.nth branches i in
+      find_node_to_run branch
   | Assume { cond = _; cont } -> find_node_to_run cont
   | Assert { cond; cont = _; disproved = None } ->
     let pc : Concolic_choice.pc = Select (cond, false) :: tree.pc in
