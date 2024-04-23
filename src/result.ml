@@ -110,7 +110,8 @@ let rec err_to_string = function
   | `Unexpected_token -> "unexpected token"
   | `Unknown_function id -> Format.sprintf "unknown function %d" id
   | `Unknown_global -> "unknown global"
-  | `Unknown_import (modul, value) -> Format.sprintf "unknown import %S %S" modul value
+  | `Unknown_import (modul, value) ->
+    Format.sprintf "unknown import %S %S" modul value
   | `Unknown_label -> "unknown label"
   | `Unknown_local id -> Format.sprintf "unknown local %s" id
   | `Unknown_memory id -> Format.sprintf "unknown memory %d" id

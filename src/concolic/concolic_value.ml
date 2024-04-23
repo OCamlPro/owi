@@ -33,7 +33,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   (* Bof... *)
   let value_pair (c : C.t) (s : S.t) =
-    match c, s with
+    match (c, s) with
     | I32 c, I32 s -> I32 { c; s }
     | I64 c, I64 s -> I64 { c; s }
     | F32 c, F32 s -> F32 { c; s }
