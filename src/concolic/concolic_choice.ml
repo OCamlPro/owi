@@ -71,16 +71,22 @@ let ( let+ ) = map
 
 let add_pc (st : thread) c = { st with pc = c :: st.pc }
 
+let no_choice e =
+  let v = Smtml.Expr.simplify e in
+  match Smtml.Expr.view v with Val _ -> true | _ -> false
+
 let select (vb : Concolic_value.V.vbool) =
   let r = vb.c in
   let cond = Select (vb.s, r) in
-  M (fun st -> (Ok r, add_pc st cond))
+  let no_choice = no_choice vb.s in
+  M (fun st -> (Ok r, if no_choice then st else add_pc st cond))
 [@@inline]
 
 let select_i32 (i : Concolic_value.V.int32) =
   let r = i.c in
   let expr = Select_i32 (i.s, i.c) in
-  M (fun st -> (Ok r, add_pc st expr))
+  let no_choice = no_choice i.s in
+  M (fun st -> (Ok r, if no_choice then st else add_pc st expr))
 [@@inline]
 
 let assume (vb : Concolic_value.V.vbool) =
@@ -92,7 +98,9 @@ let assume (vb : Concolic_value.V.vbool) =
 let assertion (vb : Concolic_value.V.vbool) =
   let assert_pc = Assert vb.s in
   let r = vb.c in
-  if r then M (fun st -> (Ok (), add_pc st assert_pc))
+  if r then
+    let no_choice = no_choice vb.s in
+    M (fun st -> (Ok (), if no_choice then st else add_pc st assert_pc))
   else M (fun st -> (Error (Assume_fail vb.s), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
