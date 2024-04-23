@@ -19,18 +19,18 @@ let symbolic_extern_module :
         let sym_value = Smtml.Expr.Bitv.I32.v n in
         sym_value, Value.pair n sym_expr )
   in
-  (* let assume_i32 (i : Value.int32) : unit Choice.t = *)
-  (*   let c = Value.I32.to_bool i in *)
-  (*   Choice.add_pc c *)
-  (* in *)
+  let assume_i32 (i : Value.int32) : unit Choice.t =
+    let c = Value.I32.to_bool i in
+    Concolic_choice.assume c
+  in
   (* let assume_positive_i32 (i : Value.int32) : unit Choice.t = *)
   (*   let c = Value.I32.ge i Value.I32.zero in *)
   (*   Choice.add_pc c *)
   (* in *)
-  (* let assert_i32 (i : Value.int32) : unit Choice.t = *)
-  (*   let c = Value.I32.to_bool i in *)
-  (*   Choice.assertion c *)
-  (* in *)
+  let assert_i32 (i : Value.int32) : unit Choice.t =
+    let c = Value.I32.to_bool i in
+    Concolic_choice.assertion c
+  in
   (* we need to describe their types *)
   let functions =
     [ (*   ( "i8_symbol" *)
@@ -48,15 +48,15 @@ let symbolic_extern_module :
       (* ; ( "f64_symbol" *)
       (*   , Symbolic.P.Extern_func.Extern_func *)
       (*       (Func (UArg Res, R1 F64), symbol (Ty_fp 64)) ) *)
-      (* ; ( "assume" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (Arg (I32, Res), R0), assume_i32) ) *)
+      ; ( "assume"
+        , Concolic.P.Extern_func.Extern_func
+            (Func (Arg (I32, Res), R0), assume_i32) )
       (* ; ( "assume_positive_i32" *)
       (*   , Symbolic.P.Extern_func.Extern_func *)
       (*       (Func (Arg (I32, Res), R0), assume_positive_i32) ) *)
-      (* ; ( "assert" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (Arg (I32, Res), R0), assert_i32) ) *)
+      ; ( "assert"
+        , Concolic.P.Extern_func.Extern_func
+            (Func (Arg (I32, Res), R0), assert_i32) )
     ]
   in
   { functions }
@@ -159,7 +159,8 @@ let run_file ~unsafe ~optimize pc filename =
   simplify_then_link_then_run ~unsafe ~optimize pc m0dule
 
 let get_model (* ~symbols *) solver pc =
-  assert (`Sat = Solver.Z3Batch.check solver pc);
+  let expr = Concolic_choice.pc_to_exprs pc in
+  assert (`Sat = Solver.Z3Batch.check solver expr);
   match Solver.Z3Batch.model (* ~symbols *) solver with
   | None -> assert false
   | Some model -> model
@@ -200,8 +201,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
 
   let print_pc () =
     Format.pp_std "PC:@\n";
-    List.iter (fun e -> Format.pp_std "  %a" Expr.pp e) pc;
-    Format.pp_std "@\n"
+    Format.pp_std "%a@\n" Concolic_choice.pp_pc pc
   in
   let print_values () =
     Format.pp_std "Assignments:@\n";
@@ -223,6 +223,12 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       (* TODO rerun with something else *)
     end
     | Ok (Error e) -> Result.failwith e
+    | Error (Assume_fail c) ->
+      Format.pp_std "Assume_fail: %a@\n" Smtml.Expr.pp c;
+      print_pc ();
+      print_values ();
+      let model = get_model solver pc in
+      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
     | Error (Trap trap) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string trap);
       print_pc ();
