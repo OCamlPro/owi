@@ -287,7 +287,7 @@ let exit_code =
       | `Unexpected_token -> 40
       | `Unknown_function _id -> 41
       | `Unknown_global -> 42
-      | `Unknown_import -> 43
+      | `Unknown_import _ -> 43
       | `Unknown_label -> 44
       | `Unknown_local _id -> 45
       | `Unknown_memory _id -> 46
