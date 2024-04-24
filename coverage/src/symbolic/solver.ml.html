@@ -31,10 +31,14 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -52,8 +56,16 @@
 <a href="#L11">11</a>
 <a href="#L12">12</a>
 <a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
 </pre>
-<pre><code class="ocaml">type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 
 type solver = S : ('a solver_module * 'a) -&gt; solver [@@unboxed]
 
@@ -62,10 +74,10 @@ module Z3Batch = Smtml.Solver.Batch (Smtml.Z3_mappings)
 let solver_mod : Z3Batch.t solver_module = (module Z3Batch)
 
 let fresh_solver () =
-  <span data-count="1312">l</span>et module Mapping = Smtml.Z3_mappings.Fresh.Make () in
+  <span data-count="1314">l</span>et module Mapping = Smtml.Z3_mappings.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="1311">S</span> ((module Batch), solver)
+  <span data-count="1313">S</span> ((module Batch), solver)
 </code></pre>
       </div>
     </div>

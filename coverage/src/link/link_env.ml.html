@@ -327,8 +327,8 @@
 <a href="#L148">148</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021 Léo Andrès *)
-(* Copyright © 2021 Pierre Chambart *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
 
 open Types
 open Syntax
@@ -357,21 +357,21 @@ type 'ext t =
   ; id : Env_id.t
   }
 
-let id (env : _ t) = <span data-count="313890">e</span>nv.id
+let id (env : _ t) = <span data-count="315733">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="24498">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="24733">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="2136539">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="2138084">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1611882">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1611890">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10127250">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10127275">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="986">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="1740">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="23949">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="23960">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
