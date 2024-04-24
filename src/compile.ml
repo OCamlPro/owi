@@ -27,7 +27,7 @@ let until_typecheck ~unsafe m =
 
 let until_optimize ~unsafe ~optimize m =
   let+ m = until_typecheck ~unsafe m in
-  if optimize then (Optimize.modul m) else m
+  if optimize then Optimize.modul m else m
 
 let until_link ~unsafe link_state ~optimize ~name m =
   let* m = until_optimize ~unsafe ~optimize m in
