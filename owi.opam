@@ -67,6 +67,5 @@ depexts: [
   ["llvm" "wabt"]  {os-family = "homebrew"}
 ]
 pin-depends: [
-  [ "smtml.dev" "git+https://github.com/formalsec/smtml#6536983c6c778f66bb3b57e7467760831e3efd4a"]
   [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
 ]
