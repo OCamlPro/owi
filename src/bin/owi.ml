@@ -187,6 +187,18 @@ let sym_cmd =
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
       $ files )
 
+let wasm2wat_cmd =
+  let open Cmdliner in
+  let info =
+    let doc =
+      "Generate a text format file (.wat) file from a binary format file \
+       (.wasm)"
+    in
+    let man = [] @ shared_man in
+    Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info Term.(const Cmd_wasm2wat.cmd $ files)
+
 let cli =
   let open Cmdliner in
   let info =
@@ -199,7 +211,15 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ c_cmd; fmt_cmd; opt_cmd; run_cmd; script_cmd; sym_cmd; validate_cmd ]
+    [ c_cmd
+    ; fmt_cmd
+    ; opt_cmd
+    ; run_cmd
+    ; script_cmd
+    ; sym_cmd
+    ; validate_cmd
+    ; wasm2wat_cmd
+    ]
 
 let exit_code =
   let open Cmdliner.Cmd.Exit in

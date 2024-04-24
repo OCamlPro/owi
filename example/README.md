@@ -9,6 +9,7 @@
 - [`owi script`]
 - [`owi sym`]
 - [`owi validate`]
+- [`owi wasm2wat`]
 
 ## Owi library
 
@@ -47,6 +48,10 @@ COMMANDS
        validate [--debug] [OPTION]… [ARG]…
            Validate a module
 
+       wasm2wat [OPTION]… [ARG]…
+           Generate a text format file (.wat) file from a binary format file
+           (.wasm)
+
 COMMON OPTIONS
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
@@ -79,5 +84,6 @@ BUGS
 [`owi script`]: ./script
 [`owi sym`]: ./sym
 [`owi validate`]: ./validate
+[`owi wasm2wat`]: ./wasm2wat
 [import OCaml functions in a Wasm module]: ./define_host_function
 [OCaml library]: ./lib
