@@ -221,9 +221,9 @@
 
 open Stdlib.Result
 
-let ( let* ) o f = <span data-count="1518101">m</span>atch o with <span data-count="1508144">O</span>k v -&gt; f v | <span data-count="9957">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="1551199">m</span>atch o with <span data-count="1537667">O</span>k v -&gt; f v | <span data-count="13532">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="338032">m</span>atch o with <span data-count="336063">O</span>k v -&gt; Ok (<span data-count="336063">f</span> v) | <span data-count="1969">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="352457">m</span>atch o with <span data-count="344976">O</span>k v -&gt; Ok (<span data-count="344976">f</span> v) | <span data-count="7481">E</span>rror _ as e -&gt; e
 
 let error v = <span data-count="0">E</span>rror v
 

@@ -125,13 +125,13 @@ type t =
   ; breadcrumbs : int32 list
   }
 
-let pc t = <span data-count="1542">t</span>.pc
+let pc t = <span data-count="1384">t</span>.pc
 
-let memories t = <span data-count="295817">t</span>.memories
+let memories t = <span data-count="295621">t</span>.memories
 
-let tables t = <span data-count="4509">t</span>.tables
+let tables t = <span data-count="4502">t</span>.tables
 
-let globals t = <span data-count="23462">t</span>.globals
+let globals t = <span data-count="23282">t</span>.globals
 
 let breadcrumbs t = <span data-count="82">t</span>.breadcrumbs
 
@@ -146,10 +146,10 @@ let create () =
   }
 
 let clone { choices; symbol_set; pc; memories; tables; globals; breadcrumbs } =
-  <span data-count="9323">l</span>et memories = Symbolic_memory.clone memories in
-  <span data-count="9322">l</span>et tables = Symbolic_table.clone tables in
-  <span data-count="9323">l</span>et globals = Symbolic_global.clone globals in
-  <span data-count="9322">{</span> choices; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  <span data-count="8980">l</span>et memories = Symbolic_memory.clone memories in
+  <span data-count="8981">l</span>et tables = Symbolic_table.clone tables in
+  <span data-count="8981">l</span>et globals = Symbolic_global.clone globals in
+  <span data-count="8982">{</span> choices; symbol_set; pc; memories; tables; globals; breadcrumbs }
 </code></pre>
       </div>
     </div>

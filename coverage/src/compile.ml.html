@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>compile.ml &mdash; Coverage report</title>
-    <meta name="description" content="95.24% coverage in src/compile.ml">
+    <meta name="description" content="93.75% coverage in src/compile.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,11 @@
           <span class="dirname">src/</span>compile.ml
         </a>
       </h1>
-      <h2>95.24%</h2>
+      <h2>93.75%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:16.67%"></span>
-      <span class="some-visited" style="bottom:38.10%"></span>
+      <span class="some-visited" style="top:17.95%"></span>
+      <span class="some-visited" style="bottom:41.03%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -28,44 +28,41 @@
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
-<a id="L5"></a><span class="visited"> </span>
+<a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span class="some-visited"> </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
+<a id="L23"></a><span class="some-visited"> </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="some-visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span > </span>
-<a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -109,43 +106,37 @@
 <a href="#L37">37</a>
 <a href="#L38">38</a>
 <a href="#L39">39</a>
-<a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021 Léo Andrès *)
 (* Copyright © 2021 Pierre Chambart *)
 
-let ( let* ) o f = <span data-count="66534">m</span>atch o with <span data-count="9528">E</span>rror msg -&gt; Error msg | <span data-count="57006">O</span>k v -&gt; f v
+open Syntax
 
 let until_check ~unsafe m = <span data-count="6259">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6259">C</span>heck.modul m
 
 let until_group ~unsafe m =
   <span data-count="6259">l</span>et* m = until_chec<span data-count="6259">k</span> ~unsafe m in
-  <span data-count="6197">l</span>et* m = Grouped.of_symboli<span data-count="6197">c</span> m in
-  <span data-count="6179">O</span>k m
+  <span data-count="6197">G</span>rouped.of_symbolic m
 
 let until_assign ~unsafe m =
   <span data-count="6259">l</span>et* m = until_grou<span data-count="6259">p</span> ~unsafe m in
-  <span data-count="6179">l</span>et* m = Assigned.of_groupe<span data-count="6179">d</span> m in
-  <span data-count="6161">O</span>k m
+  <span data-count="6179">A</span>ssigned.of_grouped m
 
 let until_simplify ~unsafe m =
   <span data-count="6259">l</span>et* m = until_assig<span data-count="6259">n</span> ~unsafe m in
-  <span data-count="6161">l</span>et* m = Rewrite.modu<span data-count="6161">l</span> m in
-  <span data-count="5756">O</span>k m
+  <span data-count="6161">R</span>ewrite.modul m
 
 let until_typecheck ~unsafe m =
   <span data-count="6138">l</span>et* m = until_simplif<span data-count="6138">y</span> ~unsafe m in
   <span data-count="5753">i</span>f unsafe then <span data-count="0">O</span>k m
   else
-    <span data-count="5753">l</span>et* () = Typecheck.modu<span data-count="5749">l</span> m in
-    <span data-count="3184">O</span>k m
+    <span data-count="5753">l</span>et+ () = Typecheck.modu<span data-count="5749">l</span> m in
+    <span data-count="3184">m</span>
 
 let until_optimize ~unsafe ~optimize m =
-  <span data-count="6135">l</span>et* m = until_typechec<span data-count="6131">k</span> ~unsafe m in
-  <span data-count="3184">i</span>f optimize then <span data-count="1387">O</span>k (Optimize.modu<span data-count="1387">l</span> m) else <span data-count="1797">O</span>k m
+  <span data-count="6135">l</span>et+ m = until_typechec<span data-count="6131">k</span> ~unsafe m in
+  <span data-count="3184">i</span>f optimize then <span data-count="1387">O</span>ptimize.modul m else <span data-count="1797">m</span>
 
 let until_link ~unsafe link_state ~optimize ~name m =
   <span data-count="6113">l</span>et* m = until_optimiz<span data-count="6109">e</span> ~unsafe ~optimize m in
@@ -153,8 +144,8 @@ let until_link ~unsafe link_state ~optimize ~name m =
 
 let until_interpret link_state ~unsafe ~optimize ~name m =
   <span data-count="2552">l</span>et* m, link_state = until_lin<span data-count="2548">k</span> link_state ~unsafe ~optimize ~name m in
-  <span data-count="2545">l</span>et* () = Interpret.Concrete.modu<span data-count="2545">l</span> link_state.envs m in
-  <span data-count="2545">O</span>k link_state
+  <span data-count="2545">l</span>et+ () = Interpret.Concrete.modu<span data-count="2545">l</span> link_state.envs m in
+  <span data-count="2545">l</span>ink_state
 </code></pre>
       </div>
     </div>
