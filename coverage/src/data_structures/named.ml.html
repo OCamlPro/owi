@@ -33,13 +33,15 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -62,6 +64,8 @@
 <a href="#L16">16</a>
 <a href="#L17">17</a>
 <a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -72,6 +76,8 @@ type 'a t =
   { values : 'a Indexed.t list
   ; named : int String_map.t
   }
+
+let empty = { values = []; named = String_map.empty }
 
 let fold f v acc =
   <span data-count="24053">L</span>ist.fold_left

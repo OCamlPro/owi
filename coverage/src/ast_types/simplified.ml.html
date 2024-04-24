@@ -18,10 +18,10 @@
       <h2>69.23%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:19.51%"></span>
-      <span class="unvisited" style="bottom:14.63%"></span>
-      <span class="unvisited" style="bottom:7.32%"></span>
-      <span class="some-visited" style="bottom:4.88%"></span>
+      <span class="some-visited" style="bottom:17.02%"></span>
+      <span class="unvisited" style="bottom:12.77%"></span>
+      <span class="unvisited" style="bottom:6.38%"></span>
+      <span class="some-visited" style="bottom:4.26%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -91,23 +91,35 @@
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
-<a id="L66"></a><span class="some-visited"> </span>
+<a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span class="unvisited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span class="visited"> </span>
+<a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
-<a id="L74"></a><span class="visited"> </span>
+<a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span class="unvisited"> </span>
+<a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span class="some-visited"> </span>
 <a id="L79"></a><span > </span>
 <a id="L80"></a><span > </span>
 <a id="L81"></a><span class="visited"> </span>
-<a id="L82"></a><span > </span>
+<a id="L82"></a><span class="unvisited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span class="some-visited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -194,6 +206,18 @@
 <a href="#L80">80</a>
 <a href="#L81">81</a>
 <a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -257,6 +281,18 @@ type modul =
   ; data : data Named.t
   ; exports : exports
   ; start : int option
+  }
+
+let empty_modul =
+  { id = None
+  ; global = Named.empty
+  ; table = Named.empty
+  ; mem = Named.empty
+  ; func = Named.empty
+  ; elem = Named.empty
+  ; data = Named.empty
+  ; exports = { global = []; mem = []; table = []; func = [] }
+  ; start = None
   }
 
 module Pp = struct
