@@ -559,8 +559,8 @@ let check_dependencies () : deps Result.t =
     }
 
 let pre_patterns : (Re2.t * string) array =
-  Array.ma<span data-count="620">p</span>
-    (fun (regex, template) -&gt; <span data-count="620">(</span>Re2.create_ex<span data-count="620">n</span> regex, template))
+  Array.ma<span data-count="628">p</span>
+    (fun (regex, template) -&gt; <span data-count="628">(</span>Re2.create_ex<span data-count="628">n</span> regex, template))
     [| ( "void\\s+reach_error\\(\\)\\s*\\{.*\\}"
        , "void reach_error() { owi_assert(0); }" )
        (* ugly: Hack to solve duplicate errors on compilation *)
@@ -664,9 +664,9 @@ let link ~deps ~workspace files : Fpath.t Result.t =
 let cleanup dir : unit =
   <span data-count="166">O</span>S.Path.fold ~elements:`Files
     (fun path _acc -&gt;
-      <span data-count="2851">i</span>f not @@ Fpath.has_ex<span data-count="2851">t</span> ".wat" path then
-        <span data-count="2685">m</span>atch OS.Path.delete path with
-        | <span data-count="2685">O</span>k () -&gt; ()
+      <span data-count="2853">i</span>f not @@ Fpath.has_ex<span data-count="2853">t</span> ".wat" path then
+        <span data-count="2687">m</span>atch OS.Path.delete path with
+        | <span data-count="2687">O</span>k () -&gt; ()
         | <span data-count="0">E</span>rror (`Msg e) -&gt; Logs.warn (fun m -&gt; <span data-count="0">m</span> "%s" e) )
     () [ dir ]
   |&gt; <span data-count="166">L</span>ogs.on_error_msg ~level:Logs.Warning ~use:Fun.id

@@ -296,22 +296,22 @@ let empty_modul =
   }
 
 module Pp = struct
-  let id fmt = <span data-count="24">O</span>ption.iter (fun id -&gt; <span data-count="0">p</span>p fmt " $%s" id)
+  let id fmt = <span data-count="27">O</span>ption.iter (fun id -&gt; <span data-count="0">p</span>p fmt " $%s" id)
 
   let func fmt = function
-    | <span data-count="76">R</span>untime.Local f -&gt; pp_func fmt f
+    | <span data-count="81">R</span>untime.Local f -&gt; pp_func fmt f
     | <span data-count="0">R</span>untime.Imported { Imported.modul; name; _ } -&gt; pp fmt "%s.%s" modul name
 
-  let lst f fmt l = <span data-count="24">(</span>pp_lis<span data-count="24">t</span> ~pp_sep:pp_newline f) fmt (List.re<span data-count="24">v</span> l)
+  let lst f fmt l = <span data-count="27">(</span>pp_lis<span data-count="27">t</span> ~pp_sep:pp_newline f) fmt (List.re<span data-count="27">v</span> l)
 
-  let funcs fmt funcs = <span data-count="24">l</span>st (Indexed.p<span data-count="24">p</span> func) fmt funcs.Named.values
+  let funcs fmt funcs = <span data-count="27">l</span>st (Indexed.p<span data-count="27">p</span> func) fmt funcs.Named.values
 
   let export fmt (export : export) = <span data-count="0">p</span>p fmt "%s: %d" export.name export.id
 
-  let start fmt = function <span data-count="0">N</span>one -&gt; () | <span data-count="24">S</span>ome ind -&gt; pp fmt "(start %d)" ind
+  let start fmt = function <span data-count="0">N</span>one -&gt; () | <span data-count="27">S</span>ome ind -&gt; pp fmt "(start %d)" ind
 
   let modul fmt (m : modul) : unit =
-    <span data-count="24">p</span>p fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func start m.start
+    <span data-count="27">p</span>p fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func start m.start
 end
 </code></pre>
       </div>

@@ -145,30 +145,30 @@
 
 open Syntax
 
-let until_check ~unsafe m = <span data-count="6259">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6259">C</span>heck.modul m
+let until_check ~unsafe m = <span data-count="6257">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6257">C</span>heck.modul m
 
 let until_group ~unsafe m =
-  <span data-count="6259">l</span>et* m = until_chec<span data-count="6259">k</span> ~unsafe m in
-  <span data-count="6197">G</span>rouped.of_symbolic m
+  <span data-count="6257">l</span>et* m = until_chec<span data-count="6257">k</span> ~unsafe m in
+  <span data-count="6195">G</span>rouped.of_symbolic m
 
 let until_assign ~unsafe m =
-  <span data-count="6259">l</span>et* m = until_grou<span data-count="6259">p</span> ~unsafe m in
-  <span data-count="6179">A</span>ssigned.of_grouped m
+  <span data-count="6257">l</span>et* m = until_grou<span data-count="6257">p</span> ~unsafe m in
+  <span data-count="6177">A</span>ssigned.of_grouped m
 
 let until_simplify ~unsafe m =
-  <span data-count="6259">l</span>et* m = until_assig<span data-count="6259">n</span> ~unsafe m in
-  <span data-count="6161">R</span>ewrite.modul m
+  <span data-count="6257">l</span>et* m = until_assig<span data-count="6257">n</span> ~unsafe m in
+  <span data-count="6159">R</span>ewrite.modul m
 
 let until_typecheck ~unsafe m =
-  <span data-count="6138">l</span>et* m = until_simplif<span data-count="6138">y</span> ~unsafe m in
-  <span data-count="5753">i</span>f unsafe then <span data-count="0">O</span>k m
+  <span data-count="6136">l</span>et* m = until_simplif<span data-count="6136">y</span> ~unsafe m in
+  <span data-count="5751">i</span>f unsafe then <span data-count="0">O</span>k m
   else
-    <span data-count="5753">l</span>et+ () = Typecheck.modu<span data-count="5749">l</span> m in
-    <span data-count="3184">m</span>
+    <span data-count="5751">l</span>et+ () = Typecheck.modu<span data-count="5747">l</span> m in
+    <span data-count="3182">m</span>
 
 let until_optimize ~unsafe ~optimize m =
-  <span data-count="6135">l</span>et+ m = until_typechec<span data-count="6131">k</span> ~unsafe m in
-  <span data-count="3184">i</span>f optimize then <span data-count="1387">O</span>ptimize.modul m else <span data-count="1797">m</span>
+  <span data-count="6133">l</span>et+ m = until_typechec<span data-count="6129">k</span> ~unsafe m in
+  <span data-count="3182">i</span>f optimize then <span data-count="1385">O</span>ptimize.modul m else <span data-count="1797">m</span>
 
 let until_link ~unsafe link_state ~optimize ~name m =
   <span data-count="6113">l</span>et* m = until_optimiz<span data-count="6109">e</span> ~unsafe ~optimize m in

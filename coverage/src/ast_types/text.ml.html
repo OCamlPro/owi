@@ -536,10 +536,10 @@ let pp_module_field fmt = function
   | <span data-count="3">M</span>Global g -&gt; pp_global fmt g
   | <span data-count="3">M</span>Table t -&gt; pp_table fmt t
   | <span data-count="10">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="125">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="143">M</span>Func f -&gt; pp_func fmt f
   | <span data-count="3">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="0">M</span>Data d -&gt; pp_data fmt d
-  | <span data-count="2">M</span>Start s -&gt; pp_start fmt s
+  | <span data-count="4">M</span>Start s -&gt; pp_start fmt s
   | <span data-count="0">M</span>Import i -&gt; pp_import fmt i
   | <span data-count="31">M</span>Export e -&gt; pp_export fmt e
 
@@ -549,8 +549,8 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="87">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
-    (pp_lis<span data-count="87">t</span> ~pp_sep:pp_newline pp_module_field)
+  <span data-count="89">p</span>p fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
+    (pp_lis<span data-count="89">t</span> ~pp_sep:pp_newline pp_module_field)
     m.fields
 
 type action =

@@ -76,17 +76,17 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  <span data-count="22">l</span>et* modul = Parse.Module.from_fil<span data-count="22">e</span> filename in
-  <span data-count="22">C</span>ompile.until_optimize ~unsafe ~optimize:true modul
+  <span data-count="20">l</span>et* modul = Parse.Module.from_fil<span data-count="20">e</span> filename in
+  <span data-count="20">C</span>ompile.until_optimize ~unsafe ~optimize:true modul
 
 let cmd debug unsafe files =
-  <span data-count="22">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
-  <span data-count="22">l</span>ist_iter
+  <span data-count="20">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
+  <span data-count="20">l</span>ist_iter
     (fun file -&gt;
-      <span data-count="22">m</span>atch optimize_file ~unsafe file with
-      | <span data-count="22">O</span>k modul -&gt;
+      <span data-count="20">m</span>atch optimize_file ~unsafe file with
+      | <span data-count="20">O</span>k modul -&gt;
         Format.pp_std "%a@\n" Simplified.Pp.modul modul;
-        <span data-count="22">O</span>k ()
+        <span data-count="20">O</span>k ()
       | <span data-count="0">E</span>rror _ as e -&gt; e )
     files
 </code></pre>
