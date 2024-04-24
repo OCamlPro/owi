@@ -1,7 +1,7 @@
 // An encoding representing the problem of finding a suitable
 // set of cards for https://en.wikipedia.org/wiki/Dobble.
-// Cards are encoded on integers, with each position 
-// representing one of N_CARDS possible symbols. 
+// Cards are encoded on integers, with each position
+// representing one of N_CARDS possible symbols.
 #include <owi.h>
 #include <stdlib.h>
 
