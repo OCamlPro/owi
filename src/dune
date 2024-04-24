@@ -17,6 +17,7 @@
   cmd_script
   cmd_sym
   cmd_validate
+  cmd_wasm2wat
   compile
   concrete
   concrete_choice

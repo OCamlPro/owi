@@ -1,0 +1,2 @@
+(cram
+ (deps %{bin:owi} done.wasm m.wasm locals.wasm locals_drop.wasm))

@@ -28,6 +28,10 @@ no subcommand should print help
          validate [--debug] [OPTION]… [ARG]…
              Validate a module
   
+         wasm2wat [OPTION]… [ARG]…
+             Generate a text format file (.wat) file from a binary format file
+             (.wasm)
+  
   COMMON OPTIONS
          --help[=FMT] (default=auto)
              Show this help in format FMT. The value FMT must be one of auto,

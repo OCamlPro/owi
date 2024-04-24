@@ -9,6 +9,7 @@
 - [`owi script`]: an interpreter for [Wasm scripts];
 - [`owi sym`]: a symbolic Wasm interpreter;
 - [`owi validate`]: a validator for Wasm modules.
+- [`owi wasm2wat`]: a Wasm binary to text format translater.
 
 It also provides an [OCaml library] which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
 
@@ -181,6 +182,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [`owi script`]: example/script
 [`owi sym`]: example/sym
 [`owi validate`]: example/validate
+[`owi wasm2wat`]: example/wasm2wat
 [import OCaml functions in a Wasm module]: example/define_host_function
 [OCaml library]: example/lib
 [a fuzzer]: test/fuzz
