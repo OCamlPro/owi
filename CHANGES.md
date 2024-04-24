@@ -1,18 +1,10 @@
 ## unreleased
 
-- add an advanced example based on the Conway's Game of Life
-- add some new optimizations
-- add function to directly parse a module instead of a script
-- add a basic optimization mode
+- use a subcommand system for the `owi` binary
+- add `owi c`, `owi fmt`, `owi opt`, `owi sym` and `owi validate` subcommands
+- add a fuzzer
 - add a profiling mode
-- improve compilation time by using menhir with table mode
-- improve performance (ifprintf was critical in the interpreter loop)
-- allow to name linked module (no need to register them anymore)
 - make `spectec` print stuff for real
-- fix bug with memory grow limit on i32
-- fix bug with i32 to int conversion
-- fix bug with address on i32 architecture
-- fix `menhir` lower bound
 
 ## 0.1 - 2023-01-14
 
