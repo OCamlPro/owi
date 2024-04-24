@@ -1,5 +1,7 @@
 ## unreleased
 
+## 0.2 - 2024-04-24
+
 - use a subcommand system for the `owi` binary
 - add `owi c`, `owi fmt`, `owi opt`, `owi sym`, `owi validate` and `owi wasm2wat` subcommands
 - add a fuzzer
