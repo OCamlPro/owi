@@ -4,7 +4,6 @@
  (public_name owi)
  (modules
   assigned
-  binary_basic_decode
   binary_deserializer
   c_instrumentor
   c_share
