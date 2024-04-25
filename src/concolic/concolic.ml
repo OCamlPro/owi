@@ -174,51 +174,50 @@ module P = struct
   end
 
   module Env = struct
-    type t =
-      { concrete_env : Extern_func.extern_func Link_env.t
-      ; memories : Symbolic_memory.collection
-      ; tables : Symbolic_table.collection
-      ; globals : Symbolic_global.collection
-      }
+    type t = Extern_func.extern_func Link_env.t
 
     type t' = Env_id.t
 
     let get_memory env id : Memory.t Choice.t =
-      let orig_mem = Link_env.get_memory env.concrete_env id in
-      let sym_mem =
-        Symbolic_memory.get_memory
-          (Link_env.id env.concrete_env)
-          orig_mem env.memories id
+      let orig_mem = Link_env.get_memory env id in
+      let f (t : thread) : Memory.t =
+        let sym_mem =
+          Symbolic_memory.get_memory (Link_env.id env) orig_mem
+            t.shared.memories id
+        in
+        { c = orig_mem; s = sym_mem }
       in
-      Choice.return ({ c = orig_mem; s = sym_mem } : Memory.t)
+      Choice.with_thread f
 
-    let get_func env id = Link_env.get_func env.concrete_env id
+    let get_func env id = Link_env.get_func env id
 
-    let get_extern_func env id = Link_env.get_extern_func env.concrete_env id
+    let get_extern_func env id = Link_env.get_extern_func env id
 
-    let get_table (env : t) i : Table.t Choice.t =
-      let orig_table = Link_env.get_table env.concrete_env i in
-      let sym_table =
-        Symbolic_table.get_table
-          (Link_env.id env.concrete_env)
-          orig_table env.tables i
+    let get_table env id : Table.t Choice.t =
+      let orig_table = Link_env.get_table env id in
+      let f (t : thread) : Table.t =
+        let sym_table =
+          Symbolic_table.get_table (Link_env.id env) orig_table t.shared.tables id
+        in
+        { c = orig_table; s = sym_table }
       in
-      Choice.return ({ c = orig_table; s = sym_table } : Table.t)
+      Choice.with_thread f
 
-    let get_elem env i = Link_env.get_elem env.concrete_env i
+    let get_elem env i = Link_env.get_elem env i
 
     let get_data env n =
-      let data = Link_env.get_data env.concrete_env n in
+      let data = Link_env.get_data env n in
       Choice.return data
 
-    let get_global (env : t) i : Global.t Choice.t =
-      let orig_global = Link_env.get_global env.concrete_env i in
-      let sym_global =
-        Symbolic_global.get_global
-          (Link_env.id env.concrete_env)
-          orig_global env.globals i
+    let get_global env id : Global.t Choice.t =
+      let orig_global = Link_env.get_global env id in
+      let f (t : thread) : Global.t =
+        let sym_global =
+          Symbolic_global.get_global (Link_env.id env) orig_global t.shared.globals id
+        in
+        { c = orig_global; s = sym_global }
       in
-      Choice.return ({ c = orig_global; s = sym_global } : Global.t)
+      Choice.with_thread f
 
     let drop_elem _ =
       (* TODO *)
@@ -244,13 +243,6 @@ end
 
 module P' : Interpret_intf.P = P
 
-let convert_env (env : P.Extern_func.extern_func Link_env.t) : P.Env.t =
-  { concrete_env = env
-  ; memories = Symbolic_memory.init ()
-  ; tables = Symbolic_table.init ()
-  ; globals = Symbolic_global.init ()
-  }
-
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.
-    { modul = m.modul; env = convert_env m.env; to_run = m.to_run }
+    { modul = m.modul; env = m.env; to_run = m.to_run }

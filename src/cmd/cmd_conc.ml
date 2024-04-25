@@ -169,16 +169,10 @@ let simplify_then_link_files ~unsafe ~optimize filenames =
   (link_state, List.rev modules_to_run)
 
 let run_modules_to_run (link_state : _ Link.state) modules_to_run =
-  let link_state_envs =
-    (* TODO: fix (move globals/memories/tables back to thread and fix this)
-       Or we can fix this by sharing the result of Concolic.convert_env
-    *)
-    Env_id.map Concolic.convert_env link_state.envs
-  in
   List.fold_left
     (fun (acc : unit Result.t Concolic.P.Choice.t) to_run ->
       let** () = acc in
-      (Interpret.Concolic.modul link_state_envs) to_run )
+      (Interpret.Concolic.modul link_state.envs) to_run )
     (Choice.return (Ok ())) modules_to_run
 
 let get_model (* ~symbols *) solver pc =
@@ -301,7 +295,7 @@ let add_trace tree trace = add_trace [] tree trace
 let run_once tree link_state modules_to_run forced_values =
   let result = run_modules_to_run link_state modules_to_run in
   let ( ( result
-        , Choice.{ pc; symbols = _; symbols_value; preallocated_values = _ } )
+        , Choice.{ pc; symbols = _; symbols_value; shared = _; preallocated_values = _ } )
         as r ) =
     let forced_values =
       match forced_values with None -> Hashtbl.create 0 | Some v -> v

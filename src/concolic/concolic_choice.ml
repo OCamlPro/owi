@@ -33,15 +33,22 @@ let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
 
 type pc = pc_elt list
 
+type shared_thread_info =
+  { memories : Symbolic_memory.collection
+  ; tables : Symbolic_table.collection
+  ; globals : Symbolic_global.collection
+  }
+
 type thread =
   { pc : pc
   ; symbols : int
   ; symbols_value : (Smtml.Symbol.t * Int32.t) list
   ; preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
+  ; shared : shared_thread_info
   }
 
-let init_thread preallocated_values =
-  { symbols = 0; pc = []; symbols_value = []; preallocated_values }
+let init_thread preallocated_values shared =
+  { symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
 
 type 'a run_result = ('a, err) Stdlib.Result.t * thread
 
@@ -122,7 +129,14 @@ let with_new_symbol ty f =
       in
       (Ok v, st) )
 
-let run' (M v) : _ run_result = v (init_thread (Hashtbl.create 0))
-
 let run preallocated_values (M v) : _ run_result =
-  v (init_thread preallocated_values)
+  let shared =
+    { memories = Symbolic_memory.init ()
+    ; tables = Symbolic_table.init ()
+    ; globals = Symbolic_global.init () }
+  in
+  v (init_thread preallocated_values shared)
+
+let run' t : _ run_result =
+  let preallocated_values = Hashtbl.create 0 in
+  run preallocated_values t
