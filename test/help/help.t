@@ -10,6 +10,9 @@ no subcommand should print help
          c [OPTION]… [ARG]…
              Compile a C file to Wasm and run the symbolic interpreter on it
   
+         conc [OPTION]… [ARG]…
+             Run the concolic interpreter
+  
          fmt [--inplace] [OPTION]… [ARG]…
              Format a .wat or .wast file
   
