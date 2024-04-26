@@ -3,6 +3,7 @@
 ## Owi binary
 
 - [`owi c`]
+- [`owi conc`]
 - [`owi fmt`]
 - [`owi opt`]
 - [`owi run`]
@@ -29,6 +30,9 @@ SYNOPSIS
 COMMANDS
        c [OPTION]… [ARG]…
            Compile a C file to Wasm and run the symbolic interpreter on it
+
+       conc [OPTION]… [ARG]…
+           Run the concolic interpreter
 
        fmt [--inplace] [OPTION]… [ARG]…
            Format a .wat or .wast file
