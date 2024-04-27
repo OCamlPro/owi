@@ -17,6 +17,7 @@ type err =
   | `Duplicate_local of string
   | `Duplicate_memory of string
   | `Duplicate_table of string
+  | `Failed_with_but_expected of err * string
   | `Found_bug of int
   | `Global_is_immutable
   | `Illegal_escape of string
@@ -55,12 +56,11 @@ type err =
   | `Unknown_operator
   | `Unknown_type
   | `Unsupported_file_extension of string
-  | `Wrong_memory_id of int
   ]
 
 type 'a t = ('a, err) Stdlib.Result.t
 
-let err_to_string = function
+let rec err_to_string = function
   | `Alignment_too_large -> "alignment must not be larger than natural"
   | `Assert_failure -> "script assert failure"
   | `Bad_result -> "bad result"
@@ -68,12 +68,14 @@ let err_to_string = function
   | `Constant_expression_required -> "constant expression required"
   | `Constant_out_of_range -> "constant out of range"
   | `Did_not_fail_but_expected expected ->
-    Format.sprintf "expected %s but got Ok" expected
+    Format.sprintf "expected %s but there was no error" expected
   | `Duplicate_export_name -> "duplicate export name"
   | `Duplicate_global id -> Format.sprintf "duplicate global %s" id
   | `Duplicate_local id -> Format.sprintf "duplicate local %s" id
   | `Duplicate_memory id -> Format.sprintf "duplicate memory %s" id
   | `Duplicate_table id -> Format.sprintf "duplicate table %s" id
+  | `Failed_with_but_expected (got, expected) ->
+    Format.sprintf "expected %s but got (%s)" expected (err_to_string got)
   | `Found_bug n ->
     if n > 1 then Format.sprintf "Reached %d problems!" n
     else Format.sprintf "Reached problem!"
@@ -117,6 +119,5 @@ let err_to_string = function
   | `Unknown_type -> "unknown type"
   | `Unsupported_file_extension ext ->
     Format.sprintf "unsupported file_extension %S" ext
-  | `Wrong_memory_id id -> Format.sprintf "wrong memory %d" id
 
 let failwith e = failwith (err_to_string e)

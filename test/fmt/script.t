@@ -1534,10 +1534,10 @@ print script:
     "type mismatch"
   )
   (assert_malformed_quote
-    [(func (result i32) (i32.const nan:arithmetic))]
+    "(func (result i32) (i32.const nan:arithmetic))"
     "unexpected token"
   )
   (assert_malformed_quote
-    [(func (result i32) (i32.const nan:canonical))]
+    "(func (result i32) (i32.const nan:canonical))"
     "unexpected token"
   )

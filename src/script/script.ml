@@ -24,7 +24,7 @@ let check_error ~expected ~got : unit Result.t =
        && (expected = "i32 constant out of range" || expected = "i32 constant")
   in
   if not ok then begin
-    Error got
+    Error (`Failed_with_but_expected (got, expected))
   end
   else Ok ()
 
@@ -159,57 +159,64 @@ let run ~no_exhaustion ~optimize script =
         let* m, link_state =
           Compile.until_link link_state ~unsafe ~optimize ~name:None m
         in
-        let+ () =
-          check_error_result expected
-            (Interpret.Concrete.modul link_state.envs m)
-        in
+        let got = Interpret.Concrete.modul link_state.envs m in
+        let+ () = check_error_result expected got in
         link_state
-      | Assert (Assert_malformed_binary _) ->
+      | Assert (Assert_malformed_binary (m, expected)) ->
         Log.debug0 "*** assert_malformed_binary@\n";
-        (* TODO: check this when binary format is supported *)
-        Ok link_state
+        let got = Binary_deserializer.from_string m in
+        let+ () = check_error_result expected got in
+        link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug0 "*** assert_malformed_quote@\n";
+        (* TODO: use Parse.Module.from_string instead *)
+        let got = Parse.Script.from_string m in
         let+ () =
-          match Parse.Script.from_string (String.concat "\n" m) with
+          match got with
           | Error got -> check_error ~expected ~got
-          | Ok [ Module m ] -> (
-            match Compile.until_simplify ~unsafe m with
-            | Error got -> check_error ~expected ~got
-            | Ok _m ->
-              let got = `No_error in
-              check_error ~expected ~got )
-          | Ok _ -> assert false
+          | Ok [ Module m ] ->
+            let got = Compile.until_simplify ~unsafe m in
+            check_error_result expected got
+          | _ -> assert false
         in
         link_state
-      | Assert (Assert_invalid_binary _) ->
+      | Assert (Assert_invalid_binary (m, expected)) ->
         Log.debug0 "*** assert_invalid_binary@\n";
-        (* TODO: check this when binary format is supported *)
-        Ok link_state
+        let got = Binary_deserializer.from_string m in
+        let+ () =
+          match got with
+          | Error got -> check_error ~expected ~got
+          | Ok m ->
+            (* TODO: there should be some checks here before linking ! *)
+            let got = Link.modul link_state ~name:None m in
+            check_error_result expected got
+        in
+        link_state
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug0 "*** assert_invalid@\n";
-        let+ () =
-          match
-            Compile.until_link link_state ~unsafe ~optimize ~name:None m
-          with
-          | Ok _ -> check_error ~expected ~got:`No_error
-          | Error got -> check_error ~expected ~got
+        let got =
+          Compile.until_link link_state ~unsafe ~optimize ~name:None m
         in
+        let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.debug0 "*** assert_invalid_quote@\n";
-        let got = Parse.Script.from_string (String.concat "\n" m) in
+        let got = Parse.Module.from_string m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.debug0 "*** assert_unlinkable@\n";
-        let+ () =
-          check_error_result expected
-            (Compile.until_link link_state ~unsafe ~optimize ~name:None m)
+        let got =
+          Compile.until_link link_state ~unsafe ~optimize ~name:None m
         in
+        let+ () = check_error_result expected got in
         link_state
-      | Assert (Assert_malformed _) ->
+      | Assert (Assert_malformed (m, expected)) ->
         Log.debug0 "*** assert_malformed@\n";
+        let got =
+          Compile.until_link ~unsafe ~optimize ~name:None link_state m
+        in
+        let+ () = check_error_result expected got in
         Log.err "TODO"
       | Assert (Assert_return (a, res)) ->
         Log.debug0 "*** assert_return@\n";

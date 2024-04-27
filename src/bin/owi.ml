@@ -281,7 +281,7 @@ let exit_code =
       | `Unknown_operator -> 48
       | `Unknown_type -> 49
       | `Unsupported_file_extension _ext -> 50
-      | `Wrong_memory_id _id -> 51
+      | `Failed_with_but_expected (_got, _expected) -> 51
     end
   end
   | Error e -> (
