@@ -133,7 +133,8 @@ let run preallocated_values (M v) : _ run_result =
   let shared =
     { memories = Symbolic_memory.init ()
     ; tables = Symbolic_table.init ()
-    ; globals = Symbolic_global.init () }
+    ; globals = Symbolic_global.init ()
+    }
   in
   v (init_thread preallocated_values shared)
 

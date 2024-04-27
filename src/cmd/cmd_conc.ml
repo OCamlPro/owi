@@ -297,8 +297,13 @@ let add_trace tree trace = add_trace [] tree trace
 let run_once tree link_state modules_to_run forced_values =
   let result = run_modules_to_run link_state modules_to_run in
   let ( ( result
-        , Choice.{ pc; symbols = _; symbols_value; shared = _; preallocated_values = _ } )
-        as r ) =
+        , Choice.
+            { pc
+            ; symbols = _
+            ; symbols_value
+            ; shared = _
+            ; preallocated_values = _
+            } ) as r ) =
     let forced_values =
       match forced_values with None -> Hashtbl.create 0 | Some v -> v
     in
