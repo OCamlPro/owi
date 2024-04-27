@@ -274,7 +274,7 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  if mem <> 0 then Error (`Wrong_memory_id mem)
+  if mem <> 0 then Error (`Unknown_memory mem)
   else
     Ok
       [ I32_const offset

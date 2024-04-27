@@ -17,6 +17,7 @@ type err =
   | `Duplicate_local of string
   | `Duplicate_memory of string
   | `Duplicate_table of string
+  | `Failed_with_but_expected of err * string
   | `Found_bug of int
   | `Global_is_immutable
   | `Illegal_escape of string
@@ -55,7 +56,6 @@ type err =
   | `Unknown_operator
   | `Unknown_type
   | `Unsupported_file_extension of string
-  | `Wrong_memory_id of int
   ]
 
 type 'a t = ('a, err) Stdlib.Result.t

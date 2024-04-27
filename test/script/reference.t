@@ -1,7 +1,11 @@
   $ owi script --no-exhaustion reference/address.wast
   $ owi script --no-exhaustion reference/align.wast
   $ owi script --no-exhaustion reference/binary-leb128.wast
+  expected integer representation too long but there was no error
+  [7]
   $ owi script --no-exhaustion reference/binary.wast
+  expected integer too large but there was no error
+  [7]
   $ owi script --no-exhaustion reference/block.wast
   $ owi script --no-exhaustion reference/br_if.wast
   $ owi script --no-exhaustion reference/br_table.wast
@@ -13,7 +17,11 @@
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
   $ owi script --no-exhaustion reference/custom.wast
+  expected unexpected end but there was no error
+  [7]
   $ owi script --no-exhaustion reference/data.wast
+  expected unknown memory 0 but there was no error
+  [7]
   $ owi script --no-exhaustion reference/elem.wast
   $ owi script --no-exhaustion reference/endianness.wast
   $ owi script --no-exhaustion reference/exports.wast
@@ -107,6 +115,12 @@
   $ owi script --no-exhaustion reference/unreached-valid.wast
   $ owi script --no-exhaustion reference/unwind.wast
   $ owi script --no-exhaustion reference/utf8-custom-section-id.wast
+  expected malformed UTF-8 encoding but there was no error
+  [7]
   $ owi script --no-exhaustion reference/utf8-import-field.wast
+  expected malformed UTF-8 encoding but there was no error
+  [7]
   $ owi script --no-exhaustion reference/utf8-import-module.wast
+  expected malformed UTF-8 encoding but there was no error
+  [7]
   $ owi script --no-exhaustion reference/utf8-invalid-encoding.wast

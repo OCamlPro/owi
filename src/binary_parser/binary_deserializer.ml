@@ -9,31 +9,6 @@ open Simplified
 open Syntax
 open Types
 
-module Error = struct
-  type t =
-    { pos : int
-    ; context : string list
-    ; backtrace : Printexc.raw_backtrace
-    }
-
-  let add_context ctx err =
-    match err with
-    | Ok _ as ok -> ok
-    | Error err -> Error { err with context = ctx :: err.context }
-
-  let fail pos ctx =
-    Error { pos; context = [ ctx ]; backtrace = Printexc.get_callstack 10 }
-
-  let msg err =
-    let ctx =
-      List.fold_left
-        (fun str ctx -> Format.sprintf "%s%s@\n" str ctx)
-        "" err.context
-    in
-    let bt = Printexc.raw_backtrace_to_string err.backtrace in
-    Format.sprintf "at_byte:%d@\n%s%s" err.pos ctx bt
-end
-
 module Input = struct
   type t =
     { bytes : string
@@ -41,8 +16,6 @@ module Input = struct
     ; size : int
     ; error_msg_info : string
     }
-
-  let global_pos input = input.pt + input.size
 
   let is_empty input = input.size = 0
 
@@ -54,8 +27,8 @@ module Input = struct
     if pos <= input.size && len <= input.size - pos then
       Ok { input with pt = input.pt + pos; size = len; error_msg_info }
     else
-      Error.fail (global_pos input)
-        ("Unexpected end-of-section: " ^ error_msg_info)
+      Error
+        (`Msg (Format.sprintf "Unexpected end-of-section: %s" error_msg_info))
 
   let sub_suffix pos error_msg_info input =
     sub ~pos ~len:(input.size - pos) error_msg_info input
@@ -64,9 +37,7 @@ module Input = struct
 
   let get n input =
     if n < input.size then Ok (String.get input.bytes (input.pt + n))
-    else
-      Error.fail (global_pos input)
-        (Format.sprintf "get_byte %d error: input %d %d" n input.pt input.size)
+    else Error (`Msg "unexpected end")
 
   let get0 = get 0
 end
@@ -77,57 +48,57 @@ let string_of_char_list char_list =
   Buffer.contents buf
 
 let read_byte input =
-  let* c = Error.add_context "read one byte" @@ Input.get0 input in
+  let* c = Input.get0 input in
   let+ next_input = Input.sub_suffix 1 input.error_msg_info input in
   (c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
 let rec read_UN n input =
-  assert (n > 0);
-  let* b, input = read_byte input in
-  let b = Char.code b in
-  let x = Int64.of_int (b land 0x7f) in
-  if b land 0x80 = 0 then Ok (x, input)
-  else
-    (* TODO: make this tail-rec *)
-    let+ i64, input = read_UN (n - 7) input in
-    (Int64.logor x (Int64.shl i64 7L), input)
+  if n <= 0 then Error (`Msg "integer representation too long")
+  else begin
+    let* b, input = read_byte input in
+    let b = Char.code b in
+    let x = Int64.of_int (b land 0x7f) in
+    if b land 0x80 = 0 then Ok (x, input)
+    else
+      (* TODO: make this tail-rec *)
+      let+ i64, input = read_UN (n - 7) input in
+      (Int64.logor x (Int64.shl i64 7L), input)
+  end
 
 let read_U32 input =
-  let+ i64, input =
-    Error.add_context "unsigned i32 parsing" @@ read_UN 32 input
-  in
+  let+ i64, input = read_UN 32 input in
   (Int64.to_int i64, input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
 let rec read_SN n input =
-  assert (n > 0);
-  let* b, input = read_byte input in
-  let b = Char.code b in
-  let x = Int64.of_int (b land 0x7f) in
-  if b land 0x80 = 0 then
-    if b land 0x40 = 0 then Ok (x, input)
-    else Ok (Int64.(logor x (logxor (-1L) 0x7fL)), input)
-  else
-    (* TODO: make this tail-rec *)
-    let* i64, input = read_SN (n - 7) input in
-    Ok (Int64.logor x (Int64.shl i64 7L), input)
+  if n <= 0 then Error (`Msg "integer representation too long")
+  else begin
+    let* b, input = read_byte input in
+    let b = Char.code b in
+    let x = Int64.of_int (b land 0x7f) in
+    if b land 0x80 = 0 then
+      let x =
+        if b land 0x40 = 0 then x else Int64.(logor x (logxor (-1L) 0x7fL))
+      in
+      Ok (x, input)
+    else
+      (* TODO: make this tail-rec *)
+      let+ i64, input = read_SN (n - 7) input in
+      (Int64.logor x (Int64.shl i64 7L), input)
+  end
 
 let read_S32 input =
-  let+ i64, input =
-    Error.add_context "signed i32 parsing" @@ read_SN 32 input
-  in
+  let+ i64, input = read_SN 32 input in
   (Int64.to_int32 i64, input)
 
 let read_S64 input =
-  let+ i64, input =
-    Error.add_context "signed i64 parsing" @@ read_SN 64 input
-  in
+  let+ i64, input = read_SN 64 input in
   (i64, input)
 
 let read_F32 input =
   let i32_of_byte input =
-    let+ b, input = Error.add_context "float32 parsing" @@ read_byte input in
+    let+ b, input = read_byte input in
     (Int32.of_int (int_of_char b), input)
   in
   let* i1, input = i32_of_byte input in
@@ -142,7 +113,7 @@ let read_F32 input =
 
 let read_F64 input =
   let i64_of_byte input =
-    let+ b, input = Error.add_context "float64 parsing" @@ read_byte input in
+    let+ b, input = read_byte input in
     (Int64.of_int (int_of_char b), input)
   in
   let* i1, input = i64_of_byte input in
@@ -164,7 +135,7 @@ let read_F64 input =
   (Float64.of_bits i64, input)
 
 let vector parse_elt input =
-  let* nb_elt, input = Error.add_context "vector parsing" @@ read_U32 input in
+  let* nb_elt, input = read_U32 input in
   let rec loop loop_id input acc =
     if nb_elt = loop_id then Ok (List.rev acc, input)
     else
@@ -177,21 +148,19 @@ let vector parse_elt input =
 let vector_no_id f input = vector (fun _id -> f) input
 
 let deserialize_indice input :
-  (Types.simplified Types.indice * Input.t, Error.t) result =
+  (Types.simplified Types.indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (Raw indice, input)
 
 let deserialize_reftype input =
-  let* b, input = Error.add_context "deserialize_reftype" @@ read_byte input in
+  let* b, input = read_byte input in
   match b with
   | '\x70' -> Ok ((Null, Func_ht), input)
   | '\x6F' -> Ok ((Null, Extern_ht), input)
-  | c ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_reftype error: char %c" c)
+  | c -> Error (`Msg (Format.sprintf "deserialize_reftype error: char %c" c))
 
 let deserialize_valtype input =
-  let* b, input = Error.add_context "deserialize_valtype" @@ read_byte input in
+  let* b, input = read_byte input in
   match b with
   | '\x7F' -> Ok (Num_type I32, input)
   | '\x7E' -> Ok (Num_type I64, input)
@@ -200,21 +169,17 @@ let deserialize_valtype input =
   | '\x7B' -> assert false (* (V128, input) *)
   | '\x70' -> Ok (Ref_type (Null, Func_ht), input)
   | '\x6F' -> Ok (Ref_type (Null, Extern_ht), input)
-  | c ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_valtype error: char %c" c)
+  | c -> Error (`Msg (Format.sprintf "deserialize_valtype error: char %c" c))
 
 let deserialize_mut input =
-  let* b, input = Error.add_context "deserialize_mut" @@ read_byte input in
+  let* b, input = read_byte input in
   match b with
   | '\x00' -> Ok (Const, input)
   | '\x01' -> Ok (Var, input)
-  | c ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_mut error: char %c" c)
+  | _c -> Error (`Msg "malformed mutability")
 
 let deserialize_limits input =
-  let* b, input = Error.add_context "deserialize_limits" @@ read_byte input in
+  let* b, input = read_byte input in
   match b with
   | '\x00' ->
     let+ min, input = read_U32 input in
@@ -223,21 +188,17 @@ let deserialize_limits input =
     let* min, input = read_U32 input in
     let+ max, input = read_U32 input in
     ({ min; max = Some max }, input)
-  | c ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_limits error: char %c" c)
+  | c -> Error (`Msg (Format.sprintf "deserialize_limits error: char %c" c))
 
 let deserialize_memarg input =
-  let* align, input =
-    Error.add_context "deserialize_memargs" @@ read_U32 input
-  in
+  let* align, input = read_U32 input in
   let+ offset, input = read_U32 input in
   let align = Int32.of_int align in
   let offset = Int32.of_int offset in
   ({ align; offset }, input)
 
 let deserialize_FC input =
-  let* i, input = Error.add_context "deserialize_0xFC" @@ read_U32 input in
+  let* i, input = read_U32 input in
   match i with
   | 0 -> Ok (I_trunc_sat_f (S32, S32, S), input)
   | 1 -> Ok (I_trunc_sat_f (S32, S32, U), input)
@@ -253,9 +214,7 @@ let deserialize_FC input =
     begin
       match b with
       | '\x00' -> Ok (Memory_init dataidx, input)
-      | c ->
-        Error.fail (Input.global_pos input)
-          (Format.sprintf "deserialize_0xFC 8 error: char %c" c)
+      | c -> Error (`Msg (Format.sprintf "deserialize_0xFC 8 error: char %c" c))
     end
   | 9 ->
     let* dataidx, input = deserialize_indice input in
@@ -270,21 +229,16 @@ let deserialize_FC input =
           match b with
           | '\x00' -> Ok (Memory_copy, input)
           | c ->
-            Error.fail (Input.global_pos input)
-              (Format.sprintf "deserialize_0xFC 10 error: char %c" c)
+            Error (`Msg (Format.sprintf "deserialize_0xFC 10 error: char %c" c))
         end
-      | c ->
-        Error.fail (Input.global_pos input)
-          (Format.sprintf "deserialize_0xFC 10 error: char %c" c)
+      | c -> Error (`Msg (Format.sprintf "deserialize_0xFC 10 error: char %c" c))
     end
   | 11 ->
     let* b, input = read_byte input in
     begin
       match b with
       | '\x00' -> Ok (Memory_fill, input)
-      | c ->
-        Error.fail (Input.global_pos input)
-          (Format.sprintf "deserialize_0xFC 11 error: char %c" c)
+      | c -> Error (`Msg (Format.sprintf "deserialize_0xFC 11 error: char %c" c))
     end
   | 12 ->
     let* elemidx, input = deserialize_indice input in
@@ -306,14 +260,10 @@ let deserialize_FC input =
   | 17 ->
     let* tableidx, input = deserialize_indice input in
     Ok (Table_fill tableidx, input)
-  | i ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_0xFC %d error" i)
+  | i -> Error (`Msg (Format.sprintf "deserialize_0xFC %d error" i))
 
 let rec deserialize_instr block_type_array input =
-  let* b, next_input =
-    Error.add_context "deserialize_instruction" @@ read_byte input
-  in
+  let* b, next_input = read_byte input in
   match b with
   | '\x00' -> Ok (Unreachable, next_input)
   | '\x01' -> Ok (Nop, next_input)
@@ -514,8 +464,8 @@ let rec deserialize_instr block_type_array input =
       match b with
       | '\x00' -> Ok (Memory_size, next_input)
       | c ->
-        Error.fail (Input.global_pos input)
-          (Format.sprintf "deserialize_instruction 0x3F error: char %c" c)
+        Error
+          (`Msg (Format.sprintf "deserialize_instruction 0x3F error: char %c" c))
     end
   | '\x40' ->
     let* b, next_input = read_byte next_input in
@@ -523,8 +473,8 @@ let rec deserialize_instr block_type_array input =
       match b with
       | '\x00' -> Ok (Memory_grow, next_input)
       | c ->
-        Error.fail (Input.global_pos input)
-          (Format.sprintf "deserialize_instruction 0x40 error: char %c" c)
+        Error
+          (`Msg (Format.sprintf "deserialize_instruction 0x40 error: char %c" c))
     end
   | '\x41' ->
     let* i32, next_input = read_S32 next_input in
@@ -674,15 +624,11 @@ let rec deserialize_instr block_type_array input =
     let* funcidx, next_input = deserialize_indice next_input in
     Ok (Ref_func funcidx, next_input)
   | '\xFC' -> deserialize_FC input
-  | c ->
-    Error.fail (Input.global_pos input)
-      (Format.sprintf "deserialize_instruction error: char %c" c)
+  | c -> Error (`Msg (Format.sprintf "deserialize_instruction error: char %c" c))
 
 and deserialize_code block_type_array instr_list input :
-  ('a expr * Input.t, Error.t) result =
-  let* b, next_input =
-    Error.add_context "deserialize_code" @@ read_byte input
-  in
+  ('a expr * Input.t, _) result =
+  let* b, next_input = read_byte input in
   match b with
   | '\x0B' -> Ok (List.rev instr_list, next_input)
   | _ ->
@@ -691,10 +637,8 @@ and deserialize_code block_type_array instr_list input :
     deserialize_code block_type_array instr_list input
 
 and deserialize_codes_if block_type_array instr_list_then instr_list_else input
-  : ('a expr * 'a expr * Input.t, Error.t) result =
-  let* b, next_input =
-    Error.add_context "deserialize_codes_if" @@ read_byte input
-  in
+  : ('a expr * 'a expr * Input.t, _) result =
+  let* b, next_input = read_byte input in
   match b with
   | '\x05' ->
     let* instr_list_else, next_input =
@@ -713,27 +657,25 @@ type ('a, 'b) import =
   | Mem of limits
   | Global of mut * 'b val_type
 
-let consume_to_end x error_msg_info input =
-  let+ input = Input.sub ~pos:0 ~len:0 error_msg_info input in
-  (x, input)
-
 let magic_check str =
-  let magic = String.sub str 0 4 in
-  if String.equal magic "\x00\x61\x73\x6d" then Ok ()
-  else Error (`Msg "magic_check error")
+  if String.length str < 4 then Error (`Msg "unexpected end")
+  else
+    let magic = String.sub str 0 4 in
+    if String.equal magic "\x00\x61\x73\x6d" then Ok ()
+    else Error (`Msg "magic header not detected")
 
 let version_check str =
-  let version = String.sub str 4 4 in
-  if String.equal version "\x01\x00\x00\x00" then Ok ()
-  else Error (`Msg "version_check error")
+  if String.length str < 8 then Error (`Msg "unexpected end")
+  else
+    let version = String.sub str 4 4 in
+    if String.equal version "\x01\x00\x00\x00" then Ok ()
+    else Error (`Msg "unknown binary version")
 
 let section_parse input error_msg_info ~expected_id default
   section_content_parse =
   if Input.is_empty input then Ok (default, input)
   else
-    let* id =
-      Error.add_context ("section_parse " ^ error_msg_info) @@ Input.get0 input
-    in
+    let* id = Input.get0 input in
     if id = expected_id then (
       let* input = Input.sub_suffix 1 error_msg_info input in
       let* size, input = read_U32 input in
@@ -745,6 +687,24 @@ let section_parse input error_msg_info ~expected_id default
     else Ok (default, input)
 
 let section_custom input =
+  let consume_to_end x error_msg_info input =
+    let+ input = Input.sub ~pos:0 ~len:0 error_msg_info input in
+    (x, input)
+  in
+  (* TODO: we should fail if name byte count has too many byte *)
+  (* small example:
+      (assert_malformed
+       (module binary
+         "\00asm" "\01\00\00\00"
+         "\00"                   ;; custom section
+         "\0A"                   ;; section size
+         "\83\80\80\80\80\00"    ;; name byte count 3 with one byte too many
+         "123"                   ;; name
+         "4"                     ;; sequence of bytes
+       )
+       "integer representation too long"
+     )
+  *)
   section_parse input "custom_section" ~expected_id:'\x00' ()
   @@ consume_to_end () "custom_section"
 
@@ -752,7 +712,11 @@ let section_type input =
   section_parse input "type_section" ~expected_id:'\x01' []
     (vector (fun id input ->
          let* fcttype, input = read_byte input in
-         assert (fcttype = '\x60');
+         let* () =
+           if fcttype <> '\x60' then
+             Error (`Msg "integer representation too long")
+           else Ok ()
+         in
          let* params, input = vector_no_id deserialize_valtype input in
          let+ results, input = vector_no_id deserialize_valtype input in
          let params = List.map (fun param -> (None, param)) params in
@@ -781,9 +745,7 @@ let section_import input =
            let* val_type, input = deserialize_valtype input in
            let* mut, input = deserialize_mut input in
            Ok ((modul, name, Global (mut, val_type)), input)
-         | c ->
-           Error.fail (Input.global_pos input)
-             (Format.sprintf "import_section error: char %c" c) )
+         | c -> Error (`Msg (Format.sprintf "import_section error: char %c" c)) )
 
 let section_function input =
   section_parse input "function_section" ~expected_id:'\x03' []
@@ -859,8 +821,7 @@ let section_element block_type_array input =
                    }
                  , input )
              | c ->
-               Error.fail (Input.global_pos input)
-                 (Format.sprintf "element_section 1 error: char %c" c)
+               Error (`Msg (Format.sprintf "element_section 1 error: char %c" c))
            end
          | 2 ->
            let* Raw tableidx, input = deserialize_indice input in
@@ -881,8 +842,7 @@ let section_element block_type_array input =
                    }
                  , input )
              | c ->
-               Error.fail (Input.global_pos input)
-                 (Format.sprintf "element_section 2 error: char %c" c)
+               Error (`Msg (Format.sprintf "element_section 2 error: char %c" c))
            end
          | 3 ->
            let* elemkind, input = read_byte input in
@@ -901,8 +861,7 @@ let section_element block_type_array input =
                    }
                  , input )
              | c ->
-               Error.fail (Input.global_pos input)
-                 (Format.sprintf "element_section 3 error: char %c" c)
+               Error (`Msg (Format.sprintf "element_section 3 error: char %c" c))
            end
          | 4 ->
            let* expr, input = deserialize_code block_type_array [] input in
@@ -946,9 +905,7 @@ let section_element block_type_array input =
                input
            in
            Ok ({ id = None; typ; init; mode = Elem_declarative }, input)
-         | i ->
-           Error.fail (Input.global_pos input)
-             (Format.sprintf "element_section %d error" i) ) )
+         | i -> Error (`Msg (Format.sprintf "element_section %d error" i)) ) )
 
 let section_code block_type_array input =
   section_parse input "code_section" ~expected_id:'\x0A' []
@@ -987,12 +944,10 @@ let section_data block_type_array input =
            let init = string_of_char_list bytes in
            Ok
              ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
-         | i ->
-           Error.fail (Input.global_pos input)
-             (Format.sprintf "data_section %d error" i) ) )
+         | i -> Error (`Msg (Format.sprintf "data_section %d error" i)) ) )
 
 let sections_iterate (modul : Simplified.modul) (input : Input.t) =
-  let* (), input = section_custom input in
+  let* _custom_section, input = section_custom input in
   let* block_type_list_type, input = section_type input in
   let block_type_array = Array.of_list block_type_list_type in
   let* imports, input = section_import input in
@@ -1005,7 +960,10 @@ let sections_iterate (modul : Simplified.modul) (input : Input.t) =
   let* elems, input = section_element block_type_array input in
   let* locals_code_list, input = section_code block_type_array input in
   let+ datas, input = section_data block_type_array input in
-  assert (Input.is_empty input);
+  let* () =
+    if not @@ Input.is_empty input then Error (`Msg "malformed section id")
+    else Ok ()
+  in
   let mem =
     let values =
       List.mapi (fun id mem -> Indexed.return id (Runtime.Local mem)) mems
@@ -1147,30 +1105,21 @@ let sections_iterate (modul : Simplified.modul) (input : Input.t) =
         | _ -> failwith "deserialize_exportdesc error" )
       empty_exports exports
   in
-  { modul with global; mem; elem; func; table; start; data; exports }
+  Ok { modul with global; mem; elem; func; table; start; data; exports }
 
-let deserialize content =
+let from_string content =
   let* () = magic_check content in
   let* () = version_check content in
-  let input =
+  let* input =
     Input.from_str_bytes content "full_file" |> Input.sub_suffix 8 "full_file"
   in
-  match input with
-  | Ok input ->
-    let modul = sections_iterate Simplified.empty_modul input in
-    begin
-      match modul with
-      | Ok _ as m -> m
-      | Error err -> Error (`Msg (Error.msg err))
-    end
-  | Error err -> Error (`Msg (Error.msg err))
+  let* m = sections_iterate Simplified.empty_modul input in
+  m
+
+let from_chan chan =
+  let content = In_channel.input_all chan in
+  from_string content
 
 let from_file (filename : Fpath.t) =
-  let* res =
-    Bos.OS.File.with_ic filename
-      (fun chan () ->
-        let content = In_channel.input_all chan in
-        deserialize content )
-      ()
-  in
+  let* res = Bos.OS.File.with_ic filename (fun chan () -> from_chan chan) () in
   res

@@ -1083,11 +1083,23 @@ let assert_ ==
   | ASSERT_TRAP; ~ = par(action); ~ = NAME; <Assert_trap>
   | ASSERT_TRAP; ~ = modul; ~ = NAME; <Assert_trap_module>
   | ASSERT_MALFORMED; ~ = modul; ~ = NAME; <Assert_malformed>
-  | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_quote>
-  | ASSERT_MALFORMED; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_malformed_binary>
+  | ASSERT_MALFORMED; LPAR; MODULE; QUOTE; lines = list(NAME); RPAR; expected = NAME; {
+    let modul = String.concat "\n" lines in
+    Assert_malformed_quote (modul, expected)
+  }
+  | ASSERT_MALFORMED; LPAR; MODULE; BINARY; lines = list(NAME); RPAR; expected = NAME; {
+    let modul = String.concat "" lines in
+    Assert_malformed_binary (modul, expected)
+  }
   | ASSERT_INVALID; ~ = modul; ~ = NAME; <Assert_invalid>
-  | ASSERT_INVALID; LPAR; MODULE; QUOTE; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_quote>
-  | ASSERT_INVALID; LPAR; MODULE; BINARY; ~ = list(NAME); RPAR; ~ = NAME; <Assert_invalid_binary>
+  | ASSERT_INVALID; LPAR; MODULE; QUOTE; lines = list(NAME); RPAR; expected = NAME; {
+    let modul = String.concat "\n" lines in
+    Assert_invalid_quote (modul, expected)
+  }
+  | ASSERT_INVALID; LPAR; MODULE; BINARY; lines = list(NAME); RPAR; expected = NAME; {
+    let modul = String.concat "" lines in
+    Assert_invalid_binary (modul, expected)
+  }
   | ASSERT_UNLINKABLE; ~ = modul; ~ = NAME; <Assert_unlinkable>
 
 let register ==

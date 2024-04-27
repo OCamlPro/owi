@@ -141,15 +141,13 @@ type assertion =
   | Assert_trap of action * string
   | Assert_trap_module of modul * string
   | Assert_malformed of modul * string
-  | Assert_malformed_quote of string list * string
-  | Assert_malformed_binary of string list * string
+  | Assert_malformed_quote of string * string
+  | Assert_malformed_binary of string * string
   | Assert_invalid of modul * string
-  | Assert_invalid_quote of string list * string
-  | Assert_invalid_binary of string list * string
+  | Assert_invalid_quote of string * string
+  | Assert_invalid_binary of string * string
   | Assert_exhaustion of action * string
   | Assert_unlinkable of modul * string
-
-let pp_strings fmt l = pp fmt "[%a]" (pp_list ~pp_sep:pp_space pp_string) l
 
 let pp_assertion fmt = function
   | Assert_return (a, l) ->
@@ -164,19 +162,16 @@ let pp_assertion fmt = function
   | Assert_unlinkable (m, msg) ->
     pp fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
   | Assert_malformed (m, msg) ->
-    pp fmt "(assert_malformed@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
+    pp fmt "(assert_malformed (module binary@\n  @[<v>%a@])@\n  @[<v>%S@]@\n)"
+      pp_modul m msg
   | Assert_malformed_quote (ls, msg) ->
-    pp fmt "(assert_malformed_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_strings
-      ls msg
+    pp fmt "(assert_malformed_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_invalid_quote (ls, msg) ->
-    pp fmt "(assert_invalid_quote@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_strings ls
-      msg
+    pp fmt "(assert_invalid_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_malformed_binary (ls, msg) ->
-    pp fmt "(assert_malformed_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_strings
-      ls msg
+    pp fmt "(assert_malformed_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_invalid_binary (ls, msg) ->
-    pp fmt "(assert_invalid_binary@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_strings
-      ls msg
+    pp fmt "(assert_invalid_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
 
 type register = string * string option
 

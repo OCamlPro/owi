@@ -1,5 +1,6 @@
   $ owi script --no-exhaustion gc/array.wast
-  no error
+  expected unknown type but there was no error
+  [7]
   $ owi script --no-exhaustion gc/br_on_cast_fail.wast
   unexpected token
   [40]
@@ -23,7 +24,7 @@
        Called from Owi__Compile.until_interpret in file "src/compile.ml", line 37, characters 23-70
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 152, characters 10-75
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Script.exec in file "src/script/script.ml", line 253, characters 21-56
+       Called from Owi__Script.exec in file "src/script/script.ml", line 260, characters 21-56
        Called from Owi__Syntax.list_iter.(fun) in file "src/utils/syntax.ml", line 22, characters 14-17
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
@@ -35,9 +36,9 @@
        File "src/script/script.ml", line 103, characters 4-10: Assertion failed
        Raised at Owi__Script.compare_result_const in file "src/script/script.ml", line 103, characters 4-16
        Called from Stdlib__List.for_all2 in file "list.ml", line 181, characters 24-31
-       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 219, characters 17-74
+       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 226, characters 17-74
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Script.exec in file "src/script/script.ml", line 253, characters 21-56
+       Called from Owi__Script.exec in file "src/script/script.ml", line 260, characters 21-56
        Called from Owi__Syntax.list_iter.(fun) in file "src/utils/syntax.ml", line 22, characters 14-17
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
@@ -58,7 +59,7 @@
        Called from Owi__Compile.until_interpret in file "src/compile.ml", line 37, characters 23-70
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 152, characters 10-75
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Script.exec in file "src/script/script.ml", line 253, characters 21-56
+       Called from Owi__Script.exec in file "src/script/script.ml", line 260, characters 21-56
        Called from Owi__Syntax.list_iter.(fun) in file "src/utils/syntax.ml", line 22, characters 14-17
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
@@ -79,7 +80,7 @@
        Called from Owi__Compile.until_interpret in file "src/compile.ml", line 37, characters 23-70
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 152, characters 10-75
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Script.exec in file "src/script/script.ml", line 253, characters 21-56
+       Called from Owi__Script.exec in file "src/script/script.ml", line 260, characters 21-56
        Called from Owi__Syntax.list_iter.(fun) in file "src/utils/syntax.ml", line 22, characters 14-17
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
@@ -100,7 +101,7 @@
        Called from Owi__Compile.until_interpret in file "src/compile.ml", line 37, characters 23-70
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 152, characters 10-75
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
-       Called from Owi__Script.exec in file "src/script/script.ml", line 253, characters 21-56
+       Called from Owi__Script.exec in file "src/script/script.ml", line 260, characters 21-56
        Called from Owi__Syntax.list_iter.(fun) in file "src/utils/syntax.ml", line 22, characters 14-17
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
@@ -111,7 +112,8 @@
   unknown type
   [49]
   $ owi script --no-exhaustion gc/struct.wast
-  no error
+  expected duplicate field but there was no error
+  [7]
   $ owi script --no-exhaustion gc/type-subtyping.wast
   unknown type
   [49]
