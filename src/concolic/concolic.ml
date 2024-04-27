@@ -197,7 +197,8 @@ module P = struct
       let orig_table = Link_env.get_table env id in
       let f (t : thread) : Table.t =
         let sym_table =
-          Symbolic_table.get_table (Link_env.id env) orig_table t.shared.tables id
+          Symbolic_table.get_table (Link_env.id env) orig_table t.shared.tables
+            id
         in
         { c = orig_table; s = sym_table }
       in
@@ -213,7 +214,8 @@ module P = struct
       let orig_global = Link_env.get_global env id in
       let f (t : thread) : Global.t =
         let sym_global =
-          Symbolic_global.get_global (Link_env.id env) orig_global t.shared.globals id
+          Symbolic_global.get_global (Link_env.id env) orig_global
+            t.shared.globals id
         in
         { c = orig_global; s = sym_global }
       in
@@ -244,5 +246,4 @@ end
 module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  P.Module_to_run.
-    { modul = m.modul; env = m.env; to_run = m.to_run }
+  P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
