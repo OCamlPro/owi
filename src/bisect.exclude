@@ -1,2 +1,2 @@
-file "src/text_parser/menhir_parser.ml"
-file "src/text_parser/lexer.ml"
+file "src/parser/text_parser.ml"
+file "src/parser/text_lexer.ml"

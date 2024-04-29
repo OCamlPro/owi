@@ -1,3 +1,0 @@
-(menhir
- (flags --table)
- (modules menhir_parser))

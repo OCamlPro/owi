@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 open Sedlexing
-open Menhir_parser
+open Text_parser
 
 exception Illegal_escape of string
 

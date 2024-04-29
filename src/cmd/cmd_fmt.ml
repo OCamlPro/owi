@@ -8,10 +8,10 @@ let get_printer filename =
   let ext = Fpath.get_ext filename in
   match ext with
   | ".wat" ->
-    let+ v = Parse.Module.from_file filename in
+    let+ v = Parse.Text.Module.from_file filename in
     fun fmt () -> Text.pp_modul fmt v
   | ".wast" ->
-    let+ v = Parse.Script.from_file filename in
+    let+ v = Parse.Text.Script.from_file filename in
     fun fmt () -> Text.pp_script fmt v
   | ext -> Error (`Unsupported_file_extension ext)
 

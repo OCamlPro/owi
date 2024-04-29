@@ -1,0 +1,3 @@
+(menhir
+ (flags --table)
+ (modules text_parser))

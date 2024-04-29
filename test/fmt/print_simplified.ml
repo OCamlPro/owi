@@ -7,7 +7,7 @@ open Owi
 let filename = Fpath.v Sys.argv.(1)
 
 let m =
-  match Parse.Module.from_file filename with
+  match Parse.Text.Module.from_file filename with
   | Ok m -> m
   | Error e -> Result.failwith e
 
@@ -19,7 +19,7 @@ let m =
 let s = Format.asprintf "%a@\n" Simplified.Pp.modul m
 
 let m =
-  match Parse.Module.from_string s with
+  match Parse.Text.Module.from_string s with
   | Ok m -> m
   | Error e -> Result.failwith e
 

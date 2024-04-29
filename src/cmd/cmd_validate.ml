@@ -5,7 +5,7 @@
 open Syntax
 
 let validate filename =
-  let* modul = Parse.Module.from_file filename in
+  let* modul = Parse.Text.Module.from_file filename in
   let+ _modul = Compile.until_typecheck ~unsafe:false modul in
   ()
 
