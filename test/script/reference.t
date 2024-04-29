@@ -1,8 +1,8 @@
   $ owi script --no-exhaustion reference/address.wast
   $ owi script --no-exhaustion reference/align.wast
   $ owi script --no-exhaustion reference/binary-leb128.wast
-  expected integer representation too long but there was no error
-  [7]
+  expected integer representation too long but got (unexpected end)
+  [51]
   $ owi script --no-exhaustion reference/binary.wast
   expected integer too large but there was no error
   [7]
@@ -17,8 +17,8 @@
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
   $ owi script --no-exhaustion reference/custom.wast
-  expected unexpected end but there was no error
-  [7]
+  expected function and code section have inconsistent lengths but got (malformed section id)
+  [51]
   $ owi script --no-exhaustion reference/data.wast
   expected unknown memory 0 but there was no error
   [7]
