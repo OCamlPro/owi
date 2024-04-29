@@ -5,7 +5,7 @@
 open Syntax
 
 let run_file exec filename =
-  let* script = Parse.Script.from_file filename in
+  let* script = Parse.Text.Script.from_file filename in
   exec script
 
 let cmd profiling debug optimize files no_exhaustion =

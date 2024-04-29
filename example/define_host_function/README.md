@@ -76,7 +76,7 @@ let link_state =
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.Module.from_file (Fpath.v "extern.wat") with
+  match Parse.Text.Module.from_file (Fpath.v "extern.wat") with
   | Error e -> Result.failwith e
   | Ok modul -> modul
 

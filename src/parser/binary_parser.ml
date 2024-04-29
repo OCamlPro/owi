@@ -1120,10 +1120,12 @@ let from_string content =
   let* m = sections_iterate Simplified.empty_modul input in
   m
 
-let from_chan chan =
+let from_channel chan =
   let content = In_channel.input_all chan in
   from_string content
 
 let from_file (filename : Fpath.t) =
-  let* res = Bos.OS.File.with_ic filename (fun chan () -> from_chan chan) () in
+  let* res =
+    Bos.OS.File.with_ic filename (fun chan () -> from_channel chan) ()
+  in
   res

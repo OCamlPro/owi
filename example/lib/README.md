@@ -9,7 +9,7 @@ Given a file `quickstart.wat`, here's how to parse and run this file:
 # let filename = Fpath.v "quickstart.wat";;
 val filename : Fpath.t = <abstr>
 # let m =
-    match Parse.Module.from_file filename with
+    match Parse.Text.Module.from_file filename with
     | Ok script -> script
     | Error e -> Result.failwith e;;
 val m : Text.modul =

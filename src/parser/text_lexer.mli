@@ -12,10 +12,10 @@ exception Unknown_operator of string
 exception Unexpected_character of string
 
 (** tokenizer *)
-val token : Sedlexing.lexbuf -> Menhir_parser.token
+val token : Sedlexing.lexbuf -> Text_parser.token
 
 (** lexer *)
 val lexer :
      Sedlexing.lexbuf
   -> unit
-  -> Menhir_parser.token * Lexing.position * Lexing.position
+  -> Text_parser.token * Lexing.position * Lexing.position

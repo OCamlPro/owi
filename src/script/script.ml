@@ -164,13 +164,13 @@ let run ~no_exhaustion ~optimize script =
         link_state
       | Assert (Assert_malformed_binary (m, expected)) ->
         Log.debug0 "*** assert_malformed_binary@\n";
-        let got = Binary_deserializer.from_string m in
+        let got = Parse.Binary.Module.from_string m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug0 "*** assert_malformed_quote@\n";
-        (* TODO: use Parse.Module.from_string instead *)
-        let got = Parse.Script.from_string m in
+        (* TODO: use Parse.Text.Module.from_string instead *)
+        let got = Parse.Text.Script.from_string m in
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
@@ -182,7 +182,7 @@ let run ~no_exhaustion ~optimize script =
         link_state
       | Assert (Assert_invalid_binary (m, expected)) ->
         Log.debug0 "*** assert_invalid_binary@\n";
-        let got = Binary_deserializer.from_string m in
+        let got = Parse.Binary.Module.from_string m in
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
@@ -201,7 +201,7 @@ let run ~no_exhaustion ~optimize script =
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.debug0 "*** assert_invalid_quote@\n";
-        let got = Parse.Module.from_string m in
+        let got = Parse.Text.Module.from_string m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->

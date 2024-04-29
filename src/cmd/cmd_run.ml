@@ -4,27 +4,25 @@
 
 open Syntax
 
-let run_wat_file ~unsafe ~optimize filename =
-  let* modul = Parse.Module.from_file filename in
-  let name = None in
-  let+ (_state : Concrete_value.Func.extern_func Link.state) =
-    Compile.until_interpret Link.empty_state ~unsafe ~optimize ~name modul
-  in
-  ()
-
-let run_wasm_file ~unsafe ~optimize filename =
-  let* modul = Binary_deserializer.from_file filename in
-  let name = None in
-  let+ (_state : Concrete_value.Func.extern_func Link.state) =
-    Compile.simplified_interpret Link.empty_state ~unsafe ~optimize ~name modul
-  in
-  ()
-
 let run_file ~unsafe ~optimize filename =
-  if Fpath.has_ext "wasm" filename then run_wasm_file ~unsafe ~optimize filename
-  else if Fpath.has_ext "wat" filename then
-    run_wat_file ~unsafe ~optimize filename
-  else Error (`Unsupported_file_extension (Fpath.filename filename))
+  let* m = Parse.guess_from_file filename in
+  let name = None in
+  match m with
+  | Either.Left (Either.Left text_module) ->
+    let+ (_state : Concrete_value.Func.extern_func Link.state) =
+      Compile.until_interpret Link.empty_state ~unsafe ~optimize ~name
+        text_module
+    in
+    ()
+  | Either.Left (Either.Right _text_script) ->
+    (* TODO: merge script and run cmd together and call script here *)
+    assert false
+  | Either.Right binary_module ->
+    let+ (_state : Concrete_value.Func.extern_func Link.state) =
+      Compile.simplified_interpret Link.empty_state ~unsafe ~optimize ~name
+        binary_module
+    in
+    ()
 
 let cmd profiling debug unsafe optimize files =
   if profiling then Log.profiling_on := true;

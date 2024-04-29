@@ -5,7 +5,7 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  let* modul = Parse.Module.from_file filename in
+  let* modul = Parse.Text.Module.from_file filename in
   Compile.until_optimize ~unsafe ~optimize:true modul
 
 let cmd debug unsafe files =

@@ -151,7 +151,7 @@ let simplify_then_link_then_run ~unsafe ~optimize (pc : unit Result.t Choice.t)
       match r with Error _ -> Choice.return r | Ok () -> c )
 
 let run_file ~unsafe ~optimize pc filename =
-  let*/ m0dule = Parse.Module.from_file filename in
+  let*/ m0dule = Parse.Text.Module.from_file filename in
   simplify_then_link_then_run ~unsafe ~optimize pc m0dule
 
 let get_model ~symbols solver pc =

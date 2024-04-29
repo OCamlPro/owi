@@ -4,6 +4,6 @@
 
 val from_string : string -> Simplified.modul Result.t
 
-val from_chan : in_channel -> Simplified.modul Result.t
+val from_channel : in_channel -> Simplified.modul Result.t
 
 val from_file : Fpath.t -> Simplified.modul Result.t
