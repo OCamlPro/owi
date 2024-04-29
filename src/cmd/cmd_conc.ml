@@ -423,8 +423,6 @@ let launch solver tree link_state modules_to_run =
   in
   loop 10
 
-(* TODO ICI: avec ce modèle, préparer un truc que symbol va pouvoir utiliser pour donner les valeurs de l'exécution *)
-
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
@@ -438,11 +436,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
 
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
-  (* let* () = *)
-  (*   match Bos.OS.Dir.create ~path:true ~mode:0o755 workspace with *)
-  (*   | Ok true | Ok false -> Ok () *)
-  (*   | Error (`Msg msg) -> Error (`Msg msg) *)
-  (* in *)
+  let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.Z3Batch.create () in
   let* link_state, modules_to_run =
     simplify_then_link_files ~unsafe ~optimize files
@@ -462,25 +456,36 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     Format.pp_std "@\n"
   in
 
-  let () =
-    match result with
-    | None -> Format.pp_std "OK@\n"
-    | Some (`Trap trap, thread) ->
-      Format.pp_std "Trap: %s@\n" (Trap.to_string trap);
-      if debug then begin
-        print_pc thread.pc;
-        print_values thread.symbols_value
-      end;
-      let model = get_model solver thread.pc in
-      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
-    | Some (`Assert_fail, thread) ->
-      Format.pp_std "Assert failure@\n";
-      if debug then begin
-        print_pc thread.pc;
-        print_values thread.symbols_value
-      end;
-      let model = get_model solver thread.pc in
-      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
+  let testcase model =
+    if not no_values then
+      let testcase =
+        List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
+      in
+      Testcase.write_testcase ~dir:workspace ~err:true testcase
+    else Ok ()
   in
 
-  Ok ()
+  match result with
+  | None ->
+    Format.pp_std "OK@\n";
+    Ok ()
+  | Some (`Trap trap, thread) ->
+    Format.pp_std "Trap: %s@\n" (Trap.to_string trap);
+    if debug then begin
+      print_pc thread.pc;
+      print_values thread.symbols_value
+    end;
+    let model = get_model solver thread.pc in
+    Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
+    let* () = testcase model in
+    Error (`Found_bug 1)
+  | Some (`Assert_fail, thread) ->
+    Format.pp_std "Assert failure@\n";
+    if debug then begin
+      print_pc thread.pc;
+      print_values thread.symbols_value
+    end;
+    let model = get_model solver thread.pc in
+    Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
+    let* () = testcase model in
+    Error (`Found_bug 1)
