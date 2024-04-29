@@ -28,7 +28,9 @@ module Input = struct
       Ok { input with pt = input.pt + pos; size = len; error_msg_info }
     else
       Error
-        (`Msg (Format.sprintf "Unexpected end-of-section: %s" error_msg_info))
+        (`Msg
+          (Format.sprintf "length out of bounds in section %s" error_msg_info)
+          )
 
   let sub_suffix pos error_msg_info input =
     sub ~pos ~len:(input.size - pos) error_msg_info input
@@ -705,8 +707,10 @@ let section_custom input =
        "integer representation too long"
      )
   *)
-  section_parse input "custom_section" ~expected_id:'\x00' ()
-  @@ consume_to_end () "custom_section"
+  section_parse input "custom_section" ~expected_id:'\x00' None @@ fun input ->
+  let* name, input = vector_no_id read_byte input in
+  let+ (), input = consume_to_end () "custom_section" input in
+  (Some name, input)
 
 let section_type input =
   section_parse input "type_section" ~expected_id:'\x01' []
