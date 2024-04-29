@@ -67,6 +67,7 @@
   stack
   string_map
   syntax
+  testcase
   text
   text_lexer
   text_parser

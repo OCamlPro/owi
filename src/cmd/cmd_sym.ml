@@ -201,32 +201,6 @@ let get_model ~symbols solver pc =
   | None -> assert false
   | Some model -> model
 
-let out_testcase ~dst ~err testcase =
-  let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  let tag ?(atts = []) name = (("", name), atts) in
-  let atts = if err then Some [ (("", "coversError"), "true") ] else None in
-  let to_string v = Format.asprintf "%a" Smtml.Value.pp_num v in
-  let input v = `El (tag "input", [ `Data (to_string v) ]) in
-  let testcase = `El (tag ?atts "testcase", List.map input testcase) in
-  let dtd =
-    {|<!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd">|}
-  in
-  Xmlm.output o (`Dtd (Some dtd));
-  Xmlm.output_tree Fun.id o testcase
-
-let write_testcase =
-  let cnt = ref 0 in
-  fun ~dir ~err testcase ->
-    incr cnt;
-    let name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
-    let path = Fpath.append dir name in
-    let* res =
-      Bos.OS.File.with_oc path
-        (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) ~err testcase))
-        ()
-    in
-    res
-
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
@@ -237,11 +211,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
-  let* () =
-    match Bos.OS.Dir.create ~path:true ~mode:0o755 workspace with
-    | Ok true | Ok false -> Ok ()
-    | Error (`Msg msg) -> Error (`Msg msg)
-  in
+  let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let pc = Choice.return (Ok ()) in
   let solver = Solver.Z3Batch.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
@@ -280,7 +250,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
           let testcase =
             List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
           in
-          write_testcase ~dir:workspace ~err:is_err testcase
+          Testcase.write_testcase ~dir:workspace ~err:is_err testcase
         else Ok ()
       in
       if (not is_err) || no_stop_at_failure then
