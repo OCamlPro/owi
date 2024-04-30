@@ -2,10 +2,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Simplified
+open Binary
 open Types
 
-let rec optimize_expr expr : bool * simplified instr list =
+let rec optimize_expr expr : bool * binary instr list =
   match expr with
   | ((I32_const _ | I64_const _) as x)
     :: ((I32_const _ | I64_const _) as y)
@@ -330,9 +330,9 @@ let rec optimize_expr expr : bool * simplified instr list =
     (has_changed, hd :: e)
   | [] -> (false, [])
 
-let locals_func (body_expr : simplified expr) =
+let locals_func (body_expr : binary expr) =
   let locals_hashtbl = Hashtbl.create 16 in
-  let rec aux_instr (instr : simplified instr) =
+  let rec aux_instr (instr : binary instr) =
     match instr with
     | Local_get ind | Local_set ind | Local_tee ind ->
       Hashtbl.replace locals_hashtbl ind ()
@@ -400,11 +400,11 @@ let locals_func (body_expr : simplified expr) =
   locals_hashtbl
 
 let remove_local map body =
-  let new_x (Raw x : simplified indice) =
+  let new_x (Raw x : binary indice) =
     let x = match Hashtbl.find_opt map x with None -> x | Some x -> x in
     Raw x
   in
-  let rec aux_instr (instr : simplified instr) : simplified instr =
+  let rec aux_instr (instr : binary instr) : binary instr =
     match instr with
     | Local_get ind -> Local_get (new_x ind)
     | Local_set ind -> Local_set (new_x ind)
@@ -497,7 +497,7 @@ let remove_unused_locals locals nb_args body =
   let body = remove_local rename_map body in
   (locals, body)
 
-let optimize_func (func : simplified func) =
+let optimize_func (func : binary func) =
   let { type_f; locals; body; id } = func in
   let rec loop has_changed e =
     if not has_changed then

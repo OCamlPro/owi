@@ -11,7 +11,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : limits
-  ; typ : simplified ref_type
+  ; typ : binary ref_type
   ; mutable data : table
   }
 
@@ -21,7 +21,7 @@ let fresh =
     incr r;
     !r
 
-let init ?label (typ : simplified table_type) : t =
+let init ?label (typ : binary table_type) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
   let table = Array.make limits.min null in

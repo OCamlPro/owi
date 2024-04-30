@@ -16,7 +16,7 @@ let m =
   | Ok m -> m
   | Error e -> Result.failwith e
 
-let s = Format.asprintf "%a@\n" Simplified.Pp.modul m
+let s = Format.asprintf "%a@\n" Binary.Pp.modul m
 
 let m =
   match Parse.Text.Module.from_string s with
@@ -28,4 +28,4 @@ let m =
   | Ok m -> m
   | Error e -> Result.failwith e
 
-let () = Format.pp_std "%a@\n" Simplified.Pp.modul m
+let () = Format.pp_std "%a@\n" Binary.Pp.modul m

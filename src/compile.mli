@@ -6,12 +6,12 @@
 
 val until_check : unsafe:bool -> Text.modul -> Text.modul Result.t
 
-val until_simplify : unsafe:bool -> Text.modul -> Simplified.modul Result.t
+val until_simplify : unsafe:bool -> Text.modul -> Binary.modul Result.t
 
-val until_typecheck : unsafe:bool -> Text.modul -> Simplified.modul Result.t
+val until_typecheck : unsafe:bool -> Text.modul -> Binary.modul Result.t
 
 val until_optimize :
-  unsafe:bool -> optimize:bool -> Text.modul -> Simplified.modul Result.t
+  unsafe:bool -> optimize:bool -> Text.modul -> Binary.modul Result.t
 
 (** compile a module with a given link state and produce a new link state and a
     runnable module *)
@@ -39,5 +39,5 @@ val simplified_interpret :
   -> unsafe:bool
   -> optimize:bool
   -> name:string option
-  -> Simplified.modul
+  -> Binary.modul
   -> Concrete_value.Func.extern_func Link.state Result.t

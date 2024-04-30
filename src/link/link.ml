@@ -22,9 +22,9 @@ type exports =
   }
 
 type 'f module_to_run =
-  { modul : Simplified.modul
+  { modul : Binary.modul
   ; env : 'f Link_env.t
-  ; to_run : simplified expr list
+  ; to_run : binary expr list
   }
 
 type 'f envs = 'f Link_env.t Env_id.collection
@@ -60,7 +60,7 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error `Unknown_import
     | v -> Ok v )
 
-let load_global (ls : 'f state) (import : simplified global_type Imported.t) :
+let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   global Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
@@ -98,7 +98,7 @@ module Eval_const = struct
          | Mul -> mul n1 n2
          | _ -> assert false )
 
-  (* TODO: simplified+const instr *)
+  (* TODO: binary+const instr *)
   let instr env stack instr =
     match instr with
     | I32_const n -> ok @@ Stack.push_i32 stack n
@@ -131,7 +131,7 @@ module Eval_const = struct
       ok stack
     | _ -> assert false
 
-  (* TODO: simplified+const expr *)
+  (* TODO: binary+const expr *)
   let expr env e : Concrete_value.t Result.t =
     let* stack = list_fold_left (instr env) Stack.empty e in
     match stack with
@@ -141,9 +141,8 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env
-  (global : (Simplified.global, simplified global_type) Runtime.t) :
-  global Result.t =
+let eval_global ls env (global : (Binary.global, binary global_type) Runtime.t)
+  : global Result.t =
   match global with
   | Local global ->
     let* value = Eval_const.expr env global.init in
@@ -203,19 +202,17 @@ let eval_memories ls env memories =
       Ok env )
     memories (Ok env)
 
-let table_types_are_compatible (import, (t1 : simplified ref_type))
-  (imported, t2) =
+let table_types_are_compatible (import, (t1 : binary ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
 
-let load_table (ls : 'f state) (import : simplified table_type Imported.t) :
+let load_table (ls : 'f state) (import : binary table_type Imported.t) :
   table Result.t =
-  let typ : simplified table_type = import.desc in
+  let typ : binary table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error `Incompatible_import_type
 
-let eval_table ls (table : (_, simplified table_type) Runtime.t) :
-  table Result.t =
+let eval_table ls (table : (_, binary table_type) Runtime.t) : table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
@@ -237,7 +234,7 @@ let func_types_are_compatible a b =
   in
   remove_param a = remove_param b
 
-let load_func (ls : 'f state) (import : simplified block_type Imported.t) :
+let load_func (ls : 'f state) (import : binary block_type Imported.t) :
   func Result.t =
   let (Bt_raw ((None | Some _), typ)) = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
@@ -290,7 +287,7 @@ let get_i32 = function
 
 let define_data env data =
   Named.fold
-    (fun id (data : Simplified.data) env_and_init ->
+    (fun id (data : Binary.data) env_and_init ->
       let* env, init = env_and_init in
       let data' : Link_env.data = { value = data.init } in
       let env = Link_env.Build.add_data id data' env in
@@ -312,7 +309,7 @@ let define_data env data =
 
 let define_elem env elem =
   Named.fold
-    (fun id (elem : Simplified.elem) env_and_inits ->
+    (fun id (elem : Binary.elem) env_and_inits ->
       let* env, inits = env_and_inits in
       let* init = list_map (Eval_const.expr env) elem.init in
       let* init_as_ref =
@@ -345,10 +342,10 @@ let define_elem env elem =
     elem
     (Ok (env, []))
 
-let populate_exports env (exports : Simplified.exports) : exports Result.t =
+let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) (export : Simplified.export) ->
+      (fun (acc, names) (export : Binary.export) ->
         let value = get_env env export.id in
         if StringSet.mem export.name names then Error `Duplicate_export_name
         else
@@ -364,7 +361,7 @@ let populate_exports env (exports : Simplified.exports) : exports Result.t =
   let* functions, names = fill_exports Link_env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let modul (ls : 'f state) ~name (modul : Simplified.modul) =
+let modul (ls : 'f state) ~name (modul : Binary.modul) =
   Log.debug0 "linking      ...@\n";
   let* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_id
@@ -406,8 +403,8 @@ let modul (ls : 'f state) ~name (modul : Simplified.modul) =
       ; envs
       } )
 
-let extern_module' (ls : 'f state) ~name
-  ~(func_typ : 'f -> simplified func_type) (module_ : 'f extern_module) =
+let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> binary func_type)
+  (module_ : 'f extern_module) =
   let functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) ->

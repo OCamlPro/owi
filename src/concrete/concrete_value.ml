@@ -33,7 +33,7 @@ struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : simplified val_type =
+  let elt_type (type t) (e : t telt) : binary val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64
@@ -41,7 +41,7 @@ struct
     | F64 -> Num_type F64
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : simplified result_type =
+  let res_type (type t) (r : t rtype) : binary result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -49,7 +49,7 @@ struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> simplified param_type = function
+  let rec arg_type : type t r. (t, r) atype -> binary param_type = function
     | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
@@ -58,8 +58,7 @@ struct
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
-  let extern_type (Extern_func (Func (arg, res), _)) :
-    simplified Types.func_type =
+  let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
     (arg_type arg, res_type res)
 
   type t = Func_intf.t
@@ -119,7 +118,7 @@ type t =
   | Ref of ref_value
 
 (* TODO: make a new kind of instr for this *)
-let of_instr (i : simplified instr) : t =
+let of_instr (i : binary instr) : t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c

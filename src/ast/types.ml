@@ -24,7 +24,7 @@ type without_ind_bt = < raw_bt : no >
 (* various IR *)
 type text = < with_string_indices ; with_ind_bt >
 
-type simplified = < without_string_indices ; without_ind_bt >
+type binary = < without_string_indices ; without_ind_bt >
 
 (* identifiers *)
 

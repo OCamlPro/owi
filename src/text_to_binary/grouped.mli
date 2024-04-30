@@ -31,8 +31,8 @@ type t =
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Text.global, simplified global_type) Runtime.t Indexed.t list
-  ; table : (simplified table, simplified table_type) Runtime.t Indexed.t list
+  ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
+  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
   ; mem : (mem, Types.limits) Runtime.t Indexed.t list
   ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list

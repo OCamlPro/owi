@@ -108,7 +108,7 @@ let value_of_const : text const -> V.t Result.t = function
   | Const_F32 v -> ok @@ Concrete_value.F32 v
   | Const_F64 v -> ok @@ Concrete_value.F64 v
   | Const_null rt ->
-    let+ rt = Simplified_types.convert_heap_type None rt in
+    let+ rt = Binary_types.convert_heap_type None rt in
     Concrete_value.ref_null rt
   | Const_extern i -> ok @@ Concrete_value.Ref (Host_externref.value i)
   | i ->
