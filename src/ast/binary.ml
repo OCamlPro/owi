@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Format
 open Types
 
 (** named export *)
@@ -73,22 +72,3 @@ let empty_modul =
   ; exports = { global = []; mem = []; table = []; func = [] }
   ; start = None
   }
-
-module Pp = struct
-  let id fmt = Option.iter (fun id -> pp fmt " $%s" id)
-
-  let func fmt = function
-    | Runtime.Local f -> pp_func fmt f
-    | Runtime.Imported { Imported.modul; name; _ } -> pp fmt "%s.%s" modul name
-
-  let lst f fmt l = (pp_list ~pp_sep:pp_newline f) fmt (List.rev l)
-
-  let funcs fmt funcs = lst (Indexed.pp func) fmt funcs.Named.values
-
-  let export fmt (export : export) = pp fmt "%s: %d" export.name export.id
-
-  let start fmt = function None -> () | Some ind -> pp fmt "(start %d)" ind
-
-  let modul fmt (m : modul) : unit =
-    pp fmt "(module%a@\n  @[%a@\n%a@]@\n)" id m.id funcs m.func start m.start
-end

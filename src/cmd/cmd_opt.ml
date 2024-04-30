@@ -13,8 +13,9 @@ let cmd debug unsafe files =
   list_iter
     (fun file ->
       match optimize_file ~unsafe file with
-      | Ok modul ->
-        Format.pp_std "%a@\n" Binary.Pp.modul modul;
+      | Ok m ->
+        let m = Binary_to_text.modul m in
+        Format.pp_std "%a@\n" Text.pp_modul m;
         Ok ()
       | Error _ as e -> e )
     files
