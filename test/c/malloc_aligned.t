@@ -1,2 +1,3 @@
   $ owi c ./malloc_aligned.c
-  All OK
+  malformed section id
+  [26]
