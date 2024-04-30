@@ -7,7 +7,7 @@
 
 val guess_from_file :
      Fpath.t
-  -> ((Text.modul, Text.script) Either.t, Simplified.modul) Either.t Result.t
+  -> ((Text.modul, Text.script) Either.t, Binary.modul) Either.t Result.t
 
 module Text : sig
   module Script : sig
@@ -47,12 +47,12 @@ end
 module Binary : sig
   module Module : sig
     (** Parse a module from a string. *)
-    val from_string : string -> Simplified.modul Result.t
+    val from_string : string -> Binary.modul Result.t
 
     (** Parse a module from a channel. *)
-    val from_channel : in_channel -> Simplified.modul Result.t
+    val from_channel : in_channel -> Binary.modul Result.t
 
     (** Parse a module from a file. *)
-    val from_file : Fpath.t -> Simplified.modul Result.t
+    val from_file : Fpath.t -> Binary.modul Result.t
   end
 end

@@ -6,15 +6,14 @@ open Types
 open Syntax
 
 module StrType = struct
-  type t = simplified str_type
+  type t = binary str_type
 
   let compare = compare
 end
 
 module TypeMap = Map.Make (StrType)
 
-let equal_func_types (a : simplified func_type) (b : simplified func_type) :
-  bool =
+let equal_func_types (a : binary func_type) (b : binary func_type) : bool =
   let remove_param (pt, rt) =
     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
     (pt, rt)
@@ -23,9 +22,9 @@ let equal_func_types (a : simplified func_type) (b : simplified func_type) :
 
 type t =
   { id : string option
-  ; typ : simplified str_type Named.t
-  ; global : (Text.global, simplified global_type) Runtime.t Named.t
-  ; table : (simplified table, simplified table_type) Runtime.t Named.t
+  ; typ : binary str_type Named.t
+  ; global : (Text.global, binary global_type) Runtime.t Named.t
+  ; table : (binary table, binary table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
   ; func : (text func, text block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
@@ -35,8 +34,8 @@ type t =
   }
 
 type type_acc =
-  { declared_types : simplified str_type Indexed.t list
-  ; func_types : simplified str_type Indexed.t list
+  { declared_types : binary str_type Indexed.t list
+  ; func_types : binary str_type Indexed.t list
   ; named_types : int String_map.t
   ; last_assigned_int : int
   ; all_types : int TypeMap.t
@@ -49,7 +48,7 @@ let assign_type (acc : type_acc) (name, sub_type) : type_acc Result.t =
   in
   let+ last_assigned_int, declared_types, named_types, all_types =
     let _final, _indices, str_type = sub_type in
-    let+ str_type = Simplified_types.convert_str None str_type in
+    let+ str_type = Binary_types.convert_str None str_type in
     let id = last_assigned_int in
     let last_assigned_int = succ last_assigned_int in
     let declared_types = Indexed.return id str_type :: declared_types in
@@ -67,7 +66,7 @@ let assign_type (acc : type_acc) (name, sub_type) : type_acc Result.t =
 
 let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
   let { func_types; last_assigned_int; all_types; _ } = acc in
-  let+ typ = Simplified_types.convert_func_type None typ in
+  let+ typ = Binary_types.convert_func_type None typ in
   let typ = Def_func_t typ in
   match TypeMap.find_opt typ all_types with
   | Some _id -> acc
@@ -83,7 +82,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : simplified str_type Named.t Result.t =
+let assign_types (modul : Grouped.t) : binary str_type Named.t Result.t =
   let empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -119,8 +118,8 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   { Named.values; named }
 
-let check_type_id (types : simplified str_type Named.t)
-  (check : Grouped.type_check) =
+let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
+    =
   let id, func_type = check in
   let id =
     match id with Raw i -> i | Text name -> String_map.find name types.named
@@ -129,7 +128,7 @@ let check_type_id (types : simplified str_type Named.t)
   match Indexed.get_at id types.values with
   | None -> Error `Unknown_type
   | Some (Def_func_t func_type') ->
-    let* func_type = Simplified_types.convert_func_type None func_type in
+    let* func_type = Binary_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then
       Error `Inline_function_type
     else Ok ()
@@ -145,7 +144,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* table =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : simplified table) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : binary table) -> id))
       modul.table
   in
   let* mem =

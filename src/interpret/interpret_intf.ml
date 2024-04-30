@@ -67,7 +67,7 @@ module type P = sig
 
     val mut : t -> Types.mut
 
-    val typ : t -> simplified val_type
+    val typ : t -> binary val_type
   end
 
   module Table : sig
@@ -79,7 +79,7 @@ module type P = sig
 
     val size : t -> int
 
-    val typ : t -> simplified ref_type
+    val typ : t -> binary ref_type
 
     val max_size : t -> int option
 
@@ -177,9 +177,9 @@ module type P = sig
 
     val env : t -> Env.t
 
-    val to_run : t -> simplified expr list
+    val to_run : t -> binary expr list
 
-    val modul : t -> Simplified.modul
+    val modul : t -> Binary.modul
   end
 end
 

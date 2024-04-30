@@ -5,7 +5,7 @@
 [@@@ocaml.warning "-32-33"]
 
 open Types
-open Simplified
+open Binary
 
 let use_ite_for_select = true
 
@@ -576,13 +576,13 @@ module Make (P : Interpret_intf.P) :
         locals
     end
 
-    type pc = simplified instr list
+    type pc = binary instr list
 
     type block =
       { branch : pc
-      ; branch_rt : simplified result_type
+      ; branch_rt : binary result_type
       ; continue : pc
-      ; continue_rt : simplified result_type
+      ; continue_rt : binary result_type
       ; stack : stack
       ; is_loop : bool
       }
@@ -593,7 +593,7 @@ module Make (P : Interpret_intf.P) :
       { name : string option
       ; mutable enter : int
       ; mutable instructions : int
-      ; calls : (simplified indice, count) Hashtbl.t
+      ; calls : (binary indice, count) Hashtbl.t
       }
 
     type exec_state =
@@ -602,7 +602,7 @@ module Make (P : Interpret_intf.P) :
       ; locals : Locals.t
       ; pc : pc
       ; block_stack : block_stack
-      ; func_rt : simplified result_type
+      ; func_rt : binary result_type
       ; env : Env.t
       ; count : count
       ; envs : Env.t Env_id.collection
@@ -637,7 +637,7 @@ module Make (P : Interpret_intf.P) :
           Format.pp ppf "@ @[<v 2>calls@ %a@]"
             (Format.pp_list
                ~pp_sep:(fun ppf () -> Format.pp ppf "@ ")
-               (fun ppf ((Raw id : simplified indice), count) ->
+               (fun ppf ((Raw id : binary indice), count) ->
                  let name ppf = function
                    | None -> ()
                    | Some name -> Format.pp ppf " %s" name
@@ -703,7 +703,7 @@ module Make (P : Interpret_intf.P) :
   end
 
   let exec_block (state : State.exec_state) ~is_loop
-    (bt : simplified block_type option) expr =
+    (bt : binary block_type option) expr =
     let pt, rt =
       match bt with
       | None -> ([], [])
@@ -724,7 +724,7 @@ module Make (P : Interpret_intf.P) :
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
   let exec_func ~return ~id (state : State.exec_state) env
-    (func : simplified Types.func) =
+    (func : binary Types.func) =
     Log.debug1 "calling func : func %s@."
       (Option.value func.id ~default:"anonymous");
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
@@ -788,7 +788,7 @@ module Make (P : Interpret_intf.P) :
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~return (state : State.exec_state)
-    (tbl_i, (Bt_raw ((None | Some _), typ_i) : simplified block_type)) =
+    (tbl_i, (Bt_raw ((None | Some _), typ_i) : binary block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let* t = Env.get_table state.env tbl_i in

@@ -87,7 +87,7 @@ module type T = sig
 
   val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
 
-  val get_func_typ : t -> func -> simplified func_type
+  val get_func_typ : t -> func -> binary func_type
 
   val pp : Format.formatter -> t -> unit
 

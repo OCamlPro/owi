@@ -4,7 +4,9 @@
  (public_name owi)
  (modules
   assigned
+  binary
   binary_parser
+  binary_types
   c_instrumentor
   c_share
   c_share_site
@@ -49,8 +51,6 @@
   rewrite
   runtime
   script
-  simplified
-  simplified_types
   solver
   symbolic
   symbolic_choice

@@ -3,13 +3,13 @@
 (* Written by the Owi programmers *)
 
 open Types
-open Simplified
+open Binary
 open Syntax
 open Format
 
 type typ =
   | Num_type of num_type
-  | Ref_type of simplified heap_type
+  | Ref_type of binary heap_type
   | Any
   | Something
 
@@ -36,11 +36,11 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals : (global, simplified global_type) Runtime.t Named.t
-    ; result_type : simplified result_type
-    ; funcs : (simplified func, simplified block_type) Runtime.t Named.t
+    ; globals : (global, binary global_type) Runtime.t Named.t
+    ; result_type : binary result_type
+    ; funcs : (binary func, binary block_type) Runtime.t Named.t
     ; blocks : typ list list
-    ; tables : (simplified table, simplified table_type) Runtime.t Named.t
+    ; tables : (binary table, binary table_type) Runtime.t Named.t
     ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
@@ -69,7 +69,7 @@ module Env = struct
     | None -> Error `Unknown_label
     | Some bt -> Ok bt
 
-  let table_type_get_from_module i (modul : Simplified.modul) =
+  let table_type_get_from_module i (modul : Binary.modul) =
     let value = Indexed.get_at_exn i modul.table.values in
     match value with
     | Local table -> snd (snd table)
@@ -128,13 +128,13 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : simplified block_type -> t -> t Result.t
+  val pop_push : binary block_type -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
   val equal : t -> t -> bool
 
-  val match_ref_type : simplified heap_type -> simplified heap_type -> bool
+  val match_ref_type : binary heap_type -> binary heap_type -> bool
 
   val match_types : typ -> typ -> bool
 
@@ -221,7 +221,7 @@ end = struct
     push rt stack
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
+let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
   stack Result.t =
   match instr with
   | Nop -> Ok stack
@@ -441,7 +441,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     let* _stack = Stack.pop default_jt stack in
     let* () =
       array_iter
-        (fun (Raw i : simplified indice) ->
+        (fun (Raw i : binary indice) ->
           let* jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
             Error (`Type_mismatch "br_table")
@@ -477,11 +477,11 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     Log.debug2 "TODO (typecheck instr) %a" pp_instr i;
     assert false
 
-and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
+and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
   ~stack:previous_stack : stack Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : simplified block_type) ->
+      ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : binary block_type) ->
         (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
@@ -549,7 +549,7 @@ let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []
 
 let typecheck_global (modul : modul) refs
-  (global : (global, simplified global_type) Runtime.t Indexed.t) =
+  (global : (global, binary global_type) Runtime.t Indexed.t) =
   match Indexed.get global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (

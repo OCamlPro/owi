@@ -4,4 +4,4 @@
 
 (** Optimize module *)
 
-val modul : Simplified.modul -> Simplified.modul
+val modul : Binary.modul -> Binary.modul

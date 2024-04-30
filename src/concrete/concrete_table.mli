@@ -12,7 +12,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : limits
-  ; typ : simplified ref_type
+  ; typ : binary ref_type
   ; mutable data : table
   }
 
@@ -22,11 +22,11 @@ val set : t -> int -> Concrete_value.ref_value -> unit
 
 val size : t -> int
 
-val typ : t -> simplified ref_type
+val typ : t -> binary ref_type
 
 val update : t -> table -> unit
 
-val init : ?label:string -> simplified table_type -> t
+val init : ?label:string -> binary table_type -> t
 
 val max_size : t -> int option
 

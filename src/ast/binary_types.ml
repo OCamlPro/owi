@@ -5,8 +5,7 @@
 open Types
 open Syntax
 
-let equal_func_types (a : simplified func_type) (b : simplified func_type) :
-  bool =
+let equal_func_types (a : binary func_type) (b : binary func_type) : bool =
   let remove_param (pt, rt) =
     let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
     (pt, rt)
@@ -34,8 +33,7 @@ let convert_ref_type tbl (null, heap_type) =
   let+ heap_type = convert_heap_type tbl heap_type in
   (null, heap_type)
 
-let convert_val_type tbl : text val_type -> simplified val_type Result.t =
-  function
+let convert_val_type tbl : text val_type -> binary val_type Result.t = function
   | Num_type _t as t -> Ok t
   | Ref_type rt ->
     let+ rt = convert_ref_type tbl rt in

@@ -5,7 +5,7 @@
 (* binary format specification:
    https://webassembly.github.io/spec/core/binary/modules.html#binary-importsec *)
 
-open Simplified
+open Binary
 open Syntax
 open Types
 
@@ -149,8 +149,7 @@ let vector parse_elt input =
 
 let vector_no_id f input = vector (fun _id -> f) input
 
-let deserialize_indice input :
-  (Types.simplified Types.indice * Input.t, _) result =
+let deserialize_indice input : (Types.binary Types.indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (Raw indice, input)
 
@@ -950,7 +949,7 @@ let section_data block_type_array input =
              ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
          | i -> Error (`Msg (Format.sprintf "data_section %d error" i)) ) )
 
-let sections_iterate (modul : Simplified.modul) (input : Input.t) =
+let sections_iterate (modul : Binary.modul) (input : Input.t) =
   let* _custom_section, input = section_custom input in
   let* block_type_list_type, input = section_type input in
   let block_type_array = Array.of_list block_type_list_type in
@@ -1117,7 +1116,7 @@ let from_string content =
   let* input =
     Input.from_str_bytes content "full_file" |> Input.sub_suffix 8 "full_file"
   in
-  let* m = sections_iterate Simplified.empty_modul input in
+  let* m = sections_iterate Binary.empty_modul input in
   m
 
 let from_channel chan =

@@ -35,8 +35,8 @@ type t =
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Text.global, simplified global_type) Runtime.t Indexed.t list
-  ; table : (simplified table, simplified table_type) Runtime.t Indexed.t list
+  ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
+  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
   ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
@@ -119,7 +119,7 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       ok @@ ({ fields with typ }, curr)
     | MGlobal global -> ok @@ add_global (Local global) fields curr
     | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
-      let+ val_type = Simplified_types.convert_val_type None val_type in
+      let+ val_type = Binary_types.convert_val_type None val_type in
       let b = (mut, val_type) in
       let imported = imp import (a, b) in
       add_global (Imported imported) fields curr
@@ -133,11 +133,11 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       let _, (limits, _) = table in
       let* () = check_limit limits in
       let id, table_type = table in
-      let+ table_type = Simplified_types.convert_table_type None table_type in
+      let+ table_type = Binary_types.convert_table_type None table_type in
       let table = (id, table_type) in
       add_table (Local table) fields curr
     | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
-      let+ table_type = Simplified_types.convert_table_type None table_type in
+      let+ table_type = Binary_types.convert_table_type None table_type in
       let imported = imp import (id, table_type) in
       add_table (Imported imported) fields curr
     | MExport { name; desc = Export_table id } ->

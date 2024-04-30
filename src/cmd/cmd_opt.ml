@@ -14,7 +14,7 @@ let cmd debug unsafe files =
     (fun file ->
       match optimize_file ~unsafe file with
       | Ok modul ->
-        Format.pp_std "%a@\n" Simplified.Pp.modul modul;
+        Format.pp_std "%a@\n" Binary.Pp.modul modul;
         Ok ()
       | Error _ as e -> e )
     files

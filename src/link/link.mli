@@ -2,8 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(** Module to link a simplified/extern module and producing a runnable module
-    along with a link state. *)
+(** Module to link a binary/extern module and producing a runnable module along
+    with a link state. *)
 
 (** runtime env *)
 
@@ -11,9 +11,9 @@ open Types
 
 (** runnable module *)
 type 'f module_to_run =
-  { modul : Simplified.modul
+  { modul : Binary.modul
   ; env : 'f Link_env.t
-  ; to_run : simplified expr list
+  ; to_run : binary expr list
   }
 
 module StringMap : Map.S with type key = string
@@ -52,7 +52,7 @@ val empty_state : 'f state
 val modul :
      'f state
   -> name:string option
-  -> Simplified.modul
+  -> Binary.modul
   -> ('f module_to_run * 'f state) Result.t
 
 (** register a module inside a link state, producing a new link state *)
@@ -67,7 +67,7 @@ type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 val extern_module' :
      'f state
   -> name:string
-  -> func_typ:('f -> simplified func_type)
+  -> func_typ:('f -> binary func_type)
   -> 'f extern_module
   -> 'f state
 
