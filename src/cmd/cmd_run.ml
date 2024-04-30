@@ -10,7 +10,7 @@ let run_file ~unsafe ~optimize filename =
   match m with
   | Either.Left (Either.Left text_module) ->
     let+ (_state : Concrete_value.Func.extern_func Link.state) =
-      Compile.until_interpret Link.empty_state ~unsafe ~optimize ~name
+      Compile.Text.until_interpret Link.empty_state ~unsafe ~optimize ~name
         text_module
     in
     ()
@@ -19,7 +19,7 @@ let run_file ~unsafe ~optimize filename =
     assert false
   | Either.Right binary_module ->
     let+ (_state : Concrete_value.Func.extern_func Link.state) =
-      Compile.simplified_interpret Link.empty_state ~unsafe ~optimize ~name
+      Compile.Binary.until_interpret Link.empty_state ~unsafe ~optimize ~name
         binary_module
     in
     ()

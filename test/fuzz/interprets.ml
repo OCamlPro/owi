@@ -37,7 +37,7 @@ module Owi_unoptimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -54,7 +54,7 @@ module Owi_optimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let simplified = Optimize.modul simplified in
     let* regular, link_state =
@@ -74,7 +74,7 @@ module Owi_symbolic : INTERPRET = struct
   let dummy_workers_count = 42
 
   let run modul : unit Result.t =
-    let* simplified = Compile.until_simplify ~unsafe:false modul in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified

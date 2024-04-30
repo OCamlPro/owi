@@ -6,7 +6,7 @@ open Syntax
 
 let validate filename =
   let* modul = Parse.Text.Module.from_file filename in
-  let+ _modul = Compile.until_typecheck ~unsafe:false modul in
+  let+ _modul = Compile.Text.until_typecheck ~unsafe:false modul in
   ()
 
 let cmd debug files =
