@@ -77,7 +77,7 @@ let map v f =
 let ( let+ ) = map
 
 let abort = M (fun st -> Ok (), { st with pc = Assert (Symbolic_value.Bool.const false) :: st.pc })
-let add_pc (c : Concolic_value.V.vbool) = M (fun st -> Ok (), { st with pc = Assume c.s :: st.pc })
+let add_pc (c : Concolic_value.V.vbool) = M (fun st -> Ok (), { st with pc = Assume c.symbolic :: st.pc })
 let add_pc_to_thread (st : thread) c = { st with pc = c :: st.pc }
 
 let no_choice e =
@@ -85,32 +85,32 @@ let no_choice e =
   match Smtml.Expr.view v with Val _ -> true | _ -> false
 
 let select (vb : Concolic_value.V.vbool) =
-  let r = vb.c in
-  let cond = Select (vb.s, r) in
-  let no_choice = no_choice vb.s in
+  let r = vb.concrete in
+  let cond = Select (vb.symbolic, r) in
+  let no_choice = no_choice vb.symbolic in
   M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st cond))
 [@@inline]
 
 let select_i32 (i : Concolic_value.V.int32) =
-  let r = i.c in
-  let expr = Select_i32 (i.s, i.c) in
-  let no_choice = no_choice i.s in
+  let r = i.concrete in
+  let expr = Select_i32 (i.symbolic, i.concrete) in
+  let no_choice = no_choice i.symbolic in
   M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st expr))
 [@@inline]
 
 let assume (vb : Concolic_value.V.vbool) =
-  let assume_pc = Assume vb.s in
-  let r = vb.c in
+  let assume_pc = Assume vb.symbolic in
+  let r = vb.concrete in
   if r then M (fun st -> (Ok (), add_pc_to_thread st assume_pc))
-  else M (fun st -> (Error (Assume_fail vb.s), st))
+  else M (fun st -> (Error (Assume_fail vb.symbolic), st))
 
 let assertion (vb : Concolic_value.V.vbool) =
-  let assert_pc = Assert vb.s in
-  let r = vb.c in
+  let assert_pc = Assert vb.symbolic in
+  let r = vb.concrete in
   if r then
-    let no_choice = no_choice vb.s in
+    let no_choice = no_choice vb.symbolic in
     M (fun st -> (Ok (), if no_choice then st else add_pc_to_thread st assert_pc))
-  else M (fun st -> (Error (Assume_fail vb.s), st))
+  else M (fun st -> (Error (Assume_fail vb.symbolic), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
 

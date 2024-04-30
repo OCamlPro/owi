@@ -11,40 +11,40 @@ module P = struct
     Value.t Choice.t =
     (* TODO / Think: this should probably be an ite expression in the symbolic part ? *)
     let select if_true if_false =
-      if c.c then if_true.Concolic_value.c else if_false.Concolic_value.c
+      if c.concrete then if_true.Concolic_value.concrete else if_false.Concolic_value.concrete
     in
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->
       Choice.return
       @@ Value.I32
-           { s =
-               Symbolic_value.Bool.select_expr c.s ~if_true:if_true.s
-                 ~if_false:if_false.s
-           ; c = select if_true if_false
+           { symbolic =
+               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
+                 ~if_false:if_false.symbolic
+           ; concrete = select if_true if_false
            }
     | I64 if_true, I64 if_false ->
       Choice.return
       @@ Value.I64
-           { s =
-               Symbolic_value.Bool.select_expr c.s ~if_true:if_true.s
-                 ~if_false:if_false.s
-           ; c = select if_true if_false
+           { symbolic =
+               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
+                 ~if_false:if_false.symbolic
+           ; concrete = select if_true if_false
            }
     | F32 if_true, F32 if_false ->
       Choice.return
       @@ Value.F32
-           { s =
-               Symbolic_value.Bool.select_expr c.s ~if_true:if_true.s
-                 ~if_false:if_false.s
-           ; c = select if_true if_false
+           { symbolic =
+               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
+                 ~if_false:if_false.symbolic
+           ; concrete = select if_true if_false
            }
     | F64 if_true, F64 if_false ->
       Choice.return
       @@ Value.F64
-           { s =
-               Symbolic_value.Bool.select_expr c.s ~if_true:if_true.s
-                 ~if_false:if_false.s
-           ; c = select if_true if_false
+           { symbolic =
+               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
+                 ~if_false:if_false.symbolic
+           ; concrete = select if_true if_false
            }
     | Ref _, Ref _ ->
       (* Concretization: add something to the PC *)
@@ -60,16 +60,16 @@ module P = struct
 
     let value (g : t) : Value.t =
       Concolic_value.V.value_pair
-        (Concrete_global.value g.c)
-        (Symbolic_global.value g.s)
+        (Concrete_global.value g.concrete)
+        (Symbolic_global.value g.symbolic)
 
     let set_value (g : t) cs =
-      Concrete_global.set_value g.c (Concolic_value.V.concrete_value cs);
-      Symbolic_global.set_value g.s (Concolic_value.V.symbolic_value cs)
+      Concrete_global.set_value g.concrete (Concolic_value.V.concrete_value cs);
+      Symbolic_global.set_value g.symbolic (Concolic_value.V.symbolic_value cs)
 
-    let mut (g : t) = Concrete_global.mut g.c
+    let mut (g : t) = Concrete_global.mut g.concrete
 
-    let typ (g : t) = Concrete_global.typ g.c
+    let typ (g : t) = Concrete_global.typ g.concrete
   end
 
   module Table = struct
@@ -81,11 +81,11 @@ module P = struct
 
     let set _t _i _v = failwith "TODO"
 
-    let size t = Concrete_table.size t.c
+    let size t = Concrete_table.size t.concrete
 
-    let typ t = Concrete_table.typ t.c
+    let typ t = Concrete_table.typ t.concrete
 
-    let max_size t = Concrete_table.max_size t.c
+    let max_size t = Concrete_table.max_size t.concrete
 
     let grow _t _new_size _x = failwith "TODO"
 
@@ -105,13 +105,13 @@ module P = struct
     let with_concrete m a f_c f_s =
       let open Choice in
       let+ a = Choice.select_i32 a in
-      { c = f_c m.c a; s = f_s m.s (Symbolic_value.const_i32 a) }
+      { concrete = f_c m.concrete a; symbolic = f_s m.symbolic (Symbolic_value.const_i32 a) }
 
     let with_concrete_store m a f_c f_s v =
       let open Choice in
       let+ addr = Choice.select_i32 a in
-      f_c m.c ~addr v.c;
-      f_s m.s ~addr:(Symbolic_value.const_i32 addr) v.s
+      f_c m.concrete ~addr v.concrete;
+      f_s m.symbolic ~addr:(Symbolic_value.const_i32 addr) v.symbolic
 
     let load_8_s m a = with_concrete m a C.load_8_s S.load_8_s
 
@@ -134,14 +134,14 @@ module P = struct
     let store_64 m ~addr v = with_concrete_store m addr C.store_64 S.store_64 v
 
     let grow m delta =
-      Concrete_memory.grow m.c delta.c;
-      Symbolic_memory.grow m.s delta.s
+      Concrete_memory.grow m.concrete delta.concrete;
+      Symbolic_memory.grow m.symbolic delta.symbolic
 
-    let size m = { c = Concrete_memory.size m.c; s = Symbolic_memory.size m.s }
+    let size m = { concrete = Concrete_memory.size m.concrete; symbolic = Symbolic_memory.size m.symbolic }
 
     let size_in_pages m =
-      { c = Concrete_memory.size_in_pages m.c
-      ; s = Symbolic_memory.size_in_pages m.s
+      { concrete = Concrete_memory.size_in_pages m.concrete
+      ; symbolic = Symbolic_memory.size_in_pages m.symbolic
       }
 
     let fill _ = assert false
@@ -149,8 +149,8 @@ module P = struct
     let blit _ = assert false
 
     let blit_string m s ~src ~dst ~len =
-      { c = Concrete_memory.blit_string m.c s ~src:src.c ~dst:dst.c ~len:len.c
-      ; s = Symbolic_memory.blit_string m.s s ~src:src.s ~dst:dst.s ~len:len.s
+      { concrete = Concrete_memory.blit_string m.concrete s ~src:src.concrete ~dst:dst.concrete ~len:len.concrete
+      ; symbolic = Symbolic_memory.blit_string m.symbolic s ~src:src.symbolic ~dst:dst.symbolic ~len:len.symbolic
       }
 
     let get_limit_max _ = failwith "TODO"
@@ -167,7 +167,7 @@ module P = struct
 
     let get (elem : t) i : Value.ref_value =
       match elem.value.(i) with
-      | Funcref f -> { c = Funcref f; s = Funcref f }
+      | Funcref f -> { concrete = Funcref f; symbolic = Funcref f }
       | _ -> assert false
 
     let size (elem : t) = Array.length elem.value
@@ -185,7 +185,7 @@ module P = struct
           Symbolic_memory.get_memory (Link_env.id env) orig_mem
             t.shared.memories id
         in
-        { c = orig_mem; s = sym_mem }
+        { concrete = orig_mem; symbolic = sym_mem }
       in
       Choice.with_thread f
 
@@ -200,7 +200,7 @@ module P = struct
           Symbolic_table.get_table (Link_env.id env) orig_table t.shared.tables
             id
         in
-        { c = orig_table; s = sym_table }
+        { concrete = orig_table; symbolic = sym_table }
       in
       Choice.with_thread f
 
@@ -217,7 +217,7 @@ module P = struct
           Symbolic_global.get_global (Link_env.id env) orig_global
             t.shared.globals id
         in
-        { c = orig_global; s = sym_global }
+        { concrete = orig_global; symbolic = sym_global }
       in
       Choice.with_thread f
 
