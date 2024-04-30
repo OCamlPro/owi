@@ -32,7 +32,7 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c ./poly.c -w1
-integer representation too long
+malformed section id
 [26]
 ```
 
@@ -74,7 +74,7 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c ./poly2.c
-integer representation too long
+malformed section id
 [26]
 ```
 
@@ -165,7 +165,7 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-integer representation too long
+deserialize_instruction error: char 
 [26]
 ```
 
