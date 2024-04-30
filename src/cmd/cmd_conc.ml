@@ -10,26 +10,60 @@ let debug = false
 
 let symbolic_extern_module :
   Concolic.P.Extern_func.extern_func Link.extern_module =
-  let symbol ty () : Value.int32 Choice.t =
-    Choice.with_new_symbol ty (fun sym forced_value ->
-        let sym_expr = Expr.mk_symbol sym in
+  let symbol_i32 () : Value.int32 Choice.t =
+    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
         let n =
           match forced_value with
           | None -> Random.bits32 ()
-          | Some v -> (
-            match v with
-            | Int i -> Int32.of_int i
-            | Num (I32 n) -> n
-            | _ ->
-              Format.pp_err "Wrong type of forced value %a@." Smtml.Value.pp v;
-              Random.bits32 () )
+          | Some (Num (I32 n)) -> n
+          | _ -> assert false
+        in
+        (I32 n, Value.pair n (Expr.mk_symbol sym)) )
+  in
+  let symbol_i8 () : Value.int32 Choice.t =
+    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Int32.logand 0xFFl (Random.bits32 ())
+          | Some (Num (I32 n)) -> n
+          | _ -> assert false
         in
         let sym_expr =
-          match ty with
-          | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
-          | _ -> sym_expr
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbol sym))
         in
-        (n, Value.pair n sym_expr) )
+        (I32 n, Value.pair n sym_expr) )
+  in
+  let symbol_i64 () : Value.int64 Choice.t =
+    Choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Random.bits64 ()
+          | Some (Num (I64 n)) -> n
+          | _ -> assert false
+        in
+        (I64 n, Value.pair n (Expr.mk_symbol sym)) )
+  in
+  let symbol_f32 () : Value.float32 Choice.t =
+    Choice.with_new_symbol (Ty_fp 32) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Random.bits32 ()
+          | Some (Num (F32 n)) -> n
+          | _ -> assert false
+        in
+        let n = Float32.of_bits n in
+        (F32 n, Value.pair n (Expr.mk_symbol sym)) )
+  in
+  let symbol_f64 () : Value.float64 Choice.t =
+    Choice.with_new_symbol (Ty_fp 64) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Random.bits64 ()
+          | Some (Num (F64 n)) -> n
+          | _ -> assert false
+        in
+        let n = Float64.of_bits n in
+        (F64 n, Value.pair n (Expr.mk_symbol sym)) )
   in
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
@@ -45,21 +79,21 @@ let symbolic_extern_module :
   in
   (* we need to describe their types *)
   let functions =
-    [ (*   ( "i8_symbol" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (UArg Res, R1 I32), symbol (Ty_bitv 8)) ); *)
-      ( "i32_symbol"
-      , Concolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol (Ty_bitv 32)) )
-      (* ; ( "i64_symbol" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (UArg Res, R1 I64), symbol (Ty_bitv 64)) ) *)
-      (* ; ( "f32_symbol" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (UArg Res, R1 F32), symbol (Ty_fp 32)) ) *)
-      (* ; ( "f64_symbol" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (UArg Res, R1 F64), symbol (Ty_fp 64)) ) *)
+    [ ( "i8_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
+      )
+    ; ( "i32_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+      )
+    ; ( "i64_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
+      )
+    ; ( "f32_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
+      )
+    ; ( "f64_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
     ; ( "assume"
       , Concolic.P.Extern_func.Extern_func
           (Func (Arg (I32, Res), R0), assume_i32) )
@@ -198,7 +232,7 @@ let get_model (* ~symbols *) solver pc =
   | None -> assert false
   | Some model -> model
 
-type assignments = (Smtml.Symbol.t * Int32.t) list
+type assignments = (Smtml.Symbol.t * Concrete_value.t) list
 
 type end_of_trace =
   | Assume_fail
@@ -465,7 +499,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let print_values symbols_value =
     Format.pp_std "Assignments:@\n";
     List.iter
-      (fun (s, v) -> Format.pp_std "  %a: %li" Smtml.Symbol.pp s v)
+      (fun (s, v) ->
+        Format.pp_std "  %a: %a" Smtml.Symbol.pp s Concrete_value.pp v )
       symbols_value;
     Format.pp_std "@\n"
   in

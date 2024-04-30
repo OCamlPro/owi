@@ -20,7 +20,8 @@ let pp_pc fmt pc = List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
 
 let pp_assignments fmt assignments =
   List.iter
-    (fun (sym, v) -> Format.pp fmt "  %a : %li@\n" Smtml.Symbol.pp sym v)
+    (fun (sym, v) ->
+      Format.pp fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
     assignments
 
 let pc_elt_to_expr = function
@@ -42,7 +43,7 @@ type shared_thread_info =
 type thread =
   { pc : pc
   ; symbols : int
-  ; symbols_value : (Smtml.Symbol.t * Int32.t) list
+  ; symbols_value : (Smtml.Symbol.t * Concrete_value.t) list
   ; preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
   ; shared : shared_thread_info
   }
@@ -131,11 +132,11 @@ let with_new_symbol ty f =
       let id = st.symbols + 1 in
       let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
       let value = Hashtbl.find_opt st.preallocated_values sym in
-      let expr, v = f sym value in
+      let concrete, v = f sym value in
       let st =
         { st with
           symbols = st.symbols + 1
-        ; symbols_value = (sym, expr) :: st.symbols_value
+        ; symbols_value = (sym, concrete) :: st.symbols_value
         }
       in
       (Ok v, st) )
