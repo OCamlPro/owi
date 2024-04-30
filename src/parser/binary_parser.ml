@@ -55,33 +55,48 @@ let read_byte input =
   (c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
-let rec read_UN nbytes n input =
-  if n <= 0 then Error (`Msg "integer representation too long")
-  else begin
-    let i = int_of_float (Float.ceil (float_of_int n /. 7.)) in
-    let nbytes = nbytes + 1 in
+let read_UN n input =
+  let bytes_limit = int_of_float (Float.ceil (float_of_int n /. 7.)) in
+  let rec aux bytes_read n input =
+    let* () =
+      if n <= 0 then Error (`Msg "integer representation too long") else Ok ()
+    in
     let* b, input = read_byte input in
+    let bytes_read = succ bytes_read in
+    let* () =
+      if bytes_read > bytes_limit then
+        Error (`Msg "integer representation too large")
+      else Ok ()
+    in
     let b = Char.code b in
     let x = Int64.of_int (b land 0x7f) in
-    if b land 0x80 = 0 then
-      if nbytes > i then Error (`Msg "integer representation too long")
-      else Ok (x, input)
+    if b land 0x80 = 0 then Ok (x, input)
     else
       (* TODO: make this tail-rec *)
-      let+ i64, input = read_UN nbytes (n - 7) input in
+      let+ i64, input = aux bytes_read (n - 7) input in
       (Int64.logor x (Int64.shl i64 7L), input)
-  end
+  in
+  aux 0 n input
 
 let read_U32 input =
-  let* i64, input = read_UN 0 32 input in
+  let* i64, input = read_UN 32 input in
   if i64 >= Int64.shift_left 1L 32 then Error (`Msg "integer too large")
   else Ok (Int64.to_int i64, input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
-let rec read_SN n input =
-  if n <= 0 then Error (`Msg "integer representation too long")
-  else begin
+let read_SN n input =
+  let bytes_limit = int_of_float (Float.ceil (float_of_int n /. 7.)) in
+  let rec aux bytes_read n input =
+    let* () =
+      if n <= 0 then Error (`Msg "integer representation too long") else Ok ()
+    in
     let* b, input = read_byte input in
+    let bytes_read = succ bytes_read in
+    let* () =
+      if bytes_read > bytes_limit then
+        Error (`Msg "integer representation too large")
+      else Ok ()
+    in
     let b = Char.code b in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then
@@ -91,9 +106,10 @@ let rec read_SN n input =
       Ok (x, input)
     else
       (* TODO: make this tail-rec *)
-      let+ i64, input = read_SN (n - 7) input in
+      let+ i64, input = aux bytes_read (n - 7) input in
       (Int64.logor x (Int64.shl i64 7L), input)
-  end
+  in
+  aux 0 n input
 
 let read_S32 input =
   let* i64, input = read_SN 32 input in
