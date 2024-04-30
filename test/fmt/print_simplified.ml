@@ -12,7 +12,7 @@ let m =
   | Error e -> Result.failwith e
 
 let m =
-  match Compile.until_simplify ~unsafe:false m with
+  match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> m
   | Error e -> Result.failwith e
 
@@ -24,7 +24,7 @@ let m =
   | Error e -> Result.failwith e
 
 let m =
-  match Compile.until_simplify ~unsafe:false m with
+  match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> m
   | Error e -> Result.failwith e
 

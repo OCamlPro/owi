@@ -64,7 +64,7 @@ let pure_wasm_module_1 =
 (* our first pure wasm module, linked with `life_ext` *)
 let module_to_run, link_state =
   match
-    Compile.until_link link_state ~unsafe:false ~optimize:true
+    Compile.Text.until_link link_state ~unsafe:false ~optimize:true
       ~name:(Some "life") pure_wasm_module_1
   with
   | Error e -> Result.failwith e
@@ -85,7 +85,7 @@ let pure_wasm_module_2 =
 (* our second pure wasm module, linked with `life_ext` and `life` interpreted before *)
 let module_to_run, link_state =
   match
-    Compile.until_link link_state ~unsafe:false ~optimize:true ~name:None
+    Compile.Text.until_link link_state ~unsafe:false ~optimize:true ~name:None
       pure_wasm_module_2
   with
   | Error e -> Result.failwith e

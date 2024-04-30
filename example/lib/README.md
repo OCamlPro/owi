@@ -15,7 +15,7 @@ val filename : Fpath.t = <abstr>
 val m : Text.modul =
 ...
 # let module_to_run, link_state =
-    match Compile.until_link Link.empty_state ~unsafe:false ~optimize:false ~name:None m with
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~optimize:false ~name:None m with
     | Ok v -> v
     | Error e -> Result.failwith e;;
 val module_to_run : '_weak1 Link.module_to_run =

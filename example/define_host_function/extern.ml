@@ -39,7 +39,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run, link_state =
   match
-    Compile.until_link link_state ~unsafe:false ~optimize:true ~name:None
+    Compile.Text.until_link link_state ~unsafe:false ~optimize:true ~name:None
       pure_wasm_module
   with
   | Error e -> Result.failwith e

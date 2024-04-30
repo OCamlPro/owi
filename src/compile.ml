@@ -4,48 +4,66 @@
 
 open Syntax
 
-let until_check ~unsafe m = if unsafe then Ok m else Check.modul m
+module Text = struct
+  let until_check ~unsafe m = if unsafe then Ok m else Check.modul m
 
-let until_group ~unsafe m =
-  let* m = until_check ~unsafe m in
-  Grouped.of_symbolic m
+  let until_group ~unsafe m =
+    let* m = until_check ~unsafe m in
+    Grouped.of_symbolic m
 
-let until_assign ~unsafe m =
-  let* m = until_group ~unsafe m in
-  Assigned.of_grouped m
+  let until_assign ~unsafe m =
+    let* m = until_group ~unsafe m in
+    Assigned.of_grouped m
 
-let until_simplify ~unsafe m =
-  let* m = until_assign ~unsafe m in
-  Rewrite.modul m
+  let until_binary ~unsafe m =
+    let* m = until_assign ~unsafe m in
+    Rewrite.modul m
 
-let until_typecheck ~unsafe m =
-  let* m = until_simplify ~unsafe m in
-  if unsafe then Ok m
-  else
-    let+ () = Typecheck.modul m in
-    m
-
-let until_optimize ~unsafe ~optimize m =
-  let+ m = until_typecheck ~unsafe m in
-  if optimize then Optimize.modul m else m
-
-let until_link ~unsafe link_state ~optimize ~name m =
-  let* m = until_optimize ~unsafe ~optimize m in
-  Link.modul link_state ~name m
-
-let until_interpret link_state ~unsafe ~optimize ~name m =
-  let* m, link_state = until_link link_state ~unsafe ~optimize ~name m in
-  let+ () = Interpret.Concrete.modul link_state.envs m in
-  link_state
-
-let simplified_interpret link_state ~unsafe ~optimize ~name m =
-  let* m =
+  let until_typecheck ~unsafe m =
+    let* m = until_binary ~unsafe m in
     if unsafe then Ok m
     else
       let+ () = Typecheck.modul m in
       m
-  in
-  let* m = if optimize then Ok (Optimize.modul m) else Ok m in
-  let* m, link_state = Link.modul link_state ~name m in
-  let+ () = Interpret.Concrete.modul link_state.envs m in
-  link_state
+
+  let until_optimize ~unsafe ~optimize m =
+    let+ m = until_typecheck ~unsafe m in
+    if optimize then Optimize.modul m else m
+
+  let until_link ~unsafe link_state ~optimize ~name m =
+    let* m = until_optimize ~unsafe ~optimize m in
+    Link.modul link_state ~name m
+
+  let until_interpret link_state ~unsafe ~optimize ~name m =
+    let* m, link_state = until_link link_state ~unsafe ~optimize ~name m in
+    let+ () = Interpret.Concrete.modul link_state.envs m in
+    link_state
+end
+
+module Binary = struct
+  let until_typecheck ~unsafe m =
+    if unsafe then Ok m
+    else
+      let+ () = Typecheck.modul m in
+      m
+
+  let until_optimize ~unsafe ~optimize m =
+    let+ m = until_typecheck ~unsafe m in
+    if optimize then Optimize.modul m else m
+
+  let until_link ~unsafe link_state ~optimize ~name m =
+    let* m = until_optimize ~unsafe ~optimize m in
+    Link.modul link_state ~name m
+
+  let until_interpret link_state ~unsafe ~optimize ~name m =
+    let* m =
+      if unsafe then Ok m
+      else
+        let+ () = Typecheck.modul m in
+        m
+    in
+    let* m = if optimize then Ok (Optimize.modul m) else Ok m in
+    let* m, link_state = Link.modul link_state ~name m in
+    let+ () = Interpret.Concrete.modul link_state.envs m in
+    link_state
+end
