@@ -10,7 +10,6 @@ type deps =
   ; opt : Fpath.t -> Cmd.t
   ; llc : bc:Fpath.t -> obj:Fpath.t -> Cmd.t
   ; ld : flags:Cmd.t -> out:Fpath.t -> Fpath.t list -> Cmd.t
-  ; wasm2wat : out:Fpath.t -> Fpath.t -> Cmd.t
   }
 
 type metadata =
@@ -32,20 +31,16 @@ let ld bin ~flags ~out files : Bos.Cmd.t =
   let files = List.fold_left (fun acc f -> Cmd.(acc % p f)) Cmd.empty files in
   Cmd.(bin %% flags % "-o" % p out %% files % p C_share.libc)
 
-let wasm2wat bin0 ~out bin : Bos.Cmd.t = Cmd.(bin0 % "-o" % p out % p bin)
-
 let check_dependencies () : deps Result.t =
   let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
   let* opt_bin = OS.Cmd.resolve @@ Cmd.v "opt" in
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
   let* ld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
-  let* wasm2wat_bin = OS.Cmd.resolve @@ Cmd.v "wasm2wat" in
   Ok
     { clang = clang clang_bin
     ; opt = opt opt_bin
     ; llc = llc llc_bin
     ; ld = ld ld_bin
-    ; wasm2wat = wasm2wat wasm2wat_bin
     }
 
 let pre_patterns : (Re2.t * string) array =
@@ -144,22 +139,10 @@ let link ~deps ~workspace files : Fpath.t Result.t =
         [ "-z"; "stack-size=" ^ string_of_int stack_size; "--export=" ^ entry ] )
   in
   let wasm = Fpath.(workspace / "a.out.wasm") in
-  let wat = Fpath.(workspace / "a.out.wat") in
-  let* () =
+  let+ () =
     OS.Cmd.run @@ deps.ld ~flags:(ldflags ~entry:"_start") ~out:wasm files
   in
-  let+ () = OS.Cmd.run @@ deps.wasm2wat ~out:wat wasm in
-  wat
-
-let cleanup dir : unit =
-  OS.Path.fold ~elements:`Files
-    (fun path _acc ->
-      if not @@ Fpath.has_ext ".wat" path then
-        match OS.Path.delete path with
-        | Ok () -> ()
-        | Error (`Msg e) -> Logs.warn (fun m -> m "%s" e) )
-    () [ dir ]
-  |> Logs.on_error_msg ~level:Logs.Warning ~use:Fun.id
+  wasm
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
   unit =
@@ -226,10 +209,9 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes files
   let* (objects : Fpath.t list) =
     list_map (compile ~deps ~includes ~opt_lvl) nfiles
   in
-  let* module_ = link ~deps ~workspace objects in
-  cleanup workspace;
+  let* modul = link ~deps ~workspace objects in
   let* () = metadata ~workspace arch property files in
-  let files = [ module_ ] in
+  let files = [ modul ] in
   let workspace = Fpath.(workspace / "test-suite") in
   Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
     no_values deterministic_result_order workspace files

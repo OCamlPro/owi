@@ -63,8 +63,8 @@ build: [
 dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 depexts: [
-  ["llvm" "lld" "wabt"]  {os-family = "debian"}
-  ["llvm" "wabt"]  {os-family = "homebrew"}
+  ["llvm" "lld"]  {os-family = "debian"}
+  ["llvm"]  {os-family = "homebrew"}
 ]
 pin-depends: [
   [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
