@@ -81,19 +81,19 @@ let summaries_extern_module :
     (* let+ v = Choice.select_i32 v in *)
     (* let n = v.c in *)
     (* let x = Choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
-    match view v.s with
+    match view v.symbolic with
     | Val (Num (I32 v)) -> v
-    | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.s
+    | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.symbolic
   in
   let ptr (v : Value.int32) =
-    match view v.s with
+    match view v.symbolic with
     | Ptr (b, _) -> b
-    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v.s
+    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic
   in
   let abort () : unit Choice.t = Choice.abort in
   let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
     let base : int32 = i32 base in
-    Choice.return { Concolic_value.c = base; s = Expr.make (Ptr (base, Symbolic_value.const_i32 0l)) }
+    Choice.return { Concolic_value.concrete = base; symbolic = Expr.make (Ptr (base, Symbolic_value.const_i32 0l)) }
     (* WHAT ???? *)
     (* Choice.with_thread (fun t : Value.int32 -> *)
     (*     let memories = t.shared.memories in *)
