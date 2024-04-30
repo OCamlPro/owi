@@ -1,51 +1,64 @@
 Array tests:
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_add.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_addAt2.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_contains.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_deepCopy.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_getAt.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_indexOf.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_iterAdd.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_iterRemove.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_iterReplace.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_reduce.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_remove.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_removeAll.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_removeAt.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_replaceAt.c
-  Assert failure: (bool.ne symbol_3 symbol_2)
-  Model:
-    (model
-      (symbol_0 (i32 0))
-      (symbol_1 (i32 0))
-      (symbol_2 (i32 0))
-      (symbol_3 (i32 0)))
-  Reached problem!
-  [13]
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_reverse.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_shallowCopy.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_subarray.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_zipIterAdd.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_zipIterNext.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_zipIterRemove.c
-  All OK
+  malformed section id
+  [26]
   $ owi c -I include src/array.c src/common.c src/utils.c testsuite/array/array_test_zipIterReplace.c
-  All OK
+  malformed section id
+  [26]

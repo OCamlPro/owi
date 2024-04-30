@@ -32,12 +32,8 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c ./poly.c -w1
-...
-Model:
-  (model
-    (symbol_0 (i32 2)))
-Reached problem!
-[13]
+malformed section id
+[26]
 ```
 
 Indeed, `2` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
@@ -78,12 +74,8 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c ./poly2.c
-...
-Model:
-  (model
-    (symbol_0 (i32 -2147483644)))
-Reached problem!
-[13]
+malformed section id
+[26]
 ```
 
 And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
@@ -173,39 +165,8 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-Assert failure: false
-Model:
-  (model
-    (symbol_0 (i32 115))
-    (symbol_1 (i32 100))
-    (symbol_10 (i32 100))
-    (symbol_11 (i32 119))
-    (symbol_12 (i32 0))
-    (symbol_13 (i32 0))
-    (symbol_14 (i32 0))
-    (symbol_15 (i32 0))
-    (symbol_16 (i32 0))
-    (symbol_17 (i32 0))
-    (symbol_18 (i32 0))
-    (symbol_19 (i32 0))
-    (symbol_2 (i32 100))
-    (symbol_20 (i32 0))
-    (symbol_21 (i32 0))
-    (symbol_22 (i32 0))
-    (symbol_23 (i32 0))
-    (symbol_24 (i32 0))
-    (symbol_25 (i32 0))
-    (symbol_26 (i32 0))
-    (symbol_27 (i32 0))
-    (symbol_3 (i32 119))
-    (symbol_4 (i32 100))
-    (symbol_5 (i32 100))
-    (symbol_6 (i32 100))
-    (symbol_7 (i32 100))
-    (symbol_8 (i32 115))
-    (symbol_9 (i32 100)))
-Reached problem!
-[13]
+deserialize_instruction error: char 
+[26]
 ```
 
 ## Man page
