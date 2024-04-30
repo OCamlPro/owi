@@ -1,3 +1,3 @@
   $ owi c --testcomp ./simple.c
-  integer representation too long
+  malformed section id
   [26]

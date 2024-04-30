@@ -4,7 +4,7 @@
   expected integer representation too long but got (unexpected end)
   [51]
   $ owi script --no-exhaustion reference/binary.wast
-  expected integer too large but got (integer representation too long)
+  expected END opcode expected but got (deserialize_instruction error: char )
   [51]
   $ owi script --no-exhaustion reference/block.wast
   $ owi script --no-exhaustion reference/br_if.wast
@@ -41,8 +41,6 @@
   83
   $ owi script --no-exhaustion reference/func.wast
   $ owi script --no-exhaustion reference/global.wast
-  expected malformed mutability but got (integer representation too long)
-  [51]
   $ owi script --no-exhaustion reference/i32.wast
   $ owi script --no-exhaustion reference/i64.wast
   $ owi script --no-exhaustion reference/if.wast
