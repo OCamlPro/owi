@@ -39,7 +39,7 @@ module Input = struct
 
   let get n input =
     if n < input.size then Ok (String.get input.bytes (input.pt + n))
-    else Error (`Msg "unexpected end")
+    else Error (`Msg "unexpected end of section or function")
 
   let get0 = get 0
 end
@@ -652,7 +652,7 @@ let rec deserialize_instr block_type_array input =
     let* funcidx, next_input = deserialize_indice next_input in
     Ok (Ref_func funcidx, next_input)
   | '\xFC' -> deserialize_FC input
-  | c -> Error (`Msg (Format.sprintf "deserialize_instruction error: char %c" c))
+  | _c -> Error (`Msg "END opcode expected")
 
 and deserialize_code block_type_array instr_list input :
   ('a expr * Input.t, _) result =
