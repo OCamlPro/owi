@@ -13,10 +13,10 @@ let m =
 
 let m =
   match Compile.Text.until_binary ~unsafe:false m with
-  | Ok m -> m
+  | Ok m -> Binary_to_text.modul m
   | Error e -> Result.failwith e
 
-let s = Format.asprintf "%a@\n" Binary.Pp.modul m
+let s = Format.asprintf "%a@\n" Text.pp_modul m
 
 let m =
   match Parse.Text.Module.from_string s with
@@ -25,7 +25,7 @@ let m =
 
 let m =
   match Compile.Text.until_binary ~unsafe:false m with
-  | Ok m -> m
+  | Ok m -> Binary_to_text.modul m
   | Error e -> Result.failwith e
 
-let () = Format.pp_std "%a@\n" Binary.Pp.modul m
+let () = Format.pp_std "%a@\n" Text.pp_modul m

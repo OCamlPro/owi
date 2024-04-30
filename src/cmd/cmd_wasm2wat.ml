@@ -9,7 +9,8 @@ let cmd_one file =
   match ext with
   | ".wasm" ->
     let* m = Parse.Binary.Module.from_file file in
-    Ok (Format.pp_std "%a@\n" Binary.Pp.modul m)
+    let m = Binary_to_text.modul m in
+    Ok (Format.pp_std "%a@\n" Text.pp_modul m)
   | ext -> Error (`Msg (Format.sprintf "invalid extension: `%s`" ext))
 
 let cmd files = list_iter cmd_one files

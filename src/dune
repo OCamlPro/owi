@@ -6,6 +6,7 @@
   assigned
   binary
   binary_parser
+  binary_to_text
   binary_types
   c_instrumentor
   c_share
