@@ -165,7 +165,7 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-deserialize_instruction error: char 
+END opcode expected
 [26]
 ```
 

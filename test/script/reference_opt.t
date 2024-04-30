@@ -1,10 +1,10 @@
   $ owi script --no-exhaustion --optimize reference/address.wast
   $ owi script --no-exhaustion --optimize reference/align.wast
   $ owi script --no-exhaustion --optimize reference/binary-leb128.wast
-  expected integer representation too long but got (unexpected end)
+  expected integer representation too long but got (unexpected end of section or function)
   [51]
   $ owi script --no-exhaustion --optimize reference/binary.wast
-  expected END opcode expected but got (deserialize_instruction error: char )
+  expected section size mismatch but got (unexpected end of section or function)
   [51]
   $ owi script --no-exhaustion --optimize reference/block.wast
   $ owi script --no-exhaustion --optimize reference/br_if.wast
