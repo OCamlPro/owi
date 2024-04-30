@@ -55,22 +55,27 @@ let read_byte input =
   (c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
-let rec read_UN n input =
+let rec read_UN nbytes n input =
   if n <= 0 then Error (`Msg "integer representation too long")
   else begin
+    let i = int_of_float (Float.ceil (float_of_int n /. 7.)) in
+    let nbytes = nbytes + 1 in
     let* b, input = read_byte input in
     let b = Char.code b in
     let x = Int64.of_int (b land 0x7f) in
-    if b land 0x80 = 0 then Ok (x, input)
+    if b land 0x80 = 0 then
+      if nbytes > i then Error (`Msg "integer representation too long")
+      else Ok (x, input)
     else
       (* TODO: make this tail-rec *)
-      let+ i64, input = read_UN (n - 7) input in
+      let+ i64, input = read_UN nbytes (n - 7) input in
       (Int64.logor x (Int64.shl i64 7L), input)
   end
 
 let read_U32 input =
-  let+ i64, input = read_UN 32 input in
-  (Int64.to_int i64, input)
+  let* i64, input = read_UN 0 32 input in
+  if i64 >= Int64.shift_left 1L 32 then Error (`Msg "integer too large")
+  else Ok (Int64.to_int i64, input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
 let rec read_SN n input =
@@ -91,12 +96,18 @@ let rec read_SN n input =
   end
 
 let read_S32 input =
-  let+ i64, input = read_SN 32 input in
-  (Int64.to_int32 i64, input)
+  let* i64, input = read_SN 32 input in
+  let max = Int64.shift_left 1L 31 in
+  let min = Int64.shift_left (-1L) 31 in
+  if i64 >= max || i64 < min then Error (`Msg "integer too large")
+  else Ok (Int64.to_int32 i64, input)
 
 let read_S64 input =
-  let+ i64, input = read_SN 64 input in
-  (i64, input)
+  let* i64, input = read_SN 64 input in
+  let max = Int64.shift_left 1L 63 in
+  let min = Int64.shift_left (-1L) 63 in
+  if i64 >= max || i64 < min then Error (`Msg "integer too large")
+  else Ok (i64, input)
 
 let read_F32 input =
   let i32_of_byte input =
@@ -158,7 +169,7 @@ let deserialize_reftype input =
   match b with
   | '\x70' -> Ok ((Null, Func_ht), input)
   | '\x6F' -> Ok ((Null, Extern_ht), input)
-  | c -> Error (`Msg (Format.sprintf "deserialize_reftype error: char %c" c))
+  | _c -> Error (`Msg "malformed reference type")
 
 let deserialize_valtype input =
   let* b, input = read_byte input in
@@ -170,7 +181,7 @@ let deserialize_valtype input =
   | '\x7B' -> assert false (* (V128, input) *)
   | '\x70' -> Ok (Ref_type (Null, Func_ht), input)
   | '\x6F' -> Ok (Ref_type (Null, Extern_ht), input)
-  | c -> Error (`Msg (Format.sprintf "deserialize_valtype error: char %c" c))
+  | _c -> Error (`Msg "integer too large")
 
 let deserialize_mut input =
   let* b, input = read_byte input in
@@ -189,7 +200,7 @@ let deserialize_limits input =
     let* min, input = read_U32 input in
     let+ max, input = read_U32 input in
     ({ min; max = Some max }, input)
-  | c -> Error (`Msg (Format.sprintf "deserialize_limits error: char %c" c))
+  | _c -> Error (`Msg "integer too large")
 
 let deserialize_memarg input =
   let* align, input = read_U32 input in
@@ -677,14 +688,15 @@ let section_parse input error_msg_info ~expected_id default
   if Input.is_empty input then Ok (default, input)
   else
     let* id = Input.get0 input in
-    if id = expected_id then (
+    if id = expected_id then
       let* input = Input.sub_suffix 1 error_msg_info input in
       let* size, input = read_U32 input in
       let* section_input = Input.sub_prefix size error_msg_info input in
       let* next_input = Input.sub_suffix size error_msg_info input in
       let* res, after_section_input = section_content_parse section_input in
-      assert (Input.is_empty after_section_input);
-      Ok (res, next_input) )
+      if not (Input.is_empty after_section_input) then
+        Error (`Msg "section size mismatch")
+      else Ok (res, next_input)
     else Ok (default, input)
 
 let section_custom input =
@@ -692,20 +704,6 @@ let section_custom input =
     let+ input = Input.sub ~pos:0 ~len:0 error_msg_info input in
     (x, input)
   in
-  (* TODO: we should fail if name byte count has too many byte *)
-  (* small example:
-      (assert_malformed
-       (module binary
-         "\00asm" "\01\00\00\00"
-         "\00"                   ;; custom section
-         "\0A"                   ;; section size
-         "\83\80\80\80\80\00"    ;; name byte count 3 with one byte too many
-         "123"                   ;; name
-         "4"                     ;; sequence of bytes
-       )
-       "integer representation too long"
-     )
-  *)
   section_parse input "custom_section" ~expected_id:'\x00' None @@ fun input ->
   let* name, input = vector_no_id read_byte input in
   let+ (), input = consume_to_end () "custom_section" input in
@@ -748,7 +746,7 @@ let section_import input =
            let* val_type, input = deserialize_valtype input in
            let* mut, input = deserialize_mut input in
            Ok ((modul, name, Global (mut, val_type)), input)
-         | c -> Error (`Msg (Format.sprintf "import_section error: char %c" c)) )
+         | _c -> Error (`Msg "integer too large") )
 
 let section_function input =
   section_parse input "function_section" ~expected_id:'\x03' []
@@ -963,6 +961,11 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
   let* elems, input = section_element block_type_array input in
   let* locals_code_list, input = section_code block_type_array input in
   let+ datas, input = section_data block_type_array input in
+  let* () =
+    if List.length typeidx_list_func <> List.length locals_code_list then
+      Error (`Msg "function and code section have inconsistent lengths")
+    else Ok ()
+  in
   let* () =
     if not @@ Input.is_empty input then Error (`Msg "malformed section id")
     else Ok ()

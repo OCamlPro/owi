@@ -4,8 +4,8 @@
   expected integer representation too long but got (unexpected end)
   [51]
   $ owi script --no-exhaustion --optimize reference/binary.wast
-  expected integer too large but there was no error
-  [7]
+  expected integer too large but got (integer representation too long)
+  [51]
   $ owi script --no-exhaustion --optimize reference/block.wast
   $ owi script --no-exhaustion --optimize reference/br_if.wast
   $ owi script --no-exhaustion --optimize reference/br_table.wast
@@ -41,6 +41,8 @@
   83
   $ owi script --no-exhaustion --optimize reference/func.wast
   $ owi script --no-exhaustion --optimize reference/global.wast
+  expected malformed mutability but got (integer representation too long)
+  [51]
   $ owi script --no-exhaustion --optimize reference/i32.wast
   $ owi script --no-exhaustion --optimize reference/i64.wast
   $ owi script --no-exhaustion --optimize reference/if.wast
