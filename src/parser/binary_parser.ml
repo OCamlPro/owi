@@ -964,149 +964,157 @@ let section_data block_type_array input =
          | i -> Error (`Msg (Format.sprintf "data_section %d error" i)) ) )
 
 let sections_iterate (modul : Binary.modul) (input : Input.t) =
+  (* Custom *)
   let* _custom_section, input = section_custom input in
+
+  (* Type *)
   let* block_type_list_type, input = section_type input in
   let block_type_array = Array.of_list block_type_list_type in
+
+  (* Imports *)
   let* imports, input = section_import input in
+
+  (* Function *)
   let* typeidx_list_func, input = section_function input in
+
+  (* Tables *)
   let* tables, input = section_table input in
+
+  (* Memory *)
   let* mems, input = section_memory input in
+
+  (* Globals *)
   let* globals, input = section_global block_type_array input in
+
+  (* Exports *)
   let* exports, input = section_export input in
+
+  (* Start *)
   let* start, input = section_start input in
+
+  (* Elements *)
   let* elems, input = section_element block_type_array input in
+
+  (* Code *)
   let* locals_code_list, input = section_code block_type_array input in
-  let+ datas, input = section_data block_type_array input in
   let* () =
     if List.length typeidx_list_func <> List.length locals_code_list then
       Error (`Msg "function and code section have inconsistent lengths")
     else Ok ()
   in
+
+  (* Data *)
+  let+ datas, input = section_data block_type_array input in
+
   let* () =
     if not @@ Input.is_empty input then Error (`Msg "malformed section id")
     else Ok ()
   in
+
+  let indexed_of_list l = List.mapi Indexed.return l in
+
+  (* Memories *)
   let mem =
-    let values =
-      List.mapi (fun id mem -> Indexed.return id (Runtime.Local mem)) mems
+    let local = List.map (fun mem -> Runtime.Local mem) mems in
+    let imported =
+      List.filter_map
+        (function
+          | modul, name, Mem desc ->
+            Option.some
+            @@ Runtime.Imported { modul; name; assigned_name = None; desc }
+          | _not_a_memory_import -> None )
+        imports
     in
-    let id = ref (List.length mems - 1) in
-    let values =
-      values
-      @ List.filter_map
-          (fun (modul, name, type_import) ->
-            match type_import with
-            | Mem limits ->
-              incr id;
-              Some
-                (Indexed.return !id
-                   (Runtime.Imported
-                      { modul; name; assigned_name = None; desc = limits } ) )
-            | _ -> None )
-          imports
-    in
+    let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
   in
+
+  (* Globals *)
   let global =
-    let values =
-      List.mapi
-        (fun id (expr, global) ->
-          Indexed.return id
-            (Runtime.Local { typ = global; init = expr; id = None }) )
+    let local =
+      List.map
+        (fun (init, typ) -> Runtime.Local { typ; init; id = None })
         globals
     in
-    let id = ref (List.length globals - 1) in
-    let values =
-      values
-      @ List.filter_map
-          (fun (modul, name, type_import) ->
-            match type_import with
-            | Global (mut, val_type) ->
-              incr id;
-              Some
-                (Indexed.return !id
-                   (Runtime.Imported
-                      { modul
-                      ; name
-                      ; assigned_name = None
-                      ; desc = (mut, val_type)
-                      } ) )
-            | _ -> None )
-          imports
+    let imported =
+      List.filter_map
+        (function
+          | modul, name, Global (mut, val_type) ->
+            Option.some
+            @@ Runtime.Imported
+                 { modul; name; assigned_name = None; desc = (mut, val_type) }
+          | _not_a_global_import -> None )
+        imports
     in
+    let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
   in
+
+  (* Functions *)
   let func =
-    let values =
-      let id = ref (-1) in
+    let local =
       List.map2
         (fun typeidx (locals, body) ->
-          incr id;
-          Indexed.return !id
-            (Runtime.Local
-               { type_f = Array.get block_type_array typeidx
-               ; locals
-               ; body
-               ; id = None
-               } ) )
+          Runtime.Local
+            { type_f = Array.get block_type_array typeidx
+            ; locals
+            ; body
+            ; id = None
+            } )
         typeidx_list_func locals_code_list
     in
-    let id = ref (List.length locals_code_list - 1) in
-    let values =
-      values
-      @ List.filter_map
-          (fun (modul, name, type_import) ->
-            match type_import with
-            | Func typeidx ->
-              incr id;
-              Some
-                (Indexed.return !id
-                   (Runtime.Imported
-                      { modul
-                      ; name
-                      ; assigned_name = None
-                      ; desc = Array.get block_type_array typeidx
-                      } ) )
-            | _ -> None )
-          imports
+    let imported =
+      List.filter_map
+        (function
+          | modul, name, Func typeidx ->
+            Option.some
+            @@ Runtime.Imported
+                 { modul
+                 ; name
+                 ; assigned_name = None
+                 ; desc = Array.get block_type_array typeidx
+                 }
+          | _not_a_function_import -> None )
+        imports
     in
+    let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
   in
+
+  (* Tables *)
   let table =
-    let values =
-      List.mapi
-        (fun id tbl -> Indexed.return id (Runtime.Local (None, tbl)))
-        tables
+    let local = List.map (fun tbl -> Runtime.Local (None, tbl)) tables in
+    let imported =
+      List.filter_map
+        (function
+          | modul, name, Table (limits, ref_type) ->
+            Option.some
+            @@ Runtime.Imported
+                 { modul
+                 ; name
+                 ; assigned_name = None
+                 ; desc = (limits, ref_type)
+                 }
+          | _not_a_table_import -> None )
+        imports
     in
-    let id = ref (-1) in
-    let values =
-      values
-      @ List.filter_map
-          (fun (modul, name, type_import) ->
-            match type_import with
-            | Table (limits, ref_type) ->
-              incr id;
-              Some
-                (Indexed.return !id
-                   (Runtime.Imported
-                      { modul
-                      ; name
-                      ; assigned_name = None
-                      ; desc = (limits, ref_type)
-                      } ) )
-            | _ -> None )
-          imports
-    in
+    let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
   in
+
+  (* Elems *)
   let elem =
-    let values = List.mapi (fun id elem -> Indexed.return id elem) elems in
+    let values = indexed_of_list elems in
     { Named.values; named = String_map.empty }
   in
+
+  (* Data *)
   let data =
-    let values = List.mapi (fun id data -> Indexed.return id data) datas in
+    let values = indexed_of_list datas in
     { Named.values; named = String_map.empty }
   in
+
+  (* Exports *)
   let empty_exports = { global = []; mem = []; table = []; func = [] } in
   let exports =
     List.fold_left
@@ -1127,6 +1135,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
         | _ -> failwith "deserialize_exportdesc error" )
       empty_exports exports
   in
+
   Ok { modul with global; mem; elem; func; table; start; data; exports }
 
 let from_string content =
