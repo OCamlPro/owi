@@ -76,7 +76,9 @@ let map v f =
 
 let ( let+ ) = map
 
-let add_pc (st : thread) c = { st with pc = c :: st.pc }
+let abort = M (fun st -> Ok (), { st with pc = Assert (Symbolic_value.Bool.const false) :: st.pc })
+let add_pc (c : Concolic_value.V.vbool) = M (fun st -> Ok (), { st with pc = Assume c.s :: st.pc })
+let add_pc_to_thread (st : thread) c = { st with pc = c :: st.pc }
 
 let no_choice e =
   let v = Smtml.Expr.simplify e in
@@ -86,20 +88,20 @@ let select (vb : Concolic_value.V.vbool) =
   let r = vb.c in
   let cond = Select (vb.s, r) in
   let no_choice = no_choice vb.s in
-  M (fun st -> (Ok r, if no_choice then st else add_pc st cond))
+  M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st cond))
 [@@inline]
 
 let select_i32 (i : Concolic_value.V.int32) =
   let r = i.c in
   let expr = Select_i32 (i.s, i.c) in
   let no_choice = no_choice i.s in
-  M (fun st -> (Ok r, if no_choice then st else add_pc st expr))
+  M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st expr))
 [@@inline]
 
 let assume (vb : Concolic_value.V.vbool) =
   let assume_pc = Assume vb.s in
   let r = vb.c in
-  if r then M (fun st -> (Ok (), add_pc st assume_pc))
+  if r then M (fun st -> (Ok (), add_pc_to_thread st assume_pc))
   else M (fun st -> (Error (Assume_fail vb.s), st))
 
 let assertion (vb : Concolic_value.V.vbool) =
@@ -107,7 +109,7 @@ let assertion (vb : Concolic_value.V.vbool) =
   let r = vb.c in
   if r then
     let no_choice = no_choice vb.s in
-    M (fun st -> (Ok (), if no_choice then st else add_pc st assert_pc))
+    M (fun st -> (Ok (), if no_choice then st else add_pc_to_thread st assert_pc))
   else M (fun st -> (Error (Assume_fail vb.s), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
