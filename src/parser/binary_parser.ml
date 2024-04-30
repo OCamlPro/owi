@@ -963,48 +963,123 @@ let section_data block_type_array input =
              ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
          | i -> Error (`Msg (Format.sprintf "data_section %d error" i)) ) )
 
-let sections_iterate (modul : Binary.modul) (input : Input.t) =
+let section_data_count input =
+  section_parse input "data_count_section" ~expected_id:'\x0C' None
+    (fun input ->
+      let* i, input = read_U32 input in
+      Ok (Some i, input) )
+
+let parse_many_custom_section input =
+  let rec aux acc input =
+    let* custom_section, input = section_custom input in
+    match custom_section with
+    | None -> Ok (List.rev acc, input)
+    | Some _ as custom_section -> aux (custom_section :: acc) input
+  in
+  aux [] input
+
+let sections_iterate (input : Input.t) =
   (* Custom *)
-  let* _custom_section, input = section_custom input in
+  let* _custom_sections, input = parse_many_custom_section input in
 
   (* Type *)
-  let* block_type_list_type, input = section_type input in
-  let block_type_array = Array.of_list block_type_list_type in
+  let* type_section, input = section_type input in
+  let type_section = Array.of_list type_section in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Imports *)
-  let* imports, input = section_import input in
+  let* import_section, input = section_import input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Function *)
-  let* typeidx_list_func, input = section_function input in
+  let* function_section, input = section_function input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Tables *)
-  let* tables, input = section_table input in
+  let* table_section, input = section_table input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Memory *)
-  let* mems, input = section_memory input in
+  let* memory_section, input = section_memory input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Globals *)
-  let* globals, input = section_global block_type_array input in
+  let* global_section, input = section_global type_section input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Exports *)
-  let* exports, input = section_export input in
+  let* export_section, input = section_export input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Start *)
-  let* start, input = section_start input in
+  let* start_section, input = section_start input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Elements *)
-  let* elems, input = section_element block_type_array input in
+  let* element_section, input = section_element type_section input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
+
+  (* Data_count *)
+  let* data_count_section, input = section_data_count input in
+
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   (* Code *)
-  let* locals_code_list, input = section_code block_type_array input in
+  let* code_section, input = section_code type_section input in
   let* () =
-    if List.length typeidx_list_func <> List.length locals_code_list then
+    if List.compare_lengths function_section code_section <> 0 then
       Error (`Msg "function and code section have inconsistent lengths")
     else Ok ()
   in
 
+  (* Custom *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
+
   (* Data *)
-  let+ datas, input = section_data block_type_array input in
+  let+ data_section, input = section_data type_section input in
+  let* () =
+    match data_count_section with
+    | None -> Ok ()
+    | Some len ->
+      if List.compare_length_with data_section len <> 0 then
+        Error (`Msg "data count and data section have inconsistent lengths")
+      else Ok ()
+  in
+
+  (* Custom *)
+  (* TODO: actually use the various custom sections *)
+  let* _custom_sections', input = parse_many_custom_section input in
+  let _custom_sections = _custom_sections @ _custom_sections' in
 
   let* () =
     if not @@ Input.is_empty input then Error (`Msg "malformed section id")
@@ -1015,7 +1090,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
 
   (* Memories *)
   let mem =
-    let local = List.map (fun mem -> Runtime.Local mem) mems in
+    let local = List.map (fun mem -> Runtime.Local mem) memory_section in
     let imported =
       List.filter_map
         (function
@@ -1023,7 +1098,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
             Option.some
             @@ Runtime.Imported { modul; name; assigned_name = None; desc }
           | _not_a_memory_import -> None )
-        imports
+        import_section
     in
     let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
@@ -1034,7 +1109,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
     let local =
       List.map
         (fun (init, typ) -> Runtime.Local { typ; init; id = None })
-        globals
+        global_section
     in
     let imported =
       List.filter_map
@@ -1044,7 +1119,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
             @@ Runtime.Imported
                  { modul; name; assigned_name = None; desc = (mut, val_type) }
           | _not_a_global_import -> None )
-        imports
+        import_section
     in
     let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
@@ -1056,12 +1131,8 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Runtime.Local
-            { type_f = Array.get block_type_array typeidx
-            ; locals
-            ; body
-            ; id = None
-            } )
-        typeidx_list_func locals_code_list
+            { type_f = type_section.(typeidx); locals; body; id = None } )
+        function_section code_section
     in
     let imported =
       List.filter_map
@@ -1072,10 +1143,10 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = Array.get block_type_array typeidx
+                 ; desc = type_section.(typeidx)
                  }
           | _not_a_function_import -> None )
-        imports
+        import_section
     in
     let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
@@ -1083,7 +1154,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
 
   (* Tables *)
   let table =
-    let local = List.map (fun tbl -> Runtime.Local (None, tbl)) tables in
+    let local = List.map (fun tbl -> Runtime.Local (None, tbl)) table_section in
     let imported =
       List.filter_map
         (function
@@ -1096,7 +1167,7 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
                  ; desc = (limits, ref_type)
                  }
           | _not_a_table_import -> None )
-        imports
+        import_section
     in
     let values = indexed_of_list (local @ imported) in
     { Named.values; named = String_map.empty }
@@ -1104,13 +1175,13 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
 
   (* Elems *)
   let elem =
-    let values = indexed_of_list elems in
+    let values = indexed_of_list element_section in
     { Named.values; named = String_map.empty }
   in
 
   (* Data *)
   let data =
-    let values = indexed_of_list datas in
+    let values = indexed_of_list data_section in
     { Named.values; named = String_map.empty }
   in
 
@@ -1133,10 +1204,20 @@ let sections_iterate (modul : Binary.modul) (input : Input.t) =
           let global = export :: exports.global in
           { exports with global }
         | _ -> failwith "deserialize_exportdesc error" )
-      empty_exports exports
+      empty_exports export_section
   in
 
-  Ok { modul with global; mem; elem; func; table; start; data; exports }
+  Ok
+    { id = None
+    ; global
+    ; mem
+    ; elem
+    ; func
+    ; table
+    ; start = start_section
+    ; data
+    ; exports
+    }
 
 let from_string content =
   let* () = magic_check content in
@@ -1144,7 +1225,7 @@ let from_string content =
   let* input =
     Input.from_str_bytes content "full_file" |> Input.sub_suffix 8 "full_file"
   in
-  let* m = sections_iterate Binary.empty_modul input in
+  let* m = sections_iterate input in
   m
 
 let from_channel chan =
