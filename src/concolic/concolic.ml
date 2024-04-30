@@ -11,39 +11,40 @@ module P = struct
     Value.t Choice.t =
     (* TODO / Think: this should probably be an ite expression in the symbolic part ? *)
     let select if_true if_false =
-      if c.concrete then if_true.Concolic_value.concrete else if_false.Concolic_value.concrete
+      if c.concrete then if_true.Concolic_value.concrete
+      else if_false.Concolic_value.concrete
     in
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->
       Choice.return
       @@ Value.I32
            { symbolic =
-               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
-                 ~if_false:if_false.symbolic
+               Symbolic_value.Bool.select_expr c.symbolic
+                 ~if_true:if_true.symbolic ~if_false:if_false.symbolic
            ; concrete = select if_true if_false
            }
     | I64 if_true, I64 if_false ->
       Choice.return
       @@ Value.I64
            { symbolic =
-               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
-                 ~if_false:if_false.symbolic
+               Symbolic_value.Bool.select_expr c.symbolic
+                 ~if_true:if_true.symbolic ~if_false:if_false.symbolic
            ; concrete = select if_true if_false
            }
     | F32 if_true, F32 if_false ->
       Choice.return
       @@ Value.F32
            { symbolic =
-               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
-                 ~if_false:if_false.symbolic
+               Symbolic_value.Bool.select_expr c.symbolic
+                 ~if_true:if_true.symbolic ~if_false:if_false.symbolic
            ; concrete = select if_true if_false
            }
     | F64 if_true, F64 if_false ->
       Choice.return
       @@ Value.F64
            { symbolic =
-               Symbolic_value.Bool.select_expr c.symbolic ~if_true:if_true.symbolic
-                 ~if_false:if_false.symbolic
+               Symbolic_value.Bool.select_expr c.symbolic
+                 ~if_true:if_true.symbolic ~if_false:if_false.symbolic
            ; concrete = select if_true if_false
            }
     | Ref _, Ref _ ->
@@ -105,7 +106,9 @@ module P = struct
     let with_concrete m a f_c f_s =
       let open Choice in
       let+ a = Choice.select_i32 a in
-      { concrete = f_c m.concrete a; symbolic = f_s m.symbolic (Symbolic_value.const_i32 a) }
+      { concrete = f_c m.concrete a
+      ; symbolic = f_s m.symbolic (Symbolic_value.const_i32 a)
+      }
 
     let with_concrete_store m a f_c f_s v =
       let open Choice in
@@ -137,7 +140,10 @@ module P = struct
       Concrete_memory.grow m.concrete delta.concrete;
       Symbolic_memory.grow m.symbolic delta.symbolic
 
-    let size m = { concrete = Concrete_memory.size m.concrete; symbolic = Symbolic_memory.size m.symbolic }
+    let size m =
+      { concrete = Concrete_memory.size m.concrete
+      ; symbolic = Symbolic_memory.size m.symbolic
+      }
 
     let size_in_pages m =
       { concrete = Concrete_memory.size_in_pages m.concrete
@@ -149,8 +155,12 @@ module P = struct
     let blit _ = assert false
 
     let blit_string m s ~src ~dst ~len =
-      { concrete = Concrete_memory.blit_string m.concrete s ~src:src.concrete ~dst:dst.concrete ~len:len.concrete
-      ; symbolic = Symbolic_memory.blit_string m.symbolic s ~src:src.symbolic ~dst:dst.symbolic ~len:len.symbolic
+      { concrete =
+          Concrete_memory.blit_string m.concrete s ~src:src.concrete
+            ~dst:dst.concrete ~len:len.concrete
+      ; symbolic =
+          Symbolic_memory.blit_string m.symbolic s ~src:src.symbolic
+            ~dst:dst.symbolic ~len:len.symbolic
       }
 
     let get_limit_max _ = failwith "TODO"

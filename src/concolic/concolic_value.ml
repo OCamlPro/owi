@@ -57,17 +57,24 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     | F64 cs -> F64 cs.symbolic
     | Ref cs -> Ref cs.symbolic
 
-  let f_pair_1 fc fs cs = { concrete = fc cs.concrete; symbolic = fs cs.symbolic } [@@inline always]
-
-  let f_pair_2 fc fs cs1 cs2 = { concrete = fc cs1.concrete cs2.concrete; symbolic = fs cs1.symbolic cs2.symbolic }
+  let f_pair_1 fc fs cs =
+    { concrete = fc cs.concrete; symbolic = fs cs.symbolic }
   [@@inline always]
 
-  let f_pair_1_cst fc fs v = { concrete = fc v; symbolic = fs v } [@@inline always]
+  let f_pair_2 fc fs cs1 cs2 =
+    { concrete = fc cs1.concrete cs2.concrete
+    ; symbolic = fs cs1.symbolic cs2.symbolic
+    }
+  [@@inline always]
+
+  let f_pair_1_cst fc fs v = { concrete = fc v; symbolic = fs v }
+  [@@inline always]
 
   let f_pair_2_cst fc fs v1 v2 = { concrete = fc v1 v2; symbolic = fs v1 v2 }
   [@@inline always]
 
-  let f_pair_2_cst' fc fs cs v2 = { concrete = fc cs.concrete v2; symbolic = fs cs.symbolic v2 }
+  let f_pair_2_cst' fc fs cs v2 =
+    { concrete = fc cs.concrete v2; symbolic = fs cs.symbolic v2 }
   [@@inline always]
 
   let const_i32 v = f_pair_1_cst C.const_i32 S.const_i32 v
@@ -82,7 +89,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   let assert_ref_s = function S.Ref r -> r | _ -> assert false
 
-  let ref_pair rc rs = Ref { concrete = assert_ref_c rc; symbolic = assert_ref_s rs }
+  let ref_pair rc rs =
+    Ref { concrete = assert_ref_c rc; symbolic = assert_ref_s rs }
 
   let ref_null v = ref_pair (C.ref_null v) (S.ref_null v)
 
@@ -94,7 +102,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
   let ref_is_null v = f_pair_1 C.ref_is_null S.ref_is_null v
 
   let mk_pp c symbolic ppf v =
-    Stdlib.Format.fprintf ppf "@[<hov 2>{c: %a@, s: %a}@]" c v.concrete symbolic v.symbolic
+    Stdlib.Format.fprintf ppf "@[<hov 2>{c: %a@, s: %a}@]" c v.concrete symbolic
+      v.symbolic
 
   let pp _ _ = failwith "TODO PP"
 
@@ -113,7 +122,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
     let get_externref ref ty_id : _ Value_intf.get_ref =
       match
-        (C.Ref.get_externref ref.concrete ty_id, S.Ref.get_externref ref.symbolic ty_id)
+        ( C.Ref.get_externref ref.concrete ty_id
+        , S.Ref.get_externref ref.symbolic ty_id )
       with
       | Null, Null -> Null
       | Type_mismatch, Type_mismatch -> Type_mismatch
@@ -350,7 +360,10 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
     let trunc_sat_f64_u = f_pair_1 CIop.trunc_sat_f64_u SIop.trunc_sat_f64_u
 
-    let extend_s symbolic cs = { concrete = CIop.extend_s symbolic cs.concrete; symbolic = SIop.extend_s symbolic cs.symbolic }
+    let extend_s symbolic cs =
+      { concrete = CIop.extend_s symbolic cs.concrete
+      ; symbolic = SIop.extend_s symbolic cs.symbolic
+      }
   end
 
   module F32 = struct

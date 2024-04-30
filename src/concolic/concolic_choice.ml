@@ -76,8 +76,15 @@ let map v f =
 
 let ( let+ ) = map
 
-let abort = M (fun st -> Ok (), { st with pc = Assert (Symbolic_value.Bool.const false) :: st.pc })
-let add_pc (c : Concolic_value.V.vbool) = M (fun st -> Ok (), { st with pc = Assume c.symbolic :: st.pc })
+let abort =
+  M
+    (fun st ->
+      (Ok (), { st with pc = Assert (Symbolic_value.Bool.const false) :: st.pc })
+      )
+
+let add_pc (c : Concolic_value.V.vbool) =
+  M (fun st -> (Ok (), { st with pc = Assume c.symbolic :: st.pc }))
+
 let add_pc_to_thread (st : thread) c = { st with pc = c :: st.pc }
 
 let no_choice e =
@@ -109,7 +116,9 @@ let assertion (vb : Concolic_value.V.vbool) =
   let r = vb.concrete in
   if r then
     let no_choice = no_choice vb.symbolic in
-    M (fun st -> (Ok (), if no_choice then st else add_pc_to_thread st assert_pc))
+    M
+      (fun st ->
+        (Ok (), if no_choice then st else add_pc_to_thread st assert_pc) )
   else M (fun st -> (Error (Assume_fail vb.symbolic), st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
