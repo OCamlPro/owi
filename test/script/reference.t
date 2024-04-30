@@ -17,8 +17,6 @@
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
   $ owi script --no-exhaustion reference/custom.wast
-  expected function and code section have inconsistent lengths but got (malformed section id)
-  [51]
   $ owi script --no-exhaustion reference/data.wast
   expected unknown memory 0 but there was no error
   [7]
