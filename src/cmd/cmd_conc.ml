@@ -75,49 +75,57 @@ let symbolic_extern_module :
 
 let summaries_extern_module :
   Concolic.P.Extern_func.extern_func Link.extern_module =
-  (* let open Expr in *)
-  (* let i32 v = *)
-  (*   match view v with *)
-  (*   | Val (Num (I32 v)) -> v *)
-  (*   | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v *)
-  (* in *)
-  (* let ptr v = *)
-  (*   match view v with *)
-  (*   | Ptr (b, _) -> b *)
-  (*   | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v *)
-  (* in *)
-  (* let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in *)
-  (* let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t = *)
-  (*   let base : int32 = i32 base in *)
-  (*   Choice.with_thread (fun t -> *)
-  (*       let memories = Thread.memories t in *)
-  (*       Symbolic_memory.iter *)
-  (*         (fun tbl -> *)
-  (*           Symbolic_memory.ITbl.iter *)
-  (*             (fun _ (m : Symbolic_memory.t) -> *)
-  (*               Symbolic_memory.replace_size m base size ) *)
-  (*             tbl ) *)
-  (*         memories; *)
-  (*       Expr.make (Ptr (base, Value.const_i32 0l)) ) *)
-  (* in *)
-  (* let free (p : Value.int32) : unit Choice.t = *)
-  (*   let base = ptr p in *)
-  (*   Choice.with_thread (fun t -> *)
-  (*       let memories = Thread.memories t in *)
-  (*       Symbolic_memory.iter *)
-  (*         (fun tbl -> *)
-  (*           Symbolic_memory.ITbl.iter *)
-  (*             (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base) *)
-  (*             tbl ) *)
-  (*         memories ) *)
-  (* in *)
+  let open Expr in
+  let i32 (v : Value.int32) =
+    (* TODO: select_i32 ? *)
+    (* let+ v = Choice.select_i32 v in *)
+    (* let n = v.c in *)
+    (* let x = Choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
+    match view v.s with
+    | Val (Num (I32 v)) -> v
+    | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.s
+  in
+  let ptr (v : Value.int32) =
+    match view v.s with
+    | Ptr (b, _) -> b
+    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v.s
+  in
+  let abort () : unit Choice.t = Choice.abort in
+  let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
+    let base : int32 = i32 base in
+    Choice.return { Concolic_value.c = base; s = Expr.make (Ptr (base, Symbolic_value.const_i32 0l)) }
+    (* WHAT ???? *)
+    (* Choice.with_thread (fun t : Value.int32 -> *)
+    (*     let memories = t.shared.memories in *)
+    (*     Symbolic_memory.iter *)
+    (*       (fun tbl -> *)
+    (*         Symbolic_memory.ITbl.iter *)
+    (*           (fun _ (m : Symbolic_memory.t) -> *)
+    (*             Symbolic_memory.replace_size m base size.s ) *)
+    (*           tbl ) *)
+    (*       memories; *)
+    (*     { c = base; s = Expr.make (Ptr (base, Symbolic_value.const_i32 0l)) }) *)
+  in
+  let free (p : Value.int32) : unit Choice.t =
+    (* WHAT ???? *)
+    let _base = ptr p in
+    (* Choice.with_thread (fun t -> *)
+    (*     let memories = t.shared.memories in *)
+    (*     Symbolic_memory.iter *)
+    (*       (fun tbl -> *)
+    (*         Symbolic_memory.ITbl.iter *)
+    (*           (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base) *)
+    (*           tbl ) *)
+    (*       memories ) *)
+    Choice.return ()
+  in
   let functions =
-    [ (*   ( "alloc" *)
-      (*   , Symbolic.P.Extern_func.Extern_func *)
-      (*       (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) ) *)
-      (* ; ( "dealloc" *)
-      (*   , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) ) *)
-      (* ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort)) *) ]
+    [   ( "alloc"
+        , Concolic.P.Extern_func.Extern_func
+            (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
+      ; ( "dealloc"
+        , Concolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
+      ; ("abort", Concolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort)) ]
   in
   { functions }
 
