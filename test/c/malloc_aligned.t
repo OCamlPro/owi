@@ -1,3 +1,3 @@
   $ owi c ./malloc_aligned.c
-  malformed section id
+  integer representation too long
   [26]
