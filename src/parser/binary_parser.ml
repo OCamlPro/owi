@@ -715,13 +715,19 @@ let section_parse input error_msg_info ~expected_id default
       else Ok (res, next_input)
     else Ok (default, input)
 
+let parse_utf8_name input =
+  let* name, input = vector_no_id read_byte input in
+  let name = string_of_char_list name in
+  let+ () = Wutf8.check_utf8 name in
+  (name, input)
+
 let section_custom input =
   let consume_to_end x error_msg_info input =
     let+ input = Input.sub ~pos:0 ~len:0 error_msg_info input in
     (x, input)
   in
   section_parse input "custom_section" ~expected_id:'\x00' None @@ fun input ->
-  let* name, input = vector_no_id read_byte input in
+  let* name, input = parse_utf8_name input in
   let+ (), input = consume_to_end () "custom_section" input in
   (Some name, input)
 
@@ -742,12 +748,8 @@ let section_type input =
 let section_import input =
   section_parse input "import_section" ~expected_id:'\x02' []
   @@ vector_no_id (fun input ->
-         let* modul, input = vector_no_id read_byte input in
-         let* name, input = vector_no_id read_byte input in
-         let modul = string_of_char_list modul in
-         let* () = Wutf8.check_utf8 modul in
-         let name = string_of_char_list name in
-         let* () = Wutf8.check_utf8 name in
+         let* modul, input = parse_utf8_name input in
+         let* name, input = parse_utf8_name input in
          let* import_typeidx, input = read_byte input in
          match import_typeidx with
          | '\x00' ->
