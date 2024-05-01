@@ -113,8 +113,6 @@
   $ owi script --no-exhaustion reference/unreached-valid.wast
   $ owi script --no-exhaustion reference/unwind.wast
   $ owi script --no-exhaustion reference/utf8-custom-section-id.wast
-  expected malformed UTF-8 encoding but there was no error
-  [7]
   $ owi script --no-exhaustion reference/utf8-import-field.wast
   $ owi script --no-exhaustion reference/utf8-import-module.wast
   $ owi script --no-exhaustion reference/utf8-invalid-encoding.wast
