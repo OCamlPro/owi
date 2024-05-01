@@ -745,7 +745,9 @@ let section_import input =
          let* modul, input = vector_no_id read_byte input in
          let* name, input = vector_no_id read_byte input in
          let modul = string_of_char_list modul in
+         let* () = Wutf8.check_utf8 modul in
          let name = string_of_char_list name in
+         let* () = Wutf8.check_utf8 name in
          let* import_typeidx, input = read_byte input in
          match import_typeidx with
          | '\x00' ->

@@ -116,9 +116,5 @@
   expected malformed UTF-8 encoding but there was no error
   [7]
   $ owi script --no-exhaustion --optimize reference/utf8-import-field.wast
-  expected malformed UTF-8 encoding but there was no error
-  [7]
   $ owi script --no-exhaustion --optimize reference/utf8-import-module.wast
-  expected malformed UTF-8 encoding but there was no error
-  [7]
   $ owi script --no-exhaustion --optimize reference/utf8-invalid-encoding.wast
