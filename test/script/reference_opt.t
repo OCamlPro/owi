@@ -1,10 +1,10 @@
   $ owi script --no-exhaustion --optimize reference/address.wast
   $ owi script --no-exhaustion --optimize reference/align.wast
   $ owi script --no-exhaustion --optimize reference/binary-leb128.wast
-  expected integer representation too long but got (unexpected end of section or function)
+  expected integer representation too long but got (Input.get)
   [51]
   $ owi script --no-exhaustion --optimize reference/binary.wast
-  expected section size mismatch but got (unexpected end of section or function)
+  expected unexpected end of section or function but got (Input.get)
   [51]
   $ owi script --no-exhaustion --optimize reference/block.wast
   $ owi script --no-exhaustion --optimize reference/br_if.wast
@@ -17,6 +17,8 @@
   $ owi script --no-exhaustion --optimize reference/const.wast
   $ owi script --no-exhaustion --optimize reference/conversions.wast
   $ owi script --no-exhaustion --optimize reference/custom.wast
+  expected unexpected end but got (Input.get)
+  [51]
   $ owi script --no-exhaustion --optimize reference/data.wast
   expected unknown memory 0 but there was no error
   [7]
