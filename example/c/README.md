@@ -165,7 +165,7 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-END opcode expected
+illegal opcode \014
 [26]
 ```
 

@@ -1,10 +1,10 @@
   $ owi script --no-exhaustion reference/address.wast
   $ owi script --no-exhaustion reference/align.wast
   $ owi script --no-exhaustion reference/binary-leb128.wast
-  expected integer representation too long but got (Input.get)
+  expected integer representation too long but got (unexpected end of section or function)
   [51]
   $ owi script --no-exhaustion reference/binary.wast
-  expected unexpected end of section or function but got (Input.get)
+  expected END opcode expected but got (illegal opcode \005)
   [51]
   $ owi script --no-exhaustion reference/block.wast
   $ owi script --no-exhaustion reference/br_if.wast
@@ -17,11 +17,7 @@
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
   $ owi script --no-exhaustion reference/custom.wast
-  expected unexpected end but got (Input.get)
-  [51]
   $ owi script --no-exhaustion reference/data.wast
-  expected unknown memory 0 but there was no error
-  [7]
   $ owi script --no-exhaustion reference/elem.wast
   $ owi script --no-exhaustion reference/endianness.wast
   $ owi script --no-exhaustion reference/exports.wast
