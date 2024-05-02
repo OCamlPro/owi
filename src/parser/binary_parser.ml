@@ -39,7 +39,7 @@ module Input = struct
 
   let get n input =
     if n < input.size then Ok (String.get input.bytes (input.pt + n))
-    else Error (`Msg "Input.get")
+    else Error (`Msg "unexpected end of section or function")
 
   let get0 = get 0
 end
@@ -239,7 +239,8 @@ let read_FC input =
     begin
       match b with
       | '\x00' -> Ok (Memory_init dataidx, input)
-      | c -> Error (`Msg (Format.sprintf "read_0xFC 8 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 9 ->
     let* dataidx, input = read_indice input in
@@ -253,16 +254,20 @@ let read_FC input =
         begin
           match b with
           | '\x00' -> Ok (Memory_copy, input)
-          | c -> Error (`Msg (Format.sprintf "read_0xFC 10 error: char %c" c))
+          | c ->
+            Error
+              (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
         end
-      | c -> Error (`Msg (Format.sprintf "read_0xFC 10 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 11 ->
     let* b, input = read_byte input in
     begin
       match b with
       | '\x00' -> Ok (Memory_fill, input)
-      | c -> Error (`Msg (Format.sprintf "read_0xFC 11 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 12 ->
     let* elemidx, input = read_indice input in
@@ -284,7 +289,7 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
-  | i -> Error (`Msg (Format.sprintf "read_0xFC %d error" i))
+  | i -> Error (`Msg (Format.sprintf "illegal opcode %i" i))
 
 let rec read_instr types input =
   let old_input = input in
@@ -328,6 +333,10 @@ let rec read_instr types input =
     end
   | '\x04' ->
     let rec read_if_expr types instr_then instr_else input =
+      let* () =
+        if Input.is_empty input then Error (`Msg "END opcode expected")
+        else Ok ()
+      in
       let* b, input = read_byte input in
       match b with
       | '\x05' ->
@@ -362,6 +371,8 @@ let rec read_instr types input =
         let block_type = types.(Int64.to_int si) in
         (If_else (None, Some block_type, expr_then, expr_else), input)
     end
+  (* | '\x05' -> Error (`Msg "misplaced ELSE opcode") *)
+  (* | '\x0B' -> Error (`Msg "misplaced END opcode") *)
   | '\x0C' ->
     let+ labelidx, input = read_indice input in
     (Br labelidx, input)
@@ -474,11 +485,11 @@ let rec read_instr types input =
   | '\x3F' ->
     let* b, input = read_byte input in
     if b = '\x00' then Ok (Memory_size, input)
-    else Error (`Msg (Format.sprintf "read_instruction 0x3F error: char %c" b))
+    else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
   | '\x40' ->
     let* b, input = read_byte input in
     if b = '\x00' then Ok (Memory_grow, input)
-    else Error (`Msg (Format.sprintf "read_instruction 0x40 error: char %c" b))
+    else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
   | '\x41' ->
     let+ i32, input = read_S32 input in
     (I32_const i32, input)
@@ -627,10 +638,13 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC old_input
-  | _c -> Error (`Msg "END opcode expected")
+  | c -> Error (`Msg (Format.sprintf "illegal opcode %s" (Char.escaped c)))
 
 and read_expr types acc input =
   let rec aux acc input =
+    let* () =
+      if Input.is_empty input then Error (`Msg "END opcode expected") else Ok ()
+    in
     let* b, next_input = read_byte input in
     match b with
     | '\x0B' -> Ok (List.rev acc, next_input)
@@ -668,10 +682,6 @@ let section_parse input error_msg_info ~expected_id default
     if id = expected_id then
       let* input = Input.sub_suffix 1 error_msg_info input in
       let* size, input = read_U32 input in
-      let* () =
-        if size > input.size then Error (`Msg "section size mismatch")
-        else Ok ()
-      in
       let* section_input = Input.sub_prefix size error_msg_info input in
       let* next_input = Input.sub_suffix size error_msg_info input in
       let* res, after_section_input = section_content_parse section_input in
@@ -773,7 +783,8 @@ let read_element types input =
         let+ funcidx_l, input = vector_no_id read_indice input in
         let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
         ({ id = None; typ = (Null, Func_ht); init; mode = Elem_passive }, input)
-      | c -> Error (`Msg (Format.sprintf "element_section 1 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 2 ->
     let* Raw tableidx, input = read_indice input in
@@ -790,7 +801,8 @@ let read_element types input =
           ; mode = Elem_active (Some tableidx, expr)
           }
         , input )
-      | c -> Error (`Msg (Format.sprintf "element_section 2 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 3 ->
     let* elemkind, input = read_byte input in
@@ -801,7 +813,8 @@ let read_element types input =
         let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
         ( { id = None; typ = (Null, Func_ht); init; mode = Elem_declarative }
         , input )
-      | c -> Error (`Msg (Format.sprintf "element_section 3 error: char %c" c))
+      | c ->
+        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 4 ->
     let* expr, input = read_expr types [] input in
@@ -826,7 +839,7 @@ let read_element types input =
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_expr types []) input in
     ({ id = None; typ; init; mode = Elem_declarative }, input)
-  | i -> Error (`Msg (Format.sprintf "element_section %d error" i))
+  | i -> Error (`Msg (Format.sprintf "illegal opcode %i" i))
 
 let read_code types input =
   let* _size, input = read_U32 input in
@@ -842,13 +855,17 @@ let read_code types input =
   let+ code, input = read_expr types [] input in
   ((locals, code), input)
 
-let read_data types input =
+let read_data types memories input =
   let* i, input = read_U32 input in
   match i with
   | 0 ->
     let* expr, input = read_expr types [] input in
-    let+ bytes, input = read_bytes input in
+    let* bytes, input = read_bytes input in
     let init = string_of_char_list bytes in
+    (* TODO: this should be removed once we do proper validation of binary modules *)
+    let+ () =
+      if List.is_empty memories then Error (`Unknown_memory 0) else Ok ()
+    in
     ({ id = None; init; mode = Data_active (Some 0, expr) }, input)
   | 1 ->
     let+ bytes, input = read_bytes input in
@@ -860,7 +877,7 @@ let read_data types input =
     let+ bytes, input = read_bytes input in
     let init = string_of_char_list bytes in
     ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
-  | i -> Error (`Msg (Format.sprintf "data_section %d error" i))
+  | i -> Error (`Msg (Format.sprintf "malformed data segment kind %d" i))
 
 let parse_many_custom_section input =
   let rec aux acc input =
@@ -997,7 +1014,7 @@ let sections_iterate (input : Input.t) =
   (* Data *)
   let+ data_section, input =
     section_parse input "data_section" ~expected_id:'\x0B' []
-      (vector_no_id (read_data type_section))
+      (vector_no_id (read_data type_section memory_section))
   in
 
   let* () =
