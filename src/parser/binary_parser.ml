@@ -38,8 +38,8 @@ module Input = struct
   let sub_prefix len error_msg_info input = sub ~pos:0 ~len error_msg_info input
 
   let get n input =
-    if n < input.size then Ok (String.get input.bytes (input.pt + n))
-    else Error (`Msg "unexpected end of section or function")
+    if n < input.size then Some (String.get input.bytes (input.pt + n))
+    else None
 
   let get0 = get 0
 end
@@ -49,10 +49,12 @@ let string_of_char_list char_list =
   List.iter (Buffer.add_char buf) char_list;
   Buffer.contents buf
 
-let read_byte input =
-  let* c = Input.get0 input in
-  let+ next_input = Input.sub_suffix 1 input.error_msg_info input in
-  (c, next_input)
+let read_byte ~msg input =
+  match Input.get0 input with
+  | None -> Error (`Msg msg)
+  | Some c ->
+    let+ next_input = Input.sub_suffix 1 input.error_msg_info input in
+    (c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
 let read_UN n input =
@@ -60,7 +62,7 @@ let read_UN n input =
     let* () =
       if n <= 0 then Error (`Msg "integer representation too long") else Ok ()
     in
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"integer representation too long" input in
     let b = Char.code b in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then Ok (x, input)
@@ -82,7 +84,7 @@ let read_SN n input =
     let* () =
       if n <= 0 then Error (`Msg "integer representation too long") else Ok ()
     in
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"integer representation too long" input in
     let b = Char.code b in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then
@@ -120,7 +122,7 @@ let read_S64 input =
 
 let read_F32 input =
   let i32_of_byte input =
-    let+ b, input = read_byte input in
+    let+ b, input = read_byte ~msg:"read_F32" input in
     (Int32.of_int (int_of_char b), input)
   in
   let* i1, input = i32_of_byte input in
@@ -135,7 +137,7 @@ let read_F32 input =
 
 let read_F64 input =
   let i64_of_byte input =
-    let+ b, input = read_byte input in
+    let+ b, input = read_byte ~msg:"read_F64" input in
     (Int64.of_int (int_of_char b), input)
   in
   let* i1, input = i64_of_byte input in
@@ -169,21 +171,21 @@ let vector parse_elt input =
 
 let vector_no_id f input = vector (fun _id -> f) input
 
-let read_bytes input = vector_no_id read_byte input
+let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
 
 let read_indice input : (Types.binary Types.indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (Raw indice, input)
 
 let read_reftype input =
-  let* b, input = read_byte input in
+  let* b, input = read_byte ~msg:"read_reftype" input in
   match b with
   | '\x70' -> Ok ((Null, Func_ht), input)
   | '\x6F' -> Ok ((Null, Extern_ht), input)
   | _c -> Error (`Msg "malformed reference type")
 
 let read_valtype input =
-  let* b, input = read_byte input in
+  let* b, input = read_byte ~msg:"read_valtype" input in
   match b with
   | '\x7F' -> Ok (Num_type I32, input)
   | '\x7E' -> Ok (Num_type I64, input)
@@ -197,14 +199,14 @@ let read_valtype input =
 let read_valtypes input = vector_no_id read_valtype input
 
 let read_mut input =
-  let* b, input = read_byte input in
+  let* b, input = read_byte ~msg:"read_mut" input in
   match b with
   | '\x00' -> Ok (Const, input)
   | '\x01' -> Ok (Var, input)
   | _c -> Error (`Msg "malformed mutability")
 
 let read_limits input =
-  let* b, input = read_byte input in
+  let* b, input = read_byte ~msg:"read_limits" input in
   match b with
   | '\x00' ->
     let+ min, input = read_U32 input in
@@ -235,7 +237,7 @@ let read_FC input =
   | 7 -> Ok (I_trunc_sat_f (S64, S64, U), input)
   | 8 ->
     let* dataidx, input = read_indice input in
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"read_FC 8" input in
     begin
       match b with
       | '\x00' -> Ok (Memory_init dataidx, input)
@@ -246,11 +248,11 @@ let read_FC input =
     let* dataidx, input = read_indice input in
     Ok (Data_drop dataidx, input)
   | 10 ->
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"FC 10" input in
     begin
       match b with
       | '\x00' ->
-        let* b, input = read_byte input in
+        let* b, input = read_byte ~msg:"FC 10 0" input in
         begin
           match b with
           | '\x00' -> Ok (Memory_copy, input)
@@ -262,7 +264,7 @@ let read_FC input =
         Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 11 ->
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"FC 11" input in
     begin
       match b with
       | '\x00' -> Ok (Memory_fill, input)
@@ -293,12 +295,12 @@ let read_FC input =
 
 let rec read_instr types input =
   let old_input = input in
-  let* b, input = read_byte input in
+  let* b, input = read_byte ~msg:"read_instr" input in
   match b with
   | '\x00' -> Ok (Unreachable, input)
   | '\x01' -> Ok (Nop, input)
   | '\x02' ->
-    let* b, next2_input = read_byte input in
+    let* b, next2_input = read_byte ~msg:"read_instr 02" input in
     begin
       match b with
       | '\x40' ->
@@ -315,7 +317,7 @@ let rec read_instr types input =
         (Block (None, Some block_type, expr), input)
     end
   | '\x03' ->
-    let* b, next2_input = read_byte input in
+    let* b, next2_input = read_byte ~msg:"read_instr 03" input in
     begin
       match b with
       | '\x40' ->
@@ -337,7 +339,7 @@ let rec read_instr types input =
         if Input.is_empty input then Error (`Msg "END opcode expected")
         else Ok ()
       in
-      let* b, input = read_byte input in
+      let* b, input = read_byte ~msg:"read_instr 04 1" input in
       match b with
       | '\x05' ->
         let+ instr_list_else, input = read_expr types instr_else input in
@@ -347,7 +349,7 @@ let rec read_instr types input =
         let* i, input = read_instr types input in
         read_if_expr types (i :: instr_then) instr_else input
     in
-    let* b, next2_input = read_byte input in
+    let* b, next2_input = read_byte ~msg:"read_instr 04 2" input in
     begin
       match b with
       | '\x40' ->
@@ -483,11 +485,11 @@ let rec read_instr types input =
     let+ memarg, input = read_memarg input in
     (I64_store32 memarg, input)
   | '\x3F' ->
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"read_instr 3f" input in
     if b = '\x00' then Ok (Memory_size, input)
     else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
   | '\x40' ->
-    let* b, input = read_byte input in
+    let* b, input = read_byte ~msg:"read_instr 40" input in
     if b = '\x00' then Ok (Memory_grow, input)
     else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
   | '\x41' ->
@@ -645,7 +647,7 @@ and read_expr types acc input =
     let* () =
       if Input.is_empty input then Error (`Msg "END opcode expected") else Ok ()
     in
-    let* b, next_input = read_byte input in
+    let* b, next_input = read_byte ~msg:"read_expr" input in
     match b with
     | '\x0B' -> Ok (List.rev acc, next_input)
     | _ ->
@@ -678,22 +680,24 @@ let section_parse input error_msg_info ~expected_id default
   section_content_parse =
   if Input.is_empty input then Ok (default, input)
   else
-    let* id = Input.get0 input in
-    if id = expected_id then
-      let* input = Input.sub_suffix 1 error_msg_info input in
-      let* size, input = read_U32 input in
-      let* section_input = Input.sub_prefix size error_msg_info input in
-      let* next_input = Input.sub_suffix size error_msg_info input in
-      let* res, after_section_input = section_content_parse section_input in
-      if
-        input.size - (next_input.size + section_input.size)
-        <> after_section_input.Input.size
-      then Error (`Msg "section size mismatch")
-      else Ok (res, next_input)
-    else Ok (default, input)
+    match Input.get0 input with
+    | None -> Error (`Msg "malformed section id")
+    | Some id ->
+      if id = expected_id then
+        let* input = Input.sub_suffix 1 error_msg_info input in
+        let* size, input = read_U32 input in
+        let* section_input = Input.sub_prefix size error_msg_info input in
+        let* next_input = Input.sub_suffix size error_msg_info input in
+        let* res, after_section_input = section_content_parse section_input in
+        if
+          input.size - (next_input.size + section_input.size)
+          <> after_section_input.Input.size
+        then Error (`Msg "section size mismatch")
+        else Ok (res, next_input)
+      else Ok (default, input)
 
 let parse_utf8_name input =
-  let* name, input = read_bytes input in
+  let* name, input = read_bytes ~msg:"parse_utf8_name" input in
   let name = string_of_char_list name in
   let+ () = Wutf8.check_utf8 name in
   (name, input)
@@ -709,7 +713,7 @@ let section_custom input =
   (Some name, input)
 
 let read_type id input =
-  let* fcttype, input = read_byte input in
+  let* fcttype, input = read_byte ~msg:"read_type" input in
   let* () =
     if fcttype <> '\x60' then Error (`Msg "integer representation too long")
     else Ok ()
@@ -722,7 +726,7 @@ let read_type id input =
 let read_import input =
   let* modul, input = parse_utf8_name input in
   let* name, input = parse_utf8_name input in
-  let* import_typeidx, input = read_byte input in
+  let* import_typeidx, input = read_byte ~msg:"read_import" input in
   match import_typeidx with
   | '\x00' ->
     let+ typeidx, input = read_U32 input in
@@ -756,9 +760,9 @@ let read_global types input =
   ((expr, (mut, val_type)), input)
 
 let read_export input =
-  let* name, input = read_bytes input in
+  let* name, input = read_bytes ~msg:"read_export 1" input in
   let name = string_of_char_list name in
-  let* export_typeidx, input = read_byte input in
+  let* export_typeidx, input = read_byte ~msg:"read_export 2" input in
   let+ id, input = read_U32 input in
   ((export_typeidx, { id; name }), input)
 
@@ -776,7 +780,7 @@ let read_element types input =
       }
     , input )
   | 1 ->
-    let* elemkind, input = read_byte input in
+    let* elemkind, input = read_byte ~msg:"read_element 1" input in
     begin
       match elemkind with
       | '\x00' ->
@@ -789,7 +793,7 @@ let read_element types input =
   | 2 ->
     let* Raw tableidx, input = read_indice input in
     let* expr, input = read_expr types [] input in
-    let* elemkind, input = read_byte input in
+    let* elemkind, input = read_byte ~msg:"read_element 2" input in
     begin
       match elemkind with
       | '\x00' ->
@@ -805,7 +809,7 @@ let read_element types input =
         Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
     end
   | 3 ->
-    let* elemkind, input = read_byte input in
+    let* elemkind, input = read_byte ~msg:"read_element 3" input in
     begin
       match elemkind with
       | '\x00' ->
@@ -860,7 +864,7 @@ let read_data types memories input =
   match i with
   | 0 ->
     let* expr, input = read_expr types [] input in
-    let* bytes, input = read_bytes input in
+    let* bytes, input = read_bytes ~msg:"read_data 0" input in
     let init = string_of_char_list bytes in
     (* TODO: this should be removed once we do proper validation of binary modules *)
     let+ () =
@@ -868,13 +872,13 @@ let read_data types memories input =
     in
     ({ id = None; init; mode = Data_active (Some 0, expr) }, input)
   | 1 ->
-    let+ bytes, input = read_bytes input in
+    let+ bytes, input = read_bytes ~msg:"read_data 1" input in
     let init = string_of_char_list bytes in
     ({ id = None; init; mode = Data_passive }, input)
   | 2 ->
     let* memidx, input = read_U32 input in
     let* expr, input = read_expr types [] input in
-    let+ bytes, input = read_bytes input in
+    let+ bytes, input = read_bytes ~msg:"read_data 2" input in
     let init = string_of_char_list bytes in
     ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
   | i -> Error (`Msg (Format.sprintf "malformed data segment kind %d" i))
