@@ -1,2 +1,4 @@
 (cram
- (deps %{bin:owi}))
+ (deps
+  %{bin:owi}
+  (file ./binary_loop.wasm)))

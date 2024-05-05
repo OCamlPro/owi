@@ -138,13 +138,13 @@ module Stack : sig
 
   val match_types : typ -> typ -> bool
 
-  val _pp : formatter -> t -> unit
+  val pp : formatter -> t -> unit
 
   val match_prefix : prefix:t -> stack:t -> t option
 end = struct
   type t = typ list
 
-  let _pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
+  let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
 
   let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
@@ -491,7 +491,11 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
   if not (Stack.equal rt stack) then Error (`Type_mismatch "typecheck_expr 1")
   else
     match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
-    | None -> Error (`Type_mismatch "typecheck_expr 2")
+    | None ->
+      Error
+        (`Type_mismatch
+          (Format.asprintf "expected a prefix of %a but stack has type %a"
+             Stack.pp pt Stack.pp previous_stack ) )
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =

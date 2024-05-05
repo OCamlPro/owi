@@ -16,7 +16,7 @@
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Typecheck.typecheck_expr in file "src/typecheck/typecheck.ml", line 490, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 508, characters 6-112
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 512, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.Text.until_typecheck in file "src/compile.ml", line 26, characters 16-33
        Called from Owi__Compile.Text.until_optimize in file "src/compile.ml", line 30, characters 13-38
@@ -51,7 +51,7 @@
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Typecheck.typecheck_expr in file "src/typecheck/typecheck.ml", line 490, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 508, characters 6-112
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 512, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.Text.until_typecheck in file "src/compile.ml", line 26, characters 16-33
        Called from Owi__Compile.Text.until_optimize in file "src/compile.ml", line 30, characters 13-38
@@ -72,7 +72,7 @@
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Typecheck.typecheck_expr in file "src/typecheck/typecheck.ml", line 490, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 508, characters 6-112
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 512, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.Text.until_typecheck in file "src/compile.ml", line 26, characters 16-33
        Called from Owi__Compile.Text.until_optimize in file "src/compile.ml", line 30, characters 13-38
@@ -93,7 +93,7 @@
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Typecheck.typecheck_expr in file "src/typecheck/typecheck.ml", line 490, characters 15-59
-       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 508, characters 6-112
+       Called from Owi__Typecheck.typecheck_function in file "src/typecheck/typecheck.ml", line 512, characters 6-112
        Called from Stdlib__List.fold_left in file "list.ml", line 123, characters 24-34
        Called from Owi__Compile.Text.until_typecheck in file "src/compile.ml", line 26, characters 16-33
        Called from Owi__Compile.Text.until_optimize in file "src/compile.ml", line 30, characters 13-38
