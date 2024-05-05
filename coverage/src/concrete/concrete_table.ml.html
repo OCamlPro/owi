@@ -154,7 +154,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : limits
-  ; typ : simplified ref_type
+  ; typ : binary ref_type
   ; mutable data : table
   }
 
@@ -164,7 +164,7 @@ let fresh =
     <span data-count="960">i</span>ncr r;
     <span data-count="960">!</span>r
 
-let init ?label (typ : simplified table_type) : t =
+let init ?label (typ : binary table_type) : t =
   <span data-count="960">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
   <span data-count="960">l</span>et table = Array.make limits.min null in

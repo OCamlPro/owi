@@ -1130,10 +1130,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Simplified
+open Binary
 open Types
 
-let rec optimize_expr expr : bool * simplified instr list =
+let rec optimize_expr expr : bool * binary instr list =
   <span data-count="59701">m</span>atch expr with
   | <span data-count="71">(</span>(<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as x)
     :: ((<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as y)
@@ -1458,9 +1458,9 @@ let rec optimize_expr expr : bool * simplified instr list =
     <span data-count="42517">(</span>has_changed, hd :: e)
   | <span data-count="12906">[</span>] -&gt; (false, [])
 
-let locals_func (body_expr : simplified expr) =
+let locals_func (body_expr : binary expr) =
   <span data-count="4609">l</span>et locals_hashtbl = Hashtbl.create 16 in
-  <span data-count="4609">l</span>et rec aux_instr (instr : simplified instr) =
+  <span data-count="4609">l</span>et rec aux_instr (instr : binary instr) =
     <span data-count="21523">m</span>atch instr with
     | <span data-count="3610">L</span>ocal_get ind | <span data-count="1309">L</span>ocal_set ind | <span data-count="171">L</span>ocal_tee ind -&gt;
       Hashtbl.replace locals_hashtbl ind ()
@@ -1528,11 +1528,11 @@ let locals_func (body_expr : simplified expr) =
   <span data-count="4609">l</span>ocals_hashtbl
 
 let remove_local map body =
-  <span data-count="4609">l</span>et new_x (Raw x : simplified indice) =
+  <span data-count="4609">l</span>et new_x (Raw x : binary indice) =
     <span data-count="5090">l</span>et x = match Hashtbl.find_opt map x with <span data-count="2414">N</span>one -&gt; x | <span data-count="2676">S</span>ome x -&gt; x in
     Raw x
   in
-  let rec aux_instr (instr : simplified instr) : simplified instr =
+  let rec aux_instr (instr : binary instr) : binary instr =
     <span data-count="21523">m</span>atch instr with
     | <span data-count="3610">L</span>ocal_get ind -&gt; Local_get (new_<span data-count="3610">x</span> ind)
     | <span data-count="1309">L</span>ocal_set ind -&gt; Local_set (new_<span data-count="1309">x</span> ind)
@@ -1625,7 +1625,7 @@ let remove_unused_locals locals nb_args body =
   <span data-count="4609">l</span>et body = remove_local rename_map body in
   <span data-count="4609">(</span>locals, body)
 
-let optimize_func (func : simplified func) =
+let optimize_func (func : binary func) =
   <span data-count="4609">l</span>et { type_f; locals; body; id } = func in
   let rec loop has_changed e =
     <span data-count="9792">i</span>f not has_changed then
@@ -1648,12 +1648,12 @@ let optimize_runtime_func f =
       | <span data-count="4609">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4609">c</span> f) )
     f
 
-let optimize_funcs funs = <span data-count="1385">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1370">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1385">L</span>og.debug0 "optimizing   ...@\n";
-  <span data-count="1385">l</span>et func = optimize_funcs m.func in
-  <span data-count="1385">{</span> m with func }
+  <span data-count="1370">L</span>og.debug0 "optimizing   ...@\n";
+  <span data-count="1370">l</span>et func = optimize_funcs m.func in
+  <span data-count="1370">{</span> m with func }
 </code></pre>
       </div>
     </div>

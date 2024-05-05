@@ -94,7 +94,7 @@ type t = int
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * simplified func_type) IMap.t
+  { c : ('a * binary func_type) IMap.t
   ; last : int
   }
 
@@ -105,8 +105,8 @@ let add f t { last; c } =
   <span data-count="6142">(</span>last, { c; last = suc<span data-count="6142">c</span> last })
 
 let get i c =
-  <span data-count="23943">l</span>et v, _ = IMap.find i c.c in
-  <span data-count="23937">v</span>
+  <span data-count="23985">l</span>et v, _ = IMap.find i c.c in
+  <span data-count="23967">v</span>
 
 let get_typ i c =
   <span data-count="3505">l</span>et _, t = IMap.find i c.c in

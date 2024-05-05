@@ -803,7 +803,7 @@ module type T = sig
   val const_f64 : Float64.t -&gt; float64
   (* TODO ref *)
 
-  val ref_null : simplified heap_type -&gt; t
+  val ref_null : binary heap_type -&gt; t
 
   val ref_func : Func_intf.t -&gt; t
 

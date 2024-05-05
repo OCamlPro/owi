@@ -63,8 +63,8 @@
 open Syntax
 
 let validate filename =
-  <span data-count="3">l</span>et* modul = Parse.Module.from_fil<span data-count="3">e</span> filename in
-  <span data-count="3">l</span>et+ _modul = Compile.until_typechec<span data-count="3">k</span> ~unsafe:false modul in
+  <span data-count="3">l</span>et* modul = Parse.Text.Module.from_fil<span data-count="3">e</span> filename in
+  <span data-count="3">l</span>et+ _modul = Compile.Text.until_typechec<span data-count="3">k</span> ~unsafe:false modul in
   <span data-count="0">(</span>)
 
 let cmd debug files =

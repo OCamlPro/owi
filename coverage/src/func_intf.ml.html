@@ -233,11 +233,11 @@ module type T_Extern_func = sig
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   (* val extern_type : _ func_type -&gt; Simplified.func_type *)
-  val extern_type : extern_func -&gt; simplified Types.func_type
+  val extern_type : extern_func -&gt; binary Types.func_type
 end
 
 type t =
-  | WASM of int * simplified func * Env_id.t
+  | WASM of int * binary func * Env_id.t
   | Extern of Func_id.t
 
 module type T = sig
@@ -247,7 +247,7 @@ module type T = sig
 
   (* val typ : ('env, extern_func) t -&gt; Simplified.func_type *)
 
-  val wasm : simplified func -&gt; Env_id.t -&gt; t
+  val wasm : binary func -&gt; Env_id.t -&gt; t
 end
 </code></pre>
       </div>

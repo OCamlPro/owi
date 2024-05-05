@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>grouped.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in src/text_to_binary/grouped.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/text_to_binary/</span>grouped.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="visited"> </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span class="visited"> </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span > </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span class="visited"> </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span > </span>
+<a id="L130"></a><span > </span>
+<a id="L131"></a><span > </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span > </span>
+<a id="L134"></a><span class="visited"> </span>
+<a id="L135"></a><span class="visited"> </span>
+<a id="L136"></a><span class="visited"> </span>
+<a id="L137"></a><span class="visited"> </span>
+<a id="L138"></a><span > </span>
+<a id="L139"></a><span class="visited"> </span>
+<a id="L140"></a><span class="visited"> </span>
+<a id="L141"></a><span class="visited"> </span>
+<a id="L142"></a><span class="visited"> </span>
+<a id="L143"></a><span class="visited"> </span>
+<a id="L144"></a><span > </span>
+<a id="L145"></a><span class="visited"> </span>
+<a id="L146"></a><span > </span>
+<a id="L147"></a><span > </span>
+<a id="L148"></a><span > </span>
+<a id="L149"></a><span class="visited"> </span>
+<a id="L150"></a><span > </span>
+<a id="L151"></a><span class="visited"> </span>
+<a id="L152"></a><span > </span>
+<a id="L153"></a><span class="visited"> </span>
+<a id="L154"></a><span > </span>
+<a id="L155"></a><span class="visited"> </span>
+<a id="L156"></a><span class="visited"> </span>
+<a id="L157"></a><span > </span>
+<a id="L158"></a><span class="visited"> </span>
+<a id="L159"></a><span class="visited"> </span>
+<a id="L160"></a><span class="visited"> </span>
+<a id="L161"></a><span > </span>
+<a id="L162"></a><span class="visited"> </span>
+<a id="L163"></a><span class="visited"> </span>
+<a id="L164"></a><span > </span>
+<a id="L165"></a><span class="visited"> </span>
+<a id="L166"></a><span > </span>
+<a id="L167"></a><span > </span>
+<a id="L168"></a><span > </span>
+<a id="L169"></a><span class="visited"> </span>
+<a id="L170"></a><span > </span>
+<a id="L171"></a><span > </span>
+<a id="L172"></a><span class="visited"> </span>
+<a id="L173"></a><span class="visited"> </span>
+<a id="L174"></a><span > </span>
+<a id="L175"></a><span > </span>
+<a id="L176"></a><span class="visited"> </span>
+<a id="L177"></a><span class="visited"> </span>
+<a id="L178"></a><span > </span>
+<a id="L179"></a><span > </span>
+<a id="L180"></a><span > </span>
+<a id="L181"></a><span > </span>
+<a id="L182"></a><span > </span>
+<a id="L183"></a><span class="visited"> </span>
+<a id="L184"></a><span > </span>
+<a id="L185"></a><span > </span>
+<a id="L186"></a><span class="visited"> </span>
+<a id="L187"></a><span class="visited"> </span>
+<a id="L188"></a><span class="visited"> </span>
+<a id="L189"></a><span class="visited"> </span>
+<a id="L190"></a><span class="visited"> </span>
+<a id="L191"></a><span > </span>
+<a id="L192"></a><span class="visited"> </span>
+<a id="L193"></a><span > </span>
+<a id="L194"></a><span > </span>
+<a id="L195"></a><span > </span>
+<a id="L196"></a><span class="visited"> </span>
+<a id="L197"></a><span > </span>
+<a id="L198"></a><span > </span>
+<a id="L199"></a><span class="visited"> </span>
+<a id="L200"></a><span class="visited"> </span>
+<a id="L201"></a><span > </span>
+<a id="L202"></a><span class="visited"> </span>
+<a id="L203"></a><span > </span>
+<a id="L204"></a><span class="visited"> </span>
+<a id="L205"></a><span class="visited"> </span>
+<a id="L206"></a><span > </span>
+<a id="L207"></a><span > </span>
+<a id="L208"></a><span class="visited"> </span>
+<a id="L209"></a><span class="visited"> </span>
+<a id="L210"></a><span > </span>
+<a id="L211"></a><span class="visited"> </span>
+<a id="L212"></a><span > </span>
+<a id="L213"></a><span > </span>
+<a id="L214"></a><span class="visited"> </span>
+<a id="L215"></a><span class="visited"> </span>
+<a id="L216"></a><span > </span>
+<a id="L217"></a><span > </span>
+<a id="L218"></a><span class="visited"> </span>
+<a id="L219"></a><span > </span>
+<a id="L220"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
+<a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
+<a href="#L148">148</a>
+<a href="#L149">149</a>
+<a href="#L150">150</a>
+<a href="#L151">151</a>
+<a href="#L152">152</a>
+<a href="#L153">153</a>
+<a href="#L154">154</a>
+<a href="#L155">155</a>
+<a href="#L156">156</a>
+<a href="#L157">157</a>
+<a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
+<a href="#L167">167</a>
+<a href="#L168">168</a>
+<a href="#L169">169</a>
+<a href="#L170">170</a>
+<a href="#L171">171</a>
+<a href="#L172">172</a>
+<a href="#L173">173</a>
+<a href="#L174">174</a>
+<a href="#L175">175</a>
+<a href="#L176">176</a>
+<a href="#L177">177</a>
+<a href="#L178">178</a>
+<a href="#L179">179</a>
+<a href="#L180">180</a>
+<a href="#L181">181</a>
+<a href="#L182">182</a>
+<a href="#L183">183</a>
+<a href="#L184">184</a>
+<a href="#L185">185</a>
+<a href="#L186">186</a>
+<a href="#L187">187</a>
+<a href="#L188">188</a>
+<a href="#L189">189</a>
+<a href="#L190">190</a>
+<a href="#L191">191</a>
+<a href="#L192">192</a>
+<a href="#L193">193</a>
+<a href="#L194">194</a>
+<a href="#L195">195</a>
+<a href="#L196">196</a>
+<a href="#L197">197</a>
+<a href="#L198">198</a>
+<a href="#L199">199</a>
+<a href="#L200">200</a>
+<a href="#L201">201</a>
+<a href="#L202">202</a>
+<a href="#L203">203</a>
+<a href="#L204">204</a>
+<a href="#L205">205</a>
+<a href="#L206">206</a>
+<a href="#L207">207</a>
+<a href="#L208">208</a>
+<a href="#L209">209</a>
+<a href="#L210">210</a>
+<a href="#L211">211</a>
+<a href="#L212">212</a>
+<a href="#L213">213</a>
+<a href="#L214">214</a>
+<a href="#L215">215</a>
+<a href="#L216">216</a>
+<a href="#L217">217</a>
+<a href="#L218">218</a>
+<a href="#L219">219</a>
+<a href="#L220">220</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+open Types
+open Syntax
+
+type type_check = text indice * text func_type
+
+type opt_ind =
+  | Curr of int
+  | Indice of text indice
+
+type opt_export =
+  { name : string
+  ; id : opt_ind
+  }
+
+type opt_exports =
+  { global : opt_export list
+  ; mem : opt_export list
+  ; table : opt_export list
+  ; func : opt_export list
+  }
+
+let curr_id (curr : int) (i : text indice option) =
+  <span data-count="11897">m</span>atch i with <span data-count="7137">N</span>one -&gt; Curr (pre<span data-count="7137">d</span> curr) | <span data-count="4760">S</span>ome id -&gt; Indice id
+
+type t =
+  { id : string option
+  ; typ : text type_def list
+  ; function_type : text func_type list
+      (* Types comming from function declarations.
+         It contains potential duplication *)
+  ; type_checks : type_check list
+      (* Types checks to perform after assignment.
+         Come from function declarations with type indicies *)
+  ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
+  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
+  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; func : (text func, text block_type) Runtime.t Indexed.t list
+  ; elem : Text.elem Indexed.t list
+  ; data : Text.data Indexed.t list
+  ; exports : opt_exports
+  ; start : text indice option
+  }
+
+let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
+  <span data-count="3545">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+
+let empty_module id =
+  <span data-count="5999">{</span> id
+  ; typ = []
+  ; function_type = []
+  ; type_checks = []
+  ; global = []
+  ; table = []
+  ; mem = []
+  ; func = []
+  ; elem = []
+  ; data = []
+  ; exports = { global = []; table = []; mem = []; func = [] }
+  ; start = None
+  }
+
+type curr =
+  { global : int
+  ; table : int
+  ; mem : int
+  ; func : int
+  ; elem : int
+  ; data : int
+  }
+
+let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
+
+let add_global value (fields : t) (curr : curr) =
+  <span data-count="1341">l</span>et index = curr.global in
+  ( { fields with global = Indexed.retur<span data-count="1341">n</span> index value :: fields.global }
+  , { curr with global = suc<span data-count="1341">c</span> curr.global } )
+
+let add_table value (fields : t) (curr : curr) =
+  <span data-count="1296">l</span>et index = curr.table in
+  ( { fields with table = Indexed.retur<span data-count="1296">n</span> index value :: fields.table }
+  , { curr with table = suc<span data-count="1296">c</span> curr.table } )
+
+let add_mem value (fields : t) (curr : curr) =
+  <span data-count="1513">l</span>et index = curr.mem in
+  ( { fields with mem = Indexed.retur<span data-count="1513">n</span> index value :: fields.mem }
+  , { curr with mem = suc<span data-count="1513">c</span> curr.mem } )
+
+let add_func value (fields : t) (curr : curr) =
+  <span data-count="3140">l</span>et index = curr.func in
+  ( { fields with func = Indexed.retur<span data-count="3140">n</span> index value :: fields.func }
+  , { curr with func = suc<span data-count="3140">c</span> curr.func } )
+
+let add_elem value (fields : t) (curr : curr) =
+  <span data-count="1519">l</span>et index = curr.elem in
+  ( { fields with elem = Indexed.retur<span data-count="1519">n</span> index value :: fields.elem }
+  , { curr with elem = suc<span data-count="1519">c</span> curr.elem } )
+
+let add_data value (fields : t) (curr : curr) =
+  <span data-count="821">l</span>et index = curr.data in
+  ( { fields with data = Indexed.retur<span data-count="821">n</span> index value :: fields.data }
+  , { curr with data = suc<span data-count="821">c</span> curr.data } )
+
+let check_limit { min; max } =
+  <span data-count="2570">m</span>atch max with
+  | <span data-count="1232">N</span>one -&gt; Ok ()
+  | <span data-count="1338">S</span>ome max -&gt;
+    if min &gt; max then <span data-count="6">E</span>rror `Size_minimum_greater_than_maximum else <span data-count="1332">O</span>k ()
+
+let of_symbolic (modul : Text.modul) : t Result.t =
+  <span data-count="5999">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="5999">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
+    <span data-count="34951">m</span>atch field with
+    | <span data-count="583">T</span>ext.MType typ -&gt;
+      let typ = typ @ fields.typ in
+      ok @@ ({ fields with typ }, curr)
+    | <span data-count="1181">M</span>Global global -&gt; ok @@ add_globa<span data-count="1181">l</span> (Local global) fields curr
+    | <span data-count="160">M</span>Import ({ desc = Import_global (a, (mut, val_type)); _ } as import) -&gt;
+      let+ val_type = Binary_types.convert_val_typ<span data-count="160">e</span> None val_type in
+      <span data-count="160">l</span>et b = (mut, val_type) in
+      let imported = imp import (a, b) in
+      <span data-count="160">a</span>dd_global (Imported imported) fields curr
+    | <span data-count="986">M</span>Export { name; desc = Export_global id } -&gt;
+      let id = curr_id curr.global id in
+      <span data-count="986">l</span>et exports =
+        { fields.exports with global = { name; id } :: fields.exports.global }
+      in
+      ok ({ fields with exports }, curr)
+    | <span data-count="1165">M</span>Table table -&gt;
+      let _, (limits, _) = table in
+      let* () = check_limi<span data-count="1165">t</span> limits in
+      <span data-count="1161">l</span>et id, table_type = table in
+      let+ table_type = Binary_types.convert_table_typ<span data-count="1161">e</span> None table_type in
+      <span data-count="1161">l</span>et table = (id, table_type) in
+      add_table (Local table) fields curr
+    | <span data-count="135">M</span>Import ({ desc = Import_table (id, table_type); _ } as import) -&gt;
+      let+ table_type = Binary_types.convert_table_typ<span data-count="135">e</span> None table_type in
+      <span data-count="135">l</span>et imported = imp import (id, table_type) in
+      <span data-count="135">a</span>dd_table (Imported imported) fields curr
+    | <span data-count="303">M</span>Export { name; desc = Export_table id } -&gt;
+      let id = curr_id curr.table id in
+      <span data-count="303">l</span>et exports =
+        { fields.exports with table = { name; id } :: fields.exports.table }
+      in
+      ok ({ fields with exports }, curr)
+    | <span data-count="1417">M</span>Mem ((_, limits) as mem) -&gt;
+      let* () =
+        if limits.min &gt; 65536 then <span data-count="6">E</span>rror `Memory_size_too_large else <span data-count="1411">O</span>k ()
+      in
+      <span data-count="1411">l</span>et* () =
+        match limits.max with
+        | <span data-count="669">S</span>ome max when max &gt; 65536 -&gt; <span data-count="6">E</span>rror `Memory_size_too_large
+        | <span data-count="663">S</span>ome _ | <span data-count="742">N</span>one -&gt; Ok ()
+      in
+      <span data-count="1405">l</span>et* () = check_limi<span data-count="1405">t</span> limits in
+      <span data-count="1403">o</span>k @@ add_me<span data-count="1403">m</span> (Local mem) fields curr
+    | <span data-count="110">M</span>Import ({ desc = Import_mem (id, limits); _ } as import) -&gt;
+      let imported = imp import (id, limits) in
+      <span data-count="110">o</span>k @@ add_me<span data-count="110">m</span> (Imported imported) fields curr
+    | <span data-count="334">M</span>Export { name; desc = Export_mem id } -&gt;
+      let id = curr_id curr.mem id in
+      <span data-count="334">l</span>et exports =
+        { fields.exports with mem = { name; id } :: fields.exports.mem }
+      in
+      Ok ({ fields with exports }, curr)
+    | <span data-count="12601">M</span>Func func -&gt;
+      let function_type, type_checks =
+        match func.type_f with
+        | <span data-count="237">B</span>t_ind _ -&gt; (fields.function_type, fields.type_checks)
+        | <span data-count="12364">B</span>t_raw (id, typ) -&gt;
+          let type_checks =
+            match id with
+            | <span data-count="12344">N</span>one -&gt; fields.type_checks
+            | <span data-count="20">S</span>ome id -&gt; (id, typ) :: fields.type_checks
+          in
+          (typ :: fields.function_type, type_checks)
+      in
+      let index = curr.func in
+      let value = Runtime.Local func in
+      let func = Indexed.retur<span data-count="12601">n</span> index value :: fields.func in
+      Ok
+        ( { fields with func; function_type; type_checks }
+        , { curr with func = suc<span data-count="12601">c</span> curr.func } )
+    | <span data-count="3140">M</span>Import ({ desc = Import_func (a, b); _ } as import) -&gt;
+      let imported : text block_type Imported.t = im<span data-count="3140">p</span> import (a, b) in
+      ok @@ add_fun<span data-count="3140">c</span> (Imported imported) fields curr
+    | <span data-count="10274">M</span>Export { name; desc = Export_func id } -&gt;
+      let id = curr_id curr.func id in
+      <span data-count="10274">l</span>et exports =
+        { fields.exports with func = { name; id } :: fields.exports.func }
+      in
+      Ok ({ fields with exports }, curr)
+    | <span data-count="1519">M</span>Elem elem -&gt;
+      let mode =
+        match elem.mode with
+        | (<span data-count="704">T</span>ext.Elem_passive | <span data-count="41">E</span>lem_declarative) as mode -&gt; mode
+        | <span data-count="774">E</span>lem_active (id, expr) -&gt;
+          let id = Option.value id ~default:(Raw (curr.table - 1)) in
+          <span data-count="774">E</span>lem_active (Some id, expr)
+      in
+      ok @@ add_ele<span data-count="1519">m</span> { elem with mode } fields curr
+    | <span data-count="821">M</span>Data data -&gt;
+      let mode =
+        match data.mode with
+        | <span data-count="482">D</span>ata_passive -&gt; Text.Data_passive
+        | <span data-count="339">D</span>ata_active (id, expr) -&gt;
+          let id = Option.value id ~default:(Raw (curr.mem - 1)) in
+          <span data-count="339">D</span>ata_active (Some id, expr)
+      in
+      let data : Text.data = { id = data.id; init = data.init; mode } in
+      ok @@ add_dat<span data-count="821">a</span> data fields curr
+    | <span data-count="222">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
+  in
+  let+ modul, _curr =
+    list_fold_lef<span data-count="5999">t</span> add (empty_modul<span data-count="5999">e</span> modul.id, init_curr) modul.fields
+  in
+  <span data-count="5981">m</span>odul
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

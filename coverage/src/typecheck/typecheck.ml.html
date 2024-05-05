@@ -1317,13 +1317,13 @@
 (* Written by the Owi programmers *)
 
 open Types
-open Simplified
+open Binary
 open Syntax
 open Format
 
 type typ =
   | Num_type of num_type
-  | Ref_type of simplified heap_type
+  | Ref_type of binary heap_type
   | Any
   | Something
 
@@ -1350,11 +1350,11 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; globals : (global, simplified global_type) Runtime.t Named.t
-    ; result_type : simplified result_type
-    ; funcs : (simplified func, simplified block_type) Runtime.t Named.t
+    ; globals : (global, binary global_type) Runtime.t Named.t
+    ; result_type : binary result_type
+    ; funcs : (binary func, binary block_type) Runtime.t Named.t
     ; blocks : typ list list
-    ; tables : (simplified table, simplified table_type) Runtime.t Named.t
+    ; tables : (binary table, binary table_type) Runtime.t Named.t
     ; elems : elem Named.t
     ; refs : (int, unit) Hashtbl.t
     }
@@ -1383,7 +1383,7 @@ module Env = struct
     | <span data-count="1">N</span>one -&gt; Error `Unknown_label
     | <span data-count="58151">S</span>ome bt -&gt; Ok bt
 
-  let table_type_get_from_module i (modul : Simplified.modul) =
+  let table_type_get_from_module i (modul : Binary.modul) =
     <span data-count="885">l</span>et value = Indexed.get_at_exn i modul.table.values in
     <span data-count="885">m</span>atch value with
     | <span data-count="816">L</span>ocal table -&gt; snd (sn<span data-count="816">d</span> table)
@@ -1442,13 +1442,13 @@ module Stack : sig
 
   val push : t -&gt; t -&gt; t Result.t
 
-  val pop_push : simplified block_type -&gt; t -&gt; t Result.t
+  val pop_push : binary block_type -&gt; t -&gt; t Result.t
 
   val pop_ref : t -&gt; t Result.t
 
   val equal : t -&gt; t -&gt; bool
 
-  val match_ref_type : simplified heap_type -&gt; simplified heap_type -&gt; bool
+  val match_ref_type : binary heap_type -&gt; binary heap_type -&gt; bool
 
   val match_types : typ -&gt; typ -&gt; bool
 
@@ -1535,7 +1535,7 @@ end = struct
     <span data-count="1764">p</span>ush rt stack
 end
 
-let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
+let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
   stack Result.t =
   <span data-count="255432">m</span>atch instr with
   | <span data-count="605">N</span>op -&gt; Ok stack
@@ -1755,7 +1755,7 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     <span data-count="365">l</span>et* _stack = Stack.po<span data-count="365">p</span> default_jt stack in
     <span data-count="349">l</span>et* () =
       array_ite<span data-count="349">r</span>
-        (fun (Raw i : simplified indice) -&gt;
+        (fun (Raw i : binary indice) -&gt;
           <span data-count="49643">l</span>et* jt = Env.block_type_ge<span data-count="49643">t</span> i env in
           <span data-count="49643">i</span>f not (List.lengt<span data-count="49643">h</span> jt = List.lengt<span data-count="49643">h</span> default_jt) then
             <span data-count="8">E</span>rror (`Type_mismatch "br_table")
@@ -1791,12 +1791,12 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : simplified instr) :
     Log.debug2 "TODO (typecheck instr) %a" pp_instr i;
     <span data-count="4">a</span>ssert false
 
-and typecheck_expr env expr ~is_loop (block_type : simplified block_type option)
+and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
   ~stack:previous_stack : stack Result.t =
   <span data-count="26705">l</span>et pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : simplified block_type) -&gt;
-        <span data-count="18618">(</span>List.rev_ma<span data-count="18618">p</span> typ_of_pt pt, List.rev_ma<span data-count="18618">p</span> typ_of_val_type rt) )
+      ~some:(fun (Bt_raw ((None | Some _), (pt, rt)) : binary block_type) -&gt;
+        <span data-count="24562">(</span>List.rev_ma<span data-count="24562">p</span> typ_of_pt pt, List.rev_ma<span data-count="24562">p</span> typ_of_val_type rt) )
       block_type
   in
   <span data-count="26705">l</span>et jump_type = if is_loop then <span data-count="1219">p</span>t else <span data-count="25486">r</span>t in
@@ -1863,7 +1863,7 @@ let typecheck_const_expr (modul : modul) refs =
   <span data-count="7360">l</span>ist_fold_left (typecheck_const_inst<span data-count="7360">r</span> modul refs) []
 
 let typecheck_global (modul : modul) refs
-  (global : (global, simplified global_type) Runtime.t Indexed.t) =
+  (global : (global, binary global_type) Runtime.t Indexed.t) =
   <span data-count="1406">m</span>atch Indexed.get global with
   | <span data-count="132">I</span>mported _ -&gt; Ok ()
   | <span data-count="1274">L</span>ocal { typ; init; _ } -&gt; (
@@ -1916,15 +1916,15 @@ let typecheck_data modul refs (data : data Indexed.t) =
     | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_data") )
 
 let modul (modul : modul) =
-  <span data-count="5751">L</span>og.debug0 "typechecking ...@\n";
-  <span data-count="5751">l</span>et refs = Hashtbl.create 512 in
-  <span data-count="5751">l</span>et* () = list_ite<span data-count="5751">r</span> (typecheck_globa<span data-count="5751">l</span> modul refs) modul.global.values in
-  <span data-count="5739">l</span>et* () = list_ite<span data-count="5739">r</span> (typecheck_ele<span data-count="5739">m</span> modul refs) modul.elem.values in
-  <span data-count="5719">l</span>et* () = list_ite<span data-count="5719">r</span> (typecheck_dat<span data-count="5719">a</span> modul refs) modul.data.values in
-  <span data-count="5711">L</span>ist.iter
+  <span data-count="5721">L</span>og.debug0 "typechecking ...@\n";
+  <span data-count="5721">l</span>et refs = Hashtbl.create 512 in
+  <span data-count="5721">l</span>et* () = list_ite<span data-count="5721">r</span> (typecheck_globa<span data-count="5721">l</span> modul refs) modul.global.values in
+  <span data-count="5709">l</span>et* () = list_ite<span data-count="5709">r</span> (typecheck_ele<span data-count="5709">m</span> modul refs) modul.elem.values in
+  <span data-count="5689">l</span>et* () = list_ite<span data-count="5689">r</span> (typecheck_dat<span data-count="5689">a</span> modul refs) modul.data.values in
+  <span data-count="5681">L</span>ist.iter
     (fun (export : export) -&gt; <span data-count="10390">H</span>ashtbl.add refs export.id ())
     modul.exports.func;
-  <span data-count="5711">N</span>amed.fold
+  <span data-count="5681">N</span>amed.fold
     (fun _index func acc -&gt;
       <span data-count="20040">l</span>et* () = acc in
       <span data-count="19876">t</span>ypecheck_function modul func refs )
