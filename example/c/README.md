@@ -32,8 +32,12 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c ./poly.c -w1
-type mismatch (pop)
-[35]
+...
+Model:
+  (model
+    (symbol_0 (i32 2)))
+Reached problem!
+[13]
 ```
 
 Indeed, `2` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
@@ -74,8 +78,12 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c ./poly2.c
-type mismatch (pop)
-[35]
+...
+Model:
+  (model
+    (symbol_0 (i32 -2147483644)))
+Reached problem!
+[13]
 ```
 
 And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
@@ -165,7 +173,7 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-illegal opcode \014
+illegal opcode (2) \014
 [26]
 ```
 

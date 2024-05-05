@@ -162,6 +162,18 @@ let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
       ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
   in
   let*/ to_run, link_state =
+    let start =
+      if Option.is_some m.start then m.start
+      else
+        match
+          List.find_opt
+            (function { Binary.name = "_start"; _ } -> true | _ -> false)
+            m.exports.func
+        with
+        | None -> None
+        | Some export -> Some export.id
+    in
+    let m = { m with start } in
     (* TODO: handle start function like in text ? *)
     let+ m, state =
       Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m

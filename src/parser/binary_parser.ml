@@ -9,39 +9,49 @@ open Binary
 open Syntax
 open Types
 
-module Input = struct
+module Input : sig
+  type t
+
+  val is_empty : t -> bool
+
+  val size : t -> int
+
+  val sub_suffix : int -> t -> t Result.t
+
+  val sub_prefix : int -> t -> t Result.t
+
+  val get : int -> t -> char option
+
+  val of_string : string -> t
+
+  val sub : pos:int -> len:int -> t -> t Result.t
+end = struct
   type t =
     { bytes : string
     ; pt : int
     ; size : int
-    ; error_msg_info : string
     }
+
+  let size s = s.size
 
   let is_empty input = input.size = 0
 
-  let from_str_bytes str error_msg_info =
+  let of_string str =
     let size = String.length str in
-    { bytes = str; pt = 0; size; error_msg_info }
+    { bytes = str; pt = 0; size }
 
-  let sub ~pos ~len error_msg_info input =
+  let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
-      Ok { input with pt = input.pt + pos; size = len; error_msg_info }
-    else
-      Error
-        (`Msg
-          (Format.sprintf "length out of bounds in section %s" error_msg_info)
-          )
+      Ok { input with pt = input.pt + pos; size = len }
+    else Error (`Msg (Format.sprintf "length out of bounds in section"))
 
-  let sub_suffix pos error_msg_info input =
-    sub ~pos ~len:(input.size - pos) error_msg_info input
+  let sub_suffix pos input = sub ~pos ~len:(input.size - pos) input
 
-  let sub_prefix len error_msg_info input = sub ~pos:0 ~len error_msg_info input
+  let sub_prefix len input = sub ~pos:0 ~len input
 
   let get n input =
     if n < input.size then Some (String.get input.bytes (input.pt + n))
     else None
-
-  let get0 = get 0
 end
 
 let string_of_char_list char_list =
@@ -50,10 +60,10 @@ let string_of_char_list char_list =
   Buffer.contents buf
 
 let read_byte ~msg input =
-  match Input.get0 input with
+  match Input.get 0 input with
   | None -> Error (`Msg msg)
   | Some c ->
-    let+ next_input = Input.sub_suffix 1 input.error_msg_info input in
+    let+ next_input = Input.sub_suffix 1 input in
     (c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
@@ -157,6 +167,14 @@ let read_F64 input =
   let i64 = Int64.logor i64 (Int64.shl i2 8L) in
   let i64 = Int64.logor i64 i1 in
   (Float64.of_bits i64, input)
+
+let sized f input =
+  let* expected_size, input = read_U32 input in
+  let size = Input.size input in
+  let* x, new_input = f input in
+  let new_size = Input.size new_input in
+  if size - new_size <> expected_size then Error (`Msg "section size mismatch")
+  else Ok (x, new_input)
 
 let vector parse_elt input =
   let* nb_elt, input = read_U32 input in
@@ -291,7 +309,28 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
-  | i -> Error (`Msg (Format.sprintf "illegal opcode %i" i))
+  | i -> Error (`Msg (Format.sprintf "illegal opcode (1) %i" i))
+
+let read_block_type types input =
+  match read_S33 input with
+  | Ok (i, input) when i >= 0L ->
+    let block_type = types.(Int64.to_int i) in
+    Ok (block_type, input)
+  | Error _ | Ok _ -> begin
+    match read_byte ~msg:"read_block_type" input with
+    | Ok ('\x40', input) -> Ok (Bt_raw (None, ([], [])), input)
+    | Error _ | Ok _ ->
+      let* vt, input = read_valtype input in
+      Ok (Bt_raw (None, ([ (None, vt) ], [])), input)
+  end
+
+let check_end_opcode input =
+  let msg = "END opcode expected" in
+  match read_byte ~msg input with
+  | Ok ('\x0B', input) -> Ok input
+  | Ok (c, _input) ->
+    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
+  | Error _ as e -> e
 
 let rec read_instr types input =
   let old_input = input in
@@ -300,81 +339,29 @@ let rec read_instr types input =
   | '\x00' -> Ok (Unreachable, input)
   | '\x01' -> Ok (Nop, input)
   | '\x02' ->
-    let* b, next2_input = read_byte ~msg:"read_instr 02" input in
-    begin
-      match b with
-      | '\x40' ->
-        let+ expr, next2_input = read_expr types [] next2_input in
-        (Block (None, Some (Bt_raw (None, ([], []))), expr), next2_input)
-      | '\x7F' | '\x7E' | '\x7D' | '\x7C' | '\x7B' | '\x70' | '\x6F' ->
-        let* vt, input = read_valtype input in
-        let+ expr, input = read_expr types [] input in
-        (Block (None, Some (Bt_raw (None, ([ (None, vt) ], []))), expr), input)
-      | _ ->
-        let* si, input = read_S33 input in
-        let+ expr, input = read_expr types [] input in
-        let block_type = types.(Int64.to_int si) in
-        (Block (None, Some block_type, expr), input)
-    end
+    let* bt, input = read_block_type types input in
+    let* expr, input = read_expr types input in
+    let+ input = check_end_opcode input in
+    (Block (None, Some bt, expr), input)
   | '\x03' ->
-    let* b, next2_input = read_byte ~msg:"read_instr 03" input in
-    begin
-      match b with
-      | '\x40' ->
-        let+ expr, next2_input = read_expr types [] next2_input in
-        (Loop (None, Some (Bt_raw (None, ([], []))), expr), next2_input)
-      | '\x7F' | '\x7E' | '\x7D' | '\x7C' | '\x7B' | '\x70' | '\x6F' ->
-        let* vt, input = read_valtype input in
-        let+ expr, input = read_expr types [] input in
-        (Loop (None, Some (Bt_raw (None, ([ (None, vt) ], []))), expr), input)
-      | _ ->
-        let* si, input = read_S33 input in
-        let+ expr, input = read_expr types [] input in
-        let block_type = types.(Int64.to_int si) in
-        (Loop (None, Some block_type, expr), input)
-    end
+    let* bt, input = read_block_type types input in
+    let* expr, input = read_expr types input in
+    let+ input = check_end_opcode input in
+    (Loop (None, Some bt, expr), input)
   | '\x04' ->
-    let rec read_if_expr types instr_then instr_else input =
-      let* () =
-        if Input.is_empty input then Error (`Msg "END opcode expected")
-        else Ok ()
-      in
-      let* b, input = read_byte ~msg:"read_instr 04 1" input in
-      match b with
-      | '\x05' ->
-        let+ instr_list_else, input = read_expr types instr_else input in
-        (List.rev instr_then, instr_list_else, input)
-      | '\x0B' -> Ok (List.rev instr_then, List.rev instr_else, input)
-      | _ ->
-        let* i, input = read_instr types input in
-        read_if_expr types (i :: instr_then) instr_else input
+    let* bt, input = read_block_type types input in
+    let* expr1, input = read_expr types input in
+    let* expr2, input =
+      begin
+        match read_byte ~msg:"read_instr (0x04)" input with
+        | Ok ('\x05', input) -> read_expr types input
+        | Ok _ | Error _ -> Ok ([], input)
+      end
     in
-    let* b, next2_input = read_byte ~msg:"read_instr 04 2" input in
-    begin
-      match b with
-      | '\x40' ->
-        let+ expr_then, expr_else, next2_input =
-          read_if_expr types [] [] next2_input
-        in
-        ( If_else (None, Some (Bt_raw (None, ([], []))), expr_then, expr_else)
-        , next2_input )
-      | '\x7F' | '\x7E' | '\x7D' | '\x7C' | '\x7B' | '\x70' | '\x6F' ->
-        let* vt, input = read_valtype input in
-        let+ expr_then, expr_else, input = read_if_expr types [] [] input in
-        ( If_else
-            ( None
-            , Some (Bt_raw (None, ([ (None, vt) ], [])))
-            , expr_then
-            , expr_else )
-        , input )
-      | _ ->
-        let* si, input = read_S33 input in
-        let+ expr_then, expr_else, input = read_if_expr types [] [] input in
-        let block_type = types.(Int64.to_int si) in
-        (If_else (None, Some block_type, expr_then, expr_else), input)
-    end
-  (* | '\x05' -> Error (`Msg "misplaced ELSE opcode") *)
-  (* | '\x0B' -> Error (`Msg "misplaced END opcode") *)
+    let+ input = check_end_opcode input in
+    (If_else (None, Some bt, expr1, expr2), input)
+  | '\x05' -> Error (`Msg "misplaced ELSE opcode")
+  | '\x0B' -> Error (`Msg "misplaced END opcode")
   | '\x0C' ->
     let+ labelidx, input = read_indice input in
     (Br labelidx, input)
@@ -640,21 +627,22 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC old_input
-  | c -> Error (`Msg (Format.sprintf "illegal opcode %s" (Char.escaped c)))
+  | c -> Error (`Msg (Format.sprintf "illegal opcode (2) %s" (Char.escaped c)))
 
-and read_expr types acc input =
+and read_expr types input =
   let rec aux acc input =
-    let* () =
-      if Input.is_empty input then Error (`Msg "END opcode expected") else Ok ()
-    in
-    let* b, next_input = read_byte ~msg:"read_expr" input in
-    match b with
-    | '\x0B' -> Ok (List.rev acc, next_input)
-    | _ ->
+    match read_byte ~msg:"read_expr" input with
+    | Error _ | Ok (('\x05' | '\x0b'), _) -> Ok (List.rev acc, input)
+    | Ok _ ->
       let* instr, input = read_instr types input in
       aux (instr :: acc) input
   in
-  aux acc input
+  aux [] input
+
+let read_const types input =
+  let* c, input = read_expr types input in
+  let+ input = check_end_opcode input in
+  (c, input)
 
 type ('a, 'b) import =
   | Func of int
@@ -676,25 +664,32 @@ let version_check str =
     if String.equal version "\x01\x00\x00\x00" then Ok ()
     else Error (`Msg "unknown binary version")
 
-let section_parse input error_msg_info ~expected_id default
-  section_content_parse =
-  if Input.is_empty input then Ok (default, input)
-  else
-    match Input.get0 input with
-    | None -> Error (`Msg "malformed section id")
-    | Some id ->
-      if id = expected_id then
-        let* input = Input.sub_suffix 1 error_msg_info input in
-        let* size, input = read_U32 input in
-        let* section_input = Input.sub_prefix size error_msg_info input in
-        let* next_input = Input.sub_suffix size error_msg_info input in
-        let* res, after_section_input = section_content_parse section_input in
-        if
-          input.size - (next_input.size + section_input.size)
-          <> after_section_input.Input.size
-        then Error (`Msg "section size mismatch")
-        else Ok (res, next_input)
-      else Ok (default, input)
+let check_section_id = function
+  | '\x00' .. '\x0C' -> Ok ()
+  | c -> Error (`Msg (Format.sprintf "malformed section id %s" (Char.escaped c)))
+
+let section_parse input ~expected_id default section_content_parse =
+  match Input.get 0 input with
+  | Some id when id = expected_id ->
+    let* () = check_section_id id in
+    let* input = Input.sub_suffix 1 input in
+    let* size, input = read_U32 input in
+    let* () =
+      if size > Input.size input then Error (`Msg "section size mismatch")
+      else Ok ()
+    in
+    let* section_input = Input.sub_prefix size input in
+    let* next_input = Input.sub_suffix size input in
+    let* res, after_section_input = section_content_parse section_input in
+    if
+      Input.size input - (Input.size next_input + Input.size section_input)
+      <> Input.size after_section_input
+    then Error (`Msg "section size mismatch")
+    else Ok (res, next_input)
+  | None -> Ok (default, input)
+  | Some id ->
+    let* () = check_section_id id in
+    Ok (default, input)
 
 let parse_utf8_name input =
   let* name, input = read_bytes ~msg:"parse_utf8_name" input in
@@ -703,13 +698,13 @@ let parse_utf8_name input =
   (name, input)
 
 let section_custom input =
-  let consume_to_end x error_msg_info input =
-    let+ input = Input.sub ~pos:0 ~len:0 error_msg_info input in
+  let consume_to_end x input =
+    let+ input = Input.sub ~pos:0 ~len:0 input in
     (x, input)
   in
-  section_parse input "custom_section" ~expected_id:'\x00' None @@ fun input ->
+  section_parse input ~expected_id:'\x00' None @@ fun input ->
   let* name, input = parse_utf8_name input in
-  let+ (), input = consume_to_end () "custom_section" input in
+  let+ (), input = consume_to_end () input in
   (Some name, input)
 
 let read_type id input =
@@ -722,6 +717,11 @@ let read_type id input =
   let+ results, input = read_valtypes input in
   let params = List.map (fun param -> (None, param)) params in
   (Bt_raw (Some (Raw id), (params, results)), input)
+
+let read_global_type input =
+  let* val_type, input = read_valtype input in
+  let+ mut, input = read_mut input in
+  ((mut, val_type), input)
 
 let read_import input =
   let* modul, input = parse_utf8_name input in
@@ -739,8 +739,7 @@ let read_import input =
     let+ limits, input = read_limits input in
     ((modul, name, Mem limits), input)
   | '\x03' ->
-    let* val_type, input = read_valtype input in
-    let+ mut, input = read_mut input in
+    let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
   | _c -> Error (`Msg "SECTION_IMPORT_NO_MATCH")
 
@@ -754,10 +753,9 @@ let read_memory input =
   ((None, limits), input)
 
 let read_global types input =
-  let* val_type, input = read_valtype input in
-  let* mut, input = read_mut input in
-  let+ expr, input = read_expr types [] input in
-  ((expr, (mut, val_type)), input)
+  let* typ, input = read_global_type input in
+  let+ init, input = read_const types input in
+  ({ typ; init; id = None }, input)
 
 let read_export input =
   let* name, input = read_bytes ~msg:"read_export 1" input in
@@ -766,121 +764,133 @@ let read_export input =
   let+ id, input = read_U32 input in
   ((export_typeidx, { id; name }), input)
 
+let read_elem_active types input =
+  let* Raw index, input = read_indice input in
+  let+ offset, input = read_const types input in
+  (Elem_active (Some index, offset), input)
+
+let read_elem_active_zero types input =
+  let+ offset, input = read_const types input in
+  (Elem_active (Some 0, offset), input)
+
+let read_elem_index input =
+  let+ index, input = read_indice input in
+  ([ Ref_func index ], input)
+
+let read_elem_kind input =
+  let msg = "malformed element kind" in
+  match read_byte ~msg input with
+  | Ok ('\x00', input) -> Ok ((Null, Func_ht), input)
+  | Ok (c, _input) ->
+    Error
+      (`Msg
+        (Format.sprintf "%s (expected 0x00 but got %s)" msg (Char.escaped c)) )
+  | Error _ as e -> e
+
 let read_element types input =
   let* i, input = read_U32 input in
+  let id = None in
   match i with
   | 0 ->
-    let* expr, input = read_expr types [] input in
-    let+ funcidx_l, input = vector_no_id read_indice input in
-    let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
-    ( { id = None
-      ; typ = (Null, Func_ht)
-      ; init
-      ; mode = Elem_active (Some 0, expr)
-      }
-    , input )
+    let* mode, input = read_elem_active_zero types input in
+    let+ init, input = vector_no_id read_elem_index input in
+    let typ = (Null, Func_ht) in
+    ({ id; typ; init; mode }, input)
   | 1 ->
-    let* elemkind, input = read_byte ~msg:"read_element 1" input in
-    begin
-      match elemkind with
-      | '\x00' ->
-        let+ funcidx_l, input = vector_no_id read_indice input in
-        let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
-        ({ id = None; typ = (Null, Func_ht); init; mode = Elem_passive }, input)
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let mode = Elem_passive in
+    let* typ, input = read_elem_kind input in
+    let+ init, input = vector_no_id read_elem_index input in
+    ({ id; typ; init; mode }, input)
   | 2 ->
-    let* Raw tableidx, input = read_indice input in
-    let* expr, input = read_expr types [] input in
-    let* elemkind, input = read_byte ~msg:"read_element 2" input in
-    begin
-      match elemkind with
-      | '\x00' ->
-        let+ funcidx_l, input = vector_no_id read_indice input in
-        let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
-        ( { id = None
-          ; typ = (Null, Func_ht)
-          ; init
-          ; mode = Elem_active (Some tableidx, expr)
-          }
-        , input )
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let* mode, input = read_elem_active types input in
+    let* typ, input = read_elem_kind input in
+    let+ init, input = vector_no_id read_elem_index input in
+    ({ id; typ; init; mode }, input)
   | 3 ->
-    let* elemkind, input = read_byte ~msg:"read_element 3" input in
-    begin
-      match elemkind with
-      | '\x00' ->
-        let+ funcidx_l, input = vector_no_id read_indice input in
-        let init = List.map (fun funcidx -> [ Ref_func funcidx ]) funcidx_l in
-        ( { id = None; typ = (Null, Func_ht); init; mode = Elem_declarative }
-        , input )
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let mode = Elem_declarative in
+    let* typ, input = read_elem_kind input in
+    let+ init, input = vector_no_id read_elem_index input in
+    ({ id; typ; init; mode }, input)
   | 4 ->
-    let* expr, input = read_expr types [] input in
-    let+ init, input = vector_no_id (read_expr types []) input in
-    ( { id = None
-      ; typ = (Null, Func_ht)
-      ; init
-      ; mode = Elem_active (Some 0, expr)
-      }
-    , input )
+    let* mode, input = read_elem_active_zero types input in
+    let+ init, input = vector_no_id (read_const types) input in
+    let typ = (Null, Func_ht) in
+    ({ id; typ; init; mode }, input)
   | 5 ->
+    let mode = Elem_passive in
     let* typ, input = read_reftype input in
-    let+ init, input = vector_no_id (read_expr types []) input in
-    ({ id = None; typ; init; mode = Elem_passive }, input)
+    let+ init, input = vector_no_id (read_const types) input in
+    ({ id; typ; init; mode }, input)
   | 6 ->
-    let* Raw tableidx, input = read_indice input in
-    let* expr, input = read_expr types [] input in
+    let* mode, input = read_elem_active types input in
     let* typ, input = read_reftype input in
-    let+ init, input = vector_no_id (read_expr types []) input in
-    ({ id = None; typ; init; mode = Elem_active (Some tableidx, expr) }, input)
+    let+ init, input = vector_no_id (read_const types) input in
+    ({ id; typ; init; mode }, input)
   | 7 ->
+    let mode = Elem_declarative in
     let* typ, input = read_reftype input in
-    let+ init, input = vector_no_id (read_expr types []) input in
-    ({ id = None; typ; init; mode = Elem_declarative }, input)
-  | i -> Error (`Msg (Format.sprintf "illegal opcode %i" i))
+    let+ init, input = vector_no_id (read_const types) input in
+    ({ id; typ; init; mode }, input)
+  | i -> Error (`Msg (Format.sprintf "malformed elements segment kind: %d" i))
+
+let read_local input =
+  let* n, input = read_U32 input in
+  let+ t, input = read_valtype input in
+  ((n, t), input)
+
+let read_locals input =
+  let* nts, input = vector_no_id read_local input in
+  let ns =
+    List.map (fun (n, _t) -> Convert.Int64.extend_i32_u @@ Int32.of_int n) nts
+  in
+  let+ () =
+    if not @@ Int64.lt_u (List.fold_left Int64.add 0L ns) 0x1_0000_0000L then
+      Error (`Msg "too many locals")
+    else Ok ()
+  in
+  let locals = List.map (fun (n, t) -> List.init n (fun _i -> (None, t))) nts in
+  let locals = List.flatten locals in
+  (locals, input)
 
 let read_code types input =
-  let* _size, input = read_U32 input in
-  let* locals, input =
-    vector_no_id
-      (fun input ->
-        let* nb, input = read_U32 input in
-        let+ vt, input = read_valtype input in
-        (List.init nb (fun _ -> (None, vt)), input) )
-      input
-  in
-  let locals = List.flatten locals in
-  let+ code, input = read_expr types [] input in
+  let* locals, input = read_locals input in
+  let* code, input = read_expr types input in
+  let+ input = check_end_opcode input in
   ((locals, code), input)
+
+(* TODO: merge Elem and Data modes ? *)
+let read_data_active types input =
+  let* Raw index, input = read_indice input in
+  let+ offset, input = read_const types input in
+  (Data_active (Some index, offset), input)
+
+let read_data_active_zero types input =
+  let+ offset, input = read_const types input in
+  (Data_active (Some 0, offset), input)
 
 let read_data types memories input =
   let* i, input = read_U32 input in
+  let id = None in
   match i with
   | 0 ->
-    let* expr, input = read_expr types [] input in
-    let* bytes, input = read_bytes ~msg:"read_data 0" input in
-    let init = string_of_char_list bytes in
+    let* mode, input = read_data_active_zero types input in
+    let* init, input = read_bytes ~msg:"read_data 0" input in
+    let init = string_of_char_list init in
     (* TODO: this should be removed once we do proper validation of binary modules *)
     let+ () =
       if List.is_empty memories then Error (`Unknown_memory 0) else Ok ()
     in
-    ({ id = None; init; mode = Data_active (Some 0, expr) }, input)
+    ({ id; init; mode }, input)
   | 1 ->
-    let+ bytes, input = read_bytes ~msg:"read_data 1" input in
-    let init = string_of_char_list bytes in
-    ({ id = None; init; mode = Data_passive }, input)
+    let mode = Data_passive in
+    let+ init, input = read_bytes ~msg:"read_data 1" input in
+    let init = string_of_char_list init in
+    ({ id; init; mode }, input)
   | 2 ->
-    let* memidx, input = read_U32 input in
-    let* expr, input = read_expr types [] input in
-    let+ bytes, input = read_bytes ~msg:"read_data 2" input in
-    let init = string_of_char_list bytes in
-    ({ id = None; init; mode = Data_active (Some memidx, expr) }, input)
+    let* mode, input = read_data_active types input in
+    let+ init, input = read_bytes ~msg:"read_data 2" input in
+    let init = string_of_char_list init in
+    ({ id; init; mode }, input)
   | i -> Error (`Msg (Format.sprintf "malformed data segment kind %d" i))
 
 let parse_many_custom_section input =
@@ -898,7 +908,7 @@ let sections_iterate (input : Input.t) =
 
   (* Type *)
   let* type_section, input =
-    section_parse input "type_section" ~expected_id:'\x01' [] (vector read_type)
+    section_parse input ~expected_id:'\x01' [] (vector read_type)
   in
   let type_section = Array.of_list type_section in
 
@@ -908,8 +918,7 @@ let sections_iterate (input : Input.t) =
 
   (* Imports *)
   let* import_section, input =
-    section_parse input "import_section" ~expected_id:'\x02' []
-      (vector_no_id read_import)
+    section_parse input ~expected_id:'\x02' [] (vector_no_id read_import)
   in
 
   (* Custom *)
@@ -918,8 +927,7 @@ let sections_iterate (input : Input.t) =
 
   (* Function *)
   let* function_section, input =
-    section_parse input "function_section" ~expected_id:'\x03' []
-      (vector_no_id read_U32)
+    section_parse input ~expected_id:'\x03' [] (vector_no_id read_U32)
   in
 
   (* Custom *)
@@ -928,8 +936,7 @@ let sections_iterate (input : Input.t) =
 
   (* Tables *)
   let* table_section, input =
-    section_parse input "table_section" ~expected_id:'\x04' []
-      (vector_no_id read_table)
+    section_parse input ~expected_id:'\x04' [] (vector_no_id read_table)
   in
 
   (* Custom *)
@@ -938,8 +945,7 @@ let sections_iterate (input : Input.t) =
 
   (* Memory *)
   let* memory_section, input =
-    section_parse input "memory_section" ~expected_id:'\x05' []
-      (vector_no_id read_memory)
+    section_parse input ~expected_id:'\x05' [] (vector_no_id read_memory)
   in
 
   (* Custom *)
@@ -948,7 +954,7 @@ let sections_iterate (input : Input.t) =
 
   (* Globals *)
   let* global_section, input =
-    section_parse input "global_section" ~expected_id:'\x06' []
+    section_parse input ~expected_id:'\x06' []
       (vector_no_id (read_global type_section))
   in
 
@@ -958,8 +964,7 @@ let sections_iterate (input : Input.t) =
 
   (* Exports *)
   let* export_section, input =
-    section_parse input "export_section" ~expected_id:'\x07' []
-      (vector_no_id read_export)
+    section_parse input ~expected_id:'\x07' [] (vector_no_id read_export)
   in
 
   (* Custom *)
@@ -968,7 +973,7 @@ let sections_iterate (input : Input.t) =
 
   (* Start *)
   let* start_section, input =
-    section_parse input "start_section" ~expected_id:'\x08' None @@ fun input ->
+    section_parse input ~expected_id:'\x08' None @@ fun input ->
     let+ idx_start_func, input = read_U32 input in
     (Some idx_start_func, input)
   in
@@ -979,7 +984,7 @@ let sections_iterate (input : Input.t) =
 
   (* Elements *)
   let* element_section, input =
-    section_parse input "element_section" ~expected_id:'\x09' []
+    section_parse input ~expected_id:'\x09' []
     @@ vector_no_id (read_element type_section)
   in
 
@@ -989,8 +994,7 @@ let sections_iterate (input : Input.t) =
 
   (* Data_count *)
   let* data_count_section, input =
-    section_parse input "data_count_section" ~expected_id:'\x0C' None
-    @@ fun input ->
+    section_parse input ~expected_id:'\x0C' None @@ fun input ->
     let+ i, input = read_U32 input in
     (Some i, input)
   in
@@ -1001,8 +1005,8 @@ let sections_iterate (input : Input.t) =
 
   (* Code *)
   let* code_section, input =
-    section_parse input "code_section" ~expected_id:'\x0A' []
-      (vector_no_id (read_code type_section))
+    section_parse input ~expected_id:'\x0A' []
+      (vector_no_id (sized (read_code type_section)))
   in
 
   let* () =
@@ -1017,7 +1021,7 @@ let sections_iterate (input : Input.t) =
 
   (* Data *)
   let+ data_section, input =
-    section_parse input "data_section" ~expected_id:'\x0B' []
+    section_parse input ~expected_id:'\x0B' []
       (vector_no_id (read_data type_section memory_section))
   in
 
@@ -1054,17 +1058,13 @@ let sections_iterate (input : Input.t) =
           | _not_a_memory_import -> None )
         import_section
     in
-    let values = indexed_of_list (local @ imported) in
+    let values = indexed_of_list (imported @ local) in
     { Named.values; named = String_map.empty }
   in
 
   (* Globals *)
   let global =
-    let local =
-      List.map
-        (fun (init, typ) -> Runtime.Local { typ; init; id = None })
-        global_section
-    in
+    let local = List.map (fun g -> Runtime.Local g) global_section in
     let imported =
       List.filter_map
         (function
@@ -1075,7 +1075,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_global_import -> None )
         import_section
     in
-    let values = indexed_of_list (local @ imported) in
+    let values = indexed_of_list (imported @ local) in
     { Named.values; named = String_map.empty }
   in
 
@@ -1102,7 +1102,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_function_import -> None )
         import_section
     in
-    let values = indexed_of_list (local @ imported) in
+    let values = indexed_of_list (imported @ local) in
     { Named.values; named = String_map.empty }
   in
 
@@ -1123,7 +1123,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_table_import -> None )
         import_section
     in
-    let values = indexed_of_list (local @ imported) in
+    let values = indexed_of_list (imported @ local) in
     { Named.values; named = String_map.empty }
   in
 
@@ -1160,6 +1160,13 @@ let sections_iterate (input : Input.t) =
         | _ -> failwith "read_exportdesc error" )
       empty_exports export_section
   in
+  let exports =
+    { func = List.rev exports.func
+    ; table = List.rev exports.table
+    ; mem = List.rev exports.mem
+    ; global = List.rev exports.global
+    }
+  in
 
   { id = None
   ; global
@@ -1175,9 +1182,7 @@ let sections_iterate (input : Input.t) =
 let from_string content =
   let* () = magic_check content in
   let* () = version_check content in
-  let* input =
-    Input.from_str_bytes content "full_file" |> Input.sub_suffix 8 "full_file"
-  in
+  let* input = Input.of_string content |> Input.sub_suffix 8 in
   let* m = sections_iterate input in
   m
 

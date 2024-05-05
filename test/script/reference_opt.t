@@ -2,7 +2,7 @@
   $ owi script --no-exhaustion --optimize reference/align.wast
   $ owi script --no-exhaustion --optimize reference/binary-leb128.wast
   $ owi script --no-exhaustion --optimize reference/binary.wast
-  expected END opcode expected but got (illegal opcode \005)
+  expected unexpected end of section or function but got (END opcode expected)
   [51]
   $ owi script --no-exhaustion --optimize reference/block.wast
   $ owi script --no-exhaustion --optimize reference/br_if.wast
