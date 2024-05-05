@@ -1,10 +1,7 @@
 Ring-buffer tests:
   $ owi c -I include src/ring_buffer.c src/common.c src/utils.c testsuite/ring_buffer/ring_buffer_test_enqueue.c
-  integer too large
-  [26]
+  All OK
   $ owi c -I include src/ring_buffer.c src/common.c src/utils.c testsuite/ring_buffer/ring_buffer_test_dequeue.c
-  integer too large
-  [26]
+  All OK
   $ owi c -I include src/ring_buffer.c src/common.c src/utils.c testsuite/ring_buffer/ring_buffer_test_capacity.c
-  integer too large
-  [26]
+  All OK

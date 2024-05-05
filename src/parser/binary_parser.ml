@@ -74,6 +74,10 @@ let read_UN n input =
     in
     let* b, input = read_byte ~msg:"integer representation too long" input in
     let b = Char.code b in
+    let* () =
+      if n >= 7 || b land 0x7f < 1 lsl n then Ok ()
+      else Error (`Msg "integer too large")
+    in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then Ok (x, input)
     else
@@ -84,9 +88,8 @@ let read_UN n input =
   aux n input
 
 let read_U32 input =
-  let* i64, input = read_UN 32 input in
-  if i64 >= Int64.shift_left 1L 32 then Error (`Msg "integer too large")
-  else Ok (Int64.to_int i64, input)
+  let+ i64, input = read_UN 32 input in
+  (Int64.to_int i64, input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
 let read_SN n input =
@@ -96,6 +99,11 @@ let read_SN n input =
     in
     let* b, input = read_byte ~msg:"integer representation too long" input in
     let b = Char.code b in
+    let mask = (-1 lsl (n - 1)) land 0x7f in
+    let* () =
+      if n >= 7 || b land mask = 0 || b land mask = mask then Ok ()
+      else Error (`Msg "integer too large")
+    in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then
       let x =
@@ -110,32 +118,20 @@ let read_SN n input =
   aux n input
 
 let read_S7 input =
-  let* i64, input = read_SN 7 input in
-  let max = Int64.shift_left 1L 6 in
-  let min = Int64.shift_left (-1L) 6 in
-  if i64 >= max || i64 <= min then Error (`Msg "integer too large")
-  else Ok (Int64.to_int i64, input)
+  let+ i64, input = read_SN 7 input in
+  (Int64.to_int i64, input)
 
 let read_S32 input =
-  let* i64, input = read_SN 32 input in
-  let max = Int64.shift_left 1L 31 in
-  let min = Int64.shift_left (-1L) 31 in
-  if i64 >= max || i64 < min then Error (`Msg "integer too large")
-  else Ok (Int64.to_int32 i64, input)
+  let+ i64, input = read_SN 32 input in
+  (Int64.to_int32 i64, input)
 
 let read_S33 input =
-  let* i64, input = read_SN 33 input in
-  let max = Int64.shift_left 1L 32 in
-  let min = Int64.shift_left (-1L) 32 in
-  if i64 >= max || i64 < min then Error (`Msg "integer too large")
-  else Ok (i64, input)
+  let+ i64, input = read_SN 33 input in
+  (i64, input)
 
 let read_S64 input =
-  let* i64, input = read_SN 64 input in
-  let max = Int64.shift_left 1L 63 in
-  let min = Int64.shift_left (-1L) 63 in
-  if i64 >= max || i64 < min then Error (`Msg "integer too large")
-  else Ok (i64, input)
+  let+ i64, input = read_SN 64 input in
+  (i64, input)
 
 let read_F32 input =
   let i32_of_byte input =
@@ -264,7 +260,7 @@ let read_limits input =
     let* min, input = read_U32 input in
     let+ max, input = read_U32 input in
     ({ min; max = Some max }, input)
-  | _c -> Error (`Msg "integer too large")
+  | _c -> Error (`Msg "integer too large (read_limits)")
 
 let read_memarg input =
   let* align, input = read_U32 input in
