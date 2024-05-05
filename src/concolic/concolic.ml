@@ -240,9 +240,9 @@ module P = struct
 
   module Module_to_run = struct
     type t =
-      { modul : Simplified.modul
+      { modul : Binary.modul
       ; env : Env.t
-      ; to_run : Types.simplified Types.expr list
+      ; to_run : Types.binary Types.expr list
       }
 
     let env (t : t) = t.env

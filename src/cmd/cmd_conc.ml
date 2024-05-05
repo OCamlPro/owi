@@ -189,7 +189,7 @@ let simplify_then_link ~unsafe ~optimize link_state (m : Text.modul) =
   in
   let m = { m with fields } in
   let+ m, link_state =
-    Compile.until_link ~unsafe link_state ~optimize ~name:None m
+    Compile.Text.until_link ~unsafe link_state ~optimize ~name:None m
   in
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)
@@ -208,7 +208,7 @@ let simplify_then_link_files ~unsafe ~optimize filenames =
     List.fold_left
       (fun (acc : (_ * _) Result.t) filename ->
         let* link_state, modules_to_run = acc in
-        let* m0dule = Parse.Module.from_file filename in
+        let* m0dule = Parse.Text.Module.from_file filename in
         let+ link_state, module_to_run =
           simplify_then_link ~unsafe ~optimize link_state m0dule
         in
