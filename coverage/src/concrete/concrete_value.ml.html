@@ -428,12 +428,12 @@ struct
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="1884">-</span>1 in
+    let r = ref ~<span data-count="1887">-</span>1 in
     fun () -&gt;
-      <span data-count="13371">i</span>ncr r;
-      <span data-count="13371">!</span>r
+      <span data-count="13372">i</span>ncr r;
+      <span data-count="13372">!</span>r
 
-  let wasm func env : t = <span data-count="13371">W</span>ASM (fres<span data-count="13371">h</span> (), func, env)
+  let wasm func env : t = <span data-count="13372">W</span>ASM (fres<span data-count="13372">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
