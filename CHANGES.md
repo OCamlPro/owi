@@ -1,5 +1,9 @@
 ## unreleased
 
+- `owi opt` and `owi sym` can run on `.wasm` files directly
+- remove dependency on `wabt`
+- better API for `Parse`, `Compile` and `Simplified` (renamed to `Binary`), added a `Binary_to_tex` module
+
 ## 0.2 - 2024-04-24
 
 - use a subcommand system for the `owi` binary
