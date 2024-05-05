@@ -5,8 +5,14 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  let* modul = Parse.Text.Module.from_file filename in
-  Compile.Text.until_optimize ~unsafe ~optimize:true modul
+  let* m = Parse.guess_from_file filename in
+  match m with
+  | Either.Left (Either.Left modul) ->
+    Compile.Text.until_optimize ~unsafe ~optimize:true modul
+  | Either.Left (Either.Right _script) ->
+    Error (`Msg "script can't be optimised")
+  | Either.Right modul ->
+    Compile.Binary.until_optimize ~unsafe ~optimize:true modul
 
 let cmd debug unsafe files =
   if debug then Log.debug_on := true;
