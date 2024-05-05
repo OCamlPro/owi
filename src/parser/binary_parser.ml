@@ -109,6 +109,13 @@ let read_SN n input =
   in
   aux n input
 
+let read_S7 input =
+  let* i64, input = read_SN 7 input in
+  let max = Int64.shift_left 1L 6 in
+  let min = Int64.shift_left (-1L) 6 in
+  if i64 >= max || i64 <= min then Error (`Msg "integer too large")
+  else Ok (Int64.to_int i64, input)
+
 let read_S32 input =
   let* i64, input = read_SN 32 input in
   let max = Int64.shift_left 1L 31 in
@@ -168,14 +175,6 @@ let read_F64 input =
   let i64 = Int64.logor i64 i1 in
   (Float64.of_bits i64, input)
 
-let sized f input =
-  let* expected_size, input = read_U32 input in
-  let size = Input.size input in
-  let* x, new_input = f input in
-  let new_size = Input.size new_input in
-  if size - new_size <> expected_size then Error (`Msg "section size mismatch")
-  else Ok (x, new_input)
-
 let vector parse_elt input =
   let* nb_elt, input = read_U32 input in
   let rec loop loop_id input acc =
@@ -189,30 +188,62 @@ let vector parse_elt input =
 
 let vector_no_id f input = vector (fun _id -> f) input
 
+let check_end_opcode input =
+  let msg = "END opcode expected" in
+  match read_byte ~msg input with
+  | Ok ('\x0B', input) -> Ok input
+  | Ok (c, _input) ->
+    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
+  | Error _ as e -> e
+
+let check_zero_opcode input =
+  let msg = "zero byte expected" in
+  match read_byte ~msg input with
+  | Ok ('\x00', input) -> Ok input
+  | Ok (c, _input) ->
+    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
+  | Error _ as e -> e
+
 let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
 
 let read_indice input : (Types.binary Types.indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (Raw indice, input)
 
-let read_reftype input =
-  let* b, input = read_byte ~msg:"read_reftype" input in
+let read_numtype input =
+  let* b, input = read_S7 input in
   match b with
-  | '\x70' -> Ok ((Null, Func_ht), input)
-  | '\x6F' -> Ok ((Null, Extern_ht), input)
-  | _c -> Error (`Msg "malformed reference type")
+  | -0x01 -> Ok (I32, input)
+  | -0x02 -> Ok (I64, input)
+  | -0x03 -> Ok (F32, input)
+  | -0x04 -> Ok (F64, input)
+  | b -> Error (`Msg (Format.sprintf "malformed number type: %d" b))
+
+let read_vectype input =
+  let* b, _input = read_S7 input in
+  match b with
+  | -0x05 ->
+    (* V128 *)
+    assert false
+  | b -> Error (`Msg (Format.sprintf "malformed vector type: %d" b))
+
+let read_reftype input =
+  let* b, input = read_S7 input in
+  match b with
+  | -0x10 -> Ok ((Null, Func_ht), input)
+  | -0x11 -> Ok ((Null, Extern_ht), input)
+  | b -> Error (`Msg (Format.sprintf "malformed reference type: %d" b))
 
 let read_valtype input =
-  let* b, input = read_byte ~msg:"read_valtype" input in
-  match b with
-  | '\x7F' -> Ok (Num_type I32, input)
-  | '\x7E' -> Ok (Num_type I64, input)
-  | '\x7D' -> Ok (Num_type F32, input)
-  | '\x7C' -> Ok (Num_type F64, input)
-  | '\x7B' -> assert false (* (V128, input) *)
-  | '\x70' -> Ok (Ref_type (Null, Func_ht), input)
-  | '\x6F' -> Ok (Ref_type (Null, Extern_ht), input)
-  | _c -> Error (`Msg "integer too large")
+  match read_numtype input with
+  | Ok (t, input) -> Ok (Num_type t, input)
+  | Error _ -> (
+    match read_vectype input with
+    | Ok (_t, _input) -> assert false
+    | Error _ -> (
+      match read_reftype input with
+      | Ok (t, input) -> Ok (Ref_type t, input)
+      | Error _ as e -> e ) )
 
 let read_valtypes input = vector_no_id read_valtype input
 
@@ -255,40 +286,18 @@ let read_FC input =
   | 7 -> Ok (I_trunc_sat_f (S64, S64, U), input)
   | 8 ->
     let* dataidx, input = read_indice input in
-    let* b, input = read_byte ~msg:"read_FC 8" input in
-    begin
-      match b with
-      | '\x00' -> Ok (Memory_init dataidx, input)
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let+ input = check_zero_opcode input in
+    (Memory_init dataidx, input)
   | 9 ->
-    let* dataidx, input = read_indice input in
-    Ok (Data_drop dataidx, input)
+    let+ dataidx, input = read_indice input in
+    (Data_drop dataidx, input)
   | 10 ->
-    let* b, input = read_byte ~msg:"FC 10" input in
-    begin
-      match b with
-      | '\x00' ->
-        let* b, input = read_byte ~msg:"FC 10 0" input in
-        begin
-          match b with
-          | '\x00' -> Ok (Memory_copy, input)
-          | c ->
-            Error
-              (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-        end
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let* input = check_zero_opcode input in
+    let+ input = check_zero_opcode input in
+    (Memory_copy, input)
   | 11 ->
-    let* b, input = read_byte ~msg:"FC 11" input in
-    begin
-      match b with
-      | '\x00' -> Ok (Memory_fill, input)
-      | c ->
-        Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped c)))
-    end
+    let+ input = check_zero_opcode input in
+    (Memory_fill, input)
   | 12 ->
     let* elemidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
@@ -323,14 +332,6 @@ let read_block_type types input =
       let* vt, input = read_valtype input in
       Ok (Bt_raw (None, ([ (None, vt) ], [])), input)
   end
-
-let check_end_opcode input =
-  let msg = "END opcode expected" in
-  match read_byte ~msg input with
-  | Ok ('\x0B', input) -> Ok input
-  | Ok (c, _input) ->
-    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
-  | Error _ as e -> e
 
 let rec read_instr types input =
   let old_input = input in
@@ -368,6 +369,11 @@ let rec read_instr types input =
   | '\x0D' ->
     let+ labelidx, input = read_indice input in
     (Br_if labelidx, input)
+  | '\x0E' ->
+    let* xs, input = vector_no_id read_indice input in
+    let xs = Array.of_list xs in
+    let+ x, input = read_indice input in
+    (Br_table (xs, x), input)
   | '\x0F' -> Ok (Return, input)
   | '\x10' ->
     let+ funcidx, input = read_indice input in
@@ -472,13 +478,11 @@ let rec read_instr types input =
     let+ memarg, input = read_memarg input in
     (I64_store32 memarg, input)
   | '\x3F' ->
-    let* b, input = read_byte ~msg:"read_instr 3f" input in
-    if b = '\x00' then Ok (Memory_size, input)
-    else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
+    let+ input = check_zero_opcode input in
+    (Memory_size, input)
   | '\x40' ->
-    let* b, input = read_byte ~msg:"read_instr 40" input in
-    if b = '\x00' then Ok (Memory_grow, input)
-    else Error (`Msg (Format.sprintf "zero byte expected %s" (Char.escaped b)))
+    let+ input = check_zero_opcode input in
+    (Memory_grow, input)
   | '\x41' ->
     let+ i32, input = read_S32 input in
     (I32_const i32, input)
@@ -632,7 +636,8 @@ let rec read_instr types input =
 and read_expr types input =
   let rec aux acc input =
     match read_byte ~msg:"read_expr" input with
-    | Error _ | Ok (('\x05' | '\x0b'), _) -> Ok (List.rev acc, input)
+    | Ok (('\x05' | '\x0b'), _) -> Ok (List.rev acc, input)
+    | Error _ -> Ok (List.rev acc, input)
     | Ok _ ->
       let* instr, input = read_instr types input in
       aux (instr :: acc) input
@@ -853,6 +858,7 @@ let read_locals input =
   (locals, input)
 
 let read_code types input =
+  let* _size, input = read_U32 input in
   let* locals, input = read_locals input in
   let* code, input = read_expr types input in
   let+ input = check_end_opcode input in
@@ -1006,7 +1012,7 @@ let sections_iterate (input : Input.t) =
   (* Code *)
   let* code_section, input =
     section_parse input ~expected_id:'\x0A' []
-      (vector_no_id (sized (read_code type_section)))
+      (vector_no_id (read_code type_section))
   in
 
   let* () =
