@@ -173,8 +173,39 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c
-illegal opcode (2) \014
-[26]
+Assert failure: false
+Model:
+  (model
+    (symbol_0 (i32 115))
+    (symbol_1 (i32 100))
+    (symbol_10 (i32 100))
+    (symbol_11 (i32 119))
+    (symbol_12 (i32 0))
+    (symbol_13 (i32 0))
+    (symbol_14 (i32 0))
+    (symbol_15 (i32 0))
+    (symbol_16 (i32 0))
+    (symbol_17 (i32 0))
+    (symbol_18 (i32 0))
+    (symbol_19 (i32 0))
+    (symbol_2 (i32 100))
+    (symbol_20 (i32 0))
+    (symbol_21 (i32 0))
+    (symbol_22 (i32 0))
+    (symbol_23 (i32 0))
+    (symbol_24 (i32 0))
+    (symbol_25 (i32 0))
+    (symbol_26 (i32 0))
+    (symbol_27 (i32 0))
+    (symbol_3 (i32 119))
+    (symbol_4 (i32 100))
+    (symbol_5 (i32 100))
+    (symbol_6 (i32 100))
+    (symbol_7 (i32 100))
+    (symbol_8 (i32 115))
+    (symbol_9 (i32 100)))
+Reached problem!
+[13]
 ```
 
 ## Man page
