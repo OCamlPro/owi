@@ -22,6 +22,8 @@ let check_error ~expected ~got : unit Result.t =
        || got = `Msg "constant out of range"
        || got = `Parse_fail "constant out of range" )
        && (expected = "i32 constant out of range" || expected = "i32 constant")
+    || got = `Msg "unexpected end of section or function"
+       && expected = "section size mismatch"
   in
   if not ok then begin
     Error (`Failed_with_but_expected (got, expected))
