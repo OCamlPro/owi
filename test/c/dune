@@ -2,4 +2,5 @@
  (deps
   %{bin:owi}
   (package owi)
-  malloc_aligned.c))
+  malloc_aligned.c
+  exit.c))

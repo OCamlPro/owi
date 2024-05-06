@@ -65,40 +65,50 @@ let symbolic_extern_module :
 let summaries_extern_module :
   Symbolic.P.Extern_func.extern_func Link.extern_module =
   let open Expr in
-  let i32 v =
-    match view v with
-    | Val (Num (I32 v)) -> v
-    | _ -> Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v
-  in
-  let ptr v =
-    match view v with
-    | Ptr (b, _) -> b
-    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
-  in
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in
+
+  let i32 v : int32 Choice.t =
+    match view v with
+    | Val (Num (I32 v)) -> Choice.return v
+    | _ ->
+      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v;
+      Choice.bind (abort ()) (fun () -> Choice.return 666l)
+  in
+  let ptr v : int32 Choice.t =
+    match view v with
+    | Ptr (b, _) -> Choice.return b
+    | _ ->
+      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
+      Choice.bind (abort ()) (fun () -> Choice.return 667l)
+  in
   let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    let base : int32 = i32 base in
-    Choice.with_thread (fun t ->
-        let memories = Thread.memories t in
-        Symbolic_memory.iter
-          (fun tbl ->
-            Symbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.t) ->
-                Symbolic_memory.replace_size m base size )
-              tbl )
-          memories;
-        Expr.make (Ptr (base, Value.const_i32 0l)) )
+    Choice.bind (i32 base) (fun base ->
+        Choice.with_thread (fun t ->
+            let memories = Thread.memories t in
+            Symbolic_memory.iter
+              (fun tbl ->
+                Symbolic_memory.ITbl.iter
+                  (fun _ (m : Symbolic_memory.t) ->
+                    Symbolic_memory.replace_size m base size )
+                  tbl )
+              memories;
+            Expr.make (Ptr (base, Value.const_i32 0l)) ) )
   in
   let free (p : Value.int32) : unit Choice.t =
-    let base = ptr p in
-    Choice.with_thread (fun t ->
-        let memories = Thread.memories t in
-        Symbolic_memory.iter
-          (fun tbl ->
-            Symbolic_memory.ITbl.iter
-              (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base)
-              tbl )
-          memories )
+    Choice.bind (ptr p) (fun base ->
+        Choice.with_thread (fun t ->
+            let memories = Thread.memories t in
+            Symbolic_memory.iter
+              (fun tbl ->
+                Symbolic_memory.ITbl.iter
+                  (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base)
+                  tbl )
+              memories ) )
+  in
+
+  let exit (p : Value.int32) : unit Choice.t =
+    ignore p;
+    abort ()
   in
   let functions =
     [ ( "alloc"
@@ -107,6 +117,8 @@ let summaries_extern_module :
     ; ( "dealloc"
       , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
     ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+    ; ( "exit"
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
     ]
   in
   { functions }
