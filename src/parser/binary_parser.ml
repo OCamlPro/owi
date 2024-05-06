@@ -184,12 +184,15 @@ let vector parse_elt input =
 
 let vector_no_id f input = vector (fun _id -> f) input
 
-let check_end_opcode input =
-  let msg = "END opcode expected" in
+let check_end_opcode ?unexpected_eoi_msg input =
+  let msg = Option.value unexpected_eoi_msg ~default:"END opcode expected" in
   match read_byte ~msg input with
   | Ok ('\x0B', input) -> Ok input
   | Ok (c, _input) ->
-    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
+    Error
+      (`Msg
+        (Format.sprintf "END opcode expected (got %s instead)" (Char.escaped c))
+        )
   | Error _ as e -> e
 
 let check_zero_opcode input =
@@ -331,7 +334,6 @@ let read_block_type types input =
   end
 
 let rec read_instr types input =
-  let old_input = input in
   let* b, input = read_byte ~msg:"read_instr" input in
   match b with
   | '\x00' -> Ok (Unreachable, input)
@@ -627,13 +629,13 @@ let rec read_instr types input =
   | '\xD2' ->
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
-  | '\xFC' -> read_FC old_input
+  | '\xFC' -> read_FC input
   | c -> Error (`Msg (Format.sprintf "illegal opcode (2) %s" (Char.escaped c)))
 
 and read_expr types input =
   let rec aux acc input =
     match read_byte ~msg:"read_expr" input with
-    | Ok (('\x05' | '\x0b'), _) -> Ok (List.rev acc, input)
+    | Ok (('\x05' | '\x0B'), _) -> Ok (List.rev acc, input)
     | Error _ -> Ok (List.rev acc, input)
     | Ok _ ->
       let* instr, input = read_instr types input in
@@ -675,18 +677,19 @@ let section_parse input ~expected_id default section_content_parse =
   | Some id when id = expected_id ->
     let* () = check_section_id id in
     let* input = Input.sub_suffix 1 input in
+    let* () =
+      if Input.size input = 0 then Error (`Msg "unexpected end") else Ok ()
+    in
     let* size, input = read_U32 input in
     let* () =
-      if size > Input.size input then Error (`Msg "section size mismatch")
+      if size > Input.size input then Error (`Msg "length out of bounds")
       else Ok ()
     in
     let* section_input = Input.sub_prefix size input in
     let* next_input = Input.sub_suffix size input in
     let* res, after_section_input = section_content_parse section_input in
-    if
-      Input.size input - (Input.size next_input + Input.size section_input)
-      <> Input.size after_section_input
-    then Error (`Msg "section size mismatch")
+    if Input.size after_section_input > 0 then
+      Error (`Msg "section size mismatch")
     else Ok (res, next_input)
   | None -> Ok (default, input)
   | Some id ->
@@ -694,6 +697,9 @@ let section_parse input ~expected_id default section_content_parse =
     Ok (default, input)
 
 let parse_utf8_name input =
+  let* () =
+    if Input.size input = 0 then Error (`Msg "unexpected end") else Ok ()
+  in
   let* name, input = read_bytes ~msg:"parse_utf8_name" input in
   let name = string_of_char_list name in
   let+ () = Wutf8.check_utf8 name in
@@ -743,7 +749,7 @@ let read_import input =
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
-  | _c -> Error (`Msg "SECTION_IMPORT_NO_MATCH")
+  | _c -> Error (`Msg "malformed import kind")
 
 let read_table input =
   let* ref_type, input = read_reftype input in
@@ -855,11 +861,23 @@ let read_locals input =
   (locals, input)
 
 let read_code types input =
-  let* _size, input = read_U32 input in
-  let* locals, input = read_locals input in
-  let* code, input = read_expr types input in
-  let+ input = check_end_opcode input in
-  ((locals, code), input)
+  let* size, input = read_U32 input in
+  let* code_input = Input.sub_prefix size input in
+  let* next_input = Input.sub_suffix size input in
+  let* locals, code_input = read_locals code_input in
+  let* code, code_input = read_expr types code_input in
+  let* () =
+    if Input.size code_input = 0 && Input.size next_input = 0 then
+      Error (`Msg "unexpected end of section or function")
+    else Ok ()
+  in
+  let* code_input =
+    check_end_opcode ~unexpected_eoi_msg:"unexpected end of section or function"
+      code_input
+  in
+  if Input.size code_input > 0 then
+    Error (`Msg "unexpected end of section or function")
+  else Ok ((locals, code), next_input)
 
 (* TODO: merge Elem and Data modes ? *)
 let read_data_active types input =
@@ -1029,12 +1047,20 @@ let sections_iterate (input : Input.t) =
   in
 
   let* () =
-    match data_count_section with
-    | None -> Ok ()
-    | Some len ->
-      if List.compare_length_with data_section len <> 0 then
-        Error (`Msg "data count and data section have inconsistent lengths")
+    match (List.length data_section, data_count_section) with
+    | 0, None -> Ok ()
+    | _data_len, None ->
+      let code_use_dataidx = ref false in
+      let f_iter = function
+        | Data_drop _ | Memory_init _ -> code_use_dataidx := true
+        | _ -> ()
+      in
+      let expr = List.concat_map snd code_section in
+      iter_expr f_iter expr;
+      if !code_use_dataidx then Error (`Msg "data count section required")
       else Ok ()
+    | data_len, Some data_count when data_len = data_count -> Ok ()
+    | _ -> Error (`Msg "data count and data section have inconsistent lengths")
   in
 
   (* Custom *)

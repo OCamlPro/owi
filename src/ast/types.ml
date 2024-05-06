@@ -617,6 +617,71 @@ let rec pp_instr fmt = function
 
 and pp_expr fmt instrs = pp_list ~pp_sep:pp_newline pp_instr fmt instrs
 
+let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
+
+and iter_instr f (i : _ instr) =
+  f i;
+  match i with
+  | I32_const _ | I64_const _ | F32_const _ | F64_const _
+  | I_unop (_, _)
+  | F_unop (_, _)
+  | I_binop (_, _)
+  | F_binop (_, _)
+  | I_testop (_, _)
+  | I_relop (_, _)
+  | F_relop (_, _)
+  | I_extend8_s _ | I_extend16_s _ | I64_extend32_s | I32_wrap_i64
+  | I64_extend_i32 _
+  | I_trunc_f (_, _, _)
+  | I_trunc_sat_f (_, _, _)
+  | F32_demote_f64 | F64_promote_f32
+  | F_convert_i (_, _, _)
+  | I_reinterpret_f (_, _)
+  | F_reinterpret_i (_, _)
+  | Ref_null _ | Ref_is_null | Ref_i31 | Ref_func _ | Ref_as_non_null
+  | Ref_cast (_, _)
+  | Ref_test (_, _)
+  | Ref_eq | Drop | Select _ | Local_get _ | Local_set _ | Local_tee _
+  | Global_get _ | Global_set _ | Table_get _ | Table_set _ | Table_size _
+  | Table_grow _ | Table_fill _
+  | Table_copy (_, _)
+  | Table_init (_, _)
+  | Elem_drop _
+  | I_load (_, _)
+  | F_load (_, _)
+  | I_store (_, _)
+  | F_store (_, _)
+  | I_load8 (_, _, _)
+  | I_load16 (_, _, _)
+  | I64_load32 (_, _)
+  | I_store8 (_, _)
+  | I_store16 (_, _)
+  | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
+  | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
+  | Br_table (_, _)
+  | Br_on_cast (_, _, _)
+  | Br_on_cast_fail (_, _, _)
+  | Br_on_non_null _ | Br_on_null _ | Return | Return_call _
+  | Return_call_indirect (_, _)
+  | Return_call_ref _ | Call _
+  | Call_indirect (_, _)
+  | Call_ref _ | Array_get _ | Array_get_u _ | Array_len | Array_new _
+  | Array_new_data (_, _)
+  | Array_new_default _
+  | Array_new_elem (_, _)
+  | Array_new_fixed (_, _)
+  | Array_set _ | I31_get_u | I31_get_s
+  | Struct_get (_, _)
+  | Struct_get_s (_, _)
+  | Struct_new _ | Struct_new_default _
+  | Struct_set (_, _)
+  | Extern_externalize | Extern_internalize ->
+    ()
+  | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
+  | If_else (_, _, e1, e2) ->
+    iter_expr f e1;
+    iter_expr f e2
+
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =

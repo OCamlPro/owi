@@ -76,9 +76,8 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to a
-           machine-specific value given by the OCaml
-           Domain.recommended_domain_count function.
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
 
        --workspace=VAL (absent=owi-out)
            path to the workspace directory
