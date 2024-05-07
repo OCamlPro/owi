@@ -5,43 +5,11 @@
 open Bos
 open Syntax
 
-type deps =
-  { clang : flags:Cmd.t -> out:Fpath.t -> Fpath.t -> Cmd.t
-  ; opt : Fpath.t -> Cmd.t
-  ; llc : bc:Fpath.t -> obj:Fpath.t -> Cmd.t
-  ; ld : flags:Cmd.t -> out:Fpath.t -> Fpath.t list -> Cmd.t
-  }
-
 type metadata =
   { arch : int
   ; property : string option
   ; files : Fpath.t list
   }
-
-let clang bin ~flags ~out file : Bos.Cmd.t =
-  Cmd.(bin %% flags % "-o" % p out % p file)
-
-let opt bin file : Bos.Cmd.t = Cmd.(bin % "-O1" % "-o" % p file % p file)
-
-let llc bin ~bc ~obj : Bos.Cmd.t =
-  let flags = Cmd.of_list [ "-O1"; "-march=wasm32"; "-filetype=obj"; "-o" ] in
-  Cmd.(bin %% flags % p obj % p bc)
-
-let ld bin ~flags ~out files : Bos.Cmd.t =
-  let files = List.fold_left (fun acc f -> Cmd.(acc % p f)) Cmd.empty files in
-  Cmd.(bin %% flags % "-o" % p out %% files % p C_share.libc)
-
-let check_dependencies () : deps Result.t =
-  let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
-  let* opt_bin = OS.Cmd.resolve @@ Cmd.v "opt" in
-  let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
-  let* ld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
-  Ok
-    { clang = clang clang_bin
-    ; opt = opt opt_bin
-    ; llc = llc llc_bin
-    ; ld = ld ld_bin
-    }
 
 let pre_patterns : (Re2.t * string) array =
   Array.map
@@ -104,45 +72,38 @@ let instrument_file ?(skip = false) ~includes ~workspace file : Fpath.t Result.t
     dst
   end
 
-let compile ~deps ~includes ~opt_lvl file : Fpath.t Result.t =
-  Logs.app (fun m -> m "compiling %a" Fpath.pp file);
-  let cflags =
+let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
+  let flags =
+    let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
-    let warnings =
-      Cmd.of_list
-        [ "-Wno-int-conversion"
-        ; "-Wno-pointer-sign"
-        ; "-Wno-string-plus-int"
-        ; "-Wno-implicit-function-declaration"
-        ; "-Wno-incompatible-library-redeclaration"
-        ; "-Wno-incompatible-function-pointer-types"
-        ; "-Wno-incompatible-pointer-types"
+    Cmd.(
+      of_list
+        [ "-O" ^ opt_lvl
+        ; "--target=wasm32"
+        ; "-m32"
+        ; "-ffreestanding"
+        ; "--no-standard-libraries"
+        ; "-Wno-everything"
+        ; "-flto=thin"
+        ; (* LINKER FLAGS: *)
+          "-Wl,--no-entry"
+        ; "-Wl,--export=main"
+          (* TODO: allow this behind a flag, this is slooooow *)
+        ; "-Wl,--lto-O0"
+        ; "-Wl,-z,stack-size=" ^ stack_size
         ]
-    in
-    Cmd.(
-      of_list
-        [ "-O" ^ opt_lvl; "-g"; "-emit-llvm"; "--target=wasm32"; "-m32"; "-c" ]
-      %% warnings %% includes )
+      %% includes )
   in
-  let bc = Fpath.(file -+ ".bc") in
-  let obj = Fpath.(file -+ ".o") in
-  let* () = OS.Cmd.run @@ deps.clang ~flags:cflags ~out:bc file in
-  let* () = OS.Cmd.run @@ deps.opt bc in
-  let+ () = OS.Cmd.run @@ deps.llc ~bc ~obj in
-  obj
 
-let link ~deps ~workspace files : Fpath.t Result.t =
-  let ldflags ~entry =
-    let stack_size = 8 * (1024 * 1024) in
-    Cmd.(
-      of_list
-        [ "-z"; "stack-size=" ^ string_of_int stack_size; "--export=" ^ entry ] )
-  in
-  let wasm = Fpath.(workspace / "a.out.wasm") in
-  let+ () =
-    OS.Cmd.run @@ deps.ld ~flags:(ldflags ~entry:"_start") ~out:wasm files
-  in
-  wasm
+  let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
+
+  let out = Fpath.(v "a.out.wasm") in
+  let files = Cmd.of_list (List.map Fpath.to_string (C_share.libc :: files)) in
+  let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
+
+  let+ () = OS.Cmd.run clang in
+
+  out
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
   unit =
@@ -199,23 +160,19 @@ let cmd debug arch property testcomp workspace workers opt_lvl includes files
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
-  let* (deps : deps) = check_dependencies () in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   (* skip instrumentation if not in test-comp mode *)
   let skip = (not testcomp) || Sys.getenv_opt "RUNNER_OS" = Some "macOS" in
   let* (nfiles : Fpath.t list) =
     list_map (instrument_file ~skip ~includes ~workspace) files
   in
-  let* (objects : Fpath.t list) =
-    list_map (compile ~deps ~includes ~opt_lvl) nfiles
-  in
-  let* modul = link ~deps ~workspace objects in
+  let* modul = compile ~includes ~opt_lvl nfiles in
   let* () = metadata ~workspace arch property files in
-  let files = [ modul ] in
   let workspace = Fpath.(workspace / "test-suite") in
   if concolic then
     Cmd_conc.cmd profiling debug unsafe optimize workers no_stop_at_failure
       no_values deterministic_result_order workspace files
   else
+    let files = [ modul ] in
     Cmd_sym.cmd profiling debug unsafe optimize workers no_stop_at_failure
       no_values deterministic_result_order workspace files

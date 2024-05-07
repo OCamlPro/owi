@@ -35,7 +35,6 @@
   strstr.o
   setjmp.o
   sys_resources.o
-  start.o
   test-comp.o
   stderr.o
   time.o
@@ -74,7 +73,6 @@
   strstr.o
   setjmp.o
   sys_resources.o
-  start.o
   test-comp.o
   stderr.o
   time.o
@@ -109,7 +107,6 @@
   src/strstr.c
   src/setjmp.c
   src/sys_resources.c
-  src/start.c
   src/test-comp.c
   src/stderr.c
   src/time.c
