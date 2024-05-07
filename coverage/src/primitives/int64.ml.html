@@ -409,7 +409,7 @@ let popcnt =
 (*
    * Unsigned comparison in terms of signed comparison.
    *)
-let cmp_u x op y = <span data-count="146844">o</span>p (ad<span data-count="146844">d</span> x min_int) (ad<span data-count="146844">d</span> y min_int)
+let cmp_u x op y = <span data-count="146850">o</span>p (ad<span data-count="146850">d</span> x min_int) (ad<span data-count="146850">d</span> y min_int)
 
 (*
  * Unsigned division and remainder in terms of signed division; algorithm from
@@ -417,27 +417,27 @@ let cmp_u x op y = <span data-count="146844">o</span>p (ad<span data-count="1468
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  <span data-count="633">i</span>f d = zero then <span data-count="0">r</span>aise Division_by_zero
+  <span data-count="634">i</span>f d = zero then <span data-count="0">r</span>aise Division_by_zero
   else
-    <span data-count="633">l</span>et t = shift_right d 63 in
-    <span data-count="633">l</span>et n' = logand n (logno<span data-count="633">t</span> t) in
-    <span data-count="633">l</span>et q = shift_left (di<span data-count="633">v</span> (shift_right_logica<span data-count="633">l</span> n' 1) d) 1 in
-    <span data-count="633">l</span>et r = sub n (mu<span data-count="633">l</span> q d) in
-    <span data-count="633">i</span>f cmp_u r ( &lt; ) d then <span data-count="0">(</span>q, r) else <span data-count="633">(</span>ad<span data-count="633">d</span> q one, su<span data-count="633">b</span> r d)
+    <span data-count="634">l</span>et t = shift_right d 63 in
+    <span data-count="634">l</span>et n' = logand n (logno<span data-count="634">t</span> t) in
+    <span data-count="634">l</span>et q = shift_left (di<span data-count="634">v</span> (shift_right_logica<span data-count="634">l</span> n' 1) d) 1 in
+    <span data-count="634">l</span>et r = sub n (mu<span data-count="634">l</span> q d) in
+    <span data-count="634">i</span>f cmp_u r ( &lt; ) d then <span data-count="0">(</span>q, r) else <span data-count="634">(</span>ad<span data-count="634">d</span> q one, su<span data-count="634">b</span> r d)
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |bitwidth|-bits int. *)
-let low_int = shift_lef<span data-count="633">t</span> minus_one 63
+let low_int = shift_lef<span data-count="634">t</span> minus_one 63
 
 (* The largest signed |bitwidth|-bits int. *)
-let high_int = logxo<span data-count="633">r</span> low_int minus_one
+let high_int = logxo<span data-count="634">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="126660">f</span> x (to_in<span data-count="126660">t</span> (logan<span data-count="126660">d</span> y (of_in<span data-count="126660">t</span> 63)))
+let shift f x y = <span data-count="126710">f</span> x (to_in<span data-count="126710">t</span> (logan<span data-count="126710">d</span> y (of_in<span data-count="126710">t</span> 63)))
 
-let shl x y = <span data-count="81628">s</span>hift shift_left x y
+let shl x y = <span data-count="81678">s</span>hift shift_left x y
 
 let shr_s x y = <span data-count="162">s</span>hift shift_right x y
 
@@ -467,7 +467,7 @@ let le (x : int64) y = <span data-count="32">x</span> &lt;= y
 
 let ge (x : int64) y = <span data-count="32">x</span> &gt;= y
 
-let lt_u x y = <span data-count="13132">c</span>mp_u x ( &lt; ) y
+let lt_u x y = <span data-count="13137">c</span>mp_u x ( &lt; ) y
 
 let le_u x y = <span data-count="132686">c</span>mp_u x ( &lt;= ) y
 
@@ -489,7 +489,7 @@ let hex_digit = function
   | <span data-count="402">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="402">e</span> c - Char.cod<span data-count="402">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper, max_lower = divrem_<span data-count="633">u</span> minus_one 10L
+let max_upper, max_lower = divrem_<span data-count="634">u</span> minus_one 10L
 
 let of_string s =
   <span data-count="7927">l</span>et len = String.length s in

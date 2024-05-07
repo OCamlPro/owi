@@ -96,30 +96,30 @@
 open Syntax
 
 let out_testcase ~dst ~err testcase =
-  <span data-count="1409">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="1409">l</span>et tag ?(atts = <span data-count="26632">[</span>]) name = <span data-count="26717">(</span>("", name), atts) in
-  let atts = if err then <span data-count="85">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1324">N</span>one in
-  let to_string v = <span data-count="25308">F</span>ormat.asprintf "%a" Smtml.Value.pp_num v in
-  let input v = <span data-count="25308">`</span>El (ta<span data-count="25308">g</span> "input", [ `Data (to_strin<span data-count="25308">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="1409">g</span> ?atts "testcase", List.ma<span data-count="1409">p</span> input testcase) in
+  <span data-count="1376">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="1376">l</span>et tag ?(atts = <span data-count="25621">[</span>]) name = <span data-count="25706">(</span>("", name), atts) in
+  let atts = if err then <span data-count="85">S</span>ome [ (("", "coversError"), "true") ] else <span data-count="1291">N</span>one in
+  let to_string v = <span data-count="24330">F</span>ormat.asprintf "%a" Smtml.Value.pp_num v in
+  let input v = <span data-count="24330">`</span>El (ta<span data-count="24330">g</span> "input", [ `Data (to_strin<span data-count="24330">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="1376">g</span> ?atts "testcase", List.ma<span data-count="1376">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="1409">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="1376">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir ~err testcase -&gt;
-    <span data-count="1409">i</span>ncr cnt;
-    <span data-count="1409">l</span>et name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="1409">l</span>et path = Fpath.append dir name in
-    <span data-count="1409">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="1409">c</span> path
-        (fun chan () -&gt; <span data-count="1409">O</span>k (out_testcas<span data-count="1409">e</span> ~dst:(`Channel chan) ~err testcase))
+    <span data-count="1376">i</span>ncr cnt;
+    <span data-count="1376">l</span>et name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="1376">l</span>et path = Fpath.append dir name in
+    <span data-count="1376">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="1376">c</span> path
+        (fun chan () -&gt; <span data-count="1376">O</span>k (out_testcas<span data-count="1376">e</span> ~dst:(`Channel chan) ~err testcase))
         ()
     in
-    <span data-count="1409">r</span>es
+    <span data-count="1376">r</span>es
 </code></pre>
       </div>
     </div>

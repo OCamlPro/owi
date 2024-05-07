@@ -215,18 +215,18 @@ end
 
 module Binary = struct
   let until_typecheck ~unsafe m =
-    <span data-count="167">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="168">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="167">l</span>et+ () = Typecheck.modu<span data-count="167">l</span> m in
-      <span data-count="167">m</span>
+      <span data-count="168">l</span>et+ () = Typecheck.modu<span data-count="168">l</span> m in
+      <span data-count="168">m</span>
 
   let until_optimize ~unsafe ~optimize m =
-    <span data-count="167">l</span>et+ m = until_typechec<span data-count="167">k</span> ~unsafe m in
-    <span data-count="167">i</span>f optimize then <span data-count="0">O</span>ptimize.modul m else <span data-count="167">m</span>
+    <span data-count="168">l</span>et+ m = until_typechec<span data-count="168">k</span> ~unsafe m in
+    <span data-count="168">i</span>f optimize then <span data-count="0">O</span>ptimize.modul m else <span data-count="168">m</span>
 
   let until_link ~unsafe link_state ~optimize ~name m =
-    <span data-count="167">l</span>et* m = until_optimiz<span data-count="167">e</span> ~unsafe ~optimize m in
-    <span data-count="167">L</span>ink.modul link_state ~name m
+    <span data-count="168">l</span>et* m = until_optimiz<span data-count="168">e</span> ~unsafe ~optimize m in
+    <span data-count="168">L</span>ink.modul link_state ~name m
 
   let until_interpret link_state ~unsafe ~optimize ~name m =
     <span data-count="1">l</span>et* m =
