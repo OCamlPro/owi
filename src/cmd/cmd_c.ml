@@ -74,6 +74,7 @@ let instrument_file ?(skip = false) ~includes ~workspace file : Fpath.t Result.t
 
 let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
+    let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
     Cmd.(
       of_list
@@ -82,12 +83,15 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
         ; "-m32"
         ; "--no-standard-libraries"
         ; "-Wno-everything"
+        ; "-flto"
           (* TODO: ? *)
           (* ; -isystem replacementlibcheaders *)
         ; (* LINKER FLAGS: *)
           "-Wl,--allow-undefined"
-        ; "-Wl,--entry=__original_main"
+        ; "-Wl,--export=__original_main"
+        ; "-Wl,--no-entry"
         ; "-Wl,--lto-O" ^ opt_lvl
+        ; "-Wl,-z,stack-size=" ^ stack_size
         ]
       %% includes )
   in
