@@ -179,7 +179,9 @@ let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
       else
         match
           List.find_opt
-            (function { Binary.name = "_start"; _ } -> true | _ -> false)
+            (function
+              | { Binary.name = "_start" | "__original_main"; _ } -> true
+              | _ -> false )
             m.exports.func
         with
         | None -> None
