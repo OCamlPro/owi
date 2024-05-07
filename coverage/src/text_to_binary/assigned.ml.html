@@ -450,25 +450,25 @@ let assign_type (acc : type_acc) (name, sub_type) : type_acc Result.t =
   <span data-count="579">{</span> declared_types; func_types; named_types; last_assigned_int; all_types }
 
 let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
-  <span data-count="12362">l</span>et { func_types; last_assigned_int; all_types; _ } = acc in
-  let+ typ = Binary_types.convert_func_typ<span data-count="12362">e</span> None typ in
-  <span data-count="12361">l</span>et typ = Def_func_t typ in
+  <span data-count="12363">l</span>et { func_types; last_assigned_int; all_types; _ } = acc in
+  let+ typ = Binary_types.convert_func_typ<span data-count="12363">e</span> None typ in
+  <span data-count="12362">l</span>et typ = Def_func_t typ in
   match TypeMap.find_opt typ all_types with
   | <span data-count="6302">S</span>ome _id -&gt; acc
-  | <span data-count="6059">N</span>one -&gt;
+  | <span data-count="6060">N</span>one -&gt;
     let id = last_assigned_int in
     let last_assigned_int = succ last_assigned_int in
-    <span data-count="6059">l</span>et all_types = TypeMap.add typ id all_types in
-    <span data-count="6059">l</span>et func_types =
+    <span data-count="6060">l</span>et all_types = TypeMap.add typ id all_types in
+    <span data-count="6060">l</span>et func_types =
       match typ with
-      | <span data-count="6059">D</span>ef_func_t _ftype -&gt; Indexed.retur<span data-count="6059">n</span> id typ :: func_types
+      | <span data-count="6060">D</span>ef_func_t _ftype -&gt; Indexed.retur<span data-count="6060">n</span> id typ :: func_types
       | <span data-count="0">D</span>ef_array_t (_mut, _storage_type) -&gt; func_types
       | <span data-count="0">D</span>ef_struct_t _ -&gt; func_types
     in
     { acc with func_types; last_assigned_int; all_types }
 
 let assign_types (modul : Grouped.t) : binary str_type Named.t Result.t =
-  <span data-count="5981">l</span>et empty_acc : type_acc =
+  <span data-count="5982">l</span>et empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
     ; named_types = String_map.empty
@@ -476,32 +476,32 @@ let assign_types (modul : Grouped.t) : binary str_type Named.t Result.t =
     ; all_types = TypeMap.empty
     }
   in
-  let* acc = list_fold_lef<span data-count="5981">t</span> assign_type empty_acc (List.re<span data-count="5981">v</span> modul.typ) in
-  <span data-count="5980">l</span>et+ acc =
-    list_fold_lef<span data-count="5980">t</span> assign_heap_type acc (List.re<span data-count="5980">v</span> modul.function_type)
+  let* acc = list_fold_lef<span data-count="5982">t</span> assign_type empty_acc (List.re<span data-count="5982">v</span> modul.typ) in
+  <span data-count="5981">l</span>et+ acc =
+    list_fold_lef<span data-count="5981">t</span> assign_heap_type acc (List.re<span data-count="5981">v</span> modul.function_type)
   in
-  <span data-count="5979">l</span>et values = List.re<span data-count="5979">v</span> acc.declared_types @ List.re<span data-count="5979">v</span> acc.func_types in
+  <span data-count="5980">l</span>et values = List.re<span data-count="5980">v</span> acc.declared_types @ List.re<span data-count="5980">v</span> acc.func_types in
   { Named.values; named = acc.named_types }
 
 let get_runtime_name (get_name : 'a -&gt; string option) (elt : ('a, 'b) Runtime.t)
   : string option =
-  <span data-count="19876">m</span>atch elt with
-  | <span data-count="16331">L</span>ocal v -&gt; get_name v
-  | <span data-count="3545">I</span>mported { assigned_name; _ } -&gt; assigned_name
+  <span data-count="19878">m</span>atch elt with
+  | <span data-count="16332">L</span>ocal v -&gt; get_name v
+  | <span data-count="3546">I</span>mported { assigned_name; _ } -&gt; assigned_name
 
 let name kind ~get_name values =
-  <span data-count="35862">l</span>et assign_one (named : int String_map.t) (elt : _ Indexed.t) =
-    <span data-count="22211">l</span>et elt_v = Indexed.get elt in
-    <span data-count="22211">m</span>atch get_name elt_v with
+  <span data-count="35868">l</span>et assign_one (named : int String_map.t) (elt : _ Indexed.t) =
+    <span data-count="22213">l</span>et elt_v = Indexed.get elt in
+    <span data-count="22213">m</span>atch get_name elt_v with
     | <span data-count="13911">N</span>one -&gt; Ok named
-    | <span data-count="8300">S</span>ome name -&gt;
+    | <span data-count="8302">S</span>ome name -&gt;
       let index = Indexed.get_index elt in
-      <span data-count="8300">i</span>f String_map.mem name named then
+      <span data-count="8302">i</span>f String_map.mem name named then
         <span data-count="6">E</span>rror (`Msg (Format.sprint<span data-count="6">f</span> "duplicate %s %s" kind name))
-      else <span data-count="8294">o</span>k @@ String_map.ad<span data-count="8294">d</span> name index named
+      else <span data-count="8296">o</span>k @@ String_map.ad<span data-count="8296">d</span> name index named
   in
-  let+ named = list_fold_lef<span data-count="35862">t</span> assign_one String_map.empty values in
-  <span data-count="35856">{</span> Named.values; named }
+  let+ named = list_fold_lef<span data-count="35868">t</span> assign_one String_map.empty values in
+  <span data-count="35862">{</span> Named.values; named }
 
 let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
     =
@@ -520,36 +520,36 @@ let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
   | Some _ -&gt; assert false
 
 let of_grouped (modul : Grouped.t) : t Result.t =
-  <span data-count="5981">L</span>og.debug0 "assigning    ...@\n";
-  <span data-count="5981">l</span>et* typ = assign_type<span data-count="5981">s</span> modul in
-  <span data-count="5979">l</span>et* global =
-    nam<span data-count="5979">e</span> "global"
-      ~get_name:(get_runtime_nam<span data-count="5979">e</span> (fun ({ id; _ } : Text.global) -&gt; <span data-count="1176">i</span>d))
+  <span data-count="5982">L</span>og.debug0 "assigning    ...@\n";
+  <span data-count="5982">l</span>et* typ = assign_type<span data-count="5982">s</span> modul in
+  <span data-count="5980">l</span>et* global =
+    nam<span data-count="5980">e</span> "global"
+      ~get_name:(get_runtime_nam<span data-count="5980">e</span> (fun ({ id; _ } : Text.global) -&gt; <span data-count="1176">i</span>d))
       modul.global
   in
-  <span data-count="5979">l</span>et* table =
-    nam<span data-count="5979">e</span> "table"
-      ~get_name:(get_runtime_nam<span data-count="5979">e</span> (fun ((id, _) : binary table) -&gt; <span data-count="1161">i</span>d))
+  <span data-count="5980">l</span>et* table =
+    nam<span data-count="5980">e</span> "table"
+      ~get_name:(get_runtime_nam<span data-count="5980">e</span> (fun ((id, _) : binary table) -&gt; <span data-count="1161">i</span>d))
       modul.table
   in
-  <span data-count="5979">l</span>et* mem =
-    nam<span data-count="5979">e</span> "mem"
-      ~get_name:(get_runtime_nam<span data-count="5979">e</span> (fun ((id, _) : mem) -&gt; <span data-count="1403">i</span>d))
+  <span data-count="5980">l</span>et* mem =
+    nam<span data-count="5980">e</span> "mem"
+      ~get_name:(get_runtime_nam<span data-count="5980">e</span> (fun ((id, _) : mem) -&gt; <span data-count="1403">i</span>d))
       modul.mem
   in
-  <span data-count="5979">l</span>et* func =
-    nam<span data-count="5979">e</span> "func"
-      ~get_name:(get_runtime_nam<span data-count="5979">e</span> (fun ({ id; _ } : text func) -&gt; <span data-count="12591">i</span>d))
+  <span data-count="5980">l</span>et* func =
+    nam<span data-count="5980">e</span> "func"
+      ~get_name:(get_runtime_nam<span data-count="5980">e</span> (fun ({ id; _ } : text func) -&gt; <span data-count="12592">i</span>d))
       modul.func
   in
-  <span data-count="5973">l</span>et* elem =
-    nam<span data-count="5973">e</span> "elem" ~get_name:(fun (elem : Text.elem) -&gt; <span data-count="1514">e</span>lem.id) modul.elem
+  <span data-count="5974">l</span>et* elem =
+    nam<span data-count="5974">e</span> "elem" ~get_name:(fun (elem : Text.elem) -&gt; <span data-count="1514">e</span>lem.id) modul.elem
   in
-  <span data-count="5973">l</span>et* data =
-    nam<span data-count="5973">e</span> "data" ~get_name:(fun (data : Text.data) -&gt; <span data-count="821">d</span>ata.id) modul.data
+  <span data-count="5974">l</span>et* data =
+    nam<span data-count="5974">e</span> "data" ~get_name:(fun (data : Text.data) -&gt; <span data-count="821">d</span>ata.id) modul.data
   in
-  <span data-count="5973">l</span>et+ () = list_ite<span data-count="5973">r</span> (check_type_i<span data-count="5973">d</span> typ) modul.type_checks in
-  <span data-count="5963">{</span> id = modul.id
+  <span data-count="5974">l</span>et+ () = list_ite<span data-count="5974">r</span> (check_type_i<span data-count="5974">d</span> typ) modul.type_checks in
+  <span data-count="5964">{</span> id = modul.id
   ; typ
   ; global
   ; table

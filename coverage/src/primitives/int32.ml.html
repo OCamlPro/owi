@@ -362,29 +362,29 @@ let of_int64 = Int64.to_int32
 let to_int64 = Int64.of_int32
 
 (* Unsigned comparison in terms of signed comparison. *)
-let cmp_u x op y = <span data-count="1783451">o</span>p (ad<span data-count="1783451">d</span> x min_int) (ad<span data-count="1783451">d</span> y min_int)
+let cmp_u x op y = <span data-count="1783452">o</span>p (ad<span data-count="1783452">d</span> x min_int) (ad<span data-count="1783452">d</span> y min_int)
 
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="378063">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="378038">t</span> (Int64.shift_lef<span data-count="377993">t</span> (Int64.of_int3<span data-count="378041">2</span> x) 32) 32
+  <span data-count="376016">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="376364">t</span> (Int64.shift_lef<span data-count="376164">t</span> (Int64.of_int3<span data-count="376301">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |32|-bits int. *)
-let low_int = shift_lef<span data-count="630">t</span> minus_one 31
+let low_int = shift_lef<span data-count="633">t</span> minus_one 31
 
 (* The largest signed |32|-bits int. *)
-let high_int = logxo<span data-count="630">r</span> low_int minus_one
+let high_int = logxo<span data-count="633">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="576160">f</span> x (to_in<span data-count="576127">t</span> (logan<span data-count="576117">d</span> y 31l))
+let shift f x y = <span data-count="573456">f</span> x (to_in<span data-count="572082">t</span> (logan<span data-count="573306">d</span> y 31l))
 
-let shl x y = <span data-count="338492">s</span>x (shif<span data-count="338331">t</span> shift_left x y)
+let shl x y = <span data-count="336972">s</span>x (shif<span data-count="336635">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="197984">s</span>hift shift_right x y
+let shr_s x y = <span data-count="196860">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="39730">s</span>x (shif<span data-count="39730">t</span> shift_right_logical x y)
 
@@ -397,14 +397,14 @@ let rotr x y =
   <span data-count="28">l</span>ogor (shr_<span data-count="28">u</span> x n) (sh<span data-count="28">l</span> x (su<span data-count="28">b</span> 32l n))
 
 let extend_s n x =
-  <span data-count="263">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="263">t</span> x shift) shift
+  <span data-count="260">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="260">t</span> x shift) shift
 
 let eq (x : int32) y = <span data-count="2098590">x</span> = y
 
-let ne (x : int32) y = <span data-count="16966966">x</span> &lt;&gt; y
+let ne (x : int32) y = <span data-count="16966672">x</span> &lt;&gt; y
 
-let lt (x : int32) y = <span data-count="10855105">x</span> &lt; y
+let lt (x : int32) y = <span data-count="10855108">x</span> &lt; y
 
 let gt (x : int32) y = <span data-count="3847">x</span> &gt; y
 
@@ -412,7 +412,7 @@ let le (x : int32) y = <span data-count="1605695">x</span> &lt;= y
 
 let ge (x : int32) y = <span data-count="648">x</span> &gt;= y
 
-let lt_u x y = <span data-count="126881">c</span>mp_u x ( &lt; ) y
+let lt_u x y = <span data-count="126882">c</span>mp_u x ( &lt; ) y
 
 let le_u x y = <span data-count="870004">c</span>mp_u x ( &lt;= ) y
 
@@ -422,10 +422,10 @@ let ge_u x y = <span data-count="786524">c</span>mp_u x ( &gt;= ) y
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = <span data-count="401070">i</span>f not b then <span data-count="10">L</span>og.err "of_string (int32)"
+let require b = <span data-count="401074">i</span>f not b then <span data-count="10">L</span>og.err "of_string (int32)"
 
 let dec_digit = function
-  | <span data-count="122884">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="122884">e</span> c - Char.cod<span data-count="122884">e</span> '0'
+  | <span data-count="122885">'</span>0' .. '9' as c -&gt; Char.cod<span data-count="122885">e</span> c - Char.cod<span data-count="122885">e</span> '0'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
 let hex_digit = function
@@ -434,21 +434,21 @@ let hex_digit = function
   | <span data-count="314">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="314">e</span> c - Char.cod<span data-count="314">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper = unsigned_di<span data-count="630">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="633">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="630">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="633">m</span> minus_one 10l
 
 let sign_extend i =
-  <span data-count="78970">l</span>et sign_bit = logand (of_in<span data-count="78970">t</span> (1 lsl (32 - 1))) i in
-  <span data-count="78970">i</span>f sign_bit = zero then <span data-count="76335">i</span>
+  <span data-count="78971">l</span>et sign_bit = logand (of_in<span data-count="78971">t</span> (1 lsl (32 - 1))) i in
+  <span data-count="78971">i</span>f sign_bit = zero then <span data-count="76336">i</span>
   else
     (* Build a sign-extension mask *)
     <span data-count="2635">l</span>et sign_mask = shift_left minus_one 32 in
     <span data-count="2635">l</span>ogor sign_mask i
 
 let of_string s =
-  <span data-count="78980">l</span>et len = String.length s in
-  <span data-count="78980">l</span>et rec parse_hex i num =
+  <span data-count="78981">l</span>et len = String.length s in
+  <span data-count="78981">l</span>et rec parse_hex i num =
     <span data-count="48043">i</span>f i = len then <span data-count="8557">n</span>um
     else <span data-count="39486">i</span>f s.[i] = '_' then <span data-count="78">p</span>arse_hex (i + 1) num
     else
@@ -457,32 +457,32 @@ let of_string s =
       <span data-count="39406">p</span>arse_hex (i + 1) (logo<span data-count="39406">r</span> (shift_lef<span data-count="39406">t</span> num 4) digit)
   in
   let rec parse_dec i num =
-    <span data-count="193325">i</span>f i = len then <span data-count="70417">n</span>um
-    else <span data-count="122908">i</span>f s.[i] = '_' then <span data-count="24">p</span>arse_dec (i + 1) num
+    <span data-count="193327">i</span>f i = len then <span data-count="70418">n</span>um
+    else <span data-count="122909">i</span>f s.[i] = '_' then <span data-count="24">p</span>arse_dec (i + 1) num
     else
-      <span data-count="122884">l</span>et digit = of_int (dec_digi<span data-count="122884">t</span> s.[i]) in
-      <span data-count="122884">r</span>equire (lt_<span data-count="122884">u</span> num max_uppe<span data-count="122840">r</span> || (num = max_upper &amp;&amp; <span data-count="44">l</span>e_<span data-count="44">u</span> digit max_lower<span data-count="40">)</span>);
-      <span data-count="122880">p</span>arse_dec (i + 1) (ad<span data-count="122880">d</span> (mu<span data-count="122880">l</span> num 10l) digit)
+      <span data-count="122885">l</span>et digit = of_int (dec_digi<span data-count="122885">t</span> s.[i]) in
+      <span data-count="122885">r</span>equire (lt_<span data-count="122885">u</span> num max_uppe<span data-count="122841">r</span> || (num = max_upper &amp;&amp; <span data-count="44">l</span>e_<span data-count="44">u</span> digit max_lower<span data-count="40">)</span>);
+      <span data-count="122881">p</span>arse_dec (i + 1) (ad<span data-count="122881">d</span> (mu<span data-count="122881">l</span> num 10l) digit)
   in
   let parse_int i =
-    <span data-count="78980">r</span>equire (len - i &gt; 0);
-    <span data-count="78980">i</span>f i + 2 &lt;= len &amp;&amp; <span data-count="29005">s</span>.[i] = '0' &amp;&amp; <span data-count="8563">s</span>.[i + 1] = 'x' then
+    <span data-count="78981">r</span>equire (len - i &gt; 0);
+    <span data-count="78981">i</span>f i + 2 &lt;= len &amp;&amp; <span data-count="29005">s</span>.[i] = '0' &amp;&amp; <span data-count="8563">s</span>.[i + 1] = 'x' then
       <span data-count="8559">p</span>arse_hex (i + 2) zero
-    else <span data-count="70421">p</span>arse_dec i zero
+    else <span data-count="70422">p</span>arse_dec i zero
   in
   require (len &gt; 0);
-  <span data-count="78980">l</span>et parsed =
+  <span data-count="78981">l</span>et parsed =
     match s.[0] with
     | <span data-count="2">'</span>+' -&gt; parse_in<span data-count="2">t</span> 1
     | <span data-count="1848">'</span>-' -&gt;
       let n = parse_int 1 in
       <span data-count="1848">r</span>equire (su<span data-count="1848">b</span> n one &gt;= minus_one);
       <span data-count="1844">n</span>e<span data-count="1844">g</span> n
-    | <span data-count="77130">_</span> -&gt; parse_in<span data-count="77124">t</span> 0
+    | <span data-count="77131">_</span> -&gt; parse_in<span data-count="77125">t</span> 0
   in
   let parsed = sign_extend parsed in
-  <span data-count="78970">r</span>equire (low_int &lt;= parsed &amp;&amp; <span data-count="78970">p</span>arsed &lt;= high_int);
-  <span data-count="78970">p</span>arsed
+  <span data-count="78971">r</span>equire (low_int &lt;= parsed &amp;&amp; <span data-count="78971">p</span>arsed &lt;= high_int);
+  <span data-count="78971">p</span>arsed
 
 let eq_const (i : int32) j = <span data-count="1424400">i</span> = j
 </code></pre>

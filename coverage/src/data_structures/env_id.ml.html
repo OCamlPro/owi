@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>env_id.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/data_structures/env_id.ml">
+    <meta name="description" content="77.78% coverage in src/data_structures/env_id.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,10 @@
           <span class="dirname">src/data_structures/</span>env_id.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>77.78%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:19.35%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -46,11 +47,13 @@
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
+<a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -84,6 +87,8 @@
 <a href="#L27">27</a>
 <a href="#L28">28</a>
 <a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -101,18 +106,20 @@ type 'a collection =
 let empty = { c = Map.empty; last = 0 }
 
 let with_fresh_id f { c; last } =
-  <span data-count="3142">l</span>et open Syntax in
-  let+ e, r = <span data-count="3142">f</span> last in
-  <span data-count="2958">l</span>et c = Map.add last e c in
-  <span data-count="2958">l</span>et last = succ last in
-  <span data-count="2958">(</span>{ c; last }, r)
+  <span data-count="3143">l</span>et open Syntax in
+  let+ e, r = <span data-count="3143">f</span> last in
+  <span data-count="2959">l</span>et c = Map.add last e c in
+  <span data-count="2959">l</span>et last = succ last in
+  <span data-count="2959">(</span>{ c; last }, r)
 
-let get i c = <span data-count="11795795">M</span>ap.find i c.c
+let get i c = <span data-count="11795695">M</span>ap.find i c.c
+
+let map f c = <span data-count="0">{</span> c with c = Map.ma<span data-count="0">p</span> f c.c }
 
 module Tbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="336185">x</span>
+  let hash x = <span data-count="335618">x</span>
 end)
 </code></pre>
       </div>

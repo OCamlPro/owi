@@ -18,20 +18,20 @@
       <h2>70.18%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:47.15%"></span>
-      <span class="unvisited" style="bottom:46.34%"></span>
-      <span class="unvisited" style="bottom:45.53%"></span>
-      <span class="unvisited" style="bottom:43.90%"></span>
-      <span class="unvisited" style="bottom:20.33%"></span>
-      <span class="unvisited" style="bottom:16.26%"></span>
-      <span class="unvisited" style="bottom:15.45%"></span>
-      <span class="unvisited" style="bottom:13.82%"></span>
-      <span class="unvisited" style="bottom:13.01%"></span>
-      <span class="unvisited" style="bottom:12.20%"></span>
-      <span class="unvisited" style="bottom:9.76%"></span>
-      <span class="unvisited" style="bottom:4.88%"></span>
-      <span class="unvisited" style="bottom:4.07%"></span>
-      <span class="unvisited" style="bottom:2.44%"></span>
+      <span class="unvisited" style="bottom:47.58%"></span>
+      <span class="unvisited" style="bottom:46.77%"></span>
+      <span class="unvisited" style="bottom:45.97%"></span>
+      <span class="unvisited" style="bottom:44.35%"></span>
+      <span class="unvisited" style="bottom:20.97%"></span>
+      <span class="unvisited" style="bottom:16.94%"></span>
+      <span class="unvisited" style="bottom:16.13%"></span>
+      <span class="unvisited" style="bottom:14.52%"></span>
+      <span class="unvisited" style="bottom:13.71%"></span>
+      <span class="unvisited" style="bottom:12.90%"></span>
+      <span class="unvisited" style="bottom:10.48%"></span>
+      <span class="unvisited" style="bottom:4.84%"></span>
+      <span class="unvisited" style="bottom:4.03%"></span>
+      <span class="unvisited" style="bottom:2.42%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -150,16 +150,17 @@
 <a id="L111"></a><span class="unvisited"> </span>
 <a id="L112"></a><span class="visited"> </span>
 <a id="L113"></a><span class="visited"> </span>
-<a id="L114"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
 <a id="L115"></a><span class="visited"> </span>
 <a id="L116"></a><span class="visited"> </span>
-<a id="L117"></a><span class="unvisited"> </span>
+<a id="L117"></a><span class="visited"> </span>
 <a id="L118"></a><span class="unvisited"> </span>
-<a id="L119"></a><span class="visited"> </span>
-<a id="L120"></a><span class="unvisited"> </span>
-<a id="L121"></a><span > </span>
+<a id="L119"></a><span class="unvisited"> </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="unvisited"> </span>
 <a id="L122"></a><span > </span>
-<a id="L123"></a><span class="unvisited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -287,6 +288,7 @@
 <a href="#L121">121</a>
 <a href="#L122">122</a>
 <a href="#L123">123</a>
+<a href="#L124">124</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -338,7 +340,7 @@ type err =
   | `Unexpected_token
   | `Unknown_function of int
   | `Unknown_global
-  | `Unknown_import
+  | `Unknown_import of string * string
   | `Unknown_label
   | `Unknown_local of string
   | `Unknown_memory of int
@@ -366,9 +368,9 @@ let rec err_to_string = function
   | <span data-count="12">`</span>Duplicate_table id -&gt; Format.sprintf "duplicate table %s" id
   | <span data-count="4">`</span>Failed_with_but_expected (got, expected) -&gt;
     Format.sprintf "expected %s but got (%s)" expected (err_to_strin<span data-count="4">g</span> got)
-  | <span data-count="170">`</span>Found_bug n -&gt;
+  | <span data-count="171">`</span>Found_bug n -&gt;
     if n &gt; 1 then <span data-count="8">F</span>ormat.sprintf "Reached %d problems!" n
-    else <span data-count="162">F</span>ormat.sprintf "Reached problem!"
+    else <span data-count="163">F</span>ormat.sprintf "Reached problem!"
   | <span data-count="4">`</span>Global_is_immutable -&gt; "global is immutable"
   | <span data-count="4">`</span>Illegal_escape txt -&gt; Format.sprintf "illegal escape %S" txt
   | <span data-count="8">`</span>Import_after_function -&gt; "import after function"
@@ -400,7 +402,8 @@ let rec err_to_string = function
   | <span data-count="137">`</span>Unexpected_token -&gt; "unexpected token"
   | <span data-count="0">`</span>Unknown_function id -&gt; Format.sprintf "unknown function %d" id
   | <span data-count="16">`</span>Unknown_global -&gt; "unknown global"
-  | <span data-count="22">`</span>Unknown_import -&gt; "unknown import"
+  | <span data-count="44">`</span>Unknown_import (modul, value) -&gt;
+    Format.sprintf "unknown import %S %S" modul value
   | <span data-count="33">`</span>Unknown_label -&gt; "unknown label"
   | <span data-count="76">`</span>Unknown_local id -&gt; Format.sprintf "unknown local %s" id
   | <span data-count="40">`</span>Unknown_memory id -&gt; Format.sprintf "unknown memory %d" id

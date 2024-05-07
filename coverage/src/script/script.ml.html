@@ -594,15 +594,15 @@ module Stack = Stack.Make (V) [@@inlined hint]
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="630">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="633">e</span> ()
 
   let value i = <span data-count="62">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
 
 let check_error ~expected ~got : unit Result.t =
   <span data-count="10420">l</span>et ok =
-    Result.err_to_strin<span data-count="10420">g</span> got = expecte<span data-count="2689">d</span>
-    || String.starts_wit<span data-count="7731">h</span> ~prefix:expected (Result.err_to_strin<span data-count="7731">g</span> got<span data-count="7713">)</span>
+    Result.err_to_strin<span data-count="10420">g</span> got = expecte<span data-count="2667">d</span>
+    || String.starts_wit<span data-count="7753">h</span> ~prefix:expected (Result.err_to_strin<span data-count="7753">g</span> got<span data-count="7735">)</span>
     || ( got = `Constant_out_of_rang<span data-count="0">e</span>
        || got = `Msg "constant out of range<span data-count="0">"</span>
        || got = `Parse_fail "constant out of range<span data-count="14">"</span> )

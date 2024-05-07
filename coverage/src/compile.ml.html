@@ -178,34 +178,34 @@
 open Syntax
 
 module Text = struct
-  let until_check ~unsafe m = <span data-count="6061">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6061">C</span>heck.modul m
+  let until_check ~unsafe m = <span data-count="6062">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6062">C</span>heck.modul m
 
   let until_group ~unsafe m =
-    <span data-count="6061">l</span>et* m = until_chec<span data-count="6061">k</span> ~unsafe m in
-    <span data-count="5999">G</span>rouped.of_symbolic m
+    <span data-count="6062">l</span>et* m = until_chec<span data-count="6062">k</span> ~unsafe m in
+    <span data-count="6000">G</span>rouped.of_symbolic m
 
   let until_assign ~unsafe m =
-    <span data-count="6061">l</span>et* m = until_grou<span data-count="6061">p</span> ~unsafe m in
-    <span data-count="5981">A</span>ssigned.of_grouped m
+    <span data-count="6062">l</span>et* m = until_grou<span data-count="6062">p</span> ~unsafe m in
+    <span data-count="5982">A</span>ssigned.of_grouped m
 
   let until_binary ~unsafe m =
-    <span data-count="6061">l</span>et* m = until_assig<span data-count="6061">n</span> ~unsafe m in
-    <span data-count="5963">R</span>ewrite.modul m
+    <span data-count="6062">l</span>et* m = until_assig<span data-count="6062">n</span> ~unsafe m in
+    <span data-count="5964">R</span>ewrite.modul m
 
   let until_typecheck ~unsafe m =
-    <span data-count="5940">l</span>et* m = until_binar<span data-count="5940">y</span> ~unsafe m in
-    <span data-count="5555">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="5941">l</span>et* m = until_binar<span data-count="5941">y</span> ~unsafe m in
+    <span data-count="5556">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="5555">l</span>et+ () = Typecheck.modu<span data-count="5551">l</span> m in
-      <span data-count="2986">m</span>
+      <span data-count="5556">l</span>et+ () = Typecheck.modu<span data-count="5552">l</span> m in
+      <span data-count="2987">m</span>
 
   let until_optimize ~unsafe ~optimize m =
-    <span data-count="5937">l</span>et+ m = until_typechec<span data-count="5933">k</span> ~unsafe m in
-    <span data-count="2986">i</span>f optimize then <span data-count="1370">O</span>ptimize.modul m else <span data-count="1616">m</span>
+    <span data-count="5938">l</span>et+ m = until_typechec<span data-count="5934">k</span> ~unsafe m in
+    <span data-count="2987">i</span>f optimize then <span data-count="1370">O</span>ptimize.modul m else <span data-count="1617">m</span>
 
   let until_link ~unsafe link_state ~optimize ~name m =
-    <span data-count="5917">l</span>et* m = until_optimiz<span data-count="5913">e</span> ~unsafe ~optimize m in
-    <span data-count="2966">L</span>ink.modul link_state ~name m
+    <span data-count="5918">l</span>et* m = until_optimiz<span data-count="5914">e</span> ~unsafe ~optimize m in
+    <span data-count="2967">L</span>ink.modul link_state ~name m
 
   let until_interpret link_state ~unsafe ~optimize ~name m =
     <span data-count="2522">l</span>et* m, link_state = until_lin<span data-count="2518">k</span> link_state ~unsafe ~optimize ~name m in
