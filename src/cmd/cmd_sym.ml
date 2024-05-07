@@ -144,12 +144,12 @@ let run_text_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
     in
     let has_start_id_function =
       List.exists
-        (function Text.MFunc { id = Some "_start"; _ } -> true | _ -> false)
+        (function Text.MFunc { id = Some "main"; _ } -> true | _ -> false)
         m.fields
     in
     let fields =
       if has_start || not has_start_id_function then m.fields
-      else MStart (Text "_start") :: m.fields
+      else MStart (Text "main") :: m.fields
     in
     let m = { m with fields } in
     let+ m, state =
@@ -179,7 +179,7 @@ let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
       else
         match
           List.find_opt
-            (function { Binary.name = "_start"; _ } -> true | _ -> false)
+            (function { Binary.name = "main"; _ } -> true | _ -> false)
             m.exports.func
         with
         | None -> None
