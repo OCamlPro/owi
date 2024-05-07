@@ -29,6 +29,8 @@ Trap: unreachable
 Model:
   (model
     (symbol_1 (i32 6)))
+Reached problem!
+[13]
 ```
 
 Indeed, if `x` is equal to `6` then, the `unreachable` instruction will be reached.
