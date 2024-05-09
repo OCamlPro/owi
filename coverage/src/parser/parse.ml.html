@@ -276,10 +276,10 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="358">m</span>atch Fpath.get_ext ~multi:false file with
-  | <span data-count="189">"</span>.wat" -&gt;
-    let+ m = Text.Module.from_fil<span data-count="189">e</span> file in
-    <span data-count="188">E</span>ither.Left (Either.Left m)
+  <span data-count="359">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="190">"</span>.wat" -&gt;
+    let+ m = Text.Module.from_fil<span data-count="190">e</span> file in
+    <span data-count="189">E</span>ither.Left (Either.Left m)
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">E</span>ither.Left (Either.Right m)

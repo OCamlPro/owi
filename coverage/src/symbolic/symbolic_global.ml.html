@@ -171,7 +171,7 @@
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="32761">x</span>
+  let hash x = <span data-count="32515">x</span>
 end)
 
 type t =
@@ -183,16 +183,16 @@ type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = <span data-count="338">E</span>nv_id.Tbl.create 0
 
-let global_copy r = <span data-count="9012">{</span> r with value = r.value }
+let global_copy r = <span data-count="8838">{</span> r with value = r.value }
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten... *)
-  <span data-count="9448">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="9447">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="9444">p</span>
+  <span data-count="9273">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="9271">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="9272">p</span>
        (fun (i, t) -&gt;
-         <span data-count="9002">l</span>et s = ITbl.to_seq t in
-         <span data-count="9002">(</span>i, ITbl.of_se<span data-count="8999">q</span> @@ Seq.ma<span data-count="9001">p</span> (fun (i, a) -&gt; <span data-count="9012">(</span>i, global_cop<span data-count="9010">y</span> a)) s) )
+         <span data-count="8824">l</span>et s = ITbl.to_seq t in
+         <span data-count="8826">(</span>i, ITbl.of_se<span data-count="8825">q</span> @@ Seq.ma<span data-count="8825">p</span> (fun (i, a) -&gt; <span data-count="8838">(</span>i, global_cop<span data-count="8838">y</span> a)) s) )
        s
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
@@ -209,29 +209,29 @@ let convert (orig_global : Concrete_global.t) : t =
   <span data-count="172">{</span> value = convert_value<span data-count="172">s</span> orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
-  <span data-count="23573">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="23406">S</span>ome env -&gt; env
+  <span data-count="23506">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="23336">S</span>ome env -&gt; env
   | <span data-count="169">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="169">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="169">t</span>
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="23575">l</span>et env = get_env env_id collection in
-  <span data-count="23573">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="23403">S</span>ome t -&gt; t
+  <span data-count="23506">l</span>et env = get_env env_id collection in
+  <span data-count="23504">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="23326">S</span>ome t -&gt; t
   | <span data-count="172">N</span>one -&gt;
     let t = convert orig_global in
     <span data-count="172">I</span>Tbl.add env g_id t;
     <span data-count="172">t</span>
 
-let value v = <span data-count="9139">v</span>.value
+let value v = <span data-count="9127">v</span>.value
 
-let set_value v x = <span data-count="14436">v</span>.value &lt;- x
+let set_value v x = <span data-count="14375">v</span>.value &lt;- x
 
-let mut v = <span data-count="14436">v</span>.orig.mut
+let mut v = <span data-count="14375">v</span>.orig.mut
 
-let typ v = <span data-count="14433">v</span>.orig.typ
+let typ v = <span data-count="14376">v</span>.orig.typ
 </code></pre>
       </div>
     </div>
