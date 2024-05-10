@@ -1,83 +1,7 @@
 (include_subdirs no)
 
-(executable
- (name script)
- (modules script))
-
 (rule
  (target libc.wasm)
- (deps
-  assert_fail.o
-  stdlib.o
-  ctype.o
-  stdout.o
-  errno.o
-  strchr.o
-  math.o
-  strcmp.o
-  memccpy.o
-  strcpy.o
-  memchr.o
-  strdup.o
-  memcmp.o
-  strerror.o
-  memcpy.o
-  strftime.o
-  memmove.o
-  strlen.o
-  memset.o
-  strncmp.o
-  netinet_in.o
-  strncpy.o
-  owi.o
-  strrchr.o
-  pthread.o
-  strstr.o
-  setjmp.o
-  sys_resources.o
-  test-comp.o
-  stderr.o
-  time.o
-  stdio.o
-  unistd.o)
- (action
-  (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
-
-(rule
- (targets
-  assert_fail.o
-  stdlib.o
-  ctype.o
-  stdout.o
-  errno.o
-  strchr.o
-  math.o
-  strcmp.o
-  memccpy.o
-  strcpy.o
-  memchr.o
-  strdup.o
-  memcmp.o
-  strerror.o
-  memcpy.o
-  strftime.o
-  memmove.o
-  strlen.o
-  memset.o
-  strncmp.o
-  netinet_in.o
-  strncpy.o
-  owi.o
-  strrchr.o
-  pthread.o
-  strstr.o
-  setjmp.o
-  sys_resources.o
-  test-comp.o
-  stderr.o
-  time.o
-  stdio.o
-  unistd.o)
  (deps
   src/assert_fail.c
   src/stdlib.c
@@ -113,7 +37,26 @@
   src/stdio.c
   src/unistd.c)
  (action
-  (run ./script.exe %{deps})))
+  (run
+   clang
+   -g
+   -O3
+   -ffreestanding
+   --no-standard-libraries
+   --target=wasm32
+   -m32
+   -Iinclude
+   -Wno-int-conversion
+   -Wno-return-type
+   -fbracket-depth=512
+   ;; linker flags
+   -Wl,--no-entry
+   -Wl,--export-all
+   -Wl,--relocatable ;; TODO: understand why when removing --relocatable we have undefined symbol errors
+                     ;; files
+   %{deps}
+   -o
+   %{target})))
 
 (install
  (package owi)
