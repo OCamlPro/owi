@@ -81,15 +81,15 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
         [ "-O" ^ opt_lvl
         ; "--target=wasm32"
         ; "-m32"
+        ; "-ffreestanding"
         ; "--no-standard-libraries"
         ; "-Wno-everything"
         ; "-flto"
           (* TODO: ? *)
           (* ; -isystem replacementlibcheaders *)
         ; (* LINKER FLAGS: *)
-          "-Wl,--allow-undefined"
-        ; "-Wl,--export=__original_main"
-        ; "-Wl,--no-entry"
+          "-Wl,--no-entry"
+        ; "-Wl,--export=main"
         ; "-Wl,--lto-O" ^ opt_lvl
         ; "-Wl,-z,stack-size=" ^ stack_size
         ]
@@ -99,7 +99,7 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
 
   let out = Fpath.(v "a.out.wasm") in
-  let files = Cmd.of_list (List.map Fpath.to_string files) in
+  let files = Cmd.of_list (List.map Fpath.to_string (C_share.libc :: files)) in
   let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let+ () = OS.Cmd.run clang in
