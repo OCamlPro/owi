@@ -39,8 +39,8 @@
  (action
   (run
    clang
-   -g
    -O3
+   -g
    -ffreestanding
    --no-standard-libraries
    --target=wasm32
@@ -49,10 +49,13 @@
    -Wno-int-conversion
    -Wno-return-type
    -fbracket-depth=512
+   ;; -flto ;; [parse exception: bad local.get index (at 0:9769)]
    ;; linker flags
    -Wl,--no-entry
    -Wl,--export-all
-   -Wl,--relocatable ;; TODO: understand why when removing --relocatable we have undefined symbol errors
+   -Wl,--allow-undefined
+   -Wl,--relocatable ;; warning: linking section is present, so this is not a standard wasm file - binaryen cannot handle this properly!
+                     ;; -Wl,--lto-O3
                      ;; files
    %{deps}
    -o
