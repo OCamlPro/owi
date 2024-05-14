@@ -3,4 +3,5 @@
   %{bin:owi}
   (package owi)
   malloc_aligned.c
+  main.c
   exit.c))
