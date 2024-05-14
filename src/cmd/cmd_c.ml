@@ -86,7 +86,7 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
         ; "-Wno-everything"
         ; "-flto=thin"
         ; (* LINKER FLAGS: *)
-          "-Wl,--no-entry"
+          "-Wl,--entry=main"
         ; "-Wl,--export=main"
           (* TODO: allow this behind a flag, this is slooooow *)
         ; "-Wl,--lto-O0"

@@ -127,85 +127,75 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
 
-let run_text_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
-  (m : Text.modul) =
-  let link_state = Link.empty_state in
-  let link_state =
-    Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Symbolic.P.Extern_func.extern_type symbolic_extern_module
-  in
-  let link_state =
-    Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
-  in
-  let*/ to_run, link_state =
-    let has_start =
-      List.exists (function Text.MStart _ -> true | _ -> false) m.fields
-    in
-    let has_start_id_function =
-      List.exists
-        (function Text.MFunc { id = Some "main"; _ } -> true | _ -> false)
-        m.fields
-    in
-    let fields =
-      if has_start || not has_start_id_function then m.fields
-      else MStart (Text "main") :: m.fields
-    in
-    let m = { m with fields } in
-    let+ m, state =
-      Compile.Text.until_link ~unsafe link_state ~optimize ~name:None m
-    in
-    let m = Symbolic.convert_module_to_run m in
-    (m, state)
-  in
-  let c = (Interpret.SymbolicP.modul link_state.envs) to_run in
-  Choice.bind pc (fun r ->
-      match r with Error _ -> Choice.return r | Ok () -> c )
+let link_state =
+  lazy
+    (let func_typ = Symbolic.P.Extern_func.extern_type in
+     let link_state =
+       Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
+         symbolic_extern_module
+     in
+     Link.extern_module' link_state ~name:"summaries" ~func_typ
+       summaries_extern_module )
 
 let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
   (m : Binary.modul) =
-  let link_state = Link.empty_state in
-  let link_state =
-    Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Symbolic.P.Extern_func.extern_type symbolic_extern_module
+  let m =
+    if Option.is_some m.start then m
+    else
+      match
+        List.find_opt
+          (function { Binary.name = "main"; _ } -> true | _ -> false)
+          m.exports.func
+      with
+      | None -> m
+      | Some export ->
+        let type_f : Types.binary Types.block_type =
+          Types.Bt_raw (None, ([], []))
+        in
+        let body =
+          [ Types.I32_const 0l; Types.I32_const 0l; Call (Raw export.id); Drop ]
+        in
+        let start_code : Types.binary Types.func =
+          { Types.type_f; locals = []; body; id = None }
+        in
+        let start_func = Runtime.Local start_code in
+        let named = m.func.named in
+        let next_free_index =
+          List.fold_left
+            (fun next_free_index v ->
+              let index = Indexed.get_index v in
+              if next_free_index > index then next_free_index else index + 1 )
+            0 m.func.values
+        in
+        let values =
+          Indexed.return next_free_index start_func :: m.func.values
+        in
+        let func = { Named.named; values } in
+        let start = Some next_free_index in
+        { m with func; start }
   in
-  let link_state =
-    Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Symbolic.P.Extern_func.extern_type summaries_extern_module
+
+  let link_state = Lazy.force link_state in
+
+  let*/ m, link_state =
+    Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
-  let*/ to_run, link_state =
-    let start =
-      if Option.is_some m.start then m.start
-      else
-        match
-          List.find_opt
-            (function { Binary.name = "main"; _ } -> true | _ -> false)
-            m.exports.func
-        with
-        | None -> None
-        | Some export -> Some export.id
-    in
-    let m = { m with start } in
-    (* TODO: handle start function like in text ? *)
-    let+ m, state =
-      Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
-    in
-    let m = Symbolic.convert_module_to_run m in
-    (m, state)
-  in
-  let c = (Interpret.SymbolicP.modul link_state.envs) to_run in
+  let m = Symbolic.convert_module_to_run m in
+  let c = Interpret.SymbolicP.modul link_state.envs m in
   Choice.bind pc (fun r ->
       match r with Error _ -> Choice.return r | Ok () -> c )
 
 let run_file ~unsafe ~optimize pc filename =
   let*/ m = Parse.guess_from_file filename in
-  match m with
-  | Either.Left (Either.Left text_module) ->
-    run_text_modul ~unsafe ~optimize pc text_module
-  | Either.Left (Either.Right _text_scrpt) ->
-    Choice.return @@ Error (`Msg "can't run symbolic interpreter on a script")
-  | Either.Right binary_module ->
-    run_binary_modul ~unsafe ~optimize pc binary_module
+  let*/ m =
+    match m with
+    | Either.Left (Either.Left text_module) ->
+      Compile.Text.until_binary ~unsafe text_module
+    | Either.Left (Either.Right _text_scrpt) ->
+      Error (`Msg "can't run symbolic interpreter on a script")
+    | Either.Right binary_module -> Ok binary_module
+  in
+  run_binary_modul ~unsafe ~optimize pc m
 
 let get_model ~symbols solver pc =
   assert (`Sat = Solver.Z3Batch.check solver pc);
