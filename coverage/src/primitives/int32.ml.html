@@ -367,24 +367,24 @@ let cmp_u x op y = <span data-count="1783452">o</span>p (ad<span data-count="178
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="378216">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="378180">t</span> (Int64.shift_lef<span data-count="378104">t</span> (Int64.of_int3<span data-count="378145">2</span> x) 32) 32
+  <span data-count="379291">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="379287">t</span> (Int64.shift_lef<span data-count="379209">t</span> (Int64.of_int3<span data-count="379254">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |32|-bits int. *)
-let low_int = shift_lef<span data-count="634">t</span> minus_one 31
+let low_int = shift_lef<span data-count="635">t</span> minus_one 31
 
 (* The largest signed |32|-bits int. *)
-let high_int = logxo<span data-count="634">r</span> low_int minus_one
+let high_int = logxo<span data-count="635">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="576479">f</span> x (to_in<span data-count="576397">t</span> (logan<span data-count="576394">d</span> y 31l))
+let shift f x y = <span data-count="577805">f</span> x (to_in<span data-count="577705">t</span> (logan<span data-count="577709">d</span> y 31l))
 
-let shl x y = <span data-count="338672">s</span>x (shif<span data-count="338493">t</span> shift_left x y)
+let shl x y = <span data-count="339692">s</span>x (shif<span data-count="339572">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="198115">s</span>hift shift_right x y
+let shr_s x y = <span data-count="198446">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="39730">s</span>x (shif<span data-count="39730">t</span> shift_right_logical x y)
 
@@ -402,7 +402,7 @@ let extend_s n x =
 
 let eq (x : int32) y = <span data-count="2098590">x</span> = y
 
-let ne (x : int32) y = <span data-count="16966985">x</span> &lt;&gt; y
+let ne (x : int32) y = <span data-count="16967231">x</span> &lt;&gt; y
 
 let lt (x : int32) y = <span data-count="10855108">x</span> &lt; y
 
@@ -434,9 +434,9 @@ let hex_digit = function
   | <span data-count="314">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="314">e</span> c - Char.cod<span data-count="314">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper = unsigned_di<span data-count="634">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="635">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="634">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="635">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="78971">l</span>et sign_bit = logand (of_in<span data-count="78971">t</span> (1 lsl (32 - 1))) i in
