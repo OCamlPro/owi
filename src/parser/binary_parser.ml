@@ -316,7 +316,7 @@ let read_FC input =
     (Table_fill tableidx, input)
   | i -> Error (`Msg (Format.sprintf "illegal opcode (1) %i" i))
 
-let read_block_type ~is_loop types input =
+let read_block_type types input =
   match read_S33 input with
   | Ok (i, input) when i >= 0L ->
     let block_type = types.(Int64.to_int i) in
@@ -326,7 +326,7 @@ let read_block_type ~is_loop types input =
     | Ok ('\x40', input) -> Ok (Bt_raw (None, ([], [])), input)
     | Error _ | Ok _ ->
       let* vt, input = read_valtype input in
-      let pt, rt = if is_loop then ([], [ vt ]) else ([ (None, vt) ], []) in
+      let pt, rt = ([], [ vt ]) in
       Ok (Bt_raw (None, (pt, rt)), input)
   end
 
@@ -337,17 +337,17 @@ let rec read_instr types input =
   | '\x00' -> Ok (Unreachable, input)
   | '\x01' -> Ok (Nop, input)
   | '\x02' ->
-    let* bt, input = read_block_type ~is_loop:false types input in
+    let* bt, input = read_block_type types input in
     let* expr, input = read_expr types input in
     let+ input = check_end_opcode input in
     (Block (None, Some bt, expr), input)
   | '\x03' ->
-    let* bt, input = read_block_type ~is_loop:true types input in
+    let* bt, input = read_block_type types input in
     let* expr, input = read_expr types input in
     let+ input = check_end_opcode input in
     (Loop (None, Some bt, expr), input)
   | '\x04' ->
-    let* bt, input = read_block_type ~is_loop:false types input in
+    let* bt, input = read_block_type types input in
     let* expr1, input = read_expr types input in
     let* expr2, input =
       begin
