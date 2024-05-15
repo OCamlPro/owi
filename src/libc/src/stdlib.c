@@ -12,7 +12,7 @@
 #define ldbltype double
 #endif
 
-void owi_abort(void) __attribute__((import_module("summaries"))) __attribute__((import_name("abort")));;
+void owi_abort(void) __attribute__((import_module("summaries"))) __attribute__((import_name("abort")));
 void owi_exit(int)  __attribute__((import_module("summaries"))) __attribute__((import_name("exit")));
 
 void abort(void) { owi_abort(); }
