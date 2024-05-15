@@ -16,7 +16,7 @@ let () =
         Format.ksprintf Sys.command
           "clang -g -O3 -ffreestanding --no-standard-libraries --target=wasm32 \
            -c -m32 -Iinclude -Wno-int-conversion -Wno-return-type \
-           -fbracket-depth=512 -o %s %s"
+           -fbracket-depth=512 -DWANT_STRTOD_WITHOUT_LONG_DOUBLE -o %s %s"
           out c_filename
       in
       if n <> 0 then exit n
