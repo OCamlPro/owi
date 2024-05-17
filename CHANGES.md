@@ -4,6 +4,7 @@
 - remove dependency on `wabt`
 - better API for `Parse`, `Compile` and `Simplified` (renamed to `Binary`), added a `Binary_to_tex` module
 - add `owi conc` subcommands and `owi c --concolic`: concolic mode
+- start benchmarking against test-comp
 
 ## 0.2 - 2024-04-24
 

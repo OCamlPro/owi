@@ -1,0 +1,4 @@
+[submodule "bench/testcomp/sv-benchmarks"]
+	path = bench/testcomp/sv-benchmarks
+	url = https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.git
+	shallow = true
