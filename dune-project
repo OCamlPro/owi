@@ -69,6 +69,7 @@
   (graphics :dev)
   (tiny_httpd :dev)
   (ocamlformat :dev)
+  (rusage :dev)
   digestif
   xmlm
   pyml

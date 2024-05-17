@@ -1,3 +1,4 @@
 _build
 _coverage
 owi-out
+testcomp-results*
