@@ -45,7 +45,7 @@ type err =
   | `Unbound_module of string
   | `Unbound_name of string
   | `Undeclared_function_reference
-  | `Unexpected_token
+  | `Unexpected_token of string
   | `Unknown_function of int
   | `Unknown_global
   | `Unknown_import of string * string
@@ -107,7 +107,7 @@ let rec err_to_string = function
   | `Unbound_module id -> Format.sprintf "unbound module %s" id
   | `Unbound_name id -> Format.sprintf "unbound name %s" id
   | `Undeclared_function_reference -> "undeclared function reference"
-  | `Unexpected_token -> "unexpected token"
+  | `Unexpected_token s -> Format.sprintf "unexpected token %S" s
   | `Unknown_function id -> Format.sprintf "unknown function %d" id
   | `Unknown_global -> "unknown global"
   | `Unknown_import (modul, value) ->
