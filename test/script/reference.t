@@ -12,11 +12,9 @@
   $ owi script --no-exhaustion reference/br.wast
   $ owi script --no-exhaustion reference/bulk.wast
   $ owi script --no-exhaustion reference/call_indirect.wast
-  unexpected token
-  [40]
   $ owi script --no-exhaustion reference/call.wast
   $ owi script --no-exhaustion reference/comments.wast
-  unexpected token
+  unexpected token "\"(func (export \"f1\") (result i32)\""
   [40]
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
@@ -98,8 +96,6 @@
   $ owi script --no-exhaustion reference/proposals/tail-call/return_call.wast
   $ owi script --no-exhaustion reference/return.wast
   $ owi script --no-exhaustion reference/select.wast
-  unexpected token
-  [40]
   $ owi script --no-exhaustion reference/skip-stack-guard-page.wast
   $ owi script --no-exhaustion reference/stack.wast
   $ owi script --no-exhaustion reference/start.wast
