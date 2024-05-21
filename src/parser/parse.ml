@@ -189,8 +189,8 @@ let token_to_string = function
   | I32_CONST -> assert false
   | I32_CLZ -> assert false
   | I32_AND -> assert false
-  | I32_ADD -> assert false
-  | I32 -> assert false
+  | I32_ADD -> "i32.add"
+  | I32 -> "i32"
   | I31_REF -> assert false
   | I31_GET_U -> assert false
   | I31_GET_S -> assert false
@@ -275,14 +275,14 @@ let token_to_string = function
   | EQUAL -> assert false
   | EQ -> assert false
   | EOF -> assert false
-  | END -> assert false
-  | ELSE -> assert false
-  | ELEM_DROP -> assert false
-  | ELEM -> assert false
-  | DROP -> assert false
-  | DECLARE -> assert false
-  | DATA_DROP -> assert false
-  | DATA -> assert false
+  | END -> "end"
+  | ELSE -> "else"
+  | ELEM_DROP -> "elem.drop"
+  | ELEM -> "elem"
+  | DROP -> "drop"
+  | DECLARE -> "declare"
+  | DATA_DROP -> "data.drop"
+  | DATA -> "data"
   | CALL_REF -> assert false
   | CALL_INDIRECT -> assert false
   | CALL -> assert false

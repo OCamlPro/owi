@@ -50,5 +50,5 @@
   unknown operator unknown operator "struct.get_u"
   [23]
   $ owi script --no-exhaustion reference/proposals/gc/type-subtyping.wast
-  unexpected token
+  unexpected token "ref"
   [40]
