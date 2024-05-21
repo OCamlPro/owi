@@ -226,8 +226,6 @@ let memarg ==
 
 let instr ==
 | ~ = plain_instr; { [plain_instr] }
-| (e, es) = select_instr_instr; { e::es }
-| (e, es) = call_instr_instr; { e::es }
 | ~ = block_instr; { [ block_instr ] }
 | ~ = expr; { expr }
 
@@ -494,94 +492,53 @@ let plain_instr :=
 
 (* Instructions & Expressions *)
 
-let select_instr ==
-  | SELECT; (b, ts) = select_instr_results; {
-    Select (if b then (Some ts) else None)
+let select_instr_instr_list ==
+  | SELECT; (b, ts, es) = select_instr_results_instr_list; {
+    Select (if b then (Some ts) else None) :: es
   }
 
-let select_instr_results :=
-  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts) = select_instr_results; {
-    true, l @ ts
-  }
-  | {false, []}
-
-let select_instr_instr ==
-  | SELECT; (b, ts, es) = select_instr_results_instr; {
-    Select (if b then Some ts else None), es
-  }
-
-let select_instr_results_instr :=
-  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts, es) = select_instr_results_instr; {
+let select_instr_results_instr_list :=
+  | LPAR; RESULT; l = list(val_type); RPAR; (_, ts, es) = select_instr_results_instr_list; {
     true, l @ ts, es
   }
-  | ~ = instr; {
-    false, [], instr
+  | ~ = instr_list; {
+    false, [], instr_list
   }
 
 let call_indirect_prim ==
   | CALL_INDIRECT; { fun (id, typ) -> Call_indirect (id, typ) }
   | RETURN_CALL_INDIRECT; { fun (id, typ) -> Return_call_indirect (id, typ) }
 
-let call_instr ==
-  | ~ = call_indirect_prim; ~ = indice; ~ = call_instr_type; {
-    call_indirect_prim (indice, call_instr_type)
+let call_instr_instr_list ==
+  | ~ = call_indirect_prim; ~ = indice; (x, es) = call_instr_type_instr_list; {
+    call_indirect_prim (indice, x) :: es
   }
-  | ~ = call_indirect_prim; ~ = call_instr_type; {
-    call_indirect_prim (raw 0, call_instr_type)
-  }
-
-let call_instr_type ==
-  | ~ = type_use; ~ = call_instr_params; {
-    match call_instr_params with
-    | ([], []) -> bt_ind (type_use)
-    | (pt, rt) -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt)
-  }
-  | (pt, rt) = call_instr_params; { bt_raw None (List.map (fun t -> None, t) pt, rt) }
-
-let call_instr_params :=
-  | LPAR; PARAM; l = list(val_type); RPAR; (ts1, ts2) = call_instr_params; {
-    l @ ts1, ts2
-  }
-  | ~ = call_instr_results; {
-    [], call_instr_results
+  | ~ = call_indirect_prim; (x, es) = call_instr_type_instr_list; {
+    call_indirect_prim (raw 0, x) :: es
   }
 
-let call_instr_results :=
-  | LPAR; RESULT; l = list(val_type); RPAR; ~ = call_instr_results; {
-    l @ call_instr_results
-  }
-  | { [] }
-
-let call_instr_instr ==
-  | ~ = call_indirect_prim; ~ = indice; (x, es) = call_instr_type_instr; {
-    call_indirect_prim (indice, x), es
-  }
-  | ~ = call_indirect_prim; (x, es) = call_instr_type_instr; {
-    call_indirect_prim (raw 0, x), es
-  }
-
-let call_instr_type_instr ==
-  | ~ = type_use; ~ = call_instr_params_instr; {
-    match call_instr_params_instr with
+let call_instr_type_instr_list ==
+  | ~ = type_use; ~ = call_instr_params_instr_list; {
+    match call_instr_params_instr_list with
     | ([], []), es -> bt_ind (type_use), es
     | (pt, rt), es -> bt_raw (Some type_use) ((List.map (fun t -> None, t) pt), rt), es
   }
-  | ((pt, rt), es) = call_instr_params_instr; { bt_raw None (List.map (fun t -> None, t) pt, rt), es }
+  | ((pt, rt), es) = call_instr_params_instr_list; { bt_raw None (List.map (fun t -> None, t) pt, rt), es }
 
-let call_instr_params_instr :=
-  | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr; {
+let call_instr_params_instr_list :=
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr_list; {
     (l @ ts1, ts2), es
   }
-  | (ts, es) = call_instr_results_instr; {
+  | (ts, es) = call_instr_results_instr_list; {
     ([], ts), es
   }
 
-let call_instr_results_instr :=
-  | LPAR; RESULT; l = list(val_type); RPAR; (ts, es) = call_instr_results_instr; {
+let call_instr_results_instr_list :=
+  | LPAR; RESULT; l = list(val_type); RPAR; (ts, es) = call_instr_results_instr_list; {
     l @ ts, es
   }
-  | ~ = instr; {
-    [], instr
+  | ~ = instr_list; {
+    [], instr_list
   }
 
 let block_instr ==
@@ -729,8 +686,8 @@ let if_ :=
 
 let instr_list :=
   | { [] }
-  | ~ = select_instr; { [select_instr] }
-  | ~ = call_instr; { [call_instr] }
+  | ~ = select_instr_instr_list; <>
+  | ~ = call_instr_instr_list; <>
   | ~ = instr; ~ = instr_list; { instr @ instr_list }
 
 let expr_list :=
