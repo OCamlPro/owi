@@ -86,6 +86,7 @@ We only list proposals that reached phase 3 at least.
 
 - [september 2023]: [ICFP OCaml track]
 - [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] and hosted in Google Munich
+- april 2024: [OUPS (OCaml UserS in Paris)]
 
 ### Spelling and pronunciation
 
@@ -144,6 +145,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [OCaml]: https://ocaml.org
 [october 2023]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [opam]: https://opam.ocaml.org
+[OUPS (OCaml UserS in Paris)]: https://oups.frama.io
 [Owi]: https://ocamlpro.github.io/owi
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
