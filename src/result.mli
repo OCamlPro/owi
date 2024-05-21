@@ -45,7 +45,7 @@ type err =
   | `Unbound_module of string
   | `Unbound_name of string
   | `Undeclared_function_reference
-  | `Unexpected_token
+  | `Unexpected_token of string
   | `Unknown_function of int
   | `Unknown_global
   | `Unknown_import of string * string

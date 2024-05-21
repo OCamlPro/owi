@@ -288,7 +288,7 @@ let exit_code =
       | `Unbound_module _id -> 37
       | `Unbound_name _id -> 38
       | `Undeclared_function_reference -> 39
-      | `Unexpected_token -> 40
+      | `Unexpected_token _token -> 40
       | `Unknown_function _id -> 41
       | `Unknown_global -> 42
       | `Unknown_import _ -> 43
