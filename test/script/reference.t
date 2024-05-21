@@ -1,5 +1,7 @@
   $ owi script --no-exhaustion reference/address.wast
   $ owi script --no-exhaustion reference/align.wast
+  expected alignment must not be larger than natural but there was no error
+  [7]
   $ owi script --no-exhaustion reference/binary-leb128.wast
   $ owi script --no-exhaustion reference/binary.wast
   expected unexpected end of section or function but got (END opcode expected)
@@ -10,8 +12,12 @@
   $ owi script --no-exhaustion reference/br.wast
   $ owi script --no-exhaustion reference/bulk.wast
   $ owi script --no-exhaustion reference/call_indirect.wast
+  unexpected token
+  [40]
   $ owi script --no-exhaustion reference/call.wast
   $ owi script --no-exhaustion reference/comments.wast
+  unexpected token
+  [40]
   $ owi script --no-exhaustion reference/const.wast
   $ owi script --no-exhaustion reference/conversions.wast
   $ owi script --no-exhaustion reference/custom.wast
@@ -30,6 +36,8 @@
   $ owi script --no-exhaustion reference/fac.wast
   $ owi script --no-exhaustion reference/float_exprs.wast
   $ owi script --no-exhaustion reference/float_literals.wast
+  unbound name 4294967249
+  [38]
   $ owi script --no-exhaustion reference/float_memory.wast
   $ owi script --no-exhaustion reference/float_misc.wast
   $ owi script --no-exhaustion reference/forward.wast
@@ -56,6 +64,10 @@
   24
   24
   13
+  got:      f32.const 0
+  expected: (f32.const 666.599_975_585_937_5)
+  bad result
+  [3]
   $ owi script --no-exhaustion reference/inline-module.wast
   $ owi script --no-exhaustion reference/int_exprs.wast
   $ owi script --no-exhaustion reference/int_literals.wast
@@ -82,10 +94,12 @@
   $ owi script --no-exhaustion reference/ref_func.wast
   $ owi script --no-exhaustion reference/ref_is_null.wast
   $ owi script --no-exhaustion reference/ref_null.wast
-  $ owi script --no-exhaustion reference/return_call_indirect.wast
-  $ owi script --no-exhaustion reference/return_call.wast
+  $ owi script --no-exhaustion reference/proposals/tail-call/return_call_indirect.wast
+  $ owi script --no-exhaustion reference/proposals/tail-call/return_call.wast
   $ owi script --no-exhaustion reference/return.wast
   $ owi script --no-exhaustion reference/select.wast
+  unexpected token
+  [40]
   $ owi script --no-exhaustion reference/skip-stack-guard-page.wast
   $ owi script --no-exhaustion reference/stack.wast
   $ owi script --no-exhaustion reference/start.wast
@@ -102,7 +116,7 @@
   $ owi script --no-exhaustion reference/table_size.wast
   $ owi script --no-exhaustion reference/table-sub.wast
   $ owi script --no-exhaustion reference/table.wast
-  $ owi script --no-exhaustion reference/tokens.wast
+  $ owi script --no-exhaustion reference/token.wast
   $ owi script --no-exhaustion reference/token.wast
   $ owi script --no-exhaustion reference/traps.wast
   $ owi script --no-exhaustion reference/type.wast
