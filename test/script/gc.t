@@ -1,16 +1,16 @@
-  $ owi script --no-exhaustion gc/array.wast
+  $ owi script --no-exhaustion reference/proposals/gc/array.wast
   expected unknown type but there was no error
   [7]
-  $ owi script --no-exhaustion gc/br_on_cast_fail.wast
+  $ owi script --no-exhaustion reference/proposals/gc/br_on_cast_fail.wast
   unexpected token
   [40]
-  $ owi script --no-exhaustion gc/br_on_cast.wast
+  $ owi script --no-exhaustion reference/proposals/gc/br_on_cast.wast
   unexpected token
   [40]
-  $ owi script --no-exhaustion gc/call_ref.wast
+  $ owi script --no-exhaustion reference/proposals/gc/call_ref.wast
   unknown type
   [49]
-  $ owi script --no-exhaustion gc/extern.wast
+  $ owi script --no-exhaustion reference/proposals/gc/extern.wast
   owi: internal error, uncaught exception:
        File "src/typecheck/typecheck.ml", line 478, characters 4-10: Assertion failed
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
@@ -31,7 +31,7 @@
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
   [125]
-  $ owi script --no-exhaustion gc/i31.wast
+  $ owi script --no-exhaustion reference/proposals/gc/i31.wast
   owi: internal error, uncaught exception:
        File "src/script/script.ml", line 103, characters 4-10: Assertion failed
        Raised at Owi__Script.compare_result_const in file "src/script/script.ml", line 103, characters 4-16
@@ -45,7 +45,7 @@
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
   [125]
-  $ owi script --no-exhaustion gc/ref_cast.wast
+  $ owi script --no-exhaustion reference/proposals/gc/ref_cast.wast
   owi: internal error, uncaught exception:
        File "src/typecheck/typecheck.ml", line 478, characters 4-10: Assertion failed
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
@@ -66,7 +66,7 @@
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
   [125]
-  $ owi script --no-exhaustion gc/ref_eq.wast
+  $ owi script --no-exhaustion reference/proposals/gc/ref_eq.wast
   owi: internal error, uncaught exception:
        File "src/typecheck/typecheck.ml", line 478, characters 4-10: Assertion failed
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
@@ -87,7 +87,7 @@
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
   [125]
-  $ owi script --no-exhaustion gc/ref_test.wast
+  $ owi script --no-exhaustion reference/proposals/gc/ref_test.wast
   owi: internal error, uncaught exception:
        File "src/typecheck/typecheck.ml", line 478, characters 4-10: Assertion failed
        Raised at Owi__Typecheck.typecheck_instr in file "src/typecheck/typecheck.ml", line 478, characters 4-16
@@ -108,12 +108,12 @@
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
   [125]
-  $ owi script --no-exhaustion gc/return_call_ref.wast
+  $ owi script --no-exhaustion reference/proposals/gc/return_call_ref.wast
   unknown type
   [49]
-  $ owi script --no-exhaustion gc/struct.wast
+  $ owi script --no-exhaustion reference/proposals/gc/struct.wast
   expected duplicate field but there was no error
   [7]
-  $ owi script --no-exhaustion gc/type-subtyping.wast
+  $ owi script --no-exhaustion reference/proposals/gc/type-subtyping.wast
   unknown type
   [49]

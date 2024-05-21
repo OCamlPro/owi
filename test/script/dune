@@ -2,5 +2,4 @@
  (deps
   %{bin:owi}
   (source_tree reference)
-  (source_tree passing)
-  (source_tree gc)))
+  (source_tree passing)))
