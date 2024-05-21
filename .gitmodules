@@ -2,3 +2,7 @@
 	path = bench/testcomp/sv-benchmarks
 	url = https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.git
 	shallow = true
+[submodule "test/script/reference"]
+	path = test/script/reference
+	url = https://github.com/WebAssembly/testsuite.git
+	shallow = true
