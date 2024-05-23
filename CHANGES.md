@@ -2,9 +2,10 @@
 
 - `owi opt` and `owi sym` can run on `.wasm` files directly
 - remove dependency on `wabt`
-- better API for `Parse`, `Compile` and `Simplified` (renamed to `Binary`), added a `Binary_to_tex` module
+- better API for `Parse`, `Compile` and `Simplified` (renamed to `Binary`), added a `Binary_to_text` module
 - add `owi conc` subcommands and `owi c --concolic`: concolic mode
 - start benchmarking against test-comp
+- fix handling of `select` and `call_indirect` in the text format
 
 ## 0.2 - 2024-04-24
 
