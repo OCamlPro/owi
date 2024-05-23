@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: checkout-submodules
+        run: |
+          git submodule update --init test/script/reference
       - name: cache
         id: cache-opam
         uses: actions/cache@v4

@@ -13,6 +13,9 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
+      - name: checkout-submodules
+        run: |
+          git submodule update --init test/script/reference
       - name: cache
         id: cache-opam
         uses: actions/cache@v4
