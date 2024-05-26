@@ -10,17 +10,27 @@ type vbool = Expr.t
 
 type int32 = Expr.t
 
+let pp_int32 = Expr.pp
+
 type int64 = Expr.t
+
+let pp_int64 = Expr.pp
 
 type float32 = Expr.t
 
+let pp_float32 = Expr.pp
+
 type float64 = Expr.t
+
+let pp_float64 = Expr.pp
 
 type externref = Concrete_value.externref
 
 type ref_value =
   | Funcref of Func_intf.t option
   | Externref of externref option
+
+let pp_ref_value _fmt _v = assert false
 
 type t =
   | I32 of int32

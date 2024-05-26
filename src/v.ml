@@ -8,11 +8,19 @@ include (
 
     type int32 = Int32.t
 
+    let pp_int32 fmt i = Format.pp fmt "%ld" i
+
     type int64 = Int64.t
+
+    let pp_int64 fmt i = Format.pp fmt "%Ld" i
 
     type float32 = Float32.t
 
+    let pp_float32 = Float32.pp
+
     type float64 = Float64.t
+
+    let pp_float64 = Float64.pp
 
     let const_i32 x = x
 
@@ -23,6 +31,8 @@ include (
     let const_f64 x = x
 
     include Concrete_value
+
+    let pp_ref_value = Concrete_value.pp_ref_value
 
     module Ref = struct
       let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =

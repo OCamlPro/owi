@@ -16,15 +16,35 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   type int32 = (C.int32, S.int32) cs
 
+  let pp_int32 fmt v =
+    Format.pp fmt "{ c = %a ; s = %a }" C.pp_int32 v.concrete S.pp_int32
+      v.symbolic
+
   type int64 = (C.int64, S.int64) cs
+
+  let pp_int64 fmt v =
+    Format.pp fmt "{ c = %a ; s = %a }" C.pp_int64 v.concrete S.pp_int64
+      v.symbolic
 
   type float32 = (C.float32, S.float32) cs
 
+  let pp_float32 fmt v =
+    Format.pp fmt "{ c = %a ; s = %a }" C.pp_float32 v.concrete S.pp_float32
+      v.symbolic
+
   type float64 = (C.float64, S.float64) cs
+
+  let pp_float64 fmt v =
+    Format.pp fmt "{ c = %a ; s = %a }" C.pp_float64 v.concrete S.pp_float64
+      v.symbolic
 
   (* TODO: Probably beter not to have a different value for both,
      there are no good reason for that right now *)
   type ref_value = (C.ref_value, S.ref_value) cs
+
+  let pp_ref_value fmt v =
+    Format.pp fmt "{ c = %a ; s = %a }" C.pp_ref_value v.concrete S.pp_ref_value
+      v.symbolic
 
   type t =
     | I32 of int32
@@ -109,7 +129,12 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     Stdlib.Format.fprintf ppf "@[<hov 2>{c: %a@, s: %a}@]" c v.concrete symbolic
       v.symbolic
 
-  let pp _ _ = failwith "TODO PP"
+  let pp fmt = function
+    | I32 i -> pp_int32 fmt i
+    | I64 i -> pp_int64 fmt i
+    | F32 f -> pp_float32 fmt f
+    | F64 f -> pp_float64 fmt f
+    | Ref r -> pp_ref_value fmt r
 
   module Ref = struct
     let equal_func_intf (_ : Func_intf.t) (_ : Func_intf.t) : bool =
