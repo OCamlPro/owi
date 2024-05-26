@@ -1,0 +1,13 @@
+(library
+ (name report)
+ (modules
+  color
+  gen
+  parse
+  pie_results
+  run
+  runs
+  run_result
+  rusage
+  time_distribution)
+ (libraries bos fpath gnuplot tyxml tyxml.functor))

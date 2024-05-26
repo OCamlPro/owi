@@ -70,6 +70,7 @@
   (tiny_httpd :dev)
   (ocamlformat :dev)
   (rusage :dev)
+  (tyxml :dev)
   digestif
   xmlm
   pyml
