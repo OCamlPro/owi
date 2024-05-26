@@ -7,6 +7,15 @@ let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
 
 let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 
+let ok_or_fail = function
+  | Error (`Msg m) ->
+    Format.eprintf "ERROR: %s@\n" m;
+    exit 1
+  | Error (`Unix e) ->
+    Format.eprintf "ERROR: %s@\n" (Unix.error_message e);
+    exit 1
+  | Ok x -> x
+
 let object_field (yml : Yaml.value) (field : string) =
   match yml with
   | `O l ->
@@ -50,17 +59,6 @@ let parse_file path =
 
 let problems_root = Fpath.v "testcomp/sv-benchmarks/c/"
 
-let output_dir =
-  let t = Unix.localtime @@ Unix.gettimeofday () in
-  let filename =
-    Format.sprintf "testcomp-results-%d-%02d-%02d_%02dh%02dm%02ds/"
-      (1900 + t.tm_year) (1 + t.tm_mon) t.tm_mday t.tm_hour t.tm_min t.tm_sec
-  in
-  Fpath.v filename
-
-let timeout =
-  if Array.length Sys.argv >= 2 then float_of_string Sys.argv.(1) else 30.
-
 let is_in_whitelist =
   let tbl = Hashtbl.create 2048 in
   String.split_on_char '\n' Whitelist.v
@@ -97,20 +95,10 @@ let files =
   in
   res
 
-type rusage =
-  { clock : float
-  ; utime : float
-  ; stime : float
-  }
-
-type process_result =
-  | Timeout of rusage
-  | Nothing of rusage
-  | Reached of rusage
-  | Other of int * rusage
-  | Killed of rusage
-
 exception Sigchld
+
+let timeout =
+  if Array.length Sys.argv >= 2 then float_of_string Sys.argv.(1) else 30.
 
 let wait_pid =
   let last_utime = ref 0. in
@@ -142,8 +130,8 @@ let wait_pid =
     let stime = stime_diff in
     let clock = end_time -. start_time in
 
-    let rusage = { clock; utime; stime } in
-    if !did_timeout then Timeout rusage
+    let rusage = { Report.Rusage.clock; utime; stime } in
+    if !did_timeout then Report.Run_result.Timeout rusage
     else
       match status with
       | WEXITED code ->
@@ -168,66 +156,50 @@ let run_on_file ~out_dir file =
   let file = Fpath.to_string file in
   Unix.execvp "owi" [| "owi"; "c"; "--unsafe"; "-O1"; "-o"; out_dir; file |]
 
+let output_dir =
+  let t = Unix.localtime @@ Unix.gettimeofday () in
+  let filename =
+    Format.sprintf "testcomp-results-%d-%02d-%02d_%02dh%02dm%02ds/"
+      (1900 + t.tm_year) (1 + t.tm_mon) t.tm_mday t.tm_hour t.tm_min t.tm_sec
+  in
+  Fpath.v filename
+
+let (_existed : bool) =
+  Bos.OS.Dir.create ~path:true ~mode:0o755 output_dir |> ok_or_fail
+
+let output_chan = Fpath.(output_dir / "results") |> Fpath.to_string |> open_out
+
+let fmt = Format.formatter_of_out_channel output_chan
+
+let pp x = Format.fprintf fmt x
+
 let fork_and_run_on_file i file =
   let out_dir = Fpath.(output_dir / string_of_int i) in
   let+ () = Unix.mkdir out_dir 0o777 in
   let pid = Unix.fork () in
   let result = if pid = 0 then run_on_file ~out_dir file else wait_pid pid in
-  begin
-    match result with
-    | Timeout t ->
-      Format.printf "Timeout in %g %g %g@\n" t.clock t.utime t.stime
-    | Nothing t ->
-      Format.printf "Nothing in %g %g %g@\n" t.clock t.utime t.stime
-    | Reached t ->
-      Format.printf "Reached in %g %g %g@\n" t.clock t.utime t.stime
-    | Other (code, t) ->
-      Format.printf "Other %i in %g %g %g@\n" code t.clock t.utime t.stime
-    | Killed t -> Format.printf "Killed in %g %g %g@\n" t.clock t.utime t.stime
-  end;
+  pp "%a@\n" Report.Run_result.pp result;
   result
 
-let quick_results results =
-  let nothing = ref 0 in
-  let reached = ref 0 in
-  let timeout = ref 0 in
-  let bad = ref 0 in
-  List.iter
-    (fun (_problem, result) ->
-      match result with
-      | Nothing _ -> incr nothing
-      | Reached _ -> incr reached
-      | Timeout _ -> incr timeout
-      | Other _ | Killed _ -> incr bad )
-    results;
-  Format.printf "Nothing: %6i    Reached: %6i    Timeout: %6i    Bad: %6i"
-    !nothing !reached !timeout !bad
-
-let res =
-  let* files in
+let runs =
+  let+ files in
   let files = List.sort Fpath.compare files in
-  let* () = Bos.OS.Dir.delete ~must_exist:false ~recurse:true output_dir in
-  let+ (_existed : bool) =
-    Bos.OS.Dir.create ~path:true ~mode:0o755 output_dir
-  in
   let len = List.length files in
   let results = ref [] in
+  let limit = 10_000 in
   List.iteri
-    (fun i input_file ->
+    (fun i file ->
       let i = succ i in
-      Format.printf "Run %d/%d: %a@\n  @[<v>" i len Fpath.pp input_file;
-      let result = fork_and_run_on_file i input_file in
-      match result with
-      | Error (`Unix e) -> failwith (Unix.error_message e)
-      | Ok result ->
-        results := (problem, result) :: !results;
-        quick_results !results;
-        Format.printf "@]@\n%!" )
-    files
+      if i < limit + 1 then begin
+        pp "%a@\n  @[<v>" (Report.Run.pp_header (min len limit)) (i, file);
+        let result = fork_and_run_on_file i file |> ok_or_fail in
+        let result = { Report.Run.i; file; res = result } in
+        results := result :: !results;
+        pp "%a@]@\n%!" Report.Runs.pp_quick_results !results
+      end )
+    files;
+  !results
 
 let () =
-  match res with
-  | Ok () -> ()
-  | Error (`Msg m) ->
-    Format.eprintf "ERROR: %s@\n" m;
-    exit 1
+  let runs = ok_or_fail runs in
+  Report.Gen.html output_dir runs |> ok_or_fail

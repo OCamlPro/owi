@@ -1,7 +1,7 @@
 (executable
  (name testcomp)
  (modules testcomp whitelist)
- (libraries bos fpath rusage yaml unix))
+ (libraries bos fpath report rusage yaml unix))
 
 (rule
  (deps whitelist.txt)
@@ -12,8 +12,3 @@
     (echo "let v = {|")
     (cat whitelist.txt)
     (echo "|}")))))
-
-(executable
- (name report)
- (modules report)
- (libraries fpath gnuplot))
