@@ -170,13 +170,23 @@ module type T = sig
 
   type int32
 
+  val pp_int32 : Format.formatter -> int32 -> unit
+
   type int64
+
+  val pp_int64 : Format.formatter -> int64 -> unit
 
   type float32
 
+  val pp_float32 : Format.formatter -> float32 -> unit
+
   type float64
 
+  val pp_float64 : Format.formatter -> float64 -> unit
+
   type ref_value
+
+  val pp_ref_value : Format.formatter -> ref_value -> unit
 
   type t =
     | I32 of int32
@@ -184,6 +194,8 @@ module type T = sig
     | F32 of float32
     | F64 of float64
     | Ref of ref_value
+
+  val pp : Format.formatter -> t -> unit
 
   val const_i32 : Int32.t -> int32
 
@@ -201,8 +213,6 @@ module type T = sig
   val ref_externref : 'a Type.Id.t -> 'a -> t
 
   val ref_is_null : ref_value -> vbool
-
-  val pp : Format.formatter -> t -> unit
 
   module Ref : sig
     val get_func : ref_value -> Func_intf.t get_ref
