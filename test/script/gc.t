@@ -38,7 +38,7 @@
        Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
        Called from Owi__Syntax.list_iter in file "src/utils/syntax.ml", line 20, characters 4-157
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
-       Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 34, characters 37-44
+       Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 35, characters 37-44
   [125]
   $ owi script --no-exhaustion reference/proposals/gc/ref_test.wast
   unknown operator unknown operator "any.convert_extern"
