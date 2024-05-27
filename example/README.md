@@ -82,6 +82,7 @@ BUGS
 ```
 
 [`owi c`]: ./c
+[`owi conc`]: ./conc
 [`owi fmt`]: ./fmt
 [`owi opt`]: ./opt
 [`owi run`]: ./run
