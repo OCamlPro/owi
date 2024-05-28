@@ -25,7 +25,7 @@ let html output_dir runs =
           (summary [ txt summary_txt ])
           ~a:[]
           [ ul
-              (List.map
+              (Runs.map
                  (fun run ->
                    li
                      [ Format.kasprintf txt "run %d: " run.Run.i
@@ -57,11 +57,11 @@ let html output_dir runs =
               ~alt:"Distribution of execution times" ()
           ]
       ; h2 [ txt "Details of results" ]
-      ; mk_details "Killed runs" (List.filter Run.is_killed runs)
-      ; mk_details "Other runs" (List.filter Run.is_other runs)
-      ; mk_details "Nothing runs" (List.filter Run.is_nothing runs)
-      ; mk_details "Reached runs" (List.filter Run.is_reached runs)
-      ; mk_details "Timeout runs" (List.filter Run.is_timeout runs)
+      ; mk_details "Killed runs" (Runs.keep_killed runs)
+      ; mk_details "Other runs" (Runs.keep_other runs)
+      ; mk_details "Nothing runs" (Runs.keep_nothing runs)
+      ; mk_details "Reached runs" (Runs.keep_reached runs)
+      ; mk_details "Timeout runs" (Runs.keep_timeout runs)
       ]
   in
 

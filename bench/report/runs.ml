@@ -1,5 +1,9 @@
 type t = Run.t list
 
+let empty = []
+
+let add hd tl = hd :: tl
+
 let count_nothing runs =
   List.fold_left
     (fun count r -> match r.Run.res with Nothing _ -> succ count | _ -> count)
@@ -24,6 +28,16 @@ let count_killed runs =
   List.fold_left
     (fun count r -> match r.Run.res with Killed _ -> succ count | _ -> count)
     0 runs
+
+let keep_nothing = List.filter Run.is_nothing
+
+let keep_reached = List.filter Run.is_reached
+
+let keep_timeout = List.filter Run.is_timeout
+
+let keep_other = List.filter Run.is_other
+
+let keep_killed = List.filter Run.is_killed
 
 let min_clock runs =
   match runs with
@@ -68,3 +82,5 @@ let pp_quick_results fmt results =
   Format.fprintf fmt
     "Nothing: %6i    Reached: %6i    Timeout: %6i    Other: %6i    Killed: %6i"
     !nothing !reached !timeout !other !killed
+
+let map = List.map
