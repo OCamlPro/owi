@@ -4,7 +4,7 @@
 
 open Types
 open Syntax
-module Stack = Stack.Make (V) [@@inlined hint]
+module Stack = Stack.Make [@inlined hint] (V)
 
 module Host_externref = struct
   type t = int

@@ -20,7 +20,7 @@ module Make (P : Interpret_intf.P) :
   open P
   open Value
   open Choice
-  module Stack = Stack.Make (Value) [@@inlined hint]
+  module Stack = Stack.Make [@inlined hint] (Value)
 
   module I32 = struct
     include I32
@@ -1584,7 +1584,7 @@ module Make (P : Interpret_intf.P) :
   type value = Value.t
 end
 
-module Concrete = Make (Concrete) [@@inlined hint]
-module SymbolicP = Make (Symbolic.P) [@@inlined hint]
-module SymbolicM = Make (Symbolic.M) [@@inlined hint]
-module Concolic = Make (Concolic.P) [@@inlined hint]
+module Concrete = Make [@inlined hint] (Concrete)
+module SymbolicP = Make [@inlined hint] (Symbolic.P)
+module SymbolicM = Make [@inlined hint] (Symbolic.M)
+module Concolic = Make [@inlined hint] (Concolic.P)

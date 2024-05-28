@@ -73,8 +73,6 @@
   (tyxml :dev)
   digestif
   xmlm
-  pyml
-  re2
   (hc (>= 0.3))
   dune-site)
  (sites (share pyc) (share binc) (share libc)))
