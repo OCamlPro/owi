@@ -6,6 +6,10 @@ type t =
 
 val clock : t -> float
 
+val utime : t -> float
+
+val stime : t -> float
+
 val is_nothing : t -> bool
 
 val is_killed : t -> bool

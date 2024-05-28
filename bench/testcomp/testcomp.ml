@@ -202,4 +202,4 @@ let runs =
 
 let () =
   let runs = ok_or_fail runs in
-  Report.Gen.html output_dir runs |> ok_or_fail
+  Report.Gen.full_report runs output_dir |> ok_or_fail

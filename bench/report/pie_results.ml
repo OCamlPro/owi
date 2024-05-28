@@ -12,7 +12,9 @@ let legend_color = Color.to_string Color.dark
 
 let legend_size = 10 |> string_of_int
 
-let title = "Owi results"
+let title : string option =
+  (* Some "Owi results" *)
+  None
 
 let title_color = Color.to_string Color.dark
 
@@ -45,39 +47,37 @@ let make runs output_dir =
   let out = Fpath.(output_dir // v "results_owi_count.svg") in
 
   let flags =
-    [ "-o"
-    ; Fpath.to_string out
-    ; "-f"
-    ; output_format
-    ; "-w"
-    ; w
-    ; "-h"
-    ; h
-    ; "-l"
-    ; legend_color
-    ; "-L"
-    ; legend_size
-    ; "-t"
-    ; title
-    ; "-T"
-    ; title_color
-    ; "-b"
-    ; background_color
-    ; "-r"
-    ; ratio_w_h
-    ; "-c"
-    ; pie_line_width
-    ; "-C"
-    ; pie_line_color
-    ; "-d"
-    ; percent_explode
-    ; "-e"
-    ; percent_extrusion
-    ; "-m"
-    ; margin
-    ; "-s"
-    ; title_size
-    ]
+    ( [ "-o"
+      ; Fpath.to_string out
+      ; "-f"
+      ; output_format
+      ; "-w"
+      ; w
+      ; "-h"
+      ; h
+      ; "-l"
+      ; legend_color
+      ; "-L"
+      ; legend_size
+      ; "-b"
+      ; background_color
+      ; "-r"
+      ; ratio_w_h
+      ; "-c"
+      ; pie_line_width
+      ; "-C"
+      ; pie_line_color
+      ; "-d"
+      ; percent_explode
+      ; "-e"
+      ; percent_extrusion
+      ; "-m"
+      ; margin
+      ]
+    @
+    match title with
+    | None -> []
+    | Some title -> [ "-t"; title; "-T"; title_color; "-s"; title_size ] )
     |> Cmd.of_list
   in
 

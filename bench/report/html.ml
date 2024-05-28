@@ -26,6 +26,12 @@ let make runs output_dir =
       ]
   in
 
+  let reached = Runs.keep_reached runs in
+  let killed = Runs.keep_killed runs in
+  let nothing = Runs.keep_nothing runs in
+  let other = Runs.keep_other runs in
+  let timeout = Runs.keep_timeout runs in
+
   let body =
     div
       [ p
@@ -46,12 +52,39 @@ let make runs output_dir =
               ~src:"results_owi_time_distribution.png"
               ~alt:"Distribution of execution times" ()
           ]
+      ; h2 [ txt "Statistics" ]
+      ; div
+          [ p
+              [ Format.ksprintf txt "Sum of clock times (reached): %f"
+                  (Runs.sum_clock reached)
+              ]
+          ; p
+              [ Format.ksprintf txt "Mean of clock times (reached): %f"
+                  (Runs.mean_clock reached)
+              ]
+          ; p
+              [ Format.ksprintf txt "Sum of utime times (reached): %f"
+                  (Runs.sum_utime reached)
+              ]
+          ; p
+              [ Format.ksprintf txt "Mean of utime times (reached): %f"
+                  (Runs.mean_utime reached)
+              ]
+          ; p
+              [ Format.ksprintf txt "Sum of stime times (reached): %f"
+                  (Runs.sum_stime reached)
+              ]
+          ; p
+              [ Format.ksprintf txt "Mean of stime times (reached): %f"
+                  (Runs.mean_stime reached)
+              ]
+          ]
       ; h2 [ txt "Details of results" ]
-      ; mk_details "Killed runs" (Runs.keep_killed runs)
-      ; mk_details "Other runs" (Runs.keep_other runs)
-      ; mk_details "Nothing runs" (Runs.keep_nothing runs)
-      ; mk_details "Reached runs" (Runs.keep_reached runs)
-      ; mk_details "Timeout runs" (Runs.keep_timeout runs)
+      ; mk_details "Killed runs" killed
+      ; mk_details "Other runs" other
+      ; mk_details "Nothing runs" nothing
+      ; mk_details "Reached runs" reached
+      ; mk_details "Timeout runs" timeout
       ]
   in
 
