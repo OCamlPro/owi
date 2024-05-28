@@ -8,7 +8,6 @@
   binary_parser
   binary_to_text
   binary_types
-  c_instrumentor
   c_share
   c_share_site
   check
@@ -97,8 +96,6 @@
   menhirLib
   ocaml_intrinsics
   ppxlib
-  pyml
-  re2
   sedlex
   uutf
   runtime_events

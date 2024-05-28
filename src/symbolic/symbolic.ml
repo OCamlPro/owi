@@ -182,12 +182,12 @@ struct
 end
 
 module P = struct
-  include MakeP (Thread) (Symbolic_choice.Multicore) [@@inlined hint]
+  include MakeP [@inlined hint] (Thread) (Symbolic_choice.Multicore)
   module Choice = Symbolic_choice.Multicore
 end
 
 module M = struct
-  include MakeP (Thread) (Symbolic_choice.Minimalist) [@@inlined hint]
+  include MakeP [@inlined hint] (Thread) (Symbolic_choice.Minimalist)
   module Choice = Symbolic_choice.Minimalist
 end
 

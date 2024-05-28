@@ -74,7 +74,7 @@ let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   else Ok global
 
 module Eval_const = struct
-  module Stack = Stack.Make (V) [@@inlined hint]
+  module Stack = Stack.Make [@inlined hint] (V)
 
   (* TODO: const ibinop *)
   let ibinop stack nn (op : ibinop) =

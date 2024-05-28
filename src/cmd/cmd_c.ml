@@ -11,67 +11,6 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let pre_patterns : (Re2.t * string) array =
-  Array.map
-    (fun (regex, template) -> (Re2.create_exn regex, template))
-    [| ( "void\\s+reach_error\\(\\)\\s*\\{.*\\}"
-       , "void reach_error() { owi_assert(0); }" )
-       (* ugly: Hack to solve duplicate errors on compilation *)
-       (* ; ("void\\s+(assert|assume)\\(", "void old_\\1(") *)
-    |]
-
-let patch_with_regex ~patterns (data : string) : string =
-  Array.fold_left
-    (fun data (regex, template) -> Re2.rewrite_exn regex ~template data)
-    data patterns
-
-let patch ~src ~dst : unit Result.t =
-  let* data = OS.File.read src in
-  let data = patch_with_regex ~patterns:pre_patterns data in
-  let data =
-    String.concat "\n"
-      [ "#define __attribute__(x)"
-      ; "#define __extension__"
-      ; "#define __restrict"
-      ; "#define __inline"
-      ; "#include <owi.h>"
-      ; data
-      ]
-  in
-  OS.File.write dst data
-
-let copy ~src ~dst : Fpath.t Result.t =
-  let* data = OS.File.read src in
-  let+ () = OS.File.write dst data in
-  dst
-
-let instrument_file ?(skip = false) ~includes ~workspace file : Fpath.t Result.t
-    =
-  let dst = Fpath.(workspace // base (file -+ ".c")) in
-  if skip then copy ~src:file ~dst
-  else begin
-    Logs.app (fun m -> m "instrumenting %a" Fpath.pp file);
-    let* () = patch ~src:file ~dst in
-    let pypath =
-      Format.asprintf "%a"
-        (Format.pp_list
-           ~pp_sep:(fun fmt () -> Format.pp_char fmt ':')
-           Fpath.pp )
-        C_share.py_location
-    in
-    let+ () = OS.Env.set_var "PYTHONPATH" (Some pypath) in
-    begin
-      try
-        Py.initialize ();
-        C_instrumentor.instrument dst includes;
-        Py.finalize ()
-      with Py.E (errtype, errvalue) ->
-        let pp = Py.Object.format in
-        Logs.warn (fun m -> m "instrumentor: %a: %a" pp errtype pp errvalue)
-    end;
-    dst
-  end
-
 let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
@@ -154,19 +93,14 @@ let metadata ~workspace arch property files : unit Result.t =
   let* res = OS.File.with_oc fpath out_metadata { arch; property; files } in
   res
 
-let cmd debug arch property testcomp workspace workers opt_lvl includes files
+let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
   deterministic_result_order concolic : unit Result.t =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = C_share.lib_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
-  (* skip instrumentation if not in test-comp mode *)
-  let skip = (not testcomp) || Sys.getenv_opt "RUNNER_OS" = Some "macOS" in
-  let* (nfiles : Fpath.t list) =
-    list_map (instrument_file ~skip ~includes ~workspace) files
-  in
-  let* modul = compile ~includes ~opt_lvl nfiles in
+  let* modul = compile ~includes ~opt_lvl files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
