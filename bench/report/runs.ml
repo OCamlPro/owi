@@ -4,6 +4,8 @@ let empty = []
 
 let add hd tl = hd :: tl
 
+let count_all runs = List.length runs
+
 let count_nothing runs =
   List.fold_left
     (fun count r -> match r.Run.res with Nothing _ -> succ count | _ -> count)
@@ -55,6 +57,10 @@ let max_clock runs =
       let clock = Run.clock r in
       max clock current_max )
     0. runs
+
+let sum_clock runs = List.fold_left (fun sum r -> Run.clock r +. sum) 0. runs
+
+let mean_clock runs = sum_clock runs /. (count_all runs |> float_of_int)
 
 let to_distribution ~max_time runs =
   List.init max_time (fun i ->
