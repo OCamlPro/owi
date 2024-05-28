@@ -4,10 +4,15 @@ type t =
   ; file : Fpath.t
   }
 
-let clock { res; _ } =
+let rusage { res; _ } =
   match res with
-  | Run_result.Reached t | Timeout t | Nothing t | Killed t | Other (_, t) ->
-    t.clock
+  | Run_result.Reached t | Timeout t | Nothing t | Killed t | Other (_, t) -> t
+
+let clock run = (rusage run).clock
+
+let utime run = (rusage run).utime
+
+let stime run = (rusage run).stime
 
 let is_reached { res; _ } = Run_result.is_reached res
 

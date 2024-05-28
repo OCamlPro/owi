@@ -62,6 +62,14 @@ let sum_clock runs = List.fold_left (fun sum r -> Run.clock r +. sum) 0. runs
 
 let mean_clock runs = sum_clock runs /. (count_all runs |> float_of_int)
 
+let sum_utime runs = List.fold_left (fun sum r -> Run.utime r +. sum) 0. runs
+
+let mean_utime runs = sum_utime runs /. (count_all runs |> float_of_int)
+
+let sum_stime runs = List.fold_left (fun sum r -> Run.stime r +. sum) 0. runs
+
+let mean_stime runs = sum_stime runs /. (count_all runs |> float_of_int)
+
 let to_distribution ~max_time runs =
   List.init max_time (fun i ->
       List.fold_left
