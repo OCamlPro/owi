@@ -17,10 +17,10 @@ jobs:
           - ubuntu-latest
           # - windows-latest see #5
         ocaml-compiler:
-          - "5.1"
-        #include:
-        #  - os: ubuntu-latest
-        #    ocaml-compiler: "4.13"
+          - "5.2"
+        include:
+          - os: ubuntu-latest
+            ocaml-compiler: "5.1"
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout
