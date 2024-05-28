@@ -28,7 +28,7 @@ jobs:
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: "5.1"
+          ocaml-compiler: "5.2"
           dune-cache: false
           opam-depext: true
           opam-pin: true
