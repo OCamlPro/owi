@@ -16,4 +16,4 @@ let runs = Parse.from_file file
 
 let output_dir = Fpath.v "./"
 
-let () = Gen.html output_dir runs |> ok_or_fail
+let () = Gen.full_report runs output_dir |> ok_or_fail

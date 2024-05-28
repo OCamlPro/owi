@@ -28,6 +28,10 @@ val min_clock : t -> float
 
 val max_clock : t -> float
 
+val sum_clock : t -> float
+
+val mean_clock : t -> float
+
 val to_distribution : max_time:int -> t -> float list
 
 val pp_quick_results : Format.formatter -> t -> unit

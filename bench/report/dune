@@ -3,6 +3,7 @@
  (modules
   color
   gen
+  html
   parse
   pie_results
   run
