@@ -6,3 +6,7 @@
 	path = test/script/reference
 	url = https://github.com/WebAssembly/testsuite.git
 	shallow = true
+[submodule "bench/klee"]
+	path = bench/klee
+	url = https://github.com/zapashcanon/klee-testcomp.git
+	shallow = true

@@ -43,8 +43,11 @@ let margin = 10. |> string_of_float
 let mk_value (n, color, ratio_explode, name) =
   Format.sprintf "%d%s:%f:%s" n (Color.to_string color) ratio_explode name
 
-let make runs output_dir =
-  let out = Fpath.(output_dir // v "results_owi_count.svg") in
+let make runs output_dir reference_name =
+  let out =
+    Fpath.(
+      output_dir // v (Format.sprintf "results_%s_count.svg" reference_name) )
+  in
 
   let flags =
     ( [ "-o"
