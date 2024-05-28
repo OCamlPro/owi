@@ -12,7 +12,7 @@ let title = "Distribution of execution times"
 
 let custom = [ ("set style histogram rowstacked", "") ]
 
-let make runs output_dir =
+let make runs output_dir reference_name =
   let gp = Gnuplot.create () in
 
   let max_time = Runs.max_clock runs |> int_of_float |> ( + ) 5 in
@@ -49,8 +49,11 @@ let make runs output_dir =
   let output =
     Gnuplot.Output.create
       (`Png
-        Fpath.(output_dir // v "results_owi_time_distribution.png" |> to_string)
-        )
+        Fpath.(
+          output_dir
+          // v
+               (Format.sprintf "results_%s_time_distribution.png" reference_name)
+          |> to_string ) )
   in
 
   let range = Gnuplot.Range.X (min_time, float_of_int max_time) in

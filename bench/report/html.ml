@@ -1,4 +1,4 @@
-let make runs output_dir =
+let make runs output_dir reference_name =
   let gen_time =
     let t = Unix.localtime @@ Unix.gettimeofday () in
     Format.sprintf "%d-%02d-%02d at %02dh%02dm%02ds" (1900 + t.tm_year)
@@ -36,20 +36,23 @@ let make runs output_dir =
     div
       [ p
           [ Format.ksprintf txt
-              "Here are the benchmarks results for Owi, generated on the %s."
-              gen_time
+              "Here are the benchmarks results for %s, generated on the %s."
+              reference_name gen_time
           ]
       ; h2 [ txt "Score" ]
       ; div
           [ img
               ~a:[ a_width 500; a_class [] ]
-              ~src:"results_owi_count.svg" ~alt:"Score made by Owi" ()
+              ~src:(Format.sprintf "results_%s_count.svg" reference_name)
+              ~alt:"Score made by Owi" ()
           ]
       ; h2 [ txt "Distribution of execution times" ]
       ; div
           [ img
               ~a:[ a_width 500; a_class [] ]
-              ~src:"results_owi_time_distribution.png"
+              ~src:
+                (Format.sprintf "results_%s_time_distribution.png"
+                   reference_name )
               ~alt:"Distribution of execution times" ()
           ]
       ; h2 [ txt "Statistics" ]

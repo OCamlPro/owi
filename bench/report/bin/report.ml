@@ -16,4 +16,5 @@ let runs = Parse.from_file file
 
 let output_dir = Fpath.v "./"
 
-let () = Gen.full_report runs output_dir |> ok_or_fail
+(* TODO: put the tool in the output in order to be able to reprint it, instead of using "unknown_tool" *)
+let () = Gen.full_report runs output_dir "unknown_tool" |> ok_or_fail
