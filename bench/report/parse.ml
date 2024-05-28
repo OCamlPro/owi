@@ -83,6 +83,9 @@ let from_file file =
     { Run.i; res; file }
   in
 
-  List.map
-    (fun v -> match parse_run v with Error e -> failwith e | Ok v -> v)
-    runs
+  List.fold_left
+    (fun runs v ->
+      match parse_run v with
+      | Error e -> failwith e
+      | Ok run -> Runs.add run runs )
+    Runs.empty runs

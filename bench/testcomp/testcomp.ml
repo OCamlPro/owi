@@ -185,7 +185,7 @@ let runs =
   let+ files in
   let files = List.sort Fpath.compare files in
   let len = List.length files in
-  let results = ref [] in
+  let results = ref Report.Runs.empty in
   let limit = 10_000 in
   List.iteri
     (fun i file ->
@@ -194,7 +194,7 @@ let runs =
         pp "%a@\n  @[<v>" (Report.Run.pp_header (min len limit)) (i, file);
         let result = fork_and_run_on_file i file |> ok_or_fail in
         let result = { Report.Run.i; file; res = result } in
-        results := result :: !results;
+        results := Report.Runs.add result !results;
         pp "%a@]@\n%!" Report.Runs.pp_quick_results !results
       end )
     files;

@@ -23,27 +23,26 @@ let make runs output_dir =
   in
 
   let times_reached =
-    List.filter Run.is_reached runs
+    Runs.keep_reached runs
     |> mk_time_distrib "Reached" (Color.to_rgb Color.reached)
   in
 
   let times_timeout =
-    List.filter Run.is_timeout runs
+    Runs.keep_timeout runs
     |> mk_time_distrib "Timeout" (Color.to_rgb Color.timeout)
   in
 
   let times_other =
-    List.filter Run.is_other runs
-    |> mk_time_distrib "Other" (Color.to_rgb Color.other)
+    Runs.keep_other runs |> mk_time_distrib "Other" (Color.to_rgb Color.other)
   in
 
   let times_nothing =
-    List.filter Run.is_nothing runs
+    Runs.keep_nothing runs
     |> mk_time_distrib "Nothing" (Color.to_rgb Color.nothing)
   in
 
   let times_killed =
-    List.filter Run.is_killed runs
+    Runs.keep_killed runs
     |> mk_time_distrib "Killed" (Color.to_rgb Color.killed)
   in
 
