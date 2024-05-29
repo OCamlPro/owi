@@ -1,0 +1,4 @@
+(executable
+ (name diff)
+ (modules diff)
+ (libraries report tool))

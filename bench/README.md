@@ -28,10 +28,14 @@ A folder `testcomp-results-YYYY-MM-DD_HHhMMhSSs` has been created with a lot of 
 
 ## Generate the report by hand
 
-### Running on some benchmark output
-
 ```shell-session
 $ dune exec -- report/bin/report.exe testcomp/results # this is an example of an old run, use the correct file instead
 ```
 
 A folder `results-report` should be available in the working directory with the `index.html` file that contains the results.
+
+## Comparing two runs
+
+```shell-session
+$ dune exec diff/diff.exe -- results1 results2
+```
