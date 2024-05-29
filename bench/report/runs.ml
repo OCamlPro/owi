@@ -41,6 +41,8 @@ let keep_other = List.filter Run.is_other
 
 let keep_killed = List.filter Run.is_killed
 
+let keep_if f runs = List.filter f runs
+
 let min_clock runs =
   match runs with
   | [] -> 0.
@@ -98,3 +100,5 @@ let pp_quick_results fmt results =
     !nothing !reached !timeout !other !killed
 
 let map = List.map
+
+let files = List.map (fun run -> run.Run.file)
