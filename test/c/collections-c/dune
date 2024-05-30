@@ -1,0 +1,5 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  (source_tree files)))
