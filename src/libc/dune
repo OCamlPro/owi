@@ -121,10 +121,3 @@
   (site
    (owi binc)))
  (files libc.wasm))
-
-(install
- (package owi)
- (section
-  (site
-   (owi pyc)))
- (files instrumentor.py))
