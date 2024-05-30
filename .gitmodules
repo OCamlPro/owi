@@ -10,3 +10,7 @@
 	path = bench/klee
 	url = https://github.com/zapashcanon/klee-testcomp.git
 	shallow = true
+[submodule "test/c/collections-c/files"]
+	path = test/c/collections-c/files
+	url = https://github.com/zapashcanon/Collections-C.git
+	shallow = true
