@@ -124,7 +124,7 @@ let assertion (vb : Concolic_value.V.vbool) =
     M
       (fun st ->
         (Ok (), if no_choice then st else add_pc_to_thread st assert_pc) )
-  else M (fun st -> (Error (Assume_fail vb.symbolic), st))
+  else M (fun st -> (Error Assert_fail, st))
 
 let trap t = M (fun th -> (Error (Trap t), th))
 
