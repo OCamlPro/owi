@@ -2,18 +2,17 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Solver
-open Smtml
 open Symbolic_value
 
-exception Assertion of Expr.t * Thread.t
+exception Assertion of Smtml.Expr.t * Thread.t
 
 module Minimalist = struct
   type err =
     | Assert_fail
     | Trap of Trap.t
 
-  type 'a t = M of (Thread.t -> solver -> ('a, err) Stdlib.Result.t * Thread.t)
+  type 'a t =
+    | M of (Thread.t -> Solver.t -> ('a, err) Stdlib.Result.t * Thread.t)
   [@@unboxed]
 
   type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
@@ -39,21 +38,23 @@ module Minimalist = struct
   let ( let+ ) = map
 
   let select (vb : vbool) =
-    let v = Expr.simplify vb in
-    match Expr.view v with
+    let v = Smtml.Expr.simplify vb in
+    match Smtml.Expr.view v with
     | Val True -> return true
     | Val False -> return false
-    | _ -> Format.kasprintf failwith "%a" Expr.pp v
+    | _ -> Format.kasprintf failwith "%a" Smtml.Expr.pp v
 
   let select_i32 (i : int32) =
-    let v = Expr.simplify i in
-    match Expr.view v with Val (Num (I32 i)) -> return i | _ -> assert false
+    let v = Smtml.Expr.simplify i in
+    match Smtml.Expr.view v with
+    | Val (Num (I32 i)) -> return i
+    | _ -> assert false
 
   let trap t = M (fun th _sol -> (Error (Trap t), th))
 
   let assertion (vb : vbool) =
-    let v = Expr.simplify vb in
-    match Expr.view v with
+    let v = Smtml.Expr.simplify vb in
+    match Smtml.Expr.view v with
     | Val True -> return ()
     | Val False -> M (fun th _sol -> (Error Assert_fail, th))
     | _ -> assert false
@@ -66,7 +67,7 @@ module Minimalist = struct
 
   let add_pc (_vb : vbool) = return ()
 
-  let run ~workers:_ t thread = run t thread (fresh_solver ())
+  let run ~workers:_ t thread = run t thread (Solver.fresh ())
 end
 
 module WQ = struct
@@ -172,7 +173,7 @@ module Multicore = struct
 
     val stop : 'a t
 
-    val assertion_fail : Expr.t -> 'a t
+    val assertion_fail : Smtml.Expr.t -> 'a t
 
     val trap : Trap.t -> 'a t
 
@@ -180,7 +181,7 @@ module Multicore = struct
 
     val yield : unit t
 
-    val solver : solver t
+    val solver : Solver.t t
 
     val with_thread : (Thread.t -> 'a) -> 'a t
 
@@ -197,7 +198,7 @@ module Multicore = struct
     type 'a eval =
       | EVal of 'a
       | ETrap of Trap.t
-      | EAssert of Expr.t
+      | EAssert of Smtml.Expr.t
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
@@ -314,7 +315,8 @@ module Multicore = struct
       *)
       module M = Schedulable
 
-      type 'a t = St of (Thread.t -> ('a * Thread.t, solver) M.t) [@@unboxed]
+      type 'a t = St of (Thread.t -> ('a * Thread.t, Solver.t) M.t)
+      [@@unboxed]
 
       let run (St mxf) st = mxf st
 
@@ -359,7 +361,7 @@ module Multicore = struct
       type 'a eval =
         | EVal of 'a
         | ETrap of Trap.t
-        | EAssert of Expr.t
+        | EAssert of Smtml.Expr.t
 
       type 'a t = 'a eval M.t
 
@@ -436,7 +438,7 @@ module Multicore = struct
       add_init_task sched (State.run t thread);
       let join_handles =
         Array.map
-          (fun () -> spawn_worker sched fresh_solver)
+          (fun () -> spawn_worker sched Solver.fresh)
           (Array.init workers (Fun.const ()))
       in
       WQ.read_as_seq sched.res_writer ~finalizer:(fun () ->
@@ -455,7 +457,7 @@ module Multicore = struct
   include CoreImpl
 
   let add_pc (c : vbool) =
-    match Expr.view c with
+    match Smtml.Expr.view c with
     | Val True -> return ()
     | Val False -> stop
     | _ ->
@@ -473,27 +475,25 @@ module Multicore = struct
   *)
   let check_reachability =
     let* () = yield in
-    let* (S (solver_module, s)) = solver in
-    let module Solver = (val solver_module) in
     let* thread in
-    match Solver.check s thread.pc with
+    let* solver in
+    match Solver.check solver thread.pc with
     | `Sat -> return ()
     | `Unsat | `Unknown -> stop
 
   let get_model symbol =
     let* () = yield in
-    let* (S (solver_module, s)) = solver in
-    let module Solver = (val solver_module) in
+    let* solver in
     let+ thread in
-    match Solver.check s thread.pc with
+    match Solver.check solver thread.pc with
     | `Unsat | `Unknown -> None
     | `Sat -> begin
-      let model = Solver.model ~symbols:[ symbol ] s in
+      let model = Solver.model solver ~symbols:[ symbol ] in
       match model with
       | None ->
         failwith "Unreachable: The problem is sat so a model should exist"
       | Some model -> begin
-        match Model.evaluate model symbol with
+        match Smtml.Model.evaluate model symbol with
         | None ->
           failwith
             "Unreachable: The model exists so this symbol should evaluate"
@@ -506,8 +506,8 @@ module Multicore = struct
     match model with Some v -> return v | None -> stop
 
   let select (cond : Symbolic_value.vbool) =
-    let v = Expr.simplify cond in
-    match Expr.view v with
+    let v = Smtml.Expr.simplify cond in
+    match Smtml.Expr.view v with
     | Val True -> return true
     | Val False -> return false
     | Val (Num (I32 _)) -> failwith "unreachable (type error)"
@@ -527,21 +527,21 @@ module Multicore = struct
       choose true_branch false_branch
   [@@inline]
 
-  let summary_symbol (e : Expr.t) =
+  let summary_symbol (e : Smtml.Expr.t) =
     let* thread in
-    match Expr.view e with
+    match Smtml.Expr.view e with
     | Symbol sym -> return (None, sym)
     | _ ->
       let choices = thread.choices in
       let symbol_name = Format.sprintf "choice_i32_%i" choices in
       let+ () = modify_thread (fun t -> { t with choices = choices + 1 }) in
-      let sym = Symbol.(symbol_name @: Ty_bitv 32) in
-      let assign = Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
+      let sym = Smtml.Symbol.(symbol_name @: Ty_bitv 32) in
+      let assign = Smtml.Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =
-    let sym_int = Expr.simplify i in
-    match Expr.view sym_int with
+    let sym_int = Smtml.Expr.simplify i in
+    match Smtml.Expr.view sym_int with
     | Val (Num (I32 i)) -> return i
     | _ ->
       let* assign, symbol = summary_symbol sym_int in
@@ -555,10 +555,14 @@ module Multicore = struct
           | Num (I32 i) -> i
           | _ -> failwith "Unreachable: found symbol must be a value"
         in
-        let this_value_cond = Expr.Bitv.I32.(Expr.mk_symbol symbol = v i) in
+        let this_value_cond =
+          let open Smtml.Expr in
+          Bitv.I32.(mk_symbol symbol = v i)
+        in
         let not_this_value_cond =
-          (* != is **not** the physical equality here *)
-          Expr.Bitv.I32.(Expr.mk_symbol symbol != v i)
+          let open Smtml.Expr in
+          (* != is **not** the physical inequality here *)
+          Bitv.I32.(mk_symbol symbol != v i)
         in
         let this_val_branch =
           let* () = add_breadcrumb i in
