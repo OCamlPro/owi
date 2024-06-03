@@ -35,7 +35,7 @@ module type Complete = sig
 
   val with_thread : (thread -> 'b) -> 'b t
 
-  val solver : Solver.solver t
+  val solver : Solver.t t
 
   val thread : thread t
 
