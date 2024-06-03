@@ -22,6 +22,9 @@
   cmd_validate
   cmd_wasm2wat
   compile
+  concolic
+  concolic_choice
+  concolic_value
   concrete
   concrete_choice
   concrete_global
@@ -55,13 +58,11 @@
   solver
   symbolic
   symbolic_choice
+  symbolic_choice_minimalist
   symbolic_global
   symbolic_memory
   symbolic_table
   symbolic_value
-  concolic_value
-  concolic_choice
-  concolic
   spectest
   stack
   string_map
@@ -77,6 +78,7 @@
   types
   value_intf
   v
+  wq
   wutf8)
  (private_modules
   binary_parser

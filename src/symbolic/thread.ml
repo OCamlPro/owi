@@ -14,6 +14,8 @@ type t =
   ; breadcrumbs : int32 list
   }
 
+let choices t = t.choices
+
 let pc t = t.pc
 
 let memories t = t.memories
@@ -23,6 +25,16 @@ let tables t = t.tables
 let globals t = t.globals
 
 let breadcrumbs t = t.breadcrumbs
+
+let symbols t = t.symbol_set
+
+let add_symbol t s = t.symbol_set <- s :: t.symbol_set
+
+let add_pc t c = { t with pc = c :: t.pc }
+
+let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
+
+let incr_choices t = { t with choices = succ t.choices }
 
 let create () =
   { choices = 0

@@ -158,7 +158,7 @@ i32:
   Trap: unreachable
   Model:
     (model
-      (symbol_0 (i32 -1))
-      (symbol_1 (i32 0)))
+      (symbol_0 (i32 -67108865))
+      (symbol_1 (i32 67108864)))
   Reached problem!
   [13]

@@ -21,11 +21,12 @@ module MakeP
                  and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
-
-  type thread = Thread.t
-
   module Choice = Choice
   module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
+  module Global = Symbolic_global
+  module Table = Symbolic_table
+
+  type thread = Thread.t
 
   let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
@@ -43,9 +44,6 @@ struct
       let+ b = select c in
       if b then if_true else if_false
     | _, _ -> assert false
-
-  module Global = Symbolic_global
-  module Table = Symbolic_table
 
   module Elem = struct
     type t = Link_env.elem
@@ -181,15 +179,8 @@ struct
   end
 end
 
-module P = struct
-  include MakeP [@inlined hint] (Thread) (Symbolic_choice.Multicore)
-  module Choice = Symbolic_choice.Multicore
-end
-
-module M = struct
-  include MakeP [@inlined hint] (Thread) (Symbolic_choice.Minimalist)
-  module Choice = Symbolic_choice.Minimalist
-end
+module P = MakeP [@inlined hint] (Thread) (Symbolic_choice)
+module M = MakeP [@inlined hint] (Thread) (Symbolic_choice_minimalist)
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }

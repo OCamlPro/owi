@@ -15,7 +15,7 @@ let symbolic_extern_module :
     let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
     let sym_expr = Expr.mk_symbol sym in
     Choice.with_thread (fun thread ->
-        thread.symbol_set <- sym :: thread.symbol_set;
+        Thread.add_symbol thread sym;
         match ty with
         | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
         | _ -> sym_expr )
@@ -72,14 +72,14 @@ let summaries_extern_module :
     | Val (Num (I32 v)) -> Choice.return v
     | _ ->
       Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> Choice.return 666l)
+      Choice.bind (abort ()) (fun () -> assert false)
   in
   let ptr v : int32 Choice.t =
     match view v with
     | Ptr (b, _) -> Choice.return b
     | _ ->
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> Choice.return 667l)
+      Choice.bind (abort ()) (fun () -> assert false)
   in
   let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
     Choice.bind (i32 base) (fun base ->
@@ -230,12 +230,6 @@ let run_file ~unsafe ~optimize pc filename =
   in
   run_binary_modul ~unsafe ~optimize pc m
 
-let get_model ~symbols solver pc =
-  assert (`Sat = Solver.Z3Batch.check solver pc);
-  match Solver.Z3Batch.model ~symbols solver with
-  | None -> assert false
-  | Some model -> model
-
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
@@ -248,7 +242,6 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let pc = Choice.return (Ok ()) in
-  let solver = Solver.Z3Batch.create () in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
   let results = Choice.run ~workers result thread in
@@ -263,25 +256,25 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let rec print_and_count_failures count_acc results =
     match results () with
     | Seq.Nil -> Ok count_acc
-    | Seq.Cons ((result, thread), tl) ->
-      let pc = Thread.pc thread in
-      let symbols = thread.symbol_set in
-      let model = get_model ~symbols solver pc in
-      let* is_err =
-        let open Symbolic_choice.Multicore in
+    | Seq.Cons ((result, _thread), tl) ->
+      let* is_err, model =
+        let open Symbolic_choice in
         match result with
-        | EAssert assertion ->
+        | EAssert (assertion, model) ->
           print_bug (`EAssert (assertion, model));
-          Ok true
-        | ETrap tr ->
+          Ok (true, Some model)
+        | ETrap (tr, model) ->
           print_bug (`ETrap (tr, model));
-          Ok true
-        | EVal (Ok ()) -> Ok false
+          Ok (true, Some model)
+        | EVal (Ok ()) -> Ok (false, None)
         | EVal (Error e) -> Error e
       in
       let count_acc = if is_err then succ count_acc else count_acc in
       let* () =
         if not no_values then
+          let model =
+            match model with None -> Hashtbl.create 16 | Some m -> m
+          in
           let testcase =
             List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
           in
@@ -295,8 +288,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let results =
     if deterministic_result_order then
       results
-      |> Seq.map (function (_, th) as x ->
-           (x, List.rev @@ Thread.breadcrumbs th) )
+      |> Seq.map (function (_, thread) as x ->
+           (x, List.rev @@ Thread.breadcrumbs thread) )
       |> List.of_seq
       |> List.sort (fun (_, bc1) (_, bc2) ->
              List.compare Stdlib.Int32.compare bc1 bc2 )

@@ -28,7 +28,7 @@ $ owi conc ./mini.wat
 Trap: unreachable
 Model:
   (model
-    (symbol_1 (i32 6)))
+    )
 Reached problem!
 [13]
 ```

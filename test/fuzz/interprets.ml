@@ -84,7 +84,7 @@ module Owi_symbolic : INTERPRET = struct
         let c = Interpret.SymbolicM.modul link_state.envs regular in
         let init_thread : Thread.t = Thread.create () in
         let res, _ =
-          Symbolic_choice.Minimalist.run ~workers:dummy_workers_count c
+          Symbolic_choice_minimalist.run ~workers:dummy_workers_count c
             init_thread
         in
         match res with
