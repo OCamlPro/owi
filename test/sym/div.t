@@ -61,6 +61,6 @@ div binop:
   Model:
     (model
       (symbol_0 (i32 3))
-      (symbol_6 (i64 0)))
+      (symbol_5 (i64 0)))
   Reached 4 problems!
   [13]

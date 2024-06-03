@@ -256,12 +256,9 @@ let run_modules_to_run (link_state : _ Link.state) modules_to_run =
       (Interpret.Concolic.modul link_state.envs) to_run )
     (Choice.return (Ok ())) modules_to_run
 
-let get_model (* ~symbols *) solver pc =
-  let expr = Concolic_choice.pc_to_exprs pc in
-  assert (`Sat = Solver.Z3Batch.check solver expr);
-  match Solver.Z3Batch.model (* ~symbols *) solver with
-  | None -> assert false
-  | Some model -> model
+let get_model ~symbols solver pc =
+  let pc = Concolic_choice.pc_to_exprs pc in
+  Solver.model ~symbols ~pc solver
 
 type assignments = (Smtml.Symbol.t * Concrete_value.t) list
 
@@ -447,13 +444,12 @@ let rec find_node_to_run tree =
     None
 
 let pc_model solver pc =
-  let expr = Concolic_choice.pc_to_exprs pc in
-  match Solver.Z3Batch.check solver expr with
+  let pc = Concolic_choice.pc_to_exprs pc in
+  match Solver.check solver pc with
   | `Unsat | `Unknown -> None
-  | `Sat -> (
-    match Solver.Z3Batch.model solver with
-    | None -> assert false
-    | Some model -> Some model )
+  | `Sat ->
+    let model = Solver.model ~symbols:[] ~pc solver in
+    Some model
 
 let find_model_to_run solver tree =
   match find_node_to_run tree with
@@ -518,7 +514,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
-  let solver = Solver.Z3Batch.create () in
+  let solver = Solver.fresh () in
   let* link_state, modules_to_run =
     simplify_then_link_files ~unsafe ~optimize files
   in
@@ -557,7 +553,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
-    let model = get_model solver thread.pc in
+    let model = get_model ~symbols:[] solver thread.pc in
     Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)
@@ -567,7 +563,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
-    let model = get_model solver thread.pc in
+    let model = get_model ~symbols:[] solver thread.pc in
     Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)
