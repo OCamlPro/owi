@@ -40,6 +40,4 @@ module type Complete = sig
   val thread : thread t
 
   val add_pc : V.vbool -> unit t
-
-  val run : workers:int -> 'a t -> thread -> 'a run_result
 end
