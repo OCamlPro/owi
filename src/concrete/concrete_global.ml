@@ -18,3 +18,7 @@ let set_value g v = g.value <- v
 let mut g = g.mut
 
 let typ g = g.typ
+
+let backup t = { t with value = t.value }
+
+let recover ~from_ ~to_ = to_.value <- from_.value

@@ -20,3 +20,7 @@ val set_value : t -> Concrete_value.t -> unit
 val typ : t -> binary val_type
 
 val mut : t -> mut
+
+val backup : t -> t
+
+val recover : from_:t -> to_:t -> unit
