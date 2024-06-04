@@ -244,7 +244,20 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Symbolic_choice.run ~workers result thread in
+  let res_queue = Wq.init () in
+  let callback = function
+    | Symbolic_choice.EVal (Ok ()), _ -> ()
+    | v -> Wq.push v res_queue
+  in
+  let join_handles =
+    Symbolic_choice.run ~workers result thread ~callback
+      ~callback_init:(fun () -> Wq.make_pledge res_queue)
+      ~callback_end:(fun () -> Wq.end_pledge res_queue)
+  in
+  let results =
+    Wq.read_as_seq res_queue ~finalizer:(fun () ->
+        Array.iter Domain.join join_handles )
+  in
   let print_bug = function
     | `ETrap (tr, model) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string tr);

@@ -65,7 +65,14 @@ module CoreImpl : sig
 
   type 'a run_result = ('a eval * Thread.t) Seq.t
 
-  val run : workers:int -> 'a t -> Thread.t -> 'a run_result
+  val run :
+       workers:int
+    -> 'a t
+    -> Thread.t
+    -> callback:('a eval * Thread.t -> unit)
+    -> callback_init:(unit -> unit)
+    -> callback_end:(unit -> unit)
+    -> unit Domain.t array
 end = struct
   module Schedulable = struct
     (*
@@ -127,25 +134,19 @@ end = struct
       *)
     type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Wq.t
 
-    type 'a res_queue = 'a Wq.t
-
-    type ('a, 'wls) t =
-      { work_queue : ('a, 'wls) work_queue
-      ; res_writer : 'a res_queue
-      }
+    type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue }
 
     let init_scheduler () =
       let work_queue = Wq.init () in
-      let res_writer = Wq.init () in
-      { work_queue; res_writer }
+      { work_queue }
 
     let add_init_task sched task = Wq.push task sched.work_queue
 
-    let rec work wls sched =
+    let rec work wls sched callback =
       let rec handle_status (t : _ Schedulable.status) sched =
         match t with
         | Stop -> ()
-        | Now x -> Wq.push x sched.res_writer
+        | Now x -> callback x
         | Yield (_prio, f) -> Wq.push f sched.work_queue
         | Choice (m1, m2) ->
           handle_status m1 sched;
@@ -156,17 +157,17 @@ end = struct
       | Some f -> begin
         handle_status (Schedulable.run f wls) sched;
         Wq.end_pledge sched.work_queue;
-        work wls sched
+        work wls sched callback
       end
 
-    let spawn_worker sched wls_init =
-      Wq.make_pledge sched.res_writer;
+    let spawn_worker sched wls_init callback callback_init callback_close =
+      callback_init ();
       Domain.spawn (fun () ->
           let wls = wls_init () in
           Fun.protect
-            ~finally:(fun () -> Wq.end_pledge sched.res_writer)
+            ~finally:(fun () -> callback_close ())
             (fun () ->
-              try work wls sched
+              try work wls sched callback
               with e ->
                 let bt = Printexc.get_raw_backtrace () in
                 Wq.fail sched.work_queue;
@@ -295,17 +296,15 @@ end = struct
 
   type 'a run_result = ('a eval * Thread.t) Seq.t
 
-  let run ~workers t thread =
+  let run ~workers t thread ~callback ~callback_init ~callback_end =
     let open Scheduler in
     let sched = init_scheduler () in
     add_init_task sched (State.run t thread);
     let join_handles =
-      Array.map
-        (fun () -> spawn_worker sched Solver.fresh)
-        (Array.init workers (Fun.const ()))
+      Array.init workers (fun _i ->
+          spawn_worker sched Solver.fresh callback callback_init callback_end )
     in
-    Wq.read_as_seq sched.res_writer ~finalizer:(fun () ->
-        Array.iter Domain.join join_handles )
+    join_handles
 
   let trap t =
     let* thread in

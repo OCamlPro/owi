@@ -13,4 +13,11 @@ include
      and type 'a run_result = ('a eval * Thread.t) Seq.t
      and module V := Symbolic_value
 
-val run : workers:int -> 'a t -> Thread.t -> 'a run_result
+val run :
+     workers:int
+  -> 'a t
+  -> Thread.t
+  -> callback:('a eval * Thread.t -> unit)
+  -> callback_init:(unit -> unit)
+  -> callback_end:(unit -> unit)
+  -> unit Domain.t array
