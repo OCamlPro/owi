@@ -18,4 +18,7 @@ val run :
   -> Smtml.Solver_dispatcher.solver_type
   -> 'a t
   -> Thread.t
-  -> 'a run_result
+  -> callback:('a eval * Thread.t -> unit)
+  -> callback_init:(unit -> unit)
+  -> callback_end:(unit -> unit)
+  -> unit Domain.t array
