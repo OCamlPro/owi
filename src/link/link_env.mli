@@ -6,6 +6,8 @@ open Types
 
 type 'ext t
 
+type 'ext backup
+
 type t' = Env_id.t
 
 type elem = { mutable value : Concrete_value.ref_value array }
@@ -13,6 +15,10 @@ type elem = { mutable value : Concrete_value.ref_value array }
 type data = { mutable value : string }
 
 type func := Func_intf.t
+
+val backup : 'ext t -> 'ext backup
+
+val recover : 'ext backup -> 'ext t -> unit
 
 val get_memory : _ t -> int -> Concrete_memory.t
 

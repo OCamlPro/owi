@@ -29,6 +29,27 @@ type 'ext t =
   ; id : Env_id.t
   }
 
+type 'ext backup = 'ext t
+
+let backup t =
+  { t with
+    globals = IMap.map Concrete_global.backup t.globals (* TODO tables/memory *)
+  }
+
+let recover backup into =
+  let apply f _key v1 v2 =
+    match (v1, v2) with
+    | Some v1, Some v2 ->
+      f ~from_:v1 ~to_:v2;
+      None
+    | _ -> assert false
+  in
+  let _ : _ IMap.t =
+    IMap.merge (apply Concrete_global.recover) backup.globals into.globals
+  in
+  (* TODO tables/memory *)
+  ()
+
 let id (env : _ t) = env.id
 
 let get_global (env : _ t) id = IMap.find id env.globals

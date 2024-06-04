@@ -374,6 +374,7 @@ let rec add_trace pc node (trace : trace) =
 let add_trace tree trace = add_trace [] tree trace
 
 let run_once tree link_state modules_to_run forced_values =
+  let backups = List.map Concolic.backup modules_to_run in
   let result = run_modules_to_run link_state modules_to_run in
   let ( ( result
         , Choice.
@@ -388,6 +389,7 @@ let run_once tree link_state modules_to_run forced_values =
     in
     Choice.run forced_values result
   in
+  let () = List.iter2 Concolic.recover backups modules_to_run in
   let end_of_trace =
     match result with
     | Ok (Ok ()) -> Normal
