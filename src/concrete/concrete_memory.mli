@@ -5,6 +5,10 @@
 (** runtime memory *)
 type t
 
+val backup : t -> t
+
+val recover : from_:t -> to_:t -> unit
+
 val get_limit_max : t -> int64 option
 
 val get_limits : t -> Types.limits

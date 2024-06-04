@@ -15,6 +15,10 @@ type t =
   ; mutable data : table
   }
 
+let backup t = { t with data = Array.copy t.data }
+
+let recover ~from_ ~to_ = to_.data <- from_.data
+
 let fresh =
   let r = ref (-1) in
   fun () ->
