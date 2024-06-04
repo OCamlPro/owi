@@ -74,5 +74,6 @@
   digestif
   xmlm
   (hc (>= 0.3))
+  (processor (>= 0.1))
   dune-site)
  (sites (share binc) (share libc)))

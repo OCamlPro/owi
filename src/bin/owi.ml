@@ -72,12 +72,12 @@ let unsafe =
 
 let workers =
   let doc =
-    "number of workers for symbolic execution. Defaults to a machine-specific \
-     value given by the OCaml Domain.recommended_domain_count function."
+    "number of workers for symbolic execution. Defaults to the number of \
+     physical cores."
   in
   Cmdliner.Arg.(
     value
-    & opt int (Domain.recommended_domain_count ())
+    & opt int Processor.Query.core_count
     & info [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
