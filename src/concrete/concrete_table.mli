@@ -16,6 +16,10 @@ type t =
   ; mutable data : table
   }
 
+val backup : t -> t
+
+val recover : from_:t -> to_:t -> unit
+
 val get : t -> int -> Concrete_value.ref_value
 
 val set : t -> int -> Concrete_value.ref_value -> unit

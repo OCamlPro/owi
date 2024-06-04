@@ -31,9 +31,21 @@ type 'ext t =
 
 type 'ext backup = 'ext t
 
+let backup_data (data : data) : data = { value = data.value }
+
+let backup_elem (elem : elem) : elem = { value = elem.value }
+
+let recover_data ~(from_ : data) ~(to_ : data) = to_.value <- from_.value
+
+let recover_elem ~(from_ : elem) ~(to_ : elem) = to_.value <- from_.value
+
 let backup t =
   { t with
-    globals = IMap.map Concrete_global.backup t.globals (* TODO tables/memory *)
+    globals = IMap.map Concrete_global.backup t.globals
+  ; memories = IMap.map Concrete_memory.backup t.memories
+  ; tables = IMap.map Concrete_table.backup t.tables
+  ; data = IMap.map backup_data t.data
+  ; elem = IMap.map backup_elem t.elem
   }
 
 let recover backup into =
@@ -47,7 +59,14 @@ let recover backup into =
   let _ : _ IMap.t =
     IMap.merge (apply Concrete_global.recover) backup.globals into.globals
   in
-  (* TODO tables/memory *)
+  let _ : _ IMap.t =
+    IMap.merge (apply Concrete_memory.recover) backup.memories into.memories
+  in
+  let _ : _ IMap.t =
+    IMap.merge (apply Concrete_table.recover) backup.tables into.tables
+  in
+  let _ : _ IMap.t = IMap.merge (apply recover_data) backup.data into.data in
+  let _ : _ IMap.t = IMap.merge (apply recover_elem) backup.elem into.elem in
   ()
 
 let id (env : _ t) = env.id
