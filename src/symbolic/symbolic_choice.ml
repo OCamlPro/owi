@@ -224,20 +224,22 @@ module Multicore = struct
       let return_status status = Sched (Fun.const status)
 
       let rec bind (mx : ('a, 'wls) t) (f : 'a -> ('b, 'wls) t) : _ t =
-        let rec bind_status (x : _ status) (f : _ -> _ status) : _ status =
+        let rec bind_status (x : _ status) (outter_wls : 'wls) f : _ status =
           match x with
-          | Now x -> f x
+          | Now x -> run (f x) outter_wls
           | Yield (prio, lx) ->
-            Yield (prio, Sched (fun wls -> bind_status (run lx wls) f))
-          | Choice (mx1, mx2) -> Choice (bind_status mx1 f, bind_status mx2 f)
+            Yield (prio, Sched (fun wls -> bind_status (run lx wls) wls f))
+          | Choice (mx1, mx2) ->
+            let mx1' = bind_status mx1 outter_wls f in
+            let mx2' = bind_status mx2 outter_wls f in
+            Choice (mx1', mx2')
           | Stop -> Stop
         in
         Sched
           (fun wls ->
-            let argumented_f x = run (f x) wls in
             match run mx wls with
             | Yield (prio, mx) -> Yield (prio, bind mx f)
-            | x -> bind_status x argumented_f )
+            | x -> bind_status x wls f )
 
       let ( let* ) = bind
 
