@@ -244,7 +244,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Choice.run ~workers result thread in
+  let results = Symbolic_choice.run ~workers result thread in
   let print_bug = function
     | `ETrap (tr, model) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
