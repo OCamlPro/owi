@@ -98,6 +98,7 @@
   menhirLib
   ocaml_intrinsics
   ppxlib
+  processor
   sedlex
   uutf
   runtime_events
