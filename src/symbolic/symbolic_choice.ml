@@ -366,7 +366,7 @@ let get_model_or_stop symbol =
     | Some v -> return v
   end
 
-let select (cond : Symbolic_value.vbool) =
+let select_inner ~explore_first (cond : Symbolic_value.vbool) =
   let v = Smtml.Expr.simplify cond in
   match Smtml.Expr.view v with
   | Val True -> return true
@@ -385,7 +385,11 @@ let select (cond : Symbolic_value.vbool) =
       let+ () = check_reachability in
       false
     in
-    choose true_branch false_branch
+    if explore_first then choose true_branch false_branch
+    else choose false_branch true_branch
+[@@inline]
+
+let select (cond : Symbolic_value.vbool) = select_inner cond ~explore_first:true
 [@@inline]
 
 let summary_symbol (e : Smtml.Expr.t) =
@@ -440,7 +444,7 @@ let select_i32 (i : Symbolic_value.int32) =
     generator ()
 
 let assertion c =
-  let* assertion_true = select c in
+  let* assertion_true = select_inner c ~explore_first:false in
   if assertion_true then return ()
   else
     let* thread in
