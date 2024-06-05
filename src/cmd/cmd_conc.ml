@@ -542,16 +542,17 @@ let find_model_to_run solver tree =
 
 let launch solver tree link_state modules_to_run =
   let rec find_model n =
-    if n = 0 then
-      let () = Format.pp_std "Failed to find something to run@." in
+    if n = 0 then begin
+      Format.pp_std "Failed to find something to run@\n";
       None
+    end
     else
       match find_model_to_run solver tree with
       | None -> find_model (n - 1)
       | Some m ->
         if debug then begin
-          Format.pp_std "Found something to run %a@."
-            (fun ppf v -> Smtml.Model.pp ppf v)
+          Format.pp_std "Found something to run %a@\n"
+            (Smtml.Model.pp ~no_values:false)
             m
         end;
         Some m
@@ -577,7 +578,7 @@ let launch solver tree link_state modules_to_run =
       | None ->
         Format.pp_err "Can't satisfy assume !@\n";
         loop (count - 1)
-      | Some model -> run_model (Some model) (count - 1)
+      | Some _model as model -> run_model model (count - 1)
     end
     | Error (Trap trap) -> Some (`Trap trap, thread)
     | Error Assert_fail -> Some (`Assert_fail, thread)

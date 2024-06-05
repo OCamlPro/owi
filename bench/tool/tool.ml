@@ -1,7 +1,8 @@
 type t =
   | Owi of
-      { workers : int
+      { concolic : bool
       ; optimisation_level : int
+      ; workers : int
       }
   | Klee
 
@@ -10,11 +11,13 @@ let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 let to_short_name = function Owi _ -> "owi" | Klee -> "klee"
 
 let to_reference_name = function
-  | Owi { workers; optimisation_level } ->
-    Format.sprintf "owi_w%d_O%d" workers optimisation_level
+  | Owi { concolic; workers; optimisation_level } ->
+    Format.sprintf "owi_w%d_O%d%s" workers optimisation_level
+      (if concolic then "_concolic" else "")
   | Klee -> "klee"
 
-let mk_owi ~workers ~optimisation_level = Owi { workers; optimisation_level }
+let mk_owi ~concolic ~workers ~optimisation_level =
+  Owi { concolic; workers; optimisation_level }
 
 let mk_klee () = Klee
 
@@ -94,29 +97,30 @@ let execvp ~output_dir tool file timeout =
   let timeout = string_of_int timeout in
   let bin, args =
     match tool with
-    | Owi { workers; optimisation_level } ->
+    | Owi { workers; optimisation_level; concolic } ->
       ( "owi"
-      , [| "owi"
-         ; "c"
-         ; "--unsafe"
-         ; Format.sprintf "-O%d" optimisation_level
-         ; Format.sprintf "-w%d" workers
-         ; "-o"
-         ; output_dir
-         ; file
-        |] )
+      , [ "owi"; "c" ]
+        @ (if concolic then [ "--concolic" ] else [])
+        @ [ "--unsafe"
+          ; Format.sprintf "-O%d" optimisation_level
+          ; Format.sprintf "-w%d" workers
+          ; "-o"
+          ; output_dir
+          ; file
+          ] )
     | Klee ->
       let path_to_klee = "klee/bin/klee" in
       ( path_to_klee
-      , [| path_to_klee
-         ; "--error-only"
-         ; "--max-time"
-         ; timeout
-         ; "--max-walltime"
-         ; timeout
-         ; file
-        |] )
+      , [ path_to_klee
+        ; "--error-only"
+        ; "--max-time"
+        ; timeout
+        ; "--max-walltime"
+        ; timeout
+        ; file
+        ] )
   in
+  let args = Array.of_list args in
   Unix.execvp bin args
 
 let dup ~src ~dst =
