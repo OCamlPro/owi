@@ -3,9 +3,9 @@ module Unix = struct
   include Bos.OS.U
 end
 
-let _tool = Tool.mk_owi ~workers:4 ~optimisation_level:1
+let tool = Tool.mk_owi ~concolic:false ~workers:24 ~optimisation_level:3
 
-let tool = Tool.mk_klee ()
+let _tool = Tool.mk_klee ()
 
 let reference_name = Tool.to_reference_name tool
 
