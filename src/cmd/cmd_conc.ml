@@ -448,7 +448,8 @@ let pc_model solver pc =
   match Solver.check solver pc with
   | `Unsat | `Unknown -> None
   | `Sat ->
-    let model = Solver.model ~symbols:[] ~pc solver in
+    let symbols = None in
+    let model = Solver.model ~symbols ~pc solver in
     Some model
 
 let find_model_to_run solver tree =
@@ -553,7 +554,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
-    let model = get_model ~symbols:[] solver thread.pc in
+    let symbols = None in
+    let model = get_model ~symbols solver thread.pc in
     Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)
@@ -563,7 +565,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
-    let model = get_model ~symbols:[] solver thread.pc in
+    let symbols = None in
+    let model = get_model ~symbols solver thread.pc in
     Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)

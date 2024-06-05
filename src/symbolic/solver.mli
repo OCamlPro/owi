@@ -9,4 +9,7 @@ val fresh : unit -> t
 val check : t -> Smtml.Expr.t list -> Smtml.Solver_intf.satisfiability
 
 val model :
-  t -> symbols:Smtml.Symbol.t list -> pc:Smtml.Expr.t list -> Smtml.Model.t
+     t
+  -> symbols:Smtml.Symbol.t list option
+  -> pc:Smtml.Expr.t list
+  -> Smtml.Model.t
