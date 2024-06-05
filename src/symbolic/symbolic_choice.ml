@@ -311,7 +311,7 @@ end = struct
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
-    let symbols = Thread.symbols thread in
+    let symbols = Thread.symbols thread |> Option.some in
     let model = Solver.model solver ~symbols ~pc in
     State.return (ETrap (t, model))
 
@@ -359,7 +359,8 @@ let get_model_or_stop symbol =
   match Solver.check solver pc with
   | `Unsat | `Unknown -> stop
   | `Sat -> begin
-    let model = Solver.model solver ~symbols:[ symbol ] ~pc in
+    let symbols = [ symbol ] |> Option.some in
+    let model = Solver.model solver ~symbols ~pc in
     match Smtml.Model.evaluate model symbol with
     | None ->
       failwith "Unreachable: The model exists so this symbol should evaluate"
@@ -445,7 +446,7 @@ let assertion c =
   else
     let* thread in
     let* solver in
-    let symbols = Thread.symbols thread in
+    let symbols = Thread.symbols thread |> Option.some in
     let pc = Thread.pc thread in
     let model = Solver.model ~symbols ~pc solver in
     assertion_fail c model
