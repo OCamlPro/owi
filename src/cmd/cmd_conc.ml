@@ -276,6 +276,22 @@ type trace =
 
 module IMap = Map.Make (Stdlib.Int32)
 
+module Unexplored : sig
+  type t
+  val none : t -> bool
+  val zero : t
+  val one : t
+  val add : t -> t -> t
+end = struct
+  type t = int
+  let none t = t = 0
+  let zero = 0
+  let one = 1
+  let add a b = a + b
+end
+
+type unexplored = Unexplored.t
+
 type node =
   | Select of
       { cond : Smtml.Expr.t
@@ -300,11 +316,48 @@ type node =
 
 and eval_tree =
   { mutable node : node
+  ; mutable unexplored : unexplored
   ; pc : Concolic_choice.pc
   ; mutable ends : (end_of_trace * assignments) list
   }
 
-let fresh_tree pc = { node = Not_explored; pc; ends = [] }
+let rec rec_count_unexplored tree =
+  match tree.node with
+  | Select { if_true; if_false; _ } ->
+    Unexplored.add (rec_count_unexplored if_true) (rec_count_unexplored if_false)
+  | Select_i32 { branches; _ } ->
+    IMap.fold (fun _ branch -> Unexplored.add (rec_count_unexplored branch)) branches Unexplored.zero
+  | Assume { cont; _ }
+  | Assert { cont; _ } ->
+    rec_count_unexplored cont
+  | Unreachable ->
+    Unexplored.zero
+  | Not_explored ->
+    Unexplored.one
+let _ = rec_count_unexplored
+
+let count_unexplored tree =
+  match tree.node with
+  | Select { if_true; if_false; _ } ->
+    Unexplored.add if_true.unexplored if_false.unexplored
+  | Select_i32 { branches; _ } ->
+    IMap.fold (fun _ branch -> Unexplored.add branch.unexplored) branches Unexplored.zero
+  | Assume { cont; _ }
+  | Assert { cont; _ } ->
+    cont.unexplored
+  | Unreachable ->
+    Unexplored.zero
+  | Not_explored ->
+    Unexplored.one
+
+let update_unexplored tree =
+  tree.unexplored <- count_unexplored tree
+
+let update_node tree node =
+  tree.node <- node;
+  update_unexplored tree
+
+let fresh_tree pc = { node = Not_explored; unexplored = Unexplored.one; pc; ends = [] }
 
 let new_node pc (head : Concolic_choice.pc_elt) : node =
   match head with
@@ -315,22 +368,25 @@ let new_node pc (head : Concolic_choice.pc_elt) : node =
   | Assert cond -> Assert { cond; cont = fresh_tree pc; disproved = None }
 
 let try_initialize pc node head =
-  match node.node with Not_explored -> node.node <- new_node pc head | _ -> ()
+  match node.node with Not_explored -> update_node node (new_node pc head) | _ -> ()
 
 let check = true
 
-let rec add_trace pc node (trace : trace) =
+let rec add_trace pc node (trace : trace) to_update : eval_tree list =
   match trace.remaining_pc with
   | [] -> begin
-    node.ends <- (trace.end_of_trace, trace.assignments) :: node.ends;
-    match trace.end_of_trace with
-    | Trap Unreachable -> begin
-      match node.node with
-      | Not_explored -> node.node <- Unreachable
-      | Unreachable -> ()
-      | _ -> assert false
-    end
-    | _ -> ()
+      node.ends <- (trace.end_of_trace, trace.assignments) :: node.ends;
+      let () =
+        match trace.end_of_trace with
+        | Trap Unreachable -> begin
+            match node.node with
+            | Not_explored -> node.node <- Unreachable
+            | Unreachable -> ()
+            | _ -> assert false
+          end
+        | _ -> ()
+      in
+      node :: to_update
   end
   | head_of_trace :: tail_of_trace -> (
     try_initialize pc node head_of_trace;
@@ -341,7 +397,7 @@ let rec add_trace pc node (trace : trace) =
     | Select { cond; if_true; if_false }, Select (cond', v) ->
       if check then assert (Smtml.Expr.equal cond cond');
       let branch = if v then if_true else if_false in
-      add_trace pc branch { trace with remaining_pc = tail_of_trace }
+      add_trace pc branch { trace with remaining_pc = tail_of_trace } (node :: to_update)
     | _, Select _ | Select _, _ -> assert false
     | Select_i32 { value; branches }, Select_i32 (value', v) ->
       if check then assert (Smtml.Expr.equal value value');
@@ -349,15 +405,15 @@ let rec add_trace pc node (trace : trace) =
         match IMap.find_opt v branches with
         | None ->
           let t = fresh_tree pc in
-          node.node <- Select_i32 { value; branches = IMap.add v t branches };
+          update_node node (Select_i32 { value; branches = IMap.add v t branches });
           t
         | Some t -> t
       in
-      add_trace pc branch { trace with remaining_pc = tail_of_trace }
+      add_trace pc branch { trace with remaining_pc = tail_of_trace } (node :: to_update)
     | _, Select_i32 _ | Select_i32 _, _ -> assert false
     | Assume { cond; cont }, Assume cond' ->
       if check then assert (Smtml.Expr.equal cond cond');
-      add_trace pc cont { trace with remaining_pc = tail_of_trace }
+      add_trace pc cont { trace with remaining_pc = tail_of_trace } (node :: to_update)
     | _, Assume _ | Assume _, _ -> assert false
     | Assert ({ cond; cont; disproved = _ } as assert_), Assert cond' ->
       if check then assert (Smtml.Expr.equal cond cond');
@@ -366,9 +422,11 @@ let rec add_trace pc node (trace : trace) =
         | [], Assert_fail -> assert_.disproved <- Some trace.assignments
         | _ -> ()
       end;
-      add_trace pc cont { trace with remaining_pc = tail_of_trace } )
+      add_trace pc cont { trace with remaining_pc = tail_of_trace } (node :: to_update) )
 
-let add_trace tree trace = add_trace [] tree trace
+let add_trace tree trace =
+  let to_update = add_trace [] tree trace [] in
+  List.iter update_unexplored to_update
 
 let run_once tree link_state modules_to_run forced_values =
   let backups = List.map Concolic.backup modules_to_run in
@@ -414,7 +472,11 @@ let rec find_node_to_run tree =
     end;
     Some tree.pc
   | Select { cond = _; if_true; if_false } ->
-    let b = Random.bool () in
+    let b =
+      if Unexplored.none if_true.unexplored then false
+      else if Unexplored.none if_false.unexplored then true
+      else Random.bool ()
+    in
     if debug then begin
       Format.pp_std "Select bool %b@." b
     end;
@@ -423,14 +485,19 @@ let rec find_node_to_run tree =
   | Select_i32 { value = _; branches } ->
     (* TODO: better ! *)
     let branches = IMap.bindings branches in
+    let branches =
+      List.filter (fun (_i, v) ->
+          not (Unexplored.none v.unexplored))
+        branches
+    in
     let n = List.length branches in
     if n = 0 then None
     else begin
       let i = Random.int n in
+      let i, branch = List.nth branches i in
       if debug then begin
-        Format.pp_std "Select_i32 %i@." i
+        Format.pp_std "Select_i32 %li@." i
       end;
-      let _, branch = List.nth branches i in
       find_node_to_run branch
     end
   | Assume { cond = _; cont } -> find_node_to_run cont
