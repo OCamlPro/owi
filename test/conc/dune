@@ -1,2 +1,2 @@
 (cram
- (deps %{bin:owi} immediately_fail.wat))
+ (deps %{bin:owi} global_sharing.wat immediately_fail.wat))
