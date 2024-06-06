@@ -60,6 +60,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
        -u, --unsafe
            skip typechecking pass
 
