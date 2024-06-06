@@ -398,8 +398,8 @@ let rec add_trace pc node (trace : trace) to_update : eval_tree list =
     node :: to_update
   end
   | head_of_trace :: tail_of_trace -> (
-    try_initialize pc node head_of_trace;
     let pc = head_of_trace :: pc in
+    try_initialize pc node head_of_trace;
     match (node.node, head_of_trace) with
     | Not_explored, _ -> assert false
     | Unreachable, _ -> assert false
