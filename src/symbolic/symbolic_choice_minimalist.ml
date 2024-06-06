@@ -63,4 +63,4 @@ let solver = M (fun st sol -> (Ok sol, st))
 
 let add_pc (_vb : vbool) = return ()
 
-let run ~workers:_ t thread = run t thread (Solver.fresh ())
+let run ~workers:_ solver t thread = run t thread (Solver.fresh solver ())

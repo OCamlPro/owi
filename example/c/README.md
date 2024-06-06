@@ -323,6 +323,9 @@ OPTIONS
        --property=VAL
            property file
 
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
        --testcomp
            test-comp mode
 
