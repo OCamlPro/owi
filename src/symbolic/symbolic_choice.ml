@@ -395,9 +395,10 @@ let summary_symbol (e : Smtml.Expr.t) =
   | Symbol sym -> return (None, sym)
   | _ ->
     let choices = Thread.choices thread in
-    let symbol_name = Format.sprintf "choice_i32_%i" choices in
     let+ () = modify_thread Thread.incr_choices in
-    let sym = Smtml.Symbol.(symbol_name @: Ty_bitv 32) in
+    let sym_name = Format.sprintf "choice_i32_%i" choices in
+    let sym_type = Smtml.Ty.Ty_bitv 32 in
+    let sym = Smtml.Symbol.make sym_type sym_name in
     let assign = Smtml.Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
     (Some assign, sym)
 
@@ -418,14 +419,15 @@ let select_i32 (i : Symbolic_value.int32) =
         | Smtml.Value.Num (I32 i) -> i
         | _ -> failwith "Unreachable: found symbol must be a value"
       in
+      let s = Smtml.Expr.mk_symbol symbol in
       let this_value_cond =
         let open Smtml.Expr in
-        Bitv.I32.(mk_symbol symbol = v i)
+        Bitv.I32.(s = v i)
       in
       let not_this_value_cond =
         let open Smtml.Expr in
         (* != is **not** the physical inequality here *)
-        Bitv.I32.(mk_symbol symbol != v i)
+        Bitv.I32.(s != v i)
       in
       let this_val_branch =
         let* () = add_breadcrumb i in
