@@ -235,7 +235,7 @@ let run_file ~unsafe ~optimize pc filename =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) files =
+  deterministic_result_order (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -244,7 +244,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread : Thread.t = Thread.create () in
-  let results = Symbolic_choice.run ~workers result thread in
+  let results = Symbolic_choice.run ~workers solver result thread in
   let print_bug = function
     | `ETrap (tr, model) ->
       Format.pp_std "Trap: %s@\n" (Trap.to_string tr);

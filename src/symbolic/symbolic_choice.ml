@@ -65,7 +65,12 @@ module CoreImpl : sig
 
   type 'a run_result = ('a eval * Thread.t) Seq.t
 
-  val run : workers:int -> 'a t -> Thread.t -> 'a run_result
+  val run :
+       workers:int
+    -> Smtml.Solver_dispatcher.solver_type
+    -> 'a t
+    -> Thread.t
+    -> 'a run_result
 end = struct
   module Schedulable = struct
     (*
@@ -162,15 +167,13 @@ end = struct
     let spawn_worker sched wls_init =
       Wq.make_pledge sched.res_writer;
       Domain.spawn (fun () ->
-          let wls = wls_init () in
           Fun.protect
-            ~finally:(fun () -> Wq.end_pledge sched.res_writer)
+            ~finally:(fun () ->
+              Wq.end_pledge sched.res_writer;
+              Wq.fail sched.work_queue )
             (fun () ->
-              try work wls sched
-              with e ->
-                let bt = Printexc.get_raw_backtrace () in
-                Wq.fail sched.work_queue;
-                Printexc.raise_with_backtrace e bt ) )
+              let wls = wls_init () in
+              work wls sched ) )
   end
 
   module State = struct
@@ -295,13 +298,13 @@ end = struct
 
   type 'a run_result = ('a eval * Thread.t) Seq.t
 
-  let run ~workers t thread =
+  let run ~workers solver t thread =
     let open Scheduler in
     let sched = init_scheduler () in
     add_init_task sched (State.run t thread);
     let join_handles =
       Array.map
-        (fun () -> spawn_worker sched Solver.fresh)
+        (fun () -> spawn_worker sched (Solver.fresh solver))
         (Array.init workers (Fun.const ()))
     in
     Wq.read_as_seq sched.res_writer ~finalizer:(fun () ->

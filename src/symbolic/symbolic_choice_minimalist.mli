@@ -12,4 +12,9 @@ include
      and type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
      and module V := Symbolic_value
 
-val run : workers:int -> 'a t -> Thread.t -> 'a run_result
+val run :
+     workers:int
+  -> Smtml.Solver_dispatcher.solver_type
+  -> 'a t
+  -> Thread.t
+  -> 'a run_result

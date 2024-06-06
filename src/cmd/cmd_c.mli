@@ -19,4 +19,5 @@ val cmd :
   -> bool
   -> bool
   -> bool
+  -> Smtml.Solver_dispatcher.solver_type
   -> unit Result.t

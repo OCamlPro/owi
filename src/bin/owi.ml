@@ -22,6 +22,18 @@ let dir_file =
   let parse s = `Ok (Fpath.v s) in
   (parse, Fpath.pp)
 
+let solver_conv =
+  Cmdliner.Arg.conv
+    ( Smtml.Solver_dispatcher.solver_type_of_string
+    , Smtml.Solver_dispatcher.pp_solver_type )
+
+let deterministic_result_order =
+  let doc =
+    "Guarantee a fixed deterministic order of found failures. This implies \
+     --no-stop-at-failure."
+  in
+  Cmdliner.Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
+
 let files =
   let doc = "source files" in
   let f = existing_non_dir_file in
@@ -39,13 +51,6 @@ let no_values =
   let doc = "do not display a value for each symbol" in
   Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
 
-let deterministic_result_order =
-  let doc =
-    "Guarantee a fixed deterministic order of found failures. This implies \
-     --no-stop-at-failure."
-  in
-  Cmdliner.Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
-
 let optimize =
   let doc = "optimize mode" in
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
@@ -53,6 +58,13 @@ let optimize =
 let profiling =
   let doc = "profiling mode" in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
+
+let solver =
+  let doc = "SMT solver to use" in
+  Cmdliner.Arg.(
+    value
+    & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
+    & info [ "solver"; "s" ] ~doc )
 
 let unsafe =
   let doc = "skip typechecking pass" in
@@ -123,7 +135,8 @@ let c_cmd =
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic
+      $ solver )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -189,7 +202,7 @@ let sym_cmd =
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ files )
+      $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -202,7 +215,7 @@ let conc_cmd =
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ files )
+      $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in

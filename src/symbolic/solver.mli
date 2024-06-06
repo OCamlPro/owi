@@ -4,7 +4,7 @@
 
 type t
 
-val fresh : unit -> t
+val fresh : Smtml.Solver_dispatcher.solver_type -> unit -> t
 
 val check : t -> Smtml.Expr.t list -> Smtml.Solver_intf.satisfiability
 

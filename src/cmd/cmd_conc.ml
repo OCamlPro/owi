@@ -590,7 +590,7 @@ let launch solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) files =
+  deterministic_result_order (workspace : Fpath.t) solver files =
   ignore (workers, no_stop_at_failure, deterministic_result_order, workspace);
 
   if profiling then Log.profiling_on := true;
@@ -599,7 +599,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
-  let solver = Solver.fresh () in
+  let solver = Solver.fresh solver () in
   let* link_state, modules_to_run =
     simplify_then_link_files ~unsafe ~optimize files
   in
