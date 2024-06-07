@@ -36,7 +36,7 @@ let make_pledge q =
 let end_pledge q =
   Mutex.lock q.mutex;
   q.pledges <- q.pledges - 1;
-  Condition.broadcast q.cond;
+  if q.pledges = 0 then Condition.broadcast q.cond;
   Mutex.unlock q.mutex
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
@@ -49,9 +49,8 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
 
 let push v q =
   Mutex.lock q.mutex;
-  let was_empty = Queue.is_empty q.queue in
   Queue.push v q.queue;
-  if was_empty then Condition.broadcast q.cond;
+  Condition.signal q.cond;
   Mutex.unlock q.mutex
 
 let fail q =
