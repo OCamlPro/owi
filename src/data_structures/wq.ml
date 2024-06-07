@@ -27,8 +27,7 @@ let fail = Synchronizer.fail
 let make () =
   let q = Queue.create () in
   let writter v condvar =
-    let was_empty = Queue.is_empty q in
     Queue.push v q;
-    if was_empty then Condition.broadcast condvar
+    Condition.signal condvar
   in
   Synchronizer.init (fun () -> Queue.take_opt q) writter

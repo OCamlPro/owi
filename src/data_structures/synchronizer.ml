@@ -46,7 +46,7 @@ let make_pledge synchro =
 let end_pledge synchro =
   Mutex.lock synchro.mutex;
   synchro.pledges <- synchro.pledges - 1;
-  Condition.broadcast synchro.cond;
+  if Int.equal synchro.pledges 0 then Condition.broadcast synchro.cond;
   Mutex.unlock synchro.mutex
 
 let fail q =
