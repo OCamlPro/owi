@@ -1,5 +1,6 @@
 ## unreleased
 
+- support the extended const proposal
 - `owi opt` and `owi sym` can run on `.wasm` files directly
 - remove dependency on `wabt`
 - better API for `Parse`, `Compile` and `Simplified` (renamed to `Binary`), added a `Binary_to_text` module

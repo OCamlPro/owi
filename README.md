@@ -67,8 +67,8 @@ We only list proposals that reached phase 3 at least.
 | ------------------------------------------------ | -------- |
 | [Tail call]                                      |  ✔️       |
 | [Typed Function References]                      |  ✔️       |
+| [Extended Constant Expressions]                  |  ✔️       |
 | [Garbage collection]                             |  Ongoing |
-| [Extended Constant Expressions]                  |  ❌      |
 | [Multiple memories]                              |  ❌      |
 | [Custom Annotation Syntax in the Text Format]    |  ❌      |
 | [Memory64]                                       |  ❌      |
