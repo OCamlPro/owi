@@ -351,7 +351,7 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
       match mut with
       | Const -> ok @@ Global_get (Raw idx)
       | Var -> Error `Constant_expression_required
-      end
+    end
     | Ref_null v ->
       let+ v = Binary_types.convert_heap_type None v in
       Ref_null v
@@ -364,7 +364,8 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
     | Array_new_default t ->
       let+ t = find "unknown type" modul.typ (Some t) in
       Array_new_default t
-    | (I32_const _ | I64_const _ | F32_const _ | F64_const _ | Ref_i31) | I_binop (_, (Add | Sub | Mul)) as i ->
+    | ( I32_const _ | I64_const _ | F32_const _ | F64_const _ | Ref_i31
+      | I_binop (_, (Add | Sub | Mul)) ) as i ->
       Ok i
     | _i -> Error `Constant_expression_required
   in
