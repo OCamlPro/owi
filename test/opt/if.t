@@ -1,5 +1,6 @@
 if then else instruction:
-  $ owi opt if.wat
+  $ owi opt if.wat > if.opt.wat
+  $ cat if.opt.wat
   (module
     (func $start
       (block (result i32)
@@ -11,3 +12,4 @@ if then else instruction:
     )
     (start 0)
   )
+  $ owi run if.opt.wat

@@ -1,5 +1,6 @@
 br instructions:
-  $ owi opt br.wat
+  $ owi opt br.wat > br.opt.wat
+  $ cat br.opt.wat
   (module
     (func $br
       i32.const 42
@@ -14,3 +15,4 @@ br instructions:
     )
     (start 2)
   )
+  $ owi run br.opt.wat

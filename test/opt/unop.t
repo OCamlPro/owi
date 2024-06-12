@@ -1,5 +1,6 @@
 unop () instructions:
-  $ owi opt unop.wat
+  $ owi opt unop.wat > unop.opt.wat
+  $ cat unop.opt.wat
   (module
     (func $iunop
       
@@ -17,3 +18,4 @@ unop () instructions:
     )
     (start 3)
   )
+  $ owi run unop.opt.wat

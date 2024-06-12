@@ -1,5 +1,6 @@
 return instructions:
-  $ owi opt return.wat
+  $ owi opt return.wat > return.opt.wat
+  $ cat return.opt.wat
   (module
     (table $tab 1 1 (ref null func))
     (func $return (result i32)
@@ -24,3 +25,4 @@ return instructions:
     (elem (table 0) (offset i32.const 0) (ref null func) (item ref.func 0))
     (start 3)
   )
+  $ owi run return.opt.wat

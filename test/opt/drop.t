@@ -1,5 +1,6 @@
 drop instruction:
-  $ owi opt drop.wat
+  $ owi opt drop.wat > drop.opt.wat
+  $ cat drop.opt.wat
   (module
     (global $g i32 i32.const 0)
     (func $start
@@ -14,3 +15,4 @@ drop instruction:
     )
     (start 0)
   )
+  $ owi run drop.opt.wat

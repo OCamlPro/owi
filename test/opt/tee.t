@@ -1,5 +1,6 @@
 set get tee simplification:
-  $ owi opt tee.wat
+  $ owi opt tee.wat > tee.opt.wat
+  $ cat tee.opt.wat
   (module
     (func $start (local $x i32)
       i32.const 41
@@ -10,3 +11,4 @@ set get tee simplification:
     )
     (start 0)
   )
+  $ owi run tee.opt.wat

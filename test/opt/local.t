@@ -1,5 +1,6 @@
 unused local variables:
-  $ owi opt local.wat
+  $ owi opt local.wat > local.opt.wat
+  $ cat local.opt.wat
   (module
     (func $f0 (local i32)
       i32.const 0
@@ -48,3 +49,4 @@ unused local variables:
     )
     (start 7)
   )
+  $ owi run local.opt.wat

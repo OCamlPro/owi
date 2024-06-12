@@ -1,5 +1,6 @@
 **.eq eqz lt gt ...  instructions:
-  $ owi opt relop_testop.wat
+  $ owi opt relop_testop.wat > relop_testop.opt.wat
+  $ cat relop_testop.opt.wat
   (module
     (func $i32relop
       
@@ -25,3 +26,4 @@
     )
     (start 5)
   )
+  $ owi run relop_testop.opt.wat
