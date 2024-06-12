@@ -1,5 +1,6 @@
 i**.extend_** i32.wrap_i64 instructions:
-  $ owi opt extend_wrap.wat
+  $ owi opt extend_wrap.wat > extend_wrap.opt.wat
+  $ cat extend_wrap.opt.wat
   (module
     (func $extend
       
@@ -13,3 +14,4 @@ i**.extend_** i32.wrap_i64 instructions:
     )
     (start 2)
   )
+  $ owi run extend_wrap.opt.wat

@@ -1,5 +1,6 @@
 **.trunc_** **.trunc_sat_** instructions:
-  $ owi opt trunc.wat
+  $ owi opt trunc.wat > trunc.opt.wat
+  $ cat trunc.opt.wat
   (module
     (func $trunc
       
@@ -13,3 +14,4 @@
     )
     (start 2)
   )
+  $ owi run trunc.opt.wat

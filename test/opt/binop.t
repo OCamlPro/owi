@@ -1,5 +1,6 @@
 binary operations instructions:
-  $ owi opt binop.wat
+  $ owi opt binop.wat > binop.opt.wat
+  $ cat binop.opt.wat
   (module
     (func $i32binop
       
@@ -21,3 +22,4 @@ binary operations instructions:
     )
     (start 4)
   )
+  $ owi run binop.opt.wat
