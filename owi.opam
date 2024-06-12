@@ -31,7 +31,7 @@ depends: [
   "odoc" {with-doc}
   "crunch" {dev}
   "bos"
-  "smtml"
+  "smtml" {>= "0.1.1"}
   "mdx" {with-test & >= "2.1"}
   "crowbar" {with-test}
   "graphics" {dev}

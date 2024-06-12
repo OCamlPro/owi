@@ -60,7 +60,7 @@
   (odoc :with-doc)
   (crunch :dev)
   bos
-  smtml
+  (smtml (>= 0.1.1))
   (mdx
    (and
     :with-test
