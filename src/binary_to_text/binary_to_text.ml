@@ -104,6 +104,7 @@ let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
         let desc = Import_global (assigned_name, convert_global_type desc) in
         MImport { modul; name; desc } :: acc )
     global []
+  |> List.rev
 
 let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
   Text.module_field list =
@@ -117,6 +118,7 @@ let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
         let desc = Import_table (assigned_name, convert_table_type desc) in
         MImport { modul; name; desc } :: acc )
     table []
+  |> List.rev
 
 let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
   Named.fold
@@ -127,6 +129,7 @@ let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
         let desc = Import_mem (assigned_name, desc) in
         MImport { modul; name; desc } :: acc )
     mem []
+  |> List.rev
 
 let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
   Text.module_field list =
@@ -143,6 +146,7 @@ let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
         let desc = Import_func (assigned_name, convert_block_type desc) in
         MImport { modul; name; desc } :: acc )
     func []
+  |> List.rev
 
 let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
   Named.fold
@@ -150,6 +154,7 @@ let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
       let elem = convert_elem elem in
       MElem elem :: acc )
     elem []
+  |> List.rev
 
 let from_data (data : Binary.data Named.t) : Text.module_field list =
   Named.fold
@@ -157,6 +162,7 @@ let from_data (data : Binary.data Named.t) : Text.module_field list =
       let data = convert_data data in
       MData data :: acc )
     data []
+  |> List.rev
 
 let from_exports (exports : Binary.exports) : Text.module_field list =
   let global =
