@@ -201,12 +201,12 @@ let modul { Binary.id; global; table; mem; func; elem; data; start; exports } =
     @ from_elem elem @ from_data data @ from_exports exports @ from_start start
   in
   let imported, locals =
-    List.fold_left
-      (fun (imported, locals) -> function
-        | MImport _ as import -> (import :: imported, locals)
-        | local -> (imported, local :: locals) )
-      ([], []) fields
+    List.partition_map
+      (function
+        | MImport _ as import -> Either.Left import
+        | local -> Either.Right local )
+      fields
   in
-  let fields = imported @ List.rev locals in
+  let fields = imported @ locals in
 
   { Text.id; fields }
