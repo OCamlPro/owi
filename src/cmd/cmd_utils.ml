@@ -4,7 +4,7 @@
 
 open Syntax
 
-let add_main_to_run (m : Binary.modul) =
+let add_main_as_start (m : Binary.modul) =
   (* We are checking if there's a start function *)
   if Option.is_some m.start then Ok m
   else
