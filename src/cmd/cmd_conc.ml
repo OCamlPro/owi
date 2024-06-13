@@ -178,50 +178,18 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   Choice.bind t (fun t ->
       match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
-let simplify_then_link_text_module ~unsafe ~optimize link_state (m : Text.modul)
-    =
-  let has_start =
-    List.exists (function Text.MStart _ -> true | _ -> false) m.fields
-  in
-  let has_start_id_function =
-    List.exists
-      (function Text.MFunc { id = Some "_start"; _ } -> true | _ -> false)
-      m.fields
-  in
-  let fields =
-    if has_start || not has_start_id_function then m.fields
-    else MStart (Text "_start") :: m.fields
-  in
-  let m = { m with fields } in
-  Compile.Text.until_link ~unsafe link_state ~optimize ~name:None m
-
-let simplify_then_link_binary_module ~unsafe ~optimize link_state
-  (m : Binary.modul) =
-  let start =
-    if Option.is_some m.start then m.start
-    else
-      match
-        List.find_opt
-          (function { Binary.name = "_start"; _ } -> true | _ -> false)
-          m.exports.func
-      with
-      | None -> None
-      | Some export -> Some export.id
-  in
-  let m = { m with start } in
-  Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
-
 let simplify_then_link ~unsafe ~optimize link_state m =
-  let+ m, link_state =
+  let* m =
     match m with
     | Either.Left (Either.Left text_module) ->
-      simplify_then_link_text_module ~unsafe ~optimize link_state text_module
-    | Either.Left (Either.Right _text_script) ->
+      Compile.Text.until_binary ~unsafe text_module
+    | Either.Left (Either.Right _text_scrpt) ->
       Error (`Msg "can't run concolic interpreter on a script")
-    | Either.Right binary_module ->
-      let* binary_module = Cmd_utils.add_main_to_run binary_module in
-      simplify_then_link_binary_module ~unsafe ~optimize link_state
-        binary_module
+    | Either.Right binary_module -> Ok binary_module
+  in
+  let* m = Cmd_utils.add_main_as_start m in
+  let+ m, link_state =
+    Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)
