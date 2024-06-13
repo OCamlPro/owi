@@ -71,13 +71,18 @@ let from_file file =
       | [ "Other"; n; "in"; t1; t2; t3 ] ->
         let* n = parse_int n in
         let+ rusage = parse_time t1 t2 t3 in
-        Run_result.Other (n, rusage)
+        Run_result.Other (rusage, n)
       | [ "Nothing"; "in"; t1; t2; t3 ] ->
         let+ rusage = parse_time t1 t2 t3 in
         Run_result.Nothing rusage
-      | [ "Killed"; "in"; t1; t2; t3 ] ->
-        let+ rusage = parse_time t1 t2 t3 in
-        Run_result.Killed rusage
+      | [ "Signaled"; n; "in"; t1; t2; t3 ] ->
+        let* rusage = parse_time t1 t2 t3 in
+        let+ n = parse_int n in
+        Run_result.Stopped (rusage, n)
+      | [ "Stopped"; n; "in"; t1; t2; t3 ] ->
+        let* rusage = parse_time t1 t2 t3 in
+        let+ n = parse_int n in
+        Run_result.Signaled (rusage, n)
       | _ -> ksprintf error "malformed result: %S" result
     in
     { Run.i; res; file }
