@@ -137,17 +137,23 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
     Bos.OS.Dir.create ~path:true ~mode:0o755 output_dir
   in
   let dst_stderr = Fpath.(output_dir / "stderr") in
-  let pid = Unix.fork () in
   let result =
-    if pid = 0 then begin
-      ExtUnix.Specific.setpgid 0 0;
-      dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
-      dup ~dst:dst_stderr ~src:Unix.stderr;
-      execvp ~output_dir tool file (int_of_float timeout)
-    end
-    else begin
-      wait_pid ~pid ~timeout ~tool ~dst_stderr
-    end
+    let rec loop retries =
+      let pid = Unix.fork () in
+      if pid = 0 then begin
+        ExtUnix.Specific.setpgid 0 0;
+        dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
+        dup ~dst:dst_stderr ~src:Unix.stderr;
+        execvp ~output_dir tool file (int_of_float timeout)
+      end
+      else begin
+        match wait_pid ~pid ~timeout ~tool ~dst_stderr with
+        | (Signaled _ | Stopped _) as result ->
+          if retries = 0 then result else loop (pred retries)
+        | result -> result
+      end
+    in
+    loop 3
   in
   Format.fprintf fmt "%a@\n" Report.Run_result.pp result;
   result
