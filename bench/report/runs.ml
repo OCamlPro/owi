@@ -28,7 +28,8 @@ let count_other runs =
 
 let count_killed runs =
   List.fold_left
-    (fun count r -> match r.Run.res with Killed _ -> succ count | _ -> count)
+    (fun count r ->
+      match r.Run.res with Signaled _ | Stopped _ -> succ count | _ -> count )
     0 runs
 
 let keep_nothing = List.filter Run.is_nothing
@@ -92,7 +93,7 @@ let pp_quick_results fmt results =
       | Nothing _ -> incr nothing
       | Reached _ -> incr reached
       | Timeout _ -> incr timeout
-      | Killed _ -> incr killed
+      | Signaled _ | Stopped _ -> incr killed
       | Other _ -> incr other )
     results;
   Format.fprintf fmt

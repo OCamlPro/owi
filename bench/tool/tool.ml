@@ -63,7 +63,7 @@ let wait_pid =
         | Owi _ ->
           if code = 0 then Nothing rusage
           else if code = 13 then Reached rusage
-          else Other (code, rusage)
+          else Other (rusage, code)
         | Klee ->
           if code = 0 then begin
             let chan = open_in (Fpath.to_string dst_stderr) in
@@ -87,9 +87,10 @@ let wait_pid =
             close_in chan;
             if !has_found_error then Reached rusage else Nothing rusage
           end
-          else Other (code, rusage)
+          else Other (rusage, code)
       end
-      | WSIGNALED _ | WSTOPPED _ -> Killed rusage
+      | WSIGNALED n -> Signaled (rusage, n)
+      | WSTOPPED n -> Stopped (rusage, n)
 
 let execvp ~output_dir tool file timeout =
   let output_dir = Fpath.(output_dir / to_short_name tool) |> Fpath.to_string in

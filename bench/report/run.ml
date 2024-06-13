@@ -6,7 +6,13 @@ type t =
 
 let rusage { res; _ } =
   match res with
-  | Run_result.Reached t | Timeout t | Nothing t | Killed t | Other (_, t) -> t
+  | Run_result.Reached t
+  | Timeout t
+  | Nothing t
+  | Signaled (t, _)
+  | Stopped (t, _)
+  | Other (t, _) ->
+    t
 
 let clock run = (rusage run).clock
 
