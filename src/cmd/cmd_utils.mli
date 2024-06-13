@@ -4,3 +4,5 @@
 
 val write_testcase :
   dir:Fpath.t -> err:bool -> Smtml.Value.t list -> unit Result.t
+
+val add_main_as_start : Binary.modul -> (Binary.modul, [> `Msg of string ]) result
