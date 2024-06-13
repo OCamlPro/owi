@@ -12,6 +12,7 @@
   c_share_site
   check
   choice_intf
+  cmd_utils
   cmd_c
   cmd_fmt
   cmd_opt

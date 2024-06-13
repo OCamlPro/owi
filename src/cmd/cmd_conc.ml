@@ -219,6 +219,7 @@ let simplify_then_link ~unsafe ~optimize link_state m =
     | Either.Left (Either.Right _text_script) ->
       Error (`Msg "can't run concolic interpreter on a script")
     | Either.Right binary_module ->
+      let* binary_module = Cmd_utils.add_main_to_run binary_module in
       simplify_then_link_binary_module ~unsafe ~optimize link_state
         binary_module
   in
