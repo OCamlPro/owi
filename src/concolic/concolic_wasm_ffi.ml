@@ -73,6 +73,19 @@ module M :
         let n = Float64.of_bits n in
         (F64 n, Value.pair n (Expr.mk_symbol sym)) )
 
+  let symbol_bool () : Value.int32 Choice.t =
+    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Int32.logand 1l (Random.bits32 ())
+          | Some (Num (I32 n)) -> n
+          | _ -> assert false
+        in
+        let sym_expr =
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 31, Expr.mk_symbol sym))
+        in
+        (I32 n, Value.pair n sym_expr) )
+
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
     Concolic_choice.assume c
@@ -145,6 +158,9 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
+    ; ( "bool_symbol"
+      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Concolic.P.Extern_func.Extern_func
