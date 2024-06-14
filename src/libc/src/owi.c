@@ -15,6 +15,8 @@ __attribute__((import_module("symbolic"), import_name("f32_symbol"))) float
 owi_f32(void);
 __attribute__((import_module("symbolic"), import_name("f64_symbol"))) double
 owi_f64(void);
+__attribute__((import_module("symbolic"), import_name("bool_symbol"))) _Bool
+owi_bool(void);
 
 __attribute__((import_module("symbolic"), import_name("assume"))) void
 owi_assume(int);
