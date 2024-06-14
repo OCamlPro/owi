@@ -338,10 +338,15 @@ let fresh_tree pc =
 let new_node pc (head : Concolic_choice.pc_elt) : node =
   match head with
   | Select (cond, _) ->
-    Select { cond; if_true = fresh_tree pc; if_false = fresh_tree pc }
+    Select
+      { cond
+      ; if_true = fresh_tree (Select (cond, true) :: pc)
+      ; if_false = fresh_tree (Select (cond, false) :: pc)
+      }
   | Select_i32 (value, _) -> Select_i32 { value; branches = IMap.empty }
-  | Assume cond -> Assume { cond; cont = fresh_tree pc }
-  | Assert cond -> Assert { cond; cont = fresh_tree pc; disproved = None }
+  | Assume cond -> Assume { cond; cont = fresh_tree (Assume cond :: pc) }
+  | Assert cond ->
+    Assert { cond; cont = fresh_tree (Assert cond :: pc); disproved = None }
 
 let try_initialize pc node head =
   match node.node with
@@ -367,8 +372,8 @@ let rec add_trace pc node (trace : trace) to_update : eval_tree list =
     node :: to_update
   end
   | head_of_trace :: tail_of_trace -> (
-    let pc = head_of_trace :: pc in
     try_initialize pc node head_of_trace;
+    let pc = head_of_trace :: pc in
     match (node.node, head_of_trace) with
     | Not_explored, _ -> assert false
     | Unreachable, _ -> assert false
