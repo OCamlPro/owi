@@ -1,3 +1,5 @@
+(dirs :standard \ sv-benchmarks)
+
 (executable
  (name testcomp)
  (modules testcomp whitelist)
