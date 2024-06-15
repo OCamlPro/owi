@@ -75,4 +75,4 @@
   xmlm
   (hc (>= 0.3))
   dune-site)
- (sites (share pyc) (share binc) (share libc)))
+ (sites (share binc) (share libc)))

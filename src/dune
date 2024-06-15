@@ -8,7 +8,6 @@
   binary_parser
   binary_to_text
   binary_types
-  c_share
   c_share_site
   check
   choice_intf

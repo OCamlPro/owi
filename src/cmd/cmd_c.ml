@@ -11,6 +11,28 @@ type metadata =
   ; files : Fpath.t list
   }
 
+let binc_location = List.map Fpath.v C_share_site.Sites.binc
+
+let libc_location = List.map Fpath.v C_share_site.Sites.libc
+
+let find location file : Fpath.t Result.t =
+  let* l =
+    list_map
+      (fun dir ->
+        let filename = Fpath.append dir file in
+        match Bos.OS.File.exists filename with
+        | Ok true -> Ok (Some filename)
+        | Ok false -> Ok None
+        | Error (`Msg msg) -> Error (`Msg msg) )
+      location
+  in
+  let rec loop = function
+    | [] -> Error (`Msg (Format.asprintf "can't find file %a" Fpath.pp file))
+    | None :: tl -> loop tl
+    | Some file :: _tl -> Ok file
+  in
+  loop l
+
 let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
@@ -37,7 +59,10 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
 
   let out = Fpath.(v "a.out.wasm") in
-  let files = Cmd.of_list (List.map Fpath.to_string (C_share.libc :: files)) in
+
+  let* libc = find binc_location (Fpath.v "libc.wasm") in
+
+  let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
   let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let+ () = OS.Cmd.run clang in
@@ -98,7 +123,7 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   deterministic_result_order concolic solver : unit Result.t =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
-  let includes = C_share.lib_location @ includes in
+  let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* modul = compile ~includes ~opt_lvl files in
   let* () = metadata ~workspace arch property files in
