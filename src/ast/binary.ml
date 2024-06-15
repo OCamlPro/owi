@@ -50,7 +50,7 @@ type elem =
 
 type modul =
   { id : string option
-  ; types : binary str_type Named.t
+  ; types : binary rec_type Named.t
   ; global : (global, binary global_type) Runtime.t Named.t
   ; table : (binary table, binary table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t

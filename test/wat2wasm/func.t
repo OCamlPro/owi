@@ -26,6 +26,10 @@
   stack        : [  ]
   $ owi wasm2wat func.wasm
   (module
+    
+    (type (sub final  (func (param f32) (result f32))))
+    
+    (type (sub final  (func)))
     (func (param f32) (result f32) (local f32)
       f32.const 2.019_999_980_926_513_7
       local.tee 1

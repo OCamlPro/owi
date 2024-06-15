@@ -802,15 +802,17 @@ let pp_sub_type fmt (f, ids, t) =
 
 type 'a type_def = string option * 'a sub_type
 
-let pp_type_def fmt (id, t) =
-  pp fmt "@\n  @[<v>(type%a %a)@]" pp_id_opt id pp_sub_type t
+let pp_type_def_no_indent fmt (id, t) =
+  pp fmt "(type%a %a)" pp_id_opt id pp_sub_type t
+
+let pp_type_def fmt t = pp fmt "@\n  @[<v>%a@]" pp_type_def_no_indent t
 
 type 'a rec_type = 'a type_def list
 
 let pp_rec_type fmt l =
   match l with
   | [] -> ()
-  | [ t ] -> pp_type_def fmt t
+  | [ t ] -> pp fmt "@\n%a" pp_type_def_no_indent t
   | l -> pp fmt "(rec %a)" (pp_list ~pp_sep:pp_space pp_type_def) l
 
 let pp_start fmt start = pp fmt "(start %a)" pp_indice start

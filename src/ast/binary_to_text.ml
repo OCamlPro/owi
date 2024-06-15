@@ -39,15 +39,48 @@ let convert_param_type (pt : binary param_type) : text param_type =
 let convert_result_type (rt : binary result_type) : text result_type =
   List.map convert_val_type rt
 
+let convert_func_type ((pt, rt) : binary func_type) : text func_type =
+  (convert_param_type pt, convert_result_type rt)
+
 let convert_block_type (bt : binary block_type) : text block_type =
   match bt with
-  | Bt_raw (opt, (pt, rt)) ->
+  | Bt_raw (opt, ft) ->
     let opt =
       match opt with None -> None | Some i -> Some (convert_indice i)
     in
-    let pt = convert_param_type pt in
-    let rt = convert_result_type rt in
-    Bt_raw (opt, (pt, rt))
+    let ft = convert_func_type ft in
+    Bt_raw (opt, ft)
+
+let convert_storage_type (t : binary storage_type) : text storage_type =
+  match t with
+  | Val_storage_t vt -> Val_storage_t (convert_val_type vt)
+  | Val_packed_t _ as t -> t
+
+let convert_field_type ((m, t) : binary field_type) : text field_type =
+  (m, convert_storage_type t)
+
+let convert_struct_field ((name, field_types) : binary struct_field) :
+  text struct_field =
+  (name, List.map convert_field_type field_types)
+
+let convert_struct_type (t : binary struct_type) : text struct_type =
+  List.map convert_struct_field t
+
+let convert_str_type (str_t : binary str_type) : text str_type =
+  match str_t with
+  | Def_struct_t t -> Def_struct_t (convert_struct_type t)
+  | Def_array_t t -> Def_array_t (convert_field_type t)
+  | Def_func_t t -> Def_func_t (convert_func_type t)
+
+let convert_sub_type ((final, indices, str_type) : binary sub_type) :
+  text sub_type =
+  (final, List.map convert_indice indices, convert_str_type str_type)
+
+let convert_type_def ((name, sub_type) : binary type_def) : text type_def =
+  (name, convert_sub_type sub_type)
+
+let convert_rec_type (t : binary rec_type) : text rec_type =
+  List.map convert_type_def t
 
 let convert_expr (e : binary expr) : text expr =
   (* TODO: proper conversion ! *)
@@ -89,6 +122,15 @@ let convert_data (e : Binary.data) : Text.data =
   let { Binary.id; init; mode } : Binary.data = e in
   let mode = convert_data_mode mode in
   { id; init; mode }
+
+let from_types (types : Types.binary Types.rec_type Named.t) :
+  Text.module_field list =
+  Named.fold
+    (fun i (t : Types.binary Types.rec_type) acc ->
+      let t = convert_rec_type t in
+      (i, MType t) :: acc )
+    types []
+  |> List.sort compare |> List.map snd
 
 let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
   : Text.module_field list =
@@ -204,10 +246,10 @@ let from_start = function None -> [] | Some n -> [ MStart (Raw n) ]
 let modul
   { Binary.id; types; global; table; mem; func; elem; data; start; exports } =
   ignore types;
-  (* TODO: @Léo *)
   let fields =
-    from_global global @ from_table table @ from_mem mem @ from_func func
-    @ from_elem elem @ from_data data @ from_exports exports @ from_start start
+    from_types types @ from_global global @ from_table table @ from_mem mem
+    @ from_func func @ from_elem elem @ from_data data @ from_exports exports
+    @ from_start start
   in
   let imported, locals =
     List.partition_map

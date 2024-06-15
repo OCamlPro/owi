@@ -319,10 +319,17 @@ let read_FC input =
     (Table_fill tableidx, input)
   | i -> Error (`Msg (Format.sprintf "illegal opcode (1) %i" i))
 
+let block_type_of_rec_type t =
+  (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
+  match t with
+  | [ (_id, (_final, _subtypes, Def_func_t (pt, rt))) ] ->
+    Bt_raw (None, (pt, rt))
+  | _ -> assert false
+
 let read_block_type types input =
   match read_S33 input with
   | Ok (i, input) when i >= 0L ->
-    let block_type = types.(Int64.to_int i) in
+    let block_type = block_type_of_rec_type types.(Int64.to_int i) in
     Ok (block_type, input)
   | Error _ | Ok _ -> begin
     match read_byte ~msg:"read_block_type" input with
@@ -380,7 +387,7 @@ let rec read_instr types input =
   | '\x11' ->
     let* Raw typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Call_indirect (tableidx, types.(typeidx)), input)
+    (Call_indirect (tableidx, block_type_of_rec_type types.(typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
   | '\x1C' ->
@@ -715,7 +722,7 @@ let section_custom input =
   let+ (), input = consume_to_end () input in
   (Some name, input)
 
-let read_type id input =
+let read_type _id input =
   let* fcttype, input = read_byte ~msg:"read_type" input in
   let* () =
     if fcttype <> '\x60' then Error (`Msg "integer representation too long")
@@ -724,7 +731,7 @@ let read_type id input =
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
   let params = List.map (fun param -> (None, param)) params in
-  (Bt_raw (Some (Raw id), (params, results)), input)
+  ([ (None, (Final, [], Def_func_t (params, results))) ], input)
 
 let read_global_type input =
   let* val_type, input = read_valtype input in
@@ -931,7 +938,7 @@ let sections_iterate (input : Input.t) =
   let* type_section, input =
     section_parse input ~expected_id:'\x01' [] (vector read_type)
   in
-  let type_section_array = Array.of_list type_section in
+  let type_section = Array.of_list type_section in
 
   (* Custom *)
   let* _custom_sections', input = parse_many_custom_section input in
@@ -976,7 +983,7 @@ let sections_iterate (input : Input.t) =
   (* Globals *)
   let* global_section, input =
     section_parse input ~expected_id:'\x06' []
-      (vector_no_id (read_global type_section_array))
+      (vector_no_id (read_global type_section))
   in
 
   (* Custom *)
@@ -1006,7 +1013,7 @@ let sections_iterate (input : Input.t) =
   (* Elements *)
   let* element_section, input =
     section_parse input ~expected_id:'\x09' []
-    @@ vector_no_id (read_element type_section_array)
+    @@ vector_no_id (read_element type_section)
   in
 
   (* Custom *)
@@ -1027,7 +1034,7 @@ let sections_iterate (input : Input.t) =
   (* Code *)
   let* code_section, input =
     section_parse input ~expected_id:'\x0A' []
-      (vector_no_id (read_code type_section_array))
+      (vector_no_id (read_code type_section))
   in
 
   let* () =
@@ -1043,7 +1050,7 @@ let sections_iterate (input : Input.t) =
   (* Data *)
   let+ data_section, input =
     section_parse input ~expected_id:'\x0B' []
-      (vector_no_id (read_data type_section_array memory_section))
+      (vector_no_id (read_data type_section memory_section))
   in
 
   let* () =
@@ -1074,16 +1081,11 @@ let sections_iterate (input : Input.t) =
   in
 
   let indexed_of_list l = List.mapi Indexed.return l in
+  let indexed_of_array l = Array.mapi Indexed.return l |> Array.to_list in
 
   (* Types *)
   let types =
-    let typs =
-      List.map
-        (fun (Bt_raw (_ind, (params, results)) : binary block_type) ->
-          Def_func_t (params, results) )
-        type_section
-    in
-    let values = indexed_of_list typs in
+    let values = indexed_of_array type_section in
     { Named.values; named = String_map.empty }
   in
 
@@ -1126,8 +1128,11 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Runtime.Local
-            { type_f = type_section_array.(typeidx); locals; body; id = None }
-          )
+            { type_f = block_type_of_rec_type type_section.(typeidx)
+            ; locals
+            ; body
+            ; id = None
+            } )
         function_section code_section
     in
     let imported =
@@ -1139,7 +1144,7 @@ let sections_iterate (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = type_section_array.(typeidx)
+                 ; desc = block_type_of_rec_type type_section.(typeidx)
                  }
           | _not_a_function_import -> None )
         import_section

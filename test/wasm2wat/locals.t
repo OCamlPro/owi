@@ -1,5 +1,9 @@
   $ owi wasm2wat locals.wasm
   (module
+    
+    (type (sub final  (func (param i32) (param i32) (param i32))))
+    
+    (type (sub final  (func)))
     (func (param i32) (param i32) (param i32) (local i32) (local i32)
       local.get 3
       local.get 4
