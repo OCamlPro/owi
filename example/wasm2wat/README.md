@@ -7,6 +7,8 @@ Given a file `42.wasm`:
 ```sh
 $ owi wasm2wat ./42.wasm
 (module
+
+  (type (sub final  (func)))
   (func
     i32.const 20
     i32.const 22

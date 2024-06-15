@@ -22,6 +22,8 @@
   stack        : [  ]
   $ owi wasm2wat globals.wasm
   (module
+    
+    (type (sub final  (func)))
     (global i32 i32.const 42)
     (global (mut i64) i64.const 2)
     (func
