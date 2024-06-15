@@ -83,34 +83,36 @@ module M :
 
   open Expr
 
-  let i32 (v : Value.int32) =
+  let abort () : unit Choice.t = Choice.abort
+
+  let i32 (v : Value.int32) : int32 Choice.t =
     (* TODO: select_i32 ? *)
     (* let+ v = Choice.select_i32 v in *)
     (* let n = v.c in *)
     (* let x = Choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
     match view v.symbolic with
-    | Val (Num (I32 v)) -> v
+    | Val (Num (I32 v)) -> Choice.return v
     | _ ->
-      Log.err {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.symbolic
+      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.symbolic;
+      Choice.bind (abort ()) (fun () -> assert false)
 
-  let ptr (v : Value.int32) =
+  let ptr (v : Value.int32) : int32 Choice.t =
     match view v.symbolic with
-    | Ptr (b, _) -> b
+    | Ptr (b, _) -> Choice.return b
     | _ ->
-      Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic
-
-  let abort () : unit Choice.t = Choice.abort
+      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic;
+      Choice.bind (abort ()) (fun () -> assert false)
 
   let exit (p : Value.int32) : unit Choice.t =
     ignore p;
     abort ()
 
   let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
-    let base : int32 = i32 base in
-    Choice.return
-      { Concolic_value.concrete = base
-      ; symbolic = Expr.make (Ptr (base, Symbolic_value.const_i32 0l))
-      }
+    Choice.bind (i32 base) (fun (base : int32) ->
+        Choice.return
+          { Concolic_value.concrete = base
+          ; symbolic = Expr.make (Ptr (base, Symbolic_value.const_i32 0l))
+          } )
   (* WHAT ???? *)
   (* Choice.with_thread (fun t : Value.int32 -> *)
   (*     let memories = t.shared.memories in *)
