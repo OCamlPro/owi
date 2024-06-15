@@ -4,124 +4,7 @@
 
 open Syntax
 module Expr = Smtml.Expr
-module Value = Symbolic_value
 module Choice = Symbolic.P.Choice
-
-let symbolic_extern_module :
-  Symbolic.P.Extern_func.extern_func Link.extern_module =
-  let sym_cnt = Atomic.make 0 in
-  let symbol ty () : Value.int32 Choice.t =
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
-    let sym_expr = Expr.mk_symbol sym in
-    Choice.with_thread (fun thread ->
-        Thread.add_symbol thread sym;
-        match ty with
-        | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
-        | _ -> sym_expr )
-  in
-  let assume_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.to_bool i in
-    Choice.add_pc c
-  in
-  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.ge i Value.I32.zero in
-    Choice.add_pc c
-  in
-  let assert_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.to_bool i in
-    Choice.assertion c
-  in
-  (* we need to describe their types *)
-  let functions =
-    [ ( "i8_symbol"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol (Ty_bitv 8)) )
-    ; ( "i32_symbol"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol (Ty_bitv 32)) )
-    ; ( "i64_symbol"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 I64), symbol (Ty_bitv 64)) )
-    ; ( "f32_symbol"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F32), symbol (Ty_fp 32)) )
-    ; ( "f64_symbol"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (UArg Res, R1 F64), symbol (Ty_fp 64)) )
-    ; ( "assume"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_i32) )
-    ; ( "assume_positive_i32"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_positive_i32) )
-    ; ( "assert"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assert_i32) )
-    ]
-  in
-  { functions }
-
-let summaries_extern_module :
-  Symbolic.P.Extern_func.extern_func Link.extern_module =
-  let open Expr in
-  let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false in
-
-  let i32 v : int32 Choice.t =
-    match view v with
-    | Val (Num (I32 v)) -> Choice.return v
-    | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-  in
-  let ptr v : int32 Choice.t =
-    match view v with
-    | Ptr (b, _) -> Choice.return b
-    | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-  in
-  let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    Choice.bind (i32 base) (fun base ->
-        Choice.with_thread (fun t ->
-            let memories = Thread.memories t in
-            Symbolic_memory.iter
-              (fun tbl ->
-                Symbolic_memory.ITbl.iter
-                  (fun _ (m : Symbolic_memory.t) ->
-                    Symbolic_memory.replace_size m base size )
-                  tbl )
-              memories;
-            Expr.make (Ptr (base, Value.const_i32 0l)) ) )
-  in
-  let free (p : Value.int32) : unit Choice.t =
-    Choice.bind (ptr p) (fun base ->
-        Choice.with_thread (fun t ->
-            let memories = Thread.memories t in
-            Symbolic_memory.iter
-              (fun tbl ->
-                Symbolic_memory.ITbl.iter
-                  (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base)
-                  tbl )
-              memories ) )
-  in
-
-  let exit (p : Value.int32) : unit Choice.t =
-    ignore p;
-    abort ()
-  in
-  let functions =
-    [ ( "alloc"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
-    ; ( "dealloc"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
-    ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
-    ; ( "exit"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
-    ]
-  in
-  { functions }
 
 let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
@@ -132,10 +15,10 @@ let link_state =
     (let func_typ = Symbolic.P.Extern_func.extern_type in
      let link_state =
        Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
-         symbolic_extern_module
+         Symbolic_wasm_ffi.symbolic_extern_module
      in
      Link.extern_module' link_state ~name:"summaries" ~func_typ
-       summaries_extern_module )
+       Symbolic_wasm_ffi.summaries_extern_module )
 
 let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
   (m : Binary.modul) =

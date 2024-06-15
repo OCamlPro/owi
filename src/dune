@@ -26,6 +26,7 @@
   concolic
   concolic_choice
   concolic_value
+  concolic_wasm_ffi
   concrete
   concrete_choice
   concrete_global
@@ -64,6 +65,7 @@
   symbolic_memory
   symbolic_table
   symbolic_value
+  symbolic_wasm_ffi
   spectest
   stack
   string_map
@@ -78,6 +80,7 @@
   types
   value_intf
   v
+  wasm_ffi_intf
   wq
   wutf8)
  (private_modules
