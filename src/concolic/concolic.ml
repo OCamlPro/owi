@@ -82,9 +82,14 @@ module P = struct
 
     type t = (Concrete_table.t, Symbolic_table.t) cs
 
-    let get _t _i = failwith "TODO"
+    let get t i =
+      Concolic_value.V.pair
+        (Concrete_table.get t.concrete i)
+        (Symbolic_table.get t.symbolic i)
 
-    let set _t _i _v = failwith "TODO"
+    let set t i v =
+      Concrete_table.set t.concrete i v.concrete;
+      Symbolic_table.set t.symbolic i v.symbolic
 
     let size t = Concrete_table.size t.concrete
 
@@ -92,11 +97,19 @@ module P = struct
 
     let max_size t = Concrete_table.max_size t.concrete
 
-    let grow _t _new_size _x = failwith "TODO"
+    let grow t new_size x =
+      Concrete_table.grow t.concrete new_size x.concrete;
+      Symbolic_table.grow t.symbolic new_size x.symbolic
 
-    let fill _t _pos _len _x = failwith "TODO"
+    let fill t pos len x =
+      Concrete_table.fill t.concrete pos len x.concrete;
+      Symbolic_table.fill t.symbolic pos len x.symbolic
 
-    let copy ~t_src:_ ~t_dst:_ ~src:_ ~dst:_ ~len:_ = failwith "TODO"
+    let copy ~t_src ~t_dst ~src ~dst ~len =
+      Concrete_table.copy ~t_src:t_src.concrete ~t_dst:t_dst.concrete ~src ~dst
+        ~len;
+      Symbolic_table.copy ~t_src:t_src.symbolic ~t_dst:t_dst.symbolic ~src ~dst
+        ~len
   end
 
   module Memory = struct
