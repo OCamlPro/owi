@@ -112,8 +112,11 @@ let write_block_type buf (typ : binary block_type option) =
   | None | Some (Bt_raw (None, ([], []))) -> Buffer.add_char buf '\x40'
   | Some (Bt_raw (None, ([], [ vt ]))) -> write_valtype buf vt
   | Some (Bt_raw (None, (pt, _))) ->
-    write_paramtype buf pt (*TODO: bug? yes, modul.types *)
-  | _ -> assert false (* TODO: types link *)
+    write_paramtype buf pt
+    (* TODO: memo
+       will this pattern matching be enough with the use of the new modul.types field?
+    *)
+  | _ -> assert false (* TODO: same, new pattern matching cases ? *)
 
 let write_global_type buf ((mut, vt) : _ global_type) =
   write_valtype buf vt;
@@ -155,6 +158,13 @@ let write_table_import buf
   write_reftype buf heaptype;
   write_limits buf limits
 
+let write_func_import buf
+  ({ Imported.modul; name; desc = _; _ } : _ block_type Imported.t) =
+  write_string buf modul;
+  write_string buf name;
+  Buffer.add_char buf '\x00'
+(* TODO: How to get typeidx ? *)
+
 let write_fc buf i =
   Buffer.add_char buf '\xFC';
   write_u32_of_int buf i
@@ -194,6 +204,8 @@ let rec write_instr buf instr =
   | Call_indirect (idx, bt) ->
     add_char '\x11';
     write_block_type buf (Some bt);
+    (* TODO: get typeidx instead of block_type ?
+       (see call_indirect.wat test) *)
     write_indice buf idx
   | Drop -> add_char '\x1A'
   | Select None -> add_char '\x1B'
@@ -635,13 +647,7 @@ let encode_imports buf (funcs, tables, memories, globals) =
     List.length funcs + List.length tables + List.length memories
     + List.length globals
   in
-  List.iteri
-    (fun i { Imported.modul; name; _ } ->
-      write_string imp_buf modul;
-      write_string imp_buf name;
-      Buffer.add_char imp_buf '\x00';
-      write_u32_of_int imp_buf i (* TODO ? *) )
-    funcs;
+  List.iter (write_func_import imp_buf) funcs;
   List.iter (write_table_import imp_buf) tables;
   List.iter (write_memory_import imp_buf) memories;
   List.iter (write_global_import imp_buf) globals;
