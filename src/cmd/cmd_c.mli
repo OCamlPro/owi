@@ -20,5 +20,6 @@ val cmd :
   -> bool
   -> Cmd_sym.fail_mode
   -> bool
+  -> bool
   -> Smtml.Solver_dispatcher.solver_type
   -> unit Result.t
