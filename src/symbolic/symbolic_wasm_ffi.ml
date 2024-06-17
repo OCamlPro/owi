@@ -39,7 +39,10 @@ module M :
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  let symbol_bool = symbol (Ty_bitv 32)
+  let symbol_bool () = 
+    let open Choice in
+    let+ sym = symbol Ty_bool () in
+    Expr.make (Cvtop (Ty_bool, Smtml.Ty.OfBool, sym))
 
   open Expr
 
