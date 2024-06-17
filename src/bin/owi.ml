@@ -59,6 +59,10 @@ let profiling =
   let doc = "profiling mode" in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
+let eacsl =
+  let doc = "e-acsl mode" in
+  Cmdliner.Arg.(value & flag & info [ "e-acsl" ] ~doc)
+
 let solver =
   let doc = "SMT solver to use" in
   Cmdliner.Arg.(
@@ -136,7 +140,7 @@ let c_cmd =
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic
-      $ solver )
+      $ eacsl $ solver )
 
 let fmt_cmd =
   let open Cmdliner in
