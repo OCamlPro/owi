@@ -4,7 +4,12 @@ val to_short_name : t -> string
 
 val to_reference_name : t -> string
 
-val mk_owi : concolic:bool -> workers:int -> optimisation_level:int -> t
+val mk_owi :
+     concolic:bool
+  -> workers:int
+  -> optimisation_level:int
+  -> solver:Smtml.Solver_dispatcher.solver_type
+  -> t
 
 val mk_klee : unit -> t
 

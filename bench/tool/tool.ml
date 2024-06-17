@@ -1,8 +1,11 @@
+module S = Smtml.Solver_dispatcher
+
 type t =
   | Owi of
       { concolic : bool
       ; optimisation_level : int
       ; workers : int
+      ; solver : S.solver_type
       }
   | Klee
 
@@ -11,13 +14,14 @@ let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 let to_short_name = function Owi _ -> "owi" | Klee -> "klee"
 
 let to_reference_name = function
-  | Owi { concolic; workers; optimisation_level } ->
-    Format.sprintf "owi_w%d_O%d%s" workers optimisation_level
+  | Owi { concolic; workers; optimisation_level; solver } ->
+    Format.asprintf "owi_w%d_O%d_s%a%s" workers optimisation_level
+      S.pp_solver_type solver
       (if concolic then "_concolic" else "")
   | Klee -> "klee"
 
-let mk_owi ~concolic ~workers ~optimisation_level =
-  Owi { concolic; workers; optimisation_level }
+let mk_owi ~concolic ~workers ~optimisation_level ~solver =
+  Owi { concolic; workers; optimisation_level; solver }
 
 let mk_klee () = Klee
 
@@ -98,7 +102,7 @@ let execvp ~output_dir tool file timeout =
   let timeout = string_of_int timeout in
   let bin, args =
     match tool with
-    | Owi { workers; optimisation_level; concolic } ->
+    | Owi { workers; optimisation_level; concolic; solver } ->
       ( "owi"
       , [ "owi"; "c" ]
         @ (if concolic then [ "--concolic" ] else [])
@@ -107,6 +111,8 @@ let execvp ~output_dir tool file timeout =
           ; Format.sprintf "-w%d" workers
           ; "-o"
           ; output_dir
+          ; "--solver"
+          ; Format.asprintf "%a" S.pp_solver_type solver
           ; file
           ] )
     | Klee ->

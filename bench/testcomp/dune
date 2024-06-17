@@ -3,7 +3,7 @@
 (executable
  (name testcomp)
  (modules testcomp whitelist)
- (libraries bos fpath report tool yaml unix))
+ (libraries bos fpath report tool yaml unix smtml))
 
 (rule
  (deps whitelist.txt)
