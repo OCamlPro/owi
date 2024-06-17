@@ -1,2 +1,12 @@
 (cram
- (deps %{bin:owi} bad.ext func.wat globals.wat loop.wat mem.wat rec.wat))
+ (deps
+  %{bin:owi}
+  bad.ext
+  call_indirect.wat
+  concolic.wat
+  func.wat
+  globals.wat
+  loop.wat
+  mem.wat
+  rec.wat
+  symbolic.wat))

@@ -3,6 +3,7 @@
     (local $cloop i32)
     i32.const 0
     local.set $cloop
+    ;; f32.const 42
     (loop $l (result i64) ;; TODO: add (param f32)
       local.get $cloop
       i32.const 1
@@ -10,10 +11,13 @@
       local.tee $cloop
       local.get $nloop
       i32.ne
-      (if
-        (then br $l)
+      (if 
+        (then
+          ;; f32.const 42
+          br $l)
         (else nop))
       ;; br_if $l
+      ;; drop
       i64.const 42
     )
   )
