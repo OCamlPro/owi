@@ -2,3 +2,4 @@ _build
 _coverage
 owi-out
 results-*
+a.out.wasm
