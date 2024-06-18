@@ -74,17 +74,16 @@ module M :
         (F64 n, Value.pair n (Expr.mk_symbol sym)) )
 
   let symbol_bool () : Value.int32 Choice.t =
-    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-        let n =
+    Choice.with_new_symbol Ty_bool (fun sym forced_value ->
+        let b =
           match forced_value with
-          | None -> Int32.logand 1l (Random.bits32 ())
-          | Some (Num (I32 n)) -> n
+          | None -> Random.bool ()
+          | Some True -> true
+          | Some False -> false
           | _ -> assert false
         in
-        let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 31, Expr.mk_symbol sym))
-        in
-        (I32 n, Value.pair n sym_expr) )
+        let n = V.Bool.int32 b in
+        (I32 n, Value.(Bool.int32 (pair b (Expr.mk_symbol sym)))) )
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
