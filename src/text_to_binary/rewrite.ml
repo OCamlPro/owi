@@ -5,6 +5,19 @@
 open Types
 open Syntax
 
+module StrType = struct
+  type t = binary str_type
+
+  let compare = compare
+end
+
+module TypeMap = Map.Make (StrType)
+
+let typemap (types : binary str_type Named.t) =
+  Named.fold
+    (fun idx typ acc -> TypeMap.add typ (Raw idx) acc)
+    types TypeMap.empty
+
 let find msg (named : 'a Named.t) (indice : text indice option) :
   binary indice Result.t =
   match indice with
@@ -74,7 +87,9 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     | Bt_ind ind -> begin
       let* v = get "unknown type" modul.typ (Some ind) in
       match Indexed.get v with
-      | Def_func_t t' -> Ok (Bt_raw (None, t'))
+      | Def_func_t t' ->
+        let idx = Indexed.get_index v in
+        Ok (Bt_raw (Some (Raw idx), t'))
       | _ -> assert false
     end
     | Bt_raw (type_use, t) -> (
@@ -371,18 +386,28 @@ let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
   in
   list_map const_instr expr
 
-let rewrite_block_type (modul : Assigned.t) (block_type : text block_type) :
-  binary block_type Result.t =
+let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (block_type : text block_type) : binary block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
     let* v = get "unknown type" modul.typ (Some id) in
     match Indexed.get v with
-    | Def_func_t t' -> Ok (Bt_raw (None, t'))
+    | Def_func_t t' ->
+      let idx = Indexed.get_index v in
+      Ok (Bt_raw (Some (Raw idx), t'))
     | _ -> assert false
   end
   | Bt_raw (_, func_type) ->
     let* t = Binary_types.convert_func_type None func_type in
-    Ok (Bt_raw (None, t))
+    let* idx =
+      try Ok (TypeMap.find (Def_func_t t) typemap)
+      with Not_found ->
+        Error
+          (`Msg
+            (Format.asprintf "Missing func type in index table %a" pp_func_type
+               t ) )
+    in
+    Ok (Bt_raw (Some idx, t))
 
 let rewrite_global (modul : Assigned.t) (global : Text.global) :
   Binary.global Result.t =
@@ -441,9 +466,9 @@ let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
   let+ func = rewrite_export "unknown function" modul.func exports.func in
   { Binary.global; mem; table; func }
 
-let rewrite_func (modul : Assigned.t) (func : text func) : binary func Result.t
-    =
-  let* type_f = rewrite_block_type modul func.type_f in
+let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (func : text func) : binary func Result.t =
+  let* type_f = rewrite_block_type typemap modul func.type_f in
   let (Bt_raw ((None | Some _), (params, _))) = type_f in
   let* locals = list_map (Binary_types.convert_param None) func.locals in
   let+ body = rewrite_expr modul (params @ locals) func.body in
@@ -475,8 +500,15 @@ let rewrite_named f named =
   in
   { named with Named.values }
 
+let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
+  binary rec_type Result.t =
+  (* TODO: the input `t` should actually be a `binary rec_type` *)
+  let t = [ (None, (Final, [], t)) ] in
+  Ok t
+
 let modul (modul : Assigned.t) : Binary.modul Result.t =
   Log.debug0 "rewriting    ...@\n";
+  let typemap = typemap modul.typ in
   let* (global : (Binary.global, binary global_type) Runtime.t Named.t) =
     let* { Named.named; values } =
       rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
@@ -491,10 +523,11 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let* data = rewrite_named (rewrite_data modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
   let* (func : (binary func, binary block_type) Runtime.t Named.t) =
-    let import = rewrite_import (rewrite_block_type modul) in
-    let runtime = rewrite_runtime (rewrite_func modul) import in
+    let import = rewrite_import (rewrite_block_type typemap modul) in
+    let runtime = rewrite_runtime (rewrite_func typemap modul) import in
     rewrite_named runtime modul.func
   in
+  let* types = rewrite_named (rewrite_types modul) modul.typ in
   let+ start =
     match modul.start with
     | None -> Ok None
@@ -519,7 +552,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
     { id = modul.id
     ; mem = modul.mem
     ; table = modul.table
-    ; types = Named.empty (* TODO: @Pierre *)
+    ; types
     ; global
     ; elem
     ; data
