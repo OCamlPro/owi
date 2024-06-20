@@ -626,22 +626,24 @@ let encode_section buf id encode_func data =
   end
 
 (* type: section 1 *)
-let encode_types buf funcs =
-  encode_vector buf funcs
-    (fun buf { type_f = (Bt_raw (_ind, (pt, rt)) : binary block_type); _ } ->
-      Buffer.add_char buf '\x60';
-      write_paramtype buf pt;
-      write_resulttype buf rt )
-
-(* let encode_types_tmp buf { Named.values = types; _ } =
-   encode_vector buf types (fun buf typ ->
-     let typ = Indexed.get typ in
-     match typ with
-     | Def_func_t (pt, rt) ->
-       Buffer.add_char buf '\x60';
-       write_paramtype buf pt;
-       write_resulttype buf rt
-     | _ -> assert false ) *)
+let encode_types buf (rec_types : binary rec_type Named.t) =
+  encode_vector buf rec_types.values
+    (fun buf (typ : binary rec_type Indexed.t) ->
+      let typ = Indexed.get typ in
+      match typ with
+      | [] -> assert false
+      | _ :: _ :: _ ->
+        (* TODO rec types *)
+        assert false
+      | [ typ ] -> (
+        match typ with
+        | _name, (Final, _idx, Def_func_t (pt, rt)) ->
+          Buffer.add_char buf '\x60';
+          write_paramtype buf pt;
+          write_resulttype buf rt
+        | _ ->
+          (* TODO non final types and other type declarations *)
+          assert false ) )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =
@@ -752,8 +754,7 @@ let encode (modul : Binary.modul) =
   (* magic *)
   Buffer.add_string buf "\x01\x00\x00\x00";
   (* version *)
-  encode_section buf '\x01' encode_types local_funcs;
-  (* encode_section buf '\x01' encode_types_tmp modul.types; *)
+  encode_section buf '\x01' encode_types modul.types;
   encode_section buf '\x02' encode_imports
     (imported_funcs, imported_tables, imported_memories, imported_globals);
   encode_section buf '\x03' encode_functions local_funcs;
