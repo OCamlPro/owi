@@ -118,6 +118,11 @@ let write_block_type buf (typ : binary block_type option) =
     *)
   | _ -> assert false (* TODO: same, new pattern matching cases ? *)
 
+let write_block_type_idx buf (typ : binary block_type) =
+  match typ with
+  | Bt_raw (None, _) -> assert false
+  | Bt_raw (Some idx, _) -> write_indice buf idx
+
 let write_global_type buf ((mut, vt) : _ global_type) =
   write_valtype buf vt;
   write_mut buf mut
@@ -203,9 +208,7 @@ let rec write_instr buf instr =
   | Call idx -> write_char_indice buf '\x10' idx
   | Call_indirect (idx, bt) ->
     add_char '\x11';
-    write_block_type buf (Some bt);
-    (* TODO: get typeidx instead of block_type ?
-       (see call_indirect.wat test) *)
+    write_block_type_idx buf bt;
     write_indice buf idx
   | Drop -> add_char '\x1A'
   | Select None -> add_char '\x1B'
@@ -655,10 +658,10 @@ let encode_imports buf (funcs, tables, memories, globals) =
   Buffer.add_buffer buf imp_buf
 
 (* function: section 3 *)
-let encode_functions buf funcs =
+let encode_functions buf (funcs : binary func list) =
   let idx = ref 0 in
-  encode_vector buf funcs (fun buf _func ->
-      write_u32_of_int buf !idx;
+  encode_vector buf funcs (fun buf func ->
+      write_block_type_idx buf func.type_f;
       incr idx )
 
 (* table: section 4 *)
