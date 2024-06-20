@@ -56,7 +56,10 @@ let optimize =
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
 
 let profiling =
-  let doc = "profiling mode" in
+  let doc =
+    "profiling mode (including solver statistics display in the context of \
+     symbolic execution)"
+  in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
 let solver =

@@ -112,6 +112,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     else results
   in
   let* count = print_and_count_failures 0 results in
+  if profiling then
+    Format.pp_std "%a@\n" Smtml.Solver_dispatcher.pp_solver_type solver;
   if count > 0 then Error (`Found_bug count)
   else begin
     Format.pp_std "All OK";
