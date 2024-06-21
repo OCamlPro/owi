@@ -104,6 +104,17 @@ let add_data value (fields : t) (curr : curr) =
   ( { fields with data = Indexed.return index value :: fields.data }
   , { curr with data = succ curr.data } )
 
+let declare_func_type type_f (fields : t) =
+  match type_f with
+  | Bt_ind _ -> fields
+  | Bt_raw (id, typ) ->
+    let type_checks =
+      match id with
+      | None -> fields.type_checks
+      | Some id -> (id, typ) :: fields.type_checks
+    in
+    { fields with function_type = typ :: fields.function_type; type_checks }
+
 let check_limit { min; max } =
   match max with
   | None -> Ok ()
@@ -167,25 +178,14 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       in
       Ok ({ fields with exports }, curr)
     | MFunc func ->
-      let function_type, type_checks =
-        match func.type_f with
-        | Bt_ind _ -> (fields.function_type, fields.type_checks)
-        | Bt_raw (id, typ) ->
-          let type_checks =
-            match id with
-            | None -> fields.type_checks
-            | Some id -> (id, typ) :: fields.type_checks
-          in
-          (typ :: fields.function_type, type_checks)
-      in
+      let fields = declare_func_type func.type_f fields in
       let index = curr.func in
       let value = Runtime.Local func in
       let func = Indexed.return index value :: fields.func in
-      Ok
-        ( { fields with func; function_type; type_checks }
-        , { curr with func = succ curr.func } )
-    | MImport ({ desc = Import_func (a, b); _ } as import) ->
-      let imported : text block_type Imported.t = imp import (a, b) in
+      Ok ({ fields with func }, { curr with func = succ curr.func })
+    | MImport ({ desc = Import_func (a, type_f); _ } as import) ->
+      let imported : text block_type Imported.t = imp import (a, type_f) in
+      let fields = declare_func_type type_f fields in
       ok @@ add_func (Imported imported) fields curr
     | MExport { name; desc = Export_func id } ->
       let id = curr_id curr.func id in
