@@ -2,6 +2,8 @@ unused local variables:
   $ owi opt local.wat > local.opt.wat
   $ cat local.opt.wat
   (module
+    
+    (type (sub final  (func)))
     (func $f0 (local i32)
       i32.const 0
       local.set 0
