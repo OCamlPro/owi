@@ -12,8 +12,6 @@
     (type (sub final  (func (param i32) (param f32))))
     
     (type (sub final  (func (param i32) (param f64))))
-    
-    (type (sub final  (func)))
     (memory 1)
     (func
       i32.const 32
