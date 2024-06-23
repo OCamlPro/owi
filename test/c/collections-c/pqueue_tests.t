@@ -1,5 +1,5 @@
 Pqueue tests:
-  $ owi c -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_enqueue.c --no-value
+  $ owi c -O0 -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_enqueue.c --no-value
   Trap: memory heap buffer overflow
   Model:
     (model
@@ -11,7 +11,7 @@ Pqueue tests:
       (symbol_5 i32))
   Reached problem!
   [13]
-  $ owi c -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_pop.c --no-value
+  $ owi c -O0 -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_pop.c --no-value
   Trap: memory heap buffer overflow
   Model:
     (model

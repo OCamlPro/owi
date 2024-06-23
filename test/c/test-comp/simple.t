@@ -1,4 +1,4 @@
-  $ owi c --testcomp ./simple.c
+  $ owi c -O0 --testcomp ./simple.c
   Assert failure: (bool.ne (i32.mul symbol_0 symbol_0) (i32 0))
   Model:
     (model
