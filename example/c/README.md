@@ -257,8 +257,9 @@ int main() {
 }
 ```
 
+<!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
 ```sh
-$ owi c ./dobble.c -w1 --no-value
+$ owi c -O1 ./dobble.c -w1 --no-value
 ...
 Model:
   (model
@@ -311,7 +312,7 @@ OPTIONS
        -o VAL, --output=VAL (absent=owi-out)
            write results to dir
 
-       -O VAL (absent=0)
+       -O VAL (absent=3)
            specify which optimization level to use
 
        --optimize

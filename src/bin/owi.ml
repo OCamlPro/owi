@@ -117,7 +117,7 @@ let c_cmd =
   in
   let opt_lvl =
     let doc = "specify which optimization level to use" in
-    Arg.(value & opt string "0" & info [ "O" ] ~doc)
+    Arg.(value & opt string "3" & info [ "O" ] ~doc)
   in
   let testcomp =
     let doc = "test-comp mode" in
