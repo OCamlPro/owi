@@ -98,7 +98,7 @@ module M :
 
   let ptr (v : Value.int32) : int32 Choice.t =
     match view v.symbolic with
-    | Ptr (b, _) -> Choice.return b
+    | Ptr { base; _ } -> Choice.return base
     | _ ->
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic;
       Choice.bind (abort ()) (fun () -> assert false)
@@ -111,7 +111,7 @@ module M :
     Choice.bind (i32 base) (fun (base : int32) ->
         Choice.return
           { Concolic_value.concrete = base
-          ; symbolic = Expr.make (Ptr (base, Symbolic_value.const_i32 0l))
+          ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
           } )
   (* WHAT ???? *)
   (* Choice.with_thread (fun t : Value.int32 -> *)

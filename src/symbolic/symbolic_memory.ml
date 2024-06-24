@@ -179,7 +179,7 @@ let get_limit_max _m = None (* TODO *)
 let check_within_bounds m a =
   match view a with
   | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
-  | Ptr (base, offset) -> (
+  | Ptr { base; offset } -> (
     match Hashtbl.find m.chunks base with
     | exception Not_found -> Error Trap.Memory_leak_use_after_free
     | size ->

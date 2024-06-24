@@ -61,7 +61,7 @@ module M :
 
   let ptr v : int32 Choice.t =
     match view v with
-    | Ptr (b, _) -> Choice.return b
+    | Ptr { base; _ } -> Choice.return base
     | _ ->
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
       Choice.bind (abort ()) (fun () -> assert false)
@@ -77,7 +77,7 @@ module M :
                     Symbolic_memory.replace_size m base size )
                   tbl )
               memories;
-            Expr.make (Ptr (base, Value.const_i32 0l)) ) )
+            Expr.ptr base (Value.const_i32 0l) ) )
 
   let free (p : Value.int32) : unit Choice.t =
     Choice.bind (ptr p) (fun base ->
