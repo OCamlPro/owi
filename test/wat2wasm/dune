@@ -3,7 +3,6 @@
   %{bin:owi}
   bad.ext
   call_indirect.wat
-  concolic.wat
   func.wat
   globals.wat
   loop.wat

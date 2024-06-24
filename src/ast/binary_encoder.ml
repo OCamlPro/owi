@@ -164,11 +164,11 @@ let write_table_import buf
   write_limits buf limits
 
 let write_func_import buf
-  ({ Imported.modul; name; desc = _; _ } : _ block_type Imported.t) =
+  ({ Imported.modul; name; desc; _ } : binary block_type Imported.t) =
   write_string buf modul;
   write_string buf name;
-  Buffer.add_char buf '\x00'
-(* TODO: How to get typeidx ? *)
+  Buffer.add_char buf '\x00';
+  write_block_type_idx buf desc
 
 let write_fc buf i =
   Buffer.add_char buf '\xFC';
