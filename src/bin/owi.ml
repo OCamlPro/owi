@@ -66,6 +66,8 @@ let solver =
     & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
+let profile = Cmdliner.Term.const @@ Some (Fpath.v "profile.json")
+
 let unsafe =
   let doc = "skip typechecking pass" in
   Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
@@ -136,7 +138,7 @@ let c_cmd =
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic
-      $ solver )
+      $ solver $ profile )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -202,7 +204,7 @@ let sym_cmd =
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ solver $ files )
+      $ solver $ profile $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -215,7 +217,7 @@ let conc_cmd =
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
       $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ solver $ files )
+      $ solver $ profile $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in

@@ -67,6 +67,7 @@
   symbolic_wasm_ffi
   spectest
   stack
+  stats
   string_map
   syntax
   text

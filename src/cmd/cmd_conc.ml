@@ -403,7 +403,10 @@ let launch solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
+  deterministic_result_order (workspace : Fpath.t) solver profile files =
+  begin
+    match profile with None -> () | Some f -> Stats.init_logger_to_file f
+  end;
   ignore (workers, no_stop_at_failure, deterministic_result_order, workspace);
 
   if profiling then Log.profiling_on := true;
