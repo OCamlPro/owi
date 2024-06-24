@@ -23,5 +23,7 @@ owi_assume(int);
 __attribute__((import_module("symbolic"), import_name("assert"))) void
 owi_assert(int);
 
-__attribute__((weak, import_module("symbolic"), import_name("assume"))) void
-assume(int);
+__attribute__((import_module("summaries"))) __attribute__((import_name("abort"))) void
+owi_abort(void);
+__attribute__((import_module("summaries"))) __attribute__((import_name("exit"))) void
+owi_exit(int);
