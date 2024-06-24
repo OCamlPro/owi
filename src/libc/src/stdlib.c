@@ -12,11 +12,11 @@
 #define ldbltype double
 #endif
 
-void owi_abort(void) __attribute__((import_module("summaries"))) __attribute__((import_name("abort")));
-void owi_exit(int)  __attribute__((import_module("summaries"))) __attribute__((import_name("exit")));
-
 void abort(void) { owi_abort(); }
 void exit(int status) { owi_exit(status); }
+
+__attribute__((weak, import_module("symbolic"), import_name("assume"))) void
+assume(int);
 
 extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;

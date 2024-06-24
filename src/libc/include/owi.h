@@ -1,23 +1,26 @@
 #ifndef _OWI_H
 #define _OWI_H
 
-void *owi_malloc(void *base, unsigned int size) __attribute__((import_module("summaries"))) __attribute__((import_name("alloc")));
+void *owi_malloc(void *base, unsigned int size);
 
-void owi_free(void *) __attribute__((import_module("summaries"))) __attribute__((import_name("dealloc")));
+void owi_free(void *);
 
-char owi_i8(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("i8_symbol")));
+char owi_i8(void);
 
-int owi_i32(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("i32_symbol")));
+int owi_i32(void);
 
-long long owi_i64(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("i64_symbol")));
+long long owi_i64(void);
 
-float owi_f32(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("f32_symbol")));
+float owi_f32(void);
 
-double owi_f64(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("f64_symbol")));
+double owi_f64(void);
 
-_Bool owi_bool(void) __attribute__((import_module("symbolic"))) __attribute__((import_name("bool_symbol")));
+_Bool owi_bool(void);
 
-void owi_assume(int c) __attribute__((import_module("symbolic"))) __attribute__((import_name("assume")));
-void owi_assert(int c) __attribute__((import_module("symbolic"))) __attribute__((import_name("assert")));
+void owi_assume(int c);
+void owi_assert(int c);
+
+void owi_abort(void);
+void owi_exit(int c);
 
 #endif
