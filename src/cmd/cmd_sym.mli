@@ -13,5 +13,6 @@ val cmd :
   -> bool
   -> Fpath.t
   -> Smtml.Solver_dispatcher.solver_type
+  -> Fpath.t option
   -> Fpath.t list
   -> unit Result.t
