@@ -63,10 +63,10 @@ struct
       match Expr.view a with
       (* Avoid unecessary re-hashconsing and allocation when the value
          is already concrete. *)
-      | Val _ | Ptr (_, { node = Val _; _ }) -> return a
-      | Ptr (base, offset) ->
+      | Val _ | Ptr { offset = { node = Val _; _ }; _ } -> return a
+      | Ptr { base; offset } ->
         let+ offset = select_i32 offset in
-        Expr.make (Ptr (base, Symbolic_value.const_i32 offset))
+        Expr.ptr base (Symbolic_value.const_i32 offset)
       | _ ->
         let+ v = select_i32 a in
         Symbolic_value.const_i32 v
