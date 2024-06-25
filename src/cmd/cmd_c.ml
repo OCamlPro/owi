@@ -2,6 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+[@@@warnerror "-unused-var-strict"]
+
 open Bos
 open Syntax
 
@@ -35,12 +37,51 @@ let find location file : Fpath.t Result.t =
 
 let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
   Fpath.t list Result.t =
-  print_endline "Enter E-ACSL mode";
-  print_endline
-    ("\tinclude path: " ^ String.concat " " (List.map Fpath.to_string includes));
-  print_endline
-    ("\tfiles path: " ^ String.concat " " (List.map Fpath.to_string files));
-  if eacsl then ok files else ok files
+  if eacsl then
+    let flags1 =
+      let includes =
+        String.concat " "
+          (List.map (fun libpath -> "-I" ^ Fpath.to_string libpath) includes)
+      in
+      Cmd.(
+        of_list
+          [ "-e-acsl"
+          ; "-no-frama-c-stdlib"
+          ; "-kernel-warn-key"
+          ; "CERT:MSC:38=inactive"
+          ; String.concat "" [ "-cpp-extra-args=\""; includes; "\"" ]
+          ] )
+    in
+    let flags2 = Cmd.(of_list [ "-then-last"; "-print"; "-ocode" ]) in
+
+    let* framac_bin = OS.Cmd.resolve @@ Cmd.v "frama-c" in
+
+    let outs =
+      List.map
+        (fun file ->
+          let ext = Fpath.get_ext ~multi:true file in
+          let file_without_ext = Fpath.rem_ext ~multi:true file in
+          let file_without_ext =
+            Fpath.to_string file_without_ext ^ "_instrumented"
+          in
+          let file = file_without_ext ^ ext in
+          Fpath.v file )
+        files
+    in
+
+    let framac : Fpath.t -> Fpath.t -> Bos.Cmd.t =
+     fun file out ->
+      Cmd.(
+        framac_bin %% flags1 % Fpath.to_string file %% flags2
+        % Fpath.to_string out )
+    in
+
+    let+ () =
+      list_iter2 (fun file out -> OS.Cmd.run @@ framac file out) files outs
+    in
+
+    outs
+  else Ok files
 
 let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
