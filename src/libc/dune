@@ -39,7 +39,8 @@
   stderr.o
   time.o
   stdio.o
-  unistd.o)
+  unistd.o
+  eacsl.o)
  (action
   (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
 
@@ -77,7 +78,8 @@
   stderr.o
   time.o
   stdio.o
-  unistd.o)
+  unistd.o
+  eacsl.o)
  (deps
   src/assert_fail.c
   src/stdlib.c
@@ -111,7 +113,8 @@
   src/stderr.c
   src/time.c
   src/stdio.c
-  src/unistd.c)
+  src/unistd.c
+  src/eacsl.c)
  (action
   (run ./script.exe %{deps})))
 

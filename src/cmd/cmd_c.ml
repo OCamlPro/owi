@@ -2,8 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-[@@@warnerror "-unused-var-strict"]
-
 open Bos
 open Syntax
 
