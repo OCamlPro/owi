@@ -85,32 +85,29 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     match results () with
     | Seq.Nil -> Ok count_acc
     | Seq.Cons ((result, _thread), tl) ->
-      let* is_err, model =
+      let* model =
         let open Symbolic_choice in
         match result with
         | EAssert (assertion, model) ->
           print_bug (`EAssert (assertion, model));
-          Ok (true, Some model)
+          Ok model
         | ETrap (tr, model) ->
           print_bug (`ETrap (tr, model));
-          Ok (true, Some model)
-        | EVal (Ok ()) -> Ok (false, None)
+          Ok model
+        | EVal (Ok ()) ->
+          failwith "unreachable: callback should have filtered eval ok out."
         | EVal (Error e) -> Error e
       in
-      let count_acc = if is_err then succ count_acc else count_acc in
+      let count_acc = succ count_acc in
       let* () =
         if not no_values then
-          let model =
-            match model with None -> Hashtbl.create 16 | Some m -> m
-          in
           let testcase =
             List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
           in
-          Cmd_utils.write_testcase ~dir:workspace ~err:is_err testcase
+          Cmd_utils.write_testcase ~dir:workspace testcase
         else Ok ()
       in
-      if (not is_err) || no_stop_at_failure then
-        print_and_count_failures count_acc tl
+      if no_stop_at_failure then print_and_count_failures count_acc tl
       else Ok count_acc
   in
   let results =

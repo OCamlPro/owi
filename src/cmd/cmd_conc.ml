@@ -437,7 +437,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       let testcase =
         List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
       in
-      Cmd_utils.write_testcase ~dir:workspace ~err:true testcase
+      Cmd_utils.write_testcase ~dir:workspace testcase
     else Ok ()
   in
 

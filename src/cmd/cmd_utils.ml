@@ -4,10 +4,10 @@
 
 open Syntax
 
-let out_testcase ~dst ~err testcase =
+let out_testcase ~dst testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag ?(atts = []) name = (("", name), atts) in
-  let atts = if err then Some [ (("", "coversError"), "true") ] else None in
+  let atts = Some [ (("", "coversError"), "true") ] in
   let to_string v = Format.asprintf "%a" Smtml.Value.pp_num v in
   let input v = `El (tag "input", [ `Data (to_string v) ]) in
   let testcase = `El (tag ?atts "testcase", List.map input testcase) in
@@ -19,13 +19,13 @@ let out_testcase ~dst ~err testcase =
 
 let write_testcase =
   let cnt = ref 0 in
-  fun ~dir ~err testcase ->
+  fun ~dir testcase ->
     incr cnt;
     let name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
     let path = Fpath.append dir name in
     let* res =
       Bos.OS.File.with_oc path
-        (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) ~err testcase))
+        (fun chan () -> Ok (out_testcase ~dst:(`Channel chan) testcase))
         ()
     in
     res
