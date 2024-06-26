@@ -24,20 +24,6 @@ let list_iter f l =
     Ok ()
   with Exit -> Option.get !err
 
-let list_iter2 f l1 l2 =
-  let err = ref None in
-  try
-    List.iter2
-      (fun v u ->
-        match f v u with
-        | Error _e as e ->
-          err := Some e;
-          raise Exit
-        | Ok () -> () )
-      l1 l2;
-    Ok ()
-  with Exit -> Option.get !err
-
 let list_map f l =
   let err = ref None in
   try

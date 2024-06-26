@@ -75,7 +75,9 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
     in
 
     let+ () =
-      list_iter2 (fun file out -> OS.Cmd.run @@ framac file out) files outs
+      list_iter
+        (fun (file, out) -> OS.Cmd.run @@ framac file out)
+        (List.combine files outs)
     in
 
     outs
