@@ -40,7 +40,7 @@ Reached problem!
 [13]
 ```
 
-Indeed, `2` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
+Indeed, `4` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
 
 We can do so by assuming that `x` is not equal to any of these with the function `owi_assume(bool)`:
 
@@ -296,6 +296,9 @@ OPTIONS
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
+
+       --e-acsl
+           e-acsl mode
 
        --fail-on-assertion-only
            ignore traps and only report assertion violations
