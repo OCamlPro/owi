@@ -17,12 +17,6 @@ val list_iter :
   -> 'a list
   -> (unit, 'err) Prelude.Result.t
 
-val list_iter2 :
-     ('a -> 'b -> (unit, 'err) Stdlib.Result.t)
-  -> 'a list
-  -> 'b list
-  -> (unit, 'err) Stdlib.Result.t
-
 val list_map :
      ('a -> ('b, 'err) Prelude.Result.t)
   -> 'a list
