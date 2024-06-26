@@ -33,7 +33,7 @@ let find location file : Fpath.t Result.t =
   in
   loop l
 
-let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
+let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
   Fpath.t list Result.t =
   if eacsl then
     let flags1 =
@@ -41,12 +41,15 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
         String.concat " "
           (List.map (fun libpath -> "-I" ^ Fpath.to_string libpath) includes)
       in
+      let framac_verbosity_level = if debug then "2" else "0" in
       Cmd.(
         of_list
           [ "-e-acsl"
           ; "-no-frama-c-stdlib"
           ; "-kernel-warn-key"
           ; "CERT:MSC:38=inactive"
+          ; "-verbose"
+          ; framac_verbosity_level
           ; String.concat "" [ "-cpp-extra-args=\""; includes; "\"" ]
           ] )
     in
@@ -173,7 +176,7 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
-  let* files = eacsl_instrument eacsl ~includes files in
+  let* files = eacsl_instrument eacsl debug ~includes files in
   let* modul = compile ~includes ~opt_lvl files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
