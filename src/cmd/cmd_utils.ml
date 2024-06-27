@@ -6,11 +6,11 @@ open Syntax
 
 let out_testcase ~dst testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  let tag ?(atts = []) name = (("", name), atts) in
-  let atts = Some [ (("", "coversError"), "true") ] in
+  let tag atts name = (("", name), atts) in
+  let atts = [ (("", "coversError"), "true") ] in
   let to_string v = Format.asprintf "%a" Smtml.Value.pp_num v in
-  let input v = `El (tag "input", [ `Data (to_string v) ]) in
-  let testcase = `El (tag ?atts "testcase", List.map input testcase) in
+  let input v = `El (tag [] "input", [ `Data (to_string v) ]) in
+  let testcase = `El (tag atts "testcase", List.map input testcase) in
   let dtd =
     {|<!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd">|}
   in
