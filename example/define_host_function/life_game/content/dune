@@ -2,4 +2,4 @@
  (deps ../life.wat)
  (targets life.wasm)
  (action
-  (run %{bin:wat2wasm} ../life.wat)))
+  (run %{bin:owi} wat2wasm ../life.wat)))
