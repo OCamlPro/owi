@@ -3,8 +3,8 @@
 (* Written by the Owi programmers *)
 
 type t =
-  { choices : int
-  ; mutable symbol_set : Smtml.Symbol.t list
+  { symbols : int
+  ; symbol_set : Smtml.Symbol.t list
   ; pc : Symbolic_value.vbool list
   ; memories : Symbolic_memory.collection
   ; tables : Symbolic_table.collection
@@ -14,7 +14,7 @@ type t =
   ; breadcrumbs : int32 list
   }
 
-let choices t = t.choices
+let symbols t = t.symbols
 
 let pc t = t.pc
 
@@ -26,18 +26,18 @@ let globals t = t.globals
 
 let breadcrumbs t = t.breadcrumbs
 
-let symbols t = t.symbol_set
+let symbols_set t = t.symbol_set
 
-let add_symbol t s = t.symbol_set <- s :: t.symbol_set
+let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
 
 let add_pc t c = { t with pc = c :: t.pc }
 
 let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
 
-let incr_choices t = { t with choices = succ t.choices }
+let incr_symbols t = { t with symbols = succ t.symbols }
 
 let create () =
-  { choices = 0
+  { symbols = 0
   ; symbol_set = []
   ; pc = []
   ; memories = Symbolic_memory.init ()
@@ -46,8 +46,8 @@ let create () =
   ; breadcrumbs = []
   }
 
-let clone { choices; symbol_set; pc; memories; tables; globals; breadcrumbs } =
+let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs } =
   let memories = Symbolic_memory.clone memories in
   let tables = Symbolic_table.clone tables in
   let globals = Symbolic_global.clone globals in
-  { choices; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }

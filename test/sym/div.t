@@ -51,16 +51,16 @@ div binop:
   Model:
     (model
       (symbol_0 (i32 1))
-      (symbol_2 (i32 0)))
+      (symbol_1 (i32 0)))
   Trap: integer divide by zero
   Model:
     (model
       (symbol_0 (i32 2))
-      (symbol_3 (i64 0)))
+      (symbol_1 (i64 0)))
   Trap: integer divide by zero
   Model:
     (model
       (symbol_0 (i32 3))
-      (symbol_5 (i64 0)))
+      (symbol_1 (i64 0)))
   Reached 4 problems!
   [13]
