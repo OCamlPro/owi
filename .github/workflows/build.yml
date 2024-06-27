@@ -53,6 +53,7 @@ jobs:
         if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam install . --deps-only --with-test --with-doc
+          opam install smtml z3
           opam clean --switch-cleanup
       - name: build
         run: |
