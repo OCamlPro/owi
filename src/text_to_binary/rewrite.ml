@@ -248,55 +248,17 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     | Elem_drop id ->
       let* id = find_elem (Some id) in
       ok @@ Elem_drop id
-    (* TODO: should we check alignment or memory existence first ? is it tested in the reference implementation ? *)
-    | I_load8 (nn, sx, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 1l then Error `Alignment_too_large
-      else Ok (I_load8 (nn, sx, memarg))
-    | I_store8 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 1l then Error `Alignment_too_large
-      else ok @@ I_store8 (nn, memarg)
-    | I_load16 (nn, sx, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 2l then Error `Alignment_too_large
-      else ok @@ I_load16 (nn, sx, memarg)
-    | I_store16 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 2l then Error `Alignment_too_large
-      else ok @@ I_store16 (nn, memarg)
-    | I64_load32 (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 4l then Error `Alignment_too_large
-      else ok @@ I64_load32 (nn, memarg)
-    | I64_store32 memarg ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else if memarg.align >= 4l then Error `Alignment_too_large
-      else ok @@ I64_store32 memarg
-    | I_load (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else
-        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then Error `Alignment_too_large
-        else ok @@ I_load (nn, memarg)
-    | F_load (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else
-        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then Error `Alignment_too_large
-        else ok @@ F_load (nn, memarg)
-    | F_store (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else
-        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then Error `Alignment_too_large
-        else ok @@ F_store (nn, memarg)
-    | I_store (nn, memarg) ->
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else
-        let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-        if memarg.align >= max_allowed then Error `Alignment_too_large
-        else ok @@ I_store (nn, memarg)
+    (* alignment and memory existence checks have been moved in typecheck ? TODO: is it tested in the reference implementation ? *)
+    | I_load8 (nn, sx, memarg) -> ok @@ I_load8 (nn, sx, memarg)
+    | I_store8 (nn, memarg) -> ok @@ I_store8 (nn, memarg)
+    | I_load16 (nn, sx, memarg) -> ok @@ I_load16 (nn, sx, memarg)
+    | I_store16 (nn, memarg) -> ok @@ I_store16 (nn, memarg)
+    | I64_load32 (nn, memarg) -> ok @@ I64_load32 (nn, memarg)
+    | I64_store32 memarg -> ok @@ I64_store32 memarg
+    | I_load (nn, memarg) -> ok @@ I_load (nn, memarg)
+    | F_load (nn, memarg) -> ok @@ F_load (nn, memarg)
+    | F_store (nn, memarg) -> ok @@ F_store (nn, memarg)
+    | I_store (nn, memarg) -> ok @@ I_store (nn, memarg)
     | (Memory_copy | Memory_size | Memory_fill | Memory_grow) as i ->
       if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
       else Ok i
