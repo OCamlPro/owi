@@ -14,9 +14,9 @@ val globals : t -> Symbolic_global.collection
 
 val breadcrumbs : t -> int32 list
 
-val symbols : t -> Smtml.Symbol.t list
+val symbols_set : t -> Smtml.Symbol.t list
 
-val choices : t -> int
+val symbols : t -> int
 
 val create : unit -> t
 
@@ -26,6 +26,6 @@ val add_pc : t -> Symbolic_value.vbool -> t
 
 val add_breadcrumb : t -> int32 -> t
 
-val add_symbol : t -> Smtml.Symbol.t -> unit
+val add_symbol : t -> Smtml.Symbol.t -> t
 
-val incr_choices : t -> t
+val incr_symbols : t -> t

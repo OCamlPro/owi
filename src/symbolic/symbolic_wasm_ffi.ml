@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 module Expr = Smtml.Expr
-module Choice = Symbolic.P.Choice
+module Choice = Symbolic_choice
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
@@ -14,39 +14,26 @@ module M :
 
   module Value = Symbolic_value
 
-  let sym_cnt = Atomic.make 0
-
-  let symbol ty () : Value.int32 Choice.t =
-    let id = Atomic.fetch_and_add sym_cnt 1 in
-    let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
-    let sym_expr = Expr.mk_symbol sym in
-    Choice.with_thread (fun thread ->
-        Thread.add_symbol thread sym;
-        match ty with
-        | Ty_bitv 8 -> Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, sym_expr))
-        | _ -> sym_expr )
-
   let assume_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.to_bool i in
-    Choice.add_pc c
+    Choice.add_pc @@ Value.I32.to_bool i
 
   let assume_positive_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.ge i Value.I32.zero in
-    Choice.add_pc c
+    Choice.add_pc @@ Value.I32.ge i Value.I32.zero
 
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.to_bool i in
-    Choice.assertion c
+    Choice.assertion @@ Value.I32.to_bool i
 
-  let symbol_i8 = symbol (Ty_bitv 8)
+  let symbol_i8 () =
+    Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
 
-  let symbol_i32 = symbol (Ty_bitv 32)
+  let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
-  let symbol_i64 = symbol (Ty_bitv 64)
+  let symbol_i64 () = Choice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
-  let symbol_f32 = symbol (Ty_fp 32)
+  let symbol_f32 () = Choice.with_new_symbol (Ty_fp 32) Expr.symbol
 
-  let symbol_f64 = symbol (Ty_fp 64)
+  let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
   open Expr
 

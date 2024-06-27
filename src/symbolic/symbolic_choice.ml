@@ -309,7 +309,7 @@ end = struct
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
-    let symbols = Thread.symbols thread |> Option.some in
+    let symbols = Thread.symbols_set thread |> Option.some in
     let model = Solver.model solver ~symbols ~pc in
     State.return (ETrap (t, model))
 
@@ -335,6 +335,17 @@ let add_pc (c : Symbolic_value.vbool) =
 
 let add_breadcrumb crumb =
   modify_thread (fun t -> Thread.add_breadcrumb t crumb)
+
+let with_new_symbol ty f =
+  let* thread in
+  let n = Thread.symbols thread in
+  let sym = Format.ksprintf (Smtml.Symbol.make ty) "symbol_%d" n in
+  let+ () =
+    modify_thread (fun thread ->
+        let thread = Thread.add_symbol thread sym in
+        Thread.incr_symbols thread )
+  in
+  f sym
 
 (*
     Yielding is currently done each time the solver is about to be called,
@@ -396,9 +407,9 @@ let summary_symbol (e : Smtml.Expr.t) =
   match Smtml.Expr.view e with
   | Symbol sym -> return (None, sym)
   | _ ->
-    let choices = Thread.choices thread in
-    let+ () = modify_thread Thread.incr_choices in
-    let sym_name = Format.sprintf "choice_i32_%i" choices in
+    let num_symbols = Thread.symbols thread in
+    let+ () = modify_thread Thread.incr_symbols in
+    let sym_name = Format.sprintf "choice_i32_%i" num_symbols in
     let sym_type = Smtml.Ty.Ty_bitv 32 in
     let sym = Smtml.Symbol.make sym_type sym_name in
     let assign = Smtml.Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
@@ -450,7 +461,7 @@ let assertion c =
   else
     let* thread in
     let* solver in
-    let symbols = Thread.symbols thread |> Option.some in
+    let symbols = Thread.symbols_set thread |> Option.some in
     let pc = Thread.pc thread in
     let model = Solver.model ~symbols ~pc solver in
     assertion_fail c model
