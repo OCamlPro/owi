@@ -25,5 +25,6 @@ let () =
         (Ok (asset_loader "life.wasm")) );
 
   Printf.printf "listening on http://%s:%d\n%!" (S.addr server) (S.port server);
-  ignore @@ Sys.command "xdg-open http://localhost:8000";
+  (* "&": if web browser is closed, the command must be executed in background *)
+  ignore @@ Sys.command "xdg-open http://localhost:8000 &";
   ignore (match S.run server with Ok () -> () | Error e -> raise e)
