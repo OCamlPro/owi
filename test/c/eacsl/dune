@@ -1,0 +1,7 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  max.c
+  max_ptr.c
+  integer_dividable.c))

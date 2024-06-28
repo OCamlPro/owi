@@ -33,6 +33,59 @@ let find location file : Fpath.t Result.t =
   in
   loop l
 
+let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
+  Fpath.t list Result.t =
+  if eacsl then
+    let flags1 =
+      let includes =
+        String.concat " "
+          (List.map (fun libpath -> "-I" ^ Fpath.to_string libpath) includes)
+      in
+      let framac_verbosity_level = if debug then "2" else "0" in
+      Cmd.(
+        of_list
+          [ "-e-acsl"
+          ; "-no-frama-c-stdlib"
+          ; "-kernel-warn-key"
+          ; "CERT:MSC:38=inactive"
+          ; "-verbose"
+          ; framac_verbosity_level
+          ; String.concat "" [ "-cpp-extra-args=\""; includes; "\"" ]
+          ] )
+    in
+    let flags2 = Cmd.(of_list [ "-then-last"; "-print"; "-ocode" ]) in
+
+    let* framac_bin = OS.Cmd.resolve @@ Cmd.v "frama-c" in
+
+    let outs =
+      List.map
+        (fun file ->
+          let ext = Fpath.get_ext ~multi:true file in
+          let file_without_ext = Fpath.rem_ext ~multi:true file in
+          let file_without_ext =
+            Fpath.to_string file_without_ext ^ "_instrumented"
+          in
+          let file = file_without_ext ^ ext in
+          Fpath.v file )
+        files
+    in
+
+    let framac : Fpath.t -> Fpath.t -> Bos.Cmd.t =
+     fun file out ->
+      Cmd.(
+        framac_bin %% flags1 % Fpath.to_string file %% flags2
+        % Fpath.to_string out )
+    in
+
+    let+ () =
+      list_iter
+        (fun (file, out) -> OS.Cmd.run @@ framac file out)
+        (List.combine files outs)
+    in
+
+    outs
+  else Ok files
+
 let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
@@ -120,11 +173,12 @@ let metadata ~workspace arch property files : unit Result.t =
 
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
-  deterministic_result_order concolic solver : unit Result.t =
+  deterministic_result_order concolic eacsl solver : unit Result.t =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
+  let* files = eacsl_instrument eacsl debug ~includes files in
   let* modul = compile ~includes ~opt_lvl files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in

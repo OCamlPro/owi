@@ -13,6 +13,7 @@
   alloca.h
   assert.h
   ctype.h
+  eacsl.h
   endian.h
   errno.h
   fcntl.h
