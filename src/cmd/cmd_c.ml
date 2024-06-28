@@ -120,7 +120,10 @@ let metadata ~workspace arch property files : unit Result.t =
 
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
-  deterministic_result_order concolic solver : unit Result.t =
+  deterministic_result_order concolic solver profile : unit Result.t =
+  begin
+    match profile with None -> () | Some f -> Stats.init_logger_to_file f
+  end;
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
@@ -131,4 +134,4 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     profiling debug unsafe optimize workers no_stop_at_failure no_values
-    deterministic_result_order workspace solver files
+    deterministic_result_order workspace solver None files
