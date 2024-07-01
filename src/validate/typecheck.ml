@@ -36,6 +36,7 @@ end
 module Env = struct
   type t =
     { locals : typ Index.Map.t
+    ; mem : (mem, limits) Runtime.t Named.t
     ; globals : (global, binary global_type) Runtime.t Named.t
     ; result_type : binary result_type
     ; funcs : (binary func, binary block_type) Runtime.t Named.t
@@ -85,7 +86,8 @@ module Env = struct
     let value = Indexed.get_at_exn i env.elems.values in
     value.typ
 
-  let make ~params ~locals ~globals ~funcs ~result_type ~tables ~elems ~refs =
+  let make ~params ~locals ~mem ~globals ~funcs ~result_type ~tables ~elems
+    ~refs =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
       List.fold_left
@@ -94,7 +96,16 @@ module Env = struct
           Index.Map.add i typ locals )
         Index.Map.empty l
     in
-    { locals; globals; result_type; funcs; tables; elems; blocks = []; refs }
+    { locals
+    ; mem
+    ; globals
+    ; result_type
+    ; funcs
+    ; tables
+    ; elems
+    ; blocks = []
+    ; refs
+    }
 end
 
 type env = Env.t
@@ -223,6 +234,11 @@ end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
   stack Result.t =
+  let check_mem memarg_align align =
+    if List.length env.mem.values < 1 then Error (`Unknown_memory 0)
+    else if memarg_align >= align then Error `Alignment_too_large
+    else Ok ()
+  in
   match instr with
   | Nop -> Ok stack
   | Drop -> Stack.drop stack
@@ -281,19 +297,45 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     stack_e1
-  | I_load (nn, _) | I_load16 (nn, _, _) | I_load8 (nn, _, _) ->
+  | I_load8 (nn, _, memarg) ->
+    let* () = check_mem memarg.align 1l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I64_load32 _ ->
+  | I_load16 (nn, _, memarg) ->
+    let* () = check_mem memarg.align 2l in
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ itype nn ] stack
+  | I_load (nn, memarg) ->
+    let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
+    let* () = check_mem memarg.align max_allowed in
+    let* stack = Stack.pop [ i32 ] stack in
+    Stack.push [ itype nn ] stack
+  | I64_load32 (_, memarg) ->
+    let* () = check_mem memarg.align 4l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
-  | I_store8 (nn, _) | I_store16 (nn, _) | I_store (nn, _) ->
+  | I_store8 (nn, memarg) ->
+    let* () = check_mem memarg.align 1l in
     Stack.pop [ itype nn; i32 ] stack
-  | I64_store32 _ -> Stack.pop [ i64; i32 ] stack
-  | F_load (nn, _) ->
+  | I_store16 (nn, memarg) ->
+    let* () = check_mem memarg.align 2l in
+    Stack.pop [ itype nn; i32 ] stack
+  | I_store (nn, memarg) ->
+    let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
+    let* () = check_mem memarg.align max_allowed in
+    Stack.pop [ itype nn; i32 ] stack
+  | I64_store32 memarg ->
+    let* () = check_mem memarg.align 4l in
+    Stack.pop [ i64; i32 ] stack
+  | F_load (nn, memarg) ->
+    let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
+    let* () = check_mem memarg.align max_allowed in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ ftype nn ] stack
-  | F_store (nn, _) -> Stack.pop [ ftype nn; i32 ] stack
+  | F_store (nn, memarg) ->
+    let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
+    let* () = check_mem memarg.align max_allowed in
+    Stack.pop [ ftype nn; i32 ] stack
   | I_reinterpret_f (inn, fnn) ->
     let* stack = Stack.pop [ ftype fnn ] stack in
     Stack.push [ itype inn ] stack
@@ -504,7 +546,7 @@ let typecheck_function (modul : modul) func refs =
   | Local func ->
     let (Bt_raw ((None | Some _), (params, result))) = func.type_f in
     let env =
-      Env.make ~params ~funcs:modul.func ~locals:func.locals
+      Env.make ~params ~funcs:modul.func ~locals:func.locals ~mem:modul.mem
         ~globals:modul.global ~result_type:result ~tables:modul.table
         ~elems:modul.elem ~refs
     in
