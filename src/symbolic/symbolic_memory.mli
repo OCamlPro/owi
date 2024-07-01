@@ -12,7 +12,7 @@ val clone : collection -> collection
 
 val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t
 
-val check_within_bounds :
+val is_out_of_bounds :
   t -> Smtml.Expr.t -> (Smtml.Expr.t * Symbolic_value.int32, Trap.t) result
 
 val replace_size : t -> Int32.t -> Smtml.Expr.t -> unit
@@ -59,6 +59,8 @@ val size : t -> Smtml.Expr.t
 val size_in_pages : t -> Smtml.Expr.t
 
 val get_limit_max : t -> Smtml.Expr.t option
+
+val pp : Format.formatter -> t -> unit
 
 module ITbl : sig
   type 'a t

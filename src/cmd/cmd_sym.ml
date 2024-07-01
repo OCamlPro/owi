@@ -17,8 +17,12 @@ let link_state =
        Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
          Symbolic_wasm_ffi.symbolic_extern_module
      in
-     Link.extern_module' link_state ~name:"summaries" ~func_typ
-       Symbolic_wasm_ffi.summaries_extern_module )
+     let link_state =
+       Link.extern_module' link_state ~name:"summaries" ~func_typ
+         Symbolic_wasm_ffi.summaries_extern_module
+     in
+     Link.extern_module' link_state ~name:"debug" ~func_typ
+       Symbolic_wasm_ffi.debug_extern_module )
 
 let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
   (m : Binary.modul) =
@@ -81,9 +85,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
       Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
   in
-  let rec print_and_count_failures count_acc results =
+  let rec print_and_count_failures (failures_acc, paths_acc) results =
     match results () with
-    | Seq.Nil -> Ok count_acc
+    | Seq.Nil -> Ok (failures_acc, paths_acc)
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
         let open Symbolic_choice in
@@ -98,7 +102,8 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
           failwith "unreachable: callback should have filtered eval ok out."
         | EVal (Error e) -> Error e
       in
-      let count_acc = succ count_acc in
+      let paths_acc = succ paths_acc in
+      let failures_acc = succ failures_acc in
       let* () =
         if not no_values then
           let testcase =
@@ -107,8 +112,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
           Cmd_utils.write_testcase ~dir:workspace testcase
         else Ok ()
       in
-      if no_stop_at_failure then print_and_count_failures count_acc tl
-      else Ok count_acc
+      if no_stop_at_failure then
+        print_and_count_failures (failures_acc, paths_acc) tl
+      else Ok (failures_acc, paths_acc)
   in
   let results =
     if deterministic_result_order then
@@ -121,8 +127,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
       |> List.to_seq |> Seq.map fst
     else results
   in
-  let* count = print_and_count_failures 0 results in
-  if count > 0 then Error (`Found_bug count)
+  let* failures, paths = print_and_count_failures (0, 0) results in
+  Format.pp_std "Completed paths: %d@." paths;
+  if failures > 0 then Error (`Found_bug failures)
   else begin
     Format.pp_std "All OK";
     Ok ()

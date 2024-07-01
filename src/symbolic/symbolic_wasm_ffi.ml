@@ -129,3 +129,30 @@ let summaries_extern_module =
     ]
   in
   { Link.functions }
+
+let debug_extern_module =
+  let dump_memory () : unit Choice.t =
+    Choice.with_thread (fun t ->
+        let memories = Thread.memories t in
+        Symbolic_memory.iter
+          (fun tbl ->
+            Symbolic_memory.ITbl.iter
+              (fun _ (m : Symbolic_memory.t) ->
+                Format.pp_err "Memory:@\n@[<v 2>  %a@]@." Symbolic_memory.pp m
+                )
+              tbl )
+          memories )
+  in
+  let print_i32 i32 : Symbolic_value.int32 Choice.t =
+    Format.pp_std "Print: %a@." Smtml.Expr.pp i32;
+    Choice.return i32
+  in
+  let functions =
+    [ ( "dump_memory"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), dump_memory) )
+    ; ( "print_i32"
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), print_i32) )
+    ]
+  in
+  { Link.functions }

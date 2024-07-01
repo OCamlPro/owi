@@ -57,25 +57,58 @@ struct
   module Memory = struct
     include Symbolic_memory
 
-    let load_8_s m a = Choice.return @@ load_8_s m a
+    let concretise (a : Smtml.Expr.t) : Smtml.Expr.t Choice.t =
+      let open Choice in
+      let open Smtml in
+      match Expr.view a with
+      (* Avoid unecessary re-hashconsing and allocation when the value
+         is already concrete. *)
+      | Val _ | Ptr { offset = { node = Val _; _ }; _ } -> return a
+      | Ptr { base; offset } ->
+        let+ offset = select_i32 offset in
+        Expr.ptr base (Symbolic_value.const_i32 offset)
+      | _ ->
+        let+ v = select_i32 a in
+        Symbolic_value.const_i32 v
 
-    let load_8_u m a = Choice.return @@ load_8_u m a
+    let check_within_bounds m a =
+      match is_out_of_bounds m a with
+      | Error t -> Choice.trap t
+      | Ok (cond, ptr) ->
+        let open Choice in
+        let* out_of_bounds = select cond in
+        if out_of_bounds then trap Trap.Memory_heap_buffer_overflow
+        else return ptr
 
-    let load_16_s m a = Choice.return @@ load_16_s m a
+    let with_concrete (m : t) a f : 'a Choice.t =
+      let open Choice in
+      let* addr = concretise a in
+      let+ ptr = check_within_bounds m addr in
+      f m ptr
 
-    let load_16_u m a = Choice.return @@ load_16_u m a
+    let load_8_s m a = with_concrete m a load_8_s
 
-    let load_32 m a = Choice.return @@ load_32 m a
+    let load_8_u m a = with_concrete m a load_8_u
 
-    let load_64 m a = Choice.return @@ load_64 m a
+    let load_16_s m a = with_concrete m a load_16_s
 
-    let store_8 m ~addr v = Choice.return @@ store_8 m ~addr v
+    let load_16_u m a = with_concrete m a load_16_u
 
-    let store_16 m ~addr v = Choice.return @@ store_16 m ~addr v
+    let load_32 m a = with_concrete m a load_32
 
-    let store_32 m ~addr v = Choice.return @@ store_32 m ~addr v
+    let load_64 m a = with_concrete m a load_64
 
-    let store_64 m ~addr v = Choice.return @@ store_64 m ~addr v
+    let store_8 m ~addr v =
+      with_concrete m addr (fun m addr -> store_8 m ~addr v)
+
+    let store_16 m ~addr v =
+      with_concrete m addr (fun m addr -> store_16 m ~addr v)
+
+    let store_32 m ~addr v =
+      with_concrete m addr (fun m addr -> store_32 m ~addr v)
+
+    let store_64 m ~addr v =
+      with_concrete m addr (fun m addr -> store_64 m ~addr v)
   end
 
   module Data = struct

@@ -184,3 +184,7 @@ let summaries_extern_module =
     ]
   in
   { Link.functions }
+
+let debug_extern_module =
+  let functions = [] in
+  { Link.functions }
