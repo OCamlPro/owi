@@ -137,16 +137,11 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     | Ref r -> pp_ref_value fmt r
 
   module Ref = struct
-    let equal_func_intf (_ : Func_intf.t) (_ : Func_intf.t) : bool =
-      failwith "TODO equal_func_intf"
-
     let get_func ref : Func_intf.t Value_intf.get_ref =
       match (C.Ref.get_func ref.concrete, S.Ref.get_func ref.symbolic) with
       | Null, Null -> Null
       | Type_mismatch, Type_mismatch -> Type_mismatch
-      | Ref_value c, Ref_value s ->
-        assert (equal_func_intf c s);
-        Ref_value c
+      | Ref_value c, Ref_value _s -> Ref_value c
       | _ -> assert false
 
     let get_externref ref ty_id : _ Value_intf.get_ref =

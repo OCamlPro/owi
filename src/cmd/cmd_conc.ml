@@ -8,8 +8,6 @@ module Choice = Concolic.P.Choice
 (* let () = Random.self_init () *)
 let () = Random.init 42
 
-let debug = false
-
 let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   Choice.bind t (fun t ->
@@ -137,22 +135,6 @@ and eval_tree =
   ; mutable ends : (end_of_trace * assignments) list
   }
 
-let rec rec_count_unexplored tree =
-  match tree.node with
-  | Select { if_true; if_false; _ } ->
-    Unexplored.add
-      (rec_count_unexplored if_true)
-      (rec_count_unexplored if_false)
-  | Select_i32 { branches; _ } ->
-    IMap.fold
-      (fun _ branch -> Unexplored.add (rec_count_unexplored branch))
-      branches Unexplored.zero
-  | Assume { cont; _ } | Assert { cont; _ } -> rec_count_unexplored cont
-  | Unreachable -> Unexplored.zero
-  | Not_explored -> Unexplored.one
-
-let _ = rec_count_unexplored
-
 let count_unexplored tree =
   match tree.node with
   | Select { if_true; if_false; _ } ->
@@ -203,7 +185,8 @@ let rec add_trace pc node (trace : trace) to_update : eval_tree list =
       | Trap Unreachable -> begin
         match node.node with
         | Not_explored -> node.node <- Unreachable
-        | Unreachable -> ()
+        | Unreachable ->
+          (* it means we explored two times the same branch ! :S *) assert false
         | _ -> assert false
       end
       | _ -> ()
@@ -287,10 +270,8 @@ let run_once tree link_state modules_to_run forced_values =
   let trace =
     { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
   in
-  if debug then begin
-    Format.pp_std "Add trace:@\n";
-    Format.pp_std "%a@\n" Concolic_choice.pp_pc trace.remaining_pc
-  end;
+  Log.debug0 "Add trace:@\n";
+  Log.debug2 "%a@\n" Concolic_choice.pp_pc trace.remaining_pc;
   add_trace tree trace;
   r
 
@@ -298,9 +279,7 @@ let run_once tree link_state modules_to_run forced_values =
 let rec find_node_to_run tree =
   match tree.node with
   | Not_explored ->
-    if debug then begin
-      Format.pp_std "Try unexplored@.%a@.@." Concolic_choice.pp_pc tree.pc
-    end;
+    Log.debug2 "Try unexplored@.%a@.@." Concolic_choice.pp_pc tree.pc;
     Some tree.pc
   | Select { cond = _; if_true; if_false } ->
     let b =
@@ -308,9 +287,7 @@ let rec find_node_to_run tree =
       else if Unexplored.none if_false.unexplored then true
       else Random.bool ()
     in
-    if debug then begin
-      Format.pp_std "Select bool %b@." b
-    end;
+    Log.debug1 "Select bool %b@." b;
     let tree = if b then if_true else if_false in
     find_node_to_run tree
   | Select_i32 { value = _; branches } ->
@@ -324,19 +301,17 @@ let rec find_node_to_run tree =
     else begin
       let i = Random.int n in
       let i, branch = List.nth branches i in
-      if debug then begin
-        Format.pp_std "Select_i32 %li@." i
-      end;
+      Log.debug1 "Select_i32 %li@." i;
       find_node_to_run branch
     end
   | Assume { cond = _; cont } -> find_node_to_run cont
   | Assert { cond; cont = _; disproved = None } ->
     let pc : Concolic_choice.pc = Select (cond, false) :: tree.pc in
-    Format.pp_std "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
+    Log.debug2 "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
     Some pc
   | Assert { cond = _; cont; disproved = Some _ } -> find_node_to_run cont
   | Unreachable ->
-    Format.pp_std "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
+    Log.debug2 "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
     None
 
 let pc_model solver pc =
@@ -351,52 +326,40 @@ let pc_model solver pc =
 let find_model_to_run solver tree =
   match find_node_to_run tree with
   | None -> None
-  | Some pc -> pc_model solver pc
+  | Some pc ->
+    let m = pc_model solver pc in
+    Option.iter
+      (Log.debug2 "Found something to run %a@\n"
+         (Smtml.Model.pp ~no_values:false) )
+      m;
+    m
 
 let launch solver tree link_state modules_to_run =
-  let rec find_model n =
-    if n = 0 then begin
-      Format.pp_std "Failed to find something to run@\n";
-      None
-    end
-    else
-      match find_model_to_run solver tree with
-      | None -> find_model (n - 1)
-      | Some m ->
-        if debug then begin
-          Format.pp_std "Found something to run %a@\n"
-            (Smtml.Model.pp ~no_values:false)
-            m
-        end;
-        Some m
-  in
-  let rec loop count =
-    if count <= 0 then None
-    else
-      let model = find_model 20 in
-      run_model model count
-  and run_model model count =
+  let rec run_model model =
     let r, thread = run_once tree link_state modules_to_run model in
     match r with
-    | Ok (Ok ()) -> loop (count - 1)
+    | Ok (Ok ()) ->
+      let model = find_model_to_run solver tree in
+      begin
+        match model with
+        | None -> None
+        | Some _model as model -> run_model model
+      end
     | Ok (Error e) -> Result.failwith e
     | Error (Assume_fail c) -> begin
-      if debug then begin
-        Format.pp_std "Assume_fail: %a@\n" Smtml.Expr.pp c;
-        Format.pp_std "Assignments:@\n%a@\n" Concolic_choice.pp_assignments
-          thread.symbols_value;
-        Format.pp_std "Retry !@\n"
-      end;
+      Log.debug2 "Assume_fail: %a@\n" Smtml.Expr.pp c;
+      Log.debug2 "Assignments:@\n%a@\n" Concolic_choice.pp_assignments
+        thread.symbols_value;
+      Log.debug0 "Retry !@\n";
       match pc_model solver thread.pc with
-      | None ->
-        Format.pp_err "Can't satisfy assume !@\n";
-        loop (count - 1)
-      | Some _model as model -> run_model model (count - 1)
+      | None -> Result.failwith (`Msg "Can't satisfy assume")
+      | Some _model as model -> run_model model
     end
     | Error (Trap trap) -> Some (`Trap trap, thread)
     | Error Assert_fail -> Some (`Assert_fail, thread)
   in
-  loop 10
+  let model = find_model_to_run solver tree in
+  run_model model
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
