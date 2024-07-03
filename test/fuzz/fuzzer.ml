@@ -17,17 +17,11 @@ let compare (module I1 : Interprets.INTERPRET)
     Fmt.epr "running %s@\n" I1.name;
     Fmt.flush Fmt.stderr ()
   end;
-  let r1 =
-    let m = I1.of_symbolic m in
-    I1.run m
-  in
+  let r1 = I1.parse_and_run m in
   if Param.debug then begin
     Fmt.epr "running %s@\n" I2.name
   end;
-  let r2 =
-    let m = I2.of_symbolic m in
-    I2.run m
-  in
+  let r2 = I2.parse_and_run m in
   Fmt.epr "@]";
   match (r1, r2) with
   | Ok (), Ok () -> true
