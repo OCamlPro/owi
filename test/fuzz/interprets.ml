@@ -4,11 +4,7 @@ open Syntax
 exception Timeout
 
 module type INTERPRET = sig
-  type t
-
-  val of_symbolic : Text.modul -> t
-
-  val run : t -> unit Result.t
+  val parse_and_run : Text.modul -> unit Result.t
 
   val name : string
 end
@@ -34,14 +30,8 @@ let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
   with Timeout -> Error `Timeout
 
 module Owi_unoptimized : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
-  let run modul =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
+  let parse_and_run modul =
+    let* simplified = Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -53,14 +43,8 @@ module Owi_unoptimized : INTERPRET = struct
 end
 
 module Owi_optimized : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
-  let run modul =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
+  let parse_and_run modul =
+    let* simplified = Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul in
     let* () = Binary_validate.modul simplified in
     let simplified = Optimize.modul simplified in
     let* regular, link_state =
@@ -73,16 +57,10 @@ module Owi_optimized : INTERPRET = struct
 end
 
 module Owi_symbolic : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
   let dummy_workers_count = 42
 
-  let run modul : unit Result.t =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
+  let parse_and_run modul : unit Result.t =
+    let* simplified = Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -104,22 +82,15 @@ module Owi_symbolic : INTERPRET = struct
 end
 
 module Reference : INTERPRET = struct
-  type t = string
+  let parse_and_run modul : unit Result.t =
 
-  let of_symbolic modul = Fmt.str "%a" Text.pp_modul modul
-
-  let run modul : unit Result.t =
-    let* tmp_file = Bos.OS.File.tmp "owi_fuzzer_official%s.wat" in
-    let* () = Bos.OS.File.writef tmp_file "%s@\n" modul in
-    let* status =
-      Bos.OS.Cmd.run_status
-        Bos.Cmd.(
-          v "timeout" % Fmt.str "%fs" Param.max_time_execution % p tmp_file )
-    in
+    let* tmp_file = Bos.OS.Dir.tmp "owi_fuzzer_official%s.wast" in
+    let* () = Bos.OS.File.writef tmp_file "%a" Text.pp_modul modul in
+ 
+    let* cmd = Bos.OS.Cmd.resolve (Bos.Cmd.(v "timeout" % Fmt.str "%fs" Param.max_time_execution % "wasm" % p tmp_file)) in
+    let* status = Bos.OS.Cmd.run_status cmd in
     match status with
-    | `Signaled n ->
-      Fmt.failwith "error, timeout command was signaled with OCaml signal %d@\n"
-        n
+    | `Signaled n -> Fmt.error_msg "timeout signaled %d" n
     | `Exited 0 -> Ok ()
     | `Exited 42 ->
       (* TODO: fix this *)
