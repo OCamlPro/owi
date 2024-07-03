@@ -13,7 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          # Deactivated, see: https://github.com/OCamlPro/owi/issues/346
+          #- macos-latest
           - ubuntu-latest
           # - windows-latest see #5
         ocaml-compiler:
