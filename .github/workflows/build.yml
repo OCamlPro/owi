@@ -73,6 +73,7 @@ jobs:
           # $(exit $(wc -l output.txt | cut -d " " -f1))
       - name: lint-fmt
         run: |
+          opam install ocamlformat
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
       - name: lint-fresh-opam-file
         run: |
