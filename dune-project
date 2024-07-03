@@ -30,50 +30,53 @@
  (synopsis
   "OCaml toolchain to work with WebAssembly, including an interpreter")
  (description
-  "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
+  "Owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
  (tags
   (owi ocaml webassembly wasm interpreter compiler))
  (depends
+   ;; build
   (ocaml
    (>= 5.1))
+  (menhir
+   (and
+    :build
+    (>= 20220210)))
+  (dune-site :build)
+  ;; runtime
   (integers
    (>= 0.5.1))
   cmdliner
   conf-clang
   sedlex
-  (menhir
-   (and
-    :build
-    (>= 20220210)))
   ocaml_intrinsics
   uutf
-  (bisect_ppx
-   (and
-    :with-test
-    (>= 2.5)
-    :dev))
-  (ocb
-   (and
-    :with-test
-    (>= 0.1)
-    :dev))
-  (odoc :with-doc)
-  (crunch :dev)
   bos
   (smtml (>= 0.2.0))
+  digestif
+  xmlm
+  (processor (>= 0.1))
+  ;; doc
+  (odoc :with-doc)
+  ;; test
   (mdx
    (and
     :with-test
     (>= 2.1)))
-  (crowbar :with-test)
-  (graphics :dev)
-  (tiny_httpd :dev)
-  (ocamlformat :dev)
-  (rusage :dev)
-  (tyxml :dev)
-  digestif
-  xmlm
-  (hc (>= 0.3))
-  (processor (>= 0.1))
-  dune-site)
+  ;; dev
+  (bisect_ppx
+   (and
+    (>= 2.5)
+    :with-dev-setup))
+  (ocb
+   (and
+    (>= 0.1)
+    :with-dev-setup))
+  (crunch :with-dev-setup)
+  (crowbar :with-dev-setup)
+  (graphics :with-dev-setup)
+  (tiny_httpd :with-dev-setup)
+  (ocamlformat :with-dev-setup)
+  (rusage :with-dev-setup)
+  (tyxml :with-dev-setup)
+  )
  (sites (share binc) (share libc)))

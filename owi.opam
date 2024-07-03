@@ -3,7 +3,7 @@ opam-version: "2.0"
 synopsis:
   "OCaml toolchain to work with WebAssembly, including an interpreter"
 description:
-  "owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library."
+  "Owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library."
 maintainer: ["Léo Andrès <contact@ndrs.fr>"]
 authors: [
   "Léo Andrès <contact@ndrs.fr>"
@@ -19,31 +19,30 @@ bug-reports: "https://github.com/ocamlpro/owi/issues"
 depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "5.1"}
+  "menhir" {build & >= "20220210"}
+  "dune-site" {build}
   "integers" {>= "0.5.1"}
   "cmdliner"
   "conf-clang"
   "sedlex"
-  "menhir" {build & >= "20220210"}
   "ocaml_intrinsics"
   "uutf"
-  "bisect_ppx" {with-test & >= "2.5" & dev}
-  "ocb" {with-test & >= "0.1" & dev}
-  "odoc" {with-doc}
-  "crunch" {dev}
   "bos"
   "smtml" {>= "0.2.0"}
-  "mdx" {with-test & >= "2.1"}
-  "crowbar" {with-test}
-  "graphics" {dev}
-  "tiny_httpd" {dev}
-  "ocamlformat" {dev}
-  "rusage" {dev}
-  "tyxml" {dev}
   "digestif"
   "xmlm"
-  "hc" {>= "0.3"}
   "processor" {>= "0.1"}
-  "dune-site"
+  "odoc" {with-doc}
+  "mdx" {with-test & >= "2.1"}
+  "bisect_ppx" {>= "2.5" & with-dev-setup}
+  "ocb" {>= "0.1" & with-dev-setup}
+  "crunch" {with-dev-setup}
+  "crowbar" {with-dev-setup}
+  "graphics" {with-dev-setup}
+  "tiny_httpd" {with-dev-setup}
+  "ocamlformat" {with-dev-setup}
+  "rusage" {with-dev-setup}
+  "tyxml" {with-dev-setup}
 ]
 build: [
   ["dune" "subst"] {dev}

@@ -43,6 +43,17 @@ $ dune build -p owi @install
 $ dune install
 ```
 
+### Development setup
+
+To get a proper development setup:
+
+```shell-session
+$ git clone git@github.com:OCamlPro/owi.git
+$ cd owi
+$ opam install . --deps-only --with-test --with-doc --with-dev-setup
+$ dune build @all
+```
+
 ## Supported proposals
 
 The 🐌 status means the proposal is not applicable to Owi.
