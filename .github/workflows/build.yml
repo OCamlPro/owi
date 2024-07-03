@@ -39,7 +39,7 @@ jobs:
             ~/work/owi/owi/_opam/
           key: ${{ runner.os }}-build-${{ matrix.ocaml-compiler }}-${{ env.cache-name }}-${{ hashFiles('**/*.opam') }}
       - name: setup-ocaml
-        uses: ocaml/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
