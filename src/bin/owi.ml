@@ -70,7 +70,11 @@ let profiling =
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
 let eacsl =
-  let doc = "e-acsl mode" in
+  let doc =
+    "e-acsl mode, refer to \
+     https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+     Frama-C's current language feature implementations"
+  in
   Cmdliner.Arg.(value & flag & info [ "e-acsl" ] ~doc)
 
 let solver =
