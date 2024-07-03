@@ -234,10 +234,13 @@ end
 
 let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
   stack Result.t =
-  let check_mem memarg_align align =
+  let check_mem align =
     if List.length env.mem.values < 1 then Error (`Unknown_memory 0)
-    else if memarg_align >= align then Error `Alignment_too_large
-    else Ok ()
+    else
+      match align with
+      | None -> Ok ()
+      | Some (memarg_align, align) ->
+        if memarg_align >= align then Error `Alignment_too_large else Ok ()
   in
   match instr with
   | Nop -> Ok stack
@@ -298,43 +301,43 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
     let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     stack_e1
   | I_load8 (nn, _, memarg) ->
-    let* () = check_mem memarg.align 1l in
+    let* () = check_mem (Some (memarg.align, 1l)) in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I_load16 (nn, _, memarg) ->
-    let* () = check_mem memarg.align 2l in
+    let* () = check_mem (Some (memarg.align, 2l)) in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I_load (nn, memarg) ->
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_mem memarg.align max_allowed in
+    let* () = check_mem (Some (memarg.align, max_allowed)) in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I64_load32 (_, memarg) ->
-    let* () = check_mem memarg.align 4l in
+    let* () = check_mem (Some (memarg.align, 4l)) in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
   | I_store8 (nn, memarg) ->
-    let* () = check_mem memarg.align 1l in
+    let* () = check_mem (Some (memarg.align, 1l)) in
     Stack.pop [ itype nn; i32 ] stack
   | I_store16 (nn, memarg) ->
-    let* () = check_mem memarg.align 2l in
+    let* () = check_mem (Some (memarg.align, 2l)) in
     Stack.pop [ itype nn; i32 ] stack
   | I_store (nn, memarg) ->
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_mem memarg.align max_allowed in
+    let* () = check_mem (Some (memarg.align, max_allowed)) in
     Stack.pop [ itype nn; i32 ] stack
   | I64_store32 memarg ->
-    let* () = check_mem memarg.align 4l in
+    let* () = check_mem (Some (memarg.align, 4l)) in
     Stack.pop [ i64; i32 ] stack
   | F_load (nn, memarg) ->
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_mem memarg.align max_allowed in
+    let* () = check_mem (Some (memarg.align, max_allowed)) in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ ftype nn ] stack
   | F_store (nn, memarg) ->
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_mem memarg.align max_allowed in
+    let* () = check_mem (Some (memarg.align, max_allowed)) in
     Stack.pop [ ftype nn; i32 ] stack
   | I_reinterpret_f (inn, fnn) ->
     let* stack = Stack.pop [ ftype fnn ] stack in
@@ -368,10 +371,14 @@ let rec typecheck_instr (env : env) (stack : stack) (instr : binary instr) :
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
   | Memory_grow ->
+    let* () = check_mem None in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i32 ] stack
-  | Memory_size -> Stack.push [ i32 ] stack
+  | Memory_size ->
+    let* () = check_mem None in
+    Stack.push [ i32 ] stack
   | Memory_copy | Memory_init _ | Memory_fill ->
+    let* () = check_mem None in
     Stack.pop [ i32; i32; i32 ] stack
   | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
