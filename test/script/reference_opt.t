@@ -1,7 +1,5 @@
   $ owi script --no-exhaustion --optimize reference/address.wast
   $ owi script --no-exhaustion --optimize reference/align.wast
-  expected malformed memop flags but there was no error
-  [7]
   $ owi script --no-exhaustion --optimize reference/binary-leb128.wast
   $ owi script --no-exhaustion --optimize reference/binary.wast
   expected END opcode expected but got (unexpected end of section or function)

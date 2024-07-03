@@ -265,12 +265,14 @@ let read_limits input =
     ({ min; max = Some max }, input)
   | _c -> Error (`Msg "integer too large (read_limits)")
 
-let read_memarg input =
+let read_memarg max_align input =
   let* align, input = read_U32 input in
-  let+ offset, input = read_U32 input in
-  let align = Int32.of_int align in
-  let offset = Int32.of_int offset in
-  ({ align; offset }, input)
+  if align >= max_align then Error (`Msg "malformed memop flags")
+  else
+    let+ offset, input = read_U32 input in
+    let align = Int32.of_int align in
+    let offset = Int32.of_int offset in
+    ({ align; offset }, input)
 
 let read_FC input =
   let* i, input = read_U32 input in
@@ -415,73 +417,73 @@ let rec read_instr types input =
     let+ tableidx, input = read_indice input in
     (Table_set tableidx, input)
   | '\x28' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_load (S32, memarg), input)
   | '\x29' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_load (S64, memarg), input)
   | '\x2A' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (F_load (S32, memarg), input)
   | '\x2B' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (F_load (S64, memarg), input)
   | '\x2C' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_load8 (S32, S, memarg), input)
   | '\x2D' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_load8 (S32, U, memarg), input)
   | '\x2E' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_load16 (S32, S, memarg), input)
   | '\x2F' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_load16 (S32, U, memarg), input)
   | '\x30' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_load8 (S64, S, memarg), input)
   | '\x31' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_load8 (S64, U, memarg), input)
   | '\x32' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_load16 (S64, S, memarg), input)
   | '\x33' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_load16 (S64, U, memarg), input)
   | '\x34' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I64_load32 (S, memarg), input)
   | '\x35' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I64_load32 (U, memarg), input)
   | '\x36' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_store (S32, memarg), input)
   | '\x37' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_store (S64, memarg), input)
   | '\x38' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (F_store (S32, memarg), input)
   | '\x39' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (F_store (S64, memarg), input)
   | '\x3A' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_store8 (S32, memarg), input)
   | '\x3B' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I_store16 (S32, memarg), input)
   | '\x3C' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_store8 (S64, memarg), input)
   | '\x3D' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 64 input in
     (I_store16 (S64, memarg), input)
   | '\x3E' ->
-    let+ memarg, input = read_memarg input in
+    let+ memarg, input = read_memarg 32 input in
     (I64_store32 memarg, input)
   | '\x3F' ->
     let+ input = check_zero_opcode input in
