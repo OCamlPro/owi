@@ -45,7 +45,7 @@ jobs:
           dune-cache: true
           opam-depext: true
           opam-pin: true
-          allow-prerelease-opam: true
+          allow-prerelease-opam: false
       - name: depext
         run: |
           opam install . --depext-only --with-test --with-doc
