@@ -188,10 +188,13 @@ let run ~no_exhaustion ~optimize script =
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
-          | Ok m ->
-            (* TODO: there should be some checks here before linking ! *)
-            let got = Link.modul link_state ~name:None m in
-            check_error_result expected got
+          | Ok m -> begin
+            match Typecheck.modul m with
+            | Error got -> check_error ~expected ~got
+            | Ok () ->
+              let got = Link.modul link_state ~name:None m in
+              check_error_result expected got
+          end
         in
         link_state
       | Assert (Assert_invalid (m, expected)) ->

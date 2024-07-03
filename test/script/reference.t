@@ -1,6 +1,6 @@
   $ owi script --no-exhaustion reference/address.wast
   $ owi script --no-exhaustion reference/align.wast
-  expected alignment must not be larger than natural but there was no error
+  expected malformed memop flags but there was no error
   [7]
   $ owi script --no-exhaustion reference/binary-leb128.wast
   $ owi script --no-exhaustion reference/binary.wast
