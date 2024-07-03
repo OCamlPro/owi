@@ -727,9 +727,12 @@ let import_desc fmt : 'a import_desc -> Unit.t = function
     pp fmt "(global%a %a)" pp_id_opt id pp_global_type t
 
 type 'a import =
-  { modul : string
-  ; name : string
+  { modul : string  (** The name of the module from which the import is done *)
+  ; name : string  (** The name of the importee in its module of origin *)
   ; desc : 'a import_desc
+      (** If this import_desc first field is Some s, the importee is made
+          available under name s, else it can only be used via its numerical
+          index.*)
   }
 
 let pp_import fmt i =
