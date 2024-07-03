@@ -43,7 +43,6 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
-          opam-depext: true
           opam-pin: true
           allow-prerelease-opam: false
       - name: depext

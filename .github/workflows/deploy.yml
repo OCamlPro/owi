@@ -31,7 +31,6 @@ jobs:
         with:
           ocaml-compiler: "5.2"
           dune-cache: false
-          opam-depext: true
           opam-pin: true
           allow-prerelease-opam: false
       - name: depext
