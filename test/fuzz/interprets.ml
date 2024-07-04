@@ -4,11 +4,7 @@ open Syntax
 exception Timeout
 
 module type INTERPRET = sig
-  type t
-
-  val of_symbolic : Text.modul -> t
-
-  val run : t -> unit Result.t
+  val parse_and_run : Text.modul -> unit Result.t
 
   val name : string
 end
@@ -32,11 +28,7 @@ let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
   with Timeout -> Error `Timeout
 
 module Owi_unoptimized : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
-  let run modul =
+  let parse_and_run modul =
     let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let* regular, link_state =
@@ -49,11 +41,7 @@ module Owi_unoptimized : INTERPRET = struct
 end
 
 module Owi_optimized : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
-  let run modul =
+  let parse_and_run modul =
     let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let simplified = Optimize.modul simplified in
@@ -67,13 +55,9 @@ module Owi_optimized : INTERPRET = struct
 end
 
 module Owi_symbolic : INTERPRET = struct
-  type t = Text.modul
-
-  let of_symbolic = Fun.id
-
   let dummy_workers_count = 42
 
-  let run modul : unit Result.t =
+  let parse_and_run modul : unit Result.t =
     let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Typecheck.modul simplified in
     let* regular, link_state =
@@ -96,11 +80,8 @@ module Owi_symbolic : INTERPRET = struct
 end
 
 module Reference : INTERPRET = struct
-  type t = string
-
-  let of_symbolic modul = Format.asprintf "%a" Text.pp_modul modul
-
-  let run modul : unit Result.t =
+  let parse_and_run modul : unit Result.t =
+    let modul = Format.asprintf "%a" Text.pp_modul modul in
     let prefix = "owi_fuzzer_official" in
     let suffix = ".wast" in
     let tmp_file = Filename.temp_file prefix suffix in
@@ -122,4 +103,41 @@ module Reference : INTERPRET = struct
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"
+end
+
+module Owi_symbolic_multicore (Symbolizer : sig
+  val symbolize : Text.modul -> Text.modul
+end) : INTERPRET = struct
+  let name = "multicore"
+
+  let parse_and_run modul : unit Result.t =
+    let modul = Symbolizer.symbolize modul in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
+    let* () = Typecheck.modul simplified in
+    let* regular, link_state =
+      Link.modul Link.empty_state ~name:None simplified
+    in
+    let regular = Symbolic.convert_module_to_run regular in
+    timeout_call_run (fun () ->
+        let c = Interpret.SymbolicP.modul link_state.envs regular in
+        let init_thread : Thread.t = Thread.create () in
+        let res_acc = ref [] in
+        let res_acc_mutex = Mutex.create () in
+        let jhs =
+          Symbolic_choice.run ~workers:1 Smtml.Solver_dispatcher.Z3_solver c
+            init_thread
+            ~callback:(fun (res, _) ->
+              Mutex.protect res_acc_mutex (fun () -> res_acc := res :: !res_acc) )
+            ~callback_init:(fun () -> ())
+            ~callback_end:(fun () -> ())
+        in
+        Array.iter (fun jh -> Domain.join jh) jhs;
+        match !res_acc with
+        | [ v ] -> begin
+          match v with
+          | EVal r -> r
+          | ETrap (t, _mdl) -> Error (`Trap t)
+          | EAssert (_expr, _mdl) -> Error `Assert_failure
+        end
+        | _ -> failwith "Unexpected multiple results." )
 end

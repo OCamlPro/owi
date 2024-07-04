@@ -3,11 +3,13 @@
 
 let debug = false
 
-let optimize_fuzzing = true
+let optimize_fuzzing = false
 
 let reference_fuzzing = false
 
-let symbolic_fuzzing = true
+let symbolic_fuzzing = false
+
+let full_symbolic_fuzzing = true
 
 let initial_fuel = 100
 
