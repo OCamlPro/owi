@@ -27,7 +27,7 @@ type global =
 type data_mode =
   | Data_passive
   (* TODO: Data_active binary+const expr*)
-  | Data_active of int option * binary expr
+  | Data_active of int * binary expr
 
 type data =
   { id : string option

@@ -604,16 +604,15 @@ let write_data buf ({ init; mode; _ } : data) =
   | Data_passive ->
     write_u32_of_int buf 1;
     write_string buf init
-  | Data_active (Some 0, expr) ->
+  | Data_active (0, expr) ->
     write_u32_of_int buf 0;
     write_expr buf expr ~end_op_code:None;
     write_string buf init
-  | Data_active (Some i, expr) ->
+  | Data_active (i, expr) ->
     write_u32_of_int buf 2;
     write_u32_of_int buf i;
     write_expr buf expr ~end_op_code:None;
     write_string buf init
-  | Data_active (None, _) -> assert false
 
 let encode_section buf id encode_func data =
   let section_buf = Buffer.create 16 in

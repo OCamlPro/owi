@@ -46,15 +46,18 @@ type err =
   | `Unbound_name of string
   | `Undeclared_function_reference
   | `Unexpected_token of string
-  | `Unknown_function of int
-  | `Unknown_global
+  | `Unknown_data of Types.text Types.indice
+  | `Unknown_elem of Types.text Types.indice
+  | `Unknown_func of Types.text Types.indice
+  | `Unknown_global of Types.text Types.indice
   | `Unknown_import of string * string
-  | `Unknown_label
-  | `Unknown_local of string
-  | `Unknown_memory of int
+  | `Unknown_label of Types.text Types.indice
+  | `Unknown_local of Types.text Types.indice
+  | `Unknown_memory of Types.text Types.indice
   | `Unknown_module of string
   | `Unknown_operator
-  | `Unknown_type
+  | `Unknown_table of Types.text Types.indice
+  | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
   ]
 

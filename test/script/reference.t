@@ -3,7 +3,7 @@
   $ owi script --no-exhaustion reference/binary-leb128.wast
   $ owi script --no-exhaustion reference/binary.wast
   expected END opcode expected but got (unexpected end of section or function)
-  [51]
+  [54]
   $ owi script --no-exhaustion reference/block.wast
   $ owi script --no-exhaustion reference/br_if.wast
   $ owi script --no-exhaustion reference/br_table.wast

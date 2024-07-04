@@ -122,7 +122,7 @@ module Build = struct
 
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
-    | None -> Error `Unknown_global
+    | None -> Error (`Unknown_global (Raw id))
     | Some v -> Ok v
 
   let get_const_global (env : t) id =
@@ -133,7 +133,7 @@ module Build = struct
 
   let get_func (env : t) id =
     match IMap.find_opt id env.functions with
-    | None -> Error (`Unknown_function id)
+    | None -> Error (`Unknown_func (Raw id))
     | Some v -> Ok v
 end
 

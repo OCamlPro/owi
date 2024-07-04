@@ -114,9 +114,8 @@ let convert_data_mode (m : Binary.data_mode) : Text.data_mode =
   match m with
   | Data_passive -> Data_passive
   | Data_active (i, e) ->
-    let i = Option.map (fun i -> Raw i) i in
     let e = convert_expr e in
-    Data_active (i, e)
+    Data_active (Some (Raw i), e)
 
 let convert_data (e : Binary.data) : Text.data =
   let { Binary.id; init; mode } : Binary.data = e in
