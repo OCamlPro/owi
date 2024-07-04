@@ -9,9 +9,9 @@ int main(void) {
     if (x >= 0) {
         //@ ghost num = 42;
     }
-    //@ ghost else num = 0;  
+    //@ ghost else num = 0;
 
    //@ assert num == 42;
-    
+
     return 0;
 }
