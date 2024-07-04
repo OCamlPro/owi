@@ -1,0 +1,8 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  breaks.c
+  continues.c
+  exits.c
+  returns.c))
