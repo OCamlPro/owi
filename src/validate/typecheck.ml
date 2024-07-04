@@ -718,6 +718,35 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
+let check_limit { min; max } =
+  match max with
+  | None -> Ok ()
+  | Some max ->
+    if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
+
+let validate_tables modul =
+  list_iter
+    (fun t ->
+      match Indexed.get t with
+      | Runtime.Local (_, (limits, _)) | Imported { desc = limits, _; _ } ->
+        check_limit limits )
+    modul.table.values
+
+let validate_mem modul =
+  list_iter
+    (fun t ->
+      match Indexed.get t with
+      | Runtime.Local (_, desc) | Imported { desc; _ } ->
+        let* () =
+          if desc.min > 65536 then Error `Memory_size_too_large
+          else
+            match desc.max with
+            | Some max when max > 65536 -> Error `Memory_size_too_large
+            | Some _ | None -> Ok ()
+        in
+        check_limit desc )
+    modul.mem.values
+
 let modul (modul : modul) =
   Log.debug0 "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
@@ -726,6 +755,8 @@ let modul (modul : modul) =
   let* () = list_iter (typecheck_data modul refs) modul.data.values in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
+  let* () = validate_tables modul in
+  let* () = validate_mem modul in
   List.iter
     (fun (export : export) -> Hashtbl.add refs export.id ())
     modul.exports.func;
