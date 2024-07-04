@@ -18,38 +18,23 @@ let typemap (types : binary str_type Named.t) =
     (fun idx typ acc -> TypeMap.add typ (Raw idx) acc)
     types TypeMap.empty
 
-let find msg (named : 'a Named.t) : _ -> binary indice Result.t = function
-  | Raw i as indice ->
-    (* TODO change Indexed.t strucure for that to be more efficient *)
-    if not (List.exists (Indexed.has_index i) named.values) then
-      Error (`Msg (Format.sprintf "%s %i" msg i))
-    else Ok indice
+let find error (named : 'a Named.t) : _ -> binary indice Result.t = function
+  | Raw _i as indice -> Ok indice
   | Text name -> (
     match String_map.find_opt name named.named with
-    | None -> Error (`Msg (Format.sprintf "%s %s" msg name))
+    | None -> Error error
     | Some i -> Ok (Raw i) )
 
-let get msg (named : 'a Named.t) indice : 'a Indexed.t Result.t =
-  let* (Raw i) = find msg named indice in
+let get error (named : 'a Named.t) indice : 'a Indexed.t Result.t =
+  let* (Raw i) = find error named indice in
   (* TODO change Named.t structure to make that sensible *)
-  match List.nth_opt named.values i with
-  | None -> Error (`Msg msg)
-  | Some v -> Ok v
+  match List.nth_opt named.values i with None -> Error error | Some v -> Ok v
 
-let find_global (modul : Assigned.t) ~imported_only id : (int * mut) Result.t =
-  let* (Raw idx) = find "unknown global" modul.global id in
-  let va = List.find (Indexed.has_index idx) modul.global.values in
-  let+ mut, _typ =
-    match Indexed.get va with
-    | Imported imported -> Ok imported.desc
-    | Local global ->
-      if imported_only then Error `Unknown_global
-      else
-        let mut, val_type = global.typ in
-        let+ val_type = Binary_types.convert_val_type None val_type in
-        (mut, val_type)
-  in
-  (idx, mut)
+let find_global (modul : Assigned.t) id : binary indice Result.t =
+  find (`Unknown_global id) modul.global id
+
+let find_memory (modul : Assigned.t) id : binary indice Result.t =
+  find (`Unknown_memory id) modul.mem id
 
 let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   (iexpr : text expr) : binary expr Result.t =
@@ -70,17 +55,18 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
               block_ids
           with Exit -> ()
         end;
-        if !pos = -1 then Error `Unknown_label else Ok !pos
+        if !pos = -1 then Error (`Unknown_label (Text id)) else Ok !pos
       | Raw id -> Ok id
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
-    if id > List.length block_ids + loop_count then Error `Unknown_label
+    if id > List.length block_ids + loop_count then
+      Error (`Unknown_label (Raw id))
     else Ok (Raw id)
   in
 
   let bt_some_to_raw : text block_type -> binary block_type Result.t = function
     | Bt_ind ind -> begin
-      let+ v = get "unknown type" modul.typ ind in
+      let+ v = get (`Unknown_type ind) modul.typ ind in
       match Indexed.get v with
       | Def_func_t t' ->
         let idx = Indexed.get_index v in
@@ -94,7 +80,7 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
       | Some ind ->
         (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
         let* t' =
-          let+ v = get "unknown type" modul.typ ind in
+          let+ v = get (`Unknown_type ind) modul.typ ind in
           match Indexed.get v with Def_func_t t' -> t' | _ -> assert false
         in
         let ok = Binary_types.equal_func_types t t' in
@@ -109,7 +95,7 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
       Some raw
   in
 
-  let* locals, after_last_assigned_local =
+  let* locals, _after_last_assigned_local =
     List.fold_left
       (fun acc ((name, _type) : binary param) ->
         let* locals, next_free_int = acc in
@@ -124,22 +110,18 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   in
 
   let find_local = function
-    | Raw i as id ->
-      if i >= after_last_assigned_local then
-        Error (`Unknown_local (string_of_int i))
-      else Ok id
-    | Text name -> (
+    | Raw _i as id -> Ok id
+    | Text name as id -> (
       match String_map.find_opt name locals with
-      | None -> Error (`Unknown_local name)
+      | None -> Error (`Unknown_local id)
       | Some id -> Ok (Raw id) )
   in
 
-  let find_table id = find "unknown table" modul.table id in
-  let find_func id = find "unknown function" modul.func id in
-  let _find_mem id = find "unknown memory" modul.mem id in
-  let find_data id = find "unknown data segment" modul.data id in
-  let find_elem id = find "unknown elem segment" modul.elem id in
-  let find_type id = find "unknown type" modul.typ id in
+  let find_table id = find (`Unknown_table id) modul.table id in
+  let find_func id = find (`Unknown_func id) modul.func id in
+  let find_data id = find (`Unknown_data id) modul.data id in
+  let find_elem id = find (`Unknown_elem id) modul.elem id in
+  let find_type id = find (`Unknown_type id) modul.typ id in
 
   let rec body (loop_count, block_ids) : text instr -> binary instr Result.t =
     function
@@ -197,15 +179,12 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     | Return_call_ref bt ->
       let+ bt = bt_some_to_raw bt in
       Return_call_ref bt
-    | Global_set id -> begin
-      let* idx, mut = find_global modul ~imported_only:false id in
-      match mut with
-      | Const -> Error `Global_is_immutable
-      | Var -> ok @@ Global_set (Raw idx)
-    end
+    | Global_set id ->
+      let+ idx = find_global modul id in
+      Global_set idx
     | Global_get id ->
-      let+ idx, _mut = find_global modul ~imported_only:false id in
-      Global_get (Raw idx)
+      let+ idx = find_global modul id in
+      Global_get idx
     | Ref_func id ->
       let+ id = find_func id in
       Ref_func id
@@ -233,11 +212,8 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
       let+ table' = find_table i' in
       Table_copy (table, table')
     | Memory_init id ->
-      (* TODO: this is already checked in typechecked.ml but for some reason, but we need to test is here first for now in order to pass a test, until we move the find_data validation for *binary* indice in typecheck *)
-      if List.length modul.mem.values < 1 then Error (`Unknown_memory 0)
-      else
-        let+ id = find_data id in
-        Memory_init id
+      let+ id = find_data id in
+      Memory_init id
     | Data_drop id ->
       let+ id = find_data id in
       Data_drop id
@@ -303,41 +279,11 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   in
   expr iexpr (0, [])
 
-(* TODO: binary+const expr/list *)
-let rewrite_const_expr (modul : Assigned.t) (expr : text expr) :
-  binary expr Result.t =
-  let const_instr (instr : text instr) : binary instr Result.t =
-    match instr with
-    | Global_get id -> begin
-      let* idx, mut = find_global modul ~imported_only:true id in
-      match mut with
-      | Const -> ok @@ Global_get (Raw idx)
-      | Var -> Error `Constant_expression_required
-    end
-    | Ref_null v ->
-      let+ v = Binary_types.convert_heap_type None v in
-      Ref_null v
-    | Ref_func f ->
-      let+ f = find "unknown function" modul.func f in
-      Ref_func f
-    | Array_new t ->
-      let+ t = find "unknown type" modul.typ t in
-      Array_new t
-    | Array_new_default t ->
-      let+ t = find "unknown type" modul.typ t in
-      Array_new_default t
-    | ( I32_const _ | I64_const _ | F32_const _ | F64_const _ | Ref_i31
-      | I_binop (_, (Add | Sub | Mul)) ) as i ->
-      Ok i
-    | _i -> Error `Constant_expression_required
-  in
-  list_map const_instr expr
-
 let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (block_type : text block_type) : binary block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
-    let+ v = get "unknown type" modul.typ id in
+    let+ v = get (`Unknown_type id) modul.typ id in
     match Indexed.get v with
     | Def_func_t t' ->
       let idx = Indexed.get_index v in
@@ -358,7 +304,7 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
 
 let rewrite_global (modul : Assigned.t) (global : Text.global) :
   Binary.global Result.t =
-  let* init = rewrite_const_expr modul global.init in
+  let* init = rewrite_expr modul [] global.init in
   let mut, val_type = global.typ in
   let+ val_type = Binary_types.convert_val_type None val_type in
   let typ = (mut, val_type) in
@@ -372,13 +318,13 @@ let rewrite_elem (modul : Assigned.t) (elem : Text.elem) : Binary.elem Result.t
     | Elem_passive -> Ok Elem_passive
     | Elem_active (None, _expr) ->
       (* TODO: does this really happen ? *)
-      Error (`Msg "unknown table")
-    | Elem_active (Some indice, expr) ->
-      let* (Raw indice) = find "unknown table" modul.table indice in
-      let+ expr = rewrite_const_expr modul expr in
+      Error (`Unknown_table (Raw 0))
+    | Elem_active (Some id, expr) ->
+      let* (Raw indice) = find (`Unknown_table id) modul.table id in
+      let+ expr = rewrite_expr modul [] expr in
       Binary.Elem_active (Some indice, expr)
   in
-  let* init = list_map (rewrite_const_expr modul) elem.init in
+  let* init = list_map (rewrite_expr modul []) elem.init in
   let+ typ = Binary_types.convert_ref_type None elem.typ in
   { Binary.init; mode; id = elem.id; typ }
 
@@ -388,16 +334,16 @@ let rewrite_data (modul : Assigned.t) (data : Text.data) : Binary.data Result.t
     match data.mode with
     | Data_passive -> Ok Binary.Data_passive
     | Data_active (None, _expr) ->
-      (* TODO: does this really happen ? *)
-      Error (`Msg "unknown memory")
+      (* TODO: maybe we should change the type in assigned to avoid this case ? *)
+      assert false
     | Data_active (Some indice, expr) ->
-      let* (Raw indice) = find "unknown memory" modul.mem indice in
-      let+ expr = rewrite_const_expr modul expr in
-      Binary.Data_active (Some indice, expr)
+      let* (Raw indice) = find_memory modul indice in
+      let+ expr = rewrite_expr modul [] expr in
+      Binary.Data_active (indice, expr)
   in
   { Binary.mode; id = data.id; init = data.init }
 
-let rewrite_export msg named (exports : Grouped.opt_export list) :
+let rewrite_export err named (exports : Grouped.opt_export list) :
   Binary.export list Result.t =
   list_map
     (fun { Grouped.name; id } ->
@@ -405,7 +351,7 @@ let rewrite_export msg named (exports : Grouped.opt_export list) :
         match id with
         | Curr id -> Ok id
         | Indice id ->
-          let+ (Raw id) = find msg named id in
+          let+ (Raw id) = find (err id) named id in
           id
       in
       { Binary.name; id } )
@@ -413,19 +359,28 @@ let rewrite_export msg named (exports : Grouped.opt_export list) :
 
 let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
   Binary.exports Result.t =
-  let* global = rewrite_export "unknown global" modul.global exports.global in
-  let* mem = rewrite_export "unknown memory" modul.mem exports.mem in
-  let* table = rewrite_export "unknown table" modul.table exports.table in
-  let+ func = rewrite_export "unknown function" modul.func exports.func in
+  let* global =
+    rewrite_export (fun id -> `Unknown_global id) modul.global exports.global
+  in
+  let* mem =
+    rewrite_export (fun id -> `Unknown_memory id) modul.mem exports.mem
+  in
+  let* table =
+    rewrite_export (fun id -> `Unknown_table id) modul.table exports.table
+  in
+  let+ func =
+    rewrite_export (fun id -> `Unknown_func id) modul.func exports.func
+  in
   { Binary.global; mem; table; func }
 
 let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
-  (func : text func) : binary func Result.t =
-  let* type_f = rewrite_block_type typemap modul func.type_f in
-  let (Bt_raw ((None | Some _), (params, _))) = type_f in
-  let* locals = list_map (Binary_types.convert_param None) func.locals in
-  let+ body = rewrite_expr modul (params @ locals) func.body in
-  { body; type_f; id = func.id; locals }
+  ({ id; type_f; locals; body; _ } : text func) : binary func Result.t =
+  let* (Bt_raw (_, (params, _)) as type_f) =
+    rewrite_block_type typemap modul type_f
+  in
+  let* locals = list_map (Binary_types.convert_param None) locals in
+  let+ body = rewrite_expr modul (params @ locals) body in
+  { body; type_f; id; locals }
 
 let rewrite_import (f : 'a -> 'b Result.t) (import : 'a Imported.t) :
   'b Imported.t Result.t =
@@ -462,20 +417,17 @@ let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
 let modul (modul : Assigned.t) : Binary.modul Result.t =
   Log.debug0 "rewriting    ...@\n";
   let typemap = typemap modul.typ in
-  let* (global : (Binary.global, binary global_type) Runtime.t Named.t) =
+  let* global =
     let+ { Named.named; values } =
       rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
     in
     let values = List.rev values in
-    let global : (Binary.global, binary global_type) Runtime.t Named.t =
-      { Named.named; values }
-    in
-    global
+    { Named.named; values }
   in
   let* elem = rewrite_named (rewrite_elem modul) modul.elem in
   let* data = rewrite_named (rewrite_data modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
-  let* (func : (binary func, binary block_type) Runtime.t Named.t) =
+  let* func =
     let import = rewrite_import (rewrite_block_type typemap modul) in
     let runtime = rewrite_runtime (rewrite_func typemap modul) import in
     rewrite_named runtime modul.func
@@ -484,21 +436,9 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let+ start =
     match modul.start with
     | None -> Ok None
-    | Some start -> (
-      let* (Raw idx) = find "unknown function" func start in
-      let va = List.find (Indexed.has_index idx) func.Named.values in
-      let param_typ, result_typ =
-        match Indexed.get va with
-        | Local func ->
-          let (Bt_raw ((None | Some _), t)) = func.type_f in
-          t
-        | Imported imported ->
-          let (Bt_raw ((None | Some _), t)) = imported.desc in
-          t
-      in
-      match (param_typ, result_typ) with
-      | [], [] -> Ok (Some idx)
-      | _, _ -> Error `Start_function )
+    | Some id ->
+      let* (Raw id) = find (`Unknown_func id) func id in
+      Ok (Some id)
   in
 
   let modul : Binary.modul =

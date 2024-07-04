@@ -271,7 +271,7 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  if mem <> 0 then Error (`Unknown_memory mem)
+  if mem <> 0 then Error (`Unknown_memory (Raw mem))
   else
     Ok
       [ I32_const offset
@@ -293,8 +293,7 @@ let define_data env data =
       let env = Link_env.Build.add_data id data' env in
       let* init =
         match data.mode with
-        | Data_active (None, _) -> assert false
-        | Data_active (Some mem, offset) ->
+        | Data_active (mem, offset) ->
           let* offset = Eval_const.expr env offset in
           let length = Int32.of_int @@ String.length data.init in
           let* offset = get_i32 offset in

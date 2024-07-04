@@ -892,24 +892,20 @@ let read_code types input =
 let read_data_active types input =
   let* Raw index, input = read_indice input in
   let+ offset, input = read_const types input in
-  (Data_active (Some index, offset), input)
+  (Data_active (index, offset), input)
 
 let read_data_active_zero types input =
   let+ offset, input = read_const types input in
-  (Data_active (Some 0, offset), input)
+  (Data_active (0, offset), input)
 
-let read_data types memories input =
+let read_data types input =
   let* i, input = read_U32 input in
   let id = None in
   match i with
   | 0 ->
     let* mode, input = read_data_active_zero types input in
-    let* init, input = read_bytes ~msg:"read_data 0" input in
+    let+ init, input = read_bytes ~msg:"read_data 0" input in
     let init = string_of_char_list init in
-    (* TODO: this should be removed once we do proper validation of binary modules *)
-    let+ () =
-      if List.is_empty memories then Error (`Unknown_memory 0) else Ok ()
-    in
     ({ id; init; mode }, input)
   | 1 ->
     let mode = Data_passive in
@@ -1052,7 +1048,7 @@ let sections_iterate (input : Input.t) =
   (* Data *)
   let+ data_section, input =
     section_parse input ~expected_id:'\x0B' []
-      (vector_no_id (read_data type_section memory_section))
+      (vector_no_id (read_data type_section))
   in
 
   let* () =

@@ -126,7 +126,7 @@ let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with
-  | None -> Error `Unknown_type
+  | None -> Error (`Unknown_type (Raw id))
   | Some (Def_func_t func_type') ->
     let* func_type = Binary_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then
