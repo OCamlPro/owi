@@ -3,10 +3,10 @@
 
 #include <endian.h>
 
-typedef char *va_list;
-#define va_start(ap, parmn) (void)((ap) = (char *)(&(parmn) + 1))
-#define va_end(ap) (void)((ap) = 0)
-#define va_arg(ap, type) (((type *)((ap) = ((ap) + sizeof(type))))[-1])
+typedef __builtin_va_list va_list;
+#define va_start(ap, param) __builtin_va_start(ap, param)
+#define va_end(ap)          __builtin_va_end(ap)
+#define va_arg(ap, type)    __builtin_va_arg(ap, type)
 
 #ifndef va_end
 #include <stdarg-cruft.h>
