@@ -1,0 +1,9 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  case.c
+  default.c
+  else.c
+  global.c
+  parameter.c))
