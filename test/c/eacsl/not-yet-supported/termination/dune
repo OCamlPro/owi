@@ -1,0 +1,7 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  decreases.c
+  decreases_mutual.c
+  general_measure.c))
