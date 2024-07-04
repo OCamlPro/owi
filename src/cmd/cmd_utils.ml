@@ -46,7 +46,7 @@ let add_main_as_start (m : Binary.modul) =
     | Some export -> (
       (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
       let main_id = export.id in
-      match Indexed.get_at main_id m.func.values with
+      match Indexed.get_at main_id m.func with
       | None -> Error (`Msg "can't find a main function")
       | Some main_function ->
         let (Bt_raw main_type) =
@@ -79,18 +79,14 @@ let add_main_as_start (m : Binary.modul) =
           { Types.type_f; locals = []; body; id = None }
         in
         let start_func = Runtime.Local start_code in
-        let named = m.func.named in
         (* We need to add the new start function to the funcs of the module at the next free index *)
         let next_free_index =
           List.fold_left
             (fun next_free_index v ->
               let index = Indexed.get_index v in
               if next_free_index > index then next_free_index else index + 1 )
-            0 m.func.values
+            0 m.func
         in
-        let values =
-          Indexed.return next_free_index start_func :: m.func.values
-        in
-        let func = { Named.named; values } in
+        let func = Indexed.return next_free_index start_func :: m.func in
         let start = Some next_free_index in
         { m with func; start } )

@@ -122,87 +122,99 @@ let convert_data (e : Binary.data) : Text.data =
   let mode = convert_data_mode mode in
   { id; init; mode }
 
-let from_types (types : Types.binary Types.rec_type Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (t : Types.binary Types.rec_type) acc ->
+let from_types types : Text.module_field list =
+  List.map
+    (fun t ->
+      let i = Indexed.get_index t in
+      let t = Indexed.get t in
       let t = convert_rec_type t in
-      (i, MType t) :: acc )
-    types []
+      (i, MType t) )
+    types
   |> List.sort compare |> List.map snd
 
-let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
-  : Text.module_field list =
-  Named.fold
-    (fun i (g : (Binary.global, binary global_type) Runtime.t) acc ->
+let from_global global : Text.module_field list =
+  List.map
+    (fun g ->
+      let i = Indexed.get_index g in
+      let g : (Binary.global, binary global_type) Runtime.t = Indexed.get g in
       match g with
       | Runtime.Local g ->
         let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
-        (i, MGlobal { typ; init; id }) :: acc
+        (i, MGlobal { typ; init; id })
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_global (assigned_name, convert_global_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    global []
+        (i, MImport { modul; name; desc }) )
+    global
   |> List.sort compare |> List.map snd
 
-let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (t : (binary table, binary table_type) Runtime.t) acc ->
+let from_table table : Text.module_field list =
+  List.map
+    (fun t ->
+      let i = Indexed.get_index t in
+      let t = Indexed.get t in
       match t with
       | Runtime.Local t ->
         let t = convert_table t in
-        (i, MTable t) :: acc
+        (i, MTable t)
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_table (assigned_name, convert_table_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    table []
+        (i, MImport { modul; name; desc }) )
+    table
   |> List.sort compare |> List.map snd
 
-let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
-  Named.fold
-    (fun i mem acc ->
+let from_mem mem : Text.module_field list =
+  List.map
+    (fun mem ->
+      let i = Indexed.get_index mem in
+      let mem = Indexed.get mem in
       match mem with
-      | Runtime.Local mem -> (i, MMem mem) :: acc
+      | Runtime.Local mem -> (i, MMem mem)
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_mem (assigned_name, desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    mem []
+        (i, MImport { modul; name; desc }) )
+    mem
   |> List.sort compare |> List.map snd
 
-let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (func : (binary func, binary block_type) Runtime.t) acc ->
+let from_func func : Text.module_field list =
+  List.map
+    (fun func ->
+      let i = Indexed.get_index func in
+      let func : (binary func, binary block_type) Runtime.t =
+        Indexed.get func
+      in
       match func with
       | Runtime.Local func ->
         let type_f = convert_block_type func.type_f in
         let locals = convert_param_type func.locals in
         let body = convert_expr func.body in
         let id = func.id in
-        (i, MFunc { type_f; locals; body; id }) :: acc
+        (i, MFunc { type_f; locals; body; id })
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_func (assigned_name, convert_block_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    func []
+        (i, MImport { modul; name; desc }) )
+    func
   |> List.sort compare |> List.map snd
 
-let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
-  Named.fold
-    (fun i (elem : Binary.elem) acc ->
-      let elem = convert_elem elem in
-      (i, MElem elem) :: acc )
-    elem []
+let from_elem (elem : Binary.elem Indexed.t list) : Text.module_field list =
+  List.map
+    (fun v ->
+      let i = Indexed.get_index v in
+      let v = Indexed.get v in
+      let elem = convert_elem v in
+      (i, MElem elem) )
+    elem
   |> List.sort compare |> List.map snd
 
-let from_data (data : Binary.data Named.t) : Text.module_field list =
-  Named.fold
-    (fun i (data : Binary.data) acc ->
-      let data = convert_data data in
-      (i, MData data) :: acc )
-    data []
+let from_data (data : _ Indexed.t list) : Text.module_field list =
+  List.map
+    (fun v ->
+      let i = Indexed.get_index v in
+      let v = Indexed.get v in
+      let data = convert_data v in
+      (i, MData data) )
+    data
   |> List.sort compare |> List.map snd
 
 let from_exports (exports : Binary.exports) : Text.module_field list =

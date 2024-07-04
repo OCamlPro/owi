@@ -34,12 +34,10 @@ module Index = struct
 end
 
 let check_mem modul n =
-  if n >= List.length modul.mem.values then Error (`Unknown_memory (Raw n))
-  else Ok ()
+  if n >= List.length modul.mem then Error (`Unknown_memory (Raw n)) else Ok ()
 
 let check_data modul n =
-  if n >= List.length modul.data.values then Error (`Unknown_data (Raw n))
-  else Ok ()
+  if n >= List.length modul.data then Error (`Unknown_data (Raw n)) else Ok ()
 
 let check_align memarg_align align =
   if memarg_align >= align then Error `Alignment_too_large else Ok ()
@@ -59,13 +57,13 @@ module Env = struct
     | Some v -> Ok v
 
   let global_get i modul =
-    let value = Indexed.get_at i modul.global.values in
+    let value = Indexed.get_at i modul.global in
     match value with
     | None -> Error (`Unknown_global (Raw i))
     | Some (Runtime.Local { typ = desc; _ } | Imported { desc; _ }) -> Ok desc
 
   let func_get i modul =
-    let value = Indexed.get_at i modul.func.values in
+    let value = Indexed.get_at i modul.func in
     match value with
     | None -> Error (`Unknown_func (Raw i))
     | Some
@@ -79,13 +77,13 @@ module Env = struct
     | Some bt -> Ok bt
 
   let table_type_get i (modul : Binary.modul) =
-    let value = Indexed.get_at i modul.table.values in
+    let value = Indexed.get_at i modul.table in
     match value with
     | None -> Error (`Unknown_table (Raw i))
     | Some (Runtime.Local (_, (_, t)) | Imported { desc = _, t; _ }) -> Ok t
 
   let elem_type_get i env =
-    let value = Indexed.get_at i env.modul.elem.values in
+    let value = Indexed.get_at i env.modul.elem in
     match value with
     | None -> Error (`Unknown_elem (Raw i))
     | Some value -> Ok value.typ
@@ -562,7 +560,7 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =
-  match func with
+  match Indexed.get func with
   | Runtime.Imported _ -> Ok ()
   | Local func ->
     let (Bt_raw (_, (params, result))) = func.type_f in
@@ -590,7 +588,7 @@ let typecheck_const_instr (modul : modul) refs stack = function
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
   | Global_get (Raw i as idx) ->
-    let value = Indexed.get_at i modul.global.values in
+    let value = Indexed.get_at i modul.global in
     let* mut, typ =
       match value with
       | None | Some (Local _) -> Error (`Unknown_global idx)
@@ -678,7 +676,7 @@ let typecheck_start { start; func; _ } =
   | None -> Ok ()
   | Some idx -> (
     let* f =
-      match List.find_opt (Indexed.has_index idx) func.values with
+      match List.find_opt (Indexed.has_index idx) func with
       | None -> Error (`Unknown_func (Raw idx))
       | Some f -> Ok f
     in
@@ -730,7 +728,7 @@ let validate_tables modul =
       match Indexed.get t with
       | Runtime.Local (_, (limits, _)) | Imported { desc = limits, _; _ } ->
         check_limit limits )
-    modul.table.values
+    modul.table
 
 let validate_mem modul =
   list_iter
@@ -745,14 +743,14 @@ let validate_mem modul =
             | Some _ | None -> Ok ()
         in
         check_limit desc )
-    modul.mem.values
+    modul.mem
 
 let modul (modul : modul) =
   Log.debug0 "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
-  let* () = list_iter (typecheck_global modul refs) modul.global.values in
-  let* () = list_iter (typecheck_elem modul refs) modul.elem.values in
-  let* () = list_iter (typecheck_data modul refs) modul.data.values in
+  let* () = list_iter (typecheck_global modul refs) modul.global in
+  let* () = list_iter (typecheck_elem modul refs) modul.elem in
+  let* () = list_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
   let* () = validate_tables modul in
@@ -760,8 +758,4 @@ let modul (modul : modul) =
   List.iter
     (fun (export : export) -> Hashtbl.add refs export.id ())
     modul.exports.func;
-  Named.fold
-    (fun _index func acc ->
-      let* () = acc in
-      typecheck_function modul func refs )
-    modul.func (Ok ())
+  list_iter (fun func -> typecheck_function modul func refs) modul.func

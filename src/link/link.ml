@@ -152,13 +152,14 @@ let eval_global ls env (global : (Binary.global, binary global_type) Runtime.t)
   | Imported import -> load_global ls import
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
-  Named.fold
-    (fun id global env ->
-      let* env in
+  list_fold_left
+    (fun env global ->
+      let id = Indexed.get_index global in
+      let global = Indexed.get global in
       let* global = eval_global ls env global in
       let env = Link_env.Build.add_global id global env in
       Ok env )
-    globals (Ok env)
+    env globals
 
 (*
 let eval_in_data (env : Link_env.t) (data : _ data') : (int, value) data' =
@@ -194,13 +195,14 @@ let eval_memory ls (memory : (mem, limits) Runtime.t) :
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
-  Named.fold
-    (fun id mem env ->
-      let* env in
-      let* memory = eval_memory ls mem in
+  list_fold_left
+    (fun env mem ->
+      let id = Indexed.get_index mem in
+      let mem = Indexed.get mem in
+      let+ memory = eval_memory ls mem in
       let env = Link_env.Build.add_memory id memory env in
-      Ok env )
-    memories (Ok env)
+      env )
+    env memories
 
 let table_types_are_compatible (import, (t1 : binary ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && t1 = t2
@@ -218,13 +220,14 @@ let eval_table ls (table : (_, binary table_type) Runtime.t) : table Result.t =
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
-  Named.fold
-    (fun id table env ->
-      let* env in
-      let* table = eval_table ls table in
+  list_fold_left
+    (fun env table ->
+      let id = Indexed.get_index table in
+      let table = Indexed.get table in
+      let+ table = eval_table ls table in
       let env = Link_env.Build.add_table id table env in
-      Ok env )
-    tables (Ok env)
+      env )
+    env tables
 
 let func_types_are_compatible a b =
   (* TODO: copied from Simplify_bis.equal_func_types => should factorize *)
@@ -254,13 +257,14 @@ let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Link_env.t') env functions =
-  Named.fold
-    (fun id func env ->
-      let* env in
-      let* func = eval_func ls finished_env func in
+  list_fold_left
+    (fun env func ->
+      let id = Indexed.get_index func in
+      let func = Indexed.get func in
+      let+ func = eval_func ls finished_env func in
       let env = Link_env.Build.add_func id func env in
-      Ok env )
-    functions (Ok env)
+      env )
+    env functions
 
 let active_elem_expr ~offset ~length ~table ~elem =
   [ I32_const offset
@@ -286,35 +290,35 @@ let get_i32 = function
   | _ -> Error (`Type_mismatch "get_i32")
 
 let define_data env data =
-  Named.fold
-    (fun id (data : Binary.data) env_and_init ->
-      let* env, init = env_and_init in
+  list_fold_left
+    (fun (env, init) data ->
+      let id = Indexed.get_index data in
+      let data : Binary.data = Indexed.get data in
       let data' : Link_env.data = { value = data.init } in
       let env = Link_env.Build.add_data id data' env in
-      let* init =
+      let+ init =
         match data.mode with
         | Data_active (mem, offset) ->
           let* offset = Eval_const.expr env offset in
           let length = Int32.of_int @@ String.length data.init in
           let* offset = get_i32 offset in
           let id = Raw id in
-          let* v = active_data_expr ~offset ~length ~mem ~data:id in
-          ok @@ (v :: init)
+          let+ v = active_data_expr ~offset ~length ~mem ~data:id in
+          v :: init
         | Data_passive -> Ok init
       in
-      Ok (env, init) )
-    data
-    (Ok (env, []))
+      (env, init) )
+    (env, []) data
 
 let define_elem env elem =
-  Named.fold
-    (fun id (elem : Binary.elem) env_and_inits ->
-      let* env, inits = env_and_inits in
+  list_fold_left
+    (fun (env, inits) elem ->
+      let id = Indexed.get_index elem in
+      let elem : Binary.elem = Indexed.get elem in
       let* init = list_map (Eval_const.expr env) elem.init in
       let* init_as_ref =
         list_map
-          (fun v ->
-            match v with
+          (function
             | Concrete_value.Ref v -> Ok v
             | _ -> Error `Constant_expression_required )
           init
@@ -327,19 +331,18 @@ let define_elem env elem =
           (* Declarative element have no runtime value *)
           Link_env.Build.add_elem id { value = [||] } env
       in
-      let* inits =
+      let+ inits =
         match elem.mode with
         | Elem_active (None, _) -> assert false
         | Elem_active (Some table, offset) ->
           let length = Int32.of_int @@ List.length init in
           let* offset = Eval_const.expr env offset in
-          let* offset = get_i32 offset in
-          ok @@ (active_elem_expr ~offset ~length ~table ~elem:id :: inits)
+          let+ offset = get_i32 offset in
+          active_elem_expr ~offset ~length ~table ~elem:id :: inits
         | Elem_passive | Elem_declarative -> Ok inits
       in
-      Ok (env, inits) )
-    elem
-    (Ok (env, []))
+      (env, inits) )
+    (env, []) elem
 
 let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =

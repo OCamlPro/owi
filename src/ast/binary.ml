@@ -50,27 +50,27 @@ type elem =
 
 type modul =
   { id : string option
-  ; types : binary rec_type Named.t
-  ; global : (global, binary global_type) Runtime.t Named.t
-  ; table : (binary table, binary table_type) Runtime.t Named.t
-  ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (binary func, binary block_type) Runtime.t Named.t
+  ; types : binary rec_type Indexed.t list
+  ; global : (global, binary global_type) Runtime.t Indexed.t list
+  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
+  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; func : (binary func, binary block_type) Runtime.t Indexed.t list
       (* TODO: switch to func_type *)
-  ; elem : elem Named.t
-  ; data : data Named.t
+  ; elem : elem Indexed.t list
+  ; data : data Indexed.t list
   ; exports : exports
   ; start : int option
   }
 
 let empty_modul =
   { id = None
-  ; types = Named.empty
-  ; global = Named.empty
-  ; table = Named.empty
-  ; mem = Named.empty
-  ; func = Named.empty
-  ; elem = Named.empty
-  ; data = Named.empty
+  ; types = []
+  ; global = []
+  ; table = []
+  ; mem = []
+  ; func = []
+  ; elem = []
+  ; data = []
   ; exports = { global = []; mem = []; table = []; func = [] }
   ; start = None
   }

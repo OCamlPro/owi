@@ -397,16 +397,13 @@ let rewrite_runtime f g r =
     Runtime.Imported i
 
 let rewrite_named f named =
-  let+ values =
-    list_map
-      (fun ind ->
-        let index = Indexed.get_index ind in
-        let value = Indexed.get ind in
-        let+ value = f value in
-        Indexed.return index value )
-      named.Named.values
-  in
-  { named with Named.values }
+  list_map
+    (fun ind ->
+      let index = Indexed.get_index ind in
+      let value = Indexed.get ind in
+      let+ value = f value in
+      Indexed.return index value )
+    named.Named.values
 
 let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   binary rec_type Result.t =
@@ -418,11 +415,10 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   Log.debug0 "rewriting    ...@\n";
   let typemap = typemap modul.typ in
   let* global =
-    let+ { Named.named; values } =
+    let+ global =
       rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
     in
-    let values = List.rev values in
-    { Named.named; values }
+    List.rev global
   in
   let* elem = rewrite_named (rewrite_elem modul) modul.elem in
   let* data = rewrite_named (rewrite_data modul) modul.data in
@@ -437,14 +433,14 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
     match modul.start with
     | None -> Ok None
     | Some id ->
-      let* (Raw id) = find (`Unknown_func id) func id in
+      let* (Raw id) = find (`Unknown_func id) modul.func id in
       Ok (Some id)
   in
 
   let modul : Binary.modul =
     { id = modul.id
-    ; mem = modul.mem
-    ; table = modul.table
+    ; mem = modul.mem.values
+    ; table = modul.table.values
     ; types
     ; global
     ; elem

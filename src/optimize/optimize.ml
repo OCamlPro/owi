@@ -520,7 +520,7 @@ let optimize_runtime_func f =
       | Local f -> Runtime.Local (optimize_func f) )
     f
 
-let optimize_funcs funs = Named.map optimize_runtime_func funs
+let optimize_funcs funs = List.map optimize_runtime_func funs
 
 let modul m =
   Log.debug0 "optimizing   ...@\n";

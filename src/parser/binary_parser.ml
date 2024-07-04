@@ -1082,10 +1082,7 @@ let sections_iterate (input : Input.t) =
   let indexed_of_array l = Array.mapi Indexed.return l |> Array.to_list in
 
   (* Types *)
-  let types =
-    let values = indexed_of_array type_section in
-    { Named.values; named = String_map.empty }
-  in
+  let types = indexed_of_array type_section in
 
   (* Memories *)
   let mem =
@@ -1099,8 +1096,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_memory_import -> None )
         import_section
     in
-    let values = indexed_of_list (imported @ local) in
-    { Named.values; named = String_map.empty }
+    indexed_of_list (imported @ local)
   in
 
   (* Globals *)
@@ -1116,8 +1112,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_global_import -> None )
         import_section
     in
-    let values = indexed_of_list (imported @ local) in
-    { Named.values; named = String_map.empty }
+    indexed_of_list (imported @ local)
   in
 
   (* Functions *)
@@ -1147,8 +1142,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_function_import -> None )
         import_section
     in
-    let values = indexed_of_list (imported @ local) in
-    { Named.values; named = String_map.empty }
+    indexed_of_list (imported @ local)
   in
 
   (* Tables *)
@@ -1168,21 +1162,14 @@ let sections_iterate (input : Input.t) =
           | _not_a_table_import -> None )
         import_section
     in
-    let values = indexed_of_list (imported @ local) in
-    { Named.values; named = String_map.empty }
+    indexed_of_list (imported @ local)
   in
 
   (* Elems *)
-  let elem =
-    let values = indexed_of_list element_section in
-    { Named.values; named = String_map.empty }
-  in
+  let elem = indexed_of_list element_section in
 
   (* Data *)
-  let data =
-    let values = indexed_of_list data_section in
-    { Named.values; named = String_map.empty }
-  in
+  let data = indexed_of_list data_section in
 
   (* Exports *)
   let empty_exports = { global = []; mem = []; table = []; func = [] } in

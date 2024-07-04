@@ -625,9 +625,8 @@ let encode_section buf id encode_func data =
   end
 
 (* type: section 1 *)
-let encode_types buf (rec_types : binary rec_type Named.t) =
-  encode_vector buf rec_types.values
-    (fun buf (typ : binary rec_type Indexed.t) ->
+let encode_types buf rec_types =
+  encode_vector buf rec_types (fun buf (typ : binary rec_type Indexed.t) ->
       let typ = Indexed.get typ in
       match typ with
       | [] -> assert false
@@ -698,13 +697,13 @@ let encode_start buf int_opt =
   match int_opt with None -> () | Some funcidx -> write_u32_of_int buf funcidx
 
 (* element: section 9 *)
-let encode_elements buf { Named.values = elems; _ } =
+let encode_elements buf elems =
   encode_vector buf elems (fun buf elem ->
       let elem = Indexed.get elem in
       write_element buf elem )
 
 (* datacount: section 12 *)
-let encode_datacount buf { Named.values = datas; _ } =
+let encode_datacount buf datas =
   let len = List.length datas in
   write_u32_of_int buf len
 
@@ -718,12 +717,12 @@ let encode_codes buf funcs =
       Buffer.add_buffer buf code_buf )
 
 (* data: section 11 *)
-let encode_datas buf { Named.values = datas; _ } =
+let encode_datas buf datas =
   encode_vector buf datas (fun buf data ->
       let data = Indexed.get data in
       write_data buf data )
 
-let keep_local { Named.values; _ } =
+let keep_local values =
   List.filter_map
     (fun data ->
       match Indexed.get data with
@@ -731,7 +730,7 @@ let keep_local { Named.values; _ } =
       | Runtime.Imported _data -> None )
     (List.rev values)
 
-let keep_imported { Named.values; _ } =
+let keep_imported values =
   List.filter_map
     (fun data ->
       match Indexed.get data with
