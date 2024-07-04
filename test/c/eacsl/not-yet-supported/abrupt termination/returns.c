@@ -5,7 +5,7 @@ int main(void) {
     owi_assume(x >= 0);
     owi_assume(x <= 20);
     while (x > 0) {
-    /*@ returns \result % 5 == 0 && (\result + 1) % 7 != 0 && (\result + 2) % 11 != 0 && \result == \at(x, Pre) - 2;
+    /*@ returns \result % 5 == 0 && (\result + 1) % 7 != 0 && (\result + 2) % 11 != 0 && \result == \old(x) - 2;
       @ ensures (x + 1) % 5 != 0 && (x + 2) % 7 != 0  && (x + 3) % 11 != 0 && x == \old(x) - 3;
     */
     {
