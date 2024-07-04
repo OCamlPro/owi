@@ -118,9 +118,8 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   { Named.values; named }
 
-let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
-    =
-  let id, func_type = check in
+let check_type_id (types : binary str_type Named.t)
+  ((id, func_type) : Grouped.type_check) =
   let id =
     match id with Raw i -> i | Text name -> String_map.find name types.named
   in
