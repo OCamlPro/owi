@@ -16,8 +16,8 @@
         ensures \result == value;
 
     behavior odd:
-        assumes value % 2 == 1;
-        requires (value % 2) - 1 == 0;
+        assumes value % 2 == 1 || value % 2 == -1;
+        requires (value % 2) - 1 == 0 || (value % 2) + 1 == 0;
         ensures \result == value;
 
     behavior even:
@@ -37,7 +37,7 @@ int f(int value) {
 }
 
 int main() {
-    int value = -1;
+    int value = owi_i32();
     owi_assume(value > INT_MIN);
     f(value);
     return 0;
