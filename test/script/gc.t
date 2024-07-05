@@ -20,10 +20,8 @@
   unknown operator unknown operator "any.convert_extern"
   [23]
   $ owi script --no-exhaustion reference/proposals/gc/ref_eq.wast
-  owi: internal error, uncaught exception:
-       File "src/validate/typecheck.ml", line 541, characters 4-10: Assertion failed
-       
-  [125]
+  type mismatch (pop)
+  [35]
   $ owi script --no-exhaustion reference/proposals/gc/ref_test.wast
   unknown operator unknown operator "any.convert_extern"
   [23]

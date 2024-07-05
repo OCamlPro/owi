@@ -1,5 +1,7 @@
   $ owi wat2wasm rec.wat
   $ owi run rec.wasm
+  start function must have type [] -> []
+  [32]
   $ owi wasm2wat rec.wasm
   (module
     
@@ -7,6 +9,11 @@
     
     (type (sub final  (func)))
     (memory 1)
+    (func
+      i32.const 4
+      call 0
+      drop
+    )
     (func (param i32) (result i32)
       local.get 0
       i32.const 0
@@ -52,11 +59,6 @@
       i32.mul
       i32.load align=1
       return
-    )
-    (func
-      i32.const 4
-      call 0
-      drop
     )
     (start 1)
   )

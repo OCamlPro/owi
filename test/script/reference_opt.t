@@ -19,6 +19,10 @@
   $ owi script --no-exhaustion --optimize reference/custom.wast
   $ owi script --no-exhaustion --optimize reference/data.wast
   $ owi script --no-exhaustion --optimize reference/elem.wast
+  got:      i32.const 65
+  expected: (i32.const 66)
+  bad result
+  [3]
   $ owi script --no-exhaustion --optimize reference/endianness.wast
   $ owi script --no-exhaustion --optimize reference/exports.wast
   $ owi script --no-exhaustion --optimize reference/f32_bitwise.wast
@@ -68,6 +72,8 @@
   $ owi script --no-exhaustion --optimize reference/labels.wast
   $ owi script --no-exhaustion --optimize reference/left-to-right.wast
   $ owi script --no-exhaustion --optimize reference/linking.wast
+  uninitialized element 7
+  [26]
   $ owi script --no-exhaustion --optimize reference/load.wast
   $ owi script --no-exhaustion --optimize reference/local_get.wast
   $ owi script --no-exhaustion --optimize reference/local_set.wast

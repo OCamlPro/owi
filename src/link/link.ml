@@ -215,7 +215,7 @@ let eval_tables ls env tables =
       (fun (env, i) table ->
         let+ table = eval_table ls table in
         let env = Link_env.Build.add_table i table env in
-        (env, i) )
+        (env, succ i) )
       (env, 0) tables
   in
   env
