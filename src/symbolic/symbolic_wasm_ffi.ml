@@ -4,13 +4,17 @@
 
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice
+module Memory = Symbolic_memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
     with type 'a t = 'a Choice.t
+     and type memory = Memory.t
      and module Value = Symbolic_value = struct
   type 'a t = 'a Choice.t
+
+  type memory = Memory.t
 
   module Value = Symbolic_value
 
@@ -53,29 +57,16 @@ module M :
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
       Choice.bind (abort ()) (fun () -> assert false)
 
-  let alloc (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    Choice.bind (i32 base) (fun base ->
-        Choice.with_thread (fun t ->
-            let memories = Thread.memories t in
-            Symbolic_memory.iter
-              (fun tbl ->
-                Symbolic_memory.ITbl.iter
-                  (fun _ (m : Symbolic_memory.t) ->
-                    Symbolic_memory.replace_size m base size )
-                  tbl )
-              memories;
-            Expr.ptr base (Value.const_i32 0l) ) )
+  let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
+    let open Choice in
+    let+ base = i32 base in
+    Memory.replace_size m base size;
+    Expr.ptr base (Value.const_i32 0l)
 
-  let free (p : Value.int32) : unit Choice.t =
-    Choice.bind (ptr p) (fun base ->
-        Choice.with_thread (fun t ->
-            let memories = Thread.memories t in
-            Symbolic_memory.iter
-              (fun tbl ->
-                Symbolic_memory.ITbl.iter
-                  (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base)
-                  tbl )
-              memories ) )
+  let free m (p : Value.int32) : unit Choice.t =
+    let open Choice in
+    let+ base = ptr p in
+    Memory.free m base
 
   let exit (p : Value.int32) : unit Choice.t =
     ignore p;
@@ -120,9 +111,10 @@ let summaries_extern_module =
   let functions =
     [ ( "alloc"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
+          (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (Mem (Arg (I32, Res)), R0), free) )
     ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ; ( "exit"
       , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )

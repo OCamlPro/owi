@@ -5,6 +5,8 @@
 module type S0 = sig
   type 'a t
 
+  type memory
+
   module Value : sig
     type int32
 
@@ -33,9 +35,9 @@ module type S0 = sig
 
   val abort : unit -> unit t
 
-  val alloc : Value.int32 -> Value.int32 -> Value.int32 t
+  val alloc : memory -> Value.int32 -> Value.int32 -> Value.int32 t
 
-  val free : Value.int32 -> unit t
+  val free : memory -> Value.int32 -> unit t
 
   val exit : Value.int32 -> unit t
 end

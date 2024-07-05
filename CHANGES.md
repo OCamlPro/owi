@@ -1,5 +1,6 @@
 ## unreleased
 
+- adds a `Mem` argument to external function to allow direct manipulation of the memory.
 - support other solvers through the `--solver` option (Z3, Colibri2, Bitwuzla and CVC5)
 - support the extended constant expressions proposal
 - `owi opt` and `owi sym` can run on `.wasm` files directly
