@@ -5,9 +5,14 @@
 open Types
 open Format
 
-module Make_extern_func (V : Func_intf.Value_types) (M : Func_intf.Monad_type) =
+module Make_extern_func
+    (V : Func_intf.Value_types)
+    (M : Func_intf.Monad_type)
+    (Memory : Func_intf.Memory_type) =
 struct
   type 'a m = 'a M.t
+
+  type memory = Memory.t
 
   type _ telt =
     | I32 : V.int32 telt
@@ -24,6 +29,7 @@ struct
     | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
   type (_, _) atype =
+    | Mem : ('b, 'r) atype -> (memory -> 'b, 'r) atype
     | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
     | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
@@ -50,6 +56,7 @@ struct
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
   let rec arg_type : type t r. (t, r) atype -> binary param_type = function
+    | Mem tl -> arg_type tl
     | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
@@ -93,6 +100,7 @@ module Func = struct
       (struct
         type 'a t = 'a
       end)
+      (Concrete_memory)
 end
 
 type externref = E : 'a Type.Id.t * 'a -> externref

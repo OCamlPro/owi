@@ -56,8 +56,6 @@ module P = struct
       failwith "TODO"
     | _, _ -> assert false
 
-  module Extern_func = Concrete_value.Make_extern_func (Value) (Choice)
-
   module Global = struct
     open Concolic_value
 
@@ -182,6 +180,8 @@ module P = struct
 
     let get_limit_max _ = failwith "TODO"
   end
+
+  module Extern_func = Concrete_value.Make_extern_func (Value) (Choice) (Memory)
 
   module Data = struct
     type t = Link_env.data

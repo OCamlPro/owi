@@ -4,42 +4,6 @@
 
 open Types
 
-module type Memory_data = sig
-  type int32
-
-  type int64
-
-  type t
-
-  val load_8_s : t -> int32 -> int32
-
-  val load_8_u : t -> int32 -> int32
-
-  val load_16_s : t -> int32 -> int32
-
-  val load_16_u : t -> int32 -> int32
-
-  val load_32 : t -> int32 -> int32
-
-  val load_64 : t -> int32 -> int64
-
-  val store_8 : t -> addr:int32 -> int32 -> unit
-
-  val store_16 : t -> addr:int32 -> int32 -> unit
-
-  val store_32 : t -> addr:int32 -> int32 -> unit
-
-  val store_64 : t -> addr:int32 -> int64 -> unit
-
-  val create : Int32.t -> t
-
-  val grow : t -> int32 -> unit
-
-  val size : t -> int32
-
-  val size_in_pages : t -> int32
-end
-
 module type P = sig
   type thread
 
@@ -49,14 +13,6 @@ module type P = sig
 
   val select :
     Value.vbool -> if_true:Value.t -> if_false:Value.t -> Value.t Choice.t
-
-  module Extern_func :
-    Func_intf.T_Extern_func
-      with type int32 := Value.int32
-       and type int64 := Value.int64
-       and type float32 := Value.float32
-       and type float64 := Value.float64
-       and type 'a m := 'a Choice.t
 
   module Global : sig
     type t
@@ -134,6 +90,15 @@ module type P = sig
 
     val get_limit_max : t -> Value.int64 option
   end
+
+  module Extern_func :
+    Func_intf.T_Extern_func
+      with type int32 := Value.int32
+       and type int64 := Value.int64
+       and type float32 := Value.float32
+       and type float64 := Value.float64
+       and type 'a m := 'a Choice.t
+       and type memory := Memory.t
 
   module Data : sig
     type t
