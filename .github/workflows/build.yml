@@ -54,6 +54,7 @@ jobs:
         run: |
           opam install . --deps-only --with-test --with-doc
           opam install smtml z3
+          opam install ocamlformat
           opam clean --switch-cleanup
       - name: build
         run: |
@@ -73,7 +74,6 @@ jobs:
           # $(exit $(wc -l output.txt | cut -d " " -f1))
       - name: lint-fmt
         run: |
-          opam install ocamlformat
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
       - name: lint-fresh-opam-file
         run: |
