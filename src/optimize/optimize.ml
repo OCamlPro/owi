@@ -513,14 +513,11 @@ let optimize_func (func : binary func) =
   let locals, body = remove_unused_locals locals nb_args body in
   { type_f; locals; body; id }
 
-let optimize_runtime_func f =
-  Indexed.map
-    (function
-      | Runtime.Imported _ as f -> f
-      | Local f -> Runtime.Local (optimize_func f) )
-    f
+let optimize_runtime_func = function
+  | Runtime.Imported _ as f -> f
+  | Local f -> Runtime.Local (optimize_func f)
 
-let optimize_funcs funs = List.map optimize_runtime_func funs
+let optimize_funcs funs = Array.map optimize_runtime_func funs
 
 let modul m =
   Log.debug0 "optimizing   ...@\n";

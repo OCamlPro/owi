@@ -437,17 +437,28 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
       Ok (Some id)
   in
 
+  let indexed_list_to_array l =
+    let tbl = Hashtbl.create 512 in
+    List.iter
+      (fun v ->
+        let i = Indexed.get_index v in
+        let v = Indexed.get v in
+        Hashtbl.add tbl i v )
+      l;
+    Array.init (List.length l) (fun i ->
+        match Hashtbl.find_opt tbl i with None -> assert false | Some v -> v )
+  in
+
+  let id = modul.id in
+  let mem = indexed_list_to_array modul.mem.values in
+  let table = indexed_list_to_array modul.table.values in
+  let types = indexed_list_to_array types in
+  let global = indexed_list_to_array global in
+  let elem = indexed_list_to_array elem in
+  let data = indexed_list_to_array data in
+  let func = indexed_list_to_array func in
+
   let modul : Binary.modul =
-    { id = modul.id
-    ; mem = modul.mem.values
-    ; table = modul.table.values
-    ; types
-    ; global
-    ; elem
-    ; data
-    ; exports
-    ; func
-    ; start
-    }
+    { id; mem; table; types; global; elem; data; exports; func; start }
   in
   modul

@@ -123,99 +123,83 @@ let convert_data (e : Binary.data) : Text.data =
   { id; init; mode }
 
 let from_types types : Text.module_field list =
-  List.map
+  Array.map
     (fun t ->
-      let i = Indexed.get_index t in
-      let t = Indexed.get t in
       let t = convert_rec_type t in
-      (i, MType t) )
+      MType t )
     types
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
 let from_global global : Text.module_field list =
-  List.map
-    (fun g ->
-      let i = Indexed.get_index g in
-      let g : (Binary.global, binary global_type) Runtime.t = Indexed.get g in
+  Array.map
+    (fun (g : (Binary.global, binary global_type) Runtime.t) ->
       match g with
       | Runtime.Local g ->
         let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
-        (i, MGlobal { typ; init; id })
+        MGlobal { typ; init; id }
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_global (assigned_name, convert_global_type desc) in
-        (i, MImport { modul; name; desc }) )
+        MImport { modul; name; desc } )
     global
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
 let from_table table : Text.module_field list =
-  List.map
+  Array.map
     (fun t ->
-      let i = Indexed.get_index t in
-      let t = Indexed.get t in
       match t with
       | Runtime.Local t ->
         let t = convert_table t in
-        (i, MTable t)
+        MTable t
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_table (assigned_name, convert_table_type desc) in
-        (i, MImport { modul; name; desc }) )
+        MImport { modul; name; desc } )
     table
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
 let from_mem mem : Text.module_field list =
-  List.map
+  Array.map
     (fun mem ->
-      let i = Indexed.get_index mem in
-      let mem = Indexed.get mem in
       match mem with
-      | Runtime.Local mem -> (i, MMem mem)
+      | Runtime.Local mem -> MMem mem
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_mem (assigned_name, desc) in
-        (i, MImport { modul; name; desc }) )
+        MImport { modul; name; desc } )
     mem
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
 let from_func func : Text.module_field list =
-  List.map
-    (fun func ->
-      let i = Indexed.get_index func in
-      let func : (binary func, binary block_type) Runtime.t =
-        Indexed.get func
-      in
+  Array.map
+    (fun (func : (binary func, binary block_type) Runtime.t) ->
       match func with
       | Runtime.Local func ->
         let type_f = convert_block_type func.type_f in
         let locals = convert_param_type func.locals in
         let body = convert_expr func.body in
         let id = func.id in
-        (i, MFunc { type_f; locals; body; id })
+        MFunc { type_f; locals; body; id }
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_func (assigned_name, convert_block_type desc) in
-        (i, MImport { modul; name; desc }) )
+        MImport { modul; name; desc } )
     func
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
-let from_elem (elem : Binary.elem Indexed.t list) : Text.module_field list =
-  List.map
+let from_elem elem : Text.module_field list =
+  Array.map
     (fun v ->
-      let i = Indexed.get_index v in
-      let v = Indexed.get v in
       let elem = convert_elem v in
-      (i, MElem elem) )
+      MElem elem )
     elem
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
-let from_data (data : _ Indexed.t list) : Text.module_field list =
-  List.map
+let from_data data : Text.module_field list =
+  Array.map
     (fun v ->
-      let i = Indexed.get_index v in
-      let v = Indexed.get v in
       let data = convert_data v in
-      (i, MData data) )
+      MData data )
     data
-  |> List.sort compare |> List.map snd
+  |> Array.to_list
 
 let from_exports (exports : Binary.exports) : Text.module_field list =
   let global =
