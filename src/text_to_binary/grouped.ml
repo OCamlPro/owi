@@ -115,19 +115,13 @@ let declare_func_type type_f (fields : t) =
     in
     { fields with function_type = typ :: fields.function_type; type_checks }
 
-let check_limit { min; max } =
-  match max with
-  | None -> Ok ()
-  | Some max ->
-    if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
-
 let of_symbolic (modul : Text.modul) : t Result.t =
   Log.debug0 "grouping     ...@\n";
   let add ((fields : t), curr) field : (t * curr) Result.t =
     match field with
     | Text.MType typ ->
       let typ = typ @ fields.typ in
-      ok @@ ({ fields with typ }, curr)
+      Ok ({ fields with typ }, curr)
     | MGlobal global -> ok @@ add_global (Local global) fields curr
     | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
       let+ val_type = Binary_types.convert_val_type None val_type in
@@ -139,10 +133,8 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       let exports =
         { fields.exports with global = { name; id } :: fields.exports.global }
       in
-      ok ({ fields with exports }, curr)
+      Ok ({ fields with exports }, curr)
     | MTable table ->
-      let _, (limits, _) = table in
-      let* () = check_limit limits in
       let id, table_type = table in
       let+ table_type = Binary_types.convert_table_type None table_type in
       let table = (id, table_type) in
@@ -156,18 +148,8 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       let exports =
         { fields.exports with table = { name; id } :: fields.exports.table }
       in
-      ok ({ fields with exports }, curr)
-    | MMem ((_, limits) as mem) ->
-      let* () =
-        if limits.min > 65536 then Error `Memory_size_too_large else Ok ()
-      in
-      let* () =
-        match limits.max with
-        | Some max when max > 65536 -> Error `Memory_size_too_large
-        | Some _ | None -> Ok ()
-      in
-      let* () = check_limit limits in
-      ok @@ add_mem (Local mem) fields curr
+      Ok ({ fields with exports }, curr)
+    | MMem mem -> ok @@ add_mem (Local mem) fields curr
     | MImport ({ desc = Import_mem (id, limits); _ } as import) ->
       let imported = imp import (id, limits) in
       ok @@ add_mem (Imported imported) fields curr

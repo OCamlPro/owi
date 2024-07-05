@@ -46,15 +46,18 @@ type err =
   | `Unbound_name of string
   | `Undeclared_function_reference
   | `Unexpected_token of string
-  | `Unknown_function of int
-  | `Unknown_global
+  | `Unknown_data of Types.text Types.indice
+  | `Unknown_elem of Types.text Types.indice
+  | `Unknown_func of Types.text Types.indice
+  | `Unknown_global of Types.text Types.indice
   | `Unknown_import of string * string
-  | `Unknown_label
-  | `Unknown_local of string
-  | `Unknown_memory of int
+  | `Unknown_label of Types.text Types.indice
+  | `Unknown_local of Types.text Types.indice
+  | `Unknown_memory of Types.text Types.indice
   | `Unknown_module of string
   | `Unknown_operator
-  | `Unknown_type
+  | `Unknown_table of Types.text Types.indice
+  | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
   ]
 
@@ -108,16 +111,21 @@ let rec err_to_string = function
   | `Unbound_name id -> Format.sprintf "unbound name %s" id
   | `Undeclared_function_reference -> "undeclared function reference"
   | `Unexpected_token s -> Format.sprintf "unexpected token %S" s
-  | `Unknown_function id -> Format.sprintf "unknown function %d" id
-  | `Unknown_global -> "unknown global"
+  | `Unknown_data id ->
+    Format.asprintf "unknown data segment %a" Types.pp_indice id
+  | `Unknown_elem id ->
+    Format.asprintf "unknown elem segment %a" Types.pp_indice id
+  | `Unknown_func id -> Format.asprintf "unknown function %a" Types.pp_indice id
+  | `Unknown_global id -> Format.asprintf "unknown global %a" Types.pp_indice id
   | `Unknown_import (modul, value) ->
     Format.sprintf "unknown import %S %S" modul value
-  | `Unknown_label -> "unknown label"
-  | `Unknown_local id -> Format.sprintf "unknown local %s" id
-  | `Unknown_memory id -> Format.sprintf "unknown memory %d" id
-  | `Unknown_module id -> Format.sprintf "unknown module %s" id
+  | `Unknown_label id -> Format.asprintf "unknown label %a" Types.pp_indice id
+  | `Unknown_local id -> Format.asprintf "unknown local %a" Types.pp_indice id
+  | `Unknown_memory id -> Format.asprintf "unknown memory %a" Types.pp_indice id
+  | `Unknown_module name -> Format.sprintf "unknown module %s" name
   | `Unknown_operator -> Format.sprintf "unknown operator"
-  | `Unknown_type -> "unknown type"
+  | `Unknown_table id -> Format.asprintf "unknown table %a" Types.pp_indice id
+  | `Unknown_type id -> Format.asprintf "unknown type %a" Types.pp_indice id
   | `Unsupported_file_extension ext ->
     Format.sprintf "unsupported file_extension %S" ext
 

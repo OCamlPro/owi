@@ -314,17 +314,20 @@ let exit_code =
       | `Unbound_name _id -> 38
       | `Undeclared_function_reference -> 39
       | `Unexpected_token _token -> 40
-      | `Unknown_function _id -> 41
-      | `Unknown_global -> 42
-      | `Unknown_import _ -> 43
-      | `Unknown_label -> 44
-      | `Unknown_local _id -> 45
-      | `Unknown_memory _id -> 46
-      | `Unknown_module _id -> 47
-      | `Unknown_operator -> 48
-      | `Unknown_type -> 49
-      | `Unsupported_file_extension _ext -> 50
-      | `Failed_with_but_expected (_got, _expected) -> 51
+      | `Unknown_data _id -> 41
+      | `Unknown_elem _id -> 42
+      | `Unknown_func _id -> 43
+      | `Unknown_global _id -> 44
+      | `Unknown_import _ -> 45
+      | `Unknown_label _id -> 46
+      | `Unknown_local _id -> 47
+      | `Unknown_memory _id -> 48
+      | `Unknown_module _id -> 49
+      | `Unknown_operator -> 50
+      | `Unknown_table _id -> 51
+      | `Unknown_type _id -> 52
+      | `Unsupported_file_extension _ext -> 53
+      | `Failed_with_but_expected (_got, _expected) -> 54
     end
   end
   | Error e -> (

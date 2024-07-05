@@ -118,15 +118,14 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   { Named.values; named }
 
-let check_type_id (types : binary str_type Named.t) (check : Grouped.type_check)
-    =
-  let id, func_type = check in
+let check_type_id (types : binary str_type Named.t)
+  ((id, func_type) : Grouped.type_check) =
   let id =
     match id with Raw i -> i | Text name -> String_map.find name types.named
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with
-  | None -> Error `Unknown_type
+  | None -> Error (`Unknown_type (Raw id))
   | Some (Def_func_t func_type') ->
     let* func_type = Binary_types.convert_func_type None func_type in
     if not (equal_func_types func_type func_type') then

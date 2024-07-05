@@ -114,97 +114,92 @@ let convert_data_mode (m : Binary.data_mode) : Text.data_mode =
   match m with
   | Data_passive -> Data_passive
   | Data_active (i, e) ->
-    let i = Option.map (fun i -> Raw i) i in
     let e = convert_expr e in
-    Data_active (i, e)
+    Data_active (Some (Raw i), e)
 
 let convert_data (e : Binary.data) : Text.data =
   let { Binary.id; init; mode } : Binary.data = e in
   let mode = convert_data_mode mode in
   { id; init; mode }
 
-let from_types (types : Types.binary Types.rec_type Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (t : Types.binary Types.rec_type) acc ->
+let from_types types : Text.module_field list =
+  Array.map
+    (fun t ->
       let t = convert_rec_type t in
-      (i, MType t) :: acc )
-    types []
-  |> List.sort compare |> List.map snd
+      MType t )
+    types
+  |> Array.to_list
 
-let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
-  : Text.module_field list =
-  Named.fold
-    (fun i (g : (Binary.global, binary global_type) Runtime.t) acc ->
+let from_global global : Text.module_field list =
+  Array.map
+    (fun (g : (Binary.global, binary global_type) Runtime.t) ->
       match g with
       | Runtime.Local g ->
         let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
-        (i, MGlobal { typ; init; id }) :: acc
+        MGlobal { typ; init; id }
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_global (assigned_name, convert_global_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    global []
-  |> List.sort compare |> List.map snd
+        MImport { modul; name; desc } )
+    global
+  |> Array.to_list
 
-let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (t : (binary table, binary table_type) Runtime.t) acc ->
+let from_table table : Text.module_field list =
+  Array.map
+    (fun t ->
       match t with
       | Runtime.Local t ->
         let t = convert_table t in
-        (i, MTable t) :: acc
+        MTable t
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_table (assigned_name, convert_table_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    table []
-  |> List.sort compare |> List.map snd
+        MImport { modul; name; desc } )
+    table
+  |> Array.to_list
 
-let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
-  Named.fold
-    (fun i mem acc ->
+let from_mem mem : Text.module_field list =
+  Array.map
+    (fun mem ->
       match mem with
-      | Runtime.Local mem -> (i, MMem mem) :: acc
+      | Runtime.Local mem -> MMem mem
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_mem (assigned_name, desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    mem []
-  |> List.sort compare |> List.map snd
+        MImport { modul; name; desc } )
+    mem
+  |> Array.to_list
 
-let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
-  Text.module_field list =
-  Named.fold
-    (fun i (func : (binary func, binary block_type) Runtime.t) acc ->
+let from_func func : Text.module_field list =
+  Array.map
+    (fun (func : (binary func, binary block_type) Runtime.t) ->
       match func with
       | Runtime.Local func ->
         let type_f = convert_block_type func.type_f in
         let locals = convert_param_type func.locals in
         let body = convert_expr func.body in
         let id = func.id in
-        (i, MFunc { type_f; locals; body; id }) :: acc
+        MFunc { type_f; locals; body; id }
       | Imported { modul; name; assigned_name; desc } ->
         let desc = Import_func (assigned_name, convert_block_type desc) in
-        (i, MImport { modul; name; desc }) :: acc )
-    func []
-  |> List.sort compare |> List.map snd
+        MImport { modul; name; desc } )
+    func
+  |> Array.to_list
 
-let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
-  Named.fold
-    (fun i (elem : Binary.elem) acc ->
-      let elem = convert_elem elem in
-      (i, MElem elem) :: acc )
-    elem []
-  |> List.sort compare |> List.map snd
+let from_elem elem : Text.module_field list =
+  Array.map
+    (fun v ->
+      let elem = convert_elem v in
+      MElem elem )
+    elem
+  |> Array.to_list
 
-let from_data (data : Binary.data Named.t) : Text.module_field list =
-  Named.fold
-    (fun i (data : Binary.data) acc ->
-      let data = convert_data data in
-      (i, MData data) :: acc )
-    data []
-  |> List.sort compare |> List.map snd
+let from_data data : Text.module_field list =
+  Array.map
+    (fun v ->
+      let data = convert_data v in
+      MData data )
+    data
+  |> Array.to_list
 
 let from_exports (exports : Binary.exports) : Text.module_field list =
   let global =

@@ -5,4 +5,4 @@
   [124]
   $ owi wat2wasm bad.ext
   unsupported file_extension ".ext"
-  [50]
+  [53]

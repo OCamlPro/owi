@@ -1,5 +1,7 @@
   $ owi wat2wasm mem.wat
   $ owi run mem.wasm
+  type mismatch (pop)
+  [35]
   $ owi wasm2wat mem.wasm
   (module
     
@@ -13,31 +15,6 @@
     
     (type (sub final  (func (param i32) (param f64))))
     (memory 1)
-    (func
-      i32.const 32
-      memory.grow
-      drop
-    )
-    (func (param i32) (param i32)
-      local.get 0
-      local.get 1
-      i32.store align=1
-    )
-    (func (param i32) (param i64)
-      local.get 0
-      local.get 1
-      i64.store align=1
-    )
-    (func (param i32) (param f32)
-      local.get 0
-      local.get 1
-      f32.store align=1
-    )
-    (func (param i32) (param f64)
-      local.get 0
-      local.get 1
-      f64.store align=1
-    )
     (func
       call 0
       memory.size
@@ -68,6 +45,31 @@
       drop
       i32.const 23
       f64.load align=1
+      drop
+    )
+    (func (param i32) (param f64)
+      local.get 0
+      local.get 1
+      f64.store align=1
+    )
+    (func (param i32) (param f32)
+      local.get 0
+      local.get 1
+      f32.store align=1
+    )
+    (func (param i32) (param i64)
+      local.get 0
+      local.get 1
+      i64.store align=1
+    )
+    (func (param i32) (param i32)
+      local.get 0
+      local.get 1
+      i32.store align=1
+    )
+    (func
+      i32.const 32
+      memory.grow
       drop
     )
     (data (memory 0) (offset i32.const 0) "a")
