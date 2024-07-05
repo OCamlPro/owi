@@ -20,6 +20,10 @@ module type Monad_type = sig
   type 'a t
 end
 
+module type Memory_type = sig
+  type t
+end
+
 module type T_Extern_func = sig
   type int32
 
@@ -30,6 +34,8 @@ module type T_Extern_func = sig
   type float64
 
   type 'a m
+
+  type memory
 
   type _ telt =
     | I32 : int32 telt
@@ -46,6 +52,7 @@ module type T_Extern_func = sig
     | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
   type (_, _) atype =
+    | Mem : ('b, 'r) atype -> (memory -> 'b, 'r) atype
     | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
     | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype

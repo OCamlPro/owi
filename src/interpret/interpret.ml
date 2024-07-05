@@ -487,7 +487,7 @@ module Make (P : Interpret_intf.P) :
 
   type extern_func = Extern_func.extern_func
 
-  let exec_extern_func stack (f : extern_func) =
+  let exec_extern_func env stack (f : extern_func) =
     let pop_arg (type ty) stack (arg : ty Extern_func.telt) :
       (ty * Stack.t) Choice.t =
       match arg with
@@ -511,7 +511,8 @@ module Make (P : Interpret_intf.P) :
         (elt :: elts, stack)
       in
       match ty with
-      | Extern_func.Arg (_, args) -> split_one_arg args
+      | Mem args -> split_args stack args
+      | Arg (_, args) -> split_one_arg args
       | UArg args -> split_args stack args
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
@@ -520,7 +521,10 @@ module Make (P : Interpret_intf.P) :
       type f r. Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
      fun stack ty f ->
       match ty with
-      | Extern_func.Arg (arg, args) ->
+      | Mem args ->
+        let* mem = Env.get_memory env mem_0 in
+        apply stack args (f mem)
+      | Arg (arg, args) ->
         let* v, stack = pop_arg stack arg in
         apply stack args (f v)
       | UArg args -> apply stack args (f ())
@@ -755,7 +759,7 @@ module Make (P : Interpret_intf.P) :
       Choice.return (State.Continue (exec_func ~return ~id state env func))
     | Extern f ->
       let f = Env.get_extern_func state.env f in
-      let+ stack = exec_extern_func state.stack f in
+      let+ stack = exec_extern_func state.env state.stack f in
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
@@ -1567,7 +1571,7 @@ module Make (P : Interpret_intf.P) :
               (State.Continue (exec_func ~return:true ~id state env func))
           | Extern f ->
             let f = Env.get_extern_func exec_state.env f in
-            let+ stack = exec_extern_func exec_state.stack f in
+            let+ stack = exec_extern_func exec_state.env exec_state.stack f in
             let state = State.{ exec_state with stack } in
             State.return state
         in
