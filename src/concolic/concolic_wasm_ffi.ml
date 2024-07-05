@@ -4,13 +4,17 @@
 
 module Expr = Smtml.Expr
 module Choice = Concolic.P.Choice
+module Memory = Concolic.P.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
     with type 'a t = 'a Choice.t
+     and type memory = Memory.t
      and module Value = Concolic_value.V = struct
   type 'a t = 'a Choice.t
+
+  type memory = Memory.t
 
   module Value = Concolic_value.V
 
@@ -107,35 +111,17 @@ module M :
     ignore p;
     abort ()
 
-  let alloc (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t =
+  let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
+      =
     Choice.bind (i32 base) (fun (base : int32) ->
         Choice.return
           { Concolic_value.concrete = base
           ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
           } )
-  (* WHAT ???? *)
-  (* Choice.with_thread (fun t : Value.int32 -> *)
-  (*     let memories = t.shared.memories in *)
-  (*     Symbolic_memory.iter *)
-  (*       (fun tbl -> *)
-  (*         Symbolic_memory.ITbl.iter *)
-  (*           (fun _ (m : Symbolic_memory.t) -> *)
-  (*             Symbolic_memory.replace_size m base size.s ) *)
-  (*           tbl ) *)
-  (*       memories; *)
-  (*     { c = base; s = Expr.make (Ptr (base, Symbolic_value.const_i32 0l)) }) *)
 
-  let free (p : Value.int32) : unit Choice.t =
+  let free _ (p : Value.int32) : unit Choice.t =
     (* WHAT ???? *)
     let _base = ptr p in
-    (* Choice.with_thread (fun t -> *)
-    (*     let memories = t.shared.memories in *)
-    (*     Symbolic_memory.iter *)
-    (*       (fun tbl -> *)
-    (*         Symbolic_memory.ITbl.iter *)
-    (*           (fun _ (m : Symbolic_memory.t) -> Symbolic_memory.free m base) *)
-    (*           tbl ) *)
-    (*       memories ) *)
     Choice.return ()
 end
 
@@ -177,9 +163,10 @@ let summaries_extern_module =
   let functions =
     [ ( "alloc"
       , Concolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), alloc) )
+          (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
-      , Concolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), free) )
+      , Concolic.P.Extern_func.Extern_func
+          (Func (Mem (Arg (I32, Res)), R0), free) )
     ; ("abort", Concolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ]
   in
