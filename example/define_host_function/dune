@@ -2,11 +2,18 @@
  (name extern)
  (libraries owi))
 
+(executable
+ (name extern_mem)
+ (libraries owi))
+
 (mdx
  (libraries owi fpath)
  (deps
   %{bin:owi}
   (file extern.exe)
   (file extern.ml)
-  (file extern.wat))
+  (file extern.wat)
+  (file extern_mem.exe)
+  (file extern_mem.ml)
+  (file extern_mem.wat))
  (files README.md))

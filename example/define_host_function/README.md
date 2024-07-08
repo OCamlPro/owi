@@ -1,5 +1,7 @@
 # Using and defining external functions (host functions)
 
+## Dealing with the Stack
+
 Given the following `extern.wat` file:
 
 <!-- $MDX file=extern.wat -->
@@ -104,7 +106,127 @@ $ ./extern.exe
 13
 ```
 
+## Dealing with the Linear Memory
+
+Owi also allows interacting with linear memory through external functions.
+This is helpful because it enables the host system to communicate directly
+with a Wasm instance through its linear memory. Consider the tiny example
+below to illustrate this:
+
+<!-- $MDX file=extern_mem.wat -->
+```wat
+(module $extern_mem
+
+  (import "chorizo" "memset" (func $memset (param i32 i32 i32)))
+
+  (import "chorizo" "print_x64" (func $print_x64 (param i64)))
+
+  (memory 1)
+
+  (func $start
+
+    ;; memset 0 0xAA 8
+    (call $memset (i32.const 0) (i32.const 0xAA) (i32.const 8))
+
+    ;; print_x64 (load 0)
+    (call $print_x64 (i64.load (i32.const 0)))
+  )
+
+  (start $start)
+)
+```
+
+In the module `$extern_mem`, we first import `$memset` and `$print_x64`. Then,
+in the `$start` function, we initialize the memory starting at address
+`(i32.const 0)` with a sequence of length `(i32.const 8)` with bytes of
+`(i32.const 0xAA)`.
+
+The definition of the external functions follows the same format as the
+[previous example]. The difference is that, now, in the GADT definition of
+memset to allow the memory to be passed to this function, we need to wrap
+the three I32 arguments in a Mem variant. That is, instead of writing
+memset as:
+
+<!-- $MDX skip -->
+```ocaml
+(Func (Arg (I32, (Arg (I32, (Arg (I32, Res))))), R0), memset)
+```
+
+One should use:
+
+<!-- $MDX skip -->
+```ocaml
+(Func (Mem (Arg (I32, (Arg (I32, (Arg (I32, Res)))))), R0), memset)
+```
+
+See the module below for the whole implementation:
+
+<!-- $MDX file=extern_mem.ml -->
+```ocaml
+open Owi
+
+(* an extern module that will be linked with a wasm module *)
+let extern_module : Concrete_value.Func.extern_func Link.extern_module =
+  (* some custom functions *)
+  let memset m start byte length =
+    let rec loop offset =
+      if Int32.le offset length then begin
+        Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte;
+        loop (Int32.add offset 1l)
+      end
+    in
+    loop 0l
+  in
+  let print_x64 (i : int64) = Printf.printf "0x%LX\n%!" i in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "print_x64"
+      , Concrete_value.Func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
+      )
+    ; ( "memset"
+      , Concrete_value.Func.Extern_func
+          (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
+    ]
+  in
+  { functions }
+
+(* a link state that contains our custom module, available under the name `chorizo` *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"chorizo" extern_module
+
+(* a pure wasm module refering to `$extern_mem` *)
+let pure_wasm_module =
+  match Parse.Text.Module.from_file (Fpath.v "extern_mem.wat") with
+  | Error e -> Result.failwith e
+  | Ok modul -> modul
+
+(* our pure wasm module, linked with `chorizo` *)
+let module_to_run, link_state =
+  match
+    Compile.Text.until_link link_state ~unsafe:false ~optimize:true ~name:None
+      pure_wasm_module
+  with
+  | Error e -> Result.failwith e
+  | Ok v -> v
+
+(* let's run it ! it will print the values as defined in the print_i64 function *)
+let () =
+  match Interpret.Concrete.modul link_state.envs module_to_run with
+  | Error e -> Result.failwith e
+  | Ok () -> ()
+```
+
+Running the above program should yield:
+
+```sh
+$ ./extern_mem.exe
+0xAAAAAAAAAAAAAAAA
+```
+
+## Advanced Usage
+
 To learn more, see our advanced [Game of Life] example
 based on the famous cellular automaton by Conway. It show how to link several modules from different `.wat` files.
 
 [Game of Life]: ./life_game
+[previous example]: ./README.md#dealing-with-the-stack
