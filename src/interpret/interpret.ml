@@ -1504,8 +1504,7 @@ module Make (P : Interpret_intf.P) :
                   None
               in
               Log.profile3 "Exec module %s@.%a@."
-                (Option.value (Module_to_run.modul modul).id
-                   ~default:"anonymous" )
+                (Option.value (Module_to_run.id modul) ~default:"anonymous")
                 State.print_count count )
             (Choice.return ())
             (Module_to_run.to_run modul)
