@@ -2,42 +2,13 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t =
-  { mutex : Mutex.t
-  ; cond : Condition.t
-  ; queue : 'a Queue.t
-  ; mutable pledges : int
-  ; mutable failed : bool
-  }
+type 'a t = ('a, 'a) Synchronizer.t
 
-let pop q pledge =
-  Mutex.lock q.mutex;
-  let r =
-    try
-      while Queue.is_empty q.queue do
-        if q.pledges = 0 || q.failed then raise Exit;
-        Condition.wait q.cond q.mutex
-      done;
-      let v = Queue.pop q.queue in
-      if pledge then q.pledges <- q.pledges + 1;
-      Some v
-    with Exit ->
-      Condition.broadcast q.cond;
-      None
-  in
-  Mutex.unlock q.mutex;
-  r
+let pop q pledge = Synchronizer.get q pledge
 
-let make_pledge q =
-  Mutex.lock q.mutex;
-  q.pledges <- q.pledges + 1;
-  Mutex.unlock q.mutex
+let make_pledge = Synchronizer.make_pledge
 
-let end_pledge q =
-  Mutex.lock q.mutex;
-  q.pledges <- q.pledges - 1;
-  Condition.broadcast q.cond;
-  Mutex.unlock q.mutex
+let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
  fun () ->
@@ -47,23 +18,17 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     Nil
   | Some v -> Cons (v, read_as_seq q ~finalizer)
 
-let push v q =
-  Mutex.lock q.mutex;
-  let was_empty = Queue.is_empty q.queue in
-  Queue.push v q.queue;
-  if was_empty then Condition.broadcast q.cond;
-  Mutex.unlock q.mutex
+let push v q = Synchronizer.write v q
 
-let fail q =
-  Mutex.lock q.mutex;
-  q.failed <- true;
-  Condition.broadcast q.cond;
-  Mutex.unlock q.mutex
+let work_while f q = Synchronizer.work_while f q
+
+let fail = Synchronizer.fail
 
 let init () =
-  { mutex = Mutex.create ()
-  ; cond = Condition.create ()
-  ; queue = Queue.create ()
-  ; pledges = 0
-  ; failed = false
-  }
+  let q = Queue.create () in
+  let writter v condvar =
+    let was_empty = Queue.is_empty q in
+    Queue.push v q;
+    if was_empty then Condition.broadcast condvar
+  in
+  Synchronizer.init (fun () -> Queue.take_opt q) writter
