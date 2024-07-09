@@ -167,14 +167,14 @@ struct
   module Module_to_run = struct
     (** runnable module *)
     type t =
-      { modul : Binary.modul
+      { id : string option
       ; env : Env.t
       ; to_run : Types.binary Types.expr list
       }
 
     let env (t : t) = t.env
 
-    let modul (t : t) = t.modul
+    let id (t : t) = t.id
 
     let to_run (t : t) = t.to_run
   end
@@ -184,7 +184,7 @@ module P = MakeP [@inlined hint] (Thread) (Symbolic_choice)
 module M = MakeP [@inlined hint] (Thread) (Symbolic_choice_minimalist)
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  P.Module_to_run.{ id = m.id; env = m.env; to_run = m.to_run }
 
 let convert_module_to_run_minimalist (m : 'f Link.module_to_run) =
-  M.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  M.Module_to_run.{ id = m.id; env = m.env; to_run = m.to_run }
