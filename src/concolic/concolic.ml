@@ -122,14 +122,14 @@ module P = struct
       let open Choice in
       let+ a = Choice.select_i32 a in
       { concrete = f_c m.concrete a
-      ; symbolic = f_s m.symbolic (Symbolic_value.const_i32 a)
+      ; symbolic = f_s m.symbolic (S.address_i32 a)
       }
 
     let with_concrete_store m a f_c f_s v =
       let open Choice in
       let+ addr = Choice.select_i32 a in
       f_c m.concrete ~addr v.concrete;
-      f_s m.symbolic ~addr:(Symbolic_value.const_i32 addr) v.symbolic
+      f_s m.symbolic ~addr:(S.address_i32 addr) v.symbolic
 
     let load_8_s m a = with_concrete m a C.load_8_s S.load_8_s
 

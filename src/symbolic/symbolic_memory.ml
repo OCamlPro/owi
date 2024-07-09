@@ -32,6 +32,13 @@ module Backend : Symbolic_memory_intf.M = struct
     | Val (Num (I32 i)) -> i
     | _ -> Log.err {|Unsupported symbolic value reasoning over "%a"|} Expr.pp v
 
+  let ptr v =
+    match view v with
+    | Ptr { base; _ } -> base
+    | _ -> Log.err {|free: cannot fetch pointer base of "%a"|} Expr.pp v
+
+  let address_i32 i = i
+
   let rec load_byte { parent; data; _ } a =
     try Hashtbl.find data a
     with Not_found -> (
@@ -103,7 +110,7 @@ module Backend : Symbolic_memory_intf.M = struct
 
   let is_within_bounds m a =
     match view a with
-    | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
+    | Val (Num (I32 a)) -> Ok (Value.Bool.const false, a)
     | Ptr { base; offset } -> (
       match Hashtbl.find m.chunks base with
       | exception Not_found -> Error Trap.Memory_leak_use_after_free
@@ -112,17 +119,18 @@ module Backend : Symbolic_memory_intf.M = struct
         let upper_bound =
           Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
         in
-        Ok
-          ( Value.Bool.(or_ (const (Int32.lt ptr base)) upper_bound)
-          , Value.const_i32 ptr ) )
+        Ok (Value.Bool.(or_ (const (Int32.lt ptr base)) upper_bound), ptr) )
     | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
 
-  let free m base =
-    if not @@ Hashtbl.mem m.chunks base then
-      Fmt.failwith "Memory leak double free";
-    Hashtbl.remove m.chunks base
+  let free m ptr =
+    if not @@ Hashtbl.mem m.chunks ptr then
+      Error Trap.Memory_leak_use_after_free
+      (* failwith "Memory leak double free"; *)
+    else Ok (Hashtbl.remove m.chunks ptr)
 
-  let realloc m base size = Hashtbl.replace m.chunks base size
+  let realloc m ptr size =
+    Hashtbl.replace m.chunks ptr size;
+    Expr.ptr ptr (Symbolic_value.const_i32 0l)
 end
 
 module Make (Backend : Symbolic_memory_intf.M) = struct
@@ -131,7 +139,15 @@ module Make (Backend : Symbolic_memory_intf.M) = struct
     ; mutable size : Value.int32
     }
 
+  type address = Backend.address
+
   let create size = { data = Backend.create (); size = Value.const_i32 size }
+
+  let ptr p = Backend.ptr p
+
+  let address a = Backend.address a
+
+  let address_i32 a = Backend.address_i32 a
 
   let i32 v =
     match view v with
@@ -169,7 +185,7 @@ module Make (Backend : Symbolic_memory_intf.M) = struct
     else begin
       for i = 0 to len - 1 do
         let byte = Char.code @@ String.get str (src + i) in
-        let dst = Backend.address (Value.const_i32 (Int32.of_int (dst + i))) in
+        let dst = Backend.address_i32 (Int32.of_int (dst + i)) in
         Backend.storen m.data dst (value (Num (I8 byte))) 1
       done;
       Value.Bool.const false
@@ -178,49 +194,48 @@ module Make (Backend : Symbolic_memory_intf.M) = struct
   let clone m = { data = Backend.clone m.data; size = m.size }
 
   let load_8_s m a =
-    let v = Backend.loadn m.data (Backend.address a) 1 in
+    let v = Backend.loadn m.data a 1 in
     match view v with
     | Val (Num (I8 i8)) -> Value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
     | _ -> cvtop (Ty_bitv 32) (Sign_extend 24) v
 
   let load_8_u m a =
-    let v = Backend.loadn m.data (Backend.address a) 1 in
+    let v = Backend.loadn m.data a 1 in
     match view v with
     | Val (Num (I8 i)) -> Value.const_i32 (Int32.of_int i)
     | _ -> cvtop (Ty_bitv 32) (Zero_extend 24) v
 
   let load_16_s m a =
-    let v = Backend.loadn m.data (Backend.address a) 2 in
+    let v = Backend.loadn m.data a 2 in
     match view v with
     | Val (Num (I32 i16)) -> Value.const_i32 (Int32.extend_s 16 i16)
     | _ -> cvtop (Ty_bitv 32) (Sign_extend 16) v
 
   let load_16_u m a =
-    let v = Backend.loadn m.data (Backend.address a) 2 in
+    let v = Backend.loadn m.data a 2 in
     match view v with
     | Val (Num (I32 _)) -> v
     | _ -> cvtop (Ty_bitv 32) (Zero_extend 16) v
 
-  let load_32 m a = Backend.loadn m.data (Backend.address a) 4
+  let load_32 m a = Backend.loadn m.data a 4
 
-  let load_64 m a = Backend.loadn m.data (Backend.address a) 8
+  let load_64 m a = Backend.loadn m.data a 8
 
-  let store_8 m ~addr v = Backend.storen m.data (Backend.address addr) v 1
+  let store_8 m ~addr v = Backend.storen m.data addr v 1
 
-  let store_16 m ~addr v = Backend.storen m.data (Backend.address addr) v 2
+  let store_16 m ~addr v = Backend.storen m.data addr v 2
 
-  let store_32 m ~addr v = Backend.storen m.data (Backend.address addr) v 4
+  let store_32 m ~addr v = Backend.storen m.data addr v 4
 
-  let store_64 m ~addr v = Backend.storen m.data (Backend.address addr) v 8
+  let store_64 m ~addr v = Backend.storen m.data addr v 8
 
   let get_limit_max _m = None (* TODO *)
 
-  let check_within_bounds m a = Backend.is_within_bounds m.data a
+  let is_within_bounds m a = Backend.is_within_bounds m.data a
 
-  let free m base = Backend.free m.data (Backend.address (Value.const_i32 base))
+  let free m ptr = Backend.free m.data ptr
 
-  let replace_size m base size =
-    Backend.realloc m.data (Backend.address (Value.const_i32 base)) size
+  let realloc m ptr size = Backend.realloc m.data ptr size
 end
 
 include Make (Backend)

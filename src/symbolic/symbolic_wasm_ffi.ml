@@ -39,34 +39,15 @@ module M :
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  open Expr
-
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false
 
-  let i32 v : int32 Choice.t =
-    match view v with
-    | Val (Num (I32 v)) -> Choice.return v
-    | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-
-  let ptr v : int32 Choice.t =
-    match view v with
-    | Ptr { base; _ } -> Choice.return base
-    | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    let open Choice in
-    let+ base = i32 base in
-    Memory.replace_size m base size;
-    Expr.ptr base (Value.const_i32 0l)
+    Choice.return (Memory.realloc m (Memory.address base) size)
 
   let free m (p : Value.int32) : unit Choice.t =
-    let open Choice in
-    let+ base = ptr p in
-    Memory.free m base
+    match Memory.free m (Memory.ptr p) with
+    | Error t -> Choice.trap t
+    | Ok () -> Choice.return ()
 
   let exit (_p : Value.int32) : unit Choice.t = abort ()
 end

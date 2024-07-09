@@ -73,7 +73,7 @@ struct
         Symbolic_value.const_i32 v
 
     let check_within_bounds m a =
-      match check_within_bounds m a with
+      match is_within_bounds m a with
       | Error t -> Choice.trap t
       | Ok (cond, ptr) ->
         let open Choice in
