@@ -87,23 +87,19 @@ module CoreImpl = struct
 
     let add_init_task sched task = Wq.push task sched.work_queue
 
-    let rec work wls sched callback =
-      let rec handle_status (t : _ Schedulable.status) sched =
+    let work wls sched callback =
+      let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
         | Now x -> callback x
-        | Yield (_prio, f) -> Wq.push f sched.work_queue
+        | Yield (_prio, f) -> write_back f
         | Choice (m1, m2) ->
-          handle_status m1 sched;
-          handle_status m2 sched
+          handle_status m1 write_back;
+          handle_status m2 write_back
       in
-      match Wq.pop sched.work_queue true with
-      | None -> ()
-      | Some f -> begin
-        handle_status (Schedulable.run f wls) sched;
-        Wq.end_pledge sched.work_queue;
-        work wls sched callback
-      end
+      Wq.work_while
+        (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
+        sched.work_queue
 
     let spawn_worker sched wls_init callback callback_init callback_close =
       callback_init ();

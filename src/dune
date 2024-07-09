@@ -77,6 +77,7 @@
   stack
   string_map
   syntax
+  synchronizer
   text
   text_lexer
   text_parser

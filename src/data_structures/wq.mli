@@ -17,3 +17,5 @@ val end_pledge : 'a t -> unit
 val fail : 'a t -> unit
 
 val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
+
+val work_while : ('a -> ('a -> unit) -> unit) -> 'a t -> unit
