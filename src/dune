@@ -64,6 +64,8 @@
   symbolic_choice_minimalist
   symbolic_global
   symbolic_memory
+  symbolic_memory_backend
+  symbolic_memory_choice
   symbolic_memory_intf
   symbolic_table
   symbolic_value
