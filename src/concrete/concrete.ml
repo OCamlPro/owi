@@ -46,7 +46,7 @@ module Module_to_run = struct
 
   let env (t : Concrete_value.Func.extern_func Link.module_to_run) = t.env
 
-  let modul (t : Concrete_value.Func.extern_func Link.module_to_run) = t.modul
+  let id (t : Concrete_value.Func.extern_func Link.module_to_run) = t.id
 
   let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = t.to_run
 end

@@ -144,7 +144,7 @@ module type P = sig
 
     val to_run : t -> binary expr list
 
-    val modul : t -> Binary.modul
+    val id : t -> string option
   end
 end
 

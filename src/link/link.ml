@@ -22,7 +22,7 @@ type exports =
   }
 
 type 'f module_to_run =
-  { modul : Binary.modul
+  { id : string option
   ; env : 'f Link_env.t
   ; to_run : binary expr list
   }
@@ -393,7 +393,7 @@ let modul (ls : 'f state) ~name (modul : Binary.modul) =
   in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
-  let module_to_run = { modul; env; to_run } in
+  let module_to_run = { id = modul.id; env; to_run } in
   Ok
     ( module_to_run
     , { by_id
