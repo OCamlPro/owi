@@ -94,7 +94,13 @@ We only list proposals that reached phase 3 at least.
 
 ## About
 
-### Talks
+### Publications and Talks
+
+#### Publications
+
+- [Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly], 2024
+
+#### Talks
 
 - [september 2023]: [ICFP OCaml track]
 - [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] and hosted in Google Munich
@@ -159,6 +165,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [opam]: https://opam.ocaml.org
 [OUPS (OCaml UserS in Paris)]: https://oups.frama.io
 [Owi]: https://ocamlpro.github.io/owi
+[Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly]: https://hal.science/hal-04627413
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
