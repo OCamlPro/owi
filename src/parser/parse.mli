@@ -5,9 +5,7 @@
 (** Module providing functions to parse a wasm script from various kind of
     inputs. *)
 
-val guess_from_file :
-     Fpath.t
-  -> ((Text.modul, Text.script) Either.t, Binary.modul) Either.t Result.t
+val guess_from_file : Fpath.t -> 'extern_func Kind.t Result.t
 
 module Text : sig
   module Script : sig

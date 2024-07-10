@@ -389,11 +389,11 @@ let guess_from_file file =
   match Fpath.get_ext ~multi:false file with
   | ".wat" ->
     let+ m = Text.Module.from_file file in
-    Either.Left (Either.Left m)
+    Kind.Wat m
   | ".wast" ->
     let+ m = Text.Script.from_file file in
-    Either.Left (Either.Right m)
+    Kind.Wast m
   | ".wasm" ->
     let+ m = Binary.Module.from_file file in
-    Either.Right m
+    Kind.Wasm m
   | ext -> Error (`Unsupported_file_extension ext)

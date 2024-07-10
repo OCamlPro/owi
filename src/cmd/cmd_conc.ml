@@ -18,11 +18,9 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
 let simplify_then_link ~unsafe ~optimize link_state m =
   let* m =
     match m with
-    | Either.Left (Either.Left text_module) ->
-      Compile.Text.until_binary ~unsafe text_module
-    | Either.Left (Either.Right _text_scrpt) ->
-      Error (`Msg "can't run concolic interpreter on a script")
-    | Either.Right binary_module -> Ok binary_module
+    | Kind.Wat _ | Wasm _ -> Compile.Any.until_typecheck ~unsafe m
+    | Wast _ -> Error (`Msg "can't run concolic interpreter on a script")
+    | Ocaml _ -> assert false
   in
   let* m = Cmd_utils.add_main_as_start m in
   let+ m, link_state =
