@@ -50,7 +50,10 @@ let run_file ~unsafe ~optimize pc filename =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
+  deterministic_result_order (workspace : Fpath.t) solver profile files =
+  begin
+    match profile with None -> () | Some f -> Stats.init_logger_to_file f
+  end;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)

@@ -48,6 +48,8 @@ module CoreImpl : sig
 
   val with_thread : (Thread.t -> 'a) -> 'a t
 
+  val lazily : (unit -> 'a) -> 'a t
+
   val set_thread : Thread.t -> unit t
 
   val modify_thread : (Thread.t -> Thread.t) -> unit t
@@ -270,6 +272,8 @@ end = struct
 
   let with_thread f = lift (State.with_state (fun st -> (f st, st)))
 
+  let lazily f = with_thread (fun _th -> f ())
+
   let thread = with_thread Fun.id
 
   let modify_thread f = lift (State.modify_state f)
@@ -386,12 +390,20 @@ let select_inner ~explore_first (cond : Symbolic_value.vbool) =
     let true_branch =
       let* () = add_pc v in
       let* () = add_breadcrumb 1l in
+      let* () =
+        lazily (fun () ->
+            Stats.event "check true branch reachability" "branches" )
+      in
       let+ () = check_reachability in
       true
     in
     let false_branch =
       let* () = add_pc (Symbolic_value.Bool.not v) in
       let* () = add_breadcrumb 0l in
+      let* () =
+        lazily (fun () ->
+            Stats.event "check true branch reachability" "branches" )
+      in
       let+ () = check_reachability in
       false
     in
@@ -444,7 +456,8 @@ let select_i32 (i : Symbolic_value.int32) =
       in
       let this_val_branch =
         let* () = add_breadcrumb i in
-        let+ () = add_pc this_value_cond in
+        let* () = add_pc this_value_cond in
+        let+ () = lazily (fun () -> Stats.event "selected n" "branches") in
         i
       in
       let not_this_val_branch =
