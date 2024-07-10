@@ -6,58 +6,36 @@ open Syntax
 module Expr = Smtml.Expr
 module Choice = Symbolic.P.Choice
 
-let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
-  'b Result.t Choice.t =
-  match t with Error e -> Choice.return (Error e) | Ok x -> f x
-
-let link_state =
-  lazy
-    (let func_typ = Symbolic.P.Extern_func.extern_type in
-     let link_state =
-       Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
-         Symbolic_wasm_ffi.symbolic_extern_module
-     in
-     Link.extern_module' link_state ~name:"summaries" ~func_typ
-       Symbolic_wasm_ffi.summaries_extern_module )
-
-let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
-  (m : Binary.modul) =
-  let*/ m = Cmd_utils.add_main_as_start m in
-  let link_state = Lazy.force link_state in
-
-  let*/ m, link_state =
-    Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
-  in
-  let m = Symbolic.convert_module_to_run m in
-  let c = Interpret.SymbolicP.modul link_state.envs m in
+let run_modul link_output (pc : unit Result.t Choice.t) module_to_run =
+  let m = Symbolic.convert_module_to_run module_to_run in
+  let c = Interpret.SymbolicP.modul link_output.Link.envs m in
   Choice.bind pc (fun r ->
       match r with Error _ -> Choice.return r | Ok () -> c )
-
-let run_file ~unsafe ~optimize pc filename =
-  let*/ m = Parse.guess_from_file filename in
-  let*/ m =
-    match m with
-    | Either.Left (Either.Left text_module) ->
-      Compile.Text.until_binary ~unsafe text_module
-    | Either.Left (Either.Right _text_scrpt) ->
-      Error (`Msg "can't run symbolic interpreter on a script")
-    | Either.Right binary_module -> Ok binary_module
-  in
-  run_binary_modul ~unsafe ~optimize pc m
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
+  deterministic_result_order (workspace : Fpath.t) solver filenames =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
+  let func_typ = Symbolic.P.Extern_func.extern_type in
+  let* modules_to_run, link_output =
+    Compile.ApiV2.(
+      compile
+        [ extern_module ~name:"symbolic" ~func_typ
+            ~module_impl:Symbolic_wasm_ffi.symbolic_extern_module
+        ; extern_module ~name:"summaries" ~func_typ
+            ~module_impl:Symbolic_wasm_ffi.summaries_extern_module
+        ; files ~filenames ~unsafe ~optimize ~add_main_as_start:true
+        ] )
+  in
   let pc = Choice.return (Ok ()) in
-  let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
+  let result = List.fold_left (run_modul link_output) pc modules_to_run in
   let thread : Thread.t = Thread.create () in
   let res_queue = Wq.init () in
   let callback = function
