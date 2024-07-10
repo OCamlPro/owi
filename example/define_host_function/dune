@@ -1,10 +1,12 @@
 (executable
  (name extern)
- (libraries owi))
+ (libraries owi)
+ (modules extern))
 
 (executable
  (name extern_mem)
- (libraries owi))
+ (libraries owi)
+ (modules extern_mem))
 
 (mdx
  (libraries owi fpath)
