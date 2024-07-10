@@ -20,8 +20,8 @@ let link_state =
      Link.extern_module' link_state ~name:"summaries" ~func_typ
        Symbolic_wasm_ffi.summaries_extern_module )
 
-let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
-  (m : Binary.modul) =
+let run_file ~unsafe ~optimize pc filename =
+  let*/ m = Compile.File.until_typecheck ~unsafe filename in
   let*/ m = Cmd_utils.add_main_as_start m in
   let link_state = Lazy.force link_state in
 
@@ -32,18 +32,6 @@ let run_binary_modul ~unsafe ~optimize (pc : unit Result.t Choice.t)
   let c = Interpret.SymbolicP.modul link_state.envs m in
   Choice.bind pc (fun r ->
       match r with Error _ -> Choice.return r | Ok () -> c )
-
-let run_file ~unsafe ~optimize pc filename =
-  let*/ m = Parse.guess_from_file filename in
-  let*/ m =
-    match m with
-    | Either.Left (Either.Left text_module) ->
-      Compile.Text.until_binary ~unsafe text_module
-    | Either.Left (Either.Right _text_scrpt) ->
-      Error (`Msg "can't run symbolic interpreter on a script")
-    | Either.Right binary_module -> Ok binary_module
-  in
-  run_binary_modul ~unsafe ~optimize pc m
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,

@@ -4,6 +4,61 @@
 
 (** Utility functions to compile a module until a given step. *)
 
+module Any : sig
+  val until_typecheck :
+    unsafe:bool -> 'extern_func Kind.t -> Binary.modul Result.t
+
+  val until_optimize :
+    unsafe:bool -> optimize:bool -> 'extern_func Kind.t -> Binary.modul Result.t
+
+  (** compile a module with a given link state and produce a new link state and
+      a runnable module *)
+  val until_link :
+       unsafe:bool
+    -> optimize:bool
+    -> name:string option
+    -> 'extern_func Link.state
+    -> 'extern_func Kind.t
+    -> ('extern_func Link.module_to_run * 'extern_func Link.state) Result.t
+
+  (** compile and interpret a module with a given link state and produce a new
+      link state *)
+  val until_interpret :
+       unsafe:bool
+    -> optimize:bool
+    -> name:string option
+    -> Concrete_value.Func.extern_func Link.state
+    -> Concrete_value.Func.extern_func Kind.t
+    -> Concrete_value.Func.extern_func Link.state Result.t
+end
+
+module File : sig
+  val until_typecheck : unsafe:bool -> Fpath.t -> Binary.modul Result.t
+
+  val until_optimize :
+    unsafe:bool -> optimize:bool -> Fpath.t -> Binary.modul Result.t
+
+  (** compile a file with a given link state and produce a new link state and a
+      runnable module *)
+  val until_link :
+       unsafe:bool
+    -> optimize:bool
+    -> name:string option
+    -> 'extern_func Link.state
+    -> Fpath.t
+    -> ('extern_func Link.module_to_run * 'extern_func Link.state) Result.t
+
+  (** compile and interpret a file with a given link state and produce a new
+      link state *)
+  val until_interpret :
+       unsafe:bool
+    -> optimize:bool
+    -> name:string option
+    -> Concrete_value.Func.extern_func Link.state
+    -> Fpath.t
+    -> Concrete_value.Func.extern_func Link.state Result.t
+end
+
 module Text : sig
   val until_check : unsafe:bool -> Text.modul -> Text.modul Result.t
 
@@ -18,19 +73,19 @@ module Text : sig
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> 'f Link.state
     -> optimize:bool
     -> name:string option
+    -> 'f Link.state
     -> Text.modul
     -> ('f Link.module_to_run * 'f Link.state) Result.t
 
   (** compile and interpret a module with a given link state and produce a new
       link state *)
   val until_interpret :
-       Concrete_value.Func.extern_func Link.state
-    -> unsafe:bool
+       unsafe:bool
     -> optimize:bool
     -> name:string option
+    -> Concrete_value.Func.extern_func Link.state
     -> Text.modul
     -> Concrete_value.Func.extern_func Link.state Result.t
 end
@@ -45,19 +100,19 @@ module Binary : sig
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> 'f Link.state
     -> optimize:bool
     -> name:string option
+    -> 'f Link.state
     -> Binary.modul
     -> ('f Link.module_to_run * 'f Link.state) Result.t
 
   (** compile and interpret a module with a given link state and produce a new
       link state *)
   val until_interpret :
-       Concrete_value.Func.extern_func Link.state
-    -> unsafe:bool
+       unsafe:bool
     -> optimize:bool
     -> name:string option
+    -> Concrete_value.Func.extern_func Link.state
     -> Binary.modul
     -> Concrete_value.Func.extern_func Link.state Result.t
 end

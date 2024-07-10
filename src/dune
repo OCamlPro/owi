@@ -48,6 +48,7 @@
   int64
   interpret
   interpret_intf
+  kind
   link
   link_env
   log
