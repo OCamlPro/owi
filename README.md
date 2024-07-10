@@ -19,6 +19,8 @@ We also have [a fuzzer] that is able to generate random *valid* Wasm programs. F
 
 ⚠️ For now, the optimizer and the formatter are quite experimental. The optimizer is well tested but only performs basic optimizations in an inefficient way. The formatter is mainly used for debugging purpose and is probably incorrect on some cases.
 
+🧑‍🎓 We are looking for interns, have a look at the [internship labeled issues].
+
 ## Installation
 
 `owi` can be installed with [opam]:
@@ -157,6 +159,7 @@ This project was funded through the [NGI0 Core] Fund, a fund established by [NLn
 [documentation]: https://ocamlpro.github.io/owi/api/owi
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
+[internship labeled issues]: https://github.com/OCamlPro/owi/labels/internship
 [Next Generation Internet]: https://ngi.eu
 [NLnet]: https://nlnet.nl
 [NGI0 Core]: https://nlnet.nl/core
