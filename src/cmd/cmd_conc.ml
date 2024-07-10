@@ -15,48 +15,6 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   Choice.bind t (fun t ->
       match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
-let simplify_then_link ~unsafe ~optimize link_state m =
-  let* m =
-    match m with
-    | Either.Left (Either.Left text_module) ->
-      Compile.Text.until_binary ~unsafe text_module
-    | Either.Left (Either.Right _text_scrpt) ->
-      Error (`Msg "can't run concolic interpreter on a script")
-    | Either.Right binary_module -> Ok binary_module
-  in
-  let* m = Cmd_utils.add_main_as_start m in
-  let+ m, link_state =
-    Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
-  in
-  let module_to_run = Concolic.convert_module_to_run m in
-  (link_state, module_to_run)
-
-let simplify_then_link_files ~unsafe ~optimize filenames =
-  let link_state = Link.empty_state in
-  let link_state =
-    Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Concolic.P.Extern_func.extern_type
-      Concolic_wasm_ffi.symbolic_extern_module
-  in
-  let link_state =
-    Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Concolic.P.Extern_func.extern_type
-      Concolic_wasm_ffi.summaries_extern_module
-  in
-  let+ link_state, modules_to_run =
-    List.fold_left
-      (fun (acc : (_ * _) Result.t) filename ->
-        let* link_state, modules_to_run = acc in
-        let* m0dule = Parse.guess_from_file filename in
-        let+ link_state, module_to_run =
-          simplify_then_link ~unsafe ~optimize link_state m0dule
-        in
-        (link_state, module_to_run :: modules_to_run) )
-      (Ok (link_state, []))
-      filenames
-  in
-  (link_state, List.rev modules_to_run)
-
 let run_modules_to_run (link_state : _ Link.state) modules_to_run =
   List.fold_left
     (fun (acc : unit Result.t Concolic.P.Choice.t) to_run ->
@@ -403,7 +361,7 @@ let launch solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
+  deterministic_result_order (workspace : Fpath.t) solver filenames =
   ignore (workers, no_stop_at_failure, deterministic_result_order, workspace);
 
   if profiling then Log.profiling_on := true;
@@ -413,9 +371,18 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
-  let* link_state, modules_to_run =
-    simplify_then_link_files ~unsafe ~optimize files
+  let func_typ = Concolic.P.Extern_func.extern_type in
+  let* modules_to_run, link_state =
+    Compile.ApiV2.(
+      compile
+        [ extern_module ~name:"symbolic" ~func_typ
+            ~module_impl:Concolic_wasm_ffi.symbolic_extern_module
+        ; extern_module ~name:"summaries" ~func_typ
+            ~module_impl:Concolic_wasm_ffi.summaries_extern_module
+        ; files ~filenames ~unsafe ~optimize ~add_main_as_start:true
+        ] )
   in
+  let modules_to_run = List.map Concolic.convert_module_to_run modules_to_run in
   let tree = fresh_tree [] in
   let result = launch solver tree link_state modules_to_run in
 

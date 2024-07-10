@@ -61,3 +61,30 @@ module Binary : sig
     -> Binary.modul
     -> Concrete_value.Func.extern_func Link.state Result.t
 end
+
+module ApiV2 : sig
+  type 'a t
+
+  val extern_module :
+       func_typ:('a -> Types.binary Types.func_type)
+    -> name:string
+    -> module_impl:'a Link.extern_module
+    -> 'a t
+
+  val file :
+       filename:Fpath.t
+    -> unsafe:bool
+    -> optimize:bool
+    -> add_main_as_start:bool
+    -> 'a t
+
+  val files :
+       filenames:Fpath.t list
+    -> unsafe:bool
+    -> optimize:bool
+    -> add_main_as_start:bool
+    -> 'a t
+
+  val compile :
+    'a t list -> ('a Link.module_to_run list * 'a Link.state) Result.t
+end
