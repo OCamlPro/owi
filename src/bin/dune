@@ -4,6 +4,8 @@
  (public_name owi)
  (modules owi)
  (package owi)
- (libraries sedlex owi cmdliner)
+ (libraries cmdliner owi prelude sedlex)
  (instrumentation
-  (backend bisect_ppx)))
+  (backend bisect_ppx))
+ (flags
+  (:standard -open Prelude)))

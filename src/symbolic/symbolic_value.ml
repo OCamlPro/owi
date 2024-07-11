@@ -169,25 +169,33 @@ module I32 = struct
     end
     | _ -> relop Ty_bool Eq e (const_i32 c)
 
-  let eq e1 e2 = if e1 == e2 then Bool.const true else relop Ty_bool Eq e1 e2
+  let eq e1 e2 =
+    if phys_equal e1 e2 then Bool.const true else relop Ty_bool Eq e1 e2
 
-  let ne e1 e2 = if e1 == e2 then Bool.const false else relop Ty_bool Ne e1 e2
+  let ne e1 e2 =
+    if phys_equal e1 e2 then Bool.const false else relop Ty_bool Ne e1 e2
 
-  let lt e1 e2 = if e1 == e2 then Bool.const false else relop ty Lt e1 e2
+  let lt e1 e2 =
+    if phys_equal e1 e2 then Bool.const false else relop ty Lt e1 e2
 
-  let gt e1 e2 = if e1 == e2 then Bool.const false else relop ty Gt e1 e2
+  let gt e1 e2 =
+    if phys_equal e1 e2 then Bool.const false else relop ty Gt e1 e2
 
-  let lt_u e1 e2 = if e1 == e2 then Bool.const false else relop ty LtU e1 e2
+  let lt_u e1 e2 =
+    if phys_equal e1 e2 then Bool.const false else relop ty LtU e1 e2
 
-  let gt_u e1 e2 = if e1 == e2 then Bool.const false else relop ty GtU e1 e2
+  let gt_u e1 e2 =
+    if phys_equal e1 e2 then Bool.const false else relop ty GtU e1 e2
 
-  let le e1 e2 = if e1 == e2 then Bool.const true else relop ty Le e1 e2
+  let le e1 e2 = if phys_equal e1 e2 then Bool.const true else relop ty Le e1 e2
 
-  let ge e1 e2 = if e1 == e2 then Bool.const true else relop ty Ge e1 e2
+  let ge e1 e2 = if phys_equal e1 e2 then Bool.const true else relop ty Ge e1 e2
 
-  let le_u e1 e2 = if e1 == e2 then Bool.const true else relop ty LeU e1 e2
+  let le_u e1 e2 =
+    if phys_equal e1 e2 then Bool.const true else relop ty LeU e1 e2
 
-  let ge_u e1 e2 = if e1 == e2 then Bool.const true else relop ty GeU e1 e2
+  let ge_u e1 e2 =
+    if phys_equal e1 e2 then Bool.const true else relop ty GeU e1 e2
 
   let to_bool (e : vbool) =
     match view e with

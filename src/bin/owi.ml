@@ -13,7 +13,7 @@ let existing_non_dir_file =
     let path = Fpath.v s in
     match Bos.OS.File.exists path with
     | Ok true -> `Ok path
-    | Ok false -> `Error (Format.asprintf "no file '%a'" Fpath.pp path)
+    | Ok false -> `Error (Fmt.str "no file '%a'" Fpath.pp path)
     | Error (`Msg s) -> `Error s
   in
   (parse, Fpath.pp)
@@ -272,7 +272,7 @@ let exit_code =
     match result with
     | Ok () -> ok
     | Error e -> begin
-      Format.pp_err "%s" (Result.err_to_string e);
+      Fmt.epr "%s" (Result.err_to_string e);
       match e with
       | `No_error -> ok
       | `Alignment_too_large -> 1

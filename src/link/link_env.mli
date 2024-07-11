@@ -95,7 +95,7 @@ module type T = sig
 
   val get_func_typ : t -> func -> binary func_type
 
-  val pp : Format.formatter -> t -> unit
+  val pp : Fmt.formatter -> t -> unit
 
   val freeze : Build.t -> extern_func Func_id.collection -> t
 end

@@ -43,16 +43,17 @@
     (>= 20220210)))
   (dune-site :build)
   ;; runtime
-  (integers
-   (>= 0.5.1))
+  bos
   cmdliner
   conf-clang
-  sedlex
-  ocaml_intrinsics
-  uutf
-  bos
-  (smtml (>= 0.2.0))
   digestif
+  (integers
+   (>= 0.5.1))
+  ocaml_intrinsics
+  prelude
+  sedlex
+  (smtml (>= 0.2.0))
+  uutf
   xmlm
   (processor (>= 0.1))
   ;; doc

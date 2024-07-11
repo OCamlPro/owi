@@ -2,15 +2,13 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Stdlib.Result
+open Prelude.Result
 
 let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
 
 let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 
 let error v = Error v
-
-let error_s format = Format.kasprintf error format
 
 let ok v = Ok v
 

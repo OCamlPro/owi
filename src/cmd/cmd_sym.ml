@@ -63,11 +63,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   in
   let print_bug = function
     | `ETrap (tr, model) ->
-      Format.pp_std "Trap: %s@\n" (Trap.to_string tr);
-      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
+      Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
+      Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
     | `EAssert (assertion, model) ->
-      Format.pp_std "Assert failure: %a@\n" Expr.pp assertion;
-      Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
+      Fmt.pr "Assert failure: %a@\n" Expr.pp assertion;
+      Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
   in
   let rec print_and_count_failures count_acc results =
     match results () with
@@ -83,15 +83,13 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
           print_bug (`ETrap (tr, model));
           Ok model
         | EVal (Ok ()) ->
-          failwith "unreachable: callback should have filtered eval ok out."
+          Fmt.failwith "unreachable: callback should have filtered eval ok out."
         | EVal (Error e) -> Error e
       in
       let count_acc = succ count_acc in
       let* () =
         if not no_values then
-          let testcase =
-            List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
-          in
+          let testcase = Smtml.Model.get_bindings model |> List.map snd in
           Cmd_utils.write_testcase ~dir:workspace testcase
         else Ok ()
       in
@@ -105,13 +103,13 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
            (x, List.rev @@ Thread.breadcrumbs thread) )
       |> List.of_seq
       |> List.sort (fun (_, bc1) (_, bc2) ->
-             List.compare Stdlib.Int32.compare bc1 bc2 )
+             List.compare Prelude.Int32.compare bc1 bc2 )
       |> List.to_seq |> Seq.map fst
     else results
   in
   let* count = print_and_count_failures 0 results in
   if count > 0 then Error (`Found_bug count)
   else begin
-    Format.pp_std "All OK";
+    Fmt.pr "All OK";
     Ok ()
   end

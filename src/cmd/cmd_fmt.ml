@@ -19,19 +19,11 @@ let cmd_one inplace file =
   match get_printer file with
   | Error _e as e -> e
   | Ok pp ->
-    if inplace then
-      let* res =
-        Bos.OS.File.with_oc file
-          (fun chan () ->
-            let fmt = Stdlib.Format.formatter_of_out_channel chan in
-            Ok (Format.pp fmt "%a@\n" pp ()) )
-          ()
-      in
-      res
-    else Ok (Format.pp_std "%a@\n" pp ())
+    if inplace then Bos.OS.File.writef file "%a@\n" pp ()
+    else Ok (Fmt.pr "%a@\n" pp ())
 
 let cmd inplace files = list_iter (cmd_one inplace) files
 
 let format_file_to_string file =
   let+ pp = get_printer file in
-  Format.asprintf "%a@\n" pp ()
+  Fmt.str "%a@\n" pp ()

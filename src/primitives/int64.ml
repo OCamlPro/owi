@@ -10,11 +10,11 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Modified by the Owi programmers *)
 
-include Stdlib.Int64
+include Prelude.Int64
 
-let clz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_leading_zeros n)
+let clz n = of_int (Ocaml_intrinsics.Int64.count_leading_zeros n)
 
-let ctz n = Stdlib.Int64.of_int (Ocaml_intrinsics.Int64.count_trailing_zeros n)
+let ctz n = of_int (Ocaml_intrinsics.Int64.count_trailing_zeros n)
 
 (* Taken from Base *)
 let popcnt =
@@ -46,19 +46,39 @@ let popcnt =
    *)
 let cmp_u x op y = op (add x min_int) (add y min_int)
 
+let eq (x : int64) y = equal x y
+
+let ne (x : int64) y = not (equal x y)
+
+let lt (x : int64) y = compare x y < 0
+
+let gt (x : int64) y = compare x y > 0
+
+let le (x : int64) y = compare x y <= 0
+
+let ge (x : int64) y = compare x y >= 0
+
+let lt_u x y = cmp_u x lt y
+
+let le_u x y = cmp_u x le y
+
+let gt_u x y = cmp_u x gt y
+
+let ge_u x y = cmp_u x ge y
+
 (*
  * Unsigned division and remainder in terms of signed division; algorithm from
  * Hacker's Delight, Second Edition, by Henry S. Warren, Jr., section 9-3
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  if d = zero then raise Division_by_zero
+  if equal d zero then raise Division_by_zero
   else
     let t = shift_right d 63 in
     let n' = logand n (lognot t) in
     let q = shift_left (div (shift_right_logical n' 1) d) 1 in
     let r = sub n (mul q d) in
-    if cmp_u r ( < ) d then (q, r) else (add q one, sub r d)
+    if cmp_u r lt d then (q, r) else (add q one, sub r d)
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
@@ -90,26 +110,6 @@ let extend_s n x =
   let shift = 64 - n in
   shift_right (shift_left x shift) shift
 
-let eq (x : int64) y = x = y
-
-let ne (x : int64) y = x <> y
-
-let lt (x : int64) y = x < y
-
-let gt (x : int64) y = x > y
-
-let le (x : int64) y = x <= y
-
-let ge (x : int64) y = x >= y
-
-let lt_u x y = cmp_u x ( < ) y
-
-let le_u x y = cmp_u x ( <= ) y
-
-let gt_u x y = cmp_u x ( > ) y
-
-let ge_u x y = cmp_u x ( >= ) y
-
 (* String conversion that allows leading signs and unsigned values *)
 
 let require b = if not b then Log.err "of_string (int64)"
@@ -130,7 +130,7 @@ let of_string s =
   let len = String.length s in
   let rec parse_hex i num =
     if i = len then num
-    else if s.[i] = '_' then parse_hex (i + 1) num
+    else if Char.equal s.[i] '_' then parse_hex (i + 1) num
     else
       let digit = of_int (hex_digit s.[i]) in
       require (le_u num (shr_u minus_one (of_int 4)));
@@ -138,15 +138,15 @@ let of_string s =
   in
   let rec parse_dec i num =
     if i = len then num
-    else if s.[i] = '_' then parse_dec (i + 1) num
+    else if Char.equal s.[i] '_' then parse_dec (i + 1) num
     else
       let digit = of_int (dec_digit s.[i]) in
-      require (lt_u num max_upper || (num = max_upper && le_u digit max_lower));
+      require (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
       parse_dec (i + 1) (add (mul num 10L) digit)
   in
   let parse_int i =
     require (len - i > 0);
-    if i + 2 <= len && s.[i] = '0' && s.[i + 1] = 'x' then
+    if i + 2 <= len && Char.equal s.[i] '0' && Char.equal s.[i + 1] 'x' then
       parse_hex (i + 2) zero
     else parse_dec i zero
   in
@@ -156,11 +156,9 @@ let of_string s =
     | '+' -> parse_int 1
     | '-' ->
       let n = parse_int 1 in
-      require (sub n one >= minus_one);
+      require (ge (sub n one) minus_one);
       neg n
     | _ -> parse_int 0
   in
-  require (low_int <= parsed && parsed <= high_int);
+  require (le low_int parsed && le parsed high_int);
   parsed
-
-let eq_const (i : int64) j = i = j

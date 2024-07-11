@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Format
+open Fmt
 open Types
 
 let symbolic v = Text v
@@ -20,7 +20,7 @@ type global =
   }
 
 let pp_global fmt (g : global) =
-  pp fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
+  pf fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ pp_expr g.init
 
 type data_mode =
   | Data_passive
@@ -29,7 +29,7 @@ type data_mode =
 let pp_data_mode fmt = function
   | Data_passive -> ()
   | Data_active (i, e) ->
-    pp fmt "(memory %a) (offset %a)" pp_indice_opt i pp_expr e
+    pf fmt "(memory %a) (offset %a)" pp_indice_opt i pp_expr e
 
 type data =
   { id : string option
@@ -38,7 +38,7 @@ type data =
   }
 
 let pp_data fmt (d : data) =
-  pp fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
+  pf fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
 
 type elem_mode =
   | Elem_passive
@@ -47,11 +47,11 @@ type elem_mode =
 
 let pp_elem_mode fmt = function
   | Elem_passive -> ()
-  | Elem_declarative -> pp fmt "declare"
+  | Elem_declarative -> pf fmt "declare"
   | Elem_active (i, e) -> (
     match i with
-    | None -> pp fmt "(offset %a)" pp_expr e
-    | Some i -> pp fmt "(table %a) (offset %a)" pp_indice i pp_expr e )
+    | None -> pf fmt "(offset %a)" pp_expr e
+    | Some i -> pf fmt "(table %a) (offset %a)" pp_indice i pp_expr e )
 
 type elem =
   { id : string option
@@ -60,12 +60,12 @@ type elem =
   ; mode : elem_mode
   }
 
-let pp_elem_expr fmt e = pp fmt "(item %a)" pp_expr e
+let pp_elem_expr fmt e = pf fmt "(item %a)" pp_expr e
 
 let pp_elem fmt (e : elem) =
-  pp fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
+  pf fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
     pp_ref_type e.typ
-    (pp_list ~pp_sep:pp_newline pp_elem_expr)
+    (list ~sep:pp_newline pp_elem_expr)
     e.init
 
 type module_field =
@@ -98,8 +98,8 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  pp fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
-    (pp_list ~pp_sep:pp_newline pp_module_field)
+  pf fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
+    (list ~sep:pp_newline pp_module_field)
     m.fields
 
 type action =
@@ -108,8 +108,8 @@ type action =
 
 let pp_action fmt = function
   | Invoke (mod_name, name, c) ->
-    pp fmt {|(invoke%a "%s" %a)|} pp_id_opt mod_name name pp_consts c
-  | Get _ -> pp fmt "<action_get TODO>"
+    pf fmt {|(invoke%a "%s" %a)|} pp_id_opt mod_name name pp_consts c
+  | Get _ -> pf fmt "<action_get TODO>"
 
 type result_const =
   | Literal of text const
@@ -118,8 +118,8 @@ type result_const =
 
 let pp_result_const fmt = function
   | Literal c -> pp_const fmt c
-  | Nan_canon n -> pp fmt "float%a.const nan:canonical" pp_nn n
-  | Nan_arith n -> pp fmt "float%a.const nan:arithmetic" pp_nn n
+  | Nan_canon n -> pf fmt "f%a.const nan:canonical" pp_nn n
+  | Nan_arith n -> pf fmt "f%a.const nan:arithmetic" pp_nn n
 
 type result =
   | Result_const of result_const
@@ -127,14 +127,14 @@ type result =
   | Result_func_ref
 
 let pp_result fmt = function
-  | Result_const c -> pp fmt "(%a)" pp_result_const c
+  | Result_const c -> pf fmt "(%a)" pp_result_const c
   | Result_func_ref | Result_extern_ref -> Log.err "not yet implemented"
 
 let pp_result_bis fmt = function
-  | Result_const c -> pp fmt "%a" pp_result_const c
+  | Result_const c -> pf fmt "%a" pp_result_const c
   | Result_extern_ref | Result_func_ref -> Log.err "not yet implemented"
 
-let pp_results fmt r = pp_list ~pp_sep:pp_space pp_result_bis fmt r
+let pp_results fmt r = list ~sep:sp pp_result_bis fmt r
 
 type assertion =
   | Assert_return of action * result list
@@ -151,31 +151,31 @@ type assertion =
 
 let pp_assertion fmt = function
   | Assert_return (a, l) ->
-    pp fmt "(assert_return %a %a)" pp_action a pp_results l
+    pf fmt "(assert_return %a %a)" pp_action a pp_results l
   | Assert_exhaustion (a, msg) ->
-    pp fmt "(assert_exhaustion %a %s)" pp_action a msg
-  | Assert_trap (a, f) -> pp fmt {|(assert_trap %a "%s")|} pp_action a f
+    pf fmt "(assert_exhaustion %a %s)" pp_action a msg
+  | Assert_trap (a, f) -> pf fmt {|(assert_trap %a "%s")|} pp_action a f
   | Assert_trap_module (m, f) ->
-    pp fmt {|(assert_trap_module %a "%s")|} pp_modul m f
+    pf fmt {|(assert_trap_module %a "%s")|} pp_modul m f
   | Assert_invalid (m, msg) ->
-    pp fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
+    pf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
   | Assert_unlinkable (m, msg) ->
-    pp fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
+    pf fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
   | Assert_malformed (m, msg) ->
-    pp fmt "(assert_malformed (module binary@\n  @[<v>%a@])@\n  @[<v>%S@]@\n)"
+    pf fmt "(assert_malformed (module binary@\n  @[<v>%a@])@\n  @[<v>%S@]@\n)"
       pp_modul m msg
   | Assert_malformed_quote (ls, msg) ->
-    pp fmt "(assert_malformed_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
+    pf fmt "(assert_malformed_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_invalid_quote (ls, msg) ->
-    pp fmt "(assert_invalid_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
+    pf fmt "(assert_invalid_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_malformed_binary (ls, msg) ->
-    pp fmt "(assert_malformed_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
+    pf fmt "(assert_malformed_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_invalid_binary (ls, msg) ->
-    pp fmt "(assert_invalid_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
+    pf fmt "(assert_invalid_binary@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
 
 type register = string * string option
 
-let pp_register fmt (s, _name) = pp fmt "(register %s)" s
+let pp_register fmt (s, _name) = pf fmt "(register %s)" s
 
 type cmd =
   | Module of modul
@@ -187,8 +187,8 @@ let pp_cmd fmt = function
   | Module m -> pp_modul fmt m
   | Assert a -> pp_assertion fmt a
   | Register (s, name) -> pp_register fmt (s, name)
-  | Action _a -> pp fmt "<action>"
+  | Action _a -> pf fmt "<action>"
 
 type script = cmd list
 
-let pp_script fmt l = pp_list ~pp_sep:pp_newline pp_cmd fmt l
+let pp_script fmt l = list ~sep:pp_newline pp_cmd fmt l

@@ -252,8 +252,8 @@ let rec optimize_expr expr : bool * binary instr list =
   | (I32_const _ | I64_const _ | F32_const _ | F64_const _) :: Drop :: tl ->
     let _has_changed, e = optimize_expr tl in
     (true, e)
-  | Local_set x :: Local_get y :: tl when x = y ->
-    let _has_changed, e = optimize_expr (Local_tee x :: tl) in
+  | Local_set (Raw x) :: Local_get (Raw y) :: tl when x = y ->
+    let _has_changed, e = optimize_expr (Local_tee (Raw x) :: tl) in
     (true, e)
   | Local_get _ :: Drop :: tl ->
     let _has_changed, e = optimize_expr tl in

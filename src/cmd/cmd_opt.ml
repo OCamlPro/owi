@@ -13,5 +13,5 @@ let cmd debug unsafe files =
     (fun file ->
       let+ m = optimize_file ~unsafe file in
       let m = Binary_to_text.modul m in
-      Format.pp_std "%a@\n" Text.pp_modul m )
+      Fmt.pr "%a@\n" Text.pp_modul m )
     files

@@ -20,7 +20,10 @@ let check (S (solver_module, s)) pc =
 
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
-  assert (Solver.check s pc = `Sat);
-  match Solver.model ?symbols s with
-  | None -> assert false
-  | Some model -> model
+  match Solver.check s pc with
+  | `Sat -> begin
+    match Solver.model ?symbols s with
+    | None -> assert false
+    | Some model -> model
+  end
+  | `Unsat | `Unknown -> assert false

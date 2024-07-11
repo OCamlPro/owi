@@ -129,7 +129,8 @@ let from_types (types : Types.binary Types.rec_type Named.t) :
       let t = convert_rec_type t in
       (i, MType t) :: acc )
     types []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
   : Text.module_field list =
@@ -145,7 +146,8 @@ let from_global (global : (Binary.global, binary global_type) Runtime.t Named.t)
         let desc = Import_global (assigned_name, convert_global_type desc) in
         (i, MImport { modul; name; desc }) :: acc )
     global []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
   Text.module_field list =
@@ -159,7 +161,8 @@ let from_table (table : (binary table, binary table_type) Runtime.t Named.t) :
         let desc = Import_table (assigned_name, convert_table_type desc) in
         (i, MImport { modul; name; desc }) :: acc )
     table []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
   Named.fold
@@ -170,7 +173,8 @@ let from_mem (mem : (mem, limits) Runtime.t Named.t) : Text.module_field list =
         let desc = Import_mem (assigned_name, desc) in
         (i, MImport { modul; name; desc }) :: acc )
     mem []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
   Text.module_field list =
@@ -187,7 +191,8 @@ let from_func (func : (binary func, binary block_type) Runtime.t Named.t) :
         let desc = Import_func (assigned_name, convert_block_type desc) in
         (i, MImport { modul; name; desc }) :: acc )
     func []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
   Named.fold
@@ -195,7 +200,8 @@ let from_elem (elem : Binary.elem Named.t) : Text.module_field list =
       let elem = convert_elem elem in
       (i, MElem elem) :: acc )
     elem []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_data (data : Binary.data Named.t) : Text.module_field list =
   Named.fold
@@ -203,7 +209,8 @@ let from_data (data : Binary.data Named.t) : Text.module_field list =
       let data = convert_data data in
       (i, MData data) :: acc )
     data []
-  |> List.sort compare |> List.map snd
+  |> List.sort (fun (i1, _t1) (i2, _t2) -> Int.compare i1 i2)
+  |> List.map snd
 
 let from_exports (exports : Binary.exports) : Text.module_field list =
   let global =
@@ -244,7 +251,6 @@ let from_start = function None -> [] | Some n -> [ MStart (Raw n) ]
 
 let modul
   { Binary.id; types; global; table; mem; func; elem; data; start; exports } =
-  ignore types;
   let fields =
     from_types types @ from_global global @ from_table table @ from_mem mem
     @ from_func func @ from_elem elem @ from_data data @ from_exports exports
