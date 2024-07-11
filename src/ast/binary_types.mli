@@ -6,8 +6,6 @@ open Types
 
 type tbl = (string, int) Hashtbl.t Option.t
 
-val equal_func_types : binary func_type -> binary func_type -> bool
-
 val convert_val_type : tbl -> text val_type -> binary val_type Result.t
 
 val convert_heap_type : tbl -> text heap_type -> binary heap_type Result.t

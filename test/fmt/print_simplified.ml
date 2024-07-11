@@ -28,4 +28,4 @@ let m =
   | Ok m -> Binary_to_text.modul m
   | Error e -> Result.failwith e
 
-let () = Format.pp_std "%a@\n" Text.pp_modul m
+let () = Fmt.pr "%a@\n" Text.pp_modul m

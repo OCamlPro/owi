@@ -80,7 +80,7 @@ type trace =
   ; end_of_trace : end_of_trace
   }
 
-module IMap = Map.Make (Stdlib.Int32)
+module IMap = Map.Make (Prelude.Int32)
 
 module Unexplored : sig
   type t
@@ -286,8 +286,8 @@ let run_once tree link_state modules_to_run forced_values =
     { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
   in
   if debug then begin
-    Format.pp_std "Add trace:@\n";
-    Format.pp_std "%a@\n" Concolic_choice.pp_pc trace.remaining_pc
+    Fmt.pr "Add trace:@\n";
+    Fmt.pr "%a@\n" Concolic_choice.pp_pc trace.remaining_pc
   end;
   add_trace tree trace;
   r
@@ -297,7 +297,7 @@ let rec find_node_to_run tree =
   match tree.node with
   | Not_explored ->
     if debug then begin
-      Format.pp_std "Try unexplored@.%a@.@." Concolic_choice.pp_pc tree.pc
+      Fmt.pr "Try unexplored@.%a@.@." Concolic_choice.pp_pc tree.pc
     end;
     Some tree.pc
   | Select { cond = _; if_true; if_false } ->
@@ -307,7 +307,7 @@ let rec find_node_to_run tree =
       else Random.bool ()
     in
     if debug then begin
-      Format.pp_std "Select bool %b@." b
+      Fmt.pr "Select bool %b@." b
     end;
     let tree = if b then if_true else if_false in
     find_node_to_run tree
@@ -323,18 +323,18 @@ let rec find_node_to_run tree =
       let i = Random.int n in
       let i, branch = List.nth branches i in
       if debug then begin
-        Format.pp_std "Select_i32 %li@." i
+        Fmt.pr "Select_i32 %li@." i
       end;
       find_node_to_run branch
     end
   | Assume { cond = _; cont } -> find_node_to_run cont
   | Assert { cond; cont = _; disproved = None } ->
     let pc : Concolic_choice.pc = Select (cond, false) :: tree.pc in
-    Format.pp_std "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
+    Fmt.pr "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
     Some pc
   | Assert { cond = _; cont; disproved = Some _ } -> find_node_to_run cont
   | Unreachable ->
-    Format.pp_std "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
+    Fmt.pr "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
     None
 
 let pc_model solver pc =
@@ -354,7 +354,7 @@ let find_model_to_run solver tree =
 let launch solver tree link_state modules_to_run =
   let rec find_model n =
     if n = 0 then begin
-      Format.pp_std "Failed to find something to run@\n";
+      Fmt.pr "Failed to find something to run@\n";
       None
     end
     else
@@ -362,7 +362,7 @@ let launch solver tree link_state modules_to_run =
       | None -> find_model (n - 1)
       | Some m ->
         if debug then begin
-          Format.pp_std "Found something to run %a@\n"
+          Fmt.pr "Found something to run %a@\n"
             (Smtml.Model.pp ~no_values:false)
             m
         end;
@@ -380,14 +380,14 @@ let launch solver tree link_state modules_to_run =
     | Ok (Error e) -> Result.failwith e
     | Error (Assume_fail c) -> begin
       if debug then begin
-        Format.pp_std "Assume_fail: %a@\n" Smtml.Expr.pp c;
-        Format.pp_std "Assignments:@\n%a@\n" Concolic_choice.pp_assignments
+        Fmt.pr "Assume_fail: %a@\n" Smtml.Expr.pp c;
+        Fmt.pr "Assignments:@\n%a@\n" Concolic_choice.pp_assignments
           thread.symbols_value;
-        Format.pp_std "Retry !@\n"
+        Fmt.pr "Retry !@\n"
       end;
       match pc_model solver thread.pc with
       | None ->
-        Format.pp_err "Can't satisfy assume !@\n";
+        Fmt.epr "Can't satisfy assume !@\n";
         loop (count - 1)
       | Some _model as model -> run_model model (count - 1)
     end
@@ -400,10 +400,8 @@ let launch solver tree link_state modules_to_run =
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
-  ignore (workers, no_stop_at_failure, deterministic_result_order, workspace);
-
+let cmd profiling debug unsafe optimize _workers _no_stop_at_failure no_values
+  _deterministic_result_order (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
 
@@ -418,50 +416,47 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let result = launch solver tree link_state modules_to_run in
 
   let print_pc pc =
-    Format.pp_std "PC:@\n";
-    Format.pp_std "%a@\n" Concolic_choice.pp_pc pc
+    Fmt.pr "PC:@\n";
+    Fmt.pr "%a@\n" Concolic_choice.pp_pc pc
   in
   let print_values symbols_value =
-    Format.pp_std "Assignments:@\n";
+    Fmt.pr "Assignments:@\n";
     List.iter
-      (fun (s, v) ->
-        Format.pp_std "  %a: %a" Smtml.Symbol.pp s Concrete_value.pp v )
+      (fun (s, v) -> Fmt.pr "  %a: %a" Smtml.Symbol.pp s Concrete_value.pp v)
       symbols_value;
-    Format.pp_std "@\n"
+    Fmt.pr "@\n"
   in
 
   let testcase model =
     if not no_values then
-      let testcase =
-        List.sort compare (Smtml.Model.get_bindings model) |> List.map snd
-      in
+      let testcase = Smtml.Model.get_bindings model |> List.map snd in
       Cmd_utils.write_testcase ~dir:workspace testcase
     else Ok ()
   in
 
   match result with
   | None ->
-    Format.pp_std "OK@\n";
+    Fmt.pr "OK@\n";
     Ok ()
   | Some (`Trap trap, thread) ->
-    Format.pp_std "Trap: %s@\n" (Trap.to_string trap);
+    Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
     if debug then begin
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
     let symbols = None in
     let model = get_model ~symbols solver thread.pc in
-    Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
+    Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)
   | Some (`Assert_fail, thread) ->
-    Format.pp_std "Assert failure@\n";
+    Fmt.pr "Assert failure@\n";
     if debug then begin
       print_pc thread.pc;
       print_values thread.symbols_value
     end;
     let symbols = None in
     let model = get_model ~symbols solver thread.pc in
-    Format.pp_std "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
+    Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model;
     let* () = testcase model in
     Error (`Found_bug 1)

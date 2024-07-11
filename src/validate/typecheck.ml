@@ -5,7 +5,7 @@
 open Types
 open Binary
 open Syntax
-open Format
+open Fmt
 
 type typ =
   | Num_type of num_type
@@ -13,13 +13,21 @@ type typ =
   | Any
   | Something
 
+let typ_equal t1 t2 =
+  match (t1, t2) with
+  | Num_type t1, Num_type t2 -> Types.num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> Types.heap_type_eq t1 t2
+  | Any, _ | _, Any -> true
+  | Something, _ | _, Something -> true
+  | _, _ -> false
+
 let pp_typ fmt = function
   | Num_type t -> pp_num_type fmt t
   | Ref_type t -> pp_heap_type fmt t
-  | Any -> pp_string fmt "any"
-  | Something -> pp_string fmt "something"
+  | Any -> string fmt "any"
+  | Something -> string fmt "something"
 
-let pp_typ_list fmt l = pp_list ~pp_sep:pp_space pp_typ fmt l
+let pp_typ_list fmt l = list ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
   | Types.Ref_type (_null, t) -> Ref_type t
@@ -42,7 +50,7 @@ let check_data modul n =
   else Ok ()
 
 let check_align memarg_align align =
-  if memarg_align >= align then Error `Alignment_too_large else Ok ()
+  if Int32.ge memarg_align align then Error `Alignment_too_large else Ok ()
 
 module Env = struct
   type t =
@@ -147,7 +155,7 @@ module Stack : sig
 end = struct
   type t = typ list
 
-  let pp fmt (s : stack) = pp fmt "[%a]" pp_typ_list s
+  let pp fmt (s : stack) = pf fmt "[%a]" pp_typ_list s
 
   let match_num_type (required : num_type) (got : num_type) =
     match (required, got) with
@@ -183,7 +191,7 @@ end = struct
 
   let rec equal s s' =
     match (s, s') with
-    | [], s | s, [] -> List.for_all (( = ) Any) s
+    | [], s | s, [] -> List.for_all (function Any -> true | _ -> false) s
     | Any :: tl, Any :: tl' -> equal tl s' || equal s tl'
     | Any :: tl, hd :: tl' | hd :: tl', Any :: tl ->
       equal tl (hd :: tl') || equal (Any :: tl) tl'
@@ -449,7 +457,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
   | Table_copy (Raw i, Raw i') ->
     let* typ = Env.table_type_get i env.modul in
     let* typ' = Env.table_type_get i' env.modul in
-    if typ <> typ' then Error (`Type_mismatch "table_copy")
+    if not @@ Types.ref_type_eq typ typ' then Error (`Type_mismatch "table_copy")
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_fill (Raw i) ->
     let* _null, t = Env.table_type_get i env.modul in
@@ -557,8 +565,8 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
     | None ->
       Error
         (`Type_mismatch
-          (Format.asprintf "expected a prefix of %a but stack has type %a"
-             Stack.pp pt Stack.pp previous_stack ) )
+          (Fmt.str "expected a prefix of %a but stack has type %a" Stack.pp pt
+             Stack.pp previous_stack ) )
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =
@@ -628,7 +636,8 @@ let typecheck_global (modul : modul) refs
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd typ in
-      if expected <> real_type then Error (`Type_mismatch "typecheck global 1")
+      if not @@ typ_equal expected real_type then
+        Error (`Type_mismatch "typecheck global 1")
       else Ok ()
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
@@ -641,7 +650,7 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
         let* real_type = typecheck_const_expr modul refs init in
         match real_type with
         | [ real_type ] ->
-          if Ref_type expected_type <> real_type then
+          if not @@ typ_equal (Ref_type expected_type) real_type then
             Error (`Type_mismatch "typecheck_elem 1")
           else Ok ()
         | _whatever -> Error (`Type_mismatch "typecheck elem 2") )
@@ -652,12 +661,14 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
   | Elem_active (None, _e) -> assert false
   | Elem_active (Some tbl_i, e) -> (
     let* _null, tbl_type = Env.table_type_get tbl_i modul in
-    if tbl_type <> expected_type then Error (`Type_mismatch "typecheck elem 3")
+    if not @@ Types.heap_type_eq tbl_type expected_type then
+      Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
-        if t <> tbl_type then Error (`Type_mismatch "typecheck_elem 4")
+        if not @@ Types.heap_type_eq t tbl_type then
+          Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
       | [ _t ] -> Ok ()
       | _whatever -> Error (`Type_mismatch "typecheck_elem 5") )

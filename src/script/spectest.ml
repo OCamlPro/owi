@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Format
+open Fmt
 open Types
 open Concrete_value.Func
 
@@ -10,10 +10,10 @@ type extern_module = extern_func Link.extern_module
 
 let extern_m =
   let print = () in
-  let print_i32 i = pp_std "%li@\n%!" i in
-  let print_i64 i = pp_std "%Li@\n%!" i in
-  let print_f32 f = pp_std "%a@\n%!" Float32.pp f in
-  let print_f64 f = pp_std "%a@\n%!" Float64.pp f in
+  let print_i32 i = pr "%li@\n%!" i in
+  let print_i64 i = pr "%Li@\n%!" i in
+  let print_f32 f = pr "%a@\n%!" Float32.pp f in
+  let print_f64 f = pr "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
     print_i32 i;
     print_f32 f

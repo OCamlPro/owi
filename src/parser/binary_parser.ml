@@ -43,7 +43,7 @@ end = struct
   let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
       Ok { input with pt = input.pt + pos; size = len }
-    else Error (`Msg (Format.sprintf "length out of bounds in section"))
+    else Error (`Msg (Fmt.str "length out of bounds in section"))
 
   let sub_suffix pos input = sub ~pos ~len:(input.size - pos) input
 
@@ -190,9 +190,7 @@ let check_end_opcode ?unexpected_eoi_msg input =
   | Ok ('\x0B', input) -> Ok input
   | Ok (c, _input) ->
     Error
-      (`Msg
-        (Format.sprintf "END opcode expected (got %s instead)" (Char.escaped c))
-        )
+      (`Msg (Fmt.str "END opcode expected (got %s instead)" (Char.escaped c)))
   | Error _ as e -> e
 
 let check_zero_opcode input =
@@ -200,7 +198,7 @@ let check_zero_opcode input =
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok input
   | Ok (c, _input) ->
-    Error (`Msg (Format.sprintf "%s (got %s instead)" msg (Char.escaped c)))
+    Error (`Msg (Fmt.str "%s (got %s instead)" msg (Char.escaped c)))
   | Error _ as e -> e
 
 let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
@@ -216,7 +214,7 @@ let read_numtype input =
   | -0x02 -> Ok (I64, input)
   | -0x03 -> Ok (F32, input)
   | -0x04 -> Ok (F64, input)
-  | b -> Error (`Msg (Format.sprintf "malformed number type: %d" b))
+  | b -> Error (`Msg (Fmt.str "malformed number type: %d" b))
 
 let read_vectype input =
   let* b, _input = read_S7 input in
@@ -224,14 +222,14 @@ let read_vectype input =
   | -0x05 ->
     (* V128 *)
     assert false
-  | b -> Error (`Msg (Format.sprintf "malformed vector type: %d" b))
+  | b -> Error (`Msg (Fmt.str "malformed vector type: %d" b))
 
 let read_reftype input =
   let* b, input = read_S7 input in
   match b with
   | -0x10 -> Ok ((Null, Func_ht), input)
   | -0x11 -> Ok ((Null, Extern_ht), input)
-  | b -> Error (`Msg (Format.sprintf "malformed reference type: %d" b))
+  | b -> Error (`Msg (Fmt.str "malformed reference type: %d" b))
 
 let read_valtype input =
   match read_numtype input with
@@ -319,7 +317,7 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
-  | i -> Error (`Msg (Format.sprintf "illegal opcode (1) %i" i))
+  | i -> Error (`Msg (Fmt.str "illegal opcode (1) %i" i))
 
 let block_type_of_rec_type t =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
@@ -330,7 +328,7 @@ let block_type_of_rec_type t =
 
 let read_block_type types input =
   match read_S33 input with
-  | Ok (i, input) when i >= 0L ->
+  | Ok (i, input) when Int64.ge i 0L ->
     let block_type = block_type_of_rec_type types.(Int64.to_int i) in
     Ok (block_type, input)
   | Error _ | Ok _ -> begin
@@ -639,7 +637,7 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC input
-  | c -> Error (`Msg (Format.sprintf "illegal opcode (2) %s" (Char.escaped c)))
+  | c -> Error (`Msg (Fmt.str "illegal opcode (2) %s" (Char.escaped c)))
 
 and read_expr types input =
   let rec aux acc input =
@@ -679,11 +677,11 @@ let version_check str =
 
 let check_section_id = function
   | '\x00' .. '\x0C' -> Ok ()
-  | c -> Error (`Msg (Format.sprintf "malformed section id %s" (Char.escaped c)))
+  | c -> Error (`Msg (Fmt.str "malformed section id %s" (Char.escaped c)))
 
 let section_parse input ~expected_id default section_content_parse =
   match Input.get 0 input with
-  | Some id when id = expected_id ->
+  | Some id when Char.equal id expected_id ->
     let* () = check_section_id id in
     let* input = Input.sub_suffix 1 input in
     let* () =
@@ -727,8 +725,9 @@ let section_custom input =
 let read_type _id input =
   let* fcttype, input = read_byte ~msg:"read_type" input in
   let* () =
-    if fcttype <> '\x60' then Error (`Msg "integer representation too long")
-    else Ok ()
+    match fcttype with
+    | '\x60' -> Ok ()
+    | _ -> Error (`Msg "integer representation too long")
   in
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
@@ -799,9 +798,7 @@ let read_elem_kind input =
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok ((Null, Func_ht), input)
   | Ok (c, _input) ->
-    Error
-      (`Msg
-        (Format.sprintf "%s (expected 0x00 but got %s)" msg (Char.escaped c)) )
+    Error (`Msg (Fmt.str "%s (expected 0x00 but got %s)" msg (Char.escaped c)))
   | Error _ as e -> e
 
 let read_element types input =
@@ -848,7 +845,7 @@ let read_element types input =
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
     ({ id; typ; init; mode }, input)
-  | i -> Error (`Msg (Format.sprintf "malformed elements segment kind: %d" i))
+  | i -> Error (`Msg (Fmt.str "malformed elements segment kind: %d" i))
 
 let read_local input =
   let* n, input = read_U32 input in
@@ -917,7 +914,7 @@ let read_data types input =
     let+ init, input = read_bytes ~msg:"read_data 2" input in
     let init = string_of_char_list init in
     ({ id; init; mode }, input)
-  | i -> Error (`Msg (Format.sprintf "malformed data segment kind %d" i))
+  | i -> Error (`Msg (Fmt.str "malformed data segment kind %d" i))
 
 let parse_many_custom_section input =
   let rec aux acc input =
@@ -1202,7 +1199,7 @@ let sections_iterate (input : Input.t) =
         | '\x03' ->
           let global = export :: exports.global in
           { exports with global }
-        | _ -> failwith "read_exportdesc error" )
+        | _ -> Fmt.failwith "read_exportdesc error" )
       empty_exports export_section
   in
   let exports =

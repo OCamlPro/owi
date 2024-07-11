@@ -8,7 +8,7 @@ let out_testcase ~dst testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag atts name = (("", name), atts) in
   let atts = [ (("", "coversError"), "true") ] in
-  let to_string v = Format.asprintf "%a" Smtml.Value.pp_num v in
+  let to_string v = Fmt.str "%a" Smtml.Value.pp_num v in
   let input v = `El (tag [] "input", [ `Data (to_string v) ]) in
   let testcase = `El (tag atts "testcase", List.map input testcase) in
   let dtd =
@@ -21,7 +21,7 @@ let write_testcase =
   let cnt = ref 0 in
   fun ~dir testcase ->
     incr cnt;
-    let name = Format.ksprintf Fpath.v "testcase-%d.xml" !cnt in
+    let name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
     let path = Fpath.append dir name in
     let* res =
       Bos.OS.File.with_oc path
@@ -61,7 +61,7 @@ let add_main_as_start (m : Binary.modul) =
           | Ref_type (Types.No_null, t) ->
             Error
               (`Msg
-                (Format.asprintf "can not create default value of type %a"
+                (Fmt.str "can not create default value of type %a"
                    Types.pp_heap_type t ) )
         in
         let+ body =

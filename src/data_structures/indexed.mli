@@ -18,4 +18,4 @@ val get_at_exn : int -> 'a t list -> 'a
 
 val has_index : int -> 'a t -> bool
 
-val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+val pp : (Fmt.formatter -> 'a -> unit) -> Fmt.formatter -> 'a t -> unit

@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 open Types
-open Format
+open Fmt
 
 module Make_extern_func
     (V : Func_intf.Value_types)
@@ -114,9 +114,9 @@ type ref_value =
   | Arrayref of unit Array.t option
 
 let pp_ref_value fmt = function
-  | Externref _ -> pp fmt "externref"
-  | Funcref _ -> pp fmt "funcref"
-  | Arrayref _ -> pp fmt "array"
+  | Externref _ -> pf fmt "externref"
+  | Funcref _ -> pf fmt "funcref"
+  | Arrayref _ -> pf fmt "array"
 
 type t =
   | I32 of Int32.t
@@ -142,10 +142,10 @@ let to_instr = function
   | Ref _ -> assert false
 
 let pp fmt = function
-  | I32 i -> pp fmt "i32.const %ld" i
-  | I64 i -> pp fmt "i64.const %Ld" i
-  | F32 f -> pp fmt "f32.const %a" Float32.pp f
-  | F64 f -> pp fmt "f64.const %a" Float64.pp f
+  | I32 i -> pf fmt "i32.const %ld" i
+  | I64 i -> pf fmt "i64.const %Ld" i
+  | F32 f -> pf fmt "f32.const %a" Float32.pp f
+  | F64 f -> pf fmt "f64.const %a" Float64.pp f
   | Ref r -> pp_ref_value fmt r
 
 let ref_null' = function

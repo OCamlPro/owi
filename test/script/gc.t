@@ -21,7 +21,7 @@
   [23]
   $ owi script --no-exhaustion reference/proposals/gc/ref_eq.wast
   owi: internal error, uncaught exception:
-       File "src/validate/typecheck.ml", line 541, characters 4-10: Assertion failed
+       File "src/ast/types.ml", line 923, characters 12-18: Assertion failed
        
   [125]
   $ owi script --no-exhaustion reference/proposals/gc/ref_test.wast

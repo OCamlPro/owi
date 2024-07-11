@@ -101,5 +101,3 @@ val unsigned_div : t -> t -> t
 val rem : t -> t -> t
 
 val unsigned_rem : t -> t -> t
-
-val eq_const : t -> int32 -> bool

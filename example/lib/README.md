@@ -5,13 +5,14 @@
 Given a file `quickstart.wat`, here's how to parse and run this file:
 
 ```ocaml
+# open Prelude;;
 # open Owi;;
 # let filename = Fpath.v "quickstart.wat";;
 val filename : Fpath.t = <abstr>
 # let m =
     match Parse.Text.Module.from_file filename with
     | Ok script -> script
-    | Error e -> Result.failwith e;;
+    | Error e -> assert false;;
 val m : Text.modul =
 ...
 # let module_to_run, link_state =

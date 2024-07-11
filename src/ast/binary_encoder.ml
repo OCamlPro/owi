@@ -28,7 +28,7 @@ let write_bytes_8 buf i =
 
 let rec write_u64 buf i =
   let b = Int64.to_int (Int64.logand i 0x7fL) in
-  if 0L <= i && i < 128L then write_byte buf b
+  if Int64.le 0L i && Int64.lt i 128L then write_byte buf b
   else begin
     write_byte buf (b lor 0x80);
     write_u64 buf (Int64.shift_right_logical i 7)
@@ -48,7 +48,7 @@ let write_string buf str =
 
 let rec write_s64 buf i =
   let b = Int64.to_int (Int64.logand i 0x7fL) in
-  if -64L <= i && i < 64L then write_byte buf b
+  if Int64.le (-64L) i && Int64.lt i 64L then write_byte buf b
   else begin
     write_byte buf (b lor 0x80);
     write_s64 buf (Int64.shift_right i 7)
@@ -524,7 +524,8 @@ let write_locals buf locals =
          (fun compressed (_so, local_type) ->
            let c = get_char_valtype local_type in
            match compressed with
-           | (ch, cnt) :: compressed when ch = c -> (c, cnt + 1) :: compressed
+           | (ch, cnt) :: compressed when Char.equal ch c ->
+             (c, cnt + 1) :: compressed
            | compressed -> (c, 1) :: compressed )
          [] locals
   in
@@ -769,9 +770,10 @@ let encode (modul : Binary.modul) =
   Buffer.contents buf
 
 let write_file filename content =
+  let _dir, filename = Fpath.split_base filename in
   let filename, _ext = Fpath.split_ext filename in
-  let filename = Fpath.filename filename in
-  let filename = filename ^ ".wasm" in
+  let filename = Fpath.add_ext ".wasm" filename in
+  let filename = Fpath.to_string filename in
   let oc = Out_channel.open_bin filename in
   Out_channel.output_string oc content;
   Out_channel.close oc

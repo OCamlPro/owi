@@ -8,7 +8,7 @@ open Syntax
 module StrType = struct
   type t = binary str_type
 
-  let compare = compare
+  let compare (x : t) (y : t) = Types.compare_str_type x y
 end
 
 module TypeMap = Map.Make (StrType)
@@ -42,20 +42,15 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
       match id with
-      | Text id ->
-        let pos = ref (-1) in
-        begin
-          try
-            List.iteri
-              (fun i n ->
-                if n = Some id then begin
-                  pos := i;
-                  raise Exit
-                end )
-              block_ids
-          with Exit -> ()
-        end;
-        if !pos = -1 then Error (`Unknown_label (Text id)) else Ok !pos
+      | Text id -> begin
+        match
+          List.find_index
+            (function Some id' -> String.equal id id' | None -> false)
+            block_ids
+        with
+        | None -> Error (`Unknown_label (Text id))
+        | Some id -> Ok id
+      end
       | Raw id -> Ok id
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
@@ -83,7 +78,7 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
           let+ v = get (`Unknown_type ind) modul.typ ind in
           match Indexed.get v with Def_func_t t' -> t' | _ -> assert false
         in
-        let ok = Binary_types.equal_func_types t t' in
+        let ok = Types.func_type_eq t t' in
         if not ok then Error `Inline_function_type else Ok (Bt_raw (None, t)) )
   in
 
@@ -296,9 +291,7 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       try Ok (TypeMap.find (Def_func_t t) typemap)
       with Not_found ->
         Error
-          (`Msg
-            (Format.asprintf "Missing func type in index table %a" pp_func_type
-               t ) )
+          (`Msg (Fmt.str "Missing func type in index table %a" pp_func_type t))
     in
     Bt_raw (Some idx, t)
 

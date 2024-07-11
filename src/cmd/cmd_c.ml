@@ -27,7 +27,7 @@ let find location file : Fpath.t Result.t =
       location
   in
   let rec loop = function
-    | [] -> Error (`Msg (Format.asprintf "can't find file %a" Fpath.pp file))
+    | [] -> Error (`Msg (Fmt.str "can't find file %a" Fpath.pp file))
     | None :: tl -> loop tl
     | Some file :: _tl -> Ok file
   in
@@ -39,7 +39,7 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
     Cmd.(
       of_list
-        [ "-O" ^ opt_lvl
+        [ Fmt.str "-O%s" opt_lvl
         ; "--target=wasm32"
         ; "-m32"
         ; "-ffreestanding"
@@ -51,7 +51,7 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
         ; "-Wl,--export=main"
           (* TODO: allow this behind a flag, this is slooooow *)
         ; "-Wl,--lto-O0"
-        ; "-Wl,-z,stack-size=" ^ stack_size
+        ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
         ]
       %% includes )
   in
@@ -71,7 +71,7 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
   unit =
-  Format.pp fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
+  Fmt.pf fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
 let metadata ~workspace arch property files : unit Result.t =
@@ -102,8 +102,8 @@ let metadata ~workspace arch property files : unit Result.t =
           ; el "programfile" file
           ; el "programhash" hash
           ; el "entryfunction" "main"
-          ; el "architecture" (Format.sprintf "%dbit" arch)
-          ; el "creationtime" (Format.asprintf "%a" pp_tm time)
+          ; el "architecture" (Fmt.str "%dbit" arch)
+          ; el "creationtime" (Fmt.str "%a" pp_tm time)
           ] )
     in
     let dtd =

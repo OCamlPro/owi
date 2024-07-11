@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include module type of Stdlib.Result
+include module type of Prelude.Result
 
 type err =
   [ `Alignment_too_large
@@ -61,7 +61,7 @@ type err =
   | `Unsupported_file_extension of string
   ]
 
-type 'a t = ('a, err) Stdlib.Result.t
+type 'a t = ('a, err) Prelude.Result.t
 
 val err_to_string : err -> string
 

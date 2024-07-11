@@ -107,9 +107,7 @@ module M :
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic;
       Choice.bind (abort ()) (fun () -> assert false)
 
-  let exit (p : Value.int32) : unit Choice.t =
-    ignore p;
-    abort ()
+  let exit (_p : Value.int32) : unit Choice.t = abort ()
 
   let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
       =

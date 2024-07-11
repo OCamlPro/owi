@@ -154,7 +154,7 @@ let extract v pos =
     value (Num (I8 i'))
   | Cvtop (_, Zero_extend 24, ({ node = Symbol _; _ } as sym))
   | Cvtop (_, Sign_extend 24, ({ node = Symbol _; _ } as sym))
-    when ty sym = Ty_bitv 8 ->
+    when Smtml.Ty.equal (Ty_bitv 8) (ty sym) ->
     sym
   | _ -> make (Extract (v, pos + 1, pos))
 
@@ -187,12 +187,14 @@ let check_within_bounds m a =
       let upper_bound =
         Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
       in
-      Ok (Value.Bool.(or_ (const (ptr < base)) upper_bound), Value.const_i32 ptr)
-    )
+      Ok
+        ( Value.Bool.(or_ (const (Int32.lt ptr base)) upper_bound)
+        , Value.const_i32 ptr ) )
   | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
 
 let free m base =
-  if not @@ Hashtbl.mem m.chunks base then failwith "Memory leak double free";
+  if not @@ Hashtbl.mem m.chunks base then
+    Fmt.failwith "Memory leak double free";
   Hashtbl.remove m.chunks base
 
 let replace_size m base size = Hashtbl.replace m.chunks base size

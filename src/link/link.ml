@@ -68,7 +68,7 @@ let load_global (ls : 'f state) (import : binary global_type Imported.t) :
     | Var, Const | Const, Var -> Error `Incompatible_import_type
     | Const, Const | Var, Var -> Ok ()
   in
-  if snd import.desc <> global.typ then begin
+  if not @@ Types.val_type_eq (snd import.desc) global.typ then begin
     Error `Incompatible_import_type
   end
   else Ok global
@@ -203,7 +203,7 @@ let eval_memories ls env memories =
     memories (Ok env)
 
 let table_types_are_compatible (import, (t1 : binary ref_type)) (imported, t2) =
-  limit_is_included ~import ~imported && t1 = t2
+  limit_is_included ~import ~imported && Types.ref_type_eq t1 t2
 
 let load_table (ls : 'f state) (import : binary table_type Imported.t) :
   table Result.t =
@@ -226,14 +226,6 @@ let eval_tables ls env tables =
       Ok env )
     tables (Ok env)
 
-let func_types_are_compatible a b =
-  (* TODO: copied from Simplify_bis.equal_func_types => should factorize *)
-  let remove_param (pt, rt) =
-    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
-    (pt, rt)
-  in
-  remove_param a = remove_param b
-
 let load_func (ls : 'f state) (import : binary block_type Imported.t) :
   func Result.t =
   let (Bt_raw ((None | Some _), typ)) = import.desc in
@@ -245,7 +237,7 @@ let load_func (ls : 'f state) (import : binary block_type Imported.t) :
       t
     | Extern func_id -> Func_id.get_typ func_id ls.collection
   in
-  if func_types_are_compatible typ type' then Ok func
+  if Types.func_type_eq typ type' then Ok func
   else Error `Incompatible_import_type
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =

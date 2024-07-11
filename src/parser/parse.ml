@@ -315,9 +315,9 @@ let token_to_string = function
   | ANY_REF -> "anyref"
   | ANY -> "any"
   | ALIGN -> "align"
-  | NUM s -> Format.sprintf "%s" s
-  | NAME s -> Format.sprintf {|"%s"|} s
-  | ID s -> Format.sprintf "$%s" s
+  | NUM s -> Fmt.str "%s" s
+  | NAME s -> Fmt.str {|"%s"|} s
+  | ID s -> Fmt.str "$%s" s
 
 module Make (M : sig
   type t

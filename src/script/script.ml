@@ -16,14 +16,18 @@ end
 
 let check_error ~expected ~got : unit Result.t =
   let ok =
-    Result.err_to_string got = expected
+    String.equal (Result.err_to_string got) expected
     || String.starts_with ~prefix:expected (Result.err_to_string got)
-    || ( got = `Constant_out_of_range
-       || got = `Msg "constant out of range"
-       || got = `Parse_fail "constant out of range" )
-       && (expected = "i32 constant out of range" || expected = "i32 constant")
-    || got = `Msg "unexpected end of section or function"
-       && expected = "section size mismatch"
+    ||
+    match got with
+    | (`Msg s | `Parse_fail s)
+      when String.starts_with ~prefix:"constant out of range" s ->
+      String.starts_with ~prefix:"i32 constant" expected
+    | `Constant_out_of_range ->
+      String.starts_with ~prefix:"i32 constant" expected
+    | `Msg "unexpected end of section or function" ->
+      String.equal expected "section size mismatch"
+    | _ -> false
   in
   if not ok then begin
     Error (`Failed_with_but_expected (got, expected))
@@ -70,10 +74,12 @@ let load_global_from_module ls mod_id name =
 
 let compare_result_const result (const : Concrete_value.t) =
   match (result, const) with
-  | Text.Result_const (Literal (Const_I32 n)), I32 n' -> n = n'
-  | Result_const (Literal (Const_I64 n)), I64 n' -> n = n'
-  | Result_const (Literal (Const_F32 n)), F32 n' -> n = n'
-  | Result_const (Literal (Const_F64 n)), F64 n' -> n = n'
+  | Text.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
+  | Result_const (Literal (Const_I64 n)), I64 n' -> Int64.eq n n'
+  | Result_const (Literal (Const_F32 n)), F32 n' ->
+    Float32.eq n n' || String.equal (Float32.to_string n) (Float32.to_string n')
+  | Result_const (Literal (Const_F64 n)), F64 n' ->
+    Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
   | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
   | Result_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -> begin
@@ -82,15 +88,15 @@ let compare_result_const result (const : Concrete_value.t) =
     | Some n' -> n = n'
   end
   | Result_const (Nan_canon S32), F32 f ->
-    f = Float32.pos_nan || f = Float32.neg_nan
+    Float32.is_pos_nan f || Float32.is_neg_nan f
   | Result_const (Nan_canon S64), F64 f ->
-    f = Float64.pos_nan || f = Float64.neg_nan
+    Float64.is_pos_nan f || Float64.is_neg_nan f
   | Result_const (Nan_arith S32), F32 f ->
     let pos_nan = Float32.to_bits Float32.pos_nan in
-    Int32.logand (Float32.to_bits f) pos_nan = pos_nan
+    Int32.eq (Int32.logand (Float32.to_bits f) pos_nan) pos_nan
   | Result_const (Nan_arith S64), F64 f ->
     let pos_nan = Float64.to_bits Float64.pos_nan in
-    Int64.logand (Float64.to_bits f) pos_nan = pos_nan
+    Int64.eq (Int64.logand (Float64.to_bits f) pos_nan) pos_nan
   | Result_const (Nan_arith _), _
   | Result_const (Nan_canon _), _
   | Result_const (Literal (Const_I32 _)), _
@@ -120,7 +126,7 @@ let value_of_const : text const -> V.t Result.t = function
 let action (link_state : Concrete_value.Func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
     Log.debug5 "invoke %a %s %a...@\n"
-      (Format.pp_option ~none:Format.pp_nothing Format.pp_string)
+      (Fmt.option ~none:Fmt.nop Fmt.string)
       mod_id f Types.pp_consts args;
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
@@ -226,12 +232,13 @@ let run ~no_exhaustion ~optimize script =
       | Assert (Assert_return (a, res)) ->
         Log.debug0 "*** assert_return@\n";
         let* stack = action link_state a in
+        let stack = List.rev stack in
         if
           List.compare_lengths res stack <> 0
-          || not (List.for_all2 compare_result_const res (List.rev stack))
+          || not (List.for_all2 compare_result_const res stack)
         then begin
-          Format.pp_err "got:      %a@.expected: %a@." Stack.pp (List.rev stack)
-            Text.pp_results res;
+          Fmt.epr "got:      %a@.expected: %a@." Stack.pp stack Text.pp_results
+            res;
           Error `Bad_result
         end
         else Ok link_state
@@ -250,7 +257,7 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Register (name, mod_name) ->
-        if !curr_module = 1 && !registered = false then Log.debug_on := false;
+        if !curr_module = 1 && not !registered then Log.debug_on := false;
         Log.debug0 "*** register@\n";
         let+ state = Link.register_module link_state ~name ~id:mod_name in
         Log.debug_on := debug_on;

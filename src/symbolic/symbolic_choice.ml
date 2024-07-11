@@ -339,7 +339,7 @@ let add_breadcrumb crumb =
 let with_new_symbol ty f =
   let* thread in
   let n = Thread.symbols thread in
-  let sym = Format.ksprintf (Smtml.Symbol.make ty) "symbol_%d" n in
+  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
   let+ () =
     modify_thread (fun thread ->
         let thread = Thread.add_symbol thread sym in
@@ -372,7 +372,8 @@ let get_model_or_stop symbol =
     let model = Solver.model solver ~symbols ~pc in
     match Smtml.Model.evaluate model symbol with
     | None ->
-      failwith "Unreachable: The model exists so this symbol should evaluate"
+      Fmt.failwith
+        "Unreachable: The model exists so this symbol should evaluate"
     | Some v -> return v
   end
 
@@ -381,7 +382,7 @@ let select_inner ~explore_first (cond : Symbolic_value.vbool) =
   match Smtml.Expr.view v with
   | Val True -> return true
   | Val False -> return false
-  | Val (Num (I32 _)) -> failwith "unreachable (type error)"
+  | Val (Num (I32 _)) -> Fmt.failwith "unreachable (type error)"
   | _ ->
     let true_branch =
       let* () = add_pc v in
@@ -409,7 +410,7 @@ let summary_symbol (e : Smtml.Expr.t) =
   | _ ->
     let num_symbols = Thread.symbols thread in
     let+ () = modify_thread Thread.incr_symbols in
-    let sym_name = Format.sprintf "choice_i32_%i" num_symbols in
+    let sym_name = Fmt.str "choice_i32_%i" num_symbols in
     let sym_type = Smtml.Ty.Ty_bitv 32 in
     let sym = Smtml.Symbol.make sym_type sym_name in
     let assign = Smtml.Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
@@ -430,7 +431,7 @@ let select_i32 (i : Symbolic_value.int32) =
       let i =
         match possible_value with
         | Smtml.Value.Num (I32 i) -> i
-        | _ -> failwith "Unreachable: found symbol must be a value"
+        | _ -> Fmt.failwith "Unreachable: found symbol must be a value"
       in
       let s = Smtml.Expr.mk_symbol symbol in
       let this_value_cond =

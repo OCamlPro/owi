@@ -53,7 +53,7 @@ module P = struct
            }
     | Ref _, Ref _ ->
       (* Concretization: add something to the PC *)
-      failwith "TODO"
+      Fmt.failwith "TODO"
     | _, _ -> assert false
 
   module Global = struct
@@ -178,7 +178,7 @@ module P = struct
             ~dst:dst.symbolic ~len:len.symbolic
       }
 
-    let get_limit_max _ = failwith "TODO"
+    let get_limit_max _ = Fmt.failwith "TODO"
   end
 
   module Extern_func = Concrete_value.Make_extern_func (Value) (Choice) (Memory)

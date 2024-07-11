@@ -89,8 +89,6 @@ module Make (P : Interpret_intf.P) :
     let* b = select b in
     return (b, stack)
 
-  let p_type_eq (_id1, t1) (_id2, t2) = t1 = t2
-
   let ( let> ) v f =
     let* v = select v in
     f v
@@ -400,28 +398,29 @@ module Make (P : Interpret_intf.P) :
     end
 
   let exec_fconverti stack nn nn' sx =
+    let is_signed = match sx with S -> true | U -> false in
     match nn with
     | S32 -> (
       let open F32 in
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = if sx = S then convert_i32_s n else convert_i32_u n in
+        let n = if is_signed then convert_i32_s n else convert_i32_u n in
         Stack.push_f32 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = if sx = S then convert_i64_s n else convert_i64_u n in
+        let n = if is_signed then convert_i64_s n else convert_i64_u n in
         Stack.push_f32 stack n )
     | S64 -> (
       let open F64 in
       match nn' with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
-        let n = if sx = S then convert_i32_s n else convert_i32_u n in
+        let n = if is_signed then convert_i32_s n else convert_i32_u n in
         Stack.push_f64 stack n
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
-        let n = if sx = S then convert_i64_s n else convert_i64_u n in
+        let n = if is_signed then convert_i64_s n else convert_i64_u n in
         Stack.push_f64 stack n )
 
   let exec_ireinterpretf stack nn nn' =
@@ -632,25 +631,29 @@ module Make (P : Interpret_intf.P) :
     let rec print_count ppf count =
       let calls ppf tbl =
         let l =
-          List.sort (fun (id1, _) (id2, _) -> compare id1 id2)
+          (* TODO: move this to Types.ml *)
+          List.sort
+            (fun
+              ((Raw id1 : binary indice), _) ((Raw id2 : binary indice), _) ->
+              compare id1 id2 )
           @@ List.of_seq @@ Hashtbl.to_seq tbl
         in
         match l with
         | [] -> ()
         | _ :: _ ->
-          Format.pp ppf "@ @[<v 2>calls@ %a@]"
-            (Format.pp_list
-               ~pp_sep:(fun ppf () -> Format.pp ppf "@ ")
+          Fmt.pf ppf "@ @[<v 2>calls@ %a@]"
+            (Fmt.list
+               ~sep:(fun ppf () -> Fmt.pf ppf "@ ")
                (fun ppf ((Raw id : binary indice), count) ->
                  let name ppf = function
                    | None -> ()
-                   | Some name -> Format.pp ppf " %s" name
+                   | Some name -> Fmt.pf ppf " %s" name
                  in
-                 Format.pp ppf "@[<v 2>id %i%a@ %a@]" id name count.name
+                 Fmt.pf ppf "@[<v 2>id %i%a@ %a@]" id name count.name
                    print_count count ) )
             l
       in
-      Format.pp ppf "@[<v>enter %i@ intrs %i%a@]" count.enter count.instructions
+      Fmt.pf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter count.instructions
         calls count.calls
 
     let empty_count name =
@@ -772,8 +775,7 @@ module Make (P : Interpret_intf.P) :
       let f = Env.get_extern_func state.env f in
       Extern_func.extern_type f
 
-  let call_ref ~return (state : State.exec_state) typ_i =
-    ignore (return, state, typ_i);
+  let call_ref ~return:_ (_state : State.exec_state) _typ_i =
     (* TODO *)
     assert false
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
@@ -797,8 +799,8 @@ module Make (P : Interpret_intf.P) :
     let state = { state with stack } in
     let* t = Env.get_table state.env tbl_i in
     let _null, ref_kind = Table.typ t in
-    if ref_kind <> Func_ht then Choice.trap Indirect_call_type_mismatch
-    else
+    match ref_kind with
+    | Func_ht ->
       let size = Table.size t in
       let> out_of_bounds =
         Bool.or_ I32.(fun_i < const 0l) @@ I32.(consti size <= fun_i)
@@ -808,15 +810,18 @@ module Make (P : Interpret_intf.P) :
         let* fun_i = Choice.select_i32 fun_i in
         let fun_i = Int32.to_int fun_i in
         let f_ref = Table.get t fun_i in
-        match Ref.get_func f_ref with
-        | Null -> Choice.trap (Uninitialized_element fun_i)
-        | Type_mismatch -> Choice.trap Element_type_error
-        | Ref_value func ->
-          let pt, rt = func_type state func in
-          let pt', rt' = typ_i in
-          if not (rt = rt' && List.equal p_type_eq pt pt') then
-            Choice.trap Indirect_call_type_mismatch
-          else exec_vfunc ~return state func
+        begin
+          match Ref.get_func f_ref with
+          | Null -> Choice.trap (Uninitialized_element fun_i)
+          | Type_mismatch -> Choice.trap Element_type_error
+          | Ref_value func ->
+            let ft = func_type state func in
+            let ft' = typ_i in
+            if not (Types.func_type_eq ft ft') then
+              Choice.trap Indirect_call_type_mismatch
+            else exec_vfunc ~return state func
+        end
+    | _ -> Choice.trap Indirect_call_type_mismatch
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
@@ -1018,7 +1023,6 @@ module Make (P : Interpret_intf.P) :
       st @@ Stack.push stack (Global.value g)
     | Global_set (Raw i) ->
       let* global = Env.get_global env i in
-      if Global.mut global = Const then Log.err "Can't set const global";
       let v, stack =
         match Global.typ global with
         | Ref_type _rt -> Stack.pop_ref stack
@@ -1071,13 +1075,13 @@ module Make (P : Interpret_intf.P) :
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
       let allowed =
-        ( match Table.max_size t with
-        | None -> true
-        | Some max -> consti max >= new_size )
-        && new_size >= const 0l
-        && new_size >= size
+        Bool.and_
+          ( match Table.max_size t with
+          | None -> Bool.const true
+          | Some max -> I32.ge (consti max) new_size )
+        @@ Bool.and_ (I32.ge new_size (const 0l)) (I32.ge new_size size)
       in
-
+      let> allowed in
       if not allowed then
         let stack = Stack.drop stack in
         st @@ Stack.push_i32_of_int stack (-1)
@@ -1091,10 +1095,11 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
-      let out_of_bounds =
-        len < const 0l
-        || pos < const 0l
-        || I32.(pos + len) > consti (Table.size t)
+      let> out_of_bounds =
+        Bool.or_ (I32.lt len (const 0l))
+        @@ Bool.or_
+             (I32.lt pos (const 0l))
+             (I32.gt I32.(pos + len) (consti (Table.size t)))
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
@@ -1109,19 +1114,19 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let out_of_bounds =
+      let> out_of_bounds =
         let t_src_len = Table.size t_src in
         let t_dst_len = Table.size t_dst in
-        I32.(src + len) > consti t_src_len
-        || I32.(dst + len) > consti t_dst_len
-        || len < const 0l
-        || src < const 0l
-        || dst < const 0l
+        Bool.or_ (I32.gt I32.(src + len) (consti t_src_len))
+        @@ Bool.or_ (I32.gt I32.(dst + len) (consti t_dst_len))
+        @@ Bool.or_ (I32.lt len (const 0l))
+        @@ Bool.or_ (I32.lt src (const 0l)) (I32.lt dst (const 0l))
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
         let* () =
-          if len <> const 0l then begin
+          let> len_is_not_zero = I32.ne len (const 0l) in
+          if len_is_not_zero then begin
             let* src = Choice.select_i32 src in
             let* dst = Choice.select_i32 dst in
             let+ len = Choice.select_i32 len in
@@ -1189,7 +1194,8 @@ module Make (P : Interpret_intf.P) :
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
         let* res =
-          (if sx = S then Memory.load_16_s else Memory.load_16_u) mem addr
+          (match sx with S -> Memory.load_16_s | U -> Memory.load_16_u)
+            mem addr
         in
         st
         @@
@@ -1211,7 +1217,7 @@ module Make (P : Interpret_intf.P) :
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
         let* res =
-          (if sx = S then Memory.load_8_s else Memory.load_8_u) mem addr
+          (match sx with S -> Memory.load_8_s | U -> Memory.load_8_u) mem addr
         in
         st
         @@
@@ -1544,7 +1550,7 @@ module Make (P : Interpret_intf.P) :
               match end_stack with
               | [] -> ()
               | _ :: _ ->
-                Format.pp_err "non empty stack@\n%a@." Stack.pp end_stack;
+                Fmt.epr "non empty stack@\n%a@." Stack.pp end_stack;
                 assert false )
             (Choice.return ())
             (Module_to_run.to_run modul)

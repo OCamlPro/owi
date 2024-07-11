@@ -9,7 +9,7 @@ type err = private
 include
   Choice_intf.Complete
     with type thread := Thread.t
-     and type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
+     and type 'a run_result = ('a, err) Prelude.Result.t * Thread.t
      and module V := Symbolic_value
 
 val run :

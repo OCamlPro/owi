@@ -21,7 +21,7 @@ module type S = sig
 
   val empty : t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : Fmt.formatter -> t -> unit
 
   (** pop operations *)
 
@@ -130,7 +130,7 @@ module Make (V : Value_intf.T) :
   let push_array _ _ = assert false
 
   let pp fmt (s : t) =
-    Format.pp_list ~pp_sep:(fun fmt () -> Format.pp_string fmt " ; ") V.pp fmt s
+    Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " ; ") V.pp fmt s
 
   let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
@@ -213,5 +213,8 @@ module Make (V : Value_intf.T) :
 
   let rec drop_n s n =
     if n = 0 then s
-    else match s with [] -> invalid_arg "drop_n" | _ :: tl -> drop_n tl (n - 1)
+    else
+      match s with
+      | [] -> Fmt.invalid_arg "drop_n"
+      | _ :: tl -> drop_n tl (n - 1)
 end

@@ -5,13 +5,6 @@
 open Types
 open Syntax
 
-let equal_func_types (a : binary func_type) (b : binary func_type) : bool =
-  let remove_param (pt, rt) =
-    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
-    (pt, rt)
-  in
-  remove_param a = remove_param b
-
 type tbl = (string, int) Hashtbl.t Option.t
 
 let convert_heap_type tbl = function

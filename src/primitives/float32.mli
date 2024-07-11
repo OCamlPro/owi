@@ -10,6 +10,10 @@ val neg_nan : t
 
 val pos_nan : t
 
+val is_neg_nan : t -> bool
+
+val is_pos_nan : t -> bool
+
 val of_bits : Int32.t -> t
 
 val to_bits : t -> Int32.t
@@ -66,4 +70,4 @@ val to_float : t -> Float.t
 
 val of_float : Float.t -> t
 
-val pp : Format.formatter -> t -> unit
+val pp : Fmt.formatter -> t -> unit

@@ -3,48 +3,45 @@
 (* Written by the Owi programmers *)
 
 val ( let* ) :
-     ('a, 'err) Stdlib.Result.t
-  -> ('a -> ('b, 'err) Stdlib.Result.t)
-  -> ('b, 'err) Stdlib.Result.t
+     ('a, 'err) Prelude.Result.t
+  -> ('a -> ('b, 'err) Prelude.Result.t)
+  -> ('b, 'err) Prelude.Result.t
 
 val ( let+ ) :
-  ('a, 'err) Stdlib.Result.t -> ('a -> 'b) -> ('b, 'err) Stdlib.Result.t
+  ('a, 'err) Prelude.Result.t -> ('a -> 'b) -> ('b, 'err) Prelude.Result.t
 
-val error : string -> ('a, string) Stdlib.Result.t
+val error : string -> ('a, string) Prelude.Result.t
 
-val error_s :
-  ('a, Format.formatter, unit, ('b, string) Stdlib.Result.t) format4 -> 'a
-
-val ok : 'a -> ('a, 'err) Stdlib.Result.t
+val ok : 'a -> ('a, 'err) Prelude.Result.t
 
 val list_iter :
-     ('a -> (unit, 'err) Stdlib.Result.t)
+     ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a list
-  -> (unit, 'err) Stdlib.Result.t
+  -> (unit, 'err) Prelude.Result.t
 
 val list_map :
-     ('a -> ('b, 'err) Stdlib.Result.t)
+     ('a -> ('b, 'err) Prelude.Result.t)
   -> 'a list
-  -> ('b list, 'err) Stdlib.Result.t
+  -> ('b list, 'err) Prelude.Result.t
 
 val list_fold_left :
-     ('a -> 'b -> ('a, 'err) Stdlib.Result.t)
+     ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a
   -> 'b list
-  -> ('a, 'err) Stdlib.Result.t
+  -> ('a, 'err) Prelude.Result.t
 
 val array_iter :
-     ('a -> (unit, 'err) Stdlib.Result.t)
+     ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a array
-  -> (unit, 'err) Stdlib.Result.t
+  -> (unit, 'err) Prelude.Result.t
 
 val array_map :
-     ('a -> ('b, 'err) Stdlib.Result.t)
+     ('a -> ('b, 'err) Prelude.Result.t)
   -> 'a array
-  -> ('b array, 'err) Stdlib.Result.t
+  -> ('b array, 'err) Prelude.Result.t
 
 val array_fold_left :
-     ('a -> 'b -> ('a, 'err) Stdlib.Result.t)
+     ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a
   -> 'b array
-  -> ('a, 'err) Stdlib.Result.t
+  -> ('a, 'err) Prelude.Result.t

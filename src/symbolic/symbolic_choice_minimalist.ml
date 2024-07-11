@@ -8,10 +8,11 @@ type err =
   | Assert_fail
   | Trap of Trap.t
 
-type 'a t = M of (Thread.t -> Solver.t -> ('a, err) Stdlib.Result.t * Thread.t)
+type 'a t =
+  | M of (Thread.t -> Solver.t -> ('a, err) Prelude.Result.t * Thread.t)
 [@@unboxed]
 
-type 'a run_result = ('a, err) Stdlib.Result.t * Thread.t
+type 'a run_result = ('a, err) Prelude.Result.t * Thread.t
 
 let return v = M (fun t _sol -> (Ok v, t))
 
@@ -38,7 +39,7 @@ let select (vb : vbool) =
   match Smtml.Expr.view v with
   | Val True -> return true
   | Val False -> return false
-  | _ -> Format.kasprintf failwith "%a" Smtml.Expr.pp v
+  | _ -> Fmt.failwith "%a" Smtml.Expr.pp v
 
 let select_i32 (i : int32) =
   let v = Smtml.Expr.simplify i in

@@ -13,22 +13,22 @@ exception Unexpected_character of string
 
 let illegal_escape buf =
   let tok = Utf8.lexeme buf in
-  raise @@ Illegal_escape (Printf.sprintf "illegal escape %S" tok)
+  raise @@ Illegal_escape (Fmt.str "illegal escape %S" tok)
 
 let unknown_operator buf =
   let tok = Utf8.lexeme buf in
-  raise @@ Unknown_operator (Printf.sprintf "unknown operator %S" tok)
+  raise @@ Unknown_operator (Fmt.str "unknown operator %S" tok)
 
 let unexpected_character buf =
   let tok = Utf8.lexeme buf in
-  raise @@ Unexpected_character (Printf.sprintf "unexpected character `%S`" tok)
+  raise @@ Unexpected_character (Fmt.str "unexpected character `%S`" tok)
 
 let mk_string buf s =
   let b = Buffer.create (String.length s) in
   let i = ref 0 in
   while !i < String.length s do
     let c =
-      if s.[!i] <> '\\' then s.[!i]
+      if not @@ Char.equal s.[!i] '\\' then s.[!i]
       else
         match
           incr i;
@@ -43,16 +43,17 @@ let mk_string buf s =
         | 'u' ->
           let j = !i + 2 in
           i := String.index_from s j '}';
-          let n = int_of_string ("0x" ^ String.sub s j (!i - j)) in
+          let n = int_of_string (Fmt.str "0x%s" (String.sub s j (!i - j))) in
+          let n = match n with None -> assert false | Some n -> n in
           let bs = Wutf8.encode [ n ] in
           Buffer.add_substring b bs 0 (String.length bs - 1);
           bs.[String.length bs - 1]
         | h ->
           incr i;
           if !i >= String.length s then illegal_escape buf;
-          let str = Format.sprintf "0x%c%c" h s.[!i] in
+          let str = Fmt.str "0x%c%c" h s.[!i] in
           begin
-            match int_of_string_opt str with
+            match int_of_string str with
             | None -> illegal_escape buf
             | Some n -> Char.chr n
           end
@@ -454,6 +455,7 @@ let rec token buf =
     NAME name
   | eof -> EOF
   (* | "" -> EOF *)
+  | any -> unexpected_character buf
   | _ -> unexpected_character buf
 
 and comment buf =

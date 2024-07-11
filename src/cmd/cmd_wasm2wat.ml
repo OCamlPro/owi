@@ -10,7 +10,7 @@ let cmd_one file =
   | ".wasm" ->
     let* m = Parse.Binary.Module.from_file file in
     let m = Binary_to_text.modul m in
-    Ok (Format.pp_std "%a@\n" Text.pp_modul m)
+    Ok (Fmt.pr "%a@\n" Text.pp_modul m)
   | ext -> Error (`Unsupported_file_extension ext)
 
 let cmd files = list_iter cmd_one files

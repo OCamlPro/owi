@@ -68,9 +68,7 @@ module M :
     let+ base = ptr p in
     Memory.free m base
 
-  let exit (p : Value.int32) : unit Choice.t =
-    ignore p;
-    abort ()
+  let exit (_p : Value.int32) : unit Choice.t = abort ()
 end
 
 type extern_func = Symbolic.P.Extern_func.extern_func

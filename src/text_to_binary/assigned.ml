@@ -8,17 +8,10 @@ open Syntax
 module StrType = struct
   type t = binary str_type
 
-  let compare = compare
+  let compare = Types.compare_str_type
 end
 
 module TypeMap = Map.Make (StrType)
-
-let equal_func_types (a : binary func_type) (b : binary func_type) : bool =
-  let remove_param (pt, rt) =
-    let pt = List.map (fun (_id, vt) -> (None, vt)) pt in
-    (pt, rt)
-  in
-  remove_param a = remove_param b
 
 type t =
   { id : string option
@@ -112,7 +105,7 @@ let name kind ~get_name values =
     | Some name ->
       let index = Indexed.get_index elt in
       if String_map.mem name named then
-        Error (`Msg (Format.sprintf "duplicate %s %s" kind name))
+        Error (`Msg (Fmt.str "duplicate %s %s" kind name))
       else ok @@ String_map.add name index named
   in
   let+ named = list_fold_left assign_one String_map.empty values in
@@ -128,7 +121,7 @@ let check_type_id (types : binary str_type Named.t)
   | None -> Error (`Unknown_type (Raw id))
   | Some (Def_func_t func_type') ->
     let* func_type = Binary_types.convert_func_type None func_type in
-    if not (equal_func_types func_type func_type') then
+    if not (Types.func_type_eq func_type func_type') then
       Error `Inline_function_type
     else Ok ()
   | Some _ -> assert false

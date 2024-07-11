@@ -106,7 +106,7 @@ module Reference : INTERPRET = struct
     let tmp_file = Filename.temp_file prefix suffix in
     let chan = open_out tmp_file in
     let fmt = Stdlib.Format.formatter_of_out_channel chan in
-    Format.pp_string fmt modul;
+    Fmt.pf fmt "%s@\n" modul;
     close_out chan;
     let n =
       Format.kasprintf Sys.command "timeout %fs wasm %s"

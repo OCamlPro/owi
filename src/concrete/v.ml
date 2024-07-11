@@ -8,11 +8,11 @@ include (
 
     type int32 = Int32.t
 
-    let pp_int32 fmt i = Format.pp fmt "%ld" i
+    let pp_int32 fmt i = Fmt.pf fmt "%ld" i
 
     type int64 = Int64.t
 
-    let pp_int64 fmt i = Format.pp fmt "%Ld" i
+    let pp_int64 fmt i = Fmt.pf fmt "%Ld" i
 
     type float32 = Float32.t
 
@@ -62,7 +62,7 @@ include (
 
       let int32 = function true -> 1l | false -> 0l
 
-      let pp = Format.pp_bool
+      let pp = Fmt.bool
     end
 
     module I32 = struct
@@ -70,11 +70,15 @@ include (
       include Convert.Int32
 
       let to_bool i = Int32.ne i 0l
+
+      let eq_const = eq
     end
 
     module I64 = struct
       include Int64
       include Convert.Int64
+
+      let eq_const = eq
     end
 
     module F32 = struct

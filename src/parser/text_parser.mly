@@ -33,23 +33,23 @@ let failwith msg = raise @@ Parse_fail msg
 
 let u32 s =
   try Unsigned.UInt32.to_int (Unsigned.UInt32.of_string s)
-  with Failure _msg -> failwith "constant out of range"
+  with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i32 s =
   try Int32.of_string s
-  with Failure _msg -> failwith "constant out of range"
+  with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i64 s =
   try Int64.of_string s
-  with Failure _msg -> failwith "constant out of range"
+  with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f64 s =
   try Float64.of_string s
-  with Failure _msg -> failwith "constant out of range"
+  with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f32 s =
   try Float32.of_string s
-  with Failure _msg -> failwith "constant out of range"
+  with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 %}
 
@@ -210,7 +210,7 @@ let num_type ==
 let align ==
   | ALIGN; EQUAL; n = NUM; {
     let n = i32 n in
-    if n = 0l || Int32.(logand n (sub n 1l)) <> 0l then failwith "alignment"
+    if Int32.eq n 0l || Int32.ne Int32.(logand n (sub n 1l)) 0l then failwith "alignment"
     else Int32.div n 2l
   }
 
@@ -543,20 +543,24 @@ let call_instr_results_instr_list :=
 
 let block_instr ==
   | BLOCK; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
+    if Option.is_some id2 && not @@ Option.equal String.equal id id2
+    then failwith "mismatching label";
     Block (id, bt, es)
   }
   | LOOP; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
+    if Option.is_some id2 && not @@ Option.equal String.equal id id2
+    then failwith "mismatching label";
     Loop (id, bt, es)
   }
   | IF; id = option(id); (bt, es) = block; END; id2 = option(id); {
-    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
+    if Option.is_some id2 && not @@ Option.equal String.equal id id2
+    then failwith "mismatching label";
     If_else (id, bt, es, [])
   }
   | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
-    if Option.is_some id2 && id <> id2 then failwith "mismatching label";
-    if Option.is_some id3 && id <> id3 then failwith "mismatching label";
+    if (Option.is_some id2 && not @@ Option.equal String.equal id id2)
+    || (Option.is_some id3 && not @@ Option.equal String.equal id id3)
+    then failwith "mismatching label";
     If_else (id, bt, es1, instr_list)
   }
 
@@ -711,7 +715,7 @@ let func ==
       | MExport e -> MExport { e with desc = Export_func func_id }
       | MFunc f -> MFunc { f with id }
       | MData _ | MElem _ | MGlobal _ | MStart _ | MType _ | MTable _ | MMem _ as field -> begin
-        Format.pp_err "got invalid field: `%a`@." pp_module_field field;
+        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
         assert false
       end
     ) func_fields
@@ -832,7 +836,7 @@ let table ==
       | Import_func _ | Import_global _ | Import_mem _ -> assert false
     end
     | MMem _ | MData _ | MStart _ | MFunc _ | MGlobal _ | MType _ as field -> begin
-      Format.pp_err "got invalid field: `%a`@." pp_module_field field;
+      Fmt.epr "got invalid field: `%a`@." pp_module_field field;
       assert false
     end
   ) table_fields
@@ -879,7 +883,7 @@ let memory ==
         | Import_table _ | Import_func _ | Import_global _ -> assert false
         end
       | MElem _ | MType _ | MTable _ | MFunc _ | MGlobal _ | MStart _ as field -> begin
-        Format.pp_err "got invalid field: `%a`@." pp_module_field field;
+        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
         assert false
       end
     ) memory_fields
@@ -914,7 +918,7 @@ let global ==
         | Import_mem _ | Import_table _ | Import_func _ -> assert false
         end
       | MStart _ | MFunc _ | MData _ | MElem _ | MMem _ | MTable _ | MType _ as field -> begin
-        Format.pp_err "got invalid field: `%a`@." pp_module_field field;
+        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
         assert false
       end
     ) global_fields
@@ -1016,8 +1020,16 @@ let literal_const ==
   | F32_CONST; num = NUM; { Const_F32 (f32 num) }
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | REF_NULL; ~ = heap_type; <Const_null>
-  | REF_EXTERN; num = NUM; { Const_extern (int_of_string num) }
-  | REF_HOST; num = NUM; { Const_host (int_of_string num) }
+  | REF_EXTERN; num = NUM; {
+    match int_of_string num with
+    | None -> assert false
+    | Some num -> Const_extern num
+  }
+  | REF_HOST; num = NUM; {
+    match int_of_string num with
+    | None -> assert false
+    | Some num -> Const_host num
+  }
   | REF_ARRAY; { Const_array }
   | REF_EQ; { Const_eq }
   | REF_I31; { Const_i31 }

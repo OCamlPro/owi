@@ -15,17 +15,17 @@ type pc_elt =
   | Assert of Symbolic_value.vbool
 
 let pp_pc_elt fmt = function
-  | Select (c, v) -> Format.pp fmt "Select(%a, %b)" Smtml.Expr.pp c v
-  | Select_i32 (c, v) -> Format.pp fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
-  | Assume c -> Format.pp fmt "Assume(%a)" Smtml.Expr.pp c
-  | Assert c -> Format.pp fmt "Assert(%a)" Smtml.Expr.pp c
+  | Select (c, v) -> Fmt.pf fmt "Select(%a, %b)" Smtml.Expr.pp c v
+  | Select_i32 (c, v) -> Fmt.pf fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
+  | Assume c -> Fmt.pf fmt "Assume(%a)" Smtml.Expr.pp c
+  | Assert c -> Fmt.pf fmt "Assert(%a)" Smtml.Expr.pp c
 
-let pp_pc fmt pc = List.iter (fun e -> Format.pp fmt "  %a@\n" pp_pc_elt e) pc
+let pp_pc fmt pc = List.iter (fun e -> Fmt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
 let pp_assignments fmt assignments =
   List.iter
     (fun (sym, v) ->
-      Format.pp fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
+      Fmt.pf fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
     assignments
 
 let pc_elt_to_expr = function
@@ -55,7 +55,7 @@ type thread =
 let init_thread preallocated_values shared =
   { symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
 
-type 'a run_result = ('a, err) Stdlib.Result.t * thread
+type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -> 'a run_result) [@@unboxed]
 
@@ -134,7 +134,7 @@ let with_new_symbol ty f =
   M
     (fun st ->
       let id = st.symbols + 1 in
-      let sym = Format.kasprintf (Smtml.Symbol.make ty) "symbol_%d" id in
+      let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" id in
       let value = Hashtbl.find_opt st.preallocated_values sym in
       let concrete, v = f sym value in
       let st =
