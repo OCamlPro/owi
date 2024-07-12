@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 module Expr = Smtml.Expr
-module Choice = Symbolic_choice
+module Choice = Symbolic_choice_with_memory
 module Memory = Symbolic_memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)

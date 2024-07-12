@@ -5,7 +5,9 @@
 module type Thread = sig
   type t
 
-  val memories : t -> Symbolic_memory.collection
+  type memories = Symbolic_memory.collection
+
+  val memories : t -> memories
 
   val tables : t -> Symbolic_table.collection
 
@@ -21,7 +23,24 @@ module MakeP
                  and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
-  module Choice = Choice
+
+  module Choice = struct
+    include Choice
+
+    let lift_without_memory (_v : 'a Symbolic_choice_without_memory.t) :
+      'a Choice.t =
+      Choice.with_thread (fun _t ->
+          (* let thread_without_memory = (1* translate _t *1) in *)
+          (* let results = *)
+          (*   Symbolic_choice_without_memory.run *)
+          (*     ~workers:1 *)
+          (*     v *)
+          (*     thread_without_memory *)
+          (*     ~callback *)
+          (*     ... *)
+          Obj.magic 0 )
+  end
+
   module Extern_func =
     Concrete_value.Make_extern_func (Value) (Choice) (Symbolic_memory)
   module Global = Symbolic_global
@@ -83,6 +102,7 @@ struct
 
     let with_concrete (m : t) a f : 'a Choice.t =
       let open Choice in
+      let* _ = Choice.lift_without_memory @@ address () in
       let* addr = concretise a in
       let+ ptr = check_within_bounds m addr in
       f m ptr
@@ -180,8 +200,10 @@ struct
   end
 end
 
-module P = MakeP [@inlined hint] (Thread) (Symbolic_choice)
-module M = MakeP [@inlined hint] (Thread) (Symbolic_choice_minimalist)
+module P =
+  MakeP [@inlined hint] (Thread_with_memory) (Symbolic_choice_with_memory)
+module M =
+  MakeP [@inlined hint] (Thread_with_memory) (Symbolic_choice_minimalist)
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }

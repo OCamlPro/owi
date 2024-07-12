@@ -36,6 +36,12 @@ let grow m delta =
       (Value.I32.gt new_size m.size)
       ~if_true:new_size ~if_false:m.size
 
+let address () =
+  let open Symbolic_choice_without_memory in
+  let b = Expr.symbol (Smtml.Symbol.make Ty_bool "x") in
+  let+ b = select b in
+  if b then Value.const_i32 1l else Value.const_i32 0l
+
 let size { size; _ } = Value.I32.mul size page_size
 
 let size_in_pages { size; _ } = size

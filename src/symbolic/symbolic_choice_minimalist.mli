@@ -8,13 +8,13 @@ type err = private
 
 include
   Choice_intf.Complete
-    with type thread := Thread.t
-     and type 'a run_result = ('a, err) Prelude.Result.t * Thread.t
+    with type thread := Thread_with_memory.t
+     and type 'a run_result = ('a, err) Prelude.Result.t * Thread_with_memory.t
      and module V := Symbolic_value
 
 val run :
      workers:int
   -> Smtml.Solver_dispatcher.solver_type
   -> 'a t
-  -> Thread.t
+  -> Thread_with_memory.t
   -> 'a run_result
