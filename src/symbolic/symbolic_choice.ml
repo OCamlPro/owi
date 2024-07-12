@@ -8,55 +8,58 @@ module type S = sig
       and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch.
       Using functions defined here should be foolproof.
     *)
-  type ('a, 's) t
 
-  val return : 'a -> ('a, 's) t
+  type thread
 
-  val bind : ('a, 's) t -> ('a -> ('b, 's) t) -> ('b, 's) t
+  type 'a t
 
-  val ( let* ) : ('a, 's) t -> ('a -> ('b, 's) t) -> ('b, 's) t
+  val return : 'a -> 'a t
 
-  val map : ('a, 's) t -> ('a -> 'b) -> ('b, 's) t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
 
-  val ( let+ ) : ('a, 's) t -> ('a -> 'b) -> ('b, 's) t
+  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
-  val assertion_fail : Smtml.Expr.t -> Smtml.Model.t -> ('a, 's) t
+  val map : 'a t -> ('a -> 'b) -> 'b t
 
-  val stop : ('a, 's) t
+  val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
-  val trap : Trap.t -> ('a, 's) t
+  val assertion_fail : Smtml.Expr.t -> Smtml.Model.t -> 'a t
 
-  val thread : ('s, 's) t
+  val stop : 'a t
 
-  val yield : (unit, 's) t
+  val trap : Trap.t -> 'a t
 
-  val solver : (Solver.t, 's) t
+  val thread : thread t
 
-  val with_thread : ('s -> 'a) -> ('a, 's) t
+  val yield : unit t
 
-  val set_thread : 's -> (unit, 's) t
+  val solver : Solver.t t
 
-  val modify_thread : ('s -> 's) -> (unit, 's) t
+  val with_thread : (thread -> 'a) -> 'a t
+
+  val set_thread : thread -> unit t
+
+  val modify_thread : (thread -> thread) -> unit t
 
   (*
        Indicates a possible choice between two values. Thread duplication
        is already handled by choose and should not be done before by the caller.
     *)
-  val choose : ('a, 's) t -> ('a, 's) t -> ('a, 's) t
+  val choose : 'a t -> 'a t -> 'a t
 
   type 'a eval =
     | EVal of 'a
     | ETrap of Trap.t * Smtml.Model.t
     | EAssert of Smtml.Expr.t * Smtml.Model.t
 
-  type ('a, 's) run_result = ('a eval * 's) Seq.t
+  type 'a run_result = ('a eval * thread) Seq.t
 
   val run :
        workers:int
     -> Smtml.Solver_dispatcher.solver_type
-    -> ('a, 's) t
-    -> 's
-    -> callback:('a eval * 's -> unit)
+    -> 'a t
+    -> thread
+    -> callback:('a eval * thread -> unit)
     -> callback_init:(unit -> unit)
     -> callback_end:(unit -> unit)
     -> unit Domain.t array
@@ -217,6 +220,14 @@ module CoreImpl = struct
     let with_state f = St (fun st -> M.return (f st))
 
     let modify_state f = St (fun st -> M.return ((), f st))
+
+    let project_state (project_and_backup : 'st1 -> 'st2 * 'backup) restore
+      other =
+      St
+        (fun st ->
+          let proj, backup = project_and_backup st in
+          M.bind (run other proj) (fun (res, new_state) ->
+              M.return (res, restore backup new_state) ) )
   end
 
   module Eval = struct
@@ -261,21 +272,24 @@ module CoreImpl = struct
     let ( let+ ) = map
   end
 
+  (*  *)
   module Make (Thread : Thread.S) = struct
     include Eval
 
-    (* type 'a t = ('a, Thread.t) Eval.t *)
+    type 'a t = ('a, Thread.t) Eval.t
 
     (*
        Here we define functions to seamlessly
        operate on the three monads layers
     *)
 
-    let lift_schedulable (v : ('a, _) Schedulable.t) : ('a, 's) t =
-      let v : ('a, 's) State.t = State.lift v in
+    let lift_schedulable (v : ('a, _) Schedulable.t) : 'a t =
+      let v = State.lift v in
       lift v
 
-    let with_thread f = lift (State.with_state (fun st -> (f st, st)))
+    let with_thread (f : Thread.t -> 'a) : 'a t =
+      let x = State.with_state (fun st -> (f st, st)) in
+      lift x
 
     let thread = with_thread Fun.id
 
