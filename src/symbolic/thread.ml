@@ -2,52 +2,89 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t =
-  { symbols : int
-  ; symbol_set : Smtml.Symbol.t list
-  ; pc : Symbolic_value.vbool list
-  ; memories : Symbolic_memory.collection
-  ; tables : Symbolic_table.collection
-  ; globals : Symbolic_global.collection
-      (** Breadcrumbs represent the list of choices that were made so far. They
-          identify one given symbolic execution trace. *)
-  ; breadcrumbs : int32 list
-  }
+module type S = sig
+  type t
 
-let symbols t = t.symbols
+  type memories
 
-let pc t = t.pc
+  val pc : t -> Symbolic_value.vbool list
 
-let memories t = t.memories
+  val memories : t -> memories
 
-let tables t = t.tables
+  val tables : t -> Symbolic_table.collection
 
-let globals t = t.globals
+  val globals : t -> Symbolic_global.collection
 
-let breadcrumbs t = t.breadcrumbs
+  val breadcrumbs : t -> int32 list
 
-let symbols_set t = t.symbol_set
+  val symbols_set : t -> Smtml.Symbol.t list
 
-let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
+  val symbols : t -> int
 
-let add_pc t c = { t with pc = c :: t.pc }
+  val create : unit -> t
 
-let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
+  val clone : t -> t
 
-let incr_symbols t = { t with symbols = succ t.symbols }
+  val add_pc : t -> Symbolic_value.vbool -> t
 
-let create () =
-  { symbols = 0
-  ; symbol_set = []
-  ; pc = []
-  ; memories = Symbolic_memory.init ()
-  ; tables = Symbolic_table.init ()
-  ; globals = Symbolic_global.init ()
-  ; breadcrumbs = []
-  }
+  val add_breadcrumb : t -> int32 -> t
 
-let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs } =
-  let memories = Symbolic_memory.clone memories in
-  let tables = Symbolic_table.clone tables in
-  let globals = Symbolic_global.clone globals in
-  { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  val add_symbol : t -> Smtml.Symbol.t -> t
+
+  val incr_symbols : t -> t
+end
+
+module Make (M : Symbolic_memory_intf.S) = struct
+  type memories = M.collection
+
+  type t =
+    { symbols : int
+    ; symbol_set : Smtml.Symbol.t list
+    ; pc : Symbolic_value.vbool list
+    ; memories : memories
+    ; tables : Symbolic_table.collection
+    ; globals : Symbolic_global.collection
+        (** Breadcrumbs represent the list of choices that were made so far.
+            They identify one given symbolic execution trace. *)
+    ; breadcrumbs : int32 list
+    }
+
+  let symbols t = t.symbols
+
+  let pc t = t.pc
+
+  let memories t = t.memories
+
+  let tables t = t.tables
+
+  let globals t = t.globals
+
+  let breadcrumbs t = t.breadcrumbs
+
+  let symbols_set t = t.symbol_set
+
+  let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
+
+  let add_pc t c = { t with pc = c :: t.pc }
+
+  let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
+
+  let incr_symbols t = { t with symbols = succ t.symbols }
+
+  let create () =
+    { symbols = 0
+    ; symbol_set = []
+    ; pc = []
+    ; memories = M.init ()
+    ; tables = Symbolic_table.init ()
+    ; globals = Symbolic_global.init ()
+    ; breadcrumbs = []
+    }
+
+  let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+      =
+    let memories = M.clone memories in
+    let tables = Symbolic_table.clone tables in
+    let globals = Symbolic_global.clone globals in
+    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+end

@@ -4,7 +4,7 @@
 
 open Syntax
 module Expr = Smtml.Expr
-module Choice = Symbolic.P.Choice
+module Choice = Symbolic_choice_with_memory
 
 let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
@@ -46,14 +46,18 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
-  let thread : Thread.t = Thread.create () in
+  let thread = Thread_with_memory.create () in
   let res_queue = Wq.init () in
-  let callback = function
-    | Symbolic_choice.EVal (Ok ()), _ -> ()
+  (* Hackity hack *)
+  let path_counter = ref 0 in
+  let callback v =
+    incr path_counter;
+    match v with
+    | Symbolic_choice_with_memory.EVal (Ok ()), _ -> ()
     | v -> Wq.push v res_queue
   in
   let join_handles =
-    Symbolic_choice.run ~workers solver result thread ~callback
+    Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -> Wq.make_pledge res_queue)
       ~callback_end:(fun () -> Wq.end_pledge res_queue)
   in
@@ -74,7 +78,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     | Seq.Nil -> Ok count_acc
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
-        let open Symbolic_choice in
+        let open Symbolic_choice_with_memory in
         match result with
         | EAssert (assertion, model) ->
           print_bug (`EAssert (assertion, model));
@@ -100,7 +104,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     if deterministic_result_order then
       results
       |> Seq.map (function (_, thread) as x ->
-           (x, List.rev @@ Thread.breadcrumbs thread) )
+           (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
       |> List.of_seq
       |> List.sort (fun (_, bc1) (_, bc2) ->
              List.compare Prelude.Int32.compare bc1 bc2 )
@@ -108,6 +112,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     else results
   in
   let* count = print_and_count_failures 0 results in
+  Format.pp_std "completed paths: %d@." !path_counter;
   if count > 0 then Error (`Found_bug count)
   else begin
     Fmt.pr "All OK";

@@ -82,7 +82,7 @@ module Owi_symbolic : INTERPRET = struct
     let regular = Symbolic.convert_module_to_run_minimalist regular in
     timeout_call_run (fun () ->
         let c = Interpret.SymbolicM.modul link_state.envs regular in
-        let init_thread : Thread.t = Thread.create () in
+        let init_thread = Thread_with_memory.create () in
         let res, _ =
           Symbolic_choice_minimalist.run ~workers:dummy_workers_count
             Smtml.Solver_dispatcher.Z3_solver c init_thread
