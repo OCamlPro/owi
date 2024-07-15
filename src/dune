@@ -66,7 +66,6 @@
   symbolic_choice_without_memory
   symbolic_global
   symbolic_memory
-  symbolic_memory_intf
   symbolic_table
   symbolic_value
   symbolic_wasm_ffi
@@ -78,6 +77,7 @@
   text_lexer
   text_parser
   thread
+  thread_intf
   thread_with_memory
   thread_without_memory
   tracing

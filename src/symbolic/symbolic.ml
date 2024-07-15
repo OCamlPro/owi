@@ -2,45 +2,14 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module type Thread = sig
-  type t
-
-  type memories = Symbolic_memory.collection
-
-  val memories : t -> memories
-
-  val tables : t -> Symbolic_table.collection
-
-  val globals : t -> Symbolic_global.collection
-
-  val pc : t -> Symbolic_value.vbool list
-end
-
 module MakeP
-    (Thread : Thread)
+    (Thread : Thread.S_with_memory)
     (Choice : Choice_intf.Complete
                 with module V := Symbolic_value
                  and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
-
-  module Choice = struct
-    include Choice
-
-    let lift_without_memory (_v : 'a Symbolic_choice_without_memory.t) :
-      'a Choice.t =
-      Choice.with_thread (fun _t ->
-          (* let thread_without_memory = (1* translate _t *1) in *)
-          (* let results = *)
-          (*   Symbolic_choice_without_memory.run *)
-          (*     ~workers:1 *)
-          (*     v *)
-          (*     thread_without_memory *)
-          (*     ~callback *)
-          (*     ... *)
-          Obj.magic 0 )
-  end
-
+  module Choice = Choice
   module Extern_func =
     Concrete_value.Make_extern_func (Value) (Choice) (Symbolic_memory)
   module Global = Symbolic_global
@@ -102,7 +71,6 @@ struct
 
     let with_concrete (m : t) a f : 'a Choice.t =
       let open Choice in
-      let* _ = Choice.lift_without_memory @@ address () in
       let* addr = concretise a in
       let+ ptr = check_within_bounds m addr in
       f m ptr

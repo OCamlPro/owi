@@ -1,49 +1,18 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
+include Thread_intf
 
-module type S = sig
-  type t
-
-  type memories
-
-  val pc : t -> Symbolic_value.vbool list
-
-  val memories : t -> memories
-
-  val tables : t -> Symbolic_table.collection
-
-  val globals : t -> Symbolic_global.collection
-
-  val breadcrumbs : t -> int32 list
-
-  val symbols_set : t -> Smtml.Symbol.t list
-
-  val symbols : t -> int
-
-  val create : unit -> t
-
-  val clone : t -> t
-
-  val add_pc : t -> Symbolic_value.vbool -> t
-
-  val add_breadcrumb : t -> int32 -> t
-
-  val add_symbol : t -> Smtml.Symbol.t -> t
-
-  val incr_symbols : t -> t
-end
-
-module Make (M : Symbolic_memory_intf.S) = struct
-  type memories = M.collection
-
-  module Memory : Symbolic_memory_intf.S with type collection = memories = M
+module Make (Symbolic_memory : M) :
+  S with type Memory.collection = Symbolic_memory.collection = struct
+  module Memory : M with type collection = Symbolic_memory.collection =
+    Symbolic_memory
 
   type t =
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
     ; pc : Symbolic_value.vbool list
-    ; memories : memories
+    ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection
         (** Breadcrumbs represent the list of choices that were made so far.
@@ -51,7 +20,22 @@ module Make (M : Symbolic_memory_intf.S) = struct
     ; breadcrumbs : int32 list
     }
 
+  let create symbols symbol_set pc memories tables globals breadcrumbs =
+    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+
+  let init () =
+    let symbols = 0 in
+    let symbol_set = [] in
+    let pc = [] in
+    let memories = Memory.init () in
+    let tables = Symbolic_table.init () in
+    let globals = Symbolic_global.init () in
+    let breadcrumbs = [] in
+    create symbols symbol_set pc memories tables globals breadcrumbs
+
   let symbols t = t.symbols
+
+  let symbols_set t = t.symbol_set
 
   let pc t = t.pc
 
@@ -63,8 +47,6 @@ module Make (M : Symbolic_memory_intf.S) = struct
 
   let breadcrumbs t = t.breadcrumbs
 
-  let symbols_set t = t.symbol_set
-
   let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
 
   let add_pc t c = { t with pc = c :: t.pc }
@@ -73,19 +55,9 @@ module Make (M : Symbolic_memory_intf.S) = struct
 
   let incr_symbols t = { t with symbols = succ t.symbols }
 
-  let create () =
-    { symbols = 0
-    ; symbol_set = []
-    ; pc = []
-    ; memories = M.init ()
-    ; tables = Symbolic_table.init ()
-    ; globals = Symbolic_global.init ()
-    ; breadcrumbs = []
-    }
-
   let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
       =
-    let memories = M.clone memories in
+    let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
     { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }

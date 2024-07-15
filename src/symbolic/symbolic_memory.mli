@@ -6,8 +6,6 @@ type t
 
 type collection
 
-val address : unit -> Smtml.Expr.t Symbolic_choice_without_memory.t
-
 val init : unit -> collection
 
 val clone : collection -> collection
