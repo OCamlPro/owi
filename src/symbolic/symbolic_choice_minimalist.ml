@@ -66,6 +66,8 @@ module Make (Thread : Thread.S) = struct
   let add_pc (_vb : vbool) = return ()
 
   let run ~workers:_ solver t thread = run t thread (Solver.fresh solver ())
+
+  let lift_mem _ = assert false
 end
 
 include Make (Thread_with_memory)
