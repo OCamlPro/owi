@@ -37,6 +37,8 @@ end
 module Make (M : Symbolic_memory_intf.S) = struct
   type memories = M.collection
 
+  module Memory : Symbolic_memory_intf.S with type collection = memories = M
+
   type t =
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
