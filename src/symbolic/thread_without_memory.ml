@@ -1,7 +1,7 @@
 include Thread.Make (struct
-  type collection = unit
+  type collection = bool
 
-  let init () = ()
+  let init () = false
 
-  let clone () = ()
+  let clone _ = true
 end)
