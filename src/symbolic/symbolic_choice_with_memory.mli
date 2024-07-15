@@ -9,8 +9,7 @@ type 'a eval = private
 
 include
   Choice_intf.Complete
-    with type thread := Thread.t
-     and type 'a run_result = ('a eval * Thread.t) Seq.t
+    with type thread := Thread_with_memory.t
      and module V := Symbolic_value
 
 val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
@@ -19,8 +18,8 @@ val run :
      workers:int
   -> Smtml.Solver_dispatcher.solver_type
   -> 'a t
-  -> Thread.t
-  -> callback:('a eval * Thread.t -> unit)
+  -> Thread_with_memory.t
+  -> callback:('a eval * Thread_with_memory.t -> unit)
   -> callback_init:(unit -> unit)
   -> callback_end:(unit -> unit)
   -> unit Domain.t array

@@ -3,4 +3,4 @@
 (* Written by the Owi programmers *)
 
 (** @inline *)
-include Thread.S_without_memory
+include Thread.S with type Memory.collection = bool

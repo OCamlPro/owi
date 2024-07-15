@@ -225,10 +225,10 @@ module CoreImpl = struct
       other =
       St
         (fun st ->
-          let ( let* ) = M.( let* ) in
+          let ( let+ ) = M.( let+ ) in
           let proj, backup = project_and_backup st in
-          let* res, new_state = run other proj in
-          M.return (res, restore backup new_state) )
+          let+ res, new_state = run other proj in
+          (res, restore backup new_state) )
   end
 
   module Eval = struct
@@ -274,7 +274,9 @@ module CoreImpl = struct
   end
 
   (*  *)
-  module Make (Thread : Thread.S) = struct
+  module Make (Thread : Thread.S) :
+    S with type thread := Thread.t and type 'a t = ('a, Thread.t) Eval.t =
+  struct
     include Eval
 
     type 'a t = ('a, Thread.t) Eval.t
@@ -343,7 +345,6 @@ end
     We can now use CoreImpl only through its exposed signature which
     maintains all invariants.
   *)
-(* module CoreImpl' : S = CoreImpl *)
 
 module Make (Thread : Thread.S) = struct
   include CoreImpl.Make (Thread)

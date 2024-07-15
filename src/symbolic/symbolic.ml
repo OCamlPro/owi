@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 module MakeP
-    (Thread : Thread.S_with_memory)
+    (Thread : Thread.S with type Memory.collection = Symbolic_memory.collection)
     (Choice : Choice_intf.Complete
                 with module V := Symbolic_value
                  and type thread := Thread.t) =

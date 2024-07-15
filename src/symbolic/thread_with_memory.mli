@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 (** @inline *)
-include Thread.S_with_memory
+include Thread.S with type Memory.collection = Symbolic_memory.collection
 
 val project : t -> Thread_without_memory.t * Memory.collection
 
