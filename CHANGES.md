@@ -1,5 +1,6 @@
 ## unreleased
 
+- parameterize the `Thread` module on the symbolic memory and the `Choice_monad` module on a Thread
 - adds a `owi_char` function to create char symbolic value
 - adds a `Mem` argument to external function to allow direct manipulation of the memory.
 - support other solvers through the `--solver` option (Z3, Colibri2, Bitwuzla and CVC5)
