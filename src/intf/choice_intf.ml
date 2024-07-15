@@ -40,4 +40,6 @@ module type Complete = sig
   val thread : thread t
 
   val add_pc : V.vbool -> unit t
+
+  val lift_mem : 'a Symbolic_choice_without_memory.t -> 'a t
 end

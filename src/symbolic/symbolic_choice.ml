@@ -225,9 +225,10 @@ module CoreImpl = struct
       other =
       St
         (fun st ->
+          let ( let* ) = M.( let* ) in
           let proj, backup = project_and_backup st in
-          M.bind (run other proj) (fun (res, new_state) ->
-              M.return (res, restore backup new_state) ) )
+          let* res, new_state = run other proj in
+          M.return (res, restore backup new_state) )
   end
 
   module Eval = struct
