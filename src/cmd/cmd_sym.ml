@@ -46,12 +46,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
-  let thread = Thread_with_memory.create () in
+  let thread = Thread_with_memory.init () in
   let res_queue = Wq.init () in
-  (* Hackity hack *)
-  let path_counter = ref 0 in
   let callback v =
-    incr path_counter;
     match v with
     | Symbolic_choice_with_memory.EVal (Ok ()), _ -> ()
     | v -> Wq.push v res_queue
