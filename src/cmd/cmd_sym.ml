@@ -109,7 +109,6 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     else results
   in
   let* count = print_and_count_failures 0 results in
-  Format.pp_std "completed paths: %d@." !path_counter;
   if count > 0 then Error (`Found_bug count)
   else begin
     Fmt.pr "All OK";

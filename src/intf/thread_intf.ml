@@ -52,19 +52,10 @@ module type S = sig
   val incr_symbols : t -> t
 end
 
-module type S_with_memory =
-  S with type Memory.collection = Symbolic_memory.collection
-
-module type S_without_memory = S with type Memory.collection = bool
-
 module type Intf = sig
   module type M = M
 
   module type S = S
-
-  module type S_with_memory = S_with_memory
-
-  module type S_without_memory = S_without_memory
 
   module Make (Symbolic_memory : M) :
     S with type Memory.collection = Symbolic_memory.collection
