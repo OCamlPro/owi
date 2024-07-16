@@ -33,6 +33,7 @@ depends: [
   "uutf"
   "xmlm"
   "processor" {>= "0.2"}
+  "frama-c"
   "odoc" {with-doc}
   "mdx" {with-test & >= "2.1"}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
