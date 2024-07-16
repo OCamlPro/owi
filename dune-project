@@ -56,6 +56,7 @@
   uutf
   xmlm
   (processor (>= 0.2))
+  frama-c
   ;; doc
   (odoc :with-doc)
   ;; test
