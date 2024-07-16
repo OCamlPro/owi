@@ -274,6 +274,100 @@ Reached problem!
 [13]
 ```
 
+## Combining symbolic execution with runtime assertion checking (RAC)
+
+Given the following function `is_dividable` wrongly annotated by E-ACSL specification language, where `requires` specifies the pre-condition of the function, `assumes` specifies the behavior condition, and `ensures` specifies the post-condition of the function for each behavior.
+
+```c
+/*@ requires y != 0;
+    behavior yes:
+      assumes x % y == 0;
+      ensures \result == 1;
+    behavior no:
+      assumes x % y != 0;
+      ensures \result == 1; */
+int is_dividable(int x, int y) {
+  return x % y == 0;
+}
+```
+
+The E-ACSL plugin of Frama-C will output a monitored version of the code against the formal E-ACSL specification, whose execution will be aborted if any specified property is violated at runtime.
+
+Generally, the function is called with concrete values, which limits the capability for detecting errors. But we can also call this function with owi symbols, the automatically generated assertions will then be called upon symbolic values:
+
+<!-- $MDX file=integer_dividable.c -->
+```c
+#include <owi.h>
+
+/*@ requires y != 0;
+    behavior yes:
+      assumes x % y == 0;
+      ensures \result == 1;
+    behavior no:
+      assumes x % y != 0;
+      ensures \result == 1; */
+int is_dividable(int x, int y) {
+  return x % y == 0;
+}
+
+int main(void) {
+  int x = owi_i32();
+  int y = owi_i32();
+
+  owi_assume(y != 0);
+
+  is_dividable(x, y);
+  return 0;
+}
+```
+
+```sh
+$ owi c --e-acsl ./integer_dividable.c -w1
+...
+Model:
+  (model
+    (symbol_0 (i32 1043398666))
+    (symbol_1 (i32 387481605)))
+Reached problem!
+[13]
+```
+
+The result indicates that our annotation is incorrect with a model where the two symbols have different values, that is the `no` behavior.
+
+If we correct the `ensures` clause and recall the function:
+
+<!-- $MDX file=integer_dividable2.c -->
+```c
+#include <owi.h>
+
+/*@ requires y != 0;
+    behavior yes:
+      assumes x % y == 0;
+      ensures \result == 1;
+    behavior no:
+      assumes x % y != 0;
+      ensures \result == 0; */
+int is_dividable(int x, int y) {
+  return x % y == 0;
+}
+
+int main(void) {
+  int x = owi_i32();
+  int y = owi_i32();
+
+  owi_assume(y != 0);
+
+  is_dividable(x, y);
+  return 0;
+}
+```
+
+```sh
+$ owi c --e-acsl ./integer_dividable2.c -w1
+All OK
+```
+
+The result `All OK` shows that our function annotation is correct.
 
 ## Man page
 
@@ -298,7 +392,9 @@ OPTIONS
            implies --no-stop-at-failure.
 
        --e-acsl
-           e-acsl mode
+           e-acsl mode, refer to
+           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
+           Frama-C's current language feature implementations
 
        --fail-on-assertion-only
            ignore traps and only report assertion violations
