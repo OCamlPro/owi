@@ -33,9 +33,9 @@ depends: [
   "uutf"
   "xmlm"
   "processor" {>= "0.2"}
-  "frama-c"
   "odoc" {with-doc}
   "mdx" {with-test & >= "2.1"}
+  "frama-c" {with-test}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
   "ocb" {>= "0.1" & with-dev-setup}
   "crunch" {with-dev-setup}

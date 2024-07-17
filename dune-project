@@ -56,7 +56,6 @@
   uutf
   xmlm
   (processor (>= 0.2))
-  frama-c
   ;; doc
   (odoc :with-doc)
   ;; test
@@ -64,6 +63,7 @@
    (and
     :with-test
     (>= 2.1)))
+  (frama-c :with-test)
   ;; dev
   (bisect_ppx
    (and
