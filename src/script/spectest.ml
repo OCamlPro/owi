@@ -207,4 +207,5 @@ let m =
             ; desc = Export_global (Some (Text "global_f64"))
             }
         ]
+    ; annots = []
     }

@@ -264,5 +264,6 @@ let modul
       fields
   in
   let fields = imported @ locals in
+  let annots = [] in
 
-  { Text.id; fields }
+  { Text.id; fields; annots }
