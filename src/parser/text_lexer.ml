@@ -120,6 +120,9 @@ let bad_id = [%sedlex.regexp? id, Plus name]
 
 let bad_num = [%sedlex.regexp? num, Plus id]
 
+let annot_atom =
+  [%sedlex.regexp? Plus (id_char | name) | ',' | ';' | '[' | ']' | '{' | '}']
+
 let keywords =
   let tbl = Hashtbl.create 512 in
   Array.iter
@@ -433,12 +436,31 @@ let rec token buf =
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator with Not_found -> unknown_operator buf
   end
+  (* comment *)
   | ";;" ->
     single_comment buf;
     token buf
   | "(;" ->
     comment buf;
     token buf
+  (* custom annotation *)
+  | "(@", name ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 3 (String.length annotid - 4) in
+    let annotid = mk_string buf annotid in
+    if annotid = "" then Log.err "empty annotation id"
+    else
+      let items = annot buf in
+      Annot.(record_annot { annotid; items });
+      token buf
+  | "(@", Plus id_char ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 2 (String.length annotid - 2) in
+    let annotid = mk_string buf annotid in
+    let items = annot buf in
+    Annot.(record_annot { annotid; items });
+    token buf
+  | "(@" -> Log.err "empty annotation id"
   (* 1 *)
   | "(" -> LPAR
   | ")" -> RPAR
@@ -474,5 +496,57 @@ and single_comment buf =
   | eof -> Log.err "eof in single line comment"
   | any -> single_comment buf
   | _ -> assert false
+
+and annot buf =
+  match%sedlex buf with
+  | Plus any_blank -> annot buf
+  (* comment *)
+  | ";;" ->
+    single_comment buf;
+    annot buf
+  | "(;" ->
+    comment buf;
+    annot buf
+  (* custom annotation *)
+  | "(@", name ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 3 (String.length annotid - 4) in
+    let annotid = mk_string buf annotid in
+    if annotid = "" then Log.err "empty annotation id"
+    else
+      let items = annot buf in
+      Annot.Annot { annotid; items } :: annot buf
+  | "(@", Plus id_char ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 2 (String.length annotid - 2) in
+    let annotid = mk_string buf annotid in
+    let items = annot buf in
+    Annot.Annot { annotid; items } :: annot buf
+  (* 1 *)
+  | "(" ->
+    let items = annot buf in
+    Annot.Parens items :: annot buf
+  | ")" -> []
+  (* other *)
+  | int ->
+    let i = Utf8.lexeme buf in
+    Annot.Int i :: annot buf
+  | float ->
+    let f = Utf8.lexeme buf in
+    Annot.Float f :: annot buf
+  | id ->
+    let id = Utf8.lexeme buf in
+    let id = String.sub id 1 (String.length id - 1) in
+    Annot.Id id :: annot buf
+  | name ->
+    let name = Utf8.lexeme buf in
+    let name = String.sub name 1 (String.length name - 2) in
+    let name = mk_string buf name in
+    Annot.String name :: annot buf
+  | eof -> Log.err "eof in annotation"
+  | annot_atom ->
+    let annot_atom = Utf8.lexeme buf in
+    Annot.Atom annot_atom :: annot buf
+  | _ -> unexpected_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

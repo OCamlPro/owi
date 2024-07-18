@@ -3,6 +3,7 @@
 (library
  (public_name owi)
  (modules
+  annot
   assigned
   binary
   binary_encoder
