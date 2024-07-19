@@ -12,11 +12,7 @@ and item =
   | Parens of item list
   | Annot of annot
 
-module NameMap = Map.Make (struct
-  type t = string
-
-  let compare = compare
-end)
+module NameMap = Map.Make (String)
 
 let annot_recorder : annot list NameMap.t ref = ref NameMap.empty
 
