@@ -12,6 +12,8 @@ and item =
   | Parens of item list
   | Annot of annot
 
+val pp_annot : Format.formatter -> annot -> unit
+
 val record_annot : annot -> unit
 
 val get_annots : ?name:string -> unit -> annot list
