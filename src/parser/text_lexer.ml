@@ -448,7 +448,7 @@ let rec token buf =
     let annotid = Utf8.lexeme buf in
     let annotid = String.sub annotid 3 (String.length annotid - 4) in
     let annotid = mk_string buf annotid in
-    if annotid = "" then Log.err "empty annotation id"
+    if String.equal "" annotid then Log.err "empty annotation id"
     else
       let items = annot buf in
       Annot.(record_annot { annotid; items });
@@ -512,7 +512,7 @@ and annot buf =
     let annotid = Utf8.lexeme buf in
     let annotid = String.sub annotid 3 (String.length annotid - 4) in
     let annotid = mk_string buf annotid in
-    if annotid = "" then Log.err "empty annotation id"
+    if String.equal "" annotid then Log.err "empty annotation id"
     else
       let items = annot buf in
       Annot.Annot { annotid; items } :: annot buf
