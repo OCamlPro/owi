@@ -1,7 +1,17 @@
 #include <owi.h>
 
-_Bool __VERIFIER_nondet_bool(void) {
+inline __attribute__((always_inline)) int or_(int a, int b) {
+  __asm__ __volatile__("local.get 0;"
+                       "i32.const 0;"
+                       "i32.ne;"
+                       "local.get 1;"
+                       "i32.const 0;"
+                       "i32.ne;"
+                       "i32.or;"
+                       "return;");
+}
 
+_Bool __VERIFIER_nondet_bool(void) {
   _Bool var = owi_i32();
   owi_assume(or_(var == 0, var == 1));
   return var;

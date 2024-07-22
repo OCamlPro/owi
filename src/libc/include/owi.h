@@ -29,8 +29,4 @@ owi_abort(void);
 __attribute__((import_module("summaries"))) __attribute__((import_name("exit"))) void
 owi_exit(int);
 
-int and_(int, int);
-
-int or_(int, int);
-
 #endif
