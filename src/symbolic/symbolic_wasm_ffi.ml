@@ -39,11 +39,6 @@ module M :
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  let symbol_bool () =
-    let open Choice in
-    let+ sym = symbol Ty_bool () in
-    Expr.make (Cvtop (Ty_bool, Smtml.Ty.OfBool, sym))
-
   open Expr
 
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false
@@ -96,9 +91,6 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-      )
-    ; ( "bool_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Symbolic.P.Extern_func.Extern_func
