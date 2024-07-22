@@ -1,6 +1,11 @@
 #include <owi.h>
 
-_Bool __VERIFIER_nondet_bool(void) { return owi_bool(); }
+_Bool __VERIFIER_nondet_bool(void) {
+
+  _Bool var = owi_i32();
+  owi_assume(or_(var == 0, var == 1));
+  return var;
+}
 
 char __VERIFIER_nondet_char(void) { return (char)owi_i32(); }
 
