@@ -1,5 +1,5 @@
   $ owi c --e-acsl ./case.c
-  Assert failure: false
+  Assert failure: (bool.ne symbol_0 (i32 2))
   Model:
     (model
       (symbol_0 (i32 2)))
