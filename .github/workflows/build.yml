@@ -48,6 +48,9 @@ jobs:
           allow-prerelease-opam: false
       - name: depext
         run: |
+          if [ "$RUNNER_OS" == "linux" ]; then
+            apt update
+          fi
           opam install . --depext-only --with-test --with-doc
       - name: setup
         if: steps.cache-opam.outputs.cache-hit != 'true'
