@@ -154,12 +154,12 @@ let m =
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
-            ; init = [ F32_const Float32.zero ]
+            ; init = [ F32_const (Float32.of_float 666.6) ]
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
-            ; init = [ F64_const Float64.zero ]
+            ; init = [ F64_const (Float64.of_float 666.6) ]
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
