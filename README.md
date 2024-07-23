@@ -87,8 +87,8 @@ We only list proposals that reached phase 3 at least.
 | [Typed Function References]                      |  ✔️       |
 | [Extended Constant Expressions]                  |  ✔️       |
 | [Garbage collection]                             |  Ongoing |
+| [Custom Annotation Syntax in the Text Format]    |  Ongoing |
 | [Multiple memories]                              |  ❌      |
-| [Custom Annotation Syntax in the Text Format]    |  ❌      |
 | [Memory64]                                       |  ❌      |
 | [Exception handling]                             |  ❌      |
 | [Branch Hinting]                                 |  ❌      |
