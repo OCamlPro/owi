@@ -39,7 +39,9 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     let flags1 =
       let includes =
         String.concat " "
-          (List.map (fun libpath -> "-I" ^ Fpath.to_string libpath) includes)
+          (List.map
+             (fun libpath -> Fmt.str "-I%s" (Fpath.to_string libpath))
+             includes )
       in
       let framac_verbosity_level = if debug then "2" else "0" in
       Cmd.(
@@ -60,21 +62,14 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     let outs =
       List.map
         (fun file ->
-          let ext = Fpath.get_ext ~multi:true file in
-          let file_without_ext = Fpath.rem_ext ~multi:true file in
-          let file_without_ext =
-            Fpath.to_string file_without_ext ^ "_instrumented"
-          in
-          let file = file_without_ext ^ ext in
-          Fpath.v file )
+          let file, ext = Fpath.split_ext file in
+          let file = Fpath.add_ext ".instrumented" file in
+          Fpath.add_ext ext file )
         files
     in
 
     let framac : Fpath.t -> Fpath.t -> Bos.Cmd.t =
-     fun file out ->
-      Cmd.(
-        framac_bin %% flags1 % Fpath.to_string file %% flags2
-        % Fpath.to_string out )
+     fun file out -> Cmd.(framac_bin %% flags1 % p file %% flags2 % p out)
     in
 
     let+ () =
