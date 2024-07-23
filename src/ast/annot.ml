@@ -1,4 +1,4 @@
-open Format
+open Fmt
 
 type annot =
   { annotid : string
@@ -21,17 +21,16 @@ module NameMap = Map.Make (String)
       - defining rules specific to each sort of annotations *)
 
 let rec pp_annot fmt annot =
-  pp fmt "(annot %a@\n  @[<b 2>%a@]@\n)" pp_string annot.annotid
-    (pp_list ~pp_sep:pp_space pp_item)
-    annot.items
+  pf fmt "(annot %a@\n  @[<b 2>%a@]@\n)" Fmt.string annot.annotid
+    (list ~sep:sp pp_item) annot.items
 
 and pp_item fmt = function
-  | Atom atom -> pp_string fmt atom
-  | String str -> pp_string fmt str
+  | Atom atom -> Fmt.string fmt atom
+  | String str -> Fmt.string fmt str
   | Id id -> Types.pp_id fmt id
-  | Int i -> pp_string fmt i
-  | Float f -> pp_string fmt f
-  | Parens items -> pp_list ~pp_sep:pp_space pp_item fmt items
+  | Int i -> Fmt.string fmt i
+  | Float f -> Fmt.string fmt f
+  | Parens items -> list ~sep:sp pp_item fmt items
   | Annot annot -> pp_annot fmt annot
 
 let annot_recorder : annot list NameMap.t ref = ref NameMap.empty

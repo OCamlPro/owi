@@ -1,3 +1,5 @@
+open Fmt
+
 type annot =
   { annotid : string
   ; items : item list
@@ -12,7 +14,7 @@ and item =
   | Parens of item list
   | Annot of annot
 
-val pp_annot : Format.formatter -> annot -> unit
+val pp_annot : formatter -> annot -> unit
 
 val record_annot : annot -> unit
 

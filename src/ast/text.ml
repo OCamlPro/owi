@@ -100,7 +100,7 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  pp fmt "%a(module%a@\n  @[<v>%a@]@\n)"
+  pf fmt "%a(module%a@\n  @[<v>%a@]@\n)"
     (list ~sep:pp_newline pp_annot)
     m.annots pp_id_opt m.id
     (list ~sep:pp_newline pp_module_field)
