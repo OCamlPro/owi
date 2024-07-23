@@ -43,3 +43,4 @@
   $ owi script --no-exhaustion passing/typecheck4.wast
   $ owi script --no-exhaustion passing/typecheckbis.wast
   $ owi script --no-exhaustion passing/typecheck.wast
+  $ owi script --no-exhaustion passing/quoted.wast

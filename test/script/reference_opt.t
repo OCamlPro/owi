@@ -12,8 +12,6 @@
   $ owi script --no-exhaustion --optimize reference/call_indirect.wast
   $ owi script --no-exhaustion --optimize reference/call.wast
   $ owi script --no-exhaustion --optimize reference/comments.wast
-  unexpected token "\"(func (export \"f1\") (result i32)\""
-  [40]
   $ owi script --no-exhaustion --optimize reference/const.wast
   $ owi script --no-exhaustion --optimize reference/conversions.wast
   $ owi script --no-exhaustion --optimize reference/custom.wast
