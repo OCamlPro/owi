@@ -49,7 +49,7 @@ let extern_m =
 
 let m =
   let open Text in
-  Text.Module
+  Text.Text_module
     { id = Some "spectest"
     ; fields =
         [ MImport

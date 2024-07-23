@@ -30,8 +30,6 @@
   $ owi script --no-exhaustion --optimize reference/fac.wast
   $ owi script --no-exhaustion --optimize reference/float_exprs.wast
   $ owi script --no-exhaustion --optimize reference/float_literals.wast
-  unbound name 4294967249
-  [38]
   $ owi script --no-exhaustion --optimize reference/float_memory.wast
   $ owi script --no-exhaustion --optimize reference/float_misc.wast
   $ owi script --no-exhaustion --optimize reference/forward.wast

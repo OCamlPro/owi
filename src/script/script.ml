@@ -152,12 +152,24 @@ let run ~no_exhaustion ~optimize script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_value.Func.extern_func Link.state) -> function
-      | Text.Module m ->
+      | Text.Text_module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug0 "*** module@\n";
         incr curr_module;
         let+ link_state =
           Compile.Text.until_interpret link_state ~unsafe ~optimize ~name:None m
+        in
+        Log.debug_on := debug_on;
+        link_state
+      | Text.Binary_module (id, m) ->
+        if !curr_module = 0 then Log.debug_on := false;
+        Log.debug0 "*** binary module@\n";
+        incr curr_module;
+        let* m = Parse.Binary.Module.from_string m in
+        let m = { m with id } in
+        let+ link_state =
+          Compile.Binary.until_interpret link_state ~unsafe ~optimize ~name:None
+            m
         in
         Log.debug_on := debug_on;
         link_state
@@ -182,7 +194,7 @@ let run ~no_exhaustion ~optimize script =
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
-          | Ok [ Module m ] ->
+          | Ok [ Text_module m ] ->
             let got = Compile.Text.until_binary ~unsafe m in
             check_error_result expected got
           | _ -> assert false
