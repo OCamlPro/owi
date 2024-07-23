@@ -1008,10 +1008,8 @@ let modul :=
   }
 
 let module_binary :=
-  | MODULE; id = ioption(id); BINARY; ~ = inline_module_inner; _ = list(NAME); {
-    (* TODO: handle fields_bin
-    let fields_bin = String.concat "" l in *)
-    { inline_module_inner with id }
+  | MODULE; id = ioption(id); BINARY; lines = list(NAME); {
+    id, String.concat "" lines
   }
 
 let literal_const ==
@@ -1079,8 +1077,11 @@ let action ==
   | GET; ~ = ioption(id); ~ = utf8_name; <Get>
 
 let cmd ==
-  | ~ = modul; <Module>
-  | ~ = par(module_binary); <Module>
+  | ~ = modul; <Text_module>
+  | bm = par(module_binary); {
+    let id, m = bm in
+    Binary_module (id, m)
+  }
   | ~ = par(assert_); <Assert>
   | ~ = par(register); <>
   | ~ = par(action); <Action>
@@ -1088,5 +1089,5 @@ let cmd ==
 let script :=
   | ~ = nonempty_list(cmd); EOF; <>
   | ~ = inline_module_inner; EOF; {
-    [ Module inline_module_inner ]
+    [ Text_module inline_module_inner ]
   }

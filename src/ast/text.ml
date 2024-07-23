@@ -178,13 +178,15 @@ type register = string * string option
 let pp_register fmt (s, _name) = pf fmt "(register %s)" s
 
 type cmd =
-  | Module of modul
+  | Binary_module of string option * string
+  | Text_module of modul
   | Assert of assertion
   | Register of string * string option
   | Action of action
 
 let pp_cmd fmt = function
-  | Module m -> pp_modul fmt m
+  | Binary_module (id, m) -> Fmt.pf fmt "(module %a %S)" Types.pp_id_opt id m
+  | Text_module m -> pp_modul fmt m
   | Assert a -> pp_assertion fmt a
   | Register (s, name) -> pp_register fmt (s, name)
   | Action _a -> pf fmt "<action>"
