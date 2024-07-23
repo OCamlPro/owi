@@ -54,10 +54,6 @@
   24
   24
   13
-  got:      f32.const 0
-  expected: (f32.const 666.599_975_585_937_5)
-  bad result
-  [3]
   $ owi script --no-exhaustion --optimize reference/inline-module.wast
   $ owi script --no-exhaustion --optimize reference/int_exprs.wast
   $ owi script --no-exhaustion --optimize reference/int_literals.wast
