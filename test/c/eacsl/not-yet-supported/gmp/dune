@@ -1,0 +1,6 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  explicit.c
+  implicit.c))
