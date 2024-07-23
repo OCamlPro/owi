@@ -56,24 +56,6 @@ int __e_acsl_contract_get_behavior_assumes(const __e_acsl_contract_t *c, size_t 
 int __e_acsl_contract_partial_count_behaviors(const __e_acsl_contract_t *c, size_t count, ...);
 int __e_acsl_contract_partial_count_all_behaviors(const __e_acsl_contract_t *c);
 
-/* Assertions */
-// struct eacsl_mpz_struct {
-//   int _mp_alloc;
-//   int _mp_size;
-//   unsigned long *_mp_d;
-// };
-
-// typedef struct eacsl_mpz_struct eacsl_mpz_struct;
-// typedef eacsl_mpz_struct(eacsl_mpz_t)[1];
-
-// struct eacsl_mpq_struct {
-//   eacsl_mpz_struct _mp_num;
-//   eacsl_mpz_struct _mp_den;
-// };
-
-// typedef struct eacsl_mpq_struct eacsl_mpq_struct;
-// typedef eacsl_mpq_struct(eacsl_mpq_t)[1];
-
 typedef enum __e_acsl_assert_data_type_t {
   /*! Integer data. */
   E_ACSL_INT = 0,
@@ -126,13 +108,6 @@ typedef union __e_acsl_assert_data_int_value_t {
   unsigned long value_ulong;
   long long value_llong;
   unsigned long long value_ullong;
-  // /* Store a pointer to `struct eacsl_mpz_struct` instead of a `mpz_t` value to
-  //    optimize the size of the union. With this optimization the size of the
-  //    union is `sizeof(unsigned long long)` whereas, without the optimization, it
-  //    is at least `sizeof(int) + sizeof(int) + sizeof(unsigned long *)`.
-  //    In return, we need to manually allocate the memory for
-  //    `struct eacsl_mpz_struct` before calling `__gmpz_init_set()`. */
-  // struct __e_acsl_mpz_struct *value_mpz;
 } __e_acsl_assert_data_int_value_t;
 
 typedef struct __e_acsl_assert_data_int_content_t {
@@ -152,21 +127,12 @@ typedef enum __e_acsl_assert_data_rkind_t {
   E_ACSL_RDOUBLE,
   /*! Floating point data of type long double. */
   E_ACSL_RLONGDOUBLE,
-  // /*! Rational data of type mpq_t. */
-  // E_ACSL_RMPQ,
 } __e_acsl_assert_data_rkind_t;
 
 typedef union __e_acsl_assert_data_real_value_t {
   float value_float;
   double value_double;
   long double value_ldouble;
-  // /* Store a pointer to `struct eacsl_mpq_struct` instead of a `mpq_t` value to
-  //    optimize the size of the union. With this optimization the size of the
-  //    union is `sizeof(unsigned long long)` whereas, without the optimization, it
-  //    is at least `2*sizeof(int) + 2*sizeof(int) + 2*sizeof(unsigned long *)`.
-  //    In return, we need to manually allocate the memory for
-  //    `struct eacsl_mpq_struct` before calling `__gmpq_init_set()`. */
-  // struct __e_acsl_mpq_struct *value_mpq;
 } __e_acsl_assert_data_real_value_t;
 
 typedef struct __e_acsl_assert_data_real_content_t {
@@ -249,16 +215,12 @@ void __e_acsl_assert_register_longlong(__e_acsl_assert_data_t *data, const char 
 void __e_acsl_assert_register_ulonglong(__e_acsl_assert_data_t *data,
                                      const char *name, int is_enum,
                                      unsigned long long value);
-// void __e_acsl_assert_register_mpz(__e_acsl_assert_data_t *data, const char *name,
-//                                int is_enum, const __e_acsl_mpz_t value);
 void __e_acsl_assert_register_float(__e_acsl_assert_data_t *data, const char *name,
                                  float value);
 void __e_acsl_assert_register_double(__e_acsl_assert_data_t *data, const char *name,
                                   double value);
 void __e_acsl_assert_register_longdouble(__e_acsl_assert_data_t *data,
                                       const char *name, long double value);
-// void __e_acsl_assert_register_mpq(__e_acsl_assert_data_t *data, const char *name,
-//                                const __e_acsl_mpq_t value);
 void __e_acsl_assert_register_ptr(__e_acsl_assert_data_t *data, const char *name,
                                void *ptr);
 void __e_acsl_assert_register_array(__e_acsl_assert_data_t *data, const char *name,

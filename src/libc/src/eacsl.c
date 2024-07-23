@@ -168,8 +168,6 @@ void __e_acsl_assert_register_longlong(__e_acsl_assert_data_t *data, const char 
 void __e_acsl_assert_register_ulonglong(__e_acsl_assert_data_t *data,
                                      const char *name, int is_enum,
                                      unsigned long long value) {}
-// void __e_acsl_assert_register_mpz(__e_acsl_assert_data_t *data, const char *name,
-//                                int is_enum, const __e_acsl_mpz_t value) {}
 void __e_acsl_assert_register_generic_real(__e_acsl_assert_data_t *data,
                                         const char *name,
                                         __e_acsl_assert_data_rkind_t kind,
@@ -180,8 +178,6 @@ void __e_acsl_assert_register_double(__e_acsl_assert_data_t *data, const char *n
                                   double value) {}
 void __e_acsl_assert_register_longdouble(__e_acsl_assert_data_t *data,
                                       const char *name, long double value) {}
-// void __e_acsl_assert_register_mpq(__e_acsl_assert_data_t *data, const char *name,
-//                                const __e_acsl_mpq_t value) {}
 void __e_acsl_assert_register_ptr(__e_acsl_assert_data_t *data, const char *name,
                                void *ptr) {}
 void __e_acsl_assert_register_array(__e_acsl_assert_data_t *data, const char *name,
