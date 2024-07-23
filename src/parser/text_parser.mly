@@ -1002,14 +1002,17 @@ let inline_module :=
 
 let modul :=
   | LPAR; MODULE; id = ioption(id); ~ = inline_module_inner; RPAR; {
-    (* TODO: handle fields_bin
-    let fields_bin = String.concat "" l in *)
     { inline_module_inner with id }
   }
 
 let module_binary :=
   | MODULE; id = ioption(id); BINARY; lines = list(NAME); {
     id, String.concat "" lines
+  }
+
+let module_quoted :=
+  | MODULE; QUOTE; lines = list(NAME); {
+    String.concat "" lines
   }
 
 let literal_const ==
@@ -1078,6 +1081,7 @@ let action ==
 
 let cmd ==
   | ~ = modul; <Text_module>
+  | ~ = par(module_quoted); <Quoted_module>
   | bm = par(module_binary); {
     let id, m = bm in
     Binary_module (id, m)

@@ -161,8 +161,15 @@ let run ~no_exhaustion ~optimize script =
         in
         Log.debug_on := debug_on;
         link_state
+      | Text.Quoted_module m ->
+        Log.debug0 "*** quoted module@\n";
+        incr curr_module;
+        let* m = Parse.Text.Inline_module.from_string m in
+        let+ link_state =
+          Compile.Text.until_interpret link_state ~unsafe ~optimize ~name:None m
+        in
+        link_state
       | Text.Binary_module (id, m) ->
-        if !curr_module = 0 then Log.debug_on := false;
         Log.debug0 "*** binary module@\n";
         incr curr_module;
         let* m = Parse.Binary.Module.from_string m in
@@ -171,7 +178,6 @@ let run ~no_exhaustion ~optimize script =
           Compile.Binary.until_interpret link_state ~unsafe ~optimize ~name:None
             m
         in
-        Log.debug_on := debug_on;
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug0 "*** assert_trap@\n";
