@@ -5,5 +5,8 @@
   concolic.c
   malloc_aligned.c
   main.c
+  bool.c
+  char.c
   exit.c
-  char.c))
+  main.c
+  malloc_aligned.c))

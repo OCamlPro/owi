@@ -24,6 +24,10 @@ module M :
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
 
+  let symbol_bool () =
+    Choice.with_new_symbol (Ty_bitv 1) (fun sym ->
+        Expr.cvtop (Ty_bitv 32) (Smtml.Ty.Zero_extend 31) (Expr.symbol sym) )
+
   let symbol_i8 () =
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
       Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
@@ -73,6 +77,9 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
+    ; ( "bool_symbol"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
