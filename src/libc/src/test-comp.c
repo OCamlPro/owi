@@ -1,17 +1,7 @@
 #include <owi.h>
 
-static __attribute__((naked,noinline,optnone)) _Bool or_(_Bool a, _Bool b) {
-  __asm__ __volatile__("local.get 0;"
-                       "local.get 1;"
-                       "i32.or;"
-                       "return;");
-}
-
 _Bool __VERIFIER_nondet_bool(void) {
-  const _Bool var = owi_i32();
-  const _Bool pc = or_(var == 0, var == 1);
-  owi_assume(pc);
-  return var;
+  return owi_bool();
 }
 
 char __VERIFIER_nondet_char(void) { return (char)owi_i32(); }
