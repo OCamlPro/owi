@@ -55,7 +55,7 @@
   (smtml (>= 0.2.0))
   uutf
   xmlm
-  (processor (>= 0.1))
+  (processor (>= 0.2))
   ;; doc
   (odoc :with-doc)
   ;; test
