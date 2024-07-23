@@ -50,7 +50,7 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
           ; "CERT:MSC:38=inactive"
           ; "-verbose"
           ; framac_verbosity_level
-          ; String.concat "" [ "-cpp-extra-args=\""; includes; "\"" ]
+          ; String.concat "" [ {|-cpp-extra-args="|}; includes; {|"|} ]
           ] )
     in
     let flags2 = Cmd.(of_list [ "-then-last"; "-print"; "-ocode" ]) in
