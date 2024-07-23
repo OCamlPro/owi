@@ -27,6 +27,10 @@ We also have [a fuzzer] that is able to generate random *valid* Wasm programs. F
 
 ```shell-session
 $ opam install owi
+# if you intend to use symbolic execution you must install one solver
+# you can choose any solver supported by smtml
+# z3, colibri2, bitwuzla-cxx or cvc5 for instance
+$ opam install z3
 ```
 
 If you don't have `opam`, you can install it following the [how to install opam] guide.
