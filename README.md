@@ -146,6 +146,8 @@ A few files have been taken from the WebAssembly reference interpreter. They are
 
 Some code has been taken from the `base` library from Jane Street. It is licensed under the MIT License and have a different copyright which is stated in the header of the files.
 
+Some code has been taken from the E-ACSL plugin of Frama-C. It is licensed under the GNU Lesser General Public License 2.1 and have a different copyright which is stated in the header of the files.
+
 ### Fundings
 
 This project was funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] programme. See [Owi project on NLnet].
