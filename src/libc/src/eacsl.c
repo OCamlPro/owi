@@ -1,3 +1,23 @@
+/******************************************************************************/
+/*                                                                            */
+/*  SPDX-License-Identifier: LGPL-2.1-or-later                                */
+/*                                                                            */
+/*  Copyright (C) 2012-2024                                                   */
+/*    CEA (Commissariat à l'énergie atomique et aux énergies                  */
+/*         alternatives)                                                      */
+/*                                                                            */
+/*  This file is originally from the Frama-C's E-ACSL plug-in available       */
+/*    at https://git.frama-c.com/pub/frama-c/-/tree/master/src/plugins/e-acsl */
+/*                                                                            */
+/*                                                                            */
+/*  SPDX-License-Identifier: AGPL-3.0-or-later                                */
+/*                                                                            */
+/*  Copyright © 2021-2024 OCamlPro                                            */
+/*                                                                            */
+/*  Modified by the Owi programmers                                           */
+/*                                                                            */
+/******************************************************************************/
+
 #include <eacsl.h>
 #include <stddef.h>
 #include <stdlib.h>
