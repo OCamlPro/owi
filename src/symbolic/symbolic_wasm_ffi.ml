@@ -31,6 +31,10 @@ module M :
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
         Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
 
+  let symbol_char () =
+    Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
+
   let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i64 () = Choice.with_new_symbol (Ty_bitv 64) Expr.symbol
@@ -79,6 +83,9 @@ let symbolic_extern_module =
   let functions =
     [ ( "i8_symbol"
       , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
+      )
+    ; ( "char_symbol"
+      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
       )
     ; ( "i32_symbol"
       , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)

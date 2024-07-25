@@ -19,6 +19,8 @@ module type S0 = sig
 
   val symbol_i8 : unit -> Value.int32 t
 
+  val symbol_char : unit -> Value.int32 t
+
   val symbol_i32 : unit -> Value.int32 t
 
   val symbol_i64 : unit -> Value.int64 t
