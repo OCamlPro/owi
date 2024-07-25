@@ -8,6 +8,8 @@ owi_free(void *);
 
 __attribute__((import_module("symbolic"), import_name("i8_symbol"))) char
 owi_i8(void);
+__attribute__((import_module("symbolic"), import_name("char_symbol"))) char
+owi_char(void);
 __attribute__((import_module("symbolic"), import_name("i32_symbol"))) int
 owi_i32(void);
 __attribute__((import_module("symbolic"), import_name("i64_symbol"))) long long

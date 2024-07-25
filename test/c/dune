@@ -4,4 +4,5 @@
   (package owi)
   malloc_aligned.c
   main.c
-  exit.c))
+  exit.c
+  char.c))

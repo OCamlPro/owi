@@ -41,6 +41,19 @@ module M :
         in
         (I32 n, Value.pair n sym_expr) )
 
+  let symbol_char () : Value.int32 Choice.t =
+    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+        let n =
+          match forced_value with
+          | None -> Int32.logand 0xFFl (Random.bits32 ())
+          | Some (Num (I32 n)) -> n
+          | _ -> assert false
+        in
+        let sym_expr =
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbol sym))
+        in
+        (I32 n, Value.pair n sym_expr) )
+
   let symbol_i64 () : Value.int64 Choice.t =
     Choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
         let n =
