@@ -28,5 +28,6 @@ int main(void) {
     owi_assume(n <= MAX_SIZE);
 
     primes(is_prime, n);
+    free(is_prime);
     return 0;
 }
