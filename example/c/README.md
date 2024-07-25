@@ -274,100 +274,154 @@ Reached problem!
 [13]
 ```
 
-## Combining symbolic execution with runtime assertion checking (RAC)
+# Combining symbolic execution with runtime assertion checking (RAC)
 
-Given the following function `is_dividable` wrongly annotated by E-ACSL specification language, where `requires` specifies the pre-condition of the function, `assumes` specifies the behavior condition, and `ensures` specifies the post-condition of the function for each behavior.
+E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properities are violated at runtime.
+
+Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properities using symbolic values. This will lead to better coverage of potential execution paths and scenarios.
+
+## Finding primes
+
+Consider the following (faulty) function `primes`, it implements the algorithm of the **Sieve of Eratosthenes** to find all the prime numbers smaller than `n`:
 
 ```c
-/*@ requires y != 0;
-    behavior yes:
-      assumes x % y == 0;
-      ensures \result == 1;
-    behavior no:
-      assumes x % y != 0;
-      ensures \result == 1; */
-int is_dividable(int x, int y) {
-  return x % y == 0;
+void primes(int *is_prime, int n) {
+    for (int i = 1; i < n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i < n; ++i) {
+        if (is_prime[i] == 0) continue;
+        for (int j = i; i * j < n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
 }
 ```
 
-The E-ACSL plugin of Frama-C will output a monitored version of the code against the formal E-ACSL specification, whose execution will be aborted if any specified property is violated at runtime.
+Initially, it marks each number as prime. It then marks as composite the multiples of each prime, iterating in an ascending order. If a number is still marked as prime at the point of iteration, then it does not admit a nontrivial factor and should be a prime.
 
-Generally, the function is called with concrete values, which limits the capability for detecting errors. But we can also call this function with owi symbols, the automatically generated assertions will then be called upon symbolic values:
+In order to verify the implementation, we annotate the function `primes` using the E-ACSL specification language. The annotations should be written immediately above the function and surrounded by `/*@ ... */`.
 
-<!-- $MDX file=integer_dividable.c -->
 ```c
-#include <owi.h>
+#define MAX_SIZE 100
 
-/*@ requires y != 0;
-    behavior yes:
-      assumes x % y == 0;
-      ensures \result == 1;
-    behavior no:
-      assumes x % y != 0;
-      ensures \result == 1; */
-int is_dividable(int x, int y) {
-  return x % y == 0;
+/*@ requires 2 <= n <= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 <= i < n ==>
+        (is_prime[i] == 1 <==>
+            (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i < n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i < n; ++i) {
+        if (is_prime[i] == 0) continue;
+        for (int j = i; i * j < n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+```
+
+Here, `requires` and `ensures` specify the pre-condition and post-condition of the function. The annotation means:
+- When the function is called,
+  + the argument `n` should be between `2` and `MAX_SIZE`
+  + for all `i` between `0` and `n - 1`, `is_prime + i` should be memory locations safe to read and write
+- When the function returns,
+  + for all `i` between `0` and `n - 1`, `is_prime[i]` equals `1` if and only if `i` is larger than `2` and does not have a factor between `2` and `i - 1` (which indicates the primality of `i`)
+
+We can then call the function with symbolic values and see what happens. We should pass the option `--e-acsl` to let owi invoke the E-ACSL plugin.
+
+<!-- $MDX file=primes.c -->
+```c
+#define MAX_SIZE 100
+
+#include <owi.h>
+#include <stdlib.h>
+
+/*@ requires 2 <= n <= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 <= i < n ==>
+        (is_prime[i] == 1 <==>
+            (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i < n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i < n; ++i) {
+        if (is_prime[i] == 0) continue;
+        for (int j = i; i * j < n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
 }
 
 int main(void) {
-  int x = owi_i32();
-  int y = owi_i32();
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
 
-  owi_assume(y != 0);
+    int n = owi_i32();
+    owi_assume(n >= 2);
+    owi_assume(n <= MAX_SIZE);
 
-  is_dividable(x, y);
-  return 0;
+    primes(is_prime, n);
+    return 0;
 }
 ```
 
 ```sh
-$ owi c --e-acsl ./integer_dividable.c -w1
-...
+$ owi c --e-acsl primes.c
+Assert failure: false
 Model:
   (model
-    (symbol_0 (i32 1043398666))
-    (symbol_1 (i32 387481605)))
+    (symbol_0 (i32 2)))
 Reached problem!
 [13]
 ```
 
-The result indicates that our annotation is incorrect with a model where the two symbols have different values, that is the `no` behavior.
+The execution got aborted because one of the specifications has been violated with `n = 2`. (The error message is not so informative for the time being, extra information aiding the diagnostic of errors may be added in the future.)
 
-If we correct the `ensures` clause and recall the function:
+The problem is that we should mark `0` and `1` as non-prime during the initialization. Let's fix it and rerun the program.
 
-<!-- $MDX file=integer_dividable2.c -->
+<!-- $MDX file=primes2.c -->
 ```c
-#include <owi.h>
+#define MAX_SIZE 100
 
-/*@ requires y != 0;
-    behavior yes:
-      assumes x % y == 0;
-      ensures \result == 1;
-    behavior no:
-      assumes x % y != 0;
-      ensures \result == 0; */
-int is_dividable(int x, int y) {
-  return x % y == 0;
+#include <owi.h>
+#include <stdlib.h>
+
+/*@ requires 2 <= n <= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 <= i < n ==>
+        (is_prime[i] == 1 <==>
+            (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i < n; ++i) is_prime[i] = 1;
+    is_prime[0] = is_prime[1] = 0;
+    for (int i = 2; i * i < n; ++i) {
+        if (is_prime[i] == 0) continue;
+        for (int j = i; i * j < n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
 }
 
 int main(void) {
-  int x = owi_i32();
-  int y = owi_i32();
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
 
-  owi_assume(y != 0);
+    int n = owi_i32();
+    owi_assume(n >= 2);
+    owi_assume(n <= MAX_SIZE);
 
-  is_dividable(x, y);
-  return 0;
+    primes(is_prime, n);
+    return 0;
 }
 ```
 
 ```sh
-$ owi c --e-acsl ./integer_dividable2.c -w1
+$ owi c --e-acsl primes2.c
 All OK
 ```
 
-The result `All OK` shows that our function annotation is correct.
+All the specified properties have been satisfied during the execution.
 
 ## Man page
 
