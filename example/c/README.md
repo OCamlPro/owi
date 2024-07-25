@@ -389,7 +389,7 @@ The problem is that we should mark `0` and `1` as non-prime during the initializ
 /*@ requires 2 <= n <= MAX_SIZE;
     requires \valid(is_prime + (0 .. (n - 1)));
     ensures  \forall integer i; 0 <= i < n ==>
-        (is_prime[i] == 1 <==>
+        (is_prime[i] <==>
             (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
 */
 void primes(int *is_prime, int n) {
