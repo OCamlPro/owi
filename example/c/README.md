@@ -306,7 +306,7 @@ In order to verify the implementation, we annotate the function `primes` using t
 /*@ requires 2 <= n <= MAX_SIZE;
     requires \valid(is_prime + (0 .. (n - 1)));
     ensures  \forall integer i; 0 <= i < n ==>
-        (is_prime[i] == 1 <==>
+        (is_prime[i] <==>
             (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
 */
 void primes(int *is_prime, int n) {
@@ -325,7 +325,7 @@ Here, `requires` and `ensures` specify the pre-condition and post-condition of t
   + the argument `n` should be between `2` and `MAX_SIZE`
   + for all `i` between `0` and `n - 1`, `is_prime + i` should be memory locations safe to read and write
 - When the function returns,
-  + for all `i` between `0` and `n - 1`, `is_prime[i]` equals `1` if and only if `i` is larger than `2` and does not have a factor between `2` and `i - 1` (which indicates the primality of `i`)
+  + for all `i` between `0` and `n - 1`, `is_prime[i]` evaluates to `true` if and only if `i` is larger than `2` and does not have a factor between `2` and `i - 1` (which indicates the primality of `i`)
 
 We can then call the function with symbolic values and see what happens. We should pass the option `--e-acsl` to let owi invoke the E-ACSL plugin.
 
@@ -339,7 +339,7 @@ We can then call the function with symbolic values and see what happens. We shou
 /*@ requires 2 <= n <= MAX_SIZE;
     requires \valid(is_prime + (0 .. (n - 1)));
     ensures  \forall integer i; 0 <= i < n ==>
-        (is_prime[i] == 1 <==>
+        (is_prime[i] <==>
             (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
 */
 void primes(int *is_prime, int n) {
