@@ -5,5 +5,7 @@
   (file poly.c)
   (file poly2.c)
   (file dobble.c)
+  (file primes.c)
+  (file primes2.c)
   (package owi))
  (files README.md))
