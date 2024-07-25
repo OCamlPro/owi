@@ -1,5 +1,6 @@
 ## unreleased
 
+- adds a `owi_char` function to create char symbolic value
 - adds a `Mem` argument to external function to allow direct manipulation of the memory.
 - support other solvers through the `--solver` option (Z3, Colibri2, Bitwuzla and CVC5)
 - support the extended constant expressions proposal
