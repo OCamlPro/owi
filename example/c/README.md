@@ -288,7 +288,7 @@ Consider the following (faulty) function `primes`, it implements the algorithm o
 void primes(int *is_prime, int n) {
     for (int i = 1; i < n; ++i) is_prime[i] = 1;
     for (int i = 2; i * i < n; ++i) {
-        if (is_prime[i] == 0) continue;
+        if (!is_prime[i]) continue;
         for (int j = i; i * j < n; ++j) {
             is_prime[i * j] = 0;
         }
@@ -312,7 +312,7 @@ In order to verify the implementation, we annotate the function `primes` using t
 void primes(int *is_prime, int n) {
     for (int i = 0; i < n; ++i) is_prime[i] = 1;
     for (int i = 2; i * i < n; ++i) {
-        if (is_prime[i] == 0) continue;
+        if (!is_prime[i]) continue;
         for (int j = i; i * j < n; ++j) {
             is_prime[i * j] = 0;
         }
@@ -345,7 +345,7 @@ We can then call the function with symbolic values and see what happens. We shou
 void primes(int *is_prime, int n) {
     for (int i = 0; i < n; ++i) is_prime[i] = 1;
     for (int i = 2; i * i < n; ++i) {
-        if (is_prime[i] == 0) continue;
+        if (!is_prime[i]) continue;
         for (int j = i; i * j < n; ++j) {
             is_prime[i * j] = 0;
         }
@@ -397,7 +397,7 @@ void primes(int *is_prime, int n) {
     for (int i = 0; i < n; ++i) is_prime[i] = 1;
     is_prime[0] = is_prime[1] = 0;
     for (int i = 2; i * i < n; ++i) {
-        if (is_prime[i] == 0) continue;
+        if (!is_prime[i]) continue;
         for (int j = i; i * j < n; ++j) {
             is_prime[i * j] = 0;
         }
