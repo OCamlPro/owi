@@ -14,8 +14,6 @@ and item =
   | Parens of item list
   | Annot of annot
 
-module NameMap = Map.Make (String)
-
 (* TODO: find a better way to format annotations, possibly by
       - recording extra format information when parsing
       - defining rules specific to each sort of annotations *)
@@ -33,22 +31,11 @@ and pp_item fmt = function
   | Parens items -> list ~sep:sp pp_item fmt items
   | Annot annot -> pp_annot fmt annot
 
-let annot_recorder : annot list NameMap.t ref = ref NameMap.empty
+let annot_recorder : (string, annot) Hashtbl.t = Hashtbl.create 17
 
-let find_nil key map = Option.value (NameMap.find_opt key map) ~default:[]
-
-let record_annot annot =
-  let old = find_nil annot.annotid !annot_recorder in
-  annot_recorder := NameMap.add annot.annotid (annot :: old) !annot_recorder
+let record_annot annot = Hashtbl.add annot_recorder annot.annotid annot
 
 let get_annots ?name () =
-  let annots =
-    match name with
-    | Some name -> find_nil name !annot_recorder
-    | None ->
-      List.concat_map
-        (fun (_, annots) -> annots)
-        (NameMap.to_list !annot_recorder)
-  in
-  annot_recorder := NameMap.empty;
-  annots
+  match name with
+  | Some name -> Hashtbl.find_all annot_recorder name
+  | None -> Hashtbl.fold (fun _ annot acc -> annot :: acc) annot_recorder []
