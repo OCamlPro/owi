@@ -12,7 +12,7 @@
 void primes(int *is_prime, int n) {
     for (int i = 0; i < n; ++i) is_prime[i] = 1;
     for (int i = 2; i * i < n; ++i) {
-        if (is_prime[i] == 0) continue;
+        if (!is_prime[i]) continue;
         for (int j = i; i * j < n; ++j) {
             is_prime[i * j] = 0;
         }
