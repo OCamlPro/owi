@@ -50,9 +50,9 @@
   (integers
    (>= 0.5.1))
   ocaml_intrinsics
-  prelude
+  (prelude (>= 0.3))
   sedlex
-  (smtml (>= 0.2.0))
+  (smtml (>= 0.2.3))
   uutf
   xmlm
   (processor (>= 0.2))
@@ -73,11 +73,14 @@
     (>= 0.1)
     :with-dev-setup))
   (crunch :with-dev-setup)
+  (extunix :with-dev-setup)
   (crowbar :with-dev-setup)
+  (gnuplot :with-dev-setup)
   (graphics :with-dev-setup)
   (tiny_httpd :with-dev-setup)
   (ocamlformat :with-dev-setup)
   (rusage :with-dev-setup)
   (tyxml :with-dev-setup)
+  (yaml :with-dev-setup)
   )
  (sites (share binc) (share libc)))
