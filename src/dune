@@ -59,6 +59,7 @@
   rewrite
   runtime
   script
+  sexp
   solver
   symbolic
   symbolic_choice
