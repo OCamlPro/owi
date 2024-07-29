@@ -1,6 +1,6 @@
 open Fmt
 
-type annot =
+type t =
   { annotid : string
   ; items : Sexp.t
   }
@@ -9,7 +9,7 @@ let pp_annot fmt annot =
   pf fmt "(@%a@\n  @[<b 2>%a@]@\n)" string annot.annotid Sexp.pp_sexp
     annot.items
 
-let annot_recorder : (string, annot) Hashtbl.t = Hashtbl.create 17
+let annot_recorder : (string, t) Hashtbl.t = Hashtbl.create 17
 
 let record_annot annot = Hashtbl.add annot_recorder annot.annotid annot
 
