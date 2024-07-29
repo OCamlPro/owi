@@ -4,7 +4,6 @@
 
 open Fmt
 open Types
-open Annot
 
 let symbolic v = Text v
 
@@ -96,12 +95,12 @@ let pp_module_field fmt = function
 type modul =
   { id : string option
   ; fields : module_field list
-  ; annots : annot list
+  ; annots : Annot.t list
   }
 
 let pp_modul fmt (m : modul) =
   pf fmt "%a(module%a@\n  @[<v>%a@]@\n)"
-    (list ~sep:pp_newline pp_annot)
+    (list ~sep:pp_newline Annot.pp_annot)
     m.annots pp_id_opt m.id
     (list ~sep:pp_newline pp_module_field)
     m.fields
