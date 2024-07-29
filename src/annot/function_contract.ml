@@ -32,5 +32,5 @@ let parse Annot.{ annotid; items } =
     Error (`Annotation_id_incorrect annotid)
   else
     let* func, items' = parse_func items in
-    let* preconditions, postconditions = parse_clauses items' in
-    Ok { func; preconditions; postconditions }
+    let+ preconditions, postconditions = parse_clauses items' in
+    { func; preconditions; postconditions }
