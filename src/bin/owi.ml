@@ -368,6 +368,9 @@ let exit_code =
       | `Unknown_type _id -> 52
       | `Unsupported_file_extension _ext -> 53
       | `Failed_with_but_expected (_got, _expected) -> 54
+      | `Annotation_id_incorrect _annotid -> 55
+      | `Unknown_annotation_clause -> 56
+      | `Unknown_annotation_object -> 57
     end
   end
   | Error e -> (
