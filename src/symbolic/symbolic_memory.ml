@@ -197,7 +197,7 @@ let free m base =
     Fmt.failwith "Memory leak double free";
   Hashtbl.remove m.chunks base
 
-let replace_size m base size = Hashtbl.replace m.chunks base size
+let realloc m base size = Hashtbl.replace m.chunks base size
 
 module ITbl = Hashtbl.Make (struct
   include Int

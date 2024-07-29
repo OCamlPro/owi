@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Thread.Make (Symbolic_memory)
+include Thread.Make (Symbolic_memory_concretizing)
 
 let project (th : t) : Thread_without_memory.t * _ =
   let projected =
@@ -24,7 +24,8 @@ let restore backup th =
   let symbols_set = Thread_without_memory.symbols_set th in
   let pc = Thread_without_memory.pc th in
   let memories =
-    if Thread_without_memory.memories th then Symbolic_memory.clone backup
+    if Thread_without_memory.memories th then
+      Symbolic_memory_concretizing.clone backup
     else backup
   in
   let tables = Thread_without_memory.tables th in

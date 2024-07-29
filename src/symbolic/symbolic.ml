@@ -3,15 +3,15 @@
 (* Written by the Owi programmers *)
 
 module MakeP
-    (Thread : Thread.S with type Memory.collection = Symbolic_memory.collection)
+    (Memory : Symbolic_memory_intf.S)
+    (Thread : Thread.S with type Memory.collection = Memory.collection)
     (Choice : Choice_intf.Complete
                 with module V := Symbolic_value
                  and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
   module Choice = Choice
-  module Extern_func =
-    Concrete_value.Make_extern_func (Value) (Choice) (Symbolic_memory)
+  module Extern_func = Concrete_value.Make_extern_func (Value) (Choice) (Memory)
   module Global = Symbolic_global
   module Table = Symbolic_table
 
@@ -44,60 +44,27 @@ struct
   end
 
   module Memory = struct
-    include Symbolic_memory
+    include Memory
 
-    let concretise (a : Smtml.Expr.t) : Smtml.Expr.t Choice.t =
-      let open Choice in
-      let open Smtml in
-      match Expr.view a with
-      (* Avoid unecessary re-hashconsing and allocation when the value
-         is already concrete. *)
-      | Val _ | Ptr { offset = { node = Val _; _ }; _ } -> return a
-      | Ptr { base; offset } ->
-        let+ offset = select_i32 offset in
-        Expr.ptr base (Symbolic_value.const_i32 offset)
-      | _ ->
-        let+ v = select_i32 a in
-        Symbolic_value.const_i32 v
+    let load_8_s m a = Choice.lift_mem @@ load_8_s m a
 
-    let check_within_bounds m a =
-      match check_within_bounds m a with
-      | Error t -> Choice.trap t
-      | Ok (cond, ptr) ->
-        let open Choice in
-        let* out_of_bounds = select cond in
-        if out_of_bounds then trap Trap.Memory_heap_buffer_overflow
-        else return ptr
+    let load_8_u m a = Choice.lift_mem @@ load_8_u m a
 
-    let with_concrete (m : t) a f : 'a Choice.t =
-      let open Choice in
-      let* addr = concretise a in
-      let+ ptr = check_within_bounds m addr in
-      f m ptr
+    let load_16_s m a = Choice.lift_mem @@ load_16_s m a
 
-    let load_8_s m a = with_concrete m a load_8_s
+    let load_16_u m a = Choice.lift_mem @@ load_16_u m a
 
-    let load_8_u m a = with_concrete m a load_8_u
+    let load_32 m a = Choice.lift_mem @@ load_32 m a
 
-    let load_16_s m a = with_concrete m a load_16_s
+    let load_64 m a = Choice.lift_mem @@ load_64 m a
 
-    let load_16_u m a = with_concrete m a load_16_u
+    let store_8 m ~addr v = Choice.lift_mem @@ store_8 m ~addr v
 
-    let load_32 m a = with_concrete m a load_32
+    let store_16 m ~addr v = Choice.lift_mem @@ store_16 m ~addr v
 
-    let load_64 m a = with_concrete m a load_64
+    let store_32 m ~addr v = Choice.lift_mem @@ store_32 m ~addr v
 
-    let store_8 m ~addr v =
-      with_concrete m addr (fun m addr -> store_8 m ~addr v)
-
-    let store_16 m ~addr v =
-      with_concrete m addr (fun m addr -> store_16 m ~addr v)
-
-    let store_32 m ~addr v =
-      with_concrete m addr (fun m addr -> store_32 m ~addr v)
-
-    let store_64 m ~addr v =
-      with_concrete m addr (fun m addr -> store_64 m ~addr v)
+    let store_64 m ~addr v = Choice.lift_mem @@ store_64 m ~addr v
   end
 
   module Data = struct
@@ -115,7 +82,7 @@ struct
       let orig_mem = Link_env.get_memory env id in
       let f (t : thread) =
         let memories = Thread.memories t in
-        Symbolic_memory.get_memory (Link_env.id env) orig_mem memories id
+        Memory.get_memory (Link_env.id env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -169,9 +136,11 @@ struct
 end
 
 module P =
-  MakeP [@inlined hint] (Thread_with_memory) (Symbolic_choice_with_memory)
+  MakeP [@inlined hint] (Symbolic_memory_concretizing) (Thread_with_memory)
+    (Symbolic_choice_with_memory)
 module M =
-  MakeP [@inlined hint] (Thread_with_memory) (Symbolic_choice_minimalist)
+  MakeP [@inlined hint] (Symbolic_memory_concretizing) (Thread_with_memory)
+    (Symbolic_choice_minimalist)
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }

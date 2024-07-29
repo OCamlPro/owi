@@ -4,7 +4,7 @@
 
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
-module Memory = Symbolic_memory
+module Memory = Symbolic.P.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
@@ -43,34 +43,13 @@ module M :
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  open Expr
-
   let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false
 
-  let i32 v : int32 Choice.t =
-    match view v with
-    | Val (Num (I32 v)) -> Choice.return v
-    | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-
-  let ptr v : int32 Choice.t =
-    match view v with
-    | Ptr { base; _ } -> Choice.return base
-    | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
-      Choice.bind (abort ()) (fun () -> assert false)
-
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    let open Choice in
-    let+ base = i32 base in
-    Memory.replace_size m base size;
-    Expr.ptr base (Value.const_i32 0l)
+    Choice.lift_mem @@ Memory.realloc m ~ptr:base ~size
 
-  let free m (p : Value.int32) : unit Choice.t =
-    let open Choice in
-    let+ base = ptr p in
-    Memory.free m base
+  let free m (ptr : Value.int32) : unit Choice.t =
+    Choice.lift_mem @@ Memory.free m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = abort ()
 end
