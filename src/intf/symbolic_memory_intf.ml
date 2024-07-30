@@ -27,6 +27,8 @@ module type M = sig
     -> Smtml.Expr.t Symbolic_choice_without_memory.t
 
   val free : t -> Smtml.Expr.t -> unit Symbolic_choice_without_memory.t
+
+  val pp : Fmt.formatter -> t -> unit
 end
 
 module type S = sig
@@ -117,6 +119,8 @@ module type S = sig
   val size_in_pages : t -> Smtml.Expr.t
 
   val get_limit_max : t -> Smtml.Expr.t option
+
+  val pp : Fmt.formatter -> t -> unit
 
   module ITbl : sig
     type 'a t
