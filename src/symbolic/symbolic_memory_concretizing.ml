@@ -141,6 +141,14 @@ module Backend = struct
     let+ base = address ptr in
     Hashtbl.replace m.chunks base size;
     Expr.ptr base (Symbolic_value.const_i32 0l)
+
+  let rec pp fmt m =
+    let pp_parent =
+      Fmt.option ~none:(fun fmt () -> Fmt.string fmt "None (root mem)") pp
+    in
+    let pp_v fmt (a, b) = Fmt.pf fmt "0x%08lx %a" a Expr.pp b in
+    Fmt.pf fmt "@[<v>parent:@;@[<v 1> %a@]@;data:@;@[<v 1> %a@]@]" pp_parent
+      m.parent (Fmt.hashtbl pp_v) m.data
 end
 
 include Symbolic_memory_make.Make (Backend)

@@ -60,6 +60,8 @@ val size_in_pages : t -> Smtml.Expr.t
 
 val get_limit_max : t -> Smtml.Expr.t option
 
+val pp : Fmt.formatter -> t -> unit
+
 module ITbl : sig
   type 'a t
 

@@ -197,6 +197,18 @@ let free m base =
 
 let realloc m base size = Hashtbl.replace m.chunks base size
 
+let pp fmt m =
+  let pp_parent v =
+    Fmt.option
+      ~none:(fun fmt () -> Fmt.string fmt "None")
+      (fun fmt _v -> Fmt.string fmt "Some")
+      v
+  in
+  let pp_v fmt (a, b) = Fmt.pf fmt "0x%08ld %a" a Expr.pp b in
+  Fmt.pf fmt "size: %a@;" Expr.pp m.size;
+  Fmt.pf fmt "parent: %a@;" pp_parent m.parent;
+  Fmt.pf fmt "data:@;  @[<v>%a@]" (Fmt.hashtbl pp_v) m.data
+
 module ITbl = Hashtbl.Make (struct
   include Int
 
