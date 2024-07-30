@@ -11,7 +11,7 @@ open Types
 
 (** runnable module *)
 type 'f module_to_run =
-  { modul : Binary.modul
+  { id : string option
   ; env : 'f Link_env.t
   ; to_run : binary expr list
   }
