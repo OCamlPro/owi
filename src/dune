@@ -39,7 +39,7 @@
   env_id
   float32
   float64
-  function_contract
+  contract
   func_id
   func_intf
   grouped
