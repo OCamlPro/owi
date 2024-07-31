@@ -36,6 +36,28 @@ type _ indice =
 
 let pp_id fmt id = pf fmt "$%s" id
 
+let pp_name fmt s =
+  let pp_hex_char fmt c = pf fmt "\\%02x" (Char.code c) in
+  let pp_char fmt = function
+    | '\n' -> string fmt "\\n"
+    | '\t' -> string fmt "\\t"
+    | '\r' -> string fmt "\\r"
+    | '\"' -> string fmt "\\\""
+    | '\\' -> string fmt "\\\\"
+    | c ->
+      let ci = Char.code c in
+      if 0x20 <= ci && ci < 0x7f then char fmt c else pp_hex_char fmt c
+  in
+  let pp_unicode_char fmt = function
+    | (0x09 | 0x0a) as c -> pp_char fmt (Char.chr c)
+    | uc when 0x20 <= uc && uc < 0x7f -> pp_char fmt (Char.chr uc)
+    | uc -> pf fmt "\\u{%02x}" uc
+  in
+  let pp_string fmt s =
+    String.iter (fun c -> pp_unicode_char fmt (Char.code c)) s
+  in
+  pf fmt {|"%a"|} pp_string s
+
 let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
 let pp_indice (type kind) fmt : kind indice -> unit = function
