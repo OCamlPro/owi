@@ -26,6 +26,17 @@ $ dune exec -- testcomp/testcomp.exe 5 # timeout of 5 seconds
 
 A folder `testcomp-results-YYYY-MM-DD_HHhMMhSSs` has been created with a lot of output. It contains `results-report/index.html` which is the recommended way to visualize the results.
 
+### Zulip notification:
+
+You can set up the script to notify you or a stream on Zulip using the Zulip Slack incoming webhook integration.
+For information on creating webhooks, see [this](https://zulip.com/integrations/doc/slack_incoming#zulip-slack-incoming-webhook-integration).
+Next, just set the `ZULIP_WEBHOOK` environment variable with the generated webhook and launch the script:
+
+```shell-session
+export ZULIP_WEBHOOK="https://saussice.zulipchat.com/api/v1/external/slack_incoming?api_key=...&stream=germany&topic=bratwurst"
+dune exec ./testcomp/testcomp.exe
+```
+
 ## Generate the report by hand
 
 ```shell-session

@@ -146,6 +146,73 @@ let runs =
     files;
   !results
 
+let notify_finished runs =
+  let open Cohttp in
+  let open Cohttp_lwt_unix in
+  let headers =
+    let headers = Header.init () in
+    Header.add_list headers
+      [ ("Content-type", "application/json"); ("User-Agent", "Owibot/1.0") ]
+  in
+  let send url body =
+    let body = Cohttp_lwt.Body.of_string (Yojson.to_string body) in
+    Client.post ~body ~headers url
+  in
+  let head () =
+    let open Bos in
+    let cmd = Cmd.(v "git" % "rev-parse" % "--short" % "HEAD") in
+    let output = OS.Cmd.run_out ~err:OS.Cmd.err_run_out cmd in
+    match OS.Cmd.out_string ~trim:true output with
+    | Ok (stdout, (_, `Exited 0)) -> stdout
+    | Error (`Msg err) ->
+      Format.eprintf "ERROR: %s@." err;
+      "unknown"
+    | Ok (stdout, (_, (`Exited _ | `Signaled _))) ->
+      Format.eprintf "%s@\nWARN: Unable to fetch git HEAD@." stdout;
+      "unknown"
+  in
+  let text =
+    Format.asprintf "Using tool=*%s* and timeout=*%F*@\n@\n%a@."
+      (Tool.to_reference_name tool)
+      timeout Report.Runs.pp_quick_results runs
+  in
+  (* Notify on `ZULIP_WEBHOOK` *)
+  match Bos.OS.Env.var "ZULIP_WEBHOOK" with
+  | None -> Format.eprintf "%s" text
+  | Some url ->
+    let url = Uri.of_string url in
+    let title =
+      Format.sprintf "Benchmark results (commit hash=%s) :octopus:" (head ())
+    in
+    let body =
+      (* Using Yojson just to ensure we're sending correct json *)
+      `Assoc
+        [ ( "blocks"
+          , `List
+              [ `Assoc
+                  [ ("type", `String "header")
+                  ; ( "text"
+                    , `Assoc
+                        [ ("type", `String "plain_text")
+                        ; ("text", `String title)
+                        ; ("emoji", `Bool true)
+                        ] )
+                  ]
+              ; `Assoc
+                  [ ("type", `String "section")
+                  ; ( "text"
+                    , `Assoc
+                        [ ("type", `String "mrkdwn"); ("text", `String text) ]
+                    )
+                  ]
+              ] )
+        ]
+    in
+    let result, _ = Lwt_main.run @@ send url body in
+    let status = Response.status result in
+    Format.eprintf "Server responded: %s@." (Code.string_of_status status)
+
 let () =
   let runs = ok_or_fail runs in
+  notify_finished runs;
   Report.Gen.full_report runs output_dir reference_name |> ok_or_fail
