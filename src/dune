@@ -61,6 +61,7 @@
   solver
   symbolic
   symbolic_choice
+  symbolic_choice_intf
   symbolic_choice_minimalist
   symbolic_choice_with_memory
   symbolic_choice_without_memory

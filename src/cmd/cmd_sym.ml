@@ -50,7 +50,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let res_queue = Wq.init () in
   let callback v =
     match v with
-    | Symbolic_choice_with_memory.EVal (Ok ()), _ -> ()
+    | Symbolic_choice_intf.EVal (Ok ()), _ -> ()
     | v -> Wq.push v res_queue
   in
   let join_handles =
@@ -75,7 +75,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     | Seq.Nil -> Ok count_acc
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
-        let open Symbolic_choice_with_memory in
+        let open Symbolic_choice_intf in
         match result with
         | EAssert (assertion, model) ->
           print_bug (`EAssert (assertion, model));

@@ -2,68 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module type S = sig
-  (*
-      The core implementation of the monad. It is isolated in a module to restict its exposed interface
-      and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch.
-      Using functions defined here should be foolproof.
-    *)
-
-  type thread
-
-  type 'a t
-
-  val return : 'a -> 'a t
-
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-
-  val map : 'a t -> ('a -> 'b) -> 'b t
-
-  val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
-
-  val assertion_fail : Smtml.Expr.t -> Smtml.Model.t -> 'a t
-
-  val stop : 'a t
-
-  val trap : Trap.t -> 'a t
-
-  val thread : thread t
-
-  val yield : unit t
-
-  val solver : Solver.t t
-
-  val with_thread : (thread -> 'a) -> 'a t
-
-  val set_thread : thread -> unit t
-
-  val modify_thread : (thread -> thread) -> unit t
-
-  (*
-       Indicates a possible choice between two values. Thread duplication
-       is already handled by choose and should not be done before by the caller.
-    *)
-  val choose : 'a t -> 'a t -> 'a t
-
-  type 'a eval =
-    | EVal of 'a
-    | ETrap of Trap.t * Smtml.Model.t
-    | EAssert of Smtml.Expr.t * Smtml.Model.t
-
-  type 'a run_result = ('a eval * thread) Seq.t
-
-  val run :
-       workers:int
-    -> Smtml.Solver_dispatcher.solver_type
-    -> 'a t
-    -> thread
-    -> callback:('a eval * thread -> unit)
-    -> callback_init:(unit -> unit)
-    -> callback_end:(unit -> unit)
-    -> unit Domain.t array
-end
+include Symbolic_choice_intf
 
 (*
      Multicore is based on several layers of monad transformers defined here
@@ -238,11 +177,6 @@ module CoreImpl = struct
       *)
     module M = State
 
-    type 'a eval =
-      | EVal of 'a
-      | ETrap of Trap.t * Smtml.Model.t
-      | EAssert of Smtml.Expr.t * Smtml.Model.t
-
     type ('a, 's) t = ('a eval, 's) M.t
 
     let return x : _ t = M.return (EVal x)
@@ -273,10 +207,63 @@ module CoreImpl = struct
     let ( let+ ) = map
   end
 
-  (*  *)
-  module Make (Thread : Thread.S) :
-    S with type thread := Thread.t and type 'a t = ('a, Thread.t) Eval.t =
-  struct
+  module Make (Thread : Thread.S) : sig
+    (*
+      The core implementation of the monad. It is isolated in a module to restict its exposed interface
+      and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch.
+      Using functions defined here should be foolproof.
+    *)
+
+    type thread := Thread.t
+
+    type 'a t = ('a, Thread.t) Eval.t
+
+    val return : 'a -> 'a t
+
+    val bind : 'a t -> ('a -> 'b t) -> 'b t
+
+    val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
+
+    val map : 'a t -> ('a -> 'b) -> 'b t
+
+    val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
+
+    val assertion_fail : Smtml.Expr.t -> Smtml.Model.t -> 'a t
+
+    val stop : 'a t
+
+    val trap : Trap.t -> 'a t
+
+    val thread : thread t
+
+    val yield : unit t
+
+    val solver : Solver.t t
+
+    val with_thread : (thread -> 'a) -> 'a t
+
+    val set_thread : thread -> unit t
+
+    val modify_thread : (thread -> thread) -> unit t
+
+    (*
+       Indicates a possible choice between two values. Thread duplication
+       is already handled by choose and should not be done before by the caller.
+    *)
+    val choose : 'a t -> 'a t -> 'a t
+
+    type 'a run_result = ('a eval * thread) Seq.t
+
+    val run :
+         workers:int
+      -> Smtml.Solver_dispatcher.solver_type
+      -> 'a t
+      -> thread
+      -> callback:('a eval * thread -> unit)
+      -> callback_init:(unit -> unit)
+      -> callback_end:(unit -> unit)
+      -> unit Domain.t array
+  end = struct
     include Eval
 
     type 'a t = ('a, Thread.t) Eval.t
@@ -345,7 +332,6 @@ end
     We can now use CoreImpl only through its exposed signature which
     maintains all invariants.
   *)
-
 module Make (Thread : Thread.S) = struct
   include CoreImpl.Make (Thread)
 
