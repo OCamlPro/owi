@@ -927,7 +927,7 @@ let parse_many_custom_section input =
 
 let sections_iterate (input : Input.t) =
   (* Custom *)
-  let* _custom_sections, input = parse_many_custom_section input in
+  let* custom_sections, input = parse_many_custom_section input in
 
   (* Type *)
   let* types, input =
@@ -936,8 +936,8 @@ let sections_iterate (input : Input.t) =
   let types = Array.of_list types in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Imports *)
   let* import_section, input =
@@ -945,8 +945,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Function *)
   let* function_section, input =
@@ -954,8 +954,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Tables *)
   let* table_section, input =
@@ -963,8 +963,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Memory *)
   let* memory_section, input =
@@ -972,8 +972,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Globals *)
   let* global_section, input =
@@ -982,8 +982,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Exports *)
   let* export_section, input =
@@ -991,8 +991,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Start *)
   let* start_section, input =
@@ -1002,8 +1002,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Elements *)
   let* element_section, input =
@@ -1012,8 +1012,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Data_count *)
   let* data_count_section, input =
@@ -1023,8 +1023,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Code *)
   let* code_section, input =
@@ -1038,8 +1038,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   (* Data *)
   let+ data, input =
@@ -1066,9 +1066,8 @@ let sections_iterate (input : Input.t) =
   in
 
   (* Custom *)
-  (* TODO: actually use the various custom sections *)
-  let* _custom_sections', input = parse_many_custom_section input in
-  let _custom_sections = _custom_sections @ _custom_sections' in
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
 
   let+ () =
     if not @@ Input.is_empty input then Error (`Msg "malformed section id")
@@ -1188,6 +1187,13 @@ let sections_iterate (input : Input.t) =
     }
   in
 
+  (* Custom *)
+  let custom =
+    List.filter_map
+      (Option.map (fun x -> Uninterpreted (Either.Left x)))
+      custom_sections
+  in
+
   { id = None
   ; types
   ; global
@@ -1198,6 +1204,7 @@ let sections_iterate (input : Input.t) =
   ; start = start_section
   ; data
   ; exports
+  ; custom
   }
 
 let from_string content =

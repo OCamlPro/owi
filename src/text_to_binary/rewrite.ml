@@ -400,6 +400,6 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let func = Named.to_array func in
 
   let modul : Binary.modul =
-    { id; mem; table; types; global; elem; data; exports; func; start }
+    { id; mem; table; types; global; elem; data; exports; func; start; custom = [] }
   in
   modul

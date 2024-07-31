@@ -48,6 +48,10 @@ type elem =
   ; mode : elem_mode
   }
 
+type custom =
+  | Uninterpreted of (string, Sexp.t) Either.t
+  | Contract of binary Contract.t
+
 type modul =
   { id : string option
   ; types : binary rec_type array
@@ -60,6 +64,7 @@ type modul =
   ; data : data array
   ; exports : exports
   ; start : int option
+  ; custom : custom list
   }
 
 let empty_modul =
@@ -73,4 +78,5 @@ let empty_modul =
   ; data = [||]
   ; exports = { global = []; mem = []; table = []; func = [] }
   ; start = None
+  ; custom = []
   }
