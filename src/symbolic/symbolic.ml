@@ -136,10 +136,10 @@ struct
 end
 
 module P =
-  MakeP [@inlined hint] (Symbolic_memory_concretizing) (Thread_with_memory)
+  MakeP [@inlined hint] (Symbolic_memory_memsight) (Thread_with_memory)
     (Symbolic_choice_with_memory)
 module M =
-  MakeP [@inlined hint] (Symbolic_memory_concretizing) (Thread_with_memory)
+  MakeP [@inlined hint] (Symbolic_memory_memsight) (Thread_with_memory)
     (Symbolic_choice_minimalist)
 
 let convert_module_to_run (m : 'f Link.module_to_run) =

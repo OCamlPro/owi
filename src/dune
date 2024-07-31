@@ -67,9 +67,11 @@
   symbolic_choice_without_memory
   symbolic_global
   symbolic_memory
+  symbolic_memory_base
   symbolic_memory_concretizing
   symbolic_memory_intf
   symbolic_memory_make
+  symbolic_memory_memsight
   symbolic_table
   symbolic_value
   symbolic_wasm_ffi

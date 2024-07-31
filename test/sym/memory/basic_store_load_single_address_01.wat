@@ -9,6 +9,7 @@
     i32.const 0x00000000
     i32.const 0x50ffc001
     i32.store
+    call $dump_memory
     i32.const 0x00000000
     i32.load
     i32.const 0x50ffc001
