@@ -2,24 +2,13 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a eval = private
-  | EVal of 'a
-  | ETrap of Trap.t * Smtml.Model.t
-  | EAssert of Smtml.Expr.t * Smtml.Model.t
-
 include
-  Choice_intf.Complete
-    with type thread := Thread_with_memory.t
+  Symbolic_choice_intf.S
+    with type 'a t =
+      ( 'a Symbolic_choice_intf.eval
+      , Thread_with_memory.t )
+      Symbolic_choice.CoreImpl.State.t
+     and type thread := Thread_with_memory.t
      and module V := Symbolic_value
 
-val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
-
-val run :
-     workers:int
-  -> Smtml.Solver_dispatcher.solver_type
-  -> 'a t
-  -> Thread_with_memory.t
-  -> callback:('a eval * Thread_with_memory.t -> unit)
-  -> callback_init:(unit -> unit)
-  -> callback_end:(unit -> unit)
-  -> unit Domain.t array
+val lift_mem : 'a Symbolic_choice_without_memory.t -> 'a t
