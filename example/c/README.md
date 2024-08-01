@@ -297,6 +297,12 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
        -I VAL
            headers path
 

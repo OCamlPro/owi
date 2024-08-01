@@ -401,7 +401,7 @@ let launch solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize _workers _no_stop_at_failure no_values
-  _deterministic_result_order (workspace : Fpath.t) solver files =
+  _deterministic_result_order _fail_mode (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
 
