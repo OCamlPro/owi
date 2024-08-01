@@ -74,14 +74,23 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
 
     let+ () =
       list_iter
-        (fun (file, out) -> OS.Cmd.run @@ framac file out)
+        (fun (file, out) ->
+          match OS.Cmd.run @@ framac file out with
+          | Ok _ as v -> v
+          | Error (`Msg e) ->
+            Error
+              (`Msg
+                (Fmt.str "Frama-C failed: %s"
+                   ( if debug then e
+                     else "run with --debug to get the full error message" ) )
+                ) )
         (List.combine files outs)
     in
 
     outs
   else Ok files
 
-let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
@@ -113,7 +122,16 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
   let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
-  let+ () = OS.Cmd.run clang in
+  let+ () =
+    match OS.Cmd.run clang with
+    | Ok _ as v -> v
+    | Error (`Msg e) ->
+      Error
+        (`Msg
+          (Fmt.str "Clang failed: %s"
+             ( if debug then e
+               else "run with --debug to get the full error message" ) ) )
+  in
 
   out
 
@@ -172,7 +190,7 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
-  let* modul = compile ~includes ~opt_lvl files in
+  let* modul = compile ~includes ~opt_lvl debug files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
