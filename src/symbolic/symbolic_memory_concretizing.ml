@@ -108,16 +108,12 @@ module Backend = struct
     match Smtml.Expr.view a with
     | Val (Num (I32 _)) -> return (Ok a) (* An i32 is a valid address *)
     | Ptr { base; offset } -> (
-      let (* A pointer is valid if it's within bounds. *)
-      open Symbolic_value in
+      let open Symbolic_value in
+      (* A pointer is valid if it's within bounds. *)
       match Hashtbl.find m.chunks base with
       | exception Not_found -> return (Error Trap.Memory_leak_use_after_free)
       | size ->
-        let base = const_i32 base in
-        let ptr = I32.add base offset in
-        let+ is_out_of_bounds =
-          select (Bool.or_ (I32.lt ptr base) (I32.ge ptr (I32.add base size)))
-        in
+        let+ is_out_of_bounds = select (I32.ge_u offset size) in
         if is_out_of_bounds then Error Trap.Memory_heap_buffer_overflow
         else Ok a )
     | _ ->
