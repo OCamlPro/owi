@@ -107,6 +107,7 @@ let execvp ~output_dir tool file timeout =
       , [ "owi"; "c" ]
         @ (if concolic then [ "--concolic" ] else [])
         @ [ "--unsafe"
+          ; "--fail-on-assertion-only"
           ; Format.sprintf "-O%d" optimisation_level
           ; Format.sprintf "-w%d" workers
           ; "-o"

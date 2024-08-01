@@ -6,6 +6,12 @@ open Syntax
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
 
+type fail_mode =
+  [ `Trap_only
+  | `Assertion_only
+  | `Both
+  ]
+
 let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
@@ -38,7 +44,7 @@ let run_file ~unsafe ~optimize pc filename =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
-  deterministic_result_order (workspace : Fpath.t) solver files =
+  deterministic_result_order fail_mode (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -49,9 +55,15 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.init () in
   let callback v =
-    match v with
-    | Symbolic_choice_intf.EVal (Ok ()), _ -> ()
-    | v -> Wq.push v res_queue
+    let open Symbolic_choice_intf in
+    match (fail_mode, v) with
+    | _, (EVal (Ok ()), _) -> ()
+    | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
+    | (`Both | `Trap_only), (ETrap (t, m), thread) ->
+      Wq.push (`ETrap (t, m), thread) res_queue
+    | (`Both | `Assertion_only), (EAssert (e, m), thread) ->
+      Wq.push (`EAssert (e, m), thread) res_queue
+    | (`Trap_only | `Assertion_only), _ -> ()
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
@@ -75,17 +87,11 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     | Seq.Nil -> Ok count_acc
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
-        let open Symbolic_choice_intf in
         match result with
-        | EAssert (assertion, model) ->
-          print_bug (`EAssert (assertion, model));
+        | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
+          print_bug bug;
           Ok model
-        | ETrap (tr, model) ->
-          print_bug (`ETrap (tr, model));
-          Ok model
-        | EVal (Ok ()) ->
-          Fmt.failwith "unreachable: callback should have filtered eval ok out."
-        | EVal (Error e) -> Error e
+        | `Error e -> Error e
       in
       let count_acc = succ count_acc in
       let* () =

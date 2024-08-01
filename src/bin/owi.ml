@@ -51,6 +51,16 @@ let no_values =
   let doc = "do not display a value for each symbol" in
   Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
 
+let fail_mode =
+  let trap_doc = "ignore assertion violations and only report traps" in
+  let assert_doc = "ignore traps and only report assertion violations" in
+  Cmdliner.Arg.(
+    value
+    & vflag `Both
+        [ (`Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
+        ; (`Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
+        ] )
+
 let optimize =
   let doc = "optimize mode" in
   Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
@@ -135,8 +145,8 @@ let c_cmd =
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ concolic
-      $ solver )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
+      $ concolic $ solver )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -201,8 +211,8 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
+      $ workspace $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -214,8 +224,8 @@ let conc_cmd =
   Cmd.v info
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ workspace
-      $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
+      $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in
