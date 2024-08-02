@@ -112,11 +112,10 @@ module P = struct
 
   module Memory = struct
     open Concolic_value
-
-    type t = (Concrete_memory.t, Symbolic_memory.t) cs
-
     module C = Concrete_memory
-    module S = Symbolic_memory
+    module S = Symbolic_memory_concretizing
+
+    type t = (C.t, S.t) cs
 
     let with_concrete m a f_c f_s =
       let open Choice in
@@ -152,17 +151,14 @@ module P = struct
     let store_64 m ~addr v = with_concrete_store m addr C.store_64 S.store_64 v
 
     let grow m delta =
-      Concrete_memory.grow m.concrete delta.concrete;
-      Symbolic_memory.grow m.symbolic delta.symbolic
+      C.grow m.concrete delta.concrete;
+      S.grow m.symbolic delta.symbolic
 
-    let size m =
-      { concrete = Concrete_memory.size m.concrete
-      ; symbolic = Symbolic_memory.size m.symbolic
-      }
+    let size m = { concrete = C.size m.concrete; symbolic = S.size m.symbolic }
 
     let size_in_pages m =
-      { concrete = Concrete_memory.size_in_pages m.concrete
-      ; symbolic = Symbolic_memory.size_in_pages m.symbolic
+      { concrete = C.size_in_pages m.concrete
+      ; symbolic = S.size_in_pages m.symbolic
       }
 
     let fill _ = assert false
@@ -171,11 +167,11 @@ module P = struct
 
     let blit_string m s ~src ~dst ~len =
       { concrete =
-          Concrete_memory.blit_string m.concrete s ~src:src.concrete
-            ~dst:dst.concrete ~len:len.concrete
+          C.blit_string m.concrete s ~src:src.concrete ~dst:dst.concrete
+            ~len:len.concrete
       ; symbolic =
-          Symbolic_memory.blit_string m.symbolic s ~src:src.symbolic
-            ~dst:dst.symbolic ~len:len.symbolic
+          S.blit_string m.symbolic s ~src:src.symbolic ~dst:dst.symbolic
+            ~len:len.symbolic
       }
 
     let get_limit_max _ = Fmt.failwith "TODO"
@@ -209,7 +205,7 @@ module P = struct
       let orig_mem = Link_env.get_memory env id in
       let f (t : thread) : Memory.t =
         let sym_mem =
-          Symbolic_memory.get_memory (Link_env.id env) orig_mem
+          Symbolic_memory_concretizing.get_memory (Link_env.id env) orig_mem
             t.shared.memories id
         in
         { concrete = orig_mem; symbolic = sym_mem }
@@ -269,8 +265,6 @@ module P = struct
     let to_run (t : t) = t.to_run
   end
 end
-
-module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
   P.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
