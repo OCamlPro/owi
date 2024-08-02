@@ -9,23 +9,23 @@ let filename = Fpath.v Sys.argv.(1)
 let m =
   match Parse.Text.Module.from_file filename with
   | Ok m -> m
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
 
 let m =
   match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> Binary_to_text.modul m
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
 
 let s = Format.asprintf "%a@\n" Text.pp_modul m
 
 let m =
   match Parse.Text.Module.from_string s with
   | Ok m -> m
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
 
 let m =
   match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> Binary_to_text.modul m
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
 
 let () = Fmt.pr "%a@\n" Text.pp_modul m

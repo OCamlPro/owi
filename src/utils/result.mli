@@ -64,5 +64,3 @@ type err =
 type 'a t = ('a, err) Prelude.Result.t
 
 val err_to_string : err -> string
-
-val failwith : err -> 'a

@@ -274,13 +274,13 @@ let run_once tree link_state modules_to_run forced_values =
     Choice.run forced_values result
   in
   let () = List.iter2 Concolic.recover backups modules_to_run in
-  let end_of_trace =
+  let+ end_of_trace =
     match result with
-    | Ok (Ok ()) -> Normal
-    | Ok (Error e) -> Result.failwith e
-    | Error (Trap t) -> Trap t
-    | Error Assert_fail -> Assert_fail
-    | Error (Assume_fail _c) -> Assume_fail
+    | Ok (Ok ()) -> Ok Normal
+    | Ok (Error _ as e) -> e
+    | Error (Trap t) -> Ok (Trap t)
+    | Error Assert_fail -> Ok Assert_fail
+    | Error (Assume_fail _c) -> Ok Assume_fail
   in
   let trace =
     { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
@@ -368,16 +368,16 @@ let launch solver tree link_state modules_to_run =
         end;
         Some m
   in
-  let rec loop count =
-    if count <= 0 then None
+  let rec loop count : _ Result.t =
+    if count <= 0 then Ok None
     else
       let model = find_model 20 in
       run_model model count
-  and run_model model count =
-    let r, thread = run_once tree link_state modules_to_run model in
+  and run_model model count : _ Result.t =
+    let* r, thread = run_once tree link_state modules_to_run model in
     match r with
     | Ok (Ok ()) -> loop (count - 1)
-    | Ok (Error e) -> Result.failwith e
+    | Ok (Error _ as e) -> e
     | Error (Assume_fail c) -> begin
       if debug then begin
         Fmt.pr "Assume_fail: %a@\n" Smtml.Expr.pp c;
@@ -391,8 +391,8 @@ let launch solver tree link_state modules_to_run =
         loop (count - 1)
       | Some _model as model -> run_model model (count - 1)
     end
-    | Error (Trap trap) -> Some (`Trap trap, thread)
-    | Error Assert_fail -> Some (`Assert_fail, thread)
+    | Error (Trap trap) -> Ok (Some (`Trap trap, thread))
+    | Error Assert_fail -> Ok (Some (`Assert_fail, thread))
   in
   loop 10
 
@@ -413,7 +413,7 @@ let cmd profiling debug unsafe optimize _workers _no_stop_at_failure no_values
     simplify_then_link_files ~unsafe ~optimize files
   in
   let tree = fresh_tree [] in
-  let result = launch solver tree link_state modules_to_run in
+  let* result = launch solver tree link_state modules_to_run in
 
   let print_pc pc =
     Fmt.pr "PC:@\n";

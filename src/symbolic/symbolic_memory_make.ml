@@ -16,10 +16,7 @@ module Make (Backend : M) = struct
     { data = Backend.make (); size = Symbolic_value.const_i32 size }
 
   let i32 v =
-    match Smtml.Expr.view v with
-    | Val (Num (I32 i)) -> i
-    | _ ->
-      Log.err {|Unsupported symbolic value reasoning over "%a"|} Smtml.Expr.pp v
+    match Smtml.Expr.view v with Val (Num (I32 i)) -> i | _ -> assert false
 
   let grow m delta =
     let old_size = Symbolic_value.I32.mul m.size page_size in

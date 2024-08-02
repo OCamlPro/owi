@@ -17,13 +17,7 @@ let return index value = { index; value }
 
 let has_index idx { index; _ } = idx = index
 
-let get_at_exn i values =
-  let { value; _ } = List.find (has_index i) values in
-  value
-
 let get_at i values =
   match List.find_opt (has_index i) values with
   | None -> None
   | Some { value; _ } -> Some value
-
-let pp f fmt v = f fmt v.value

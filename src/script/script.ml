@@ -246,7 +246,7 @@ let run ~no_exhaustion ~optimize script =
           Compile.Text.until_link ~unsafe ~optimize ~name:None link_state m
         in
         let+ () = check_error_result expected got in
-        Log.err "TODO"
+        assert false
       | Assert (Assert_return (a, res)) ->
         Log.debug0 "*** assert_return@\n";
         let* stack = action link_state a in
