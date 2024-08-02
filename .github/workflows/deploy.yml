@@ -11,7 +11,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
           persist-credentials: false
       - name: checkout-submodules
         run: |
@@ -30,7 +29,7 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.2"
-          dune-cache: false
+          dune-cache: true
           opam-pin: true
           allow-prerelease-opam: false
       - name: depext
