@@ -117,20 +117,34 @@ let () =
   Format.printf "tool2 had %03d tasks tool1 did not found@\n@\n"
     (count_reached2 - count_common);
   Format.printf
-    "on      commonly  reached tasks, tool 1 took %04f sec. (mean %04f) and \
-     tool 2 took %06f sec. (mean %04f)@\n"
+    "on      commonly  reached tasks, tool 1 took %04f sec. (mean %04f, median \
+     %04f, min %04f, max %04f) and tool 2 took %06f sec. (mean %04f, median \
+     %04f, min %04f, max %04f)@\n"
     (Runs.sum_clock reached_common_1)
     (Runs.mean_clock reached_common_1)
+    (Runs.median_clock reached_common_1)
+    (Runs.min_clock reached_common_1)
+    (Runs.max_clock reached_common_1)
     (Runs.sum_clock reached_common_2)
-    (Runs.mean_clock reached_common_2);
+    (Runs.mean_clock reached_common_2)
+    (Runs.median_clock reached_common_2)
+    (Runs.min_clock reached_common_2)
+    (Runs.max_clock reached_common_2);
   Format.printf
-    "on *not commonly* reached tasks, tool 1 took %04f sec. (mean %04f) and \
-     tool 2 took %06f sec. (mean %04f)@\n\
+    "on *not commonly* reached tasks, tool 1 took %04f sec. (mean %04f, median \
+     %04f, min %04f, max %04f) and tool 2 took %06f sec. (mean %04f, median \
+     %04f, min %04f, max %04f)@\n\
      @\n"
     (Runs.sum_clock reached_only_1)
     (Runs.mean_clock reached_only_1)
+    (Runs.median_clock reached_only_1)
+    (Runs.min_clock reached_only_1)
+    (Runs.max_clock reached_only_1)
     (Runs.sum_clock reached_only_2)
-    (Runs.mean_clock reached_only_2);
+    (Runs.mean_clock reached_only_2)
+    (Runs.median_clock reached_only_2)
+    (Runs.min_clock reached_only_2)
+    (Runs.max_clock reached_only_2);
   Format.printf
     "among tasks reached only by tool 1, tool 2 replied %03d nothing, %03d \
      timeout, %02d other and %02d killed@\n"
@@ -144,4 +158,14 @@ let () =
     (Runs.count_nothing report1_found_by_2_not_by_1)
     (Runs.count_timeout report1_found_by_2_not_by_1)
     (Runs.count_other report1_found_by_2_not_by_1)
-    (Runs.count_killed report1_found_by_2_not_by_1)
+    (Runs.count_killed report1_found_by_2_not_by_1);
+  Format.printf "tasks solved only by tool 1:@\n  @[<v>%a@]@\n"
+    (Format.pp_print_list
+       ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+       Fpath.pp )
+    (Runs.files reached_only_1);
+  Format.printf "tasks solved only by tool 2:@\n  @[<v>%a@]@\n"
+    (Format.pp_print_list
+       ~pp_sep:(fun fmt () -> Format.fprintf fmt "@\n")
+       Fpath.pp )
+    (Runs.files reached_only_2)

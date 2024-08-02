@@ -61,6 +61,15 @@ let max_clock runs =
       max clock current_max )
     0. runs
 
+let median_clock runs =
+  let n = List.length runs in
+  if n = 0 then 0.
+  else if n mod 2 = 0 then
+    ( Run.clock (List.nth runs (n / 2))
+    +. Run.clock (List.nth runs ((n / 2) + 1)) )
+    /. 2.
+  else List.nth runs (n / 2) |> Run.clock
+
 let sum_clock runs = List.fold_left (fun sum r -> Run.clock r +. sum) 0. runs
 
 let mean_clock runs = sum_clock runs /. (count_all runs |> float_of_int)

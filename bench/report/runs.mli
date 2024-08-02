@@ -36,6 +36,8 @@ val sum_clock : t -> float
 
 val mean_clock : t -> float
 
+val median_clock : t -> float
+
 val sum_utime : t -> float
 
 val mean_utime : t -> float
