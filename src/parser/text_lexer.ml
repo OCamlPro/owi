@@ -452,14 +452,14 @@ let rec token buf =
     if String.equal "" annotid then Log.err "empty annotation id"
     else
       let items = Sexp.List (annot buf) in
-      Annot.(record_annot { annotid; items });
+      Annot.(record_annot annotid (Annot { annotid; items }));
       token buf
   | "(@", Plus id_char ->
     let annotid = Utf8.lexeme buf in
     let annotid = String.sub annotid 2 (String.length annotid - 2) in
     let annotid = mk_string buf annotid in
     let items = Sexp.List (annot buf) in
-    Annot.(record_annot { annotid; items });
+    Annot.(record_annot annotid (Annot { annotid; items }));
     token buf
   | "(@" -> Log.err "empty annotation id"
   (* 1 *)
