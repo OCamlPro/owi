@@ -63,12 +63,11 @@ let max_clock runs =
 
 let median_clock runs =
   let n = List.length runs in
+  let runs = List.sort compare @@ List.map (fun run -> Run.clock run) runs in
   if n = 0 then 0.
   else if n mod 2 = 0 then
-    ( Run.clock (List.nth runs (n / 2))
-    +. Run.clock (List.nth runs ((n / 2) + 1)) )
-    /. 2.
-  else List.nth runs (n / 2) |> Run.clock
+    (List.nth runs (n / 2) +. List.nth runs ((n / 2) + 1)) /. 2.
+  else List.nth runs (n / 2)
 
 let sum_clock runs = List.fold_left (fun sum r -> Run.clock r +. sum) 0. runs
 
