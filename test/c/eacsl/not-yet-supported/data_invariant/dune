@@ -1,0 +1,8 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  global.c
+  type.c
+  strong_global.c
+  strong_type.c))

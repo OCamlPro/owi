@@ -33,7 +33,64 @@ let find location file : Fpath.t Result.t =
   in
   loop l
 
-let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
+let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
+  Fpath.t list Result.t =
+  if eacsl then
+    let flags1 =
+      let includes =
+        String.concat " "
+          (List.map
+             (fun libpath -> Fmt.str "-I%s" (Fpath.to_string libpath))
+             includes )
+      in
+      let framac_verbosity_level = if debug then "2" else "0" in
+      Cmd.(
+        of_list
+          [ "-e-acsl"
+          ; "-no-frama-c-stdlib"
+          ; "-kernel-warn-key"
+          ; "CERT:MSC:38=inactive"
+          ; "-verbose"
+          ; framac_verbosity_level
+          ; String.concat "" [ {|-cpp-extra-args="|}; includes; {|"|} ]
+          ] )
+    in
+    let flags2 = Cmd.(of_list [ "-then-last"; "-print"; "-ocode" ]) in
+
+    let* framac_bin = OS.Cmd.resolve @@ Cmd.v "frama-c" in
+
+    let outs =
+      List.map
+        (fun file ->
+          let file, ext = Fpath.split_ext file in
+          let file = Fpath.add_ext ".instrumented" file in
+          Fpath.add_ext ext file )
+        files
+    in
+
+    let framac : Fpath.t -> Fpath.t -> Bos.Cmd.t =
+     fun file out -> Cmd.(framac_bin %% flags1 % p file %% flags2 % p out)
+    in
+
+    let+ () =
+      list_iter
+        (fun (file, out) ->
+          match OS.Cmd.run @@ framac file out with
+          | Ok _ as v -> v
+          | Error (`Msg e) ->
+            Error
+              (`Msg
+                (Fmt.str "Frama-C failed: %s"
+                   ( if debug then e
+                     else "run with --debug to get the full error message" ) )
+                ) )
+        (List.combine files outs)
+    in
+
+    outs
+  else Ok files
+
+let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
@@ -65,7 +122,16 @@ let compile ~includes ~opt_lvl (files : Fpath.t list) : Fpath.t Result.t =
   let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
   let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
-  let+ () = OS.Cmd.run clang in
+  let+ () =
+    match OS.Cmd.run clang with
+    | Ok _ as v -> v
+    | Error (`Msg e) ->
+      Error
+        (`Msg
+          (Fmt.str "Clang failed: %s"
+             ( if debug then e
+               else "run with --debug to get the full error message" ) ) )
+  in
 
   out
 
@@ -120,12 +186,13 @@ let metadata ~workspace arch property files : unit Result.t =
 
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
-  deterministic_result_order fail_mode concolic solver : unit Result.t =
+  deterministic_result_order fail_mode concolic eacsl solver : unit Result.t =
   if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
-  let* modul = compile ~includes ~opt_lvl files in
+  let* files = eacsl_instrument eacsl debug ~includes files in
+  let* modul = compile ~includes ~opt_lvl debug files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
