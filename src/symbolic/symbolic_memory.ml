@@ -23,10 +23,7 @@ let create size =
   ; chunks = Hashtbl.create 16
   }
 
-let i32 v =
-  match view v with
-  | Val (Num (I32 i)) -> i
-  | _ -> Log.err {|Unsupported symbolic value reasoning over "%a"|} Expr.pp v
+let i32 v = match view v with Val (Num (I32 i)) -> i | _ -> assert false
 
 let grow m delta =
   let old_size = Value.I32.mul m.size page_size in
@@ -190,7 +187,7 @@ let check_within_bounds m a =
       Ok
         ( Value.Bool.(or_ (const (Int32.lt ptr base)) upper_bound)
         , Value.const_i32 ptr ) )
-  | _ -> Log.err {|Unable to calculate address of: "%a"|} Expr.pp a
+  | _ -> assert false
 
 let free m base =
   if not @@ Hashtbl.mem m.chunks base then

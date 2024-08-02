@@ -7,7 +7,7 @@ open Syntax
 
 type metadata =
   { arch : int
-  ; property : string option
+  ; property : Fpath.t option
   ; files : Fpath.t list
   }
 
@@ -80,15 +80,14 @@ let metadata ~workspace arch property files : unit Result.t =
     let tag n = (("", n), []) in
     let el n d = `El (tag n, [ `Data d ]) in
     let* spec =
-      match property with None -> Ok "" | Some f -> OS.File.read @@ Fpath.v f
+      match property with None -> Ok "" | Some f -> OS.File.read f
     in
     let file = String.concat " " (List.map Fpath.to_string files) in
     let* hash =
       list_fold_left
         (fun context file ->
-          match Bos.OS.File.read file with
-          | Error (`Msg msg) -> Error (`Msg msg)
-          | Ok str -> Ok (Digestif.SHA256.feed_string context str) )
+          let+ str = Bos.OS.File.read file in
+          Digestif.SHA256.feed_string context str )
         Digestif.SHA256.empty files
     in
     let hash = Digestif.SHA256.to_hex (Digestif.SHA256.get hash) in
@@ -121,7 +120,6 @@ let metadata ~workspace arch property files : unit Result.t =
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
   deterministic_result_order fail_mode concolic solver : unit Result.t =
-  if debug then Logs.set_level (Some Debug);
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in

@@ -119,7 +119,8 @@ let c_cmd =
   in
   let property =
     let doc = "property file" in
-    Arg.(value & opt (some string) None & info [ "property" ] ~doc)
+    Arg.(
+      value & opt (some existing_non_dir_file) None & info [ "property" ] ~doc )
   in
   let includes =
     let doc = "headers path" in

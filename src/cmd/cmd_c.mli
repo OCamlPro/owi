@@ -5,7 +5,7 @@
 val cmd :
      bool
   -> int
-  -> string option
+  -> Fpath.t option
   -> bool
   -> string
   -> int

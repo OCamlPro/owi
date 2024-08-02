@@ -70,8 +70,8 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     let func_types =
       match typ with
       | Def_func_t _ftype -> Indexed.return id typ :: func_types
-      | Def_array_t (_mut, _storage_type) -> func_types
-      | Def_struct_t _ -> func_types
+      | Def_array_t (_mut, _storage_type) -> assert false
+      | Def_struct_t _ -> assert false
     in
     { acc with func_types; last_assigned_int; all_types }
 

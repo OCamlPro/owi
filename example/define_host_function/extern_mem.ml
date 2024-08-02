@@ -32,7 +32,7 @@ let link_state =
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
   match Parse.Text.Module.from_file (Fpath.v "extern_mem.wat") with
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `chorizo` *)
@@ -41,11 +41,11 @@ let module_to_run, link_state =
     Compile.Text.until_link link_state ~unsafe:false ~optimize:true ~name:None
       pure_wasm_module
   with
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
   | Ok v -> v
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
   match Interpret.Concrete.modul link_state.envs module_to_run with
-  | Error e -> Result.failwith e
+  | Error _ -> assert false
   | Ok () -> ()

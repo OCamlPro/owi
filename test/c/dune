@@ -2,6 +2,7 @@
  (deps
   %{bin:owi}
   (package owi)
+  concolic.c
   malloc_aligned.c
   main.c
   exit.c

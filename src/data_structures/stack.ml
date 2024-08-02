@@ -138,73 +138,51 @@ module Make (V : Value_intf.T) :
 
   let pop_i32 s =
     let hd, tl = pop s in
-    match hd with
-    | I32 n -> (n, tl)
-    | _ -> Log.err "invalid type (expected i32)"
+    match hd with I32 n -> (n, tl) | _ -> assert false
 
   let pop2_i32 s =
     let n2, s = pop s in
     let n1, tl = pop s in
-    match (n1, n2) with
-    | I32 n1, I32 n2 -> ((n1, n2), tl)
-    | _ -> Log.err "invalid type (expected i32)"
+    match (n1, n2) with I32 n1, I32 n2 -> ((n1, n2), tl) | _ -> assert false
 
   let pop_i64 s =
     let hd, tl = pop s in
-    match hd with
-    | I64 n -> (n, tl)
-    | _ -> Log.err "invalid type (expected i64)"
+    match hd with I64 n -> (n, tl) | _ -> assert false
 
   let pop2_i64 s =
     let n2, s = pop s in
     let n1, tl = pop s in
-    match (n1, n2) with
-    | I64 n1, I64 n2 -> ((n1, n2), tl)
-    | _ -> Log.err "invalid type (expected i64)"
+    match (n1, n2) with I64 n1, I64 n2 -> ((n1, n2), tl) | _ -> assert false
 
   let pop_f32 s =
     let hd, tl = pop s in
-    match hd with
-    | F32 f -> (f, tl)
-    | _ -> Log.err "invalid type (expected f32)"
+    match hd with F32 f -> (f, tl) | _ -> assert false
 
   let pop2_f32 s =
     let n2, s = pop s in
     let n1, tl = pop s in
-    match (n1, n2) with
-    | F32 n1, F32 n2 -> ((n1, n2), tl)
-    | _ -> Log.err "invalid type (expected f32)"
+    match (n1, n2) with F32 n1, F32 n2 -> ((n1, n2), tl) | _ -> assert false
 
   let pop_f64 s =
     let hd, tl = pop s in
-    match hd with
-    | F64 f -> (f, tl)
-    | _ -> Log.err "invalid type (expected f64)"
+    match hd with F64 f -> (f, tl) | _ -> assert false
 
   let pop2_f64 s =
     let n2, s = pop s in
     let n1, tl = pop s in
-    match (n1, n2) with
-    | F64 n1, F64 n2 -> ((n1, n2), tl)
-    | _ -> Log.err "invalid type (expected f64)"
+    match (n1, n2) with F64 n1, F64 n2 -> ((n1, n2), tl) | _ -> assert false
 
   let pop_ref s =
     let hd, tl = pop s in
-    match hd with
-    | Ref _ -> (hd, tl)
-    | _ -> Log.err "invalid type (expected ref)"
+    match hd with Ref _ -> (hd, tl) | _ -> assert false
 
   let pop_as_ref s =
     let hd, tl = pop s in
-    match hd with
-    | Ref hd -> (hd, tl)
-    | _ -> Log.err "invalid type (expected ref)"
+    match hd with Ref hd -> (hd, tl) | _ -> assert false
 
   let pop_bool s =
     let hd, tl = pop s in
-    match hd with
-    | I32 n -> (V.I32.to_bool n, tl)
-    | _ -> Log.err "invalid type (expected i32 (bool))"
+    match hd with I32 n -> (V.I32.to_bool n, tl) | _ -> assert false
 
   let pop_n s n =
     (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)
@@ -213,8 +191,5 @@ module Make (V : Value_intf.T) :
 
   let rec drop_n s n =
     if n = 0 then s
-    else
-      match s with
-      | [] -> Fmt.invalid_arg "drop_n"
-      | _ :: tl -> drop_n tl (n - 1)
+    else match s with [] -> assert false | _ :: tl -> drop_n tl (n - 1)
 end

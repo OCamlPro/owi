@@ -124,5 +124,3 @@ let rec err_to_string = function
   | `Unknown_type id -> Fmt.str "unknown type %a" Types.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
-
-let failwith e = Fmt.failwith "%s" (err_to_string e)

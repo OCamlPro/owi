@@ -128,11 +128,11 @@ type result =
 
 let pp_result fmt = function
   | Result_const c -> pf fmt "(%a)" pp_result_const c
-  | Result_func_ref | Result_extern_ref -> Log.err "not yet implemented"
+  | Result_func_ref | Result_extern_ref -> assert false
 
 let pp_result_bis fmt = function
   | Result_const c -> pf fmt "%a" pp_result_const c
-  | Result_extern_ref | Result_func_ref -> Log.err "not yet implemented"
+  | Result_extern_ref | Result_func_ref -> assert false
 
 let pp_results fmt r = list ~sep:sp pp_result_bis fmt r
 

@@ -16,14 +16,8 @@ let get_printer filename =
   | ext -> Error (`Unsupported_file_extension ext)
 
 let cmd_one inplace file =
-  match get_printer file with
-  | Error _e as e -> e
-  | Ok pp ->
-    if inplace then Bos.OS.File.writef file "%a@\n" pp ()
-    else Ok (Fmt.pr "%a@\n" pp ())
+  let* pp = get_printer file in
+  if inplace then Bos.OS.File.writef file "%a@\n" pp ()
+  else Ok (Fmt.pr "%a@\n" pp ())
 
 let cmd inplace files = list_iter (cmd_one inplace) files
-
-let format_file_to_string file =
-  let+ pp = get_printer file in
-  Fmt.str "%a@\n" pp ()

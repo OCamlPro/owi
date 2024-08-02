@@ -14,8 +14,4 @@ val return : int -> 'a -> 'a t
 
 val get_at : int -> 'a t list -> 'a option
 
-val get_at_exn : int -> 'a t list -> 'a
-
 val has_index : int -> 'a t -> bool
-
-val pp : (Fmt.formatter -> 'a -> unit) -> Fmt.formatter -> 'a t -> unit
