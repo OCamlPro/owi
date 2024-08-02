@@ -1211,9 +1211,7 @@ let sections_iterate (input : Input.t) =
 
   (* Custom *)
   let custom =
-    List.filter_map
-      (Option.map (fun x -> Uninterpreted (Either.Left x)))
-      custom_sections
+    List.filter_map (Option.map (fun x -> Uninterpreted x)) custom_sections
   in
 
   { id = None

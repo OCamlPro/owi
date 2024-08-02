@@ -49,8 +49,8 @@ type elem =
   }
 
 type custom =
-  | Uninterpreted of (string, Sexp.t) Either.t
-  | Contract of binary Contract.t
+  | Uninterpreted of string
+  | From_annot of binary Annot.annot
 
 type modul =
   { id : string option

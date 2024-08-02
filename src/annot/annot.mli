@@ -1,12 +1,17 @@
 open Fmt
+open Types
 
 type t =
   { annotid : string
   ; items : Sexp.t
   }
 
-val pp_annot : formatter -> t -> unit
+type 'a annot =
+  | Contract of 'a Contract.t
+  | Annot of t
 
-val record_annot : t -> unit
+val pp_annot : formatter -> text annot -> unit
 
-val get_annots : ?name:string -> unit -> t list
+val record_annot : string -> text annot -> unit
+
+val get_annots : ?name:string -> unit -> text annot list

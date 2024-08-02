@@ -95,7 +95,7 @@ let pp_module_field fmt = function
 type modul =
   { id : string option
   ; fields : module_field list
-  ; annots : Annot.t list
+  ; annots : text Annot.annot list
   }
 
 let pp_modul fmt (m : modul) =
