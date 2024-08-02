@@ -59,11 +59,13 @@
   ;; doc
   (odoc :with-doc)
   ;; test
+  ;; TODO: conf-gcc should be needed on macOS only...
+  (conf-gcc :with-test)
+  (frama-c (and (>= 29.0) :with-test))
   (mdx
    (and
     :with-test
     (>= 2.1)))
-  (frama-c (and (>= 29.0) :with-test))
   ;; dev
   (bisect_ppx
    (and
