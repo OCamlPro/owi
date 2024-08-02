@@ -276,9 +276,9 @@ Reached problem!
 
 # Combining symbolic execution with runtime assertion checking (RAC)
 
-E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properities are violated at runtime.
+E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properties are violated at runtime.
 
-Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properities using symbolic values. This will lead to better coverage of potential execution paths and scenarios.
+Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properties using symbolic values. This will lead to better coverage of potential execution paths and scenarios.
 
 ## Finding primes
 
