@@ -40,7 +40,7 @@ jobs:
         if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam install . --deps-only --with-test --with-doc
-          opam install bisect_ppx
+          opam install bisect_ppx z3
       - name: api
         run: |
           touch doc/.nojekyll
