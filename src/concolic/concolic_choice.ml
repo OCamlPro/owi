@@ -39,7 +39,7 @@ let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
 type pc = pc_elt list
 
 type shared_thread_info =
-  { memories : Symbolic_memory.collection
+  { memories : Symbolic_memory_concretizing.collection
   ; tables : Symbolic_table.collection
   ; globals : Symbolic_global.collection
   }
@@ -147,7 +147,7 @@ let with_new_symbol ty f =
 
 let run preallocated_values (M v) : _ run_result =
   let shared =
-    { memories = Symbolic_memory.init ()
+    { memories = Symbolic_memory_concretizing.init ()
     ; tables = Symbolic_table.init ()
     ; globals = Symbolic_global.init ()
     }
