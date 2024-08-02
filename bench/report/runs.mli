@@ -50,6 +50,10 @@ val to_distribution : max_time:int -> t -> float list
 
 val pp_quick_results : Format.formatter -> t -> unit
 
+val pp_table_results : Format.formatter -> t -> unit
+
+val pp_table_statistics : Format.formatter -> t -> unit
+
 val map : (Run.t -> 'a) -> t -> 'a list
 
 val files : t -> Fpath.t list
