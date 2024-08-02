@@ -1,4 +1,4 @@
-  $ owi c --e-acsl implicit.c --no-value 2>&1 | grep -v "wasm-ld"
+  $ owi c --e-acsl implicit.c --no-value 2>&1 | grep -v "wasm-ld" | grep -v "gmp.h"
   [e-acsl] implicit.c:10: Warning: 
     E-ACSL construct `assigns' is not yet supported. Ignoring annotation.
   [e-acsl] implicit.c:10: Warning: 
