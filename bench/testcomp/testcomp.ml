@@ -152,7 +152,7 @@ let notify_finished runs =
   let headers =
     let headers = Header.init () in
     Header.add_list headers
-      [ ("Content-type", "application/json"); ("User-Agent", "Owibot/1.0") ]
+      [ ("Content-type", "application/json"); ("User-Agent", "Owibot/1.1") ]
   in
   let send url body =
     let body = Cohttp_lwt.Body.of_string (Yojson.to_string body) in
@@ -172,9 +172,21 @@ let notify_finished runs =
       "unknown"
   in
   let text =
-    Format.asprintf "Using tool=*%s* and timeout=*%F*@\n@\n%a@."
-      (Tool.to_reference_name tool)
-      timeout Report.Runs.pp_quick_results runs
+    Format.asprintf
+      "@[<v>Using:@;\
+       - Tool: `%s`@;\
+       - Timeout: `%F`@;\
+       - Output dir: `%a`@]@\n\
+       @\n\
+       Results:@\n\
+       @\n\
+       %a@\n\
+       @\n\
+       Time stats (in seconds):@\n\
+       @\n\
+       %a@."
+      reference_name timeout Fpath.pp output_dir Report.Runs.pp_table_results
+      runs Report.Runs.pp_table_statistics runs
   in
   (* Notify on `ZULIP_WEBHOOK` *)
   match Bos.OS.Env.var "ZULIP_WEBHOOK" with

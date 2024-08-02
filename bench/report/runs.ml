@@ -108,6 +108,31 @@ let pp_quick_results fmt results =
     "Nothing: %6i    Reached: %6i    Timeout: %6i    Other: %6i    Killed: %6i"
     !nothing !reached !timeout !other !killed
 
+let pp_table_results fmt results =
+  let nothing = count_nothing results in
+  let reached = count_reached results in
+  let timeout = count_timeout results in
+  let other = count_other results in
+  let killed = count_killed results in
+  let total = count_all results in
+  Format.fprintf fmt
+    "| Nothing | Reached | Timeout | Other | Killed | Total |@\n\
+     |:-------:|:-------:|:-------:|:-----:|:------:|:-----:|@\n\
+     | %6i | %6i | %6i | %6i | %6i | %6i |" nothing reached timeout other killed
+    total
+
+let pp_table_statistics fmt results =
+  let total = sum_clock results in
+  let mean = mean_clock results in
+  let median = median_clock results in
+  let min = min_clock results in
+  let max = max_clock results in
+  Format.fprintf fmt
+    "| Total | Mean | Median | Min | Max |@\n\
+     |:-----:|:----:|:------:|:---:|:---:|@\n\
+     | %0.2f | %0.2f | %0.2f | %0.2f | %0.2f |@\n"
+    total mean median min max
+
 let map = List.map
 
 let files = List.map (fun run -> run.Run.file)
