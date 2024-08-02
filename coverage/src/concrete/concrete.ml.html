@@ -174,21 +174,21 @@ type thread = unit
 module Choice = Concrete_choice
 
 let select cond ~if_true ~if_false =
-  <span data-count="462">i</span>f cond then <span data-count="234">C</span>hoice.return if_true else <span data-count="228">C</span>hoice.return if_false
+  <span data-count="465">i</span>f cond then <span data-count="237">C</span>hoice.return if_true else <span data-count="228">C</span>hoice.return if_false
 [@@inline]
 
 module Elem = struct
   type t = Link_env.elem
 
-  let get (e : t) i = <span data-count="2282">e</span>.value.(i)
+  let get (e : t) i = <span data-count="2399">e</span>.value.(i)
 
-  let size (e : t) = <span data-count="761">A</span>rray.length e.value
+  let size (e : t) = <span data-count="889">A</span>rray.length e.value
 end
 
 module Data = struct
   type t = Link_env.data
 
-  let value data = <span data-count="376">d</span>ata.Link_env.value
+  let value data = <span data-count="464">d</span>ata.Link_env.value
 end
 
 module Env = struct
@@ -203,8 +203,8 @@ module Env = struct
   let get_elem = Link_env.get_elem
 
   let get_data env n =
-    <span data-count="654">l</span>et data = Link_env.get_data env n in
-    <span data-count="654">C</span>hoice.return data
+    <span data-count="816">l</span>et data = Link_env.get_data env n in
+    <span data-count="816">C</span>hoice.return data
 
   let get_global = Link_env.get_global
 
@@ -219,11 +219,11 @@ module Module_to_run = struct
   (** runnable module *)
   type t = Concrete_value.Func.extern_func Link.module_to_run
 
-  let env (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="978">t</span>.env
+  let env (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="1219">t</span>.env
 
-  let modul (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="910">t</span>.modul
+  let modul (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="1125">t</span>.modul
 
-  let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="2586">t</span>.to_run
+  let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = <span data-count="2761">t</span>.to_run
 end
 </code></pre>
       </div>

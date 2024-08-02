@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>result.ml &mdash; Coverage report</title>
+    <meta name="description" content="73.33% coverage in src/utils/result.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/utils/</span>result.ml
+        </a>
+      </h1>
+      <h2>73.33%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:46.88%"></span>
+      <span class="unvisited" style="bottom:46.09%"></span>
+      <span class="unvisited" style="bottom:45.31%"></span>
+      <span class="unvisited" style="bottom:43.75%"></span>
+      <span class="unvisited" style="bottom:42.97%"></span>
+      <span class="unvisited" style="bottom:21.88%"></span>
+      <span class="unvisited" style="bottom:17.97%"></span>
+      <span class="unvisited" style="bottom:17.19%"></span>
+      <span class="unvisited" style="bottom:15.62%"></span>
+      <span class="unvisited" style="bottom:14.84%"></span>
+      <span class="unvisited" style="bottom:14.06%"></span>
+      <span class="unvisited" style="bottom:5.47%"></span>
+      <span class="unvisited" style="bottom:4.69%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="unvisited"> </span>
+<a id="L69"></a><span class="unvisited"> </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="unvisited"> </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="unvisited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span > </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="unvisited"> </span>
+<a id="L106"></a><span class="unvisited"> </span>
+<a id="L107"></a><span class="visited"> </span>
+<a id="L108"></a><span class="unvisited"> </span>
+<a id="L109"></a><span class="unvisited"> </span>
+<a id="L110"></a><span class="unvisited"> </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="unvisited"> </span>
+<a id="L122"></a><span class="unvisited"> </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span class="visited"> </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span class="unvisited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+include Prelude.Result
+
+type err =
+  [ `Alignment_too_large
+  | `Assert_failure
+  | `Bad_result
+  | `Call_stack_exhausted
+  | `Constant_expression_required
+  | `Constant_out_of_range
+  | `Did_not_fail_but_expected of string
+  | `Duplicate_export_name
+  | `Duplicate_global of string
+  | `Duplicate_local of string
+  | `Duplicate_memory of string
+  | `Duplicate_table of string
+  | `Failed_with_but_expected of err * string
+  | `Found_bug of int
+  | `Global_is_immutable
+  | `Illegal_escape of string
+  | `Import_after_function
+  | `Import_after_global
+  | `Import_after_memory
+  | `Import_after_table
+  | `Incompatible_import_type
+  | `Inline_function_type
+  | `Invalid_result_arity
+  | `Lexer_unknown_operator of string
+  | `Malformed_utf8_encoding of string
+  | `Memory_size_too_large
+  | `Msg of string
+  | `Multiple_memories
+  | `Multiple_start_sections
+  | `No_error
+  | `Parse_fail of string
+  | `Size_minimum_greater_than_maximum
+  | `Start_function
+  | `Timeout
+  | `Trap of Trap.t
+  | `Type_mismatch of string
+  | `Unbound_last_module
+  | `Unbound_module of string
+  | `Unbound_name of string
+  | `Undeclared_function_reference
+  | `Unexpected_token of string
+  | `Unknown_data of Types.text Types.indice
+  | `Unknown_elem of Types.text Types.indice
+  | `Unknown_func of Types.text Types.indice
+  | `Unknown_global of Types.text Types.indice
+  | `Unknown_import of string * string
+  | `Unknown_label of Types.text Types.indice
+  | `Unknown_local of Types.text Types.indice
+  | `Unknown_memory of Types.text Types.indice
+  | `Unknown_module of string
+  | `Unknown_operator
+  | `Unknown_table of Types.text Types.indice
+  | `Unknown_type of Types.text Types.indice
+  | `Unsupported_file_extension of string
+  ]
+
+type 'a t = ('a, err) Prelude.Result.t
+
+let rec err_to_string = function
+  | <span data-count="76">`</span>Alignment_too_large -&gt; "alignment must not be larger than natural"
+  | <span data-count="0">`</span>Assert_failure -&gt; "script assert failure"
+  | <span data-count="0">`</span>Bad_result -&gt; "bad result"
+  | <span data-count="0">`</span>Call_stack_exhausted -&gt; "call stack exhausted"
+  | <span data-count="65">`</span>Constant_expression_required -&gt; "constant expression required"
+  | <span data-count="0">`</span>Constant_out_of_range -&gt; "constant out of range"
+  | <span data-count="0">`</span>Did_not_fail_but_expected expected -&gt;
+    Fmt.str "expected %s but there was no error" expected
+  | <span data-count="38">`</span>Duplicate_export_name -&gt; "duplicate export name"
+  | <span data-count="18">`</span>Duplicate_global id -&gt; Fmt.str "duplicate global %s" id
+  | <span data-count="12">`</span>Duplicate_local id -&gt; Fmt.str "duplicate local %s" id
+  | <span data-count="12">`</span>Duplicate_memory id -&gt; Fmt.str "duplicate memory %s" id
+  | <span data-count="12">`</span>Duplicate_table id -&gt; Fmt.str "duplicate table %s" id
+  | <span data-count="2">`</span>Failed_with_but_expected (got, expected) -&gt;
+    Fmt.str "expected %s but got (%s)" expected (err_to_strin<span data-count="2">g</span> got)
+  | <span data-count="176">`</span>Found_bug n -&gt;
+    if n &gt; 1 then <span data-count="8">F</span>mt.str "Reached %d problems!" n
+    else <span data-count="168">F</span>mt.str "Reached problem!"
+  | <span data-count="6">`</span>Global_is_immutable -&gt; "global is immutable"
+  | <span data-count="4">`</span>Illegal_escape txt -&gt; Fmt.str "illegal escape %S" txt
+  | <span data-count="8">`</span>Import_after_function -&gt; "import after function"
+  | <span data-count="8">`</span>Import_after_global -&gt; "import after global"
+  | <span data-count="8">`</span>Import_after_memory -&gt; "import after memory"
+  | <span data-count="8">`</span>Import_after_table -&gt; "import after table"
+  | <span data-count="144">`</span>Incompatible_import_type -&gt; "incompatible import type"
+  | <span data-count="48">`</span>Inline_function_type -&gt; "inline function type"
+  | <span data-count="4">`</span>Invalid_result_arity -&gt; "invalid result arity"
+  | <span data-count="816">`</span>Lexer_unknown_operator op -&gt; Fmt.str "unknown operator %s" op
+  | <span data-count="2112">`</span>Malformed_utf8_encoding txt -&gt; Fmt.str "malformed UTF-8 encoding %S" txt
+  | <span data-count="12">`</span>Memory_size_too_large -&gt; "memory size must be at most 65536 pages (4GiB)"
+  | <span data-count="8622">`</span>Msg msg -&gt; msg
+  | <span data-count="10">`</span>Multiple_memories -&gt; "multiple memories"
+  | <span data-count="2">`</span>Multiple_start_sections -&gt; "multiple start sections"
+  | <span data-count="0">`</span>No_error -&gt; "no error"
+  | <span data-count="620">`</span>Parse_fail msg -&gt; msg
+  | <span data-count="6">`</span>Size_minimum_greater_than_maximum -&gt;
+    "size minimum must not be greater than maximum"
+  | <span data-count="8">`</span>Start_function -&gt; "start function must have type [] -&gt; []"
+  | <span data-count="0">`</span>Timeout -&gt; "timeout"
+  | <span data-count="0">`</span>Trap t -&gt; Fmt.str "trap: %s" (Trap.to_strin<span data-count="0">g</span> t)
+  | <span data-count="5214">`</span>Type_mismatch msg -&gt; Fmt.str "type mismatch (%s)" msg
+  | <span data-count="0">`</span>Unbound_last_module -&gt; "unbound last module"
+  | <span data-count="0">`</span>Unbound_module id -&gt; Fmt.str "unbound module %s" id
+  | <span data-count="0">`</span>Unbound_name id -&gt; Fmt.str "unbound name %s" id
+  | <span data-count="4">`</span>Undeclared_function_reference -&gt; "undeclared function reference"
+  | <span data-count="274">`</span>Unexpected_token s -&gt; Fmt.str "unexpected token %S" s
+  | <span data-count="10">`</span>Unknown_data id -&gt; Fmt.str "unknown data segment %a" Types.pp_indice id
+  | <span data-count="4">`</span>Unknown_elem id -&gt; Fmt.str "unknown elem segment %a" Types.pp_indice id
+  | <span data-count="44">`</span>Unknown_func id -&gt; Fmt.str "unknown function %a" Types.pp_indice id
+  | <span data-count="130">`</span>Unknown_global id -&gt; Fmt.str "unknown global %a" Types.pp_indice id
+  | <span data-count="44">`</span>Unknown_import (modul, value) -&gt; Fmt.str "unknown import %S %S" modul value
+  | <span data-count="73">`</span>Unknown_label id -&gt; Fmt.str "unknown label %a" Types.pp_indice id
+  | <span data-count="76">`</span>Unknown_local id -&gt; Fmt.str "unknown local %a" Types.pp_indice id
+  | <span data-count="75">`</span>Unknown_memory id -&gt; Fmt.str "unknown memory %a" Types.pp_indice id
+  | <span data-count="0">`</span>Unknown_module name -&gt; Fmt.str "unknown module %s" name
+  | <span data-count="0">`</span>Unknown_operator -&gt; Fmt.str "unknown operator"
+  | <span data-count="46">`</span>Unknown_table id -&gt; Fmt.str "unknown table %a" Types.pp_indice id
+  | <span data-count="38">`</span>Unknown_type id -&gt; Fmt.str "unknown type %a" Types.pp_indice id
+  | <span data-count="2">`</span>Unsupported_file_extension ext -&gt;
+    Fmt.str "unsupported file_extension %S" ext
+
+let failwith e = <span data-count="0">F</span>mt.failwith "%s" (err_to_strin<span data-count="0">g</span> e)
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

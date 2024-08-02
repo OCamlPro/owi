@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concolic_choice.ml &mdash; Coverage report</title>
-    <meta name="description" content="45.24% coverage in src/concolic/concolic_choice.ml">
+    <meta name="description" content="60.71% coverage in src/concolic/concolic_choice.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/concolic/</span>concolic_choice.ml
         </a>
       </h1>
-      <h2>45.24%</h2>
+      <h2>60.71%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:11.32%"></span>
@@ -25,25 +25,18 @@
       <span class="unvisited" style="top:14.47%"></span>
       <span class="unvisited" style="top:16.35%"></span>
       <span class="unvisited" style="top:17.61%"></span>
-      <span class="some-visited" style="top:20.13%"></span>
       <span class="unvisited" style="top:20.75%"></span>
       <span class="unvisited" style="top:21.38%"></span>
       <span class="unvisited" style="top:22.01%"></span>
       <span class="unvisited" style="bottom:45.28%"></span>
       <span class="unvisited" style="bottom:42.77%"></span>
-      <span class="some-visited" style="bottom:38.99%"></span>
       <span class="some-visited" style="bottom:35.22%"></span>
       <span class="unvisited" style="bottom:32.70%"></span>
       <span class="unvisited" style="bottom:30.82%"></span>
       <span class="unvisited" style="bottom:28.30%"></span>
       <span class="unvisited" style="bottom:27.04%"></span>
       <span class="unvisited" style="bottom:26.42%"></span>
-      <span class="unvisited" style="bottom:24.53%"></span>
-      <span class="unvisited" style="bottom:22.64%"></span>
-      <span class="unvisited" style="bottom:22.01%"></span>
-      <span class="unvisited" style="bottom:20.75%"></span>
-      <span class="unvisited" style="bottom:20.13%"></span>
-      <span class="unvisited" style="bottom:17.61%"></span>
+      <span class="some-visited" style="bottom:20.75%"></span>
       <span class="unvisited" style="bottom:0.63%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
@@ -81,7 +74,7 @@
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="some-visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span class="unvisited"> </span>
 <a id="L34"></a><span class="unvisited"> </span>
 <a id="L35"></a><span class="unvisited"> </span>
@@ -146,7 +139,7 @@
 <a id="L94"></a><span > </span>
 <a id="L95"></a><span > </span>
 <a id="L96"></a><span class="visited"> </span>
-<a id="L97"></a><span class="some-visited"> </span>
+<a id="L97"></a><span class="visited"> </span>
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span > </span>
 <a id="L100"></a><span class="visited"> </span>
@@ -169,18 +162,18 @@
 <a id="L117"></a><span class="unvisited"> </span>
 <a id="L118"></a><span > </span>
 <a id="L119"></a><span > </span>
-<a id="L120"></a><span class="unvisited"> </span>
+<a id="L120"></a><span class="visited"> </span>
 <a id="L121"></a><span > </span>
 <a id="L122"></a><span > </span>
-<a id="L123"></a><span class="unvisited"> </span>
-<a id="L124"></a><span class="unvisited"> </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span class="visited"> </span>
 <a id="L125"></a><span > </span>
-<a id="L126"></a><span class="unvisited"> </span>
-<a id="L127"></a><span class="unvisited"> </span>
+<a id="L126"></a><span class="some-visited"> </span>
+<a id="L127"></a><span class="visited"> </span>
 <a id="L128"></a><span > </span>
 <a id="L129"></a><span class="visited"> </span>
 <a id="L130"></a><span > </span>
-<a id="L131"></a><span class="unvisited"> </span>
+<a id="L131"></a><span class="visited"> </span>
 <a id="L132"></a><span > </span>
 <a id="L133"></a><span > </span>
 <a id="L134"></a><span class="visited"> </span>
@@ -390,26 +383,26 @@ type pc_elt =
   | Assert of Symbolic_value.vbool
 
 let pp_pc_elt fmt = function
-  | <span data-count="0">S</span>elect (c, v) -&gt; Format.pp fmt "Select(%a, %b)" Smtml.Expr.pp c v
-  | <span data-count="0">S</span>elect_i32 (c, v) -&gt; Format.pp fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
-  | <span data-count="0">A</span>ssume c -&gt; Format.pp fmt "Assume(%a)" Smtml.Expr.pp c
-  | <span data-count="0">A</span>ssert c -&gt; Format.pp fmt "Assert(%a)" Smtml.Expr.pp c
+  | <span data-count="0">S</span>elect (c, v) -&gt; Fmt.pf fmt "Select(%a, %b)" Smtml.Expr.pp c v
+  | <span data-count="0">S</span>elect_i32 (c, v) -&gt; Fmt.pf fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
+  | <span data-count="0">A</span>ssume c -&gt; Fmt.pf fmt "Assume(%a)" Smtml.Expr.pp c
+  | <span data-count="0">A</span>ssert c -&gt; Fmt.pf fmt "Assert(%a)" Smtml.Expr.pp c
 
-let pp_pc fmt pc = <span data-count="0">L</span>ist.iter (fun e -&gt; <span data-count="0">F</span>ormat.pp fmt "  %a@\n" pp_pc_elt e) pc
+let pp_pc fmt pc = <span data-count="0">L</span>ist.iter (fun e -&gt; <span data-count="0">F</span>mt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
 let pp_assignments fmt assignments =
   <span data-count="0">L</span>ist.iter
     (fun (sym, v) -&gt;
-      <span data-count="0">F</span>ormat.pp fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
+      <span data-count="0">F</span>mt.pf fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
     assignments
 
 let pc_elt_to_expr = function
-  | <span data-count="1">S</span>elect (c, v) -&gt; Some (if v then <span data-count="1">c</span> else <span data-count="0">S</span>mtml.Expr.Bool.no<span data-count="0">t</span> c)
+  | <span data-count="13">S</span>elect (c, v) -&gt; Some (if v then <span data-count="8">c</span> else <span data-count="5">S</span>mtml.Expr.Bool.no<span data-count="5">t</span> c)
   | <span data-count="0">S</span>elect_i32 (c, n) -&gt; Some Smtml.Expr.Bitv.I32.(c = <span data-count="0">v</span> n)
   | <span data-count="0">A</span>ssume c -&gt; Some c
   | <span data-count="0">A</span>ssert _ -&gt; None
 
-let pc_to_exprs pc = <span data-count="4">L</span>ist.filter_map pc_elt_to_expr pc
+let pc_to_exprs pc = <span data-count="18">L</span>ist.filter_map pc_elt_to_expr pc
 
 type pc = pc_elt list
 
@@ -428,30 +421,30 @@ type thread =
   }
 
 let init_thread preallocated_values shared =
-  <span data-count="3">{</span> symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
+  <span data-count="15">{</span> symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
 
-type 'a run_result = ('a, err) Stdlib.Result.t * thread
+type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="50">M</span> (fun t -&gt; <span data-count="50">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="462">M</span> (fun t -&gt; <span data-count="462">(</span>Ok v, t)) [@@inline]
 
-let run (M v) st : _ run_result = <span data-count="112">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="1082">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="58">M</span>
+  <span data-count="548">M</span>
     (fun init_s -&gt;
-      <span data-count="58">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="58">m</span>atch v_final with
-      | <span data-count="54">O</span>k v_final -&gt; run (<span data-count="54">f</span> v_final) tmp_st
-      | <span data-count="4">E</span>rror _ as e -&gt; (e, tmp_st) )
+      <span data-count="548">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="548">m</span>atch v_final with
+      | <span data-count="534">O</span>k v_final -&gt; run (<span data-count="534">f</span> v_final) tmp_st
+      | <span data-count="14">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="15">l</span>et* v in
-  <span data-count="12">r</span>eturn (<span data-count="12">f</span> v)
+  <span data-count="117">l</span>et* v in
+  <span data-count="106">r</span>eturn (<span data-count="106">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
@@ -465,17 +458,17 @@ let abort =
 let add_pc (c : Concolic_value.V.vbool) =
   <span data-count="0">M</span> (fun st -&gt; <span data-count="0">(</span>Ok (), { st with pc = Assume c.symbolic :: st.pc }))
 
-let add_pc_to_thread (st : thread) c = <span data-count="3">{</span> st with pc = c :: st.pc }
+let add_pc_to_thread (st : thread) c = <span data-count="14">{</span> st with pc = c :: st.pc }
 
 let no_choice e =
-  <span data-count="3">l</span>et v = Smtml.Expr.simplify e in
-  <span data-count="3">m</span>atch Smtml.Expr.view v with <span data-count="0">V</span>al _ -&gt; true | <span data-count="3">_</span> -&gt; false
+  <span data-count="28">l</span>et v = Smtml.Expr.simplify e in
+  <span data-count="28">m</span>atch Smtml.Expr.view v with <span data-count="14">V</span>al _ -&gt; true | <span data-count="14">_</span> -&gt; false
 
 let select (vb : Concolic_value.V.vbool) =
-  <span data-count="3">l</span>et r = vb.concrete in
+  <span data-count="14">l</span>et r = vb.concrete in
   let cond = Select (vb.symbolic, r) in
   let no_choice = no_choice vb.symbolic in
-  <span data-count="3">M</span> (fun st -&gt; <span data-count="3">(</span>Ok r, if no_choice then <span data-count="0">s</span>t else <span data-count="3">a</span>dd_pc_to_threa<span data-count="3">d</span> st cond))
+  <span data-count="14">M</span> (fun st -&gt; <span data-count="14">(</span>Ok r, if no_choice then <span data-count="0">s</span>t else <span data-count="14">a</span>dd_pc_to_threa<span data-count="14">d</span> st cond))
 [@@inline]
 
 let select_i32 (i : Concolic_value.V.int32) =
@@ -492,27 +485,27 @@ let assume (vb : Concolic_value.V.vbool) =
   else <span data-count="0">M</span> (fun st -&gt; <span data-count="0">(</span>Error (Assume_fail vb.symbolic), st))
 
 let assertion (vb : Concolic_value.V.vbool) =
-  <span data-count="0">l</span>et assert_pc = Assert vb.symbolic in
+  <span data-count="15">l</span>et assert_pc = Assert vb.symbolic in
   let r = vb.concrete in
   if r then
-    <span data-count="0">l</span>et no_choice = no_choice vb.symbolic in
-    <span data-count="0">M</span>
+    <span data-count="14">l</span>et no_choice = no_choice vb.symbolic in
+    <span data-count="14">M</span>
       (fun st -&gt;
-        <span data-count="0">(</span>Ok (), if no_choice then <span data-count="0">s</span>t else <span data-count="0">a</span>dd_pc_to_threa<span data-count="0">d</span> st assert_pc) )
-  else <span data-count="0">M</span> (fun st -&gt; <span data-count="0">(</span>Error (Assume_fail vb.symbolic), st))
+        <span data-count="14">(</span>Ok (), if no_choice then <span data-count="14">s</span>t else <span data-count="0">a</span>dd_pc_to_threa<span data-count="0">d</span> st assert_pc) )
+  else <span data-count="1">M</span> (fun st -&gt; <span data-count="1">(</span>Error Assert_fail, st))
 
-let trap t = <span data-count="1">M</span> (fun th -&gt; <span data-count="1">(</span>Error (Trap t), th))
+let trap t = <span data-count="2">M</span> (fun th -&gt; <span data-count="2">(</span>Error (Trap t), th))
 
-let with_thread f = <span data-count="0">M</span> (fun st -&gt; <span data-count="0">(</span>Ok (<span data-count="0">f</span> st), st))
+let with_thread f = <span data-count="42">M</span> (fun st -&gt; <span data-count="42">(</span>Ok (<span data-count="42">f</span> st), st))
 
 let with_new_symbol ty f =
-  <span data-count="3">M</span>
+  <span data-count="14">M</span>
     (fun st -&gt;
-      <span data-count="3">l</span>et id = st.symbols + 1 in
-      let sym = Format.kasprintf (Smtml.Symbol.mak<span data-count="3">e</span> ty) "symbol_%d" id in
-      <span data-count="3">l</span>et value = Hashtbl.find_opt st.preallocated_values sym in
-      <span data-count="3">l</span>et concrete, v = f sym value in
-      <span data-count="3">l</span>et st =
+      <span data-count="14">l</span>et id = st.symbols + 1 in
+      let sym = Fmt.kstr (Smtml.Symbol.mak<span data-count="14">e</span> ty) "symbol_%d" id in
+      <span data-count="14">l</span>et value = Hashtbl.find_opt st.preallocated_values sym in
+      <span data-count="14">l</span>et concrete, v = f sym value in
+      <span data-count="14">l</span>et st =
         { st with
           symbols = st.symbols + 1
         ; symbols_value = (sym, concrete) :: st.symbols_value
@@ -521,13 +514,13 @@ let with_new_symbol ty f =
       (Ok v, st) )
 
 let run preallocated_values (M v) : _ run_result =
-  <span data-count="3">l</span>et shared =
-    { memories = Symbolic_memory.ini<span data-count="3">t</span> ()
-    ; tables = Symbolic_table.ini<span data-count="3">t</span> ()
-    ; globals = Symbolic_global.ini<span data-count="3">t</span> ()
+  <span data-count="15">l</span>et shared =
+    { memories = Symbolic_memory.ini<span data-count="15">t</span> ()
+    ; tables = Symbolic_table.ini<span data-count="15">t</span> ()
+    ; globals = Symbolic_global.ini<span data-count="15">t</span> ()
     }
   in
-  v (init_threa<span data-count="3">d</span> preallocated_values shared)
+  v (init_threa<span data-count="15">d</span> preallocated_values shared)
 
 let run' t : _ run_result =
   <span data-count="0">l</span>et preallocated_values = Hashtbl.create 0 in

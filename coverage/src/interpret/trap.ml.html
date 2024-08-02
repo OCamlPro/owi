@@ -18,10 +18,10 @@
       <h2>69.23%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:17.65%"></span>
-      <span class="unvisited" style="bottom:8.82%"></span>
-      <span class="unvisited" style="bottom:5.88%"></span>
-      <span class="unvisited" style="bottom:2.94%"></span>
+      <span class="unvisited" style="bottom:18.18%"></span>
+      <span class="unvisited" style="bottom:9.09%"></span>
+      <span class="unvisited" style="bottom:6.06%"></span>
+      <span class="unvisited" style="bottom:3.03%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -50,16 +50,15 @@
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="unvisited"> </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span class="visited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
 <a id="L31"></a><span class="unvisited"> </span>
 <a id="L32"></a><span class="unvisited"> </span>
-<a id="L33"></a><span class="unvisited"> </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -97,7 +96,6 @@
 <a href="#L31">31</a>
 <a href="#L32">32</a>
 <a href="#L33">33</a>
-<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -119,15 +117,14 @@ type t =
   | Memory_heap_buffer_overflow
 
 let to_string = function
-  | <span data-count="176">O</span>ut_of_bounds_table_access -&gt; "out of bounds table access"
-  | <span data-count="619">O</span>ut_of_bounds_memory_access -&gt; "out of bounds memory access"
-  | <span data-count="60">U</span>ndefined_element -&gt; "undefined element"
-  | <span data-count="3531">U</span>ninitialized_element fun_i -&gt;
-    Printf.sprintf "uninitialized element %i" fun_i
+  | <span data-count="190">O</span>ut_of_bounds_table_access -&gt; "out of bounds table access"
+  | <span data-count="633">O</span>ut_of_bounds_memory_access -&gt; "out of bounds memory access"
+  | <span data-count="61">U</span>ndefined_element -&gt; "undefined element"
+  | <span data-count="3536">U</span>ninitialized_element fun_i -&gt; Fmt.str "uninitialized element %i" fun_i
   | <span data-count="14">I</span>nteger_overflow -&gt; "integer overflow"
   | <span data-count="90">I</span>nteger_divide_by_zero -&gt; "integer divide by zero"
   | <span data-count="0">E</span>lement_type_error -&gt; "element_type_error"
-  | <span data-count="288">U</span>nreachable -&gt; "unreachable"
+  | <span data-count="290">U</span>nreachable -&gt; "unreachable"
   | <span data-count="33">I</span>ndirect_call_type_mismatch -&gt; "indirect call type mismatch"
   | <span data-count="0">E</span>xtern_call_arg_type_mismatch -&gt; "extern call arg type mismatch"
   | <span data-count="0">E</span>xtern_call_null_arg -&gt; "extern call null arg"

@@ -1134,7 +1134,7 @@ open Binary
 open Types
 
 let rec optimize_expr expr : bool * binary instr list =
-  <span data-count="59701">m</span>atch expr with
+  <span data-count="60205">m</span>atch expr with
   | <span data-count="71">(</span>(<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as x)
     :: ((<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as y)
     :: (I_binop (nn, op) as i_binop)
@@ -1202,17 +1202,17 @@ let rec optimize_expr expr : bool * binary instr list =
         <span data-count="14">(</span>true, e)
       | _ -&gt; assert false
     end
-  | <span data-count="2">(</span>(<span data-count="1">I</span>32_const _ | <span data-count="1">I</span>64_const _) as x) :: I_testop (nn, op) :: tl -&gt;
+  | <span data-count="3">(</span>(<span data-count="2">I</span>32_const _ | <span data-count="1">I</span>64_const _) as x) :: I_testop (nn, op) :: tl -&gt;
     let result =
-      Interpret.Concrete.exec_itestop [ Concrete_value.of_inst<span data-count="2">r</span> x ] nn op
+      Interpret.Concrete.exec_itestop [ Concrete_value.of_inst<span data-count="3">r</span> x ] nn op
     in
-    <span data-count="2">b</span>egin
+    <span data-count="3">b</span>egin
       match result with
-      | <span data-count="2">[</span> (I32 _ as result) ] -&gt;
+      | <span data-count="3">[</span> (I32 _ as result) ] -&gt;
         let _has_changed, e =
-          optimize_expr (Concrete_value.to_inst<span data-count="2">r</span> result :: tl)
+          optimize_expr (Concrete_value.to_inst<span data-count="3">r</span> result :: tl)
         in
-        <span data-count="2">(</span>true, e)
+        <span data-count="3">(</span>true, e)
       | _ -&gt; assert false
     end
   | <span data-count="20">(</span>(<span data-count="10">I</span>32_const _ | <span data-count="10">I</span>64_const _) as x)
@@ -1354,14 +1354,14 @@ let rec optimize_expr expr : bool * binary instr list =
         <span data-count="8">(</span>true, e)
       | _ -&gt; assert false
     end
-  | <span data-count="64">(</span>(<span data-count="32">F</span>32_const _ | <span data-count="32">F</span>64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl -&gt;
+  | <span data-count="80">(</span>(<span data-count="40">F</span>32_const _ | <span data-count="40">F</span>64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl -&gt;
     let result =
-      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_inst<span data-count="64">r</span> x ] nn nn'
+      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_inst<span data-count="80">r</span> x ] nn nn'
     in
-    <span data-count="64">b</span>egin
+    <span data-count="80">b</span>egin
       match result with
-      | <span data-count="64">[</span> ((<span data-count="32">I</span>32 _ | <span data-count="32">I</span>64 _) as result) ] -&gt;
-        optimize_expr (Concrete_value.to_inst<span data-count="64">r</span> result :: tl)
+      | <span data-count="80">[</span> ((<span data-count="40">I</span>32 _ | <span data-count="40">I</span>64 _) as result) ] -&gt;
+        optimize_expr (Concrete_value.to_inst<span data-count="80">r</span> result :: tl)
       | _ -&gt; assert false
     end
   | <span data-count="3">(</span>(<span data-count="1">I</span>32_const _ | <span data-count="2">I</span>64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl -&gt;
@@ -1380,8 +1380,8 @@ let rec optimize_expr expr : bool * binary instr list =
   | <span data-count="525">(</span><span data-count="308">I</span>32_const _ | <span data-count="59">I</span>64_const _ | <span data-count="73">F</span>32_const _ | <span data-count="85">F</span>64_const _) :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
     <span data-count="525">(</span>true, e)
-  | <span data-count="172">L</span>ocal_set x :: Local_get y :: tl when x = y -&gt;
-    <span data-count="62">l</span>et _has_changed, e = optimize_expr (Local_tee x :: tl) in
+  | <span data-count="172">L</span>ocal_set (Raw x) :: Local_get (Raw y) :: tl when x = y -&gt;
+    <span data-count="62">l</span>et _has_changed, e = optimize_expr (Local_tee (Raw x) :: tl) in
     <span data-count="62">(</span>true, e)
   | <span data-count="11">L</span>ocal_get _ :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
@@ -1389,7 +1389,7 @@ let rec optimize_expr expr : bool * binary instr list =
   | <span data-count="2">G</span>lobal_get _ :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
     <span data-count="2">(</span>true, e)
-  | <span data-count="107">(</span>Br _ as br) :: _ :: _ -&gt; (true, [ br ])
+  | <span data-count="108">(</span>Br _ as br) :: _ :: _ -&gt; (true, [ br ])
   | <span data-count="80">I</span>32_const c :: Br_if l :: tl -&gt; begin
     match c with
     | <span data-count="4">0</span>l -&gt;
@@ -1403,9 +1403,9 @@ let rec optimize_expr expr : bool * binary instr list =
   | <span data-count="1">R</span>ef_null _ :: Ref_is_null :: tl -&gt;
     let _has_changed, e = optimize_expr (I32_const 1l :: tl) in
     <span data-count="1">(</span>true, e)
-  | <span data-count="212">N</span>op :: tl -&gt;
+  | <span data-count="224">N</span>op :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
-    <span data-count="212">(</span>true, e)
+    <span data-count="224">(</span>true, e)
   | <span data-count="9">(</span>(<span data-count="3">I</span>32_const _ | <span data-count="2">I</span>64_const _ | <span data-count="2">F</span>32_const _ | <span data-count="2">F</span>64_const _) as v1)
     :: ((<span data-count="3">I</span>32_const _ | <span data-count="2">I</span>64_const _ | <span data-count="2">F</span>32_const _ | <span data-count="2">F</span>64_const _) as v2)
     :: I32_const c
@@ -1417,14 +1417,14 @@ let rec optimize_expr expr : bool * binary instr list =
     in
     (true, e)
   end
-  | <span data-count="1922">B</span>lock (n, bt, e) :: tl -&gt; begin
+  | <span data-count="1934">B</span>lock (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
-    | <span data-count="27">h</span>as_changed, [] -&gt;
+    | <span data-count="29">h</span>as_changed, [] -&gt;
       let has_changed', e = optimize_expr tl in
-      <span data-count="27">(</span>has_change<span data-count="4">d</span> || has_changed<span data-count="16">'</span>, e)
-    | <span data-count="1895">h</span>as_changed, oe -&gt;
+      <span data-count="29">(</span>has_change<span data-count="4">d</span> || has_changed<span data-count="17">'</span>, e)
+    | <span data-count="1905">h</span>as_changed, oe -&gt;
       let has_changed', e = optimize_expr tl in
-      <span data-count="1895">(</span>has_change<span data-count="279">d</span> || has_changed<span data-count="59">'</span>, Block (n, bt, oe) :: e)
+      <span data-count="1905">(</span>has_change<span data-count="279">d</span> || has_changed<span data-count="59">'</span>, Block (n, bt, oe) :: e)
   end
   | <span data-count="469">L</span>oop (n, bt, e) :: tl -&gt; begin
     match optimize_expr e with
@@ -1435,9 +1435,9 @@ let rec optimize_expr expr : bool * binary instr list =
       let has_changed', e = optimize_expr tl in
       <span data-count="461">(</span>has_change<span data-count="35">d</span> || has_changed<span data-count="18">'</span>, Loop (n, bt, oe) :: e)
   end
-  | <span data-count="32">I</span>32_const 0l :: If_else (n, bt, _e1, e2) :: tl -&gt;
+  | <span data-count="34">I</span>32_const 0l :: If_else (n, bt, _e1, e2) :: tl -&gt;
     let _has_changed, e = optimize_expr (Block (n, bt, e2) :: tl) in
-    <span data-count="32">(</span>true, e)
+    <span data-count="34">(</span>true, e)
   | <span data-count="32">I</span>32_const _ :: If_else (n, bt, e1, _e2) :: tl -&gt;
     let _has_changed, e = optimize_expr (Block (n, bt, e1) :: tl) in
     <span data-count="32">(</span>true, e)
@@ -1453,49 +1453,49 @@ let rec optimize_expr expr : bool * binary instr list =
       <span data-count="475">(</span> has_changed<span data-count="7">1</span> || has_changed<span data-count="3">2</span> || has_changed<span data-count="2">'</span>
       , If_else (n, bt, oe1, oe2) :: e )
   end
-  | <span data-count="42517">h</span>d :: tl -&gt;
+  | <span data-count="42797">h</span>d :: tl -&gt;
     let has_changed, e = optimize_expr tl in
-    <span data-count="42517">(</span>has_changed, hd :: e)
-  | <span data-count="12906">[</span>] -&gt; (false, [])
+    <span data-count="42797">(</span>has_changed, hd :: e)
+  | <span data-count="13086">[</span>] -&gt; (false, [])
 
 let locals_func (body_expr : binary expr) =
-  <span data-count="4609">l</span>et locals_hashtbl = Hashtbl.create 16 in
-  <span data-count="4609">l</span>et rec aux_instr (instr : binary instr) =
-    <span data-count="21523">m</span>atch instr with
-    | <span data-count="3610">L</span>ocal_get ind | <span data-count="1309">L</span>ocal_set ind | <span data-count="171">L</span>ocal_tee ind -&gt;
+  <span data-count="4688">l</span>et locals_hashtbl = Hashtbl.create 16 in
+  <span data-count="4688">l</span>et rec aux_instr (instr : binary instr) =
+    <span data-count="21666">m</span>atch instr with
+    | <span data-count="3617">L</span>ocal_get ind | <span data-count="1309">L</span>ocal_set ind | <span data-count="171">L</span>ocal_tee ind -&gt;
       Hashtbl.replace locals_hashtbl ind ()
-    | <span data-count="762">B</span>lock (_, _, e) -&gt; aux_expr e
+    | <span data-count="767">B</span>lock (_, _, e) -&gt; aux_expr e
     | <span data-count="199">L</span>oop (_, _, e) -&gt; aux_expr e
     | <span data-count="226">I</span>f_else (_, _, e1, e2) -&gt;
       aux_expr e1;
       <span data-count="226">a</span>ux_expr e2
     | <span data-count="1">I</span>64_extend32_s | <span data-count="14">I</span>32_wrap_i64 | <span data-count="8">F</span>32_demote_f64 | <span data-count="15">F</span>64_promote_f32
     | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="276">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="65">M</span>emory_grow
-    | <span data-count="117">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="96">U</span>nreachable | <span data-count="202">R</span>eturn | <span data-count="0">A</span>rray_len
+    | <span data-count="117">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="123">U</span>nreachable | <span data-count="205">R</span>eturn | <span data-count="0">A</span>rray_len
     | <span data-count="0">I</span>31_get_u | <span data-count="0">I</span>31_get_s | <span data-count="0">R</span>ef_i31 | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
-    | <span data-count="6779">I</span>32_const _ | <span data-count="335">I</span>64_const _ | <span data-count="365">F</span>32_const _ | <span data-count="369">F</span>64_const _
+    | <span data-count="6808">I</span>32_const _ | <span data-count="343">I</span>64_const _ | <span data-count="365">F</span>32_const _ | <span data-count="370">F</span>64_const _
     | <span data-count="21">I</span>_unop (_, _)
     | <span data-count="108">F</span>_unop (_, _)
-    | <span data-count="454">I</span>_binop (_, _)
+    | <span data-count="455">I</span>_binop (_, _)
     | <span data-count="450">F</span>_binop (_, _)
     | <span data-count="77">I</span>_testop (_, _)
     | <span data-count="191">I</span>_relop (_, _)
     | <span data-count="133">F</span>_relop (_, _)
     | <span data-count="2">I</span>_extend8_s _ | <span data-count="2">I</span>_extend16_s _ | <span data-count="11">I</span>64_extend_i32 _
     | <span data-count="38">I</span>_trunc_f (_, _, _)
-    | <span data-count="8">I</span>_trunc_sat_f (_, _, _)
+    | <span data-count="12">I</span>_trunc_sat_f (_, _, _)
     | <span data-count="53">F</span>_convert_i (_, _, _)
     | <span data-count="23">I</span>_reinterpret_f (_, _)
     | <span data-count="27">F</span>_reinterpret_i (_, _)
     | <span data-count="11">R</span>ef_null _ | <span data-count="16">R</span>ef_func _
     | <span data-count="0">R</span>ef_cast (_, _)
     | <span data-count="0">R</span>ef_test (_, _)
-    | <span data-count="119">S</span>elect _ | <span data-count="63">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
-    | <span data-count="5">T</span>able_size _ | <span data-count="9">T</span>able_grow _ | <span data-count="1">T</span>able_fill _
+    | <span data-count="139">S</span>elect _ | <span data-count="66">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
+    | <span data-count="5">T</span>able_size _ | <span data-count="10">T</span>able_grow _ | <span data-count="2">T</span>able_fill _
     | <span data-count="60">T</span>able_copy (_, _)
     | <span data-count="40">T</span>able_init (_, _)
     | <span data-count="12">E</span>lem_drop _
-    | <span data-count="1151">I</span>_load (_, _)
+    | <span data-count="1152">I</span>_load (_, _)
     | <span data-count="66">F</span>_load (_, _)
     | <span data-count="1136">I</span>_store (_, _)
     | <span data-count="39">F</span>_store (_, _)
@@ -1504,14 +1504,14 @@ let locals_func (body_expr : binary expr) =
     | <span data-count="30">I</span>64_load32 (_, _)
     | <span data-count="51">I</span>_store8 (_, _)
     | <span data-count="30">I</span>_store16 (_, _)
-    | <span data-count="14">I</span>64_store32 _ | <span data-count="27">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="323">B</span>r _ | <span data-count="87">B</span>r_if _
-    | <span data-count="152">B</span>r_table (_, _)
+    | <span data-count="14">I</span>64_store32 _ | <span data-count="27">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="325">B</span>r _ | <span data-count="87">B</span>r_if _
+    | <span data-count="157">B</span>r_table (_, _)
     | <span data-count="0">B</span>r_on_cast (_, _, _)
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
     | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="19">R</span>eturn_call _
     | <span data-count="28">R</span>eturn_call_indirect (_, _)
-    | <span data-count="879">C</span>all _
-    | <span data-count="244">C</span>all_indirect (_, _)
+    | <span data-count="881">C</span>all _
+    | <span data-count="267">C</span>all_indirect (_, _)
     | <span data-count="0">C</span>all_ref _ | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="0">A</span>rray_get _ | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">A</span>rray_new _
     | <span data-count="0">A</span>rray_new_data (_, _)
     | <span data-count="0">A</span>rray_new_default _
@@ -1523,50 +1523,50 @@ let locals_func (body_expr : binary expr) =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       ()
-  and aux_expr expr = <span data-count="6022">L</span>ist.iter aux_instr expr in
+  and aux_expr expr = <span data-count="6106">L</span>ist.iter aux_instr expr in
   aux_expr body_expr;
-  <span data-count="4609">l</span>ocals_hashtbl
+  <span data-count="4688">l</span>ocals_hashtbl
 
 let remove_local map body =
-  <span data-count="4609">l</span>et new_x (Raw x : binary indice) =
-    <span data-count="5090">l</span>et x = match Hashtbl.find_opt map x with <span data-count="2414">N</span>one -&gt; x | <span data-count="2676">S</span>ome x -&gt; x in
+  <span data-count="4688">l</span>et new_x (Raw x : binary indice) =
+    <span data-count="5097">l</span>et x = match Hashtbl.find_opt map x with <span data-count="2421">N</span>one -&gt; x | <span data-count="2676">S</span>ome x -&gt; x in
     Raw x
   in
   let rec aux_instr (instr : binary instr) : binary instr =
-    <span data-count="21523">m</span>atch instr with
-    | <span data-count="3610">L</span>ocal_get ind -&gt; Local_get (new_<span data-count="3610">x</span> ind)
+    <span data-count="21666">m</span>atch instr with
+    | <span data-count="3617">L</span>ocal_get ind -&gt; Local_get (new_<span data-count="3617">x</span> ind)
     | <span data-count="1309">L</span>ocal_set ind -&gt; Local_set (new_<span data-count="1309">x</span> ind)
     | <span data-count="171">L</span>ocal_tee ind -&gt; Local_tee (new_<span data-count="171">x</span> ind)
-    | <span data-count="762">B</span>lock (m, t, e) -&gt; Block (m, t, aux_exp<span data-count="762">r</span> e)
+    | <span data-count="767">B</span>lock (m, t, e) -&gt; Block (m, t, aux_exp<span data-count="767">r</span> e)
     | <span data-count="199">L</span>oop (m, t, e) -&gt; Loop (m, t, aux_exp<span data-count="199">r</span> e)
     | <span data-count="226">I</span>f_else (m, t, e1, e2) -&gt; If_else (m, t, aux_exp<span data-count="226">r</span> e1, aux_exp<span data-count="226">r</span> e2)
     | <span data-count="1">I</span>64_extend32_s | <span data-count="14">I</span>32_wrap_i64 | <span data-count="8">F</span>32_demote_f64 | <span data-count="15">F</span>64_promote_f32
     | <span data-count="9">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_eq | <span data-count="276">D</span>rop | <span data-count="10">M</span>emory_size | <span data-count="65">M</span>emory_grow
-    | <span data-count="117">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="96">U</span>nreachable | <span data-count="202">R</span>eturn | <span data-count="0">A</span>rray_len
+    | <span data-count="117">M</span>emory_fill | <span data-count="137">M</span>emory_copy | <span data-count="0">N</span>op | <span data-count="123">U</span>nreachable | <span data-count="205">R</span>eturn | <span data-count="0">A</span>rray_len
     | <span data-count="0">I</span>31_get_u | <span data-count="0">I</span>31_get_s | <span data-count="0">R</span>ef_i31 | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize
-    | <span data-count="6779">I</span>32_const _ | <span data-count="335">I</span>64_const _ | <span data-count="365">F</span>32_const _ | <span data-count="369">F</span>64_const _
+    | <span data-count="6808">I</span>32_const _ | <span data-count="343">I</span>64_const _ | <span data-count="365">F</span>32_const _ | <span data-count="370">F</span>64_const _
     | <span data-count="21">I</span>_unop (_, _)
     | <span data-count="108">F</span>_unop (_, _)
-    | <span data-count="454">I</span>_binop (_, _)
+    | <span data-count="455">I</span>_binop (_, _)
     | <span data-count="450">F</span>_binop (_, _)
     | <span data-count="77">I</span>_testop (_, _)
     | <span data-count="191">I</span>_relop (_, _)
     | <span data-count="133">F</span>_relop (_, _)
     | <span data-count="2">I</span>_extend8_s _ | <span data-count="2">I</span>_extend16_s _ | <span data-count="11">I</span>64_extend_i32 _
     | <span data-count="38">I</span>_trunc_f (_, _, _)
-    | <span data-count="8">I</span>_trunc_sat_f (_, _, _)
+    | <span data-count="12">I</span>_trunc_sat_f (_, _, _)
     | <span data-count="53">F</span>_convert_i (_, _, _)
     | <span data-count="23">I</span>_reinterpret_f (_, _)
     | <span data-count="27">F</span>_reinterpret_i (_, _)
     | <span data-count="11">R</span>ef_null _ | <span data-count="16">R</span>ef_func _
     | <span data-count="0">R</span>ef_cast (_, _)
     | <span data-count="0">R</span>ef_test (_, _)
-    | <span data-count="119">S</span>elect _ | <span data-count="63">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
-    | <span data-count="5">T</span>able_size _ | <span data-count="9">T</span>able_grow _ | <span data-count="1">T</span>able_fill _
+    | <span data-count="139">S</span>elect _ | <span data-count="66">G</span>lobal_get _ | <span data-count="25">G</span>lobal_set _ | <span data-count="12">T</span>able_get _ | <span data-count="13">T</span>able_set _
+    | <span data-count="5">T</span>able_size _ | <span data-count="10">T</span>able_grow _ | <span data-count="2">T</span>able_fill _
     | <span data-count="60">T</span>able_copy (_, _)
     | <span data-count="40">T</span>able_init (_, _)
     | <span data-count="12">E</span>lem_drop _
-    | <span data-count="1151">I</span>_load (_, _)
+    | <span data-count="1152">I</span>_load (_, _)
     | <span data-count="66">F</span>_load (_, _)
     | <span data-count="1136">I</span>_store (_, _)
     | <span data-count="39">F</span>_store (_, _)
@@ -1575,14 +1575,14 @@ let remove_local map body =
     | <span data-count="30">I</span>64_load32 (_, _)
     | <span data-count="51">I</span>_store8 (_, _)
     | <span data-count="30">I</span>_store16 (_, _)
-    | <span data-count="14">I</span>64_store32 _ | <span data-count="27">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="323">B</span>r _ | <span data-count="87">B</span>r_if _
-    | <span data-count="152">B</span>r_table (_, _)
+    | <span data-count="14">I</span>64_store32 _ | <span data-count="27">M</span>emory_init _ | <span data-count="9">D</span>ata_drop _ | <span data-count="325">B</span>r _ | <span data-count="87">B</span>r_if _
+    | <span data-count="157">B</span>r_table (_, _)
     | <span data-count="0">B</span>r_on_cast (_, _, _)
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
     | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="19">R</span>eturn_call _
     | <span data-count="28">R</span>eturn_call_indirect (_, _)
-    | <span data-count="879">C</span>all _
-    | <span data-count="244">C</span>all_indirect (_, _)
+    | <span data-count="881">C</span>all _
+    | <span data-count="267">C</span>all_indirect (_, _)
     | <span data-count="0">C</span>all_ref _ | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="0">A</span>rray_get _ | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">A</span>rray_new _
     | <span data-count="0">A</span>rray_new_data (_, _)
     | <span data-count="0">A</span>rray_new_default _
@@ -1594,17 +1594,17 @@ let remove_local map body =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       instr
-  and aux_expr expr = <span data-count="6022">L</span>ist.map aux_instr expr in
+  and aux_expr expr = <span data-count="6106">L</span>ist.map aux_instr expr in
   aux_expr body
 
 let remove_unused_locals locals nb_args body =
-  <span data-count="4609">l</span>et unused_locals =
+  <span data-count="4688">l</span>et unused_locals =
     let used_locals = locals_func body in
-    <span data-count="4609">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1310">R</span>aw (nb_args + i)) locals in
-    <span data-count="4609">L</span>ist.filte<span data-count="4609">r</span> (fun x -&gt; <span data-count="1310">n</span>ot @@ Hashtbl.me<span data-count="1310">m</span> used_locals x) locals
+    <span data-count="4688">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1310">R</span>aw (nb_args + i)) locals in
+    <span data-count="4688">L</span>ist.filte<span data-count="4688">r</span> (fun x -&gt; <span data-count="1310">n</span>ot @@ Hashtbl.me<span data-count="1310">m</span> used_locals x) locals
   in
   let rename_map = Hashtbl.create 16 in
-  <span data-count="4609">L</span>ist.iteri
+  <span data-count="4688">L</span>ist.iteri
     (fun j x -&gt;
       <span data-count="1310">l</span>et name, _ = x in
       let _x = Option.value name ~default:"anon" in
@@ -1616,44 +1616,44 @@ let remove_unused_locals locals nb_args body =
         Hashtbl.replace rename_map (nb_args + j) (nb_args + j - !count)
       end )
     locals;
-  <span data-count="4609">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1310">(</span>nb_args + i, x)) locals in
-  <span data-count="4609">l</span>et locals =
+  <span data-count="4688">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1310">(</span>nb_args + i, x)) locals in
+  <span data-count="4688">l</span>et locals =
     List.filter_map
       (fun (i, x) -&gt; <span data-count="1310">i</span>f List.mem (Raw i) unused_locals then <span data-count="60">N</span>one else <span data-count="1250">S</span>ome x)
       locals
   in
-  <span data-count="4609">l</span>et body = remove_local rename_map body in
-  <span data-count="4609">(</span>locals, body)
+  <span data-count="4688">l</span>et body = remove_local rename_map body in
+  <span data-count="4688">(</span>locals, body)
 
 let optimize_func (func : binary func) =
-  <span data-count="4609">l</span>et { type_f; locals; body; id } = func in
+  <span data-count="4688">l</span>et { type_f; locals; body; id } = func in
   let rec loop has_changed e =
-    <span data-count="9792">i</span>f not has_changed then
+    <span data-count="9961">i</span>f not has_changed then
       (* TODO: it should be enough to return e directly, but doing one more call to optimize_expr seems to perform more optimizations... *)
-      <span data-count="4609">s</span>nd @@ optimize_exp<span data-count="4609">r</span> e
+      <span data-count="4688">s</span>nd @@ optimize_exp<span data-count="4688">r</span> e
     else
-      <span data-count="5183">l</span>et has_changed, e = optimize_expr e in
-      <span data-count="5183">l</span>oop has_changed e
+      <span data-count="5273">l</span>et has_changed, e = optimize_expr e in
+      <span data-count="5273">l</span>oop has_changed e
   in
   let body = loop true body in
-  <span data-count="4609">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
+  <span data-count="4688">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
   let nb_args = List.length pt in
-  <span data-count="4609">l</span>et locals, body = remove_unused_locals locals nb_args body in
-  <span data-count="4609">{</span> type_f; locals; body; id }
+  <span data-count="4688">l</span>et locals, body = remove_unused_locals locals nb_args body in
+  <span data-count="4688">{</span> type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  <span data-count="5826">I</span>ndexed.map
+  <span data-count="5911">I</span>ndexed.map
     (function
-      | <span data-count="1217">R</span>untime.Imported _ as f -&gt; f
-      | <span data-count="4609">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4609">c</span> f) )
+      | <span data-count="1223">R</span>untime.Imported _ as f -&gt; f
+      | <span data-count="4688">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4688">c</span> f) )
     f
 
-let optimize_funcs funs = <span data-count="1370">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1400">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1370">L</span>og.debug0 "optimizing   ...@\n";
-  <span data-count="1370">l</span>et func = optimize_funcs m.func in
-  <span data-count="1370">{</span> m with func }
+  <span data-count="1400">L</span>og.debug0 "optimizing   ...@\n";
+  <span data-count="1400">l</span>et func = optimize_funcs m.func in
+  <span data-count="1400">{</span> m with func }
 </code></pre>
       </div>
     </div>

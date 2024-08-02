@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>wq.ml &mdash; Coverage report</title>
+    <meta name="description" content="90.00% coverage in src/data_structures/wq.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/data_structures/</span>wq.ml
+        </a>
+      </h1>
+      <h2>90.00%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:26.09%"></span>
+      <span class="unvisited" style="bottom:15.94%"></span>
+      <span class="unvisited" style="bottom:14.49%"></span>
+      <span class="unvisited" style="bottom:11.59%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="some-visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span class="unvisited"> </span>
+<a id="L59"></a><span class="unvisited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+type 'a t =
+  { mutex : Mutex.t
+  ; cond : Condition.t
+  ; queue : 'a Queue.t
+  ; mutable pledges : int
+  ; mutable failed : bool
+  }
+
+let pop q pledge =
+  <span data-count="28919">M</span>utex.lock q.mutex;
+  <span data-count="28919">l</span>et r =
+    try
+      while Queue.is_empt<span data-count="30296">y</span> q.queue do
+        <span data-count="2360">i</span>f q.pledges = <span data-count="981">0</span> || q.faile<span data-count="0">d</span> then <span data-count="981">r</span>aise Exit;
+        <span data-count="1379">C</span>ondition.wai<span data-count="1377">t</span> q.cond q.mutex
+      done;
+      let v = Queue.pop q.queue in
+      <span data-count="27936">i</span>f pledge then <span data-count="27752">q</span>.pledges &lt;- q.pledges + 1;
+      <span data-count="27936">S</span>ome v
+    with <span data-count="981">E</span>xit -&gt;
+      Condition.broadcast q.cond;
+      <span data-count="981">N</span>one
+  in
+  Mutex.unlock q.mutex;
+  <span data-count="28917">r</span>
+
+let make_pledge q =
+  <span data-count="673">M</span>utex.lock q.mutex;
+  <span data-count="673">q</span>.pledges &lt;- q.pledges + 1;
+  Mutex.unlock q.mutex
+
+let end_pledge q =
+  <span data-count="28398">M</span>utex.lock q.mutex;
+  <span data-count="28398">q</span>.pledges &lt;- q.pledges - 1;
+  Condition.broadcast q.cond;
+  <span data-count="28398">M</span>utex.unlock q.mutex
+
+let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
+ <span data-count="524">f</span>un () -&gt;
+  <span data-count="509">m</span>atch pop q false with
+  | <span data-count="325">N</span>one -&gt;
+    finalizer ();
+    <span data-count="325">N</span>il
+  | <span data-count="184">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="184">q</span> q ~finalizer)
+
+let push v q =
+  <span data-count="27974">M</span>utex.lock q.mutex;
+  <span data-count="27974">l</span>et was_empty = Queue.is_empty q.queue in
+  <span data-count="27974">Q</span>ueue.push v q.queue;
+  <span data-count="27974">i</span>f was_empty then <span data-count="2098">C</span>ondition.broadcas<span data-count="2098">t</span> q.cond;
+  <span data-count="27974">M</span>utex.unlock q.mutex
+
+let fail q =
+  <span data-count="0">M</span>utex.lock q.mutex;
+  <span data-count="0">q</span>.failed &lt;- true;
+  Condition.broadcast q.cond;
+  <span data-count="0">M</span>utex.unlock q.mutex
+
+let init () =
+  <span data-count="680">{</span> mutex = Mutex.creat<span data-count="680">e</span> ()
+  ; cond = Condition.creat<span data-count="680">e</span> ()
+  ; queue = Queue.creat<span data-count="680">e</span> ()
+  ; pledges = 0
+  ; failed = false
+  }
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

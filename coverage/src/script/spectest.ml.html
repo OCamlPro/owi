@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>spectest.ml &mdash; Coverage report</title>
-    <meta name="description" content="80.00% coverage in src/script/spectest.ml">
+    <meta name="description" content="83.33% coverage in src/script/spectest.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/script/</span>spectest.ml
         </a>
       </h1>
-      <h2>80.00%</h2>
+      <h2>83.33%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.38%"></span>
@@ -180,12 +180,12 @@
 <a id="L154"></a><span > </span>
 <a id="L155"></a><span > </span>
 <a id="L156"></a><span > </span>
-<a id="L157"></a><span > </span>
+<a id="L157"></a><span class="visited"> </span>
 <a id="L158"></a><span > </span>
 <a id="L159"></a><span > </span>
 <a id="L160"></a><span > </span>
 <a id="L161"></a><span > </span>
-<a id="L162"></a><span > </span>
+<a id="L162"></a><span class="visited"> </span>
 <a id="L163"></a><span > </span>
 <a id="L164"></a><span > </span>
 <a id="L165"></a><span > </span>
@@ -453,7 +453,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Format
+open Fmt
 open Types
 open Concrete_value.Func
 
@@ -461,10 +461,10 @@ type extern_module = extern_func Link.extern_module
 
 let extern_m =
   let print = () in
-  let print_i32 i = <span data-count="30">p</span>p_std "%li@\n%!" i in
-  let print_i64 i = <span data-count="4">p</span>p_std "%Li@\n%!" i in
-  let print_f32 f = <span data-count="6">p</span>p_std "%a@\n%!" Float32.pp f in
-  let print_f64 f = <span data-count="15">p</span>p_std "%a@\n%!" Float64.pp f in
+  let print_i32 i = <span data-count="30">p</span>r "%li@\n%!" i in
+  let print_i64 i = <span data-count="4">p</span>r "%Li@\n%!" i in
+  let print_f32 f = <span data-count="6">p</span>r "%a@\n%!" Float32.pp f in
+  let print_f64 f = <span data-count="15">p</span>r "%a@\n%!" Float64.pp f in
   let print_i32_f32 i f =
     <span data-count="3">p</span>rint_i32 i;
     <span data-count="3">p</span>rint_f32 f
@@ -500,7 +500,7 @@ let extern_m =
 
 let m =
   let open Text in
-  Text.Module
+  Text.Text_module
     { id = Some "spectest"
     ; fields =
         [ MImport
@@ -605,12 +605,12 @@ let m =
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
-            ; init = [ F32_const Float32.zero ]
+            ; init = [ F32_const (Float32.of_floa<span data-count="696">t</span> 666.6) ]
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
-            ; init = [ F64_const Float64.zero ]
+            ; init = [ F64_const (Float64.of_floa<span data-count="696">t</span> 666.6) ]
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }

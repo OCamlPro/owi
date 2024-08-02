@@ -89,26 +89,26 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157404549">x</span> [@@inline]
+let return x = <span data-count="157408413">x</span> [@@inline]
 
-let bind x f = <span data-count="183851981">f</span> x [@@inline]
+let bind x f = <span data-count="183856925">f</span> x [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="13519181">l</span>et* v in
-  <span data-count="13519181">r</span>eturn (<span data-count="13519181">f</span> v)
+  <span data-count="13519932">l</span>et* v in
+  <span data-count="13519932">r</span>eturn (<span data-count="13519932">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
 
-let select b = <span data-count="19577511">b</span> [@@inline]
+let select b = <span data-count="19578144">b</span> [@@inline]
 
-let select_i32 i = <span data-count="1608696">i</span> [@@inline]
+let select_i32 i = <span data-count="1609080">i</span> [@@inline]
 
-let trap msg = <span data-count="4654">r</span>aise (Types.Trap msg)
+let trap msg = <span data-count="4688">r</span>aise (Types.Trap msg)
 
-let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4654">t</span>rap (Trap.to_strin<span data-count="4654">g</span> tr)
+let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4688">t</span>rap (Trap.to_strin<span data-count="4688">g</span> tr)
 
 let run = Fun.id
 </code></pre>

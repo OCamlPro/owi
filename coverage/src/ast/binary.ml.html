@@ -96,6 +96,8 @@
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -174,6 +176,8 @@
 <a href="#L72">72</a>
 <a href="#L73">73</a>
 <a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -204,7 +208,7 @@ type global =
 type data_mode =
   | Data_passive
   (* TODO: Data_active binary+const expr*)
-  | Data_active of int option * binary expr
+  | Data_active of int * binary expr
 
 type data =
   { id : string option
@@ -227,6 +231,7 @@ type elem =
 
 type modul =
   { id : string option
+  ; types : binary rec_type Named.t
   ; global : (global, binary global_type) Runtime.t Named.t
   ; table : (binary table, binary table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
@@ -240,6 +245,7 @@ type modul =
 
 let empty_modul =
   { id = None
+  ; types = Named.empty
   ; global = Named.empty
   ; table = Named.empty
   ; mem = Named.empty
