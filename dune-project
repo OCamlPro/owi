@@ -63,7 +63,7 @@
    (and
     :with-test
     (>= 2.1)))
-  (frama-c :with-test)
+  (frama-c (and (>= 29.0) :with-test))
   ;; dev
   (bisect_ppx
    (and
