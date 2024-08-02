@@ -59,6 +59,9 @@ type err =
   | `Unknown_table of Types.text Types.indice
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
+  | `Annotation_id_incorrect of string
+  | `Unknown_annotation_clause
+  | `Unknown_annotation_object
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

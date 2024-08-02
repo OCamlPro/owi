@@ -445,6 +445,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
     ; exports
     ; func
     ; start
+    ; custom = []
     }
   in
   modul

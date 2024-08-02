@@ -59,6 +59,9 @@ type err =
   | `Unknown_table of Types.text Types.indice
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
+  | `Annotation_id_incorrect of string
+  | `Unknown_annotation_clause
+  | `Unknown_annotation_object
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -124,5 +127,9 @@ let rec err_to_string = function
   | `Unknown_type id -> Fmt.str "unknown type %a" Types.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
+  | `Annotation_id_incorrect annotid ->
+    Fmt.str "annotation id %s incorrect" annotid
+  | `Unknown_annotation_clause -> Fmt.str "unknown annotation clause"
+  | `Unknown_annotation_object -> Fmt.str "unknown annotation object"
 
 let failwith e = Fmt.failwith "%s" (err_to_string e)

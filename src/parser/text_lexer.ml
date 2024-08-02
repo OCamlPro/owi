@@ -120,6 +120,10 @@ let bad_id = [%sedlex.regexp? id, Plus name]
 
 let bad_num = [%sedlex.regexp? num, Plus id]
 
+let annot_atom =
+  [%sedlex.regexp?
+    num | Plus (id_char | name) | ',' | ';' | '[' | ']' | '{' | '}']
+
 let keywords =
   let tbl = Hashtbl.create 512 in
   Array.iter
@@ -433,12 +437,31 @@ let rec token buf =
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator with Not_found -> unknown_operator buf
   end
+  (* comment *)
   | ";;" ->
     single_comment buf;
     token buf
   | "(;" ->
     comment buf;
     token buf
+  (* custom annotation *)
+  | "(@", name ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 3 (String.length annotid - 4) in
+    let annotid = mk_string buf annotid in
+    if String.equal "" annotid then Log.err "empty annotation id"
+    else
+      let items = Sexp.List (annot buf) in
+      Annot.(record_annot annotid (Annot { annotid; items }));
+      token buf
+  | "(@", Plus id_char ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 2 (String.length annotid - 2) in
+    let annotid = mk_string buf annotid in
+    let items = Sexp.List (annot buf) in
+    Annot.(record_annot annotid (Annot { annotid; items }));
+    token buf
+  | "(@" -> Log.err "empty annotation id"
   (* 1 *)
   | "(" -> LPAR
   | ")" -> RPAR
@@ -474,5 +497,24 @@ and single_comment buf =
   | eof -> Log.err "eof in single line comment"
   | any -> single_comment buf
   | _ -> assert false
+
+and annot buf =
+  match%sedlex buf with
+  | Plus any_blank -> annot buf
+  | ";;" ->
+    single_comment buf;
+    annot buf
+  | "(;" ->
+    comment buf;
+    annot buf
+  | "(" ->
+    let items = annot buf in
+    Sexp.List items :: annot buf
+  | ")" -> []
+  | annot_atom ->
+    let annot_atom = Utf8.lexeme buf in
+    Sexp.Atom annot_atom :: annot buf
+  | eof -> Log.err "eof in annotation"
+  | _ -> unexpected_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

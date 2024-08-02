@@ -250,7 +250,8 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 let from_start = function None -> [] | Some n -> [ MStart (Raw n) ]
 
 let modul
-  { Binary.id; types; global; table; mem; func; elem; data; start; exports } =
+  { Binary.id; types; global; table; mem; func; elem; data; start; exports; _ }
+    =
   let fields =
     from_types types @ from_global global @ from_table table @ from_mem mem
     @ from_func func @ from_elem elem @ from_data data @ from_exports exports
@@ -264,5 +265,6 @@ let modul
       fields
   in
   let fields = imported @ locals in
+  let annots = [] in
 
-  { Text.id; fields }
+  { Text.id; fields; annots }

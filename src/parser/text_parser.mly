@@ -992,7 +992,9 @@ let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
-    { id; fields }
+    let annots = Annot.get_annots () in
+    let () = Fmt.pr "%a" (Fmt.list ~sep:(fun _ _ -> Fmt.pr "@\n ") Annot.pp_annot) annots in
+    { id; fields; annots }
   }
 
 let inline_module :=

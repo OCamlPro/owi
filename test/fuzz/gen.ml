@@ -345,4 +345,5 @@ let modul conf =
   let id = Some "m" in
   let* env = const Env.empty in
   let+ fields = fields (env conf) in
-  { id; fields }
+  let annots = [] in
+  { id; fields; annots }
