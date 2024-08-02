@@ -50,6 +50,7 @@
   interpret
   interpret_intf
   kind
+  spec
   link
   link_env
   log

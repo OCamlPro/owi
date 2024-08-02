@@ -1,17 +1,26 @@
 open Fmt
+open Types
 
 type t =
   { annotid : string
   ; items : Sexp.t
   }
 
-let pp_annot fmt annot =
-  pf fmt "(@%a@\n  @[<b 2>%a@]@\n)" string annot.annotid Sexp.pp_sexp
-    annot.items
+type 'a annot =
+  | Contract of 'a Contract.t
+  | Annot of t
 
-let annot_recorder : (string, t) Hashtbl.t = Hashtbl.create 17
+let pp_annot fmt = function
+  | Contract contract ->
+    pf fmt "(@%a@\n  @[<v>%a@]@\n)" string "contract" Contract.pp_contract
+      contract
+  | Annot annot ->
+    pf fmt "(@%a@\n  @[<hv>%a@]@\n)" string annot.annotid Sexp.pp_sexp
+      annot.items
 
-let record_annot annot = Hashtbl.add annot_recorder annot.annotid annot
+let annot_recorder : (string, text annot) Hashtbl.t = Hashtbl.create 17
+
+let record_annot annotid annot = Hashtbl.add annot_recorder annotid annot
 
 let get_annots ?name () =
   match name with
