@@ -482,7 +482,7 @@ let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
   <span data-count="3592">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="6178">{</span> id
+  <span data-count="6179">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -508,9 +508,9 @@ type curr =
 let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
 let add_global value (fields : t) (curr : curr) =
-  <span data-count="1434">l</span>et index = curr.global in
-  ( { fields with global = Indexed.retur<span data-count="1434">n</span> index value :: fields.global }
-  , { curr with global = suc<span data-count="1434">c</span> curr.global } )
+  <span data-count="1435">l</span>et index = curr.global in
+  ( { fields with global = Indexed.retur<span data-count="1435">n</span> index value :: fields.global }
+  , { curr with global = suc<span data-count="1435">c</span> curr.global } )
 
 let add_table value (fields : t) (curr : curr) =
   <span data-count="1379">l</span>et index = curr.table in
@@ -538,24 +538,24 @@ let add_data value (fields : t) (curr : curr) =
   , { curr with data = suc<span data-count="948">c</span> curr.data } )
 
 let declare_func_type type_f (fields : t) =
-  <span data-count="16062">m</span>atch type_f with
+  <span data-count="16065">m</span>atch type_f with
   | <span data-count="290">B</span>t_ind _ -&gt; fields
-  | <span data-count="15772">B</span>t_raw (id, typ) -&gt;
+  | <span data-count="15775">B</span>t_raw (id, typ) -&gt;
     let type_checks =
       match id with
-      | <span data-count="15752">N</span>one -&gt; fields.type_checks
+      | <span data-count="15755">N</span>one -&gt; fields.type_checks
       | <span data-count="20">S</span>ome id -&gt; (id, typ) :: fields.type_checks
     in
     { fields with function_type = typ :: fields.function_type; type_checks }
 
 let of_symbolic (modul : Text.modul) : t Result.t =
-  <span data-count="6178">L</span>og.debug0 "grouping     ...@\n";
-  <span data-count="6178">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
-    <span data-count="35873">m</span>atch field with
+  <span data-count="6179">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="6179">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
+    <span data-count="35878">m</span>atch field with
     | <span data-count="577">T</span>ext.MType typ -&gt;
       let typ = typ @ fields.typ in
       Ok ({ fields with typ }, curr)
-    | <span data-count="1237">M</span>Global global -&gt; ok @@ add_globa<span data-count="1237">l</span> (Local global) fields curr
+    | <span data-count="1238">M</span>Global global -&gt; ok @@ add_globa<span data-count="1238">l</span> (Local global) fields curr
     | <span data-count="197">M</span>Import ({ desc = Import_global (a, (mut, val_type)); _ } as import) -&gt;
       let+ val_type = Binary_types.convert_val_typ<span data-count="197">e</span> None val_type in
       <span data-count="197">l</span>et b = (mut, val_type) in
@@ -592,12 +592,12 @@ let of_symbolic (modul : Text.modul) : t Result.t =
         { fields.exports with mem = { name; id } :: fields.exports.mem }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="12944">M</span>Func func -&gt;
+    | <span data-count="12947">M</span>Func func -&gt;
       let fields = declare_func_type func.type_f fields in
-      <span data-count="12944">l</span>et index = curr.func in
+      <span data-count="12947">l</span>et index = curr.func in
       let value = Runtime.Local func in
-      let func = Indexed.retur<span data-count="12944">n</span> index value :: fields.func in
-      Ok ({ fields with func }, { curr with func = suc<span data-count="12944">c</span> curr.func })
+      let func = Indexed.retur<span data-count="12947">n</span> index value :: fields.func in
+      Ok ({ fields with func }, { curr with func = suc<span data-count="12947">c</span> curr.func })
     | <span data-count="3118">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
       let imported : text block_type Imported.t = im<span data-count="3118">p</span> import (a, type_f) in
       let fields = declare_func_type type_f fields in
@@ -627,12 +627,12 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       in
       let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_dat<span data-count="948">a</span> data fields curr
-    | <span data-count="254">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
+    | <span data-count="255">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in
   let+ modul, _curr =
-    list_fold_lef<span data-count="6178">t</span> add (empty_modul<span data-count="6178">e</span> modul.id, init_curr) modul.fields
+    list_fold_lef<span data-count="6179">t</span> add (empty_modul<span data-count="6179">e</span> modul.id, init_curr) modul.fields
   in
-  <span data-count="6178">m</span>odul
+  <span data-count="6179">m</span>odul
 </code></pre>
       </div>
     </div>

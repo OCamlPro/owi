@@ -263,28 +263,28 @@ let write_testcase =
 
 let add_main_as_start (m : Binary.modul) =
   (* We are checking if there's a start function *)
-  <span data-count="343">i</span>f Option.is_some m.start then <span data-count="171">O</span>k m
+  <span data-count="344">i</span>f Option.is_some m.start then <span data-count="171">O</span>k m
   else
     (* If there is none, we look for a function exported with the name `main` *)
-    <span data-count="172">m</span>atch
+    <span data-count="173">m</span>atch
       List.find_opt
-        (function <span data-count="172">{</span> Binary.name = "main"; _ } -&gt; true | <span data-count="0">_</span> -&gt; false)
+        (function <span data-count="173">{</span> Binary.name = "main"; _ } -&gt; true | <span data-count="0">_</span> -&gt; false)
         m.exports.func
     with
     | <span data-count="0">N</span>one -&gt;
       (* TODO: fail/display a warning saying nothing will be done ? *)
       Ok m
-    | <span data-count="172">S</span>ome export -&gt; (
+    | <span data-count="173">S</span>ome export -&gt; (
       (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
       let main_id = export.id in
       match Indexed.get_at main_id m.func.values with
       | <span data-count="0">N</span>one -&gt; Error (`Msg "can't find a main function")
-      | <span data-count="172">S</span>ome main_function -&gt;
+      | <span data-count="173">S</span>ome main_function -&gt;
         let (Bt_raw main_type) =
-          match main_function with <span data-count="172">L</span>ocal f -&gt; f.type_f | <span data-count="0">I</span>mported i -&gt; i.desc
+          match main_function with <span data-count="173">L</span>ocal f -&gt; f.type_f | <span data-count="0">I</span>mported i -&gt; i.desc
         in
         let default_value_of_t = function
-          | <span data-count="344">T</span>ypes.Num_type I32 -&gt; Ok (Types.I32_const 0l)
+          | <span data-count="346">T</span>ypes.Num_type I32 -&gt; Ok (Types.I32_const 0l)
           | <span data-count="0">N</span>um_type I64 -&gt; Ok (Types.I64_const 0L)
           | <span data-count="0">N</span>um_type F32 -&gt; Ok (Types.F32_const (Float32.of_floa<span data-count="0">t</span> 0.))
           | <span data-count="0">N</span>um_type F64 -&gt; Ok (Types.F64_const (Float64.of_floa<span data-count="0">t</span> 0.))
@@ -297,13 +297,13 @@ let add_main_as_start (m : Binary.modul) =
         in
         let+ body =
           let pt, rt = snd main_type in
-          <span data-count="172">l</span>et+ args = list_ma<span data-count="172">p</span> (fun (_, t) -&gt; <span data-count="344">d</span>efault_value_of_t t) pt in
-          <span data-count="172">l</span>et after_call =
-            List.map (fun (_ : _ Types.val_type) -&gt; <span data-count="172">T</span>ypes.Drop) rt
+          <span data-count="173">l</span>et+ args = list_ma<span data-count="173">p</span> (fun (_, t) -&gt; <span data-count="346">d</span>efault_value_of_t t) pt in
+          <span data-count="173">l</span>et after_call =
+            List.map (fun (_ : _ Types.val_type) -&gt; <span data-count="173">T</span>ypes.Drop) rt
           in
-          <span data-count="172">a</span>rgs @ [ Types.Call (Raw main_id) ] @ after_call
+          <span data-count="173">a</span>rgs @ [ Types.Call (Raw main_id) ] @ after_call
         in
-        <span data-count="172">l</span>et type_f : Types.binary Types.block_type =
+        <span data-count="173">l</span>et type_f : Types.binary Types.block_type =
           Types.Bt_raw (None, ([], []))
         in
         let start_code : Types.binary Types.func =
@@ -315,12 +315,12 @@ let add_main_as_start (m : Binary.modul) =
         let next_free_index =
           List.fold_left
             (fun next_free_index v -&gt;
-              <span data-count="2919">l</span>et index = Indexed.get_index v in
-              <span data-count="2919">i</span>f next_free_index &gt; index then <span data-count="2">n</span>ext_free_index else <span data-count="2917">i</span>ndex + 1 )
+              <span data-count="2922">l</span>et index = Indexed.get_index v in
+              <span data-count="2922">i</span>f next_free_index &gt; index then <span data-count="2">n</span>ext_free_index else <span data-count="2920">i</span>ndex + 1 )
             0 m.func.values
         in
-        <span data-count="172">l</span>et values =
-          Indexed.retur<span data-count="172">n</span> next_free_index start_func :: m.func.values
+        <span data-count="173">l</span>et values =
+          Indexed.retur<span data-count="173">n</span> next_free_index start_func :: m.func.values
         in
         let func = { Named.named; values } in
         let start = Some next_free_index in

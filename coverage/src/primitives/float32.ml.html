@@ -781,13 +781,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Fmt.st<span data-count="696">r</span> "%lx"
+let to_hex_string = Fmt.st<span data-count="698">r</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="696">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="698">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="696">t</span> (-<span data-count="696">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="698">t</span> (-<span data-count="698">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -795,9 +795,9 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1324">x</span>
 
-let to_bits x = <span data-count="2889">x</span>
+let to_bits x = <span data-count="2891">x</span>
 
-let is_inf x = <span data-count="23487">I</span>nt32.e<span data-count="23487">q</span> x pos_in<span data-count="16">f</span> || Int32.eq x neg_inf
+let is_inf x = <span data-count="23488">I</span>nt32.e<span data-count="23488">q</span> x pos_in<span data-count="16">f</span> || Int32.eq x neg_inf
 
 let is_nan x =
   <span data-count="3299">l</span>et xf = Int32.float_of_bits x in
@@ -852,7 +852,7 @@ let unary op x =
   <span data-count="310">l</span>et t = op (to_floa<span data-count="310">t</span> x) in
   <span data-count="310">i</span>f not @@ Float.is_na<span data-count="310">n</span> t then <span data-count="266">o</span>f_float t else <span data-count="44">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="696">t</span> 0.0
+let zero = of_floa<span data-count="698">t</span> 0.0
 
 let add x y = <span data-count="25420">b</span>inary x ( +. ) y
 
@@ -1009,19 +1009,19 @@ let compare_mantissa_str hex s1 s2 =
  *)
 let float_of_string_prevent_double_rounding s =
   (* First parse to a 64 bit float. *)
-  <span data-count="23487">l</span>et z = match float_of_string s with None -&gt; assert false | <span data-count="23487">S</span>ome z -&gt; z in
+  <span data-count="23488">l</span>et z = match float_of_string s with None -&gt; assert false | <span data-count="23488">S</span>ome z -&gt; z in
   (* If value is already infinite we are done. *)
-  if Float.compar<span data-count="23487">e</span> (abs_floa<span data-count="23487">t</span> z) (1.0 /. 0.0) = 0 then <span data-count="0">z</span>
+  if Float.compar<span data-count="23488">e</span> (abs_floa<span data-count="23488">t</span> z) (1.0 /. 0.0) = 0 then <span data-count="0">z</span>
   else
     (* Else, bit twiddling to see what rounding to target precision will do. *)
-    <span data-count="23487">l</span>et open Int64 in
+    <span data-count="23488">l</span>et open Int64 in
     let bits = bits_of_float z in
-    <span data-count="23487">l</span>et lsb = shift_left 1L 29 in
+    <span data-count="23488">l</span>et lsb = shift_left 1L 29 in
     (* Check for tie, i.e. whether the bits right of target LSB are 10000... *)
-    <span data-count="23487">l</span>et tie = shift_right lsb 1 in
-    <span data-count="23487">l</span>et mask = lognot (shift_lef<span data-count="23487">t</span> (-1L) 29) in
+    <span data-count="23488">l</span>et tie = shift_right lsb 1 in
+    <span data-count="23488">l</span>et mask = lognot (shift_lef<span data-count="23488">t</span> (-1L) 29) in
     (* If we have no tie, we are good. *)
-    <span data-count="23487">i</span>f Int64.ne (logan<span data-count="23487">d</span> bits mask) tie then <span data-count="23359">z</span>
+    <span data-count="23488">i</span>f Int64.ne (logan<span data-count="23488">d</span> bits mask) tie then <span data-count="23360">z</span>
     else
       (* Else, define epsilon to be the value of the tie bit. *)
       <span data-count="128">l</span>et exp = float_of_bits (logan<span data-count="128">d</span> bits 0xfff0_0000_0000_0000L) in
@@ -1059,9 +1059,9 @@ let float_of_string_prevent_double_rounding s =
       | <span data-count="56">_</span> -&gt; z
 
 let of_signless_string s =
-  <span data-count="31014">i</span>f String.equal s "inf" then <span data-count="2991">p</span>os_inf
-  else <span data-count="28023">i</span>f String.equal s "nan" then <span data-count="2382">p</span>os_nan
-  else <span data-count="25641">i</span>f String.lengt<span data-count="25641">h</span> s &gt; 6 &amp;&amp; <span data-count="15206">S</span>tring.equa<span data-count="15206">l</span> (String.su<span data-count="15206">b</span> s 0 6) "nan:0x" then
+  <span data-count="31015">i</span>f String.equal s "inf" then <span data-count="2991">p</span>os_inf
+  else <span data-count="28024">i</span>f String.equal s "nan" then <span data-count="2382">p</span>os_nan
+  else <span data-count="25642">i</span>f String.lengt<span data-count="25642">h</span> s &gt; 6 &amp;&amp; <span data-count="15206">S</span>tring.equa<span data-count="15206">l</span> (String.su<span data-count="15206">b</span> s 0 6) "nan:0x" then
     <span data-count="2154">l</span>et x = Int32.of_string (String.su<span data-count="2154">b</span> s 4 (String.lengt<span data-count="2154">h</span> s - 4)) in
     <span data-count="2154">i</span>f Int32.eq x Int32.zero then <span data-count="2">F</span>mt.failwith "nan payload must not be zero"
     else <span data-count="2152">i</span>f Int32.ne (Int32.logan<span data-count="2152">d</span> x bare_nan) Int32.zero then
@@ -1070,16 +1070,16 @@ let of_signless_string s =
       <span data-count="0">F</span>mt.failwith "nan payload must not overlap with sign bit"
     else <span data-count="2148">I</span>nt32.logor x bare_nan
   else
-    <span data-count="23487">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23487">r</span> '_' s) in
-    <span data-count="23487">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23487">g</span> s') in
-    <span data-count="23487">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23471">x</span>
+    <span data-count="23488">l</span>et s' = String.concat "" (String.split_on_cha<span data-count="23488">r</span> '_' s) in
+    <span data-count="23488">l</span>et x = of_float (float_of_string_prevent_double_roundin<span data-count="23488">g</span> s') in
+    <span data-count="23488">i</span>f is_inf x then <span data-count="16">L</span>og.err "of_string" else <span data-count="23472">x</span>
 
 let of_string s =
-  <span data-count="31014">i</span>f String.equal s "" then <span data-count="0">L</span>og.err "of_string"
-  else <span data-count="31014">i</span>f Char.equa<span data-count="31014">l</span> s.[0] '+<span data-count="298">'</span> || Char.equa<span data-count="30716">l</span> s.[0] '-<span data-count="13948">'</span> then
+  <span data-count="31015">i</span>f String.equal s "" then <span data-count="0">L</span>og.err "of_string"
+  else <span data-count="31015">i</span>f Char.equa<span data-count="31015">l</span> s.[0] '+<span data-count="298">'</span> || Char.equa<span data-count="30717">l</span> s.[0] '-<span data-count="13948">'</span> then
     <span data-count="14246">l</span>et x = of_signless_string (String.su<span data-count="14246">b</span> s 1 (String.lengt<span data-count="14246">h</span> s - 1)) in
     <span data-count="14238">i</span>f Char.equal s.[0] '+' then <span data-count="298">x</span> else <span data-count="13940">n</span>eg x
-  else <span data-count="16768">o</span>f_signless_string s
+  else <span data-count="16769">o</span>f_signless_string s
 
 (* String conversion that groups digits for readability *)
 
@@ -1130,7 +1130,7 @@ let to_string' convert is_digit n x =
           (if Char.equal s.[String.lengt<span data-count="43">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="43">s</span>)
     )
 
-let to_string = to_string<span data-count="696">'</span> (Fmt.st<span data-count="696">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="698">'</span> (Fmt.st<span data-count="698">r</span> "%.17g") is_digit 3
 
 let pp fmt v = <span data-count="43">F</span>mt.string fmt (to_strin<span data-count="43">g</span> v)
 </code></pre>

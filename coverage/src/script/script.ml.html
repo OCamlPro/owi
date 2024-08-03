@@ -660,7 +660,7 @@ module Stack = Stack.Make [@inlined hint] (V)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="696">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="698">e</span> ()
 
   let value i = <span data-count="65">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
@@ -897,7 +897,7 @@ let run ~no_exhaustion ~optimize script =
           Compile.Text.until_link ~unsafe ~optimize ~name:None link_state m
         in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
-        <span data-count="0">L</span>og.err "TODO"
+        <span data-count="0">a</span>ssert false
       | <span data-count="43096">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.debug0 "*** assert_return@\n";
         <span data-count="43096">l</span>et* stack = actio<span data-count="43096">n</span> link_state a in

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>indexed.ml &mdash; Coverage report</title>
-    <meta name="description" content="71.43% coverage in src/data_structures/indexed.ml">
+    <meta name="description" content="100.00% coverage in src/data_structures/indexed.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,9 @@
           <span class="dirname">src/data_structures/</span>indexed.ml
         </a>
       </h1>
-      <h2>71.43%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:27.59%"></span>
-      <span class="unvisited" style="bottom:24.14%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -45,15 +42,9 @@
 <a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span class="unvisited"> </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -81,12 +72,6 @@
 <a href="#L21">21</a>
 <a href="#L22">22</a>
 <a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -97,26 +82,20 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="115803">v</span>.value
+let get v = <span data-count="115844">v</span>.value
 
-let get_index v = <span data-count="94798">v</span>.index
+let get_index v = <span data-count="94833">v</span>.index
 
-let map f v = <span data-count="5911">{</span> index = v.index; value = <span data-count="5911">f</span> v.value }
+let map f v = <span data-count="5914">{</span> index = v.index; value = <span data-count="5914">f</span> v.value }
 
-let return index value = <span data-count="66155">{</span> index; value }
+let return index value = <span data-count="66175">{</span> index; value }
 
-let has_index idx { index; _ } = <span data-count="657848">i</span>dx = index
-
-let get_at_exn i values =
-  <span data-count="0">l</span>et { value; _ } = List.find (has_inde<span data-count="0">x</span> i) values in
-  <span data-count="0">v</span>alue
+let has_index idx { index; _ } = <span data-count="657903">i</span>dx = index
 
 let get_at i values =
-  <span data-count="38717">m</span>atch List.find_opt (has_inde<span data-count="38717">x</span> i) values with
+  <span data-count="38738">m</span>atch List.find_opt (has_inde<span data-count="38738">x</span> i) values with
   | <span data-count="100">N</span>one -&gt; None
-  | <span data-count="38617">S</span>ome { value; _ } -&gt; Some value
-
-let pp f fmt v = <span data-count="0">f</span> fmt v.value
+  | <span data-count="38638">S</span>ome { value; _ } -&gt; Some value
 </code></pre>
       </div>
     </div>

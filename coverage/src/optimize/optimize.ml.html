@@ -1134,7 +1134,7 @@ open Binary
 open Types
 
 let rec optimize_expr expr : bool * binary instr list =
-  <span data-count="60205">m</span>atch expr with
+  <span data-count="60231">m</span>atch expr with
   | <span data-count="71">(</span>(<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as x)
     :: ((<span data-count="37">I</span>32_const _ | <span data-count="34">I</span>64_const _) as y)
     :: (I_binop (nn, op) as i_binop)
@@ -1377,18 +1377,18 @@ let rec optimize_expr expr : bool * binary instr list =
         <span data-count="3">(</span>true, e)
       | _ -&gt; assert false
     end
-  | <span data-count="525">(</span><span data-count="308">I</span>32_const _ | <span data-count="59">I</span>64_const _ | <span data-count="73">F</span>32_const _ | <span data-count="85">F</span>64_const _) :: Drop :: tl -&gt;
+  | <span data-count="531">(</span><span data-count="311">I</span>32_const _ | <span data-count="60">I</span>64_const _ | <span data-count="74">F</span>32_const _ | <span data-count="86">F</span>64_const _) :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
-    <span data-count="525">(</span>true, e)
+    <span data-count="531">(</span>true, e)
   | <span data-count="172">L</span>ocal_set (Raw x) :: Local_get (Raw y) :: tl when x = y -&gt;
     <span data-count="62">l</span>et _has_changed, e = optimize_expr (Local_tee (Raw x) :: tl) in
     <span data-count="62">(</span>true, e)
-  | <span data-count="11">L</span>ocal_get _ :: Drop :: tl -&gt;
+  | <span data-count="12">L</span>ocal_get _ :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
-    <span data-count="11">(</span>true, e)
-  | <span data-count="2">G</span>lobal_get _ :: Drop :: tl -&gt;
+    <span data-count="12">(</span>true, e)
+  | <span data-count="3">G</span>lobal_get _ :: Drop :: tl -&gt;
     let _has_changed, e = optimize_expr tl in
-    <span data-count="2">(</span>true, e)
+    <span data-count="3">(</span>true, e)
   | <span data-count="108">(</span>Br _ as br) :: _ :: _ -&gt; (true, [ br ])
   | <span data-count="80">I</span>32_const c :: Br_if l :: tl -&gt; begin
     match c with
@@ -1453,15 +1453,15 @@ let rec optimize_expr expr : bool * binary instr list =
       <span data-count="475">(</span> has_changed<span data-count="7">1</span> || has_changed<span data-count="3">2</span> || has_changed<span data-count="2">'</span>
       , If_else (n, bt, oe1, oe2) :: e )
   end
-  | <span data-count="42797">h</span>d :: tl -&gt;
+  | <span data-count="42805">h</span>d :: tl -&gt;
     let has_changed, e = optimize_expr tl in
-    <span data-count="42797">(</span>has_changed, hd :: e)
-  | <span data-count="13086">[</span>] -&gt; (false, [])
+    <span data-count="42805">(</span>has_changed, hd :: e)
+  | <span data-count="13096">[</span>] -&gt; (false, [])
 
 let locals_func (body_expr : binary expr) =
-  <span data-count="4688">l</span>et locals_hashtbl = Hashtbl.create 16 in
-  <span data-count="4688">l</span>et rec aux_instr (instr : binary instr) =
-    <span data-count="21666">m</span>atch instr with
+  <span data-count="4691">l</span>et locals_hashtbl = Hashtbl.create 16 in
+  <span data-count="4691">l</span>et rec aux_instr (instr : binary instr) =
+    <span data-count="21668">m</span>atch instr with
     | <span data-count="3617">L</span>ocal_get ind | <span data-count="1309">L</span>ocal_set ind | <span data-count="171">L</span>ocal_tee ind -&gt;
       Hashtbl.replace locals_hashtbl ind ()
     | <span data-count="767">B</span>lock (_, _, e) -&gt; aux_expr e
@@ -1510,7 +1510,7 @@ let locals_func (body_expr : binary expr) =
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
     | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="19">R</span>eturn_call _
     | <span data-count="28">R</span>eturn_call_indirect (_, _)
-    | <span data-count="881">C</span>all _
+    | <span data-count="883">C</span>all _
     | <span data-count="267">C</span>all_indirect (_, _)
     | <span data-count="0">C</span>all_ref _ | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="0">A</span>rray_get _ | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">A</span>rray_new _
     | <span data-count="0">A</span>rray_new_data (_, _)
@@ -1523,17 +1523,17 @@ let locals_func (body_expr : binary expr) =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       ()
-  and aux_expr expr = <span data-count="6106">L</span>ist.iter aux_instr expr in
+  and aux_expr expr = <span data-count="6109">L</span>ist.iter aux_instr expr in
   aux_expr body_expr;
-  <span data-count="4688">l</span>ocals_hashtbl
+  <span data-count="4691">l</span>ocals_hashtbl
 
 let remove_local map body =
-  <span data-count="4688">l</span>et new_x (Raw x : binary indice) =
+  <span data-count="4691">l</span>et new_x (Raw x : binary indice) =
     <span data-count="5097">l</span>et x = match Hashtbl.find_opt map x with <span data-count="2421">N</span>one -&gt; x | <span data-count="2676">S</span>ome x -&gt; x in
     Raw x
   in
   let rec aux_instr (instr : binary instr) : binary instr =
-    <span data-count="21666">m</span>atch instr with
+    <span data-count="21668">m</span>atch instr with
     | <span data-count="3617">L</span>ocal_get ind -&gt; Local_get (new_<span data-count="3617">x</span> ind)
     | <span data-count="1309">L</span>ocal_set ind -&gt; Local_set (new_<span data-count="1309">x</span> ind)
     | <span data-count="171">L</span>ocal_tee ind -&gt; Local_tee (new_<span data-count="171">x</span> ind)
@@ -1581,7 +1581,7 @@ let remove_local map body =
     | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
     | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="19">R</span>eturn_call _
     | <span data-count="28">R</span>eturn_call_indirect (_, _)
-    | <span data-count="881">C</span>all _
+    | <span data-count="883">C</span>all _
     | <span data-count="267">C</span>all_indirect (_, _)
     | <span data-count="0">C</span>all_ref _ | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="0">A</span>rray_get _ | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">A</span>rray_new _
     | <span data-count="0">A</span>rray_new_data (_, _)
@@ -1594,66 +1594,66 @@ let remove_local map body =
     | <span data-count="0">S</span>truct_new _ | <span data-count="0">S</span>truct_new_default _
     | <span data-count="0">S</span>truct_set (_, _) -&gt;
       instr
-  and aux_expr expr = <span data-count="6106">L</span>ist.map aux_instr expr in
+  and aux_expr expr = <span data-count="6109">L</span>ist.map aux_instr expr in
   aux_expr body
 
 let remove_unused_locals locals nb_args body =
-  <span data-count="4688">l</span>et unused_locals =
+  <span data-count="4691">l</span>et unused_locals =
     let used_locals = locals_func body in
-    <span data-count="4688">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1310">R</span>aw (nb_args + i)) locals in
-    <span data-count="4688">L</span>ist.filte<span data-count="4688">r</span> (fun x -&gt; <span data-count="1310">n</span>ot @@ Hashtbl.me<span data-count="1310">m</span> used_locals x) locals
+    <span data-count="4691">l</span>et locals = List.mapi (fun i _x -&gt; <span data-count="1311">R</span>aw (nb_args + i)) locals in
+    <span data-count="4691">L</span>ist.filte<span data-count="4691">r</span> (fun x -&gt; <span data-count="1311">n</span>ot @@ Hashtbl.me<span data-count="1311">m</span> used_locals x) locals
   in
   let rename_map = Hashtbl.create 16 in
-  <span data-count="4688">L</span>ist.iteri
+  <span data-count="4691">L</span>ist.iteri
     (fun j x -&gt;
-      <span data-count="1310">l</span>et name, _ = x in
+      <span data-count="1311">l</span>et name, _ = x in
       let _x = Option.value name ~default:"anon" in
-      <span data-count="1310">l</span>et count = ref 0 in
+      <span data-count="1311">l</span>et count = ref 0 in
       for i = 0 to j do
-        <span data-count="558606">i</span>f List.mem (Raw (nb_args + i)) unused_locals then <span data-count="136">i</span>nc<span data-count="136">r</span> count
+        <span data-count="558607">i</span>f List.mem (Raw (nb_args + i)) unused_locals then <span data-count="137">i</span>nc<span data-count="137">r</span> count
       done;
-      if not @@ List.me<span data-count="1310">m</span> (Raw (nb_args + j)) unused_locals then <span data-count="1250">b</span>egin
+      if not @@ List.me<span data-count="1311">m</span> (Raw (nb_args + j)) unused_locals then <span data-count="1250">b</span>egin
         Hashtbl.replace rename_map (nb_args + j) (nb_args + j - !count)
       end )
     locals;
-  <span data-count="4688">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1310">(</span>nb_args + i, x)) locals in
-  <span data-count="4688">l</span>et locals =
+  <span data-count="4691">l</span>et locals = List.mapi (fun i x -&gt; <span data-count="1311">(</span>nb_args + i, x)) locals in
+  <span data-count="4691">l</span>et locals =
     List.filter_map
-      (fun (i, x) -&gt; <span data-count="1310">i</span>f List.mem (Raw i) unused_locals then <span data-count="60">N</span>one else <span data-count="1250">S</span>ome x)
+      (fun (i, x) -&gt; <span data-count="1311">i</span>f List.mem (Raw i) unused_locals then <span data-count="61">N</span>one else <span data-count="1250">S</span>ome x)
       locals
   in
-  <span data-count="4688">l</span>et body = remove_local rename_map body in
-  <span data-count="4688">(</span>locals, body)
+  <span data-count="4691">l</span>et body = remove_local rename_map body in
+  <span data-count="4691">(</span>locals, body)
 
 let optimize_func (func : binary func) =
-  <span data-count="4688">l</span>et { type_f; locals; body; id } = func in
+  <span data-count="4691">l</span>et { type_f; locals; body; id } = func in
   let rec loop has_changed e =
-    <span data-count="9961">i</span>f not has_changed then
+    <span data-count="9971">i</span>f not has_changed then
       (* TODO: it should be enough to return e directly, but doing one more call to optimize_expr seems to perform more optimizations... *)
-      <span data-count="4688">s</span>nd @@ optimize_exp<span data-count="4688">r</span> e
+      <span data-count="4691">s</span>nd @@ optimize_exp<span data-count="4691">r</span> e
     else
-      <span data-count="5273">l</span>et has_changed, e = optimize_expr e in
-      <span data-count="5273">l</span>oop has_changed e
+      <span data-count="5280">l</span>et has_changed, e = optimize_expr e in
+      <span data-count="5280">l</span>oop has_changed e
   in
   let body = loop true body in
-  <span data-count="4688">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
+  <span data-count="4691">l</span>et (Bt_raw ((None | Some _), (pt, _))) = type_f in
   let nb_args = List.length pt in
-  <span data-count="4688">l</span>et locals, body = remove_unused_locals locals nb_args body in
-  <span data-count="4688">{</span> type_f; locals; body; id }
+  <span data-count="4691">l</span>et locals, body = remove_unused_locals locals nb_args body in
+  <span data-count="4691">{</span> type_f; locals; body; id }
 
 let optimize_runtime_func f =
-  <span data-count="5911">I</span>ndexed.map
+  <span data-count="5914">I</span>ndexed.map
     (function
       | <span data-count="1223">R</span>untime.Imported _ as f -&gt; f
-      | <span data-count="4688">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4688">c</span> f) )
+      | <span data-count="4691">L</span>ocal f -&gt; Runtime.Local (optimize_fun<span data-count="4691">c</span> f) )
     f
 
-let optimize_funcs funs = <span data-count="1400">N</span>amed.map optimize_runtime_func funs
+let optimize_funcs funs = <span data-count="1401">N</span>amed.map optimize_runtime_func funs
 
 let modul m =
-  <span data-count="1400">L</span>og.debug0 "optimizing   ...@\n";
-  <span data-count="1400">l</span>et func = optimize_funcs m.func in
-  <span data-count="1400">{</span> m with func }
+  <span data-count="1401">L</span>og.debug0 "optimizing   ...@\n";
+  <span data-count="1401">l</span>et func = optimize_funcs m.func in
+  <span data-count="1401">{</span> m with func }
 </code></pre>
       </div>
     </div>

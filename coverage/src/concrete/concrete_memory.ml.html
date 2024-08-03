@@ -282,15 +282,15 @@ type t =
   ; mutable data : bytes
   }
 
-let backup t = <span data-count="10">{</span> t with data = Bytes.cop<span data-count="10">y</span> t.data }
+let backup t = <span data-count="11">{</span> t with data = Bytes.cop<span data-count="11">y</span> t.data }
 
 let recover ~from_ ~to_ =
-  <span data-count="10">t</span>o_.limits &lt;- from_.limits;
+  <span data-count="11">t</span>o_.limits &lt;- from_.limits;
   to_.data &lt;- from_.data
 
 let init limits : t =
-  <span data-count="884">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
-  <span data-count="884">{</span> limits; data }
+  <span data-count="885">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
+  <span data-count="885">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="196">l</span>et limits =

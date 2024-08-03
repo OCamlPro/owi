@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>result.ml &mdash; Coverage report</title>
-    <meta name="description" content="73.33% coverage in src/utils/result.ml">
+    <meta name="description" content="75.86% coverage in src/utils/result.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,23 +15,22 @@
           <span class="dirname">src/utils/</span>result.ml
         </a>
       </h1>
-      <h2>73.33%</h2>
+      <h2>75.86%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:46.88%"></span>
-      <span class="unvisited" style="bottom:46.09%"></span>
-      <span class="unvisited" style="bottom:45.31%"></span>
-      <span class="unvisited" style="bottom:43.75%"></span>
-      <span class="unvisited" style="bottom:42.97%"></span>
-      <span class="unvisited" style="bottom:21.88%"></span>
-      <span class="unvisited" style="bottom:17.97%"></span>
-      <span class="unvisited" style="bottom:17.19%"></span>
-      <span class="unvisited" style="bottom:15.62%"></span>
-      <span class="unvisited" style="bottom:14.84%"></span>
-      <span class="unvisited" style="bottom:14.06%"></span>
-      <span class="unvisited" style="bottom:5.47%"></span>
-      <span class="unvisited" style="bottom:4.69%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
+      <span class="unvisited" style="bottom:46.03%"></span>
+      <span class="unvisited" style="bottom:45.24%"></span>
+      <span class="unvisited" style="bottom:44.44%"></span>
+      <span class="unvisited" style="bottom:42.86%"></span>
+      <span class="unvisited" style="bottom:42.06%"></span>
+      <span class="unvisited" style="bottom:20.63%"></span>
+      <span class="unvisited" style="bottom:16.67%"></span>
+      <span class="unvisited" style="bottom:15.87%"></span>
+      <span class="unvisited" style="bottom:14.29%"></span>
+      <span class="unvisited" style="bottom:13.49%"></span>
+      <span class="unvisited" style="bottom:12.70%"></span>
+      <span class="unvisited" style="bottom:3.97%"></span>
+      <span class="unvisited" style="bottom:3.17%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -162,8 +161,6 @@
 <a id="L124"></a><span class="visited"> </span>
 <a id="L125"></a><span class="visited"> </span>
 <a id="L126"></a><span > </span>
-<a id="L127"></a><span > </span>
-<a id="L128"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -294,8 +291,6 @@
 <a href="#L124">124</a>
 <a href="#L125">125</a>
 <a href="#L126">126</a>
-<a href="#L127">127</a>
-<a href="#L128">128</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -378,9 +373,9 @@ let rec err_to_string = function
   | <span data-count="12">`</span>Duplicate_table id -&gt; Fmt.str "duplicate table %s" id
   | <span data-count="2">`</span>Failed_with_but_expected (got, expected) -&gt;
     Fmt.str "expected %s but got (%s)" expected (err_to_strin<span data-count="2">g</span> got)
-  | <span data-count="176">`</span>Found_bug n -&gt;
+  | <span data-count="177">`</span>Found_bug n -&gt;
     if n &gt; 1 then <span data-count="8">F</span>mt.str "Reached %d problems!" n
-    else <span data-count="168">F</span>mt.str "Reached problem!"
+    else <span data-count="169">F</span>mt.str "Reached problem!"
   | <span data-count="6">`</span>Global_is_immutable -&gt; "global is immutable"
   | <span data-count="4">`</span>Illegal_escape txt -&gt; Fmt.str "illegal escape %S" txt
   | <span data-count="8">`</span>Import_after_function -&gt; "import after function"
@@ -423,8 +418,6 @@ let rec err_to_string = function
   | <span data-count="38">`</span>Unknown_type id -&gt; Fmt.str "unknown type %a" Types.pp_indice id
   | <span data-count="2">`</span>Unsupported_file_extension ext -&gt;
     Fmt.str "unsupported file_extension %S" ext
-
-let failwith e = <span data-count="0">F</span>mt.failwith "%s" (err_to_strin<span data-count="0">g</span> e)
 </code></pre>
       </div>
     </div>
