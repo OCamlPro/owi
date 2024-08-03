@@ -182,48 +182,48 @@ type 'a t =
   }
 
 let pop q pledge =
-  <span data-count="29041">M</span>utex.lock q.mutex;
-  <span data-count="29041">l</span>et r =
+  <span data-count="28138">M</span>utex.lock q.mutex;
+  <span data-count="28138">l</span>et r =
     try
-      while Queue.is_empt<span data-count="30435">y</span> q.queue do
-        <span data-count="2376">i</span>f q.pledges = <span data-count="978">0</span> || q.faile<span data-count="0">d</span> then <span data-count="978">r</span>aise Exit;
-        <span data-count="1398">C</span>ondition.wai<span data-count="1394">t</span> q.cond q.mutex
+      while Queue.is_empt<span data-count="29511">y</span> q.queue do
+        <span data-count="2349">i</span>f q.pledges = <span data-count="973">0</span> || q.faile<span data-count="0">d</span> then <span data-count="973">r</span>aise Exit;
+        <span data-count="1376">C</span>ondition.wai<span data-count="1373">t</span> q.cond q.mutex
       done;
       let v = Queue.pop q.queue in
-      <span data-count="28059">i</span>f pledge then <span data-count="27875">q</span>.pledges &lt;- q.pledges + 1;
-      <span data-count="28059">S</span>ome v
-    with <span data-count="978">E</span>xit -&gt;
+      <span data-count="27162">i</span>f pledge then <span data-count="26983">q</span>.pledges &lt;- q.pledges + 1;
+      <span data-count="27162">S</span>ome v
+    with <span data-count="973">E</span>xit -&gt;
       Condition.broadcast q.cond;
-      <span data-count="978">N</span>one
+      <span data-count="973">N</span>one
   in
   Mutex.unlock q.mutex;
-  <span data-count="29037">r</span>
+  <span data-count="28135">r</span>
 
 let make_pledge q =
-  <span data-count="673">M</span>utex.lock q.mutex;
-  <span data-count="673">q</span>.pledges &lt;- q.pledges + 1;
+  <span data-count="665">M</span>utex.lock q.mutex;
+  <span data-count="665">q</span>.pledges &lt;- q.pledges + 1;
   Mutex.unlock q.mutex
 
 let end_pledge q =
-  <span data-count="28514">M</span>utex.lock q.mutex;
-  <span data-count="28515">q</span>.pledges &lt;- q.pledges - 1;
+  <span data-count="27620">M</span>utex.lock q.mutex;
+  <span data-count="27621">q</span>.pledges &lt;- q.pledges - 1;
   Condition.broadcast q.cond;
-  <span data-count="28515">M</span>utex.unlock q.mutex
+  <span data-count="27621">M</span>utex.unlock q.mutex
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
- <span data-count="524">f</span>un () -&gt;
-  <span data-count="509">m</span>atch pop q false with
+ <span data-count="514">f</span>un () -&gt;
+  <span data-count="504">m</span>atch pop q false with
   | <span data-count="325">N</span>one -&gt;
     finalizer ();
     <span data-count="325">N</span>il
-  | <span data-count="184">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="184">q</span> q ~finalizer)
+  | <span data-count="179">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="179">q</span> q ~finalizer)
 
 let push v q =
-  <span data-count="28093">M</span>utex.lock q.mutex;
-  <span data-count="28093">l</span>et was_empty = Queue.is_empty q.queue in
-  <span data-count="28093">Q</span>ueue.push v q.queue;
-  <span data-count="28093">i</span>f was_empty then <span data-count="2079">C</span>ondition.broadcas<span data-count="2079">t</span> q.cond;
-  <span data-count="28093">M</span>utex.unlock q.mutex
+  <span data-count="27188">M</span>utex.lock q.mutex;
+  <span data-count="27189">l</span>et was_empty = Queue.is_empty q.queue in
+  <span data-count="27189">Q</span>ueue.push v q.queue;
+  <span data-count="27189">i</span>f was_empty then <span data-count="2029">C</span>ondition.broadcas<span data-count="2029">t</span> q.cond;
+  <span data-count="27189">M</span>utex.unlock q.mutex
 
 let fail q =
   <span data-count="0">M</span>utex.lock q.mutex;
@@ -232,9 +232,9 @@ let fail q =
   <span data-count="0">M</span>utex.unlock q.mutex
 
 let init () =
-  <span data-count="680">{</span> mutex = Mutex.creat<span data-count="680">e</span> ()
-  ; cond = Condition.creat<span data-count="680">e</span> ()
-  ; queue = Queue.creat<span data-count="680">e</span> ()
+  <span data-count="670">{</span> mutex = Mutex.creat<span data-count="670">e</span> ()
+  ; cond = Condition.creat<span data-count="670">e</span> ()
+  ; queue = Queue.creat<span data-count="670">e</span> ()
   ; pledges = 0
   ; failed = false
   }

@@ -346,51 +346,51 @@
     }
 
   let make () =
-    <span data-count="169">{</span> data = Hashtbl.creat<span data-count="169">e</span> 16; parent = None; chunks = Hashtbl.creat<span data-count="169">e</span> 16 }
+    <span data-count="167">{</span> data = Hashtbl.creat<span data-count="167">e</span> 16; parent = None; chunks = Hashtbl.creat<span data-count="167">e</span> 16 }
 
   let clone m =
     (* TODO: Make chunk copying lazy *)
-    <span data-count="27036">{</span> data = Hashtbl.creat<span data-count="27036">e</span> 16
+    <span data-count="25444">{</span> data = Hashtbl.creat<span data-count="25442">e</span> 16
     ; parent = Some m
-    ; chunks = Hashtbl.cop<span data-count="27036">y</span> m.chunks
+    ; chunks = Hashtbl.cop<span data-count="25444">y</span> m.chunks
     }
 
   let address a =
-    <span data-count="83140">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="82806">l</span>et open Symbolic_choice_without_memory in
     match Expr.view a with
-    | <span data-count="46881">V</span>al (Num (I32 i)) -&gt; return i
-    | <span data-count="35735">P</span>tr { base; offset } -&gt;
-      select_i32 Symbolic_value.(I32.ad<span data-count="35735">d</span> (const_i3<span data-count="35736">2</span> base) offset)
+    | <span data-count="46568">V</span>al (Num (I32 i)) -&gt; return i
+    | <span data-count="35714">P</span>tr { base; offset } -&gt;
+      select_i32 Symbolic_value.(I32.ad<span data-count="35714">d</span> (const_i3<span data-count="35714">2</span> base) offset)
     | <span data-count="524">_</span> -&gt; select_i32 a
 
-  let address_i32 a = <span data-count="738">a</span>
+  let address_i32 a = <span data-count="661">a</span>
 
   let rec load_byte { parent; data; _ } a =
-    <span data-count="1051277">t</span>ry Hashtbl.fin<span data-count="163620">d</span> data a
-    with <span data-count="887734">N</span>ot_found -&gt; (
+    <span data-count="1038089">t</span>ry Hashtbl.fin<span data-count="163091">d</span> data a
+    with <span data-count="875084">N</span>ot_found -&gt; (
       match parent with
-      | <span data-count="4212">N</span>one -&gt; Expr.value (Num (I8 0))
-      | <span data-count="883486">S</span>ome parent -&gt; load_byte parent a )
+      | <span data-count="4200">N</span>one -&gt; Expr.value (Num (I8 0))
+      | <span data-count="870833">S</span>ome parent -&gt; load_byte parent a )
 
   (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
   let merge_extracts (e1, h, m1) (e2, m2, l) =
-    <span data-count="45691">l</span>et ty = Expr.ty e1 in
-    <span data-count="45691">i</span>f m1 = m2 &amp;&amp; <span data-count="45579">E</span>xpr.equa<span data-count="45579">l</span> e1 e2 then
-      <span data-count="45579">i</span>f h - l = Ty.siz<span data-count="45578">e</span> ty then <span data-count="15189">e</span>1 else <span data-count="30389">E</span>xpr.make (Extract (e1, h, l))
+    <span data-count="45493">l</span>et ty = Expr.ty e1 in
+    <span data-count="45493">i</span>f m1 = m2 &amp;&amp; <span data-count="45381">E</span>xpr.equa<span data-count="45381">l</span> e1 e2 then
+      <span data-count="45381">i</span>f h - l = Ty.siz<span data-count="45381">e</span> ty then <span data-count="15123">e</span>1 else <span data-count="30258">E</span>xpr.make (Extract (e1, h, l))
     else
       <span data-count="112">E</span>xpr.(
         make (Concat (mak<span data-count="112">e</span> (Extract (e1, h, m1)), mak<span data-count="112">e</span> (Extract (e2, m2, l)))) )
 
   let concat ~msb ~lsb offset =
-    <span data-count="123086">a</span>ssert <span data-count="123086">(</span>offset &gt; 0 &amp;&amp; <span data-count="123086">o</span>ffset &lt;= 8);
-    match (Expr.vie<span data-count="123088">w</span> msb, Expr.vie<span data-count="123088">w</span> lsb) with
-    | <span data-count="25678">V</span>al (Num (I8 i1)), Val (Num (I8 i2)) -&gt;
-      Symbolic_value.const_i32 Int32.(logo<span data-count="25679">r</span> (sh<span data-count="25679">l</span> (of_in<span data-count="25678">t</span> i1) 8l) (of_in<span data-count="25678">t</span> i2))
-    | <span data-count="51432">V</span>al (Num (I8 i1)), Val (Num (I32 i2)) -&gt;
+    <span data-count="122802">a</span>ssert <span data-count="122802">(</span>offset &gt; 0 &amp;&amp; <span data-count="122802">o</span>ffset &lt;= 8);
+    match (Expr.vie<span data-count="122803">w</span> msb, Expr.vie<span data-count="122803">w</span> lsb) with
+    | <span data-count="25650">V</span>al (Num (I8 i1)), Val (Num (I8 i2)) -&gt;
+      Symbolic_value.const_i32 Int32.(logo<span data-count="25649">r</span> (sh<span data-count="25649">l</span> (of_in<span data-count="25647">t</span> i1) 8l) (of_in<span data-count="25649">t</span> i2))
+    | <span data-count="51376">V</span>al (Num (I8 i1)), Val (Num (I32 i2)) -&gt;
       let offset = offset * 8 in
       if offset &lt; 32 then
-        <span data-count="51356">S</span>ymbolic_value.const_i32
-          Int32.(logo<span data-count="51357">r</span> (sh<span data-count="51357">l</span> (of_in<span data-count="51356">t</span> i1) (of_in<span data-count="51356">t</span> offset)) i2)
+        <span data-count="51300">S</span>ymbolic_value.const_i32
+          Int32.(logo<span data-count="51299">r</span> (sh<span data-count="51299">l</span> (of_in<span data-count="51300">t</span> i1) (of_in<span data-count="51300">t</span> offset)) i2)
       else
         <span data-count="76">l</span>et i1' = Int64.of_int i1 in
         <span data-count="76">l</span>et i2' = Int64.of_int32 i2 in
@@ -398,28 +398,28 @@
     | <span data-count="228">V</span>al (Num (I8 i1)), Val (Num (I64 i2)) -&gt;
       let offset = Int64.of_int (offset * 8) in
       <span data-count="228">S</span>ymbolic_value.const_i64 Int64.(logo<span data-count="228">r</span> (sh<span data-count="228">l</span> (of_in<span data-count="228">t</span> i1) offset) i2)
-    | <span data-count="45635">E</span>xtract (e1, h, m1), Extract (e2, m2, l) -&gt;
+    | <span data-count="45437">E</span>xtract (e1, h, m1), Extract (e2, m2, l) -&gt;
       merge_extracts (e1, h, m1) (e2, m2, l)
     | <span data-count="56">E</span>xtract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) -&gt;
       Expr.(make (Concat (merge_extract<span data-count="56">s</span> (e1, h, m1) (e2, m2, l), e3)))
     | <span data-count="56">_</span> -&gt; Expr.make (Concat (msb, lsb))
 
   let loadn m a n =
-    <span data-count="44744">l</span>et rec loop addr size i acc =
-      <span data-count="167828">i</span>f i = size then <span data-count="44745">a</span>cc
+    <span data-count="44490">l</span>et rec loop addr size i acc =
+      <span data-count="167289">i</span>f i = size then <span data-count="44491">a</span>cc
       else
-        <span data-count="123084">l</span>et addr' = Int32.(ad<span data-count="123086">d</span> addr (of_in<span data-count="123088">t</span> i)) in
+        <span data-count="122800">l</span>et addr' = Int32.(ad<span data-count="122800">d</span> addr (of_in<span data-count="122801">t</span> i)) in
         let byte = load_byte m addr' in
-        <span data-count="123086">l</span>oop addr size (i + 1) (conca<span data-count="123085">t</span> i ~msb:byte ~lsb:acc)
+        <span data-count="122803">l</span>oop addr size (i + 1) (conca<span data-count="122802">t</span> i ~msb:byte ~lsb:acc)
     in
     let v0 = load_byte m a in
-    <span data-count="44744">l</span>oop a n 1 v0
+    <span data-count="44487">l</span>oop a n 1 v0
 
   let extract v pos =
-    <span data-count="107435">m</span>atch Expr.view v with
-    | <span data-count="738">V</span>al (Num (I8 _)) -&gt; v
-    | <span data-count="75434">V</span>al (Num (I32 i)) -&gt;
-      let i' = Int32.(to_in<span data-count="75435">t</span> @@ logand 0xff<span data-count="75434">l</span> @@ shr_s <span data-count="75434">i</span> @@ of_in<span data-count="75434">t</span> (pos * 8)) in
+    <span data-count="107209">m</span>atch Expr.view v with
+    | <span data-count="661">V</span>al (Num (I8 _)) -&gt; v
+    | <span data-count="75361">V</span>al (Num (I32 i)) -&gt;
+      let i' = Int32.(to_in<span data-count="75358">t</span> @@ logand 0xff<span data-count="75356">l</span> @@ shr_s <span data-count="75356">i</span> @@ of_in<span data-count="75358">t</span> (pos * 8)) in
       Expr.value (Num (I8 i'))
     | <span data-count="4024">V</span>al (Num (I64 i)) -&gt;
       let i' = Int64.(to_in<span data-count="4024">t</span> @@ logand 0xff<span data-count="4024">L</span> @@ shr_s <span data-count="4024">i</span> @@ of_in<span data-count="4024">t</span> (pos * 8)) in
@@ -430,32 +430,32 @@
         (_, Sign_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
       -&gt;
       sym
-    | <span data-count="27239">_</span> -&gt; Expr.make (Extract (v, pos + 1, pos))
+    | <span data-count="27167">_</span> -&gt; Expr.make (Extract (v, pos + 1, pos))
 
   let storen m a v n =
-    <span data-count="29259">f</span>or i = 0 to n - 1 do
-      <span data-count="107436">l</span>et a' = Int32.add a (Int32.of_in<span data-count="107436">t</span> i) in
-      <span data-count="107436">l</span>et v' = extract v i in
-      <span data-count="107436">H</span>ashtbl.replac<span data-count="107435">e</span> m.data a' v'
+    <span data-count="29105">f</span>or i = 0 to n - 1 do
+      <span data-count="107210">l</span>et a' = Int32.add a (Int32.of_in<span data-count="107210">t</span> i) in
+      <span data-count="107212">l</span>et v' = extract v i in
+      <span data-count="107212">H</span>ashtbl.replac<span data-count="107211">e</span> m.data a' v'
     done
 
   let validate_address m a =
-    <span data-count="73251">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="72916">l</span>et open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | <span data-count="36987">V</span>al (Num (I32 _)) -&gt; return (Ok a) (* An i32 is a valid address *)
-    | <span data-count="35739">P</span>tr { base; offset } -&gt; (
+    | <span data-count="36674">V</span>al (Num (I32 _)) -&gt; return (Ok a) (* An i32 is a valid address *)
+    | <span data-count="35718">P</span>tr { base; offset } -&gt; (
       let (* A pointer is valid if it's within bounds. *)
       open Symbolic_value in
       match Hashtbl.find m.chunks base with
       | <span data-count="0">e</span>xception Not_found -&gt; return (Error Trap.Memory_leak_use_after_free)
-      | <span data-count="35739">s</span>ize -&gt;
+      | <span data-count="35718">s</span>ize -&gt;
         let base = const_i32 base in
-        <span data-count="35739">l</span>et ptr = I32.add base offset in
-        <span data-count="35738">l</span>et+ is_out_of_bounds =
-          selec<span data-count="35739">t</span> (Bool.or<span data-count="35739">_</span> (I32.l<span data-count="35739">t</span> ptr base) (I32.g<span data-count="35738">e</span> ptr (I32.ad<span data-count="35739">d</span> base size)))
+        <span data-count="35718">l</span>et ptr = I32.add base offset in
+        <span data-count="35718">l</span>et+ is_out_of_bounds =
+          selec<span data-count="35718">t</span> (Bool.or<span data-count="35718">_</span> (I32.l<span data-count="35718">t</span> ptr base) (I32.g<span data-count="35718">e</span> ptr (I32.ad<span data-count="35718">d</span> base size)))
         in
-        <span data-count="35739">i</span>f is_out_of_bounds then <span data-count="3">E</span>rror Trap.Memory_heap_buffer_overflow
-        else <span data-count="35736">O</span>k a )
+        <span data-count="35718">i</span>f is_out_of_bounds then <span data-count="3">E</span>rror Trap.Memory_heap_buffer_overflow
+        else <span data-count="35715">O</span>k a )
     | <span data-count="524">_</span> -&gt;
       (* A symbolic expression should be a valid address *)
       return (Ok a)
@@ -477,10 +477,10 @@
     <span data-count="2437">H</span>ashtbl.remove m.chunks base
 
   let realloc m ~ptr ~size =
-    <span data-count="9893">l</span>et open Symbolic_choice_without_memory in
-    let+ base = addres<span data-count="9893">s</span> ptr in
-    <span data-count="9894">H</span>ashtbl.replace m.chunks base size;
-    <span data-count="9894">E</span>xpr.ptr base (Symbolic_value.const_i3<span data-count="9894">2</span> 0l)
+    <span data-count="9892">l</span>et open Symbolic_choice_without_memory in
+    let+ base = addres<span data-count="9891">s</span> ptr in
+    <span data-count="9892">H</span>ashtbl.replace m.chunks base size;
+    <span data-count="9892">E</span>xpr.ptr base (Symbolic_value.const_i3<span data-count="9892">2</span> 0l)
 end
 
 include Symbolic_memory_make.Make (Backend)

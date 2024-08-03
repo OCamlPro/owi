@@ -173,14 +173,14 @@ let recover ~from_ ~to_ = <span data-count="1">t</span>o_.data &lt;- from_.data
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
-    <span data-count="1021">i</span>ncr r;
-    <span data-count="1021">!</span>r
+    <span data-count="1016">i</span>ncr r;
+    <span data-count="1016">!</span>r
 
 let init ?label (typ : binary table_type) : t =
-  <span data-count="1021">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="1016">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_value.ref_null' heap_type in
-  <span data-count="1021">l</span>et table = Array.make limits.min null in
-  <span data-count="1021">{</span> id = fres<span data-count="1021">h</span> (); label; limits; typ = ref_type; data = table }
+  <span data-count="1016">l</span>et table = Array.make limits.min null in
+  <span data-count="1016">{</span> id = fres<span data-count="1016">h</span> (); label; limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="54">t</span>able.data &lt;- data
 

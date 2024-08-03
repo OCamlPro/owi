@@ -236,55 +236,55 @@
 open Syntax
 
 let out_testcase ~dst testcase =
-  <span data-count="86">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="86">l</span>et tag atts name = <span data-count="195">(</span>("", name), atts) in
+  <span data-count="82">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="82">l</span>et tag atts name = <span data-count="187">(</span>("", name), atts) in
   let atts = [ (("", "coversError"), "true") ] in
-  let to_string v = <span data-count="109">F</span>mt.str "%a" Smtml.Value.pp v in
-  let input v = <span data-count="109">`</span>El (ta<span data-count="109">g</span> [] "input", [ `Data (to_strin<span data-count="109">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="86">g</span> atts "testcase", List.ma<span data-count="86">p</span> input testcase) in
+  let to_string v = <span data-count="105">F</span>mt.str "%a" Smtml.Value.pp v in
+  let input v = <span data-count="105">`</span>El (ta<span data-count="105">g</span> [] "input", [ `Data (to_strin<span data-count="105">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="82">g</span> atts "testcase", List.ma<span data-count="82">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="86">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="82">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir testcase -&gt;
-    <span data-count="86">i</span>ncr cnt;
-    <span data-count="86">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="86">l</span>et path = Fpath.append dir name in
-    <span data-count="86">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="86">c</span> path
-        (fun chan () -&gt; <span data-count="86">O</span>k (out_testcas<span data-count="86">e</span> ~dst:(`Channel chan) testcase))
+    <span data-count="82">i</span>ncr cnt;
+    <span data-count="82">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="82">l</span>et path = Fpath.append dir name in
+    <span data-count="82">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="82">c</span> path
+        (fun chan () -&gt; <span data-count="82">O</span>k (out_testcas<span data-count="82">e</span> ~dst:(`Channel chan) testcase))
         ()
     in
-    <span data-count="86">r</span>es
+    <span data-count="82">r</span>es
 
 let add_main_as_start (m : Binary.modul) =
   (* We are checking if there's a start function *)
-  <span data-count="344">i</span>f Option.is_some m.start then <span data-count="171">O</span>k m
+  <span data-count="338">i</span>f Option.is_some m.start then <span data-count="169">O</span>k m
   else
     (* If there is none, we look for a function exported with the name `main` *)
-    <span data-count="173">m</span>atch
+    <span data-count="169">m</span>atch
       List.find_opt
-        (function <span data-count="173">{</span> Binary.name = "main"; _ } -&gt; true | <span data-count="0">_</span> -&gt; false)
+        (function <span data-count="169">{</span> Binary.name = "main"; _ } -&gt; true | <span data-count="0">_</span> -&gt; false)
         m.exports.func
     with
     | <span data-count="0">N</span>one -&gt;
       (* TODO: fail/display a warning saying nothing will be done ? *)
       Ok m
-    | <span data-count="173">S</span>ome export -&gt; (
+    | <span data-count="169">S</span>ome export -&gt; (
       (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
       let main_id = export.id in
       match Indexed.get_at main_id m.func.values with
       | <span data-count="0">N</span>one -&gt; Error (`Msg "can't find a main function")
-      | <span data-count="173">S</span>ome main_function -&gt;
+      | <span data-count="169">S</span>ome main_function -&gt;
         let (Bt_raw main_type) =
-          match main_function with <span data-count="173">L</span>ocal f -&gt; f.type_f | <span data-count="0">I</span>mported i -&gt; i.desc
+          match main_function with <span data-count="169">L</span>ocal f -&gt; f.type_f | <span data-count="0">I</span>mported i -&gt; i.desc
         in
         let default_value_of_t = function
-          | <span data-count="346">T</span>ypes.Num_type I32 -&gt; Ok (Types.I32_const 0l)
+          | <span data-count="338">T</span>ypes.Num_type I32 -&gt; Ok (Types.I32_const 0l)
           | <span data-count="0">N</span>um_type I64 -&gt; Ok (Types.I64_const 0L)
           | <span data-count="0">N</span>um_type F32 -&gt; Ok (Types.F32_const (Float32.of_floa<span data-count="0">t</span> 0.))
           | <span data-count="0">N</span>um_type F64 -&gt; Ok (Types.F64_const (Float64.of_floa<span data-count="0">t</span> 0.))
@@ -297,13 +297,13 @@ let add_main_as_start (m : Binary.modul) =
         in
         let+ body =
           let pt, rt = snd main_type in
-          <span data-count="173">l</span>et+ args = list_ma<span data-count="173">p</span> (fun (_, t) -&gt; <span data-count="346">d</span>efault_value_of_t t) pt in
-          <span data-count="173">l</span>et after_call =
-            List.map (fun (_ : _ Types.val_type) -&gt; <span data-count="173">T</span>ypes.Drop) rt
+          <span data-count="169">l</span>et+ args = list_ma<span data-count="169">p</span> (fun (_, t) -&gt; <span data-count="338">d</span>efault_value_of_t t) pt in
+          <span data-count="169">l</span>et after_call =
+            List.map (fun (_ : _ Types.val_type) -&gt; <span data-count="169">T</span>ypes.Drop) rt
           in
-          <span data-count="173">a</span>rgs @ [ Types.Call (Raw main_id) ] @ after_call
+          <span data-count="169">a</span>rgs @ [ Types.Call (Raw main_id) ] @ after_call
         in
-        <span data-count="173">l</span>et type_f : Types.binary Types.block_type =
+        <span data-count="169">l</span>et type_f : Types.binary Types.block_type =
           Types.Bt_raw (None, ([], []))
         in
         let start_code : Types.binary Types.func =
@@ -315,12 +315,12 @@ let add_main_as_start (m : Binary.modul) =
         let next_free_index =
           List.fold_left
             (fun next_free_index v -&gt;
-              <span data-count="2922">l</span>et index = Indexed.get_index v in
-              <span data-count="2922">i</span>f next_free_index &gt; index then <span data-count="2">n</span>ext_free_index else <span data-count="2920">i</span>ndex + 1 )
+              <span data-count="2904">l</span>et index = Indexed.get_index v in
+              <span data-count="2904">i</span>f next_free_index &gt; index then <span data-count="2">n</span>ext_free_index else <span data-count="2902">i</span>ndex + 1 )
             0 m.func.values
         in
-        <span data-count="173">l</span>et values =
-          Indexed.retur<span data-count="173">n</span> next_free_index start_func :: m.func.values
+        <span data-count="169">l</span>et values =
+          Indexed.retur<span data-count="169">n</span> next_free_index start_func :: m.func.values
         in
         let func = { Named.named; values } in
         let start = Some next_free_index in

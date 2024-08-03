@@ -457,14 +457,14 @@ module M :
   module Value = Concolic_value.V
 
   let symbol_i32 () : Value.int32 Choice.t =
-    <span data-count="14">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-        <span data-count="14">l</span>et n =
+    <span data-count="12">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
+        <span data-count="12">l</span>et n =
           match forced_value with
-          | <span data-count="3">N</span>one -&gt; Random.bits3<span data-count="3">2</span> ()
-          | <span data-count="11">S</span>ome (Num (I32 n)) -&gt; n
+          | <span data-count="2">N</span>one -&gt; Random.bits3<span data-count="2">2</span> ()
+          | <span data-count="10">S</span>ome (Num (I32 n)) -&gt; n
           | _ -&gt; assert false
         in
-        (I32 n, Value.pai<span data-count="14">r</span> n (Expr.mk_symbo<span data-count="14">l</span> sym)) )
+        (I32 n, Value.pai<span data-count="12">r</span> n (Expr.mk_symbo<span data-count="12">l</span> sym)) )
 
   let symbol_i8 () : Value.int32 Choice.t =
     <span data-count="6">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;

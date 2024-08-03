@@ -72,17 +72,17 @@
 open Syntax
 
 let cmd_one ~unsafe ~optimize file =
-  <span data-count="10">l</span>et ext = Fpath.get_ext file in
-  <span data-count="10">m</span>atch ext with
-  | <span data-count="9">"</span>.wat" -&gt;
-    let* modul = Parse.Text.Module.from_fil<span data-count="9">e</span> file in
-    <span data-count="9">B</span>inary_encoder.convert file ~unsafe ~optimize modul
+  <span data-count="9">l</span>et ext = Fpath.get_ext file in
+  <span data-count="9">m</span>atch ext with
+  | <span data-count="8">"</span>.wat" -&gt;
+    let* modul = Parse.Text.Module.from_fil<span data-count="8">e</span> file in
+    <span data-count="8">B</span>inary_encoder.convert file ~unsafe ~optimize modul
   | <span data-count="1">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 
 let cmd profiling debug unsafe optimize files =
-  <span data-count="10">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="10">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
-  <span data-count="10">l</span>ist_iter (cmd_one ~unsafe ~optimize) files
+  <span data-count="9">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="9">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
+  <span data-count="9">l</span>ist_iter (cmd_one ~unsafe ~optimize) files
 </code></pre>
       </div>
     </div>

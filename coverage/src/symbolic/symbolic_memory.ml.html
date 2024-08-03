@@ -641,7 +641,7 @@ module Expr = Smtml.Expr
 module Ty = Smtml.Ty
 open Expr
 
-let page_size = Symbolic_value.const_i3<span data-count="698">2</span> 65_536l
+let page_size = Symbolic_value.const_i3<span data-count="656">2</span> 65_536l
 
 type t =
   { data : (Int32.t, Value.int32) Hashtbl.t
@@ -838,7 +838,7 @@ end)
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="16">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="14">E</span>nv_id.Tbl.create 0
 
 let iter f collection = <span data-count="0">E</span>nv_id.Tbl.iter (fun _ tbl -&gt; <span data-count="0">f</span> tbl) collection
 
