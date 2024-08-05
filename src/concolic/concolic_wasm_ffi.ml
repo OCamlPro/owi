@@ -182,3 +182,7 @@ let summaries_extern_module =
     ]
   in
   { Link.functions }
+
+let introspection_extern_module =
+  let functions = [] in
+  { Link.functions }

@@ -131,6 +131,10 @@ module Make (Backend : M) = struct
 
   let realloc m ~ptr ~size = Backend.realloc m.data ~ptr ~size
 
+  let pp fmt m =
+    Fmt.pf fmt "@[<v 1>Memory:@;size: %a@;backend:@;@[<v 1> %a@]@]"
+      Smtml.Expr.pp m.size Backend.pp m.data
+
   (* TODO: Move this into a separate module? *)
   module ITbl = Hashtbl.Make (struct
     include Int

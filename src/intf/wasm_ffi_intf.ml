@@ -50,4 +50,6 @@ module type S = sig
   val symbolic_extern_module : extern_func Link.extern_module
 
   val summaries_extern_module : extern_func Link.extern_module
+
+  val introspection_extern_module : extern_func Link.extern_module
 end
