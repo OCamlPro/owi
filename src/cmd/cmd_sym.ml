@@ -53,7 +53,7 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let pc = Choice.return (Ok ()) in
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread = Thread_with_memory.init () in
-  let res_queue = Wq.init () in
+  let res_queue = Wq.make () in
   let callback v =
     let open Symbolic_choice_intf in
     match (fail_mode, v) with

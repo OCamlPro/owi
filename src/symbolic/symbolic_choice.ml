@@ -32,29 +32,27 @@ module CoreImpl = struct
       | Choice of (('a, 'wls) status * ('a, 'wls) status)
       | Stop
 
-    let run (Sched mxf) wls = mxf wls
+    let run (Sched mxf : ('a, 'wls) t) (wls : 'wls) : ('a, 'wls) status =
+      mxf wls
 
     let return x : _ t = Sched (Fun.const (Now x))
 
     let return_status status = Sched (Fun.const status)
 
-    let rec bind (mx : ('a, 'wls) t) (f : 'a -> ('b, 'wls) t) : _ t =
-      let rec bind_status (x : _ status) (outter_wls : 'wls) f : _ status =
-        match x with
-        | Now x -> run (f x) outter_wls
-        | Yield (prio, lx) ->
-          Yield (prio, Sched (fun wls -> bind_status (run lx wls) wls f))
-        | Choice (mx1, mx2) ->
-          let mx1' = bind_status mx1 outter_wls f in
-          let mx2' = bind_status mx2 outter_wls f in
-          Choice (mx1', mx2')
-        | Stop -> Stop
-      in
+    let rec bind (mx : ('a, 'wls) t) (f : 'a -> ('b, 'wls) t) : ('b, 'wls) t =
       Sched
         (fun wls ->
-          match run mx wls with
-          | Yield (prio, mx) -> Yield (prio, bind mx f)
-          | x -> bind_status x wls f )
+          let rec unfold_status (x : ('a, 'wls) status) : ('b, 'wls) status =
+            match x with
+            | Now x -> run (f x) wls
+            | Yield (prio, lx) -> Yield (prio, bind lx f)
+            | Choice (mx1, mx2) ->
+              let mx1' = unfold_status mx1 in
+              let mx2' = unfold_status mx2 in
+              Choice (mx1', mx2')
+            | Stop -> Stop
+          in
+          unfold_status (run mx wls) )
 
     let ( let* ) = bind
 
@@ -82,7 +80,7 @@ module CoreImpl = struct
     type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue } [@@unboxed]
 
     let init_scheduler () =
-      let work_queue = Wq.init () in
+      let work_queue = Wq.make () in
       { work_queue }
 
     let add_init_task sched task = Wq.push task sched.work_queue
