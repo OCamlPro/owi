@@ -82,7 +82,7 @@ module CoreImpl = struct
     type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue } [@@unboxed]
 
     let init_scheduler () =
-      let work_queue = Wq.init () in
+      let work_queue = Wq.make () in
       { work_queue }
 
     let add_init_task sched task = Wq.push task sched.work_queue
