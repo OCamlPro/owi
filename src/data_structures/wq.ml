@@ -24,7 +24,7 @@ let work_while f q = Synchronizer.work_while f q
 
 let fail = Synchronizer.fail
 
-let init () =
+let make () =
   let q = Queue.create () in
   let writter v condvar =
     let was_empty = Queue.is_empty q in
