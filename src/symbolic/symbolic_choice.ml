@@ -32,7 +32,8 @@ module CoreImpl = struct
       | Choice of (('a, 'wls) status * ('a, 'wls) status)
       | Stop
 
-    let run (Sched mxf) wls = mxf wls
+    let run (Sched mxf : ('a, 'wls) t) (wls : 'wls) : ('a, 'wls) status =
+      mxf wls
 
     let return x : _ t = Sched (Fun.const (Now x))
 
