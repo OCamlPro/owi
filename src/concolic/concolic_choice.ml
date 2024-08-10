@@ -14,6 +14,10 @@ type pc_elt =
   | Assume of Symbolic_value.vbool
   | Assert of Symbolic_value.vbool
 
+type pc = pc_elt list
+
+type assignments = (Smtml.Symbol.t * Concrete_value.t) list
+
 let pp_pc_elt fmt = function
   | Select (c, v) -> Fmt.pf fmt "Select(%a, %b)" Smtml.Expr.pp c v
   | Select_i32 (c, v) -> Fmt.pf fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
@@ -22,11 +26,16 @@ let pp_pc_elt fmt = function
 
 let pp_pc fmt pc = List.iter (fun e -> Fmt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
-let pp_assignments fmt assignments =
-  List.iter
-    (fun (sym, v) ->
-      Fmt.pf fmt "  %a : %a@\n" Smtml.Symbol.pp sym Concrete_value.pp v )
-    assignments
+let pp_assignments ~no_values fmt assignments =
+  let open Smtml in
+  let pp_v =
+    if not no_values then
+      Fmt.parens (Fmt.pair ~sep:Fmt.sp Symbol.pp (Fmt.parens Concrete_value.pp))
+    else fun fmt (x, _) ->
+      let ty = Symbol.type_of x in
+      Fmt.parens (Fmt.pair ~sep:Fmt.sp Smtml.Symbol.pp Smtml.Ty.pp) fmt (x, ty)
+  in
+  Fmt.pf fmt "(model@\n  %a)" (Fmt.vbox (Fmt.list pp_v)) assignments
 
 let pc_elt_to_expr = function
   | Select (c, v) -> Some (if v then c else Smtml.Expr.Bool.not c)
@@ -35,8 +44,6 @@ let pc_elt_to_expr = function
   | Assert _ -> None
 
 let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
-
-type pc = pc_elt list
 
 type shared_thread_info =
   { memories : Symbolic_memory.collection
@@ -47,7 +54,7 @@ type shared_thread_info =
 type thread =
   { pc : pc
   ; symbols : int
-  ; symbols_value : (Smtml.Symbol.t * Concrete_value.t) list
+  ; symbols_value : assignments
   ; preallocated_values : (Smtml.Symbol.t, Smtml.Value.t) Hashtbl.t
   ; shared : shared_thread_info
   }
@@ -84,7 +91,7 @@ let ( let+ ) = map
 let abort =
   M
     (fun st ->
-      (Ok (), { st with pc = Assert (Symbolic_value.Bool.const false) :: st.pc })
+      (Ok (), { st with pc = Assume (Symbolic_value.Bool.const false) :: st.pc })
       )
 
 let add_pc (c : Concolic_value.V.vbool) =
@@ -94,7 +101,7 @@ let add_pc_to_thread (st : thread) c = { st with pc = c :: st.pc }
 
 let no_choice e =
   let v = Smtml.Expr.simplify e in
-  match Smtml.Expr.view v with Val _ -> true | _ -> false
+  not (Smtml.Expr.is_symbolic v)
 
 let select (vb : Concolic_value.V.vbool) =
   let r = vb.concrete in

@@ -1,5 +1,7 @@
 Pqueue tests:
-  $ owi c -O0 -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_enqueue.c --no-value
+  $ ./run-subdir.sh pqueue -O0 --no-value
+  Testing "files/normal/testsuite/pqueue/pqueue_test_enqueue.c":
+  Using owi sym:
   Trap: memory heap buffer overflow
   Model:
     (model
@@ -9,9 +11,12 @@ Pqueue tests:
       (symbol_3 i32)
       (symbol_4 i32)
       (symbol_5 i32))
-  Reached problem!Segmentation fault
-  [139]
-  $ owi c -O0 -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_pop.c --no-value
+  Reached problem!
+  [13]
+  Using owi conc:
+  All OK
+  Testing "files/normal/testsuite/pqueue/pqueue_test_pop.c":
+  Using owi sym:
   Trap: memory heap buffer overflow
   Model:
     (model
@@ -26,3 +31,5 @@ Pqueue tests:
       (symbol_8 i32))
   Reached problem!
   [13]
+  Using owi conc:
+  All OK

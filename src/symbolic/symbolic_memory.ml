@@ -149,9 +149,10 @@ let extract v pos =
   | Val (Num (I64 i)) ->
     let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
     value (Num (I8 i'))
-  | Cvtop (_, Zero_extend 24, ({ node = Symbol _; _ } as sym))
-  | Cvtop (_, Sign_extend 24, ({ node = Symbol _; _ } as sym))
-    when Smtml.Ty.equal (Ty_bitv 8) (ty sym) ->
+  | Cvtop
+      ( _
+      , (Zero_extend 24 | Sign_extend 24)
+      , ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym) ) ->
     sym
   | _ -> make (Extract (v, pos + 1, pos))
 

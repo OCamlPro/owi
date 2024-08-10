@@ -200,6 +200,7 @@ module I32 = struct
   let to_bool (e : vbool) =
     match view e with
     | Val (Num (I32 i)) -> Bool.const @@ Int32.ne i 0l
+    | Ptr _ -> Bool.const true
     | Cvtop (_, OfBool, cond) -> cond
     | _ -> make (Cvtop (ty, ToBool, e))
 
