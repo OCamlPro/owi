@@ -12,6 +12,9 @@ type fail_mode =
   | `Both
   ]
 
+(* TODO: add a flag for this *)
+let print_paths = false
+
 let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
@@ -54,8 +57,10 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
   let result = List.fold_left (run_file ~unsafe ~optimize) pc files in
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
+  let path_count = ref 0 in
   let callback v =
     let open Symbolic_choice_intf in
+    incr path_count;
     match (fail_mode, v) with
     | _, (EVal (Ok ()), _) -> ()
     | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
@@ -115,8 +120,9 @@ let cmd profiling debug unsafe optimize workers no_stop_at_failure no_values
     else results
   in
   let* count = print_and_count_failures 0 results in
+  if print_paths then Fmt.pr "Completed paths: %d@." !path_count;
   if count > 0 then Error (`Found_bug count)
   else begin
-    Fmt.pr "All OK";
+    Fmt.pr "All OK@.";
     Ok ()
   end

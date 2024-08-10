@@ -110,14 +110,16 @@ module M :
     match view v.symbolic with
     | Val (Num (I32 v)) -> Choice.return v
     | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"|} Expr.pp v.symbolic;
+      Log.debug2 {|alloc: cannot allocate base pointer "%a"@.|} Expr.pp
+        v.symbolic;
       Choice.bind (abort ()) (fun () -> assert false)
 
   let ptr (v : Value.int32) : int32 Choice.t =
     match view v.symbolic with
     | Ptr { base; _ } -> Choice.return base
     | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v.symbolic;
+      Log.debug2 {|free: cannot fetch pointer base of "%a"@.|} Expr.pp
+        v.symbolic;
       Choice.bind (abort ()) (fun () -> assert false)
 
   let exit (_p : Value.int32) : unit Choice.t = abort ()

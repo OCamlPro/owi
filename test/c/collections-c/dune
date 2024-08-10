@@ -2,4 +2,5 @@
  (deps
   %{bin:owi}
   (package owi)
-  (source_tree files)))
+  (source_tree files)
+  run-subdir.sh))
