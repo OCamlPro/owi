@@ -9,3 +9,5 @@ type 'a t =
   }
 
 val pp_contract : formatter -> 'a t -> unit
+
+val parse_contract : Sexp.t -> text t Result.t

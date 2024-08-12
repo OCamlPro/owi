@@ -60,8 +60,13 @@ type err =
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
   | `Annotation_id_incorrect of string
-  | `Unknown_annotation_clause
-  | `Unknown_annotation_object
+  | `Invalid_indice of string
+  | `Invalid_text_indice of string
+  | `Unknown_annotation_clause of Sexp.t
+  | `Unknown_annotation_object of Sexp.t
+  | `Unknown_binder_type of Sexp.t
+  | `Unknown_prop of Sexp.t
+  | `Unknown_term of Sexp.t
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
