@@ -417,7 +417,7 @@ let rec rewrite_prop (modul : Assigned.t) (binder_list : string option list) :
     BinConnect (b, pr1, pr2)
   | Binder (b, bt, id_opt, pr1) ->
     let+ pr1 = rewrite_prop modul (id_opt :: binder_list) pr1 in
-    Binder (b, bt, id_opt, pr1)
+    Binder (b, bt, None, pr1)
 
 let rewrite_contract (modul : Assigned.t) :
   text Contract.t -> binary Contract.t Result.t =
