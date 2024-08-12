@@ -15,6 +15,7 @@ type t =
   ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
   ; start : text indice option
+  ; annots : text Annot.annot list
   }
 
 val of_grouped : Grouped.t -> t Result.t

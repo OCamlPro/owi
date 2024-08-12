@@ -39,6 +39,7 @@ type t =
   ; data : Text.data Indexed.t list
   ; exports : opt_exports
   ; start : text indice option
+  ; annots : text Annot.annot list
   }
 
 let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
@@ -57,6 +58,7 @@ let empty_module id =
   ; data = []
   ; exports = { global = []; table = []; mem = []; func = [] }
   ; start = None
+  ; annots = []
   }
 
 type curr =
@@ -211,6 +213,8 @@ let add_field curr (fields : t) = function
     ok @@ add_data data fields curr
   | MStart start -> Ok { fields with start = Some start }
 
-let of_symbolic { Text.fields; id; _ } =
+let of_symbolic { Text.fields; id; annots } =
   Log.debug0 "grouping     ...@\n";
-  list_fold_left (add_field (init_curr ())) (empty_module id) fields
+  let+ modul = list_fold_left (add_field (init_curr ())) (empty_module id) fields
+  in
+  { modul with annots }
