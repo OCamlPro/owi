@@ -311,6 +311,8 @@ let of_string s =
     if Char.equal s.[0] '+' then x else neg x
   else of_signless_string s
 
+let of_string_opt s = try Some (of_string s) with _ -> None
+
 (* String conversion that groups digits for readability *)
 
 let is_digit = function '0' .. '9' -> true | _ -> false
