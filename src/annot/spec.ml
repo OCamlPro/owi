@@ -17,6 +17,9 @@ term ::= '(' pterm ')'             ==> pterm
   | result                         ==> Result
 
 pterm ::= 'i32' i32                ==> Int32 (Int32.of_string i32)
+  | 'i64' i64                      ==> Int64 (Int64.of_string i64)
+  | 'f32' f32                      ==> Float32 (Float32.of_string f32)
+  | 'f64' f64                      ==> Float64 (Float64.of_string f64)
   | 'global' ind                   ==> let* ind = parse_indice ind in Global ind
   | 'binder' ind                   ==> let* ind = parse_indice ind in Binder ind
   | unop term_1                    ==> Unop (unop, term_1)
@@ -88,7 +91,10 @@ type nonrec binop =
   | Div
 
 type 'a term =
-  | Int32 : int32 -> 'a term
+  | Int32 : Int32.t -> 'a term
+  | Int64 : Int64.t -> 'a term
+  | Float32 : Float32.t -> 'a term
+  | Float64 : Float64.t -> 'a term
   | Var : text indice -> text term
   | GlobalVar : 'a indice -> 'a term
   | BinderVar : 'a indice -> 'a term
@@ -135,30 +141,33 @@ let pp_binop fmt = function
 
 let rec pp_term : type a. formatter -> a term -> unit =
  fun fmt -> function
-  | Int32 i -> pf fmt "%i" (Int32.to_int i)
+  | Int32 i32 -> pf fmt "(i32 %i)" (Int32.to_int i32)
+  | Int64 i64 -> pf fmt "(i64 %i)" (Int64.to_int i64)
+  | Float32 f32 -> pf fmt "(f32 %a)" Float32.pp f32
+  | Float64 f64 -> pf fmt "(f64 %a)" Float64.pp f64
   | Var ind -> pf fmt "%a" pp_indice ind
-  | GlobalVar ind -> pf fmt "global.%a" pp_indice ind
-  | BinderVar ind -> pf fmt "binder.%a" pp_indice ind
-  | UnOp (u, tm1) -> pf fmt "@[<hv 2>%a@ %a@]" pp_unop u pp_term tm1
+  | GlobalVar ind -> pf fmt "(global %a)" pp_indice ind
+  | BinderVar ind -> pf fmt "(binder %a)" pp_indice ind
+  | UnOp (u, tm1) -> pf fmt "@[<hv 2>(%a@ %a)@]" pp_unop u pp_term tm1
   | BinOp (b, tm1, tm2) ->
-    pf fmt "@[<hv 2>%a@ %a@ %a@]" pp_term tm1 pp_binop b pp_term tm2
-  | Result -> pf fmt {|\result|}
+    pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binop b pp_term tm1 pp_term tm2
+  | Result -> pf fmt "result"
 
 let rec pp_prop : type a. formatter -> a prop -> unit =
  fun fmt -> function
   | Const bool -> pf fmt "%a" pp_bool bool
   | BinPred (b, tm1, tm2) ->
-    pf fmt "@[<hv 2>%a@ %a@ %a@]" pp_term tm1 pp_binpred b pp_term tm2
-  | UnConnect (u, pr1) -> pf fmt "@[<hv 2>%a@ %a@]" pp_unconnect u pp_prop pr1
+    pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binpred b pp_term tm1 pp_term tm2
+  | UnConnect (u, pr1) -> pf fmt "@[<hv 2>(%a@ %a)@]" pp_unconnect u pp_prop pr1
   | BinConnect (b, pr1, pr2) ->
-    pf fmt "@[<hv 2>%a@ %a@ %a@]" pp_prop pr1 pp_binconnect b pp_prop pr2
+    pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binconnect b pp_prop pr1 pp_prop pr2
   | Binder (b, bt, id_opt, pr1) -> (
     match id_opt with
     | Some id ->
-      pf fmt "@[<hv 2>%a@ %a@ %a, %a@]" pp_binder b pp_binder_type bt pp_id id
+      pf fmt "@[<hv 2>(%a %a:%a@ %a)@]" pp_binder b pp_id id pp_binder_type bt
         pp_prop pr1
     | None ->
-      pf fmt "@[<hv 2>%a@ %a@, %a@]" pp_binder b pp_binder_type bt pp_prop pr1 )
+      pf fmt "@[<hv 2>(%a %a@ %a)@]" pp_binder b pp_binder_type bt pp_prop pr1 )
 
 let valid_text_indice_char = function
   | '0' .. '9'
@@ -221,6 +230,21 @@ let rec parse_term =
     match Int32.of_string_opt i32 with
     | Some i32 -> ok @@ Int32 i32
     | None -> Error (`Invalid_int32 i32) )
+  (* Int64 *)
+  | List [ Atom "i64"; Atom i64 ] -> (
+    match Int64.of_string_opt i64 with
+    | Some i64 -> ok @@ Int64 i64
+    | None -> Error (`Invalid_int64 i64) )
+  (* Float32 *)
+  | List [ Atom "f32"; Atom f32 ] -> (
+    match Float32.of_string_opt f32 with
+    | Some f32 -> ok @@ Float32 f32
+    | None -> Error (`Invalid_float32 f32) )
+  (* Float64 *)
+  | List [ Atom "f64"; Atom f64 ] -> (
+    match Float64.of_string_opt f64 with
+    | Some f64 -> ok @@ Float64 f64
+    | None -> Error (`Invalid_float64 f64) )
   (* Var *)
   | Atom ind when Option.is_some (parse_text_id ind) ->
     let+ ind = parse_text_indice ind in

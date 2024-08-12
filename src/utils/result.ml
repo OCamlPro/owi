@@ -61,6 +61,9 @@ type err =
   | `Unsupported_file_extension of string
   | `Annotation_id_incorrect of string
   | `Invalid_int32 of string
+  | `Invalid_int64 of string
+  | `Invalid_float32 of string
+  | `Invalid_float64 of string
   | `Invalid_indice of string
   | `Invalid_text_indice of string
   | `Unknown_annotation_clause of Sexp.t
@@ -137,7 +140,10 @@ let rec err_to_string = function
     Fmt.str "unsupported file_extension %S" ext
   | `Annotation_id_incorrect annotid ->
     Fmt.str "annotation id %S incorrect" annotid
-  | `Invalid_int32 int32 -> Fmt.str "invalid int32 %S" int32
+  | `Invalid_int32 i32 -> Fmt.str "invalid int32 %S" i32
+  | `Invalid_int64 i64 -> Fmt.str "invalid int64 %S" i64
+  | `Invalid_float32 f32 -> Fmt.str "invalid float32 %S" f32
+  | `Invalid_float64 f64 -> Fmt.str "invalid float64 %S" f64
   | `Invalid_indice id -> Fmt.str "invalid indice %S" id
   | `Invalid_text_indice id -> Fmt.str "invalid text indice %S" id
   | `Unknown_annotation_clause s ->
