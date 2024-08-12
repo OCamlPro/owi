@@ -378,7 +378,10 @@ let rec rewrite_term (modul : Assigned.t) (binder_list : string option list) :
   text Spec.term -> binary Spec.term Result.t =
   let open Spec in
   function
-  | Int32 i -> Ok (Int32 i)
+  | Int32 i32 -> Ok (Int32 i32)
+  | Int64 i64 -> Ok (Int64 i64)
+  | Float32 f32 -> Ok (Float32 f32)
+  | Float64 f64 -> Ok (Float64 f64)
   | Var ind -> (
     match (find_binder binder_list ind, find_global modul ind) with
     | Ok ind, _ -> Ok (BinderVar ind)

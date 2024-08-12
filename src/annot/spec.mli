@@ -32,7 +32,10 @@ type nonrec binop =
   | Div
 
 type 'a term =
-  | Int32 : int32 -> 'a term
+  | Int32 : Int32.t -> 'a term
+  | Int64 : Int64.t -> 'a term
+  | Float32 : Float32.t -> 'a term
+  | Float64 : Float64.t -> 'a term
   | Var : text indice -> text term
   | GlobalVar : 'a indice -> 'a term
   | BinderVar : 'a indice -> 'a term

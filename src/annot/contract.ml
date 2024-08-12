@@ -11,10 +11,9 @@ type 'a t =
 
 let pp_contract fmt { func; preconditions; postconditions } =
   pf fmt
-    "@[<v>Contract:@;\
-     <1 2>%a\n\
+    "@[<v>Contract of function %a@,\
      Preconditions:@;\
-     <1 2>@[<v>%a@]\n\
+     <1 2>@[<v>%a@]@,\
      Postconditions:@;\
      <1 2>@[<v>%a@]@]" pp_indice func
     (list ~sep:pp_newline pp_prop)

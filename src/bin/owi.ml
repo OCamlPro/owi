@@ -369,16 +369,19 @@ let exit_code =
       | `Unsupported_file_extension _ext -> 53
       | `Failed_with_but_expected (_got, _expected) -> 54
       | `Annotation_id_incorrect _annotid -> 55
-      | `Invalid_int32 _int32 -> 56
-      | `Invalid_indice _id -> 57
-      | `Invalid_text_indice _id -> 58
-      | `Unknown_annotation_clause _s -> 59
-      | `Unknown_annotation_object _s -> 60
-      | `Unknown_binder _id -> 61
-      | `Unknown_binder_or_global _id -> 62
-      | `Unknown_binder_type _s -> 63
-      | `Unknown_prop _pr -> 64
-      | `Unknown_term _tm -> 65
+      | `Invalid_int32 _i32 -> 56
+      | `Invalid_int64 _i64 -> 57
+      | `Invalid_float32 _f32 -> 58
+      | `Invalid_float64 _f64 -> 59
+      | `Invalid_indice _id -> 60
+      | `Invalid_text_indice _id -> 61
+      | `Unknown_annotation_clause _s -> 62
+      | `Unknown_annotation_object _s -> 63
+      | `Unknown_binder _id -> 64
+      | `Unknown_binder_or_global _id -> 65
+      | `Unknown_binder_type _s -> 66
+      | `Unknown_prop _pr -> 67
+      | `Unknown_term _tm -> 68
     end
   end
   | Error e -> (
