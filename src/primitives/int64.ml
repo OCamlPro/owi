@@ -162,3 +162,5 @@ let of_string s =
   in
   require (le low_int parsed && le parsed high_int);
   parsed
+
+let of_string_opt s = try Some (of_string s) with _ -> None

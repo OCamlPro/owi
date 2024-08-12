@@ -12,14 +12,13 @@ binop ::= '+'                      ==> Plus
   | '/'                            ==> Div
 
 term ::= '(' pterm ')'             ==> pterm
+  | i32                            ==> Int32 (Int32.of_string i32)                  if Option.is_some (Int32.of_string_opt i32)
+  | ind                            ==> let* ind = parse_text_indice ind in Var ind  if Option.is_some (parse_text_id ind)
   | result                         ==> Result
 
 pterm ::= 'i32' i32                ==> Int32 (Int32.of_string i32)
-  | 'var' ind                      ==> Var (Text ind)                     if (valid_text_indice ind)
-  | 'global' ind                   ==> Global (Text ind)                  if (valid_text_indice ind)
-                                   ==> Global (Raw ind)                   if (valid_binary_indice ind)
-  | 'binder' ind                   ==> Binder (Text ind)                  if (valid_text_indice ind)
-                                   ==> Binder (Raw ind)                   if (valid_binary_indice ind)
+  | 'global' ind                   ==> let* ind = parse_indice ind in Global ind
+  | 'binder' ind                   ==> let* ind = parse_indice ind in Binder ind
   | unop term_1                    ==> Unop (unop, term_1)
   | binop term_1 term_2            ==> BinOp (binop, term_1, term_2)
 
@@ -53,8 +52,9 @@ pprop ::= binpred term_1 term_2    ==> BinPred (binpred, term_1, term_2)
   | unconnect prop_1               ==> UnConnect (unconnect, prop_1)
   | binconnect prop_1 prop_2       ==> BinConnect (binconnect, prop_1, prop_2)
   | binder binder_type prop_1      ==> Binder (binder, binder_type, None, prop_1)
-  | binder binder_type ind prop_1  ==> Binder (binder, binder_type, Some ind, prop_1)
-                                                                          if (valid_text_indice ind)
+  | binder binder_type ind prop_1  ==> let* ind = (parse_text_id_result ind) in
+                                          Binder (binder, binder_type, Some ind, prop_1)
+
 *)
 
 type nonrec binpred =
@@ -106,24 +106,22 @@ type 'a prop =
 let pp_bool fmt = function true -> pf fmt "true" | false -> pf fmt "false"
 
 let pp_binpred fmt = function
-  | Ge -> pf fmt ">="
+  | Ge -> pf fmt "≥"
   | Gt -> pf fmt ">"
-  | Le -> pf fmt "<="
+  | Le -> pf fmt "≤"
   | Lt -> pf fmt "<"
   | Eq -> pf fmt "="
-  | Neq -> pf fmt "!="
+  | Neq -> pf fmt "≠"
 
-let pp_unconnect fmt = function Not -> pf fmt "!"
+let pp_unconnect fmt = function Not -> pf fmt "¬"
 
 let pp_binconnect fmt = function
-  | And -> pf fmt "&&"
-  | Or -> pf fmt "||"
-  | Imply -> pf fmt "==>"
-  | Equiv -> pf fmt "<==>"
+  | And -> pf fmt "∧"
+  | Or -> pf fmt "∨"
+  | Imply -> pf fmt "⇒"
+  | Equiv -> pf fmt "⇔"
 
-let pp_binder fmt = function
-  | Forall -> pf fmt "forall"
-  | Exists -> pf fmt "exists"
+let pp_binder fmt = function Forall -> pf fmt "∀" | Exists -> pf fmt "∃"
 
 let pp_binder_type = pp_num_type
 
@@ -143,7 +141,7 @@ let rec pp_term : type a. formatter -> a term -> unit =
   | BinderVar ind -> pf fmt "binder.%a" pp_indice ind
   | UnOp (u, tm1) -> pf fmt "@[<hv 2>%a@ %a@]" pp_unop u pp_term tm1
   | BinOp (b, tm1, tm2) ->
-    pf fmt "@[<hv 2>%a@ %a@ %a@]" pp_binop b pp_term tm1 pp_term tm2
+    pf fmt "@[<hv 2>%a@ %a@ %a@]" pp_term tm1 pp_binop b pp_term tm2
   | Result -> pf fmt {|\result|}
 
 let rec pp_prop : type a. formatter -> a prop -> unit =
@@ -171,19 +169,38 @@ let valid_text_indice_char = function
     true
   | _ -> false
 
-let valid_text_indice ind =
-  match List.of_seq (String.to_seq ind) with
-  | '$' :: rest -> List.for_all valid_text_indice_char rest
-  | _ -> false
+let parse_text_id id =
+  try
+    let len = String.length id in
+    let hd = String.get id 0 in
+    let tl = String.sub id 1 (len - 1) in
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id then
+      Some tl
+    else None
+  with Invalid_argument _ -> None
 
-let valid_binary_indice x =
-  Option.to_result ~none:(`Invalid_indice x) (int_of_string x)
+let parse_text_id_result id =
+  try
+    let len = String.length id in
+    let hd = String.get id 0 in
+    let tl = String.sub id 1 (len - 1) in
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id then Ok tl
+    else Error (`Invalid_text_indice id)
+  with Invalid_argument _ -> Error (`Invalid_text_indice id)
 
-let parse_indice ind =
-  if valid_text_indice ind then ok @@ Text ind
-  else
-    let* ind = valid_binary_indice ind in
-    ok @@ Raw ind
+let parse_raw_id id =
+  match int_of_string id with Some id -> Some id | None -> None
+
+let parse_text_indice id =
+  match parse_text_id id with
+  | Some id -> Ok (Text id)
+  | None -> Error (`Invalid_text_indice id)
+
+let parse_indice id =
+  match (parse_text_id id, parse_raw_id id) with
+  | Some id, _ -> Ok (Text id)
+  | _, Some id -> Ok (Raw id)
+  | _, _ -> Error (`Invalid_indice id)
 
 let parse_binder_type =
   let open Sexp in
@@ -198,11 +215,16 @@ let rec parse_term =
   let open Sexp in
   function
   (* Int32 *)
-  | List [ Atom "i32"; Atom i32 ] -> ok @@ Int32 (Int32.of_string i32)
+  | Atom i32 when Option.is_some (Int32.of_string_opt i32) ->
+    ok @@ Int32 (Int32.of_string i32)
+  | List [ Atom "i32"; Atom i32 ] -> (
+    match Int32.of_string_opt i32 with
+    | Some i32 -> ok @@ Int32 i32
+    | None -> Error (`Invalid_int32 i32) )
   (* Var *)
-  | List [ Atom "local"; Atom ind ] ->
-    if valid_text_indice ind then ok @@ Var (Text ind)
-    else Error (`Invalid_text_indice ind)
+  | Atom ind when Option.is_some (parse_text_id ind) ->
+    let+ ind = parse_text_indice ind in
+    Var ind
   (* GlobalVar *)
   | List [ Atom "global"; Atom ind ] ->
     let+ ind = parse_indice ind in
@@ -295,20 +317,18 @@ let rec parse_prop =
     let+ pr1 = parse_prop pr1 in
     Binder (Forall, bt, None, pr1)
   | List [ Atom "forall"; bt; Atom ind; pr1 ] ->
-    if valid_text_indice ind then
-      let* bt = parse_binder_type bt in
-      let+ pr1 = parse_prop pr1 in
-      Binder (Forall, bt, Some ind, pr1)
-    else Error (`Invalid_text_indice ind)
+    let* bt = parse_binder_type bt in
+    let* ind = parse_text_id_result ind in
+    let+ pr1 = parse_prop pr1 in
+    Binder (Forall, bt, Some ind, pr1)
   | List [ Atom "exists"; bt; pr1 ] ->
     let* bt = parse_binder_type bt in
     let+ pr1 = parse_prop pr1 in
     Binder (Exists, bt, None, pr1)
   | List [ Atom "exists"; bt; Atom ind; pr1 ] ->
-    if valid_text_indice ind then
-      let* bt = parse_binder_type bt in
-      let+ pr1 = parse_prop pr1 in
-      Binder (Exists, bt, Some ind, pr1)
-    else Error (`Invalid_text_indice ind)
+    let* bt = parse_binder_type bt in
+    let* ind = parse_text_id_result ind in
+    let+ pr1 = parse_prop pr1 in
+    Binder (Exists, bt, Some ind, pr1)
   (* invalid *)
   | _ as pr -> Error (`Unknown_prop pr)
