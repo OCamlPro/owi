@@ -60,8 +60,13 @@ type err =
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
   | `Annotation_id_incorrect of string
-  | `Unknown_annotation_clause
-  | `Unknown_annotation_object
+  | `Invalid_indice of string
+  | `Invalid_text_indice of string
+  | `Unknown_annotation_clause of Sexp.t
+  | `Unknown_annotation_object of Sexp.t
+  | `Unknown_binder_type of Sexp.t
+  | `Unknown_prop of Sexp.t
+  | `Unknown_term of Sexp.t
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -127,3 +132,14 @@ let rec err_to_string = function
   | `Unknown_type id -> Fmt.str "unknown type %a" Types.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
+  | `Annotation_id_incorrect annotid ->
+    Fmt.str "annotation id %S incorrect" annotid
+  | `Invalid_indice ind -> Fmt.str "invalid indice %S" ind
+  | `Invalid_text_indice ind -> Fmt.str "invalid text indice %S" ind
+  | `Unknown_annotation_clause s ->
+    Fmt.str "unknown annotation clause %a" Sexp.pp_sexp s
+  | `Unknown_annotation_object s ->
+    Fmt.str "unknown annotation object %a" Sexp.pp_sexp s
+  | `Unknown_binder_type s -> Fmt.str "unknown binder type %a" Sexp.pp_sexp s
+  | `Unknown_prop pr -> Fmt.str "unknown prop %a" Sexp.pp_sexp pr
+  | `Unknown_term tm -> Fmt.str "unknown term %a" Sexp.pp_sexp tm
