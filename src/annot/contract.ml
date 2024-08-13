@@ -4,18 +4,18 @@ open Spec
 open Syntax
 
 type 'a t =
-  { func : 'a indice
+  { funcid : 'a indice
   ; preconditions : 'a prop list
   ; postconditions : 'a prop list
   }
 
-let pp_contract fmt { func; preconditions; postconditions } =
+let pp_contract fmt { funcid; preconditions; postconditions } =
   pf fmt
     "@[<v>Contract of function %a@,\
      Preconditions:@;\
      <1 2>@[<v>%a@]@,\
      Postconditions:@;\
-     <1 2>@[<v>%a@]@]" pp_indice func
+     <1 2>@[<v>%a@]@]" pp_indice funcid
     (list ~sep:pp_newline pp_prop)
     preconditions
     (list ~sep:pp_newline pp_prop)
@@ -28,7 +28,7 @@ let cons_second (l1, l2) x2 = (l1, x2 :: l2)
 let parse_contract =
   let open Sexp in
   function
-  | List (Atom func :: conds) ->
+  | List (Atom funcid :: conds) ->
     let aux acc = function
       | List [ Atom "requires"; precond ] ->
         let+ precond = parse_prop precond in
@@ -38,7 +38,7 @@ let parse_contract =
         cons_second acc postcond
       | _ as s -> Error (`Unknown_annotation_clause s)
     in
-    let* func = parse_indice func in
+    let* funcid = parse_indice funcid in
     let+ preconditions, postconditions = list_fold_left aux ([], []) conds in
-    { func; preconditions; postconditions }
+    { funcid; preconditions; postconditions }
   | _ as s -> Error (`Unknown_annotation_object s)

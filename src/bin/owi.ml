@@ -378,10 +378,11 @@ let exit_code =
       | `Unknown_annotation_clause _s -> 62
       | `Unknown_annotation_object _s -> 63
       | `Unknown_binder _id -> 64
-      | `Unknown_binder_or_global _id -> 65
-      | `Unknown_binder_type _s -> 66
-      | `Unknown_prop _pr -> 67
-      | `Unknown_term _tm -> 68
+      | `Unknown_param _id -> 65
+      | `Unknown_variable _id -> 66
+      | `Unknown_binder_type _s -> 67
+      | `Unknown_prop _pr -> 68
+      | `Unknown_term _tm -> 69
     end
   end
   | Error e -> (

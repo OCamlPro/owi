@@ -992,8 +992,24 @@ let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
-    let annots = Annot.get_annots () in
-    let () = Fmt.pr "%a" (Fmt.list ~sep:(fun _ _ -> Fmt.pr "@\n ") Annot.pp_annot) annots in
+    let open Annot in
+    let open Contract in
+    let open Syntax in
+    let annots = get_annots () in
+    let annots =
+      match (list_map
+        (fun t ->
+          match t with
+          | Annot t ->
+            let+ c = parse_contract t.items in
+            Contract c
+          | _ -> Error (`Invalid_indice ""))
+      annots) with
+      | Ok annots -> annots
+      | _ -> []
+    in
+    Fmt.(pr "Recorded annotations:\n");
+    Fmt.(pr "%a\n" (list pp_annot) annots);
     { id; fields; annots }
   }
 
