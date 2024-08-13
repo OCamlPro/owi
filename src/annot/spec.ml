@@ -114,8 +114,6 @@ type 'a prop =
   | BinConnect : binconnect * 'a prop * 'a prop -> 'a prop
   | Binder : binder * binder_type * string option * 'a prop -> 'a prop
 
-let pp_bool fmt = function true -> pf fmt "true" | false -> pf fmt "false"
-
 let pp_binpred fmt = function
   | Ge -> pf fmt "≥"
   | Gt -> pf fmt ">"
@@ -164,7 +162,7 @@ let rec pp_term : type a. formatter -> a term -> unit =
 
 let rec pp_prop : type a. formatter -> a prop -> unit =
  fun fmt -> function
-  | Const bool -> pf fmt "%a" pp_bool bool
+  | Const bool -> pf fmt "%a" Fmt.bool bool
   | BinPred (b, tm1, tm2) ->
     pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binpred b pp_term tm1 pp_term tm2
   | UnConnect (u, pr1) -> pf fmt "@[<hv 2>(%a@ %a)@]" pp_unconnect u pp_prop pr1
@@ -206,8 +204,7 @@ let parse_text_id_result id =
     else Error (`Invalid_text_indice id)
   with Invalid_argument _ -> Error (`Invalid_text_indice id)
 
-let parse_raw_id id =
-  match int_of_string id with Some id -> Some id | None -> None
+let parse_raw_id id = int_of_string id
 
 let parse_text_indice id =
   match parse_text_id id with
@@ -223,11 +220,11 @@ let parse_indice id =
 let parse_binder_type =
   let open Sexp in
   function
-  | Atom "i32" -> ok I32
-  | Atom "i64" -> ok I64
-  | Atom "f32" -> ok F32
-  | Atom "f64" -> ok F64
-  | _ as bt -> Error (`Unknown_binder_type bt)
+  | Atom "i32" -> Ok I32
+  | Atom "i64" -> Ok I64
+  | Atom "f32" -> Ok F32
+  | Atom "f64" -> Ok F64
+  | bt -> Error (`Unknown_binder_type bt)
 
 let rec parse_term =
   let open Sexp in
@@ -301,7 +298,7 @@ let rec parse_term =
   (* Result *)
   | Atom "result" -> ok Result
   (* Invalid *)
-  | _ as tm -> Error (`Unknown_term tm)
+  | tm -> Error (`Unknown_term tm)
 
 let rec parse_prop =
   let open Sexp in

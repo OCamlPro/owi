@@ -21,24 +21,20 @@ let pp_contract fmt { funcid; preconditions; postconditions } =
     (list ~sep:pp_newline pp_prop)
     postconditions
 
-let cons_first (l1, l2) x1 = (x1 :: l1, l2)
-
-let cons_second (l1, l2) x2 = (l1, x2 :: l2)
-
 let parse_contract =
   let open Sexp in
   function
   | List (Atom funcid :: conds) ->
-    let aux acc = function
+    let aux (l1, l2) = function
       | List [ Atom "requires"; precond ] ->
         let+ precond = parse_prop precond in
-        cons_first acc precond
+        (precond :: l1, l2)
       | List [ Atom "ensures"; postcond ] ->
         let+ postcond = parse_prop postcond in
-        cons_second acc postcond
-      | _ as s -> Error (`Unknown_annotation_clause s)
+        (l1, postcond :: l2)
+      | cl -> Error (`Unknown_annotation_clause cl)
     in
     let* funcid = parse_indice funcid in
     let+ preconditions, postconditions = list_fold_left aux ([], []) conds in
     { funcid; preconditions; postconditions }
-  | _ as s -> Error (`Unknown_annotation_object s)
+  | annot -> Error (`Unknown_annotation_object annot)

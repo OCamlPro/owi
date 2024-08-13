@@ -54,8 +54,6 @@ type 'a prop =
   | BinConnect : binconnect * 'a prop * 'a prop -> 'a prop
   | Binder : binder * binder_type * string option * 'a prop -> 'a prop
 
-val pp_bool : formatter -> bool -> unit
-
 val pp_binpred : formatter -> binpred -> unit
 
 val pp_unconnect : formatter -> unconnect -> unit
