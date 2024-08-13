@@ -3,7 +3,7 @@ open Types
 open Spec
 
 type 'a t =
-  { func : 'a indice
+  { funcid : 'a indice
   ; preconditions : 'a prop list
   ; postconditions : 'a prop list
   }

@@ -20,8 +20,9 @@ pterm ::= 'i32' i32                ==> Int32 (Int32.of_string i32)
   | 'i64' i64                      ==> Int64 (Int64.of_string i64)
   | 'f32' f32                      ==> Float32 (Float32.of_string f32)
   | 'f64' f64                      ==> Float64 (Float64.of_string f64)
-  | 'global' ind                   ==> let* ind = parse_indice ind in Global ind
-  | 'binder' ind                   ==> let* ind = parse_indice ind in Binder ind
+  | 'param' ind                    ==> let* ind = parse_indice ind in ParamVar ind
+  | 'global' ind                   ==> let* ind = parse_indice ind in GlobalVar ind
+  | 'binder' ind                   ==> let* ind = parse_indice ind in BinderVar ind
   | unop term_1                    ==> Unop (unop, term_1)
   | binop term_1 term_2            ==> BinOp (binop, term_1, term_2)
 
@@ -82,13 +83,16 @@ type nonrec binder =
 
 type nonrec binder_type = num_type
 
-type nonrec unop = Neg
+type nonrec unop =
+  | Neg
+  | CustomUnOp of string (* for testing purpose only *)
 
 type nonrec binop =
   | Plus
   | Minus
   | Mult
   | Div
+  | CustomBinOp of string (* for testing purpose only *)
 
 type 'a term =
   | Int32 : Int32.t -> 'a term
@@ -96,6 +100,7 @@ type 'a term =
   | Float32 : Float32.t -> 'a term
   | Float64 : Float64.t -> 'a term
   | Var : text indice -> text term
+  | ParamVar : 'a indice -> 'a term
   | GlobalVar : 'a indice -> 'a term
   | BinderVar : 'a indice -> 'a term
   | UnOp : unop * 'a term -> 'a term
@@ -131,13 +136,16 @@ let pp_binder fmt = function Forall -> pf fmt "∀" | Exists -> pf fmt "∃"
 
 let pp_binder_type = pp_num_type
 
-let pp_unop fmt = function Neg -> pf fmt "-"
+let pp_unop fmt = function
+  | Neg -> pf fmt "-"
+  | CustomUnOp c -> pf fmt "%a" string c
 
 let pp_binop fmt = function
   | Plus -> pf fmt "+"
   | Minus -> pf fmt "-"
   | Mult -> pf fmt "*"
   | Div -> pf fmt "/"
+  | CustomBinOp c -> pf fmt "%a" string c
 
 let rec pp_term : type a. formatter -> a term -> unit =
  fun fmt -> function
@@ -146,6 +154,7 @@ let rec pp_term : type a. formatter -> a term -> unit =
   | Float32 f32 -> pf fmt "(f32 %a)" Float32.pp f32
   | Float64 f64 -> pf fmt "(f64 %a)" Float64.pp f64
   | Var ind -> pf fmt "%a" pp_indice ind
+  | ParamVar ind -> pf fmt "(param %a)" pp_indice ind
   | GlobalVar ind -> pf fmt "(global %a)" pp_indice ind
   | BinderVar ind -> pf fmt "(binder %a)" pp_indice ind
   | UnOp (u, tm1) -> pf fmt "@[<hv 2>(%a@ %a)@]" pp_unop u pp_term tm1
@@ -249,6 +258,10 @@ let rec parse_term =
   | Atom ind when Option.is_some (parse_text_id ind) ->
     let+ ind = parse_text_indice ind in
     Var ind
+  (* ParamVar *)
+  | List [ Atom "param"; Atom ind ] ->
+    let+ ind = parse_indice ind in
+    ParamVar ind
   (* GlobalVar *)
   | List [ Atom "global"; Atom ind ] ->
     let+ ind = parse_indice ind in
@@ -261,6 +274,9 @@ let rec parse_term =
   | List [ Atom "-"; tm1 ] ->
     let+ tm1 = parse_term tm1 in
     UnOp (Neg, tm1)
+  | List [ Atom c; tm1 ] ->
+    let+ tm1 = parse_term tm1 in
+    UnOp (CustomUnOp c, tm1)
   (* BinOp *)
   | List [ Atom "+"; tm1; tm2 ] ->
     let* tm1 = parse_term tm1 in
@@ -278,6 +294,10 @@ let rec parse_term =
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinOp (Div, tm1, tm2)
+  | List [ Atom c; tm1; tm2 ] ->
+    let* tm1 = parse_term tm1 in
+    let+ tm2 = parse_term tm2 in
+    BinOp (CustomBinOp c, tm1, tm2)
   (* Result *)
   | Atom "result" -> ok Result
   (* Invalid *)

@@ -69,7 +69,8 @@ type err =
   | `Unknown_annotation_clause of Sexp.t
   | `Unknown_annotation_object of Sexp.t
   | `Unknown_binder of Types.text Types.indice
-  | `Unknown_binder_or_global of Types.text Types.indice
+  | `Unknown_param of Types.text Types.indice
+  | `Unknown_variable of Types.text Types.indice
   | `Unknown_binder_type of Sexp.t
   | `Unknown_prop of Sexp.t
   | `Unknown_term of Sexp.t

@@ -23,13 +23,16 @@ type nonrec binder =
 
 type nonrec binder_type = num_type
 
-type nonrec unop = Neg
+type nonrec unop =
+  | Neg
+  | CustomUnOp of string (* for testing purpose only *)
 
 type nonrec binop =
   | Plus
   | Minus
   | Mult
   | Div
+  | CustomBinOp of string (* for testing purpose only *)
 
 type 'a term =
   | Int32 : Int32.t -> 'a term
@@ -37,6 +40,7 @@ type 'a term =
   | Float32 : Float32.t -> 'a term
   | Float64 : Float64.t -> 'a term
   | Var : text indice -> text term
+  | ParamVar : 'a indice -> 'a term
   | GlobalVar : 'a indice -> 'a term
   | BinderVar : 'a indice -> 'a term
   | UnOp : unop * 'a term -> 'a term

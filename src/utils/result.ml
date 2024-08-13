@@ -69,7 +69,8 @@ type err =
   | `Unknown_annotation_clause of Sexp.t
   | `Unknown_annotation_object of Sexp.t
   | `Unknown_binder of Types.text Types.indice
-  | `Unknown_binder_or_global of Types.text Types.indice
+  | `Unknown_param of Types.text Types.indice
+  | `Unknown_variable of Types.text Types.indice
   | `Unknown_binder_type of Sexp.t
   | `Unknown_prop of Sexp.t
   | `Unknown_term of Sexp.t
@@ -151,8 +152,8 @@ let rec err_to_string = function
   | `Unknown_annotation_object s ->
     Fmt.str "unknown annotation object %a" Sexp.pp_sexp s
   | `Unknown_binder id -> Fmt.str "unknown binder %a" Types.pp_indice id
-  | `Unknown_binder_or_global id ->
-    Fmt.str "unknown binder or global %a" Types.pp_indice id
+  | `Unknown_param id -> Fmt.str "unknown param %a" Types.pp_indice id
+  | `Unknown_variable id -> Fmt.str "unknown variable %a" Types.pp_indice id
   | `Unknown_binder_type s -> Fmt.str "unknown binder type %a" Sexp.pp_sexp s
   | `Unknown_prop pr -> Fmt.str "unknown prop %a" Sexp.pp_sexp pr
   | `Unknown_term tm -> Fmt.str "unknown term %a" Sexp.pp_sexp tm
