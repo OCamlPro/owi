@@ -361,9 +361,8 @@ let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   let t = [ (None, (Final, [], t)) ] in
   Ok t
 
-let rec rewrite_term (binder_list : string option list)
-  ?(modul : Binary.modul = Binary.empty_modul)
-  ?(func_param_list : string option list = []) :
+let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
+  ~(func_param_list : string option list) :
   text Spec.term -> binary Spec.term Result.t =
   let rec find_raw_indice error acc id = function
     | [] -> Error error
@@ -423,36 +422,34 @@ let rec rewrite_term (binder_list : string option list)
     let+ ind = find_binder binder_list ind in
     BinderVar ind
   | UnOp (u, tm1) ->
-    let+ tm1 = rewrite_term binder_list ~modul ~func_param_list tm1 in
+    let+ tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
     UnOp (u, tm1)
   | BinOp (b, tm1, tm2) ->
-    let* tm1 = rewrite_term binder_list ~modul ~func_param_list tm1 in
-    let+ tm2 = rewrite_term binder_list ~modul ~func_param_list tm2 in
+    let* tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
     BinOp (b, tm1, tm2)
   | Result -> Ok Result
 
-let rec rewrite_prop (binder_list : string option list)
-  ?(modul : Binary.modul = Binary.empty_modul)
-  ?(func_param_list : string option list = []) :
+let rec rewrite_prop ~(binder_list : string option list) ~(modul : Binary.modul)
+  ~(func_param_list : string option list) :
   text Spec.prop -> binary Spec.prop Result.t =
   let open Spec in
   function
   | Const b -> Ok (Const b)
   | BinPred (b, tm1, tm2) ->
-    let* tm1 = rewrite_term binder_list ~modul ~func_param_list tm1 in
-    let+ tm2 = rewrite_term binder_list ~modul ~func_param_list tm2 in
+    let* tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
     BinPred (b, tm1, tm2)
   | UnConnect (u, pr1) ->
-    let+ pr1 = rewrite_prop binder_list ~modul ~func_param_list pr1 in
+    let+ pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
     UnConnect (u, pr1)
   | BinConnect (b, pr1, pr2) ->
-    let* pr1 = rewrite_prop binder_list ~modul ~func_param_list pr1 in
-    let+ pr2 = rewrite_prop binder_list ~modul ~func_param_list pr2 in
+    let* pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
+    let+ pr2 = rewrite_prop ~binder_list ~modul ~func_param_list pr2 in
     BinConnect (b, pr1, pr2)
   | Binder (b, bt, id_opt, pr1) ->
-    let+ pr1 =
-      rewrite_prop (id_opt :: binder_list) ~modul ~func_param_list pr1
-    in
+    let binder_list = id_opt :: binder_list in
+    let+ pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
     Binder (b, bt, id_opt, pr1)
 
 let rewrite_contract (modul : Binary.modul) :
@@ -469,10 +466,14 @@ let rewrite_contract (modul : Binary.modul) :
     List.map fst params
   in
   let* preconditions =
-    list_map (rewrite_prop [] ~modul ~func_param_list) preconditions
+    list_map
+      (rewrite_prop ~binder_list:[] ~modul ~func_param_list)
+      preconditions
   in
   let+ postconditions =
-    list_map (rewrite_prop [] ~modul ~func_param_list) postconditions
+    list_map
+      (rewrite_prop ~binder_list:[] ~modul ~func_param_list)
+      postconditions
   in
   { Contract.funcid; preconditions; postconditions }
 
