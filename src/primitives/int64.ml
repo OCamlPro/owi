@@ -126,7 +126,7 @@ let hex_digit = function
 
 let max_upper, max_lower = divrem_u minus_one 10L
 
-let of_string s =
+let of_string_exn s =
   let len = String.length s in
   let rec parse_hex i num =
     if i = len then num
@@ -163,4 +163,4 @@ let of_string s =
   require (le low_int parsed && le parsed high_int);
   parsed
 
-let of_string_opt s = try Some (of_string s) with _ -> None
+let of_string s = try Some (of_string_exn s) with _ -> None

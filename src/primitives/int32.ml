@@ -111,7 +111,7 @@ let sign_extend i =
     let sign_mask = shift_left minus_one 32 in
     logor sign_mask i
 
-let of_string s =
+let of_string_exn s =
   let len = String.length s in
   let rec parse_hex i num =
     if i = len then num
@@ -149,4 +149,4 @@ let of_string s =
   require (le low_int parsed && le parsed high_int);
   parsed
 
-let of_string_opt s = try Some (of_string s) with _ -> None
+let of_string s = try Some (of_string_exn s) with _ -> None

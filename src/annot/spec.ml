@@ -12,14 +12,14 @@ binop ::= '+'                      ==> Plus
   | '/'                            ==> Div
 
 term ::= '(' pterm ')'             ==> pterm
-  | i32                            ==> Int32 (Int32.of_string i32)                  if Option.is_some (Int32.of_string_opt i32)
-  | ind                            ==> let* ind = parse_text_indice ind in Var ind  if Option.is_some (parse_text_id ind)
+  | i32                            ==> match Int32.of_string i32 with Some i32 -> Int32 i32
+  | ind                            ==> match parse_text_id ind with Some ind -> Var (Text ind)
   | result                         ==> Result
 
-pterm ::= 'i32' i32                ==> Int32 (Int32.of_string i32)
-  | 'i64' i64                      ==> Int64 (Int64.of_string i64)
-  | 'f32' f32                      ==> Float32 (Float32.of_string f32)
-  | 'f64' f64                      ==> Float64 (Float64.of_string f64)
+pterm ::= 'i32' i32                ==> match Int32.of_string i32 with Some i32 -> Int32 i32 | None -> `Invalid_int32 i32
+  | 'i64' i64                      ==> match Int64.of_string i64 with Some i64 -> Int64 i64 | None -> `Invalid_int64 i64
+  | 'f32' f32                      ==> match Float32.of_string f32 with Some f32 -> Float32 f32 | None -> `Invalid_float32 f32
+  | 'f64' f64                      ==> match Float64.of_string f64 with Some f64 -> Float64 f64 | None -> `Invalid_float64 f64
   | 'param' ind                    ==> let* ind = parse_indice ind in ParamVar ind
   | 'global' ind                   ==> let* ind = parse_indice ind in GlobalVar ind
   | 'binder' ind                   ==> let* ind = parse_indice ind in BinderVar ind
@@ -190,8 +190,8 @@ let parse_text_id id =
   if len >= 2 then
     let hd = String.get id 0 in
     let tl = String.sub id 1 (len - 1) in
-    if Char.equal hd '$' && String.for_all valid_text_indice_char id
-    then Some tl
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id then
+      Some tl
     else None
   else None
 
@@ -200,17 +200,11 @@ let parse_text_id_result id =
   if len >= 2 then
     let hd = String.get id 0 in
     let tl = String.sub id 1 (len - 1) in
-    if Char.equal hd '$' && String.for_all valid_text_indice_char id
-    then Ok tl
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id then Ok tl
     else Error (`Invalid_text_indice id)
   else Error (`Invalid_text_indice id)
 
 let parse_raw_id id = int_of_string id
-
-let parse_text_indice id =
-  match parse_text_id id with
-  | Some id -> Ok (Text id)
-  | None -> Error (`Invalid_text_indice id)
 
 let parse_indice id =
   match (parse_text_id id, parse_raw_id id) with
@@ -230,32 +224,39 @@ let parse_binder_type =
 let rec parse_term =
   let open Sexp in
   function
+  | Atom a as tm -> begin
+    (* Int32 *)
+    match Int32.of_string a with
+    | Some i32 -> Ok (Int32 i32)
+    | None -> (
+      (* Var *)
+      match parse_text_id a with
+      | Some ind -> Ok (Var (Text ind))
+      | None ->
+        (* Result *)
+        if String.equal "result" a then Ok Result (* Invalid *)
+        else Error (`Unknown_term tm) )
+  end
   (* Int32 *)
-  | Atom i32 when Option.is_some (Int32.of_string_opt i32) ->
-    ok @@ Int32 (Int32.of_string i32)
   | List [ Atom "i32"; Atom i32 ] -> (
-    match Int32.of_string_opt i32 with
+    match Int32.of_string i32 with
     | Some i32 -> ok @@ Int32 i32
     | None -> Error (`Invalid_int32 i32) )
   (* Int64 *)
   | List [ Atom "i64"; Atom i64 ] -> (
-    match Int64.of_string_opt i64 with
+    match Int64.of_string i64 with
     | Some i64 -> ok @@ Int64 i64
     | None -> Error (`Invalid_int64 i64) )
   (* Float32 *)
   | List [ Atom "f32"; Atom f32 ] -> (
-    match Float32.of_string_opt f32 with
+    match Float32.of_string f32 with
     | Some f32 -> ok @@ Float32 f32
     | None -> Error (`Invalid_float32 f32) )
   (* Float64 *)
   | List [ Atom "f64"; Atom f64 ] -> (
-    match Float64.of_string_opt f64 with
+    match Float64.of_string f64 with
     | Some f64 -> ok @@ Float64 f64
     | None -> Error (`Invalid_float64 f64) )
-  (* Var *)
-  | Atom ind when Option.is_some (parse_text_id ind) ->
-    let+ ind = parse_text_indice ind in
-    Var ind
   (* ParamVar *)
   | List [ Atom "param"; Atom ind ] ->
     let+ ind = parse_indice ind in
@@ -296,8 +297,6 @@ let rec parse_term =
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinOp (CustomBinOp c, tm1, tm2)
-  (* Result *)
-  | Atom "result" -> ok Result
   (* Invalid *)
   | tm -> Error (`Unknown_term tm)
 

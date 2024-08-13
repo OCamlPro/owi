@@ -36,19 +36,19 @@ let u32 s =
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i32 s =
-  try Int32.of_string s
+  try Int32.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i64 s =
-  try Int64.of_string s
+  try Int64.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f64 s =
-  try Float64.of_string s
+  try Float64.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f32 s =
-  try Float32.of_string s
+  try Float32.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 %}
@@ -1008,8 +1008,7 @@ let inline_module_inner ==
       | Ok annots -> annots
       | _ -> []
     in
-    Fmt.(pr "Recorded annotations:\n");
-    Fmt.(pr "%a\n" (list pp_annot) annots);
+    let () = Fmt.(pr "%a\n" (list pp_annot) annots) in
     { id; fields; annots }
   }
 
