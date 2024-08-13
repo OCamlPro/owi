@@ -196,4 +196,4 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     profiling debug unsafe optimize workers no_stop_at_failure no_values
-    deterministic_result_order fail_mode workspace solver files
+    deterministic_result_order false fail_mode workspace solver files

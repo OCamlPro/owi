@@ -1,5 +1,4 @@
 open Fmt
-open Types
 
 type t =
   { annotid : string
@@ -18,11 +17,15 @@ let pp_annot fmt = function
     pf fmt "(@%a@\n  @[<hv>%a@]@\n)" string annot.annotid Sexp.pp_sexp
       annot.items
 
-let annot_recorder : (string, text annot) Hashtbl.t = Hashtbl.create 17
+let annot_recorder : (string, Sexp.t) Hashtbl.t = Hashtbl.create 17
 
-let record_annot annotid annot = Hashtbl.add annot_recorder annotid annot
+let record_annot annotid sexp = Hashtbl.add annot_recorder annotid sexp
 
-let get_annots ?name () =
-  match name with
-  | Some name -> Hashtbl.find_all annot_recorder name
-  | None -> Hashtbl.fold (fun _ annot acc -> annot :: acc) annot_recorder []
+let get_annots () =
+  let res =
+    Hashtbl.fold
+      (fun annotid items acc -> { annotid; items } :: acc)
+      annot_recorder []
+  in
+  Hashtbl.reset annot_recorder;
+  res

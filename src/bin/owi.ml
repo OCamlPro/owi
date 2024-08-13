@@ -122,6 +122,10 @@ let workspace =
   Cmdliner.Arg.(
     value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
 
+let spec =
+  let doc = "WEbAssembly Specification Language" in
+  Cmdliner.Arg.(value & flag & info [ "spec" ] ~doc)
+
 let copts_t = Cmdliner.Term.(const [])
 
 let sdocs = Cmdliner.Manpage.s_common_options
@@ -239,8 +243,8 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ spec
+      $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -252,8 +256,8 @@ let conc_cmd =
   Cmd.v info
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ spec
+      $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in
