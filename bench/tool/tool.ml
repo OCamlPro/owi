@@ -160,7 +160,7 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
         | result -> result
       end
     in
-    loop 3
+    loop 10
   in
   Format.fprintf fmt "%a@\n" Report.Run_result.pp result;
   result
