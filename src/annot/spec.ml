@@ -186,23 +186,24 @@ let valid_text_indice_char = function
   | _ -> false
 
 let parse_text_id id =
-  try
-    let len = String.length id in
+  let len = String.length id in
+  if len >= 2 then
     let hd = String.get id 0 in
     let tl = String.sub id 1 (len - 1) in
-    if Char.equal hd '$' && String.for_all valid_text_indice_char id then
-      Some tl
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id
+    then Some tl
     else None
-  with Invalid_argument _ -> None
+  else None
 
 let parse_text_id_result id =
-  try
-    let len = String.length id in
+  let len = String.length id in
+  if len >= 2 then
     let hd = String.get id 0 in
     let tl = String.sub id 1 (len - 1) in
-    if Char.equal hd '$' && String.for_all valid_text_indice_char id then Ok tl
+    if Char.equal hd '$' && String.for_all valid_text_indice_char id
+    then Ok tl
     else Error (`Invalid_text_indice id)
-  with Invalid_argument _ -> Error (`Invalid_text_indice id)
+  else Error (`Invalid_text_indice id)
 
 let parse_raw_id id = int_of_string id
 
