@@ -995,20 +995,20 @@ let inline_module_inner ==
     let open Annot in
     let open Contract in
     let open Syntax in
-    let annots = get_annots () in
     let annots =
-      match (list_map
-        (fun t ->
-          match t with
-          | Annot t ->
-            let+ c = parse_contract t.items in
-            Contract c
-          | _ -> Error (`Invalid_indice ""))
-      annots) with
+      match
+        list_map
+          (fun ({ annotid; items } as t) ->
+            if String.equal "contract" annotid then
+              let+ c = parse_contract items in
+              Log.debug2 "%a\n" pp_contract c;
+              Contract c
+            else Ok (Annot t) )
+          (get_annots ())
+      with
       | Ok annots -> annots
-      | _ -> []
+      | Error err -> failwith (Result.err_to_string err)
     in
-    let () = Fmt.(pr "%a" (list pp_annot) annots) in
     { id; fields; annots }
   }
 
