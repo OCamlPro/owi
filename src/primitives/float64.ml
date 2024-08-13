@@ -292,7 +292,7 @@ let of_signless_string s =
   if String.equal s "inf" then pos_inf
   else if String.equal s "nan" then pos_nan
   else if String.length s > 6 && String.equal (String.sub s 0 6) "nan:0x" then
-    let x = Int64.of_string (String.sub s 4 (String.length s - 4)) in
+    let x = Int64.of_string_exn (String.sub s 4 (String.length s - 4)) in
     if Int64.eq x Int64.zero then Fmt.failwith "nan payload must not be zero"
     else if Int64.ne (Int64.logand x bare_nan) Int64.zero then
       Fmt.failwith "nan payload must not overlap with exponent bits"
@@ -304,14 +304,14 @@ let of_signless_string s =
     let x = of_float (float_of_string_prevent_double_rounding s') in
     if is_inf x then Log.err "of_string" else x
 
-let of_string s =
-  if String.equal s "" then Log.err "of_string"
+let of_string_exn s =
+  if String.equal s "" then Log.err "of_string_exn"
   else if Char.equal s.[0] '+' || Char.equal s.[0] '-' then
     let x = of_signless_string (String.sub s 1 (String.length s - 1)) in
     if Char.equal s.[0] '+' then x else neg x
   else of_signless_string s
 
-let of_string_opt s = try Some (of_string s) with _ -> None
+let of_string s = try Some (of_string_exn s) with _ -> None
 
 (* String conversion that groups digits for readability *)
 

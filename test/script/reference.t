@@ -112,3 +112,4 @@
   $ owi script --no-exhaustion reference/utf8-import-field.wast
   $ owi script --no-exhaustion reference/utf8-import-module.wast
   $ owi script --no-exhaustion reference/utf8-invalid-encoding.wast
+  $ owi script --no-exhaustion reference/proposals/annotations/annotations.wast

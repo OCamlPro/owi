@@ -60,9 +60,9 @@ val le : t -> t -> bool
 
 val ge : t -> t -> bool
 
-val of_string : string -> t
+val of_string_exn : string -> t
 
-val of_string_opt : string -> t option
+val of_string : string -> t option
 
 val to_hex_string : t -> string
 

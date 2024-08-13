@@ -365,25 +365,26 @@ let rec rewrite_term (binder_list : string option list)
   ?(modul : Binary.modul = Binary.empty_modul)
   ?(func_param_list : string option list = []) :
   text Spec.term -> binary Spec.term Result.t =
-  let rec aux error acc id = function
+  let rec find_raw_indice error acc id = function
     | [] -> Error error
     | Some id' :: bl ->
-      if String.equal id id' then Ok (Raw acc) else aux error (acc + 1) id bl
-    | _ :: bl -> aux error (acc + 1) id bl
+      if String.equal id id' then Ok (Raw acc)
+      else find_raw_indice error (acc + 1) id bl
+    | None :: bl -> find_raw_indice error (acc + 1) id bl
   in
 
   let find_binder (binder_list : string option list) (ind : text indice) :
     binary indice Result.t =
     match ind with
     | Raw id -> Ok (Raw id)
-    | Text id -> aux (`Unknown_binder ind) 0 id binder_list
+    | Text id -> find_raw_indice (`Unknown_binder ind) 0 id binder_list
   in
 
   let find_param (func_param_list : string option list) (ind : text indice) :
     binary indice Result.t =
     match ind with
     | Raw id -> Ok (Raw id)
-    | Text id -> aux (`Unknown_param ind) 0 id func_param_list
+    | Text id -> find_raw_indice (`Unknown_param ind) 0 id func_param_list
   in
 
   let find_global (modul : Binary.modul) (ind : text indice) :
