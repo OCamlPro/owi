@@ -9,8 +9,8 @@ Pqueue tests:
       (symbol_3 i32)
       (symbol_4 i32)
       (symbol_5 i32))
-  Reached problem!
-  [13]
+  Reached problem!Segmentation fault
+  [139]
   $ owi c -O0 -I files/normal/include files/normal/src/pqueue.c files/normal/src/common.c files/normal/src/utils.c files/normal/testsuite/pqueue/pqueue_test_pop.c --no-value
   Trap: memory heap buffer overflow
   Model:
