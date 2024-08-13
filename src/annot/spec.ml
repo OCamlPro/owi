@@ -307,7 +307,7 @@ let rec parse_prop =
   | Atom "true" -> ok @@ Const true
   | Atom "false" -> ok @@ Const false
   (* BinPred *)
-  | List [ Atom ">="; tm1; tm2 ] ->
+  | List [ Atom (">=" | "≥"); tm1; tm2 ] ->
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinPred (Ge, tm1, tm2)
@@ -315,7 +315,7 @@ let rec parse_prop =
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinPred (Gt, tm1, tm2)
-  | List [ Atom "<="; tm1; tm2 ] ->
+  | List [ Atom ("<=" | "≤"); tm1; tm2 ] ->
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinPred (Le, tm1, tm2)
@@ -327,46 +327,46 @@ let rec parse_prop =
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinPred (Eq, tm1, tm2)
-  | List [ Atom "!="; tm1; tm2 ] ->
+  | List [ Atom ("!=" | "≠"); tm1; tm2 ] ->
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinPred (Neq, tm1, tm2)
   (* UnConnect *)
-  | List [ Atom "!"; pr1 ] ->
+  | List [ Atom ("!" | "¬"); pr1 ] ->
     let+ pr1 = parse_prop pr1 in
     UnConnect (Not, pr1)
   (* BinConnect *)
-  | List [ Atom "&&"; pr1; pr2 ] ->
+  | List [ Atom ("&&" | "∧"); pr1; pr2 ] ->
     let* pr1 = parse_prop pr1 in
     let+ pr2 = parse_prop pr2 in
     BinConnect (And, pr1, pr2)
-  | List [ Atom "||"; pr1; pr2 ] ->
+  | List [ Atom ("||" | "∨"); pr1; pr2 ] ->
     let* pr1 = parse_prop pr1 in
     let+ pr2 = parse_prop pr2 in
     BinConnect (Or, pr1, pr2)
-  | List [ Atom "==>"; pr1; pr2 ] ->
+  | List [ Atom ("==>" | "⇒"); pr1; pr2 ] ->
     let* pr1 = parse_prop pr1 in
     let+ pr2 = parse_prop pr2 in
     BinConnect (Imply, pr1, pr2)
-  | List [ Atom "<==>"; pr1; pr2 ] ->
+  | List [ Atom ("<==>" | "⇔"); pr1; pr2 ] ->
     let* pr1 = parse_prop pr1 in
     let+ pr2 = parse_prop pr2 in
     BinConnect (Equiv, pr1, pr2)
   (* Binder *)
-  | List [ Atom "forall"; bt; pr1 ] ->
+  | List [ Atom ("forall" | "∀"); bt; pr1 ] ->
     let* bt = parse_binder_type bt in
     let+ pr1 = parse_prop pr1 in
     Binder (Forall, bt, None, pr1)
-  | List [ Atom "forall"; bt; Atom ind; pr1 ] ->
+  | List [ Atom ("forall" | "∀"); bt; Atom ind; pr1 ] ->
     let* bt = parse_binder_type bt in
     let* ind = parse_text_id_result ind in
     let+ pr1 = parse_prop pr1 in
     Binder (Forall, bt, Some ind, pr1)
-  | List [ Atom "exists"; bt; pr1 ] ->
+  | List [ Atom ("exists" | "∃"); bt; pr1 ] ->
     let* bt = parse_binder_type bt in
     let+ pr1 = parse_prop pr1 in
     Binder (Exists, bt, None, pr1)
-  | List [ Atom "exists"; bt; Atom ind; pr1 ] ->
+  | List [ Atom ("exists" | "∃"); bt; Atom ind; pr1 ] ->
     let* bt = parse_binder_type bt in
     let* ind = parse_text_id_result ind in
     let+ pr1 = parse_prop pr1 in

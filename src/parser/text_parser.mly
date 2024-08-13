@@ -1008,7 +1008,7 @@ let inline_module_inner ==
       | Ok annots -> annots
       | _ -> []
     in
-    let () = Fmt.(pr "%a\n" (list pp_annot) annots) in
+    let () = Fmt.(pr "%a" (list pp_annot) annots) in
     { id; fields; annots }
   }
 
