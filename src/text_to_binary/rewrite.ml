@@ -511,10 +511,10 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let* types = rewrite_named (rewrite_types modul) modul.typ in
   let* start =
     match modul.start with
-    | None -> None
+    | None -> Ok None
     | Some id ->
       let (Raw id) = find func id in
-      Some id
+      Ok (Some id)
   in
 
   let id = modul.id in
