@@ -122,9 +122,9 @@ let workspace =
   Cmdliner.Arg.(
     value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
 
-let spec =
+let rac =
   let doc = "WEbAssembly Specification Language" in
-  Cmdliner.Arg.(value & flag & info [ "spec" ] ~doc)
+  Cmdliner.Arg.(value & flag & info [ "runtime-assertion-checking"; "r" ] ~doc)
 
 let copts_t = Cmdliner.Term.(const [])
 
@@ -210,7 +210,8 @@ let run_cmd =
     Cmd.info "run" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+    Term.(
+      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
 
 let validate_cmd =
   let open Cmdliner in
@@ -219,7 +220,7 @@ let validate_cmd =
     let man = [] @ shared_man in
     Cmd.info "validate" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ files)
+  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ rac $ files)
 
 let script_cmd =
   let open Cmdliner in
@@ -230,7 +231,7 @@ let script_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_script.cmd $ profiling $ debug $ optimize $ files
+      const Cmd_script.cmd $ profiling $ debug $ rac $ optimize $ files
       $ no_exhaustion )
 
 let sym_cmd =
@@ -243,7 +244,7 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ spec
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ rac
       $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
@@ -256,7 +257,7 @@ let conc_cmd =
   Cmd.v info
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ spec
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ rac
       $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
@@ -372,21 +373,22 @@ let exit_code =
       | `Unknown_type _id -> 52
       | `Unsupported_file_extension _ext -> 53
       | `Failed_with_but_expected (_got, _expected) -> 54
-      | `Annotation_id_incorrect _annotid -> 55
-      | `Invalid_int32 _i32 -> 56
-      | `Invalid_int64 _i64 -> 57
-      | `Invalid_float32 _f32 -> 58
-      | `Invalid_float64 _f64 -> 59
-      | `Invalid_indice _id -> 60
-      | `Invalid_text_indice _id -> 61
+      | `Spec_invalid_int32 _i32 -> 56
+      | `Spec_invalid_int64 _i64 -> 57
+      | `Spec_invalid_float32 _f32 -> 58
+      | `Spec_invalid_float64 _f64 -> 59
+      | `Spec_invalid_indice _id -> 60
+      | `Spec_invalid_text_indice _id -> 61
       | `Unknown_annotation_clause _s -> 62
       | `Unknown_annotation_object _s -> 63
-      | `Unknown_binder _id -> 64
-      | `Unknown_param _id -> 65
-      | `Unknown_variable _id -> 66
-      | `Unknown_binder_type _s -> 67
-      | `Unknown_prop _pr -> 68
-      | `Unknown_term _tm -> 69
+      | `Spec_unknown_binder _id -> 64
+      | `Spec_unknown_param _id -> 65
+      | `Spec_unknown_variable _id -> 66
+      | `Spec_unknown_binder_type _s -> 67
+      | `Spec_unknown_prop _pr -> 68
+      | `Spec_unknown_term _tm -> 69
+      | `Spec_type_error _str -> 70
+      | `Contract_unknown_func _id -> 71
     end
   end
   | Error e -> (

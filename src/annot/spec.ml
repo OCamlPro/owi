@@ -18,17 +18,18 @@ binop ::= '+'                      ==> Plus
 term ::= '(' pterm ')'             ==> pterm
   | i32                            ==> match Int32.of_string i32 with Some i32 -> Int32 i32
   | ind                            ==> match parse_text_id ind with Some ind -> Var (Text ind)
-  | result                         ==> Result
+  | 'result'                       ==> Result None
 
-pterm ::= 'i32' i32                ==> match Int32.of_string i32 with Some i32 -> Int32 i32 | None -> `Invalid_int32 i32
-  | 'i64' i64                      ==> match Int64.of_string i64 with Some i64 -> Int64 i64 | None -> `Invalid_int64 i64
-  | 'f32' f32                      ==> match Float32.of_string f32 with Some f32 -> Float32 f32 | None -> `Invalid_float32 f32
-  | 'f64' f64                      ==> match Float64.of_string f64 with Some f64 -> Float64 f64 | None -> `Invalid_float64 f64
+pterm ::= 'i32' i32                ==> match Int32.of_string i32 with Some i32 -> Int32 i32 | None -> `Spec_invalid_int32 i32
+  | 'i64' i64                      ==> match Int64.of_string i64 with Some i64 -> Int64 i64 | None -> `Spec_invalid_int64 i64
+  | 'f32' f32                      ==> match Float32.of_string f32 with Some f32 -> Float32 f32 | None -> `Spec_invalid_float32 f32
+  | 'f64' f64                      ==> match Float64.of_string f64 with Some f64 -> Float64 f64 | None -> `Spec_invalid_float64 f64
   | 'param' ind                    ==> let* ind = parse_indice ind in ParamVar ind
   | 'global' ind                   ==> let* ind = parse_indice ind in GlobalVar ind
   | 'binder' ind                   ==> let* ind = parse_indice ind in BinderVar ind
   | unop term_1                    ==> Unop (unop, term_1)
   | binop term_1 term_2            ==> BinOp (binop, term_1, term_2)
+  | 'result' i                     ==> Result (Some i)
 
 binpred ::= '>='                   ==> Ge
   | '>'                            ==> Gt
@@ -109,7 +110,7 @@ type 'a term =
   | BinderVar : 'a indice -> 'a term
   | UnOp : unop * 'a term -> 'a term
   | BinOp : binop * 'a term * 'a term -> 'a term
-  | Result : 'a term
+  | Result : int option -> 'a term
 
 type 'a prop =
   | Const : bool -> 'a prop
@@ -162,7 +163,8 @@ let rec pp_term : type a. formatter -> a term -> unit =
   | UnOp (u, tm1) -> pf fmt "@[<hv 2>(%a@ %a)@]" pp_unop u pp_term tm1
   | BinOp (b, tm1, tm2) ->
     pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binop b pp_term tm1 pp_term tm2
-  | Result -> pf fmt "result"
+  | Result (Some i) -> pf fmt "(result %i)" i
+  | Result None -> pf fmt "result"
 
 let rec pp_prop : type a. formatter -> a prop -> unit =
  fun fmt -> function
@@ -205,8 +207,8 @@ let parse_text_id_result id =
     let hd = String.get id 0 in
     let tl = String.sub id 1 (len - 1) in
     if Char.equal hd '$' && String.for_all valid_text_indice_char id then Ok tl
-    else Error (`Invalid_text_indice id)
-  else Error (`Invalid_text_indice id)
+    else Error (`Spec_invalid_text_indice id)
+  else Error (`Spec_invalid_text_indice id)
 
 let parse_raw_id id = int_of_string id
 
@@ -214,7 +216,7 @@ let parse_indice id =
   match (parse_text_id id, parse_raw_id id) with
   | Some id, _ -> Ok (Text id)
   | _, Some id -> Ok (Raw id)
-  | _, _ -> Error (`Invalid_indice id)
+  | _, _ -> Error (`Spec_invalid_indice id)
 
 let parse_binder_type =
   let open Sexp in
@@ -223,7 +225,7 @@ let parse_binder_type =
   | Atom "i64" -> Ok I64
   | Atom "f32" -> Ok F32
   | Atom "f64" -> Ok F64
-  | bt -> Error (`Unknown_binder_type bt)
+  | bt -> Error (`Spec_unknown_binder_type bt)
 
 let rec parse_term =
   let open Sexp in
@@ -238,29 +240,34 @@ let rec parse_term =
       | Some ind -> Ok (Var (Text ind))
       | None ->
         (* Result *)
-        if String.equal "result" a then Ok Result (* Invalid *)
-        else Error (`Unknown_term tm) )
+        if String.equal "result" a then Ok (Result None) (* Invalid *)
+        else Error (`Spec_unknown_term tm) )
   end
+  (* Result *)
+  | List [ Atom "result"; Atom i ] -> (
+    match int_of_string i with
+    | Some i -> Ok (Result (Some i))
+    | None -> Error (`Spec_invalid_int32 i) )
   (* Int32 *)
   | List [ Atom "i32"; Atom i32 ] -> (
     match Int32.of_string i32 with
     | Some i32 -> ok @@ Int32 i32
-    | None -> Error (`Invalid_int32 i32) )
+    | None -> Error (`Spec_invalid_int32 i32) )
   (* Int64 *)
   | List [ Atom "i64"; Atom i64 ] -> (
     match Int64.of_string i64 with
     | Some i64 -> ok @@ Int64 i64
-    | None -> Error (`Invalid_int64 i64) )
+    | None -> Error (`Spec_invalid_int64 i64) )
   (* Float32 *)
   | List [ Atom "f32"; Atom f32 ] -> (
     match Float32.of_string f32 with
     | Some f32 -> ok @@ Float32 f32
-    | None -> Error (`Invalid_float32 f32) )
+    | None -> Error (`Spec_invalid_float32 f32) )
   (* Float64 *)
   | List [ Atom "f64"; Atom f64 ] -> (
     match Float64.of_string f64 with
     | Some f64 -> ok @@ Float64 f64
-    | None -> Error (`Invalid_float64 f64) )
+    | None -> Error (`Spec_invalid_float64 f64) )
   (* ParamVar *)
   | List [ Atom "param"; Atom ind ] ->
     let+ ind = parse_indice ind in
@@ -302,7 +309,7 @@ let rec parse_term =
     let+ tm2 = parse_term tm2 in
     BinOp (CustomBinOp c, tm1, tm2)
   (* Invalid *)
-  | tm -> Error (`Unknown_term tm)
+  | tm -> Error (`Spec_unknown_term tm)
 
 let rec parse_prop =
   let open Sexp in
@@ -376,4 +383,4 @@ let rec parse_prop =
     let+ pr1 = parse_prop pr1 in
     Binder (Exists, bt, Some ind, pr1)
   (* invalid *)
-  | _ as pr -> Error (`Unknown_prop pr)
+  | _ as pr -> Error (`Spec_unknown_prop pr)

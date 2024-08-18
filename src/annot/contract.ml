@@ -13,6 +13,14 @@ type 'a t =
   ; postconditions : 'a prop list
   }
 
+let compare_funcid c1 c2 = compare_indice c1.funcid c2.funcid
+
+let join_contract { preconditions = pre1; postconditions = post1; funcid }
+  { preconditions = pre2; postconditions = post2; _ } =
+  let preconditions = pre1 @ pre2 in
+  let postconditions = post1 @ post2 in
+  { funcid; preconditions; postconditions }
+
 let pp_contract fmt { funcid; preconditions; postconditions } =
   pf fmt
     "@[<v>Contract of function %a@,\
