@@ -49,7 +49,7 @@ type 'a term =
   | BinderVar : 'a indice -> 'a term
   | UnOp : unop * 'a term -> 'a term
   | BinOp : binop * 'a term * 'a term -> 'a term
-  | Result : 'a term
+  | Result : int option -> 'a term
 
 type 'a prop =
   | Const : bool -> 'a prop
@@ -68,9 +68,13 @@ val pp_binder : formatter -> binder -> unit
 
 val pp_binder_type : formatter -> binder_type -> unit
 
-val pp_prop : formatter -> 'a prop -> unit
+val pp_unop : formatter -> unop -> unit
+
+val pp_binop : formatter -> binop -> unit
 
 val pp_term : formatter -> 'a term -> unit
+
+val pp_prop : formatter -> 'a prop -> unit
 
 val parse_indice : string -> text indice Result.t
 

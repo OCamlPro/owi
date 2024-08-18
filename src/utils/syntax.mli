@@ -22,6 +22,11 @@ val list_map :
   -> 'a list
   -> ('b list, 'err) Prelude.Result.t
 
+val list_concat_map :
+     ('a -> ('b list, 'err) Prelude.Result.t)
+  -> 'a list
+  -> ('b list, 'err) Prelude.Result.t
+
 val list_fold_left :
      ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a

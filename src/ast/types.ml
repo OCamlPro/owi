@@ -42,12 +42,14 @@ let pp_indice (type kind) fmt : kind indice -> unit = function
   | Raw u -> int fmt u
   | Text i -> pp_id fmt i
 
-let compare_indice id1 id2 =
+let compare_indice (type a) (id1 : a indice) (id2 : a indice) =
   match (id1, id2) with
   | Raw i1, Raw i2 -> compare i1 i2
   | Text s1, Text s2 -> String.compare s1 s2
   | Raw _, Text _ -> -1
   | Text _, Raw _ -> 1
+
+let indice_eq id1 id2 = compare_indice id1 id2 = 0
 
 let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
 
@@ -256,6 +258,11 @@ type nonrec final =
 let pp_final fmt = function
   | Final -> pf fmt "final"
   | No_final -> pf fmt "no_final"
+
+let final_eq f1 f2 =
+  match (f1, f2) with
+  | Final, Final | No_final, No_final -> true
+  | _, _ -> false
 
 (** Structure *)
 
@@ -927,12 +934,18 @@ type 'a sub_type = final * 'a indice list * 'a str_type
 let pp_sub_type fmt (f, ids, t) =
   pf fmt "(sub %a %a %a)" pp_final f pp_indices ids str_type t
 
+let sub_type_eq (f1, ids1, t1) (f2, ids2, t2) =
+  final_eq f1 f2 && List.equal indice_eq ids1 ids2 && str_type_eq t1 t2
+
 type 'a type_def = string option * 'a sub_type
 
 let pp_type_def_no_indent fmt (id, t) =
   pf fmt "(type%a %a)" pp_id_opt id pp_sub_type t
 
 let pp_type_def fmt t = pf fmt "@\n  @[<v>%a@]" pp_type_def_no_indent t
+
+let type_def_eq (id1, t1) (id2, t2) =
+  Option.equal String.equal id1 id2 && sub_type_eq t1 t2
 
 type 'a rec_type = 'a type_def list
 
@@ -941,6 +954,8 @@ let pp_rec_type fmt l =
   | [] -> ()
   | [ t ] -> pf fmt "%a" pp_type_def_no_indent t
   | l -> pf fmt "(rec %a)" (list ~sep:sp pp_type_def) l
+
+let rec_type_eq l1 l2 = List.equal type_def_eq l1 l2
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 

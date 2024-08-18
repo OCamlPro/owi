@@ -24,6 +24,7 @@
   cmd_validate
   cmd_wasm2wat
   cmd_wat2wasm
+  code_generator
   compile
   concolic
   concolic_choice

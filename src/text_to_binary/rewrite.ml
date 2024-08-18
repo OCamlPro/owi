@@ -376,14 +376,14 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
     binary indice Result.t =
     match ind with
     | Raw id -> Ok (Raw id)
-    | Text id -> find_raw_indice (`Unknown_binder ind) 0 id binder_list
+    | Text id -> find_raw_indice (`Spec_unknown_binder ind) 0 id binder_list
   in
 
   let find_param (func_param_list : string option list) (ind : text indice) :
     binary indice Result.t =
     match ind with
     | Raw id -> Ok (Raw id)
-    | Text id -> find_raw_indice (`Unknown_param ind) 0 id func_param_list
+    | Text id -> find_raw_indice (`Spec_unknown_param ind) 0 id func_param_list
   in
 
   let find_global (modul : Binary.modul) (ind : text indice) :
@@ -411,7 +411,7 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
     | Ok ind, _, _ -> Ok (BinderVar ind)
     | _, Ok ind, _ -> Ok (ParamVar ind)
     | _, _, Ok ind -> Ok (GlobalVar ind)
-    | _, _, _ -> Error (`Unknown_variable ind) )
+    | _, _, _ -> Error (`Spec_unknown_variable ind) )
   | ParamVar ind ->
     let+ ind = find_param func_param_list ind in
     ParamVar ind
@@ -428,7 +428,7 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
     let* tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
     let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
     BinOp (b, tm1, tm2)
-  | Result -> Ok Result
+  | Result i -> Ok (Result i)
 
 let rec rewrite_prop ~(binder_list : string option list) ~(modul : Binary.modul)
   ~(func_param_list : string option list) :
@@ -455,11 +455,15 @@ let rec rewrite_prop ~(binder_list : string option list) ~(modul : Binary.modul)
 let rewrite_contract (modul : Binary.modul) :
   text Contract.t -> binary Contract.t Result.t =
  fun { Contract.funcid; preconditions; postconditions } ->
-  let* func = get (`Unknown_func funcid) modul.func funcid in
-  let funcid = Raw (Indexed.get_index func) in
+  let (Raw i as funcid) = find modul.func funcid in
+  let* func =
+    match Indexed.get_at i modul.func.values with
+    | None -> Error (`Unknown_func funcid)
+    | Some v -> Ok v
+  in
   let func_param_list =
     let (Bt_raw (_, (params, _))) =
-      match Indexed.get func with
+      match func with
       | Local { type_f; _ } -> type_f
       | Imported { desc; _ } -> desc
     in

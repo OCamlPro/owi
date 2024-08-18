@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : bool -> bool -> bool -> bool -> Fpath.t list -> bool -> unit Result.t
+val generate : bool -> Binary.modul -> Binary.modul Result.t
