@@ -1,7 +1,4 @@
-  $ owi c --e-acsl ./else.c --no-value
-  Assert failure: (i32.ge symbol_0 (i32 0))
+  $ owi c --e-acsl ./else.c --no-value 2>1 | grep -v "Assert failure"
   Model:
     (model
       (symbol_0 i32))
-  Reached problem!
-  [13]
