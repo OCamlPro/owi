@@ -367,7 +367,7 @@ int main(void) {
 ```
 
 ```sh
-$ owi c --e-acsl primes.c
+$ owi c --e-acsl primes.c -w1
 Assert failure: false
 Model:
   (model

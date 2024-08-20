@@ -70,3 +70,10 @@ let array_map f a =
              raise Exit
            | Ok v -> v )
   with Exit -> Option.get !err
+
+let array_fold_left f acc l =
+  Array.fold_left
+    (fun acc v ->
+      let* acc in
+      f acc v )
+    (Ok acc) l

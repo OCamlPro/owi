@@ -37,3 +37,9 @@ val array_map :
      ('a -> ('b, 'err) Prelude.Result.t)
   -> 'a array
   -> ('b array, 'err) Prelude.Result.t
+
+val array_fold_left :
+     ('a -> 'b -> ('a, 'err) Prelude.Result.t)
+  -> 'a
+  -> 'b array
+  -> ('a, 'err) Prelude.Result.t

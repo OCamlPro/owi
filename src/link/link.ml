@@ -152,13 +152,15 @@ let eval_global ls env (global : (Binary.global, binary global_type) Runtime.t)
   | Imported import -> load_global ls import
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
-  Named.fold
-    (fun id global env ->
-      let* env in
-      let* global = eval_global ls env global in
-      let env = Link_env.Build.add_global id global env in
-      Ok env )
-    globals (Ok env)
+  let+ env, _i =
+    array_fold_left
+      (fun (env, i) global ->
+        let+ global = eval_global ls env global in
+        let env = Link_env.Build.add_global i global env in
+        (env, succ i) )
+      (env, 0) globals
+  in
+  env
 
 (*
 let eval_in_data (env : Link_env.t) (data : _ data') : (int, value) data' =
@@ -194,13 +196,15 @@ let eval_memory ls (memory : (mem, limits) Runtime.t) :
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
-  Named.fold
-    (fun id mem env ->
-      let* env in
-      let* memory = eval_memory ls mem in
-      let env = Link_env.Build.add_memory id memory env in
-      Ok env )
-    memories (Ok env)
+  let+ env, _i =
+    array_fold_left
+      (fun (env, id) mem ->
+        let+ memory = eval_memory ls mem in
+        let env = Link_env.Build.add_memory id memory env in
+        (env, succ id) )
+      (env, 0) memories
+  in
+  env
 
 let table_types_are_compatible (import, (t1 : binary ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && Types.ref_type_eq t1 t2
@@ -218,13 +222,15 @@ let eval_table ls (table : (_, binary table_type) Runtime.t) : table Result.t =
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
-  Named.fold
-    (fun id table env ->
-      let* env in
-      let* table = eval_table ls table in
-      let env = Link_env.Build.add_table id table env in
-      Ok env )
-    tables (Ok env)
+  let+ env, _i =
+    array_fold_left
+      (fun (env, i) table ->
+        let+ table = eval_table ls table in
+        let env = Link_env.Build.add_table i table env in
+        (env, succ i) )
+      (env, 0) tables
+  in
+  env
 
 let load_func (ls : 'f state) (import : binary block_type Imported.t) :
   func Result.t =
@@ -246,13 +252,15 @@ let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Link_env.t') env functions =
-  Named.fold
-    (fun id func env ->
-      let* env in
-      let* func = eval_func ls finished_env func in
-      let env = Link_env.Build.add_func id func env in
-      Ok env )
-    functions (Ok env)
+  let+ env, _i =
+    array_fold_left
+      (fun (env, i) func ->
+        let+ func = eval_func ls finished_env func in
+        let env = Link_env.Build.add_func i func env in
+        (env, succ i) )
+      (env, 0) functions
+  in
+  env
 
 let active_elem_expr ~offset ~length ~table ~elem =
   [ I32_const offset
@@ -278,60 +286,61 @@ let get_i32 = function
   | _ -> Error (`Type_mismatch "get_i32")
 
 let define_data env data =
-  Named.fold
-    (fun id (data : Binary.data) env_and_init ->
-      let* env, init = env_and_init in
-      let data' : Link_env.data = { value = data.init } in
-      let env = Link_env.Build.add_data id data' env in
-      let* init =
-        match data.mode with
-        | Data_active (mem, offset) ->
-          let* offset = Eval_const.expr env offset in
-          let length = Int32.of_int @@ String.length data.init in
-          let* offset = get_i32 offset in
-          let id = Raw id in
-          let* v = active_data_expr ~offset ~length ~mem ~data:id in
-          ok @@ (v :: init)
-        | Data_passive -> Ok init
-      in
-      Ok (env, init) )
-    data
-    (Ok (env, []))
+  let+ env, init, _i =
+    array_fold_left
+      (fun (env, init, i) (data : Binary.data) ->
+        let data' : Link_env.data = { value = data.init } in
+        let env = Link_env.Build.add_data i data' env in
+        let+ init =
+          match data.mode with
+          | Data_active (mem, offset) ->
+            let* offset = Eval_const.expr env offset in
+            let length = Int32.of_int @@ String.length data.init in
+            let* offset = get_i32 offset in
+            let id = Raw i in
+            let* v = active_data_expr ~offset ~length ~mem ~data:id in
+            ok @@ (v :: init)
+          | Data_passive -> Ok init
+        in
+        (env, init, succ i) )
+      (env, [], 0) data
+  in
+  (env, List.rev init)
 
 let define_elem env elem =
-  Named.fold
-    (fun id (elem : Binary.elem) env_and_inits ->
-      let* env, inits = env_and_inits in
-      let* init = list_map (Eval_const.expr env) elem.init in
-      let* init_as_ref =
-        list_map
-          (fun v ->
-            match v with
-            | Concrete_value.Ref v -> Ok v
-            | _ -> Error `Constant_expression_required )
-          init
-      in
-      let env =
-        match elem.mode with
-        | Elem_active _ | Elem_passive ->
-          Link_env.Build.add_elem id { value = Array.of_list init_as_ref } env
-        | Elem_declarative ->
-          (* Declarative element have no runtime value *)
-          Link_env.Build.add_elem id { value = [||] } env
-      in
-      let* inits =
-        match elem.mode with
-        | Elem_active (None, _) -> assert false
-        | Elem_active (Some table, offset) ->
-          let length = Int32.of_int @@ List.length init in
-          let* offset = Eval_const.expr env offset in
-          let* offset = get_i32 offset in
-          ok @@ (active_elem_expr ~offset ~length ~table ~elem:id :: inits)
-        | Elem_passive | Elem_declarative -> Ok inits
-      in
-      Ok (env, inits) )
-    elem
-    (Ok (env, []))
+  let+ env, inits, _i =
+    array_fold_left
+      (fun (env, inits, i) (elem : Binary.elem) ->
+        let* init = list_map (Eval_const.expr env) elem.init in
+        let* init_as_ref =
+          list_map
+            (function
+              | Concrete_value.Ref v -> Ok v
+              | _ -> Error `Constant_expression_required )
+            init
+        in
+        let value =
+          match elem.mode with
+          | Elem_active _ | Elem_passive -> Array.of_list init_as_ref
+          | Elem_declarative ->
+            (* Declarative element have no runtime value *)
+            [||]
+        in
+        let env = Link_env.Build.add_elem i { value } env in
+        let+ inits =
+          match elem.mode with
+          | Elem_active (None, _) -> assert false
+          | Elem_active (Some table, offset) ->
+            let length = Int32.of_int @@ List.length init in
+            let* offset = Eval_const.expr env offset in
+            let* offset = get_i32 offset in
+            ok @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
+          | Elem_passive | Elem_declarative -> Ok inits
+        in
+        (env, inits, succ i) )
+      (env, [], 0) elem
+  in
+  (env, List.rev inits)
 
 let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =
