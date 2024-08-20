@@ -89,15 +89,21 @@ let write_valtype buf vt =
   let c = get_char_valtype vt in
   Buffer.add_char buf c
 
-let encode_vector buf datas encode_func =
+let encode_vector length iter buf datas encode_func =
   let vector_buf = Buffer.create 16 in
-  let len = List.length datas in
-  List.iter (encode_func vector_buf) datas;
+  let len = length datas in
+  iter (encode_func vector_buf) datas;
   write_u32_of_int buf len;
   Buffer.add_buffer buf vector_buf
 
+let encode_vector_list buf datas encode_func =
+  encode_vector List.length List.iter buf datas encode_func
+
+let encode_vector_array buf datas encode_func =
+  encode_vector Array.length Array.iter buf datas encode_func
+
 let write_resulttype buf (rt : _ result_type) =
-  encode_vector buf rt write_valtype
+  encode_vector_list buf rt write_valtype
 
 let write_paramtype buf (pt : _ param_type) =
   let vt = List.map snd pt in
@@ -111,11 +117,10 @@ let write_block_type buf (typ : binary block_type option) =
   match typ with
   | None | Some (Bt_raw (None, ([], []))) -> Buffer.add_char buf '\x40'
   | Some (Bt_raw (None, ([], [ vt ]))) -> write_valtype buf vt
-  | Some (Bt_raw (None, (pt, _))) ->
-    write_paramtype buf pt
-    (* TODO: memo
-       will this pattern matching be enough with the use of the new modul.types field?
-    *)
+  | Some (Bt_raw (None, (pt, _))) -> write_paramtype buf pt
+  (* TODO: memo
+     will this pattern matching be enough with the use of the new modul.types field?
+  *)
   | _ -> assert false (* TODO: same, new pattern matching cases ? *)
 
 let write_block_type_idx buf (typ : binary block_type) =
@@ -200,9 +205,8 @@ let rec write_instr buf instr =
   | Br idx -> write_char_indice buf '\x0C' idx
   | Br_if idx -> write_char_indice buf '\x0D' idx
   | Br_table (idxs, idx) ->
-    let idxs = Array.to_list idxs in
     add_char '\x0E';
-    encode_vector buf idxs write_indice;
+    encode_vector_array buf idxs write_indice;
     write_indice buf idx
   | Return -> add_char '\x0F'
   | Call idx -> write_char_indice buf '\x10' idx
@@ -540,12 +544,11 @@ let write_locals buf locals =
 let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
   let write_init buf init =
     let is_ref_func = ref true in
-    encode_vector buf init (fun buf expr ->
-        match expr with
-        | [ Ref_func idx ] -> write_indice buf idx
-        | expr ->
-          write_expr buf expr ~end_op_code:None;
-          is_ref_func := false );
+    encode_vector_list buf init (fun buf -> function
+      | [ Ref_func idx ] -> write_indice buf idx
+      | expr ->
+        write_expr buf expr ~end_op_code:None;
+        is_ref_func := false );
     !is_ref_func
   in
   match mode with
@@ -626,24 +629,21 @@ let encode_section buf id encode_func data =
   end
 
 (* type: section 1 *)
-let encode_types buf (rec_types : binary rec_type Named.t) =
-  encode_vector buf rec_types.values
-    (fun buf (typ : binary rec_type Indexed.t) ->
-      let typ = Indexed.get typ in
+let encode_types buf rec_types =
+  encode_vector_array buf rec_types (fun buf -> function
+    | [] -> assert false
+    | _ :: _ :: _ ->
+      (* TODO rec types *)
+      assert false
+    | [ typ ] -> (
       match typ with
-      | [] -> assert false
-      | _ :: _ :: _ ->
-        (* TODO rec types *)
-        assert false
-      | [ typ ] -> (
-        match typ with
-        | _name, (Final, _idx, Def_func_t (pt, rt)) ->
-          Buffer.add_char buf '\x60';
-          write_paramtype buf pt;
-          write_resulttype buf rt
-        | _ ->
-          (* TODO non final types and other type declarations *)
-          assert false ) )
+      | _name, (Final, _idx, Def_func_t (pt, rt)) ->
+        Buffer.add_char buf '\x60';
+        write_paramtype buf pt;
+        write_resulttype buf rt
+      | _ ->
+        (* TODO non final types and other type declarations *)
+        assert false ) )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =
@@ -662,20 +662,18 @@ let encode_imports buf (funcs, tables, memories, globals) =
 (* function: section 3 *)
 let encode_functions buf (funcs : binary func list) =
   let idx = ref 0 in
-  encode_vector buf funcs (fun buf func ->
+  encode_vector_list buf funcs (fun buf func ->
       write_block_type_idx buf func.type_f;
       incr idx )
 
 (* table: section 4 *)
-let encode_tables buf tables = encode_vector buf tables write_table
+let encode_tables buf tables = encode_vector_list buf tables write_table
 
 (* memory: section 5 *)
-let encode_memories buf memories = encode_vector buf memories write_memory
+let encode_memories buf memories = encode_vector_list buf memories write_memory
 
 (* global: section 6 *)
-let encode_globals buf globals =
-  let globals = List.rev globals in
-  encode_vector buf globals write_global
+let encode_globals buf globals = encode_vector_list buf globals write_global
 
 (* export: section 7 *)
 let encode_exports buf ({ global; mem; table; func } : exports) =
@@ -699,19 +697,16 @@ let encode_start buf int_opt =
   match int_opt with None -> () | Some funcidx -> write_u32_of_int buf funcidx
 
 (* element: section 9 *)
-let encode_elements buf { Named.values = elems; _ } =
-  encode_vector buf elems (fun buf elem ->
-      let elem = Indexed.get elem in
-      write_element buf elem )
+let encode_elements buf elems = encode_vector_array buf elems write_element
 
 (* datacount: section 12 *)
-let encode_datacount buf { Named.values = datas; _ } =
-  let len = List.length datas in
+let encode_datacount buf datas =
+  let len = Array.length datas in
   write_u32_of_int buf len
 
 (* code: section 10 *)
 let encode_codes buf funcs =
-  encode_vector buf funcs (fun buf { locals; body; _ } ->
+  encode_vector_list buf funcs (fun buf { locals; body; _ } ->
       let code_buf = Buffer.create 16 in
       write_locals code_buf locals;
       write_expr code_buf body ~end_op_code:None;
@@ -719,54 +714,49 @@ let encode_codes buf funcs =
       Buffer.add_buffer buf code_buf )
 
 (* data: section 11 *)
-let encode_datas buf { Named.values = datas; _ } =
-  encode_vector buf datas (fun buf data ->
-      let data = Indexed.get data in
-      write_data buf data )
+let encode_datas buf datas = encode_vector_array buf datas write_data
 
-let keep_local { Named.values; _ } =
+let keep_local values =
   List.filter_map
-    (fun data ->
-      match Indexed.get data with
-      | Runtime.Local data -> Some data
-      | Runtime.Imported _data -> None )
-    (List.rev values)
+    (function Runtime.Local data -> Some data | Runtime.Imported _data -> None)
+    (Array.to_list values)
 
-let keep_imported { Named.values; _ } =
+let keep_imported values =
   List.filter_map
-    (fun data ->
-      match Indexed.get data with
-      | Runtime.Local _data -> None
-      | Runtime.Imported data -> Some data )
-    (List.rev values)
+    (function Runtime.Local _data -> None | Runtime.Imported data -> Some data)
+    (Array.to_list values)
 
-let encode (modul : Binary.modul) =
+let encode
+  ({ func; table; global; exports; start; data; mem; types; elem; _ } :
+    Binary.modul ) =
   let buf = Buffer.create 256 in
-  let local_funcs = keep_local modul.func in
-  let local_tables = keep_local modul.table in
-  let local_memories = keep_local modul.mem in
-  let local_globales = keep_local modul.global in
-  let imported_funcs = keep_imported modul.func in
-  let imported_tables = keep_imported modul.table in
-  let imported_memories = keep_imported modul.mem in
-  let imported_globals = keep_imported modul.global in
+
+  let local_funcs = keep_local func in
+  let local_tables = keep_local table in
+  let local_memories = keep_local mem in
+  let local_globales = keep_local global in
+  let imported_funcs = keep_imported func in
+  let imported_tables = keep_imported table in
+  let imported_memories = keep_imported mem in
+  let imported_globals = keep_imported global in
+
   Buffer.add_string buf "\x00\x61\x73\x6d";
   (* magic *)
   Buffer.add_string buf "\x01\x00\x00\x00";
   (* version *)
-  encode_section buf '\x01' encode_types modul.types;
+  encode_section buf '\x01' encode_types types;
   encode_section buf '\x02' encode_imports
     (imported_funcs, imported_tables, imported_memories, imported_globals);
   encode_section buf '\x03' encode_functions local_funcs;
   encode_section buf '\x04' encode_tables local_tables;
   encode_section buf '\x05' encode_memories local_memories;
   encode_section buf '\x06' encode_globals local_globales;
-  encode_section buf '\x07' encode_exports modul.exports;
-  encode_section buf '\x08' encode_start modul.start;
-  encode_section buf '\x09' encode_elements modul.elem;
-  encode_section buf '\x0C' encode_datacount modul.data;
+  encode_section buf '\x07' encode_exports exports;
+  encode_section buf '\x08' encode_start start;
+  encode_section buf '\x09' encode_elements elem;
+  encode_section buf '\x0C' encode_datacount data;
   encode_section buf '\x0A' encode_codes local_funcs;
-  encode_section buf '\x0B' encode_datas modul.data;
+  encode_section buf '\x0B' encode_datas data;
   Buffer.contents buf
 
 let write_file filename content =

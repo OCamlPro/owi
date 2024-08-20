@@ -417,17 +417,16 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
       Some id
   in
 
+  let id = modul.id in
+  let mem = Named.to_array modul.mem in
+  let table = Named.to_array modul.table in
+  let types = Named.to_array types in
+  let global = Named.to_array global in
+  let elem = Named.to_array elem in
+  let data = Named.to_array data in
+  let func = Named.to_array func in
+
   let modul : Binary.modul =
-    { id = modul.id
-    ; mem = modul.mem
-    ; table = modul.table
-    ; types
-    ; global
-    ; elem
-    ; data
-    ; exports
-    ; func
-    ; start
-    }
+    { id; mem; table; types; global; elem; data; exports; func; start }
   in
   modul

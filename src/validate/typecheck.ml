@@ -42,12 +42,10 @@ module Index = struct
 end
 
 let check_mem modul n =
-  if n >= List.length modul.mem.values then Error (`Unknown_memory (Raw n))
-  else Ok ()
+  if n >= Array.length modul.mem then Error (`Unknown_memory (Raw n)) else Ok ()
 
 let check_data modul n =
-  if n >= List.length modul.data.values then Error (`Unknown_data (Raw n))
-  else Ok ()
+  if n >= Array.length modul.data then Error (`Unknown_data (Raw n)) else Ok ()
 
 let check_align memarg_align align =
   if Int32.ge memarg_align align then Error `Alignment_too_large else Ok ()
@@ -67,19 +65,18 @@ module Env = struct
     | Some v -> Ok v
 
   let global_get i modul =
-    let value = Indexed.get_at i modul.global.values in
-    match value with
-    | None -> Error (`Unknown_global (Raw i))
-    | Some (Runtime.Local { typ = desc; _ } | Imported { desc; _ }) -> Ok desc
+    if i >= Array.length modul.global then Error (`Unknown_global (Raw i))
+    else
+      match modul.global.(i) with
+      | Runtime.Local { typ = desc; _ } | Imported { desc; _ } -> Ok desc
 
   let func_get i modul =
-    let value = Indexed.get_at i modul.func.values in
-    match value with
-    | None -> Error (`Unknown_func (Raw i))
-    | Some
-        ( Runtime.Local { type_f = Bt_raw (_, t); _ }
-        | Imported { desc = Bt_raw (_, t); _ } ) ->
-      Ok t
+    if i >= Array.length modul.func then Error (`Unknown_func (Raw i))
+    else
+      match modul.func.(i) with
+      | Runtime.Local { type_f = Bt_raw (_, t); _ }
+      | Imported { desc = Bt_raw (_, t); _ } ->
+        Ok t
 
   let block_type_get i env =
     match List.nth_opt env.blocks i with
@@ -87,16 +84,14 @@ module Env = struct
     | Some bt -> Ok bt
 
   let table_type_get i (modul : Binary.modul) =
-    let value = Indexed.get_at i modul.table.values in
-    match value with
-    | None -> Error (`Unknown_table (Raw i))
-    | Some (Runtime.Local (_, (_, t)) | Imported { desc = _, t; _ }) -> Ok t
+    if i >= Array.length modul.table then Error (`Unknown_table (Raw i))
+    else
+      match modul.table.(i) with
+      | Runtime.Local (_, (_, t)) | Imported { desc = _, t; _ } -> Ok t
 
-  let elem_type_get i env =
-    let value = Indexed.get_at i env.modul.elem.values in
-    match value with
-    | None -> Error (`Unknown_elem (Raw i))
-    | Some value -> Ok value.typ
+  let elem_type_get i modul =
+    if i >= Array.length modul.elem then Error (`Unknown_elem (Raw i))
+    else match modul.elem.(i) with value -> Ok value.typ
 
   let make ~params ~locals ~modul ~result_type ~refs =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
@@ -450,7 +445,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     Ok stack
   | Table_init (Raw ti, Raw ei) ->
     let* table_typ = Env.table_type_get ti env.modul in
-    let* elem_typ = Env.elem_type_get ei env in
+    let* elem_typ = Env.elem_type_get ei env.modul in
     if not @@ Stack.match_ref_type (snd table_typ) (snd elem_typ) then
       Error (`Type_mismatch "table_init")
     else Stack.pop [ i32; i32; i32 ] stack
@@ -474,7 +469,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     Stack.push [ i32 ] stack
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
   | Elem_drop (Raw id) ->
-    let* _elem_typ = Env.elem_type_get id env in
+    let* _elem_typ = Env.elem_type_get id env.modul in
     Ok stack
   | Select t ->
     let* stack = Stack.pop [ i32 ] stack in
@@ -597,19 +592,20 @@ let typecheck_const_instr (modul : modul) refs stack = function
     let* _t = Env.func_get i modul in
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
-  | Global_get (Raw i as idx) ->
-    let value = Indexed.get_at i modul.global.values in
-    let* mut, typ =
-      match value with
-      | None | Some (Local _) -> Error (`Unknown_global idx)
-      | Some (Imported t) -> Ok t.desc
-    in
-    let* () =
-      match mut with
-      | Const -> Ok ()
-      | Var -> Error `Constant_expression_required
-    in
-    Stack.push [ typ_of_val_type typ ] stack
+  | Global_get (Raw i) ->
+    if i >= Array.length modul.global then Error (`Unknown_global (Raw i))
+    else
+      let* mut, typ =
+        match modul.global.(i) with
+        | Runtime.Local _ -> Error (`Unknown_global (Raw i))
+        | Imported { desc; _ } -> Ok desc
+      in
+      let* () =
+        match mut with
+        | Const -> Ok ()
+        | Var -> Error `Constant_expression_required
+      in
+      Stack.push [ typ_of_val_type typ ] stack
   | I_binop (t, _op) ->
     let t = itype t in
     let* stack = Stack.pop [ t; t ] stack in
@@ -628,8 +624,8 @@ let typecheck_const_expr (modul : modul) refs =
   list_fold_left (typecheck_const_instr modul refs) []
 
 let typecheck_global (modul : modul) refs
-  (global : (global, binary global_type) Runtime.t Indexed.t) =
-  match Indexed.get global with
+  (global : (global, binary global_type) Runtime.t) =
+  match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
     let* real_type = typecheck_const_expr modul refs init in
@@ -641,8 +637,7 @@ let typecheck_global (modul : modul) refs
       else Ok ()
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
-let typecheck_elem modul refs (elem : elem Indexed.t) =
-  let elem = Indexed.get elem in
+let typecheck_elem modul refs (elem : elem) =
   let _null, expected_type = elem.typ in
   let* () =
     list_iter
@@ -673,8 +668,7 @@ let typecheck_elem modul refs (elem : elem Indexed.t) =
       | [ _t ] -> Ok ()
       | _whatever -> Error (`Type_mismatch "typecheck_elem 5") )
 
-let typecheck_data modul refs (data : data Indexed.t) =
-  let data = Indexed.get data in
+let typecheck_data modul refs (data : data) =
   match data.mode with
   | Data_passive -> Ok ()
   | Data_active (n, e) -> (
@@ -689,17 +683,14 @@ let typecheck_start { start; func; _ } =
   | None -> Ok ()
   | Some idx -> (
     let* f =
-      match List.find_opt (Indexed.has_index idx) func.values with
-      | None -> Error (`Unknown_func (Raw idx))
-      | Some f -> Ok f
+      if idx >= Array.length func then Error (`Unknown_func (Raw idx))
+      else Ok func.(idx)
     in
-    let pt, rt =
-      match Indexed.get f with
-      | Local { type_f = Bt_raw (_, t); _ }
-      | Imported { desc = Bt_raw (_, t); _ } ->
-        t
-    in
-    match (pt, rt) with [], [] -> Ok () | _, _ -> Error `Start_function )
+    match f with
+    | Local { type_f = Bt_raw (_, ([], [])); _ }
+    | Imported { desc = Bt_raw (_, ([], [])); _ } ->
+      Ok ()
+    | _ -> Error `Start_function )
 
 let validate_exports modul =
   let* () =
@@ -736,17 +727,15 @@ let check_limit { min; max } =
     if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
 
 let validate_tables modul =
-  list_iter
-    (fun t ->
-      match Indexed.get t with
+  array_iter
+    (function
       | Runtime.Local (_, (limits, _)) | Imported { desc = limits, _; _ } ->
         check_limit limits )
-    modul.table.values
+    modul.table
 
 let validate_mem modul =
-  list_iter
-    (fun t ->
-      match Indexed.get t with
+  array_iter
+    (function
       | Runtime.Local (_, desc) | Imported { desc; _ } ->
         let* () =
           if desc.min > 65536 then Error `Memory_size_too_large
@@ -756,14 +745,14 @@ let validate_mem modul =
             | Some _ | None -> Ok ()
         in
         check_limit desc )
-    modul.mem.values
+    modul.mem
 
 let modul (modul : modul) =
   Log.debug0 "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
-  let* () = list_iter (typecheck_global modul refs) modul.global.values in
-  let* () = list_iter (typecheck_elem modul refs) modul.elem.values in
-  let* () = list_iter (typecheck_data modul refs) modul.data.values in
+  let* () = array_iter (typecheck_global modul refs) modul.global in
+  let* () = array_iter (typecheck_elem modul refs) modul.elem in
+  let* () = array_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
   let* () = validate_tables modul in
@@ -771,8 +760,4 @@ let modul (modul : modul) =
   List.iter
     (fun (export : export) -> Hashtbl.add refs export.id ())
     modul.exports.func;
-  Named.fold
-    (fun _index func acc ->
-      let* () = acc in
-      typecheck_function modul func refs )
-    modul.func (Ok ())
+  array_iter (fun func -> typecheck_function modul func refs) modul.func
