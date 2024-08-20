@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>v.ml &mdash; Coverage report</title>
-    <meta name="description" content="64.71% coverage in src/concrete/v.ml">
+    <meta name="description" content="82.35% coverage in src/concrete/v.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,15 +15,12 @@
           <span class="dirname">src/concrete/</span>v.ml
         </a>
       </h1>
-      <h2>64.71%</h2>
+      <h2>82.35%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:10.89%"></span>
       <span class="unvisited" style="top:14.85%"></span>
       <span class="unvisited" style="top:41.58%"></span>
-      <span class="unvisited" style="top:45.54%"></span>
-      <span class="unvisited" style="top:46.53%"></span>
-      <span class="unvisited" style="top:49.50%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -73,11 +70,11 @@
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span class="unvisited"> </span>
-<a id="L47"></a><span class="unvisited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
-<a id="L50"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
@@ -259,11 +256,11 @@ include (
 
     let pp_float64 = Float64.pp
 
-    let const_i32 x = <span data-count="21952941">x</span>
+    let const_i32 x = <span data-count="22390597">x</span>
 
-    let const_i64 x = <span data-count="10229252">x</span>
+    let const_i64 x = <span data-count="10230688">x</span>
 
-    let const_f32 x = <span data-count="114911">x</span>
+    let const_f32 x = <span data-count="115127">x</span>
 
     let const_f64 x = <span data-count="112291">x</span>
 
@@ -273,18 +270,18 @@ include (
 
     module Ref = struct
       let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-        <span data-count="1605626">m</span>atch r with
-        | <span data-count="1602090">F</span>uncref (Some f) -&gt; Ref_value f
+        <span data-count="1609492">m</span>atch r with
+        | <span data-count="1605956">F</span>uncref (Some f) -&gt; Ref_value f
         | <span data-count="3536">F</span>uncref None -&gt; Null
         | <span data-count="0">_</span> -&gt; Type_mismatch
 
       let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
         t Value_intf.get_ref =
-        <span data-count="0">m</span>atch r with
-        | <span data-count="0">E</span>xternref (Some (E (ety, v))) -&gt; (
+        <span data-count="3">m</span>atch r with
+        | <span data-count="3">E</span>xternref (Some (E (ety, v))) -&gt; (
           match Type.Id.provably_equal t ety with
           | None -&gt; assert false
-          | <span data-count="0">S</span>ome Equal -&gt; Ref_value v )
+          | <span data-count="3">S</span>ome Equal -&gt; Ref_value v )
         | _ -&gt; assert false
     end
 
@@ -297,7 +294,7 @@ include (
 
       let or_ = ( || )
 
-      let int32 = function <span data-count="1951246">t</span>rue -&gt; 1l | <span data-count="14170135">f</span>alse -&gt; 0l
+      let int32 = function <span data-count="1960980">t</span>rue -&gt; 1l | <span data-count="14180115">f</span>alse -&gt; 0l
 
       let pp = Fmt.bool
     end
@@ -306,7 +303,7 @@ include (
       include Int32
       include Convert.Int32
 
-      let to_bool i = <span data-count="16113685">I</span>nt32.ne i 0l
+      let to_bool i = <span data-count="16139995">I</span>nt32.ne i 0l
 
       let eq_const = eq
     end

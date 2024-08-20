@@ -276,66 +276,66 @@
 open Syntax
 
 module Text = struct
-  let until_check ~unsafe m = <span data-count="6231">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6231">C</span>heck.modul m
+  let until_check ~unsafe m = <span data-count="6244">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6244">C</span>heck.modul m
 
   let until_group ~unsafe m =
-    <span data-count="6231">l</span>et* m = until_chec<span data-count="6231">k</span> ~unsafe m in
-    <span data-count="6166">G</span>rouped.of_symbolic m
+    <span data-count="6244">l</span>et* m = until_chec<span data-count="6244">k</span> ~unsafe m in
+    <span data-count="6179">G</span>rouped.of_symbolic m
 
   let until_assign ~unsafe m =
-    <span data-count="6231">l</span>et* m = until_grou<span data-count="6231">p</span> ~unsafe m in
-    <span data-count="6166">A</span>ssigned.of_grouped m
+    <span data-count="6244">l</span>et* m = until_grou<span data-count="6244">p</span> ~unsafe m in
+    <span data-count="6179">A</span>ssigned.of_grouped m
 
   let until_binary ~unsafe m =
-    <span data-count="6231">l</span>et* m = until_assig<span data-count="6230">n</span> ~unsafe m in
-    <span data-count="6148">R</span>ewrite.modul m
+    <span data-count="6244">l</span>et* m = until_assig<span data-count="6243">n</span> ~unsafe m in
+    <span data-count="6161">R</span>ewrite.modul m
 
   let until_typecheck ~unsafe m =
-    <span data-count="6104">l</span>et* m = until_binar<span data-count="6103">y</span> ~unsafe m in
-    <span data-count="6043">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="6117">l</span>et* m = until_binar<span data-count="6116">y</span> ~unsafe m in
+    <span data-count="6056">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="6043">l</span>et+ () = Typecheck.modu<span data-count="6043">l</span> m in
-      <span data-count="3078">m</span>
+      <span data-count="6056">l</span>et+ () = Typecheck.modu<span data-count="6056">l</span> m in
+      <span data-count="3089">m</span>
 
   let until_optimize ~unsafe ~optimize m =
-    <span data-count="5935">l</span>et+ m = until_typechec<span data-count="5934">k</span> ~unsafe m in
-    <span data-count="2910">i</span>f optimize then <span data-count="1357">O</span>ptimize.modul m else <span data-count="1553">m</span>
+    <span data-count="5944">l</span>et+ m = until_typechec<span data-count="5943">k</span> ~unsafe m in
+    <span data-count="2919">i</span>f optimize then <span data-count="1360">O</span>ptimize.modul m else <span data-count="1559">m</span>
 
   let until_link ~unsafe ~optimize ~name link_state m =
-    <span data-count="5907">l</span>et* m = until_optimiz<span data-count="5906">e</span> ~unsafe ~optimize m in
-    <span data-count="2882">L</span>ink.modul link_state ~name m
+    <span data-count="5914">l</span>et* m = until_optimiz<span data-count="5913">e</span> ~unsafe ~optimize m in
+    <span data-count="2889">L</span>ink.modul link_state ~name m
 
   let until_interpret ~unsafe ~optimize ~name link_state m =
-    <span data-count="2573">l</span>et* m, link_state = until_lin<span data-count="2572">k</span> ~unsafe ~optimize ~name link_state m in
-    <span data-count="2570">l</span>et+ () = Interpret.Concrete.modu<span data-count="2570">l</span> link_state.envs m in
-    <span data-count="2570">l</span>ink_state
+    <span data-count="2577">l</span>et* m, link_state = until_lin<span data-count="2576">k</span> ~unsafe ~optimize ~name link_state m in
+    <span data-count="2574">l</span>et+ () = Interpret.Concrete.modu<span data-count="2574">l</span> link_state.envs m in
+    <span data-count="2574">l</span>ink_state
 end
 
 module Binary = struct
   let until_typecheck ~unsafe m =
-    <span data-count="597">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="964">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="597">l</span>et+ () = Typecheck.modu<span data-count="597">l</span> m in
-      <span data-count="597">m</span>
+      <span data-count="964">l</span>et+ () = Typecheck.modu<span data-count="964">l</span> m in
+      <span data-count="964">m</span>
 
   let until_optimize ~unsafe ~optimize m =
-    <span data-count="427">l</span>et+ m = until_typechec<span data-count="427">k</span> ~unsafe m in
-    <span data-count="427">i</span>f optimize then <span data-count="41">O</span>ptimize.modul m else <span data-count="386">m</span>
+    <span data-count="612">l</span>et+ m = until_typechec<span data-count="612">k</span> ~unsafe m in
+    <span data-count="612">i</span>f optimize then <span data-count="41">O</span>ptimize.modul m else <span data-count="571">m</span>
 
   let until_link ~unsafe ~optimize ~name link_state m =
-    <span data-count="427">l</span>et* m = until_optimiz<span data-count="427">e</span> ~unsafe ~optimize m in
-    <span data-count="427">L</span>ink.modul link_state ~name m
+    <span data-count="612">l</span>et* m = until_optimiz<span data-count="612">e</span> ~unsafe ~optimize m in
+    <span data-count="612">L</span>ink.modul link_state ~name m
 
   let until_interpret ~unsafe ~optimize ~name link_state m =
-    <span data-count="89">l</span>et* m, link_state = until_lin<span data-count="89">k</span> ~unsafe ~optimize ~name link_state m in
-    <span data-count="89">l</span>et+ () = Interpret.Concrete.modu<span data-count="89">l</span> link_state.envs m in
-    <span data-count="89">l</span>ink_state
+    <span data-count="90">l</span>et* m, link_state = until_lin<span data-count="90">k</span> ~unsafe ~optimize ~name link_state m in
+    <span data-count="90">l</span>et+ () = Interpret.Concrete.modu<span data-count="90">l</span> link_state.envs m in
+    <span data-count="90">l</span>ink_state
 end
 
 module Any = struct
   let until_typecheck ~unsafe = function
-    | <span data-count="2">K</span>ind.Wat m -&gt; Text.until_typecheck ~unsafe m
-    | <span data-count="2">W</span>asm m -&gt; Binary.until_typecheck ~unsafe m
+    | <span data-count="3">K</span>ind.Wat m -&gt; Text.until_typecheck ~unsafe m
+    | <span data-count="161">W</span>asm m -&gt; Binary.until_typecheck ~unsafe m
     | Wast _ | Ocaml _ -&gt; assert false
 
   let until_optimize ~unsafe ~optimize = function
@@ -356,16 +356,16 @@ end
 
 module File = struct
   let until_typecheck ~unsafe filename =
-    <span data-count="336">l</span>et* m = Parse.guess_from_fil<span data-count="336">e</span> filename in
-    <span data-count="335">m</span>atch m with
-    | <span data-count="167">K</span>ind.Wat m -&gt; Text.until_typecheck ~unsafe m
-    | <span data-count="168">W</span>asm m -&gt; Binary.until_typecheck ~unsafe m
+    <span data-count="362">l</span>et* m = Parse.guess_from_fil<span data-count="362">e</span> filename in
+    <span data-count="361">m</span>atch m with
+    | <span data-count="170">K</span>ind.Wat m -&gt; Text.until_typecheck ~unsafe m
+    | <span data-count="191">W</span>asm m -&gt; Binary.until_typecheck ~unsafe m
     | Wast _ | Ocaml _ -&gt; assert false
 
   let until_optimize ~unsafe ~optimize filename =
-    <span data-count="20">l</span>et* m = Parse.guess_from_fil<span data-count="20">e</span> filename in
-    <span data-count="20">m</span>atch m with
-    | <span data-count="20">K</span>ind.Wat m -&gt; Text.until_optimize ~unsafe ~optimize m
+    <span data-count="21">l</span>et* m = Parse.guess_from_fil<span data-count="21">e</span> filename in
+    <span data-count="21">m</span>atch m with
+    | <span data-count="21">K</span>ind.Wat m -&gt; Text.until_optimize ~unsafe ~optimize m
     | <span data-count="0">W</span>asm m -&gt; Binary.until_optimize ~unsafe ~optimize m
     | Wast _ | Ocaml _ -&gt; assert false
 
@@ -377,10 +377,10 @@ module File = struct
     | Wast _ | Ocaml _ -&gt; assert false
 
   let until_interpret ~unsafe ~optimize ~name link_state filename =
-    <span data-count="26">l</span>et* m = Parse.guess_from_fil<span data-count="26">e</span> filename in
-    <span data-count="26">m</span>atch m with
-    | <span data-count="19">K</span>ind.Wat m -&gt; Text.until_interpret ~unsafe ~optimize ~name link_state m
-    | <span data-count="7">W</span>asm m -&gt; Binary.until_interpret ~unsafe ~optimize ~name link_state m
+    <span data-count="29">l</span>et* m = Parse.guess_from_fil<span data-count="29">e</span> filename in
+    <span data-count="29">m</span>atch m with
+    | <span data-count="21">K</span>ind.Wat m -&gt; Text.until_interpret ~unsafe ~optimize ~name link_state m
+    | <span data-count="8">W</span>asm m -&gt; Binary.until_interpret ~unsafe ~optimize ~name link_state m
     | Wast _ | Ocaml _ -&gt; assert false
 end
 </code></pre>

@@ -80,13 +80,13 @@ type 'a t =
 let empty = { values = []; named = String_map.empty }
 
 let fold f v acc =
-  <span data-count="32017">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="53356">f</span> (Indexed.get_inde<span data-count="53356">x</span> v) (Indexed.ge<span data-count="53356">t</span> v) acc)
+  <span data-count="33576">L</span>ist.fold_left
+    (fun acc v -&gt; <span data-count="64051">f</span> (Indexed.get_inde<span data-count="64051">x</span> v) (Indexed.ge<span data-count="64051">t</span> v) acc)
     acc v.values
 
 let map f v =
-  <span data-count="1398">l</span>et values = List.map f v.values in
-  <span data-count="1398">{</span> v with values }
+  <span data-count="1401">l</span>et values = List.map f v.values in
+  <span data-count="1401">{</span> v with values }
 </code></pre>
       </div>
     </div>

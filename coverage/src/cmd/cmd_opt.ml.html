@@ -68,15 +68,15 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  <span data-count="20">C</span>ompile.File.until_optimize ~unsafe ~optimize:true filename
+  <span data-count="21">C</span>ompile.File.until_optimize ~unsafe ~optimize:true filename
 
 let cmd debug unsafe files =
-  <span data-count="20">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
-  <span data-count="20">l</span>ist_iter
+  <span data-count="21">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
+  <span data-count="21">l</span>ist_iter
     (fun file -&gt;
-      <span data-count="20">l</span>et+ m = optimize_fil<span data-count="20">e</span> ~unsafe file in
-      <span data-count="20">l</span>et m = Binary_to_text.modul m in
-      <span data-count="20">F</span>mt.pr "%a@\n" Text.pp_modul m )
+      <span data-count="21">l</span>et+ m = optimize_fil<span data-count="21">e</span> ~unsafe file in
+      <span data-count="21">l</span>et m = Binary_to_text.modul m in
+      <span data-count="21">F</span>mt.pr "%a@\n" Text.pp_modul m )
     files
 </code></pre>
       </div>

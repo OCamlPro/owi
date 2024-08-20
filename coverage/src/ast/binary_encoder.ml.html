@@ -1874,8 +1874,8 @@ open Types
 
 (* add byte from int (ascii code) *)
 let write_byte buf i =
-  <span data-count="421">l</span>et c = Char.chr (i land 0xff) in
-  <span data-count="421">B</span>uffer.add_char buf c
+  <span data-count="452">l</span>et c = Char.chr (i land 0xff) in
+  <span data-count="452">B</span>uffer.add_char buf c
 
 (* add 2 bytes (16 bits) from int *)
 let write_bytes_2 buf i =
@@ -1893,19 +1893,19 @@ let write_bytes_8 buf i =
   <span data-count="1">w</span>rite_bytes_4 buf (Int64.to_int3<span data-count="1">2</span> (Int64.shift_righ<span data-count="1">t</span> i 32))
 
 let rec write_u64 buf i =
-  <span data-count="367">l</span>et b = Int64.to_int (Int64.logan<span data-count="367">d</span> i 0x7fL) in
-  <span data-count="367">i</span>f Int64.l<span data-count="367">e</span> 0L i &amp;&amp; <span data-count="367">I</span>nt64.l<span data-count="367">t</span> i 128L then <span data-count="367">w</span>rite_byte buf b
+  <span data-count="396">l</span>et b = Int64.to_int (Int64.logan<span data-count="396">d</span> i 0x7fL) in
+  <span data-count="396">i</span>f Int64.l<span data-count="396">e</span> 0L i &amp;&amp; <span data-count="396">I</span>nt64.l<span data-count="396">t</span> i 128L then <span data-count="396">w</span>rite_byte buf b
   else <span data-count="0">b</span>egin
     write_byte buf (b lor 0x80);
     <span data-count="0">w</span>rite_u64 buf (Int64.shift_right_logica<span data-count="0">l</span> i 7)
   end
 
 let write_u32 buf i =
-  <span data-count="367">w</span>rite_u64 buf (Int64.logan<span data-count="367">d</span> (Int64.of_int3<span data-count="367">2</span> i) 0xffffffffL)
+  <span data-count="396">w</span>rite_u64 buf (Int64.logan<span data-count="396">d</span> (Int64.of_int3<span data-count="396">2</span> i) 0xffffffffL)
 
 let write_u32_of_int buf i =
-  <span data-count="343">l</span>et i = Int32.of_int i in
-  <span data-count="343">w</span>rite_u32 buf i
+  <span data-count="372">l</span>et i = Int32.of_int i in
+  <span data-count="372">w</span>rite_u32 buf i
 
 let write_string buf str =
   <span data-count="5">l</span>et len = String.length str in
@@ -1913,14 +1913,14 @@ let write_string buf str =
   <span data-count="5">B</span>uffer.add_string buf str
 
 let rec write_s64 buf i =
-  <span data-count="34">l</span>et b = Int64.to_int (Int64.logan<span data-count="34">d</span> i 0x7fL) in
-  <span data-count="34">i</span>f Int64.l<span data-count="34">e</span> (-64L) i &amp;&amp; <span data-count="34">I</span>nt64.l<span data-count="34">t</span> i 64L then <span data-count="34">w</span>rite_byte buf b
+  <span data-count="36">l</span>et b = Int64.to_int (Int64.logan<span data-count="36">d</span> i 0x7fL) in
+  <span data-count="36">i</span>f Int64.l<span data-count="36">e</span> (-64L) i &amp;&amp; <span data-count="36">I</span>nt64.l<span data-count="36">t</span> i 64L then <span data-count="36">w</span>rite_byte buf b
   else <span data-count="0">b</span>egin
     write_byte buf (b lor 0x80);
     <span data-count="0">w</span>rite_s64 buf (Int64.shift_righ<span data-count="0">t</span> i 7)
   end
 
-let write_s32 buf i = <span data-count="28">w</span>rite_s64 buf (Int64.of_int3<span data-count="28">2</span> i)
+let write_s32 buf i = <span data-count="30">w</span>rite_s64 buf (Int64.of_int3<span data-count="30">2</span> i)
 
 let write_f32 buf f =
   <span data-count="3">l</span>et i32 = Float32.to_bits f in
@@ -1930,7 +1930,7 @@ let write_f64 buf f =
   <span data-count="1">l</span>et i64 = Float64.to_bits f in
   <span data-count="1">w</span>rite_bytes_8 buf i64
 
-let write_indice buf (Raw idx : binary indice) = <span data-count="65">w</span>rite_u32_of_int buf idx
+let write_indice buf (Raw idx : binary indice) = <span data-count="66">w</span>rite_u32_of_int buf idx
 
 let write_char_indice buf c idx =
   <span data-count="43">B</span>uffer.add_char buf c;
@@ -1956,18 +1956,18 @@ let write_valtype buf vt =
   <span data-count="21">B</span>uffer.add_char buf c
 
 let encode_vector buf datas encode_func =
-  <span data-count="101">l</span>et vector_buf = Buffer.create 16 in
-  <span data-count="101">l</span>et len = List.length datas in
-  <span data-count="101">L</span>ist.iter (encode_fun<span data-count="101">c</span> vector_buf) datas;
-  <span data-count="101">w</span>rite_u32_of_int buf len;
-  <span data-count="101">B</span>uffer.add_buffer buf vector_buf
+  <span data-count="111">l</span>et vector_buf = Buffer.create 16 in
+  <span data-count="111">l</span>et len = List.length datas in
+  <span data-count="111">L</span>ist.iter (encode_fun<span data-count="111">c</span> vector_buf) datas;
+  <span data-count="111">w</span>rite_u32_of_int buf len;
+  <span data-count="111">B</span>uffer.add_buffer buf vector_buf
 
 let write_resulttype buf (rt : _ result_type) =
-  <span data-count="36">e</span>ncode_vector buf rt write_valtype
+  <span data-count="38">e</span>ncode_vector buf rt write_valtype
 
 let write_paramtype buf (pt : _ param_type) =
-  <span data-count="18">l</span>et vt = List.map snd pt in
-  <span data-count="18">w</span>rite_resulttype buf vt
+  <span data-count="19">l</span>et vt = List.map snd pt in
+  <span data-count="19">w</span>rite_resulttype buf vt
 
 let write_mut buf (mut : mut) =
   <span data-count="2">l</span>et c = match mut with <span data-count="1">C</span>onst -&gt; '\x00' | <span data-count="1">V</span>ar -&gt; '\x01' in
@@ -1985,9 +1985,9 @@ let write_block_type buf (typ : binary block_type option) =
   | _ -&gt; assert false (* TODO: same, new pattern matching cases ? *)
 
 let write_block_type_idx buf (typ : binary block_type) =
-  <span data-count="20">m</span>atch typ with
+  <span data-count="21">m</span>atch typ with
   | Bt_raw (None, _) -&gt; assert false
-  | <span data-count="20">B</span>t_raw (Some idx, _) -&gt; write_indice buf idx
+  | <span data-count="21">B</span>t_raw (Some idx, _) -&gt; write_indice buf idx
 
 let write_global_type buf ((mut, vt) : _ global_type) =
   <span data-count="2">w</span>rite_valtype buf vt;
@@ -2041,7 +2041,7 @@ let write_fc buf i =
   <span data-count="0">w</span>rite_u32_of_int buf i
 
 let rec write_instr buf instr =
-  <span data-count="137">l</span>et add_char c = <span data-count="96">B</span>uffer.add_char buf c in
+  <span data-count="141">l</span>et add_char c = <span data-count="100">B</span>uffer.add_char buf c in
   match instr with
   | <span data-count="3">U</span>nreachable -&gt; add_char '\x00'
   | <span data-count="1">N</span>op -&gt; add_char '\x01'
@@ -2076,7 +2076,7 @@ let rec write_instr buf instr =
     add_char '\x11';
     <span data-count="1">w</span>rite_block_type_idx buf bt;
     <span data-count="1">w</span>rite_indice buf idx
-  | <span data-count="13">D</span>rop -&gt; add_char '\x1A'
+  | <span data-count="14">D</span>rop -&gt; add_char '\x1A'
   | <span data-count="0">S</span>elect None -&gt; add_char '\x1B'
   | <span data-count="0">S</span>elect (Some vts) -&gt;
     add_char '\x1C';
@@ -2163,9 +2163,9 @@ let rec write_instr buf instr =
   | <span data-count="1">M</span>emory_grow -&gt;
     add_char '\x40';
     <span data-count="1">a</span>dd_char '\x00'
-  | <span data-count="28">I</span>32_const i -&gt;
+  | <span data-count="30">I</span>32_const i -&gt;
     add_char '\x41';
-    <span data-count="28">w</span>rite_s32 buf i
+    <span data-count="30">w</span>rite_s32 buf i
   | <span data-count="6">I</span>64_const i -&gt;
     add_char '\x42';
     <span data-count="6">w</span>rite_s64 buf i
@@ -2212,7 +2212,7 @@ let rec write_instr buf instr =
   | <span data-count="0">I</span>_unop (S32, Clz) -&gt; add_char '\x67'
   | <span data-count="0">I</span>_unop (S32, Ctz) -&gt; add_char '\x68'
   | <span data-count="0">I</span>_unop (S32, Popcnt) -&gt; add_char '\x69'
-  | <span data-count="2">I</span>_binop (S32, Add) -&gt; add_char '\x6A'
+  | <span data-count="3">I</span>_binop (S32, Add) -&gt; add_char '\x6A'
   | <span data-count="2">I</span>_binop (S32, Sub) -&gt; add_char '\x6B'
   | <span data-count="3">I</span>_binop (S32, Mul) -&gt; add_char '\x6C'
   | <span data-count="0">I</span>_binop (S32, Div S) -&gt; add_char '\x6D'
@@ -2361,9 +2361,9 @@ let rec write_instr buf instr =
     assert false
 
 and write_expr buf expr ~end_op_code =
-  <span data-count="29">L</span>ist.iter (write_inst<span data-count="29">r</span> buf) expr;
-  <span data-count="29">l</span>et end_op_code = Option.value end_op_code ~default:'\x0B' in
-  <span data-count="29">B</span>uffer.add_char buf end_op_code
+  <span data-count="30">L</span>ist.iter (write_inst<span data-count="30">r</span> buf) expr;
+  <span data-count="30">l</span>et end_op_code = Option.value end_op_code ~default:'\x0B' in
+  <span data-count="30">B</span>uffer.add_char buf end_op_code
 
 let write_export buf cid ({ name; id } : Binary.export) =
   <span data-count="0">w</span>rite_string buf name;
@@ -2384,9 +2384,9 @@ let write_global_import buf
   <span data-count="0">w</span>rite_mut buf mut
 
 let write_locals buf locals =
-  <span data-count="17">l</span>et compressed =
+  <span data-count="18">l</span>et compressed =
     List.rev
-    @@ List.fold_lef<span data-count="17">t</span>
+    @@ List.fold_lef<span data-count="18">t</span>
          (fun compressed (_so, local_type) -&gt;
            <span data-count="4">l</span>et c = get_char_valtype local_type in
            <span data-count="4">m</span>atch compressed with
@@ -2395,9 +2395,9 @@ let write_locals buf locals =
            | <span data-count="4">c</span>ompressed -&gt; (c, 1) :: compressed )
          [] locals
   in
-  <span data-count="17">l</span>et len = List.length compressed in
-  <span data-count="17">w</span>rite_u32_of_int buf len;
-  <span data-count="17">L</span>ist.iter
+  <span data-count="18">l</span>et len = List.length compressed in
+  <span data-count="18">w</span>rite_u32_of_int buf len;
+  <span data-count="18">L</span>ist.iter
     (fun (char, count) -&gt;
       <span data-count="4">w</span>rite_u32_of_int buf count;
       <span data-count="4">B</span>uffer.add_char buf char )
@@ -2482,173 +2482,173 @@ let write_data buf ({ init; mode; _ } : data) =
     <span data-count="0">w</span>rite_string buf init
 
 let encode_section buf id encode_func data =
-  <span data-count="96">l</span>et section_buf = Buffer.create 16 in
-  <span data-count="96">e</span>ncode_func section_buf data;
-  <span data-count="96">l</span>et section_len = Buffer.length section_buf in
-  <span data-count="96">i</span>f section_len &lt;&gt; 0 then <span data-count="96">b</span>egin
+  <span data-count="108">l</span>et section_buf = Buffer.create 16 in
+  <span data-count="108">e</span>ncode_func section_buf data;
+  <span data-count="108">l</span>et section_len = Buffer.length section_buf in
+  <span data-count="108">i</span>f section_len &lt;&gt; 0 then <span data-count="108">b</span>egin
     Buffer.add_char buf id;
-    <span data-count="96">w</span>rite_u32_of_int buf section_len;
-    <span data-count="96">B</span>uffer.add_buffer buf section_buf
+    <span data-count="108">w</span>rite_u32_of_int buf section_len;
+    <span data-count="108">B</span>uffer.add_buffer buf section_buf
   end
 
 (* type: section 1 *)
 let encode_types buf (rec_types : binary rec_type Named.t) =
-  <span data-count="8">e</span>ncode_vector buf rec_types.values
+  <span data-count="9">e</span>ncode_vector buf rec_types.values
     (fun buf (typ : binary rec_type Indexed.t) -&gt;
-      <span data-count="18">l</span>et typ = Indexed.get typ in
-      <span data-count="18">m</span>atch typ with
+      <span data-count="19">l</span>et typ = Indexed.get typ in
+      <span data-count="19">m</span>atch typ with
       | [] -&gt; assert false
       | _ :: _ :: _ -&gt;
         (* TODO rec types *)
         assert false
-      | <span data-count="18">[</span> typ ] -&gt; (
+      | <span data-count="19">[</span> typ ] -&gt; (
         match typ with
-        | <span data-count="18">_</span>name, (Final, _idx, Def_func_t (pt, rt)) -&gt;
+        | <span data-count="19">_</span>name, (Final, _idx, Def_func_t (pt, rt)) -&gt;
           Buffer.add_char buf '\x60';
-          <span data-count="18">w</span>rite_paramtype buf pt;
-          <span data-count="18">w</span>rite_resulttype buf rt
+          <span data-count="19">w</span>rite_paramtype buf pt;
+          <span data-count="19">w</span>rite_resulttype buf rt
         | _ -&gt;
           (* TODO non final types and other type declarations *)
           assert false ) )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =
-  <span data-count="8">l</span>et imp_buf = Buffer.create 16 in
-  <span data-count="8">l</span>et len =
-    List.lengt<span data-count="8">h</span> funcs + List.lengt<span data-count="8">h</span> tables + List.lengt<span data-count="8">h</span> memories
-    + List.lengt<span data-count="8">h</span> globals
+  <span data-count="9">l</span>et imp_buf = Buffer.create 16 in
+  <span data-count="9">l</span>et len =
+    List.lengt<span data-count="9">h</span> funcs + List.lengt<span data-count="9">h</span> tables + List.lengt<span data-count="9">h</span> memories
+    + List.lengt<span data-count="9">h</span> globals
   in
-  List.iter (write_func_impor<span data-count="8">t</span> imp_buf) funcs;
-  <span data-count="8">L</span>ist.iter (write_table_impor<span data-count="8">t</span> imp_buf) tables;
-  <span data-count="8">L</span>ist.iter (write_memory_impor<span data-count="8">t</span> imp_buf) memories;
-  <span data-count="8">L</span>ist.iter (write_global_impor<span data-count="8">t</span> imp_buf) globals;
-  <span data-count="8">w</span>rite_u32_of_int buf len;
-  <span data-count="8">B</span>uffer.add_buffer buf imp_buf
+  List.iter (write_func_impor<span data-count="9">t</span> imp_buf) funcs;
+  <span data-count="9">L</span>ist.iter (write_table_impor<span data-count="9">t</span> imp_buf) tables;
+  <span data-count="9">L</span>ist.iter (write_memory_impor<span data-count="9">t</span> imp_buf) memories;
+  <span data-count="9">L</span>ist.iter (write_global_impor<span data-count="9">t</span> imp_buf) globals;
+  <span data-count="9">w</span>rite_u32_of_int buf len;
+  <span data-count="9">B</span>uffer.add_buffer buf imp_buf
 
 (* function: section 3 *)
 let encode_functions buf (funcs : binary func list) =
-  <span data-count="8">l</span>et idx = ref 0 in
+  <span data-count="9">l</span>et idx = ref 0 in
   encode_vector buf funcs (fun buf func -&gt;
-      <span data-count="17">w</span>rite_block_type_idx buf func.type_f;
-      <span data-count="17">i</span>ncr idx )
+      <span data-count="18">w</span>rite_block_type_idx buf func.type_f;
+      <span data-count="18">i</span>ncr idx )
 
 (* table: section 4 *)
-let encode_tables buf tables = <span data-count="8">e</span>ncode_vector buf tables write_table
+let encode_tables buf tables = <span data-count="9">e</span>ncode_vector buf tables write_table
 
 (* memory: section 5 *)
-let encode_memories buf memories = <span data-count="8">e</span>ncode_vector buf memories write_memory
+let encode_memories buf memories = <span data-count="9">e</span>ncode_vector buf memories write_memory
 
 (* global: section 6 *)
 let encode_globals buf globals =
-  <span data-count="8">l</span>et globals = List.rev globals in
-  <span data-count="8">e</span>ncode_vector buf globals write_global
+  <span data-count="9">l</span>et globals = List.rev globals in
+  <span data-count="9">e</span>ncode_vector buf globals write_global
 
 (* export: section 7 *)
 let encode_exports buf ({ global; mem; table; func } : exports) =
-  <span data-count="8">l</span>et exp_buf = Buffer.create 16 in
-  <span data-count="8">l</span>et len =
-    List.lengt<span data-count="8">h</span> global + List.lengt<span data-count="8">h</span> mem + List.lengt<span data-count="8">h</span> table + List.lengt<span data-count="8">h</span> func
+  <span data-count="9">l</span>et exp_buf = Buffer.create 16 in
+  <span data-count="9">l</span>et len =
+    List.lengt<span data-count="9">h</span> global + List.lengt<span data-count="9">h</span> mem + List.lengt<span data-count="9">h</span> table + List.lengt<span data-count="9">h</span> func
   in
   let global = List.rev global in
-  <span data-count="8">l</span>et mem = List.rev mem in
-  <span data-count="8">l</span>et table = List.rev table in
-  <span data-count="8">l</span>et func = List.rev func in
-  <span data-count="8">L</span>ist.iter (write_expor<span data-count="8">t</span> exp_buf '\x03') global;
-  <span data-count="8">L</span>ist.iter (write_expor<span data-count="8">t</span> exp_buf '\x02') mem;
-  <span data-count="8">L</span>ist.iter (write_expor<span data-count="8">t</span> exp_buf '\x01') table;
-  <span data-count="8">L</span>ist.iter (write_expor<span data-count="8">t</span> exp_buf '\x00') func;
-  <span data-count="8">w</span>rite_u32_of_int buf len;
-  <span data-count="8">B</span>uffer.add_buffer buf exp_buf
+  <span data-count="9">l</span>et mem = List.rev mem in
+  <span data-count="9">l</span>et table = List.rev table in
+  <span data-count="9">l</span>et func = List.rev func in
+  <span data-count="9">L</span>ist.iter (write_expor<span data-count="9">t</span> exp_buf '\x03') global;
+  <span data-count="9">L</span>ist.iter (write_expor<span data-count="9">t</span> exp_buf '\x02') mem;
+  <span data-count="9">L</span>ist.iter (write_expor<span data-count="9">t</span> exp_buf '\x01') table;
+  <span data-count="9">L</span>ist.iter (write_expor<span data-count="9">t</span> exp_buf '\x00') func;
+  <span data-count="9">w</span>rite_u32_of_int buf len;
+  <span data-count="9">B</span>uffer.add_buffer buf exp_buf
 
 (* start: section 8 *)
 let encode_start buf int_opt =
-  <span data-count="8">m</span>atch int_opt with <span data-count="0">N</span>one -&gt; () | <span data-count="8">S</span>ome funcidx -&gt; write_u32_of_int buf funcidx
+  <span data-count="9">m</span>atch int_opt with <span data-count="0">N</span>one -&gt; () | <span data-count="9">S</span>ome funcidx -&gt; write_u32_of_int buf funcidx
 
 (* element: section 9 *)
 let encode_elements buf { Named.values = elems; _ } =
-  <span data-count="8">e</span>ncode_vector buf elems (fun buf elem -&gt;
+  <span data-count="9">e</span>ncode_vector buf elems (fun buf elem -&gt;
       <span data-count="1">l</span>et elem = Indexed.get elem in
       <span data-count="1">w</span>rite_element buf elem )
 
 (* datacount: section 12 *)
 let encode_datacount buf { Named.values = datas; _ } =
-  <span data-count="8">l</span>et len = List.length datas in
-  <span data-count="8">w</span>rite_u32_of_int buf len
+  <span data-count="9">l</span>et len = List.length datas in
+  <span data-count="9">w</span>rite_u32_of_int buf len
 
 (* code: section 10 *)
 let encode_codes buf funcs =
-  <span data-count="8">e</span>ncode_vector buf funcs (fun buf { locals; body; _ } -&gt;
-      <span data-count="17">l</span>et code_buf = Buffer.create 16 in
-      <span data-count="17">w</span>rite_locals code_buf locals;
-      <span data-count="17">w</span>rite_expr code_buf body ~end_op_code:None;
-      <span data-count="17">w</span>rite_u32_of_int buf (Buffer.lengt<span data-count="17">h</span> code_buf);
-      <span data-count="17">B</span>uffer.add_buffer buf code_buf )
+  <span data-count="9">e</span>ncode_vector buf funcs (fun buf { locals; body; _ } -&gt;
+      <span data-count="18">l</span>et code_buf = Buffer.create 16 in
+      <span data-count="18">w</span>rite_locals code_buf locals;
+      <span data-count="18">w</span>rite_expr code_buf body ~end_op_code:None;
+      <span data-count="18">w</span>rite_u32_of_int buf (Buffer.lengt<span data-count="18">h</span> code_buf);
+      <span data-count="18">B</span>uffer.add_buffer buf code_buf )
 
 (* data: section 11 *)
 let encode_datas buf { Named.values = datas; _ } =
-  <span data-count="8">e</span>ncode_vector buf datas (fun buf data -&gt;
+  <span data-count="9">e</span>ncode_vector buf datas (fun buf data -&gt;
       <span data-count="1">l</span>et data = Indexed.get data in
       <span data-count="1">w</span>rite_data buf data )
 
 let keep_local { Named.values; _ } =
-  <span data-count="32">L</span>ist.filter_map
+  <span data-count="36">L</span>ist.filter_map
     (fun data -&gt;
-      <span data-count="24">m</span>atch Indexed.get data with
-      | <span data-count="22">R</span>untime.Local data -&gt; Some data
+      <span data-count="25">m</span>atch Indexed.get data with
+      | <span data-count="23">R</span>untime.Local data -&gt; Some data
       | <span data-count="2">R</span>untime.Imported _data -&gt; None )
-    (List.re<span data-count="32">v</span> values)
+    (List.re<span data-count="36">v</span> values)
 
 let keep_imported { Named.values; _ } =
-  <span data-count="32">L</span>ist.filter_map
+  <span data-count="36">L</span>ist.filter_map
     (fun data -&gt;
-      <span data-count="24">m</span>atch Indexed.get data with
-      | <span data-count="22">R</span>untime.Local _data -&gt; None
+      <span data-count="25">m</span>atch Indexed.get data with
+      | <span data-count="23">R</span>untime.Local _data -&gt; None
       | <span data-count="2">R</span>untime.Imported data -&gt; Some data )
-    (List.re<span data-count="32">v</span> values)
+    (List.re<span data-count="36">v</span> values)
 
 let encode (modul : Binary.modul) =
-  <span data-count="8">l</span>et buf = Buffer.create 256 in
-  <span data-count="8">l</span>et local_funcs = keep_local modul.func in
-  <span data-count="8">l</span>et local_tables = keep_local modul.table in
-  <span data-count="8">l</span>et local_memories = keep_local modul.mem in
-  <span data-count="8">l</span>et local_globales = keep_local modul.global in
-  <span data-count="8">l</span>et imported_funcs = keep_imported modul.func in
-  <span data-count="8">l</span>et imported_tables = keep_imported modul.table in
-  <span data-count="8">l</span>et imported_memories = keep_imported modul.mem in
-  <span data-count="8">l</span>et imported_globals = keep_imported modul.global in
-  <span data-count="8">B</span>uffer.add_string buf "\x00\x61\x73\x6d";
+  <span data-count="9">l</span>et buf = Buffer.create 256 in
+  <span data-count="9">l</span>et local_funcs = keep_local modul.func in
+  <span data-count="9">l</span>et local_tables = keep_local modul.table in
+  <span data-count="9">l</span>et local_memories = keep_local modul.mem in
+  <span data-count="9">l</span>et local_globales = keep_local modul.global in
+  <span data-count="9">l</span>et imported_funcs = keep_imported modul.func in
+  <span data-count="9">l</span>et imported_tables = keep_imported modul.table in
+  <span data-count="9">l</span>et imported_memories = keep_imported modul.mem in
+  <span data-count="9">l</span>et imported_globals = keep_imported modul.global in
+  <span data-count="9">B</span>uffer.add_string buf "\x00\x61\x73\x6d";
   (* magic *)
-  <span data-count="8">B</span>uffer.add_string buf "\x01\x00\x00\x00";
+  <span data-count="9">B</span>uffer.add_string buf "\x01\x00\x00\x00";
   (* version *)
-  <span data-count="8">e</span>ncode_section buf '\x01' encode_types modul.types;
-  <span data-count="8">e</span>ncode_section buf '\x02' encode_imports
+  <span data-count="9">e</span>ncode_section buf '\x01' encode_types modul.types;
+  <span data-count="9">e</span>ncode_section buf '\x02' encode_imports
     (imported_funcs, imported_tables, imported_memories, imported_globals);
-  <span data-count="8">e</span>ncode_section buf '\x03' encode_functions local_funcs;
-  <span data-count="8">e</span>ncode_section buf '\x04' encode_tables local_tables;
-  <span data-count="8">e</span>ncode_section buf '\x05' encode_memories local_memories;
-  <span data-count="8">e</span>ncode_section buf '\x06' encode_globals local_globales;
-  <span data-count="8">e</span>ncode_section buf '\x07' encode_exports modul.exports;
-  <span data-count="8">e</span>ncode_section buf '\x08' encode_start modul.start;
-  <span data-count="8">e</span>ncode_section buf '\x09' encode_elements modul.elem;
-  <span data-count="8">e</span>ncode_section buf '\x0C' encode_datacount modul.data;
-  <span data-count="8">e</span>ncode_section buf '\x0A' encode_codes local_funcs;
-  <span data-count="8">e</span>ncode_section buf '\x0B' encode_datas modul.data;
-  <span data-count="8">B</span>uffer.contents buf
+  <span data-count="9">e</span>ncode_section buf '\x03' encode_functions local_funcs;
+  <span data-count="9">e</span>ncode_section buf '\x04' encode_tables local_tables;
+  <span data-count="9">e</span>ncode_section buf '\x05' encode_memories local_memories;
+  <span data-count="9">e</span>ncode_section buf '\x06' encode_globals local_globales;
+  <span data-count="9">e</span>ncode_section buf '\x07' encode_exports modul.exports;
+  <span data-count="9">e</span>ncode_section buf '\x08' encode_start modul.start;
+  <span data-count="9">e</span>ncode_section buf '\x09' encode_elements modul.elem;
+  <span data-count="9">e</span>ncode_section buf '\x0C' encode_datacount modul.data;
+  <span data-count="9">e</span>ncode_section buf '\x0A' encode_codes local_funcs;
+  <span data-count="9">e</span>ncode_section buf '\x0B' encode_datas modul.data;
+  <span data-count="9">B</span>uffer.contents buf
 
 let write_file filename content =
-  <span data-count="8">l</span>et _dir, filename = Fpath.split_base filename in
-  <span data-count="8">l</span>et filename, _ext = Fpath.split_ext filename in
-  <span data-count="8">l</span>et filename = Fpath.add_ext ".wasm" filename in
-  <span data-count="8">l</span>et filename = Fpath.to_string filename in
-  <span data-count="8">l</span>et oc = Out_channel.open_bin filename in
-  <span data-count="8">O</span>ut_channel.output_string oc content;
-  <span data-count="8">O</span>ut_channel.close oc
+  <span data-count="9">l</span>et _dir, filename = Fpath.split_base filename in
+  <span data-count="9">l</span>et filename, _ext = Fpath.split_ext filename in
+  <span data-count="9">l</span>et filename = Fpath.add_ext ".wasm" filename in
+  <span data-count="9">l</span>et filename = Fpath.to_string filename in
+  <span data-count="9">l</span>et oc = Out_channel.open_bin filename in
+  <span data-count="9">O</span>ut_channel.output_string oc content;
+  <span data-count="9">O</span>ut_channel.close oc
 
 let convert (filename : Fpath.t) ~unsafe ~optimize m =
-  <span data-count="8">L</span>og.debug0 "bin encoding ...@\n";
-  <span data-count="8">l</span>et+ m = Compile.Text.until_optimiz<span data-count="8">e</span> ~unsafe ~optimize m in
-  <span data-count="8">l</span>et content = encode m in
-  <span data-count="8">w</span>rite_file filename content
+  <span data-count="9">L</span>og.debug0 "bin encoding ...@\n";
+  <span data-count="9">l</span>et+ m = Compile.Text.until_optimiz<span data-count="9">e</span> ~unsafe ~optimize m in
+  <span data-count="9">l</span>et content = encode m in
+  <span data-count="9">w</span>rite_file filename content
 </code></pre>
       </div>
     </div>
