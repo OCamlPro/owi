@@ -28,6 +28,7 @@ type err =
   | `Incompatible_import_type
   | `Inline_function_type
   | `Invalid_result_arity
+  | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
@@ -75,6 +76,8 @@ type err =
   | `Spec_unknown_term of Sexp.t
   | `Spec_type_error of string
   | `Contract_unknown_func of Types.text Types.indice
+  | `Empty_annotation_id
+  | `Empty_identifier
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -107,7 +110,8 @@ let rec err_to_string = function
   | `Incompatible_import_type -> "incompatible import type"
   | `Inline_function_type -> "inline function type"
   | `Invalid_result_arity -> "invalid result arity"
-  | `Lexer_unknown_operator op -> Fmt.str "unknown operator %s" op
+  | `Lexer_illegal_character c -> Fmt.str "%s" c
+  | `Lexer_unknown_operator op -> Fmt.str "%s" op
   | `Malformed_utf8_encoding txt -> Fmt.str "malformed UTF-8 encoding %S" txt
   | `Memory_size_too_large -> "memory size must be at most 65536 pages (4GiB)"
   | `Msg msg -> msg
@@ -163,3 +167,5 @@ let rec err_to_string = function
   | `Spec_type_error str -> Fmt.str "spec: %S type error" str
   | `Contract_unknown_func id ->
     Fmt.str "contract: unknown function %a" Types.pp_indice id
+  | `Empty_annotation_id -> Fmt.str "empty annotation id"
+  | `Empty_identifier -> Fmt.str "empty identifier"

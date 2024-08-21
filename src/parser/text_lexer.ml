@@ -5,11 +5,19 @@
 open Sedlexing
 open Text_parser
 
+exception Empty_annotation_id
+
+exception Empty_identifier
+
+exception Illegal_character of string
+
 exception Illegal_escape of string
 
 exception Unknown_operator of string
 
-exception Unexpected_character of string
+let illegal_character buf =
+  let tok = Utf8.lexeme buf in
+  raise @@ Illegal_character (Fmt.str "illegal character %S" tok)
 
 let illegal_escape buf =
   let tok = Utf8.lexeme buf in
@@ -18,10 +26,6 @@ let illegal_escape buf =
 let unknown_operator buf =
   let tok = Utf8.lexeme buf in
   raise @@ Unknown_operator (Fmt.str "unknown operator %S" tok)
-
-let unexpected_character buf =
-  let tok = Utf8.lexeme buf in
-  raise @@ Unexpected_character (Fmt.str "unexpected character `%S`" tok)
 
 let mk_string buf s =
   let b = Buffer.create (String.length s) in
@@ -449,7 +453,7 @@ let rec token buf =
     let annotid = Utf8.lexeme buf in
     let annotid = String.sub annotid 3 (String.length annotid - 4) in
     let annotid = mk_string buf annotid in
-    if String.equal "" annotid then Log.err "empty annotation id"
+    if String.equal "" annotid then raise Empty_annotation_id
     else
       let items = Sexp.List (annot buf) in
       Annot.(record_annot annotid items);
@@ -461,7 +465,7 @@ let rec token buf =
     let items = Sexp.List (annot buf) in
     Annot.(record_annot annotid items);
     token buf
-  | "(@" -> Log.err "empty annotation id"
+  | "(@" -> raise Empty_annotation_id
   (* 1 *)
   | "(" -> LPAR
   | ")" -> RPAR
@@ -471,6 +475,7 @@ let rec token buf =
     let id = Utf8.lexeme buf in
     let id = String.sub id 1 (String.length id - 1) in
     ID id
+  | "$" -> raise Empty_identifier
   | name ->
     let name = Utf8.lexeme buf in
     let name = String.sub name 1 (String.length name - 2) in
@@ -478,8 +483,8 @@ let rec token buf =
     NAME name
   | eof -> EOF
   (* | "" -> EOF *)
-  | any -> unexpected_character buf
-  | _ -> unexpected_character buf
+  | any -> unknown_operator buf
+  | _ -> unknown_operator buf
 
 and comment buf =
   match%sedlex buf with
@@ -515,6 +520,7 @@ and annot buf =
     let annot_atom = Utf8.lexeme buf in
     Sexp.Atom annot_atom :: annot buf
   | eof -> Log.err "eof in annotation"
-  | _ -> unexpected_character buf
+  | any -> illegal_character buf
+  | _ -> illegal_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

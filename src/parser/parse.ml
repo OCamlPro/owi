@@ -336,13 +336,15 @@ struct
       in
       try Ok (parser provider) with
       | Types.Parse_fail msg -> Error (`Parse_fail msg)
+      | Text_lexer.Empty_annotation_id -> Error `Empty_annotation_id
+      | Text_lexer.Empty_identifier -> Error `Empty_identifier
       | Text_lexer.Illegal_escape msg -> Error (`Illegal_escape msg)
+      | Text_lexer.Illegal_character msg -> Error (`Lexer_illegal_character msg)
       | Text_lexer.Unknown_operator msg -> Error (`Lexer_unknown_operator msg)
-      | Text_lexer.Unexpected_character msg ->
-        Error (`Lexer_unknown_operator msg)
       | Text_parser.Error ->
         let tok = Text_lexer.token buf |> token_to_string in
         Error (`Unexpected_token tok)
+      | Sedlexing.MalFormed -> Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
     let open Syntax in

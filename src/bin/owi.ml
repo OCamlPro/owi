@@ -123,8 +123,8 @@ let workspace =
     value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
 
 let rac =
-  let doc = "WEbAssembly Specification Language" in
-  Cmdliner.Arg.(value & flag & info [ "runtime-assertion-checking"; "r" ] ~doc)
+  let doc = "runtime assertion checking mode" in
+  Cmdliner.Arg.(value & flag & info [ "rac" ] ~doc)
 
 let copts_t = Cmdliner.Term.(const [])
 
@@ -342,6 +342,7 @@ let exit_code =
       | `Incompatible_import_type -> 20
       | `Inline_function_type -> 21
       | `Invalid_result_arity -> 22
+      | `Lexer_illegal_character _c -> 23
       | `Lexer_unknown_operator _op -> 23
       | `Malformed_utf8_encoding _txt -> 24
       | `Memory_size_too_large -> 25
@@ -389,6 +390,8 @@ let exit_code =
       | `Spec_unknown_term _tm -> 69
       | `Spec_type_error _str -> 70
       | `Contract_unknown_func _id -> 71
+      | `Empty_annotation_id -> 72
+      | `Empty_identifier -> 73
     end
   end
   | Error e -> (
