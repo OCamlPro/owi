@@ -41,7 +41,7 @@ let files =
 
 let emit_files =
   let doc = "emit (.wat) files from corresponding (.wasm) files" in
-  Cmdliner.Arg.(value & flag & info [ "o" ] ~doc)
+  Cmdliner.Arg.(value & flag & info [ "emit-file" ] ~doc)
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in
