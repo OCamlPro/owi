@@ -28,6 +28,7 @@ type err =
   | `Incompatible_import_type
   | `Inline_function_type
   | `Invalid_result_arity
+  | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
@@ -75,6 +76,8 @@ type err =
   | `Spec_unknown_term of Sexp.t
   | `Spec_type_error of string
   | `Contract_unknown_func of Types.text Types.indice
+  | `Empty_annotation_id
+  | `Empty_identifier
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

@@ -49,6 +49,10 @@ let type_env (m : modul) (func_ty : binary param_type * binary result_type)
     method get_global_type (Raw i : binary indice) : binary val_type option =
       List.nth_opt global_types i
 
+    method get_binder_type_and_index (Raw _i : binary indice)
+      : (binary indice * binary val_type) option =
+      None (* TODO *)
+
     method get_result_type (i : int) : binary val_type option =
       List.nth_opt result_types i
 
@@ -183,7 +187,10 @@ let rec term_generate tenv term : (binary expr * binary val_type) Result.t =
     match tenv#get_global_type id with
     | Some t -> Ok ([ Global_get id ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | BinderVar _id -> Ok ([], Num_type I32) (* TODO : binder index calculation *)
+  | BinderVar id -> (
+    match tenv#get_binder_type_and_index id with
+    | Some (id, t) -> Ok ([ Local_get id ], t)
+    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
   | UnOp (u, tm1) ->
     let* expr1, ty1 = term_generate tenv tm1 in
     unop_generate u expr1 ty1
@@ -280,7 +287,7 @@ let prop_generate tenv : binary prop -> binary expr Result.t =
       let* expr2 = prop_generate_aux pr2 in
       binconnect_generate b expr1 expr2
     | Binder (_b, _bt, _, _pr1) ->
-      (* TODO : quantification checking *)
+      (* TODO : quantifier checking *)
       Ok []
   in
   fun pr ->

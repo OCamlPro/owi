@@ -5,11 +5,15 @@
 (** Module for Wasm lexing. *)
 
 (** lexing error exception *)
+exception Empty_annotation_id
+
+exception Empty_identifier
+
 exception Illegal_escape of string
 
 exception Unknown_operator of string
 
-exception Unexpected_character of string
+exception Illegal_character of string
 
 (** tokenizer *)
 val token : Sedlexing.lexbuf -> Text_parser.token
