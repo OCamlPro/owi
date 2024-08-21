@@ -41,6 +41,9 @@ COMMANDS
        opt [--debug] [--output=FILE] [--unsafe] [OPTION]… ARG
            Optimize a module
 
+       rac [--unsafe] [OPTION]… [ARG]…
+           Perform runtime assertion checking
+
        run [OPTION]… [ARG]…
            Run the concrete interpreter
 
