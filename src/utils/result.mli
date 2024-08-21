@@ -78,6 +78,9 @@ type err =
   | `Contract_unknown_func of Types.text Types.indice
   | `Empty_annotation_id
   | `Empty_identifier
+  | `Unclosed_annotation
+  | `Unclosed_comment
+  | `Unclosed_string
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

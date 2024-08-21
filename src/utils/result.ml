@@ -78,6 +78,9 @@ type err =
   | `Contract_unknown_func of Types.text Types.indice
   | `Empty_annotation_id
   | `Empty_identifier
+  | `Unclosed_annotation
+  | `Unclosed_comment
+  | `Unclosed_string
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -169,3 +172,6 @@ let rec err_to_string = function
     Fmt.str "contract: unknown function %a" Types.pp_indice id
   | `Empty_annotation_id -> Fmt.str "empty annotation id"
   | `Empty_identifier -> Fmt.str "empty identifier"
+  | `Unclosed_annotation -> Fmt.str "unclosed annotation"
+  | `Unclosed_comment -> Fmt.str "unclosed comment"
+  | `Unclosed_string -> Fmt.str "unclosed string"

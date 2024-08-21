@@ -9,11 +9,17 @@ exception Empty_annotation_id
 
 exception Empty_identifier
 
+exception Illegal_character of string
+
 exception Illegal_escape of string
 
-exception Unknown_operator of string
+exception Unclosed_annotation
 
-exception Illegal_character of string
+exception Unclosed_comment
+
+exception Unclosed_string
+
+exception Unknown_operator of string
 
 (** tokenizer *)
 val token : Sedlexing.lexbuf -> Text_parser.token

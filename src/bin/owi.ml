@@ -397,6 +397,9 @@ let exit_code =
       | `Contract_unknown_func _id -> 71
       | `Empty_annotation_id -> 72
       | `Empty_identifier -> 73
+      | `Unclosed_annotation -> 74
+      | `Unclosed_comment -> 75
+      | `Unclosed_string -> 76
     end
   end
   | Error e -> (

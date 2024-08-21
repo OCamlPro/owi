@@ -340,6 +340,9 @@ struct
       | Text_lexer.Empty_identifier -> Error `Empty_identifier
       | Text_lexer.Illegal_escape msg -> Error (`Illegal_escape msg)
       | Text_lexer.Illegal_character msg -> Error (`Lexer_illegal_character msg)
+      | Text_lexer.Unclosed_annotation -> Error `Unclosed_annotation
+      | Text_lexer.Unclosed_comment -> Error `Unclosed_comment
+      | Text_lexer.Unclosed_string -> Error `Unclosed_string
       | Text_lexer.Unknown_operator msg -> Error (`Lexer_unknown_operator msg)
       | Text_parser.Error ->
         let tok = Text_lexer.token buf |> token_to_string in

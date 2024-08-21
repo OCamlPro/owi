@@ -7,73 +7,49 @@ open Binary
 open Spec
 open Syntax
 
-let type_env (m : modul) (func_ty : binary param_type * binary result_type)
-  (owi_funcs : (string * int) list) =
-  object
-    val param_types : binary val_type list = List.map snd (fst func_ty)
+type type_env =
+  { param_types : binary val_type list
+  ; global_types : binary val_type list
+  ; result_types : binary val_type list
+  ; owi_i32 : int
+  ; owi_i64 : int
+  ; owi_f32 : int
+  ; owi_f64 : int
+  ; owi_assume : int
+  ; owi_assert : int
+  }
 
-    val global_types : binary val_type list =
-      let sorted_global_types =
-        List.sort
-          (fun x y -> compare (Indexed.get_index x) (Indexed.get_index y))
-          m.global.values
-      in
-      List.map
-        (fun (x : (global, binary global_type) Runtime.t Indexed.t) ->
-          match Indexed.get x with
-          | Runtime.Local { typ = _, gt; _ } -> gt
-          | Runtime.Imported { desc = _, gt; _ } -> gt )
-        sorted_global_types
-
-    val result_types : binary val_type list = snd func_ty
-
-    val param_number : int = List.length (fst func_ty)
-
-    val result_number : int = List.length (snd func_ty)
-
-    val owi_i32 : int = List.assoc "i32_symbol" owi_funcs
-
-    val owi_i64 : int = List.assoc "i64_symbol" owi_funcs
-
-    val owi_f32 : int = List.assoc "f32_symbol" owi_funcs
-
-    val owi_f64 : int = List.assoc "f64_symbol" owi_funcs
-
-    val owi_assume : int = List.assoc "assume" owi_funcs
-
-    val owi_assert : int = List.assoc "assert" owi_funcs
-
-    method get_param_type (Raw i : binary indice) : binary val_type option =
-      List.nth_opt param_types i
-
-    method get_global_type (Raw i : binary indice) : binary val_type option =
-      List.nth_opt global_types i
-
-    method get_binder_type_and_index (Raw _i : binary indice)
-      : (binary indice * binary val_type) option =
-      None (* TODO *)
-
-    method get_result_type (i : int) : binary val_type option =
-      List.nth_opt result_types i
-
-    method get_param_number : int = param_number
-
-    method get_result_number : int = result_number
-
-    method get_result_types : binary val_type list = result_types
-
-    method get_owi_i32 : int = owi_i32
-
-    method get_owi_i64 : int = owi_i64
-
-    method get_owi_f32 : int = owi_f32
-
-    method get_owi_f64 : int = owi_f64
-
-    method get_owi_assume : int = owi_assume
-
-    method get_owi_assert : int = owi_assert
-  end
+let build_type_env (m : modul)
+  (func_ty : binary param_type * binary result_type)
+  (owi_funcs : (string * int) list) : type_env =
+  let param_types = List.map snd (fst func_ty) in
+  let global_types (* would get simplified with #353 *) =
+    List.map
+      (fun (x : (global, binary global_type) Runtime.t Indexed.t) ->
+        match Indexed.get x with
+        | Runtime.Local { typ = _, gt; _ } -> gt
+        | Runtime.Imported { desc = _, gt; _ } -> gt )
+      (List.sort
+         (fun x y -> compare (Indexed.get_index x) (Indexed.get_index y))
+         m.global.values )
+  in
+  let result_types = snd func_ty in
+  let owi_i32 = List.assoc "i32_symbol" owi_funcs in
+  let owi_i64 = List.assoc "i64_symbol" owi_funcs in
+  let owi_f32 = List.assoc "f32_symbol" owi_funcs in
+  let owi_f64 = List.assoc "f64_symbol" owi_funcs in
+  let owi_assume = List.assoc "assume" owi_funcs in
+  let owi_assert = List.assoc "assert" owi_funcs in
+  { param_types
+  ; global_types
+  ; result_types
+  ; owi_i32
+  ; owi_i64
+  ; owi_f32
+  ; owi_f64
+  ; owi_assume
+  ; owi_assert
+  }
 
 let prop_true = I32_const (Int32.of_int 1)
 
@@ -173,22 +149,23 @@ let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
   | CustomBinOp _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b))
 
-let rec term_generate tenv term : (binary expr * binary val_type) Result.t =
+let rec term_generate tenv (term : binary term) :
+  (binary expr * binary val_type) Result.t =
   match term with
   | Int32 i32 -> Ok ([ I32_const i32 ], Num_type I32)
   | Int64 i64 -> Ok ([ I64_const i64 ], Num_type I64)
   | Float32 f32 -> Ok ([ F32_const f32 ], Num_type F32)
   | Float64 f64 -> Ok ([ F64_const f64 ], Num_type F64)
-  | ParamVar id -> (
-    match tenv#get_param_type id with
+  | ParamVar (Raw i as id) -> (
+    match List.nth_opt tenv.param_types i with
     | Some t -> Ok ([ Local_get id ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | GlobalVar id -> (
-    match tenv#get_global_type id with
+  | GlobalVar (Raw i as id) -> (
+    match List.nth_opt tenv.global_types i with
     | Some t -> Ok ([ Global_get id ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | BinderVar id -> (
-    match tenv#get_binder_type_and_index id with
+  | BinderVar (Raw _i as _id) -> (
+    match None with
     | Some (id, t) -> Ok ([ Local_get id ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
   | UnOp (u, tm1) ->
@@ -199,12 +176,12 @@ let rec term_generate tenv term : (binary expr * binary val_type) Result.t =
     let* expr2, ty2 = term_generate tenv tm2 in
     binop_generate b expr1 ty1 expr2 ty2
   | Result (Some i) -> (
-    match tenv#get_result_type i with
-    | Some t -> Ok ([ Local_get (Raw (tenv#get_param_number + i)) ], t)
+    match List.nth_opt tenv.result_types i with
+    | Some t -> Ok ([ Local_get (Raw (List.length tenv.param_types + i)) ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
   | Result None -> (
-    match tenv#get_result_type 0 with
-    | Some t -> Ok ([ Local_get (Raw tenv#get_param_number) ], t)
+    match List.nth_opt tenv.result_types 0 with
+    | Some t -> Ok ([ Local_get (Raw (List.length tenv.param_types)) ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
 
 let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
@@ -286,13 +263,18 @@ let prop_generate tenv : binary prop -> binary expr Result.t =
       let* expr1 = prop_generate_aux pr1 in
       let* expr2 = prop_generate_aux pr2 in
       binconnect_generate b expr1 expr2
-    | Binder (_b, _bt, _, _pr1) ->
-      (* TODO : quantifier checking *)
-      Ok []
+    | Binder (_b, bt, _, _pr1) -> (
+      match bt with
+      | I32 -> Ok [ Call (Raw tenv.owi_i32) ]
+      | I64 -> Ok [ Call (Raw tenv.owi_i64) ]
+      | F32 -> Ok [ Call (Raw tenv.owi_f32) ]
+      | F64 -> Ok [ Call (Raw tenv.owi_f64) ] )
+    (* TODO : quantifier checking *)
   in
   fun pr ->
     let+ expr = prop_generate_aux pr in
-    expr @ [ Call (Raw tenv#get_owi_assert) ]
+    expr @ [ Call (Raw tenv.owi_assert); Call (Raw tenv.owi_assume) ]
+(* add option *)
 
 let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   (m : modul) : modul =
@@ -426,22 +408,22 @@ let contract_generate (owi_funcs : (string * int) list) (m : modul)
   let index = List.length m.func.values in
   let id = Fmt.str "__rac_%s" old_id in
 
-  let tenv = type_env m old_type owi_funcs in
+  let tenv = build_type_env m old_type owi_funcs in
 
   let locals =
     List.mapi
       (fun i rt -> (Some Fmt.(str "__rac_res_%i" i), rt))
-      tenv#get_result_types
+      tenv.result_types
   in
   let call =
-    List.init tenv#get_param_number (fun i -> Local_get (Raw i))
+    List.init (List.length tenv.param_types) (fun i -> Local_get (Raw i))
     @ [ Call (Raw old_index) ]
-    @ List.init tenv#get_result_number (fun i ->
-          Local_set (Raw (tenv#get_param_number + i)) )
+    @ List.init (List.length tenv.result_types) (fun i ->
+          Local_set (Raw (List.length tenv.param_types + i)) )
   in
   let return =
-    List.init tenv#get_result_number (fun i ->
-        Local_get (Raw (tenv#get_param_number + i)) )
+    List.init (List.length tenv.result_types) (fun i ->
+        Local_get (Raw (List.length tenv.param_types + i)) )
   in
   let* precond_checker = list_concat_map (prop_generate tenv) preconditions in
   let+ postcond_checker = list_concat_map (prop_generate tenv) postconditions in
