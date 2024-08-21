@@ -39,6 +39,10 @@ let files =
   let f = existing_non_dir_file in
   Cmdliner.Arg.(value & pos_all f [] (info [] ~doc))
 
+let emit_files =
+  let doc = "emit (.wat) files from corresponding (.wasm) files" in
+  Cmdliner.Arg.(value & flag & info [ "o" ] ~doc)
+
 let no_exhaustion =
   let doc = "no exhaustion tests" in
   Cmdliner.Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
@@ -245,7 +249,7 @@ let wasm2wat_cmd =
     let man = [] @ shared_man in
     Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_wasm2wat.cmd $ files)
+  Cmd.v info Term.(const Cmd_wasm2wat.cmd $ files $ emit_files)
 
 let wat2wasm_cmd =
   let open Cmdliner in
