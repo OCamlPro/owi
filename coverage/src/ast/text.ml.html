@@ -449,13 +449,13 @@
 open Fmt
 open Types
 
-let symbolic v = <span data-count="16046">T</span>ext v
+let symbolic v = <span data-count="15985">T</span>ext v
 
-let raw v = <span data-count="61037">R</span>aw v
+let raw v = <span data-count="61019">R</span>aw v
 
-let bt_ind i = <span data-count="14609">B</span>t_ind i
+let bt_ind i = <span data-count="14592">B</span>t_ind i
 
-let bt_raw i t = <span data-count="16392">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="16366">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
@@ -525,14 +525,14 @@ type module_field =
   | MExport of text export
 
 let pp_module_field fmt = function
-  | <span data-count="59">M</span>Type t -&gt; pp_rec_type fmt t
+  | <span data-count="57">M</span>Type t -&gt; pp_rec_type fmt t
   | <span data-count="8">M</span>Global g -&gt; pp_global fmt g
   | <span data-count="6">M</span>Table t -&gt; pp_table fmt t
-  | <span data-count="13">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="246">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="12">M</span>Mem m -&gt; pp_mem fmt m
+  | <span data-count="239">M</span>Func f -&gt; pp_func fmt f
   | <span data-count="5">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="1">M</span>Data d -&gt; pp_data fmt d
-  | <span data-count="40">M</span>Start s -&gt; pp_start fmt s
+  | <span data-count="38">M</span>Start s -&gt; pp_start fmt s
   | <span data-count="3">M</span>Import i -&gt; pp_import fmt i
   | <span data-count="33">M</span>Export e -&gt; pp_export fmt e
 
@@ -542,8 +542,8 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="126">p</span>f fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
-    (lis<span data-count="126">t</span> ~sep:pp_newline pp_module_field)
+  <span data-count="123">p</span>f fmt "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id
+    (lis<span data-count="123">t</span> ~sep:pp_newline pp_module_field)
     m.fields
 
 type action =

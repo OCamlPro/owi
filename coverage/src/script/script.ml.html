@@ -660,7 +660,7 @@ module Stack = Stack.Make [@inlined hint] (V)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="883">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="847">e</span> ()
 
   let value i = <span data-count="65">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
@@ -793,24 +793,24 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
 let unsafe = false
 
 let run ~no_exhaustion ~optimize script =
-  <span data-count="223">l</span>et state =
+  <span data-count="222">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="223">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="222">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_value.Func.extern_func Link.state) -&gt; function
-      | <span data-count="2553">T</span>ext.Text_module m -&gt;
-        if !curr_module = 0 then <span data-count="223">L</span>og.debug_on := false;
-        <span data-count="2553">L</span>og.debug0 "*** module@\n";
-        <span data-count="2553">i</span>ncr curr_module;
-        <span data-count="2553">l</span>et+ link_state =
-          Compile.Text.until_interpre<span data-count="2552">t</span> link_state ~unsafe ~optimize ~name:None m
+      | <span data-count="2551">T</span>ext.Text_module m -&gt;
+        if !curr_module = 0 then <span data-count="222">L</span>og.debug_on := false;
+        <span data-count="2551">L</span>og.debug0 "*** module@\n";
+        <span data-count="2551">i</span>ncr curr_module;
+        <span data-count="2551">l</span>et+ link_state =
+          Compile.Text.until_interpre<span data-count="2550">t</span> link_state ~unsafe ~optimize ~name:None m
         in
-        <span data-count="2550">L</span>og.debug_on := debug_on;
+        <span data-count="2548">L</span>og.debug_on := debug_on;
         link_state
       | <span data-count="3">T</span>ext.Quoted_module m -&gt;
         Log.debug0 "*** quoted module@\n";
@@ -925,11 +925,11 @@ let run ~no_exhaustion ~optimize script =
             <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
         in
         <span data-count="30">l</span>ink_state
-      | <span data-count="270">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="223">n</span>ot !registered then <span data-count="223">L</span>og.debug_on := false;
-        <span data-count="270">L</span>og.debug0 "*** register@\n";
-        <span data-count="270">l</span>et+ state = Link.register_modul<span data-count="270">e</span> link_state ~name ~id:mod_name in
-        <span data-count="270">L</span>og.debug_on := debug_on;
+      | <span data-count="269">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="222">n</span>ot !registered then <span data-count="222">L</span>og.debug_on := false;
+        <span data-count="269">L</span>og.debug0 "*** register@\n";
+        <span data-count="269">l</span>et+ state = Link.register_modul<span data-count="269">e</span> link_state ~name ~id:mod_name in
+        <span data-count="269">L</span>og.debug_on := debug_on;
         state
       | <span data-count="312">A</span>ction a -&gt;
         Log.debug0 "*** action@\n";
@@ -938,8 +938,8 @@ let run ~no_exhaustion ~optimize script =
     state script
 
 let exec ~no_exhaustion ~optimize script =
-  <span data-count="223">l</span>et+ _link_state = ru<span data-count="222">n</span> ~no_exhaustion ~optimize script in
-  <span data-count="218">(</span>)
+  <span data-count="222">l</span>et+ _link_state = ru<span data-count="221">n</span> ~no_exhaustion ~optimize script in
+  <span data-count="217">(</span>)
 </code></pre>
       </div>
     </div>

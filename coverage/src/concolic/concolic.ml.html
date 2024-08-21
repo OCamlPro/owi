@@ -829,9 +829,9 @@ module P = struct
       in
       Choice.with_thread f
 
-    let get_func env id = <span data-count="20501">L</span>ink_env.get_func env id
+    let get_func env id = <span data-count="20497">L</span>ink_env.get_func env id
 
-    let get_extern_func env id = <span data-count="11024">L</span>ink_env.get_extern_func env id
+    let get_extern_func env id = <span data-count="11022">L</span>ink_env.get_extern_func env id
 
     let get_table env id : Table.t Choice.t =
       <span data-count="4369">l</span>et orig_table = Link_env.get_table env id in
@@ -875,22 +875,22 @@ module P = struct
       ; to_run : Types.binary Types.expr list
       }
 
-    let env (t : t) = <span data-count="1530">t</span>.env
+    let env (t : t) = <span data-count="1528">t</span>.env
 
-    let modul (t : t) = <span data-count="1302">t</span>.modul
+    let modul (t : t) = <span data-count="1301">t</span>.modul
 
-    let to_run (t : t) = <span data-count="511">t</span>.to_run
+    let to_run (t : t) = <span data-count="509">t</span>.to_run
   end
 end
 
 module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  <span data-count="164">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  <span data-count="163">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
 
-let backup (m : P.Module_to_run.t) = <span data-count="511">L</span>ink_env.backup m.env
+let backup (m : P.Module_to_run.t) = <span data-count="509">L</span>ink_env.backup m.env
 
-let recover b (m : P.Module_to_run.t) = <span data-count="511">L</span>ink_env.recover b m.env
+let recover b (m : P.Module_to_run.t) = <span data-count="509">L</span>ink_env.recover b m.env
 </code></pre>
       </div>
     </div>

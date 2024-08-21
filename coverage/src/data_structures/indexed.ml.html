@@ -82,20 +82,20 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="128279">v</span>.value
+let get v = <span data-count="128026">v</span>.value
 
-let get_index v = <span data-count="108429">v</span>.index
+let get_index v = <span data-count="108203">v</span>.index
 
-let map f v = <span data-count="5914">{</span> index = v.index; value = <span data-count="5914">f</span> v.value }
+let map f v = <span data-count="5901">{</span> index = v.index; value = <span data-count="5901">f</span> v.value }
 
-let return index value = <span data-count="71386">{</span> index; value }
+let return index value = <span data-count="71239">{</span> index; value }
 
-let has_index idx { index; _ } = <span data-count="791293">i</span>dx = index
+let has_index idx { index; _ } = <span data-count="791152">i</span>dx = index
 
 let get_at i values =
-  <span data-count="56698">m</span>atch List.find_opt (has_inde<span data-count="56698">x</span> i) values with
+  <span data-count="56665">m</span>atch List.find_opt (has_inde<span data-count="56665">x</span> i) values with
   | <span data-count="100">N</span>one -&gt; None
-  | <span data-count="56598">S</span>ome { value; _ } -&gt; Some value
+  | <span data-count="56565">S</span>ome { value; _ } -&gt; Some value
 </code></pre>
       </div>
     </div>

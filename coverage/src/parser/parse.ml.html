@@ -1463,14 +1463,14 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="2649">f</span>un buf -&gt;
-      <span data-count="1684">L</span>og.debug0 "parsing      ...@\n";
-      <span data-count="1684">l</span>et provider () =
-        <span data-count="1391081">l</span>et tok = Text_lexer.token buf in
-        <span data-count="1390667">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1390667">(</span>tok, start, stop)
+    <span data-count="2541">f</span>un buf -&gt;
+      <span data-count="1671">L</span>og.debug0 "parsing      ...@\n";
+      <span data-count="1671">l</span>et provider () =
+        <span data-count="1390068">l</span>et tok = Text_lexer.token buf in
+        <span data-count="1389654">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1389654">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="586">r</span> provider) with
+      try Ok (parse<span data-count="573">r</span> provider) with
       | <span data-count="546">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="2">T</span>ext_lexer.Illegal_escape msg -&gt; Error (`Illegal_escape msg)
       | <span data-count="396">T</span>ext_lexer.Unknown_operator msg -&gt; Error (`Lexer_unknown_operator msg)
@@ -1481,16 +1481,16 @@ struct
         <span data-count="138">E</span>rror (`Unexpected_token tok)
 
   let from_file filename =
-    <span data-count="467">l</span>et open Syntax in
+    <span data-count="454">l</span>et open Syntax in
     let* res =
-      Bos.OS.File.with_i<span data-count="467">c</span> filename
+      Bos.OS.File.with_i<span data-count="454">c</span> filename
         (fun chan () -&gt;
-          <span data-count="467">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="467">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="467">g</span> filename);
-          <span data-count="467">f</span>rom_lexbuf lb )
+          <span data-count="454">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="454">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="454">g</span> filename);
+          <span data-count="454">f</span>rom_lexbuf lb )
         ()
     in
-    <span data-count="467">r</span>es
+    <span data-count="454">r</span>es
 
   let from_string s = <span data-count="1217">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1217">g</span> s)
 
@@ -1522,16 +1522,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="576">m</span>atch Fpath.get_ext ~multi:false file with
-  | <span data-count="216">"</span>.wat" -&gt;
-    let+ m = Text.Module.from_fil<span data-count="216">e</span> file in
-    <span data-count="215">K</span>ind.Wat m
+  <span data-count="568">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="209">"</span>.wat" -&gt;
+    let+ m = Text.Module.from_fil<span data-count="209">e</span> file in
+    <span data-count="208">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="360">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="360">e</span> file in
-    <span data-count="360">K</span>ind.Wasm m
+  | <span data-count="359">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="359">e</span> file in
+    <span data-count="359">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>
