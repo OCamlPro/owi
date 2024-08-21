@@ -4,7 +4,7 @@
 
 open Syntax
 
-(* Utility function to handle writing to a file or printing to stdout *)
+(** Utility function to handle writing to a file or printing to stdout *)
 let cmd_one emitfile file =
   let ext = Fpath.get_ext file in
   let wat_file = Fpath.set_ext "wat" file in
