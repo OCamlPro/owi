@@ -4,16 +4,12 @@
 
 open Syntax
 
-let validate rac filename =
+let validate filename =
   let+ (_modul : Binary.modul) =
-<<<<<<< HEAD
     Compile.File.until_binary_validate ~unsafe:false filename
-=======
-    Compile.File.until_typecheck ~unsafe:false ~rac filename
->>>>>>> 66d816d7 (framework for rac code generation)
   in
   ()
 
-let cmd debug rac files =
+let cmd debug files =
   if debug then Log.debug_on := true;
-  list_iter (validate rac) files
+  list_iter validate files

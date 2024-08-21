@@ -17,7 +17,6 @@ val cmd :
   -> bool
   -> bool
   -> bool
-  -> bool
   -> fail_mode
   -> Fpath.t
   -> Smtml.Solver_dispatcher.solver_type
