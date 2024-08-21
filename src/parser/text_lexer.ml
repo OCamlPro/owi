@@ -13,6 +13,12 @@ exception Illegal_character of string
 
 exception Illegal_escape of string
 
+exception Unclosed_annotation
+
+exception Unclosed_comment
+
+exception Unclosed_string
+
 exception Unknown_operator of string
 
 let illegal_character buf =
@@ -111,10 +117,12 @@ let id_char =
     | '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '/' | ':'
     | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' )]
 
-let name = [%sedlex.regexp? "\"", Star (Sub (any, "\"") | "\\\""), "\""]
+let string_elem = [%sedlex.regexp? Sub (any, "\"") | "\\\""]
+
+let name = [%sedlex.regexp? "\"", Star string_elem, "\""]
 
 let operator =
-  [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':'), Star name]
+  [%sedlex.regexp? 'a' .. 'z', Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':')]
 
 let id = [%sedlex.regexp? "$", Plus id_char]
 
@@ -126,7 +134,7 @@ let bad_num = [%sedlex.regexp? num, Plus id]
 
 let annot_atom =
   [%sedlex.regexp?
-    num | Plus (id_char | name) | ',' | ';' | '[' | ']' | '{' | '}']
+    Plus id_char | num | name | ',' | ';' | '[' | ']' | '{' | '}']
 
 let keywords =
   let tbl = Hashtbl.create 512 in
@@ -481,6 +489,7 @@ let rec token buf =
     let name = String.sub name 1 (String.length name - 2) in
     let name = mk_string buf name in
     NAME name
+  | "\"", Star string_elem -> raise Unclosed_string
   | eof -> EOF
   (* | "" -> EOF *)
   | any -> unknown_operator buf
@@ -492,14 +501,14 @@ and comment buf =
   | "(;" ->
     comment buf;
     comment buf
-  | eof -> Log.err "eof in comment"
+  | eof -> raise Unclosed_comment
   | any -> comment buf
   | _ -> assert false
 
 and single_comment buf =
   match%sedlex buf with
   | newline -> ()
-  | eof -> Log.err "eof in single line comment"
+  | eof -> raise Unclosed_comment
   | any -> single_comment buf
   | _ -> assert false
 
@@ -519,7 +528,8 @@ and annot buf =
   | annot_atom ->
     let annot_atom = Utf8.lexeme buf in
     Sexp.Atom annot_atom :: annot buf
-  | eof -> Log.err "eof in annotation"
+  | "\"", Star string_elem -> raise Unclosed_string
+  | eof -> raise Unclosed_annotation
   | any -> illegal_character buf
   | _ -> illegal_character buf
 
