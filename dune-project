@@ -83,5 +83,8 @@
   (rusage :with-dev-setup)
   (tyxml :with-dev-setup)
   (yaml :with-dev-setup)
+  (lwt :with-dev-setup)
+  (cohttp :with-dev-setup)
+  (cohttp-lwt-unix :with-dev-setup)
   )
  (sites (share binc) (share libc)))
