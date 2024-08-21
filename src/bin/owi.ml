@@ -122,10 +122,6 @@ let workspace =
   Cmdliner.Arg.(
     value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
 
-let rac =
-  let doc = "runtime assertion checking mode" in
-  Cmdliner.Arg.(value & flag & info [ "rac" ] ~doc)
-
 let copts_t = Cmdliner.Term.(const [])
 
 let sdocs = Cmdliner.Manpage.s_common_options
@@ -202,6 +198,15 @@ let opt_cmd =
   in
   Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile $ outfile)
 
+let rac_cmd =
+  let open Cmdliner in
+  let info =
+    let doc = "Perform runtime assertion checking" in
+    let man = [] @ shared_man in
+    Cmd.info "rac" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info Term.(const Cmd_rac.cmd $ unsafe $ files)
+
 let run_cmd =
   let open Cmdliner in
   let info =
@@ -210,8 +215,7 @@ let run_cmd =
     Cmd.info "run" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(
-      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
+    Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
 
 let validate_cmd =
   let open Cmdliner in
@@ -220,7 +224,7 @@ let validate_cmd =
     let man = [] @ shared_man in
     Cmd.info "validate" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ rac $ files)
+  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ files)
 
 let script_cmd =
   let open Cmdliner in
@@ -231,7 +235,7 @@ let script_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_script.cmd $ profiling $ debug $ rac $ optimize $ files
+      const Cmd_script.cmd $ profiling $ debug $ optimize $ files
       $ no_exhaustion )
 
 let sym_cmd =
@@ -244,8 +248,8 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ rac
-      $ fail_mode $ workspace $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
+      $ workspace $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -257,8 +261,8 @@ let conc_cmd =
   Cmd.v info
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ rac
-      $ fail_mode $ workspace $ solver $ files )
+      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
+      $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in
@@ -300,6 +304,7 @@ let cli =
     [ c_cmd
     ; fmt_cmd
     ; opt_cmd
+    ; rac_cmd
     ; run_cmd
     ; script_cmd
     ; sym_cmd

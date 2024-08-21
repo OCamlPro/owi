@@ -5,26 +5,16 @@
 (** Utility functions to compile a module until a given step. *)
 
 module Any : sig
-<<<<<<< HEAD
   val until_binary_validate :
     unsafe:bool -> 'extern_func Kind.t -> Binary.modul Result.t
-=======
-  val until_typecheck :
-    unsafe:bool -> rac:bool -> 'extern_func Kind.t -> Binary.modul Result.t
->>>>>>> 66d816d7 (framework for rac code generation)
 
   val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> optimize:bool
-    -> 'extern_func Kind.t
-    -> Binary.modul Result.t
+    unsafe:bool -> optimize:bool -> 'extern_func Kind.t -> Binary.modul Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> 'extern_func Link.state
@@ -35,7 +25,6 @@ module Any : sig
       link state *)
   val until_interpret :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> Concrete_value.Func.extern_func Link.state
@@ -44,21 +33,15 @@ module Any : sig
 end
 
 module File : sig
-<<<<<<< HEAD
   val until_binary_validate : unsafe:bool -> Fpath.t -> Binary.modul Result.t
-=======
-  val until_typecheck :
-    unsafe:bool -> rac:bool -> Fpath.t -> Binary.modul Result.t
->>>>>>> 66d816d7 (framework for rac code generation)
 
   val until_optimize :
-    unsafe:bool -> rac:bool -> optimize:bool -> Fpath.t -> Binary.modul Result.t
+    unsafe:bool -> optimize:bool -> Fpath.t -> Binary.modul Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> 'extern_func Link.state
@@ -69,7 +52,6 @@ module File : sig
       link state *)
   val until_interpret :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> Concrete_value.Func.extern_func Link.state
@@ -82,25 +64,15 @@ module Text : sig
 
   val until_binary : unsafe:bool -> Text.modul -> Binary.modul Result.t
 
-<<<<<<< HEAD
   val until_binary_validate : unsafe:bool -> Text.modul -> Binary.modul Result.t
-=======
-  val until_typecheck :
-    unsafe:bool -> rac:bool -> Text.modul -> Binary.modul Result.t
->>>>>>> 66d816d7 (framework for rac code generation)
 
   val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> optimize:bool
-    -> Text.modul
-    -> Binary.modul Result.t
+    unsafe:bool -> optimize:bool -> Text.modul -> Binary.modul Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> 'f Link.state
@@ -111,7 +83,6 @@ module Text : sig
       link state *)
   val until_interpret :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> Concrete_value.Func.extern_func Link.state
@@ -120,26 +91,16 @@ module Text : sig
 end
 
 module Binary : sig
-<<<<<<< HEAD
   val until_binary_validate :
     unsafe:bool -> Binary.modul -> Binary.modul Result.t
-=======
-  val until_typecheck :
-    unsafe:bool -> rac:bool -> Binary.modul -> Binary.modul Result.t
->>>>>>> 66d816d7 (framework for rac code generation)
 
   val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> optimize:bool
-    -> Binary.modul
-    -> Binary.modul Result.t
+    unsafe:bool -> optimize:bool -> Binary.modul -> Binary.modul Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> 'f Link.state
@@ -150,7 +111,6 @@ module Binary : sig
       link state *)
   val until_interpret :
        unsafe:bool
-    -> rac:bool
     -> optimize:bool
     -> name:string option
     -> Concrete_value.Func.extern_func Link.state

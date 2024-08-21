@@ -141,7 +141,7 @@ let action (link_state : Concrete_value.Func.extern_func Link.state) = function
 
 let unsafe = false
 
-let run ~no_exhaustion ~rac ~optimize script =
+let run ~no_exhaustion ~optimize script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
@@ -157,8 +157,7 @@ let run ~no_exhaustion ~rac ~optimize script =
         Log.debug0 "*** module@\n";
         incr curr_module;
         let+ link_state =
-          Compile.Text.until_interpret link_state ~unsafe ~rac ~optimize
-            ~name:None m
+          Compile.Text.until_interpret link_state ~unsafe ~optimize ~name:None m
         in
         Log.debug_on := debug_on;
         link_state
@@ -167,8 +166,7 @@ let run ~no_exhaustion ~rac ~optimize script =
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
         let+ link_state =
-          Compile.Text.until_interpret link_state ~unsafe ~rac ~optimize
-            ~name:None m
+          Compile.Text.until_interpret link_state ~unsafe ~optimize ~name:None m
         in
         link_state
       | Text.Binary_module (id, m) ->
@@ -177,15 +175,15 @@ let run ~no_exhaustion ~rac ~optimize script =
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
         let+ link_state =
-          Compile.Binary.until_interpret link_state ~unsafe ~rac ~optimize
-            ~name:None m
+          Compile.Binary.until_interpret link_state ~unsafe ~optimize ~name:None
+            m
         in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.debug0 "*** assert_trap@\n";
         incr curr_module;
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~rac ~optimize ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~optimize ~name:None m
         in
         let got = Interpret.Concrete.modul link_state.envs m in
         let+ () = check_error_result expected got in
@@ -226,7 +224,7 @@ let run ~no_exhaustion ~rac ~optimize script =
       | Assert (Assert_invalid (m, expected)) ->
         Log.debug0 "*** assert_invalid@\n";
         let got =
-          Compile.Text.until_link link_state ~unsafe ~rac ~optimize ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~optimize ~name:None m
         in
         let+ () = check_error_result expected got in
         link_state
@@ -238,14 +236,14 @@ let run ~no_exhaustion ~rac ~optimize script =
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.debug0 "*** assert_unlinkable@\n";
         let got =
-          Compile.Text.until_link link_state ~unsafe ~rac ~optimize ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~optimize ~name:None m
         in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed (m, expected)) ->
         Log.debug0 "*** assert_malformed@\n";
         let got =
-          Compile.Text.until_link ~unsafe ~rac ~optimize ~name:None link_state m
+          Compile.Text.until_link ~unsafe ~optimize ~name:None link_state m
         in
         let+ () = check_error_result expected got in
         assert false
@@ -288,6 +286,6 @@ let run ~no_exhaustion ~rac ~optimize script =
         link_state )
     state script
 
-let exec ~no_exhaustion ~rac ~optimize script =
-  let+ _link_state = run ~no_exhaustion ~rac ~optimize script in
+let exec ~no_exhaustion ~optimize script =
+  let+ _link_state = run ~no_exhaustion ~optimize script in
   ()

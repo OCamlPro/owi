@@ -582,11 +582,9 @@ let add_owi_funcs (m : modul) : modul * (string * int) list =
   in
   update_func ()
 
-let generate (enabled : bool) (m : modul) : modul Result.t =
-  if not enabled then Ok m
-  else
-    let m, owi_funcs = add_owi_funcs m in
-    contracts_generate owi_funcs m
-      (List.filter_map
-         (function From_annot (Annot.Contract c) -> Some c | _ -> None)
-         m.custom )
+let generate (m : modul) : modul Result.t =
+  let m, owi_funcs = add_owi_funcs m in
+  contracts_generate owi_funcs m
+    (List.filter_map
+       (function From_annot (Annot.Contract c) -> Some c | _ -> None)
+       m.custom )
