@@ -262,13 +262,13 @@ module M :
   module Value = Symbolic_value
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="565">C</span>hoice.add_pc @@ Value.I32.to_boo<span data-count="565">l</span> i
+    <span data-count="573">C</span>hoice.add_pc @@ Value.I32.to_boo<span data-count="573">l</span> i
 
   let assume_positive_i32 (i : Value.int32) : unit Choice.t =
     <span data-count="6">C</span>hoice.add_pc @@ Value.I32.g<span data-count="6">e</span> i Value.I32.zero
 
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="96929">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96904">l</span> i
+    <span data-count="96931">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96914">l</span> i
 
   let symbol_i8 () =
     <span data-count="6">C</span>hoice.with_new_symbol (Ty_bitv 8) (fun sym -&gt;
@@ -278,7 +278,7 @@ module M :
     <span data-count="1">C</span>hoice.with_new_symbol (Ty_bitv 8) (fun sym -&gt;
         <span data-count="1">E</span>xpr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="1">l</span> sym)) )
 
-  let symbol_i32 () = <span data-count="1151">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () = <span data-count="1152">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i64 () = <span data-count="51">C</span>hoice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
@@ -289,10 +289,10 @@ module M :
   let abort () : unit Choice.t = <span data-count="2">C</span>hoice.add_pc @@ Value.Bool.cons<span data-count="2">t</span> false
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9912">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9908">c</span> m ~ptr:base ~size
+    <span data-count="9916">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9915">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : unit Choice.t =
-    <span data-count="2543">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2543">e</span> m ptr
+    <span data-count="2537">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2536">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
 end

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_utils.ml &mdash; Coverage report</title>
-    <meta name="description" content="76.47% coverage in src/cmd/cmd_utils.ml">
+    <meta name="description" content="77.78% coverage in src/cmd/cmd_utils.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,19 +15,19 @@
           <span class="dirname">src/cmd/</span>cmd_utils.ml
         </a>
       </h1>
-      <h2>76.47%</h2>
+      <h2>77.78%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:41.67%"></span>
-      <span class="unvisited" style="top:44.79%"></span>
-      <span class="unvisited" style="bottom:47.92%"></span>
-      <span class="some-visited" style="bottom:44.79%"></span>
-      <span class="unvisited" style="bottom:40.62%"></span>
-      <span class="unvisited" style="bottom:39.58%"></span>
-      <span class="unvisited" style="bottom:38.54%"></span>
-      <span class="unvisited" style="bottom:37.50%"></span>
-      <span class="unvisited" style="bottom:36.46%"></span>
-      <span class="unvisited" style="bottom:33.33%"></span>
+      <span class="some-visited" style="top:43.48%"></span>
+      <span class="unvisited" style="top:46.74%"></span>
+      <span class="unvisited" style="bottom:45.65%"></span>
+      <span class="some-visited" style="bottom:41.30%"></span>
+      <span class="unvisited" style="bottom:36.96%"></span>
+      <span class="unvisited" style="bottom:35.87%"></span>
+      <span class="unvisited" style="bottom:34.78%"></span>
+      <span class="unvisited" style="bottom:33.70%"></span>
+      <span class="unvisited" style="bottom:32.61%"></span>
+      <span class="unvisited" style="bottom:29.35%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -80,34 +80,34 @@
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="unvisited"> </span>
-<a id="L51"></a><span class="visited"> </span>
-<a id="L52"></a><span > </span>
-<a id="L53"></a><span class="some-visited"> </span>
-<a id="L54"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="some-visited"> </span>
 <a id="L55"></a><span > </span>
-<a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="unvisited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span class="unvisited"> </span>
 <a id="L59"></a><span class="unvisited"> </span>
 <a id="L60"></a><span class="unvisited"> </span>
 <a id="L61"></a><span class="unvisited"> </span>
-<a id="L62"></a><span > </span>
+<a id="L62"></a><span class="unvisited"> </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="unvisited"> </span>
-<a id="L65"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
 <a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span class="visited"> </span>
-<a id="L72"></a><span > </span>
-<a id="L73"></a><span class="visited"> </span>
-<a id="L74"></a><span > </span>
-<a id="L75"></a><span class="visited"> </span>
-<a id="L76"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span > </span>
@@ -123,11 +123,7 @@
 <a id="L89"></a><span > </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span class="visited"> </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span > </span>
-<a id="L94"></a><span > </span>
-<a id="L95"></a><span > </span>
-<a id="L96"></a><span > </span>
+<a id="L92"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -224,10 +220,6 @@
 <a href="#L90">90</a>
 <a href="#L91">91</a>
 <a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
-<a href="#L95">95</a>
-<a href="#L96">96</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -236,34 +228,34 @@
 open Syntax
 
 let out_testcase ~dst testcase =
-  <span data-count="88">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="88">l</span>et tag atts name = <span data-count="202">(</span>("", name), atts) in
+  <span data-count="90">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="90">l</span>et tag atts name = <span data-count="206">(</span>("", name), atts) in
   let atts = [ (("", "coversError"), "true") ] in
-  let to_string v = <span data-count="114">F</span>mt.str "%a" Smtml.Value.pp v in
-  let input v = <span data-count="114">`</span>El (ta<span data-count="114">g</span> [] "input", [ `Data (to_strin<span data-count="114">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="88">g</span> atts "testcase", List.ma<span data-count="88">p</span> input testcase) in
+  let to_string v = <span data-count="116">F</span>mt.str "%a" Smtml.Value.pp v in
+  let input v = <span data-count="116">`</span>El (ta<span data-count="116">g</span> [] "input", [ `Data (to_strin<span data-count="116">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="90">g</span> atts "testcase", List.ma<span data-count="90">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="88">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="90">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir testcase -&gt;
-    <span data-count="88">i</span>ncr cnt;
-    <span data-count="88">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="88">l</span>et path = Fpath.append dir name in
-    <span data-count="88">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="88">c</span> path
-        (fun chan () -&gt; <span data-count="88">O</span>k (out_testcas<span data-count="88">e</span> ~dst:(`Channel chan) testcase))
+    <span data-count="90">i</span>ncr cnt;
+    <span data-count="90">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="90">l</span>et path = Fpath.append dir name in
+    <span data-count="90">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="90">c</span> path
+        (fun chan () -&gt; <span data-count="90">O</span>k (out_testcas<span data-count="90">e</span> ~dst:(`Channel chan) testcase))
         ()
     in
-    <span data-count="88">r</span>es
+    <span data-count="90">r</span>es
 
 let add_main_as_start (m : Binary.modul) =
   (* We are checking if there's a start function *)
-  <span data-count="520">i</span>f Option.is_some m.start then <span data-count="169">O</span>k m
+  <span data-count="522">i</span>f Option.is_some m.start then <span data-count="171">O</span>k m
   else
     (* If there is none, we look for a function exported with the name `main` *)
     <span data-count="351">m</span>atch
@@ -274,13 +266,14 @@ let add_main_as_start (m : Binary.modul) =
     | <span data-count="0">N</span>one -&gt;
       (* TODO: fail/display a warning saying nothing will be done ? *)
       Ok m
-    | <span data-count="351">S</span>ome export -&gt; (
+    | <span data-count="351">S</span>ome export -&gt;
       (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
       let main_id = export.id in
-      match Indexed.get_at main_id m.func.values with
-      | <span data-count="0">N</span>one -&gt; Error (`Msg "can't find a main function")
-      | <span data-count="351">S</span>ome main_function -&gt;
-        let (Bt_raw main_type) =
+      if main_id &gt;= Array.lengt<span data-count="351">h</span> m.func then
+        <span data-count="0">E</span>rror (`Msg "can't find a main function")
+      else
+        <span data-count="351">l</span>et main_function = m.func.(main_id) in
+        <span data-count="351">l</span>et (Bt_raw main_type) =
           match main_function with <span data-count="351">L</span>ocal f -&gt; f.type_f | <span data-count="0">I</span>mported i -&gt; i.desc
         in
         let default_value_of_t = function
@@ -310,21 +303,16 @@ let add_main_as_start (m : Binary.modul) =
           { Types.type_f; locals = []; body; id = None }
         in
         let start_func = Runtime.Local start_code in
-        let named = m.func.named in
+
         (* We need to add the new start function to the funcs of the module at the next free index *)
-        let next_free_index =
-          List.fold_left
-            (fun next_free_index v -&gt;
-              <span data-count="6013">l</span>et index = Indexed.get_index v in
-              <span data-count="6013">i</span>f next_free_index &gt; index then <span data-count="2">n</span>ext_free_index else <span data-count="6011">i</span>ndex + 1 )
-            0 m.func.values
+        let func =
+          Array.init
+            (Array.lengt<span data-count="351">h</span> m.func + 1)
+            (fun i -&gt; <span data-count="6364">i</span>f i = Array.lengt<span data-count="6364">h</span> m.func then <span data-count="351">s</span>tart_func else <span data-count="6013">m</span>.func.(i))
         in
-        <span data-count="351">l</span>et values =
-          Indexed.retur<span data-count="351">n</span> next_free_index start_func :: m.func.values
-        in
-        let func = { Named.named; values } in
-        let start = Some next_free_index in
-        { m with func; start } )
+
+        <span data-count="351">l</span>et start = Some (Array.lengt<span data-count="351">h</span> m.func) in
+        { m with func; start }
 </code></pre>
       </div>
     </div>

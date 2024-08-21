@@ -173,8 +173,8 @@ type ('get, 'write) t =
   }
 
 let init getter writter =
-  <span data-count="716">{</span> mutex = Mutex.creat<span data-count="716">e</span> ()
-  ; cond = Condition.creat<span data-count="716">e</span> ()
+  <span data-count="718">{</span> mutex = Mutex.creat<span data-count="718">e</span> ()
+  ; cond = Condition.creat<span data-count="718">e</span> ()
   ; getter
   ; writter
   ; pledges = 0
@@ -182,33 +182,33 @@ let init getter writter =
   }
 
 let get synchro pledge =
-  <span data-count="44998">l</span>et rec inner_loop synchro pledge =
-    <span data-count="46067">m</span>atch synchro.getter () with
-    | <span data-count="2086">N</span>one when synchro.pledges = <span data-count="1011">0</span> || synchro.close<span data-count="0">d</span> -&gt;
-      <span data-count="1011">C</span>ondition.broadcast synchro.cond;
-      <span data-count="1011">N</span>one
-    | <span data-count="1077">N</span>one -&gt;
+  <span data-count="44877">l</span>et rec inner_loop synchro pledge =
+    <span data-count="46048">m</span>atch synchro.getter () with
+    | <span data-count="2188">N</span>one when synchro.pledges = <span data-count="1014">0</span> || synchro.close<span data-count="0">d</span> -&gt;
+      <span data-count="1014">C</span>ondition.broadcast synchro.cond;
+      <span data-count="1014">N</span>one
+    | <span data-count="1174">N</span>one -&gt;
       Condition.wait synchro.cond synchro.mutex;
-      <span data-count="1069">i</span>nner_loop synchro pledge
-    | <span data-count="43979">S</span>ome _ as v -&gt;
-      if pledge then <span data-count="43788">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
-      <span data-count="43979">v</span>
+      <span data-count="1169">i</span>nner_loop synchro pledge
+    | <span data-count="43860">S</span>ome _ as v -&gt;
+      if pledge then <span data-count="43668">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
+      <span data-count="43860">v</span>
   in
-  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="44998">i</span>nner_loop synchro pledge)
+  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="44879">i</span>nner_loop synchro pledge)
 
 let write v { writter; cond; mutex; _ } =
-  <span data-count="43998">M</span>utex.protect mutex (fun () -&gt; <span data-count="44007">w</span>ritter v cond)
+  <span data-count="43885">M</span>utex.protect mutex (fun () -&gt; <span data-count="43892">w</span>ritter v cond)
 
 let make_pledge synchro =
-  <span data-count="709">M</span>utex.lock synchro.mutex;
-  <span data-count="709">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
+  <span data-count="710">M</span>utex.lock synchro.mutex;
+  <span data-count="710">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
   Mutex.unlock synchro.mutex
 
 let end_pledge synchro =
-  <span data-count="44442">M</span>utex.lock synchro.mutex;
-  <span data-count="44440">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
+  <span data-count="44326">M</span>utex.lock synchro.mutex;
+  <span data-count="44326">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
   Condition.broadcast synchro.cond;
-  <span data-count="44440">M</span>utex.unlock synchro.mutex
+  <span data-count="44326">M</span>utex.unlock synchro.mutex
 
 let fail q =
   <span data-count="0">M</span>utex.lock q.mutex;
@@ -217,12 +217,12 @@ let fail q =
   <span data-count="0">M</span>utex.unlock q.mutex
 
 let rec work_while f q =
-  <span data-count="44471">m</span>atch get q true with
-  | <span data-count="675">N</span>one -&gt; ()
-  | <span data-count="43788">S</span>ome v -&gt;
-    let () = f v (fun v -&gt; <span data-count="43452">w</span>rite v q) in
-    <span data-count="43767">e</span>nd_pledge q;
-    <span data-count="43767">w</span>ork_while f q
+  <span data-count="44351">m</span>atch get q true with
+  | <span data-count="678">N</span>one -&gt; ()
+  | <span data-count="43669">S</span>ome v -&gt;
+    let () = f v (fun v -&gt; <span data-count="43336">w</span>rite v q) in
+    <span data-count="43648">e</span>nd_pledge q;
+    <span data-count="43648">w</span>ork_while f q
 </code></pre>
       </div>
     </div>

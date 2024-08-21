@@ -86,18 +86,18 @@ let debug_on = ref false
 let profiling_on = ref false
 
 let debug0 t : unit =
-  <span data-count="99093">i</span>f !debug_on then <span data-count="19">b</span>egin
+  <span data-count="99202">i</span>f !debug_on then <span data-count="37">b</span>egin
     Fmt.epr t;
-    <span data-count="19">F</span>mt.flush Fmt.stderr ()
+    <span data-count="37">F</span>mt.flush Fmt.stderr ()
   end
 
-let debug1 t a : unit = <span data-count="12027349">i</span>f !debug_on then <span data-count="7">F</span>mt.epr t a
+let debug1 t a : unit = <span data-count="12027348">i</span>f !debug_on then <span data-count="10">F</span>mt.epr t a
 
-let debug2 t a b : unit = <span data-count="244892879">i</span>f !debug_on then <span data-count="134">F</span>mt.epr t a b
+let debug2 t a b : unit = <span data-count="244886445">i</span>f !debug_on then <span data-count="170">F</span>mt.epr t a b
 
 let debug5 t a b c d e : unit = <span data-count="48130">i</span>f !debug_on then <span data-count="0">F</span>mt.epr t a b c d e
 
-let profile3 t a b c : unit = <span data-count="4322">i</span>f !profiling_on then <span data-count="0">F</span>mt.epr t a b c
+let profile3 t a b c : unit = <span data-count="4232">i</span>f !profiling_on then <span data-count="0">F</span>mt.epr t a b c
 
 (* TODO: remove this *)
 let err f = <span data-count="50">F</span>mt.failwith f

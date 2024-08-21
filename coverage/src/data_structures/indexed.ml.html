@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>indexed.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/data_structures/indexed.ml">
+    <meta name="description" content="80.00% coverage in src/data_structures/indexed.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,10 @@
           <span class="dirname">src/data_structures/</span>indexed.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>80.00%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:39.13%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -35,7 +36,7 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L14"></a><span class="unvisited"> </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
@@ -82,20 +83,20 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="128026">v</span>.value
+let get v = <span data-count="93815">v</span>.value
 
-let get_index v = <span data-count="108203">v</span>.index
+let get_index v = <span data-count="79189">v</span>.index
 
-let map f v = <span data-count="5901">{</span> index = v.index; value = <span data-count="5901">f</span> v.value }
+let map f v = <span data-count="0">{</span> index = v.index; value = <span data-count="0">f</span> v.value }
 
-let return index value = <span data-count="71239">{</span> index; value }
+let return index value = <span data-count="61003">{</span> index; value }
 
-let has_index idx { index; _ } = <span data-count="791152">i</span>dx = index
+let has_index idx { index; _ } = <span data-count="50">i</span>dx = index
 
 let get_at i values =
-  <span data-count="56665">m</span>atch List.find_opt (has_inde<span data-count="56665">x</span> i) values with
-  | <span data-count="100">N</span>one -&gt; None
-  | <span data-count="56565">S</span>ome { value; _ } -&gt; Some value
+  <span data-count="20">m</span>atch List.find_opt (has_inde<span data-count="20">x</span> i) values with
+  | <span data-count="2">N</span>one -&gt; None
+  | <span data-count="18">S</span>ome { value; _ } -&gt; Some value
 </code></pre>
       </div>
     </div>

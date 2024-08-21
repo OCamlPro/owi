@@ -457,7 +457,7 @@ type opt_exports =
   }
 
 let curr_id (curr : int) (i : text indice option) =
-  <span data-count="11936">m</span>atch i with <span data-count="7239">N</span>one -&gt; Curr (pre<span data-count="7239">d</span> curr) | <span data-count="4697">S</span>ome id -&gt; Indice id
+  <span data-count="11953">m</span>atch i with <span data-count="7239">N</span>one -&gt; Curr (pre<span data-count="7239">d</span> curr) | <span data-count="4714">S</span>ome id -&gt; Indice id
 
 type t =
   { id : string option
@@ -479,10 +479,10 @@ type t =
   }
 
 let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
-  <span data-count="3572">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+  <span data-count="3592">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="6166">{</span> id
+  <span data-count="6179">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -508,24 +508,24 @@ type curr =
 let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
 
 let add_global value (fields : t) (curr : curr) =
-  <span data-count="1431">l</span>et index = curr.global in
-  ( { fields with global = Indexed.retur<span data-count="1431">n</span> index value :: fields.global }
-  , { curr with global = suc<span data-count="1431">c</span> curr.global } )
+  <span data-count="1435">l</span>et index = curr.global in
+  ( { fields with global = Indexed.retur<span data-count="1435">n</span> index value :: fields.global }
+  , { curr with global = suc<span data-count="1435">c</span> curr.global } )
 
 let add_table value (fields : t) (curr : curr) =
-  <span data-count="1378">l</span>et index = curr.table in
-  ( { fields with table = Indexed.retur<span data-count="1378">n</span> index value :: fields.table }
-  , { curr with table = suc<span data-count="1378">c</span> curr.table } )
+  <span data-count="1379">l</span>et index = curr.table in
+  ( { fields with table = Indexed.retur<span data-count="1379">n</span> index value :: fields.table }
+  , { curr with table = suc<span data-count="1379">c</span> curr.table } )
 
 let add_mem value (fields : t) (curr : curr) =
-  <span data-count="1589">l</span>et index = curr.mem in
-  ( { fields with mem = Indexed.retur<span data-count="1589">n</span> index value :: fields.mem }
-  , { curr with mem = suc<span data-count="1589">c</span> curr.mem } )
+  <span data-count="1591">l</span>et index = curr.mem in
+  ( { fields with mem = Indexed.retur<span data-count="1591">n</span> index value :: fields.mem }
+  , { curr with mem = suc<span data-count="1591">c</span> curr.mem } )
 
 let add_func value (fields : t) (curr : curr) =
-  <span data-count="3098">l</span>et index = curr.func in
-  ( { fields with func = Indexed.retur<span data-count="3098">n</span> index value :: fields.func }
-  , { curr with func = suc<span data-count="3098">c</span> curr.func } )
+  <span data-count="3118">l</span>et index = curr.func in
+  ( { fields with func = Indexed.retur<span data-count="3118">n</span> index value :: fields.func }
+  , { curr with func = suc<span data-count="3118">c</span> curr.func } )
 
 let add_elem value (fields : t) (curr : curr) =
   <span data-count="1675">l</span>et index = curr.elem in
@@ -538,73 +538,73 @@ let add_data value (fields : t) (curr : curr) =
   , { curr with data = suc<span data-count="948">c</span> curr.data } )
 
 let declare_func_type type_f (fields : t) =
-  <span data-count="16029">m</span>atch type_f with
+  <span data-count="16065">m</span>atch type_f with
   | <span data-count="290">B</span>t_ind _ -&gt; fields
-  | <span data-count="15739">B</span>t_raw (id, typ) -&gt;
+  | <span data-count="15775">B</span>t_raw (id, typ) -&gt;
     let type_checks =
       match id with
-      | <span data-count="15719">N</span>one -&gt; fields.type_checks
+      | <span data-count="15755">N</span>one -&gt; fields.type_checks
       | <span data-count="20">S</span>ome id -&gt; (id, typ) :: fields.type_checks
     in
     { fields with function_type = typ :: fields.function_type; type_checks }
 
 let of_symbolic (modul : Text.modul) : t Result.t =
-  <span data-count="6166">L</span>og.debug0 "grouping     ...@\n";
-  <span data-count="6166">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
-    <span data-count="35806">m</span>atch field with
+  <span data-count="6179">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="6179">l</span>et add ((fields : t), curr) field : (t * curr) Result.t =
+    <span data-count="35878">m</span>atch field with
     | <span data-count="577">T</span>ext.MType typ -&gt;
       let typ = typ @ fields.typ in
       Ok ({ fields with typ }, curr)
-    | <span data-count="1234">M</span>Global global -&gt; ok @@ add_globa<span data-count="1234">l</span> (Local global) fields curr
+    | <span data-count="1238">M</span>Global global -&gt; ok @@ add_globa<span data-count="1238">l</span> (Local global) fields curr
     | <span data-count="197">M</span>Import ({ desc = Import_global (a, (mut, val_type)); _ } as import) -&gt;
       let+ val_type = Binary_types.convert_val_typ<span data-count="197">e</span> None val_type in
       <span data-count="197">l</span>et b = (mut, val_type) in
       let imported = imp import (a, b) in
       <span data-count="197">a</span>dd_global (Imported imported) fields curr
-    | <span data-count="975">M</span>Export { name; desc = Export_global id } -&gt;
+    | <span data-count="979">M</span>Export { name; desc = Export_global id } -&gt;
       let id = curr_id curr.global id in
-      <span data-count="975">l</span>et exports =
+      <span data-count="979">l</span>et exports =
         { fields.exports with global = { name; id } :: fields.exports.global }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="1227">M</span>Table table -&gt;
+    | <span data-count="1228">M</span>Table table -&gt;
       let id, table_type = table in
-      let+ table_type = Binary_types.convert_table_typ<span data-count="1227">e</span> None table_type in
-      <span data-count="1227">l</span>et table = (id, table_type) in
+      let+ table_type = Binary_types.convert_table_typ<span data-count="1228">e</span> None table_type in
+      <span data-count="1228">l</span>et table = (id, table_type) in
       add_table (Local table) fields curr
     | <span data-count="151">M</span>Import ({ desc = Import_table (id, table_type); _ } as import) -&gt;
       let+ table_type = Binary_types.convert_table_typ<span data-count="151">e</span> None table_type in
       <span data-count="151">l</span>et imported = imp import (id, table_type) in
       <span data-count="151">a</span>dd_table (Imported imported) fields curr
-    | <span data-count="301">M</span>Export { name; desc = Export_table id } -&gt;
+    | <span data-count="302">M</span>Export { name; desc = Export_table id } -&gt;
       let id = curr_id curr.table id in
-      <span data-count="301">l</span>et exports =
+      <span data-count="302">l</span>et exports =
         { fields.exports with table = { name; id } :: fields.exports.table }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="1463">M</span>Mem mem -&gt; ok @@ add_me<span data-count="1463">m</span> (Local mem) fields curr
+    | <span data-count="1465">M</span>Mem mem -&gt; ok @@ add_me<span data-count="1465">m</span> (Local mem) fields curr
     | <span data-count="126">M</span>Import ({ desc = Import_mem (id, limits); _ } as import) -&gt;
       let imported = imp import (id, limits) in
       <span data-count="126">o</span>k @@ add_me<span data-count="126">m</span> (Imported imported) fields curr
-    | <span data-count="331">M</span>Export { name; desc = Export_mem id } -&gt;
+    | <span data-count="332">M</span>Export { name; desc = Export_mem id } -&gt;
       let id = curr_id curr.mem id in
-      <span data-count="331">l</span>et exports =
+      <span data-count="332">l</span>et exports =
         { fields.exports with mem = { name; id } :: fields.exports.mem }
       in
       Ok ({ fields with exports }, curr)
-    | <span data-count="12931">M</span>Func func -&gt;
+    | <span data-count="12947">M</span>Func func -&gt;
       let fields = declare_func_type func.type_f fields in
-      <span data-count="12931">l</span>et index = curr.func in
+      <span data-count="12947">l</span>et index = curr.func in
       let value = Runtime.Local func in
-      let func = Indexed.retur<span data-count="12931">n</span> index value :: fields.func in
-      Ok ({ fields with func }, { curr with func = suc<span data-count="12931">c</span> curr.func })
-    | <span data-count="3098">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
-      let imported : text block_type Imported.t = im<span data-count="3098">p</span> import (a, type_f) in
+      let func = Indexed.retur<span data-count="12947">n</span> index value :: fields.func in
+      Ok ({ fields with func }, { curr with func = suc<span data-count="12947">c</span> curr.func })
+    | <span data-count="3118">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
+      let imported : text block_type Imported.t = im<span data-count="3118">p</span> import (a, type_f) in
       let fields = declare_func_type type_f fields in
-      <span data-count="3098">o</span>k @@ add_fun<span data-count="3098">c</span> (Imported imported) fields curr
-    | <span data-count="10329">M</span>Export { name; desc = Export_func id } -&gt;
+      <span data-count="3118">o</span>k @@ add_fun<span data-count="3118">c</span> (Imported imported) fields curr
+    | <span data-count="10340">M</span>Export { name; desc = Export_func id } -&gt;
       let id = curr_id curr.func id in
-      <span data-count="10329">l</span>et exports =
+      <span data-count="10340">l</span>et exports =
         { fields.exports with func = { name; id } :: fields.exports.func }
       in
       Ok ({ fields with exports }, curr)
@@ -627,12 +627,12 @@ let of_symbolic (modul : Text.modul) : t Result.t =
       in
       let data : Text.data = { id = data.id; init = data.init; mode } in
       ok @@ add_dat<span data-count="948">a</span> data fields curr
-    | <span data-count="243">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
+    | <span data-count="255">M</span>Start start -&gt; Ok ({ fields with start = Some start }, curr)
   in
   let+ modul, _curr =
-    list_fold_lef<span data-count="6166">t</span> add (empty_modul<span data-count="6166">e</span> modul.id, init_curr) modul.fields
+    list_fold_lef<span data-count="6179">t</span> add (empty_modul<span data-count="6179">e</span> modul.id, init_curr) modul.fields
   in
-  <span data-count="6166">m</span>odul
+  <span data-count="6179">m</span>odul
 </code></pre>
       </div>
     </div>
