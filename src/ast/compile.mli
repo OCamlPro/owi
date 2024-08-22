@@ -5,7 +5,7 @@
 (** Utility functions to compile a module until a given step. *)
 
 module Any : sig
-  val until_typecheck :
+  val until_binary_validate :
     unsafe:bool -> 'extern_func Kind.t -> Binary.modul Result.t
 
   val until_optimize :
@@ -33,7 +33,7 @@ module Any : sig
 end
 
 module File : sig
-  val until_typecheck : unsafe:bool -> Fpath.t -> Binary.modul Result.t
+  val until_binary_validate : unsafe:bool -> Fpath.t -> Binary.modul Result.t
 
   val until_optimize :
     unsafe:bool -> optimize:bool -> Fpath.t -> Binary.modul Result.t
@@ -60,11 +60,11 @@ module File : sig
 end
 
 module Text : sig
-  val until_check : unsafe:bool -> Text.modul -> Text.modul Result.t
+  val until_text_validate : unsafe:bool -> Text.modul -> Text.modul Result.t
 
   val until_binary : unsafe:bool -> Text.modul -> Binary.modul Result.t
 
-  val until_typecheck : unsafe:bool -> Text.modul -> Binary.modul Result.t
+  val until_binary_validate : unsafe:bool -> Text.modul -> Binary.modul Result.t
 
   val until_optimize :
     unsafe:bool -> optimize:bool -> Text.modul -> Binary.modul Result.t
@@ -91,7 +91,8 @@ module Text : sig
 end
 
 module Binary : sig
-  val until_typecheck : unsafe:bool -> Binary.modul -> Binary.modul Result.t
+  val until_binary_validate :
+    unsafe:bool -> Binary.modul -> Binary.modul Result.t
 
   val until_optimize :
     unsafe:bool -> optimize:bool -> Binary.modul -> Binary.modul Result.t

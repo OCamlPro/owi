@@ -30,7 +30,7 @@ let link_state =
        Symbolic_wasm_ffi.summaries_extern_module )
 
 let run_file ~unsafe ~optimize pc filename =
-  let*/ m = Compile.File.until_typecheck ~unsafe filename in
+  let*/ m = Compile.File.until_binary_validate ~unsafe filename in
   let*/ m = Cmd_utils.add_main_as_start m in
   let link_state = Lazy.force link_state in
 

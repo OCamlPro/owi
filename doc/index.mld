@@ -13,7 +13,7 @@ Here you will only find the API documentation which is written towards people us
 {!modules:
 Owi.Binary
 Owi.Binary_to_text
-Owi.Check
+Owi.Binary_validate
 Owi.Cmd_c
 Owi.Cmd_conc
 Owi.Cmd_fmt
@@ -32,7 +32,7 @@ Owi.Parse
 Owi.Result
 Owi.Script
 Owi.Text
-Owi.Typecheck
+Owi.Text_validate
 Owi.Types
 }
 

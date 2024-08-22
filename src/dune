@@ -5,12 +5,12 @@
  (modules
   assigned
   binary
+  binary_encoder
   binary_parser
   binary_to_text
   binary_types
-  binary_encoder
+  binary_validate
   c_share_site
-  check
   choice_intf
   cmd_utils
   cmd_c
@@ -81,13 +81,13 @@
   text
   text_lexer
   text_parser
+  text_validate
   thread
   thread_intf
   thread_with_memory
   thread_without_memory
   tracing
   trap
-  typecheck
   types
   value_intf
   v
