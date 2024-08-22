@@ -5,10 +5,11 @@
 open Syntax
 
 module Text = struct
-  let until_check ~unsafe m = if unsafe then Ok m else Check.modul m
+  let until_text_validate ~unsafe m =
+    if unsafe then Ok m else Text_validate.modul m
 
   let until_group ~unsafe m =
-    let* m = until_check ~unsafe m in
+    let* m = until_text_validate ~unsafe m in
     Grouped.of_symbolic m
 
   let until_assign ~unsafe m =
@@ -19,15 +20,15 @@ module Text = struct
     let* m = until_assign ~unsafe m in
     Rewrite.modul m
 
-  let until_typecheck ~unsafe m =
+  let until_binary_validate ~unsafe m =
     let* m = until_binary ~unsafe m in
     if unsafe then Ok m
     else
-      let+ () = Typecheck.modul m in
+      let+ () = Binary_validate.modul m in
       m
 
   let until_optimize ~unsafe ~optimize m =
-    let+ m = until_typecheck ~unsafe m in
+    let+ m = until_binary_validate ~unsafe m in
     if optimize then Optimize.modul m else m
 
   let until_link ~unsafe ~optimize ~name link_state m =
@@ -41,14 +42,14 @@ module Text = struct
 end
 
 module Binary = struct
-  let until_typecheck ~unsafe m =
+  let until_binary_validate ~unsafe m =
     if unsafe then Ok m
     else
-      let+ () = Typecheck.modul m in
+      let+ () = Binary_validate.modul m in
       m
 
   let until_optimize ~unsafe ~optimize m =
-    let+ m = until_typecheck ~unsafe m in
+    let+ m = until_binary_validate ~unsafe m in
     if optimize then Optimize.modul m else m
 
   let until_link ~unsafe ~optimize ~name link_state m =
@@ -62,9 +63,9 @@ module Binary = struct
 end
 
 module Any = struct
-  let until_typecheck ~unsafe = function
-    | Kind.Wat m -> Text.until_typecheck ~unsafe m
-    | Wasm m -> Binary.until_typecheck ~unsafe m
+  let until_binary_validate ~unsafe = function
+    | Kind.Wat m -> Text.until_binary_validate ~unsafe m
+    | Wasm m -> Binary.until_binary_validate ~unsafe m
     | Wast _ | Ocaml _ -> assert false
 
   let until_optimize ~unsafe ~optimize = function
@@ -84,11 +85,11 @@ module Any = struct
 end
 
 module File = struct
-  let until_typecheck ~unsafe filename =
+  let until_binary_validate ~unsafe filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_typecheck ~unsafe m
-    | Wasm m -> Binary.until_typecheck ~unsafe m
+    | Kind.Wat m -> Text.until_binary_validate ~unsafe m
+    | Wasm m -> Binary.until_binary_validate ~unsafe m
     | Wast _ | Ocaml _ -> assert false
 
   let until_optimize ~unsafe ~optimize filename =

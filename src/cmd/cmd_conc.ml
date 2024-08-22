@@ -19,7 +19,7 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
 let simplify_then_link ~unsafe ~optimize link_state m =
   let* m =
     match m with
-    | Kind.Wat _ | Wasm _ -> Compile.Any.until_typecheck ~unsafe m
+    | Kind.Wat _ | Wasm _ -> Compile.Any.until_binary_validate ~unsafe m
     | Wast _ -> Error (`Msg "can't run concolic interpreter on a script")
     | Ocaml _ -> assert false
   in

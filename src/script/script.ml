@@ -213,7 +213,7 @@ let run ~no_exhaustion ~optimize script =
           match got with
           | Error got -> check_error ~expected ~got
           | Ok m -> begin
-            match Typecheck.modul m with
+            match Binary_validate.modul m with
             | Error got -> check_error ~expected ~got
             | Ok () ->
               let got = Link.modul link_state ~name:None m in

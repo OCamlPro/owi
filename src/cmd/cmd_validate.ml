@@ -6,7 +6,7 @@ open Syntax
 
 let validate filename =
   let+ (_modul : Binary.modul) =
-    Compile.File.until_typecheck ~unsafe:false filename
+    Compile.File.until_binary_validate ~unsafe:false filename
   in
   ()
 
