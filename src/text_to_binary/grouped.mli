@@ -4,13 +4,9 @@
 
 open Types
 
-type opt_ind =
-  | Curr of int
-  | Indice of text indice
-
 type opt_export =
   { name : string
-  ; id : opt_ind
+  ; id : text indice
   }
 
 type opt_exports =
