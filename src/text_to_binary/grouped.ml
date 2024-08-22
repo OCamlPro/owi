@@ -19,8 +19,8 @@ type opt_exports =
   ; func : opt_export list
   }
 
-let curr_id (curr : int) (i : text indice option) =
-  match i with None -> Raw (pred curr) | Some id -> id
+let curr_id (curr : int ref) (i : text indice option) =
+  match i with None -> Raw (pred !curr) | Some id -> id
 
 type t =
   { id : string option
@@ -60,45 +60,22 @@ let empty_module id =
   }
 
 type curr =
-  { global : int
-  ; table : int
-  ; mem : int
-  ; func : int
-  ; elem : int
-  ; data : int
+  { global : int ref
+  ; table : int ref
+  ; mem : int ref
+  ; func : int ref
+  ; elem : int ref
+  ; data : int ref
   }
 
-let init_curr = { global = 0; table = 0; mem = 0; func = 0; elem = 0; data = 0 }
-
-let add_global value (fields : t) (curr : curr) =
-  let index = curr.global in
-  ( { fields with global = Indexed.return index value :: fields.global }
-  , { curr with global = succ curr.global } )
-
-let add_table value (fields : t) (curr : curr) =
-  let index = curr.table in
-  ( { fields with table = Indexed.return index value :: fields.table }
-  , { curr with table = succ curr.table } )
-
-let add_mem value (fields : t) (curr : curr) =
-  let index = curr.mem in
-  ( { fields with mem = Indexed.return index value :: fields.mem }
-  , { curr with mem = succ curr.mem } )
-
-let add_func value (fields : t) (curr : curr) =
-  let index = curr.func in
-  ( { fields with func = Indexed.return index value :: fields.func }
-  , { curr with func = succ curr.func } )
-
-let add_elem value (fields : t) (curr : curr) =
-  let index = curr.elem in
-  ( { fields with elem = Indexed.return index value :: fields.elem }
-  , { curr with elem = succ curr.elem } )
-
-let add_data value (fields : t) (curr : curr) =
-  let index = curr.data in
-  ( { fields with data = Indexed.return index value :: fields.data }
-  , { curr with data = succ curr.data } )
+let init_curr () =
+  { global = ref 0
+  ; table = ref 0
+  ; mem = ref 0
+  ; func = ref 0
+  ; elem = ref 0
+  ; data = ref 0
+  }
 
 let declare_func_type type_f (fields : t) =
   match type_f with
@@ -111,88 +88,114 @@ let declare_func_type type_f (fields : t) =
     in
     { fields with function_type = typ :: fields.function_type; type_checks }
 
-let of_symbolic (modul : Text.modul) : t Result.t =
+let add_global value (fields : t) (curr : curr) =
+  let index = !(curr.global) in
+  incr curr.global;
+  { fields with global = Indexed.return index value :: fields.global }
+
+let add_table value (fields : t) (curr : curr) =
+  let index = !(curr.table) in
+  incr curr.table;
+  { fields with table = Indexed.return index value :: fields.table }
+
+let add_mem value (fields : t) (curr : curr) =
+  let index = !(curr.mem) in
+  incr curr.mem;
+  { fields with mem = Indexed.return index value :: fields.mem }
+
+let add_func value (fields : t) (curr : curr) =
+  let func_type =
+    match value with
+    | Runtime.Local func -> func.type_f
+    | Imported func -> func.desc
+  in
+  let fields = declare_func_type func_type fields in
+  let index = !(curr.func) in
+  incr curr.func;
+  { fields with func = Indexed.return index value :: fields.func }
+
+let add_elem value (fields : t) (curr : curr) =
+  let index = !(curr.elem) in
+  incr curr.elem;
+  { fields with elem = Indexed.return index value :: fields.elem }
+
+let add_data value (fields : t) (curr : curr) =
+  let index = !(curr.data) in
+  incr curr.data;
+  { fields with data = Indexed.return index value :: fields.data }
+
+let add_field curr (fields : t) = function
+  | Text.MType typ ->
+    let typ = typ @ fields.typ in
+    Ok { fields with typ }
+  | MGlobal global -> ok @@ add_global (Local global) fields curr
+  | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
+    let+ val_type = Binary_types.convert_val_type None val_type in
+    let b = (mut, val_type) in
+    let imported = imp import (a, b) in
+    add_global (Imported imported) fields curr
+  | MExport { name; desc = Export_global id } ->
+    let id = curr_id curr.global id in
+    let exports =
+      { fields.exports with global = { name; id } :: fields.exports.global }
+    in
+    Ok { fields with exports }
+  | MTable table ->
+    let id, table_type = table in
+    let+ table_type = Binary_types.convert_table_type None table_type in
+    let table = (id, table_type) in
+    add_table (Local table) fields curr
+  | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
+    let+ table_type = Binary_types.convert_table_type None table_type in
+    let imported = imp import (id, table_type) in
+    add_table (Imported imported) fields curr
+  | MExport { name; desc = Export_table id } ->
+    let id = curr_id curr.table id in
+    let exports =
+      { fields.exports with table = { name; id } :: fields.exports.table }
+    in
+    Ok { fields with exports }
+  | MMem mem -> ok @@ add_mem (Local mem) fields curr
+  | MImport ({ desc = Import_mem (id, limits); _ } as import) ->
+    let imported = imp import (id, limits) in
+    ok @@ add_mem (Imported imported) fields curr
+  | MExport { name; desc = Export_mem id } ->
+    let id = curr_id curr.mem id in
+    let exports =
+      { fields.exports with mem = { name; id } :: fields.exports.mem }
+    in
+    Ok { fields with exports }
+  | MFunc func -> ok @@ add_func (Runtime.Local func) fields curr
+  | MImport ({ desc = Import_func (a, type_f); _ } as import) ->
+    let imported : text block_type Imported.t = imp import (a, type_f) in
+    ok @@ add_func (Imported imported) fields curr
+  | MExport { name; desc = Export_func id } ->
+    let id = curr_id curr.func id in
+    let exports =
+      { fields.exports with func = { name; id } :: fields.exports.func }
+    in
+    Ok { fields with exports }
+  | MElem elem ->
+    let mode =
+      match elem.mode with
+      | (Text.Elem_passive | Elem_declarative) as mode -> mode
+      | Elem_active (id, expr) ->
+        let id = curr_id curr.table id in
+        Elem_active (Some id, expr)
+    in
+    ok @@ add_elem { elem with mode } fields curr
+  | MData data ->
+    let mode =
+      match data.mode with
+      | Data_passive -> Text.Data_passive
+      | Data_active (id, expr) ->
+        let id = curr_id curr.mem id in
+        Data_active (Some id, expr)
+    in
+    let data : Text.data = { id = data.id; init = data.init; mode } in
+    ok @@ add_data data fields curr
+  | MStart start -> Ok { fields with start = Some start }
+
+let of_symbolic { Text.fields; id; _ } =
   Log.debug0 "grouping     ...@\n";
-  let add ((fields : t), curr) field : (t * curr) Result.t =
-    match field with
-    | Text.MType typ ->
-      let typ = typ @ fields.typ in
-      Ok ({ fields with typ }, curr)
-    | MGlobal global -> ok @@ add_global (Local global) fields curr
-    | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
-      let+ val_type = Binary_types.convert_val_type None val_type in
-      let b = (mut, val_type) in
-      let imported = imp import (a, b) in
-      add_global (Imported imported) fields curr
-    | MExport { name; desc = Export_global id } ->
-      let id = curr_id curr.global id in
-      let exports =
-        { fields.exports with global = { name; id } :: fields.exports.global }
-      in
-      Ok ({ fields with exports }, curr)
-    | MTable table ->
-      let id, table_type = table in
-      let+ table_type = Binary_types.convert_table_type None table_type in
-      let table = (id, table_type) in
-      add_table (Local table) fields curr
-    | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
-      let+ table_type = Binary_types.convert_table_type None table_type in
-      let imported = imp import (id, table_type) in
-      add_table (Imported imported) fields curr
-    | MExport { name; desc = Export_table id } ->
-      let id = curr_id curr.table id in
-      let exports =
-        { fields.exports with table = { name; id } :: fields.exports.table }
-      in
-      Ok ({ fields with exports }, curr)
-    | MMem mem -> ok @@ add_mem (Local mem) fields curr
-    | MImport ({ desc = Import_mem (id, limits); _ } as import) ->
-      let imported = imp import (id, limits) in
-      ok @@ add_mem (Imported imported) fields curr
-    | MExport { name; desc = Export_mem id } ->
-      let id = curr_id curr.mem id in
-      let exports =
-        { fields.exports with mem = { name; id } :: fields.exports.mem }
-      in
-      Ok ({ fields with exports }, curr)
-    | MFunc func ->
-      let fields = declare_func_type func.type_f fields in
-      let index = curr.func in
-      let value = Runtime.Local func in
-      let func = Indexed.return index value :: fields.func in
-      Ok ({ fields with func }, { curr with func = succ curr.func })
-    | MImport ({ desc = Import_func (a, type_f); _ } as import) ->
-      let imported : text block_type Imported.t = imp import (a, type_f) in
-      let fields = declare_func_type type_f fields in
-      ok @@ add_func (Imported imported) fields curr
-    | MExport { name; desc = Export_func id } ->
-      let id = curr_id curr.func id in
-      let exports =
-        { fields.exports with func = { name; id } :: fields.exports.func }
-      in
-      Ok ({ fields with exports }, curr)
-    | MElem elem ->
-      let mode =
-        match elem.mode with
-        | (Text.Elem_passive | Elem_declarative) as mode -> mode
-        | Elem_active (id, expr) ->
-          let id = Option.value id ~default:(Raw (curr.table - 1)) in
-          Elem_active (Some id, expr)
-      in
-      ok @@ add_elem { elem with mode } fields curr
-    | MData data ->
-      let mode =
-        match data.mode with
-        | Data_passive -> Text.Data_passive
-        | Data_active (id, expr) ->
-          let id = Option.value id ~default:(Raw (curr.mem - 1)) in
-          Data_active (Some id, expr)
-      in
-      let data : Text.data = { id = data.id; init = data.init; mode } in
-      ok @@ add_data data fields curr
-    | MStart start -> Ok ({ fields with start = Some start }, curr)
-  in
-  let+ modul, _curr =
-    list_fold_left add (empty_module modul.id, init_curr) modul.fields
-  in
-  modul
+  list_fold_left (add_field (init_curr ())) (empty_module id) fields
