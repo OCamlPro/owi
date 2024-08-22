@@ -328,25 +328,19 @@ let rewrite_data (modul : Assigned.t) (data : Text.data) : Binary.data Result.t
   { Binary.mode; id = data.id; init = data.init }
 
 let rewrite_export named (exports : Grouped.opt_export list) :
-  Binary.export list Result.t =
-  list_map
+  Binary.export list =
+  List.map
     (fun { Grouped.name; id } ->
-      let+ id =
-        match id with
-        | Curr id -> Ok id
-        | Indice id ->
-          let (Raw id) = find named id in
-          Ok id
-      in
+      let (Raw id) = find named id in
       { Binary.name; id } )
     exports
 
 let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
-  Binary.exports Result.t =
-  let* global = rewrite_export modul.global exports.global in
-  let* mem = rewrite_export modul.mem exports.mem in
-  let* table = rewrite_export modul.table exports.table in
-  let+ func = rewrite_export modul.func exports.func in
+  Binary.exports =
+  let global = rewrite_export modul.global exports.global in
+  let mem = rewrite_export modul.mem exports.mem in
+  let table = rewrite_export modul.table exports.table in
+  let func = rewrite_export modul.func exports.func in
   { Binary.global; mem; table; func }
 
 let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
@@ -402,7 +396,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   in
   let* elem = rewrite_named (rewrite_elem modul) modul.elem in
   let* data = rewrite_named (rewrite_data modul) modul.data in
-  let* exports = rewrite_exports modul modul.exports in
+  let exports = rewrite_exports modul modul.exports in
   let* func =
     let import = rewrite_import (rewrite_block_type typemap modul) in
     let runtime = rewrite_runtime (rewrite_func typemap modul) import in

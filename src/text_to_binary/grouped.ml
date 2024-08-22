@@ -7,13 +7,9 @@ open Syntax
 
 type type_check = text indice * text func_type
 
-type opt_ind =
-  | Curr of int
-  | Indice of text indice
-
 type opt_export =
   { name : string
-  ; id : opt_ind
+  ; id : text indice
   }
 
 type opt_exports =
@@ -24,7 +20,7 @@ type opt_exports =
   }
 
 let curr_id (curr : int) (i : text indice option) =
-  match i with None -> Curr (pred curr) | Some id -> Indice id
+  match i with None -> Raw (pred curr) | Some id -> id
 
 type t =
   { id : string option
