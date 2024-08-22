@@ -21,7 +21,3 @@ let get_at i values =
   match List.find_opt (has_index i) values with
   | None -> None
   | Some { value; _ } -> Some value
-
-let rec to_assoc_list = function
-  | [] -> []
-  | { index; value } :: l -> (index, value) :: to_assoc_list l

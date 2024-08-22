@@ -15,5 +15,3 @@ val return : int -> 'a -> 'a t
 val get_at : int -> 'a t list -> 'a option
 
 val has_index : int -> 'a t -> bool
-
-val to_assoc_list : 'a t list -> (int * 'a) list

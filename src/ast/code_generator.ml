@@ -11,38 +11,83 @@ type type_env =
   { param_types : binary val_type list
   ; global_types : binary val_type list
   ; result_types : binary val_type list
-  ; owi_i32 : int
-  ; owi_i64 : int
-  ; owi_f32 : int
-  ; owi_f64 : int
-  ; owi_assume : int
-  ; owi_assert : int
+  ; result : int -> binary indice
+  ; owi_i32 : binary indice
+  ; owi_i64 : binary indice
+  ; owi_f32 : binary indice
+  ; owi_f64 : binary indice
+  ; owi_assume : binary indice
+  ; owi_assert : binary indice
   }
 
 let build_type_env (m : modul)
   (func_ty : binary param_type * binary result_type)
-  (owi_funcs : (string * int) list) : type_env =
+  (owi_funcs : (string * int) array) : type_env =
   let param_types = List.map snd (fst func_ty) in
-  let global_types (* would get simplified with #353 *) =
+  let global_types =
     List.map
-      (fun (x : (global, binary global_type) Runtime.t Indexed.t) ->
-        match Indexed.get x with
+      (fun (x : (global, binary global_type) Runtime.t) ->
+        match x with
         | Runtime.Local { typ = _, gt; _ } -> gt
         | Runtime.Imported { desc = _, gt; _ } -> gt )
-      (List.sort
-         (fun x y -> compare (Indexed.get_index x) (Indexed.get_index y))
-         m.global.values )
+      (Array.to_list m.global)
   in
   let result_types = snd func_ty in
-  let owi_i32 = List.assoc "i32_symbol" owi_funcs in
-  let owi_i64 = List.assoc "i64_symbol" owi_funcs in
-  let owi_f32 = List.assoc "f32_symbol" owi_funcs in
-  let owi_f64 = List.assoc "f64_symbol" owi_funcs in
-  let owi_assume = List.assoc "assume" owi_funcs in
-  let owi_assert = List.assoc "assert" owi_funcs in
+  let result i = Raw (List.length param_types + i + 1) in
+  let owi_i32 =
+    match
+      Array.find_index
+        (fun (name, _) -> String.equal "i32_symbol" name)
+        owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
+  let owi_i64 =
+    match
+      Array.find_index
+        (fun (name, _) -> String.equal "i64_symbol" name)
+        owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
+  let owi_f32 =
+    match
+      Array.find_index
+        (fun (name, _) -> String.equal "f32_symbol" name)
+        owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
+  let owi_f64 =
+    match
+      Array.find_index
+        (fun (name, _) -> String.equal "f64_symbol" name)
+        owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
+  let owi_assume =
+    match
+      Array.find_index (fun (name, _) -> String.equal "assume" name) owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
+  let owi_assert =
+    match
+      Array.find_index (fun (name, _) -> String.equal "assert" name) owi_funcs
+    with
+    | Some i -> Raw i
+    | None -> assert false
+  in
   { param_types
   ; global_types
   ; result_types
+  ; result
   ; owi_i32
   ; owi_i64
   ; owi_f32
@@ -177,11 +222,11 @@ let rec term_generate tenv (term : binary term) :
     binop_generate b expr1 ty1 expr2 ty2
   | Result (Some i) -> (
     match List.nth_opt tenv.result_types i with
-    | Some t -> Ok ([ Local_get (Raw (List.length tenv.param_types + i)) ], t)
+    | Some t -> Ok ([ Local_get (tenv.result i) ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
   | Result None -> (
     match List.nth_opt tenv.result_types 0 with
-    | Some t -> Ok ([ Local_get (Raw (List.length tenv.param_types)) ], t)
+    | Some t -> Ok ([ Local_get (tenv.result 0) ], t)
     | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
 
 let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
@@ -265,16 +310,15 @@ let prop_generate tenv : binary prop -> binary expr Result.t =
       binconnect_generate b expr1 expr2
     | Binder (_b, bt, _, _pr1) -> (
       match bt with
-      | I32 -> Ok [ Call (Raw tenv.owi_i32) ]
-      | I64 -> Ok [ Call (Raw tenv.owi_i64) ]
-      | F32 -> Ok [ Call (Raw tenv.owi_f32) ]
-      | F64 -> Ok [ Call (Raw tenv.owi_f64) ] )
+      | I32 -> Ok [ Call tenv.owi_i32 ]
+      | I64 -> Ok [ Call tenv.owi_i64 ]
+      | F32 -> Ok [ Call tenv.owi_f32 ]
+      | F64 -> Ok [ Call tenv.owi_f64 ] )
     (* TODO : quantifier checking *)
   in
   fun pr ->
     let+ expr = prop_generate_aux pr in
-    expr @ [ Call (Raw tenv.owi_assert); Call (Raw tenv.owi_assume) ]
-(* add option *)
+    expr @ [ Call tenv.owi_assert ]
 
 let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   (m : modul) : modul =
@@ -297,14 +341,7 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
       Runtime.Local { typ; init = subst_expr init; id }
     | Imported _ -> global
   in
-  let global =
-    { m.global with
-      values =
-        List.map
-          (fun v -> Indexed.(return (get_index v) (subst_global (get v))))
-          m.global.values
-    }
-  in
+  let global = Array.map subst_global m.global in
 
   let subst_func (func : (binary func, binary block_type) Runtime.t) =
     match func with
@@ -312,14 +349,7 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
       Runtime.Local { type_f; locals; body = subst_expr body; id }
     | Imported _ -> func
   in
-  let func =
-    { m.func with
-      values =
-        List.map
-          (fun v -> Indexed.(return (get_index v) (subst_func (get v))))
-          m.func.values
-    }
-  in
+  let func = Array.map subst_func m.func in
 
   let subst_elem_mode = function
     | Elem_passive -> Elem_passive
@@ -329,14 +359,7 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   let subst_elem ({ id; typ; init; mode } : elem) =
     { id; typ; init = List.map subst_expr init; mode = subst_elem_mode mode }
   in
-  let elem =
-    { m.elem with
-      values =
-        List.map
-          (fun v -> Indexed.(return (get_index v) (subst_elem (get v))))
-          m.elem.values
-    }
-  in
+  let elem = Array.map subst_elem m.elem in
 
   let subst_data_mode = function
     | Data_passive -> Data_passive
@@ -345,14 +368,7 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   let subst_data ({ id; init; mode } : data) =
     { id; init; mode = subst_data_mode mode }
   in
-  let data =
-    { m.data with
-      values =
-        List.map
-          (fun v -> Indexed.(return (get_index v) (subst_data (get v))))
-          m.data.values
-    }
-  in
+  let data = Array.map subst_data m.data in
 
   let subst_export ({ name; id } : export) = { name; id = subst id } in
   let exports =
@@ -390,59 +406,60 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   ; custom
   }
 
-let contract_generate (owi_funcs : (string * int) list) (m : modul)
+let contract_generate (owi_funcs : (string * int) array) (m : modul)
   ({ funcid = Raw old_index; preconditions; postconditions } : binary Contract.t)
   : modul Result.t =
+  let func = m.func in
+  let func_num = Array.length func in
   let* old_id, Bt_raw (ty_index, old_type) =
-    match Indexed.get_at old_index m.func.values with
-    | Some (Runtime.Local { id; type_f; _ }) -> (
-      match id with
-      | Some id -> Ok (id, type_f)
-      | None -> Ok (Fmt.str "func_%i" old_index, type_f) )
-    | Some (Imported { modul; name; assigned_name; desc }) -> (
-      match assigned_name with
-      | Some assigned_name -> Ok (assigned_name, desc)
-      | None -> Ok (Fmt.str "func_%s_%s_%i" modul name old_index, desc) )
-    | None -> Error (`Contract_unknown_func (Raw old_index))
+    if old_index >= func_num || old_index < 0 then
+      Error (`Contract_unknown_func (Raw old_index))
+    else
+      match Array.get func old_index with
+      | Runtime.Local { id; type_f; _ } -> (
+        match id with
+        | Some id -> Ok (id, type_f)
+        | None -> Ok (Fmt.str "func_%i" old_index, type_f) )
+      | Imported { modul; name; assigned_name; desc } -> (
+        match assigned_name with
+        | Some assigned_name -> Ok (assigned_name, desc)
+        | None -> Ok (Fmt.str "func_%s_%s_%i" modul name old_index, desc) )
   in
-  let index = List.length m.func.values in
   let id = Fmt.str "__rac_%s" old_id in
+  let index = func_num in
 
   let tenv = build_type_env m old_type owi_funcs in
 
   let locals =
     List.mapi
-      (fun i rt -> (Some Fmt.(str "__rac_res_%i" i), rt))
+      (fun i rt -> (Some Fmt.(str "__rac_res_%i" (i + 1)), rt))
       tenv.result_types
   in
   let call =
     List.init (List.length tenv.param_types) (fun i -> Local_get (Raw i))
     @ [ Call (Raw old_index) ]
     @ List.init (List.length tenv.result_types) (fun i ->
-          Local_set (Raw (List.length tenv.param_types + i)) )
+          Local_set (tenv.result i) )
   in
   let return =
     List.init (List.length tenv.result_types) (fun i ->
-        Local_get (Raw (List.length tenv.param_types + i)) )
+        Local_get (tenv.result i) )
   in
   let* precond_checker = list_concat_map (prop_generate tenv) preconditions in
   let+ postcond_checker = list_concat_map (prop_generate tenv) postconditions in
   let body = precond_checker @ call @ postcond_checker @ return in
 
   let m = subst_index old_index index m in
-
-  let value =
-    Runtime.Local
-      { type_f = Bt_raw (ty_index, old_type); locals; body; id = Some id }
-  in
   let func =
-    { Named.values = Indexed.return index value :: m.func.values
-    ; named = String_map.add id index m.func.named
-    }
+    Array.append func
+      [| Runtime.Local
+           { type_f = Bt_raw (ty_index, old_type); locals; body; id = Some id }
+      |]
   in
+
   { m with func }
 
-let contracts_generate (owi_funcs : (string * int) list) (m : modul)
+let contracts_generate (owi_funcs : (string * int) array) (m : modul)
   (contracts : binary Contract.t list) : modul Result.t =
   let rec join = function
     | ([] | [ _ ]) as l -> l
@@ -454,111 +471,88 @@ let contracts_generate (owi_funcs : (string * int) list) (m : modul)
   let contracts = join (List.sort Contract.compare_funcid contracts) in
   list_fold_left (contract_generate owi_funcs) m contracts
 
-let add_owi_funcs (m : modul) : modul * (string * int) list =
-  let owi_funcs : (string * binary func_type) list =
-    [ ("i32_symbol", ([], [ Num_type I32 ]))
-    ; ("i64_symbol", ([], [ Num_type I64 ]))
-    ; ("f32_symbol", ([], [ Num_type F32 ]))
-    ; ("f64_symbol", ([], [ Num_type F64 ]))
-    ; ("assume", ([ (None, Num_type I32) ], []))
-    ; ("assert", ([ (None, Num_type I32) ], []))
-    ]
+let add_owi_funcs (m : modul) : modul * (string * int) array =
+  let owi_funcs : (string * binary func_type) array =
+    [| ("i32_symbol", ([], [ Num_type I32 ]))
+     ; ("i64_symbol", ([], [ Num_type I64 ]))
+     ; ("f32_symbol", ([], [ Num_type F32 ]))
+     ; ("f64_symbol", ([], [ Num_type F64 ]))
+     ; ("assume", ([ (None, Num_type I32) ], []))
+     ; ("assert", ([ (None, Num_type I32) ], []))
+    |]
   in
 
   (* update module field `types` *)
-  let update_types () : modul * (string * (binary func_type * int)) list =
+  let update_types () : modul * (string * (binary func_type * int)) array =
     let func_type2rec_type : binary func_type -> binary rec_type =
      fun ty -> [ (None, (Final, [], Def_func_t ty)) ]
     in
-    let owi_funcs : (string * (binary func_type * binary rec_type)) list =
-      List.map (fun (name, ty) -> (name, (ty, func_type2rec_type ty))) owi_funcs
+    let owi_funcs : (string * (binary func_type * binary rec_type)) array =
+      Array.map
+        (fun (name, ty) -> (name, (ty, func_type2rec_type ty)))
+        owi_funcs
     in
-    let values = m.types.values in
-    let values, owi_funcs =
-      List.fold_left_map
-        (fun values (name, (ft, rt)) ->
-          match
-            List.find_map
-              (fun (index, rt') ->
-                if rec_type_eq rt rt' then Some index else None )
-              (Indexed.to_assoc_list values)
-          with
-          | Some index -> (values, (name, (ft, index)))
+    let types, owi_funcs =
+      Array.fold_left_map
+        (fun types (name, (owi_ft, owi_rt)) ->
+          match Array.find_index (fun rt -> rec_type_eq rt owi_rt) types with
+          | Some index -> (types, (name, (owi_ft, index)))
           | None ->
-            let index = List.length values in
-            (Indexed.return index rt :: values, (name, (ft, index))) )
-        (List.rev values) owi_funcs
+            ( Array.append types [| owi_rt |]
+            , (name, (owi_ft, Array.length types)) ) )
+        m.types owi_funcs
     in
-    let values = List.rev values in
-    ({ m with types = { values; named = m.types.named } }, owi_funcs)
+    ({ m with types }, owi_funcs)
   in
   let m, owi_funcs = update_types () in
 
   (* update module field `func` *)
-  let update_func () : modul * (string * int) list =
+  let update_func () : modul * (string * int) array =
+    let func = m.func in
+    let func_num = Array.length func in
     let imported, locals =
-      List.partition_map
-        (fun i ->
-          let v = Indexed.get i in
-          match v with
-          | Runtime.Imported _ -> Either.Left (Indexed.get_index i, v)
-          | Local _ -> Either.Right (Indexed.get_index i, v) )
-        m.func.values
+      let i =
+        Option.fold ~none:func_num
+          ~some:(fun x -> x)
+          (Array.find_index
+             (function Runtime.Local _ -> true | Imported _ -> false)
+             func )
+      in
+      (Array.sub func 0 i, Array.sub func i (func_num - i))
     in
-    let imported_num = List.length imported in
     let owi_funcs =
-      List.mapi
-        (fun i (name, (ty, index)) ->
+      Array.map
+        (fun (name, (ft, index)) ->
           ( name
-          , ( { Imported.modul = "symbolic"
-              ; name
-              ; assigned_name = Some name
-              ; desc = Bt_raw (Some (Raw index), ty)
-              }
-            , imported_num + i ) ) )
+          , { Imported.modul = "symbolic"
+            ; name
+            ; assigned_name = Some name
+            ; desc = Bt_raw (Some (Raw index), ft)
+            } ) )
         owi_funcs
     in
-
     let imported =
-      List.map
-        (fun (_, (f, index)) -> (index, Runtime.Imported f))
-        (List.rev owi_funcs)
-      @ imported
+      Array.append imported
+        (Array.map (fun (_, f) -> Runtime.Imported f) owi_funcs)
     in
 
-    let subst_task, locals =
-      List.fold_left_map
-        (fun subst_task (old_index, f) ->
-          let index = old_index + List.length owi_funcs in
-          ((old_index, index) :: subst_task, (index, f)) )
-        [] locals
-    in
+    let func = Array.append imported locals in
+    let m = { m with func } in
 
-    let values =
-      List.map (fun (index, f) -> Indexed.return index f) (imported @ locals)
+    let subst_task =
+      List.init (Array.length locals) (fun i -> (i, Array.length imported + i))
     in
-    let named =
-      List.map
-        (fun (name, index) ->
-          if index < imported_num then (name, index)
-          else (name, index + List.length owi_funcs) )
-        (String_map.to_list m.func.named)
-    in
-    let named =
-      String_map.of_list
-        (List.map (fun (name, (_, index)) -> (name, index)) owi_funcs @ named)
-    in
-
-    let m = { m with func = { values; named } } in
-
     let m =
       List.fold_left
         (fun m (old_index, index) ->
           subst_index ~subst_custom:true old_index index m )
         m subst_task
     in
+
     let owi_funcs =
-      List.map (fun (name, (_, index)) -> (name, index)) owi_funcs
+      Array.mapi
+        (fun i (name, _) -> (name, Array.length imported + i))
+        owi_funcs
     in
     (m, owi_funcs)
   in
