@@ -472,11 +472,9 @@ let rewrite_contract (modul : Assigned.t) :
     | Bt_ind ind -> (
       let (Raw i) = find modul.typ ind in
       match Indexed.get_at i modul.typ.values with
-      | Some (Def_func_t (func_pt, _)) ->
-        Ok (List.map (fun (str_opt, _) -> str_opt) func_pt)
+      | Some (Def_func_t (func_pt, _)) -> Ok (List.map fst func_pt)
       | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
-    | Bt_raw (_, (func_pt, _)) ->
-      Ok (List.map (fun (str_opt, _) -> str_opt) func_pt)
+    | Bt_raw (_, (func_pt, _)) -> Ok (List.map fst func_pt)
   in
   let* preconditions =
     list_map

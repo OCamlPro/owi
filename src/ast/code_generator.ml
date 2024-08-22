@@ -8,9 +8,9 @@ open Spec
 open Syntax
 
 type type_env =
-  { param_types : binary val_type list
-  ; global_types : binary val_type list
-  ; result_types : binary val_type list
+  { param_types : binary val_type array
+  ; global_types : binary val_type array
+  ; result_types : binary val_type array
   ; result : int -> binary indice
   ; owi_i32 : binary indice
   ; owi_i64 : binary indice
@@ -23,17 +23,17 @@ type type_env =
 let build_type_env (m : modul)
   (func_ty : binary param_type * binary result_type)
   (owi_funcs : (string * int) array) : type_env =
-  let param_types = List.map snd (fst func_ty) in
+  let param_types = Array.of_list (List.map snd (fst func_ty)) in
   let global_types =
-    List.map
+    Array.map
       (fun (x : (global, binary global_type) Runtime.t) ->
         match x with
         | Runtime.Local { typ = _, gt; _ } -> gt
         | Runtime.Imported { desc = _, gt; _ } -> gt )
-      (Array.to_list m.global)
+      m.global
   in
-  let result_types = snd func_ty in
-  let result i = Raw (List.length param_types + i + 1) in
+  let result_types = Array.of_list (snd func_ty) in
+  let result i = Raw (Array.length param_types + i) in
   let owi_i32 =
     match
       Array.find_index
@@ -201,18 +201,15 @@ let rec term_generate tenv (term : binary term) :
   | Int64 i64 -> Ok ([ I64_const i64 ], Num_type I64)
   | Float32 f32 -> Ok ([ F32_const f32 ], Num_type F32)
   | Float64 f64 -> Ok ([ F64_const f64 ], Num_type F64)
-  | ParamVar (Raw i as id) -> (
-    match List.nth_opt tenv.param_types i with
-    | Some t -> Ok ([ Local_get id ], t)
-    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | GlobalVar (Raw i as id) -> (
-    match List.nth_opt tenv.global_types i with
-    | Some t -> Ok ([ Global_get id ], t)
-    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | BinderVar (Raw _i as _id) -> (
-    match None with
-    | Some (id, t) -> Ok ([ Local_get id ], t)
-    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
+  | ParamVar (Raw i as id) ->
+    if i < 0 || i >= Array.length tenv.param_types then
+      Error (`Spec_invalid_indice (Int.to_string i))
+    else Ok ([ Local_get id ], tenv.param_types.(i))
+  | GlobalVar (Raw i as id) ->
+    if i < 0 || i >= Array.length tenv.global_types then
+      Error (`Spec_invalid_indice (Int.to_string i))
+    else Ok ([ Global_get id ], tenv.global_types.(i))
+  | BinderVar (Raw _i as _id) -> assert false
   | UnOp (u, tm1) ->
     let* expr1, ty1 = term_generate tenv tm1 in
     unop_generate u expr1 ty1
@@ -220,14 +217,13 @@ let rec term_generate tenv (term : binary term) :
     let* expr1, ty1 = term_generate tenv tm1 in
     let* expr2, ty2 = term_generate tenv tm2 in
     binop_generate b expr1 ty1 expr2 ty2
-  | Result (Some i) -> (
-    match List.nth_opt tenv.result_types i with
-    | Some t -> Ok ([ Local_get (tenv.result i) ], t)
-    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
-  | Result None -> (
-    match List.nth_opt tenv.result_types 0 with
-    | Some t -> Ok ([ Local_get (tenv.result 0) ], t)
-    | None -> Error (`Spec_type_error Fmt.(str "%a" pp_term term)) )
+  | Result (Some i) ->
+    if i < 0 || i >= Array.length tenv.result_types then
+      Error (`Spec_invalid_indice (Int.to_string i))
+    else Ok ([ Local_get (Raw i) ], tenv.result_types.(i))
+  | Result None ->
+    if Array.length tenv.result_types = 0 then Error (`Spec_invalid_indice "0")
+    else Ok ([ Local_get (Raw 0) ], tenv.result_types.(0))
 
 let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
   (expr2 : binary expr) (ty2 : binary val_type) : binary expr Result.t =
@@ -412,10 +408,10 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
   let func = m.func in
   let func_num = Array.length func in
   let* old_id, Bt_raw (ty_index, old_type) =
-    if old_index >= func_num || old_index < 0 then
+    if old_index < 0 || old_index >= func_num then
       Error (`Contract_unknown_func (Raw old_index))
     else
-      match Array.get func old_index with
+      match func.(old_index) with
       | Runtime.Local { id; type_f; _ } -> (
         match id with
         | Some id -> Ok (id, type_f)
@@ -433,16 +429,16 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
   let locals =
     List.mapi
       (fun i rt -> (Some Fmt.(str "__rac_res_%i" (i + 1)), rt))
-      tenv.result_types
+      (Array.to_list tenv.result_types)
   in
   let call =
-    List.init (List.length tenv.param_types) (fun i -> Local_get (Raw i))
+    List.init (Array.length tenv.param_types) (fun i -> Local_get (Raw i))
     @ [ Call (Raw old_index) ]
-    @ List.init (List.length tenv.result_types) (fun i ->
+    @ List.init (Array.length tenv.result_types) (fun i ->
           Local_set (tenv.result i) )
   in
   let return =
-    List.init (List.length tenv.result_types) (fun i ->
+    List.init (Array.length tenv.result_types) (fun i ->
         Local_get (tenv.result i) )
   in
   let* precond_checker = list_concat_map (prop_generate tenv) preconditions in
@@ -512,8 +508,7 @@ let add_owi_funcs (m : modul) : modul * (string * int) array =
     let func_num = Array.length func in
     let imported, locals =
       let i =
-        Option.fold ~none:func_num
-          ~some:(fun x -> x)
+        Option.fold ~none:func_num ~some:Fun.id
           (Array.find_index
              (function Runtime.Local _ -> true | Imported _ -> false)
              func )
