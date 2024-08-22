@@ -191,37 +191,37 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4171236">m</span>atch o with <span data-count="4151454">O</span>k v -&gt; f v | <span data-count="19782">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4146826">m</span>atch o with <span data-count="4127044">O</span>k v -&gt; f v | <span data-count="19782">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="2134880">m</span>atch o with <span data-count="2125629">O</span>k v -&gt; Ok (<span data-count="2125628">f</span> v) | <span data-count="9251">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2110701">m</span>atch o with <span data-count="2101450">O</span>k v -&gt; Ok (<span data-count="2101449">f</span> v) | <span data-count="9251">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="812541">O</span>k v
+let ok v = <span data-count="800848">O</span>k v
 
 let list_iter f l =
-  <span data-count="36098">l</span>et err = ref None in
+  <span data-count="36099">l</span>et err = ref None in
   try
     List.iter
       (fun v -&gt;
-        <span data-count="20210">m</span>atch f v with
+        <span data-count="20211">m</span>atch f v with
         | <span data-count="77">E</span>rror _e as e -&gt;
           err := Some e;
           raise Exit
-        | <span data-count="20132">O</span>k () -&gt; () )
+        | <span data-count="20133">O</span>k () -&gt; () )
       l;
-    <span data-count="36020">O</span>k ()
+    <span data-count="36021">O</span>k ()
   with <span data-count="77">E</span>xit -&gt; Option.get !err
 
 let list_map f l =
-  <span data-count="216060">l</span>et err = ref None in
+  <span data-count="191420">l</span>et err = ref None in
   try
-    o<span data-count="215836">k</span>
-    @@ List.ma<span data-count="215836">p</span>
+    o<span data-count="191196">k</span>
+    @@ List.ma<span data-count="191196">p</span>
          (fun v -&gt;
-           <span data-count="233978">m</span>atch f v with
+           <span data-count="222051">m</span>atch f v with
            | <span data-count="224">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="233754">O</span>k v -&gt; v )
+           | <span data-count="221827">O</span>k v -&gt; v )
          l
   with <span data-count="224">E</span>xit -&gt; Option.get !err
 

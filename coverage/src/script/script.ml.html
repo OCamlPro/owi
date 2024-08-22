@@ -660,7 +660,7 @@ module Stack = Stack.Make [@inlined hint] (V)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="883">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="884">e</span> ()
 
   let value i = <span data-count="65">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
 end
@@ -864,7 +864,7 @@ let run ~no_exhaustion ~optimize script =
           match got with
           | <span data-count="0">E</span>rror got -&gt; check_error ~expected ~got
           | <span data-count="17">O</span>k m -&gt; begin
-            match Typecheck.modul m with
+            match Binary_validate.modul m with
             | <span data-count="17">E</span>rror got -&gt; check_error ~expected ~got
             | <span data-count="0">O</span>k () -&gt;
               let got = Link.modul link_state ~name:None m in

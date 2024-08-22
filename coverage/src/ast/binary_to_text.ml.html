@@ -578,8 +578,8 @@ let convert_ref_type (t : binary ref_type) : text ref_type =
   (nullable, convert_heap_typ<span data-count="5">e</span> heap_type)
 
 let convert_val_type (t : binary val_type) : text val_type =
-  <span data-count="181">m</span>atch t with
-  | <span data-count="181">N</span>um_type _ as t -&gt; t
+  <span data-count="187">m</span>atch t with
+  | <span data-count="187">N</span>um_type _ as t -&gt; t
   | <span data-count="0">R</span>ef_type t -&gt; Ref_type (convert_ref_typ<span data-count="0">e</span> t)
 
 let convert_global_type (t : binary global_type) : text global_type =
@@ -587,26 +587,26 @@ let convert_global_type (t : binary global_type) : text global_type =
   (mut, convert_val_typ<span data-count="5">e</span> vt)
 
 let convert_param (p : binary param) : text param =
-  <span data-count="148">l</span>et id, vt = p in
-  (id, convert_val_typ<span data-count="148">e</span> vt)
+  <span data-count="152">l</span>et id, vt = p in
+  (id, convert_val_typ<span data-count="152">e</span> vt)
 
 let convert_param_type (pt : binary param_type) : text param_type =
-  <span data-count="265">L</span>ist.map convert_param pt
+  <span data-count="271">L</span>ist.map convert_param pt
 
 let convert_result_type (rt : binary result_type) : text result_type =
-  <span data-count="162">L</span>ist.map convert_val_type rt
+  <span data-count="166">L</span>ist.map convert_val_type rt
 
 let convert_func_type ((pt, rt) : binary func_type) : text func_type =
-  <span data-count="162">(</span>convert_param_typ<span data-count="162">e</span> pt, convert_result_typ<span data-count="162">e</span> rt)
+  <span data-count="166">(</span>convert_param_typ<span data-count="166">e</span> pt, convert_result_typ<span data-count="166">e</span> rt)
 
 let convert_block_type (bt : binary block_type) : text block_type =
-  <span data-count="106">m</span>atch bt with
-  | <span data-count="106">B</span>t_raw (opt, ft) -&gt;
+  <span data-count="108">m</span>atch bt with
+  | <span data-count="108">B</span>t_raw (opt, ft) -&gt;
     let opt =
-      match opt with <span data-count="45">N</span>one -&gt; None | <span data-count="61">S</span>ome i -&gt; Some (convert_indic<span data-count="61">e</span> i)
+      match opt with <span data-count="47">N</span>one -&gt; None | <span data-count="61">S</span>ome i -&gt; Some (convert_indic<span data-count="61">e</span> i)
     in
     let ft = convert_func_type ft in
-    <span data-count="106">B</span>t_raw (opt, ft)
+    <span data-count="108">B</span>t_raw (opt, ft)
 
 let convert_storage_type (t : binary storage_type) : text storage_type =
   <span data-count="0">m</span>atch t with
@@ -624,24 +624,24 @@ let convert_struct_type (t : binary struct_type) : text struct_type =
   <span data-count="0">L</span>ist.map convert_struct_field t
 
 let convert_str_type (str_t : binary str_type) : text str_type =
-  <span data-count="56">m</span>atch str_t with
+  <span data-count="58">m</span>atch str_t with
   | <span data-count="0">D</span>ef_struct_t t -&gt; Def_struct_t (convert_struct_typ<span data-count="0">e</span> t)
   | <span data-count="0">D</span>ef_array_t t -&gt; Def_array_t (convert_field_typ<span data-count="0">e</span> t)
-  | <span data-count="56">D</span>ef_func_t t -&gt; Def_func_t (convert_func_typ<span data-count="56">e</span> t)
+  | <span data-count="58">D</span>ef_func_t t -&gt; Def_func_t (convert_func_typ<span data-count="58">e</span> t)
 
 let convert_sub_type ((final, indices, str_type) : binary sub_type) :
   text sub_type =
-  <span data-count="56">(</span>final, List.ma<span data-count="56">p</span> convert_indice indices, convert_str_typ<span data-count="56">e</span> str_type)
+  <span data-count="58">(</span>final, List.ma<span data-count="58">p</span> convert_indice indices, convert_str_typ<span data-count="58">e</span> str_type)
 
 let convert_type_def ((name, sub_type) : binary type_def) : text type_def =
-  <span data-count="56">(</span>name, convert_sub_typ<span data-count="56">e</span> sub_type)
+  <span data-count="58">(</span>name, convert_sub_typ<span data-count="58">e</span> sub_type)
 
 let convert_rec_type (t : binary rec_type) : text rec_type =
-  <span data-count="56">L</span>ist.map convert_type_def t
+  <span data-count="58">L</span>ist.map convert_type_def t
 
 let convert_expr (e : binary expr) : text expr =
   (* TODO: proper conversion ! *)
-  <span data-count="113">O</span>bj.magic e
+  <span data-count="115">O</span>bj.magic e
 
 let convert_table_type (t : binary table_type) : text table_type =
   <span data-count="3">l</span>et limits, t = t in
@@ -680,15 +680,15 @@ let convert_data (e : Binary.data) : Text.data =
   <span data-count="1">{</span> id; init; mode }
 
 let from_types types : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (fun (t : Types.binary Types.rec_type) -&gt;
-      <span data-count="56">l</span>et t = convert_rec_type t in
-      <span data-count="56">M</span>Type t )
+      <span data-count="58">l</span>et t = convert_rec_type t in
+      <span data-count="58">M</span>Type t )
     types
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_global global : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (function
       | <span data-count="5">R</span>untime.Local (g : Binary.global) -&gt;
         let typ = convert_global_type g.typ in
@@ -699,10 +699,10 @@ let from_global global : Text.module_field list =
         let desc = Import_global (assigned_name, convert_global_typ<span data-count="0">e</span> desc) in
         MImport { modul; name; desc } )
     global
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_table table : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (function
       | <span data-count="3">R</span>untime.Local t -&gt;
         let t = convert_table t in
@@ -711,51 +711,51 @@ let from_table table : Text.module_field list =
         let desc = Import_table (assigned_name, convert_table_typ<span data-count="0">e</span> desc) in
         MImport { modul; name; desc } )
     table
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_mem mem : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (function
       | <span data-count="3">R</span>untime.Local mem -&gt; MMem mem
       | <span data-count="0">I</span>mported { modul; name; assigned_name; desc } -&gt;
         let desc = Import_mem (assigned_name, desc) in
         MImport { modul; name; desc } )
     mem
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_func func : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (function
-      | <span data-count="103">R</span>untime.Local func -&gt;
+      | <span data-count="105">R</span>untime.Local func -&gt;
         let type_f = convert_block_type func.type_f in
-        <span data-count="103">l</span>et locals = convert_param_type func.locals in
-        <span data-count="103">l</span>et body = convert_expr func.body in
-        <span data-count="103">l</span>et id = func.id in
+        <span data-count="105">l</span>et locals = convert_param_type func.locals in
+        <span data-count="105">l</span>et body = convert_expr func.body in
+        <span data-count="105">l</span>et id = func.id in
         MFunc { type_f; locals; body; id }
       | <span data-count="3">I</span>mported { modul; name; assigned_name; desc } -&gt;
         let desc = Import_func (assigned_name, convert_block_typ<span data-count="3">e</span> desc) in
         MImport { modul; name; desc } )
     func
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_elem elem : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (fun (elem : Binary.elem) -&gt;
       <span data-count="2">l</span>et elem = convert_elem elem in
       <span data-count="2">M</span>Elem elem )
     elem
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_data data : Text.module_field list =
-  <span data-count="37">A</span>rray.map
+  <span data-count="38">A</span>rray.map
     (fun (data : Binary.data) -&gt;
       <span data-count="1">l</span>et data = convert_data data in
       <span data-count="1">M</span>Data data )
     data
-  |&gt; <span data-count="37">A</span>rray.to_list
+  |&gt; <span data-count="38">A</span>rray.to_list
 
 let from_exports (exports : Binary.exports) : Text.module_field list =
-  <span data-count="37">l</span>et global =
+  <span data-count="38">l</span>et global =
     List.map
       (fun { name; id } -&gt;
         <span data-count="0">l</span>et id = Some (Raw id) in
@@ -763,7 +763,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
       exports.global
   in
 
-  <span data-count="37">l</span>et mem =
+  <span data-count="38">l</span>et mem =
     List.map
       (fun { name; id } -&gt;
         <span data-count="1">l</span>et id = Some (Raw id) in
@@ -771,7 +771,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
       exports.mem
   in
 
-  <span data-count="37">l</span>et table =
+  <span data-count="38">l</span>et table =
     List.map
       (fun { name; id } -&gt;
         <span data-count="0">l</span>et id = Some (Raw id) in
@@ -779,7 +779,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
       exports.table
   in
 
-  <span data-count="37">l</span>et func =
+  <span data-count="38">l</span>et func =
     List.map
       (fun { name; id } -&gt;
         <span data-count="1">l</span>et id = Some (Raw id) in
@@ -787,25 +787,25 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
       exports.func
   in
 
-  <span data-count="37">g</span>lobal @ mem @ table @ func
+  <span data-count="38">g</span>lobal @ mem @ table @ func
 
-let from_start = function <span data-count="1">N</span>one -&gt; [] | <span data-count="36">S</span>ome n -&gt; [ MStart (Raw n) ]
+let from_start = function <span data-count="1">N</span>one -&gt; [] | <span data-count="37">S</span>ome n -&gt; [ MStart (Raw n) ]
 
 let modul
   { Binary.id; types; global; table; mem; func; elem; data; start; exports } =
-  <span data-count="37">l</span>et fields =
-    from_type<span data-count="37">s</span> types @ from_globa<span data-count="37">l</span> global @ from_tabl<span data-count="37">e</span> table @ from_me<span data-count="37">m</span> mem
-    @ from_fun<span data-count="37">c</span> func @ from_ele<span data-count="37">m</span> elem @ from_dat<span data-count="37">a</span> data @ from_export<span data-count="37">s</span> exports
-    @ from_star<span data-count="37">t</span> start
+  <span data-count="38">l</span>et fields =
+    from_type<span data-count="38">s</span> types @ from_globa<span data-count="38">l</span> global @ from_tabl<span data-count="38">e</span> table @ from_me<span data-count="38">m</span> mem
+    @ from_fun<span data-count="38">c</span> func @ from_ele<span data-count="38">m</span> elem @ from_dat<span data-count="38">a</span> data @ from_export<span data-count="38">s</span> exports
+    @ from_star<span data-count="38">t</span> start
   in
   let imported, locals =
     List.partition_map
       (function
         | <span data-count="3">M</span>Import _ as import -&gt; Either.Left import
-        | <span data-count="211">l</span>ocal -&gt; Either.Right local )
+        | <span data-count="216">l</span>ocal -&gt; Either.Right local )
       fields
   in
-  <span data-count="37">l</span>et fields = imported @ locals in
+  <span data-count="38">l</span>et fields = imported @ locals in
 
   { Text.id; fields }
 </code></pre>
