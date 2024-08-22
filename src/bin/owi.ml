@@ -205,7 +205,7 @@ let rac_cmd =
     let man = [] @ shared_man in
     Cmd.info "rac" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_rac.cmd $ unsafe $ files)
+  Cmd.v info Term.(const Cmd_rac.cmd $ debug $ unsafe $ files)
 
 let run_cmd =
   let open Cmdliner in

@@ -361,7 +361,7 @@ let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   let t = [ (None, (Final, [], t)) ] in
   Ok t
 
-let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
+let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)
   ~(func_param_list : string option list) :
   text Spec.term -> binary Spec.term Result.t =
   let rec find_raw_indice error acc id = function
@@ -386,7 +386,7 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
     | Text id -> find_raw_indice (`Spec_unknown_param ind) 0 id func_param_list
   in
 
-  let find_global (modul : Binary.modul) (ind : text indice) :
+  let find_global (modul : Assigned.t) (ind : text indice) :
     binary indice Result.t =
     match ind with
     | Raw id -> Ok (Raw id)
@@ -430,7 +430,7 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Binary.modul)
     BinOp (b, tm1, tm2)
   | Result i -> Ok (Result i)
 
-let rec rewrite_prop ~(binder_list : string option list) ~(modul : Binary.modul)
+let rec rewrite_prop ~(binder_list : string option list) ~(modul : Assigned.t)
   ~(func_param_list : string option list) :
   text Spec.prop -> binary Spec.prop Result.t =
   let open Spec in
@@ -452,22 +452,31 @@ let rec rewrite_prop ~(binder_list : string option list) ~(modul : Binary.modul)
     let+ pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
     Binder (b, bt, id_opt, pr1)
 
-let rewrite_contract (modul : Binary.modul) :
+let rewrite_contract (modul : Assigned.t) :
   text Contract.t -> binary Contract.t Result.t =
  fun { Contract.funcid; preconditions; postconditions } ->
-  let (Raw i as funcid) = find modul.func funcid in
+  let funcid = find modul.func funcid in
   let* func =
+    let (Raw i) = funcid in
     match Indexed.get_at i modul.func.values with
-    | None -> Error (`Unknown_func funcid)
     | Some v -> Ok v
+    | None -> Error (`Spec_invalid_indice (Int.to_string i))
   in
-  let func_param_list =
-    let (Bt_raw (_, (params, _))) =
-      match func with
-      | Local { type_f; _ } -> type_f
-      | Imported { desc; _ } -> desc
-    in
-    List.map fst params
+  let func_bt =
+    match func with
+    | Local { type_f; _ } -> type_f
+    | Imported { desc; _ } -> desc
+  in
+  let* func_param_list =
+    match func_bt with
+    | Bt_ind ind -> (
+      let (Raw i) = find modul.typ ind in
+      match Indexed.get_at i modul.typ.values with
+      | Some (Def_func_t (func_pt, _)) ->
+        Ok (List.map (fun (str_opt, _) -> str_opt) func_pt)
+      | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
+    | Bt_raw (_, (func_pt, _)) ->
+      Ok (List.map (fun (str_opt, _) -> str_opt) func_pt)
   in
   let* preconditions =
     list_map
@@ -481,14 +490,14 @@ let rewrite_contract (modul : Binary.modul) :
   in
   { Contract.funcid; preconditions; postconditions }
 
-let rewrite_annot (modul : Binary.modul) :
+let rewrite_annot (modul : Assigned.t) :
   text Annot.annot -> Binary.custom Result.t = function
   | Contract contract ->
     let+ contract = rewrite_contract modul contract in
     Binary.From_annot (Contract contract)
   | Annot annot -> ok @@ Binary.From_annot (Annot annot)
 
-let rewrite_annots (modul : Binary.modul) :
+let rewrite_annots (modul : Assigned.t) :
   text Annot.annot list -> Binary.custom list Result.t =
   list_map (rewrite_annot modul)
 
@@ -520,6 +529,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
       let (Raw id) = find func id in
       Ok (Some id)
   in
+  let+ custom = rewrite_annots modul modul.annots in
 
   let id = modul.id in
   let mem = Named.to_array modul.mem in
@@ -530,11 +540,15 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let data = Named.to_array data in
   let func = Named.to_array func in
 
-  let modul_without_annots : Binary.modul =
-    { id; mem; table; types; global; elem; data; exports; func; start; custom = [] }
-  in
-
-  let+ custom = rewrite_annots modul_without_annots modul.annots in
-
-  let modul : Binary.modul = { modul_without_annots with custom } in
-  modul
+  { Binary.id
+  ; mem
+  ; table
+  ; types
+  ; global
+  ; elem
+  ; data
+  ; exports
+  ; func
+  ; start
+  ; custom
+  }
