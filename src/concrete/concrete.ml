@@ -31,27 +31,13 @@ module Data = struct
 end
 
 module Env = struct
+  include Link_env
+
   type t = Concrete_value.Func.extern_func Link_env.t
 
-  let get_memory = Link_env.get_memory
-
-  let get_func = Link_env.get_func
-
-  let get_table = Link_env.get_table
-
-  let get_elem = Link_env.get_elem
-
   let get_data env n =
-    let data = Link_env.get_data env n in
+    let data = get_data env n in
     Choice.return data
-
-  let get_global = Link_env.get_global
-
-  let get_extern_func = Link_env.get_extern_func
-
-  let drop_elem = Link_env.drop_elem
-
-  let drop_data = Link_env.drop_data
 end
 
 module Module_to_run = struct
