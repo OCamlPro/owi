@@ -57,14 +57,14 @@ module Make (Backend : M) = struct
 
   let clone m = { data = Backend.clone m.data; size = m.size }
 
-  let must_be_valid_address m a =
+  let must_be_valid_address m a n =
     let open Symbolic_choice_without_memory in
-    let* addr = Backend.validate_address m a in
+    let* addr = Backend.validate_address m a n in
     match addr with Error t -> trap t | Ok ptr -> Backend.address ptr
 
   let load_8_s m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
+    let+ a = must_be_valid_address m.data a 1 in
     let v = Backend.loadn m.data a 1 in
     match Smtml.Expr.view v with
     | Val (Num (I8 i8)) ->
@@ -73,7 +73,7 @@ module Make (Backend : M) = struct
 
   let load_8_u m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
+    let+ a = must_be_valid_address m.data a 1 in
     let v = Backend.loadn m.data a 1 in
     match Smtml.Expr.view v with
     | Val (Num (I8 i)) -> Symbolic_value.const_i32 (Int32.of_int i)
@@ -81,7 +81,7 @@ module Make (Backend : M) = struct
 
   let load_16_s m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
+    let+ a = must_be_valid_address m.data a 2 in
     let v = Backend.loadn m.data a 2 in
     match Smtml.Expr.view v with
     | Val (Num (I32 i16)) -> Symbolic_value.const_i32 (Int32.extend_s 16 i16)
@@ -89,40 +89,49 @@ module Make (Backend : M) = struct
 
   let load_16_u m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
+    let+ a = must_be_valid_address m.data a 2 in
     let v = Backend.loadn m.data a 2 in
     match Smtml.Expr.view v with
     | Val (Num (I32 _)) -> v
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
+  (* TODO: Smtml should do this. Make call to Expr.simplify *)
+  let try_to_remove_extract v =
+    match Smtml.Expr.view v with
+    | Extract ({ node = Concat (({ node = Ptr _; _ } as ptr), _); _ }, 8, 4) ->
+      ptr
+    | Extract ({ node = Concat (_, ({ node = Ptr _; _ } as ptr)); _ }, 4, 0) ->
+      ptr
+    | _ -> v
+
   let load_32 m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
-    Backend.loadn m.data a 4
+    let+ a = must_be_valid_address m.data a 4 in
+    try_to_remove_extract @@ Backend.loadn m.data a 4
 
   let load_64 m a =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data a in
+    let+ a = must_be_valid_address m.data a 8 in
     Backend.loadn m.data a 8
 
   let store_8 m ~addr v =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data addr in
+    let+ a = must_be_valid_address m.data addr 1 in
     Backend.storen m.data a v 1
 
   let store_16 m ~addr v =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data addr in
+    let+ a = must_be_valid_address m.data addr 2 in
     Backend.storen m.data a v 2
 
   let store_32 m ~addr v =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data addr in
+    let+ a = must_be_valid_address m.data addr 4 in
     Backend.storen m.data a v 4
 
   let store_64 m ~addr v =
     let open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_address m.data addr in
+    let+ a = must_be_valid_address m.data addr 8 in
     Backend.storen m.data a v 8
 
   let get_limit_max _m = None (* TODO *)

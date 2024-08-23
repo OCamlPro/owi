@@ -103,21 +103,31 @@ module Backend = struct
       Hashtbl.replace m.data a' v'
     done
 
-  let validate_address m a =
+  let validate_address m a range =
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | Val (Num (I32 _)) -> return (Ok a) (* An i32 is a valid address *)
-    | Ptr { base; offset } -> (
+    | Val (Num (I32 _)) ->
+      (* An i32 is not a pointer to a heap chunk, so its valid *)
+      return (Ok a)
+    | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
-      (* A pointer is valid if it's within bounds. *)
       match Hashtbl.find m.chunks base with
       | exception Not_found -> return (Error Trap.Memory_leak_use_after_free)
-      | size ->
-        let+ is_out_of_bounds = select (I32.ge_u offset size) in
+      | chunk_size ->
+        let+ is_out_of_bounds =
+          let range = const_i32 (Int32.of_int (range - 1)) in
+          (* end_offset: last byte we will read/write *)
+          let end_offset = I32.add start_offset range in
+          select
+            (Bool.or_
+               (I32.ge_u start_offset chunk_size)
+               (I32.ge_u end_offset chunk_size) )
+        in
         if is_out_of_bounds then Error Trap.Memory_heap_buffer_overflow
         else Ok a )
     | _ ->
-      (* A symbolic expression should be a valid address *)
+      (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
+      Log.debug2 "Saw a symbolic address: %a@." Expr.pp a;
       return (Ok a)
 
   let ptr v =
