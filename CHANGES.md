@@ -1,5 +1,6 @@
 ## unreleased
 
+- `wat2wasm` emit wasm files in same dir as wat files 
 - add `--emit-file` option to `wasm2wat` to emit .wat files
 - adds flags `--fail-on-trap-only` and `fail-on-assertion-only`
 - parameterize the `Thread` module on the symbolic memory and the `Choice_monad` module on a Thread
