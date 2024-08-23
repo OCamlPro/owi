@@ -939,15 +939,11 @@ module Make (P : Interpret_intf.P) :
       let* mem = Env.get_memory env mem_0 in
       let old_size = I64.of_int32 @@ Memory.size mem in
       let max_size = Memory.get_limit_max mem in
-      let delta, stack =
-        (* TODO: convert to unsigned *)
-        Stack.pop_i32 stack
-      in
+      let delta, stack = Stack.pop_i32 stack in
       let delta = I64.(of_int32 delta * page_size) in
       let new_size = I64.(old_size + delta) in
       let> too_big =
-        Bool.or_ I64.(delta < const_i64 0L)
-        @@ Bool.or_ I64.(ge_u new_size (page_size * page_size))
+        Bool.or_ I64.(ge_u new_size (page_size * page_size))
         @@
         match max_size with
         | Some max -> I64.(new_size > max * page_size)
