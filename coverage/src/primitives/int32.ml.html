@@ -358,33 +358,33 @@ let of_int64 = Int64.to_int32
 let to_int64 = Int64.of_int32
 
 (* Unsigned comparison in terms of signed comparison. *)
-let cmp_u x op y = <span data-count="1856643">o</span>p (ad<span data-count="1856643">d</span> x min_int) (ad<span data-count="1856643">d</span> y min_int)
+let cmp_u x op y = <span data-count="5326814">o</span>p (ad<span data-count="5326814">d</span> x min_int) (ad<span data-count="5326814">d</span> y min_int)
 
 let eq (x : int32) y = <span data-count="3692578">e</span>qual x y
 
-let ne (x : int32) y = <span data-count="17264852">c</span>ompar<span data-count="17264860">e</span> x y &lt;&gt; 0
+let ne (x : int32) y = <span data-count="17264800">c</span>ompar<span data-count="17264807">e</span> x y &lt;&gt; 0
 
-let lt (x : int32) y = <span data-count="11256957">c</span>ompar<span data-count="11256957">e</span> x y &lt; 0
+let lt (x : int32) y = <span data-count="5890945">c</span>ompar<span data-count="5890945">e</span> x y &lt; 0
 
-let gt (x : int32) y = <span data-count="8935">c</span>ompar<span data-count="8935">e</span> x y &gt; 0
+let gt (x : int32) y = <span data-count="6151">c</span>ompar<span data-count="6151">e</span> x y &gt; 0
 
 let le (x : int32) y = <span data-count="2638712">c</span>ompar<span data-count="2638712">e</span> x y &lt;= 0
 
-let ge (x : int32) y = <span data-count="874653">c</span>ompar<span data-count="874653">e</span> x y &gt;= 0
+let ge (x : int32) y = <span data-count="874587">c</span>ompar<span data-count="874587">e</span> x y &gt;= 0
 
-let lt_u x y = <span data-count="198549">c</span>mp_u x lt y
+let lt_u x y = <span data-count="2055286">c</span>mp_u x lt y
 
-let le_u x y = <span data-count="870476">c</span>mp_u x le y
+let le_u x y = <span data-count="2480028">c</span>mp_u x le y
 
-let gt_u x y = <span data-count="171">c</span>mp_u x gt y
+let gt_u x y = <span data-count="3245">c</span>mp_u x gt y
 
-let ge_u x y = <span data-count="787447">c</span>mp_u x ge y
+let ge_u x y = <span data-count="788255">c</span>mp_u x ge y
 
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="214632">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="214633">t</span> (Int64.shift_lef<span data-count="214634">t</span> (Int64.of_int3<span data-count="214627">2</span> x) 32) 32
+  <span data-count="214481">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="214481">t</span> (Int64.shift_lef<span data-count="214482">t</span> (Int64.of_int3<span data-count="214480">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
@@ -396,11 +396,11 @@ let low_int = shift_lef<span data-count="884">t</span> minus_one 31
 let high_int = logxo<span data-count="884">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="2818947">f</span> x (to_in<span data-count="2818613">t</span> (logan<span data-count="2818333">d</span> y 31l))
+let shift f x y = <span data-count="2818695">f</span> x (to_in<span data-count="2818567">t</span> (logan<span data-count="2818680">d</span> y 31l))
 
-let shl x y = <span data-count="171192">s</span>x (shif<span data-count="171176">t</span> shift_left x y)
+let shl x y = <span data-count="171029">s</span>x (shif<span data-count="171027">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="2604274">s</span>hift shift_right x y
+let shr_s x y = <span data-count="2604184">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="43454">s</span>x (shif<span data-count="43454">t</span> shift_right_logical x y)
 
@@ -413,8 +413,8 @@ let rotr x y =
   <span data-count="28">l</span>ogor (shr_<span data-count="28">u</span> x n) (sh<span data-count="28">l</span> x (su<span data-count="28">b</span> 32l n))
 
 let extend_s n x =
-  <span data-count="404">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="404">t</span> x shift) shift
+  <span data-count="403">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="403">t</span> x shift) shift
 
 (* String conversion that allows leading signs and unsigned values *)
 

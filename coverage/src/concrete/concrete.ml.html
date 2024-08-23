@@ -60,34 +60,20 @@
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
-<a id="L39"></a><span > </span>
-<a id="L40"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span > </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span > </span>
-<a id="L56"></a><span > </span>
-<a id="L57"></a><span > </span>
-<a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
-<a id="L60"></a><span > </span>
-<a id="L61"></a><span class="visited"> </span>
-<a id="L62"></a><span > </span>
-<a id="L63"></a><span class="visited"> </span>
-<a id="L64"></a><span > </span>
-<a id="L65"></a><span class="visited"> </span>
-<a id="L66"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -144,20 +130,6 @@
 <a href="#L50">50</a>
 <a href="#L51">51</a>
 <a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -192,27 +164,13 @@ module Data = struct
 end
 
 module Env = struct
+  include Link_env
+
   type t = Concrete_value.Func.extern_func Link_env.t
 
-  let get_memory = Link_env.get_memory
-
-  let get_func = Link_env.get_func
-
-  let get_table = Link_env.get_table
-
-  let get_elem = Link_env.get_elem
-
   let get_data env n =
-    <span data-count="816">l</span>et data = Link_env.get_data env n in
+    <span data-count="816">l</span>et data = get_data env n in
     <span data-count="816">C</span>hoice.return data
-
-  let get_global = Link_env.get_global
-
-  let get_extern_func = Link_env.get_extern_func
-
-  let drop_elem = Link_env.drop_elem
-
-  let drop_data = Link_env.drop_data
 end
 
 module Module_to_run = struct

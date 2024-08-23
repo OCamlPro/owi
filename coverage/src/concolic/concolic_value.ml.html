@@ -1154,12 +1154,12 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
   [@@inline always]
 
   let f_pair_2 fc fs cs1 cs2 =
-    <span data-count="652461">{</span> concrete = f<span data-count="652461">c</span> cs1.concrete cs2.concrete
-    ; symbolic = f<span data-count="652461">s</span> cs1.symbolic cs2.symbolic
+    <span data-count="515579">{</span> concrete = f<span data-count="515579">c</span> cs1.concrete cs2.concrete
+    ; symbolic = f<span data-count="515579">s</span> cs1.symbolic cs2.symbolic
     }
   [@@inline always]
 
-  let f_pair_1_cst fc fs v = <span data-count="440624">{</span> concrete = f<span data-count="440624">c</span> v; symbolic = f<span data-count="440624">s</span> v }
+  let f_pair_1_cst fc fs v = <span data-count="367761">{</span> concrete = f<span data-count="367761">c</span> v; symbolic = f<span data-count="367761">s</span> v }
   [@@inline always]
 
   let f_pair_2_cst fc fs v1 v2 = <span data-count="0">{</span> concrete = f<span data-count="0">c</span> v1 v2; symbolic = f<span data-count="0">s</span> v1 v2 }
@@ -1169,7 +1169,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     <span data-count="5741">{</span> concrete = f<span data-count="5741">c</span> cs.concrete v2; symbolic = f<span data-count="5741">s</span> cs.symbolic v2 }
   [@@inline always]
 
-  let const_i32 v = <span data-count="438114">f</span>_pair_1_cst C.const_i32 S.const_i32 v
+  let const_i32 v = <span data-count="365251">f</span>_pair_1_cst C.const_i32 S.const_i32 v
 
   let const_i64 v = <span data-count="2294">f</span>_pair_1_cst C.const_i64 S.const_i64 v
 
