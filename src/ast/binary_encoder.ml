@@ -763,7 +763,8 @@ let write_file filename content =
   let _dir, filename = Fpath.split_base filename in
   let filename, _ext = Fpath.split_ext filename in
   let filename = Fpath.add_ext ".wasm" filename in
-  let filename = Fpath.to_string filename in
+  let fullpath = Fpath.add_seg _dir (Fpath.to_string filename) in
+  let filename = Fpath.to_string fullpath in
   let oc = Out_channel.open_bin filename in
   Out_channel.output_string oc content;
   Out_channel.close oc
