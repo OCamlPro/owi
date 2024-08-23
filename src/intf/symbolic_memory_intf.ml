@@ -15,9 +15,13 @@ module type M = sig
 
   val storen : t -> address -> Smtml.Expr.t -> int -> unit
 
+  (** [validate_address m a range] verifies whether an operation starting at
+      address [a] is valid within the address range [a] to [a + range - 1]
+      (inclusive). *)
   val validate_address :
        t
     -> Smtml.Expr.t
+    -> int
     -> (Smtml.Expr.t, Trap.t) result Symbolic_choice_without_memory.t
 
   val realloc :
