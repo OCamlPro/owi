@@ -802,9 +802,7 @@ module Make (P : Interpret_intf.P) :
     match ref_kind with
     | Func_ht ->
       let size = Table.size t in
-      let> out_of_bounds =
-        Bool.or_ I32.(fun_i < const 0l) @@ I32.(consti size <= fun_i)
-      in
+      let> out_of_bounds = I32.(le_u (consti size) fun_i) in
       if out_of_bounds then Choice.trap Undefined_element
       else
         let* fun_i = Choice.select_i32 fun_i in
@@ -946,7 +944,7 @@ module Make (P : Interpret_intf.P) :
         Bool.or_ I64.(ge_u new_size (page_size * page_size))
         @@
         match max_size with
-        | Some max -> I64.(new_size > max * page_size)
+        | Some max -> I64.(gt_u new_size (max * page_size))
         | None ->
           (* TODO: replace by false... *)
           I64.(const_i64 0L <> const_i64 0L)
@@ -1074,8 +1072,8 @@ module Make (P : Interpret_intf.P) :
         Bool.and_
           ( match Table.max_size t with
           | None -> Bool.const true
-          | Some max -> I32.ge (consti max) new_size )
-        @@ Bool.and_ (I32.ge new_size (const 0l)) (I32.ge new_size size)
+          | Some max -> I32.ge_u (consti max) new_size )
+          (I32.ge_u new_size size)
       in
       let> allowed in
       if not allowed then
@@ -1091,12 +1089,7 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
-      let> out_of_bounds =
-        Bool.or_ (I32.lt len (const 0l))
-        @@ Bool.or_
-             (I32.lt pos (const 0l))
-             (I32.gt I32.(pos + len) (consti (Table.size t)))
-      in
+      let> out_of_bounds = I32.gt_u I32.(pos + len) (consti (Table.size t)) in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
         let* pos = Choice.select_i32 pos in
@@ -1113,9 +1106,9 @@ module Make (P : Interpret_intf.P) :
       let> out_of_bounds =
         let t_src_len = Table.size t_src in
         let t_dst_len = Table.size t_dst in
-        Bool.or_ (I32.gt I32.(src + len) (consti t_src_len))
-        @@ Bool.or_ (I32.gt I32.(dst + len) (consti t_dst_len))
-        @@ Bool.or_ (I32.lt len (const 0l))
+        Bool.or_ (I32.gt_u I32.(src + len) (consti t_src_len))
+        @@ Bool.or_ (I32.gt_u I32.(dst + len) (consti t_dst_len))
+        (* TODO: I don't understand why this last one check is needed... *)
         @@ Bool.or_ (I32.lt src (const 0l)) (I32.lt dst (const 0l))
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
@@ -1143,18 +1136,10 @@ module Make (P : Interpret_intf.P) :
       let table_size = Table.size t in
       let elem_len = Elem.size elem in
       let> out_of_bounds =
-        Bool.or_ I32.(pos_x + len > consti elem_len)
-        @@ Bool.or_ I32.(pos + len > consti table_size)
-        (* TODO: this is dumb, why do we have to fail even when len = 0 ?
-           * I don't remember where exactly but somewhere else it's the opposite:
-           * if len is 0 then we do not fail...
-           * if it wasn't needed, the following check would be useless
-           * as the next one would take care of it
-           * (or maybe not because we don't want to fail
-           * in the middle of the loop but still...)*)
-        @@ Bool.or_ I32.(const 0l > len)
-        @@ Bool.or_ I32.(const 0l > pos)
-        @@ I32.(const 0l > pos_x)
+        Bool.or_ I32.(gt_u (pos_x + len) (consti elem_len))
+        @@ Bool.or_
+             I32.(gt_u (pos + len) (consti table_size))
+             I32.(const 0l > pos)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_table_access
       else begin
@@ -1182,10 +1167,9 @@ module Make (P : Interpret_intf.P) :
       let addr = I32.(pos + offset) in
       let> out_of_bounds =
         Bool.or_ I32.(offset < const 0l)
-        @@ Bool.or_ I32.(Memory.size mem < addr + const 2l)
-        @@ Bool.or_ I32.(pos < const 0l)
-        @@ Bool.or_ I32.(addr + const 2l < const 0l)
-        @@ I32.(addr < const 0l)
+        @@ Bool.or_
+             I32.(lt_u (Memory.size mem) (addr + const 2l))
+             I32.(pos < const 0l)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
@@ -1205,10 +1189,9 @@ module Make (P : Interpret_intf.P) :
       let addr = I32.(pos + offset) in
       let> out_of_bounds =
         Bool.or_ I32.(offset < const 0l)
-        @@ Bool.or_ I32.(Memory.size mem < addr + const 1l)
-        @@ Bool.or_ I32.(pos < const 0l)
-        @@ Bool.or_ I32.(addr + const 1l < const 0l)
-        @@ I32.(addr < const 0l)
+        @@ Bool.or_
+             I32.(lt_u (Memory.size mem) (addr + const 1l))
+             I32.(pos < const 0l)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
@@ -1236,10 +1219,9 @@ module Make (P : Interpret_intf.P) :
       let addr = I32.(pos + offset) in
       let> out_of_bounds =
         Bool.or_ I32.(offset < const 0l)
-        @@ Bool.or_ I32.(Memory.size mem < addr + const 1l)
-        @@ Bool.or_ I32.(pos < const 0l)
-        @@ Bool.or_ I32.(addr + const 1l < const 0l)
-        @@ I32.(addr < const 0l)
+        @@ Bool.or_
+             I32.(lt_u (Memory.size mem) (addr + const 1l))
+             I32.(pos < const 0l)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
@@ -1254,9 +1236,7 @@ module Make (P : Interpret_intf.P) :
       let offset = const offset in
       let addr = I32.(pos + offset) in
       let> out_of_bounds =
-        Bool.or_ I32.(offset < const 0l)
-        @@ Bool.or_ I32.(pos < const 0l)
-        @@ I32.(addr < const 0l)
+        Bool.or_ I32.(offset < const 0l) I32.(pos < const 0l)
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
@@ -1421,8 +1401,7 @@ module Make (P : Interpret_intf.P) :
       let pos, stack = Stack.pop_i32 stack in
       let addr = I32.(pos + offset) in
       let> out_of_bounds =
-        Bool.or_ I32.(offset < const 0l)
-        @@ Bool.or_ I32.(pos < const 0l)
+        Bool.or_ I32.(pos < const 0l)
         @@ I32.(lt_u memory_length (addr + const 4l))
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
@@ -1436,11 +1415,7 @@ module Make (P : Interpret_intf.P) :
       st stack
     | Br_table (inds, Raw i) ->
       let target, stack = Stack.pop_i32 stack in
-      let> out =
-        Bool.or_
-          I32.(target < const 0l)
-          I32.(target >= const (Int32.of_int (Array.length inds)))
-      in
+      let> out = I32.(ge_u target (const (Int32.of_int (Array.length inds)))) in
       let* target =
         if out then return i
         else
