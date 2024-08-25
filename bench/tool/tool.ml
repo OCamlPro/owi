@@ -58,8 +58,12 @@ let wait_pid =
     let stime = stime_diff in
     let clock = end_time -. start_time in
 
+    (* Sometimes the clock goes a little bit above the allowed timeout... *)
+    let clock = min clock timeout in
     let rusage = { Report.Rusage.clock; utime; stime } in
-    if !did_timeout then Report.Run_result.Timeout rusage
+
+    if !did_timeout || Float.equal clock timeout then
+      Report.Run_result.Timeout rusage
     else
       match status with
       | WEXITED code -> begin
