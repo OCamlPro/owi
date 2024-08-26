@@ -54,8 +54,8 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     in
     Bt_raw (Some idx, t)
 
-let rewrite_expr (modul : Assigned.t) (locals : binary param list)
-  (iexpr : text expr) : binary expr Result.t =
+let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (locals : binary param list) (iexpr : text expr) : binary expr Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -75,6 +75,14 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     if id > List.length block_ids + loop_count then
       Error (`Unknown_label (Raw id))
     else Ok (Raw id)
+  in
+
+  (* block_types handling *)
+  let block_ty_opt_rewrite = function
+    | Some bt ->
+      let+ bt = rewrite_block_type typemap modul bt in
+      Some bt
+    | None -> Ok None
   in
 
   let* locals, _after_last_assigned_local =
@@ -132,50 +140,32 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
       let id = find_local id in
       Ok (Local_tee id)
     | If_else (id, bt, e1, e2) ->
-      let* bt =
-        match bt with
-        | Some bt ->
-          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
-          Some bt
-        | None -> Ok None
-      in
+      let* bt = block_ty_opt_rewrite bt in
       let block_ids = id :: block_ids in
       let* e1 = expr e1 (loop_count, block_ids) in
       let+ e2 = expr e2 (loop_count, block_ids) in
       If_else (id, bt, e1, e2)
     | Loop (id, bt, e) ->
-      let* bt =
-        match bt with
-        | Some bt ->
-          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
-          Some bt
-        | None -> Ok None
-      in
+      let* bt = block_ty_opt_rewrite bt in
       let+ e = expr e (loop_count + 1, id :: block_ids) in
       Loop (id, bt, e)
     | Block (id, bt, e) ->
-      let* bt =
-        match bt with
-        | Some bt ->
-          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
-          Some bt
-        | None -> Ok None
-      in
+      let* bt = block_ty_opt_rewrite bt in
       let+ e = expr e (loop_count, id :: block_ids) in
       Block (id, bt, e)
     | Call_indirect (tbl_i, bt) ->
       let tbl_i = find_table tbl_i in
-      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+      let+ bt = rewrite_block_type typemap modul bt in
       Call_indirect (tbl_i, bt)
     | Return_call_indirect (tbl_i, bt) ->
       let tbl_i = find_table tbl_i in
-      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+      let+ bt = rewrite_block_type typemap modul bt in
       Return_call_indirect (tbl_i, bt)
     | Call_ref t ->
       let t = find_type t in
       Ok (Call_ref t)
     | Return_call_ref bt ->
-      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+      let+ bt = rewrite_block_type typemap modul bt in
       Return_call_ref bt
     | Global_set id ->
       let idx = find_global modul id in
@@ -277,16 +267,16 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   in
   expr iexpr (0, [])
 
-let rewrite_global (modul : Assigned.t) (global : Text.global) :
-  Binary.global Result.t =
-  let* init = rewrite_expr modul [] global.init in
+let rewrite_global (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (global : Text.global) : Binary.global Result.t =
+  let* init = rewrite_expr typemap modul [] global.init in
   let mut, val_type = global.typ in
   let+ val_type = Binary_types.convert_val_type None val_type in
   let typ = (mut, val_type) in
   { Binary.id = global.id; init; typ }
 
-let rewrite_elem (modul : Assigned.t) (elem : Text.elem) : Binary.elem Result.t
-    =
+let rewrite_elem (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (elem : Text.elem) : Binary.elem Result.t =
   let* (mode : Binary.elem_mode) =
     match elem.mode with
     | Elem_declarative -> Ok Binary.Elem_declarative
@@ -294,22 +284,22 @@ let rewrite_elem (modul : Assigned.t) (elem : Text.elem) : Binary.elem Result.t
     | Elem_active (None, _expr) -> assert false
     | Elem_active (Some id, expr) ->
       let (Raw indice) = find modul.table id in
-      let+ expr = rewrite_expr modul [] expr in
+      let+ expr = rewrite_expr typemap modul [] expr in
       Binary.Elem_active (Some indice, expr)
   in
-  let* init = list_map (rewrite_expr modul []) elem.init in
+  let* init = list_map (rewrite_expr typemap modul []) elem.init in
   let+ typ = Binary_types.convert_ref_type None elem.typ in
   { Binary.init; mode; id = elem.id; typ }
 
-let rewrite_data (modul : Assigned.t) (data : Text.data) : Binary.data Result.t
-    =
+let rewrite_data (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (data : Text.data) : Binary.data Result.t =
   let+ mode =
     match data.mode with
     | Data_passive -> Ok Binary.Data_passive
     | Data_active (None, _expr) -> assert false
     | Data_active (Some indice, expr) ->
       let (Raw indice) = find_memory modul indice in
-      let+ expr = rewrite_expr modul [] expr in
+      let+ expr = rewrite_expr typemap modul [] expr in
       Binary.Data_active (indice, expr)
   in
   { Binary.mode; id = data.id; init = data.init }
@@ -336,7 +326,7 @@ let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     rewrite_block_type typemap modul type_f
   in
   let* locals = list_map (Binary_types.convert_param None) locals in
-  let+ body = rewrite_expr modul (params @ locals) body in
+  let+ body = rewrite_expr typemap modul (params @ locals) body in
   { body; type_f; id; locals }
 
 let rewrite_import (f : 'a -> 'b Result.t) (import : 'a Imported.t) :
@@ -376,13 +366,15 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let typemap = typemap modul.typ in
   let* global =
     let+ { Named.named; values } =
-      rewrite_named (rewrite_runtime (rewrite_global modul) ok) modul.global
+      rewrite_named
+        (rewrite_runtime (rewrite_global typemap modul) ok)
+        modul.global
     in
     let values = List.rev values in
     { Named.named; values }
   in
-  let* elem = rewrite_named (rewrite_elem modul) modul.elem in
-  let* data = rewrite_named (rewrite_data modul) modul.data in
+  let* elem = rewrite_named (rewrite_elem typemap modul) modul.elem in
+  let* data = rewrite_named (rewrite_data typemap modul) modul.data in
   let exports = rewrite_exports modul modul.exports in
   let* func =
     let import = rewrite_import (rewrite_block_type typemap modul) in

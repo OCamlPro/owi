@@ -106,15 +106,13 @@ let add_mem value (fields : t) (curr : curr) =
 let rec extract_block_types expr =
   let aux instr =
     match instr with
-    | Block (_str_opt, bt, expr1) ->
-      Option.to_list bt @ extract_block_types expr1
-    | Loop (_str_opt, bt, expr1) ->
+    | Block (_str_opt, bt, expr1) | Loop (_str_opt, bt, expr1) ->
       Option.to_list bt @ extract_block_types expr1
     | If_else (_str_opt, bt, expr1, expr2) ->
       Option.to_list bt @ extract_block_types expr1 @ extract_block_types expr2
-    | Return_call_indirect (_ind, bt) -> [ bt ]
-    | Return_call_ref bt -> [ bt ]
-    | Call_indirect (_ind, bt) -> [ bt ]
+    | Return_call_indirect (_, bt) | Return_call_ref bt | Call_indirect (_, bt)
+      ->
+      [ bt ]
     | _ -> []
   in
   List.concat_map aux expr
@@ -124,8 +122,7 @@ let add_func value (fields : t) (curr : curr) =
     match value with
     | Runtime.Local func ->
       let fields = declare_func_type fields func.type_f in
-      let temp = extract_block_types func.body in
-      List.fold_left declare_func_type fields temp
+      List.fold_left declare_func_type fields (extract_block_types func.body)
     | Imported func -> declare_func_type fields func.desc
   in
   let index = !(curr.func) in
