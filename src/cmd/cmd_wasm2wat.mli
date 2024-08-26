@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : Fpath.t -> bool -> string option -> unit Result.t
+val cmd : Fpath.t -> bool -> Fpath.t option -> unit Result.t

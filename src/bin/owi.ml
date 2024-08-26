@@ -46,8 +46,13 @@ let sourcefile ty =
 
 let outfile ty =
   let doc = Fmt.str "%s" ty in
+  let string_to_path =
+    Cmdliner.Arg.conv ~docv:"FILE" (Fpath.of_string, Fpath.pp)
+  in
   Cmdliner.Arg.(
-    value & opt (some string) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
+    value
+    & opt (some string_to_path) None
+    & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
 let emit_files =
   let doc = "emit (.wat) files from corresponding (.wasm) files" in
@@ -191,7 +196,8 @@ let opt_cmd =
     let man = [] @ shared_man in
     Cmd.info "opt" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ files)
+  Cmd.v info
+    Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile "wat" $ outfile "wat")
 
 let run_cmd =
   let open Cmdliner in
@@ -260,7 +266,8 @@ let wasm2wat_cmd =
     Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_wasm2wat.cmd $ sourcefile "wasm" $ emit_files $ outfile "wasm")
+    Term.(
+      const Cmd_wasm2wat.cmd $ sourcefile "wasm" $ emit_files $ outfile "wasm" )
 
 let wat2wasm_cmd =
   let open Cmdliner in

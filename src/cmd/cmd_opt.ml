@@ -7,11 +7,15 @@ open Syntax
 let optimize_file ~unsafe filename =
   Compile.File.until_optimize ~unsafe ~optimize:true filename
 
-let cmd debug unsafe files =
+let print_or_emit ~unsafe file outfile =
+  let+ m = optimize_file ~unsafe file in
+  let m = Binary_to_text.modul m in
+  match outfile with
+  | Some name -> Bos.OS.File.writef name "%a@\n" Text.pp_modul m
+  | None -> Ok (Fmt.pr "%a@\n" Text.pp_modul m)
+
+let cmd debug unsafe file outfile =
   if debug then Log.debug_on := true;
-  list_iter
-    (fun file ->
-      let+ m = optimize_file ~unsafe file in
-      let m = Binary_to_text.modul m in
-      Fmt.pr "%a@\n" Text.pp_modul m )
-    files
+  match print_or_emit ~unsafe file outfile with
+  | Error _ -> raise Exit
+  | Ok _ -> Ok ()
