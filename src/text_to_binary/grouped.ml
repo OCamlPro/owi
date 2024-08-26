@@ -77,7 +77,7 @@ let init_curr () =
   ; data = ref 0
   }
 
-let declare_func_type type_f (fields : t) =
+let declare_func_type (fields : t) type_f =
   match type_f with
   | Bt_ind _ -> fields
   | Bt_raw (id, typ) ->
@@ -103,13 +103,31 @@ let add_mem value (fields : t) (curr : curr) =
   incr curr.mem;
   { fields with mem = Indexed.return index value :: fields.mem }
 
-let add_func value (fields : t) (curr : curr) =
-  let func_type =
-    match value with
-    | Runtime.Local func -> func.type_f
-    | Imported func -> func.desc
+let rec extract_block_types expr =
+  let aux instr =
+    match instr with
+    | Block (_str_opt, bt, expr1) ->
+      Option.to_list bt @ extract_block_types expr1
+    | Loop (_str_opt, bt, expr1) ->
+      Option.to_list bt @ extract_block_types expr1
+    | If_else (_str_opt, bt, expr1, expr2) ->
+      Option.to_list bt @ extract_block_types expr1 @ extract_block_types expr2
+    | Return_call_indirect (_ind, bt) -> [ bt ]
+    | Return_call_ref bt -> [ bt ]
+    | Call_indirect (_ind, bt) -> [ bt ]
+    | _ -> []
   in
-  let fields = declare_func_type func_type fields in
+  List.concat_map aux expr
+
+let add_func value (fields : t) (curr : curr) =
+  let fields =
+    match value with
+    | Runtime.Local func ->
+      let fields = declare_func_type fields func.type_f in
+      let temp = extract_block_types func.body in
+      List.fold_left declare_func_type fields temp
+    | Imported func -> declare_func_type fields func.desc
+  in
   let index = !(curr.func) in
   incr curr.func;
   { fields with func = Indexed.return index value :: fields.func }

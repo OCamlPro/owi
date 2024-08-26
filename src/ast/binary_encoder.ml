@@ -117,7 +117,7 @@ let write_block_type buf (typ : binary block_type option) =
   match typ with
   | None | Some (Bt_raw (None, ([], []))) -> Buffer.add_char buf '\x40'
   | Some (Bt_raw (None, ([], [ vt ]))) -> write_valtype buf vt
-  | Some (Bt_raw (None, (pt, _))) -> write_paramtype buf pt
+  | Some (Bt_raw (Some idx, _)) -> write_indice buf idx
   (* TODO: memo
      will this pattern matching be enough with the use of the new modul.types field?
   *)

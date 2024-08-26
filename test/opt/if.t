@@ -4,6 +4,8 @@ if then else instruction:
   (module
     
     (type (sub final  (func)))
+    
+    (type (sub final  (func (result i32))))
     (func $start
       (block (result i32)
         i32.const 42)

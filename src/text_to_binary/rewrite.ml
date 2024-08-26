@@ -34,6 +34,26 @@ let find_global (modul : Assigned.t) id : binary indice = find modul.global id
 
 let find_memory (modul : Assigned.t) id : binary indice = find modul.mem id
 
+let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
+  (block_type : text block_type) : binary block_type Result.t =
+  match block_type with
+  | Bt_ind id -> begin
+    let+ v = get (`Unknown_type id) modul.typ id in
+    match Indexed.get v with
+    | Def_func_t t' ->
+      let idx = Indexed.get_index v in
+      Bt_raw (Some (Raw idx), t')
+    | _ -> assert false
+  end
+  | Bt_raw (_, func_type) ->
+    let+ t = Binary_types.convert_func_type None func_type in
+    let idx =
+      match TypeMap.find_opt (Def_func_t t) typemap with
+      | None -> assert false
+      | Some idx -> idx
+    in
+    Bt_raw (Some idx, t)
+
 let rewrite_expr (modul : Assigned.t) (locals : binary param list)
   (iexpr : text expr) : binary expr Result.t =
   (* block_ids handling *)
@@ -55,37 +75,6 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     if id > List.length block_ids + loop_count then
       Error (`Unknown_label (Raw id))
     else Ok (Raw id)
-  in
-
-  let bt_some_to_raw : text block_type -> binary block_type Result.t = function
-    | Bt_ind ind -> begin
-      let+ v = get (`Unknown_type ind) modul.typ ind in
-      match Indexed.get v with
-      | Def_func_t t' ->
-        let idx = Indexed.get_index v in
-        Bt_raw (Some (Raw idx), t')
-      | _ -> assert false
-    end
-    | Bt_raw (type_use, t) -> (
-      let* t = Binary_types.convert_func_type None t in
-      match type_use with
-      | None -> Ok (Bt_raw (None, t))
-      | Some ind ->
-        (* we check that the explicit type match the type_use, we have to remove parameters names to do so *)
-        let* t' =
-          let+ v = get (`Unknown_type ind) modul.typ ind in
-          match Indexed.get v with Def_func_t t' -> t' | _ -> assert false
-        in
-        let ok = Types.func_type_eq t t' in
-        if not ok then Error `Inline_function_type else Ok (Bt_raw (None, t)) )
-  in
-
-  let bt_to_raw : text block_type option -> binary block_type option Result.t =
-    function
-    | None -> Ok None
-    | Some bt ->
-      let+ raw = bt_some_to_raw bt in
-      Some raw
   in
 
   let* locals, _after_last_assigned_local =
@@ -143,32 +132,50 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
       let id = find_local id in
       Ok (Local_tee id)
     | If_else (id, bt, e1, e2) ->
-      let* bt = bt_to_raw bt in
+      let* bt =
+        match bt with
+        | Some bt ->
+          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+          Some bt
+        | None -> Ok None
+      in
       let block_ids = id :: block_ids in
       let* e1 = expr e1 (loop_count, block_ids) in
       let+ e2 = expr e2 (loop_count, block_ids) in
       If_else (id, bt, e1, e2)
     | Loop (id, bt, e) ->
-      let* bt = bt_to_raw bt in
+      let* bt =
+        match bt with
+        | Some bt ->
+          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+          Some bt
+        | None -> Ok None
+      in
       let+ e = expr e (loop_count + 1, id :: block_ids) in
       Loop (id, bt, e)
     | Block (id, bt, e) ->
-      let* bt = bt_to_raw bt in
+      let* bt =
+        match bt with
+        | Some bt ->
+          let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
+          Some bt
+        | None -> Ok None
+      in
       let+ e = expr e (loop_count, id :: block_ids) in
       Block (id, bt, e)
     | Call_indirect (tbl_i, bt) ->
       let tbl_i = find_table tbl_i in
-      let+ bt = bt_some_to_raw bt in
+      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
       Call_indirect (tbl_i, bt)
     | Return_call_indirect (tbl_i, bt) ->
       let tbl_i = find_table tbl_i in
-      let+ bt = bt_some_to_raw bt in
+      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
       Return_call_indirect (tbl_i, bt)
     | Call_ref t ->
       let t = find_type t in
       Ok (Call_ref t)
     | Return_call_ref bt ->
-      let+ bt = bt_some_to_raw bt in
+      let+ bt = rewrite_block_type (typemap modul.typ) modul bt in
       Return_call_ref bt
     | Global_set id ->
       let idx = find_global modul id in
@@ -269,26 +276,6 @@ let rewrite_expr (modul : Assigned.t) (locals : binary param list)
     list_map (fun i -> body (loop_count, block_ids) i) e
   in
   expr iexpr (0, [])
-
-let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
-  (block_type : text block_type) : binary block_type Result.t =
-  match block_type with
-  | Bt_ind id -> begin
-    let+ v = get (`Unknown_type id) modul.typ id in
-    match Indexed.get v with
-    | Def_func_t t' ->
-      let idx = Indexed.get_index v in
-      Bt_raw (Some (Raw idx), t')
-    | _ -> assert false
-  end
-  | Bt_raw (_, func_type) ->
-    let+ t = Binary_types.convert_func_type None func_type in
-    let idx =
-      match TypeMap.find_opt (Def_func_t t) typemap with
-      | None -> assert false
-      | Some idx -> idx
-    in
-    Bt_raw (Some idx, t)
 
 let rewrite_global (modul : Assigned.t) (global : Text.global) :
   Binary.global Result.t =
