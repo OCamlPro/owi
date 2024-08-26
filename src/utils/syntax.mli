@@ -33,6 +33,12 @@ val list_fold_left :
   -> 'b list
   -> ('a, 'err) Prelude.Result.t
 
+val list_fold_left_map :
+     ('a -> 'b -> ('a * 'c, 'err) Prelude.Result.t)
+  -> 'a
+  -> 'b list
+  -> ('a * 'c list, 'err) Prelude.Result.t
+
 val array_iter :
      ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a array

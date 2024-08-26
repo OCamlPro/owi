@@ -9,21 +9,27 @@ open Syntax
 
 type type_env =
   { param_types : binary val_type array
+  ; binder_types : binary val_type array
   ; global_types : binary val_type array
   ; result_types : binary val_type array
+  ; binder : int -> binary indice
   ; result : int -> binary indice
-  ; owi_i32 : binary indice
-  ; owi_i64 : binary indice
-  ; owi_f32 : binary indice
-  ; owi_f64 : binary indice
-  ; owi_assume : binary indice
+  ; copy : binary expr
+  ; void_to_i32 : binary indice
+  ; i32_to_i32 : binary indice
+  ; _owi_i32 : binary indice
+  ; _owi_i64 : binary indice
+  ; _owi_f32 : binary indice
+  ; _owi_f64 : binary indice
+  ; _owi_assume : binary indice
   ; owi_assert : binary indice
   }
 
 let build_type_env (m : modul)
   (func_ty : binary param_type * binary result_type)
-  (owi_funcs : (string * int) array) : type_env =
+  (owi_funcs : (string * int) array) : type_env * modul =
   let param_types = Array.of_list (List.map snd (fst func_ty)) in
+  let binder_types = [||] in
   let global_types =
     Array.map
       (fun (x : (global, binary global_type) Runtime.t) ->
@@ -33,8 +39,37 @@ let build_type_env (m : modul)
       m.global
   in
   let result_types = Array.of_list (snd func_ty) in
-  let result i = Raw (Array.length param_types + i) in
-  let owi_i32 =
+  let binder i =
+    Raw (Array.length param_types + Array.length result_types + i)
+  in
+  let result i = Raw (Array.length param_types + i + 1) in
+  let copy =
+    [ Local_tee (Raw (Array.length param_types))
+    ; Local_get (Raw (Array.length param_types))
+    ]
+  in
+
+  let void_to_i32 =
+    [ (None, (Final, [], Def_func_t ([], [ Num_type I32 ]))) ]
+  in
+  let i32_to_i32 =
+    [ ( None
+      , (Final, [], Def_func_t ([ (None, Num_type I32) ], [ Num_type I32 ])) )
+    ]
+  in
+  let types = m.types in
+  let types, void_to_i32 =
+    match Array.find_index (rec_type_eq void_to_i32) types with
+    | Some i -> (types, Raw i)
+    | None -> (Array.append types [| void_to_i32 |], Raw (Array.length types))
+  in
+  let types, i32_to_i32 =
+    match Array.find_index (rec_type_eq i32_to_i32) types with
+    | Some i -> (types, Raw i)
+    | None -> (Array.append types [| i32_to_i32 |], Raw (Array.length types))
+  in
+
+  let _owi_i32 =
     match
       Array.find_index
         (fun (name, _) -> String.equal "i32_symbol" name)
@@ -43,7 +78,7 @@ let build_type_env (m : modul)
     | Some i -> Raw i
     | None -> assert false
   in
-  let owi_i64 =
+  let _owi_i64 =
     match
       Array.find_index
         (fun (name, _) -> String.equal "i64_symbol" name)
@@ -52,7 +87,7 @@ let build_type_env (m : modul)
     | Some i -> Raw i
     | None -> assert false
   in
-  let owi_f32 =
+  let _owi_f32 =
     match
       Array.find_index
         (fun (name, _) -> String.equal "f32_symbol" name)
@@ -61,7 +96,7 @@ let build_type_env (m : modul)
     | Some i -> Raw i
     | None -> assert false
   in
-  let owi_f64 =
+  let _owi_f64 =
     match
       Array.find_index
         (fun (name, _) -> String.equal "f64_symbol" name)
@@ -70,7 +105,7 @@ let build_type_env (m : modul)
     | Some i -> Raw i
     | None -> assert false
   in
-  let owi_assume =
+  let _owi_assume =
     match
       Array.find_index (fun (name, _) -> String.equal "assume" name) owi_funcs
     with
@@ -84,17 +119,23 @@ let build_type_env (m : modul)
     | Some i -> Raw i
     | None -> assert false
   in
-  { param_types
-  ; global_types
-  ; result_types
-  ; result
-  ; owi_i32
-  ; owi_i64
-  ; owi_f32
-  ; owi_f64
-  ; owi_assume
-  ; owi_assert
-  }
+  ( { param_types
+    ; binder_types
+    ; global_types
+    ; result_types
+    ; binder
+    ; result
+    ; copy
+    ; void_to_i32
+    ; i32_to_i32
+    ; _owi_i32
+    ; _owi_i64
+    ; _owi_f32
+    ; _owi_f64
+    ; _owi_assume
+    ; owi_assert
+    }
+  , { m with types } )
 
 let prop_true = I32_const (Int32.of_int 1)
 
@@ -209,7 +250,10 @@ let rec term_generate tenv (term : binary term) :
     if i < 0 || i >= Array.length tenv.global_types then
       Error (`Spec_invalid_indice (Int.to_string i))
     else Ok ([ Global_get id ], tenv.global_types.(i))
-  | BinderVar (Raw _i as _id) -> assert false
+  | BinderVar (Raw i) ->
+    if i < 0 || i >= Array.length tenv.binder_types then
+      Error (`Spec_invalid_indice (Int.to_string i))
+    else Ok ([ Local_get (tenv.binder i) ], tenv.binder_types.(i))
   | UnOp (u, tm1) ->
     let* expr1, ty1 = term_generate tenv tm1 in
     unop_generate u expr1 ty1
@@ -289,32 +333,161 @@ let binconnect_generate (b : binconnect) (expr1 : binary expr)
             (None, Some bt, expr2, (prop_true :: expr2) @ [ I_binop (S32, Xor) ])
         ] )
 
-let prop_generate tenv : binary prop -> binary expr Result.t =
-  let rec prop_generate_aux = function
-    | Const true -> Ok [ prop_true ]
-    | Const false -> Ok [ prop_false ]
+let bounded_quantification :
+     binary prop
+  -> (binder * binder_type * binary term * binary term * binary prop) Result.t =
+  function
+  | Binder (b, ((I32 | I64) as bt), _, pr1) -> (
+    match pr1 with
+    | BinConnect
+        ( Imply
+        , BinConnect
+            ( And
+            , BinPred (Ge, BinderVar (Raw 0), tm1)
+            , BinPred (Le, BinderVar (Raw 0), tm2) )
+        , pr2 ) ->
+      Ok (b, bt, tm1, tm2, pr2)
+    | _ -> Error `Unbounded_quantification )
+  | _ -> Error `Unbounded_quantification
+
+let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
+  let rec prop_generate_aux tenv = function
+    | Const true -> Ok (tenv, [ prop_true ])
+    | Const false -> Ok (tenv, [ prop_false ])
     | BinPred (b, tm1, tm2) ->
       let* expr1, ty1 = term_generate tenv tm1 in
       let* expr2, ty2 = term_generate tenv tm2 in
-      binpred_generate b expr1 ty1 expr2 ty2
+      let+ expr = binpred_generate b expr1 ty1 expr2 ty2 in
+      (tenv, expr)
     | UnConnect (u, pr1) ->
-      let* expr1 = prop_generate_aux pr1 in
-      unconnect_generate u expr1
+      let* tenv1, expr1 = prop_generate_aux tenv pr1 in
+      let+ expr = unconnect_generate u expr1 in
+      (tenv1, expr)
     | BinConnect (b, pr1, pr2) ->
-      let* expr1 = prop_generate_aux pr1 in
-      let* expr2 = prop_generate_aux pr2 in
-      binconnect_generate b expr1 expr2
-    | Binder (_b, bt, _, _pr1) -> (
-      match bt with
-      | I32 -> Ok [ Call tenv.owi_i32 ]
-      | I64 -> Ok [ Call tenv.owi_i64 ]
-      | F32 -> Ok [ Call tenv.owi_f32 ]
-      | F64 -> Ok [ Call tenv.owi_f64 ] )
-    (* TODO : quantifier checking *)
+      let* tenv1, expr1 = prop_generate_aux tenv pr1 in
+      let* tenv2, expr2 = prop_generate_aux tenv1 pr2 in
+      let+ expr = binconnect_generate b expr1 expr2 in
+      (tenv2, expr)
+    | Binder _ as pr1 ->
+      let* b, bt, lower, upper, pr2 = bounded_quantification pr1 in
+      let* lower, lower_ty = term_generate tenv lower in
+      let* upper, upper_ty = term_generate tenv upper in
+      if val_type_eq lower_ty upper_ty && val_type_eq (Num_type bt) lower_ty
+      then
+        let tenv =
+          { tenv with
+            binder_types = Array.append [| Num_type bt |] tenv.binder_types
+          ; binder =
+              (fun i ->
+                let (Raw i) = tenv.binder i in
+                Raw (i + 1) )
+          }
+        in
+        let+ tenv, expr1 = prop_generate_aux tenv pr2 in
+        match b with
+        | Forall ->
+          let init = lower @ [ Local_set (tenv.binder 0); prop_true ] in
+          let incr =
+            match bt with
+            | I32 ->
+              [ Local_get (tenv.binder 0)
+              ; I32_const (Int32.of_int 1)
+              ; I_binop (S32, Add)
+              ; Local_set (tenv.binder 0)
+              ]
+            | I64 ->
+              [ Local_get (tenv.binder 0)
+              ; I64_const (Int64.of_int 1)
+              ; I_binop (S64, Add)
+              ; Local_set (tenv.binder 0)
+              ]
+            | _ -> assert false
+          in
+          let check_smaller =
+            match bt with
+            | I32 ->
+              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S32, Le S) ]
+            | I64 ->
+              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S64, Le S) ]
+            | _ -> assert false
+          in
+          let loop_body =
+            expr1
+            @ [ I_binop (S32, And) ]
+            @ tenv.copy
+            @ [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
+            @ incr @ check_smaller @ [ Br_if (Raw 0) ]
+          in
+          let loop =
+            [ Loop
+                ( Some "__rac_loop"
+                , Some
+                    (Bt_raw
+                       ( Some tenv.i32_to_i32
+                       , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
+                , loop_body )
+            ]
+          in
+          ( tenv
+          , [ Block
+                ( Some "__rac_forall"
+                , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
+                , init @ loop )
+            ] )
+        | Exists ->
+          let init = lower @ [ Local_set (tenv.binder 0); prop_false ] in
+          let incr =
+            match bt with
+            | I32 ->
+              [ Local_get (tenv.binder 0)
+              ; I32_const (Int32.of_int 1)
+              ; I_binop (S32, Add)
+              ; Local_set (tenv.binder 0)
+              ]
+            | I64 ->
+              [ Local_get (tenv.binder 0)
+              ; I64_const (Int64.of_int 1)
+              ; I_binop (S64, Add)
+              ; Local_set (tenv.binder 0)
+              ]
+            | _ -> assert false
+          in
+          let check_smaller =
+            match bt with
+            | I32 ->
+              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S32, Le S) ]
+            | I64 ->
+              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S64, Le S) ]
+            | _ -> assert false
+          in
+          let loop_body =
+            expr1
+            @ [ I_binop (S32, Or) ]
+            @ tenv.copy
+            @ [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
+            @ incr @ check_smaller @ [ Br_if (Raw 0) ]
+          in
+          let loop =
+            [ Loop
+                ( Some "__rac_loop"
+                , Some
+                    (Bt_raw
+                       ( Some tenv.i32_to_i32
+                       , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
+                , loop_body )
+            ]
+          in
+          ( tenv
+          , [ Block
+                ( Some "__rac_exists"
+                , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
+                , init @ loop )
+            ] )
+      else Error `Unbounded_quantification
   in
   fun pr ->
-    let+ expr = prop_generate_aux pr in
-    expr @ [ Call tenv.owi_assert ]
+    let+ tenv, expr = prop_generate_aux tenv pr in
+    (tenv, expr @ [ Call tenv.owi_assert ])
 
 let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   (m : modul) : modul =
@@ -402,6 +575,12 @@ let subst_index ?(subst_custom = false) (old_index : int) (index : int)
   ; custom
   }
 
+let rec binder_locals = function
+  | UnConnect (_, pr1) -> binder_locals pr1
+  | BinConnect (_, pr1, pr2) -> binder_locals pr1 @ binder_locals pr2
+  | Binder (_, bt, _, pr1) -> Num_type bt :: binder_locals pr1
+  | _ -> []
+
 let contract_generate (owi_funcs : (string * int) array) (m : modul)
   ({ funcid = Raw old_index; preconditions; postconditions } : binary Contract.t)
   : modul Result.t =
@@ -424,12 +603,16 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
   let id = Fmt.str "__rac_%s" old_id in
   let index = func_num in
 
-  let tenv = build_type_env m old_type owi_funcs in
+  let tenv, m = build_type_env m old_type owi_funcs in
 
   let locals =
-    List.mapi
-      (fun i rt -> (Some Fmt.(str "__rac_res_%i" (i + 1)), rt))
-      (Array.to_list tenv.result_types)
+    [ (Some "__rac_temp", Num_type I32) ]
+    @ List.mapi
+        (fun i t -> (Some Fmt.(str "__rac_res_%i" i), t))
+        (Array.to_list tenv.result_types)
+    @ List.mapi
+        (fun i t -> (Some Fmt.(str "__rac_binder_%i" i), t))
+        (List.concat (List.map binder_locals (preconditions @ postconditions)))
   in
   let call =
     List.init (Array.length tenv.param_types) (fun i -> Local_get (Raw i))
@@ -441,8 +624,17 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
     List.init (Array.length tenv.result_types) (fun i ->
         Local_get (tenv.result i) )
   in
-  let* precond_checker = list_concat_map (prop_generate tenv) preconditions in
-  let+ postcond_checker = list_concat_map (prop_generate tenv) postconditions in
+
+  let* tenv, precond_checker =
+    list_fold_left_map prop_generate tenv preconditions
+  in
+  let precond_checker = List.concat precond_checker in
+
+  let+ _tenv, postcond_checker =
+    list_fold_left_map prop_generate tenv postconditions
+  in
+  let postcond_checker = List.concat postcond_checker in
+
   let body = precond_checker @ call @ postcond_checker @ return in
 
   let m = subst_index old_index index m in
