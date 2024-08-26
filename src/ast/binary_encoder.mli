@@ -3,7 +3,8 @@
 (* Written by the Owi programmers *)
 
 val convert :
-     Fpath.t
+     string option
+  -> Fpath.t
   -> unsafe:bool
   -> optimize:bool
   -> Text.modul

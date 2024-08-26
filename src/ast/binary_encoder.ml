@@ -759,18 +759,17 @@ let encode
   encode_section buf '\x0B' encode_datas data;
   Buffer.contents buf
 
-let write_file filename content =
+let write_file outfile filename content =
   let _dir, filename = Fpath.split_base filename in
-  let filename, _ext = Fpath.split_ext filename in
-  let filename = Fpath.add_ext ".wasm" filename in
-  let fullpath = Fpath.add_seg _dir (Fpath.to_string filename) in
-  let filename = Fpath.to_string fullpath in
+  let filename = Fpath.set_ext "wasm" filename in
+  let filename = match outfile with Some name -> Fpath.v name | None -> filename in
+  let filename = Fpath.to_string filename in
   let oc = Out_channel.open_bin filename in
   Out_channel.output_string oc content;
   Out_channel.close oc
 
-let convert (filename : Fpath.t) ~unsafe ~optimize m =
+let convert (outfile: string option) (filename : Fpath.t) ~unsafe ~optimize m =
   Log.debug0 "bin encoding ...@\n";
   let+ m = Compile.Text.until_optimize ~unsafe ~optimize m in
   let content = encode m in
-  write_file filename content
+  write_file outfile filename content
