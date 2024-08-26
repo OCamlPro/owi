@@ -115,6 +115,8 @@
     
     (type (sub final  (func (param i32) (result i64))))
     
+    (type (sub final  (func (result i64))))
+    
     (type (sub final  (func)))
     (func (param i32) (result i64) (local i32)
       i32.const 0
