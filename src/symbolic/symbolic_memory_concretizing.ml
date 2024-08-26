@@ -144,7 +144,8 @@ module Backend = struct
     let+ base = ptr p in
     if not @@ Hashtbl.mem m.chunks base then
       Fmt.failwith "Memory leak double free";
-    Hashtbl.remove m.chunks base
+    Hashtbl.remove m.chunks base;
+    Symbolic_value.const_i32 base
 
   let realloc m ~ptr ~size =
     let open Symbolic_choice_without_memory in

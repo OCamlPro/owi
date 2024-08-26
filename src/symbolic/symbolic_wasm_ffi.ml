@@ -48,7 +48,7 @@ module M :
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
     Choice.lift_mem @@ Memory.realloc m ~ptr:base ~size
 
-  let free m (ptr : Value.int32) : unit Choice.t =
+  let free m (ptr : Value.int32) : Value.int32 Choice.t =
     Choice.lift_mem @@ Memory.free m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = abort ()
@@ -98,7 +98,7 @@ let summaries_extern_module =
           (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
       , Symbolic.P.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R0), free) )
+          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
     ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ; ( "exit"
       , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )

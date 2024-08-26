@@ -39,7 +39,7 @@ module type S0 = sig
 
   val alloc : memory -> Value.int32 -> Value.int32 -> Value.int32 t
 
-  val free : memory -> Value.int32 -> unit t
+  val free : memory -> Value.int32 -> Value.int32 t
 
   val exit : Value.int32 -> unit t
 end

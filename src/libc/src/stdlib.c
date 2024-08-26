@@ -43,11 +43,11 @@ void *calloc(size_t nmemb, size_t size) {
 
 void *realloc(void *ptr, size_t size) {
   // TODO: fix
-  owi_free(ptr);
+  (void) owi_free(ptr);
   return (void *)owi_malloc(ptr, size);
 }
 
-void free(void *ptr) { owi_free(ptr); }
+void free(void *ptr) { (void) owi_free(ptr); }
 
 char *getenv(const char *name) { return (char *)0; }
 int setenv(const char *name, const char *value, int overwrite) { return 0; }

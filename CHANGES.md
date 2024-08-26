@@ -1,6 +1,7 @@
 ## unreleased
 
 - add `--output` option to `wat2wasm`, `wasm2wat` and `opt` cmd
+- Change `free` prototype to now return a pointer on which tracking is deactivated
 - add `--emit-file` option to `wasm2wat` to emit .wat files
 - adds flags `--fail-on-trap-only` and `fail-on-assertion-only`
 - parameterize the `Thread` module on the symbolic memory and the `Choice_monad` module on a Thread

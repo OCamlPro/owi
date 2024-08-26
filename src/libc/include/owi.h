@@ -3,7 +3,7 @@
 
 __attribute__((import_module("summaries"), import_name("alloc"))) void *
 owi_malloc(void *, unsigned int);
-__attribute__((import_module("summaries"), import_name("dealloc"))) void
+__attribute__((import_module("summaries"), import_name("dealloc"))) void *
 owi_free(void *);
 
 __attribute__((import_module("symbolic"), import_name("i8_symbol"))) char
