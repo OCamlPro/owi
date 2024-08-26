@@ -31,11 +31,11 @@ no subcommand should print help
          validate [--debug] [OPTION]… [ARG]…
              Validate a module
   
-         wasm2wat [--emit-file] [OPTION]… [ARG]…
+         wasm2wat [--emit-file] [--output=FILE] [OPTION]… ARG
              Generate a text format file (.wat) from a binary format file
              (.wasm)
   
-         wat2wasm [OPTION]… [ARG]…
+         wat2wasm [OPTION]… ARG
              Generate a binary format file (.wasm) from a text format file
              (.wat)
   

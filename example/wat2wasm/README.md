@@ -34,11 +34,14 @@ NAME
        format file (.wat)
 
 SYNOPSIS
-       owi wat2wasm [OPTION]… [ARG]…
+       owi wat2wasm [OPTION]… ARG
 
 OPTIONS
        -d, --debug
            debug mode
+
+       -o FILE, --output=FILE
+           wat
 
        --optimize
            optimize mode

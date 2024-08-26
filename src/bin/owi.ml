@@ -39,6 +39,16 @@ let files =
   let f = existing_non_dir_file in
   Cmdliner.Arg.(value & pos_all f [] (info [] ~doc))
 
+let sourcefile ty =
+  let doc = Fmt.str "%s source file" ty in
+  let f = existing_non_dir_file in
+  Cmdliner.Arg.(required & pos 0 (some f) None (info [] ~doc))
+
+let outfile ty =
+  let doc = Fmt.str "%s" ty in
+  Cmdliner.Arg.(
+    value & opt (some string) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
+
 let emit_files =
   let doc = "emit (.wat) files from corresponding (.wasm) files" in
   Cmdliner.Arg.(value & flag & info [ "emit-file" ] ~doc)
@@ -249,7 +259,8 @@ let wasm2wat_cmd =
     let man = [] @ shared_man in
     Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_wasm2wat.cmd $ files $ emit_files)
+  Cmd.v info
+    Term.(const Cmd_wasm2wat.cmd $ sourcefile "wasm" $ emit_files $ outfile "wasm")
 
 let wat2wasm_cmd =
   let open Cmdliner in
@@ -261,7 +272,9 @@ let wat2wasm_cmd =
     Cmd.info "wat2wasm" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_wat2wasm.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+    Term.(
+      const Cmd_wat2wasm.cmd $ profiling $ debug $ unsafe $ optimize
+      $ outfile "wat" $ sourcefile "wat" )
 
 let cli =
   let open Cmdliner in

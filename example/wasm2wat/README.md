@@ -27,11 +27,14 @@ NAME
        file (.wasm)
 
 SYNOPSIS
-       owi wasm2wat [--emit-file] [OPTION]… [ARG]…
+       owi wasm2wat [--emit-file] [--output=FILE] [OPTION]… ARG
 
 OPTIONS
        --emit-file
            emit (.wat) files from corresponding (.wasm) files
+
+       -o FILE, --output=FILE
+           wasm
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

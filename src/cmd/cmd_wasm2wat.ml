@@ -5,16 +5,24 @@
 open Syntax
 
 (** Utility function to handle writing to a file or printing to stdout *)
-let cmd_one emitfile file =
+let cmd_one emitfile outfile file =
   let ext = Fpath.get_ext file in
-  let wat_file = Fpath.set_ext "wat" file in
+  let _dir, wat_file = Fpath.split_base file in
+  let wat_file = Fpath.set_ext "wat" wat_file in
 
   match ext with
   | ".wasm" ->
     let* m = Parse.Binary.Module.from_file file in
     let m = Binary_to_text.modul m in
-    if emitfile then Bos.OS.File.writef wat_file "%a@\n" Text.pp_modul m
+    let outname, output =
+      begin
+        match outfile with
+        | Some name -> Fpath.v name, true
+        | None -> wat_file, false
+      end
+    in
+    if emitfile || output then Bos.OS.File.writef outname "%a@\n" Text.pp_modul m
     else Ok (Fmt.pr "%a@\n" Text.pp_modul m)
   | ext -> Error (`Unsupported_file_extension ext)
 
-let cmd files emitfile = list_iter (cmd_one emitfile) files
+let cmd file emitfile outfile = cmd_one emitfile outfile file
