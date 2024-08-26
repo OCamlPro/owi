@@ -132,10 +132,11 @@ module M :
           ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
           } )
 
-  let free _ (p : Value.int32) : unit Choice.t =
+  let free _ (p : Value.int32) =
     (* WHAT ???? *)
-    let _base = ptr p in
-    Choice.return ()
+    let open Choice in
+    let+ base = ptr p in
+    Value.const_i32 base
 end
 
 type extern_func = Concolic.P.Extern_func.extern_func
@@ -179,7 +180,7 @@ let summaries_extern_module =
           (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
       , Concolic.P.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R0), free) )
+          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
     ; ("abort", Concolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ]
   in
