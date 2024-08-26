@@ -105,3 +105,23 @@ let summaries_extern_module =
     ]
   in
   { Link.functions }
+
+let introspection_extern_module =
+  let dump_memory m : unit Choice.t =
+    Fmt.epr "%a@." Memory.pp m;
+    Choice.return ()
+  in
+
+  let print_i32 i32 : Symbolic_value.int32 Choice.t =
+    Fmt.pr "Print: %a@." Smtml.Expr.pp i32;
+    Choice.return i32
+  in
+  let functions =
+    [ ( "dump_memory"
+      , Symbolic.P.Extern_func.Extern_func (Func (Mem Res, R0), dump_memory) )
+    ; ( "print_i32"
+      , Symbolic.P.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), print_i32) )
+    ]
+  in
+  { Link.functions }

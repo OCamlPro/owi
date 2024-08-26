@@ -26,8 +26,12 @@ let link_state =
        Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
          Symbolic_wasm_ffi.symbolic_extern_module
      in
-     Link.extern_module' link_state ~name:"summaries" ~func_typ
-       Symbolic_wasm_ffi.summaries_extern_module )
+     let link_state =
+       Link.extern_module' link_state ~name:"summaries" ~func_typ
+         Symbolic_wasm_ffi.summaries_extern_module
+     in
+     Link.extern_module' link_state ~name:"introspection" ~func_typ
+       Symbolic_wasm_ffi.introspection_extern_module )
 
 let run_file ~unsafe ~optimize pc filename =
   let*/ m = Compile.File.until_binary_validate ~unsafe filename in
