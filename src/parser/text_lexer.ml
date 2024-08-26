@@ -525,12 +525,11 @@ and annot buf =
     let items = annot buf in
     Sexp.List items :: annot buf
   | ")" -> []
+  | "\"", Star string_elem -> raise Unclosed_string
+  | eof -> raise Unclosed_annotation
   | annot_atom ->
     let annot_atom = Utf8.lexeme buf in
     Sexp.Atom annot_atom :: annot buf
-  | "\"", Star string_elem -> raise Unclosed_string
-  | eof -> raise Unclosed_annotation
-  | any -> illegal_character buf
   | _ -> illegal_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

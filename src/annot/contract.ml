@@ -48,5 +48,7 @@ let parse_contract =
     in
     let* funcid = parse_indice funcid in
     let+ preconditions, postconditions = list_fold_left aux ([], []) conds in
+    let preconditions = List.rev preconditions in
+    let postconditions = List.rev postconditions in
     { funcid; preconditions; postconditions }
   | annot -> Error (`Unknown_annotation_object annot)

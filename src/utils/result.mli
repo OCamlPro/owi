@@ -81,6 +81,7 @@ type err =
   | `Unclosed_annotation
   | `Unclosed_comment
   | `Unclosed_string
+  | `Unbounded_quantification
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

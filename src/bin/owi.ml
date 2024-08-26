@@ -400,6 +400,7 @@ let exit_code =
       | `Unclosed_annotation -> 74
       | `Unclosed_comment -> 75
       | `Unclosed_string -> 76
+      | `Unbounded_quantification -> 77
     end
   end
   | Error e -> (

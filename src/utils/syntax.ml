@@ -59,6 +59,16 @@ let list_fold_left f acc l =
       f acc v )
     (Ok acc) l
 
+let list_fold_left_map f acc l =
+  let+ acc, l =
+    list_fold_left
+      (fun (acc, l) v ->
+        let+ acc, x = f acc v in
+        (acc, x :: l) )
+      (acc, []) l
+  in
+  (acc, List.rev l)
+
 let array_iter f a =
   let err = ref None in
   try
