@@ -370,11 +370,14 @@ NAME
        owi-opt - Optimize a module
 
 SYNOPSIS
-       owi opt [--debug] [--unsafe] [OPTION]… [ARG]…
+       owi opt [--debug] [--output=FILE] [--unsafe] [OPTION]… ARG
 
 OPTIONS
        -d, --debug
            debug mode
+
+       -o FILE, --output=FILE
+           wat
 
        -u, --unsafe
            skip typechecking pass

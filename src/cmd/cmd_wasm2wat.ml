@@ -17,11 +17,12 @@ let cmd_one emitfile outfile file =
     let outname, output =
       begin
         match outfile with
-        | Some name -> Fpath.v name, true
-        | None -> wat_file, false
+        | Some name -> (name, true)
+        | None -> (wat_file, false)
       end
     in
-    if emitfile || output then Bos.OS.File.writef outname "%a@\n" Text.pp_modul m
+    if emitfile || output then
+      Bos.OS.File.writef outname "%a@\n" Text.pp_modul m
     else Ok (Fmt.pr "%a@\n" Text.pp_modul m)
   | ext -> Error (`Unsupported_file_extension ext)
 

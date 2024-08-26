@@ -762,14 +762,15 @@ let encode
 let write_file outfile filename content =
   let _dir, filename = Fpath.split_base filename in
   let filename = Fpath.set_ext "wasm" filename in
-  let filename = match outfile with Some name -> Fpath.v name | None -> filename in
-  let filename = Fpath.to_string filename in
-  let oc = Out_channel.open_bin filename in
-  Out_channel.output_string oc content;
-  Out_channel.close oc
+  match outfile with
+  | Some name -> Bos.OS.File.write name content
+  | None -> Bos.OS.File.write filename content
 
-let convert (outfile: string option) (filename : Fpath.t) ~unsafe ~optimize m =
+let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe ~optimize m
+    =
   Log.debug0 "bin encoding ...@\n";
   let+ m = Compile.Text.until_optimize ~unsafe ~optimize m in
   let content = encode m in
-  write_file outfile filename content
+  match write_file outfile filename content with
+  | Error _ -> raise Exit
+  | Ok _ -> ()
