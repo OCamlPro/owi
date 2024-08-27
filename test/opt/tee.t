@@ -2,7 +2,6 @@ set get tee simplification:
   $ owi opt tee.wat > tee.opt.wat
   $ cat tee.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $start (local $x i32)
       i32.const 41

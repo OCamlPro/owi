@@ -2,9 +2,7 @@ return instructions:
   $ owi opt return.wat > return.opt.wat
   $ cat return.opt.wat
   (module
-    
     (type (sub final  (func (result i32))))
-    
     (type (sub final  (func)))
     (table $tab 1 1 (ref null func))
     (func $return (result i32)

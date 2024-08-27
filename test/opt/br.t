@@ -2,7 +2,6 @@ br instructions:
   $ owi opt br.wat > br.opt.wat
   $ cat br.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $br
       i32.const 42

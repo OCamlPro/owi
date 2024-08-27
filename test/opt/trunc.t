@@ -2,7 +2,6 @@
   $ owi opt trunc.wat > trunc.opt.wat
   $ cat trunc.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $trunc
       

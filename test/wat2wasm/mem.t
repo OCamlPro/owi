@@ -2,15 +2,10 @@
   $ owi run mem.wasm
   $ owi wasm2wat mem.wasm
   (module
-    
     (type (sub final  (func)))
-    
     (type (sub final  (func (param i32) (param i32))))
-    
     (type (sub final  (func (param i32) (param i64))))
-    
     (type (sub final  (func (param i32) (param f32))))
-    
     (type (sub final  (func (param i32) (param f64))))
     (memory 1)
     (func

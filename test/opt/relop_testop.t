@@ -2,7 +2,6 @@
   $ owi opt relop_testop.wat > relop_testop.opt.wat
   $ cat relop_testop.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $i32relop
       
