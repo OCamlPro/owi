@@ -4,14 +4,16 @@
 
 open Syntax
 
-let cmd_one unsafe file =
+let cmd_one unsafe symbolic file =
   let _dir, filename = Fpath.split_base file in
   let filename, ext = Fpath.split_ext filename in
   match ext with
   | ".wat" ->
     let* text_modul = Parse.Text.Module.from_file file in
     let* binary_modul = Compile.Text.until_binary ~unsafe text_modul in
-    let* instrumented_binary_modul = Code_generator.generate binary_modul in
+    let* instrumented_binary_modul =
+      Code_generator.generate symbolic binary_modul
+    in
     let instrumented_text_modul =
       Binary_to_text.modul instrumented_binary_modul
     in
@@ -24,6 +26,6 @@ let cmd_one unsafe file =
     Bos.OS.File.writef filename "%a" Text.pp_modul instrumented_text_modul
   | ext -> Error (`Unsupported_file_extension ext)
 
-let cmd debug unsafe files =
+let cmd debug unsafe symbolic files =
   if debug then Log.debug_on := true;
-  list_iter (cmd_one unsafe) files
+  list_iter (cmd_one unsafe symbolic) files
