@@ -16,6 +16,4 @@ let print_or_emit ~unsafe file outfile =
 
 let cmd debug unsafe file outfile =
   if debug then Log.debug_on := true;
-  match print_or_emit ~unsafe file outfile with
-  | Error _ -> raise Exit
-  | Ok _ -> Ok ()
+  Result.bind (print_or_emit ~unsafe file outfile) (fun _ -> Ok ())
