@@ -19,7 +19,7 @@ let cmd_one unsafe symbolic file =
     let filename = Fpath.add_ext ".instrumented" filename in
     let filename = Fpath.add_ext ".wat" filename in
     let* () =
-      Binary_encoder.convert filename ~unsafe ~optimize:false
+      Binary_encoder.convert None filename ~unsafe ~optimize:false
         instrumented_text_modul
     in
     Bos.OS.File.writef filename "%a" Text.pp_modul instrumented_text_modul

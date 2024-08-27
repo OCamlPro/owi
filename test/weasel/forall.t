@@ -40,18 +40,10 @@
   $ owi instrument forall.wat --symbolic
   $ cat forall.instrumented.wat
   (module
-    (import "symbolic" "i32_symbol" (func $i32_symbol  (result i32)))
-    (import "symbolic" "i64_symbol" (func $i64_symbol  (result i64)))
-    (import "symbolic" "f32_symbol" (func $f32_symbol  (result f32)))
-    (import "symbolic" "f64_symbol" (func $f64_symbol  (result f64)))
-    (import "symbolic" "assume" (func $assume  (param i32)))
     (import "symbolic" "assert" (func $assert  (param i32)))
     (type (sub final  (func)))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (result i64))))
-    (type (sub final  (func (result f32))))
-    (type (sub final  (func (result f64))))
     (type (sub final  (func (param i32))))
+    (type (sub final  (func (result i32))))
     (type (sub final  (func (param i32) (result i32))))
     (func $start
       
@@ -79,10 +71,10 @@
           i32.const 10
           i32.le_s
           br_if 0))
-      call 5
-      call 6
+      call 0
+      call 1
     )
-    (start 7)
+    (start 2)
   )
   $ owi sym forall.wat --rac --debug
   parsing      ...
@@ -519,7 +511,7 @@
   linking      ...
   interpreting ...
   stack        : [  ]
-  running instr: call 7
+  running instr: call 2
   calling func : func __weasel_start
   stack        : [  ]
   running instr: (block $__weasel_forall (result i32)
@@ -912,9 +904,9 @@
   stack        : [ (i32 1) ]
   stack        : [ (i32 1) ]
   stack        : [ (i32 1) ]
-  running instr: call 5
+  running instr: call 0
   stack        : [  ]
-  running instr: call 6
+  running instr: call 1
   calling func : func start
   stack        : [  ]
   stack        : [  ]
