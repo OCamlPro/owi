@@ -122,7 +122,7 @@ let string_elem = [%sedlex.regexp? Sub (any, "\"") | "\\\""]
 let name = [%sedlex.regexp? "\"", Star string_elem, "\""]
 
 let operator =
-  [%sedlex.regexp? 'a' .. 'z', Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':')]
+  [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':'), Star name]
 
 let id = [%sedlex.regexp? "$", Plus id_char]
 
