@@ -1,0 +1,2 @@
+(cram
+ (deps %{bin:owi} forall.wat plus.wat))
