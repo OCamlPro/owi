@@ -198,14 +198,17 @@ let opt_cmd =
   in
   Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile $ outfile)
 
-let rac_cmd =
+let instrument_cmd =
   let open Cmdliner in
   let info =
-    let doc = "Perform runtime assertion checking" in
+    let doc =
+      "Generate an instrumented file with runtime assertion checking coming \
+       from Weasel specifications"
+    in
     let man = [] @ shared_man in
-    Cmd.info "rac" ~version ~doc ~sdocs ~man
+    Cmd.info "instrument" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_rac.cmd $ debug $ unsafe $ files)
+  Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ files)
 
 let run_cmd =
   let open Cmdliner in
@@ -304,7 +307,7 @@ let cli =
     [ c_cmd
     ; fmt_cmd
     ; opt_cmd
-    ; rac_cmd
+    ; instrument_cmd
     ; run_cmd
     ; script_cmd
     ; sym_cmd

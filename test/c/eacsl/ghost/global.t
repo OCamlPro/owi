@@ -3,5 +3,5 @@
   Model:
     (model
       (symbol_0 (i32 20)))
-  Reached problem!Segmentation fault (core dumped)
-  [139]
+  Reached problem!
+  [13]

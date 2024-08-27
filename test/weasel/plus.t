@@ -1,4 +1,4 @@
-  $ owi rac plus.wat
+  $ owi instrument plus.wat
   $ owi sym plus.instrumented.wat
   All OK
   $ owi sym plus.instrumented.wasm

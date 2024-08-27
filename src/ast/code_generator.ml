@@ -420,7 +420,7 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
           in
           let loop =
             [ Loop
-                ( Some "__rac_loop"
+                ( Some "__weasel_loop"
                 , Some
                     (Bt_raw
                        ( Some tenv.i32_to_i32
@@ -430,7 +430,7 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
           in
           ( tenv
           , [ Block
-                ( Some "__rac_forall"
+                ( Some "__weasel_forall"
                 , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
                 , init @ loop )
             ] )
@@ -469,7 +469,7 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
           in
           let loop =
             [ Loop
-                ( Some "__rac_loop"
+                ( Some "__weasel_loop"
                 , Some
                     (Bt_raw
                        ( Some tenv.i32_to_i32
@@ -479,7 +479,7 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
           in
           ( tenv
           , [ Block
-                ( Some "__rac_exists"
+                ( Some "__weasel_exists"
                 , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
                 , init @ loop )
             ] )
@@ -600,18 +600,18 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
         | Some assigned_name -> Ok (assigned_name, desc)
         | None -> Ok (Fmt.str "func_%s_%s_%i" modul name old_index, desc) )
   in
-  let id = Fmt.str "__rac_%s" old_id in
+  let id = Fmt.str "__weasel_%s" old_id in
   let index = func_num in
 
   let tenv, m = build_type_env m old_type owi_funcs in
 
   let locals =
-    [ (Some "__rac_temp", Num_type I32) ]
+    [ (Some "__weasel_temp", Num_type I32) ]
     @ List.mapi
-        (fun i t -> (Some Fmt.(str "__rac_res_%i" i), t))
+        (fun i t -> (Some Fmt.(str "__weasel_res_%i" i), t))
         (Array.to_list tenv.result_types)
     @ List.mapi
-        (fun i t -> (Some Fmt.(str "__rac_binder_%i" i), t))
+        (fun i t -> (Some Fmt.(str "__weasel_binder_%i" i), t))
         (List.concat (List.map binder_locals (preconditions @ postconditions)))
   in
   let call =

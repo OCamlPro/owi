@@ -38,11 +38,12 @@ COMMANDS
        fmt [--inplace] [OPTION]… [ARG]…
            Format a .wat or .wast file
 
+       instrument [--debug] [--unsafe] [OPTION]… [ARG]…
+           Generate an instrumented file with runtime assertion checking
+           coming from Weasel specifications
+
        opt [--debug] [--output=FILE] [--unsafe] [OPTION]… ARG
            Optimize a module
-
-       rac [--debug] [--unsafe] [OPTION]… [ARG]…
-           Perform runtime assertion checking
 
        run [OPTION]… [ARG]…
            Run the concrete interpreter
