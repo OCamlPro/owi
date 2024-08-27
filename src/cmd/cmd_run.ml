@@ -4,15 +4,15 @@
 
 open Syntax
 
-let run_file ~unsafe ~optimize filename =
+let run_file ~unsafe ~rac ~optimize filename =
   let name = None in
   let+ (_ : _ Link.state) =
-    Compile.File.until_interpret ~unsafe ~optimize ~name Link.empty_state
-      filename
+    Compile.File.until_interpret ~unsafe ~rac ~srac:false ~optimize ~name
+      Link.empty_state filename
   in
   ()
 
-let cmd profiling debug unsafe optimize files =
+let cmd profiling debug unsafe rac optimize files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  list_iter (run_file ~unsafe ~optimize) files
+  list_iter (run_file ~unsafe ~rac ~optimize) files

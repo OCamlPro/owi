@@ -195,5 +195,5 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    profiling debug unsafe optimize workers no_stop_at_failure no_values
-    deterministic_result_order fail_mode workspace solver files
+    profiling debug unsafe false false optimize workers no_stop_at_failure
+    no_values deterministic_result_order fail_mode workspace solver files

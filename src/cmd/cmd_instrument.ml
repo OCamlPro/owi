@@ -10,9 +10,8 @@ let cmd_one unsafe symbolic file =
   match ext with
   | ".wat" ->
     let* text_modul = Parse.Text.Module.from_file file in
-    let* binary_modul = Compile.Text.until_binary ~unsafe text_modul in
     let* instrumented_binary_modul =
-      Code_generator.generate symbolic binary_modul
+      Compile.Text.until_binary ~unsafe ~rac:true ~srac:symbolic text_modul
     in
     let instrumented_text_modul =
       Binary_to_text.modul instrumented_binary_modul

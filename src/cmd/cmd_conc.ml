@@ -16,10 +16,11 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   Choice.bind t (fun t ->
       match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
-let simplify_then_link ~unsafe ~optimize link_state m =
+let simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m =
   let* m =
     match m with
-    | Kind.Wat _ | Wasm _ -> Compile.Any.until_binary_validate ~unsafe m
+    | Kind.Wat _ | Wasm _ ->
+      Compile.Any.until_binary_validate ~unsafe ~rac ~srac m
     | Wast _ -> Error (`Msg "can't run concolic interpreter on a script")
     | Ocaml _ -> assert false
   in
@@ -30,7 +31,7 @@ let simplify_then_link ~unsafe ~optimize link_state m =
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)
 
-let simplify_then_link_files ~unsafe ~optimize filenames =
+let simplify_then_link_files ~unsafe ~rac ~srac ~optimize filenames =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
@@ -48,7 +49,7 @@ let simplify_then_link_files ~unsafe ~optimize filenames =
         let* link_state, modules_to_run = acc in
         let* m0dule = Parse.guess_from_file filename in
         let+ link_state, module_to_run =
-          simplify_then_link ~unsafe ~optimize link_state m0dule
+          simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m0dule
         in
         (link_state, module_to_run :: modules_to_run) )
       (Ok (link_state, []))
@@ -414,8 +415,9 @@ let run solver tree link_state modules_to_run =
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd profiling debug unsafe optimize _workers _no_stop_at_failure no_values
-  _deterministic_result_order _fail_mode (workspace : Fpath.t) solver files =
+let cmd profiling debug unsafe rac srac optimize _workers _no_stop_at_failure
+  no_values _deterministic_result_order _fail_mode (workspace : Fpath.t) solver
+  files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -423,7 +425,7 @@ let cmd profiling debug unsafe optimize _workers _no_stop_at_failure no_values
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
   let* link_state, modules_to_run =
-    simplify_then_link_files ~unsafe ~optimize files
+    simplify_then_link_files ~unsafe ~rac ~srac ~optimize files
   in
   let tree = fresh_tree [] in
   let* result = run solver tree link_state modules_to_run in

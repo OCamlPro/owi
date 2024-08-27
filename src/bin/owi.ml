@@ -88,6 +88,14 @@ let profiling =
   let doc = "profiling mode" in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
+let rac =
+  let doc = "runtime assertion checking mode" in
+  Cmdliner.Arg.(value & flag & info [ "rac" ] ~doc)
+
+let srac =
+  let doc = "symbolic runtime assertion checking mode" in
+  Cmdliner.Arg.(value & flag & info [ "srac" ] ~doc)
+
 let eacsl =
   let doc =
     "e-acsl mode, refer to \
@@ -222,7 +230,8 @@ let run_cmd =
     Cmd.info "run" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+    Term.(
+      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
 
 let validate_cmd =
   let open Cmdliner in
@@ -254,9 +263,9 @@ let sym_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
+      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -267,9 +276,9 @@ let conc_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
+      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in
