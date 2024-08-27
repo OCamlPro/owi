@@ -477,21 +477,21 @@ let recover backup into =
   <span data-count="511">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="511">y</span> recover_elem) backup.elem into.elem in
   <span data-count="511">(</span>)
 
-let id (env : _ t) = <span data-count="1183627">e</span>nv.id
+let id (env : _ t) = <span data-count="1183525">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="6460">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="6402">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="3020406">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="3020422">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1615940">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1615954">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10497155">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10497166">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="2226">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="2988">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="122373">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="122355">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
@@ -522,7 +522,7 @@ module Build = struct
     <span data-count="1314">{</span> env with tables = IMap.ad<span data-count="1314">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="19131">{</span> env with functions = IMap.ad<span data-count="19131">d</span> id func env.functions }
+    <span data-count="19134">{</span> env with functions = IMap.ad<span data-count="19134">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="1120">{</span> env with data = IMap.ad<span data-count="1120">d</span> id data env.data }
 
@@ -593,7 +593,7 @@ end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="3321">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="3323">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>

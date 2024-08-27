@@ -191,56 +191,56 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4146826">m</span>atch o with <span data-count="4127044">O</span>k v -&gt; f v | <span data-count="19782">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4150659">m</span>atch o with <span data-count="4130896">O</span>k v -&gt; f v | <span data-count="19763">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="2110701">m</span>atch o with <span data-count="2101450">O</span>k v -&gt; Ok (<span data-count="2101449">f</span> v) | <span data-count="9251">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2118740">m</span>atch o with <span data-count="2109649">O</span>k v -&gt; Ok (<span data-count="2109648">f</span> v) | <span data-count="9091">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="800848">O</span>k v
+let ok v = <span data-count="805620">O</span>k v
 
 let list_iter f l =
-  <span data-count="36099">l</span>et err = ref None in
+  <span data-count="36129">l</span>et err = ref None in
   try
     List.iter
       (fun v -&gt;
-        <span data-count="20211">m</span>atch f v with
-        | <span data-count="77">E</span>rror _e as e -&gt;
+        <span data-count="20277">m</span>atch f v with
+        | <span data-count="117">E</span>rror _e as e -&gt;
           err := Some e;
           raise Exit
-        | <span data-count="20133">O</span>k () -&gt; () )
+        | <span data-count="20159">O</span>k () -&gt; () )
       l;
-    <span data-count="36021">O</span>k ()
-  with <span data-count="77">E</span>xit -&gt; Option.get !err
+    <span data-count="36011">O</span>k ()
+  with <span data-count="117">E</span>xit -&gt; Option.get !err
 
 let list_map f l =
-  <span data-count="191420">l</span>et err = ref None in
+  <span data-count="196052">l</span>et err = ref None in
   try
-    o<span data-count="191196">k</span>
-    @@ List.ma<span data-count="191196">p</span>
+    o<span data-count="195908">k</span>
+    @@ List.ma<span data-count="195908">p</span>
          (fun v -&gt;
-           <span data-count="222051">m</span>atch f v with
-           | <span data-count="224">E</span>rror _e as e -&gt;
+           <span data-count="225028">m</span>atch f v with
+           | <span data-count="144">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="221827">O</span>k v -&gt; v )
+           | <span data-count="224884">O</span>k v -&gt; v )
          l
-  with <span data-count="224">E</span>xit -&gt; Option.get !err
+  with <span data-count="144">E</span>xit -&gt; Option.get !err
 
 let list_fold_left f acc l =
-  <span data-count="153492">L</span>ist.fold_left
+  <span data-count="153496">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="712905">l</span>et* acc in
-      <span data-count="711325">f</span> acc v )
+      <span data-count="715411">l</span>et* acc in
+      <span data-count="713826">f</span> acc v )
     (Ok acc) l
 
 let array_iter f a =
-  <span data-count="41696">l</span>et err = ref None in
+  <span data-count="41732">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="41696">h</span> a - 1 do
-      <span data-count="71818">m</span>atch f (Array.unsafe_ge<span data-count="71818">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="41732">h</span> a - 1 do
+      <span data-count="71827">m</span>atch f (Array.unsafe_ge<span data-count="71827">t</span> a i) with
       | <span data-count="2964">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="68854">O</span>k () -&gt; ()
+      | <span data-count="68863">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="2964">E</span>xit -&gt; Option.get !err
@@ -259,10 +259,10 @@ let array_map f a =
   with <span data-count="4">E</span>xit -&gt; Option.get !err
 
 let array_fold_left f acc l =
-  <span data-count="20372">A</span>rray.fold_left
+  <span data-count="20384">A</span>rray.fold_left
     (fun acc v -&gt;
-      <span data-count="26146">l</span>et* acc in
-      <span data-count="26128">f</span> acc v )
+      <span data-count="26149">l</span>et* acc in
+      <span data-count="26131">f</span> acc v )
     (Ok acc) l
 </code></pre>
       </div>

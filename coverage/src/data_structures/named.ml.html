@@ -105,8 +105,8 @@ type 'a t =
 let empty = { values = []; named = String_map.empty }
 
 let fold f v acc =
-  <span data-count="6161">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="9056">f</span> (Indexed.get_inde<span data-count="9056">x</span> v) (Indexed.ge<span data-count="9056">t</span> v) acc)
+  <span data-count="6123">L</span>ist.fold_left
+    (fun acc v -&gt; <span data-count="9300">f</span> (Indexed.get_inde<span data-count="9300">x</span> v) (Indexed.ge<span data-count="9300">t</span> v) acc)
     acc v.values
 
 let map f v =
@@ -114,15 +114,15 @@ let map f v =
   <span data-count="0">{</span> v with values }
 
 let to_array v =
-  <span data-count="42406">l</span>et tbl = Hashtbl.create 512 in
-  <span data-count="42406">L</span>ist.iter
+  <span data-count="42420">l</span>et tbl = Hashtbl.create 512 in
+  <span data-count="42420">L</span>ist.iter
     (fun v -&gt;
-      <span data-count="31768">l</span>et i = Indexed.get_index v in
-      <span data-count="31768">l</span>et v = Indexed.get v in
-      <span data-count="31768">i</span>f Hashtbl.mem tbl i then <span data-count="0">a</span>ssert false else <span data-count="31768">H</span>ashtbl.add tbl i v )
+      <span data-count="32089">l</span>et i = Indexed.get_index v in
+      <span data-count="32089">l</span>et v = Indexed.get v in
+      <span data-count="32089">i</span>f Hashtbl.mem tbl i then <span data-count="0">a</span>ssert false else <span data-count="32089">H</span>ashtbl.add tbl i v )
     v.values;
-  <span data-count="42406">A</span>rray.init (List.lengt<span data-count="42406">h</span> v.values) (fun i -&gt;
-      <span data-count="31768">m</span>atch Hashtbl.find_opt tbl i with None -&gt; assert false | <span data-count="31768">S</span>ome v -&gt; v )
+  <span data-count="42420">A</span>rray.init (List.lengt<span data-count="42420">h</span> v.values) (fun i -&gt;
+      <span data-count="32089">m</span>atch Hashtbl.find_opt tbl i with None -&gt; assert false | <span data-count="32089">S</span>ome v -&gt; v )
 </code></pre>
       </div>
     </div>

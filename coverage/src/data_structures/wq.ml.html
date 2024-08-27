@@ -101,34 +101,34 @@
 
 type 'a t = ('a, 'a) Synchronizer.t
 
-let pop q pledge = <span data-count="528">S</span>ynchronizer.get q pledge
+let pop q pledge = <span data-count="530">S</span>ynchronizer.get q pledge
 
 let make_pledge = Synchronizer.make_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
- <span data-count="551">f</span>un () -&gt;
-  <span data-count="528">m</span>atch pop q false with
-  | <span data-count="336">N</span>one -&gt;
+ <span data-count="553">f</span>un () -&gt;
+  <span data-count="530">m</span>atch pop q false with
+  | <span data-count="338">N</span>one -&gt;
     finalizer ();
-    <span data-count="336">N</span>il
+    <span data-count="338">N</span>il
   | <span data-count="192">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="192">q</span> q ~finalizer)
 
-let push v q = <span data-count="551">S</span>ynchronizer.write v q
+let push v q = <span data-count="553">S</span>ynchronizer.write v q
 
-let work_while f q = <span data-count="708">S</span>ynchronizer.work_while f q
+let work_while f q = <span data-count="710">S</span>ynchronizer.work_while f q
 
 let fail = Synchronizer.fail
 
 let make () =
-  <span data-count="718">l</span>et q = Queue.create () in
-  <span data-count="718">l</span>et writter v condvar =
-    <span data-count="44022">l</span>et was_empty = Queue.is_empty q in
-    <span data-count="44022">Q</span>ueue.push v q;
-    <span data-count="44022">i</span>f was_empty then <span data-count="1412">C</span>ondition.broadcast condvar
+  <span data-count="722">l</span>et q = Queue.create () in
+  <span data-count="722">l</span>et writter v condvar =
+    <span data-count="43959">l</span>et was_empty = Queue.is_empty q in
+    <span data-count="43959">Q</span>ueue.push v q;
+    <span data-count="43959">i</span>f was_empty then <span data-count="1401">C</span>ondition.broadcast condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="46089">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="46051">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

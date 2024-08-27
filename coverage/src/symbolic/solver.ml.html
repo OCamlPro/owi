@@ -94,24 +94,24 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
 let fresh solver () =
-  <span data-count="873">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="873">r</span> solver)
+  <span data-count="876">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="876">r</span> solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="871">S</span> ((module Batch), solver)
+  <span data-count="873">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="44288">l</span>et module Solver = (val solver_module) in
+  <span data-count="44210">l</span>et module Solver = (val solver_module) in
   Solver.check s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1428">l</span>et module Solver = (val solver_module) in
+  <span data-count="1372">l</span>et module Solver = (val solver_module) in
   match Solver.check s pc with
-  | <span data-count="1428">`</span>Sat -&gt; begin
+  | <span data-count="1372">`</span>Sat -&gt; begin
     match Solver.model ?symbols s with
     | None -&gt; assert false
-    | <span data-count="1427">S</span>ome model -&gt; model
+    | <span data-count="1372">S</span>ome model -&gt; model
   end
   | `Unsat | `Unknown -&gt; assert false
 </code></pre>

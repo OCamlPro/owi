@@ -75,18 +75,18 @@ open Syntax
 
 (** Utility function to handle writing to a file or printing to stdout *)
 let cmd_one emitfile file =
-  <span data-count="16">l</span>et ext = Fpath.get_ext file in
-  <span data-count="16">l</span>et wat_file = Fpath.set_ext "wat" file in
+  <span data-count="18">l</span>et ext = Fpath.get_ext file in
+  <span data-count="18">l</span>et wat_file = Fpath.set_ext "wat" file in
 
-  <span data-count="16">m</span>atch ext with
-  | <span data-count="15">"</span>.wasm" -&gt;
-    let* m = Parse.Binary.Module.from_fil<span data-count="15">e</span> file in
-    <span data-count="15">l</span>et m = Binary_to_text.modul m in
-    <span data-count="15">i</span>f emitfile then <span data-count="1">B</span>os.OS.File.writef wat_file "%a@\n" Text.pp_modul m
-    else <span data-count="14">O</span>k (Fmt.p<span data-count="14">r</span> "%a@\n" Text.pp_modul m)
+  <span data-count="18">m</span>atch ext with
+  | <span data-count="17">"</span>.wasm" -&gt;
+    let* m = Parse.Binary.Module.from_fil<span data-count="17">e</span> file in
+    <span data-count="17">l</span>et m = Binary_to_text.modul m in
+    <span data-count="17">i</span>f emitfile then <span data-count="1">B</span>os.OS.File.writef wat_file "%a@\n" Text.pp_modul m
+    else <span data-count="16">O</span>k (Fmt.p<span data-count="16">r</span> "%a@\n" Text.pp_modul m)
   | <span data-count="1">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 
-let cmd files emitfile = <span data-count="16">l</span>ist_iter (cmd_on<span data-count="16">e</span> emitfile) files
+let cmd files emitfile = <span data-count="18">l</span>ist_iter (cmd_on<span data-count="18">e</span> emitfile) files
 </code></pre>
       </div>
     </div>
