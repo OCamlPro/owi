@@ -103,6 +103,10 @@ let solver =
     & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
+let symbolic =
+  let doc = "generate instrumented module that depends on symbolic execution" in
+  Cmdliner.Arg.(value & flag & info [ "symbolic" ] ~doc)
+
 let unsafe =
   let doc = "skip typechecking pass" in
   Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
@@ -208,7 +212,7 @@ let instrument_cmd =
     let man = [] @ shared_man in
     Cmd.info "instrument" ~version ~doc ~sdocs ~man
   in
-  Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ files)
+  Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ symbolic $ files)
 
 let run_cmd =
   let open Cmdliner in

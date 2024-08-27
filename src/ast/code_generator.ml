@@ -17,11 +17,6 @@ type type_env =
   ; copy : binary expr
   ; void_to_i32 : binary indice
   ; i32_to_i32 : binary indice
-  ; _owi_i32 : binary indice
-  ; _owi_i64 : binary indice
-  ; _owi_f32 : binary indice
-  ; _owi_f64 : binary indice
-  ; _owi_assume : binary indice
   ; owi_assert : binary indice
   }
 
@@ -68,50 +63,6 @@ let build_type_env (m : modul)
     | Some i -> (types, Raw i)
     | None -> (Array.append types [| i32_to_i32 |], Raw (Array.length types))
   in
-
-  let _owi_i32 =
-    match
-      Array.find_index
-        (fun (name, _) -> String.equal "i32_symbol" name)
-        owi_funcs
-    with
-    | Some i -> Raw i
-    | None -> assert false
-  in
-  let _owi_i64 =
-    match
-      Array.find_index
-        (fun (name, _) -> String.equal "i64_symbol" name)
-        owi_funcs
-    with
-    | Some i -> Raw i
-    | None -> assert false
-  in
-  let _owi_f32 =
-    match
-      Array.find_index
-        (fun (name, _) -> String.equal "f32_symbol" name)
-        owi_funcs
-    with
-    | Some i -> Raw i
-    | None -> assert false
-  in
-  let _owi_f64 =
-    match
-      Array.find_index
-        (fun (name, _) -> String.equal "f64_symbol" name)
-        owi_funcs
-    with
-    | Some i -> Raw i
-    | None -> assert false
-  in
-  let _owi_assume =
-    match
-      Array.find_index (fun (name, _) -> String.equal "assume" name) owi_funcs
-    with
-    | Some i -> Raw i
-    | None -> assert false
-  in
   let owi_assert =
     match
       Array.find_index (fun (name, _) -> String.equal "assert" name) owi_funcs
@@ -128,11 +79,6 @@ let build_type_env (m : modul)
     ; copy
     ; void_to_i32
     ; i32_to_i32
-    ; _owi_i32
-    ; _owi_i64
-    ; _owi_f32
-    ; _owi_f64
-    ; _owi_assume
     ; owi_assert
     }
   , { m with types } )
@@ -489,9 +435,11 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
     let+ tenv, expr = prop_generate_aux tenv pr in
     (tenv, expr @ [ Call tenv.owi_assert ])
 
-let subst_index ?(subst_custom = false) (old_index : int) (index : int)
+let subst_index ?(subst_custom = false) (subst_task : (int * int) list)
   (m : modul) : modul =
-  let subst i = if i = old_index then index else i in
+  let subst i =
+    match List.assoc_opt i subst_task with Some j -> j | None -> i
+  in
   let rec subst_instr (instr : binary instr) : binary instr =
     match instr with
     | Ref_func (Raw i) -> Ref_func (Raw (subst i))
@@ -584,16 +532,15 @@ let rec binder_locals = function
 let contract_generate (owi_funcs : (string * int) array) (m : modul)
   ({ funcid = Raw old_index; preconditions; postconditions } : binary Contract.t)
   : modul Result.t =
-  let func = m.func in
-  let func_num = Array.length func in
+  let func_num = Array.length m.func in
   let* old_id, Bt_raw (ty_index, old_type) =
     if old_index < 0 || old_index >= func_num then
       Error (`Contract_unknown_func (Raw old_index))
     else
-      match func.(old_index) with
+      match m.func.(old_index) with
       | Runtime.Local { id; type_f; _ } -> (
         match id with
-        | Some id -> Ok (id, type_f)
+        | Some name -> Ok (name, type_f)
         | None -> Ok (Fmt.str "func_%i" old_index, type_f) )
       | Imported { modul; name; assigned_name; desc } -> (
         match assigned_name with
@@ -637,9 +584,9 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
 
   let body = precond_checker @ call @ postcond_checker @ return in
 
-  let m = subst_index old_index index m in
+  let m = subst_index [ (old_index, index) ] m in
   let func =
-    Array.append func
+    Array.append m.func
       [| Runtime.Local
            { type_f = Bt_raw (ty_index, old_type); locals; body; id = Some id }
       |]
@@ -659,17 +606,8 @@ let contracts_generate (owi_funcs : (string * int) array) (m : modul)
   let contracts = join (List.sort Contract.compare_funcid contracts) in
   list_fold_left (contract_generate owi_funcs) m contracts
 
-let add_owi_funcs (m : modul) : modul * (string * int) array =
-  let owi_funcs : (string * binary func_type) array =
-    [| ("i32_symbol", ([], [ Num_type I32 ]))
-     ; ("i64_symbol", ([], [ Num_type I64 ]))
-     ; ("f32_symbol", ([], [ Num_type F32 ]))
-     ; ("f64_symbol", ([], [ Num_type F64 ]))
-     ; ("assume", ([ (None, Num_type I32) ], []))
-     ; ("assert", ([ (None, Num_type I32) ], []))
-    |]
-  in
-
+let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
+  modul * (string * int) array =
   (* update module field `types` *)
   let update_types () : modul * (string * (binary func_type * int)) array =
     let func_type2rec_type : binary func_type -> binary rec_type =
@@ -729,12 +667,7 @@ let add_owi_funcs (m : modul) : modul * (string * int) array =
     let subst_task =
       List.init (Array.length locals) (fun i -> (i, Array.length imported + i))
     in
-    let m =
-      List.fold_left
-        (fun m (old_index, index) ->
-          subst_index ~subst_custom:true old_index index m )
-        m subst_task
-    in
+    let m = subst_index ~subst_custom:true subst_task m in
 
     let owi_funcs =
       Array.mapi
@@ -745,8 +678,19 @@ let add_owi_funcs (m : modul) : modul * (string * int) array =
   in
   update_func ()
 
-let generate (m : modul) : modul Result.t =
-  let m, owi_funcs = add_owi_funcs m in
+let generate (symbolic : bool) (m : modul) : modul Result.t =
+  let owi_funcs =
+    if symbolic then
+      [| ("i32_symbol", ([], [ Num_type I32 ]))
+       ; ("i64_symbol", ([], [ Num_type I64 ]))
+       ; ("f32_symbol", ([], [ Num_type F32 ]))
+       ; ("f64_symbol", ([], [ Num_type F64 ]))
+       ; ("assume", ([ (None, Num_type I32) ], []))
+       ; ("assert", ([ (None, Num_type I32) ], []))
+      |]
+    else [| ("assert", ([ (None, Num_type I32) ], [])) |]
+  in
+  let m, owi_funcs = add_owi_funcs owi_funcs m in
   contracts_generate owi_funcs m
     (List.filter_map
        (function From_annot (Annot.Contract c) -> Some c | _ -> None)
