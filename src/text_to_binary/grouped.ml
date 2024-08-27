@@ -215,6 +215,7 @@ let add_field curr (fields : t) = function
 
 let of_symbolic { Text.fields; id; annots } =
   Log.debug0 "grouping     ...@\n";
-  let+ modul = list_fold_left (add_field (init_curr ())) (empty_module id) fields
+  let+ modul =
+    list_fold_left (add_field (init_curr ())) (empty_module id) fields
   in
   { modul with annots }
