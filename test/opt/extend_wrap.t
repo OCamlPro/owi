@@ -2,7 +2,6 @@ i**.extend_** i32.wrap_i64 instructions:
   $ owi opt extend_wrap.wat > extend_wrap.opt.wat
   $ cat extend_wrap.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $extend
       

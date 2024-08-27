@@ -2,9 +2,7 @@ test that we can emit to a file:
   $ owi wasm2wat m.wasm --emit-file
   $ cat m.wat
   (module
-    
     (type (sub final  (func (param i32) (param i32) (result i32))))
-    
     (type (sub final  (func)))
     (func (param i32) (param i32) (result i32)
       local.get 0

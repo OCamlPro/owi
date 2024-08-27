@@ -9,9 +9,7 @@
   $ owi wasm2wat symbolic.wasm
   (module
     (import "symbolic" "i32_symbol" (func  (result i32)))
-    
     (type (sub final  (func (result i32))))
-    
     (type (sub final  (func)))
     (func (local i32)
       call 0

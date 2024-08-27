@@ -2,6 +2,8 @@
  (deps
   %{bin:owi}
   bad.ext
+  block_type1.wat
+  block_type2.wat
   call_indirect.wat
   func.wat
   globals.wat

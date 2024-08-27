@@ -2,7 +2,6 @@ binary operations instructions:
   $ owi opt binop.wat > binop.opt.wat
   $ cat binop.opt.wat
   (module
-    
     (type (sub final  (func)))
     (func $i32binop
       

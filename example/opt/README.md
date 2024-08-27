@@ -339,7 +339,6 @@ Owi is able to get rid of most of the code:
 ```sh
 $ owi opt useless.wat
 (module
-
   (type (sub final  (func)))
   (func $i32binop
 
