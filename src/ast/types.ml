@@ -939,7 +939,7 @@ type 'a rec_type = 'a type_def list
 let pp_rec_type fmt l =
   match l with
   | [] -> ()
-  | [ t ] -> pf fmt "@\n%a" pp_type_def_no_indent t
+  | [ t ] -> pf fmt "%a" pp_type_def_no_indent t
   | l -> pf fmt "(rec %a)" (list ~sep:sp pp_type_def) l
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
