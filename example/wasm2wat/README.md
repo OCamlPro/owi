@@ -31,10 +31,10 @@ SYNOPSIS
 
 OPTIONS
        --emit-file
-           emit (.wat) files from corresponding (.wasm) files
+           Emit (.wat) files from corresponding (.wasm) files.
 
        -o FILE, --output=FILE
-           wasm
+           Write output to a file.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

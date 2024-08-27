@@ -8,7 +8,7 @@ let optimize_file ~unsafe filename =
   Compile.File.until_optimize ~unsafe ~optimize:true filename
 
 let print_or_emit ~unsafe file outfile =
-  let+ m = optimize_file ~unsafe file in
+  let* m = optimize_file ~unsafe file in
   let m = Binary_to_text.modul m in
   match outfile with
   | Some name -> Bos.OS.File.writef name "%a@\n" Text.pp_modul m
@@ -16,4 +16,4 @@ let print_or_emit ~unsafe file outfile =
 
 let cmd debug unsafe file outfile =
   if debug then Log.debug_on := true;
-  Result.bind (print_or_emit ~unsafe file outfile) (fun _ -> Ok ())
+  print_or_emit ~unsafe file outfile
