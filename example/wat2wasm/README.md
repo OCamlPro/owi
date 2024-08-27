@@ -41,7 +41,7 @@ OPTIONS
            debug mode
 
        -o FILE, --output=FILE
-           wat
+           Write output to a file.
 
        --optimize
            optimize mode
