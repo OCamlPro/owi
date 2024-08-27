@@ -210,10 +210,10 @@ let rec term_generate tenv (term : binary term) :
   | Result (Some i) ->
     if i < 0 || i >= Array.length tenv.result_types then
       Error (`Spec_invalid_indice (Int.to_string i))
-    else Ok ([ Local_get (Raw i) ], tenv.result_types.(i))
+    else Ok ([ Local_get (tenv.result i) ], tenv.result_types.(i))
   | Result None ->
     if Array.length tenv.result_types = 0 then Error (`Spec_invalid_indice "0")
-    else Ok ([ Local_get (Raw 0) ], tenv.result_types.(0))
+    else Ok ([ Local_get (tenv.result 0) ], tenv.result_types.(0))
 
 let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
   (expr2 : binary expr) (ty2 : binary val_type) : binary expr Result.t =

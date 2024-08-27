@@ -37,7 +37,9 @@ module Owi_unoptimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
+    let* simplified =
+      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
+    in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -54,7 +56,9 @@ module Owi_optimized : INTERPRET = struct
   let of_symbolic = Fun.id
 
   let run modul =
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
+    let* simplified =
+      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
+    in
     let* () = Binary_validate.modul simplified in
     let simplified = Optimize.modul simplified in
     let* regular, link_state =
@@ -74,7 +78,9 @@ module Owi_symbolic : INTERPRET = struct
   let dummy_workers_count = 42
 
   let run modul : unit Result.t =
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
+    let* simplified =
+      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
+    in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
