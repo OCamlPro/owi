@@ -33,19 +33,11 @@
   $ owi instrument plus.wat --symbolic
   $ cat plus.instrumented.wat
   (module
-    (import "symbolic" "i32_symbol" (func $i32_symbol  (result i32)))
-    (import "symbolic" "i64_symbol" (func $i64_symbol  (result i64)))
-    (import "symbolic" "f32_symbol" (func $f32_symbol  (result f32)))
-    (import "symbolic" "f64_symbol" (func $f64_symbol  (result f64)))
-    (import "symbolic" "assume" (func $assume  (param i32)))
     (import "symbolic" "assert" (func $assert  (param i32)))
     (type (sub final  (func (param $x i32) (result i32))))
     (type (sub final  (func)))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (result i64))))
-    (type (sub final  (func (result f32))))
-    (type (sub final  (func (result f64))))
     (type (sub final  (func (param i32))))
+    (type (sub final  (func (result i32))))
     (func $plus_three (param $x i32) (result i32)
       i32.const 3
       local.get 0
@@ -53,22 +45,22 @@
     )
     (func $start
       i32.const 42
-      call 8
+      call 3
       drop
     )
     (func $__weasel_plus_three (param $x i32) (result i32) (local $__weasel_temp i32) (local $__weasel_res_0 i32)
       local.get 0
-      call 6
+      call 1
       local.set 2
       local.get 2
       local.get 0
       i32.const 3
       i32.add
       i32.eq
-      call 5
+      call 0
       local.get 2
     )
-    (start 7)
+    (start 2)
   )
   $ owi sym plus.wat --rac --debug
   parsing      ...
@@ -143,17 +135,17 @@
   linking      ...
   interpreting ...
   stack        : [  ]
-  running instr: call 7
+  running instr: call 2
   calling func : func start
   stack        : [  ]
   running instr: i32.const 42
   stack        : [ (i32 42) ]
-  running instr: call 8
+  running instr: call 3
   calling func : func __weasel_plus_three
   stack        : [  ]
   running instr: local.get 0
   stack        : [ (i32 42) ]
-  running instr: call 6
+  running instr: call 1
   calling func : func plus_three
   stack        : [  ]
   running instr: i32.const 3
@@ -175,7 +167,7 @@
   stack        : [ (i32 45) ; (i32 45) ]
   running instr: i32.eq
   stack        : [ (i32 1) ]
-  running instr: call 5
+  running instr: call 0
   stack        : [  ]
   running instr: local.get 2
   stack        : [ (i32 45) ]

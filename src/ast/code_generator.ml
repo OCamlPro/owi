@@ -680,14 +680,7 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
 
 let generate (symbolic : bool) (m : modul) : modul Result.t =
   let owi_funcs =
-    if symbolic then
-      [| ("i32_symbol", ([], [ Num_type I32 ]))
-       ; ("i64_symbol", ([], [ Num_type I64 ]))
-       ; ("f32_symbol", ([], [ Num_type F32 ]))
-       ; ("f64_symbol", ([], [ Num_type F64 ]))
-       ; ("assume", ([ (None, Num_type I32) ], []))
-       ; ("assert", ([ (None, Num_type I32) ], []))
-      |]
+    if symbolic then [| ("assert", ([ (None, Num_type I32) ], [])) |]
     else [| ("assert", ([ (None, Num_type I32) ], [])) |]
   in
   let m, owi_funcs = add_owi_funcs owi_funcs m in
