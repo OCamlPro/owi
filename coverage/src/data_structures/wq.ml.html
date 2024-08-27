@@ -115,9 +115,9 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="336">N</span>il
   | <span data-count="192">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="192">q</span> q ~finalizer)
 
-let push v q = <span data-count="554">S</span>ynchronizer.write v q
+let push v q = <span data-count="551">S</span>ynchronizer.write v q
 
-let work_while f q = <span data-count="704">S</span>ynchronizer.work_while f q
+let work_while f q = <span data-count="708">S</span>ynchronizer.work_while f q
 
 let fail = Synchronizer.fail
 
@@ -126,9 +126,9 @@ let make () =
   <span data-count="718">l</span>et writter v condvar =
     <span data-count="44022">l</span>et was_empty = Queue.is_empty q in
     <span data-count="44022">Q</span>ueue.push v q;
-    <span data-count="44022">i</span>f was_empty then <span data-count="1428">C</span>ondition.broadcast condvar
+    <span data-count="44022">i</span>f was_empty then <span data-count="1412">C</span>ondition.broadcast condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="46065">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="46089">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

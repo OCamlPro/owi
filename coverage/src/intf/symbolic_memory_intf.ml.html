@@ -160,6 +160,10 @@
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span > </span>
 <a id="L138"></a><span > </span>
+<a id="L139"></a><span > </span>
+<a id="L140"></a><span > </span>
+<a id="L141"></a><span > </span>
+<a id="L142"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -302,6 +306,10 @@
 <a href="#L136">136</a>
 <a href="#L137">137</a>
 <a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
 </pre>
 <pre><code class="ocaml">module type M = sig
   type t
@@ -320,9 +328,13 @@
 
   val storen : t -&gt; address -&gt; Smtml.Expr.t -&gt; int -&gt; unit
 
+  (** [validate_address m a range] verifies whether an operation starting at
+      address [a] is valid within the address range [a] to [a + range - 1]
+      (inclusive). *)
   val validate_address :
        t
     -&gt; Smtml.Expr.t
+    -&gt; int
     -&gt; (Smtml.Expr.t, Trap.t) result Symbolic_choice_without_memory.t
 
   val realloc :
