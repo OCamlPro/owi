@@ -1,4 +1,4 @@
-  $ owi rac forall.wat
+  $ owi instrument forall.wat
   $ owi sym forall.instrumented.wat --debug
   parsing      ...
   checking     ...
@@ -11,13 +11,13 @@
   interpreting ...
   stack        : [  ]
   running instr: call 7
-  calling func : func __rac_start
+  calling func : func __weasel_start
   stack        : [  ]
-  running instr: (block $__rac_forall (result i32)
+  running instr: (block $__weasel_forall (result i32)
     i32.const 1
     local.set 1
     i32.const 1
-    (loop $__rac_loop (param i32) (result i32)
+    (loop $__weasel_loop (param i32) (result i32)
       local.get 1
       i32.const 100
       i32.le_s
@@ -42,7 +42,7 @@
   stack        : [  ]
   running instr: i32.const 1
   stack        : [ (i32 1) ]
-  running instr: (loop $__rac_loop (param i32) (result i32)
+  running instr: (loop $__weasel_loop (param i32) (result i32)
     local.get 1
     i32.const 100
     i32.le_s

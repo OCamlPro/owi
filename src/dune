@@ -16,8 +16,8 @@
   cmd_utils
   cmd_c
   cmd_fmt
+  cmd_instrument
   cmd_opt
-  cmd_rac
   cmd_run
   cmd_script
   cmd_sym
