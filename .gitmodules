@@ -17,3 +17,6 @@
 [submodule "bench/btree"]
 	path = bench/btree
 	url = https://github.com/filipeom/wasm-dataset.git
+[submodule "bench/symbiotic"]
+	path = bench/symbiotic
+	url = https://github.com/filipeom/symbiotic-testcomp.git
