@@ -6,10 +6,14 @@ type t =
       ; solver : Smtml.Solver_type.t
       }
   | Klee
+  | Symbiotic
 
 let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 
-let to_short_name = function Owi _ -> "owi" | Klee -> "klee"
+let to_short_name = function
+  | Owi _ -> "owi"
+  | Klee -> "klee"
+  | Symbiotic -> "symbiotic"
 
 let to_reference_name = function
   | Owi { concolic; workers; optimisation_level; solver } ->
@@ -17,11 +21,14 @@ let to_reference_name = function
       Smtml.Solver_type.pp solver
       (if concolic then "_concolic" else "")
   | Klee -> "klee"
+  | Symbiotic -> "symbiotic"
 
 let mk_owi ~concolic ~workers ~optimisation_level ~solver =
   Owi { concolic; workers; optimisation_level; solver }
 
 let mk_klee () = Klee
+
+let mk_symbiotic () = Symbiotic
 
 exception Sigchld
 
@@ -94,6 +101,17 @@ let wait_pid =
             if !has_found_error then Reached rusage else Nothing rusage
           end
           else Other (rusage, code)
+        | Symbiotic ->
+          if code = 0 then begin
+            match Bos.OS.File.read dst_stderr with
+            | Error (`Msg err) -> failwith err
+            | Ok data -> (
+              let error = Astring.String.find_sub ~sub:"Found ERROR!" data in
+              match error with
+              | Some _ -> Reached rusage
+              | None -> Nothing rusage )
+          end
+          else Other (rusage, code)
       end
       | WSIGNALED n -> Signaled (rusage, n)
       | WSTOPPED n -> Stopped (rusage, n)
@@ -127,6 +145,15 @@ let execvp ~output_dir tool file timeout =
         ; timeout
         ; "--max-walltime"
         ; timeout
+        ; file
+        ] )
+    | Symbiotic ->
+      let path_to_symbiotic = "symbiotic/bin/symbiotic" in
+      ( path_to_symbiotic
+      , [ path_to_symbiotic
+        ; "--test-comp"
+        ; Format.sprintf "--timeout=%s" timeout
+        ; "--prp=testcomp/sv-benchmarks/c/properties/coverage-error-call.prp"
         ; file
         ] )
   in
