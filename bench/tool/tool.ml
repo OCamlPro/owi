@@ -32,6 +32,10 @@ let mk_symbiotic () = Symbiotic
 
 exception Sigchld
 
+let kill_klee_descendants () =
+  let _ = Format.ksprintf Sys.command "pkill klee" in
+  ()
+
 let wait_pid =
   let last_utime = ref 0. in
   let last_stime = ref 0. in
@@ -51,6 +55,8 @@ let wait_pid =
     end;
     Sys.set_signal Sys.sigchld Signal_default;
     let waited_pid, status = Unix.waitpid [] (-pid) in
+    (* Because symbiotic is leaking klee processes *)
+    kill_klee_descendants ();
     let end_time = Unix.gettimeofday () in
     let { Rusage.utime; stime; _ } = Rusage.get Rusage.Children in
     assert (waited_pid = pid);
