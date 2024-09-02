@@ -27,16 +27,13 @@ type nonrec binder =
 
 type nonrec binder_type = num_type
 
-type nonrec unop =
-  | Neg
-  | CustomUnOp of string (* for testing purpose only *)
+type nonrec unop = Neg
 
 type nonrec binop =
   | Plus
   | Minus
   | Mult
   | Div
-  | CustomBinOp of string (* for testing purpose only *)
 
 type 'a term =
   | Int32 : Int32.t -> 'a term
@@ -50,6 +47,7 @@ type 'a term =
   | UnOp : unop * 'a term -> 'a term
   | BinOp : binop * 'a term * 'a term -> 'a term
   | Result : int option -> 'a term
+  | Memory : 'a term -> 'a term
 
 type 'a prop =
   | Const : bool -> 'a prop

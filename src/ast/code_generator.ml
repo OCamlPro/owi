@@ -113,7 +113,6 @@ let unop_generate (u : unop) (expr1 : binary expr) (ty1 : binary val_type) :
       in
       Ok (expr, Num_type F64)
     | Ref_type _ -> Error (`Spec_type_error Fmt.(str "%a" pp_unop u)) )
-  | CustomUnOp _ -> Error (`Spec_type_error Fmt.(str "%a" pp_unop u))
 
 let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
   (expr2 : binary expr) (ty2 : binary val_type) :
@@ -179,7 +178,6 @@ let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
       let expr = expr1 @ expr2 @ [ F_binop (S64, Div) ] in
       Ok (expr, Num_type F64)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
-  | CustomBinOp _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b))
 
 let rec term_generate tenv (term : binary term) :
   (binary expr * binary val_type) Result.t =
@@ -214,6 +212,16 @@ let rec term_generate tenv (term : binary term) :
   | Result None ->
     if Array.length tenv.result_types = 0 then Error (`Spec_invalid_indice "0")
     else Ok ([ Local_get (tenv.result 0) ], tenv.result_types.(0))
+  | Memory tm1 -> (
+    let* expr1, ty1 = term_generate tenv tm1 in
+    match ty1 with
+    | Num_type I32 ->
+      Ok
+        ( expr1
+          @ [ I_load (S32, { offset = Int32.of_int 0; align = Int32.of_int 0 })
+            ]
+        , Num_type I32 )
+    | _ -> Error (`Spec_type_error Fmt.(str "%a" pp_term tm1)) )
 
 let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
   (expr2 : binary expr) (ty2 : binary val_type) : binary expr Result.t =
