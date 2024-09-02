@@ -30,6 +30,7 @@ pterm ::= 'i32' i32                ==> match Int32.of_string i32 with Some i32 -
   | unop term_1                    ==> Unop (unop, term_1)
   | binop term_1 term_2            ==> BinOp (binop, term_1, term_2)
   | 'result' i                     ==> Result (Some i)
+  | 'memory' term_1                ==> Memory term_1
 
 binpred ::= '>='                   ==> Ge
   | '>'                            ==> Gt
@@ -88,16 +89,13 @@ type nonrec binder =
 
 type nonrec binder_type = num_type
 
-type nonrec unop =
-  | Neg
-  | CustomUnOp of string (* for testing purpose only *)
+type nonrec unop = Neg
 
 type nonrec binop =
   | Plus
   | Minus
   | Mult
   | Div
-  | CustomBinOp of string (* for testing purpose only *)
 
 type 'a term =
   | Int32 : Int32.t -> 'a term
@@ -111,6 +109,7 @@ type 'a term =
   | UnOp : unop * 'a term -> 'a term
   | BinOp : binop * 'a term * 'a term -> 'a term
   | Result : int option -> 'a term
+  | Memory : 'a term -> 'a term
 
 type 'a prop =
   | Const : bool -> 'a prop
@@ -139,16 +138,13 @@ let pp_binder fmt = function Forall -> pf fmt "∀" | Exists -> pf fmt "∃"
 
 let pp_binder_type = pp_num_type
 
-let pp_unop fmt = function
-  | Neg -> pf fmt "-"
-  | CustomUnOp c -> pf fmt "%a" string c
+let pp_unop fmt = function Neg -> pf fmt "-"
 
 let pp_binop fmt = function
   | Plus -> pf fmt "+"
   | Minus -> pf fmt "-"
   | Mult -> pf fmt "*"
   | Div -> pf fmt "/"
-  | CustomBinOp c -> pf fmt "%a" string c
 
 let rec pp_term : type a. formatter -> a term -> unit =
  fun fmt -> function
@@ -165,6 +161,7 @@ let rec pp_term : type a. formatter -> a term -> unit =
     pf fmt "@[<hv 2>(%a@ %a@ %a)@]" pp_binop b pp_term tm1 pp_term tm2
   | Result (Some i) -> pf fmt "(result %i)" i
   | Result None -> pf fmt "result"
+  | Memory tm1 -> pf fmt "(memory %a)" pp_term tm1
 
 let rec pp_prop : type a. formatter -> a prop -> unit =
  fun fmt -> function
@@ -284,9 +281,6 @@ let rec parse_term =
   | List [ Atom "-"; tm1 ] ->
     let+ tm1 = parse_term tm1 in
     UnOp (Neg, tm1)
-  | List [ Atom c; tm1 ] ->
-    let+ tm1 = parse_term tm1 in
-    UnOp (CustomUnOp c, tm1)
   (* BinOp *)
   | List [ Atom "+"; tm1; tm2 ] ->
     let* tm1 = parse_term tm1 in
@@ -304,10 +298,10 @@ let rec parse_term =
     let* tm1 = parse_term tm1 in
     let+ tm2 = parse_term tm2 in
     BinOp (Div, tm1, tm2)
-  | List [ Atom c; tm1; tm2 ] ->
-    let* tm1 = parse_term tm1 in
-    let+ tm2 = parse_term tm2 in
-    BinOp (CustomBinOp c, tm1, tm2)
+  (* Memory *)
+  | List [ Atom "memory"; tm1 ] ->
+    let+ tm1 = parse_term tm1 in
+    Memory tm1
   (* Invalid *)
   | tm -> Error (`Spec_unknown_term tm)
 

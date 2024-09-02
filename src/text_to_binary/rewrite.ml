@@ -429,6 +429,9 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)
     let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
     BinOp (b, tm1, tm2)
   | Result i -> Ok (Result i)
+  | Memory tm1 ->
+    let+ tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    Memory tm1
 
 let rec rewrite_prop ~(binder_list : string option list) ~(modul : Assigned.t)
   ~(func_param_list : string option list) :
