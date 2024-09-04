@@ -20,7 +20,7 @@ let find location file : Fpath.t Result.t =
     list_map
       (fun dir ->
         let filename = Fpath.append dir file in
-        match Bos.OS.File.exists filename with
+        match OS.File.exists filename with
         | Ok true -> Ok (Some filename)
         | Ok false -> Ok None
         | Error (`Msg msg) -> Error (`Msg msg) )
@@ -68,7 +68,7 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
         files
     in
 
-    let framac : Fpath.t -> Fpath.t -> Bos.Cmd.t =
+    let framac : Fpath.t -> Fpath.t -> Cmd.t =
      fun file out -> Cmd.(framac_bin %% flags1 % p file %% flags2 % p out)
     in
 
@@ -120,7 +120,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
   let* libc = find binc_location (Fpath.v "libc.wasm") in
 
   let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
-  let clang : Bos.Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
+  let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let+ () =
     match OS.Cmd.run clang with
@@ -152,7 +152,7 @@ let metadata ~workspace arch property files : unit Result.t =
     let* hash =
       list_fold_left
         (fun context file ->
-          let+ str = Bos.OS.File.read file in
+          let+ str = OS.File.read file in
           Digestif.SHA256.feed_string context str )
         Digestif.SHA256.empty files
     in
@@ -184,7 +184,7 @@ let metadata ~workspace arch property files : unit Result.t =
   res
 
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
-  ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_values
+  ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver : unit Result.t =
   let workspace = Fpath.v workspace in
@@ -197,5 +197,5 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
-    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files

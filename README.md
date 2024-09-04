@@ -6,6 +6,7 @@
 - [`owi conc`]: a concolic Wasm interpreter;
 - [`owi fmt`]: a formatter for Wasm;
 - [`owi opt`]: an optimizer for Wasm;
+- [`owi replay`]: run a module containing symbols with concrete values from a model produced by a previous symbolic execution
 - [`owi run`]: a concrete Wasm interpreter;
 - [`owi script`]: an interpreter for [Wasm scripts];
 - [`owi sym`]: a symbolic Wasm interpreter;
@@ -214,6 +215,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [`owi conc`]: example/conc
 [`owi fmt`]: example/fmt
 [`owi opt`]: example/opt
+[`owi replay`]: example/replay
 [`owi run`]: example/run
 [`owi script`]: example/script
 [`owi sym`]: example/sym

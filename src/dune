@@ -18,6 +18,7 @@
   cmd_fmt
   cmd_instrument
   cmd_opt
+  cmd_replay
   cmd_run
   cmd_script
   cmd_sym

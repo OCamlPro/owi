@@ -26,10 +26,10 @@ let pp_pc_elt fmt = function
 
 let pp_pc fmt pc = List.iter (fun e -> Fmt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
-let pp_assignments ~no_values fmt assignments =
+let pp_assignments ~no_value fmt assignments =
   let open Smtml in
   let pp_v =
-    if not no_values then
+    if not no_value then
       Fmt.parens (Fmt.pair ~sep:Fmt.sp Symbol.pp (Fmt.parens Concrete_value.pp))
     else fun fmt (x, _) ->
       let ty = Symbol.type_of x in
