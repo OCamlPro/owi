@@ -82,6 +82,7 @@ type err =
   | `Unclosed_comment
   | `Unclosed_string
   | `Unbounded_quantification
+  | `Invalid_model of string
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -177,3 +178,4 @@ let rec err_to_string = function
   | `Unclosed_comment -> Fmt.str "unclosed comment"
   | `Unclosed_string -> Fmt.str "unclosed string"
   | `Unbounded_quantification -> Fmt.str "unbounded quantification"
+  | `Invalid_model msg -> Fmt.str "invalid model: %s" msg

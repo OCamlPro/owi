@@ -388,7 +388,7 @@ let run solver tree link_state modules_to_run =
         Log.debug2 "Assume_fail: %a@." Smtml.Expr.pp c;
         Log.debug2 "Pc:@.%a" Concolic_choice.pp_pc trace.remaining_pc;
         Log.debug2 "Assignments:@.%a@."
-          (Concolic_choice.pp_assignments ~no_values:false)
+          (Concolic_choice.pp_assignments ~no_value:false)
           trace.assignments;
         Log.debug0 "Retry !@.";
         match pc_model solver (Assume c :: trace.remaining_pc) with
@@ -416,7 +416,7 @@ let run solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
-  ~no_stop_at_failure:_ ~no_values ~no_assert_failure_expression_printing
+  ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
   ~files =
   if profiling then Log.profiling_on := true;
@@ -431,7 +431,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   let tree = fresh_tree [] in
   let* result = run solver tree link_state modules_to_run in
   let testcase assignments =
-    if not no_values then
+    if not no_value then
       let testcase : Smtml.Value.t list =
         List.map
           (fun (_, v) ->
@@ -455,7 +455,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     let assignments = List.rev assignments in
     Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
     Fmt.pr "Model:@\n  @[<v>%a@]@."
-      (Concolic_choice.pp_assignments ~no_values)
+      (Concolic_choice.pp_assignments ~no_value)
       assignments;
     let* () = testcase assignments in
     Error (`Found_bug 1)
@@ -469,7 +469,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
       Fmt.pr "Assert failure@\n"
     end;
     Fmt.pr "Model:@\n  @[<v>%a@]@."
-      (Concolic_choice.pp_assignments ~no_values)
+      (Concolic_choice.pp_assignments ~no_value)
       assignments;
     let* () = testcase assignments in
     Error (`Found_bug 1)

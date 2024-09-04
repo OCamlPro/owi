@@ -47,7 +47,7 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
-  ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -85,7 +85,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let print_bug = function
     | `ETrap (tr, model) ->
       Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
-      Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
+      Fmt.pr "%s@\n" (Smtml.Model.to_scfg_string ~no_value model)
     | `EAssert (assertion, model) ->
       if no_assert_failure_expression_printing then begin
         Fmt.pr "Assert failure@\n"
@@ -93,7 +93,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       else begin
         Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
       end;
-      Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
+      Fmt.pr "%s@\n" (Smtml.Model.to_scfg_string ~no_value model)
   in
   let rec print_and_count_failures count_acc results =
     match results () with
@@ -108,7 +108,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       in
       let count_acc = succ count_acc in
       let* () =
-        if not no_values then
+        if not no_value then
           let testcase = Smtml.Model.get_bindings model |> List.map snd in
           Cmd_utils.write_testcase ~dir:workspace testcase
         else Ok ()

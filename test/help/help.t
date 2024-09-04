@@ -23,6 +23,10 @@ no subcommand should print help
          opt [--debug] [--output=FILE] [--unsafe] [OPTION]… ARG
              Optimize a module
   
+         replay [OPTION]… ARG
+             Replay a module containing symbols with concrete values in a
+             replay file containing a model
+  
          run [OPTION]… [ARG]…
              Run the concrete interpreter
   

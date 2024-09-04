@@ -1,0 +1,9 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  missing_replay_file.wat
+  no_bug.model
+  no_bug.wat
+  simple.model
+  simple.wat))

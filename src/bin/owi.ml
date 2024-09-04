@@ -58,8 +58,7 @@ let files =
 
 let sourcefile =
   let doc = "source file" in
-  let f = existing_non_dir_file in
-  Arg.(required & pos 0 (some f) None (info [] ~doc))
+  Arg.(required & pos 0 (some existing_non_dir_file) None (info [] ~doc))
 
 let outfile =
   let doc = "Write output to a file." in
@@ -73,7 +72,7 @@ let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
   Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
 
-let no_values =
+let no_value =
   let doc = "do not display a value for each symbol" in
   Arg.(value & flag & info [ "no-value" ] ~doc)
 
@@ -169,7 +168,7 @@ let c_cmd =
   and+ unsafe
   and+ optimize
   and+ no_stop_at_failure
-  and+ no_values
+  and+ no_value
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
@@ -182,7 +181,7 @@ let c_cmd =
     Arg.(value & flag & info [ "e-acsl" ] ~doc)
   and+ solver in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
-    ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_values
+    ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver
 
@@ -297,7 +296,7 @@ let sym_cmd =
   and+ optimize
   and+ workers
   and+ no_stop_at_failure
-  and+ no_values
+  and+ no_value
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
@@ -305,8 +304,37 @@ let sym_cmd =
   and+ solver
   and+ files in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
-    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
+
+(* owi replay *)
+
+let replay_info =
+  let doc =
+    "Replay a module containing symbols with concrete values in a replay file \
+     containing a model"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "replay" ~version ~doc ~sdocs ~man
+
+let replay_cmd =
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ optimize
+  and+ replay_file =
+    let parse s =
+      let path = Fpath.v s in
+      match Bos.OS.File.exists path with
+      | Ok true -> Ok path
+      | Ok false -> Error (`Msg (Fmt.str "no file '%a'" Fpath.pp path))
+      | Error _e as e -> e
+    in
+    let replay_file = Cmdliner.Arg.conv (parse, Fpath.pp) in
+    let doc = "Which replay file to use" in
+    Arg.(required & opt (some replay_file) None & info [ "replay-file" ] ~doc)
+  and+ sourcefile in
+  Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~sourcefile
 
 (* owi conc *)
 
@@ -324,7 +352,7 @@ let conc_cmd =
   and+ optimize
   and+ workers
   and+ no_stop_at_failure
-  and+ no_values
+  and+ no_value
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
@@ -332,7 +360,7 @@ let conc_cmd =
   and+ solver
   and+ files in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
-    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
 
 (* owi wasm2wat *)
@@ -387,6 +415,7 @@ let cli =
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.v opt_info opt_cmd
     ; Cmd.v instrument_info instrument_cmd
+    ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v script_info script_cmd
     ; Cmd.v sym_info sym_cmd
@@ -483,6 +512,7 @@ let exit_code =
       | `Unclosed_comment -> 75
       | `Unclosed_string -> 76
       | `Unbounded_quantification -> 77
+      | `Invalid_model _msg -> 78
     end
   end
   | Error e -> (

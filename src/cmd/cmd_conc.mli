@@ -11,7 +11,7 @@ val cmd :
   -> optimize:bool
   -> workers:int
   -> no_stop_at_failure:bool
-  -> no_values:bool
+  -> no_value:bool
   -> no_assert_failure_expression_printing:bool
   -> deterministic_result_order:bool
   -> fail_mode:Cmd_sym.fail_mode
