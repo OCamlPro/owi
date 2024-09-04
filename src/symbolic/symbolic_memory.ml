@@ -10,14 +10,14 @@ open Expr
 let page_size = Symbolic_value.const_i32 65_536l
 
 type t =
-  { data : (Int32.t, Value.int32) Hashtbl.t
+  { data : (Int32.t, Value.int32) Hashtbl.t option ref
   ; parent : t option
   ; mutable size : Value.int32
   ; chunks : (Int32.t, Value.int32) Hashtbl.t
   }
 
 let create size =
-  { data = Hashtbl.create 128
+  { data = ref None
   ; parent = None
   ; size = Value.const_i32 size
   ; chunks = Hashtbl.create 16
@@ -41,6 +41,14 @@ let fill _ = assert false
 
 let blit _ = assert false
 
+let replace m k v =
+  match !(m.data) with
+  | None ->
+    let tbl = Hashtbl.create 16 in
+    Hashtbl.add tbl k v;
+    m.data := Some tbl
+  | Some tbl -> Hashtbl.replace tbl k v
+
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
   let str_len = String.length str in
@@ -54,26 +62,29 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
-      Hashtbl.replace m.data dst (make (Val (Num (I8 byte))))
+      replace m dst (make (Val (Num (I8 byte))))
     done;
     Value.Bool.const false
   end
 
 let clone m =
-  { data = Hashtbl.create 16
-  ; parent = Some m
+  let parent = if Option.is_none !(m.data) then m.parent else Some m in
+  { data = ref None
+  ; parent
   ; size = m.size
   ; chunks = Hashtbl.copy m.chunks (* TODO: we can make this lazy as well *)
   }
 
 let rec load_byte { parent; data; _ } a =
-  match Hashtbl.find_opt data a with
-  | None -> begin
+  let v =
+    match !data with None -> None | Some data -> Hashtbl.find_opt data a
+  in
+  match v with
+  | Some v -> v
+  | None -> (
     match parent with
     | None -> make (Val (Num (I8 0)))
-    | Some parent -> load_byte parent a
-  end
-  | Some v -> v
+    | Some parent -> load_byte parent a )
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
 let merge_extracts (e1, h, m1) (e2, m2, l) =
@@ -163,7 +174,7 @@ let storen m ~addr v n =
   for i = 0 to n - 1 do
     let addr' = Int32.add a0 (Int32.of_int i) in
     let v' = extract v i in
-    Hashtbl.replace m.data addr' v'
+    replace m addr' v'
   done
 
 let store_8 m ~addr v = storen m ~addr v 1
