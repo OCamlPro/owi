@@ -13,6 +13,8 @@ val mk_owi :
 
 val mk_klee : unit -> t
 
+val mk_symbiotic : unit -> t
+
 val fork_and_run_on_file :
      i:int
   -> fmt:Format.formatter

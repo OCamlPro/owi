@@ -1,1 +1,1 @@
-(dirs :standard \ klee pie results-*)
+(dirs :standard \ klee symbiotic pie results-*)
