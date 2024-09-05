@@ -10,14 +10,14 @@ open Expr
 let page_size = Symbolic_value.const_i32 65_536l
 
 type t =
-  { data : (Int32.t, Value.int32) Hashtbl.t option ref
+  { mutable data : (Int32.t, Value.int32) Hashtbl.t option
   ; parent : t option
   ; mutable size : Value.int32
   ; chunks : (Int32.t, Value.int32) Hashtbl.t
   }
 
 let create size =
-  { data = ref None
+  { data = None
   ; parent = None
   ; size = Value.const_i32 size
   ; chunks = Hashtbl.create 16
@@ -42,11 +42,11 @@ let fill _ = assert false
 let blit _ = assert false
 
 let replace m k v =
-  match !(m.data) with
+  match m.data with
   | None ->
     let tbl = Hashtbl.create 16 in
     Hashtbl.add tbl k v;
-    m.data := Some tbl
+    m.data <- Some tbl
   | Some tbl -> Hashtbl.replace tbl k v
 
 let blit_string m str ~src ~dst ~len =
@@ -68,8 +68,8 @@ let blit_string m str ~src ~dst ~len =
   end
 
 let clone m =
-  let parent = if Option.is_none !(m.data) then m.parent else Some m in
-  { data = ref None
+  let parent = if Option.is_none m.data then m.parent else Some m in
+  { data = None
   ; parent
   ; size = m.size
   ; chunks = Hashtbl.copy m.chunks (* TODO: we can make this lazy as well *)
@@ -77,7 +77,7 @@ let clone m =
 
 let rec load_byte { parent; data; _ } a =
   let v =
-    match !data with None -> None | Some data -> Hashtbl.find_opt data a
+    match data with None -> None | Some data -> Hashtbl.find_opt data a
   in
   match v with
   | Some v -> v
