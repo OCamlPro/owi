@@ -14,3 +14,6 @@
 	path = test/c/collections-c/files
 	url = https://github.com/zapashcanon/Collections-C.git
 	shallow = true
+[submodule "bench/btree"]
+	path = bench/btree
+	url = https://github.com/filipeom/wasm-dataset.git
