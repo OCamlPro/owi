@@ -2,17 +2,17 @@ module Backend = struct
   type address = Int32.t
 
   type t =
-    { data : (address, Symbolic_value.int32) Hashtbl.t option ref
+    { mutable data : (address, Symbolic_value.int32) Hashtbl.t option
     ; parent : t option
     ; chunks : (address, Symbolic_value.int32) Hashtbl.t
     }
 
-  let make () = { data = ref None; parent = None; chunks = Hashtbl.create 16 }
+  let make () = { data = None; parent = None; chunks = Hashtbl.create 16 }
 
   let clone m =
-    let parent = if Option.is_none !(m.data) then m.parent else Some m in
+    let parent = if Option.is_none m.data then m.parent else Some m in
     (* TODO: Make chunk copying lazy *)
-    { data = ref None; parent; chunks = Hashtbl.copy m.chunks }
+    { data = None; parent; chunks = Hashtbl.copy m.chunks }
 
   let address a =
     let open Symbolic_choice_without_memory in
@@ -26,7 +26,7 @@ module Backend = struct
 
   let rec load_byte { parent; data; _ } a =
     let v =
-      match !data with None -> None | Some data -> Hashtbl.find_opt data a
+      match data with None -> None | Some data -> Hashtbl.find_opt data a
     in
     match v with
     | Some v -> v
@@ -97,11 +97,11 @@ module Backend = struct
     | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
 
   let replace m k v =
-    match !(m.data) with
+    match m.data with
     | None ->
       let tbl = Hashtbl.create 16 in
       Hashtbl.add tbl k v;
-      m.data := Some tbl
+      m.data <- Some tbl
     | Some tbl -> Hashtbl.replace tbl k v
 
   let storen m a v n =
