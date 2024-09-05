@@ -10,14 +10,14 @@ open Expr
 let page_size = Symbolic_value.const_i32 65_536l
 
 type t =
-  { data : (Int32.t, Value.int32) Hashtbl.t
+  { mutable data : (Int32.t, Value.int32) Hashtbl.t option
   ; parent : t option
   ; mutable size : Value.int32
   ; chunks : (Int32.t, Value.int32) Hashtbl.t
   }
 
 let create size =
-  { data = Hashtbl.create 128
+  { data = ref None
   ; parent = None
   ; size = Value.const_i32 size
   ; chunks = Hashtbl.create 16
@@ -41,6 +41,14 @@ let fill _ = assert false
 
 let blit _ = assert false
 
+let replace m k v =
+  match m.data with
+  | None ->
+    let tbl = Hashtbl.create 16 in
+    Hashtbl.add tbl k v;
+    m.data <- Some tbl
+  | Some tbl -> Hashtbl.replace tbl k v
+
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
   let str_len = String.length str in
@@ -54,20 +62,22 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
-      Hashtbl.replace m.data dst (make (Val (Num (I8 byte))))
+      replace m dst (make (Val (Num (I8 byte))))
     done;
     Value.Bool.const false
   end
 
 let clone m =
-  { data = Hashtbl.create 16
-  ; parent = Some m
+  let parent = if Option.is_none m.data then m.parent else Some m in
+  { data = None
+  ; parent
   ; size = m.size
   ; chunks = Hashtbl.copy m.chunks (* TODO: we can make this lazy as well *)
   }
 
 let rec load_byte { parent; data; _ } a =
-  try Hashtbl.find data a
+  try
+    match data with None -> raise Not_found | Some data -> Hashtbl.find data a
   with Not_found -> (
     match parent with
     | None -> make (Val (Num (I8 0)))
@@ -161,7 +171,7 @@ let storen m ~addr v n =
   for i = 0 to n - 1 do
     let addr' = Int32.add a0 (Int32.of_int i) in
     let v' = extract v i in
-    Hashtbl.replace m.data addr' v'
+    replace m addr' v'
   done
 
 let store_8 m ~addr v = storen m ~addr v 1
