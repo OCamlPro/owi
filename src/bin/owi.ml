@@ -231,7 +231,7 @@ let run_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
+      const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files )
 
 let validate_cmd =
   let open Cmdliner in

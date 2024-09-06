@@ -1,8 +1,7 @@
 ## unreleased
 
 - add `owi instrument` to instrument Webassembly module annotated by Weasel specification language
-- add `--srac` option to `sym` and `conc` cmd
-- add `--rac` option to `run`, `sym` and `conc` cmd
+- add `--rac` and `--srac` option to `sym` and `conc` cmd
 - add `--output` option to `wat2wasm`, `wasm2wat` and `opt` cmd
 - Change `free` prototype to now return a pointer on which tracking is deactivated
 - add `--emit-file` option to `wasm2wat` to emit .wat files

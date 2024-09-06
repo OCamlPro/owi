@@ -1,0 +1,4 @@
+(mdx
+ (libraries owi)
+ (deps %{bin:owi} plus_three.wat plus_three.instrumented.wat)
+ (files README.md))
