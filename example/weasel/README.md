@@ -4,7 +4,7 @@ Weasel stands for WEbAssembly Specification Language, it can be used to annotate
 
 Commands and options related to Weasel:
 - `owi instrument` to instrument an annotated text module.
-- `--rac` for `sym` and `conc` to instrument an annotated text module and perform runtime assertion checking.
+- `--rac` for `run`, `sym` and `conc` to instrument an annotated text module and perform runtime assertion checking.
 - `--srac` for `sym` and `conc` to instrument an annotated text module and perform runtime assertion checking symbolically.
 
 The formal specification of Weasel can be found in `src/annot/spec.ml`.
