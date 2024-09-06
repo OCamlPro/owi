@@ -4,11 +4,26 @@
 
 open Syntax
 
+let extern_module : Concrete_value.Func.extern_func Link.extern_module =
+  let assert_i32 n = assert (not @@ Prelude.Int32.equal n 0l) in
+  let functions =
+    [ ( "assert"
+      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
+      )
+    ]
+  in
+  { functions }
+
+(* module name is called "symbolic" to be compatible with code generator *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"symbolic" extern_module
+
 let run_file ~unsafe ~rac ~optimize filename =
   let name = None in
+  let link_state = if rac then link_state else Link.empty_state in
   let+ (_ : _ Link.state) =
     Compile.File.until_interpret ~unsafe ~rac ~srac:false ~optimize ~name
-      Link.empty_state filename
+      link_state filename
   in
   ()
 
