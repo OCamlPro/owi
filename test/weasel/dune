@@ -1,2 +1,2 @@
 (cram
- (deps %{bin:owi} forall.wat plus.wat sum.wat))
+ (deps %{bin:owi} assert.wat forall.wat plus.wat sum.wat))
