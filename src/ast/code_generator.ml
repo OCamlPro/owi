@@ -686,11 +686,8 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
   in
   update_func ()
 
-let generate (symbolic : bool) (m : modul) : modul Result.t =
-  let owi_funcs =
-    if symbolic then [| ("assert", ([ (None, Num_type I32) ], [])) |]
-    else [| ("assert", ([ (None, Num_type I32) ], [])) |]
-  in
+let generate (_symbolic : bool) (m : modul) : modul Result.t =
+  let owi_funcs = [| ("assert", ([ (None, Num_type I32) ], [])) |] in
   let m, owi_funcs = add_owi_funcs owi_funcs m in
   contracts_generate owi_funcs m
     (List.filter_map
