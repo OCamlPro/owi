@@ -88,6 +88,14 @@ let profiling =
   let doc = "profiling mode" in
   Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
+let rac =
+  let doc = "runtime assertion checking mode" in
+  Cmdliner.Arg.(value & flag & info [ "rac" ] ~doc)
+
+let srac =
+  let doc = "symbolic runtime assertion checking mode" in
+  Cmdliner.Arg.(value & flag & info [ "srac" ] ~doc)
+
 let eacsl =
   let doc =
     "e-acsl mode, refer to \
@@ -102,6 +110,10 @@ let solver =
     value
     & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
     & info [ "solver"; "s" ] ~doc )
+
+let symbolic =
+  let doc = "generate instrumented module that depends on symbolic execution" in
+  Cmdliner.Arg.(value & flag & info [ "symbolic" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in
@@ -198,6 +210,18 @@ let opt_cmd =
   in
   Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile $ outfile)
 
+let instrument_cmd =
+  let open Cmdliner in
+  let info =
+    let doc =
+      "Generate an instrumented file with runtime assertion checking coming \
+       from Weasel specifications"
+    in
+    let man = [] @ shared_man in
+    Cmd.info "instrument" ~version ~doc ~sdocs ~man
+  in
+  Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ symbolic $ files)
+
 let run_cmd =
   let open Cmdliner in
   let info =
@@ -206,7 +230,8 @@ let run_cmd =
     Cmd.info "run" ~version ~doc ~sdocs ~man
   in
   Cmd.v info
-    Term.(const Cmd_run.cmd $ profiling $ debug $ unsafe $ optimize $ files)
+    Term.(
+      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
 
 let validate_cmd =
   let open Cmdliner in
@@ -238,9 +263,9 @@ let sym_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
+      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
   let open Cmdliner in
@@ -251,9 +276,9 @@ let conc_cmd =
   in
   Cmd.v info
     Term.(
-      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ optimize $ workers
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ workspace $ solver $ files )
+      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
+      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
   let open Cmdliner in
@@ -295,6 +320,7 @@ let cli =
     [ c_cmd
     ; fmt_cmd
     ; opt_cmd
+    ; instrument_cmd
     ; run_cmd
     ; script_cmd
     ; sym_cmd
@@ -337,6 +363,7 @@ let exit_code =
       | `Incompatible_import_type -> 20
       | `Inline_function_type -> 21
       | `Invalid_result_arity -> 22
+      | `Lexer_illegal_character _c -> 23
       | `Lexer_unknown_operator _op -> 23
       | `Malformed_utf8_encoding _txt -> 24
       | `Memory_size_too_large -> 25
@@ -368,6 +395,28 @@ let exit_code =
       | `Unknown_type _id -> 52
       | `Unsupported_file_extension _ext -> 53
       | `Failed_with_but_expected (_got, _expected) -> 54
+      | `Spec_invalid_int32 _i32 -> 56
+      | `Spec_invalid_int64 _i64 -> 57
+      | `Spec_invalid_float32 _f32 -> 58
+      | `Spec_invalid_float64 _f64 -> 59
+      | `Spec_invalid_indice _id -> 60
+      | `Spec_invalid_text_indice _id -> 61
+      | `Unknown_annotation_clause _s -> 62
+      | `Unknown_annotation_object _s -> 63
+      | `Spec_unknown_binder _id -> 64
+      | `Spec_unknown_param _id -> 65
+      | `Spec_unknown_variable _id -> 66
+      | `Spec_unknown_binder_type _s -> 67
+      | `Spec_unknown_prop _pr -> 68
+      | `Spec_unknown_term _tm -> 69
+      | `Spec_type_error _str -> 70
+      | `Contract_unknown_func _id -> 71
+      | `Empty_annotation_id -> 72
+      | `Empty_identifier -> 73
+      | `Unclosed_annotation -> 74
+      | `Unclosed_comment -> 75
+      | `Unclosed_string -> 76
+      | `Unbounded_quantification -> 77
     end
   end
   | Error e -> (

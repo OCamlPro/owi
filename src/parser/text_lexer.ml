@@ -5,11 +5,25 @@
 open Sedlexing
 open Text_parser
 
+exception Empty_annotation_id
+
+exception Empty_identifier
+
+exception Illegal_character of string
+
 exception Illegal_escape of string
+
+exception Unclosed_annotation
+
+exception Unclosed_comment
+
+exception Unclosed_string
 
 exception Unknown_operator of string
 
-exception Unexpected_character of string
+let illegal_character buf =
+  let tok = Utf8.lexeme buf in
+  raise @@ Illegal_character (Fmt.str "illegal character %S" tok)
 
 let illegal_escape buf =
   let tok = Utf8.lexeme buf in
@@ -18,10 +32,6 @@ let illegal_escape buf =
 let unknown_operator buf =
   let tok = Utf8.lexeme buf in
   raise @@ Unknown_operator (Fmt.str "unknown operator %S" tok)
-
-let unexpected_character buf =
-  let tok = Utf8.lexeme buf in
-  raise @@ Unexpected_character (Fmt.str "unexpected character `%S`" tok)
 
 let mk_string buf s =
   let b = Buffer.create (String.length s) in
@@ -105,9 +115,11 @@ let id_char =
     | 'a' .. 'z'
     | 'A' .. 'Z'
     | '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '/' | ':'
-    | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' | '*' )]
+    | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' )]
 
-let name = [%sedlex.regexp? "\"", Star (Sub (any, "\"") | "\\\""), "\""]
+let string_elem = [%sedlex.regexp? Sub (any, "\"") | "\\\""]
+
+let name = [%sedlex.regexp? "\"", Star string_elem, "\""]
 
 let operator =
   [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':'), Star name]
@@ -119,6 +131,10 @@ let bad_name = [%sedlex.regexp? name, Plus (name | id | operator)]
 let bad_id = [%sedlex.regexp? id, Plus name]
 
 let bad_num = [%sedlex.regexp? num, Plus id]
+
+let annot_atom =
+  [%sedlex.regexp?
+    Plus id_char | num | name | ',' | ';' | '[' | ']' | '{' | '}']
 
 let keywords =
   let tbl = Hashtbl.create 512 in
@@ -433,12 +449,31 @@ let rec token buf =
     let operator = Utf8.lexeme buf in
     try Hashtbl.find keywords operator with Not_found -> unknown_operator buf
   end
+  (* comment *)
   | ";;" ->
     single_comment buf;
     token buf
   | "(;" ->
     comment buf;
     token buf
+  (* custom annotation *)
+  | "(@", name ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 3 (String.length annotid - 4) in
+    let annotid = mk_string buf annotid in
+    if String.equal "" annotid then raise Empty_annotation_id
+    else
+      let items = Sexp.List (annot buf) in
+      Annot.(record_annot annotid items);
+      token buf
+  | "(@", Plus id_char ->
+    let annotid = Utf8.lexeme buf in
+    let annotid = String.sub annotid 2 (String.length annotid - 2) in
+    let annotid = mk_string buf annotid in
+    let items = Sexp.List (annot buf) in
+    Annot.(record_annot annotid items);
+    token buf
+  | "(@" -> raise Empty_annotation_id
   (* 1 *)
   | "(" -> LPAR
   | ")" -> RPAR
@@ -448,15 +483,17 @@ let rec token buf =
     let id = Utf8.lexeme buf in
     let id = String.sub id 1 (String.length id - 1) in
     ID id
+  | "$" -> raise Empty_identifier
   | name ->
     let name = Utf8.lexeme buf in
     let name = String.sub name 1 (String.length name - 2) in
     let name = mk_string buf name in
     NAME name
+  | "\"", Star string_elem -> raise Unclosed_string
   | eof -> EOF
   (* | "" -> EOF *)
-  | any -> unexpected_character buf
-  | _ -> unexpected_character buf
+  | any -> unknown_operator buf
+  | _ -> unknown_operator buf
 
 and comment buf =
   match%sedlex buf with
@@ -464,15 +501,35 @@ and comment buf =
   | "(;" ->
     comment buf;
     comment buf
-  | eof -> Log.err "eof in comment"
+  | eof -> raise Unclosed_comment
   | any -> comment buf
   | _ -> assert false
 
 and single_comment buf =
   match%sedlex buf with
   | newline -> ()
-  | eof -> Log.err "eof in single line comment"
+  | eof -> raise Unclosed_comment
   | any -> single_comment buf
   | _ -> assert false
+
+and annot buf =
+  match%sedlex buf with
+  | Plus any_blank -> annot buf
+  | ";;" ->
+    single_comment buf;
+    annot buf
+  | "(;" ->
+    comment buf;
+    annot buf
+  | "(" ->
+    let items = annot buf in
+    Sexp.List items :: annot buf
+  | ")" -> []
+  | "\"", Star string_elem -> raise Unclosed_string
+  | eof -> raise Unclosed_annotation
+  | annot_atom ->
+    let annot_atom = Utf8.lexeme buf in
+    Sexp.Atom annot_atom :: annot buf
+  | _ -> illegal_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

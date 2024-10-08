@@ -95,10 +95,13 @@ let pp_module_field fmt = function
 type modul =
   { id : string option
   ; fields : module_field list
+  ; annots : text Annot.annot list
   }
 
 let pp_modul fmt (m : modul) =
-  pf fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
+  pf fmt "%a(module%a@\n  @[<v>%a@]@\n)"
+    (list ~sep:pp_newline Annot.pp_annot)
+    m.annots pp_id_opt m.id
     (list ~sep:pp_newline pp_module_field)
     m.fields
 

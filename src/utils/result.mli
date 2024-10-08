@@ -28,6 +28,7 @@ type err =
   | `Incompatible_import_type
   | `Inline_function_type
   | `Invalid_result_arity
+  | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
@@ -59,6 +60,28 @@ type err =
   | `Unknown_table of Types.text Types.indice
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
+  | `Spec_invalid_int32 of string
+  | `Spec_invalid_int64 of string
+  | `Spec_invalid_float32 of string
+  | `Spec_invalid_float64 of string
+  | `Spec_invalid_indice of string
+  | `Spec_invalid_text_indice of string
+  | `Unknown_annotation_clause of Sexp.t
+  | `Unknown_annotation_object of Sexp.t
+  | `Spec_unknown_binder of Types.text Types.indice
+  | `Spec_unknown_param of Types.text Types.indice
+  | `Spec_unknown_variable of Types.text Types.indice
+  | `Spec_unknown_binder_type of Sexp.t
+  | `Spec_unknown_prop of Sexp.t
+  | `Spec_unknown_term of Sexp.t
+  | `Spec_type_error of string
+  | `Contract_unknown_func of Types.text Types.indice
+  | `Empty_annotation_id
+  | `Empty_identifier
+  | `Unclosed_annotation
+  | `Unclosed_comment
+  | `Unclosed_string
+  | `Unbounded_quantification
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

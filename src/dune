@@ -3,6 +3,7 @@
 (library
  (public_name owi)
  (modules
+  annot
   assigned
   binary
   binary_encoder
@@ -15,6 +16,7 @@
   cmd_utils
   cmd_c
   cmd_fmt
+  cmd_instrument
   cmd_opt
   cmd_run
   cmd_script
@@ -23,6 +25,7 @@
   cmd_validate
   cmd_wasm2wat
   cmd_wat2wasm
+  code_generator
   compile
   concolic
   concolic_choice
@@ -38,6 +41,7 @@
   env_id
   float32
   float64
+  contract
   func_id
   func_intf
   grouped
@@ -48,6 +52,7 @@
   interpret
   interpret_intf
   kind
+  spec
   link
   link_env
   log
@@ -58,6 +63,7 @@
   rewrite
   runtime
   script
+  sexp
   solver
   symbolic
   symbolic_choice

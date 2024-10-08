@@ -75,8 +75,14 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --rac
+           runtime assertion checking mode
+
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
+
+       --srac
+           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass

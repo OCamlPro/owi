@@ -24,6 +24,7 @@ type t =
   ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
   ; start : text indice option
+  ; annots : text Annot.annot list
   }
 
 type type_acc =
@@ -166,4 +167,5 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   ; data
   ; exports = modul.exports
   ; start = modul.start
+  ; annots = modul.annots
   }

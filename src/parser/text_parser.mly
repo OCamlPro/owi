@@ -36,19 +36,19 @@ let u32 s =
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i32 s =
-  try Int32.of_string s
+  try Int32.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let i64 s =
-  try Int64.of_string s
+  try Int64.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f64 s =
-  try Float64.of_string s
+  try Float64.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 let f32 s =
-  try Float32.of_string s
+  try Float32.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
 %}
@@ -992,7 +992,24 @@ let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
-    { id; fields }
+    let open Annot in
+    let open Contract in
+    let open Syntax in
+    let annots =
+      match
+        list_map
+          (fun ({ annotid; items } as t) ->
+            if String.equal "contract" annotid then
+              let+ c = parse_contract items in
+              Log.debug2 "%a\n" pp_contract c;
+              Contract c
+            else Ok (Annot t) )
+          (get_annots ())
+      with
+      | Ok annots -> annots
+      | Error err -> failwith (Result.err_to_string err)
+    in
+    { id; fields; annots }
   }
 
 let inline_module :=

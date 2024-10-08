@@ -28,6 +28,7 @@ type err =
   | `Incompatible_import_type
   | `Inline_function_type
   | `Invalid_result_arity
+  | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
@@ -59,6 +60,28 @@ type err =
   | `Unknown_table of Types.text Types.indice
   | `Unknown_type of Types.text Types.indice
   | `Unsupported_file_extension of string
+  | `Spec_invalid_int32 of string
+  | `Spec_invalid_int64 of string
+  | `Spec_invalid_float32 of string
+  | `Spec_invalid_float64 of string
+  | `Spec_invalid_indice of string
+  | `Spec_invalid_text_indice of string
+  | `Unknown_annotation_clause of Sexp.t
+  | `Unknown_annotation_object of Sexp.t
+  | `Spec_unknown_binder of Types.text Types.indice
+  | `Spec_unknown_param of Types.text Types.indice
+  | `Spec_unknown_variable of Types.text Types.indice
+  | `Spec_unknown_binder_type of Sexp.t
+  | `Spec_unknown_prop of Sexp.t
+  | `Spec_unknown_term of Sexp.t
+  | `Spec_type_error of string
+  | `Contract_unknown_func of Types.text Types.indice
+  | `Empty_annotation_id
+  | `Empty_identifier
+  | `Unclosed_annotation
+  | `Unclosed_comment
+  | `Unclosed_string
+  | `Unbounded_quantification
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -91,7 +114,8 @@ let rec err_to_string = function
   | `Incompatible_import_type -> "incompatible import type"
   | `Inline_function_type -> "inline function type"
   | `Invalid_result_arity -> "invalid result arity"
-  | `Lexer_unknown_operator op -> Fmt.str "unknown operator %s" op
+  | `Lexer_illegal_character c -> Fmt.str "%s" c
+  | `Lexer_unknown_operator op -> Fmt.str "%s" op
   | `Malformed_utf8_encoding txt -> Fmt.str "malformed UTF-8 encoding %S" txt
   | `Memory_size_too_large -> "memory size must be at most 65536 pages (4GiB)"
   | `Msg msg -> msg
@@ -124,3 +148,32 @@ let rec err_to_string = function
   | `Unknown_type id -> Fmt.str "unknown type %a" Types.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
+  | `Spec_invalid_int32 i32 -> Fmt.str "spec: invalid int32 %S" i32
+  | `Spec_invalid_int64 i64 -> Fmt.str "spec: invalid int64 %S" i64
+  | `Spec_invalid_float32 f32 -> Fmt.str "spec: invalid float32 %S" f32
+  | `Spec_invalid_float64 f64 -> Fmt.str "spec: invalid float64 %S" f64
+  | `Spec_invalid_indice id -> Fmt.str "spec: invalid indice %S" id
+  | `Spec_invalid_text_indice id -> Fmt.str "spec: invalid text indice %S" id
+  | `Unknown_annotation_clause s ->
+    Fmt.str "unknown annotation clause %a" Sexp.pp_sexp s
+  | `Unknown_annotation_object s ->
+    Fmt.str "unknown annotation object %a" Sexp.pp_sexp s
+  | `Spec_unknown_binder id ->
+    Fmt.str "spec: unknown binder %a" Types.pp_indice id
+  | `Spec_unknown_param id ->
+    Fmt.str "spec: unknown param %a" Types.pp_indice id
+  | `Spec_unknown_variable id ->
+    Fmt.str "spec: unknown variable %a" Types.pp_indice id
+  | `Spec_unknown_binder_type s ->
+    Fmt.str "spec: unknown binder type %a" Sexp.pp_sexp s
+  | `Spec_unknown_prop pr -> Fmt.str "spec: unknown prop %a" Sexp.pp_sexp pr
+  | `Spec_unknown_term tm -> Fmt.str "spec: unknown term %a" Sexp.pp_sexp tm
+  | `Spec_type_error str -> Fmt.str "spec: %S type error" str
+  | `Contract_unknown_func id ->
+    Fmt.str "contract: unknown function %a" Types.pp_indice id
+  | `Empty_annotation_id -> Fmt.str "empty annotation id"
+  | `Empty_identifier -> Fmt.str "empty identifier"
+  | `Unclosed_annotation -> Fmt.str "unclosed annotation"
+  | `Unclosed_comment -> Fmt.str "unclosed comment"
+  | `Unclosed_string -> Fmt.str "unclosed string"
+  | `Unbounded_quantification -> Fmt.str "unbounded quantification"

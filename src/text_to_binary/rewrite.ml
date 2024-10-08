@@ -210,7 +210,7 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       Ok (Elem_drop id)
     | Select typ -> begin
       match typ with
-      | None -> ok @@ Select None
+      | None -> Ok (Select None)
       | Some [ t ] ->
         let+ t = Binary_types.convert_val_type None t in
         Select (Some [ t ])
@@ -361,6 +361,147 @@ let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   let t = [ (None, (Final, [], t)) ] in
   Ok t
 
+let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)
+  ~(func_param_list : string option list) :
+  text Spec.term -> binary Spec.term Result.t =
+  let rec find_raw_indice error acc id = function
+    | [] -> Error error
+    | Some id' :: bl ->
+      if String.equal id id' then Ok (Raw acc)
+      else find_raw_indice error (acc + 1) id bl
+    | None :: bl -> find_raw_indice error (acc + 1) id bl
+  in
+
+  let find_binder (binder_list : string option list) (ind : text indice) :
+    binary indice Result.t =
+    match ind with
+    | Raw id -> Ok (Raw id)
+    | Text id -> find_raw_indice (`Spec_unknown_binder ind) 0 id binder_list
+  in
+
+  let find_param (func_param_list : string option list) (ind : text indice) :
+    binary indice Result.t =
+    match ind with
+    | Raw id -> Ok (Raw id)
+    | Text id -> find_raw_indice (`Spec_unknown_param ind) 0 id func_param_list
+  in
+
+  let find_global (modul : Assigned.t) (ind : text indice) :
+    binary indice Result.t =
+    match ind with
+    | Raw id -> Ok (Raw id)
+    | Text id -> (
+      match String_map.find_opt id modul.global.named with
+      | None -> Error (`Unknown_global ind)
+      | Some i -> Ok (Raw i) )
+  in
+
+  let open Spec in
+  function
+  | Int32 i32 -> Ok (Int32 i32)
+  | Int64 i64 -> Ok (Int64 i64)
+  | Float32 f32 -> Ok (Float32 f32)
+  | Float64 f64 -> Ok (Float64 f64)
+  | Var ind -> (
+    match
+      ( find_binder binder_list ind
+      , find_param func_param_list ind
+      , find_global modul ind )
+    with
+    | Ok ind, _, _ -> Ok (BinderVar ind)
+    | _, Ok ind, _ -> Ok (ParamVar ind)
+    | _, _, Ok ind -> Ok (GlobalVar ind)
+    | _, _, _ -> Error (`Spec_unknown_variable ind) )
+  | ParamVar ind ->
+    let+ ind = find_param func_param_list ind in
+    ParamVar ind
+  | GlobalVar ind ->
+    let+ ind = find_global modul ind in
+    GlobalVar ind
+  | BinderVar ind ->
+    let+ ind = find_binder binder_list ind in
+    BinderVar ind
+  | UnOp (u, tm1) ->
+    let+ tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    UnOp (u, tm1)
+  | BinOp (b, tm1, tm2) ->
+    let* tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
+    BinOp (b, tm1, tm2)
+  | Result i -> Ok (Result i)
+  | Memory tm1 ->
+    let+ tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    Memory tm1
+
+let rec rewrite_prop ~(binder_list : string option list) ~(modul : Assigned.t)
+  ~(func_param_list : string option list) :
+  text Spec.prop -> binary Spec.prop Result.t =
+  let open Spec in
+  function
+  | Const b -> Ok (Const b)
+  | BinPred (b, tm1, tm2) ->
+    let* tm1 = rewrite_term ~binder_list ~modul ~func_param_list tm1 in
+    let+ tm2 = rewrite_term ~binder_list ~modul ~func_param_list tm2 in
+    BinPred (b, tm1, tm2)
+  | UnConnect (u, pr1) ->
+    let+ pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
+    UnConnect (u, pr1)
+  | BinConnect (b, pr1, pr2) ->
+    let* pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
+    let+ pr2 = rewrite_prop ~binder_list ~modul ~func_param_list pr2 in
+    BinConnect (b, pr1, pr2)
+  | Binder (b, bt, id_opt, pr1) ->
+    let binder_list = id_opt :: binder_list in
+    let+ pr1 = rewrite_prop ~binder_list ~modul ~func_param_list pr1 in
+    Binder (b, bt, id_opt, pr1)
+
+let rewrite_contract (modul : Assigned.t) :
+  text Contract.t -> binary Contract.t Result.t =
+ fun { Contract.funcid; preconditions; postconditions } ->
+  let funcid = find modul.func funcid in
+  let* func =
+    let (Raw i) = funcid in
+    match Indexed.get_at i modul.func.values with
+    | Some v -> Ok v
+    | None -> Error (`Spec_invalid_indice (Int.to_string i))
+  in
+  let func_bt =
+    match func with
+    | Local { type_f; _ } -> type_f
+    | Imported { desc; _ } -> desc
+  in
+  let* func_param_list =
+    match func_bt with
+    | Bt_ind ind -> (
+      let (Raw i) = find modul.typ ind in
+      match Indexed.get_at i modul.typ.values with
+      | Some (Def_func_t (func_pt, _)) -> Ok (List.map fst func_pt)
+      | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
+    | Bt_raw (_, (func_pt, _)) -> Ok (List.map fst func_pt)
+  in
+  let* preconditions =
+    list_map
+      (rewrite_prop ~binder_list:[] ~modul ~func_param_list)
+      preconditions
+  in
+  let+ postconditions =
+    list_map
+      (rewrite_prop ~binder_list:[] ~modul ~func_param_list)
+      postconditions
+  in
+  { Contract.funcid; preconditions; postconditions }
+
+let rewrite_annot (modul : Assigned.t) :
+  text Annot.annot -> Binary.custom Result.t = function
+  | Contract contract ->
+    let+ contract = rewrite_contract modul contract in
+    Binary.From_annot (Contract contract)
+  | Annot annot -> ok @@ Binary.From_annot (Annot annot)
+
+let rewrite_annots (modul : Assigned.t) :
+  text Annot.annot list -> Binary.custom list Result.t =
+  list_map (rewrite_annot modul)
+
 let modul (modul : Assigned.t) : Binary.modul Result.t =
   Log.debug0 "rewriting    ...@\n";
   let typemap = typemap modul.typ in
@@ -381,14 +522,15 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
     let runtime = rewrite_runtime (rewrite_func typemap modul) import in
     rewrite_named runtime modul.func
   in
-  let+ types = rewrite_named (rewrite_types modul) modul.typ in
-  let start =
+  let* types = rewrite_named (rewrite_types modul) modul.typ in
+  let* start =
     match modul.start with
-    | None -> None
+    | None -> Ok None
     | Some id ->
       let (Raw id) = find func id in
-      Some id
+      Ok (Some id)
   in
+  let+ custom = rewrite_annots modul modul.annots in
 
   let id = modul.id in
   let mem = Named.to_array modul.mem in
@@ -399,7 +541,15 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let data = Named.to_array data in
   let func = Named.to_array func in
 
-  let modul : Binary.modul =
-    { id; mem; table; types; global; elem; data; exports; func; start }
-  in
-  modul
+  { Binary.id
+  ; mem
+  ; table
+  ; types
+  ; global
+  ; elem
+  ; data
+  ; exports
+  ; func
+  ; start
+  ; custom
+  }

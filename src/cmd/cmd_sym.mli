@@ -13,6 +13,8 @@ val cmd :
   -> bool
   -> bool
   -> bool
+  -> bool
+  -> bool
   -> int
   -> bool
   -> bool

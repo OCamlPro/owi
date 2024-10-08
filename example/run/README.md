@@ -70,6 +70,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --rac
+           runtime assertion checking mode
+
        -u, --unsafe
            skip typechecking pass
 

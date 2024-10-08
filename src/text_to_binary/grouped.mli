@@ -35,6 +35,7 @@ type t =
   ; data : Text.data Indexed.t list
   ; exports : opt_exports
   ; start : text indice option
+  ; annots : text Annot.annot list
   }
 
 val of_symbolic : Text.modul -> t Result.t

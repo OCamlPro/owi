@@ -5,7 +5,8 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  Compile.File.until_optimize ~unsafe ~optimize:true filename
+  Compile.File.until_optimize ~unsafe ~rac:false ~srac:false ~optimize:true
+    filename
 
 let print_or_emit ~unsafe file outfile =
   let* m = optimize_file ~unsafe file in

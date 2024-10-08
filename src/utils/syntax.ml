@@ -38,12 +38,36 @@ let list_map f l =
          l
   with Exit -> Option.get !err
 
+let list_concat_map f l =
+  let err = ref None in
+  try
+    ok
+    @@ List.concat_map
+         (fun v ->
+           match f v with
+           | Error _e as e ->
+             err := Some e;
+             raise Exit
+           | Ok v -> v )
+         l
+  with Exit -> Option.get !err
+
 let list_fold_left f acc l =
   List.fold_left
     (fun acc v ->
       let* acc in
       f acc v )
     (Ok acc) l
+
+let list_fold_left_map f acc l =
+  let+ acc, l =
+    list_fold_left
+      (fun (acc, l) v ->
+        let+ acc, x = f acc v in
+        (acc, x :: l) )
+      (acc, []) l
+  in
+  (acc, List.rev l)
 
 let array_iter f a =
   let err = ref None in
