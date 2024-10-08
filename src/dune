@@ -16,6 +16,7 @@
   cmd_c
   cmd_fmt
   cmd_opt
+  cmd_replay
   cmd_run
   cmd_script
   cmd_sym
