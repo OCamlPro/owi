@@ -4,20 +4,17 @@ module Backend = struct
   type address = Int32.t
 
   type t =
-    { data : (address, Symbolic_value.int32) Hashtbl.t
+    { mutable data : (address, Symbolic_value.int32) Hashtbl.t option
     ; parent : t option
     ; chunks : (address, Symbolic_value.int32) Hashtbl.t
     }
 
-  let make () =
-    { data = Hashtbl.create 16; parent = None; chunks = Hashtbl.create 16 }
+  let make () = { data = None; parent = None; chunks = Hashtbl.create 16 }
 
   let clone m =
+    let parent = if Option.is_none m.data then m.parent else Some m in
     (* TODO: Make chunk copying lazy *)
-    { data = Hashtbl.create 16
-    ; parent = Some m
-    ; chunks = Hashtbl.copy m.chunks
-    }
+    { data = None; parent; chunks = Hashtbl.copy m.chunks }
 
   let address a =
     let open Symbolic_choice_without_memory in
@@ -30,7 +27,10 @@ module Backend = struct
   let address_i32 a = a
 
   let rec load_byte { parent; data; _ } a =
-    try Hashtbl.find data a
+    try
+      match data with
+      | None -> raise Not_found
+      | Some data -> Hashtbl.find data a
     with Not_found -> (
       match parent with
       | None -> Expr.value (Num (I8 0))
@@ -96,11 +96,19 @@ module Backend = struct
       sym
     | _ -> Expr.make (Extract (v, pos + 1, pos))
 
+  let replace m k v =
+    match m.data with
+    | None ->
+      let tbl = Hashtbl.create 16 in
+      Hashtbl.add tbl k v;
+      m.data <- Some tbl
+    | Some tbl -> Hashtbl.replace tbl k v
+
   let storen m a v n =
     for i = 0 to n - 1 do
       let a' = Int32.add a (Int32.of_int i) in
       let v' = extract v i in
-      Hashtbl.replace m.data a' v'
+      replace m a' v'
     done
 
   let validate_address m a range =
