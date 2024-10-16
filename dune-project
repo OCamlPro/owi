@@ -18,7 +18,7 @@
  "Pierre Chambart <pierre.chambart@ocamlpro.com>"
  "Filipe Marques <filipe.s.marques@tecnico.ulisboa.pt>"
  "Eric Patrizio <epatrizio@mpns.fr>"
- "Arthur Carcano <arthur.carcano@ocamlpro.com")
+ "Arthur Carcano <arthur.carcano@ocamlpro.com>")
 
 (maintainers "Léo Andrès <contact@ndrs.fr>")
 
