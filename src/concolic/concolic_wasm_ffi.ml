@@ -26,7 +26,7 @@ module M :
           | Some (Num (I32 n)) -> n
           | _ -> assert false
         in
-        (I32 n, Value.pair n (Expr.mk_symbol sym)) )
+        (I32 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_i8 () : Value.int32 Choice.t =
     Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
@@ -37,7 +37,7 @@ module M :
           | _ -> assert false
         in
         let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbol sym))
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
         in
         (I32 n, Value.pair n sym_expr) )
 
@@ -50,7 +50,7 @@ module M :
           | _ -> assert false
         in
         let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbol sym))
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
         in
         (I32 n, Value.pair n sym_expr) )
 
@@ -62,7 +62,7 @@ module M :
           | Some (Num (I64 n)) -> n
           | _ -> assert false
         in
-        (I64 n, Value.pair n (Expr.mk_symbol sym)) )
+        (I64 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_f32 () : Value.float32 Choice.t =
     Choice.with_new_symbol (Ty_fp 32) (fun sym forced_value ->
@@ -73,7 +73,7 @@ module M :
           | _ -> assert false
         in
         let n = Float32.of_bits n in
-        (F32 n, Value.pair n (Expr.mk_symbol sym)) )
+        (F32 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_f64 () : Value.float64 Choice.t =
     Choice.with_new_symbol (Ty_fp 64) (fun sym forced_value ->
@@ -84,7 +84,7 @@ module M :
           | _ -> assert false
         in
         let n = Float64.of_bits n in
-        (F64 n, Value.pair n (Expr.mk_symbol sym)) )
+        (F64 n, Value.pair n (Expr.symbol sym)) )
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in

@@ -420,7 +420,7 @@ module Make (Thread : Thread.S) = struct
       let sym_name = Fmt.str "choice_i32_%i" num_symbols in
       let sym_type = Smtml.Ty.Ty_bitv 32 in
       let sym = Smtml.Symbol.make sym_type sym_name in
-      let assign = Smtml.Expr.(relop Ty_bool Eq (mk_symbol sym) e) in
+      let assign = Smtml.Expr.(relop Ty_bool Eq (symbol sym) e) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =
@@ -440,7 +440,7 @@ module Make (Thread : Thread.S) = struct
           | Smtml.Value.Num (I32 i) -> i
           | _ -> Fmt.failwith "Unreachable: found symbol must be a value"
         in
-        let s = Smtml.Expr.mk_symbol symbol in
+        let s = Smtml.Expr.symbol symbol in
         let this_value_cond =
           let open Smtml.Expr in
           Bitv.I32.(s = v i)

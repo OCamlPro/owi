@@ -1,6 +1,4 @@
 module Backend = struct
-  open Smtml
-
   type address = Int32.t
 
   type t =
@@ -21,7 +19,7 @@ module Backend = struct
 
   let address a =
     let open Symbolic_choice_without_memory in
-    match Expr.view a with
+    match Smtml.Expr.view a with
     | Val (Num (I32 i)) -> return i
     | Ptr { base; offset } ->
       select_i32 Symbolic_value.(I32.add (const_i32 base) offset)
@@ -33,21 +31,22 @@ module Backend = struct
     try Hashtbl.find data a
     with Not_found -> (
       match parent with
-      | None -> Expr.value (Num (I8 0))
+      | None -> Smtml.Expr.value (Num (I8 0))
       | Some parent -> load_byte parent a )
 
   (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
   let merge_extracts (e1, h, m1) (e2, m2, l) =
-    let ty = Expr.ty e1 in
-    if m1 = m2 && Expr.equal e1 e2 then
-      if h - l = Ty.size ty then e1 else Expr.make (Extract (e1, h, l))
+    let ty = Smtml.Expr.ty e1 in
+    if m1 = m2 && Smtml.Expr.equal e1 e2 then
+      if h - l = Smtml.Ty.size ty then e1
+      else Smtml.Expr.make (Extract (e1, h, l))
     else
-      Expr.(
+      Smtml.Expr.(
         make (Concat (make (Extract (e1, h, m1)), make (Extract (e2, m2, l)))) )
 
   let concat ~msb ~lsb offset =
     assert (offset > 0 && offset <= 8);
-    match (Expr.view msb, Expr.view lsb) with
+    match (Smtml.Expr.view msb, Smtml.Expr.view lsb) with
     | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
       Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
     | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
@@ -65,8 +64,8 @@ module Backend = struct
     | Extract (e1, h, m1), Extract (e2, m2, l) ->
       merge_extracts (e1, h, m1) (e2, m2, l)
     | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
-      Expr.(make (Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3)))
-    | _ -> Expr.make (Concat (msb, lsb))
+      Smtml.Expr.(make (Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3)))
+    | _ -> Smtml.Expr.make (Concat (msb, lsb))
 
   let loadn m a n =
     let rec loop addr size i acc =
@@ -80,21 +79,21 @@ module Backend = struct
     loop a n 1 v0
 
   let extract v pos =
-    match Expr.view v with
+    match Smtml.Expr.view v with
     | Val (Num (I8 _)) -> v
     | Val (Num (I32 i)) ->
       let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-      Expr.value (Num (I8 i'))
+      Smtml.Expr.value (Num (I8 i'))
     | Val (Num (I64 i)) ->
       let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-      Expr.value (Num (I8 i'))
+      Smtml.Expr.value (Num (I8 i'))
     | Cvtop
         (_, Zero_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
     | Cvtop
         (_, Sign_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
       ->
       sym
-    | _ -> Expr.make (Extract (v, pos + 1, pos))
+    | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
 
   let storen m a v n =
     for i = 0 to n - 1 do
@@ -127,16 +126,16 @@ module Backend = struct
         else Ok a )
     | _ ->
       (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
-      Log.debug2 "Saw a symbolic address: %a@." Expr.pp a;
+      Log.debug2 "Saw a symbolic address: %a@." Smtml.Expr.pp a;
       return (Ok a)
 
   let ptr v =
     let open Symbolic_choice_without_memory in
-    match Expr.view v with
+    match Smtml.Expr.view v with
     | Ptr { base; _ } -> return base
     | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Expr.pp v;
-      let* () = add_pc @@ Expr.value False in
+      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v;
+      let* () = add_pc @@ Smtml.Expr.value False in
       assert false
 
   let free m p =
@@ -151,7 +150,7 @@ module Backend = struct
     let open Symbolic_choice_without_memory in
     let+ base = address ptr in
     Hashtbl.replace m.chunks base size;
-    Expr.ptr base (Symbolic_value.const_i32 0l)
+    Smtml.Expr.ptr base (Symbolic_value.const_i32 0l)
 end
 
 include Symbolic_memory_make.Make (Backend)
