@@ -111,7 +111,7 @@ We only list proposals that reached phase 3 at least.
 - [september 2023]: [ICFP OCaml track]
 - [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] and hosted in Google Munich
 - april 2024: [OUPS (OCaml UserS in Paris)]
-- [november 2024]: [LVP working group] day of the [GrR GPL]
+- [november 2024]: [LVP working group] day of the [GdR GPL]
 
 ### Spelling and pronunciation
 
