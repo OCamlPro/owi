@@ -14,13 +14,13 @@
 (license AGPL-3.0-or-later)
 
 (authors
- "Léo Andrès <contact@ndrs.fr>"
+ "Léo Andrès <leo@ocamlpro.com>"
  "Pierre Chambart <pierre.chambart@ocamlpro.com>"
  "Filipe Marques <filipe.s.marques@tecnico.ulisboa.pt>"
  "Eric Patrizio <epatrizio@mpns.fr>"
  "Arthur Carcano <arthur.carcano@ocamlpro.com>")
 
-(maintainers "Léo Andrès <contact@ndrs.fr>")
+(maintainers "Léo Andrès <leo@ocamlpro.com>")
 
 (source
  (github ocamlpro/owi))
