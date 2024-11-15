@@ -111,6 +111,7 @@ We only list proposals that reached phase 3 at least.
 - [september 2023]: [ICFP OCaml track]
 - [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] and hosted in Google Munich
 - april 2024: [OUPS (OCaml UserS in Paris)]
+- [november 2024]: [LVP working group] day of the [GrR GPL]
 
 ### Spelling and pronunciation
 
@@ -163,12 +164,15 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
 [coverage percentage]: https://ocamlpro.github.io/owi/coverage
 [documentation]: https://ocamlpro.github.io/owi/api/owi
+[GdR GPL]: https://gdr-gpl.cnrs.fr/
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
 [internship labeled issues]: https://github.com/OCamlPro/owi/labels/internship
+[LVP working group]: https://gdrgpl.myxwiki.org/xwiki/bin/view/Main/GTs/GT%20Langages%20et%20v%C3%A9rification%20de%20programmes%20(LVP)
 [Next Generation Internet]: https://ngi.eu
 [NLnet]: https://nlnet.nl
 [NGI0 Core]: https://nlnet.nl/core
+[november 2024]: https://groupes.renater.fr/wiki/lvp/public/journee_lvp_novembre2024
 [OCaml]: https://ocaml.org
 [october 2023]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [opam]: https://opam.ocaml.org
