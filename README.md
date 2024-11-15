@@ -150,7 +150,7 @@ Some code has been taken from the E-ACSL plugin of Frama-C. It is licensed under
 
 ### Fundings
 
-This project was funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] programme. See [Owi project on NLnet].
+This project was partly funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] programme. See [Owi project on NLnet].
 
 [CHANGELOG]: ./CHANGES.md
 [dune-project]: ./dune-project
