@@ -26,7 +26,8 @@ div binop:
   Reached 2 problems!
   [13]
   $ owi sym div_f32.wat --no-value --deterministic-result-order -w1
-  Assert failure: (f32.eq (f32.div symbol_0 symbol_1) (f32.div symbol_0 symbol_1))
+  Assert failure: (f32.eq (f32.div symbol_0 symbol_1)
+                   (f32.div symbol_0 symbol_1))
   Model:
     (model
       (symbol_0 f32)
@@ -34,7 +35,8 @@ div binop:
   Reached problem!
   [13]
   $ owi sym div_f64.wat --no-value --deterministic-result-order -w1
-  Assert failure: (f64.eq (f64.div symbol_0 symbol_1) (f64.div symbol_0 symbol_1))
+  Assert failure: (f64.eq (f64.div symbol_0 symbol_1)
+                   (f64.div symbol_0 symbol_1))
   Model:
     (model
       (symbol_0 f64)

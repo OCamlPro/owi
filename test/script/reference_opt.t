@@ -113,3 +113,5 @@
   $ owi script --no-exhaustion --optimize reference/utf8-import-module.wast
   $ owi script --no-exhaustion --optimize reference/utf8-invalid-encoding.wast
   $ owi script --no-exhaustion --optimize reference/proposals/annotations/annotations.wast
+  unknown operator "\"(@x \\\"\") \"unclosed"
+  [23]
