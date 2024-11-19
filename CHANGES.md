@@ -20,6 +20,7 @@
 - start benchmarking against test-comp
 - fix handling of `select` and `call_indirect` in the text format
 - add `owi wat2wasm` subcommand
+- add a `no-assert-failure-expression-printing` flag to `owi c`, `owi sym` and `owi conc`
 
 ## 0.2 - 2024-04-24
 

@@ -18,6 +18,7 @@ val cmd :
   -> bool
   -> bool
   -> bool
+  -> bool
   -> Cmd_sym.fail_mode
   -> bool
   -> bool
