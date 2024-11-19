@@ -63,6 +63,9 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
        --no-stop-at-failure
            do not stop when a program failure is encountered
 

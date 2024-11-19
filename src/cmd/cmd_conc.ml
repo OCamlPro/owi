@@ -416,8 +416,8 @@ let run solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe rac srac optimize _workers _no_stop_at_failure
-  no_values _deterministic_result_order _fail_mode (workspace : Fpath.t) solver
-  files =
+  no_values no_assert_failure_expression_printing _deterministic_result_order
+  _fail_mode (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -460,7 +460,13 @@ let cmd profiling debug unsafe rac srac optimize _workers _no_stop_at_failure
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
     let assignments = List.rev assignments in
-    Fmt.pr "Assert failure@\n";
+    if no_assert_failure_expression_printing then begin
+      Fmt.pr "Assert failure@\n"
+    end
+    else begin
+      (* TODO: print the assert failure expression ! *)
+      Fmt.pr "Assert failure@\n"
+    end;
     Fmt.pr "Model:@\n  @[<v>%a@]@."
       (Concolic_choice.pp_assignments ~no_values)
       assignments;

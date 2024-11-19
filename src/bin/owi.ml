@@ -70,6 +70,11 @@ let no_values =
   let doc = "do not display a value for each symbol" in
   Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
 
+let no_assert_failure_expression_printing =
+  let doc = "do not display the expression in the assert failure" in
+  Cmdliner.Arg.(
+    value & flag & info [ "no-assert-failure-expression-printing" ] ~doc )
+
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
   let assert_doc = "ignore traps and only report assertion violations" in
@@ -185,8 +190,8 @@ let c_cmd =
     Term.(
       const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
       $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values $ deterministic_result_order $ fail_mode
-      $ concolic $ eacsl $ solver )
+      $ no_stop_at_failure $ no_values $ no_assert_failure_expression_printing
+      $ deterministic_result_order $ fail_mode $ concolic $ eacsl $ solver )
 
 let fmt_cmd =
   let open Cmdliner in
@@ -264,7 +269,8 @@ let sym_cmd =
   Cmd.v info
     Term.(
       const Cmd_sym.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
-      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ workers $ no_stop_at_failure $ no_values
+      $ no_assert_failure_expression_printing $ deterministic_result_order
       $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
@@ -277,7 +283,8 @@ let conc_cmd =
   Cmd.v info
     Term.(
       const Cmd_conc.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
-      $ workers $ no_stop_at_failure $ no_values $ deterministic_result_order
+      $ workers $ no_stop_at_failure $ no_values
+      $ no_assert_failure_expression_printing $ deterministic_result_order
       $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =

@@ -185,7 +185,8 @@ let metadata ~workspace arch property files : unit Result.t =
 
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
-  deterministic_result_order fail_mode concolic eacsl solver : unit Result.t =
+  no_assert_failure_expression_printing deterministic_result_order fail_mode
+  concolic eacsl solver : unit Result.t =
   let workspace = Fpath.v workspace in
   let includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
@@ -196,4 +197,5 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     profiling debug unsafe false false optimize workers no_stop_at_failure
-    no_values deterministic_result_order fail_mode workspace solver files
+    no_values no_assert_failure_expression_printing deterministic_result_order
+    fail_mode workspace solver files

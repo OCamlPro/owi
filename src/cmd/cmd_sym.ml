@@ -47,8 +47,8 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
-  no_values deterministic_result_order fail_mode (workspace : Fpath.t) solver
-  files =
+  no_values no_assert_failure_expression_printing deterministic_result_order
+  fail_mode (workspace : Fpath.t) solver files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -87,7 +87,12 @@ let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
       Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
       Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
     | `EAssert (assertion, model) ->
-      Fmt.pr "Assert failure: %a@\n" Expr.pp assertion;
+      if no_assert_failure_expression_printing then begin
+        Fmt.pr "Assert failure@\n"
+      end
+      else begin
+        Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
+      end;
       Fmt.pr "Model:@\n  @[<v>%a@]@." (Smtml.Model.pp ~no_values) model
   in
   let rec print_and_count_failures count_acc results =
