@@ -48,6 +48,11 @@ jobs:
           allow-prerelease-opam: false
       - name: depext
         run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            brew update
+            brew upgrade
+            brew install pkgconf
+          fi
           if [ "$RUNNER_OS" == "linux" ]; then
             apt update
           fi
