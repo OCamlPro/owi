@@ -30,6 +30,7 @@ jobs:
         run: |
           git submodule update --init test/script/reference
           git submodule update --init test/c/collections-c/files
+          mv .git .git.tmp # prevents opam from checking-out submodules
       - name: cache
         id: cache-opam
         uses: actions/cache@v4
@@ -72,6 +73,7 @@ jobs:
           opam exec -- dune build @install
       - name: test
         run: |
+          mv .git.tmp .git # bring it back, we won't call opam anymore from now on
           if [ "$RUNNER_OS" == "macOS" ]; then
             export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
           fi
