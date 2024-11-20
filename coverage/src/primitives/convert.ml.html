@@ -688,7 +688,7 @@ module MInt64 = struct
 
   let extend_i32_s x = <span data-count="21">I</span>nt64.of_int32 x
 
-  let extend_i32_u x = <span data-count="3096">I</span>nt64.logand (Int64.of_int3<span data-count="3096">2</span> x) 0x0000_0000_ffff_ffffL
+  let extend_i32_u x = <span data-count="3097">I</span>nt64.logand (Int64.of_int3<span data-count="3097">2</span> x) 0x0000_0000_ffff_ffffL
 
   let trunc_f32_s x =
     <span data-count="59">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
@@ -798,9 +798,9 @@ module MFloat32 = struct
    * the least significant bit to round correctly.
    *)
   let convert_i32_u x =
-    <span data-count="151">F</span>loat32.of_float
+    <span data-count="149">F</span>loat32.of_float
       Int32.(
-        if Int32.ge x zero then <span data-count="131">t</span>o_floa<span data-count="131">t</span> x
+        if Int32.ge x zero then <span data-count="129">t</span>o_floa<span data-count="129">t</span> x
         else <span data-count="20">t</span>o_floa<span data-count="20">t</span> (logo<span data-count="20">r</span> (shift_right_logica<span data-count="20">l</span> x 1) (logan<span data-count="20">d</span> x 1l)) *. 2.0 )
 
   (*

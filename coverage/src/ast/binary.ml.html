@@ -98,6 +98,12 @@
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -178,6 +184,12 @@
 <a href="#L74">74</a>
 <a href="#L75">75</a>
 <a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -229,6 +241,10 @@ type elem =
   ; mode : elem_mode
   }
 
+type custom =
+  | Uninterpreted of string
+  | From_annot of binary Annot.annot
+
 type modul =
   { id : string option
   ; types : binary rec_type array
@@ -241,6 +257,7 @@ type modul =
   ; data : data array
   ; exports : exports
   ; start : int option
+  ; custom : custom list
   }
 
 let empty_modul =
@@ -254,6 +271,7 @@ let empty_modul =
   ; data = [||]
   ; exports = { global = []; mem = []; table = []; func = [] }
   ; start = None
+  ; custom = []
   }
 </code></pre>
       </div>

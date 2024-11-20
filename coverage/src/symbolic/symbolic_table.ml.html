@@ -224,7 +224,7 @@ open Types
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="13615">x</span>
+  let hash x = <span data-count="13634">x</span>
 end)
 
 type t =
@@ -233,57 +233,57 @@ type t =
   ; typ : binary ref_type
   }
 
-let clone_t { limits; data; typ } = <span data-count="4544">{</span> typ; limits; data = Array.cop<span data-count="4545">y</span> data }
+let clone_t { limits; data; typ } = <span data-count="4572">{</span> typ; limits; data = Array.cop<span data-count="4572">y</span> data }
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="872">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="879">E</span>nv_id.Tbl.create 0
 
 let clone (collection : collection) =
   (* TODO: this is ugly and should be rewritten *)
-  <span data-count="44092">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="44087">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="44088">p</span>
+  <span data-count="44144">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="44142">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="44141">p</span>
        (fun (i, t) -&gt;
-         <span data-count="4544">l</span>et s = ITbl.to_seq t in
-         <span data-count="4544">(</span>i, ITbl.of_se<span data-count="4544">q</span> @@ Seq.ma<span data-count="4544">p</span> (fun (i, a) -&gt; <span data-count="4544">(</span>i, clone_<span data-count="4543">t</span> a)) s) )
+         <span data-count="4572">l</span>et s = ITbl.to_seq t in
+         <span data-count="4572">(</span>i, ITbl.of_se<span data-count="4572">q</span> @@ Seq.ma<span data-count="4572">p</span> (fun (i, a) -&gt; <span data-count="4572">(</span>i, clone_<span data-count="4572">t</span> a)) s) )
        s
 
 let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
     =
-  <span data-count="2950">m</span>atch v with <span data-count="2950">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
+  <span data-count="2944">m</span>atch v with <span data-count="2944">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
 
 let convert (orig_table : Concrete_table.t) =
-  <span data-count="666">{</span> data = Array.ma<span data-count="666">p</span> convert_ref_values orig_table.data
+  <span data-count="665">{</span> data = Array.ma<span data-count="665">p</span> convert_ref_values orig_table.data
   ; limits = orig_table.limits
   ; typ = orig_table.typ
   }
 
 let get_env env_id tables =
-  <span data-count="8405">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="7739">S</span>ome env -&gt; env
-  | <span data-count="666">N</span>one -&gt;
+  <span data-count="8397">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="7732">S</span>ome env -&gt; env
+  | <span data-count="665">N</span>one -&gt;
     let t = ITbl.create 0 in
-    <span data-count="666">E</span>nv_id.Tbl.add tables env_id t;
-    <span data-count="666">t</span>
+    <span data-count="665">E</span>nv_id.Tbl.add tables env_id t;
+    <span data-count="665">t</span>
 
 let get_table env_id (orig_table : Concrete_table.t) (collection : collection)
   t_id =
-  <span data-count="8405">l</span>et env = get_env env_id collection in
-  <span data-count="8405">m</span>atch ITbl.find_opt env t_id with
-  | <span data-count="7739">S</span>ome t -&gt; t
-  | <span data-count="666">N</span>one -&gt;
+  <span data-count="8397">l</span>et env = get_env env_id collection in
+  <span data-count="8397">m</span>atch ITbl.find_opt env t_id with
+  | <span data-count="7732">S</span>ome t -&gt; t
+  | <span data-count="665">N</span>one -&gt;
     let t = convert orig_table in
-    <span data-count="666">I</span>Tbl.add env t_id t;
-    <span data-count="666">t</span>
+    <span data-count="665">I</span>Tbl.add env t_id t;
+    <span data-count="665">t</span>
 
-let get t i = <span data-count="7743">t</span>.data.(i)
+let get t i = <span data-count="7736">t</span>.data.(i)
 
-let set t i v = <span data-count="2286">t</span>.data.(i) &lt;- v
+let set t i v = <span data-count="2281">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="4036">A</span>rray.length t.data
+let size t = <span data-count="4035">A</span>rray.length t.data
 
-let typ t = <span data-count="3872">t</span>.typ
+let typ t = <span data-count="3871">t</span>.typ
 
 let max_size t = <span data-count="0">t</span>.limits.max
 

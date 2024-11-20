@@ -18,14 +18,14 @@
       <h2>92.31%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.56%"></span>
-      <span class="unvisited" style="top:13.07%"></span>
-      <span class="unvisited" style="top:15.08%"></span>
-      <span class="unvisited" style="top:15.58%"></span>
-      <span class="some-visited" style="top:23.12%"></span>
-      <span class="unvisited" style="top:42.21%"></span>
-      <span class="unvisited" style="bottom:33.67%"></span>
-      <span class="some-visited" style="bottom:25.13%"></span>
+      <span class="unvisited" style="top:12.44%"></span>
+      <span class="unvisited" style="top:12.94%"></span>
+      <span class="unvisited" style="top:14.93%"></span>
+      <span class="unvisited" style="top:15.42%"></span>
+      <span class="some-visited" style="top:22.89%"></span>
+      <span class="unvisited" style="top:41.79%"></span>
+      <span class="unvisited" style="bottom:34.33%"></span>
+      <span class="some-visited" style="bottom:25.87%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -218,17 +218,19 @@
 <a id="L186"></a><span > </span>
 <a id="L187"></a><span > </span>
 <a id="L188"></a><span > </span>
-<a id="L189"></a><span class="visited"> </span>
+<a id="L189"></a><span > </span>
 <a id="L190"></a><span class="visited"> </span>
 <a id="L191"></a><span class="visited"> </span>
 <a id="L192"></a><span class="visited"> </span>
 <a id="L193"></a><span class="visited"> </span>
 <a id="L194"></a><span class="visited"> </span>
 <a id="L195"></a><span class="visited"> </span>
-<a id="L196"></a><span > </span>
-<a id="L197"></a><span class="visited"> </span>
-<a id="L198"></a><span > </span>
+<a id="L196"></a><span class="visited"> </span>
+<a id="L197"></a><span > </span>
+<a id="L198"></a><span class="visited"> </span>
 <a id="L199"></a><span > </span>
+<a id="L200"></a><span > </span>
+<a id="L201"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -432,6 +434,8 @@
 <a href="#L197">197</a>
 <a href="#L198">198</a>
 <a href="#L199">199</a>
+<a href="#L200">200</a>
+<a href="#L201">201</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -446,9 +450,9 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let binc_location = List.ma<span data-count="890">p</span> Fpath.v C_share_site.Sites.binc
+let binc_location = List.ma<span data-count="915">p</span> Fpath.v C_share_site.Sites.binc
 
-let libc_location = List.ma<span data-count="890">p</span> Fpath.v C_share_site.Sites.libc
+let libc_location = List.ma<span data-count="915">p</span> Fpath.v C_share_site.Sites.libc
 
 let find location file : Fpath.t Result.t =
   <span data-count="352">l</span>et* l =
@@ -620,7 +624,8 @@ let metadata ~workspace arch property files : unit Result.t =
 
 let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   profiling unsafe optimize no_stop_at_failure no_values
-  deterministic_result_order fail_mode concolic eacsl solver : unit Result.t =
+  no_assert_failure_expression_printing deterministic_result_order fail_mode
+  concolic eacsl solver : unit Result.t =
   <span data-count="357">l</span>et workspace = Fpath.v workspace in
   <span data-count="357">l</span>et includes = libc_location @ includes in
   let* (_exists : bool) = OS.Dir.creat<span data-count="357">e</span> ~path:true workspace in
@@ -630,8 +635,9 @@ let cmd debug arch property _testcomp workspace workers opt_lvl includes files
   <span data-count="350">l</span>et workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
   (if concolic then <span data-count="160">C</span>md_conc.cmd else <span data-count="190">C</span>md_sym.cmd)
-    profiling debug unsafe optimize workers no_stop_at_failure no_values
-    deterministic_result_order fail_mode workspace solver files
+    profiling debug unsafe false false optimize workers no_stop_at_failure
+    no_values no_assert_failure_expression_printing deterministic_result_order
+    fail_mode workspace solver files
 </code></pre>
       </div>
     </div>

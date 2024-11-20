@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>int64.ml &mdash; Coverage report</title>
-    <meta name="description" content="96.92% coverage in src/primitives/int64.ml">
+    <meta name="description" content="94.74% coverage in src/primitives/int64.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,14 @@
           <span class="dirname">src/primitives/</span>int64.ml
         </a>
       </h1>
-      <h2>96.92%</h2>
+      <h2>94.74%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:45.73%"></span>
-      <span class="some-visited" style="top:49.39%"></span>
-      <span class="unvisited" style="bottom:27.44%"></span>
-      <span class="unvisited" style="bottom:23.78%"></span>
+      <span class="some-visited" style="top:45.18%"></span>
+      <span class="some-visited" style="top:48.80%"></span>
+      <span class="unvisited" style="bottom:28.31%"></span>
+      <span class="unvisited" style="bottom:24.70%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -190,6 +191,8 @@
 <a id="L162"></a><span > </span>
 <a id="L163"></a><span class="visited"> </span>
 <a id="L164"></a><span class="visited"> </span>
+<a id="L165"></a><span > </span>
+<a id="L166"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -358,6 +361,8 @@
 <a href="#L162">162</a>
 <a href="#L163">163</a>
 <a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: Apache-2.0 *)
 (* Copyright 2017 WebAssembly Community Group participants *)
@@ -405,21 +410,21 @@ let popcnt =
 (*
    * Unsigned comparison in terms of signed comparison.
    *)
-let cmp_u x op y = <span data-count="148080">o</span>p (ad<span data-count="148080">d</span> x min_int) (ad<span data-count="148080">d</span> y min_int)
+let cmp_u x op y = <span data-count="148109">o</span>p (ad<span data-count="148109">d</span> x min_int) (ad<span data-count="148109">d</span> y min_int)
 
-let eq (x : int64) y = <span data-count="10058486">e</span>qual x y
+let eq (x : int64) y = <span data-count="10058494">e</span>qual x y
 
-let ne (x : int64) y = <span data-count="49346">n</span>ot (equa<span data-count="49346">l</span> x y)
+let ne (x : int64) y = <span data-count="49356">n</span>ot (equa<span data-count="49356">l</span> x y)
 
-let lt (x : int64) y = <span data-count="17779">c</span>ompar<span data-count="17779">e</span> x y &lt; 0
+let lt (x : int64) y = <span data-count="18279">c</span>ompar<span data-count="18279">e</span> x y &lt; 0
 
 let gt (x : int64) y = <span data-count="288">c</span>ompar<span data-count="288">e</span> x y &gt; 0
 
-let le (x : int64) y = <span data-count="149441">c</span>ompar<span data-count="149441">e</span> x y &lt;= 0
+let le (x : int64) y = <span data-count="149912">c</span>ompar<span data-count="149912">e</span> x y &lt;= 0
 
 let ge (x : int64) y = <span data-count="9735">c</span>ompar<span data-count="9735">e</span> x y &gt;= 0
 
-let lt_u x y = <span data-count="13763">c</span>mp_u x lt y
+let lt_u x y = <span data-count="13767">c</span>mp_u x lt y
 
 let le_u x y = <span data-count="132970">c</span>mp_u x le y
 
@@ -433,29 +438,29 @@ let ge_u x y = <span data-count="249">c</span>mp_u x ge y
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  <span data-count="890">i</span>f equal d zero then <span data-count="0">r</span>aise Division_by_zero
+  <span data-count="915">i</span>f equal d zero then <span data-count="0">r</span>aise Division_by_zero
   else
-    <span data-count="890">l</span>et t = shift_right d 63 in
-    <span data-count="890">l</span>et n' = logand n (logno<span data-count="890">t</span> t) in
-    <span data-count="890">l</span>et q = shift_left (di<span data-count="890">v</span> (shift_right_logica<span data-count="890">l</span> n' 1) d) 1 in
-    <span data-count="890">l</span>et r = sub n (mu<span data-count="890">l</span> q d) in
-    <span data-count="890">i</span>f cmp_u r lt d then <span data-count="0">(</span>q, r) else <span data-count="890">(</span>ad<span data-count="890">d</span> q one, su<span data-count="890">b</span> r d)
+    <span data-count="915">l</span>et t = shift_right d 63 in
+    <span data-count="915">l</span>et n' = logand n (logno<span data-count="915">t</span> t) in
+    <span data-count="915">l</span>et q = shift_left (di<span data-count="915">v</span> (shift_right_logica<span data-count="915">l</span> n' 1) d) 1 in
+    <span data-count="915">l</span>et r = sub n (mu<span data-count="915">l</span> q d) in
+    <span data-count="915">i</span>f cmp_u r lt d then <span data-count="0">(</span>q, r) else <span data-count="915">(</span>ad<span data-count="915">d</span> q one, su<span data-count="915">b</span> r d)
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |bitwidth|-bits int. *)
-let low_int = shift_lef<span data-count="890">t</span> minus_one 63
+let low_int = shift_lef<span data-count="915">t</span> minus_one 63
 
 (* The largest signed |bitwidth|-bits int. *)
-let high_int = logxo<span data-count="890">r</span> low_int minus_one
+let high_int = logxo<span data-count="915">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="2955491">f</span> x (to_in<span data-count="2955417">t</span> (logan<span data-count="2955483">d</span> y (of_in<span data-count="2955439">t</span> 63)))
+let shift f x y = <span data-count="2954301">f</span> x (to_in<span data-count="2953805">t</span> (logan<span data-count="2953660">d</span> y (of_in<span data-count="2953784">t</span> 63)))
 
 let shl x y = <span data-count="107000">s</span>hift shift_left x y
 
-let shr_s x y = <span data-count="2803318">s</span>hift shift_right x y
+let shr_s x y = <span data-count="2801653">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="45154">s</span>hift shift_right_logical x y
 
@@ -485,9 +490,9 @@ let hex_digit = function
   | <span data-count="402">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="402">e</span> c - Char.cod<span data-count="402">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper, max_lower = divrem_<span data-count="890">u</span> minus_one 10L
+let max_upper, max_lower = divrem_<span data-count="915">u</span> minus_one 10L
 
-let of_string s =
+let of_string_exn s =
   <span data-count="7970">l</span>et len = String.length s in
   <span data-count="7970">l</span>et rec parse_hex i num =
     <span data-count="48468">i</span>f i = len then <span data-count="3370">n</span>um
@@ -523,6 +528,8 @@ let of_string s =
   in
   require (l<span data-count="7962">e</span> low_int parsed &amp;&amp; <span data-count="7962">l</span><span data-count="7962">e</span> parsed high_int);
   <span data-count="7962">p</span>arsed
+
+let of_string s = <span data-count="0">t</span>ry Some (of_string_ex<span data-count="0">n</span> s) with <span data-count="0">_</span> -&gt; None
 </code></pre>
       </div>
     </div>

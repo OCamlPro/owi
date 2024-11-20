@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concolic_wasm_ffi.ml &mdash; Coverage report</title>
-    <meta name="description" content="40.00% coverage in src/concolic/concolic_wasm_ffi.ml">
+    <meta name="description" content="40.79% coverage in src/concolic/concolic_wasm_ffi.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,39 +15,39 @@
           <span class="dirname">src/concolic/</span>concolic_wasm_ffi.ml
         </a>
       </h1>
-      <h2>40.00%</h2>
+      <h2>40.79%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:19.35%"></span>
-      <span class="unvisited" style="top:24.19%"></span>
-      <span class="unvisited" style="top:24.73%"></span>
-      <span class="unvisited" style="top:25.81%"></span>
-      <span class="unvisited" style="top:26.34%"></span>
-      <span class="unvisited" style="top:28.49%"></span>
-      <span class="unvisited" style="top:29.57%"></span>
-      <span class="unvisited" style="top:31.18%"></span>
-      <span class="unvisited" style="top:31.72%"></span>
-      <span class="unvisited" style="top:32.80%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="unvisited" style="top:34.95%"></span>
-      <span class="unvisited" style="top:36.56%"></span>
-      <span class="unvisited" style="top:37.10%"></span>
-      <span class="unvisited" style="top:38.17%"></span>
-      <span class="unvisited" style="top:38.71%"></span>
-      <span class="unvisited" style="top:40.86%"></span>
-      <span class="unvisited" style="top:42.47%"></span>
-      <span class="unvisited" style="top:43.01%"></span>
-      <span class="unvisited" style="top:44.09%"></span>
-      <span class="unvisited" style="top:44.62%"></span>
-      <span class="unvisited" style="top:46.77%"></span>
-      <span class="unvisited" style="bottom:49.46%"></span>
-      <span class="unvisited" style="bottom:48.92%"></span>
-      <span class="unvisited" style="bottom:44.62%"></span>
-      <span class="unvisited" style="bottom:39.78%"></span>
-      <span class="unvisited" style="bottom:38.17%"></span>
-      <span class="unvisited" style="bottom:35.48%"></span>
-      <span class="unvisited" style="bottom:33.87%"></span>
-      <span class="unvisited" style="bottom:32.80%"></span>
+      <span class="unvisited" style="top:19.25%"></span>
+      <span class="unvisited" style="top:24.06%"></span>
+      <span class="unvisited" style="top:24.60%"></span>
+      <span class="unvisited" style="top:25.67%"></span>
+      <span class="unvisited" style="top:26.20%"></span>
+      <span class="unvisited" style="top:28.34%"></span>
+      <span class="unvisited" style="top:29.41%"></span>
+      <span class="unvisited" style="top:31.02%"></span>
+      <span class="unvisited" style="top:31.55%"></span>
+      <span class="unvisited" style="top:32.62%"></span>
+      <span class="unvisited" style="top:33.16%"></span>
+      <span class="unvisited" style="top:34.76%"></span>
+      <span class="unvisited" style="top:36.36%"></span>
+      <span class="unvisited" style="top:36.90%"></span>
+      <span class="unvisited" style="top:37.97%"></span>
+      <span class="unvisited" style="top:38.50%"></span>
+      <span class="unvisited" style="top:40.64%"></span>
+      <span class="unvisited" style="top:42.25%"></span>
+      <span class="unvisited" style="top:42.78%"></span>
+      <span class="unvisited" style="top:43.85%"></span>
+      <span class="unvisited" style="top:44.39%"></span>
+      <span class="unvisited" style="top:46.52%"></span>
+      <span class="unvisited" style="bottom:49.73%"></span>
+      <span class="unvisited" style="bottom:49.20%"></span>
+      <span class="unvisited" style="bottom:44.92%"></span>
+      <span class="unvisited" style="bottom:40.11%"></span>
+      <span class="unvisited" style="bottom:38.50%"></span>
+      <span class="unvisited" style="bottom:35.83%"></span>
+      <span class="unvisited" style="bottom:34.22%"></span>
+      <span class="unvisited" style="bottom:33.16%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -190,7 +190,7 @@
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span class="visited"> </span>
 <a id="L138"></a><span class="visited"> </span>
-<a id="L139"></a><span > </span>
+<a id="L139"></a><span class="visited"> </span>
 <a id="L140"></a><span > </span>
 <a id="L141"></a><span > </span>
 <a id="L142"></a><span > </span>
@@ -238,6 +238,7 @@
 <a id="L184"></a><span > </span>
 <a id="L185"></a><span > </span>
 <a id="L186"></a><span > </span>
+<a id="L187"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -428,6 +429,7 @@
 <a href="#L184">184</a>
 <a href="#L185">185</a>
 <a href="#L186">186</a>
+<a href="#L187">187</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -450,14 +452,14 @@ module M :
   module Value = Concolic_value.V
 
   let symbol_i32 () : Value.int32 Choice.t =
-    <span data-count="3099">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-        <span data-count="3099">l</span>et n =
+    <span data-count="3090">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
+        <span data-count="3090">l</span>et n =
           match forced_value with
           | <span data-count="1646">N</span>one -&gt; Random.bits3<span data-count="1646">2</span> ()
-          | <span data-count="1453">S</span>ome (Num (I32 n)) -&gt; n
+          | <span data-count="1444">S</span>ome (Num (I32 n)) -&gt; n
           | _ -&gt; assert false
         in
-        (I32 n, Value.pai<span data-count="3099">r</span> n (Expr.mk_symbo<span data-count="3099">l</span> sym)) )
+        (I32 n, Value.pai<span data-count="3090">r</span> n (Expr.symbo<span data-count="3090">l</span> sym)) )
 
   let symbol_i8 () : Value.int32 Choice.t =
     <span data-count="6">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
@@ -468,7 +470,7 @@ module M :
           | _ -&gt; assert false
         in
         let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbo<span data-count="6">l</span> sym))
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="6">l</span> sym))
         in
         <span data-count="6">(</span>I32 n, Value.pai<span data-count="6">r</span> n sym_expr) )
 
@@ -481,7 +483,7 @@ module M :
           | _ -&gt; assert false
         in
         let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.mk_symbo<span data-count="0">l</span> sym))
+          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="0">l</span> sym))
         in
         <span data-count="0">(</span>I32 n, Value.pai<span data-count="0">r</span> n sym_expr) )
 
@@ -493,7 +495,7 @@ module M :
           | <span data-count="0">S</span>ome (Num (I64 n)) -&gt; n
           | _ -&gt; assert false
         in
-        (I64 n, Value.pai<span data-count="0">r</span> n (Expr.mk_symbo<span data-count="0">l</span> sym)) )
+        (I64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let symbol_f32 () : Value.float32 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_fp 32) (fun sym forced_value -&gt;
@@ -504,7 +506,7 @@ module M :
           | _ -&gt; assert false
         in
         let n = Float32.of_bits n in
-        <span data-count="0">(</span>F32 n, Value.pai<span data-count="0">r</span> n (Expr.mk_symbo<span data-count="0">l</span> sym)) )
+        <span data-count="0">(</span>F32 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let symbol_f64 () : Value.float64 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_fp 64) (fun sym forced_value -&gt;
@@ -515,19 +517,19 @@ module M :
           | _ -&gt; assert false
         in
         let n = Float64.of_bits n in
-        <span data-count="0">(</span>F64 n, Value.pai<span data-count="0">r</span> n (Expr.mk_symbo<span data-count="0">l</span> sym)) )
+        <span data-count="0">(</span>F64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="1939">l</span>et c = Value.I32.to_bool i in
-    <span data-count="1939">C</span>oncolic_choice.assume c
+    <span data-count="1934">l</span>et c = Value.I32.to_bool i in
+    <span data-count="1934">C</span>oncolic_choice.assume c
 
   let assume_positive_i32 (i : Value.int32) : unit Choice.t =
     <span data-count="0">l</span>et c = Value.I32.ge i Value.I32.zero in
     <span data-count="0">C</span>oncolic_choice.assume c
 
   let assert_i32 (i : Value.int32) : unit Choice.t =
-    <span data-count="1040">l</span>et c = Value.I32.to_bool i in
-    <span data-count="1040">C</span>oncolic_choice.assertion c
+    <span data-count="1037">l</span>et c = Value.I32.to_bool i in
+    <span data-count="1037">C</span>oncolic_choice.assertion c
 
   open Expr
 
@@ -538,8 +540,8 @@ module M :
     (* let+ v = Choice.select_i32 v in *)
     (* let n = v.c in *)
     (* let x = Choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
-    <span data-count="3170">m</span>atch view v.symbolic with
-    | <span data-count="3170">V</span>al (Num (I32 v)) -&gt; Choice.return v
+    <span data-count="3166">m</span>atch view v.symbolic with
+    | <span data-count="3166">V</span>al (Num (I32 v)) -&gt; Choice.return v
     | <span data-count="0">_</span> -&gt;
       Log.debug2 {|alloc: cannot allocate base pointer "%a"@.|} Expr.pp
         v.symbolic;
@@ -557,16 +559,17 @@ module M :
 
   let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
       =
-    <span data-count="3170">C</span>hoice.bind (i3<span data-count="3170">2</span> base) (fun (base : int32) -&gt;
-        <span data-count="3170">C</span>hoice.return
+    <span data-count="3166">C</span>hoice.bind (i3<span data-count="3166">2</span> base) (fun (base : int32) -&gt;
+        <span data-count="3166">C</span>hoice.return
           { Concolic_value.concrete = base
-          ; symbolic = Expr.pt<span data-count="3170">r</span> base (Symbolic_value.const_i3<span data-count="3170">2</span> 0l)
+          ; symbolic = Expr.pt<span data-count="3166">r</span> base (Symbolic_value.const_i3<span data-count="3166">2</span> 0l)
           } )
 
-  let free _ (p : Value.int32) : unit Choice.t =
+  let free _ (p : Value.int32) =
     (* WHAT ???? *)
-    <span data-count="1770">l</span>et _base = ptr p in
-    <span data-count="1770">C</span>hoice.return ()
+    <span data-count="1770">l</span>et open Choice in
+    let+ base = pt<span data-count="1770">r</span> p in
+    <span data-count="1770">V</span>alue.const_i32 base
 end
 
 type extern_func = Concolic.P.Extern_func.extern_func
@@ -610,7 +613,7 @@ let summaries_extern_module =
           (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
       , Concolic.P.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R0), free) )
+          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
     ; ("abort", Concolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ]
   in

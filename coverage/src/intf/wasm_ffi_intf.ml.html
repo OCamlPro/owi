@@ -174,7 +174,7 @@ module type S0 = sig
 
   val alloc : memory -&gt; Value.int32 -&gt; Value.int32 -&gt; Value.int32 t
 
-  val free : memory -&gt; Value.int32 -&gt; unit t
+  val free : memory -&gt; Value.int32 -&gt; Value.int32 t
 
   val exit : Value.int32 -&gt; unit t
 end

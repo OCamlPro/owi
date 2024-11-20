@@ -256,11 +256,11 @@ include (
 
     let pp_float64 = Float64.pp
 
-    let const_i32 x = <span data-count="15165012">x</span>
+    let const_i32 x = <span data-count="15164684">x</span>
 
-    let const_i64 x = <span data-count="10230499">x</span>
+    let const_i64 x = <span data-count="10230599">x</span>
 
-    let const_f32 x = <span data-count="115127">x</span>
+    let const_f32 x = <span data-count="115125">x</span>
 
     let const_f64 x = <span data-count="112291">x</span>
 
@@ -270,8 +270,8 @@ include (
 
     module Ref = struct
       let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-        <span data-count="1609492">m</span>atch r with
-        | <span data-count="1605956">F</span>uncref (Some f) -&gt; Ref_value f
+        <span data-count="1609486">m</span>atch r with
+        | <span data-count="1605950">F</span>uncref (Some f) -&gt; Ref_value f
         | <span data-count="3536">F</span>uncref None -&gt; Null
         | <span data-count="0">_</span> -&gt; Type_mismatch
 
@@ -294,7 +294,7 @@ include (
 
       let or_ = ( || )
 
-      let int32 = function <span data-count="1960980">t</span>rue -&gt; 1l | <span data-count="14180115">f</span>alse -&gt; 0l
+      let int32 = function <span data-count="1960945">t</span>rue -&gt; 1l | <span data-count="14180082">f</span>alse -&gt; 0l
 
       let pp = Fmt.bool
     end
@@ -303,7 +303,7 @@ include (
       include Int32
       include Convert.Int32
 
-      let to_bool i = <span data-count="16139995">I</span>nt32.ne i 0l
+      let to_bool i = <span data-count="16139939">I</span>nt32.ne i 0l
 
       let eq_const = eq
     end

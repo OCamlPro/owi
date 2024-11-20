@@ -32,13 +32,16 @@
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -60,6 +63,9 @@
 <a href="#L15">15</a>
 <a href="#L16">16</a>
 <a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -68,16 +74,19 @@
 open Syntax
 
 let optimize_file ~unsafe filename =
-  <span data-count="21">C</span>ompile.File.until_optimize ~unsafe ~optimize:true filename
+  <span data-count="22">C</span>ompile.File.until_optimize ~unsafe ~rac:false ~srac:false ~optimize:true
+    filename
 
-let cmd debug unsafe files =
-  <span data-count="21">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
-  <span data-count="21">l</span>ist_iter
-    (fun file -&gt;
-      <span data-count="21">l</span>et+ m = optimize_fil<span data-count="21">e</span> ~unsafe file in
-      <span data-count="21">l</span>et m = Binary_to_text.modul m in
-      <span data-count="21">F</span>mt.pr "%a@\n" Text.pp_modul m )
-    files
+let print_or_emit ~unsafe file outfile =
+  <span data-count="22">l</span>et* m = optimize_fil<span data-count="22">e</span> ~unsafe file in
+  <span data-count="22">l</span>et m = Binary_to_text.modul m in
+  <span data-count="22">m</span>atch outfile with
+  | <span data-count="1">S</span>ome name -&gt; Bos.OS.File.writef name "%a@\n" Text.pp_modul m
+  | <span data-count="21">N</span>one -&gt; Ok (Fmt.p<span data-count="21">r</span> "%a@\n" Text.pp_modul m)
+
+let cmd debug unsafe file outfile =
+  <span data-count="22">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
+  <span data-count="22">p</span>rint_or_emit ~unsafe file outfile
 </code></pre>
       </div>
     </div>

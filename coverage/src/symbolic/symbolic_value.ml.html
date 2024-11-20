@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_value.ml &mdash; Coverage report</title>
-    <meta name="description" content="84.84% coverage in src/symbolic/symbolic_value.ml">
+    <meta name="description" content="85.66% coverage in src/symbolic/symbolic_value.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/symbolic/</span>symbolic_value.ml
         </a>
       </h1>
-      <h2>84.84%</h2>
+      <h2>85.66%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:7.24%"></span>
@@ -24,8 +24,6 @@
       <span class="unvisited" style="top:11.84%"></span>
       <span class="unvisited" style="top:12.50%"></span>
       <span class="unvisited" style="top:12.72%"></span>
-      <span class="unvisited" style="top:13.38%"></span>
-      <span class="unvisited" style="top:13.82%"></span>
       <span class="unvisited" style="top:14.04%"></span>
       <span class="unvisited" style="top:14.25%"></span>
       <span class="unvisited" style="top:14.47%"></span>
@@ -116,9 +114,9 @@
 <a id="L58"></a><span class="unvisited"> </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
-<a id="L61"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="visited"> </span>
 <a id="L62"></a><span > </span>
-<a id="L63"></a><span class="unvisited"> </span>
+<a id="L63"></a><span class="visited"> </span>
 <a id="L64"></a><span class="unvisited"> </span>
 <a id="L65"></a><span class="unvisited"> </span>
 <a id="L66"></a><span class="unvisited"> </span>
@@ -1014,13 +1012,13 @@ type t =
   | F64 of float64
   | Ref of ref_value
 
-let const_i32 (i : Int32.t) : int32 = <span data-count="6381297">v</span>alue (Num (I32 i))
+let const_i32 (i : Int32.t) : int32 = <span data-count="6379024">v</span>alue (Num (I32 i))
 
-let const_i64 (i : Int64.t) : int64 = <span data-count="357270">v</span>alue (Num (I64 i))
+let const_i64 (i : Int64.t) : int64 = <span data-count="357472">v</span>alue (Num (I64 i))
 
-let const_f32 (f : Float32.t) : float32 = <span data-count="1158">v</span>alue (Num (F32 (Float32.to_bit<span data-count="1158">s</span> f)))
+let const_f32 (f : Float32.t) : float32 = <span data-count="1179">v</span>alue (Num (F32 (Float32.to_bit<span data-count="1179">s</span> f)))
 
-let const_f64 (f : Float64.t) : float64 = <span data-count="923">v</span>alue (Num (F64 (Float64.to_bit<span data-count="923">s</span> f)))
+let const_f64 (f : Float64.t) : float64 = <span data-count="948">v</span>alue (Num (F64 (Float64.to_bit<span data-count="948">s</span> f)))
 
 let ref_null _ty = <span data-count="0">R</span>ef (Funcref None)
 
@@ -1033,9 +1031,9 @@ let ref_is_null = function
   | <span data-count="0">F</span>uncref None | <span data-count="0">E</span>xternref None -&gt; value True
 
 let pp ppf v =
-  <span data-count="0">l</span>et e =
+  <span data-count="834">l</span>et e =
     match v with
-    | <span data-count="0">I</span>32 e -&gt; e
+    | <span data-count="834">I</span>32 e -&gt; e
     | <span data-count="0">I</span>64 e -&gt; e
     | <span data-count="0">F</span>32 e -&gt; e
     | <span data-count="0">F</span>64 e -&gt; e
@@ -1045,8 +1043,8 @@ let pp ppf v =
 
 module Ref = struct
   let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-    <span data-count="7745">m</span>atch r with
-    | <span data-count="7745">F</span>uncref (Some f) -&gt; Ref_value f
+    <span data-count="7738">m</span>atch r with
+    | <span data-count="7738">F</span>uncref (Some f) -&gt; Ref_value f
     | <span data-count="0">F</span>uncref None -&gt; Null
     | <span data-count="0">E</span>xternref _ -&gt; Type_mismatch
 
@@ -1061,22 +1059,22 @@ module Ref = struct
 end
 
 module Bool = struct
-  let const b = <span data-count="432007">B</span>ool.v b
+  let const b = <span data-count="432017">B</span>ool.v b
 
-  let not e = <span data-count="21680">B</span>ool.not e
+  let not e = <span data-count="21689">B</span>ool.not e
 
-  let or_ e1 e2 = <span data-count="1214222">B</span>ool.or_ e1 e2
+  let or_ e1 e2 = <span data-count="1213846">B</span>ool.or_ e1 e2
 
-  let and_ e1 e2 = <span data-count="5625">B</span>ool.and_ e1 e2
+  let and_ e1 e2 = <span data-count="5626">B</span>ool.and_ e1 e2
 
   let int32 e =
-    <span data-count="329699">m</span>atch view e with
-    | <span data-count="108072">V</span>al True -&gt; const_i32 1l
-    | <span data-count="192153">V</span>al False -&gt; const_i32 0l
+    <span data-count="329720">m</span>atch view e with
+    | <span data-count="108109">V</span>al True -&gt; const_i32 1l
+    | <span data-count="192149">V</span>al False -&gt; const_i32 0l
     | <span data-count="0">C</span>vtop (Ty_bitv 32, ToBool, e') -&gt; e'
-    | <span data-count="29470">_</span> -&gt; make (Cvtop (Ty_bitv 32, OfBool, e))
+    | <span data-count="29468">_</span> -&gt; make (Cvtop (Ty_bitv 32, OfBool, e))
 
-  let select_expr c ~if_true ~if_false = <span data-count="28633">B</span>ool.ite c if_true if_false
+  let select_expr c ~if_true ~if_false = <span data-count="28620">B</span>ool.ite c if_true if_false
 
   let pp ppf (e : vbool) = <span data-count="0">E</span>xpr.pp ppf e
 end
@@ -1084,9 +1082,9 @@ end
 module I32 = struct
   let ty = Ty_bitv 32
 
-  let zero = const_i3<span data-count="890">2</span> 0l
+  let zero = const_i3<span data-count="915">2</span> 0l
 
-  let clz e = <span data-count="13088">u</span>nop ty Clz e
+  let clz e = <span data-count="13082">u</span>nop ty Clz e
 
   let ctz e = <span data-count="0">u</span>nop ty Ctz e
 
@@ -1094,90 +1092,90 @@ module I32 = struct
     (* TODO *)
     <span data-count="0">a</span>ssert false
 
-  let add e1 e2 = <span data-count="3387049">b</span>inop ty Add e1 e2
+  let add e1 e2 = <span data-count="3385749">b</span>inop ty Add e1 e2
 
-  let sub e1 e2 = <span data-count="16338">b</span>inop ty Sub e1 e2
+  let sub e1 e2 = <span data-count="16295">b</span>inop ty Sub e1 e2
 
-  let mul e1 e2 = <span data-count="1152917">b</span>inop ty Mul e1 e2
+  let mul e1 e2 = <span data-count="1152186">b</span>inop ty Mul e1 e2
 
   let div e1 e2 = <span data-count="108">b</span>inop ty Div e1 e2
 
-  let unsigned_div e1 e2 = <span data-count="104">b</span>inop ty DivU e1 e2
+  let unsigned_div e1 e2 = <span data-count="102">b</span>inop ty DivU e1 e2
 
   let rem e1 e2 = <span data-count="17">b</span>inop ty Rem e1 e2
 
-  let unsigned_rem e1 e2 = <span data-count="80076">b</span>inop ty RemU e1 e2
+  let unsigned_rem e1 e2 = <span data-count="80104">b</span>inop ty RemU e1 e2
 
   let boolify e =
-    <span data-count="58555">m</span>atch view e with
-    | <span data-count="694">V</span>al (Num (I32 0l)) -&gt; Some (Bool.cons<span data-count="694">t</span> false)
-    | <span data-count="9021">V</span>al (Num (I32 1l)) -&gt; Some (Bool.cons<span data-count="9021">t</span> true)
-    | <span data-count="1919">C</span>vtop (_, OfBool, cond) -&gt; Some cond
-    | <span data-count="46920">_</span> -&gt; None
+    <span data-count="58536">m</span>atch view e with
+    | <span data-count="689">V</span>al (Num (I32 0l)) -&gt; Some (Bool.cons<span data-count="689">t</span> false)
+    | <span data-count="9029">V</span>al (Num (I32 1l)) -&gt; Some (Bool.cons<span data-count="9029">t</span> true)
+    | <span data-count="1916">C</span>vtop (_, OfBool, cond) -&gt; Some cond
+    | <span data-count="46901">_</span> -&gt; None
 
   let logand e1 e2 =
-    <span data-count="29089">m</span>atch (boolif<span data-count="29088">y</span> e1, boolif<span data-count="29089">y</span> e2) with
-    | <span data-count="5515">S</span>ome b1, Some b2 -&gt; Bool.int32 (Bool.and<span data-count="5515">_</span> b1 b2)
-    | <span data-count="23573">_</span> -&gt; binop ty And e1 e2
+    <span data-count="29079">m</span>atch (boolif<span data-count="29079">y</span> e1, boolif<span data-count="29080">y</span> e2) with
+    | <span data-count="5516">S</span>ome b1, Some b2 -&gt; Bool.int32 (Bool.and<span data-count="5516">_</span> b1 b2)
+    | <span data-count="23563">_</span> -&gt; binop ty And e1 e2
 
   let logor e1 e2 =
     <span data-count="189">m</span>atch (boolif<span data-count="189">y</span> e1, boolif<span data-count="189">y</span> e2) with
     | <span data-count="10">S</span>ome b1, Some b2 -&gt; Bool.int32 (Bool.or<span data-count="10">_</span> b1 b2)
     | <span data-count="179">_</span> -&gt; binop ty Or e1 e2
 
-  let logxor e1 e2 = <span data-count="429">b</span>inop ty Xor e1 e2
+  let logxor e1 e2 = <span data-count="449">b</span>inop ty Xor e1 e2
 
-  let shl e1 e2 = <span data-count="9966">b</span>inop ty Shl e1 e2
+  let shl e1 e2 = <span data-count="9942">b</span>inop ty Shl e1 e2
 
-  let shr_s e1 e2 = <span data-count="947">b</span>inop ty ShrA e1 e2
+  let shr_s e1 e2 = <span data-count="943">b</span>inop ty ShrA e1 e2
 
-  let shr_u e1 e2 = <span data-count="13850">b</span>inop ty ShrL e1 e2
+  let shr_u e1 e2 = <span data-count="13836">b</span>inop ty ShrL e1 e2
 
   let rotl e1 e2 = <span data-count="1">b</span>inop ty Rotl e1 e2
 
   let rotr e1 e2 = <span data-count="1">b</span>inop ty Rotr e1 e2
 
   let eq_const e c =
-    <span data-count="105796">m</span>atch view e with
-    | <span data-count="466">C</span>vtop (_, OfBool, cond) -&gt; begin
-      match c with <span data-count="466">0</span>l -&gt; Bool.not cond | <span data-count="0">1</span>l -&gt; cond | <span data-count="0">_</span> -&gt; Bool.const false
+    <span data-count="105780">m</span>atch view e with
+    | <span data-count="464">C</span>vtop (_, OfBool, cond) -&gt; begin
+      match c with <span data-count="464">0</span>l -&gt; Bool.not cond | <span data-count="0">1</span>l -&gt; cond | <span data-count="0">_</span> -&gt; Bool.const false
     end
-    | <span data-count="105322">_</span> -&gt; relop Ty_bool Eq e (const_i3<span data-count="105339">2</span> c)
+    | <span data-count="105314">_</span> -&gt; relop Ty_bool Eq e (const_i3<span data-count="105318">2</span> c)
 
   let eq e1 e2 =
-    <span data-count="174031">i</span>f phys_equal e1 e2 then <span data-count="5243">B</span>ool.const true else <span data-count="168783">r</span>elop Ty_bool Eq e1 e2
+    <span data-count="174070">i</span>f phys_equal e1 e2 then <span data-count="5249">B</span>ool.const true else <span data-count="168818">r</span>elop Ty_bool Eq e1 e2
 
   let ne e1 e2 =
-    <span data-count="13451">i</span>f phys_equal e1 e2 then <span data-count="1198">B</span>ool.const false else <span data-count="12253">r</span>elop Ty_bool Ne e1 e2
+    <span data-count="13442">i</span>f phys_equal e1 e2 then <span data-count="1199">B</span>ool.const false else <span data-count="12243">r</span>elop Ty_bool Ne e1 e2
 
   let lt e1 e2 =
-    <span data-count="1288346">i</span>f phys_equal e1 e2 then <span data-count="75447">B</span>ool.const false else <span data-count="1212871">r</span>elop ty Lt e1 e2
+    <span data-count="1287585">i</span>f phys_equal e1 e2 then <span data-count="75378">B</span>ool.const false else <span data-count="1212207">r</span>elop ty Lt e1 e2
 
   let gt e1 e2 =
-    <span data-count="2625">i</span>f phys_equal e1 e2 then <span data-count="2">B</span>ool.const false else <span data-count="2623">r</span>elop ty Gt e1 e2
+    <span data-count="2620">i</span>f phys_equal e1 e2 then <span data-count="2">B</span>ool.const false else <span data-count="2618">r</span>elop ty Gt e1 e2
 
   let lt_u e1 e2 =
-    <span data-count="1245437">i</span>f phys_equal e1 e2 then <span data-count="4658">B</span>ool.const false else <span data-count="1240778">r</span>elop ty LtU e1 e2
+    <span data-count="1244973">i</span>f phys_equal e1 e2 then <span data-count="4658">B</span>ool.const false else <span data-count="1240309">r</span>elop ty LtU e1 e2
 
   let gt_u e1 e2 =
-    <span data-count="1547">i</span>f phys_equal e1 e2 then <span data-count="1403">B</span>ool.const false else <span data-count="144">r</span>elop ty GtU e1 e2
+    <span data-count="1545">i</span>f phys_equal e1 e2 then <span data-count="1401">B</span>ool.const false else <span data-count="144">r</span>elop ty GtU e1 e2
 
-  let le e1 e2 = <span data-count="736">i</span>f phys_equal e1 e2 then <span data-count="103">B</span>ool.const true else <span data-count="633">r</span>elop ty Le e1 e2
+  let le e1 e2 = <span data-count="776">i</span>f phys_equal e1 e2 then <span data-count="105">B</span>ool.const true else <span data-count="671">r</span>elop ty Le e1 e2
 
-  let ge e1 e2 = <span data-count="343">i</span>f phys_equal e1 e2 then <span data-count="79">B</span>ool.const true else <span data-count="264">r</span>elop ty Ge e1 e2
+  let ge e1 e2 = <span data-count="342">i</span>f phys_equal e1 e2 then <span data-count="79">B</span>ool.const true else <span data-count="263">r</span>elop ty Ge e1 e2
 
   let le_u e1 e2 =
-    <span data-count="8318">i</span>f phys_equal e1 e2 then <span data-count="67">B</span>ool.const true else <span data-count="8251">r</span>elop ty LeU e1 e2
+    <span data-count="8308">i</span>f phys_equal e1 e2 then <span data-count="66">B</span>ool.const true else <span data-count="8242">r</span>elop ty LeU e1 e2
 
   let ge_u e1 e2 =
-    <span data-count="99449">i</span>f phys_equal e1 e2 then <span data-count="173">B</span>ool.const true else <span data-count="99276">r</span>elop ty GeU e1 e2
+    <span data-count="99469">i</span>f phys_equal e1 e2 then <span data-count="172">B</span>ool.const true else <span data-count="99296">r</span>elop ty GeU e1 e2
 
   let to_bool (e : vbool) =
-    <span data-count="359949">m</span>atch view e with
-    | <span data-count="328885">V</span>al (Num (I32 i)) -&gt; Bool.const @@ Int32.n<span data-count="328933">e</span> i 0l
-    | <span data-count="4285">P</span>tr _ -&gt; Bool.const true
-    | <span data-count="26087">C</span>vtop (_, OfBool, cond) -&gt; cond
-    | <span data-count="653">_</span> -&gt; make (Cvtop (ty, ToBool, e))
+    <span data-count="360034">m</span>atch view e with
+    | <span data-count="329009">V</span>al (Num (I32 i)) -&gt; Bool.const @@ Int32.n<span data-count="329012">e</span> i 0l
+    | <span data-count="4281">P</span>tr _ -&gt; Bool.const true
+    | <span data-count="26088">C</span>vtop (_, OfBool, cond) -&gt; cond
+    | <span data-count="652">_</span> -&gt; make (Cvtop (ty, ToBool, e))
 
   let trunc_f32_s x = <span data-count="4">c</span>vtop ty TruncSF32 x
 
@@ -1207,7 +1205,7 @@ end
 module I64 = struct
   let ty = Ty_bitv 64
 
-  let zero = const_i6<span data-count="890">4</span> 0L
+  let zero = const_i6<span data-count="915">4</span> 0L
 
   let clz e = <span data-count="1">u</span>nop ty Clz e
 
@@ -1303,7 +1301,7 @@ end
 module F32 = struct
   let ty = Ty_fp 32
 
-  let zero = const_f3<span data-count="890">2</span> Float32.zero
+  let zero = const_f3<span data-count="915">2</span> Float32.zero
 
   let abs x = <span data-count="7">u</span>nop ty Abs x
 
@@ -1339,13 +1337,13 @@ module F32 = struct
 
   let gt x y = <span data-count="3">r</span>elop ty Gt x y
 
-  let le x y = <span data-count="104">r</span>elop ty Le x y
+  let le x y = <span data-count="102">r</span>elop ty Le x y
 
-  let ge x y = <span data-count="120">r</span>elop ty Ge x y
+  let ge x y = <span data-count="118">r</span>elop ty Ge x y
 
   let convert_i32_s x = <span data-count="1">c</span>vtop ty ConvertSI32 x
 
-  let convert_i32_u x = <span data-count="118">c</span>vtop ty ConvertUI32 x
+  let convert_i32_u x = <span data-count="116">c</span>vtop ty ConvertUI32 x
 
   let convert_i64_s x = <span data-count="1">c</span>vtop ty ConvertSI64 x
 
@@ -1355,9 +1353,9 @@ module F32 = struct
 
   let reinterpret_i32 x = <span data-count="1">c</span>vtop ty Reinterpret_int x
 
-  let of_bits x = <span data-count="419">c</span>vtop ty Reinterpret_int x
+  let of_bits x = <span data-count="411">c</span>vtop ty Reinterpret_int x
 
-  let to_bits x = <span data-count="309">c</span>vtop (Ty_bitv 32) Reinterpret_float x
+  let to_bits x = <span data-count="303">c</span>vtop (Ty_bitv 32) Reinterpret_float x
 
   let copy_sign x y =
     <span data-count="3">l</span>et xi = to_bits (ab<span data-count="3">s</span> x) in
@@ -1368,7 +1366,7 @@ end
 module F64 = struct
   let ty = Ty_fp 64
 
-  let zero = const_f6<span data-count="890">4</span> Float64.zero
+  let zero = const_f6<span data-count="915">4</span> Float64.zero
 
   let abs x = <span data-count="6">u</span>nop ty Abs x
 

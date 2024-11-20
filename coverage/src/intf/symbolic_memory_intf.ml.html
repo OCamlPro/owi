@@ -164,6 +164,7 @@
 <a id="L140"></a><span > </span>
 <a id="L141"></a><span > </span>
 <a id="L142"></a><span > </span>
+<a id="L143"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -310,6 +311,7 @@
 <a href="#L140">140</a>
 <a href="#L141">141</a>
 <a href="#L142">142</a>
+<a href="#L143">143</a>
 </pre>
 <pre><code class="ocaml">module type M = sig
   type t
@@ -343,7 +345,7 @@
     -&gt; size:Smtml.Expr.t
     -&gt; Smtml.Expr.t Symbolic_choice_without_memory.t
 
-  val free : t -&gt; Smtml.Expr.t -&gt; unit Symbolic_choice_without_memory.t
+  val free : t -&gt; Smtml.Expr.t -&gt; Smtml.Expr.t Symbolic_choice_without_memory.t
 end
 
 module type S = sig
@@ -366,7 +368,8 @@ module type S = sig
     -&gt; size:Smtml.Expr.t
     -&gt; Smtml.Expr.t Symbolic_choice_without_memory.t
 
-  val free : t -&gt; Smtml.Expr.t -&gt; unit Symbolic_choice_without_memory.t
+  val free :
+    t -&gt; Smtml.Expr.t -&gt; Symbolic_value.int32 Symbolic_choice_without_memory.t
 
   val load_8_s :
     t -&gt; Smtml.Expr.t -&gt; Symbolic_value.int32 Symbolic_choice_without_memory.t

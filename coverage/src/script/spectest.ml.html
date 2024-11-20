@@ -18,8 +18,8 @@
       <h2>83.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.38%"></span>
-      <span class="unvisited" style="top:13.33%"></span>
+      <span class="unvisited" style="top:12.32%"></span>
+      <span class="unvisited" style="top:13.27%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -234,6 +234,7 @@
 <a id="L208"></a><span > </span>
 <a id="L209"></a><span > </span>
 <a id="L210"></a><span > </span>
+<a id="L211"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -448,6 +449,7 @@
 <a href="#L208">208</a>
 <a href="#L209">209</a>
 <a href="#L210">210</a>
+<a href="#L211">211</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -605,12 +607,12 @@ let m =
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
-            ; init = [ F32_const (Float32.of_floa<span data-count="890">t</span> 666.6) ]
+            ; init = [ F32_const (Float32.of_floa<span data-count="915">t</span> 666.6) ]
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
-            ; init = [ F64_const (Float64.of_floa<span data-count="890">t</span> 666.6) ]
+            ; init = [ F64_const (Float64.of_floa<span data-count="915">t</span> 666.6) ]
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
@@ -658,6 +660,7 @@ let m =
             ; desc = Export_global (Some (Text "global_f64"))
             }
         ]
+    ; annots = []
     }
 </code></pre>
       </div>
