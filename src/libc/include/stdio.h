@@ -52,11 +52,15 @@ int scanf(const char *format, ...);
 int fscanf(FILE *stream, const char *format, ...);
 int sscanf(const char *str, const char *format, ...);
 
+int vfprintf(FILE *restrict stream, const char *restrict format, va_list ap);
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 
 char getchar(void);
 
 int fflush(FILE *stream);
+int ferror(FILE *stream);
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *restrict stream);
+
 /*
 int vprintf(const char *format, va_list ap);
 int vfprintf(FILE *stream, const char *format, va_list ap);
@@ -74,12 +78,17 @@ __attribute__((__format__(__scanf__,2,0)));
 
 */
 
+void perror(const char *s);
+
 int fclose(FILE *stream);
 FILE *fopen(const char *path, const char *mode);
 int feof(FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 char *fgets(char *s, int size, FILE *stream);
+long ftell(FILE *stream);
 
 FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
+
+FILE *open_memstream(char **ptr, size_t *sizeloc);
 #endif
