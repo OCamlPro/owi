@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+FILE *stdin = &(FILE){0};
+
 int puts(const char *str) { return 0; }
 
 int fputs(const char *s, FILE *stream) { return 0; }
