@@ -1,6 +1,8 @@
 #ifndef ASSERT_H
 #define ASSERT_H
 
+#define static_assert(...)
+
 extern void __assert_fail(const char *__assertion, const char *__file,
                           unsigned int __line, const char *__function);
 #define assert(expr)                                                           \
