@@ -25,6 +25,12 @@ int fscanf(FILE *stream, const char *format, ...) { return 0; }
 int sscanf(const char *str, const char *format, ...) { return 0; }
 
 int fflush(FILE *stream) { return 0; }
+int ferror(FILE *stream) { return 0; }
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *restrict stream) {
+  return 0;
+}
+
+void perror(const char *s) {}
 
 int fclose(FILE *stream) { return 0; }
 FILE *fopen(const char *path, const char *mode) { return 0; }
@@ -33,10 +39,19 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
   return 0;
 }
 char *fgets(char *s, int size, FILE *stream) { return 0; }
+long ftell(FILE *stream) { return 0; }
 
 FILE *popen(const char *command, const char *type) { return 0; }
 int pclose(FILE *stream) { return 0; }
 
+int vfprintf(FILE *restrict stream, const char *restrict format, va_list ap) {
+  return 0;
+}
 int vsnprintf(char *str, size_t size, const char *format, va_list ap) {
   return 0;
+}
+
+FILE memstream = {0};
+FILE *open_memstream(char **ptr, size_t *sizeloc) {
+  return &memstream;
 }
