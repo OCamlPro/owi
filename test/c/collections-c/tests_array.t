@@ -68,12 +68,12 @@ Array tests:
   Testing "files/normal/testsuite/array/array_test_replaceAt.c":
   Using owi sym:
   Assert failure: (bool.ne symbol_3 symbol_2)
-  Model:
-    (model
-      (symbol_0 (i32 0))
-      (symbol_1 (i32 0))
-      (symbol_2 (i32 0))
-      (symbol_3 (i32 0)))
+  model {
+    symbol symbol_0 i32 0
+    symbol symbol_1 i32 0
+    symbol symbol_2 i32 0
+    symbol symbol_3 i32 0
+  }
   Reached problem!
   [13]
   Using owi conc:

@@ -120,11 +120,11 @@
       br_if 0))
   stack        : [  ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.set 1
   stack        : [  ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: (loop $__weasel_loop (param i32) (result i32)
     local.get 1
     i32.const 100
@@ -143,349 +143,349 @@
     i32.const 10
     i32.le_s
     br_if 0)
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 1) ; (i32 1) ]
+  stack        : [ 100 ; 1 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 2) ; (i32 1) ]
+  stack        : [ 10 ; 2 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 2) ; (i32 1) ]
+  stack        : [ 100 ; 2 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 2) ; (i32 1) ]
+  stack        : [ 1 ; 2 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 3) ; (i32 1) ]
+  stack        : [ 10 ; 3 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 3) ; (i32 1) ]
+  stack        : [ 100 ; 3 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 3) ; (i32 1) ]
+  stack        : [ 1 ; 3 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 4) ; (i32 1) ]
+  stack        : [ 10 ; 4 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 4) ; (i32 1) ]
+  stack        : [ 100 ; 4 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 4) ; (i32 1) ]
+  stack        : [ 1 ; 4 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 5) ; (i32 1) ]
+  stack        : [ 10 ; 5 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 5) ; (i32 1) ]
+  stack        : [ 100 ; 5 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 5) ; (i32 1) ]
+  stack        : [ 1 ; 5 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 6) ; (i32 1) ]
+  stack        : [ 10 ; 6 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 6) ; (i32 1) ]
+  stack        : [ 100 ; 6 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 6) ; (i32 1) ]
+  stack        : [ 1 ; 6 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 7) ; (i32 1) ]
+  stack        : [ 10 ; 7 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 7) ; (i32 1) ]
+  stack        : [ 100 ; 7 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 7) ; (i32 1) ]
+  stack        : [ 1 ; 7 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 8) ; (i32 1) ]
+  stack        : [ 10 ; 8 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 8) ; (i32 1) ]
+  stack        : [ 100 ; 8 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 8) ; (i32 1) ]
+  stack        : [ 1 ; 8 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 9) ; (i32 1) ]
+  stack        : [ 10 ; 9 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 9) ; (i32 1) ]
+  stack        : [ 100 ; 9 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 9) ; (i32 1) ]
+  stack        : [ 1 ; 9 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 10 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 10) ; (i32 1) ]
+  stack        : [ 100 ; 10 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 10) ; (i32 1) ]
+  stack        : [ 1 ; 10 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 11) ; (i32 1) ]
+  stack        : [ 11 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 11) ; (i32 1) ]
+  stack        : [ 11 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 11) ; (i32 1) ]
+  stack        : [ 10 ; 11 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
-  stack        : [ (i32 1) ]
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
+  stack        : [ 1 ]
+  stack        : [ 1 ]
   running instr: call 0
   stack        : [  ]
   running instr: call 1
@@ -538,11 +538,11 @@
       br_if 0))
   stack        : [  ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.set 1
   stack        : [  ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: (loop $__weasel_loop (param i32) (result i32)
     local.get 1
     i32.const 100
@@ -561,349 +561,349 @@
     i32.const 10
     i32.le_s
     br_if 0)
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 1) ; (i32 1) ]
+  stack        : [ 100 ; 1 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 2) ; (i32 1) ]
+  stack        : [ 10 ; 2 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 2) ; (i32 1) ]
+  stack        : [ 100 ; 2 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 2) ; (i32 1) ]
+  stack        : [ 2 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 2) ; (i32 1) ]
+  stack        : [ 1 ; 2 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 3) ; (i32 1) ]
+  stack        : [ 10 ; 3 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 3) ; (i32 1) ]
+  stack        : [ 100 ; 3 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 3) ; (i32 1) ]
+  stack        : [ 3 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 3) ; (i32 1) ]
+  stack        : [ 1 ; 3 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 4) ; (i32 1) ]
+  stack        : [ 10 ; 4 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 4) ; (i32 1) ]
+  stack        : [ 100 ; 4 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 4) ; (i32 1) ]
+  stack        : [ 4 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 4) ; (i32 1) ]
+  stack        : [ 1 ; 4 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 5) ; (i32 1) ]
+  stack        : [ 10 ; 5 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 5) ; (i32 1) ]
+  stack        : [ 100 ; 5 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 5) ; (i32 1) ]
+  stack        : [ 5 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 5) ; (i32 1) ]
+  stack        : [ 1 ; 5 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 6) ; (i32 1) ]
+  stack        : [ 10 ; 6 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 6) ; (i32 1) ]
+  stack        : [ 100 ; 6 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 6) ; (i32 1) ]
+  stack        : [ 6 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 6) ; (i32 1) ]
+  stack        : [ 1 ; 6 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 7) ; (i32 1) ]
+  stack        : [ 10 ; 7 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 7) ; (i32 1) ]
+  stack        : [ 100 ; 7 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 7) ; (i32 1) ]
+  stack        : [ 7 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 7) ; (i32 1) ]
+  stack        : [ 1 ; 7 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 8) ; (i32 1) ]
+  stack        : [ 10 ; 8 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 8) ; (i32 1) ]
+  stack        : [ 100 ; 8 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 8) ; (i32 1) ]
+  stack        : [ 8 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 8) ; (i32 1) ]
+  stack        : [ 1 ; 8 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 9) ; (i32 1) ]
+  stack        : [ 10 ; 9 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 9) ; (i32 1) ]
+  stack        : [ 100 ; 9 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 9) ; (i32 1) ]
+  stack        : [ 9 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 9) ; (i32 1) ]
+  stack        : [ 1 ; 9 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 10 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 100
-  stack        : [ (i32 100) ; (i32 10) ; (i32 1) ]
+  stack        : [ 100 ; 10 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.and
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.tee 0
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 0
-  stack        : [ (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 1) ; (i32 1) ]
+  stack        : [ 1 ; 1 ; 1 ]
   running instr: i32.xor
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 10) ; (i32 1) ]
+  stack        : [ 10 ; 1 ]
   running instr: i32.const 1
-  stack        : [ (i32 1) ; (i32 10) ; (i32 1) ]
+  stack        : [ 1 ; 10 ; 1 ]
   running instr: i32.add
-  stack        : [ (i32 11) ; (i32 1) ]
+  stack        : [ 11 ; 1 ]
   running instr: local.set 1
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: local.get 1
-  stack        : [ (i32 11) ; (i32 1) ]
+  stack        : [ 11 ; 1 ]
   running instr: i32.const 10
-  stack        : [ (i32 10) ; (i32 11) ; (i32 1) ]
+  stack        : [ 10 ; 11 ; 1 ]
   running instr: i32.le_s
-  stack        : [ (i32 0) ; (i32 1) ]
+  stack        : [ 0 ; 1 ]
   running instr: br_if 0
-  stack        : [ (i32 1) ]
-  stack        : [ (i32 1) ]
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
+  stack        : [ 1 ]
+  stack        : [ 1 ]
   running instr: call 0
   stack        : [  ]
   running instr: call 1
