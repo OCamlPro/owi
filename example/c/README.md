@@ -31,11 +31,11 @@ We are defining one symbolic variable `x` using the function `owi_i32(void)`. Th
 Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
-$ owi c ./poly.c -w1
-...
-Model:
-  (model
-    (symbol_0 (i32 4)))
+$ owi c ./poly.c -w1 --no-assert-failure-expression-printing
+Assert failure
+model {
+  symbol symbol_0 i32 4
+}
 Reached problem!
 [13]
 ```
@@ -77,11 +77,11 @@ Let's run owi on this new input:
 
 
 ```sh
-$ owi c ./poly2.c
-...
-Model:
-  (model
-    (symbol_0 (i32 -2147483644)))
+$ owi c ./poly2.c --no-assert-failure-expression-printing
+Assert failure
+model {
+  symbol symbol_0 i32 -2147483644
+}
 Reached problem!
 [13]
 ```
@@ -172,38 +172,38 @@ int main (void) {
 ```
 
 ```sh
-$ owi c ./maze.c --no-value
-Assert failure: false
-Model:
-  (model
-    (symbol_0 i32)
-    (symbol_1 i32)
-    (symbol_10 i32)
-    (symbol_11 i32)
-    (symbol_12 i32)
-    (symbol_13 i32)
-    (symbol_14 i32)
-    (symbol_15 i32)
-    (symbol_16 i32)
-    (symbol_17 i32)
-    (symbol_18 i32)
-    (symbol_19 i32)
-    (symbol_2 i32)
-    (symbol_20 i32)
-    (symbol_21 i32)
-    (symbol_22 i32)
-    (symbol_23 i32)
-    (symbol_24 i32)
-    (symbol_25 i32)
-    (symbol_26 i32)
-    (symbol_27 i32)
-    (symbol_3 i32)
-    (symbol_4 i32)
-    (symbol_5 i32)
-    (symbol_6 i32)
-    (symbol_7 i32)
-    (symbol_8 i32)
-    (symbol_9 i32))
+$ owi c ./maze.c --no-value --no-assert-failure-expression-printing
+Assert failure
+model {
+  symbol symbol_0 i32
+  symbol symbol_1 i32
+  symbol symbol_10 i32
+  symbol symbol_11 i32
+  symbol symbol_12 i32
+  symbol symbol_13 i32
+  symbol symbol_14 i32
+  symbol symbol_15 i32
+  symbol symbol_16 i32
+  symbol symbol_17 i32
+  symbol symbol_18 i32
+  symbol symbol_19 i32
+  symbol symbol_2 i32
+  symbol symbol_20 i32
+  symbol symbol_21 i32
+  symbol symbol_22 i32
+  symbol symbol_23 i32
+  symbol symbol_24 i32
+  symbol symbol_25 i32
+  symbol symbol_26 i32
+  symbol symbol_27 i32
+  symbol symbol_3 i32
+  symbol symbol_4 i32
+  symbol symbol_5 i32
+  symbol symbol_6 i32
+  symbol symbol_7 i32
+  symbol symbol_8 i32
+  symbol symbol_9 i32
+}
 Reached problem!
 [13]
 ```
@@ -259,17 +259,17 @@ int main() {
 
 <!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
 ```sh
-$ owi c -O1 ./dobble.c -w1 --no-value
-...
-Model:
-  (model
-    (symbol_0 i32)
-    (symbol_1 i32)
-    (symbol_2 i32)
-    (symbol_3 i32)
-    (symbol_4 i32)
-    (symbol_5 i32)
-    (symbol_6 i32))
+$ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
+Assert failure
+model {
+  symbol symbol_0 i32
+  symbol symbol_1 i32
+  symbol symbol_2 i32
+  symbol symbol_3 i32
+  symbol symbol_4 i32
+  symbol symbol_5 i32
+  symbol symbol_6 i32
+}
 Reached problem!
 [13]
 ```
@@ -369,9 +369,9 @@ int main(void) {
 ```sh
 $ owi c --e-acsl primes.c -w1
 Assert failure: false
-Model:
-  (model
-    (symbol_0 (i32 2)))
+model {
+  symbol symbol_0 i32 2
+}
 Reached problem!
 [13]
 ```

@@ -26,18 +26,14 @@ Let's see if owi is able to find a value for `x` that lead to an error:
 ```sh
 $ owi sym ./mini.wat
 Trap: unreachable
-Model:
-  (model
-    (symbol_0 (i32 6)))
+model {
+  symbol symbol_0 i32 6
+}
 Reached problem!
 [13]
 ```
 
 Indeed, if `x` is equal to `6` then, the `unreachable` instruction will be reached.
-
-## Complicated example
-
-TODO
 
 ## Man page
 

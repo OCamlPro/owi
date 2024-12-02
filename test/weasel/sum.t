@@ -112,67 +112,67 @@
   calling func : func start
   stack        : [  ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: call 3
   calling func : func __weasel_sum
   stack        : [  ]
   running instr: local.get 0
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: call 1
   calling func : func sum
   stack        : [  ]
   running instr: local.get 0
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 84) ; (i32 42) ; (i32 42) ]
+  stack        : [ 84 ; 42 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 126) ; (i32 42) ]
+  stack        : [ 126 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 168) ]
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
+  stack        : [ 168 ]
   running instr: local.set 5
   stack        : [  ]
   running instr: local.get 5
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
   running instr: local.get 0
-  stack        : [ (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 168 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 168 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 42 ; 168 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 84) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 84 ; 42 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 126) ; (i32 42) ; (i32 168) ]
+  stack        : [ 126 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 168) ; (i32 168) ]
+  stack        : [ 168 ; 168 ]
   running instr: i32.eq
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: call 0
   stack        : [  ]
   running instr: local.get 5
-  stack        : [ (i32 168) ]
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
+  stack        : [ 168 ]
   running instr: drop
   stack        : [  ]
   stack        : [  ]
@@ -197,67 +197,67 @@
   calling func : func start
   stack        : [  ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: i32.const 42
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: call 3
   calling func : func __weasel_sum
   stack        : [  ]
   running instr: local.get 0
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: call 1
   calling func : func sum
   stack        : [  ]
   running instr: local.get 0
-  stack        : [ (i32 42) ]
+  stack        : [ 42 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 84) ; (i32 42) ; (i32 42) ]
+  stack        : [ 84 ; 42 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 126) ; (i32 42) ]
+  stack        : [ 126 ; 42 ]
   running instr: i32.add
-  stack        : [ (i32 168) ]
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
+  stack        : [ 168 ]
   running instr: local.set 5
   stack        : [  ]
   running instr: local.get 5
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
   running instr: local.get 0
-  stack        : [ (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 168 ]
   running instr: local.get 1
-  stack        : [ (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 168 ]
   running instr: local.get 2
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 42 ; 168 ]
   running instr: local.get 3
-  stack        : [ (i32 42) ; (i32 42) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 42 ; 42 ; 42 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 84) ; (i32 42) ; (i32 42) ; (i32 168) ]
+  stack        : [ 84 ; 42 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 126) ; (i32 42) ; (i32 168) ]
+  stack        : [ 126 ; 42 ; 168 ]
   running instr: i32.add
-  stack        : [ (i32 168) ; (i32 168) ]
+  stack        : [ 168 ; 168 ]
   running instr: i32.eq
-  stack        : [ (i32 1) ]
+  stack        : [ 1 ]
   running instr: call 0
   stack        : [  ]
   running instr: local.get 5
-  stack        : [ (i32 168) ]
-  stack        : [ (i32 168) ]
+  stack        : [ 168 ]
+  stack        : [ 168 ]
   running instr: drop
   stack        : [  ]
   stack        : [  ]

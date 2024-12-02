@@ -31,8 +31,8 @@ Then you can replay the module execution with the values in the model like this:
 
 ```sh
 $ owi replay --replay-file mini.model mini.wat
-invalid model: can not find the directive `model` while parsing the scfg config
-[78]
+unreachable
+[26]
 ```
 
 ## Man page
