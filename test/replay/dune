@@ -2,6 +2,7 @@
  (deps
   %{bin:owi}
   (package owi)
+  all_types.wat
   missing_replay_file.wat
   no_bug.model
   no_bug.wat
