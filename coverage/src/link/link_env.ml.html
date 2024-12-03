@@ -477,21 +477,21 @@ let recover backup into =
   <span data-count="510">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="510">y</span> recover_elem) backup.elem into.elem in
   <span data-count="510">(</span>)
 
-let id (env : _ t) = <span data-count="1182849">e</span>nv.id
+let id (env : _ t) = <span data-count="1182490">e</span>nv.id
 
-let get_global (env : _ t) id = <span data-count="6375">I</span>Map.find id env.globals
+let get_global (env : _ t) id = <span data-count="6252">I</span>Map.find id env.globals
 
-let get_memory (env : _ t) id = <span data-count="3019720">I</span>Map.find id env.memories
+let get_memory (env : _ t) id = <span data-count="3019432">I</span>Map.find id env.memories
 
-let get_table (env : _ t) id = <span data-count="1615946">I</span>Map.find id env.tables
+let get_table (env : _ t) id = <span data-count="1615931">I</span>Map.find id env.tables
 
-let get_func (env : _ t) id = <span data-count="10497141">I</span>Map.find id env.functions
+let get_func (env : _ t) id = <span data-count="10497108">I</span>Map.find id env.functions
 
 let get_data (env : _ t) id = <span data-count="2224">I</span>Map.find id env.data
 
 let get_elem (env : _ t) id = <span data-count="2986">I</span>Map.find id env.elem
 
-let get_extern_func env id = <span data-count="122366">F</span>unc_id.get id env.extern_funcs
+let get_extern_func env id = <span data-count="122350">F</span>unc_id.get id env.extern_funcs
 
 module Build = struct
   type t =
