@@ -19,23 +19,52 @@ let run_file ~unsafe ~optimize filename model =
   let assert_i32 n = assert (not @@ Prelude.Int32.equal n 0l) in
 
   let symbol_i32 () =
-    match model.(next ()) with Concrete_value.I32 n -> n | _ -> assert false
+    match model.(next ()) with
+    | Concrete_value.I32 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a i32 value." Concrete_value.pp v;
+      assert false
   in
 
-  let symbol_char = symbol_i32 in
+  let symbol_char () =
+    match model.(next ()) with
+    | Concrete_value.I32 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a char (i32) value." Concrete_value.pp
+        v;
+      assert false
+  in
 
-  let symbol_i8 = symbol_i32 in
+  let symbol_i8 () =
+    match model.(next ()) with
+    | Concrete_value.I32 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a i8 (i32) value." Concrete_value.pp v;
+      assert false
+  in
 
   let symbol_i64 () =
-    match model.(next ()) with Concrete_value.I64 n -> n | _ -> assert false
+    match model.(next ()) with
+    | Concrete_value.I64 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a i64 value." Concrete_value.pp v;
+      assert false
   in
 
   let symbol_f32 () =
-    match model.(next ()) with Concrete_value.F32 n -> n | _ -> assert false
+    match model.(next ()) with
+    | Concrete_value.F32 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a f32 value." Concrete_value.pp v;
+      assert false
   in
 
   let symbol_f64 () =
-    match model.(next ()) with Concrete_value.F64 n -> n | _ -> assert false
+    match model.(next ()) with
+    | Concrete_value.F64 n -> n
+    | v ->
+      Fmt.epr "Got value %a but expected a f64 value." Concrete_value.pp v;
+      assert false
   in
 
   let replay_extern_module =
