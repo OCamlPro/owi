@@ -3,10 +3,11 @@
 (* Written by the Owi programmers *)
 
 open Owi
+open Cmdliner
 
 let debug =
   let doc = "debug mode" in
-  Cmdliner.Arg.(value & flag & info [ "debug"; "d" ] ~doc)
+  Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
 let existing_non_dir_file =
   let parse s =
@@ -23,7 +24,7 @@ let dir_file =
   (parse, Fpath.pp)
 
 let solver_conv =
-  Cmdliner.Arg.conv
+  Arg.conv
     ( Smtml.Solver_dispatcher.solver_type_of_string
     , Smtml.Solver_dispatcher.pp_solver_type )
 
@@ -32,53 +33,50 @@ let deterministic_result_order =
     "Guarantee a fixed deterministic order of found failures. This implies \
      --no-stop-at-failure."
   in
-  Cmdliner.Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
+  Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
 
 let files =
   let doc = "source files" in
   let f = existing_non_dir_file in
-  Cmdliner.Arg.(value & pos_all f [] (info [] ~doc))
+  Arg.(value & pos_all f [] (info [] ~doc))
 
 let sourcefile =
   let doc = "source file" in
   let f = existing_non_dir_file in
-  Cmdliner.Arg.(required & pos 0 (some f) None (info [] ~doc))
+  Arg.(required & pos 0 (some f) None (info [] ~doc))
 
 let outfile =
   let doc = "Write output to a file." in
-  let string_to_path =
-    Cmdliner.Arg.conv ~docv:"FILE" (Fpath.of_string, Fpath.pp)
-  in
-  Cmdliner.Arg.(
+  let string_to_path = Arg.conv ~docv:"FILE" (Fpath.of_string, Fpath.pp) in
+  Arg.(
     value
     & opt (some string_to_path) None
     & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
 let emit_file =
   let doc = "Emit (.wat) files from corresponding (.wasm) files." in
-  Cmdliner.Arg.(value & flag & info [ "emit-file" ] ~doc)
+  Arg.(value & flag & info [ "emit-file" ] ~doc)
 
 let no_exhaustion =
   let doc = "no exhaustion tests" in
-  Cmdliner.Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+  Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
 
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
-  Cmdliner.Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
+  Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
 
 let no_values =
   let doc = "do not display a value for each symbol" in
-  Cmdliner.Arg.(value & flag & info [ "no-value" ] ~doc)
+  Arg.(value & flag & info [ "no-value" ] ~doc)
 
 let no_assert_failure_expression_printing =
   let doc = "do not display the expression in the assert failure" in
-  Cmdliner.Arg.(
-    value & flag & info [ "no-assert-failure-expression-printing" ] ~doc )
+  Arg.(value & flag & info [ "no-assert-failure-expression-printing" ] ~doc)
 
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
   let assert_doc = "ignore traps and only report assertion violations" in
-  Cmdliner.Arg.(
+  Arg.(
     value
     & vflag `Both
         [ (`Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
@@ -87,19 +85,19 @@ let fail_mode =
 
 let optimize =
   let doc = "optimize mode" in
-  Cmdliner.Arg.(value & flag & info [ "optimize" ] ~doc)
+  Arg.(value & flag & info [ "optimize" ] ~doc)
 
 let profiling =
   let doc = "profiling mode" in
-  Cmdliner.Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
+  Arg.(value & flag & info [ "profiling"; "p" ] ~doc)
 
 let rac =
   let doc = "runtime assertion checking mode" in
-  Cmdliner.Arg.(value & flag & info [ "rac" ] ~doc)
+  Arg.(value & flag & info [ "rac" ] ~doc)
 
 let srac =
   let doc = "symbolic runtime assertion checking mode" in
-  Cmdliner.Arg.(value & flag & info [ "srac" ] ~doc)
+  Arg.(value & flag & info [ "srac" ] ~doc)
 
 let eacsl =
   let doc =
@@ -107,49 +105,46 @@ let eacsl =
      https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
      Frama-C's current language feature implementations"
   in
-  Cmdliner.Arg.(value & flag & info [ "e-acsl" ] ~doc)
+  Arg.(value & flag & info [ "e-acsl" ] ~doc)
 
 let solver =
   let doc = "SMT solver to use" in
-  Cmdliner.Arg.(
+  Arg.(
     value
     & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
 let symbolic =
   let doc = "generate instrumented module that depends on symbolic execution" in
-  Cmdliner.Arg.(value & flag & info [ "symbolic" ] ~doc)
+  Arg.(value & flag & info [ "symbolic" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in
-  Cmdliner.Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
+  Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
 
 let workers =
   let doc =
     "number of workers for symbolic execution. Defaults to the number of \
      physical cores."
   in
-  Cmdliner.Arg.(
+  Arg.(
     value
     & opt int Processor.Query.core_count
     & info [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
   let doc = "path to the workspace directory" in
-  Cmdliner.Arg.(
-    value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc )
+  Arg.(value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc)
 
-let copts_t = Cmdliner.Term.(const [])
+let copts_t = Term.(const [])
 
-let sdocs = Cmdliner.Manpage.s_common_options
+let sdocs = Manpage.s_common_options
 
-let shared_man =
-  [ `S Cmdliner.Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
+let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
 
 let version = "%%VERSION%%"
 
 let c_cmd =
-  let open Cmdliner in
   let info =
     let doc =
       "Compile a C file to Wasm and run the symbolic interpreter on it"
@@ -194,7 +189,6 @@ let c_cmd =
       $ deterministic_result_order $ fail_mode $ concolic $ eacsl $ solver )
 
 let fmt_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Format a .wat or .wast file" in
     let man = [] @ shared_man in
@@ -202,12 +196,11 @@ let fmt_cmd =
   in
   let inplace =
     let doc = "Format in-place, overwriting input file" in
-    Cmdliner.Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
+    Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
   in
   Cmd.v info Term.(const Cmd_fmt.cmd $ inplace $ files)
 
 let opt_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Optimize a module" in
     let man = [] @ shared_man in
@@ -216,7 +209,6 @@ let opt_cmd =
   Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile $ outfile)
 
 let instrument_cmd =
-  let open Cmdliner in
   let info =
     let doc =
       "Generate an instrumented file with runtime assertion checking coming \
@@ -228,7 +220,6 @@ let instrument_cmd =
   Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ symbolic $ files)
 
 let run_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Run the concrete interpreter" in
     let man = [] @ shared_man in
@@ -239,7 +230,6 @@ let run_cmd =
       const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
 
 let validate_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Validate a module" in
     let man = [] @ shared_man in
@@ -248,7 +238,6 @@ let validate_cmd =
   Cmd.v info Term.(const Cmd_validate.cmd $ debug $ files)
 
 let script_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Run a reference test suite script" in
     let man = [] @ shared_man in
@@ -260,7 +249,6 @@ let script_cmd =
       $ no_exhaustion )
 
 let sym_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Run the symbolic interpreter" in
     let man = [] @ shared_man in
@@ -274,7 +262,6 @@ let sym_cmd =
       $ fail_mode $ workspace $ solver $ files )
 
 let conc_cmd =
-  let open Cmdliner in
   let info =
     let doc = "Run the concolic interpreter" in
     let man = [] @ shared_man in
@@ -288,7 +275,6 @@ let conc_cmd =
       $ fail_mode $ workspace $ solver $ files )
 
 let wasm2wat_cmd =
-  let open Cmdliner in
   let info =
     let doc =
       "Generate a text format file (.wat) from a binary format file (.wasm)"
@@ -299,7 +285,6 @@ let wasm2wat_cmd =
   Cmd.v info Term.(const Cmd_wasm2wat.cmd $ sourcefile $ emit_file $ outfile)
 
 let wat2wasm_cmd =
-  let open Cmdliner in
   let info =
     let doc =
       "Generate a binary format file (.wasm) from a text format file (.wat)"
@@ -313,7 +298,6 @@ let wat2wasm_cmd =
       $ sourcefile )
 
 let cli =
-  let open Cmdliner in
   let info =
     let doc = "OCaml WebAssembly Interpreter" in
     let sdocs = Manpage.s_common_options in
@@ -338,8 +322,8 @@ let cli =
     ]
 
 let exit_code =
-  let open Cmdliner.Cmd.Exit in
-  match Cmdliner.Cmd.eval_value cli with
+  let open Cmd.Exit in
+  match Cmd.eval_value cli with
   | Ok (`Help | `Version) -> ok
   | Ok (`Ok result) -> begin
     match result with
