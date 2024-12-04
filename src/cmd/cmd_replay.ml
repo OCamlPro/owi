@@ -136,7 +136,7 @@ let cmd profiling debug unsafe optimize replay_file file =
             | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing ->
               Error
                 (`Invalid_model
-                  (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
+                   (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
           (Smtml.Model.get_bindings model)
       in
       Array.of_list model
