@@ -3,4 +3,10 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-  bool -> bool -> bool -> bool -> Fpath.t option -> Fpath.t -> unit Result.t
+     profiling:bool
+  -> debug:bool
+  -> unsafe:bool
+  -> optimize:bool
+  -> outfile:Fpath.t option
+  -> file:Fpath.t
+  -> unit Result.t

@@ -3,24 +3,24 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     bool
-  -> int
-  -> Fpath.t option
-  -> bool
-  -> string
-  -> int
-  -> string
-  -> Fpath.t list
-  -> Fpath.t list
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> Cmd_sym.fail_mode
-  -> bool
-  -> bool
-  -> Smtml.Solver_dispatcher.solver_type
+     debug:bool
+  -> arch:int
+  -> property:Fpath.t option
+  -> testcomp:bool
+  -> workspace:string
+  -> workers:int
+  -> opt_lvl:string
+  -> includes:Fpath.t list
+  -> files:Fpath.t list
+  -> profiling:bool
+  -> unsafe:bool
+  -> optimize:bool
+  -> no_stop_at_failure:bool
+  -> no_values:bool
+  -> no_assert_failure_expression_printing:bool
+  -> deterministic_result_order:bool
+  -> fail_mode:Cmd_sym.fail_mode
+  -> concolic:bool
+  -> eacsl:bool
+  -> solver:Smtml.Solver_dispatcher.solver_type
   -> unit Result.t

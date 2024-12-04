@@ -20,4 +20,4 @@ let cmd_one inplace file =
   if inplace then Bos.OS.File.writef file "%a@\n" pp ()
   else Ok (Fmt.pr "%a@\n" pp ())
 
-let cmd inplace files = list_iter (cmd_one inplace) files
+let cmd ~inplace ~files = list_iter (cmd_one inplace) files

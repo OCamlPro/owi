@@ -27,7 +27,7 @@ let run_file ~unsafe ~rac ~optimize filename =
   in
   ()
 
-let cmd profiling debug unsafe rac optimize files =
+let cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   list_iter (run_file ~unsafe ~rac ~optimize) files

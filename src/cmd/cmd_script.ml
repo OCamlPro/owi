@@ -8,7 +8,7 @@ let run_file exec filename =
   let* script = Parse.Text.Script.from_file filename in
   exec script
 
-let cmd profiling debug optimize files no_exhaustion =
+let cmd ~profiling ~debug ~optimize ~files ~no_exhaustion =
   let exec = Script.exec ~no_exhaustion ~optimize in
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;

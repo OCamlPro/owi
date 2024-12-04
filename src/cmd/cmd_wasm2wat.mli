@@ -2,4 +2,5 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : Fpath.t -> bool -> Fpath.t option -> unit Result.t
+val cmd :
+  file:Fpath.t -> emit_file:bool -> outfile:Fpath.t option -> unit Result.t

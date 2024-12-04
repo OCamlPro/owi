@@ -9,19 +9,19 @@ type fail_mode =
   ]
 
 val cmd :
-     bool
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> int
-  -> bool
-  -> bool
-  -> bool
-  -> bool
-  -> fail_mode
-  -> Fpath.t
-  -> Smtml.Solver_dispatcher.solver_type
-  -> Fpath.t list
+     profiling:bool
+  -> debug:bool
+  -> unsafe:bool
+  -> rac:bool
+  -> srac:bool
+  -> optimize:bool
+  -> workers:int
+  -> no_stop_at_failure:bool
+  -> no_values:bool
+  -> no_assert_failure_expression_printing:bool
+  -> deterministic_result_order:bool
+  -> fail_mode:fail_mode
+  -> workspace:Fpath.t
+  -> solver:Smtml.Solver_dispatcher.solver_type
+  -> files:Fpath.t list
   -> unit Result.t

@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : bool -> Fpath.t list -> unit Result.t
+val cmd : inplace:bool -> files:Fpath.t list -> unit Result.t

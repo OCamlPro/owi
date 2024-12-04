@@ -15,6 +15,6 @@ let print_or_emit ~unsafe file outfile =
   | Some name -> Bos.OS.File.writef name "%a@\n" Text.pp_modul m
   | None -> Ok (Fmt.pr "%a@\n" Text.pp_modul m)
 
-let cmd debug unsafe file outfile =
+let cmd ~debug ~unsafe ~file ~outfile =
   if debug then Log.debug_on := true;
   print_or_emit ~unsafe file outfile
