@@ -42,8 +42,8 @@ let popcnt =
     (x * h01) lsr 56
 
 (*
-   * Unsigned comparison in terms of signed comparison.
-   *)
+ * Unsigned comparison in terms of signed comparison.
+ *)
 let cmp_u x op y = op (add x min_int) (add y min_int)
 
 let eq (x : int64) y = equal x y

@@ -80,10 +80,10 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
           | Error (`Msg e) ->
             Error
               (`Msg
-                (Fmt.str "Frama-C failed: %s"
-                   ( if debug then e
-                     else "run with --debug to get the full error message" ) )
-                ) )
+                 (Fmt.str "Frama-C failed: %s"
+                    ( if debug then e
+                      else "run with --debug to get the full error message" ) )
+              ) )
         (List.combine files outs)
     in
 
@@ -128,9 +128,9 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
     | Error (`Msg e) ->
       Error
         (`Msg
-          (Fmt.str "Clang failed: %s"
-             ( if debug then e
-               else "run with --debug to get the full error message" ) ) )
+           (Fmt.str "Clang failed: %s"
+              ( if debug then e
+                else "run with --debug to get the full error message" ) ) )
   in
 
   out

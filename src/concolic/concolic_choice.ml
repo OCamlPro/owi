@@ -91,8 +91,7 @@ let ( let+ ) = map
 let abort =
   M
     (fun st ->
-      (Ok (), { st with pc = Assume (Symbolic_value.Bool.const false) :: st.pc })
-      )
+      (Ok (), { st with pc = Assume (Symbolic_value.Bool.const false) :: st.pc }) )
 
 let add_pc (c : Concolic_value.V.vbool) =
   M (fun st -> (Ok (), { st with pc = Assume c.symbolic :: st.pc }))

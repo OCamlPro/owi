@@ -27,7 +27,8 @@ let pp_contract fmt { funcid; preconditions; postconditions } =
      Preconditions:@;\
      <1 2>@[<v>%a@]@,\
      Postconditions:@;\
-     <1 2>@[<v>%a@]@]" pp_indice funcid
+     <1 2>@[<v>%a@]@]"
+    pp_indice funcid
     (list ~sep:pp_newline pp_prop)
     preconditions
     (list ~sep:pp_newline pp_prop)

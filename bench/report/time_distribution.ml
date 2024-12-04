@@ -49,11 +49,12 @@ let make runs output_dir reference_name =
   let output =
     Gnuplot.Output.create
       (`Png
-        Fpath.(
-          output_dir
-          // v
-               (Format.sprintf "results_%s_time_distribution.png" reference_name)
-          |> to_string ) )
+         Fpath.(
+           output_dir
+           // v
+                (Format.sprintf "results_%s_time_distribution.png"
+                   reference_name )
+           |> to_string ) )
   in
 
   let range = Gnuplot.Range.X (min_time, float_of_int max_time) in

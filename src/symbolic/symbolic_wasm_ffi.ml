@@ -29,11 +29,11 @@ module M :
 
   let symbol_i8 () =
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
-        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
+      Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
 
   let symbol_char () =
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
-        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
+      Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym)) )
 
   let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
 

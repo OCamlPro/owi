@@ -501,8 +501,8 @@ module Make (P : Interpret_intf.P) :
         | Type_mismatch -> Choice.trap Trap.Extern_call_arg_type_mismatch
         | Null -> Choice.trap Trap.Extern_call_null_arg )
     in
-    let rec split_args :
-      type f r. Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t =
+    let rec split_args : type f r.
+      Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t =
      fun stack ty ->
       let[@local] split_one_arg args =
         let elt, stack = Stack.pop stack in
@@ -516,8 +516,8 @@ module Make (P : Interpret_intf.P) :
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
-    let rec apply :
-      type f r. Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
+    let rec apply : type f r.
+      Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
      fun stack ty f ->
       match ty with
       | Mem args ->
@@ -635,7 +635,7 @@ module Make (P : Interpret_intf.P) :
           List.sort
             (fun
               ((Raw id1 : binary indice), _) ((Raw id2 : binary indice), _) ->
-              compare id1 id2 )
+            compare id1 id2 )
           @@ List.of_seq @@ Hashtbl.to_seq tbl
         in
         match l with

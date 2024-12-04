@@ -40,7 +40,7 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
   let m = Symbolic.convert_module_to_run m in
   let c = Interpret.SymbolicP.modul link_state.envs m in
   Choice.bind pc (fun r ->
-      match r with Error _ -> Choice.return r | Ok () -> c )
+    match r with Error _ -> Choice.return r | Ok () -> c )
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
@@ -80,7 +80,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   in
   let results =
     Wq.read_as_seq res_queue ~finalizer:(fun () ->
-        Array.iter Domain.join join_handles )
+      Array.iter Domain.join join_handles )
   in
   let print_bug = function
     | `ETrap (tr, model) ->
@@ -123,7 +123,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
            (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
       |> List.of_seq
       |> List.sort (fun (_, bc1) (_, bc2) ->
-             List.compare Prelude.Int32.compare bc1 bc2 )
+           List.compare Prelude.Int32.compare bc1 bc2 )
       |> List.to_seq |> Seq.map fst
     else results
   in

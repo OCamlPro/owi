@@ -62,8 +62,8 @@ let add_main_as_start (m : Binary.modul) =
           | Ref_type (Types.No_null, t) ->
             Error
               (`Msg
-                (Fmt.str "can not create default value of type %a"
-                   Types.pp_heap_type t ) )
+                 (Fmt.str "can not create default value of type %a"
+                    Types.pp_heap_type t ) )
         in
         let+ body =
           let pt, rt = snd main_type in

@@ -28,4 +28,4 @@ let to_array v =
       if Hashtbl.mem tbl i then assert false else Hashtbl.add tbl i v )
     v.values;
   Array.init (List.length v.values) (fun i ->
-      match Hashtbl.find_opt tbl i with None -> assert false | Some v -> v )
+    match Hashtbl.find_opt tbl i with None -> assert false | Some v -> v )

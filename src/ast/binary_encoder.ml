@@ -663,8 +663,8 @@ let encode_imports buf (funcs, tables, memories, globals) =
 let encode_functions buf (funcs : binary func list) =
   let idx = ref 0 in
   encode_vector_list buf funcs (fun buf func ->
-      write_block_type_idx buf func.type_f;
-      incr idx )
+    write_block_type_idx buf func.type_f;
+    incr idx )
 
 (* table: section 4 *)
 let encode_tables buf tables = encode_vector_list buf tables write_table
@@ -707,11 +707,11 @@ let encode_datacount buf datas =
 (* code: section 10 *)
 let encode_codes buf funcs =
   encode_vector_list buf funcs (fun buf { locals; body; _ } ->
-      let code_buf = Buffer.create 16 in
-      write_locals code_buf locals;
-      write_expr code_buf body ~end_op_code:None;
-      write_u32_of_int buf (Buffer.length code_buf);
-      Buffer.add_buffer buf code_buf )
+    let code_buf = Buffer.create 16 in
+    write_locals code_buf locals;
+    write_expr code_buf body ~end_op_code:None;
+    write_u32_of_int buf (Buffer.length code_buf);
+    Buffer.add_buffer buf code_buf )
 
 (* data: section 11 *)
 let encode_datas buf datas = encode_vector_array buf datas write_data

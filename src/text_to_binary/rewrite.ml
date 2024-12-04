@@ -28,7 +28,9 @@ let find (named : 'a Named.t) : _ -> binary indice = function
 let get error (named : 'a Named.t) indice : 'a Indexed.t Result.t =
   let (Raw i) = find named indice in
   (* TODO change Named.t structure to make that sensible *)
-  match List.nth_opt named.values i with None -> Error error | Some v -> Ok v
+  match List.nth_opt named.values i with
+  | None -> Error error
+  | Some v -> Ok v
 
 let find_global (modul : Assigned.t) id : binary indice = find modul.global id
 
@@ -92,8 +94,7 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
         | None -> Ok (locals, next_free_int + 1)
         | Some name ->
           if String_map.mem name locals then Error (`Duplicate_local name)
-          else Ok (String_map.add name next_free_int locals, next_free_int + 1)
-        )
+          else Ok (String_map.add name next_free_int locals, next_free_int + 1) )
       (String_map.empty, 0) locals
   in
 

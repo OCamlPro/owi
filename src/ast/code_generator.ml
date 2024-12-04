@@ -573,11 +573,11 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
     List.init (Array.length tenv.param_types) (fun i -> Local_get (Raw i))
     @ [ Call (Raw old_index) ]
     @ List.init (Array.length tenv.result_types) (fun i ->
-          Local_set (tenv.result i) )
+        Local_set (tenv.result i) )
   in
   let return =
     List.init (Array.length tenv.result_types) (fun i ->
-        Local_get (tenv.result i) )
+      Local_get (tenv.result i) )
   in
 
   let* tenv, precond_checker =

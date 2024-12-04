@@ -74,13 +74,13 @@ let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
 let add_test name gen (module I1 : Interprets.INTERPRET)
   (module I2 : Interprets.INTERPRET) =
   Crowbar.add_test ~name [ gen ] (fun m ->
-      incr global_count;
-      if Param.debug then Fmt.epr "%a@\n" Owi.Text.pp_modul m;
-      Fmt.epr "test module %d [got %d timeouts...]@\n@[<v>" !global_count
-        !timeout_count;
-      Fmt.flush Fmt.stderr ();
-      Crowbar.check (check (module I1) (module I2) m);
-      Fmt.epr "@]" )
+    incr global_count;
+    if Param.debug then Fmt.epr "%a@\n" Owi.Text.pp_modul m;
+    Fmt.epr "test module %d [got %d timeouts...]@\n@[<v>" !global_count
+      !timeout_count;
+    Fmt.flush Fmt.stderr ();
+    Crowbar.check (check (module I1) (module I2) m);
+    Fmt.epr "@]" )
 
 let gen (conf : Env.conf) =
   Crowbar.with_printer Owi.Text.pp_modul (Gen.modul conf)
