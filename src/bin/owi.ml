@@ -69,14 +69,6 @@ let outfile =
     & opt (some string_to_path) None
     & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
-let emit_file =
-  let doc = "Emit (.wat) files from corresponding (.wasm) files." in
-  Arg.(value & flag & info [ "emit-file" ] ~doc)
-
-let no_exhaustion =
-  let doc = "no exhaustion tests" in
-  Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
   Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
@@ -115,24 +107,12 @@ let srac =
   let doc = "symbolic runtime assertion checking mode" in
   Arg.(value & flag & info [ "srac" ] ~doc)
 
-let eacsl =
-  let doc =
-    "e-acsl mode, refer to \
-     https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
-     Frama-C's current language feature implementations"
-  in
-  Arg.(value & flag & info [ "e-acsl" ] ~doc)
-
 let solver =
   let doc = "SMT solver to use" in
   Arg.(
     value
     & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
     & info [ "solver"; "s" ] ~doc )
-
-let symbolic =
-  let doc = "generate instrumented module that depends on symbolic execution" in
-  Arg.(value & flag & info [ "symbolic" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in
@@ -176,7 +156,7 @@ let c_cmd =
   and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
-  and+ output =
+  and+ workspace =
     let doc = "write results to dir" in
     Arg.(value & opt string "owi-out" & info [ "output"; "o" ] ~doc)
   and+ concolic =
@@ -193,12 +173,18 @@ let c_cmd =
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
-  and+ eacsl
+  and+ eacsl =
+    let doc =
+      "e-acsl mode, refer to \
+       https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+       Frama-C's current language feature implementations"
+    in
+    Arg.(value & flag & info [ "e-acsl" ] ~doc)
   and+ solver in
-  Cmd_c.cmd debug arch property testcomp output workers opt_lvl includes files
-    profiling unsafe optimize no_stop_at_failure no_values
-    no_assert_failure_expression_printing deterministic_result_order fail_mode
-    concolic eacsl solver
+  Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
+    ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_values
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~concolic ~eacsl ~solver
 
 (* owi fmt *)
 
@@ -212,7 +198,7 @@ let fmt_cmd =
     let doc = "Format in-place, overwriting input file" in
     Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
   and+ files in
-  Cmd_fmt.cmd inplace files
+  Cmd_fmt.cmd ~inplace ~files
 
 (* owi opt *)
 
@@ -226,7 +212,7 @@ let opt_cmd =
   and+ unsafe
   and+ sourcefile
   and+ outfile in
-  Cmd_opt.cmd debug unsafe sourcefile outfile
+  Cmd_opt.cmd ~debug ~unsafe ~file:sourcefile ~outfile
 
 (* owi instrument *)
 
@@ -241,9 +227,13 @@ let instrument_info =
 let instrument_cmd =
   let+ debug
   and+ unsafe
-  and+ symbolic
+  and+ symbolic =
+    let doc =
+      "generate instrumented module that depends on symbolic execution"
+    in
+    Arg.(value & flag & info [ "symbolic" ] ~doc)
   and+ files in
-  Cmd_instrument.cmd debug unsafe symbolic files
+  Cmd_instrument.cmd ~debug ~unsafe ~symbolic ~files
 
 (* owi run *)
 
@@ -259,7 +249,7 @@ let run_cmd =
   and+ rac
   and+ optimize
   and+ files in
-  Cmd_run.cmd profiling debug unsafe rac optimize files
+  Cmd_run.cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files
 
 (* owi validate *)
 
@@ -271,7 +261,7 @@ let validate_info =
 let validate_cmd =
   let+ debug
   and+ files in
-  Cmd_validate.cmd debug files
+  Cmd_validate.cmd ~debug ~files
 
 (* owi script *)
 
@@ -285,8 +275,11 @@ let script_cmd =
   and+ debug
   and+ optimize
   and+ files
-  and+ no_exhaustion in
-  Cmd_script.cmd profiling debug optimize files no_exhaustion
+  and+ no_exhaustion =
+    let doc = "no exhaustion tests" in
+    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+  in
+  Cmd_script.cmd ~profiling ~debug ~optimize ~files ~no_exhaustion
 
 (* owi sym *)
 
@@ -311,9 +304,9 @@ let sym_cmd =
   and+ workspace
   and+ solver
   and+ files in
-  Cmd_sym.cmd profiling debug unsafe rac srac optimize workers
-    no_stop_at_failure no_values no_assert_failure_expression_printing
-    deterministic_result_order fail_mode workspace solver files
+  Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
 
 (* owi conc *)
 
@@ -338,9 +331,9 @@ let conc_cmd =
   and+ workspace
   and+ solver
   and+ files in
-  Cmd_conc.cmd profiling debug unsafe rac srac optimize workers
-    no_stop_at_failure no_values no_assert_failure_expression_printing
-    deterministic_result_order fail_mode workspace solver files
+  Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
 
 (* owi wasm2wat *)
 
@@ -353,9 +346,11 @@ let wasm2wat_info =
 
 let wasm2wat_cmd =
   let+ sourcefile
-  and+ emit_file
+  and+ emit_file =
+    let doc = "Emit (.wat) files from corresponding (.wasm) files." in
+    Arg.(value & flag & info [ "emit-file" ] ~doc)
   and+ outfile in
-  Cmd_wasm2wat.cmd sourcefile emit_file outfile
+  Cmd_wasm2wat.cmd ~file:sourcefile ~emit_file ~outfile
 
 (* owi wat2wasm *)
 
@@ -373,7 +368,7 @@ let wat2wasm_cmd =
   and+ optimize
   and+ outfile
   and+ sourcefile in
-  Cmd_wat2wasm.cmd profiling debug unsafe optimize outfile sourcefile
+  Cmd_wat2wasm.cmd ~profiling ~debug ~unsafe ~optimize ~outfile ~file:sourcefile
 
 (* owi *)
 

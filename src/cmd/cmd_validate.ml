@@ -11,6 +11,6 @@ let validate filename =
   in
   ()
 
-let cmd debug files =
+let cmd ~debug ~files =
   if debug then Log.debug_on := true;
   list_iter validate files

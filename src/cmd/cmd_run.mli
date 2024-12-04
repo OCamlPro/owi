@@ -2,4 +2,11 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : bool -> bool -> bool -> bool -> bool -> Fpath.t list -> unit Result.t
+val cmd :
+     profiling:bool
+  -> debug:bool
+  -> unsafe:bool
+  -> rac:bool
+  -> optimize:bool
+  -> files:Fpath.t list
+  -> unit Result.t

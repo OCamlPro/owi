@@ -2,4 +2,9 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : bool -> bool -> Fpath.t -> Fpath.t option -> unit Result.t
+val cmd :
+     debug:bool
+  -> unsafe:bool
+  -> file:Fpath.t
+  -> outfile:Fpath.t option
+  -> unit Result.t

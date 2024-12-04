@@ -415,9 +415,10 @@ let run solver tree link_state modules_to_run =
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd profiling debug unsafe rac srac optimize _workers _no_stop_at_failure
-  no_values no_assert_failure_expression_printing _deterministic_result_order
-  _fail_mode (workspace : Fpath.t) solver files =
+let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
+  ~no_stop_at_failure:_ ~no_values ~no_assert_failure_expression_printing
+  ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
+  ~files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)

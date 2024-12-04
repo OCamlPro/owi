@@ -25,6 +25,6 @@ let cmd_one unsafe symbolic file =
     Bos.OS.File.writef filename "%a" Text.pp_modul instrumented_text_modul
   | ext -> Error (`Unsupported_file_extension ext)
 
-let cmd debug unsafe symbolic files =
+let cmd ~debug ~unsafe ~symbolic ~files =
   if debug then Log.debug_on := true;
   list_iter (cmd_one unsafe symbolic) files

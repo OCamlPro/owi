@@ -46,9 +46,9 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
-  no_values no_assert_failure_expression_printing deterministic_result_order
-  fail_mode (workspace : Fpath.t) solver files =
+let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+  ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+  ~deterministic_result_order ~fail_mode ~workspace ~solver ~files =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
