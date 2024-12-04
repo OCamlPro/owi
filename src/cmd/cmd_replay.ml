@@ -115,7 +115,7 @@ let run_file ~unsafe ~optimize filename model =
   let c = Interpret.Concrete.modul link_state.envs m in
   c
 
-let cmd profiling debug unsafe optimize replay_file file =
+let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let* model =
@@ -141,5 +141,5 @@ let cmd profiling debug unsafe optimize replay_file file =
       in
       Array.of_list model
   in
-  let+ () = run_file ~unsafe ~optimize file model in
+  let+ () = run_file ~unsafe ~optimize source_file model in
   Fmt.pr "All OK@."

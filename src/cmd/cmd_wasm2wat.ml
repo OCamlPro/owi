@@ -5,17 +5,17 @@
 open Syntax
 
 (** Utility function to handle writing to a file or printing to stdout *)
-let cmd ~file ~emit_file ~outfile =
-  let ext = Fpath.get_ext file in
+let cmd ~source_file ~emit_file ~out_file =
+  let ext = Fpath.get_ext source_file in
   match ext with
   | ".wasm" ->
-    let _dir, wat_file = Fpath.split_base file in
+    let _dir, wat_file = Fpath.split_base source_file in
     let wat_file = Fpath.set_ext "wat" wat_file in
-    let* m = Parse.Binary.Module.from_file file in
+    let* m = Parse.Binary.Module.from_file source_file in
     let m = Binary_to_text.modul m in
     let outname, output =
       begin
-        match outfile with
+        match out_file with
         | Some name -> (name, true)
         | None -> (wat_file, false)
       end

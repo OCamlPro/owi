@@ -7,6 +7,6 @@ val cmd :
   -> debug:bool
   -> unsafe:bool
   -> optimize:bool
-  -> outfile:Fpath.t option
-  -> file:Fpath.t
+  -> out_file:Fpath.t option
+  -> source_file:Fpath.t
   -> unit Result.t
