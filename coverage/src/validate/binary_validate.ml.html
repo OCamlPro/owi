@@ -2170,8 +2170,8 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
     | <span data-count="50">N</span>one -&gt;
       Error
         (`Type_mismatch
-          (Fmt.st<span data-count="50">r</span> "expected a prefix of %a but stack has type %a" Stack.pp pt
-             Stack.pp previous_stack ) )
+           (Fmt.st<span data-count="50">r</span> "expected a prefix of %a but stack has type %a" Stack.pp pt
+              Stack.pp previous_stack ) )
     | <span data-count="41193">S</span>ome stack_to_push -&gt; Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =

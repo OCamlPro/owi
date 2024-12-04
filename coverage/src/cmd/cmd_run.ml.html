@@ -123,7 +123,7 @@ let run_file ~unsafe ~rac ~optimize filename =
   in
   <span data-count="31">(</span>)
 
-let cmd profiling debug unsafe rac optimize files =
+let cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files =
   <span data-count="31">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
   <span data-count="31">i</span>f debug then <span data-count="7">L</span>og.debug_on := true;
   <span data-count="31">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files

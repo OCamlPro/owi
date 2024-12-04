@@ -116,7 +116,7 @@ let cmd_one unsafe symbolic file =
     <span data-count="7">B</span>os.OS.File.writef filename "%a" Text.pp_modul instrumented_text_modul
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 
-let cmd debug unsafe symbolic files =
+let cmd ~debug ~unsafe ~symbolic ~files =
   <span data-count="7">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
   <span data-count="7">l</span>ist_iter (cmd_on<span data-count="7">e</span> unsafe symbolic) files
 </code></pre>

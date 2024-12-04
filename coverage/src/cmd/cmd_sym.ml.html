@@ -347,15 +347,15 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
   <span data-count="368">l</span>et m = Symbolic.convert_module_to_run m in
   <span data-count="368">l</span>et c = Interpret.SymbolicP.modul link_state.envs m in
   <span data-count="368">C</span>hoice.bind pc (fun r -&gt;
-      <span data-count="368">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="368">O</span>k () -&gt; c )
+    <span data-count="368">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="368">O</span>k () -&gt; c )
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
-  no_values no_assert_failure_expression_printing deterministic_result_order
-  fail_mode (workspace : Fpath.t) solver files =
+let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+  ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+  ~deterministic_result_order ~fail_mode ~workspace ~solver ~files =
   <span data-count="369">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
   <span data-count="369">i</span>f debug then <span data-count="6">L</span>og.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
@@ -369,10 +369,10 @@ let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
   <span data-count="369">l</span>et res_queue = Wq.make () in
   <span data-count="369">l</span>et path_count = ref 0 in
   let callback v =
-    <span data-count="1604">l</span>et open Symbolic_choice_intf in
+    <span data-count="1564">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1605">m</span>atch (fail_mode, v) with
-    | <span data-count="1413">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1562">m</span>atch (fail_mode, v) with
+    | <span data-count="1372">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="1">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="160">(</span><span data-count="160">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -383,11 +383,11 @@ let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="730">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="697">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="696">W</span>q.end_pledge res_queue)
   in
   <span data-count="369">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
-        <span data-count="346">A</span>rray.iter Domain.join join_handles )
+      <span data-count="346">A</span>rray.iter Domain.join join_handles )
   in
   <span data-count="369">l</span>et print_bug = function
     | <span data-count="160">`</span>ETrap (tr, model) -&gt;
@@ -430,7 +430,7 @@ let cmd profiling debug unsafe rac srac optimize workers no_stop_at_failure
            (x, List.re<span data-count="32">v</span> @@ Thread_with_memory.breadcrumb<span data-count="32">s</span> thread) )
       |&gt; <span data-count="29">L</span>ist.of_seq
       |&gt; <span data-count="29">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt;
-             <span data-count="9">L</span>ist.compare Prelude.Int32.compare bc1 bc2 )
+           <span data-count="9">L</span>ist.compare Prelude.Int32.compare bc1 bc2 )
       |&gt; <span data-count="29">L</span>ist.to_seq |&gt; <span data-count="58">S</span>eq.ma<span data-count="29">p</span> fst
     else <span data-count="340">r</span>esults
   in

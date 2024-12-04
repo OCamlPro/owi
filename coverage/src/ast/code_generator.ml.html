@@ -2162,11 +2162,11 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
     List.ini<span data-count="15">t</span> (Array.lengt<span data-count="15">h</span> tenv.param_types) (fun i -&gt; <span data-count="22">L</span>ocal_get (Raw i))
     @ [ Call (Raw old_index) ]
     @ List.ini<span data-count="15">t</span> (Array.lengt<span data-count="15">h</span> tenv.result_types) (fun i -&gt;
-          <span data-count="10">L</span>ocal_set (tenv.resul<span data-count="10">t</span> i) )
+        <span data-count="10">L</span>ocal_set (tenv.resul<span data-count="10">t</span> i) )
   in
   let return =
     List.init (Array.lengt<span data-count="15">h</span> tenv.result_types) (fun i -&gt;
-        <span data-count="10">L</span>ocal_get (tenv.resul<span data-count="10">t</span> i) )
+      <span data-count="10">L</span>ocal_get (tenv.resul<span data-count="10">t</span> i) )
   in
 
   <span data-count="15">l</span>et* tenv, precond_checker =

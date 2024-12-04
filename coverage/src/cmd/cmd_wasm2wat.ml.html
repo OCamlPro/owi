@@ -38,19 +38,16 @@
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -81,9 +78,6 @@
 <a href="#L24">24</a>
 <a href="#L25">25</a>
 <a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -92,14 +86,13 @@
 open Syntax
 
 (** Utility function to handle writing to a file or printing to stdout *)
-let cmd_one emitfile outfile file =
+let cmd ~file ~emit_file ~outfile =
   <span data-count="19">l</span>et ext = Fpath.get_ext file in
-  <span data-count="19">l</span>et _dir, wat_file = Fpath.split_base file in
-  <span data-count="19">l</span>et wat_file = Fpath.set_ext "wat" wat_file in
-
   <span data-count="19">m</span>atch ext with
   | <span data-count="18">"</span>.wasm" -&gt;
-    let* m = Parse.Binary.Module.from_fil<span data-count="18">e</span> file in
+    let _dir, wat_file = Fpath.split_base file in
+    <span data-count="18">l</span>et wat_file = Fpath.set_ext "wat" wat_file in
+    <span data-count="18">l</span>et* m = Parse.Binary.Module.from_fil<span data-count="18">e</span> file in
     <span data-count="18">l</span>et m = Binary_to_text.modul m in
     <span data-count="18">l</span>et outname, output =
       begin
@@ -108,12 +101,10 @@ let cmd_one emitfile outfile file =
         | <span data-count="17">N</span>one -&gt; (wat_file, false)
       end
     in
-    if emitfil<span data-count="1">e</span> || outpu<span data-count="1">t</span> then
+    if emit_fil<span data-count="1">e</span> || outpu<span data-count="1">t</span> then
       <span data-count="2">B</span>os.OS.File.writef outname "%a@\n" Text.pp_modul m
     else <span data-count="16">O</span>k (Fmt.p<span data-count="16">r</span> "%a@\n" Text.pp_modul m)
   | <span data-count="1">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
-
-let cmd file emitfile outfile = <span data-count="19">c</span>md_one emitfile outfile file
 </code></pre>
       </div>
     </div>

@@ -285,8 +285,8 @@ let add_main_as_start (m : Binary.modul) =
           | <span data-count="0">R</span>ef_type (Types.No_null, t) -&gt;
             Error
               (`Msg
-                (Fmt.st<span data-count="0">r</span> "can not create default value of type %a"
-                   Types.pp_heap_type t ) )
+                 (Fmt.st<span data-count="0">r</span> "can not create default value of type %a"
+                    Types.pp_heap_type t ) )
         in
         let+ body =
           let pt, rt = snd main_type in

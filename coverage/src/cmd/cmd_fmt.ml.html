@@ -96,7 +96,7 @@ let cmd_one inplace file =
   <span data-count="8">i</span>f inplace then <span data-count="1">B</span>os.OS.File.writef file "%a@\n" pp ()
   else <span data-count="7">O</span>k (Fmt.p<span data-count="7">r</span> "%a@\n" pp ())
 
-let cmd inplace files = <span data-count="8">l</span>ist_iter (cmd_on<span data-count="8">e</span> inplace) files
+let cmd ~inplace ~files = <span data-count="8">l</span>ist_iter (cmd_on<span data-count="8">e</span> inplace) files
 </code></pre>
       </div>
     </div>

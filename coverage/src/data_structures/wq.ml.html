@@ -124,11 +124,11 @@ let fail = Synchronizer.fail
 let make () =
   <span data-count="738">l</span>et q = Queue.create () in
   <span data-count="738">l</span>et writter v condvar =
-    <span data-count="43810">l</span>et was_empty = Queue.is_empty q in
-    <span data-count="43810">Q</span>ueue.push v q;
-    <span data-count="43810">i</span>f was_empty then <span data-count="1386">C</span>ondition.broadcast condvar
+    <span data-count="43806">l</span>et was_empty = Queue.is_empty q in
+    <span data-count="43806">Q</span>ueue.push v q;
+    <span data-count="43806">i</span>f was_empty then <span data-count="1398">C</span>ondition.broadcast condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="45908">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="45871">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

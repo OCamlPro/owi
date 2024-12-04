@@ -329,12 +329,12 @@ let array_map f a =
   try
     o<span data-count="433">k</span>
     @@ Array.ini<span data-count="433">t</span> (Array.lengt<span data-count="437">h</span> a) (fun i -&gt;
-           <span data-count="32728">l</span>et v = Array.get a i in
-           <span data-count="32728">m</span>atch f v with
-           | <span data-count="4">E</span>rror _e as e -&gt;
-             err := Some e;
-             raise Exit
-           | <span data-count="32724">O</span>k v -&gt; v )
+         <span data-count="32728">l</span>et v = Array.get a i in
+         <span data-count="32728">m</span>atch f v with
+         | <span data-count="4">E</span>rror _e as e -&gt;
+           err := Some e;
+           raise Exit
+         | <span data-count="32724">O</span>k v -&gt; v )
   with <span data-count="4">E</span>xit -&gt; Option.get !err
 
 let array_fold_left f acc l =

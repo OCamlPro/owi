@@ -453,71 +453,71 @@ module M :
 
   let symbol_i32 () : Value.int32 Choice.t =
     <span data-count="3090">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-        <span data-count="3090">l</span>et n =
-          match forced_value with
-          | <span data-count="1646">N</span>one -&gt; Random.bits3<span data-count="1646">2</span> ()
-          | <span data-count="1444">S</span>ome (Num (I32 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        (I32 n, Value.pai<span data-count="3090">r</span> n (Expr.symbo<span data-count="3090">l</span> sym)) )
+      <span data-count="3090">l</span>et n =
+        match forced_value with
+        | <span data-count="1646">N</span>one -&gt; Random.bits3<span data-count="1646">2</span> ()
+        | <span data-count="1444">S</span>ome (Num (I32 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      (I32 n, Value.pai<span data-count="3090">r</span> n (Expr.symbo<span data-count="3090">l</span> sym)) )
 
   let symbol_i8 () : Value.int32 Choice.t =
     <span data-count="6">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-        <span data-count="6">l</span>et n =
-          match forced_value with
-          | <span data-count="6">N</span>one -&gt; Int32.logan<span data-count="6">d</span> 0xFFl (Random.bits3<span data-count="6">2</span> ())
-          | <span data-count="0">S</span>ome (Num (I32 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="6">l</span> sym))
-        in
-        <span data-count="6">(</span>I32 n, Value.pai<span data-count="6">r</span> n sym_expr) )
+      <span data-count="6">l</span>et n =
+        match forced_value with
+        | <span data-count="6">N</span>one -&gt; Int32.logan<span data-count="6">d</span> 0xFFl (Random.bits3<span data-count="6">2</span> ())
+        | <span data-count="0">S</span>ome (Num (I32 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      let sym_expr =
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="6">l</span> sym))
+      in
+      <span data-count="6">(</span>I32 n, Value.pai<span data-count="6">r</span> n sym_expr) )
 
   let symbol_char () : Value.int32 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-        <span data-count="0">l</span>et n =
-          match forced_value with
-          | <span data-count="0">N</span>one -&gt; Int32.logan<span data-count="0">d</span> 0xFFl (Random.bits3<span data-count="0">2</span> ())
-          | <span data-count="0">S</span>ome (Num (I32 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="0">l</span> sym))
-        in
-        <span data-count="0">(</span>I32 n, Value.pai<span data-count="0">r</span> n sym_expr) )
+      <span data-count="0">l</span>et n =
+        match forced_value with
+        | <span data-count="0">N</span>one -&gt; Int32.logan<span data-count="0">d</span> 0xFFl (Random.bits3<span data-count="0">2</span> ())
+        | <span data-count="0">S</span>ome (Num (I32 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      let sym_expr =
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="0">l</span> sym))
+      in
+      <span data-count="0">(</span>I32 n, Value.pai<span data-count="0">r</span> n sym_expr) )
 
   let symbol_i64 () : Value.int64 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_bitv 64) (fun sym forced_value -&gt;
-        <span data-count="0">l</span>et n =
-          match forced_value with
-          | <span data-count="0">N</span>one -&gt; Random.bits6<span data-count="0">4</span> ()
-          | <span data-count="0">S</span>ome (Num (I64 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        (I64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
+      <span data-count="0">l</span>et n =
+        match forced_value with
+        | <span data-count="0">N</span>one -&gt; Random.bits6<span data-count="0">4</span> ()
+        | <span data-count="0">S</span>ome (Num (I64 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      (I64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let symbol_f32 () : Value.float32 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_fp 32) (fun sym forced_value -&gt;
-        <span data-count="0">l</span>et n =
-          match forced_value with
-          | <span data-count="0">N</span>one -&gt; Random.bits3<span data-count="0">2</span> ()
-          | <span data-count="0">S</span>ome (Num (F32 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        let n = Float32.of_bits n in
-        <span data-count="0">(</span>F32 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
+      <span data-count="0">l</span>et n =
+        match forced_value with
+        | <span data-count="0">N</span>one -&gt; Random.bits3<span data-count="0">2</span> ()
+        | <span data-count="0">S</span>ome (Num (F32 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      let n = Float32.of_bits n in
+      <span data-count="0">(</span>F32 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let symbol_f64 () : Value.float64 Choice.t =
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_fp 64) (fun sym forced_value -&gt;
-        <span data-count="0">l</span>et n =
-          match forced_value with
-          | <span data-count="0">N</span>one -&gt; Random.bits6<span data-count="0">4</span> ()
-          | <span data-count="0">S</span>ome (Num (F64 n)) -&gt; n
-          | _ -&gt; assert false
-        in
-        let n = Float64.of_bits n in
-        <span data-count="0">(</span>F64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
+      <span data-count="0">l</span>et n =
+        match forced_value with
+        | <span data-count="0">N</span>one -&gt; Random.bits6<span data-count="0">4</span> ()
+        | <span data-count="0">S</span>ome (Num (F64 n)) -&gt; n
+        | _ -&gt; assert false
+      in
+      let n = Float64.of_bits n in
+      <span data-count="0">(</span>F64 n, Value.pai<span data-count="0">r</span> n (Expr.symbo<span data-count="0">l</span> sym)) )
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
     <span data-count="1934">l</span>et c = Value.I32.to_bool i in
@@ -560,10 +560,10 @@ module M :
   let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
       =
     <span data-count="3166">C</span>hoice.bind (i3<span data-count="3166">2</span> base) (fun (base : int32) -&gt;
-        <span data-count="3166">C</span>hoice.return
-          { Concolic_value.concrete = base
-          ; symbolic = Expr.pt<span data-count="3166">r</span> base (Symbolic_value.const_i3<span data-count="3166">2</span> 0l)
-          } )
+      <span data-count="3166">C</span>hoice.return
+        { Concolic_value.concrete = base
+        ; symbolic = Expr.pt<span data-count="3166">r</span> base (Symbolic_value.const_i3<span data-count="3166">2</span> 0l)
+        } )
 
   let free _ (p : Value.int32) =
     (* WHAT ???? *)

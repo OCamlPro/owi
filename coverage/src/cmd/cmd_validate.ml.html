@@ -73,7 +73,7 @@ let validate filename =
   in
   <span data-count="0">(</span>)
 
-let cmd debug files =
+let cmd ~debug ~files =
   <span data-count="3">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
   <span data-count="3">l</span>ist_iter validate files
 </code></pre>

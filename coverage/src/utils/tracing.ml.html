@@ -125,7 +125,7 @@ let model =
 let with_ev ev f =
   <span data-count="0">R</span>untime_events.User.write ev Runtime_events.Type.Begin;
   <span data-count="0">F</span>un.protect f ~finally:(fun () -&gt;
-      <span data-count="0">R</span>untime_events.User.write ev Runtime_events.Type.End )
+    <span data-count="0">R</span>untime_events.User.write ev Runtime_events.Type.End )
 </code></pre>
       </div>
     </div>

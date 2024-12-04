@@ -2494,8 +2494,8 @@ let encode_imports buf (funcs, tables, memories, globals) =
 let encode_functions buf (funcs : binary func list) =
   <span data-count="19">l</span>et idx = ref 0 in
   encode_vector_list buf funcs (fun buf func -&gt;
-      <span data-count="42">w</span>rite_block_type_idx buf func.type_f;
-      <span data-count="42">i</span>ncr idx )
+    <span data-count="42">w</span>rite_block_type_idx buf func.type_f;
+    <span data-count="42">i</span>ncr idx )
 
 (* table: section 4 *)
 let encode_tables buf tables = <span data-count="19">e</span>ncode_vector_list buf tables write_table
@@ -2538,11 +2538,11 @@ let encode_datacount buf datas =
 (* code: section 10 *)
 let encode_codes buf funcs =
   <span data-count="19">e</span>ncode_vector_list buf funcs (fun buf { locals; body; _ } -&gt;
-      <span data-count="42">l</span>et code_buf = Buffer.create 16 in
-      <span data-count="42">w</span>rite_locals code_buf locals;
-      <span data-count="42">w</span>rite_expr code_buf body ~end_op_code:None;
-      <span data-count="42">w</span>rite_u32_of_int buf (Buffer.lengt<span data-count="42">h</span> code_buf);
-      <span data-count="42">B</span>uffer.add_buffer buf code_buf )
+    <span data-count="42">l</span>et code_buf = Buffer.create 16 in
+    <span data-count="42">w</span>rite_locals code_buf locals;
+    <span data-count="42">w</span>rite_expr code_buf body ~end_op_code:None;
+    <span data-count="42">w</span>rite_u32_of_int buf (Buffer.lengt<span data-count="42">h</span> code_buf);
+    <span data-count="42">B</span>uffer.add_buffer buf code_buf )
 
 (* data: section 11 *)
 let encode_datas buf datas = <span data-count="19">e</span>ncode_vector_array buf datas write_data
