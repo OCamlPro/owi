@@ -365,7 +365,7 @@ let cmp_u x op y = <span data-count="5326123">o</span>p (ad<span data-count="532
 
 let eq (x : int32) y = <span data-count="3692359">e</span>qual x y
 
-let ne (x : int32) y = <span data-count="17264882">c</span>ompar<span data-count="17264886">e</span> x y &lt;&gt; 0
+let ne (x : int32) y = <span data-count="17264807">c</span>ompar<span data-count="17264808">e</span> x y &lt;&gt; 0
 
 let lt (x : int32) y = <span data-count="5889404">c</span>ompar<span data-count="5889404">e</span> x y &lt; 0
 
@@ -386,8 +386,8 @@ let ge_u x y = <span data-count="788250">c</span>mp_u x ge y
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="214101">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="214098">t</span> (Int64.shift_lef<span data-count="214097">t</span> (Int64.of_int3<span data-count="214099">2</span> x) 32) 32
+  <span data-count="214096">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="214093">t</span> (Int64.shift_lef<span data-count="214090">t</span> (Int64.of_int3<span data-count="214097">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
@@ -399,11 +399,11 @@ let low_int = shift_lef<span data-count="915">t</span> minus_one 31
 let high_int = logxo<span data-count="915">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="2818175">f</span> x (to_in<span data-count="2818221">t</span> (logan<span data-count="2818205">d</span> y 31l))
+let shift f x y = <span data-count="2817743">f</span> x (to_in<span data-count="2817875">t</span> (logan<span data-count="2817818">d</span> y 31l))
 
-let shl x y = <span data-count="170658">s</span>x (shif<span data-count="170654">t</span> shift_left x y)
+let shl x y = <span data-count="170659">s</span>x (shif<span data-count="170651">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="2604334">s</span>hift shift_right x y
+let shr_s x y = <span data-count="2603852">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="43444">s</span>x (shif<span data-count="43444">t</span> shift_right_logical x y)
 
@@ -416,8 +416,8 @@ let rotr x y =
   <span data-count="28">l</span>ogor (shr_<span data-count="28">u</span> x n) (sh<span data-count="28">l</span> x (su<span data-count="28">b</span> 32l n))
 
 let extend_s n x =
-  <span data-count="405">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="405">t</span> x shift) shift
+  <span data-count="404">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="404">t</span> x shift) shift
 
 (* String conversion that allows leading signs and unsigned values *)
 

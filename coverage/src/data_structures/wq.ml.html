@@ -53,9 +53,8 @@
 <a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -93,7 +92,6 @@
 <a href="#L31">31</a>
 <a href="#L32">32</a>
 <a href="#L33">33</a>
-<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -117,18 +115,17 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
 
 let push v q = <span data-count="561">S</span>ynchronizer.write v q
 
-let work_while f q = <span data-count="723">S</span>ynchronizer.work_while f q
+let work_while f q = <span data-count="721">S</span>ynchronizer.work_while f q
 
 let fail = Synchronizer.fail
 
 let make () =
   <span data-count="738">l</span>et q = Queue.create () in
   <span data-count="738">l</span>et writter v condvar =
-    <span data-count="44085">l</span>et was_empty = Queue.is_empty q in
-    <span data-count="44085">Q</span>ueue.push v q;
-    <span data-count="44085">i</span>f was_empty then <span data-count="1396">C</span>ondition.broadcast condvar
+    <span data-count="43823">Q</span>ueue.push v q;
+    <span data-count="43823">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="46152">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="45702">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

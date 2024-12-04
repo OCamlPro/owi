@@ -357,9 +357,9 @@ struct
 
   let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
-    <span data-count="21188">m</span>atch (if_true, if_false) with
-    | <span data-count="21187">I</span>32 if_true, I32 if_false -&gt;
-      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="21188">r</span> c ~if_true ~if_false))
+    <span data-count="21180">m</span>atch (if_true, if_false) with
+    | <span data-count="21176">I</span>32 if_true, I32 if_false -&gt;
+      Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="21177">r</span> c ~if_true ~if_false))
     | <span data-count="0">I</span>64 if_true, I64 if_false -&gt;
       Choice.return (Value.I64 (Value.Bool.select_exp<span data-count="0">r</span> c ~if_true ~if_false))
     | <span data-count="2">F</span>32 if_true, F32 if_false -&gt;
@@ -384,25 +384,25 @@ struct
   module Memory = struct
     include Memory
 
-    let load_8_s m a = <span data-count="607">C</span>hoice.lift_mem @@ load_8_<span data-count="607">s</span> m a
+    let load_8_s m a = <span data-count="596">C</span>hoice.lift_mem @@ load_8_<span data-count="596">s</span> m a
 
-    let load_8_u m a = <span data-count="3253">C</span>hoice.lift_mem @@ load_8_<span data-count="3252">u</span> m a
+    let load_8_u m a = <span data-count="3206">C</span>hoice.lift_mem @@ load_8_<span data-count="3206">u</span> m a
 
     let load_16_s m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">s</span> m a
 
     let load_16_u m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">u</span> m a
 
-    let load_32 m a = <span data-count="73798">C</span>hoice.lift_mem @@ load_3<span data-count="73790">2</span> m a
+    let load_32 m a = <span data-count="73817">C</span>hoice.lift_mem @@ load_3<span data-count="73813">2</span> m a
 
     let load_64 m a = <span data-count="78">C</span>hoice.lift_mem @@ load_6<span data-count="78">4</span> m a
 
-    let store_8 m ~addr v = <span data-count="3173">C</span>hoice.lift_mem @@ store_<span data-count="3173">8</span> m ~addr v
+    let store_8 m ~addr v = <span data-count="3161">C</span>hoice.lift_mem @@ store_<span data-count="3160">8</span> m ~addr v
 
     let store_16 m ~addr v = <span data-count="2">C</span>hoice.lift_mem @@ store_1<span data-count="2">6</span> m ~addr v
 
-    let store_32 m ~addr v = <span data-count="641153">C</span>hoice.lift_mem @@ store_3<span data-count="641061">2</span> m ~addr v
+    let store_32 m ~addr v = <span data-count="641066">C</span>hoice.lift_mem @@ store_3<span data-count="640976">2</span> m ~addr v
 
-    let store_64 m ~addr v = <span data-count="349873">C</span>hoice.lift_mem @@ store_6<span data-count="349807">4</span> m ~addr v
+    let store_64 m ~addr v = <span data-count="349860">C</span>hoice.lift_mem @@ store_6<span data-count="349847">4</span> m ~addr v
   end
 
   module Data = struct
@@ -417,10 +417,10 @@ struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="1084528">l</span>et orig_mem = Link_env.get_memory env id in
-      <span data-count="1084501">l</span>et f (t : thread) =
-        <span data-count="1084408">l</span>et memories = Thread.memories t in
-        <span data-count="1084403">M</span>emory.get_memory (Link_env.i<span data-count="1084419">d</span> env) orig_mem memories id
+      <span data-count="1084350">l</span>et orig_mem = Link_env.get_memory env id in
+      <span data-count="1084346">l</span>et f (t : thread) =
+        <span data-count="1084281">l</span>et memories = Thread.memories t in
+        <span data-count="1084288">M</span>emory.get_memory (Link_env.i<span data-count="1084283">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -430,7 +430,7 @@ struct
 
     let get_table (env : t) i : Table.t Choice.t =
       <span data-count="4039">l</span>et orig_table = Link_env.get_table env i in
-      <span data-count="4039">l</span>et f (t : thread) =
+      <span data-count="4038">l</span>et f (t : thread) =
         <span data-count="4039">l</span>et tables = Thread.tables t in
         <span data-count="4039">S</span>ymbolic_table.get_table (Link_env.i<span data-count="4039">d</span> env) orig_table tables i
       in
@@ -443,10 +443,10 @@ struct
       <span data-count="378">C</span>hoice.return data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="2391">l</span>et orig_global = Link_env.get_global env i in
-      <span data-count="2390">l</span>et f (t : thread) =
-        <span data-count="2391">l</span>et globals = Thread.globals t in
-        <span data-count="2391">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2391">d</span> env) orig_global globals i
+      <span data-count="2172">l</span>et orig_global = Link_env.get_global env i in
+      <span data-count="2172">l</span>et f (t : thread) =
+        <span data-count="2172">l</span>et globals = Thread.globals t in
+        <span data-count="2172">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2172">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 
@@ -467,7 +467,7 @@ struct
 
     let env (t : t) = <span data-count="720">t</span>.env
 
-    let id (t : t) = <span data-count="1969">t</span>.id
+    let id (t : t) = <span data-count="1745">t</span>.id
 
     let to_run (t : t) = <span data-count="368">t</span>.to_run
   end
