@@ -4,17 +4,17 @@
 
 open Syntax
 
-let optimize_file ~unsafe filename =
+let optimize_file ~unsafe ~source_file =
   Compile.File.until_optimize ~unsafe ~rac:false ~srac:false ~optimize:true
-    filename
+    source_file
 
-let print_or_emit ~unsafe file outfile =
-  let* m = optimize_file ~unsafe file in
+let print_or_emit ~unsafe ~source_file ~out_file =
+  let* m = optimize_file ~unsafe ~source_file in
   let m = Binary_to_text.modul m in
-  match outfile with
+  match out_file with
   | Some name -> Bos.OS.File.writef name "%a@\n" Text.pp_modul m
   | None -> Ok (Fmt.pr "%a@\n" Text.pp_modul m)
 
-let cmd ~debug ~unsafe ~file ~outfile =
+let cmd ~debug ~unsafe ~source_file ~out_file =
   if debug then Log.debug_on := true;
-  print_or_emit ~unsafe file outfile
+  print_or_emit ~unsafe ~source_file ~out_file

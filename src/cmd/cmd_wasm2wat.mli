@@ -3,4 +3,7 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-  file:Fpath.t -> emit_file:bool -> outfile:Fpath.t option -> unit Result.t
+     source_file:Fpath.t
+  -> emit_file:bool
+  -> out_file:Fpath.t option
+  -> unit Result.t

@@ -56,11 +56,11 @@ let files =
   let f = existing_non_dir_file in
   Arg.(value & pos_all f [] (info [] ~doc))
 
-let sourcefile =
+let source_file =
   let doc = "source file" in
   Arg.(required & pos 0 (some existing_non_dir_file) None (info [] ~doc))
 
-let outfile =
+let out_file =
   let doc = "Write output to a file." in
   let string_to_path = Arg.conv ~docv:"FILE" (Fpath.of_string, Fpath.pp) in
   Arg.(
@@ -209,9 +209,9 @@ let opt_info =
 let opt_cmd =
   let+ debug
   and+ unsafe
-  and+ sourcefile
-  and+ outfile in
-  Cmd_opt.cmd ~debug ~unsafe ~file:sourcefile ~outfile
+  and+ source_file
+  and+ out_file in
+  Cmd_opt.cmd ~debug ~unsafe ~source_file ~out_file
 
 (* owi instrument *)
 
@@ -333,8 +333,8 @@ let replay_cmd =
     let replay_file = Cmdliner.Arg.conv (parse, Fpath.pp) in
     let doc = "Which replay file to use" in
     Arg.(required & opt (some replay_file) None & info [ "replay-file" ] ~doc)
-  and+ sourcefile in
-  Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~sourcefile
+  and+ source_file in
+  Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
 
 (* owi conc *)
 
@@ -373,12 +373,12 @@ let wasm2wat_info =
   Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
 
 let wasm2wat_cmd =
-  let+ sourcefile
+  let+ source_file
   and+ emit_file =
     let doc = "Emit (.wat) files from corresponding (.wasm) files." in
     Arg.(value & flag & info [ "emit-file" ] ~doc)
-  and+ outfile in
-  Cmd_wasm2wat.cmd ~file:sourcefile ~emit_file ~outfile
+  and+ out_file in
+  Cmd_wasm2wat.cmd ~source_file ~emit_file ~out_file
 
 (* owi wat2wasm *)
 
@@ -394,9 +394,9 @@ let wat2wasm_cmd =
   and+ debug
   and+ unsafe
   and+ optimize
-  and+ outfile
-  and+ sourcefile in
-  Cmd_wat2wasm.cmd ~profiling ~debug ~unsafe ~optimize ~outfile ~file:sourcefile
+  and+ out_file
+  and+ source_file in
+  Cmd_wat2wasm.cmd ~profiling ~debug ~unsafe ~optimize ~out_file ~source_file
 
 (* owi *)
 
