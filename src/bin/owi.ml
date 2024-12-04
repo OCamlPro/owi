@@ -5,9 +5,7 @@
 open Owi
 open Cmdliner
 
-let debug =
-  let doc = "debug mode" in
-  Arg.(value & flag & info [ "debug"; "d" ] ~doc)
+(* Helpers *)
 
 let existing_non_dir_file =
   let parse s =
@@ -27,6 +25,24 @@ let solver_conv =
   Arg.conv
     ( Smtml.Solver_dispatcher.solver_type_of_string
     , Smtml.Solver_dispatcher.pp_solver_type )
+
+(* Common options *)
+
+let copts_t = Term.(const [])
+
+let sdocs = Manpage.s_common_options
+
+let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
+
+let version = "%%VERSION%%"
+
+(* Common terms *)
+
+open Term.Syntax
+
+let debug =
+  let doc = "debug mode" in
+  Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
 let deterministic_result_order =
   let doc =
@@ -136,166 +152,230 @@ let workspace =
   let doc = "path to the workspace directory" in
   Arg.(value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc)
 
-let copts_t = Term.(const [])
+(* owi c *)
 
-let sdocs = Manpage.s_common_options
-
-let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
-
-let version = "%%VERSION%%"
+let c_info =
+  let doc = "Compile a C file to Wasm and run the symbolic interpreter on it" in
+  let man = [] @ shared_man in
+  Cmd.info "c" ~version ~doc ~sdocs ~man
 
 let c_cmd =
-  let info =
-    let doc =
-      "Compile a C file to Wasm and run the symbolic interpreter on it"
-    in
-    let man = [] @ shared_man in
-    Cmd.info "c" ~version ~doc ~sdocs ~man
-  in
-  let arch =
+  let+ arch =
     let doc = "data model" in
     Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
-  in
-  let property =
+  and+ property =
     let doc = "property file" in
     Arg.(
       value & opt (some existing_non_dir_file) None & info [ "property" ] ~doc )
-  in
-  let includes =
+  and+ includes =
     let doc = "headers path" in
     Arg.(value & opt_all dir_file [] & info [ "I" ] ~doc)
-  in
-  let opt_lvl =
+  and+ opt_lvl =
     let doc = "specify which optimization level to use" in
     Arg.(value & opt string "3" & info [ "O" ] ~doc)
-  in
-  let testcomp =
+  and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
-  in
-  let output =
+  and+ output =
     let doc = "write results to dir" in
     Arg.(value & opt string "owi-out" & info [ "output"; "o" ] ~doc)
-  in
-  let concolic =
+  and+ concolic =
     let doc = "concolic mode" in
     Arg.(value & flag & info [ "concolic" ] ~doc)
-  in
-  Cmd.v info
-    Term.(
-      const Cmd_c.cmd $ debug $ arch $ property $ testcomp $ output $ workers
-      $ opt_lvl $ includes $ files $ profiling $ unsafe $ optimize
-      $ no_stop_at_failure $ no_values $ no_assert_failure_expression_printing
-      $ deterministic_result_order $ fail_mode $ concolic $ eacsl $ solver )
+  and+ debug
+  and+ workers
+  and+ files
+  and+ profiling
+  and+ unsafe
+  and+ optimize
+  and+ no_stop_at_failure
+  and+ no_values
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ eacsl
+  and+ solver in
+  Cmd_c.cmd debug arch property testcomp output workers opt_lvl includes files
+    profiling unsafe optimize no_stop_at_failure no_values
+    no_assert_failure_expression_printing deterministic_result_order fail_mode
+    concolic eacsl solver
+
+(* owi fmt *)
+
+let fmt_info =
+  let doc = "Format a .wat or .wast file" in
+  let man = [] @ shared_man in
+  Cmd.info "fmt" ~version ~doc ~sdocs ~man
 
 let fmt_cmd =
-  let info =
-    let doc = "Format a .wat or .wast file" in
-    let man = [] @ shared_man in
-    Cmd.info "fmt" ~version ~doc ~sdocs ~man
-  in
-  let inplace =
+  let+ inplace =
     let doc = "Format in-place, overwriting input file" in
     Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
-  in
-  Cmd.v info Term.(const Cmd_fmt.cmd $ inplace $ files)
+  and+ files in
+  Cmd_fmt.cmd inplace files
+
+(* owi opt *)
+
+let opt_info =
+  let doc = "Optimize a module" in
+  let man = [] @ shared_man in
+  Cmd.info "opt" ~version ~doc ~sdocs ~man
 
 let opt_cmd =
-  let info =
-    let doc = "Optimize a module" in
-    let man = [] @ shared_man in
-    Cmd.info "opt" ~version ~doc ~sdocs ~man
+  let+ debug
+  and+ unsafe
+  and+ sourcefile
+  and+ outfile in
+  Cmd_opt.cmd debug unsafe sourcefile outfile
+
+(* owi instrument *)
+
+let instrument_info =
+  let doc =
+    "Generate an instrumented file with runtime assertion checking coming from \
+     Weasel specifications"
   in
-  Cmd.v info Term.(const Cmd_opt.cmd $ debug $ unsafe $ sourcefile $ outfile)
+  let man = [] @ shared_man in
+  Cmd.info "instrument" ~version ~doc ~sdocs ~man
 
 let instrument_cmd =
-  let info =
-    let doc =
-      "Generate an instrumented file with runtime assertion checking coming \
-       from Weasel specifications"
-    in
-    let man = [] @ shared_man in
-    Cmd.info "instrument" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info Term.(const Cmd_instrument.cmd $ debug $ unsafe $ symbolic $ files)
+  let+ debug
+  and+ unsafe
+  and+ symbolic
+  and+ files in
+  Cmd_instrument.cmd debug unsafe symbolic files
+
+(* owi run *)
+
+let run_info =
+  let doc = "Run the concrete interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "run" ~version ~doc ~sdocs ~man
 
 let run_cmd =
-  let info =
-    let doc = "Run the concrete interpreter" in
-    let man = [] @ shared_man in
-    Cmd.info "run" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info
-    Term.(
-      const Cmd_run.cmd $ profiling $ debug $ unsafe $ rac $ optimize $ files )
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ rac
+  and+ optimize
+  and+ files in
+  Cmd_run.cmd profiling debug unsafe rac optimize files
+
+(* owi validate *)
+
+let validate_info =
+  let doc = "Validate a module" in
+  let man = [] @ shared_man in
+  Cmd.info "validate" ~version ~doc ~sdocs ~man
 
 let validate_cmd =
-  let info =
-    let doc = "Validate a module" in
-    let man = [] @ shared_man in
-    Cmd.info "validate" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info Term.(const Cmd_validate.cmd $ debug $ files)
+  let+ debug
+  and+ files in
+  Cmd_validate.cmd debug files
+
+(* owi script *)
+
+let script_info =
+  let doc = "Run a reference test suite script" in
+  let man = [] @ shared_man in
+  Cmd.info "script" ~version ~doc ~sdocs ~man
 
 let script_cmd =
-  let info =
-    let doc = "Run a reference test suite script" in
-    let man = [] @ shared_man in
-    Cmd.info "script" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info
-    Term.(
-      const Cmd_script.cmd $ profiling $ debug $ optimize $ files
-      $ no_exhaustion )
+  let+ profiling
+  and+ debug
+  and+ optimize
+  and+ files
+  and+ no_exhaustion in
+  Cmd_script.cmd profiling debug optimize files no_exhaustion
+
+(* owi sym *)
+
+let sym_info =
+  let doc = "Run the symbolic interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "sym" ~version ~doc ~sdocs ~man
 
 let sym_cmd =
-  let info =
-    let doc = "Run the symbolic interpreter" in
-    let man = [] @ shared_man in
-    Cmd.info "sym" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info
-    Term.(
-      const Cmd_sym.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
-      $ workers $ no_stop_at_failure $ no_values
-      $ no_assert_failure_expression_printing $ deterministic_result_order
-      $ fail_mode $ workspace $ solver $ files )
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ rac
+  and+ srac
+  and+ optimize
+  and+ workers
+  and+ no_stop_at_failure
+  and+ no_values
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ workspace
+  and+ solver
+  and+ files in
+  Cmd_sym.cmd profiling debug unsafe rac srac optimize workers
+    no_stop_at_failure no_values no_assert_failure_expression_printing
+    deterministic_result_order fail_mode workspace solver files
+
+(* owi conc *)
+
+let conc_info =
+  let doc = "Run the concolic interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "conc" ~version ~doc ~sdocs ~man
 
 let conc_cmd =
-  let info =
-    let doc = "Run the concolic interpreter" in
-    let man = [] @ shared_man in
-    Cmd.info "conc" ~version ~doc ~sdocs ~man
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ rac
+  and+ srac
+  and+ optimize
+  and+ workers
+  and+ no_stop_at_failure
+  and+ no_values
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ workspace
+  and+ solver
+  and+ files in
+  Cmd_conc.cmd profiling debug unsafe rac srac optimize workers
+    no_stop_at_failure no_values no_assert_failure_expression_printing
+    deterministic_result_order fail_mode workspace solver files
+
+(* owi wasm2wat *)
+
+let wasm2wat_info =
+  let doc =
+    "Generate a text format file (.wat) from a binary format file (.wasm)"
   in
-  Cmd.v info
-    Term.(
-      const Cmd_conc.cmd $ profiling $ debug $ unsafe $ rac $ srac $ optimize
-      $ workers $ no_stop_at_failure $ no_values
-      $ no_assert_failure_expression_printing $ deterministic_result_order
-      $ fail_mode $ workspace $ solver $ files )
+  let man = [] @ shared_man in
+  Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
 
 let wasm2wat_cmd =
-  let info =
-    let doc =
-      "Generate a text format file (.wat) from a binary format file (.wasm)"
-    in
-    let man = [] @ shared_man in
-    Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
+  let+ sourcefile
+  and+ emit_file
+  and+ outfile in
+  Cmd_wasm2wat.cmd sourcefile emit_file outfile
+
+(* owi wat2wasm *)
+
+let wat2wasm_info =
+  let doc =
+    "Generate a binary format file (.wasm) from a text format file (.wat)"
   in
-  Cmd.v info Term.(const Cmd_wasm2wat.cmd $ sourcefile $ emit_file $ outfile)
+  let man = [] @ shared_man in
+  Cmd.info "wat2wasm" ~version ~doc ~sdocs ~man
 
 let wat2wasm_cmd =
-  let info =
-    let doc =
-      "Generate a binary format file (.wasm) from a text format file (.wat)"
-    in
-    let man = [] @ shared_man in
-    Cmd.info "wat2wasm" ~version ~doc ~sdocs ~man
-  in
-  Cmd.v info
-    Term.(
-      const Cmd_wat2wasm.cmd $ profiling $ debug $ unsafe $ optimize $ outfile
-      $ sourcefile )
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ optimize
+  and+ outfile
+  and+ sourcefile in
+  Cmd_wat2wasm.cmd profiling debug unsafe optimize outfile sourcefile
+
+(* owi *)
 
 let cli =
   let info =
@@ -308,17 +388,17 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ c_cmd
-    ; fmt_cmd
-    ; opt_cmd
-    ; instrument_cmd
-    ; run_cmd
-    ; script_cmd
-    ; sym_cmd
-    ; conc_cmd
-    ; validate_cmd
-    ; wasm2wat_cmd
-    ; wat2wasm_cmd
+    [ Cmd.v c_info c_cmd
+    ; Cmd.v fmt_info fmt_cmd
+    ; Cmd.v opt_info opt_cmd
+    ; Cmd.v instrument_info instrument_cmd
+    ; Cmd.v run_info run_cmd
+    ; Cmd.v script_info script_cmd
+    ; Cmd.v sym_info sym_cmd
+    ; Cmd.v conc_info conc_cmd
+    ; Cmd.v validate_info validate_cmd
+    ; Cmd.v wasm2wat_info wasm2wat_cmd
+    ; Cmd.v wat2wasm_info wat2wasm_cmd
     ]
 
 let exit_code =
