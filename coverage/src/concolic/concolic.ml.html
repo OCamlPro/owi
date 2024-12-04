@@ -870,14 +870,14 @@ module P = struct
 
   module Module_to_run = struct
     type t =
-      { modul : Binary.modul
+      { id : string option
       ; env : Env.t
       ; to_run : Types.binary Types.expr list
       }
 
     let env (t : t) = <span data-count="1527">t</span>.env
 
-    let modul (t : t) = <span data-count="1300">t</span>.modul
+    let id (t : t) = <span data-count="1300">t</span>.id
 
     let to_run (t : t) = <span data-count="510">t</span>.to_run
   end
@@ -886,7 +886,7 @@ end
 module P' : Interpret_intf.P = P
 
 let convert_module_to_run (m : 'f Link.module_to_run) =
-  <span data-count="164">P</span>.Module_to_run.{ modul = m.modul; env = m.env; to_run = m.to_run }
+  <span data-count="164">P</span>.Module_to_run.{ id = m.id; env = m.env; to_run = m.to_run }
 
 let backup (m : P.Module_to_run.t) = <span data-count="510">L</span>ink_env.backup m.env
 
