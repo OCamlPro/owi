@@ -102,15 +102,15 @@ module CoreImpl = struct
     let spawn_worker sched wls_init callback callback_init callback_close =
       callback_init ();
       Domain.spawn (fun () ->
-          Fun.protect
-            ~finally:(fun () -> callback_close ())
-            (fun () ->
-              let wls = wls_init () in
-              try work wls sched callback
-              with e ->
-                let bt = Printexc.get_raw_backtrace () in
-                Wq.fail sched.work_queue;
-                Printexc.raise_with_backtrace e bt ) )
+        Fun.protect
+          ~finally:(fun () -> callback_close ())
+          (fun () ->
+            let wls = wls_init () in
+            try work wls sched callback
+            with e ->
+              let bt = Printexc.get_raw_backtrace () in
+              Wq.fail sched.work_queue;
+              Printexc.raise_with_backtrace e bt ) )
   end
 
   module State = struct
@@ -307,8 +307,8 @@ module CoreImpl = struct
       let sched = init_scheduler () in
       add_init_task sched (State.run t thread);
       Array.init workers (fun _i ->
-          spawn_worker sched (Solver.fresh solver) callback callback_init
-            callback_end )
+        spawn_worker sched (Solver.fresh solver) callback callback_init
+          callback_end )
 
     let trap t =
       let* thread in
@@ -348,8 +348,8 @@ module Make (Thread : Thread.S) = struct
     let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
     let+ () =
       modify_thread (fun thread ->
-          let thread = Thread.add_symbol thread sym in
-          Thread.incr_symbols thread )
+        let thread = Thread.add_symbol thread sym in
+        Thread.incr_symbols thread )
     in
     f sym
 

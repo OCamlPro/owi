@@ -5,9 +5,10 @@
 module MakeP
     (Memory : Symbolic_memory_intf.S)
     (Thread : Thread.S with type Memory.collection = Memory.collection)
-    (Choice : Choice_intf.Complete
-                with module V := Symbolic_value
-                 and type thread := Thread.t) =
+    (Choice :
+      Choice_intf.Complete
+        with module V := Symbolic_value
+         and type thread := Thread.t) =
 struct
   module Value = Symbolic_value
   module Choice = Choice

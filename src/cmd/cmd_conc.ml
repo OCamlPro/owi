@@ -14,7 +14,7 @@ let print_paths = false
 let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   Choice.bind t (fun t ->
-      match t with Error e -> Choice.return (Error e) | Ok x -> f x )
+    match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
 let simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m =
   let* m =

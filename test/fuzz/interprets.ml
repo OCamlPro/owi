@@ -27,8 +27,8 @@ let set =
 let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
   try
     Fun.protect ~finally:unset (fun () ->
-        set ();
-        try run () with Timeout -> Error `Timeout )
+      set ();
+      try run () with Timeout -> Error `Timeout )
   with Timeout -> Error `Timeout
 
 module Owi_unoptimized : INTERPRET = struct
@@ -45,7 +45,7 @@ module Owi_unoptimized : INTERPRET = struct
       Link.modul Link.empty_state ~name:None simplified
     in
     timeout_call_run (fun () ->
-        Interpret.Concrete.modul link_state.envs regular )
+      Interpret.Concrete.modul link_state.envs regular )
 
   let name = "owi"
 end
@@ -65,7 +65,7 @@ module Owi_optimized : INTERPRET = struct
       Link.modul Link.empty_state ~name:None simplified
     in
     timeout_call_run (fun () ->
-        Interpret.Concrete.modul link_state.envs regular )
+      Interpret.Concrete.modul link_state.envs regular )
 
   let name = "owi+optimize"
 end
@@ -87,16 +87,16 @@ module Owi_symbolic : INTERPRET = struct
     in
     let regular = Symbolic.convert_module_to_run_minimalist regular in
     timeout_call_run (fun () ->
-        let c = Interpret.SymbolicM.modul link_state.envs regular in
-        let init_thread = Thread_with_memory.init () in
-        let res, _ =
-          Symbolic_choice_minimalist.run ~workers:dummy_workers_count
-            Smtml.Solver_dispatcher.Z3_solver c init_thread
-        in
-        match res with
-        | Ok res -> res
-        | Error (Trap t) -> Error (`Trap t)
-        | Error Assert_fail -> Error `Assert_failure )
+      let c = Interpret.SymbolicM.modul link_state.envs regular in
+      let init_thread = Thread_with_memory.init () in
+      let res, _ =
+        Symbolic_choice_minimalist.run ~workers:dummy_workers_count
+          Smtml.Solver_dispatcher.Z3_solver c init_thread
+      in
+      match res with
+      | Ok res -> res
+      | Error (Trap t) -> Error (`Trap t)
+      | Error Assert_fail -> Error `Assert_failure )
 
   let name = "owi_symbolic"
 end

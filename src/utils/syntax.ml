@@ -87,12 +87,12 @@ let array_map f a =
   try
     ok
     @@ Array.init (Array.length a) (fun i ->
-           let v = Array.get a i in
-           match f v with
-           | Error _e as e ->
-             err := Some e;
-             raise Exit
-           | Ok v -> v )
+         let v = Array.get a i in
+         match f v with
+         | Error _e as e ->
+           err := Some e;
+           raise Exit
+         | Ok v -> v )
   with Exit -> Option.get !err
 
 let array_fold_left f acc l =

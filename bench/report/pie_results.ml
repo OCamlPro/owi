@@ -107,7 +107,7 @@ let make runs output_dir reference_name =
       , Format.sprintf "Nothing (%d)" count_nothing )
     ]
     |> List.filter_map (fun ((count, _, _, _) as v) ->
-           if count = 0 then None else Some v )
+         if count = 0 then None else Some v )
     |> List.sort (fun (c1, _, _, _) (c2, _, _, _) -> compare c2 c1)
     |> List.map mk_value |> Cmd.of_list
   in

@@ -21,7 +21,10 @@ let heap_type : text heap_type Crowbar.gen = const Func_ht
 let ref_type = pair nullable heap_type
 
 let limits =
-  let sup = if true then 10 else 100000 (* TODO: fix max size ? *) in
+  let sup =
+    if true then 10 else 100000
+    (* TODO: fix max size ? *)
+  in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
   { min; max }
@@ -288,8 +291,7 @@ let global ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:false in
   List.map
     (fun (name, (_, _)) ->
-      pair (const (Global_get (Text name))) (const [ S.Push (Num_type ntyp) ])
-      )
+      pair (const (Global_get (Text name))) (const [ S.Push (Num_type ntyp) ]) )
     globals
 
 let global_i32 env = global I32 env

@@ -20,71 +20,71 @@ module M :
 
   let symbol_i32 () : Value.int32 Choice.t =
     Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Random.bits32 ()
-          | Some (Num (I32 n)) -> n
-          | _ -> assert false
-        in
-        (I32 n, Value.pair n (Expr.symbol sym)) )
+      let n =
+        match forced_value with
+        | None -> Random.bits32 ()
+        | Some (Num (I32 n)) -> n
+        | _ -> assert false
+      in
+      (I32 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_i8 () : Value.int32 Choice.t =
     Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Int32.logand 0xFFl (Random.bits32 ())
-          | Some (Num (I32 n)) -> n
-          | _ -> assert false
-        in
-        let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
-        in
-        (I32 n, Value.pair n sym_expr) )
+      let n =
+        match forced_value with
+        | None -> Int32.logand 0xFFl (Random.bits32 ())
+        | Some (Num (I32 n)) -> n
+        | _ -> assert false
+      in
+      let sym_expr =
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
+      in
+      (I32 n, Value.pair n sym_expr) )
 
   let symbol_char () : Value.int32 Choice.t =
     Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Int32.logand 0xFFl (Random.bits32 ())
-          | Some (Num (I32 n)) -> n
-          | _ -> assert false
-        in
-        let sym_expr =
-          Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
-        in
-        (I32 n, Value.pair n sym_expr) )
+      let n =
+        match forced_value with
+        | None -> Int32.logand 0xFFl (Random.bits32 ())
+        | Some (Num (I32 n)) -> n
+        | _ -> assert false
+      in
+      let sym_expr =
+        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
+      in
+      (I32 n, Value.pair n sym_expr) )
 
   let symbol_i64 () : Value.int64 Choice.t =
     Choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Random.bits64 ()
-          | Some (Num (I64 n)) -> n
-          | _ -> assert false
-        in
-        (I64 n, Value.pair n (Expr.symbol sym)) )
+      let n =
+        match forced_value with
+        | None -> Random.bits64 ()
+        | Some (Num (I64 n)) -> n
+        | _ -> assert false
+      in
+      (I64 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_f32 () : Value.float32 Choice.t =
     Choice.with_new_symbol (Ty_fp 32) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Random.bits32 ()
-          | Some (Num (F32 n)) -> n
-          | _ -> assert false
-        in
-        let n = Float32.of_bits n in
-        (F32 n, Value.pair n (Expr.symbol sym)) )
+      let n =
+        match forced_value with
+        | None -> Random.bits32 ()
+        | Some (Num (F32 n)) -> n
+        | _ -> assert false
+      in
+      let n = Float32.of_bits n in
+      (F32 n, Value.pair n (Expr.symbol sym)) )
 
   let symbol_f64 () : Value.float64 Choice.t =
     Choice.with_new_symbol (Ty_fp 64) (fun sym forced_value ->
-        let n =
-          match forced_value with
-          | None -> Random.bits64 ()
-          | Some (Num (F64 n)) -> n
-          | _ -> assert false
-        in
-        let n = Float64.of_bits n in
-        (F64 n, Value.pair n (Expr.symbol sym)) )
+      let n =
+        match forced_value with
+        | None -> Random.bits64 ()
+        | Some (Num (F64 n)) -> n
+        | _ -> assert false
+      in
+      let n = Float64.of_bits n in
+      (F64 n, Value.pair n (Expr.symbol sym)) )
 
   let assume_i32 (i : Value.int32) : unit Choice.t =
     let c = Value.I32.to_bool i in
@@ -127,10 +127,10 @@ module M :
   let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
       =
     Choice.bind (i32 base) (fun (base : int32) ->
-        Choice.return
-          { Concolic_value.concrete = base
-          ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
-          } )
+      Choice.return
+        { Concolic_value.concrete = base
+        ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
+        } )
 
   let free _ (p : Value.int32) =
     (* WHAT ???? *)

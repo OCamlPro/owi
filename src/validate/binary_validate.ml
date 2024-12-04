@@ -560,8 +560,8 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
     | None ->
       Error
         (`Type_mismatch
-          (Fmt.str "expected a prefix of %a but stack has type %a" Stack.pp pt
-             Stack.pp previous_stack ) )
+           (Fmt.str "expected a prefix of %a but stack has type %a" Stack.pp pt
+              Stack.pp previous_stack ) )
     | Some stack_to_push -> Stack.push rt stack_to_push
 
 let typecheck_function (modul : modul) func refs =

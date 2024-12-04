@@ -83,11 +83,11 @@ let mean_stime runs = sum_stime runs /. (count_all runs |> float_of_int)
 
 let to_distribution ~max_time runs =
   List.init max_time (fun i ->
-      List.fold_left
-        (fun count r ->
-          let clock = Run.clock r |> int_of_float in
-          if clock = i then count +. 1. else count )
-        0. runs )
+    List.fold_left
+      (fun count r ->
+        let clock = Run.clock r |> int_of_float in
+        if clock = i then count +. 1. else count )
+      0. runs )
 
 let pp_quick_results fmt results =
   let nothing = ref 0 in
@@ -118,8 +118,8 @@ let pp_table_results fmt results =
   Format.fprintf fmt
     "| Nothing | Reached | Timeout | Other | Killed | Total |@\n\
      |:-------:|:-------:|:-------:|:-----:|:------:|:-----:|@\n\
-     | %6i | %6i | %6i | %6i | %6i | %6i |" nothing reached timeout other killed
-    total
+     | %6i | %6i | %6i | %6i | %6i | %6i |"
+    nothing reached timeout other killed total
 
 let pp_table_statistics fmt results =
   let total = sum_clock results in
