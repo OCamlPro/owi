@@ -1009,7 +1009,7 @@ open Syntax
 module Choice = Concolic.P.Choice
 
 (* let () = Random.self_init () *)
-let () = Random.ini<span data-count="915">t</span> 42
+let () = Random.ini<span data-count="927">t</span> 42
 
 (* TODO: add a flag for this *)
 let print_paths = false
@@ -1391,7 +1391,7 @@ let run solver tree link_state modules_to_run =
         <span data-count="222">L</span>og.debug2 "Assume_fail: %a@." Smtml.Expr.pp c;
         <span data-count="222">L</span>og.debug2 "Pc:@.%a" Concolic_choice.pp_pc trace.remaining_pc;
         <span data-count="222">L</span>og.debug2 "Assignments:@.%a@."
-          (Concolic_choice.pp_assignments ~no_values:false)
+          (Concolic_choice.pp_assignments ~no_value:false)
           trace.assignments;
         <span data-count="222">L</span>og.debug0 "Retry !@.";
         <span data-count="222">m</span>atch pc_model solver (Assume c :: trace.remaining_pc) with
@@ -1419,7 +1419,7 @@ let run solver tree link_state modules_to_run =
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
-  ~no_stop_at_failure:_ ~no_values ~no_assert_failure_expression_printing
+  ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
   ~files =
   <span data-count="164">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
@@ -1434,7 +1434,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   <span data-count="164">l</span>et tree = fresh_tree [] in
   <span data-count="164">l</span>et* result = ru<span data-count="164">n</span> solver tree link_state modules_to_run in
   <span data-count="164">l</span>et testcase assignments =
-    <span data-count="5">i</span>f not no_values then
+    <span data-count="5">i</span>f not no_value then
       <span data-count="4">l</span>et testcase : Smtml.Value.t list =
         List.ma<span data-count="4">p</span>
           (fun (_, v) -&gt;
@@ -1458,7 +1458,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     let assignments = List.rev assignments in
     <span data-count="2">F</span>mt.pr "Trap: %s@\n" (Trap.to_strin<span data-count="2">g</span> trap);
     <span data-count="2">F</span>mt.pr "Model:@\n  @[&lt;v&gt;%a@]@."
-      (Concolic_choice.pp_assignments ~no_values)
+      (Concolic_choice.pp_assignments ~no_value)
       assignments;
     <span data-count="2">l</span>et* () = testcas<span data-count="2">e</span> assignments in
     <span data-count="2">E</span>rror (`Found_bug 1)
@@ -1472,7 +1472,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
       <span data-count="3">F</span>mt.p<span data-count="3">r</span> "Assert failure@\n"
     end;
     Fmt.pr "Model:@\n  @[&lt;v&gt;%a@]@."
-      (Concolic_choice.pp_assignments ~no_values)
+      (Concolic_choice.pp_assignments ~no_value)
       assignments;
     <span data-count="3">l</span>et* () = testcas<span data-count="3">e</span> assignments in
     <span data-count="3">E</span>rror (`Found_bug 1)

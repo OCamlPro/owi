@@ -246,14 +246,14 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4173866">m</span>atch o with <span data-count="4154038">O</span>k v -&gt; f v | <span data-count="19828">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4174890">m</span>atch o with <span data-count="4155062">O</span>k v -&gt; f v | <span data-count="19828">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="2127301">m</span>atch o with <span data-count="2118210">O</span>k v -&gt; Ok (<span data-count="2118210">f</span> v) | <span data-count="9091">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2127763">m</span>atch o with <span data-count="2118668">O</span>k v -&gt; Ok (<span data-count="2118668">f</span> v) | <span data-count="9095">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="818690">O</span>k v
+let ok v = <span data-count="819064">O</span>k v
 
 let list_iter f l =
-  <span data-count="36218">l</span>et err = ref None in
+  <span data-count="36290">l</span>et err = ref None in
   try
     List.iter
       (fun v -&gt;
@@ -263,20 +263,20 @@ let list_iter f l =
           raise Exit
         | <span data-count="20134">O</span>k () -&gt; () )
       l;
-    <span data-count="36101">O</span>k ()
+    <span data-count="36173">O</span>k ()
   with <span data-count="117">E</span>xit -&gt; Option.get !err
 
 let list_map f l =
-  <span data-count="208901">l</span>et err = ref None in
+  <span data-count="209083">l</span>et err = ref None in
   try
-    o<span data-count="208757">k</span>
-    @@ List.ma<span data-count="208757">p</span>
+    o<span data-count="208939">k</span>
+    @@ List.ma<span data-count="208939">p</span>
          (fun v -&gt;
-           <span data-count="225728">m</span>atch f v with
+           <span data-count="225863">m</span>atch f v with
            | <span data-count="144">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="225584">O</span>k v -&gt; v )
+           | <span data-count="225719">O</span>k v -&gt; v )
          l
   with <span data-count="144">E</span>xit -&gt; Option.get !err
 
@@ -295,10 +295,10 @@ let list_concat_map f l =
   with <span data-count="0">E</span>xit -&gt; Option.get !err
 
 let list_fold_left f acc l =
-  <span data-count="153925">L</span>ist.fold_left
+  <span data-count="154101">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="716872">l</span>et* acc in
-      <span data-count="715287">f</span> acc v )
+      <span data-count="717066">l</span>et* acc in
+      <span data-count="715481">f</span> acc v )
     (Ok acc) l
 
 let list_fold_left_map f acc l =
@@ -312,14 +312,14 @@ let list_fold_left_map f acc l =
   <span data-count="30">(</span>acc, List.re<span data-count="30">v</span> l)
 
 let array_iter f a =
-  <span data-count="41888">l</span>et err = ref None in
+  <span data-count="41984">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="41888">h</span> a - 1 do
-      <span data-count="71904">m</span>atch f (Array.unsafe_ge<span data-count="71904">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="41984">h</span> a - 1 do
+      <span data-count="71944">m</span>atch f (Array.unsafe_ge<span data-count="71944">t</span> a i) with
       | <span data-count="2964">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="68940">O</span>k () -&gt; ()
+      | <span data-count="68980">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="2964">E</span>xit -&gt; Option.get !err
@@ -338,10 +338,10 @@ let array_map f a =
   with <span data-count="4">E</span>xit -&gt; Option.get !err
 
 let array_fold_left f acc l =
-  <span data-count="20438">A</span>rray.fold_left
+  <span data-count="20486">A</span>rray.fold_left
     (fun acc v -&gt;
-      <span data-count="26167">l</span>et* acc in
-      <span data-count="26149">f</span> acc v )
+      <span data-count="26187">l</span>et* acc in
+      <span data-count="26169">f</span> acc v )
     (Ok acc) l
 </code></pre>
       </div>

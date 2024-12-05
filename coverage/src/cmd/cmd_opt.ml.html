@@ -73,20 +73,20 @@
 
 open Syntax
 
-let optimize_file ~unsafe filename =
+let optimize_file ~unsafe ~source_file =
   <span data-count="22">C</span>ompile.File.until_optimize ~unsafe ~rac:false ~srac:false ~optimize:true
-    filename
+    source_file
 
-let print_or_emit ~unsafe file outfile =
-  <span data-count="22">l</span>et* m = optimize_fil<span data-count="22">e</span> ~unsafe file in
+let print_or_emit ~unsafe ~source_file ~out_file =
+  <span data-count="22">l</span>et* m = optimize_file ~unsafe ~source_file in
   <span data-count="22">l</span>et m = Binary_to_text.modul m in
-  <span data-count="22">m</span>atch outfile with
+  <span data-count="22">m</span>atch out_file with
   | <span data-count="1">S</span>ome name -&gt; Bos.OS.File.writef name "%a@\n" Text.pp_modul m
   | <span data-count="21">N</span>one -&gt; Ok (Fmt.p<span data-count="21">r</span> "%a@\n" Text.pp_modul m)
 
-let cmd ~debug ~unsafe ~file ~outfile =
+let cmd ~debug ~unsafe ~source_file ~out_file =
   <span data-count="22">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
-  <span data-count="22">p</span>rint_or_emit ~unsafe file outfile
+  <span data-count="22">p</span>rint_or_emit ~unsafe ~source_file ~out_file
 </code></pre>
       </div>
     </div>

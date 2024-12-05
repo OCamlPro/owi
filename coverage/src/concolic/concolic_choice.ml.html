@@ -394,10 +394,10 @@ let pp_pc_elt fmt = function
 
 let pp_pc fmt pc = <span data-count="0">L</span>ist.iter (fun e -&gt; <span data-count="0">F</span>mt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
-let pp_assignments ~no_values fmt assignments =
+let pp_assignments ~no_value fmt assignments =
   <span data-count="5">l</span>et open Smtml in
   let pp_v =
-    if not no_values then
+    if not no_value then
       <span data-count="4">F</span>mt.paren<span data-count="4">s</span> (Fmt.pai<span data-count="4">r</span> ~sep:Fmt.sp Symbol.pp (Fmt.paren<span data-count="4">s</span> Concrete_value.pp))
     else <span data-count="1">f</span>un fmt (x, _) -&gt;
       <span data-count="6">l</span>et ty = Symbol.type_of x in

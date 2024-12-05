@@ -450,16 +450,16 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let binc_location = List.ma<span data-count="915">p</span> Fpath.v C_share_site.Sites.binc
+let binc_location = List.ma<span data-count="927">p</span> Fpath.v C_share_site.Sites.binc
 
-let libc_location = List.ma<span data-count="915">p</span> Fpath.v C_share_site.Sites.libc
+let libc_location = List.ma<span data-count="927">p</span> Fpath.v C_share_site.Sites.libc
 
 let find location file : Fpath.t Result.t =
   <span data-count="352">l</span>et* l =
     list_ma<span data-count="352">p</span>
       (fun dir -&gt;
         <span data-count="352">l</span>et filename = Fpath.append dir file in
-        <span data-count="352">m</span>atch Bos.OS.File.exists filename with
+        <span data-count="352">m</span>atch OS.File.exists filename with
         | <span data-count="352">O</span>k true -&gt; Ok (Some filename)
         | <span data-count="0">O</span>k false -&gt; Ok None
         | <span data-count="0">E</span>rror (`Msg msg) -&gt; Error (`Msg msg) )
@@ -507,7 +507,7 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
         files
     in
 
-    <span data-count="25">l</span>et framac : Fpath.t -&gt; Fpath.t -&gt; Bos.Cmd.t =
+    <span data-count="25">l</span>et framac : Fpath.t -&gt; Fpath.t -&gt; Cmd.t =
      fun file out -&gt; <span data-count="25">C</span>md.(framac_bin %<span data-count="25">%</span> flags1 <span data-count="25">%</span> <span data-count="25">p</span> file %<span data-count="25">%</span> flags2 % <span data-count="25">p</span> out)
     in
 
@@ -559,7 +559,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
   let* libc = fin<span data-count="352">d</span> binc_location (Fpath.<span data-count="352">v</span> "libc.wasm") in
 
   <span data-count="352">l</span>et files = Cmd.of_list (List.ma<span data-count="352">p</span> Fpath.to_string (libc :: files)) in
-  <span data-count="352">l</span>et clang : Bos.Cmd.t = Cmd.(clang_bin %<span data-count="352">%</span> flags <span data-count="352">%</span> "-o" <span data-count="352">%</span> <span data-count="352">p</span> out %<span data-count="352">%</span> files) in
+  <span data-count="352">l</span>et clang : Cmd.t = Cmd.(clang_bin %<span data-count="352">%</span> flags <span data-count="352">%</span> "-o" <span data-count="352">%</span> <span data-count="352">p</span> out %<span data-count="352">%</span> files) in
 
   let+ () =
     match OS.Cmd.run clang with
@@ -591,7 +591,7 @@ let metadata ~workspace arch property files : unit Result.t =
     <span data-count="350">l</span>et* hash =
       list_fold_lef<span data-count="350">t</span>
         (fun context file -&gt;
-          <span data-count="4808">l</span>et+ str = Bos.OS.File.rea<span data-count="4808">d</span> file in
+          <span data-count="4808">l</span>et+ str = OS.File.rea<span data-count="4808">d</span> file in
           <span data-count="4808">D</span>igestif.SHA256.feed_string context str )
         Digestif.SHA256.empty files
     in
@@ -623,7 +623,7 @@ let metadata ~workspace arch property files : unit Result.t =
   <span data-count="350">r</span>es
 
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
-  ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_values
+  ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver : unit Result.t =
   <span data-count="357">l</span>et workspace = Fpath.v workspace in
@@ -636,7 +636,7 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   let files = [ modul ] in
   (if concolic then <span data-count="160">C</span>md_conc.cmd else <span data-count="190">C</span>md_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
-    ~no_stop_at_failure ~no_values ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
 </code></pre>
       </div>

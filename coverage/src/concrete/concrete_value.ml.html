@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_value.ml &mdash; Coverage report</title>
-    <meta name="description" content="66.67% coverage in src/concrete/concrete_value.ml">
+    <meta name="description" content="68.06% coverage in src/concrete/concrete_value.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/concrete/</span>concrete_value.ml
         </a>
       </h1>
-      <h2>66.67%</h2>
+      <h2>68.06%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:32.14%"></span>
@@ -26,7 +26,6 @@
       <span class="unvisited" style="bottom:30.36%"></span>
       <span class="unvisited" style="bottom:29.76%"></span>
       <span class="unvisited" style="bottom:29.17%"></span>
-      <span class="unvisited" style="bottom:11.90%"></span>
       <span class="unvisited" style="bottom:11.31%"></span>
       <span class="unvisited" style="bottom:8.33%"></span>
       <span class="some-visited" style="bottom:0.60%"></span>
@@ -182,7 +181,7 @@
 <a id="L145"></a><span class="visited"> </span>
 <a id="L146"></a><span class="visited"> </span>
 <a id="L147"></a><span class="visited"> </span>
-<a id="L148"></a><span class="unvisited"> </span>
+<a id="L148"></a><span class="visited"> </span>
 <a id="L149"></a><span class="unvisited"> </span>
 <a id="L150"></a><span > </span>
 <a id="L151"></a><span > </span>
@@ -418,43 +417,43 @@ struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : binary val_type =
-    <span data-count="11248">m</span>atch e with
-    | <span data-count="8313">I</span>32 -&gt; Num_type I32
-    | <span data-count="755">I</span>64 -&gt; Num_type I64
-    | <span data-count="976">F</span>32 -&gt; Num_type F32
-    | <span data-count="1201">F</span>64 -&gt; Num_type F64
+    <span data-count="11344">m</span>atch e with
+    | <span data-count="8385">I</span>32 -&gt; Num_type I32
+    | <span data-count="763">I</span>64 -&gt; Num_type I64
+    | <span data-count="984">F</span>32 -&gt; Num_type F32
+    | <span data-count="1209">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : binary result_type =
-    <span data-count="9957">m</span>atch r with
-    | <span data-count="5419">R</span>0 -&gt; []
-    | <span data-count="4538">R</span>1 a -&gt; [ elt_typ<span data-count="4538">e</span> a ]
+    <span data-count="10049">m</span>atch r with
+    | <span data-count="5459">R</span>0 -&gt; []
+    | <span data-count="4590">R</span>1 a -&gt; [ elt_typ<span data-count="4590">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; binary param_type = function
-    | <span data-count="1065">M</span>em tl -&gt; arg_type tl
-    | <span data-count="3560">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="6710">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="6710">e</span> hd) :: arg_typ<span data-count="6710">e</span> tl
+    | <span data-count="1069">M</span>em tl -&gt; arg_type tl
+    | <span data-count="3610">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="6754">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="6754">e</span> hd) :: arg_typ<span data-count="6754">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="9957">R</span>es -&gt; []
+    | <span data-count="10049">R</span>es -&gt; []
 
   (* let extern_type (Func (arg, res)) : Simplified.func_type = *)
   (*   (arg_type arg, res_type res) *)
 
   let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
-    <span data-count="9957">(</span>arg_typ<span data-count="9957">e</span> arg, res_typ<span data-count="9957">e</span> res)
+    <span data-count="10049">(</span>arg_typ<span data-count="10049">e</span> arg, res_typ<span data-count="10049">e</span> res)
 
   type t = Func_intf.t
 
   let fresh =
-    let r = ref ~<span data-count="3660">-</span>1 in
+    let r = ref ~<span data-count="3708">-</span>1 in
     fun () -&gt;
-      <span data-count="14622">i</span>ncr r;
-      <span data-count="14622">!</span>r
+      <span data-count="14630">i</span>ncr r;
+      <span data-count="14630">!</span>r
 
-  let wasm func env : t = <span data-count="14622">W</span>ASM (fres<span data-count="14622">h</span> (), func, env)
+  let wasm func env : t = <span data-count="14630">W</span>ASM (fres<span data-count="14630">h</span> (), func, env)
 
   (* let typ = function *)
   (*   | Func_intf.WASM (_, func, _env) -&gt; func.type_f *)
@@ -520,10 +519,10 @@ let to_instr = function
   | Ref _ -&gt; assert false
 
 let pp fmt = function
-  | <span data-count="52">I</span>32 i -&gt; pf fmt "i32.const %ld" i
-  | <span data-count="12">I</span>64 i -&gt; pf fmt "i64.const %Ld" i
-  | <span data-count="14">F</span>32 f -&gt; pf fmt "f32.const %a" Float32.pp f
-  | <span data-count="0">F</span>64 f -&gt; pf fmt "f64.const %a" Float64.pp f
+  | <span data-count="64">I</span>32 i -&gt; pf fmt "i32.const %ld" i
+  | <span data-count="15">I</span>64 i -&gt; pf fmt "i64.const %Ld" i
+  | <span data-count="17">F</span>32 f -&gt; pf fmt "f32.const %a" Float32.pp f
+  | <span data-count="3">F</span>64 f -&gt; pf fmt "f64.const %a" Float64.pp f
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
 let ref_null' = function

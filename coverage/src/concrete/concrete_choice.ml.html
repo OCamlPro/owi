@@ -89,26 +89,26 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157408448">x</span> [@@inline]
+let return x = <span data-count="157408531">x</span> [@@inline]
 
-let bind x f = <span data-count="183856216">f</span> x [@@inline]
+let bind x f = <span data-count="183856307">f</span> x [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="13519940">l</span>et* v in
-  <span data-count="13519940">r</span>eturn (<span data-count="13519940">f</span> v)
+  <span data-count="13519960">l</span>et* v in
+  <span data-count="13519960">r</span>eturn (<span data-count="13519960">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
 
-let select b = <span data-count="19577400">b</span> [@@inline]
+let select b = <span data-count="19577407">b</span> [@@inline]
 
 let select_i32 i = <span data-count="1609080">i</span> [@@inline]
 
-let trap msg = <span data-count="4688">r</span>aise (Types.Trap msg)
+let trap msg = <span data-count="4692">r</span>aise (Types.Trap msg)
 
-let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4688">t</span>rap (Trap.to_strin<span data-count="4688">g</span> tr)
+let trap : Trap.t -&gt; 'a t = fun tr -&gt; <span data-count="4692">t</span>rap (Trap.to_strin<span data-count="4692">g</span> tr)
 
 let run = Fun.id
 </code></pre>
