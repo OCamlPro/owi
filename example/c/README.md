@@ -473,11 +473,11 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -o VAL, --output=VAL (absent=owi-out)
-           write results to dir
-
        -O VAL (absent=3)
            specify which optimization level to use
+
+       -o VAL, --outpt=VAL (absent=owi-out)
+           write results to dir
 
        --optimize
            optimize mode

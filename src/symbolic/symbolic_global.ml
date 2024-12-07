@@ -2,11 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module ITbl = Hashtbl.Make (struct
-  include Int
-
-  let hash x = x
-end)
+module ITbl = Hashtbl.Make (Int)
 
 type t =
   { mutable value : Symbolic_value.t
