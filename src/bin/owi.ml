@@ -7,19 +7,33 @@ open Cmdliner
 
 (* Helpers *)
 
-let existing_non_dir_file =
+let existing_file_conv =
   let parse s =
-    let path = Fpath.v s in
-    match Bos.OS.File.exists path with
-    | Ok true -> `Ok path
-    | Ok false -> `Error (Fmt.str "no file '%a'" Fpath.pp path)
-    | Error (`Msg s) -> `Error s
+    match Fpath.of_string s with
+    | Error _ as e -> e
+    | Ok path -> begin
+      match Bos.OS.File.exists path with
+      | Ok true -> Ok path
+      | Ok false -> Fmt.error_msg "no file '%a'" Fpath.pp path
+      | Error _ as e -> e
+    end
   in
-  (parse, Fpath.pp)
+  Arg.conv (parse, Fpath.pp)
 
-let dir_file =
-  let parse s = `Ok (Fpath.v s) in
-  (parse, Fpath.pp)
+let existing_dir_conv =
+  let parse s =
+    match Fpath.of_string s with
+    | Error _ as e -> e
+    | Ok path -> begin
+      match Bos.OS.Dir.exists path with
+      | Ok true -> Ok path
+      | Ok false -> Fmt.error_msg "no directory '%a'" Fpath.pp path
+      | Error _ as e -> e
+    end
+  in
+  Arg.conv (parse, Fpath.pp)
+
+let path_conv = Arg.conv (Fpath.of_string, Fpath.pp)
 
 let solver_conv =
   Arg.conv
@@ -53,20 +67,16 @@ let deterministic_result_order =
 
 let files =
   let doc = "source files" in
-  let f = existing_non_dir_file in
-  Arg.(value & pos_all f [] (info [] ~doc))
+  Arg.(value & pos_all existing_file_conv [] (info [] ~doc))
 
 let source_file =
   let doc = "source file" in
-  Arg.(required & pos 0 (some existing_non_dir_file) None (info [] ~doc))
+  Arg.(required & pos 0 (some existing_file_conv) None (info [] ~doc))
 
 let out_file =
   let doc = "Write output to a file." in
-  let string_to_path = Arg.conv ~docv:"FILE" (Fpath.of_string, Fpath.pp) in
   Arg.(
-    value
-    & opt (some string_to_path) None
-    & info [ "o"; "output" ] ~docv:"FILE" ~doc )
+    value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
@@ -128,8 +138,8 @@ let workers =
     & info [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
-  let doc = "path to the workspace directory" in
-  Arg.(value & opt dir_file (Fpath.v "owi-out") & info [ "workspace" ] ~doc)
+  let doc = "write results to dir" in
+  Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
 
 (* owi c *)
 
@@ -144,20 +154,17 @@ let c_cmd =
     Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
   and+ property =
     let doc = "property file" in
-    Arg.(
-      value & opt (some existing_non_dir_file) None & info [ "property" ] ~doc )
+    Arg.(value & opt (some existing_file_conv) None & info [ "property" ] ~doc)
   and+ includes =
     let doc = "headers path" in
-    Arg.(value & opt_all dir_file [] & info [ "I" ] ~doc)
+    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
   and+ opt_lvl =
     let doc = "specify which optimization level to use" in
     Arg.(value & opt string "3" & info [ "O" ] ~doc)
   and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
-  and+ workspace =
-    let doc = "write results to dir" in
-    Arg.(value & opt string "owi-out" & info [ "output"; "o" ] ~doc)
+  and+ workspace
   and+ concolic =
     let doc = "concolic mode" in
     Arg.(value & flag & info [ "concolic" ] ~doc)
@@ -323,16 +330,11 @@ let replay_cmd =
   and+ unsafe
   and+ optimize
   and+ replay_file =
-    let parse s =
-      let path = Fpath.v s in
-      match Bos.OS.File.exists path with
-      | Ok true -> Ok path
-      | Ok false -> Error (`Msg (Fmt.str "no file '%a'" Fpath.pp path))
-      | Error _e as e -> e
-    in
-    let replay_file = Cmdliner.Arg.conv (parse, Fpath.pp) in
     let doc = "Which replay file to use" in
-    Arg.(required & opt (some replay_file) None & info [ "replay-file" ] ~doc)
+    Arg.(
+      required
+      & opt (some existing_file_conv) None
+      & info [ "replay-file" ] ~doc )
   and+ source_file in
   Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
 

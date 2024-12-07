@@ -7,7 +7,7 @@ val cmd :
   -> arch:int
   -> property:Fpath.t option
   -> testcomp:bool
-  -> workspace:string
+  -> workspace:Fpath.t
   -> workers:int
   -> opt_lvl:string
   -> includes:Fpath.t list
