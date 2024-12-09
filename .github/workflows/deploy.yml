@@ -49,7 +49,7 @@ jobs:
           color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85)
           opam exec -- ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg
       - name: deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.1
+        uses: JamesIves/github-pages-deploy-action@v4.7.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
