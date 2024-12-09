@@ -8,3 +8,5 @@ char *optarg = NULL;
 int close(int fd) { return 0; }
 ssize_t read(int fd, void *buf, size_t len) { return 0; }
 int getpid(void) { return 0; }
+
+int getopt(int argc, char *argv[], const char *optstring) { return -1; }
