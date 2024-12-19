@@ -21,8 +21,8 @@ let rec is_stack_compatible st1 st2 =
   match (st1, st2) with
   | _, [] -> true
   | [], _ -> false
-  | s1 :: st1, s2 :: st2 -> s1 = s2 && is_stack_compatible st1 st2
+  | s1 :: st1, s2 :: st2 -> val_type_eq s1 s2 && is_stack_compatible st1 st2
 
 let is_stack_compatible_param stack pt =
-  let s = List.map (fun p -> snd p) pt in
+  let s = List.map snd pt in
   is_stack_compatible stack s

@@ -19,10 +19,12 @@ let set =
   let raise n = if n = -2 then raise Timeout in
   fun () ->
     Sys.set_signal Sys.sigalrm (Sys.Signal_handle raise);
-    ignore
-    @@ ( Unix.setitimer Unix.ITIMER_REAL
-           { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
-         : Unix.interval_timer_status )
+    let _ : Unix.interval_timer_status =
+      ( Unix.setitimer Unix.ITIMER_REAL
+          { Unix.it_interval = 0.; Unix.it_value = Param.max_time_execution }
+        : Unix.interval_timer_status )
+    in
+    ()
 
 let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
   try
