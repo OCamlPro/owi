@@ -70,7 +70,7 @@ let pp_num_type fmt = function
 let num_type_eq t1 t2 =
   match (t1, t2) with
   | I32, I32 | I64, I64 | F32, F32 | F64, F64 -> true
-  | _, _ -> false
+  | (I32 | I64 | F32 | F64), _ -> false
 
 let compare_num_type t1 t2 =
   let to_int = function I32 -> 0 | I64 -> 1 | F32 -> 2 | F64 -> 3 in
@@ -100,6 +100,8 @@ type nonrec mut =
   | Var
 
 let pp_mut fmt = function Const -> () | Var -> pf fmt "mut"
+
+let is_mut = function Const -> false | Var -> true
 
 type nonrec nn =
   | S32

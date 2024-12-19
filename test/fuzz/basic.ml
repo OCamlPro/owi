@@ -418,7 +418,7 @@ let memory_exists (env : Env.t) = Option.is_some env.memory
 
 let memarg nsize =
   let* offset = int32 in
-  let offset = if offset < 0l then Int32.sub 0l offset else offset in
+  let offset = if Owi.Int32.lt offset 0l then Int32.sub 0l offset else offset in
   let+ align =
     match nsize with
     | NS8 -> const 0
@@ -549,11 +549,13 @@ let table_copy (env : Env.t) =
     let instr =
       let* name_x, (_lim_x, rt_x) = choose tables in
       let* name_y, (_lim_y, rt_y) = choose tables in
-      if rt_x = rt_y then
+      match (rt_x, rt_y) with
+      | ((Null, ht1), (Null, ht2) | (No_null, ht1), (No_null, ht2))
+        when heap_type_eq ht1 ht2 ->
         pair
           (const (Table_copy (Text name_x, Text name_y)))
           (const [ S.Pop; S.Pop; S.Pop ])
-      else pair (const Nop) (const [ S.Nothing ])
+      | _ -> pair (const Nop) (const [ S.Nothing ])
       (* TODO: avoid if ... then ... else pair (const (Nop)) (const [ S.Nothing ])
          https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
     in

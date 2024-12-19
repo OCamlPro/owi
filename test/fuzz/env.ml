@@ -63,7 +63,7 @@ let get_blocks env = env.blocks
 
 let add_data env =
   let n = env.next_data in
-  let name = Format.sprintf "d%d" n in
+  let name = Fmt.str "d%d" n in
   env.datas <- name :: env.datas;
   env.next_data <- succ n;
   name
@@ -72,57 +72,57 @@ let add_memory env =
   match env.memory with
   | None ->
     let n = env.next_memory in
-    let name = Format.sprintf "m%d" n in
+    let name = Fmt.str "m%d" n in
     env.memory <- Some name;
     env.next_memory <- succ n;
     name
-  | Some _ -> failwith "a memory already exists"
+  | Some _ -> assert false
 
 let add_type env typ =
   let n = env.next_type in
-  let name = Format.sprintf "ty%d" n in
+  let name = Fmt.str "ty%d" n in
   env.types <- (name, typ) :: env.types;
   env.next_type <- succ n;
   name
 
 let add_elem env typ =
   let n = env.next_elem in
-  let name = Format.sprintf "e%d" n in
+  let name = Fmt.str "e%d" n in
   env.elems <- (name, typ) :: env.elems;
   env.next_elem <- succ n;
   name
 
 let add_table env typ =
   let n = env.next_table in
-  let name = Format.sprintf "t%d" n in
+  let name = Fmt.str "t%d" n in
   env.tables <- (name, typ) :: env.tables;
   env.next_table <- succ n;
   name
 
 let add_global env typ =
   let n = env.next_global in
-  let name = Format.sprintf "g%d" n in
+  let name = Fmt.str "g%d" n in
   env.globals <- (name, typ) :: env.globals;
   env.next_global <- succ n;
   name
 
 let add_local env typ =
   let n = env.next_local in
-  let name = Format.sprintf "l%d" n in
+  let name = Fmt.str "l%d" n in
   env.locals <- (name, typ) :: env.locals;
   env.next_local <- succ n;
   name
 
 let add_block env typ bkind =
   let n = env.next_block in
-  let name = Format.sprintf "b%d" n in
+  let name = Fmt.str "b%d" n in
   env.blocks <- (bkind, name, typ) :: env.blocks;
   env.next_block <- succ n;
   name
 
 let add_func env typ =
   let n = env.next_fun in
-  let name = Format.sprintf "f%d" n in
+  let name = Fmt.str "f%d" n in
   env.next_fun <- succ n;
   env.funcs <- (name, typ) :: env.funcs;
   name
@@ -131,7 +131,7 @@ let get_globals ntyp env ~only_mut =
   let is_typ global =
     let _, (m, v) = global in
     match v with
-    | Num_type nt -> nt = ntyp && ((not only_mut) || m = Owi.Types.Var)
+    | Num_type nt -> num_type_eq ntyp nt && ((not only_mut) || is_mut m)
     | Ref_type _ -> false
   in
   List.filter is_typ env.globals
@@ -139,7 +139,7 @@ let get_globals ntyp env ~only_mut =
 let get_locals ntyp env =
   let is_typ local =
     let _, v = local in
-    match v with Num_type nt -> nt = ntyp | Ref_type _ -> false
+    match v with Num_type nt -> num_type_eq nt ntyp | Ref_type _ -> false
   in
   List.filter is_typ env.locals
 
