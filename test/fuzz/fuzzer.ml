@@ -4,6 +4,11 @@ let timeout_count = ref 0
 
 let global_count = ref 0
 
+let write_module filename m = 
+  let oc = open_out filename in
+  Fmt.pf (Format.formatter_of_out_channel oc) "%a@." Owi.Text.pp_modul m;
+  close_out oc
+
 let compare (module I1 : Interprets.INTERPRET)
   (module I2 : Interprets.INTERPRET) m =
   if Param.debug then begin
@@ -69,6 +74,20 @@ let compare (module I1 : Interprets.INTERPRET)
 
 let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
   m =
+  (* Save the generated module *)
+  if Param.save_modules then (
+    (* Create output directory if it doesn't exist *)
+    if not (Sys.file_exists Param.output_dir) then
+      Unix.mkdir Param.output_dir 0o755;
+
+    let filename = Printf.sprintf "%s/gen_do_module_%d.wat" 
+      Param.output_dir !global_count in
+    write_module filename m;
+
+    if Param.debug then 
+      Fmt.epr "Saved module to %s@\n" filename;
+  );
+
   compare (module I1) (module I2) m
 
 let add_test name gen (module I1 : Interprets.INTERPRET)
