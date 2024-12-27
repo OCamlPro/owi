@@ -106,27 +106,26 @@ end
 module Reference : INTERPRET = struct
   type t = string
 
-  let of_symbolic modul = Format.asprintf "%a" Text.pp_modul modul
+  let of_symbolic modul = Fmt.str "%a" Text.pp_modul modul
 
   let run modul : unit Result.t =
-    let prefix = "owi_fuzzer_official" in
-    let suffix = ".wast" in
-    let tmp_file = Filename.temp_file prefix suffix in
-    let chan = open_out tmp_file in
-    let fmt = Stdlib.Format.formatter_of_out_channel chan in
-    Fmt.pf fmt "%s@\n" modul;
-    close_out chan;
-    let n =
-      Format.kasprintf Sys.command "timeout %fs wasm %s"
-        Param.max_time_execution tmp_file
+    let* tmp_file = Bos.OS.File.tmp "owi_fuzzer_official%s.wat" in
+    let* () = Bos.OS.File.writef tmp_file "%s@\n" modul in
+    let* status =
+      Bos.OS.Cmd.run_status
+        Bos.Cmd.(
+          v "timeout" % Fmt.str "%fs" Param.max_time_execution % p tmp_file )
     in
-    match n with
-    | 0 -> Ok ()
-    | 42 ->
+    match status with
+    | `Signaled n ->
+      Fmt.failwith "error, timeout command was signaled with OCaml signal %d@\n"
+        n
+    | `Exited 0 -> Ok ()
+    | `Exited 42 ->
       (* TODO: fix this *)
       Error (`Trap Trap.Out_of_bounds_memory_access)
-    | 124 -> Error `Timeout
-    | n -> Error (`Msg (Format.sprintf "error %d" n))
+    | `Exited 124 -> Error `Timeout
+    | `Exited n -> Fmt.error_msg "error %d" n
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"
