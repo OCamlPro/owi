@@ -59,7 +59,7 @@ let compare (module I1 : Interprets.INTERPRET)
   | Error msg1, Error msg2 ->
     let msg1 = Owi.Result.err_to_string msg1 in
     let msg2 = Owi.Result.err_to_string msg2 in
-    true (* TODO: fixme *) || msg1 = msg2
+    true (* TODO: fixme *) || String.equal msg1 msg2
     ||
     ( Fmt.epr "`%s` gave error `%s` but `%s` gave error `%s`" I1.name msg1
         I2.name msg2;
