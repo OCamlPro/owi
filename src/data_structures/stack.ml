@@ -21,7 +21,7 @@ module type S = sig
 
   val empty : t
 
-  val pp : Fmt.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit
 
   (** pop operations *)
 

@@ -1,11 +1,9 @@
-module S = Smtml.Solver_dispatcher
-
 type t =
   | Owi of
       { concolic : bool
       ; optimisation_level : int
       ; workers : int
-      ; solver : S.solver_type
+      ; solver : Smtml.Solver_type.t
       }
   | Klee
 
@@ -16,7 +14,7 @@ let to_short_name = function Owi _ -> "owi" | Klee -> "klee"
 let to_reference_name = function
   | Owi { concolic; workers; optimisation_level; solver } ->
     Format.asprintf "owi_w%d_O%d_s%a%s" workers optimisation_level
-      S.pp_solver_type solver
+      Smtml.Solver_type.pp solver
       (if concolic then "_concolic" else "")
   | Klee -> "klee"
 
@@ -117,7 +115,7 @@ let execvp ~output_dir tool file timeout =
           ; "-o"
           ; output_dir
           ; "--solver"
-          ; Format.asprintf "%a" S.pp_solver_type solver
+          ; Format.asprintf "%a" Smtml.Solver_type.pp solver
           ; file
           ] )
     | Klee ->

@@ -5,7 +5,7 @@ end
 
 let tool =
   Tool.mk_owi ~concolic:false ~workers:24 ~optimisation_level:3
-    ~solver:Smtml.Solver_dispatcher.Z3_solver
+    ~solver:Smtml.Solver_type.Z3_solver
 
 let _tool = Tool.mk_klee ()
 

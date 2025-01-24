@@ -22,7 +22,7 @@ let list_iter f l =
         | Ok () -> () )
       l;
     Ok ()
-  with Exit -> Option.get !err
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
 
 let list_map f l =
   let err = ref None in
@@ -36,7 +36,7 @@ let list_map f l =
              raise Exit
            | Ok v -> v )
          l
-  with Exit -> Option.get !err
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
 
 let list_concat_map f l =
   let err = ref None in
@@ -50,7 +50,7 @@ let list_concat_map f l =
              raise Exit
            | Ok v -> v )
          l
-  with Exit -> Option.get !err
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
 
 let list_fold_left f acc l =
   List.fold_left
@@ -80,7 +80,7 @@ let array_iter f a =
       | Ok () -> ()
     done;
     Ok ()
-  with Exit -> Option.get !err
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
 
 let array_map f a =
   let err = ref None in
@@ -93,7 +93,7 @@ let array_map f a =
            err := Some e;
            raise Exit
          | Ok v -> v )
-  with Exit -> Option.get !err
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
 
 let array_fold_left f acc l =
   Array.fold_left

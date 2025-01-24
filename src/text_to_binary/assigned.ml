@@ -115,7 +115,12 @@ let name kind ~get_name values =
 let check_type_id (types : binary str_type Named.t)
   ((id, func_type) : Grouped.type_check) =
   let id =
-    match id with Raw i -> i | Text name -> String_map.find name types.named
+    match id with
+    | Raw i -> i
+    | Text name -> (
+      match String_map.find_opt name types.named with
+      | None -> (* TODO: unchecked, is this actually reachable? *) assert false
+      | Some v -> v )
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with

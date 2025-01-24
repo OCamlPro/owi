@@ -120,8 +120,9 @@ let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file =
   if debug then Log.debug_on := true;
   let* model =
     match Smtml.Model.Parse.Scfg.from_file replay_file with
-    | Error msg -> Error (`Invalid_model msg)
+    | Error (`Msg msg) -> Error (`Invalid_model msg)
     | Ok model ->
+      let bindings = Smtml.Model.get_bindings model in
       let+ model =
         list_map
           (fun (_sym, v) ->
@@ -137,7 +138,7 @@ let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file =
               Error
                 (`Invalid_model
                    (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
-          (Smtml.Model.get_bindings model)
+          bindings
       in
       Array.of_list model
   in

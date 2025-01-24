@@ -11,14 +11,15 @@ val debug_on : bool ref
 val profiling_on : bool ref
 
 (** print some debug info *)
-val debug0 : (unit, Fmt.formatter, unit) format -> unit
+val debug0 : (unit, Format.formatter, unit) format -> unit
 
-val debug1 : ('a -> unit, Fmt.formatter, unit) format -> 'a -> unit
+val debug1 : ('a -> unit, Format.formatter, unit) format -> 'a -> unit
 
-val debug2 : ('a -> 'b -> unit, Fmt.formatter, unit) format -> 'a -> 'b -> unit
+val debug2 :
+  ('a -> 'b -> unit, Format.formatter, unit) format -> 'a -> 'b -> unit
 
 val debug5 :
-     ('a -> 'b -> 'c -> 'd -> 'e -> unit, Fmt.formatter, unit) format
+     ('a -> 'b -> 'c -> 'd -> 'e -> unit, Format.formatter, unit) format
   -> 'a
   -> 'b
   -> 'c
@@ -28,7 +29,11 @@ val debug5 :
 
 (** print some profiling info *)
 val profile3 :
-  ('a -> 'b -> 'c -> unit, Fmt.formatter, unit) format -> 'a -> 'b -> 'c -> unit
+     ('a -> 'b -> 'c -> unit, Format.formatter, unit) format
+  -> 'a
+  -> 'b
+  -> 'c
+  -> unit
 
 (** print some error and exit *)
-val err : ('a, Fmt.formatter, unit, 'b) format4 -> 'a
+val err : ('a, Format.formatter, unit, 'b) format4 -> 'a

@@ -47,13 +47,13 @@ let load_func_from_module ls mod_id f_name =
       | Some m -> Ok m
     end
     | Some mod_id -> (
-      match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Error (`Unbound_module mod_id)
-      | exports -> Ok exports )
+      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      | None -> Error (`Unbound_module mod_id)
+      | Some exports -> Ok exports )
   in
-  match Link.StringMap.find f_name exports.functions with
-  | exception Not_found -> Error (`Unbound_name f_name)
-  | v -> Ok (v, env_id)
+  match Link.StringMap.find_opt f_name exports.functions with
+  | None -> Error (`Unbound_name f_name)
+  | Some v -> Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   let* exports =
@@ -64,13 +64,13 @@ let load_global_from_module ls mod_id name =
       | Some (m, _env_id) -> Ok m
     end
     | Some mod_id -> (
-      match Link.StringMap.find mod_id ls.Link.by_id with
-      | exception Not_found -> Error (`Unbound_module mod_id)
-      | exports, _env_id -> Ok exports )
+      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      | None -> Error (`Unbound_module mod_id)
+      | Some (exports, _env_id) -> Ok exports )
   in
-  match Link.StringMap.find name exports.globals with
-  | exception Not_found -> Error (`Unbound_name name)
-  | v -> Ok v
+  match Link.StringMap.find_opt name exports.globals with
+  | None -> Error (`Unbound_name name)
+  | Some v -> Ok v
 
 let compare_result_const result (const : Concrete_value.t) =
   match (result, const) with

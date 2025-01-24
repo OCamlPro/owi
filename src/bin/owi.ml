@@ -35,10 +35,7 @@ let existing_dir_conv =
 
 let path_conv = Arg.conv (Fpath.of_string, Fpath.pp)
 
-let solver_conv =
-  Arg.conv
-    ( Smtml.Solver_dispatcher.solver_type_of_string
-    , Smtml.Solver_dispatcher.pp_solver_type )
+let solver_conv = Arg.conv (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 
 (* Common options *)
 
@@ -120,7 +117,7 @@ let solver =
   let doc = "SMT solver to use" in
   Arg.(
     value
-    & opt solver_conv Smtml.Solver_dispatcher.Z3_solver
+    & opt solver_conv Smtml.Solver_type.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
 let unsafe =

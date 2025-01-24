@@ -4,9 +4,9 @@
 
 type t
 
-val fresh : Smtml.Solver_dispatcher.solver_type -> unit -> t
+val fresh : Smtml.Solver_type.t -> unit -> t
 
-val check : t -> Smtml.Expr.t list -> Smtml.Solver_intf.satisfiability
+val check : t -> Smtml.Expr.t list -> [ `Sat | `Unknown | `Unsat ]
 
 val model :
      t

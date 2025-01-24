@@ -46,7 +46,7 @@ module type S = sig
 
   val run :
        workers:int
-    -> Smtml.Solver_dispatcher.solver_type
+    -> Smtml.Solver_type.t
     -> 'a t
     -> thread
     -> callback:('a eval * thread -> unit)

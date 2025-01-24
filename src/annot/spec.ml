@@ -146,7 +146,7 @@ let pp_binop fmt = function
   | Mult -> pf fmt "*"
   | Div -> pf fmt "/"
 
-let rec pp_term : type a. formatter -> a term -> unit =
+let rec pp_term : type a. Format.formatter -> a term -> unit =
  fun fmt -> function
   | Int32 i32 -> pf fmt "(i32 %i)" (Int32.to_int i32)
   | Int64 i64 -> pf fmt "(i64 %i)" (Int64.to_int i64)
@@ -163,7 +163,7 @@ let rec pp_term : type a. formatter -> a term -> unit =
   | Result None -> pf fmt "result"
   | Memory tm1 -> pf fmt "(memory %a)" pp_term tm1
 
-let rec pp_prop : type a. formatter -> a prop -> unit =
+let rec pp_prop : type a. Format.formatter -> a prop -> unit =
  fun fmt -> function
   | Const bool -> pf fmt "%a" Fmt.bool bool
   | BinPred (b, tm1, tm2) ->
@@ -207,7 +207,7 @@ let parse_text_id_result id =
     else Error (`Spec_invalid_text_indice id)
   else Error (`Spec_invalid_text_indice id)
 
-let parse_raw_id id = int_of_string id
+let parse_raw_id id = int_of_string_opt id
 
 let parse_indice id =
   match (parse_text_id id, parse_raw_id id) with
@@ -242,7 +242,7 @@ let rec parse_term =
   end
   (* Result *)
   | List [ Atom "result"; Atom i ] -> (
-    match int_of_string i with
+    match int_of_string_opt i with
     | Some i -> Ok (Result (Some i))
     | None -> Error (`Spec_invalid_int32 i) )
   (* Int32 *)

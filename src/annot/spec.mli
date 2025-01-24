@@ -3,7 +3,6 @@
 (* Written by the Owi programmers *)
 
 open Types
-open Fmt
 
 type nonrec binpred =
   | Ge
@@ -56,23 +55,23 @@ type 'a prop =
   | BinConnect : binconnect * 'a prop * 'a prop -> 'a prop
   | Binder : binder * binder_type * string option * 'a prop -> 'a prop
 
-val pp_binpred : formatter -> binpred -> unit
+val pp_binpred : Format.formatter -> binpred -> unit
 
-val pp_unconnect : formatter -> unconnect -> unit
+val pp_unconnect : Format.formatter -> unconnect -> unit
 
-val pp_binconnect : formatter -> binconnect -> unit
+val pp_binconnect : Format.formatter -> binconnect -> unit
 
-val pp_binder : formatter -> binder -> unit
+val pp_binder : Format.formatter -> binder -> unit
 
-val pp_binder_type : formatter -> binder_type -> unit
+val pp_binder_type : Format.formatter -> binder_type -> unit
 
-val pp_unop : formatter -> unop -> unit
+val pp_unop : Format.formatter -> unop -> unit
 
-val pp_binop : formatter -> binop -> unit
+val pp_binop : Format.formatter -> binop -> unit
 
-val pp_term : formatter -> 'a term -> unit
+val pp_term : Format.formatter -> 'a term -> unit
 
-val pp_prop : formatter -> 'a prop -> unit
+val pp_prop : Format.formatter -> 'a prop -> unit
 
 val parse_indice : string -> text indice Result.t
 

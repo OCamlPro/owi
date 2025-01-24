@@ -49,7 +49,7 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
           [ "-e-acsl"
           ; "-no-frama-c-stdlib"
           ; "-kernel-warn-key"
-          ; "CERT:MSC:38=inactive"
+          ; "CERT:MSC:38=inactive,unknown-attribute=inactive"
           ; "-verbose"
           ; framac_verbosity_level
           ; String.concat "" [ {|-cpp-extra-args="|}; includes; {|"|} ]
@@ -78,12 +78,9 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
           match OS.Cmd.run @@ framac file out with
           | Ok _ as v -> v
           | Error (`Msg e) ->
-            Error
-              (`Msg
-                 (Fmt.str "Frama-C failed: %s"
-                    ( if debug then e
-                      else "run with --debug to get the full error message" ) )
-              ) )
+            Fmt.error_msg "Frama-C failed: %s"
+              ( if debug then e
+                else "run with --debug to get the full error message" ) )
         (List.combine files outs)
     in
 

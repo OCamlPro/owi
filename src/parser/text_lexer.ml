@@ -52,18 +52,26 @@ let mk_string buf s =
         | '\"' -> '\"'
         | 'u' ->
           let j = !i + 2 in
-          i := String.index_from s j '}';
-          let n = int_of_string (Fmt.str "0x%s" (String.sub s j (!i - j))) in
-          let n = match n with None -> assert false | Some n -> n in
-          let bs = Wutf8.encode [ n ] in
-          Buffer.add_substring b bs 0 (String.length bs - 1);
-          bs.[String.length bs - 1]
+          begin
+            match String.index_from_opt s j '}' with
+            | None ->
+              (* TODO: is this the expected error ? *) illegal_escape buf
+            | Some index ->
+              i := index;
+              let n =
+                int_of_string_opt (Fmt.str "0x%s" (String.sub s j (!i - j)))
+              in
+              let n = match n with None -> assert false | Some n -> n in
+              let bs = Wutf8.encode [ n ] in
+              Buffer.add_substring b bs 0 (String.length bs - 1);
+              bs.[String.length bs - 1]
+          end
         | h ->
           incr i;
           if !i >= String.length s then illegal_escape buf;
           let str = Fmt.str "0x%c%c" h s.[!i] in
           begin
-            match int_of_string str with
+            match int_of_string_opt str with
             | None -> illegal_escape buf
             | Some n -> Char.chr n
           end
@@ -447,7 +455,9 @@ let rec token buf =
   | num -> NUM (Utf8.lexeme buf)
   | operator -> begin
     let operator = Utf8.lexeme buf in
-    try Hashtbl.find keywords operator with Not_found -> unknown_operator buf
+    match Hashtbl.find_opt keywords operator with
+    | None -> unknown_operator buf
+    | Some v -> v
   end
   (* comment *)
   | ";;" ->

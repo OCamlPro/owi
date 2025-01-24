@@ -144,7 +144,7 @@ module Stack : sig
 
   val match_types : typ -> typ -> bool
 
-  val pp : formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit
 
   val match_prefix : prefix:t -> stack:t -> t option
 end = struct
