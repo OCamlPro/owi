@@ -318,9 +318,12 @@ let find_node_to_run tree =
       if n = 0 then None
       else begin
         let i = Random.int n in
-        let i, branch = List.nth branches i in
-        Log.debug1 "Select_i32 %li@." i;
-        loop branch (tree :: to_update)
+        (* TODO: change the datastructure or stop being random ? *)
+        match List.nth_opt branches i with
+        | None -> assert false
+        | Some (i, branch) ->
+          Log.debug1 "Select_i32 %li@." i;
+          loop branch (tree :: to_update)
       end
     | Assume { cond = _; cont } -> loop cont (tree :: to_update)
     | Assert { cond; cont = _; status = Unknown } ->
@@ -346,7 +349,7 @@ let pc_model solver pc =
 let rec find_model_to_run solver tree =
   let ( let* ) = Option.bind in
   let* pc, to_update = find_node_to_run tree in
-  let node = List.hd to_update in
+  let node = match to_update with [] -> assert false | hd :: _tl -> hd in
   let model =
     match pc with
     | [] -> assert false

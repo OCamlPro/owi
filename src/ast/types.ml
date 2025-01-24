@@ -803,7 +803,7 @@ let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
 
 let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
 
-let pp_func : type kind. formatter -> kind func -> unit =
+let pp_func : type kind. Format.formatter -> kind func -> unit =
  fun fmt f ->
   (* TODO: typeuse ? *)
   pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f

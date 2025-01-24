@@ -50,15 +50,15 @@ let empty_state =
   }
 
 let load_from_module ls f (import : _ Imported.t) =
-  match StringMap.find import.modul ls.by_name with
-  | exception Not_found -> Error (`Unknown_module import.modul)
-  | exports -> (
-    match StringMap.find import.name (f exports) with
-    | exception Not_found ->
+  match StringMap.find_opt import.modul ls.by_name with
+  | None -> Error (`Unknown_module import.modul)
+  | Some exports -> (
+    match StringMap.find_opt import.name (f exports) with
+    | None ->
       if StringSet.mem import.name exports.defined_names then
         Error `Incompatible_import_type
       else Error (`Unknown_import (import.modul, import.name))
-    | v -> Ok v )
+    | Some v -> Ok v )
 
 let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   global Result.t =
@@ -345,13 +345,10 @@ let define_elem env elem =
 let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) (export : Binary.export) ->
-        let value = get_env env export.id in
-        if StringSet.mem export.name names then Error `Duplicate_export_name
-        else
-          Ok
-            ( StringMap.add export.name value acc
-            , StringSet.add export.name names ) )
+      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
+        let value = get_env env id in
+        if StringSet.mem name names then Error `Duplicate_export_name
+        else Ok (StringMap.add name value acc, StringSet.add name names) )
       (StringMap.empty, names) exports
   in
   let names = StringSet.empty in

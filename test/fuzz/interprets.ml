@@ -93,7 +93,7 @@ module Owi_symbolic : INTERPRET = struct
       let init_thread = Thread_with_memory.init () in
       let res, _ =
         Symbolic_choice_minimalist.run ~workers:dummy_workers_count
-          Smtml.Solver_dispatcher.Z3_solver c init_thread
+          Smtml.Solver_type.Z3_solver c init_thread
       in
       match res with
       | Ok res -> res

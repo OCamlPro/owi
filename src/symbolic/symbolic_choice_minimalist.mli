@@ -14,7 +14,7 @@ include
 
 val run :
      workers:int
-  -> Smtml.Solver_dispatcher.solver_type
+  -> Smtml.Solver_type.t
   -> 'a t
   -> Thread_with_memory.t
   -> 'a run_result

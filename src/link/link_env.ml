@@ -71,19 +71,28 @@ let recover backup into =
 
 let id (env : _ t) = env.id
 
-let get_global (env : _ t) id = IMap.find id env.globals
+let get_global (env : _ t) id =
+  match IMap.find_opt id env.globals with None -> assert false | Some v -> v
 
-let get_memory (env : _ t) id = IMap.find id env.memories
+let get_memory (env : _ t) id =
+  match IMap.find_opt id env.memories with None -> assert false | Some v -> v
 
-let get_table (env : _ t) id = IMap.find id env.tables
+let get_table (env : _ t) id =
+  match IMap.find_opt id env.tables with None -> assert false | Some v -> v
 
-let get_func (env : _ t) id = IMap.find id env.functions
+let get_func (env : _ t) id =
+  match IMap.find_opt id env.functions with None -> assert false | Some v -> v
 
-let get_data (env : _ t) id = IMap.find id env.data
+let get_data (env : _ t) id =
+  match IMap.find_opt id env.data with None -> assert false | Some v -> v
 
-let get_elem (env : _ t) id = IMap.find id env.elem
+let get_elem (env : _ t) id =
+  match IMap.find_opt id env.elem with None -> assert false | Some v -> v
 
-let get_extern_func env id = Func_id.get id env.extern_funcs
+let get_extern_func env id =
+  match Func_id.get id env.extern_funcs with
+  | None -> assert false
+  | Some v -> v
 
 module Build = struct
   type t =
@@ -168,7 +177,7 @@ module type T = sig
 
   val get_func_typ : t -> func -> binary func_type
 
-  val pp : Fmt.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit
 
   val freeze : Build.t -> extern_func Func_id.collection -> t
 end

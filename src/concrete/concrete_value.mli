@@ -35,7 +35,7 @@ type ref_value =
   | Funcref of Func_intf.t option
   | Arrayref of unit array option
 
-val pp_ref_value : Fmt.formatter -> ref_value -> unit
+val pp_ref_value : Format.formatter -> ref_value -> unit
 
 type t =
   | I32 of Int32.t
@@ -60,4 +60,4 @@ val ref_externref : 'a Type.Id.t -> 'a -> t
 
 val ref_is_null : ref_value -> bool
 
-val pp : Fmt.formatter -> t -> unit
+val pp : Format.formatter -> t -> unit

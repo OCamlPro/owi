@@ -20,7 +20,7 @@ let with_fresh_id f { c; last } =
   let last = succ last in
   ({ c; last }, r)
 
-let get i c = Map.find i c.c
+let get i c = match Map.find_opt i c.c with None -> assert false | Some v -> v
 
 let map f c = { c with c = Map.map f c.c }
 

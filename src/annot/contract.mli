@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Fmt
 open Types
 open Spec
 
@@ -16,6 +15,6 @@ val compare_funcid : 'a t -> 'a t -> int
 
 val join_contract : 'a t -> 'a t -> 'a t
 
-val pp_contract : formatter -> 'a t -> unit
+val pp_contract : Format.formatter -> 'a t -> unit
 
 val parse_contract : Sexp.t -> text t Result.t

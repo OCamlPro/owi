@@ -28,8 +28,9 @@ module Backend = struct
   let address_i32 a = a
 
   let rec load_byte { parent; data; _ } a =
-    try Hashtbl.find data a
-    with Not_found -> (
+    match Hashtbl.find_opt data a with
+    | Some v -> v
+    | None -> (
       match parent with
       | None -> Smtml.Expr.value (Num (I8 0))
       | Some parent -> load_byte parent a )
@@ -110,9 +111,9 @@ module Backend = struct
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
-      match Hashtbl.find m.chunks base with
-      | exception Not_found -> return (Error Trap.Memory_leak_use_after_free)
-      | chunk_size ->
+      match Hashtbl.find_opt m.chunks base with
+      | None -> return (Error Trap.Memory_leak_use_after_free)
+      | Some chunk_size ->
         let+ is_out_of_bounds =
           let range = const_i32 (Int32.of_int (range - 1)) in
           (* end_offset: last byte we will read/write *)

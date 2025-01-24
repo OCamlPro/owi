@@ -8,7 +8,7 @@ val mk_owi :
      concolic:bool
   -> workers:int
   -> optimisation_level:int
-  -> solver:Smtml.Solver_dispatcher.solver_type
+  -> solver:Smtml.Solver_type.t
   -> t
 
 val mk_klee : unit -> t

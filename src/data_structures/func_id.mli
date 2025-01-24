@@ -12,6 +12,6 @@ val empty : 'a collection
 
 val add : 'a -> binary func_type -> 'a collection -> t * 'a collection
 
-val get : t -> 'a collection -> 'a
+val get : t -> 'a collection -> 'a option
 
 val get_typ : t -> 'a collection -> binary func_type

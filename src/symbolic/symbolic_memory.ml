@@ -67,11 +67,13 @@ let clone m =
   }
 
 let rec load_byte { parent; data; _ } a =
-  try Hashtbl.find data a
-  with Not_found -> (
+  match Hashtbl.find_opt data a with
+  | None -> begin
     match parent with
     | None -> make (Val (Num (I8 0)))
-    | Some parent -> load_byte parent a )
+    | Some parent -> load_byte parent a
+  end
+  | Some v -> v
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
 let merge_extracts (e1, h, m1) (e2, m2, l) =
@@ -178,9 +180,9 @@ let check_within_bounds m a =
   match view a with
   | Val (Num (I32 _)) -> Ok (Value.Bool.const false, a)
   | Ptr { base; offset } -> (
-    match Hashtbl.find m.chunks base with
-    | exception Not_found -> Error Trap.Memory_leak_use_after_free
-    | size ->
+    match Hashtbl.find_opt m.chunks base with
+    | None -> Error Trap.Memory_leak_use_after_free
+    | Some size ->
       let ptr = Int32.add base (i32 offset) in
       let upper_bound =
         Value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))

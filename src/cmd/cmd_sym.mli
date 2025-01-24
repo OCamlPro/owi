@@ -22,6 +22,6 @@ val cmd :
   -> deterministic_result_order:bool
   -> fail_mode:fail_mode
   -> workspace:Fpath.t
-  -> solver:Smtml.Solver_dispatcher.solver_type
+  -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
   -> unit Result.t

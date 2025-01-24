@@ -1039,12 +1039,12 @@ let literal_const ==
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | REF_NULL; ~ = heap_type; <Const_null>
   | REF_EXTERN; num = NUM; {
-    match int_of_string num with
+    match int_of_string_opt num with
     | None -> assert false
     | Some num -> Const_extern num
   }
   | REF_HOST; num = NUM; {
-    match int_of_string num with
+    match int_of_string_opt num with
     | None -> assert false
     | Some num -> Const_host num
   }

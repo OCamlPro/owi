@@ -239,7 +239,9 @@ let compare_mantissa_str hex s1 s2 =
  *)
 let float_of_string_prevent_double_rounding s =
   (* First parse to a 64 bit float. *)
-  let z = match float_of_string s with None -> assert false | Some z -> z in
+  let z =
+    match float_of_string_opt s with None -> assert false | Some z -> z
+  in
   (* If value is already infinite we are done. *)
   if Float.equal (abs_float z) (1.0 /. 0.0) then z
   else

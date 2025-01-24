@@ -22,5 +22,5 @@ val cmd :
   -> fail_mode:Cmd_sym.fail_mode
   -> concolic:bool
   -> eacsl:bool
-  -> solver:Smtml.Solver_dispatcher.solver_type
+  -> solver:Smtml.Solver_type.t
   -> unit Result.t

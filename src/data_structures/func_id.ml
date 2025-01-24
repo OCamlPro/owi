@@ -20,9 +20,7 @@ let add f t { last; c } =
   (last, { c; last = succ last })
 
 let get i c =
-  let v, _ = IMap.find i c.c in
-  v
+  match IMap.find_opt i c.c with None -> None | Some (v, _) -> Some v
 
 let get_typ i c =
-  let _, t = IMap.find i c.c in
-  t
+  match IMap.find_opt i c.c with None -> assert false | Some (_, t) -> t
