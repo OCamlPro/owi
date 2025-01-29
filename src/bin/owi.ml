@@ -138,6 +138,45 @@ let workspace =
   let doc = "write results to dir" in
   Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
 
+(* owi cpp *)
+
+let cpp_info =
+  let doc =
+    "Compile a C++ file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "c++" ~version ~doc ~sdocs ~man
+
+let cpp_cmd =
+  let+ arch =
+    let doc = "data model" in
+    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
+  and+ includes =
+    let doc = "headers path" in
+    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
+  and+ opt_lvl =
+    let doc = "specify which optimization level to use" in
+    Arg.(value & opt string "3" & info [ "O" ] ~doc)
+  and+ concolic =
+    let doc = "concolic mode" in
+    Arg.(value & flag & info [ "concolic" ] ~doc)
+  and+ debug
+  and+ workers
+  and+ files
+  and+ profiling
+  and+ unsafe
+  and+ optimize
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ solver in
+  Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
+    ~optimize ~no_stop_at_failure ~no_value
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~concolic ~solver
+
 (* owi c *)
 
 let c_info =
@@ -422,6 +461,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.v c_info c_cmd
+    ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.v opt_info opt_cmd
     ; Cmd.v instrument_info instrument_cmd

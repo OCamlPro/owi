@@ -3,6 +3,7 @@
 [Owi] is a toolchain to work with WebAssembly. It is written in [OCaml]. It provides a binary with many subcommands:
 
 - [`owi c`]: a bug finding tool for C code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
+- [`owi c++`]: a bug finding tool for C++ code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
 - [`owi conc`]: a concolic Wasm interpreter;
 - [`owi fmt`]: a formatter for Wasm;
 - [`owi opt`]: an optimizer for Wasm;
@@ -218,6 +219,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [JS Promise Integration]: https://github.com/WebAssembly/js-promise-integration
 
 [`owi c`]: example/c
+[`owi c++`]: example/cpp
 [`owi conc`]: example/conc
 [`owi fmt`]: example/fmt
 [`owi opt`]: example/opt
