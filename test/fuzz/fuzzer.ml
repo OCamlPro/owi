@@ -1,18 +1,14 @@
 let () = Random.self_init ()
 
-let ( let* ) o f = match o with Ok v -> f v | Error _e as e -> e
-
 let timeout_count = ref 0
 
 let global_count = ref 0
 
 let write_module (fpath : Fpath.t) m =
   match Bos.OS.File.writef fpath "%a@." Owi.Text.pp_modul m with
-  | Ok () ->
-    if Param.debug then Fmt.epr "Saved module to %a@\n" Fpath.pp fpath;
-    Ok ()
+  | Ok () -> Ok ()
   | Error (`Msg err) ->
-    Error (`Msg (Fmt.str "Failed to write module to %a: %s" Fpath.pp fpath err))
+    Fmt.error_msg "Failed to write module to %a: %s" Fpath.pp fpath err
 
 let compare (module I1 : Interprets.INTERPRET)
   (module I2 : Interprets.INTERPRET) m =
@@ -79,19 +75,21 @@ let compare (module I1 : Interprets.INTERPRET)
 
 let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
   m =
-  let res =
-    if Param.save_modules then
-      let* _ = Bos.OS.Dir.create ~mode:0o755 Param.output_dir in
+  let open Owi.Syntax in
+  let+ () =
+    if Param.save_modules then begin
+      let outdir = Param.output_dir in
+      let* _exist = Bos.OS.Dir.create ~mode:0o755 outdir in
       let filename =
         Fpath.(Param.output_dir / Fmt.str "gen_do_module_%d.wat" !global_count)
       in
-      write_module filename m
+      let* () = write_module filename m in
+      if Param.debug then Fmt.epr "Saved module to %a@\n" Fpath.pp filename;
+      Ok ()
+    end
     else Ok ()
   in
-  Result.fold
-    ~ok:(fun _ -> ())
-    ~error:(Fmt.epr "Failed to save module: %a@\n" Rresult.R.pp_msg)
-    res;
+
   compare (module I1) (module I2) m
 
 let add_test name gen (module I1 : Interprets.INTERPRET)
@@ -102,8 +100,11 @@ let add_test name gen (module I1 : Interprets.INTERPRET)
     Fmt.epr "test module %d [got %d timeouts...]@\n@[<v>" !global_count
       !timeout_count;
     Fmt.flush Fmt.stderr ();
-    Crowbar.check (check (module I1) (module I2) m);
-    Fmt.epr "@]" )
+    match check (module I1) (module I2) m with
+    | Error (`Msg s) -> Fmt.failwith "%s" s
+    | Ok v ->
+      Crowbar.check v;
+      Fmt.epr "@]" )
 
 let gen (conf : Env.conf) =
   Crowbar.with_printer Owi.Text.pp_modul (Gen.modul conf)
