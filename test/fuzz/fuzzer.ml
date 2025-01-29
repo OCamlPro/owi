@@ -1,7 +1,5 @@
 let () = Random.self_init ()
 
-let ( let* ) o f = match o with Ok v -> f v | Error _e as e -> e
-
 let timeout_count = ref 0
 
 let global_count = ref 0
@@ -91,6 +89,7 @@ let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
     end
     else Ok ()
   in
+
   compare (module I1) (module I2) m
 
 let add_test name gen (module I1 : Interprets.INTERPRET)
