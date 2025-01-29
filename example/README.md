@@ -3,6 +3,7 @@
 ## Owi binary
 
 - [`owi c`]
+- [`owi c++`]
 - [`owi conc`]
 - [`owi fmt`]
 - [`owi opt`]
@@ -95,6 +96,7 @@ BUGS
 ```
 
 [`owi c`]: ./c
+[`owi c++`]: ./cpp
 [`owi conc`]: ./conc
 [`owi fmt`]: ./fmt
 [`owi opt`]: ./opt

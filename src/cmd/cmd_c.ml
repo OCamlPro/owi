@@ -11,9 +11,9 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let binc_location = List.map Fpath.v C_share_site.Sites.binc
+let binc_location = List.map Fpath.v Share.Sites.binc
 
-let libc_location = List.map Fpath.v C_share_site.Sites.libc
+let libc_location = List.map Fpath.v Share.Sites.libc
 
 let find location file : Fpath.t Result.t =
   let* l =
@@ -125,7 +125,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
     | Error (`Msg e) ->
       Error
         (`Msg
-           (Fmt.str "Clang failed: %s"
+           (Fmt.str "clang failed: %s"
               ( if debug then e
                 else "run with --debug to get the full error message" ) ) )
   in

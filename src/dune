@@ -11,10 +11,10 @@
   binary_to_text
   binary_types
   binary_validate
-  c_share_site
   choice_intf
   cmd_utils
   cmd_c
+  cmd_cpp
   cmd_fmt
   cmd_instrument
   cmd_opt
@@ -66,6 +66,7 @@
   runtime
   script
   sexp
+  share
   solver
   symbolic
   symbolic_choice
@@ -141,5 +142,5 @@
    (-w +a-4-40-41-42-44-45-70-73 -warn-error +a))))
 
 (generate_sites_module
- (module c_share_site)
+ (module share)
  (sites owi))

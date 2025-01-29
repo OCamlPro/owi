@@ -1,6 +1,11 @@
 #ifndef _OWI_H
 #define _OWI_H
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 __attribute__((import_module("summaries"), import_name("alloc"))) void *
 owi_malloc(void *, unsigned int);
 __attribute__((import_module("summaries"), import_name("dealloc"))) void *
@@ -18,7 +23,12 @@ __attribute__((import_module("symbolic"), import_name("f32_symbol"))) float
 owi_f32(void);
 __attribute__((import_module("symbolic"), import_name("f64_symbol"))) double
 owi_f64(void);
-__attribute__((import_module("symbolic"), import_name("bool_symbol"))) _Bool
+__attribute__((import_module("symbolic"), import_name("bool_symbol")))
+#ifdef __cplusplus
+  bool
+#elif
+  _Bool
+#endif
 owi_bool(void);
 
 __attribute__((import_module("symbolic"), import_name("assume"))) void
@@ -30,5 +40,10 @@ __attribute__((import_module("summaries"))) __attribute__((import_name("abort"))
 owi_abort(void);
 __attribute__((import_module("summaries"))) __attribute__((import_name("exit"))) void
 owi_exit(int);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
