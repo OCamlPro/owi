@@ -24,6 +24,7 @@
   cmd_sym
   cmd_conc
   cmd_validate
+  cmd_version
   cmd_wasm2wat
   cmd_wat2wasm
   code_generator
@@ -112,6 +113,7 @@
  (libraries
   bos
   digestif
+  dune-build-info
   dune-site
   smtml
   hc
