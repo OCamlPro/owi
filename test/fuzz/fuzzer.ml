@@ -1,13 +1,18 @@
 let () = Random.self_init ()
 
+let ( let* ) o f = match o with Ok v -> f v | Error _e as e -> e
+
 let timeout_count = ref 0
 
 let global_count = ref 0
 
-let write_module (fpath : Fpath.t) m = 
+let write_module (fpath : Fpath.t) m =
   match Bos.OS.File.writef fpath "%a@." Owi.Text.pp_modul m with
-  | Ok () -> Ok ()
-  | Error (`Msg err) -> Error (`Msg (Fmt.str "Failed to write module to %a: %s" Fpath.pp fpath err))
+  | Ok () ->
+    if Param.debug then Fmt.epr "Saved module to %a@\n" Fpath.pp fpath;
+    Ok ()
+  | Error (`Msg err) ->
+    Error (`Msg (Fmt.str "Failed to write module to %a: %s" Fpath.pp fpath err))
 
 let compare (module I1 : Interprets.INTERPRET)
   (module I2 : Interprets.INTERPRET) m =
@@ -72,18 +77,21 @@ let compare (module I1 : Interprets.INTERPRET)
     Fmt.epr "`%s` was OK but `%s` gave error `%s`" I2.name I1.name msg;
     false
 
-let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET) m =
-  if Param.save_modules then begin
-    let outdir = Fpath.v Param.output_dir in
-    let* () = Bos.OS.Dir.create ~mode:0o755 outdir in
-    let filename = Fpath.(v Param.output_dir / Fmt.str "gen_do_module_%d.wat" !global_count) in
-    let* () = write_module filename m in
-    if Param.debug then
-      Fmt.epr "Saved module to %a@\n" Fpath.pp filename;
-    Ok ()
-  end else
-    Ok ();
-  
+let check (module I1 : Interprets.INTERPRET) (module I2 : Interprets.INTERPRET)
+  m =
+  let res =
+    if Param.save_modules then
+      let* _ = Bos.OS.Dir.create ~mode:0o755 Param.output_dir in
+      let filename =
+        Fpath.(Param.output_dir / Fmt.str "gen_do_module_%d.wat" !global_count)
+      in
+      write_module filename m
+    else Ok ()
+  in
+  Result.fold
+    ~ok:(fun _ -> ())
+    ~error:(Fmt.epr "Failed to save module: %a@\n" Rresult.R.pp_msg)
+    res;
   compare (module I1) (module I2) m
 
 let add_test name gen (module I1 : Interprets.INTERPRET)
