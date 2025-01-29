@@ -362,6 +362,17 @@ let conc_cmd =
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
 
+(* owi version *)
+
+let version_info =
+  let doc = "Print some version informations" in
+  let man = [] @ shared_man in
+  Cmd.info "version" ~version ~doc ~sdocs ~man
+
+let version_cmd =
+  let+ () = Term.const () in
+  Cmd_version.cmd ()
+
 (* owi wasm2wat *)
 
 let wasm2wat_info =
@@ -420,6 +431,7 @@ let cli =
     ; Cmd.v sym_info sym_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v validate_info validate_cmd
+    ; Cmd.v version_info version_cmd
     ; Cmd.v wasm2wat_info wasm2wat_cmd
     ; Cmd.v wat2wasm_info wat2wasm_cmd
     ]

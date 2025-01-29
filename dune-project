@@ -41,6 +41,7 @@
    (and
     :build
     (>= 20220210)))
+  (dune-build-info :build)
   (dune-site :build)
   ;; runtime
   bos
