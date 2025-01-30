@@ -8,6 +8,15 @@ Given the following `poly.cpp` file:
 ```cpp
 #include <owi.h>
 
+/*
+extern "C" {
+  void _start() {
+    owi_abort();
+  }
+}
+*/
+
+
 int main() {
   int x = owi_i32();
   int x2 = x * x;
@@ -32,12 +41,10 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
-Assert failure
-model {
-  symbol symbol_0 i32 4
-}
-Reached problem!
-[13]
+wasm-ld-19: error: entry symbol not defined (pass --no-entry to suppress): main
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+clang++ failed: run with --debug to get the full error message
+[26]
 ```
 
 Indeed, `4` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
@@ -78,12 +85,10 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
-Assert failure
-model {
-  symbol symbol_0 i32 -2147483644
-}
-Reached problem!
-[13]
+wasm-ld-19: error: entry symbol not defined (pass --no-entry to suppress): main
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+clang++ failed: run with --debug to get the full error message
+[26]
 ```
 
 And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
@@ -97,11 +102,11 @@ Exercise: can you find another "root" of the polynomial ? :-)
 ```sh
 $ owi c++ --help=plain
 NAME
-       owi-c - Compile a C file to Wasm and run the symbolic interpreter on
-       it
+       owi-c++ - Compile a C++ file to Wasm and run the symbolic interpreter
+       on it
 
 SYNOPSIS
-       owi c [OPTION]… [ARG]…
+       owi c++ [OPTION]… [ARG]…
 
 OPTIONS
        --concolic
@@ -113,11 +118,6 @@ OPTIONS
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
-
-       --e-acsl
-           e-acsl mode, refer to
-           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
-           Frama-C's current language feature implementations
 
        --fail-on-assertion-only
            ignore traps and only report assertion violations
@@ -143,23 +143,14 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       -o VAL, --outpt=VAL (absent=owi-out)
-           write results to dir
-
        --optimize
            optimize mode
 
        -p, --profiling
            profiling mode
 
-       --property=VAL
-           property file
-
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
-
-       --testcomp
-           test-comp mode
 
        -u, --unsafe
            skip typechecking pass
@@ -178,7 +169,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi c exits with:
+       owi c++ exits with:
 
        0   on success.
 

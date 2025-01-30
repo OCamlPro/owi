@@ -10,6 +10,9 @@ no subcommand should print help
          c [OPTION]… [ARG]…
              Compile a C file to Wasm and run the symbolic interpreter on it
   
+         c++ [OPTION]… [ARG]…
+             Compile a C++ file to Wasm and run the symbolic interpreter on it
+  
          conc [OPTION]… [ARG]…
              Run the concolic interpreter
   
@@ -38,6 +41,9 @@ no subcommand should print help
   
          validate [--debug] [OPTION]… [ARG]…
              Validate a module
+  
+         version [OPTION]…
+             Print some version informations
   
          wasm2wat [--emit-file] [--output=FILE] [OPTION]… ARG
              Generate a text format file (.wat) from a binary format file
