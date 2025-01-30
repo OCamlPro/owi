@@ -29,39 +29,20 @@ let find location file : Fpath.t Result.t =
   loop l
 
 let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
-  let flags =
-    let stack_size = 8 * 1024 * 1024 |> string_of_int in
-    let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
+  let* clangpp_bin = OS.Cmd.resolve @@ Cmd.v "clang++" in
+  let opt_lvl = Fmt.str "-O%s" opt_lvl in
+
+  let includes = Cmd.of_list ~slip:"-I" (List.map Cmd.p includes) in
+
+  let clang_cmd : Cmd.t =
     Cmd.(
-      of_list
-        [ Fmt.str "-O%s" opt_lvl
-        ; "--target=wasm32"
-        ; "-m32"
-        ; "-ffreestanding"
-        ; "--no-standard-libraries"
-        ; "-Wno-everything"
-        ; "-flto=thin"
-        ; (* LINKER FLAGS: *)
-          "-Wl,--entry=main"
-        ; "-Wl,--export=main"
-          (* TODO: allow this behind a flag, this is slooooow *)
-        ; "-Wl,--lto-O0"
-        ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
-        ]
-      %% includes )
+      clangpp_bin % "-Wno-everything" % opt_lvl % "-emit-llvm"
+      % "--target=wasm32" % "-m32" % "-c" %% includes
+      %% Cmd.of_list (List.map Cmd.p files) )
   in
 
-  let* clangpp_bin = OS.Cmd.resolve @@ Cmd.v "clang++" in
-
-  let out = Fpath.(v "a.out.wasm") in
-
-  let* libc = find binc_location (Fpath.v "libc.wasm") in
-
-  let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
-  let clangpp : Cmd.t = Cmd.(clangpp_bin %% flags % "-o" % p out %% files) in
-
-  let+ () =
-    match OS.Cmd.run clangpp with
+  let* () =
+    match OS.Cmd.run clang_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Error
@@ -71,7 +52,57 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
                 else "run with --debug to get the full error message" ) ) )
   in
 
-  out
+  let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
+
+  let files_bc =
+    Cmd.of_list @@ List.map (fun file -> Cmd.p Fpath.(file -+ ".bc")) files
+  in
+
+  let llc_cmd : Cmd.t =
+    Cmd.(
+      llc_bin
+      %
+      (* TODO: configure this ? *)
+      "-O0" % "-march=wasm32" % "-filetype=obj" %% files_bc )
+  in
+
+  let* () =
+    match OS.Cmd.run llc_cmd with
+    | Ok _ as v -> v
+    | Error (`Msg e) ->
+      Error
+        (`Msg
+           (Fmt.str "llc failed: %s"
+              ( if debug then e
+                else "run with --debug to get the full error message" ) ) )
+  in
+  let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
+
+  let files_o =
+    Cmd.of_list @@ List.map (fun file -> Cmd.p Fpath.(file -+ ".o")) files
+  in
+
+  let out = Fpath.v "a.out.wasm" in
+
+  let* binc = find binc_location (Fpath.v "libc.wasm") in
+  let wasmld_cmd : Cmd.t =
+    Cmd.(
+      wasmld_bin % "-z" % "stack-size=8388608" % "--export=main"
+      % "--entry=main" %% files_o % p binc % "-o" % p out )
+  in
+
+  let* () =
+    match OS.Cmd.run wasmld_cmd with
+    | Ok _ as v -> v
+    | Error (`Msg e) ->
+      Error
+        (`Msg
+           (Fmt.str "wasm-ld failed: %s"
+              ( if debug then e
+                else "run with --debug to get the full error message" ) ) )
+  in
+
+  Ok out
 
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
