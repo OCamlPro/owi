@@ -57,7 +57,8 @@ let empty conf =
 
 let reset_locals env = env.locals <- []
 
-let remove_block env = env.blocks <- List.tl env.blocks
+let remove_block env =
+  match env.blocks with [] -> assert false | _hd :: tl -> env.blocks <- tl
 
 let get_blocks env = env.blocks
 
