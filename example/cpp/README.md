@@ -8,28 +8,24 @@ Given the following `poly.cpp` file:
 ```cpp
 #include <owi.h>
 
-/*
-extern "C" {
-  void _start() {
-    owi_abort();
-  }
-}
-*/
-
+class Poly {
+  public:
+    int poly;
+    Poly(int a, int b, int c, int d) {
+      int x = owi_i32();
+      int x2 = x * x;
+      int x3 = x * x * x;
+      poly = a * x3 + b * x2 + c * x + d;
+    }
+    int getPoly() {
+      return this->poly;
+    }
+};
 
 int main() {
-  int x = owi_i32();
-  int x2 = x * x;
-  int x3 = x * x * x;
+  Poly p(1, -7, 14, -8);
 
-  int a = 1;
-  int b = -7;
-  int c = 14;
-  int d = -8;
-
-  int poly = a * x3 + b * x2 + c * x + d;
-
-  owi_assert(poly != 0);
+  owi_assert(p.getPoly() != 0);
 
   return 0;
 }
@@ -41,10 +37,12 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
-wasm-ld-19: error: entry symbol not defined (pass --no-entry to suppress): main
-clang++: error: linker command failed with exit code 1 (use -v to see invocation)
-clang++ failed: run with --debug to get the full error message
-[26]
+Assert failure
+model {
+  symbol symbol_0 i32 4
+}
+Reached problem!
+[13]
 ```
 
 Indeed, `4` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
@@ -55,26 +53,29 @@ We can do so by assuming that `x` is not equal to any of these with the function
 ```cpp
 #include <owi.h>
 
+class Poly {
+  public:
+    int poly;
+    Poly(int a, int b, int c, int d) {
+      int x = owi_i32();
+      int x2 = x * x;
+      int x3 = x * x * x;
+      poly = a * x3 + b * x2 + c * x + d;
+      owi_assume(x != 1);
+      owi_assume(x != 2);
+      // Make model output deterministic
+      owi_assume(x > -2147483646);
+      owi_assume(x != 4);
+    }
+    int getPoly() {
+      return this->poly;
+    }
+};
+
 int main() {
-  int x = owi_i32();
-  int x2 = x * x;
-  int x3 = x * x * x;
+  Poly p(1, -7, 14, -8);
 
-  int a = 1;
-  int b = -7;
-  int c = 14;
-  int d = -8;
-
-  int poly = a * x3 + b * x2 + c * x + d;
-
-  owi_assume(x != 1);
-  owi_assume(x != 2);
-  owi_assume(x != 4);
-
-  // Make model output deterministic
-  owi_assume(x > -2147483646);
-
-  owi_assert(poly != 0);
+  owi_assert(p.getPoly() != 0);
 
   return 0;
 }
@@ -85,10 +86,12 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
-wasm-ld-19: error: entry symbol not defined (pass --no-entry to suppress): main
-clang++: error: linker command failed with exit code 1 (use -v to see invocation)
-clang++ failed: run with --debug to get the full error message
-[26]
+Assert failure
+model {
+  symbol symbol_0 i32 -2147483644
+}
+Reached problem!
+[13]
 ```
 
 And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
