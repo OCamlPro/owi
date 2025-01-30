@@ -25,6 +25,16 @@
 (source
  (github ocamlpro/owi))
 
+(pin
+  (package (name crowbar))
+  (url "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"))
+(pin
+  (package (name alt-ergo-lib))
+  (url "git+https://github.com/OCamlPro/alt-ergo.git#7ee96296a5de9588a4d585b3b8abec35f4755425"))
+(pin
+  (package (name alt-ergo))
+  (url "git+https://github.com/OCamlPro/alt-ergo.git#7ee96296a5de9588a4d585b3b8abec35f4755425"))
+
 (package
  (name owi)
  (synopsis
