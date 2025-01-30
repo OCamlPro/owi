@@ -5,7 +5,7 @@
 Given the following `poly.cpp` file:
 
 <!-- $MDX file=poly.cpp -->
-```c
+```cpp
 #include <owi.h>
 
 int main() {
@@ -45,7 +45,7 @@ Indeed, `4` is a root of the polynomial and thus it is expected to be equal to `
 We can do so by assuming that `x` is not equal to any of these with the function `owi_assume(bool)`:
 
 <!-- $MDX file=poly2.cpp -->
-```c
+```cpp
 #include <owi.h>
 
 int main() {
