@@ -26,7 +26,7 @@ owi_f64(void);
 __attribute__((import_module("symbolic"), import_name("bool_symbol")))
 #ifdef __cplusplus
   bool
-#elif
+#else
   _Bool
 #endif
 owi_bool(void);
