@@ -18,9 +18,7 @@ let statically_linked_libraries =
 
 let cmd () =
   Fmt.pr "owi version %s@\n" version;
-  Fmt.pr "%a"
-    (Fmt.list
-       ~sep:(fun fmt () -> Fmt.pf fmt "@\n")
-       (fun fmt (name, version) -> Fmt.pf fmt "%s version %s" name version) )
+  List.iter
+    (fun (name, version) -> Fmt.pr "%s version %s@\n" name version)
     statically_linked_libraries;
   Ok ()
