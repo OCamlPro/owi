@@ -4,3 +4,4 @@ _coverage
 owi-out
 results-*
 a.out.wasm
+owi.install
