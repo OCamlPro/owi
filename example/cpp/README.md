@@ -33,7 +33,7 @@ int main() {
 
 We are defining one symbolic variable `x` using the function `owi_i32(void)`. Then we build a polynomial `poly` equal to $x^3 - 7x^2 + 14x - 8$.
 
-Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
+Then we use `owi_assert(p.getPoly() != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
 $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
