@@ -117,6 +117,7 @@ We only list proposals that reached phase 3 at least.
 - april 2024: [OUPS (OCaml UserS in Paris)]
 - [november 2024]: [LVP working group] day of the [GdR GPL]
 - [december 2024]: Léo Andrès' PhD defense
+- january 2025: [JFLA 2025]
 
 ### Spelling and pronunciation
 
@@ -172,6 +173,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [december 2024]: https://www.zapashcanon.fr/phd#:~:text=after%20the%20defense.-,Defense,My%20slides%20are%20available%20here.,-%F0%9F%94%9D%20%7C%20nothing%20to%20hide
 [documentation]: https://ocamlpro.github.io/owi/api/owi
 [Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
+[JFLA 2025]: https://jfla.inria.fr/jfla2025.html
 [GdR GPL]: https://gdr-gpl.cnrs.fr/
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
