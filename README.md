@@ -9,6 +9,7 @@
 - [`owi opt`]: an optimizer for Wasm;
 - [`owi replay`]: run a module containing symbols with concrete values from a model produced by a previous symbolic execution
 - [`owi run`]: a concrete Wasm interpreter;
+- [`owi rust`]: a bug finding tool for Rust code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
 - [`owi script`]: an interpreter for [Wasm scripts];
 - [`owi sym`]: a symbolic Wasm interpreter;
 - [`owi validate`]: a validator for Wasm modules;
@@ -227,6 +228,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [`owi opt`]: example/opt
 [`owi replay`]: example/replay
 [`owi run`]: example/run
+[`owi rust`]: example/rust
 [`owi script`]: example/script
 [`owi sym`]: example/sym
 [`owi validate`]: example/validate

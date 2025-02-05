@@ -293,6 +293,45 @@ let run_cmd =
   and+ files in
   Cmd_run.cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files
 
+(* owi rust *)
+
+let rust_info =
+  let doc =
+    "Compile a Rust file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "rust" ~version ~doc ~sdocs ~man
+
+let rust_cmd =
+  let+ arch =
+    let doc = "data model" in
+    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
+  and+ includes =
+    let doc = "headers path" in
+    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
+  and+ opt_lvl =
+    let doc = "specify which optimization level to use" in
+    Arg.(value & opt string "3" & info [ "O" ] ~doc)
+  and+ concolic =
+    let doc = "concolic mode" in
+    Arg.(value & flag & info [ "concolic" ] ~doc)
+  and+ debug
+  and+ workers
+  and+ files
+  and+ profiling
+  and+ unsafe
+  and+ optimize
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ solver in
+  Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
+    ~unsafe ~optimize ~no_stop_at_failure ~no_value
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~concolic ~solver
+
 (* owi validate *)
 
 let validate_info =
@@ -467,6 +506,7 @@ let cli =
     ; Cmd.v instrument_info instrument_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
+    ; Cmd.v rust_info rust_cmd
     ; Cmd.v script_info script_cmd
     ; Cmd.v sym_info sym_cmd
     ; Cmd.v conc_info conc_cmd

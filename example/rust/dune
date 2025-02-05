@@ -1,0 +1,7 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file main.rs)
+  (package owi))
+ (files README.md))

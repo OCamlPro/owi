@@ -1,0 +1,18 @@
+(rule
+ (target libowi_sym.rlib)
+ (deps owi_sym.rs)
+ (action
+  (run
+   rustc
+   --target=wasm32-unknown-unknown
+   --crate-type=rlib
+   --crate-name
+   owi_sym
+   %{deps})))
+
+(install
+ (package owi)
+ (section
+  (site
+   (owi rust_files)))
+ (files libowi_sym.rlib))

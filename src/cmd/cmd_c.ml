@@ -11,9 +11,7 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let binc_location = List.map Fpath.v Share.Sites.binc
-
-let libc_location = List.map Fpath.v Share.Sites.libc
+let c_files_location = List.map Fpath.v Share.Sites.c_files
 
 let find location file : Fpath.t Result.t =
   let* l =
@@ -114,7 +112,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
 
   let out = Fpath.(v "a.out.wasm") in
 
-  let* libc = find binc_location (Fpath.v "libc.wasm") in
+  let* libc = find c_files_location (Fpath.v "libc.wasm") in
 
   let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
@@ -184,7 +182,7 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver : unit Result.t =
-  let includes = libc_location @ includes in
+  let includes = c_files_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
   let* modul = compile ~includes ~opt_lvl debug files in

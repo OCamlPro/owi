@@ -8,6 +8,7 @@
 - [`owi fmt`]
 - [`owi opt`]
 - [`owi run`]
+- [`owi rust`]
 - [`owi script`]
 - [`owi sym`]
 - [`owi validate`]
@@ -55,6 +56,9 @@ COMMANDS
 
        run [OPTION]… [ARG]…
            Run the concrete interpreter
+
+       rust [OPTION]… [ARG]…
+           Compile a Rust file to Wasm and run the symbolic interpreter on it
 
        script [OPTION]… [ARG]…
            Run a reference test suite script
@@ -107,6 +111,7 @@ BUGS
 [`owi fmt`]: ./fmt
 [`owi opt`]: ./opt
 [`owi run`]: ./run
+[`owi rust`]: ./rust
 [`owi script`]: ./script
 [`owi sym`]: ./sym
 [`owi validate`]: ./validate

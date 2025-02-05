@@ -20,6 +20,7 @@
   cmd_opt
   cmd_replay
   cmd_run
+  cmd_rust
   cmd_script
   cmd_sym
   cmd_conc
