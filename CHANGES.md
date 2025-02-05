@@ -24,6 +24,7 @@
 - add a `no-assert-failure-expression-printing` flag to `owi c`, `owi sym` and `owi conc`
 - add `owi version` subcommand
 - add `owi c++` subcommand
+- add `owi rust` subcommand
 
 ## 0.2 - 2024-04-24
 

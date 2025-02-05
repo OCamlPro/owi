@@ -6,9 +6,7 @@ open Bos
 open Syntax
 
 (* TODO: refactor to re-use code in Cmd_c.ml *)
-let binc_location = List.map Fpath.v Share.Sites.binc
-
-let libc_location = List.map Fpath.v Share.Sites.libc
+let c_files_location = List.map Fpath.v Share.Sites.c_files
 
 let find location file : Fpath.t Result.t =
   let* l =
@@ -84,7 +82,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
 
   let out = Fpath.v "a.out.wasm" in
 
-  let* binc = find binc_location (Fpath.v "libc.wasm") in
+  let* binc = find c_files_location (Fpath.v "libc.wasm") in
   let wasmld_cmd : Cmd.t =
     Cmd.(
       wasmld_bin % "-z" % "stack-size=8388608" % "--export=main"
@@ -107,7 +105,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver : unit Result.t =
-  let includes = libc_location @ includes in
+  let includes = c_files_location @ includes in
   let* modul = compile ~includes ~opt_lvl debug files in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)

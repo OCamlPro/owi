@@ -2,7 +2,7 @@
  (package owi)
  (section
   (site
-   (owi libc)))
+   (owi c_files)))
  (files
   (netinet/in.h as netinet/in.h)
   (sys/cdefs.h as sys/cdefs.h)

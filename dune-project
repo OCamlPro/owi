@@ -88,4 +88,4 @@
   (cohttp :with-dev-setup)
   (cohttp-lwt-unix :with-dev-setup)
   )
- (sites (share binc) (share libc) (share bincpp) (share libcpp)))
+ (sites (share c_files) (share rust_files)))

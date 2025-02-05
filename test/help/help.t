@@ -33,6 +33,9 @@ no subcommand should print help
          run [OPTION]… [ARG]…
              Run the concrete interpreter
   
+         rust [OPTION]… [ARG]…
+             Compile a Rust file to Wasm and run the symbolic interpreter on it
+  
          script [OPTION]… [ARG]…
              Run a reference test suite script
   

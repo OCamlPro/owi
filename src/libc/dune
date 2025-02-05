@@ -122,5 +122,5 @@
  (package owi)
  (section
   (site
-   (owi binc)))
+   (owi c_files)))
  (files libc.wasm))
