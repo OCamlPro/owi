@@ -44,21 +44,34 @@
   (dune-build-info :build)
   (dune-site :build)
   ;; system packages
+  conf-clang
+  ;;conf-lld
+  ;;conf-llvm
+  ;;conf-rust-llvm
+  ;;conf-rust-wasm
   ;;conf-zig
   ;; runtime
-  bos
-  cmdliner
-  conf-clang
-  digestif
+  (bos
+    (>= 0.2.1))
+  (cmdliner
+    (>= 1.3.0))
+  (digestif
+    (>= 1.2.0))
   (integers
    (>= 0.5.1))
-  ocaml_intrinsics
-  (prelude (>= 0.3))
-  sedlex
-  (smtml (>= 0.6.0))
-  uutf
-  xmlm
-  (processor (>= 0.2))
+  (ocaml_intrinsics
+    (>= "v0.17.0"))
+  (prelude
+    (>= 0.5))
+  (processor
+    (>= 0.2))
+  (sedlex
+    (>= 3.3))
+  (smtml
+    (>= 0.6.0))
+  (uutf
+    (>= 1.0.3))
+  (xmlm (>= 1.4.0))
   ;; doc
   (odoc :with-doc)
   ;; test
@@ -76,7 +89,6 @@
    (and
     (>= 0.1)
     :with-dev-setup))
-  (crunch :with-dev-setup)
   (extunix :with-dev-setup)
   (crowbar :with-dev-setup)
   (gnuplot :with-dev-setup)
