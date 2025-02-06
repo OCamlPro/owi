@@ -18,7 +18,7 @@ jobs:
           - ubuntu-latest
           # - windows-latest see #5
         ocaml-compiler:
-          - "5.2"
+          - "5.3"
         include:
           - os: ubuntu-latest
             ocaml-compiler: "5.1"
