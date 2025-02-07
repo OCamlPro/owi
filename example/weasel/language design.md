@@ -173,7 +173,7 @@ assumes_clause ::= "(" "assumes" prop ")"
 
 requires_clause ::= "(" "requires" prop ")"
 
-assigns_clause ::= "(" "assigns" ? ")"
+assigns_clause ::= "(" "assigns" {"nothing" | memarg} ")"
 
 ensures_clause ::= "(" "ensures" prop ")"
 
