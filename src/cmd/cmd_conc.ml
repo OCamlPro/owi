@@ -333,12 +333,12 @@ let find_node_to_run tree =
   loop tree []
 
 let pc_model solver pc =
-  let pc = Concolic_choice.pc_to_exprs pc in
+  let pc = Concolic_choice.pc_to_exprs pc |> Symbolic_path_condition.to_set in
   match Solver.check solver pc with
   | `Unsat | `Unknown -> None
   | `Sat ->
     let symbols =
-      let pc = Symbolic_path_condition.to_list pc in
+      let pc = Smtml.Expr.Set.to_list pc in
       Some (Smtml.Expr.get_symbols pc)
     in
     Some (Solver.model ~symbols ~pc solver)
