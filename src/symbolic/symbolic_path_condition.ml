@@ -2,14 +2,37 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Smtml.Expr.Set.t
+module Union_find = Union_find.Make (Smtml.Symbol)
 
-let empty = Smtml.Expr.Set.empty
+type t = Smtml.Expr.Set.t Union_find.t
+
+let empty : t = Union_find.empty
+
+let rec union_on_all_syms (c : Smtml.Expr.Set.t)
+  (pc : Smtml.Expr.Set.t Union_find.t) = function
+  | [] ->
+    (* TODO: I'm not sure what to do here... *)
+    pc
+  | [ last_sym ] -> Union_find.add ~merge:Smtml.Expr.Set.union last_sym c pc
+  | sym0 :: (sym1 :: _tl as tl) ->
+    let pc = Union_find.union ~merge:Smtml.Expr.Set.union sym0 sym1 pc in
+    union_on_all_syms c pc tl
 
 (* TODO: should we make some normalization here? *)
-(* TODO: is it the good place for simplification? *)
-let add pc c =
-  let c = Smtml.Expr.simplify c in
-  Smtml.Expr.Set.add c pc
+let add (pc : t) (c : Symbolic_value.bool) : t =
+  let symbols = Smtml.Expr.get_symbols [ c ] in
+  let c = Smtml.Expr.Set.singleton c in
+  union_on_all_syms c pc symbols
 
-let to_list pc = Smtml.Expr.Set.to_list pc
+(* Return the set of constraints from [pc] that are relevant for [c]. *)
+let slice (pc : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
+  match Smtml.Expr.get_symbols [ c ] with
+  | [] -> (* TODO: not sure what to do here *) Smtml.Expr.Set.empty
+  | sym0 :: _tl -> (
+    match Union_find.find_opt sym0 pc with
+    | None -> Smtml.Expr.Set.empty
+    | Some s -> s )
+
+let to_set pc =
+  Union_find.merge_all_values ~empty:Smtml.Expr.Set.empty
+    ~merge:Smtml.Expr.Set.union pc
