@@ -8,5 +8,6 @@ val empty : t
 
 val add : t -> Symbolic_value.bool -> t
 
-(* TODO: this is needed because *)
-val to_list : t -> Symbolic_value.bool list
+val slice : t -> Symbolic_value.bool -> Smtml.Expr.Set.t
+
+val to_set : t -> Smtml.Expr.Set.t
