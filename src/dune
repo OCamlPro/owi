@@ -105,6 +105,7 @@
   tracing
   trap
   types
+  union_find
   value_intf
   v
   wasm_ffi_intf
