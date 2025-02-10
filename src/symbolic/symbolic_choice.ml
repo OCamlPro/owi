@@ -409,7 +409,8 @@ module Make (Thread : Thread_intf.S) = struct
         true
       in
       let false_branch =
-        let* () = add_pc (Symbolic_value.Bool.not v) in
+        let v = Symbolic_value.Bool.not v in
+        let* () = add_pc v in
         let* () = add_breadcrumb 0l in
         let+ () = check_reachability (Symbolic_value.Bool.not v) in
         false

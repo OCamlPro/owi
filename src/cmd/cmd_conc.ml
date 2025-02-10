@@ -333,7 +333,7 @@ let find_node_to_run tree =
   loop tree []
 
 let pc_model solver pc =
-  let pc = Concolic_choice.pc_to_exprs pc |> Symbolic_path_condition.to_set in
+  let pc = Concolic_choice.pc_to_exprs pc in
   match Solver.check solver pc with
   | `Unsat | `Unknown -> None
   | `Sat ->
