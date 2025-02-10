@@ -173,6 +173,7 @@ module Make (X : VariableType) : S with type key = X.t = struct
           datum
         }
       in
+      let canonical_elements = MX.add demoted canonical canonical_elements in
       let node_of_canonicals = MX.add canonical node t.node_of_canonicals in
       let node_of_canonicals = MX.remove demoted node_of_canonicals in
       { canonical_elements; node_of_canonicals }
