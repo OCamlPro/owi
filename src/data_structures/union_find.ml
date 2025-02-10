@@ -168,7 +168,7 @@ module Make (X : VariableType) : S with type key = X.t = struct
         | Some lhs_datum, Some rhs_datum -> Some (merge lhs_datum rhs_datum)
       in
       let node =
-        { aliases = SX.union lhs_node.aliases rhs_node.aliases;
+        { aliases = SX.add demoted (SX.union lhs_node.aliases rhs_node.aliases);
           cardinal = lhs_node.cardinal + rhs_node.cardinal + 1;
           datum
         }
