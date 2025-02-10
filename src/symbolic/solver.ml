@@ -16,10 +16,13 @@ let fresh solver () =
 
 let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
+  (* TODO: maybe we should change the API of smtml so that Solver.check expects a set instead of a list ? (to avoid duplicates) *)
+  let pc = Symbolic_path_condition.to_list pc in
   Solver.check s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
+  let pc = Symbolic_path_condition.to_list pc in
   let model =
     match Solver.check s pc with
     | `Sat -> begin

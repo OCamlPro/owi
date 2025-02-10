@@ -4,7 +4,7 @@
 
 open Symbolic_value
 
-module Make (Thread : Thread.S) = struct
+module Make (Thread : Thread_intf.S) = struct
   type err =
     | Assert_fail
     | Trap of Result.err

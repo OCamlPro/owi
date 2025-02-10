@@ -201,7 +201,7 @@ module CoreImpl = struct
     let ( let+ ) = map
   end
 
-  module Make (Thread : Thread.S) : sig
+  module Make (Thread : Thread_intf.S) : sig
     (*
       The core implementation of the monad. It is isolated in a module to restict its exposed interface
       and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch.
@@ -330,7 +330,7 @@ end
     We can now use CoreImpl only through its exposed signature which
     maintains all invariants.
   *)
-module Make (Thread : Thread.S) = struct
+module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
   let add_pc (c : Symbolic_value.bool) =
