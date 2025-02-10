@@ -314,7 +314,7 @@ module CoreImpl = struct
     let trap t =
       let* thread in
       let* solver in
-      let pc = Thread.pc thread in
+      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let symbols = Thread.symbols_set thread |> Option.some in
       let model = Solver.model solver ~symbols ~pc in
       let labels = Thread.labels thread in
@@ -367,12 +367,13 @@ module Make (Thread : Thread_intf.S) = struct
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability =
+  let check_reachability v =
     let* () = yield in
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
-    match Solver.check solver pc with
+    let sliced_pc = Symbolic_path_condition.slice pc v in
+    match Solver.check solver sliced_pc with
     | `Sat -> return ()
     | `Unsat | `Unknown -> stop
 
@@ -380,7 +381,8 @@ module Make (Thread : Thread_intf.S) = struct
     let* () = yield in
     let* solver in
     let+ thread in
-    let pc = Thread.pc thread in
+    (* TODO: should we slice instead of using the whole PC? *)
+    let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
     match Solver.check solver pc with
     | `Unsat | `Unknown -> stop
     | `Sat -> begin
@@ -403,13 +405,13 @@ module Make (Thread : Thread_intf.S) = struct
       let true_branch =
         let* () = add_pc v in
         let* () = add_breadcrumb 1l in
-        let+ () = check_reachability in
+        let+ () = check_reachability v in
         true
       in
       let false_branch =
         let* () = add_pc (Symbolic_value.Bool.not v) in
         let* () = add_breadcrumb 0l in
-        let+ () = check_reachability in
+        let+ () = check_reachability (Symbolic_value.Bool.not v) in
         false
       in
       if explore_first then choose true_branch false_branch
@@ -480,7 +482,7 @@ module Make (Thread : Thread_intf.S) = struct
       let* thread in
       let* solver in
       let symbols = Thread.symbols_set thread |> Option.some in
-      let pc = Thread.pc thread in
+      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let model = Solver.model ~symbols ~pc solver in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
