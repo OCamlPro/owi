@@ -6,10 +6,10 @@ type t
 
 val fresh : Smtml.Solver_type.t -> unit -> t
 
-val check : t -> Smtml.Expr.t list -> [ `Sat | `Unknown | `Unsat ]
+val check : t -> Symbolic_path_condition.t -> [ `Sat | `Unknown | `Unsat ]
 
 val model :
      t
   -> symbols:Smtml.Symbol.t list option
-  -> pc:Smtml.Expr.t list
+  -> pc:Symbolic_path_condition.t
   -> Smtml.Model.t
