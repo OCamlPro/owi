@@ -26,11 +26,11 @@ fn main() {
 Let's check if the two functions are the same for any input:
 
 ```sh
-$ owi rust ./main.rs -w1 --fail-on-assertion-only --no-assert-failure-expression-printing
+$ owi rust ./main.rs -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 1073741835
-  symbol symbol_1 i32 -2147483642
+  symbol symbol_0 i32 -487586839
+  symbol symbol_1 i32 486539486
 }
 owi: [ERROR] Reached problem!
 [13]
