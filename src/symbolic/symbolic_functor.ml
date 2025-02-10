@@ -4,7 +4,7 @@
 
 module Make
     (Memory : Symbolic_memory_intf.S)
-    (Thread : Thread.S with type Memory.collection = Memory.collection)
+    (Thread : Thread_intf.S with type Memory.collection = Memory.collection)
     (Choice :
       Choice_intf.Complete
         with module V := Symbolic_value
