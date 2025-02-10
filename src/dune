@@ -103,6 +103,7 @@
   thread_with_memory
   thread_without_memory
   types
+  union_find
   value_intf
   v
   wasm_ffi_intf

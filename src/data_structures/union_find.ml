@@ -58,38 +58,36 @@ module Make (X : VariableType) : S with type key = X.t = struct
     }
 
   let print_set ppf set =
-    if SX.is_empty set then Format.fprintf ppf "{}"
+    if SX.is_empty set then Fmt.pf ppf "{}"
     else (
-      Format.fprintf ppf "@[<hov 1>{";
+      Fmt.pf ppf "@[<hov 1>{";
       let first = ref true in
       SX.iter
         (fun x ->
-          if !first then first := false else Format.fprintf ppf ",@ ";
+          if !first then first := false else Fmt.pf ppf ",@ ";
           X.print ppf x )
         set;
-      Format.fprintf ppf "}@]" )
+      Fmt.pf ppf "}@]" )
 
   let print_map pp ppf map =
-    if MX.is_empty map then Format.fprintf ppf "{}"
+    if MX.is_empty map then Fmt.pf ppf "{}"
     else (
-      Format.fprintf ppf "@[<hov 1>{";
+      Fmt.pf ppf "@[<hov 1>{";
       let first = ref true in
       MX.iter
         (fun key value ->
-          if !first then first := false else Format.fprintf ppf ",@ ";
-          Format.fprintf ppf "@[<hov 1>(%a@ %a)@]" X.print key pp value )
+          if !first then first := false else Fmt.pf ppf ",@ ";
+          Fmt.pf ppf "@[<hov 1>(%a@ %a)@]" X.print key pp value )
         map;
-      Format.fprintf ppf "}@]" )
+      Fmt.pf ppf "}@]" )
 
   let print_aliases ppf { aliases; _ } = print_set ppf aliases
 
   let print_datum pp ppf { datum; _ } =
-    Format.pp_print_option
-      ~none:(fun ppf () -> Format.fprintf ppf "<default>")
-      pp ppf datum
+    Fmt.option ~none:(fun ppf () -> Fmt.pf ppf "<default>") pp ppf datum
 
   let[@ocamlformat "disable"] print pp ppf { node_of_canonicals; _ } =
-    Format.fprintf ppf
+    Fmt.pf ppf
       "@[<hov 1>(\
         @[<hov 1>(aliases_of_canonicals@ %a)@]@ \
         @[<hov 1>(payload_of_canonicals@ %a)@]\
