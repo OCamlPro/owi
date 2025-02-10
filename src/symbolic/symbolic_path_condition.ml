@@ -32,7 +32,9 @@ let to_set pc =
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
 let slice (pc : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
-  | [] -> Smtml.Expr.Set.singleton c
+  | [] ->
+    (* TODO: using Smtml.Expr.Set.empty seems to be working but it looks suspicious, it should be tested *)
+    Smtml.Expr.Set.singleton c
   | sym0 :: _tl -> (
     (* we need only the first symbol as all the other one should have been merged with it *)
     match Union_find.find_opt sym0 pc with
