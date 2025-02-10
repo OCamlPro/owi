@@ -1,17 +1,18 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-include Thread_intf
 
-module Make (Symbolic_memory : M) :
-  S with type Memory.collection = Symbolic_memory.collection = struct
-  module Memory : M with type collection = Symbolic_memory.collection =
+module Make (Symbolic_memory : Thread_intf.M) :
+  Thread_intf.S with type Memory.collection = Symbolic_memory.collection =
+struct
+  module Memory :
+    Thread_intf.M with type collection = Symbolic_memory.collection =
     Symbolic_memory
 
   type t =
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
-    ; pc : Symbolic_value.bool list
+    ; pc : Symbolic_path_condition.t
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection
@@ -27,7 +28,7 @@ module Make (Symbolic_memory : M) :
   let init () =
     let symbols = 0 in
     let symbol_set = [] in
-    let pc = [] in
+    let pc = Symbolic_path_condition.empty in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
@@ -53,7 +54,9 @@ module Make (Symbolic_memory : M) :
 
   let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
 
-  let add_pc t c = { t with pc = c :: t.pc }
+  let add_pc t c =
+    let pc = Symbolic_path_condition.add t.pc c in
+    { t with pc }
 
   let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
 

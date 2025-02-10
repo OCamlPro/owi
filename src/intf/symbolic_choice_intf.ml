@@ -79,7 +79,7 @@ module type Intf = sig
     end
   end
 
-  module Make (Thread : Thread.S) :
+  module Make (Thread : Thread_intf.S) :
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t

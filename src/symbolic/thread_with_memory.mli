@@ -4,7 +4,8 @@
 
 (** @inline *)
 include
-  Thread.S with type Memory.collection = Symbolic_memory_concretizing.collection
+  Thread_intf.S
+    with type Memory.collection = Symbolic_memory_concretizing.collection
 
 val project : t -> Thread_without_memory.t * Memory.collection
 

@@ -40,7 +40,9 @@ let pc_elt_to_expr = function
     (* Should never be reached because no model should be requested if we stopped *)
     assert false
 
-let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
+let pc_to_exprs pc =
+  List.filter_map pc_elt_to_expr pc
+  |> List.fold_left Symbolic_path_condition.add Symbolic_path_condition.empty
 
 type shared_thread_info =
   { memories : Symbolic_memory.collection

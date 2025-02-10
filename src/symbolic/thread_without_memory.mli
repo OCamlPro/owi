@@ -3,4 +3,4 @@
 (* Written by the Owi programmers *)
 
 (** @inline *)
-include Thread.S with type Memory.collection = bool
+include Thread_intf.S with type Memory.collection = bool
