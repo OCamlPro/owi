@@ -18,14 +18,26 @@ module type S = sig
 
   val empty : 'a t
 
-  val add : key -> 'a -> 'a t -> 'a t
+  (** [add ~meet key value uf] adds the key [key] with associated value [value]
+      to the union-find.
 
+      If [key] is already present in the union-find (including if it is no
+      longer canonical), [meet] is used to combine the new value with the
+      existing value associated with [key]. *)
+  val add : meet:('a -> 'a -> 'a) -> key -> 'a -> 'a t -> 'a t
+
+  (** [find_canonical key uf] returns the current canonical representative for
+      [key]. *)
   val find_canonical : key -> 'a t -> key
 
+  (** [find_opt key uf] returns the value associated with [key], if any.
+
+      [key] does not need to be canonical. *)
   val find_opt : key -> 'a t -> 'a option
 
-  (* Raises [Invalid_argument] if either key is not in the map. *)
-  val union : merge:('a -> 'a -> 'a) -> key -> key -> 'a t -> 'a t
+  (** [union ~meet key1 key2 uf] merges the equivalence classes associated with
+      [key1] and [key2], calling [meet] on the corresponding values. *)
+  val union : meet:('a -> 'a -> 'a) -> key -> key -> 'a t -> 'a t
 end
 
 module Make (X : VariableType) : S with type key = X.t = struct
@@ -37,7 +49,7 @@ module Make (X : VariableType) : S with type key = X.t = struct
   type 'a node =
     { aliases : SX.t;
       cardinal : int;
-      datum : 'a
+      datum : 'a option
     }
 
   type 'a t =
@@ -73,7 +85,10 @@ module Make (X : VariableType) : S with type key = X.t = struct
 
   let print_aliases ppf { aliases; _ } = print_set ppf aliases
 
-  let print_datum pp ppf { datum; _ } = pp ppf datum
+  let print_datum pp ppf { datum; _ } =
+    Format.pp_print_option
+      ~none:(fun ppf () -> Format.fprintf ppf "<default>")
+      pp ppf datum
 
   let[@ocamlformat "disable"] print pp ppf { node_of_canonicals; _ } =
     Format.fprintf ppf
@@ -86,30 +101,40 @@ module Make (X : VariableType) : S with type key = X.t = struct
 
   let empty = { canonical_elements = MX.empty; node_of_canonicals = MX.empty }
 
-  let add variable datum t =
-    let node_of_canonicals =
-      MX.add variable
-        { aliases = SX.empty; cardinal = 0; datum }
-        t.node_of_canonicals
-    in
-    { t with node_of_canonicals }
-
   let find_canonical variable t =
     match MX.find_opt variable t.canonical_elements with
     | None -> variable
     | Some canonical -> canonical
 
+  let add ~meet variable datum t =
+    let variable = find_canonical variable t in
+    let node_of_canonicals =
+      MX.update variable (function
+        | None ->
+          Some { aliases = SX.empty ; cardinal = 0 ; datum = Some datum }
+        | Some node ->
+          let datum =
+            match node.datum with
+            | None -> Some datum
+            | Some existing_datum ->
+              Some (meet datum existing_datum)
+          in
+          Some { node with datum })
+      t.node_of_canonicals
+    in
+    { t with node_of_canonicals }
+
   let find_node_opt canonical t = MX.find_opt canonical t.node_of_canonicals
 
-  let find_node_or_raise name canonical t =
+  let find_node canonical t =
     match find_node_opt canonical t with
-    | None -> invalid_arg name
+    | None -> { aliases = SX.empty ; cardinal = 0 ; datum = None }
     | Some node -> node
 
   let find_opt variable t =
-    Option.map
-      (fun node -> node.datum)
+    Option.bind
       (find_node_opt (find_canonical variable t) t)
+      (fun node -> node.datum)
 
   let set_canonical_element aliases canonical canonical_elements =
     SX.fold
@@ -117,14 +142,14 @@ module Make (X : VariableType) : S with type key = X.t = struct
         MX.add alias canonical canonical_elements)
       aliases canonical_elements
 
-  let union ~merge lhs rhs t =
+  let union ~meet lhs rhs t =
     let lhs = find_canonical lhs t in
     let rhs = find_canonical rhs t in
     if X.equal lhs rhs
     then t
     else
-      let lhs_node = find_node_or_raise "union" lhs t in
-      let rhs_node = find_node_or_raise "union" rhs t in
+      let lhs_node = find_node lhs t in
+      let rhs_node = find_node rhs t in
       let demoted, canonical, canonical_elements =
         if lhs_node.cardinal < rhs_node.cardinal
         then
@@ -136,10 +161,16 @@ module Make (X : VariableType) : S with type key = X.t = struct
             lhs,
             set_canonical_element rhs_node.aliases lhs t.canonical_elements )
       in
+      let datum =
+        match lhs_node.datum, rhs_node.datum with
+        | None, None -> None
+        | None, Some datum | Some datum, None -> Some datum
+        | Some lhs_datum, Some rhs_datum -> Some (meet lhs_datum rhs_datum)
+      in
       let node =
         { aliases = SX.union lhs_node.aliases rhs_node.aliases;
           cardinal = lhs_node.cardinal + rhs_node.cardinal + 1;
-          datum = merge lhs_node.datum rhs_node.datum
+          datum
         }
       in
       let node_of_canonicals = MX.add canonical node t.node_of_canonicals in
