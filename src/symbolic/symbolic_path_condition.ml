@@ -24,15 +24,19 @@ let add (pc : t) (c : Symbolic_value.bool) : t =
   let c = Smtml.Expr.Set.singleton c in
   union_on_all_syms c pc symbols
 
-(* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice (pc : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
-  match Smtml.Expr.get_symbols [ c ] with
-  | [] -> (* TODO: not sure what to do here *) Smtml.Expr.Set.empty
-  | sym0 :: _tl -> (
-    match Union_find.find_opt sym0 pc with
-    | None -> Smtml.Expr.Set.empty
-    | Some s -> s )
-
+(* Turns all constraints into a set *)
 let to_set pc =
   Union_find.merge_all_values ~empty:Smtml.Expr.Set.empty
     ~merge:Smtml.Expr.Set.union pc
+
+(* Return the set of constraints from [pc] that are relevant for [c]. *)
+let slice (pc : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
+  match Smtml.Expr.get_symbols [ c ] with
+  | [] -> Smtml.Expr.Set.add c (to_set pc)
+  | sym0 :: _tl -> (
+    (* we need only the first symbol as all the other one should have been merged with it *)
+    match Union_find.find_opt sym0 pc with
+    | None ->
+      (* if there is a symbol, it should have been added to the union-find structure before *)
+      assert false
+    | Some s -> s )
