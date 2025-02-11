@@ -9,25 +9,22 @@ Given the following `poly.cpp` file:
 #include <owi.h>
 
 class Poly {
-  public:
-    int poly;
-    Poly(int a, int b, int c, int d) {
-      int x = owi_i32();
-      int x2 = x * x;
-      int x3 = x * x * x;
-      poly = a * x3 + b * x2 + c * x + d;
-    }
-    int getPoly() {
-      return this->poly;
-    }
+private:
+  int poly;
+public:
+  Poly(int a, int b, int c, int d) {
+    int x = owi_i32();
+    int x2 = x * x;
+    int x3 = x2 * x;
+    poly = a*x3 + b*x2 + c*x + d;
+  }
+
+  int hasRoot() const { return poly == 0; }
 };
 
 int main() {
   Poly p(1, -7, 14, -8);
-
-  owi_assert(p.getPoly() != 0);
-
-  return 0;
+  owi_assert(not(p.hasRoot()));
 }
 ```
 
@@ -54,30 +51,27 @@ We can do so by assuming that `x` is not equal to any of these with the function
 #include <owi.h>
 
 class Poly {
-  public:
-    int poly;
-    Poly(int a, int b, int c, int d) {
-      int x = owi_i32();
-      int x2 = x * x;
-      int x3 = x * x * x;
-      poly = a * x3 + b * x2 + c * x + d;
-      owi_assume(x != 1);
-      owi_assume(x != 2);
-      // Make model output deterministic
-      owi_assume(x > -2147483646);
-      owi_assume(x != 4);
-    }
-    int getPoly() {
-      return this->poly;
-    }
+private:
+  int poly;
+public:
+  Poly(int a, int b, int c, int d) {
+    int x = owi_i32();
+    int x2 = x * x;
+    int x3 = x2 * x;
+    owi_assume(x != 1);
+    owi_assume(x != 2);
+    // make model output deterministic
+    owi_assume(x > -2147483646);
+    owi_assume(x != 4);
+    poly = a*x3 + b*x2 + c*x + d;
+  }
+
+  int hasRoot() const { return poly == 0; }
 };
 
 int main() {
   Poly p(1, -7, 14, -8);
-
-  owi_assert(p.getPoly() != 0);
-
-  return 0;
+  owi_assert(not(p.hasRoot()));
 }
 ```
 
@@ -99,6 +93,35 @@ And indeed, `-2147483644` is a root of the polynomial! Well, not quite…
 Remember that we are working on 32 bits integers here. Thus *overflows* are a thing we have to think about. And indeed when `x` is equal to `-2147483644`, because of overflows, the polynomial will be equal to zero.
 
 Exercise: can you find another "root" of the polynomial ? :-)
+
+## Checking the equivalence of two functions
+
+<!-- $MDX file=mean.cpp -->
+```cpp
+#include <owi.h>
+
+struct IntPair {
+  int x, y;
+  int mean1() const { return (x & y) + ((x ^ y) >> 1); }
+  int mean2() const { return (x + y) / 2; }
+};
+
+int main() {
+  IntPair p{owi_i32(), owi_i32()};
+  owi_assert(p.mean1() == p.mean2());
+}
+```
+
+```sh
+$ owi c++ ./mean.cpp --no-assert-failure-expression-printing
+Assert failure
+model {
+  symbol symbol_0 i32 -2147483648
+  symbol symbol_1 i32 -2147483646
+}
+Reached problem!
+[13]
+```
 
 ## Man page
 
