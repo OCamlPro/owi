@@ -9,18 +9,6 @@ open Types
 
 type externref = E : 'a Type.Id.t * 'a -> externref
 
-module Make_extern_func
-    (V : Func_intf.Value_types)
-    (M : Func_intf.Monad_type)
-    (Memory : Func_intf.Memory_type) :
-  Func_intf.T_Extern_func
-    with type int32 := V.int32
-     and type int64 := V.int64
-     and type float32 := V.float32
-     and type float64 := V.float64
-     and type 'a m := 'a M.t
-     and type memory := Memory.t
-
 module Func :
   Func_intf.T
     with type int32 := Int32.t
