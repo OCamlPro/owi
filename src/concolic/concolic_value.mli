@@ -1,5 +1,3 @@
-type externref
-
 include
   Value_intf.T
     with type bool = Concrete.Value.bool * Symbolic_value.bool
