@@ -6,4 +6,4 @@ include
   Symbolic_functor.Make [@inlined hint]
     (Symbolic_memory_concretizing)
     (Thread_with_memory)
-    (Symbolic_choice_with_memory)
+    (Minimalist_symbolic_choice)

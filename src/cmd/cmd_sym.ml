@@ -21,7 +21,7 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
 
 let link_state =
   lazy
-    (let func_typ = Symbolic.P.Extern_func.extern_type in
+    (let func_typ = Symbolic.Extern_func.extern_type in
      let link_state =
        Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
          Symbolic_wasm_ffi.symbolic_extern_module
@@ -38,7 +38,7 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  let c = Interpret.SymbolicP.modul link_state.envs m in
+  let c = Interpret.Symbolic.modul link_state.envs m in
   Choice.bind pc (fun r ->
     match r with Error _ -> Choice.return r | Ok () -> c )
 
