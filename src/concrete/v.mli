@@ -9,15 +9,6 @@ open Types
 
 type externref = E : 'a Type.Id.t * 'a -> externref
 
-module Func :
-  Func_intf.T
-    with type int32 := Int32.t
-     and type int64 := Int64.t
-     and type float32 := Float32.t
-     and type float64 := Float64.t
-     and type 'a m := 'a
-     and type memory := Concrete_memory.t
-
 type ref_value =
   | Externref of externref option
   | Funcref of Func_intf.t option
@@ -42,7 +33,7 @@ val ref_null' : binary heap_type -> ref_value
 
 val ref_null : binary heap_type -> t
 
-val ref_func : Func.t -> t
+val ref_func : Concrete_extern_func.t -> t
 
 val ref_externref : 'a Type.Id.t -> 'a -> t
 

@@ -14,7 +14,7 @@ type elem = { mutable value : Concrete_value.ref_value array }
 
 let drop_elem (elem : elem) = elem.value <- [||]
 
-type extern_funcs = V.Func.extern_func Func_id.collection
+type extern_funcs = Concrete_extern_func.extern_func Func_id.collection
 
 type t' = Env_id.t
 
@@ -173,7 +173,7 @@ module type T = sig
 
   val drop_data : data -> unit
 
-  val get_extern_func : t -> Func_id.t -> V.Func.extern_func
+  val get_extern_func : t -> Func_id.t -> Concrete_extern_func.extern_func
 
   val get_func_typ : t -> func -> binary func_type
 

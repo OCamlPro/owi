@@ -40,9 +40,9 @@ module Any : sig
     -> srac:bool
     -> optimize:bool
     -> name:string option
-    -> V.Func.extern_func Link.state
-    -> V.Func.extern_func Kind.t
-    -> V.Func.extern_func Link.state Result.t
+    -> Concrete_extern_func.extern_func Link.state
+    -> Concrete_extern_func.extern_func Kind.t
+    -> Concrete_extern_func.extern_func Link.state Result.t
 end
 
 module File : sig
@@ -77,9 +77,9 @@ module File : sig
     -> srac:bool
     -> optimize:bool
     -> name:string option
-    -> V.Func.extern_func Link.state
+    -> Concrete_extern_func.extern_func Link.state
     -> Fpath.t
-    -> V.Func.extern_func Link.state Result.t
+    -> Concrete_extern_func.extern_func Link.state Result.t
 end
 
 module Text : sig
@@ -119,9 +119,9 @@ module Text : sig
     -> srac:bool
     -> optimize:bool
     -> name:string option
-    -> V.Func.extern_func Link.state
+    -> Concrete_extern_func.extern_func Link.state
     -> Text.modul
-    -> V.Func.extern_func Link.state Result.t
+    -> Concrete_extern_func.extern_func Link.state Result.t
 end
 
 module Binary : sig
@@ -147,7 +147,7 @@ module Binary : sig
        unsafe:bool
     -> optimize:bool
     -> name:string option
-    -> V.Func.extern_func Link.state
+    -> Concrete_extern_func.extern_func Link.state
     -> Binary.modul
-    -> V.Func.extern_func Link.state Result.t
+    -> Concrete_extern_func.extern_func Link.state Result.t
 end

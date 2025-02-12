@@ -5,24 +5,6 @@
 open Types
 open Fmt
 
-module Func =
-  Func_intf.Make_extern_func
-    (struct
-      type int32 = Int32.t
-
-      type int64 = Int64.t
-
-      type float32 = Float32.t
-
-      type float64 = Float64.t
-
-      type nonrec bool = bool
-    end)
-    (struct
-      type 'a t = 'a
-    end)
-    (Concrete_memory)
-
 type externref = E : 'a Type.Id.t * 'a -> externref
 
 let cast_ref (type r) (E (rty, r) : externref) (ty : r Type.Id.t) : r option =
@@ -78,7 +60,7 @@ let ref_null' = function
 
 let ref_null typ = Ref (ref_null' typ)
 
-let ref_func (f : Func.t) : t = Ref (Funcref (Some f))
+let ref_func (f : Concrete_extern_func.t) : t = Ref (Funcref (Some f))
 
 let ref_externref (type x) (t : x Type.Id.t) (v : x) : t =
   Ref (Externref (Some (E (t, v))))

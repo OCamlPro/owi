@@ -66,15 +66,30 @@ let run_file ~unsafe ~optimize filename model =
 
   let replay_extern_module =
     let functions =
-      [ ("i8_symbol", V.Func.Extern_func (Func (UArg Res, R1 I32), symbol_i8))
+      [ ( "i8_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
+        )
       ; ( "char_symbol"
-        , V.Func.Extern_func (Func (UArg Res, R1 I32), symbol_char) )
-      ; ("i32_symbol", V.Func.Extern_func (Func (UArg Res, R1 I32), symbol_i32))
-      ; ("i64_symbol", V.Func.Extern_func (Func (UArg Res, R1 I64), symbol_i64))
-      ; ("f32_symbol", V.Func.Extern_func (Func (UArg Res, R1 F32), symbol_f32))
-      ; ("f64_symbol", V.Func.Extern_func (Func (UArg Res, R1 F64), symbol_f64))
-      ; ("assume", V.Func.Extern_func (Func (Arg (I32, Res), R0), assume))
-      ; ("assert", V.Func.Extern_func (Func (Arg (I32, Res), R0), assert'))
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
+        )
+      ; ( "i32_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+        )
+      ; ( "i64_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
+        )
+      ; ( "f32_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
+        )
+      ; ( "f64_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+        )
+      ; ( "assume"
+        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
+        )
+      ; ( "assert"
+        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
+        )
       ]
     in
     { Link.functions }

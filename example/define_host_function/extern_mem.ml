@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : V.Func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
@@ -15,9 +15,11 @@ let extern_module : V.Func.extern_func Link.extern_module =
   let print_x64 (i : int64) = Printf.printf "0x%LX\n%!" i in
   (* we need to describe their types *)
   let functions =
-    [ ("print_x64", V.Func.Extern_func (Func (Arg (I64, Res), R0), print_x64))
+    [ ( "print_x64"
+      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
+      )
     ; ( "memset"
-      , V.Func.Extern_func
+      , Concrete_extern_func.Extern_func
           (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
     ]
   in

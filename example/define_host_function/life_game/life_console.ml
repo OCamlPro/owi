@@ -3,7 +3,7 @@ open Owi
 let () = Random.self_init ()
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : V.Func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let str_buffer = Buffer.create 16 in
   let height (_ : int32) : int32 = 45l in
@@ -25,16 +25,28 @@ let extern_module : V.Func.extern_func Link.extern_module =
   let init_window (_ : int32) = () in
   (* we need to describe their types *)
   let functions =
-    [ ("height", V.Func.Extern_func (Func (Arg (I32, Res), R1 I32), height))
-    ; ("width", V.Func.Extern_func (Func (Arg (I32, Res), R1 I32), width))
-    ; ("sleep", V.Func.Extern_func (Func (Arg (I32, Res), R0), sleep))
-    ; ("newline", V.Func.Extern_func (Func (Arg (I32, Res), R0), newline))
-    ; ("cell_print", V.Func.Extern_func (Func (Arg (I32, Res), R0), cell_print))
+    [ ( "height"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), height)
+      )
+    ; ( "width"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), width)
+      )
+    ; ( "sleep"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), sleep) )
+    ; ( "newline"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), newline) )
+    ; ( "cell_print"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), cell_print)
+      )
     ; ( "clear_screen"
-      , V.Func.Extern_func (Func (Arg (I32, Res), R0), clear_screen) )
-    ; ("rand_val", V.Func.Extern_func (Func (Arg (I32, Res), R1 I32), rand_val))
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), clear_screen) )
+    ; ( "rand_val"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), rand_val) )
     ; ( "init_window"
-      , V.Func.Extern_func (Func (Arg (I32, Res), R0), init_window) )
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), init_window)
+      )
     ]
   in
   { functions }

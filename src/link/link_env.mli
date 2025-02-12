@@ -62,7 +62,7 @@ module Build : sig
   val get_func : t -> int -> func Result.t
 end
 
-type extern_funcs = V.Func.extern_func Func_id.collection
+type extern_funcs = Concrete_extern_func.extern_func Func_id.collection
 
 val freeze : t' -> Build.t -> 'ext Func_id.collection -> 'ext t
 
@@ -91,7 +91,7 @@ module type T = sig
 
   val drop_data : data -> unit
 
-  val get_extern_func : t -> Func_id.t -> V.Func.extern_func
+  val get_extern_func : t -> Func_id.t -> Concrete_extern_func.extern_func
 
   val get_func_typ : t -> func -> binary func_type
 
