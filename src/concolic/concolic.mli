@@ -4,8 +4,8 @@
 
 include
   Interpret_intf.P
-    with module Value = Concolic_value
-     and module Choice = Concolic_choice
+    with module Choice = Concolic_choice
+     and module Value = Concolic_value
      and module Memory = Concolic_memory
      and module Extern_func = Concolic_extern_func
      and type Env.t = Concolic_extern_func.extern_func Link_env.t
