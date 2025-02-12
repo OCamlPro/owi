@@ -57,12 +57,12 @@ module Build : sig
 
   val add_elem : int -> elem -> t -> t
 
-  val get_const_global : t -> int -> Concrete_value.t Result.t
+  val get_const_global : t -> int -> V.t Result.t
 
   val get_func : t -> int -> func Result.t
 end
 
-type extern_funcs = Concrete_value.Func.extern_func Func_id.collection
+type extern_funcs = V.Func.extern_func Func_id.collection
 
 val freeze : t' -> Build.t -> 'ext Func_id.collection -> 'ext t
 
@@ -71,7 +71,7 @@ module type T = sig
 
   type t
 
-  type elem = { mutable value : Concrete_value.ref_value array }
+  type elem = { mutable value : V.ref_value array }
 
   type data = { mutable value : string }
 
@@ -91,7 +91,7 @@ module type T = sig
 
   val drop_data : data -> unit
 
-  val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
+  val get_extern_func : t -> Func_id.t -> V.Func.extern_func
 
   val get_func_typ : t -> func -> binary func_type
 
@@ -101,13 +101,11 @@ module type T = sig
 end
 
 module type P = sig
-  val const_i32 : Int32.t -> V.int32
+  val const_i32 : Int32.t -> Concrete_value.int32
 
-  val const_i64 : Int64.t -> V.int64
+  val const_i64 : Int64.t -> Concrete_value.int64
 
-  val const_f32 : Float32.t -> V.float32
+  val const_f32 : Float32.t -> Concrete_value.float32
 
-  val const_f64 : Float64.t -> V.float64
+  val const_f64 : Float64.t -> Concrete_value.float64
 end
-
-(* module Make(P : P) : T with module V := P.V *)

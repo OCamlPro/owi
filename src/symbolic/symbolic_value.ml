@@ -24,7 +24,7 @@ type float64 = Expr.t
 
 let pp_float64 = Expr.pp
 
-type externref = Concrete_value.externref
+type externref = V.externref
 
 type ref_value =
   | Funcref of Func_intf.t option

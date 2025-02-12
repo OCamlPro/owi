@@ -4,10 +4,9 @@
 
 include
   Interpret_intf.P
-    with module Value = V
+    with module Value = Concrete_value
      and module Choice = Concrete_choice
      and module Memory = Concrete_memory
     (* and module Extern_func = Concrete_extern_func *)
-     and type Env.t = Concrete_value.Func.extern_func Link_env.t
-     and type Module_to_run.t =
-      Concrete_value.Func.extern_func Link.module_to_run
+     and type Env.t = V.Func.extern_func Link_env.t
+     and type Module_to_run.t = V.Func.extern_func Link.module_to_run

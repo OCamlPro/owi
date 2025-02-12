@@ -33,7 +33,7 @@ type exports =
 
 type 'ext envs = 'ext Link_env.t Env_id.collection
 
-type fenvs = Concrete_value.Func.extern_func Link_env.t Env_id.collection
+type fenvs = V.Func.extern_func Link_env.t Env_id.collection
 
 (** link state *)
 type 'f state =
@@ -72,9 +72,9 @@ val extern_module' :
   -> 'f state
 
 val extern_module :
-     Concrete_value.Func.extern_func state
+     V.Func.extern_func state
   -> name:string
-  -> Concrete_value.Func.extern_func extern_module
-  -> Concrete_value.Func.extern_func state
+  -> V.Func.extern_func extern_module
+  -> V.Func.extern_func state
 
-type extern_func = Concrete_value.Func.extern_func Func_id.collection
+type extern_func = V.Func.extern_func Func_id.collection

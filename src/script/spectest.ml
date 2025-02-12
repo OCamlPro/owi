@@ -4,7 +4,7 @@
 
 open Fmt
 open Types
-open Concrete_value.Func
+open V.Func
 
 type extern_module = extern_func Link.extern_module
 

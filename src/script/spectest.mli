@@ -4,7 +4,7 @@
 
 (** The `spectest` module, to run script from the official test suite. *)
 
-type extern_module = Concrete_value.Func.extern_func Link.extern_module
+type extern_module = V.Func.extern_func Link.extern_module
 
 val extern_m : extern_module
 

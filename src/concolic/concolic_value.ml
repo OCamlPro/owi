@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module C = V
+module C = Concrete_value
 module S = Symbolic_value
 
 type bool = C.bool * S.bool

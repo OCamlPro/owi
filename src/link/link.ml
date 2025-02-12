@@ -11,7 +11,7 @@ type global = Concrete_global.t
 
 type table = Concrete_table.t
 
-type func = Concrete_value.Func.t
+type func = V.Func.t
 
 type exports =
   { globals : global StringMap.t
@@ -29,7 +29,7 @@ type 'f module_to_run =
 
 type 'f envs = 'f Link_env.t Env_id.collection
 
-type fenvs = Concrete_value.Func.extern_func Link_env.t Env_id.collection
+type fenvs = V.Func.extern_func Link_env.t Env_id.collection
 
 type 'f state =
   { by_name : exports StringMap.t
@@ -74,7 +74,7 @@ let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   else Ok global
 
 module Eval_const = struct
-  module Stack = Stack.Make [@inlined hint] (V)
+  module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
   (* TODO: const ibinop *)
   let ibinop stack nn (op : ibinop) =
@@ -248,7 +248,7 @@ let load_func (ls : 'f state) (import : binary block_type Imported.t) :
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   match func with
-  | Runtime.Local func -> ok @@ Concrete_value.Func.wasm func finished_env
+  | Runtime.Local func -> ok @@ V.Func.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Link_env.t') env functions =
@@ -427,7 +427,7 @@ let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> binary func_type)
   { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
 let extern_module ls ~name modul =
-  extern_module' ls ~name ~func_typ:Concrete_value.Func.extern_type modul
+  extern_module' ls ~name ~func_typ:V.Func.extern_type modul
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =
@@ -443,4 +443,4 @@ let register_module (ls : 'f state) ~name ~(id : string option) :
   in
   Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
-type extern_func = Concrete_value.Func.extern_func Func_id.collection
+type extern_func = V.Func.extern_func Func_id.collection
