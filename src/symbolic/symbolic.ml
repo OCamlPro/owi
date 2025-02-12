@@ -12,7 +12,7 @@ module MakeP
 struct
   module Value = Symbolic_value
   module Choice = Choice
-  module Extern_func = Concrete_value.Make_extern_func (Value) (Choice) (Memory)
+  module Extern_func = Func_intf.Make_extern_func (Value) (Choice) (Memory)
   module Global = Symbolic_global
   module Table = Symbolic_table
 
