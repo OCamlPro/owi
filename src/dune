@@ -38,6 +38,7 @@
   concolic_wasm_ffi
   concrete
   concrete_choice
+  concrete_extern_func
   concrete_global
   concrete_memory
   concrete_table

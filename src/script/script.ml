@@ -123,7 +123,7 @@ let value_of_const : text const -> V.t Result.t = function
     Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
     assert false
 
-let action (link_state : V.Func.extern_func Link.state) = function
+let action (link_state : Concrete_extern_func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
     Log.debug5 "invoke %a %s %a...@\n"
       (Fmt.option ~none:Fmt.nop Fmt.string)
@@ -151,7 +151,7 @@ let run ~no_exhaustion ~optimize script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : V.Func.extern_func Link.state) -> function
+    (fun (link_state : Concrete_extern_func.extern_func Link.state) -> function
       | Text.Text_module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug0 "*** module@\n";
