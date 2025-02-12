@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 module type S = sig
-  type vbool
+  type bool
 
   type int32
 
@@ -35,7 +35,7 @@ module type S = sig
 
   val keep : t -> int -> t
 
-  val pop_bool : t -> vbool * t
+  val pop_bool : t -> bool * t
 
   val pop_i32 : t -> int32 * t
 
@@ -61,7 +61,7 @@ module type S = sig
 
   val push : t -> value -> t
 
-  val push_bool : t -> vbool -> t
+  val push_bool : t -> bool -> t
 
   val push_i32 : t -> int32 -> t
 
@@ -89,7 +89,7 @@ end
 module Make (V : Value_intf.T) :
   S
     with type value := V.t
-     and type vbool := V.vbool
+     and type bool := V.bool
      and type int32 := V.int32
      and type int64 := V.int64
      and type float32 := V.float32

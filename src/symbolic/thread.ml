@@ -11,7 +11,7 @@ module Make (Symbolic_memory : M) :
   type t =
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
-    ; pc : Symbolic_value.vbool list
+    ; pc : Symbolic_value.bool list
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection

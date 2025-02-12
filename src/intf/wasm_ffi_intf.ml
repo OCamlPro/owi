@@ -29,11 +29,9 @@ module type S0 = sig
 
   val symbol_f64 : unit -> Value.float64 t
 
-  val assume_i32 : Value.int32 -> unit t
+  val assume : Value.int32 -> unit t
 
-  val assume_positive_i32 : Value.int32 -> unit t
-
-  val assert_i32 : Value.int32 -> unit t
+  val assert' : Value.int32 -> unit t
 
   val abort : unit -> unit t
 

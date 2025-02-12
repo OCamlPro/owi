@@ -26,11 +26,11 @@ module type S = sig
 
   val trap : Trap.t -> 'a t
 
-  val select : V.vbool -> bool t
+  val select : V.bool -> Bool.t t
 
   val select_i32 : V.int32 -> Int32.t t
 
-  val assertion : V.vbool -> unit t
+  val assertion : V.bool -> unit t
 
   val with_thread : (thread -> 'a) -> 'a t
 
@@ -40,7 +40,7 @@ module type S = sig
 
   val thread : thread t
 
-  val add_pc : V.vbool -> unit t
+  val add_pc : V.bool -> unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 

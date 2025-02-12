@@ -58,6 +58,6 @@ val ref_func : Func.t -> t
 
 val ref_externref : 'a Type.Id.t -> 'a -> t
 
-val ref_is_null : ref_value -> bool
+val ref_is_null : ref_value -> Bool.t
 
 val pp : Format.formatter -> t -> unit

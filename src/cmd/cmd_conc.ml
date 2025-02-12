@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 open Syntax
-module Choice = Concolic.P.Choice
+module Choice = Concolic.Choice
 
 (* let () = Random.self_init () *)
 let () = Random.init 42
@@ -35,12 +35,12 @@ let simplify_then_link_files ~unsafe ~rac ~srac ~optimize filenames =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Concolic.P.Extern_func.extern_type
+      ~func_typ:Concolic.Extern_func.extern_type
       Concolic_wasm_ffi.symbolic_extern_module
   in
   let link_state =
     Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Concolic.P.Extern_func.extern_type
+      ~func_typ:Concolic.Extern_func.extern_type
       Concolic_wasm_ffi.summaries_extern_module
   in
   let+ link_state, modules_to_run =
@@ -59,7 +59,7 @@ let simplify_then_link_files ~unsafe ~rac ~srac ~optimize filenames =
 
 let run_modules_to_run (link_state : _ Link.state) modules_to_run =
   List.fold_left
-    (fun (acc : unit Result.t Concolic.P.Choice.t) to_run ->
+    (fun (acc : unit Result.t Concolic.Choice.t) to_run ->
       let** () = acc in
       (Interpret.Concolic.modul link_state.envs) to_run )
     (Choice.return (Ok ())) modules_to_run
@@ -135,7 +135,7 @@ type node =
 and eval_tree =
   { mutable node : node
   ; mutable unexplored : unexplored
-  ; pc : Choice.pc
+  ; pc : Concolic_choice.pc
   ; mutable ends : (end_of_trace * Concolic_choice.assignments) list
   }
 
@@ -169,23 +169,24 @@ let update_node (tree : eval_tree) (node : node) : unit =
   tree.node <- node;
   update_unexplored tree
 
-let fresh_tree (pc : Choice.pc) : eval_tree =
+let fresh_tree (pc : Concolic_choice.pc) : eval_tree =
   { node = Not_explored; unexplored = Unexplored.one; pc; ends = [] }
 
-let new_node (pc : Choice.pc) (head : Choice.pc_elt) : node =
+let new_node (pc : Concolic_choice.pc) (head : Concolic_choice.pc_elt) : node =
   match head with
-  | Select (cond, _) ->
+  | Select (_, cond) ->
     Select
       { cond
-      ; if_true = fresh_tree (Select (cond, true) :: pc)
-      ; if_false = fresh_tree (Select (cond, false) :: pc)
+      ; if_true = fresh_tree (Select (true, cond) :: pc)
+      ; if_false = fresh_tree (Select (false, cond) :: pc)
       }
-  | Select_i32 (value, _) -> Select_i32 { value; branches = IMap.empty }
+  | Select_i32 (_, value) -> Select_i32 { value; branches = IMap.empty }
   | Assume cond -> Assume { cond; cont = fresh_tree (Assume cond :: pc) }
   | Assert cond ->
     Assert { cond; cont = fresh_tree (Assert cond :: pc); status = Unknown }
 
-let try_initialize (pc : Choice.pc) (node : eval_tree) (head : Choice.pc_elt) =
+let try_initialize (pc : Concolic_choice.pc) (node : eval_tree)
+  (head : Concolic_choice.pc_elt) =
   match node.node with
   | Not_explored | Being_explored -> update_node node (new_node pc head)
   | _ -> ()
@@ -197,7 +198,7 @@ let set_on_unexplored tree transition =
   | Not_explored | Being_explored -> tree.node <- transition
   | _ -> assert false (* Sanity Check *)
 
-let rec add_trace (pc : Choice.pc) (node : eval_tree) (trace : trace)
+let rec add_trace (pc : Concolic_choice.pc) (node : eval_tree) (trace : trace)
   (to_update : eval_tree list) : eval_tree list =
   match trace.remaining_pc with
   | [] -> begin
@@ -219,14 +220,14 @@ let rec add_trace (pc : Choice.pc) (node : eval_tree) (trace : trace)
     match (node.node, head_of_trace) with
     | (Unreachable | Not_explored | Being_explored | Explored), _ ->
       assert false
-    | Select { cond; if_true; if_false }, Select (cond', v) ->
+    | Select { cond; if_true; if_false }, Select (v, cond') ->
       if check then assert (Smtml.Expr.equal cond cond');
       let branch = if v then if_true else if_false in
       add_trace pc branch
         { trace with remaining_pc = tail_of_trace }
         (node :: to_update)
     | _, Select _ | Select _, _ -> assert false
-    | Select_i32 { value; branches }, Select_i32 (value', v) ->
+    | Select_i32 { value; branches }, Select_i32 (v, value') ->
       if check then assert (Smtml.Expr.equal value value');
       let branch =
         match IMap.find_opt v branches with
@@ -264,14 +265,14 @@ let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
   let backups = List.map Concolic.backup modules_to_run in
   let result = run_modules_to_run link_state modules_to_run in
   let ( result
-      , Choice.
+      , Concolic_choice.
           { pc
           ; symbols = _
           ; symbols_value
           ; shared = _
           ; preallocated_values = _
           } ) =
-    Choice.run forced_values result
+    Concolic_choice.run forced_values result
   in
   let () = List.iter2 Concolic.recover backups modules_to_run in
   let+ end_of_trace =
@@ -327,7 +328,7 @@ let find_node_to_run tree =
       end
     | Assume { cond = _; cont } -> loop cont (tree :: to_update)
     | Assert { cond; cont = _; status = Unknown } ->
-      let pc : Concolic_choice.pc = Select (cond, false) :: tree.pc in
+      let pc : Concolic_choice.pc = Select (false, cond) :: tree.pc in
       Log.debug2 "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
       Some (pc, tree :: to_update)
     | Assert { cond = _; cont; status = _ } -> loop cont (tree :: to_update)

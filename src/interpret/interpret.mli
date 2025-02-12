@@ -56,7 +56,7 @@ end
 
 module Concolic : sig
   val modul :
-       Concolic.P.Env.t Env_id.collection
-    -> Concolic.P.Module_to_run.t
-    -> unit Result.t Concolic.P.Choice.t
+       Concolic.Env.t Env_id.collection
+    -> Concolic.Module_to_run.t
+    -> unit Result.t Concolic.Choice.t
 end

@@ -35,7 +35,7 @@ module Make (Thread : Thread.S) = struct
 
   let ( let+ ) = map
 
-  let select (vb : vbool) =
+  let select (vb : bool) =
     let v = Smtml.Expr.simplify vb in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -50,7 +50,7 @@ module Make (Thread : Thread.S) = struct
 
   let trap t = M (fun th _sol -> (Error (Trap t), th))
 
-  let assertion (vb : vbool) =
+  let assertion (vb : bool) =
     let v = Smtml.Expr.simplify vb in
     match Smtml.Expr.view v with
     | Val True -> return ()
@@ -63,7 +63,7 @@ module Make (Thread : Thread.S) = struct
 
   let solver = M (fun st sol -> (Ok sol, st))
 
-  let add_pc (_vb : vbool) = return ()
+  let add_pc (_vb : bool) = return ()
 
   let run ~workers:_ solver t thread = run t thread (Solver.fresh solver ())
 

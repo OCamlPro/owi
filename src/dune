@@ -32,6 +32,8 @@
   compile
   concolic
   concolic_choice
+  concolic_extern_func
+  concolic_memory
   concolic_value
   concolic_wasm_ffi
   concrete
