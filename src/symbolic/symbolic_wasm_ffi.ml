@@ -18,13 +18,10 @@ module M :
 
   module Value = Symbolic_value
 
-  let assume_i32 (i : Value.int32) : unit Choice.t =
+  let assume (i : Value.int32) : unit Choice.t =
     Choice.add_pc @@ Value.I32.to_bool i
 
-  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
-    Choice.add_pc @@ Value.I32.ge i Value.I32.zero
-
-  let assert_i32 (i : Value.int32) : unit Choice.t =
+  let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
 
   let symbol_i8 () =
@@ -79,14 +76,11 @@ let symbolic_extern_module =
       , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "assume"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_i32) )
-    ; ( "assume_positive_i32"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_positive_i32) )
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
+      )
     ; ( "assert"
-      , Symbolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assert_i32) )
+      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
+      )
     ]
   in
   { Link.functions }

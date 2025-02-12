@@ -18,7 +18,7 @@ struct
 
   type thread = Thread.t
 
-  let select (c : Value.vbool) ~(if_true : Value.t) ~(if_false : Value.t) :
+  let select (c : Value.bool) ~(if_true : Value.t) ~(if_false : Value.t) :
     Value.t Choice.t =
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->

@@ -3,33 +3,31 @@
 (* Written by the Owi programmers *)
 
 module Expr = Smtml.Expr
-module Choice = Concolic.P.Choice
-module Memory = Concolic.P.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
-    with type 'a t = 'a Choice.t
-     and type memory = Memory.t
-     and module Value = Concolic_value.V = struct
-  type 'a t = 'a Choice.t
+    with type 'a t = 'a Concolic_choice.t
+     and type memory = Concolic_memory.t
+     and module Value = Concolic_value = struct
+  type 'a t = 'a Concolic_choice.t
 
-  type memory = Memory.t
+  type memory = Concolic_memory.t
 
-  module Value = Concolic_value.V
+  module Value = Concolic_value
 
-  let symbol_i32 () : Value.int32 Choice.t =
-    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+  let symbol_i32 () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Random.bits32 ()
         | Some (Num (I32 n)) -> n
         | _ -> assert false
       in
-      (I32 n, Value.pair n (Expr.symbol sym)) )
+      (I32 n, (n, Expr.symbol sym)) )
 
-  let symbol_i8 () : Value.int32 Choice.t =
-    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+  let symbol_i8 () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Int32.logand 0xFFl (Random.bits32 ())
@@ -39,10 +37,10 @@ module M :
       let sym_expr =
         Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
       in
-      (I32 n, Value.pair n sym_expr) )
+      (I32 n, (n, sym_expr)) )
 
-  let symbol_char () : Value.int32 Choice.t =
-    Choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+  let symbol_char () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Int32.logand 0xFFl (Random.bits32 ())
@@ -52,20 +50,20 @@ module M :
       let sym_expr =
         Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
       in
-      (I32 n, Value.pair n sym_expr) )
+      (I32 n, (n, sym_expr)) )
 
-  let symbol_i64 () : Value.int64 Choice.t =
-    Choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
+  let symbol_i64 () : Value.int64 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Random.bits64 ()
         | Some (Num (I64 n)) -> n
         | _ -> assert false
       in
-      (I64 n, Value.pair n (Expr.symbol sym)) )
+      (I64 n, (n, Expr.symbol sym)) )
 
-  let symbol_f32 () : Value.float32 Choice.t =
-    Choice.with_new_symbol (Ty_fp 32) (fun sym forced_value ->
+  let symbol_f32 () : Value.float32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_fp 32) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Random.bits32 ()
@@ -73,10 +71,10 @@ module M :
         | _ -> assert false
       in
       let n = Float32.of_bits n in
-      (F32 n, Value.pair n (Expr.symbol sym)) )
+      (F32 n, (n, Expr.symbol sym)) )
 
-  let symbol_f64 () : Value.float64 Choice.t =
-    Choice.with_new_symbol (Ty_fp 64) (fun sym forced_value ->
+  let symbol_f64 () : Value.float64 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_fp 64) (fun sym forced_value ->
       let n =
         match forced_value with
         | None -> Random.bits64 ()
@@ -84,91 +82,76 @@ module M :
         | _ -> assert false
       in
       let n = Float64.of_bits n in
-      (F64 n, Value.pair n (Expr.symbol sym)) )
+      (F64 n, (n, Expr.symbol sym)) )
 
-  let assume_i32 (i : Value.int32) : unit Choice.t =
+  let assume (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
     Concolic_choice.assume c
 
-  let assume_positive_i32 (i : Value.int32) : unit Choice.t =
-    let c = Value.I32.ge i Value.I32.zero in
-    Concolic_choice.assume c
-
-  let assert_i32 (i : Value.int32) : unit Choice.t =
+  let assert' (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
     Concolic_choice.assertion c
 
   open Expr
 
-  let abort () : unit Choice.t = Choice.abort
+  let abort () : unit Concolic_choice.t = Concolic_choice.abort
 
-  let i32 (v : Value.int32) : int32 Choice.t =
+  let i32 ((_c, s) : Value.int32) : int32 Concolic_choice.t =
     (* TODO: select_i32 ? *)
-    (* let+ v = Choice.select_i32 v in *)
+    (* let+ v = Concolic_choice.select_i32 v in *)
     (* let n = v.c in *)
-    (* let x = Choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
-    match view v.symbolic with
-    | Val (Num (I32 v)) -> Choice.return v
+    (* let x = Concolic_choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
+    match view s with
+    | Val (Num (I32 v)) -> Concolic_choice.return v
     | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"@.|} Expr.pp
-        v.symbolic;
-      Choice.bind (abort ()) (fun () -> assert false)
+      Log.debug2 {|alloc: cannot allocate base pointer "%a"@.|} Expr.pp s;
+      Concolic_choice.bind (abort ()) (fun () -> assert false)
 
-  let ptr (v : Value.int32) : int32 Choice.t =
-    match view v.symbolic with
-    | Ptr { base; _ } -> Choice.return base
+  let ptr ((_c, s) : Value.int32) : int32 Concolic_choice.t =
+    match view s with
+    | Ptr { base; _ } -> Concolic_choice.return base
     | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"@.|} Expr.pp
-        v.symbolic;
-      Choice.bind (abort ()) (fun () -> assert false)
+      Log.debug2 {|free: cannot fetch pointer base of "%a"@.|} Expr.pp s;
+      Concolic_choice.bind (abort ()) (fun () -> assert false)
 
-  let exit (_p : Value.int32) : unit Choice.t = abort ()
+  let exit (_p : Value.int32) : unit Concolic_choice.t = abort ()
 
-  let alloc _ (base : Value.int32) (_size : Value.int32) : Value.int32 Choice.t
-      =
-    Choice.bind (i32 base) (fun (base : int32) ->
-      Choice.return
-        { Concolic_value.concrete = base
-        ; symbolic = Expr.ptr base (Symbolic_value.const_i32 0l)
-        } )
+  let alloc _ (base : Value.int32) (_size : Value.int32) :
+    Value.int32 Concolic_choice.t =
+    Concolic_choice.bind (i32 base) (fun (base : int32) ->
+      Concolic_choice.return (base, Expr.ptr base (Symbolic_value.const_i32 0l)) )
 
   let free _ (p : Value.int32) =
     (* WHAT ???? *)
-    let open Choice in
+    let open Concolic_choice in
     let+ base = ptr p in
     Value.const_i32 base
 end
 
-type extern_func = Concolic.P.Extern_func.extern_func
+type extern_func = Concolic.Extern_func.extern_func
 
 open M
 
 let symbolic_extern_module =
   let functions =
     [ ( "i8_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
-      )
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
     ; ( "i32_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
       )
     ; ( "i64_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
       )
     ; ( "f32_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
       )
     ; ( "f64_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "assume"
-      , Concolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_i32) )
-    ; ( "assume_positive_i32"
-      , Concolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assume_positive_i32) )
+      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
-      , Concolic.P.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), assert_i32) )
+      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
     ]
   in
   { Link.functions }
@@ -176,12 +159,12 @@ let symbolic_extern_module =
 let summaries_extern_module =
   let functions =
     [ ( "alloc"
-      , Concolic.P.Extern_func.Extern_func
+      , Concolic.Extern_func.Extern_func
           (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
-      , Concolic.P.Extern_func.Extern_func
+      , Concolic.Extern_func.Extern_func
           (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-    ; ("abort", Concolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+    ; ("abort", Concolic.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ]
   in
   { Link.functions }

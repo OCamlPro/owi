@@ -6,7 +6,7 @@ open Smtml
 open Ty
 open Expr
 
-type vbool = Expr.t
+type bool = Expr.t
 
 type int32 = Expr.t
 
@@ -103,7 +103,7 @@ module Bool = struct
 
   let select_expr c ~if_true ~if_false = Bool.ite c if_true if_false
 
-  let pp ppf (e : vbool) = Expr.pp ppf e
+  let pp ppf (e : bool) = Expr.pp ppf e
 end
 
 module I32 = struct
@@ -197,7 +197,7 @@ module I32 = struct
   let ge_u e1 e2 =
     if phys_equal e1 e2 then Bool.const true else relop ty GeU e1 e2
 
-  let to_bool (e : vbool) =
+  let to_bool (e : bool) =
     match view e with
     | Val (Num (I32 i)) -> Bool.const @@ Int32.ne i 0l
     | Ptr _ -> Bool.const true

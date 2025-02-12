@@ -329,7 +329,7 @@ end
 module Make (Thread : Thread.S) = struct
   include CoreImpl.Make (Thread)
 
-  let add_pc (c : Symbolic_value.vbool) =
+  let add_pc (c : Symbolic_value.bool) =
     match Smtml.Expr.view c with
     | Val True -> return ()
     | Val False -> stop
@@ -383,7 +383,7 @@ module Make (Thread : Thread.S) = struct
       | Some v -> return v
     end
 
-  let select_inner ~explore_first (cond : Symbolic_value.vbool) =
+  let select_inner ~explore_first (cond : Symbolic_value.bool) =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -406,7 +406,7 @@ module Make (Thread : Thread.S) = struct
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.vbool) =
+  let select (cond : Symbolic_value.bool) =
     select_inner cond ~explore_first:true
   [@@inline]
 

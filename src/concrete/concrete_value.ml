@@ -95,7 +95,7 @@ module Func = struct
 
         type float64 = Float64.t
 
-        type vbool = bool
+        type nonrec bool = bool
       end)
       (struct
         type 'a t = 'a

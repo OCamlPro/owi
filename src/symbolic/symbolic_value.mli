@@ -11,7 +11,7 @@ type ref_value =
 include
   Value_intf.T
     with type ref_value := ref_value
-    with type vbool = Smtml.Expr.t
+    with type bool = Smtml.Expr.t
      and type int32 = Smtml.Expr.t
      and type int64 = Smtml.Expr.t
      and type float32 = Smtml.Expr.t

@@ -9,7 +9,7 @@ module type Iop = sig
 
   type const
 
-  type vbool
+  type bool
 
   type float32
 
@@ -53,27 +53,27 @@ module type Iop = sig
 
   val rotr : num -> num -> num
 
-  val eq_const : num -> const -> vbool
+  val eq_const : num -> const -> bool
 
-  val eq : num -> num -> vbool
+  val eq : num -> num -> bool
 
-  val ne : num -> num -> vbool
+  val ne : num -> num -> bool
 
-  val lt : num -> num -> vbool
+  val lt : num -> num -> bool
 
-  val gt : num -> num -> vbool
+  val gt : num -> num -> bool
 
-  val lt_u : num -> num -> vbool
+  val lt_u : num -> num -> bool
 
-  val gt_u : num -> num -> vbool
+  val gt_u : num -> num -> bool
 
-  val le : num -> num -> vbool
+  val le : num -> num -> bool
 
-  val ge : num -> num -> vbool
+  val ge : num -> num -> bool
 
-  val le_u : num -> num -> vbool
+  val le_u : num -> num -> bool
 
-  val ge_u : num -> num -> vbool
+  val ge_u : num -> num -> bool
 
   val trunc_f32_s : float32 -> num
 
@@ -97,7 +97,7 @@ end
 module type Fop = sig
   type num
 
-  type vbool
+  type bool
 
   type int32
 
@@ -135,17 +135,17 @@ module type Fop = sig
 
   val copy_sign : num -> num -> num
 
-  val eq : num -> num -> vbool
+  val eq : num -> num -> bool
 
-  val ne : num -> num -> vbool
+  val ne : num -> num -> bool
 
-  val lt : num -> num -> vbool
+  val lt : num -> num -> bool
 
-  val gt : num -> num -> vbool
+  val gt : num -> num -> bool
 
-  val le : num -> num -> vbool
+  val le : num -> num -> bool
 
-  val ge : num -> num -> vbool
+  val ge : num -> num -> bool
 
   val convert_i32_s : int32 -> num
 
@@ -166,7 +166,7 @@ type 'a get_ref =
   | Type_mismatch
 
 module type T = sig
-  type vbool
+  type bool
 
   type int32
 
@@ -212,7 +212,7 @@ module type T = sig
 
   val ref_externref : 'a Type.Id.t -> 'a -> t
 
-  val ref_is_null : ref_value -> vbool
+  val ref_is_null : ref_value -> bool
 
   module Ref : sig
     val get_func : ref_value -> Func_intf.t get_ref
@@ -221,24 +221,24 @@ module type T = sig
   end
 
   module Bool : sig
-    val const : bool -> vbool
+    val const : Bool.t -> bool
 
-    val not : vbool -> vbool
+    val not : bool -> bool
 
-    val or_ : vbool -> vbool -> vbool
+    val or_ : bool -> bool -> bool
 
-    val and_ : vbool -> vbool -> vbool
+    val and_ : bool -> bool -> bool
 
-    val int32 : vbool -> int32
+    val int32 : bool -> int32
 
-    val pp : Format.formatter -> vbool -> unit
+    val pp : Format.formatter -> bool -> unit
   end
 
   module F32 : sig
     include
       Fop
         with type num := float32
-         and type vbool := vbool
+         and type bool := bool
          and type int32 := int32
          and type int64 := int64
          and type same_size_int := int32
@@ -252,7 +252,7 @@ module type T = sig
     include
       Fop
         with type num := float64
-         and type vbool := vbool
+         and type bool := bool
          and type int32 := int32
          and type int64 := int64
          and type same_size_int := int64
@@ -266,12 +266,12 @@ module type T = sig
     include
       Iop
         with type num := int32
-         and type vbool := vbool
+         and type bool := bool
          and type const := Int32.t
          and type float32 := float32
          and type float64 := float64
 
-    val to_bool : int32 -> vbool
+    val to_bool : int32 -> bool
 
     val reinterpret_f32 : float32 -> int32
 
@@ -282,7 +282,7 @@ module type T = sig
     include
       Iop
         with type num := int64
-         and type vbool := vbool
+         and type bool := bool
          and type const := Int64.t
          and type float32 := float32
          and type float64 := float64

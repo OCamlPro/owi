@@ -587,7 +587,7 @@ module Make (P : Interpret_intf.P) :
       ; continue : pc
       ; continue_rt : binary result_type
       ; stack : stack
-      ; is_loop : bool
+      ; is_loop : Prelude.Bool.t
       }
 
     type block_stack = block list
@@ -1551,4 +1551,4 @@ end
 module Concrete = Make [@inlined hint] (Concrete)
 module SymbolicP = Make [@inlined hint] (Symbolic.P)
 module SymbolicM = Make [@inlined hint] (Symbolic.M)
-module Concolic = Make [@inlined hint] (Concolic.P)
+module Concolic = Make [@inlined hint] (Concolic)

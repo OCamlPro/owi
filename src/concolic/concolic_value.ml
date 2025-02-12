@@ -6,43 +6,35 @@ module type T = sig
   type t
 end
 
-type ('c, 's) cs =
-  { concrete : 'c
-  ; symbolic : 's
-  }
-
 module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
-  type vbool = (C.vbool, S.vbool) cs
+  type bool = C.bool * S.bool
 
-  type int32 = (C.int32, S.int32) cs
+  type int32 = C.int32 * S.int32
 
-  let pp_int32 fmt v =
-    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_int32 v.concrete S.pp_int32 v.symbolic
+  let pp_int32 fmt (c, s) =
+    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_int32 c S.pp_int32 s
 
-  type int64 = (C.int64, S.int64) cs
+  type int64 = C.int64 * S.int64
 
-  let pp_int64 fmt v =
-    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_int64 v.concrete S.pp_int64 v.symbolic
+  let pp_int64 fmt (c, s) =
+    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_int64 c S.pp_int64 s
 
-  type float32 = (C.float32, S.float32) cs
+  type float32 = C.float32 * S.float32
 
-  let pp_float32 fmt v =
-    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_float32 v.concrete S.pp_float32
-      v.symbolic
+  let pp_float32 fmt (c, s) =
+    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_float32 c S.pp_float32 s
 
-  type float64 = (C.float64, S.float64) cs
+  type float64 = C.float64 * S.float64
 
-  let pp_float64 fmt v =
-    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_float64 v.concrete S.pp_float64
-      v.symbolic
+  let pp_float64 fmt (c, s) =
+    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_float64 c S.pp_float64 s
 
   (* TODO: Probably beter not to have a different value for both,
      there are no good reason for that right now *)
-  type ref_value = (C.ref_value, S.ref_value) cs
+  type ref_value = C.ref_value * S.ref_value
 
-  let pp_ref_value fmt v =
-    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_ref_value v.concrete S.pp_ref_value
-      v.symbolic
+  let pp_ref_value fmt (c, s) =
+    Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_ref_value c S.pp_ref_value s
 
   type t =
     | I32 of int32
@@ -51,53 +43,39 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     | F64 of float64
     | Ref of ref_value
 
-  let pair concrete symbolic = { concrete; symbolic }
-
   (* Bof... *)
-  let value_pair (c : C.t) (s : S.t) =
+  let pair_value (c : C.t) (s : S.t) =
     match (c, s) with
-    | I32 concrete, I32 symbolic -> I32 { concrete; symbolic }
-    | I64 concrete, I64 symbolic -> I64 { concrete; symbolic }
-    | F32 concrete, F32 symbolic -> F32 { concrete; symbolic }
-    | F64 concrete, F64 symbolic -> F64 { concrete; symbolic }
-    | Ref concrete, Ref symbolic -> Ref { concrete; symbolic }
+    | I32 c, I32 s -> I32 (c, s)
+    | I64 c, I64 s -> I64 (c, s)
+    | F32 c, F32 s -> F32 (c, s)
+    | F64 c, F64 s -> F64 (c, s)
+    | Ref c, Ref s -> Ref (c, s)
     | _, _ -> assert false
 
   let concrete_value (cs : t) : C.t =
     match cs with
-    | I32 cs -> I32 cs.concrete
-    | I64 cs -> I64 cs.concrete
-    | F32 cs -> F32 cs.concrete
-    | F64 cs -> F64 cs.concrete
-    | Ref cs -> Ref cs.concrete
+    | I32 (c, _s) -> I32 c
+    | I64 (c, _s) -> I64 c
+    | F32 (c, _s) -> F32 c
+    | F64 (c, _s) -> F64 c
+    | Ref (c, _s) -> Ref c
 
   let symbolic_value (cs : t) : S.t =
     match cs with
-    | I32 cs -> I32 cs.symbolic
-    | I64 cs -> I64 cs.symbolic
-    | F32 cs -> F32 cs.symbolic
-    | F64 cs -> F64 cs.symbolic
-    | Ref cs -> Ref cs.symbolic
+    | I32 (_c, s) -> I32 s
+    | I64 (_c, s) -> I64 s
+    | F32 (_c, s) -> F32 s
+    | F64 (_c, s) -> F64 s
+    | Ref (_c, s) -> Ref s
 
-  let f_pair_1 fc fs cs =
-    { concrete = fc cs.concrete; symbolic = fs cs.symbolic }
-  [@@inline always]
+  let f_pair_1 fc fs (c, s) = (fc c, fs s) [@@inline always]
 
-  let f_pair_2 fc fs cs1 cs2 =
-    { concrete = fc cs1.concrete cs2.concrete
-    ; symbolic = fs cs1.symbolic cs2.symbolic
-    }
-  [@@inline always]
+  let f_pair_2 fc fs (c1, s1) (c2, s2) = (fc c1 c2, fs s1 s2) [@@inline always]
 
-  let f_pair_1_cst fc fs v = { concrete = fc v; symbolic = fs v }
-  [@@inline always]
+  let f_pair_1_cst fc fs v = (fc v, fs v) [@@inline always]
 
-  let f_pair_2_cst fc fs v1 v2 = { concrete = fc v1 v2; symbolic = fs v1 v2 }
-  [@@inline always]
-
-  let f_pair_2_cst' fc fs cs v2 =
-    { concrete = fc cs.concrete v2; symbolic = fs cs.symbolic v2 }
-  [@@inline always]
+  let f_pair_2_cst' fc fs (c, s) v2 = (fc c v2, fs s v2) [@@inline always]
 
   let const_i32 v = f_pair_1_cst C.const_i32 S.const_i32 v
 
@@ -111,8 +89,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   let assert_ref_s = function S.Ref r -> r | _ -> assert false
 
-  let ref_pair rc rs =
-    Ref { concrete = assert_ref_c rc; symbolic = assert_ref_s rs }
+  let ref_pair rc rs = Ref (assert_ref_c rc, assert_ref_s rs)
 
   let ref_null v = ref_pair (C.ref_null v) (S.ref_null v)
 
@@ -123,8 +100,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
   let ref_is_null v = f_pair_1 C.ref_is_null S.ref_is_null v
 
-  let mk_pp c symbolic ppf v =
-    Fmt.pf ppf "@[<hov 2>{c: %a@, s: %a}@]" c v.concrete symbolic v.symbolic
+  let mk_pp ppc pps ppf (c, s) =
+    Fmt.pf ppf "@[<hov 2>{c: %a@, s: %a}@]" ppc c pps s
 
   let pp fmt = function
     | I32 i -> pp_int32 fmt i
@@ -134,26 +111,23 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     | Ref r -> pp_ref_value fmt r
 
   module Ref = struct
-    let equal_func_intf (_ : Func_intf.t) (_ : Func_intf.t) : bool =
+    let _equal_func_intf (_ : Func_intf.t) (_ : Func_intf.t) : Bool.t =
       Fmt.failwith "TODO equal_func_intf"
 
-    let get_func ref : Func_intf.t Value_intf.get_ref =
-      match (C.Ref.get_func ref.concrete, S.Ref.get_func ref.symbolic) with
+    let get_func (c, s) : Func_intf.t Value_intf.get_ref =
+      match (C.Ref.get_func c, S.Ref.get_func s) with
       | Null, Null -> Null
       | Type_mismatch, Type_mismatch -> Type_mismatch
       | Ref_value c, Ref_value _s -> Ref_value c
       | _ -> assert false
 
-    let get_externref ref ty_id : _ Value_intf.get_ref =
-      match
-        ( C.Ref.get_externref ref.concrete ty_id
-        , S.Ref.get_externref ref.symbolic ty_id )
-      with
+    let get_externref (c, s) ty_id : _ Value_intf.get_ref =
+      match (C.Ref.get_externref c ty_id, S.Ref.get_externref s ty_id) with
       | Null, Null -> Null
       | Type_mismatch, Type_mismatch -> Type_mismatch
       | Ref_value c, Ref_value _s ->
         (* We could ask for equality from the externref but this would require to add
-           an equality to Type.Id.t *)
+         an equality to Type.Id.t *)
         Ref_value c
       | _ -> assert false
   end
@@ -180,7 +154,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     include
       Value_intf.Fop
         with type num := num
-         and type vbool := C.vbool
+         and type bool := C.bool
          and type int32 := C.int32
          and type int64 := C.int64
          and type same_size_int := same_size_int
@@ -194,7 +168,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
     include
       Value_intf.Fop
         with type num := num
-         and type vbool := S.vbool
+         and type bool := S.bool
          and type int32 := S.int32
          and type int64 := S.int64
          and type same_size_int := same_size_int
@@ -208,12 +182,12 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
       (CFop : CFop with type num := CT.t and type same_size_int := CIT.t)
       (SFop : SFop with type num := ST.t and type same_size_int := SIT.t) :
     Value_intf.Fop
-      with type num := (CT.t, ST.t) cs
-       and type vbool := vbool
+      with type num := CT.t * ST.t
+       and type bool := bool
        and type int32 := int32
        and type int64 := int64
-       and type same_size_int := (CIT.t, SIT.t) cs = struct
-    let zero = pair CFop.zero SFop.zero
+       and type same_size_int := CIT.t * SIT.t = struct
+    let zero = (CFop.zero, SFop.zero)
 
     let abs = f_pair_1 CFop.abs SFop.abs
 
@@ -277,7 +251,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
       Value_intf.Iop
         with type num := num
          and type const := const
-         and type vbool := C.vbool
+         and type bool := C.bool
          and type float32 := C.float32
          and type float64 := C.float64
   end
@@ -291,7 +265,7 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
       Value_intf.Iop
         with type num := num
          and type const := const
-         and type vbool := S.vbool
+         and type bool := S.bool
          and type float32 := S.float32
          and type float64 := S.float64
   end
@@ -303,12 +277,12 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
       (CIop : CIop with type num := CT.t and type const := Const.t)
       (SIop : SIop with type num := ST.t and type const := Const.t) :
     Value_intf.Iop
-      with type num := (CT.t, ST.t) cs
+      with type num := CT.t * ST.t
        and type const := Const.t
-       and type vbool := vbool
+       and type bool := bool
        and type float32 := float32
        and type float64 := float64 = struct
-    let zero = pair CIop.zero SIop.zero
+    let zero = (CIop.zero, SIop.zero)
 
     let clz = f_pair_1 CIop.clz SIop.clz
 
@@ -384,10 +358,8 @@ module T_pair (C : Value_intf.T) (S : Value_intf.T) = struct
 
     let trunc_sat_f64_u = f_pair_1 CIop.trunc_sat_f64_u SIop.trunc_sat_f64_u
 
-    let extend_s symbolic cs =
-      { concrete = CIop.extend_s symbolic cs.concrete
-      ; symbolic = SIop.extend_s symbolic cs.symbolic
-      }
+    let extend_s symbolic (c, s) =
+      (CIop.extend_s symbolic c, SIop.extend_s symbolic s)
   end
 
   module F32 = struct
@@ -487,13 +459,7 @@ end
 
 module V = T_pair (Concrete.Value) (Symbolic_value)
 
-module V' :
-  Value_intf.T
-    with type vbool = (Concrete.Value.vbool, Symbolic_value.vbool) cs
-     and type int32 = (Concrete.Value.int32, Symbolic_value.int32) cs
-     and type int64 = (Concrete.Value.int64, Symbolic_value.int64) cs
-     and type float32 = (Concrete.Value.float32, Symbolic_value.float32) cs
-     and type float64 = (Concrete.Value.float64, Symbolic_value.float64) cs
-     and type ref_value =
-      (Concrete.Value.ref_value, Symbolic_value.ref_value) cs =
-  V
+(* TODO: fix this *)
+type externref = |
+
+include V

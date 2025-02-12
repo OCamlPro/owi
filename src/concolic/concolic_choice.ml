@@ -6,21 +6,21 @@ type err =
   | Assert_fail
     (* TODO add assertion (will be needed by the environment functions *)
   | Trap of Trap.t
-  | Assume_fail of Symbolic_value.vbool
+  | Assume_fail of Symbolic_value.bool
 
 type pc_elt =
-  | Select of Symbolic_value.vbool * bool
-  | Select_i32 of Symbolic_value.int32 * int32
-  | Assume of Symbolic_value.vbool
-  | Assert of Symbolic_value.vbool
+  | Select of Bool.t * Symbolic_value.bool
+  | Select_i32 of Int32.t * Symbolic_value.int32
+  | Assume of Symbolic_value.bool
+  | Assert of Symbolic_value.bool
 
 type pc = pc_elt list
 
 type assignments = (Smtml.Symbol.t * Concrete_value.t) list
 
 let pp_pc_elt fmt = function
-  | Select (c, v) -> Fmt.pf fmt "Select(%a, %b)" Smtml.Expr.pp c v
-  | Select_i32 (c, v) -> Fmt.pf fmt "Select_i32(%a, %li)" Smtml.Expr.pp c v
+  | Select (v, c) -> Fmt.pf fmt "Select(%b, %a)" v Smtml.Expr.pp c
+  | Select_i32 (v, c) -> Fmt.pf fmt "Select_i32(%li, %a)" v Smtml.Expr.pp c
   | Assume c -> Fmt.pf fmt "Assume(%a)" Smtml.Expr.pp c
   | Assert c -> Fmt.pf fmt "Assert(%a)" Smtml.Expr.pp c
 
@@ -38,8 +38,8 @@ let pp_assignments ~no_value fmt assignments =
   Fmt.pf fmt "(model@\n  %a)" (Fmt.vbox (Fmt.list pp_v)) assignments
 
 let pc_elt_to_expr = function
-  | Select (c, v) -> Some (if v then c else Smtml.Expr.Bool.not c)
-  | Select_i32 (c, n) -> Some Smtml.Expr.Bitv.I32.(c = v n)
+  | Select (v, c) -> Some (if v then c else Smtml.Expr.Bool.not c)
+  | Select_i32 (n, c) -> Some Smtml.Expr.Bitv.I32.(c = v n)
   | Assume c -> Some c
   | Assert _ -> None
 
@@ -93,8 +93,8 @@ let abort =
     (fun st ->
       (Ok (), { st with pc = Assume (Symbolic_value.Bool.const false) :: st.pc }) )
 
-let add_pc (c : Concolic_value.V.vbool) =
-  M (fun st -> (Ok (), { st with pc = Assume c.symbolic :: st.pc }))
+let add_pc ((_c, s) : Concolic_value.bool) =
+  M (fun st -> (Ok (), { st with pc = Assume s :: st.pc }))
 
 let add_pc_to_thread (st : thread) c = { st with pc = c :: st.pc }
 
@@ -102,31 +102,27 @@ let no_choice e =
   let v = Smtml.Expr.simplify e in
   not (Smtml.Expr.is_symbolic v)
 
-let select (vb : Concolic_value.V.vbool) =
-  let r = vb.concrete in
-  let cond = Select (vb.symbolic, r) in
-  let no_choice = no_choice vb.symbolic in
-  M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st cond))
+let select ((c, s) : Concolic_value.bool) =
+  let cond = Select (c, s) in
+  let no_choice = no_choice s in
+  M (fun st -> (Ok c, if no_choice then st else add_pc_to_thread st cond))
 [@@inline]
 
-let select_i32 (i : Concolic_value.V.int32) =
-  let r = i.concrete in
-  let expr = Select_i32 (i.symbolic, i.concrete) in
-  let no_choice = no_choice i.symbolic in
-  M (fun st -> (Ok r, if no_choice then st else add_pc_to_thread st expr))
+let select_i32 ((c, s) : Concolic_value.int32) =
+  let expr = Select_i32 (c, s) in
+  let no_choice = no_choice s in
+  M (fun st -> (Ok c, if no_choice then st else add_pc_to_thread st expr))
 [@@inline]
 
-let assume (vb : Concolic_value.V.vbool) =
-  let assume_pc = Assume vb.symbolic in
-  let r = vb.concrete in
-  if r then M (fun st -> (Ok (), add_pc_to_thread st assume_pc))
-  else M (fun st -> (Error (Assume_fail vb.symbolic), st))
+let assume ((c, s) : Concolic_value.bool) =
+  let assume_pc = Assume s in
+  if c then M (fun st -> (Ok (), add_pc_to_thread st assume_pc))
+  else M (fun st -> (Error (Assume_fail s), st))
 
-let assertion (vb : Concolic_value.V.vbool) =
-  let assert_pc = Assert vb.symbolic in
-  let r = vb.concrete in
-  if r then
-    let no_choice = no_choice vb.symbolic in
+let assertion ((c, s) : Concolic_value.bool) =
+  let assert_pc = Assert s in
+  if c then
+    let no_choice = no_choice s in
     M
       (fun st ->
         (Ok (), if no_choice then st else add_pc_to_thread st assert_pc) )

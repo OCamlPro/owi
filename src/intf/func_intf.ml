@@ -13,7 +13,7 @@ module type Value_types = sig
 
   type float64
 
-  type vbool
+  type bool
 end
 
 module type Monad_type = sig
