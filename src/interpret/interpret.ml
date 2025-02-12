@@ -1549,6 +1549,6 @@ module Make (P : Interpret_intf.P) :
 end
 
 module Concrete = Make [@inlined hint] (Concrete)
-module SymbolicP = Make [@inlined hint] (Symbolic.P)
-module SymbolicM = Make [@inlined hint] (Symbolic.M)
+module Symbolic = Make [@inlined hint] (Symbolic)
+module Minimalist_symbolic = Make [@inlined hint] (Minimalist_symbolic)
 module Concolic = Make [@inlined hint] (Concolic)

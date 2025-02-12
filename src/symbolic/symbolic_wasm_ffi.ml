@@ -4,7 +4,7 @@
 
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
-module Memory = Symbolic.P.Memory
+module Memory = Symbolic.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
@@ -51,36 +51,33 @@ module M :
   let exit (_p : Value.int32) : unit Choice.t = abort ()
 end
 
-type extern_func = Symbolic.P.Extern_func.extern_func
+type extern_func = Symbolic.Extern_func.extern_func
 
 open M
 
 let symbolic_extern_module =
   let functions =
     [ ( "i8_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
-      )
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
     ; ( "char_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
       )
     ; ( "i32_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
       )
     ; ( "i64_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
       )
     ; ( "f32_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
       )
     ; ( "f64_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "assume"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
-      )
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
-      )
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
     ]
   in
   { Link.functions }
@@ -88,14 +85,14 @@ let symbolic_extern_module =
 let summaries_extern_module =
   let functions =
     [ ( "alloc"
-      , Symbolic.P.Extern_func.Extern_func
+      , Symbolic.Extern_func.Extern_func
           (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
     ; ( "dealloc"
-      , Symbolic.P.Extern_func.Extern_func
+      , Symbolic.Extern_func.Extern_func
           (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-    ; ("abort", Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+    ; ("abort", Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), abort))
     ; ( "exit"
-      , Symbolic.P.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
     ]
   in
   { Link.functions }

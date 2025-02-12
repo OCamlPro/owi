@@ -40,18 +40,18 @@ module Concrete : sig
   val exec_freinterpreti : V.t list -> Types.nn -> Types.nn -> V.t list
 end
 
-module SymbolicP : sig
+module Symbolic : sig
   val modul :
-       Symbolic.P.Env.t Env_id.collection
-    -> Symbolic.P.Module_to_run.t
-    -> unit Result.t Symbolic.P.Choice.t
+       Symbolic.Env.t Env_id.collection
+    -> Symbolic.Module_to_run.t
+    -> unit Result.t Symbolic.Choice.t
 end
 
-module SymbolicM : sig
+module Minimalist_symbolic : sig
   val modul :
-       Symbolic.M.Env.t Env_id.collection
-    -> Symbolic.M.Module_to_run.t
-    -> unit Result.t Symbolic.M.Choice.t
+       Minimalist_symbolic.Env.t Env_id.collection
+    -> Minimalist_symbolic.Module_to_run.t
+    -> unit Result.t Minimalist_symbolic.Choice.t
 end
 
 module Concolic : sig
