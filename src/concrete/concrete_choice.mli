@@ -3,6 +3,6 @@
 (* Written by the Owi programmers *)
 
 (* TODO: type 'a t should be abstract, run will be needed for this *)
-include Choice_intf.Base with type 'a t = 'a and module V := V
+include Choice_intf.Base with type 'a t = 'a and module V := Concrete_value
 
 val run : 'a t -> 'a

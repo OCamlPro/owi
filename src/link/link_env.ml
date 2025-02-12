@@ -14,7 +14,7 @@ type elem = { mutable value : Concrete_value.ref_value array }
 
 let drop_elem (elem : elem) = elem.value <- [||]
 
-type extern_funcs = Concrete_value.Func.extern_func Func_id.collection
+type extern_funcs = V.Func.extern_func Func_id.collection
 
 type t' = Env_id.t
 
@@ -173,7 +173,7 @@ module type T = sig
 
   val drop_data : data -> unit
 
-  val get_extern_func : t -> Func_id.t -> Concrete_value.Func.extern_func
+  val get_extern_func : t -> Func_id.t -> V.Func.extern_func
 
   val get_func_typ : t -> func -> binary func_type
 
@@ -183,13 +183,13 @@ module type T = sig
 end
 
 module type P = sig
-  val const_i32 : Int32.t -> V.int32
+  val const_i32 : Int32.t -> Concrete_value.int32
 
-  val const_i64 : Int64.t -> V.int64
+  val const_i64 : Int64.t -> Concrete_value.int64
 
-  val const_f32 : Float32.t -> V.float32
+  val const_f32 : Float32.t -> Concrete_value.float32
 
-  val const_f64 : Float64.t -> V.float64
+  val const_f64 : Float64.t -> Concrete_value.float64
 end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)

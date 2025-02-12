@@ -13,16 +13,12 @@ let rec optimize_expr expr : bool * binary instr list =
     :: tl -> begin
     try
       let result =
-        Interpret.Concrete.exec_ibinop
-          [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
-          nn op
+        Interpret.Concrete.exec_ibinop [ V.of_instr y; V.of_instr x ] nn op
       in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e =
-            optimize_expr (Concrete_value.to_instr result :: tl)
-          in
+          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
           (true, e)
         | _ -> assert false
       end
@@ -35,55 +31,39 @@ let rec optimize_expr expr : bool * binary instr list =
     :: F_binop (nn, op)
     :: tl ->
     let result =
-      Interpret.Concrete.exec_fbinop
-        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
-        nn op
+      Interpret.Concrete.exec_fbinop [ V.of_instr y; V.of_instr x ] nn op
     in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_unop (nn, op) :: tl ->
-    let result =
-      Interpret.Concrete.exec_iunop [ Concrete_value.of_instr x ] nn op
-    in
+    let result = Interpret.Concrete.exec_iunop [ V.of_instr x ] nn op in
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: F_unop (nn, op) :: tl ->
-    let result =
-      Interpret.Concrete.exec_funop [ Concrete_value.of_instr x ] nn op
-    in
+    let result = Interpret.Concrete.exec_funop [ V.of_instr x ] nn op in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: I_testop (nn, op) :: tl ->
-    let result =
-      Interpret.Concrete.exec_itestop [ Concrete_value.of_instr x ] nn op
-    in
+    let result = Interpret.Concrete.exec_itestop [ V.of_instr x ] nn op in
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
@@ -92,16 +72,12 @@ let rec optimize_expr expr : bool * binary instr list =
     :: I_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.Concrete.exec_irelop
-        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
-        nn op
+      Interpret.Concrete.exec_irelop [ V.of_instr y; V.of_instr x ] nn op
     in
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
@@ -110,16 +86,12 @@ let rec optimize_expr expr : bool * binary instr list =
     :: F_relop (nn, op)
     :: tl ->
     let result =
-      Interpret.Concrete.exec_frelop
-        [ Concrete_value.of_instr y; Concrete_value.of_instr x ]
-        nn op
+      Interpret.Concrete.exec_frelop [ V.of_instr y; V.of_instr x ] nn op
     in
     begin
       match result with
       | [ (I32 _ as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
@@ -175,15 +147,11 @@ let rec optimize_expr expr : bool * binary instr list =
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
     try
-      let result =
-        Interpret.Concrete.exec_itruncf [ Concrete_value.of_instr c ] nn nn' sx
-      in
+      let result = Interpret.Concrete.exec_itruncf [ V.of_instr c ] nn nn' sx in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e =
-            optimize_expr (Concrete_value.to_instr result :: tl)
-          in
+          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
           (true, e)
         | _ -> assert false
       end
@@ -196,16 +164,12 @@ let rec optimize_expr expr : bool * binary instr list =
     :: tl -> begin
     try
       let result =
-        Interpret.Concrete.exec_itruncsatf
-          [ Concrete_value.of_instr c ]
-          nn nn' sx
+        Interpret.Concrete.exec_itruncsatf [ V.of_instr c ] nn nn' sx
       in
       begin
         match result with
         | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e =
-            optimize_expr (Concrete_value.to_instr result :: tl)
-          in
+          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
           (true, e)
         | _ -> assert false
       end
@@ -214,38 +178,32 @@ let rec optimize_expr expr : bool * binary instr list =
       (has_changed, c :: e)
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
-    let result =
-      Interpret.Concrete.exec_fconverti [ Concrete_value.of_instr x ] nn nn' sx
-    in
+    let result = Interpret.Concrete.exec_fconverti [ V.of_instr x ] nn nn' sx in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end
   | ((F32_const _ | F64_const _) as x) :: I_reinterpret_f (nn, nn') :: tl ->
     let result =
-      Interpret.Concrete.exec_ireinterpretf [ Concrete_value.of_instr x ] nn nn'
+      Interpret.Concrete.exec_ireinterpretf [ V.of_instr x ] nn nn'
     in
     begin
       match result with
       | [ ((I32 _ | I64 _) as result) ] ->
-        optimize_expr (Concrete_value.to_instr result :: tl)
+        optimize_expr (V.to_instr result :: tl)
       | _ -> assert false
     end
   | ((I32_const _ | I64_const _) as x) :: F_reinterpret_i (nn, nn') :: tl ->
     let result =
-      Interpret.Concrete.exec_freinterpreti [ Concrete_value.of_instr x ] nn nn'
+      Interpret.Concrete.exec_freinterpreti [ V.of_instr x ] nn nn'
     in
     begin
       match result with
       | [ ((F32 _ | F64 _) as result) ] ->
-        let _has_changed, e =
-          optimize_expr (Concrete_value.to_instr result :: tl)
-        in
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
         (true, e)
       | _ -> assert false
     end

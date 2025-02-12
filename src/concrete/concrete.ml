@@ -2,8 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Extern_func = Concrete_value.Func
-module Value = V
+module Extern_func = V.Func
+module Value = Concrete_value
 module Global = Concrete_global
 module Table = Concrete_table
 module Memory = Concrete_memory
@@ -33,7 +33,7 @@ end
 module Env = struct
   include Link_env
 
-  type t = Concrete_value.Func.extern_func Link_env.t
+  type t = V.Func.extern_func Link_env.t
 
   let get_data env n =
     let data = get_data env n in
@@ -42,11 +42,11 @@ end
 
 module Module_to_run = struct
   (** runnable module *)
-  type t = Concrete_value.Func.extern_func Link.module_to_run
+  type t = V.Func.extern_func Link.module_to_run
 
-  let env (t : Concrete_value.Func.extern_func Link.module_to_run) = t.env
+  let env (t : V.Func.extern_func Link.module_to_run) = t.env
 
-  let id (t : Concrete_value.Func.extern_func Link.module_to_run) = t.id
+  let id (t : V.Func.extern_func Link.module_to_run) = t.id
 
-  let to_run (t : Concrete_value.Func.extern_func Link.module_to_run) = t.to_run
+  let to_run (t : V.Func.extern_func Link.module_to_run) = t.to_run
 end

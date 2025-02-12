@@ -4,14 +4,14 @@
 
 open Types
 open Syntax
-module Stack = Stack.Make [@inlined hint] (V)
+module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
 module Host_externref = struct
   type t = int
 
   let ty : t Type.Id.t = Type.Id.make ()
 
-  let value i = Concrete_value.Externref (Some (Concrete_value.E (ty, i)))
+  let value i = V.Externref (Some (V.E (ty, i)))
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -72,7 +72,7 @@ let load_global_from_module ls mod_id name =
   | None -> Error (`Unbound_name name)
   | Some v -> Ok v
 
-let compare_result_const result (const : Concrete_value.t) =
+let compare_result_const result (const : V.t) =
   match (result, const) with
   | Text.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> Int64.eq n n'
@@ -83,7 +83,7 @@ let compare_result_const result (const : Concrete_value.t) =
   | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
   | Result_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -> begin
-    match Concrete_value.cast_ref ref Host_externref.ty with
+    match V.cast_ref ref Host_externref.ty with
     | None -> false
     | Some n' -> n = n'
   end
@@ -111,19 +111,19 @@ let compare_result_const result (const : Concrete_value.t) =
     assert false
 
 let value_of_const : text const -> V.t Result.t = function
-  | Const_I32 v -> ok @@ Concrete_value.I32 v
-  | Const_I64 v -> ok @@ Concrete_value.I64 v
-  | Const_F32 v -> ok @@ Concrete_value.F32 v
-  | Const_F64 v -> ok @@ Concrete_value.F64 v
+  | Const_I32 v -> ok @@ V.I32 v
+  | Const_I64 v -> ok @@ V.I64 v
+  | Const_F32 v -> ok @@ V.F32 v
+  | Const_F64 v -> ok @@ V.F64 v
   | Const_null rt ->
     let+ rt = Binary_types.convert_heap_type None rt in
-    Concrete_value.ref_null rt
-  | Const_extern i -> ok @@ Concrete_value.Ref (Host_externref.value i)
+    V.ref_null rt
+  | Const_extern i -> ok @@ V.Ref (Host_externref.value i)
   | i ->
     Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
     assert false
 
-let action (link_state : Concrete_value.Func.extern_func Link.state) = function
+let action (link_state : V.Func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
     Log.debug5 "invoke %a %s %a...@\n"
       (Fmt.option ~none:Fmt.nop Fmt.string)
@@ -151,7 +151,7 @@ let run ~no_exhaustion ~optimize script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : Concrete_value.Func.extern_func Link.state) -> function
+    (fun (link_state : V.Func.extern_func Link.state) -> function
       | Text.Text_module m ->
         if !curr_module = 0 then Log.debug_on := false;
         Log.debug0 "*** module@\n";

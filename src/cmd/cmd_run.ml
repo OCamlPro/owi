@@ -4,13 +4,10 @@
 
 open Syntax
 
-let extern_module : Concrete_value.Func.extern_func Link.extern_module =
+let extern_module : V.Func.extern_func Link.extern_module =
   let assert_i32 n = assert (not @@ Prelude.Int32.equal n 0l) in
   let functions =
-    [ ( "assert"
-      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
-      )
-    ]
+    [ ("assert", V.Func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)) ]
   in
   { functions }
 
