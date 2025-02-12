@@ -119,6 +119,7 @@ We only list proposals that reached phase 3 at least.
 - [november 2024]: [LVP working group] day of the [GdR GPL]
 - [december 2024]: Léo Andrès' PhD defense
 - january 2025: [JFLA 2025]
+- february 2025: [Wasm Research Day 2025]
 
 ### Spelling and pronunciation
 
@@ -197,6 +198,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [WebAssembly]: https://webassembly.org
 [WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
+[Wasm Research Day 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025.html
 
 [Import/Export of Mutable Globals]: https://github.com/WebAssembly/mutable-global
 [Non-trapping float-to-int conversions]: https://github.com/WebAssembly/nontrapping-float-to-int-conversions
