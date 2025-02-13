@@ -35,8 +35,8 @@ let slice (pc : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
   | [] ->
     (* TODO: It means Smt.ml did not properly simplified a expression... *)
     (* assert false *)
-    (* For now, we use the empty set, should be removed and assert false should be used instead later*)
-    Smtml.Expr.Set.empty
+    (* For now, we use this, it should be removed and assert false should be used instead later *)
+    Smtml.Expr.Set.add c (to_set pc)
   | sym0 :: _tl -> (
     (* we need only the first symbol as all the other one should have been merged with it *)
     match Union_find.find_opt sym0 pc with
