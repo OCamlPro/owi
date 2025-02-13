@@ -1,7 +1,11 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2025 OCamlPro *)
+(* Written by the Owi programmers *)
+
 module type VariableType = sig
   type t
 
-  val print : Format.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit
 
   val equal : t -> t -> bool
 
@@ -38,6 +42,10 @@ module type S = sig
   (** [union ~merge key1 key2 uf] merges the equivalence classes associated with
       [key1] and [key2], calling [merge] on the corresponding values. *)
   val union : merge:('a -> 'a -> 'a) -> key -> key -> 'a t -> 'a t
+
+  (** [merge_all_values merge uf] merges values from all equivalence classes in
+      [uf] using [merge] and the initial value [empty]. *)
+  val merge_all_values : empty:'a -> merge:('a -> 'a -> 'a) -> 'a t -> 'a
 end
 
 module Make (X : VariableType) : S with type key = X.t = struct
@@ -58,42 +66,40 @@ module Make (X : VariableType) : S with type key = X.t = struct
     }
 
   let print_set ppf set =
-    if SX.is_empty set then Format.fprintf ppf "{}"
+    if SX.is_empty set then Fmt.pf ppf "{}"
     else (
-      Format.fprintf ppf "@[<hov 1>{";
+      Fmt.pf ppf "@[<hov 1>{";
       let first = ref true in
       SX.iter
         (fun x ->
-          if !first then first := false else Format.fprintf ppf ",@ ";
-          X.print ppf x )
+          if !first then first := false else Fmt.pf ppf ",@ ";
+          X.pp ppf x )
         set;
-      Format.fprintf ppf "}@]" )
+      Fmt.pf ppf "}@]" )
 
   let print_map pp ppf map =
-    if MX.is_empty map then Format.fprintf ppf "{}"
+    if MX.is_empty map then Fmt.pf ppf "{}"
     else (
-      Format.fprintf ppf "@[<hov 1>{";
+      Fmt.pf ppf "@[<hov 1>{";
       let first = ref true in
       MX.iter
         (fun key value ->
-          if !first then first := false else Format.fprintf ppf ",@ ";
-          Format.fprintf ppf "@[<hov 1>(%a@ %a)@]" X.print key pp value )
+          if !first then first := false else Fmt.pf ppf ",@ ";
+          Fmt.pf ppf "@[<hov 1>(%a@ %a)@]" X.pp key pp value )
         map;
-      Format.fprintf ppf "}@]" )
+      Fmt.pf ppf "}@]" )
 
   let print_aliases ppf { aliases; _ } = print_set ppf aliases
 
   let print_datum pp ppf { datum; _ } =
-    Format.pp_print_option
-      ~none:(fun ppf () -> Format.fprintf ppf "<default>")
-      pp ppf datum
+    Fmt.option ~none:(fun ppf () -> Fmt.pf ppf "<default>") pp ppf datum
 
   let[@ocamlformat "disable"] print pp ppf { node_of_canonicals; _ } =
-    Format.fprintf ppf
+    Fmt.pf ppf
       "@[<hov 1>(\
-        @[<hov 1>(aliases_of_canonicals@ %a)@]@ \
-        @[<hov 1>(payload_of_canonicals@ %a)@]\
-      )@]"
+       @[<hov 1>(aliases_of_canonicals@ %a)@]@ \
+       @[<hov 1>(payload_of_canonicals@ %a)@]\
+       )@]"
       (print_map print_aliases) node_of_canonicals
       (print_map (print_datum pp)) node_of_canonicals
 
@@ -172,4 +178,10 @@ module Make (X : VariableType) : S with type key = X.t = struct
       let node_of_canonicals = MX.add canonical node t.node_of_canonicals in
       let node_of_canonicals = MX.remove demoted node_of_canonicals in
       { canonical_elements; node_of_canonicals }
+
+  let merge_all_values ~empty ~merge t =
+    MX.fold
+      (fun _canonical node set ->
+        match node.datum with None -> set | Some datum -> merge set datum )
+      t.node_of_canonicals empty
 end

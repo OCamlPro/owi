@@ -16,11 +16,11 @@ let fresh solver () =
 
 let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
-  Solver.check s pc
+  Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
-  match Solver.check s pc with
+  match Solver.check_set s pc with
   | `Sat -> begin
     match Solver.model ?symbols s with
     | None -> assert false
