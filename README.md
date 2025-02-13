@@ -120,6 +120,7 @@ We only list proposals that reached phase 3 at least.
 - [december 2024]: Léo Andrès' PhD defense
 - january 2025: [JFLA 2025]
 - february 2025: [Wasm Research Day 2025]
+- february 2025: [PPS Seminar]
 
 ### Spelling and pronunciation
 
@@ -192,6 +193,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [Owi]: https://ocamlpro.github.io/owi
 [Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly]: https://hal.science/hal-04627413
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
+[PPS Seminar]: https://www.irif.fr/seminaires/pps/index
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
 [september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
 [Wasm scripts]: https://github.com/WebAssembly/spec/tree/main/interpreter#scripts
