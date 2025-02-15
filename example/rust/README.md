@@ -88,6 +88,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --profile=FILE
+           Profile file.
+
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
 

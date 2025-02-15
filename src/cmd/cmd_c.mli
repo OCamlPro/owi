@@ -23,4 +23,5 @@ val cmd :
   -> concolic:bool
   -> eacsl:bool
   -> solver:Smtml.Solver_type.t
+  -> profile:Fpath.t option
   -> unit Result.t

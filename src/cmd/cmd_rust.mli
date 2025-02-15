@@ -19,4 +19,5 @@ val cmd :
   -> fail_mode:Cmd_sym.fail_mode
   -> concolic:bool
   -> solver:Smtml.Solver_type.t
+  -> profile:Fpath.t option
   -> unit Result.t

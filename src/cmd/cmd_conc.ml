@@ -422,7 +422,8 @@ let run solver tree link_state modules_to_run =
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
-  ~files =
+  ~files ~profile =
+  Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)

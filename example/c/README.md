@@ -485,6 +485,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --profile=FILE
+           Profile file.
+
        --property=VAL
            property file
 

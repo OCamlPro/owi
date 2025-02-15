@@ -55,11 +55,12 @@ let compile ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
 
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver : unit Result.t =
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile :
+  unit Result.t =
   let* modul = compile ~includes ~opt_lvl debug files in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace:(Fpath.v "owi-out")
-    ~solver ~files
+    ~solver ~files ~profile

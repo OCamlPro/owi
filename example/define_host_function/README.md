@@ -47,7 +47,7 @@ You can define the various required external functions in OCaml like this :
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : V.Func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
   let fresh i = ref i in
@@ -56,15 +56,18 @@ let extern_module : V.Func.extern_func Link.extern_module =
   let print_i32 (i : int32) = Printf.printf "%li\n%!" i in
   (* we need to describe their types *)
   let functions =
-    [ ("print_i32", V.Func.Extern_func (Func (Arg (I32, Res), R0), print_i32))
+    [ ( "print_i32"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
     ; ( "fresh"
-      , V.Func.Extern_func (Func (Arg (I32, Res), R1 (Externref rint)), fresh)
-      )
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
     ; ( "set_i32r"
-      , V.Func.Extern_func (Func (Arg (Externref rint, Arg (I32, Res)), R0), set)
-      )
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
     ; ( "get_i32r"
-      , V.Func.Extern_func (Func (Arg (Externref rint, Res), R1 I32), get) )
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Res), R1 I32), get) )
     ]
   in
   { functions }
@@ -163,7 +166,7 @@ See the module below for the whole implementation:
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : V.Func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
@@ -177,9 +180,11 @@ let extern_module : V.Func.extern_func Link.extern_module =
   let print_x64 (i : int64) = Printf.printf "0x%LX\n%!" i in
   (* we need to describe their types *)
   let functions =
-    [ ("print_x64", V.Func.Extern_func (Func (Arg (I64, Res), R0), print_x64))
+    [ ( "print_x64"
+      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
+      )
     ; ( "memset"
-      , V.Func.Extern_func
+      , Concrete_extern_func.Extern_func
           (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
     ]
   in

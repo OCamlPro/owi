@@ -77,6 +77,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --profile=FILE
+           Profile file.
+
        --rac
            runtime assertion checking mode
 
