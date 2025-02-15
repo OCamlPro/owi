@@ -75,6 +75,10 @@ let out_file =
   Arg.(
     value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
+let profile =
+  let doc = "Profile file." in
+  Arg.(value & opt (some path_conv) None & info [ "profile" ] ~docv:"FILE" ~doc)
+
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
   Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
@@ -171,11 +175,12 @@ let cpp_cmd =
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
-  and+ solver in
+  and+ solver
+  and+ profile in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver
+    ~fail_mode ~concolic ~solver ~profile
 
 (* owi c *)
 
@@ -215,6 +220,7 @@ let c_cmd =
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
+  and+ profile
   and+ eacsl =
     let doc =
       "e-acsl mode, refer to \
@@ -226,7 +232,7 @@ let c_cmd =
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~eacsl ~solver
+    ~fail_mode ~concolic ~eacsl ~solver ~profile
 
 (* owi fmt *)
 
@@ -326,11 +332,12 @@ let rust_cmd =
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
-  and+ solver in
+  and+ solver
+  and+ profile in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver
+    ~fail_mode ~concolic ~solver ~profile
 
 (* owi validate *)
 
@@ -384,10 +391,11 @@ let sym_cmd =
   and+ fail_mode
   and+ workspace
   and+ solver
-  and+ files in
+  and+ files
+  and+ profile in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
 
 (* owi replay *)
 
@@ -435,10 +443,11 @@ let conc_cmd =
   and+ fail_mode
   and+ workspace
   and+ solver
-  and+ files in
+  and+ files
+  and+ profile in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
 
 (* owi version *)
 

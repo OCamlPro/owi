@@ -74,6 +74,7 @@
   sexp
   share
   solver
+  stats
   symbolic
   symbolic_choice
   symbolic_choice_intf

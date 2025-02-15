@@ -18,4 +18,5 @@ val cmd :
   -> workspace:Fpath.t
   -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
+  -> profile:Fpath.t option
   -> unit Result.t

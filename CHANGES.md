@@ -25,6 +25,7 @@
 - add `owi version` subcommand
 - add `owi c++` subcommand
 - add `owi rust` subcommand
+- add event logger
 
 ## 0.2 - 2024-04-24
 

@@ -15,15 +15,23 @@ let fresh solver () =
   S ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
+  Stats.start_span "check" "solver";
   let module Solver = (val solver_module) in
-  Solver.check s pc
+  let check = Solver.check s pc in
+  Stats.close_span ();
+  check
 
 let model (S (solver_module, s)) ~symbols ~pc =
+  Stats.start_span "model" "solver";
   let module Solver = (val solver_module) in
-  match Solver.check s pc with
-  | `Sat -> begin
-    match Solver.model ?symbols s with
-    | None -> assert false
-    | Some model -> model
-  end
-  | `Unsat | `Unknown -> assert false
+  let model =
+    match Solver.check s pc with
+    | `Sat -> begin
+      match Solver.model ?symbols s with
+      | None -> assert false
+      | Some model -> model
+    end
+    | `Unsat | `Unknown -> assert false
+  in
+  Stats.close_span ();
+  model
