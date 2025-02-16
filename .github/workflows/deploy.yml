@@ -20,12 +20,15 @@ jobs:
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: "5.2"
+          ocaml-compiler: "5.3"
           dune-cache: false
           opam-pin: true
           allow-prerelease-opam: false
       - name: depext
         run: |
+          # Installs rust-wasm
+          rustup update
+          rustup target add wasm32-unknown-unknown
           sudo apt update
           opam install . --depext-only --with-test --with-doc
       - name: setup-deploy
