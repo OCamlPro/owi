@@ -28,13 +28,11 @@ $ owi instrument ill_formed.wat
 unknown annotation clause owi
 ```
 
-## Types of Annotations
+## Type of Annotation
 
-In Weasel, `annotid` specifies the type of annotation. Different types of annotations follow slightly different grammatical rules and must appear in specific locations of the source code. Weasel defines two types of annotations:
+In Weasel, `annotid` specifies the type of annotation. Different types of annotations follow slightly different grammatical rules and must appear in specific locations of the source code. Currently, Weasel define only one type of annotation:
 
 - **function contract** should appear anywhere a module field is allowed (i.e. as a custom section). Though it is recommended to place the contract immediately before the corresponding function definition.
-
-- **assertion** should appear anywhere an instruction is allowed.
 
 ## Grammar
 
@@ -48,10 +46,21 @@ We present the grammar of Weasel annotations in BNF form. The following notation
 - Asterisk denotes zero, one or more occurrences. `{sym}*`
 - Plus denotes one or more occurrences. `{sym}+`
 - Question mark denotes zero or one occurrence. `{sym}?`
+- The nonterminal symbol `integer` denotes arbitrary-precision mathematical integers.
+- The nonterminal symbol `real` denotes arbitrary-precision mathematical real numbers.
+
 
 ```ocaml
+id ::= {"0" | ... | "9"
+      | "A" | ... | "Z"
+      | "a" | ... | "z"
+      | "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-" | "." | "/"
+      | ":" | "<" | "=" | ">" | "?" | "@" | "\" | "^" | "_" | "`" | "|" | "~"}+
+
+u32 ::= 0 | 1 | ... | 2^32 - 1
+
 ind ::= "$" id
-    | integer
+    | u32
 
 unop ::= "clz"        (on wasm_int_type)
     | "ctz"           (on wasm_int_type)
@@ -108,16 +117,6 @@ pterm ::= "result" {integer}?
     | "i64_load" memarg
     | "f32_load" memarg
     | "f64_load" memarg
-    | "i32_load8_s" memarg
-    | "i32_load8_x" memarg
-    | "i32_load16_s" memarg
-    | "i32_load16_x" memarg
-    | "i64_load8_s" memarg
-    | "i64_load8_x" memarg
-    | "i64_load16_s" memarg
-    | "i64_load16_x" memarg
-    | "i64_load32_s" memarg
-    | "i64_load32_x" memarg
     | "memory_size" ind           (now there is only one memory)
     | "?:" term term term
     | "let" {id}? term term
@@ -149,8 +148,8 @@ pprop ::= "old" prop
     | "let" {id}? term prop
     | unpred prop
     | binpred prop prop
-    | "forall" numerical_type {id}? prop
-    | "exists" numerical_type {id}? prop
+    | ("forall" | "∀") numerical_type {id}? prop
+    | ("exists" | "∃") numerical_type {id}? prop
     | (* predicate application *)
 
 wasm_int_type ::= "i32"
@@ -169,8 +168,6 @@ numerical_type ::= wasm_type
 ref_type ::= "funcref"
     | "externref"
 
-assumes_clause ::= "(" "assumes" prop ")"
-
 requires_clause ::= "(" "requires" prop ")"
 
 assigns_clause ::= "(" "assigns" {"nothing" | memarg} ")"
@@ -179,19 +176,14 @@ ensures_clause ::= "(" "ensures" prop ")"
 
 simple_behavior ::= {requires_clause | assigns_clause | ensures_clause}*
 
-named_behavior ::= "(" "behavior" {assumes_clause | requires_clause | assigns_clause | ensures_clause}* ")"
-
-contract ::= "(@contract" ind simple_behavior {named_behavior}* ")"
-
-assertion ::= "(@assert" prop ")"
+contract ::= "(@contract" ind simple_behavior ")"
 
 annotation ::= contract
-    | assertion
-
 ```
 
 TODO:
-- vector type
+- big number
+- variants of memory loads
+- specification of loop invariant
 - application of (pure) functions through call, call_indirect, call_ref
-- stack access in assertion
 - make memory access syntax more lightweight
