@@ -75,15 +75,15 @@ module M :
 
   let symbol_bool () : Value.int32 Concolic_choice.t =
     Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
-        let b =
-          match forced_value with
-          | None -> Random.bool ()
-          | Some True -> true
-          | Some False -> false
-          | _ -> assert false
-        in
-        let n = Concrete_value.Bool.int32 b in
-        (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
+      let b =
+        match forced_value with
+        | None -> Random.bool ()
+        | Some True -> true
+        | Some False -> false
+        | _ -> assert false
+      in
+      let n = Concrete_value.Bool.int32 b in
+      (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
 
   let assume (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
