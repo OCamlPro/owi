@@ -150,7 +150,7 @@ let symbolic_extern_module =
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "bool_symbol"
-      , Concolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
