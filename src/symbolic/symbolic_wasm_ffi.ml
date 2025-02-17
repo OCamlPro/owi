@@ -77,7 +77,7 @@ let symbolic_extern_module =
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "bool_symbol"
-      , Symbolic.P.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
