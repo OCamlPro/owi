@@ -9,7 +9,7 @@
 - add `--emit-file` option to `wasm2wat` to emit .wat files
 - adds flags `--fail-on-trap-only` and `fail-on-assertion-only`
 - parameterize the `Thread` module on the symbolic memory and the `Choice_monad` module on a Thread
-- adds a `owi_char` function to create char symbolic value
+- add `owi_char` and `owi_bool` function to create char and bool symbolic values
 - adds a `Mem` argument to external function to allow direct manipulation of the memory.
 - add `owi c --e-acsl` to instrument the program by Frama-C's E-ACSL plugin before subsequent steps
 - support other solvers through the `--solver` option (Z3, Colibri2, Bitwuzla and CVC5)

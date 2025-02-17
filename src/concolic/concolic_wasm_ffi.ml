@@ -39,18 +39,7 @@ module M :
       in
       (I32 n, (n, sym_expr)) )
 
-  let symbol_char () : Value.int32 Concolic_choice.t =
-    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-      let n =
-        match forced_value with
-        | None -> Int32.logand 0xFFl (Random.bits32 ())
-        | Some (Num (I32 n)) -> n
-        | _ -> assert false
-      in
-      let sym_expr =
-        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbol sym))
-      in
-      (I32 n, (n, sym_expr)) )
+  let symbol_char = symbol_i8
 
   let symbol_i64 () : Value.int64 Concolic_choice.t =
     Concolic_choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
@@ -83,6 +72,18 @@ module M :
       in
       let n = Float64.of_bits n in
       (F64 n, (n, Expr.symbol sym)) )
+
+  let symbol_bool () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
+      let b =
+        match forced_value with
+        | None -> Random.bool ()
+        | Some True -> true
+        | Some False -> false
+        | _ -> assert false
+      in
+      let n = Concrete_value.Bool.int32 b in
+      (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
 
   let assume (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
@@ -147,6 +148,9 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
+    ; ( "bool_symbol"
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "assume"
       , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
