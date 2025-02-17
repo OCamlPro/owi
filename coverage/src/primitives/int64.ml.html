@@ -456,11 +456,11 @@ let low_int = shift_lef<span data-count="939">t</span> minus_one 63
 let high_int = logxo<span data-count="939">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="2958184">f</span> x (to_in<span data-count="2958167">t</span> (logan<span data-count="2958243">d</span> y (of_in<span data-count="2958236">t</span> 63)))
+let shift f x y = <span data-count="2956517">f</span> x (to_in<span data-count="2956270">t</span> (logan<span data-count="2956449">d</span> y (of_in<span data-count="2956538">t</span> 63)))
 
 let shl x y = <span data-count="109822">s</span>hift shift_left x y
 
-let shr_s x y = <span data-count="2803448">s</span>hift shift_right x y
+let shr_s x y = <span data-count="2801878">s</span>hift shift_right x y
 
 let shr_u x y = <span data-count="45154">s</span>hift shift_right_logical x y
 
