@@ -43,7 +43,7 @@ let pc_elt_to_expr = function
   | Assume c -> Some c
   | Assert _ -> None
 
-let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
+let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc |> Smtml.Expr.Set.of_list
 
 type shared_thread_info =
   { memories : Symbolic_memory.collection
