@@ -82,8 +82,8 @@ module M :
           | Some False -> false
           | _ -> assert false
         in
-        let n = V.Bool.int32 b in
-        (I32 n, Value.(Bool.int32 (pair b (Expr.mk_symbol sym)))) )
+        let n = Concrete_value.Bool.int32 b in
+        (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
 
   let assume (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
