@@ -26,7 +26,7 @@ module M :
 
   let symbol_bool () =
     Choice.with_new_symbol (Ty_bitv 1) (fun sym ->
-        Expr.cvtop (Ty_bitv 32) (Smtml.Ty.Zero_extend 31) (Expr.symbol sym) )
+        Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
 
   let symbol_i8 () =
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
