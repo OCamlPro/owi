@@ -100,11 +100,11 @@
 
 open Syntax
 
-let extern_module : Concrete_value.Func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   let assert_i32 n = assert <span data-count="2">(</span>no<span data-count="1">t</span> @@ Prelude.Int32.equa<span data-count="1">l</span> n 0l) in
   let functions =
     [ ( "assert"
-      , Concrete_value.Func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
       )
     ]
   in
@@ -112,7 +112,7 @@ let extern_module : Concrete_value.Func.extern_func Link.extern_module =
 
 (* module name is called "symbolic" to be compatible with code generator *)
 let link_state =
-  Link.extern_modul<span data-count="927">e</span> Link.empty_state ~name:"symbolic" extern_module
+  Link.extern_modul<span data-count="939">e</span> Link.empty_state ~name:"symbolic" extern_module
 
 let run_file ~unsafe ~rac ~optimize filename =
   <span data-count="31">l</span>et name = None in

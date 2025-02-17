@@ -132,7 +132,7 @@ module type Base = sig
 
   val map : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
-  val select : V.vbool -&gt; bool t
+  val select : V.bool -&gt; Bool.t t
 
   val select_i32 : V.int32 -&gt; Int32.t t
 
@@ -150,7 +150,7 @@ module type Complete = sig
 
   type 'a run_result
 
-  val assertion : V.vbool -&gt; unit t
+  val assertion : V.bool -&gt; unit t
 
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
 
@@ -158,7 +158,7 @@ module type Complete = sig
 
   val thread : thread t
 
-  val add_pc : V.vbool -&gt; unit t
+  val add_pc : V.bool -&gt; unit t
 
   val lift_mem : 'a Symbolic_choice_without_memory.t -&gt; 'a t
 end

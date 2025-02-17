@@ -451,7 +451,7 @@ module type P = sig
   module Choice : Choice_intf.Base with module V := Value
 
   val select :
-    Value.vbool -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t Choice.t
+    Value.bool -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t Choice.t
 
   module Global : sig
     type t
@@ -510,10 +510,10 @@ module type P = sig
 
     val grow : t -&gt; Value.int32 -&gt; unit
 
-    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; Value.vbool
+    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; Value.bool
 
     val blit :
-      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; Value.vbool
+      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; Value.bool
 
     val blit_string :
          t
@@ -521,7 +521,7 @@ module type P = sig
       -&gt; src:Value.int32
       -&gt; dst:Value.int32
       -&gt; len:Value.int32
-      -&gt; Value.vbool
+      -&gt; Value.bool
 
     val size : t -&gt; Value.int32
 

@@ -217,11 +217,11 @@ module type S = sig
 
   val trap : Trap.t -&gt; 'a t
 
-  val select : V.vbool -&gt; bool t
+  val select : V.bool -&gt; Bool.t t
 
   val select_i32 : V.int32 -&gt; Int32.t t
 
-  val assertion : V.vbool -&gt; unit t
+  val assertion : V.bool -&gt; unit t
 
   val with_thread : (thread -&gt; 'a) -&gt; 'a t
 
@@ -231,13 +231,13 @@ module type S = sig
 
   val thread : thread t
 
-  val add_pc : V.vbool -&gt; unit t
+  val add_pc : V.bool -&gt; unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 
   val run :
        workers:int
-    -&gt; Smtml.Solver_dispatcher.solver_type
+    -&gt; Smtml.Solver_type.t
     -&gt; 'a t
     -&gt; thread
     -&gt; callback:('a eval * thread -&gt; unit)

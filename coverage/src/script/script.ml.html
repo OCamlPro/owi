@@ -671,14 +671,14 @@
 
 open Types
 open Syntax
-module Stack = Stack.Make [@inlined hint] (V)
+module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="927">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="939">e</span> ()
 
-  let value i = <span data-count="65">C</span>oncrete_value.Externref (Some (Concrete_value.E (ty, i)))
+  let value i = <span data-count="65">V</span>.Externref (Some (V.E (ty, i)))
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -714,13 +714,13 @@ let load_func_from_module ls mod_id f_name =
       | <span data-count="47913">S</span>ome m -&gt; Ok m
     end
     | <span data-count="217">S</span>ome mod_id -&gt; (
-      match Link.StringMap.find mod_id ls.Link.by_id with
-      | <span data-count="0">e</span>xception Not_found -&gt; Error (`Unbound_module mod_id)
-      | <span data-count="217">e</span>xports -&gt; Ok exports )
+      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      | <span data-count="0">N</span>one -&gt; Error (`Unbound_module mod_id)
+      | <span data-count="217">S</span>ome exports -&gt; Ok exports )
   in
-  <span data-count="48130">m</span>atch Link.StringMap.find f_name exports.functions with
-  | <span data-count="0">e</span>xception Not_found -&gt; Error (`Unbound_name f_name)
-  | <span data-count="48130">v</span> -&gt; Ok (v, env_id)
+  <span data-count="48130">m</span>atch Link.StringMap.find_opt f_name exports.functions with
+  | <span data-count="0">N</span>one -&gt; Error (`Unbound_name f_name)
+  | <span data-count="48130">S</span>ome v -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   <span data-count="22">l</span>et* exports =
@@ -731,15 +731,15 @@ let load_global_from_module ls mod_id name =
       | <span data-count="2">S</span>ome (m, _env_id) -&gt; Ok m
     end
     | <span data-count="20">S</span>ome mod_id -&gt; (
-      match Link.StringMap.find mod_id ls.Link.by_id with
-      | <span data-count="0">e</span>xception Not_found -&gt; Error (`Unbound_module mod_id)
-      | <span data-count="20">e</span>xports, _env_id -&gt; Ok exports )
+      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      | <span data-count="0">N</span>one -&gt; Error (`Unbound_module mod_id)
+      | <span data-count="20">S</span>ome (exports, _env_id) -&gt; Ok exports )
   in
-  <span data-count="22">m</span>atch Link.StringMap.find name exports.globals with
-  | <span data-count="0">e</span>xception Not_found -&gt; Error (`Unbound_name name)
-  | <span data-count="22">v</span> -&gt; Ok v
+  <span data-count="22">m</span>atch Link.StringMap.find_opt name exports.globals with
+  | <span data-count="0">N</span>one -&gt; Error (`Unbound_name name)
+  | <span data-count="22">S</span>ome v -&gt; Ok v
 
-let compare_result_const result (const : Concrete_value.t) =
+let compare_result_const result (const : V.t) =
   <span data-count="42714">m</span>atch (result, const) with
   | <span data-count="25589">T</span>ext.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
   | <span data-count="1777">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
@@ -750,7 +750,7 @@ let compare_result_const result (const : Concrete_value.t) =
   | <span data-count="14">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Funcref None) -&gt; true
   | <span data-count="51">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Externref None) -&gt; true
   | <span data-count="66">R</span>esult_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -&gt; begin
-    match Concrete_value.cast_ref ref Host_externref.ty with
+    match V.cast_ref ref Host_externref.ty with
     | <span data-count="0">N</span>one -&gt; false
     | <span data-count="66">S</span>ome n' -&gt; n = n'
   end
@@ -778,19 +778,19 @@ let compare_result_const result (const : Concrete_value.t) =
     <span data-count="0">a</span>ssert false
 
 let value_of_const : text const -&gt; V.t Result.t = function
-  | <span data-count="20475">C</span>onst_I32 v -&gt; ok @@ Concrete_value.I32 v
-  | <span data-count="2264">C</span>onst_I64 v -&gt; ok @@ Concrete_value.I64 v
-  | <span data-count="23358">C</span>onst_F32 v -&gt; ok @@ Concrete_value.F32 v
-  | <span data-count="23690">C</span>onst_F64 v -&gt; ok @@ Concrete_value.F64 v
+  | <span data-count="20475">C</span>onst_I32 v -&gt; ok @@ V.I32 v
+  | <span data-count="2264">C</span>onst_I64 v -&gt; ok @@ V.I64 v
+  | <span data-count="23358">C</span>onst_F32 v -&gt; ok @@ V.F32 v
+  | <span data-count="23690">C</span>onst_F64 v -&gt; ok @@ V.F64 v
   | <span data-count="28">C</span>onst_null rt -&gt;
     let+ rt = Binary_types.convert_heap_typ<span data-count="28">e</span> None rt in
-    <span data-count="28">C</span>oncrete_value.ref_null rt
-  | <span data-count="65">C</span>onst_extern i -&gt; ok @@ Concrete_value.Ref (Host_externref.valu<span data-count="65">e</span> i)
+    <span data-count="28">V</span>.ref_null rt
+  | <span data-count="65">C</span>onst_extern i -&gt; ok @@ V.Ref (Host_externref.valu<span data-count="65">e</span> i)
   | <span data-count="0">i</span> -&gt;
     Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
     <span data-count="0">a</span>ssert false
 
-let action (link_state : Concrete_value.Func.extern_func Link.state) = function
+let action (link_state : Concrete_extern_func.extern_func Link.state) = function
   | <span data-count="48130">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
     Log.debug5 "invoke %a %s %a...@\n"
       (Fmt.optio<span data-count="48130">n</span> ~none:Fmt.nop Fmt.string)
@@ -818,7 +818,7 @@ let run ~no_exhaustion ~optimize script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : Concrete_value.Func.extern_func Link.state) -&gt; function
+    (fun (link_state : Concrete_extern_func.extern_func Link.state) -&gt; function
       | <span data-count="2551">T</span>ext.Text_module m -&gt;
         if !curr_module = 0 then <span data-count="222">L</span>og.debug_on := false;
         <span data-count="2551">L</span>og.debug0 "*** module@\n";

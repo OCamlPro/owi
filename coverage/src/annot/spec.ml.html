@@ -1057,7 +1057,7 @@ let pp_binop fmt = function
   | <span data-count="0">M</span>ult -&gt; pf fmt "*"
   | <span data-count="0">D</span>iv -&gt; pf fmt "/"
 
-let rec pp_term : type a. formatter -&gt; a term -&gt; unit =
+let rec pp_term : type a. Format.formatter -&gt; a term -&gt; unit =
  fun fmt -&gt; function
   | <span data-count="8">I</span>nt32 i32 -&gt; pf fmt "(i32 %i)" (Int32.to_in<span data-count="8">t</span> i32)
   | <span data-count="0">I</span>nt64 i64 -&gt; pf fmt "(i64 %i)" (Int64.to_in<span data-count="0">t</span> i64)
@@ -1074,7 +1074,7 @@ let rec pp_term : type a. formatter -&gt; a term -&gt; unit =
   | <span data-count="4">R</span>esult None -&gt; pf fmt "result"
   | <span data-count="0">M</span>emory tm1 -&gt; pf fmt "(memory %a)" pp_term tm1
 
-let rec pp_prop : type a. formatter -&gt; a prop -&gt; unit =
+let rec pp_prop : type a. Format.formatter -&gt; a prop -&gt; unit =
  fun fmt -&gt; function
   | <span data-count="0">C</span>onst bool -&gt; pf fmt "%a" Fmt.bool bool
   | <span data-count="10">B</span>inPred (b, tm1, tm2) -&gt;
@@ -1118,7 +1118,7 @@ let parse_text_id_result id =
     else <span data-count="0">E</span>rror (`Spec_invalid_text_indice id)
   else <span data-count="0">E</span>rror (`Spec_invalid_text_indice id)
 
-let parse_raw_id id = <span data-count="15">i</span>nt_of_string id
+let parse_raw_id id = <span data-count="15">i</span>nt_of_string_opt id
 
 let parse_indice id =
   <span data-count="15">m</span>atch (parse_text_i<span data-count="15">d</span> id, parse_raw_i<span data-count="15">d</span> id) with
@@ -1153,7 +1153,7 @@ let rec parse_term =
   end
   (* Result *)
   | <span data-count="0">L</span>ist [ Atom "result"; Atom i ] -&gt; (
-    match int_of_string i with
+    match int_of_string_opt i with
     | <span data-count="0">S</span>ome i -&gt; Ok (Result (Some i))
     | <span data-count="0">N</span>one -&gt; Error (`Spec_invalid_int32 i) )
   (* Int32 *)

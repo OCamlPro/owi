@@ -18,8 +18,8 @@
       <h2>83.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.32%"></span>
-      <span class="unvisited" style="top:13.27%"></span>
+      <span class="unvisited" style="top:11.16%"></span>
+      <span class="unvisited" style="top:12.05%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -35,23 +35,23 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
@@ -180,12 +180,12 @@
 <a id="L154"></a><span > </span>
 <a id="L155"></a><span > </span>
 <a id="L156"></a><span > </span>
-<a id="L157"></a><span class="visited"> </span>
+<a id="L157"></a><span > </span>
 <a id="L158"></a><span > </span>
 <a id="L159"></a><span > </span>
 <a id="L160"></a><span > </span>
 <a id="L161"></a><span > </span>
-<a id="L162"></a><span class="visited"> </span>
+<a id="L162"></a><span > </span>
 <a id="L163"></a><span > </span>
 <a id="L164"></a><span > </span>
 <a id="L165"></a><span > </span>
@@ -193,12 +193,12 @@
 <a id="L167"></a><span > </span>
 <a id="L168"></a><span > </span>
 <a id="L169"></a><span > </span>
-<a id="L170"></a><span > </span>
+<a id="L170"></a><span class="visited"> </span>
 <a id="L171"></a><span > </span>
 <a id="L172"></a><span > </span>
 <a id="L173"></a><span > </span>
 <a id="L174"></a><span > </span>
-<a id="L175"></a><span > </span>
+<a id="L175"></a><span class="visited"> </span>
 <a id="L176"></a><span > </span>
 <a id="L177"></a><span > </span>
 <a id="L178"></a><span > </span>
@@ -235,6 +235,19 @@
 <a id="L209"></a><span > </span>
 <a id="L210"></a><span > </span>
 <a id="L211"></a><span > </span>
+<a id="L212"></a><span > </span>
+<a id="L213"></a><span > </span>
+<a id="L214"></a><span > </span>
+<a id="L215"></a><span > </span>
+<a id="L216"></a><span > </span>
+<a id="L217"></a><span > </span>
+<a id="L218"></a><span > </span>
+<a id="L219"></a><span > </span>
+<a id="L220"></a><span > </span>
+<a id="L221"></a><span > </span>
+<a id="L222"></a><span > </span>
+<a id="L223"></a><span > </span>
+<a id="L224"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -450,6 +463,19 @@
 <a href="#L209">209</a>
 <a href="#L210">210</a>
 <a href="#L211">211</a>
+<a href="#L212">212</a>
+<a href="#L213">213</a>
+<a href="#L214">214</a>
+<a href="#L215">215</a>
+<a href="#L216">216</a>
+<a href="#L217">217</a>
+<a href="#L218">218</a>
+<a href="#L219">219</a>
+<a href="#L220">220</a>
+<a href="#L221">221</a>
+<a href="#L222">222</a>
+<a href="#L223">223</a>
+<a href="#L224">224</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -457,9 +483,8 @@
 
 open Fmt
 open Types
-open Concrete_value.Func
 
-type extern_module = extern_func Link.extern_module
+type extern_module = Concrete_extern_func.extern_func Link.extern_module
 
 let extern_m =
   let print = () in
@@ -481,20 +506,34 @@ let extern_m =
   let func_in_i32_out_i32 (_i : int32) = <span data-count="0">1</span>l in
 
   let functions =
-    [ ("print", Extern_func (Func (Res, R0), print))
-    ; ("print_i32", Extern_func (Func (Arg (I32, Res), R0), print_i32))
-    ; ("print_i64", Extern_func (Func (Arg (I64, Res), R0), print_i64))
-    ; ("print_f32", Extern_func (Func (Arg (F32, Res), R0), print_f32))
-    ; ("print_f64", Extern_func (Func (Arg (F64, Res), R0), print_f64))
+    [ ("print", Concrete_extern_func.Extern_func (Func (Res, R0), print))
+    ; ( "print_i32"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
+    ; ( "print_i64"
+      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_i64)
+      )
+    ; ( "print_f32"
+      , Concrete_extern_func.Extern_func (Func (Arg (F32, Res), R0), print_f32)
+      )
+    ; ( "print_f64"
+      , Concrete_extern_func.Extern_func (Func (Arg (F64, Res), R0), print_f64)
+      )
     ; ( "print_i32_f32"
-      , Extern_func (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
     ; ( "print_f64_f64"
-      , Extern_func (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
-    ; ("func", Extern_func (Func (Res, R0), func))
-    ; ("func-i32", Extern_func (Func (Arg (I32, Res), R0), func_in_i32))
-    ; ("func-&gt;i32", Extern_func (Func (Res, R1 I32), func_out_i32))
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
+    ; ("func", Concrete_extern_func.Extern_func (Func (Res, R0), func))
+    ; ( "func-i32"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32)
+      )
+    ; ( "func-&gt;i32"
+      , Concrete_extern_func.Extern_func (Func (Res, R1 I32), func_out_i32) )
     ; ( "func-i32-&gt;i32"
-      , Extern_func (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
     ]
   in
 
@@ -607,12 +646,12 @@ let m =
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
-            ; init = [ F32_const (Float32.of_floa<span data-count="927">t</span> 666.6) ]
+            ; init = [ F32_const (Float32.of_floa<span data-count="939">t</span> 666.6) ]
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
-            ; init = [ F64_const (Float64.of_floa<span data-count="927">t</span> 666.6) ]
+            ; init = [ F64_const (Float64.of_floa<span data-count="939">t</span> 666.6) ]
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }

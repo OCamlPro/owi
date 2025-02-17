@@ -173,14 +173,14 @@ module type S = sig
   val create :
        int
     -&gt; Smtml.Symbol.t list
-    -&gt; Symbolic_value.vbool list
+    -&gt; Symbolic_value.bool list
     -&gt; Memory.collection
     -&gt; Symbolic_table.collection
     -&gt; Symbolic_global.collection
     -&gt; int32 list
     -&gt; t
 
-  val pc : t -&gt; Symbolic_value.vbool list
+  val pc : t -&gt; Symbolic_value.bool list
 
   val memories : t -&gt; Memory.collection
 
@@ -196,7 +196,7 @@ module type S = sig
 
   val clone : t -&gt; t
 
-  val add_pc : t -&gt; Symbolic_value.vbool -&gt; t
+  val add_pc : t -&gt; Symbolic_value.bool -&gt; t
 
   val add_breadcrumb : t -&gt; int32 -&gt; t
 

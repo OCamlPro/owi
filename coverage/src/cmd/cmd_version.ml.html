@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>cmd_version.ml &mdash; Coverage report</title>
+    <meta name="description" content="75.00% coverage in src/cmd/cmd_version.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/cmd/</span>cmd_version.ml
+        </a>
+      </h1>
+      <h2>75.00%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:16.67%"></span>
+      <span class="unvisited" style="bottom:12.50%"></span>
+      <span class="unvisited" style="bottom:8.33%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+let string_of_version = function
+  | <span data-count="13182">N</span>one -&gt; "unknown"
+  | <span data-count="73440">S</span>ome v -&gt; Build_info.V1.Version.to_string v
+
+let version = string_of_versio<span data-count="939">n</span> @@ Build_info.V1.versio<span data-count="939">n</span> ()
+
+let statically_linked_libraries =
+  Build_info.V1.Statically_linked_libraries.to_list ()
+  |&gt; <span data-count="939">L</span>ist.map (fun l -&gt;
+       <span data-count="85683">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="85683">e</span> l
+       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="85683">s</span>tring_of_versio<span data-count="85683">n</span>
+       ) )
+  |&gt; <span data-count="939">L</span>ist.sor<span data-count="939">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="440157">S</span>tring.compare n1 n2)
+
+let cmd () =
+  <span data-count="0">F</span>mt.pr "owi version %s@\n" version;
+  <span data-count="0">L</span>ist.iter
+    (fun (name, version) -&gt; <span data-count="0">F</span>mt.pr "%s version %s@\n" name version)
+    statically_linked_libraries;
+  <span data-count="0">O</span>k ()
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
