@@ -73,8 +73,8 @@ module M :
       let n = Float64.of_bits n in
       (F64 n, (n, Expr.symbol sym)) )
 
-  let symbol_bool () : Value.int32 Choice.t =
-    Choice.with_new_symbol Ty_bool (fun sym forced_value ->
+  let symbol_bool () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
         let b =
           match forced_value with
           | None -> Random.bool ()
