@@ -85,7 +85,7 @@ pterm =
   | "?:" , term , term , term
   | "let" , numerical_type , [ id ] , term , term
   | "cast" , numerical_type , term
-  | (* function application *) ;
+  | "call" , ind , { term } ;
 
 unpred =
     "eqz"
@@ -118,7 +118,7 @@ pprop =
   | binpred , prop , prop
   | ("forall" | "∀") , numerical_type , [ id ] , prop
   | ("exists" | "∃") , numerical_type , [ id ] , prop
-  | (* predicate application *) ;
+  | "call" , ind , { term } ; (the function must return an i32)
 
 wasm_int_type =
     "i32"
@@ -149,6 +149,6 @@ ensures_clause = "(" , "ensures" , prop , ")" ;
 
 simple_behavior = { requires_clause | assigns_clause | ensures_clause } ;
 
-contract = "(@contract" , ind , simple_behavior , ")" ;
+contract = "(@contract" , ind , [ "pure" ] , simple_behavior , ")" ;
 
 annotation = contract ;

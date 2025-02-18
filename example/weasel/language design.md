@@ -43,7 +43,4 @@ The grammar of Weasel annotations is specified [here](grammar.ebnf) in [EBNF-ISO
 ## Future works
 
 - big number
-- variants of memory loads
 - specification of loop invariant
-- application of (pure) functions through call, call_indirect, call_ref
-- make memory access syntax more lightweight
