@@ -2,7 +2,6 @@
     In the grammar below, the following notations are adopted:
         - The nonterminal symbol `u32` denotes 32-bit unsigned integers.
         - The nonterminal symbol `integer` denotes arbitrary-precision mathematical integers.
-        - The nonterminal symbol `real` denotes arbitrary-precision mathematical real numbers.
 *)
 
 idchar =
@@ -19,6 +18,26 @@ ind =
     "$" , id
   | u32 ;
 
+wasm_int_type =
+    "i32"
+  | "i64" ;
+
+wasm_float_type =
+    "f32"
+  | "f64" ;
+
+wasm_type =
+    wasm_int_type
+  | wasm_float_type ;
+
+num_type =
+    wasm_type
+  | "integer"
+
+ref_type =
+    "funcref"
+  | "externref" ;
+
 unop =
     "clz"             (on wasm_int_type)
   | "ctz"             (on wasm_int_type)
@@ -28,8 +47,8 @@ unop =
   | "sqrt"
   | "ceil"
   | "floor"
-  | "trunc"           (on wasm_float_type or real)
-  | "nearst" ;        (on wasm_float_type or real)
+  | "trunc"           (on wasm_float_type)
+  | "nearest" ;       (on wasm_float_type)
 
 binop =
     "add" | "+"
@@ -46,8 +65,7 @@ binop =
   | "shr_s" | ">>"    (on wasm_int_type or integer)
   | "shr_x" | ">>>"   (on wasm_int_type or integer)
   | "rotl"            (on wasm_int_type)
-  | "rotr"            (on wasm_int_type)
-  | "copysign" ;
+  | "rotr" ;          (on wasm_int_type)
 
 memarg =
   "(" , "base" , term , ")" ,
@@ -61,8 +79,7 @@ term =
   | "i64_max"
   | "i64_min"
   | integer
-  | real
-  | ind
+  | id
   | pterm ;
 
 pterm =
@@ -72,8 +89,8 @@ pterm =
   | "global" , ind
   | "binder" , ind
   | unop , term
-  | binop , term,  term
-  | "null" , ref_type
+  | binop , term , term
+  | "ref_null" , ref_type
   | "ref_func" , ind
   | "table_get" , ind
   | "table_size" , ind
@@ -82,9 +99,9 @@ pterm =
   | "f32_load" , memarg
   | "f64_load" , memarg
   | "memory_size" , ind
-  | "?:" , term , term , term
-  | "let" , numerical_type , [ id ] , term , term
-  | "cast" , numerical_type , term
+  | "cond" , prop , term , term
+  | "let" , num_type , [ id ] , term , term
+  | "cast" , num_type , term
   | "call" , ind , { term } ;
 
 unpred =
@@ -112,34 +129,13 @@ pprop =
   | "^^" , prop , prop
   | "==>" , prop , prop
   | "<==>" , prop , prop
-  | "?:" , prop , prop , prop
-  | "let" , numerical_type , [ id ] , term , prop
-  | unpred , prop
-  | binpred , prop , prop
-  | ("forall" | "∀") , numerical_type , [ id ] , prop
-  | ("exists" | "∃") , numerical_type , [ id ] , prop
+  | "cond" , prop , prop , prop
+  | "let" , num_type , [ id ] , term , prop
+  | unpred , term
+  | binpred , term , term
+  | ("forall" | "∀") , num_type , [ id ] , prop
+  | ("exists" | "∃") , num_type , [ id ] , prop
   | "call" , ind , { term } ; (the function must return an i32)
-
-wasm_int_type =
-    "i32"
-  | "i64" ;
-
-wasm_float_type =
-    "f32"
-  | "f64" ;
-
-wasm_type =
-    wasm_int_type
-  | wasm_float_type ;
-
-numerical_type =
-    wasm_type
-  | "integer"
-  | "real" ;
-
-ref_type =
-    "funcref"
-  | "externref" ;
 
 requires_clause = "(" , "requires" , prop , ")" ;
 
