@@ -87,5 +87,6 @@
   (lwt :with-dev-setup)
   (cohttp :with-dev-setup)
   (cohttp-lwt-unix :with-dev-setup)
+  (lwt_ssl :with-dev-setup)
   )
  (sites (share c_files) (share rust_files)))
