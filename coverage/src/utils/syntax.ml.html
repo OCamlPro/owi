@@ -246,11 +246,11 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4175844">m</span>atch o with <span data-count="4156016">O</span>k v -&gt; f v | <span data-count="19828">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4176514">m</span>atch o with <span data-count="4156686">O</span>k v -&gt; f v | <span data-count="19828">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="2130197">m</span>atch o with <span data-count="2121102">O</span>k v -&gt; Ok (<span data-count="2121102">f</span> v) | <span data-count="9095">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2130600">m</span>atch o with <span data-count="2121505">O</span>k v -&gt; Ok (<span data-count="2121505">f</span> v) | <span data-count="9095">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="812478">O</span>k v
+let ok v = <span data-count="812589">O</span>k v
 
 let list_iter f l =
   <span data-count="36360">l</span>et err = ref None in
@@ -295,10 +295,10 @@ let list_concat_map f l =
   with <span data-count="0">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="0">S</span>ome e -&gt; e )
 
 let list_fold_left f acc l =
-  <span data-count="153784">L</span>ist.fold_left
+  <span data-count="153798">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="709254">l</span>et* acc in
-      <span data-count="707669">f</span> acc v )
+      <span data-count="709368">l</span>et* acc in
+      <span data-count="707783">f</span> acc v )
     (Ok acc) l
 
 let list_fold_left_map f acc l =
@@ -340,8 +340,8 @@ let array_map f a =
 let array_fold_left f acc l =
   <span data-count="20534">A</span>rray.fold_left
     (fun acc v -&gt;
-      <span data-count="26330">l</span>et* acc in
-      <span data-count="26312">f</span> acc v )
+      <span data-count="26331">l</span>et* acc in
+      <span data-count="26313">f</span> acc v )
     (Ok acc) l
 </code></pre>
       </div>

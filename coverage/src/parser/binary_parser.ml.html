@@ -2755,7 +2755,7 @@ end = struct
     ; size : int
     }
 
-  let size s = <span data-count="33260">s</span>.size
+  let size s = <span data-count="33262">s</span>.size
 
   let is_empty input = <span data-count="484">i</span>nput.size = 0
 
@@ -2764,16 +2764,16 @@ end = struct
     <span data-count="1706">{</span> bytes = str; pt = 0; size }
 
   let sub ~pos ~len input =
-    <span data-count="994645">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="994645">l</span>en &lt;= input.size - pos then
-      <span data-count="994645">O</span>k { input with pt = input.pt + pos; size = len }
+    <span data-count="994900">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="994900">l</span>en &lt;= input.size - pos then
+      <span data-count="994900">O</span>k { input with pt = input.pt + pos; size = len }
     else <span data-count="0">E</span>rror (`Msg (Fmt.st<span data-count="0">r</span> "length out of bounds in section"))
 
-  let sub_suffix pos input = <span data-count="982302">s</span>ub ~pos ~len:(input.size - pos) input
+  let sub_suffix pos input = <span data-count="982556">s</span>ub ~pos ~len:(input.size - pos) input
 
-  let sub_prefix len input = <span data-count="11199">s</span>ub ~pos:0 ~len input
+  let sub_prefix len input = <span data-count="11200">s</span>ub ~pos:0 ~len input
 
   let get n input =
-    <span data-count="981247">i</span>f n &lt; input.size then <span data-count="979769">S</span>ome (String.ge<span data-count="979769">t</span> input.bytes (input.pt + n))
+    <span data-count="981500">i</span>f n &lt; input.size then <span data-count="980022">S</span>ome (String.ge<span data-count="980022">t</span> input.bytes (input.pt + n))
     else <span data-count="1478">N</span>one
 end
 
@@ -2783,54 +2783,54 @@ let string_of_char_list char_list =
   <span data-count="6719">B</span>uffer.contents buf
 
 let read_byte ~msg input =
-  <span data-count="962913">m</span>atch Input.get 0 input with
+  <span data-count="963166">m</span>atch Input.get 0 input with
   | <span data-count="6">N</span>one -&gt; Error (`Msg msg)
-  | <span data-count="962907">S</span>ome c -&gt;
-    let+ next_input = Input.sub_suffi<span data-count="962907">x</span> 1 input in
-    <span data-count="962907">(</span>c, next_input)
+  | <span data-count="963160">S</span>ome c -&gt;
+    let+ next_input = Input.sub_suffi<span data-count="963160">x</span> 1 input in
+    <span data-count="963160">(</span>c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
 let read_UN n input =
-  <span data-count="239580">l</span>et rec aux n input =
-    <span data-count="333333">l</span>et* () =
-      if n &lt;= 0 then <span data-count="46">E</span>rror (`Msg "integer representation too long") else <span data-count="333287">O</span>k ()
+  <span data-count="239622">l</span>et rec aux n input =
+    <span data-count="333388">l</span>et* () =
+      if n &lt;= 0 then <span data-count="46">E</span>rror (`Msg "integer representation too long") else <span data-count="333342">O</span>k ()
     in
-    <span data-count="333287">l</span>et* b, input = read_byt<span data-count="333287">e</span> ~msg:"integer representation too long" input in
-    <span data-count="333285">l</span>et b = Char.code b in
-    <span data-count="333285">l</span>et* () =
-      if n &gt;= <span data-count="310432">7</span> || b land 0x7f &lt; 1 lsl <span data-count="22811">n</span> then <span data-count="333243">O</span>k ()
+    <span data-count="333342">l</span>et* b, input = read_byt<span data-count="333342">e</span> ~msg:"integer representation too long" input in
+    <span data-count="333340">l</span>et b = Char.code b in
+    <span data-count="333340">l</span>et* () =
+      if n &gt;= <span data-count="310484">7</span> || b land 0x7f &lt; 1 lsl <span data-count="22814">n</span> then <span data-count="333298">O</span>k ()
       else <span data-count="42">E</span>rror (`Msg "integer too large")
     in
-    <span data-count="333243">l</span>et x = Int64.of_int (b land 0x7f) in
-    <span data-count="333243">i</span>f b land 0x80 = 0 then <span data-count="239490">O</span>k (x, input)
+    <span data-count="333298">l</span>et x = Int64.of_int (b land 0x7f) in
+    <span data-count="333298">i</span>f b land 0x80 = 0 then <span data-count="239532">O</span>k (x, input)
     else
       (* TODO: make this tail-rec *)
-      <span data-count="93753">l</span>et+ i64, input = au<span data-count="93753">x</span> (n - 7) input in
-      <span data-count="93351">(</span>Int64.logo<span data-count="93351">r</span> x (Int64.sh<span data-count="93351">l</span> i64 7L), input)
+      <span data-count="93766">l</span>et+ i64, input = au<span data-count="93766">x</span> (n - 7) input in
+      <span data-count="93364">(</span>Int64.logo<span data-count="93364">r</span> x (Int64.sh<span data-count="93364">l</span> i64 7L), input)
   in
   aux n input
 
 let read_U32 input =
-  <span data-count="239580">l</span>et+ i64, input = read_U<span data-count="239580">N</span> 32 input in
-  <span data-count="239490">(</span>Int64.to_in<span data-count="239490">t</span> i64, input)
+  <span data-count="239622">l</span>et+ i64, input = read_U<span data-count="239622">N</span> 32 input in
+  <span data-count="239532">(</span>Int64.to_in<span data-count="239532">t</span> i64, input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
 let read_SN n input =
-  <span data-count="53921">l</span>et rec aux n input =
-    <span data-count="69640">l</span>et* () =
-      if n &lt;= 0 then <span data-count="8">E</span>rror (`Msg "integer representation too long") else <span data-count="69632">O</span>k ()
+  <span data-count="53937">l</span>et rec aux n input =
+    <span data-count="69656">l</span>et* () =
+      if n &lt;= 0 then <span data-count="8">E</span>rror (`Msg "integer representation too long") else <span data-count="69648">O</span>k ()
     in
-    <span data-count="69632">l</span>et* b, input = read_byt<span data-count="69632">e</span> ~msg:"integer representation too long" input in
-    <span data-count="69632">l</span>et b = Char.code b in
-    <span data-count="69632">l</span>et mask = (-1 lsl (n - 1)) land 0x7f in
+    <span data-count="69648">l</span>et* b, input = read_byt<span data-count="69648">e</span> ~msg:"integer representation too long" input in
+    <span data-count="69648">l</span>et b = Char.code b in
+    <span data-count="69648">l</span>et mask = (-1 lsl (n - 1)) land 0x7f in
     let* () =
-      if n &gt;= <span data-count="66569">7</span> || b land mask = <span data-count="2287">0</span> || b land mask = mas<span data-count="760">k</span> then <span data-count="69616">O</span>k ()
+      if n &gt;= <span data-count="66584">7</span> || b land mask = <span data-count="2288">0</span> || b land mask = mas<span data-count="760">k</span> then <span data-count="69632">O</span>k ()
       else <span data-count="16">E</span>rror (`Msg "integer too large")
     in
-    <span data-count="69616">l</span>et x = Int64.of_int (b land 0x7f) in
-    <span data-count="69616">i</span>f b land 0x80 = 0 then
-      <span data-count="53897">l</span>et x =
-        if b land 0x40 = 0 then <span data-count="33429">x</span> else <span data-count="20468">I</span>nt64.(logo<span data-count="20468">r</span> x (logxo<span data-count="20468">r</span> (-1L) 0x7fL))
+    <span data-count="69632">l</span>et x = Int64.of_int (b land 0x7f) in
+    <span data-count="69632">i</span>f b land 0x80 = 0 then
+      <span data-count="53913">l</span>et x =
+        if b land 0x40 = 0 then <span data-count="33438">x</span> else <span data-count="20475">I</span>nt64.(logo<span data-count="20475">r</span> x (logxo<span data-count="20475">r</span> (-1L) 0x7fL))
       in
       Ok (x, input)
     else
@@ -2841,20 +2841,20 @@ let read_SN n input =
   aux n input
 
 let read_S7 input =
-  <span data-count="8254">l</span>et+ i64, input = read_S<span data-count="8254">N</span> 7 input in
-  <span data-count="8254">(</span>Int64.to_in<span data-count="8254">t</span> i64, input)
+  <span data-count="8255">l</span>et+ i64, input = read_S<span data-count="8255">N</span> 7 input in
+  <span data-count="8255">(</span>Int64.to_in<span data-count="8255">t</span> i64, input)
 
 let read_S32 input =
-  <span data-count="36489">l</span>et+ i64, input = read_S<span data-count="36489">N</span> 32 input in
-  <span data-count="36477">(</span>Int64.to_int3<span data-count="36477">2</span> i64, input)
+  <span data-count="36497">l</span>et+ i64, input = read_S<span data-count="36497">N</span> 32 input in
+  <span data-count="36485">(</span>Int64.to_int3<span data-count="36485">2</span> i64, input)
 
 let read_S33 input =
-  <span data-count="8421">l</span>et+ i64, input = read_S<span data-count="8421">N</span> 33 input in
-  <span data-count="8421">(</span>i64, input)
+  <span data-count="8427">l</span>et+ i64, input = read_S<span data-count="8427">N</span> 33 input in
+  <span data-count="8427">(</span>i64, input)
 
 let read_S64 input =
-  <span data-count="757">l</span>et+ i64, input = read_S<span data-count="757">N</span> 64 input in
-  <span data-count="745">(</span>i64, input)
+  <span data-count="758">l</span>et+ i64, input = read_S<span data-count="758">N</span> 64 input in
+  <span data-count="746">(</span>i64, input)
 
 let read_F32 input =
   <span data-count="158">l</span>et i32_of_byte input =
@@ -2895,22 +2895,22 @@ let read_F64 input =
   <span data-count="4">(</span>Float64.of_bit<span data-count="4">s</span> i64, input)
 
 let vector parse_elt input =
-  <span data-count="21196">l</span>et* nb_elt, input = read_U3<span data-count="21196">2</span> input in
-  <span data-count="21168">l</span>et rec loop loop_id input acc =
-    <span data-count="93750">i</span>f nb_elt = loop_id then <span data-count="20336">O</span>k (List.re<span data-count="20336">v</span> acc, input)
+  <span data-count="21197">l</span>et* nb_elt, input = read_U3<span data-count="21197">2</span> input in
+  <span data-count="21169">l</span>et rec loop loop_id input acc =
+    <span data-count="93801">i</span>f nb_elt = loop_id then <span data-count="20337">O</span>k (List.re<span data-count="20337">v</span> acc, input)
     else
-      <span data-count="73414">l</span>et* acc_elt, input = parse_el<span data-count="73414">t</span> loop_id input in
-      <span data-count="72582">l</span>et acc = acc_elt :: acc in
+      <span data-count="73464">l</span>et* acc_elt, input = parse_el<span data-count="73464">t</span> loop_id input in
+      <span data-count="72632">l</span>et acc = acc_elt :: acc in
       loop (loop_id + 1) input acc
   in
   loop 0 input []
 
-let vector_no_id f input = <span data-count="20705">v</span>ector (fun _id -&gt; <span data-count="71179">f</span>) input
+let vector_no_id f input = <span data-count="20706">v</span>ector (fun _id -&gt; <span data-count="71229">f</span>) input
 
 let check_end_opcode ?unexpected_eoi_msg input =
-  <span data-count="14189">l</span>et msg = Option.value unexpected_eoi_msg ~default:"END opcode expected" in
-  <span data-count="14189">m</span>atch read_byte ~msg input with
-  | <span data-count="14187">O</span>k ('\x0B', input) -&gt; Ok input
+  <span data-count="14196">l</span>et msg = Option.value unexpected_eoi_msg ~default:"END opcode expected" in
+  <span data-count="14196">m</span>atch read_byte ~msg input with
+  | <span data-count="14194">O</span>k ('\x0B', input) -&gt; Ok input
   | <span data-count="0">O</span>k (c, _input) -&gt;
     Error
       (`Msg (Fmt.st<span data-count="0">r</span> "END opcode expected (got %s instead)" (Char.escape<span data-count="0">d</span> c)))
@@ -2927,13 +2927,13 @@ let check_zero_opcode input =
 let read_bytes ~msg input = <span data-count="6735">v</span>ector_no_id (read_byte ~msg) input
 
 let read_indice input : (Types.binary Types.indice * Input.t, _) result =
-  <span data-count="116264">l</span>et+ indice, input = read_U3<span data-count="116264">2</span> input in
-  <span data-count="116264">(</span>Raw indice, input)
+  <span data-count="116284">l</span>et+ indice, input = read_U3<span data-count="116284">2</span> input in
+  <span data-count="116284">(</span>Raw indice, input)
 
 let read_numtype input =
-  <span data-count="7883">l</span>et* b, input = read_S<span data-count="7883">7</span> input in
-  <span data-count="7883">m</span>atch b with
-  | <span data-count="7760">-</span>0x01 -&gt; Ok (I32, input)
+  <span data-count="7884">l</span>et* b, input = read_S<span data-count="7884">7</span> input in
+  <span data-count="7884">m</span>atch b with
+  | <span data-count="7761">-</span>0x01 -&gt; Ok (I32, input)
   | <span data-count="47">-</span>0x02 -&gt; Ok (I64, input)
   | <span data-count="72">-</span>0x03 -&gt; Ok (F32, input)
   | <span data-count="4">-</span>0x04 -&gt; Ok (F64, input)
@@ -2955,8 +2955,8 @@ let read_reftype input =
   | <span data-count="0">b</span> -&gt; Error (`Msg (Fmt.st<span data-count="0">r</span> "malformed reference type: %d" b))
 
 let read_valtype input =
-  <span data-count="7883">m</span>atch read_numtype input with
-  | <span data-count="7883">O</span>k (t, input) -&gt; Ok (Num_type t, input)
+  <span data-count="7884">m</span>atch read_numtype input with
+  | <span data-count="7884">O</span>k (t, input) -&gt; Ok (Num_type t, input)
   | <span data-count="0">E</span>rror _ -&gt; (
     match read_vectype input with
     | Ok (_t, _input) -&gt; assert false
@@ -2987,13 +2987,13 @@ let read_limits input =
   | <span data-count="0">_</span>c -&gt; Error (`Msg "integer too large (read_limits)")
 
 let read_memarg max_align input =
-  <span data-count="39467">l</span>et* align, input = read_U3<span data-count="39467">2</span> input in
-  <span data-count="39455">i</span>f align &gt;= max_align then <span data-count="10">E</span>rror (`Msg "malformed memop flags")
+  <span data-count="39476">l</span>et* align, input = read_U3<span data-count="39476">2</span> input in
+  <span data-count="39464">i</span>f align &gt;= max_align then <span data-count="10">E</span>rror (`Msg "malformed memop flags")
   else
-    <span data-count="39445">l</span>et+ offset, input = read_U3<span data-count="39445">2</span> input in
-    <span data-count="39433">l</span>et align = Int32.of_int align in
-    <span data-count="39433">l</span>et offset = Int32.of_int offset in
-    <span data-count="39433">(</span>{ align; offset }, input)
+    <span data-count="39454">l</span>et+ offset, input = read_U3<span data-count="39454">2</span> input in
+    <span data-count="39442">l</span>et align = Int32.of_int align in
+    <span data-count="39442">l</span>et offset = Int32.of_int offset in
+    <span data-count="39442">(</span>{ align; offset }, input)
 
 let read_FC input =
   <span data-count="10">l</span>et* i, input = read_U3<span data-count="10">2</span> input in
@@ -3044,19 +3044,19 @@ let read_FC input =
 
 let block_type_of_rec_type t =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
-  <span data-count="8110">m</span>atch t with
-  | <span data-count="8110">[</span> (_id, (_final, _subtypes, Def_func_t (pt, rt))) ] -&gt;
+  <span data-count="8111">m</span>atch t with
+  | <span data-count="8111">[</span> (_id, (_final, _subtypes, Def_func_t (pt, rt))) ] -&gt;
     Bt_raw (None, (pt, rt))
   | _ -&gt; assert false
 
 let read_block_type types input =
-  <span data-count="8421">m</span>atch read_S33 input with
-  | <span data-count="8421">O</span>k (i, input) when Int64.g<span data-count="8421">e</span> i 0L -&gt;
+  <span data-count="8427">m</span>atch read_S33 input with
+  | <span data-count="8427">O</span>k (i, input) when Int64.g<span data-count="8427">e</span> i 0L -&gt;
     <span data-count="6">l</span>et block_type = block_type_of_rec_type types.(Int64.to_in<span data-count="6">t</span> i) in
     <span data-count="6">O</span>k (block_type, input)
-  | <span data-count="0">E</span>rror _ | <span data-count="8415">O</span>k _ -&gt; begin
+  | <span data-count="0">E</span>rror _ | <span data-count="8421">O</span>k _ -&gt; begin
     match read_byte ~msg:"read_block_type" input with
-    | <span data-count="8410">O</span>k ('\x40', input) -&gt; Ok (Bt_raw (None, ([], [])), input)
+    | <span data-count="8416">O</span>k ('\x40', input) -&gt; Ok (Bt_raw (None, ([], [])), input)
     | <span data-count="0">E</span>rror _ | <span data-count="5">O</span>k _ -&gt;
       let* vt, input = read_valtyp<span data-count="5">e</span> input in
       <span data-count="5">l</span>et pt, rt = ([], [ vt ]) in
@@ -3064,15 +3064,15 @@ let read_block_type types input =
   end
 
 let rec read_instr types input =
-  <span data-count="234305">l</span>et* b, input = read_byt<span data-count="234305">e</span> ~msg:"read_instr" input in
-  <span data-count="234305">m</span>atch b with
-  | <span data-count="59">'</span>\x00' -&gt; Ok (Unreachable, input)
+  <span data-count="234362">l</span>et* b, input = read_byt<span data-count="234362">e</span> ~msg:"read_instr" input in
+  <span data-count="234362">m</span>atch b with
+  | <span data-count="61">'</span>\x00' -&gt; Ok (Unreachable, input)
   | <span data-count="2">'</span>\x01' -&gt; Ok (Nop, input)
-  | <span data-count="6966">'</span>\x02' -&gt;
-    let* bt, input = read_block_typ<span data-count="6966">e</span> types input in
-    <span data-count="6966">l</span>et* expr, input = read_exp<span data-count="6966">r</span> types input in
-    <span data-count="6966">l</span>et+ input = check_end_opcod<span data-count="6966">e</span> input in
-    <span data-count="6966">(</span>Block (None, Some bt, expr), input)
+  | <span data-count="6972">'</span>\x02' -&gt;
+    let* bt, input = read_block_typ<span data-count="6972">e</span> types input in
+    <span data-count="6972">l</span>et* expr, input = read_exp<span data-count="6972">r</span> types input in
+    <span data-count="6972">l</span>et+ input = check_end_opcod<span data-count="6972">e</span> input in
+    <span data-count="6972">(</span>Block (None, Some bt, expr), input)
   | <span data-count="1443">'</span>\x03' -&gt;
     let* bt, input = read_block_typ<span data-count="1443">e</span> types input in
     <span data-count="1443">l</span>et* expr, input = read_exp<span data-count="1443">r</span> types input in
@@ -3092,54 +3092,54 @@ let rec read_instr types input =
     <span data-count="12">(</span>If_else (None, Some bt, expr1, expr2), input)
   | <span data-count="0">'</span>\x05' -&gt; Error (`Msg "misplaced ELSE opcode")
   | <span data-count="0">'</span>\x0B' -&gt; Error (`Msg "misplaced END opcode")
-  | <span data-count="1719">'</span>\x0C' -&gt;
-    let+ labelidx, input = read_indic<span data-count="1719">e</span> input in
-    <span data-count="1719">(</span>Br labelidx, input)
-  | <span data-count="8037">'</span>\x0D' -&gt;
-    let+ labelidx, input = read_indic<span data-count="8037">e</span> input in
-    <span data-count="8037">(</span>Br_if labelidx, input)
+  | <span data-count="1720">'</span>\x0C' -&gt;
+    let+ labelidx, input = read_indic<span data-count="1720">e</span> input in
+    <span data-count="1720">(</span>Br labelidx, input)
+  | <span data-count="8043">'</span>\x0D' -&gt;
+    let+ labelidx, input = read_indic<span data-count="8043">e</span> input in
+    <span data-count="8043">(</span>Br_if labelidx, input)
   | <span data-count="24">'</span>\x0E' -&gt;
     let* xs, input = vector_no_i<span data-count="24">d</span> read_indice input in
     <span data-count="24">l</span>et xs = Array.of_list xs in
     <span data-count="24">l</span>et+ x, input = read_indic<span data-count="24">e</span> input in
     <span data-count="24">(</span>Br_table (xs, x), input)
-  | <span data-count="807">'</span>\x0F' -&gt; Ok (Return, input)
-  | <span data-count="12582">'</span>\x10' -&gt;
-    let+ funcidx, input = read_indic<span data-count="12582">e</span> input in
-    <span data-count="12582">(</span>Call funcidx, input)
+  | <span data-count="808">'</span>\x0F' -&gt; Ok (Return, input)
+  | <span data-count="12586">'</span>\x10' -&gt;
+    let+ funcidx, input = read_indic<span data-count="12586">e</span> input in
+    <span data-count="12586">(</span>Call funcidx, input)
   | <span data-count="1903">'</span>\x11' -&gt;
     let* Raw typeidx, input = read_indic<span data-count="1903">e</span> input in
     <span data-count="1903">l</span>et+ tableidx, input = read_indic<span data-count="1903">e</span> input in
     <span data-count="1903">(</span>Call_indirect (tableidx, block_type_of_rec_typ<span data-count="1903">e</span> types.(typeidx)), input)
-  | <span data-count="3773">'</span>\x1A' -&gt; Ok (Drop, input)
-  | <span data-count="2219">'</span>\x1B' -&gt; Ok (Select None, input)
+  | <span data-count="3775">'</span>\x1A' -&gt; Ok (Drop, input)
+  | <span data-count="2220">'</span>\x1B' -&gt; Ok (Select None, input)
   | <span data-count="0">'</span>\x1C' -&gt;
     let+ valtypes, input = read_valtype<span data-count="0">s</span> input in
     <span data-count="0">(</span>Select (Some valtypes), input)
-  | <span data-count="65622">'</span>\x20' -&gt;
-    let+ localidx, input = read_indic<span data-count="65622">e</span> input in
-    <span data-count="65622">(</span>Local_get localidx, input)
-  | <span data-count="10852">'</span>\x21' -&gt;
-    let+ localidx, input = read_indic<span data-count="10852">e</span> input in
-    <span data-count="10852">(</span>Local_set localidx, input)
-  | <span data-count="11132">'</span>\x22' -&gt;
-    let+ localidx, input = read_indic<span data-count="11132">e</span> input in
-    <span data-count="11132">(</span>Local_tee localidx, input)
-  | <span data-count="447">'</span>\x23' -&gt;
-    let+ globalidx, input = read_indic<span data-count="447">e</span> input in
-    <span data-count="447">(</span>Global_get globalidx, input)
-  | <span data-count="850">'</span>\x24' -&gt;
-    let+ globalidx, input = read_indic<span data-count="850">e</span> input in
-    <span data-count="850">(</span>Global_set globalidx, input)
+  | <span data-count="65639">'</span>\x20' -&gt;
+    let+ localidx, input = read_indic<span data-count="65639">e</span> input in
+    <span data-count="65639">(</span>Local_get localidx, input)
+  | <span data-count="10846">'</span>\x21' -&gt;
+    let+ localidx, input = read_indic<span data-count="10846">e</span> input in
+    <span data-count="10846">(</span>Local_set localidx, input)
+  | <span data-count="11134">'</span>\x22' -&gt;
+    let+ localidx, input = read_indic<span data-count="11134">e</span> input in
+    <span data-count="11134">(</span>Local_tee localidx, input)
+  | <span data-count="446">'</span>\x23' -&gt;
+    let+ globalidx, input = read_indic<span data-count="446">e</span> input in
+    <span data-count="446">(</span>Global_get globalidx, input)
+  | <span data-count="848">'</span>\x24' -&gt;
+    let+ globalidx, input = read_indic<span data-count="848">e</span> input in
+    <span data-count="848">(</span>Global_set globalidx, input)
   | <span data-count="0">'</span>\x25' -&gt;
     let+ tableidx, input = read_indic<span data-count="0">e</span> input in
     <span data-count="0">(</span>Table_get tableidx, input)
   | <span data-count="0">'</span>\x26' -&gt;
     let+ tableidx, input = read_indic<span data-count="0">e</span> input in
     <span data-count="0">(</span>Table_set tableidx, input)
-  | <span data-count="20096">'</span>\x28' -&gt;
-    let+ memarg, input = read_memar<span data-count="20096">g</span> 32 input in
-    <span data-count="20074">(</span>I_load (S32, memarg), input)
+  | <span data-count="20099">'</span>\x28' -&gt;
+    let+ memarg, input = read_memar<span data-count="20099">g</span> 32 input in
+    <span data-count="20077">(</span>I_load (S32, memarg), input)
   | <span data-count="115">'</span>\x29' -&gt;
     let+ memarg, input = read_memar<span data-count="115">g</span> 64 input in
     <span data-count="115">(</span>I_load (S64, memarg), input)
@@ -3152,9 +3152,9 @@ let rec read_instr types input =
   | <span data-count="57">'</span>\x2C' -&gt;
     let+ memarg, input = read_memar<span data-count="57">g</span> 32 input in
     <span data-count="57">(</span>I_load8 (S32, S, memarg), input)
-  | <span data-count="2276">'</span>\x2D' -&gt;
-    let+ memarg, input = read_memar<span data-count="2276">g</span> 32 input in
-    <span data-count="2276">(</span>I_load8 (S32, U, memarg), input)
+  | <span data-count="2277">'</span>\x2D' -&gt;
+    let+ memarg, input = read_memar<span data-count="2277">g</span> 32 input in
+    <span data-count="2277">(</span>I_load8 (S32, U, memarg), input)
   | <span data-count="0">'</span>\x2E' -&gt;
     let+ memarg, input = read_memar<span data-count="0">g</span> 32 input in
     <span data-count="0">(</span>I_load16 (S32, S, memarg), input)
@@ -3179,21 +3179,21 @@ let rec read_instr types input =
   | <span data-count="0">'</span>\x35' -&gt;
     let+ memarg, input = read_memar<span data-count="0">g</span> 32 input in
     <span data-count="0">(</span>I64_load32 (U, memarg), input)
-  | <span data-count="12414">'</span>\x36' -&gt;
-    let+ memarg, input = read_memar<span data-count="12414">g</span> 32 input in
-    <span data-count="12402">(</span>I_store (S32, memarg), input)
-  | <span data-count="834">'</span>\x37' -&gt;
-    let+ memarg, input = read_memar<span data-count="834">g</span> 64 input in
-    <span data-count="834">(</span>I_store (S64, memarg), input)
+  | <span data-count="12419">'</span>\x36' -&gt;
+    let+ memarg, input = read_memar<span data-count="12419">g</span> 32 input in
+    <span data-count="12407">(</span>I_store (S32, memarg), input)
+  | <span data-count="835">'</span>\x37' -&gt;
+    let+ memarg, input = read_memar<span data-count="835">g</span> 64 input in
+    <span data-count="835">(</span>I_store (S64, memarg), input)
   | <span data-count="26">'</span>\x38' -&gt;
     let+ memarg, input = read_memar<span data-count="26">g</span> 32 input in
     <span data-count="26">(</span>F_store (S32, memarg), input)
   | <span data-count="2">'</span>\x39' -&gt;
     let+ memarg, input = read_memar<span data-count="2">g</span> 64 input in
     <span data-count="2">(</span>F_store (S64, memarg), input)
-  | <span data-count="3545">'</span>\x3A' -&gt;
-    let+ memarg, input = read_memar<span data-count="3545">g</span> 32 input in
-    <span data-count="3545">(</span>I_store8 (S32, memarg), input)
+  | <span data-count="3544">'</span>\x3A' -&gt;
+    let+ memarg, input = read_memar<span data-count="3544">g</span> 32 input in
+    <span data-count="3544">(</span>I_store8 (S32, memarg), input)
   | <span data-count="5">'</span>\x3B' -&gt;
     let+ memarg, input = read_memar<span data-count="5">g</span> 32 input in
     <span data-count="5">(</span>I_store16 (S32, memarg), input)
@@ -3212,22 +3212,22 @@ let rec read_instr types input =
   | <span data-count="3">'</span>\x40' -&gt;
     let+ input = check_zero_opcod<span data-count="3">e</span> input in
     <span data-count="3">(</span>Memory_grow, input)
-  | <span data-count="36489">'</span>\x41' -&gt;
-    let+ i32, input = read_S3<span data-count="36489">2</span> input in
-    <span data-count="36477">(</span>I32_const i32, input)
-  | <span data-count="757">'</span>\x42' -&gt;
-    let+ i64, input = read_S6<span data-count="757">4</span> input in
-    <span data-count="745">(</span>I64_const i64, input)
+  | <span data-count="36497">'</span>\x41' -&gt;
+    let+ i32, input = read_S3<span data-count="36497">2</span> input in
+    <span data-count="36485">(</span>I32_const i32, input)
+  | <span data-count="758">'</span>\x42' -&gt;
+    let+ i64, input = read_S6<span data-count="758">4</span> input in
+    <span data-count="746">(</span>I64_const i64, input)
   | <span data-count="158">'</span>\x43' -&gt;
     let+ f32, input = read_F3<span data-count="158">2</span> input in
     <span data-count="158">(</span>F32_const f32, input)
   | <span data-count="4">'</span>\x44' -&gt;
     let+ f64, input = read_F6<span data-count="4">4</span> input in
     <span data-count="4">(</span>F64_const f64, input)
-  | <span data-count="2639">'</span>\x45' -&gt; Ok (I_testop (S32, Eqz), input)
-  | <span data-count="2325">'</span>\x46' -&gt; Ok (I_relop (S32, Eq), input)
+  | <span data-count="2643">'</span>\x45' -&gt; Ok (I_testop (S32, Eqz), input)
+  | <span data-count="2326">'</span>\x46' -&gt; Ok (I_relop (S32, Eq), input)
   | <span data-count="1241">'</span>\x47' -&gt; Ok (I_relop (S32, Ne), input)
-  | <span data-count="459">'</span>\x48' -&gt; Ok (I_relop (S32, Lt S), input)
+  | <span data-count="460">'</span>\x48' -&gt; Ok (I_relop (S32, Lt S), input)
   | <span data-count="1151">'</span>\x49' -&gt; Ok (I_relop (S32, Lt U), input)
   | <span data-count="393">'</span>\x4A' -&gt; Ok (I_relop (S32, Gt S), input)
   | <span data-count="100">'</span>\x4B' -&gt; Ok (I_relop (S32, Gt U), input)
@@ -3261,8 +3261,8 @@ let rec read_instr types input =
   | <span data-count="652">'</span>\x67' -&gt; Ok (I_unop (S32, Clz), input)
   | <span data-count="3">'</span>\x68' -&gt; Ok (I_unop (S32, Ctz), input)
   | <span data-count="0">'</span>\x69' -&gt; Ok (I_unop (S32, Popcnt), input)
-  | <span data-count="12183">'</span>\x6A' -&gt; Ok (I_binop (S32, Add), input)
-  | <span data-count="1450">'</span>\x6B' -&gt; Ok (I_binop (S32, Sub), input)
+  | <span data-count="12184">'</span>\x6A' -&gt; Ok (I_binop (S32, Add), input)
+  | <span data-count="1449">'</span>\x6B' -&gt; Ok (I_binop (S32, Sub), input)
   | <span data-count="381">'</span>\x6C' -&gt; Ok (I_binop (S32, Mul), input)
   | <span data-count="4">'</span>\x6D' -&gt; Ok (I_binop (S32, Div S), input)
   | <span data-count="11">'</span>\x6E' -&gt; Ok (I_binop (S32, Div U), input)
@@ -3363,13 +3363,13 @@ let rec read_instr types input =
   | <span data-count="0">c</span> -&gt; Error (`Msg (Fmt.st<span data-count="0">r</span> "illegal opcode (2) %s" (Char.escape<span data-count="0">d</span> c)))
 
 and read_expr types input =
-  <span data-count="14251">l</span>et rec aux acc input =
-    <span data-count="248496">m</span>atch read_byte ~msg:"read_expr" input with
-    | <span data-count="14189">O</span>k ((<span data-count="2">'</span>\x05' | <span data-count="14187">'</span>\x0B'), _) -&gt; Ok (List.re<span data-count="14189">v</span> acc, input)
+  <span data-count="14258">l</span>et rec aux acc input =
+    <span data-count="248560">m</span>atch read_byte ~msg:"read_expr" input with
+    | <span data-count="14196">O</span>k ((<span data-count="2">'</span>\x05' | <span data-count="14194">'</span>\x0B'), _) -&gt; Ok (List.re<span data-count="14196">v</span> acc, input)
     | <span data-count="2">E</span>rror _ -&gt; Ok (List.re<span data-count="2">v</span> acc, input)
-    | <span data-count="234305">O</span>k _ -&gt;
-      let* instr, input = read_inst<span data-count="234305">r</span> types input in
-      <span data-count="234245">a</span>ux (instr :: acc) input
+    | <span data-count="234362">O</span>k _ -&gt;
+      let* instr, input = read_inst<span data-count="234362">r</span> types input in
+      <span data-count="234302">a</span>ux (instr :: acc) input
   in
   aux [] input
 
@@ -3571,42 +3571,42 @@ let read_element types input =
   | <span data-count="0">i</span> -&gt; Error (`Msg (Fmt.st<span data-count="0">r</span> "malformed elements segment kind: %d" i))
 
 let read_local input =
-  <span data-count="3064">l</span>et* n, input = read_U3<span data-count="3064">2</span> input in
-  <span data-count="3064">l</span>et+ t, input = read_valtyp<span data-count="3064">e</span> input in
-  <span data-count="3064">(</span>(n, t), input)
+  <span data-count="3065">l</span>et* n, input = read_U3<span data-count="3065">2</span> input in
+  <span data-count="3065">l</span>et+ t, input = read_valtyp<span data-count="3065">e</span> input in
+  <span data-count="3065">(</span>(n, t), input)
 
 let read_locals input =
-  <span data-count="4719">l</span>et* nts, input = vector_no_i<span data-count="4719">d</span> read_local input in
-  <span data-count="4719">l</span>et ns =
-    List.map (fun (n, _t) -&gt; <span data-count="3064">C</span>onvert.Int64.extend_i32_u @@ Int32.of_in<span data-count="3064">t</span> n) nts
+  <span data-count="4720">l</span>et* nts, input = vector_no_i<span data-count="4720">d</span> read_local input in
+  <span data-count="4720">l</span>et ns =
+    List.map (fun (n, _t) -&gt; <span data-count="3065">C</span>onvert.Int64.extend_i32_u @@ Int32.of_in<span data-count="3065">t</span> n) nts
   in
-  <span data-count="4719">l</span>et+ () =
-    if not @@ Int64.lt_<span data-count="4719">u</span> (List.fold_lef<span data-count="4719">t</span> Int64.add 0L ns) 0x1_0000_0000L then
+  <span data-count="4720">l</span>et+ () =
+    if not @@ Int64.lt_<span data-count="4720">u</span> (List.fold_lef<span data-count="4720">t</span> Int64.add 0L ns) 0x1_0000_0000L then
       <span data-count="0">E</span>rror (`Msg "too many locals")
-    else <span data-count="4719">O</span>k ()
+    else <span data-count="4720">O</span>k ()
   in
-  <span data-count="4719">l</span>et locals = List.map (fun (n, t) -&gt; <span data-count="3064">L</span>ist.init n (fun _i -&gt; <span data-count="7688">(</span>None, t))) nts in
-  <span data-count="4719">l</span>et locals = List.flatten locals in
-  <span data-count="4719">(</span>locals, input)
+  <span data-count="4720">l</span>et locals = List.map (fun (n, t) -&gt; <span data-count="3065">L</span>ist.init n (fun _i -&gt; <span data-count="7682">(</span>None, t))) nts in
+  <span data-count="4720">l</span>et locals = List.flatten locals in
+  <span data-count="4720">(</span>locals, input)
 
 let read_code types input =
-  <span data-count="4719">l</span>et* size, input = read_U3<span data-count="4719">2</span> input in
-  <span data-count="4719">l</span>et* code_input = Input.sub_prefi<span data-count="4719">x</span> size input in
-  <span data-count="4719">l</span>et* next_input = Input.sub_suffi<span data-count="4719">x</span> size input in
-  <span data-count="4719">l</span>et* locals, code_input = read_local<span data-count="4719">s</span> code_input in
-  <span data-count="4719">l</span>et* code, code_input = read_exp<span data-count="4719">r</span> types code_input in
-  <span data-count="4683">l</span>et* () =
-    if Input.siz<span data-count="4683">e</span> code_input = 0 &amp;&amp; <span data-count="2">I</span>nput.siz<span data-count="2">e</span> next_input = 0 then
+  <span data-count="4720">l</span>et* size, input = read_U3<span data-count="4720">2</span> input in
+  <span data-count="4720">l</span>et* code_input = Input.sub_prefi<span data-count="4720">x</span> size input in
+  <span data-count="4720">l</span>et* next_input = Input.sub_suffi<span data-count="4720">x</span> size input in
+  <span data-count="4720">l</span>et* locals, code_input = read_local<span data-count="4720">s</span> code_input in
+  <span data-count="4720">l</span>et* code, code_input = read_exp<span data-count="4720">r</span> types code_input in
+  <span data-count="4684">l</span>et* () =
+    if Input.siz<span data-count="4684">e</span> code_input = 0 &amp;&amp; <span data-count="2">I</span>nput.siz<span data-count="2">e</span> next_input = 0 then
       <span data-count="0">E</span>rror (`Msg "unexpected end of section or function")
-    else <span data-count="4683">O</span>k ()
+    else <span data-count="4684">O</span>k ()
   in
-  <span data-count="4683">l</span>et* code_input =
-    check_end_opcod<span data-count="4683">e</span> ~unexpected_eoi_msg:"unexpected end of section or function"
+  <span data-count="4684">l</span>et* code_input =
+    check_end_opcod<span data-count="4684">e</span> ~unexpected_eoi_msg:"unexpected end of section or function"
       code_input
   in
-  <span data-count="4681">i</span>f Input.siz<span data-count="4681">e</span> code_input &gt; 0 then
+  <span data-count="4682">i</span>f Input.siz<span data-count="4682">e</span> code_input &gt; 0 then
     <span data-count="0">E</span>rror (`Msg "unexpected end of section or function")
-  else <span data-count="4681">O</span>k ((locals, code), next_input)
+  else <span data-count="4682">O</span>k ((locals, code), next_input)
 
 (* TODO: merge Elem and Data modes ? *)
 let read_data_active types input =
@@ -3778,7 +3778,7 @@ let sections_iterate (input : Input.t) =
       let code_use_dataidx = ref false in
       let f_iter = function
         | <span data-count="0">D</span>ata_drop _ | <span data-count="0">M</span>emory_init _ -&gt; code_use_dataidx := true
-        | <span data-count="232010">_</span> -&gt; ()
+        | <span data-count="232067">_</span> -&gt; ()
       in
       let expr = List.concat_map snd code_section in
       <span data-count="362">i</span>ter_expr f_iter expr;
@@ -3833,8 +3833,8 @@ let sections_iterate (input : Input.t) =
     let local =
       List.map2
         (fun typeidx (locals, body) -&gt;
-          <span data-count="4679">R</span>untime.Local
-            { type_f = block_type_of_rec_typ<span data-count="4679">e</span> types.(typeidx)
+          <span data-count="4680">R</span>untime.Local
+            { type_f = block_type_of_rec_typ<span data-count="4680">e</span> types.(typeidx)
             ; locals
             ; body
             ; id = None
