@@ -10,7 +10,7 @@ let fresh solver () =
   let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
-  let module Batch = Smtml.Solver.Batch (Mapping) in
+  let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
   S ((module Batch), solver)
 
