@@ -10,21 +10,38 @@ let fresh solver () =
   let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
-  let module Batch = Smtml.Solver.Cached (Mapping) in
+  let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
   S ((module Batch), solver)
 
-let check (S (solver_module, s)) pc =
-  Stats.start_span "check" "solver";
-  let module Solver = (val solver_module) in
-  let check = Solver.check_set s pc in
-  Stats.close_span ();
-  check
+let check =
+  let module Cache = Smtml.Cache.Strong in
+  let cache = Cache.create 512 in
+  let lock = Mutex.create () in
+  fun (S (solver_module, s)) pc ->
+    Stats.start_span "check" "solver";
+    Mutex.lock lock;
+    let satisfiability = Cache.find_opt cache pc in
+    Mutex.unlock lock;
+    let check =
+      match satisfiability with
+      | Some satisfiability -> satisfiability
+      | None ->
+        let module Solver = (val solver_module) in
+        let satisfiability = Solver.check_set s pc in
+        Mutex.lock lock;
+        Cache.add cache pc satisfiability;
+        Mutex.unlock lock;
+        satisfiability
+    in
+    Stats.close_span ();
+    check
 
 let model (S (solver_module, s)) ~symbols ~pc =
   Stats.start_span "model" "solver";
   let module Solver = (val solver_module) in
   let model =
+    (* we don't memoïze this call, because check_set *must* be used before calling model *)
     match Solver.check_set s pc with
     | `Sat -> begin
       match Solver.model ?symbols s with
