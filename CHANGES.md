@@ -1,5 +1,7 @@
 ## unreleased
 
+## 0.3 - 2025-02-05
+
 - add `owi replay` command to check a model produced by symbolic execution on a concrete execution
 - add `owi instrument` to instrument Webassembly module annotated by Weasel specification language
 - add `--srac` option to `sym` and `conc` cmd

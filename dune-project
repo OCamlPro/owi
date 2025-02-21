@@ -43,20 +43,34 @@
     (>= 20220210)))
   (dune-build-info :build)
   (dune-site :build)
-  ;; runtime
-  bos
-  cmdliner
+  ;; system packages
   conf-clang
-  digestif
+  conf-lld
+  conf-llvm
+  conf-rust-llvm
+  conf-rust-wasm
+  ;; runtime
+  (bos
+    (>= 0.2.1))
+  (cmdliner
+    (>= 1.3.0))
+  (digestif
+    (>= 1.2.0))
   (integers
    (>= 0.5.1))
-  ocaml_intrinsics
-  (prelude (>= 0.3))
-  sedlex
-  (smtml (>= 0.4.1))
-  uutf
-  xmlm
-  (processor (>= 0.2))
+  (ocaml_intrinsics
+    (>= "v0.17.0"))
+  (prelude
+    (>= 0.5))
+  (sedlex
+    (>= 3.3))
+  (smtml
+    (>= 0.5.0))
+  (uutf
+    (>= 1.0.3))
+  (xmlm (>= 1.4.0))
+  (processor
+    (>= 0.2))
   ;; doc
   (odoc :with-doc)
   ;; test
@@ -74,7 +88,6 @@
    (and
     (>= 0.1)
     :with-dev-setup))
-  (crunch :with-dev-setup)
   (extunix :with-dev-setup)
   (crowbar :with-dev-setup)
   (gnuplot :with-dev-setup)
@@ -86,6 +99,5 @@
   (yaml :with-dev-setup)
   (lwt :with-dev-setup)
   (cohttp :with-dev-setup)
-  (cohttp-lwt-unix :with-dev-setup)
-  )
+  (cohttp-lwt-unix :with-dev-setup))
  (sites (share c_files) (share rust_files)))
