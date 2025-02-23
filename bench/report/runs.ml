@@ -81,6 +81,30 @@ let sum_stime runs = List.fold_left (fun sum r -> Run.stime r +. sum) 0. runs
 
 let mean_stime runs = sum_stime runs /. (count_all runs |> float_of_int)
 
+let sum_maxrss runs =
+  List.fold_left (fun sum r -> Int64.add (Run.maxrss r) sum) 0L runs
+
+let mean_maxrss runs =
+  Int64.to_float (sum_maxrss runs) /. (count_all runs |> float)
+
+let median_maxrss runs =
+  let runs = Array.of_list @@ List.map Run.maxrss runs in
+  let n = Array.length runs in
+  Array.fast_sort compare runs;
+  if n = 0 then 0.
+  else if n mod 2 = 0 then
+    let left = Array.get runs (n / 2) in
+    let right = Array.get runs ((n / 2) + 1) in
+    Int64.(to_float (add left right)) /. 2.
+  else Int64.to_float @@ Array.get runs (n / 2)
+
+let min_max_maxrss runs =
+  List.fold_left
+    (fun (curr_min, curr_max) r ->
+      let maxrss = Run.maxrss r in
+      (min curr_min maxrss, max curr_max maxrss) )
+    (Int64.max_int, 0L) runs
+
 let to_distribution ~max_time runs =
   List.init max_time (fun i ->
     List.fold_left
@@ -131,6 +155,17 @@ let pp_table_statistics fmt results =
     "| Total | Mean | Median | Min | Max |@\n\
      |:-----:|:----:|:------:|:---:|:---:|@\n\
      | %0.2f | %0.2f | %0.2f | %0.2f | %0.2f |@\n"
+    total mean median min max
+
+let pp_table_memory fmt results =
+  let total = sum_maxrss results in
+  let mean = mean_maxrss results in
+  let median = median_maxrss results in
+  let min, max = min_max_maxrss results in
+  Format.fprintf fmt
+    "| Total | Mean | Median | Min | Max |@\n\
+     |:-----:|:----:|:------:|:---:|:---:|@\n\
+     | %Ld | %0.2f | %0.2f | %Ld | %Ld |@\n"
     total mean median min max
 
 let map = List.map
