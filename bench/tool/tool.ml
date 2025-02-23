@@ -32,95 +32,80 @@ let mk_symbiotic () = Symbiotic
 
 exception Sigchld
 
-let kill_klee_descendants () =
-  let _ = Format.ksprintf Sys.command "pkill klee" in
-  ()
+let wait_pid ~pid ~timeout ~tool ~dst_stderr =
+  let did_timeout = ref false in
+  let start_time = Unix.gettimeofday () in
+  begin
+    try
+      Sys.set_signal Sys.sigchld (Signal_handle (fun (_ : int) -> raise Sigchld));
+      Unix.sleepf timeout;
+      did_timeout := true;
+      (* we kill the process group id (pgid) which should be equal to pid *)
+      Unix.kill (-pid) 9;
+      Sys.set_signal Sys.sigchld Signal_default
+    with Sigchld -> ()
+  end;
+  Sys.set_signal Sys.sigchld Signal_default;
+  let ( waited_pid
+      , status
+      , { ExtUnix.Specific.ru_utime = utime; ru_stime = stime; ru_maxrss = _ } )
+      =
+    ExtUnix.Specific.wait4 [] ~-pid
+  in
+  let end_time = Unix.gettimeofday () in
+  assert (waited_pid = pid);
 
-let wait_pid =
-  let last_utime = ref 0. in
-  let last_stime = ref 0. in
-  fun ~pid ~timeout ~tool ~dst_stderr ->
-    let did_timeout = ref false in
-    let start_time = Unix.gettimeofday () in
-    begin
-      try
-        Sys.set_signal Sys.sigchld
-          (Signal_handle (fun (_ : int) -> raise Sigchld));
-        Unix.sleepf timeout;
-        did_timeout := true;
-        (* we kill the process group id (pgid) which should be equal to pid *)
-        Unix.kill (-pid) 9;
-        Sys.set_signal Sys.sigchld Signal_default
-      with Sigchld -> ()
-    end;
-    Sys.set_signal Sys.sigchld Signal_default;
-    let waited_pid, status = Unix.waitpid [] (-pid) in
-    (* Because symbiotic is leaking klee processes *)
-    kill_klee_descendants ();
-    let end_time = Unix.gettimeofday () in
-    let { Rusage.utime; stime; _ } = Rusage.get Rusage.Children in
-    assert (waited_pid = pid);
+  let clock = end_time -. start_time in
 
-    let utime_diff = utime -. !last_utime in
-    let stime_diff = stime -. !last_stime in
-    last_utime := utime;
-    last_stime := stime;
-    let utime = utime_diff in
-    let stime = stime_diff in
-    let clock = end_time -. start_time in
+  (* Sometimes the clock goes a little bit above the allowed timeout... *)
+  let clock = min clock timeout in
+  let rusage = { Report.Rusage.clock; utime; stime } in
 
-    (* Sometimes the clock goes a little bit above the allowed timeout... *)
-    let clock = min clock timeout in
-    let rusage = { Report.Rusage.clock; utime; stime } in
-
-    if !did_timeout || Float.equal clock timeout then
-      Report.Run_result.Timeout rusage
-    else
-      match status with
-      | WEXITED code -> begin
-        match tool with
-        | Owi _ ->
-          if code = 0 then Nothing rusage
-          else if code = 13 then Reached rusage
-          else Other (rusage, code)
-        | Klee ->
-          if code = 0 then begin
-            let chan = open_in (Fpath.to_string dst_stderr) in
-            let has_found_error = ref false in
-            begin
-              try
-                while true do
-                  let line = input_line chan in
-                  match
-                    String.split_on_char ' ' line
-                    |> List.filter (fun s -> s <> "")
-                  with
-                  | [ "KLEE:"; "ERROR:"; _location; "ASSERTION"; "FAIL:"; "0" ]
-                    ->
-                    has_found_error := true;
-                    raise Exit
-                  | _line -> ()
-                done
-              with End_of_file | Exit -> ()
-            end;
-            close_in chan;
-            if !has_found_error then Reached rusage else Nothing rusage
-          end
-          else Other (rusage, code)
-        | Symbiotic ->
-          if code = 0 then begin
-            match Bos.OS.File.read dst_stderr with
-            | Error (`Msg err) -> failwith err
-            | Ok data -> (
-              let error = Astring.String.find_sub ~sub:"Found ERROR!" data in
-              match error with
-              | Some _ -> Reached rusage
-              | None -> Nothing rusage )
-          end
-          else Other (rusage, code)
-      end
-      | WSIGNALED n -> Signaled (rusage, n)
-      | WSTOPPED n -> Stopped (rusage, n)
+  if !did_timeout || Float.equal clock timeout then
+    Report.Run_result.Timeout rusage
+  else
+    match status with
+    | WEXITED code -> begin
+      match tool with
+      | Owi _ ->
+        if code = 0 then Nothing rusage
+        else if code = 13 then Reached rusage
+        else Other (rusage, code)
+      | Klee ->
+        if code = 0 then begin
+          let chan = open_in (Fpath.to_string dst_stderr) in
+          let has_found_error = ref false in
+          begin
+            try
+              while true do
+                let line = input_line chan in
+                match
+                  String.split_on_char ' ' line
+                  |> List.filter (fun s -> s <> "")
+                with
+                | [ "KLEE:"; "ERROR:"; _location; "ASSERTION"; "FAIL:"; "0" ] ->
+                  has_found_error := true;
+                  raise Exit
+                | _line -> ()
+              done
+            with End_of_file | Exit -> ()
+          end;
+          close_in chan;
+          if !has_found_error then Reached rusage else Nothing rusage
+        end
+        else Other (rusage, code)
+      | Symbiotic ->
+        if code = 0 then begin
+          match Bos.OS.File.read dst_stderr with
+          | Error (`Msg err) -> failwith err
+          | Ok data -> (
+            let error = Astring.String.find_sub ~sub:"Found ERROR!" data in
+            match error with Some _ -> Reached rusage | None -> Nothing rusage )
+        end
+        else Other (rusage, code)
+    end
+    | WSIGNALED n -> Signaled (rusage, n)
+    | WSTOPPED n -> Stopped (rusage, n)
 
 let execvp ~output_dir tool file timeout =
   let output_dir = Fpath.(output_dir / to_short_name tool) |> Fpath.to_string in
