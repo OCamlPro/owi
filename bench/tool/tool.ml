@@ -48,8 +48,10 @@ let wait_pid ~pid ~timeout ~tool ~dst_stderr =
   Sys.set_signal Sys.sigchld Signal_default;
   let ( waited_pid
       , status
-      , { ExtUnix.Specific.ru_utime = utime; ru_stime = stime; ru_maxrss = _ } )
-      =
+      , { ExtUnix.Specific.ru_utime = utime
+        ; ru_stime = stime
+        ; ru_maxrss = maxrss
+        } ) =
     ExtUnix.Specific.wait4 [] ~-pid
   in
   let end_time = Unix.gettimeofday () in
@@ -59,7 +61,7 @@ let wait_pid ~pid ~timeout ~tool ~dst_stderr =
 
   (* Sometimes the clock goes a little bit above the allowed timeout... *)
   let clock = min clock timeout in
-  let rusage = { Report.Rusage.clock; utime; stime } in
+  let rusage = { Report.Rusage.clock; utime; stime; maxrss } in
 
   if !did_timeout || Float.equal clock timeout then
     Report.Run_result.Timeout rusage
