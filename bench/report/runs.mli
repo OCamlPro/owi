@@ -46,13 +46,19 @@ val sum_stime : t -> float
 
 val mean_stime : t -> float
 
+val sum_maxrss : t -> int64
+
+val mean_maxrss : t -> float
+
 val to_distribution : max_time:int -> t -> float list
 
-val pp_quick_results : Format.formatter -> t -> unit
+val pp_quick_results : t Fmt.t
 
-val pp_table_results : Format.formatter -> t -> unit
+val pp_table_results : t Fmt.t
 
-val pp_table_statistics : Format.formatter -> t -> unit
+val pp_table_statistics : t Fmt.t
+
+val pp_table_memory : t Fmt.t
 
 val map : (Run.t -> 'a) -> t -> 'a list
 
