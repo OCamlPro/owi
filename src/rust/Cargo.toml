@@ -3,6 +3,8 @@ name = "owi_sym"
 version = "0.1.0"
 edition = "2021"
 
+exclude = ["dune"]
+
 [dependencies]
 
 [lib]

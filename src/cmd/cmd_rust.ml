@@ -37,12 +37,12 @@ let compile ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
 
   let rustc_cmd : Cmd.t =
     Cmd.(
-      rustc_bin % "--target=wasm32-unknown-unknown" % "--extern"
+      rustc_bin % "--target=wasm32-unknown-unknown" % "--edition=2021"
+      % "--extern"
       % Fmt.str "owi_sym=%a" Fpath.pp libowi_sym_rlib
       % "-o" % Cmd.p out
       %% Cmd.of_list (List.map Cmd.p files) )
   in
-
   let+ () =
     match OS.Cmd.run rustc_cmd with
     | Ok _ as v -> v

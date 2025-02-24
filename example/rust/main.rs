@@ -9,7 +9,7 @@ fn mean_correct(x: i32, y: i32) -> i32 {
 }
 
 fn main() {
-    let x = u32::symbol() as i32;
-    let y = u32::symbol() as i32;
+    let x = i32::symbol();
+    let y = i32::symbol();
     owi_sym::assert(mean_wrong(x, y) == mean_correct(x, y))
 }
