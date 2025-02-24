@@ -1,18 +1,26 @@
 module Backend = struct
   type address = Int32.t
 
+  module Map = Map.Make (struct
+    include Int32
+
+    (* TODO: define this in Int32 directly? *)
+    let compare i1 i2 = compare (Int32.to_int i1) (Int32.to_int i2)
+  end)
+
   type t =
-    { mutable data : (address, Symbolic_value.int32) Hashtbl.t option
-    ; parent : t option
+    { mutable data : Symbolic_value.int32 Map.t
     ; chunks : (address, Symbolic_value.int32) Hashtbl.t
     }
 
-  let make () = { data = None; parent = None; chunks = Hashtbl.create 16 }
+  let make () = { data = Map.empty; chunks = Hashtbl.create 16 }
 
-  let clone m =
-    let parent = if Option.is_none m.data then m.parent else Some m in
+  let clone { data; chunks } =
+    (* Caution, it is tempting not to rebuild the record here, but...
+       it must be! otherwise the mutable data points to the same location *)
     (* TODO: Make chunk copying lazy *)
-    { data = None; parent; chunks = Hashtbl.copy m.chunks }
+    let chunks = Hashtbl.copy m.chunks in
+    { data; chunks }
 
   let address a =
     let open Symbolic_choice_without_memory in
@@ -24,16 +32,10 @@ module Backend = struct
 
   let address_i32 a = a
 
-  let rec load_byte { parent; data; _ } a =
-    let v =
-      match data with None -> None | Some data -> Hashtbl.find_opt data a
-    in
-    match v with
+  let load_byte { data; _ } a =
+    match Map.find_opt a data with
+    | None -> Smtml.Expr.value (Num (I8 0))
     | Some v -> v
-    | None -> (
-      match parent with
-      | None -> Smtml.Expr.value (Num (I8 0))
-      | Some parent -> load_byte parent a )
 
   (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
   let merge_extracts (e1, h, m1) (e2, m2, l) =
@@ -96,13 +98,7 @@ module Backend = struct
       sym
     | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
 
-  let replace m k v =
-    match m.data with
-    | None ->
-      let tbl = Hashtbl.create 16 in
-      Hashtbl.add tbl k v;
-      m.data <- Some tbl
-    | Some tbl -> Hashtbl.replace tbl k v
+  let replace m k v = m.data <- Map.add k v m.data
 
   let storen m a v n =
     for i = 0 to n - 1 do
