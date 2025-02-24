@@ -1,4 +1,6 @@
-use std::alloc::{GlobalAlloc, Layout};
+pub mod alloc;
+mod symbolic;
+pub use symbolic::Symbolic;
 
 mod sys {
     #[link(wasm_import_module = "symbolic")]
@@ -24,22 +26,32 @@ pub fn stop_exploration() -> ! {
     }
 }
 
+#[deprecated(
+    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `u8::symbol()`."
+)]
 pub fn u8_symbol() -> u8 {
-    unsafe { sys::i8_symbol() }
+    Symbolic::symbol()
 }
 
+#[deprecated(
+    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `u32::symbol()`."
+)]
 pub fn u32_symbol() -> u32 {
-    unsafe { sys::i32_symbol() }
+    Symbolic::symbol()
 }
 
+#[deprecated(
+    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `f32::symbol()`."
+)]
 pub fn f32_symbol() -> f32 {
-    unsafe { sys::f32_symbol() }
+    Symbolic::symbol()
 }
 
+#[deprecated(
+    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `char::symbol()`."
+)]
 pub fn char_symbol() -> char {
-    let x = u32_symbol();
-    let c = char::from_u32(x).unwrap_or_else(|| stop_exploration());
-    c
+    Symbolic::symbol()
 }
 
 pub fn assert(b: bool) {
@@ -48,18 +60,4 @@ pub fn assert(b: bool) {
 
 pub fn assume(b: bool) {
     unsafe { sys::assume(b) }
-}
-
-pub struct OwiTrackingAllocator;
-
-unsafe impl GlobalAlloc for OwiTrackingAllocator {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let alloc = std::alloc::System.alloc(layout);
-        sys::alloc(alloc, layout.size() as u32)
-    }
-
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        let ptr = sys::dealloc(ptr);
-        std::alloc::System.dealloc(ptr, layout);
-    }
 }

@@ -6,6 +6,8 @@ Given the following `main.rs` file:
 
 <!-- $MDX file=main.rs -->
 ```rs
+use owi_sym::Symbolic;
+
 fn mean_wrong(x: i32, y: i32) -> i32 {
     (x + y) / 2
 }

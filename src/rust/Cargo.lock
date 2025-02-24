@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "rust"
+name = "owi_sym"
 version = "0.1.0"
