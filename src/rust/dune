@@ -1,6 +1,6 @@
 (rule
  (target libowi_sym.rlib)
- (deps owi_sym.rs)
+ (deps src/owi_sym.rs)
  (action
   (run
    rustc
