@@ -174,3 +174,24 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   ; start = modul.start
   ; annots = modul.annots
   }
+
+let find (named : 'a Named.t) err : _ -> binary indice Result.t = function
+  | Raw _i as indice -> Ok indice
+  | Text name -> (
+    match String_map.find_opt name named.named with
+    | None -> Error err
+    | Some i -> Ok (Raw i) )
+
+let find_func modul id = find modul.func (`Unknown_func id) id
+
+let find_global modul id = find modul.global (`Unknown_global id) id
+
+let find_memory modul id = find modul.mem (`Unknown_memory id) id
+
+let find_table modul id = find modul.table (`Unknown_table id) id
+
+let find_data modul id = find modul.data (`Unknown_data id) id
+
+let find_elem modul id = find modul.elem (`Unknown_elem id) id
+
+let find_type modul id = find modul.typ (`Unknown_type id) id
