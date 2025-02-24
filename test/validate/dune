@@ -1,2 +1,2 @@
 (cram
- (deps %{bin:owi} unknown_label.wat))
+ (deps %{bin:owi} ./unknown_label.wat ./unknown_func.wat))

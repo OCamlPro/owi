@@ -674,6 +674,7 @@ let exit_code =
       | `Unclosed_string -> 76
       | `Unbounded_quantification -> 77
       | `Invalid_model _msg -> 78
+      | `Unknown_export _id -> 79
     end
   end
   | Error e -> (

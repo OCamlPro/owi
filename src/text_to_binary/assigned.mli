@@ -19,3 +19,17 @@ type t =
   }
 
 val of_grouped : Grouped.t -> t Result.t
+
+val find_func : t -> text indice -> binary indice Result.t
+
+val find_global : t -> text indice -> binary indice Result.t
+
+val find_memory : t -> text indice -> binary indice Result.t
+
+val find_data : t -> text indice -> binary indice Result.t
+
+val find_table : t -> text indice -> binary indice Result.t
+
+val find_elem : t -> text indice -> binary indice Result.t
+
+val find_type : t -> text indice -> binary indice Result.t
