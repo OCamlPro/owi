@@ -1,6 +1,7 @@
 (rule
  (target libowi_sym.rlib)
- (deps src/owi_sym.rs)
+ (deps
+  (glob_files_rec *.rs))
  (action
   (run
    rustc
@@ -8,7 +9,7 @@
    --crate-type=rlib
    --crate-name
    owi_sym
-   %{deps})))
+   src/owi_sym.rs)))
 
 (install
  (package owi)
