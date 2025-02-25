@@ -115,29 +115,29 @@ let fresh solver () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="909">S</span> ((module Batch), solver)
+  <span data-count="910">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="44746">S</span>tats.start_span "check" "solver";
-  <span data-count="44746">l</span>et module Solver = (val solver_module) in
+  <span data-count="44692">S</span>tats.start_span "check" "solver";
+  <span data-count="44690">l</span>et module Solver = (val solver_module) in
   let check = Solver.check s pc in
-  <span data-count="44728">S</span>tats.close_span ();
-  <span data-count="44722">c</span>heck
+  <span data-count="44673">S</span>tats.close_span ();
+  <span data-count="44668">c</span>heck
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1401">S</span>tats.start_span "model" "solver";
-  <span data-count="1400">l</span>et module Solver = (val solver_module) in
+  <span data-count="1359">S</span>tats.start_span "model" "solver";
+  <span data-count="1358">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1401">`</span>Sat -&gt; begin
+    | <span data-count="1357">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1399">S</span>ome model -&gt; model
+      | <span data-count="1353">S</span>ome model -&gt; model
     end
     | `Unsat | `Unknown -&gt; assert false
   in
   Stats.close_span ();
-  <span data-count="1400">m</span>odel
+  <span data-count="1358">m</span>odel
 </code></pre>
       </div>
     </div>
