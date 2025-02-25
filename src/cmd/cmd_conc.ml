@@ -407,8 +407,7 @@ let run solver tree link_state modules_to_run =
       | Error Assert_fail ->
         (* TODO: Check if we want to report this *)
         Ok (Some (`Assert_fail, trace))
-      | Error ErrExplicitStop ->
-        Ok None
+      | Error ErrExplicitStop -> Ok None
     in
     match error with
     | Some _ -> Ok error

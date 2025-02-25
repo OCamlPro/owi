@@ -21,6 +21,7 @@ mod sys {
     extern "C" {
         pub fn alloc(base: *mut u8, size: u32) -> *mut u8;
         pub fn dealloc(base: *mut u8) -> *mut u8;
+        pub fn abort() -> !;
     }
 }
 
@@ -62,8 +63,7 @@ pub fn assume(b: bool) {
 
 pub fn stop_exploration() -> ! {
     unsafe {
-        sys::assume(false);
-        std::process::abort()
+        sys::abort();
     }
 }
 
