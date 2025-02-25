@@ -184,6 +184,7 @@ let new_node (pc : Concolic_choice.pc) (head : Concolic_choice.pc_elt) : node =
   | Assume cond -> Assume { cond; cont = fresh_tree (Assume cond :: pc) }
   | Assert cond ->
     Assert { cond; cont = fresh_tree (Assert cond :: pc); status = Unknown }
+  | EltExplicitStop -> Explored
 
 let try_initialize (pc : Concolic_choice.pc) (node : eval_tree)
   (head : Concolic_choice.pc_elt) =
@@ -218,6 +219,7 @@ let rec add_trace (pc : Concolic_choice.pc) (node : eval_tree) (trace : trace)
     try_initialize pc node head_of_trace;
     let pc = head_of_trace :: pc in
     match (node.node, head_of_trace) with
+    | Assert _, EltExplicitStop -> assert false
     | (Unreachable | Not_explored | Being_explored | Explored), _ ->
       assert false
     | Select { cond; if_true; if_false }, Select (v, cond') ->
@@ -282,6 +284,7 @@ let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
     | Error (Trap t) -> Ok (Trap t)
     | Error Assert_fail -> Ok Assert_fail
     | Error (Assume_fail _c) -> Ok Assume_fail
+    | Error ErrExplicitStop -> Ok Normal
   in
   let trace =
     { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
@@ -404,6 +407,8 @@ let run solver tree link_state modules_to_run =
       | Error Assert_fail ->
         (* TODO: Check if we want to report this *)
         Ok (Some (`Assert_fail, trace))
+      | Error ErrExplicitStop ->
+        Ok None
     in
     match error with
     | Some _ -> Ok error
