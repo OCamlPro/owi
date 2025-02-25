@@ -325,30 +325,30 @@ let print_paths = false
 
 let ( let*/ ) (t : 'a Result.t) (f : 'a -&gt; 'b Result.t Choice.t) :
   'b Result.t Choice.t =
-  <span data-count="1135">m</span>atch t with <span data-count="1">E</span>rror e -&gt; Choice.return (Error e) | <span data-count="1134">O</span>k x -&gt; f x
+  <span data-count="1138">m</span>atch t with <span data-count="1">E</span>rror e -&gt; Choice.return (Error e) | <span data-count="1137">O</span>k x -&gt; f x
 
 let link_state =
   lazy
-    <span data-count="378">(</span>let func_typ = Symbolic.Extern_func.extern_type in
+    <span data-count="379">(</span>let func_typ = Symbolic.Extern_func.extern_type in
      let link_state =
        Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
          Symbolic_wasm_ffi.symbolic_extern_module
      in
-     <span data-count="378">L</span>ink.extern_module' link_state ~name:"summaries" ~func_typ
+     <span data-count="379">L</span>ink.extern_module' link_state ~name:"summaries" ~func_typ
        Symbolic_wasm_ffi.summaries_extern_module )
 
 let run_file ~unsafe ~rac ~srac ~optimize pc filename =
-  <span data-count="379">l</span>et*/ m = Compile.File.until_binary_validat<span data-count="379">e</span> ~unsafe ~rac ~srac filename in
-  <span data-count="378">l</span>et*/ m = Cmd_utils.add_main_as_star<span data-count="378">t</span> m in
-  <span data-count="378">l</span>et link_state = Lazy.force link_state in
+  <span data-count="380">l</span>et*/ m = Compile.File.until_binary_validat<span data-count="380">e</span> ~unsafe ~rac ~srac filename in
+  <span data-count="379">l</span>et*/ m = Cmd_utils.add_main_as_star<span data-count="379">t</span> m in
+  <span data-count="379">l</span>et link_state = Lazy.force link_state in
 
-  <span data-count="378">l</span>et*/ m, link_state =
-    Compile.Binary.until_lin<span data-count="378">k</span> ~unsafe ~optimize ~name:None link_state m
+  <span data-count="379">l</span>et*/ m, link_state =
+    Compile.Binary.until_lin<span data-count="379">k</span> ~unsafe ~optimize ~name:None link_state m
   in
-  <span data-count="378">l</span>et m = Symbolic.convert_module_to_run m in
-  <span data-count="378">l</span>et c = Interpret.Symbolic.modul link_state.envs m in
-  <span data-count="378">C</span>hoice.bind pc (fun r -&gt;
-    <span data-count="378">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="378">O</span>k () -&gt; c )
+  <span data-count="379">l</span>et m = Symbolic.convert_module_to_run m in
+  <span data-count="379">l</span>et c = Interpret.Symbolic.modul link_state.envs m in
+  <span data-count="379">C</span>hoice.bind pc (fun r -&gt;
+    <span data-count="379">m</span>atch r with <span data-count="0">E</span>rror _ -&gt; Choice.return r | <span data-count="379">O</span>k () -&gt; c )
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
@@ -357,24 +357,24 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile =
-  <span data-count="379">O</span>ption.iter Stats.init_logger_to_file profile;
-  <span data-count="379">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="379">i</span>f debug then <span data-count="6">L</span>og.debug_on := true;
+  <span data-count="380">O</span>ption.iter Stats.init_logger_to_file profile;
+  <span data-count="380">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="380">i</span>f debug then <span data-count="6">L</span>og.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
-  <span data-count="379">l</span>et no_stop_at_failure = deterministic_result_orde<span data-count="33">r</span> || no_stop_at_failur<span data-count="136">e</span> in
-  let* _created_dir = Bos.OS.Dir.creat<span data-count="379">e</span> ~path:true ~mode:0o755 workspace in
-  <span data-count="379">l</span>et pc = Choice.return (Ok ()) in
-  <span data-count="379">l</span>et result =
+  <span data-count="380">l</span>et no_stop_at_failure = deterministic_result_orde<span data-count="33">r</span> || no_stop_at_failur<span data-count="136">e</span> in
+  let* _created_dir = Bos.OS.Dir.creat<span data-count="380">e</span> ~path:true ~mode:0o755 workspace in
+  <span data-count="380">l</span>et pc = Choice.return (Ok ()) in
+  <span data-count="380">l</span>et result =
     List.fold_left (run_file ~unsafe ~rac ~srac ~optimize) pc files
   in
-  <span data-count="379">l</span>et thread = Thread_with_memory.init () in
-  <span data-count="379">l</span>et res_queue = Wq.make () in
-  <span data-count="379">l</span>et path_count = ref 0 in
+  <span data-count="380">l</span>et thread = Thread_with_memory.init () in
+  <span data-count="380">l</span>et res_queue = Wq.make () in
+  <span data-count="380">l</span>et path_count = ref 0 in
   let callback v =
-    <span data-count="1722">l</span>et open Symbolic_choice_intf in
+    <span data-count="1740">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1724">m</span>atch (fail_mode, v) with
-    | <span data-count="1524">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1741">m</span>atch (fail_mode, v) with
+    | <span data-count="1541">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="1">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -384,14 +384,14 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
-      ~callback_init:(fun () -&gt; <span data-count="747">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="725">W</span>q.end_pledge res_queue)
+      ~callback_init:(fun () -&gt; <span data-count="749">W</span>q.make_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="729">W</span>q.end_pledge res_queue)
   in
-  <span data-count="379">l</span>et results =
+  <span data-count="380">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
-      <span data-count="350">A</span>rray.iter Domain.join join_handles )
+      <span data-count="351">A</span>rray.iter Domain.join join_handles )
   in
-  <span data-count="379">l</span>et print_bug = function
+  <span data-count="380">l</span>et print_bug = function
     | <span data-count="164">`</span>ETrap (tr, model) -&gt;
       Fmt.pr "Trap: %s@\n" (Trap.to_strin<span data-count="164">g</span> tr);
       <span data-count="164">F</span>mt.pr "%s@\n" (Smtml.Model.to_scfg_strin<span data-count="164">g</span> ~no_value model)
@@ -405,8 +405,8 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       Fmt.pr "%s@\n" (Smtml.Model.to_scfg_strin<span data-count="35">g</span> ~no_value model)
   in
   let rec print_and_count_failures count_acc results =
-    <span data-count="550">m</span>atch results () with
-    | <span data-count="350">S</span>eq.Nil -&gt; Ok count_acc
+    <span data-count="551">m</span>atch results () with
+    | <span data-count="351">S</span>eq.Nil -&gt; Ok count_acc
     | <span data-count="200">S</span>eq.Cons ((result, _thread), tl) -&gt;
       let* model =
         match result with
@@ -434,14 +434,14 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       |&gt; <span data-count="33">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt;
            <span data-count="9">L</span>ist.compare Prelude.Int32.compare bc1 bc2 )
       |&gt; <span data-count="33">L</span>ist.to_seq |&gt; <span data-count="66">S</span>eq.ma<span data-count="33">p</span> fst
-    else <span data-count="346">r</span>esults
+    else <span data-count="347">r</span>esults
   in
-  let* count = print_and_count_failure<span data-count="379">s</span> 0 results in
-  <span data-count="378">i</span>f print_paths then <span data-count="0">F</span>mt.p<span data-count="0">r</span> "Completed paths: %d@." !path_count;
-  <span data-count="378">i</span>f count &gt; 0 then <span data-count="189">E</span>rror (`Found_bug count)
-  else <span data-count="189">b</span>egin
+  let* count = print_and_count_failure<span data-count="380">s</span> 0 results in
+  <span data-count="379">i</span>f print_paths then <span data-count="0">F</span>mt.p<span data-count="0">r</span> "Completed paths: %d@." !path_count;
+  <span data-count="379">i</span>f count &gt; 0 then <span data-count="189">E</span>rror (`Found_bug count)
+  else <span data-count="190">b</span>egin
     Fmt.pr "All OK@.";
-    <span data-count="189">O</span>k ()
+    <span data-count="190">O</span>k ()
   end
 </code></pre>
       </div>

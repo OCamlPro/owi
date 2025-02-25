@@ -73,6 +73,8 @@
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -128,6 +130,8 @@
 <a href="#L49">49</a>
 <a href="#L50">50</a>
 <a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -159,6 +163,8 @@ module type S0 = sig
   val symbol_f32 : unit -&gt; Value.float32 t
 
   val symbol_f64 : unit -&gt; Value.float64 t
+
+  val symbol_bool : unit -&gt; Value.int32 t
 
   val assume : Value.int32 -&gt; unit t
 

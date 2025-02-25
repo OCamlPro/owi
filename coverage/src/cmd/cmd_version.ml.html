@@ -84,18 +84,18 @@
 (* Written by the Owi programmers *)
 
 let string_of_version = function
-  | <span data-count="13182">N</span>one -&gt; "unknown"
-  | <span data-count="73440">S</span>ome v -&gt; Build_info.V1.Version.to_string v
+  | <span data-count="13196">N</span>one -&gt; "unknown"
+  | <span data-count="73518">S</span>ome v -&gt; Build_info.V1.Version.to_string v
 
-let version = string_of_versio<span data-count="939">n</span> @@ Build_info.V1.versio<span data-count="939">n</span> ()
+let version = string_of_versio<span data-count="940">n</span> @@ Build_info.V1.versio<span data-count="940">n</span> ()
 
 let statically_linked_libraries =
   Build_info.V1.Statically_linked_libraries.to_list ()
-  |&gt; <span data-count="939">L</span>ist.map (fun l -&gt;
-       <span data-count="85683">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="85683">e</span> l
-       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="85683">s</span>tring_of_versio<span data-count="85683">n</span>
+  |&gt; <span data-count="940">L</span>ist.map (fun l -&gt;
+       <span data-count="85774">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="85774">e</span> l
+       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="85774">s</span>tring_of_versio<span data-count="85774">n</span>
        ) )
-  |&gt; <span data-count="939">L</span>ist.sor<span data-count="939">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="440157">S</span>tring.compare n1 n2)
+  |&gt; <span data-count="940">L</span>ist.sor<span data-count="940">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="440624">S</span>tring.compare n1 n2)
 
 let cmd () =
   <span data-count="0">F</span>mt.pr "owi version %s@\n" version;

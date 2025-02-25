@@ -495,19 +495,19 @@ let recover backup into =
   <span data-count="518">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="518">y</span> recover_elem) backup.elem into.elem in
   <span data-count="518">(</span>)
 
-let id (env : _ t) = <span data-count="1187247">e</span>nv.id
+let id (env : _ t) = <span data-count="1187194">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="6398">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6395">S</span>ome v -&gt; v
+  <span data-count="6415">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6413">S</span>ome v -&gt; v
 
 let get_memory (env : _ t) id =
-  <span data-count="3023870">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="3023883">S</span>ome v -&gt; v
+  <span data-count="3023753">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="3023785">S</span>ome v -&gt; v
 
 let get_table (env : _ t) id =
-  <span data-count="1616088">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616089">S</span>ome v -&gt; v
+  <span data-count="1616092">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616092">S</span>ome v -&gt; v
 
 let get_func (env : _ t) id =
-  <span data-count="10498117">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498113">S</span>ome v -&gt; v
+  <span data-count="10498113">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498129">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="2246">m</span>atch IMap.find_opt id env.data with None -&gt; assert false | <span data-count="2246">S</span>ome v -&gt; v
@@ -516,9 +516,9 @@ let get_elem (env : _ t) id =
   <span data-count="3004">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="3004">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="122728">m</span>atch Func_id.get id env.extern_funcs with
+  <span data-count="122732">m</span>atch Func_id.get id env.extern_funcs with
   | None -&gt; assert false
-  | <span data-count="122722">S</span>ome v -&gt; v
+  | <span data-count="122735">S</span>ome v -&gt; v
 
 module Build = struct
   type t =
@@ -540,16 +540,16 @@ module Build = struct
     }
 
   let add_global id const (env : t) =
-    <span data-count="1512">{</span> env with globals = IMap.ad<span data-count="1512">d</span> id const env.globals }
+    <span data-count="1513">{</span> env with globals = IMap.ad<span data-count="1513">d</span> id const env.globals }
 
   let add_memory id mem (env : t) =
-    <span data-count="1162">{</span> env with memories = IMap.ad<span data-count="1162">d</span> id mem env.memories }
+    <span data-count="1163">{</span> env with memories = IMap.ad<span data-count="1163">d</span> id mem env.memories }
 
   let add_table id table (env : t) =
-    <span data-count="1317">{</span> env with tables = IMap.ad<span data-count="1317">d</span> id table env.tables }
+    <span data-count="1318">{</span> env with tables = IMap.ad<span data-count="1318">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="19300">{</span> env with functions = IMap.ad<span data-count="19300">d</span> id func env.functions }
+    <span data-count="19306">{</span> env with functions = IMap.ad<span data-count="19306">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="1123">{</span> env with data = IMap.ad<span data-count="1123">d</span> id data env.data }
 
@@ -620,7 +620,7 @@ end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="3348">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="3349">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>
