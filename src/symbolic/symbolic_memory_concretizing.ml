@@ -10,16 +10,14 @@ module Backend = struct
 
   type t =
     { mutable data : Symbolic_value.int32 Map.t
-    ; chunks : (address, Symbolic_value.int32) Hashtbl.t
+    ; mutable chunks : Symbolic_value.int32 Map.t
     }
 
-  let make () = { data = Map.empty; chunks = Hashtbl.create 16 }
+  let make () = { data = Map.empty; chunks = Map.empty }
 
   let clone { data; chunks } =
     (* Caution, it is tempting not to rebuild the record here, but...
        it must be! otherwise the mutable data points to the same location *)
-    (* TODO: Make chunk copying lazy *)
-    let chunks = Hashtbl.copy m.chunks in
     { data; chunks }
 
   let address a =
@@ -115,7 +113,7 @@ module Backend = struct
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
-      match Hashtbl.find_opt m.chunks base with
+      match Map.find_opt base m.chunks with
       | None -> return (Error Trap.Memory_leak_use_after_free)
       | Some chunk_size ->
         let+ is_out_of_bounds =
@@ -146,15 +144,19 @@ module Backend = struct
   let free m p =
     let open Symbolic_choice_without_memory in
     let+ base = ptr p in
-    if not @@ Hashtbl.mem m.chunks base then
-      Fmt.failwith "Memory leak double free";
-    Hashtbl.remove m.chunks base;
-    Symbolic_value.const_i32 base
+    if not @@ Map.mem base m.chunks then Fmt.failwith "Memory leak double free"
+    else begin
+      let chunks = Map.remove base m.chunks in
+      m.chunks <- chunks;
+      Symbolic_value.const_i32 base
+    end
 
   let realloc m ~ptr ~size =
     let open Symbolic_choice_without_memory in
     let+ base = address ptr in
-    Hashtbl.replace m.chunks base size;
+    let chunks = Map.remove base m.chunks in
+    let chunks = Map.add base size chunks in
+    m.chunks <- chunks;
     Smtml.Expr.ptr base (Symbolic_value.const_i32 0l)
 end
 

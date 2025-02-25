@@ -14,14 +14,11 @@ end)
 type t =
   { mutable data : Symbolic_value.int32 Map.t
   ; mutable size : Symbolic_value.int32
-  ; chunks : (Int32.t, Symbolic_value.int32) Hashtbl.t
+  ; mutable chunks : Symbolic_value.int32 Map.t
   }
 
 let create size =
-  { data = Map.empty
-  ; size = Symbolic_value.const_i32 size
-  ; chunks = Hashtbl.create 16
-  }
+  { data = Map.empty; size = Symbolic_value.const_i32 size; chunks = Map.empty }
 
 let i32 v =
   match Smtml.Expr.view v with Val (Num (I32 i)) -> i | _ -> assert false
@@ -65,8 +62,6 @@ let blit_string m str ~src ~dst ~len =
 let clone { data; chunks; size } =
   (* Caution, it is tempting not to rebuild the record here, but...
        it must be! otherwise the mutable data points to the same location *)
-  (* TODO: we can make this lazy as well *)
-  let chunks = Hashtbl.copy chunks in
   { data; chunks; size }
 
 let load_byte { data; _ } a =
@@ -184,7 +179,7 @@ let check_within_bounds m a =
   match Smtml.Expr.view a with
   | Val (Num (I32 _)) -> Ok (Symbolic_value.Bool.const false, a)
   | Ptr { base; offset } -> (
-    match Hashtbl.find_opt m.chunks base with
+    match Map.find_opt base m.chunks with
     | None -> Error Trap.Memory_leak_use_after_free
     | Some size ->
       let ptr = Int32.add base (i32 offset) in
@@ -197,11 +192,16 @@ let check_within_bounds m a =
   | _ -> assert false
 
 let free m base =
-  if not @@ Hashtbl.mem m.chunks base then
-    Fmt.failwith "Memory leak double free";
-  Hashtbl.remove m.chunks base
+  if not @@ Map.mem base m.chunks then Fmt.failwith "Memory leak double free"
+  else begin
+    let chunks = Map.remove base m.chunks in
+    m.chunks <- chunks
+  end
 
-let realloc m base size = Hashtbl.replace m.chunks base size
+let realloc m base size =
+  let chunks = Map.remove base m.chunks in
+  let chunks = Map.add base size chunks in
+  m.chunks <- chunks
 
 module ITbl = Hashtbl.Make (struct
   include Int
