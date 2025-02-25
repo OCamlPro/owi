@@ -7,12 +7,14 @@ type err =
     (* TODO add assertion (will be needed by the environment functions *)
   | Trap of Trap.t
   | Assume_fail of Symbolic_value.bool
+  | ErrExplicitStop
 
 type pc_elt =
   | Select of Bool.t * Symbolic_value.bool
   | Select_i32 of Int32.t * Symbolic_value.int32
   | Assume of Symbolic_value.bool
   | Assert of Symbolic_value.bool
+  | EltExplicitStop
 
 type pc = pc_elt list
 
@@ -23,6 +25,7 @@ let pp_pc_elt fmt = function
   | Select_i32 (v, c) -> Fmt.pf fmt "Select_i32(%li, %a)" v Smtml.Expr.pp c
   | Assume c -> Fmt.pf fmt "Assume(%a)" Smtml.Expr.pp c
   | Assert c -> Fmt.pf fmt "Assert(%a)" Smtml.Expr.pp c
+  | EltExplicitStop -> Fmt.pf fmt "Explicit Stop"
 
 let pp_pc fmt pc = List.iter (fun e -> Fmt.pf fmt "  %a@\n" pp_pc_elt e) pc
 
@@ -42,6 +45,9 @@ let pc_elt_to_expr = function
   | Select_i32 (n, c) -> Some Smtml.Expr.Bitv.I32.(c = v n)
   | Assume c -> Some c
   | Assert _ -> None
+  | EltExplicitStop ->
+    (* Should never be reached because no model should be requested if we stopped *)
+    assert false
 
 let pc_to_exprs pc = List.filter_map pc_elt_to_expr pc
 
@@ -67,6 +73,8 @@ type 'a run_result = ('a, err) Prelude.Result.t * thread
 type 'a t = M of (thread -> 'a run_result) [@@unboxed]
 
 let return v = M (fun t -> (Ok v, t)) [@@inline]
+
+let stop = M (fun st -> (Error ErrExplicitStop, st))
 
 let run (M v) st : _ run_result = v st [@@inline]
 

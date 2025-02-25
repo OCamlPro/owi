@@ -42,7 +42,7 @@ module M :
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  let abort () : unit Choice.t = Choice.add_pc @@ Value.Bool.const false
+  let abort () : unit Choice.t = Choice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
     Choice.lift_mem @@ Memory.realloc m ~ptr:base ~size
