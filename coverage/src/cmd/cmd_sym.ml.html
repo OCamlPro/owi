@@ -371,10 +371,10 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   <span data-count="379">l</span>et res_queue = Wq.make () in
   <span data-count="379">l</span>et path_count = ref 0 in
   let callback v =
-    <span data-count="1685">l</span>et open Symbolic_choice_intf in
+    <span data-count="1833">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1689">m</span>atch (fail_mode, v) with
-    | <span data-count="1488">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1832">m</span>atch (fail_mode, v) with
+    | <span data-count="1631">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="1">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -385,7 +385,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="747">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="718">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="721">W</span>q.end_pledge res_queue)
   in
   <span data-count="379">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
