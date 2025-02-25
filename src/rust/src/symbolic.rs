@@ -1,13 +1,13 @@
 use std::ops::RangeBounds;
 
-use crate::{assert, stop_exploration, sys};
+use crate::{assume, stop_exploration, sys};
 
 pub trait Symbolic: Sized {
     fn symbol() -> Self;
 
     fn symbol_so_that(f: impl FnOnce(&Self) -> bool) -> Self {
         let x = Self::symbol();
-        assert(f(&x));
+        assume(f(&x));
         x
     }
 }
