@@ -2,6 +2,8 @@ pub mod alloc;
 mod symbolic;
 pub use symbolic::{Symbolic, SymbolicInBounds};
 
+pub mod harness;
+
 mod sys {
     #[link(wasm_import_module = "symbolic")]
     extern "C" {
