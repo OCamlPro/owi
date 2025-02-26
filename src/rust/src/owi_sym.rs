@@ -8,7 +8,7 @@ mod sys {
     #[link(wasm_import_module = "symbolic")]
     extern "C" {
         pub(super) fn bool_symbol() -> bool;
-        pub(super) fn i8_symbol() -> u8;
+        pub(super) fn i8_symbol() -> i32;
         pub(super) fn i32_symbol() -> u32;
         pub(super) fn f32_symbol() -> f32;
         pub(super) fn i64_symbol() -> u64;
