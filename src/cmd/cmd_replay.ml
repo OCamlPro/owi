@@ -12,59 +12,77 @@ let run_file ~unsafe ~optimize filename model =
       !next
   in
 
-  let assume _ = () in
+  let module M :
+    Wasm_ffi_intf.S0
+      with type 'a t = 'a
+       and type memory = Concrete_memory.t
+       and module Value = Concrete_value = struct
+    type 'a t = 'a
 
-  let assert' n = assert (not @@ Prelude.Int32.equal n 0l) in
+    type memory = Concrete_memory.t
 
-  let symbol_i32 () =
-    match model.(next ()) with
-    | V.I32 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a i32 value." V.pp v;
-      assert false
-  in
+    module Value = Concrete_value
 
-  let symbol_char () =
-    match model.(next ()) with
-    | V.I32 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a char (i32) value." V.pp v;
-      assert false
-  in
+    let assume _ = ()
 
-  let symbol_i8 () =
-    match model.(next ()) with
-    | V.I32 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a i8 (i32) value." V.pp v;
-      assert false
-  in
+    let assert' n = assert (not @@ Prelude.Int32.equal n 0l)
 
-  let symbol_i64 () =
-    match model.(next ()) with
-    | V.I64 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a i64 value." V.pp v;
-      assert false
-  in
+    let symbol_i32 () =
+      match model.(next ()) with
+      | V.I32 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a i32 value." V.pp v;
+        assert false
 
-  let symbol_f32 () =
-    match model.(next ()) with
-    | V.F32 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a f32 value." V.pp v;
-      assert false
-  in
+    let symbol_char () =
+      match model.(next ()) with
+      | V.I32 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a char (i32) value." V.pp v;
+        assert false
 
-  let symbol_f64 () =
-    match model.(next ()) with
-    | V.F64 n -> n
-    | v ->
-      Fmt.epr "Got value %a but expected a f64 value." V.pp v;
-      assert false
-  in
+    let symbol_bool = symbol_char
 
+    let abort () = assert false
+
+    let alloc (_ : memory) (_ : Value.int32) (_ : Value.int32) = assert false
+
+    let free (_ : memory) = assert false
+
+    let exit (n : Value.int32) = exit (Int32.to_int n)
+
+    let symbol_i8 () =
+      match model.(next ()) with
+      | V.I32 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a i8 (i32) value." V.pp v;
+        assert false
+
+    let symbol_i64 () =
+      match model.(next ()) with
+      | V.I64 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a i64 value." V.pp v;
+        assert false
+
+    let symbol_f32 () =
+      match model.(next ()) with
+      | V.F32 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a f32 value." V.pp v;
+        assert false
+
+    let symbol_f64 () =
+      match model.(next ()) with
+      | V.F64 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a f64 value." V.pp v;
+        assert false
+
+    let in_replay_mode () = 1l
+  end in
   let replay_extern_module =
+    let open M in
     let functions =
       [ ( "i8_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
@@ -84,12 +102,18 @@ let run_file ~unsafe ~optimize filename model =
       ; ( "f64_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
         )
+      ; ( "bool_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
+        )
       ; ( "assume"
         , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
         )
       ; ( "assert"
         , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
         )
+      ; ( "in_replay_mode"
+        , Concrete_extern_func.Extern_func
+            (Func (UArg Res, R1 I32), in_replay_mode) )
       ]
     in
     { Link.functions }

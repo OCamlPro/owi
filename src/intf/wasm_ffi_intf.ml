@@ -42,6 +42,8 @@ module type S0 = sig
   val free : memory -> Value.int32 -> Value.int32 t
 
   val exit : Value.int32 -> unit t
+
+  val in_replay_mode : unit -> Value.int32 t
 end
 
 module type S = sig

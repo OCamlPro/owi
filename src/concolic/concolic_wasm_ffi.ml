@@ -127,6 +127,9 @@ module M :
     let open Concolic_choice in
     let+ base = ptr p in
     Value.const_i32 base
+
+  let in_replay_mode () =
+    Concolic_choice.return (0l, Smtml.Expr.value (Smtml.Value.Int 1))
 end
 
 type extern_func = Concolic.Extern_func.extern_func
@@ -156,6 +159,9 @@ let symbolic_extern_module =
       , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
       , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
+    ; ( "in_replay_mode"
+      , Concolic.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), in_replay_mode) )
     ]
   in
   { Link.functions }
