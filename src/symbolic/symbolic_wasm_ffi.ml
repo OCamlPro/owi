@@ -51,6 +51,8 @@ module M :
     Choice.lift_mem @@ Memory.free m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = abort ()
+
+  let in_replay_mode () = Choice.return @@ Smtml.Expr.value (Smtml.Value.Int 1)
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -83,6 +85,9 @@ let symbolic_extern_module =
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
+    ; ( "in_replay_mode"
+      , Symbolic.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), in_replay_mode) )
     ]
   in
   { Link.functions }
