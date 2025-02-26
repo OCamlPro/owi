@@ -79,6 +79,13 @@ let run_file ~unsafe ~optimize filename model =
         Fmt.epr "Got value %a but expected a f64 value." V.pp v;
         assert false
 
+    let print_char c =
+      let n =
+        match Int32.unsigned_to_int c with None -> assert false | Some n -> n
+      in
+      let c = if n < 0 || n > 255 then assert false else char_of_int n in
+      Fmt.pr "%c@," c
+
     let in_replay_mode () = 1l
   end in
   let replay_extern_module =
@@ -114,6 +121,8 @@ let run_file ~unsafe ~optimize filename model =
       ; ( "in_replay_mode"
         , Concrete_extern_func.Extern_func
             (Func (UArg Res, R1 I32), in_replay_mode) )
+      ; ( "print_char"
+        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
       ]
     in
     { Link.functions }
