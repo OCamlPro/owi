@@ -11,7 +11,7 @@ pub fn execute_symbolically<F: Harnessable>(f: F) -> F::Ret {
 
 macro_rules! impl_harnessable_arity {
     ($($name:ident)+) => {
-        impl<$($name: Symbolic,)+ Ret> Harnessable for fn($($name,)+) -> Ret {
+        impl<$($name: Symbolic + core::fmt::Debug,)+ Ret> Harnessable for fn($($name,)+) -> Ret {
             type Ret = Ret;
 
             fn run(self) -> Self::Ret {

@@ -15,6 +15,8 @@ mod sys {
         pub(super) fn f64_symbol() -> f64;
         pub(super) fn assert(condition: bool);
         pub(super) fn assume(condition: bool);
+        pub fn in_replay_mode() -> u32;
+        pub fn print_char(byte: u32);
     }
 
     #[link(wasm_import_module = "summaries")]
@@ -59,6 +61,16 @@ pub fn assert(b: bool) {
 
 pub fn assume(b: bool) {
     unsafe { sys::assume(b) }
+}
+
+pub(crate) fn in_replay_mode() -> bool {
+    unsafe { sys::in_replay_mode() == 1 }
+}
+
+pub fn write_to_stdout(s: &[u8]) {
+    s.iter().copied().for_each(|b| unsafe {
+        sys::print_char(b as u32);
+    });
 }
 
 pub fn stop_exploration() -> ! {
