@@ -103,6 +103,8 @@
 <a id="L79"></a><span > </span>
 <a id="L80"></a><span > </span>
 <a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -188,6 +190,8 @@
 <a href="#L79">79</a>
 <a href="#L80">80</a>
 <a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -206,6 +210,8 @@ module type S = sig
   type 'a t
 
   val return : 'a -&gt; 'a t
+
+  val stop : 'a t
 
   val bind : 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t
 
