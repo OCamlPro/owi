@@ -122,7 +122,8 @@ let run_file ~unsafe ~optimize filename model =
         , Concrete_extern_func.Extern_func
             (Func (UArg Res, R1 I32), in_replay_mode) )
       ; ( "print_char"
-        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+        , Concrete_extern_func.Extern_func
+            (Func (Arg (I32, Res), R0), print_char) )
       ]
     in
     { Link.functions }

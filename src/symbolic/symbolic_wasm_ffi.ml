@@ -91,7 +91,8 @@ let symbolic_extern_module =
       , Symbolic.Extern_func.Extern_func
           (Func (UArg Res, R1 I32), in_replay_mode) )
     ; ( "print_char"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
+      )
     ]
   in
   { Link.functions }
