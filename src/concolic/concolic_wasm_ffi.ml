@@ -130,6 +130,9 @@ module M :
 
   let in_replay_mode () =
     Concolic_choice.return (0l, Smtml.Expr.value (Smtml.Value.Int 1))
+
+  let print_char ((c, _s) : Value.int32) =
+    Concolic_choice.return @@ Fmt.pr "%c" (char_of_int (Int32.to_int c))
 end
 
 type extern_func = Concolic.Extern_func.extern_func
@@ -162,6 +165,8 @@ let symbolic_extern_module =
     ; ( "in_replay_mode"
       , Concolic.Extern_func.Extern_func
           (Func (UArg Res, R1 I32), in_replay_mode) )
+    ; ( "print_char"
+      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
     ]
   in
   { Link.functions }
