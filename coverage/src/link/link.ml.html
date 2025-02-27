@@ -1344,15 +1344,15 @@ let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; binary func_type)
   <span data-count="2256">l</span>et functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) -&gt;
-        <span data-count="10167">l</span>et typ = func_typ func in
-        <span data-count="10167">l</span>et id, collection = Func_id.add func typ collection in
-        <span data-count="10167">(</span>(name, Func_intf.Extern id) :: functions, collection) )
+        <span data-count="11271">l</span>et typ = func_typ func in
+        <span data-count="11271">l</span>et id, collection = Func_id.add func typ collection in
+        <span data-count="11271">(</span>(name, Func_intf.Extern id) :: functions, collection) )
       ([], ls.collection) module_.functions
   in
   <span data-count="2256">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="2256">q</span> functions) in
   <span data-count="2256">l</span>et defined_names =
     StringMap.fold
-      (fun name _ set -&gt; <span data-count="10167">S</span>tringSet.add name set)
+      (fun name _ set -&gt; <span data-count="11271">S</span>tringSet.add name set)
       functions StringSet.empty
   in
   <span data-count="2256">l</span>et exports =

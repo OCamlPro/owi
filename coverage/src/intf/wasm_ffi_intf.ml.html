@@ -75,6 +75,10 @@
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -132,6 +136,10 @@
 <a href="#L51">51</a>
 <a href="#L52">52</a>
 <a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -177,6 +185,10 @@ module type S0 = sig
   val free : memory -&gt; Value.int32 -&gt; Value.int32 t
 
   val exit : Value.int32 -&gt; unit t
+
+  val in_replay_mode : unit -&gt; Value.int32 t
+
+  val print_char : Value.int32 -&gt; unit t
 end
 
 module type S = sig

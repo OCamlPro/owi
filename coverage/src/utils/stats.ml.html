@@ -327,8 +327,8 @@ let init_logger_to_file f =
 (* Be careful that f will be run in the critical section
    so should be kept small *)
 let on_logger f =
-  <span data-count="135073">m</span>atch !global_stats_logger with
-  | <span data-count="134840">N</span>one -&gt; ()
+  <span data-count="135800">m</span>atch !global_stats_logger with
+  | <span data-count="135565">N</span>one -&gt; ()
   | <span data-count="228">S</span>ome logger -&gt; begin
     Mutex.protect logger.mutex (fun () -&gt; <span data-count="228">f</span> logger.channel)
   end
@@ -357,12 +357,12 @@ type scope =
   | Process
   | Thread
 
-let event ?(scope = <span data-count="43594">T</span>hread) ?(arg_writter = <span data-count="43594">N</span>one) name cat =
-  <span data-count="43594">l</span>et pid = Unix.getpid () in
-  <span data-count="43595">l</span>et tid = (Domain.sel<span data-count="43591">f</span> () :&gt; int) in
-  let ts = Int.of_float (Unix.gettimeofda<span data-count="43587">y</span> () *. 1e6) in
-  <span data-count="43590">l</span>et scope =
-    match scope with <span data-count="0">G</span>lobal -&gt; "g" | <span data-count="0">P</span>rocess -&gt; "p" | <span data-count="43591">T</span>hread -&gt; "t"
+let event ?(scope = <span data-count="43748">T</span>hread) ?(arg_writter = <span data-count="43745">N</span>one) name cat =
+  <span data-count="43748">l</span>et pid = Unix.getpid () in
+  <span data-count="43747">l</span>et tid = (Domain.sel<span data-count="43741">f</span> () :&gt; int) in
+  let ts = Int.of_float (Unix.gettimeofda<span data-count="43736">y</span> () *. 1e6) in
+  <span data-count="43738">l</span>et scope =
+    match scope with <span data-count="0">G</span>lobal -&gt; "g" | <span data-count="0">P</span>rocess -&gt; "p" | <span data-count="43741">T</span>hread -&gt; "t"
   in
   on_logger (fun ch -&gt;
     <span data-count="60">b</span>egin
@@ -386,11 +386,11 @@ let event ?(scope = <span data-count="43594">T</span>hread) ?(arg_writter = <spa
       Out_channel.output_string ch "},"
     end )
 
-let start_span ?(arg_writter = <span data-count="45751">N</span>one) name cat =
-  <span data-count="45751">l</span>et pid = Unix.getpid () in
-  <span data-count="45751">l</span>et tid = (Domain.sel<span data-count="45751">f</span> () :&gt; int) in
-  let ts = Int.of_float (Unix.gettimeofda<span data-count="45750">y</span> () *. 1e6) in
-  <span data-count="45750">o</span>n_logger (fun ch -&gt;
+let start_span ?(arg_writter = <span data-count="46044">N</span>one) name cat =
+  <span data-count="46044">l</span>et pid = Unix.getpid () in
+  <span data-count="46044">l</span>et tid = (Domain.sel<span data-count="46043">f</span> () :&gt; int) in
+  let ts = Int.of_float (Unix.gettimeofda<span data-count="46041">y</span> () *. 1e6) in
+  <span data-count="46042">o</span>n_logger (fun ch -&gt;
     <span data-count="84">b</span>egin
       Out_channel.output_string ch "{";
       <span data-count="84">e</span>mit_key_val_s ch "name" name;
@@ -412,10 +412,10 @@ let start_span ?(arg_writter = <span data-count="45751">N</span>one) name cat =
     end )
 
 let close_span () =
-  <span data-count="45732">l</span>et pid = Unix.getpid () in
-  <span data-count="45737">l</span>et tid = (Domain.sel<span data-count="45730">f</span> () :&gt; int) in
-  let ts = Int.of_float (Unix.gettimeofda<span data-count="45730">y</span> () *. 1e6) in
-  <span data-count="45719">o</span>n_logger (fun ch -&gt;
+  <span data-count="46013">l</span>et pid = Unix.getpid () in
+  <span data-count="46025">l</span>et tid = (Domain.sel<span data-count="46007">f</span> () :&gt; int) in
+  let ts = Int.of_float (Unix.gettimeofda<span data-count="46019">y</span> () *. 1e6) in
+  <span data-count="46002">o</span>n_logger (fun ch -&gt;
     <span data-count="84">b</span>egin
       Out_channel.output_string ch "{";
       <span data-count="84">e</span>mit_key_val_s ch "ph" "E";
