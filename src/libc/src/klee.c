@@ -59,10 +59,11 @@ uintptr_t klee_choose(uintptr_t n) {
   return 0;
 }
 
+void klee_assert(int condition) { owi_assert(condition); }
 unsigned klee_is_symbolic(uintptr_t n) { assert(0); }
 unsigned klee_is_replay() { assert(0); }
 
-void klee_assume(uintptr_t condition) { owi_assert(condition); }
+void klee_assume(uintptr_t condition) { owi_assume(condition); }
 void klee_warning(const char *message) {}
 void klee_warning_once(const char *message) {}
 
