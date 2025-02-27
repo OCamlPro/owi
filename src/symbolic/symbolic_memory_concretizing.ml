@@ -30,7 +30,7 @@ module Backend = struct
 
   let address_i32 a = a
 
-  let load_byte { data; _ } a =
+  let load_byte a { data; _ } =
     match Map.find_opt a data with
     | None -> Smtml.Expr.value (Num (I8 0))
     | Some v -> v
@@ -73,10 +73,10 @@ module Backend = struct
       if i = size then acc
       else
         let addr' = Int32.(add addr (of_int i)) in
-        let byte = load_byte m addr' in
+        let byte = load_byte addr' m in
         loop addr size (i + 1) (concat i ~msb:byte ~lsb:acc)
     in
-    let v0 = load_byte m a in
+    let v0 = load_byte a m in
     loop a n 1 v0
 
   let extract v pos =
