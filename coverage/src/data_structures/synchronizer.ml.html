@@ -182,22 +182,22 @@ let init getter writter =
   }
 
 let get synchro pledge =
-  <span data-count="45476">l</span>et rec inner_loop synchro pledge =
-    <span data-count="46655">m</span>atch synchro.getter () with
-    | <span data-count="2248">N</span>one when synchro.pledges = <span data-count="1062">0</span> || synchro.close<span data-count="0">d</span> -&gt;
-      <span data-count="1062">C</span>ondition.broadcast synchro.cond;
-      <span data-count="1062">N</span>one
-    | <span data-count="1186">N</span>one -&gt;
+  <span data-count="45484">l</span>et rec inner_loop synchro pledge =
+    <span data-count="46626">m</span>atch synchro.getter () with
+    | <span data-count="2213">N</span>one when synchro.pledges = <span data-count="1057">0</span> || synchro.close<span data-count="0">d</span> -&gt;
+      <span data-count="1057">C</span>ondition.broadcast synchro.cond;
+      <span data-count="1057">N</span>one
+    | <span data-count="1156">N</span>one -&gt;
       Condition.wait synchro.cond synchro.mutex;
-      <span data-count="1178">i</span>nner_loop synchro pledge
-    | <span data-count="44407">S</span>ome _ as v -&gt;
-      if pledge then <span data-count="44207">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
-      <span data-count="44407">v</span>
+      <span data-count="1143">i</span>nner_loop synchro pledge
+    | <span data-count="44413">S</span>ome _ as v -&gt;
+      if pledge then <span data-count="44213">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
+      <span data-count="44413">v</span>
   in
-  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="45477">i</span>nner_loop synchro pledge)
+  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="45483">i</span>nner_loop synchro pledge)
 
 let write v { writter; cond; mutex; _ } =
-  <span data-count="44437">M</span>utex.protect mutex (fun () -&gt; <span data-count="44443">w</span>ritter v cond)
+  <span data-count="44444">M</span>utex.protect mutex (fun () -&gt; <span data-count="44451">w</span>ritter v cond)
 
 let make_pledge synchro =
   <span data-count="749">M</span>utex.lock synchro.mutex;
@@ -205,10 +205,10 @@ let make_pledge synchro =
   Mutex.unlock synchro.mutex
 
 let end_pledge synchro =
-  <span data-count="44889">M</span>utex.lock synchro.mutex;
-  <span data-count="44889">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
-  if Int.equal synchro.pledges 0 then <span data-count="1464">C</span>ondition.broadcas<span data-count="1464">t</span> synchro.cond;
-  <span data-count="44889">M</span>utex.unlock synchro.mutex
+  <span data-count="44891">M</span>utex.lock synchro.mutex;
+  <span data-count="44891">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
+  if Int.equal synchro.pledges 0 then <span data-count="1419">C</span>ondition.broadcas<span data-count="1419">t</span> synchro.cond;
+  <span data-count="44891">M</span>utex.unlock synchro.mutex
 
 let fail q =
   <span data-count="0">M</span>utex.lock q.mutex;
@@ -217,12 +217,12 @@ let fail q =
   <span data-count="0">M</span>utex.unlock q.mutex
 
 let rec work_while f q =
-  <span data-count="44925">m</span>atch get q true with
-  | <span data-count="711">N</span>one -&gt; ()
-  | <span data-count="44207">S</span>ome v -&gt;
-    let () = f v (fun v -&gt; <span data-count="43858">w</span>rite v q) in
-    <span data-count="44178">e</span>nd_pledge q;
-    <span data-count="44178">w</span>ork_while f q
+  <span data-count="44932">m</span>atch get q true with
+  | <span data-count="706">N</span>one -&gt; ()
+  | <span data-count="44213">S</span>ome v -&gt;
+    let () = f v (fun v -&gt; <span data-count="43864">w</span>rite v q) in
+    <span data-count="44184">e</span>nd_pledge q;
+    <span data-count="44185">w</span>ork_while f q
 </code></pre>
       </div>
     </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_wasm_ffi.ml &mdash; Coverage report</title>
-    <meta name="description" content="86.96% coverage in src/symbolic/symbolic_wasm_ffi.ml">
+    <meta name="description" content="100.00% coverage in src/symbolic/symbolic_wasm_ffi.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,9 @@
           <span class="dirname">src/symbolic/</span>symbolic_wasm_ffi.ml
         </a>
       </h1>
-      <h2>86.96%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:48.67%"></span>
-      <span class="unvisited" style="bottom:49.56%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -78,9 +76,9 @@
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span > </span>
-<a id="L55"></a><span class="unvisited"> </span>
+<a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="unvisited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
@@ -127,16 +125,6 @@
 <a id="L101"></a><span > </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
-<a id="L104"></a><span > </span>
-<a id="L105"></a><span > </span>
-<a id="L106"></a><span > </span>
-<a id="L107"></a><span > </span>
-<a id="L108"></a><span > </span>
-<a id="L109"></a><span > </span>
-<a id="L110"></a><span > </span>
-<a id="L111"></a><span > </span>
-<a id="L112"></a><span > </span>
-<a id="L113"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -244,16 +232,6 @@
 <a href="#L101">101</a>
 <a href="#L102">102</a>
 <a href="#L103">103</a>
-<a href="#L104">104</a>
-<a href="#L105">105</a>
-<a href="#L106">106</a>
-<a href="#L107">107</a>
-<a href="#L108">108</a>
-<a href="#L109">109</a>
-<a href="#L110">110</a>
-<a href="#L111">111</a>
-<a href="#L112">112</a>
-<a href="#L113">113</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -276,10 +254,10 @@ module M :
   module Value = Symbolic_value
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="585">C</span>hoice.add_pc @@ Value.I32.to_boo<span data-count="585">l</span> i
+    <span data-count="586">C</span>hoice.add_pc @@ Value.I32.to_boo<span data-count="586">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96930">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96921">l</span> i
+    <span data-count="96954">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96934">l</span> i
 
   let symbol_bool () =
     <span data-count="2">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -302,16 +280,12 @@ module M :
   let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9947">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9948">c</span> m ~ptr:base ~size
+    <span data-count="9947">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9945">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2539">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2539">e</span> m ptr
+    <span data-count="2537">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2537">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
-
-  let in_replay_mode () = <span data-count="0">C</span>hoice.return @@ Smtml.Expr.valu<span data-count="0">e</span> (Smtml.Value.Int 0)
-
-  let print_char (_c : Value.int32) = <span data-count="0">a</span>ssert false
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -344,12 +318,6 @@ let symbolic_extern_module =
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
-    ; ( "in_replay_mode"
-      , Symbolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), in_replay_mode) )
-    ; ( "print_char"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
-      )
     ]
   in
   { Link.functions }
