@@ -1,6 +1,6 @@
 pub mod alloc;
 mod symbolic;
-pub use symbolic::{Symbolic, SymbolicInBounds};
+pub use symbolic::{LazyArray, Symbolic, SymbolicInBounds};
 
 pub mod harness;
 

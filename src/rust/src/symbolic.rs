@@ -1,4 +1,10 @@
-use std::{fmt::Debug, ops::RangeBounds};
+use std::{
+    cell::{Cell, UnsafeCell},
+    fmt::Debug,
+    mem::MaybeUninit,
+    ops::RangeBounds,
+    slice::SliceIndex,
+};
 
 use crate::{assume, stop_exploration, sys};
 
@@ -118,3 +124,41 @@ pub trait SymbolicInBounds: Symbolic + PartialOrd + Debug {
 }
 
 impl<T: Symbolic + PartialOrd + Debug> SymbolicInBounds for T {}
+
+pub struct LazyArray<const N: usize, T> {
+    initialized: [Cell<bool>; N],
+    data: [UnsafeCell<MaybeUninit<T>>; N],
+}
+
+impl<const N: usize, T: Symbolic + Debug> LazyArray<N, T> {
+    pub fn new() -> Self {
+        Self {
+            initialized: [const { Cell::new(false) }; N],
+            data: [const { UnsafeCell::new(MaybeUninit::uninit()) }; N],
+        }
+    }
+
+    pub fn get_sub_slice<RIdx>(&self, ridx: RIdx) -> Option<&[T]>
+    where
+        RIdx: SliceIndex<[T], Output = [T]>,
+        RIdx: SliceIndex<[UnsafeCell<MaybeUninit<T>>], Output = [UnsafeCell<MaybeUninit<T>>]>,
+        RIdx: SliceIndex<[Cell<bool>], Output = [Cell<bool>]>,
+        RIdx: Clone,
+    {
+        for (is_init, data) in self
+            .initialized
+            .get(ridx.clone())?
+            .iter()
+            .zip(self.data.get(ridx.clone())?)
+        {
+            if !is_init.get() {
+                let v = T::symbol();
+                unsafe { (*data.get()).write(v) };
+                is_init.set(true);
+            }
+        }
+        let res = self.data.get(ridx)?;
+        let res = unsafe { &*(res as *const [_] as *const [T]) };
+        Some(res)
+    }
+}
