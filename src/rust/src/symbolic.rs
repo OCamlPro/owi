@@ -2,7 +2,7 @@ use std::{fmt::Debug, ops::RangeBounds};
 
 use crate::{assume, stop_exploration, sys};
 
-struct DebugWrap<'a, T>(&'a T);
+pub struct DebugWrap<'a, T>(&'a T);
 
 impl<'a, T: Debug> Debug for DebugWrap<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
