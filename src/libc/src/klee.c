@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 unsigned char *make_in(size_t size) {
   unsigned char *t = malloc(size);
@@ -27,11 +28,11 @@ unsigned char *make_in(size_t size) {
 }
 
 void klee_define_fixed_object(void *addr, size_t nbytes) {
-  addr = make_in(nbytes);
+  memcpy(addr, make_in(nbytes), nbytes);
 }
 
 void klee_make_symbolic(void *addr, size_t nbytes, const char *name) {
-  addr = make_in(nbytes);
+  memcpy(addr, make_in(nbytes), nbytes);
 }
 
 int klee_range(int begin, int end, const char *name) {
