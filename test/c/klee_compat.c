@@ -11,6 +11,7 @@ int main(void) {
     klee_assert(n + 1 > 0);
 
     int n_range = klee_range(-10, 10, "range");
-    klee_assert(n_range > 20);
+    klee_assert(n_range >= -10);
+    klee_assert(n_range < 10);
     return 0;
 }
