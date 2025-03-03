@@ -22,17 +22,17 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (block_type : text block_type) : binary block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
-      let* (Raw v) = Assigned.find_type modul id in
-      match List.nth_opt modul.typ.values v with
-      | None -> Error (`Unknown_type id)
-      | Some v -> begin
-          match Indexed.get v with
-          | Def_func_t t' ->
-            let idx = Indexed.get_index v in
-            Ok (Bt_raw (Some (Raw idx), t'))
-          | _ -> assert false
-        end
+    let* (Raw v) = Assigned.find_type modul id in
+    match List.nth_opt modul.typ.values v with
+    | None -> Error (`Unknown_type id)
+    | Some v -> begin
+      match Indexed.get v with
+      | Def_func_t t' ->
+        let idx = Indexed.get_index v in
+        Ok (Bt_raw (Some (Raw idx), t'))
+      | _ -> assert false
     end
+  end
   | Bt_raw (_, func_type) ->
     let+ t = Binary_types.convert_func_type None func_type in
     let idx =
@@ -49,14 +49,14 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     let* id =
       match id with
       | Text id -> begin
-          match
-            List.find_index
-              (function Some id' -> String.equal id id' | None -> false)
-              block_ids
-          with
-          | None -> Error (`Unknown_label (Text id))
-          | Some id -> Ok id
-        end
+        match
+          List.find_index
+            (function Some id' -> String.equal id id' | None -> false)
+            block_ids
+        with
+        | None -> Error (`Unknown_label (Text id))
+        | Some id -> Ok id
+      end
       | Raw id -> Ok id
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
@@ -76,20 +76,20 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   let* locals, _after_last_assigned_local =
     list_fold_left
       (fun (locals, next_free_int) ((name, _type) : binary param) ->
-          match name with
-          | None -> Ok (locals, next_free_int + 1)
-          | Some name ->
-            if String_map.mem name locals then Error (`Duplicate_local name)
-            else Ok (String_map.add name next_free_int locals, next_free_int + 1) )
+        match name with
+        | None -> Ok (locals, next_free_int + 1)
+        | Some name ->
+          if String_map.mem name locals then Error (`Duplicate_local name)
+          else Ok (String_map.add name next_free_int locals, next_free_int + 1) )
       (String_map.empty, 0) locals
   in
 
   let find_local = function
     | Raw _i as id -> id
     | Text name -> (
-        match String_map.find_opt name locals with
-        | None -> assert false
-        | Some id -> Raw id )
+      match String_map.find_opt name locals with
+      | None -> assert false
+      | Some id -> Raw id )
   in
 
   let rec body (loop_count, block_ids) : text instr -> binary instr Result.t =
@@ -190,13 +190,13 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       let+ id = Assigned.find_elem modul id in
       Elem_drop id
     | Select typ -> begin
-        match typ with
-        | None -> Ok (Select None)
-        | Some [ t ] ->
-          let+ t = Binary_types.convert_val_type None t in
-          Select (Some [ t ])
-        | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
-      end
+      match typ with
+      | None -> Ok (Select None)
+      | Some [ t ] ->
+        let+ t = Binary_types.convert_val_type None t in
+        Select (Some [ t ])
+      | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
+    end
     | Array_new_default id ->
       let+ id = Assigned.find_type modul id in
       Array_new_default id
@@ -289,16 +289,16 @@ let rewrite_export named (exports : Grouped.opt_export list) :
   Binary.export list Result.t =
   list_map
     (fun { Grouped.name; id } ->
-        let+ (Raw id) : binary indice =
-          match id with
-          | Raw _i as indice -> Ok indice
-          | Text name -> (
-              match String_map.find_opt name named.Named.named with
-              | None -> Error (`Unknown_export id)
-              | Some i -> Ok (Raw i) )
-        in
+      let+ (Raw id) : binary indice =
+        match id with
+        | Raw _i as indice -> Ok indice
+        | Text name -> (
+          match String_map.find_opt name named.Named.named with
+          | None -> Error (`Unknown_export id)
+          | Some i -> Ok (Raw i) )
+      in
 
-        { Binary.name; id } )
+      { Binary.name; id } )
     exports
 
 let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
@@ -336,10 +336,10 @@ let rewrite_named f named =
   let+ values =
     list_map
       (fun ind ->
-          let index = Indexed.get_index ind in
-          let value = Indexed.get ind in
-          let+ value = f value in
-          Indexed.return index value )
+        let index = Indexed.get_index ind in
+        let value = Indexed.get ind in
+        let+ value = f value in
+        Indexed.return index value )
       named.Named.values
   in
   { named with Named.values }
@@ -382,15 +382,15 @@ let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)
   | Float32 f32 -> Ok (Float32 f32)
   | Float64 f64 -> Ok (Float64 f64)
   | Var ind -> (
-      match
-        ( find_binder binder_list ind
-        , find_param func_param_list ind
-        , Assigned.find_global modul ind )
-      with
-      | Ok ind, _, _ -> Ok (BinderVar ind)
-      | _, Ok ind, _ -> Ok (ParamVar ind)
-      | _, _, Ok ind -> Ok (GlobalVar ind)
-      | _, _, _ -> Error (`Spec_unknown_variable ind) )
+    match
+      ( find_binder binder_list ind
+      , find_param func_param_list ind
+      , Assigned.find_global modul ind )
+    with
+    | Ok ind, _, _ -> Ok (BinderVar ind)
+    | _, Ok ind, _ -> Ok (ParamVar ind)
+    | _, _, Ok ind -> Ok (GlobalVar ind)
+    | _, _, _ -> Error (`Spec_unknown_variable ind) )
   | ParamVar ind ->
     let+ ind = find_param func_param_list ind in
     ParamVar ind
@@ -436,7 +436,7 @@ let rec rewrite_prop ~(binder_list : string option list) ~(modul : Assigned.t)
 
 let rewrite_contract (modul : Assigned.t) :
   text Contract.t -> binary Contract.t Result.t =
-  fun { Contract.funcid; preconditions; postconditions } ->
+ fun { Contract.funcid; preconditions; postconditions } ->
   let* funcid = Assigned.find_func modul funcid in
   let* func =
     let (Raw i) = funcid in
@@ -452,10 +452,10 @@ let rewrite_contract (modul : Assigned.t) :
   let* func_param_list =
     match func_bt with
     | Bt_ind ind -> (
-        let* (Raw i) = Assigned.find_type modul ind in
-        match Indexed.get_at i modul.typ.values with
-        | Some (Def_func_t (func_pt, _)) -> Ok (List.map fst func_pt)
-        | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
+      let* (Raw i) = Assigned.find_type modul ind in
+      match Indexed.get_at i modul.typ.values with
+      | Some (Def_func_t (func_pt, _)) -> Ok (List.map fst func_pt)
+      | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
     | Bt_raw (_, (func_pt, _)) -> Ok (List.map fst func_pt)
   in
   let* preconditions =
