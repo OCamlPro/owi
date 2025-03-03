@@ -6,8 +6,6 @@ module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
 module Memory = Symbolic.Memory
 
-let (let*) = Choice.(let*)
-
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
@@ -45,6 +43,7 @@ module M :
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
+    let open Choice in
     let* x = symbol_i32 () in
     let* () = assume (Value.I32.le lo x) in
     let* () = assume (Value.I32.gt hi x) in
