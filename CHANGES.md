@@ -26,6 +26,7 @@
 - add `owi c++` subcommand
 - add `owi rust` subcommand
 - add event logger
+- add `owi_range` primitive
 
 ## 0.2 - 2024-04-24
 

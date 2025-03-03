@@ -118,6 +118,9 @@ let run_file ~unsafe ~optimize filename model =
       ; ( "bool_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
         )
+      ; ( "range_symbol"
+        , Concrete_extern_func.Extern_func
+            (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
       ; ( "assume"
         , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
         )

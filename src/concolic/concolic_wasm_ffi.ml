@@ -4,8 +4,6 @@
 
 module Expr = Smtml.Expr
 
-let (let*) = Concolic_choice.(let*)
-
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
@@ -95,11 +93,13 @@ module M :
     let c = Value.I32.to_bool i in
     Concolic_choice.assertion c
 
-  let symbol_range (lo : Value.int32) (hi : Value.int32) : Value.int32 Concolic_choice.t =
+  let symbol_range (lo : Value.int32) (hi : Value.int32) :
+    Value.int32 Concolic_choice.t =
+    let open Concolic_choice in
     let* x = symbol_i32 () in
-    let* () = assume (Value.Bool.int32 (Value.I32.le lo x)) in
-    let* () = assume (Value.Bool.int32 (Value.I32.gt hi x)) in
-    Concolic_choice.return x
+    let* () = assume (Value.I32.le lo x) in
+    let+ () = assume (Value.I32.gt hi x) in
+    x
 
   open Expr
 
@@ -166,6 +166,9 @@ let symbolic_extern_module =
     ; ( "bool_symbol"
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
+    ; ( "range_symbol"
+      , Concolic.Extern_func.Extern_func
+          (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
     ; ( "assume"
       , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
     ; ( "assert"
