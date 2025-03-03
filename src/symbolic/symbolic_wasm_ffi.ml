@@ -54,7 +54,12 @@ module M :
 
   let in_replay_mode () = Choice.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
 
-  let print_char (_c : Value.int32) = assert false
+  let print_char (c : Value.int32) =
+    match Smtml.Expr.view c with
+    | Val (Num (I32 c)) ->
+      Fmt.pr "%c@?" (char_of_int (Int32.to_int c));
+      Choice.return ()
+    | _ -> assert false
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
