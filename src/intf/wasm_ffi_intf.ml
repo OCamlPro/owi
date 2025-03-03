@@ -31,6 +31,8 @@ module type S0 = sig
 
   val symbol_bool : unit -> Value.int32 t
 
+  val symbol_range : Value.int32 -> Value.int32 -> Value.int32 t
+
   val assume : Value.int32 -> unit t
 
   val assert' : Value.int32 -> unit t

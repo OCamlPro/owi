@@ -83,6 +83,13 @@ let run_file ~unsafe ~optimize filename model =
         Fmt.epr "Got value %a but expected a f64 value." V.pp v;
         assert false
 
+    let symbol_range _ _ =
+      match model.(next ()) with
+      | V.I32 n -> n
+      | v ->
+        Fmt.epr "Got value %a but expected a i32 value." V.pp v;
+        assert false
+
     let print_char c = Fmt.pr "%c" (char_of_int (Int32.to_int c))
 
     let in_replay_mode () = 1l
