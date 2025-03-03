@@ -23,6 +23,8 @@ __attribute__((import_module("symbolic"), import_name("f32_symbol"))) float
 owi_f32(void);
 __attribute__((import_module("symbolic"), import_name("f64_symbol"))) double
 owi_f64(void);
+__attribute__((import_module("symbolic"), import_name("range_symbol"))) int
+owi_range(int lo, int hi);
 __attribute__((import_module("symbolic"), import_name("print_char"))) void
 owi_print_char(int);
 __attribute__((import_module("symbolic"), import_name("bool_symbol")))
