@@ -962,7 +962,6 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* mem = Env.get_memory env mem_0 in
       let* c = Choice.select_i32 c in
       let c =
         let c = Int32.to_int c in
@@ -970,26 +969,27 @@ module Make (P : Interpret_intf.P) :
         Char.chr c
       in
       (* TODO: move out of bonds check here ! *)
+      let* mem = Env.get_memory env mem_0 in
       let> out_of_bounds = Memory.fill mem ~pos ~len c in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_copy ->
-      let* mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       (* TODO: move out of bonds check here ! *)
+      let* mem = Env.get_memory env mem_0 in
       let> out_of_bounds = Memory.blit mem ~src ~dst ~len in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
     | Memory_init (Raw i) ->
-      let* mem = Env.get_memory env mem_0 in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* data = Env.get_data env i in
       let data = Data.value data in
       (* TODO: move out of bonds check here ! *)
+      let* mem = Env.get_memory env mem_0 in
       let> out_of_bounds = Memory.blit_string mem data ~src ~dst ~len in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else st stack
@@ -1173,6 +1173,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
+        let* mem = Env.get_memory env mem_0 in
         let* res =
           (match sx with S -> Memory.load_16_s | U -> Memory.load_16_u)
             mem addr
@@ -1195,6 +1196,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else
+        let* mem = Env.get_memory env mem_0 in
         let* res =
           (match sx with S -> Memory.load_8_s | U -> Memory.load_8_u) mem addr
         in
@@ -1225,6 +1227,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
+        let* mem = Env.get_memory env mem_0 in
         let* () = Memory.store_8 mem ~addr n in
         (* Thread memory ? *)
         st stack
@@ -1245,12 +1248,14 @@ module Make (P : Interpret_intf.P) :
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 4l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
+            let* mem = Env.get_memory env mem_0 in
             let* res = Memory.load_32 mem addr in
             st @@ Stack.push_i32 stack res
         | S64 ->
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 8l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
+            let* mem = Env.get_memory env mem_0 in
             let* res = Memory.load_64 mem addr in
             st @@ Stack.push_i64 stack res
       end
@@ -1270,6 +1275,7 @@ module Make (P : Interpret_intf.P) :
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 4l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
+            let* mem = Env.get_memory env mem_0 in
             let* res = Memory.load_32 mem addr in
             let res = F32.of_bits res in
             st @@ Stack.push_f32 stack res
@@ -1277,6 +1283,7 @@ module Make (P : Interpret_intf.P) :
           let> out_of_bounds = I32.(lt_u memory_length (addr + const 8l)) in
           if out_of_bounds then Choice.trap Out_of_bounds_memory_access
           else
+            let* mem = Env.get_memory env mem_0 in
             let* res = Memory.load_64 mem addr in
             let res = F64.of_bits res in
             st @@ Stack.push_f64 stack res
@@ -1296,6 +1303,7 @@ module Make (P : Interpret_intf.P) :
         in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
+          let* mem = Env.get_memory env mem_0 in
           let* () = Memory.store_32 mem ~addr n in
           st stack
         end
@@ -1309,6 +1317,7 @@ module Make (P : Interpret_intf.P) :
         in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
+          let* mem = Env.get_memory env mem_0 in
           let* () = Memory.store_64 mem ~addr n in
           st stack
         end )
@@ -1327,6 +1336,7 @@ module Make (P : Interpret_intf.P) :
         in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
+          let* mem = Env.get_memory env mem_0 in
           let* () = Memory.store_32 mem ~addr (F32.to_bits n) in
           st stack
         end
@@ -1340,6 +1350,7 @@ module Make (P : Interpret_intf.P) :
         in
         if out_of_bounds then Choice.trap Out_of_bounds_memory_access
         else begin
+          let* mem = Env.get_memory env mem_0 in
           let* () = Memory.store_64 mem ~addr (F64.to_bits n) in
           st stack
         end )
@@ -1356,6 +1367,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
+        let* mem = Env.get_memory env mem_0 in
         let* res = Memory.load_32 mem addr in
         let res = I64.of_int32 res in
         let res =
@@ -1389,6 +1401,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
+        let* mem = Env.get_memory env mem_0 in
         let* () = Memory.store_16 mem ~addr n in
         st stack
       end
@@ -1406,6 +1419,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap Out_of_bounds_memory_access
       else begin
+        let* mem = Env.get_memory env mem_0 in
         let* () = Memory.store_32 mem ~addr n in
         st stack
       end
