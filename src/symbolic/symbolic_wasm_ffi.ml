@@ -46,8 +46,8 @@ module M :
     let open Choice in
     let* x = symbol_i32 () in
     let* () = assume (Value.I32.le lo x) in
-    let* () = assume (Value.I32.gt hi x) in
-    Choice.return x
+    let+ () = assume (Value.I32.gt hi x) in
+    x
 
   let abort () : unit Choice.t = Choice.stop
 
