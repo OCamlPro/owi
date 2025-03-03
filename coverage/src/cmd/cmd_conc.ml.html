@@ -1115,7 +1115,7 @@ module Unexplored : sig
 end = struct
   type t = int
 
-  let none t = <span data-count="9785">t</span> = 0
+  let none t = <span data-count="9811">t</span> = 0
 
   let zero = 0
 
@@ -1184,8 +1184,8 @@ let count_unexplored (tree : eval_tree) : Unexplored.t =
       (fun _ branch -&gt; <span data-count="225">U</span>nexplored.add branch.unexplored)
       branches Unexplored.zero
   | <span data-count="5809">A</span>ssume { cont; _ } | <span data-count="437">A</span>ssert { cont; _ } -&gt; cont.unexplored
-  | <span data-count="405">U</span>nreachable | <span data-count="281">B</span>eing_explored | <span data-count="298">E</span>xplored -&gt; Unexplored.zero
-  | <span data-count="152">N</span>ot_explored -&gt; Unexplored.one
+  | <span data-count="405">U</span>nreachable | <span data-count="283">B</span>eing_explored | <span data-count="298">E</span>xplored -&gt; Unexplored.zero
+  | <span data-count="150">N</span>ot_explored -&gt; Unexplored.one
 
 let update_unexplored tree = <span data-count="14726">t</span>ree.unexplored &lt;- count_unexplore<span data-count="14726">d</span> tree
 
@@ -1248,7 +1248,7 @@ let rec add_trace (pc : Concolic_choice.pc) (node : eval_tree) (trace : trace)
       assert false
     | <span data-count="2184">S</span>elect { cond; if_true; if_false }, Select (v, cond') -&gt;
       if check then assert <span data-count="4368">(</span>Smtml.Expr.equa<span data-count="2184">l</span> cond cond');
-      <span data-count="2184">l</span>et branch = if v then <span data-count="1020">i</span>f_true else <span data-count="1164">i</span>f_false in
+      <span data-count="2184">l</span>et branch = if v then <span data-count="1022">i</span>f_true else <span data-count="1162">i</span>f_false in
       add_trace pc branch
         { trace with remaining_pc = tail_of_trace }
         (node :: to_update)
@@ -1319,23 +1319,23 @@ let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
 let find_node_to_run tree =
   <span data-count="935">l</span>et ( let* ) = Option.bind in
   let rec loop tree to_update =
-    <span data-count="12239">m</span>atch tree.node with
+    <span data-count="12258">m</span>atch tree.node with
     | <span data-count="619">N</span>ot_explored -&gt;
       Log.debug2 "Try unexplored@.%a@." Concolic_choice.pp_pc tree.pc;
       <span data-count="619">S</span>ome (tree.pc, tree :: to_update)
-    | <span data-count="4852">S</span>elect { cond = _; if_true; if_false } -&gt;
+    | <span data-count="4865">S</span>elect { cond = _; if_true; if_false } -&gt;
       let* b =
         match
-          ( Unexplored.non<span data-count="4852">e</span> if_true.unexplored
-          , Unexplored.non<span data-count="4852">e</span> if_false.unexplored )
+          ( Unexplored.non<span data-count="4865">e</span> if_true.unexplored
+          , Unexplored.non<span data-count="4865">e</span> if_false.unexplored )
         with
-        | <span data-count="1081">t</span>rue, false -&gt; Some false (* Unexplored paths in `else` branch *)
-        | <span data-count="1866">f</span>alse, true -&gt; Some true (* Unexplored paths in `then` branch *)
+        | <span data-count="1091">t</span>rue, false -&gt; Some false (* Unexplored paths in `else` branch *)
+        | <span data-count="1870">f</span>alse, true -&gt; Some true (* Unexplored paths in `then` branch *)
         | <span data-count="1856">f</span>alse, false -&gt; Some (Random.boo<span data-count="1856">l</span> ()) (* Unexplored in both *)
-        | <span data-count="49">t</span>rue, true -&gt; None (* No unexplored remain *)
+        | <span data-count="48">t</span>rue, true -&gt; None (* No unexplored remain *)
       in
-      <span data-count="4803">L</span>og.debug1 "Select bool %b@." b;
-      <span data-count="4803">l</span>oop (if b then <span data-count="2730">i</span>f_true else <span data-count="2073">i</span>f_false) (tree :: to_update)
+      <span data-count="4817">L</span>og.debug1 "Select bool %b@." b;
+      <span data-count="4817">l</span>oop (if b then <span data-count="2735">i</span>f_true else <span data-count="2082">i</span>f_false) (tree :: to_update)
     | <span data-count="81">S</span>elect_i32 { value = _; branches } -&gt;
       (* TODO: better ! *)
       let branches = IMap.bindings branches in
@@ -1353,15 +1353,15 @@ let find_node_to_run tree =
           Log.debug1 "Select_i32 %li@." i;
           <span data-count="81">l</span>oop branch (tree :: to_update)
       end
-    | <span data-count="6341">A</span>ssume { cond = _; cont } -&gt; loop cont (tree :: to_update)
+    | <span data-count="6346">A</span>ssume { cond = _; cont } -&gt; loop cont (tree :: to_update)
     | <span data-count="20">A</span>ssert { cond; cont = _; status = Unknown } -&gt;
       let pc : Concolic_choice.pc = Select (false, cond) :: tree.pc in
       Log.debug2 "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
       <span data-count="20">S</span>ome (pc, tree :: to_update)
     | <span data-count="79">A</span>ssert { cond = _; cont; status = _ } -&gt; loop cont (tree :: to_update)
-    | <span data-count="159">U</span>nreachable -&gt;
+    | <span data-count="160">U</span>nreachable -&gt;
       Log.debug2 "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
-      <span data-count="159">N</span>one
+      <span data-count="160">N</span>one
     | <span data-count="0">B</span>eing_explored | <span data-count="88">E</span>xplored -&gt; None
   in
   loop tree []

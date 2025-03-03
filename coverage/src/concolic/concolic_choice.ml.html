@@ -419,7 +419,7 @@ let pp_assignments ~no_value fmt assignments =
   Fmt.pf fmt "(model@\n  %a)" (Fmt.vbo<span data-count="5">x</span> (Fmt.lis<span data-count="5">t</span> pp_v)) assignments
 
 let pc_elt_to_expr = function
-  | <span data-count="4223">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2220">c</span> else <span data-count="2003">S</span>mtml.Expr.Bool.no<span data-count="2003">t</span> c)
+  | <span data-count="4223">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2222">c</span> else <span data-count="2001">S</span>mtml.Expr.Bool.no<span data-count="2001">t</span> c)
   | <span data-count="70">S</span>elect_i32 (n, c) -&gt; Some Smtml.Expr.Bitv.I32.(c = <span data-count="70">v</span> n)
   | <span data-count="5259">A</span>ssume c -&gt; Some c
   | <span data-count="69">A</span>ssert _ -&gt; None
@@ -454,14 +454,14 @@ let return v = <span data-count="771001">M</span> (fun t -&gt; <span data-count=
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="2192056">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="2349340">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="1096686">M</span>
+  <span data-count="1175328">M</span>
     (fun init_s -&gt;
-      <span data-count="1096686">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="1096686">m</span>atch v_final with
-      | <span data-count="1095370">O</span>k v_final -&gt; run (<span data-count="1095370">f</span> v_final) tmp_st
+      <span data-count="1175328">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="1175328">m</span>atch v_final with
+      | <span data-count="1174012">O</span>k v_final -&gt; run (<span data-count="1174012">f</span> v_final) tmp_st
       | <span data-count="1316">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 
@@ -516,7 +516,7 @@ let assertion ((c, s) : Concolic_value.bool) =
 
 let trap t = <span data-count="2">M</span> (fun th -&gt; <span data-count="2">(</span>Error (Trap t), th))
 
-let with_thread f = <span data-count="91606">M</span> (fun st -&gt; <span data-count="91606">(</span>Ok (<span data-count="91606">f</span> st), st))
+let with_thread f = <span data-count="170248">M</span> (fun st -&gt; <span data-count="170248">(</span>Ok (<span data-count="170248">f</span> st), st))
 
 let with_new_symbol ty f =
   <span data-count="3133">M</span>

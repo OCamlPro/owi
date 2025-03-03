@@ -761,7 +761,7 @@ let realloc m base size = <span data-count="0">H</span>ashtbl.replace m.chunks b
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="84785">x</span>
+  let hash x = <span data-count="163427">x</span>
 end)
 
 type collection = t ITbl.t Env_id.Tbl.t
@@ -785,17 +785,17 @@ let convert (orig_mem : Concrete_memory.t) : t =
   <span data-count="510">c</span>reate s
 
 let get_env env_id memories =
-  <span data-count="84275">m</span>atch Env_id.Tbl.find_opt memories env_id with
-  | <span data-count="83765">S</span>ome env -&gt; env
+  <span data-count="162917">m</span>atch Env_id.Tbl.find_opt memories env_id with
+  | <span data-count="162407">S</span>ome env -&gt; env
   | <span data-count="510">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="510">E</span>nv_id.Tbl.add memories env_id t;
     <span data-count="510">t</span>
 
 let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-  <span data-count="84275">l</span>et env = get_env env_id collection in
-  <span data-count="84275">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="83765">S</span>ome t -&gt; t
+  <span data-count="162917">l</span>et env = get_env env_id collection in
+  <span data-count="162917">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="162407">S</span>ome t -&gt; t
   | <span data-count="510">N</span>one -&gt;
     let t = convert orig_memory in
     <span data-count="510">I</span>Tbl.add env g_id t;
