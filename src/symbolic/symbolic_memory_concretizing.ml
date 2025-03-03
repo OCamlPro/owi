@@ -154,8 +154,7 @@ module Backend = struct
   let realloc m ~ptr ~size =
     let open Symbolic_choice_without_memory in
     let+ base = address ptr in
-    let chunks = Map.remove base m.chunks in
-    let chunks = Map.add base size chunks in
+    let chunks = Map.add base size m.chunks in
     m.chunks <- chunks;
     Smtml.Expr.ptr base (Symbolic_value.const_i32 0l)
 end

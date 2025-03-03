@@ -199,8 +199,7 @@ let free m base =
   end
 
 let realloc m base size =
-  let chunks = Map.remove base m.chunks in
-  let chunks = Map.add base size chunks in
+  let chunks = Map.add base size m.chunks in
   m.chunks <- chunks
 
 module ITbl = Hashtbl.Make (struct
