@@ -18,8 +18,10 @@ module M :
 
   module Value = Symbolic_value
 
+  let add_pc_wrapper e = Choice.add_pc e
+
   let assume (i : Value.int32) : unit Choice.t =
-    Choice.add_pc @@ Value.I32.to_bool i
+    add_pc_wrapper @@ Value.I32.to_bool i
 
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
@@ -45,8 +47,8 @@ module M :
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
     let open Choice in
     let* x = symbol_i32 () in
-    let* () = assume (Value.I32.le lo x) in
-    let+ () = assume (Value.I32.gt hi x) in
+    let* () = add_pc_wrapper (Value.I32.le lo x) in
+    let+ () = add_pc_wrapper (Value.I32.gt hi x) in
     x
 
   let abort () : unit Choice.t = Choice.stop

@@ -36,10 +36,7 @@ void klee_make_symbolic(void *addr, size_t nbytes, const char *name) {
 }
 
 int klee_range(int begin, int end, const char *name) {
-  int n = owi_i32();
-  owi_assume(n >= begin);
-  owi_assume(n < end);
-  return n;
+  return owi_range(begin, end);
 }
 int klee_int(const char *name) { return owi_i32(); }
 
