@@ -37,7 +37,7 @@ let add_main_as_start (m : Binary.modul) =
     (* If there is none, we look for a function exported with the name `main` *)
     match
       List.find_opt
-        (function { Binary.name = "main"; _ } -> true | _ -> false)
+        (function { Binary.name = "main" | "_start"; _ } -> true | _ -> false)
         m.exports.func
     with
     | None ->

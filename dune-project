@@ -89,4 +89,4 @@
   (cohttp-lwt-unix :with-dev-setup)
   (lwt_ssl :with-dev-setup)
   )
- (sites (share c_files) (share rust_files)))
+ (sites (share c_files) (share rust_files) (share zig_files)))

@@ -28,6 +28,7 @@
   cmd_version
   cmd_wasm2wat
   cmd_wat2wasm
+  cmd_zig
   code_generator
   compile
   concolic
