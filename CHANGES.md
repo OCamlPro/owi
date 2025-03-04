@@ -27,6 +27,7 @@
 - add `owi rust` subcommand
 - add event logger
 - add `owi_range` primitive
+- add `owi zig` subcommand
 
 ## 0.2 - 2024-04-24
 

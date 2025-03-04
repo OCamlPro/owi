@@ -152,6 +152,7 @@ let cpp_info =
   Cmd.info "c++" ~version ~doc ~sdocs ~man
 
 let cpp_cmd =
+  (* TODO: refactor all of this, it can be shared between, c, cpp and for some of them with zig *)
   let+ arch =
     let doc = "data model" in
     Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
@@ -495,6 +496,39 @@ let wat2wasm_cmd =
   and+ source_file in
   Cmd_wat2wasm.cmd ~profiling ~debug ~unsafe ~optimize ~out_file ~source_file
 
+(* owi zig *)
+
+let zig_info =
+  let doc =
+    "Compile a Zig file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "zig" ~version ~doc ~sdocs ~man
+
+let zig_cmd =
+  let+ concolic =
+    let doc = "concolic mode" in
+    Arg.(value & flag & info [ "concolic" ] ~doc)
+  and+ debug
+  and+ includes =
+    let doc = "headers path" in
+    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
+  and+ workers
+  and+ files
+  and+ profiling
+  and+ unsafe
+  and+ optimize
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ profile
+  and+ solver in
+  Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
+    ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
+
 (* owi *)
 
 let cli =
@@ -523,6 +557,7 @@ let cli =
     ; Cmd.v version_info version_cmd
     ; Cmd.v wasm2wat_info wasm2wat_cmd
     ; Cmd.v wat2wasm_info wat2wasm_cmd
+    ; Cmd.v zig_info zig_cmd
     ]
 
 let exit_code =

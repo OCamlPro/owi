@@ -7,14 +7,15 @@
 - [`owi conc`]: a concolic Wasm interpreter;
 - [`owi fmt`]: a formatter for Wasm;
 - [`owi opt`]: an optimizer for Wasm;
-- [`owi replay`]: run a module containing symbols with concrete values from a model produced by a previous symbolic execution
+- [`owi replay`]: run a module containing symbols with concrete values from a model produced by a previous symbolic execution;
 - [`owi run`]: a concrete Wasm interpreter;
 - [`owi rust`]: a bug finding tool for Rust code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
 - [`owi script`]: an interpreter for [Wasm scripts];
 - [`owi sym`]: a symbolic Wasm interpreter;
 - [`owi validate`]: a validator for Wasm modules;
 - [`owi wasm2wat`]: a Wasm binary to text format translater;
-- [`owi wat2wasm`]: a Wasm text to binary format translater.
+- [`owi wat2wasm`]: a Wasm text to binary format translater;
+- [`owi zig`]: a bug finding tool for Zig code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter.
 
 It also provides an [OCaml library] which allows for instance to [import OCaml functions in a Wasm module] in a type-safe way!
 
@@ -238,6 +239,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [`owi validate`]: example/validate
 [`owi wasm2wat`]: example/wasm2wat
 [`owi wat2wasm`]: example/wat2wasm
+[`owi zig`]: example/zig
 [import OCaml functions in a Wasm module]: example/define_host_function
 [OCaml library]: example/lib
 [a fuzzer]: test/fuzz

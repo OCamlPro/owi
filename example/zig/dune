@@ -1,0 +1,7 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file fib.zig)
+  (package owi))
+ (files README.md))
