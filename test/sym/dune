@@ -22,6 +22,7 @@
   mul_i64.wat
   mul_f32.wat
   mul_f64.wat
+  range.wat
   store.wat
   sub_i32.wat
   sub_i64.wat
