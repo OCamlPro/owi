@@ -48,15 +48,21 @@ struct
 
   let breadcrumbs t = t.breadcrumbs
 
-  let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
+  let add_symbol t s =
+    let symbol_set = s :: t.symbol_set in
+    { t with symbol_set }
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
     { t with pc }
 
-  let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
+  let add_breadcrumb t crumb =
+    let breadcrumbs = crumb :: t.breadcrumbs in
+    { t with breadcrumbs }
 
-  let incr_symbols t = { t with symbols = succ t.symbols }
+  let incr_symbols t =
+    let symbols = succ t.symbols in
+    { t with symbols }
 
   let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
       =
