@@ -13,6 +13,7 @@
   stdout.o
   errno.o
   strchr.o
+  klee.o
   math.o
   strcmp.o
   memccpy.o
@@ -52,6 +53,7 @@
   stdout.o
   errno.o
   strchr.o
+  klee.o
   math.o
   strcmp.o
   memccpy.o
@@ -87,6 +89,7 @@
   src/stdout.c
   src/errno.c
   src/strchr.c
+  src/klee.c
   src/math.c
   src/strcmp.c
   src/memccpy.c

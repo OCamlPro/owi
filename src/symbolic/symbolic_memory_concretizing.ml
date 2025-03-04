@@ -1,21 +1,24 @@
 module Backend = struct
   type address = Int32.t
 
+  module Map = Map.Make (struct
+    include Int32
+
+    (* TODO: define this in Int32 directly? *)
+    let compare i1 i2 = compare (Int32.to_int i1) (Int32.to_int i2)
+  end)
+
   type t =
-    { data : (address, Symbolic_value.int32) Hashtbl.t
-    ; parent : t option
-    ; chunks : (address, Symbolic_value.int32) Hashtbl.t
+    { mutable data : Symbolic_value.int32 Map.t
+    ; mutable chunks : Symbolic_value.int32 Map.t
     }
 
-  let make () =
-    { data = Hashtbl.create 16; parent = None; chunks = Hashtbl.create 16 }
+  let make () = { data = Map.empty; chunks = Map.empty }
 
-  let clone m =
-    (* TODO: Make chunk copying lazy *)
-    { data = Hashtbl.create 16
-    ; parent = Some m
-    ; chunks = Hashtbl.copy m.chunks
-    }
+  let clone { data; chunks } =
+    (* Caution, it is tempting not to rebuild the record here, but...
+       it must be! otherwise the mutable data points to the same location *)
+    { data; chunks }
 
   let address a =
     let open Symbolic_choice_without_memory in
@@ -27,13 +30,10 @@ module Backend = struct
 
   let address_i32 a = a
 
-  let rec load_byte { parent; data; _ } a =
-    match Hashtbl.find_opt data a with
+  let load_byte a { data; _ } =
+    match Map.find_opt a data with
+    | None -> Smtml.Expr.value (Num (I8 0))
     | Some v -> v
-    | None -> (
-      match parent with
-      | None -> Smtml.Expr.value (Num (I8 0))
-      | Some parent -> load_byte parent a )
 
   (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
   let merge_extracts (e1, h, m1) (e2, m2, l) =
@@ -73,10 +73,10 @@ module Backend = struct
       if i = size then acc
       else
         let addr' = Int32.(add addr (of_int i)) in
-        let byte = load_byte m addr' in
+        let byte = load_byte addr' m in
         loop addr size (i + 1) (concat i ~msb:byte ~lsb:acc)
     in
-    let v0 = load_byte m a in
+    let v0 = load_byte a m in
     loop a n 1 v0
 
   let extract v pos =
@@ -96,11 +96,13 @@ module Backend = struct
       sym
     | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
 
+  let replace m k v = m.data <- Map.add k v m.data
+
   let storen m a v n =
     for i = 0 to n - 1 do
       let a' = Int32.add a (Int32.of_int i) in
       let v' = extract v i in
-      Hashtbl.replace m.data a' v'
+      replace m a' v'
     done
 
   let validate_address m a range =
@@ -111,7 +113,7 @@ module Backend = struct
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
-      match Hashtbl.find_opt m.chunks base with
+      match Map.find_opt base m.chunks with
       | None -> return (Error Trap.Memory_leak_use_after_free)
       | Some chunk_size ->
         let+ is_out_of_bounds =
@@ -142,15 +144,18 @@ module Backend = struct
   let free m p =
     let open Symbolic_choice_without_memory in
     let+ base = ptr p in
-    if not @@ Hashtbl.mem m.chunks base then
-      Fmt.failwith "Memory leak double free";
-    Hashtbl.remove m.chunks base;
-    Symbolic_value.const_i32 base
+    if not @@ Map.mem base m.chunks then Fmt.failwith "Memory leak double free"
+    else begin
+      let chunks = Map.remove base m.chunks in
+      m.chunks <- chunks;
+      Symbolic_value.const_i32 base
+    end
 
   let realloc m ~ptr ~size =
     let open Symbolic_choice_without_memory in
     let+ base = address ptr in
-    Hashtbl.replace m.chunks base size;
+    let chunks = Map.add base size m.chunks in
+    m.chunks <- chunks;
     Smtml.Expr.ptr base (Symbolic_value.const_i32 0l)
 end
 

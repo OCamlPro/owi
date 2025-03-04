@@ -18,6 +18,7 @@
   errno.h
   fcntl.h
   inttypes.h
+  (klee.h as klee/klee.h)
   limits.h
   math.h
   pthread.h
