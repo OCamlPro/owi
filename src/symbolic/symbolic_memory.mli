@@ -2,15 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(** Single memory *)
 type t
-
-type collection
-
-val init : unit -> collection
-
-val clone : collection -> collection
-
-val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t
 
 val check_within_bounds :
   t -> Smtml.Expr.t -> (Smtml.Expr.t * Symbolic_value.int32, Trap.t) result
@@ -60,12 +53,12 @@ val size_in_pages : t -> Smtml.Expr.t
 
 val get_limit_max : t -> Smtml.Expr.t option
 
-module ITbl : sig
-  type 'a t
+(** Collection of memories *)
 
-  type key
+type collection
 
-  val iter : (key -> 'a -> unit) -> 'a t -> unit
-end
+val init : unit -> collection
 
-val iter : (t ITbl.t -> unit) -> collection -> unit
+val clone : collection -> collection
+
+val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t
