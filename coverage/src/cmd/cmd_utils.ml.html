@@ -228,34 +228,34 @@
 open Syntax
 
 let out_testcase ~dst testcase =
-  <span data-count="94">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="94">l</span>et tag atts name = <span data-count="217">(</span>("", name), atts) in
+  <span data-count="95">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="95">l</span>et tag atts name = <span data-count="220">(</span>("", name), atts) in
   let atts = [ (("", "coversError"), "true") ] in
-  let to_string v = <span data-count="123">F</span>mt.str "%a" Smtml.Value.pp v in
-  let input v = <span data-count="123">`</span>El (ta<span data-count="123">g</span> [] "input", [ `Data (to_strin<span data-count="123">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="94">g</span> atts "testcase", List.ma<span data-count="94">p</span> input testcase) in
+  let to_string v = <span data-count="125">F</span>mt.str "%a" Smtml.Value.pp v in
+  let input v = <span data-count="125">`</span>El (ta<span data-count="125">g</span> [] "input", [ `Data (to_strin<span data-count="125">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="95">g</span> atts "testcase", List.ma<span data-count="95">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="94">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="95">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir testcase -&gt;
-    <span data-count="94">i</span>ncr cnt;
-    <span data-count="94">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="94">l</span>et path = Fpath.append dir name in
-    <span data-count="94">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="94">c</span> path
-        (fun chan () -&gt; <span data-count="94">O</span>k (out_testcas<span data-count="94">e</span> ~dst:(`Channel chan) testcase))
+    <span data-count="95">i</span>ncr cnt;
+    <span data-count="95">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="95">l</span>et path = Fpath.append dir name in
+    <span data-count="95">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="95">c</span> path
+        (fun chan () -&gt; <span data-count="95">O</span>k (out_testcas<span data-count="95">e</span> ~dst:(`Channel chan) testcase))
         ()
     in
-    <span data-count="94">r</span>es
+    <span data-count="95">r</span>es
 
 let add_main_as_start (m : Binary.modul) =
   (* We are checking if there's a start function *)
-  <span data-count="550">i</span>f Option.is_some m.start then <span data-count="193">O</span>k m
+  <span data-count="552">i</span>f Option.is_some m.start then <span data-count="195">O</span>k m
   else
     (* If there is none, we look for a function exported with the name `main` *)
     <span data-count="357">m</span>atch

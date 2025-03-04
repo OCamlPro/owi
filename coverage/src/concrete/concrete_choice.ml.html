@@ -89,15 +89,15 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157408531">x</span> [@@inline]
+let return x = <span data-count="157408552">x</span> [@@inline]
 
-let bind x f = <span data-count="185707730">f</span> x [@@inline]
+let bind x f = <span data-count="185707754">f</span> x [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="13519960">l</span>et* v in
-  <span data-count="13519960">r</span>eturn (<span data-count="13519960">f</span> v)
+  <span data-count="13519966">l</span>et* v in
+  <span data-count="13519966">r</span>eturn (<span data-count="13519966">f</span> v)
 [@@inline]
 
 let ( let+ ) = map

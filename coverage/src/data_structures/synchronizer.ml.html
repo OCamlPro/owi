@@ -173,8 +173,8 @@ type ('get, 'write) t =
   }
 
 let init getter writter =
-  <span data-count="762">{</span> mutex = Mutex.creat<span data-count="762">e</span> ()
-  ; cond = Condition.creat<span data-count="762">e</span> ()
+  <span data-count="764">{</span> mutex = Mutex.creat<span data-count="764">e</span> ()
+  ; cond = Condition.creat<span data-count="764">e</span> ()
   ; getter
   ; writter
   ; pledges = 0
@@ -182,33 +182,33 @@ let init getter writter =
   }
 
 let get synchro pledge =
-  <span data-count="45549">l</span>et rec inner_loop synchro pledge =
-    <span data-count="46786">m</span>atch synchro.getter () with
-    | <span data-count="2314">N</span>one when synchro.pledges = <span data-count="1064">0</span> || synchro.close<span data-count="0">d</span> -&gt;
-      <span data-count="1064">C</span>ondition.broadcast synchro.cond;
-      <span data-count="1064">N</span>one
-    | <span data-count="1250">N</span>one -&gt;
+  <span data-count="45377">l</span>et rec inner_loop synchro pledge =
+    <span data-count="46538">m</span>atch synchro.getter () with
+    | <span data-count="2238">N</span>one when synchro.pledges = <span data-count="1068">0</span> || synchro.close<span data-count="0">d</span> -&gt;
+      <span data-count="1068">C</span>ondition.broadcast synchro.cond;
+      <span data-count="1068">N</span>one
+    | <span data-count="1170">N</span>one -&gt;
       Condition.wait synchro.cond synchro.mutex;
-      <span data-count="1238">i</span>nner_loop synchro pledge
-    | <span data-count="44472">S</span>ome _ as v -&gt;
-      if pledge then <span data-count="44272">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
-      <span data-count="44472">v</span>
+      <span data-count="1160">i</span>nner_loop synchro pledge
+    | <span data-count="44300">S</span>ome _ as v -&gt;
+      if pledge then <span data-count="44099">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
+      <span data-count="44300">v</span>
   in
-  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="45549">i</span>nner_loop synchro pledge)
+  Mutex.protect synchro.mutex (fun () -&gt; <span data-count="45378">i</span>nner_loop synchro pledge)
 
 let write v { writter; cond; mutex; _ } =
-  <span data-count="44505">M</span>utex.protect mutex (fun () -&gt; <span data-count="44510">w</span>ritter v cond)
+  <span data-count="44322">M</span>utex.protect mutex (fun () -&gt; <span data-count="44331">w</span>ritter v cond)
 
 let make_pledge synchro =
-  <span data-count="751">M</span>utex.lock synchro.mutex;
-  <span data-count="751">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
+  <span data-count="752">M</span>utex.lock synchro.mutex;
+  <span data-count="752">s</span>ynchro.pledges &lt;- synchro.pledges + 1;
   Mutex.unlock synchro.mutex
 
 let end_pledge synchro =
-  <span data-count="44959">M</span>utex.lock synchro.mutex;
-  <span data-count="44958">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
-  if Int.equal synchro.pledges 0 then <span data-count="1462">C</span>ondition.broadcas<span data-count="1462">t</span> synchro.cond;
-  <span data-count="44958">M</span>utex.unlock synchro.mutex
+  <span data-count="44785">M</span>utex.lock synchro.mutex;
+  <span data-count="44787">s</span>ynchro.pledges &lt;- synchro.pledges - 1;
+  if Int.equal synchro.pledges 0 then <span data-count="1461">C</span>ondition.broadcas<span data-count="1461">t</span> synchro.cond;
+  <span data-count="44787">M</span>utex.unlock synchro.mutex
 
 let fail q =
   <span data-count="0">M</span>utex.lock q.mutex;
@@ -217,12 +217,12 @@ let fail q =
   <span data-count="0">M</span>utex.unlock q.mutex
 
 let rec work_while f q =
-  <span data-count="44997">m</span>atch get q true with
-  | <span data-count="712">N</span>one -&gt; ()
-  | <span data-count="44272">S</span>ome v -&gt;
-    let () = f v (fun v -&gt; <span data-count="43925">w</span>rite v q) in
-    <span data-count="44247">e</span>nd_pledge q;
-    <span data-count="44247">w</span>ork_while f q
+  <span data-count="44824">m</span>atch get q true with
+  | <span data-count="716">N</span>one -&gt; ()
+  | <span data-count="44099">S</span>ome v -&gt;
+    let () = f v (fun v -&gt; <span data-count="43743">w</span>rite v q) in
+    <span data-count="44072">e</span>nd_pledge q;
+    <span data-count="44073">w</span>ork_while f q
 </code></pre>
       </div>
     </div>

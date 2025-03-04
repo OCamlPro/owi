@@ -495,19 +495,19 @@ let recover backup into =
   <span data-count="518">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="518">y</span> recover_elem) backup.elem into.elem in
   <span data-count="518">(</span>)
 
-let id (env : _ t) = <span data-count="2338175">e</span>nv.id
+let id (env : _ t) = <span data-count="2338120">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="6394">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6394">S</span>ome v -&gt; v
+  <span data-count="6259">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6258">S</span>ome v -&gt; v
 
 let get_memory (env : _ t) id =
-  <span data-count="6026572">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="6026656">S</span>ome v -&gt; v
+  <span data-count="6026534">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="6026565">S</span>ome v -&gt; v
 
 let get_table (env : _ t) id =
-  <span data-count="1616090">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616090">S</span>ome v -&gt; v
+  <span data-count="1616093">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616093">S</span>ome v -&gt; v
 
 let get_func (env : _ t) id =
-  <span data-count="10498107">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498100">S</span>ome v -&gt; v
+  <span data-count="10498154">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498160">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="2250">m</span>atch IMap.find_opt id env.data with None -&gt; assert false | <span data-count="2250">S</span>ome v -&gt; v
@@ -516,9 +516,9 @@ let get_elem (env : _ t) id =
   <span data-count="3004">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="3004">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="122715">m</span>atch Func_id.get id env.extern_funcs with
+  <span data-count="122760">m</span>atch Func_id.get id env.extern_funcs with
   | None -&gt; assert false
-  | <span data-count="122666">S</span>ome v -&gt; v
+  | <span data-count="122748">S</span>ome v -&gt; v
 
 module Build = struct
   type t =
@@ -549,7 +549,7 @@ module Build = struct
     <span data-count="1319">{</span> env with tables = IMap.ad<span data-count="1319">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="19404">{</span> env with functions = IMap.ad<span data-count="19404">d</span> id func env.functions }
+    <span data-count="19412">{</span> env with functions = IMap.ad<span data-count="19412">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="1125">{</span> env with data = IMap.ad<span data-count="1125">d</span> id data env.data }
 
@@ -620,7 +620,7 @@ end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="3350">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="3352">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>

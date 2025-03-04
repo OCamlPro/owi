@@ -514,10 +514,10 @@ type t =
   }
 
 let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
-  <span data-count="3613">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+  <span data-count="3619">{</span> modul = import.modul; name = import.name; assigned_name; desc }
 
 let empty_module id =
-  <span data-count="6216">{</span> id
+  <span data-count="6218">{</span> id
   ; typ = []
   ; function_type = []
   ; type_checks = []
@@ -542,7 +542,7 @@ type curr =
   }
 
 let init_curr () =
-  <span data-count="6216">{</span> global = ref 0
+  <span data-count="6218">{</span> global = ref 0
   ; table = ref 0
   ; mem = ref 0
   ; func = ref 0
@@ -551,12 +551,12 @@ let init_curr () =
   }
 
 let declare_func_type (fields : t) type_f =
-  <span data-count="19287">m</span>atch type_f with
+  <span data-count="19295">m</span>atch type_f with
   | <span data-count="973">B</span>t_ind _ -&gt; fields
-  | <span data-count="18314">B</span>t_raw (id, typ) -&gt;
+  | <span data-count="18322">B</span>t_raw (id, typ) -&gt;
     let type_checks =
       match id with
-      | <span data-count="18202">N</span>one -&gt; fields.type_checks
+      | <span data-count="18210">N</span>one -&gt; fields.type_checks
       | <span data-count="112">S</span>ome id -&gt; (id, typ) :: fields.type_checks
     in
     { fields with function_type = typ :: fields.function_type; type_checks }
@@ -577,8 +577,8 @@ let add_mem value (fields : t) (curr : curr) =
   <span data-count="1594">{</span> fields with mem = Indexed.retur<span data-count="1594">n</span> index value :: fields.mem }
 
 let rec extract_block_types expr =
-  <span data-count="18162">l</span>et aux instr =
-    <span data-count="60969">m</span>atch instr with
+  <span data-count="18164">l</span>et aux instr =
+    <span data-count="60993">m</span>atch instr with
     | <span data-count="2392">B</span>lock (_str_opt, bt, expr1) | <span data-count="598">L</span>oop (_str_opt, bt, expr1) -&gt;
       Option.to_lis<span data-count="2990">t</span> bt @ extract_block_type<span data-count="2990">s</span> expr1
     | <span data-count="1076">I</span>f_else (_str_opt, bt, expr1, expr2) -&gt;
@@ -586,21 +586,21 @@ let rec extract_block_types expr =
     | <span data-count="102">R</span>eturn_call_indirect (_, bt) | <span data-count="17">R</span>eturn_call_ref bt | <span data-count="699">C</span>all_indirect (_, bt)
       -&gt;
       [ bt ]
-    | <span data-count="56085">_</span> -&gt; []
+    | <span data-count="56109">_</span> -&gt; []
   in
   List.concat_map aux expr
 
 let add_func value (fields : t) (curr : curr) =
-  <span data-count="16159">l</span>et fields =
+  <span data-count="16167">l</span>et fields =
     match value with
-    | <span data-count="13020">R</span>untime.Local func -&gt;
+    | <span data-count="13022">R</span>untime.Local func -&gt;
       let fields = declare_func_type fields func.type_f in
-      <span data-count="13020">L</span>ist.fold_lef<span data-count="13020">t</span> declare_func_type fields (extract_block_type<span data-count="13020">s</span> func.body)
-    | <span data-count="3139">I</span>mported func -&gt; declare_func_typ<span data-count="3139">e</span> fields func.desc
+      <span data-count="13022">L</span>ist.fold_lef<span data-count="13022">t</span> declare_func_type fields (extract_block_type<span data-count="13022">s</span> func.body)
+    | <span data-count="3145">I</span>mported func -&gt; declare_func_typ<span data-count="3145">e</span> fields func.desc
   in
   let index = !(curr.func) in
   incr curr.func;
-  <span data-count="16159">{</span> fields with func = Indexed.retur<span data-count="16159">n</span> index value :: fields.func }
+  <span data-count="16167">{</span> fields with func = Indexed.retur<span data-count="16167">n</span> index value :: fields.func }
 
 let add_elem value (fields : t) (curr : curr) =
   <span data-count="1675">l</span>et index = !(curr.elem) in
@@ -653,10 +653,10 @@ let add_field curr (fields : t) = function
       { fields.exports with mem = { name; id } :: fields.exports.mem }
     in
     Ok { fields with exports }
-  | <span data-count="13020">M</span>Func func -&gt; ok @@ add_fun<span data-count="13020">c</span> (Runtime.Local func) fields curr
-  | <span data-count="3139">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
-    let imported : text block_type Imported.t = im<span data-count="3139">p</span> import (a, type_f) in
-    ok @@ add_fun<span data-count="3139">c</span> (Imported imported) fields curr
+  | <span data-count="13022">M</span>Func func -&gt; ok @@ add_fun<span data-count="13022">c</span> (Runtime.Local func) fields curr
+  | <span data-count="3145">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
+    let imported : text block_type Imported.t = im<span data-count="3145">p</span> import (a, type_f) in
+    ok @@ add_fun<span data-count="3145">c</span> (Imported imported) fields curr
   | <span data-count="10327">M</span>Export { name; desc = Export_func id } -&gt;
     let id = curr_id curr.func id in
     <span data-count="10327">l</span>et exports =
@@ -682,14 +682,14 @@ let add_field curr (fields : t) = function
     in
     let data : Text.data = { id = data.id; init = data.init; mode } in
     ok @@ add_dat<span data-count="950">a</span> data fields curr
-  | <span data-count="294">M</span>Start start -&gt; Ok { fields with start = Some start }
+  | <span data-count="296">M</span>Start start -&gt; Ok { fields with start = Some start }
 
 let of_symbolic { Text.fields; id; annots } =
-  <span data-count="6216">L</span>og.debug0 "grouping     ...@\n";
-  <span data-count="6216">l</span>et+ modul =
-    list_fold_lef<span data-count="6216">t</span> (add_fiel<span data-count="6216">d</span> (init_cur<span data-count="6216">r</span> ())) (empty_modul<span data-count="6216">e</span> id) fields
+  <span data-count="6218">L</span>og.debug0 "grouping     ...@\n";
+  <span data-count="6218">l</span>et+ modul =
+    list_fold_lef<span data-count="6218">t</span> (add_fiel<span data-count="6218">d</span> (init_cur<span data-count="6218">r</span> ())) (empty_modul<span data-count="6218">e</span> id) fields
   in
-  <span data-count="6216">{</span> modul with annots }
+  <span data-count="6218">{</span> modul with annots }
 </code></pre>
       </div>
     </div>
