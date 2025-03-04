@@ -3,6 +3,8 @@
   %{bin:owi}
   (package owi)
   all_types.wat
+  assert_false.wat
+  assert_false.model
   missing_replay_file.wat
   no_bug.model
   no_bug.wat
