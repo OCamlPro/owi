@@ -334,6 +334,7 @@ module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
   let add_pc (c : Symbolic_value.bool) =
+    let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
     | Val True -> return ()
     | Val False -> stop
@@ -375,16 +376,16 @@ module Make (Thread : Thread_intf.S) = struct
     let sliced_pc = Symbolic_path_condition.slice pc v in
     match Solver.check solver sliced_pc with
     | `Sat -> return ()
-    | `Unsat | `Unknown -> stop
+    | `Unsat -> stop
+    | `Unknown -> assert false
 
   let get_model_or_stop symbol =
     let* () = yield in
     let* solver in
     let+ thread in
-    (* TODO: should we slice instead of using the whole PC? *)
     let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
     match Solver.check solver pc with
-    | `Unsat | `Unknown -> stop
+    | `Unsat -> stop
     | `Sat -> begin
       let symbols = [ symbol ] |> Option.some in
       let model = Solver.model solver ~symbols ~pc in
@@ -394,6 +395,7 @@ module Make (Thread : Thread_intf.S) = struct
           "Unreachable: The model exists so this symbol should evaluate"
       | Some v -> return v
     end
+    | `Unknown -> assert false
 
   let select_inner ~explore_first (cond : Symbolic_value.bool) =
     let v = Smtml.Expr.simplify cond in

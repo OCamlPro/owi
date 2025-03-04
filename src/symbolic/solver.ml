@@ -21,14 +21,27 @@ let check (S (solver_module, s)) pc =
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
   let model =
-    (* we don't memoïze this call, because check_set *must* be used before calling model *)
     match Solver.check_set s pc with
     | `Sat -> begin
       match Solver.model ?symbols s with
-      | None -> assert false
+      | None ->
+        (* Should not happen because we checked just before that is must be true. *)
+        Fmt.epr "symbols: %a@\n"
+          (Fmt.option
+             (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
+          symbols;
+        Fmt.epr "pc:@\n  @[<v>%a@]@\n"
+          (Smtml.Expr.Set.pretty
+             ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
+             Smtml.Expr.pp )
+          pc;
+        assert false
       | Some model -> model
     end
     | `Unsat -> assert false
-    | `Unknown -> assert false
+    | `Unknown ->
+      (* When reached, it means we finally manage to ask the solver something he can not do.
+         Please open an issue so we can investigate. *)
+      assert false
   in
   model
