@@ -21,27 +21,20 @@ let check (S (solver_module, s)) pc =
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
   let model =
-    match Solver.check_set s pc with
-    | `Sat -> begin
-      match Solver.model ?symbols s with
-      | None ->
-        (* Should not happen because we checked just before that is must be true. *)
-        Fmt.epr "symbols: %a@\n"
-          (Fmt.option
-             (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
-          symbols;
-        Fmt.epr "pc:@\n  @[<v>%a@]@\n"
-          (Smtml.Expr.Set.pretty
-             ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
-             Smtml.Expr.pp )
-          pc;
-        assert false
-      | Some model -> model
-    end
-    | `Unsat -> assert false
-    | `Unknown ->
-      (* When reached, it means we finally manage to ask the solver something he can not do.
-         Please open an issue so we can investigate. *)
+    match Solver.get_sat_model ?symbols s pc with
+    | None ->
+      (* Should not happen because we checked just before that is must be true. *)
+      Fmt.epr "something is wrong... I can not get a model.@\n";
+      Fmt.epr "symbols: %a@\n"
+        (Fmt.option
+           (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
+        symbols;
+      Fmt.epr "pc:@\n  @[<v>%a@]@\n"
+        (Smtml.Expr.Set.pretty
+           ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
+           Smtml.Expr.pp )
+        pc;
       assert false
+    | Some model -> model
   in
   model
