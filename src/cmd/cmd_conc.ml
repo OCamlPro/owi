@@ -339,6 +339,7 @@ let pc_model solver pc =
   | `Sat ->
     let symbols =
       let pc = Smtml.Expr.Set.to_list pc in
+      (* TODO: use Smtml.Expr.Set.get_symbols to avoid the conversion *)
       Some (Smtml.Expr.get_symbols pc)
     in
     Some (Solver.model ~symbols ~pc solver)
