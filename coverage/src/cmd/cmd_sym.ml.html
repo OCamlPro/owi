@@ -371,21 +371,21 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   <span data-count="381">l</span>et res_queue = Wq.make () in
   <span data-count="381">l</span>et path_count = ref 0 in
   let callback v =
-    <span data-count="1610">l</span>et open Symbolic_choice_intf in
+    <span data-count="1719">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1612">m</span>atch (fail_mode, v) with
-    | <span data-count="1411">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1719">m</span>atch (fail_mode, v) with
+    | <span data-count="1516">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="1">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
-    | <span data-count="35">(</span><span data-count="34">`</span>Both | <span data-count="1">`</span>Assertion_only), (EAssert (e, m), thread) -&gt;
+    | <span data-count="36">(</span><span data-count="35">`</span>Both | <span data-count="1">`</span>Assertion_only), (EAssert (e, m), thread) -&gt;
       Wq.push (`EAssert (e, m), thread) res_queue
     | <span data-count="1">(</span><span data-count="0">`</span>Trap_only | <span data-count="1">`</span>Assertion_only), _ -&gt; ()
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="751">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="730">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="731">W</span>q.end_pledge res_queue)
   in
   <span data-count="381">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
