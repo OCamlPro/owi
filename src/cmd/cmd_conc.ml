@@ -337,11 +337,7 @@ let pc_model solver pc =
   match Solver.check solver pc with
   | `Unsat | `Unknown -> None
   | `Sat ->
-    let symbols =
-      let pc = Smtml.Expr.Set.to_list pc in
-      (* TODO: use Smtml.Expr.Set.get_symbols to avoid the conversion *)
-      Some (Smtml.Expr.get_symbols pc)
-    in
+    let symbols = Some (Smtml.Expr.Set.get_symbols pc) in
     Some (Solver.model ~symbols ~pc solver)
 
 let rec find_model_to_run solver tree =
