@@ -10,4 +10,5 @@
   exit.c
   klee_compat.c
   main.c
-  malloc_aligned.c))
+  malloc_aligned.c
+  range.c))

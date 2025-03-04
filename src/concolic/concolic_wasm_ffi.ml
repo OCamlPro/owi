@@ -85,9 +85,11 @@ module M :
       let n = Concrete_value.Bool.int32 b in
       (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
 
+  let add_pc_wrapper e = Concolic_choice.assume e
+
   let assume (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
-    Concolic_choice.assume c
+    add_pc_wrapper c
 
   let assert' (i : Value.int32) : unit Concolic_choice.t =
     let c = Value.I32.to_bool i in
@@ -97,8 +99,8 @@ module M :
     Value.int32 Concolic_choice.t =
     let open Concolic_choice in
     let* x = symbol_i32 () in
-    let* () = assume (Value.I32.le lo x) in
-    let+ () = assume (Value.I32.gt hi x) in
+    let* () = add_pc_wrapper (Value.I32.le lo x) in
+    let+ () = add_pc_wrapper (Value.I32.gt hi x) in
     x
 
   open Expr
