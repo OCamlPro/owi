@@ -25,7 +25,11 @@ let run_file ~unsafe ~optimize filename model =
 
     let assume _ = ()
 
-    let assert' n = assert (not @@ Prelude.Int32.equal n 0l)
+    let assert' n =
+      if not @@ Prelude.Int32.equal n 0l then begin
+        Fmt.epr "Assertion failure was correctly reached\n";
+        exit 0
+      end
 
     let symbol_i32 () =
       match model.(next ()) with
