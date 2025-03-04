@@ -10,27 +10,13 @@ let fresh solver () =
   let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
-  let module Batch = Smtml.Solver.Batch (Mapping) in
+  let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
   S ((module Batch), solver)
 
-let check =
-  let module Cache = Smtml.Cache.Strong in
-  let cache = Cache.create 512 in
-  let lock = Mutex.create () in
-  fun (S (solver_module, s)) pc ->
-    Mutex.lock lock;
-    let satisfiability = Cache.find_opt cache pc in
-    Mutex.unlock lock;
-    match satisfiability with
-    | Some satisfiability -> satisfiability
-    | None ->
-      let module Solver = (val solver_module) in
-      let satisfiability = Solver.check_set s pc in
-      Mutex.lock lock;
-      Cache.add cache pc satisfiability;
-      Mutex.unlock lock;
-      satisfiability
+let check (S (solver_module, s)) pc =
+  let module Solver = (val solver_module) in
+  Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
