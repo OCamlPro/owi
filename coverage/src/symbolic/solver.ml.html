@@ -118,26 +118,26 @@ let fresh solver () =
   <span data-count="915">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="44565">S</span>tats.start_span "check" "solver";
-  <span data-count="44562">l</span>et module Solver = (val solver_module) in
+  <span data-count="44724">S</span>tats.start_span "check" "solver";
+  <span data-count="44726">l</span>et module Solver = (val solver_module) in
   let check = Solver.check s pc in
-  <span data-count="44544">S</span>tats.close_span ();
-  <span data-count="44523">c</span>heck
+  <span data-count="44700">S</span>tats.close_span ();
+  <span data-count="44698">c</span>heck
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1238">S</span>tats.start_span "model" "solver";
-  <span data-count="1238">l</span>et module Solver = (val solver_module) in
+  <span data-count="1374">S</span>tats.start_span "model" "solver";
+  <span data-count="1374">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1239">`</span>Sat -&gt; begin
+    | <span data-count="1373">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1236">S</span>ome model -&gt; model
+      | <span data-count="1367">S</span>ome model -&gt; model
     end
     | `Unsat | `Unknown -&gt; assert false
   in
   Stats.close_span ();
-  <span data-count="1237">m</span>odel
+  <span data-count="1368">m</span>odel
 </code></pre>
       </div>
     </div>
