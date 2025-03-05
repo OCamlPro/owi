@@ -44,7 +44,7 @@
   (dune-build-info :build)
   (dune-site :build)
   ;; system packages
-  conf-zig
+  ;;conf-zig
   ;; runtime
   bos
   cmdliner
