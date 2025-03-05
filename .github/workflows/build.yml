@@ -58,7 +58,7 @@ jobs:
             brew install pkgconf zig # TODO: remove zig once the conf-zig package works
           fi
           if [ "$RUNNER_OS" == "Linux" ]; then
-            apt update
+            sudo apt update
             wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
             mkdir zig
             tar xf zig-*.tar.xz -C zig --strip-components 1
