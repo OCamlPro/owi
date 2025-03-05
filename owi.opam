@@ -22,6 +22,7 @@ depends: [
   "menhir" {build & >= "20220210"}
   "dune-build-info" {build}
   "dune-site" {build}
+  "conf-zig"
   "bos"
   "cmdliner"
   "conf-clang"
