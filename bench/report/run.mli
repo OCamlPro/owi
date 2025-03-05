@@ -10,6 +10,8 @@ val utime : t -> float
 
 val stime : t -> float
 
+val maxrss : t -> int64
+
 val is_nothing : t -> bool
 
 val is_killed : t -> bool
