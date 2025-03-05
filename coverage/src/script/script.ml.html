@@ -676,7 +676,7 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="943">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="948">e</span> ()
 
   let value i = <span data-count="65">V</span>.Externref (Some (V.E (ty, i)))
 end

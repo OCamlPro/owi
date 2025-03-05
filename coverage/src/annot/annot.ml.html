@@ -122,18 +122,18 @@ let pp_annot fmt = function
     pf fmt "(@%a@\n  @[&lt;hv&gt;%a@]@\n)" string annot.annotid Sexp.pp_sexp
       annot.items
 
-let annot_recorder : (string, Sexp.t) Hashtbl.t = Hashtbl.creat<span data-count="943">e</span> 17
+let annot_recorder : (string, Sexp.t) Hashtbl.t = Hashtbl.creat<span data-count="948">e</span> 17
 
 let record_annot annotid sexp = <span data-count="49">H</span>ashtbl.add annot_recorder annotid sexp
 
 let get_annots () =
-  <span data-count="6200">l</span>et res =
+  <span data-count="6204">l</span>et res =
     Hashtbl.fold
       (fun annotid items acc -&gt; <span data-count="49">{</span> annotid; items } :: acc)
       annot_recorder []
   in
-  <span data-count="6200">H</span>ashtbl.reset annot_recorder;
-  <span data-count="6200">r</span>es
+  <span data-count="6204">H</span>ashtbl.reset annot_recorder;
+  <span data-count="6204">r</span>es
 </code></pre>
       </div>
     </div>

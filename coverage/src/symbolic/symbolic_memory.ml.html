@@ -571,7 +571,7 @@
 
 (** Single memories *)
 
-let page_size = Symbolic_value.const_i3<span data-count="943">2</span> 65_536l
+let page_size = Symbolic_value.const_i3<span data-count="948">2</span> 65_536l
 
 module Map = Map.Make (struct
   include Int32
@@ -781,7 +781,7 @@ end)
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="518">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="524">E</span>nv_id.Tbl.create 0
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten *)
