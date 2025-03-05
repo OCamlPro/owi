@@ -381,38 +381,41 @@ module Make (Thread : Thread.S) = struct
             ~other_machine:n_chck.other_machine )
       | None -> default
     in
-    let* () = yield in
     let* thread in
-    let* solver in
-    let interrupter = fun () -> Solver.interrupt solver in
-    let other_unsat =
-      on_n_chck false (fun ~self_machine ~other_machine ->
-        match !other_machine with
-        | Done `Unsat -> true
-        | Done `SatOrUnknown -> false
-        | Init | Running _ ->
-          self_machine := Running interrupter;
-          false )
-    in
-    let pc = Thread.pc thread in
-    let our_result = if other_unsat then `Sat else Solver.check solver pc in
-    match our_result with
-    | `Sat ->
-      on_n_chck () (fun ~self_machine ~other_machine:_ ->
-        self_machine := Done `SatOrUnknown );
-      return ()
-    | `Unsat ->
-      on_n_chck () (fun ~self_machine ~other_machine ->
-        self_machine := Done `Unsat;
-        match !other_machine with Running inter -> inter () | _ -> () );
-      stop
-    | `Unknown ->
-      (* Unknown is what is returned when interrupted *)
-      on_n_chck stop (fun ~self_machine ~other_machine ->
-        self_machine := Done `SatOrUnknown;
-        match !other_machine with
-        | Init | Done `SatOrUnknown | Running _ -> stop
-        | Done `Unsat -> return () )
+    let pc_fresh = Thread.pc_is_fresh thread in
+    if pc_fresh then return ()
+    else
+      let* () = yield in
+      let* solver in
+      let interrupter = fun () -> Solver.interrupt solver in
+      let other_unsat =
+        on_n_chck false (fun ~self_machine ~other_machine ->
+          match !other_machine with
+          | Done `Unsat -> true
+          | Done `SatOrUnknown -> false
+          | Init | Running _ ->
+            self_machine := Running interrupter;
+            false )
+      in
+      let pc = Thread.pc thread in
+      let our_result = if other_unsat then `Sat else Solver.check solver pc in
+      match our_result with
+      | `Sat ->
+        on_n_chck () (fun ~self_machine ~other_machine:_ ->
+          self_machine := Done `SatOrUnknown );
+        modify_thread Thread.mark_pc_fresh
+      | `Unsat ->
+        on_n_chck () (fun ~self_machine ~other_machine ->
+          self_machine := Done `Unsat;
+          match !other_machine with Running inter -> inter () | _ -> () );
+        stop
+      | `Unknown ->
+        (* Unknown is what is returned when interrupted *)
+        on_n_chck stop (fun ~self_machine ~other_machine ->
+          self_machine := Done `SatOrUnknown;
+          match !other_machine with
+          | Init | Done `SatOrUnknown | Running _ -> stop
+          | Done `Unsat -> modify_thread Thread.mark_pc_fresh )
 
   let get_model_or_stop symbol =
     let* () = yield in
@@ -438,7 +441,7 @@ module Make (Thread : Thread.S) = struct
     | Val False -> return false
     | Val (Num (I32 _)) -> Fmt.failwith "unreachable (type error)"
     | _ ->
-      let* () = check_reachability None in 
+      let* () = check_reachability None in
       let machine_a = ref Init in
       let machine_b = ref Init in
       let mutex = Mutex.create () in

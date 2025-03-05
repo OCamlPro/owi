@@ -21,6 +21,7 @@ module type S = sig
        int
     -> Smtml.Symbol.t list
     -> Symbolic_value.bool list
+    -> bool
     -> Memory.collection
     -> Symbolic_table.collection
     -> Symbolic_global.collection
@@ -28,6 +29,10 @@ module type S = sig
     -> t
 
   val pc : t -> Symbolic_value.bool list
+
+  val pc_is_fresh : t -> bool
+
+  val mark_pc_fresh : t -> t
 
   val memories : t -> Memory.collection
 

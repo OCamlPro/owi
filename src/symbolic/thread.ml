@@ -12,6 +12,7 @@ module Make (Symbolic_memory : M) :
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
     ; pc : Symbolic_value.bool list
+    ; pc_fresh : bool
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection
@@ -20,24 +21,38 @@ module Make (Symbolic_memory : M) :
     ; breadcrumbs : int32 list
     }
 
-  let create symbols symbol_set pc memories tables globals breadcrumbs =
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  let create symbols symbol_set pc pc_fresh memories tables globals breadcrumbs
+      =
+    { symbols
+    ; symbol_set
+    ; pc
+    ; pc_fresh
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    }
 
   let init () =
     let symbols = 0 in
     let symbol_set = [] in
     let pc = [] in
+    let pc_fresh = true in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
-    create symbols symbol_set pc memories tables globals breadcrumbs
+    create symbols symbol_set pc pc_fresh memories tables globals breadcrumbs
 
   let symbols t = t.symbols
 
   let symbols_set t = t.symbol_set
 
   let pc t = t.pc
+
+  let pc_is_fresh t = t.pc_fresh
+
+  let mark_pc_fresh t = { t with pc_fresh = true }
 
   let memories t = t.memories
 
@@ -49,16 +64,32 @@ module Make (Symbolic_memory : M) :
 
   let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
 
-  let add_pc t c = { t with pc = c :: t.pc }
+  let add_pc t c = { t with pc = c :: t.pc; pc_fresh = false }
 
   let add_breadcrumb t crumb = { t with breadcrumbs = crumb :: t.breadcrumbs }
 
   let incr_symbols t = { t with symbols = succ t.symbols }
 
-  let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
-      =
+  let clone
+    { symbols
+    ; symbol_set
+    ; pc
+    ; pc_fresh
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    } =
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+    { symbols
+    ; symbol_set
+    ; pc
+    ; pc_fresh
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    }
 end
