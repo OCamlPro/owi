@@ -55,7 +55,7 @@
   ocaml_intrinsics
   (prelude (>= 0.3))
   sedlex
-  (smtml (>= 0.4.1))
+  (smtml (>= 0.6.0))
   uutf
   xmlm
   (processor (>= 0.2))
