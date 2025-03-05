@@ -333,6 +333,17 @@ end
 module Make (Thread : Thread.S) = struct
   include CoreImpl.Make (Thread)
 
+  type state_machine =
+    | Init
+    | Running of (unit -> unit)
+    | Done of [ `SatOrUnknown | `Unsat ]
+
+  type neg_checker =
+    { self_machine : state_machine ref
+    ; other_machine : state_machine ref
+    ; mutex : Mutex.t
+    }
+
   let add_pc (c : Symbolic_value.bool) =
     match Smtml.Expr.view c with
     | Val True -> return ()
@@ -361,14 +372,47 @@ module Make (Thread : Thread.S) = struct
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability =
+  let check_reachability n_chck =
+    let on_n_chck default f =
+      match n_chck with
+      | Some n_chck ->
+        Mutex.protect n_chck.mutex (fun () ->
+          f ~self_machine:n_chck.self_machine
+            ~other_machine:n_chck.other_machine )
+      | None -> default
+    in
     let* () = yield in
     let* thread in
     let* solver in
+    let interrupter = fun () -> Solver.interrupt solver in
+    let other_unsat =
+      on_n_chck false (fun ~self_machine ~other_machine ->
+        match !other_machine with
+        | Done `Unsat -> true
+        | Done `SatOrUnknown -> false
+        | Init | Running _ ->
+          self_machine := Running interrupter;
+          false )
+    in
     let pc = Thread.pc thread in
-    match Solver.check solver pc with
-    | `Sat -> return ()
-    | `Unsat | `Unknown -> stop
+    let our_result = if other_unsat then `Sat else Solver.check solver pc in
+    match our_result with
+    | `Sat ->
+      on_n_chck () (fun ~self_machine ~other_machine:_ ->
+        self_machine := Done `SatOrUnknown );
+      return ()
+    | `Unsat ->
+      on_n_chck () (fun ~self_machine ~other_machine ->
+        self_machine := Done `Unsat;
+        match !other_machine with Running inter -> inter () | _ -> () );
+      stop
+    | `Unknown ->
+      (* Unknown is what is returned when interrupted *)
+      on_n_chck stop (fun ~self_machine ~other_machine ->
+        self_machine := Done `SatOrUnknown;
+        match !other_machine with
+        | Init | Done `SatOrUnknown | Running _ -> stop
+        | Done `Unsat -> return () )
 
   let get_model_or_stop symbol =
     let* () = yield in
@@ -394,6 +438,16 @@ module Make (Thread : Thread.S) = struct
     | Val False -> return false
     | Val (Num (I32 _)) -> Fmt.failwith "unreachable (type error)"
     | _ ->
+      let* () = check_reachability None in 
+      let machine_a = ref Init in
+      let machine_b = ref Init in
+      let mutex = Mutex.create () in
+      let n_chck_a =
+        { mutex; self_machine = machine_a; other_machine = machine_b }
+      in
+      let n_chck_b =
+        { mutex; self_machine = machine_b; other_machine = machine_a }
+      in
       let true_branch =
         let* () = add_pc v in
         let* () = add_breadcrumb 1l in
@@ -401,7 +455,7 @@ module Make (Thread : Thread.S) = struct
           lazily (fun () ->
             Stats.event "check true branch reachability" "branches" )
         in
-        let+ () = check_reachability in
+        let+ () = check_reachability (Some n_chck_a) in
         true
       in
       let false_branch =
@@ -411,7 +465,7 @@ module Make (Thread : Thread.S) = struct
           lazily (fun () ->
             Stats.event "check true branch reachability" "branches" )
         in
-        let+ () = check_reachability in
+        let+ () = check_reachability (Some n_chck_b) in
         false
       in
       if explore_first then choose true_branch false_branch

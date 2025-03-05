@@ -21,6 +21,10 @@ let check (S (solver_module, s)) pc =
   Stats.close_span ();
   check
 
+let interrupt (S (solver_module, s)) =
+  let module Solver = (val solver_module) in
+  Solver.interrupt s
+
 let model (S (solver_module, s)) ~symbols ~pc =
   Stats.start_span "model" "solver";
   let module Solver = (val solver_module) in
