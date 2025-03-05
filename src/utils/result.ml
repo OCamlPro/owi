@@ -55,6 +55,7 @@ type err =
   | `Unknown_label of Types.text Types.indice
   | `Unknown_local of Types.text Types.indice
   | `Unknown_memory of Types.text Types.indice
+  | `Unknown_export of Types.text Types.indice
   | `Unknown_module of string
   | `Unknown_operator
   | `Unknown_table of Types.text Types.indice
@@ -143,6 +144,7 @@ let rec err_to_string = function
   | `Unknown_label id -> Fmt.str "unknown label %a" Types.pp_indice id
   | `Unknown_local id -> Fmt.str "unknown local %a" Types.pp_indice id
   | `Unknown_memory id -> Fmt.str "unknown memory %a" Types.pp_indice id
+  | `Unknown_export id -> Fmt.str "unknown export %a" Types.pp_indice id
   | `Unknown_module name -> Fmt.str "unknown module %s" name
   | `Unknown_operator -> Fmt.str "unknown operator"
   | `Unknown_table id -> Fmt.str "unknown table %a" Types.pp_indice id

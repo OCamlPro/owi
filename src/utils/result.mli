@@ -55,6 +55,7 @@ type err =
   | `Unknown_label of Types.text Types.indice
   | `Unknown_local of Types.text Types.indice
   | `Unknown_memory of Types.text Types.indice
+  | `Unknown_export of Types.text Types.indice
   | `Unknown_module of string
   | `Unknown_operator
   | `Unknown_table of Types.text Types.indice
