@@ -80,6 +80,9 @@ COMMANDS
            Generate a binary format file (.wasm) from a text format file
            (.wat)
 
+       zig [OPTION]… [ARG]…
+           Compile a Zig file to Wasm and run the symbolic interpreter on it
+
 COMMON OPTIONS
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
