@@ -43,6 +43,8 @@
     (>= 20220210)))
   (dune-build-info :build)
   (dune-site :build)
+  ;; system packages
+  conf-zig
   ;; runtime
   bos
   cmdliner
