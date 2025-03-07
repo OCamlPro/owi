@@ -24,7 +24,6 @@ Owi.Cmd_sym
 Owi.Cmd_validate
 Owi.Cmd_wasm2wat
 Owi.Compile
-Owi.Format
 Owi.Interpret
 Owi.Link
 Owi.Optimize
@@ -44,7 +43,6 @@ You shouldn't have to use any of these modules, they're used internally only. No
 Owi.Assigned
 Owi.Binary_parser
 Owi.Binary_types
-Owi.C_share_site
 Owi.Choice_intf
 Owi.Cmd_utils
 Owi.Concolic
@@ -72,14 +70,15 @@ Owi.Interpret
 Owi.Interpret_intf
 Owi.Link_env
 Owi.Log
+Owi.Minimalist_symbolic_choice
 Owi.Named
 Owi.Rewrite
 Owi.Runtime
 Owi.Script
+Owi.Share
 Owi.Solver
 Owi.Symbolic
 Owi.Symbolic_choice
-Owi.Symbolic_choice_minimalist
 Owi.Symbolic_global
 Owi.Symbolic_memory
 Owi.Symbolic_table
