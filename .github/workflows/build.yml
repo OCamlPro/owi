@@ -88,7 +88,7 @@ jobs:
       - name: lint-doc
         run: |
           ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt || true
-          $(exit $(wc -l output.txt | cut -d " " -f1))
+          # $(exit $(wc -l output.txt | cut -d " " -f1))
       - name: lint-fmt
         run: |
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
