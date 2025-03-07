@@ -110,7 +110,7 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
 let fresh solver () =
-  <span data-count="923">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="923">r</span> solver)
+  <span data-count="924">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="924">r</span> solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
@@ -118,26 +118,26 @@ let fresh solver () =
   <span data-count="922">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="44652">S</span>tats.start_span "check" "solver";
-  <span data-count="44651">l</span>et module Solver = (val solver_module) in
+  <span data-count="45341">S</span>tats.start_span "check" "solver";
+  <span data-count="45340">l</span>et module Solver = (val solver_module) in
   let check = Solver.check s pc in
-  <span data-count="44628">S</span>tats.close_span ();
-  <span data-count="44621">c</span>heck
+  <span data-count="45319">S</span>tats.close_span ();
+  <span data-count="45312">c</span>heck
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1291">S</span>tats.start_span "model" "solver";
-  <span data-count="1289">l</span>et module Solver = (val solver_module) in
+  <span data-count="1368">S</span>tats.start_span "model" "solver";
+  <span data-count="1367">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1291">`</span>Sat -&gt; begin
+    | <span data-count="1370">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1288">S</span>ome model -&gt; model
+      | <span data-count="1370">S</span>ome model -&gt; model
     end
     | `Unsat | `Unknown -&gt; assert false
   in
   Stats.close_span ();
-  <span data-count="1288">m</span>odel
+  <span data-count="1369">m</span>odel
 </code></pre>
       </div>
     </div>
