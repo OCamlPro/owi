@@ -20,14 +20,14 @@ module type S = sig
   val create :
        int
     -> Smtml.Symbol.t list
-    -> Symbolic_value.bool list
+    -> Symbolic_path_condition.t
     -> Memory.collection
     -> Symbolic_table.collection
     -> Symbolic_global.collection
     -> int32 list
     -> t
 
-  val pc : t -> Symbolic_value.bool list
+  val pc : t -> Symbolic_path_condition.t
 
   val memories : t -> Memory.collection
 
@@ -53,10 +53,6 @@ module type S = sig
 end
 
 module type Intf = sig
-  module type M = M
-
-  module type S = S
-
   module Make (Symbolic_memory : M) :
     S with type Memory.collection = Symbolic_memory.collection
 end
