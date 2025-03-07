@@ -60,7 +60,7 @@
   (integers
    (>= 0.5.1))
   (ocaml_intrinsics
-    (>= "v0.17.0"))
+    (>= "v0.16.1"))
   (prelude
     (>= 0.5))
   (processor
