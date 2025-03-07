@@ -311,13 +311,13 @@ module M :
 
   module Value = Symbolic_value
 
-  let add_pc_wrapper e = <span data-count="604">C</span>hoice.add_pc e
+  let add_pc_wrapper e = <span data-count="608">C</span>hoice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="590">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="590">l</span> i
+    <span data-count="594">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="594">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96963">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96948">l</span> i
+    <span data-count="96945">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96882">l</span> i
 
   let symbol_bool () =
     <span data-count="2">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -344,15 +344,15 @@ module M :
     <span data-count="7">l</span>et+ () = add_pc_wrappe<span data-count="7">r</span> (Value.I32.g<span data-count="7">t</span> hi x) in
     <span data-count="7">x</span>
 
-  let abort () : unit Choice.t = <span data-count="1">C</span>hoice.stop
+  let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9947">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9945">c</span> m ~ptr:base ~size
+    <span data-count="9944">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9942">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2541">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2541">e</span> m ptr
+    <span data-count="2536">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2536">e</span> m ptr
 
-  let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
+  let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
 
   let in_replay_mode () = <span data-count="2">C</span>hoice.return @@ Smtml.Expr.valu<span data-count="2">e</span> (Smtml.Value.Int 0)
 

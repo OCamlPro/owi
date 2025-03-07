@@ -371,10 +371,10 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   <span data-count="386">l</span>et res_queue = Wq.make () in
   <span data-count="386">l</span>et path_count = ref 0 in
   let callback v =
-    <span data-count="1712">l</span>et open Symbolic_choice_intf in
+    <span data-count="1784">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1719">m</span>atch (fail_mode, v) with
-    | <span data-count="1509">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1785">m</span>atch (fail_mode, v) with
+    | <span data-count="1579">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="1">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
