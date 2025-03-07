@@ -30,6 +30,10 @@ jobs:
           rustup update
           rustup target add wasm32-unknown-unknown
           sudo apt update
+          wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
+          mkdir zig
+          tar xf zig-*.tar.xz -C zig --strip-components 1
+          sudo mv zig/* /usr/local/bin/
           opam install . --depext-only --with-test --with-doc
       - name: setup-deploy
         run: |

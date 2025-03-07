@@ -62,11 +62,8 @@ jobs:
             wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
             mkdir zig
             tar xf zig-*.tar.xz -C zig --strip-components 1
-            sudo mv zig/* /usr/bin/
-            echo "installed Zig"
+            sudo mv zig/* /usr/local/bin/
           fi
-          which zig
-          zig version
           opam install . --depext-only --with-test --with-doc
       - name: setup
         if: steps.cache-opam.outputs.cache-hit != 'true'
@@ -91,7 +88,7 @@ jobs:
       - name: lint-doc
         run: |
           ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt || true
-          # $(exit $(wc -l output.txt | cut -d " " -f1))
+          $(exit $(wc -l output.txt | cut -d " " -f1))
       - name: lint-fmt
         run: |
           opam exec -- dune build @fmt || (echo "\n⚠️ please run \`dune fmt\` and try again" && exit 1)
