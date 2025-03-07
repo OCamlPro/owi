@@ -120,7 +120,7 @@ We only list proposals that reached phase 3 at least.
 - [november 2024]: [LVP working group] day of the [GdR GPL]
 - [december 2024]: Léo Andrès' PhD defense
 - january 2025: [JFLA 2025]
-- february 2025: [Wasm Research Day 2025]
+- [february 2025]: [Wasm Research Day 2025]
 - february 2025: [PPS Seminar]
 
 ### Spelling and pronunciation
@@ -171,12 +171,9 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 
 [build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build.yml/badge.svg
 [build status]: https://github.com/ocamlpro/owi/actions
-[Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
 [coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
 [coverage percentage]: https://ocamlpro.github.io/owi/coverage
-[december 2024]: https://www.zapashcanon.fr/phd#:~:text=after%20the%20defense.-,Defense,My%20slides%20are%20available%20here.,-%F0%9F%94%9D%20%7C%20nothing%20to%20hide
 [documentation]: https://ocamlpro.github.io/owi/api/owi
-[Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
 [JFLA 2025]: https://jfla.inria.fr/jfla2025.html
 [GdR GPL]: https://gdr-gpl.cnrs.fr/
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
@@ -188,7 +185,6 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [NGI0 Core]: https://nlnet.nl/core
 [november 2024]: https://groupes.renater.fr/wiki/lvp/public/journee_lvp_novembre2024
 [OCaml]: https://ocaml.org
-[october 2023]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [opam]: https://opam.ocaml.org
 [OUPS (OCaml UserS in Paris)]: https://oups.frama.io
 [Owi]: https://ocamlpro.github.io/owi
@@ -196,12 +192,18 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [Owi project on NLnet]: https://nlnet.nl/project/OWI
 [PPS Seminar]: https://www.irif.fr/seminaires/pps/index
 [reference test suite script]: https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts
-[september 2023]: https://invidious.zapashcanon.fr/watch?v=IM76cMP3Eqo
 [Wasm scripts]: https://github.com/WebAssembly/spec/tree/main/interpreter#scripts
-[video of our talk]: https://invidious.zapashcanon.fr/watch?v=os_pknmiqmU
 [WebAssembly]: https://webassembly.org
 [WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
 [Wasm Research Day 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025.html
+
+[Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
+[Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
+
+[september 2023]: https://youtu.be/IM76cMP3Eqo
+[october 2023]: https://youtu.be/os_pknmiqmU
+[december 2024]: https://fs.zapashcanon.fr/mp4/phd_defense.mp4
+[february 2025]: https://youtu.be/x6V-NJ9agjg
 
 [Import/Export of Mutable Globals]: https://github.com/WebAssembly/mutable-global
 [Non-trapping float-to-int conversions]: https://github.com/WebAssembly/nontrapping-float-to-int-conversions
@@ -244,4 +246,4 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [OCaml library]: example/lib
 [a fuzzer]: test/fuzz
 
-[🐌]: https://invidious.zapashcanon.fr/watch?v=XgK9Fd8ikxk
+[🐌]: https://youtu.be/XgK9Fd8ikxk
