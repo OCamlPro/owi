@@ -49,7 +49,7 @@ let mk_string buf s =
         | 't' -> '\t'
         | '\\' -> '\\'
         | '\'' -> '\''
-        | '\"' -> '\"'
+        | '"' -> '"'
         | 'u' ->
           let j = !i + 2 in
           begin
@@ -103,13 +103,13 @@ let frac = [%sedlex.regexp? num]
 
 let float =
   [%sedlex.regexp?
-    ( Opt sign, num, '.', Opt frac
-    | Opt sign, num, Opt ('.', Opt frac), ('e' | 'E'), Opt sign, num
-    | Opt sign, "0x", hexnum, '.', Opt hexfrac
-    | Opt sign, "0x", hexnum, Opt ('.', Opt hexfrac), ('p' | 'P'), Opt sign, num
-    | Opt sign, "inf"
-    | Opt sign, "nan"
-    | Opt sign, "nan:", "0x", hexnum )]
+      ( Opt sign, num, '.', Opt frac
+      | Opt sign, num, Opt ('.', Opt frac), ('e' | 'E'), Opt sign, num
+      | Opt sign, "0x", hexnum, '.', Opt hexfrac
+      | Opt sign, "0x", hexnum, Opt ('.', Opt hexfrac), ('p' | 'P'), Opt sign, num
+      | Opt sign, "inf"
+      | Opt sign, "nan"
+      | Opt sign, "nan:", "0x", hexnum )]
 
 let nat = [%sedlex.regexp? num | "0x", hexnum]
 
@@ -119,15 +119,38 @@ let num = [%sedlex.regexp? float | int | nat]
 
 let id_char =
   [%sedlex.regexp?
-    ( '0' .. '9'
-    | 'a' .. 'z'
-    | 'A' .. 'Z'
-    | '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '/' | ':'
-    | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' )]
+      ( '0' .. '9'
+      | 'a' .. 'z'
+      | 'A' .. 'Z'
+      | '!' | '#' | '$' | '%' | '&' | '\'' | '*' | '+' | '-' | '.' | '/' | ':'
+      | '<' | '=' | '>' | '?' | '@' | '\\' | '^' | '_' | '`' | '|' | '~' )]
 
 let string_elem = [%sedlex.regexp? Sub (any, "\"") | "\\\""]
 
-let name = [%sedlex.regexp? "\"", Star string_elem, "\""]
+let utf8cont = [%sedlex.regexp? '\x80' .. '\xbf']
+
+let utf8enc =
+  [%sedlex.regexp?
+      ( '\xc2' .. '\xdf', utf8cont
+      | '\xe0', '\xa0' .. '\xbf', utf8cont
+      | '\xed', '\x80' .. '\x9f', utf8cont
+      | ('\xe1' .. '\xec' | '\xee' .. '\xef'), utf8cont, utf8cont
+      | '\xf0', '\x90' .. '\xbf', utf8cont, utf8cont
+      | '\xf4', '\x80' .. '\x8f', utf8cont, utf8cont
+      | '\xf1' .. '\xf3', utf8cont, utf8cont, utf8cont )]
+
+let escape = [%sedlex.regexp? 'n' | 'r' | 't' | '\\' | '\'' | '"']
+
+let character =
+  [%sedlex.regexp?
+      ( Sub (any, ('"' | '\\' | '\x00' .. '\x1f' | '\x7f' .. '\xff'))
+      | utf8enc
+      | '\\', escape
+      | '\\', hexdigit, hexdigit
+      | '\\', "u{", hexnum, '}' )]
+
+(* TODO: use character here instead of string_elem ? *)
+let name = [%sedlex.regexp? '"', Star string_elem, '"']
 
 let operator =
   [%sedlex.regexp? Plus ('0' .. '9' | 'a' .. 'z' | '.' | '_' | ':'), Star name]
@@ -142,7 +165,7 @@ let bad_num = [%sedlex.regexp? num, Plus id]
 
 let annot_atom =
   [%sedlex.regexp?
-    Plus id_char | num | name | ',' | ';' | '[' | ']' | '{' | '}']
+      Plus id_char | num | name | ',' | ';' | '[' | ']' | '{' | '}']
 
 let keywords =
   let tbl = Hashtbl.create 512 in
@@ -449,33 +472,34 @@ let keywords =
   tbl
 
 let rec token buf =
+  (* Fmt.epr "LXM = %S@\n" (Utf8.lexeme buf); *)
   match%sedlex buf with
   | Plus any_blank -> token buf
   | bad_num | bad_id | bad_name -> unknown_operator buf
   | num -> NUM (Utf8.lexeme buf)
-  | operator -> begin
+  | operator ->
     let operator = Utf8.lexeme buf in
     match Hashtbl.find_opt keywords operator with
     | None -> unknown_operator buf
     | Some v -> v
-  end
-  (* comment *)
-  | ";;" ->
-    single_comment buf;
+end
+(* comment *)
+| ";;" ->
+  single_comment buf;
+  token buf
+| "(;" ->
+  comment buf;
+  token buf
+(* custom annotation *)
+| "(@", name ->
+  let annotid = Utf8.lexeme buf in
+  let annotid = String.sub annotid 3 (String.length annotid - 4) in
+  let annotid = mk_string buf annotid in
+  if String.equal "" annotid then raise Empty_annotation_id
+  else
+    let items = Sexp.List (annot buf) in
+    Annot.(record_annot annotid items);
     token buf
-  | "(;" ->
-    comment buf;
-    token buf
-  (* custom annotation *)
-  | "(@", name ->
-    let annotid = Utf8.lexeme buf in
-    let annotid = String.sub annotid 3 (String.length annotid - 4) in
-    let annotid = mk_string buf annotid in
-    if String.equal "" annotid then raise Empty_annotation_id
-    else
-      let items = Sexp.List (annot buf) in
-      Annot.(record_annot annotid items);
-      token buf
   | "(@", Plus id_char ->
     let annotid = Utf8.lexeme buf in
     let annotid = String.sub annotid 2 (String.length annotid - 2) in
@@ -501,7 +525,6 @@ let rec token buf =
     NAME name
   | "\"", Star string_elem -> raise Unclosed_string
   | eof -> EOF
-  (* | "" -> EOF *)
   | any -> unknown_operator buf
   | _ -> unknown_operator buf
 
