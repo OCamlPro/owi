@@ -48,7 +48,8 @@ let run_file ~unsafe ~rac ~srac ~optimize pc filename =
    monad, hence the let*. *)
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile =
+  ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+  ~model_output_format =
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -62,6 +63,14 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = ref 0 in
+  let to_string =
+    match String.lowercase_ascii model_output_format with
+    | "json" -> Smtml.Model.to_json_string
+    | "scfg" -> Smtml.Model.to_scfg_string ~no_value
+    | _ ->
+      Fmt.epr "Expected \"json\" or \"scfg\" but got %s\n" model_output_format;
+      assert false
+  in
   let callback v =
     let open Symbolic_choice_intf in
     incr path_count;
@@ -86,7 +95,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let print_bug = function
     | `ETrap (tr, model) ->
       Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
-      Fmt.pr "%s@\n" (Smtml.Model.to_scfg_string ~no_value model)
+      Fmt.pr "%s@\n" (to_string model)
     | `EAssert (assertion, model) ->
       if no_assert_failure_expression_printing then begin
         Fmt.pr "Assert failure@\n"
@@ -94,7 +103,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       else begin
         Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
       end;
-      Fmt.pr "%s@\n" (Smtml.Model.to_scfg_string ~no_value model)
+      Fmt.pr "%s@\n" (to_string model)
   in
   let rec print_and_count_failures count_acc results =
     match results () with

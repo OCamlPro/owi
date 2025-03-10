@@ -124,6 +124,10 @@ let solver =
     & opt solver_conv Smtml.Solver_type.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
+let model_output_format =
+  let doc = "The format of the output model" in
+  Arg.(value & opt string "scfg" & info [ "model-output-format" ] ~doc)
+
 let unsafe =
   let doc = "skip typechecking pass" in
   Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
@@ -177,11 +181,12 @@ let cpp_cmd =
   and+ deterministic_result_order
   and+ fail_mode
   and+ solver
-  and+ profile in
+  and+ profile
+  and+ model_output_format in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~profile
+    ~fail_mode ~concolic ~solver ~profile ~model_output_format
 
 (* owi c *)
 
@@ -229,11 +234,12 @@ let c_cmd =
        Frama-C's current language feature implementations"
     in
     Arg.(value & flag & info [ "e-acsl" ] ~doc)
-  and+ solver in
+  and+ solver
+  and+ model_output_format in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~eacsl ~solver ~profile
+    ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_output_format
 
 (* owi fmt *)
 
@@ -334,11 +340,12 @@ let rust_cmd =
   and+ deterministic_result_order
   and+ fail_mode
   and+ solver
-  and+ profile in
+  and+ profile
+  and+ model_output_format in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~profile
+    ~fail_mode ~concolic ~solver ~profile ~model_output_format
 
 (* owi validate *)
 
@@ -393,10 +400,12 @@ let sym_cmd =
   and+ workspace
   and+ solver
   and+ files
-  and+ profile in
+  and+ profile
+  and+ model_output_format in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~model_output_format
 
 (* owi replay *)
 
@@ -445,10 +454,12 @@ let conc_cmd =
   and+ workspace
   and+ solver
   and+ files
-  and+ profile in
+  and+ profile
+  and+ model_output_format in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~model_output_format
 
 (* owi version *)
 
@@ -524,10 +535,12 @@ let zig_cmd =
   and+ deterministic_result_order
   and+ fail_mode
   and+ profile
-  and+ solver in
+  and+ solver
+  and+ model_output_format in
   Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
+    ~model_output_format
 
 (* owi *)
 

@@ -104,7 +104,7 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
 
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile :
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile ~model_output_format :
   unit Result.t =
   let includes = c_files_location @ includes in
   let* modul = compile ~includes ~opt_lvl debug files in
@@ -113,4 +113,4 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace:(Fpath.v "owi-out")
-    ~solver ~files ~profile
+    ~solver ~files ~profile ~model_output_format

@@ -63,7 +63,7 @@ let compile ~includes debug (files : Fpath.t list) : Fpath.t Result.t =
 
 let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile :
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile ~model_output_format :
   unit Result.t =
   let includes = zig_files_location @ includes in
   let* modul = compile ~includes debug files in
@@ -72,4 +72,4 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile ~model_output_format
