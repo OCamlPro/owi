@@ -79,12 +79,12 @@ Array tests:
   Using owi conc:
   Assert failure
   Model:
-    (model
-      (symbol_1 (i32.const 1048068351))
-      (symbol_2 (i32.const 12775386))
-      (symbol_3 (i32.const 0))
-      (symbol_4 (i32.const 0)))
-  Reached problem!
+   model {
+    symbol symbol_1 i32 1048068351
+    symbol symbol_2 i32 12775386
+    symbol symbol_3 i32 0
+    symbol symbol_4 i32 0
+  }Reached problem!
   [13]
   Testing "files/normal/testsuite/array/array_test_reverse.c":
   Using owi sym:

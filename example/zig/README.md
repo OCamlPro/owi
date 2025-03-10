@@ -71,6 +71,9 @@ OPTIONS
        -I VAL
            headers path
 
+       --model-output-format=VAL (absent=scfg)
+           The format of the output model
+
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
 

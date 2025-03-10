@@ -28,6 +28,7 @@
 - add event logger
 - add `owi_range` primitive
 - add `owi zig` subcommand
+* add `--model-output-format` option
 
 ## 0.2 - 2024-04-24
 

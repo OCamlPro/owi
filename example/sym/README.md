@@ -59,6 +59,9 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
+       --model-output-format=VAL (absent=scfg)
+           The format of the output model
+
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
 
