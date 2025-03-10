@@ -24,4 +24,5 @@ val cmd :
   -> eacsl:bool
   -> solver:Smtml.Solver_type.t
   -> profile:Fpath.t option
+  -> model_output_format: string
   -> unit Result.t

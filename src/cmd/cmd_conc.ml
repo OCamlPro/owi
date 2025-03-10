@@ -419,6 +419,23 @@ let run solver tree link_state modules_to_run =
   in
   loop initial_model
 
+let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
+  Smtml.Model.t =
+  let table = Hashtbl.create (List.length assignments) in
+  List.iter
+    (fun (s, v) ->
+      let value =
+        match v with
+        | Concrete_value.I32 x -> Smtml.Value.Num (I32 x)
+        | I64 x -> Num (I64 x)
+        | F32 x -> Num (F32 (Float32.to_bits x))
+        | F64 x -> Num (F64 (Float64.to_bits x))
+        | Ref _ -> assert false
+      in
+      Hashtbl.add table s value )
+    assignments;
+  table
+
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
@@ -426,12 +443,21 @@ let run solver tree link_state modules_to_run =
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
-  ~files ~profile =
+  ~files ~profile ~model_output_format =
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
+  let to_string =
+    match String.lowercase_ascii model_output_format with
+    | "json" -> fun m -> assignments_to_model m |> Smtml.Model.to_json_string
+    | "scfg" ->
+      fun m -> assignments_to_model m |> Smtml.Model.to_scfg_string ~no_value
+    | _ ->
+      Fmt.epr "Expected \"json\" or \"scfg\" but got %s\n" model_output_format;
+      assert false
+  in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
   let* link_state, modules_to_run =
@@ -463,9 +489,10 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
     Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
-    Fmt.pr "Model:@\n  @[<v>%a@]@."
-      (Concolic_choice.pp_assignments ~no_value)
-      assignments;
+    (* Fmt.pr "Model:@\n  @[<v>%a@]@." *)
+    (*   (Concolic_choice.pp_assignments ~no_value) *)
+    (*   assignments; *)
+    Fmt.pr "Model:@\n %s" (to_string assignments);
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
@@ -477,8 +504,9 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
       (* TODO: print the assert failure expression ! *)
       Fmt.pr "Assert failure@\n"
     end;
-    Fmt.pr "Model:@\n  @[<v>%a@]@."
-      (Concolic_choice.pp_assignments ~no_value)
-      assignments;
+    (* Fmt.pr "Model:@\n  @[<v>%a@]@." *)
+    (*   (Concolic_choice.pp_assignments ~no_value) *)
+    (*   assignments; *)
+    Fmt.pr "Model:@\n %s" (to_string assignments);
     let* () = testcase assignments in
     Error (`Found_bug 1)

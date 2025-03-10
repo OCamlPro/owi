@@ -25,4 +25,5 @@ val cmd :
   -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
   -> profile:Fpath.t option
+  -> model_output_format:string
   -> unit Result.t
