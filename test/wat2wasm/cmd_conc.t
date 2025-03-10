@@ -2,8 +2,9 @@
   $ owi conc symbolic.wasm
   Trap: unreachable
   Model:
-    (model
-      (symbol_1 (i32.const 6)))
+   model {
+    symbol symbol_1 i32 6
+  }
   Reached problem!
   [13]
   $ owi wasm2wat symbolic.wasm

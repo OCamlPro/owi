@@ -27,8 +27,9 @@ Let's see if owi is able to find a value for `x` that lead to an error:
 $ owi conc ./mini.wat
 Trap: unreachable
 Model:
-  (model
-    (symbol_1 (i32.const 6)))
+ model {
+  symbol symbol_1 i32 6
+}
 Reached problem!
 [13]
 ```
@@ -58,6 +59,9 @@ OPTIONS
 
        --fail-on-trap-only
            ignore assertion violations and only report traps
+
+       --model-output-format=VAL (absent=scfg)
+           The format of the output model
 
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure

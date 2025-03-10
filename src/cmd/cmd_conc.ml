@@ -492,7 +492,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     (* Fmt.pr "Model:@\n  @[<v>%a@]@." *)
     (*   (Concolic_choice.pp_assignments ~no_value) *)
     (*   assignments; *)
-    Fmt.pr "Model:@\n %s" (to_string assignments);
+    Fmt.pr "Model:@\n %s\n" (to_string assignments);
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
