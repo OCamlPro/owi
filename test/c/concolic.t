@@ -8,5 +8,6 @@
     symbol symbol_4 i32
     symbol symbol_5 i32
     symbol symbol_6 i32
-  }Reached problem!
+  }
+  Reached problem!
   [13]

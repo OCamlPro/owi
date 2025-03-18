@@ -449,12 +449,11 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
-  let to_string =
+  let to_string m =
+    let model = assignments_to_model m in
     match model_output_format with
-    | Cmd_utils.Json ->
-      fun m -> assignments_to_model m |> Smtml.Model.to_json_string
-    | Scfg ->
-      fun m -> assignments_to_model m |> Smtml.Model.to_scfg_string ~no_value
+    | Cmd_utils.Json -> Smtml.Model.to_json_string model
+    | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in

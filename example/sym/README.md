@@ -60,7 +60,7 @@ OPTIONS
            ignore assertion violations and only report traps
 
        --model-output-format=VAL (absent=scfg)
-           The format of the output model
+            The format of the output model ("json" or "scfg")
 
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
