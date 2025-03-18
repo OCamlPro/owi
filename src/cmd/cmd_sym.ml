@@ -64,12 +64,9 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let res_queue = Wq.make () in
   let path_count = ref 0 in
   let to_string =
-    match String.lowercase_ascii model_output_format with
-    | "json" -> Smtml.Model.to_json_string
-    | "scfg" -> Smtml.Model.to_scfg_string ~no_value
-    | _ ->
-      Fmt.epr "Expected \"json\" or \"scfg\" but got %s\n" model_output_format;
-      assert false
+    match model_output_format with
+    | Cmd_utils.Json -> Smtml.Model.to_json_string
+    | Scfg -> Smtml.Model.to_scfg_string ~no_value
   in
   let callback v =
     let open Symbolic_choice_intf in
