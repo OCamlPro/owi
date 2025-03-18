@@ -289,7 +289,7 @@ let rewrite_export named (exports : Grouped.opt_export list) :
   Binary.export list Result.t =
   list_map
     (fun { Grouped.name; id } ->
-      let+ (Raw id) : binary indice =
+      let+ id =
         match id with
         | Raw _i as indice -> Ok indice
         | Text name -> (
@@ -297,6 +297,7 @@ let rewrite_export named (exports : Grouped.opt_export list) :
           | None -> Error (`Unknown_export id)
           | Some i -> Ok (Raw i) )
       in
+      let (Raw id) : binary indice = id in
 
       { Binary.name; id } )
     exports
