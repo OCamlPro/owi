@@ -45,10 +45,10 @@
   (dune-site :build)
   ;; system packages
   conf-clang
-  ;;conf-lld
-  ;;conf-llvm
-  ;;conf-rust-llvm
-  ;;conf-rust-wasm
+  conf-lld
+  conf-llvm
+  conf-rust-llvm
+  conf-rust-wasm
   ;;conf-zig
   ;; runtime
   (bos

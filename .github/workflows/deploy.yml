@@ -26,9 +26,6 @@ jobs:
           allow-prerelease-opam: false
       - name: depext
         run: |
-          # Installs rust-wasm
-          rustup update
-          rustup target add wasm32-unknown-unknown
           sudo apt update
           wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
           mkdir zig

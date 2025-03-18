@@ -49,9 +49,6 @@ jobs:
           allow-prerelease-opam: false
       - name: depext
         run: |
-          # Installs rust-wasm
-          rustup update
-          rustup target add wasm32-unknown-unknown
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew update
             brew upgrade
