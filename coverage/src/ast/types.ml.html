@@ -2268,13 +2268,13 @@ type _ indice =
   | Text : string -&gt; &lt; with_string_indices ; .. &gt; indice
   | Raw : int -&gt; &lt; .. &gt; indice
 
-let pp_id fmt id = <span data-count="551">p</span>f fmt "$%s" id
+let pp_id fmt id = <span data-count="552">p</span>f fmt "$%s" id
 
 let pp_id_opt fmt = function <span data-count="1012">N</span>one -&gt; () | <span data-count="385">S</span>ome i -&gt; pf fmt " %a" pp_id i
 
-let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="1310">f</span>unction
+let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="1311">f</span>unction
   | <span data-count="1146">R</span>aw u -&gt; int fmt u
-  | <span data-count="164">T</span>ext i -&gt; pp_id fmt i
+  | <span data-count="165">T</span>ext i -&gt; pp_id fmt i
 
 let compare_indice (type a) (id1 : a indice) (id2 : a indice) =
   <span data-count="0">m</span>atch (id1, id2) with
@@ -2302,8 +2302,8 @@ let pp_num_type fmt = function
   | <span data-count="14">F</span>64 -&gt; pf fmt "f64"
 
 let num_type_eq t1 t2 =
-  <span data-count="3225677">m</span>atch (t1, t2) with
-  | <span data-count="2958141">I</span>32, I32 | <span data-count="89294">I</span>64, I64 | <span data-count="88973">F</span>32, F32 | <span data-count="89226">F</span>64, F64 -&gt; true
+  <span data-count="3225655">m</span>atch (t1, t2) with
+  | <span data-count="2958118">I</span>32, I32 | <span data-count="89294">I</span>64, I64 | <span data-count="88973">F</span>32, F32 | <span data-count="89226">F</span>64, F64 -&gt; true
   | <span data-count="43">(</span><span data-count="15">I</span>32 | <span data-count="10">I</span>64 | <span data-count="10">F</span>32 | <span data-count="8">F</span>64), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2605,8 +2605,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="3223834">m</span>atch (t1, t2) with
-  | <span data-count="3223812">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="3223812">m</span>atch (t1, t2) with
+  | <span data-count="3223790">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="22">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2621,7 +2621,7 @@ type nonrec 'a param = string option * 'a val_type
 
 let pp_param fmt (id, vt) = <span data-count="295">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="1616074">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="1616058">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="33631">c</span>ompare_val_type t1 t2
 
@@ -2629,9 +2629,9 @@ type nonrec 'a param_type = 'a param list
 
 let pp_param_type fmt params = <span data-count="156">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="1614821">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="1614811">L</span>ist.equal param_eq t1 t2
 
-let compare_param_type t1 t2 = <span data-count="74518">L</span>ist.compare compare_param t1 t2
+let compare_param_type t1 t2 = <span data-count="74519">L</span>ist.compare compare_param t1 t2
 
 type nonrec 'a result_type = 'a val_type list
 
@@ -2639,9 +2639,9 @@ let pp_result_ fmt vt = <span data-count="163">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="163">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="1614676">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="1614666">L</span>ist.equal val_type_eq t1 t2
 
-let compare_result_type t1 t2 = <span data-count="40703">L</span>ist.compare compare_val_type t1 t2
+let compare_result_type t1 t2 = <span data-count="40704">L</span>ist.compare compare_val_type t1 t2
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
@@ -2678,11 +2678,11 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="1614821">p</span>aram_type_e<span data-count="1614821">q</span> pt1 pt2 &amp;&amp; <span data-count="1614676">r</span>esult_type_eq rt1 rt2
+  <span data-count="1614811">p</span>aram_type_e<span data-count="1614811">q</span> pt1 pt2 &amp;&amp; <span data-count="1614666">r</span>esult_type_eq rt1 rt2
 
 let compare_func_type (pt1, rt1) (pt2, rt2) =
-  <span data-count="74518">l</span>et pt = compare_param_type pt1 pt2 in
-  <span data-count="74518">i</span>f pt = 0 then <span data-count="40703">c</span>ompare_result_type rt1 rt2 else <span data-count="33815">p</span>t
+  <span data-count="74519">l</span>et pt = compare_param_type pt1 pt2 in
+  <span data-count="74519">i</span>f pt = 0 then <span data-count="40704">c</span>ompare_result_type rt1 rt2 else <span data-count="33815">p</span>t
 
 type nonrec 'a table_type = limits * 'a ref_type
 
@@ -3161,8 +3161,8 @@ let str_type_eq t1 t2 =
   | <span data-count="0">_</span>, _ -&gt; false
 
 let compare_str_type t1 t2 =
-  <span data-count="74518">m</span>atch (t1, t2) with
-  | <span data-count="74518">D</span>ef_func_t t1, Def_func_t t2 -&gt; compare_func_type t1 t2
+  <span data-count="74519">m</span>atch (t1, t2) with
+  | <span data-count="74519">D</span>ef_func_t t1, Def_func_t t2 -&gt; compare_func_type t1 t2
   | _, _ -&gt; assert false
 
 type 'a sub_type = final * 'a indice list * 'a str_type

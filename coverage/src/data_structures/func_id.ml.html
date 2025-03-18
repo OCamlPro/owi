@@ -98,11 +98,11 @@ type 'a collection =
 let empty = { c = IMap.empty; last = 0 }
 
 let add f t { last; c } =
-  <span data-count="11965">l</span>et c = IMap.add last (f, t) c in
-  <span data-count="11965">(</span>last, { c; last = suc<span data-count="11965">c</span> last })
+  <span data-count="11966">l</span>et c = IMap.add last (f, t) c in
+  <span data-count="11966">(</span>last, { c; last = suc<span data-count="11966">c</span> last })
 
 let get i c =
-  <span data-count="122729">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="122758">S</span>ome (v, _) -&gt; Some v
+  <span data-count="122784">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="122784">S</span>ome (v, _) -&gt; Some v
 
 let get_typ i c =
   <span data-count="4327">m</span>atch IMap.find_opt i c.c with None -&gt; assert false | <span data-count="4327">S</span>ome (_, t) -&gt; t
