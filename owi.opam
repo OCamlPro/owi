@@ -31,7 +31,7 @@ depends: [
   "prelude" {>= "0.5"}
   "processor" {>= "0.2"}
   "sedlex" {>= "3.3"}
-  "smtml" {>= "0.6.0"}
+  "smtml" {>= "0.6.1"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
   "odoc" {>= "3.0.0~beta1" & with-doc}
@@ -77,6 +77,4 @@ depexts: [
 ]
 pin-depends: [
   [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
-  ["alt-ergo-lib.2.6.0" "git+https://github.com/OCamlPro/alt-ergo.git#7ee96296a5de9588a4d585b3b8abec35f4755425"]
-  ["alt-ergo.2.6.0" "git+https://github.com/OCamlPro/alt-ergo.git#7ee96296a5de9588a4d585b3b8abec35f4755425"]
 ]
