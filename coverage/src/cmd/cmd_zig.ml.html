@@ -18,16 +18,16 @@
       <h2>78.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:24.00%"></span>
-      <span class="unvisited" style="top:25.33%"></span>
-      <span class="unvisited" style="top:30.67%"></span>
-      <span class="unvisited" style="top:32.00%"></span>
-      <span class="unvisited" style="bottom:30.67%"></span>
-      <span class="unvisited" style="bottom:26.67%"></span>
-      <span class="unvisited" style="bottom:25.33%"></span>
-      <span class="unvisited" style="bottom:24.00%"></span>
-      <span class="unvisited" style="bottom:17.33%"></span>
-      <span class="some-visited" style="bottom:4.00%"></span>
+      <span class="unvisited" style="top:23.68%"></span>
+      <span class="unvisited" style="top:25.00%"></span>
+      <span class="unvisited" style="top:30.26%"></span>
+      <span class="unvisited" style="top:31.58%"></span>
+      <span class="unvisited" style="bottom:31.58%"></span>
+      <span class="unvisited" style="bottom:27.63%"></span>
+      <span class="unvisited" style="bottom:26.32%"></span>
+      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="unvisited" style="bottom:18.42%"></span>
+      <span class="some-visited" style="bottom:5.26%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -107,6 +107,7 @@
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -186,6 +187,7 @@
 <a href="#L73">73</a>
 <a href="#L74">74</a>
 <a href="#L75">75</a>
+<a href="#L76">76</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -252,8 +254,8 @@ let compile ~includes debug (files : Fpath.t list) : Fpath.t Result.t =
 
 let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile :
-  unit Result.t =
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
+  ~model_output_format : unit Result.t =
   <span data-count="1">l</span>et includes = zig_files_location @ includes in
   let* modul = compil<span data-count="1">e</span> ~includes debug files in
   <span data-count="1">l</span>et workspace = Fpath.v "owi-out" in
@@ -262,6 +264,7 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~model_output_format
 </code></pre>
       </div>
     </div>
