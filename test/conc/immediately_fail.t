@@ -1,5 +1,6 @@
   $ owi conc immediately_fail.wat
   Assert failure
   Model:
-   modelReached problem!
+   model
+  Reached problem!
   [13]

@@ -4,6 +4,8 @@
 
 open Syntax
 
+type model_output_format = Scfg | Json
+
 let out_testcase ~dst testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
   let tag atts name = (("", name), atts) in

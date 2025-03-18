@@ -37,6 +37,19 @@ let path_conv = Arg.conv (Fpath.of_string, Fpath.pp)
 
 let solver_conv = Arg.conv (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 
+let model_format_conv =
+  let of_string s =
+    match String.lowercase_ascii s with
+    | "scfg" -> Ok Cmd_utils.Scfg
+    | "json" -> Ok Json
+    | _ -> Error (`Msg "Expected \"json\" or \"scfg\" but got %s\n")
+  in
+  let pp fmt = function
+    | Cmd_utils.Scfg -> Fmt.string fmt "scfg"
+    | Json -> Fmt.string fmt "json"
+  in
+  Arg.conv (of_string, pp)
+
 (* Common options *)
 
 let copts_t = Term.(const [])
@@ -125,8 +138,8 @@ let solver =
     & info [ "solver"; "s" ] ~doc )
 
 let model_output_format =
-  let doc = "The format of the output model" in
-  Arg.(value & opt string "scfg" & info [ "model-output-format" ] ~doc)
+  let doc = "The format of the output model (\"json\" or \"scfg\")" in
+  Arg.(value & opt model_format_conv Scfg & info [ "model-output-format" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in

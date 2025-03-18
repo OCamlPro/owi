@@ -450,13 +450,11 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let to_string =
-    match String.lowercase_ascii model_output_format with
-    | "json" -> fun m -> assignments_to_model m |> Smtml.Model.to_json_string
-    | "scfg" ->
+    match model_output_format with
+    | Cmd_utils.Json ->
+      fun m -> assignments_to_model m |> Smtml.Model.to_json_string
+    | Scfg ->
       fun m -> assignments_to_model m |> Smtml.Model.to_scfg_string ~no_value
-    | _ ->
-      Fmt.epr "Expected \"json\" or \"scfg\" but got %s\n" model_output_format;
-      assert false
   in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
@@ -489,10 +487,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
     Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
-    (* Fmt.pr "Model:@\n  @[<v>%a@]@." *)
-    (*   (Concolic_choice.pp_assignments ~no_value) *)
-    (*   assignments; *)
-    Fmt.pr "Model:@\n %s\n" (to_string assignments);
+    Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments);
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
@@ -504,9 +499,6 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
       (* TODO: print the assert failure expression ! *)
       Fmt.pr "Assert failure@\n"
     end;
-    (* Fmt.pr "Model:@\n  @[<v>%a@]@." *)
-    (*   (Concolic_choice.pp_assignments ~no_value) *)
-    (*   assignments; *)
-    Fmt.pr "Model:@\n %s" (to_string assignments);
+    Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments);
     let* () = testcase assignments in
     Error (`Found_bug 1)
