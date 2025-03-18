@@ -84,7 +84,8 @@ Array tests:
     symbol symbol_2 i32 12775386
     symbol symbol_3 i32 0
     symbol symbol_4 i32 0
-  }Reached problem!
+  }
+  Reached problem!
   [13]
   Testing "files/normal/testsuite/array/array_test_reverse.c":
   Using owi sym:

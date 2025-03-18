@@ -4,7 +4,9 @@
 
 val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
 
-type model_output_format = Scfg | Json
+type model_output_format =
+  | Scfg
+  | Json
 
 val add_main_as_start :
   Binary.modul -> (Binary.modul, [> `Msg of string ]) result

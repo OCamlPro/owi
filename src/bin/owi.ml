@@ -42,7 +42,7 @@ let model_format_conv =
     match String.lowercase_ascii s with
     | "scfg" -> Ok Cmd_utils.Scfg
     | "json" -> Ok Json
-    | _ -> Error (`Msg "Expected \"json\" or \"scfg\" but got %s\n")
+    | _ -> Fmt.error_msg {|Expected "json" or "scfg" but got "%s"|} s
   in
   let pp fmt = function
     | Cmd_utils.Scfg -> Fmt.string fmt "scfg"
@@ -138,7 +138,7 @@ let solver =
     & info [ "solver"; "s" ] ~doc )
 
 let model_output_format =
-  let doc = "The format of the output model (\"json\" or \"scfg\")" in
+  let doc = {| The format of the output model ("json" or "scfg") |} in
   Arg.(value & opt model_format_conv Scfg & info [ "model-output-format" ] ~doc)
 
 let unsafe =
