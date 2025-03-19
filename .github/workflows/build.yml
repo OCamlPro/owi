@@ -53,6 +53,8 @@ jobs:
             brew update
             brew upgrade
             brew install pkgconf zig # TODO: remove zig once the conf-zig package works
+            rustup update
+            rustup target add wasm32-unknown-unknown
           fi
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt update
