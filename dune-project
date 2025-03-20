@@ -73,7 +73,7 @@
     (>= 1.0.3))
   (xmlm (>= 1.4.0))
   ;; doc
-  (odoc (and (>= "3.0.0~beta1") :with-doc))
+  (odoc (and (>= 3.0.0) :with-doc))
   ;; test
   (mdx
    (and
