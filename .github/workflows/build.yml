@@ -74,16 +74,12 @@ jobs:
           opam clean --switch-cleanup
       - name: build
         run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
-          fi
+          export PATH="$HOMEBREW_PREFIX/bin/:$PATH" # macossucks
           opam exec -- dune build @install
       - name: test
         run: |
           mv .git.tmp .git # bring it back, we won't call opam anymore from now on
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
-          fi
+          export PATH="$HOMEBREW_PREFIX/bin/:$PATH" # macossucks
           opam exec -- dune runtest
       - name: lint-doc
         run: |
