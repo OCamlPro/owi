@@ -99,7 +99,10 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
   (cohttp :with-dev-setup)
   (cohttp-lwt-unix :with-dev-setup)
   (crowbar :with-dev-setup)
-  (extunix :with-dev-setup)
+  (extunix
+   (and
+    (>= 0.4.4)
+    :with-dev-setup))
   (gnuplot :with-dev-setup)
   (graphics :with-dev-setup)
   (landmarks-ppx :with-dev-setup)
