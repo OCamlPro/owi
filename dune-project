@@ -80,6 +80,7 @@
     :with-test
     (>= 2.1)))
   (frama-c (and (>= 29.0) :with-test))
+  (z3 :with-test)
   ;; dev
   (bisect_ppx
    (and
