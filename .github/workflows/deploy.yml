@@ -37,8 +37,7 @@ jobs:
           opam install . --depext-only --with-test --with-doc
       - name: setup-deploy
         run: |
-          opam install . --deps-only --with-test --with-doc
-          opam install bisect_ppx z3 ocb
+          opam install . --deps-only --with-test --with-doc --with-dev-setup
       - name: api
         run: |
           touch doc/.nojekyll
