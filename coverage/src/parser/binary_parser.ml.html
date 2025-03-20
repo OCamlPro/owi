@@ -2823,7 +2823,7 @@ let read_SN n input =
     <span data-count="71027">l</span>et b = Char.code b in
     <span data-count="71027">l</span>et mask = (-1 lsl (n - 1)) land 0x7f in
     let* () =
-      if n &gt;= <span data-count="67905">7</span> || b land mask = <span data-count="2343">0</span> || b land mask = mas<span data-count="763">k</span> then <span data-count="71011">O</span>k ()
+      if n &gt;= <span data-count="67906">7</span> || b land mask = <span data-count="2342">0</span> || b land mask = mas<span data-count="763">k</span> then <span data-count="71011">O</span>k ()
       else <span data-count="16">E</span>rror (`Msg "integer too large")
     in
     <span data-count="71011">l</span>et x = Int64.of_int (b land 0x7f) in

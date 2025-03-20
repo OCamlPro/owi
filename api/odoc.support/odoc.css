@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* Copyright (c) 2016 The odoc contributors. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   odoc 3.0.0_beta1 */
+   odoc 3.0.0 */
 
 /* Fonts */
 /* noticia-text-regular - latin */
@@ -607,6 +607,7 @@ tt, code, pre {
   border: 1px solid var(--pre-border-color);
   border-radius: 5px;
   overflow-x: auto;
+  text-indent: initial;
 }
 
 .odoc p code,
@@ -815,13 +816,13 @@ td.def-doc *:first-child {
 
 /* Odig package page */
 
-.package nav {
+.package nav, h1 nav {
   display: inline;
   font-size: 14px;
   font-weight: normal;
 }
 
-.package .version {
+.package .version, h1 .version {
   font-size: 14px;
 }
 
