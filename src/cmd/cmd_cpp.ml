@@ -41,8 +41,9 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
       %% Cmd.of_list (List.map Cmd.p files) )
   in
 
+  let err = if debug then OS.Cmd.err_run_out else OS.Cmd.err_null in
   let* () =
-    match OS.Cmd.run clang_cmd with
+    match OS.Cmd.run ~err clang_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Error
@@ -67,7 +68,7 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   in
 
   let* () =
-    match OS.Cmd.run llc_cmd with
+    match OS.Cmd.run ~err llc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Error
@@ -94,7 +95,7 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   in
 
   let* () =
-    match OS.Cmd.run wasmld_cmd with
+    match OS.Cmd.run ~err wasmld_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Error

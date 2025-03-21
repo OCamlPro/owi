@@ -73,7 +73,11 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     let+ () =
       list_iter
         (fun (file, out) ->
-          match OS.Cmd.run @@ framac file out with
+          match
+            OS.Cmd.run
+              ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+            @@ framac file out
+          with
           | Ok _ as v -> v
           | Error (`Msg e) ->
             Fmt.error_msg "Frama-C failed: %s"
@@ -120,7 +124,11 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let+ () =
-    match OS.Cmd.run clang with
+    match
+      OS.Cmd.run
+        ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+        clang
+    with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Error
