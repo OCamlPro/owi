@@ -64,7 +64,7 @@ let compile ~includes debug (files : Fpath.t list) : Fpath.t Result.t =
 let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format : unit Result.t =
+  ~model_output_format ~entry_point : unit Result.t =
   let includes = zig_files_location @ includes in
   let* modul = compile ~includes debug files in
   let workspace = Fpath.v "owi-out" in
@@ -73,4 +73,4 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format
+    ~model_output_format ~entry_point

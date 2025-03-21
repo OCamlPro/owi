@@ -21,4 +21,5 @@ val cmd :
   -> solver:Smtml.Solver_type.t
   -> profile:Fpath.t option
   -> model_output_format:Cmd_utils.model_output_format
+  -> entry_point:string option
   -> unit Result.t

@@ -9,4 +9,5 @@ val cmd :
   -> optimize:bool
   -> replay_file:Fpath.t
   -> source_file:Fpath.t
+  -> entry_point:string option
   -> unit Result.t

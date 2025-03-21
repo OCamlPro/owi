@@ -4,7 +4,7 @@
 
 open Syntax
 
-let run_file ~unsafe ~optimize filename model =
+let run_file ~unsafe ~optimize ~entry_point filename model =
   let next =
     let next = ref ~-1 in
     fun () ->
@@ -145,14 +145,15 @@ let run_file ~unsafe ~optimize filename model =
   let* m =
     Compile.File.until_binary_validate ~rac:false ~srac:false ~unsafe filename
   in
-  let* m = Cmd_utils.add_main_as_start m in
+  let* m = Cmd_utils.set_entry_point entry_point m in
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
   let c = Interpret.Concrete.modul link_state.envs m in
   c
 
-let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file =
+let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
+  ~entry_point =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
   let* model =
@@ -179,5 +180,5 @@ let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file =
       in
       Array.of_list model
   in
-  let+ () = run_file ~unsafe ~optimize source_file model in
+  let+ () = run_file ~unsafe ~optimize ~entry_point source_file model in
   Fmt.pr "All OK@."

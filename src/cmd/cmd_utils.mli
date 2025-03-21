@@ -8,5 +8,5 @@ type model_output_format =
   | Scfg
   | Json
 
-val add_main_as_start :
-  Binary.modul -> (Binary.modul, [> `Msg of string ]) result
+val set_entry_point :
+  string option -> Binary.modul -> (Binary.modul, [> `Msg of string ]) result

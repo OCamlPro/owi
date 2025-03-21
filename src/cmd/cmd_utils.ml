@@ -34,63 +34,79 @@ let write_testcase =
     in
     res
 
-let add_main_as_start (m : Binary.modul) =
+let find_exported_name exported_names (m : Binary.modul) =
+  List.find_opt
+    (function
+      | { Binary.name; _ } when List.mem name exported_names -> true
+      | _ -> false )
+    m.exports.func
+
+let set_entry_point entry_point (m : Binary.modul) =
   (* We are checking if there's a start function *)
   if Option.is_some m.start then Ok m
   else
     (* If there is none, we look for a function exported with the name `main` *)
-    match
-      List.find_opt
-        (function { Binary.name = "main" | "_start"; _ } -> true | _ -> false)
-        m.exports.func
-    with
-    | None ->
-      (* TODO: fail/display a warning saying nothing will be done ? *)
-      Ok m
-    | Some export ->
-      (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
-      let main_id = export.id in
-      if main_id >= Array.length m.func then
-        Error (`Msg "can't find a main function")
-      else
-        let main_function = m.func.(main_id) in
-        let (Bt_raw main_type) =
-          match main_function with Local f -> f.type_f | Imported i -> i.desc
+    let* export =
+      match entry_point with
+      | Some entry_point -> begin
+        match find_exported_name [ entry_point ] m with
+        | None -> Fmt.error_msg "Entry point %s not found\n" entry_point
+        | Some ep -> Ok ep
+      end
+      | None ->
+        let possible_names = [ "main"; "_start" ] in
+        begin
+          match find_exported_name possible_names m with
+          | Some entry_point -> Ok entry_point
+          | None ->
+            Fmt.error_msg "No entry point found, tried: %a\n"
+              (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Fmt.string)
+              possible_names
+        end
+    in
+    (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
+    let main_id = export.id in
+    if main_id >= Array.length m.func then
+      Error (`Msg "can't find a main function")
+    else
+      let main_function = m.func.(main_id) in
+      let (Bt_raw main_type) =
+        match main_function with Local f -> f.type_f | Imported i -> i.desc
+      in
+      let default_value_of_t = function
+        | Types.Num_type I32 -> Ok (Types.I32_const 0l)
+        | Num_type I64 -> Ok (Types.I64_const 0L)
+        | Num_type F32 -> Ok (Types.F32_const (Float32.of_float 0.))
+        | Num_type F64 -> Ok (Types.F64_const (Float64.of_float 0.))
+        | Ref_type (Types.Null, t) -> Ok (Types.Ref_null t)
+        | Ref_type (Types.No_null, t) ->
+          Error
+            (`Msg
+               (Fmt.str "can not create default value of type %a"
+                  Types.pp_heap_type t ) )
+      in
+      let+ body =
+        let pt, rt = snd main_type in
+        let+ args = list_map (fun (_, t) -> default_value_of_t t) pt in
+        let after_call =
+          List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
         in
-        let default_value_of_t = function
-          | Types.Num_type I32 -> Ok (Types.I32_const 0l)
-          | Num_type I64 -> Ok (Types.I64_const 0L)
-          | Num_type F32 -> Ok (Types.F32_const (Float32.of_float 0.))
-          | Num_type F64 -> Ok (Types.F64_const (Float64.of_float 0.))
-          | Ref_type (Types.Null, t) -> Ok (Types.Ref_null t)
-          | Ref_type (Types.No_null, t) ->
-            Error
-              (`Msg
-                 (Fmt.str "can not create default value of type %a"
-                    Types.pp_heap_type t ) )
-        in
-        let+ body =
-          let pt, rt = snd main_type in
-          let+ args = list_map (fun (_, t) -> default_value_of_t t) pt in
-          let after_call =
-            List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
-          in
-          args @ [ Types.Call (Raw main_id) ] @ after_call
-        in
-        let type_f : Types.binary Types.block_type =
-          Types.Bt_raw (None, ([], []))
-        in
-        let start_code : Types.binary Types.func =
-          { Types.type_f; locals = []; body; id = None }
-        in
-        let start_func = Runtime.Local start_code in
+        args @ [ Types.Call (Raw main_id) ] @ after_call
+      in
+      let type_f : Types.binary Types.block_type =
+        Types.Bt_raw (None, ([], []))
+      in
+      let start_code : Types.binary Types.func =
+        { Types.type_f; locals = []; body; id = None }
+      in
+      let start_func = Runtime.Local start_code in
 
-        (* We need to add the new start function to the funcs of the module at the next free index *)
-        let func =
-          Array.init
-            (Array.length m.func + 1)
-            (fun i -> if i = Array.length m.func then start_func else m.func.(i))
-        in
+      (* We need to add the new start function to the funcs of the module at the next free index *)
+      let func =
+        Array.init
+          (Array.length m.func + 1)
+          (fun i -> if i = Array.length m.func then start_func else m.func.(i))
+      in
 
-        let start = Some (Array.length m.func) in
-        { m with func; start }
+      let start = Some (Array.length m.func) in
+      { m with func; start }

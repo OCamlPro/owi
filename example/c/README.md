@@ -452,6 +452,9 @@ OPTIONS
            https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
            Frama-C's current language feature implementations
 
+       --entry-point=VAL
+           possible entry points of the executable
+
        --fail-on-assertion-only
            ignore traps and only report assertion violations
 
