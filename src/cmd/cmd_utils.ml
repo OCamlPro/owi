@@ -43,7 +43,12 @@ let find_exported_name exported_names (m : Binary.modul) =
 
 let set_entry_point entry_point (m : Binary.modul) =
   (* We are checking if there's a start function *)
-  if Option.is_some m.start then Ok m
+  if Option.is_some m.start then
+    if Option.is_some entry_point then
+      Fmt.error_msg
+        "We don't know how to handle a custom entry point when there is a \
+         start function for now. Please open a bug report."
+    else Ok m
   else
     (* If there is none and we have an entry point passed in argument we search for it *)
     let* export =

@@ -49,7 +49,11 @@ let compile ~entry_point ~includes debug (files : Fpath.t list) :
     in
 
     let+ () =
-      match OS.Cmd.run zig with
+      match
+        OS.Cmd.run
+          ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+          zig
+      with
       | Ok _ as v -> v
       | Error (`Msg e) ->
         Error
