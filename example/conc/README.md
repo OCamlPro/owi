@@ -54,6 +54,9 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
+       --entry-point=VAL
+           entry point of the executable
+
        --fail-on-assertion-only
            ignore traps and only report assertion violations
 

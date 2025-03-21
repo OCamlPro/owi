@@ -50,6 +50,9 @@ OPTIONS
        -d, --debug
            debug mode
 
+       --entry-point=VAL
+           entry point of the executable
+
        --optimize
            optimize mode
 
