@@ -51,7 +51,7 @@ OPTIONS
            debug mode
 
        --entry-point=VAL
-           possible entry points of the executable
+           entry point of the executable
 
        --optimize
            optimize mode

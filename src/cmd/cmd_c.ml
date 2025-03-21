@@ -85,7 +85,9 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     outs
   else Ok files
 
-let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
+  Fpath.t Result.t =
+  let entry_point = Option.value entry_point ~default:"main" in
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
@@ -99,8 +101,8 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
         ; "-Wno-everything"
         ; "-flto=thin"
         ; (* LINKER FLAGS: *)
-          "-Wl,--entry=main"
-        ; "-Wl,--export=main"
+          Fmt.str "-Wl,--entry=%s" entry_point
+        ; Fmt.str "-Wl,--export=%s" entry_point
           (* TODO: allow this behind a flag, this is slooooow *)
         ; "-Wl,--lto-O0"
         ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
@@ -186,7 +188,7 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   let includes = c_files_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
-  let* modul = compile ~includes ~opt_lvl debug files in
+  let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in

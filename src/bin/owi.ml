@@ -160,7 +160,7 @@ let workspace =
   Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
 
 let entry_point =
-  let doc = "possible entry points of the executable" in
+  let doc = "entry point of the executable" in
   Arg.(value & opt (some string) None & info [ "entry-point" ] ~doc)
 
 (* owi cpp *)

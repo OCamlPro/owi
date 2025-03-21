@@ -27,8 +27,9 @@ let find location file : Fpath.t Result.t =
   loop l
 
 (* TODO: investigate which parameters makes sense *)
-let compile ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
+let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
   Fpath.t Result.t =
+  let entry_point = Option.value entry_point ~default:"main" in
   let* rustc_bin = OS.Cmd.resolve @@ Cmd.v "rustc" in
 
   let* libowi_sym_rlib = find rust_files (Fpath.v "libowi_sym.rlib") in
@@ -41,10 +42,17 @@ let compile ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
       % "--extern"
       % Fmt.str "owi_sym=%a" Fpath.pp libowi_sym_rlib
       % "-o" % Cmd.p out
+      (* link args parameters must be space separated *)
+      % "-C"
+      % Fmt.str "link-args=--entry=%s" entry_point
       %% Cmd.of_list (List.map Cmd.p files) )
   in
   let+ () =
-    match OS.Cmd.run rustc_cmd with
+    match
+      OS.Cmd.run
+        ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+        rustc_cmd
+    with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Fmt.error_msg "rustc failed: %s"
@@ -57,7 +65,7 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point : unit Result.t =
-  let* modul = compile ~includes ~opt_lvl debug files in
+  let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers

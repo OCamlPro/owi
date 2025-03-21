@@ -26,7 +26,9 @@ let find location file : Fpath.t Result.t =
   in
   loop l
 
-let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
+  Fpath.t Result.t =
+  let entry_point = Option.value entry_point ~default:"main" in
   let* clangpp_bin = OS.Cmd.resolve @@ Cmd.v "clang++" in
   let opt_lvl = Fmt.str "-O%s" opt_lvl in
 
@@ -85,8 +87,10 @@ let compile ~includes ~opt_lvl debug (files : Fpath.t list) : Fpath.t Result.t =
   let* binc = find c_files_location (Fpath.v "libc.wasm") in
   let wasmld_cmd : Cmd.t =
     Cmd.(
-      wasmld_bin % "-z" % "stack-size=8388608" % "--export=main"
-      % "--entry=main" %% files_o % p binc % "-o" % p out )
+      wasmld_bin % "-z" % "stack-size=8388608"
+      % Fmt.str "--export=%s" entry_point
+      % Fmt.str "--entry=%s" entry_point
+      %% files_o % p binc % "-o" % p out )
   in
 
   let* () =
@@ -107,7 +111,7 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point : unit Result.t =
   let includes = c_files_location @ includes in
-  let* modul = compile ~includes ~opt_lvl debug files in
+  let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
