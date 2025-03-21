@@ -16,7 +16,7 @@ let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
   Choice.bind t (fun t ->
     match t with Error e -> Choice.return (Error e) | Ok x -> f x )
 
-let simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m =
+let simplify_then_link ~entry_point ~unsafe ~rac ~srac ~optimize link_state m =
   let* m =
     match m with
     | Kind.Wat _ | Wasm _ ->
@@ -24,14 +24,15 @@ let simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m =
     | Wast _ -> Error (`Msg "can't run concolic interpreter on a script")
     | Ocaml _ -> assert false
   in
-  let* m = Cmd_utils.add_main_as_start m in
+  let* m = Cmd_utils.set_entry_point entry_point m in
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)
 
-let simplify_then_link_files ~unsafe ~rac ~srac ~optimize filenames =
+let simplify_then_link_files ~entry_point ~unsafe ~rac ~srac ~optimize filenames
+    =
   let link_state = Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"symbolic"
@@ -49,7 +50,8 @@ let simplify_then_link_files ~unsafe ~rac ~srac ~optimize filenames =
         let* link_state, modules_to_run = acc in
         let* m0dule = Parse.guess_from_file filename in
         let+ link_state, module_to_run =
-          simplify_then_link ~unsafe ~rac ~srac ~optimize link_state m0dule
+          simplify_then_link ~entry_point ~unsafe ~rac ~srac ~optimize
+            link_state m0dule
         in
         (link_state, module_to_run :: modules_to_run) )
       (Ok (link_state, []))
@@ -443,7 +445,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
-  ~files ~profile ~model_output_format =
+  ~files ~profile ~model_output_format ~entry_point =
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -458,7 +460,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
   let* link_state, modules_to_run =
-    simplify_then_link_files ~unsafe ~rac ~srac ~optimize files
+    simplify_then_link_files ~entry_point ~unsafe ~rac ~srac ~optimize files
   in
   let tree = fresh_tree [] in
   let* result = run solver tree link_state modules_to_run in

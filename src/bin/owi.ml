@@ -159,6 +159,10 @@ let workspace =
   let doc = "write results to dir" in
   Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
 
+let entry_point =
+  let doc = "possible entry points of the executable" in
+  Arg.(value & opt (some string) None & info [ "entry-point" ] ~doc)
+
 (* owi cpp *)
 
 let cpp_info =
@@ -195,11 +199,12 @@ let cpp_cmd =
   and+ fail_mode
   and+ solver
   and+ profile
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~profile ~model_output_format
+    ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
 
 (* owi c *)
 
@@ -248,11 +253,13 @@ let c_cmd =
     in
     Arg.(value & flag & info [ "e-acsl" ] ~doc)
   and+ solver
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_output_format
+    ~entry_point
 
 (* owi fmt *)
 
@@ -354,11 +361,12 @@ let rust_cmd =
   and+ fail_mode
   and+ solver
   and+ profile
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~profile ~model_output_format
+    ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
 
 (* owi validate *)
 
@@ -414,11 +422,12 @@ let sym_cmd =
   and+ solver
   and+ files
   and+ profile
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format
+    ~model_output_format ~entry_point
 
 (* owi replay *)
 
@@ -441,8 +450,10 @@ let replay_cmd =
       required
       & opt (some existing_file_conv) None
       & info [ "replay-file" ] ~doc )
-  and+ source_file in
+  and+ source_file
+  and+ entry_point in
   Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
+    ~entry_point
 
 (* owi conc *)
 
@@ -468,11 +479,12 @@ let conc_cmd =
   and+ solver
   and+ files
   and+ profile
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format
+    ~model_output_format ~entry_point
 
 (* owi version *)
 
@@ -549,11 +561,12 @@ let zig_cmd =
   and+ fail_mode
   and+ profile
   and+ solver
-  and+ model_output_format in
+  and+ model_output_format
+  and+ entry_point in
   Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-    ~model_output_format
+    ~model_output_format ~entry_point
 
 (* owi *)
 

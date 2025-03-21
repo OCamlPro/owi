@@ -181,7 +181,8 @@ let metadata ~workspace arch property files : unit Result.t =
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~eacsl ~solver ~profile ~model_output_format : unit Result.t =
+  ~concolic ~eacsl ~solver ~profile ~model_output_format ~entry_point :
+  unit Result.t =
   let includes = c_files_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
@@ -193,4 +194,4 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format
+    ~model_output_format ~entry_point

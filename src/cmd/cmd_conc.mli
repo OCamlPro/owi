@@ -20,4 +20,5 @@ val cmd :
   -> files:Fpath.t list
   -> profile:Fpath.t option
   -> model_output_format:Cmd_utils.model_output_format
+  -> entry_point:string option
   -> unit Result.t
