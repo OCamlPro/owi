@@ -45,7 +45,7 @@ let set_entry_point entry_point (m : Binary.modul) =
   (* We are checking if there's a start function *)
   if Option.is_some m.start then Ok m
   else
-    (* If there is none, we look for a function exported with the name `main` *)
+    (* If there is none and we have an entry point passed in argument we search for it *)
     let* export =
       match entry_point with
       | Some entry_point -> begin
@@ -53,6 +53,7 @@ let set_entry_point entry_point (m : Binary.modul) =
         | None -> Fmt.error_msg "Entry point %s not found\n" entry_point
         | Some ep -> Ok ep
       end
+      (* If we have no entry point argument then we search for common entry function names *)
       | None ->
         let possible_names = [ "main"; "_start" ] in
         begin
@@ -64,7 +65,8 @@ let set_entry_point entry_point (m : Binary.modul) =
               possible_names
         end
     in
-    (* We found a main function, so we check its type and build a start function that put the right values on the stack, call the main function and drop the results *)
+    (* We found an entry point, so we check its type and build a start function that put the right values on the stack,
+       call the entry function and drop the results *)
     let main_id = export.id in
     if main_id >= Array.length m.func then
       Error (`Msg "can't find a main function")

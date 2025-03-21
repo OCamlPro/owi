@@ -26,7 +26,9 @@ let find location file : Fpath.t Result.t =
   in
   loop l
 
-let compile ~includes debug (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~entry_point ~includes debug (files : Fpath.t list) :
+  Fpath.t Result.t =
+  let entry_point = Option.value entry_point ~default:"_start" in
   let includes =
     Cmd.of_list (List.map (fun p -> Fmt.str "-I%a" Fpath.pp p) includes)
   in
@@ -39,7 +41,7 @@ let compile ~includes debug (files : Fpath.t list) : Fpath.t Result.t =
   | [] -> assert false
   | [ file ] -> begin
     let out = Fpath.set_ext ".wasm" file |> Fpath.filename |> Fpath.v in
-    let entry = Fmt.str "-fentry=_start" in
+    let entry = Fmt.str "-fentry=%s" entry_point in
     let zig : Cmd.t =
       Cmd.(
         zig_bin % "build-exe" % "-target" % "wasm32-freestanding" % entry
@@ -66,7 +68,7 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point : unit Result.t =
   let includes = zig_files_location @ includes in
-  let* modul = compile ~includes debug files in
+  let* modul = compile ~entry_point ~includes debug files in
   let workspace = Fpath.v "owi-out" in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
