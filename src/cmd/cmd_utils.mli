@@ -2,11 +2,25 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
-
+(* model stuff *)
 type model_output_format =
   | Scfg
   | Json
 
+(* test-case stuff *)
+val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
+
+(* harness stuff *)
 val set_entry_point :
   string option -> Binary.modul -> (Binary.modul, [> `Msg of string ]) result
+
+(* installed files *)
+val c_files_location : Fpath.t list
+
+val zig_files_location : Fpath.t list
+
+val find_installed_c_file : Fpath.t -> Fpath.t Result.t
+
+val find_installed_rust_file : Fpath.t -> Fpath.t Result.t
+
+val find_installed_zig_file : Fpath.t -> Fpath.t Result.t

@@ -11,26 +11,6 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let c_files_location = List.map Fpath.v Share.Sites.c_files
-
-let find location file : Fpath.t Result.t =
-  let* l =
-    list_map
-      (fun dir ->
-        let filename = Fpath.append dir file in
-        match OS.File.exists filename with
-        | Ok true -> Ok (Some filename)
-        | Ok false -> Ok None
-        | Error (`Msg msg) -> Error (`Msg msg) )
-      location
-  in
-  let rec loop = function
-    | [] -> Error (`Msg (Fmt.str "can't find file %a" Fpath.pp file))
-    | None :: tl -> loop tl
-    | Some file :: _tl -> Ok file
-  in
-  loop l
-
 let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
   Fpath.t list Result.t =
   if eacsl then
@@ -118,7 +98,7 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
 
   let out = Fpath.(v "a.out.wasm") in
 
-  let* libc = find c_files_location (Fpath.v "libc.wasm") in
+  let* libc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
 
   let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
@@ -131,11 +111,8 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
     with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Error
-        (`Msg
-           (Fmt.str "clang failed: %s"
-              ( if debug then e
-                else "run with --debug to get the full error message" ) ) )
+      Fmt.error_msg "clang failed: %s"
+        (if debug then e else "run with --debug to get the full error message")
   in
 
   out
@@ -193,7 +170,7 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver ~profile ~model_output_format ~entry_point :
   unit Result.t =
-  let includes = c_files_location @ includes in
+  let includes = Cmd_utils.c_files_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
   let* modul = compile ~entry_point ~includes ~opt_lvl debug files in

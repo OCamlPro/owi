@@ -1526,7 +1526,7 @@ module Make (P : Interpret_intf.P) :
         Ok ()
       end
     with
-    | Trap msg -> Choice.return (Error (`Msg msg))
+    | Trap msg -> Choice.return (Fmt.error_msg "%s" msg)
     | Stack_overflow -> Choice.return (Error `Call_stack_exhausted)
 
   let exec_vfunc_from_outside ~locals ~env ~envs func =
@@ -1556,7 +1556,7 @@ module Make (P : Interpret_intf.P) :
           Ok res
       end
     with
-    | Trap msg -> Choice.return (Error (`Msg msg))
+    | Trap msg -> Choice.return (Fmt.error_msg "%s" msg)
     | Stack_overflow -> Choice.return (Error `Call_stack_exhausted)
 
   type value = Value.t

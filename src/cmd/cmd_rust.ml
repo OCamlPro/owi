@@ -5,34 +5,15 @@
 open Bos
 open Syntax
 
-(* TODO: refactor to re-use code in Cmd_c.ml *)
-let rust_files = List.map Fpath.v Share.Sites.rust_files
-
-let find location file : Fpath.t Result.t =
-  let* l =
-    list_map
-      (fun dir ->
-        let filename = Fpath.append dir file in
-        match OS.File.exists filename with
-        | Ok true -> Ok (Some filename)
-        | Ok false -> Ok None
-        | Error (`Msg msg) -> Error (`Msg msg) )
-      location
-  in
-  let rec loop = function
-    | [] -> Error (`Msg (Fmt.str "can't find file %a" Fpath.pp file))
-    | None :: tl -> loop tl
-    | Some file :: _tl -> Ok file
-  in
-  loop l
-
 (* TODO: investigate which parameters makes sense *)
 let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
   Fpath.t Result.t =
   let entry_point = Option.value entry_point ~default:"main" in
   let* rustc_bin = OS.Cmd.resolve @@ Cmd.v "rustc" in
 
-  let* libowi_sym_rlib = find rust_files (Fpath.v "libowi_sym.rlib") in
+  let* libowi_sym_rlib =
+    Cmd_utils.find_installed_rust_file (Fpath.v "libowi_sym.rlib")
+  in
 
   let out = Fpath.v "a.out.wasm" in
 
