@@ -390,10 +390,10 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     | <span data-count="393">S</span>cfg -&gt; Smtml.Model.to_scfg_string ~no_value
   in
   let callback v =
-    <span data-count="1671">l</span>et open Symbolic_choice_intf in
+    <span data-count="1829">l</span>et open Symbolic_choice_intf in
     incr path_count;
-    <span data-count="1672">m</span>atch (fail_mode, v) with
-    | <span data-count="1460">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1829">m</span>atch (fail_mode, v) with
+    | <span data-count="1617">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="2">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">`</span>Both | <span data-count="0">`</span>Trap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -404,7 +404,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="773">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="740">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="736">W</span>q.end_pledge res_queue)
   in
   <span data-count="393">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;

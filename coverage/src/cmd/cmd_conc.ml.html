@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_conc.ml &mdash; Coverage report</title>
-    <meta name="description" content="86.67% coverage in src/cmd/cmd_conc.ml">
+    <meta name="description" content="86.35% coverage in src/cmd/cmd_conc.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_conc.ml
         </a>
       </h1>
-      <h2>86.67%</h2>
+      <h2>86.35%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:3.37%"></span>
@@ -1090,7 +1090,7 @@ let simplify_then_link ~entry_point ~unsafe ~rac ~srac ~optimize link_state m =
     match m with
     | <span data-count="4">K</span>ind.Wat _ | <span data-count="161">W</span>asm _ -&gt;
       Compile.Any.until_binary_validat<span data-count="165">e</span> ~unsafe ~rac ~srac m
-    | <span data-count="0">W</span>ast _ -&gt; Error (`Msg "can't run concolic interpreter on a script")
+    | <span data-count="0">W</span>ast _ -&gt; Fmt.error_ms<span data-count="0">g</span> "can't run concolic interpreter on a script"
     | Ocaml _ -&gt; assert false
   in
   <span data-count="165">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="165">t</span> entry_point m in

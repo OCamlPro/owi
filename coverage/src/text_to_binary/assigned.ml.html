@@ -529,7 +529,7 @@ let name kind ~get_name values =
     | <span data-count="8631">S</span>ome name -&gt;
       let index = Indexed.get_index elt in
       <span data-count="8631">i</span>f String_map.mem name named then
-        <span data-count="6">E</span>rror (`Msg (Fmt.st<span data-count="6">r</span> "duplicate %s %s" kind name))
+        <span data-count="6">F</span>mt.error_msg "duplicate %s %s" kind name
       else <span data-count="8625">o</span>k @@ String_map.ad<span data-count="8625">d</span> name index named
   in
   let+ named = list_fold_lef<span data-count="37338">t</span> assign_one String_map.empty values in
