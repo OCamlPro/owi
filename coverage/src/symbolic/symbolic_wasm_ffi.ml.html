@@ -311,13 +311,13 @@ module M :
 
   module Value = Symbolic_value
 
-  let add_pc_wrapper e = <span data-count="606">C</span>hoice.add_pc e
+  let add_pc_wrapper e = <span data-count="613">C</span>hoice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="592">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="592">l</span> i
+    <span data-count="594">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="593">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96980">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96970">l</span> i
+    <span data-count="96971">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96952">l</span> i
 
   let symbol_bool () =
     <span data-count="2">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -329,7 +329,7 @@ module M :
 
   let symbol_char = symbol_i8
 
-  let symbol_i32 () = <span data-count="1175">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () = <span data-count="1180">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i64 () = <span data-count="53">C</span>hoice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
@@ -338,23 +338,23 @@ module M :
   let symbol_f64 () = <span data-count="58">C</span>hoice.with_new_symbol (Ty_fp 64) Expr.symbol
 
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
-    <span data-count="7">l</span>et open Choice in
-    let* x = symbol_i3<span data-count="7">2</span> () in
-    <span data-count="7">l</span>et* () = add_pc_wrappe<span data-count="7">r</span> (Value.I32.l<span data-count="7">e</span> lo x) in
-    <span data-count="7">l</span>et+ () = add_pc_wrappe<span data-count="7">r</span> (Value.I32.g<span data-count="7">t</span> hi x) in
-    <span data-count="7">x</span>
+    <span data-count="10">l</span>et open Choice in
+    let* x = symbol_i3<span data-count="10">2</span> () in
+    <span data-count="10">l</span>et* () = add_pc_wrappe<span data-count="10">r</span> (Value.I32.l<span data-count="10">e</span> lo x) in
+    <span data-count="10">l</span>et+ () = add_pc_wrappe<span data-count="10">r</span> (Value.I32.g<span data-count="10">t</span> hi x) in
+    <span data-count="10">x</span>
 
-  let abort () : unit Choice.t = <span data-count="1">C</span>hoice.stop
+  let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9943">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9942">c</span> m ~ptr:base ~size
+    <span data-count="9941">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9943">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2540">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2541">e</span> m ptr
+    <span data-count="2541">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2541">e</span> m ptr
 
-  let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
+  let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
 
-  let in_replay_mode () = <span data-count="2">C</span>hoice.return @@ Smtml.Expr.valu<span data-count="2">e</span> (Smtml.Value.Int 0)
+  let in_replay_mode () = <span data-count="3">C</span>hoice.return @@ Smtml.Expr.valu<span data-count="3">e</span> (Smtml.Value.Int 0)
 
   let print_char (c : Value.int32) =
     <span data-count="0">m</span>atch Smtml.Expr.view c with
