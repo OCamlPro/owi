@@ -7,7 +7,6 @@ open Syntax
 
 let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  let entry_point = Option.value entry_point ~default:"main" in
   let* clangpp_bin = OS.Cmd.resolve @@ Cmd.v "clang++" in
   let opt_lvl = Fmt.str "-O%s" opt_lvl in
 
@@ -32,7 +31,8 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
 
   let files_bc =
-    Cmd.of_list @@ List.map (fun file -> Cmd.p Fpath.(file -+ ".bc")) files
+    Cmd.of_list
+    @@ List.map (fun file -> Fpath.(file -+ ".bc") |> Fpath.base |> Cmd.p) files
   in
 
   let llc_cmd : Cmd.t =
@@ -53,12 +53,14 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
 
   let files_o =
-    Cmd.of_list @@ List.map (fun file -> Cmd.p Fpath.(file -+ ".o")) files
+    Cmd.of_list
+    @@ List.map (fun file -> Fpath.(file -+ ".o") |> Fpath.base |> Cmd.p) files
   in
 
   let out = Fpath.v "a.out.wasm" in
 
   let* binc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
+  let entry_point = Option.value entry_point ~default:"main" in
   let wasmld_cmd : Cmd.t =
     Cmd.(
       wasmld_bin % "-z" % "stack-size=8388608"
