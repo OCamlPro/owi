@@ -106,7 +106,7 @@ let name kind ~get_name values =
     | Some name ->
       let index = Indexed.get_index elt in
       if String_map.mem name named then
-        Error (`Msg (Fmt.str "duplicate %s %s" kind name))
+        Fmt.error_msg "duplicate %s %s" kind name
       else ok @@ String_map.add name index named
   in
   let+ named = list_fold_left assign_one String_map.empty values in

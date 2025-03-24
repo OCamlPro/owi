@@ -5,27 +5,6 @@
 open Bos
 open Syntax
 
-(* TODO: refactor to re-use code in Cmd_c.ml *)
-let c_files_location = List.map Fpath.v Share.Sites.c_files
-
-let find location file : Fpath.t Result.t =
-  let* l =
-    list_map
-      (fun dir ->
-        let filename = Fpath.append dir file in
-        match OS.File.exists filename with
-        | Ok true -> Ok (Some filename)
-        | Ok false -> Ok None
-        | Error (`Msg msg) -> Error (`Msg msg) )
-      location
-  in
-  let rec loop = function
-    | [] -> Error (`Msg (Fmt.str "can't find file %a" Fpath.pp file))
-    | None :: tl -> loop tl
-    | Some file :: _tl -> Ok file
-  in
-  loop l
-
 let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   Fpath.t Result.t =
   let entry_point = Option.value entry_point ~default:"main" in
@@ -46,11 +25,8 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
     match OS.Cmd.run ~err clang_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Error
-        (`Msg
-           (Fmt.str "clang++ failed: %s"
-              ( if debug then e
-                else "run with --debug to get the full error message" ) ) )
+      Fmt.error_msg "clang++ failed: %s"
+        (if debug then e else "run with --debug to get the full error message")
   in
 
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
@@ -71,11 +47,8 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
     match OS.Cmd.run ~err llc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Error
-        (`Msg
-           (Fmt.str "llc failed: %s"
-              ( if debug then e
-                else "run with --debug to get the full error message" ) ) )
+      Fmt.error_msg "llc failed: %s"
+        (if debug then e else "run with --debug to get the full error message")
   in
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
 
@@ -85,7 +58,7 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
 
   let out = Fpath.v "a.out.wasm" in
 
-  let* binc = find c_files_location (Fpath.v "libc.wasm") in
+  let* binc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
   let wasmld_cmd : Cmd.t =
     Cmd.(
       wasmld_bin % "-z" % "stack-size=8388608"
@@ -94,24 +67,21 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
       %% files_o % p binc % "-o" % p out )
   in
 
-  let* () =
+  let+ () =
     match OS.Cmd.run ~err wasmld_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Error
-        (`Msg
-           (Fmt.str "wasm-ld failed: %s"
-              ( if debug then e
-                else "run with --debug to get the full error message" ) ) )
+      Fmt.error_msg "wasm-ld failed: %s"
+        (if debug then e else "run with --debug to get the full error message")
   in
 
-  Ok out
+  out
 
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point : unit Result.t =
-  let includes = c_files_location @ includes in
+  let includes = Cmd_utils.c_files_location @ includes in
   let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let files = [ modul ] in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)

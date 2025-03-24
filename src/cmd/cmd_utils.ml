@@ -4,9 +4,13 @@
 
 open Syntax
 
+(* Models *)
+
 type model_output_format =
   | Scfg
   | Json
+
+(* Test-case generation *)
 
 let out_testcase ~dst testcase =
   let o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
@@ -33,6 +37,8 @@ let write_testcase =
         ()
     in
     res
+
+(* Entry-point *)
 
 let find_exported_name exported_names (m : Binary.modul) =
   List.find_opt
@@ -74,7 +80,7 @@ let set_entry_point entry_point (m : Binary.modul) =
        call the entry function and drop the results *)
     let main_id = export.id in
     if main_id >= Array.length m.func then
-      Error (`Msg "can't find a main function")
+      Fmt.error_msg "can't find a main function"
     else
       let main_function = m.func.(main_id) in
       let (Bt_raw main_type) =
@@ -87,10 +93,8 @@ let set_entry_point entry_point (m : Binary.modul) =
         | Num_type F64 -> Ok (Types.F64_const (Float64.of_float 0.))
         | Ref_type (Types.Null, t) -> Ok (Types.Ref_null t)
         | Ref_type (Types.No_null, t) ->
-          Error
-            (`Msg
-               (Fmt.str "can not create default value of type %a"
-                  Types.pp_heap_type t ) )
+          Fmt.error_msg "can not create default value of type %a"
+            Types.pp_heap_type t
       in
       let+ body =
         let pt, rt = snd main_type in
@@ -117,3 +121,35 @@ let set_entry_point entry_point (m : Binary.modul) =
 
       let start = Some (Array.length m.func) in
       { m with func; start }
+
+(* Installed files  *)
+
+let c_files_location = List.map Fpath.v Share.Sites.c_files
+
+let rust_files_location = List.map Fpath.v Share.Sites.rust_files
+
+let zig_files_location = List.map Fpath.v Share.Sites.zig_files
+
+let find location file : Fpath.t Result.t =
+  let* l =
+    list_map
+      (fun dir ->
+        let filename = Fpath.append dir file in
+        match Bos.OS.File.exists filename with
+        | Ok true -> Ok (Some filename)
+        | Ok false -> Ok None
+        | Error _ as e -> e )
+      location
+  in
+  let rec loop = function
+    | [] -> Fmt.error_msg "can't find file %a" Fpath.pp file
+    | None :: tl -> loop tl
+    | Some file :: _tl -> Ok file
+  in
+  loop l
+
+let find_installed_c_file filename = find c_files_location filename
+
+let find_installed_rust_file filename = find rust_files_location filename
+
+let find_installed_zig_file filename = find zig_files_location filename

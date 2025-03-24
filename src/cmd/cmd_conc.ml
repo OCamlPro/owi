@@ -21,7 +21,7 @@ let simplify_then_link ~entry_point ~unsafe ~rac ~srac ~optimize link_state m =
     match m with
     | Kind.Wat _ | Wasm _ ->
       Compile.Any.until_binary_validate ~unsafe ~rac ~srac m
-    | Wast _ -> Error (`Msg "can't run concolic interpreter on a script")
+    | Wast _ -> Fmt.error_msg "can't run concolic interpreter on a script"
     | Ocaml _ -> assert false
   in
   let* m = Cmd_utils.set_entry_point entry_point m in
