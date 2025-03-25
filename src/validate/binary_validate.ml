@@ -21,6 +21,8 @@ let typ_equal t1 t2 =
   | Something, _ | _, Something -> true
   | _, _ -> false
 
+let sp fmt () = Fmt.string fmt " "
+
 let pp_typ fmt = function
   | Num_type t -> pp_num_type fmt t
   | Ref_type t -> pp_heap_type fmt t
