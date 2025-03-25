@@ -64,6 +64,14 @@ let version = "%%VERSION%%"
 
 open Term.Syntax
 
+let arch =
+  let doc = "data model" in
+  Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
+
+let concolic =
+  let doc = "concolic mode" in
+  Arg.(value & flag & info [ "concolic" ] ~doc)
+
 let debug =
   let doc = "debug mode" in
   Arg.(value & flag & info [ "debug"; "d" ] ~doc)
@@ -75,34 +83,9 @@ let deterministic_result_order =
   in
   Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
 
-let files =
-  let doc = "source files" in
-  Arg.(value & pos_all existing_file_conv [] (info [] ~doc))
-
-let source_file =
-  let doc = "source file" in
-  Arg.(required & pos 0 (some existing_file_conv) None (info [] ~doc))
-
-let out_file =
-  let doc = "Write output to a file." in
-  Arg.(
-    value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
-
-let profile =
-  let doc = "Profile file." in
-  Arg.(value & opt (some path_conv) None & info [ "profile" ] ~docv:"FILE" ~doc)
-
-let no_stop_at_failure =
-  let doc = "do not stop when a program failure is encountered" in
-  Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
-
-let no_value =
-  let doc = "do not display a value for each symbol" in
-  Arg.(value & flag & info [ "no-value" ] ~doc)
-
-let no_assert_failure_expression_printing =
-  let doc = "do not display the expression in the assert failure" in
-  Arg.(value & flag & info [ "no-assert-failure-expression-printing" ] ~doc)
+let entry_point =
+  let doc = "entry point of the executable" in
+  Arg.(value & opt (some string) None & info [ "entry-point" ] ~doc)
 
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
@@ -114,9 +97,46 @@ let fail_mode =
         ; (`Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
 
+let files =
+  let doc = "source files" in
+  Arg.(value & pos_all existing_file_conv [] (info [] ~doc))
+
+let includes =
+  let doc = "headers path" in
+  Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
+
+let model_output_format =
+  let doc = {| The format of the output model ("json" or "scfg") |} in
+  Arg.(value & opt model_format_conv Scfg & info [ "model-output-format" ] ~doc)
+
+let no_assert_failure_expression_printing =
+  let doc = "do not display the expression in the assert failure" in
+  Arg.(value & flag & info [ "no-assert-failure-expression-printing" ] ~doc)
+
+let no_stop_at_failure =
+  let doc = "do not stop when a program failure is encountered" in
+  Arg.(value & flag & info [ "no-stop-at-failure" ] ~doc)
+
+let no_value =
+  let doc = "do not display a value for each symbol" in
+  Arg.(value & flag & info [ "no-value" ] ~doc)
+
 let optimize =
   let doc = "optimize mode" in
   Arg.(value & flag & info [ "optimize" ] ~doc)
+
+let opt_lvl =
+  let doc = "specify which optimization level to use" in
+  Arg.(value & opt string "3" & info [ "O" ] ~doc)
+
+let out_file =
+  let doc = "Write output to a file." in
+  Arg.(
+    value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
+
+let profile =
+  let doc = "Profile file." in
+  Arg.(value & opt (some path_conv) None & info [ "profile" ] ~docv:"FILE" ~doc)
 
 let profiling =
   let doc = "profiling mode" in
@@ -126,10 +146,6 @@ let rac =
   let doc = "runtime assertion checking mode" in
   Arg.(value & flag & info [ "rac" ] ~doc)
 
-let srac =
-  let doc = "symbolic runtime assertion checking mode" in
-  Arg.(value & flag & info [ "srac" ] ~doc)
-
 let solver =
   let doc = "SMT solver to use" in
   Arg.(
@@ -137,9 +153,13 @@ let solver =
     & opt solver_conv Smtml.Solver_type.Z3_solver
     & info [ "solver"; "s" ] ~doc )
 
-let model_output_format =
-  let doc = {| The format of the output model ("json" or "scfg") |} in
-  Arg.(value & opt model_format_conv Scfg & info [ "model-output-format" ] ~doc)
+let source_file =
+  let doc = "source file" in
+  Arg.(required & pos 0 (some existing_file_conv) None (info [] ~doc))
+
+let srac =
+  let doc = "symbolic runtime assertion checking mode" in
+  Arg.(value & flag & info [ "srac" ] ~doc)
 
 let unsafe =
   let doc = "skip typechecking pass" in
@@ -159,53 +179,6 @@ let workspace =
   let doc = "write results to dir" in
   Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
 
-let entry_point =
-  let doc = "entry point of the executable" in
-  Arg.(value & opt (some string) None & info [ "entry-point" ] ~doc)
-
-(* owi cpp *)
-
-let cpp_info =
-  let doc =
-    "Compile a C++ file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "c++" ~version ~doc ~sdocs ~man
-
-let cpp_cmd =
-  (* TODO: refactor all of this, it can be shared between, c, cpp and for some of them with zig *)
-  let+ arch =
-    let doc = "data model" in
-    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
-  and+ includes =
-    let doc = "headers path" in
-    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
-  and+ opt_lvl =
-    let doc = "specify which optimization level to use" in
-    Arg.(value & opt string "3" & info [ "O" ] ~doc)
-  and+ concolic =
-    let doc = "concolic mode" in
-    Arg.(value & flag & info [ "concolic" ] ~doc)
-  and+ debug
-  and+ workers
-  and+ files
-  and+ profiling
-  and+ unsafe
-  and+ optimize
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ solver
-  and+ profile
-  and+ model_output_format
-  and+ entry_point in
-  Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
-    ~optimize ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
-
 (* owi c *)
 
 let c_info =
@@ -214,25 +187,17 @@ let c_info =
   Cmd.info "c" ~version ~doc ~sdocs ~man
 
 let c_cmd =
-  let+ arch =
-    let doc = "data model" in
-    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
+  let+ arch
   and+ property =
     let doc = "property file" in
     Arg.(value & opt (some existing_file_conv) None & info [ "property" ] ~doc)
-  and+ includes =
-    let doc = "headers path" in
-    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
-  and+ opt_lvl =
-    let doc = "specify which optimization level to use" in
-    Arg.(value & opt string "3" & info [ "O" ] ~doc)
+  and+ includes
+  and+ opt_lvl
   and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
   and+ workspace
-  and+ concolic =
-    let doc = "concolic mode" in
-    Arg.(value & flag & info [ "concolic" ] ~doc)
+  and+ concolic
   and+ debug
   and+ workers
   and+ files
@@ -261,6 +226,71 @@ let c_cmd =
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_output_format
     ~entry_point
 
+(* owi cpp *)
+
+let cpp_info =
+  let doc =
+    "Compile a C++ file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "c++" ~version ~doc ~sdocs ~man
+
+let cpp_cmd =
+  let+ arch
+  and+ includes
+  and+ opt_lvl
+  and+ concolic
+  and+ debug
+  and+ workers
+  and+ files
+  and+ profiling
+  and+ unsafe
+  and+ optimize
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ solver
+  and+ profile
+  and+ model_output_format
+  and+ entry_point in
+  Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
+    ~optimize ~no_stop_at_failure ~no_value
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
+
+(* owi conc *)
+
+let conc_info =
+  let doc = "Run the concolic interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "conc" ~version ~doc ~sdocs ~man
+
+let conc_cmd =
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ rac
+  and+ srac
+  and+ optimize
+  and+ workers
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ workspace
+  and+ solver
+  and+ files
+  and+ profile
+  and+ model_output_format
+  and+ entry_point in
+  Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~model_output_format ~entry_point
+
 (* owi fmt *)
 
 let fmt_info =
@@ -274,20 +304,6 @@ let fmt_cmd =
     Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
   and+ files in
   Cmd_fmt.cmd ~inplace ~files
-
-(* owi opt *)
-
-let opt_info =
-  let doc = "Optimize a module" in
-  let man = [] @ shared_man in
-  Cmd.info "opt" ~version ~doc ~sdocs ~man
-
-let opt_cmd =
-  let+ debug
-  and+ unsafe
-  and+ source_file
-  and+ out_file in
-  Cmd_opt.cmd ~debug ~unsafe ~source_file ~out_file
 
 (* owi instrument *)
 
@@ -309,6 +325,46 @@ let instrument_cmd =
     Arg.(value & flag & info [ "symbolic" ] ~doc)
   and+ files in
   Cmd_instrument.cmd ~debug ~unsafe ~symbolic ~files
+
+(* owi opt *)
+
+let opt_info =
+  let doc = "Optimize a module" in
+  let man = [] @ shared_man in
+  Cmd.info "opt" ~version ~doc ~sdocs ~man
+
+let opt_cmd =
+  let+ debug
+  and+ unsafe
+  and+ source_file
+  and+ out_file in
+  Cmd_opt.cmd ~debug ~unsafe ~source_file ~out_file
+
+(* owi replay *)
+
+let replay_info =
+  let doc =
+    "Replay a module containing symbols with concrete values in a replay file \
+     containing a model"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "replay" ~version ~doc ~sdocs ~man
+
+let replay_cmd =
+  let+ profiling
+  and+ debug
+  and+ unsafe
+  and+ optimize
+  and+ replay_file =
+    let doc = "Which replay file to use" in
+    Arg.(
+      required
+      & opt (some existing_file_conv) None
+      & info [ "replay-file" ] ~doc )
+  and+ source_file
+  and+ entry_point in
+  Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
+    ~entry_point
 
 (* owi run *)
 
@@ -336,18 +392,10 @@ let rust_info =
   Cmd.info "rust" ~version ~doc ~sdocs ~man
 
 let rust_cmd =
-  let+ arch =
-    let doc = "data model" in
-    Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
-  and+ includes =
-    let doc = "headers path" in
-    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
-  and+ opt_lvl =
-    let doc = "specify which optimization level to use" in
-    Arg.(value & opt string "3" & info [ "O" ] ~doc)
-  and+ concolic =
-    let doc = "concolic mode" in
-    Arg.(value & flag & info [ "concolic" ] ~doc)
+  let+ arch
+  and+ includes
+  and+ opt_lvl
+  and+ concolic
   and+ debug
   and+ workers
   and+ files
@@ -367,18 +415,6 @@ let rust_cmd =
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
-
-(* owi validate *)
-
-let validate_info =
-  let doc = "Validate a module" in
-  let man = [] @ shared_man in
-  Cmd.info "validate" ~version ~doc ~sdocs ~man
-
-let validate_cmd =
-  let+ debug
-  and+ files in
-  Cmd_validate.cmd ~debug ~files
 
 (* owi script *)
 
@@ -429,62 +465,17 @@ let sym_cmd =
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
     ~model_output_format ~entry_point
 
-(* owi replay *)
+(* owi validate *)
 
-let replay_info =
-  let doc =
-    "Replay a module containing symbols with concrete values in a replay file \
-     containing a model"
-  in
+let validate_info =
+  let doc = "Validate a module" in
   let man = [] @ shared_man in
-  Cmd.info "replay" ~version ~doc ~sdocs ~man
+  Cmd.info "validate" ~version ~doc ~sdocs ~man
 
-let replay_cmd =
-  let+ profiling
-  and+ debug
-  and+ unsafe
-  and+ optimize
-  and+ replay_file =
-    let doc = "Which replay file to use" in
-    Arg.(
-      required
-      & opt (some existing_file_conv) None
-      & info [ "replay-file" ] ~doc )
-  and+ source_file
-  and+ entry_point in
-  Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
-    ~entry_point
-
-(* owi conc *)
-
-let conc_info =
-  let doc = "Run the concolic interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "conc" ~version ~doc ~sdocs ~man
-
-let conc_cmd =
-  let+ profiling
-  and+ debug
-  and+ unsafe
-  and+ rac
-  and+ srac
-  and+ optimize
-  and+ workers
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ workspace
-  and+ solver
-  and+ files
-  and+ profile
-  and+ model_output_format
-  and+ entry_point in
-  Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point
+let validate_cmd =
+  let+ debug
+  and+ files in
+  Cmd_validate.cmd ~debug ~files
 
 (* owi version *)
 
@@ -542,13 +533,9 @@ let zig_info =
   Cmd.info "zig" ~version ~doc ~sdocs ~man
 
 let zig_cmd =
-  let+ concolic =
-    let doc = "concolic mode" in
-    Arg.(value & flag & info [ "concolic" ] ~doc)
+  let+ concolic
   and+ debug
-  and+ includes =
-    let doc = "headers path" in
-    Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
+  and+ includes
   and+ workers
   and+ files
   and+ profiling
