@@ -30,6 +30,7 @@
 - add `owi zig` subcommand
 - add `--model-output-format` option
 - add `--entry-point` option
+- add `--invoke-with-symbols` option
 
 ## 0.2 - 2024-04-24
 
