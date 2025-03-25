@@ -2,14 +2,13 @@
  (deps
   %{bin:owi}
   (package owi)
-  concolic.c
-  malloc_aligned.c
-  main.c
   bool.c
   char.c
+  concolic.c
+  entry_point.c
   exit.c
   klee_compat.c
   main.c
   malloc_aligned.c
   range.c
-  entry_point.c))
+  invoke_with_symbols.c))

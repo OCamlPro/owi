@@ -29,9 +29,10 @@ let link_state =
      Link.extern_module' link_state ~name:"summaries" ~func_typ
        Symbolic_wasm_ffi.summaries_extern_module )
 
-let run_file ~entry_point ~unsafe ~rac ~srac ~optimize pc filename =
+let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
+  filename =
   let*/ m = Compile.File.until_binary_validate ~unsafe ~rac ~srac filename in
-  let*/ m = Cmd_utils.set_entry_point entry_point m in
+  let*/ m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state = Lazy.force link_state in
 
   let*/ m, link_state =
@@ -49,7 +50,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize pc filename =
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_output_format ~entry_point =
+  ~model_output_format ~entry_point ~invoke_with_symbols =
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -58,7 +59,9 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let pc = Choice.return (Ok ()) in
   let result =
-    List.fold_left (run_file ~entry_point ~unsafe ~rac ~srac ~optimize) pc files
+    List.fold_left
+      (run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols)
+      pc files
   in
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in

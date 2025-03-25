@@ -464,6 +464,10 @@ OPTIONS
        -I VAL
            headers path
 
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
        -m VAL, --arch=VAL (absent=32)
            data model
 
@@ -479,11 +483,11 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -O VAL (absent=3)
-           specify which optimization level to use
-
        -o VAL, --outpt=VAL (absent=owi-out)
            write results to dir
+
+       -O VAL (absent=3)
+           specify which optimization level to use
 
        --optimize
            optimize mode

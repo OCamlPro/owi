@@ -105,6 +105,13 @@ let includes =
   let doc = "headers path" in
   Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
 
+let invoke_with_symbols =
+  let doc =
+    "Invoke the entry point of the program with symbolic values instead of \
+     dummy constants."
+  in
+  Arg.(value & flag & info [ "invoke-with-symbols" ] ~doc)
+
 let model_output_format =
   let doc = {| The format of the output model ("json" or "scfg") |} in
   Arg.(value & opt model_format_conv Scfg & info [ "model-output-format" ] ~doc)
@@ -219,12 +226,13 @@ let c_cmd =
     Arg.(value & flag & info [ "e-acsl" ] ~doc)
   and+ solver
   and+ model_output_format
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_output_format
-    ~entry_point
+    ~entry_point ~invoke_with_symbols
 
 (* owi cpp *)
 
@@ -254,11 +262,13 @@ let cpp_cmd =
   and+ solver
   and+ profile
   and+ model_output_format
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
+    ~invoke_with_symbols
 
 (* owi conc *)
 
@@ -285,11 +295,12 @@ let conc_cmd =
   and+ files
   and+ profile
   and+ model_output_format
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point
+    ~model_output_format ~entry_point ~invoke_with_symbols
 
 (* owi fmt *)
 
@@ -362,9 +373,10 @@ let replay_cmd =
       & opt (some existing_file_conv) None
       & info [ "replay-file" ] ~doc )
   and+ source_file
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
-    ~entry_point
+    ~entry_point ~invoke_with_symbols
 
 (* owi run *)
 
@@ -410,11 +422,13 @@ let rust_cmd =
   and+ solver
   and+ profile
   and+ model_output_format
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
+    ~invoke_with_symbols
 
 (* owi script *)
 
@@ -459,11 +473,12 @@ let sym_cmd =
   and+ files
   and+ profile
   and+ model_output_format
-  and+ entry_point in
+  and+ entry_point
+  and+ invoke_with_symbols in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point
+    ~model_output_format ~entry_point ~invoke_with_symbols
 
 (* owi validate *)
 
@@ -549,11 +564,12 @@ let zig_cmd =
   and+ profile
   and+ solver
   and+ model_output_format
+  and+ invoke_with_symbols
   and+ entry_point in
   Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-    ~model_output_format ~entry_point
+    ~model_output_format ~entry_point ~invoke_with_symbols
 
 (* owi *)
 

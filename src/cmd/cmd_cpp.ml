@@ -82,7 +82,7 @@ let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format ~entry_point : unit Result.t =
+  ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
   let includes = Cmd_utils.c_files_location @ includes in
   let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let files = [ modul ] in
@@ -91,3 +91,4 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace:(Fpath.v "owi-out")
     ~solver ~files ~profile ~model_output_format ~entry_point
+    ~invoke_with_symbols
