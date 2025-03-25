@@ -22,7 +22,8 @@ Running the validator is as simple as:
 
 ```sh
 $ owi validate ./type_error.wat
-type mismatch (pop)
+type mismatch (expected [i32
+i32] but stack is [i32])
 [35]
 ```
 
@@ -36,7 +37,8 @@ grouping     ...
 assigning    ...
 rewriting    ...
 typechecking ...
-type mismatch (pop)
+type mismatch (expected [i32
+i32] but stack is [i32])
 [35]
 ```
 

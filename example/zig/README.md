@@ -74,6 +74,10 @@ OPTIONS
        -I VAL
            headers path
 
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
        --model-output-format=VAL (absent=scfg)
             The format of the output model ("json" or "scfg")
 

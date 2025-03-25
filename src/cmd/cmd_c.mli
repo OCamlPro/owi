@@ -26,4 +26,5 @@ val cmd :
   -> profile:Fpath.t option
   -> model_output_format:Cmd_utils.model_output_format
   -> entry_point:string option
+  -> invoke_with_symbols:bool
   -> unit Result.t

@@ -53,6 +53,10 @@ OPTIONS
        --entry-point=VAL
            entry point of the executable
 
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
        --optimize
            optimize mode
 

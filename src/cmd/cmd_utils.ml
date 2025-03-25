@@ -47,7 +47,16 @@ let find_exported_name exported_names (m : Binary.modul) =
       | _ -> false )
     m.exports.func
 
-let set_entry_point entry_point (m : Binary.modul) =
+let find_imported_func modul_name func_name (m : Binary.modul) =
+  Array.find_index
+    (function
+      | Runtime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
+        when String.equal modul_name modul && String.equal func_name name ->
+        true
+      | Local _ | Imported _ -> false )
+    m.func
+
+let set_entry_point entry_point invoke_with_symbols (m : Binary.modul) =
   (* We are checking if there's a start function *)
   if Option.is_some m.start then
     if Option.is_some entry_point then
@@ -96,9 +105,99 @@ let set_entry_point entry_point (m : Binary.modul) =
           Fmt.error_msg "can not create default value of type %a"
             Types.pp_heap_type t
       in
+      let i32_symbol, m =
+        match find_imported_func "symbolic" "i32_symbol" m with
+        | None ->
+          let func = m.func in
+          let f =
+            Runtime.Imported
+              { Imported.modul = "symbolic"
+              ; name = "i32_symbol"
+              ; assigned_name = None
+              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ]))
+              }
+          in
+          let func = Array.append func [| f |] in
+          let m = { m with func } in
+          let i = Array.length func - 1 in
+          (Types.Raw i, m)
+        | Some i -> (Types.Raw i, m)
+      in
+      let i64_symbol, m =
+        match find_imported_func "symbolic" "i64_symbol" m with
+        | None ->
+          let func = m.func in
+          let f =
+            Runtime.Imported
+              { Imported.modul = "symbolic"
+              ; name = "i64_symbol"
+              ; assigned_name = None
+              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I64 ]))
+              }
+          in
+          let func = Array.append func [| f |] in
+          let m = { m with func } in
+          let i = Array.length func - 1 in
+          (Types.Raw i, m)
+        | Some i -> (Types.Raw i, m)
+      in
+      let f32_symbol, m =
+        match find_imported_func "symbolic" "f32_symbol" m with
+        | None ->
+          let func = m.func in
+          let f =
+            Runtime.Imported
+              { Imported.modul = "symbolic"
+              ; name = "f32_symbol"
+              ; assigned_name = None
+              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F32 ]))
+              }
+          in
+          let func = Array.append func [| f |] in
+          let m = { m with func } in
+          let i = Array.length func - 1 in
+          (Types.Raw i, m)
+        | Some i -> (Types.Raw i, m)
+      in
+      let f64_symbol, m =
+        match find_imported_func "symbolic" "f64_symbol" m with
+        | None ->
+          let func = m.func in
+          let f =
+            Runtime.Imported
+              { Imported.modul = "symbolic"
+              ; name = "f64_symbol"
+              ; assigned_name = None
+              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F64 ]))
+              }
+          in
+          let func = Array.append func [| f |] in
+          let m = { m with func } in
+          let i = Array.length func - 1 in
+          (Types.Raw i, m)
+        | Some i -> (Types.Raw i, m)
+      in
+      let default_symbol_of_t = function
+        | Types.Num_type I32 -> Ok (Types.Call i32_symbol)
+        | Num_type I64 -> Ok (Types.Call i64_symbol)
+        | Num_type F32 -> Ok (Types.Call f32_symbol)
+        | Num_type F64 -> Ok (Types.Call f64_symbol)
+        | Ref_type t ->
+          Fmt.error_msg "can not create default symbol of type %a"
+            Types.pp_ref_type t
+      in
       let+ body =
         let pt, rt = snd main_type in
-        let+ args = list_map (fun (_, t) -> default_value_of_t t) pt in
+        let+ args =
+          list_map
+            (fun (_, t) ->
+              let default =
+                if invoke_with_symbols then default_symbol_of_t
+                else default_value_of_t
+              in
+              default t )
+            pt
+        in
         let after_call =
           List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
         in

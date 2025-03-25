@@ -157,6 +157,10 @@ OPTIONS
        -I VAL
            headers path
 
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
        -m VAL, --arch=VAL (absent=32)
            data model
 

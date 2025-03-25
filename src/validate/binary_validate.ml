@@ -205,7 +205,9 @@ end = struct
 
   let pop required stack =
     match match_prefix ~prefix:required ~stack with
-    | None -> Error (`Type_mismatch "pop")
+    | None ->
+      let msg = Fmt.str "expected %a but stack is %a" pp required pp stack in
+      Error (`Type_mismatch msg)
     | Some stack -> Ok stack
 
   let pop_ref = function

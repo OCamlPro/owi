@@ -31,7 +31,8 @@ let model (S (solver_module, s)) ~symbols ~pc =
       | None -> assert false
       | Some model -> model
     end
-    | `Unsat | `Unknown -> assert false
+    | `Unsat -> assert false
+    | `Unknown -> assert false
   in
   Stats.close_span ();
   model
