@@ -52,31 +52,33 @@ type custom =
   | Uninterpreted of string
   | From_annot of binary Annot.annot
 
-type modul =
-  { id : string option
-  ; types : binary rec_type array
-  ; global : (global, binary global_type) Runtime.t array
-  ; table : (binary table, binary table_type) Runtime.t array
-  ; mem : (mem, limits) Runtime.t array
-  ; func : (binary func, binary block_type) Runtime.t array
-      (* TODO: switch to func_type *)
-  ; elem : elem array
-  ; data : data array
-  ; exports : exports
-  ; start : int option
-  ; custom : custom list
-  }
+module Module = struct
+  type t =
+    { id : string option
+    ; types : binary rec_type array
+    ; global : (global, binary global_type) Runtime.t array
+    ; table : (binary table, binary table_type) Runtime.t array
+    ; mem : (mem, limits) Runtime.t array
+    ; func : (binary func, binary block_type) Runtime.t array
+        (* TODO: switch to func_type *)
+    ; elem : elem array
+    ; data : data array
+    ; exports : exports
+    ; start : int option
+    ; custom : custom list
+    }
 
-let empty_modul =
-  { id = None
-  ; types = [||]
-  ; global = [||]
-  ; table = [||]
-  ; mem = [||]
-  ; func = [||]
-  ; elem = [||]
-  ; data = [||]
-  ; exports = { global = []; mem = []; table = []; func = [] }
-  ; start = None
-  ; custom = []
-  }
+  let empty =
+    { id = None
+    ; types = [||]
+    ; global = [||]
+    ; table = [||]
+    ; mem = [||]
+    ; func = [||]
+    ; elem = [||]
+    ; data = [||]
+    ; exports = { global = []; mem = []; table = []; func = [] }
+    ; start = None
+    ; custom = []
+    }
+end

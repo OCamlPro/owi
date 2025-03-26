@@ -358,7 +358,7 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
   let* functions, names = fill_exports Link_env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 
-let modul (ls : 'f state) ~name (modul : Binary.modul) =
+let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
   Log.debug0 "linking      ...@\n";
   let* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_id

@@ -10,7 +10,7 @@ module Any : sig
     -> rac:bool
     -> srac:bool
     -> 'extern_func Kind.t
-    -> Binary.modul Result.t
+    -> Binary.Module.t Result.t
 
   val until_optimize :
        unsafe:bool
@@ -18,7 +18,7 @@ module Any : sig
     -> srac:bool
     -> optimize:bool
     -> 'extern_func Kind.t
-    -> Binary.modul Result.t
+    -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -47,7 +47,7 @@ end
 
 module File : sig
   val until_binary_validate :
-    unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.modul Result.t
+    unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
 
   val until_optimize :
        unsafe:bool
@@ -55,7 +55,7 @@ module File : sig
     -> srac:bool
     -> optimize:bool
     -> Fpath.t
-    -> Binary.modul Result.t
+    -> Binary.Module.t Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
@@ -86,10 +86,18 @@ module Text : sig
   val until_text_validate : unsafe:bool -> Text.modul -> Text.modul Result.t
 
   val until_binary :
-    unsafe:bool -> rac:bool -> srac:bool -> Text.modul -> Binary.modul Result.t
+       unsafe:bool
+    -> rac:bool
+    -> srac:bool
+    -> Text.modul
+    -> Binary.Module.t Result.t
 
   val until_binary_validate :
-    unsafe:bool -> rac:bool -> srac:bool -> Text.modul -> Binary.modul Result.t
+       unsafe:bool
+    -> rac:bool
+    -> srac:bool
+    -> Text.modul
+    -> Binary.Module.t Result.t
 
   val until_optimize :
        unsafe:bool
@@ -97,7 +105,7 @@ module Text : sig
     -> srac:bool
     -> optimize:bool
     -> Text.modul
-    -> Binary.modul Result.t
+    -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -126,10 +134,10 @@ end
 
 module Binary : sig
   val until_binary_validate :
-    unsafe:bool -> Binary.modul -> Binary.modul Result.t
+    unsafe:bool -> Binary.Module.t -> Binary.Module.t Result.t
 
   val until_optimize :
-    unsafe:bool -> optimize:bool -> Binary.modul -> Binary.modul Result.t
+    unsafe:bool -> optimize:bool -> Binary.Module.t -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -138,7 +146,7 @@ module Binary : sig
     -> optimize:bool
     -> name:string option
     -> 'f Link.state
-    -> Binary.modul
+    -> Binary.Module.t
     -> ('f Link.module_to_run * 'f Link.state) Result.t
 
   (** compile and interpret a module with a given link state and produce a new
@@ -148,6 +156,6 @@ module Binary : sig
     -> optimize:bool
     -> name:string option
     -> Concrete_extern_func.extern_func Link.state
-    -> Binary.modul
+    -> Binary.Module.t
     -> Concrete_extern_func.extern_func Link.state Result.t
 end

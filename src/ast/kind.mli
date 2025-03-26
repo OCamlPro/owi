@@ -5,5 +5,5 @@
 type 'extern_func t =
   | Wat of Text.modul
   | Wast of Text.script
-  | Wasm of Binary.modul
+  | Wasm of Binary.Module.t
   | Ocaml of 'extern_func Link.extern_module

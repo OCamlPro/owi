@@ -5,4 +5,4 @@
 (** Module to typecheck a simplified module. *)
 
 (** typecheck a given module *)
-val modul : Binary.modul -> unit Result.t
+val modul : Binary.Module.t -> unit Result.t

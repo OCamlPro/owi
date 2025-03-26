@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val generate : bool -> Binary.modul -> Binary.modul Result.t
+val generate : bool -> Binary.Module.t -> Binary.Module.t Result.t
