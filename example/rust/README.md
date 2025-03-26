@@ -47,7 +47,11 @@ NAME
        interpreter on it
 
 SYNOPSIS
-       owi rust [OPTION]… [ARG]…
+       owi rust [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        --concolic
@@ -60,7 +64,7 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
-       --entry-point=VAL
+       --entry-point=FUNCTION
            entry point of the executable
 
        --fail-on-assertion-only

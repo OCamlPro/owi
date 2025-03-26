@@ -34,7 +34,11 @@ NAME
        format file (.wat)
 
 SYNOPSIS
-       owi wat2wasm [OPTION]… ARG
+       owi wat2wasm [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
 
 OPTIONS
        -d, --debug
