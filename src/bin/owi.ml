@@ -58,7 +58,7 @@ let sdocs = Manpage.s_common_options
 
 let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
 
-let version = "%%VERSION%%"
+let version = Cmd_version.owi_version ()
 
 (* Common terms *)
 
@@ -85,7 +85,10 @@ let deterministic_result_order =
 
 let entry_point =
   let doc = "entry point of the executable" in
-  Arg.(value & opt (some string) None & info [ "entry-point" ] ~doc)
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "entry-point" ] ~doc ~docv:"FUNCTION" )
 
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
@@ -99,7 +102,7 @@ let fail_mode =
 
 let files =
   let doc = "source files" in
-  Arg.(value & pos_all existing_file_conv [] (info [] ~doc))
+  Arg.(non_empty & pos_all existing_file_conv [] (info [] ~doc ~docv:"FILE"))
 
 let includes =
   let doc = "headers path" in
@@ -162,7 +165,8 @@ let solver =
 
 let source_file =
   let doc = "source file" in
-  Arg.(required & pos 0 (some existing_file_conv) None (info [] ~doc))
+  Arg.(
+    required & pos 0 (some existing_file_conv) None (info [] ~doc ~docv:"FILE") )
 
 let srac =
   let doc = "symbolic runtime assertion checking mode" in
@@ -197,7 +201,10 @@ let c_cmd =
   let+ arch
   and+ property =
     let doc = "property file" in
-    Arg.(value & opt (some existing_file_conv) None & info [ "property" ] ~doc)
+    Arg.(
+      value
+      & opt (some existing_file_conv) None
+      & info [ "property" ] ~doc ~docv:"FILE" )
   and+ includes
   and+ opt_lvl
   and+ testcomp =
@@ -371,7 +378,7 @@ let replay_cmd =
     Arg.(
       required
       & opt (some existing_file_conv) None
-      & info [ "replay-file" ] ~doc )
+      & info [ "replay-file" ] ~doc ~docv:"FILE" )
   and+ source_file
   and+ invoke_with_symbols
   and+ entry_point in

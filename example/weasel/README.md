@@ -97,7 +97,11 @@ NAME
        checking coming from Weasel specifications
 
 SYNOPSIS
-       owi instrument [--debug] [--symbolic] [--unsafe] [OPTION]… [ARG]…
+       owi instrument [--debug] [--symbolic] [--unsafe] [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        -d, --debug

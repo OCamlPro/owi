@@ -16,9 +16,14 @@ let statically_linked_libraries =
        ) )
   |> List.sort (fun (n1, _) (n2, _) -> String.compare n1 n2)
 
-let cmd () =
-  Fmt.pr "owi version %s@\n" version;
-  List.iter
-    (fun (name, version) -> Fmt.pr "%s version %s@\n" name version)
-    statically_linked_libraries;
-  Ok ()
+let pp fmt () =
+  Fmt.list
+    ~sep:(fun fmt () -> Fmt.pf fmt "@\n")
+    (fun fmt (name, version) -> Fmt.pf fmt "%s version %s" name version)
+    fmt
+    (("owi", version) :: statically_linked_libraries);
+  Fmt.string fmt "@\n"
+
+let owi_version () = Fmt.str "owi version %s" version
+
+let cmd () = Ok (Fmt.pr "%a" pp ())

@@ -44,13 +44,17 @@ NAME
        in a replay file containing a model
 
 SYNOPSIS
-       owi replay [OPTION]… ARG
+       owi replay [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
 
 OPTIONS
        -d, --debug
            debug mode
 
-       --entry-point=VAL
+       --entry-point=FUNCTION
            entry point of the executable
 
        --invoke-with-symbols
@@ -63,7 +67,7 @@ OPTIONS
        -p, --profiling
            profiling mode
 
-       --replay-file=VAL (required)
+       --replay-file=FILE (required)
            Which replay file to use
 
        -u, --unsafe

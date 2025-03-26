@@ -48,7 +48,11 @@ NAME
        owi-validate - Validate a module
 
 SYNOPSIS
-       owi validate [--debug] [OPTION]… [ARG]…
+       owi validate [--debug] [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        -d, --debug

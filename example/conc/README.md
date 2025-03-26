@@ -44,7 +44,11 @@ NAME
        owi-conc - Run the concolic interpreter
 
 SYNOPSIS
-       owi conc [OPTION]… [ARG]…
+       owi conc [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        -d, --debug
@@ -54,7 +58,7 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
-       --entry-point=VAL
+       --entry-point=FUNCTION
            entry point of the executable
 
        --fail-on-assertion-only

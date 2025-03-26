@@ -434,7 +434,11 @@ NAME
        it
 
 SYNOPSIS
-       owi c [OPTION]… [ARG]…
+       owi c [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        --concolic
@@ -452,7 +456,7 @@ OPTIONS
            https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
            Frama-C's current language feature implementations
 
-       --entry-point=VAL
+       --entry-point=FUNCTION
            entry point of the executable
 
        --fail-on-assertion-only
@@ -498,7 +502,7 @@ OPTIONS
        --profile=FILE
            Profile file.
 
-       --property=VAL
+       --property=FILE
            property file
 
        -s VAL, --solver=VAL (absent=Z3)

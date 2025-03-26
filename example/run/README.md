@@ -58,7 +58,11 @@ NAME
        owi-run - Run the concrete interpreter
 
 SYNOPSIS
-       owi run [OPTION]… [ARG]…
+       owi run [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
 
 OPTIONS
        -d, --debug
