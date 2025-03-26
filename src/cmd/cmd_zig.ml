@@ -7,7 +7,6 @@ open Syntax
 
 let compile ~entry_point ~includes debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  let entry_point = Option.value entry_point ~default:"_start" in
   let includes =
     Cmd.of_list (List.map (fun p -> Fmt.str "-I%a" Fpath.pp p) includes)
   in
@@ -48,9 +47,11 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
   let includes = Cmd_utils.zig_files_location @ includes in
+  let entry_point = Option.value entry_point ~default:"_start" in
   let* modul = compile ~entry_point ~includes debug files in
   let workspace = Fpath.v "owi-out" in
   let files = [ modul ] in
+  let entry_point = Some entry_point in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing

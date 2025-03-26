@@ -8,7 +8,6 @@ open Syntax
 (* TODO: investigate which parameters makes sense *)
 let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  let entry_point = Option.value entry_point ~default:"main" in
   let* rustc_bin = OS.Cmd.resolve @@ Cmd.v "rustc" in
 
   let* libowi_sym_rlib =
@@ -46,8 +45,10 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
+  let entry_point = Option.value entry_point ~default:"main" in
   let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let files = [ modul ] in
+  let entry_point = Some entry_point in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing

@@ -40,21 +40,47 @@ let write_testcase =
 
 (* Entry-point *)
 
-let find_exported_name exported_names (m : Binary.Module.t) =
-  List.find_opt
-    (function
-      | { Binary.name; _ } when List.mem name exported_names -> true
-      | _ -> false )
-    m.exports.func
+let dummy_value_of_t = function
+  | Types.Num_type I32 -> Ok (Types.I32_const 0l)
+  | Num_type I64 -> Ok (Types.I64_const 0L)
+  | Num_type F32 -> Ok (Types.F32_const (Float32.of_float 0.))
+  | Num_type F64 -> Ok (Types.F64_const (Float64.of_float 0.))
+  | Ref_type (Types.Null, t) -> Ok (Types.Ref_null t)
+  | Ref_type (Types.No_null, t) ->
+    Fmt.error_msg "can not create default value of type %a" Types.pp_heap_type t
 
-let find_imported_func modul_name func_name (m : Binary.Module.t) =
-  Array.find_index
-    (function
-      | Runtime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
-        when String.equal modul_name modul && String.equal func_name name ->
-        true
-      | Local _ | Imported _ -> false )
-    m.func
+let default_symbol_of_t m =
+  (* TODO: make this lazy to avoid adding unused imports to the module *)
+  let modul_name = "symbolic" in
+  let i32_symbol, m =
+    let func_name = "i32_symbol" in
+    let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
+  let i64_symbol, m =
+    let func_name = "i64_symbol" in
+    let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I64 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
+  let f32_symbol, m =
+    let func_name = "f32_symbol" in
+    let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F32 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
+  let f64_symbol, m =
+    let func_name = "f64_symbol" in
+    let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F64 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
+  ( m
+  , function
+    | Types.Num_type I32 -> Ok (Types.Call i32_symbol)
+    | Num_type I64 -> Ok (Types.Call i64_symbol)
+    | Num_type F32 -> Ok (Types.Call f32_symbol)
+    | Num_type F64 -> Ok (Types.Call f64_symbol)
+    | Ref_type t ->
+      Fmt.error_msg "can not create default symbol of type %a" Types.pp_ref_type
+        t )
 
 let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
   (* We are checking if there's a start function *)
@@ -69,123 +95,21 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
     let* export =
       match entry_point with
       | Some entry_point -> begin
-        match find_exported_name [ entry_point ] m with
+        match Binary.Module.find_exported_func_from_name entry_point m with
         | None -> Fmt.error_msg "Entry point %s not found\n" entry_point
         | Some ep -> Ok ep
       end
       (* If we have no entry point argument then we search for common entry function names *)
       | None ->
-        let possible_names = [ "main"; "_start" ] in
-        begin
-          match find_exported_name possible_names m with
-          | Some entry_point -> Ok entry_point
-          | None ->
-            Fmt.error_msg "No entry point found, tried: %a\n"
-              (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Fmt.string)
-              possible_names
-        end
+        Fmt.error_msg
+          "No start function found, no default entry point found and no custom \
+           entry point was provided"
     in
-    (* We found an entry point, so we check its type and build a start function that put the right values on the stack,
-       call the entry function and drop the results *)
-    let main_id = export.id in
-    if main_id >= Array.length m.func then
-      Fmt.error_msg "can't find a main function"
-    else
-      let main_function = m.func.(main_id) in
-      let (Bt_raw main_type) =
-        match main_function with Local f -> f.type_f | Imported i -> i.desc
-      in
-      let default_value_of_t = function
-        | Types.Num_type I32 -> Ok (Types.I32_const 0l)
-        | Num_type I64 -> Ok (Types.I64_const 0L)
-        | Num_type F32 -> Ok (Types.F32_const (Float32.of_float 0.))
-        | Num_type F64 -> Ok (Types.F64_const (Float64.of_float 0.))
-        | Ref_type (Types.Null, t) -> Ok (Types.Ref_null t)
-        | Ref_type (Types.No_null, t) ->
-          Fmt.error_msg "can not create default value of type %a"
-            Types.pp_heap_type t
-      in
-      let i32_symbol, m =
-        match find_imported_func "symbolic" "i32_symbol" m with
-        | None ->
-          let func = m.func in
-          let f =
-            Runtime.Imported
-              { Imported.modul = "symbolic"
-              ; name = "i32_symbol"
-              ; assigned_name = None
-              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ]))
-              }
-          in
-          let func = Array.append func [| f |] in
-          let m = { m with func } in
-          let i = Array.length func - 1 in
-          (Types.Raw i, m)
-        | Some i -> (Types.Raw i, m)
-      in
-      let i64_symbol, m =
-        match find_imported_func "symbolic" "i64_symbol" m with
-        | None ->
-          let func = m.func in
-          let f =
-            Runtime.Imported
-              { Imported.modul = "symbolic"
-              ; name = "i64_symbol"
-              ; assigned_name = None
-              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I64 ]))
-              }
-          in
-          let func = Array.append func [| f |] in
-          let m = { m with func } in
-          let i = Array.length func - 1 in
-          (Types.Raw i, m)
-        | Some i -> (Types.Raw i, m)
-      in
-      let f32_symbol, m =
-        match find_imported_func "symbolic" "f32_symbol" m with
-        | None ->
-          let func = m.func in
-          let f =
-            Runtime.Imported
-              { Imported.modul = "symbolic"
-              ; name = "f32_symbol"
-              ; assigned_name = None
-              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F32 ]))
-              }
-          in
-          let func = Array.append func [| f |] in
-          let m = { m with func } in
-          let i = Array.length func - 1 in
-          (Types.Raw i, m)
-        | Some i -> (Types.Raw i, m)
-      in
-      let f64_symbol, m =
-        match find_imported_func "symbolic" "f64_symbol" m with
-        | None ->
-          let func = m.func in
-          let f =
-            Runtime.Imported
-              { Imported.modul = "symbolic"
-              ; name = "f64_symbol"
-              ; assigned_name = None
-              ; desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F64 ]))
-              }
-          in
-          let func = Array.append func [| f |] in
-          let m = { m with func } in
-          let i = Array.length func - 1 in
-          (Types.Raw i, m)
-        | Some i -> (Types.Raw i, m)
-      in
-      let default_symbol_of_t = function
-        | Types.Num_type I32 -> Ok (Types.Call i32_symbol)
-        | Num_type I64 -> Ok (Types.Call i64_symbol)
-        | Num_type F32 -> Ok (Types.Call f32_symbol)
-        | Num_type F64 -> Ok (Types.Call f64_symbol)
-        | Ref_type t ->
-          Fmt.error_msg "can not create default symbol of type %a"
-            Types.pp_ref_type t
-      in
+    (* We found an entry point, so we check its type and build a start function that put the right values on the stack (be it symbols or dummy values), call the entry function and drop the result. *)
+    match Binary.Module.get_func_type export.id m with
+    | None -> Fmt.error_msg "can't find a main function"
+    | Some (Bt_raw main_type) ->
+      let m, default_symbol_of_t = default_symbol_of_t m in
       let+ body =
         let pt, rt = snd main_type in
         let+ args =
@@ -193,7 +117,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
             (fun (_, t) ->
               let default =
                 if invoke_with_symbols then default_symbol_of_t
-                else default_value_of_t
+                else dummy_value_of_t
               in
               default t )
             pt
@@ -201,7 +125,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
         let after_call =
           List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
         in
-        args @ [ Types.Call (Raw main_id) ] @ after_call
+        args @ [ Types.Call (Raw export.id) ] @ after_call
       in
       let type_f : Types.binary Types.block_type =
         Types.Bt_raw (None, ([], []))
@@ -211,15 +135,9 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
       in
       let start_func = Runtime.Local start_code in
 
-      (* We need to add the new start function to the funcs of the module at the next free index *)
-      let func =
-        Array.init
-          (Array.length m.func + 1)
-          (fun i -> if i = Array.length m.func then start_func else m.func.(i))
-      in
-
-      let start = Some (Array.length m.func) in
-      { m with func; start }
+      let m, start_index = Binary.Module.add_func start_func m in
+      let start = Some start_index in
+      { m with start }
 
 (* Installed files  *)
 
