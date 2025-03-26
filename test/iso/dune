@@ -1,0 +1,6 @@
+(cram
+ (deps
+  %{bin:owi}
+  (package owi)
+  a1.wat
+  a2.wat))

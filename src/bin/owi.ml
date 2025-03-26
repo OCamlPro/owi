@@ -344,6 +344,24 @@ let instrument_cmd =
   and+ files in
   Cmd_instrument.cmd ~debug ~unsafe ~symbolic ~files
 
+(* owi iso *)
+
+let iso_info =
+  let doc =
+    "Check the iso-functionnality of two Wasm modules by comparing the output \
+     when calling their exports."
+  in
+  let man = [] @ shared_man in
+  Cmd.info "iso" ~version ~doc ~sdocs ~man
+
+let iso_cmd =
+  let+ concolic
+  and+ debug
+  and+ files
+  and+ solver
+  and+ unsafe in
+  Cmd_iso.cmd ~concolic ~debug ~files ~solver ~unsafe
+
 (* owi opt *)
 
 let opt_info =
@@ -596,6 +614,7 @@ let cli =
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.v opt_info opt_cmd
     ; Cmd.v instrument_info instrument_cmd
+    ; Cmd.v iso_info iso_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
