@@ -18,6 +18,21 @@ val debug1 : ('a -> unit, Format.formatter, unit) format -> 'a -> unit
 val debug2 :
   ('a -> 'b -> unit, Format.formatter, unit) format -> 'a -> 'b -> unit
 
+val debug3 :
+     ('a -> 'b -> 'c -> unit, Format.formatter, unit) format
+  -> 'a
+  -> 'b
+  -> 'c
+  -> unit
+
+val debug4 :
+     ('a -> 'b -> 'c -> 'd -> unit, Format.formatter, unit) format
+  -> 'a
+  -> 'b
+  -> 'c
+  -> 'd
+  -> unit
+
 val debug5 :
      ('a -> 'b -> 'c -> 'd -> 'e -> unit, Format.formatter, unit) format
   -> 'a

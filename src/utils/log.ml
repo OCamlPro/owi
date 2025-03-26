@@ -16,6 +16,10 @@ let debug1 t a : unit = if !debug_on then Fmt.epr t a
 
 let debug2 t a b : unit = if !debug_on then Fmt.epr t a b
 
+let debug3 t a b c : unit = if !debug_on then Fmt.epr t a b c
+
+let debug4 t a b c d : unit = if !debug_on then Fmt.epr t a b c d
+
 let debug5 t a b c d e : unit = if !debug_on then Fmt.epr t a b c d e
 
 let profile3 t a b c : unit = if !profiling_on then Fmt.epr t a b c

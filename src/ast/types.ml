@@ -414,12 +414,22 @@ let compare_result_type t1 t2 = List.compare compare_val_type t1 t2
 let with_space_list printer fmt l =
   match l with [] -> () | _l -> pf fmt " %a" printer l
 
+type nonrec 'a func_type = 'a param_type * 'a result_type
+
+let pp_func_type fmt (params, results) =
+  pf fmt "(func%a%a)"
+    (with_space_list pp_param_type)
+    params
+    (with_space_list pp_result_type)
+    results
+
+let func_type_eq (pt1, rt1) (pt2, rt2) =
+  param_type_eq pt1 pt2 && result_type_eq rt1 rt2
+
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
   | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
-  | Bt_raw :
-      ('a indice option * ('a param_type * 'a result_type))
-      -> (< .. > as 'a) block_type
+  | Bt_raw : ('a indice option * 'a func_type) -> (< .. > as 'a) block_type
 
 let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pf fmt "(type %a)" pp_indice ind
@@ -433,18 +443,6 @@ let pp_block_type (type kind) fmt : kind block_type -> unit = function
 let pp_block_type_opt fmt = function
   | None -> ()
   | Some bt -> pp_block_type fmt bt
-
-type nonrec 'a func_type = 'a param_type * 'a result_type
-
-let pp_func_type fmt (params, results) =
-  pf fmt "(func%a%a)"
-    (with_space_list pp_param_type)
-    params
-    (with_space_list pp_result_type)
-    results
-
-let func_type_eq (pt1, rt1) (pt2, rt2) =
-  param_type_eq pt1 pt2 && result_type_eq rt1 rt2
 
 let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
