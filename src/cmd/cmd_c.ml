@@ -71,7 +71,6 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
 
 let compile ~entry_point ~includes ~opt_lvl debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  let entry_point = Option.value entry_point ~default:"main" in
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
@@ -168,15 +167,17 @@ let metadata ~workspace arch property files : unit Result.t =
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~eacsl ~solver ~profile ~model_output_format ~entry_point
-  ~invoke_with_symbols : unit Result.t =
+  ~concolic ~eacsl ~solver ~profile ~model_output_format
+  ~(entry_point : string option) ~invoke_with_symbols : unit Result.t =
   let includes = Cmd_utils.c_files_location @ includes in
   let* (_exists : bool) = OS.Dir.create ~path:true workspace in
   let* files = eacsl_instrument eacsl debug ~includes files in
+  let entry_point = Option.value entry_point ~default:"main" in
   let* modul = compile ~entry_point ~includes ~opt_lvl debug files in
   let* () = metadata ~workspace arch property files in
   let workspace = Fpath.(workspace / "test-suite") in
   let files = [ modul ] in
+  let entry_point = Some entry_point in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
