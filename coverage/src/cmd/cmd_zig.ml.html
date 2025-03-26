@@ -18,10 +18,10 @@
       <h2>90.00%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:43.10%"></span>
-      <span class="some-visited" style="bottom:32.76%"></span>
-      <span class="unvisited" style="bottom:24.14%"></span>
-      <span class="some-visited" style="bottom:6.90%"></span>
+      <span class="some-visited" style="bottom:45.76%"></span>
+      <span class="some-visited" style="bottom:35.59%"></span>
+      <span class="unvisited" style="bottom:27.12%"></span>
+      <span class="some-visited" style="bottom:6.78%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -37,53 +37,54 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span > </span>
-<a id="L33"></a><span class="some-visited"> </span>
+<a id="L32"></a><span class="some-visited"> </span>
+<a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="some-visited"> </span>
+<a id="L38"></a><span class="some-visited"> </span>
+<a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span > </span>
-<a id="L44"></a><span class="unvisited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="unvisited"> </span>
+<a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
-<a id="L50"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
 <a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span class="some-visited"> </span>
-<a id="L55"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="some-visited"> </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -146,6 +147,7 @@
 <a href="#L56">56</a>
 <a href="#L57">57</a>
 <a href="#L58">58</a>
+<a href="#L59">59</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -156,7 +158,6 @@ open Syntax
 
 let compile ~entry_point ~includes debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"_start" in
   <span data-count="3">l</span>et includes =
     Cmd.of_list (List.ma<span data-count="3">p</span> (fun p -&gt; <span data-count="3">F</span>mt.str "-I%a" Fpath.pp p) includes)
   in
@@ -195,16 +196,18 @@ let compile ~entry_point ~includes debug (files : Fpath.t list) :
 let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format ~entry_point : unit Result.t =
+  ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
   <span data-count="3">l</span>et includes = Cmd_utils.zig_files_location @ includes in
-  let* modul = compil<span data-count="3">e</span> ~entry_point ~includes debug files in
+  let entry_point = Option.value entry_point ~default:"_start" in
+  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes debug files in
   <span data-count="2">l</span>et workspace = Fpath.v "owi-out" in
   <span data-count="2">l</span>et files = [ modul ] in
+  let entry_point = Some entry_point in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point
+    ~model_output_format ~entry_point ~invoke_with_symbols
 </code></pre>
       </div>
     </div>

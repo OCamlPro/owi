@@ -2559,7 +2559,7 @@ let keep_imported values =
 
 let encode
   ({ func; table; global; exports; start; data; mem; types; elem; _ } :
-    Binary.modul ) =
+    Binary.Module.t ) =
   <span data-count="19">l</span>et buf = Buffer.create 256 in
 
   <span data-count="19">l</span>et local_funcs = keep_local func in

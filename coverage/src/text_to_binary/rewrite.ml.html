@@ -1653,7 +1653,7 @@ let rewrite_annots (modul : Assigned.t) :
   text Annot.annot list -&gt; Binary.custom list Result.t =
   <span data-count="6105">l</span>ist_map (rewrite_anno<span data-count="6105">t</span> modul)
 
-let modul (modul : Assigned.t) : Binary.modul Result.t =
+let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   <span data-count="6169">L</span>og.debug0 "rewriting    ...@\n";
   <span data-count="6169">l</span>et typemap = typemap modul.typ in
   <span data-count="6169">l</span>et* global =
@@ -1692,7 +1692,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   <span data-count="6105">l</span>et data = Named.to_array data in
   <span data-count="6105">l</span>et func = Named.to_array func in
 
-  <span data-count="6105">{</span> Binary.id
+  <span data-count="6105">{</span> Binary.Module.id
   ; mem
   ; table
   ; types

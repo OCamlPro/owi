@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>types.ml &mdash; Coverage report</title>
-    <meta name="description" content="50.69% coverage in src/ast/types.ml">
+    <meta name="description" content="50.88% coverage in src/ast/types.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/ast/</span>types.ml
         </a>
       </h1>
-      <h2>50.69%</h2>
+      <h2>50.88%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:4.63%"></span>
@@ -59,7 +59,6 @@
       <span class="unvisited" style="top:29.28%"></span>
       <span class="unvisited" style="top:29.38%"></span>
       <span class="unvisited" style="top:29.58%"></span>
-      <span class="unvisited" style="top:29.68%"></span>
       <span class="unvisited" style="top:29.78%"></span>
       <span class="unvisited" style="top:29.88%"></span>
       <span class="unvisited" style="top:30.18%"></span>
@@ -533,7 +532,7 @@
 <a id="L292"></a><span class="unvisited"> </span>
 <a id="L293"></a><span class="visited"> </span>
 <a id="L294"></a><span class="unvisited"> </span>
-<a id="L295"></a><span class="unvisited"> </span>
+<a id="L295"></a><span class="visited"> </span>
 <a id="L296"></a><span class="unvisited"> </span>
 <a id="L297"></a><span class="unvisited"> </span>
 <a id="L298"></a><span > </span>
@@ -2296,14 +2295,14 @@ type nonrec num_type =
   | F64
 
 let pp_num_type fmt = function
-  | <span data-count="596">I</span>32 -&gt; pf fmt "i32"
-  | <span data-count="20">I</span>64 -&gt; pf fmt "i64"
-  | <span data-count="43">F</span>32 -&gt; pf fmt "f32"
-  | <span data-count="14">F</span>64 -&gt; pf fmt "f64"
+  | <span data-count="4092">I</span>32 -&gt; pf fmt "i32"
+  | <span data-count="869">I</span>64 -&gt; pf fmt "i64"
+  | <span data-count="891">F</span>32 -&gt; pf fmt "f32"
+  | <span data-count="654">F</span>64 -&gt; pf fmt "f64"
 
 let num_type_eq t1 t2 =
-  <span data-count="3225715">m</span>atch (t1, t2) with
-  | <span data-count="2958179">I</span>32, I32 | <span data-count="89294">I</span>64, I64 | <span data-count="88973">F</span>32, F32 | <span data-count="89226">F</span>64, F64 -&gt; true
+  <span data-count="3226828">m</span>atch (t1, t2) with
+  | <span data-count="2958195">I</span>32, I32 | <span data-count="89659">I</span>64, I64 | <span data-count="89339">F</span>32, F32 | <span data-count="89592">F</span>64, F64 -&gt; true
   | <span data-count="43">(</span><span data-count="15">I</span>32 | <span data-count="10">I</span>64 | <span data-count="10">F</span>32 | <span data-count="8">F</span>64), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2524,9 +2523,9 @@ let pp_heap_type fmt = function
   | <span data-count="0">I</span>31_ht -&gt; pf fmt "i31"
   | <span data-count="0">S</span>truct_ht -&gt; pf fmt "struct"
   | <span data-count="0">A</span>rray_ht -&gt; pf fmt "array"
-  | <span data-count="11">F</span>unc_ht -&gt; pf fmt "func"
+  | <span data-count="21">F</span>unc_ht -&gt; pf fmt "func"
   | <span data-count="0">N</span>o_func_ht -&gt; pf fmt "nofunc"
-  | <span data-count="0">E</span>xtern_ht -&gt; pf fmt "extern"
+  | <span data-count="56">E</span>xtern_ht -&gt; pf fmt "extern"
   | <span data-count="0">N</span>o_extern_ht -&gt; pf fmt "noextern"
   | <span data-count="0">D</span>ef_ht i -&gt; pf fmt "%a" pp_indice i
 
@@ -2605,8 +2604,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="3223861">m</span>atch (t1, t2) with
-  | <span data-count="3223838">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="3224971">m</span>atch (t1, t2) with
+  | <span data-count="3224949">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="22">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2621,7 +2620,7 @@ type nonrec 'a param = string option * 'a val_type
 
 let pp_param fmt (id, vt) = <span data-count="295">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="1616093">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="1616091">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="33652">c</span>ompare_val_type t1 t2
 
@@ -2629,7 +2628,7 @@ type nonrec 'a param_type = 'a param list
 
 let pp_param_type fmt params = <span data-count="156">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="1614837">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="1615950">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="74582">L</span>ist.compare compare_param t1 t2
 
@@ -2639,7 +2638,7 @@ let pp_result_ fmt vt = <span data-count="163">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="163">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="1614693">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="1615805">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="40719">L</span>ist.compare compare_val_type t1 t2
 
@@ -2678,7 +2677,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="1614838">p</span>aram_type_e<span data-count="1614836">q</span> pt1 pt2 &amp;&amp; <span data-count="1614691">r</span>esult_type_eq rt1 rt2
+  <span data-count="1615950">p</span>aram_type_e<span data-count="1615950">q</span> pt1 pt2 &amp;&amp; <span data-count="1615805">r</span>esult_type_eq rt1 rt2
 
 let compare_func_type (pt1, rt1) (pt2, rt2) =
   <span data-count="74582">l</span>et pt = compare_param_type pt1 pt2 in

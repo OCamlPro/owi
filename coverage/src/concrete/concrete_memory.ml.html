@@ -289,8 +289,8 @@ let recover ~from_ ~to_ =
   to_.data &lt;- from_.data
 
 let init limits : t =
-  <span data-count="1078">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
-  <span data-count="1078">{</span> limits; data }
+  <span data-count="1079">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
+  <span data-count="1079">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="196">l</span>et limits =

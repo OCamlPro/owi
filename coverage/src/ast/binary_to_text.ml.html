@@ -18,28 +18,28 @@
       <h2>74.47%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:5.49%"></span>
-      <span class="unvisited" style="top:5.88%"></span>
-      <span class="unvisited" style="top:6.67%"></span>
-      <span class="unvisited" style="top:10.20%"></span>
-      <span class="unvisited" style="top:21.57%"></span>
-      <span class="unvisited" style="top:21.96%"></span>
-      <span class="unvisited" style="top:22.35%"></span>
-      <span class="unvisited" style="top:23.53%"></span>
-      <span class="unvisited" style="top:25.10%"></span>
-      <span class="unvisited" style="top:26.27%"></span>
-      <span class="unvisited" style="top:27.84%"></span>
-      <span class="unvisited" style="top:28.24%"></span>
-      <span class="unvisited" style="top:38.82%"></span>
-      <span class="unvisited" style="top:39.22%"></span>
-      <span class="unvisited" style="top:45.10%"></span>
-      <span class="unvisited" style="bottom:44.71%"></span>
-      <span class="unvisited" style="bottom:44.31%"></span>
-      <span class="unvisited" style="bottom:40.00%"></span>
-      <span class="unvisited" style="bottom:39.61%"></span>
-      <span class="unvisited" style="bottom:36.08%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:13.73%"></span>
+      <span class="some-visited" style="top:5.28%"></span>
+      <span class="unvisited" style="top:5.66%"></span>
+      <span class="unvisited" style="top:6.42%"></span>
+      <span class="unvisited" style="top:9.81%"></span>
+      <span class="unvisited" style="top:20.75%"></span>
+      <span class="unvisited" style="top:21.13%"></span>
+      <span class="unvisited" style="top:21.51%"></span>
+      <span class="unvisited" style="top:22.64%"></span>
+      <span class="unvisited" style="top:24.15%"></span>
+      <span class="unvisited" style="top:25.28%"></span>
+      <span class="unvisited" style="top:26.79%"></span>
+      <span class="unvisited" style="top:27.17%"></span>
+      <span class="unvisited" style="top:37.36%"></span>
+      <span class="unvisited" style="top:37.74%"></span>
+      <span class="unvisited" style="top:43.40%"></span>
+      <span class="unvisited" style="bottom:46.79%"></span>
+      <span class="unvisited" style="bottom:46.42%"></span>
+      <span class="unvisited" style="bottom:42.26%"></span>
+      <span class="unvisited" style="bottom:41.89%"></span>
+      <span class="unvisited" style="bottom:38.49%"></span>
+      <span class="unvisited" style="bottom:23.02%"></span>
+      <span class="unvisited" style="bottom:16.98%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -283,22 +283,32 @@
 <a id="L237"></a><span > </span>
 <a id="L238"></a><span > </span>
 <a id="L239"></a><span > </span>
-<a id="L240"></a><span class="visited"> </span>
-<a id="L241"></a><span class="visited"> </span>
-<a id="L242"></a><span class="visited"> </span>
-<a id="L243"></a><span class="visited"> </span>
+<a id="L240"></a><span > </span>
+<a id="L241"></a><span > </span>
+<a id="L242"></a><span > </span>
+<a id="L243"></a><span > </span>
 <a id="L244"></a><span > </span>
 <a id="L245"></a><span > </span>
 <a id="L246"></a><span > </span>
 <a id="L247"></a><span > </span>
-<a id="L248"></a><span class="visited"> </span>
-<a id="L249"></a><span class="visited"> </span>
-<a id="L250"></a><span > </span>
-<a id="L251"></a><span > </span>
+<a id="L248"></a><span > </span>
+<a id="L249"></a><span > </span>
+<a id="L250"></a><span class="visited"> </span>
+<a id="L251"></a><span class="visited"> </span>
 <a id="L252"></a><span class="visited"> </span>
-<a id="L253"></a><span > </span>
+<a id="L253"></a><span class="visited"> </span>
 <a id="L254"></a><span > </span>
 <a id="L255"></a><span > </span>
+<a id="L256"></a><span > </span>
+<a id="L257"></a><span > </span>
+<a id="L258"></a><span class="visited"> </span>
+<a id="L259"></a><span class="visited"> </span>
+<a id="L260"></a><span > </span>
+<a id="L261"></a><span > </span>
+<a id="L262"></a><span class="visited"> </span>
+<a id="L263"></a><span > </span>
+<a id="L264"></a><span > </span>
+<a id="L265"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -558,6 +568,16 @@
 <a href="#L253">253</a>
 <a href="#L254">254</a>
 <a href="#L255">255</a>
+<a href="#L256">256</a>
+<a href="#L257">257</a>
+<a href="#L258">258</a>
+<a href="#L259">259</a>
+<a href="#L260">260</a>
+<a href="#L261">261</a>
+<a href="#L262">262</a>
+<a href="#L263">263</a>
+<a href="#L264">264</a>
+<a href="#L265">265</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -796,8 +816,18 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 let from_start = function <span data-count="1">N</span>one -&gt; [] | <span data-count="48">S</span>ome n -&gt; [ MStart (Raw n) ]
 
 let modul
-  { Binary.id; types; global; table; mem; func; elem; data; start; exports; _ }
-    =
+  { Binary.Module.id
+  ; types
+  ; global
+  ; table
+  ; mem
+  ; func
+  ; elem
+  ; data
+  ; start
+  ; exports
+  ; _
+  } =
   <span data-count="49">l</span>et fields =
     from_type<span data-count="49">s</span> types @ from_globa<span data-count="49">l</span> global @ from_tabl<span data-count="49">e</span> table @ from_me<span data-count="49">m</span> mem
     @ from_fun<span data-count="49">c</span> func @ from_ele<span data-count="49">m</span> elem @ from_dat<span data-count="49">a</span> data @ from_export<span data-count="49">s</span> exports

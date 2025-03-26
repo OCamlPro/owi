@@ -18,9 +18,9 @@
       <h2>91.89%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:38.18%"></span>
-      <span class="some-visited" style="bottom:27.27%"></span>
-      <span class="some-visited" style="bottom:7.27%"></span>
+      <span class="some-visited" style="bottom:42.11%"></span>
+      <span class="some-visited" style="bottom:31.58%"></span>
+      <span class="some-visited" style="bottom:8.77%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -36,50 +36,52 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span > </span>
-<a id="L34"></a><span class="some-visited"> </span>
+<a id="L33"></a><span class="some-visited"> </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span class="visited"> </span>
 <a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span class="some-visited"> </span>
+<a id="L39"></a><span class="some-visited"> </span>
+<a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
-<a id="L42"></a><span > </span>
-<a id="L43"></a><span class="visited"> </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
-<a id="L48"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span class="some-visited"> </span>
-<a id="L52"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="some-visited"> </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
-<a id="L55"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -139,6 +141,8 @@
 <a href="#L53">53</a>
 <a href="#L54">54</a>
 <a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -150,7 +154,6 @@ open Syntax
 (* TODO: investigate which parameters makes sense *)
 let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
   Fpath.t Result.t =
-  <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"main" in
   <span data-count="3">l</span>et* rustc_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "rustc" in
 
   <span data-count="3">l</span>et* libowi_sym_rlib =
@@ -187,14 +190,17 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format ~entry_point : unit Result.t =
+  ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
+  <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"main" in
   <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl debug files in
   <span data-count="2">l</span>et files = [ modul ] in
+  let entry_point = Some entry_point in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace:(Fpath.<span data-count="2">v</span> "owi-out")
     ~solver ~files ~profile ~model_output_format ~entry_point
+    ~invoke_with_symbols
 </code></pre>
       </div>
     </div>
