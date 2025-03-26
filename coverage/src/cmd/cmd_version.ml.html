@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_version.ml &mdash; Coverage report</title>
-    <meta name="description" content="75.00% coverage in src/cmd/cmd_version.ml">
+    <meta name="description" content="68.42% coverage in src/cmd/cmd_version.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,13 @@
           <span class="dirname">src/cmd/</span>cmd_version.ml
         </a>
       </h1>
-      <h2>75.00%</h2>
+      <h2>68.42%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:16.67%"></span>
-      <span class="unvisited" style="bottom:12.50%"></span>
-      <span class="unvisited" style="bottom:8.33%"></span>
+      <span class="unvisited" style="bottom:31.03%"></span>
+      <span class="unvisited" style="bottom:27.59%"></span>
+      <span class="unvisited" style="bottom:24.14%"></span>
+      <span class="unvisited" style="bottom:13.79%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -49,7 +50,12 @@
 <a id="L21"></a><span class="unvisited"> </span>
 <a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -78,31 +84,41 @@
 <a href="#L22">22</a>
 <a href="#L23">23</a>
 <a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 let string_of_version = function
-  | <span data-count="13548">N</span>one -&gt; "unknown"
-  | <span data-count="74514">S</span>ome v -&gt; Build_info.V1.Version.to_string v
+  | <span data-count="13702">N</span>one -&gt; "unknown"
+  | <span data-count="75361">S</span>ome v -&gt; Build_info.V1.Version.to_string v
 
-let version = string_of_versio<span data-count="965">n</span> @@ Build_info.V1.versio<span data-count="965">n</span> ()
+let version = string_of_versio<span data-count="976">n</span> @@ Build_info.V1.versio<span data-count="976">n</span> ()
 
 let statically_linked_libraries =
   Build_info.V1.Statically_linked_libraries.to_list ()
-  |&gt; <span data-count="965">L</span>ist.map (fun l -&gt;
-       <span data-count="87097">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="87097">e</span> l
-       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="87097">s</span>tring_of_versio<span data-count="87097">n</span>
+  |&gt; <span data-count="976">L</span>ist.map (fun l -&gt;
+       <span data-count="88087">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="88087">e</span> l
+       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="88087">s</span>tring_of_versio<span data-count="88087">n</span>
        ) )
-  |&gt; <span data-count="965">L</span>ist.sor<span data-count="965">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="441928">S</span>tring.compare n1 n2)
+  |&gt; <span data-count="976">L</span>ist.sor<span data-count="976">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="446944">S</span>tring.compare n1 n2)
 
-let cmd () =
-  <span data-count="0">F</span>mt.pr "owi version %s@\n" version;
-  <span data-count="0">L</span>ist.iter
-    (fun (name, version) -&gt; <span data-count="0">F</span>mt.pr "%s version %s@\n" name version)
-    statically_linked_libraries;
-  <span data-count="0">O</span>k ()
+let pp fmt () =
+  <span data-count="0">F</span>mt.list
+    ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt "@\n")
+    (fun fmt (name, version) -&gt; <span data-count="0">F</span>mt.pf fmt "%s version %s" name version)
+    fmt
+    (("owi", version) :: statically_linked_libraries);
+  <span data-count="0">F</span>mt.string fmt "@\n"
+
+let owi_version () = <span data-count="954">F</span>mt.str "owi version %s" version
+
+let cmd () = <span data-count="0">O</span>k (Fmt.p<span data-count="0">r</span> "%a" pp ())
 </code></pre>
       </div>
     </div>
