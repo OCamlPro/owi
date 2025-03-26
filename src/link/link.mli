@@ -52,7 +52,7 @@ val empty_state : 'f state
 val modul :
      'f state
   -> name:string option
-  -> Binary.modul
+  -> Binary.Module.t
   -> ('f module_to_run * 'f state) Result.t
 
 (** register a module inside a link state, producing a new link state *)

@@ -1190,7 +1190,7 @@ let sections_iterate (input : Input.t) =
     List.filter_map (Option.map (fun x -> Uninterpreted x)) custom_sections
   in
 
-  { id = None
+  { Binary.Module.id = None
   ; types
   ; global
   ; mem

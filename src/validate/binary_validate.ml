@@ -4,6 +4,7 @@
 
 open Types
 open Binary
+open Module
 open Syntax
 open Fmt
 
@@ -57,7 +58,7 @@ module Env = struct
     { locals : typ Index.Map.t
     ; result_type : binary result_type
     ; blocks : typ list list
-    ; modul : Binary.modul
+    ; modul : Binary.Module.t
     ; refs : (int, unit) Hashtbl.t
     }
 
@@ -85,7 +86,7 @@ module Env = struct
     | None -> Error (`Unknown_label (Raw i))
     | Some bt -> Ok bt
 
-  let table_type_get i (modul : Binary.modul) =
+  let table_type_get i (modul : Binary.Module.t) =
     if i >= Array.length modul.table then Error (`Unknown_table (Raw i))
     else
       match modul.table.(i) with
@@ -568,7 +569,7 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
               Stack.pp previous_stack ) )
     | Some stack_to_push -> Stack.push rt stack_to_push
 
-let typecheck_function (modul : modul) func refs =
+let typecheck_function (modul : Module.t) func refs =
   match func with
   | Runtime.Imported _ -> Ok ()
   | Local func ->
@@ -586,7 +587,7 @@ let typecheck_function (modul : modul) func refs =
       Error (`Type_mismatch "typecheck_function")
     else Ok ()
 
-let typecheck_const_instr (modul : modul) refs stack = function
+let typecheck_const_instr (modul : Module.t) refs stack = function
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
@@ -624,10 +625,10 @@ let typecheck_const_instr (modul : modul) refs stack = function
     Stack.push [ i31 ] stack
   | _ -> Error `Constant_expression_required
 
-let typecheck_const_expr (modul : modul) refs =
+let typecheck_const_expr (modul : Module.t) refs =
   list_fold_left (typecheck_const_instr modul refs) []
 
-let typecheck_global (modul : modul) refs
+let typecheck_global (modul : Module.t) refs
   (global : (global, binary global_type) Runtime.t) =
   match global with
   | Imported _ -> Ok ()
@@ -751,7 +752,7 @@ let validate_mem modul =
         check_limit desc )
     modul.mem
 
-let modul (modul : modul) =
+let modul (modul : Module.t) =
   Log.debug0 "typechecking ...@\n";
   let refs = Hashtbl.create 512 in
   let* () = array_iter (typecheck_global modul refs) modul.global in

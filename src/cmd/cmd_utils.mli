@@ -14,8 +14,8 @@ val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
 val set_entry_point :
      string option
   -> bool
-  -> Binary.modul
-  -> (Binary.modul, [> `Msg of string ]) result
+  -> Binary.Module.t
+  -> (Binary.Module.t, [> `Msg of string ]) result
 
 (* installed files *)
 val c_files_location : Fpath.t list

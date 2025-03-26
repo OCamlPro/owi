@@ -20,9 +20,9 @@ type type_env =
   ; owi_assert : binary indice
   }
 
-let build_type_env (m : modul)
+let build_type_env (m : Module.t)
   (func_ty : binary param_type * binary result_type)
-  (owi_funcs : (string * int) array) : type_env * modul =
+  (owi_funcs : (string * int) array) : type_env * Module.t =
   let param_types = Array.of_list (List.map snd (fst func_ty)) in
   let binder_types = [||] in
   let global_types =
@@ -444,7 +444,7 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
     (tenv, expr @ [ Call tenv.owi_assert ])
 
 let subst_index ?(subst_custom = false) (subst_task : (int * int) list)
-  (m : modul) : modul =
+  (m : Module.t) : Module.t =
   let subst i =
     match List.assoc_opt i subst_task with Some j -> j | None -> i
   in
@@ -537,9 +537,9 @@ let rec binder_locals = function
   | Binder (_, bt, _, pr1) -> Num_type bt :: binder_locals pr1
   | _ -> []
 
-let contract_generate (owi_funcs : (string * int) array) (m : modul)
+let contract_generate (owi_funcs : (string * int) array) (m : Module.t)
   ({ funcid = Raw old_index; preconditions; postconditions } : binary Contract.t)
-  : modul Result.t =
+  : Module.t Result.t =
   let func_num = Array.length m.func in
   let* old_id, Bt_raw (ty_index, old_type) =
     if old_index < 0 || old_index >= func_num then
@@ -602,8 +602,8 @@ let contract_generate (owi_funcs : (string * int) array) (m : modul)
 
   { m with func }
 
-let contracts_generate (owi_funcs : (string * int) array) (m : modul)
-  (contracts : binary Contract.t list) : modul Result.t =
+let contracts_generate (owi_funcs : (string * int) array) (m : Module.t)
+  (contracts : binary Contract.t list) : Module.t Result.t =
   let rec join = function
     | ([] | [ _ ]) as l -> l
     | c1 :: c2 :: l ->
@@ -614,10 +614,10 @@ let contracts_generate (owi_funcs : (string * int) array) (m : modul)
   let contracts = join (List.sort Contract.compare_funcid contracts) in
   list_fold_left (contract_generate owi_funcs) m contracts
 
-let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
-  modul * (string * int) array =
+let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : Module.t)
+  : Module.t * (string * int) array =
   (* update module field `types` *)
-  let update_types () : modul * (string * (binary func_type * int)) array =
+  let update_types () : Module.t * (string * (binary func_type * int)) array =
     let func_type2rec_type : binary func_type -> binary rec_type =
      fun ty -> [ (None, (Final, [], Def_func_t ty)) ]
     in
@@ -641,7 +641,7 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
   let m, owi_funcs = update_types () in
 
   (* update module field `func` *)
-  let update_func () : modul * (string * int) array =
+  let update_func () : Module.t * (string * int) array =
     let func = m.func in
     let func_num = Array.length func in
     let imported, locals =
@@ -686,7 +686,7 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : modul) :
   in
   update_func ()
 
-let generate (_symbolic : bool) (m : modul) : modul Result.t =
+let generate (_symbolic : bool) (m : Module.t) : Module.t Result.t =
   let owi_funcs = [| ("assert", ([ (None, Num_type I32) ], [])) |] in
   let m, owi_funcs = add_owi_funcs owi_funcs m in
   contracts_generate owi_funcs m

@@ -482,7 +482,7 @@ let rewrite_annots (modul : Assigned.t) :
   text Annot.annot list -> Binary.custom list Result.t =
   list_map (rewrite_annot modul)
 
-let modul (modul : Assigned.t) : Binary.modul Result.t =
+let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   Log.debug0 "rewriting    ...@\n";
   let typemap = typemap modul.typ in
   let* global =
@@ -521,7 +521,7 @@ let modul (modul : Assigned.t) : Binary.modul Result.t =
   let data = Named.to_array data in
   let func = Named.to_array func in
 
-  { Binary.id
+  { Binary.Module.id
   ; mem
   ; table
   ; types

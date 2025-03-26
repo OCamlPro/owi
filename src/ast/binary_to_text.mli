@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val modul : Binary.modul -> Text.modul
+val modul : Binary.Module.t -> Text.modul

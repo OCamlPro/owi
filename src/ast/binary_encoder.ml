@@ -728,7 +728,7 @@ let keep_imported values =
 
 let encode
   ({ func; table; global; exports; start; data; mem; types; elem; _ } :
-    Binary.modul ) =
+    Binary.Module.t ) =
   let buf = Buffer.create 256 in
 
   let local_funcs = keep_local func in

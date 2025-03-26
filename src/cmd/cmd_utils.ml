@@ -40,14 +40,14 @@ let write_testcase =
 
 (* Entry-point *)
 
-let find_exported_name exported_names (m : Binary.modul) =
+let find_exported_name exported_names (m : Binary.Module.t) =
   List.find_opt
     (function
       | { Binary.name; _ } when List.mem name exported_names -> true
       | _ -> false )
     m.exports.func
 
-let find_imported_func modul_name func_name (m : Binary.modul) =
+let find_imported_func modul_name func_name (m : Binary.Module.t) =
   Array.find_index
     (function
       | Runtime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
@@ -56,7 +56,7 @@ let find_imported_func modul_name func_name (m : Binary.modul) =
       | Local _ | Imported _ -> false )
     m.func
 
-let set_entry_point entry_point invoke_with_symbols (m : Binary.modul) =
+let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
   (* We are checking if there's a start function *)
   if Option.is_some m.start then
     if Option.is_some entry_point then

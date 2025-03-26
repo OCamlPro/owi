@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Binary
 open Types
 
 let rec optimize_expr expr : bool * binary instr list =
@@ -477,5 +476,5 @@ let optimize_runtime_func = function
 
 let modul m =
   Log.debug0 "optimizing   ...@\n";
-  let func = Array.map optimize_runtime_func m.func in
+  let func = Array.map optimize_runtime_func m.Binary.Module.func in
   { m with func }

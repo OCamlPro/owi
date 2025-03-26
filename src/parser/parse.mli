@@ -45,12 +45,12 @@ end
 module Binary : sig
   module Module : sig
     (** Parse a module from a string. *)
-    val from_string : string -> Binary.modul Result.t
+    val from_string : string -> Binary.Module.t Result.t
 
     (** Parse a module from a channel. *)
-    val from_channel : in_channel -> Binary.modul Result.t
+    val from_channel : in_channel -> Binary.Module.t Result.t
 
     (** Parse a module from a file. *)
-    val from_file : Fpath.t -> Binary.modul Result.t
+    val from_file : Fpath.t -> Binary.Module.t Result.t
   end
 end
