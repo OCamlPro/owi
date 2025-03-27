@@ -50,8 +50,8 @@ let str_type =
 (* TODO: complete Def_struct_t / Def_array_t *)
 
 let sub_type =
-  let* final in
-  let+ str_type in
+  let+ final
+  and+ str_type in
   (final, ([] : text indice list), str_type)
 
 let mut = choose [ const Const; const Var ]
@@ -377,8 +377,8 @@ let global_type = pair mut val_type
 let elem_active (env : Env.t) =
   List.map
     (fun (name, _) ->
-      let* ind = const (Some (Owi.Text.symbolic name)) in
-      let+ instr = const_i32 in
+      let+ ind = const (Some (Owi.Text.symbolic name))
+      and+ instr = const_i32 in
       Owi.Text.Elem_active (ind, [ instr ]) )
     env.tables
 
@@ -387,9 +387,9 @@ let elem_mode (env : Env.t) =
 (* TODO: complete Elem_declarative - elem_active *)
 
 let param env =
-  let* typ = val_type in
+  let+ typ = val_type in
   let name = Env.add_local env typ in
-  const (Some name, typ)
+  (Some name, typ)
 
 let block_type env =
   let+ param_type = list (param env)
@@ -417,15 +417,15 @@ let memory_init (env : Env.t) =
 let memory_exists (env : Env.t) = Option.is_some env.memory
 
 let memarg nsize =
-  let* offset = int32 in
-  let offset = if Owi.Int32.lt offset 0l then Int32.sub 0l offset else offset in
-  let+ align =
+  let+ offset = int32
+  and+ align =
     match nsize with
     | NS8 -> const 0
     | NS16 -> range 1
     | NS32 -> range 2
     | NS64 -> range 3
   in
+  let offset = if Owi.Int32.lt offset 0l then Int32.sub 0l offset else offset in
   let align = Int32.of_int align in
   { offset; align }
 
@@ -446,28 +446,28 @@ let f64_load : text instr gen =
   F_load (S64, memarg)
 
 let i32_load8 : text instr gen =
-  let* memarg = memarg NS8 in
-  let+ sx in
+  let+ memarg = memarg NS8
+  and+ sx in
   I_load8 (S32, sx, memarg)
 
 let i32_load16 : text instr gen =
-  let* memarg = memarg NS16 in
-  let+ sx in
+  let+ memarg = memarg NS16
+  and+ sx in
   I_load16 (S32, sx, memarg)
 
 let i64_load8 : text instr gen =
-  let* memarg = memarg NS8 in
-  let+ sx in
+  let+ memarg = memarg NS8
+  and+ sx in
   I_load8 (S64, sx, memarg)
 
 let i64_load16 : text instr gen =
-  let* memarg = memarg NS16 in
-  let+ sx in
+  let+ memarg = memarg NS16
+  and+ sx in
   I_load16 (S64, sx, memarg)
 
 let i64_load32 : text instr gen =
-  let* memarg = memarg NS32 in
-  let+ sx in
+  let+ memarg = memarg NS32
+  and+ sx in
   I64_load32 (sx, memarg)
 
 let i32_store : text instr gen =
@@ -533,8 +533,8 @@ let table_init (env : Env.t) =
     let tables = List.map const tables in
     let elems = List.map const elems in
     let instr =
-      let* name_t, _ = choose tables in
-      let* name_e, _ = choose elems in
+      let* name_t, _ = choose tables
+      and+ name_e, _ = choose elems in
       pair
         (const (Table_init (Text name_t, Text name_e)))
         (const [ S.Pop; S.Pop; S.Pop ])
@@ -547,8 +547,8 @@ let table_copy (env : Env.t) =
   | tables ->
     let tables = List.map const tables in
     let instr =
-      let* name_x, (_lim_x, rt_x) = choose tables in
-      let* name_y, (_lim_y, rt_y) = choose tables in
+      let* name_x, (_lim_x, rt_x) = choose tables
+      and+ name_y, (_lim_y, rt_y) = choose tables in
       match (rt_x, rt_y) with
       | ((Null, ht1), (Null, ht2) | (No_null, ht1), (No_null, ht2))
         when heap_type_eq ht1 ht2 ->
