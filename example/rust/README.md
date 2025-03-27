@@ -95,6 +95,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       -o FILE, --output=FILE
+           Write output to a file.
+
        -O VAL (absent=3)
            specify which optimization level to use
 
@@ -116,6 +119,9 @@ OPTIONS
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

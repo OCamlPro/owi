@@ -37,7 +37,7 @@ val cmd :
   -> no_assert_failure_expression_printing:bool
   -> deterministic_result_order:bool
   -> fail_mode:fail_mode
-  -> workspace:Fpath.t
+  -> workspace:Fpath.t option
   -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
   -> profile:Fpath.t option

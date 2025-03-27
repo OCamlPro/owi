@@ -23,4 +23,6 @@ val cmd :
   -> model_output_format:Cmd_utils.model_output_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
+  -> out_file:Fpath.t option
+  -> workspace:Fpath.t option
   -> unit Result.t

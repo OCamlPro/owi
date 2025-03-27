@@ -187,8 +187,8 @@ let workers =
     & info [ "workers"; "w" ] ~doc ~absent:"n" )
 
 let workspace =
-  let doc = "write results to dir" in
-  Arg.(value & opt path_conv (Fpath.v "owi-out") & info [ "outpt"; "o" ] ~doc)
+  let doc = "write results and intermediate compilation artifacts to dir" in
+  Arg.(value & opt (some path_conv) None & info [ "workspace" ] ~doc ~docv:"DIR")
 
 (* owi c *)
 
@@ -234,12 +234,13 @@ let c_cmd =
   and+ solver
   and+ model_output_format
   and+ invoke_with_symbols
+  and+ out_file
   and+ entry_point in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_output_format
-    ~entry_point ~invoke_with_symbols
+    ~entry_point ~invoke_with_symbols ~out_file
 
 (* owi cpp *)
 
@@ -270,12 +271,14 @@ let cpp_cmd =
   and+ profile
   and+ model_output_format
   and+ invoke_with_symbols
+  and+ out_file
+  and+ workspace
   and+ entry_point in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
-    ~invoke_with_symbols
+    ~invoke_with_symbols ~out_file ~workspace
 
 (* owi conc *)
 
@@ -458,12 +461,14 @@ let rust_cmd =
   and+ profile
   and+ model_output_format
   and+ invoke_with_symbols
+  and+ out_file
+  and+ workspace
   and+ entry_point in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_output_format ~entry_point
-    ~invoke_with_symbols
+    ~invoke_with_symbols ~out_file ~workspace
 
 (* owi script *)
 
@@ -600,11 +605,13 @@ let zig_cmd =
   and+ solver
   and+ model_output_format
   and+ invoke_with_symbols
+  and+ out_file
+  and+ workspace
   and+ entry_point in
   Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-    ~model_output_format ~entry_point ~invoke_with_symbols
+    ~model_output_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
 
 (* owi *)
 
