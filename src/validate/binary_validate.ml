@@ -559,7 +559,11 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
   let* stack = list_fold_left (typecheck_instr env) pt expr in
-  if not (Stack.equal rt stack) then Error (`Type_mismatch "typecheck_expr 1")
+  if not (Stack.equal rt stack) then
+    Error
+      (`Type_mismatch
+         (Fmt.str "expected a prefix of %a but stack has type %a" Stack.pp rt
+            Stack.pp stack ) )
   else
     match Stack.match_prefix ~prefix:pt ~stack:previous_stack with
     | None ->

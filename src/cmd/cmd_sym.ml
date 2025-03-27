@@ -40,8 +40,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
   in
   let m = Symbolic.convert_module_to_run m in
   let c = Interpret.Symbolic.modul link_state.envs m in
-  Choice.bind pc (fun r ->
-    match r with Error _ -> Choice.return r | Ok () -> c )
+  Choice.bind pc (function Error _ as r -> Choice.return r | Ok () -> c)
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,

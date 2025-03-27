@@ -3,4 +3,5 @@
   %{bin:owi}
   (package owi)
   a1.wat
-  a2.wat))
+  a2.wat
+  a3.wat))
