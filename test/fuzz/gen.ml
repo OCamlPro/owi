@@ -142,8 +142,8 @@ let expr_available_2_f64 =
 let if_else expr ~locals ~stack env =
   match stack with
   | Num_type I32 :: stack -> begin
-    let* rt = list B.val_type in
-    let* pt = B.stack_prefix stack in
+    let* rt = list B.val_type
+    and+ pt = B.stack_prefix stack in
     let typ =
       Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
     in
@@ -151,9 +151,11 @@ let if_else expr ~locals ~stack env =
     (* same behavior as block *)
     let old_fuel = env.Env.fuel in
     env.fuel <- old_fuel / 2;
-    let* expr_then = expr ~block_type:typ ~stack:pt ~locals env in
-    env.fuel <- old_fuel / 2;
-    let* expr_else = expr ~block_type:typ ~stack:pt ~locals env in
+    let* expr_then = expr ~block_type:typ ~stack:pt ~locals env
+    and+ expr_else =
+      env.fuel <- old_fuel / 2;
+      expr ~block_type:typ ~stack:pt ~locals env
+    in
     env.fuel <- old_fuel / 2;
     Env.remove_block env;
     let+ instr = const @@ If_else (Some id, Some typ, expr_then, expr_else)
@@ -164,8 +166,8 @@ let if_else expr ~locals ~stack env =
   | _ -> assert false
 
 let block expr ~locals ~stack env =
-  let* rt = list B.val_type in
-  let* pt = B.stack_prefix stack in
+  let* rt = list B.val_type
+  and+ pt = B.stack_prefix stack in
   let typ =
     Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
@@ -177,9 +179,9 @@ let block expr ~locals ~stack env =
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
 
-let loop expr ~locals ~stack env =
-  let* rt = list B.val_type in
-  let* pt = B.stack_prefix stack in
+let loop expr ~locals ~stack env : (text instr * S.stack_op list) gen =
+  let* rt = list B.val_type
+  and+ pt = B.stack_prefix stack in
   let typ =
     Bt_raw (None, (List.rev_map (fun t -> (None, t)) pt, List.rev rt))
   in
@@ -191,7 +193,7 @@ let loop expr ~locals ~stack env =
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
 
-let rec expr ~block_type ~stack ~locals env =
+let rec expr ~block_type ~stack ~locals env : text expr gen =
   let _pt, rt =
     match block_type with
     | Bt_raw (_indice, (pt, rt)) -> (pt, rt)
@@ -204,12 +206,12 @@ let rec expr ~block_type ~stack ~locals env =
     | rt, l ->
       (* TODO: if we have a matching prefix, keep it *)
       (* TODO: try to consume them instead of just dropping *)
-      let* drops = const (List.map (fun _typ -> Drop) l) in
-      let+ adds =
+      let+ drops = const (List.map (fun _typ -> Drop) l)
+      and+ adds =
         List.fold_left
           (fun (acc : text instr list gen) typ ->
-            let* acc in
-            let+ cst = B.const_of_val_type typ in
+            let+ acc
+            and+ cst = B.const_of_val_type typ in
             cst :: acc )
           (const []) (List.rev rt)
       in
@@ -254,19 +256,21 @@ let rec expr ~block_type ~stack ~locals env =
       @ B.expr_br env stack
     in
     let* i, ops = choose (expr_available env) in
-    let stack = S.apply_stack_ops stack ops in
-    let* next = expr ~block_type ~stack ~locals env in
-    let+ i = const i in
+    let+ next =
+      let stack = S.apply_stack_ops stack ops in
+      expr ~block_type ~stack ~locals env
+    and+ i = const i in
     i :: next
 
-let data env =
-  let* mode = B.data_mode env in
-  let+ init = (*bytes*) const "tmp" in
+let data env : Owi.Text.module_field gen =
+  let+ mode = B.data_mode env
+  (* TODO: add some real data ! *)
+  and+ init = (*bytes*) const "tmp" in
   (* TODO: Issue #37 *)
   let id = Some (Env.add_data env) in
   MData { id; init; mode }
 
-let memory env =
+let memory env : Owi.Text.module_field gen =
   (* TODO: fix time explosion https://github.com/OCamlPro/owi/pull/28#discussion_r1212835761 *)
   let sup = if true then 10 else 65537 in
   let* min = range sup in
@@ -274,59 +278,56 @@ let memory env =
   let id = Some (Env.add_memory env) in
   MMem (id, { min; max })
 
-let typ env =
+let typ env : Owi.Text.module_field gen =
   let+ styp = B.sub_type in
   let id = Some (Env.add_type env styp) in
   MType [ (id, styp) ]
 
-let elem env =
-  let* typ = B.ref_type in
-  let+ mode = B.elem_mode env in
+let elem env : Owi.Text.module_field gen =
+  let+ typ = B.ref_type
+  and+ mode = B.elem_mode env in
   let id = Some (Env.add_elem env typ) in
   MElem { id; typ; init = []; mode }
 
-let table env =
+let table env : Owi.Text.module_field gen =
   let+ typ = B.table_type in
   let id = Some (Env.add_table env typ) in
   MTable (id, typ)
 
-let global env =
+let global env : Owi.Text.module_field gen =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
   let id = Some (Env.add_global env typ) in
   let init = [ init ] in
   MGlobal { typ; init; id }
 
-let local = B.param
-
-let func env =
+let func env : Owi.Text.module_field gen =
   let* () = const () in
   Env.reset_locals env;
   Env.refill_fuel env;
-  let* locals = list (local env) in
-  let* type_f = B.block_type env in
+  let* locals = list (B.param env)
+  and+ type_f = B.block_type env in
   let (_name : string) = Env.add_block env type_f Env.Func in
   let+ body = expr ~block_type:type_f ~stack:[] ~locals env in
   Env.remove_block env;
   let id = Some (Env.add_func env type_f) in
   MFunc { type_f; locals; body; id }
 
-let fields env =
-  let* memory =
+let fields env : Owi.Text.module_field list gen =
+  let+ memory =
     (* No memory management in symbolic context.
        TODO: When implementation will be more advanced,
        reactivate and refine instruction by instruction (not_symbolic operator). *)
     match env.Env.conf with
     | Concrete -> option (memory env)
     | Symbolic -> const None
-  in
-  let* datas = list (data env) in
-  let* types = list (typ env) in
-  let* tables = list (table env) in
-  let* elems = list (elem env) in
-  let* globals = list (global env) in
-  let* funcs = list (func env) in
-  let+ start_code =
+  and+ datas = list (data env)
+  and+ types = list (typ env)
+  and+ tables = list (table env)
+  and+ elems = list (elem env)
+  and+ globals = list (global env)
+  and+ funcs = list (func env)
+  and+ start_code =
     let* () = const () in
     Env.reset_locals env;
     Env.refill_fuel env;
