@@ -10,6 +10,8 @@ type model_output_format =
 (* test-case stuff *)
 val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
 
+val tmp_dir : Bos.OS.Dir.tmp_name_pat -> Fpath.t
+
 (* harness stuff *)
 val set_entry_point :
      string option

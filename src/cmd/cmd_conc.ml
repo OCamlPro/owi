@@ -2,6 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+open Bos
 open Syntax
 module Choice = Concolic.Choice
 
@@ -445,8 +446,13 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
    monad, hence the let*. *)
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order:_ ~fail_mode:_ ~(workspace : Fpath.t) ~solver
-  ~files ~profile ~model_output_format ~entry_point ~invoke_with_symbols =
+  ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
+  ~model_output_format ~entry_point ~invoke_with_symbols =
+  let workspace =
+    Option.value workspace ~default:(Cmd_utils.tmp_dir "owi_conc_%s")
+  in
+  let* _ = OS.Dir.create Fpath.(workspace / "test-suite") in
+
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
@@ -458,7 +464,6 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     | Cmd_utils.Json -> Smtml.Model.to_json_string model
     | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in
-  let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let solver = Solver.fresh solver () in
   let* link_state, modules_to_run =
     simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
@@ -479,7 +484,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
             | Ref _ -> assert false )
           assignments
       in
-      Cmd_utils.write_testcase ~dir:workspace testcase
+      Cmd_utils.write_testcase ~dir:Fpath.(workspace / "test-suite") testcase
     else Ok ()
   in
   if print_paths then Fmt.pr "Completed paths: %d@." !count_path;

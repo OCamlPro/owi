@@ -7,7 +7,7 @@ val cmd :
   -> arch:int
   -> property:Fpath.t option
   -> testcomp:bool
-  -> workspace:Fpath.t
+  -> workspace:Fpath.t option
   -> workers:int
   -> opt_lvl:string
   -> includes:Fpath.t list
@@ -27,4 +27,5 @@ val cmd :
   -> model_output_format:Cmd_utils.model_output_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
+  -> out_file:Fpath.t option
   -> unit Result.t

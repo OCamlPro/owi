@@ -83,9 +83,6 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -o VAL, --outpt=VAL (absent=owi-out)
-           write results to dir
-
        --optimize
            optimize mode
 
@@ -110,6 +107,9 @@ OPTIONS
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

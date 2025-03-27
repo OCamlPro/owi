@@ -38,6 +38,12 @@ let write_testcase =
     in
     res
 
+let tmp_dir pat =
+  match Bos.OS.Dir.tmp pat with
+  | Ok path -> path
+  | Error e ->
+    Fmt.failwith "Failed to create tmp directory: %a" Rresult.R.pp_msg e
+
 (* Entry-point *)
 
 let dummy_value_of_t = function

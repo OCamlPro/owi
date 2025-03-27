@@ -5,8 +5,8 @@
 open Bos
 open Syntax
 
-let compile ~entry_point ~includes debug (files : Fpath.t list) :
-  Fpath.t Result.t =
+let compile ~workspace ~entry_point ~includes ~out_file debug
+  (files : Fpath.t list) : Fpath.t Result.t =
   let includes =
     Cmd.of_list (List.map (fun p -> Fmt.str "-I%a" Fpath.pp p) includes)
   in
@@ -18,12 +18,15 @@ let compile ~entry_point ~includes debug (files : Fpath.t list) :
   match files with
   | [] -> assert false
   | [ file ] -> begin
-    let out = Fpath.set_ext ".wasm" file |> Fpath.filename |> Fpath.v in
+    let default_out = Fpath.set_ext ".wasm" file |> Fpath.filename |> Fpath.v in
+    let out = Option.value ~default:Fpath.(workspace // default_out) out_file in
     let entry = Fmt.str "-fentry=%s" entry_point in
     let zig : Cmd.t =
       Cmd.(
-        zig_bin % "build-exe" % "-target" % "wasm32-freestanding" % entry
-        %% includes % p file % p libzig )
+        zig_bin % "build-exe" % "-target" % "wasm32-freestanding"
+        % "--cache-dir" % p workspace
+        % Fmt.str "-femit-bin=%a" Fpath.pp out
+        % entry %% includes % p file % p libzig )
     in
 
     let+ () =
@@ -45,13 +48,21 @@ let compile ~entry_point ~includes debug (files : Fpath.t list) :
 let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
-  let includes = Cmd_utils.zig_files_location @ includes in
+  ~model_output_format ~entry_point ~invoke_with_symbols ~out_file ~workspace :
+  unit Result.t =
+  let workspace =
+    Option.value workspace ~default:(Cmd_utils.tmp_dir "owi_zig_%s")
+  in
+  let* _ = OS.Dir.create workspace in
   let entry_point = Option.value entry_point ~default:"_start" in
-  let* modul = compile ~entry_point ~includes debug files in
-  let workspace = Fpath.v "owi-out" in
+
+  let includes = Cmd_utils.zig_files_location @ includes in
+  let* modul =
+    compile ~workspace ~entry_point ~includes ~out_file debug files
+  in
   let files = [ modul ] in
-  let entry_point = Some entry_point in
+  let entry_point = Some entry_point
+  and workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
