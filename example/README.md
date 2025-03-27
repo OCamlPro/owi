@@ -47,6 +47,10 @@ COMMANDS
            Generate an instrumented file with runtime assertion checking
            coming from Weasel specifications
 
+       iso [OPTION]… FILE…
+           Check the iso-functionnality of two Wasm modules by comparing the
+           output when calling their exports.
+
        opt [--debug] [--output=FILE] [--unsafe] [OPTION]… FILE
            Optimize a module
 
