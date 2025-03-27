@@ -27,3 +27,8 @@ In AFL mode:
 $ afl-fuzz -i in/ -o out -- ../../_build/default/test/fuzz/fuzzer.exe @@
 ```
 
+In order to run in AFL mode, you need an AFL-instrumented compiler. You can create a switch for it with the following command:
+
+```shell-session
+$ opam switch create 5.3.0+flambda+afl --packages=ocaml-variants.5.3.0+options,ocaml-option-flambda,ocaml-option-afl
+```
