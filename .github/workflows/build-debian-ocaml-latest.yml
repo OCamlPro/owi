@@ -44,6 +44,7 @@ jobs:
 
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
+          apt update
           opam install . --depext-only --with-test --with-doc --with-dev-setup
           opam install . --deps-only --with-test --with-doc --with-dev-setup
           opam exec -- dune build @install
