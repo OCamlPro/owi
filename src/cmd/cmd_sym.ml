@@ -7,10 +7,9 @@ module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
 
 type fail_mode =
-  [ `Trap_only
-  | `Assertion_only
-  | `Both
-  ]
+  | Trap_only
+  | Assertion_only
+  | Both
 
 (* TODO: add a flag for this *)
 let print_paths = false
@@ -76,11 +75,11 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     match (fail_mode, v) with
     | _, (EVal (Ok ()), _) -> ()
     | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
-    | (`Both | `Trap_only), (ETrap (t, m), thread) ->
+    | (Both | Trap_only), (ETrap (t, m), thread) ->
       Wq.push (`ETrap (t, m), thread) res_queue
-    | (`Both | `Assertion_only), (EAssert (e, m), thread) ->
+    | (Both | Assertion_only), (EAssert (e, m), thread) ->
       Wq.push (`EAssert (e, m), thread) res_queue
-    | (`Trap_only | `Assertion_only), _ -> ()
+    | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback

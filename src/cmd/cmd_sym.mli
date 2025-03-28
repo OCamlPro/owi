@@ -3,10 +3,9 @@
 (* Written by the Owi programmers *)
 
 type fail_mode =
-  [ `Trap_only
-  | `Assertion_only
-  | `Both
-  ]
+  | Trap_only
+  | Assertion_only
+  | Both
 
 val cmd :
      profiling:bool
