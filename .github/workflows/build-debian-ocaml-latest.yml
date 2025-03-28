@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: zapashcanon/gitea-ocaml-ci:latest
+      options: --user root
     steps:
       - name: checkout
         uses: actions/checkout@v4
