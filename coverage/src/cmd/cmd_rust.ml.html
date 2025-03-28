@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_rust.ml &mdash; Coverage report</title>
-    <meta name="description" content="91.89% coverage in src/cmd/cmd_rust.ml">
+    <meta name="description" content="90.91% coverage in src/cmd/cmd_rust.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,13 @@
           <span class="dirname">src/cmd/</span>cmd_rust.ml
         </a>
       </h1>
-      <h2>91.89%</h2>
+      <h2>90.91%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:42.11%"></span>
-      <span class="some-visited" style="bottom:31.58%"></span>
-      <span class="some-visited" style="bottom:8.77%"></span>
+      <span class="some-visited" style="bottom:48.48%"></span>
+      <span class="some-visited" style="bottom:39.39%"></span>
+      <span class="unvisited" style="bottom:21.21%"></span>
+      <span class="some-visited" style="bottom:6.06%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -42,46 +43,55 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span > </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span class="some-visited"> </span>
-<a id="L34"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="some-visited"> </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
 <a id="L37"></a><span class="visited"> </span>
 <a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="some-visited"> </span>
-<a id="L40"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="some-visited"> </span>
 <a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span class="some-visited"> </span>
-<a id="L53"></a><span > </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
 <a id="L57"></a><span > </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="some-visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -143,6 +153,15 @@
 <a href="#L55">55</a>
 <a href="#L56">56</a>
 <a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -152,15 +171,16 @@ open Bos
 open Syntax
 
 (* TODO: investigate which parameters makes sense *)
-let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
-  Fpath.t Result.t =
+let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file debug
+  (files : Fpath.t list) : Fpath.t Result.t =
   <span data-count="3">l</span>et* rustc_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "rustc" in
 
   <span data-count="3">l</span>et* libowi_sym_rlib =
     Cmd_utils.find_installed_rust_fil<span data-count="3">e</span> (Fpath.<span data-count="3">v</span> "libowi_sym.rlib")
   in
 
-  <span data-count="3">l</span>et out = Fpath.v "a.out.wasm" in
+  <span data-count="3">l</span>et* tmp = Bos.OS.Dir.tm<span data-count="3">p</span> "owi_rust_%s" in
+  <span data-count="3">l</span>et out = Option.value ~default:Fpath.(tmp / "a.out.wasm") out_file in
 
   <span data-count="3">l</span>et rustc_cmd : Cmd.t =
     Cmd.(
@@ -190,17 +210,25 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ debug (files : Fpath.t list) :
 let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_output_format ~entry_point ~invoke_with_symbols : unit Result.t =
+  ~model_output_format ~entry_point ~invoke_with_symbols ~out_file
+  ~(workspace : Fpath.t option) : unit Result.t =
+  <span data-count="3">l</span>et* workspace =
+    match workspace with
+    | <span data-count="0">S</span>ome path -&gt; Ok path
+    | <span data-count="3">N</span>one -&gt; OS.Dir.tm<span data-count="3">p</span> "owi_rust_%s"
+  in
+  <span data-count="3">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="3">e</span> workspace in
   <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"main" in
-  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl debug files in
+
+  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl ~out_file debug files in
   <span data-count="2">l</span>et files = [ modul ] in
   let entry_point = Some entry_point in
+  let workspace = Some workspace in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace:(Fpath.<span data-count="2">v</span> "owi-out")
-    ~solver ~files ~profile ~model_output_format ~entry_point
-    ~invoke_with_symbols
+    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
+    ~model_output_format ~entry_point ~invoke_with_symbols
 </code></pre>
       </div>
     </div>
