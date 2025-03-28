@@ -15,15 +15,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - name: depext
-        run: |
-          opam install . --depext-only --with-test --with-doc --with-dev-setup -y
-      - name: setup
-        run: |
-          opam install . --deps-only --with-test --with-doc --with-dev-setup -y
-      - name: build
-        run: |
-          opam exec -- dune build @install
       - name: test
-        run: |
+          eval "$(opam env)"
+          opam install . --depext-only --with-test --with-doc --with-dev-setup -y
+          opam install . --deps-only --with-test --with-doc --with-dev-setup -y
+          opam exec -- dune build @install
           opam exec -- dune runtest
