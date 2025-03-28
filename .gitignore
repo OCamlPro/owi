@@ -1,6 +1,4 @@
 _build
 _opam
 _coverage
-owi-out
 results-*
-a.out.wasm
