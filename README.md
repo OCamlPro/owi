@@ -6,6 +6,7 @@
 - [`owi c++`]: a bug finding tool for C++ code that performs symbolic execution by compiling to Wasm and using our symbolic Wasm interpreter;
 - [`owi conc`]: a concolic Wasm interpreter;
 - [`owi fmt`]: a formatter for Wasm;
+- [`owi iso`]: an iso-behaviour checker for Wasm programs;
 - [`owi opt`]: an optimizer for Wasm;
 - [`owi replay`]: run a module containing symbols with concrete values from a model produced by a previous symbolic execution;
 - [`owi run`]: a concrete Wasm interpreter;
@@ -231,6 +232,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [`owi c`]: example/c
 [`owi c++`]: example/cpp
 [`owi conc`]: example/conc
+[`owi iso`]: example/iso
 [`owi fmt`]: example/fmt
 [`owi opt`]: example/opt
 [`owi replay`]: example/replay

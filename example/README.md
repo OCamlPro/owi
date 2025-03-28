@@ -6,6 +6,7 @@
 - [`owi c++`]
 - [`owi conc`]
 - [`owi fmt`]
+- [`owi iso`]
 - [`owi opt`]
 - [`owi run`]
 - [`owi rust`]
@@ -14,6 +15,7 @@
 - [`owi validate`]
 - [`owi wasm2wat`]
 - [`owi wat2wasm`]
+- [`owi zig`]
 
 ## Owi library
 
@@ -116,6 +118,7 @@ BUGS
 [`owi c++`]: ./cpp
 [`owi conc`]: ./conc
 [`owi fmt`]: ./fmt
+[`owi iso`]: ./iso
 [`owi opt`]: ./opt
 [`owi run`]: ./run
 [`owi rust`]: ./rust
@@ -124,5 +127,6 @@ BUGS
 [`owi validate`]: ./validate
 [`owi wasm2wat`]: ./wasm2wat
 [`owi wat2wasm`]: ./wat2wasm
+[`owi zig`]: ./zig
 [import OCaml functions in a Wasm module]: ./define_host_function
 [OCaml library]: ./lib
