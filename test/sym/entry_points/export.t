@@ -4,6 +4,7 @@ export:
 
   $ owi sym export.wat --entry-point=f
   Entry point f not found
+  
   [26]
 
   $ owi sym export.wat --entry-point=fun

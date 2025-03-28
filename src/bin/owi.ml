@@ -646,7 +646,7 @@ let exit_code =
     match result with
     | Ok () -> ok
     | Error e -> begin
-      Fmt.epr "%s" (Result.err_to_string e);
+      Fmt.epr "%s@\n" (Result.err_to_string e);
       match e with
       | `No_error -> ok
       | `Alignment_too_large -> 1

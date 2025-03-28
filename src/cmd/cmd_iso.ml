@@ -186,6 +186,8 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files
     | _ -> Fmt.error_msg "require at most two modules"
   in
 
+  Fmt.pr "Comparing %a and %a@\n" Fpath.pp file1 Fpath.pp file2;
+
   Log.debug3 "Module %s is %a@\n" module_name1 Fpath.pp file1;
   Log.debug3 "Module %s is %a@\n" module_name2 Fpath.pp file2;
 
@@ -230,10 +232,6 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files
     String_set.inter exports_name_1 exports_name_2 |> String_set.to_list
   in
 
-  Log.debug2 "common exports: %a@\n"
-    (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
-    common_exports;
-
   let common_exports =
     List.fold_left
       (fun common_exports name ->
@@ -265,11 +263,19 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files
       [] common_exports
   in
 
-  let export_name, export_type =
-    match common_exports with hd :: _ -> hd | _ -> Fmt.failwith "TODO"
-  in
-  let result = check_iso ~unsafe export_name export_type module1 module2 in
+  Fmt.pr "Common exports: %a@\n"
+    (Fmt.list
+       ~sep:(fun fmt () -> Fmt.pf fmt " ")
+       (fun fmt (elt, _ft) -> Fmt.string fmt elt) )
+    common_exports;
 
-  Cmd_sym.handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
-    ~model_output_format ~no_value ~no_assert_failure_expression_printing
-    ~workspace ~no_stop_at_failure result
+  list_fold_left
+    (fun () (export_name, export_type) ->
+      Fmt.pr "Checking export %s@\n" export_name;
+      let result = check_iso ~unsafe export_name export_type module1 module2 in
+
+      Cmd_sym.handle_result ~fail_mode ~workers ~solver
+        ~deterministic_result_order ~model_output_format ~no_value
+        ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
+        result )
+    () common_exports

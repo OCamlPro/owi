@@ -75,6 +75,7 @@ Array tests:
     symbol symbol_3 i32 0
   }
   Reached problem!
+  
   [13]
   Using owi conc:
   Assert failure
@@ -86,6 +87,7 @@ Array tests:
     symbol symbol_4 i32 0
   }
   Reached problem!
+  
   [13]
   Testing "files/normal/testsuite/array/array_test_reverse.c":
   Using owi sym:
