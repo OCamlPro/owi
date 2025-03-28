@@ -45,10 +45,10 @@
   (dune-site :build)
   ;; system packages
   conf-clang
-  ;;conf-lld
-  ;;conf-llvm
-  ;;conf-rust-llvm
-  ;;conf-rust-wasm
+  conf-lld
+  ;; conf-llvm ;; this package is broken on opam-repository: on Debian it'll install the llvm-X but not llvm package...
+  conf-rust-llvm
+  conf-rust-wasm
   ;;conf-zig
   ;; runtime
   (bos

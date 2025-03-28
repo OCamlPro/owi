@@ -1,0 +1,67 @@
+name: build-debian-unstable-ocaml-latest
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zapashcanon/gitea-ocaml-ci:latest
+      options: --user root
+    steps:
+      - name: test
+        run: |
+          set -x
+
+          # GitHub sucks
+          export HOME=/root
+          cd $HOME
+
+          # Clone the repository
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          # Print stuff
+          echo "github.event_name is ${{ github.event_name }}"
+
+          # Fetch the PR or the current branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Fetching PR branch"
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            echo "Fetching current branch"
+            git checkout ${{ github.ref_name }}
+          fi
+
+          # Prepare OCaml stuff
+          eval "$(opam env)"
+          export OPAMCONFIRMLEVEL=unsafe-yes
+          opam update
+          apt update
+
+          # Install zig
+          # TODO: remove the following once the conf-zig package works
+          wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz
+          mkdir zig
+          tar xf zig-*.tar.xz -C zig --strip-components 1
+          mv zig/* /usr/local/bin/
+
+          # Install system dependencies
+          opam install . --depext-only --with-test --with-doc --with-dev-setup
+
+          # Install opam-repo dependencies
+          opam install . --deps-only --with-test --with-doc --with-dev-setup
+
+          # Fetching submodules (done after calling opam to prevent it from checking them out)
+          git submodule update --init test/script/reference
+          git submodule update --init test/c/collections-c/files
+
+          # Build and test
+          dune build @install
+          dune runtest
