@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: test
         run: |
+          set -x
+
           # GitHub sucks
           export HOME=/root
           cd $HOME
@@ -31,7 +33,7 @@ jobs:
           echo "github.event_name is ${{ github.event_name }}"
 
           # Fetch the PR or the current branch
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "Fetching PR branch"
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
