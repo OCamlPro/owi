@@ -22,11 +22,13 @@ jobs:
           export HOME=/root
           cd $HOME
           if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "Cloning PR branch"
             git clone https://github.com/${{ github.repository }}.git
             cd ${{ github.repository }}
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
           else
+            echo "Cloning branch"
             git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
             cd ${{ github.ref_name }}
           fi
