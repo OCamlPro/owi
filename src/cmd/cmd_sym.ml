@@ -18,21 +18,20 @@ let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
   'b Result.t Choice.t =
   match t with Error e -> Choice.return (Error e) | Ok x -> f x
 
-let link_state =
-  lazy
-    (let func_typ = Symbolic.Extern_func.extern_type in
-     let link_state =
-       Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
-         Symbolic_wasm_ffi.symbolic_extern_module
-     in
-     Link.extern_module' link_state ~name:"summaries" ~func_typ
-       Symbolic_wasm_ffi.summaries_extern_module )
+let link_symbolic_modules link_state =
+  let func_typ = Symbolic.Extern_func.extern_type in
+  let link_state =
+    Link.extern_module' link_state ~name:"symbolic" ~func_typ
+      Symbolic_wasm_ffi.symbolic_extern_module
+  in
+  Link.extern_module' link_state ~name:"summaries" ~func_typ
+    Symbolic_wasm_ffi.summaries_extern_module
 
 let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
   filename =
   let*/ m = Compile.File.until_binary_validate ~unsafe ~rac ~srac filename in
   let*/ m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  let link_state = Lazy.force link_state in
+  let link_state = link_symbolic_modules Link.empty_state in
 
   let*/ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
@@ -40,6 +39,100 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
   let m = Symbolic.convert_module_to_run m in
   let c = Interpret.Symbolic.modul link_state.envs m in
   Choice.bind pc (function Error _ as r -> Choice.return r | Ok () -> c)
+
+let print_bug model_output_format no_value no_assert_failure_expression_printing
+    =
+  let to_string =
+    match model_output_format with
+    | Cmd_utils.Json -> Smtml.Model.to_json_string
+    | Scfg -> Smtml.Model.to_scfg_string ~no_value
+  in
+  function
+  | `ETrap (tr, model) ->
+    Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
+    Fmt.pr "%s@\n" (to_string model)
+  | `EAssert (assertion, model) ->
+    if no_assert_failure_expression_printing then begin
+      Fmt.pr "Assert failure@\n"
+    end
+    else begin
+      Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
+    end;
+    Fmt.pr "%s@\n" (to_string model)
+
+let print_and_count_failures model_output_format no_value
+  no_assert_failure_expression_printing workspace no_stop_at_failure count_acc
+  results =
+  let rec aux count_acc results =
+    match results () with
+    | Seq.Nil -> Ok count_acc
+    | Seq.Cons ((result, _thread), tl) ->
+      let* model =
+        match result with
+        | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
+          print_bug model_output_format no_value
+            no_assert_failure_expression_printing bug;
+          Ok model
+        | `Error e -> Error e
+      in
+      let count_acc = succ count_acc in
+      let* () =
+        if not no_value then
+          let testcase = Smtml.Model.get_bindings model |> List.map snd in
+          Cmd_utils.write_testcase ~dir:workspace testcase
+        else Ok ()
+      in
+      if no_stop_at_failure then aux count_acc tl else Ok count_acc
+  in
+  aux count_acc results
+
+let sort_results deterministic_result_order results =
+  if deterministic_result_order then
+    results
+    |> Seq.map (function (_, thread) as x ->
+         (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
+    |> List.of_seq
+    |> List.sort (fun (_, bc1) (_, bc2) ->
+         List.compare Prelude.Int32.compare bc1 bc2 )
+    |> List.to_seq |> Seq.map fst
+  else results
+
+let handle_result ~workers ~no_stop_at_failure ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
+  ~workspace ~solver ~model_output_format result =
+  let thread = Thread_with_memory.init () in
+  let res_queue = Wq.make () in
+  let path_count = Atomic.make 0 in
+  let callback v =
+    let open Symbolic_choice_intf in
+    Atomic.incr path_count;
+    match (fail_mode, v) with
+    | _, (EVal (Ok ()), _) -> ()
+    | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
+    | (Both | Trap_only), (ETrap (t, m), thread) ->
+      Wq.push (`ETrap (t, m), thread) res_queue
+    | (Both | Assertion_only), (EAssert (e, m), thread) ->
+      Wq.push (`EAssert (e, m), thread) res_queue
+    | (Trap_only | Assertion_only), _ -> ()
+  in
+  let join_handles =
+    Symbolic_choice_with_memory.run ~workers solver result thread ~callback
+      ~callback_init:(fun () -> Wq.make_pledge res_queue)
+      ~callback_end:(fun () -> Wq.end_pledge res_queue)
+  in
+  let results =
+    Wq.read_as_seq res_queue ~finalizer:(fun () ->
+      Array.iter Domain.join join_handles )
+  in
+  let results = sort_results deterministic_result_order results in
+  let* count =
+    print_and_count_failures model_output_format no_value
+      no_assert_failure_expression_printing workspace no_stop_at_failure 0
+      results
+  in
+  if print_paths then Fmt.pr "Completed paths: %d@." (Atomic.get path_count);
+  let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
+  Fmt.pr "All OK@."
 
 (* NB: This function propagates potential errors (Result.err) occurring
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
@@ -61,84 +154,6 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       (run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols)
       pc files
   in
-  let thread = Thread_with_memory.init () in
-  let res_queue = Wq.make () in
-  let path_count = ref 0 in
-  let to_string =
-    match model_output_format with
-    | Cmd_utils.Json -> Smtml.Model.to_json_string
-    | Scfg -> Smtml.Model.to_scfg_string ~no_value
-  in
-  let callback v =
-    let open Symbolic_choice_intf in
-    incr path_count;
-    match (fail_mode, v) with
-    | _, (EVal (Ok ()), _) -> ()
-    | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
-    | (Both | Trap_only), (ETrap (t, m), thread) ->
-      Wq.push (`ETrap (t, m), thread) res_queue
-    | (Both | Assertion_only), (EAssert (e, m), thread) ->
-      Wq.push (`EAssert (e, m), thread) res_queue
-    | (Trap_only | Assertion_only), _ -> ()
-  in
-  let join_handles =
-    Symbolic_choice_with_memory.run ~workers solver result thread ~callback
-      ~callback_init:(fun () -> Wq.make_pledge res_queue)
-      ~callback_end:(fun () -> Wq.end_pledge res_queue)
-  in
-  let results =
-    Wq.read_as_seq res_queue ~finalizer:(fun () ->
-      Array.iter Domain.join join_handles )
-  in
-  let print_bug = function
-    | `ETrap (tr, model) ->
-      Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
-      Fmt.pr "%s@\n" (to_string model)
-    | `EAssert (assertion, model) ->
-      if no_assert_failure_expression_printing then begin
-        Fmt.pr "Assert failure@\n"
-      end
-      else begin
-        Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
-      end;
-      Fmt.pr "%s@\n" (to_string model)
-  in
-  let rec print_and_count_failures count_acc results =
-    match results () with
-    | Seq.Nil -> Ok count_acc
-    | Seq.Cons ((result, _thread), tl) ->
-      let* model =
-        match result with
-        | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
-          print_bug bug;
-          Ok model
-        | `Error e -> Error e
-      in
-      let count_acc = succ count_acc in
-      let* () =
-        if not no_value then
-          let testcase = Smtml.Model.get_bindings model |> List.map snd in
-          Cmd_utils.write_testcase ~dir:workspace testcase
-        else Ok ()
-      in
-      if no_stop_at_failure then print_and_count_failures count_acc tl
-      else Ok count_acc
-  in
-  let results =
-    if deterministic_result_order then
-      results
-      |> Seq.map (function (_, thread) as x ->
-           (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
-      |> List.of_seq
-      |> List.sort (fun (_, bc1) (_, bc2) ->
-           List.compare Prelude.Int32.compare bc1 bc2 )
-      |> List.to_seq |> Seq.map fst
-    else results
-  in
-  let* count = print_and_count_failures 0 results in
-  if print_paths then Fmt.pr "Completed paths: %d@." !path_count;
-  if count > 0 then Error (`Found_bug count)
-  else begin
-    Fmt.pr "All OK@.";
-    Ok ()
-  end
+  handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
+    ~model_output_format ~no_value ~no_assert_failure_expression_printing
+    ~workspace ~no_stop_at_failure result

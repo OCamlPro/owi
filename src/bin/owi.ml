@@ -355,12 +355,22 @@ let iso_info =
   Cmd.info "iso" ~version ~doc ~sdocs ~man
 
 let iso_cmd =
-  let+ concolic
-  and+ debug
+  let+ debug
+  and+ deterministic_result_order
+  and+ fail_mode
   and+ files
+  and+ model_output_format
+  and+ no_assert_failure_expression_printing
+  and+ no_stop_at_failure
+  and+ no_value
   and+ solver
-  and+ unsafe in
-  Cmd_iso.cmd ~concolic ~debug ~files ~solver ~unsafe
+  and+ unsafe
+  and+ workers
+  and+ workspace in
+
+  Cmd_iso.cmd ~debug ~deterministic_result_order ~fail_mode ~files
+    ~model_output_format ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
 
 (* owi opt *)
 
