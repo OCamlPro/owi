@@ -8,16 +8,6 @@ let module_name1 = "owi_iso_module1"
 
 let module_name2 = "owi_iso_module2"
 
-let link_state =
-  lazy
-    (let func_typ = Symbolic.Extern_func.extern_type in
-     let link_state =
-       Link.extern_module' Link.empty_state ~name:"symbolic" ~func_typ
-         Symbolic_wasm_ffi.symbolic_extern_module
-     in
-     Link.extern_module' link_state ~name:"summaries" ~func_typ
-       Symbolic_wasm_ffi.summaries_extern_module )
-
 let ( let*/ ) (t : 'a Result.t)
   (f : 'a -> 'b Result.t Symbolic_choice_with_memory.t) :
   'b Result.t Symbolic_choice_with_memory.t =
@@ -26,7 +16,7 @@ let ( let*/ ) (t : 'a Result.t)
   | Ok x -> f x
 
 let check_iso ~unsafe export_name export_type module1 module2 =
-  let link_state = Lazy.force link_state in
+  let link_state = Cmd_sym.link_symbolic_modules Link.empty_state in
   let*/ _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name1) ~unsafe ~optimize:false
       link_state module1
@@ -184,8 +174,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
 module String_set = Set.Make (String)
 
-let cmd ~concolic:_ ~debug ~files ~solver:_ ~unsafe =
+let cmd ~debug ~deterministic_result_order ~fail_mode ~files
+  ~model_output_format ~no_assert_failure_expression_printing
+  ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace =
   if debug then Log.debug_on := true;
+  let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let* file1, file2 =
     match files with
     | [ file1; file2 ] -> Ok (file1, file2)
@@ -277,54 +270,6 @@ let cmd ~concolic:_ ~debug ~files ~solver:_ ~unsafe =
   in
   let result = check_iso ~unsafe export_name export_type module1 module2 in
 
-  let thread = Thread_with_memory.init () in
-  let res_queue = Wq.make () in
-  let path_count = ref 0 in
-  let to_string = Smtml.Model.to_scfg_string ~no_value:false in
-  let callback v =
-    let open Symbolic_choice_intf in
-    incr path_count;
-    match v with
-    | ETrap (t, m), thread -> Wq.push (`ETrap (t, m), thread) res_queue
-    | EAssert (e, m), thread -> Wq.push (`EAssert (e, m), thread) res_queue
-    | _ -> ()
-  in
-  let join_handles =
-    Symbolic_choice_with_memory.run ~workers:2 Smtml.Solver_type.Z3_solver
-      result thread ~callback
-      ~callback_init:(fun () -> Wq.make_pledge res_queue)
-      ~callback_end:(fun () -> Wq.end_pledge res_queue)
-  in
-  let results =
-    Wq.read_as_seq res_queue ~finalizer:(fun () ->
-      Array.iter Domain.join join_handles )
-  in
-  let print_bug = function
-    | `ETrap (tr, model) ->
-      Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
-      Fmt.pr "%s@\n" (to_string model)
-    | `EAssert (assertion, model) ->
-      Fmt.pr "Assert failure: %a@\n" Smtml.Expr.pp assertion;
-      Fmt.pr "%s@\n" (to_string model)
-  in
-  let print_and_count_failures count_acc results =
-    match results () with
-    | Seq.Nil -> Ok count_acc
-    | Seq.Cons ((result, _thread), _tl) ->
-      let* _model =
-        match result with
-        | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
-          print_bug bug;
-          Ok model
-        | `Error e -> Error e
-      in
-      let count_acc = succ count_acc in
-      Ok count_acc
-  in
-  let* count = print_and_count_failures 0 results in
-  if true then Fmt.pr "Completed paths: %d@." !path_count;
-  if count > 0 then Error (`Found_bug count)
-  else begin
-    Fmt.pr "All OK@.";
-    Ok ()
-  end
+  Cmd_sym.handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
+    ~model_output_format ~no_value ~no_assert_failure_expression_printing
+    ~workspace ~no_stop_at_failure result

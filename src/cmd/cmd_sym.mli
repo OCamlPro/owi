@@ -7,6 +7,23 @@ type fail_mode =
   | Assertion_only
   | Both
 
+val link_symbolic_modules :
+     Symbolic.Extern_func.extern_func Link.state
+  -> Symbolic.Extern_func.extern_func Link.state
+
+val handle_result :
+     workers:int
+  -> no_stop_at_failure:bool
+  -> no_value:bool
+  -> no_assert_failure_expression_printing:bool
+  -> deterministic_result_order:bool
+  -> fail_mode:fail_mode
+  -> workspace:Fpath.t
+  -> solver:Smtml.Solver_type.t
+  -> model_output_format:Cmd_utils.model_output_format
+  -> unit Result.t Symbolic_choice_with_memory.t
+  -> unit Result.t
+
 val cmd :
      profiling:bool
   -> debug:bool

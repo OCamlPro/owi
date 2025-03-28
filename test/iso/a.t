@@ -98,7 +98,6 @@
   stack        : [  ]
   stack        : [  ]
   stack        : [  ]
-  Completed paths: 1
   All OK
   $ owi iso a1.wat a3.wat --debug
   Module owi_iso_module1 is a1.wat
@@ -208,6 +207,5 @@
     symbol symbol_0 i32 0
     symbol symbol_1 i32 0
   }
-  Completed paths: 1
   Reached problem!
   [13]
