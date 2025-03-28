@@ -140,7 +140,7 @@ let opt_lvl =
   Arg.(value & opt string "3" & info [ "O" ] ~doc)
 
 let out_file =
-  let doc = "Write output to a file." in
+  let doc = "Output the generated .wasm or .wat to FILE." in
   Arg.(
     value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 

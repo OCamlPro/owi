@@ -448,10 +448,12 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
   ~model_output_format ~entry_point ~invoke_with_symbols =
-  let workspace =
-    Option.value workspace ~default:(Cmd_utils.tmp_dir "owi_conc_%s")
+  let* workspace =
+    match workspace with
+    | Some path -> Ok path
+    | None -> OS.Dir.tmp "owi_conc_%s"
   in
-  let* _ = OS.Dir.create Fpath.(workspace / "test-suite") in
+  let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;

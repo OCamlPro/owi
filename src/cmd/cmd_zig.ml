@@ -24,7 +24,6 @@ let compile ~workspace ~entry_point ~includes ~out_file debug
     let zig : Cmd.t =
       Cmd.(
         zig_bin % "build-exe" % "-target" % "wasm32-freestanding"
-        % "--cache-dir" % p workspace
         % Fmt.str "-femit-bin=%a" Fpath.pp out
         % entry %% includes % p file % p libzig )
     in
@@ -50,10 +49,12 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_output_format ~entry_point ~invoke_with_symbols ~out_file ~workspace :
   unit Result.t =
-  let workspace =
-    Option.value workspace ~default:(Cmd_utils.tmp_dir "owi_zig_%s")
+  let* workspace =
+    match workspace with
+    | Some path -> Ok path
+    | None -> OS.Dir.tmp "cmd_zig_%s"
   in
-  let* _ = OS.Dir.create workspace in
+  let* _did_create : bool = OS.Dir.create workspace in
   let entry_point = Option.value entry_point ~default:"_start" in
 
   let includes = Cmd_utils.zig_files_location @ includes in
@@ -61,8 +62,8 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
     compile ~workspace ~entry_point ~includes ~out_file debug files
   in
   let files = [ modul ] in
-  let entry_point = Some entry_point
-  and workspace = Some workspace in
+  let entry_point = Some entry_point in
+  let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
