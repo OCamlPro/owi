@@ -1,4 +1,4 @@
-name: build-debian-ocaml-latest
+name: build-debian-unstable-ocaml-latest
 on:
   pull_request:
     branches:
@@ -17,10 +17,20 @@ jobs:
       image: zapashcanon/gitea-ocaml-ci:latest
       options: --user root
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
       - name: test
         run: |
+          export HOME=/root
+          cd $HOME
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            git clone https://github.com/${{ github.repository }}.git
+            cd ${{ github.repository }}
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
+            cd ${{ github.ref_name }}
+          fi
+
           eval "$(opam env)"
           opam install . --depext-only --with-test --with-doc --with-dev-setup -y
           opam install . --deps-only --with-test --with-doc --with-dev-setup -y
