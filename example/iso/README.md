@@ -105,9 +105,6 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -o VAL, --outpt=VAL (absent=owi-out)
-           write results to dir
-
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
 
@@ -117,6 +114,9 @@ OPTIONS
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

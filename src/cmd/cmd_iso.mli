@@ -10,5 +10,5 @@ val cmd :
   -> solver:Smtml.Solver_type.t
   -> unsafe:bool
   -> workers:int
-  -> workspace:Fpath.t
+  -> workspace:Fpath.t option
   -> unit Result.t

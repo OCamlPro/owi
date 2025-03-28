@@ -95,7 +95,7 @@ OPTIONS
            do not display a value for each symbol
 
        -o FILE, --output=FILE
-           Write output to a file.
+           Output the generated .wasm or .wat to FILE.
 
        --optimize
            optimize mode

@@ -38,7 +38,7 @@ OPTIONS
            Emit (.wat) files from corresponding (.wasm) files.
 
        -o FILE, --output=FILE
-           Write output to a file.
+           Output the generated .wasm or .wat to FILE.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
