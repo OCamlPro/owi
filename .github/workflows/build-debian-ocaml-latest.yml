@@ -44,8 +44,10 @@ jobs:
 
           # OCaml stuff
           eval "$(opam env)"
+
+          export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
-          opam install . --depext-only --with-test --with-doc --with-dev-setup -y
-          opam install . --deps-only --with-test --with-doc --with-dev-setup -y
+          opam install . --depext-only --with-test --with-doc --with-dev-setup
+          opam install . --deps-only --with-test --with-doc --with-dev-setup
           opam exec -- dune build @install
           opam exec -- dune runtest
