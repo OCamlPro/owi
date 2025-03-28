@@ -71,8 +71,8 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --model-output-format=VAL (absent=scfg)
-            The format of the output model ("json" or "scfg")
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
 
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure

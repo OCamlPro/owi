@@ -447,7 +447,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
-  ~model_output_format ~entry_point ~invoke_with_symbols =
+  ~model_format ~entry_point ~invoke_with_symbols =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -462,7 +462,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let to_string m =
     let model = assignments_to_model m in
-    match model_output_format with
+    match model_format with
     | Cmd_utils.Json -> Smtml.Model.to_json_string model
     | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in

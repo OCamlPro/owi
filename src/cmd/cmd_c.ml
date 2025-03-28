@@ -165,9 +165,8 @@ let metadata ~workspace arch property files : unit Result.t =
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~eacsl ~solver ~profile ~model_output_format
-  ~(entry_point : string option) ~invoke_with_symbols ~out_file : unit Result.t
-    =
+  ~concolic ~eacsl ~solver ~profile ~model_format ~(entry_point : string option)
+  ~invoke_with_symbols ~out_file : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -189,4 +188,4 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point ~invoke_with_symbols
+    ~model_format ~entry_point ~invoke_with_symbols

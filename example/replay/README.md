@@ -61,6 +61,9 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
        --optimize
            optimize mode
 

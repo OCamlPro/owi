@@ -175,9 +175,9 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
 module String_set = Set.Make (String)
 
-let cmd ~debug ~deterministic_result_order ~fail_mode ~files
-  ~model_output_format ~no_assert_failure_expression_printing
-  ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace =
+let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
+  ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
+  ~unsafe ~workers ~workspace =
   if debug then Log.debug_on := true;
   let* workspace =
     match workspace with
@@ -281,7 +281,7 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files
       let result = check_iso ~unsafe export_name export_type module1 module2 in
 
       Cmd_sym.handle_result ~fail_mode ~workers ~solver
-        ~deterministic_result_order ~model_output_format ~no_value
+        ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
         result )
     () common_exports

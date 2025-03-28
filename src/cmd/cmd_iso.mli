@@ -3,7 +3,7 @@ val cmd :
   -> deterministic_result_order:bool
   -> fail_mode:Cmd_sym.fail_mode
   -> files:Fpath.t list
-  -> model_output_format:Cmd_utils.model_output_format
+  -> model_format:Cmd_utils.model_format
   -> no_assert_failure_expression_printing:bool
   -> no_stop_at_failure:bool
   -> no_value:bool
