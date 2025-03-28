@@ -32,6 +32,7 @@
 - add `--entry-point` option
 - add `--invoke-with-symbols` option
 - add `owi iso` subcommand
+- add `--workspace` option
 
 ## 0.2 - 2024-04-24
 
