@@ -44,6 +44,7 @@ jobs:
 
           # OCaml stuff
           eval "$(opam env)"
+          opam update
           opam install . --depext-only --with-test --with-doc --with-dev-setup -y
           opam install . --deps-only --with-test --with-doc --with-dev-setup -y
           opam exec -- dune build @install
