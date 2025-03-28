@@ -2,6 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+open Bos
 open Syntax
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
@@ -144,10 +145,12 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
   ~model_output_format ~entry_point ~invoke_with_symbols =
-  let workspace =
-    Option.value workspace ~default:(Cmd_utils.tmp_dir "owi_sym_%s")
+  let* workspace =
+    match workspace with
+    | Some path -> Ok path
+    | None -> OS.Dir.tmp "owi_sym_%s"
   in
-  let* _ = Bos.OS.Dir.create Fpath.(workspace / "test-suite") in
+  let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;

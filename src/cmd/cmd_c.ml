@@ -168,10 +168,12 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~concolic ~eacsl ~solver ~profile ~model_output_format
   ~(entry_point : string option) ~invoke_with_symbols ~out_file : unit Result.t
     =
-  let workspace =
-    Option.value ~default:(Cmd_utils.tmp_dir "owi_c_%s") workspace
+  let* workspace =
+    match workspace with
+    | Some path -> Ok path
+    | None -> Bos.OS.Dir.tmp "owi_c_%s"
   in
-  let* _ = OS.Dir.create Fpath.(workspace / "test-suite") in
+  let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
   let entry_point = Option.value entry_point ~default:"main" in
 
   let includes = Cmd_utils.c_files_location @ includes in
@@ -181,8 +183,8 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   in
   let* () = metadata ~workspace arch property files in
   let files = [ modul ] in
-  let entry_point = Some entry_point
-  and workspace = Some workspace in
+  let entry_point = Some entry_point in
+  let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
