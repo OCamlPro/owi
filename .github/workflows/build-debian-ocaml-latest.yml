@@ -1,0 +1,29 @@
+name: build-debian-ocaml-latest
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zapashcanon/gitea-ocaml-ci:latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: depext
+        run: |
+          opam install . --depext-only --with-test --with-doc --with-dev-setup -y
+      - name: setup
+        run: |
+          opam install . --deps-only --with-test --with-doc --with-dev-setup -y
+      - name: build
+        run: |
+          opam exec -- dune build @install
+      - name: test
+        run: |
+          opam exec -- dune runtest
