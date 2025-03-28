@@ -1,0 +1,8 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file ./mul1.wat)
+  (file ./mul2.wat)
+  (package owi))
+ (files README.md))

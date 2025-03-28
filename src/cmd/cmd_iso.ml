@@ -136,6 +136,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       iso_modul
   in
 
+  (* TODO: all of this should be moved to a symbolic/harness.ml module and refactored with what's already in cmd_sym for entry point and invoke-with-symbols *)
   let iso_modul, iso_check_index = Binary.Module.add_func iso_func iso_modul in
   let start_function =
     let id = Some "start" in
