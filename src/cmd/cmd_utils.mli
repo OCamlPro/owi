@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 (* model stuff *)
-type model_output_format =
+type model_format =
   | Scfg
   | Json
 

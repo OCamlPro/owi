@@ -105,7 +105,7 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_output_format result =
+  ~workspace ~solver ~model_format result =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -132,7 +132,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   in
   let results = sort_results deterministic_result_order results in
   let* count =
-    print_and_count_failures model_output_format no_value
+    print_and_count_failures model_format no_value
       no_assert_failure_expression_printing workspace no_stop_at_failure 0
       results
   in
@@ -147,7 +147,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_output_format ~entry_point ~invoke_with_symbols =
+  ~model_format ~entry_point ~invoke_with_symbols =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -166,5 +166,5 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       pc files
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
-    ~model_output_format ~no_value ~no_assert_failure_expression_printing
-    ~workspace ~no_stop_at_failure result
+    ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
+    ~no_stop_at_failure result

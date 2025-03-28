@@ -20,7 +20,7 @@ val handle_result :
   -> fail_mode:fail_mode
   -> workspace:Fpath.t
   -> solver:Smtml.Solver_type.t
-  -> model_output_format:Cmd_utils.model_output_format
+  -> model_format:Cmd_utils.model_format
   -> unit Result.t Symbolic_choice_with_memory.t
   -> unit Result.t
 
@@ -41,7 +41,7 @@ val cmd :
   -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
   -> profile:Fpath.t option
-  -> model_output_format:Cmd_utils.model_output_format
+  -> model_format:Cmd_utils.model_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
   -> unit Result.t

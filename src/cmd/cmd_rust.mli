@@ -20,7 +20,7 @@ val cmd :
   -> concolic:bool
   -> solver:Smtml.Solver_type.t
   -> profile:Fpath.t option
-  -> model_output_format:Cmd_utils.model_output_format
+  -> model_format:Cmd_utils.model_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
   -> out_file:Fpath.t option

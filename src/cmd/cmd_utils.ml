@@ -6,7 +6,7 @@ open Syntax
 
 (* Models *)
 
-type model_output_format =
+type model_format =
   | Scfg
   | Json
 

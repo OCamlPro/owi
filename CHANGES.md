@@ -28,7 +28,7 @@
 - add event logger
 - add `owi_range` primitive
 - add `owi zig` subcommand
-- add `--model-output-format` option
+- add `--model-format` option
 - add `--entry-point` option
 - add `--invoke-with-symbols` option
 - add `owi iso` subcommand
