@@ -12,6 +12,7 @@ Pqueue tests:
     symbol symbol_5 i32
   }
   Reached problem!
+  
   [13]
   Using owi conc:
   All OK
@@ -30,6 +31,7 @@ Pqueue tests:
     symbol symbol_8 i32
   }
   Reached problem!
+  
   [13]
   Using owi conc:
   All OK
