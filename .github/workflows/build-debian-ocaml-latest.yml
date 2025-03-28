@@ -19,20 +19,25 @@ jobs:
     steps:
       - name: test
         run: |
+          # GitHub sucks
           export HOME=/root
           cd $HOME
+
+          # Clone the repository
+          git clone https://github.com/${{ github.repository }}.git
+          cd ${{ github.repository }}
+
+          # Fetch the PR or the current branch
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "Cloning PR branch"
-            git clone https://github.com/${{ github.repository }}.git
-            cd ${{ github.repository }}
+            echo "Fetching PR branch"
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
           else
-            echo "Cloning branch"
-            git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
-            cd ${{ github.ref_name }}
+            echo "Fetching current branch"
+            git checkout ${{ github.ref_name }}
           fi
 
+          # OCaml stuff
           eval "$(opam env)"
           opam install . --depext-only --with-test --with-doc --with-dev-setup -y
           opam install . --deps-only --with-test --with-doc --with-dev-setup -y
