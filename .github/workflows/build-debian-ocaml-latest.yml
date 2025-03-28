@@ -27,6 +27,9 @@ jobs:
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
 
+          # Print stuff
+          echo "github.even_name is ${{ github.event_name }}"
+
           # Fetch the PR or the current branch
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "Fetching PR branch"
