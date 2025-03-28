@@ -64,6 +64,11 @@ let print_bug model_output_format no_value no_assert_failure_expression_printing
 let print_and_count_failures model_output_format no_value
   no_assert_failure_expression_printing workspace no_stop_at_failure count_acc
   results =
+  let test_suite_dir = Fpath.(workspace / "test-suite") in
+  let* (_created : bool) =
+    if not no_value then OS.Dir.create test_suite_dir else Ok false
+  in
+
   let rec aux count_acc results =
     match results () with
     | Seq.Nil -> Ok count_acc
@@ -80,9 +85,7 @@ let print_and_count_failures model_output_format no_value
       let* () =
         if not no_value then
           let testcase = Smtml.Model.get_bindings model |> List.map snd in
-          Cmd_utils.write_testcase
-            ~dir:Fpath.(workspace / "test-suite")
-            testcase
+          Cmd_utils.write_testcase ~dir:test_suite_dir testcase
         else Ok ()
       in
       if no_stop_at_failure then aux count_acc tl else Ok count_acc
@@ -150,7 +153,6 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
-  let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;

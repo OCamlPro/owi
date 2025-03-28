@@ -179,6 +179,11 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files
   ~model_output_format ~no_assert_failure_expression_printing
   ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace =
   if debug then Log.debug_on := true;
+  let* workspace =
+    match workspace with
+    | Some path -> Ok path
+    | None -> Bos.OS.Dir.tmp "owi_iso_%s"
+  in
   let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
   let* file1, file2 =
     match files with

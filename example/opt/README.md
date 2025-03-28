@@ -381,7 +381,7 @@ OPTIONS
            debug mode
 
        -o FILE, --output=FILE
-           Write output to a file.
+           Output the generated .wasm or .wat to FILE.
 
        -u, --unsafe
            skip typechecking pass

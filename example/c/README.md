@@ -488,7 +488,7 @@ OPTIONS
            do not display a value for each symbol
 
        -o FILE, --output=FILE
-           Write output to a file.
+           Output the generated .wasm or .wat to FILE.
 
        -O VAL (absent=3)
            specify which optimization level to use
