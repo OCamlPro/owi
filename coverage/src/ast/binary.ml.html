@@ -450,21 +450,21 @@ module Module = struct
   (** Add a function [f] to a module [m] and returns the module and the index of
       the added function. *)
   let add_func f m =
-    <span data-count="366">l</span>et len = Array.length m.func in
-    <span data-count="366">l</span>et func =
+    <span data-count="393">l</span>et len = Array.length m.func in
+    <span data-count="393">l</span>et func =
       Array.init
-        (Array.lengt<span data-count="366">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="7864">i</span>f i = len then <span data-count="366">f</span> else <span data-count="7498">m</span>.func.(i))
+        (Array.lengt<span data-count="393">h</span> m.func + 1)
+        (fun i -&gt; <span data-count="7999">i</span>f i = len then <span data-count="393">f</span> else <span data-count="7606">m</span>.func.(i))
     in
 
-    <span data-count="366">(</span>{ m with func }, len)
+    <span data-count="393">(</span>{ m with func }, len)
 
   (** Return the type of the function at index [id]. *)
   let get_func_type id m =
-    <span data-count="366">i</span>f id &gt;= Array.lengt<span data-count="366">h</span> m.func then <span data-count="0">N</span>one
+    <span data-count="378">i</span>f id &gt;= Array.lengt<span data-count="378">h</span> m.func then <span data-count="0">N</span>one
     else
-      <span data-count="366">m</span>atch m.func.(id) with
-      | <span data-count="366">L</span>ocal f -&gt; Some f.type_f
+      <span data-count="378">m</span>atch m.func.(id) with
+      | <span data-count="378">L</span>ocal f -&gt; Some f.type_f
       | <span data-count="0">I</span>mported i -&gt; Some i.desc
 end
 </code></pre>

@@ -95,18 +95,18 @@
 (* Written by the Owi programmers *)
 
 let string_of_version = function
-  | <span data-count="13702">N</span>one -&gt; "unknown"
-  | <span data-count="75361">S</span>ome v -&gt; Build_info.V1.Version.to_string v
+  | <span data-count="13774">N</span>one -&gt; "unknown"
+  | <span data-count="75757">S</span>ome v -&gt; Build_info.V1.Version.to_string v
 
-let version = string_of_versio<span data-count="976">n</span> @@ Build_info.V1.versio<span data-count="976">n</span> ()
+let version = string_of_versio<span data-count="981">n</span> @@ Build_info.V1.versio<span data-count="981">n</span> ()
 
 let statically_linked_libraries =
   Build_info.V1.Statically_linked_libraries.to_list ()
-  |&gt; <span data-count="976">L</span>ist.map (fun l -&gt;
-       <span data-count="88087">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="88087">e</span> l
-       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="88087">s</span>tring_of_versio<span data-count="88087">n</span>
+  |&gt; <span data-count="981">L</span>ist.map (fun l -&gt;
+       <span data-count="88550">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="88550">e</span> l
+       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="88550">s</span>tring_of_versio<span data-count="88550">n</span>
        ) )
-  |&gt; <span data-count="976">L</span>ist.sor<span data-count="976">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="446944">S</span>tring.compare n1 n2)
+  |&gt; <span data-count="981">L</span>ist.sor<span data-count="981">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="449323">S</span>tring.compare n1 n2)
 
 let pp fmt () =
   <span data-count="0">F</span>mt.list
@@ -116,7 +116,7 @@ let pp fmt () =
     (("owi", version) :: statically_linked_libraries);
   <span data-count="0">F</span>mt.string fmt "@\n"
 
-let owi_version () = <span data-count="954">F</span>mt.str "owi version %s" version
+let owi_version () = <span data-count="958">F</span>mt.str "owi version %s" version
 
 let cmd () = <span data-count="0">O</span>k (Fmt.p<span data-count="0">r</span> "%a" pp ())
 </code></pre>
