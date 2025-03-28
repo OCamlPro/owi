@@ -23,6 +23,9 @@ depends: [
   "dune-build-info" {build}
   "dune-site" {build}
   "conf-clang"
+  "conf-lld"
+  "conf-rust-llvm"
+  "conf-rust-wasm"
   "bos" {>= "0.2.1"}
   "cmdliner" {>= "1.3.0"}
   "digestif" {>= "1.2.0"}
