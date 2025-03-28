@@ -95,9 +95,9 @@ let fail_mode =
   let assert_doc = "ignore traps and only report assertion violations" in
   Arg.(
     value
-    & vflag `Both
-        [ (`Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
-        ; (`Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
+    & vflag Cmd_sym.Both
+        [ (Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
+        ; (Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
 
 let files =
