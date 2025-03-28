@@ -28,10 +28,10 @@ jobs:
           cd $(basename ${{ github.repository }})
 
           # Print stuff
-          echo "github.even_name is ${{ github.event_name }}"
+          echo "github.event_name is ${{ github.event_name }}"
 
           # Fetch the PR or the current branch
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "Fetching PR branch"
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
