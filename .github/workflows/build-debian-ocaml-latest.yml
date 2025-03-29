@@ -39,13 +39,25 @@ jobs:
             git checkout ${{ github.ref_name }}
           fi
 
-          # OCaml stuff
+          # Prepare OCaml stuff
           eval "$(opam env)"
-
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
           apt update
+
+          # Install zig
+          # TODO: remove the following once the conf-zig package works
+          wget https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz
+          mkdir zig
+          tar xf zig-*.tar.xz -C zig --strip-components 1
+          mv zig/* /usr/local/bin/
+
+          # Install system dependencies
           opam install . --depext-only --with-test --with-doc --with-dev-setup
+
+          # Install opam-repo dependencies
           opam install . --deps-only --with-test --with-doc --with-dev-setup
-          opam exec -- dune build @install
-          opam exec -- dune runtest
+
+          # Build and test
+          dune build @install
+          dune runtest
