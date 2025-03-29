@@ -480,15 +480,15 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_output_format result =
+  ~workspace ~solver ~model_format result =
   <span data-count="397">l</span>et thread = Thread_with_memory.init () in
   <span data-count="397">l</span>et res_queue = Wq.make () in
   <span data-count="397">l</span>et path_count = Atomic.make 0 in
   <span data-count="397">l</span>et callback v =
-    <span data-count="1834">l</span>et open Symbolic_choice_intf in
+    <span data-count="1830">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1834">m</span>atch (fail_mode, v) with
-    | <span data-count="1619">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1833">m</span>atch (fail_mode, v) with
+    | <span data-count="1617">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="2">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">B</span>oth | <span data-count="0">T</span>rap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -499,7 +499,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="781">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="748">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="759">W</span>q.end_pledge res_queue)
   in
   <span data-count="397">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
@@ -507,7 +507,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   in
   <span data-count="397">l</span>et results = sort_results deterministic_result_order results in
   <span data-count="397">l</span>et* count =
-    print_and_count_failure<span data-count="397">s</span> model_output_format no_value
+    print_and_count_failure<span data-count="397">s</span> model_format no_value
       no_assert_failure_expression_printing workspace no_stop_at_failure 0
       results
   in
@@ -522,7 +522,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_output_format ~entry_point ~invoke_with_symbols =
+  ~model_format ~entry_point ~invoke_with_symbols =
   <span data-count="394">l</span>et* workspace =
     match workspace with
     | <span data-count="203">S</span>ome path -&gt; Ok path
@@ -541,8 +541,8 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
       pc files
   in
   <span data-count="394">h</span>andle_result ~fail_mode ~workers ~solver ~deterministic_result_order
-    ~model_output_format ~no_value ~no_assert_failure_expression_printing
-    ~workspace ~no_stop_at_failure result
+    ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
+    ~no_stop_at_failure result
 </code></pre>
       </div>
     </div>

@@ -112,29 +112,29 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
 let fresh solver () =
-  <span data-count="946">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="946">r</span> solver)
+  <span data-count="945">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="945">r</span> solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="943">S</span> ((module Batch), solver)
+  <span data-count="944">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="45479">S</span>tats.start_span "check" "solver";
-  <span data-count="45479">l</span>et module Solver = (val solver_module) in
+  <span data-count="45476">S</span>tats.start_span "check" "solver";
+  <span data-count="45473">l</span>et module Solver = (val solver_module) in
   let check = Solver.check s pc in
-  <span data-count="45461">S</span>tats.close_span ();
-  <span data-count="45456">c</span>heck
+  <span data-count="45455">S</span>tats.close_span ();
+  <span data-count="45443">c</span>heck
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1483">S</span>tats.start_span "model" "solver";
-  <span data-count="1483">l</span>et module Solver = (val solver_module) in
+  <span data-count="1485">S</span>tats.start_span "model" "solver";
+  <span data-count="1484">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1482">`</span>Sat -&gt; begin
+    | <span data-count="1484">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1482">S</span>ome model -&gt; model
+      | <span data-count="1483">S</span>ome model -&gt; model
     end
     | `Unsat -&gt; assert false
     | `Unknown -&gt; assert false

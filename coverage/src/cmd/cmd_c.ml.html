@@ -18,13 +18,13 @@
       <h2>93.44%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:12.50%"></span>
-      <span class="some-visited" style="top:30.21%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="some-visited" style="bottom:44.27%"></span>
-      <span class="some-visited" style="bottom:41.15%"></span>
-      <span class="some-visited" style="bottom:32.81%"></span>
-      <span class="unvisited" style="bottom:9.90%"></span>
+      <span class="some-visited" style="top:12.57%"></span>
+      <span class="some-visited" style="top:30.37%"></span>
+      <span class="unvisited" style="top:33.51%"></span>
+      <span class="some-visited" style="bottom:43.98%"></span>
+      <span class="some-visited" style="bottom:40.84%"></span>
+      <span class="some-visited" style="bottom:32.46%"></span>
+      <span class="unvisited" style="bottom:9.95%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -198,29 +198,28 @@
 <a id="L167"></a><span > </span>
 <a id="L168"></a><span > </span>
 <a id="L169"></a><span > </span>
-<a id="L170"></a><span > </span>
-<a id="L171"></a><span class="visited"> </span>
-<a id="L172"></a><span > </span>
-<a id="L173"></a><span class="unvisited"> </span>
-<a id="L174"></a><span class="visited"> </span>
-<a id="L175"></a><span > </span>
+<a id="L170"></a><span class="visited"> </span>
+<a id="L171"></a><span > </span>
+<a id="L172"></a><span class="unvisited"> </span>
+<a id="L173"></a><span class="visited"> </span>
+<a id="L174"></a><span > </span>
+<a id="L175"></a><span class="visited"> </span>
 <a id="L176"></a><span class="visited"> </span>
-<a id="L177"></a><span class="visited"> </span>
-<a id="L178"></a><span > </span>
+<a id="L177"></a><span > </span>
+<a id="L178"></a><span class="visited"> </span>
 <a id="L179"></a><span class="visited"> </span>
 <a id="L180"></a><span class="visited"> </span>
 <a id="L181"></a><span class="visited"> </span>
-<a id="L182"></a><span class="visited"> </span>
-<a id="L183"></a><span > </span>
+<a id="L182"></a><span > </span>
+<a id="L183"></a><span class="visited"> </span>
 <a id="L184"></a><span class="visited"> </span>
-<a id="L185"></a><span class="visited"> </span>
+<a id="L185"></a><span > </span>
 <a id="L186"></a><span > </span>
-<a id="L187"></a><span > </span>
-<a id="L188"></a><span class="visited"> </span>
+<a id="L187"></a><span class="visited"> </span>
+<a id="L188"></a><span > </span>
 <a id="L189"></a><span > </span>
 <a id="L190"></a><span > </span>
 <a id="L191"></a><span > </span>
-<a id="L192"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -416,7 +415,6 @@
 <a href="#L189">189</a>
 <a href="#L190">190</a>
 <a href="#L191">191</a>
-<a href="#L192">192</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -585,9 +583,8 @@ let metadata ~workspace arch property files : unit Result.t =
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~eacsl ~solver ~profile ~model_output_format
-  ~(entry_point : string option) ~invoke_with_symbols ~out_file : unit Result.t
-    =
+  ~concolic ~eacsl ~solver ~profile ~model_format ~(entry_point : string option)
+  ~invoke_with_symbols ~out_file : unit Result.t =
   <span data-count="363">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -609,7 +606,7 @@ let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_output_format ~entry_point ~invoke_with_symbols
+    ~model_format ~entry_point ~invoke_with_symbols
 </code></pre>
       </div>
     </div>
