@@ -36,6 +36,7 @@ let binaryen_fuzzing_support_module () =
   let call_export_catch _n =
     Symbolic_choice_with_memory.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
   in
+  let sleep _ms id = Symbolic_choice_with_memory.return id in
   let functions =
     [ ( "log-i32"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i32) )
@@ -51,6 +52,9 @@ let binaryen_fuzzing_support_module () =
     ; ( "call-export-catch"
       , Symbolic.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), call_export_catch) )
+    ; ( "sleep"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Arg (I32, Res)), R1 I32), sleep) )
     ]
   in
   { Link.functions }
