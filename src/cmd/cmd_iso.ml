@@ -15,8 +15,76 @@ let ( let*/ ) (t : 'a Result.t)
   | Error e -> Symbolic_choice_with_memory.return (Error e)
   | Ok x -> f x
 
+let binaryen_fuzzing_support_module () =
+  let log_i32 x =
+    Symbolic_choice_with_memory.return
+    @@ Fmt.pr "%a@?" Symbolic.Value.pp_int32 x
+  in
+  let log_i64 x =
+    Symbolic_choice_with_memory.return
+    @@ Fmt.pr "%a@?" Symbolic.Value.pp_int64 x
+  in
+  let log_f32 x =
+    Symbolic_choice_with_memory.return
+    @@ Fmt.pr "%a@?" Symbolic.Value.pp_float32 x
+  in
+  let log_f64 x =
+    Symbolic_choice_with_memory.return
+    @@ Fmt.pr "%a@?" Symbolic.Value.pp_float64 x
+  in
+  let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
+  let call_export_catch _n =
+    Symbolic_choice_with_memory.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
+  in
+  let functions =
+    [ ( "log-i32"
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i32) )
+    ; ( "log-i64"
+      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i64) )
+    ; ( "log-f32"
+      , Symbolic.Extern_func.Extern_func (Func (Arg (F32, Res), R0), log_f32) )
+    ; ( "log-f64"
+      , Symbolic.Extern_func.Extern_func (Func (Arg (F64, Res), R0), log_f64) )
+    ; ( "call-export"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Arg (I32, Res)), R0), call_export) )
+    ; ( "call-export-catch"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), call_export_catch) )
+    ]
+  in
+  { Link.functions }
+
+let emscripten_fuzzing_support_module () =
+  let temp_ret_0 = ref (Smtml.Expr.value (Smtml.Value.Int 0)) in
+  let set_temp_ret_0 x =
+    temp_ret_0 := x;
+    Symbolic_choice_with_memory.return ()
+  in
+  let get_temp_ret_0 () = Symbolic_choice_with_memory.return !temp_ret_0 in
+  let functions =
+    [ ( "setTempRet0"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R0), set_temp_ret_0) )
+    ; ( "getTempRet0"
+      , Symbolic.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), get_temp_ret_0) )
+    ]
+  in
+  { Link.functions }
+
 let check_iso ~unsafe export_name export_type module1 module2 =
   let link_state = Cmd_sym.link_symbolic_modules Link.empty_state in
+  let link_state =
+    Link.extern_module' link_state ~name:"fuzzing-support"
+      ~func_typ:Symbolic.Extern_func.extern_type
+      (binaryen_fuzzing_support_module ())
+  in
+  let link_state =
+    Link.extern_module' link_state ~name:"env"
+      ~func_typ:Symbolic.Extern_func.extern_type
+      (emscripten_fuzzing_support_module ())
+  in
   let*/ _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name1) ~unsafe ~optimize:false
       link_state module1
@@ -74,6 +142,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       put_on_stack @ [ Types.Call (Raw idf1) ] @ put_on_stack
       @ [ Types.Call (Raw idf2) ]
       @ ( match snd export_type with
+        | [] -> [ Types.I32_const 1l ]
         | [ Types.Num_type I32 ] -> [ Types.I_relop (S32, Eq) ]
         | [ Types.Num_type I64 ] -> [ I_relop (S64, Eq) ]
         | [ Types.Num_type F32 ] -> [ F_relop (S32, Eq) ]
