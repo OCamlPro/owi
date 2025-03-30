@@ -70,9 +70,12 @@ let read_byte ~msg input =
 let read_UN n input =
   let rec aux n input =
     let* () =
-      if n <= 0 then Fmt.error_msg "integer representation too long" else Ok ()
+      if n <= 0 then Fmt.error_msg "integer representation too long (read_UN 1)"
+      else Ok ()
     in
-    let* b, input = read_byte ~msg:"integer representation too long" input in
+    let* b, input =
+      read_byte ~msg:"integer representation too long (read_UN 2)" input
+    in
     let b = Char.code b in
     let* () =
       if n >= 7 || b land 0x7f < 1 lsl n then Ok ()
@@ -95,9 +98,12 @@ let read_U32 input =
 let read_SN n input =
   let rec aux n input =
     let* () =
-      if n <= 0 then Fmt.error_msg "integer representation too long" else Ok ()
+      if n <= 0 then Fmt.error_msg "integer representation too long (read_SN 1)"
+      else Ok ()
     in
-    let* b, input = read_byte ~msg:"integer representation too long" input in
+    let* b, input =
+      read_byte ~msg:"integer representation too long (read_SN 2)" input
+    in
     let b = Char.code b in
     let mask = (-1 lsl (n - 1)) land 0x7f in
     let* () =
@@ -725,7 +731,7 @@ let read_type _id input =
   let* () =
     match fcttype with
     | '\x60' -> Ok ()
-    | _ -> Fmt.error_msg "integer representation too long"
+    | _ -> Fmt.error_msg "integer representation too long (read_type)"
   in
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
