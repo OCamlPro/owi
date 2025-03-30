@@ -9,6 +9,8 @@ open Binary
 open Syntax
 open Types
 
+let parse_fail format = Fmt.kstr (fun msg -> Error (`Parse_fail msg)) format
+
 module Input : sig
   type t
 
@@ -43,7 +45,7 @@ end = struct
   let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
       Ok { input with pt = input.pt + pos; size = len }
-    else Fmt.error_msg "length out of bounds in section"
+    else parse_fail "length out of bounds in section"
 
   let sub_suffix pos input = sub ~pos ~len:(input.size - pos) input
 
@@ -61,7 +63,7 @@ let string_of_char_list char_list =
 
 let read_byte ~msg input =
   match Input.get 0 input with
-  | None -> Fmt.error_msg "%s" msg
+  | None -> parse_fail "%s" msg
   | Some c ->
     let+ next_input = Input.sub_suffix 1 input in
     (c, next_input)
@@ -70,7 +72,7 @@ let read_byte ~msg input =
 let read_UN n input =
   let rec aux n input =
     let* () =
-      if n <= 0 then Fmt.error_msg "integer representation too long (read_UN 1)"
+      if n <= 0 then parse_fail "integer representation too long (read_UN 1)"
       else Ok ()
     in
     let* b, input =
@@ -79,7 +81,7 @@ let read_UN n input =
     let b = Char.code b in
     let* () =
       if n >= 7 || b land 0x7f < 1 lsl n then Ok ()
-      else Fmt.error_msg "integer too large"
+      else parse_fail "integer too large"
     in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then Ok (x, input)
@@ -98,7 +100,7 @@ let read_U32 input =
 let read_SN n input =
   let rec aux n input =
     let* () =
-      if n <= 0 then Fmt.error_msg "integer representation too long (read_SN 1)"
+      if n <= 0 then parse_fail "integer representation too long (read_SN 1)"
       else Ok ()
     in
     let* b, input =
@@ -108,7 +110,7 @@ let read_SN n input =
     let mask = (-1 lsl (n - 1)) land 0x7f in
     let* () =
       if n >= 7 || b land mask = 0 || b land mask = mask then Ok ()
-      else Fmt.error_msg "integer too large"
+      else parse_fail "integer too large"
     in
     let x = Int64.of_int (b land 0x7f) in
     if b land 0x80 = 0 then
@@ -195,14 +197,14 @@ let check_end_opcode ?unexpected_eoi_msg input =
   match read_byte ~msg input with
   | Ok ('\x0B', input) -> Ok input
   | Ok (c, _input) ->
-    Fmt.error_msg "END opcode expected (got %s instead)" (Char.escaped c)
+    parse_fail "END opcode expected (got %s instead)" (Char.escaped c)
   | Error _ as e -> e
 
 let check_zero_opcode input =
   let msg = "zero byte expected" in
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok input
-  | Ok (c, _input) -> Fmt.error_msg "%s (got %s instead)" msg (Char.escaped c)
+  | Ok (c, _input) -> parse_fail "%s (got %s instead)" msg (Char.escaped c)
   | Error _ as e -> e
 
 let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
@@ -218,29 +220,29 @@ let read_numtype input =
   | -0x02 -> Ok (I64, input)
   | -0x03 -> Ok (F32, input)
   | -0x04 -> Ok (F64, input)
-  | b -> Fmt.error_msg "malformed number type: %d" b
+  | b -> parse_fail "malformed number type: %d" b
 
 let read_vectype input =
   let* b, _input = read_S7 input in
   match b with
   | -0x05 ->
     (* V128 *)
-    assert false
-  | b -> Fmt.error_msg "malformed vector type: %d" b
+    Error (`Unimplemented "simd binary parsing")
+  | b -> parse_fail "malformed vector type: %d" b
 
 let read_reftype input =
   let* b, input = read_S7 input in
   match b with
   | -0x10 -> Ok ((Null, Func_ht), input)
   | -0x11 -> Ok ((Null, Extern_ht), input)
-  | b -> Fmt.error_msg "malformed reference type: %d" b
+  | b -> parse_fail "malformed reference type: %d" b
 
 let read_valtype input =
   match read_numtype input with
   | Ok (t, input) -> Ok (Num_type t, input)
   | Error _ -> (
     match read_vectype input with
-    | Ok (_t, _input) -> assert false
+    | Ok (_t, _input) -> Error (`Unimplemented "simd binary parsing")
     | Error _ -> (
       match read_reftype input with
       | Ok (t, input) -> Ok (Ref_type t, input)
@@ -253,7 +255,7 @@ let read_mut input =
   match b with
   | '\x00' -> Ok (Const, input)
   | '\x01' -> Ok (Var, input)
-  | _c -> Fmt.error_msg "malformed mutability"
+  | _c -> parse_fail "malformed mutability"
 
 let read_limits input =
   let* b, input = read_byte ~msg:"read_limits" input in
@@ -265,11 +267,11 @@ let read_limits input =
     let* min, input = read_U32 input in
     let+ max, input = read_U32 input in
     ({ min; max = Some max }, input)
-  | _c -> Fmt.error_msg "integer too large (read_limits)"
+  | _c -> parse_fail "integer too large (read_limits)"
 
 let read_memarg max_align input =
   let* align, input = read_U32 input in
-  if align >= max_align then Fmt.error_msg "malformed memop flags"
+  if align >= max_align then parse_fail "malformed memop flags"
   else
     let+ offset, input = read_U32 input in
     let align = Int32.of_int align in
@@ -321,7 +323,7 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
-  | i -> Fmt.error_msg "illegal opcode (1) %i" i
+  | i -> parse_fail "illegal opcode (1) %i" i
 
 let block_type_of_rec_type t =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
@@ -371,8 +373,8 @@ let rec read_instr types input =
     in
     let+ input = check_end_opcode input in
     (If_else (None, Some bt, expr1, expr2), input)
-  | '\x05' -> Fmt.error_msg "misplaced ELSE opcode"
-  | '\x0B' -> Fmt.error_msg "misplaced END opcode"
+  | '\x05' -> parse_fail "misplaced ELSE opcode"
+  | '\x0B' -> parse_fail "misplaced END opcode"
   | '\x0C' ->
     let+ labelidx, input = read_indice input in
     (Br labelidx, input)
@@ -641,7 +643,7 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC input
-  | c -> Fmt.error_msg "illegal opcode (2) %s" (Char.escaped c)
+  | c -> parse_fail "illegal opcode (2) %s" (Char.escaped c)
 
 and read_expr types input =
   let rec aux acc input =
@@ -666,22 +668,22 @@ type ('a, 'b) import =
   | Global of mut * 'b val_type
 
 let magic_check str =
-  if String.length str < 4 then Fmt.error_msg "unexpected end"
+  if String.length str < 4 then parse_fail "unexpected end"
   else
     let magic = String.sub str 0 4 in
     if String.equal magic "\x00\x61\x73\x6d" then Ok ()
-    else Fmt.error_msg "magic header not detected"
+    else parse_fail "magic header not detected"
 
 let version_check str =
-  if String.length str < 8 then Fmt.error_msg "unexpected end"
+  if String.length str < 8 then parse_fail "unexpected end"
   else
     let version = String.sub str 4 4 in
     if String.equal version "\x01\x00\x00\x00" then Ok ()
-    else Fmt.error_msg "unknown binary version"
+    else parse_fail "unknown binary version"
 
 let check_section_id = function
   | '\x00' .. '\x0C' -> Ok ()
-  | c -> Fmt.error_msg "malformed section id %s" (Char.escaped c)
+  | c -> parse_fail "malformed section id %s" (Char.escaped c)
 
 let section_parse input ~expected_id default section_content_parse =
   match Input.get 0 input with
@@ -689,18 +691,18 @@ let section_parse input ~expected_id default section_content_parse =
     let* () = check_section_id id in
     let* input = Input.sub_suffix 1 input in
     let* () =
-      if Input.size input = 0 then Fmt.error_msg "unexpected end" else Ok ()
+      if Input.size input = 0 then parse_fail "unexpected end" else Ok ()
     in
     let* size, input = read_U32 input in
     let* () =
-      if size > Input.size input then Fmt.error_msg "length out of bounds"
+      if size > Input.size input then parse_fail "length out of bounds"
       else Ok ()
     in
     let* section_input = Input.sub_prefix size input in
     let* next_input = Input.sub_suffix size input in
     let* res, after_section_input = section_content_parse section_input in
     if Input.size after_section_input > 0 then
-      Fmt.error_msg "section size mismatch"
+      parse_fail "section size mismatch"
     else Ok (res, next_input)
   | None -> Ok (default, input)
   | Some id ->
@@ -709,7 +711,7 @@ let section_parse input ~expected_id default section_content_parse =
 
 let parse_utf8_name input =
   let* () =
-    if Input.size input = 0 then Fmt.error_msg "unexpected end" else Ok ()
+    if Input.size input = 0 then parse_fail "unexpected end" else Ok ()
   in
   let* name, input = read_bytes ~msg:"parse_utf8_name" input in
   let name = string_of_char_list name in
@@ -731,7 +733,7 @@ let read_type _id input =
   let* () =
     match fcttype with
     | '\x60' -> Ok ()
-    | _ -> Fmt.error_msg "integer representation too long (read_type)"
+    | _ -> parse_fail "integer representation too long (read_type)"
   in
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
@@ -761,7 +763,7 @@ let read_import input =
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
-  | _c -> Fmt.error_msg "malformed import kind"
+  | _c -> parse_fail "malformed import kind"
 
 let read_table input =
   let* ref_type, input = read_reftype input in
@@ -802,7 +804,7 @@ let read_elem_kind input =
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok ((Null, Func_ht), input)
   | Ok (c, _input) ->
-    Fmt.error_msg "%s (expected 0x00 but got %s)" msg (Char.escaped c)
+    parse_fail "%s (expected 0x00 but got %s)" msg (Char.escaped c)
   | Error _ as e -> e
 
 let read_element types input =
@@ -849,7 +851,7 @@ let read_element types input =
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
     ({ id; typ; init; mode }, input)
-  | i -> Fmt.error_msg "malformed elements segment kind: %d" i
+  | i -> parse_fail "malformed elements segment kind: %d" i
 
 let read_local input =
   let* n, input = read_U32 input in
@@ -863,7 +865,7 @@ let read_locals input =
   in
   let+ () =
     if not @@ Int64.lt_u (List.fold_left Int64.add 0L ns) 0x1_0000_0000L then
-      Fmt.error_msg "too many locals"
+      parse_fail "too many locals"
     else Ok ()
   in
   let locals = List.map (fun (n, t) -> List.init n (fun _i -> (None, t))) nts in
@@ -878,7 +880,7 @@ let read_code types input =
   let* code, code_input = read_expr types code_input in
   let* () =
     if Input.size code_input = 0 && Input.size next_input = 0 then
-      Fmt.error_msg "unexpected end of section or function"
+      parse_fail "unexpected end of section or function"
     else Ok ()
   in
   let* code_input =
@@ -886,7 +888,7 @@ let read_code types input =
       code_input
   in
   if Input.size code_input > 0 then
-    Fmt.error_msg "unexpected end of section or function"
+    parse_fail "unexpected end of section or function"
   else Ok ((locals, code), next_input)
 
 (* TODO: merge Elem and Data modes ? *)
@@ -918,7 +920,7 @@ let read_data types input =
     let+ init, input = read_bytes ~msg:"read_data 2" input in
     let init = string_of_char_list init in
     ({ id; init; mode }, input)
-  | i -> Fmt.error_msg "malformed data segment kind %d" i
+  | i -> parse_fail "malformed data segment kind %d" i
 
 let parse_many_custom_section input =
   let rec aux acc input =
@@ -1037,7 +1039,7 @@ let sections_iterate (input : Input.t) =
 
   let* () =
     if List.compare_lengths function_section code_section <> 0 then
-      Fmt.error_msg "function and code section have inconsistent lengths"
+      parse_fail "function and code section have inconsistent lengths"
     else Ok ()
   in
 
@@ -1063,10 +1065,10 @@ let sections_iterate (input : Input.t) =
       in
       let expr = List.concat_map snd code_section in
       iter_expr f_iter expr;
-      if !code_use_dataidx then Fmt.error_msg "data count section required"
+      if !code_use_dataidx then parse_fail "data count section required"
       else Ok ()
     | data_len, Some data_count when data_len = data_count -> Ok ()
-    | _ -> Fmt.error_msg "data count and data section have inconsistent lengths"
+    | _ -> parse_fail "data count and data section have inconsistent lengths"
   in
 
   (* Custom *)
@@ -1074,7 +1076,7 @@ let sections_iterate (input : Input.t) =
   let custom_sections = custom_sections @ custom_sections' in
 
   let+ () =
-    if not @@ Input.is_empty input then Fmt.error_msg "malformed section id"
+    if not @@ Input.is_empty input then parse_fail "malformed section id"
     else Ok ()
   in
 

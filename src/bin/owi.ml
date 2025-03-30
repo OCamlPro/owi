@@ -735,6 +735,7 @@ let exit_code =
       | `Unbounded_quantification -> 77
       | `Invalid_model _msg -> 78
       | `Unknown_export _id -> 79
+      | `Unimplemented _msg -> 80
     end
   end
   | Error e -> (

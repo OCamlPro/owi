@@ -84,6 +84,7 @@ type err =
   | `Unclosed_string
   | `Unbounded_quantification
   | `Invalid_model of string
+  | `Unimplemented of string
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
