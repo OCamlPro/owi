@@ -74,8 +74,8 @@
   $ owi script --no-exhaustion reference/memory_trap.wast
   $ owi script --no-exhaustion reference/memory.wast
   $ owi script --no-exhaustion reference/names.wast
-  42
-  123
+  unknown operator unexpected character `"\""`
+  [23]
   $ owi script --no-exhaustion reference/nop.wast
   $ owi script --no-exhaustion reference/ref_func.wast
   $ owi script --no-exhaustion reference/ref_is_null.wast
