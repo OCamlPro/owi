@@ -1,3 +1,19 @@
+(executable
+ (name md2html)
+ (modules md2html)
+ (libraries bos cmarkit cmdliner fpath prelude)
+ (flags
+  (:standard -open Prelude)))
+
+(rule
+ (alias doc)
+ (target index.html)
+ (deps
+  ./md2html.exe
+  (file ../README.md))
+ (action
+  (run ./md2html.exe ../README.md)))
+
 (documentation
  (package owi)
  (mld_files index))
