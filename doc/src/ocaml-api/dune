@@ -1,0 +1,23 @@
+(executable
+ (name extern)
+ (modules extern)
+ (libraries owi))
+
+(executable
+ (name extern_mem)
+ (modules extern_mem)
+ (libraries owi))
+
+(mdx
+ (libraries fmt fmt.tty fpath logs logs.fmt owi prelude)
+ (deps
+  %{bin:owi}
+  (file extern.exe)
+  (file extern.ml)
+  (file extern.wat)
+  (file extern_mem.exe)
+  (file extern_mem.ml)
+  (file extern_mem.wat)
+  (file quickstart.wat)
+  (package owi))
+ (files custom-functions.md overview.md))

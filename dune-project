@@ -28,9 +28,17 @@
 (package
  (name owi)
  (synopsis
-  "OCaml toolchain to work with WebAssembly, including an interpreter")
- (description
-  "Owi is an OCaml toolchain to work with WebAssembly. It provides an interpreter as an executable and a library.")
+  "Symbolic execution engine and WebAssembly toolkit for research and engineering")
+ (description "\
+Owi is an open-source framework for symbolic execution and WebAssembly analysis.
+It supports the analysis of programs written in WebAssembly, C, C++, Rust, and Zig.
+Owi provides symbolic execution for bug finding, solver-aided programming, test case generation, and program verification.
+
+The framework includes tools for formatting, optimizing, interpreting, validating, and translating WebAssembly modules.
+It also provides a generator for random valid WebAssembly modules.
+
+An OCaml library is available to embed WebAssembly modules and import OCaml functions in a type-safe manner."
+ )
  (tags
   (owi ocaml webassembly wasm interpreter compiler))
  (depends
