@@ -1,0 +1,11 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file poly.c)
+  (file poly.cpp)
+  (file poly2.c)
+  (file poly2.cpp)
+  (file dobble.c)
+  (package owi))
+ (files examples.md))

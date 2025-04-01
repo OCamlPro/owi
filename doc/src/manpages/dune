@@ -1,0 +1,22 @@
+(mdx
+ (libraries owi)
+ (deps %{bin:owi})
+ (files
+  owi.md
+  owi-c.md
+  owi-conc.md
+  owi-cpp.md
+  owi-fmt.md
+  owi-instrument.md
+  owi-iso.md
+  owi-opt.md
+  owi-replay.md
+  owi-run.md
+  owi-rust.md
+  owi-script.md
+  owi-sym.md
+  owi-validate.md
+  owi-version.md
+  owi-wasm2wat.md
+  owi-wat2wasm.md
+  owi-zig.md))

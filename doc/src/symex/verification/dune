@@ -1,0 +1,9 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file plus_three.wat)
+  (file primes.c)
+  (file primes2.c)
+  (package owi))
+ (files eacsl.md weasel.md))

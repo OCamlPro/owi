@@ -1,0 +1,7 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  mini.wat
+  (package owi))
+ (files iso.md replay.md))

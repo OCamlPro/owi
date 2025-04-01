@@ -1,0 +1,11 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  42.wasm
+  42.wat
+  horrible.wat
+  print.wast
+  type_error.wat
+  useless.wat)
+ (files overview.md))

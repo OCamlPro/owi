@@ -1,4 +1,0 @@
-(mdx
- (libraries owi)
- (deps %{bin:owi} useless.wat)
- (files README.md))

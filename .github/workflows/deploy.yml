@@ -54,10 +54,16 @@ jobs:
           percentage=$(opam exec -- bisect-ppx-report summary | sed -E 's/.*\((..).*/\1/g')
           color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85)
           opam exec -- ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg
+      - name: book
+        run: |
+          cd doc
+          mdbook build
+          mv api book/api
+          mv coverage book/coverage
       - name: deploy
         uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: doc/
+          FOLDER: doc/book/
           CLEAN: true
