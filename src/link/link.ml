@@ -56,7 +56,7 @@ let load_from_module ls f (import : _ Imported.t) =
     match StringMap.find_opt import.name (f exports) with
     | None ->
       if StringSet.mem import.name exports.defined_names then
-        Error `Incompatible_import_type
+        Error (`Incompatible_import_type import.name)
       else Error (`Unknown_import (import.modul, import.name))
     | Some v -> Ok v )
 
@@ -65,11 +65,11 @@ let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
     match (fst import.desc, global.mut) with
-    | Var, Const | Const, Var -> Error `Incompatible_import_type
+    | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
     | Const, Const | Var, Var -> Ok ()
   in
   if not @@ Types.val_type_eq (snd import.desc) global.typ then begin
-    Error `Incompatible_import_type
+    Error (`Incompatible_import_type import.name)
   end
   else Ok global
 
@@ -187,7 +187,7 @@ let load_memory (ls : 'f state) (import : limits Imported.t) :
   let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
   let imported_limit = Concrete_memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
-  else Error `Incompatible_import_type
+  else Error (`Incompatible_import_type import.name)
 
 let eval_memory ls (memory : (mem, limits) Runtime.t) :
   Concrete_memory.t Result.t =
@@ -214,7 +214,7 @@ let load_table (ls : 'f state) (import : binary table_type Imported.t) :
   let typ : binary table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
-  else Error `Incompatible_import_type
+  else Error (`Incompatible_import_type import.name)
 
 let eval_table ls (table : (_, binary table_type) Runtime.t) : table Result.t =
   match table with
@@ -244,7 +244,7 @@ let load_func (ls : 'f state) (import : binary block_type Imported.t) :
     | Extern func_id -> Func_id.get_typ func_id ls.collection
   in
   if Types.func_type_eq typ type' then Ok func
-  else Error `Incompatible_import_type
+  else Error (`Incompatible_import_type import.name)
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
   match func with

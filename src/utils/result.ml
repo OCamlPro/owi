@@ -25,7 +25,7 @@ type err =
   | `Import_after_global
   | `Import_after_memory
   | `Import_after_table
-  | `Incompatible_import_type
+  | `Incompatible_import_type of string
   | `Inline_function_type
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
@@ -114,7 +114,8 @@ let rec err_to_string = function
   | `Import_after_global -> "import after global"
   | `Import_after_memory -> "import after memory"
   | `Import_after_table -> "import after table"
-  | `Incompatible_import_type -> "incompatible import type"
+  | `Incompatible_import_type name ->
+    Fmt.str "incompatible import type for %s" name
   | `Inline_function_type -> "inline function type"
   | `Invalid_result_arity -> "invalid result arity"
   | `Lexer_illegal_character c -> Fmt.str "%s" c

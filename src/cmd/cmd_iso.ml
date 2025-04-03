@@ -15,7 +15,7 @@ let ( let*/ ) (t : 'a Result.t)
   | Error e -> Symbolic_choice_with_memory.return (Error e)
   | Ok x -> f x
 
-let binaryen_fuzzing_support_module () =
+let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
     Symbolic_choice_with_memory.return
     @@ Fmt.pr "%a@?" Symbolic.Value.pp_int32 x
@@ -23,6 +23,10 @@ let binaryen_fuzzing_support_module () =
   let log_i64 x =
     Symbolic_choice_with_memory.return
     @@ Fmt.pr "%a@?" Symbolic.Value.pp_int64 x
+  in
+  let log_i64_weird x y =
+    Symbolic_choice_with_memory.return
+    @@ Fmt.pr "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y
   in
   let log_f32 x =
     Symbolic_choice_with_memory.return
@@ -41,7 +45,12 @@ let binaryen_fuzzing_support_module () =
     [ ( "log-i32"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i32) )
     ; ( "log-i64"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i64) )
+      , if weird_log_i64 then
+          Symbolic.Extern_func.Extern_func
+            (Func (Arg (I32, Arg (I32, Res)), R0), log_i64_weird)
+        else
+          Symbolic.Extern_func.Extern_func (Func (Arg (I64, Res), R0), log_i64)
+      )
     ; ( "log-f32"
       , Symbolic.Extern_func.Extern_func (Func (Arg (F32, Res), R0), log_f32) )
     ; ( "log-f64"
@@ -78,11 +87,24 @@ let emscripten_fuzzing_support_module () =
   { Link.functions }
 
 let check_iso ~unsafe export_name export_type module1 module2 =
+  let weird_log_i64 =
+    match
+      Binary.Module.find_imported_func_index ~modul_name:"fuzzing-support"
+        ~func_name:"log-i64" module1
+    with
+    | None -> false
+    | Some index -> (
+      match Binary.Module.get_func_type index module1 with
+      | None -> assert false
+      | Some (Types.Bt_raw (_, (pt, _rt))) -> (
+        match List.length pt with 1 -> false | _n -> true ) )
+  in
+
   let link_state = Cmd_sym.link_symbolic_modules Link.empty_state in
   let link_state =
     Link.extern_module' link_state ~name:"fuzzing-support"
       ~func_typ:Symbolic.Extern_func.extern_type
-      (binaryen_fuzzing_support_module ())
+      (binaryen_fuzzing_support_module weird_log_i64)
   in
   let link_state =
     Link.extern_module' link_state ~name:"env"
