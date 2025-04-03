@@ -30,7 +30,9 @@ type ref_value =
   | Funcref of Func_intf.t option
   | Externref of externref option
 
-let pp_ref_value _fmt _v = assert false
+let pp_ref_value fmt = function
+  | Funcref _ -> Fmt.string fmt "funcref"
+  | Externref _ -> Fmt.string fmt "externref"
 
 type t =
   | I32 of int32
@@ -57,16 +59,12 @@ let ref_is_null = function
   | Funcref (Some _) | Externref (Some _) -> value False
   | Funcref None | Externref None -> value True
 
-let pp ppf v =
-  let e =
-    match v with
-    | I32 e -> e
-    | I64 e -> e
-    | F32 e -> e
-    | F64 e -> e
-    | Ref _ -> assert false
-  in
-  Expr.pp ppf e
+let pp fmt = function
+  | I32 i -> pp_int32 fmt i
+  | I64 i -> pp_int64 fmt i
+  | F32 f -> pp_float32 fmt f
+  | F64 f -> pp_float64 fmt f
+  | Ref r -> pp_ref_value fmt r
 
 module Ref = struct
   let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
@@ -205,21 +203,37 @@ module I32 = struct
     | Cvtop (_, OfBool, cond) -> cond
     | _ -> make (Cvtop (ty, ToBool, e))
 
-  let trunc_f32_s x = cvtop ty TruncSF32 x
+  let trunc_f32_s x =
+    try cvtop ty TruncSF32 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f32_u x = cvtop ty TruncUF32 x
+  let trunc_f32_u x =
+    try cvtop ty TruncUF32 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f64_s x = cvtop ty TruncSF64 x
+  let trunc_f64_s x =
+    try cvtop ty TruncSF64 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f64_u x = cvtop ty TruncUF64 x
+  let trunc_f64_u x =
+    try cvtop ty TruncUF64 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_sat_f32_s _ = assert false
+  let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
 
-  let trunc_sat_f32_u _ = assert false
+  let trunc_sat_f32_u x = cvtop ty Trunc_sat_f32_u x
 
-  let trunc_sat_f64_s _ = assert false
+  let trunc_sat_f64_s x = cvtop ty Trunc_sat_f64_s x
 
-  let trunc_sat_f64_u _ = assert false
+  let trunc_sat_f64_u x = cvtop ty Trunc_sat_f64_u x
 
   let reinterpret_f32 x = cvtop ty Reinterpret_float x
 
@@ -299,21 +313,37 @@ module I64 = struct
 
   let to_int32 e = cvtop (Ty_bitv 32) WrapI64 e
 
-  let trunc_f32_s x = cvtop ty TruncSF32 x
+  let trunc_f32_s x =
+    try cvtop ty TruncSF32 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f32_u x = cvtop ty TruncUF32 x
+  let trunc_f32_u x =
+    try cvtop ty TruncUF32 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f64_s x = cvtop ty TruncSF64 x
+  let trunc_f64_s x =
+    try cvtop ty TruncSF64 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_f64_u x = cvtop ty TruncUF64 x
+  let trunc_f64_u x =
+    try cvtop ty TruncUF64 x with
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Conversion_to_integer ->
+      raise (Types.Trap "invalid conversion to integer")
 
-  let trunc_sat_f32_s _ = assert false
+  let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
 
-  let trunc_sat_f32_u _ = assert false
+  let trunc_sat_f32_u x = cvtop ty Trunc_sat_f32_u x
 
-  let trunc_sat_f64_s _ = assert false
+  let trunc_sat_f64_s x = cvtop ty Trunc_sat_f64_s x
 
-  let trunc_sat_f64_u _ = assert false
+  let trunc_sat_f64_u x = cvtop ty Trunc_sat_f64_u x
 
   let reinterpret_f64 x = cvtop ty Reinterpret_float x
 
