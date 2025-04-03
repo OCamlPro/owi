@@ -41,8 +41,8 @@
   stack        : [  ]
   running instr: i32.const 1
   stack        : [ i32.const 1 ]
-  running instr: i32.load offset=1 align=1
-  stack        : [ i32.const -520159232 ]
+  running instr: i32.load align=2
+  stack        : [ i32.const -16777216 ]
   running instr: drop
   stack        : [  ]
   stack        : [  ]

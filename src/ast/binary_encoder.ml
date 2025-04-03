@@ -143,8 +143,8 @@ let write_limits buf (limits : limits) =
     write_u32_of_int buf max
 
 let write_memarg buf ({ offset; align } : memarg) =
-  write_u32 buf offset;
-  write_u32 buf align
+  write_u32 buf align;
+  write_u32 buf offset
 
 let write_memory buf ((_so, limits) : mem) = write_limits buf limits
 
