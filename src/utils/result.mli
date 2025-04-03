@@ -25,7 +25,7 @@ type err =
   | `Import_after_global
   | `Import_after_memory
   | `Import_after_table
-  | `Incompatible_import_type
+  | `Incompatible_import_type of string
   | `Inline_function_type
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
