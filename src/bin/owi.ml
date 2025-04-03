@@ -705,7 +705,7 @@ let exit_code =
       | `Import_after_global -> 17
       | `Import_after_memory -> 18
       | `Import_after_table -> 19
-      | `Incompatible_import_type -> 20
+      | `Incompatible_import_type _name -> 20
       | `Inline_function_type -> 21
       | `Invalid_result_arity -> 22
       | `Lexer_illegal_character _c -> 23
