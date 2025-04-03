@@ -294,7 +294,7 @@ let locals_func (body_expr : binary expr) =
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
     | Ref_is_null | Drop | Memory_size | Memory_grow | Memory_fill | Memory_copy
     | Nop | Unreachable | Return | Extern_externalize | Extern_internalize
-    | I32_const _ | I64_const _ | F32_const _ | F64_const _
+    | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
     | I_unop (_, _)
     | F_unop (_, _)
     | I_binop (_, _)
@@ -349,7 +349,7 @@ let remove_local map body =
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
     | Ref_is_null | Drop | Memory_size | Memory_grow | Memory_fill | Memory_copy
     | Nop | Unreachable | Return | Extern_externalize | Extern_internalize
-    | I32_const _ | I64_const _ | F32_const _ | F64_const _
+    | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
     | I_unop (_, _)
     | F_unop (_, _)
     | I_binop (_, _)

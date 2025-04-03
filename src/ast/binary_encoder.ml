@@ -312,6 +312,8 @@ let rec write_instr buf instr =
   | F64_const f ->
     add_char '\x44';
     write_f64 buf f
+  | V128_const _ ->
+    assert false
   | I_testop (S32, Eqz) -> add_char '\x45'
   | I_relop (S32, Eq) -> add_char '\x46'
   | I_relop (S32, Ne) -> add_char '\x47'

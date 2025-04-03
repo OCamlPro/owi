@@ -23,6 +23,7 @@ type t =
   | I64 of Int64.t
   | F32 of Float32.t
   | F64 of Float64.t
+  | V128 of V128.t
   | Ref of ref_value
 
 (* TODO: make a new kind of instr for this *)
@@ -32,6 +33,7 @@ let of_instr (i : binary instr) : t =
   | I64_const c -> I64 c
   | F32_const c -> F32 c
   | F64_const c -> F64 c
+  | V128_const c -> V128 c
   | _ -> assert false
 
 let to_instr = function
@@ -39,6 +41,7 @@ let to_instr = function
   | I64 c -> I64_const c
   | F32 c -> F32_const c
   | F64 c -> F64_const c
+  | V128 c -> V128_const c
   | Ref _ -> assert false
 
 let pp fmt = function
@@ -46,6 +49,7 @@ let pp fmt = function
   | I64 i -> pf fmt "i64.const %Ld" i
   | F32 f -> pf fmt "f32.const %a" Float32.pp f
   | F64 f -> pf fmt "f64.const %a" Float64.pp f
+  | V128 v -> pf fmt "v128.const %a" V128.pp v
   | Ref r -> pp_ref_value fmt r
 
 let ref_null' = function Func_ht -> Funcref None | Extern_ht -> Externref None

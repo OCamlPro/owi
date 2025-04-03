@@ -58,20 +58,22 @@ type nonrec num_type =
   | I64
   | F32
   | F64
+  | V128
 
 let pp_num_type fmt = function
   | I32 -> pf fmt "i32"
   | I64 -> pf fmt "i64"
   | F32 -> pf fmt "f32"
   | F64 -> pf fmt "f64"
+  | V128 -> pf fmt "v128"
 
 let num_type_eq t1 t2 =
   match (t1, t2) with
-  | I32, I32 | I64, I64 | F32, F32 | F64, F64 -> true
-  | (I32 | I64 | F32 | F64), _ -> false
+  | I32, I32 | I64, I64 | F32, F32 | F64, F64 | V128, V128 -> true
+  | (I32 | I64 | F32 | F64 | V128), _ -> false
 
 let compare_num_type t1 t2 =
-  let to_int = function I32 -> 0 | I64 -> 1 | F32 -> 2 | F64 -> 3 in
+  let to_int = function I32 -> 0 | I64 -> 1 | F32 -> 2 | F64 -> 3 | V128 -> 4 in
   compare (to_int t1) (to_int t2)
 
 type nullable =
@@ -405,6 +407,7 @@ type 'a instr =
   | I64_const of Int64.t
   | F32_const of Float32.t
   | F64_const of Float64.t
+  | V128_const of V128.t
   | I_unop of nn * iunop
   | F_unop of nn * funop
   | I_binop of nn * ibinop
@@ -492,6 +495,7 @@ let rec pp_instr ~short fmt = function
   | I64_const i -> pf fmt "i64.const %Ld" i
   | F32_const f -> pf fmt "f32.const %a" Float32.pp f
   | F64_const f -> pf fmt "f64.const %a" Float64.pp f
+  | V128_const f -> pf fmt "v128.const %a" V128.pp f
   | I_unop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_iunop op
   | F_unop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_funop op
   | I_binop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_ibinop op
@@ -602,7 +606,7 @@ let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
 and iter_instr f (i : _ instr) =
   f i;
   match i with
-  | I32_const _ | I64_const _ | F32_const _ | F64_const _
+  | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
   | I_unop (_, _)
   | F_unop (_, _)
   | I_binop (_, _)

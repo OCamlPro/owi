@@ -119,6 +119,8 @@ let f32 = Num_type F32
 
 let f64 = Num_type F64
 
+let v128 = Num_type V128
+
 let any = Any
 
 let itype = function S32 -> i32 | S64 -> i64
@@ -235,6 +237,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
+  | V128_const _ -> Stack.push [ v128 ] stack
   | I_unop (s, _op) ->
     let t = itype s in
     let* stack = Stack.pop [ t ] stack in
