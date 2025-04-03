@@ -395,12 +395,19 @@ let rec read_instr types input =
     let+ tableidx, input = read_indice input in
     (Call_indirect (tableidx, block_type_of_rec_type types.(typeidx)), input)
   | '\x12' ->
-      let+ funcidx, input = read_indice input in
-      (Return_call funcidx), input
+    let+ funcidx, input = read_indice input in
+    (Return_call funcidx, input)
   | '\x13' ->
     let* Raw typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Return_call_indirect (tableidx, block_type_of_rec_type types.(typeidx)), input)
+    ( Return_call_indirect (tableidx, block_type_of_rec_type types.(typeidx))
+    , input )
+  | '\x14' ->
+    let+ funcidx, input = read_indice input in
+    (Call_ref funcidx, input)
+  | '\x15' ->
+    let+ Raw typeidx, input = read_indice input in
+    (Return_call_ref (block_type_of_rec_type types.(typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
   | '\x1C' ->
