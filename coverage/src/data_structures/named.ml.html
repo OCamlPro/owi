@@ -105,8 +105,8 @@ type 'a t =
 let empty = { values = []; named = String_map.empty }
 
 let fold f v acc =
-  <span data-count="6175">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="9432">f</span> (Indexed.get_inde<span data-count="9432">x</span> v) (Indexed.ge<span data-count="9432">t</span> v) acc)
+  <span data-count="6177">L</span>ist.fold_left
+    (fun acc v -&gt; <span data-count="9434">f</span> (Indexed.get_inde<span data-count="9434">x</span> v) (Indexed.ge<span data-count="9434">t</span> v) acc)
     acc v.values
 
 let map f v =
@@ -114,15 +114,15 @@ let map f v =
   <span data-count="0">{</span> v with values }
 
 let to_array v =
-  <span data-count="42777">l</span>et tbl = Hashtbl.create 512 in
-  <span data-count="42777">L</span>ist.iter
+  <span data-count="42791">l</span>et tbl = Hashtbl.create 512 in
+  <span data-count="42791">L</span>ist.iter
     (fun v -&gt;
-      <span data-count="32357">l</span>et i = Indexed.get_index v in
-      <span data-count="32357">l</span>et v = Indexed.get v in
-      <span data-count="32357">i</span>f Hashtbl.mem tbl i then <span data-count="0">a</span>ssert false else <span data-count="32357">H</span>ashtbl.add tbl i v )
+      <span data-count="32363">l</span>et i = Indexed.get_index v in
+      <span data-count="32363">l</span>et v = Indexed.get v in
+      <span data-count="32363">i</span>f Hashtbl.mem tbl i then <span data-count="0">a</span>ssert false else <span data-count="32363">H</span>ashtbl.add tbl i v )
     v.values;
-  <span data-count="42777">A</span>rray.init (List.lengt<span data-count="42777">h</span> v.values) (fun i -&gt;
-    <span data-count="32357">m</span>atch Hashtbl.find_opt tbl i with None -&gt; assert false | <span data-count="32357">S</span>ome v -&gt; v )
+  <span data-count="42791">A</span>rray.init (List.lengt<span data-count="42791">h</span> v.values) (fun i -&gt;
+    <span data-count="32363">m</span>atch Hashtbl.find_opt tbl i with None -&gt; assert false | <span data-count="32363">S</span>ome v -&gt; v )
 </code></pre>
       </div>
     </div>

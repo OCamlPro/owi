@@ -289,8 +289,8 @@ let recover ~from_ ~to_ =
   to_.data &lt;- from_.data
 
 let init limits : t =
-  <span data-count="1079">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
-  <span data-count="1079">{</span> limits; data }
+  <span data-count="1081">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
+  <span data-count="1081">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="196">l</span>et limits =
@@ -354,8 +354,8 @@ let store_16 mem ~addr n =
   <span data-count="84">B</span>ytes.set_int16_le mem.data addr n
 
 let store_32 mem ~addr n =
-  <span data-count="26587">l</span>et addr = Int32.to_int addr in
-  <span data-count="26587">B</span>ytes.set_int32_le mem.data addr n
+  <span data-count="26589">l</span>et addr = Int32.to_int addr in
+  <span data-count="26589">B</span>ytes.set_int32_le mem.data addr n
 
 let store_64 mem ~addr n =
   <span data-count="767">l</span>et addr = Int32.to_int addr in
@@ -378,8 +378,8 @@ let load_16_u mem addr =
   <span data-count="104">I</span>nt32.of_int @@ Bytes.get_uint16_l<span data-count="104">e</span> mem.data addr
 
 let load_32 mem addr =
-  <span data-count="44605">l</span>et addr = Int32.to_int addr in
-  <span data-count="44605">B</span>ytes.get_int32_le mem.data addr
+  <span data-count="44607">l</span>et addr = Int32.to_int addr in
+  <span data-count="44607">B</span>ytes.get_int32_le mem.data addr
 
 let load_64 mem addr =
   <span data-count="1342">l</span>et addr = Int32.to_int addr in
@@ -387,7 +387,7 @@ let load_64 mem addr =
 
 let size_in_pages mem = <span data-count="785">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="785">h</span> mem.data / page_size)
 
-let size mem = <span data-count="1930767">I</span>nt32.of_int @@ Bytes.lengt<span data-count="1930767">h</span> mem.data
+let size mem = <span data-count="1930771">I</span>nt32.of_int @@ Bytes.lengt<span data-count="1930771">h</span> mem.data
 </code></pre>
       </div>
     </div>

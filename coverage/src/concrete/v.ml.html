@@ -221,7 +221,7 @@ let to_instr = function
   | Ref _ -&gt; assert false
 
 let pp fmt = function
-  | <span data-count="76">I</span>32 i -&gt; pf fmt "i32.const %ld" i
+  | <span data-count="86">I</span>32 i -&gt; pf fmt "i32.const %ld" i
   | <span data-count="15">I</span>64 i -&gt; pf fmt "i64.const %Ld" i
   | <span data-count="17">F</span>32 f -&gt; pf fmt "f32.const %a" Float32.pp f
   | <span data-count="3">F</span>64 f -&gt; pf fmt "f64.const %a" Float64.pp f

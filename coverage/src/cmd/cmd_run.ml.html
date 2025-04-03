@@ -112,21 +112,21 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 (* module name is called "symbolic" to be compatible with code generator *)
 let link_state =
-  Link.extern_modul<span data-count="981">e</span> Link.empty_state ~name:"symbolic" extern_module
+  Link.extern_modul<span data-count="984">e</span> Link.empty_state ~name:"symbolic" extern_module
 
 let run_file ~unsafe ~rac ~optimize filename =
-  <span data-count="31">l</span>et name = None in
-  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="30">L</span>ink.empty_state in
+  <span data-count="33">l</span>et name = None in
+  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="32">L</span>ink.empty_state in
   let+ (_ : _ Link.state) =
-    Compile.File.until_interpre<span data-count="31">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
+    Compile.File.until_interpre<span data-count="33">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
       link_state filename
   in
-  <span data-count="31">(</span>)
+  <span data-count="33">(</span>)
 
 let cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files =
-  <span data-count="31">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="31">i</span>f debug then <span data-count="7">L</span>og.debug_on := true;
-  <span data-count="31">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
+  <span data-count="33">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="33">i</span>f debug then <span data-count="9">L</span>og.debug_on := true;
+  <span data-count="33">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
 </code></pre>
       </div>
     </div>
