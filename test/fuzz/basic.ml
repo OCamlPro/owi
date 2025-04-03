@@ -100,6 +100,12 @@ let const_i64 =
   let+ int64 in
   I64_const int64
 
+let const_v128 =
+  let* a = int64 in
+  let+ b = int64 in
+  let v128 = Owi.V128.of_i64x2 a b in
+  V128_const v128
+
 let ibinop_32 : text instr gen =
   let+ ibinop in
   I_binop (S32, ibinop)
@@ -340,6 +346,7 @@ let const_of_num_type = function
   | I64 -> const_i64
   | F32 -> const_f32
   | F64 -> const_f64
+  | V128 -> const_v128
 
 let const_of_val_type = function
   | Num_type nt -> const_of_num_type nt

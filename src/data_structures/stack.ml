@@ -13,6 +13,8 @@ module type S = sig
 
   type float64
 
+  type v128
+
   type ref_value
 
   type value
@@ -53,6 +55,8 @@ module type S = sig
 
   val pop2_f64 : t -> (float64 * float64) * t
 
+  val pop_v128 : t -> v128 * t
+
   val pop_ref : t -> value * t
 
   val pop_as_ref : t -> ref_value * t
@@ -81,6 +85,10 @@ module type S = sig
 
   val push_const_f64 : t -> Float64.t -> t
 
+  val push_v128 : t -> v128 -> t
+
+  val push_const_v128 : t -> V128.t -> t
+
   val push_as_externref : t -> 'b Type.Id.t -> 'b -> t
 
   val push_array : t -> unit Array.t -> t
@@ -94,6 +102,7 @@ module Make (V : Value_intf.T) :
      and type int64 := V.int64
      and type float32 := V.float32
      and type float64 := V.float64
+     and type v128 := V.v128
      and type ref_value := V.ref_value = struct
   open V
 
@@ -124,6 +133,10 @@ module Make (V : Value_intf.T) :
   let push_const_f64 s f = push s (F64 (V.const_f64 f))
 
   let push_f64 s f = push s (F64 f)
+
+  let push_const_v128 s f = push s (V128 (V.const_v128 f))
+
+  let push_v128 s f = push s (V128 f)
 
   let push_as_externref s ty v = push s (V.ref_externref ty v)
 
@@ -171,6 +184,10 @@ module Make (V : Value_intf.T) :
     let n2, s = pop s in
     let n1, tl = pop s in
     match (n1, n2) with F64 n1, F64 n2 -> ((n1, n2), tl) | _ -> assert false
+
+  let pop_v128 s =
+    let hd, tl = pop s in
+    match hd with V128 f -> (f, tl) | _ -> assert false
 
   let pop_ref s =
     let hd, tl = pop s in

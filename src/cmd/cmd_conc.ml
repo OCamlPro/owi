@@ -419,6 +419,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
         | I64 x -> Smtml.Value.Bitv (Smtml.Bitvector.of_int64 x)
         | F32 x -> Num (F32 (Float32.to_bits x))
         | F64 x -> Num (F64 (Float64.to_bits x))
+        | V128 _x -> assert false
         | Ref _ -> assert false
       in
       Hashtbl.add table s value )
@@ -466,6 +467,7 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
             | I64 x -> Smtml.Value.Bitv (Smtml.Bitvector.of_int64 x)
             | F32 x -> Num (F32 (Float32.to_bits x))
             | F64 x -> Num (F64 (Float64.to_bits x))
+            | V128 _x -> assert false
             | Ref _ -> assert false )
           assignments
       in

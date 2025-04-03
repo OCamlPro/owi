@@ -494,6 +494,7 @@ module Make (P : Interpret_intf.P) :
     | Num_type I64 -> I64 I64.zero
     | Num_type F32 -> F32 F32.zero
     | Num_type F64 -> F64 F64.zero
+    | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> ref_null rt
 
   (* TODO move to module Env *)
@@ -800,6 +801,7 @@ module Make (P : Interpret_intf.P) :
     | I64_const n -> st @@ Stack.push_const_i64 stack n
     | F32_const f -> st @@ Stack.push_const_f32 stack f
     | F64_const f -> st @@ Stack.push_const_f64 stack f
+    | V128_const f -> st @@ Stack.push_const_v128 stack f
     | I_unop (nn, op) -> st @@ exec_iunop stack nn op
     | F_unop (nn, op) -> st @@ exec_funop stack nn op
     | I_binop (nn, op) ->
@@ -997,8 +999,10 @@ module Make (P : Interpret_intf.P) :
             (F32 v, stack)
           | F64 ->
             let v, stack = Stack.pop_f64 stack in
-            (F64 v, stack) )
-      in
+            (F64 v, stack)
+          | V128 ->
+            let v, stack = Stack.pop_v128 stack in
+            (V128 v, stack) )      in
       Global.set_value global v;
       st stack
     | Table_get (Raw i) ->

@@ -27,6 +27,11 @@ type float64 = C.float64 * S.float64
 let pp_float64 fmt (c, s) =
   Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_float64 c S.pp_float64 s
 
+type v128 = C.v128 * S.v128
+
+let pp_v128 fmt (c, s) =
+  Fmt.pf fmt "{ c = %a ; s = %a }" C.pp_v128 c S.pp_v128 s
+
 (* TODO: Probably beter not to have a different value for both,
      there are no good reason for that right now *)
 type ref_value = C.ref_value * S.ref_value
@@ -39,6 +44,7 @@ type t =
   | I64 of int64
   | F32 of float32
   | F64 of float64
+  | V128 of v128
   | Ref of ref_value
 
 (* Bof... *)
@@ -48,6 +54,7 @@ let pair_value (c : C.t) (s : S.t) =
   | I64 c, I64 s -> I64 (c, s)
   | F32 c, F32 s -> F32 (c, s)
   | F64 c, F64 s -> F64 (c, s)
+  | V128 c, V128 s -> V128 (c, s)
   | Ref c, Ref s -> Ref (c, s)
   | _, _ -> assert false
 
@@ -57,6 +64,7 @@ let concrete_value (cs : t) : C.t =
   | I64 (c, _s) -> I64 c
   | F32 (c, _s) -> F32 c
   | F64 (c, _s) -> F64 c
+  | V128 (c, _s) -> V128 c
   | Ref (c, _s) -> Ref c
 
 let symbolic_value (cs : t) : S.t =
@@ -65,6 +73,7 @@ let symbolic_value (cs : t) : S.t =
   | I64 (_c, s) -> I64 s
   | F32 (_c, s) -> F32 s
   | F64 (_c, s) -> F64 s
+  | V128 (_c, s) -> V128 s
   | Ref (_c, s) -> Ref s
 
 let f_pair_1 fc fs (c, s) = (fc c, fs s) [@@inline always]
@@ -89,6 +98,8 @@ let const_f32 v = f_pair_1_cst C.const_f32 S.const_f32 v
 
 let const_f64 v = f_pair_1_cst C.const_f64 S.const_f64 v
 
+let const_v128 v = f_pair_1_cst C.const_v128 S.const_v128 v
+
 let assert_ref_c = function C.Ref r -> r | _ -> assert false
 
 let assert_ref_s = function S.Ref r -> r | _ -> assert false
@@ -112,6 +123,7 @@ let pp fmt = function
   | I64 i -> pp_int64 fmt i
   | F32 f -> pp_float32 fmt f
   | F64 f -> pp_float64 fmt f
+  | V128 f -> pp_v128 fmt f
   | Ref r -> pp_ref_value fmt r
 
 module Ref = struct
@@ -462,4 +474,8 @@ module I64 = struct
   let extend_i32_s = f_pair_1 C.I64.extend_i32_s S.I64.extend_i32_s
 
   let extend_i32_u = f_pair_1 C.I64.extend_i32_u S.I64.extend_i32_u
+end
+
+module V128 = struct
+  let zero = const_v128 V128.zero
 end

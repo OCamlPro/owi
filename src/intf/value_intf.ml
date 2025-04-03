@@ -184,6 +184,10 @@ module type T = sig
 
   val pp_float64 : Format.formatter -> float64 -> unit
 
+  type v128
+
+  val pp_v128 : Format.formatter -> v128 -> unit
+
   type ref_value
 
   val pp_ref_value : Format.formatter -> ref_value -> unit
@@ -193,6 +197,7 @@ module type T = sig
     | I64 of int64
     | F32 of float32
     | F64 of float64
+    | V128 of v128
     | Ref of ref_value
 
   val pp : Format.formatter -> t -> unit
@@ -204,6 +209,8 @@ module type T = sig
   val const_f32 : Float32.t -> float32
 
   val const_f64 : Float64.t -> float64
+
+  val const_v128 : V128.t -> v128
   (* TODO ref *)
 
   val ref_null : binary heap_type -> t
@@ -296,5 +303,9 @@ module type T = sig
     val extend_i32_s : int32 -> int64
 
     val extend_i32_u : int32 -> int64
+  end
+
+  module V128 : sig
+    val zero : v128
   end
 end

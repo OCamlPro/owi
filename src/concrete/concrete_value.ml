@@ -20,6 +20,10 @@ type float64 = Float64.t
 
 let pp_float64 = Float64.pp
 
+type v128 = V128.t
+
+let pp_v128 = V128.pp
+
 let const_i32 x = x
 
 let const_i64 x = x
@@ -27,6 +31,8 @@ let const_i64 x = x
 let const_f32 x = x
 
 let const_f64 x = x
+
+let const_v128 x = x
 
 include V
 
@@ -85,4 +91,8 @@ end
 module F64 = struct
   include Float64
   include Convert.Float64
+end
+
+module V128 = struct
+  include V128
 end
