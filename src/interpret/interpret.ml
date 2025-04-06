@@ -1556,6 +1556,7 @@ module Make (P : Interpret_intf.P) :
           Ok res
       end
     with
+    (* TODO change this *)
     | Trap msg -> Choice.return (Fmt.error_msg "%s" msg)
     | Stack_overflow -> Choice.return (Error `Call_stack_exhausted)
 
