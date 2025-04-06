@@ -203,25 +203,25 @@ module I32 = struct
 
   let trunc_f32_s x =
     try cvtop ty TruncSF32 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f32_u x =
     try cvtop ty TruncUF32 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f64_s x =
     try cvtop ty TruncSF64 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f64_u x =
     try cvtop ty TruncUF64 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
@@ -311,25 +311,25 @@ module I64 = struct
 
   let trunc_f32_s x =
     try cvtop ty TruncSF32 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f32_u x =
     try cvtop ty TruncUF32 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f64_s x =
     try cvtop ty TruncSF64 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
   let trunc_f64_u x =
     try cvtop ty TruncUF64 x with
-    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "Integer_overflow")
+    | Smtml.Eval.Integer_overflow -> raise (Types.Trap "integer overflow")
     | Smtml.Eval.Conversion_to_integer ->
       raise (Types.Trap "invalid conversion to integer")
 
