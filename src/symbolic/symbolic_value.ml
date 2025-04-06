@@ -113,9 +113,7 @@ module I32 = struct
 
   let ctz e = unop ty Ctz e
 
-  let popcnt _ =
-    (* TODO *)
-    assert false
+  let popcnt e = unop ty Popcnt e
 
   let add e1 e2 = binop ty Add e1 e2
 
@@ -253,9 +251,7 @@ module I64 = struct
 
   let ctz e = unop ty Ctz e
 
-  let popcnt _ =
-    (* TODO *)
-    assert false
+  let popcnt e = unop ty Popcnt e
 
   let add e1 e2 = binop ty Add e1 e2
 
