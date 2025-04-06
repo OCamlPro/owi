@@ -154,7 +154,13 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
   let iso_func =
     let id = Some "check_iso_func" in
-    let locals = [] in
+    let locals =
+      [ (None, Types.Num_type F32)
+      ; (None, Types.Num_type F32)
+      ; (None, Num_type F64)
+      ; (None, Num_type F64)
+      ]
+    in
     let body =
       let put_on_stack =
         List.mapi
@@ -164,6 +170,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
           (fst export_type)
         |> List.flatten
       in
+      let local_offset = List.length (fst export_type) in
 
       put_on_stack @ [ Types.Call (Raw idf1) ] @ put_on_stack
       @ [ Types.Call (Raw idf2) ]
@@ -171,8 +178,74 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         | [] -> [ Types.I32_const 1l ]
         | [ Types.Num_type I32 ] -> [ Types.I_relop (S32, Eq) ]
         | [ Types.Num_type I64 ] -> [ I_relop (S64, Eq) ]
-        | [ Types.Num_type F32 ] -> [ F_relop (S32, Eq) ]
-        | [ Types.Num_type F64 ] -> [ F_relop (S64, Eq) ]
+        | [ Types.Num_type F32 ] ->
+          (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
+          [ (* We store the two floats *)
+            Local_set (Raw (local_offset + 0))
+          ; Local_set (Raw (local_offset + 1))
+          ; (* We compare the first one with itself to see if it is nan. *)
+            Local_get (Raw (local_offset + 0))
+          ; Local_get (Raw (local_offset + 0))
+          ; F_relop (S32, Eq)
+          ; If_else
+              ( None
+              , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+              , [ (* Not nan case, we can directly compare the two numbers *)
+                  Local_get (Raw (local_offset + 0))
+                ; Local_get (Raw (local_offset + 1))
+                ; F_relop (S32, Eq)
+                ]
+              , [ (* Nan case, we must check if the second one is nan *)
+                  Local_get (Raw (local_offset + 1))
+                ; Local_get (Raw (local_offset + 1))
+                ; F_relop (S32, Eq)
+                ; If_else
+                    ( None
+                    , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+                    , [ (* Not nan case, we can compare the two numbers *)
+                        Local_get (Raw (local_offset + 0))
+                      ; Local_get (Raw (local_offset + 1))
+                      ; F_relop (S32, Eq)
+                      ]
+                    , [ (* Nan case, they are both nan, we return true *)
+                        I32_const 1l
+                      ] )
+                ] )
+          ]
+        | [ Types.Num_type F64 ] ->
+          (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
+          [ (* We store the two floats *)
+            Local_set (Raw (local_offset + 2))
+          ; Local_set (Raw (local_offset + 3))
+          ; (* We compare the first one with itself to see if it is nan. *)
+            Local_get (Raw (local_offset + 2))
+          ; Local_get (Raw (local_offset + 2))
+          ; F_relop (S64, Eq)
+          ; If_else
+              ( None
+              , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+              , [ (* Not nan case, we can directly compare the two numbers *)
+                  Local_get (Raw (local_offset + 2))
+                ; Local_get (Raw (local_offset + 3))
+                ; F_relop (S64, Eq)
+                ]
+              , [ (* Nan case, we must check if the second one is nan *)
+                  Local_get (Raw (local_offset + 3))
+                ; Local_get (Raw (local_offset + 3))
+                ; F_relop (S64, Eq)
+                ; If_else
+                    ( None
+                    , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+                    , [ (* Not nan case, we can compare the two numbers *)
+                        Local_get (Raw (local_offset + 2))
+                      ; Local_get (Raw (local_offset + 3))
+                      ; F_relop (S64, Eq)
+                      ]
+                    , [ (* Nan case, they are both nan, we return true *)
+                        I32_const 1l
+                      ] )
+                ] )
+          ]
         | rt ->
           Fmt.failwith
             "Equivalence check has not been implemented for result type %a, \
