@@ -12,6 +12,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       incr next;
       !next
   in
+  let brk = ref @@ Int32.of_int 0 in
 
   let module M :
     Wasm_ffi_intf.S0
@@ -48,11 +49,14 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let symbol_bool = symbol_char
 
-    let abort () = assert false
+    let abort () = ()
 
-    let alloc (_ : memory) (_ : Value.int32) (_ : Value.int32) = assert false
+    let alloc _m _addr size =
+      let r = !brk in
+      brk := Int32.add !brk size;
+      r
 
-    let free (_ : memory) = assert false
+    let free (_ : memory) adr = adr
 
     let exit (n : Value.int32) = exit (Int32.to_int n)
 
@@ -139,8 +143,28 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     { Link.functions }
   in
 
+  let summaries_extern_module =
+    let open M in
+    let functions =
+      [ ( "alloc"
+        , Concrete.Extern_func.Extern_func
+            (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
+      ; ( "dealloc"
+        , Concrete.Extern_func.Extern_func
+            (Func (Mem (Arg (I32, Res)), R1 I32), free) )
+      ; ("abort", Concrete.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+      ; ( "exit"
+        , Concrete.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+      ]
+    in
+    { Link.functions }
+  in
+
   let link_state =
     Link.extern_module Link.empty_state ~name:"symbolic" replay_extern_module
+  in
+  let link_state =
+    Link.extern_module link_state ~name:"summaries" summaries_extern_module
   in
 
   let* m =
