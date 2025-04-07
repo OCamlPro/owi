@@ -1,18 +1,19 @@
-(rule
- (target libzig.o)
- (deps owi.o)
- (action
-  (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
-
-(rule
- (target owi.o)
- (deps owi.zig)
- (action
-  (run zig build-obj -target wasm32-freestanding %{deps})))
-
-(install
- (package owi)
- (section
-  (site
-   (owi zig_files)))
- (files libzig.o))
+;; disabled until zig is properly packaged
+;(rule
+; (target libzig.o)
+; (deps owi.o)
+; (action
+;  (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
+;
+;(rule
+; (target owi.o)
+; (deps owi.zig)
+; (action
+;  (run zig build-obj -target wasm32-freestanding %{deps})))
+;
+;(install
+; (package owi)
+; (section
+;  (site
+;   (owi zig_files)))
+; (files libzig.o))
