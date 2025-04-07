@@ -178,7 +178,7 @@ module Make (Symbolic_memory : M) :
     }
 
   let create symbols symbol_set pc memories tables globals breadcrumbs =
-    <span data-count="2171195">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+    <span data-count="2171177">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
 
   let init () =
     <span data-count="397">l</span>et symbols = 0 in
@@ -190,34 +190,34 @@ module Make (Symbolic_memory : M) :
     <span data-count="397">l</span>et breadcrumbs = [] in
     create symbols symbol_set pc memories tables globals breadcrumbs
 
-  let symbols t = <span data-count="2172312">t</span>.symbols
+  let symbols t = <span data-count="2172292">t</span>.symbols
 
-  let symbols_set t = <span data-count="2170871">t</span>.symbol_set
+  let symbols_set t = <span data-count="2170931">t</span>.symbol_set
 
-  let pc t = <span data-count="2215482">t</span>.pc
+  let pc t = <span data-count="2215480">t</span>.pc
 
-  let memories t = <span data-count="4328402">t</span>.memories
+  let memories t = <span data-count="4328047">t</span>.memories
 
-  let tables t = <span data-count="2174781">t</span>.tables
+  let tables t = <span data-count="2174764">t</span>.tables
 
-  let globals t = <span data-count="2173291">t</span>.globals
+  let globals t = <span data-count="2173372">t</span>.globals
 
-  let breadcrumbs t = <span data-count="2170847">t</span>.breadcrumbs
+  let breadcrumbs t = <span data-count="2170950">t</span>.breadcrumbs
 
   let add_symbol t s = <span data-count="1372">{</span> t with symbol_set = s :: t.symbol_set }
 
-  let add_pc t c = <span data-count="45879">{</span> t with pc = c :: t.pc }
+  let add_pc t c = <span data-count="45814">{</span> t with pc = c :: t.pc }
 
-  let add_breadcrumb t crumb = <span data-count="44440">{</span> t with breadcrumbs = crumb :: t.breadcrumbs }
+  let add_breadcrumb t crumb = <span data-count="44407">{</span> t with breadcrumbs = crumb :: t.breadcrumbs }
 
-  let incr_symbols t = <span data-count="1511">{</span> t with symbols = suc<span data-count="1511">c</span> t.symbols }
+  let incr_symbols t = <span data-count="1510">{</span> t with symbols = suc<span data-count="1510">c</span> t.symbols }
 
   let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
       =
-    <span data-count="45280">l</span>et memories = Memory.clone memories in
-    <span data-count="45286">l</span>et tables = Symbolic_table.clone tables in
-    <span data-count="45280">l</span>et globals = Symbolic_global.clone globals in
-    <span data-count="45285">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+    <span data-count="45220">l</span>et memories = Memory.clone memories in
+    <span data-count="45223">l</span>et tables = Symbolic_table.clone tables in
+    <span data-count="45220">l</span>et globals = Symbolic_global.clone globals in
+    <span data-count="45221">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
 end
 </code></pre>
       </div>

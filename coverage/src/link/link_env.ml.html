@@ -495,19 +495,19 @@ let recover backup into =
   <span data-count="524">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="524">y</span> recover_elem) backup.elem into.elem in
   <span data-count="524">(</span>)
 
-let id (env : _ t) = <span data-count="2339189">e</span>nv.id
+let id (env : _ t) = <span data-count="2338816">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="6708">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6708">S</span>ome v -&gt; v
+  <span data-count="6674">m</span>atch IMap.find_opt id env.globals with None -&gt; assert false | <span data-count="6673">S</span>ome v -&gt; v
 
 let get_memory (env : _ t) id =
-  <span data-count="6027174">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="6027179">S</span>ome v -&gt; v
+  <span data-count="6026865">m</span>atch IMap.find_opt id env.memories with None -&gt; assert false | <span data-count="6026962">S</span>ome v -&gt; v
 
 let get_table (env : _ t) id =
-  <span data-count="1616095">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616095">S</span>ome v -&gt; v
+  <span data-count="1616095">m</span>atch IMap.find_opt id env.tables with None -&gt; assert false | <span data-count="1616096">S</span>ome v -&gt; v
 
 let get_func (env : _ t) id =
-  <span data-count="10498415">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498381">S</span>ome v -&gt; v
+  <span data-count="10498425">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498428">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="2254">m</span>atch IMap.find_opt id env.data with None -&gt; assert false | <span data-count="2254">S</span>ome v -&gt; v
@@ -516,9 +516,9 @@ let get_elem (env : _ t) id =
   <span data-count="3006">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="3006">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="122815">m</span>atch Func_id.get id env.extern_funcs with
+  <span data-count="122846">m</span>atch Func_id.get id env.extern_funcs with
   | None -&gt; assert false
-  | <span data-count="122761">S</span>ome v -&gt; v
+  | <span data-count="122848">S</span>ome v -&gt; v
 
 module Build = struct
   type t =

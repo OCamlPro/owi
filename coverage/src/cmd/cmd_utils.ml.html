@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_utils.ml &mdash; Coverage report</title>
-    <meta name="description" content="79.49% coverage in src/cmd/cmd_utils.ml">
+    <meta name="description" content="78.21% coverage in src/cmd/cmd_utils.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_utils.ml
         </a>
       </h1>
-      <h2>79.49%</h2>
+      <h2>78.21%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:26.16%"></span>
@@ -32,6 +32,7 @@
       <span class="unvisited" style="bottom:8.14%"></span>
       <span class="unvisited" style="bottom:5.81%"></span>
       <span class="unvisited" style="bottom:5.23%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -207,7 +208,7 @@
 <a id="L169"></a><span > </span>
 <a id="L170"></a><span class="visited"> </span>
 <a id="L171"></a><span > </span>
-<a id="L172"></a><span class="visited"> </span>
+<a id="L172"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -535,20 +536,20 @@ let rust_files_location = List.ma<span data-count="984">p</span> Fpath.v Share.S
 let zig_files_location = List.ma<span data-count="984">p</span> Fpath.v Share.Sites.zig_files
 
 let find location file : Fpath.t Result.t =
-  <span data-count="369">l</span>et* l =
-    list_ma<span data-count="369">p</span>
+  <span data-count="366">l</span>et* l =
+    list_ma<span data-count="366">p</span>
       (fun dir -&gt;
-        <span data-count="369">l</span>et filename = Fpath.append dir file in
-        <span data-count="369">m</span>atch Bos.OS.File.exists filename with
-        | <span data-count="369">O</span>k true -&gt; Ok (Some filename)
+        <span data-count="366">l</span>et filename = Fpath.append dir file in
+        <span data-count="366">m</span>atch Bos.OS.File.exists filename with
+        | <span data-count="366">O</span>k true -&gt; Ok (Some filename)
         | <span data-count="0">O</span>k false -&gt; Ok None
         | <span data-count="0">E</span>rror _ as e -&gt; e )
       location
   in
-  <span data-count="369">l</span>et rec loop = function
+  <span data-count="366">l</span>et rec loop = function
     | <span data-count="0">[</span>] -&gt; Fmt.error_msg "can't find file %a" Fpath.pp file
     | <span data-count="0">N</span>one :: tl -&gt; loop tl
-    | <span data-count="369">S</span>ome file :: _tl -&gt; Ok file
+    | <span data-count="366">S</span>ome file :: _tl -&gt; Ok file
   in
   loop l
 
@@ -556,7 +557,7 @@ let find_installed_c_file filename = <span data-count="363">f</span>ind c_files_
 
 let find_installed_rust_file filename = <span data-count="3">f</span>ind rust_files_location filename
 
-let find_installed_zig_file filename = <span data-count="3">f</span>ind zig_files_location filename
+let find_installed_zig_file filename = <span data-count="0">f</span>ind zig_files_location filename
 </code></pre>
       </div>
     </div>

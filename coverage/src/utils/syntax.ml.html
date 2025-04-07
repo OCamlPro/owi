@@ -246,11 +246,11 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4427335">m</span>atch o with <span data-count="4407497">O</span>k v -&gt; f v | <span data-count="19838">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4427329">m</span>atch o with <span data-count="4407491">O</span>k v -&gt; f v | <span data-count="19838">E</span>rror _ as e -&gt; e
 
 let ( let+ ) o f = <span data-count="2288735">m</span>atch o with <span data-count="2279444">O</span>k v -&gt; Ok (<span data-count="2279444">f</span> v) | <span data-count="9291">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="868298">O</span>k v
+let ok v = <span data-count="868295">O</span>k v
 
 let list_iter f l =
   <span data-count="36595">l</span>et err = ref None in
@@ -267,16 +267,16 @@ let list_iter f l =
   with <span data-count="118">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="118">S</span>ome e -&gt; e )
 
 let list_map f l =
-  <span data-count="234359">l</span>et err = ref None in
+  <span data-count="234356">l</span>et err = ref None in
   try
-    o<span data-count="234213">k</span>
-    @@ List.ma<span data-count="234213">p</span>
+    o<span data-count="234210">k</span>
+    @@ List.ma<span data-count="234210">p</span>
          (fun v -&gt;
-           <span data-count="238723">m</span>atch f v with
+           <span data-count="238720">m</span>atch f v with
            | <span data-count="146">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="238577">O</span>k v -&gt; v )
+           | <span data-count="238574">O</span>k v -&gt; v )
          l
   with <span data-count="146">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="146">S</span>ome e -&gt; e )
 
