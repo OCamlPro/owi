@@ -11,5 +11,4 @@ val cmd :
   -> source_file:Fpath.t
   -> entry_point:string option
   -> invoke_with_symbols:bool
-  -> model_format:Cmd_utils.model_format
   -> unit Result.t

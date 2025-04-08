@@ -1,7 +1,7 @@
-  $ owi sym -w1 all_types.wat > all_types.model
+  $ owi sym -w1 all_types.wat > all_types.scfg
   Reached problem!
   [13]
-  $ owi replay --replay-file all_types.model all_types.wat --debug
+  $ owi replay --replay-file all_types.scfg all_types.wat --debug
   parsing      ...
   checking     ...
   grouping     ...

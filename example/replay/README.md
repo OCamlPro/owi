@@ -22,7 +22,7 @@ First, you need to perform a symbolic run and to store the output model in a fil
 You can get a model like this:
 
 ```sh
-$ owi sym ./mini.wat > mini.model
+$ owi sym ./mini.wat > mini.scfg
 Reached problem!
 [13]
 ```
@@ -30,7 +30,7 @@ Reached problem!
 Then you can replay the module execution with the values in the model like this:
 
 ```sh
-$ owi replay --replay-file mini.model mini.wat
+$ owi replay --replay-file mini.scfg mini.wat
 unreachable
 [26]
 ```
@@ -60,9 +60,6 @@ OPTIONS
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
-
-       --model-format=VAL (absent=scfg)
-            The format of the model ("json" or "scfg")
 
        --optimize
            optimize mode

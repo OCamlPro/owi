@@ -154,13 +154,15 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   c
 
 let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
-  ~entry_point ~invoke_with_symbols ~model_format =
+  ~entry_point ~invoke_with_symbols =
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
-  let parse_fn =
-    match model_format with
-    | Cmd_utils.Scfg -> Smtml.Model.Parse.Scfg.from_file
-    | Json -> Smtml.Model.Parse.Json.from_file
+  let* parse_fn =
+    let ext = Fpath.get_ext replay_file in
+    match String.lowercase_ascii ext with
+    | ".json" -> Ok Smtml.Model.Parse.Json.from_file
+    | ".scfg" -> Ok Smtml.Model.Parse.Scfg.from_file
+    | _ -> Error (`Unsupported_file_extension ext)
   in
   let* model =
     match parse_fn replay_file with

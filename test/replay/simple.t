@@ -1,7 +1,7 @@
-  $ owi replay --replay-file simple.model simple.wat
+  $ owi replay --replay-file simple.scfg simple.wat
   unreachable
   [26]
-  $ owi replay --replay-file simple.model simple.wat --debug
+  $ owi replay --replay-file simple.scfg simple.wat --debug
   parsing      ...
   checking     ...
   grouping     ...
