@@ -412,10 +412,9 @@ let replay_cmd =
       & info [ "replay-file" ] ~doc ~docv:"FILE" )
   and+ source_file
   and+ invoke_with_symbols
-  and+ model_format
   and+ entry_point in
   Cmd_replay.cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
-    ~entry_point ~invoke_with_symbols ~model_format
+    ~entry_point ~invoke_with_symbols
 
 (* owi run *)
 

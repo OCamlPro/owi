@@ -4,11 +4,11 @@
   (package owi)
   all_types.wat
   assert_false.wat
-  assert_false.model
+  assert_false.scfg
   missing_replay_file.wat
-  no_bug.model
+  no_bug.scfg
   no_bug.wat
-  range.model
+  range.scfg
   range.wat
-  simple.model
+  simple.scfg
   simple.wat))
