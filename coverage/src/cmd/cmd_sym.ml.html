@@ -485,10 +485,10 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   <span data-count="397">l</span>et res_queue = Wq.make () in
   <span data-count="397">l</span>et path_count = Atomic.make 0 in
   <span data-count="397">l</span>et callback v =
-    <span data-count="1730">l</span>et open Symbolic_choice_intf in
+    <span data-count="1721">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1731">m</span>atch (fail_mode, v) with
-    | <span data-count="1516">_</span>, (EVal (Ok ()), _) -&gt; ()
+    <span data-count="1721">m</span>atch (fail_mode, v) with
+    | <span data-count="1506">_</span>, (EVal (Ok ()), _) -&gt; ()
     | <span data-count="2">_</span>, (EVal (Error e), thread) -&gt; Wq.push (`Error e, thread) res_queue
     | <span data-count="164">(</span><span data-count="164">B</span>oth | <span data-count="0">T</span>rap_only), (ETrap (t, m), thread) -&gt;
       Wq.push (`ETrap (t, m), thread) res_queue
@@ -499,7 +499,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="781">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="751">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="764">W</span>q.end_pledge res_queue)
   in
   <span data-count="397">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
