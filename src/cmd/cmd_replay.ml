@@ -28,7 +28,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     let assume _ = ()
 
     let assert' n =
-      if not @@ Prelude.Int32.equal n 0l then begin
+      if Prelude.Int32.equal n 0l then begin
         Fmt.epr "Assertion failure was correctly reached\n";
         exit 0
       end
@@ -49,7 +49,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let symbol_bool = symbol_char
 
-    let abort () = ()
+    let abort () =
+      Fmt.epr "Unexpected abort call.\n";
+      exit 121
 
     let alloc _m _addr size =
       let r = !brk in
