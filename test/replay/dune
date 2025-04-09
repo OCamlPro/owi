@@ -2,6 +2,8 @@
  (deps
   %{bin:owi}
   (package owi)
+  alloc.c
+  alloc.scfg
   all_types.wat
   assert_false.wat
   assert_false.scfg
