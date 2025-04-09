@@ -5,13 +5,6 @@
 (** Single memory *)
 type t
 
-val check_within_bounds :
-  t -> Smtml.Expr.t -> (Smtml.Expr.t * Symbolic_value.int32, Trap.t) result
-
-val realloc : t -> Int32.t -> Smtml.Expr.t -> unit
-
-val free : t -> Int32.t -> unit
-
 val load_8_s : t -> Smtml.Expr.t -> Symbolic_value.int32
 
 val load_8_u : t -> Smtml.Expr.t -> Symbolic_value.int32
@@ -34,11 +27,6 @@ val store_64 : t -> addr:Smtml.Expr.t -> Smtml.Expr.t -> unit
 
 val grow : t -> Smtml.Expr.t -> unit
 
-val fill : t -> pos:Smtml.Expr.t -> len:Smtml.Expr.t -> char -> Smtml.Expr.t
-
-val blit :
-  t -> src:Smtml.Expr.t -> dst:Smtml.Expr.t -> len:Smtml.Expr.t -> Smtml.Expr.t
-
 val blit_string :
      t
   -> string
@@ -58,7 +46,5 @@ val get_limit_max : t -> Smtml.Expr.t option
 type collection
 
 val init : unit -> collection
-
-val clone : collection -> collection
 
 val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t

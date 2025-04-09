@@ -16,11 +16,9 @@ end)
 type t =
   { mutable data : Symbolic_value.int32 Map.t
   ; mutable size : Symbolic_value.int32
-  ; mutable chunks : Symbolic_value.int32 Map.t
   }
 
-let create size =
-  { data = Map.empty; size = Symbolic_value.const_i32 size; chunks = Map.empty }
+let create size = { data = Map.empty; size = Symbolic_value.const_i32 size }
 
 let i32 v =
   match Smtml.Expr.view v with Val (Num (I32 i)) -> i | _ -> assert false
@@ -36,10 +34,6 @@ let grow m delta =
 let size { size; _ } = Symbolic_value.I32.mul size page_size
 
 let size_in_pages { size; _ } = size
-
-let fill _ = assert false
-
-let blit _ = assert false
 
 let replace m k v = m.data <- Map.add k v m.data
 
@@ -60,11 +54,6 @@ let blit_string m str ~src ~dst ~len =
     done;
     Symbolic_value.Bool.const false
   end
-
-let clone { data; chunks; size } =
-  (* Caution, it is tempting not to rebuild the record here, but...
-       it must be! otherwise the mutable data points to the same location *)
-  { data; chunks; size }
 
 let load_byte a { data; _ } =
   match Map.find_opt a data with
@@ -177,33 +166,6 @@ let store_64 m ~addr v = storen m ~addr v 8
 
 let get_limit_max _m = None (* TODO *)
 
-let check_within_bounds m a =
-  match Smtml.Expr.view a with
-  | Val (Num (I32 _)) -> Ok (Symbolic_value.Bool.const false, a)
-  | Ptr { base; offset } -> (
-    match Map.find_opt base m.chunks with
-    | None -> Error Trap.Memory_leak_use_after_free
-    | Some size ->
-      let ptr = Int32.add base (i32 offset) in
-      let upper_bound =
-        Symbolic_value.(I32.ge (const_i32 ptr) (I32.add (const_i32 base) size))
-      in
-      Ok
-        ( Symbolic_value.Bool.(or_ (const (Int32.lt ptr base)) upper_bound)
-        , Symbolic_value.const_i32 ptr ) )
-  | _ -> assert false
-
-let free m base =
-  if not @@ Map.mem base m.chunks then Fmt.failwith "Memory leak double free"
-  else begin
-    let chunks = Map.remove base m.chunks in
-    m.chunks <- chunks
-  end
-
-let realloc m base size =
-  let chunks = Map.add base size m.chunks in
-  m.chunks <- chunks
-
 (** Collection of memories *)
 
 module ITbl = Hashtbl.Make (struct
@@ -215,16 +177,6 @@ end)
 type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = Env_id.Tbl.create 0
-
-let clone collection =
-  (* TODO: this is ugly and should be rewritten *)
-  let s = Env_id.Tbl.to_seq collection in
-  Env_id.Tbl.of_seq
-  @@ Seq.map
-       (fun (i, t) ->
-         let s = ITbl.to_seq t in
-         (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, clone a)) s) )
-       s
 
 let convert (orig_mem : Concrete_memory.t) : t =
   let s = Concrete_memory.size_in_pages orig_mem in
