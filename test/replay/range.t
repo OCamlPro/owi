@@ -35,4 +35,36 @@
   running instr: i32.ge_u
   stack        : [ i32.const 1 ]
   running instr: call 1
+  stack        : [  ]
+  running instr: local.get 0
+  stack        : [ i32.const 16 ]
+  running instr: i32.const 20
+  stack        : [ i32.const 20 ; i32.const 16 ]
+  running instr: i32.lt_u
+  stack        : [ i32.const 1 ]
+  running instr: call 1
+  stack        : [  ]
+  running instr: i32.const 200
+  stack        : [ i32.const 200 ]
+  running instr: i32.const 300
+  stack        : [ i32.const 300 ; i32.const 200 ]
+  running instr: call 0
+  stack        : [ i32.const 299 ]
+  running instr: local.set 1
+  stack        : [  ]
+  running instr: local.get 1
+  stack        : [ i32.const 299 ]
+  running instr: i32.const 200
+  stack        : [ i32.const 200 ; i32.const 299 ]
+  running instr: i32.ge_u
+  stack        : [ i32.const 1 ]
+  running instr: call 1
+  stack        : [  ]
+  running instr: local.get 1
+  stack        : [ i32.const 299 ]
+  running instr: i32.const 299
+  stack        : [ i32.const 299 ; i32.const 299 ]
+  running instr: i32.lt_u
+  stack        : [ i32.const 0 ]
+  running instr: call 1
   Assertion failure was correctly reached
