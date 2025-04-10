@@ -2298,8 +2298,8 @@ let pp_num_type fmt = function
   | <span data-count="712">F</span>64 -&gt; pf fmt "f64"
 
 let num_type_eq t1 t2 =
-  <span data-count="3226852">m</span>atch (t1, t2) with
-  | <span data-count="2958210">I</span>32, I32 | <span data-count="89662">I</span>64, I64 | <span data-count="89342">F</span>32, F32 | <span data-count="89595">F</span>64, F64 -&gt; true
+  <span data-count="3226851">m</span>atch (t1, t2) with
+  | <span data-count="2958209">I</span>32, I32 | <span data-count="89662">I</span>64, I64 | <span data-count="89342">F</span>32, F32 | <span data-count="89595">F</span>64, F64 -&gt; true
   | <span data-count="43">(</span><span data-count="15">I</span>32 | <span data-count="10">I</span>64 | <span data-count="10">F</span>32 | <span data-count="8">F</span>64), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2635,7 +2635,7 @@ let pp_result_ fmt vt = <span data-count="163">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="163">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="1615823">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="1615821">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="40733">L</span>ist.compare compare_val_type t1 t2
 
@@ -2654,7 +2654,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="1615968">p</span>aram_type_e<span data-count="1615968">q</span> pt1 pt2 &amp;&amp; <span data-count="1615823">r</span>esult_type_eq rt1 rt2
+  <span data-count="1615968">p</span>aram_type_e<span data-count="1615967">q</span> pt1 pt2 &amp;&amp; <span data-count="1615821">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
