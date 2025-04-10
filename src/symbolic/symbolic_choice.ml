@@ -201,7 +201,7 @@ module CoreImpl = struct
     let ( let+ ) = map
   end
 
-  module Make (Thread : Thread.S) : sig
+  module Make (Thread : Thread_intf.S) : sig
     (*
       The core implementation of the monad. It is isolated in a module to restict its exposed interface
       and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch.
@@ -317,7 +317,7 @@ module CoreImpl = struct
     let trap t =
       let* thread in
       let* solver in
-      let pc = Thread.pc thread in
+      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let symbols = Thread.symbols_set thread |> Option.some in
       let model = Solver.model solver ~symbols ~pc in
       State.return (ETrap (t, model))
@@ -330,10 +330,11 @@ end
     We can now use CoreImpl only through its exposed signature which
     maintains all invariants.
   *)
-module Make (Thread : Thread.S) = struct
+module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
   let add_pc (c : Symbolic_value.bool) =
+    let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
     | Val True -> return ()
     | Val False -> stop
@@ -361,22 +362,24 @@ module Make (Thread : Thread.S) = struct
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability =
+  let check_reachability v =
     let* () = yield in
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
-    match Solver.check solver pc with
+    let sliced_pc = Symbolic_path_condition.slice pc v in
+    match Solver.check solver sliced_pc with
     | `Sat -> return ()
-    | `Unsat | `Unknown -> stop
+    | `Unsat -> stop
+    | `Unknown -> assert false
 
   let get_model_or_stop symbol =
     let* () = yield in
     let* solver in
     let+ thread in
-    let pc = Thread.pc thread in
+    let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
     match Solver.check solver pc with
-    | `Unsat | `Unknown -> stop
+    | `Unsat -> stop
     | `Sat -> begin
       let symbols = [ symbol ] |> Option.some in
       let model = Solver.model solver ~symbols ~pc in
@@ -386,6 +389,7 @@ module Make (Thread : Thread.S) = struct
           "Unreachable: The model exists so this symbol should evaluate"
       | Some v -> return v
     end
+    | `Unknown -> assert false
 
   let select_inner ~explore_first (cond : Symbolic_value.bool) =
     let v = Smtml.Expr.simplify cond in
@@ -401,17 +405,18 @@ module Make (Thread : Thread.S) = struct
           lazily (fun () ->
             Stats.event "check true branch reachability" "branches" )
         in
-        let+ () = check_reachability in
+        let+ () = check_reachability v in
         true
       in
       let false_branch =
-        let* () = add_pc (Symbolic_value.Bool.not v) in
+        let v = Symbolic_value.Bool.not v in
+        let* () = add_pc v in
         let* () = add_breadcrumb 0l in
         let* () =
           lazily (fun () ->
             Stats.event "check true branch reachability" "branches" )
         in
-        let+ () = check_reachability in
+        let+ () = check_reachability v in
         false
       in
       if explore_first then choose true_branch false_branch
@@ -483,7 +488,7 @@ module Make (Thread : Thread.S) = struct
       let* thread in
       let* solver in
       let symbols = Thread.symbols_set thread |> Option.some in
-      let pc = Thread.pc thread in
+      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let model = Solver.model ~symbols ~pc solver in
       assertion_fail c model
 end
