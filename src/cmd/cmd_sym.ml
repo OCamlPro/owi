@@ -41,27 +41,37 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
   let c = Interpret.Symbolic.modul link_state.envs m in
   Choice.bind pc (function Error _ as r -> Choice.return r | Ok () -> c)
 
-let print_bug model_output_format no_value no_assert_failure_expression_printing
-    =
+let print_bug model_format model_out_file id no_value no_stop_at_failure
+  no_assert_failure_expression_printing =
   let to_string =
-    match model_output_format with
+    match model_format with
     | Cmd_utils.Json -> Smtml.Model.to_json_string
     | Scfg -> Smtml.Model.to_scfg_string ~no_value
   in
+  let to_file path model =
+    let path =
+      if no_stop_at_failure then Fpath.(path + "_" + string_of_int id) else path
+    in
+    Bos.OS.File.write path (to_string model)
+  in
   function
-  | `ETrap (tr, model) ->
+  | `ETrap (tr, model) -> (
     Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
-    Fmt.pr "%s@\n" (to_string model)
-  | `EAssert (assertion, model) ->
+    match model_out_file with
+    | Some path -> to_file path model
+    | None -> Ok (Fmt.pr "%s@\n" (to_string model)) )
+  | `EAssert (assertion, model) -> (
     if no_assert_failure_expression_printing then begin
       Fmt.pr "Assert failure@\n"
     end
     else begin
       Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
     end;
-    Fmt.pr "%s@\n" (to_string model)
+    match model_out_file with
+    | Some path -> to_file path model
+    | None -> Ok (Fmt.pr "%s@\n" (to_string model)) )
 
-let print_and_count_failures model_output_format no_value
+let print_and_count_failures model_format model_out_file no_value
   no_assert_failure_expression_printing workspace no_stop_at_failure count_acc
   results =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
@@ -76,8 +86,10 @@ let print_and_count_failures model_output_format no_value
       let* model =
         match result with
         | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
-          print_bug model_output_format no_value
-            no_assert_failure_expression_printing bug;
+          let* () =
+            print_bug model_format model_out_file count_acc no_value
+              no_stop_at_failure no_assert_failure_expression_printing bug
+          in
           Ok model
         | `Error e -> Error e
       in
@@ -105,7 +117,7 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_format result =
+  ~workspace ~solver ~model_format ~model_out_file result =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -132,7 +144,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   in
   let results = sort_results deterministic_result_order results in
   let* count =
-    print_and_count_failures model_format no_value
+    print_and_count_failures model_format model_out_file no_value
       no_assert_failure_expression_printing workspace no_stop_at_failure 0
       results
   in
@@ -147,7 +159,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_format ~entry_point ~invoke_with_symbols =
+  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -167,4 +179,4 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure result
+    ~no_stop_at_failure result ~model_out_file

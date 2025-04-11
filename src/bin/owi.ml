@@ -144,6 +144,16 @@ let out_file =
   Arg.(
     value & opt (some path_conv) None & info [ "o"; "output" ] ~docv:"FILE" ~doc )
 
+let model_out_file =
+  let doc =
+    "Output the generated model to FILE. if --no-stop-at-failure is given this \
+     is used as a prefix and the ouputed files would have PREFIX_%d."
+  in
+  Arg.(
+    value
+    & opt (some path_conv) None
+    & info [ "model-out-file" ] ~docv:"FILE" ~doc )
+
 let profile =
   let doc = "Profile file." in
   Arg.(value & opt (some path_conv) None & info [ "profile" ] ~docv:"FILE" ~doc)
@@ -235,13 +245,13 @@ let c_cmd =
   and+ model_format
   and+ invoke_with_symbols
   and+ out_file
+  and+ model_out_file
   and+ entry_point in
   Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
     ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_format ~entry_point
-    ~invoke_with_symbols ~out_file
-
+    ~invoke_with_symbols ~out_file ~model_out_file
 (* owi cpp *)
 
 let cpp_info =
@@ -273,12 +283,13 @@ let cpp_cmd =
   and+ invoke_with_symbols
   and+ out_file
   and+ workspace
+  and+ model_out_file
   and+ entry_point in
   Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_format ~entry_point
-    ~invoke_with_symbols ~out_file ~workspace
+    ~invoke_with_symbols ~out_file ~workspace ~model_out_file
 
 (* owi conc *)
 
@@ -305,12 +316,13 @@ let conc_cmd =
   and+ files
   and+ profile
   and+ model_format
+  and+ model_out_file
   and+ invoke_with_symbols
   and+ entry_point in
   Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols
+    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
 
 (* owi fmt *)
 
@@ -369,11 +381,12 @@ let iso_cmd =
   and+ solver
   and+ unsafe
   and+ workers
+  and+ model_out_file
   and+ workspace in
 
   Cmd_iso.cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
     ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
-    ~unsafe ~workers ~workspace
+    ~unsafe ~workers ~workspace ~model_out_file
 
 (* owi opt *)
 
@@ -463,12 +476,13 @@ let rust_cmd =
   and+ invoke_with_symbols
   and+ out_file
   and+ workspace
+  and+ model_out_file
   and+ entry_point in
   Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
     ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_format ~entry_point
-    ~invoke_with_symbols ~out_file ~workspace
+    ~invoke_with_symbols ~out_file ~workspace ~model_out_file
 
 (* owi script *)
 
@@ -514,11 +528,12 @@ let sym_cmd =
   and+ profile
   and+ model_format
   and+ entry_point
+  and+ model_out_file
   and+ invoke_with_symbols in
   Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols
+    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
 
 (* owi validate *)
 
@@ -607,11 +622,13 @@ let zig_cmd =
   and+ invoke_with_symbols
   and+ out_file
   and+ workspace
+  and+ model_out_file
   and+ entry_point in
   Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
     ~model_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
+    ~model_out_file
 
 (* owi *)
 

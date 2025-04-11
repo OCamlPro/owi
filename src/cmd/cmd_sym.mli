@@ -21,6 +21,7 @@ val handle_result :
   -> workspace:Fpath.t
   -> solver:Smtml.Solver_type.t
   -> model_format:Cmd_utils.model_format
+  -> model_out_file:Fpath.t option
   -> unit Result.t Symbolic_choice_with_memory.t
   -> unit Result.t
 
@@ -44,4 +45,5 @@ val cmd :
   -> model_format:Cmd_utils.model_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
+  -> model_out_file:Fpath.t option
   -> unit Result.t

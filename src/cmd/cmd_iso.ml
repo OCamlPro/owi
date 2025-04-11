@@ -250,7 +250,7 @@ module String_set = Set.Make (String)
 
 let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
   ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
-  ~unsafe ~workers ~workspace =
+  ~unsafe ~workers ~workspace ~model_out_file =
   if debug then Log.debug_on := true;
   let* workspace =
     match workspace with
@@ -356,5 +356,5 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
       Cmd_sym.handle_result ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-        result )
+        ~model_out_file result )
     () common_exports
