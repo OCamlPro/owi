@@ -148,7 +148,7 @@ type thread = unit
 module Choice = Concrete_choice
 
 let select cond ~if_true ~if_false =
-  <span data-count="465">i</span>f cond then <span data-count="237">C</span>hoice.return if_true else <span data-count="228">C</span>hoice.return if_false
+  <span data-count="467">i</span>f cond then <span data-count="238">C</span>hoice.return if_true else <span data-count="229">C</span>hoice.return if_false
 [@@inline]
 
 module Elem = struct
@@ -162,7 +162,7 @@ end
 module Data = struct
   type t = Link_env.data
 
-  let value data = <span data-count="464">d</span>ata.Link_env.value
+  let value data = <span data-count="465">d</span>ata.Link_env.value
 end
 
 module Env = struct
@@ -171,20 +171,20 @@ module Env = struct
   type t = Concrete_extern_func.extern_func Link_env.t
 
   let get_data env n =
-    <span data-count="816">l</span>et data = get_data env n in
-    <span data-count="816">C</span>hoice.return data
+    <span data-count="818">l</span>et data = get_data env n in
+    <span data-count="818">C</span>hoice.return data
 end
 
 module Module_to_run = struct
   (** runnable module *)
   type t = Concrete_extern_func.extern_func Link.module_to_run
 
-  let env (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1231">t</span>.env
+  let env (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1233">t</span>.env
 
-  let id (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1131">t</span>.id
+  let id (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1132">t</span>.id
 
   let to_run (t : Concrete_extern_func.extern_func Link.module_to_run) =
-    <span data-count="2772">t</span>.to_run
+    <span data-count="2773">t</span>.to_run
 end
 </code></pre>
       </div>

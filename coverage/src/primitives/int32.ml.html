@@ -346,7 +346,7 @@
 
 include Prelude.Int32
 
-let clz n = <span data-count="3276">o</span>f_int (Ocaml_intrinsics.Int32.count_leading_zero<span data-count="3276">s</span> n)
+let clz n = <span data-count="3277">o</span>f_int (Ocaml_intrinsics.Int32.count_leading_zero<span data-count="3277">s</span> n)
 
 let ctz n = <span data-count="29">o</span>f_int (Ocaml_intrinsics.Int32.count_trailing_zero<span data-count="29">s</span> n)
 
@@ -361,51 +361,51 @@ let of_int64 = Int64.to_int32
 let to_int64 = Int64.of_int32
 
 (* Unsigned comparison in terms of signed comparison. *)
-let cmp_u x op y = <span data-count="5329403">o</span>p (ad<span data-count="5329403">d</span> x min_int) (ad<span data-count="5329403">d</span> y min_int)
+let cmp_u x op y = <span data-count="5329415">o</span>p (ad<span data-count="5329415">d</span> x min_int) (ad<span data-count="5329415">d</span> y min_int)
 
 let eq (x : int32) y = <span data-count="3691616">e</span>qual x y
 
-let ne (x : int32) y = <span data-count="17263088">c</span>ompar<span data-count="17263093">e</span> x y &lt;&gt; 0
+let ne (x : int32) y = <span data-count="17263092">c</span>ompar<span data-count="17263098">e</span> x y &lt;&gt; 0
 
-let lt (x : int32) y = <span data-count="5896612">c</span>ompar<span data-count="5896612">e</span> x y &lt; 0
+let lt (x : int32) y = <span data-count="5896637">c</span>ompar<span data-count="5896637">e</span> x y &lt; 0
 
-let gt (x : int32) y = <span data-count="6241">c</span>ompar<span data-count="6241">e</span> x y &gt; 0
+let gt (x : int32) y = <span data-count="6250">c</span>ompar<span data-count="6250">e</span> x y &gt; 0
 
 let le (x : int32) y = <span data-count="2638730">c</span>ompar<span data-count="2638730">e</span> x y &lt;= 0
 
-let ge (x : int32) y = <span data-count="879773">c</span>ompar<span data-count="879773">e</span> x y &gt;= 0
+let ge (x : int32) y = <span data-count="879818">c</span>ompar<span data-count="879818">e</span> x y &gt;= 0
 
-let lt_u x y = <span data-count="2057589">c</span>mp_u x lt y
+let lt_u x y = <span data-count="2057600">c</span>mp_u x lt y
 
 let le_u x y = <span data-count="2480160">c</span>mp_u x le y
 
 let gt_u x y = <span data-count="3256">c</span>mp_u x gt y
 
-let ge_u x y = <span data-count="788398">c</span>mp_u x ge y
+let ge_u x y = <span data-count="788399">c</span>mp_u x ge y
 
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
 let sx x =
-  <span data-count="218214">I</span>nt64.to_int32
-  @@ Int64.shift_righ<span data-count="218202">t</span> (Int64.shift_lef<span data-count="218200">t</span> (Int64.of_int3<span data-count="218215">2</span> x) 32) 32
+  <span data-count="218185">I</span>nt64.to_int32
+  @@ Int64.shift_righ<span data-count="218186">t</span> (Int64.shift_lef<span data-count="218187">t</span> (Int64.of_int3<span data-count="218189">2</span> x) 32) 32
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |32|-bits int. *)
-let low_int = shift_lef<span data-count="984">t</span> minus_one 31
+let low_int = shift_lef<span data-count="986">t</span> minus_one 31
 
 (* The largest signed |32|-bits int. *)
-let high_int = logxo<span data-count="984">r</span> low_int minus_one
+let high_int = logxo<span data-count="986">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
-let shift f x y = <span data-count="2825378">f</span> x (to_in<span data-count="2825570">t</span> (logan<span data-count="2825508">d</span> y 31l))
+let shift f x y = <span data-count="2826034">f</span> x (to_in<span data-count="2826122">t</span> (logan<span data-count="2826100">d</span> y 31l))
 
-let shl x y = <span data-count="174655">s</span>x (shif<span data-count="174648">t</span> shift_left x y)
+let shl x y = <span data-count="174624">s</span>x (shif<span data-count="174618">t</span> shift_left x y)
 
-let shr_s x y = <span data-count="2606851">s</span>hift shift_right x y
+let shr_s x y = <span data-count="2607756">s</span>hift shift_right x y
 
-let shr_u x y = <span data-count="43562">s</span>x (shif<span data-count="43562">t</span> shift_right_logical x y)
+let shr_u x y = <span data-count="43563">s</span>x (shif<span data-count="43563">t</span> shift_right_logical x y)
 
 let rotl x y =
   <span data-count="28">l</span>et n = logand y 31l in
@@ -433,9 +433,9 @@ let hex_digit = function
   | <span data-count="316">'</span>A' .. 'F' as c -&gt; 0xa + Char.cod<span data-count="316">e</span> c - Char.cod<span data-count="316">e</span> 'A'
   | <span data-count="0">_</span> -&gt; Log.err "of_string"
 
-let max_upper = unsigned_di<span data-count="984">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="986">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="984">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="986">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="79118">l</span>et sign_bit = logand (of_in<span data-count="79118">t</span> (1 lsl (32 - 1))) i in

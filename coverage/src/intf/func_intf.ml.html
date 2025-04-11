@@ -494,40 +494,40 @@ end = struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : binary val_type =
-    <span data-count="14686">m</span>atch e with
-    | <span data-count="11637">I</span>32 -&gt; Num_type I32
-    | <span data-count="791">I</span>64 -&gt; Num_type I64
-    | <span data-count="1015">F</span>32 -&gt; Num_type F32
-    | <span data-count="1240">F</span>64 -&gt; Num_type F64
+    <span data-count="14776">m</span>atch e with
+    | <span data-count="11721">I</span>32 -&gt; Num_type I32
+    | <span data-count="793">I</span>64 -&gt; Num_type I64
+    | <span data-count="1017">F</span>32 -&gt; Num_type F32
+    | <span data-count="1242">F</span>64 -&gt; Num_type F64
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : binary result_type =
-    <span data-count="12191">m</span>atch r with
-    | <span data-count="5669">R</span>0 -&gt; []
-    | <span data-count="6522">R</span>1 a -&gt; [ elt_typ<span data-count="6522">e</span> a ]
+    <span data-count="12257">m</span>atch r with
+    | <span data-count="5697">R</span>0 -&gt; []
+    | <span data-count="6560">R</span>1 a -&gt; [ elt_typ<span data-count="6560">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
   let rec arg_type : type t r. (t, r) atype -&gt; binary param_type = function
-    | <span data-count="1121">M</span>em tl -&gt; arg_type tl
-    | <span data-count="4942">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="8164">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="8164">e</span> hd) :: arg_typ<span data-count="8164">e</span> tl
+    | <span data-count="1141">M</span>em tl -&gt; arg_type tl
+    | <span data-count="4968">U</span>Arg tl -&gt; arg_type tl
+    | <span data-count="8216">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="8216">e</span> hd) :: arg_typ<span data-count="8216">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="12191">R</span>es -&gt; []
+    | <span data-count="12257">R</span>es -&gt; []
 
   let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
-    <span data-count="12191">(</span>arg_typ<span data-count="12191">e</span> arg, res_typ<span data-count="12191">e</span> res)
+    <span data-count="12257">(</span>arg_typ<span data-count="12257">e</span> arg, res_typ<span data-count="12257">e</span> res)
 
   type nonrec t = t
 
   let fresh =
-    let r = ref ~<span data-count="3936">-</span>1 in
+    let r = ref ~<span data-count="3944">-</span>1 in
     fun () -&gt;
-      <span data-count="15009">i</span>ncr r;
-      <span data-count="15009">!</span>r
+      <span data-count="15019">i</span>ncr r;
+      <span data-count="15019">!</span>r
 
-  let wasm func env : t = <span data-count="15009">W</span>ASM (fres<span data-count="15009">h</span> (), func, env)
+  let wasm func env : t = <span data-count="15019">W</span>ASM (fres<span data-count="15019">h</span> (), func, env)
 end
 </code></pre>
       </div>

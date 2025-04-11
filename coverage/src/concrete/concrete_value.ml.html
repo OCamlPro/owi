@@ -228,9 +228,9 @@ type float64 = Float64.t
 
 let pp_float64 = Float64.pp
 
-let const_i32 x = <span data-count="15172330">x</span>
+let const_i32 x = <span data-count="15172386">x</span>
 
-let const_i64 x = <span data-count="10230916">x</span>
+let const_i64 x = <span data-count="10230924">x</span>
 
 let const_f32 x = <span data-count="115126">x</span>
 
@@ -264,7 +264,7 @@ module Bool = struct
 
   let or_ = ( || )
 
-  let int32 = function <span data-count="1961592">t</span>rue -&gt; 1l | <span data-count="14179068">f</span>alse -&gt; 0l
+  let int32 = function <span data-count="1961597">t</span>rue -&gt; 1l | <span data-count="14179069">f</span>alse -&gt; 0l
 
   let pp = Fmt.bool
 end
@@ -273,7 +273,7 @@ module I32 = struct
   include Int32
   include Convert.Int32
 
-  let to_bool i = <span data-count="16140697">I</span>nt32.ne i 0l
+  let to_bool i = <span data-count="16140699">I</span>nt32.ne i 0l
 
   let eq_const = eq
 end
