@@ -447,7 +447,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
-  ~model_format ~entry_point ~invoke_with_symbols =
+  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -490,6 +490,9 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     else Ok ()
   in
   if print_paths then Fmt.pr "Completed paths: %d@." !count_path;
+  let to_file path assignements =
+    Bos.OS.File.write path (to_string assignements)
+  in
   match result with
   | None ->
     Fmt.pr "All OK@.";
@@ -497,7 +500,11 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
     Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
-    Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments);
+    let* () =
+      match model_out_file with
+      | Some path -> to_file path assignments
+      | None -> Ok (Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments))
+    in
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
@@ -509,6 +516,10 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
       (* TODO: print the assert failure expression ! *)
       Fmt.pr "Assert failure@\n"
     end;
-    Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments);
+    let* () =
+      match model_out_file with
+      | Some path -> to_file path assignments
+      | None -> Ok (Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments))
+    in
     let* () = testcase assignments in
     Error (`Found_bug 1)

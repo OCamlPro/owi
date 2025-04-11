@@ -46,7 +46,7 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_format ~entry_point ~invoke_with_symbols ~out_file
-  ~(workspace : Fpath.t option) : unit Result.t =
+  ~(workspace : Fpath.t option) ~model_out_file : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -63,4 +63,4 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols
+    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file

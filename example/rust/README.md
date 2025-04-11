@@ -86,6 +86,11 @@ OPTIONS
        --model-format=VAL (absent=scfg)
             The format of the model ("json" or "scfg")
 
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
 

@@ -8,6 +8,7 @@
   assert_false.wat
   assert_false.scfg
   missing_replay_file.wat
+  model_out_file.wat
   no_bug.scfg
   no_bug.wat
   range.scfg

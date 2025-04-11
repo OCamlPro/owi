@@ -11,4 +11,5 @@ val cmd :
   -> unsafe:bool
   -> workers:int
   -> workspace:Fpath.t option
+  -> model_out_file:Fpath.t option
   -> unit Result.t
