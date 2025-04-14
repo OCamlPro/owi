@@ -12,4 +12,5 @@
   klee_compat.c
   main.c
   malloc_aligned.c
+  malloc_zero.c
   range.c))

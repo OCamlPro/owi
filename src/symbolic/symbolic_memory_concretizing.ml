@@ -138,18 +138,20 @@ module Backend = struct
     | Ptr { base; _ } -> return base
     | _ ->
       Log.debug2 {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v;
-      let* () = add_pc @@ Smtml.Expr.value False in
       assert false
 
   let free m p =
     let open Symbolic_choice_without_memory in
-    let* base = ptr p in
-    if not @@ Map.mem base m.chunks then trap Trap.Double_free
-    else begin
-      let chunks = Map.remove base m.chunks in
-      m.chunks <- chunks;
-      return (Symbolic_value.const_i32 base)
-    end
+    match Smtml.Expr.view p with
+    | Val (Num (I32 0l)) -> return (Symbolic_value.const_i32 0l)
+    | _ ->
+      let* base = ptr p in
+      if not @@ Map.mem base m.chunks then trap Trap.Double_free
+      else begin
+        let chunks = Map.remove base m.chunks in
+        m.chunks <- chunks;
+        return (Symbolic_value.const_i32 base)
+      end
 
   let realloc m ~ptr ~size =
     let open Symbolic_choice_without_memory in
