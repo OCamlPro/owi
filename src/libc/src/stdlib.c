@@ -23,6 +23,9 @@ unsigned int bump_pointer = &__heap_base;
 
 void *malloc(size_t size) {
   if (size == 0) {
+    // TODO: this could also be a proper *unique* pointer
+    // that is, calling malloc(0) two times, and freeing the two pointers should not lead to a double free
+    // see issue# 602 and the test added in #604 whose result should change once this is added
     return NULL;
   }
   unsigned int start = bump_pointer;

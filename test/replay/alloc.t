@@ -89,22 +89,38 @@
   running instr: call 5
   calling func : func anonymous
   stack        : [  ]
+  running instr: (block
+    local.get 0
+    br_if 0
+    i32.const 0
+    return)
+  stack        : [  ]
+  running instr: local.get 0
+  stack        : [ i32.const 9 ]
+  running instr: br_if 0
+  stack        : [  ]
   running instr: i32.const 0
   stack        : [ i32.const 0 ]
-  running instr: i32.const -2147483648
-  stack        : [ i32.const -2147483648 ; i32.const 0 ]
+  running instr: i32.const 1
+  stack        : [ i32.const 1 ; i32.const 0 ]
   running instr: local.get 0
-  stack        : [ i32.const 9 ; i32.const -2147483648 ; i32.const 0 ]
+  stack        : [ i32.const 9 ; i32.const 1 ; i32.const 0 ]
   running instr: i32.clz
-  stack        : [ i32.const 28 ; i32.const -2147483648 ; i32.const 0 ]
-  running instr: i32.shr_u
+  stack        : [ i32.const 28 ; i32.const 1 ; i32.const 0 ]
+  running instr: i32.const 31
+  stack        : [ i32.const 31 ; i32.const 28 ; i32.const 1 ; i32.const 0 ]
+  running instr: i32.xor
+  stack        : [ i32.const 3 ; i32.const 1 ; i32.const 0 ]
+  running instr: local.tee 1
+  stack        : [ i32.const 3 ; i32.const 1 ; i32.const 0 ]
+  running instr: i32.shl
   stack        : [ i32.const 8 ; i32.const 0 ]
   running instr: i32.const 16
   stack        : [ i32.const 16 ; i32.const 8 ; i32.const 0 ]
-  running instr: local.get 0
-  stack        : [ i32.const 9 ; i32.const 16 ; i32.const 8 ; i32.const 0 ]
-  running instr: i32.const 32
-  stack        : [ i32.const 32 ; i32.const 9 ; i32.const 16 ; i32.const 8 ; i32.const 0 ]
+  running instr: local.get 1
+  stack        : [ i32.const 3 ; i32.const 16 ; i32.const 8 ; i32.const 0 ]
+  running instr: i32.const 5
+  stack        : [ i32.const 5 ; i32.const 3 ; i32.const 16 ; i32.const 8 ; i32.const 0 ]
   running instr: i32.lt_u
   stack        : [ i32.const 1 ; i32.const 16 ; i32.const 8 ; i32.const 0 ]
   running instr: select
