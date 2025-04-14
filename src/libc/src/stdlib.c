@@ -22,6 +22,9 @@ extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;
 
 void *malloc(size_t size) {
+  if (size == 0) {
+    return NULL;
+  }
   unsigned int start = bump_pointer;
   unsigned int closest_pow2 = 1 << (sizeof(size_t)*8 - (__builtin_clz(size) + 1));
   unsigned int align = (closest_pow2 <= 16) ? closest_pow2 : 16;
