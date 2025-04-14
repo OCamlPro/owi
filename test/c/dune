@@ -5,10 +5,11 @@
   bool.c
   char.c
   concolic.c
+  double_free.c
   entry_point.c
   exit.c
+  invoke_with_symbols.c
   klee_compat.c
   main.c
   malloc_aligned.c
-  range.c
-  invoke_with_symbols.c))
+  range.c))

@@ -16,5 +16,6 @@ type t =
   | Extern_call_null_arg
   | Memory_leak_use_after_free
   | Memory_heap_buffer_overflow
+  | Double_free
 
 val to_string : t -> string
