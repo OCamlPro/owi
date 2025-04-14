@@ -143,12 +143,12 @@ module Backend = struct
 
   let free m p =
     let open Symbolic_choice_without_memory in
-    let+ base = ptr p in
-    if not @@ Map.mem base m.chunks then Fmt.failwith "Memory leak double free"
+    let* base = ptr p in
+    if not @@ Map.mem base m.chunks then trap Trap.Double_free
     else begin
       let chunks = Map.remove base m.chunks in
       m.chunks <- chunks;
-      Symbolic_value.const_i32 base
+      return (Symbolic_value.const_i32 base)
     end
 
   let realloc m ~ptr ~size =

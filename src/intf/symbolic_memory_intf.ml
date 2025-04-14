@@ -53,8 +53,7 @@ module type S = sig
     -> size:Smtml.Expr.t
     -> Smtml.Expr.t Symbolic_choice_without_memory.t
 
-  val free :
-    t -> Smtml.Expr.t -> Symbolic_value.int32 Symbolic_choice_without_memory.t
+  val free : t -> Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice_without_memory.t
 
   val load_8_s :
     t -> Smtml.Expr.t -> Symbolic_value.int32 Symbolic_choice_without_memory.t
