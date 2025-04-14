@@ -48,6 +48,8 @@ module type S0 = sig
   val in_replay_mode : unit -> Value.int32 t
 
   val print_char : Value.int32 -> unit t
+
+  val label : memory -> Value.int32 -> Value.int32 -> unit t
 end
 
 module type S = sig

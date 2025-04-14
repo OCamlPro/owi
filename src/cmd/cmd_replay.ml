@@ -100,6 +100,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     let print_char c = Fmt.pr "%c" (char_of_int (Int32.to_int c))
 
     let in_replay_mode () = 1l
+
+    let label _ id _ = Fmt.pr "reached %ld@." id
   end in
   let replay_extern_module =
     let open M in
@@ -140,6 +142,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       ; ( "print_char"
         , Concrete_extern_func.Extern_func
             (Func (Arg (I32, Res), R0), print_char) )
+      ; ( "label"
+        , Concrete_extern_func.Extern_func
+            (Func (Mem (Arg (I32, Arg (I32, Res))), R0), label) )
       ]
     in
     { Link.functions }

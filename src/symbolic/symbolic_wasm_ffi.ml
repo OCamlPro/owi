@@ -69,6 +69,34 @@ module M :
       Fmt.pr "%c@?" (char_of_int (Int32.to_int c));
       Choice.return ()
     | _ -> assert false
+
+  let label m (id : Value.int32) (str_ptr : Value.int32) =
+    let open Choice in
+    let rec make_str accu i =
+      let* p = Memory.load_8_u m (Expr.value (Num (I32 i))) in
+      match Smtml.Expr.view p with
+      | Val (Num (I32 c)) ->
+        let int = Int32.to_int c in
+        if int > 255 || int < 0 then assert false
+        else
+          let ch = char_of_int int in
+          if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+          else make_str (ch :: accu) (Int32.add i (Int32.of_int 1))
+      | _ -> assert false
+    in
+    let ptr =
+      match Smtml.Expr.view str_ptr with
+      | Val (Num (I32 n)) -> n
+      | _ -> assert false
+    in
+    let* chars = make_str [] ptr in
+    let str = String.init (Array.length chars) (Array.get chars) in
+
+    match Smtml.Expr.view id with
+    | Val (Num (I32 c)) ->
+      let* () = add_label (Int32.to_int c, str) in
+      return ()
+    | _ -> assert false
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -110,6 +138,9 @@ let symbolic_extern_module =
     ; ( "print_char"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
       )
+    ; ( "label"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Mem (Arg (I32, Arg (I32, Res))), R0), label) )
     ]
   in
   { Link.functions }

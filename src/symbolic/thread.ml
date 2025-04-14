@@ -18,10 +18,11 @@ module Make (Symbolic_memory : M) :
         (** Breadcrumbs represent the list of choices that were made so far.
             They identify one given symbolic execution trace. *)
     ; breadcrumbs : int32 list
+    ; labels : (int * string) list
     }
 
-  let create symbols symbol_set pc memories tables globals breadcrumbs =
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  let create symbols symbol_set pc memories tables globals breadcrumbs labels =
+    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
 
   let init () =
     let symbols = 0 in
@@ -31,7 +32,8 @@ module Make (Symbolic_memory : M) :
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
-    create symbols symbol_set pc memories tables globals breadcrumbs
+    let labels = [] in
+    create symbols symbol_set pc memories tables globals breadcrumbs labels
 
   let symbols t = t.symbols
 
@@ -47,6 +49,8 @@ module Make (Symbolic_memory : M) :
 
   let breadcrumbs t = t.breadcrumbs
 
+  let labels t = t.labels
+
   let add_symbol t s = { t with symbol_set = s :: t.symbol_set }
 
   let add_pc t c = { t with pc = c :: t.pc }
@@ -55,10 +59,13 @@ module Make (Symbolic_memory : M) :
 
   let incr_symbols t = { t with symbols = succ t.symbols }
 
-  let clone { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+  let add_label t label = { t with labels = label :: t.labels }
+
+  let clone
+    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
       =
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs }
+    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
 end

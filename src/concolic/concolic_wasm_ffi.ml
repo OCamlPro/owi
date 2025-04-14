@@ -143,6 +143,10 @@ module M :
 
   let print_char ((c, _s) : Value.int32) =
     Concolic_choice.return @@ Fmt.pr "%c" (char_of_int (Int32.to_int c))
+
+  let label _ _ _ =
+    Fmt.epr "Not implemented@.\n";
+    assert false
 end
 
 type extern_func = Concolic.Extern_func.extern_func
