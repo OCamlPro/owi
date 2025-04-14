@@ -12,4 +12,5 @@ val cmd :
   -> workers:int
   -> workspace:Fpath.t option
   -> model_out_file:Fpath.t option
+  -> with_breadcrumbs:bool
   -> unit Result.t

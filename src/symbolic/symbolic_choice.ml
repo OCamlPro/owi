@@ -222,7 +222,8 @@ module CoreImpl = struct
 
     val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
-    val assertion_fail : Smtml.Expr.t -> Smtml.Model.t -> 'a t
+    val assertion_fail :
+      Smtml.Expr.t -> Smtml.Model.t -> (int * string) list -> int32 list -> 'a t
 
     val stop : 'a t
 
@@ -320,9 +321,12 @@ module CoreImpl = struct
       let pc = Thread.pc thread in
       let symbols = Thread.symbols_set thread |> Option.some in
       let model = Solver.model solver ~symbols ~pc in
-      State.return (ETrap (t, model))
+      let labels = Thread.labels thread in
+      let breadcrumbs = Thread.breadcrumbs thread in
+      State.return (ETrap (t, model, labels, breadcrumbs))
 
-    let assertion_fail c model = State.return (EAssert (c, model))
+    let assertion_fail c model labels bcrumbs =
+      State.return (EAssert (c, model, labels, bcrumbs))
   end
 end
 
@@ -345,6 +349,8 @@ module Make (Thread : Thread.S) = struct
 
   let add_breadcrumb crumb =
     modify_thread (fun t -> Thread.add_breadcrumb t crumb)
+
+  let add_label label = modify_thread (fun t -> Thread.add_label t label)
 
   let with_new_symbol ty f =
     let* thread in
@@ -485,5 +491,7 @@ module Make (Thread : Thread.S) = struct
       let symbols = Thread.symbols_set thread |> Option.some in
       let pc = Thread.pc thread in
       let model = Solver.model ~symbols ~pc solver in
-      assertion_fail c model
+      let breadcrumbs = Thread.breadcrumbs thread in
+      let labels = Thread.labels thread in
+      assertion_fail c model labels breadcrumbs
 end

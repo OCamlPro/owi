@@ -4,8 +4,8 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of Trap.t * Smtml.Model.t
-  | EAssert of Smtml.Expr.t * Smtml.Model.t
+  | ETrap of Trap.t * Smtml.Model.t * (int * string) list * int32 list
+  | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * int32 list
 
 module type S = sig
   module V : Func_intf.Value_types
@@ -43,6 +43,8 @@ module type S = sig
   val thread : thread t
 
   val add_pc : V.bool -> unit t
+
+  val add_label : int * string -> unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 

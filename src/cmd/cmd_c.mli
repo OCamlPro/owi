@@ -29,4 +29,5 @@ val cmd :
   -> invoke_with_symbols:bool
   -> out_file:Fpath.t option
   -> model_out_file:Fpath.t option
+  -> with_breadcrumbs:bool
   -> unit Result.t

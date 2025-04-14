@@ -25,6 +25,7 @@ module type S = sig
     -> Symbolic_table.collection
     -> Symbolic_global.collection
     -> int32 list
+    -> (int * string) list
     -> t
 
   val pc : t -> Symbolic_value.bool list
@@ -41,6 +42,8 @@ module type S = sig
 
   val symbols : t -> int
 
+  val labels : t -> (int * string) list
+
   val clone : t -> t
 
   val add_pc : t -> Symbolic_value.bool -> t
@@ -48,6 +51,8 @@ module type S = sig
   val add_breadcrumb : t -> int32 -> t
 
   val add_symbol : t -> Smtml.Symbol.t -> t
+
+  val add_label : t -> int * string -> t
 
   val incr_symbols : t -> t
 end

@@ -13,8 +13,9 @@ let project (th : t) : Thread_without_memory.t * _ =
     let tables = tables th in
     let globals = globals th in
     let breadcrumbs = breadcrumbs th in
+    let labels = labels th in
     Thread_without_memory.create symbols symbols_set pc memories tables globals
-      breadcrumbs
+      breadcrumbs labels
   in
   let backup = memories th in
   (projected, backup)
@@ -31,4 +32,5 @@ let restore backup th =
   let tables = Thread_without_memory.tables th in
   let globals = Thread_without_memory.globals th in
   let breadcrumbs = Thread_without_memory.breadcrumbs th in
-  create symbols symbols_set pc memories tables globals breadcrumbs
+  let labels = Thread_without_memory.labels th in
+  create symbols symbols_set pc memories tables globals breadcrumbs labels

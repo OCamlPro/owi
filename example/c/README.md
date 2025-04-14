@@ -523,6 +523,9 @@ OPTIONS
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
        --workspace=DIR
            write results and intermediate compilation artifacts to dir
 

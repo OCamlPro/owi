@@ -41,26 +41,66 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
   let c = Interpret.Symbolic.modul link_state.envs m in
   Choice.bind pc (function Error _ as r -> Choice.return r | Ok () -> c)
 
-let print_bug model_format model_out_file id no_value no_stop_at_failure
-  no_assert_failure_expression_printing =
-  let to_string =
+let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
+  ~no_stop_at_failure ~no_assert_failure_expression_printing ~breadcrumbs
+  ~with_breadcrumbs =
+  let to_string model labels =
     match model_format with
-    | Cmd_utils.Json -> Smtml.Model.to_json_string
-    | Scfg -> Smtml.Model.to_scfg_string ~no_value
+    | Cmd_utils.Json ->
+      let json = Smtml.Model.to_json model in
+      let labels_json =
+        `List
+          (List.map
+             (fun (id, name) ->
+               `Assoc [ ("id", `Int id); ("name", `String name) ] )
+             labels )
+      in
+      let json =
+        match json with
+        | `Assoc fields -> `Assoc (("labels", labels_json) :: fields)
+        | _ -> json
+      in
+      Yojson.to_string json
+    | Scfg ->
+      let scfg = Smtml.Model.to_scfg ~no_value model in
+      let model = Scfg.Query.get_dir_exn "model" scfg in
+      let lbls =
+        List.map
+          (fun (id, lbl_name) ->
+            { Scfg.Types.name = "label"
+            ; params = [ string_of_int id; lbl_name ]
+            ; children = []
+            } )
+          labels
+      in
+      let children =
+        if with_breadcrumbs then
+          let bcrumbs =
+            [ { Scfg.Types.name = "breadcrumbs"
+              ; params =
+                  List.map (fun i -> Fmt.str "%ld" i) (List.rev breadcrumbs)
+              ; children = []
+              }
+            ]
+          in
+          model.children @ lbls @ bcrumbs
+        else model.children @ lbls
+      in
+      Fmt.str "%a" Scfg.Pp.directive { model with children }
   in
   let to_file path model =
     let path =
       if no_stop_at_failure then Fpath.(path + "_" + string_of_int id) else path
     in
-    Bos.OS.File.write path (to_string model)
+    Bos.OS.File.write path (to_string model labels)
   in
   function
-  | `ETrap (tr, model) -> (
+  | `ETrap (tr, model, _, _) -> (
     Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
     match model_out_file with
     | Some path -> to_file path model
-    | None -> Ok (Fmt.pr "%s@\n" (to_string model)) )
-  | `EAssert (assertion, model) -> (
+    | None -> Ok (Fmt.pr "%s@\n" (to_string model labels)) )
+  | `EAssert (assertion, model, _, _) -> (
     if no_assert_failure_expression_printing then begin
       Fmt.pr "Assert failure@\n"
     end
@@ -69,11 +109,11 @@ let print_bug model_format model_out_file id no_value no_stop_at_failure
     end;
     match model_out_file with
     | Some path -> to_file path model
-    | None -> Ok (Fmt.pr "%s@\n" (to_string model)) )
+    | None -> Ok (Fmt.pr "%s@\n" (to_string model labels)) )
 
-let print_and_count_failures model_format model_out_file no_value
-  no_assert_failure_expression_printing workspace no_stop_at_failure count_acc
-  results =
+let print_and_count_failures ~model_format ~model_out_file ~no_value
+  ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
+  ~count_acc ~results ~with_breadcrumbs =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
@@ -85,10 +125,12 @@ let print_and_count_failures model_format model_out_file no_value
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
         match result with
-        | (`EAssert (_, model) | `ETrap (_, model)) as bug ->
+        | ( `EAssert (_, model, labels, breadcrumbs)
+          | `ETrap (_, model, labels, breadcrumbs) ) as bug ->
           let* () =
-            print_bug model_format model_out_file count_acc no_value
-              no_stop_at_failure no_assert_failure_expression_printing bug
+            print_bug ~model_format ~labels ~model_out_file ~id:count_acc
+              ~no_value ~no_stop_at_failure ~breadcrumbs
+              ~no_assert_failure_expression_printing ~with_breadcrumbs bug
           in
           Ok model
         | `Error e -> Error e
@@ -117,7 +159,7 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_format ~model_out_file result =
+  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs result =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -127,10 +169,10 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
     match (fail_mode, v) with
     | _, (EVal (Ok ()), _) -> ()
     | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
-    | (Both | Trap_only), (ETrap (t, m), thread) ->
-      Wq.push (`ETrap (t, m), thread) res_queue
-    | (Both | Assertion_only), (EAssert (e, m), thread) ->
-      Wq.push (`EAssert (e, m), thread) res_queue
+    | (Both | Trap_only), (ETrap (t, m, labels, breadcrumbs), thread) ->
+      Wq.push (`ETrap (t, m, labels, breadcrumbs), thread) res_queue
+    | (Both | Assertion_only), (EAssert (e, m, labels, breadcrumbs), thread) ->
+      Wq.push (`EAssert (e, m, labels, breadcrumbs), thread) res_queue
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =
@@ -144,9 +186,9 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   in
   let results = sort_results deterministic_result_order results in
   let* count =
-    print_and_count_failures model_format model_out_file no_value
-      no_assert_failure_expression_printing workspace no_stop_at_failure 0
-      results
+    print_and_count_failures ~model_format ~model_out_file ~no_value
+      ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
+      ~count_acc:0 ~results ~with_breadcrumbs
   in
   if print_paths then Fmt.pr "Completed paths: %d@." (Atomic.get path_count);
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
@@ -159,7 +201,8 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file =
+  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
+  ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -179,4 +222,4 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure result ~model_out_file
+    ~no_stop_at_failure result ~model_out_file ~with_breadcrumbs

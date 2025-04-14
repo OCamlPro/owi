@@ -6,6 +6,7 @@
   add_f32.wat
   add_f64.wat
   assume.wat
+  breadcrumbs.wat
   copysign_f32.wat
   copysign_f64.wat
   div_i32.wat

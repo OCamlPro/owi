@@ -34,6 +34,8 @@
 - add `owi iso` subcommand
 - add `--workspace` option
 - add `--model-out-file` option
+- add `owi_label` primitive
+- add `--with-breadcrumbs` option
 
 ## 0.2 - 2024-04-24
 

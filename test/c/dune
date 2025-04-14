@@ -10,6 +10,7 @@
   exit.c
   invoke_with_symbols.c
   klee_compat.c
+  label.c
   main.c
   malloc_aligned.c
   malloc_zero.c
