@@ -509,15 +509,15 @@ open Syntax
 
 let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     =
-  <span data-count="9">l</span>et next =
-    let next = ref ~<span data-count="9">-</span>1 in
+  <span data-count="10">l</span>et next =
+    let next = ref ~<span data-count="10">-</span>1 in
     fun () -&gt;
-      <span data-count="12">i</span>ncr next;
-      <span data-count="12">!</span>next
+      <span data-count="13">i</span>ncr next;
+      <span data-count="13">!</span>next
   in
-  let brk = ref @@ Int32.of_in<span data-count="9">t</span> 0 in
+  let brk = ref @@ Int32.of_in<span data-count="10">t</span> 0 in
 
-  <span data-count="9">l</span>et module M :
+  <span data-count="10">l</span>et module M :
     Wasm_ffi_intf.S0
       with type 'a t = 'a
        and type memory = Concrete_memory.t
@@ -531,9 +531,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     let assume _ = <span data-count="3">(</span>)
 
     let assert' n =
-      <span data-count="6">i</span>f Prelude.Int32.equal n 0l then <span data-count="3">b</span>egin
+      <span data-count="7">i</span>f Prelude.Int32.equal n 0l then <span data-count="4">b</span>egin
         Fmt.epr "Assertion failure was correctly reached\n";
-        <span data-count="3">e</span>xit 0
+        <span data-count="4">e</span>xit 0
       end
 
     let symbol_i32 () =
@@ -594,8 +594,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
         <span data-count="0">a</span>ssert false
 
     let symbol_range _ _ =
-      <span data-count="2">m</span>atch model.(nex<span data-count="2">t</span> ()) with
-      | <span data-count="2">V</span>.I32 n -&gt; n
+      <span data-count="3">m</span>atch model.(nex<span data-count="3">t</span> ()) with
+      | <span data-count="3">V</span>.I32 n -&gt; n
       | <span data-count="0">v</span> -&gt;
         Fmt.epr "Got value %a but expected a i32 value." V.pp v;
         <span data-count="0">a</span>ssert false
@@ -668,44 +668,44 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let link_state =
     Link.extern_module Link.empty_state ~name:"symbolic" replay_extern_module
   in
-  <span data-count="9">l</span>et link_state =
+  <span data-count="10">l</span>et link_state =
     Link.extern_module link_state ~name:"summaries" summaries_extern_module
   in
 
-  <span data-count="9">l</span>et* m =
-    Compile.File.until_binary_validat<span data-count="9">e</span> ~rac:false ~srac:false ~unsafe filename
+  <span data-count="10">l</span>et* m =
+    Compile.File.until_binary_validat<span data-count="10">e</span> ~rac:false ~srac:false ~unsafe filename
   in
-  <span data-count="9">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="9">t</span> entry_point invoke_with_symbols m in
-  <span data-count="9">l</span>et* m, link_state =
-    Compile.Binary.until_lin<span data-count="9">k</span> ~unsafe link_state ~optimize ~name:None m
+  <span data-count="10">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="10">t</span> entry_point invoke_with_symbols m in
+  <span data-count="10">l</span>et* m, link_state =
+    Compile.Binary.until_lin<span data-count="10">k</span> ~unsafe link_state ~optimize ~name:None m
   in
-  <span data-count="9">l</span>et c = Interpret.Concrete.modul link_state.envs m in
+  <span data-count="10">l</span>et c = Interpret.Concrete.modul link_state.envs m in
   <span data-count="6">c</span>
 
 let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
   ~entry_point ~invoke_with_symbols =
-  <span data-count="9">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="9">i</span>f debug then <span data-count="6">L</span>og.debug_on := true;
-  <span data-count="9">l</span>et* parse_fn =
+  <span data-count="10">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="10">i</span>f debug then <span data-count="6">L</span>og.debug_on := true;
+  <span data-count="10">l</span>et* parse_fn =
     let ext = Fpath.get_ext replay_file in
-    <span data-count="9">m</span>atch String.lowercase_ascii ext with
+    <span data-count="10">m</span>atch String.lowercase_ascii ext with
     | <span data-count="0">"</span>.json" -&gt; Ok Smtml.Model.Parse.Json.from_file
-    | <span data-count="9">"</span>.scfg" -&gt; Ok Smtml.Model.Parse.Scfg.from_file
+    | <span data-count="10">"</span>.scfg" -&gt; Ok Smtml.Model.Parse.Scfg.from_file
     | <span data-count="0">_</span> -&gt; Error (`Unsupported_file_extension ext)
   in
-  <span data-count="9">l</span>et* model =
+  <span data-count="10">l</span>et* model =
     match parse_fn replay_file with
     | <span data-count="0">E</span>rror (`Msg msg) -&gt; Error (`Invalid_model msg)
-    | <span data-count="9">O</span>k model -&gt;
+    | <span data-count="10">O</span>k model -&gt;
       let bindings = Smtml.Model.get_bindings model in
-      <span data-count="9">l</span>et+ model =
-        list_ma<span data-count="9">p</span>
+      <span data-count="10">l</span>et+ model =
+        list_ma<span data-count="10">p</span>
           (fun (_sym, v) -&gt;
-            <span data-count="12">m</span>atch v with
+            <span data-count="13">m</span>atch v with
             | <span data-count="0">S</span>mtml.Value.False -&gt; Ok (V.I32 0l)
             | <span data-count="0">T</span>rue -&gt; Ok (V.I32 1l)
             | <span data-count="0">N</span>um (I8 n) -&gt; Ok (V.I32 (Int32.of_in<span data-count="0">t</span> n))
-            | <span data-count="9">N</span>um (I32 n) -&gt; Ok (V.I32 n)
+            | <span data-count="10">N</span>um (I32 n) -&gt; Ok (V.I32 n)
             | <span data-count="1">N</span>um (I64 n) -&gt; Ok (V.I64 n)
             | <span data-count="1">N</span>um (F32 n) -&gt; Ok (V.F32 (Float32.of_bit<span data-count="1">s</span> n))
             | <span data-count="1">N</span>um (F64 n) -&gt; Ok (V.F64 (Float64.of_bit<span data-count="1">s</span> n))
@@ -715,9 +715,9 @@ let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
                    (Fmt.st<span data-count="0">r</span> "unexpected value type: %a" Smtml.Value.pp v) ) )
           bindings
       in
-      <span data-count="9">A</span>rray.of_list model
+      <span data-count="10">A</span>rray.of_list model
   in
-  <span data-count="9">l</span>et+ () =
+  <span data-count="10">l</span>et+ () =
     run_fil<span data-count="6">e</span> ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
       model
   in
