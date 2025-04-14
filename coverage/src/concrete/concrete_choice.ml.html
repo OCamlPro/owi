@@ -89,20 +89,20 @@
 
 type 'a t = 'a
 
-let return x = <span data-count="157408758">x</span> [@@inline]
+let return x = <span data-count="157408767">x</span> [@@inline]
 
-let bind x f = <span data-count="185708030">f</span> x [@@inline]
+let bind x f = <span data-count="185708040">f</span> x [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="13520005">l</span>et* v in
-  <span data-count="13520005">r</span>eturn (<span data-count="13520005">f</span> v)
+  <span data-count="13520006">l</span>et* v in
+  <span data-count="13520006">r</span>eturn (<span data-count="13520006">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
 
-let select b = <span data-count="19577427">b</span> [@@inline]
+let select b = <span data-count="19577428">b</span> [@@inline]
 
 let select_i32 i = <span data-count="1609080">i</span> [@@inline]
 

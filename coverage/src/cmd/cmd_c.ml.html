@@ -431,7 +431,7 @@ type metadata =
 
 let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
   Fpath.t list Result.t =
-  <span data-count="365">i</span>f eacsl then
+  <span data-count="370">i</span>f eacsl then
     <span data-count="25">l</span>et flags1 =
       let includes =
         String.concat " "
@@ -485,16 +485,16 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     in
 
     <span data-count="20">o</span>uts
-  else <span data-count="340">O</span>k files
+  else <span data-count="345">O</span>k files
 
 let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
   (files : Fpath.t list) : Fpath.t Result.t =
-  <span data-count="360">l</span>et flags =
+  <span data-count="365">l</span>et flags =
     let stack_size = 8 * 1024 * 1024 |&gt; string_of_int in
-    <span data-count="360">l</span>et includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="360">p</span> Fpath.to_string includes) in
-    <span data-count="360">C</span>md.(
-      of_lis<span data-count="360">t</span>
-        [ Fmt.st<span data-count="360">r</span> "-O%s" opt_lvl
+    <span data-count="365">l</span>et includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="365">p</span> Fpath.to_string includes) in
+    <span data-count="365">C</span>md.(
+      of_lis<span data-count="365">t</span>
+        [ Fmt.st<span data-count="365">r</span> "-O%s" opt_lvl
         ; "--target=wasm32"
         ; "-m32"
         ; "-ffreestanding"
@@ -502,107 +502,107 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
         ; "-Wno-everything"
         ; "-flto=thin"
         ; (* LINKER FLAGS: *)
-          Fmt.st<span data-count="360">r</span> "-Wl,--entry=%s" entry_point
-        ; Fmt.st<span data-count="360">r</span> "-Wl,--export=%s" entry_point
+          Fmt.st<span data-count="365">r</span> "-Wl,--entry=%s" entry_point
+        ; Fmt.st<span data-count="365">r</span> "-Wl,--export=%s" entry_point
           (* TODO: allow this behind a flag, this is slooooow *)
         ; "-Wl,--lto-O0"
-        ; Fmt.st<span data-count="360">r</span> "-Wl,-z,stack-size=%s" stack_size
+        ; Fmt.st<span data-count="365">r</span> "-Wl,-z,stack-size=%s" stack_size
         ]
-      %<span data-count="360">%</span> includes )
+      %<span data-count="365">%</span> includes )
   in
 
-  let* clang_bin = OS.Cmd.resolv<span data-count="360">e</span> @@ Cmd.<span data-count="360">v</span> "clang" in
+  let* clang_bin = OS.Cmd.resolv<span data-count="365">e</span> @@ Cmd.<span data-count="365">v</span> "clang" in
 
-  <span data-count="360">l</span>et out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
-  <span data-count="360">l</span>et* libc = Cmd_utils.find_installed_c_fil<span data-count="360">e</span> (Fpath.<span data-count="360">v</span> "libc.wasm") in
+  <span data-count="365">l</span>et out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
+  <span data-count="365">l</span>et* libc = Cmd_utils.find_installed_c_fil<span data-count="365">e</span> (Fpath.<span data-count="365">v</span> "libc.wasm") in
 
-  <span data-count="360">l</span>et files = Cmd.of_list (List.ma<span data-count="360">p</span> Fpath.to_string (libc :: files)) in
-  <span data-count="360">l</span>et clang : Cmd.t = Cmd.(clang_bin %<span data-count="360">%</span> flags <span data-count="360">%</span> "-o" <span data-count="360">%</span> <span data-count="360">p</span> out %<span data-count="360">%</span> files) in
+  <span data-count="365">l</span>et files = Cmd.of_list (List.ma<span data-count="365">p</span> Fpath.to_string (libc :: files)) in
+  <span data-count="365">l</span>et clang : Cmd.t = Cmd.(clang_bin %<span data-count="365">%</span> flags <span data-count="365">%</span> "-o" <span data-count="365">%</span> <span data-count="365">p</span> out %<span data-count="365">%</span> files) in
 
   let+ () =
     match
       OS.Cmd.run
-        ~err:(if debug then <span data-count="0">O</span>S.Cmd.err_run_out else <span data-count="360">O</span>S.Cmd.err_null)
+        ~err:(if debug then <span data-count="0">O</span>S.Cmd.err_run_out else <span data-count="365">O</span>S.Cmd.err_null)
         clang
     with
-    | <span data-count="357">O</span>k _ as v -&gt; v
+    | <span data-count="362">O</span>k _ as v -&gt; v
     | <span data-count="3">E</span>rror (`Msg e) -&gt;
       Fmt.error_ms<span data-count="3">g</span> "clang failed: %s"
         (if debug then <span data-count="0">e</span> else <span data-count="3">"</span>run with --debug to get the full error message")
   in
 
-  <span data-count="357">o</span>ut
+  <span data-count="362">o</span>ut
 
 let pp_tm fmt Unix.{ tm_year; tm_mon; tm_mday; tm_hour; tm_min; tm_sec; _ } :
   unit =
-  <span data-count="357">F</span>mt.pf fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
+  <span data-count="362">F</span>mt.pf fmt "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm_year + 1900) tm_mon tm_mday
     tm_hour tm_min tm_sec
 
 let metadata ~workspace arch property files : unit Result.t =
-  <span data-count="357">l</span>et out_metadata chan { arch; property; files } =
-    <span data-count="357">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
-    <span data-count="357">l</span>et tag n = <span data-count="3213">(</span>("", n), []) in
-    let el n d = <span data-count="2856">`</span>El (ta<span data-count="2856">g</span> n, [ `Data d ]) in
+  <span data-count="362">l</span>et out_metadata chan { arch; property; files } =
+    <span data-count="362">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) (`Channel chan) in
+    <span data-count="362">l</span>et tag n = <span data-count="3258">(</span>("", n), []) in
+    let el n d = <span data-count="2896">`</span>El (ta<span data-count="2896">g</span> n, [ `Data d ]) in
     let* spec =
-      match property with <span data-count="357">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> f
+      match property with <span data-count="362">N</span>one -&gt; Ok "" | <span data-count="0">S</span>ome f -&gt; OS.File.rea<span data-count="0">d</span> f
     in
-    <span data-count="357">l</span>et file = String.concat " " (List.ma<span data-count="357">p</span> Fpath.to_string files) in
-    <span data-count="357">l</span>et* hash =
-      list_fold_lef<span data-count="357">t</span>
+    <span data-count="362">l</span>et file = String.concat " " (List.ma<span data-count="362">p</span> Fpath.to_string files) in
+    <span data-count="362">l</span>et* hash =
+      list_fold_lef<span data-count="362">t</span>
         (fun context file -&gt;
-          <span data-count="4815">l</span>et+ str = OS.File.rea<span data-count="4815">d</span> file in
-          <span data-count="4815">D</span>igestif.SHA256.feed_string context str )
+          <span data-count="4820">l</span>et+ str = OS.File.rea<span data-count="4820">d</span> file in
+          <span data-count="4820">D</span>igestif.SHA256.feed_string context str )
         Digestif.SHA256.empty files
     in
-    <span data-count="357">l</span>et hash = Digestif.SHA256.to_hex (Digestif.SHA256.ge<span data-count="357">t</span> hash) in
-    <span data-count="357">l</span>et time = Unix.time () |&gt; <span data-count="357">U</span>nix.localtime in
-    <span data-count="357">l</span>et test_metadata =
+    <span data-count="362">l</span>et hash = Digestif.SHA256.to_hex (Digestif.SHA256.ge<span data-count="362">t</span> hash) in
+    <span data-count="362">l</span>et time = Unix.time () |&gt; <span data-count="362">U</span>nix.localtime in
+    <span data-count="362">l</span>et test_metadata =
       `El
-        ( ta<span data-count="357">g</span> "test-metadata"
-        , [ e<span data-count="357">l</span> "sourcecodelang" "C"
-          ; e<span data-count="357">l</span> "producer" "owic"
-          ; e<span data-count="357">l</span> "specification" (String.tri<span data-count="357">m</span> spec)
-          ; e<span data-count="357">l</span> "programfile" file
-          ; e<span data-count="357">l</span> "programhash" hash
-          ; e<span data-count="357">l</span> "entryfunction" "main"
-          ; e<span data-count="357">l</span> "architecture" (Fmt.st<span data-count="357">r</span> "%dbit" arch)
-          ; e<span data-count="357">l</span> "creationtime" (Fmt.st<span data-count="357">r</span> "%a" pp_tm time)
+        ( ta<span data-count="362">g</span> "test-metadata"
+        , [ e<span data-count="362">l</span> "sourcecodelang" "C"
+          ; e<span data-count="362">l</span> "producer" "owic"
+          ; e<span data-count="362">l</span> "specification" (String.tri<span data-count="362">m</span> spec)
+          ; e<span data-count="362">l</span> "programfile" file
+          ; e<span data-count="362">l</span> "programhash" hash
+          ; e<span data-count="362">l</span> "entryfunction" "main"
+          ; e<span data-count="362">l</span> "architecture" (Fmt.st<span data-count="362">r</span> "%dbit" arch)
+          ; e<span data-count="362">l</span> "creationtime" (Fmt.st<span data-count="362">r</span> "%a" pp_tm time)
           ] )
     in
     let dtd =
       {xml|&lt;!DOCTYPE test-metadata PUBLIC "+//IDN sosy-lab.org//DTD test-format test-metadata 1.1//EN" "https://sosy-lab.org/test-format/test-metadata-1.1.dtd"&gt;|xml}
     in
     Xmlm.output o (`Dtd (Some dtd));
-    <span data-count="357">X</span>mlm.output_tree Fun.id o test_metadata;
-    <span data-count="357">O</span>k ()
+    <span data-count="362">X</span>mlm.output_tree Fun.id o test_metadata;
+    <span data-count="362">O</span>k ()
   in
   let fpath = Fpath.(workspace / "test-suite" / "metadata.xml") in
-  let* res = OS.File.with_o<span data-count="357">c</span> fpath out_metadata { arch; property; files } in
-  <span data-count="357">r</span>es
+  let* res = OS.File.with_o<span data-count="362">c</span> fpath out_metadata { arch; property; files } in
+  <span data-count="362">r</span>es
 
 let cmd ~debug ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl
   ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver ~profile ~model_format ~(entry_point : string option)
   ~invoke_with_symbols ~out_file ~model_out_file : unit Result.t =
-  <span data-count="365">l</span>et* workspace =
+  <span data-count="370">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
-    | <span data-count="365">N</span>one -&gt; Bos.OS.Dir.tm<span data-count="365">p</span> "owi_c_%s"
+    | <span data-count="370">N</span>one -&gt; Bos.OS.Dir.tm<span data-count="370">p</span> "owi_c_%s"
   in
-  <span data-count="365">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="365">e</span> Fpath.(workspace / "test-suite") in
-  <span data-count="365">l</span>et entry_point = Option.value entry_point ~default:"main" in
+  <span data-count="370">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="370">e</span> Fpath.(workspace / "test-suite") in
+  <span data-count="370">l</span>et entry_point = Option.value entry_point ~default:"main" in
 
-  <span data-count="365">l</span>et includes = Cmd_utils.c_files_location @ includes in
-  let* files = eacsl_instrumen<span data-count="365">t</span> eacsl debug ~includes files in
-  <span data-count="360">l</span>et* modul =
-    compil<span data-count="360">e</span> ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug files
+  <span data-count="370">l</span>et includes = Cmd_utils.c_files_location @ includes in
+  let* files = eacsl_instrumen<span data-count="370">t</span> eacsl debug ~includes files in
+  <span data-count="365">l</span>et* modul =
+    compil<span data-count="365">e</span> ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug files
   in
-  <span data-count="357">l</span>et* () = metadat<span data-count="357">a</span> ~workspace arch property files in
-  <span data-count="357">l</span>et files = [ modul ] in
+  <span data-count="362">l</span>et* () = metadat<span data-count="362">a</span> ~workspace arch property files in
+  <span data-count="362">l</span>et files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
-  (if concolic then <span data-count="160">C</span>md_conc.cmd else <span data-count="197">C</span>md_sym.cmd)
+  (if concolic then <span data-count="160">C</span>md_conc.cmd else <span data-count="202">C</span>md_sym.cmd)
     ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile

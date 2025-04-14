@@ -456,26 +456,26 @@ type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="771181">M</span> (fun t -&gt; <span data-count="771181">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="800467">M</span> (fun t -&gt; <span data-count="800467">(</span>Ok v, t)) [@@inline]
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="2349802">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="2414882">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="1175576">M</span>
+  <span data-count="1208116">M</span>
     (fun init_s -&gt;
-      <span data-count="1175576">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="1175576">m</span>atch v_final with
-      | <span data-count="1174226">O</span>k v_final -&gt; run (<span data-count="1174226">f</span> v_final) tmp_st
+      <span data-count="1208116">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="1208116">m</span>atch v_final with
+      | <span data-count="1206766">O</span>k v_final -&gt; run (<span data-count="1206766">f</span> v_final) tmp_st
       | <span data-count="1350">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="156124">l</span>et* v in
-  <span data-count="155001">r</span>eturn (<span data-count="155001">f</span> v)
+  <span data-count="159378">l</span>et* v in
+  <span data-count="158255">r</span>eturn (<span data-count="158255">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
@@ -491,13 +491,13 @@ let add_pc ((_c, s) : Concolic_value.bool) =
 let add_pc_to_thread (st : thread) c = <span data-count="4204">{</span> st with pc = c :: st.pc }
 
 let no_choice e =
-  <span data-count="228223">l</span>et v = Smtml.Expr.simplify e in
-  <span data-count="228223">n</span>ot (Smtml.Expr.is_symboli<span data-count="228223">c</span> v)
+  <span data-count="231477">l</span>et v = Smtml.Expr.simplify e in
+  <span data-count="231477">n</span>ot (Smtml.Expr.is_symboli<span data-count="231477">c</span> v)
 
 let select ((c, s) : Concolic_value.bool) =
-  <span data-count="142803">l</span>et cond = Select (c, s) in
+  <span data-count="146057">l</span>et cond = Select (c, s) in
   let no_choice = no_choice s in
-  <span data-count="142803">M</span> (fun st -&gt; <span data-count="142803">(</span>Ok c, if no_choice then <span data-count="140619">s</span>t else <span data-count="2184">a</span>dd_pc_to_threa<span data-count="2184">d</span> st cond))
+  <span data-count="146057">M</span> (fun st -&gt; <span data-count="146057">(</span>Ok c, if no_choice then <span data-count="143873">s</span>t else <span data-count="2184">a</span>dd_pc_to_threa<span data-count="2184">d</span> st cond))
 [@@inline]
 
 let select_i32 ((c, s) : Concolic_value.int32) =
