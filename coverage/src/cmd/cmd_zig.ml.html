@@ -18,13 +18,13 @@
       <h2>84.44%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:12.79%"></span>
-      <span class="unvisited" style="top:18.60%"></span>
-      <span class="some-visited" style="bottom:48.84%"></span>
-      <span class="some-visited" style="bottom:41.86%"></span>
-      <span class="unvisited" style="bottom:36.05%"></span>
-      <span class="unvisited" style="bottom:25.58%"></span>
-      <span class="some-visited" style="bottom:4.65%"></span>
+      <span class="some-visited" style="top:12.64%"></span>
+      <span class="unvisited" style="top:18.39%"></span>
+      <span class="some-visited" style="bottom:49.43%"></span>
+      <span class="some-visited" style="bottom:42.53%"></span>
+      <span class="unvisited" style="bottom:36.78%"></span>
+      <span class="unvisited" style="bottom:26.44%"></span>
+      <span class="some-visited" style="bottom:5.75%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -115,6 +115,7 @@
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -205,6 +206,7 @@
 <a href="#L84">84</a>
 <a href="#L85">85</a>
 <a href="#L86">86</a>
+<a href="#L87">87</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -266,7 +268,7 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
-  ~model_out_file : unit Result.t =
+  ~model_out_file ~with_breadcrumbs : unit Result.t =
   <span data-count="3">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -292,6 +294,7 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
     ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
+    ~with_breadcrumbs
 </code></pre>
       </div>
     </div>

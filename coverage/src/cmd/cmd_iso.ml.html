@@ -1034,7 +1034,7 @@ module String_set = Set.Make (String)
 
 let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
   ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
-  ~unsafe ~workers ~workspace ~model_out_file =
+  ~unsafe ~workers ~workspace ~model_out_file ~with_breadcrumbs =
   <span data-count="3">i</span>f debug then <span data-count="0">L</span>og.debug_on := true;
   <span data-count="3">l</span>et* workspace =
     match workspace with
@@ -1140,7 +1140,7 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
       <span data-count="3">C</span>md_sym.handle_result ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-        ~model_out_file result )
+        ~model_out_file ~with_breadcrumbs result )
     () common_exports
 </code></pre>
       </div>

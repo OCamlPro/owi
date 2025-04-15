@@ -18,10 +18,10 @@
       <h2>90.91%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:48.48%"></span>
-      <span class="some-visited" style="bottom:39.39%"></span>
-      <span class="unvisited" style="bottom:21.21%"></span>
-      <span class="some-visited" style="bottom:6.06%"></span>
+      <span class="some-visited" style="top:50.00%"></span>
+      <span class="some-visited" style="bottom:41.18%"></span>
+      <span class="unvisited" style="bottom:22.06%"></span>
+      <span class="some-visited" style="bottom:7.35%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -75,23 +75,25 @@
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
-<a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
-<a id="L52"></a><span class="unvisited"> </span>
-<a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
 <a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span > </span>
-<a id="L58"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
 <a id="L59"></a><span class="visited"> </span>
-<a id="L60"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span class="some-visited"> </span>
-<a id="L63"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="some-visited"> </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -162,6 +164,8 @@
 <a href="#L64">64</a>
 <a href="#L65">65</a>
 <a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -211,7 +215,8 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
   ~model_format ~entry_point ~invoke_with_symbols ~out_file
-  ~(workspace : Fpath.t option) ~model_out_file : unit Result.t =
+  ~(workspace : Fpath.t option) ~model_out_file ~with_breadcrumbs :
+  unit Result.t =
   <span data-count="3">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -229,6 +234,7 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
     ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
+    ~with_breadcrumbs
 </code></pre>
       </div>
     </div>

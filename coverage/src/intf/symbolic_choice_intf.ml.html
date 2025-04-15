@@ -105,6 +105,8 @@
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -192,6 +194,8 @@
 <a href="#L81">81</a>
 <a href="#L82">82</a>
 <a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -199,8 +203,8 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of Trap.t * Smtml.Model.t
-  | EAssert of Smtml.Expr.t * Smtml.Model.t
+  | ETrap of Trap.t * Smtml.Model.t * (int * string) list * int32 list
+  | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * int32 list
 
 module type S = sig
   module V : Func_intf.Value_types
@@ -238,6 +242,8 @@ module type S = sig
   val thread : thread t
 
   val add_pc : V.bool -&gt; unit t
+
+  val add_label : int * string -&gt; unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 
