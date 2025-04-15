@@ -21,11 +21,7 @@
   stack        : [ i32.const 42 ; i32.const 42 ]
   running instr: i32.eq
   stack        : [ i32.const 1 ]
-  running instr: (if
-    (then
-      unreachable
-    )
-  )
+  running instr: if
   stack        : [  ]
   running instr: unreachable
   unreachable
