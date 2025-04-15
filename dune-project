@@ -45,9 +45,9 @@
   (dune-site :build)
   ;; system packages
   conf-clang
-  conf-lld
+  ;; conf-lld does not have `wasm-ld` on macOS and compilation fails
   ;; conf-llvm ;; this package is broken on opam-repository: on Debian it'll install the llvm-X but not llvm package...
-  conf-rust-llvm
+  ;; conf-rust-llvm ;; not available in ubuntu
   conf-rust-wasm
   ;;conf-zig
   ;; runtime
