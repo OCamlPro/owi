@@ -1,4 +1,4 @@
-name: build
+name: build-ubuntu
 on:
   pull_request:
     branches:
