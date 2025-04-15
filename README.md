@@ -170,7 +170,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [LICENSE]: ./LICENSE.md
 [test suite]: ./test
 
-[build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build.yml/badge.svg
+[build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build-ubuntu.yml/badge.svg
 [build status]: https://github.com/ocamlpro/owi/actions
 [coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
 [coverage percentage]: https://ocamlpro.github.io/owi/coverage
