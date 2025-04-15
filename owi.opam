@@ -23,8 +23,6 @@ depends: [
   "dune-build-info" {build}
   "dune-site" {build}
   "conf-clang"
-  "conf-lld"
-  "conf-rust-llvm"
   "conf-rust-wasm"
   "bos" {>= "0.2.1"}
   "cmdliner" {>= "1.3.0"}
@@ -77,6 +75,7 @@ dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 depexts: [
   ["llvm" "lld"]  {os-family = "debian"}
+  ["rust-llvm"] {os-distribution = "debian"}
   ["llvm"]  {os-family = "homebrew"}
 ]
 pin-depends: [
