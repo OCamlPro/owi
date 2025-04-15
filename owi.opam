@@ -74,7 +74,7 @@ dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 depexts: [
   ["llvm" "lld"]  {os-family = "debian"}
-  ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
+  ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
   ["llvm"]  {os-family = "homebrew"}
 ]
 pin-depends: [
