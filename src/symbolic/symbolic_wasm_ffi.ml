@@ -64,11 +64,10 @@ module M :
   let in_replay_mode () = Choice.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
 
   let print_char (c : Value.int32) =
-    match Smtml.Expr.view c with
-    | Val (Num (I32 c)) ->
-      Fmt.pr "%c@?" (char_of_int (Int32.to_int c));
-      Choice.return ()
-    | _ -> assert false
+    let open Choice in
+    let* c = select_i32 c in
+    Fmt.pr "%c@?" (char_of_int (Int32.to_int c));
+    return ()
 
   let label m (id : Value.int32) (str_ptr : Value.int32) =
     let open Choice in
