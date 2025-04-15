@@ -829,7 +829,7 @@ module Make (P : Interpret_intf.P) :
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
     Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-    Log.debug2 "running instr: %a@." Types.pp_instr instr;
+    Log.debug2 "running instr: %a@." (Types.pp_instr ~short:true) instr;
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
@@ -1466,8 +1466,10 @@ module Make (P : Interpret_intf.P) :
       | Struct_new_default _ | Extern_externalize | Extern_internalize
       | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _
       | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug2 "TODO (Interpret.exec_instr) %a@\n" Types.pp_instr i;
-      st stack
+      Log.debug2 "TODO (Interpret.exec_instr) %a@\n"
+        (Types.pp_instr ~short:false)
+        i;
+      assert false
 
   let rec loop (state : State.exec_state) =
     match state.pc with

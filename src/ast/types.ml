@@ -589,7 +589,7 @@ and 'a expr = 'a instr list
 
 let pp_newline ppf () = pf ppf "@\n"
 
-let rec pp_instr fmt = function
+let rec pp_instr ~short fmt = function
   | I32_const i -> pf fmt "i32.const %ld" i
   | I64_const i -> pf fmt "i64.const %Ld" i
   | F32_const f -> pf fmt "f32.const %a" Float32.pp f
@@ -661,19 +661,25 @@ let rec pp_instr fmt = function
   | Nop -> pf fmt "nop"
   | Unreachable -> pf fmt "unreachable"
   | Block (id, bt, e) ->
-    pf fmt "(block%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
-      e
+    if short then pf fmt "block%a%a" pp_id_opt id pp_block_type_opt bt
+    else
+      pf fmt "(block%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+        (pp_expr ~short) e
   | Loop (id, bt, e) ->
-    pf fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt pp_expr
-      e
+    if short then pf fmt "loop%a%a" pp_id_opt id pp_block_type_opt bt
+    else
+      pf fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+        (pp_expr ~short) e
   | If_else (id, bt, e1, e2) ->
     let pp_else fmt e =
       match e with
       | [] -> ()
-      | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" pp_expr e
+      | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e
     in
-    pf fmt "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)%a@]@\n)" pp_id_opt id
-      pp_block_type_opt bt pp_expr e1 pp_else e2
+    if short then pf fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
+    else
+      pf fmt "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)%a@]@\n)" pp_id_opt id
+        pp_block_type_opt bt (pp_expr ~short) e1 pp_else e2
   | Br id -> pf fmt "br %a" pp_indice id
   | Br_if id -> pf fmt "br_if %a" pp_indice id
   | Br_table (ids, id) ->
@@ -721,7 +727,8 @@ let rec pp_instr fmt = function
     pf fmt "br_on_cast_fail %a %a %a" pp_indice id pp_nullable n pp_heap_type t
   | Ref_eq -> pf fmt "ref.eq"
 
-and pp_expr fmt instrs = list ~sep:pp_newline pp_instr fmt instrs
+and pp_expr ~short fmt instrs =
+  list ~sep:pp_newline (pp_instr ~short) fmt instrs
 
 let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
 
@@ -806,7 +813,7 @@ let pp_func : type kind. Format.formatter -> kind func -> unit =
   (* TODO: typeuse ? *)
   pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
     (with_space_list pp_locals)
-    f.locals pp_expr f.body
+    f.locals (pp_expr ~short:false) f.body
 
 let pp_funcs fmt (funcs : 'a func list) = list ~sep:pp_newline pp_func fmt funcs
 

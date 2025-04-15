@@ -545,7 +545,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     | Struct_new_default _ | Extern_externalize | Extern_internalize
     | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
     | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
-    Log.debug2 "TODO (typecheck instr) %a" pp_instr i;
+    Log.debug2 "TODO (typecheck instr) %a" (pp_instr ~short:false) i;
     assert false
 
 and typecheck_expr env expr ~is_loop (block_type : binary block_type option)

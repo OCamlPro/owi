@@ -89,11 +89,7 @@
   running instr: call 5
   calling func : func anonymous
   stack        : [  ]
-  running instr: (block
-    local.get 0
-    br_if 0
-    i32.const 0
-    return)
+  running instr: block
   stack        : [  ]
   running instr: local.get 0
   stack        : [ i32.const 9 ]
