@@ -48,7 +48,7 @@
   ;; conf-lld does not have `wasm-ld` on macOS and compilation fails
   ;; conf-llvm ;; this package is broken on opam-repository: on Debian it'll install the llvm-X but not llvm package...
   ;; conf-rust-llvm ;; not available in ubuntu
-  conf-rust-wasm
+  ;; conf-rust-wasm ;; libstd-rust-dev-wasm32 is not available in ubuntu
   ;;conf-zig
   ;; runtime
   (bos
