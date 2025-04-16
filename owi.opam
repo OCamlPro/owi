@@ -31,7 +31,7 @@ depends: [
   "prelude" {>= "0.5"}
   "processor" {>= "0.2"}
   "sedlex" {>= "3.3"}
-  "smtml" {>= "0.6.2"}
+  "smtml" {>= "0.6.3"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
   "odoc" {>= "3.0.0" & with-doc}
