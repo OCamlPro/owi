@@ -5,8 +5,10 @@ module S = Symbolic_memory
 
 let with_concrete (mc, ms) a f_c f_s =
   let open Concolic_choice in
-  let+ a = select_i32 a in
-  (f_c mc a, f_s ms (Symbolic_value.const_i32 a))
+  let* a = select_i32 a in
+  match f_c mc a with
+  | Error t -> Concolic_choice.trap t
+  | Ok c -> Concolic_choice.return (c, f_s ms (Symbolic_value.const_i32 a))
 
 let with_concrete_store (mc, ms) a f_c f_s (vc, vs) =
   let open Concolic_choice in
@@ -14,7 +16,8 @@ let with_concrete_store (mc, ms) a f_c f_s (vc, vs) =
   f_c mc ~addr vc;
   f_s ms ~addr:(Symbolic_value.const_i32 addr) vs
 
-let load_8_s m a = with_concrete m a C.load_8_s S.load_8_s
+let load_8_s m a : Concolic_value.int32 Concolic_choice.t =
+  with_concrete m a C.load_8_s S.load_8_s
 
 let load_8_u m a = with_concrete m a C.load_8_u S.load_8_u
 

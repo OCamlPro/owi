@@ -4,8 +4,6 @@
 
 open Fmt
 
-exception Trap of string
-
 exception Parse_fail of string
 
 type yes = Yes

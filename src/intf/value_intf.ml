@@ -75,13 +75,13 @@ module type Iop = sig
 
   val ge_u : num -> num -> bool
 
-  val trunc_f32_s : float32 -> num
+  val trunc_f32_s : float32 -> num Result.t
 
-  val trunc_f32_u : float32 -> num
+  val trunc_f32_u : float32 -> num Result.t
 
-  val trunc_f64_s : float64 -> num
+  val trunc_f64_s : float64 -> num Result.t
 
-  val trunc_f64_u : float64 -> num
+  val trunc_f64_u : float64 -> num Result.t
 
   val trunc_sat_f32_s : float32 -> num
 

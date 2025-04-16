@@ -4,10 +4,16 @@ open Owi
 let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
-  let fresh i = ref i in
-  let set r (i : int32) = r := i in
-  let get r : int32 = !r in
-  let print_i32 (i : int32) = Printf.printf "%li\n%!" i in
+  let fresh i = Ok (ref i) in
+  let set r (i : int32) =
+    r := i;
+    Ok ()
+  in
+  let get r = Ok !r in
+  let print_i32 (i : int32) =
+    Printf.printf "%li\n%!" i;
+    Ok ()
+  in
   (* we need to describe their types *)
   let functions =
     [ ( "print_i32"

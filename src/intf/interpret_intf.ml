@@ -159,7 +159,7 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul : env Env_id.collection -> module_to_run -> unit Result.t choice
+  val modul : env Env_id.collection -> module_to_run -> unit choice
 
   type value
 
@@ -173,7 +173,7 @@ module type S = sig
     -> env:Env_id.t
     -> envs:env Env_id.collection
     -> Func_intf.t
-    -> value list Result.t choice
+    -> value list choice
 
   val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
 
@@ -191,7 +191,7 @@ module type S = sig
   val exec_frelop : State.stack -> Types.nn -> Types.frelop -> State.stack
 
   val exec_itruncf :
-    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
+    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack choice
 
   val exec_itruncsatf :
     State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack

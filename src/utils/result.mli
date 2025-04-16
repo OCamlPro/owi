@@ -40,7 +40,6 @@ type err =
   | `Size_minimum_greater_than_maximum
   | `Start_function
   | `Timeout
-  | `Trap of Trap.t
   | `Type_mismatch of string
   | `Unbound_last_module
   | `Unbound_module of string
@@ -85,8 +84,26 @@ type err =
   | `Unbounded_quantification
   | `Invalid_model of string
   | `Unimplemented of string
+  | (* Trap: *)
+    `Out_of_bounds_table_access
+  | `Out_of_bounds_memory_access
+  | `Undefined_element
+  | `Uninitialized_element of int
+  | `Integer_overflow
+  | `Integer_divide_by_zero
+  | `Invalid_conversion_to_integer
+  | `Element_type_error
+  | `Unreachable
+  | `Indirect_call_type_mismatch
+  | `Extern_call_arg_type_mismatch
+  | `Extern_call_null_arg
+  | `Memory_leak_use_after_free
+  | `Memory_heap_buffer_overflow
+  | `Double_free
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
 
 val err_to_string : err -> string
+
+val err_to_exit_code : err -> int

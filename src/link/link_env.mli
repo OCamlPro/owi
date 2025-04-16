@@ -20,17 +20,17 @@ val backup : 'ext t -> 'ext backup
 
 val recover : 'ext backup -> 'ext t -> unit
 
-val get_memory : _ t -> int -> Concrete_memory.t
+val get_memory : _ t -> int -> Concrete_memory.t Concrete_choice.t
 
 val get_func : _ t -> int -> func
 
-val get_table : _ t -> int -> Concrete_table.t
+val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
 
 val get_elem : _ t -> int -> elem
 
-val get_data : _ t -> int -> data
+val get_data : _ t -> int -> data Concrete_choice.t
 
-val get_global : _ t -> int -> Concrete_global.t
+val get_global : _ t -> int -> Concrete_global.t Concrete_choice.t
 
 val drop_elem : elem -> unit
 

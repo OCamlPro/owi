@@ -72,19 +72,27 @@ let recover backup into =
 let id (env : _ t) = env.id
 
 let get_global (env : _ t) id =
-  match IMap.find_opt id env.globals with None -> assert false | Some v -> v
+  match IMap.find_opt id env.globals with
+  | None -> assert false
+  | Some v -> Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  match IMap.find_opt id env.memories with None -> assert false | Some v -> v
+  match IMap.find_opt id env.memories with
+  | None -> assert false
+  | Some v -> Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  match IMap.find_opt id env.tables with None -> assert false | Some v -> v
+  match IMap.find_opt id env.tables with
+  | None -> assert false
+  | Some v -> Concrete_choice.return v
 
 let get_func (env : _ t) id =
   match IMap.find_opt id env.functions with None -> assert false | Some v -> v
 
 let get_data (env : _ t) id =
-  match IMap.find_opt id env.data with None -> assert false | Some v -> v
+  match IMap.find_opt id env.data with
+  | None -> assert false
+  | Some v -> Concrete_choice.return v
 
 let get_elem (env : _ t) id =
   match IMap.find_opt id env.elem with None -> assert false | Some v -> v

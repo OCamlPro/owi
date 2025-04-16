@@ -50,10 +50,16 @@ open Owi
 let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
-  let fresh i = ref i in
-  let set r (i : int32) = r := i in
-  let get r : int32 = !r in
-  let print_i32 (i : int32) = Printf.printf "%li\n%!" i in
+  let fresh i = Ok (ref i) in
+  let set r (i : int32) =
+    r := i;
+    Ok ()
+  in
+  let get r = Ok !r in
+  let print_i32 (i : int32) =
+    Printf.printf "%li\n%!" i;
+    Ok ()
+  in
   (* we need to describe their types *)
   let functions =
     [ ( "print_i32"
@@ -171,13 +177,18 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   let memset m start byte length =
     let rec loop offset =
       if Int32.le offset length then begin
-        Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte;
-        loop (Int32.add offset 1l)
+        match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
+        | Error _ as e -> e
+        | Ok () -> loop (Int32.add offset 1l)
       end
+      else Ok ()
     in
     loop 0l
   in
-  let print_x64 (i : int64) = Printf.printf "0x%LX\n%!" i in
+  let print_x64 (i : int64) =
+    Printf.printf "0x%LX\n%!" i;
+    Ok ()
+  in
   (* we need to describe their types *)
   let functions =
     [ ( "print_x64"

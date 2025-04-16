@@ -9,13 +9,13 @@ module Int32 : sig
 
   val wrap_i64 : int64 -> t
 
-  val trunc_f32_s : Float32.t -> t
+  val trunc_f32_s : Float32.t -> t Result.t
 
-  val trunc_f32_u : Float32.t -> t
+  val trunc_f32_u : Float32.t -> t Result.t
 
-  val trunc_f64_s : Float64.t -> t
+  val trunc_f64_s : Float64.t -> t Result.t
 
-  val trunc_f64_u : Float64.t -> t
+  val trunc_f64_u : Float64.t -> t Result.t
 
   val trunc_sat_f32_s : Float32.t -> t
 
@@ -35,13 +35,13 @@ module Int64 : sig
 
   val extend_i32_u : int32 -> t
 
-  val trunc_f32_s : Float32.t -> t
+  val trunc_f32_s : Float32.t -> t Result.t
 
-  val trunc_f32_u : Float32.t -> t
+  val trunc_f32_u : Float32.t -> t Result.t
 
-  val trunc_f64_s : Float64.t -> t
+  val trunc_f64_s : Float64.t -> t Result.t
 
-  val trunc_f64_u : Float64.t -> t
+  val trunc_f64_u : Float64.t -> t Result.t
 
   val trunc_sat_f32_s : Float32.t -> t
 

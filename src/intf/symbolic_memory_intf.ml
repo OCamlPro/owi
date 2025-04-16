@@ -22,7 +22,7 @@ module type M = sig
        t
     -> Smtml.Expr.t
     -> int
-    -> (Smtml.Expr.t, Trap.t) result Symbolic_choice_without_memory.t
+    -> Smtml.Expr.t Result.t Symbolic_choice_without_memory.t
 
   val realloc :
        t

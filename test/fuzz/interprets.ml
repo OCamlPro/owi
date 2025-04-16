@@ -96,8 +96,8 @@ module Owi_symbolic : INTERPRET = struct
           Smtml.Solver_type.Z3_solver c init_thread
       in
       match res with
-      | Ok res -> res
-      | Error (Trap t) -> Error (`Trap t)
+      | Ok res -> Ok res
+      | Error (Trap t) -> Error t
       | Error Assert_fail -> Error `Assert_failure )
 
   let name = "owi_symbolic"
@@ -123,7 +123,7 @@ module Reference : INTERPRET = struct
     | `Exited 0 -> Ok ()
     | `Exited 42 ->
       (* TODO: fix this *)
-      Error (`Trap Trap.Out_of_bounds_memory_access)
+      Error `Out_of_bounds_memory_access
     | `Exited 124 -> Error `Timeout
     | `Exited n -> Fmt.error_msg "error %d" n
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)

@@ -227,7 +227,7 @@ module CoreImpl = struct
 
     val stop : 'a t
 
-    val trap : Trap.t -> 'a t
+    val trap : Result.err -> 'a t
 
     val thread : thread t
 

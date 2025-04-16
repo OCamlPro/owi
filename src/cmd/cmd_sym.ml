@@ -15,10 +15,6 @@ type fail_mode =
 (* TODO: add a flag for this *)
 let print_paths = false
 
-let ( let*/ ) (t : 'a Result.t) (f : 'a -> 'b Result.t Choice.t) :
-  'b Result.t Choice.t =
-  match t with Error e -> Choice.return (Error e) | Ok x -> f x
-
 let link_symbolic_modules link_state =
   let func_typ = Symbolic.Extern_func.extern_type in
   let link_state =
@@ -28,18 +24,17 @@ let link_symbolic_modules link_state =
   Link.extern_module' link_state ~name:"summaries" ~func_typ
     Symbolic_wasm_ffi.summaries_extern_module
 
-let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols pc
+let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   filename =
-  let*/ m = Compile.File.until_binary_validate ~unsafe ~rac ~srac filename in
-  let*/ m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
+  let* m = Compile.File.until_binary_validate ~unsafe ~rac ~srac filename in
+  let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state = link_symbolic_modules Link.empty_state in
 
-  let*/ m, link_state =
+  let+ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  let c = Interpret.Symbolic.modul link_state.envs m in
-  Choice.bind pc (function Error _ as r -> Choice.return r | Ok () -> c)
+  Interpret.Symbolic.modul link_state.envs m
 
 let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
   ~no_stop_at_failure ~no_assert_failure_expression_printing ~breadcrumbs
@@ -96,7 +91,7 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
   in
   function
   | `ETrap (tr, model, _, _) -> (
-    Fmt.pr "Trap: %s@\n" (Trap.to_string tr);
+    Fmt.pr "Trap: %s@\n" (Result.err_to_string tr);
     match model_out_file with
     | Some path -> to_file path model
     | None -> Ok (Fmt.pr "%s@\n" (to_string model labels)) )
@@ -159,7 +154,8 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs result =
+  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
+  (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -167,8 +163,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
     let open Symbolic_choice_intf in
     Atomic.incr path_count;
     match (fail_mode, v) with
-    | _, (EVal (Ok ()), _) -> ()
-    | _, (EVal (Error e), thread) -> Wq.push (`Error e, thread) res_queue
+    | _, (EVal (), _) -> ()
     | (Both | Trap_only), (ETrap (t, m, labels, breadcrumbs), thread) ->
       Wq.push (`ETrap (t, m, labels, breadcrumbs), thread) res_queue
     | (Both | Assertion_only), (EAssert (e, m, labels, breadcrumbs), thread) ->
@@ -214,12 +209,12 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   if debug then Log.debug_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
-  let pc = Choice.return (Ok ()) in
-  let result =
-    List.fold_left
+  let pc = Choice.return () in
+  let* result : unit Symbolic.Choice.t =
+    list_fold_left
       (run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols)
       pc files
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure result ~model_out_file ~with_breadcrumbs
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs result

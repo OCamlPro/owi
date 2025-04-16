@@ -12,44 +12,44 @@ module MInt32 = struct
   let wrap_i64 x = Int64.to_int32 x
 
   let trunc_f32_s x =
-    if Float32.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float32.ne x x then Error `Invalid_conversion_to_integer
     else
       let xf = Float32.to_float x in
       if
         let xf = Float64.of_float xf in
         let mif = Int32.(to_float min_int) in
         Float64.(ge xf (of_float ~-.mif)) || Float64.(lt xf (of_float mif))
-      then raise @@ Types.Trap "integer overflow"
-      else Int32.of_float xf
+      then Error `Integer_overflow
+      else Ok (Int32.of_float xf)
 
   let trunc_f32_u x =
-    if Float32.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float32.ne x x then Error `Invalid_conversion_to_integer
     else
       let xf = Float32.to_float x in
       if
         let xf = Float64.of_float xf in
         Float64.(ge xf (of_float @@ (-.Int32.(to_float min_int) *. 2.0)))
         || Float64.(le xf (Float64.of_float ~-.1.0))
-      then raise @@ Types.Trap "integer overflow"
-      else Int64.(to_int32 (of_float xf))
+      then Error `Integer_overflow
+      else Ok Int64.(to_int32 (of_float xf))
 
   let trunc_f64_s x =
-    if Float64.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float64.ne x x then Error `Invalid_conversion_to_integer
     else if
       let mif = Int32.(to_float min_int) in
       Float64.(ge x (of_float @@ -.mif))
       || Float64.(le x (of_float @@ (mif -. 1.0)))
-    then raise @@ Types.Trap "integer overflow"
-    else Int32.of_float (Float64.to_float x)
+    then Error `Integer_overflow
+    else Ok (Int32.of_float (Float64.to_float x))
 
   let trunc_f64_u x =
-    if Float64.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float64.ne x x then Error `Invalid_conversion_to_integer
     else if
       let mif = Int32.to_float Int32.min_int in
       Float64.(ge x (of_float @@ (-.mif *. 2.0)))
       || Float64.(le x (of_float ~-.1.0))
-    then raise @@ Types.Trap "integer overflow"
-    else Int64.(to_int32 (of_float (Float64.to_float x)))
+    then Error `Integer_overflow
+    else Ok Int64.(to_int32 (of_float (Float64.to_float x)))
 
   let trunc_sat_f32_s x =
     if Float32.ne x x then 0l
@@ -95,42 +95,42 @@ module MInt64 = struct
   let extend_i32_u x = Int64.logand (Int64.of_int32 x) 0x0000_0000_ffff_ffffL
 
   let trunc_f32_s x =
-    if Float32.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float32.ne x x then Error `Invalid_conversion_to_integer
     else if
       let mif = Int64.(to_float min_int) in
       Float32.(ge x @@ of_float @@ ~-.mif) || Float32.(lt x @@ of_float mif)
-    then raise @@ Types.Trap "integer overflow"
-    else Int64.of_float @@ Float32.to_float x
+    then Error `Integer_overflow
+    else Ok (Int64.of_float @@ Float32.to_float x)
 
   let trunc_f32_u x =
     let mif = Int64.(to_float min_int) in
-    if Float32.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float32.ne x x then Error `Invalid_conversion_to_integer
     else if
       Float32.(ge x @@ of_float ~-.(mif *. 2.0))
       || Float32.(le x @@ of_float ~-.1.0)
-    then raise @@ Types.Trap "integer overflow"
+    then Error `Integer_overflow
     else if Float32.(ge x @@ of_float ~-.mif) then
-      Int64.(logxor (of_float (Float32.to_float x -. 0x1p63)) min_int)
-    else Int64.of_float @@ Float32.to_float x
+      Ok Int64.(logxor (of_float (Float32.to_float x -. 0x1p63)) min_int)
+    else Ok (Int64.of_float @@ Float32.to_float x)
 
   let trunc_f64_s x =
-    if Float64.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float64.ne x x then Error `Invalid_conversion_to_integer
     else if
       let mif = Int64.(to_float min_int) in
       Float64.(ge x @@ of_float ~-.mif) || Float64.(lt x @@ of_float mif)
-    then raise @@ Types.Trap "integer overflow"
-    else Int64.of_float @@ Float64.to_float x
+    then Error `Integer_overflow
+    else Ok (Int64.of_float @@ Float64.to_float x)
 
   let trunc_f64_u x =
     let mif = Int64.(to_float min_int) in
-    if Float64.ne x x then raise @@ Types.Trap "invalid conversion to integer"
+    if Float64.ne x x then Error `Invalid_conversion_to_integer
     else if
       Float64.(ge x @@ of_float (~-.mif *. 2.0))
       || Float64.(le x @@ of_float ~-.1.0)
-    then raise @@ Types.Trap "integer overflow"
+    then Error `Integer_overflow
     else if Float64.(ge x @@ of_float ~-.mif) then
-      Int64.(logxor (of_float (Float64.to_float x -. 0x1p63)) min_int)
-    else Int64.of_float @@ Float64.to_float x
+      Ok Int64.(logxor (of_float (Float64.to_float x -. 0x1p63)) min_int)
+    else Ok (Int64.of_float @@ Float64.to_float x)
 
   let trunc_sat_f32_s x =
     if Float32.ne x x then 0L

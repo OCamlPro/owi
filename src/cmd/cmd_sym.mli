@@ -23,7 +23,7 @@ val handle_result :
   -> model_format:Cmd_utils.model_format
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
-  -> unit Result.t Symbolic_choice_with_memory.t
+  -> unit Symbolic.Choice.t
   -> unit Result.t
 
 val cmd :

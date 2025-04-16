@@ -1,4 +1,5 @@
 (cram
  (deps
   %{bin:owi}
-  (file ./binary_loop.wasm)))
+  (file ./binary_loop.wasm)
+  (file ./overflow.wat)))

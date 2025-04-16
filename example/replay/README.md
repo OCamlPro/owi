@@ -32,7 +32,7 @@ Then you can replay the module execution with the values in the model like this:
 ```sh
 $ owi replay --replay-file mini.scfg mini.wat
 unreachable
-[26]
+[94]
 ```
 
 ## Man page

@@ -4,7 +4,7 @@
 
 type err = private
   | Assert_fail
-  | Trap of Trap.t
+  | Trap of Result.err
 
 include
   Choice_intf.Complete

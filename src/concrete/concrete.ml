@@ -7,10 +7,9 @@ module Value = Concrete_value
 module Global = Concrete_global
 module Table = Concrete_table
 module Memory = Concrete_memory
+module Choice = Concrete_choice
 
 type thread = unit
-
-module Choice = Concrete_choice
 
 let select cond ~if_true ~if_false =
   if cond then Choice.return if_true else Choice.return if_false
@@ -33,21 +32,20 @@ end
 module Env = struct
   include Link_env
 
-  type t = Concrete_extern_func.extern_func Link_env.t
+  type t = Extern_func.extern_func Link_env.t
 
   let get_data env n =
     let data = get_data env n in
-    Choice.return data
+    data
 end
 
 module Module_to_run = struct
   (** runnable module *)
-  type t = Concrete_extern_func.extern_func Link.module_to_run
+  type t = Extern_func.extern_func Link.module_to_run
 
-  let env (t : Concrete_extern_func.extern_func Link.module_to_run) = t.env
+  let env (t : Extern_func.extern_func Link.module_to_run) = t.env
 
-  let id (t : Concrete_extern_func.extern_func Link.module_to_run) = t.id
+  let id (t : Extern_func.extern_func Link.module_to_run) = t.id
 
-  let to_run (t : Concrete_extern_func.extern_func Link.module_to_run) =
-    t.to_run
+  let to_run (t : Extern_func.extern_func Link.module_to_run) = t.to_run
 end

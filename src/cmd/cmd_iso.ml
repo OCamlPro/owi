@@ -8,13 +8,6 @@ let module_name1 = "owi_iso_module1"
 
 let module_name2 = "owi_iso_module2"
 
-let ( let*/ ) (t : 'a Result.t)
-  (f : 'a -> 'b Result.t Symbolic_choice_with_memory.t) :
-  'b Result.t Symbolic_choice_with_memory.t =
-  match t with
-  | Error e -> Symbolic_choice_with_memory.return (Error e)
-  | Ok x -> f x
-
 let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
     Symbolic_choice_with_memory.return
@@ -111,11 +104,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       ~func_typ:Symbolic.Extern_func.extern_type
       (emscripten_fuzzing_support_module ())
   in
-  let*/ _module, link_state =
+  let* _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name1) ~unsafe ~optimize:false
       link_state module1
   in
-  let*/ _module, link_state =
+  let* _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name2) ~unsafe ~optimize:false
       link_state module2
   in
@@ -328,18 +321,13 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let modul = { iso_modul with start } in
   let text_modul = Binary_to_text.modul modul in
   Log.debug2 "generated module:@\n  @[<v>%a@]@\n" Text.pp_modul text_modul;
-  let*/ m, link_state =
+  let+ m, link_state =
     Compile.Binary.until_link ~unsafe:false ~optimize:false ~name:None
       link_state modul
   in
   let m = Symbolic.convert_module_to_run m in
 
-  let c = Interpret.Symbolic.modul link_state.envs m in
-
-  Symbolic_choice_with_memory.bind (Symbolic_choice_with_memory.return (Ok ()))
-    (function
-    | Error _ as r -> Symbolic_choice_with_memory.return r
-    | Ok () -> c )
+  Interpret.Symbolic.modul link_state.envs m
 
 module String_set = Set.Make (String)
 
@@ -446,7 +434,7 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
   list_fold_left
     (fun () (export_name, export_type) ->
       Fmt.pr "Checking export %s@\n" export_name;
-      let result = check_iso ~unsafe export_name export_type module1 module2 in
+      let* result = check_iso ~unsafe export_name export_type module1 module2 in
 
       Cmd_sym.handle_result ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value

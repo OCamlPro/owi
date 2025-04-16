@@ -8,32 +8,39 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let x = ref 0 in
   let y = ref 0 in
-  let height (_ : int32) : int32 = 200l in
-  let width (_ : int32) : int32 = 300l in
-  let sleep (_ : int32) = Unix.sleepf 0.2 in
+  let height (_ : int32) = Ok 200l in
+  let width (_ : int32) = Ok 300l in
+  let sleep (_ : int32) =
+    Unix.sleepf 0.2;
+    Ok ()
+  in
   let newline (_ : int32) =
     x := 0;
-    incr y
+    incr y;
+    Ok ()
   in
   let cell_print (i : int32) =
     set_color (if i = 1l then black else white);
     fill_rect (!x * 2) (!y * 2) 2 2;
-    incr x
+    incr x;
+    Ok ()
   in
   let clear_screen (_ : int32) =
     synchronize ();
     x := 0;
     y := 0;
-    clear_graph ()
+    clear_graph ();
+    Ok ()
   in
-  let rand_val (bound : int32) : int32 =
+  let rand_val (bound : int32) =
     let r = Random.int32 bound in
-    if r = 0l then 1l else 0l
+    Ok (if r = 0l then 1l else 0l)
   in
   let init_window (_ : int32) =
     open_graph " 600x400";
     auto_synchronize false;
-    clear_graph ()
+    clear_graph ();
+    Ok ()
   in
   (* we need to describe their types *)
   let functions =
