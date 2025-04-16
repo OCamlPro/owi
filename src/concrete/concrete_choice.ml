@@ -2,27 +2,22 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = 'a
+type 'a t = 'a Result.t
 
-let return x = x [@@inline]
+let return x = Ok x [@@inline]
 
-let bind x f = f x [@@inline]
+let bind x f = Result.bind x f [@@inline]
 
 let ( let* ) = bind
 
-let map v f =
-  let* v in
-  return (f v)
-[@@inline]
+let map v f = Result.map f v [@@inline]
 
 let ( let+ ) = map
 
-let select b = b [@@inline]
+let select b = Ok b [@@inline]
 
-let select_i32 i = i [@@inline]
+let select_i32 i = Ok i [@@inline]
 
-let trap msg = raise (Types.Trap msg)
+let trap t = Error t
 
-let trap : Trap.t -> 'a t = fun tr -> trap (Trap.to_string tr)
-
-let run = Fun.id
+let run m = m

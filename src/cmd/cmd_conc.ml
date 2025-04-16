@@ -12,11 +12,6 @@ let () = Random.init 42
 (* TODO: add a flag for this *)
 let print_paths = false
 
-let ( let** ) (t : 'a Result.t Choice.t) (f : 'a -> 'b Result.t Choice.t) :
-  'b Result.t Choice.t =
-  Choice.bind t (fun t ->
-    match t with Error e -> Choice.return (Error e) | Ok x -> f x )
-
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize link_state m =
   let* m =
@@ -63,15 +58,15 @@ let simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
 
 let run_modules_to_run (link_state : _ Link.state) modules_to_run =
   List.fold_left
-    (fun (acc : unit Result.t Concolic.Choice.t) to_run ->
-      let** () = acc in
-      (Interpret.Concolic.modul link_state.envs) to_run )
-    (Choice.return (Ok ())) modules_to_run
+    (fun (acc : unit Choice.t) to_run ->
+      Choice.bind acc (fun () ->
+        (Interpret.Concolic.modul link_state.envs) to_run ) )
+    (Choice.return ()) modules_to_run
 
 type end_of_trace =
   | Assume_fail
   | Assert_fail
-  | Trap of Trap.t
+  | Trap of Result.err
   | Normal
 
 type trace =
@@ -213,7 +208,7 @@ let rec add_trace (pc : Concolic_choice.pc) (node : eval_tree) (trace : trace)
     | Assume_fail ->
       (* TODO: do something in this case? Otherwise, it might remain in Being_explored in unsat paths? *)
       ()
-    | Trap Unreachable -> set_on_unexplored node Unreachable
+    | Trap `Unreachable -> set_on_unexplored node Unreachable
     | Trap _ | Assert_fail ->
       (* TODO: Mark this as explored to avoid possibly empty pcs? *)
       () );
@@ -283,8 +278,7 @@ let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
   let () = List.iter2 Concolic.recover backups modules_to_run in
   let+ end_of_trace =
     match result with
-    | Ok (Ok ()) -> Ok Normal
-    | Ok (Error _ as e) -> e
+    | Ok () -> Ok Normal
     | Error (Trap t) -> Ok (Trap t)
     | Error Assert_fail -> Ok Assert_fail
     | Error (Assume_fail _c) -> Ok Assume_fail
@@ -391,8 +385,7 @@ let run solver tree link_state modules_to_run =
     add_trace tree trace;
     let* error =
       match result with
-      | Ok (Ok ()) -> Ok None
-      | Ok (Error _ as e) -> e
+      | Ok () -> Ok None
       | Error (Assume_fail c) -> (
         decr count_path;
         (* Current path condition led to assume failure, try to satisfy *)
@@ -500,7 +493,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
     Ok ()
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
-    Fmt.pr "Trap: %s@\n" (Trap.to_string trap);
+    Fmt.pr "Trap: %s@\n" (Result.err_to_string trap);
     let* () =
       match model_out_file with
       | Some path -> to_file path assignments

@@ -105,7 +105,6 @@
   thread_with_memory
   thread_without_memory
   tracing
-  trap
   types
   value_intf
   v

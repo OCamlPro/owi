@@ -16,33 +16,34 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
   let module M :
     Wasm_ffi_intf.S0
-      with type 'a t = 'a
+      with type 'a t = 'a Result.t
        and type memory = Concrete_memory.t
        and module Value = Concrete_value = struct
-    type 'a t = 'a
+    type 'a t = 'a Result.t
 
     type memory = Concrete_memory.t
 
     module Value = Concrete_value
 
-    let assume _ = ()
+    let assume _ = Ok ()
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
         Fmt.epr "Assertion failure was correctly reached\n";
         exit 0
-      end
+      end;
+      Ok ()
 
     let symbol_i32 () =
       match model.(next ()) with
-      | V.I32 n -> n
+      | V.I32 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a i32 value." V.pp v;
         assert false
 
     let symbol_char () =
       match model.(next ()) with
-      | V.I32 n -> n
+      | V.I32 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a char (i32) value." V.pp v;
         assert false
@@ -56,52 +57,56 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     let alloc _m _addr size =
       let r = !brk in
       brk := Int32.add !brk size;
-      r
+      Ok r
 
-    let free (_ : memory) adr = adr
+    let free (_ : memory) adr = Ok adr
 
     let exit (n : Value.int32) = exit (Int32.to_int n)
 
     let symbol_i8 () =
       match model.(next ()) with
-      | V.I32 n -> n
+      | V.I32 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a i8 (i32) value." V.pp v;
         assert false
 
     let symbol_i64 () =
       match model.(next ()) with
-      | V.I64 n -> n
+      | V.I64 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a i64 value." V.pp v;
         assert false
 
     let symbol_f32 () =
       match model.(next ()) with
-      | V.F32 n -> n
+      | V.F32 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a f32 value." V.pp v;
         assert false
 
     let symbol_f64 () =
       match model.(next ()) with
-      | V.F64 n -> n
+      | V.F64 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a f64 value." V.pp v;
         assert false
 
     let symbol_range _ _ =
       match model.(next ()) with
-      | V.I32 n -> n
+      | V.I32 n -> Ok n
       | v ->
         Fmt.epr "Got value %a but expected a i32 value." V.pp v;
         assert false
 
-    let print_char c = Fmt.pr "%c" (char_of_int (Int32.to_int c))
+    let print_char c =
+      Fmt.pr "%c" (char_of_int (Int32.to_int c));
+      Ok ()
 
-    let in_replay_mode () = 1l
+    let in_replay_mode () = Ok 1l
 
-    let label _ id _ = Fmt.pr "reached %ld@." id
+    let label _ id _ =
+      Fmt.pr "reached %ld@." id;
+      Ok ()
   end in
   let replay_extern_module =
     let open M in

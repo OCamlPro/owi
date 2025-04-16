@@ -10,20 +10,19 @@ let rec optimize_expr expr : bool * binary instr list =
     :: ((I32_const _ | I64_const _) as y)
     :: (I_binop (nn, op) as i_binop)
     :: tl -> begin
-    try
-      let result =
-        Interpret.Concrete.exec_ibinop [ V.of_instr y; V.of_instr x ] nn op
-      in
-      begin
-        match result with
-        | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
-          (true, e)
-        | _ -> assert false
-      end
-    with Trap _ ->
-      let has_changed, e = optimize_expr (y :: i_binop :: tl) in
-      (has_changed, x :: e)
+    let result =
+      Interpret.Concrete.exec_ibinop [ V.of_instr y; V.of_instr x ] nn op
+    in
+    begin
+      match result with
+      | Ok [ ((I32 _ | I64 _) as result) ] ->
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
+        (true, e)
+      | Error _ ->
+        let has_changed, e = optimize_expr (y :: i_binop :: tl) in
+        (has_changed, x :: e)
+      | _ -> assert false
+    end
   end
   | ((F32_const _ | F64_const _) as x)
     :: ((F32_const _ | F64_const _) as y)
@@ -145,36 +144,30 @@ let rec optimize_expr expr : bool * binary instr list =
   | ((F32_const _ | F64_const _) as c)
     :: (I_trunc_f (nn, nn', sx) as i_truncf)
     :: tl -> begin
-    try
-      let result = Interpret.Concrete.exec_itruncf [ V.of_instr c ] nn nn' sx in
-      begin
-        match result with
-        | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
-          (true, e)
-        | _ -> assert false
-      end
-    with Trap _ ->
-      let has_changed, e = optimize_expr (i_truncf :: tl) in
-      (has_changed, c :: e)
+    let result = Interpret.Concrete.exec_itruncf [ V.of_instr c ] nn nn' sx in
+    begin
+      match result with
+      | Ok [ ((I32 _ | I64 _) as result) ] ->
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
+        (true, e)
+      | Error _ ->
+        let has_changed, e = optimize_expr (i_truncf :: tl) in
+        (has_changed, c :: e)
+      | Ok _ -> assert false
+    end
   end
-  | ((F32_const _ | F64_const _) as c)
-    :: (I_trunc_sat_f (nn, nn', sx) as i_truncsatf)
-    :: tl -> begin
-    try
-      let result =
-        Interpret.Concrete.exec_itruncsatf [ V.of_instr c ] nn nn' sx
-      in
-      begin
-        match result with
-        | [ ((I32 _ | I64 _) as result) ] ->
-          let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
-          (true, e)
-        | _ -> assert false
-      end
-    with Trap _ ->
-      let has_changed, e = optimize_expr (i_truncsatf :: tl) in
-      (has_changed, c :: e)
+  | ((F32_const _ | F64_const _) as c) :: I_trunc_sat_f (nn, nn', sx) :: tl ->
+    begin
+    let result =
+      Interpret.Concrete.exec_itruncsatf [ V.of_instr c ] nn nn' sx
+    in
+    begin
+      match result with
+      | [ ((I32 _ | I64 _) as result) ] ->
+        let _has_changed, e = optimize_expr (V.to_instr result :: tl) in
+        (true, e)
+      | _ -> assert false
+    end
   end
   | ((I32_const _ | I64_const _) as x) :: F_convert_i (nn, nn', sx) :: tl ->
     let result = Interpret.Concrete.exec_fconverti [ V.of_instr x ] nn nn' sx in

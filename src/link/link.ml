@@ -351,10 +351,20 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
         else Ok (StringMap.add name value acc, StringSet.add name names) )
       (StringMap.empty, names) exports
   in
+  let fill_exports' get_env exports names =
+    list_fold_left
+      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
+        let* value = get_env env id in
+        if StringSet.mem name names then Error `Duplicate_export_name
+        else Ok (StringMap.add name value acc, StringSet.add name names) )
+      (StringMap.empty, names) exports
+  in
   let names = StringSet.empty in
-  let* globals, names = fill_exports Link_env.get_global exports.global names in
-  let* memories, names = fill_exports Link_env.get_memory exports.mem names in
-  let* tables, names = fill_exports Link_env.get_table exports.table names in
+  let* globals, names =
+    fill_exports' Link_env.get_global exports.global names
+  in
+  let* memories, names = fill_exports' Link_env.get_memory exports.mem names in
+  let* tables, names = fill_exports' Link_env.get_table exports.table names in
   let* functions, names = fill_exports Link_env.get_func exports.func names in
   Ok { globals; memories; tables; functions; defined_names = names }
 

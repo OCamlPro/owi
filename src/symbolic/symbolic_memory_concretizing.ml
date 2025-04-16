@@ -114,7 +114,7 @@ module Backend = struct
     | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
       match Map.find_opt base m.chunks with
-      | None -> return (Error Trap.Memory_leak_use_after_free)
+      | None -> return (Error `Memory_leak_use_after_free)
       | Some chunk_size ->
         let+ is_out_of_bounds =
           let range = const_i32 (Int32.of_int (range - 1)) in
@@ -125,8 +125,7 @@ module Backend = struct
                (I32.ge_u start_offset chunk_size)
                (I32.ge_u end_offset chunk_size) )
         in
-        if is_out_of_bounds then Error Trap.Memory_heap_buffer_overflow
-        else Ok a )
+        if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->
       (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
       Log.debug2 "Saw a symbolic address: %a@." Smtml.Expr.pp a;
@@ -146,7 +145,7 @@ module Backend = struct
     | Val (Num (I32 0l)) -> return (Symbolic_value.const_i32 0l)
     | _ ->
       let* base = ptr p in
-      if not @@ Map.mem base m.chunks then trap Trap.Double_free
+      if not @@ Map.mem base m.chunks then trap `Double_free
       else begin
         let chunks = Map.remove base m.chunks in
         m.chunks <- chunks;

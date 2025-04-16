@@ -69,6 +69,12 @@ let symbolic_value (cs : t) : S.t =
 
 let f_pair_1 fc fs (c, s) = (fc c, fs s) [@@inline always]
 
+let f_pair_1' fc fs (c, s) =
+  match fc c with
+  | Error _ as e -> e
+  | Ok c -> ( match fs s with Error _ as e -> e | Ok s -> Ok (c, s) )
+[@@inline always]
+
 let f_pair_2 fc fs (c1, s1) (c2, s2) = (fc c1 c2, fs s1 s2) [@@inline always]
 
 let f_pair_1_cst fc fs v = (fc v, fs v) [@@inline always]
@@ -344,13 +350,13 @@ module MK_Iop
 
   let ge_u = f_pair_2 CIop.ge_u SIop.ge_u
 
-  let trunc_f32_s = f_pair_1 CIop.trunc_f32_s SIop.trunc_f32_s
+  let trunc_f32_s = f_pair_1' CIop.trunc_f32_s SIop.trunc_f32_s
 
-  let trunc_f32_u = f_pair_1 CIop.trunc_f32_u SIop.trunc_f32_u
+  let trunc_f32_u = f_pair_1' CIop.trunc_f32_u SIop.trunc_f32_u
 
-  let trunc_f64_s = f_pair_1 CIop.trunc_f64_s SIop.trunc_f64_s
+  let trunc_f64_s = f_pair_1' CIop.trunc_f64_s SIop.trunc_f64_s
 
-  let trunc_f64_u = f_pair_1 CIop.trunc_f64_u SIop.trunc_f64_u
+  let trunc_f64_u = f_pair_1' CIop.trunc_f64_u SIop.trunc_f64_u
 
   let trunc_sat_f32_s = f_pair_1 CIop.trunc_sat_f32_s SIop.trunc_sat_f32_s
 

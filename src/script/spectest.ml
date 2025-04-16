@@ -7,24 +7,40 @@ open Types
 
 type extern_module = Concrete_extern_func.extern_func Link.extern_module
 
+let ( let* ) = Result.bind
+
 let extern_m =
-  let print = () in
-  let print_i32 i = pr "%li@\n%!" i in
-  let print_i64 i = pr "%Li@\n%!" i in
-  let print_f32 f = pr "%a@\n%!" Float32.pp f in
-  let print_f64 f = pr "%a@\n%!" Float64.pp f in
+  let print = Ok () in
+  let print_i32 i =
+    pr "%li@\n%!" i;
+    Ok ()
+  in
+  let print_i64 i =
+    pr "%Li@\n%!" i;
+    Ok ()
+  in
+  let print_f32 f =
+    pr "%a@\n%!" Float32.pp f;
+    Ok ()
+  in
+  let print_f64 f =
+    pr "%a@\n%!" Float64.pp f;
+    Ok ()
+  in
   let print_i32_f32 i f =
-    print_i32 i;
-    print_f32 f
+    let* () = print_i32 i in
+    let* () = print_f32 f in
+    Ok ()
   in
   let print_f64_f64 f1 f2 =
-    print_f64 f1;
-    print_f64 f2
+    let* () = print_f64 f1 in
+    let* () = print_f64 f2 in
+    Ok ()
   in
-  let func = () in
-  let func_in_i32 (_i : int32) = () in
-  let func_out_i32 = 1l in
-  let func_in_i32_out_i32 (_i : int32) = 1l in
+  let func = Ok () in
+  let func_in_i32 (_i : int32) = Ok () in
+  let func_out_i32 = Ok 1l in
+  let func_in_i32_out_i32 (_i : int32) = Ok 1l in
 
   let functions =
     [ ("print", Concrete_extern_func.Extern_func (Func (Res, R0), print))

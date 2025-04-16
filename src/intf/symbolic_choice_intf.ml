@@ -4,7 +4,7 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of Trap.t * Smtml.Model.t * (int * string) list * int32 list
+  | ETrap of Result.err * Smtml.Model.t * (int * string) list * int32 list
   | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * int32 list
 
 module type S = sig
@@ -26,7 +26,7 @@ module type S = sig
 
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
-  val trap : Trap.t -> 'a t
+  val trap : Result.err -> 'a t
 
   val select : V.bool -> Bool.t t
 

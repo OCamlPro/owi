@@ -1,6 +1,6 @@
   $ owi replay --replay-file simple.scfg simple.wat
   unreachable
-  [26]
+  [94]
   $ owi replay --replay-file simple.scfg simple.wat --debug
   parsing      ...
   checking     ...
@@ -25,4 +25,4 @@
   stack        : [  ]
   running instr: unreachable
   unreachable
-  [26]
+  [94]

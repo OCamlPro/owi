@@ -40,7 +40,6 @@ type err =
   | `Size_minimum_greater_than_maximum
   | `Start_function
   | `Timeout
-  | `Trap of Trap.t
   | `Type_mismatch of string
   | `Unbound_last_module
   | `Unbound_module of string
@@ -85,6 +84,21 @@ type err =
   | `Unbounded_quantification
   | `Invalid_model of string
   | `Unimplemented of string
+  | `Out_of_bounds_table_access
+  | `Out_of_bounds_memory_access
+  | `Undefined_element
+  | `Uninitialized_element of int
+  | `Integer_overflow
+  | `Integer_divide_by_zero
+  | `Invalid_conversion_to_integer
+  | `Element_type_error
+  | `Unreachable
+  | `Indirect_call_type_mismatch
+  | `Extern_call_arg_type_mismatch
+  | `Extern_call_null_arg
+  | `Memory_leak_use_after_free
+  | `Memory_heap_buffer_overflow
+  | `Double_free
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -131,7 +145,6 @@ let rec err_to_string = function
     "size minimum must not be greater than maximum"
   | `Start_function -> "start function must have type [] -> []"
   | `Timeout -> "timeout"
-  | `Trap t -> Fmt.str "trap: %s" (Trap.to_string t)
   | `Type_mismatch msg -> Fmt.str "type mismatch (%s)" msg
   | `Unbound_last_module -> "unbound last module"
   | `Unbound_module id -> Fmt.str "unbound module %s" id
@@ -184,3 +197,114 @@ let rec err_to_string = function
   | `Unbounded_quantification -> Fmt.str "unbounded quantification"
   | `Invalid_model msg -> Fmt.str "invalid model: %s" msg
   | `Unimplemented msg -> Fmt.str "unimplemented: %s" msg
+  | `Out_of_bounds_table_access -> "out of bounds table access"
+  | `Out_of_bounds_memory_access -> "out of bounds memory access"
+  | `Undefined_element -> "undefined element"
+  | `Uninitialized_element fun_i -> Fmt.str "uninitialized element %i" fun_i
+  | `Integer_overflow -> "integer overflow"
+  | `Integer_divide_by_zero -> "integer divide by zero"
+  | `Invalid_conversion_to_integer -> "invalid conversion to integer"
+  | `Element_type_error -> "element_type_error"
+  | `Unreachable -> "unreachable"
+  | `Indirect_call_type_mismatch -> "indirect call type mismatch"
+  | `Extern_call_arg_type_mismatch -> "extern call arg type mismatch"
+  | `Extern_call_null_arg -> "extern call null arg"
+  | `Memory_leak_use_after_free -> "memory leak use after free"
+  | `Memory_heap_buffer_overflow -> "memory heap buffer overflow"
+  | `Double_free -> "double free"
+
+let err_to_exit_code = function
+  | `No_error -> Cmdliner.Cmd.Exit.ok
+  | `Alignment_too_large -> 1
+  | `Assert_failure -> 2
+  | `Bad_result -> 3
+  | `Call_stack_exhausted -> 4
+  | `Constant_expression_required -> 5
+  | `Constant_out_of_range -> 6
+  | `Did_not_fail_but_expected _ -> 7
+  | `Duplicate_export_name -> 8
+  | `Duplicate_global _id -> 9
+  | `Duplicate_local _id -> 10
+  | `Duplicate_memory _id -> 11
+  | `Duplicate_table _id -> 12
+  | `Found_bug _count -> 13
+  | `Global_is_immutable -> 14
+  | `Illegal_escape _txt -> 15
+  | `Import_after_function -> 16
+  | `Import_after_global -> 17
+  | `Import_after_memory -> 18
+  | `Import_after_table -> 19
+  | `Incompatible_import_type _name -> 20
+  | `Inline_function_type -> 21
+  | `Invalid_result_arity -> 22
+  | `Lexer_illegal_character _c -> 23
+  | `Lexer_unknown_operator _op -> 23
+  | `Malformed_utf8_encoding _txt -> 24
+  | `Memory_size_too_large -> 25
+  | `Msg _msg -> 26
+  | `Multiple_memories -> 27
+  | `Multiple_start_sections -> 28
+  | `Parse_fail _txt -> 30
+  | `Size_minimum_greater_than_maximum -> 31
+  | `Start_function -> 32
+  | `Timeout -> 33
+  | `Double_free -> 34
+  | `Type_mismatch _msg -> 35
+  | `Unbound_last_module -> 36
+  | `Unbound_module _id -> 37
+  | `Unbound_name _id -> 38
+  | `Undeclared_function_reference -> 39
+  | `Unexpected_token _token -> 40
+  | `Unknown_data _id -> 41
+  | `Unknown_elem _id -> 42
+  | `Unknown_func _id -> 43
+  | `Unknown_global _id -> 44
+  | `Unknown_import _ -> 45
+  | `Unknown_label _id -> 46
+  | `Unknown_local _id -> 47
+  | `Unknown_memory _id -> 48
+  | `Unknown_module _id -> 49
+  | `Unknown_operator -> 50
+  | `Unknown_table _id -> 51
+  | `Unknown_type _id -> 52
+  | `Unsupported_file_extension _ext -> 53
+  | `Failed_with_but_expected (_got, _expected) -> 54
+  | `Spec_invalid_int32 _i32 -> 56
+  | `Spec_invalid_int64 _i64 -> 57
+  | `Spec_invalid_float32 _f32 -> 58
+  | `Spec_invalid_float64 _f64 -> 59
+  | `Spec_invalid_indice _id -> 60
+  | `Spec_invalid_text_indice _id -> 61
+  | `Unknown_annotation_clause _s -> 62
+  | `Unknown_annotation_object _s -> 63
+  | `Spec_unknown_binder _id -> 64
+  | `Spec_unknown_param _id -> 65
+  | `Spec_unknown_variable _id -> 66
+  | `Spec_unknown_binder_type _s -> 67
+  | `Spec_unknown_prop _pr -> 68
+  | `Spec_unknown_term _tm -> 69
+  | `Spec_type_error _str -> 70
+  | `Contract_unknown_func _id -> 71
+  | `Empty_annotation_id -> 72
+  | `Empty_identifier -> 73
+  | `Unclosed_annotation -> 74
+  | `Unclosed_comment -> 75
+  | `Unclosed_string -> 76
+  | `Unbounded_quantification -> 77
+  | `Invalid_model _msg -> 78
+  | `Unknown_export _id -> 79
+  | `Unimplemented _msg -> 80
+  | `Element_type_error -> 81
+  | `Extern_call_arg_type_mismatch -> 82
+  | `Extern_call_null_arg -> 83
+  | `Indirect_call_type_mismatch -> 84
+  | `Integer_divide_by_zero -> 85
+  | `Integer_overflow -> 86
+  | `Invalid_conversion_to_integer -> 87
+  | `Memory_heap_buffer_overflow -> 88
+  | `Memory_leak_use_after_free -> 89
+  | `Out_of_bounds_memory_access -> 90
+  | `Out_of_bounds_table_access -> 91
+  | `Undefined_element -> 92
+  | `Uninitialized_element _ -> 93
+  | `Unreachable -> 94

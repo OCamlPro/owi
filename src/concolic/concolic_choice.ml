@@ -5,7 +5,7 @@
 type err =
   | Assert_fail
     (* TODO add assertion (will be needed by the environment functions *)
-  | Trap of Trap.t
+  | Trap of Result.err
   | Assume_fail of Symbolic_value.bool
   | ErrExplicitStop
 
@@ -165,5 +165,5 @@ let run preallocated_values (M v) : _ run_result =
   v (init_thread preallocated_values shared)
 
 let run' t : _ run_result =
-  let preallocated_values = Hashtbl.create 0 in
+  let preallocated_values = Hashtbl.create 16 in
   run preallocated_values t

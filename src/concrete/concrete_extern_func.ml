@@ -16,6 +16,6 @@ include
       type bool = Bool.t
     end)
     (struct
-      type 'a t = 'a
+      type 'a t = 'a Result.t
     end)
     (Concrete_memory)

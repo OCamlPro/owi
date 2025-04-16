@@ -7,7 +7,7 @@ open Symbolic_value
 module Make (Thread : Thread.S) = struct
   type err =
     | Assert_fail
-    | Trap of Trap.t
+    | Trap of Result.err
 
   type 'a t =
     | M of (Thread.t -> Solver.t -> ('a, err) Prelude.Result.t * Thread.t)

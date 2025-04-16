@@ -6,23 +6,31 @@ let () = Random.self_init ()
 let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let str_buffer = Buffer.create 16 in
-  let height (_ : int32) : int32 = 45l in
-  let width (_ : int32) : int32 = 30l in
-  let sleep (_ : int32) = Unix.sleepf 0.2 in
-  let newline (_ : int32) = Buffer.add_string str_buffer "|\n" in
+  let height (_ : int32) = Ok 45l in
+  let width (_ : int32) = Ok 30l in
+  let sleep (_ : int32) =
+    Unix.sleepf 0.2;
+    Ok ()
+  in
+  let newline (_ : int32) =
+    Buffer.add_string str_buffer "|\n";
+    Ok ()
+  in
   let cell_print (i : int32) =
-    Buffer.add_string str_buffer (if i = 1l then "| X " else "|   ")
+    Buffer.add_string str_buffer (if i = 1l then "| X " else "|   ");
+    Ok ()
   in
   let clear_screen (_ : int32) =
     print_endline "\027[2J";
     print_endline (Buffer.contents str_buffer);
-    Buffer.clear str_buffer
+    Buffer.clear str_buffer;
+    Ok ()
   in
-  let rand_val (bound : int32) : int32 =
+  let rand_val (bound : int32) =
     let r = Random.int32 bound in
-    if r = 0l then 1l else 0l
+    Ok (if r = 0l then 1l else 0l)
   in
-  let init_window (_ : int32) = () in
+  let init_window (_ : int32) = Ok () in
   (* we need to describe their types *)
   let functions =
     [ ( "height"
