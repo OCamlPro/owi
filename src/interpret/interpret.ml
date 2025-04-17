@@ -746,7 +746,7 @@ module Make (P : Interpret_intf.P) :
 
   let exec_func ~return ~id (state : State.exec_state) env
     (func : binary Types.func) =
-    Log.debug1 "calling func : func %s@."
+    Log.debug1 "calling func  : func %s@."
       (Option.value func.id ~default:"anonymous");
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
     let args, stack = Stack.pop_n state.stack (List.length param_type) in
@@ -842,8 +842,11 @@ module Make (P : Interpret_intf.P) :
     let env = state.env in
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
-    Log.debug2 "stack        : [ %a ]@." Stack.pp stack;
-    Log.debug2 "running instr: %a@." (Types.pp_instr ~short:true) instr;
+    Log.debug2 "stack         : [ %a ]@." Stack.pp stack;
+    Log.debug2 "running instr : %a@." (Types.pp_instr ~short:false) instr;
+    let* pc = Choice.get_pc () in
+    if !Log.print_pc_on then
+      Log.debug2 "path condition: %a@." Smtml.Expr.pp_list pc;
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
@@ -1496,7 +1499,7 @@ module Make (P : Interpret_intf.P) :
       | State.Return res -> Choice.return res
     end
     | [] -> (
-      Log.debug2 "stack        : [ %a ]@." Stack.pp state.stack;
+      Log.debug2 "stack         : [ %a ]@." Stack.pp state.stack;
       let* state = State.end_block state in
       match state with
       | State.Continue state -> loop state

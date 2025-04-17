@@ -68,6 +68,8 @@ module Make (Thread : Thread.S) = struct
   let run ~workers:_ solver t thread = run t thread (Solver.fresh solver ())
 
   let lift_mem _ = assert false
+
+  let get_pc () = return []
 end
 
 include Make (Thread_with_memory)

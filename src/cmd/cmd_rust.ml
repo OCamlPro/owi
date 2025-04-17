@@ -42,11 +42,11 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file debug
 
   out
 
-let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
-  ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~out_file
-  ~(workspace : Fpath.t option) ~model_out_file ~with_breadcrumbs :
+let cmd ~debug ~print_pc ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling
+  ~unsafe ~optimize ~no_stop_at_failure ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
+  ~concolic ~solver ~profile ~model_format ~entry_point ~invoke_with_symbols
+  ~out_file ~(workspace : Fpath.t option) ~model_out_file ~with_breadcrumbs :
   unit Result.t =
   let* workspace =
     match workspace with
@@ -61,8 +61,8 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
-    ~with_breadcrumbs
+    ~profiling ~debug ~print_pc ~unsafe ~rac:false ~srac:false ~optimize
+    ~workers ~no_stop_at_failure ~no_value
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~profile ~model_format ~entry_point
+    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
