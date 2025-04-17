@@ -94,6 +94,9 @@ OPTIONS
        -p, --profiling
            profiling mode
 
+       --print-pc
+           print path condition
+
        --profile=FILE
            Profile file.
 

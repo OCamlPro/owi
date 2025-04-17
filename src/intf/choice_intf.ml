@@ -22,6 +22,8 @@ module type Base = sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
+
+  val get_pc : unit -> Smtml.Expr.t list t
 end
 
 module type Complete = sig

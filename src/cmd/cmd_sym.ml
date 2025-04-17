@@ -193,7 +193,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers
   ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
   ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
@@ -207,6 +207,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
+  if print_pc then Log.print_pc_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let pc = Choice.return () in
