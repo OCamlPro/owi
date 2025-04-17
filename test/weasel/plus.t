@@ -77,47 +77,47 @@
   typechecking ...
   linking      ...
   interpreting ...
-  stack        : [  ]
-  running instr: call 2
-  calling func : func start
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ 42 ]
-  running instr: call 3
-  calling func : func __weasel_plus_three
-  stack        : [  ]
-  running instr: local.get 0
-  stack        : [ 42 ]
-  running instr: call 1
-  calling func : func plus_three
-  stack        : [  ]
-  running instr: i32.const 3
-  stack        : [ 3 ]
-  running instr: local.get 0
-  stack        : [ 42 ; 3 ]
-  running instr: i32.add
-  stack        : [ 45 ]
-  stack        : [ 45 ]
-  running instr: local.set 2
-  stack        : [  ]
-  running instr: local.get 2
-  stack        : [ 45 ]
-  running instr: local.get 0
-  stack        : [ 42 ; 45 ]
-  running instr: i32.const 3
-  stack        : [ 3 ; 42 ; 45 ]
-  running instr: i32.add
-  stack        : [ 45 ; 45 ]
-  running instr: i32.eq
-  stack        : [ 1 ]
-  running instr: call 0
-  stack        : [  ]
-  running instr: local.get 2
-  stack        : [ 45 ]
-  stack        : [ 45 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
+  stack         : [  ]
+  running instr : call 2
+  calling func  : func start
+  stack         : [  ]
+  running instr : i32.const 42
+  stack         : [ 42 ]
+  running instr : call 3
+  calling func  : func __weasel_plus_three
+  stack         : [  ]
+  running instr : local.get 0
+  stack         : [ 42 ]
+  running instr : call 1
+  calling func  : func plus_three
+  stack         : [  ]
+  running instr : i32.const 3
+  stack         : [ 3 ]
+  running instr : local.get 0
+  stack         : [ 42 ; 3 ]
+  running instr : i32.add
+  stack         : [ 45 ]
+  stack         : [ 45 ]
+  running instr : local.set 2
+  stack         : [  ]
+  running instr : local.get 2
+  stack         : [ 45 ]
+  running instr : local.get 0
+  stack         : [ 42 ; 45 ]
+  running instr : i32.const 3
+  stack         : [ 3 ; 42 ; 45 ]
+  running instr : i32.add
+  stack         : [ 45 ; 45 ]
+  running instr : i32.eq
+  stack         : [ 1 ]
+  running instr : call 0
+  stack         : [  ]
+  running instr : local.get 2
+  stack         : [ 45 ]
+  stack         : [ 45 ]
+  running instr : drop
+  stack         : [  ]
+  stack         : [  ]
   All OK
   $ owi sym plus.wat --srac --debug
   parsing      ...
@@ -134,45 +134,45 @@
   typechecking ...
   linking      ...
   interpreting ...
-  stack        : [  ]
-  running instr: call 2
-  calling func : func start
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ 42 ]
-  running instr: call 3
-  calling func : func __weasel_plus_three
-  stack        : [  ]
-  running instr: local.get 0
-  stack        : [ 42 ]
-  running instr: call 1
-  calling func : func plus_three
-  stack        : [  ]
-  running instr: i32.const 3
-  stack        : [ 3 ]
-  running instr: local.get 0
-  stack        : [ 42 ; 3 ]
-  running instr: i32.add
-  stack        : [ 45 ]
-  stack        : [ 45 ]
-  running instr: local.set 2
-  stack        : [  ]
-  running instr: local.get 2
-  stack        : [ 45 ]
-  running instr: local.get 0
-  stack        : [ 42 ; 45 ]
-  running instr: i32.const 3
-  stack        : [ 3 ; 42 ; 45 ]
-  running instr: i32.add
-  stack        : [ 45 ; 45 ]
-  running instr: i32.eq
-  stack        : [ 1 ]
-  running instr: call 0
-  stack        : [  ]
-  running instr: local.get 2
-  stack        : [ 45 ]
-  stack        : [ 45 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
+  stack         : [  ]
+  running instr : call 2
+  calling func  : func start
+  stack         : [  ]
+  running instr : i32.const 42
+  stack         : [ 42 ]
+  running instr : call 3
+  calling func  : func __weasel_plus_three
+  stack         : [  ]
+  running instr : local.get 0
+  stack         : [ 42 ]
+  running instr : call 1
+  calling func  : func plus_three
+  stack         : [  ]
+  running instr : i32.const 3
+  stack         : [ 3 ]
+  running instr : local.get 0
+  stack         : [ 42 ; 3 ]
+  running instr : i32.add
+  stack         : [ 45 ]
+  stack         : [ 45 ]
+  running instr : local.set 2
+  stack         : [  ]
+  running instr : local.get 2
+  stack         : [ 45 ]
+  running instr : local.get 0
+  stack         : [ 42 ; 45 ]
+  running instr : i32.const 3
+  stack         : [ 3 ; 42 ; 45 ]
+  running instr : i32.add
+  stack         : [ 45 ; 45 ]
+  running instr : i32.eq
+  stack         : [ 1 ]
+  running instr : call 0
+  stack         : [  ]
+  running instr : local.get 2
+  stack         : [ 45 ]
+  stack         : [ 45 ]
+  running instr : drop
+  stack         : [  ]
+  stack         : [  ]
   All OK

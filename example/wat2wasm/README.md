@@ -10,19 +10,19 @@ $ owi run ./42.wasm --debug
 typechecking ...
 linking      ...
 interpreting ...
-stack        : [  ]
-running instr: call 0
-calling func : func anonymous
-stack        : [  ]
-running instr: i32.const 20
-stack        : [ i32.const 20 ]
-running instr: i32.const 22
-stack        : [ i32.const 22 ; i32.const 20 ]
-running instr: i32.add
-stack        : [ i32.const 42 ]
-running instr: drop
-stack        : [  ]
-stack        : [  ]
+stack         : [  ]
+running instr : call 0
+calling func  : func anonymous
+stack         : [  ]
+running instr : i32.const 20
+stack         : [ i32.const 20 ]
+running instr : i32.const 22
+stack         : [ i32.const 22 ; i32.const 20 ]
+running instr : i32.add
+stack         : [ i32.const 42 ]
+running instr : drop
+stack         : [  ]
+stack         : [  ]
 ```
 
 ## Man page
