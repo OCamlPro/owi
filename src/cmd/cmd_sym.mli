@@ -29,6 +29,7 @@ val handle_result :
 val cmd :
      profiling:bool
   -> debug:bool
+  -> print_pc:bool
   -> unsafe:bool
   -> rac:bool
   -> srac:bool

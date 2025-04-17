@@ -21,3 +21,6 @@ let select_i32 i = Ok i [@@inline]
 let trap t = Error t
 
 let run m = m
+
+let get_pc () = return []
+

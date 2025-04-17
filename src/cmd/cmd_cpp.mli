@@ -4,6 +4,7 @@
 
 val cmd :
      debug:bool
+  -> print_pc:bool
   -> arch:int
   -> workers:int
   -> opt_lvl:string

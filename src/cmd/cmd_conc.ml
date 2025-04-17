@@ -294,9 +294,7 @@ let find_node_to_run tree =
   let ( let* ) = Option.bind in
   let rec loop tree to_update =
     match tree.node with
-    | Not_explored ->
-      Log.debug2 "Try unexplored@.%a@." Concolic_choice.pp_pc tree.pc;
-      Some (tree.pc, tree :: to_update)
+    | Not_explored -> Some (tree.pc, tree :: to_update)
     | Select { cond = _; if_true; if_false } ->
       let* b =
         match
@@ -330,12 +328,9 @@ let find_node_to_run tree =
     | Assume { cond = _; cont } -> loop cont (tree :: to_update)
     | Assert { cond; cont = _; status = Unknown } ->
       let pc : Concolic_choice.pc = Select (false, cond) :: tree.pc in
-      Log.debug2 "Try Assert@.%a@.@." Concolic_choice.pp_pc pc;
       Some (pc, tree :: to_update)
     | Assert { cond = _; cont; status = _ } -> loop cont (tree :: to_update)
-    | Unreachable ->
-      Log.debug2 "Unreachable (Retry)@.%a@." Concolic_choice.pp_pc tree.pc;
-      None
+    | Unreachable -> None
     | Being_explored | Explored -> None
   in
   loop tree []
@@ -390,7 +385,6 @@ let run solver tree link_state modules_to_run =
         decr count_path;
         (* Current path condition led to assume failure, try to satisfy *)
         Log.debug2 "Assume_fail: %a@." Smtml.Expr.pp c;
-        Log.debug2 "Pc:@.%a" Concolic_choice.pp_pc trace.remaining_pc;
         Log.debug2 "Assignments:@.%a@."
           (Concolic_choice.pp_assignments ~no_value:false)
           trace.assignments;
@@ -437,7 +431,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
+let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers:_
   ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
   ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
   ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
@@ -452,6 +446,7 @@ let cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers:_
   Option.iter Stats.init_logger_to_file profile;
   if profiling then Log.profiling_on := true;
   if debug then Log.debug_on := true;
+  if print_pc then Log.print_pc_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let to_string m =

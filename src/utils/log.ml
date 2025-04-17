@@ -4,6 +4,8 @@
 
 let debug_on = ref false
 
+let print_pc_on = ref false
+
 let profiling_on = ref false
 
 let debug0 t : unit =
