@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_memory.ml &mdash; Coverage report</title>
-    <meta name="description" content="95.00% coverage in src/concrete/concrete_memory.ml">
+    <meta name="description" content="95.56% coverage in src/concrete/concrete_memory.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/concrete/</span>concrete_memory.ml
         </a>
       </h1>
-      <h2>95.00%</h2>
+      <h2>95.56%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:37.82%"></span>
@@ -346,44 +346,44 @@ let get_limits { limits; _ } = <span data-count="104">l</span>imits
 let store_8 mem ~addr n =
   <span data-count="7885">l</span>et addr = Int32.to_int addr in
   <span data-count="7885">l</span>et n = Int32.to_int n in
-  <span data-count="7885">B</span>ytes.set_int8 mem.data addr n
+  <span data-count="7885">O</span>k (Bytes.set_int<span data-count="7885">8</span> mem.data addr n)
 
 let store_16 mem ~addr n =
   <span data-count="84">l</span>et addr = Int32.to_int addr in
   <span data-count="84">l</span>et n = Int32.to_int n in
-  <span data-count="84">B</span>ytes.set_int16_le mem.data addr n
+  <span data-count="84">O</span>k (Bytes.set_int16_l<span data-count="84">e</span> mem.data addr n)
 
 let store_32 mem ~addr n =
   <span data-count="26592">l</span>et addr = Int32.to_int addr in
-  <span data-count="26592">B</span>ytes.set_int32_le mem.data addr n
+  <span data-count="26592">O</span>k (Bytes.set_int32_l<span data-count="26592">e</span> mem.data addr n)
 
 let store_64 mem ~addr n =
   <span data-count="767">l</span>et addr = Int32.to_int addr in
-  <span data-count="767">B</span>ytes.set_int64_le mem.data addr n
+  <span data-count="767">O</span>k (Bytes.set_int64_l<span data-count="767">e</span> mem.data addr n)
 
 let load_8_s mem addr =
   <span data-count="472">l</span>et addr = Int32.to_int addr in
-  <span data-count="472">I</span>nt32.of_int @@ Bytes.get_int<span data-count="472">8</span> mem.data addr
+  <span data-count="472">O</span>k (Int32.of_in<span data-count="472">t</span> @@ Bytes.get_int<span data-count="472">8</span> mem.data addr)
 
 let load_8_u mem addr =
   <span data-count="1848124">l</span>et addr = Int32.to_int addr in
-  <span data-count="1848124">I</span>nt32.of_int @@ Bytes.get_uint<span data-count="1848124">8</span> mem.data addr
+  <span data-count="1848124">O</span>k (Int32.of_in<span data-count="1848124">t</span> @@ Bytes.get_uint<span data-count="1848124">8</span> mem.data addr)
 
 let load_16_s mem addr =
   <span data-count="104">l</span>et addr = Int32.to_int addr in
-  <span data-count="104">I</span>nt32.of_int @@ Bytes.get_int16_l<span data-count="104">e</span> mem.data addr
+  <span data-count="104">O</span>k (Int32.of_in<span data-count="104">t</span> @@ Bytes.get_int16_l<span data-count="104">e</span> mem.data addr)
 
 let load_16_u mem addr =
   <span data-count="104">l</span>et addr = Int32.to_int addr in
-  <span data-count="104">I</span>nt32.of_int @@ Bytes.get_uint16_l<span data-count="104">e</span> mem.data addr
+  <span data-count="104">O</span>k (Int32.of_in<span data-count="104">t</span> @@ Bytes.get_uint16_l<span data-count="104">e</span> mem.data addr)
 
 let load_32 mem addr =
   <span data-count="44612">l</span>et addr = Int32.to_int addr in
-  <span data-count="44612">B</span>ytes.get_int32_le mem.data addr
+  <span data-count="44612">O</span>k (Bytes.get_int32_l<span data-count="44612">e</span> mem.data addr)
 
 let load_64 mem addr =
   <span data-count="1342">l</span>et addr = Int32.to_int addr in
-  <span data-count="1342">B</span>ytes.get_int64_le mem.data addr
+  <span data-count="1342">O</span>k (Bytes.get_int64_l<span data-count="1342">e</span> mem.data addr)
 
 let size_in_pages mem = <span data-count="793">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="793">h</span> mem.data / page_size)
 

@@ -136,7 +136,7 @@ module type Base = sig
 
   val select_i32 : V.int32 -&gt; Int32.t t
 
-  val trap : Trap.t -&gt; 'a t
+  val trap : Result.err -&gt; 'a t
 
   val ( let* ) : 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t
 

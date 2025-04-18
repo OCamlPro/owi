@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_run.ml &mdash; Coverage report</title>
-    <meta name="description" content="92.86% coverage in src/cmd/cmd_run.ml">
+    <meta name="description" content="93.33% coverage in src/cmd/cmd_run.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,10 @@
           <span class="dirname">src/cmd/</span>cmd_run.ml
         </a>
       </h1>
-      <h2>92.86%</h2>
+      <h2>93.33%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:6.06%"></span>
+      <span class="some-visited" style="bottom:5.41%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,9 +30,9 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
@@ -41,21 +41,25 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="some-visited"> </span>
+<a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="some-visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -93,6 +97,10 @@
 <a href="#L31">31</a>
 <a href="#L32">32</a>
 <a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -101,7 +109,11 @@
 open Syntax
 
 let extern_module : Concrete_extern_func.extern_func Link.extern_module =
-  let assert_i32 n = assert <span data-count="2">(</span>no<span data-count="1">t</span> @@ Prelude.Int32.equa<span data-count="1">l</span> n 0l) in
+  let assert_i32 n =
+    (* TODO: proper Error here ? *)
+    <span data-count="1">a</span>ssert <span data-count="1">(</span>no<span data-count="1">t</span> @@ Prelude.Int32.equa<span data-count="1">l</span> n 0l);
+    Ok ()
+  in
   let functions =
     [ ( "assert"
       , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
@@ -112,21 +124,21 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 (* module name is called "symbolic" to be compatible with code generator *)
 let link_state =
-  Link.extern_modul<span data-count="996">e</span> Link.empty_state ~name:"symbolic" extern_module
+  Link.extern_modul<span data-count="997">e</span> Link.empty_state ~name:"symbolic" extern_module
 
 let run_file ~unsafe ~rac ~optimize filename =
-  <span data-count="33">l</span>et name = None in
-  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="32">L</span>ink.empty_state in
+  <span data-count="34">l</span>et name = None in
+  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="33">L</span>ink.empty_state in
   let+ (_ : _ Link.state) =
-    Compile.File.until_interpre<span data-count="33">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
+    Compile.File.until_interpre<span data-count="34">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
       link_state filename
   in
   <span data-count="33">(</span>)
 
 let cmd ~profiling ~debug ~unsafe ~rac ~optimize ~files =
-  <span data-count="33">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
-  <span data-count="33">i</span>f debug then <span data-count="9">L</span>og.debug_on := true;
-  <span data-count="33">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
+  <span data-count="34">i</span>f profiling then <span data-count="0">L</span>og.profiling_on := true;
+  <span data-count="34">i</span>f debug then <span data-count="9">L</span>og.debug_on := true;
+  <span data-count="34">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
 </code></pre>
       </div>
     </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>convert.ml &mdash; Coverage report</title>
-    <meta name="description" content="99.71% coverage in src/primitives/convert.ml">
+    <meta name="description" content="99.72% coverage in src/primitives/convert.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/primitives/</span>convert.ml
         </a>
       </h1>
-      <h2>99.71%</h2>
+      <h2>99.72%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="bottom:21.91%"></span>
@@ -608,44 +608,44 @@ module MInt32 = struct
   let wrap_i64 x = <span data-count="127">I</span>nt64.to_int32 x
 
   let trunc_f32_s x =
-    <span data-count="61">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="61">i</span>f Float32.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else
       <span data-count="51">l</span>et xf = Float32.to_float x in
       <span data-count="51">i</span>f
         let xf = Float64.of_float xf in
         <span data-count="51">l</span>et mif = Int32.(to_floa<span data-count="51">t</span> min_int) in
         Float64.(g<span data-count="51">e</span> xf (of_floa<span data-count="51">t</span> ~-<span data-count="51">.</span>mif)<span data-count="4">)</span> || Float64.(l<span data-count="47">t</span> xf (of_floa<span data-count="47">t</span> mif)<span data-count="4">)</span>
-      then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="43">I</span>nt32.of_float xf
+      then <span data-count="8">E</span>rror `Integer_overflow
+      else <span data-count="43">O</span>k (Int32.of_floa<span data-count="43">t</span> xf)
 
   let trunc_f32_u x =
-    <span data-count="71">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="71">i</span>f Float32.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else
       <span data-count="61">l</span>et xf = Float32.to_float x in
       <span data-count="61">i</span>f
         let xf = Float64.of_float xf in
         <span data-count="61">F</span>loat64.(g<span data-count="61">e</span> xf (of_floa<span data-count="61">t</span> @@ (-<span data-count="61">.</span>Int32.(to_floa<span data-count="61">t</span> min_int) *. 2.0))<span data-count="4">)</span>
         || Float64.(l<span data-count="57">e</span> xf (Float64.of_floa<span data-count="57">t</span> ~-<span data-count="57">.</span>1.0)<span data-count="4">)</span>
-      then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-      else <span data-count="53">I</span>nt64.(to_int32 (of_floa<span data-count="53">t</span> xf))
+      then <span data-count="8">E</span>rror `Integer_overflow
+      else <span data-count="53">O</span>k Int64.(to_int3<span data-count="53">2</span> (of_floa<span data-count="53">t</span> xf))
 
   let trunc_f64_s x =
-    <span data-count="59">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
-    else <span data-count="49">i</span>f
-      let mif = Int32.(to_floa<span data-count="49">t</span> min_int) in
-      Float64.(g<span data-count="49">e</span> x (of_floa<span data-count="49">t</span> @@ -<span data-count="49">.</span>mif)<span data-count="4">)</span>
-      || Float64.(l<span data-count="45">e</span> x (of_floa<span data-count="45">t</span> @@ (mif -. 1.0))<span data-count="4">)</span>
-    then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-    else <span data-count="41">I</span>nt32.of_float (Float64.to_floa<span data-count="41">t</span> x)
+    <span data-count="60">i</span>f Float64.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
+    else <span data-count="50">i</span>f
+      let mif = Int32.(to_floa<span data-count="50">t</span> min_int) in
+      Float64.(g<span data-count="50">e</span> x (of_floa<span data-count="50">t</span> @@ -<span data-count="50">.</span>mif)<span data-count="4">)</span>
+      || Float64.(l<span data-count="46">e</span> x (of_floa<span data-count="46">t</span> @@ (mif -. 1.0))<span data-count="5">)</span>
+    then <span data-count="9">E</span>rror `Integer_overflow
+    else <span data-count="41">O</span>k (Int32.of_floa<span data-count="41">t</span> (Float64.to_floa<span data-count="41">t</span> x))
 
   let trunc_f64_u x =
-    <span data-count="65">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="65">i</span>f Float64.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else <span data-count="55">i</span>f
       let mif = Int32.to_float Int32.min_int in
       <span data-count="55">F</span>loat64.(g<span data-count="55">e</span> x (of_floa<span data-count="55">t</span> @@ (-<span data-count="55">.</span>mif *. 2.0))<span data-count="10">)</span>
       || Float64.(l<span data-count="45">e</span> x (of_floa<span data-count="45">t</span> ~-<span data-count="45">.</span>1.0)<span data-count="4">)</span>
-    then <span data-count="14">r</span>aise @@ Types.Trap "integer overflow"
-    else <span data-count="41">I</span>nt64.(to_int32 (of_floa<span data-count="41">t</span> (Float64.to_floa<span data-count="41">t</span> x)))
+    then <span data-count="14">E</span>rror `Integer_overflow
+    else <span data-count="41">O</span>k Int64.(to_int3<span data-count="41">2</span> (of_floa<span data-count="41">t</span> (Float64.to_floa<span data-count="41">t</span> x)))
 
   let trunc_sat_f32_s x =
     <span data-count="45">i</span>f Float32.ne x x then <span data-count="8">0</span>l
@@ -691,42 +691,42 @@ module MInt64 = struct
   let extend_i32_u x = <span data-count="3467">I</span>nt64.logand (Int64.of_int3<span data-count="3467">2</span> x) 0x0000_0000_ffff_ffffL
 
   let trunc_f32_s x =
-    <span data-count="59">i</span>f Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="59">i</span>f Float32.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else <span data-count="49">i</span>f
       let mif = Int64.(to_floa<span data-count="49">t</span> min_int) in
       Float32.(ge <span data-count="49">x</span> @@ of_floa<span data-count="49">t</span> @@ ~-<span data-count="49">.</span>mif<span data-count="4">)</span> || Float32.(lt <span data-count="45">x</span> @@ of_floa<span data-count="45">t</span> mif<span data-count="4">)</span>
-    then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-    else <span data-count="41">I</span>nt64.of_float @@ Float32.to_floa<span data-count="41">t</span> x
+    then <span data-count="8">E</span>rror `Integer_overflow
+    else <span data-count="41">O</span>k (Int64.of_floa<span data-count="41">t</span> @@ Float32.to_floa<span data-count="41">t</span> x)
 
   let trunc_f32_u x =
     <span data-count="49">l</span>et mif = Int64.(to_floa<span data-count="49">t</span> min_int) in
-    if Float32.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    if Float32.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else <span data-count="39">i</span>f
       Float32.(ge <span data-count="39">x</span> @@ of_floa<span data-count="39">t</span> ~-<span data-count="39">.</span>(mif *. 2.0)<span data-count="4">)</span>
       || Float32.(le <span data-count="35">x</span> @@ of_floa<span data-count="35">t</span> ~-<span data-count="35">.</span>1.0<span data-count="4">)</span>
-    then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
+    then <span data-count="8">E</span>rror `Integer_overflow
     else <span data-count="31">i</span>f Float32.(ge <span data-count="31">x</span> @@ of_floa<span data-count="31">t</span> ~-<span data-count="31">.</span>mif) then
-      <span data-count="2">I</span>nt64.(logxor (of_floa<span data-count="2">t</span> (Float32.to_floa<span data-count="2">t</span> x -. 0x1p63)) min_int)
-    else <span data-count="29">I</span>nt64.of_float @@ Float32.to_floa<span data-count="29">t</span> x
+      <span data-count="2">O</span>k Int64.(logxo<span data-count="2">r</span> (of_floa<span data-count="2">t</span> (Float32.to_floa<span data-count="2">t</span> x -. 0x1p63)) min_int)
+    else <span data-count="29">O</span>k (Int64.of_floa<span data-count="29">t</span> @@ Float32.to_floa<span data-count="29">t</span> x)
 
   let trunc_f64_s x =
-    <span data-count="69">i</span>f Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    <span data-count="69">i</span>f Float64.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else <span data-count="59">i</span>f
       let mif = Int64.(to_floa<span data-count="59">t</span> min_int) in
       Float64.(ge <span data-count="59">x</span> @@ of_floa<span data-count="59">t</span> ~-<span data-count="59">.</span>mif<span data-count="4">)</span> || Float64.(lt <span data-count="55">x</span> @@ of_floa<span data-count="55">t</span> mif<span data-count="4">)</span>
-    then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
-    else <span data-count="51">I</span>nt64.of_float @@ Float64.to_floa<span data-count="51">t</span> x
+    then <span data-count="8">E</span>rror `Integer_overflow
+    else <span data-count="51">O</span>k (Int64.of_floa<span data-count="51">t</span> @@ Float64.to_floa<span data-count="51">t</span> x)
 
   let trunc_f64_u x =
     <span data-count="63">l</span>et mif = Int64.(to_floa<span data-count="63">t</span> min_int) in
-    if Float64.ne x x then <span data-count="10">r</span>aise @@ Types.Trap "invalid conversion to integer"
+    if Float64.ne x x then <span data-count="10">E</span>rror `Invalid_conversion_to_integer
     else <span data-count="53">i</span>f
       Float64.(ge <span data-count="53">x</span> @@ of_floa<span data-count="53">t</span> (~-<span data-count="53">.</span>mif *. 2.0)<span data-count="4">)</span>
       || Float64.(le <span data-count="49">x</span> @@ of_floa<span data-count="49">t</span> ~-<span data-count="49">.</span>1.0<span data-count="4">)</span>
-    then <span data-count="8">r</span>aise @@ Types.Trap "integer overflow"
+    then <span data-count="8">E</span>rror `Integer_overflow
     else <span data-count="45">i</span>f Float64.(ge <span data-count="45">x</span> @@ of_floa<span data-count="45">t</span> ~-<span data-count="45">.</span>mif) then
-      <span data-count="6">I</span>nt64.(logxor (of_floa<span data-count="6">t</span> (Float64.to_floa<span data-count="6">t</span> x -. 0x1p63)) min_int)
-    else <span data-count="39">I</span>nt64.of_float @@ Float64.to_floa<span data-count="39">t</span> x
+      <span data-count="6">O</span>k Int64.(logxo<span data-count="6">r</span> (of_floa<span data-count="6">t</span> (Float64.to_floa<span data-count="6">t</span> x -. 0x1p63)) min_int)
+    else <span data-count="39">O</span>k (Int64.of_floa<span data-count="39">t</span> @@ Float64.to_floa<span data-count="39">t</span> x)
 
   let trunc_sat_f32_s x =
     <span data-count="49">i</span>f Float32.ne x x then <span data-count="8">0</span>L

@@ -36,22 +36,22 @@
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
-<a id="L16"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
@@ -59,22 +59,20 @@
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
-<a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span > </span>
-<a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -130,8 +128,6 @@
 <a href="#L49">49</a>
 <a href="#L50">50</a>
 <a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -142,10 +138,9 @@ module Value = Concrete_value
 module Global = Concrete_global
 module Table = Concrete_table
 module Memory = Concrete_memory
+module Choice = Concrete_choice
 
 type thread = unit
-
-module Choice = Concrete_choice
 
 let select cond ~if_true ~if_false =
   <span data-count="467">i</span>f cond then <span data-count="238">C</span>hoice.return if_true else <span data-count="229">C</span>hoice.return if_false
@@ -168,23 +163,22 @@ end
 module Env = struct
   include Link_env
 
-  type t = Concrete_extern_func.extern_func Link_env.t
+  type t = Extern_func.extern_func Link_env.t
 
   let get_data env n =
     <span data-count="818">l</span>et data = get_data env n in
-    <span data-count="818">C</span>hoice.return data
+    <span data-count="818">d</span>ata
 end
 
 module Module_to_run = struct
   (** runnable module *)
-  type t = Concrete_extern_func.extern_func Link.module_to_run
+  type t = Extern_func.extern_func Link.module_to_run
 
-  let env (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1234">t</span>.env
+  let env (t : Extern_func.extern_func Link.module_to_run) = <span data-count="1235">t</span>.env
 
-  let id (t : Concrete_extern_func.extern_func Link.module_to_run) = <span data-count="1132">t</span>.id
+  let id (t : Extern_func.extern_func Link.module_to_run) = <span data-count="1132">t</span>.id
 
-  let to_run (t : Concrete_extern_func.extern_func Link.module_to_run) =
-    <span data-count="2774">t</span>.to_run
+  let to_run (t : Extern_func.extern_func Link.module_to_run) = <span data-count="2775">t</span>.to_run
 end
 </code></pre>
       </div>

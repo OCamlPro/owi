@@ -790,13 +790,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Fmt.st<span data-count="996">r</span> "%lx"
+let to_hex_string = Fmt.st<span data-count="997">r</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="996">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="997">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="996">t</span> (-<span data-count="996">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="997">t</span> (-<span data-count="997">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -804,13 +804,13 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1785">x</span>
 
-let to_bits x = <span data-count="3686">x</span>
+let to_bits x = <span data-count="3687">x</span>
 
 let is_inf x = <span data-count="23498">I</span>nt32.e<span data-count="23498">q</span> x pos_in<span data-count="16">f</span> || Int32.eq x neg_inf
 
 let is_nan x =
-  <span data-count="3314">l</span>et xf = Int32.float_of_bits x in
-  <span data-count="3314">F</span>loat.is_nan xf
+  <span data-count="3312">l</span>et xf = Int32.float_of_bits x in
+  <span data-count="3312">F</span>loat.is_nan xf
 
 let is_pos_nan f = <span data-count="932">I</span>nt32.eq f pos_nan
 
@@ -861,7 +861,7 @@ let unary op x =
   <span data-count="310">l</span>et t = op (to_floa<span data-count="310">t</span> x) in
   <span data-count="310">i</span>f not @@ Float.is_na<span data-count="310">n</span> t then <span data-count="266">o</span>f_float t else <span data-count="44">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="996">t</span> 0.0
+let zero = of_floa<span data-count="997">t</span> 0.0
 
 let add x y = <span data-count="25424">b</span>inary x ( +. ) y
 
@@ -936,7 +936,7 @@ let max x y =
       <span data-count="36">I</span>nt32.logand x y
 
 (* abs, neg, copysign are purely bitwise operations, even on NaN values *)
-let abs x = <span data-count="1143">I</span>nt32.logand x Int32.max_int
+let abs x = <span data-count="1141">I</span>nt32.logand x Int32.max_int
 
 let neg x = <span data-count="14095">I</span>nt32.logxor x Int32.min_int
 
@@ -1096,56 +1096,56 @@ let of_string s = <span data-count="0">t</span>ry Some (of_string_ex<span data-c
 
 (* String conversion that groups digits for readability *)
 
-let is_digit = function <span data-count="581">'</span>0' .. '9' -&gt; true | <span data-count="54">_</span> -&gt; false
+let is_digit = function <span data-count="543">'</span>0' .. '9' -&gt; true | <span data-count="50">_</span> -&gt; false
 
 let is_hex_digit = function <span data-count="2472">'</span>0' .. '9' | <span data-count="128">'</span>a' .. 'f' -&gt; true | <span data-count="0">_</span> -&gt; false
 
 let rec add_digits buf s i j k n =
-  <span data-count="3596">i</span>f i &lt; j then <span data-count="2712">b</span>egin
-    if k = 0 then <span data-count="465">B</span>uffer.add_cha<span data-count="465">r</span> buf '_';
-    <span data-count="2712">B</span>uffer.add_char buf s.[i];
-    <span data-count="2712">a</span>dd_digits buf s (i + 1) j ((k + n - 1) mod n) n
+  <span data-count="3558">i</span>f i &lt; j then <span data-count="2678">b</span>egin
+    if k = 0 then <span data-count="457">B</span>uffer.add_cha<span data-count="457">r</span> buf '_';
+    <span data-count="2678">B</span>uffer.add_char buf s.[i];
+    <span data-count="2678">a</span>dd_digits buf s (i + 1) j ((k + n - 1) mod n) n
   end
 
 let group_digits =
   let rec find_from_opt f s i =
-    <span data-count="7688">i</span>f i = String.lengt<span data-count="7688">h</span> s then <span data-count="1714">N</span>one
-    else <span data-count="5974">i</span>f f s.[i] then <span data-count="496">S</span>ome i
-    else <span data-count="5478">f</span>ind_from_opt f s (i + 1)
+    <span data-count="7606">i</span>f i = String.lengt<span data-count="7606">h</span> s then <span data-count="1710">N</span>one
+    else <span data-count="5896">i</span>f f s.[i] then <span data-count="490">S</span>ome i
+    else <span data-count="5406">f</span>ind_from_opt f s (i + 1)
   in
   fun is_digit n s -&gt;
-    <span data-count="442">l</span>et isnt_digit c = <span data-count="2739">n</span>ot (is_digi<span data-count="2739">t</span> c) in
+    <span data-count="440">l</span>et isnt_digit c = <span data-count="2703">n</span>ot (is_digi<span data-count="2703">t</span> c) in
     let len = String.length s in
-    <span data-count="442">l</span>et x = Option.value (find_from_op<span data-count="442">t</span> (Char.equa<span data-count="442">l</span> 'x') s 0) ~default:0 in
-    <span data-count="442">l</span>et mant = Option.value (find_from_op<span data-count="442">t</span> is_digit s x) ~default:len in
-    <span data-count="442">l</span>et point = Option.value (find_from_op<span data-count="442">t</span> isnt_digit s mant) ~default:len in
-    <span data-count="442">l</span>et frac = Option.value (find_from_op<span data-count="442">t</span> is_digit s point) ~default:len in
-    <span data-count="442">l</span>et exp = Option.value (find_from_op<span data-count="442">t</span> isnt_digit s frac) ~default:len in
-    <span data-count="442">l</span>et buf = Buffer.create (len * (n + 1) / n) in
-    <span data-count="442">B</span>uffer.add_substring buf s 0 mant;
-    <span data-count="442">a</span>dd_digits buf s mant point (((point - mant) mod n) + n) n;
-    <span data-count="442">B</span>uffer.add_substring buf s point (frac - point);
-    <span data-count="442">a</span>dd_digits buf s frac exp n n;
-    <span data-count="442">B</span>uffer.add_substring buf s exp (len - exp);
-    <span data-count="442">B</span>uffer.contents buf
+    <span data-count="440">l</span>et x = Option.value (find_from_op<span data-count="440">t</span> (Char.equa<span data-count="440">l</span> 'x') s 0) ~default:0 in
+    <span data-count="440">l</span>et mant = Option.value (find_from_op<span data-count="440">t</span> is_digit s x) ~default:len in
+    <span data-count="440">l</span>et point = Option.value (find_from_op<span data-count="440">t</span> isnt_digit s mant) ~default:len in
+    <span data-count="440">l</span>et frac = Option.value (find_from_op<span data-count="440">t</span> is_digit s point) ~default:len in
+    <span data-count="440">l</span>et exp = Option.value (find_from_op<span data-count="440">t</span> isnt_digit s frac) ~default:len in
+    <span data-count="440">l</span>et buf = Buffer.create (len * (n + 1) / n) in
+    <span data-count="440">B</span>uffer.add_substring buf s 0 mant;
+    <span data-count="440">a</span>dd_digits buf s mant point (((point - mant) mod n) + n) n;
+    <span data-count="440">B</span>uffer.add_substring buf s point (frac - point);
+    <span data-count="440">a</span>dd_digits buf s frac exp n n;
+    <span data-count="440">B</span>uffer.add_substring buf s exp (len - exp);
+    <span data-count="440">B</span>uffer.contents buf
 
 (* TODO: convert all the following to a proper use of Fmt and stop concatenating strings *)
 let to_string' convert is_digit n x =
-  <span data-count="442">F</span>mt.str "%s%s"
-    (if Int32.lt x Int32.zero then <span data-count="136">"</span>-" else <span data-count="306">"</span>")
+  <span data-count="440">F</span>mt.str "%s%s"
+    (if Int32.lt x Int32.zero then <span data-count="136">"</span>-" else <span data-count="304">"</span>")
     ( if is_nan x then
         <span data-count="384">l</span>et payload = Int32.logand (ab<span data-count="384">s</span> x) (Int32.logno<span data-count="384">t</span> bare_nan) in
         <span data-count="384">F</span>mt.st<span data-count="384">r</span> "%s%s" "nan:0x"
           (group_digit<span data-count="384">s</span> is_hex_digit 4 (to_hex_strin<span data-count="384">g</span> payload))
       else
-        <span data-count="58">l</span>et s = convert (to_floa<span data-count="58">t</span> (ab<span data-count="58">s</span> x)) in
-        <span data-count="58">g</span>roup_digit<span data-count="58">s</span> is_digit n
-          (if Char.equal s.[String.lengt<span data-count="58">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="58">s</span>)
+        <span data-count="56">l</span>et s = convert (to_floa<span data-count="56">t</span> (ab<span data-count="56">s</span> x)) in
+        <span data-count="56">g</span>roup_digit<span data-count="56">s</span> is_digit n
+          (if Char.equal s.[String.lengt<span data-count="56">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="56">s</span>)
     )
 
-let to_string = to_string<span data-count="996">'</span> (Fmt.st<span data-count="996">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="997">'</span> (Fmt.st<span data-count="997">r</span> "%.17g") is_digit 3
 
-let pp fmt v = <span data-count="58">F</span>mt.string fmt (to_strin<span data-count="58">g</span> v)
+let pp fmt v = <span data-count="56">F</span>mt.string fmt (to_strin<span data-count="56">g</span> v)
 </code></pre>
       </div>
     </div>

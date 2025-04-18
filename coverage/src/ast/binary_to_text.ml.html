@@ -602,8 +602,8 @@ let convert_ref_type (t : binary ref_type) : text ref_type =
   (nullable, convert_heap_typ<span data-count="5">e</span> heap_type)
 
 let convert_val_type (t : binary val_type) : text val_type =
-  <span data-count="332">m</span>atch t with
-  | <span data-count="332">N</span>um_type _ as t -&gt; t
+  <span data-count="344">m</span>atch t with
+  | <span data-count="344">N</span>um_type _ as t -&gt; t
   | <span data-count="0">R</span>ef_type t -&gt; Ref_type (convert_ref_typ<span data-count="0">e</span> t)
 
 let convert_global_type (t : binary global_type) : text global_type =
@@ -611,8 +611,8 @@ let convert_global_type (t : binary global_type) : text global_type =
   (mut, convert_val_typ<span data-count="5">e</span> vt)
 
 let convert_param (p : binary param) : text param =
-  <span data-count="245">l</span>et id, vt = p in
-  (id, convert_val_typ<span data-count="245">e</span> vt)
+  <span data-count="257">l</span>et id, vt = p in
+  (id, convert_val_typ<span data-count="257">e</span> vt)
 
 let convert_param_type (pt : binary param_type) : text param_type =
   <span data-count="401">L</span>ist.map convert_param pt

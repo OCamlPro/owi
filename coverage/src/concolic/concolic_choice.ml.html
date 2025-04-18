@@ -389,7 +389,7 @@
 type err =
   | Assert_fail
     (* TODO add assertion (will be needed by the environment functions *)
-  | Trap of Trap.t
+  | Trap of Result.err
   | Assume_fail of Symbolic_value.bool
   | ErrExplicitStop
 
@@ -456,26 +456,26 @@ type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="800467">M</span> (fun t -&gt; <span data-count="800467">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="800479">M</span> (fun t -&gt; <span data-count="800479">(</span>Ok v, t)) [@@inline]
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="2414882">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="2414906">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="1208116">M</span>
+  <span data-count="1208128">M</span>
     (fun init_s -&gt;
-      <span data-count="1208116">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="1208116">m</span>atch v_final with
-      | <span data-count="1206766">O</span>k v_final -&gt; run (<span data-count="1206766">f</span> v_final) tmp_st
+      <span data-count="1208128">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="1208128">m</span>atch v_final with
+      | <span data-count="1206778">O</span>k v_final -&gt; run (<span data-count="1206778">f</span> v_final) tmp_st
       | <span data-count="1350">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="159378">l</span>et* v in
-  <span data-count="158255">r</span>eturn (<span data-count="158255">f</span> v)
+  <span data-count="112499">l</span>et* v in
+  <span data-count="111601">r</span>eturn (<span data-count="111601">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
@@ -549,7 +549,7 @@ let run preallocated_values (M v) : _ run_result =
   v (init_threa<span data-count="524">d</span> preallocated_values shared)
 
 let run' t : _ run_result =
-  <span data-count="0">l</span>et preallocated_values = Hashtbl.create 0 in
+  <span data-count="0">l</span>et preallocated_values = Hashtbl.create 16 in
   <span data-count="0">r</span>un preallocated_values t
 </code></pre>
       </div>

@@ -678,15 +678,15 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="996">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="997">e</span> ()
 
   let value i = <span data-count="65">V</span>.Externref (Some (V.E (ty, i)))
 end
 
 let check_error ~expected ~got : unit Result.t =
   <span data-count="10586">l</span>et ok =
-    String.equa<span data-count="10586">l</span> (Result.err_to_strin<span data-count="10586">g</span> got) expecte<span data-count="2420">d</span>
-    || String.starts_wit<span data-count="8166">h</span> ~prefix:expected (Result.err_to_strin<span data-count="8166">g</span> got<span data-count="8150">)</span>
+    String.equa<span data-count="10586">l</span> (Result.err_to_strin<span data-count="10586">g</span> got) expecte<span data-count="2276">d</span>
+    || String.starts_wit<span data-count="8310">h</span> ~prefix:expected (Result.err_to_strin<span data-count="8310">g</span> got<span data-count="8294">)</span>
     ||
     match got with
     | (<span data-count="0">`</span>Msg s | <span data-count="16">`</span>Parse_fail s)
