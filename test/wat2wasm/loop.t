@@ -16,22 +16,7 @@
   stack         : [ i32.const 0 ]
   running instr : local.set 1
   stack         : [  ]
-  running instr : (loop (result i64)
-    local.get 1
-    i32.const 1
-    i32.add
-    local.tee 1
-    local.get 0
-    i32.ne
-    (if
-      (then
-        br 1
-      )
-      (else
-        nop
-      )
-    )
-    i64.const 42)
+  running instr : loop (result i64)
   stack         : [  ]
   running instr : local.get 1
   stack         : [ i32.const 0 ]
@@ -45,14 +30,7 @@
   stack         : [ i32.const 3 ; i32.const 1 ]
   running instr : i32.ne
   stack         : [ i32.const 1 ]
-  running instr : (if
-    (then
-      br 1
-    )
-    (else
-      nop
-    )
-  )
+  running instr : if
   stack         : [  ]
   running instr : br 1
   stack         : [  ]
@@ -68,14 +46,7 @@
   stack         : [ i32.const 3 ; i32.const 2 ]
   running instr : i32.ne
   stack         : [ i32.const 1 ]
-  running instr : (if
-    (then
-      br 1
-    )
-    (else
-      nop
-    )
-  )
+  running instr : if
   stack         : [  ]
   running instr : br 1
   stack         : [  ]
@@ -91,14 +62,7 @@
   stack         : [ i32.const 3 ; i32.const 3 ]
   running instr : i32.ne
   stack         : [ i32.const 0 ]
-  running instr : (if
-    (then
-      br 1
-    )
-    (else
-      nop
-    )
-  )
+  running instr : if
   stack         : [  ]
   running instr : nop
   stack         : [  ]

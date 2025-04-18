@@ -53,18 +53,7 @@ symbolic extern module (assume and assert test):
   stack         : [ (i32.of_bool
                      (i32.lt_u (i32.div_u (i32.add symbol_0 symbol_1) 2)
                       symbol_0)) ]
-  running instr : (if
-    (then
-      local.get 2
-      local.get 1
-      i32.lt_u
-      (if
-        (then
-          unreachable
-        )
-      )
-    )
-  )
+  running instr : if
   path condition: 
   stack         : [  ]
   running instr : local.get 2
@@ -78,11 +67,7 @@ symbolic extern module (assume and assert test):
   stack         : [ (i32.of_bool
                      (i32.lt_u (i32.div_u (i32.add symbol_0 symbol_1) 2)
                       symbol_1)) ]
-  running instr : (if
-    (then
-      unreachable
-    )
-  )
+  running instr : if
   path condition: (i32.lt_u (i32.div_u (i32.add symbol_0 symbol_1) 2) symbol_0)
   stack         : [  ]
   stack         : [  ]
@@ -108,4 +93,8 @@ symbolic extern module (assume and assert test):
     symbol symbol_1 i32
   }
   Reached problem!
+  stack         : [  ]
+  stack         : [  ]
+  stack         : [  ]
+  running instr : local.get 2
   [13]
