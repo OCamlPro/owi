@@ -76,6 +76,10 @@ let debug =
   let doc = "debug mode" in
   Arg.(value & flag & info [ "debug"; "d" ] ~doc)
 
+let print_pc =
+  let doc = "print path condition" in
+  Arg.(value & flag & info [ "print-pc" ] ~doc)
+
 let deterministic_result_order =
   let doc =
     "Guarantee a fixed deterministic order of found failures. This implies \
@@ -227,6 +231,7 @@ let c_cmd =
   and+ workspace
   and+ concolic
   and+ debug
+  and+ print_pc
   and+ workers
   and+ files
   and+ profiling
@@ -252,9 +257,9 @@ let c_cmd =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ entry_point in
-  Cmd_c.cmd ~debug ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl
-    ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
+  Cmd_c.cmd ~debug ~print_pc ~arch ~property ~testcomp ~workspace ~workers
+    ~opt_lvl ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_format ~entry_point
     ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs
 (* owi cpp *)
@@ -272,6 +277,7 @@ let cpp_cmd =
   and+ opt_lvl
   and+ concolic
   and+ debug
+  and+ print_pc
   and+ workers
   and+ files
   and+ profiling
@@ -291,8 +297,8 @@ let cpp_cmd =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ entry_point in
-  Cmd_cpp.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
-    ~optimize ~no_stop_at_failure ~no_value
+  Cmd_cpp.cmd ~debug ~print_pc ~arch ~workers ~opt_lvl ~includes ~files
+    ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_format ~entry_point
     ~invoke_with_symbols ~out_file ~workspace ~model_out_file ~with_breadcrumbs
@@ -307,6 +313,7 @@ let conc_info =
 let conc_cmd =
   let+ profiling
   and+ debug
+  and+ print_pc
   and+ unsafe
   and+ rac
   and+ srac
@@ -326,7 +333,7 @@ let conc_cmd =
   and+ invoke_with_symbols
   and+ with_breadcrumbs
   and+ entry_point in
-  Cmd_conc.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+  Cmd_conc.cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
     ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
@@ -469,6 +476,7 @@ let rust_cmd =
   and+ opt_lvl
   and+ concolic
   and+ debug
+  and+ print_pc
   and+ workers
   and+ files
   and+ profiling
@@ -488,8 +496,8 @@ let rust_cmd =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ entry_point in
-  Cmd_rust.cmd ~debug ~arch ~workers ~opt_lvl ~includes ~files ~profiling
-    ~unsafe ~optimize ~no_stop_at_failure ~no_value
+  Cmd_rust.cmd ~debug ~print_pc ~arch ~workers ~opt_lvl ~includes ~files
+    ~profiling ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~profile ~model_format ~entry_point
     ~invoke_with_symbols ~out_file ~workspace ~model_out_file ~with_breadcrumbs
@@ -522,6 +530,7 @@ let sym_info =
 let sym_cmd =
   let+ profiling
   and+ debug
+  and+ print_pc
   and+ unsafe
   and+ rac
   and+ srac
@@ -541,7 +550,7 @@ let sym_cmd =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ invoke_with_symbols in
-  Cmd_sym.cmd ~profiling ~debug ~unsafe ~rac ~srac ~optimize ~workers
+  Cmd_sym.cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
     ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
@@ -617,6 +626,7 @@ let zig_info =
 let zig_cmd =
   let+ concolic
   and+ debug
+  and+ print_pc
   and+ includes
   and+ workers
   and+ files
@@ -637,11 +647,11 @@ let zig_cmd =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ entry_point in
-  Cmd_zig.cmd ~debug ~includes ~workers ~files ~profiling ~unsafe ~optimize
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-    ~model_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
-    ~model_out_file ~with_breadcrumbs
+  Cmd_zig.cmd ~debug ~print_pc ~includes ~workers ~files ~profiling ~unsafe
+    ~optimize ~no_stop_at_failure ~no_value
+    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~concolic ~solver ~profile ~model_format ~entry_point
+    ~invoke_with_symbols ~out_file ~workspace ~model_out_file ~with_breadcrumbs
 
 (* owi *)
 

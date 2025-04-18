@@ -20,15 +20,6 @@ type pc = pc_elt list
 
 type assignments = (Smtml.Symbol.t * Concrete_value.t) list
 
-let pp_pc_elt fmt = function
-  | Select (v, c) -> Fmt.pf fmt "Select(%b, %a)" v Smtml.Expr.pp c
-  | Select_i32 (v, c) -> Fmt.pf fmt "Select_i32(%li, %a)" v Smtml.Expr.pp c
-  | Assume c -> Fmt.pf fmt "Assume(%a)" Smtml.Expr.pp c
-  | Assert c -> Fmt.pf fmt "Assert(%a)" Smtml.Expr.pp c
-  | EltExplicitStop -> Fmt.pf fmt "Explicit Stop"
-
-let pp_pc fmt pc = List.iter (fun e -> Fmt.pf fmt "  %a@\n" pp_pc_elt e) pc
-
 let pp_assignments ~no_value fmt assignments =
   let open Smtml in
   let pp_v =
@@ -167,3 +158,5 @@ let run preallocated_values (M v) : _ run_result =
 let run' t : _ run_result =
   let preallocated_values = Hashtbl.create 16 in
   run preallocated_values t
+
+let get_pc () = return []

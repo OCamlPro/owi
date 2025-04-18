@@ -35,6 +35,8 @@ struct
       if b then if_true else if_false
     | _, _ -> assert false
 
+  let get_pc = Thread.pc
+
   module Elem = struct
     type t = Link_env.elem
 

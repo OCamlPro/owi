@@ -10,13 +10,13 @@
   typechecking ...
   linking      ...
   interpreting ...
-  stack        : [  ]
-  running instr: call 0
-  calling func : func f
-  stack        : [  ]
-  running instr: i32.const 42
-  stack        : [ i32.const 42 ]
-  running instr: drop
-  stack        : [  ]
-  stack        : [  ]
+  stack         : [  ]
+  running instr : call 0
+  calling func  : func f
+  stack         : [  ]
+  running instr : i32.const 42
+  stack         : [ i32.const 42 ]
+  running instr : drop
+  stack         : [  ]
+  stack         : [  ]
   All OK

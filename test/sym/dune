@@ -30,4 +30,5 @@
   sub_f32.wat
   sub_f64.wat
   syntax_error.wat
-  table.wat))
+  table.wat
+  mean.wat))

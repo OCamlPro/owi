@@ -7,6 +7,9 @@
 (** wether debug printing is enabled or not *)
 val debug_on : bool ref
 
+(** wether path control printing is enabled or not *)
+val print_pc_on : bool ref
+
 (** wether profiling printing is enabled or not *)
 val profiling_on : bool ref
 

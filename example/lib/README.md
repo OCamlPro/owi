@@ -29,17 +29,17 @@ val link_state : '_weak1 Link.state =
     | Ok () -> ()
     | Error _ -> assert false;;
 interpreting ...
-stack        : [  ]
-running instr: call 0
-calling func : func f
-stack        : [  ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ]
-running instr: i32.const 24
-stack        : [ i32.const 24 ; i32.const 24 ]
-running instr: i32.add
-stack        : [ i32.const 48 ]
-running instr: drop
-stack        : [  ]
-stack        : [  ]
+stack         : [  ]
+running instr : call 0
+calling func  : func f
+stack         : [  ]
+running instr : i32.const 24
+stack         : [ i32.const 24 ]
+running instr : i32.const 24
+stack         : [ i32.const 24 ; i32.const 24 ]
+running instr : i32.add
+stack         : [ i32.const 48 ]
+running instr : drop
+stack         : [  ]
+stack         : [  ]
 ```

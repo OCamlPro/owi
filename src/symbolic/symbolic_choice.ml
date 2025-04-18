@@ -347,6 +347,10 @@ module Make (Thread : Thread.S) = struct
       set_thread new_thread
   [@@inline]
 
+  let get_pc () =
+    let+ thread in
+    Thread.pc thread
+
   let add_breadcrumb crumb =
     modify_thread (fun t -> Thread.add_breadcrumb t crumb)
 

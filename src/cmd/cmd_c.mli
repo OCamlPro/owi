@@ -4,6 +4,7 @@
 
 val cmd :
      debug:bool
+  -> print_pc:bool
   -> arch:int
   -> property:Fpath.t option
   -> testcomp:bool
