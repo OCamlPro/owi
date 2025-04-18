@@ -7,11 +7,15 @@ module Choice = Symbolic_choice_with_memory
 module Memory = Symbolic.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
-module M :
-  Wasm_ffi_intf.S0
-    with type 'a t = 'a Choice.t
-     and type memory = Memory.t
-     and module Value = Symbolic_value = struct
+module M : sig
+  include
+    Wasm_ffi_intf.S0
+      with type 'a t = 'a Choice.t
+       and type memory = Memory.t
+       and module Value = Symbolic_value
+
+  val symbol_i32_constant : Value.int32 -> Value.int32 t
+end = struct
   type 'a t = 'a Choice.t
 
   type memory = Memory.t
@@ -37,6 +41,13 @@ module M :
   let symbol_char = symbol_i8
 
   let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
+
+  let symbol_i32_constant v =
+    let open Choice in
+    let* s = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol in
+    let eq = Value.I32.eq v s in
+    let+ () = Choice.add_pc eq in
+    s
 
   let symbol_i64 () = Choice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
@@ -112,6 +123,9 @@ let symbolic_extern_module =
     ; ( "i32_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
       )
+    ; ( "i32_symbol_constant"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), symbol_i32_constant) )
     ; ( "i64_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
       )

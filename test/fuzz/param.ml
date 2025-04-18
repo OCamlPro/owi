@@ -6,7 +6,9 @@ let optimize_fuzzing = true
 
 let reference_fuzzing = false
 
-let symbolic_fuzzing = true
+let symbolic_fuzzing = false
+
+let full_symbolic_fuzzing = true
 
 (** Enable debug mode, will slow down things. *)
 let debug = false
