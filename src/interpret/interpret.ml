@@ -843,7 +843,7 @@ module Make (P : Interpret_intf.P) :
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
     Log.debug2 "stack         : [ %a ]@." Stack.pp stack;
-    Log.debug2 "running instr : %a@." (Types.pp_instr ~short:false) instr;
+    Log.debug2 "running instr : %a@." (Types.pp_instr ~short:true) instr;
     let* pc = Choice.get_pc () in
     if !Log.print_pc_on then
       Log.debug2 "path condition: %a@." Smtml.Expr.pp_list pc;
