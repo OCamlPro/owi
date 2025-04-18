@@ -96,28 +96,7 @@
   running instr : call 2
   calling func  : func __weasel_start
   stack         : [  ]
-  running instr : (block $__weasel_forall (result i32)
-    i32.const 1
-    local.set 1
-    i32.const 1
-    (loop $__weasel_loop (param i32) (result i32)
-      local.get 1
-      i32.const 100
-      i32.le_s
-      i32.and
-      local.tee 0
-      local.get 0
-      i32.const 1
-      i32.xor
-      br_if 1
-      local.get 1
-      i32.const 1
-      i32.add
-      local.set 1
-      local.get 1
-      i32.const 10
-      i32.le_s
-      br_if 0))
+  running instr : block $__weasel_forall (result i32)
   stack         : [  ]
   running instr : i32.const 1
   stack         : [ 1 ]
@@ -125,24 +104,7 @@
   stack         : [  ]
   running instr : i32.const 1
   stack         : [ 1 ]
-  running instr : (loop $__weasel_loop (param i32) (result i32)
-    local.get 1
-    i32.const 100
-    i32.le_s
-    i32.and
-    local.tee 0
-    local.get 0
-    i32.const 1
-    i32.xor
-    br_if 1
-    local.get 1
-    i32.const 1
-    i32.add
-    local.set 1
-    local.get 1
-    i32.const 10
-    i32.le_s
-    br_if 0)
+  running instr : loop $__weasel_loop (param i32) (result i32)
   stack         : [ 1 ]
   running instr : local.get 1
   stack         : [ 1 ; 1 ]
@@ -514,28 +476,7 @@
   running instr : call 2
   calling func  : func __weasel_start
   stack         : [  ]
-  running instr : (block $__weasel_forall (result i32)
-    i32.const 1
-    local.set 1
-    i32.const 1
-    (loop $__weasel_loop (param i32) (result i32)
-      local.get 1
-      i32.const 100
-      i32.le_s
-      i32.and
-      local.tee 0
-      local.get 0
-      i32.const 1
-      i32.xor
-      br_if 1
-      local.get 1
-      i32.const 1
-      i32.add
-      local.set 1
-      local.get 1
-      i32.const 10
-      i32.le_s
-      br_if 0))
+  running instr : block $__weasel_forall (result i32)
   stack         : [  ]
   running instr : i32.const 1
   stack         : [ 1 ]
@@ -543,24 +484,7 @@
   stack         : [  ]
   running instr : i32.const 1
   stack         : [ 1 ]
-  running instr : (loop $__weasel_loop (param i32) (result i32)
-    local.get 1
-    i32.const 100
-    i32.le_s
-    i32.and
-    local.tee 0
-    local.get 0
-    i32.const 1
-    i32.xor
-    br_if 1
-    local.get 1
-    i32.const 1
-    i32.add
-    local.set 1
-    local.get 1
-    i32.const 10
-    i32.le_s
-    br_if 0)
+  running instr : loop $__weasel_loop (param i32) (result i32)
   stack         : [ 1 ]
   running instr : local.get 1
   stack         : [ 1 ; 1 ]
