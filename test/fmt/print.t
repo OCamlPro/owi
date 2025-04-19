@@ -32,3 +32,9 @@ print simplified:
     )
     (start 1)
   )
+print data:
+  $ owi fmt data.wat
+  (module
+    (memory $m 1)
+    (data $d (memory 0) (offset i32.const 0) "hello\n\\n\\\\\'\'\\r\u{0d}\\t\t\\\"\"world!")
+  )

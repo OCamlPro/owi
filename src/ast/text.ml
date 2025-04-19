@@ -39,7 +39,7 @@ type data =
   }
 
 let pp_data fmt (d : data) =
-  pf fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
+  pf fmt {|(data%a %a %a)|} pp_id_opt d.id pp_data_mode d.mode pp_name d.init
 
 type elem_mode =
   | Elem_passive
