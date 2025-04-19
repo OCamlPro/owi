@@ -90,7 +90,10 @@
    (and
     (>= 0.1)
     :with-dev-setup))
-  (extunix :with-dev-setup)
+  (extunix
+   (and
+    (>= 0.4.4)
+    :with-dev-setup))
   (crowbar :with-dev-setup)
   (gnuplot :with-dev-setup)
   (graphics :with-dev-setup)
