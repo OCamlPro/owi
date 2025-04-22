@@ -38,6 +38,8 @@
   $ owi script --no-exhaustion passing/quickstart.wast
   $ owi script --no-exhaustion passing/relop.wast
   $ owi script --no-exhaustion passing/stringinitmsg.wast
+  expected illegal escape but got (unknown operator unexpected character `"\""`)
+  [54]
   $ owi script --no-exhaustion passing/type_abbreviations.wast
   $ owi script --no-exhaustion passing/typecheck3.wast
   $ owi script --no-exhaustion passing/typecheck4.wast

@@ -198,8 +198,8 @@ let run ~no_exhaustion ~optimize script =
         link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
         Log.debug0 "*** assert_malformed_quote@\n";
-        (* TODO: use Parse.Text.Module.from_string instead *)
-        let got = Parse.Text.Script.from_string m in
+        let m = Fmt.str "%a" pp_name_inner m in
+        let got = Parse.Text.Module.from_string m in
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
@@ -208,7 +208,6 @@ let run ~no_exhaustion ~optimize script =
               Compile.Text.until_binary ~unsafe ~rac:false ~srac:false m
             in
             check_error_result expected got
-          | _ -> assert false
         in
         link_state
       | Assert (Assert_invalid_binary (m, expected)) ->
