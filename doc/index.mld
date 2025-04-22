@@ -92,7 +92,6 @@ Owi.Text_lexer
 Owi.Text_parser
 Owi.Thread
 Owi.Tracing
-Owi.Trap
 Owi.Value_intf
 Owi.V
 Owi.Wasm_ffi_intf
