@@ -93,8 +93,4 @@ symbolic extern module (assume and assert test):
     symbol symbol_1 i32
   }
   Reached problem!
-  stack         : [  ]
-  stack         : [  ]
-  stack         : [  ]
-  running instr : local.get 2
   [13]
