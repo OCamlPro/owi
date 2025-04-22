@@ -837,6 +837,7 @@ module Make (P : Interpret_intf.P) :
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
+    let* pc = Choice.get_pc () in
     State.count_instruction state;
     let stack = state.stack in
     let env = state.env in
@@ -844,7 +845,6 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Log.debug2 "stack         : [ %a ]@." Stack.pp stack;
     Log.debug2 "running instr : %a@." (Types.pp_instr ~short:true) instr;
-    let* pc = Choice.get_pc () in
     if !Log.print_pc_on then
       Log.debug2 "path condition: %a@." Smtml.Expr.pp_list pc;
     match instr with
