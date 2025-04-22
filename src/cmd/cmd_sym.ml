@@ -84,8 +84,23 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
       Fmt.str "%a" Scfg.Pp.directive { model with children }
   in
   let to_file path model =
-    let path =
-      if no_stop_at_failure then Fpath.(path + "_" + string_of_int id) else path
+    let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
+    let contains_ext =
+      Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
+    in
+    let* path =
+      let* () =
+        if contains_ext && (not @@ Fpath.has_ext model_ext path) then
+          Fmt.error_msg
+            "Given model file extension is not compatible with the current \
+             model format"
+        else Ok ()
+      in
+      let path = Fpath.to_string @@ Fpath.rem_ext path in
+      let base =
+        Fpath.v (if no_stop_at_failure then Fmt.str "%s_%d" path id else path)
+      in
+      Ok (Fpath.add_ext model_ext base)
     in
     Bos.OS.File.write path (to_string model labels)
   in
