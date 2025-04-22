@@ -145,9 +145,9 @@ end) : INTERPRET = struct
       match !res_acc with
       | [ v ] -> begin
         match v with
-        | EVal r -> r
-        | ETrap (t, _mdl) -> Error (`Trap t)
-        | EAssert (_expr, _mdl) -> Error `Assert_failure
+        | EVal r -> Ok r
+        | ETrap (t, _mdl, _labels, _breadcrumbs) -> Error t
+        | EAssert (_expr, _mdl, _labels, _breadcrumbs) -> Error `Assert_failure
       end
       | _ -> Fmt.failwith "Unexpected multiple results." )
 end
