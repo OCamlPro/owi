@@ -14,4 +14,5 @@
   main.c
   malloc_aligned.c
   malloc_zero.c
+  multi_model.c
   range.c))
