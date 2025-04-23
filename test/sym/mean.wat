@@ -1,9 +1,9 @@
 (module
   (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
-  
+
   (func $mean (export "mean") (param $x i32) (param $y i32) (result i32)
     (local $res i32)
-    
+
     (i32.div_u (i32.add (local.get $x) (local.get $y)) (i32.const 2))
     local.set $res
 
