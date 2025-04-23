@@ -846,7 +846,7 @@ module Make (P : Interpret_intf.P) :
     Log.debug2 "stack         : [ %a ]@." Stack.pp stack;
     Log.debug2 "running instr : %a@." (Types.pp_instr ~short:true) instr;
     if !Log.print_pc_on then
-      Log.debug2 "path condition: %a@." Smtml.Expr.pp_list pc;
+      Log.debug2 "path condition: [ %a ]@." Smtml.Expr.pp_list pc;
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)

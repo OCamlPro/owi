@@ -16,6 +16,7 @@
   div_zero.wat
   global.wat
   grow.wat
+  mean.wat
   memory.wat
   memory2.wat
   mini_test.wat
@@ -23,6 +24,7 @@
   mul_i64.wat
   mul_f32.wat
   mul_f64.wat
+  print_pc.wat
   range.wat
   store.wat
   sub_i32.wat
@@ -30,5 +32,4 @@
   sub_f32.wat
   sub_f64.wat
   syntax_error.wat
-  table.wat
-  mean.wat))
+  table.wat))
