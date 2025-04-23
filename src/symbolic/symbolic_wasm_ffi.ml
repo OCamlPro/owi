@@ -90,9 +90,10 @@ end = struct
 
   let rec make_str m accu i =
     let open Choice in
-    let* p = Memory.load_8_u m (Expr.value (Num (I32 i))) in
+    let* p = Memory.load_8_u m (Value.const_i32 i) in
     match Smtml.Expr.view p with
-    | Val (Num (I32 c)) ->
+    | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+      let c = Smtml.Bitvector.to_int32 bv in
       if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
       else
         let ch = char_of_int (Int32.to_int c) in
@@ -112,7 +113,11 @@ end = struct
     let id = Smtml.Expr.simplify id in
     let ptr = Smtml.Expr.simplify ptr in
     match (Smtml.Expr.view id, Smtml.Expr.view ptr) with
-    | Val (Num (I32 id)), Val (Num (I32 ptr)) ->
+    | Val (Bitv id), Val (Bitv ptr)
+      when Smtml.Bitvector.numbits id = 32 && Smtml.Bitvector.numbits ptr = 32
+      ->
+      let id = Smtml.Bitvector.to_int32 id in
+      let ptr = Smtml.Bitvector.to_int32 ptr in
       Mutex.protect cov_lock (fun () ->
         if Hashtbl.mem covered_labels id then abort ()
         else

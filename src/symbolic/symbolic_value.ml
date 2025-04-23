@@ -41,9 +41,9 @@ type t =
   | F64 of float64
   | Ref of ref_value
 
-let const_i32 (i : Int32.t) : int32 = value (Num (I32 i))
+let const_i32 (i : Int32.t) : int32 = value (Bitv (Smtml.Bitvector.of_int32 i))
 
-let const_i64 (i : Int64.t) : int64 = value (Num (I64 i))
+let const_i64 (i : Int64.t) : int64 = value (Bitv (Smtml.Bitvector.of_int64 i))
 
 let const_f32 (f : Float32.t) : float32 = value (Num (F32 (Float32.to_bits f)))
 
@@ -131,8 +131,8 @@ module I32 = struct
 
   let boolify e =
     match view e with
-    | Val (Num (I32 0l)) -> Some (Bool.const false)
-    | Val (Num (I32 1l)) -> Some (Bool.const true)
+    | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some (Bool.const false)
+    | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some (Bool.const true)
     | Cvtop (_, OfBool, cond) -> Some cond
     | _ -> None
 
@@ -195,7 +195,8 @@ module I32 = struct
 
   let to_bool (e : bool) =
     match view e with
-    | Val (Num (I32 i)) -> Bool.const @@ Int32.ne i 0l
+    | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
+      Bool.const (not @@ Bitvector.eqz i)
     | Ptr _ -> Bool.const true
     | Symbol { ty = Ty_bool; _ } -> e
     | Cvtop (_, OfBool, cond) -> cond
