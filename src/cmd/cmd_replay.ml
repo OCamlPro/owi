@@ -235,11 +235,17 @@ let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
             match v with
             | Smtml.Value.False -> Ok (V.I32 0l)
             | True -> Ok (V.I32 1l)
-            | Num (I8 n) -> Ok (V.I32 (Int32.of_int n))
-            | Num (I32 n) -> Ok (V.I32 n)
-            | Num (I64 n) -> Ok (V.I64 n)
+            | Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
+              Ok (V.I32 (Smtml.Bitvector.to_int32 bv))
+            | Bitv bv when Smtml.Bitvector.numbits bv <= 64 ->
+              Ok (V.I64 (Smtml.Bitvector.to_int64 bv))
             | Num (F32 n) -> Ok (V.F32 (Float32.of_bits n))
             | Num (F64 n) -> Ok (V.F64 (Float64.of_bits n))
+            | Bitv bv ->
+              Error
+                (`Invalid_model
+                   (Fmt.str "can not handle bitvectors of size %d"
+                      (Smtml.Bitvector.numbits bv) ) )
             | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing ->
               Error
                 (`Invalid_model

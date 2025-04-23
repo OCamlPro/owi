@@ -415,8 +415,8 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
     (fun (s, v) ->
       let value =
         match v with
-        | Concrete_value.I32 x -> Smtml.Value.Num (I32 x)
-        | I64 x -> Num (I64 x)
+        | Concrete_value.I32 x -> Smtml.Value.Bitv (Smtml.Bitvector.of_int32 x)
+        | I64 x -> Smtml.Value.Bitv (Smtml.Bitvector.of_int64 x)
         | F32 x -> Num (F32 (Float32.to_bits x))
         | F64 x -> Num (F64 (Float64.to_bits x))
         | Ref _ -> assert false
@@ -461,8 +461,9 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
         List.map
           (fun (_, v) ->
             match v with
-            | Concrete_value.I32 x -> Smtml.Value.Num (I32 x)
-            | I64 x -> Num (I64 x)
+            | Concrete_value.I32 x ->
+              Smtml.Value.Bitv (Smtml.Bitvector.of_int32 x)
+            | I64 x -> Smtml.Value.Bitv (Smtml.Bitvector.of_int64 x)
             | F32 x -> Num (F32 (Float32.to_bits x))
             | F64 x -> Num (F64 (Float64.to_bits x))
             | Ref _ -> assert false )

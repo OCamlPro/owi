@@ -411,7 +411,7 @@ module Make (Thread : Thread_intf.S) = struct
     match Smtml.Expr.view v with
     | Val True -> return true
     | Val False -> return false
-    | Val (Num (I32 _)) -> Fmt.failwith "unreachable (type error)"
+    | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
     | _ ->
       let true_branch =
         let* () = add_pc v in
@@ -450,7 +450,8 @@ module Make (Thread : Thread_intf.S) = struct
   let select_i32 (i : Symbolic_value.int32) =
     let sym_int = Smtml.Expr.simplify i in
     match Smtml.Expr.view sym_int with
-    | Val (Num (I32 i)) -> return i
+    | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
+      return (Smtml.Bitvector.to_int32 bv)
     | _ ->
       let* assign, symbol = summary_symbol sym_int in
       let* () =
@@ -461,7 +462,8 @@ module Make (Thread : Thread_intf.S) = struct
         let* possible_value in
         let i =
           match possible_value with
-          | Smtml.Value.Num (I32 i) -> i
+          | Smtml.Value.Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
+            Smtml.Bitvector.to_int32 bv
           | _ -> Fmt.failwith "Unreachable: found symbol must be a value"
         in
         let s = Smtml.Expr.symbol symbol in
