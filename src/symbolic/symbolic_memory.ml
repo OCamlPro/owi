@@ -21,7 +21,10 @@ type t =
 let create size = { data = Map.empty; size = Symbolic_value.const_i32 size }
 
 let i32 v =
-  match Smtml.Expr.view v with Val (Num (I32 i)) -> i | _ -> assert false
+  match Smtml.Expr.view v with
+  | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
+    Smtml.Bitvector.to_int32 i
+  | _ -> assert false
 
 let grow m delta =
   let old_size = Symbolic_value.I32.mul m.size page_size in
@@ -50,14 +53,14 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
-      replace m dst (Smtml.Expr.value (Num (I8 byte)))
+      replace m dst (Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 byte)))
     done;
     Symbolic_value.Bool.const false
   end
 
 let load_byte a { data; _ } =
   match Map.find_opt a data with
-  | None -> Smtml.Expr.value (Num (I8 0))
+  | None -> Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 0))
   | Some v -> v
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
@@ -74,19 +77,28 @@ let merge_extracts (e1, high, m1) (e2, m2, low) =
 let concat ~msb ~lsb offset =
   assert (offset > 0 && offset <= 8);
   match (Smtml.Expr.view msb, Smtml.Expr.view lsb) with
-  | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
-    Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
-  | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
+  | Val (Bitv i1), Val (Bitv i2)
+    when Smtml.Bitvector.numbits i1 = 8 && Smtml.Bitvector.numbits i2 = 8 ->
+    let i1 = Smtml.Bitvector.to_int32 i1 in
+    let i2 = Smtml.Bitvector.to_int32 i2 in
+    Symbolic_value.const_i32 Int32.(logor (shl i1 8l) i2)
+  | Val (Bitv i1), Val (Bitv i2)
+    when Smtml.Bitvector.numbits i1 = 8 && Smtml.Bitvector.numbits i2 = 32 ->
+    let i1 = Smtml.Bitvector.to_int32 i1 in
+    let i2 = Smtml.Bitvector.to_int32 i2 in
     let offset = offset * 8 in
     if offset < 32 then
-      Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) (of_int offset)) i2)
+      Symbolic_value.const_i32 Int32.(logor (shl i1 (of_int offset)) i2)
     else
-      let i1' = Int64.of_int i1 in
+      let i1' = Int64.of_int32 i1 in
       let i2' = Int64.of_int32 i2 in
       Symbolic_value.const_i64 Int64.(logor (shl i1' (of_int offset)) i2')
-  | Val (Num (I8 i1)), Val (Num (I64 i2)) ->
+  | Val (Bitv i1), Val (Bitv i2)
+    when Smtml.Bitvector.numbits i1 = 8 && Smtml.Bitvector.numbits i2 = 64 ->
+    let i1 = Smtml.Bitvector.to_int32 i1 in
+    let i2 = Smtml.Bitvector.to_int64 i2 in
     let offset = Int64.of_int (offset * 8) in
-    Symbolic_value.const_i64 Int64.(logor (shl (of_int i1) offset) i2)
+    Symbolic_value.const_i64 Int64.(logor (shl (of_int32 i1) offset) i2)
   | Extract (e1, h, m1), Extract (e2, m2, l) ->
     merge_extracts (e1, h, m1) (e2, m2, l)
   | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
@@ -107,26 +119,33 @@ let loadn m a n =
 let load_8_s m a =
   let v = loadn m (i32 a) 1 in
   match Smtml.Expr.view v with
-  | Val (Num (I8 i8)) ->
-    Symbolic_value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
+  | Val (Bitv i8) when Smtml.Bitvector.numbits i8 = 8 ->
+    let i8 = Smtml.Bitvector.to_int32 i8 in
+    Symbolic_value.const_i32 (Int32.extend_s 8 i8)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
 let load_8_u m a =
   let v = loadn m (i32 a) 1 in
   match Smtml.Expr.view v with
-  | Val (Num (I8 i)) -> Symbolic_value.const_i32 (Int32.of_int i)
+  | Val (Bitv i) when Smtml.Bitvector.numbits i = 8 ->
+    let i = Smtml.Bitvector.to_int32 i in
+    Symbolic_value.const_i32 i
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
 let load_16_s m a =
   let v = loadn m (i32 a) 2 in
   match Smtml.Expr.view v with
-  | Val (Num (I32 i16)) -> Symbolic_value.const_i32 (Int32.extend_s 16 i16)
+  | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+    let i16 = Smtml.Bitvector.to_int32 i16 in
+    Symbolic_value.const_i32 (Int32.extend_s 16 i16)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 16) v
 
 let load_16_u m a =
   let v = loadn m (i32 a) 2 in
   match Smtml.Expr.view v with
-  | Val (Num (I32 _)) -> v
+  | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+    let i16 = Smtml.Bitvector.to_int32 i16 in
+    Symbolic_value.const_i32 i16
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
 let load_32 m a = loadn m (i32 a) 4
@@ -135,16 +154,20 @@ let load_64 m a = loadn m (i32 a) 8
 
 let extract v pos =
   match Smtml.Expr.view v with
-  | Val (Num (I32 i)) ->
+  | Val (Bitv i) when Smtml.Bitvector.numbits i = 8 -> v
+  | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
+    let i = Smtml.Bitvector.to_int32 i in
     let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-    Smtml.Expr.value (Num (I8 i'))
-  | Val (Num (I64 i)) ->
+    Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 i'))
+  | Val (Bitv i) when Smtml.Bitvector.numbits i = 64 ->
+    let i = Smtml.Bitvector.to_int64 i in
     let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-    Smtml.Expr.value (Num (I8 i'))
+    Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 i'))
   | Cvtop
-      ( _
-      , (Zero_extend 24 | Sign_extend 24)
-      , ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym) ) ->
+      (_, Zero_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
+  | Cvtop
+      (_, Sign_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
+    ->
     sym
   | _ -> Smtml.Expr.extract v ~high:(pos + 1) ~low:pos
 

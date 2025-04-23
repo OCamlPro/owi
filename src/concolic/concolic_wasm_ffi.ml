@@ -21,7 +21,7 @@ module M :
       let n =
         match forced_value with
         | None -> Random.bits32 ()
-        | Some (Num (I32 n)) -> n
+        | Some (Bitv bv) -> Smtml.Bitvector.to_int32 bv
         | _ -> assert false
       in
       (I32 n, (n, Expr.symbol sym)) )
@@ -31,7 +31,7 @@ module M :
       let n =
         match forced_value with
         | None -> Int32.logand 0xFFl (Random.bits32 ())
-        | Some (Num (I32 n)) -> n
+        | Some (Bitv bv) -> Smtml.Bitvector.to_int32 bv
         | _ -> assert false
       in
       let sym_expr =
@@ -46,7 +46,7 @@ module M :
       let n =
         match forced_value with
         | None -> Random.bits64 ()
-        | Some (Num (I64 n)) -> n
+        | Some (Bitv bv) -> Smtml.Bitvector.to_int64 bv
         | _ -> assert false
       in
       (I64 n, (n, Expr.symbol sym)) )
@@ -126,7 +126,7 @@ module M :
     (* let n = v.c in *)
     (* let x = Concolic_choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
     match view s with
-    | Val (Num (I32 v)) -> Concolic_choice.return v
+    | Val (Bitv bv) -> Concolic_choice.return (Smtml.Bitvector.to_int32 bv)
     | _ ->
       Logs.err (fun m ->
         m {|alloc: cannot allocate base pointer "%a"|} Expr.pp s );
