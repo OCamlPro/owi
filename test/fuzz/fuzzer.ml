@@ -145,12 +145,12 @@ let () =
       (module Owi_unoptimized)
       (module Reference);
   if Param.symbolic_fuzzing then
-    add_test "symbolic_fuzzing" (gen Env.Symbolic)
+    add_test "minimalist_symbolic_fuzzing" (gen Env.Symbolic)
       (module Owi_unoptimized)
-      (module Owi_symbolic);
+      (module Owi_minimalist_symbolic);
   if Param.full_symbolic_fuzzing then
-    add_test "full symbolic_fuzzing" (gen Env.Symbolic)
+    add_test "full_symbolic_fuzzing" (gen Env.Symbolic)
       (module Owi_unoptimized)
-      ( module Owi_symbolic_multicore (struct
+      ( module Owi_full_symbolic (struct
         let symbolize = prepare_for_sym
       end) )

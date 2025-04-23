@@ -41,7 +41,7 @@ module Owi_unoptimized : INTERPRET = struct
     timeout_call_run (fun () ->
       Interpret.Concrete.modul link_state.envs regular )
 
-  let name = "owi"
+  let name = "owi_concrete"
 end
 
 module Owi_optimized : INTERPRET = struct
@@ -57,10 +57,10 @@ module Owi_optimized : INTERPRET = struct
     timeout_call_run (fun () ->
       Interpret.Concrete.modul link_state.envs regular )
 
-  let name = "owi+optimize"
+  let name = "owi_concrete_optimized"
 end
 
-module Owi_symbolic : INTERPRET = struct
+module Owi_minimalist_symbolic : INTERPRET = struct
   let dummy_workers_count = 42
 
   let parse_and_run modul : unit Result.t =
@@ -84,7 +84,7 @@ module Owi_symbolic : INTERPRET = struct
       | Error (Trap t) -> Error t
       | Error Assert_fail -> Error `Assert_failure )
 
-  let name = "owi_symbolic"
+  let name = "owi_minimalist_symbolic"
 end
 
 module Reference : INTERPRET = struct
@@ -113,10 +113,10 @@ module Reference : INTERPRET = struct
   let name = "reference"
 end
 
-module Owi_symbolic_multicore (Symbolizer : sig
+module Owi_full_symbolic (Symbolizer : sig
   val symbolize : Text.modul -> Text.modul
 end) : INTERPRET = struct
-  let name = "multicore"
+  let name = "owi_full_symbolic"
 
   let parse_and_run modul : unit Result.t =
     let modul = Symbolizer.symbolize modul in

@@ -2,13 +2,13 @@
    https://github.com/OCamlPro/owi/pull/28#discussion_r1231983824 *)
 
 (** What kind of differential fuzzing should be performed. *)
-let optimize_fuzzing = true
+let optimize_fuzzing = false
 
 let reference_fuzzing = false
 
-let symbolic_fuzzing = false
+let symbolic_fuzzing = true
 
-let full_symbolic_fuzzing = true
+let full_symbolic_fuzzing = false
 
 (** Enable debug mode, will slow down things. *)
 let debug = false

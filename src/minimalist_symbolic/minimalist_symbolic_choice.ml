@@ -40,13 +40,17 @@ module Make (Thread : Thread.S) = struct
     match Smtml.Expr.view v with
     | Val True -> return true
     | Val False -> return false
-    | _ -> Fmt.failwith "%a" Smtml.Expr.pp v
+    | _ ->
+      Fmt.failwith "Minimalist_symbolic_choice.select failed on %a"
+        Smtml.Expr.pp v
 
   let select_i32 (i : int32) =
     let v = Smtml.Expr.simplify i in
     match Smtml.Expr.view v with
     | Val (Num (I32 i)) -> return i
-    | _ -> assert false
+    | _ ->
+      Fmt.failwith "Minimalist_symbolic_choice.select_i32 failed on %a"
+        Smtml.Expr.pp v
 
   let trap t = M (fun th _sol -> (Error (Trap t), th))
 
@@ -55,7 +59,9 @@ module Make (Thread : Thread.S) = struct
     match Smtml.Expr.view v with
     | Val True -> return ()
     | Val False -> M (fun th _sol -> (Error Assert_fail, th))
-    | _ -> assert false
+    | _ ->
+      Fmt.failwith "Minimalist_symbolic_choice.assertion failed on %a"
+        Smtml.Expr.pp v
 
   let with_thread f = M (fun st _sol -> (Ok (f st), st))
 
