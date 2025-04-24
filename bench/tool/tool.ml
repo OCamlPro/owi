@@ -112,7 +112,7 @@ let execvp ~output_dir tool file timeout =
           ; "--fail-on-assertion-only"
           ; Format.sprintf "-O%d" optimisation_level
           ; Format.sprintf "-w%d" workers
-          ; "-o"
+          ; "--workspace"
           ; output_dir
           ; "--solver"
           ; Format.asprintf "%a" Smtml.Solver_type.pp solver
