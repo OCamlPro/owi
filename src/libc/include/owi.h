@@ -27,8 +27,10 @@ __attribute__((import_module("symbolic"), import_name("range_symbol"))) int
 owi_range(int lo, int hi);
 __attribute__((import_module("symbolic"), import_name("print_char"))) void
 owi_print_char(int);
-__attribute__((import_module("symbolic"), import_name("label"))) void
-owi_label(int id, char * name);
+__attribute__((import_module("symbolic"), import_name("cov_label_is_covered"))) void
+owi_label_is_covered(int id);
+__attribute__((import_module("symbolic"), import_name("cov_label_set"))) void
+owi_label_set(int id, char * name);
 __attribute__((import_module("symbolic"), import_name("bool_symbol")))
 #ifdef __cplusplus
   bool

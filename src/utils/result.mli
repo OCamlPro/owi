@@ -27,6 +27,7 @@ type err =
   | `Import_after_table
   | `Incompatible_import_type of string
   | `Inline_function_type
+  | `Invalid_character_in_memory
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string

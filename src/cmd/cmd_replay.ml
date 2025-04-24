@@ -13,6 +13,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       !next
   in
   let brk = ref @@ Int32.of_int 0 in
+  let covered_labels = Hashtbl.create 16 in
 
   let module M :
     Wasm_ffi_intf.S0
@@ -106,8 +107,27 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let in_replay_mode () = Ok 1l
 
-    let label _ id _ =
-      Logs.info (fun m -> m "reached label %ld@." id);
+    let rec make_str m accu i =
+      let open Concrete_choice in
+      let* p = Concrete_memory.load_8_u m i in
+      if Int32.gt p 255l || Int32.lt p 0l then trap `Invalid_character_in_memory
+      else
+        let ch = char_of_int (Int32.to_int p) in
+        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+        else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
+
+    let cov_label_is_covered id =
+      let open Concrete_choice in
+      let* id = select_i32 id in
+      return @@ Value.const_i32
+      @@ if Hashtbl.mem covered_labels id then 1l else 0l
+
+    let cov_label_set m id str_ptr =
+      let* chars = make_str m [] str_ptr in
+      let* id = Concrete_choice.select_i32 id in
+      let str = String.init (Array.length chars) (Array.get chars) in
+      Hashtbl.add covered_labels id str;
+      Fmt.pr "reached %ld@." id;
       Ok ()
   end in
   let replay_extern_module =
@@ -149,9 +169,12 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       ; ( "print_char"
         , Concrete_extern_func.Extern_func
             (Func (Arg (I32, Res), R0), print_char) )
-      ; ( "label"
+      ; ( "cov_label_is_covered"
         , Concrete_extern_func.Extern_func
-            (Func (Mem (Arg (I32, Arg (I32, Res))), R0), label) )
+            (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
+      ; ( "cov_label_set"
+        , Concrete_extern_func.Extern_func
+            (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
       ]
     in
     { Link.functions }
@@ -188,8 +211,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
-  let c = Interpret.Concrete.modul link_state.envs m in
-  c
+  let* () = Interpret.Concrete.modul link_state.envs m in
+  Ok ()
 
 let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
   ~invoke_with_symbols =
