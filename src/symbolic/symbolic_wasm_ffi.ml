@@ -22,6 +22,10 @@ end = struct
 
   module Value = Symbolic_value
 
+  let covered_labels = Hashtbl.create 16
+
+  let cov_lock = Mutex.create ()
+
   let add_pc_wrapper e = Choice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
@@ -80,33 +84,37 @@ end = struct
     Logs.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
-  let label m (id : Value.int32) (str_ptr : Value.int32) =
+  let rec make_str m accu i =
     let open Choice in
-    let rec make_str accu i =
-      let* p = Memory.load_8_u m (Expr.value (Num (I32 i))) in
-      match Smtml.Expr.view p with
-      | Val (Num (I32 c)) ->
-        let int = Int32.to_int c in
-        if int > 255 || int < 0 then assert false
-        else
-          let ch = char_of_int int in
-          if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
-          else make_str (ch :: accu) (Int32.add i (Int32.of_int 1))
-      | _ -> assert false
-    in
-    let ptr =
-      match Smtml.Expr.view str_ptr with
-      | Val (Num (I32 n)) -> n
-      | _ -> assert false
-    in
-    let* chars = make_str [] ptr in
-    let str = String.init (Array.length chars) (Array.get chars) in
-
-    match Smtml.Expr.view id with
+    let* p = Memory.load_8_u m (Expr.value (Num (I32 i))) in
+    match Smtml.Expr.view p with
     | Val (Num (I32 c)) ->
-      let* () = add_label (Int32.to_int c, str) in
-      return ()
+      if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
+      else
+        let ch = char_of_int (Int32.to_int c) in
+        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+        else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
     | _ -> assert false
+
+  let cov_label_is_covered id =
+    let open Choice in
+    let* id = select_i32 id in
+    return @@ Value.const_i32
+    @@ Mutex.protect cov_lock (fun () ->
+         if Hashtbl.mem covered_labels id then 1l else 0l )
+
+  let cov_label_set m id ptr =
+    let open Choice in
+    let* id = select_i32 id in
+    Mutex.protect cov_lock (fun () ->
+      if Hashtbl.mem covered_labels id then abort ()
+      else
+        let* ptr = select_i32 ptr in
+        let* chars = make_str m [] ptr in
+        let str = String.init (Array.length chars) (Array.get chars) in
+        Hashtbl.add covered_labels id str;
+        let* () = add_label (Int32.to_int id, str) in
+        return () )
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -151,9 +159,12 @@ let symbolic_extern_module =
     ; ( "print_char"
       , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
       )
-    ; ( "label"
+    ; ( "cov_label_set"
       , Symbolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Res))), R0), label) )
+          (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
+    ; ( "cov_label_is_covered"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
     ]
   in
   { Link.functions }

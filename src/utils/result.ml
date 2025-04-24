@@ -27,6 +27,7 @@ type err =
   | `Import_after_table
   | `Incompatible_import_type of string
   | `Inline_function_type
+  | `Invalid_character_in_memory
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
@@ -131,6 +132,7 @@ let rec err_to_string = function
   | `Incompatible_import_type name ->
     Fmt.str "incompatible import type for %s" name
   | `Inline_function_type -> "inline function type"
+  | `Invalid_character_in_memory -> "Invalide character in_memory"
   | `Invalid_result_arity -> "invalid result arity"
   | `Lexer_illegal_character c -> Fmt.str "%s" c
   | `Lexer_unknown_operator op -> Fmt.str "%s" op
@@ -308,3 +310,4 @@ let err_to_exit_code = function
   | `Undefined_element -> 92
   | `Uninitialized_element _ -> 93
   | `Unreachable -> 94
+  | `Invalid_character_in_memory -> 95

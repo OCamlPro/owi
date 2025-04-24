@@ -147,9 +147,14 @@ module M :
     Logs.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
     Concolic_choice.return ()
 
-  let label _ _ _ =
+  let cov_label_set _ _ _ =
     Logs.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
+
+  let cov_label_is_covered _ =
+    Logs.err (fun m -> m "labels are not implemented in concolic mode");
+    assert false
+
 end
 
 type extern_func = Concolic.Extern_func.extern_func

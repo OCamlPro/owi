@@ -49,7 +49,9 @@ module type S0 = sig
 
   val print_char : Value.int32 -> unit t
 
-  val label : memory -> Value.int32 -> Value.int32 -> unit t
+  val cov_label_is_covered : Value.int32 -> Value.int32 t
+
+  val cov_label_set : memory -> Value.int32 -> Value.int32 -> unit t
 end
 
 module type S = sig
