@@ -23,31 +23,26 @@ Running the interpreter is as simple as:
 $ owi run ./42.wat
 ```
 
-Nothing is happening, so you can add the `--debug` option to print an execution trace:
+Nothing is happening, so you can add the `-v` option to print an execution trace:
 
 ```sh
-$ owi run ./42.wat --debug
-parsing      ...
-checking     ...
-grouping     ...
-assigning    ...
-rewriting    ...
-typechecking ...
-linking      ...
-interpreting ...
-stack         : [  ]
-running instr : call 0
-calling func  : func f
-stack         : [  ]
-running instr : i32.const 20
-stack         : [ i32.const 20 ]
-running instr : i32.const 22
-stack         : [ i32.const 22 ; i32.const 20 ]
-running instr : i32.add
-stack         : [ i32.const 42 ]
-running instr : drop
-stack         : [  ]
-stack         : [  ]
+$ owi run ./42.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func f
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop
 ```
 
 ## Man page
@@ -65,20 +60,28 @@ ARGUMENTS
            source files
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
 
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        --rac
            runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -99,6 +102,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi run:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

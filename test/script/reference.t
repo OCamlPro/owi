@@ -2,7 +2,7 @@
   $ owi script --no-exhaustion reference/align.wast
   $ owi script --no-exhaustion reference/binary-leb128.wast
   $ owi script --no-exhaustion reference/binary.wast
-  expected END opcode expected but got (unexpected end of section or function)
+  owi: [ERROR] expected END opcode expected but got (unexpected end of section or function)
   [54]
   $ owi script --no-exhaustion reference/block.wast
   $ owi script --no-exhaustion reference/br_if.wast
@@ -113,5 +113,5 @@
   $ owi script --no-exhaustion reference/utf8-import-module.wast
   $ owi script --no-exhaustion reference/utf8-invalid-encoding.wast
   $ owi script --no-exhaustion reference/proposals/annotations/annotations.wast
-  unknown operator "\"(@x \\\"\") \"unclosed"
+  owi: [ERROR] unknown operator "\"(@x \\\"\") \"unclosed"
   [23]

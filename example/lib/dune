@@ -1,4 +1,4 @@
 (mdx
- (libraries fpath owi prelude)
+ (libraries fpath owi logs prelude)
  (deps %{bin:owi} quickstart.wat)
  (files README.md))

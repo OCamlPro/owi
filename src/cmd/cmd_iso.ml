@@ -10,24 +10,25 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
-    Symbolic_choice_with_memory.return
-    @@ Fmt.pr "%a@?" Symbolic.Value.pp_int32 x
+    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_int32 x);
+    Symbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    Symbolic_choice_with_memory.return
-    @@ Fmt.pr "%a@?" Symbolic.Value.pp_int64 x
+    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_int64 x);
+    Symbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
-    Symbolic_choice_with_memory.return
-    @@ Fmt.pr "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y
+    Logs.app (fun m ->
+      m "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y );
+    Symbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    Symbolic_choice_with_memory.return
-    @@ Fmt.pr "%a@?" Symbolic.Value.pp_float32 x
+    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_float32 x);
+    Symbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    Symbolic_choice_with_memory.return
-    @@ Fmt.pr "%a@?" Symbolic.Value.pp_float64 x
+    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_float64 x);
+    Symbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
   let call_export_catch _n =
@@ -320,7 +321,8 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let start = Some index in
   let modul = { iso_modul with start } in
   let text_modul = Binary_to_text.modul modul in
-  Log.debug2 "generated module:@\n  @[<v>%a@]@\n" Text.pp_modul text_modul;
+  Logs.debug (fun m ->
+    m "generated module:@\n  @[<v>%a@]" Text.pp_modul text_modul );
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe:false ~optimize:false ~name:None
       link_state modul
@@ -331,10 +333,9 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
 module String_set = Set.Make (String)
 
-let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
+let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
   ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
   ~unsafe ~workers ~workspace ~model_out_file ~with_breadcrumbs =
-  if debug then Log.debug_on := true;
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -348,19 +349,18 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
     | _ -> Fmt.error_msg "require at most two modules"
   in
 
-  Fmt.pr "Comparing %a and %a@\n" Fpath.pp file1 Fpath.pp file2;
-
-  Log.debug3 "Module %s is %a@\n" module_name1 Fpath.pp file1;
-  Log.debug3 "Module %s is %a@\n" module_name2 Fpath.pp file2;
+  Logs.info (fun m -> m "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
+  Logs.info (fun m -> m "module %s is %a" module_name1 Fpath.pp file1);
+  Logs.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
 
   let compile ~unsafe file =
     Compile.File.until_binary_validate ~unsafe ~rac:false ~srac:false file
   in
 
-  Log.debug2 "Compiling %a@\n" Fpath.pp file1;
+  Logs.info (fun m -> m "Compiling %a" Fpath.pp file1);
   let* module1 = compile ~unsafe file1 in
 
-  Log.debug2 "Compiling %a@\n" Fpath.pp file2;
+  Logs.info (fun m -> m "Compiling %a" Fpath.pp file2);
   let* module2 = compile ~unsafe file2 in
 
   let funcexports1 =
@@ -379,13 +379,15 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
   let exports_name_1 = List.map fst funcexports1 in
   let exports_name_2 = List.map fst funcexports2 in
 
-  Log.debug4 "%a exports: %a@\n" Fpath.pp file1
-    (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
-    exports_name_1;
+  Logs.debug (fun m ->
+    m "%a exports: %a" Fpath.pp file1
+      (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
+      exports_name_1 );
 
-  Log.debug4 "%a exports: %a@\n" Fpath.pp file2
-    (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
-    exports_name_2;
+  Logs.debug (fun m ->
+    m "%a exports: %a" Fpath.pp file2
+      (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
+      exports_name_2 );
 
   let exports_name_1 = String_set.of_list exports_name_1 in
   let exports_name_2 = String_set.of_list exports_name_2 in
@@ -416,24 +418,26 @@ let cmd ~debug ~deterministic_result_order ~fail_mode ~files ~model_format
         in
         if Types.func_type_eq typ1 typ2 then (name, typ1) :: common_exports
         else begin
-          Log.debug1
-            "Removing %s from common exports because they have a different \
-             type in each module.@\n"
-            name;
+          Logs.warn (fun m ->
+            m
+              "Removing %s from common exports because they have a different \
+               type in each module."
+              name );
           common_exports
         end )
       [] common_exports
   in
 
-  Fmt.pr "Common exports: %a@\n"
-    (Fmt.list
-       ~sep:(fun fmt () -> Fmt.pf fmt " ")
-       (fun fmt (elt, _ft) -> Fmt.string fmt elt) )
-    common_exports;
+  Logs.info (fun m ->
+    m "common exports: %a"
+      (Fmt.list
+         ~sep:(fun fmt () -> Fmt.pf fmt " ")
+         (fun fmt (elt, _ft) -> Fmt.string fmt elt) )
+      common_exports );
 
   list_fold_left
     (fun () (export_name, export_type) ->
-      Fmt.pr "Checking export %s@\n" export_name;
+      Logs.info (fun m -> m "checking export %s" export_name);
       let* result = check_iso ~unsafe export_name export_type module1 module2 in
 
       Cmd_sym.handle_result ~fail_mode ~workers ~solver

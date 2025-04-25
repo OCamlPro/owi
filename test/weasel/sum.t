@@ -92,173 +92,151 @@
     )
     (start 2)
   )
-  $ owi sym sum.wat --rac --debug
-  parsing      ...
-  Contract of function 0
-  Preconditions:
-    
-  Postconditions:
-    (= result (+ $p1 (+ $p2 (+ $p3 $p4))))
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func start
-  stack         : [  ]
-  running instr : i32.const 42
-  stack         : [ 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : call 3
-  calling func  : func __weasel_sum
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : call 1
-  calling func  : func sum
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : i32.add
-  stack         : [ 84 ; 42 ; 42 ]
-  running instr : i32.add
-  stack         : [ 126 ; 42 ]
-  running instr : i32.add
-  stack         : [ 168 ]
-  stack         : [ 168 ]
-  running instr : local.set 5
-  stack         : [  ]
-  running instr : local.get 5
-  stack         : [ 168 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 168 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ; 168 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ; 168 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 84 ; 42 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 126 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 168 ; 168 ]
-  running instr : i32.eq
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : local.get 5
-  stack         : [ 168 ]
-  stack         : [ 168 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
-  All OK
-  $ owi sym sum.wat --srac --debug
-  parsing      ...
-  Contract of function 0
-  Preconditions:
-    
-  Postconditions:
-    (= result (+ $p1 (+ $p2 (+ $p3 $p4))))
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func start
-  stack         : [  ]
-  running instr : i32.const 42
-  stack         : [ 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : i32.const 42
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : call 3
-  calling func  : func __weasel_sum
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : call 1
-  calling func  : func sum
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ]
-  running instr : i32.add
-  stack         : [ 84 ; 42 ; 42 ]
-  running instr : i32.add
-  stack         : [ 126 ; 42 ]
-  running instr : i32.add
-  stack         : [ 168 ]
-  stack         : [ 168 ]
-  running instr : local.set 5
-  stack         : [  ]
-  running instr : local.get 5
-  stack         : [ 168 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 168 ]
-  running instr : local.get 1
-  stack         : [ 42 ; 42 ; 168 ]
-  running instr : local.get 2
-  stack         : [ 42 ; 42 ; 42 ; 168 ]
-  running instr : local.get 3
-  stack         : [ 42 ; 42 ; 42 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 84 ; 42 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 126 ; 42 ; 168 ]
-  running instr : i32.add
-  stack         : [ 168 ; 168 ]
-  running instr : i32.eq
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : local.get 5
-  stack         : [ 168 ]
-  stack         : [ 168 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
-  All OK
+  $ owi sym sum.wat --rac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : call 3
+  owi: [INFO] calling func  : func __weasel_sum
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func sum
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 84 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 126 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : local.set 5
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 5
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 168 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 84 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 126 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 168 ; 168 ]
+  owi: [INFO] running instr : i32.eq
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 5
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] Completed paths: 1
+  All OK!
+  $ owi sym sum.wat --srac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : call 3
+  owi: [INFO] calling func  : func __weasel_sum
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func sum
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 84 ; 42 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 126 ; 42 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : local.set 5
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 5
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 168 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : local.get 3
+  owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 84 ; 42 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 126 ; 42 ; 168 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 168 ; 168 ]
+  owi: [INFO] running instr : i32.eq
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 5
+  owi: [INFO] stack         : [ 168 ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] Completed paths: 1
+  All OK!

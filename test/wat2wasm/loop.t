@@ -1,79 +1,74 @@
   $ owi wat2wasm loop.wat
-  $ owi run loop.wasm --debug
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 1
-  calling func  : func anonymous
-  stack         : [  ]
-  running instr : i32.const 3
-  stack         : [ i32.const 3 ]
-  running instr : call 0
-  calling func  : func anonymous
-  stack         : [  ]
-  running instr : i32.const 0
-  stack         : [ i32.const 0 ]
-  running instr : local.set 1
-  stack         : [  ]
-  running instr : loop (result i64)
-  stack         : [  ]
-  running instr : local.get 1
-  stack         : [ i32.const 0 ]
-  running instr : i32.const 1
-  stack         : [ i32.const 1 ; i32.const 0 ]
-  running instr : i32.add
-  stack         : [ i32.const 1 ]
-  running instr : local.tee 1
-  stack         : [ i32.const 1 ]
-  running instr : local.get 0
-  stack         : [ i32.const 3 ; i32.const 1 ]
-  running instr : i32.ne
-  stack         : [ i32.const 1 ]
-  running instr : if
-  stack         : [  ]
-  running instr : br 1
-  stack         : [  ]
-  running instr : local.get 1
-  stack         : [ i32.const 1 ]
-  running instr : i32.const 1
-  stack         : [ i32.const 1 ; i32.const 1 ]
-  running instr : i32.add
-  stack         : [ i32.const 2 ]
-  running instr : local.tee 1
-  stack         : [ i32.const 2 ]
-  running instr : local.get 0
-  stack         : [ i32.const 3 ; i32.const 2 ]
-  running instr : i32.ne
-  stack         : [ i32.const 1 ]
-  running instr : if
-  stack         : [  ]
-  running instr : br 1
-  stack         : [  ]
-  running instr : local.get 1
-  stack         : [ i32.const 2 ]
-  running instr : i32.const 1
-  stack         : [ i32.const 1 ; i32.const 2 ]
-  running instr : i32.add
-  stack         : [ i32.const 3 ]
-  running instr : local.tee 1
-  stack         : [ i32.const 3 ]
-  running instr : local.get 0
-  stack         : [ i32.const 3 ; i32.const 3 ]
-  running instr : i32.ne
-  stack         : [ i32.const 0 ]
-  running instr : if
-  stack         : [  ]
-  running instr : nop
-  stack         : [  ]
-  stack         : [  ]
-  running instr : i64.const 42
-  stack         : [ i64.const 42 ]
-  stack         : [ i64.const 42 ]
-  stack         : [ i64.const 42 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
+  $ owi run loop.wasm -v
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func anonymous
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] stack         : [ i32.const 3 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] calling func  : func anonymous
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] stack         : [ i32.const 0 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : loop (result i64)
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ i32.const 0 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ i32.const 1 ; i32.const 0 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32.const 1 ]
+  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] stack         : [ i32.const 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32.const 3 ; i32.const 1 ]
+  owi: [INFO] running instr : i32.ne
+  owi: [INFO] stack         : [ i32.const 1 ]
+  owi: [INFO] running instr : if
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : br 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ i32.const 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ i32.const 1 ; i32.const 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32.const 2 ]
+  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] stack         : [ i32.const 2 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32.const 3 ; i32.const 2 ]
+  owi: [INFO] running instr : i32.ne
+  owi: [INFO] stack         : [ i32.const 1 ]
+  owi: [INFO] running instr : if
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : br 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ i32.const 2 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ i32.const 1 ; i32.const 2 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32.const 3 ]
+  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] stack         : [ i32.const 3 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32.const 3 ; i32.const 3 ]
+  owi: [INFO] running instr : i32.ne
+  owi: [INFO] stack         : [ i32.const 0 ]
+  owi: [INFO] running instr : if
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : nop
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i64.const 42
+  owi: [INFO] stack         : [ i64.const 42 ]
+  owi: [INFO] running instr : drop
   $ owi wasm2wat loop.wasm
   (module
     (type (sub final  (func (param i32) (result i64))))

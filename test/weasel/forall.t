@@ -76,763 +76,737 @@
     )
     (start 2)
   )
-  $ owi sym forall.wat --rac --debug
-  parsing      ...
-  Contract of function $start
-  Preconditions:
-    (∀ $x:i32
-      (⇒ (∧ (≥ $x (i32 1)) (≤ $x (i32 10))) (≤ $x (i32 100))))
-  Postconditions:
-    
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func __weasel_start
-  stack         : [  ]
-  running instr : block $__weasel_forall (result i32)
-  stack         : [  ]
-  running instr : i32.const 1
-  stack         : [ 1 ]
-  running instr : local.set 1
-  stack         : [  ]
-  running instr : i32.const 1
-  stack         : [ 1 ]
-  running instr : loop $__weasel_loop (param i32) (result i32)
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 1 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.add
-  stack         : [ 2 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 2 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 2 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 2 ; 1 ]
-  running instr : i32.add
-  stack         : [ 3 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 3 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 3 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 3 ; 1 ]
-  running instr : i32.add
-  stack         : [ 4 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 4 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 4 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 4 ; 1 ]
-  running instr : i32.add
-  stack         : [ 5 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 5 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 5 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 5 ; 1 ]
-  running instr : i32.add
-  stack         : [ 6 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 6 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 6 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 6 ; 1 ]
-  running instr : i32.add
-  stack         : [ 7 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 7 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 7 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 7 ; 1 ]
-  running instr : i32.add
-  stack         : [ 8 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 8 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 8 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 8 ; 1 ]
-  running instr : i32.add
-  stack         : [ 9 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 9 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 9 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 9 ; 1 ]
-  running instr : i32.add
-  stack         : [ 10 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 10 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 10 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 10 ; 1 ]
-  running instr : i32.add
-  stack         : [ 11 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 11 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 11 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  stack         : [ 1 ]
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : call 1
-  calling func  : func start
-  stack         : [  ]
-  stack         : [  ]
-  stack         : [  ]
-  All OK
-  $ owi sym forall.wat --srac --debug
-  parsing      ...
-  Contract of function $start
-  Preconditions:
-    (∀ $x:i32
-      (⇒ (∧ (≥ $x (i32 1)) (≤ $x (i32 10))) (≤ $x (i32 100))))
-  Postconditions:
-    
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func __weasel_start
-  stack         : [  ]
-  running instr : block $__weasel_forall (result i32)
-  stack         : [  ]
-  running instr : i32.const 1
-  stack         : [ 1 ]
-  running instr : local.set 1
-  stack         : [  ]
-  running instr : i32.const 1
-  stack         : [ 1 ]
-  running instr : loop $__weasel_loop (param i32) (result i32)
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 1 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.add
-  stack         : [ 2 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 2 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 2 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 2 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 2 ; 1 ]
-  running instr : i32.add
-  stack         : [ 3 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 3 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 3 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 3 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 3 ; 1 ]
-  running instr : i32.add
-  stack         : [ 4 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 4 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 4 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 4 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 4 ; 1 ]
-  running instr : i32.add
-  stack         : [ 5 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 5 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 5 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 5 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 5 ; 1 ]
-  running instr : i32.add
-  stack         : [ 6 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 6 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 6 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 6 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 6 ; 1 ]
-  running instr : i32.add
-  stack         : [ 7 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 7 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 7 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 7 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 7 ; 1 ]
-  running instr : i32.add
-  stack         : [ 8 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 8 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 8 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 8 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 8 ; 1 ]
-  running instr : i32.add
-  stack         : [ 9 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 9 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 9 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 9 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 9 ; 1 ]
-  running instr : i32.add
-  stack         : [ 10 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 10 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 100
-  stack         : [ 100 ; 10 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 1 ; 1 ]
-  running instr : i32.and
-  stack         : [ 1 ]
-  running instr : local.tee 0
-  stack         : [ 1 ]
-  running instr : local.get 0
-  stack         : [ 1 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 1 ; 1 ]
-  running instr : i32.xor
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 10 ; 1 ]
-  running instr : i32.const 1
-  stack         : [ 1 ; 10 ; 1 ]
-  running instr : i32.add
-  stack         : [ 11 ; 1 ]
-  running instr : local.set 1
-  stack         : [ 1 ]
-  running instr : local.get 1
-  stack         : [ 11 ; 1 ]
-  running instr : i32.const 10
-  stack         : [ 10 ; 11 ; 1 ]
-  running instr : i32.le_s
-  stack         : [ 0 ; 1 ]
-  running instr : br_if 0
-  stack         : [ 1 ]
-  stack         : [ 1 ]
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : call 1
-  calling func  : func start
-  stack         : [  ]
-  stack         : [  ]
-  stack         : [  ]
-  All OK
+  $ owi sym forall.wat --rac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func __weasel_start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : block $__weasel_forall (result i32)
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : loop $__weasel_loop (param i32) (result i32)
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 11 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 11 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 11 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func start
+  owi: [INFO] Completed paths: 1
+  All OK!
+  $ owi sym forall.wat --srac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func __weasel_start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : block $__weasel_forall (result i32)
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : loop $__weasel_loop (param i32) (result i32)
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 2 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 2 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 3 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 3 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 4 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 4 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 5 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 5 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 6 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 6 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 7 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 7 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 8 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 8 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 9 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 9 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ 100 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.and
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.tee 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 1 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 1 ; 1 ]
+  owi: [INFO] running instr : i32.xor
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 10 ; 1 ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ 1 ; 10 ; 1 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 11 ; 1 ]
+  owi: [INFO] running instr : local.set 1
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : local.get 1
+  owi: [INFO] stack         : [ 11 ; 1 ]
+  owi: [INFO] running instr : i32.const 10
+  owi: [INFO] stack         : [ 10 ; 11 ; 1 ]
+  owi: [INFO] running instr : i32.le_s
+  owi: [INFO] stack         : [ 0 ; 1 ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func start
+  owi: [INFO] Completed paths: 1
+  All OK!

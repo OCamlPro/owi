@@ -83,9 +83,9 @@ We can perform runtime assertion checking either by `owi sym plus_three.instrume
 
 ```sh
 $ owi sym plus_three.instrumented.wat
-All OK
+All OK!
 $ owi sym --rac plus_three.wat
-All OK
+All OK!
 ```
 
 ## Man page
@@ -97,21 +97,32 @@ NAME
        checking coming from Weasel specifications
 
 SYNOPSIS
-       owi instrument [--debug] [--symbolic] [--unsafe] [OPTION]… FILE…
+       owi instrument [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        --symbolic
            generate instrumented module that depends on symbolic execution
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -132,6 +143,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi instrument:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

@@ -29,7 +29,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
-        Fmt.epr "Assertion failure was correctly reached\n";
+        Logs.app (fun m -> m "Assertion failure was correctly reached!");
         exit 0
       end;
       Ok ()
@@ -38,20 +38,21 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       match model.(next ()) with
       | V.I32 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a i32 value." V.pp v;
+        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let symbol_char () =
       match model.(next ()) with
       | V.I32 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a char (i32) value." V.pp v;
+        Logs.err (fun m ->
+          m "Got value %a but expected a char (i32) value." V.pp v );
         assert false
 
     let symbol_bool = symbol_char
 
     let abort () =
-      Fmt.epr "Unexpected abort call.\n";
+      Logs.err (fun m -> m "Unexpected abort call.");
       exit 121
 
     let alloc _m _addr size =
@@ -67,45 +68,46 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       match model.(next ()) with
       | V.I32 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a i8 (i32) value." V.pp v;
+        Logs.err (fun m ->
+          m "Got value %a but expected a i8 (i32) value." V.pp v );
         assert false
 
     let symbol_i64 () =
       match model.(next ()) with
       | V.I64 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a i64 value." V.pp v;
+        Logs.err (fun m -> m "Got value %a but expected a i64 value." V.pp v);
         assert false
 
     let symbol_f32 () =
       match model.(next ()) with
       | V.F32 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a f32 value." V.pp v;
+        Logs.err (fun m -> m "Got value %a but expected a f32 value." V.pp v);
         assert false
 
     let symbol_f64 () =
       match model.(next ()) with
       | V.F64 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a f64 value." V.pp v;
+        Logs.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
         assert false
 
     let symbol_range _ _ =
       match model.(next ()) with
       | V.I32 n -> Ok n
       | v ->
-        Fmt.epr "Got value %a but expected a i32 value." V.pp v;
+        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let print_char c =
-      Fmt.pr "%c" (char_of_int (Int32.to_int c));
+      Logs.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
       Ok ()
 
     let in_replay_mode () = Ok 1l
 
     let label _ id _ =
-      Fmt.pr "reached %ld@." id;
+      Logs.info (fun m -> m "reached label %ld@." id);
       Ok ()
   end in
   let replay_extern_module =
@@ -189,10 +191,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let c = Interpret.Concrete.modul link_state.envs m in
   c
 
-let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
-  ~entry_point ~invoke_with_symbols =
-  if profiling then Log.profiling_on := true;
-  if debug then Log.debug_on := true;
+let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
+  ~invoke_with_symbols =
   let* parse_fn =
     let ext = Fpath.get_ext replay_file in
     match String.lowercase_ascii ext with
@@ -228,4 +228,4 @@ let cmd ~profiling ~debug ~unsafe ~optimize ~replay_file ~source_file
     run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
       model
   in
-  Fmt.pr "All OK@."
+  Logs.app (fun m -> m "All OK!")

@@ -4,5 +4,5 @@
   Try 'owi wat2wasm --help' or 'owi --help' for more information.
   [124]
   $ owi wat2wasm bad.ext
-  unsupported file_extension ".ext"
+  owi: [ERROR] unsupported file_extension ".ext"
   [53]

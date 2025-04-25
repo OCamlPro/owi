@@ -766,7 +766,7 @@ let write_file outfile filename content =
 
 let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe ~optimize m
     =
-  Log.debug0 "bin encoding ...@\n";
+  Logs.info (fun m -> m "binary encoding ...");
   let* m =
     Compile.Text.until_optimize ~unsafe ~rac:false ~srac:false ~optimize m
   in

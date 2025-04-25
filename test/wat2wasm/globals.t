@@ -1,25 +1,23 @@
   $ owi wat2wasm globals.wat
-  $ owi run globals.wasm --debug
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 0
-  calling func  : func anonymous
-  stack         : [  ]
-  running instr : global.get 0
-  stack         : [ i32.const 42 ]
-  running instr : drop
-  stack         : [  ]
-  running instr : i64.const 42
-  stack         : [ i64.const 42 ]
-  running instr : global.set 1
-  stack         : [  ]
-  running instr : global.get 1
-  stack         : [ i64.const 42 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
+  $ owi run globals.wasm -v
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] calling func  : func anonymous
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : global.get 0
+  owi: [INFO] stack         : [ i32.const 42 ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i64.const 42
+  owi: [INFO] stack         : [ i64.const 42 ]
+  owi: [INFO] running instr : global.set 1
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : global.get 1
+  owi: [INFO] stack         : [ i64.const 42 ]
+  owi: [INFO] running instr : drop
   $ owi wasm2wat globals.wasm
   (module
     (type (sub final  (func)))

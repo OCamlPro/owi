@@ -13,4 +13,4 @@
     (start 0)
   )
   $ owi sym block_type1.wasm
-  All OK
+  All OK!

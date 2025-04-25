@@ -112,17 +112,17 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then Log.err "of_string (int64)"
+let require b = if not b then Fmt.failwith "of_string (int64)"
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | _ -> Log.err "of_string"
+  | _ -> Fmt.failwith "of_string"
 
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
-  | _ -> Log.err "of_string"
+  | _ -> Fmt.failwith "of_string"
 
 let max_upper, max_lower = divrem_u minus_one 10L
 

@@ -468,6 +468,6 @@ let optimize_runtime_func = function
   | Local f -> Runtime.Local (optimize_func f)
 
 let modul m =
-  Log.debug0 "optimizing   ...@\n";
+  Logs.info (fun m -> m "optimizing   ...");
   let func = Array.map optimize_runtime_func m.Binary.Module.func in
   { m with func }

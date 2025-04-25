@@ -11,7 +11,7 @@ type metadata =
   ; files : Fpath.t list
   }
 
-let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
+let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
   Fpath.t list Result.t =
   if eacsl then
     let flags1 =
@@ -21,7 +21,10 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
              (fun libpath -> Fmt.str "-I%s" (Fpath.to_string libpath))
              includes )
       in
-      let framac_verbosity_level = if debug then "2" else "0" in
+      let framac_verbosity_level =
+        (* TODO: make this available via CLI *)
+        if false then "2" else "0"
+      in
       Cmd.(
         of_list
           [ "-e-acsl"
@@ -55,13 +58,16 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
         (fun (file, out) ->
           match
             OS.Cmd.run
-              ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+              ~err:
+                ( if false (* TODO: make this available via CLI *) then
+                    OS.Cmd.err_run_out
+                  else OS.Cmd.err_null )
             @@ framac file out
           with
           | Ok _ as v -> v
           | Error (`Msg e) ->
             Fmt.error_msg "Frama-C failed: %s"
-              ( if debug then e
+              ( if false (* TODO: make this available via CLI *) then e
                 else "run with --debug to get the full error message" ) )
         (List.combine files outs)
     in
@@ -69,7 +75,7 @@ let eacsl_instrument eacsl debug ~includes (files : Fpath.t list) :
     outs
   else Ok files
 
-let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
+let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   (files : Fpath.t list) : Fpath.t Result.t =
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
@@ -104,13 +110,17 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
   let+ () =
     match
       OS.Cmd.run
-        ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+        ~err:
+          ( if (* TODO: make this available via CLI *) false then
+              OS.Cmd.err_run_out
+            else OS.Cmd.err_null )
         clang
     with
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Fmt.error_msg "clang failed: %s"
-        (if debug then e else "run with --debug to get the full error message")
+        ( if (* TODO: make this available via CLI *) false then e
+          else "run with --debug to get the full error message" )
   in
 
   out
@@ -162,12 +172,12 @@ let metadata ~workspace arch property files : unit Result.t =
   let* res = OS.File.with_oc fpath out_metadata { arch; property; files } in
   res
 
-let cmd ~debug ~print_pc ~arch ~property ~testcomp:_ ~workspace ~workers
-  ~opt_lvl ~includes ~files ~profiling ~unsafe ~optimize ~no_stop_at_failure
-  ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-  ~fail_mode ~concolic ~eacsl ~solver ~profile ~model_format
-  ~(entry_point : string option) ~invoke_with_symbols ~out_file ~model_out_file
-  ~with_breadcrumbs : unit Result.t =
+let cmd ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl ~includes
+  ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
+  ~concolic ~eacsl ~solver ~model_format ~(entry_point : string option)
+  ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs :
+  unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -177,17 +187,16 @@ let cmd ~debug ~print_pc ~arch ~property ~testcomp:_ ~workspace ~workers
   let entry_point = Option.value entry_point ~default:"main" in
 
   let includes = Cmd_utils.c_files_location @ includes in
-  let* files = eacsl_instrument eacsl debug ~includes files in
+  let* files = eacsl_instrument eacsl ~includes files in
   let* modul =
-    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug files
+    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
   in
   let* () = metadata ~workspace arch property files in
   let files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~profiling ~debug ~print_pc ~unsafe ~rac:false ~srac:false ~optimize
-    ~workers ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~profile ~model_format ~entry_point
+    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs

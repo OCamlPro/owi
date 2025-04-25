@@ -1,6 +1,5 @@
 val cmd :
-     debug:bool
-  -> deterministic_result_order:bool
+     deterministic_result_order:bool
   -> fail_mode:Cmd_sym.fail_mode
   -> files:Fpath.t list
   -> model_format:Cmd_utils.model_format

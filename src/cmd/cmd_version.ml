@@ -26,4 +26,4 @@ let pp fmt () =
 
 let owi_version () = Fmt.str "owi version %s" version
 
-let cmd () = Ok (Fmt.pr "%a" pp ())
+let cmd () = Ok (Logs.app (fun m -> m "%a" pp ()))

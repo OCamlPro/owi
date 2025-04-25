@@ -1,3 +1,3 @@
   $ owi run ./overflow.wat
-  integer overflow
+  owi: [ERROR] integer overflow
   [86]

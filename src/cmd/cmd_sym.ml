@@ -12,9 +12,6 @@ type fail_mode =
   | Assertion_only
   | Both
 
-(* TODO: add a flag for this *)
-let print_paths = false
-
 let link_symbolic_modules link_state =
   let func_typ = Symbolic.Extern_func.extern_type in
   let link_state =
@@ -106,20 +103,26 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
   in
   function
   | `ETrap (tr, model, _, _) -> (
-    Fmt.pr "Trap: %s@\n" (Result.err_to_string tr);
+    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
     match model_out_file with
     | Some path -> to_file path model
-    | None -> Ok (Fmt.pr "%s@\n" (to_string model labels)) )
+    | None -> begin
+      Logs.app (fun m -> m "%s" (to_string model labels));
+      Ok ()
+    end )
   | `EAssert (assertion, model, _, _) -> (
     if no_assert_failure_expression_printing then begin
-      Fmt.pr "Assert failure@\n"
+      Logs.err (fun m -> m "Assert failure")
     end
     else begin
-      Fmt.pr "Assert failure: %a@\n" Expr.pp assertion
+      Logs.err (fun m -> m "Assert failure: %a" Expr.pp assertion)
     end;
     match model_out_file with
     | Some path -> to_file path model
-    | None -> Ok (Fmt.pr "%s@\n" (to_string model labels)) )
+    | None -> begin
+      Logs.app (fun m -> m "%s" (to_string model labels));
+      Ok ()
+    end )
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
@@ -200,29 +203,24 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~count_acc:0 ~results ~with_breadcrumbs
   in
-  if print_paths then Fmt.pr "Completed paths: %d@." (Atomic.get path_count);
+  Logs.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
-  Fmt.pr "All OK@."
+  Logs.app (fun m -> m "All OK!")
 
 (* NB: This function propagates potential errors (Result.err) occurring
-   during evaluation (OS, syntax error, etc.), except for Trap and Assert,
-   which are handled here. Most of the computations are done in the Result
-   monad, hence the let*. *)
-let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
-  ~with_breadcrumbs =
+         during evaluation (OS, syntax error, etc.), except for Trap and Assert,
+         which are handled here. Most of the computations are done in the Result
+         monad, hence the let*. *)
+let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
+  ~workspace ~solver ~files ~model_format ~entry_point ~invoke_with_symbols
+  ~model_out_file ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
 
-  Option.iter Stats.init_logger_to_file profile;
-  if profiling then Log.profiling_on := true;
-  if debug then Log.debug_on := true;
-  if print_pc then Log.print_pc_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let pc = Choice.return () in

@@ -1,2 +1,2 @@
   $ owi c ./bool.c
-  All OK
+  All OK!

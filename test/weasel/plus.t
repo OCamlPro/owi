@@ -62,117 +62,95 @@
     )
     (start 2)
   )
-  $ owi sym plus.wat --rac --debug
-  parsing      ...
-  Contract of function $plus_three
-  Preconditions:
-    
-  Postconditions:
-    (= result (+ $x (i32 3)))
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func start
-  stack         : [  ]
-  running instr : i32.const 42
-  stack         : [ 42 ]
-  running instr : call 3
-  calling func  : func __weasel_plus_three
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : call 1
-  calling func  : func plus_three
-  stack         : [  ]
-  running instr : i32.const 3
-  stack         : [ 3 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 3 ]
-  running instr : i32.add
-  stack         : [ 45 ]
-  stack         : [ 45 ]
-  running instr : local.set 2
-  stack         : [  ]
-  running instr : local.get 2
-  stack         : [ 45 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 45 ]
-  running instr : i32.const 3
-  stack         : [ 3 ; 42 ; 45 ]
-  running instr : i32.add
-  stack         : [ 45 ; 45 ]
-  running instr : i32.eq
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : local.get 2
-  stack         : [ 45 ]
-  stack         : [ 45 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
-  All OK
-  $ owi sym plus.wat --srac --debug
-  parsing      ...
-  Contract of function $plus_three
-  Preconditions:
-    
-  Postconditions:
-    (= result (+ $x (i32 3)))
-  checking     ...
-  grouping     ...
-  assigning    ...
-  rewriting    ...
-  typechecking ...
-  typechecking ...
-  linking      ...
-  interpreting ...
-  stack         : [  ]
-  running instr : call 2
-  calling func  : func start
-  stack         : [  ]
-  running instr : i32.const 42
-  stack         : [ 42 ]
-  running instr : call 3
-  calling func  : func __weasel_plus_three
-  stack         : [  ]
-  running instr : local.get 0
-  stack         : [ 42 ]
-  running instr : call 1
-  calling func  : func plus_three
-  stack         : [  ]
-  running instr : i32.const 3
-  stack         : [ 3 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 3 ]
-  running instr : i32.add
-  stack         : [ 45 ]
-  stack         : [ 45 ]
-  running instr : local.set 2
-  stack         : [  ]
-  running instr : local.get 2
-  stack         : [ 45 ]
-  running instr : local.get 0
-  stack         : [ 42 ; 45 ]
-  running instr : i32.const 3
-  stack         : [ 3 ; 42 ; 45 ]
-  running instr : i32.add
-  stack         : [ 45 ; 45 ]
-  running instr : i32.eq
-  stack         : [ 1 ]
-  running instr : call 0
-  stack         : [  ]
-  running instr : local.get 2
-  stack         : [ 45 ]
-  stack         : [ 45 ]
-  running instr : drop
-  stack         : [  ]
-  stack         : [  ]
-  All OK
+  $ owi sym plus.wat --rac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : call 3
+  owi: [INFO] calling func  : func __weasel_plus_three
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func plus_three
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] stack         : [ 3 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 3 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : local.set 2
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 45 ]
+  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] stack         : [ 3 ; 42 ; 45 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 45 ; 45 ]
+  owi: [INFO] running instr : i32.eq
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] Completed paths: 1
+  All OK!
+  $ owi sym plus.wat --srac -v
+  owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] typechecking ...
+  owi: [INFO] linking      ...
+  owi: [INFO] interpreting ...
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : call 2
+  owi: [INFO] calling func  : func start
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : call 3
+  owi: [INFO] calling func  : func __weasel_plus_three
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ]
+  owi: [INFO] running instr : call 1
+  owi: [INFO] calling func  : func plus_three
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] stack         : [ 3 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 3 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : local.set 2
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ 42 ; 45 ]
+  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] stack         : [ 3 ; 42 ; 45 ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ 45 ; 45 ]
+  owi: [INFO] running instr : i32.eq
+  owi: [INFO] stack         : [ 1 ]
+  owi: [INFO] running instr : call 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] running instr : local.get 2
+  owi: [INFO] stack         : [ 45 ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] Completed paths: 1
+  All OK!

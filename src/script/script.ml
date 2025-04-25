@@ -107,7 +107,7 @@ let compare_result_const result (const : V.t) =
   | Result_const (Literal (Const_host _)), _ ->
     false
   | _ ->
-    Log.debug0 "TODO (Script.compare_result_const)@\n";
+    Logs.err (fun m -> m "TODO: unimplemented Script.compare_result_const");
     assert false
 
 let value_of_const : text const -> V.t Result.t = function
@@ -120,14 +120,16 @@ let value_of_const : text const -> V.t Result.t = function
     V.ref_null rt
   | Const_extern i -> ok @@ V.Ref (Host_externref.value i)
   | i ->
-    Log.debug2 "TODO (Script.value_of_const) %a@\n" Types.pp_const i;
+    Logs.err (fun m ->
+      m "TODO: unimplemented Script.value_of_const %a)" Types.pp_const i );
     assert false
 
 let action (link_state : Concrete_extern_func.extern_func Link.state) = function
   | Text.Invoke (mod_id, f, args) -> begin
-    Log.debug5 "invoke %a %s %a...@\n"
-      (Fmt.option ~none:Fmt.nop Fmt.string)
-      mod_id f Types.pp_consts args;
+    Logs.info (fun m ->
+      m "invoke %a %s %a..."
+        (Fmt.option ~none:Fmt.nop Fmt.string)
+        mod_id f Types.pp_consts args );
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
@@ -135,7 +137,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
       ~envs:link_state.envs f
   end
   | Get (mod_id, name) ->
-    Log.debug0 "get...@\n";
+    Logs.info (fun m -> m "get...");
     let+ global = load_global_from_module link_state mod_id name in
     [ global.value ]
 
@@ -147,23 +149,24 @@ let run ~no_exhaustion ~optimize script =
       Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
-  let debug_on = !Log.debug_on in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.state) -> function
       | Text.Text_module m ->
-        if !curr_module = 0 then Log.debug_on := false;
-        Log.debug0 "*** module@\n";
+        if !curr_module = 0 then
+          (* TODO: disable printing*)
+          ();
+        Logs.info (fun m -> m "*** module");
         incr curr_module;
         let+ link_state =
           Compile.Text.until_interpret link_state ~unsafe ~rac:false ~srac:false
             ~optimize ~name:None m
         in
-        Log.debug_on := debug_on;
+        (* TODO: enable printing again! *)
         link_state
       | Text.Quoted_module m ->
-        Log.debug0 "*** quoted module@\n";
+        Logs.info (fun m -> m "*** quoted module");
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
         let+ link_state =
@@ -172,7 +175,7 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Text.Binary_module (id, m) ->
-        Log.debug0 "*** binary module@\n";
+        Logs.info (fun m -> m "*** binary module");
         incr curr_module;
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
@@ -182,7 +185,7 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
-        Log.debug0 "*** assert_trap@\n";
+        Logs.info (fun m -> m "*** assert_trap");
         incr curr_module;
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
@@ -192,12 +195,12 @@ let run ~no_exhaustion ~optimize script =
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_binary (m, expected)) ->
-        Log.debug0 "*** assert_malformed_binary@\n";
+        Logs.info (fun m -> m "*** assert_malformed_binary");
         let got = Parse.Binary.Module.from_string m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_quote (m, expected)) ->
-        Log.debug0 "*** assert_malformed_quote@\n";
+        Logs.info (fun m -> m "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
         let got = Parse.Text.Script.from_string m in
         let+ () =
@@ -212,7 +215,7 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Assert (Assert_invalid_binary (m, expected)) ->
-        Log.debug0 "*** assert_invalid_binary@\n";
+        Logs.info (fun m -> m "*** assert_invalid_binary");
         let got = Parse.Binary.Module.from_string m in
         let+ () =
           match got with
@@ -227,7 +230,7 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Assert (Assert_invalid (m, expected)) ->
-        Log.debug0 "*** assert_invalid@\n";
+        Logs.info (fun m -> m "*** assert_invalid");
         let got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~optimize ~name:None m
@@ -235,12 +238,12 @@ let run ~no_exhaustion ~optimize script =
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
-        Log.debug0 "*** assert_invalid_quote@\n";
+        Logs.info (fun m -> m "*** assert_invalid_quote");
         let got = Parse.Text.Module.from_string m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->
-        Log.debug0 "*** assert_unlinkable@\n";
+        Logs.info (fun m -> m "*** assert_unlinkable");
         let got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~optimize ~name:None m
@@ -248,7 +251,7 @@ let run ~no_exhaustion ~optimize script =
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed (m, expected)) ->
-        Log.debug0 "*** assert_malformed@\n";
+        Logs.info (fun m -> m "*** assert_malformed");
         let got =
           Compile.Text.until_link ~unsafe ~optimize ~rac:false ~srac:false
             ~name:None link_state m
@@ -256,25 +259,25 @@ let run ~no_exhaustion ~optimize script =
         let+ () = check_error_result expected got in
         assert false
       | Assert (Assert_return (a, res)) ->
-        Log.debug0 "*** assert_return@\n";
+        Logs.info (fun m -> m "*** assert_return");
         let* stack = action link_state a in
         let stack = List.rev stack in
         if
           List.compare_lengths res stack <> 0
           || not (List.for_all2 compare_result_const res stack)
         then begin
-          Fmt.epr "got:      %a@.expected: %a@." Stack.pp stack Text.pp_results
-            res;
+          Logs.err (fun m ->
+            m "got:      %a@.expected: %a" Stack.pp stack Text.pp_results res );
           Error `Bad_result
         end
         else Ok link_state
       | Assert (Assert_trap (a, expected)) ->
-        Log.debug0 "*** assert_trap@\n";
+        Logs.info (fun m -> m "*** assert_trap");
         let got = action link_state a in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_exhaustion (a, expected)) ->
-        Log.debug0 "*** assert_exhaustion@\n";
+        Logs.info (fun m -> m "*** assert_exhaustion");
         let+ () =
           if no_exhaustion then Ok ()
           else
@@ -283,13 +286,13 @@ let run ~no_exhaustion ~optimize script =
         in
         link_state
       | Register (name, mod_name) ->
-        if !curr_module = 1 && not !registered then Log.debug_on := false;
-        Log.debug0 "*** register@\n";
+        if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
+        Logs.info (fun m -> m "*** register");
         let+ state = Link.register_module link_state ~name ~id:mod_name in
-        Log.debug_on := debug_on;
+        (* TODO: enable debug again! *)
         state
       | Action a ->
-        Log.debug0 "*** action@\n";
+        Logs.info (fun m -> m "*** action");
         let+ _stack = action link_state a in
         link_state )
     state script

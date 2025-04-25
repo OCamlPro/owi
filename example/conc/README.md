@@ -25,12 +25,12 @@ Let's see if owi is able to find a value for `x` that lead to an error:
 
 ```sh
 $ owi conc ./mini.wat
-Trap: unreachable
+owi: [ERROR] Trap: unreachable
 Model:
  model {
   symbol symbol_1 i32 6
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -51,8 +51,8 @@ ARGUMENTS
            source files
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
 
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
@@ -91,14 +91,8 @@ OPTIONS
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
-
-       --print-pc
-           print path condition
-
-       --profile=FILE
-           Profile file.
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        --rac
            runtime assertion checking mode
@@ -111,6 +105,14 @@ OPTIONS
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
@@ -141,6 +143,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi conc:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

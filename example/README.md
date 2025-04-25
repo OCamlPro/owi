@@ -42,10 +42,10 @@ COMMANDS
        conc [OPTION]… FILE…
            Run the concolic interpreter
 
-       fmt [--inplace] [OPTION]… FILE…
+       fmt [OPTION]… FILE…
            Format a .wat or .wast file
 
-       instrument [--debug] [--symbolic] [--unsafe] [OPTION]… FILE…
+       instrument [OPTION]… FILE…
            Generate an instrumented file with runtime assertion checking
            coming from Weasel specifications
 
@@ -53,7 +53,7 @@ COMMANDS
            Check the iso-functionnality of two Wasm modules by comparing the
            output when calling their exports.
 
-       opt [--debug] [--output=FILE] [--unsafe] [OPTION]… FILE
+       opt [OPTION]… FILE
            Optimize a module
 
        replay [OPTION]… FILE
@@ -72,13 +72,13 @@ COMMANDS
        sym [OPTION]… FILE…
            Run the symbolic interpreter
 
-       validate [--debug] [OPTION]… FILE…
+       validate [OPTION]… FILE…
            Validate a module
 
        version [OPTION]…
            Print some version informations
 
-       wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
+       wasm2wat [OPTION]… FILE
            Generate a text format file (.wat) from a binary format file
            (.wasm)
 

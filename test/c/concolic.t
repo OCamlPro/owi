@@ -1,5 +1,5 @@
   $ owi c --concolic ./main.c --no-value
-  Assert failure
+  owi: [ERROR] Assert failure
   Model:
    model {
     symbol symbol_1 i32
@@ -9,5 +9,5 @@
     symbol symbol_5 i32
     symbol symbol_6 i32
   }
-  Reached problem!
+  owi: [ERROR] Reached problem!
   [13]

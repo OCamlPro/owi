@@ -3,10 +3,7 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     profiling:bool
-  -> debug:bool
-  -> print_pc:bool
-  -> unsafe:bool
+     unsafe:bool
   -> rac:bool
   -> srac:bool
   -> optimize:bool
@@ -19,7 +16,6 @@ val cmd :
   -> workspace:Fpath.t option
   -> solver:Smtml.Solver_type.t
   -> files:Fpath.t list
-  -> profile:Fpath.t option
   -> model_format:Cmd_utils.model_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
