@@ -107,20 +107,20 @@ let fresh solver () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="943">S</span> ((module Batch), solver)
+  <span data-count="947">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
   <span data-count="45276">l</span>et module Solver = (val solver_module) in
   Solver.check s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1341">l</span>et module Solver = (val solver_module) in
+  <span data-count="1328">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1340">`</span>Sat -&gt; begin
+    | <span data-count="1328">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1339">S</span>ome model -&gt; model
+      | <span data-count="1327">S</span>ome model -&gt; model
     end
     | `Unsat -&gt; assert false
     | `Unknown -&gt; assert false
