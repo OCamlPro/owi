@@ -75,7 +75,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let lift_mem _ = assert false
 
-  let get_pc () = return []
+  let get_pc () = return Smtml.Expr.Set.empty
 end
 
 include Make (Thread_with_memory)

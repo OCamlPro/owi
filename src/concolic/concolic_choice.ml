@@ -159,4 +159,4 @@ let run' t : _ run_result =
   let preallocated_values = Hashtbl.create 16 in
   run preallocated_values t
 
-let get_pc () = return []
+let get_pc () = return Smtml.Expr.Set.empty

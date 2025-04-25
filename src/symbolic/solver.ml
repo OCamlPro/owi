@@ -22,19 +22,22 @@ let model (S (solver_module, s)) ~symbols ~pc =
   let module Solver = (val solver_module) in
   let model =
     match Solver.get_sat_model ?symbols s pc with
-    | None ->
+    | `Unknown -> assert false
+    | `Unsat ->
       (* Should not happen because we checked just before that is must be true. *)
-      Fmt.epr "something is wrong... I can not get a model.@\n";
-      Fmt.epr "symbols: %a@\n"
-        (Fmt.option
-           (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
-        symbols;
-      Fmt.epr "pc:@\n  @[<v>%a@]@\n"
-        (Smtml.Expr.Set.pretty
-           ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
-           Smtml.Expr.pp )
-        pc;
+      Logs.err (fun m -> m "something is wrong... I can not get a model");
+      Logs.err (fun m ->
+        m "symbols: %a"
+          (Fmt.option
+             (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
+          symbols );
+      Logs.err (fun m ->
+        m "pc:@\n  @[<v>%a@]"
+          (Smtml.Expr.Set.pretty
+             ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
+             Smtml.Expr.pp )
+          pc );
       assert false
-    | Some model -> model
+    | `Model model -> model
   in
   model

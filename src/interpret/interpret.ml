@@ -775,7 +775,6 @@ module Make (P : Interpret_intf.P) :
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
-    let* pc = Choice.get_pc () in
     let stack = state.stack in
     let env = state.env in
     let locals = state.locals in
@@ -783,7 +782,15 @@ module Make (P : Interpret_intf.P) :
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
       m "running instr : %a" (Types.pp_instr ~short:true) instr );
-    Logs.debug (fun m -> m "path condition: [ %a ]" Smtml.Expr.pp_list pc);
+    let* () =
+      match Logs.level () with
+      | Some Logs.Debug ->
+        let+ pc = Choice.get_pc () in
+        Logs.debug (fun m ->
+          m "path condition: [ %a ]" Smtml.Expr.pp_list
+            (Smtml.Expr.Set.to_list pc) )
+      | None | Some _ -> return ()
+    in
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)

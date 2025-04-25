@@ -44,7 +44,7 @@ module type S = sig
 
   val add_pc : V.bool -> unit t
 
-  val get_pc : unit -> Smtml.Expr.t list t
+  val get_pc : unit -> Smtml.Expr.Set.t t
 
   val add_label : int * string -> unit t
 

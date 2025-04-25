@@ -16,11 +16,16 @@ let empty : t =
 
 (* TODO: should we make some normalization here? *)
 (* TODO: it would be better to split the conjunctions in many sub-conditions *)
-let add ({ uf; set } : t) (c : Symbolic_value.bool) : t =
+let add ({ uf; set } as old : t) (c : Symbolic_value.bool) : t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
-    Fmt.epr "Wrong condition: %a@\n" Symbolic_value.pp_int32 c;
-    assert false
+    (* TODO: It means Smt.ml did not properly simplified a expression... *)
+    (* assert false *)
+    (* For now, we use this, it should be removed and assert false should be used instead later *)
+    Logs.debug (fun m ->
+      m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
+        c );
+    old
   | hd :: tl ->
     let set = Smtml.Expr.Set.add c set in
     (* We add the first symbol to the UF *)
@@ -41,14 +46,16 @@ let add ({ uf; set } : t) (c : Symbolic_value.bool) : t =
 let to_set { uf = _; set } = set
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice ({ uf; set = _ } : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
+let slice ({ uf; set } : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
-    assert false
     (* TODO: It means Smt.ml did not properly simplified a expression... *)
     (* assert false *)
     (* For now, we use this, it should be removed and assert false should be used instead later *)
-    (* Smtml.Expr.Set.add c set *)
+    Logs.debug (fun m ->
+      m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
+        c );
+    Smtml.Expr.Set.add c set
   | sym0 :: _tl -> (
     (* we need only the first symbol as all the others should have been merged with it *)
     match Union_find.find_opt sym0 uf with
