@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_choice.ml &mdash; Coverage report</title>
-    <meta name="description" content="85.71% coverage in src/concrete/concrete_choice.ml">
+    <meta name="description" content="87.50% coverage in src/concrete/concrete_choice.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,10 @@
           <span class="dirname">src/concrete/</span>concrete_choice.ml
         </a>
       </h1>
-      <h2>85.71%</h2>
+      <h2>87.50%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:0.00%"></span>
+      <span class="unvisited" style="bottom:8.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -46,6 +46,8 @@
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -73,6 +75,8 @@
 <a href="#L21">21</a>
 <a href="#L22">22</a>
 <a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -80,9 +84,9 @@
 
 type 'a t = 'a Result.t
 
-let return x = <span data-count="151538232">O</span>k x [@@inline]
+let return x = <span data-count="264201837">O</span>k x [@@inline]
 
-let bind x f = <span data-count="172196224">R</span>esult.bind x f [@@inline]
+let bind x f = <span data-count="284859766">R</span>esult.bind x f [@@inline]
 
 let ( let* ) = bind
 
@@ -97,6 +101,8 @@ let select_i32 i = <span data-count="1609080">O</span>k i [@@inline]
 let trap t = <span data-count="4843">E</span>rror t
 
 let run m = <span data-count="0">m</span>
+
+let get_pc () = <span data-count="112663542">r</span>eturn []
 </code></pre>
       </div>
     </div>

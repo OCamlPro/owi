@@ -18,10 +18,10 @@
       <h2>90.91%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:50.00%"></span>
-      <span class="some-visited" style="bottom:41.18%"></span>
-      <span class="unvisited" style="bottom:22.06%"></span>
-      <span class="some-visited" style="bottom:7.35%"></span>
+      <span class="unvisited" style="bottom:48.57%"></span>
+      <span class="unvisited" style="bottom:38.57%"></span>
+      <span class="unvisited" style="bottom:20.00%"></span>
+      <span class="some-visited" style="bottom:5.71%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -59,41 +59,43 @@
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span class="some-visited"> </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
+<a id="L36"></a><span class="unvisited"> </span>
 <a id="L37"></a><span class="visited"> </span>
-<a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span class="some-visited"> </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span > </span>
-<a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="unvisited"> </span>
+<a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span class="unvisited"> </span>
+<a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
-<a id="L56"></a><span class="visited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
 <a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span class="visited"> </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span > </span>
-<a id="L63"></a><span class="some-visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span class="visited"> </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
-<a id="L66"></a><span > </span>
+<a id="L66"></a><span class="some-visited"> </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -166,6 +168,8 @@
 <a href="#L66">66</a>
 <a href="#L67">67</a>
 <a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -175,8 +179,8 @@ open Bos
 open Syntax
 
 (* TODO: investigate which parameters makes sense *)
-let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file debug
-  (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
+  : Fpath.t Result.t =
   <span data-count="3">l</span>et* rustc_bin = OS.Cmd.resolv<span data-count="3">e</span> @@ Cmd.<span data-count="3">v</span> "rustc" in
 
   <span data-count="3">l</span>et* libowi_sym_rlib =
@@ -200,23 +204,26 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file debug
   let+ () =
     match
       OS.Cmd.run
-        ~err:(if debug then <span data-count="0">O</span>S.Cmd.err_run_out else <span data-count="3">O</span>S.Cmd.err_null)
+        ~err:
+          ( if false (* TODO: make this available via CLI *) then
+              <span data-count="0">O</span>S.Cmd.err_run_out
+            else <span data-count="3">O</span>S.Cmd.err_null )
         rustc_cmd
     with
     | <span data-count="2">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;
       Fmt.error_ms<span data-count="1">g</span> "rustc failed: %s"
-        (if debug then <span data-count="0">e</span> else <span data-count="1">"</span>run with --debug to get the full error message")
+        ( if false (* TODO: make this available via CLI *) then <span data-count="0">e</span>
+          else <span data-count="1">"</span>run with --debug to get the full error message" )
   in
 
   <span data-count="2">o</span>ut
 
-let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
-  ~optimize ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~out_file
-  ~(workspace : Fpath.t option) ~model_out_file ~with_breadcrumbs :
-  unit Result.t =
+let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
+  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
+  ~entry_point ~invoke_with_symbols ~out_file ~(workspace : Fpath.t option)
+  ~model_out_file ~with_breadcrumbs : unit Result.t =
   <span data-count="3">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -225,16 +232,15 @@ let cmd ~debug ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling ~unsafe
   <span data-count="3">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="3">e</span> workspace in
   <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"main" in
 
-  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl ~out_file debug files in
+  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl ~out_file files in
   <span data-count="2">l</span>et files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
-    ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
-    ~with_breadcrumbs
+    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 </code></pre>
       </div>
     </div>

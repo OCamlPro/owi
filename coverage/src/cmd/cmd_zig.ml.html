@@ -20,11 +20,11 @@
     <div id="navbar">
       <span class="some-visited" style="top:12.64%"></span>
       <span class="unvisited" style="top:18.39%"></span>
-      <span class="some-visited" style="bottom:49.43%"></span>
-      <span class="some-visited" style="bottom:42.53%"></span>
-      <span class="unvisited" style="bottom:36.78%"></span>
-      <span class="unvisited" style="bottom:26.44%"></span>
-      <span class="some-visited" style="bottom:5.75%"></span>
+      <span class="unvisited" style="bottom:47.13%"></span>
+      <span class="unvisited" style="bottom:39.08%"></span>
+      <span class="unvisited" style="bottom:32.18%"></span>
+      <span class="unvisited" style="bottom:22.99%"></span>
+      <span class="some-visited" style="bottom:4.60%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -72,46 +72,46 @@
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span class="some-visited"> </span>
+<a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
+<a id="L46"></a><span class="unvisited"> </span>
 <a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span class="some-visited"> </span>
-<a id="L51"></a><span > </span>
-<a id="L52"></a><span > </span>
-<a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span class="unvisited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
+<a id="L59"></a><span class="unvisited"> </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="unvisited"> </span>
+<a id="L64"></a><span > </span>
 <a id="L65"></a><span class="visited"> </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span class="visited"> </span>
+<a id="L67"></a><span class="unvisited"> </span>
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
-<a id="L71"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
 <a id="L72"></a><span > </span>
-<a id="L73"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
-<a id="L77"></a><span class="visited"> </span>
+<a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span > </span>
-<a id="L82"></a><span class="some-visited"> </span>
-<a id="L83"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="some-visited"> </span>
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
@@ -215,8 +215,8 @@
 open Bos
 open Syntax
 
-let compile ~workspace ~entry_point ~includes ~out_file debug
-  (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
+  Fpath.t Result.t =
   <span data-count="3">l</span>et includes =
     Cmd.of_list (List.ma<span data-count="3">p</span> (fun p -&gt; <span data-count="0">F</span>mt.str "-I%a" Fpath.pp p) includes)
   in
@@ -251,24 +251,27 @@ let compile ~workspace ~entry_point ~includes ~out_file debug
     let+ () =
       match
         OS.Cmd.run
-          ~err:(if debug then <span data-count="0">O</span>S.Cmd.err_run_out else <span data-count="3">O</span>S.Cmd.err_null)
+          ~err:
+            ( if false (* TODO: make this available via CLI *) then
+                <span data-count="0">O</span>S.Cmd.err_run_out
+              else <span data-count="3">O</span>S.Cmd.err_null )
           zig
       with
       | <span data-count="2">O</span>k _ as v -&gt; v
       | <span data-count="1">E</span>rror (`Msg e) -&gt;
         Fmt.error_ms<span data-count="1">g</span> "zig failed: %s"
-          (if debug then <span data-count="0">e</span> else <span data-count="1">"</span>run with --debug to get the full error message")
+          ( if false (* TODO: make this available via CLI *) then <span data-count="0">e</span>
+            else <span data-count="1">"</span>run with --debug to get the full error message" )
     in
 
     <span data-count="2">o</span>ut
   end
   | <span data-count="0">_</span> -&gt; Fmt.failwith "TODO"
 
-let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
-  ~model_out_file ~with_breadcrumbs : unit Result.t =
+let cmd ~workers ~includes ~files ~unsafe ~optimize ~no_stop_at_failure
+  ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+  ~fail_mode ~concolic ~solver ~model_format ~entry_point ~invoke_with_symbols
+  ~out_file ~workspace ~model_out_file ~with_breadcrumbs : unit Result.t =
   <span data-count="3">l</span>et* workspace =
     match workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -283,18 +286,15 @@ let cmd ~debug ~workers ~includes ~files ~profiling ~unsafe ~optimize
 *)
     includes
   in
-  let* modul =
-    compil<span data-count="3">e</span> ~workspace ~entry_point ~includes ~out_file debug files
-  in
+  let* modul = compil<span data-count="3">e</span> ~workspace ~entry_point ~includes ~out_file files in
   <span data-count="2">l</span>et files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
-    ~profiling ~debug ~unsafe ~rac:false ~srac:false ~optimize ~workers
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~workspace ~solver ~files ~profile
-    ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
-    ~with_breadcrumbs
+    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 </code></pre>
       </div>
     </div>

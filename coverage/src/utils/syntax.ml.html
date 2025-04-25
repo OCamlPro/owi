@@ -246,37 +246,37 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="4481733">m</span>atch o with <span data-count="4461895">O</span>k v -&gt; f v | <span data-count="19838">E</span>rror _ as e -&gt; e
+let ( let* ) o f = <span data-count="4481476">m</span>atch o with <span data-count="4461638">O</span>k v -&gt; f v | <span data-count="19838">E</span>rror _ as e -&gt; e
 
-let ( let+ ) o f = <span data-count="2318601">m</span>atch o with <span data-count="2309301">O</span>k v -&gt; Ok (<span data-count="2309301">f</span> v) | <span data-count="9300">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2318742">m</span>atch o with <span data-count="2309441">O</span>k v -&gt; Ok (<span data-count="2309441">f</span> v) | <span data-count="9301">E</span>rror _ as e -&gt; e
 
-let ok v = <span data-count="879010">O</span>k v
+let ok v = <span data-count="878521">O</span>k v
 
 let list_iter f l =
-  <span data-count="36700">l</span>et err = ref None in
+  <span data-count="36690">l</span>et err = ref None in
   try
     List.iter
       (fun v -&gt;
-        <span data-count="20501">m</span>atch f v with
+        <span data-count="20509">m</span>atch f v with
         | <span data-count="119">E</span>rror _e as e -&gt;
           err := Some e;
           raise Exit
-        | <span data-count="20382">O</span>k () -&gt; () )
+        | <span data-count="20390">O</span>k () -&gt; () )
       l;
-    <span data-count="36581">O</span>k ()
+    <span data-count="36571">O</span>k ()
   with <span data-count="119">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="119">S</span>ome e -&gt; e )
 
 let list_map f l =
-  <span data-count="234481">l</span>et err = ref None in
+  <span data-count="234356">l</span>et err = ref None in
   try
-    o<span data-count="234335">k</span>
-    @@ List.ma<span data-count="234335">p</span>
+    o<span data-count="234210">k</span>
+    @@ List.ma<span data-count="234210">p</span>
          (fun v -&gt;
-           <span data-count="238831">m</span>atch f v with
+           <span data-count="238557">m</span>atch f v with
            | <span data-count="146">E</span>rror _e as e -&gt;
              err := Some e;
              raise Exit
-           | <span data-count="238685">O</span>k v -&gt; v )
+           | <span data-count="238411">O</span>k v -&gt; v )
          l
   with <span data-count="146">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="146">S</span>ome e -&gt; e )
 
@@ -295,10 +295,10 @@ let list_concat_map f l =
   with <span data-count="0">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="0">S</span>ome e -&gt; e )
 
 let list_fold_left f acc l =
-  <span data-count="158114">L</span>ist.fold_left
+  <span data-count="158076">L</span>ist.fold_left
     (fun acc v -&gt;
-      <span data-count="760596">l</span>et* acc in
-      <span data-count="759011">f</span> acc v )
+      <span data-count="760189">l</span>et* acc in
+      <span data-count="758604">f</span> acc v )
     (Ok acc) l
 
 let list_fold_left_map f acc l =
@@ -312,14 +312,14 @@ let list_fold_left_map f acc l =
   <span data-count="30">(</span>acc, List.re<span data-count="30">v</span> l)
 
 let array_iter f a =
-  <span data-count="42574">l</span>et err = ref None in
+  <span data-count="42562">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="42574">h</span> a - 1 do
-      <span data-count="74405">m</span>atch f (Array.unsafe_ge<span data-count="74405">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="42562">h</span> a - 1 do
+      <span data-count="74372">m</span>atch f (Array.unsafe_ge<span data-count="74372">t</span> a i) with
       | <span data-count="2964">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="71441">O</span>k () -&gt; ()
+      | <span data-count="71408">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="2964">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="2964">S</span>ome e -&gt; e )
@@ -338,10 +338,10 @@ let array_map f a =
   with <span data-count="4">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="4">S</span>ome e -&gt; e )
 
 let array_fold_left f acc l =
-  <span data-count="20780">A</span>rray.fold_left
+  <span data-count="20774">A</span>rray.fold_left
     (fun acc v -&gt;
-      <span data-count="27971">l</span>et* acc in
-      <span data-count="27953">f</span> acc v )
+      <span data-count="27959">l</span>et* acc in
+      <span data-count="27941">f</span> acc v )
     (Ok acc) l
 </code></pre>
       </div>

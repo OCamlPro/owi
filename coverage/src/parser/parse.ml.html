@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>parse.ml &mdash; Coverage report</title>
-    <meta name="description" content="9.94% coverage in src/parser/parse.ml">
+    <meta name="description" content="10.20% coverage in src/parser/parse.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/parser/</span>parse.ml
         </a>
       </h1>
-      <h2>9.94%</h2>
+      <h2>10.20%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:2.72%"></span>
@@ -1480,14 +1480,14 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="2991">f</span>un buf -&gt;
-      <span data-count="1741">L</span>og.debug0 "parsing      ...@\n";
-      <span data-count="1741">l</span>et provider () =
-        <span data-count="1394665">l</span>et tok = Text_lexer.token buf in
-        <span data-count="1394249">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1394249">(</span>tok, start, stop)
+    <span data-count="2988">f</span>un buf -&gt;
+      <span data-count="1739">L</span>ogs.info (fun m -&gt; <span data-count="16">m</span> "parsing      ...");
+      <span data-count="1739">l</span>et provider () =
+        <span data-count="1393687">l</span>et tok = Text_lexer.token buf in
+        <span data-count="1393271">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1393271">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="641">r</span> provider) with
+      try Ok (parse<span data-count="639">r</span> provider) with
       | <span data-count="546">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="0">T</span>ext_lexer.Empty_annotation_id -&gt; Error `Empty_annotation_id
       | <span data-count="0">T</span>ext_lexer.Empty_identifier -&gt; Error `Empty_identifier
@@ -1503,16 +1503,16 @@ struct
       | <span data-count="0">S</span>edlexing.MalFormed -&gt; Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
-    <span data-count="524">l</span>et open Syntax in
+    <span data-count="522">l</span>et open Syntax in
     let* res =
-      Bos.OS.File.with_i<span data-count="524">c</span> filename
+      Bos.OS.File.with_i<span data-count="522">c</span> filename
         (fun chan () -&gt;
-          <span data-count="524">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="524">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="524">g</span> filename);
-          <span data-count="524">f</span>rom_lexbuf lb )
+          <span data-count="522">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="522">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="522">g</span> filename);
+          <span data-count="522">f</span>rom_lexbuf lb )
         ()
     in
-    <span data-count="524">r</span>es
+    <span data-count="522">r</span>es
 
   let from_string s = <span data-count="1217">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1217">g</span> s)
 
@@ -1544,16 +1544,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="645">m</span>atch Fpath.get_ext ~multi:false file with
-  | <span data-count="259">"</span>.wat" -&gt;
-    let+ m = Text.Module.from_fil<span data-count="259">e</span> file in
-    <span data-count="258">K</span>ind.Wat m
+  <span data-count="644">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="257">"</span>.wat" -&gt;
+    let+ m = Text.Module.from_fil<span data-count="257">e</span> file in
+    <span data-count="256">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="386">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="386">e</span> file in
-    <span data-count="386">K</span>ind.Wasm m
+  | <span data-count="387">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="387">e</span> file in
+    <span data-count="387">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>

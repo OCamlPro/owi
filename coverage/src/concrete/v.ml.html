@@ -221,14 +221,14 @@ let to_instr = function
   | Ref _ -&gt; assert false
 
 let pp fmt = function
-  | <span data-count="244">I</span>32 i -&gt; pf fmt "i32.const %ld" i
-  | <span data-count="15">I</span>64 i -&gt; pf fmt "i64.const %Ld" i
-  | <span data-count="17">F</span>32 f -&gt; pf fmt "f32.const %a" Float32.pp f
+  | <span data-count="239">I</span>32 i -&gt; pf fmt "i32.const %ld" i
+  | <span data-count="12">I</span>64 i -&gt; pf fmt "i64.const %Ld" i
+  | <span data-count="15">F</span>32 f -&gt; pf fmt "f32.const %a" Float32.pp f
   | <span data-count="3">F</span>64 f -&gt; pf fmt "f64.const %a" Float64.pp f
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
 let ref_null' = function
-  | <span data-count="1275">F</span>unc_ht -&gt; Funcref None
+  | <span data-count="1276">F</span>unc_ht -&gt; Funcref None
   | <span data-count="121">E</span>xtern_ht -&gt; Externref None
   | <span data-count="0">A</span>rray_ht -&gt; Arrayref None
   | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht

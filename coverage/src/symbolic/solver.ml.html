@@ -40,26 +40,21 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -97,11 +92,6 @@
 <a href="#L31">31</a>
 <a href="#L32">32</a>
 <a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
-<a href="#L36">36</a>
-<a href="#L37">37</a>
-<a href="#L38">38</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -112,35 +102,30 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
 let fresh solver () =
-  <span data-count="956">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="956">r</span> solver)
+  <span data-count="952">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="952">r</span> solver)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="953">S</span> ((module Batch), solver)
+  <span data-count="943">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="45235">S</span>tats.start_span "check" "solver";
-  <span data-count="45233">l</span>et module Solver = (val solver_module) in
-  let check = Solver.check s pc in
-  <span data-count="45206">S</span>tats.close_span ();
-  <span data-count="45206">c</span>heck
+  <span data-count="45276">l</span>et module Solver = (val solver_module) in
+  Solver.check s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1266">S</span>tats.start_span "model" "solver";
-  <span data-count="1265">l</span>et module Solver = (val solver_module) in
+  <span data-count="1341">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
-    | <span data-count="1265">`</span>Sat -&gt; begin
+    | <span data-count="1340">`</span>Sat -&gt; begin
       match Solver.model ?symbols s with
       | None -&gt; assert false
-      | <span data-count="1266">S</span>ome model -&gt; model
+      | <span data-count="1339">S</span>ome model -&gt; model
     end
     | `Unsat -&gt; assert false
     | `Unknown -&gt; assert false
   in
-  Stats.close_span ();
-  <span data-count="1265">m</span>odel
+  model
 </code></pre>
       </div>
     </div>

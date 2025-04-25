@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concolic.ml &mdash; Coverage report</title>
-    <meta name="description" content="72.29% coverage in src/concolic/concolic.ml">
+    <meta name="description" content="71.08% coverage in src/concolic/concolic.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/concolic/</span>concolic.ml
         </a>
       </h1>
-      <h2>72.29%</h2>
+      <h2>71.08%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.37%"></span>
@@ -39,6 +39,7 @@
       <span class="unvisited" style="bottom:30.65%"></span>
       <span class="unvisited" style="bottom:22.58%"></span>
       <span class="unvisited" style="bottom:19.89%"></span>
+      <span class="unvisited" style="bottom:5.38%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -218,7 +219,7 @@
 <a id="L173"></a><span > </span>
 <a id="L174"></a><span class="visited"> </span>
 <a id="L175"></a><span > </span>
-<a id="L176"></a><span class="visited"> </span>
+<a id="L176"></a><span class="unvisited"> </span>
 <a id="L177"></a><span > </span>
 <a id="L178"></a><span class="visited"> </span>
 <a id="L179"></a><span > </span>
@@ -595,7 +596,7 @@ module Module_to_run = struct
 
   let env (t : t) = <span data-count="1557">t</span>.env
 
-  let id (t : t) = <span data-count="1332">t</span>.id
+  let id (t : t) = <span data-count="0">t</span>.id
 
   let to_run (t : t) = <span data-count="524">t</span>.to_run
 end

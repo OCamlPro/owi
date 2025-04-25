@@ -107,6 +107,8 @@
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -196,6 +198,8 @@
 <a href="#L83">83</a>
 <a href="#L84">84</a>
 <a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -242,6 +246,8 @@ module type S = sig
   val thread : thread t
 
   val add_pc : V.bool -&gt; unit t
+
+  val get_pc : unit -&gt; Smtml.Expr.t list t
 
   val add_label : int * string -&gt; unit t
 

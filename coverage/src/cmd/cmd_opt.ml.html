@@ -38,10 +38,12 @@
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -66,6 +68,8 @@
 <a href="#L18">18</a>
 <a href="#L19">19</a>
 <a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -82,10 +86,12 @@ let print_or_emit ~unsafe ~source_file ~out_file =
   <span data-count="22">l</span>et m = Binary_to_text.modul m in
   <span data-count="22">m</span>atch out_file with
   | <span data-count="1">S</span>ome name -&gt; Bos.OS.File.writef name "%a@\n" Text.pp_modul m
-  | <span data-count="21">N</span>one -&gt; Ok (Fmt.p<span data-count="21">r</span> "%a@\n" Text.pp_modul m)
+  | <span data-count="21">N</span>one -&gt; begin
+    Logs.app (fun log -&gt; <span data-count="21">l</span>og "%a" Text.pp_modul m);
+    <span data-count="21">O</span>k ()
+  end
 
-let cmd ~debug ~unsafe ~source_file ~out_file =
-  <span data-count="22">i</span>f debug then <span data-count="1">L</span>og.debug_on := true;
+let cmd ~unsafe ~source_file ~out_file =
   <span data-count="22">p</span>rint_or_emit ~unsafe ~source_file ~out_file
 </code></pre>
       </div>
