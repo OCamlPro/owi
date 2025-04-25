@@ -22,4 +22,4 @@ let trap t = Error t
 
 let run m = m
 
-let get_pc () = return []
+let get_pc () = return Smtml.Expr.Set.empty

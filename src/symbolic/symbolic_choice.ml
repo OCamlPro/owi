@@ -346,7 +346,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let get_pc () =
     let+ thread in
-    Thread.pc thread
+    let pc = Thread.pc thread in
+    Symbolic_path_condition.to_set pc
 
   let add_breadcrumb crumb =
     modify_thread (fun t -> Thread.add_breadcrumb t crumb)
@@ -388,6 +389,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unsat -> stop
     | `Sat -> begin
       let symbols = [ symbol ] |> Option.some in
+      (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
       let model = Solver.model solver ~symbols ~pc in
       match Smtml.Model.evaluate model symbol with
       | None ->
@@ -411,10 +413,10 @@ module Make (Thread : Thread_intf.S) = struct
         true
       in
       let false_branch =
-        let v = Symbolic_value.Bool.not v in
-        let* () = add_pc v in
+        let neg_v = Symbolic_value.Bool.not v in
+        let* () = add_pc neg_v in
         let* () = add_breadcrumb 0l in
-        let+ () = check_reachability (Symbolic_value.Bool.not v) in
+        let+ () = check_reachability neg_v in
         false
       in
       if explore_first then choose true_branch false_branch
