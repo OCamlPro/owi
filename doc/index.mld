@@ -69,7 +69,6 @@ Owi.Int64
 Owi.Interpret
 Owi.Interpret_intf
 Owi.Link_env
-Owi.Log
 Owi.Minimalist_symbolic_choice
 Owi.Named
 Owi.Rewrite
@@ -91,7 +90,6 @@ Owi.Syntax
 Owi.Text_lexer
 Owi.Text_parser
 Owi.Thread
-Owi.Tracing
 Owi.Value_intf
 Owi.V
 Owi.Wasm_ffi_intf

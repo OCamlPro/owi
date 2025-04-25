@@ -15,14 +15,10 @@ let fresh solver () =
   S ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  Stats.start_span "check" "solver";
   let module Solver = (val solver_module) in
-  let check = Solver.check s pc in
-  Stats.close_span ();
-  check
+  Solver.check s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  Stats.start_span "model" "solver";
   let module Solver = (val solver_module) in
   let model =
     match Solver.check s pc with
@@ -34,5 +30,4 @@ let model (S (solver_module, s)) ~symbols ~pc =
     | `Unsat -> assert false
     | `Unknown -> assert false
   in
-  Stats.close_span ();
   model

@@ -13,8 +13,10 @@ let print_or_emit ~unsafe ~source_file ~out_file =
   let m = Binary_to_text.modul m in
   match out_file with
   | Some name -> Bos.OS.File.writef name "%a@\n" Text.pp_modul m
-  | None -> Ok (Fmt.pr "%a@\n" Text.pp_modul m)
+  | None -> begin
+    Logs.app (fun log -> log "%a" Text.pp_modul m);
+    Ok ()
+  end
 
-let cmd ~debug ~unsafe ~source_file ~out_file =
-  if debug then Log.debug_on := true;
+let cmd ~unsafe ~source_file ~out_file =
   print_or_emit ~unsafe ~source_file ~out_file

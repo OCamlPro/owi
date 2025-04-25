@@ -1001,7 +1001,7 @@ let inline_module_inner ==
           (fun ({ annotid; items } as t) ->
             if String.equal "contract" annotid then
               let+ c = parse_contract items in
-              Log.debug2 "%a\n" pp_contract c;
+              Logs.debug (fun m -> m "%a\n" pp_contract c);
               Contract c
             else Ok (Annot t) )
           (get_annots ())

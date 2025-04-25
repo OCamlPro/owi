@@ -23,7 +23,8 @@ You can get a model like this:
 
 ```sh
 $ owi sym ./mini.wat > mini.scfg
-Reached problem!
+owi: [ERROR] Trap: unreachable
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -31,7 +32,7 @@ Then you can replay the module execution with the values in the model like this:
 
 ```sh
 $ owi replay --replay-file mini.scfg mini.wat
-unreachable
+owi: [ERROR] unreachable
 [94]
 ```
 
@@ -51,8 +52,8 @@ ARGUMENTS
            source file
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
 
        --entry-point=FUNCTION
            entry point of the executable
@@ -64,14 +65,22 @@ OPTIONS
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        --replay-file=FILE (required)
            Which replay file to use
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -92,6 +101,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi replay:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

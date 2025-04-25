@@ -328,7 +328,7 @@ struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
     fun buf ->
-      Log.debug0 "parsing      ...@\n";
+      Logs.info (fun m -> m "parsing      ...");
       let provider () =
         let tok = Text_lexer.token buf in
         let start, stop = Sedlexing.lexing_positions buf in

@@ -606,13 +606,6 @@ module Make (P : Interpret_intf.P) :
 
     type block_stack = block list
 
-    type count =
-      { name : string option
-      ; mutable enter : int
-      ; mutable instructions : int
-      ; calls : (binary indice, count) Hashtbl.t
-      }
-
     type exec_state =
       { return_state : exec_state option
       ; stack : stack
@@ -621,7 +614,6 @@ module Make (P : Interpret_intf.P) :
       ; block_stack : block_stack
       ; func_rt : binary result_type
       ; env : Env.t
-      ; count : count
       ; envs : Env.t Env_id.collection
       }
 
@@ -633,60 +625,8 @@ module Make (P : Interpret_intf.P) :
       ; block_stack = []
       ; func_rt = []
       ; env
-      ; count =
-          { name = None
-          ; enter = 0
-          ; instructions = 0
-          ; calls = Hashtbl.create 512
-          }
       ; envs
       }
-
-    let rec print_count ppf count =
-      let calls ppf tbl =
-        let l =
-          (* TODO: move this to Types.ml *)
-          List.sort
-            (fun
-              ((Raw id1 : binary indice), _) ((Raw id2 : binary indice), _) ->
-            compare id1 id2 )
-          @@ List.of_seq @@ Hashtbl.to_seq tbl
-        in
-        match l with
-        | [] -> ()
-        | _ :: _ ->
-          Fmt.pf ppf "@ @[<v 2>calls@ %a@]"
-            (Fmt.list
-               ~sep:(fun ppf () -> Fmt.pf ppf "@ ")
-               (fun ppf ((Raw id : binary indice), count) ->
-                 let name ppf = function
-                   | None -> ()
-                   | Some name -> Fmt.pf ppf " %s" name
-                 in
-                 Fmt.pf ppf "@[<v 2>id %i%a@ %a@]" id name count.name
-                   print_count count ) )
-            l
-      in
-      Fmt.pf ppf "@[<v>enter %i@ intrs %i%a@]" count.enter count.instructions
-        calls count.calls
-
-    let empty_count name =
-      { name; enter = 0; instructions = 0; calls = Hashtbl.create 0 }
-
-    let count_instruction state =
-      state.count.instructions <- state.count.instructions + 1
-
-    let enter_function_count count func_name func =
-      let c =
-        match Hashtbl.find_opt count.calls func with
-        | None ->
-          let c = empty_count func_name in
-          Hashtbl.add count.calls func c;
-          c
-        | Some c -> c
-      in
-      c.enter <- c.enter + 1;
-      c
 
     type instr_result =
       | Return of value list
@@ -744,10 +684,10 @@ module Make (P : Interpret_intf.P) :
       (State.Continue
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
-  let exec_func ~return ~id (state : State.exec_state) env
-    (func : binary Types.func) =
-    Log.debug1 "calling func  : func %s@."
-      (Option.value func.id ~default:"anonymous");
+  let exec_func ~return (state : State.exec_state) env (func : binary Types.func)
+      =
+    Logs.info (fun m ->
+      m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
     let args, stack = Stack.pop_n state.stack (List.length param_type) in
     let return_state =
@@ -765,15 +705,13 @@ module Make (P : Interpret_intf.P) :
       ; return_state
       ; env
       ; envs = state.envs
-      ; count = enter_function_count state.count func.id id
       }
 
   let exec_vfunc ~return (state : State.exec_state) (func : Func_intf.t) =
     match func with
-    | WASM (id, func, env_id) ->
+    | WASM (_id, func, env_id) ->
       let env = Env_id.get env_id state.envs in
-      let id = Raw id in
-      Choice.return (State.Continue (exec_func ~return ~id state env func))
+      Choice.return (State.Continue (exec_func ~return state env func))
     | Extern f ->
       let f = Env.get_extern_func state.env f in
       let+ stack = exec_extern_func state.env state.stack f in
@@ -838,15 +776,14 @@ module Make (P : Interpret_intf.P) :
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
     let* pc = Choice.get_pc () in
-    State.count_instruction state;
     let stack = state.stack in
     let env = state.env in
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
-    Log.debug2 "stack         : [ %a ]@." Stack.pp stack;
-    Log.debug2 "running instr : %a@." (Types.pp_instr ~short:true) instr;
-    if !Log.print_pc_on then
-      Log.debug2 "path condition: [ %a ]@." Smtml.Expr.pp_list pc;
+    Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
+    Logs.info (fun m ->
+      m "running instr : %a" (Types.pp_instr ~short:true) instr );
+    Logs.debug (fun m -> m "path condition: [ %a ]" Smtml.Expr.pp_list pc);
     match instr with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
@@ -1485,9 +1422,8 @@ module Make (P : Interpret_intf.P) :
       | Struct_new_default _ | Extern_externalize | Extern_internalize
       | Ref_as_non_null | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _
       | Br_on_cast_fail _ | Br_on_non_null _ | Br_on_null _ ) as i ->
-      Log.debug2 "TODO (Interpret.exec_instr) %a@\n"
-        (Types.pp_instr ~short:false)
-        i;
+      Logs.err (fun m ->
+        m "unimplemented instruction: %a" (Types.pp_instr ~short:false) i );
       assert false
 
   let rec loop (state : State.exec_state) =
@@ -1499,15 +1435,12 @@ module Make (P : Interpret_intf.P) :
       | State.Return res -> Choice.return res
     end
     | [] -> (
-      Log.debug2 "stack         : [ %a ]@." Stack.pp state.stack;
-      let* state = State.end_block state in
-      match state with
+      let* next_state = State.end_block state in
+      match next_state with
       | State.Continue state -> loop state
       | State.Return res -> Choice.return res )
 
   let exec_expr envs env locals stack expr bt =
-    let count = State.empty_count (Some "start") in
-    count.enter <- count.enter + 1;
     let state : State.exec_state =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
@@ -1518,15 +1451,14 @@ module Make (P : Interpret_intf.P) :
       ; block_stack = []
       ; pc = expr
       ; return_state = None
-      ; count
       }
     in
 
     let+ state = loop state in
-    (state, count)
+    state
 
   let modul envs (modul : Module_to_run.t) : unit P.Choice.t =
-    Log.debug0 "interpreting ...@\n";
+    Logs.info (fun m -> m "interpreting ...");
 
     try
       begin
@@ -1534,14 +1466,12 @@ module Make (P : Interpret_intf.P) :
           List.fold_left
             (fun u to_run ->
               let* () = u in
-              let+ _end_stack, count =
+              let+ _end_stack =
                 let env = Module_to_run.env modul in
                 exec_expr envs env (State.Locals.of_list []) Stack.empty to_run
                   None
               in
-              Log.profile3 "Exec module %s@.%a@."
-                (Option.value (Module_to_run.id modul) ~default:"anonymous")
-                State.print_count count )
+              () )
             (Choice.return ())
             (Module_to_run.to_run modul)
         in
@@ -1556,13 +1486,12 @@ module Make (P : Interpret_intf.P) :
       begin
         let* state =
           match func with
-          | Func_intf.WASM (id, func, env_id) ->
+          | Func_intf.WASM (_id, func, env_id) ->
             let env = Env_id.get env_id exec_state.State.envs in
             let stack = locals in
             let state = State.{ exec_state with stack } in
-            let id = Raw id in
             Choice.return
-              (State.Continue (exec_func ~return:true ~id state env func))
+              (State.Continue (exec_func ~return:true state env func))
           | Extern f ->
             let f = Env.get_extern_func exec_state.env f in
             let+ stack = exec_extern_func exec_state.env exec_state.stack f in

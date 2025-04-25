@@ -1,5 +1,5 @@
   $ owi c double_free.c --entry-point=f
-  Trap: double free
+  owi: [ERROR] Trap: double free
   model
-  Reached problem!
+  owi: [ERROR] Reached problem!
   [13]

@@ -6,23 +6,21 @@ Given a file `42.wat`:
 
 ```sh
 $ owi wat2wasm ./42.wat
-$ owi run ./42.wasm --debug
-typechecking ...
-linking      ...
-interpreting ...
-stack         : [  ]
-running instr : call 0
-calling func  : func anonymous
-stack         : [  ]
-running instr : i32.const 20
-stack         : [ i32.const 20 ]
-running instr : i32.const 22
-stack         : [ i32.const 22 ; i32.const 20 ]
-running instr : i32.add
-stack         : [ i32.const 42 ]
-running instr : drop
-stack         : [  ]
-stack         : [  ]
+$ owi run ./42.wasm -v
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop
 ```
 
 ## Man page
@@ -41,8 +39,8 @@ ARGUMENTS
            source file
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
 
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
@@ -50,11 +48,19 @@ OPTIONS
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -75,6 +81,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi wat2wasm:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

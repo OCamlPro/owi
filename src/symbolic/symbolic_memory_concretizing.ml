@@ -128,7 +128,7 @@ module Backend = struct
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->
       (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
-      Log.debug2 "Saw a symbolic address: %a@." Smtml.Expr.pp a;
+      Logs.warn (fun m -> m "Saw a symbolic address: %a" Smtml.Expr.pp a);
       return (Ok a)
 
   let ptr v =
@@ -136,7 +136,8 @@ module Backend = struct
     match Smtml.Expr.view v with
     | Ptr { base; _ } -> return base
     | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v;
+      Logs.err (fun m ->
+        m {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v );
       assert false
 
   let free m p =

@@ -32,11 +32,11 @@ Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has mu
 
 ```sh
 $ owi c ./poly.c -w1 --no-assert-failure-expression-printing
-Assert failure
+owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -78,11 +78,11 @@ Let's run owi on this new input:
 
 ```sh
 $ owi c ./poly2.c --no-assert-failure-expression-printing
-Assert failure
+owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -173,7 +173,7 @@ int main (void) {
 
 ```sh
 $ owi c ./maze.c --no-value --no-assert-failure-expression-printing
-Assert failure
+owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
   symbol symbol_1 i32
@@ -204,7 +204,7 @@ model {
   symbol symbol_8 i32
   symbol symbol_9 i32
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -260,7 +260,7 @@ int main() {
 <!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
 ```sh
 $ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
-Assert failure
+owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
   symbol symbol_1 i32
@@ -270,7 +270,7 @@ model {
   symbol symbol_5 i32
   symbol symbol_6 i32
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -368,11 +368,11 @@ int main(void) {
 
 ```sh
 $ owi c --e-acsl primes.c -w1
-Assert failure: false
+owi: [ERROR] Assert failure: false
 model {
   symbol symbol_0 i32 2
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -420,7 +420,7 @@ int main(void) {
 
 ```sh
 $ owi c --e-acsl primes2.c
-All OK
+All OK!
 ```
 
 All the specified properties have been satisfied during the execution.
@@ -441,11 +441,11 @@ ARGUMENTS
            source files
 
 OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --concolic
            concolic mode
-
-       -d, --debug
-           debug mode
 
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
@@ -501,17 +501,11 @@ OPTIONS
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
-
-       --print-pc
-           print path condition
-
-       --profile=FILE
-           Profile file.
-
        --property=FILE
            property file
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
@@ -521,6 +515,14 @@ OPTIONS
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
@@ -551,6 +553,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi c:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

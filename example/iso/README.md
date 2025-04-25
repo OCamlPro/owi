@@ -51,16 +51,13 @@ Owi can find an input for which the `mul` function of these two modules is not e
 
 ```sh
 $ owi iso ./mul1.wat ./mul2.wat
-Comparing ./mul1.wat and ./mul2.wat
-Common exports: mul
-Checking export mul
-Assert failure: (bool.eq (i32.mul symbol_0 symbol_1)
-                 (i32.add (i32.mul symbol_1 symbol_0) 1))
+owi: [ERROR] Assert failure: (bool.eq (i32.mul symbol_0 symbol_1)
+                              (i32.add (i32.mul symbol_1 symbol_0) 1))
 model {
   symbol symbol_0 i32 0
   symbol symbol_1 i32 0
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -80,8 +77,8 @@ ARGUMENTS
            source files
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
 
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
@@ -110,11 +107,22 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
@@ -145,6 +153,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi iso:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

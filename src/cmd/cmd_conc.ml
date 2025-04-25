@@ -9,9 +9,6 @@ module Choice = Concolic.Choice
 (* let () = Random.self_init () *)
 let () = Random.init 42
 
-(* TODO: add a flag for this *)
-let print_paths = false
-
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize link_state m =
   let* m =
@@ -306,7 +303,7 @@ let find_node_to_run tree =
         | false, false -> Some (Random.bool ()) (* Unexplored in both *)
         | true, true -> None (* No unexplored remain *)
       in
-      Log.debug1 "Select bool %b@." b;
+      Logs.debug (fun m -> m "select bool %b" b);
       loop (if b then if_true else if_false) (tree :: to_update)
     | Select_i32 { value = _; branches } ->
       (* TODO: better ! *)
@@ -322,7 +319,7 @@ let find_node_to_run tree =
         match List.nth_opt branches i with
         | None -> assert false
         | Some (i, branch) ->
-          Log.debug1 "Select_i32 %li@." i;
+          Logs.debug (fun m -> m "select_i32 %li" i);
           loop branch (tree :: to_update)
       end
     | Assume { cond = _; cont } -> loop cont (tree :: to_update)
@@ -384,11 +381,12 @@ let run solver tree link_state modules_to_run =
       | Error (Assume_fail c) -> (
         decr count_path;
         (* Current path condition led to assume failure, try to satisfy *)
-        Log.debug2 "Assume_fail: %a@." Smtml.Expr.pp c;
-        Log.debug2 "Assignments:@.%a@."
-          (Concolic_choice.pp_assignments ~no_value:false)
-          trace.assignments;
-        Log.debug0 "Retry !@.";
+        Logs.debug (fun m -> m "assume_fail: %a" Smtml.Expr.pp c);
+        Logs.debug (fun m ->
+          m "Assignments:@.%a"
+            (Concolic_choice.pp_assignments ~no_value:false)
+            trace.assignments );
+        Logs.debug (fun m -> m "Retry !");
         match pc_model solver (Assume c :: trace.remaining_pc) with
         | Some model -> loop model
         | None -> Ok None )
@@ -431,11 +429,10 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers:_
-  ~no_stop_at_failure:_ ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order:_ ~fail_mode:_ ~workspace ~solver ~files ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~model_out_file
-  ~with_breadcrumbs:_ =
+let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order:_
+  ~fail_mode:_ ~workspace ~solver ~files ~model_format ~entry_point
+  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs:_ =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -443,10 +440,6 @@ let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers:_
   in
   let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
-  Option.iter Stats.init_logger_to_file profile;
-  if profiling then Log.profiling_on := true;
-  if debug then Log.debug_on := true;
-  if print_pc then Log.print_pc_on := true;
   (* deterministic_result_order implies no_stop_at_failure *)
   (* let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in *)
   let to_string m =
@@ -478,37 +471,41 @@ let cmd ~profiling ~debug ~print_pc ~unsafe ~rac ~srac ~optimize ~workers:_
       Cmd_utils.write_testcase ~dir:Fpath.(workspace / "test-suite") testcase
     else Ok ()
   in
-  if print_paths then Fmt.pr "Completed paths: %d@." !count_path;
+  Logs.info (fun m -> m "completed paths: %d" !count_path);
   let to_file path assignements =
     Bos.OS.File.write path (to_string assignements)
   in
   match result with
   | None ->
-    Fmt.pr "All OK@.";
+    Logs.app (fun m -> m "All OK!");
     Ok ()
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
-    Fmt.pr "Trap: %s@\n" (Result.err_to_string trap);
+    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string trap));
     let* () =
       match model_out_file with
       | Some path -> to_file path assignments
-      | None -> Ok (Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments))
+      | None ->
+        Logs.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
+        Ok ()
     in
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; _ }) ->
     let assignments = List.rev assignments in
     if no_assert_failure_expression_printing then begin
-      Fmt.pr "Assert failure@\n"
+      Logs.err (fun m -> m "Assert failure")
     end
     else begin
       (* TODO: print the assert failure expression ! *)
-      Fmt.pr "Assert failure@\n"
+      Logs.err (fun m -> m "Assert failure")
     end;
     let* () =
       match model_out_file with
       | Some path -> to_file path assignments
-      | None -> Ok (Fmt.pr "Model:@\n @[<v>%s@]@." (to_string assignments))
+      | None ->
+        Logs.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
+        Ok ()
     in
     let* () = testcase assignments in
     Error (`Found_bug 1)

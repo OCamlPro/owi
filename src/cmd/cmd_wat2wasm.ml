@@ -12,7 +12,5 @@ let cmd_one ~unsafe ~optimize ~out_file ~source_file =
     Binary_encoder.convert out_file source_file ~unsafe ~optimize modul
   | ext -> Error (`Unsupported_file_extension ext)
 
-let cmd ~profiling ~debug ~unsafe ~optimize ~out_file ~source_file =
-  if profiling then Log.profiling_on := true;
-  if debug then Log.debug_on := true;
+let cmd ~unsafe ~optimize ~out_file ~source_file =
   cmd_one ~unsafe ~optimize ~out_file ~source_file

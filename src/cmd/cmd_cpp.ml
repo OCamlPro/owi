@@ -5,14 +5,17 @@
 open Bos
 open Syntax
 
-let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
+let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   (files : Fpath.t list) : Fpath.t Result.t =
   let* clangpp_bin = OS.Cmd.resolve @@ Cmd.v "clang++" in
   let opt_lvl = Fmt.str "-O%s" opt_lvl in
 
   let includes = Cmd.of_list ~slip:"-I" (List.map Cmd.p includes) in
 
-  let err = if debug then OS.Cmd.err_run_out else OS.Cmd.err_null in
+  let err =
+    if false (* TODO: make this available via CLI *) then OS.Cmd.err_run_out
+    else OS.Cmd.err_null
+  in
   let* () =
     (* TODO: we use this recursive function in order to be able to use `-o` on
        each file. We could get rid of this if we managed to call the C++
@@ -32,7 +35,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
         | Ok _ -> compile_files rest
         | Error (`Msg e) ->
           Fmt.error_msg "clang++ failed: %s"
-            ( if debug then e
+            ( if false (* TODO: make this available via CLI *) then e
               else "run with --debug to get the full error message" ) )
     in
     compile_files files
@@ -60,7 +63,8 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Fmt.error_msg "llc failed: %s"
-        (if debug then e else "run with --debug to get the full error message")
+        ( if false (* TODO: make this available via CLI *) then e
+          else "run with --debug to get the full error message" )
   in
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
 
@@ -89,16 +93,17 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug
     | Ok _ as v -> v
     | Error (`Msg e) ->
       Fmt.error_msg "wasm-ld failed: %s"
-        (if debug then e else "run with --debug to get the full error message")
+        ( if false (* TODO: make this available via CLI *) then e
+          else "run with --debug to get the full error message" )
   in
 
   out
 
-let cmd ~debug ~print_pc ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling
-  ~unsafe ~optimize ~no_stop_at_failure ~no_value
-  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~solver ~profile ~model_format ~entry_point ~invoke_with_symbols
-  ~out_file ~workspace ~model_out_file ~with_breadcrumbs : unit Result.t =
+let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
+  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
+  ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
+  ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
+  ~with_breadcrumbs : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -109,14 +114,13 @@ let cmd ~debug ~print_pc ~arch:_ ~workers ~opt_lvl ~includes ~files ~profiling
   let entry_point = Option.value entry_point ~default:"main" in
   let includes = Cmd_utils.c_files_location @ includes in
   let* modul =
-    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file debug files
+    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
   in
   let files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~profiling ~debug ~print_pc ~unsafe ~rac:false ~srac:false ~optimize
-    ~workers ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~profile ~model_format ~entry_point
+    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs

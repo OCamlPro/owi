@@ -22,21 +22,18 @@ Running the validator is as simple as:
 
 ```sh
 $ owi validate ./type_error.wat
-type mismatch (expected [i32 i32] but stack is [i32])
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
 ```
 
-You can also print a more detailed trace with the `--debug` option:
+You can also print a more detailed trace with the `-v` option:
 
 ```sh
-$ owi validate ./type_error.wat --debug
-parsing      ...
-checking     ...
-grouping     ...
-assigning    ...
-rewriting    ...
-typechecking ...
-type mismatch (expected [i32 i32] but stack is [i32])
+$ owi validate ./type_error.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
 ```
 
@@ -48,15 +45,26 @@ NAME
        owi-validate - Validate a module
 
 SYNOPSIS
-       owi validate [--debug] [OPTION]… FILE…
+       owi validate [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
-       -d, --debug
-           debug mode
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -77,6 +85,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi validate:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

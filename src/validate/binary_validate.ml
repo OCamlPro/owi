@@ -545,7 +545,9 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     | Struct_new_default _ | Extern_externalize | Extern_internalize
     | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
     | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
-    Log.debug2 "TODO (typecheck instr) %a" (pp_instr ~short:false) i;
+    Logs.err (fun m ->
+      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
+        i );
     assert false
 
 and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
@@ -757,7 +759,7 @@ let validate_mem modul =
     modul.mem
 
 let modul (modul : Module.t) =
-  Log.debug0 "typechecking ...@\n";
+  Logs.info (fun m -> m "typechecking ...");
   let refs = Hashtbl.create 512 in
   let* () = array_iter (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in

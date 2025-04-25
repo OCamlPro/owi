@@ -133,7 +133,7 @@ let check_type_id (types : binary str_type Named.t)
   | Some _ -> assert false
 
 let of_grouped (modul : Grouped.t) : t Result.t =
-  Log.debug0 "assigning    ...@\n";
+  Logs.debug (fun m -> m "assigning    ...");
   let* typ = assign_types modul in
   let* global =
     name "global"

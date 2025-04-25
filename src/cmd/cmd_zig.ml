@@ -5,8 +5,8 @@
 open Bos
 open Syntax
 
-let compile ~workspace ~entry_point ~includes ~out_file debug
-  (files : Fpath.t list) : Fpath.t Result.t =
+let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
+  Fpath.t Result.t =
   let includes =
     Cmd.of_list (List.map (fun p -> Fmt.str "-I%a" Fpath.pp p) includes)
   in
@@ -41,24 +41,27 @@ let compile ~workspace ~entry_point ~includes ~out_file debug
     let+ () =
       match
         OS.Cmd.run
-          ~err:(if debug then OS.Cmd.err_run_out else OS.Cmd.err_null)
+          ~err:
+            ( if false (* TODO: make this available via CLI *) then
+                OS.Cmd.err_run_out
+              else OS.Cmd.err_null )
           zig
       with
       | Ok _ as v -> v
       | Error (`Msg e) ->
         Fmt.error_msg "zig failed: %s"
-          (if debug then e else "run with --debug to get the full error message")
+          ( if false (* TODO: make this available via CLI *) then e
+            else "run with --debug to get the full error message" )
     in
 
     out
   end
   | _ -> Fmt.failwith "TODO"
 
-let cmd ~debug ~print_pc ~workers ~includes ~files ~profiling ~unsafe ~optimize
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~profile
-  ~model_format ~entry_point ~invoke_with_symbols ~out_file ~workspace
-  ~model_out_file ~with_breadcrumbs : unit Result.t =
+let cmd ~workers ~includes ~files ~unsafe ~optimize ~no_stop_at_failure
+  ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+  ~fail_mode ~concolic ~solver ~model_format ~entry_point ~invoke_with_symbols
+  ~out_file ~workspace ~model_out_file ~with_breadcrumbs : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -73,15 +76,12 @@ let cmd ~debug ~print_pc ~workers ~includes ~files ~profiling ~unsafe ~optimize
 *)
     includes
   in
-  let* modul =
-    compile ~workspace ~entry_point ~includes ~out_file debug files
-  in
+  let* modul = compile ~workspace ~entry_point ~includes ~out_file files in
   let files = [ modul ] in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~profiling ~debug ~print_pc ~unsafe ~rac:false ~srac:false ~optimize
-    ~workers ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~profile ~model_format ~entry_point
+    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs

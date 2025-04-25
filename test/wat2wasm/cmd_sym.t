@@ -1,10 +1,10 @@
   $ owi wat2wasm symbolic.wat
   $ owi sym symbolic.wasm
-  Trap: unreachable
+  owi: [ERROR] Trap: unreachable
   model {
     symbol symbol_0 i32 6
   }
-  Reached problem!
+  owi: [ERROR] Reached problem!
   [13]
   $ owi wasm2wat symbolic.wasm
   (module

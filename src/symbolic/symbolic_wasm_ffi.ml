@@ -77,7 +77,7 @@ end = struct
   let print_char (c : Value.int32) =
     let open Choice in
     let* c = select_i32 c in
-    Fmt.pr "%c@?" (char_of_int (Int32.to_int c));
+    Logs.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
   let label m (id : Value.int32) (str_ptr : Value.int32) =

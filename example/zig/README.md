@@ -32,11 +32,11 @@ Owi can find a crash with:
 
 ```sh
 $ owi zig ./fib.zig -w1 --no-assert-failure-expression-printing
-Assert failure
+owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 7
 }
-Reached problem!
+owi: [ERROR] Reached problem!
 [13]
 ```
 
@@ -56,11 +56,11 @@ ARGUMENTS
            source files
 
 OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --concolic
            concolic mode
-
-       -d, --debug
-           debug mode
 
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
@@ -105,20 +105,22 @@ OPTIONS
        --optimize
            optimize mode
 
-       -p, --profiling
-           profiling mode
-
-       --print-pc
-           print path condition
-
-       --profile=FILE
-           Profile file.
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
 
        -u, --unsafe
            skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
@@ -149,6 +151,12 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi zig:
+
+       OWI_VERBOSITY
+           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

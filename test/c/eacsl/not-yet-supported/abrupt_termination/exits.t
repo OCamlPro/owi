@@ -3,4 +3,4 @@
     E-ACSL construct `abnormal termination case in behavior'
     is not yet supported.
     Ignoring annotation.
-  All OK
+  All OK!

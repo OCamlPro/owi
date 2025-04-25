@@ -3,9 +3,7 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     profiling:bool
-  -> debug:bool
-  -> unsafe:bool
+     unsafe:bool
   -> rac:bool
   -> optimize:bool
   -> files:Fpath.t list

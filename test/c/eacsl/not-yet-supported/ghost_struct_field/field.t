@@ -15,5 +15,5 @@
     21    }
     22
   [kernel] Frama-C aborted: invalid user input.
-  Frama-C failed: run with --debug to get the full error message
+  owi: [ERROR] Frama-C failed: run with --debug to get the full error message
   [26]

@@ -1,2 +1,2 @@
   $ owi c ./char.c
-  All OK
+  All OK!

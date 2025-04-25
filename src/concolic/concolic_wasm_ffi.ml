@@ -115,14 +115,16 @@ module M :
     match view s with
     | Val (Num (I32 v)) -> Concolic_choice.return v
     | _ ->
-      Log.debug2 {|alloc: cannot allocate base pointer "%a"@.|} Expr.pp s;
+      Logs.err (fun m ->
+        m {|alloc: cannot allocate base pointer "%a"|} Expr.pp s );
       Concolic_choice.bind (abort ()) (fun () -> assert false)
 
   let ptr ((_c, s) : Value.int32) : int32 Concolic_choice.t =
     match view s with
     | Ptr { base; _ } -> Concolic_choice.return base
     | _ ->
-      Log.debug2 {|free: cannot fetch pointer base of "%a"@.|} Expr.pp s;
+      Logs.err (fun m ->
+        m {|free: cannot fetch pointer base of "%a"|} Expr.pp s );
       Concolic_choice.bind (abort ()) (fun () -> assert false)
 
   let exit (_p : Value.int32) : unit Concolic_choice.t = abort ()
@@ -142,10 +144,11 @@ module M :
     Concolic_choice.return (0l, Smtml.Expr.value (Smtml.Value.Int 1))
 
   let print_char ((c, _s) : Value.int32) =
-    Concolic_choice.return @@ Fmt.pr "%c" (char_of_int (Int32.to_int c))
+    Logs.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
+    Concolic_choice.return ()
 
   let label _ _ _ =
-    Fmt.epr "Not implemented@.\n";
+    Logs.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
 end
 

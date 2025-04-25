@@ -59,6 +59,8 @@
     (>= 1.2.0))
   (integers
    (>= 0.5.1))
+  (logs
+    (>= 0.8.0))
   (ocaml_intrinsics
     (>= "v0.16.1"))
   (prelude

@@ -54,17 +54,9 @@ $ dune build -p owi @install
 $ dune install
 ```
 
-### Development setup
+### Contributing
 
-To get a proper development setup:
-
-```shell-session
-$ git clone git@github.com:OCamlPro/owi.git
-$ cd owi
-$ opam install . --deps-only --with-test --with-doc --with-dev-setup
-$ git submodule update --init --recursive
-$ dune build @all
-```
+See [HACKING].
 
 ## Supported proposals
 
@@ -168,6 +160,7 @@ This project was partly funded through the [NGI0 Core] Fund, a fund established 
 [CHANGELOG]: ./CHANGES.md
 [dune-project]: ./dune-project
 [example]: ./example
+[HACKING]: ./HACKING.md
 [LICENSE]: ./LICENSE.md
 [test suite]: ./test
 
