@@ -27,34 +27,6 @@ mod sys {
     }
 }
 
-#[deprecated(
-    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `u8::symbol()`."
-)]
-pub fn u8_symbol() -> u8 {
-    Symbolic::symbol()
-}
-
-#[deprecated(
-    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `u32::symbol()`."
-)]
-pub fn u32_symbol() -> u32 {
-    Symbolic::symbol()
-}
-
-#[deprecated(
-    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `f32::symbol()`."
-)]
-pub fn f32_symbol() -> f32 {
-    Symbolic::symbol()
-}
-
-#[deprecated(
-    note = "*_symbol functions have been deprecated in favor of the Symbolic trait, use instead: `char::symbol()`."
-)]
-pub fn char_symbol() -> char {
-    Symbolic::symbol()
-}
-
 pub fn assert(b: bool) {
     unsafe { sys::assert(b) }
 }
