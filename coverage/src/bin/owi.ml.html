@@ -2056,10 +2056,10 @@ let exit_code =
   | Ok (<span data-count="17">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
   | <span data-count="929">O</span>k (`Ok result) -&gt; begin
     match result with
-    | <span data-count="674">O</span>k () -&gt; ok
-    | <span data-count="255">E</span>rror e -&gt; begin
-      Logs.err (fun m -&gt; <span data-count="255">m</span> "%s" (Result.err_to_strin<span data-count="255">g</span> e));
-      <span data-count="255">R</span>esult.err_to_exit_cod<span data-count="255">e</span> e
+    | <span data-count="672">O</span>k () -&gt; ok
+    | <span data-count="257">E</span>rror e -&gt; begin
+      Logs.err (fun m -&gt; <span data-count="257">m</span> "%s" (Result.err_to_strin<span data-count="257">g</span> e));
+      <span data-count="257">R</span>esult.err_to_exit_cod<span data-count="257">e</span> e
     end
   end
   | <span data-count="23">E</span>rror e -&gt; (
