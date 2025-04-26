@@ -343,7 +343,7 @@ let rewrite_named f named =
         Indexed.return index value )
       named.Named.values
   in
-  { named with Named.values }
+  Named.create values named.named
 
 let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   binary rec_type Result.t =
@@ -492,7 +492,7 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
         modul.global
     in
     let values = List.rev values in
-    { Named.named; values }
+    Named.create values named
   in
   let* elem = rewrite_named (rewrite_elem typemap modul) modul.elem in
   let* data = rewrite_named (rewrite_data typemap modul) modul.data in

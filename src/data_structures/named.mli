@@ -2,12 +2,14 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t =
+type 'a t = private
   { values : 'a Indexed.t list
   ; named : int String_map.t
   }
 
 val empty : 'a t
+
+val create : 'a Indexed.t list -> int String_map.t -> 'a t
 
 val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 

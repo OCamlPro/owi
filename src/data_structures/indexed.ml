@@ -21,3 +21,11 @@ let get_at i values =
   match List.find_opt (has_index i) values with
   | None -> None
   | Some { value; _ } -> Some value
+
+let list_to_array l =
+  List.sort
+    (fun { index = i1; value = _ } { index = i2; value = _ } ->
+      Int.compare i1 i2 )
+    l
+  |> List.map (fun { value; _ } -> value)
+  |> Array.of_list

@@ -22,32 +22,32 @@ let popcnt =
   fun [@inline] x ->
     Int64.to_int32 (Int64.popcnt (Int64.logand (Int64.of_int32 x) mask))
 
-let of_int64 = Int64.to_int32
+let of_int64 n = Int64.to_int32 n [@@inline]
 
-let to_int64 = Int64.of_int32
+let to_int64 n = Int64.of_int32 n [@@inline]
 
 (* Unsigned comparison in terms of signed comparison. *)
-let cmp_u x op y = op (add x min_int) (add y min_int)
+let cmp_u x op y = op (add x min_int) (add y min_int) [@@inline]
 
-let eq (x : int32) y = equal x y
+let eq (x : int32) y = equal x y [@@inline]
 
-let ne (x : int32) y = compare x y <> 0
+let ne (x : int32) y = compare x y <> 0 [@@inline]
 
-let lt (x : int32) y = compare x y < 0
+let lt (x : int32) y = compare x y < 0 [@@inline]
 
-let gt (x : int32) y = compare x y > 0
+let gt (x : int32) y = compare x y > 0 [@@inline]
 
-let le (x : int32) y = compare x y <= 0
+let le (x : int32) y = compare x y <= 0 [@@inline]
 
-let ge (x : int32) y = compare x y >= 0
+let ge (x : int32) y = compare x y >= 0 [@@inline]
 
-let lt_u x y = cmp_u x lt y
+let lt_u x y = cmp_u x lt y [@@inline]
 
-let le_u x y = cmp_u x le y
+let le_u x y = cmp_u x le y [@@inline]
 
-let gt_u x y = cmp_u x gt y
+let gt_u x y = cmp_u x gt y [@@inline]
 
-let ge_u x y = cmp_u x ge y
+let ge_u x y = cmp_u x ge y [@@inline]
 
 (* If bit (32 - 1) is set, sx will sign-extend t to maintain the
  * invariant that small ints are stored sign-extended inside a wider int. *)
@@ -87,17 +87,19 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then Fmt.failwith "of_string (int32)"
+let require b = if not b then Fmt.failwith "of_string (int32)" [@@inline]
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | _ -> Fmt.failwith "of_string"
+[@@inline]
 
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
   | _ -> Fmt.failwith "of_string"
+[@@inline]
 
 let max_upper = unsigned_div minus_one 10l
 
@@ -113,29 +115,41 @@ let sign_extend i =
 
 let of_string_exn s =
   let len = String.length s in
+
   let rec parse_hex i num =
     if i = len then num
-    else if Char.equal s.[i] '_' then parse_hex (i + 1) num
     else
-      let digit = of_int (hex_digit s.[i]) in
-      require (le_u num (shr_u minus_one (of_int 4)));
-      parse_hex (i + 1) (logor (shift_left num 4) digit)
+      let c = s.[i] in
+      if Char.equal c '_' then parse_hex (i + 1) num
+      else begin
+        let digit = of_int (hex_digit c) in
+        require (le_u num (shr_u minus_one (of_int 4)));
+        parse_hex (i + 1) (logor (shift_left num 4) digit)
+      end
   in
+
   let rec parse_dec i num =
     if i = len then num
-    else if Char.equal s.[i] '_' then parse_dec (i + 1) num
     else
-      let digit = of_int (dec_digit s.[i]) in
-      require (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
-      parse_dec (i + 1) (add (mul num 10l) digit)
+      let c = s.[i] in
+      if Char.equal c '_' then parse_dec (i + 1) num
+      else begin
+        let digit = of_int (dec_digit c) in
+        require
+          (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
+        parse_dec (i + 1) (add (mul num 10l) digit)
+      end
   in
+
   let parse_int i =
     require (len - i > 0);
     if i + 2 <= len && Char.equal s.[i] '0' && Char.equal s.[i + 1] 'x' then
       parse_hex (i + 2) zero
     else parse_dec i zero
   in
+
   require (len > 0);
+
   let parsed =
     match s.[0] with
     | '+' -> parse_int 1
@@ -145,6 +159,7 @@ let of_string_exn s =
       neg n
     | _ -> parse_int 0
   in
+
   let parsed = sign_extend parsed in
   require (le low_int parsed && le parsed high_int);
   parsed
