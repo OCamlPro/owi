@@ -6,9 +6,9 @@ let string_of_version = function
   | None -> "unknown"
   | Some v -> Build_info.V1.Version.to_string v
 
-let version = string_of_version @@ Build_info.V1.version ()
+let version () = string_of_version @@ Build_info.V1.version ()
 
-let statically_linked_libraries =
+let statically_linked_libraries () =
   Build_info.V1.Statically_linked_libraries.to_list ()
   |> List.map (fun l ->
        ( Build_info.V1.Statically_linked_library.name l
@@ -21,9 +21,9 @@ let pp fmt () =
     ~sep:(fun fmt () -> Fmt.pf fmt "@\n")
     (fun fmt (name, version) -> Fmt.pf fmt "%s version %s" name version)
     fmt
-    (("owi", version) :: statically_linked_libraries);
+    (("owi", version ()) :: statically_linked_libraries ());
   Fmt.string fmt "@\n"
 
-let owi_version () = Fmt.str "owi version %s" version
+let owi_version () = Fmt.str "owi version %s" (version ())
 
 let cmd () = Ok (Logs.app (fun m -> m "%a" pp ()))

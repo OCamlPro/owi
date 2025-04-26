@@ -8,11 +8,11 @@ let return x = Ok x [@@inline]
 
 let bind x f = Result.bind x f [@@inline]
 
-let ( let* ) = bind
+let ( let* ) x f = bind x f [@@inline]
 
 let map v f = Result.map f v [@@inline]
 
-let ( let+ ) = map
+let ( let+ ) v f = map v f [@@inline]
 
 let select b = Ok b [@@inline]
 

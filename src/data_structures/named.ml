@@ -10,6 +10,8 @@ type 'a t =
 
 let empty = { values = []; named = String_map.empty }
 
+let create values named = { values; named }
+
 let fold f v acc =
   List.fold_left
     (fun acc v -> f (Indexed.get_index v) (Indexed.get v) acc)
@@ -19,13 +21,4 @@ let map f v =
   let values = List.map f v.values in
   { v with values }
 
-let to_array v =
-  let tbl = Hashtbl.create 512 in
-  List.iter
-    (fun v ->
-      let i = Indexed.get_index v in
-      let v = Indexed.get v in
-      if Hashtbl.mem tbl i then assert false else Hashtbl.add tbl i v )
-    v.values;
-  Array.init (List.length v.values) (fun i ->
-    match Hashtbl.find_opt tbl i with None -> assert false | Some v -> v )
+let to_array v = Indexed.list_to_array v.values

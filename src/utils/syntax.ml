@@ -4,60 +4,49 @@
 
 open Prelude.Result
 
-let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
+let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e [@@inline]
 
 let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
+[@@inline]
 
-let ok v = Ok v
+let ok v = Ok v [@@inline]
 
 let list_iter f l =
-  let err = ref None in
-  try
-    List.iter
-      (fun v ->
-        match f v with
-        | Error _e as e ->
-          err := Some e;
-          raise Exit
-        | Ok () -> () )
-      l;
-    Ok ()
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
+  let rec aux = function
+    | [] -> Ok ()
+    | x :: xs -> ( match f x with Ok () -> aux xs | Error _ as e -> e )
+  in
+  aux l
+[@@inline]
 
 let list_map f l =
-  let err = ref None in
-  try
-    ok
-    @@ List.map
-         (fun v ->
-           match f v with
-           | Error _e as e ->
-             err := Some e;
-             raise Exit
-           | Ok v -> v )
-         l
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
+  let rec aux acc = function
+    | [] -> Ok (List.rev acc)
+    | x :: xs -> (
+      match f x with Ok v -> aux (v :: acc) xs | Error _ as e -> e )
+  in
+  aux [] l
+[@@inline]
 
 let list_concat_map f l =
-  let err = ref None in
-  try
-    ok
-    @@ List.concat_map
-         (fun v ->
-           match f v with
-           | Error _e as e ->
-             err := Some e;
-             raise Exit
-           | Ok v -> v )
-         l
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
+  let rec aux acc = function
+    | [] -> Ok (List.rev acc)
+    | v :: tl -> (
+      match f v with
+      | Ok vs -> aux (List.rev_append vs acc) tl
+      | Error _ as e -> e )
+  in
+  aux [] l
+[@@inline]
 
 let list_fold_left f acc l =
-  List.fold_left
-    (fun acc v ->
-      let* acc in
-      f acc v )
-    (Ok acc) l
+  let rec aux acc = function
+    | [] -> Ok acc
+    | v :: tl -> (
+      match f acc v with Ok acc -> aux acc tl | Error _ as e -> e )
+  in
+  aux acc l
+[@@inline]
 
 let list_fold_left_map f acc l =
   let+ acc, l =
@@ -68,6 +57,7 @@ let list_fold_left_map f acc l =
       (acc, []) l
   in
   (acc, List.rev l)
+[@@inline]
 
 let array_iter f a =
   let err = ref None in
@@ -81,6 +71,7 @@ let array_iter f a =
     done;
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
 
 let array_map f a =
   let err = ref None in
@@ -94,6 +85,7 @@ let array_map f a =
            raise Exit
          | Ok v -> v )
   with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
 
 let array_fold_left f acc l =
   Array.fold_left
@@ -101,3 +93,4 @@ let array_fold_left f acc l =
       let* acc in
       f acc v )
     (Ok acc) l
+[@@inline]

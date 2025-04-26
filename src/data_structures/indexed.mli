@@ -15,3 +15,5 @@ val return : int -> 'a -> 'a t
 val get_at : int -> 'a t list -> 'a option
 
 val has_index : int -> 'a t -> bool
+
+val list_to_array : 'a t list -> 'a array

@@ -51,9 +51,8 @@ let modul m =
   in
 
   let+ (_env : env) =
-    List.fold_left
+    list_fold_left
       (fun env field ->
-        let* env in
         match field with
         | MExport _e -> Ok env
         | MFunc _f -> Ok { env with funcs = true }
@@ -92,8 +91,7 @@ let modul m =
         | MTable (id, _) ->
           let+ () = add_table id in
           { env with tables = true } )
-      (Ok (empty_env ()))
-      m.fields
+      (empty_env ()) m.fields
   in
 
   m

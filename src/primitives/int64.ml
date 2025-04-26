@@ -44,27 +44,27 @@ let popcnt =
 (*
  * Unsigned comparison in terms of signed comparison.
  *)
-let cmp_u x op y = op (add x min_int) (add y min_int)
+let cmp_u x op y = op (add x min_int) (add y min_int) [@@inline]
 
-let eq (x : int64) y = equal x y
+let eq (x : int64) y = equal x y [@@inline]
 
-let ne (x : int64) y = not (equal x y)
+let ne (x : int64) y = not (equal x y) [@@inline]
 
-let lt (x : int64) y = compare x y < 0
+let lt (x : int64) y = compare x y < 0 [@@inline]
 
-let gt (x : int64) y = compare x y > 0
+let gt (x : int64) y = compare x y > 0 [@@inline]
 
-let le (x : int64) y = compare x y <= 0
+let le (x : int64) y = compare x y <= 0 [@@inline]
 
-let ge (x : int64) y = compare x y >= 0
+let ge (x : int64) y = compare x y >= 0 [@@inline]
 
-let lt_u x y = cmp_u x lt y
+let lt_u x y = cmp_u x lt y [@@inline]
 
-let le_u x y = cmp_u x le y
+let le_u x y = cmp_u x le y [@@inline]
 
-let gt_u x y = cmp_u x gt y
+let gt_u x y = cmp_u x gt y [@@inline]
 
-let ge_u x y = cmp_u x ge y
+let ge_u x y = cmp_u x ge y [@@inline]
 
 (*
  * Unsigned division and remainder in terms of signed division; algorithm from
@@ -112,45 +112,59 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then Fmt.failwith "of_string (int64)"
+let require b = if not b then Fmt.failwith "of_string (int64)" [@@inline]
 
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | _ -> Fmt.failwith "of_string"
+[@@inline]
 
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
   | _ -> Fmt.failwith "of_string"
+[@@inline]
 
 let max_upper, max_lower = divrem_u minus_one 10L
 
 let of_string_exn s =
   let len = String.length s in
+
   let rec parse_hex i num =
     if i = len then num
-    else if Char.equal s.[i] '_' then parse_hex (i + 1) num
     else
-      let digit = of_int (hex_digit s.[i]) in
-      require (le_u num (shr_u minus_one (of_int 4)));
-      parse_hex (i + 1) (logor (shift_left num 4) digit)
+      let c = s.[i] in
+      if Char.equal c '_' then parse_hex (i + 1) num
+      else begin
+        let digit = of_int (hex_digit c) in
+        require (le_u num (shr_u minus_one (of_int 4)));
+        parse_hex (i + 1) (logor (shift_left num 4) digit)
+      end
   in
+
   let rec parse_dec i num =
     if i = len then num
-    else if Char.equal s.[i] '_' then parse_dec (i + 1) num
     else
-      let digit = of_int (dec_digit s.[i]) in
-      require (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
-      parse_dec (i + 1) (add (mul num 10L) digit)
+      let c = s.[i] in
+      if Char.equal c '_' then parse_dec (i + 1) num
+      else begin
+        let digit = of_int (dec_digit c) in
+        require
+          (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
+        parse_dec (i + 1) (add (mul num 10L) digit)
+      end
   in
+
   let parse_int i =
     require (len - i > 0);
     if i + 2 <= len && Char.equal s.[i] '0' && Char.equal s.[i + 1] 'x' then
       parse_hex (i + 2) zero
     else parse_dec i zero
   in
+
   require (len > 0);
+
   let parsed =
     match s.[0] with
     | '+' -> parse_int 1
@@ -160,6 +174,7 @@ let of_string_exn s =
       neg n
     | _ -> parse_int 0
   in
+
   require (le low_int parsed && le parsed high_int);
   parsed
 
