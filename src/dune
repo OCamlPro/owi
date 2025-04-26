@@ -146,7 +146,9 @@
   (pps sedlex.ppx))
  (instrumentation
   (backend bisect_ppx --exclusions src/bisect.exclude)
-  (deps bisect.exclude)))
+  (deps bisect.exclude))
+ (instrumentation
+  (backend landmarks --auto)))
 
 (env
  (_
