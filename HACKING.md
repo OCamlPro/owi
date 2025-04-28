@@ -63,7 +63,7 @@ Note: it seems landmarks is not compatible with domains and thus won't work with
 See [bench].
 
 [bench]: ./bench/README.md
-[fuzz]: ./test/fuzz/README.md
+[test/fuzz]: ./test/fuzz/README.md
 
 [Cram Tests]: https://dune.readthedocs.io/en/latest/reference/cram.html
 [MDX]: https://github.com/realworldocaml/mdx
