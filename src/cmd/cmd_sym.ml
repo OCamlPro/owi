@@ -70,9 +70,7 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
           let bcrumbs =
             [ { Scfg.Types.name = "breadcrumbs"
               ; params =
-                  List.map
-                    (fun b -> if b then "1" else "0")
-                    (List.rev breadcrumbs)
+                  List.map (fun b -> string_of_int b) (List.rev breadcrumbs)
               ; children = []
               }
             ]
@@ -167,7 +165,7 @@ let sort_results deterministic_result_order results =
     |> Seq.map (function (_, thread) as x ->
          (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
     |> List.of_seq
-    |> List.sort (fun (_, bc1) (_, bc2) -> List.compare Bool.compare bc1 bc2)
+    |> List.sort (fun (_, bc1) (_, bc2) -> List.compare compare bc1 bc2)
     |> List.to_seq |> Seq.map fst
   else results
 

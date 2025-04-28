@@ -18,7 +18,7 @@ struct
     ; globals : Symbolic_global.collection
         (** Breadcrumbs represent the list of choices that were made so far.
             They identify one given symbolic execution trace. *)
-    ; breadcrumbs : bool list
+    ; breadcrumbs : int list
     ; labels : (int * string) list
     }
 

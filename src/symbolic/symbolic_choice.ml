@@ -223,7 +223,7 @@ module CoreImpl = struct
     val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
     val assertion_fail :
-      Smtml.Expr.t -> Smtml.Model.t -> (int * string) list -> bool list -> 'a t
+      Smtml.Expr.t -> Smtml.Model.t -> (int * string) list -> int list -> 'a t
 
     val stop : 'a t
 
@@ -408,14 +408,14 @@ module Make (Thread : Thread_intf.S) = struct
     | _ ->
       let true_branch =
         let* () = add_pc v in
-        let* () = add_breadcrumb true in
+        let* () = add_breadcrumb 1 in
         let+ () = check_reachability v in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
-        let* () = add_breadcrumb false in
+        let* () = add_breadcrumb 0 in
         let+ () = check_reachability neg_v in
         false
       in
@@ -468,7 +468,7 @@ module Make (Thread : Thread_intf.S) = struct
           Bitv.I32.(s != v i)
         in
         let this_val_branch =
-          let* () = add_breadcrumb (Int32.to_int i <> 0) in
+          let* () = add_breadcrumb (Int32.to_int i) in
           let+ () = add_pc this_value_cond in
           i
         in
