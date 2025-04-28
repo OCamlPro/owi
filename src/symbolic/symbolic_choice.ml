@@ -375,10 +375,8 @@ module Make (Thread : Thread_intf.S) = struct
     let* solver in
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
-    match Solver.check solver sliced_pc with
-    | `Sat -> return ()
-    | `Unsat -> stop
-    | `Unknown -> assert false
+    let reachability = Solver.check solver sliced_pc in
+    return reachability
 
   let get_model_or_stop symbol =
     let* () = yield in
@@ -406,19 +404,31 @@ module Make (Thread : Thread_intf.S) = struct
     | Val False -> return false
     | Val (Num (I32 _)) -> Fmt.failwith "unreachable (type error)"
     | _ ->
-      let true_branch =
-        let* () = add_pc v in
-        let* () = add_breadcrumb 1l in
-        let+ () = check_reachability v in
-        true
+      let is_other_unsat = ref false in
+      let branch condition final_value =
+        let* () = add_pc condition in
+        let* () = add_breadcrumb (if final_value then 1l else 0l) in
+        (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when the false branch is unsat, we don't have to check the reachability of the condition's negation, because it is always going to be SAT. *)
+        if !is_other_unsat then begin
+          Logs.debug (fun m ->
+            m "The SMT call for the %b branch was optimized away" final_value );
+          return final_value
+        end
+        else begin
+          let* satisfiability = check_reachability condition in
+          begin
+            match satisfiability with
+            | `Unknown -> assert false
+            | `Unsat ->
+              is_other_unsat := true;
+              stop
+            | `Sat -> return final_value
+          end
+        end
       in
-      let false_branch =
-        let neg_v = Symbolic_value.Bool.not v in
-        let* () = add_pc neg_v in
-        let* () = add_breadcrumb 0l in
-        let+ () = check_reachability neg_v in
-        false
-      in
+
+      let true_branch = branch v true in
+      let false_branch = branch (Symbolic_value.Bool.not v) false in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
