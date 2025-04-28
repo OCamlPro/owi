@@ -207,8 +207,8 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of Result.err * Smtml.Model.t * (int * string) list * bool list
-  | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * bool list
+  | ETrap of Result.err * Smtml.Model.t * (int * string) list * int list
+  | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * int list
 
 module type S = sig
   module V : Func_intf.Value_types

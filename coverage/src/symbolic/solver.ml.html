@@ -138,14 +138,14 @@ let fresh solver () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="939">S</span> ((module Batch), solver)
+  <span data-count="943">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="45574">l</span>et module Solver = (val solver_module) in
+  <span data-count="45653">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbols ~pc =
-  <span data-count="1395">l</span>et module Solver = (val solver_module) in
+  <span data-count="1449">l</span>et module Solver = (val solver_module) in
   let model =
     match Solver.get_sat_model ?symbols s pc with
     | `Unknown -&gt; assert false
@@ -164,7 +164,7 @@ let model (S (solver_module, s)) ~symbols ~pc =
              Smtml.Expr.pp )
           pc );
       <span data-count="0">a</span>ssert false
-    | <span data-count="1395">`</span>Model model -&gt; model
+    | <span data-count="1448">`</span>Model model -&gt; model
   in
   model
 </code></pre>

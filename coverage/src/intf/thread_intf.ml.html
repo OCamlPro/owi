@@ -179,7 +179,7 @@ module type S = sig
     -&gt; Memory.collection
     -&gt; Symbolic_table.collection
     -&gt; Symbolic_global.collection
-    -&gt; bool list
+    -&gt; int list
     -&gt; (int * string) list
     -&gt; t
 
@@ -191,7 +191,7 @@ module type S = sig
 
   val globals : t -&gt; Symbolic_global.collection
 
-  val breadcrumbs : t -&gt; bool list
+  val breadcrumbs : t -&gt; int list
 
   val symbols_set : t -&gt; Smtml.Symbol.t list
 
@@ -203,7 +203,7 @@ module type S = sig
 
   val add_pc : t -&gt; Symbolic_value.bool -&gt; t
 
-  val add_breadcrumb : t -&gt; bool -&gt; t
+  val add_breadcrumb : t -&gt; int -&gt; t
 
   val add_symbol : t -&gt; Smtml.Symbol.t -&gt; t
 
