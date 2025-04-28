@@ -226,7 +226,7 @@
 
 open Symbolic_value
 
-module Make (Thread : Thread.S) = struct
+module Make (Thread : Thread_intf.S) = struct
   type err =
     | Assert_fail
     | Trap of Result.err
@@ -297,7 +297,7 @@ module Make (Thread : Thread.S) = struct
 
   let lift_mem _ = <span data-count="0">a</span>ssert false
 
-  let get_pc () = <span data-count="0">r</span>eturn []
+  let get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
 end
 
 include Make (Thread_with_memory)

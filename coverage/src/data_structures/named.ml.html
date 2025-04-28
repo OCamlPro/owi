@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>named.ml &mdash; Coverage report</title>
-    <meta name="description" content="82.35% coverage in src/data_structures/named.ml">
+    <meta name="description" content="75.00% coverage in src/data_structures/named.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,11 @@
           <span class="dirname">src/data_structures/</span>named.ml
         </a>
       </h1>
-      <h2>82.35%</h2>
+      <h2>75.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:38.71%"></span>
-      <span class="unvisited" style="bottom:35.48%"></span>
-      <span class="some-visited" style="bottom:9.68%"></span>
+      <span class="unvisited" style="bottom:12.50%"></span>
+      <span class="unvisited" style="bottom:8.33%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -37,25 +36,18 @@
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span class="unvisited"> </span>
-<a id="L20"></a><span class="unvisited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="some-visited"> </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
-<a id="L31"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -84,13 +76,6 @@
 <a href="#L22">22</a>
 <a href="#L23">23</a>
 <a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -104,6 +89,8 @@ type 'a t =
 
 let empty = { values = []; named = String_map.empty }
 
+let create values named = <span data-count="80569">{</span> values; named }
+
 let fold f v acc =
   <span data-count="6179">L</span>ist.fold_left
     (fun acc v -&gt; <span data-count="9430">f</span> (Indexed.get_inde<span data-count="9430">x</span> v) (Indexed.ge<span data-count="9430">t</span> v) acc)
@@ -113,16 +100,7 @@ let map f v =
   <span data-count="0">l</span>et values = List.map f v.values in
   <span data-count="0">{</span> v with values }
 
-let to_array v =
-  <span data-count="42805">l</span>et tbl = Hashtbl.create 512 in
-  <span data-count="42805">L</span>ist.iter
-    (fun v -&gt;
-      <span data-count="32342">l</span>et i = Indexed.get_index v in
-      <span data-count="32342">l</span>et v = Indexed.get v in
-      <span data-count="32342">i</span>f Hashtbl.mem tbl i then <span data-count="0">a</span>ssert false else <span data-count="32342">H</span>ashtbl.add tbl i v )
-    v.values;
-  <span data-count="42805">A</span>rray.init (List.lengt<span data-count="42805">h</span> v.values) (fun i -&gt;
-    <span data-count="32342">m</span>atch Hashtbl.find_opt tbl i with None -&gt; assert false | <span data-count="32342">S</span>ome v -&gt; v )
+let to_array v = <span data-count="42805">I</span>ndexed.list_to_array v.values
 </code></pre>
       </div>
     </div>

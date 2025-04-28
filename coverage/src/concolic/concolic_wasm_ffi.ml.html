@@ -493,14 +493,14 @@ module M :
   module Value = Concolic_value
 
   let symbol_i32 () : Value.int32 Concolic_choice.t =
-    <span data-count="3137">C</span>oncolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
-      <span data-count="3137">l</span>et n =
+    <span data-count="3176">C</span>oncolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
+      <span data-count="3176">l</span>et n =
         match forced_value with
-        | <span data-count="1637">N</span>one -&gt; Random.bits3<span data-count="1637">2</span> ()
-        | <span data-count="1500">S</span>ome (Num (I32 n)) -&gt; n
+        | <span data-count="1636">N</span>one -&gt; Random.bits3<span data-count="1636">2</span> ()
+        | <span data-count="1540">S</span>ome (Num (I32 n)) -&gt; n
         | _ -&gt; assert false
       in
-      (I32 n, (n, Expr.symbo<span data-count="3137">l</span> sym)) )
+      (I32 n, (n, Expr.symbo<span data-count="3176">l</span> sym)) )
 
   let symbol_i8 () : Value.int32 Concolic_choice.t =
     <span data-count="6">C</span>oncolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value -&gt;
@@ -561,15 +561,15 @@ module M :
       let n = Concrete_value.Bool.int32 b in
       <span data-count="0">(</span>I32 n, Value.Bool.int3<span data-count="0">2</span> (b, Expr.symbo<span data-count="0">l</span> sym)) )
 
-  let add_pc_wrapper e = <span data-count="1949">C</span>oncolic_choice.assume e
+  let add_pc_wrapper e = <span data-count="1974">C</span>oncolic_choice.assume e
 
   let assume (i : Value.int32) : unit Concolic_choice.t =
-    <span data-count="1931">l</span>et c = Value.I32.to_bool i in
-    <span data-count="1931">a</span>dd_pc_wrapper c
+    <span data-count="1956">l</span>et c = Value.I32.to_bool i in
+    <span data-count="1956">a</span>dd_pc_wrapper c
 
   let assert' (i : Value.int32) : unit Concolic_choice.t =
-    <span data-count="1112">l</span>et c = Value.I32.to_bool i in
-    <span data-count="1112">C</span>oncolic_choice.assertion c
+    <span data-count="1134">l</span>et c = Value.I32.to_bool i in
+    <span data-count="1134">C</span>oncolic_choice.assertion c
 
   let symbol_range (lo : Value.int32) (hi : Value.int32) :
     Value.int32 Concolic_choice.t =
@@ -588,16 +588,16 @@ module M :
     (* let+ v = Concolic_choice.select_i32 v in *)
     (* let n = v.c in *)
     (* let x = Concolic_choice.assume (Value.I32.eq v (Value.const_i32 n)) in *)
-    <span data-count="3254">m</span>atch view s with
-    | <span data-count="3254">V</span>al (Num (I32 v)) -&gt; Concolic_choice.return v
+    <span data-count="3303">m</span>atch view s with
+    | <span data-count="3303">V</span>al (Num (I32 v)) -&gt; Concolic_choice.return v
     | <span data-count="0">_</span> -&gt;
       Logs.err (fun m -&gt;
         <span data-count="0">m</span> {|alloc: cannot allocate base pointer "%a"|} Expr.pp s );
       <span data-count="0">C</span>oncolic_choice.bind (abor<span data-count="0">t</span> ()) (fun () -&gt; <span data-count="0">a</span>ssert false)
 
   let ptr ((_c, s) : Value.int32) : int32 Concolic_choice.t =
-    <span data-count="1856">m</span>atch view s with
-    | <span data-count="1856">P</span>tr { base; _ } -&gt; Concolic_choice.return base
+    <span data-count="1903">m</span>atch view s with
+    | <span data-count="1903">P</span>tr { base; _ } -&gt; Concolic_choice.return base
     | <span data-count="0">_</span> -&gt;
       Logs.err (fun m -&gt;
         <span data-count="0">m</span> {|free: cannot fetch pointer base of "%a"|} Expr.pp s );
@@ -607,14 +607,14 @@ module M :
 
   let alloc _ (base : Value.int32) (_size : Value.int32) :
     Value.int32 Concolic_choice.t =
-    <span data-count="3254">C</span>oncolic_choice.bind (i3<span data-count="3254">2</span> base) (fun (base : int32) -&gt;
-      <span data-count="3254">C</span>oncolic_choice.return (base, Expr.pt<span data-count="3254">r</span> base (Symbolic_value.const_i3<span data-count="3254">2</span> 0l)) )
+    <span data-count="3303">C</span>oncolic_choice.bind (i3<span data-count="3303">2</span> base) (fun (base : int32) -&gt;
+      <span data-count="3303">C</span>oncolic_choice.return (base, Expr.pt<span data-count="3303">r</span> base (Symbolic_value.const_i3<span data-count="3303">2</span> 0l)) )
 
   let free _ (p : Value.int32) =
     (* WHAT ???? *)
-    <span data-count="1856">l</span>et open Concolic_choice in
-    let+ base = pt<span data-count="1856">r</span> p in
-    <span data-count="1856">V</span>alue.const_i32 base
+    <span data-count="1903">l</span>et open Concolic_choice in
+    let+ base = pt<span data-count="1903">r</span> p in
+    <span data-count="1903">V</span>alue.const_i32 base
 
   let in_replay_mode () =
     <span data-count="0">C</span>oncolic_choice.return (0l, Smtml.Expr.valu<span data-count="0">e</span> (Smtml.Value.Int 1))

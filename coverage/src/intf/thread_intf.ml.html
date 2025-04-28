@@ -85,10 +85,6 @@
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span > </span>
-<a id="L65"></a><span > </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -156,10 +152,6 @@
 <a href="#L61">61</a>
 <a href="#L62">62</a>
 <a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -183,7 +175,7 @@ module type S = sig
   val create :
        int
     -&gt; Smtml.Symbol.t list
-    -&gt; Symbolic_value.bool list
+    -&gt; Symbolic_path_condition.t
     -&gt; Memory.collection
     -&gt; Symbolic_table.collection
     -&gt; Symbolic_global.collection
@@ -191,7 +183,7 @@ module type S = sig
     -&gt; (int * string) list
     -&gt; t
 
-  val pc : t -&gt; Symbolic_value.bool list
+  val pc : t -&gt; Symbolic_path_condition.t
 
   val memories : t -&gt; Memory.collection
 
@@ -221,10 +213,6 @@ module type S = sig
 end
 
 module type Intf = sig
-  module type M = M
-
-  module type S = S
-
   module Make (Symbolic_memory : M) :
     S with type Memory.collection = Symbolic_memory.collection
 end

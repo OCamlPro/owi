@@ -247,7 +247,7 @@ module type S = sig
 
   val add_pc : V.bool -&gt; unit t
 
-  val get_pc : unit -&gt; Smtml.Expr.t list t
+  val get_pc : unit -&gt; Smtml.Expr.Set.t t
 
   val add_label : int * string -&gt; unit t
 
@@ -282,7 +282,7 @@ module type Intf = sig
     end
   end
 
-  module Make (Thread : Thread.S) :
+  module Make (Thread : Thread_intf.S) :
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t

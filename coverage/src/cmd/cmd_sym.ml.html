@@ -643,8 +643,8 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
   in
 
   <span data-count="404">l</span>et rec aux count_acc results =
-    <span data-count="580">m</span>atch results () with
-    | <span data-count="356">S</span>eq.Nil -&gt; Ok count_acc
+    <span data-count="581">m</span>atch results () with
+    | <span data-count="357">S</span>eq.Nil -&gt; Ok count_acc
     | <span data-count="224">S</span>eq.Cons ((result, _thread), tl) -&gt;
       let* model =
         match result with
@@ -665,20 +665,20 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
           <span data-count="113">C</span>md_utils.write_testcas<span data-count="113">e</span> ~dir:test_suite_dir testcase
         else <span data-count="111">O</span>k ()
       in
-      <span data-count="224">i</span>f no_stop_at_failure then <span data-count="176">a</span>ux count_acc tl else <span data-count="48">O</span>k count_acc
+      <span data-count="224">i</span>f no_stop_at_failure then <span data-count="177">a</span>ux count_acc tl else <span data-count="47">O</span>k count_acc
   in
   aux count_acc results
 
 let sort_results deterministic_result_order results =
   <span data-count="404">i</span>f deterministic_result_order then
-    <span data-count="31">r</span>esults
-    |&gt; Seq.map (function <span data-count="37">(</span>_, thread) as x -&gt;
-         (x, List.re<span data-count="37">v</span> @@ Thread_with_memory.breadcrumb<span data-count="37">s</span> thread) )
-    |&gt; <span data-count="31">L</span>ist.of_seq
-    |&gt; <span data-count="31">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt;
+    <span data-count="32">r</span>esults
+    |&gt; Seq.map (function <span data-count="38">(</span>_, thread) as x -&gt;
+         (x, List.re<span data-count="38">v</span> @@ Thread_with_memory.breadcrumb<span data-count="38">s</span> thread) )
+    |&gt; <span data-count="32">L</span>ist.of_seq
+    |&gt; <span data-count="32">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt;
          <span data-count="10">L</span>ist.compare Prelude.Int32.compare bc1 bc2 )
-    |&gt; <span data-count="31">L</span>ist.to_seq |&gt; <span data-count="31">S</span>eq.map fst
-  else <span data-count="373">r</span>esults
+    |&gt; <span data-count="32">L</span>ist.to_seq |&gt; <span data-count="32">S</span>eq.map fst
+  else <span data-count="372">r</span>esults
 
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
@@ -688,24 +688,24 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   <span data-count="404">l</span>et res_queue = Wq.make () in
   <span data-count="404">l</span>et path_count = Atomic.make 0 in
   <span data-count="404">l</span>et callback v =
-    <span data-count="1831">l</span>et open Symbolic_choice_intf in
+    <span data-count="1690">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1833">m</span>atch (fail_mode, v) with
-    | <span data-count="1607">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1688">m</span>atch (fail_mode, v) with
+    | <span data-count="1461">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="165">(</span><span data-count="165">B</span>oth | <span data-count="0">T</span>rap_only), (ETrap (t, m, labels, breadcrumbs), thread) -&gt;
       Wq.push (`ETrap (t, m, labels, breadcrumbs), thread) res_queue
-    | <span data-count="59">(</span><span data-count="58">B</span>oth | <span data-count="1">A</span>ssertion_only), (EAssert (e, m, labels, breadcrumbs), thread) -&gt;
+    | <span data-count="60">(</span><span data-count="59">B</span>oth | <span data-count="1">A</span>ssertion_only), (EAssert (e, m, labels, breadcrumbs), thread) -&gt;
       Wq.push (`EAssert (e, m, labels, breadcrumbs), thread) res_queue
     | <span data-count="1">(</span><span data-count="0">T</span>rap_only | <span data-count="1">A</span>ssertion_only), _ -&gt; ()
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
-      ~callback_init:(fun () -&gt; <span data-count="787">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="757">W</span>q.end_pledge res_queue)
+      ~callback_init:(fun () -&gt; <span data-count="786">W</span>q.make_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="751">W</span>q.end_pledge res_queue)
   in
   <span data-count="404">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
-      <span data-count="356">A</span>rray.iter Domain.join join_handles )
+      <span data-count="357">A</span>rray.iter Domain.join join_handles )
   in
   <span data-count="404">l</span>et results = sort_results deterministic_result_order results in
   <span data-count="404">l</span>et* count =
@@ -732,7 +732,7 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   in
 
   (* deterministic_result_order implies no_stop_at_failure *)
-  <span data-count="403">l</span>et no_stop_at_failure = deterministic_result_orde<span data-count="31">r</span> || no_stop_at_failur<span data-count="137">e</span> in
+  <span data-count="403">l</span>et no_stop_at_failure = deterministic_result_orde<span data-count="32">r</span> || no_stop_at_failur<span data-count="137">e</span> in
   let pc = Choice.return () in
   <span data-count="403">l</span>et* result : unit Symbolic.Choice.t =
     list_fold_lef<span data-count="403">t</span>

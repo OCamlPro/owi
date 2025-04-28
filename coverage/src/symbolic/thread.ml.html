@@ -46,53 +46,62 @@
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span class="visited"> </span>
-<a id="L35"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
-<a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span > </span>
-<a id="L44"></a><span class="visited"> </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span > </span>
-<a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span class="visited"> </span>
 <a id="L57"></a><span > </span>
-<a id="L58"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span class="visited"> </span>
-<a id="L61"></a><span > </span>
-<a id="L62"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span class="visited"> </span>
-<a id="L71"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -168,21 +177,31 @@
 <a href="#L69">69</a>
 <a href="#L70">70</a>
 <a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-include Thread_intf
 
-module Make (Symbolic_memory : M) :
-  S with type Memory.collection = Symbolic_memory.collection = struct
-  module Memory : M with type collection = Symbolic_memory.collection =
+module Make (Symbolic_memory : Thread_intf.M) :
+  Thread_intf.S with type Memory.collection = Symbolic_memory.collection =
+struct
+  module Memory :
+    Thread_intf.M with type collection = Symbolic_memory.collection =
     Symbolic_memory
 
   type t =
     { symbols : int
     ; symbol_set : Smtml.Symbol.t list
-    ; pc : Symbolic_value.bool list
+    ; pc : Symbolic_path_condition.t
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection
@@ -193,12 +212,12 @@ module Make (Symbolic_memory : M) :
     }
 
   let create symbols symbol_set pc memories tables globals breadcrumbs labels =
-    <span data-count="2171114">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+    <span data-count="2174490">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
 
   let init () =
     <span data-count="404">l</span>et symbols = 0 in
     let symbol_set = [] in
-    let pc = [] in
+    let pc = Symbolic_path_condition.empty in
     let memories = Memory.init () in
     <span data-count="404">l</span>et tables = Symbolic_table.init () in
     <span data-count="404">l</span>et globals = Symbolic_global.init () in
@@ -206,39 +225,47 @@ module Make (Symbolic_memory : M) :
     let labels = [] in
     create symbols symbol_set pc memories tables globals breadcrumbs labels
 
-  let symbols t = <span data-count="2172282">t</span>.symbols
+  let symbols t = <span data-count="2175707">t</span>.symbols
 
-  let symbols_set t = <span data-count="2170798">t</span>.symbol_set
+  let symbols_set t = <span data-count="2174233">t</span>.symbol_set
 
-  let pc t = <span data-count="10208198">t</span>.pc
+  let pc t = <span data-count="2218779">t</span>.pc
 
-  let memories t = <span data-count="4328481">t</span>.memories
+  let memories t = <span data-count="4335113">t</span>.memories
 
-  let tables t = <span data-count="2174776">t</span>.tables
+  let tables t = <span data-count="2178016">t</span>.tables
 
-  let globals t = <span data-count="2173366">t</span>.globals
+  let globals t = <span data-count="2176458">t</span>.globals
 
-  let breadcrumbs t = <span data-count="2170933">t</span>.breadcrumbs
+  let breadcrumbs t = <span data-count="2174268">t</span>.breadcrumbs
 
-  let labels t = <span data-count="2171004">t</span>.labels
+  let labels t = <span data-count="2174334">t</span>.labels
 
-  let add_symbol t s = <span data-count="1373">{</span> t with symbol_set = s :: t.symbol_set }
+  let add_symbol t s =
+    <span data-count="1373">l</span>et symbol_set = s :: t.symbol_set in
+    { t with symbol_set }
 
-  let add_pc t c = <span data-count="45971">{</span> t with pc = c :: t.pc }
+  let add_pc t c =
+    <span data-count="45855">l</span>et pc = Symbolic_path_condition.add t.pc c in
+    <span data-count="45855">{</span> t with pc }
 
-  let add_breadcrumb t crumb = <span data-count="44480">{</span> t with breadcrumbs = crumb :: t.breadcrumbs }
+  let add_breadcrumb t crumb =
+    <span data-count="44525">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+    { t with breadcrumbs }
 
-  let incr_symbols t = <span data-count="1515">{</span> t with symbols = suc<span data-count="1515">c</span> t.symbols }
+  let incr_symbols t =
+    <span data-count="1510">l</span>et symbols = succ t.symbols in
+    <span data-count="1510">{</span> t with symbols }
 
   let add_label t label = <span data-count="2">{</span> t with labels = label :: t.labels }
 
   let clone
     { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
       =
-    <span data-count="45374">l</span>et memories = Memory.clone memories in
-    <span data-count="45378">l</span>et tables = Symbolic_table.clone tables in
-    <span data-count="45374">l</span>et globals = Symbolic_global.clone globals in
-    <span data-count="45373">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+    <span data-count="45254">l</span>et memories = Memory.clone memories in
+    <span data-count="45257">l</span>et tables = Symbolic_table.clone tables in
+    <span data-count="45257">l</span>et globals = Symbolic_global.clone globals in
+    <span data-count="45258">{</span> symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
 end
 </code></pre>
       </div>

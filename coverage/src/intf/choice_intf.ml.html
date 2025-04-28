@@ -146,7 +146,7 @@ module type Base = sig
 
   val ( let+ ) : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
-  val get_pc : unit -&gt; Smtml.Expr.t list t
+  val get_pc : unit -&gt; Smtml.Expr.Set.t t
 end
 
 module type Complete = sig

@@ -1514,7 +1514,7 @@ let rewrite_named f named =
         <span data-count="29397">I</span>ndexed.return index value )
       named.Named.values
   in
-  <span data-count="30764">{</span> named with Named.values }
+  <span data-count="30764">N</span>amed.create values named.named
 
 let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
   binary rec_type Result.t =
@@ -1663,7 +1663,7 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
         modul.global
     in
     <span data-count="6178">l</span>et values = List.rev values in
-    <span data-count="6178">{</span> Named.named; values }
+    <span data-count="6178">N</span>amed.create values named
   in
   <span data-count="6178">l</span>et* elem = rewrite_name<span data-count="6178">d</span> (rewrite_ele<span data-count="6178">m</span> typemap modul) modul.elem in
   <span data-count="6178">l</span>et* data = rewrite_name<span data-count="6178">d</span> (rewrite_dat<span data-count="6178">a</span> typemap modul) modul.data in

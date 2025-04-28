@@ -166,9 +166,9 @@ type t =
   ; mutable data : table
   }
 
-let backup t = <span data-count="511">{</span> t with data = Array.cop<span data-count="511">y</span> t.data }
+let backup t = <span data-count="519">{</span> t with data = Array.cop<span data-count="519">y</span> t.data }
 
-let recover ~from_ ~to_ = <span data-count="511">t</span>o_.data &lt;- from_.data
+let recover ~from_ ~to_ = <span data-count="519">t</span>o_.data &lt;- from_.data
 
 let fresh =
   let r = ref (-1) in
@@ -184,13 +184,13 @@ let init ?label (typ : binary table_type) : t =
 
 let update table data = <span data-count="54">t</span>able.data &lt;- data
 
-let get t i = <span data-count="1609816">t</span>.data.(i)
+let get t i = <span data-count="1609945">t</span>.data.(i)
 
-let set t i v = <span data-count="4205">t</span>.data.(i) &lt;- v
+let set t i v = <span data-count="4237">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="1611745">A</span>rray.length t.data
+let size t = <span data-count="1611882">A</span>rray.length t.data
 
-let typ t = <span data-count="1609686">t</span>.typ
+let typ t = <span data-count="1609815">t</span>.typ
 
 let max_size t = <span data-count="66">t</span>.limits.max
 

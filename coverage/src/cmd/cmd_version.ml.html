@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_version.ml &mdash; Coverage report</title>
-    <meta name="description" content="65.00% coverage in src/cmd/cmd_version.ml">
+    <meta name="description" content="21.74% coverage in src/cmd/cmd_version.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,19 @@
           <span class="dirname">src/cmd/</span>cmd_version.ml
         </a>
       </h1>
-      <h2>65.00%</h2>
+      <h2>21.74%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="top:24.14%"></span>
+      <span class="unvisited" style="top:41.38%"></span>
+      <span class="unvisited" style="top:44.83%"></span>
+      <span class="unvisited" style="top:48.28%"></span>
+      <span class="unvisited" style="bottom:48.28%"></span>
+      <span class="unvisited" style="bottom:41.38%"></span>
       <span class="unvisited" style="bottom:31.03%"></span>
       <span class="unvisited" style="bottom:27.59%"></span>
       <span class="unvisited" style="bottom:24.14%"></span>
+      <span class="unvisited" style="bottom:17.24%"></span>
       <span class="unvisited" style="bottom:13.79%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
@@ -33,24 +40,24 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span class="visited"> </span>
-<a id="L7"></a><span class="visited"> </span>
+<a id="L7"></a><span class="unvisited"> </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L12"></a><span class="unvisited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
+<a id="L14"></a><span class="unvisited"> </span>
+<a id="L15"></a><span class="unvisited"> </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span class="unvisited"> </span>
 <a id="L21"></a><span class="unvisited"> </span>
 <a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
 <a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
@@ -95,28 +102,28 @@
 (* Written by the Owi programmers *)
 
 let string_of_version = function
-  | <span data-count="13984">N</span>one -&gt; "unknown"
-  | <span data-count="79900">S</span>ome v -&gt; Build_info.V1.Version.to_string v
+  | <span data-count="973">N</span>one -&gt; "unknown"
+  | <span data-count="0">S</span>ome v -&gt; Build_info.V1.Version.to_string v
 
-let version = string_of_versio<span data-count="996">n</span> @@ Build_info.V1.versio<span data-count="996">n</span> ()
+let version () = <span data-count="973">s</span>tring_of_version @@ Build_info.V1.versio<span data-count="973">n</span> ()
 
-let statically_linked_libraries =
-  Build_info.V1.Statically_linked_libraries.to_list ()
-  |&gt; <span data-count="996">L</span>ist.map (fun l -&gt;
-       <span data-count="92888">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="92888">e</span> l
-       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="92888">s</span>tring_of_versio<span data-count="92888">n</span>
+let statically_linked_libraries () =
+  <span data-count="0">B</span>uild_info.V1.Statically_linked_libraries.to_list ()
+  |&gt; <span data-count="0">L</span>ist.map (fun l -&gt;
+       <span data-count="0">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="0">e</span> l
+       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="0">s</span>tring_of_versio<span data-count="0">n</span>
        ) )
-  |&gt; <span data-count="996">L</span>ist.sor<span data-count="996">t</span> (fun (n1, _) (n2, _) -&gt; <span data-count="478907">S</span>tring.compare n1 n2)
+  |&gt; <span data-count="0">L</span>ist.sort (fun (n1, _) (n2, _) -&gt; <span data-count="0">S</span>tring.compare n1 n2)
 
 let pp fmt () =
   <span data-count="0">F</span>mt.list
     ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt "@\n")
     (fun fmt (name, version) -&gt; <span data-count="0">F</span>mt.pf fmt "%s version %s" name version)
     fmt
-    (("owi", version) :: statically_linked_libraries);
+    (("owi", versio<span data-count="0">n</span> ()) :: statically_linked_librarie<span data-count="0">s</span> ());
   <span data-count="0">F</span>mt.string fmt "@\n"
 
-let owi_version () = <span data-count="973">F</span>mt.str "owi version %s" version
+let owi_version () = <span data-count="973">F</span>mt.str "owi version %s" (versio<span data-count="973">n</span> ())
 
 let cmd () = <span data-count="0">O</span>k (Logs.ap<span data-count="0">p</span> (fun m -&gt; <span data-count="0">m</span> "%a" pp ()))
 </code></pre>
