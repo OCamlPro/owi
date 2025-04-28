@@ -1,8 +1,8 @@
   $ owi sym assert_false.wat -w1
   owi: [ERROR] Assert failure: (i32.gt_u symbol_0 symbol_1)
   model {
-    symbol symbol_0 i32 294734597
-    symbol symbol_1 i32 -1853712862
+    symbol symbol_0 i32 38077858
+    symbol symbol_1 i32 38175397
   }
   owi: [ERROR] Reached problem!
   [13]
