@@ -80,7 +80,6 @@
 
 # About
 - [History of Owi](about/history.md)
-- [Spelling and Pronunciation](about/spelling.md)
 - [Authors and Contributors](about/authors.md)
 - [License](about/license.md)
 - [Funding](about/fundings.md)
