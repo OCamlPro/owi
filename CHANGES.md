@@ -37,6 +37,8 @@
 - add `owi_label` primitive
 - add `--with-breadcrumbs` option
 - add path-condition slicing
+- add `owi_invisible_bool` primitive
+- add `owi_label_is_covered` primitive
 
 ## 0.2 - 2024-04-24
 
