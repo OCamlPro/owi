@@ -1,6 +1,7 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
+open Scoped_symbol
 
 module Make (Symbolic_memory : Thread_intf.M) :
   Thread_intf.S with type Memory.collection = Symbolic_memory.collection =
@@ -10,8 +11,8 @@ struct
     Symbolic_memory
 
   type t =
-    { symbols : int
-    ; symbol_set : Smtml.Symbol.t list
+    { num_symbols : int
+    ; scoped_symbols : scope_token list
     ; pc : Symbolic_path_condition.t
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
@@ -22,23 +23,33 @@ struct
     ; labels : (int * string) list
     }
 
-  let create symbols symbol_set pc memories tables globals breadcrumbs labels =
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+  let create num_symbols scoped_symbols pc memories tables globals breadcrumbs
+    labels =
+    { num_symbols
+    ; scoped_symbols
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    }
 
   let init () =
-    let symbols = 0 in
-    let symbol_set = [] in
+    let num_symbols = 0 in
+    let scoped_symbols = [] in
     let pc = Symbolic_path_condition.empty in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
-    create symbols symbol_set pc memories tables globals breadcrumbs labels
+    create num_symbols scoped_symbols pc memories tables globals breadcrumbs
+      labels
 
-  let symbols t = t.symbols
+  let num_symbols t = t.num_symbols
 
-  let symbols_set t = t.symbol_set
+  let scoped_symbols t = t.scoped_symbols
 
   let pc t = t.pc
 
@@ -52,9 +63,7 @@ struct
 
   let labels t = t.labels
 
-  let add_symbol t s =
-    let symbol_set = s :: t.symbol_set in
-    { t with symbol_set }
+  let add_symbol t s = { t with scoped_symbols = Symbol s :: t.scoped_symbols }
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
@@ -64,17 +73,37 @@ struct
     let breadcrumbs = crumb :: t.breadcrumbs in
     { t with breadcrumbs }
 
-  let incr_symbols t =
-    let symbols = succ t.symbols in
-    { t with symbols }
+  let incr_num_symbols t =
+    let num_symbols = succ t.num_symbols in
+    { t with num_symbols }
 
   let add_label t label = { t with labels = label :: t.labels }
 
+  let open_scope t scope =
+    { t with scoped_symbols = Open_scope scope :: t.scoped_symbols }
+
+  let end_scope t = { t with scoped_symbols = Close_scope :: t.scoped_symbols }
+
   let clone
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
-      =
+    { num_symbols
+    ; scoped_symbols
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    } =
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+    { num_symbols
+    ; scoped_symbols
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    }
 end

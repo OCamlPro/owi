@@ -14,6 +14,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   in
   let brk = ref @@ Int32.of_int 0 in
   let covered_labels = Hashtbl.create 16 in
+  let opened_scopes = ref [] in
 
   let module M :
     Wasm_ffi_intf.S0
@@ -130,6 +131,19 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       Hashtbl.add covered_labels id str;
       Logs.debug (fun m -> m "reached %ld@." id);
       Ok ()
+
+    let open_scope m strptr =
+      let* chars = make_str m [] strptr in
+      let str = String.init (Array.length chars) (Array.get chars) in
+      opened_scopes := str :: !opened_scopes;
+      Concrete_choice.return ()
+
+    let end_scope () =
+      match !opened_scopes with
+      | [] -> assert false
+      | _ :: t ->
+        opened_scopes := t;
+        Concrete_choice.return ()
   end in
   let replay_extern_module =
     let open M in

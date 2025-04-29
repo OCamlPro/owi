@@ -167,6 +167,10 @@ module M :
   let cov_label_is_covered _ =
     Logs.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
+
+  let open_scope _m _strptr = assert false
+
+  let end_scope () = assert false
 end
 
 type extern_func = Concolic.Extern_func.extern_func

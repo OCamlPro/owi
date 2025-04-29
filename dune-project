@@ -1,4 +1,6 @@
-(lang dune 3.0)
+(lang dune 3.7)
+
+(map_workspace_root false)
 
 (using menhir 2.1)
 (using dune_site 0.1)

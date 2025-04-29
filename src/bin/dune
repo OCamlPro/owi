@@ -2,6 +2,7 @@
 
 (executable
  (public_name owi)
+ (modes byte exe)
  (modules owi)
  (package owi)
  (libraries cmdliner owi prelude sedlex)

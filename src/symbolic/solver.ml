@@ -18,8 +18,9 @@ let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
-let model (S (solver_module, s)) ~symbols ~pc =
+let model (S (solver_module, s)) ~scoped_symbols ~pc =
   let module Solver = (val solver_module) in
+  let symbols = Some (Scoped_symbol.only_symbols scoped_symbols) in
   let model =
     match Solver.get_sat_model ?symbols s pc with
     | `Unknown -> assert false
