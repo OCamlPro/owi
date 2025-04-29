@@ -109,6 +109,8 @@
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
 <a id="L87"></a><span > </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -200,6 +202,8 @@
 <a href="#L85">85</a>
 <a href="#L86">86</a>
 <a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -238,6 +242,8 @@ module type S = sig
   val assertion : V.bool -&gt; unit t
 
   val with_thread : (thread -&gt; 'a) -&gt; 'a t
+
+  val with_new_invisible_symbol : Smtml.Ty.t -&gt; (Smtml.Symbol.t -&gt; 'b) -&gt; 'b t
 
   val with_new_symbol : Smtml.Ty.t -&gt; (Smtml.Symbol.t -&gt; 'b) -&gt; 'b t
 

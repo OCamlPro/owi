@@ -235,15 +235,15 @@ type t =
   ; typ : binary ref_type
   }
 
-let clone_t { limits; data; typ } = <span data-count="5262">{</span> typ; limits; data = Array.cop<span data-count="5262">y</span> data }
+let clone_t { limits; data; typ } = <span data-count="5252">{</span> typ; limits; data = Array.cop<span data-count="5252">y</span> data }
 
-let get t i = <span data-count="8081">t</span>.data.(i)
+let get t i = <span data-count="8067">t</span>.data.(i)
 
 let set t i v = <span data-count="2395">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="4113">A</span>rray.length t.data
+let size t = <span data-count="4099">A</span>rray.length t.data
 
-let typ t = <span data-count="3947">t</span>.typ
+let typ t = <span data-count="3933">t</span>.typ
 
 let max_size t = <span data-count="0">t</span>.limits.max
 
@@ -269,21 +269,21 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="14703">x</span>
+  let hash x = <span data-count="14680">x</span>
 end)
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="936">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="937">E</span>nv_id.Tbl.create 0
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten *)
-  <span data-count="45208">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="45205">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="45205">p</span>
+  <span data-count="45320">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="45320">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="45320">p</span>
        (fun (i, t) -&gt;
-         <span data-count="5262">l</span>et s = ITbl.to_seq t in
-         <span data-count="5262">(</span>i, ITbl.of_se<span data-count="5261">q</span> @@ Seq.ma<span data-count="5262">p</span> (fun (i, a) -&gt; <span data-count="5262">(</span>i, clone_<span data-count="5262">t</span> a)) s) )
+         <span data-count="5252">l</span>et s = ITbl.to_seq t in
+         <span data-count="5252">(</span>i, ITbl.of_se<span data-count="5251">q</span> @@ Seq.ma<span data-count="5252">p</span> (fun (i, a) -&gt; <span data-count="5252">(</span>i, clone_<span data-count="5252">t</span> a)) s) )
        s
 
 let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
@@ -297,17 +297,17 @@ let convert (orig_table : Concrete_table.t) =
   }
 
 let get_env env_id tables =
-  <span data-count="8760">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="8077">S</span>ome env -&gt; env
+  <span data-count="8746">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="8063">S</span>ome env -&gt; env
   | <span data-count="683">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="683">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="683">t</span>
 
 let get_table env_id (orig_table : Concrete_table.t) collection g_id =
-  <span data-count="8760">l</span>et env = get_env env_id collection in
-  <span data-count="8760">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="8077">S</span>ome t -&gt; t
+  <span data-count="8746">l</span>et env = get_env env_id collection in
+  <span data-count="8746">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="8063">S</span>ome t -&gt; t
   | <span data-count="683">N</span>one -&gt;
     let t = convert orig_table in
     <span data-count="683">I</span>Tbl.add env g_id t;
