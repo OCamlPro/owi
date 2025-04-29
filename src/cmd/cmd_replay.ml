@@ -50,6 +50,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
           m "Got value %a but expected a char (i32) value." V.pp v );
         assert false
 
+    let symbol_invisible_bool () = Ok 0l
+
     let symbol_bool = symbol_char
 
     let abort () =

@@ -34,6 +34,10 @@ end = struct
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
 
+  let symbol_invisible_bool () =
+    Choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
+      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
+
   let symbol_bool () =
     Choice.with_new_symbol (Ty_bitv 1) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
@@ -146,6 +150,9 @@ let symbolic_extern_module =
     ; ( "bool_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
+    ; ( "invisible_bool_symbol"
+      , Symbolic.Extern_func.Extern_func
+          (Func (UArg Res, R1 I32), symbol_invisible_bool) )
     ; ( "range_symbol"
       , Symbolic.Extern_func.Extern_func
           (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )

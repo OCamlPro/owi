@@ -36,6 +36,8 @@ module type S = sig
 
   val with_thread : (thread -> 'a) -> 'a t
 
+  val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
+
   val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
   val solver : Solver.t t

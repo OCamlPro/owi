@@ -73,6 +73,19 @@ module M :
       let n = Float64.of_bits n in
       (F64 n, (n, Expr.symbol sym)) )
 
+  let symbol_invisible_bool () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_invisible_symbol Ty_bool
+      (fun sym (forced_value : Smtml.Value.t option) ->
+      let b =
+        match forced_value with
+        | None -> Random.bool ()
+        | Some True -> true
+        | Some False -> false
+        | _ -> assert false
+      in
+      let n = Concrete_value.Bool.int32 b in
+      (V.I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
+
   let symbol_bool () : Value.int32 Concolic_choice.t =
     Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
       let b =
@@ -154,7 +167,6 @@ module M :
   let cov_label_is_covered _ =
     Logs.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
-
 end
 
 type extern_func = Concolic.Extern_func.extern_func
@@ -178,6 +190,9 @@ let symbolic_extern_module =
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
       )
     ; ( "bool_symbol"
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
+      )
+    ; ( "invisible_bool_symbol"
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
       )
     ; ( "range_symbol"
