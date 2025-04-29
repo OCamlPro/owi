@@ -39,6 +39,7 @@
 - add path-condition slicing
 - add `owi_invisible_bool` primitive
 - add `owi_label_is_covered` primitive
+- add scopes with `owi_open_scope` and `owi_end_scope` primitives
 
 ## 0.2 - 2024-04-24
 

@@ -223,7 +223,12 @@ module CoreImpl = struct
     val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
     val assertion_fail :
-      Smtml.Expr.t -> Smtml.Model.t -> (int * string) list -> int list -> 'a t
+         Smtml.Expr.t
+      -> Smtml.Model.t
+      -> (int * string) list
+      -> int list
+      -> Scoped_symbol.scope_token list
+      -> 'a t
 
     val stop : 'a t
 
@@ -315,14 +320,14 @@ module CoreImpl = struct
       let* thread in
       let* solver in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-      let symbols = Thread.symbols_set thread |> Option.some in
-      let model = Solver.model solver ~symbols ~pc in
+      let scoped_symbols = Thread.scoped_symbols thread in
+      let model = Solver.model solver ~scoped_symbols ~pc in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
-      State.return (ETrap (t, model, labels, breadcrumbs))
+      State.return (ETrap (t, model, labels, breadcrumbs, scoped_symbols))
 
-    let assertion_fail c model labels bcrumbs =
-      State.return (EAssert (c, model, labels, bcrumbs))
+    let assertion_fail c model labels bcrumbs scoped_symbols =
+      State.return (EAssert (c, model, labels, bcrumbs, scoped_symbols))
   end
 end
 
@@ -354,21 +359,25 @@ module Make (Thread : Thread_intf.S) = struct
 
   let add_label label = modify_thread (fun t -> Thread.add_label t label)
 
+  let open_scope scope = modify_thread (fun t -> Thread.open_scope t scope)
+
+  let end_scope () = modify_thread (fun t -> Thread.end_scope t)
+
   let with_new_invisible_symbol ty f =
     let* thread in
-    let n = Thread.symbols thread in
-    let+ () = modify_thread Thread.incr_symbols in
+    let n = Thread.num_symbols thread in
+    let+ () = modify_thread Thread.incr_num_symbols in
     let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" n in
     f sym
 
   let with_new_symbol ty f =
     let* thread in
-    let n = Thread.symbols thread in
+    let n = Thread.num_symbols thread in
     let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
     let+ () =
       modify_thread (fun thread ->
         let thread = Thread.add_symbol thread sym in
-        Thread.incr_symbols thread )
+        Thread.incr_num_symbols thread )
     in
     f sym
 
@@ -395,9 +404,9 @@ module Make (Thread : Thread_intf.S) = struct
     match Solver.check solver pc with
     | `Unsat -> stop
     | `Sat -> begin
-      let symbols = [ symbol ] |> Option.some in
+      let scoped_symbols = [ Scoped_symbol.Symbol symbol ] in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
-      let model = Solver.model solver ~symbols ~pc in
+      let model = Solver.model solver ~scoped_symbols ~pc in
       match Smtml.Model.evaluate model symbol with
       | None ->
         Fmt.failwith
@@ -439,8 +448,8 @@ module Make (Thread : Thread_intf.S) = struct
     match Smtml.Expr.view e with
     | Symbol sym -> return (None, sym)
     | _ ->
-      let num_symbols = Thread.symbols thread in
-      let+ () = modify_thread Thread.incr_symbols in
+      let num_symbols = Thread.num_symbols thread in
+      let+ () = modify_thread Thread.incr_num_symbols in
       let sym_name = Fmt.str "choice_i32_%i" num_symbols in
       let sym_type = Smtml.Ty.Ty_bitv 32 in
       let sym = Smtml.Symbol.make sym_type sym_name in
@@ -495,10 +504,10 @@ module Make (Thread : Thread_intf.S) = struct
     else
       let* thread in
       let* solver in
-      let symbols = Thread.symbols_set thread |> Option.some in
+      let scoped_symbols = Thread.scoped_symbols thread in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-      let model = Solver.model ~symbols ~pc solver in
+      let model = Solver.model ~scoped_symbols ~pc solver in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
-      assertion_fail c model labels breadcrumbs
+      assertion_fail c model labels breadcrumbs scoped_symbols
 end

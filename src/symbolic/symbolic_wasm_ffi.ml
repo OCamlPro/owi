@@ -131,6 +131,15 @@ end = struct
         m "cov_label_set: invalid type id:%a ptr:%a" Smtml.Expr.pp id
           Smtml.Expr.pp ptr );
       assert false
+
+  let open_scope m ptr =
+    let open Choice in
+    let* ptr = select_i32 ptr in
+    let* chars = make_str m [] ptr in
+    let str = String.init (Array.length chars) (Array.get chars) in
+    open_scope str
+
+  let end_scope = Choice.end_scope
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -184,6 +193,11 @@ let symbolic_extern_module =
     ; ( "cov_label_is_covered"
       , Symbolic.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
+    ; ( "open_scope"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Mem (Arg (I32, Res)), R0), open_scope) )
+    ; ( "end_scope"
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), end_scope) )
     ]
   in
   { Link.functions }

@@ -19,7 +19,7 @@ module type S = sig
 
   val create :
        int
-    -> Smtml.Symbol.t list
+    -> Scoped_symbol.scope_token list
     -> Symbolic_path_condition.t
     -> Memory.collection
     -> Symbolic_table.collection
@@ -38,9 +38,9 @@ module type S = sig
 
   val breadcrumbs : t -> int list
 
-  val symbols_set : t -> Smtml.Symbol.t list
+  val scoped_symbols : t -> Scoped_symbol.scope_token list
 
-  val symbols : t -> int
+  val num_symbols : t -> int
 
   val labels : t -> (int * string) list
 
@@ -54,7 +54,11 @@ module type S = sig
 
   val add_label : t -> int * string -> t
 
-  val incr_symbols : t -> t
+  val open_scope : t -> string -> t
+
+  val end_scope : t -> t
+
+  val incr_num_symbols : t -> t
 end
 
 module type Intf = sig

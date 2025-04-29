@@ -54,6 +54,10 @@ module type S0 = sig
   val cov_label_is_covered : Value.int32 -> Value.int32 t
 
   val cov_label_set : memory -> Value.int32 -> Value.int32 -> unit t
+
+  val open_scope : memory -> Value.int32 -> unit t
+
+  val end_scope : unit -> unit t
 end
 
 module type S = sig

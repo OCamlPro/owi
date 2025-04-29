@@ -4,8 +4,18 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of Result.err * Smtml.Model.t * (int * string) list * int list
-  | EAssert of Smtml.Expr.t * Smtml.Model.t * (int * string) list * int list
+  | ETrap of
+      Result.err
+      * Smtml.Model.t
+      * (int * string) list
+      * int list
+      * Scoped_symbol.scope_token list
+  | EAssert of
+      Smtml.Expr.t
+      * Smtml.Model.t
+      * (int * string) list
+      * int list
+      * Scoped_symbol.scope_token list
 
 module type S = sig
   module V : Func_intf.Value_types
@@ -49,6 +59,10 @@ module type S = sig
   val get_pc : unit -> Smtml.Expr.Set.t t
 
   val add_label : int * string -> unit t
+
+  val open_scope : string -> unit t
+
+  val end_scope : unit -> unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 

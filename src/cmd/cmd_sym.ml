@@ -33,28 +33,25 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   let m = Symbolic.convert_module_to_run m in
   Interpret.Symbolic.modul link_state.envs m
 
-let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
-  ~no_stop_at_failure ~no_assert_failure_expression_printing ~breadcrumbs
-  ~with_breadcrumbs =
-  let to_string model labels =
+let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
+  ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
+  let to_string model labels breadcrumbs scoped_values =
     match model_format with
     | Cmd_utils.Json ->
-      let json = Smtml.Model.to_json model in
+      let json = Scoped_symbol.to_json model scoped_values in
       let labels_json =
-        `List
-          (List.map
-             (fun (id, name) ->
-               `Assoc [ ("id", `Int id); ("name", `String name) ] )
-             labels )
+        List.map
+          (fun (id, name) -> `Assoc [ ("id", `Int id); ("name", `String name) ])
+          labels
       in
       let json =
         match json with
-        | `Assoc fields -> `Assoc (("labels", labels_json) :: fields)
+        | `Assoc fields -> `Assoc (("labels", `List labels_json) :: fields)
         | _ -> json
       in
-      Yojson.to_string json
+      Yojson.Basic.to_string json
     | Scfg ->
-      let scfg = Smtml.Model.to_scfg ~no_value model in
+      let scfg = Scoped_symbol.to_scfg ~no_value model scoped_values in
       let model = Scfg.Query.get_dir_exn "model" scfg in
       let lbls =
         List.map
@@ -69,8 +66,7 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
         if with_breadcrumbs then
           let bcrumbs =
             [ { Scfg.Types.name = "breadcrumbs"
-              ; params =
-                  List.map (fun b -> string_of_int b) (List.rev breadcrumbs)
+              ; params = List.map string_of_int (List.rev breadcrumbs)
               ; children = []
               }
             ]
@@ -80,7 +76,7 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
       in
       Fmt.str "%a" Scfg.Pp.directive { model with children }
   in
-  let to_file path model =
+  let to_file path model labels breadcrumbs scoped_symbols =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =
       Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
@@ -99,30 +95,26 @@ let print_bug ~model_format ~labels ~model_out_file ~id ~no_value
       in
       Ok (Fpath.add_ext model_ext base)
     in
-    Bos.OS.File.write path (to_string model labels)
+    Bos.OS.File.write path (to_string model labels breadcrumbs scoped_symbols)
   in
-  function
-  | `ETrap (tr, model, _, _) -> (
-    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
+  let output model labels breadcrumbs scoped_symbols =
     match model_out_file with
-    | Some path -> to_file path model
+    | Some path -> to_file path model labels breadcrumbs scoped_symbols
     | None -> begin
-      Logs.app (fun m -> m "%s" (to_string model labels));
+      Logs.app (fun m ->
+        m "%s" (to_string model labels breadcrumbs scoped_symbols) );
       Ok ()
-    end )
-  | `EAssert (assertion, model, _, _) -> (
-    if no_assert_failure_expression_printing then begin
-      Logs.err (fun m -> m "Assert failure")
     end
-    else begin
-      Logs.err (fun m -> m "Assert failure: %a" Expr.pp assertion)
-    end;
-    match model_out_file with
-    | Some path -> to_file path model
-    | None -> begin
-      Logs.app (fun m -> m "%s" (to_string model labels));
-      Ok ()
-    end )
+  in
+  match bug with
+  | `ETrap (tr, model, labels, breadcrumbs, scoped_symbols) ->
+    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
+    output model labels breadcrumbs scoped_symbols
+  | `EAssert (assertion, model, labels, breadcrumbs, scoped_symbols) ->
+    if no_assert_failure_expression_printing then
+      Logs.err (fun m -> m "Assert failure")
+    else Logs.err (fun m -> m "Assert failure: %a" Expr.pp assertion);
+    output model labels breadcrumbs scoped_symbols
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
@@ -138,12 +130,11 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
         match result with
-        | ( `EAssert (_, model, labels, breadcrumbs)
-          | `ETrap (_, model, labels, breadcrumbs) ) as bug ->
+        | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
           let* () =
-            print_bug ~model_format ~labels ~model_out_file ~id:count_acc
-              ~no_value ~no_stop_at_failure ~breadcrumbs
-              ~no_assert_failure_expression_printing ~with_breadcrumbs bug
+            print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
+              ~no_stop_at_failure ~no_assert_failure_expression_printing
+              ~with_breadcrumbs bug
           in
           Ok model
         | `Error e -> Error e
@@ -181,10 +172,16 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
     Atomic.incr path_count;
     match (fail_mode, v) with
     | _, (EVal (), _) -> ()
-    | (Both | Trap_only), (ETrap (t, m, labels, breadcrumbs), thread) ->
-      Wq.push (`ETrap (t, m, labels, breadcrumbs), thread) res_queue
-    | (Both | Assertion_only), (EAssert (e, m, labels, breadcrumbs), thread) ->
-      Wq.push (`EAssert (e, m, labels, breadcrumbs), thread) res_queue
+    | ( (Both | Trap_only)
+      , (ETrap (t, m, labels, breadcrumbs, scoped_symbols), thread) ) ->
+      Wq.push
+        (`ETrap (t, m, labels, breadcrumbs, scoped_symbols), thread)
+        res_queue
+    | ( (Both | Assertion_only)
+      , (EAssert (e, m, labels, breadcrumbs, scoped_symbols), thread) ) ->
+      Wq.push
+        (`EAssert (e, m, labels, breadcrumbs, scoped_symbols), thread)
+        res_queue
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =

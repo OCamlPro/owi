@@ -10,6 +10,6 @@ val check : t -> Smtml.Expr.Set.t -> [ `Sat | `Unknown | `Unsat ]
 
 val model :
      t
-  -> symbols:Smtml.Symbol.t list option
+  -> scoped_symbols:Scoped_symbol.scope_token list
   -> pc:Smtml.Expr.Set.t
   -> Smtml.Model.t
