@@ -109,16 +109,23 @@ end = struct
 
   let cov_label_set m id ptr =
     let open Choice in
-    let* id = select_i32 id in
-    Mutex.protect cov_lock (fun () ->
-      if Hashtbl.mem covered_labels id then abort ()
-      else
-        let* ptr = select_i32 ptr in
-        let* chars = make_str m [] ptr in
-        let str = String.init (Array.length chars) (Array.get chars) in
-        Hashtbl.add covered_labels id str;
-        let* () = add_label (Int32.to_int id, str) in
-        return () )
+    let id = Smtml.Expr.simplify id in
+    let ptr = Smtml.Expr.simplify ptr in
+    match (Smtml.Expr.view id, Smtml.Expr.view ptr) with
+    | Val (Num (I32 id)), Val (Num (I32 ptr)) ->
+      Mutex.protect cov_lock (fun () ->
+        if Hashtbl.mem covered_labels id then abort ()
+        else
+          let* chars = make_str m [] ptr in
+          let str = String.init (Array.length chars) (Array.get chars) in
+          Hashtbl.add covered_labels id str;
+          let* () = add_label (Int32.to_int id, str) in
+          return () )
+    | _ ->
+      Logs.err (fun m ->
+        m "cov_label_set: invalid type id:%a ptr:%a" Smtml.Expr.pp id
+          Smtml.Expr.pp ptr );
+      assert false
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
