@@ -1,0 +1,419 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>How to Define Custom Functions - Owi</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Owi</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="using-and-defining-external-functions-host-functions"><a class="header" href="#using-and-defining-external-functions-host-functions">Using and defining external functions (host functions)</a></h1>
+<h2 id="dealing-with-the-stack"><a class="header" href="#dealing-with-the-stack">Dealing with the Stack</a></h2>
+<p>Given the following <code>extern.wat</code> file:</p>
+<!-- $MDX file=extern.wat -->
+<pre><code class="language-wat">(module $extern
+
+  (import "sausage" "fresh"
+    (func $fresh (param i32) (result externref)))
+
+  (import "sausage" "get_i32r"
+    (func $get (param externref) (result i32)))
+
+  (import "sausage" "set_i32r"
+    (func $set (param externref) (param i32)))
+
+  (import "sausage" "print_i32"
+    (func $print_i32 (param i32)))
+
+  (func $start (local $ref externref)
+
+    ;; let ref = fresh 42
+    (local.set $ref (call $fresh (i32.const 42)))
+
+    ;; print_i32 (get ref)
+    (call $print_i32 (call $get (local.get $ref)))
+
+    ;; set ref 13
+    (call $set (local.get $ref) (i32.const 13)  )
+
+    ;; print_i32 (get ref)
+    (call $print_i32 (call $get (local.get $ref)))
+
+  )
+
+  (start $start)
+)
+</code></pre>
+<p>You can define the various required external functions in OCaml like this :</p>
+<!-- $MDX file=extern.ml -->
+<pre><code class="language-ocaml">open Owi
+
+(* an extern module that will be linked with a wasm module *)
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+  (* some custom functions *)
+  let rint : int32 ref Type.Id.t = Type.Id.make () in
+  let fresh i = Ok (ref i) in
+  let set r (i : int32) =
+    r := i;
+    Ok ()
+  in
+  let get r = Ok !r in
+  let print_i32 (i : int32) =
+    Printf.printf "%li\n%!" i;
+    Ok ()
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "print_i32"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
+    ; ( "fresh"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
+    ; ( "set_i32r"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
+    ; ( "get_i32r"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Res), R1 I32), get) )
+    ]
+  in
+  { functions }
+
+(* a link state that contains our custom module, available under the name `sausage` *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"sausage" extern_module
+
+(* a pure wasm module refering to `sausage` *)
+let pure_wasm_module =
+  match Parse.Text.Module.from_file (Fpath.v "extern.wat") with
+  | Error _ -&gt; assert false
+  | Ok modul -&gt; modul
+
+(* our pure wasm module, linked with `sausage` *)
+let module_to_run, link_state =
+  match
+    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
+      ~optimize:true ~name:None pure_wasm_module
+  with
+  | Error _ -&gt; assert false
+  | Ok v -&gt; v
+
+(* let's run it ! it will print the values as defined in the print_i32 function *)
+let () =
+  match Interpret.Concrete.modul link_state.envs module_to_run with
+  | Error _ -&gt; assert false
+  | Ok () -&gt; ()
+</code></pre>
+<p>You'll get the expected result:</p>
+<pre><code class="language-sh">$ ./extern.exe
+42
+13
+</code></pre>
+<h2 id="dealing-with-the-linear-memory"><a class="header" href="#dealing-with-the-linear-memory">Dealing with the Linear Memory</a></h2>
+<p>Owi also allows interacting with linear memory through external functions.
+This is helpful because it enables the host system to communicate directly
+with a Wasm instance through its linear memory. Consider the tiny example
+below to illustrate this:</p>
+<!-- $MDX file=extern_mem.wat -->
+<pre><code class="language-wat">(module $extern_mem
+
+  (import "chorizo" "memset" (func $memset (param i32 i32 i32)))
+
+  (import "chorizo" "print_x64" (func $print_x64 (param i64)))
+
+  (memory 1)
+
+  (func $start
+
+    ;; memset 0 0xAA 8
+    (call $memset (i32.const 0) (i32.const 0xAA) (i32.const 8))
+
+    ;; print_x64 (load 0)
+    (call $print_x64 (i64.load (i32.const 0)))
+  )
+
+  (start $start)
+)
+</code></pre>
+<p>In the module <code>$extern_mem</code>, we first import <code>$memset</code> and <code>$print_x64</code>. Then,
+in the <code>$start</code> function, we initialize the memory starting at address
+<code>(i32.const 0)</code> with a sequence of length <code>(i32.const 8)</code> with bytes of
+<code>(i32.const 0xAA)</code>.</p>
+<p>The definition of the external functions follows the same format as the
+<a href="./README.html#dealing-with-the-stack">previous example</a>. The difference is that, now, in the GADT definition of
+memset to allow the memory to be passed to this function, we need to wrap
+the three I32 arguments in a Mem variant. That is, instead of writing
+memset as:</p>
+<!-- $MDX skip -->
+<pre><code class="language-ocaml">(Func (Arg (I32, (Arg (I32, (Arg (I32, Res))))), R0), memset)
+</code></pre>
+<p>One should use:</p>
+<!-- $MDX skip -->
+<pre><code class="language-ocaml">(Func (Mem (Arg (I32, (Arg (I32, (Arg (I32, Res)))))), R0), memset)
+</code></pre>
+<p>See the module below for the whole implementation:</p>
+<!-- $MDX file=extern_mem.ml -->
+<pre><code class="language-ocaml">open Owi
+
+(* an extern module that will be linked with a wasm module *)
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+  (* some custom functions *)
+  let memset m start byte length =
+    let rec loop offset =
+      if Int32.le offset length then begin
+        match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
+        | Error _ as e -&gt; e
+        | Ok () -&gt; loop (Int32.add offset 1l)
+      end
+      else Ok ()
+    in
+    loop 0l
+  in
+  let print_x64 (i : int64) =
+    Printf.printf "0x%LX\n%!" i;
+    Ok ()
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "print_x64"
+      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
+      )
+    ; ( "memset"
+      , Concrete_extern_func.Extern_func
+          (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
+    ]
+  in
+  { functions }
+
+(* a link state that contains our custom module, available under the name `chorizo` *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"chorizo" extern_module
+
+(* a pure wasm module refering to `$extern_mem` *)
+let pure_wasm_module =
+  match Parse.Text.Module.from_file (Fpath.v "extern_mem.wat") with
+  | Error _ -&gt; assert false
+  | Ok modul -&gt; modul
+
+(* our pure wasm module, linked with `chorizo` *)
+let module_to_run, link_state =
+  match
+    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
+      ~optimize:true ~name:None pure_wasm_module
+  with
+  | Error _ -&gt; assert false
+  | Ok v -&gt; v
+
+(* let's run it ! it will print the values as defined in the print_i64 function *)
+let () =
+  match Interpret.Concrete.modul link_state.envs module_to_run with
+  | Error _ -&gt; assert false
+  | Ok () -&gt; ()
+</code></pre>
+<p>Running the above program should yield:</p>
+<pre><code class="language-sh">$ ./extern_mem.exe
+0xAAAAAAAAAAAAAAAA
+</code></pre>
+<h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
+<p>To learn more, see our advanced <a href="./life_game">Game of Life</a> example
+based on the famous cellular automaton by Conway. It show how to link several modules from different <code>.wat</code> files.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../ocaml-api/overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../ocaml-api/game-of-life/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../ocaml-api/overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../ocaml-api/game-of-life/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

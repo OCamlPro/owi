@@ -1,0 +1,25 @@
+(executable
+ (name life_console)
+ (modules life_console)
+ (libraries unix owi))
+
+(executable
+ (name life_graphics)
+ (modules life_graphics)
+ (libraries unix graphics owi))
+
+(executable
+ (name runweb)
+ (modules runweb content)
+ (libraries tiny_httpd))
+
+(rule
+ (target content.ml)
+ (deps
+  (file content/life.wasm)
+  (file content/index.html)
+  (file content/life_browser.js))
+ (action
+  (with-stdout-to
+   %{null}
+   (run ocaml-crunch -m plain content -o %{target}))))

@@ -1,0 +1,3736 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Owi</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Owi</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="welcome-to-owi"><a class="header" href="#welcome-to-owi">Welcome to Owi</a></h1>
+<p><strong>Owi</strong> is an open-source framework for advanced <a href="https://webassembly.org">WebAssembly</a> analysis and manipulation, with a focus on practical symbolic execution and robust tooling.
+It is designed for researchers, engineers, programming language enthusiasts and practitioners requiring precise, flexible, and extensible support program reasoning.</p>
+<p>Owi provides three primary components:</p>
+<h3 id="-symbolic-execution-engine-for-wasm-c-c-rust-and-zig"><a class="header" href="#-symbolic-execution-engine-for-wasm-c-c-rust-and-zig">🔬 <a href="symex/overview.html">Symbolic Execution Engine</a> for <a href="symex/quickstart/wasm.html">Wasm</a>, <a href="symex/quickstart/c.html">C</a>, <a href="symex/quickstart/cpp.html">C++</a>, <a href="symex/quickstart/rust.html">Rust</a>, and <a href="symex/quickstart/zig.html">Zig</a></a></h3>
+<p>Owi includes a cross-language symbolic execution engine supporting:</p>
+<ul>
+<li><a href="symex/bugfinding.html"><strong>Automated testing, bug finding and pentesting</strong></a> through symbolic testing and constraint solving;</li>
+<li><a href="symex/sap.html"><strong>Solver-aided programming</strong></a> for problem solving and synthesis tasks;</li>
+<li><a href="symex/testcase_generation.html"><strong>Test case generation</strong></a> aligned with advanced coverage criteria;</li>
+<li><a href="symex/verification.html"><strong>Formal verification</strong></a>: prove properties or find counterexamples in real-world programs.</li>
+</ul>
+<p>The engine is designed for precision, scalability, interoperability across languages, and extensibility toward both experimental and applied verification use-cases.
+It offers a practical path from fuzzing to formal proofs.</p>
+<h3 id="-the-wasm-swiss-army-knife"><a class="header" href="#-the-wasm-swiss-army-knife">🔧 The <a href="./wasm-toolkit/overview.html">Wasm Swiss Army Knife</a></a></h3>
+<p>Owi offers a set of practical tools for Wasm development and analysis:</p>
+<ul>
+<li><strong>Formatter</strong> and <strong>optimizer</strong> for Wasm modules;</li>
+<li><strong>Interpreter</strong> for <code>.wasm</code>, <code>.wat</code>, and even <a href="https://github.com/WebAssembly/spec/tree/main/interpreter#scripts">Wasm scripts</a>  (<code>.wast</code>) files that are used in the <a href="https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts">reference test suite</a>;</li>
+<li><strong>Specification-compliant validator</strong>;</li>
+<li><strong>Bidirectional translation</strong> between binary (<code>.wasm</code>) and text (<code>.wat</code>) formats;</li>
+<li><strong>Randomized fuzzer</strong> generating valid (well-typed) Wasm modules.</li>
+</ul>
+<p>These tools aim to support everyday development tasks as well as research on program analysis, fuzzing, and program transformation.</p>
+<h3 id="--native-ocaml-library-for-wasm-integration"><a class="header" href="#--native-ocaml-library-for-wasm-integration">🐪  Native <a href="ocaml-api/overview.html">OCaml Library for Wasm</a> Integration</a></h3>
+<p>Owi is written in <a href="https://ocaml.org">OCaml</a>, thus it also provides a library for:</p>
+<ul>
+<li><strong>Embedding Wasm modules</strong> into OCaml applications;</li>
+<li><strong>Importing OCaml functions</strong> into Wasm modules with full type safety.</li>
+</ul>
+<p>This allows for tightly integrating Wasm-based computation within OCaml-based systems while maintaining strong type guarantees.</p>
+<h3 id="-warning"><a class="header" href="#-warning">⚠️ Warning</a></h3>
+<p>For now, the optimizer and the formatter are quite experimental. The optimizer is well tested but only performs basic optimizations in an inefficient way. The formatter is mainly used for debugging purpose and is probably incorrect on some cases. Moreover, the <em>concolic</em> mode is currently broken, use the symbolic one.</p>
+<h3 id="want-to-join-us"><a class="header" href="#want-to-join-us">🧑‍🎓Want to join us?</a></h3>
+<p>We are looking for interns, have a look at the <a href="https://github.com/OCamlPro/owi/labels/internship">internship labeled issues</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<p><code>owi</code> can be installed with <a href="https://opam.ocaml.org">opam</a>:</p>
+<pre><code class="language-shell-session">$ opam install owi
+# if you intend to use symbolic execution you must install one solver
+# you can choose any solver supported by smtml
+# z3, colibri2, bitwuzla-cxx or cvc5 for instance
+$ opam install z3
+</code></pre>
+<p>If you don't have <code>opam</code>, you can install it following the <a href="https://opam.ocaml.org/doc/Install.html">how to install opam</a> guide.</p>
+<p>If you can't or don't want to use <code>opam</code>, you can build the package with <code>dune build -p owi @install</code> but you'll first have to install the dependencies by yourself. You can find the list of dependencies in the <code>dune-project</code> file.</p>
+<h3 id="development-version"><a class="header" href="#development-version">Development version</a></h3>
+<p>To get the development version:</p>
+<pre><code class="language-shell-session">$ git clone git@github.com:OCamlPro/owi.git
+$ cd owi
+$ opam install . --deps-only
+$ dune build -p owi @install
+$ dune install
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="supported-wasm-proposals"><a class="header" href="#supported-wasm-proposals">Supported Wasm proposals</a></h1>
+<p>The 🐌 status means the proposal is not applicable to Owi.</p>
+<h3 id="adopted-proposals"><a class="header" href="#adopted-proposals">Adopted proposals</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Proposal</th><th>Status</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/WebAssembly/mutable-global">Import/Export of Mutable Globals</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/nontrapping-float-to-int-conversions">Non-trapping float-to-int conversions</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/sign-extension-ops">Sign-extension operators</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/multi-value">Multi-value</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/reference-types">Reference Types</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/bulk-memory-operations">Bulk memory operations</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/webassembly/simd">Fixed-width SIMD</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/JS-BigInt-integration">JavaScript BigInt to WebAssembly i64 integration</a></td><td>🐌</td></tr>
+</tbody></table>
+</div>
+<h3 id="current-proposals"><a class="header" href="#current-proposals">Current proposals</a></h3>
+<p>We only list proposals that reached phase 3 at least.</p>
+<div class="table-wrapper"><table><thead><tr><th>Proposal</th><th>Status</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/WebAssembly/tail-call">Tail call</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/function-references">Typed Function References</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/extended-const">Extended Constant Expressions</a></td><td>✔️</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/gc">Garbage collection</a></td><td>Ongoing</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/annotations">Custom Annotation Syntax in the Text Format</a></td><td>Ongoing</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/multi-memory">Multiple memories</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/memory64">Memory64</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/exception-handling">Exception handling</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/branch-hinting">Branch Hinting</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/relaxed-simd">Relaxed SIMD</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/webassembly/threads">Threads</a></td><td>❌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/content-security-policy">Web Content Security Policy</a></td><td>🐌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/js-promise-integration">JS Promise Integration</a></td><td>🐌</td></tr>
+<tr><td><a href="https://github.com/WebAssembly/js-types">Type Reflection for WebAssembly JavaScript API</a></td><td>🐌</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="symbolic-execution-101"><a class="header" href="#symbolic-execution-101">Symbolic Execution 101</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="c-quickstart"><a class="header" href="#c-quickstart">C Quickstart</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="c-quickstart-1"><a class="header" href="#c-quickstart-1">C++ Quickstart</a></h1>
+<h2 id="checking-the-equivalence-of-two-functions"><a class="header" href="#checking-the-equivalence-of-two-functions">Checking the equivalence of two functions</a></h2>
+<!-- $MDX file=mean.cpp -->
+<pre><code class="language-cpp">#include &lt;owi.h&gt;
+
+struct IntPair {
+  int x, y;
+  int mean1() const { return (x &amp; y) + ((x ^ y) &gt;&gt; 1); }
+  int mean2() const { return (x + y) / 2; }
+};
+
+int main() {
+  IntPair p{owi_i32(), owi_i32()};
+  owi_assert(p.mean1() == p.mean2());
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c++ ./mean.cpp --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -2147483648
+  symbol symbol_1 i32 -2147483646
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-quickstart"><a class="header" href="#rust-quickstart">Rust Quickstart</a></h1>
+<p>Given the following <code>main.rs</code> file:</p>
+<!-- $MDX file=mean.rs -->
+<pre><code class="language-rs">use owi_sym::Symbolic;
+
+fn mean_wrong(x: i32, y: i32) -&gt; i32 {
+    (x + y) / 2
+}
+
+fn mean_correct(x: i32, y: i32) -&gt; i32 {
+    (x &amp; y) + ((x ^ y) &gt;&gt; 1)
+}
+
+fn main() {
+    let x = i32::symbol();
+    let y = i32::symbol();
+    owi_sym::assert(mean_wrong(x, y) == mean_correct(x, y))
+}
+</code></pre>
+<p>Let's check if the two functions are the same for any input:</p>
+<pre><code class="language-sh">$ owi rust ./mean.rs -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -487586839
+  symbol symbol_1 i32 486539486
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>Indeed, in this case, there will be an integer overflow in one of the two functions and thus they won't give the same result.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="zig-quickstart"><a class="header" href="#zig-quickstart">Zig Quickstart</a></h1>
+<h2 id="fibonacci-example"><a class="header" href="#fibonacci-example">Fibonacci example</a></h2>
+<p>Given the following <code>fib.zig</code> file:</p>
+<!-- $MDX file=fib.zig -->
+<pre><code class="language-zig">// TODO: replace this by a proper include of the owi header?
+extern "symbolic" fn i32_symbol() i32;
+extern "symbolic" fn assume(bool) void;
+extern "symbolic" fn assert(bool) void;
+
+fn fibonacci(n: i32) i32 {
+    if (n &lt; 0) {
+        @panic("expected a positive number");
+    }
+    if (n &lt;= 2) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+pub fn main() void {
+    const n: i32 = i32_symbol();
+    assume(n &gt; 0);
+    assume(n &lt; 10);
+    const result = fibonacci(n);
+    assert(result != 21);
+}
+</code></pre>
+<p>Owi can find a crash with:</p>
+<pre><code class="language-sh">$ owi zig ./fib.zig -w1 --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 7
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="webassembly-quickstart"><a class="header" href="#webassembly-quickstart">WebAssembly Quickstart</a></h1>
+<h2 id="symbolic-engine"><a class="header" href="#symbolic-engine">Symbolic engine</a></h2>
+<p>The symbolic interpreter provides functions that allows to create <em>symbolic values</em>.
+For instance, here, the <code>$i32_symbol</code> function creates a symbol of type <code>i32</code>.
+This value will represent "any possible value".</p>
+<p>Then, during the execution we collect informations and when an error is reached, we are able to find a concrete value for each symbol such that this value lead to the error.</p>
+<p>For instance, in the following file, we define <code>x</code> as a symbolic variable.
+Then if <code>5 &lt; x</code>, we fail:</p>
+<!-- $MDX file=mini.wat -->
+<pre><code class="language-wat">(module
+
+  (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
+
+  (func $start (local $x i32)
+    (local.set $x (call $i32_symbol))
+
+    (if (i32.lt_s (i32.const 5) (local.get $x)) (then
+      unreachable
+    ))
+  )
+
+  (start $start))
+</code></pre>
+<p>Let's see if owi is able to find a value for <code>x</code> that lead to an error:</p>
+<pre><code class="language-sh">$ owi sym ./mini.wat
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 6
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>Indeed, if <code>x</code> is equal to <code>6</code> then, the <code>unreachable</code> instruction will be reached.</p>
+<h2 id="concolic-engine"><a class="header" href="#concolic-engine">Concolic engine</a></h2>
+<p>The concolic engine works exactly in the same way than the symbolic engine:</p>
+<pre><code class="language-sh">$ owi conc ./mini.wat
+owi: [ERROR] Trap: unreachable
+Model:
+ model {
+  symbol symbol_1 i32 6
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bug-finding-testing--pen-testing"><a class="header" href="#bug-finding-testing--pen-testing">Bug-Finding, Testing &amp; Pen-testing</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-bug-finding"><a class="header" href="#examples-of-bug-finding">Examples of Bug Finding</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up"><a class="header" href="#how-to-speed-it-up">How to Speed it Up</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="replaying-a-model"><a class="header" href="#replaying-a-model">Replaying a model</a></h1>
+<p>Let's say you found a bug and want to check what is going on with the concrete input it contains.
+The <code>replay</code> commands can help with that.</p>
+<p>First, you need to perform a symbolic run and to store the output model in a file.
+Given the following <code>mini.wat</code> file containing symbols:</p>
+<!-- $MDX file=mini.wat -->
+<pre><code class="language-wat">(module
+
+  (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
+
+  (func $start (local $x i32)
+    (local.set $x (call $i32_symbol))
+
+    (if (i32.lt_s (i32.const 5) (local.get $x)) (then
+      unreachable
+    ))
+  )
+
+  (start $start))
+</code></pre>
+<p>You can get a model like this:</p>
+<pre><code class="language-sh">$ owi sym ./mini.wat &gt; mini.scfg
+owi: [ERROR] Trap: unreachable
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>Then you can replay the module execution with the values in the model like this:</p>
+<pre><code class="language-sh">$ owi replay --replay-file mini.scfg mini.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 1
+owi: [INFO] calling func  : func start
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] stack         : [ i32.const 6 ]
+owi: [INFO] running instr : local.set 0
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 5
+owi: [INFO] stack         : [ i32.const 5 ]
+owi: [INFO] running instr : local.get 0
+owi: [INFO] stack         : [ i32.const 6 ; i32.const 5 ]
+owi: [INFO] running instr : i32.lt_s
+owi: [INFO] stack         : [ i32.const 1 ]
+owi: [INFO] running instr : if
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : unreachable
+owi: [ERROR] unreachable
+[94]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparing-iso-functionnality-of-two-modules"><a class="header" href="#comparing-iso-functionnality-of-two-modules">Comparing iso-functionnality of two modules</a></h1>
+<p>The <code>owi iso</code> command takes two Wasm modules as input.
+Then, for every common exports between these two modules, Owi will check their equivalence.</p>
+<p>Given the following <code>mul1.wat</code> file:</p>
+<!-- $MDX file=mul1.wat -->
+<pre><code class="language-wat">(module
+
+  (func (export "unused1") (param $x i32)
+    local.get $x
+    drop
+  )
+
+  (func (export "mul") (param $x i32) (param $y i32) (result i32)
+    local.get $x
+    local.get $y
+    i32.mul
+  )
+)
+</code></pre>
+<p>And the following <code>mul2.wat</code> file:</p>
+<!-- $MDX file=mul2.wat -->
+<pre><code class="language-wat">(module
+
+  (func (export "unused2") (param $x i32) (param $y i64) (result i64)
+    local.get $x
+    (if (then (unreachable)))
+    local.get $y
+  )
+
+  (func (export "mul") (param $x i32) (param $y i32) (result i32)
+    local.get $y
+    local.get $x
+    i32.mul
+    i32.const 1
+    i32.add
+  )
+)
+</code></pre>
+<p>Owi can find an input for which the <code>mul</code> function of these two modules is not equivalent:</p>
+<pre><code class="language-sh">$ owi iso ./mul1.wat ./mul2.wat -v -w1
+owi: [INFO] comparing ./mul1.wat and ./mul2.wat
+owi: [INFO] module owi_iso_module1 is ./mul1.wat
+owi: [INFO] module owi_iso_module2 is ./mul2.wat
+owi: [INFO] Compiling ./mul1.wat
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] Compiling ./mul2.wat
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] common exports: mul
+owi: [INFO] checking export mul
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 8
+owi: [INFO] calling func  : func start
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 3
+owi: [INFO] stack         : [ symbol_0 ]
+owi: [INFO] running instr : call 3
+owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
+owi: [INFO] running instr : call 7
+owi: [INFO] calling func  : func check_iso_func
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : local.get 0
+owi: [INFO] stack         : [ symbol_0 ]
+owi: [INFO] running instr : local.get 1
+owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : local.get 0
+owi: [INFO] stack         : [ symbol_0 ]
+owi: [INFO] running instr : local.get 1
+owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
+owi: [INFO] running instr : i32.mul
+owi: [INFO] stack         : [ (i32.mul symbol_0 symbol_1) ]
+owi: [INFO] running instr : local.get 0
+owi: [INFO] stack         : [ symbol_0 ; (i32.mul symbol_0 symbol_1) ]
+owi: [INFO] running instr : local.get 1
+owi: [INFO] stack         : [ symbol_1 ; symbol_0 ; (i32.mul symbol_0
+                                                     symbol_1) ]
+owi: [INFO] running instr : call 1
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : local.get 1
+owi: [INFO] stack         : [ symbol_1 ]
+owi: [INFO] running instr : local.get 0
+owi: [INFO] stack         : [ symbol_0 ; symbol_1 ]
+owi: [INFO] running instr : i32.mul
+owi: [INFO] stack         : [ (i32.mul symbol_1 symbol_0) ]
+owi: [INFO] running instr : i32.const 1
+owi: [INFO] stack         : [ 1 ; (i32.mul symbol_1 symbol_0) ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ (i32.add (i32.mul symbol_1 symbol_0) 1) ;
+            (i32.mul symbol_0 symbol_1) ]
+owi: [INFO] running instr : i32.eq
+owi: [INFO] stack         : [ (i32.of_bool
+                               (bool.eq (i32.mul symbol_0 symbol_1)
+                                (i32.add (i32.mul symbol_1 symbol_0) 1))) ]
+owi: [INFO] running instr : call 2
+owi: [ERROR] Assert failure: (bool.eq (i32.mul symbol_0 symbol_1)
+                              (i32.add (i32.mul symbol_1 symbol_0) 1))
+model {
+  symbol symbol_0 i32 0
+  symbol symbol_1 i32 0
+}
+owi: [INFO] Completed paths: 1
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-to-fuzzing-and-abstract-interpretation"><a class="header" href="#comparison-to-fuzzing-and-abstract-interpretation">Comparison to Fuzzing and Abstract Interpretation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bugs-found-by-owi"><a class="header" href="#bugs-found-by-owi">Bugs Found by Owi</a></h1>
+<ul>
+<li><a href="https://github.com/rust-lang/rust/pull/129321">Wrong neutral element of <code>&lt;fNN as iter::Sum&gt;</code> in the Rust standard library</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="solver-aided-programming"><a class="header" href="#solver-aided-programming">Solver-Aided Programming</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-problem-solving"><a class="header" href="#examples-of-problem-solving">Examples of Problem Solving</a></h1>
+<h2 id="solving-polynomials"><a class="header" href="#solving-polynomials">Solving polynomials</a></h2>
+<details>
+  <summary>C</summary>
+<p>Given the following <code>poly.c</code> file:</p>
+<!-- $MDX file=poly.c -->
+<pre><code class="language-c">#include &lt;owi.h&gt;
+
+int main() {
+  int x = owi_i32();
+  int x2 = x * x;
+  int x3 = x * x * x;
+
+  int a = 1;
+  int b = -7;
+  int c = 14;
+  int d = -8;
+
+  int poly = a * x3 + b * x2 + c * x + d;
+
+  owi_assert(poly != 0);
+
+  return 0;
+}
+</code></pre>
+<p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
+<p>Then we use <code>owi_assert(poly != 0)</code>. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:</p>
+<pre><code class="language-sh">$ owi c ./poly.c -w1 --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 4
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>Indeed, <code>4</code> is a root of the polynomial and thus it is expected to be equal to <code>0</code> in this case. We know the three roots are <code>1</code>, <code>2</code> and <code>4</code>, so let's inform owi that we are not interested in this cases.</p>
+<p>We can do so by assuming that <code>x</code> is not equal to any of these with the function <code>owi_assume(bool)</code>:</p>
+<!-- $MDX file=poly2.c -->
+<pre><code class="language-c">#include &lt;owi.h&gt;
+
+int main() {
+  int x = owi_i32();
+  int x2 = x * x;
+  int x3 = x * x * x;
+
+  int a = 1;
+  int b = -7;
+  int c = 14;
+  int d = -8;
+
+  int poly = a * x3 + b * x2 + c * x + d;
+
+  owi_assume(x != 1);
+  owi_assume(x != 2);
+  owi_assume(x != 4);
+
+  // Make model output deterministic
+  owi_assume(x &gt; -2147483646);
+
+  owi_assert(poly != 0);
+
+  return 0;
+}
+</code></pre>
+<p>Let's run owi on this new input:</p>
+<pre><code class="language-sh">$ owi c ./poly2.c --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -2147483644
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>And indeed, <code>-2147483644</code> is a root of the polynomial! Well, not quite…</p>
+<p>Remember that we are working on 32 bits integers here. Thus <em>overflows</em> are a thing we have to think about. And indeed when <code>x</code> is equal to <code>-2147483644</code>, because of overflows, the polynomial will be equal to zero.</p>
+<p>Exercise: can you find another "root" of the polynomial ? :-)</p>
+</details>
+<details>
+  <summary>C++</summary>
+<p>Given the following <code>poly.cpp</code> file:</p>
+<!-- $MDX file=poly.cpp -->
+<pre><code class="language-cpp">#include &lt;owi.h&gt;
+
+class Poly {
+private:
+  int poly;
+public:
+  Poly(int a, int b, int c, int d) {
+    int x = owi_i32();
+    int x2 = x * x;
+    int x3 = x2 * x;
+    poly = a*x3 + b*x2 + c*x + d;
+  }
+
+  int hasRoot() const { return poly == 0; }
+};
+
+int main() {
+  Poly p(1, -7, 14, -8);
+  owi_assert(not(p.hasRoot()));
+}
+</code></pre>
+<p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
+<p>Then we use <code>owi_assert(p.getPoly() != 0)</code>. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:</p>
+<pre><code class="language-sh">$ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 4
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>Indeed, <code>4</code> is a root of the polynomial and thus it is expected to be equal to <code>0</code> in this case. We know the three roots are <code>1</code>, <code>2</code> and <code>4</code>, so let's inform owi that we are not interested in this cases.</p>
+<p>We can do so by assuming that <code>x</code> is not equal to any of these with the function <code>owi_assume(bool)</code>:</p>
+<!-- $MDX file=poly2.cpp -->
+<pre><code class="language-cpp">#include &lt;owi.h&gt;
+
+class Poly {
+private:
+  int poly;
+public:
+  Poly(int a, int b, int c, int d) {
+    int x = owi_i32();
+    int x2 = x * x;
+    int x3 = x2 * x;
+    owi_assume(x != 1);
+    owi_assume(x != 2);
+    // make model output deterministic
+    owi_assume(x &gt; -2147483646);
+    owi_assume(x != 4);
+    poly = a*x3 + b*x2 + c*x + d;
+  }
+
+  int hasRoot() const { return poly == 0; }
+};
+
+int main() {
+  Poly p(1, -7, 14, -8);
+  owi_assert(not(p.hasRoot()));
+}
+</code></pre>
+<p>Let's run owi on this new input:</p>
+<pre><code class="language-sh">$ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -2147483644
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>And indeed, <code>-2147483644</code> is a root of the polynomial! Well, not quite…</p>
+<p>Remember that we are working on 32 bits integers here. Thus <em>overflows</em> are a thing we have to think about. And indeed when <code>x</code> is equal to <code>-2147483644</code>, because of overflows, the polynomial will be equal to zero.</p>
+<p>Exercise: can you find another "root" of the polynomial ? :-)</p>
+</details>
+<h2 id="solving-a-maze"><a class="header" href="#solving-a-maze">Solving a maze</a></h2>
+<!-- $MDX file=maze.c -->
+<pre><code class="language-c">#include &lt;owi.h&gt;
+
+// example from https://feliam.wordpress.com/2010/10/07/the-symbolic-maze/
+
+#define H 7
+#define W 11
+#define ITERS 28
+
+char maze[H][W] = {
+  "+-+---+---+",
+  "| |     |#|",
+  "| | --+ | |",
+  "| |   | | |",
+  "| +-- | | |",
+  "|     |   |",
+  "+-----+---+"
+};
+
+int main (void) {
+
+  int x = 1;
+  int y = 1;
+  maze[y][x]='X';
+
+  char program[ITERS];
+
+  for (int i = 0; i &lt; ITERS; i++) {
+    program[i] = owi_i32();
+  }
+
+  int old_x = x;
+  int old_y = y;
+
+  for (int i = 0; i &lt; ITERS; i++) {
+
+    old_x = x;
+    old_y = y;
+
+    switch (program[i]) {
+      case 'w':
+        y--;
+        break;
+      case 's':
+        y++;
+        break;
+      case 'a':
+        x--;
+        break;
+      case 'd':
+        x++;
+        break;
+      default:
+        return 1;
+    }
+
+    if (maze[y][x] == '#') {
+      // TODO: print the result
+      owi_assert(0);
+      return 0;
+    }
+
+    if (maze[y][x] != ' ' &amp;&amp; !((y == 2 &amp;&amp; maze[y][x] == '|' &amp;&amp; x &gt; 0 &amp;&amp; x &lt; W))) {
+      return 1;
+    }
+
+    if (old_x == x &amp;&amp; old_y == y) {
+      return 1;
+    }
+
+    maze[y][x] = 'X';
+  }
+  return 1;
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c ./maze.c --no-value --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32
+  symbol symbol_1 i32
+  symbol symbol_10 i32
+  symbol symbol_11 i32
+  symbol symbol_12 i32
+  symbol symbol_13 i32
+  symbol symbol_14 i32
+  symbol symbol_15 i32
+  symbol symbol_16 i32
+  symbol symbol_17 i32
+  symbol symbol_18 i32
+  symbol symbol_19 i32
+  symbol symbol_2 i32
+  symbol symbol_20 i32
+  symbol symbol_21 i32
+  symbol symbol_22 i32
+  symbol symbol_23 i32
+  symbol symbol_24 i32
+  symbol symbol_25 i32
+  symbol symbol_26 i32
+  symbol symbol_27 i32
+  symbol symbol_3 i32
+  symbol symbol_4 i32
+  symbol symbol_5 i32
+  symbol symbol_6 i32
+  symbol symbol_7 i32
+  symbol symbol_8 i32
+  symbol symbol_9 i32
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<h2 id="dobble-example"><a class="header" href="#dobble-example">Dobble example</a></h2>
+<!-- $MDX file=dobble.c -->
+<pre><code class="language-c">// An encoding representing the problem of finding a suitable
+// set of cards for https://en.wikipedia.org/wiki/Dobble.
+// Cards are encoded on integers, with each position
+// representing one of N_CARDS possible symbols.
+#include &lt;owi.h&gt;
+#include &lt;stdlib.h&gt;
+
+// Number of symbols per card
+#define CARD_SIZE 3
+
+#define N_CARDS ((CARD_SIZE*CARD_SIZE) - CARD_SIZE + 1)
+
+int popcount(unsigned int x) {
+    int count = 0;
+    for (int i = 0; i &lt; N_CARDS; i++) {
+        count += x &amp; 1;
+        x &gt;&gt;= 1;
+    }
+    return count;
+}
+
+int main() {
+    unsigned int cards[N_CARDS];
+    for (int i=0;i &lt; N_CARDS; i++) {
+        unsigned int x = owi_i32();
+        owi_assume((x &gt;&gt; N_CARDS) == 0);
+        owi_assume(popcount(x) == CARD_SIZE);
+        cards[i] = x;
+        if (i &gt; 0) {
+            owi_assume(cards[i] &gt; cards[i-1]);
+        }
+    }
+    unsigned int acc = 1;
+    for (int i=0;i &lt; N_CARDS; i++) {
+        for(int j=i+1; j &lt; N_CARDS;j++) {
+            owi_assume(cards[i] != cards[j]);
+            unsigned int z = cards[i] &amp; cards[j];
+            acc = acc &amp; (z != 0);
+            acc = acc &amp; ((z &amp; (z-1)) == 0);
+        }
+    }
+    owi_assert(!acc);
+}
+</code></pre>
+<!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
+<pre><code class="language-sh">$ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32
+  symbol symbol_1 i32
+  symbol symbol_2 i32
+  symbol symbol_3 i32
+  symbol symbol_4 i32
+  symbol symbol_5 i32
+  symbol symbol_6 i32
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up-1"><a class="header" href="#how-to-speed-it-up-1">How to Speed it Up</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-to-rosette-prolog-etc"><a class="header" href="#comparison-to-rosette-prolog-etc">Comparison to Rosette, Prolog, etc.</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="test-case-generation"><a class="header" href="#test-case-generation">Test-Case Generation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="labels"><a class="header" href="#labels">Labels</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="verification-and-proof-of-programs"><a class="header" href="#verification-and-proof-of-programs">Verification and Proof of Programs</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-deductive-verification-and-abstract-interpretation"><a class="header" href="#comparison-with-deductive-verification-and-abstract-interpretation">Comparison with Deductive Verification and Abstract Interpretation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="e-acsl"><a class="header" href="#e-acsl">E-ACSL</a></h1>
+<h1 id="combining-symbolic-execution-with-runtime-assertion-checking-rac"><a class="header" href="#combining-symbolic-execution-with-runtime-assertion-checking-rac">Combining symbolic execution with runtime assertion checking (RAC)</a></h1>
+<p>E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properties are violated at runtime.</p>
+<p>Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properties using symbolic values. This will lead to better coverage of potential execution paths and scenarios.</p>
+<h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
+<p>Consider the following (faulty) function <code>primes</code>, it implements the algorithm of the <strong>Sieve of Eratosthenes</strong> to find all the prime numbers smaller than <code>n</code>:</p>
+<pre><code class="language-c">void primes(int *is_prime, int n) {
+    for (int i = 1; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+</code></pre>
+<p>Initially, it marks each number as prime. It then marks as composite the multiples of each prime, iterating in an ascending order. If a number is still marked as prime at the point of iteration, then it does not admit a nontrivial factor and should be a prime.</p>
+<p>In order to verify the implementation, we annotate the function <code>primes</code> using the E-ACSL specification language. The annotations should be written immediately above the function and surrounded by <code>/*@ ... */</code>.</p>
+<pre><code class="language-c">#define MAX_SIZE 100
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+</code></pre>
+<p>Here, <code>requires</code> and <code>ensures</code> specify the pre-condition and post-condition of the function. The annotation means:</p>
+<ul>
+<li>When the function is called,
+<ul>
+<li>the argument <code>n</code> should be between <code>2</code> and <code>MAX_SIZE</code></li>
+<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime + i</code> should be memory locations safe to read and write</li>
+</ul>
+</li>
+<li>When the function returns,
+<ul>
+<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime[i]</code> evaluates to <code>true</code> if and only if <code>i</code> is larger than <code>2</code> and does not have a factor between <code>2</code> and <code>i - 1</code> (which indicates the primality of <code>i</code>)</li>
+</ul>
+</li>
+</ul>
+<p>We can then call the function with symbolic values and see what happens. We should pass the option <code>--e-acsl</code> to let owi invoke the E-ACSL plugin.</p>
+<!-- $MDX file=primes.c -->
+<pre><code class="language-c">#define MAX_SIZE 100
+
+#include &lt;owi.h&gt;
+#include &lt;stdlib.h&gt;
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+
+int main(void) {
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
+
+    int n = owi_i32();
+    owi_assume(n &gt;= 2);
+    owi_assume(n &lt;= MAX_SIZE);
+
+    primes(is_prime, n);
+    free(is_prime);
+    return 0;
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c --e-acsl primes.c -w1
+owi: [ERROR] Assert failure: false
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>The execution got aborted because one of the specifications has been violated with <code>n = 2</code>. (The error message is not so informative for the time being, extra information aiding the diagnostic of errors may be added in the future.)</p>
+<p>The problem is that we should mark <code>0</code> and <code>1</code> as non-prime during the initialization. Let's fix it and rerun the program.</p>
+<!-- $MDX file=primes2.c -->
+<pre><code class="language-c">#define MAX_SIZE 100
+
+#include &lt;owi.h&gt;
+#include &lt;stdlib.h&gt;
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    is_prime[0] = is_prime[1] = 0;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+
+int main(void) {
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
+
+    int n = owi_i32();
+    owi_assume(n &gt;= 2);
+    owi_assume(n &lt;= MAX_SIZE);
+
+    primes(is_prime, n);
+    free(is_prime);
+    return 0;
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c --e-acsl primes2.c
+All OK!
+</code></pre>
+<p>All the specified properties have been satisfied during the execution.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="weasel"><a class="header" href="#weasel">Weasel</a></h1>
+<p>Weasel stands for WEbAssembly Specification Language, it can be used to annotate Webassembly text modules in <a href="https://github.com/WebAssembly/annotations">custom annotation</a>. Annotated modules can be instrumented to perform runtime assertion checking thanks to owi's code generator.</p>
+<p>Commands and options related to Weasel:</p>
+<ul>
+<li><code>owi instrument</code> to instrument an annotated text module.</li>
+<li><code>--rac</code> for <code>run</code>, <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking.</li>
+<li><code>--srac</code> for <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking symbolically.</li>
+</ul>
+<p>The formal specification of Weasel can be found in <code>src/annot/spec.ml</code>.</p>
+<h2 id="basic-example"><a class="header" href="#basic-example">Basic example</a></h2>
+<p>Suppose we have a function returning its parameter plus three:</p>
+<pre><code class="language-wast">(module
+  (;...;)
+  (func $plus_three (param $x i32) (result i32)
+    local.get $x
+    i32.const 3
+    i32.add
+  )
+  (;...;)
+)
+</code></pre>
+<p>With Weasel, we can annotate this function by specifying its postconditions:</p>
+<pre><code class="language-wast">(module
+  (;...;)
+  (@contract $plus_three
+    (ensures (= result (+ $x 3)))
+  )
+  (func $plus_three (param $x i32) (result i32)
+    local.get $x
+    i32.const 3
+    i32.add
+  )
+  (;...;)
+)
+</code></pre>
+<p><code>owi instrument</code> generates a new wrapper function checking this postcondition:</p>
+<pre><code class="language-sh">$ owi instrument plus_three.wat
+$ cat plus_three.instrumented.wat
+(module
+  (import "symbolic" "assert" (func $assert  (param i32)))
+  (type (sub final  (func (param $x i32) (result i32))))
+  (type (sub final  (func)))
+  (type (sub final  (func (param i32))))
+  (type (sub final  (func (result i32))))
+  (func $plus_three (param $x i32) (result i32)
+    local.get 0
+    i32.const 3
+    i32.add
+  )
+  (func $start
+    i32.const 42
+    call 3
+    drop
+  )
+  (func $__weasel_plus_three (param $x i32) (result i32) (local $__weasel_temp i32) (local $__weasel_res_0 i32)
+    local.get 0
+    call 1
+    local.set 2
+    local.get 2
+    local.get 0
+    i32.const 3
+    i32.add
+    i32.eq
+    call 0
+    local.get 2
+  )
+  (start 2)
+)
+</code></pre>
+<p>We can perform runtime assertion checking either by <code>owi sym plus_three.instrumented.wat</code> or by <code>owi sym --rac plus_three.wat</code>.</p>
+<pre><code class="language-sh">$ owi sym plus_three.instrumented.wat
+All OK!
+$ owi sym --rac plus_three.wat
+All OK!
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="going-further"><a class="header" href="#going-further">Going Further</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-engines"><a class="header" href="#comparison-with-other-engines">Comparison with Other Engines</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="talks-and-papers"><a class="header" href="#talks-and-papers">Talks and Papers</a></h1>
+<h2 id="publications"><a class="header" href="#publications">Publications</a></h2>
+<ul>
+<li><a href="https://hal.science/hal-04627413">Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly</a>, 2024</li>
+<li><a href="https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf">Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly</a>, 2024</li>
+<li><a href="https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf">Cross-Language Symbolic Runtime Annotation Checking</a>, 2025</li>
+</ul>
+<h2 id="talks"><a class="header" href="#talks">Talks</a></h2>
+<ul>
+<li><a href="https://youtu.be/IM76cMP3Eqo">september 2023</a>: <a href="https://icfp23.sigplan.org/home/ocaml-2023">ICFP OCaml track</a></li>
+<li><a href="https://youtu.be/os_pknmiqmU">october 2023</a>: Wasm Research Day organized by the <a href="https://www.cs.cmu.edu/wrc">WebAssembly Research Center</a> and hosted in Google Munich</li>
+<li>april 2024: <a href="https://oups.frama.io">OUPS (OCaml UserS in Paris)</a></li>
+<li><a href="https://groupes.renater.fr/wiki/lvp/public/journee_lvp_novembre2024">november 2024</a>: <a href="https://gdrgpl.myxwiki.org/xwiki/bin/view/Main/GTs/GT%20Langages%20et%20v%C3%A9rification%20de%20programmes%20(LVP)">LVP working group</a> day of the <a href="https://gdr-gpl.cnrs.fr/">GdR GPL</a></li>
+<li><a href="https://fs.zapashcanon.fr/mp4/phd_defense.mp4">december 2024</a>: Léo Andrès' PhD defense</li>
+<li>january 2025: <a href="https://jfla.inria.fr/jfla2025.html">JFLA 2025</a></li>
+<li><a href="https://youtu.be/x6V-NJ9agjg">february 2025</a>: <a href="https://www.cs.cmu.edu/~wasm/wasm-research-day-2025.html">Wasm Research Day 2025</a></li>
+<li>february 2025: <a href="https://www.irif.fr/seminaires/pps/index">PPS Seminar</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="commands-and-options"><a class="header" href="#commands-and-options">Commands and Options</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="api-symbols-and-helpers"><a class="header" href="#api-symbols-and-helpers">API: Symbols and Helpers</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="overview-1"><a class="header" href="#overview-1">Overview</a></h1>
+<h2 id="formatter"><a class="header" href="#formatter">Formatter</a></h2>
+<p>Given a file <code>horrible.wat</code>:</p>
+<details>
+<!-- $MDX file=horrible.wat -->
+<pre><code class="language-wat">(module (memory
+10) (func
+$f (param
+     $n i32) (result
+i32) (if
+             (                       i32.lt_s
+        (
+local.get $n)
+        (
+                          i32.const
+                          
+                          
+                          0))
+    (  then
+(
+ 
+ unreachable)))
+
+    (
+     if
+( 
+i32.lt_s
+        (local.get                            $n)
+        (i32.const                             2))
+    (then          (return (local.get $n)))) (if   
+      (i32.eqz   
+(i32.load (i32.mul (i32.const 4) (local.get $n)))) (then local.get $n i32.const 4 i32.mul
+      (call $f (i32.sub (local.get $n) (i32.const 1)))
+      (call $f (i32.sub (local.get $n)
+(i32.const 2))) i32.add   i32.store )) local.get $n       i32.const 4 i32.mul i32.load return))
+</code></pre>
+</details>
+<p>Owi will format it like this:</p>
+<pre><code class="language-sh">$ owi fmt horrible.wat
+(module
+  (memory 10)
+  (func $f (param $n i32) (result i32)
+    local.get $n
+    i32.const 0
+    i32.lt_s
+    (if
+      (then
+        unreachable
+      )
+    )
+    local.get $n
+    i32.const 2
+    i32.lt_s
+    (if
+      (then
+        local.get $n
+        return
+      )
+    )
+    i32.const 4
+    local.get $n
+    i32.mul
+    i32.load align=1
+    i32.eqz
+    (if
+      (then
+        local.get $n
+        i32.const 4
+        i32.mul
+        local.get $n
+        i32.const 1
+        i32.sub
+        call $f
+        local.get $n
+        i32.const 2
+        i32.sub
+        call $f
+        i32.add
+        i32.store align=1
+      )
+    )
+    local.get $n
+    i32.const 4
+    i32.mul
+    i32.load align=1
+    return
+  )
+)
+</code></pre>
+<p>Are you able to recognize the program now?</p>
+<h2 id="interpreter"><a class="header" href="#interpreter">Interpreter</a></h2>
+<p>Given a file <code>42.wat</code> with the following content:</p>
+<!-- $MDX file=42.wat -->
+<pre><code class="language-wat">(module $quickstart
+  (func $f
+    i32.const 20
+    i32.const 22
+    i32.add
+    drop
+  )
+  (start $f)
+)
+</code></pre>
+<p>Running the interpreter is as simple as:</p>
+<pre><code class="language-sh">$ owi run ./42.wat
+</code></pre>
+<p>Nothing is happening, so you can add the <code>-v</code> option to print an execution trace:</p>
+<pre><code class="language-sh">$ owi run ./42.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func f
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop
+</code></pre>
+<h2 id="script-using-the-spectest-module"><a class="header" href="#script-using-the-spectest-module">Script using the <code>spectest</code> module</a></h2>
+<p>Given the following <code>print.wast</code> file:</p>
+<!-- $MDX file=print.wast -->
+<pre><code class="language-wast">(module
+
+  (func $print_i32 (import "spectest" "print_i32") (param i32))
+
+  (func $main
+    i32.const 42
+    call $print_i32
+  )
+
+  (start $main)
+)
+</code></pre>
+<p>You can print the value thanks to the <code>print_i32</code> function imported from the <code>spectest</code> module:</p>
+<pre><code class="language-sh">$ owi script ./print.wast
+42
+</code></pre>
+<h2 id="optimizer"><a class="header" href="#optimizer">Optimizer</a></h2>
+<p>Given the useless program <code>useless.wat</code>:</p>
+<details>
+<!-- $MDX file=useless.wat -->
+<pre><code class="language-wat">(module
+  (func $i32binop
+    i32.const 21
+    i32.const 21
+    i32.add
+    i32.const 0
+    drop
+    drop
+
+    i32.const 63
+    i32.const 21
+    i32.sub
+    i32.const 0
+    drop
+    drop
+
+    i32.const 21
+    i32.const 2
+    i32.mul
+    i32.const 0
+    drop
+    drop
+
+    i32.const 84
+    i32.const 2
+    i32.div_s
+    i32.const 0
+    drop
+    drop
+
+    i32.const 84
+    i32.const 2
+    i32.div_u
+    i32.const 0
+    drop
+    drop
+
+    i32.const -42
+    i32.const 4
+    i32.rem_s     ;; 4*10 + 2 &gt; =-2
+    i32.const 0
+    drop
+    drop
+
+    i32.const -42
+    i32.const 4
+    i32.rem_u     ;; 4*10 + 2 &gt; =2
+    i32.const 0
+    drop
+    drop
+
+    i32.const 1
+    i32.const 3
+    i32.and          ;; bitwise ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i32.const 1
+    i32.const 3
+    i32.or           ;; bitwise ope &gt; =3
+    i32.const 0
+    drop
+    drop
+
+    i32.const 1
+    i32.const 3
+    i32.xor          ;; bitwise ope &gt; =2
+    i32.const 0
+    drop
+    drop
+
+    i32.const 1
+    i32.const 3
+    i32.shl          ;; shift left ope &gt; =8
+    i32.const 0
+    drop
+    drop
+
+    i32.const 8
+    i32.const 3
+    i32.shr_u        ;; shift right ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i32.const 8
+    i32.const 3
+    i32.shr_s        ;; shift right ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i32.const 1
+    i32.const 3
+    i32.rotl         ;; rotation left ope &gt; =8
+    i32.const 0
+    drop
+    drop
+
+    i32.const 8
+    i32.const 3
+    i32.rotr         ;; rotation left ope &gt; =1
+    i32.const 0
+    drop
+    drop
+  )
+
+  (func $i64binop
+    i64.const 21
+    i64.const 21
+    i64.add
+    i32.const 0
+    drop
+    drop
+
+    i64.const 63
+    i64.const 21
+    i64.sub
+    i32.const 0
+    drop
+    drop
+
+    i64.const 21
+    i64.const 2
+    i64.mul
+    i32.const 0
+    drop
+    drop
+
+    i64.const 84
+    i64.const 2
+    i64.div_s
+    i32.const 0
+    drop
+    drop
+
+    i64.const 84
+    i64.const 2
+    i64.div_u
+    i32.const 0
+    drop
+    drop
+
+    i64.const -42
+    i64.const 4
+    i64.rem_s     ;; 4*10 + 2 &gt; =-2
+    i32.const 0
+    drop
+    drop
+
+    i64.const -42
+    i64.const 4
+    i64.rem_u     ;; 4*10 + 2 &gt; =2
+    i32.const 0
+    drop
+    drop
+
+    i64.const 1
+    i64.const 3
+    i64.and          ;; bitwise ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i64.const 1
+    i64.const 3
+    i64.or           ;; bitwise ope &gt; =3
+    i32.const 0
+    drop
+    drop
+
+    i64.const 1
+    i64.const 3
+    i64.xor          ;; bitwise ope &gt; =2
+    i32.const 0
+    drop
+    drop
+
+    i64.const 1
+    i64.const 3
+    i64.shl          ;; shift left ope &gt; =8
+    i32.const 0
+    drop
+    drop
+
+    i64.const 8
+    i64.const 3
+    i64.shr_u        ;; shift right ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i64.const 8
+    i64.const 3
+    i64.shr_s        ;; shift right ope &gt; =1
+    i32.const 0
+    drop
+    drop
+
+    i64.const 1
+    i64.const 3
+    i64.rotl         ;; rotation left ope &gt; =8
+    i32.const 0
+    drop
+    drop
+
+    i64.const 8
+    i64.const 3
+    i64.rotr         ;; rotation left ope &gt; =1
+    i32.const 0
+    drop
+    drop
+  )
+
+  (func $f32binop
+    f32.const 21
+    f32.const 21
+    f32.add
+    i32.const 0
+    drop
+    drop
+
+    f32.const 63
+    f32.const 21
+    f32.sub
+    i32.const 0
+    drop
+    drop
+
+    f32.const 21
+    f32.const 2
+    f32.mul
+    i32.const 0
+    drop
+    drop
+
+    f32.const 84
+    f32.const 2
+    f32.div
+    i32.const 0
+    drop
+    drop
+
+    f32.const 42
+    f32.const 21
+    f32.max
+    i32.const 0
+    drop
+    drop
+
+    f32.const 42
+    f32.const 84
+    f32.min
+    i32.const 0
+    drop
+    drop
+
+    f32.const -42
+    f32.const 21
+    f32.copysign
+    i32.const 0
+    drop
+    drop
+  )
+
+  (func $f64binop
+    f64.const 21
+    f64.const 21
+    f64.add
+    i32.const 0
+    drop
+    drop
+
+    f64.const 63
+    f64.const 21
+    f64.sub
+    i32.const 0
+    drop
+    drop
+
+    f64.const 21
+    f64.const 2
+    f64.mul
+    i32.const 0
+    drop
+    drop
+
+    f64.const 84
+    f64.const 2
+    f64.div
+    i32.const 0
+    drop
+    drop
+
+    f64.const 42
+    f64.const 21
+    f64.max
+    i32.const 0
+    drop
+    drop
+
+    f64.const 42
+    f64.const 84
+    f64.min
+    i32.const 0
+    drop
+    drop
+
+    f64.const -42
+    f64.const 21
+    f64.copysign
+    i32.const 0
+    drop
+    drop
+  )
+
+  (func $start
+    call $i32binop
+    call $i64binop
+    call $f32binop
+    call $f64binop
+  )
+
+  (start $start)
+)
+</code></pre>
+</details>
+<p>Owi is able to get rid of most of the code:</p>
+<pre><code class="language-sh">$ owi opt useless.wat
+(module
+  (type (sub final  (func)))
+  (func $i32binop
+
+  )
+  (func $i64binop
+
+  )
+  (func $f32binop
+
+  )
+  (func $f64binop
+
+  )
+  (func $start
+    call 0
+    call 1
+    call 2
+    call 3
+  )
+  (start 4)
+)
+</code></pre>
+<h2 id="validator"><a class="header" href="#validator">Validator</a></h2>
+<p>Given a file <code>type_error.wat</code> with the following content:</p>
+<!-- $MDX file=type_error.wat -->
+<pre><code class="language-wat">(module $quickstart
+  (func $f
+    i32.const 20
+    i32.const 22
+    i32.add
+    i32.add
+    drop
+  )
+  (start $f)
+)
+</code></pre>
+<p>Running the validator is as simple as:</p>
+<pre><code class="language-sh">$ owi validate ./type_error.wat
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
+[35]
+</code></pre>
+<p>You can also print a more detailed trace with the <code>-v</code> option:</p>
+<pre><code class="language-sh">$ owi validate ./type_error.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
+[35]
+</code></pre>
+<h2 id="wasm2wat"><a class="header" href="#wasm2wat">Wasm2wat</a></h2>
+<p>Given a file <code>42.wasm</code>, you can convert it to <code>result.wat</code> and then run it:</p>
+<pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
+$ cat result.wat
+(module
+  (type (sub final  (func)))
+  (func
+    i32.const 20
+    i32.const 22
+    i32.add
+    drop
+  )
+  (start 0)
+)
+$ owi run result.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop
+</code></pre>
+<h2 id="wat2wasm"><a class="header" href="#wat2wasm">Wat2wasm</a></h2>
+<p>Given a file <code>42.wat</code>, you can convert it to <code>result.wasm</code> and then run it:</p>
+<pre><code class="language-sh">$ owi wat2wasm 42.wat -o result.wasm
+$ owi run result.wasm -v
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with Other Tools</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi"><a class="header" href="#owi"><code>owi</code></a></h1>
+<pre><code class="language-sh">$ owi --help=plain
+NAME
+       owi - OCaml WebAssembly Interpreter
+
+SYNOPSIS
+       owi [COMMAND] …
+
+COMMANDS
+       c [OPTION]… FILE…
+           Compile a C file to Wasm and run the symbolic interpreter on it
+
+       c++ [OPTION]… FILE…
+           Compile a C++ file to Wasm and run the symbolic interpreter on it
+
+       conc [OPTION]… FILE…
+           Run the concolic interpreter
+
+       fmt [OPTION]… FILE…
+           Format a .wat or .wast file
+
+       instrument [OPTION]… FILE…
+           Generate an instrumented file with runtime assertion checking
+           coming from Weasel specifications
+
+       iso [OPTION]… FILE…
+           Check the iso-functionnality of two Wasm modules by comparing the
+           output when calling their exports.
+
+       opt [OPTION]… FILE
+           Optimize a module
+
+       replay [OPTION]… FILE
+           Replay a module containing symbols with concrete values in a
+           replay file containing a model
+
+       run [OPTION]… FILE…
+           Run the concrete interpreter
+
+       rust [OPTION]… FILE…
+           Compile a Rust file to Wasm and run the symbolic interpreter on it
+
+       script [OPTION]… FILE…
+           Run a reference test suite script
+
+       sym [OPTION]… FILE…
+           Run the symbolic interpreter
+
+       validate [OPTION]… FILE…
+           Validate a module
+
+       version [OPTION]…
+           Print some version informations
+
+       wasm2wat [OPTION]… FILE
+           Generate a text format file (.wat) from a binary format file
+           (.wasm)
+
+       wat2wasm [OPTION]… FILE
+           Generate a binary format file (.wasm) from a text format file
+           (.wat)
+
+       zig [OPTION]… FILE…
+           Compile a Zig file to Wasm and run the symbolic interpreter on it
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-c"><a class="header" href="#owi-c"><code>owi c</code></a></h1>
+<pre><code class="language-sh">$ owi c --help=plain
+NAME
+       owi-c - Compile a C file to Wasm and run the symbolic interpreter on
+       it
+
+SYNOPSIS
+       owi c [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --concolic
+           concolic mode
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --e-acsl
+           e-acsl mode, refer to
+           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
+           Frama-C's current language feature implementations
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       -I VAL
+           headers path
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       -m VAL, --arch=VAL (absent=32)
+           data model
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -O VAL (absent=3)
+           specify which optimization level to use
+
+       --optimize
+           optimize mode
+
+       --property=FILE
+           property file
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       --testcomp
+           test-comp mode
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi c exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi c:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-c-1"><a class="header" href="#owi-c-1"><code>owi c++</code></a></h1>
+<pre><code class="language-sh">$ owi c++ --help=plain
+NAME
+       owi-c++ - Compile a C++ file to Wasm and run the symbolic interpreter
+       on it
+
+SYNOPSIS
+       owi c++ [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --concolic
+           concolic mode
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       -I VAL
+           headers path
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       -m VAL, --arch=VAL (absent=32)
+           data model
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -O VAL (absent=3)
+           specify which optimization level to use
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi c++ exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi c++:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-conc"><a class="header" href="#owi-conc"><code>owi conc</code></a></h1>
+<pre><code class="language-sh">$ owi conc --help=plain
+NAME
+       owi-conc - Run the concolic interpreter
+
+SYNOPSIS
+       owi conc [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       --rac
+           runtime assertion checking mode
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       --srac
+           symbolic runtime assertion checking mode
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi conc exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi conc:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-fmt"><a class="header" href="#owi-fmt"><code>owi fmt</code></a></h1>
+<pre><code class="language-sh">$ owi fmt --help=plain
+NAME
+       owi-fmt - Format a .wat or .wast file
+
+SYNOPSIS
+       owi fmt [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -i, --inplace
+           Format in-place, overwriting input file
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi fmt exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi fmt:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-instrument"><a class="header" href="#owi-instrument"><code>owi instrument</code></a></h1>
+<pre><code class="language-sh">$ owi instrument --help=plain
+NAME
+       owi-instrument - Generate an instrumented file with runtime assertion
+       checking coming from Weasel specifications
+
+SYNOPSIS
+       owi instrument [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       --symbolic
+           generate instrumented module that depends on symbolic execution
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi instrument exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi instrument:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-iso"><a class="header" href="#owi-iso"><code>owi iso</code></a></h1>
+<pre><code class="language-sh">$ owi iso --help=plain
+NAME
+       owi-iso - Check the iso-functionnality of two Wasm modules by
+       comparing the output when calling their exports.
+
+SYNOPSIS
+       owi iso [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi iso exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi iso:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-opt"><a class="header" href="#owi-opt"><code>owi opt</code></a></h1>
+<pre><code class="language-sh">$ owi opt --help=plain
+NAME
+       owi-opt - Optimize a module
+
+SYNOPSIS
+       owi opt [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi opt exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi opt:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-replay"><a class="header" href="#owi-replay"><code>owi replay</code></a></h1>
+<pre><code class="language-sh">$ owi replay --help=plain
+NAME
+       owi-replay - Replay a module containing symbols with concrete values
+       in a replay file containing a model
+
+SYNOPSIS
+       owi replay [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       --replay-file=FILE (required)
+           Which replay file to use
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi replay exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi replay:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-run"><a class="header" href="#owi-run"><code>owi run</code></a></h1>
+<pre><code class="language-sh">$ owi run --help=plain
+NAME
+       owi-run - Run the concrete interpreter
+
+SYNOPSIS
+       owi run [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       --rac
+           runtime assertion checking mode
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi run exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi run:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-rust"><a class="header" href="#owi-rust"><code>owi rust</code></a></h1>
+<pre><code class="language-sh">$ owi rust --help=plain
+NAME
+       owi-rust - Compile a Rust file to Wasm and run the symbolic
+       interpreter on it
+
+SYNOPSIS
+       owi rust [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --concolic
+           concolic mode
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       -I VAL
+           headers path
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       -m VAL, --arch=VAL (absent=32)
+           data model
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -O VAL (absent=3)
+           specify which optimization level to use
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi rust exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi rust:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-script"><a class="header" href="#owi-script"><code>owi script</code></a></h1>
+<pre><code class="language-sh">$ owi script --help=plain
+NAME
+       owi-script - Run a reference test suite script
+
+SYNOPSIS
+       owi script [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --no-exhaustion
+           no exhaustion tests
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi script exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi script:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-sym"><a class="header" href="#owi-sym"><code>owi sym</code></a></h1>
+<pre><code class="language-sh">$ owi sym --help=plain
+NAME
+       owi-sym - Run the symbolic interpreter
+
+SYNOPSIS
+       owi sym [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       --rac
+           runtime assertion checking mode
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       --srac
+           symbolic runtime assertion checking mode
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi sym exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi sym:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-validate"><a class="header" href="#owi-validate"><code>owi validate</code></a></h1>
+<pre><code class="language-sh">$ owi validate --help=plain
+NAME
+       owi-validate - Validate a module
+
+SYNOPSIS
+       owi validate [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi validate exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi validate:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-version"><a class="header" href="#owi-version"><code>owi version</code></a></h1>
+<pre><code class="language-sh">$ owi version --help=plain
+NAME
+       owi-version - Print some version informations
+
+SYNOPSIS
+       owi version [OPTION]…
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi version exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi version:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-wasm2wat"><a class="header" href="#owi-wasm2wat"><code>owi wasm2wat</code></a></h1>
+<pre><code class="language-sh">$ owi wasm2wat --help=plain
+NAME
+       owi-wasm2wat - Generate a text format file (.wat) from a binary format
+       file (.wasm)
+
+SYNOPSIS
+       owi wasm2wat [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --emit-file
+           Emit (.wat) files from corresponding (.wasm) files.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi wasm2wat exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi wasm2wat:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-wat2wasm"><a class="header" href="#owi-wat2wasm"><code>owi wat2wasm</code></a></h1>
+<pre><code class="language-sh">$ owi wat2wasm --help=plain
+NAME
+       owi-wat2wasm - Generate a binary format file (.wasm) from a text
+       format file (.wat)
+
+SYNOPSIS
+       owi wat2wasm [OPTION]… FILE
+
+ARGUMENTS
+       FILE (required)
+           source file
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi wat2wasm exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi wat2wasm:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-zig"><a class="header" href="#owi-zig"><code>owi zig</code></a></h1>
+<pre><code class="language-sh">$ owi zig --help=plain
+NAME
+       owi-zig - Compile a Zig file to Wasm and run the symbolic interpreter
+       on it
+
+SYNOPSIS
+       owi zig [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --concolic
+           concolic mode
+
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION
+           entry point of the executable
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       -I VAL
+           headers path
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       --model-format=VAL (absent=scfg)
+            The format of the model ("json" or "scfg")
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       --optimize
+           optimize mode
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -s VAL, --solver=VAL (absent=Z3)
+           SMT solver to use
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+       -w VAL, --workers=VAL (absent=n)
+           number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi zig exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+ENVIRONMENT
+       These environment variables affect the execution of owi zig:
+
+       OWI_VERBOSITY
+           See option --verbosity.
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="overview-2"><a class="header" href="#overview-2">Overview</a></h1>
+<p>Given a file <code>quickstart.wat</code>, here's how to parse and run this file:</p>
+<pre><code class="language-ocaml"># open Prelude;;
+# open Owi;;
+# Fmt_tty.setup_std_outputs ();;
+- : unit = ()
+# Logs.set_level ~all:true (Some Logs.Info);;
+- : unit = ()
+# Logs.set_reporter (Logs_fmt.reporter ())
+- : unit = ()
+# let filename = Fpath.v "quickstart.wat";;
+val filename : Fpath.t = &lt;abstr&gt;
+# let m =
+    match Parse.Text.Module.from_file filename with
+    | Ok script -&gt; script
+    | Error e -&gt; assert false;;
+mdx_gen.bc.exe: [INFO] parsing      ...
+...
+   annots = []}
+# let module_to_run, link_state =
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~optimize:false ~name:None m with
+    | Ok v -&gt; v
+    | Error _ -&gt; assert false;;
+mdx_gen.bc.exe: [INFO] checking     ...
+mdx_gen.bc.exe: [INFO] typechecking ...
+mdx_gen.bc.exe: [INFO] linking      ...
+...
+# let () =
+    match Interpret.Concrete.modul link_state.envs module_to_run with
+    | Ok () -&gt; ()
+    | Error _ -&gt; assert false;;
+mdx_gen.bc.exe: [INFO] interpreting ...
+mdx_gen.bc.exe: [INFO] stack         : [  ]
+mdx_gen.bc.exe: [INFO] running instr : call 0
+mdx_gen.bc.exe: [INFO] calling func  : func f
+mdx_gen.bc.exe: [INFO] stack         : [  ]
+mdx_gen.bc.exe: [INFO] running instr : i32.const 24
+mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ]
+mdx_gen.bc.exe: [INFO] running instr : i32.const 24
+mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ; i32.const 24 ]
+mdx_gen.bc.exe: [INFO] running instr : i32.add
+mdx_gen.bc.exe: [INFO] stack         : [ i32.const 48 ]
+mdx_gen.bc.exe: [INFO] running instr : drop
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="using-and-defining-external-functions-host-functions"><a class="header" href="#using-and-defining-external-functions-host-functions">Using and defining external functions (host functions)</a></h1>
+<h2 id="dealing-with-the-stack"><a class="header" href="#dealing-with-the-stack">Dealing with the Stack</a></h2>
+<p>Given the following <code>extern.wat</code> file:</p>
+<!-- $MDX file=extern.wat -->
+<pre><code class="language-wat">(module $extern
+
+  (import "sausage" "fresh"
+    (func $fresh (param i32) (result externref)))
+
+  (import "sausage" "get_i32r"
+    (func $get (param externref) (result i32)))
+
+  (import "sausage" "set_i32r"
+    (func $set (param externref) (param i32)))
+
+  (import "sausage" "print_i32"
+    (func $print_i32 (param i32)))
+
+  (func $start (local $ref externref)
+
+    ;; let ref = fresh 42
+    (local.set $ref (call $fresh (i32.const 42)))
+
+    ;; print_i32 (get ref)
+    (call $print_i32 (call $get (local.get $ref)))
+
+    ;; set ref 13
+    (call $set (local.get $ref) (i32.const 13)  )
+
+    ;; print_i32 (get ref)
+    (call $print_i32 (call $get (local.get $ref)))
+
+  )
+
+  (start $start)
+)
+</code></pre>
+<p>You can define the various required external functions in OCaml like this :</p>
+<!-- $MDX file=extern.ml -->
+<pre><code class="language-ocaml">open Owi
+
+(* an extern module that will be linked with a wasm module *)
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+  (* some custom functions *)
+  let rint : int32 ref Type.Id.t = Type.Id.make () in
+  let fresh i = Ok (ref i) in
+  let set r (i : int32) =
+    r := i;
+    Ok ()
+  in
+  let get r = Ok !r in
+  let print_i32 (i : int32) =
+    Printf.printf "%li\n%!" i;
+    Ok ()
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "print_i32"
+      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
+      )
+    ; ( "fresh"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
+    ; ( "set_i32r"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
+    ; ( "get_i32r"
+      , Concrete_extern_func.Extern_func
+          (Func (Arg (Externref rint, Res), R1 I32), get) )
+    ]
+  in
+  { functions }
+
+(* a link state that contains our custom module, available under the name `sausage` *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"sausage" extern_module
+
+(* a pure wasm module refering to `sausage` *)
+let pure_wasm_module =
+  match Parse.Text.Module.from_file (Fpath.v "extern.wat") with
+  | Error _ -&gt; assert false
+  | Ok modul -&gt; modul
+
+(* our pure wasm module, linked with `sausage` *)
+let module_to_run, link_state =
+  match
+    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
+      ~optimize:true ~name:None pure_wasm_module
+  with
+  | Error _ -&gt; assert false
+  | Ok v -&gt; v
+
+(* let's run it ! it will print the values as defined in the print_i32 function *)
+let () =
+  match Interpret.Concrete.modul link_state.envs module_to_run with
+  | Error _ -&gt; assert false
+  | Ok () -&gt; ()
+</code></pre>
+<p>You'll get the expected result:</p>
+<pre><code class="language-sh">$ ./extern.exe
+42
+13
+</code></pre>
+<h2 id="dealing-with-the-linear-memory"><a class="header" href="#dealing-with-the-linear-memory">Dealing with the Linear Memory</a></h2>
+<p>Owi also allows interacting with linear memory through external functions.
+This is helpful because it enables the host system to communicate directly
+with a Wasm instance through its linear memory. Consider the tiny example
+below to illustrate this:</p>
+<!-- $MDX file=extern_mem.wat -->
+<pre><code class="language-wat">(module $extern_mem
+
+  (import "chorizo" "memset" (func $memset (param i32 i32 i32)))
+
+  (import "chorizo" "print_x64" (func $print_x64 (param i64)))
+
+  (memory 1)
+
+  (func $start
+
+    ;; memset 0 0xAA 8
+    (call $memset (i32.const 0) (i32.const 0xAA) (i32.const 8))
+
+    ;; print_x64 (load 0)
+    (call $print_x64 (i64.load (i32.const 0)))
+  )
+
+  (start $start)
+)
+</code></pre>
+<p>In the module <code>$extern_mem</code>, we first import <code>$memset</code> and <code>$print_x64</code>. Then,
+in the <code>$start</code> function, we initialize the memory starting at address
+<code>(i32.const 0)</code> with a sequence of length <code>(i32.const 8)</code> with bytes of
+<code>(i32.const 0xAA)</code>.</p>
+<p>The definition of the external functions follows the same format as the
+<a href="ocaml-api/./README.html#dealing-with-the-stack">previous example</a>. The difference is that, now, in the GADT definition of
+memset to allow the memory to be passed to this function, we need to wrap
+the three I32 arguments in a Mem variant. That is, instead of writing
+memset as:</p>
+<!-- $MDX skip -->
+<pre><code class="language-ocaml">(Func (Arg (I32, (Arg (I32, (Arg (I32, Res))))), R0), memset)
+</code></pre>
+<p>One should use:</p>
+<!-- $MDX skip -->
+<pre><code class="language-ocaml">(Func (Mem (Arg (I32, (Arg (I32, (Arg (I32, Res)))))), R0), memset)
+</code></pre>
+<p>See the module below for the whole implementation:</p>
+<!-- $MDX file=extern_mem.ml -->
+<pre><code class="language-ocaml">open Owi
+
+(* an extern module that will be linked with a wasm module *)
+let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+  (* some custom functions *)
+  let memset m start byte length =
+    let rec loop offset =
+      if Int32.le offset length then begin
+        match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
+        | Error _ as e -&gt; e
+        | Ok () -&gt; loop (Int32.add offset 1l)
+      end
+      else Ok ()
+    in
+    loop 0l
+  in
+  let print_x64 (i : int64) =
+    Printf.printf "0x%LX\n%!" i;
+    Ok ()
+  in
+  (* we need to describe their types *)
+  let functions =
+    [ ( "print_x64"
+      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
+      )
+    ; ( "memset"
+      , Concrete_extern_func.Extern_func
+          (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
+    ]
+  in
+  { functions }
+
+(* a link state that contains our custom module, available under the name `chorizo` *)
+let link_state =
+  Link.extern_module Link.empty_state ~name:"chorizo" extern_module
+
+(* a pure wasm module refering to `$extern_mem` *)
+let pure_wasm_module =
+  match Parse.Text.Module.from_file (Fpath.v "extern_mem.wat") with
+  | Error _ -&gt; assert false
+  | Ok modul -&gt; modul
+
+(* our pure wasm module, linked with `chorizo` *)
+let module_to_run, link_state =
+  match
+    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
+      ~optimize:true ~name:None pure_wasm_module
+  with
+  | Error _ -&gt; assert false
+  | Ok v -&gt; v
+
+(* let's run it ! it will print the values as defined in the print_i64 function *)
+let () =
+  match Interpret.Concrete.modul link_state.envs module_to_run with
+  | Error _ -&gt; assert false
+  | Ok () -&gt; ()
+</code></pre>
+<p>Running the above program should yield:</p>
+<pre><code class="language-sh">$ ./extern_mem.exe
+0xAAAAAAAAAAAAAAAA
+</code></pre>
+<h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
+<p>To learn more, see our advanced <a href="ocaml-api/./life_game">Game of Life</a> example
+based on the famous cellular automaton by Conway. It show how to link several modules from different <code>.wat</code> files.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="conways-game-of-life"><a class="header" href="#conways-game-of-life">Conway's Game of Life</a></h1>
+<p>This example is a <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a> implementation.
+3 outputs are proposed (console, <a href="https://github.com/ocaml/graphics">OCaml Graphics</a> and HTML/JavaScript),
+each one using the same WebAssembly modules.</p>
+<h2 id="console-and-ocaml-graphics"><a class="header" href="#console-and-ocaml-graphics">Console and OCaml Graphics</a></h2>
+<p>Console and Graphics implementations use <em>external functions</em> technique as the
+<a href="ocaml-api/game-of-life/../custom-functions.html">standard example</a>. Here are the command lines to run in this directory to execute the programs:</p>
+<ul>
+<li>Console  mode: <code>dune exec -- ./life_graphics.exe</code></li>
+<li>Graphics mode: <code>dune exec -- ./life_console.exe</code></li>
+</ul>
+<p>Several modules (defined in <code>life.wat</code> and <code>life_loop.wat</code> files) are linked.</p>
+<p><strong>Why are two <code>.wat</code> files required ?</strong></p>
+<p>Because, in JavaScript, the <code>Sleep</code> function uses the
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise system</a>
+which cannot work in a wasm call context.
+So, if we want to use the same WebAssembly components in all contexts,
+the game loop had to be extracted in a separate module.</p>
+<p>See the following section for JavaScript implementation details.</p>
+<h2 id="htmljavascript"><a class="header" href="#htmljavascript">HTML/JavaScript</a></h2>
+<p>Here is a standard example of a wasm module called in a web page using the
+<a href="https://webassembly.org/getting-started/js-api/">JavaScript API</a>.</p>
+<p>First of all, a compiled version of the WebAssembly module is needed, obtained by the
+command line <code>wat2wasm life.wat</code>. wat2wasm is part of the
+<a href="https://github.com/WebAssembly/wabt">WABT: The WebAssembly Binary Toolkit</a>.</p>
+<p>As in OCaml in the previous contexts, external functions are defined in the environment execution
+(here in JavaScript). As explained before, only one wasm module is imported (<code>life.wasm</code>) and
+the game loop has been written directly in JavaScript.
+This function (<code>life()</code>) must be <code>async</code> because <code>sleep</code> function is called in <code>await</code> mode.</p>
+<p>To see the final result, simply open <code>life.html</code> in your favorite browser.</p>
+<p>However, the command line <code>dune exec -- ./runweb.exe</code> launches a full build and open it
+directly in your browser. Some additional dependencies are required including
+<a href="https://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> and
+<a href="https://github.com/mirage/ocaml-crunch">ocaml-crunch</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generated-api-documentation"><a class="header" href="#generated-api-documentation">Generated API Documentation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="development-setup"><a class="header" href="#development-setup">Development Setup</a></h1>
+<p>To get a proper development setup:</p>
+<pre><code class="language-shell-session">$ git clone git@github.com:OCamlPro/owi.git
+$ cd owi
+$ opam install . --deps-only --with-test --with-doc --with-dev-setup
+$ git submodule update --init --recursive
+$ dune build @all
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="coding-guidelines"><a class="header" href="#coding-guidelines">Coding Guidelines</a></h1>
+<h2 id="the-prelude-library"><a class="header" href="#the-prelude-library">The <code>prelude</code> library</a></h2>
+<p>We use the <a href="https://git.zapashcanon.fr/zapashcanon/prelude"><code>prelude</code></a> library to <strong>hide dangerous functions</strong> from the standard library.
+It is automatically opened in the whole project.
+More than dangerous functions, this library also hide some modules for which better alternatives exists.
+For instance, all system interactions are done using <a href="https://erratique.ch/software/bos/doc/"><code>Bos</code></a> and all the formatting is done with <a href="https://erratique.ch/software/fmt/doc/"><code>Fmt</code></a>.</p>
+<h2 id="printing"><a class="header" href="#printing">Printing</a></h2>
+<p>Read the <a href="https://erratique.ch/software/logs/doc/Logs/index.html#basics">Logs basics</a> and in particular, the <a href="https://erratique.ch/software/logs/doc/Logs/index.html#usage">usage conventions</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="documentation"><a class="header" href="#documentation">Documentation</a></h1>
+<h2 id="api"><a class="header" href="#api">API</a></h2>
+<p>You can build the documentation with:</p>
+<pre><code class="language-shell-session">$ dune build @doc
+$ xdg-open _build/default/doc/index.html
+</code></pre>
+<h2 id="full-documentation"><a class="header" href="#full-documentation">Full documentation</a></h2>
+<pre><code class="language-shell-session">$ cd ./doc
+$ mdbook serve
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="testing"><a class="header" href="#testing">Testing</a></h1>
+<h2 id="unit-tests"><a class="header" href="#unit-tests">Unit tests</a></h2>
+<p>Tests are mostly written using <a href="https://dune.readthedocs.io/en/latest/reference/cram.html">Cram Tests</a>.
+The ones that are integrated into documentation are using <a href="https://github.com/realworldocaml/mdx">MDX</a>.
+You can run them as follow:</p>
+<pre><code class="language-shell-session">$ dune runtest
+</code></pre>
+<p>If you made some changes and the output of some tests is changing, the diff will be displayed.
+If you want to automatically accept the diff as being the new expected output, you can run:</p>
+<pre><code class="language-shell-session">$ dune promote
+</code></pre>
+<h2 id="code-coverage"><a class="header" href="#code-coverage">Code coverage</a></h2>
+<p>You can generate the code coverage report with:</p>
+<pre><code class="language-shell-session">BISECT_FILE=$(pwd)/bisect odune runtest --force --instrument-with bisect_ppx
+bisect-ppx-report html -o _coverage
+xdg-open _coverage/index.html
+</code></pre>
+<h2 id="fuzzing"><a class="header" href="#fuzzing">Fuzzing</a></h2>
+<p>See <a href="https://github.com/OCamlPro/owi/tree/main/test/fuzz">test/fuzz</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="benchmarking"><a class="header" href="#benchmarking">Benchmarking</a></h1>
+<h2 id="landmarks"><a class="header" href="#landmarks">Landmarks</a></h2>
+<pre><code class="language-shell-session">OCAML_LANDMARKS=on dune exec --instrument-with landmarks --profile release -- owi run test/run/binary_loop.wasm
+</code></pre>
+<p>Note: it seems landmarks is not compatible with domains and thus won't work with most sub-commands.</p>
+<h2 id="test-comp"><a class="header" href="#test-comp">Test-comp</a></h2>
+<p>See <a href="https://github.com/OCamlPro/owi/tree/main/bench">bench</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="history-of-owi"><a class="header" href="#history-of-owi">History of Owi</a></h1>
+<h3 id="spelling-and-pronunciation"><a class="header" href="#spelling-and-pronunciation">Spelling and pronunciation</a></h3>
+<p>Although the name Owi comes from an acronym (OCaml WebAssembly Interpreter), it must be written as a proper noun and only the first letter must be capitalized. It is possible to write the name in full lowercase when referring to the opam package or to the name of the binary.</p>
+<p>The reason we chose this spelling rather than the fully capitalized version is that in French, Owi is pronounced [o’wi(ʃ)] which sounds like "Oh oui !" which means "Oh yes!". Thus it should be pronounced this way and not by spelling the three letters it is made of.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="authors-and-contributors"><a class="header" href="#authors-and-contributors">Authors and Contributors</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="license"><a class="header" href="#license">License</a></h1>
+<pre><code>Owi
+Copyright (C) 2021-2024 OCamlPro
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+</code></pre>
+<p>See <a href="https://github.com/OCamlPro/owi/blob/main/LICENSE.md">LICENSE</a>.</p>
+<p>A few files have been taken from the WebAssembly reference interpreter. They are licensed under the Apache License 2.0 and have a different copyright which is stated in the header of the files.</p>
+<p>Some code has been taken from the <code>base</code> library from Jane Street. It is licensed under the MIT License and have a different copyright which is stated in the header of the files.</p>
+<p>Some code has been taken from the E-ACSL plugin of Frama-C. It is licensed under the GNU Lesser General Public License 2.1 and have a different copyright which is stated in the header of the files.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="funding"><a class="header" href="#funding">Funding</a></h1>
+<p>This project was partly funded through the <a href="https://nlnet.nl/core">NGI0 Core</a> Fund, a fund established by <a href="https://nlnet.nl">NLnet</a> with financial support from the European Commission's <a href="https://ngi.eu">Next Generation Internet</a> programme. See <a href="https://nlnet.nl/project/OWI">Owi project on NLnet</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="changelog"><a class="header" href="#changelog">Changelog</a></h1>
+<p>See <a href="https://github.com/OCamlPro/owi/blob/main/CHANGES.md">CHANGELOG</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="projects-and-people-using-owi"><a class="header" href="#projects-and-people-using-owi">Projects and People Using Owi</a></h1>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

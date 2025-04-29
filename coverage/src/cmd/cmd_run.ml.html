@@ -119,19 +119,19 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 (* module name is called "symbolic" to be compatible with code generator *)
 let link_state =
-  Link.extern_modul<span data-count="996">e</span> Link.empty_state ~name:"symbolic" extern_module
+  Link.extern_modul<span data-count="1010">e</span> Link.empty_state ~name:"symbolic" extern_module
 
 let run_file ~unsafe ~rac ~optimize filename =
-  <span data-count="34">l</span>et name = None in
-  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="33">L</span>ink.empty_state in
+  <span data-count="35">l</span>et name = None in
+  let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="34">L</span>ink.empty_state in
   let+ (_ : _ Link.state) =
-    Compile.File.until_interpre<span data-count="34">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
+    Compile.File.until_interpre<span data-count="35">t</span> ~unsafe ~rac ~srac:false ~optimize ~name
       link_state filename
   in
-  <span data-count="33">(</span>)
+  <span data-count="34">(</span>)
 
 let cmd ~unsafe ~rac ~optimize ~files =
-  <span data-count="34">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
+  <span data-count="35">l</span>ist_iter (run_file ~unsafe ~rac ~optimize) files
 </code></pre>
       </div>
     </div>

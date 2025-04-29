@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_iso.ml &mdash; Coverage report</title>
-    <meta name="description" content="55.48% coverage in src/cmd/cmd_iso.ml">
+    <meta name="description" content="61.29% coverage in src/cmd/cmd_iso.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_iso.ml
         </a>
       </h1>
-      <h2>55.48%</h2>
+      <h2>61.29%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:2.91%"></span>
@@ -53,11 +53,6 @@
       <span class="unvisited" style="bottom:23.71%"></span>
       <span class="unvisited" style="bottom:22.15%"></span>
       <span class="unvisited" style="bottom:21.92%"></span>
-      <span class="some-visited" style="bottom:21.25%"></span>
-      <span class="some-visited" style="bottom:21.03%"></span>
-      <span class="some-visited" style="bottom:20.81%"></span>
-      <span class="unvisited" style="bottom:19.46%"></span>
-      <span class="some-visited" style="bottom:18.79%"></span>
       <span class="unvisited" style="bottom:14.32%"></span>
       <span class="unvisited" style="bottom:14.09%"></span>
       <span class="unvisited" style="bottom:13.20%"></span>
@@ -65,11 +60,7 @@
       <span class="unvisited" style="bottom:6.04%"></span>
       <span class="unvisited" style="bottom:5.59%"></span>
       <span class="unvisited" style="bottom:4.70%"></span>
-      <span class="unvisited" style="bottom:3.36%"></span>
-      <span class="unvisited" style="bottom:3.13%"></span>
       <span class="unvisited" style="bottom:2.91%"></span>
-      <span class="unvisited" style="bottom:2.68%"></span>
-      <span class="some-visited" style="bottom:1.57%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -425,18 +416,18 @@
 <a id="L349"></a><span class="unvisited"> </span>
 <a id="L350"></a><span > </span>
 <a id="L351"></a><span > </span>
-<a id="L352"></a><span class="some-visited"> </span>
-<a id="L353"></a><span class="some-visited"> </span>
-<a id="L354"></a><span class="some-visited"> </span>
+<a id="L352"></a><span class="visited"> </span>
+<a id="L353"></a><span class="visited"> </span>
+<a id="L354"></a><span class="visited"> </span>
 <a id="L355"></a><span > </span>
 <a id="L356"></a><span class="visited"> </span>
 <a id="L357"></a><span class="visited"> </span>
 <a id="L358"></a><span > </span>
 <a id="L359"></a><span > </span>
-<a id="L360"></a><span class="unvisited"> </span>
+<a id="L360"></a><span class="visited"> </span>
 <a id="L361"></a><span class="visited"> </span>
 <a id="L362"></a><span > </span>
-<a id="L363"></a><span class="some-visited"> </span>
+<a id="L363"></a><span class="visited"> </span>
 <a id="L364"></a><span class="visited"> </span>
 <a id="L365"></a><span > </span>
 <a id="L366"></a><span class="visited"> </span>
@@ -505,15 +496,15 @@
 <a id="L429"></a><span > </span>
 <a id="L430"></a><span > </span>
 <a id="L431"></a><span class="visited"> </span>
-<a id="L432"></a><span class="unvisited"> </span>
-<a id="L433"></a><span class="unvisited"> </span>
+<a id="L432"></a><span class="visited"> </span>
+<a id="L433"></a><span class="visited"> </span>
 <a id="L434"></a><span class="unvisited"> </span>
-<a id="L435"></a><span class="unvisited"> </span>
+<a id="L435"></a><span class="visited"> </span>
 <a id="L436"></a><span > </span>
 <a id="L437"></a><span > </span>
 <a id="L438"></a><span class="visited"> </span>
 <a id="L439"></a><span > </span>
-<a id="L440"></a><span class="some-visited"> </span>
+<a id="L440"></a><span class="visited"> </span>
 <a id="L441"></a><span class="visited"> </span>
 <a id="L442"></a><span > </span>
 <a id="L443"></a><span class="visited"> </span>
@@ -1324,18 +1315,18 @@ let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
     | <span data-count="0">_</span> -&gt; Fmt.error_ms<span data-count="0">g</span> "require at most two modules"
   in
 
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "module %s is %a" module_name1 Fpath.pp file1);
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "module %s is %a" module_name2 Fpath.pp file2);
+  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
+  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name1 Fpath.pp file1);
+  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name2 Fpath.pp file2);
 
   <span data-count="3">l</span>et compile ~unsafe file =
     <span data-count="6">C</span>ompile.File.until_binary_validate ~unsafe ~rac:false ~srac:false file
   in
 
-  Logs.info (fun m -&gt; <span data-count="0">m</span> "Compiling %a" Fpath.pp file1);
+  Logs.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file1);
   <span data-count="3">l</span>et* module1 = compil<span data-count="3">e</span> ~unsafe file1 in
 
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "Compiling %a" Fpath.pp file2);
+  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file2);
   <span data-count="3">l</span>et* module2 = compil<span data-count="3">e</span> ~unsafe file2 in
 
   <span data-count="3">l</span>et funcexports1 =
@@ -1404,15 +1395,15 @@ let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
   in
 
   <span data-count="3">L</span>ogs.info (fun m -&gt;
-    <span data-count="0">m</span> "common exports: %a"
-      (Fmt.lis<span data-count="0">t</span>
+    <span data-count="1">m</span> "common exports: %a"
+      (Fmt.lis<span data-count="1">t</span>
          ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt " ")
-         (fun fmt (elt, _ft) -&gt; <span data-count="0">F</span>mt.string fmt elt) )
+         (fun fmt (elt, _ft) -&gt; <span data-count="1">F</span>mt.string fmt elt) )
       common_exports );
 
   <span data-count="3">l</span>ist_fold_left
     (fun () (export_name, export_type) -&gt;
-      <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "checking export %s" export_name);
+      <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "checking export %s" export_name);
       <span data-count="3">l</span>et* result = check_is<span data-count="3">o</span> ~unsafe export_name export_type module1 module2 in
 
       <span data-count="3">C</span>md_sym.handle_result ~fail_mode ~workers ~solver

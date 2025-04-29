@@ -1,0 +1,5 @@
+(rule
+ (deps ../life.wat)
+ (targets life.wasm)
+ (action
+  (run %{bin:owi} wat2wasm ../life.wat)))
