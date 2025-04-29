@@ -131,6 +131,10 @@ let trap t = M (fun th -> (Error (Trap t), th))
 
 let with_thread f = M (fun st -> (Ok (f st), st))
 
+let with_new_invisible_symbol (_ty : Smtml.Ty.t) _fn =
+  Logs.err (fun m -> m "Not implemented in concolic mode");
+  assert false
+
 let with_new_symbol ty f =
   M
     (fun st ->

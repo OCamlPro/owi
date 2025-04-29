@@ -38,6 +38,10 @@ __attribute__((import_module("symbolic"), import_name("bool_symbol")))
   _Bool
 #endif
 owi_bool(void);
+#ifdef __OWI_INTERNALS
+__attribute__((import_module("symbolic"))) __attribute__((import_name("invisible_bool_symbol"))) int
+owi_invisible_bool();
+#endif
 
 __attribute__((import_module("symbolic"), import_name("assume"))) void
 owi_assume(int);
@@ -48,6 +52,7 @@ __attribute__((import_module("summaries"))) __attribute__((import_name("abort"))
 owi_abort(void);
 __attribute__((import_module("summaries"))) __attribute__((import_name("exit"))) void
 owi_exit(int);
+
 
 #ifdef __cplusplus
 }

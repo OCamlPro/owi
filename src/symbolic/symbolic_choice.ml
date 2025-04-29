@@ -354,6 +354,13 @@ module Make (Thread : Thread_intf.S) = struct
 
   let add_label label = modify_thread (fun t -> Thread.add_label t label)
 
+  let with_new_invisible_symbol ty f =
+    let* thread in
+    let n = Thread.symbols thread in
+    let+ () = modify_thread Thread.incr_symbols in
+    let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" n in
+    f sym
+
   let with_new_symbol ty f =
     let* thread in
     let n = Thread.symbols thread in

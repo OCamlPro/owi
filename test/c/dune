@@ -9,6 +9,7 @@
   entry_point.c
   exit.c
   invoke_with_symbols.c
+  invisible_bool.c
   klee_compat.c
   label.c
   main.c
