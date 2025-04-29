@@ -126,10 +126,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let cov_label_set m id str_ptr =
       let* chars = make_str m [] str_ptr in
-      let* id = Concrete_choice.select_i32 id in
       let str = String.init (Array.length chars) (Array.get chars) in
       Hashtbl.add covered_labels id str;
-      Fmt.pr "reached %ld@." id;
+      Logs.debug (fun m -> m "reached %ld@." id);
       Ok ()
   end in
   let replay_extern_module =
