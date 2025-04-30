@@ -9,6 +9,27 @@ module Choice = Concolic.Choice
 (* let () = Random.self_init () *)
 let () = Random.init 42
 
+let link_concolic_modules link_state =
+  let func_typ = Concolic.Extern_func.extern_type in
+  let link_state =
+    Link.extern_module' link_state ~name:"symbolic" ~func_typ
+      Concolic_wasm_ffi.symbolic_extern_module
+  in
+  Link.extern_module' link_state ~name:"summaries" ~func_typ
+    Concolic_wasm_ffi.summaries_extern_module
+
+let run_file ~entry_point ~unsafe ~invoke_with_symbols ~optimize filename =
+  let* m =
+    Compile.File.until_binary_validate ~unsafe ~rac:false ~srac:false filename
+  in
+  let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
+  let link_state = link_concolic_modules Link.empty_state in
+  let+ m, link_state =
+    Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
+  in
+  let m = Concolic.convert_module_to_run m in
+  Interpret.Concolic.modul
+
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize link_state m =
   let* m =
@@ -28,16 +49,10 @@ let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
 let simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
   ~srac ~optimize filenames =
   let link_state = Link.empty_state in
+  (*
   let link_state =
-    Link.extern_module' link_state ~name:"symbolic"
-      ~func_typ:Concolic.Extern_func.extern_type
-      Concolic_wasm_ffi.symbolic_extern_module
   in
-  let link_state =
-    Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Concolic.Extern_func.extern_type
-      Concolic_wasm_ffi.summaries_extern_module
-  in
+  *)
   let+ link_state, modules_to_run =
     List.fold_left
       (fun (acc : (_ * _) Result.t) filename ->
