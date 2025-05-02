@@ -60,46 +60,13 @@ let load_byte a { data; _ } =
   | None -> Smtml.Expr.make (Val (Num (I8 0)))
   | Some v -> v
 
-(* TODO: don't rebuild so many values it generates unecessary hc lookups *)
-let merge_extracts (e1, h, m1) (e2, m2, l) =
-  let ty = Smtml.Expr.ty e1 in
-  if m1 = m2 && Smtml.Expr.equal e1 e2 then
-    if h - l = Smtml.Ty.size ty then e1 else Smtml.Expr.make (Extract (e1, h, l))
-  else
-    Smtml.Expr.make
-      (Concat
-         ( Smtml.Expr.make (Extract (e1, h, m1))
-         , Smtml.Expr.make (Extract (e2, m2, l)) ) )
-
-let concat ~msb ~lsb offset =
-  assert (offset > 0 && offset <= 8);
-  match (Smtml.Expr.view msb, Smtml.Expr.view lsb) with
-  | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
-    Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
-  | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
-    let offset = offset * 8 in
-    if offset < 32 then
-      Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) (of_int offset)) i2)
-    else
-      let i1' = Int64.of_int i1 in
-      let i2' = Int64.of_int32 i2 in
-      Symbolic_value.const_i64 Int64.(logor (shl i1' (of_int offset)) i2')
-  | Val (Num (I8 i1)), Val (Num (I64 i2)) ->
-    let offset = Int64.of_int (offset * 8) in
-    Symbolic_value.const_i64 Int64.(logor (shl (of_int i1) offset) i2)
-  | Extract (e1, h, m1), Extract (e2, m2, l) ->
-    merge_extracts (e1, h, m1) (e2, m2, l)
-  | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
-    Smtml.Expr.make (Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3))
-  | _ -> Smtml.Expr.make (Concat (msb, lsb))
-
 let loadn m a n =
   let rec loop addr size i acc =
     if i = size then acc
     else
       let addr' = Int32.(add addr (of_int i)) in
       let byte = load_byte addr' m in
-      loop addr size (i + 1) (concat i ~msb:byte ~lsb:acc)
+      loop addr size (i + 1) (Smtml.Expr.concat3 i ~msb:byte ~lsb:acc)
   in
   let v0 = load_byte a m in
   loop a n 1 v0
