@@ -79,29 +79,12 @@ module Backend = struct
     let v0 = load_byte a m in
     loop a n 1 v0
 
-  let extract v pos =
-    match Smtml.Expr.view v with
-    | Val (Num (I8 _)) -> v
-    | Val (Num (I32 i)) ->
-      let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-      Smtml.Expr.value (Num (I8 i'))
-    | Val (Num (I64 i)) ->
-      let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-      Smtml.Expr.value (Num (I8 i'))
-    | Cvtop
-        (_, Zero_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
-    | Cvtop
-        (_, Sign_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
-      ->
-      sym
-    | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
-
   let replace m k v = m.data <- Map.add k v m.data
 
   let storen m a v n =
     for i = 0 to n - 1 do
       let a' = Int32.add a (Int32.of_int i) in
-      let v' = extract v i in
+      let v' = Smtml.Expr.extract2 v i in
       replace m a' v'
     done
 

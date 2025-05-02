@@ -133,26 +133,11 @@ let load_32 m a = loadn m (i32 a) 4
 
 let load_64 m a = loadn m (i32 a) 8
 
-let extract v pos =
-  match Smtml.Expr.view v with
-  | Val (Num (I32 i)) ->
-    let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-    Smtml.Expr.value (Num (I8 i'))
-  | Val (Num (I64 i)) ->
-    let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-    Smtml.Expr.value (Num (I8 i'))
-  | Cvtop
-      ( _
-      , (Zero_extend 24 | Sign_extend 24)
-      , ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym) ) ->
-    sym
-  | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
-
 let storen m ~addr v n =
   let a0 = i32 addr in
   for i = 0 to n - 1 do
     let addr' = Int32.add a0 (Int32.of_int i) in
-    let v' = extract v i in
+    let v' = Smtml.Expr.extract2 v i in
     replace m addr' v'
   done
 
