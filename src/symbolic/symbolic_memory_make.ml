@@ -95,19 +95,11 @@ module Make (Backend : M) = struct
     | Val (Num (I32 _)) -> v
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
-  (* TODO: Smtml should do this. Make call to Expr.simplify *)
-  let try_to_remove_extract v =
-    match Smtml.Expr.view v with
-    | Extract ({ node = Concat (({ node = Ptr _; _ } as ptr), _); _ }, 8, 4) ->
-      ptr
-    | Extract ({ node = Concat (_, ({ node = Ptr _; _ } as ptr)); _ }, 4, 0) ->
-      ptr
-    | _ -> v
-
   let load_32 m a =
     let open Symbolic_choice_without_memory in
     let+ a = must_be_valid_address m.data a 4 in
-    try_to_remove_extract @@ Backend.loadn m.data a 4
+    let res = Backend.loadn m.data a 4 in
+    Smtml.Expr.simplify res
 
   let load_64 m a =
     let open Symbolic_choice_without_memory in
