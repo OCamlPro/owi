@@ -478,7 +478,7 @@ end = struct
     <span data-count="595">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="595">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="97108">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="97106">l</span> i
+    <span data-count="97111">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="97111">l</span> i
 
   let symbol_invisible_bool () =
     <span data-count="1">C</span>hoice.with_new_invisible_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -522,7 +522,7 @@ end = struct
     <span data-count="9950">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9950">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2609">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2609">e</span> m ptr
+    <span data-count="2607">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2607">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
 

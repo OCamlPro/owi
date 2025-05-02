@@ -112,14 +112,14 @@ let with_fresh_id f { c; last } =
   <span data-count="3390">l</span>et last = succ last in
   <span data-count="3390">(</span>{ c; last }, r)
 
-let get i c = <span data-count="12072247">m</span>atch Map.find_opt i c.c with None -&gt; assert false | <span data-count="12072246">S</span>ome v -&gt; v
+let get i c = <span data-count="12072248">m</span>atch Map.find_opt i c.c with None -&gt; assert false | <span data-count="12072248">S</span>ome v -&gt; v
 
 let map f c = <span data-count="0">{</span> c with c = Map.ma<span data-count="0">p</span> f c.c }
 
 module Tbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="2424075">x</span>
+  let hash x = <span data-count="2424710">x</span>
 end)
 </code></pre>
       </div>
