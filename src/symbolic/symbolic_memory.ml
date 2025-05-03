@@ -50,26 +50,26 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
-      replace m dst (Smtml.Expr.make (Val (Num (I8 byte))))
+      replace m dst (Smtml.Expr.value (Num (I8 byte)))
     done;
     Symbolic_value.Bool.const false
   end
 
 let load_byte a { data; _ } =
   match Map.find_opt a data with
-  | None -> Smtml.Expr.make (Val (Num (I8 0)))
+  | None -> Smtml.Expr.value (Num (I8 0))
   | Some v -> v
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
-let merge_extracts (e1, h, m1) (e2, m2, l) =
+let merge_extracts (e1, high, m1) (e2, m2, low) =
   let ty = Smtml.Expr.ty e1 in
   if m1 = m2 && Smtml.Expr.equal e1 e2 then
-    if h - l = Smtml.Ty.size ty then e1 else Smtml.Expr.make (Extract (e1, h, l))
+    if high - low = Smtml.Ty.size ty then e1
+    else Smtml.Expr.extract e1 ~high ~low
   else
-    Smtml.Expr.make
-      (Concat
-         ( Smtml.Expr.make (Extract (e1, h, m1))
-         , Smtml.Expr.make (Extract (e2, m2, l)) ) )
+    Smtml.Expr.concat
+      (Smtml.Expr.extract e1 ~high ~low:m1)
+      (Smtml.Expr.extract e2 ~high:m2 ~low)
 
 let concat ~msb ~lsb offset =
   assert (offset > 0 && offset <= 8);
@@ -90,8 +90,8 @@ let concat ~msb ~lsb offset =
   | Extract (e1, h, m1), Extract (e2, m2, l) ->
     merge_extracts (e1, h, m1) (e2, m2, l)
   | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
-    Smtml.Expr.make (Concat (merge_extracts (e1, h, m1) (e2, m2, l), e3))
-  | _ -> Smtml.Expr.make (Concat (msb, lsb))
+    Smtml.Expr.concat (merge_extracts (e1, h, m1) (e2, m2, l)) e3
+  | _ -> Smtml.Expr.concat msb lsb
 
 let loadn m a n =
   let rec loop addr size i acc =
@@ -146,7 +146,7 @@ let extract v pos =
       , (Zero_extend 24 | Sign_extend 24)
       , ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym) ) ->
     sym
-  | _ -> Smtml.Expr.make (Extract (v, pos + 1, pos))
+  | _ -> Smtml.Expr.extract v ~high:(pos + 1) ~low:pos
 
 let storen m ~addr v n =
   let a0 = i32 addr in

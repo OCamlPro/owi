@@ -97,7 +97,7 @@ module Bool = struct
     | Val True -> const_i32 1l
     | Val False -> const_i32 0l
     | Cvtop (Ty_bitv 32, ToBool, e') -> e'
-    | _ -> make (Cvtop (Ty_bitv 32, OfBool, e))
+    | _ -> Expr.cvtop (Ty_bitv 32) OfBool e
 
   let select_expr c ~if_true ~if_false = Bool.ite c if_true if_false
 
@@ -199,7 +199,7 @@ module I32 = struct
     | Ptr _ -> Bool.const true
     | Symbol { ty = Ty_bool; _ } -> e
     | Cvtop (_, OfBool, cond) -> cond
-    | _ -> make (Cvtop (ty, ToBool, e))
+    | _ -> Smtml.Expr.cvtop ty ToBool e
 
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x) with
@@ -235,7 +235,7 @@ module I32 = struct
 
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
-    cvtop ty (Sign_extend (32 - n)) (make (Extract (x, n / 8, 0)))
+    cvtop ty (Sign_extend (32 - n)) (Smtml.Expr.extract x ~high:(n / 8) ~low:0)
 end
 
 module I64 = struct
@@ -337,7 +337,7 @@ module I64 = struct
 
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
-    cvtop ty (Sign_extend (64 - n)) (make (Extract (x, n / 8, 0)))
+    cvtop ty (Sign_extend (64 - n)) (Smtml.Expr.extract x ~high:(n / 8) ~low:0)
 
   let extend_i32_s x = cvtop ty (Sign_extend 32) x
 
