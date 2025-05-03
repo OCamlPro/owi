@@ -559,7 +559,7 @@ module M :
         | _ -&gt; assert false
       in
       let sym_expr =
-        Expr.make (Cvtop (Ty_bitv 32, Zero_extend 24, Expr.symbo<span data-count="6">l</span> sym))
+        Expr.cvtop (Ty_bitv 32) (Zero_extend 24) (Expr.symbo<span data-count="6">l</span> sym)
       in
       <span data-count="6">(</span>I32 n, (n, sym_expr)) )
 

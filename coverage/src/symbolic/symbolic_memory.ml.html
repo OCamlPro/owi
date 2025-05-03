@@ -108,9 +108,9 @@
 <a id="L65"></a><span class="visited"> </span>
 <a id="L66"></a><span class="visited"> </span>
 <a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span class="visited"> </span>
 <a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
@@ -498,26 +498,26 @@ let blit_string m str ~src ~dst ~len =
     for i = 0 to len - 1 do
       <span data-count="2085">l</span>et byte = Char.code @@ String.ge<span data-count="2085">t</span> str (src + i) in
       <span data-count="2085">l</span>et dst = Int32.of_int (dst + i) in
-      <span data-count="2085">r</span>eplac<span data-count="2085">e</span> m dst (Smtml.Expr.mak<span data-count="2085">e</span> (Val (Num (I8 byte))))
+      <span data-count="2085">r</span>eplac<span data-count="2085">e</span> m dst (Smtml.Expr.valu<span data-count="2085">e</span> (Num (I8 byte)))
     done;
     Symbolic_value.Bool.const false
   end
 
 let load_byte a { data; _ } =
   <span data-count="179429">m</span>atch Map.find_opt a data with
-  | <span data-count="3984">N</span>one -&gt; Smtml.Expr.make (Val (Num (I8 0)))
+  | <span data-count="3984">N</span>one -&gt; Smtml.Expr.value (Num (I8 0))
   | <span data-count="175445">S</span>ome v -&gt; v
 
 (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
-let merge_extracts (e1, h, m1) (e2, m2, l) =
+let merge_extracts (e1, high, m1) (e2, m2, low) =
   <span data-count="57400">l</span>et ty = Smtml.Expr.ty e1 in
   <span data-count="57400">i</span>f m1 = m2 &amp;&amp; <span data-count="57288">S</span>mtml.Expr.equa<span data-count="57288">l</span> e1 e2 then
-    <span data-count="57288">i</span>f h - l = Smtml.Ty.siz<span data-count="57288">e</span> ty then <span data-count="19096">e</span>1 else <span data-count="38192">S</span>mtml.Expr.make (Extract (e1, h, l))
+    <span data-count="57288">i</span>f high - low = Smtml.Ty.siz<span data-count="57288">e</span> ty then <span data-count="19096">e</span>1
+    else <span data-count="38192">S</span>mtml.Expr.extract e1 ~high ~low
   else
-    <span data-count="112">S</span>mtml.Expr.make
-      (Concat
-         ( Smtml.Expr.mak<span data-count="112">e</span> (Extract (e1, h, m1))
-         , Smtml.Expr.mak<span data-count="112">e</span> (Extract (e2, m2, l)) ) )
+    <span data-count="112">S</span>mtml.Expr.concat
+      (Smtml.Expr.extrac<span data-count="112">t</span> e1 ~high ~low:m1)
+      (Smtml.Expr.extrac<span data-count="112">t</span> e2 ~high:m2 ~low)
 
 let concat ~msb ~lsb offset =
   <span data-count="131932">a</span>ssert <span data-count="131932">(</span>offset &gt; 0 &amp;&amp; <span data-count="131932">o</span>ffset &lt;= 8);
@@ -538,8 +538,8 @@ let concat ~msb ~lsb offset =
   | <span data-count="57344">E</span>xtract (e1, h, m1), Extract (e2, m2, l) -&gt;
     merge_extracts (e1, h, m1) (e2, m2, l)
   | <span data-count="56">E</span>xtract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) -&gt;
-    Smtml.Expr.make (Concat (merge_extract<span data-count="56">s</span> (e1, h, m1) (e2, m2, l), e3))
-  | <span data-count="56">_</span> -&gt; Smtml.Expr.make (Concat (msb, lsb))
+    Smtml.Expr.concat (merge_extract<span data-count="56">s</span> (e1, h, m1) (e2, m2, l)) e3
+  | <span data-count="56">_</span> -&gt; Smtml.Expr.concat msb lsb
 
 let loadn m a n =
   <span data-count="47497">l</span>et rec loop addr size i acc =
@@ -594,7 +594,7 @@ let extract v pos =
       , (<span data-count="0">Z</span>ero_extend 24 | <span data-count="0">S</span>ign_extend 24)
       , ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym) ) -&gt;
     sym
-  | <span data-count="42481">_</span> -&gt; Smtml.Expr.make (Extract (v, pos + 1, pos))
+  | <span data-count="42481">_</span> -&gt; Smtml.Expr.extract v ~high:(pos + 1) ~low:pos
 
 let storen m ~addr v n =
   <span data-count="33132">l</span>et a0 = i32 addr in
