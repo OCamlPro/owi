@@ -18,19 +18,18 @@ let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
-let model (S (solver_module, s)) ~scoped_symbols ~pc =
+let model (S (solver_module, s)) ~symbol_scopes ~pc =
   let module Solver = (val solver_module) in
-  let symbols = Some (Scoped_symbol.only_symbols scoped_symbols) in
+  let symbols = Symbol_scope.only_symbols symbol_scopes in
   let model =
-    match Solver.get_sat_model ?symbols s pc with
+    match Solver.get_sat_model ~symbols s pc with
     | `Unknown -> assert false
     | `Unsat ->
       (* Should not happen because we checked just before that is must be true. *)
       Logs.err (fun m -> m "something is wrong... I can not get a model");
       Logs.err (fun m ->
         m "symbols: %a"
-          (Fmt.option
-             (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp) )
+          (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp)
           symbols );
       Logs.err (fun m ->
         m "pc:@\n  @[<v>%a@]"

@@ -170,7 +170,7 @@ module M :
 
   let open_scope _m _strptr = assert false
 
-  let end_scope () = assert false
+  let close_scope () = assert false
 end
 
 type extern_func = Concolic.Extern_func.extern_func

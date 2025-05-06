@@ -138,9 +138,11 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       opened_scopes := str :: !opened_scopes;
       Concrete_choice.return ()
 
-    let end_scope () =
+    let close_scope () =
       match !opened_scopes with
-      | [] -> assert false
+      | [] ->
+        Logs.err (fun m -> m "Trying to close a non existing scope");
+        assert false
       | _ :: t ->
         opened_scopes := t;
         Concrete_choice.return ()

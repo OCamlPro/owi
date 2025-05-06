@@ -57,7 +57,7 @@ module type S0 = sig
 
   val open_scope : memory -> Value.int32 -> unit t
 
-  val end_scope : unit -> unit t
+  val close_scope : unit -> unit t
 end
 
 module type S = sig

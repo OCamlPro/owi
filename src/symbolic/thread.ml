@@ -1,7 +1,6 @@
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-open Scoped_symbol
 
 module Make (Symbolic_memory : Thread_intf.M) :
   Thread_intf.S with type Memory.collection = Symbolic_memory.collection =
@@ -12,7 +11,7 @@ struct
 
   type t =
     { num_symbols : int
-    ; scoped_symbols : scope_token list
+    ; symbol_scopes : Symbol_scope.t
     ; pc : Symbolic_path_condition.t
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
@@ -23,10 +22,10 @@ struct
     ; labels : (int * string) list
     }
 
-  let create num_symbols scoped_symbols pc memories tables globals breadcrumbs
+  let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
     labels =
     { num_symbols
-    ; scoped_symbols
+    ; symbol_scopes
     ; pc
     ; memories
     ; tables
@@ -37,19 +36,19 @@ struct
 
   let init () =
     let num_symbols = 0 in
-    let scoped_symbols = [] in
+    let symbol_scopes = Symbol_scope.empty in
     let pc = Symbolic_path_condition.empty in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
-    create num_symbols scoped_symbols pc memories tables globals breadcrumbs
+    create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels
 
   let num_symbols t = t.num_symbols
 
-  let scoped_symbols t = t.scoped_symbols
+  let symbol_scopes t = t.symbol_scopes
 
   let pc t = t.pc
 
@@ -63,7 +62,9 @@ struct
 
   let labels t = t.labels
 
-  let add_symbol t s = { t with scoped_symbols = Symbol s :: t.scoped_symbols }
+  let add_symbol t s =
+    let open Symbol_scope in
+    { t with symbol_scopes = push (symbol s) t.symbol_scopes }
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
@@ -80,13 +81,16 @@ struct
   let add_label t label = { t with labels = label :: t.labels }
 
   let open_scope t scope =
-    { t with scoped_symbols = Open_scope scope :: t.scoped_symbols }
+    let open Symbol_scope in
+    { t with symbol_scopes = push (open_scope scope) t.symbol_scopes }
 
-  let end_scope t = { t with scoped_symbols = Close_scope :: t.scoped_symbols }
+  let close_scope t =
+    let open Symbol_scope in
+    { t with symbol_scopes = push close_scope t.symbol_scopes }
 
   let clone
     { num_symbols
-    ; scoped_symbols
+    ; symbol_scopes
     ; pc
     ; memories
     ; tables
@@ -98,7 +102,7 @@ struct
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
     { num_symbols
-    ; scoped_symbols
+    ; symbol_scopes
     ; pc
     ; memories
     ; tables
