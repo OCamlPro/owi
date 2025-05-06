@@ -134,7 +134,7 @@ end = struct
     let str = String.init (Array.length chars) (Array.get chars) in
     open_scope str
 
-  let end_scope = Choice.end_scope
+  let close_scope = Choice.close_scope
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -191,8 +191,8 @@ let symbolic_extern_module =
     ; ( "open_scope"
       , Symbolic.Extern_func.Extern_func
           (Func (Mem (Arg (I32, Res)), R0), open_scope) )
-    ; ( "end_scope"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), end_scope) )
+    ; ( "close_scope"
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
     ]
   in
   { Link.functions }

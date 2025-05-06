@@ -37,19 +37,19 @@ void klee_define_fixed_object(void *addr, size_t nbytes) {
 void klee_make_symbolic(void *addr, size_t nbytes, const char *name) {
   owi_open_scope(name);
   memcpy(addr, make_in(nbytes), nbytes);
-  owi_end_scope();
+  owi_close_scope();
 }
 
 int klee_range(int begin, int end, const char *name) {
   owi_open_scope(name);
   int range = owi_range(begin, end);
-  owi_end_scope();
+  owi_close_scope();
   return range;
 }
 int klee_int(const char *name) {
   owi_open_scope(name);
   int i = owi_i32();
-  owi_end_scope();
+  owi_close_scope();
   return i;
 }
 

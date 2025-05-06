@@ -19,7 +19,7 @@ module type S = sig
 
   val create :
        int
-    -> Scoped_symbol.scope_token list
+    -> Symbol_scope.t
     -> Symbolic_path_condition.t
     -> Memory.collection
     -> Symbolic_table.collection
@@ -38,7 +38,7 @@ module type S = sig
 
   val breadcrumbs : t -> int list
 
-  val scoped_symbols : t -> Scoped_symbol.scope_token list
+  val symbol_scopes : t -> Symbol_scope.t
 
   val num_symbols : t -> int
 
@@ -56,7 +56,7 @@ module type S = sig
 
   val open_scope : t -> string -> t
 
-  val end_scope : t -> t
+  val close_scope : t -> t
 
   val incr_num_symbols : t -> t
 end

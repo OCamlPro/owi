@@ -227,7 +227,7 @@ module CoreImpl = struct
       -> Smtml.Model.t
       -> (int * string) list
       -> int list
-      -> Scoped_symbol.scope_token list
+      -> Symbol_scope.t
       -> 'a t
 
     val stop : 'a t
@@ -320,14 +320,14 @@ module CoreImpl = struct
       let* thread in
       let* solver in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-      let scoped_symbols = Thread.scoped_symbols thread in
-      let model = Solver.model solver ~scoped_symbols ~pc in
+      let symbol_scopes = Thread.symbol_scopes thread in
+      let model = Solver.model solver ~symbol_scopes ~pc in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
-      State.return (ETrap (t, model, labels, breadcrumbs, scoped_symbols))
+      State.return (ETrap (t, model, labels, breadcrumbs, symbol_scopes))
 
-    let assertion_fail c model labels bcrumbs scoped_symbols =
-      State.return (EAssert (c, model, labels, bcrumbs, scoped_symbols))
+    let assertion_fail c model labels bcrumbs symbol_scopes =
+      State.return (EAssert (c, model, labels, bcrumbs, symbol_scopes))
   end
 end
 
@@ -361,7 +361,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let open_scope scope = modify_thread (fun t -> Thread.open_scope t scope)
 
-  let end_scope () = modify_thread (fun t -> Thread.end_scope t)
+  let close_scope () = modify_thread (fun t -> Thread.close_scope t)
 
   let with_new_invisible_symbol ty f =
     let* thread in
@@ -404,9 +404,9 @@ module Make (Thread : Thread_intf.S) = struct
     match Solver.check solver pc with
     | `Unsat -> stop
     | `Sat -> begin
-      let scoped_symbols = [ Scoped_symbol.Symbol symbol ] in
+      let symbol_scopes = Symbol_scope.of_symbol symbol in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
-      let model = Solver.model solver ~scoped_symbols ~pc in
+      let model = Solver.model solver ~symbol_scopes ~pc in
       match Smtml.Model.evaluate model symbol with
       | None ->
         Fmt.failwith
@@ -502,10 +502,10 @@ module Make (Thread : Thread_intf.S) = struct
     else
       let* thread in
       let* solver in
-      let scoped_symbols = Thread.scoped_symbols thread in
+      let symbol_scopes = Thread.symbol_scopes thread in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-      let model = Solver.model ~scoped_symbols ~pc solver in
+      let model = Solver.model ~symbol_scopes ~pc solver in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
-      assertion_fail c model labels breadcrumbs scoped_symbols
+      assertion_fail c model labels breadcrumbs symbol_scopes
 end

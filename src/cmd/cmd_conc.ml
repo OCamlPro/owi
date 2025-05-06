@@ -337,10 +337,8 @@ let pc_model solver pc =
   match Solver.check solver pc with
   | `Unsat | `Unknown -> None
   | `Sat ->
-    let scoped_symbols =
-      List.map Scoped_symbol.symbol (Smtml.Expr.Set.get_symbols pc)
-    in
-    Some (Solver.model ~scoped_symbols ~pc solver)
+    let symbol_scopes = Symbol_scope.of_expressions pc in
+    Some (Solver.model ~symbol_scopes ~pc solver)
 
 let rec find_model_to_run solver tree =
   let ( let* ) = Option.bind in

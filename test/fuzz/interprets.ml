@@ -146,8 +146,8 @@ end) : INTERPRET = struct
       | [ v ] -> begin
         match v with
         | EVal r -> Ok r
-        | ETrap (t, _mdl, _labels, _breadcrumbs, _scoped_symbols) -> Error t
-        | EAssert (_expr, _mdl, _labels, _breadcrumbs, _scoped_symbols) ->
+        | ETrap (t, _mdl, _labels, _breadcrumbs, _symbol_scopes) -> Error t
+        | EAssert (_expr, _mdl, _labels, _breadcrumbs, _symbol_scopes) ->
           Error `Assert_failure
       end
       | _ -> Fmt.failwith "Unexpected multiple results." )

@@ -45,8 +45,8 @@ owi_invisible_bool();
 __attribute__((import_module("symbolic"))) __attribute__((import_name("open_scope"))) void
 owi_open_scope(const char *name);
 
-__attribute__((import_module("symbolic"))) __attribute__((import_name("end_scope"))) void
-owi_end_scope();
+__attribute__((import_module("symbolic"))) __attribute__((import_name("close_scope"))) void
+owi_close_scope();
 #endif
 
 __attribute__((import_module("symbolic"), import_name("assume"))) void

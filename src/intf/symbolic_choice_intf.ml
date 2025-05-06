@@ -9,13 +9,13 @@ type 'a eval =
       * Smtml.Model.t
       * (int * string) list
       * int list
-      * Scoped_symbol.scope_token list
+      * Symbol_scope.t
   | EAssert of
       Smtml.Expr.t
       * Smtml.Model.t
       * (int * string) list
       * int list
-      * Scoped_symbol.scope_token list
+      * Symbol_scope.t
 
 module type S = sig
   module V : Func_intf.Value_types
@@ -62,7 +62,7 @@ module type S = sig
 
   val open_scope : string -> unit t
 
-  val end_scope : unit -> unit t
+  val close_scope : unit -> unit t
 
   type 'a run_result = ('a eval * thread) Seq.t
 

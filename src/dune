@@ -72,7 +72,7 @@
   rewrite
   runtime
   script
-  scoped_symbol
+  symbol_scope
   sexp
   share
   solver
