@@ -16,6 +16,8 @@ type opt_exports =
   ; func : opt_export list
   }
 
+val pp_opt_exports : Format.formatter -> opt_exports -> unit
+
 type type_check = text indice * text func_type
 
 type t =
@@ -38,6 +40,6 @@ type t =
   ; annots : text Annot.annot list
   }
 
-val of_symbolic : Text.modul -> t Result.t
+val of_text : Text.modul -> t Result.t
 
 val pp : Format.formatter -> t -> unit

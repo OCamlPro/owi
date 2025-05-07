@@ -917,7 +917,7 @@ type 'a str_type =
   | Def_array_t of 'a field_type
   | Def_func_t of 'a func_type
 
-let str_type fmt = function
+let pp_str_type fmt = function
   | Def_struct_t t -> pp_struct_type fmt t
   | Def_array_t t -> pp_array_type fmt t
   | Def_func_t t -> pp_func_type fmt t
@@ -937,7 +937,7 @@ let compare_str_type t1 t2 =
 type 'a sub_type = final * 'a indice list * 'a str_type
 
 let pp_sub_type fmt (f, ids, t) =
-  pf fmt "(sub %a %a %a)" pp_final f pp_indices ids str_type t
+  pf fmt "(sub %a %a %a)" pp_final f pp_indices ids pp_str_type t
 
 let sub_type_eq (f1, ids1, t1) (f2, ids2, t2) =
   final_eq f1 f2 && List.equal indice_eq ids1 ids2 && str_type_eq t1 t2

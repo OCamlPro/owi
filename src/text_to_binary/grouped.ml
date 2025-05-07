@@ -286,9 +286,11 @@ let add_field curr (fields : t) = function
     ok @@ add_data data fields curr
   | MStart start -> Ok { fields with start = Some start }
 
-let of_symbolic { Text.fields; id; annots } =
+let of_text { Text.fields; id; annots } =
   Logs.debug (fun m -> m "grouping     ...");
   let+ modul =
     list_fold_left (add_field (init_curr ())) (empty_module id) fields
   in
-  { modul with annots }
+  let modul = { modul with annots } in
+  Logs.debug (fun m -> m "%a" pp modul);
+  modul
