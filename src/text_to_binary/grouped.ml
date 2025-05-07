@@ -110,9 +110,8 @@ let pp fmt
   ; annots
   } =
   Fmt.pf fmt
-    "{@\n\
-    \  @[<v>id: %a@\n\
-     typ: %a@\n\
+    "{id: %a@\n\
+    \  @[<v>typ: %a@\n\
      function_type: %a@\n\
      type_checks: %a@\n\
      global: %a@\n\
