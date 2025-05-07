@@ -97,18 +97,14 @@ let to_json ~no_value model scope_tokens =
   let open Smtml in
   let open Yojson.Basic in
   let symbol_to_json sym =
-    if no_value then Symbol.to_json sym
+    let name = ("symbol", `String (Symbol.to_string sym)) in
+    let ty = ("type", `String (Fmt.str "%a" Ty.pp sym.ty)) in
+    if no_value then `Assoc [ name; ty ]
     else
-      match Symbol.to_json sym with
-      | `Assoc [ (name, props) ] ->
-        let value = get_value model sym in
-        let value = `Assoc [ ("value", Value.to_json value) ] in
-        `Assoc [ (name, Util.combine props value) ]
-      | _ ->
-        Logs.err (fun m ->
-          m "Symbol.to_json returned something impossible: %a" Symbol.pp sym );
-        assert false
+      let value = ("value", Value.to_json @@ get_value model sym) in
+      `Assoc [ name; ty; value ]
   in
+
   let rec process_scope scope_name tokens =
     let rec collect_items acc tokens =
       match tokens with
@@ -120,10 +116,12 @@ let to_json ~no_value model scope_tokens =
         let content, remaining = process_scope scope_name rest in
         let json =
           match content with
-          | `Assoc [ (name, value) ] :: [] ->
+          | `Assoc pairs :: [] ->
+            let obj = `Assoc pairs in
             let scope_json = `Assoc [ ("scope", `String scope_name) ] in
-            `Assoc [ (name, Util.combine value scope_json) ]
-          | _ -> `Assoc [ (scope_name, `List content) ]
+            Util.combine obj scope_json
+          | _ ->
+            `Assoc [ ("scope", `String scope_name); ("content", `List content) ]
         in
         collect_items (json :: acc) remaining
       | Symbol sym :: rest -> collect_items (symbol_to_json sym :: acc) rest
@@ -135,24 +133,27 @@ let to_json ~no_value model scope_tokens =
 
   let rec process_tokens tokens acc =
     match tokens with
-    | [] -> `List (List.rev acc)
+    | [] -> List.rev acc
     | Open_scope scope_name :: rest -> (
       let content, remaining = process_scope scope_name rest in
       match content with
-      | `Assoc [ (name, value) ] :: [] ->
+      | `Assoc pairs :: [] ->
+        let obj = `Assoc pairs in
         let scope_json = `Assoc [ ("scope", `String scope_name) ] in
-        let value = Util.combine value scope_json in
-        process_tokens remaining (`Assoc [ (name, value) ] :: acc)
+        process_tokens remaining (Util.combine obj scope_json :: acc)
       | _ ->
-        let scope_json = `Assoc [ (scope_name, `List content) ] in
-        process_tokens remaining (scope_json :: acc) )
+        let json =
+          `Assoc [ ("scope", `String scope_name); ("content", `List content) ]
+        in
+        process_tokens remaining (json :: acc) )
     | Symbol s :: rest -> process_tokens rest (symbol_to_json s :: acc)
     | Close_scope :: _ ->
       Log.err (fun m ->
         m "Called close_scope without a corresponding open_scope" );
       assert false
   in
+
   let rev_scope_tokens = List.rev scope_tokens in
   Logs.debug (fun m -> m "Current scope tokens: [%a]" pp_list rev_scope_tokens);
   let result = process_tokens rev_scope_tokens [] in
-  `Assoc [ ("model", result) ]
+  `Assoc [ ("model", `List result) ]

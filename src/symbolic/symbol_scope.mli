@@ -24,4 +24,4 @@ val to_json :
      no_value:bool
   -> Smtml.Model.t
   -> t
-  -> [> `Assoc of (string * [> `List of Yojson.Basic.t list ]) list ]
+  -> [> `Assoc of (string * Yojson.Basic.t) list ]
