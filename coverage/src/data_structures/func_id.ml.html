@@ -102,7 +102,7 @@ let add f t { last; c } =
   <span data-count="14241">(</span>last, { c; last = suc<span data-count="14241">c</span> last })
 
 let get i c =
-  <span data-count="123212">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="123211">S</span>ome (v, _) -&gt; Some v
+  <span data-count="123213">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="123212">S</span>ome (v, _) -&gt; Some v
 
 let get_typ i c =
   <span data-count="5547">m</span>atch IMap.find_opt i c.c with None -&gt; assert false | <span data-count="5547">S</span>ome (_, t) -&gt; t

@@ -421,7 +421,7 @@ module Make (Backend : M) = struct
         (Symbolic_value.I32.g<span data-count="1">t</span> new_size m.size)
         ~if_true:new_size ~if_false:m.size
 
-  let size { size; _ } = <span data-count="1075042">S</span>ymbolic_value.I32.mul size page_size
+  let size { size; _ } = <span data-count="1075110">S</span>ymbolic_value.I32.mul size page_size
 
   let size_in_pages { size; _ } = <span data-count="0">s</span>ize
 
@@ -450,29 +450,29 @@ module Make (Backend : M) = struct
       Symbolic_value.Bool.const false
     end
 
-  let clone m = <span data-count="44343">{</span> data = Backend.clon<span data-count="44341">e</span> m.data; size = m.size }
+  let clone m = <span data-count="45053">{</span> data = Backend.clon<span data-count="45052">e</span> m.data; size = m.size }
 
   let must_be_valid_address m a n =
-    <span data-count="1075052">l</span>et open Symbolic_choice_without_memory in
-    let* addr = Backend.validate_addres<span data-count="1075047">s</span> m a n in
-    <span data-count="1075047">m</span>atch addr with <span data-count="3">E</span>rror t -&gt; trap t | <span data-count="1075045">O</span>k ptr -&gt; Backend.address ptr
+    <span data-count="1075116">l</span>et open Symbolic_choice_without_memory in
+    let* addr = Backend.validate_addres<span data-count="1075120">s</span> m a n in
+    <span data-count="1075119">m</span>atch addr with <span data-count="3">E</span>rror t -&gt; trap t | <span data-count="1075116">O</span>k ptr -&gt; Backend.address ptr
 
   let load_8_s m a =
-    <span data-count="616">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="616">s</span> m.data a 1 in
-    <span data-count="616">l</span>et v = Backend.loadn m.data a 1 in
-    <span data-count="616">m</span>atch Smtml.Expr.view v with
-    | <span data-count="249">V</span>al (Num (I8 i8)) -&gt;
-      Symbolic_value.const_i32 (Int32.extend_<span data-count="249">s</span> 8 (Int32.of_in<span data-count="249">t</span> i8))
+    <span data-count="615">l</span>et open Symbolic_choice_without_memory in
+    let+ a = must_be_valid_addres<span data-count="615">s</span> m.data a 1 in
+    <span data-count="615">l</span>et v = Backend.loadn m.data a 1 in
+    <span data-count="615">m</span>atch Smtml.Expr.view v with
+    | <span data-count="248">V</span>al (Num (I8 i8)) -&gt;
+      Symbolic_value.const_i32 (Int32.extend_<span data-count="248">s</span> 8 (Int32.of_in<span data-count="248">t</span> i8))
     | <span data-count="367">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
   let load_8_u m a =
-    <span data-count="3472">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="3470">s</span> m.data a 1 in
-    <span data-count="3473">l</span>et v = Backend.loadn m.data a 1 in
-    <span data-count="3474">m</span>atch Smtml.Expr.view v with
-    | <span data-count="2526">V</span>al (Num (I8 i)) -&gt; Symbolic_value.const_i32 (Int32.of_in<span data-count="2526">t</span> i)
-    | <span data-count="948">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
+    <span data-count="3537">l</span>et open Symbolic_choice_without_memory in
+    let+ a = must_be_valid_addres<span data-count="3537">s</span> m.data a 1 in
+    <span data-count="3539">l</span>et v = Backend.loadn m.data a 1 in
+    <span data-count="3538">m</span>atch Smtml.Expr.view v with
+    | <span data-count="2592">V</span>al (Num (I8 i)) -&gt; Symbolic_value.const_i32 (Int32.of_in<span data-count="2592">t</span> i)
+    | <span data-count="947">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
   let load_16_s m a =
     <span data-count="2">l</span>et open Symbolic_choice_without_memory in
@@ -491,10 +491,10 @@ module Make (Backend : M) = struct
     | <span data-count="2">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
   let load_32 m a =
-    <span data-count="75700">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="75697">s</span> m.data a 4 in
-    <span data-count="75699">l</span>et res = Backend.loadn m.data a 4 in
-    <span data-count="75700">S</span>mtml.Expr.simplify res
+    <span data-count="75692">l</span>et open Symbolic_choice_without_memory in
+    let+ a = must_be_valid_addres<span data-count="75689">s</span> m.data a 4 in
+    <span data-count="75692">l</span>et res = Backend.loadn m.data a 4 in
+    <span data-count="75693">S</span>mtml.Expr.simplify res
 
   let load_64 m a =
     <span data-count="81">l</span>et open Symbolic_choice_without_memory in
@@ -503,8 +503,8 @@ module Make (Backend : M) = struct
 
   let store_8 m ~addr v =
     <span data-count="3344">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="3344">s</span> m.data addr 1 in
-    <span data-count="3344">B</span>ackend.storen m.data a v 1
+    let+ a = must_be_valid_addres<span data-count="3342">s</span> m.data addr 1 in
+    <span data-count="3345">B</span>ackend.storen m.data a v 1
 
   let store_16 m ~addr v =
     <span data-count="3">l</span>et open Symbolic_choice_without_memory in
@@ -512,26 +512,26 @@ module Make (Backend : M) = struct
     <span data-count="3">B</span>ackend.storen m.data a v 2
 
   let store_32 m ~addr v =
-    <span data-count="641903">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="641902">s</span> m.data addr 4 in
-    <span data-count="641917">B</span>ackend.storen m.data a v 4
+    <span data-count="641916">l</span>et open Symbolic_choice_without_memory in
+    let+ a = must_be_valid_addres<span data-count="641916">s</span> m.data addr 4 in
+    <span data-count="641930">B</span>ackend.storen m.data a v 4
 
   let store_64 m ~addr v =
     <span data-count="349928">l</span>et open Symbolic_choice_without_memory in
-    let+ a = must_be_valid_addres<span data-count="349928">s</span> m.data addr 8 in
-    <span data-count="349927">B</span>ackend.storen m.data a v 8
+    let+ a = must_be_valid_addres<span data-count="349927">s</span> m.data addr 8 in
+    <span data-count="349928">B</span>ackend.storen m.data a v 8
 
   let get_limit_max _m = <span data-count="1">N</span>one (* TODO *)
 
-  let free m base = <span data-count="2603">B</span>ackend.free m.data base
+  let free m base = <span data-count="2606">B</span>ackend.free m.data base
 
-  let realloc m ~ptr ~size = <span data-count="9946">B</span>ackend.realloc m.data ~ptr ~size
+  let realloc m ~ptr ~size = <span data-count="9948">B</span>ackend.realloc m.data ~ptr ~size
 
   (* TODO: Move this into a separate module? *)
   module ITbl = Hashtbl.Make (struct
     include Int
 
-    let hash x = <span data-count="2207374">x</span>
+    let hash x = <span data-count="2208229">x</span>
   end)
 
   type collection = t ITbl.t Env_id.Tbl.t
@@ -542,12 +542,12 @@ module Make (Backend : M) = struct
 
   let clone collection =
     (* TODO: this is ugly and should be rewritten *)
-    <span data-count="44819">l</span>et s = Env_id.Tbl.to_seq collection in
-    <span data-count="44818">E</span>nv_id.Tbl.of_seq
-    @@ Seq.ma<span data-count="44820">p</span>
+    <span data-count="45531">l</span>et s = Env_id.Tbl.to_seq collection in
+    <span data-count="45531">E</span>nv_id.Tbl.of_seq
+    @@ Seq.ma<span data-count="45528">p</span>
          (fun (i, t) -&gt;
-           <span data-count="44345">l</span>et s = ITbl.to_seq t in
-           <span data-count="44343">(</span>i, ITbl.of_se<span data-count="44342">q</span> @@ Seq.ma<span data-count="44340">p</span> (fun (i, a) -&gt; <span data-count="44344">(</span>i, clon<span data-count="44341">e</span> a)) s) )
+           <span data-count="45051">l</span>et s = ITbl.to_seq t in
+           <span data-count="45050">(</span>i, ITbl.of_se<span data-count="45052">q</span> @@ Seq.ma<span data-count="45050">p</span> (fun (i, a) -&gt; <span data-count="45053">(</span>i, clon<span data-count="45052">e</span> a)) s) )
          s
 
   let convert (orig_mem : Concrete_memory.t) : t =
@@ -555,17 +555,17 @@ module Make (Backend : M) = struct
     <span data-count="201">c</span>reate s
 
   let get_env env_id memories =
-    <span data-count="2162834">m</span>atch Env_id.Tbl.find_opt memories env_id with
-    | <span data-count="2162628">S</span>ome env -&gt; env
+    <span data-count="2162977">m</span>atch Env_id.Tbl.find_opt memories env_id with
+    | <span data-count="2162769">S</span>ome env -&gt; env
     | <span data-count="201">N</span>one -&gt;
       let t = ITbl.create 0 in
       <span data-count="201">E</span>nv_id.Tbl.add memories env_id t;
       <span data-count="201">t</span>
 
   let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-    <span data-count="2162834">l</span>et env = get_env env_id collection in
-    <span data-count="2162829">m</span>atch ITbl.find_opt env g_id with
-    | <span data-count="2162629">S</span>ome t -&gt; t
+    <span data-count="2162977">l</span>et env = get_env env_id collection in
+    <span data-count="2162968">m</span>atch ITbl.find_opt env g_id with
+    | <span data-count="2162775">S</span>ome t -&gt; t
     | <span data-count="201">N</span>one -&gt;
       let t = convert orig_memory in
       <span data-count="201">I</span>Tbl.add env g_id t;

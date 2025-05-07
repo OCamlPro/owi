@@ -33,6 +33,10 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -48,6 +52,10 @@
 <a href="#L9"> 9</a>
 <a href="#L10">10</a>
 <a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -60,6 +68,10 @@ type 'a t =
   ; assigned_name : string option
   ; desc : 'a
   }
+
+let pp pp_desc fmt { modul; name; assigned_name; desc } =
+  <span data-count="2">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ndesc: %a@]}"
+    modul name Types.pp_id_opt assigned_name pp_desc desc
 </code></pre>
       </div>
     </div>

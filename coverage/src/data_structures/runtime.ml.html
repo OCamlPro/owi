@@ -29,17 +29,27 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">1</a>
-<a href="#L2">2</a>
-<a href="#L3">3</a>
-<a href="#L4">4</a>
-<a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -48,6 +58,11 @@
 type ('a, 'b) t =
   | Local of 'a
   | Imported of 'b Imported.t
+
+let pp ~pp_local ~pp_imported fmt = function
+  | <span data-count="2">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
+  | <span data-count="2">I</span>mported imported -&gt;
+    Fmt.pf fmt "Imported (%a)" (Imported.p<span data-count="2">p</span> pp_imported) imported
 </code></pre>
       </div>
     </div>
