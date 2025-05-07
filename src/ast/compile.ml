@@ -10,7 +10,7 @@ module Text = struct
 
   let until_group ~unsafe m =
     let* m = until_text_validate ~unsafe m in
-    Grouped.of_symbolic m
+    Grouped.of_text m
 
   let until_assign ~unsafe m =
     let* m = until_group ~unsafe m in

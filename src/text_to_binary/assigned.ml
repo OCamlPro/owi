@@ -27,6 +27,47 @@ type t =
   ; annots : text Annot.annot list
   }
 
+let sep fmt () = Fmt.pf fmt " ; "
+
+let pp_id fmt id = Types.pp_id_opt fmt id
+
+let pp_typ fmt typ = Named.pp Types.pp_str_type fmt typ
+
+let pp_runtime_named ~pp_local ~pp_imported fmt l =
+  Named.pp (Runtime.pp ~pp_local ~pp_imported) fmt l
+
+let pp_global fmt g =
+  pp_runtime_named ~pp_local:Text.pp_global ~pp_imported:Types.pp_global_type
+    fmt g
+
+let pp_table fmt t =
+  pp_runtime_named ~pp_local:Types.pp_table ~pp_imported:Types.pp_table_type fmt
+    t
+
+let pp_mem fmt m =
+  pp_runtime_named ~pp_local:Types.pp_mem ~pp_imported:Types.pp_limits fmt m
+
+let pp_func fmt f =
+  pp_runtime_named ~pp_local:Types.pp_func ~pp_imported:Types.pp_block_type fmt
+    f
+
+let pp_elem fmt e = Named.pp Text.pp_elem fmt e
+
+let pp_data fmt d = Named.pp Text.pp_data fmt d
+
+let pp_start fmt s = Types.pp_indice_opt fmt s
+
+let pp_annots fmt annots =
+  Fmt.pf fmt "[%a]" (Fmt.list ~sep Annot.pp_annot) annots
+
+let pp fmt
+  { id; typ; global; table; mem; func; elem; data; exports; start; annots } =
+  Fmt.pf fmt
+    {|{@\n  @[<v>id: %a@\ntyp: %a@\nglobal: %a@\ntable: %a@\nmem: %a@\nfunc: %a@\nelem: %a@\ndata: %a@\nexports: %a@\nstart: %a@\nannots: %a@]@\n}|}
+    pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
+    pp_elem elem pp_data data Grouped.pp_opt_exports exports pp_start start
+    pp_annots annots
+
 type type_acc =
   { declared_types : binary str_type Indexed.t list
   ; func_types : binary str_type Indexed.t list
@@ -162,18 +203,22 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     name "data" ~get_name:(fun (data : Text.data) -> data.id) modul.data
   in
   let+ () = list_iter (check_type_id typ) modul.type_checks in
-  { id = modul.id
-  ; typ
-  ; global
-  ; table
-  ; mem
-  ; func
-  ; elem
-  ; data
-  ; exports = modul.exports
-  ; start = modul.start
-  ; annots = modul.annots
-  }
+  let modul =
+    { id = modul.id
+    ; typ
+    ; global
+    ; table
+    ; mem
+    ; func
+    ; elem
+    ; data
+    ; exports = modul.exports
+    ; start = modul.start
+    ; annots = modul.annots
+    }
+  in
+  Logs.debug (fun m -> m "%a" pp modul);
+  modul
 
 let find (named : 'a Named.t) err : _ -> binary indice Result.t = function
   | Raw _i as indice -> Ok indice

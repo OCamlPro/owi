@@ -33,3 +33,5 @@ val find_table : t -> text indice -> binary indice Result.t
 val find_elem : t -> text indice -> binary indice Result.t
 
 val find_type : t -> text indice -> binary indice Result.t
+
+val pp : Format.formatter -> t -> unit
