@@ -49,7 +49,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         | `Assoc fields -> `Assoc (("labels", `List labels_json) :: fields)
         | _ -> json
       in
-      Yojson.Basic.pp fmt json
+      Yojson.Basic.pretty_print fmt json
     | Scfg ->
       let scfg = Symbol_scope.to_scfg ~no_value model scoped_values in
       let model = Scfg.Query.get_dir_exn "model" scfg in

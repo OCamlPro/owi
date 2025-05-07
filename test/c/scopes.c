@@ -15,6 +15,16 @@ int main() {
     int sym4 = owi_i32();
     owi_close_scope();
 
+    owi_open_scope("scope 3");
+    owi_open_scope("scope 3.1");
+    int sym5 = owi_i32();
+    owi_close_scope();
+    owi_open_scope("scope 3.2");
+    int sym6 = owi_i32();
+    int sym7 = owi_i32();
+    owi_close_scope();
+    owi_close_scope();
+
     owi_assert(0);
 
     return 0;
