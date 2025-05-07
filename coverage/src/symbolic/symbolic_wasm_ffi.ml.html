@@ -472,10 +472,10 @@ end = struct
 
   let cov_lock = Mutex.creat<span data-count="1011">e</span> ()
 
-  let add_pc_wrapper e = <span data-count="623">C</span>hoice.add_pc e
+  let add_pc_wrapper e = <span data-count="627">C</span>hoice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="599">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="599">l</span> i
+    <span data-count="603">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="603">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
     <span data-count="97111">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="97111">l</span> i
