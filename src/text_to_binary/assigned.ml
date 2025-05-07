@@ -63,7 +63,19 @@ let pp_annots fmt annots =
 let pp fmt
   { id; typ; global; table; mem; func; elem; data; exports; start; annots } =
   Fmt.pf fmt
-    {|{@\n  @[<v>id: %a@\ntyp: %a@\nglobal: %a@\ntable: %a@\nmem: %a@\nfunc: %a@\nelem: %a@\ndata: %a@\nexports: %a@\nstart: %a@\nannots: %a@]@\n}|}
+    "{@\n\
+    \  @[<v>id: %a@\n\
+     typ: %a@\n\
+     global: %a@\n\
+     table: %a@\n\
+     mem: %a@\n\
+     func: %a@\n\
+     elem: %a@\n\
+     data: %a@\n\
+     exports: %a@\n\
+     start: %a@\n\
+     annots: %a@]@\n\
+     }"
     pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
     pp_elem elem pp_data data Grouped.pp_opt_exports exports pp_start start
     pp_annots annots
