@@ -76,7 +76,7 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
   (sedlex
     (>= 3.3))
   (smtml
-    (>= 0.6.3))
+    (>= 0.7.0))
   (uutf
     (>= 1.0.3))
   (xmlm (>= 1.4.0))
