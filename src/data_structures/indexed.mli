@@ -17,3 +17,7 @@ val get_at : int -> 'a t list -> 'a option
 val has_index : int -> 'a t -> bool
 
 val list_to_array : 'a t list -> 'a array
+
+val pp : 'a Fmt.t -> Format.formatter -> 'a t -> unit
+
+val pp_list : 'a Fmt.t -> Format.formatter -> 'a t list -> unit

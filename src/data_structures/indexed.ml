@@ -29,3 +29,10 @@ let list_to_array l =
     l
   |> List.map (fun { value; _ } -> value)
   |> Array.of_list
+
+let pp pp_v fmt { index; value } =
+  Fmt.pf fmt "{ index = %d ; value = %a }" index pp_v value
+
+let pp_list pp_v fmt l =
+  let pp fmt v = pp pp_v fmt v in
+  Fmt.pf fmt "[%a]" (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ; ") pp) l

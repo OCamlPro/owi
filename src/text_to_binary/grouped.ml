@@ -5,12 +5,21 @@
 open Types
 open Syntax
 
+let sep fmt () = Fmt.pf fmt " ; "
+
 type type_check = text indice * text func_type
+
+let pp_type_check fmt (indice, func_type) =
+  Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
 
 type opt_export =
   { name : string
   ; id : text indice
   }
+
+let pp_opt_export fmt { name; id } = Fmt.pf fmt "(%S, %a)" name pp_indice id
+
+let pp_opt_export_list fmt l = Fmt.pf fmt "[%a]" (Fmt.list ~sep pp_opt_export) l
 
 type opt_exports =
   { global : opt_export list
@@ -18,6 +27,11 @@ type opt_exports =
   ; table : opt_export list
   ; func : opt_export list
   }
+
+let pp_opt_exports fmt { global; mem; table; func } =
+  Fmt.pf fmt "{@\n  @[<v>global: %a@\nmem: %a@\ntable: %a@\nfunc: %a@\n@]}"
+    pp_opt_export_list global pp_opt_export_list mem pp_opt_export_list table
+    pp_opt_export_list func
 
 let curr_id (curr : int ref) (i : text indice option) =
   match i with None -> Raw (pred !curr) | Some id -> id
@@ -27,10 +41,10 @@ type t =
   ; typ : text type_def list
   ; function_type : text func_type list
       (* Types comming from function declarations.
-         It contains potential duplication *)
+     It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
-         Come from function declarations with type indicies *)
+     Come from function declarations with type indicies *)
   ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
   ; table : (binary table, binary table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
@@ -41,6 +55,65 @@ type t =
   ; start : text indice option
   ; annots : text Annot.annot list
   }
+
+let pp_id fmt id = Types.pp_id_opt fmt id
+
+let pp_typ fmt typ = Fmt.pf fmt "[%a]" (Fmt.list ~sep Types.pp_type_def) typ
+
+let pp_function_type fmt function_type =
+  Fmt.pf fmt "[%a]" (Fmt.list ~sep Types.pp_func_type) function_type
+
+let pp_type_checks fmt type_checks =
+  Fmt.pf fmt "[%a]" (Fmt.list ~sep pp_type_check) type_checks
+
+let pp_runtime_indexed_list ~pp_local ~pp_imported fmt l =
+  Indexed.pp_list (Runtime.pp ~pp_local ~pp_imported) fmt l
+
+let pp_global fmt g =
+  pp_runtime_indexed_list ~pp_local:Text.pp_global
+    ~pp_imported:Types.pp_global_type fmt g
+
+let pp_table fmt t =
+  pp_runtime_indexed_list ~pp_local:Types.pp_table
+    ~pp_imported:Types.pp_table_type fmt t
+
+let pp_mem fmt m =
+  pp_runtime_indexed_list ~pp_local:Types.pp_mem ~pp_imported:Types.pp_limits
+    fmt m
+
+let pp_func fmt f =
+  pp_runtime_indexed_list ~pp_local:Types.pp_func
+    ~pp_imported:Types.pp_block_type fmt f
+
+let pp_elem fmt e = Indexed.pp_list Text.pp_elem fmt e
+
+let pp_data fmt d = Indexed.pp_list Text.pp_data fmt d
+
+let pp_start fmt s = Types.pp_indice_opt fmt s
+
+let pp_annots fmt annots =
+  Fmt.pf fmt "[%a]" (Fmt.list ~sep Annot.pp_annot) annots
+
+let pp fmt
+  { id
+  ; typ
+  ; function_type
+  ; type_checks
+  ; global
+  ; table
+  ; mem
+  ; func
+  ; elem
+  ; data
+  ; exports
+  ; start
+  ; annots
+  } =
+  Fmt.pf fmt
+    {|{@\n  @[<v>id: %a@\ntyp: %a@\nfunction_type: %a@\ntype_checks: %a@\nglobal: %a@\ntable: %a@\nmem: %a@\nfunc: %a@\nelem: %a@\ndata: %a@\nexports: %a@\nstart: %a@\nannots: %a@]@\n}|}
+    pp_id id pp_typ typ pp_function_type function_type pp_type_checks
+    type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
+    elem pp_data data pp_opt_exports exports pp_start start pp_annots annots
 
 let imp (import : text import) (assigned_name, desc) : 'a Imported.t =
   { modul = import.modul; name = import.name; assigned_name; desc }
