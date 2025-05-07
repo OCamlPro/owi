@@ -5,3 +5,8 @@
 type ('a, 'b) t =
   | Local of 'a
   | Imported of 'b Imported.t
+
+let pp ~pp_local ~pp_imported fmt = function
+  | Local local -> Fmt.pf fmt "Local (%a)" pp_local local
+  | Imported imported ->
+    Fmt.pf fmt "Imported (%a)" (Imported.pp pp_imported) imported

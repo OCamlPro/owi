@@ -9,3 +9,5 @@ type 'a t =
   ; assigned_name : string option
   ; desc : 'a
   }
+
+val pp : 'a Fmt.t -> Format.formatter -> 'a t -> unit

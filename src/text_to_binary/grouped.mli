@@ -39,3 +39,5 @@ type t =
   }
 
 val of_symbolic : Text.modul -> t Result.t
+
+val pp : Format.formatter -> t -> unit
