@@ -23,7 +23,8 @@ module Backend = struct
   let address a =
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | Val (Num (I32 i)) -> return i
+    | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
+      return (Smtml.Bitvector.to_int32 bv)
     | Ptr { base; offset } ->
       select_i32 Symbolic_value.(I32.add (const_i32 base) offset)
     | _ -> select_i32 a
@@ -32,42 +33,8 @@ module Backend = struct
 
   let load_byte a { data; _ } =
     match Map.find_opt a data with
-    | None -> Smtml.Expr.value (Num (I8 0))
+    | None -> Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 0))
     | Some v -> v
-
-  (* TODO: don't rebuild so many values it generates unecessary hc lookups *)
-  let merge_extracts (e1, high, m1) (e2, m2, low) =
-    let ty = Smtml.Expr.ty e1 in
-    if m1 = m2 && Smtml.Expr.equal e1 e2 then
-      if high - low = Smtml.Ty.size ty then e1
-      else Smtml.Expr.extract e1 ~high ~low
-    else
-      Smtml.Expr.concat
-        (Smtml.Expr.extract e1 ~high ~low:m1)
-        (Smtml.Expr.extract e2 ~high:m2 ~low)
-
-  let concat ~msb ~lsb offset =
-    assert (offset > 0 && offset <= 8);
-    match (Smtml.Expr.view msb, Smtml.Expr.view lsb) with
-    | Val (Num (I8 i1)), Val (Num (I8 i2)) ->
-      Symbolic_value.const_i32 Int32.(logor (shl (of_int i1) 8l) (of_int i2))
-    | Val (Num (I8 i1)), Val (Num (I32 i2)) ->
-      let offset = offset * 8 in
-      if offset < 32 then
-        Symbolic_value.const_i32
-          Int32.(logor (shl (of_int i1) (of_int offset)) i2)
-      else
-        let i1' = Int64.of_int i1 in
-        let i2' = Int64.of_int32 i2 in
-        Symbolic_value.const_i64 Int64.(logor (shl i1' (of_int offset)) i2')
-    | Val (Num (I8 i1)), Val (Num (I64 i2)) ->
-      let offset = Int64.of_int (offset * 8) in
-      Symbolic_value.const_i64 Int64.(logor (shl (of_int i1) offset) i2)
-    | Extract (e1, h, m1), Extract (e2, m2, l) ->
-      merge_extracts (e1, h, m1) (e2, m2, l)
-    | Extract (e1, h, m1), Concat ({ node = Extract (e2, m2, l); _ }, e3) ->
-      Smtml.Expr.concat (merge_extracts (e1, h, m1) (e2, m2, l)) e3
-    | _ -> Smtml.Expr.concat msb lsb
 
   let loadn m a n =
     let rec loop addr size i acc =
@@ -75,41 +42,24 @@ module Backend = struct
       else
         let addr' = Int32.(add addr (of_int i)) in
         let byte = load_byte addr' m in
-        loop addr size (i + 1) (concat i ~msb:byte ~lsb:acc)
+        loop addr size (i + 1) (Smtml.Expr.concat byte acc)
     in
     let v0 = load_byte a m in
     loop a n 1 v0
-
-  let extract v pos =
-    match Smtml.Expr.view v with
-    | Val (Num (I8 _)) -> v
-    | Val (Num (I32 i)) ->
-      let i' = Int32.(to_int @@ logand 0xffl @@ shr_s i @@ of_int (pos * 8)) in
-      Smtml.Expr.value (Num (I8 i'))
-    | Val (Num (I64 i)) ->
-      let i' = Int64.(to_int @@ logand 0xffL @@ shr_s i @@ of_int (pos * 8)) in
-      Smtml.Expr.value (Num (I8 i'))
-    | Cvtop
-        (_, Zero_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
-    | Cvtop
-        (_, Sign_extend 24, ({ node = Symbol { ty = Ty_bitv 8; _ }; _ } as sym))
-      ->
-      sym
-    | _ -> Smtml.Expr.extract v ~high:(pos + 1) ~low:pos
 
   let replace m k v = m.data <- Map.add k v m.data
 
   let storen m a v n =
     for i = 0 to n - 1 do
       let a' = Int32.add a (Int32.of_int i) in
-      let v' = extract v i in
+      let v' = Smtml.Expr.extract v ~low:i ~high:(i + 1) in
       replace m a' v'
     done
 
   let validate_address m a range =
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | Val (Num (I32 _)) ->
+    | Val (Bitv _) ->
       (* An i32 is not a pointer to a heap chunk, so its valid *)
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
@@ -144,7 +94,8 @@ module Backend = struct
   let free m p =
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view p with
-    | Val (Num (I32 0l)) -> return (Symbolic_value.const_i32 0l)
+    | Val (Bitv bv) when Smtml.Bitvector.eqz bv ->
+      return (Symbolic_value.const_i32 0l)
     | _ ->
       let* base = ptr p in
       if not @@ Map.mem base m.chunks then trap `Double_free

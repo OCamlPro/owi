@@ -16,7 +16,10 @@ module Make (Backend : M) = struct
     { data = Backend.make (); size = Symbolic_value.const_i32 size }
 
   let i32 v =
-    match Smtml.Expr.view v with Val (Num (I32 i)) -> i | _ -> assert false
+    match Smtml.Expr.view v with
+    | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
+      Smtml.Bitvector.to_int32 i
+    | _ -> assert false
 
   let grow m delta =
     let old_size = Symbolic_value.I32.mul m.size page_size in
@@ -50,7 +53,9 @@ module Make (Backend : M) = struct
       for i = 0 to len - 1 do
         let byte = Char.code @@ String.get str (src + i) in
         let a = Backend.address_i32 (Int32.of_int (dst + i)) in
-        Backend.storen m.data a (Smtml.Expr.value (Num (I8 byte))) 1
+        Backend.storen m.data a
+          (Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 byte)))
+          1
       done;
       Symbolic_value.Bool.const false
     end
@@ -67,8 +72,9 @@ module Make (Backend : M) = struct
     let+ a = must_be_valid_address m.data a 1 in
     let v = Backend.loadn m.data a 1 in
     match Smtml.Expr.view v with
-    | Val (Num (I8 i8)) ->
-      Symbolic_value.const_i32 (Int32.extend_s 8 (Int32.of_int i8))
+    | Val (Bitv i8) when Smtml.Bitvector.numbits i8 = 8 ->
+      let i8 = Smtml.Bitvector.to_int32 i8 in
+      Symbolic_value.const_i32 (Int32.extend_s 8 i8)
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
   let load_8_u m a =
@@ -76,7 +82,9 @@ module Make (Backend : M) = struct
     let+ a = must_be_valid_address m.data a 1 in
     let v = Backend.loadn m.data a 1 in
     match Smtml.Expr.view v with
-    | Val (Num (I8 i)) -> Symbolic_value.const_i32 (Int32.of_int i)
+    | Val (Bitv i) when Smtml.Bitvector.numbits i = 8 ->
+      let i = Smtml.Bitvector.to_int32 i in
+      Symbolic_value.const_i32 i
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
   let load_16_s m a =
@@ -84,7 +92,9 @@ module Make (Backend : M) = struct
     let+ a = must_be_valid_address m.data a 2 in
     let v = Backend.loadn m.data a 2 in
     match Smtml.Expr.view v with
-    | Val (Num (I32 i16)) -> Symbolic_value.const_i32 (Int32.extend_s 16 i16)
+    | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+      let i16 = Smtml.Bitvector.to_int32 i16 in
+      Symbolic_value.const_i32 (Int32.extend_s 16 i16)
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 16) v
 
   let load_16_u m a =
@@ -92,7 +102,9 @@ module Make (Backend : M) = struct
     let+ a = must_be_valid_address m.data a 2 in
     let v = Backend.loadn m.data a 2 in
     match Smtml.Expr.view v with
-    | Val (Num (I32 _)) -> v
+    | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+      let i16 = Smtml.Bitvector.to_int32 i16 in
+      Symbolic_value.const_i32 i16
     | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
   let load_32 m a =
