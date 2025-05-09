@@ -40,13 +40,13 @@ __attribute__((import_module("symbolic"), import_name("bool_symbol")))
 owi_bool(void);
 #ifdef __OWI_INTERNALS
 __attribute__((import_module("symbolic"))) __attribute__((import_name("invisible_bool_symbol"))) int
-owi_invisible_bool();
+owi_invisible_bool(void);
 
 __attribute__((import_module("symbolic"))) __attribute__((import_name("open_scope"))) void
 owi_open_scope(const char *name);
 
 __attribute__((import_module("symbolic"))) __attribute__((import_name("close_scope"))) void
-owi_close_scope();
+owi_close_scope(void);
 #endif
 
 __attribute__((import_module("symbolic"), import_name("assume"))) void

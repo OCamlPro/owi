@@ -182,4 +182,5 @@
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ]
   owi: [INFO] running instr : call 0
+  owi: [INFO] scopes : [symbol symbol_0]
   Assertion failure was correctly reached!
