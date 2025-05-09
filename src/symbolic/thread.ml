@@ -10,8 +10,8 @@ struct
     Symbolic_memory
 
   type t =
-    { symbols : int
-    ; symbol_set : Smtml.Symbol.t list
+    { num_symbols : int
+    ; symbol_scopes : Symbol_scope.t
     ; pc : Symbolic_path_condition.t
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
@@ -22,23 +22,33 @@ struct
     ; labels : (int * string) list
     }
 
-  let create symbols symbol_set pc memories tables globals breadcrumbs labels =
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+  let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
+    labels =
+    { num_symbols
+    ; symbol_scopes
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    }
 
   let init () =
-    let symbols = 0 in
-    let symbol_set = [] in
+    let num_symbols = 0 in
+    let symbol_scopes = Symbol_scope.empty in
     let pc = Symbolic_path_condition.empty in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
-    create symbols symbol_set pc memories tables globals breadcrumbs labels
+    create num_symbols symbol_scopes pc memories tables globals breadcrumbs
+      labels
 
-  let symbols t = t.symbols
+  let num_symbols t = t.num_symbols
 
-  let symbols_set t = t.symbol_set
+  let symbol_scopes t = t.symbol_scopes
 
   let pc t = t.pc
 
@@ -53,8 +63,8 @@ struct
   let labels t = t.labels
 
   let add_symbol t s =
-    let symbol_set = s :: t.symbol_set in
-    { t with symbol_set }
+    let open Symbol_scope in
+    { t with symbol_scopes = symbol s t.symbol_scopes }
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
@@ -64,17 +74,40 @@ struct
     let breadcrumbs = crumb :: t.breadcrumbs in
     { t with breadcrumbs }
 
-  let incr_symbols t =
-    let symbols = succ t.symbols in
-    { t with symbols }
+  let incr_num_symbols t =
+    let num_symbols = succ t.num_symbols in
+    { t with num_symbols }
 
   let add_label t label = { t with labels = label :: t.labels }
 
+  let open_scope t scope =
+    let open Symbol_scope in
+    { t with symbol_scopes = open_scope scope t.symbol_scopes }
+
+  let close_scope t =
+    let open Symbol_scope in
+    { t with symbol_scopes = close_scope t.symbol_scopes }
+
   let clone
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
-      =
+    { num_symbols
+    ; symbol_scopes
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    } =
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    { symbols; symbol_set; pc; memories; tables; globals; breadcrumbs; labels }
+    { num_symbols
+    ; symbol_scopes
+    ; pc
+    ; memories
+    ; tables
+    ; globals
+    ; breadcrumbs
+    ; labels
+    }
 end

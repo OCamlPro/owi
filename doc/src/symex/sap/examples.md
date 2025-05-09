@@ -279,6 +279,14 @@ owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
   symbol symbol_1 i32
+  symbol symbol_2 i32
+  symbol symbol_3 i32
+  symbol symbol_4 i32
+  symbol symbol_5 i32
+  symbol symbol_6 i32
+  symbol symbol_7 i32
+  symbol symbol_8 i32
+  symbol symbol_9 i32
   symbol symbol_10 i32
   symbol symbol_11 i32
   symbol symbol_12 i32
@@ -289,7 +297,6 @@ model {
   symbol symbol_17 i32
   symbol symbol_18 i32
   symbol symbol_19 i32
-  symbol symbol_2 i32
   symbol symbol_20 i32
   symbol symbol_21 i32
   symbol symbol_22 i32
@@ -298,13 +305,6 @@ model {
   symbol symbol_25 i32
   symbol symbol_26 i32
   symbol symbol_27 i32
-  symbol symbol_3 i32
-  symbol symbol_4 i32
-  symbol symbol_5 i32
-  symbol symbol_6 i32
-  symbol symbol_7 i32
-  symbol symbol_8 i32
-  symbol symbol_9 i32
 }
 owi: [ERROR] Reached problem!
 [13]

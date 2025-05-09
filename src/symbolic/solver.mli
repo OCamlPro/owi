@@ -9,7 +9,4 @@ val fresh : Smtml.Solver_type.t -> unit -> t
 val check : t -> Smtml.Expr.Set.t -> [ `Sat | `Unknown | `Unsat ]
 
 val model :
-     t
-  -> symbols:Smtml.Symbol.t list option
-  -> pc:Smtml.Expr.Set.t
-  -> Smtml.Model.t
+  t -> symbol_scopes:Symbol_scope.t -> pc:Smtml.Expr.Set.t -> Smtml.Model.t

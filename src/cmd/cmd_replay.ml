@@ -14,6 +14,13 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   in
   let brk = ref @@ Int32.of_int 0 in
   let covered_labels = Hashtbl.create 16 in
+  let scopes = ref Symbol_scope.empty in
+
+  let add_sym i =
+    (* the type doesn't matter, we just want the name for now *)
+    let sym = Smtml.Symbol.(Fmt.str "symbol_%d" i @: Smtml.Ty.Ty_bitv 0) in
+    scopes := Symbol_scope.symbol sym !scopes
+  in
 
   let module M :
     Wasm_ffi_intf.S0
@@ -30,21 +37,28 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
+        Logs.info (fun m -> m "scopes : [%a]" Symbol_scope.pp !scopes);
         Logs.app (fun m -> m "Assertion failure was correctly reached!");
         exit 0
       end;
       Ok ()
 
     let symbol_i32 () =
-      match model.(next ()) with
-      | V.I32 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let symbol_char () =
-      match model.(next ()) with
-      | V.I32 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m ->
           m "Got value %a but expected a char (i32) value." V.pp v );
@@ -68,37 +82,52 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
     let exit (n : Value.int32) = exit (Int32.to_int n)
 
     let symbol_i8 () =
-      match model.(next ()) with
-      | V.I32 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m ->
           m "Got value %a but expected a i8 (i32) value." V.pp v );
         assert false
 
     let symbol_i64 () =
-      match model.(next ()) with
-      | V.I64 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.I64 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a i64 value." V.pp v);
         assert false
 
     let symbol_f32 () =
-      match model.(next ()) with
-      | V.F32 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.F32 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a f32 value." V.pp v);
         assert false
 
     let symbol_f64 () =
-      match model.(next ()) with
-      | V.F64 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.F64 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
         assert false
 
     let symbol_range _ _ =
-      match model.(next ()) with
-      | V.I32 n -> Ok n
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
@@ -130,6 +159,16 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       Hashtbl.add covered_labels id str;
       Logs.debug (fun m -> m "reached %ld@." id);
       Ok ()
+
+    let open_scope m strptr =
+      let* chars = make_str m [] strptr in
+      let str = String.init (Array.length chars) (Array.get chars) in
+      scopes := Symbol_scope.open_scope str !scopes;
+      Concrete_choice.return ()
+
+    let close_scope () =
+      scopes := Symbol_scope.close_scope !scopes;
+      Concrete_choice.return ()
   end in
   let replay_extern_module =
     let open M in
@@ -176,6 +215,11 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       ; ( "cov_label_set"
         , Concrete_extern_func.Extern_func
             (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
+      ; ( "open_scope"
+        , Concrete_extern_func.Extern_func
+            (Func (Mem (Arg (I32, Res)), R0), open_scope) )
+      ; ( "close_scope"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
       ]
     in
     { Link.functions }
@@ -220,13 +264,15 @@ let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
   let* parse_fn =
     let ext = Fpath.get_ext replay_file in
     match String.lowercase_ascii ext with
-    | ".json" -> Ok Smtml.Model.Parse.Json.from_file
-    | ".scfg" -> Ok Smtml.Model.Parse.Scfg.from_file
+    | ".json" -> Ok Symbol_scope.model_of_json
+    | ".scfg" -> Ok Symbol_scope.model_of_scfg
     | _ -> Error (`Unsupported_file_extension ext)
   in
+  let* file_content = Bos.OS.File.read replay_file in
   let* model =
-    match parse_fn replay_file with
+    match parse_fn file_content with
     | Error (`Msg msg) -> Error (`Invalid_model msg)
+    | Error err -> Error err
     | Ok model ->
       let bindings = Smtml.Model.get_bindings model in
       let+ model =

@@ -13,7 +13,6 @@ Bug-triggering tests:
   model {
     symbol symbol_0 i32
     symbol symbol_1 i32
-    symbol symbol_10 i32
     symbol symbol_2 i32
     symbol symbol_3 i32
     symbol symbol_4 i32
@@ -22,6 +21,7 @@ Bug-triggering tests:
     symbol symbol_7 i32
     symbol symbol_8 i32
     symbol symbol_9 i32
+    symbol symbol_10 i32
   }
   owi: [ERROR] Reached problem!
   [13]
