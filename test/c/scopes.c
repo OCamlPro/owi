@@ -25,7 +25,16 @@ int main() {
     owi_close_scope();
     owi_close_scope();
 
-    owi_assert(0);
+    owi_open_scope("aaa");
+    int x = owi_i32();
+    owi_close_scope();
+
+    owi_open_scope("aaa");
+    int y = owi_i32();
+    owi_close_scope();
+    if (x == 42 && y != 42) {
+        owi_assert(0);
+    }
 
     return 0;
 }

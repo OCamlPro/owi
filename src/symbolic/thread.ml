@@ -64,7 +64,7 @@ struct
 
   let add_symbol t s =
     let open Symbol_scope in
-    { t with symbol_scopes = push (symbol s) t.symbol_scopes }
+    { t with symbol_scopes = symbol s t.symbol_scopes }
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
@@ -82,11 +82,11 @@ struct
 
   let open_scope t scope =
     let open Symbol_scope in
-    { t with symbol_scopes = push (open_scope scope) t.symbol_scopes }
+    { t with symbol_scopes = open_scope scope t.symbol_scopes }
 
   let close_scope t =
     let open Symbol_scope in
-    { t with symbol_scopes = push close_scope t.symbol_scopes }
+    { t with symbol_scopes = close_scope t.symbol_scopes }
 
   let clone
     { num_symbols
