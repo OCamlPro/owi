@@ -65,8 +65,6 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
     (>= 1.3.0))
   (digestif
     (>= 1.2.0))
-  (integers
-   (>= 0.5.1))
   (logs
     (>= 0.8.0))
   (ocaml_intrinsics
