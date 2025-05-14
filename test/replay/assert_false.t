@@ -1,5 +1,5 @@
   $ owi sym assert_false.wat -w1
-  owi: [ERROR] Assert failure: (i32.gt_u symbol_0 symbol_1)
+  owi: [ERROR] Assert failure: (i32.lt_u symbol_1 symbol_0)
   model {
     symbol symbol_0 i32 38077858
     symbol symbol_1 i32 38175397
