@@ -1,6 +1,6 @@
 entry_point:
   $ owi zig entry_point.zig --entry-point=fun
-  owi: [ERROR] Assert failure: (i32.ge_s symbol_0 5)
+  owi: [ERROR] Assert failure: (i32.le_s 5 symbol_0)
   model {
     symbol symbol_0 i32 4
   }
