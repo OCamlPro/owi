@@ -106,35 +106,35 @@
 include Thread.Make (Symbolic_memory_concretizing)
 
 let project (th : t) : Thread_without_memory.t * _ =
-  <span data-count="1087684">l</span>et projected =
+  <span data-count="1087747">l</span>et projected =
     let symbols = symbols th in
-    <span data-count="1087669">l</span>et symbols_set = symbols_set th in
-    <span data-count="1087671">l</span>et pc = pc th in
-    <span data-count="1087668">l</span>et memories = Thread_without_memory.Memory.init () in
-    <span data-count="1087669">l</span>et tables = tables th in
-    <span data-count="1087656">l</span>et globals = globals th in
-    <span data-count="1087663">l</span>et breadcrumbs = breadcrumbs th in
-    <span data-count="1087661">l</span>et labels = labels th in
-    <span data-count="1087661">T</span>hread_without_memory.creat<span data-count="1087671">e</span> symbols symbols_set pc memories tables globals
+    <span data-count="1087729">l</span>et symbols_set = symbols_set th in
+    <span data-count="1087728">l</span>et pc = pc th in
+    <span data-count="1087725">l</span>et memories = Thread_without_memory.Memory.init () in
+    <span data-count="1087730">l</span>et tables = tables th in
+    <span data-count="1087728">l</span>et globals = globals th in
+    <span data-count="1087727">l</span>et breadcrumbs = breadcrumbs th in
+    <span data-count="1087730">l</span>et labels = labels th in
+    <span data-count="1087733">T</span>hread_without_memory.creat<span data-count="1087736">e</span> symbols symbols_set pc memories tables globals
       breadcrumbs labels
   in
   let backup = memories th in
-  <span data-count="1087676">(</span>projected, backup)
+  <span data-count="1087738">(</span>projected, backup)
 
 let restore backup th =
-  <span data-count="1087706">l</span>et symbols = Thread_without_memory.symbols th in
-  <span data-count="1087706">l</span>et symbols_set = Thread_without_memory.symbols_set th in
-  <span data-count="1087703">l</span>et pc = Thread_without_memory.pc th in
-  <span data-count="1087702">l</span>et memories =
+  <span data-count="1087768">l</span>et symbols = Thread_without_memory.symbols th in
+  <span data-count="1087765">l</span>et symbols_set = Thread_without_memory.symbols_set th in
+  <span data-count="1087760">l</span>et pc = Thread_without_memory.pc th in
+  <span data-count="1087761">l</span>et memories =
     if Thread_without_memory.memories th then
       <span data-count="127">S</span>ymbolic_memory_concretizing.clon<span data-count="127">e</span> backup
-    else <span data-count="1087573">b</span>ackup
+    else <span data-count="1087633">b</span>ackup
   in
   let tables = Thread_without_memory.tables th in
-  <span data-count="1087702">l</span>et globals = Thread_without_memory.globals th in
-  <span data-count="1087696">l</span>et breadcrumbs = Thread_without_memory.breadcrumbs th in
-  <span data-count="1087699">l</span>et labels = Thread_without_memory.labels th in
-  <span data-count="1087700">c</span>reate symbols symbols_set pc memories tables globals breadcrumbs labels
+  <span data-count="1087760">l</span>et globals = Thread_without_memory.globals th in
+  <span data-count="1087754">l</span>et breadcrumbs = Thread_without_memory.breadcrumbs th in
+  <span data-count="1087763">l</span>et labels = Thread_without_memory.labels th in
+  <span data-count="1087764">c</span>reate symbols symbols_set pc memories tables globals breadcrumbs labels
 </code></pre>
       </div>
     </div>
