@@ -117,10 +117,11 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
         clang
     with
     | Ok _ as v -> v
-    | Error (`Msg e) ->
-      Fmt.error_msg "clang failed: %s"
-        ( if (* TODO: make this available via CLI *) false then e
-          else "run with --debug to get the full error message" )
+    | Error (`Msg msg) ->
+      Logs.debug (fun m -> m "clang failed: %s" msg);
+      Fmt.error_msg
+        "clang failed (run with -vv if the full error message is not displayed \
+         above)"
   in
 
   out
