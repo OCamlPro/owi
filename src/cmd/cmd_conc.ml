@@ -57,7 +57,9 @@ let run_modules_to_run (link_state : _ Link.state) modules_to_run =
   List.fold_left
     (fun (acc : unit Choice.t) to_run ->
       Choice.bind acc (fun () ->
-        (Interpret.Concolic.modul link_state.envs) to_run ) )
+        (Interpret.Concolic.modul ~timeout:None ~timeout_instr:None
+           link_state.envs )
+          to_run ) )
     (Choice.return ()) modules_to_run
 
 type end_of_trace =

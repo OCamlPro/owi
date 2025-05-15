@@ -316,7 +316,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
   let m = Symbolic.convert_module_to_run m in
 
-  Interpret.Symbolic.modul link_state.envs m
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 module String_set = Set.Make (String)
 

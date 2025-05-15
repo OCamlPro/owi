@@ -237,7 +237,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
-  let* () = Interpret.Concrete.modul link_state.envs m in
+  let* () =
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  in
   Ok ()
 
 let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
