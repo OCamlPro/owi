@@ -1205,17 +1205,17 @@ let load_func (ls : 'f state) (import : binary block_type Imported.t) :
   else <span data-count="36">E</span>rror (`Incompatible_import_type import.name)
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
-  <span data-count="20924">m</span>atch func with
-  | <span data-count="15044">R</span>untime.Local func -&gt; ok @@ Concrete_extern_func.was<span data-count="15044">m</span> func finished_env
+  <span data-count="20918">m</span>atch func with
+  | <span data-count="15038">R</span>untime.Local func -&gt; ok @@ Concrete_extern_func.was<span data-count="15038">m</span> func finished_env
   | <span data-count="5880">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : Link_env.t') env functions =
   <span data-count="3570">l</span>et+ env, _i =
     array_fold_lef<span data-count="3570">t</span>
       (fun (env, i) func -&gt;
-        <span data-count="20924">l</span>et+ func = eval_fun<span data-count="20924">c</span> ls finished_env func in
-        <span data-count="20870">l</span>et env = Link_env.Build.add_func i func env in
-        <span data-count="20870">(</span>env, suc<span data-count="20870">c</span> i) )
+        <span data-count="20918">l</span>et+ func = eval_fun<span data-count="20918">c</span> ls finished_env func in
+        <span data-count="20864">l</span>et env = Link_env.Build.add_func i func env in
+        <span data-count="20864">(</span>env, suc<span data-count="20864">c</span> i) )
       (env, 0) functions
   in
   <span data-count="3516">e</span>nv

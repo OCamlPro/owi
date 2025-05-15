@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>types.ml &mdash; Coverage report</title>
-    <meta name="description" content="51.84% coverage in src/ast/types.ml">
+    <meta name="description" content="52.43% coverage in src/ast/types.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/ast/</span>types.ml
         </a>
       </h1>
-      <h2>51.84%</h2>
+      <h2>52.43%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:4.41%"></span>
@@ -168,7 +168,6 @@
       <span class="unvisited" style="bottom:23.97%"></span>
       <span class="unvisited" style="bottom:23.87%"></span>
       <span class="unvisited" style="bottom:23.77%"></span>
-      <span class="unvisited" style="bottom:23.17%"></span>
       <span class="unvisited" style="bottom:23.07%"></span>
       <span class="some-visited" style="bottom:22.77%"></span>
       <span class="some-visited" style="bottom:22.67%"></span>
@@ -1001,7 +1000,7 @@
 <a id="L763"></a><span class="visited"> </span>
 <a id="L764"></a><span class="visited"> </span>
 <a id="L765"></a><span class="visited"> </span>
-<a id="L766"></a><span class="unvisited"> </span>
+<a id="L766"></a><span class="visited"> </span>
 <a id="L767"></a><span class="unvisited"> </span>
 <a id="L768"></a><span class="visited"> </span>
 <a id="L769"></a><span class="visited"> </span>
@@ -2303,8 +2302,8 @@ let pp_num_type fmt = function
   | <span data-count="712">F</span>64 -&gt; pf fmt "f64"
 
 let num_type_eq t1 t2 =
-  <span data-count="3227277">m</span>atch (t1, t2) with
-  | <span data-count="2958603">I</span>32, I32 | <span data-count="89673">I</span>64, I64 | <span data-count="89353">F</span>32, F32 | <span data-count="89606">F</span>64, F64 -&gt; true
+  <span data-count="3227281">m</span>atch (t1, t2) with
+  | <span data-count="2958605">I</span>32, I32 | <span data-count="89673">I</span>64, I64 | <span data-count="89353">F</span>32, F32 | <span data-count="89606">F</span>64, F64 -&gt; true
   | <span data-count="43">(</span><span data-count="15">I</span>32 | <span data-count="10">I</span>64 | <span data-count="10">F</span>32 | <span data-count="8">F</span>64), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2606,8 +2605,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="3225398">m</span>atch (t1, t2) with
-  | <span data-count="3225377">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="3225401">m</span>atch (t1, t2) with
+  | <span data-count="3225378">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="22">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2622,7 +2621,7 @@ type nonrec 'a param = string option * 'a val_type
 
 let pp_param fmt (id, vt) = <span data-count="297">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="1616355">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="1616356">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="33617">c</span>ompare_val_type t1 t2
 
@@ -2630,7 +2629,7 @@ type nonrec 'a param_type = 'a param list
 
 let pp_param_type fmt params = <span data-count="158">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="1616165">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="1616169">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="74490">L</span>ist.compare compare_param t1 t2
 
@@ -2640,7 +2639,7 @@ let pp_result_ fmt vt = <span data-count="165">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="165">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="1616022">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="1616024">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="40676">L</span>ist.compare compare_val_type t1 t2
 
@@ -2659,7 +2658,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="1616166">p</span>aram_type_e<span data-count="1616166">q</span> pt1 pt2 &amp;&amp; <span data-count="1616021">r</span>esult_type_eq rt1 rt2
+  <span data-count="1616170">p</span>aram_type_e<span data-count="1616169">q</span> pt1 pt2 &amp;&amp; <span data-count="1616023">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
@@ -2965,20 +2964,20 @@ let rec pp_instr ~short fmt = function
 and pp_expr ~short fmt instrs =
   <span data-count="346">l</span>ist ~sep:pp_newline (pp_instr ~short) fmt instrs
 
-let rec iter_expr f (e : _ expr) = <span data-count="10099">L</span>ist.iter (iter_inst<span data-count="10099">r</span> f) e
+let rec iter_expr f (e : _ expr) = <span data-count="10059">L</span>ist.iter (iter_inst<span data-count="10059">r</span> f) e
 
 and iter_instr f (i : _ instr) =
-  <span data-count="256741">f</span> i;
-  <span data-count="256741">m</span>atch i with
-  | <span data-count="39064">I</span>32_const _ | <span data-count="756">I</span>64_const _ | <span data-count="150">F</span>32_const _ | <span data-count="0">F</span>64_const _
+  <span data-count="255330">f</span> i;
+  <span data-count="255330">m</span>atch i with
+  | <span data-count="38893">I</span>32_const _ | <span data-count="756">I</span>64_const _ | <span data-count="150">F</span>32_const _ | <span data-count="0">F</span>64_const _
   | <span data-count="681">I</span>_unop (_, _)
   | <span data-count="0">F</span>_unop (_, _)
-  | <span data-count="21400">I</span>_binop (_, _)
+  | <span data-count="21226">I</span>_binop (_, _)
   | <span data-count="65">F</span>_binop (_, _)
-  | <span data-count="2799">I</span>_testop (_, _)
-  | <span data-count="6620">I</span>_relop (_, _)
+  | <span data-count="2786">I</span>_testop (_, _)
+  | <span data-count="6563">I</span>_relop (_, _)
   | <span data-count="146">F</span>_relop (_, _)
-  | <span data-count="37">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="17">I</span>32_wrap_i64
+  | <span data-count="37">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="19">I</span>32_wrap_i64
   | <span data-count="30">I</span>64_extend_i32 _
   | <span data-count="65">I</span>_trunc_f (_, _, _)
   | <span data-count="0">I</span>_trunc_sat_f (_, _, _)
@@ -2989,30 +2988,30 @@ and iter_instr f (i : _ instr) =
   | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_i31 | <span data-count="0">R</span>ef_func _ | <span data-count="0">R</span>ef_as_non_null
   | <span data-count="0">R</span>ef_cast (_, _)
   | <span data-count="0">R</span>ef_test (_, _)
-  | <span data-count="0">R</span>ef_eq | <span data-count="3747">D</span>rop | <span data-count="2312">S</span>elect _ | <span data-count="72407">L</span>ocal_get _ | <span data-count="13286">L</span>ocal_set _ | <span data-count="12282">L</span>ocal_tee _
-  | <span data-count="556">G</span>lobal_get _ | <span data-count="1035">G</span>lobal_set _ | <span data-count="0">T</span>able_get _ | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _
+  | <span data-count="0">R</span>ef_eq | <span data-count="3731">D</span>rop | <span data-count="2298">S</span>elect _ | <span data-count="71913">L</span>ocal_get _ | <span data-count="13198">L</span>ocal_set _ | <span data-count="12210">L</span>ocal_tee _
+  | <span data-count="552">G</span>lobal_get _ | <span data-count="1027">G</span>lobal_set _ | <span data-count="0">T</span>able_get _ | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _
   | <span data-count="0">T</span>able_grow _ | <span data-count="0">T</span>able_fill _
   | <span data-count="0">T</span>able_copy (_, _)
   | <span data-count="0">T</span>able_init (_, _)
   | <span data-count="0">E</span>lem_drop _
-  | <span data-count="21132">I</span>_load (_, _)
+  | <span data-count="21062">I</span>_load (_, _)
   | <span data-count="89">F</span>_load (_, _)
-  | <span data-count="14271">I</span>_store (_, _)
+  | <span data-count="14241">I</span>_store (_, _)
   | <span data-count="24">F</span>_store (_, _)
-  | <span data-count="2459">I</span>_load8 (_, _, _)
-  | <span data-count="0">I</span>_load16 (_, _, _)
+  | <span data-count="2409">I</span>_load8 (_, _, _)
+  | <span data-count="18">I</span>_load16 (_, _, _)
   | <span data-count="0">I</span>64_load32 (_, _)
-  | <span data-count="3694">I</span>_store8 (_, _)
-  | <span data-count="2">I</span>_store16 (_, _)
-  | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="2">M</span>emory_grow | <span data-count="0">M</span>emory_fill | <span data-count="0">M</span>emory_copy
-  | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="121">U</span>nreachable | <span data-count="1967">B</span>r _ | <span data-count="9253">B</span>r_if _
+  | <span data-count="3612">I</span>_store8 (_, _)
+  | <span data-count="6">I</span>_store16 (_, _)
+  | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="2">M</span>emory_grow | <span data-count="2">M</span>emory_fill | <span data-count="14">M</span>emory_copy
+  | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="123">U</span>nreachable | <span data-count="1987">B</span>r _ | <span data-count="9203">B</span>r_if _
   | <span data-count="31">B</span>r_table (_, _)
   | <span data-count="0">B</span>r_on_cast (_, _, _)
   | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
-  | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="1636">R</span>eturn | <span data-count="0">R</span>eturn_call _
+  | <span data-count="0">B</span>r_on_non_null _ | <span data-count="0">B</span>r_on_null _ | <span data-count="1614">R</span>eturn | <span data-count="0">R</span>eturn_call _
   | <span data-count="0">R</span>eturn_call_indirect (_, _)
-  | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="12871">C</span>all _
-  | <span data-count="1936">C</span>all_indirect (_, _)
+  | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="12859">C</span>all _
+  | <span data-count="1930">C</span>all_indirect (_, _)
   | <span data-count="0">C</span>all_ref _ | <span data-count="0">A</span>rray_get _ | <span data-count="0">A</span>rray_get_u _ | <span data-count="0">A</span>rray_len | <span data-count="0">A</span>rray_new _
   | <span data-count="0">A</span>rray_new_data (_, _)
   | <span data-count="0">A</span>rray_new_default _
@@ -3025,7 +3024,7 @@ and iter_instr f (i : _ instr) =
   | <span data-count="0">S</span>truct_set (_, _)
   | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
     ()
-  | <span data-count="8222">B</span>lock (_, _, e) | <span data-count="1503">L</span>oop (_, _, e) -&gt; iter_expr f e
+  | <span data-count="8204">B</span>lock (_, _, e) | <span data-count="1481">L</span>oop (_, _, e) -&gt; iter_expr f e
   | <span data-count="0">I</span>f_else (_, _, e1, e2) -&gt;
     iter_expr f e1;
     <span data-count="0">i</span>ter_expr f e2
