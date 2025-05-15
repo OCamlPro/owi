@@ -12,3 +12,20 @@ double sqrt(double x) { return x; }
 float roundf(float x) { return x; }
 float log2f(float x) { return x; }
 float sqrtf(float x) { return x; }
+float fabsf(float x) {
+  __asm__ __volatile__(
+    "local.get 0;"
+    "f32.abs;"
+    "return;"
+  );
+}
+/*
+int isnan(float x) {
+  __asm__ __volatile__(
+    "local.get 0;"
+    "local.get 0;"
+    "f32.ne;"
+    "return;"
+  );
+}
+*/
