@@ -450,7 +450,7 @@ module IMap = Map.Make (Int)
 
 type data = { mutable value : string }
 
-let drop_data data = <span data-count="1086">d</span>ata.value &lt;- ""
+let drop_data data = <span data-count="1084">d</span>ata.value &lt;- ""
 
 type elem = { mutable value : Concrete_value.ref_value array }
 
@@ -473,76 +473,76 @@ type 'ext t =
 
 type 'ext backup = 'ext t
 
-let backup_data (data : data) : data = <span data-count="531">{</span> value = data.value }
+let backup_data (data : data) : data = <span data-count="529">{</span> value = data.value }
 
-let backup_elem (elem : elem) : elem = <span data-count="518">{</span> value = elem.value }
+let backup_elem (elem : elem) : elem = <span data-count="516">{</span> value = elem.value }
 
-let recover_data ~(from_ : data) ~(to_ : data) = <span data-count="531">t</span>o_.value &lt;- from_.value
+let recover_data ~(from_ : data) ~(to_ : data) = <span data-count="529">t</span>o_.value &lt;- from_.value
 
-let recover_elem ~(from_ : elem) ~(to_ : elem) = <span data-count="518">t</span>o_.value &lt;- from_.value
+let recover_elem ~(from_ : elem) ~(to_ : elem) = <span data-count="516">t</span>o_.value &lt;- from_.value
 
 let backup t =
-  <span data-count="532">{</span> t with
-    globals = IMap.ma<span data-count="532">p</span> Concrete_global.backup t.globals
-  ; memories = IMap.ma<span data-count="532">p</span> Concrete_memory.backup t.memories
-  ; tables = IMap.ma<span data-count="532">p</span> Concrete_table.backup t.tables
-  ; data = IMap.ma<span data-count="532">p</span> backup_data t.data
-  ; elem = IMap.ma<span data-count="532">p</span> backup_elem t.elem
+  <span data-count="530">{</span> t with
+    globals = IMap.ma<span data-count="530">p</span> Concrete_global.backup t.globals
+  ; memories = IMap.ma<span data-count="530">p</span> Concrete_memory.backup t.memories
+  ; tables = IMap.ma<span data-count="530">p</span> Concrete_table.backup t.tables
+  ; data = IMap.ma<span data-count="530">p</span> backup_data t.data
+  ; elem = IMap.ma<span data-count="530">p</span> backup_elem t.elem
   }
 
 let recover backup into =
-  <span data-count="532">l</span>et apply f _key v1 v2 =
-    <span data-count="2610">m</span>atch (v1, v2) with
-    | <span data-count="2610">S</span>ome v1, Some v2 -&gt;
+  <span data-count="530">l</span>et apply f _key v1 v2 =
+    <span data-count="2600">m</span>atch (v1, v2) with
+    | <span data-count="2600">S</span>ome v1, Some v2 -&gt;
       f ~from_:v1 ~to_:v2;
       None
     | _ -&gt; assert false
   in
   let _ : _ IMap.t =
-    IMap.merge (appl<span data-count="532">y</span> Concrete_global.recover) backup.globals into.globals
+    IMap.merge (appl<span data-count="530">y</span> Concrete_global.recover) backup.globals into.globals
   in
-  <span data-count="532">l</span>et _ : _ IMap.t =
-    IMap.merge (appl<span data-count="532">y</span> Concrete_memory.recover) backup.memories into.memories
+  <span data-count="530">l</span>et _ : _ IMap.t =
+    IMap.merge (appl<span data-count="530">y</span> Concrete_memory.recover) backup.memories into.memories
   in
-  <span data-count="532">l</span>et _ : _ IMap.t =
-    IMap.merge (appl<span data-count="532">y</span> Concrete_table.recover) backup.tables into.tables
+  <span data-count="530">l</span>et _ : _ IMap.t =
+    IMap.merge (appl<span data-count="530">y</span> Concrete_table.recover) backup.tables into.tables
   in
-  <span data-count="532">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="532">y</span> recover_data) backup.data into.data in
-  <span data-count="532">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="532">y</span> recover_elem) backup.elem into.elem in
-  <span data-count="532">(</span>)
+  <span data-count="530">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="530">y</span> recover_data) backup.data into.data in
+  <span data-count="530">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="530">y</span> recover_elem) backup.elem into.elem in
+  <span data-count="530">(</span>)
 
-let id (env : _ t) = <span data-count="2348533">e</span>nv.id
+let id (env : _ t) = <span data-count="2340704">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="6863">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="6693">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="6863">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="6694">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="6035916">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="6028323">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="6035914">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="6028322">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="1616293">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="1616223">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="1616293">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1616223">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="10499307">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10499306">S</span>ome v -&gt; v
+  <span data-count="10498574">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="10498572">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
-  <span data-count="2284">m</span>atch IMap.find_opt id env.data with
+  <span data-count="2280">m</span>atch IMap.find_opt id env.data with
   | None -&gt; assert false
-  | <span data-count="2284">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="2280">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_elem (env : _ t) id =
-  <span data-count="3022">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="3022">S</span>ome v -&gt; v
+  <span data-count="3018">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="3018">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="123232">m</span>atch Func_id.get id env.extern_funcs with
+  <span data-count="122984">m</span>atch Func_id.get id env.extern_funcs with
   | None -&gt; assert false
-  | <span data-count="123232">S</span>ome v -&gt; v
+  | <span data-count="122983">S</span>ome v -&gt; v
 
 module Build = struct
   type t =

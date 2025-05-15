@@ -163,17 +163,17 @@ module C = Concrete_memory
 module S = Symbolic_memory
 
 let with_concrete (mc, ms) a f_c f_s =
-  <span data-count="47497">l</span>et open Concolic_choice in
-  let* a = select_i3<span data-count="47497">2</span> a in
-  <span data-count="47497">m</span>atch f_c mc a with
+  <span data-count="47086">l</span>et open Concolic_choice in
+  let* a = select_i3<span data-count="47086">2</span> a in
+  <span data-count="47086">m</span>atch f_c mc a with
   | <span data-count="0">E</span>rror t -&gt; Concolic_choice.trap t
-  | <span data-count="47497">O</span>k c -&gt; Concolic_choice.return (c, f_<span data-count="47497">s</span> ms (Symbolic_value.const_i3<span data-count="47497">2</span> a))
+  | <span data-count="47086">O</span>k c -&gt; Concolic_choice.return (c, f_<span data-count="47086">s</span> ms (Symbolic_value.const_i3<span data-count="47086">2</span> a))
 
 let with_concrete_store (mc, ms) a f_c f_s (vc, vs) =
-  <span data-count="33132">l</span>et open Concolic_choice in
-  let+ addr = select_i3<span data-count="33132">2</span> a in
-  <span data-count="33132">f</span>_c mc ~addr vc;
-  <span data-count="33132">f</span>_s ms ~addr:(Symbolic_value.const_i3<span data-count="33132">2</span> addr) vs
+  <span data-count="32951">l</span>et open Concolic_choice in
+  let+ addr = select_i3<span data-count="32951">2</span> a in
+  <span data-count="32951">f</span>_c mc ~addr vc;
+  <span data-count="32951">f</span>_s ms ~addr:(Symbolic_value.const_i3<span data-count="32951">2</span> addr) vs
 
 let load_8_s m a : Concolic_value.int32 Concolic_choice.t =
   <span data-count="380">w</span>ith_concrete m a C.load_8_s S.load_8_s
@@ -184,15 +184,15 @@ let load_16_s m a = <span data-count="0">w</span>ith_concrete m a C.load_16_s S.
 
 let load_16_u m a = <span data-count="0">w</span>ith_concrete m a C.load_16_u S.load_16_u
 
-let load_32 m a = <span data-count="43737">w</span>ith_concrete m a C.load_32 S.load_32
+let load_32 m a = <span data-count="43326">w</span>ith_concrete m a C.load_32 S.load_32
 
 let load_64 m a = <span data-count="103">w</span>ith_concrete m a C.load_64 S.load_64
 
-let store_8 m ~addr v = <span data-count="5765">w</span>ith_concrete_store m addr C.store_8 S.store_8 v
+let store_8 m ~addr v = <span data-count="5757">w</span>ith_concrete_store m addr C.store_8 S.store_8 v
 
 let store_16 m ~addr v = <span data-count="0">w</span>ith_concrete_store m addr C.store_16 S.store_16 v
 
-let store_32 m ~addr v = <span data-count="26691">w</span>ith_concrete_store m addr C.store_32 S.store_32 v
+let store_32 m ~addr v = <span data-count="26518">w</span>ith_concrete_store m addr C.store_32 S.store_32 v
 
 let store_64 m ~addr v = <span data-count="676">w</span>ith_concrete_store m addr C.store_64 S.store_64 v
 
@@ -200,7 +200,7 @@ let grow (mc, ms) (deltac, deltas) =
   <span data-count="0">C</span>oncrete_memory.grow mc deltac;
   <span data-count="0">S</span>ymbolic_memory.grow ms deltas
 
-let size (mc, ms) = <span data-count="80629">(</span>Concrete_memory.siz<span data-count="80629">e</span> mc, Symbolic_memory.siz<span data-count="80629">e</span> ms)
+let size (mc, ms) = <span data-count="80037">(</span>Concrete_memory.siz<span data-count="80037">e</span> mc, Symbolic_memory.siz<span data-count="80037">e</span> ms)
 
 let size_in_pages (mc, ms) =
   <span data-count="0">(</span>Concrete_memory.size_in_page<span data-count="0">s</span> mc, Symbolic_memory.size_in_page<span data-count="0">s</span> ms)
@@ -210,11 +210,11 @@ let fill _ = <span data-count="0">F</span>mt.failwith "TODO"
 let blit _ = <span data-count="0">F</span>mt.failwith "TODO"
 
 let blit_string (mc, ms) str ~src ~dst ~len =
-  <span data-count="531">l</span>et src_c, src_s = src in
+  <span data-count="529">l</span>et src_c, src_s = src in
   let dst_c, dst_s = dst in
   let len_c, len_s = len in
-  ( Concrete_memory.blit_strin<span data-count="531">g</span> mc str ~src:src_c ~dst:dst_c ~len:len_c
-  , Symbolic_memory.blit_strin<span data-count="531">g</span> ms str ~src:src_s ~dst:dst_s ~len:len_s )
+  ( Concrete_memory.blit_strin<span data-count="529">g</span> mc str ~src:src_c ~dst:dst_c ~len:len_c
+  , Symbolic_memory.blit_strin<span data-count="529">g</span> ms str ~src:src_s ~dst:dst_s ~len:len_s )
 
 let get_limit_max _ = <span data-count="0">F</span>mt.failwith "TODO"
 </code></pre>

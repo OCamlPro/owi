@@ -269,7 +269,7 @@ module Make (Thread : Thread_intf.S) = struct
   let select_i32 (i : int32) =
     <span data-count="0">l</span>et v = Smtml.Expr.simplify i in
     <span data-count="0">m</span>atch Smtml.Expr.view v with
-    | <span data-count="0">V</span>al (Num (I32 i)) -&gt; return i
+    | <span data-count="0">V</span>al (Bitv bv) -&gt; return (Smtml.Bitvector.to_int3<span data-count="0">2</span> bv)
     | <span data-count="0">_</span> -&gt;
       Fmt.failwith "Minimalist_symbolic_choice.select_i32 failed on %a"
         Smtml.Expr.pp v

@@ -1042,8 +1042,8 @@ type t =
 
 (* Bof... *)
 let pair_value (c : C.t) (s : S.t) =
-  <span data-count="1185">m</span>atch (c, s) with
-  | <span data-count="1185">I</span>32 c, I32 s -&gt; I32 (c, s)
+  <span data-count="1164">m</span>atch (c, s) with
+  | <span data-count="1164">I</span>32 c, I32 s -&gt; I32 (c, s)
   | <span data-count="0">I</span>64 c, I64 s -&gt; I64 (c, s)
   | <span data-count="0">F</span>32 c, F32 s -&gt; F32 (c, s)
   | <span data-count="0">F</span>64 c, F64 s -&gt; F64 (c, s)
@@ -1051,22 +1051,22 @@ let pair_value (c : C.t) (s : S.t) =
   | _, _ -&gt; assert false
 
 let concrete_value (cs : t) : C.t =
-  <span data-count="1659">m</span>atch cs with
-  | <span data-count="1659">I</span>32 (c, _s) -&gt; I32 c
+  <span data-count="1630">m</span>atch cs with
+  | <span data-count="1630">I</span>32 (c, _s) -&gt; I32 c
   | <span data-count="0">I</span>64 (c, _s) -&gt; I64 c
   | <span data-count="0">F</span>32 (c, _s) -&gt; F32 c
   | <span data-count="0">F</span>64 (c, _s) -&gt; F64 c
   | <span data-count="0">R</span>ef (c, _s) -&gt; Ref c
 
 let symbolic_value (cs : t) : S.t =
-  <span data-count="1659">m</span>atch cs with
-  | <span data-count="1659">I</span>32 (_c, s) -&gt; I32 s
+  <span data-count="1630">m</span>atch cs with
+  | <span data-count="1630">I</span>32 (_c, s) -&gt; I32 s
   | <span data-count="0">I</span>64 (_c, s) -&gt; I64 s
   | <span data-count="0">F</span>32 (_c, s) -&gt; F32 s
   | <span data-count="0">F</span>64 (_c, s) -&gt; F64 s
   | <span data-count="0">R</span>ef (_c, s) -&gt; Ref s
 
-let f_pair_1 fc fs (c, s) = <span data-count="55053">(</span>f<span data-count="55053">c</span> c, f<span data-count="55053">s</span> s) [@@inline always]
+let f_pair_1 fc fs (c, s) = <span data-count="54835">(</span>f<span data-count="54835">c</span> c, f<span data-count="54835">s</span> s) [@@inline always]
 
 let f_pair_1' fc fs (c, s) =
   <span data-count="12">m</span>atch fc c with
@@ -1074,17 +1074,17 @@ let f_pair_1' fc fs (c, s) =
   | <span data-count="12">O</span>k c -&gt; ( match fs s with <span data-count="0">E</span>rror _ as e -&gt; e | <span data-count="12">O</span>k s -&gt; Ok (c, s) )
 [@@inline always]
 
-let f_pair_2 fc fs (c1, s1) (c2, s2) = <span data-count="542939">(</span>f<span data-count="542939">c</span> c1 c2, f<span data-count="542939">s</span> s1 s2) [@@inline always]
+let f_pair_2 fc fs (c1, s1) (c2, s2) = <span data-count="539224">(</span>f<span data-count="539224">c</span> c1 c2, f<span data-count="539224">s</span> s1 s2) [@@inline always]
 
-let f_pair_1_cst fc fs v = <span data-count="387792">(</span>f<span data-count="387792">c</span> v, f<span data-count="387792">s</span> v) [@@inline always]
+let f_pair_1_cst fc fs v = <span data-count="385238">(</span>f<span data-count="385238">c</span> v, f<span data-count="385238">s</span> v) [@@inline always]
 
-let f_pair_2_cst' fc fs (c, s) v2 = <span data-count="5143">(</span>f<span data-count="5143">c</span> c v2, f<span data-count="5143">s</span> s v2) [@@inline always]
+let f_pair_2_cst' fc fs (c, s) v2 = <span data-count="5109">(</span>f<span data-count="5109">c</span> c v2, f<span data-count="5109">s</span> s v2) [@@inline always]
 
-let const_i32 v = <span data-count="384985">f</span>_pair_1_cst C.const_i32 S.const_i32 v
+let const_i32 v = <span data-count="382435">f</span>_pair_1_cst C.const_i32 S.const_i32 v
 
 let const_i64 v = <span data-count="2595">f</span>_pair_1_cst C.const_i64 S.const_i64 v
 
-let const_f32 v = <span data-count="212">f</span>_pair_1_cst C.const_f32 S.const_f32 v
+let const_f32 v = <span data-count="208">f</span>_pair_1_cst C.const_f32 S.const_f32 v
 
 let const_f64 v = <span data-count="0">f</span>_pair_1_cst C.const_f64 S.const_f64 v
 
@@ -1118,10 +1118,10 @@ module Ref = struct
     <span data-count="0">F</span>mt.failwith "TODO equal_func_intf"
 
   let get_func (c, s) : Func_intf.t Value_intf.get_ref =
-    <span data-count="4129">m</span>atch (C.Ref.get_fun<span data-count="4129">c</span> c, S.Ref.get_fun<span data-count="4129">c</span> s) with
+    <span data-count="4115">m</span>atch (C.Ref.get_fun<span data-count="4115">c</span> c, S.Ref.get_fun<span data-count="4115">c</span> s) with
     | <span data-count="0">N</span>ull, Null -&gt; Null
     | <span data-count="0">T</span>ype_mismatch, Type_mismatch -&gt; Type_mismatch
-    | <span data-count="4129">R</span>ef_value c, Ref_value _s -&gt; Ref_value c
+    | <span data-count="4115">R</span>ef_value c, Ref_value _s -&gt; Ref_value c
     | _ -&gt; assert false
 
   let get_externref (c, s) ty_id : _ Value_intf.get_ref =
