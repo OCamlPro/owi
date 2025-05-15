@@ -38,11 +38,14 @@ module Text = struct
     let* m = until_optimize ~unsafe ~rac ~srac ~optimize m in
     Link.modul link_state ~name m
 
-  let until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state m =
+  let until_interpret ~unsafe ~timeout ~timeout_instr ~rac ~srac ~optimize ~name
+    link_state m =
     let* m, link_state =
       until_link ~unsafe ~rac ~srac ~optimize ~name link_state m
     in
-    let+ () = Interpret.Concrete.modul link_state.envs m in
+    let+ () =
+      Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
+    in
     link_state
 end
 
@@ -61,9 +64,12 @@ module Binary = struct
     let* m = until_optimize ~unsafe ~optimize m in
     Link.modul link_state ~name m
 
-  let until_interpret ~unsafe ~optimize ~name link_state m =
+  let until_interpret ~unsafe ~timeout ~timeout_instr ~optimize ~name link_state
+    m =
     let* m, link_state = until_link ~unsafe ~optimize ~name link_state m in
-    let+ () = Interpret.Concrete.modul link_state.envs m in
+    let+ () =
+      Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
+    in
     link_state
 end
 
@@ -84,10 +90,14 @@ module Any = struct
     | Wasm m -> Binary.until_link ~unsafe ~optimize ~name link_state m
     | Wast _ | Ocaml _ -> assert false
 
-  let until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state = function
+  let until_interpret ~unsafe ~timeout ~timeout_instr ~rac ~srac ~optimize ~name
+    link_state = function
     | Kind.Wat m ->
-      Text.until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state m
-    | Wasm m -> Binary.until_interpret ~unsafe ~optimize ~name link_state m
+      Text.until_interpret ~unsafe ~timeout ~timeout_instr ~rac ~srac ~optimize
+        ~name link_state m
+    | Wasm m ->
+      Binary.until_interpret ~unsafe ~timeout ~timeout_instr ~optimize ~name
+        link_state m
     | Wast _ | Ocaml _ -> assert false
 end
 
@@ -114,11 +124,15 @@ module File = struct
     | Wasm m -> Binary.until_link ~unsafe ~optimize ~name link_state m
     | Wast _ | Ocaml _ -> assert false
 
-  let until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state filename =
+  let until_interpret ~unsafe ~timeout ~timeout_instr ~rac ~srac ~optimize ~name
+    link_state filename =
     let* m = Parse.guess_from_file filename in
     match m with
     | Kind.Wat m ->
-      Text.until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state m
-    | Wasm m -> Binary.until_interpret ~unsafe ~optimize ~name link_state m
+      Text.until_interpret ~unsafe ~timeout ~timeout_instr ~rac ~srac ~optimize
+        ~name link_state m
+    | Wasm m ->
+      Binary.until_interpret ~unsafe ~timeout ~timeout_instr ~optimize ~name
+        link_state m
     | Wast _ | Ocaml _ -> assert false
 end
