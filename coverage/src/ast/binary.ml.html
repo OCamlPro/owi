@@ -410,8 +410,8 @@ module Module = struct
   (** Return the first function exported as [name] if it exists. Return [None]
       otherwise.*)
   let find_exported_func_from_name name m =
-    <span data-count="379">L</span>ist.find_opt
-      (function <span data-count="381">{</span> name = name'; _ } -&gt; String.equal name name')
+    <span data-count="380">L</span>ist.find_opt
+      (function <span data-count="382">{</span> name = name'; _ } -&gt; String.equal name name')
       m.exports.func
 
   (** Imports *)
@@ -419,19 +419,19 @@ module Module = struct
   (** Return the index of a function imported from a given [modul_name] and
       [func_name] if it exists. Return [None] otherwise. *)
   let find_imported_func_index ~modul_name ~func_name m =
-    <span data-count="1515">A</span>rray.find_index
+    <span data-count="1519">A</span>rray.find_index
       (function
-        | <span data-count="7359">R</span>untime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
+        | <span data-count="7380">R</span>untime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
           -&gt;
-          String.equa<span data-count="7359">l</span> modul_name modul &amp;&amp; <span data-count="4687">S</span>tring.equal func_name name
-        | <span data-count="14651">L</span>ocal _ -&gt; false )
+          String.equa<span data-count="7380">l</span> modul_name modul &amp;&amp; <span data-count="4708">S</span>tring.equal func_name name
+        | <span data-count="14657">L</span>ocal _ -&gt; false )
       m.func
 
   (** Look for an imported function index, adding it if not already imported. *)
   let add_import_if_not_present ~modul_name ~func_name ~desc m =
-    <span data-count="1512">m</span>atch find_imported_func_index ~modul_name ~func_name m with
-    | <span data-count="354">S</span>ome i -&gt; (Types.Raw i, m)
-    | <span data-count="1158">N</span>one -&gt;
+    <span data-count="1516">m</span>atch find_imported_func_index ~modul_name ~func_name m with
+    | <span data-count="355">S</span>ome i -&gt; (Types.Raw i, m)
+    | <span data-count="1161">N</span>one -&gt;
       let f =
         Runtime.Imported
           { Imported.modul = modul_name
@@ -441,8 +441,8 @@ module Module = struct
           }
       in
       let func = Array.append m.func [| f |] in
-      <span data-count="1158">l</span>et m = { m with func } in
-      let i = Array.lengt<span data-count="1158">h</span> func - 1 in
+      <span data-count="1161">l</span>et m = { m with func } in
+      let i = Array.lengt<span data-count="1161">h</span> func - 1 in
       (Types.Raw i, m)
 
   (** Functions *)
@@ -450,21 +450,21 @@ module Module = struct
   (** Add a function [f] to a module [m] and returns the module and the index of
       the added function. *)
   let add_func f m =
-    <span data-count="405">l</span>et len = Array.length m.func in
-    <span data-count="405">l</span>et func =
+    <span data-count="406">l</span>et len = Array.length m.func in
+    <span data-count="406">l</span>et func =
       Array.init
-        (Array.lengt<span data-count="405">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="8110">i</span>f i = len then <span data-count="405">f</span> else <span data-count="7705">m</span>.func.(i))
+        (Array.lengt<span data-count="406">h</span> m.func + 1)
+        (fun i -&gt; <span data-count="8122">i</span>f i = len then <span data-count="406">f</span> else <span data-count="7716">m</span>.func.(i))
     in
 
-    <span data-count="405">(</span>{ m with func }, len)
+    <span data-count="406">(</span>{ m with func }, len)
 
   (** Return the type of the function at index [id]. *)
   let get_func_type id m =
-    <span data-count="390">i</span>f id &gt;= Array.lengt<span data-count="390">h</span> m.func then <span data-count="0">N</span>one
+    <span data-count="391">i</span>f id &gt;= Array.lengt<span data-count="391">h</span> m.func then <span data-count="0">N</span>one
     else
-      <span data-count="390">m</span>atch m.func.(id) with
-      | <span data-count="390">L</span>ocal f -&gt; Some f.type_f
+      <span data-count="391">m</span>atch m.func.(id) with
+      | <span data-count="391">L</span>ocal f -&gt; Some f.type_f
       | <span data-count="0">I</span>mported i -&gt; Some i.desc
 end
 </code></pre>

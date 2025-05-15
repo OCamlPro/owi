@@ -289,8 +289,8 @@ let recover ~from_ ~to_ =
   to_.data &lt;- from_.data
 
 let init limits : t =
-  <span data-count="1088">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
-  <span data-count="1088">{</span> limits; data }
+  <span data-count="1089">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
+  <span data-count="1089">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="196">l</span>et limits =
@@ -385,7 +385,7 @@ let load_64 mem addr =
   <span data-count="1342">l</span>et addr = Int32.to_int addr in
   <span data-count="1342">O</span>k (Bytes.get_int64_l<span data-count="1342">e</span> mem.data addr)
 
-let size_in_pages mem = <span data-count="797">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="797">h</span> mem.data / page_size)
+let size_in_pages mem = <span data-count="798">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="798">h</span> mem.data / page_size)
 
 let size mem = <span data-count="1932174">I</span>nt32.of_int @@ Bytes.lengt<span data-count="1932174">h</span> mem.data
 </code></pre>

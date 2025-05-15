@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_wasm_ffi.ml &mdash; Coverage report</title>
-    <meta name="description" content="73.83% coverage in src/symbolic/symbolic_wasm_ffi.ml">
+    <meta name="description" content="75.65% coverage in src/symbolic/symbolic_wasm_ffi.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,28 +15,28 @@
           <span class="dirname">src/symbolic/</span>symbolic_wasm_ffi.ml
         </a>
       </h1>
-      <h2>73.83%</h2>
+      <h2>75.65%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:26.47%"></span>
-      <span class="unvisited" style="top:26.96%"></span>
-      <span class="unvisited" style="top:27.45%"></span>
-      <span class="unvisited" style="top:27.94%"></span>
-      <span class="unvisited" style="top:28.43%"></span>
-      <span class="unvisited" style="top:42.16%"></span>
-      <span class="unvisited" style="top:42.65%"></span>
-      <span class="unvisited" style="top:43.14%"></span>
-      <span class="unvisited" style="top:43.63%"></span>
-      <span class="some-visited" style="top:47.55%"></span>
-      <span class="unvisited" style="bottom:48.53%"></span>
-      <span class="unvisited" style="bottom:48.04%"></span>
-      <span class="unvisited" style="bottom:47.55%"></span>
-      <span class="unvisited" style="bottom:47.06%"></span>
-      <span class="unvisited" style="bottom:46.57%"></span>
-      <span class="some-visited" style="bottom:40.20%"></span>
-      <span class="unvisited" style="bottom:36.76%"></span>
-      <span class="unvisited" style="bottom:35.78%"></span>
-      <span class="unvisited" style="bottom:34.80%"></span>
+      <span class="unvisited" style="top:24.77%"></span>
+      <span class="unvisited" style="top:25.23%"></span>
+      <span class="unvisited" style="top:25.69%"></span>
+      <span class="unvisited" style="top:26.15%"></span>
+      <span class="unvisited" style="top:26.61%"></span>
+      <span class="unvisited" style="top:39.45%"></span>
+      <span class="unvisited" style="top:39.91%"></span>
+      <span class="unvisited" style="top:40.37%"></span>
+      <span class="unvisited" style="top:40.83%"></span>
+      <span class="some-visited" style="top:44.50%"></span>
+      <span class="unvisited" style="top:48.17%"></span>
+      <span class="unvisited" style="top:48.62%"></span>
+      <span class="unvisited" style="top:49.08%"></span>
+      <span class="unvisited" style="top:49.54%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="some-visited" style="bottom:44.04%"></span>
+      <span class="unvisited" style="bottom:40.83%"></span>
+      <span class="unvisited" style="bottom:39.91%"></span>
+      <span class="unvisited" style="bottom:38.99%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -176,11 +176,11 @@
 <a id="L133"></a><span class="unvisited"> </span>
 <a id="L134"></a><span > </span>
 <a id="L135"></a><span > </span>
-<a id="L136"></a><span > </span>
-<a id="L137"></a><span > </span>
-<a id="L138"></a><span > </span>
-<a id="L139"></a><span > </span>
-<a id="L140"></a><span > </span>
+<a id="L136"></a><span class="visited"> </span>
+<a id="L137"></a><span class="visited"> </span>
+<a id="L138"></a><span class="visited"> </span>
+<a id="L139"></a><span class="visited"> </span>
+<a id="L140"></a><span class="visited"> </span>
 <a id="L141"></a><span > </span>
 <a id="L142"></a><span > </span>
 <a id="L143"></a><span > </span>
@@ -245,6 +245,20 @@
 <a id="L202"></a><span > </span>
 <a id="L203"></a><span > </span>
 <a id="L204"></a><span > </span>
+<a id="L205"></a><span > </span>
+<a id="L206"></a><span > </span>
+<a id="L207"></a><span > </span>
+<a id="L208"></a><span > </span>
+<a id="L209"></a><span > </span>
+<a id="L210"></a><span > </span>
+<a id="L211"></a><span > </span>
+<a id="L212"></a><span > </span>
+<a id="L213"></a><span > </span>
+<a id="L214"></a><span > </span>
+<a id="L215"></a><span > </span>
+<a id="L216"></a><span > </span>
+<a id="L217"></a><span > </span>
+<a id="L218"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -453,6 +467,20 @@
 <a href="#L202">202</a>
 <a href="#L203">203</a>
 <a href="#L204">204</a>
+<a href="#L205">205</a>
+<a href="#L206">206</a>
+<a href="#L207">207</a>
+<a href="#L208">208</a>
+<a href="#L209">209</a>
+<a href="#L210">210</a>
+<a href="#L211">211</a>
+<a href="#L212">212</a>
+<a href="#L213">213</a>
+<a href="#L214">214</a>
+<a href="#L215">215</a>
+<a href="#L216">216</a>
+<a href="#L217">217</a>
+<a href="#L218">218</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -478,17 +506,17 @@ end = struct
 
   module Value = Symbolic_value
 
-  let covered_labels = Hashtbl.creat<span data-count="1011">e</span> 16
+  let covered_labels = Hashtbl.creat<span data-count="1012">e</span> 16
 
-  let cov_lock = Mutex.creat<span data-count="1011">e</span> ()
+  let cov_lock = Mutex.creat<span data-count="1012">e</span> ()
 
-  let add_pc_wrapper e = <span data-count="619">C</span>hoice.add_pc e
+  let add_pc_wrapper e = <span data-count="627">C</span>hoice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="595">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="595">l</span> i
+    <span data-count="603">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="603">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96997">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96996">l</span> i
+    <span data-count="96998">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96997">l</span> i
 
   let symbol_invisible_bool () =
     <span data-count="1">C</span>hoice.with_new_invisible_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -504,7 +532,7 @@ end = struct
 
   let symbol_char = symbol_i8
 
-  let symbol_i32 () = <span data-count="1190">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () = <span data-count="1200">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i32_constant v =
     <span data-count="0">l</span>et open Choice in
@@ -529,10 +557,10 @@ end = struct
   let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9919">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9919">c</span> m ~ptr:base ~size
+    <span data-count="9920">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9920">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2545">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2546">e</span> m ptr
+    <span data-count="2548">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2548">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="2">a</span>bort ()
 
@@ -545,16 +573,16 @@ end = struct
     <span data-count="0">r</span>eturn ()
 
   let rec make_str m accu i =
-    <span data-count="16">l</span>et open Choice in
-    let* p = Memory.load_8_<span data-count="16">u</span> m (Value.const_i3<span data-count="16">2</span> i) in
-    <span data-count="16">m</span>atch Smtml.Expr.view p with
-    | <span data-count="16">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="16">s</span> bv = 32 -&gt;
-      <span data-count="16">l</span>et c = Smtml.Bitvector.to_int32 bv in
-      <span data-count="16">i</span>f Int32.g<span data-count="16">t</span> c 255<span data-count="0">l</span> || Int32.l<span data-count="16">t</span> c 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
+    <span data-count="83">l</span>et open Choice in
+    let* p = Memory.load_8_<span data-count="83">u</span> m (Value.const_i3<span data-count="83">2</span> i) in
+    <span data-count="83">m</span>atch Smtml.Expr.view p with
+    | <span data-count="83">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="83">s</span> bv = 32 -&gt;
+      <span data-count="83">l</span>et c = Smtml.Bitvector.to_int32 bv in
+      <span data-count="83">i</span>f Int32.g<span data-count="83">t</span> c 255<span data-count="0">l</span> || Int32.l<span data-count="83">t</span> c 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
       else
-        <span data-count="16">l</span>et ch = char_of_int (Int32.to_in<span data-count="16">t</span> c) in
-        <span data-count="16">i</span>f Char.equal ch '\x00' then <span data-count="2">r</span>eturn (List.rev accu |&gt; <span data-count="2">A</span>rray.of_lis<span data-count="2">t</span>)
-        else <span data-count="14">m</span>ake_str m (ch :: accu) (Int32.ad<span data-count="14">d</span> i (Int32.of_in<span data-count="14">t</span> 1))
+        <span data-count="83">l</span>et ch = char_of_int (Int32.to_in<span data-count="83">t</span> c) in
+        <span data-count="83">i</span>f Char.equal ch '\x00' then <span data-count="12">r</span>eturn (List.rev accu |&gt; <span data-count="12">A</span>rray.of_lis<span data-count="12">t</span>)
+        else <span data-count="71">m</span>ake_str m (ch :: accu) (Int32.ad<span data-count="71">d</span> i (Int32.of_in<span data-count="71">t</span> 1))
     | _ -&gt; assert false
 
   let cov_label_is_covered id =
@@ -587,6 +615,15 @@ end = struct
         <span data-count="0">m</span> "cov_label_set: invalid type id:%a ptr:%a" Smtml.Expr.pp id
           Smtml.Expr.pp ptr );
       <span data-count="0">a</span>ssert false
+
+  let open_scope m ptr =
+    <span data-count="10">l</span>et open Choice in
+    let* ptr = select_i3<span data-count="10">2</span> ptr in
+    <span data-count="10">l</span>et* chars = make_st<span data-count="10">r</span> m [] ptr in
+    <span data-count="10">l</span>et str = String.init (Array.lengt<span data-count="10">h</span> chars) (Array.ge<span data-count="10">t</span> chars) in
+    <span data-count="10">o</span>pen_scope str
+
+  let close_scope = Choice.close_scope
 end
 
 type extern_func = Symbolic.Extern_func.extern_func
@@ -640,6 +677,11 @@ let symbolic_extern_module =
     ; ( "cov_label_is_covered"
       , Symbolic.Extern_func.Extern_func
           (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
+    ; ( "open_scope"
+      , Symbolic.Extern_func.Extern_func
+          (Func (Mem (Arg (I32, Res)), R0), open_scope) )
+    ; ( "close_scope"
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
     ]
   in
   { Link.functions }

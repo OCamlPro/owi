@@ -1480,7 +1480,7 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="3033">f</span>un buf -&gt;
+    <span data-count="3036">f</span>un buf -&gt;
       <span data-count="1740">L</span>ogs.info (fun m -&gt; <span data-count="21">m</span> "parsing      ...");
       <span data-count="1740">l</span>et provider () =
         <span data-count="1393711">l</span>et tok = Text_lexer.token buf in
@@ -1544,16 +1544,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="646">m</span>atch Fpath.get_ext ~multi:false file with
+  <span data-count="647">m</span>atch Fpath.get_ext ~multi:false file with
   | <span data-count="258">"</span>.wat" -&gt;
     let+ m = Text.Module.from_fil<span data-count="258">e</span> file in
     <span data-count="257">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="388">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="388">e</span> file in
-    <span data-count="388">K</span>ind.Wasm m
+  | <span data-count="389">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="389">e</span> file in
+    <span data-count="389">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>

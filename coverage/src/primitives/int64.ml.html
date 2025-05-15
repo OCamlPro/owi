@@ -440,21 +440,21 @@ let popcnt =
 (*
  * Unsigned comparison in terms of signed comparison.
  *)
-let cmp_u x op y = <span data-count="148553">o</span>p (ad<span data-count="148553">d</span> x min_int) (ad<span data-count="148553">d</span> y min_int) [@@inline]
+let cmp_u x op y = <span data-count="148556">o</span>p (ad<span data-count="148556">d</span> x min_int) (ad<span data-count="148556">d</span> y min_int) [@@inline]
 
 let eq (x : int64) y = <span data-count="10058503">e</span>qual x y [@@inline]
 
 let ne (x : int64) y = <span data-count="49362">n</span>ot (equa<span data-count="49362">l</span> x y) [@@inline]
 
-let lt (x : int64) y = <span data-count="18767">c</span>ompar<span data-count="18767">e</span> x y &lt; 0 [@@inline]
+let lt (x : int64) y = <span data-count="18770">c</span>ompar<span data-count="18770">e</span> x y &lt; 0 [@@inline]
 
 let gt (x : int64) y = <span data-count="288">c</span>ompar<span data-count="288">e</span> x y &gt; 0 [@@inline]
 
 let le (x : int64) y = <span data-count="149956">c</span>ompar<span data-count="149956">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int64) y = <span data-count="10684">c</span>ompar<span data-count="10684">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int64) y = <span data-count="10685">c</span>ompar<span data-count="10685">e</span> x y &gt;= 0 [@@inline]
 
-let lt_u x y = <span data-count="14115">c</span>mp_u x lt y [@@inline]
+let lt_u x y = <span data-count="14117">c</span>mp_u x lt y [@@inline]
 
 let le_u x y = <span data-count="132970">c</span>mp_u x le y [@@inline]
 
@@ -468,27 +468,27 @@ let ge_u x y = <span data-count="249">c</span>mp_u x ge y [@@inline]
  * "Unsigned Short Division from Signed Division".
  *)
 let divrem_u n d =
-  <span data-count="1011">i</span>f equal d zero then <span data-count="0">r</span>aise Division_by_zero
+  <span data-count="1012">i</span>f equal d zero then <span data-count="0">r</span>aise Division_by_zero
   else
-    <span data-count="1011">l</span>et t = shift_right d 63 in
-    <span data-count="1011">l</span>et n' = logand n (logno<span data-count="1011">t</span> t) in
-    <span data-count="1011">l</span>et q = shift_left (di<span data-count="1011">v</span> (shift_right_logica<span data-count="1011">l</span> n' 1) d) 1 in
-    <span data-count="1011">l</span>et r = sub n (mu<span data-count="1011">l</span> q d) in
-    <span data-count="1011">i</span>f cmp_u r lt d then <span data-count="0">(</span>q, r) else <span data-count="1011">(</span>ad<span data-count="1011">d</span> q one, su<span data-count="1011">b</span> r d)
+    <span data-count="1012">l</span>et t = shift_right d 63 in
+    <span data-count="1012">l</span>et n' = logand n (logno<span data-count="1012">t</span> t) in
+    <span data-count="1012">l</span>et q = shift_left (di<span data-count="1012">v</span> (shift_right_logica<span data-count="1012">l</span> n' 1) d) 1 in
+    <span data-count="1012">l</span>et r = sub n (mu<span data-count="1012">l</span> q d) in
+    <span data-count="1012">i</span>f cmp_u r lt d then <span data-count="0">(</span>q, r) else <span data-count="1012">(</span>ad<span data-count="1012">d</span> q one, su<span data-count="1012">b</span> r d)
 
 (* We don't override min_int and max_int since those are used
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |bitwidth|-bits int. *)
-let low_int = shift_lef<span data-count="1011">t</span> minus_one 63
+let low_int = shift_lef<span data-count="1012">t</span> minus_one 63
 
 (* The largest signed |bitwidth|-bits int. *)
-let high_int = logxo<span data-count="1011">r</span> low_int minus_one
+let high_int = logxo<span data-count="1012">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="157825">f</span> x (to_in<span data-count="157825">t</span> (logan<span data-count="157825">d</span> y (of_in<span data-count="157825">t</span> 63)))
+let shift f x y = <span data-count="158001">f</span> x (to_in<span data-count="158001">t</span> (logan<span data-count="158001">d</span> y (of_in<span data-count="158001">t</span> 63)))
 
-let shl x y = <span data-count="112629">s</span>hift shift_left x y
+let shl x y = <span data-count="112805">s</span>hift shift_left x y
 
 let shr_s x y = <span data-count="42">s</span>hift shift_right x y
 
@@ -522,7 +522,7 @@ let hex_digit = function
   | <span data-count="0">_</span> -&gt; Fmt.failwith "of_string"
 [@@inline]
 
-let max_upper, max_lower = divrem_<span data-count="1011">u</span> minus_one 10L
+let max_upper, max_lower = divrem_<span data-count="1012">u</span> minus_one 10L
 
 let of_string_exn s =
   <span data-count="7972">l</span>et len = String.length s in

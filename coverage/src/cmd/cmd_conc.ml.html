@@ -394,7 +394,7 @@
 <a id="L337"></a><span class="visited"> </span>
 <a id="L338"></a><span class="some-visited"> </span>
 <a id="L339"></a><span class="visited"> </span>
-<a id="L340"></a><span class="visited"> </span>
+<a id="L340"></a><span > </span>
 <a id="L341"></a><span class="visited"> </span>
 <a id="L342"></a><span > </span>
 <a id="L343"></a><span > </span>
@@ -1093,7 +1093,7 @@ open Syntax
 module Choice = Concolic.Choice
 
 (* let () = Random.self_init () *)
-let () = Random.ini<span data-count="1011">t</span> 42
+let () = Random.ini<span data-count="1012">t</span> 42
 
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize link_state m =
@@ -1423,8 +1423,8 @@ let pc_model solver pc =
   <span data-count="870">m</span>atch Solver.check solver pc with
   | <span data-count="505">`</span>Unsat | <span data-count="0">`</span>Unknown -&gt; None
   | <span data-count="365">`</span>Sat -&gt;
-    let symbols = Some (Smtml.Expr.Set.get_symbol<span data-count="365">s</span> pc) in
-    Some (Solver.mode<span data-count="365">l</span> ~symbols ~pc solver)
+    let symbol_scopes = Symbol_scope.of_expressions pc in
+    <span data-count="365">S</span>ome (Solver.mode<span data-count="365">l</span> ~symbol_scopes ~pc solver)
 
 let rec find_model_to_run solver tree =
   <span data-count="944">l</span>et ( let* ) = Option.bind in

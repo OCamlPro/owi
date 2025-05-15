@@ -85,6 +85,10 @@
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -152,6 +156,10 @@
 <a href="#L61">61</a>
 <a href="#L62">62</a>
 <a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -174,7 +182,7 @@ module type S = sig
 
   val create :
        int
-    -&gt; Smtml.Symbol.t list
+    -&gt; Symbol_scope.t
     -&gt; Symbolic_path_condition.t
     -&gt; Memory.collection
     -&gt; Symbolic_table.collection
@@ -193,9 +201,9 @@ module type S = sig
 
   val breadcrumbs : t -&gt; int list
 
-  val symbols_set : t -&gt; Smtml.Symbol.t list
+  val symbol_scopes : t -&gt; Symbol_scope.t
 
-  val symbols : t -&gt; int
+  val num_symbols : t -&gt; int
 
   val labels : t -&gt; (int * string) list
 
@@ -209,7 +217,11 @@ module type S = sig
 
   val add_label : t -&gt; int * string -&gt; t
 
-  val incr_symbols : t -&gt; t
+  val open_scope : t -&gt; string -&gt; t
+
+  val close_scope : t -&gt; t
+
+  val incr_num_symbols : t -&gt; t
 end
 
 module type Intf = sig

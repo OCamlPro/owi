@@ -399,13 +399,13 @@ let eq (x : int32) y = <span data-count="3740763">e</span>qual x y [@@inline]
 
 let ne (x : int32) y = <span data-count="16940845">c</span>ompar<span data-count="16940845">e</span> x y &lt;&gt; 0 [@@inline]
 
-let lt (x : int32) y = <span data-count="5946706">c</span>ompar<span data-count="5946706">e</span> x y &lt; 0 [@@inline]
+let lt (x : int32) y = <span data-count="5946773">c</span>ompar<span data-count="5946773">e</span> x y &lt; 0 [@@inline]
 
-let gt (x : int32) y = <span data-count="6324">c</span>ompar<span data-count="6324">e</span> x y &gt; 0 [@@inline]
+let gt (x : int32) y = <span data-count="6391">c</span>ompar<span data-count="6391">e</span> x y &gt; 0 [@@inline]
 
 let le (x : int32) y = <span data-count="2749876">c</span>ompar<span data-count="2749876">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int32) y = <span data-count="879448">c</span>ompar<span data-count="879448">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int32) y = <span data-count="879472">c</span>ompar<span data-count="879472">e</span> x y &gt;= 0 [@@inline]
 
 let lt_u x y = <span data-count="2105176">c</span>mp_u x lt y [@@inline]
 
@@ -425,10 +425,10 @@ let sx x =
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |32|-bits int. *)
-let low_int = shift_lef<span data-count="1011">t</span> minus_one 31
+let low_int = shift_lef<span data-count="1012">t</span> minus_one 31
 
 (* The largest signed |32|-bits int. *)
-let high_int = logxo<span data-count="1011">r</span> low_int minus_one
+let high_int = logxo<span data-count="1012">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
 let shift f x y = <span data-count="59447">f</span> x (to_in<span data-count="59447">t</span> (logan<span data-count="59447">d</span> y 31l))
@@ -448,8 +448,8 @@ let rotr x y =
   <span data-count="28">l</span>ogor (shr_<span data-count="28">u</span> x n) (sh<span data-count="28">l</span> x (su<span data-count="28">b</span> 32l n))
 
 let extend_s n x =
-  <span data-count="683">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="683">t</span> x shift) shift
+  <span data-count="684">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="684">t</span> x shift) shift
 
 (* String conversion that allows leading signs and unsigned values *)
 
@@ -467,9 +467,9 @@ let hex_digit = function
   | <span data-count="0">_</span> -&gt; Fmt.failwith "of_string"
 [@@inline]
 
-let max_upper = unsigned_di<span data-count="1011">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="1012">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="1011">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="1012">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="128144">l</span>et sign_bit = logand (of_in<span data-count="128144">t</span> (1 lsl (32 - 1))) i in

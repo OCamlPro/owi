@@ -339,18 +339,18 @@ end
 
 module Binary = struct
   let until_binary_validate ~unsafe m =
-    <span data-count="1056">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="1058">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="1056">l</span>et+ () = Binary_validate.modu<span data-count="1056">l</span> m in
-      <span data-count="1056">m</span>
+      <span data-count="1058">l</span>et+ () = Binary_validate.modu<span data-count="1058">l</span> m in
+      <span data-count="1058">m</span>
 
   let until_optimize ~unsafe ~optimize m =
-    <span data-count="678">l</span>et+ m = until_binary_validat<span data-count="678">e</span> ~unsafe m in
-    <span data-count="678">i</span>f optimize then <span data-count="41">O</span>ptimize.modul m else <span data-count="637">m</span>
+    <span data-count="679">l</span>et+ m = until_binary_validat<span data-count="679">e</span> ~unsafe m in
+    <span data-count="679">i</span>f optimize then <span data-count="41">O</span>ptimize.modul m else <span data-count="638">m</span>
 
   let until_link ~unsafe ~optimize ~name link_state m =
-    <span data-count="678">l</span>et* m = until_optimiz<span data-count="678">e</span> ~unsafe ~optimize m in
-    <span data-count="678">L</span>ink.modul link_state ~name m
+    <span data-count="679">l</span>et* m = until_optimiz<span data-count="679">e</span> ~unsafe ~optimize m in
+    <span data-count="679">L</span>ink.modul link_state ~name m
 
   let until_interpret ~unsafe ~optimize ~name link_state m =
     <span data-count="92">l</span>et* m, link_state = until_lin<span data-count="92">k</span> ~unsafe ~optimize ~name link_state m in
@@ -384,10 +384,10 @@ end
 
 module File = struct
   let until_binary_validate ~unsafe ~rac ~srac filename =
-    <span data-count="424">l</span>et* m = Parse.guess_from_fil<span data-count="424">e</span> filename in
-    <span data-count="423">m</span>atch m with
+    <span data-count="425">l</span>et* m = Parse.guess_from_fil<span data-count="425">e</span> filename in
+    <span data-count="424">m</span>atch m with
     | <span data-count="206">K</span>ind.Wat m -&gt; Text.until_binary_validate ~unsafe ~rac ~srac m
-    | <span data-count="217">W</span>asm m -&gt; Binary.until_binary_validate ~unsafe m
+    | <span data-count="218">W</span>asm m -&gt; Binary.until_binary_validate ~unsafe m
     | Wast _ | Ocaml _ -&gt; assert false
 
   let until_optimize ~unsafe ~rac ~srac ~optimize filename =

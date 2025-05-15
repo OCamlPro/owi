@@ -122,7 +122,7 @@ let pp_annot fmt = function
     pf fmt "(@%a@\n  @[&lt;hv&gt;%a@]@\n)" string annot.annotid Sexp.pp_sexp
       annot.items
 
-let annot_recorder : (string, Sexp.t) Hashtbl.t = Hashtbl.creat<span data-count="1011">e</span> 17
+let annot_recorder : (string, Sexp.t) Hashtbl.t = Hashtbl.creat<span data-count="1012">e</span> 17
 
 let record_annot annotid sexp = <span data-count="49">H</span>ashtbl.add annot_recorder annotid sexp
 

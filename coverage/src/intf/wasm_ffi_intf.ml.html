@@ -87,6 +87,10 @@
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -156,6 +160,10 @@
 <a href="#L63">63</a>
 <a href="#L64">64</a>
 <a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -213,6 +221,10 @@ module type S0 = sig
   val cov_label_is_covered : Value.int32 -&gt; Value.int32 t
 
   val cov_label_set : memory -&gt; Value.int32 -&gt; Value.int32 -&gt; unit t
+
+  val open_scope : memory -&gt; Value.int32 -&gt; unit t
+
+  val close_scope : unit -&gt; unit t
 end
 
 module type S = sig
