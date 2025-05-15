@@ -127,7 +127,6 @@
   fmt.tty
   smtml
   hc
-  integers
   logs
   logs.cli
   logs.fmt
