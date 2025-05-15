@@ -4,6 +4,8 @@
 
 val cmd :
      unsafe:bool
+  -> timeout:float option
+  -> timeout_instr:int option
   -> rac:bool
   -> optimize:bool
   -> files:Fpath.t list

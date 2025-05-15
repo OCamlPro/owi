@@ -36,6 +36,8 @@ module Any : sig
       link state *)
   val until_interpret :
        unsafe:bool
+    -> timeout:float option
+    -> timeout_instr:int option
     -> rac:bool
     -> srac:bool
     -> optimize:bool
@@ -73,6 +75,8 @@ module File : sig
       link state *)
   val until_interpret :
        unsafe:bool
+    -> timeout:float option
+    -> timeout_instr:int option
     -> rac:bool
     -> srac:bool
     -> optimize:bool
@@ -123,6 +127,8 @@ module Text : sig
       link state *)
   val until_interpret :
        unsafe:bool
+    -> timeout:float option
+    -> timeout_instr:int option
     -> rac:bool
     -> srac:bool
     -> optimize:bool
@@ -153,6 +159,8 @@ module Binary : sig
       link state *)
   val until_interpret :
        unsafe:bool
+    -> timeout:float option
+    -> timeout_instr:int option
     -> optimize:bool
     -> name:string option
     -> Concrete_extern_func.extern_func Link.state
