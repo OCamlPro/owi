@@ -1,5 +1,7 @@
 (cram
  (deps
   %{bin:owi}
+  (file ./loop.wat)
+  (file ./fibo.wat)
   (file ./binary_loop.wasm)
   (file ./overflow.wat)))

@@ -180,6 +180,24 @@ let srac =
   let doc = "symbolic runtime assertion checking mode" in
   Arg.(value & flag & info [ "srac" ] ~doc)
 
+let timeout =
+  let doc =
+    "Stop execution after S seconds."
+  in
+  Arg.(
+    value
+    & opt (some float) None
+    & info [ "timeout" ] ~doc ~docv:"S" )
+
+let timeout_instr =
+  let doc =
+    "Stop execution after running I instructions."
+  in
+  Arg.(
+    value
+    & opt (some int) None
+    & info [ "timeout-instr" ] ~doc ~docv:"I" )
+
 let unsafe =
   let doc = "skip typechecking pass" in
   Arg.(value & flag & info [ "unsafe"; "u" ] ~doc)
@@ -249,8 +267,8 @@ let c_cmd =
   and+ with_breadcrumbs
   and+ entry_point in
   Cmd_c.cmd ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl ~includes
-    ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
+    ~files ~unsafe ~optimize ~no_stop_at_failure
+    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~model_format ~entry_point
     ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs
 (* owi cpp *)
@@ -438,11 +456,13 @@ let run_info =
 
 let run_cmd =
   let+ unsafe
+  and+ timeout
+  and+ timeout_instr
   and+ rac
   and+ optimize
   and+ () = setup_log
   and+ files in
-  Cmd_run.cmd ~unsafe ~rac ~optimize ~files
+  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~files
 
 (* owi rust *)
 
