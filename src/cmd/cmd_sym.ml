@@ -31,7 +31,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  Interpret.Symbolic.modul link_state.envs m
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =

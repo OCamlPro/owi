@@ -4,7 +4,9 @@
 
 module Concrete : sig
   val modul :
-       Concrete.Env.t Env_id.collection
+       timeout:float option
+    -> timeout_instr:int option
+    -> Concrete.Env.t Env_id.collection
     -> Concrete.Module_to_run.t
     -> unit Concrete_choice.t
 
@@ -44,21 +46,27 @@ end
 
 module Symbolic : sig
   val modul :
-       Symbolic.Env.t Env_id.collection
+       timeout:float option
+    -> timeout_instr:int option
+    -> Symbolic.Env.t Env_id.collection
     -> Symbolic.Module_to_run.t
     -> unit Symbolic.Choice.t
 end
 
 module Minimalist_symbolic : sig
   val modul :
-       Minimalist_symbolic.Env.t Env_id.collection
+       timeout:float option
+    -> timeout_instr:int option
+    -> Minimalist_symbolic.Env.t Env_id.collection
     -> Minimalist_symbolic.Module_to_run.t
     -> unit Minimalist_symbolic.Choice.t
 end
 
 module Concolic : sig
   val modul :
-       Concolic.Env.t Env_id.collection
+       timeout:float option
+    -> timeout_instr:int option
+    -> Concolic.Env.t Env_id.collection
     -> Concolic.Module_to_run.t
     -> unit Concolic.Choice.t
 end
