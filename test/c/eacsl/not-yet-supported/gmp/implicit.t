@@ -4,4 +4,4 @@
   [e-acsl] implicit.c:10: Warning: 
     E-ACSL construct `assigns clause in behavior' is not yet supported.
     Ignoring annotation.
-  owi: [ERROR] clang failed: run with --debug to get the full error message
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
