@@ -229,11 +229,11 @@ let add_data value (fields : t) (curr : curr) =
 
 let add_field curr (fields : t) = function
   | Text.MType typ ->
-    let typ = typ @ fields.typ in
+    let typ = typ :: fields.typ in
     Ok { fields with typ }
   | MGlobal global -> ok @@ add_global (Local global) fields curr
   | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
-    let+ val_type = Binary_types.convert_val_type None val_type in
+    let+ val_type = Binary_types.convert_val_type val_type in
     let b = (mut, val_type) in
     let imported = imp import (a, b) in
     add_global (Imported imported) fields curr
@@ -245,11 +245,11 @@ let add_field curr (fields : t) = function
     Ok { fields with exports }
   | MTable table ->
     let id, table_type = table in
-    let+ table_type = Binary_types.convert_table_type None table_type in
+    let+ table_type = Binary_types.convert_table_type table_type in
     let table = (id, table_type) in
     add_table (Local table) fields curr
   | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
-    let+ table_type = Binary_types.convert_table_type None table_type in
+    let+ table_type = Binary_types.convert_table_type table_type in
     let imported = imp import (id, table_type) in
     add_table (Imported imported) fields curr
   | MExport { name; desc = Export_table id } ->

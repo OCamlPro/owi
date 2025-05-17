@@ -71,7 +71,7 @@ let pp_elem fmt (e : elem) =
     e.init
 
 type module_field =
-  | MType of text rec_type
+  | MType of text type_def
   | MGlobal of global
   | MTable of text table
   | MMem of mem
@@ -83,7 +83,7 @@ type module_field =
   | MExport of text export
 
 let pp_module_field fmt = function
-  | MType t -> pp_rec_type fmt t
+  | MType t -> pp_type_def fmt t
   | MGlobal g -> pp_global fmt g
   | MTable t -> pp_table fmt t
   | MMem m -> pp_mem fmt m

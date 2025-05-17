@@ -12,7 +12,6 @@ type externref = E : 'a Type.Id.t * 'a -> externref
 type ref_value =
   | Externref of externref option
   | Funcref of Func_intf.t option
-  | Arrayref of unit array option
 
 val pp_ref_value : Format.formatter -> ref_value -> unit
 

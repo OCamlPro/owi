@@ -1,4 +1,5 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+4 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
+
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
@@ -118,15 +119,11 @@ let f32 = Num_type F32
 
 let f64 = Num_type F64
 
-let i31 = Ref_type I31_ht
-
 let any = Any
 
 let itype = function S32 -> i32 | S64 -> i64
 
 let ftype = function S32 -> f32 | S64 -> f64
-
-let arraytype _modul _i = (* TODO *) assert false
 
 module Stack : sig
   type t = typ list
@@ -165,19 +162,10 @@ end = struct
 
   let match_ref_type required got =
     match (required, got) with
-    | Any_ht, _ -> true
-    | None_ht, None_ht -> true
-    | Eq_ht, Eq_ht -> true
-    | I31_ht, I31_ht -> true
-    | Struct_ht, Struct_ht -> true
-    | Array_ht, Array_ht -> true
-    | No_func_ht, No_func_ht -> true
     | Func_ht, Func_ht -> true
     | Extern_ht, Extern_ht -> true
-    | No_extern_ht, No_extern_ht -> true
-    | _ ->
-      (* TODO: complete this *)
-      false
+    | Func_ht, Extern_ht -> false
+    | Extern_ht, Func_ht -> false
 
   let match_types required got =
     match (required, got) with
@@ -529,22 +517,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
   | Table_set (Raw i) ->
     let* _null, t = Env.table_type_get i env.modul in
     Stack.pop [ Ref_type t; i32 ] stack
-  | Array_len ->
-    (* TODO: fixme, Something is not right *)
-    let* stack = Stack.pop [ Something ] stack in
-    Stack.push [ i32 ] stack
-  | Ref_i31 ->
-    let* stack = Stack.pop [ i32 ] stack in
-    Stack.push [ i31 ] stack
-  | I31_get_s | I31_get_u ->
-    let* stack = Stack.pop [ i31 ] stack in
-    Stack.push [ i32 ] stack
-  | ( Array_new_data _ | Array_new _ | Array_new_default _ | Array_new_elem _
-    | Array_new_fixed _ | Array_get _ | Array_get_u _ | Array_set _
-    | Struct_get _ | Struct_get_s _ | Struct_set _ | Struct_new _
-    | Struct_new_default _ | Extern_externalize | Extern_internalize
-    | Ref_as_non_null | Ref_cast _ | Ref_test _ | Br_on_non_null _
-    | Br_on_null _ | Br_on_cast _ | Br_on_cast_fail _ | Ref_eq ) as i ->
+  | (Extern_externalize | Extern_internalize) as i ->
     Logs.err (fun m ->
       m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
         i );
@@ -621,14 +594,6 @@ let typecheck_const_instr (modul : Module.t) refs stack = function
     let t = itype t in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
-  | Array_new t ->
-    let t = arraytype modul t in
-    let* stack = Stack.pop [ i32; t ] stack in
-    Stack.push [ Ref_type Array_ht ] stack
-  | Array_new_default _i -> assert false
-  | Ref_i31 ->
-    let* stack = Stack.pop [ i32 ] stack in
-    Stack.push [ i31 ] stack
   | _ -> Error `Constant_expression_required
 
 let typecheck_const_expr (modul : Module.t) refs =
@@ -656,8 +621,12 @@ let typecheck_elem modul refs (elem : elem) =
         let* real_type = typecheck_const_expr modul refs init in
         match real_type with
         | [ real_type ] ->
-          if not @@ typ_equal (Ref_type expected_type) real_type then
-            Error (`Type_mismatch "typecheck_elem 1")
+          let expected_type = Ref_type expected_type in
+          if not @@ typ_equal expected_type real_type then
+            Error
+              (`Type_mismatch
+                 (Fmt.str "expected %a got %a" pp_typ expected_type pp_typ
+                    real_type ) )
           else Ok ()
         | _whatever -> Error (`Type_mismatch "typecheck elem 2") )
       elem.init

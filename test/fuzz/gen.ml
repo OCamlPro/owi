@@ -279,9 +279,9 @@ let memory env : Owi.Text.module_field gen =
   MMem (id, { min; max })
 
 let typ env : Owi.Text.module_field gen =
-  let+ styp = B.sub_type in
-  let id = Some (Env.add_type env styp) in
-  MType [ (id, styp) ]
+  let+ typ = B.func_type in
+  let id = Some (Env.add_type env typ) in
+  MType (id, typ)
 
 let elem env : Owi.Text.module_field gen =
   let+ typ = B.ref_type

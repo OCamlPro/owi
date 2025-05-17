@@ -13,12 +13,10 @@ let cast_ref (type r) (E (rty, r) : externref) (ty : r Type.Id.t) : r option =
 type ref_value =
   | Externref of externref option
   | Funcref of Func_intf.t option
-  | Arrayref of unit Array.t option
 
 let pp_ref_value fmt = function
   | Externref _ -> pf fmt "externref"
   | Funcref _ -> pf fmt "funcref"
-  | Arrayref _ -> pf fmt "array"
 
 type t =
   | I32 of Int32.t
@@ -50,13 +48,7 @@ let pp fmt = function
   | F64 f -> pf fmt "f64.const %a" Float64.pp f
   | Ref r -> pp_ref_value fmt r
 
-let ref_null' = function
-  | Func_ht -> Funcref None
-  | Extern_ht -> Externref None
-  | Array_ht -> Arrayref None
-  | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | No_func_ht | No_extern_ht
-  | Def_ht _ ->
-    assert false
+let ref_null' = function Func_ht -> Funcref None | Extern_ht -> Externref None
 
 let ref_null typ = Ref (ref_null' typ)
 
@@ -66,5 +58,5 @@ let ref_externref (type x) (t : x Type.Id.t) (v : x) : t =
   Ref (Externref (Some (E (t, v))))
 
 let ref_is_null = function
-  | Funcref None | Externref None | Arrayref None -> true
-  | Funcref (Some _) | Externref (Some _) | Arrayref (Some _) -> false
+  | Funcref None | Externref None -> true
+  | Funcref (Some _) | Externref (Some _) -> false

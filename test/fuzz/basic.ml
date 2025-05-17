@@ -11,8 +11,6 @@ type num_size =
 
 let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
-let packed_type = choose [ const I8; const I16 ]
-
 let nullable = choose [ const No_null; const Null ]
 
 let heap_type : text heap_type Crowbar.gen = const Func_ht
@@ -31,9 +29,6 @@ let limits =
 
 let table_type = pair limits ref_type
 
-let final = const Final
-(* TODO: complete No_final *)
-
 let sx = choose [ const U; const S ]
 
 let val_type =
@@ -44,27 +39,7 @@ let param = pair (const (None : string option)) val_type
 
 let func_type = pair (list param) (list val_type)
 
-let str_type =
-  let+ func_type in
-  Def_func_t func_type
-(* TODO: complete Def_struct_t / Def_array_t *)
-
-let sub_type =
-  let+ final
-  and+ str_type in
-  (final, ([] : text indice list), str_type)
-
 let mut = choose [ const Const; const Var ]
-
-let val_storage_t =
-  let+ val_type in
-  Val_storage_t val_type
-
-let val_packed_t =
-  let+ packed_type in
-  Val_packed_t packed_type
-
-let storage_type = choose [ val_storage_t; val_packed_t ]
 
 let div =
   let+ sx in

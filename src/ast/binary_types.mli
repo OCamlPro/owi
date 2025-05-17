@@ -6,16 +6,14 @@ open Types
 
 type tbl = (string, int) Hashtbl.t Option.t
 
-val convert_val_type : tbl -> text val_type -> binary val_type Result.t
+val convert_val_type : text val_type -> binary val_type Result.t
 
-val convert_heap_type : tbl -> text heap_type -> binary heap_type Result.t
+val convert_heap_type : text heap_type -> binary heap_type Result.t
 
-val convert_func_type : tbl -> text func_type -> binary func_type Result.t
+val convert_func_type : text func_type -> binary func_type Result.t
 
-val convert_ref_type : tbl -> text ref_type -> binary ref_type Result.t
+val convert_ref_type : text ref_type -> binary ref_type Result.t
 
-val convert_param : tbl -> text param -> binary param Result.t
+val convert_param : text param -> binary param Result.t
 
-val convert_table_type : tbl -> text table_type -> binary table_type Result.t
-
-val convert_str : tbl -> text str_type -> binary str_type Result.t
+val convert_table_type : text table_type -> binary table_type Result.t

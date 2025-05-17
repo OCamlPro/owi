@@ -74,7 +74,6 @@ let write_reftype buf ht =
   match ht with
   | Func_ht -> Buffer.add_char buf '\x70'
   | Extern_ht -> Buffer.add_char buf '\x6F'
-  | _ -> assert false
 
 let get_char_valtype = function
   | Num_type I32 -> '\x7F'
@@ -488,14 +487,9 @@ let rec write_instr buf instr =
   | Table_fill idx ->
     write_fc buf 17;
     write_indice buf idx
-  | I_reinterpret_f _ | F_reinterpret_i _ | Ref_i31 | Ref_as_non_null
-  | Ref_cast _ | Ref_test _ | Ref_eq | Br_on_cast _ | Br_on_cast_fail _
-  | Br_on_non_null _ | Br_on_null _ | Return_call _ | Return_call_indirect _
-  | Return_call_ref _ | Call_ref _ | Array_get _ | Array_get_u _ | Array_len
-  | Array_new _ | Array_new_data _ | Array_new_default _ | Array_new_elem _
-  | Array_new_fixed _ | Array_set _ | I31_get_u | I31_get_s | Struct_get _
-  | Struct_get_s _ | Struct_new _ | Struct_new_default _ | Struct_set _
-  | Extern_externalize | Extern_internalize ->
+  | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
+  | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
+  | Extern_internalize ->
     assert false
 
 and write_expr buf expr ~end_op_code =
@@ -629,21 +623,11 @@ let encode_section buf id encode_func data =
   end
 
 (* type: section 1 *)
-let encode_types buf rec_types =
-  encode_vector_array buf rec_types (fun buf -> function
-    | [] -> assert false
-    | _ :: _ :: _ ->
-      (* TODO rec types *)
-      assert false
-    | [ typ ] -> (
-      match typ with
-      | _name, (Final, _idx, Def_func_t (pt, rt)) ->
-        Buffer.add_char buf '\x60';
-        write_paramtype buf pt;
-        write_resulttype buf rt
-      | _ ->
-        (* TODO non final types and other type declarations *)
-        assert false ) )
+let encode_types buf types =
+  encode_vector_array buf types (fun buf (_id, (pt, rt)) ->
+    Buffer.add_char buf '\x60';
+    write_paramtype buf pt;
+    write_resulttype buf rt )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =

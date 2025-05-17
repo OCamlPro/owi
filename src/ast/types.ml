@@ -84,15 +84,6 @@ let pp_nullable fmt = function
     pf fmt ""
   | Null -> pf fmt "null"
 
-type nonrec packed_type =
-  | I8
-  | I16
-
-let pp_packed_type fmt = function I8 -> pf fmt "i8" | I16 -> pf fmt "i16"
-
-let packed_type_eq t1 t2 =
-  match (t1, t2) with I8, I8 | I16, I16 -> true | _, _ -> false
-
 type nonrec mut =
   | Const
   | Var
@@ -251,94 +242,31 @@ type nonrec mem = string option * limits
 
 let pp_mem fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 
-type nonrec final =
-  | Final
-  | No_final
-
-let pp_final fmt = function
-  | Final -> pf fmt "final"
-  | No_final -> pf fmt "no_final"
-
-let final_eq f1 f2 =
-  match (f1, f2) with
-  | Final, Final | No_final, No_final -> true
-  | _, _ -> false
-
 (** Structure *)
 
 (** Types *)
 
 type 'a heap_type =
-  | Any_ht
-  | None_ht
-  | Eq_ht
-  | I31_ht
-  | Struct_ht
-  | Array_ht
   | Func_ht
-  | No_func_ht
   | Extern_ht
-  | No_extern_ht
-  | Def_ht of 'a indice
 
 let pp_heap_type fmt = function
-  | Any_ht -> pf fmt "any"
-  | None_ht -> pf fmt "none"
-  | Eq_ht -> pf fmt "eq"
-  | I31_ht -> pf fmt "i31"
-  | Struct_ht -> pf fmt "struct"
-  | Array_ht -> pf fmt "array"
   | Func_ht -> pf fmt "func"
-  | No_func_ht -> pf fmt "nofunc"
   | Extern_ht -> pf fmt "extern"
-  | No_extern_ht -> pf fmt "noextern"
-  | Def_ht i -> pf fmt "%a" pp_indice i
 
 let pp_heap_type_short fmt = function
-  | Any_ht -> pf fmt "anyref"
-  | None_ht -> pf fmt "(ref none)"
-  | Eq_ht -> pf fmt "eqref"
-  | I31_ht -> pf fmt "i31ref"
-  | Struct_ht -> pf fmt "(ref struct)"
-  | Array_ht -> pf fmt "(ref array)"
   | Func_ht -> pf fmt "funcref"
-  | No_func_ht -> pf fmt "nofunc"
   | Extern_ht -> pf fmt "externref"
-  | No_extern_ht -> pf fmt "(ref noextern)"
-  | Def_ht i -> pf fmt "(ref %a)" pp_indice i
 
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
-  | Any_ht, Any_ht
-  | None_ht, None_ht
-  | Eq_ht, Eq_ht
-  | I31_ht, I31_ht
-  | Struct_ht, Struct_ht
-  | Array_ht, Array_ht
-  | Func_ht, Func_ht
-  | No_func_ht, No_func_ht
-  | Extern_ht, Extern_ht
-  | No_extern_ht, No_extern_ht ->
-    true
-  | Def_ht _, Def_ht _ -> assert false
+  | Func_ht, Func_ht | Extern_ht, Extern_ht -> true
   | _, _ -> false
 
 let compare_heap_type t1 t2 =
   (* TODO: this is wrong *)
-  let to_int = function
-    | Any_ht -> 0
-    | None_ht -> 1
-    | Eq_ht -> 2
-    | I31_ht -> 3
-    | Struct_ht -> 4
-    | Array_ht -> 5
-    | Func_ht -> 6
-    | No_func_ht -> 7
-    | Extern_ht -> 8
-    | No_extern_ht -> 9
-    | Def_ht _ -> assert false
-  in
+  let to_int = function Func_ht -> 0 | Extern_ht -> 1 in
   Int.compare (to_int t1) (to_int t2)
 
 type nonrec 'a ref_type = nullable * 'a heap_type
@@ -499,12 +427,7 @@ type 'a instr =
   (* Reference instructions *)
   | Ref_null of 'a heap_type
   | Ref_is_null
-  | Ref_i31
   | Ref_func of 'a indice
-  | Ref_as_non_null
-  | Ref_cast of nullable * 'a heap_type
-  | Ref_test of nullable * 'a heap_type
-  | Ref_eq
   (* Parametric instructions *)
   | Drop
   | Select of 'a val_type list option
@@ -549,10 +472,6 @@ type 'a instr =
   | Br of 'a indice
   | Br_if of 'a indice
   | Br_table of 'a indice array * 'a indice
-  | Br_on_cast of 'a indice * 'a ref_type * 'a ref_type
-  | Br_on_cast_fail of 'a indice * nullable * 'a heap_type
-  | Br_on_non_null of 'a indice
-  | Br_on_null of 'a indice
   | Return
   | Return_call of 'a indice
   | Return_call_indirect of 'a indice * 'a block_type
@@ -560,25 +479,6 @@ type 'a instr =
   | Call of 'a indice
   | Call_indirect of 'a indice * 'a block_type
   | Call_ref of 'a indice
-  (* Array instructions *)
-  | Array_get of 'a indice
-  | Array_get_u of 'a indice
-  | Array_len
-  | Array_new of 'a indice
-  | Array_new_data of 'a indice * 'a indice
-  | Array_new_default of 'a indice
-  | Array_new_elem of 'a indice * 'a indice
-  | Array_new_fixed of 'a indice * int
-  | Array_set of 'a indice
-  (* I31 *)
-  | I31_get_u
-  | I31_get_s
-  (* struct*)
-  | Struct_get of 'a indice * 'a indice
-  | Struct_get_s of 'a indice * 'a indice
-  | Struct_new of 'a indice
-  | Struct_new_default of 'a indice
-  | Struct_set of 'a indice * 'a indice
   (* extern *)
   | Extern_externalize
   | Extern_internalize
@@ -691,39 +591,8 @@ let rec pp_instr ~short fmt = function
   | Call_indirect (tbl_id, ty_id) ->
     pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf fmt "call_ref %a" pp_indice ty_id
-  | Array_new id -> pf fmt "array.new %a" pp_indice id
-  | Array_new_data (id1, id2) ->
-    pf fmt "array.new_data %a %a" pp_indice id1 pp_indice id2
-  | Array_new_default id -> pf fmt "array.new_default %a" pp_indice id
-  | Array_new_elem (id1, id2) ->
-    pf fmt "array.new_elem %a %a" pp_indice id1 pp_indice id2
-  | Array_new_fixed (id, i) -> pf fmt "array.new_fixed %a %d" pp_indice id i
-  | Array_get id -> pf fmt "array.get %a" pp_indice id
-  | Array_get_u id -> pf fmt "array.get_u %a" pp_indice id
-  | Array_set id -> pf fmt "array.set %a" pp_indice id
-  | Array_len -> pf fmt "array.len"
-  | Ref_i31 -> pf fmt "ref.i31"
-  | I31_get_s -> pf fmt "i31.get_s"
-  | I31_get_u -> pf fmt "i31.get_u"
-  | Struct_get (i1, i2) -> pf fmt "struct.get %a %a" pp_indice i1 pp_indice i2
-  | Struct_get_s (i1, i2) ->
-    pf fmt "struct.get_s %a %a" pp_indice i1 pp_indice i2
-  | Struct_new i -> pf fmt "struct.new %a" pp_indice i
-  | Struct_new_default i -> pf fmt "struct.new_default %a" pp_indice i
-  | Struct_set (i1, i2) -> pf fmt "struct.set %a %a" pp_indice i1 pp_indice i2
   | Extern_externalize -> pf fmt "extern.externalize"
   | Extern_internalize -> pf fmt "extern.internalize"
-  | Ref_as_non_null -> pf fmt "ref.as_non_null"
-  | Ref_cast (n, t) ->
-    pf fmt "ref.cast (ref %a %a)" pp_nullable n pp_heap_type t
-  | Ref_test (n, t) -> pf fmt "ref.test %a %a" pp_nullable n pp_heap_type t
-  | Br_on_non_null id -> pf fmt "br_on_non_null %a" pp_indice id
-  | Br_on_null id -> pf fmt "br_on_null %a" pp_indice id
-  | Br_on_cast (id, t1, t2) ->
-    pf fmt "br_on_cast %a %a %a" pp_indice id pp_ref_type t1 pp_ref_type t2
-  | Br_on_cast_fail (id, n, t) ->
-    pf fmt "br_on_cast_fail %a %a %a" pp_indice id pp_nullable n pp_heap_type t
-  | Ref_eq -> pf fmt "ref.eq"
 
 and pp_expr ~short fmt instrs =
   list ~sep:pp_newline (pp_instr ~short) fmt instrs
@@ -749,12 +618,9 @@ and iter_instr f (i : _ instr) =
   | F_convert_i (_, _, _)
   | I_reinterpret_f (_, _)
   | F_reinterpret_i (_, _)
-  | Ref_null _ | Ref_is_null | Ref_i31 | Ref_func _ | Ref_as_non_null
-  | Ref_cast (_, _)
-  | Ref_test (_, _)
-  | Ref_eq | Drop | Select _ | Local_get _ | Local_set _ | Local_tee _
-  | Global_get _ | Global_set _ | Table_get _ | Table_set _ | Table_size _
-  | Table_grow _ | Table_fill _
+  | Ref_null _ | Ref_is_null | Ref_func _ | Drop | Select _ | Local_get _
+  | Local_set _ | Local_tee _ | Global_get _ | Global_set _ | Table_get _
+  | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
   | Table_copy (_, _)
   | Table_init (_, _)
   | Elem_drop _
@@ -770,23 +636,11 @@ and iter_instr f (i : _ instr) =
   | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
   | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
   | Br_table (_, _)
-  | Br_on_cast (_, _, _)
-  | Br_on_cast_fail (_, _, _)
-  | Br_on_non_null _ | Br_on_null _ | Return | Return_call _
+  | Return | Return_call _
   | Return_call_indirect (_, _)
   | Return_call_ref _ | Call _
   | Call_indirect (_, _)
-  | Call_ref _ | Array_get _ | Array_get_u _ | Array_len | Array_new _
-  | Array_new_data (_, _)
-  | Array_new_default _
-  | Array_new_elem (_, _)
-  | Array_new_fixed (_, _)
-  | Array_set _ | I31_get_u | I31_get_s
-  | Struct_get (_, _)
-  | Struct_get_s (_, _)
-  | Struct_new _ | Struct_new_default _
-  | Struct_set (_, _)
-  | Extern_externalize | Extern_internalize ->
+  | Call_ref _ | Extern_externalize | Extern_internalize ->
     ()
   | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
   | If_else (_, _, e1, e2) ->
@@ -869,98 +723,12 @@ type 'a export =
 let pp_export fmt (e : text export) =
   pf fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
-type 'a storage_type =
-  | Val_storage_t of 'a val_type
-  | Val_packed_t of packed_type
+type 'a type_def = string option * 'a func_type
 
-let pp_storage_type fmt = function
-  | Val_storage_t t -> pp_val_type fmt t
-  | Val_packed_t t -> pp_packed_type fmt t
-
-let storage_type_eq t1 t2 =
-  match (t1, t2) with
-  | Val_storage_t t1, Val_storage_t t2 -> val_type_eq t1 t2
-  | Val_packed_t t1, Val_packed_t t2 -> packed_type_eq t1 t2
-  | _, _ -> false
-
-type 'a field_type = mut * 'a storage_type
-
-let pp_field_type fmt (m, t) =
-  match m with
-  | Const -> pf fmt " %a" pp_storage_type t
-  | Var -> pf fmt "(%a %a)" pp_mut m pp_storage_type t
-
-let field_type_eq t1 t2 =
-  match (t1, t2) with
-  | (Const, t1), (Const, t2) | (Var, t1), (Var, t2) -> storage_type_eq t1 t2
-  | _, _ -> false
-
-type 'a struct_field = string option * 'a field_type list
-
-let pp_fields fmt = list ~sep:sp pp_field_type fmt
-
-let pp_struct_field fmt ((n : string option), f) =
-  pf fmt "@\n  @[<v>(field%a%a)@]" pp_id_opt n pp_fields f
-
-let struct_field_eq (_, t1) (_, t2) = List.equal field_type_eq t1 t2
-
-type 'a struct_type = 'a struct_field list
-
-let pp_struct_type fmt = pf fmt "(struct %a)" (list ~sep:sp pp_struct_field)
-
-let struct_type_eq t1 t2 = List.equal struct_field_eq t1 t2
-
-let pp_array_type fmt = pf fmt "(array %a)" pp_field_type
-
-type 'a str_type =
-  | Def_struct_t of 'a struct_type
-  | Def_array_t of 'a field_type
-  | Def_func_t of 'a func_type
-
-let pp_str_type fmt = function
-  | Def_struct_t t -> pp_struct_type fmt t
-  | Def_array_t t -> pp_array_type fmt t
-  | Def_func_t t -> pp_func_type fmt t
-
-let str_type_eq t1 t2 =
-  match (t1, t2) with
-  | Def_struct_t t1, Def_struct_t t2 -> struct_type_eq t1 t2
-  | Def_array_t t1, Def_array_t t2 -> field_type_eq t1 t2
-  | Def_func_t t1, Def_func_t t2 -> func_type_eq t1 t2
-  | _, _ -> false
-
-let compare_str_type t1 t2 =
-  match (t1, t2) with
-  | Def_func_t t1, Def_func_t t2 -> compare_func_type t1 t2
-  | _, _ -> assert false
-
-type 'a sub_type = final * 'a indice list * 'a str_type
-
-let pp_sub_type fmt (f, ids, t) =
-  pf fmt "(sub %a %a %a)" pp_final f pp_indices ids pp_str_type t
-
-let sub_type_eq (f1, ids1, t1) (f2, ids2, t2) =
-  final_eq f1 f2 && List.equal indice_eq ids1 ids2 && str_type_eq t1 t2
-
-type 'a type_def = string option * 'a sub_type
-
-let pp_type_def_no_indent fmt (id, t) =
-  pf fmt "(type%a %a)" pp_id_opt id pp_sub_type t
-
-let pp_type_def fmt t = pf fmt "@\n  @[<v>%a@]" pp_type_def_no_indent t
+let pp_type_def fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
 
 let type_def_eq (id1, t1) (id2, t2) =
-  Option.equal String.equal id1 id2 && sub_type_eq t1 t2
-
-type 'a rec_type = 'a type_def list
-
-let pp_rec_type fmt l =
-  match l with
-  | [] -> ()
-  | [ t ] -> pf fmt "%a" pp_type_def_no_indent t
-  | l -> pf fmt "(rec %a)" (list ~sep:sp pp_type_def) l
-
-let rec_type_eq l1 l2 = List.equal type_def_eq l1 l2
+  Option.equal String.equal id1 id2 && func_type_eq t1 t2
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 
@@ -972,10 +740,6 @@ type 'a const =
   | Const_null of 'a heap_type
   | Const_host of int
   | Const_extern of int
-  | Const_array
-  | Const_eq
-  | Const_i31
-  | Const_struct
 
 let pp_const fmt c =
   pf fmt "(%a)"
@@ -987,11 +751,7 @@ let pp_const fmt c =
       | Const_F64 f -> pf fmt "f64.const %a" Float64.pp f
       | Const_null rt -> pf fmt "ref.null %a" pp_heap_type rt
       | Const_host i -> pf fmt "ref.host %d" i
-      | Const_extern i -> pf fmt "ref.extern %d" i
-      | Const_array -> pf fmt "ref.array"
-      | Const_eq -> pf fmt "ref.eq"
-      | Const_i31 -> pf fmt "ref.i31"
-      | Const_struct -> pf fmt "ref.struct" )
+      | Const_extern i -> pf fmt "ref.extern %d" i )
     c
 
 let pp_consts fmt c = list ~sep:sp pp_const fmt c

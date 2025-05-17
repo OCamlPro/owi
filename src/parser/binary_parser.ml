@@ -325,17 +325,14 @@ let read_FC input =
     (Table_fill tableidx, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
-let block_type_of_rec_type t =
+let block_type_of_type_def (_id, (pt, rt)) =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
-  match t with
-  | [ (_id, (_final, _subtypes, Def_func_t (pt, rt))) ] ->
-    Bt_raw (None, (pt, rt))
-  | _ -> assert false
+  Bt_raw (None, (pt, rt))
 
 let read_block_type types input =
   match read_S33 input with
   | Ok (i, input) when Int64.ge i 0L ->
-    let block_type = block_type_of_rec_type types.(Int64.to_int i) in
+    let block_type = block_type_of_type_def types.(Int64.to_int i) in
     Ok (block_type, input)
   | Error _ | Ok _ -> begin
     match read_byte ~msg:"read_block_type" input with
@@ -393,21 +390,21 @@ let rec read_instr types input =
   | '\x11' ->
     let* Raw typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Call_indirect (tableidx, block_type_of_rec_type types.(typeidx)), input)
+    (Call_indirect (tableidx, block_type_of_type_def types.(typeidx)), input)
   | '\x12' ->
     let+ funcidx, input = read_indice input in
     (Return_call funcidx, input)
   | '\x13' ->
     let* Raw typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    ( Return_call_indirect (tableidx, block_type_of_rec_type types.(typeidx))
+    ( Return_call_indirect (tableidx, block_type_of_type_def types.(typeidx))
     , input )
   | '\x14' ->
     let+ funcidx, input = read_indice input in
     (Call_ref funcidx, input)
   | '\x15' ->
     let+ Raw typeidx, input = read_indice input in
-    (Return_call_ref (block_type_of_rec_type types.(typeidx)), input)
+    (Return_call_ref (block_type_of_type_def types.(typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
   | '\x1C' ->
@@ -752,7 +749,7 @@ let read_type _id input =
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
   let params = List.map (fun param -> (None, param)) params in
-  ([ (None, (Final, [], Def_func_t (params, results))) ], input)
+  ((None, (params, results)), input)
 
 let read_global_type input =
   let* val_type, input = read_valtype input in
@@ -1131,7 +1128,7 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Runtime.Local
-            { type_f = block_type_of_rec_type types.(typeidx)
+            { type_f = block_type_of_type_def types.(typeidx)
             ; locals
             ; body
             ; id = None
@@ -1147,7 +1144,7 @@ let sections_iterate (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = block_type_of_rec_type types.(typeidx)
+                 ; desc = block_type_of_type_def types.(typeidx)
                  }
           | _not_a_function_import -> None )
         import_section
