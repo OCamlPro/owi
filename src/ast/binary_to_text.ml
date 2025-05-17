@@ -10,11 +10,7 @@ let convert_indice (t : binary indice) : text indice =
   match t with Raw _ as t -> t
 
 let convert_heap_type (t : binary heap_type) : text heap_type =
-  match t with
-  | ( Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht | Func_ht
-    | No_func_ht | Extern_ht | No_extern_ht ) as t ->
-    t
-  | Def_ht id -> Def_ht (convert_indice id)
+  match t with (Func_ht | Extern_ht) as t -> t
 
 let convert_ref_type (t : binary ref_type) : text ref_type =
   let nullable, heap_type = t in
@@ -51,36 +47,8 @@ let convert_block_type (bt : binary block_type) : text block_type =
     let ft = convert_func_type ft in
     Bt_raw (opt, ft)
 
-let convert_storage_type (t : binary storage_type) : text storage_type =
-  match t with
-  | Val_storage_t vt -> Val_storage_t (convert_val_type vt)
-  | Val_packed_t _ as t -> t
-
-let convert_field_type ((m, t) : binary field_type) : text field_type =
-  (m, convert_storage_type t)
-
-let convert_struct_field ((name, field_types) : binary struct_field) :
-  text struct_field =
-  (name, List.map convert_field_type field_types)
-
-let convert_struct_type (t : binary struct_type) : text struct_type =
-  List.map convert_struct_field t
-
-let convert_str_type (str_t : binary str_type) : text str_type =
-  match str_t with
-  | Def_struct_t t -> Def_struct_t (convert_struct_type t)
-  | Def_array_t t -> Def_array_t (convert_field_type t)
-  | Def_func_t t -> Def_func_t (convert_func_type t)
-
-let convert_sub_type ((final, indices, str_type) : binary sub_type) :
-  text sub_type =
-  (final, List.map convert_indice indices, convert_str_type str_type)
-
-let convert_type_def ((name, sub_type) : binary type_def) : text type_def =
-  (name, convert_sub_type sub_type)
-
-let convert_rec_type (t : binary rec_type) : text rec_type =
-  List.map convert_type_def t
+let convert_type_def ((name, func_type) : binary type_def) : text type_def =
+  (name, convert_func_type func_type)
 
 let convert_expr (e : binary expr) : text expr =
   (* TODO: proper conversion ! *)
@@ -124,8 +92,8 @@ let convert_data (e : Binary.data) : Text.data =
 
 let from_types types : Text.module_field list =
   Array.map
-    (fun (t : Types.binary Types.rec_type) ->
-      let t = convert_rec_type t in
+    (fun (t : Types.binary Types.type_def) ->
+      let t = convert_type_def t in
       MType t )
     types
   |> Array.to_list

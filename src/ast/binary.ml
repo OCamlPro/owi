@@ -55,7 +55,7 @@ type custom =
 module Module = struct
   type t =
     { id : string option
-    ; types : binary rec_type array
+    ; types : binary type_def array
     ; global : (global, binary global_type) Runtime.t array
     ; table : (binary table, binary table_type) Runtime.t array
     ; mem : (mem, limits) Runtime.t array

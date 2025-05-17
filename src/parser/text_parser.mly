@@ -86,30 +86,13 @@ let null_opt ==
   | { No_null }
 
 let heap_type ==
-  | ANY; { Any_ht }
-  | NONE; { None_ht }
-  | EQ; { Eq_ht }
-  | I31; { I31_ht }
-  | STRUCT; { Struct_ht }
-  | ARRAY; { Array_ht }
   | FUNC; { Func_ht }
-  | NOFUNC; { No_func_ht }
   | EXTERN; { Extern_ht }
-  | NOEXTERN; { No_extern_ht }
-  | ~ = indice; <Def_ht>
 
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
-  | ANY_REF; { Null, Any_ht }
-  | NULL_REF; { Null, None_ht }
-  | EQ_REF; { Null, Eq_ht }
-  | I31_REF; { Null, I31_ht }
-  | STRUCTREF; { Null, Struct_ht }
-  | ARRAY_REF; { Null, Array_ht }
   | FUNC_REF; { Null, Func_ht }
-  | NULL_FUNC_REF; { Null, No_func_ht }
   | EXTERN_REF; { Null, Extern_ht }
-  | NULL_EXTERN_REF; { Null, No_extern_ht }
 
 let packed_type :=
   | I8; { I8 }
@@ -123,44 +106,8 @@ let global_type ==
   | ~ = val_type; { Const, val_type }
   | val_type = par(preceded(MUTABLE, val_type)); { Var, val_type }
 
-let storage_type ==
-  | ~ = val_type; <Val_storage_t>
-  | ~ = packed_type; <Val_packed_t>
-
-let field_type ==
-  | ~ = storage_type; { Const, storage_type }
-  | t = par(preceded(MUTABLE, storage_type)); { Var, t }
-
-let struct_field ==
-    | FIELD; l = list(field_type); { None, l }
-    | FIELD; ~ = id; ~ = field_type; { Some id, [field_type] }
-
-let struct_type ==
-  | ~ = list(par(struct_field)); <>
-
-let array_type ==
-  | ~ = field_type; <>
-
-let str_type ==
-  | ~ = par(preceded(STRUCT, struct_type)); <Def_struct_t>
-  | ~ = par(preceded(ARRAY, array_type)); <Def_array_t>
-  | ~ = par(preceded(FUNC, func_type)); <Def_func_t>
-
-let sub_type ==
-  | ~ = str_type; { Final, [], str_type }
-  | LPAR; SUB; indices = list(indice); ~ = str_type; RPAR; {
-    No_final, indices, str_type
-  }
-  | LPAR; SUB; FINAL; indices = list(indice); ~ = str_type; RPAR; {
-    Final, indices, str_type
-  }
-
 let type_def ==
-  | TYPE; id = option(id); ~ = sub_type; { id, sub_type }
-
-let def_type ==
-  | ~ = type_def; { [ type_def ] }
-  | REC; ~ = list(par(type_def)); <>
+    | TYPE; id = option(id); LPAR; FUNC; ~ = func_type; RPAR; { id, func_type }
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
@@ -240,11 +187,6 @@ let plain_instr :=
   | DROP; { Drop }
   | BR; ~ = indice; <Br>
   | BR_IF; ~ = indice; <Br_if>
-  | BR_ON_CAST; ~ = indice; null_opt1 = null_opt; ht1 = heap_type; null_opt2 = null_opt; ht2 = heap_type;  { Br_on_cast (indice, (null_opt1, ht1), (null_opt2, ht2))}
-  | BR_ON_CAST_FAIL; ~ = indice; ~ = null_opt; ~ = heap_type; <Br_on_cast_fail>
-  | BR_ON_NON_NULL; ~ = indice; <Br_on_non_null>
-  | BR_ON_NULL; ~ = indice; <Br_on_null>
-
   | BR_TABLE; l = nonempty_list(indice); {
     let xs = Array.of_list l in
     let n = Array.length xs in
@@ -431,13 +373,8 @@ let plain_instr :=
   | F64_REINTERPRET_I64; { F_reinterpret_i (S64, S64) }
   (* ref *)
   | REF_NULL; ~ = heap_type; <Ref_null>
-  | REF_I31 ; { Ref_i31 }
   | REF_IS_NULL; { Ref_is_null }
   | REF_FUNC; ~ = indice; <Ref_func>
-  | REF_AS_NON_NULL; { Ref_as_non_null }
-  | REF_CAST; ~ = null_opt; ~ = heap_type; <Ref_cast>
-  | REF_TEST; ~ = null_opt; ~ = heap_type; <Ref_test>
-  | REF_EQ; { Ref_eq }
   (* i32 *)
   | I32_LOAD; memarg = memarg; { I_load (S32, memarg) }
   | I64_LOAD; memarg = memarg; { I_load (S64, memarg) }
@@ -468,29 +405,6 @@ let plain_instr :=
   | MEMORY_COPY; { Memory_copy }
   | MEMORY_INIT; ~ = indice; <Memory_init>
   | DATA_DROP; ~ = indice; <Data_drop>
-  (* array *)
-  | ARRAY_GET; ~ = indice; <Array_get>
-  | ARRAY_GET_U; ~ = indice; <Array_get_u>
-  | ARRAY_LEN; { Array_len }
-  | ARRAY_NEW_CANON; ~ = indice; <Array_new>
-  | ARRAY_NEW_CANON_DATA; i1 = indice; i2 = indice; <Array_new_data>
-  | ARRAY_NEW_CANON_DEFAULT; ~ = indice; <Array_new_default>
-  | ARRAY_NEW_CANON_ELEM; i1 = indice; i2 = indice; <Array_new_elem>
-  | ARRAY_NEW_CANON_FIXED; ~ = indice; num = NUM; {
-    (* we need to convert to i32 to check it's okay *)
-    let num = i32 num in
-    let num = Int32.to_int num in
-    Array_new_fixed (indice, num) }
-  | ARRAY_SET; ~ = indice; <Array_set>
-  (* i31 *)
-  | I31_GET_S; { I31_get_s }
-  | I31_GET_U; { I31_get_u }
-  (* struct *)
-  | STRUCT_GET; i1 = indice; i2 = indice; <Struct_get>
-  | STRUCT_GET_S; i1 = indice; i2 = indice; <Struct_get_s>
-  | STRUCT_NEW_CANON; ~ = indice; <Struct_new>
-  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_default>
-  | STRUCT_SET; i1 = indice; i2 = indice; <Struct_set>
   (* extern *)
   | EXTERN_EXTERNALIZE; { Extern_externalize }
   | EXTERN_INTERNALIZE; { Extern_internalize }
@@ -974,9 +888,7 @@ let inline_export ==
 (* Modules *)
 
 let type_field ==
-  | ~ = def_type; {
-    [ MType def_type ]
-  }
+  | ~ = type_def; { [ MType type_def ] }
 
 let start ==
   | START; ~ = indice; { [ MStart indice ] }
@@ -1053,10 +965,6 @@ let literal_const ==
     | None -> assert false
     | Some num -> Const_host num
   }
-  | REF_ARRAY; { Const_array }
-  | REF_EQ; { Const_eq }
-  | REF_I31; { Const_i31 }
-  | REF_STRUCT; { Const_struct }
 
 let const ==
   | ~ = literal_const; <Literal>

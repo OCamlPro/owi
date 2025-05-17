@@ -116,7 +116,7 @@ let value_of_const : text const -> V.t Result.t = function
   | Const_F32 v -> ok @@ V.F32 v
   | Const_F64 v -> ok @@ V.F64 v
   | Const_null rt ->
-    let+ rt = Binary_types.convert_heap_type None rt in
+    let+ rt = Binary_types.convert_heap_type rt in
     V.ref_null rt
   | Const_extern i -> ok @@ V.Ref (Host_externref.value i)
   | i ->

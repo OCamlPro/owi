@@ -44,22 +44,16 @@ let build_type_env (m : Module.t)
     ]
   in
 
-  let void_to_i32 =
-    [ (None, (Final, [], Def_func_t ([], [ Num_type I32 ]))) ]
-  in
-  let i32_to_i32 =
-    [ ( None
-      , (Final, [], Def_func_t ([ (None, Num_type I32) ], [ Num_type I32 ])) )
-    ]
-  in
+  let void_to_i32 = (None, ([], [ Num_type I32 ])) in
+  let i32_to_i32 = (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) in
   let types = m.types in
   let types, void_to_i32 =
-    match Array.find_index (rec_type_eq void_to_i32) types with
+    match Array.find_index (type_def_eq void_to_i32) types with
     | Some i -> (types, Raw i)
     | None -> (Array.append types [| void_to_i32 |], Raw (Array.length types))
   in
   let types, i32_to_i32 =
-    match Array.find_index (rec_type_eq i32_to_i32) types with
+    match Array.find_index (type_def_eq i32_to_i32) types with
     | Some i -> (types, Raw i)
     | None -> (Array.append types [| i32_to_i32 |], Raw (Array.length types))
   in
@@ -618,18 +612,18 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : Module.t)
   : Module.t * (string * int) array =
   (* update module field `types` *)
   let update_types () : Module.t * (string * (binary func_type * int)) array =
-    let func_type2rec_type : binary func_type -> binary rec_type =
-     fun ty -> [ (None, (Final, [], Def_func_t ty)) ]
+    let func_type2type_def : binary func_type -> binary type_def =
+     fun ty -> (None, ty)
     in
-    let owi_funcs : (string * (binary func_type * binary rec_type)) array =
+    let owi_funcs : (string * (binary func_type * binary type_def)) array =
       Array.map
-        (fun (name, ty) -> (name, (ty, func_type2rec_type ty)))
+        (fun (name, ty) -> (name, (ty, func_type2type_def ty)))
         owi_funcs
     in
     let types, owi_funcs =
       Array.fold_left_map
         (fun types (name, (owi_ft, owi_rt)) ->
-          match Array.find_index (fun rt -> rec_type_eq rt owi_rt) types with
+          match Array.find_index (fun rt -> type_def_eq rt owi_rt) types with
           | Some index -> (types, (name, (owi_ft, index)))
           | None ->
             ( Array.append types [| owi_rt |]

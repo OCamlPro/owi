@@ -114,21 +114,6 @@ module Eval_const = struct
     | Global_get (Raw id) ->
       let* g = Link_env.Build.get_const_global env id in
       ok @@ Stack.push stack g
-    | Array_new _i ->
-      let len, stack = Stack.pop_i32 stack in
-      let len = Int32.to_int len in
-      (* TODO: check type of *default* *)
-      let _default, stack = Stack.pop stack in
-      let a = Array.init len (fun _i -> ()) in
-      ok @@ Stack.push_array stack a
-    | Array_new_default _i ->
-      let len, stack = Stack.pop_i32 stack in
-      let len = Int32.to_int len in
-      let a = Array.init len (fun _i -> ()) in
-      ok @@ Stack.push_array stack a
-    | Ref_i31 ->
-      (* TODO *)
-      ok stack
     | _ -> assert false
 
   (* TODO: binary+const expr *)

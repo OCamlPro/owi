@@ -292,9 +292,8 @@ let locals_func (body_expr : binary expr) =
       aux_expr e1;
       aux_expr e2
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
-    | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size | Memory_grow
-    | Memory_fill | Memory_copy | Nop | Unreachable | Return | Array_len
-    | I31_get_u | I31_get_s | Ref_i31 | Extern_externalize | Extern_internalize
+    | Ref_is_null | Drop | Memory_size | Memory_grow | Memory_fill | Memory_copy
+    | Nop | Unreachable | Return | Extern_externalize | Extern_internalize
     | I32_const _ | I64_const _ | F32_const _ | F64_const _
     | I_unop (_, _)
     | F_unop (_, _)
@@ -309,11 +308,8 @@ let locals_func (body_expr : binary expr) =
     | F_convert_i (_, _, _)
     | I_reinterpret_f (_, _)
     | F_reinterpret_i (_, _)
-    | Ref_null _ | Ref_func _
-    | Ref_cast (_, _)
-    | Ref_test (_, _)
-    | Select _ | Global_get _ | Global_set _ | Table_get _ | Table_set _
-    | Table_size _ | Table_grow _ | Table_fill _
+    | Ref_null _ | Ref_func _ | Select _ | Global_get _ | Global_set _
+    | Table_get _ | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
     | Table_copy (_, _)
     | Table_init (_, _)
     | Elem_drop _
@@ -328,22 +324,10 @@ let locals_func (body_expr : binary expr) =
     | I_store16 (_, _)
     | I64_store32 _ | Memory_init _ | Data_drop _ | Br _ | Br_if _
     | Br_table (_, _)
-    | Br_on_cast (_, _, _)
-    | Br_on_cast_fail (_, _, _)
-    | Br_on_non_null _ | Br_on_null _ | Return_call _
     | Return_call_indirect (_, _)
     | Call _
     | Call_indirect (_, _)
-    | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _ | Array_new _
-    | Array_new_data (_, _)
-    | Array_new_default _
-    | Array_new_elem (_, _)
-    | Array_new_fixed (_, _)
-    | Array_set _
-    | Struct_get (_, _)
-    | Struct_get_s (_, _)
-    | Struct_new _ | Struct_new_default _
-    | Struct_set (_, _) ->
+    | Call_ref _ | Return_call_ref _ | Return_call _ ->
       ()
   and aux_expr expr = List.iter aux_instr expr in
   aux_expr body_expr;
@@ -363,9 +347,8 @@ let remove_local map body =
     | Loop (m, t, e) -> Loop (m, t, aux_expr e)
     | If_else (m, t, e1, e2) -> If_else (m, t, aux_expr e1, aux_expr e2)
     | I64_extend32_s | I32_wrap_i64 | F32_demote_f64 | F64_promote_f32
-    | Ref_is_null | Ref_as_non_null | Ref_eq | Drop | Memory_size | Memory_grow
-    | Memory_fill | Memory_copy | Nop | Unreachable | Return | Array_len
-    | I31_get_u | I31_get_s | Ref_i31 | Extern_externalize | Extern_internalize
+    | Ref_is_null | Drop | Memory_size | Memory_grow | Memory_fill | Memory_copy
+    | Nop | Unreachable | Return | Extern_externalize | Extern_internalize
     | I32_const _ | I64_const _ | F32_const _ | F64_const _
     | I_unop (_, _)
     | F_unop (_, _)
@@ -380,11 +363,8 @@ let remove_local map body =
     | F_convert_i (_, _, _)
     | I_reinterpret_f (_, _)
     | F_reinterpret_i (_, _)
-    | Ref_null _ | Ref_func _
-    | Ref_cast (_, _)
-    | Ref_test (_, _)
-    | Select _ | Global_get _ | Global_set _ | Table_get _ | Table_set _
-    | Table_size _ | Table_grow _ | Table_fill _
+    | Ref_null _ | Ref_func _ | Select _ | Global_get _ | Global_set _
+    | Table_get _ | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
     | Table_copy (_, _)
     | Table_init (_, _)
     | Elem_drop _
@@ -399,22 +379,11 @@ let remove_local map body =
     | I_store16 (_, _)
     | I64_store32 _ | Memory_init _ | Data_drop _ | Br _ | Br_if _
     | Br_table (_, _)
-    | Br_on_cast (_, _, _)
-    | Br_on_cast_fail (_, _, _)
-    | Br_on_non_null _ | Br_on_null _ | Return_call _
+    | Return_call _
     | Return_call_indirect (_, _)
     | Call _
     | Call_indirect (_, _)
-    | Call_ref _ | Return_call_ref _ | Array_get _ | Array_get_u _ | Array_new _
-    | Array_new_data (_, _)
-    | Array_new_default _
-    | Array_new_elem (_, _)
-    | Array_new_fixed (_, _)
-    | Array_set _
-    | Struct_get (_, _)
-    | Struct_get_s (_, _)
-    | Struct_new _ | Struct_new_default _
-    | Struct_set (_, _) ->
+    | Call_ref _ | Return_call_ref _ ->
       instr
   and aux_expr expr = List.map aux_instr expr in
   aux_expr body

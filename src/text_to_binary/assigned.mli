@@ -6,7 +6,7 @@ open Types
 
 type t =
   { id : string option
-  ; typ : binary str_type Named.t
+  ; typ : binary func_type Named.t
   ; global : (Text.global, binary global_type) Runtime.t Named.t
   ; table : (binary table, binary table_type) Runtime.t Named.t
   ; mem : (Types.mem, Types.limits) Runtime.t Named.t

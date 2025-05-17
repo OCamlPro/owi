@@ -5,15 +5,15 @@
 open Types
 open Syntax
 
-module StrType = struct
-  type t = binary str_type
+module Type = struct
+  type t = binary func_type
 
-  let compare (x : t) (y : t) = Types.compare_str_type x y
+  let compare (x : t) (y : t) = Types.compare_func_type x y
 end
 
-module TypeMap = Map.Make (StrType)
+module TypeMap = Map.Make (Type)
 
-let typemap (types : binary str_type Named.t) =
+let typemap (types : Type.t Named.t) =
   Named.fold
     (fun idx typ acc -> TypeMap.add typ (Raw idx) acc)
     types TypeMap.empty
@@ -25,18 +25,15 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     let* (Raw v) = Assigned.find_type modul id in
     match List.nth_opt modul.typ.values v with
     | None -> Error (`Unknown_type id)
-    | Some v -> begin
-      match Indexed.get v with
-      | Def_func_t t' ->
-        let idx = Indexed.get_index v in
-        Ok (Bt_raw (Some (Raw idx), t'))
-      | _ -> assert false
-    end
+    | Some v ->
+      let t' = Indexed.get v in
+      let idx = Indexed.get_index v in
+      Ok (Bt_raw (Some (Raw idx), t'))
   end
   | Bt_raw (_, func_type) ->
-    let+ t = Binary_types.convert_func_type None func_type in
+    let+ t = Binary_types.convert_func_type func_type in
     let idx =
-      match TypeMap.find_opt (Def_func_t t) typemap with
+      match TypeMap.find_opt t typemap with
       | None -> assert false
       | Some idx -> idx
     in
@@ -193,56 +190,24 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       match typ with
       | None -> Ok (Select None)
       | Some [ t ] ->
-        let+ t = Binary_types.convert_val_type None t in
+        let+ t = Binary_types.convert_val_type t in
         Select (Some [ t ])
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
     end
-    | Array_new_default id ->
-      let+ id = Assigned.find_type modul id in
-      Array_new_default id
-    | Array_set id ->
-      let+ id = Assigned.find_type modul id in
-      Array_set id
-    | Array_get id ->
-      let+ id = Assigned.find_type modul id in
-      Array_set id
-    | Ref_null heap_type ->
-      let+ t = Binary_types.convert_heap_type None heap_type in
-      Ref_null t
-    | Br_on_cast (i, t1, t2) ->
-      let* i = Assigned.find_type modul i in
-      let* t1 = Binary_types.convert_ref_type None t1 in
-      let+ t2 = Binary_types.convert_ref_type None t2 in
-      Br_on_cast (i, t1, t2)
-    | Br_on_cast_fail (i, null, ht) ->
-      let* i = Assigned.find_type modul i in
-      let+ ht = Binary_types.convert_heap_type None ht in
-      Br_on_cast_fail (i, null, ht)
-    | Struct_new_default i ->
-      let+ i = Assigned.find_type modul i in
-      Struct_new_default i
-    | Ref_cast (null, ht) ->
-      let+ ht = Binary_types.convert_heap_type None ht in
-      Ref_cast (null, ht)
-    | Ref_test (null, ht) ->
-      let+ ht = Binary_types.convert_heap_type None ht in
-      Ref_test (null, ht)
     | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
       | I32_wrap_i64 | F_reinterpret_i _ | I_reinterpret_f _ | I64_extend_i32 _
       | I64_extend32_s | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
       | F64_promote_f32 | F_convert_i _ | I_trunc_f _ | I_trunc_sat_f _
       | Ref_is_null | F_binop _ | F32_const _ | F64_const _ | I32_const _
-      | I64_const _ | Unreachable | Drop | Nop | Return | Ref_i31 | I31_get_s
-      | I31_get_u | Array_len | Ref_as_non_null | Extern_externalize
-      | Extern_internalize | Ref_eq | I_load8 _ | I_store8 _ | I_load16 _
-      | I_store16 _ | I64_load32 _ | I64_store32 _ | I_load _ | F_load _
-      | F_store _ | I_store _ | Memory_copy | Memory_size | Memory_fill
-      | Memory_grow ) as i ->
+      | I64_const _ | Unreachable | Drop | Nop | Return | Extern_externalize
+      | Extern_internalize | I_load8 _ | I_store8 _ | I_load16 _ | I_store16 _
+      | I64_load32 _ | I64_store32 _ | I_load _ | F_load _ | F_store _
+      | I_store _ | Memory_copy | Memory_size | Memory_fill | Memory_grow ) as i
+      ->
       Ok i
-    | ( Array_new_data _ | Array_new _ | Array_new_elem _ | Array_new_fixed _
-      | Array_get_u _ | Struct_get _ | Struct_get_s _ | Struct_set _
-      | Struct_new _ | Br_on_non_null _ | Br_on_null _ ) as _i ->
-      assert false
+    | Ref_null t ->
+      let+ t = Binary_types.convert_heap_type t in
+      Ref_null t
   and expr (e : text expr) (loop_count, block_ids) : binary expr Result.t =
     list_map (fun i -> body (loop_count, block_ids) i) e
   in
@@ -252,7 +217,7 @@ let rewrite_global (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (global : Text.global) : Binary.global Result.t =
   let* init = rewrite_expr typemap modul [] global.init in
   let mut, val_type = global.typ in
-  let+ val_type = Binary_types.convert_val_type None val_type in
+  let+ val_type = Binary_types.convert_val_type val_type in
   let typ = (mut, val_type) in
   { Binary.id = global.id; init; typ }
 
@@ -269,7 +234,7 @@ let rewrite_elem (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       Binary.Elem_active (Some indice, expr)
   in
   let* init = list_map (rewrite_expr typemap modul []) elem.init in
-  let+ typ = Binary_types.convert_ref_type None elem.typ in
+  let+ typ = Binary_types.convert_ref_type elem.typ in
   { Binary.init; mode; id = elem.id; typ }
 
 let rewrite_data (typemap : binary indice TypeMap.t) (modul : Assigned.t)
@@ -315,7 +280,7 @@ let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   let* (Bt_raw (_, (params, _)) as type_f) =
     rewrite_block_type typemap modul type_f
   in
-  let* locals = list_map (Binary_types.convert_param None) locals in
+  let* locals = list_map Binary_types.convert_param locals in
   let+ body = rewrite_expr typemap modul (params @ locals) body in
   { body; type_f; id; locals }
 
@@ -345,11 +310,9 @@ let rewrite_named f named =
   in
   Named.create values named.named
 
-let rewrite_types (_modul : Assigned.t) (t : binary str_type) :
-  binary rec_type Result.t =
-  (* TODO: the input `t` should actually be a `binary rec_type` *)
-  let t = [ (None, (Final, [], t)) ] in
-  Ok t
+let rewrite_types (_modul : Assigned.t) (t : binary func_type) :
+  binary type_def Result.t =
+  Ok (None, t)
 
 let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)
   ~(func_param_list : string option list) :
@@ -455,7 +418,7 @@ let rewrite_contract (modul : Assigned.t) :
     | Bt_ind ind -> (
       let* (Raw i) = Assigned.find_type modul ind in
       match Indexed.get_at i modul.typ.values with
-      | Some (Def_func_t (func_pt, _)) -> Ok (List.map fst func_pt)
+      | Some (func_pt, _) -> Ok (List.map fst func_pt)
       | _ -> Error (`Spec_invalid_indice (Int.to_string i)) )
     | Bt_raw (_, (func_pt, _)) -> Ok (List.map fst func_pt)
   in
