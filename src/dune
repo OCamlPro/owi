@@ -45,6 +45,7 @@
   concrete_memory
   concrete_table
   concrete_value
+  concrete_wasm_ffi
   convert
   env_id
   float32

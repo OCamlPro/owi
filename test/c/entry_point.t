@@ -8,5 +8,5 @@ entry_point:
   [13]
 
   $ owi c entry_point.c
-  owi: [ERROR] clang failed: run with --debug to get the full error message
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
   [26]
