@@ -12,7 +12,7 @@
 %token I16 I31 I31_GET_S I31_GET_U I31_REF
 %token I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR
 %token I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR
-%token V128_CONST I8X16 I16X8 I32X4 I64X2 F32X4 F64X2
+%token V128 V128_CONST I8X16 I16X8 I32X4 I64X2 F32X4 F64X2
 %token I8 IF IMPORT INVOKE ITEM
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
 %token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE
@@ -177,6 +177,7 @@ let num_type ==
   | I64; { Types.I64 }
   | F32; { Types.F32 }
   | F64; { Types.F64 }
+  | V128; { Types.V128 }
 
 let align ==
   | ALIGN; EQUAL; n = NUM; {
@@ -199,6 +200,22 @@ let instr ==
 | ~ = plain_instr; { [plain_instr] }
 | ~ = block_instr; { [ block_instr ] }
 | ~ = expr; { expr }
+
+let v128_const :=
+  | V128_CONST; I8X16; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM;
+    n9 = NUM; n10 = NUM; n11 = NUM; n12 = NUM; n13 = NUM; n14 = NUM; n15 = NUM; n16 = NUM; {
+    V128.of_i8x16 (i8 n1) (i8 n2) (i8 n3) (i8 n4) (i8 n5) (i8 n6) (i8 n7) (i8 n8)
+                  (i8 n9) (i8 n10) (i8 n11) (i8 n12) (i8 n13) (i8 n14) (i8 n15) (i8 n16)
+  }
+  | V128_CONST; I16X8; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM; {
+    V128.of_i16x8 (i16 n1) (i16 n2) (i16 n3) (i16 n4) (i16 n5) (i16 n6) (i16 n7) (i16 n8)
+  }
+  | V128_CONST; F32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; {
+    V128.of_f32x4 (f32 n1) (f32 n2) (f32 n3) (f32 n4)
+  }
+  | V128_CONST; F64X2; n1 = NUM; n2 = NUM; { V128.of_f64x2 (f64 n1) (f64 n2) }
+  | V128_CONST; I32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; { V128.of_i32x4 (i32 n1) (i32 n2) (i32 n3) (i32 n4) }
+  | V128_CONST; I64X2; n1 = NUM; n2 = NUM; { V128.of_i64x2 (i64 n1) (i64 n2) }
 
 let plain_instr :=
   | NOP; { Nop }
@@ -250,18 +267,7 @@ let plain_instr :=
   | I64_CONST; n = NUM; { I64_const (i64 n) }
   | F32_CONST; n = NUM; { F32_const (f32 n) }
   | F64_CONST; n = NUM; { F64_const (f64 n) }
-  | V128_CONST; I8X16; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM;
-    n9 = NUM; n10 = NUM; n11 = NUM; n12 = NUM; n13 = NUM; n14 = NUM; n15 = NUM; n16 = NUM; {
-    V128_const (V128.of_i8x16 (i8 n1) (i8 n2) (i8 n3) (i8 n4) (i8 n5) (i8 n6) (i8 n7) (i8 n8)
-                  (i8 n9) (i8 n10) (i8 n11) (i8 n12) (i8 n13) (i8 n14) (i8 n15) (i8 n16))
-  }
-  | V128_CONST; I16X8; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM; {
-    V128_const (V128.of_i16x8 (i16 n1) (i16 n2) (i16 n3) (i16 n4) (i16 n5) (i16 n6) (i16 n7) (i16 n8))
-  }
-  | V128_CONST; F32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; { V128_const (V128.of_f32x4 (f32 n1) (f32 n2) (f32 n3) (f32 n4)) }
-  | V128_CONST; F64X2; n1 = NUM; n2 = NUM; { V128_const (V128.of_f64x2 (f64 n1) (f64 n2)) }
-  | V128_CONST; I32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; { V128_const (V128.of_i32x4 (i32 n1) (i32 n2) (i32 n3) (i32 n4)) }
-  | V128_CONST; I64X2; n1 = NUM; n2 = NUM; { V128_const (V128.of_i64x2 (i64 n1) (i64 n2)) }
+  | n = v128_const; { V128_const n }
   | I32_CLZ; { I_unop (S32, Clz) }
   | I64_CLZ; { I_unop (S64, Clz) }
   | I32_CTZ; { I_unop (S32, Ctz) }
@@ -985,6 +991,7 @@ let literal_const ==
   | I64_CONST; num = NUM; { Const_I64 (i64 num) }
   | F32_CONST; num = NUM; { Const_F32 (f32 num) }
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
+  | n = v128_const; { Const_V128 n }
   | REF_NULL; ~ = heap_type; <Const_null>
   | REF_EXTERN; num = NUM; {
     match int_of_string_opt num with

@@ -451,6 +451,7 @@ let keywords =
      ; ("then", THEN)
      ; ("type", TYPE)
      ; ("unreachable", UNREACHABLE)
+     ; ("v128", V128)
      ; ("v128.const", V128_CONST)
     |];
   tbl
