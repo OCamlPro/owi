@@ -13,7 +13,6 @@
   stdout.o
   errno.o
   strchr.o
-  klee.o
   math.o
   strcmp.o
   memccpy.o
@@ -30,18 +29,15 @@
   strncmp.o
   netinet_in.o
   strncpy.o
-  owi.o
   strrchr.o
   pthread.o
   strstr.o
   setjmp.o
   sys_resources.o
-  test-comp.o
   stderr.o
   time.o
   stdio.o
-  unistd.o
-  eacsl.o)
+  unistd.o)
  (action
   (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
 
@@ -53,7 +49,6 @@
   stdout.o
   errno.o
   strchr.o
-  klee.o
   math.o
   strcmp.o
   memccpy.o
@@ -70,18 +65,15 @@
   strncmp.o
   netinet_in.o
   strncpy.o
-  owi.o
   strrchr.o
   pthread.o
   strstr.o
   setjmp.o
   sys_resources.o
-  test-comp.o
   stderr.o
   time.o
   stdio.o
-  unistd.o
-  eacsl.o)
+  unistd.o)
  (deps
   src/assert_fail.c
   src/stdlib.c
@@ -89,7 +81,6 @@
   src/stdout.c
   src/errno.c
   src/strchr.c
-  src/klee.c
   src/math.c
   src/strcmp.c
   src/memccpy.c
@@ -106,18 +97,15 @@
   src/strncmp.c
   src/netinet_in.c
   src/strncpy.c
-  src/owi.c
   src/strrchr.c
   src/pthread.c
   src/strstr.c
   src/setjmp.c
   src/sys_resources.c
-  src/test-comp.c
   src/stderr.c
   src/time.c
   src/stdio.c
-  src/unistd.c
-  src/eacsl.c)
+  src/unistd.c)
  (action
   (run ./script.exe %{deps})))
 
