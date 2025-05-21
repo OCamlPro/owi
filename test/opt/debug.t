@@ -5,7 +5,7 @@ test debug printing:
   owi: [INFO] typechecking ...
   owi: [INFO] optimizing   ...
   (module
-    (type (sub final  (func)))
+    (type (func))
     (global $g i32 i32.const 0)
     (func $start
       call 1

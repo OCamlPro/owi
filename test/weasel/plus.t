@@ -2,10 +2,10 @@
   $ cat plus.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func (param $x i32) (result i32))))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
+    (type (func (param $x i32) (result i32)))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
     (func $plus_three (param $x i32) (result i32)
       i32.const 3
       local.get 0
@@ -34,10 +34,10 @@
   $ cat plus.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func (param $x i32) (result i32))))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
+    (type (func (param $x i32) (result i32)))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
     (func $plus_three (param $x i32) (result i32)
       i32.const 3
       local.get 0

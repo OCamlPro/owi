@@ -513,7 +513,7 @@ Owi is able to get rid of most of the code:
 ```sh
 $ owi opt useless.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func $i32binop
 
   )
@@ -581,7 +581,7 @@ Given a file `42.wasm`, you can convert it to `result.wat` and then run it:
 $ owi wasm2wat 42.wasm -o result.wat
 $ cat result.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func
     i32.const 20
     i32.const 22
