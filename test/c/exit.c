@@ -1,9 +1,8 @@
+#include <stdlib.h>
 #include <owi.h>
 
-extern void exit(int);
-
 int main(void) {
-    int s = owi_i32();
+    int s = owi_int();
     if (s) {
       exit(0);
     }

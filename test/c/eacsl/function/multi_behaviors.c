@@ -37,7 +37,7 @@ int f(int value) {
 }
 
 int main() {
-    int value = owi_i32();
+    int value = owi_int();
     owi_assume(value > INT_MIN);
     f(value);
     return 0;

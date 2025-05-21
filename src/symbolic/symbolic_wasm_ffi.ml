@@ -34,19 +34,21 @@ end = struct
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
 
-  let symbol_invisible_bool () =
-    Choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
-
   let symbol_bool () =
     Choice.with_new_symbol (Ty_bitv 1) (fun sym ->
+      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
+
+  let symbol_invisible_bool () =
+    Choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
 
   let symbol_i8 () =
     Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 24) (Expr.symbol sym) )
 
-  let symbol_char = symbol_i8
+  let symbol_i16 () =
+    Choice.with_new_symbol (Ty_bitv 16) (fun sym ->
+      Expr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbol sym) )
 
   let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
@@ -152,8 +154,8 @@ let symbolic_extern_module =
   let functions =
     [ ( "i8_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
-    ; ( "char_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
+    ; ( "i16_symbol"
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i16)
       )
     ; ( "i32_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)

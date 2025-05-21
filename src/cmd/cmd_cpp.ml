@@ -13,8 +13,9 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let includes = Cmd.of_list ~slip:"-I" (List.map Cmd.p includes) in
 
   let err =
-    if false (* TODO: make this available via CLI *) then OS.Cmd.err_run_out
-    else OS.Cmd.err_null
+    match Logs.level () with
+    | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
+    | None | Some _ -> OS.Cmd.err_null
   in
   let* () =
     (* TODO: we use this recursive function in order to be able to use `-o` on
@@ -34,9 +35,9 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
         match OS.Cmd.run ~err clang_cmd with
         | Ok _ -> compile_files rest
         | Error (`Msg e) ->
-          Fmt.error_msg "clang++ failed: %s"
-            ( if false (* TODO: make this available via CLI *) then e
-              else "run with --debug to get the full error message" ) )
+          Logs.debug (fun m -> m "clang++ failed: %s" e);
+          Fmt.error_msg
+            "clang++ failed: run with -vv if the error is not displayed above" )
     in
     compile_files files
   in
@@ -62,9 +63,8 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     match OS.Cmd.run ~err llc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Fmt.error_msg "llc failed: %s"
-        ( if false (* TODO: make this available via CLI *) then e
-          else "run with --debug to get the full error message" )
+      Logs.debug (fun m -> m "llc failed: %s" e);
+      Fmt.error_msg "llc failed: run with --debug to get the full error message"
   in
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
 
@@ -79,22 +79,24 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     Option.value ~default:Fpath.(workspace // v "a.out.wasm") out_file
   in
 
-  let* binc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
+  let* libc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
+  let* libowi = Cmd_utils.find_installed_c_file (Fpath.v "libowi.wasm") in
   let wasmld_cmd : Cmd.t =
     Cmd.(
       wasmld_bin % "-z" % "stack-size=8388608"
       % Fmt.str "--export=%s" entry_point
       % Fmt.str "--entry=%s" entry_point
-      %% files_o % p binc % "-o" % p out )
+      %% files_o % p libc % p libowi % "-o" % p out )
   in
 
   let+ () =
     match OS.Cmd.run ~err wasmld_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Fmt.error_msg "wasm-ld failed: %s"
-        ( if false (* TODO: make this available via CLI *) then e
-          else "run with --debug to get the full error message" )
+      Logs.debug (fun m -> m "wasm-ld failed: %s" e);
+      Fmt.error_msg
+        "wasm-ld failed: run with -vv to get the full error message if it was \
+         not displayed above"
   in
 
   out

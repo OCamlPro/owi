@@ -14,7 +14,7 @@ void may_exit(int cond, int val) {
 }
 
 int main(void) {
-    int cond = owi_i32(), val = owi_i32();
+    int cond = owi_int(), val = owi_int();
     may_exit(cond, val);
     return 0;
 }

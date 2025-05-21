@@ -1,7 +1,7 @@
 #include <owi.h>
 
 int main(void) {
-    int n = owi_i32();
+    int n = owi_int();
     //@ ghost int is_default = 0;
     switch (n) {
         case 0: {

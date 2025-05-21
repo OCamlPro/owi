@@ -1,7 +1,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
-#include <owi.h>
 #include <stdlib.h>
 
 #define ABS_LONG_MIN 2147483648UL
@@ -12,11 +11,17 @@
 #define ldbltype double
 #endif
 
-void abort(void) { owi_abort(); }
-void exit(int status) { owi_exit(status); }
+__attribute__((import_module("summaries"), import_name("abort"))) void owi_abort(void);
 
-__attribute__((weak, import_module("symbolic"), import_name("assume"))) void
-assume(int);
+void abort(void) {
+  owi_abort();
+}
+
+__attribute__((import_module("summaries"), import_name("exit"))) void owi_exit(int);
+
+void exit(int n) {
+  owi_exit(n);
+}
 
 extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;
@@ -40,20 +45,23 @@ void *malloc(size_t size) {
   return (void *)owi_malloc(start, size);
 }
 
+void free(void *ptr) {
+  (void) owi_free(ptr);
+}
+
+void *realloc(void *ptr, size_t size) {
+  // TODO: fix
+  (void) free(ptr);
+  return (void *)owi_malloc(ptr, size);
+}
+
+
 void *alloca(size_t size) { return malloc(size); }
 
 void *calloc(size_t nmemb, size_t size) {
   // TODO: correctly handle overflow on multiplication
   return malloc(nmemb * size);
 }
-
-void *realloc(void *ptr, size_t size) {
-  // TODO: fix
-  (void) owi_free(ptr);
-  return (void *)owi_malloc(ptr, size);
-}
-
-void free(void *ptr) { (void) owi_free(ptr); }
 
 char *getenv(const char *name) { return (char *)0; }
 int setenv(const char *name, const char *value, int overwrite) { return 0; }

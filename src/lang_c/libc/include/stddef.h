@@ -3,7 +3,12 @@
 
 typedef signed long ptrdiff_t;
 typedef unsigned long size_t;
+
+#if defined(__cplusplus)
+#else
 typedef int wchar_t;
+#endif
+
 
 #undef NULL
 #if defined(__cplusplus)
