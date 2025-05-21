@@ -21,10 +21,13 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
              (fun libpath -> Fmt.str "-I%s" (Fpath.to_string libpath))
              includes )
       in
+
       let framac_verbosity_level =
-        (* TODO: make this available via CLI *)
-        if false then "2" else "0"
+        match Logs.level () with
+        | Some (Logs.Debug | Logs.Info) -> "2"
+        | None | Some _ -> "0"
       in
+
       Cmd.(
         of_list
           [ "-e-acsl"
@@ -53,22 +56,22 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
      fun file out -> Cmd.(framac_bin %% flags1 % p file %% flags2 % p out)
     in
 
+    let err =
+      match Logs.level () with
+      | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
+      | None | Some _ -> OS.Cmd.err_null
+    in
+
     let+ () =
       list_iter
         (fun (file, out) ->
-          match
-            OS.Cmd.run
-              ~err:
-                ( if false (* TODO: make this available via CLI *) then
-                    OS.Cmd.err_run_out
-                  else OS.Cmd.err_null )
-            @@ framac file out
-          with
+          match OS.Cmd.run ~err @@ framac file out with
           | Ok _ as v -> v
           | Error (`Msg e) ->
-            Fmt.error_msg "Frama-C failed: %s"
-              ( if false (* TODO: make this available via CLI *) then e
-                else "run with --debug to get the full error message" ) )
+            Logs.debug (fun m -> m "frama-c failed: %s" e);
+            Fmt.error_msg
+              "Frama-C failed: run with -vv to get the full error message if \
+               it was not displayed above" )
         (List.combine files outs)
     in
 
@@ -103,19 +106,21 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
 
   let out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
   let* libc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
+  let* libowi = Cmd_utils.find_installed_c_file (Fpath.v "libowi.wasm") in
 
-  let files = Cmd.of_list (List.map Fpath.to_string (libc :: files)) in
+  let files =
+    Cmd.of_list (List.map Fpath.to_string (libc :: libowi :: files))
+  in
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
+  let err =
+    match Logs.level () with
+    | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
+    | None | Some _ -> OS.Cmd.err_null
+  in
+
   let+ () =
-    match
-      OS.Cmd.run
-        ~err:
-          ( if (* TODO: make this available via CLI *) false then
-              OS.Cmd.err_run_out
-            else OS.Cmd.err_null )
-        clang
-    with
+    match OS.Cmd.run ~err clang with
     | Ok _ as v -> v
     | Error (`Msg msg) ->
       Logs.debug (fun m -> m "clang failed: %s" msg);

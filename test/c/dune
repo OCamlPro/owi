@@ -2,6 +2,7 @@
  (deps
   %{bin:owi}
   (package owi)
+  abort.c
   bool.c
   char.c
   concolic.c

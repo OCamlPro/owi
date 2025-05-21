@@ -5,7 +5,7 @@ private:
   int poly;
 public:
   Poly(int a, int b, int c, int d) {
-    int x = owi_i32();
+    int x = owi_int();
     int x2 = x * x;
     int x3 = x2 * x;
     owi_assume(x != 1);

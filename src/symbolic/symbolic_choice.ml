@@ -312,6 +312,7 @@ module CoreImpl = struct
       let open Scheduler in
       let sched = init_scheduler () in
       add_init_task sched (State.run t thread);
+      if workers > 1 then Logs_threaded.enable ();
       Array.init workers (fun _i ->
         spawn_worker sched (Solver.fresh solver) callback callback_init
           callback_end )

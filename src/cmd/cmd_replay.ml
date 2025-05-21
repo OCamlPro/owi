@@ -43,44 +43,6 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       end;
       Ok ()
 
-    let symbol_i32 () =
-      let i = next () in
-      match model.(i) with
-      | V.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
-        assert false
-
-    let symbol_char () =
-      let i = next () in
-      match model.(i) with
-      | V.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Logs.err (fun m ->
-          m "Got value %a but expected a char (i32) value." V.pp v );
-        assert false
-
-    let symbol_invisible_bool () = Ok 0l
-
-    let symbol_bool = symbol_char
-
-    let abort () =
-      Logs.err (fun m -> m "Unexpected abort call.");
-      exit 121
-
-    let alloc _m _addr size =
-      let r = !brk in
-      brk := Int32.add !brk size;
-      Ok r
-
-    let free (_ : memory) adr = Ok adr
-
-    let exit (n : Value.int32) = exit (Int32.to_int n)
-
     let symbol_i8 () =
       let i = next () in
       match model.(i) with
@@ -90,6 +52,31 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       | v ->
         Logs.err (fun m ->
           m "Got value %a but expected a i8 (i32) value." V.pp v );
+        assert false
+
+    let symbol_bool = symbol_i8
+
+    let symbol_invisible_bool () = Ok 0l
+
+    let symbol_i16 () =
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m ->
+          m "Got value %a but expected a i16 (i32) value." V.pp v );
+        assert false
+
+    let symbol_i32 () =
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let symbol_i64 () =
@@ -131,6 +118,19 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
         assert false
+
+    let abort () =
+      Logs.err (fun m -> m "Unexpected abort call.");
+      exit 121
+
+    let alloc _m _addr size =
+      let r = !brk in
+      brk := Int32.add !brk size;
+      Ok r
+
+    let free (_ : memory) adr = Ok adr
+
+    let exit (n : Value.int32) = exit (Int32.to_int n)
 
     let symbol_range _ _ =
       let i = next () in
@@ -186,8 +186,8 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       [ ( "i8_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
         )
-      ; ( "char_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
+      ; ( "i16_symbol"
+        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i16)
         )
       ; ( "i32_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)

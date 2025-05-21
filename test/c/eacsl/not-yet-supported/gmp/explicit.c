@@ -2,8 +2,7 @@
 #include <gmp.h>
 
 int main(void) {
-    int owi_var;
-    owi_var = owi_i32();
+    int owi_var = owi_int32();
 
     mpz_t gmp_var;
     mpz_init_set_si(gmp_var, 0);
