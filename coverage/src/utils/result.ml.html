@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>result.ml &mdash; Coverage report</title>
-    <meta name="description" content="34.72% coverage in src/utils/result.ml">
+    <meta name="description" content="34.20% coverage in src/utils/result.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/utils/</span>result.ml
         </a>
       </h1>
-      <h2>34.72%</h2>
+      <h2>34.20%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:34.82%"></span>
@@ -106,6 +106,7 @@
       <span class="unvisited" style="bottom:14.38%"></span>
       <span class="unvisited" style="bottom:14.06%"></span>
       <span class="unvisited" style="bottom:13.74%"></span>
+      <span class="unvisited" style="bottom:13.42%"></span>
       <span class="unvisited" style="bottom:12.46%"></span>
       <span class="unvisited" style="bottom:12.14%"></span>
       <span class="unvisited" style="bottom:11.82%"></span>
@@ -418,7 +419,7 @@
 <a id="L268"></a><span class="unvisited"> </span>
 <a id="L269"></a><span class="unvisited"> </span>
 <a id="L270"></a><span class="unvisited"> </span>
-<a id="L271"></a><span class="visited"> </span>
+<a id="L271"></a><span class="unvisited"> </span>
 <a id="L272"></a><span class="visited"> </span>
 <a id="L273"></a><span class="visited"> </span>
 <a id="L274"></a><span class="unvisited"> </span>
@@ -916,7 +917,7 @@ let rec err_to_string = function
   | <span data-count="0">`</span>Invalid_character_in_memory -&gt; "Invalide character in_memory"
   | <span data-count="4">`</span>Invalid_result_arity -&gt; "invalid result arity"
   | <span data-count="0">`</span>Lexer_illegal_character c -&gt; Fmt.str "%s" c
-  | <span data-count="818">`</span>Lexer_unknown_operator op -&gt; Fmt.str "%s" op
+  | <span data-count="810">`</span>Lexer_unknown_operator op -&gt; Fmt.str "%s" op
   | <span data-count="2112">`</span>Malformed_utf8_encoding txt -&gt; Fmt.str "malformed UTF-8 encoding %S" txt
   | <span data-count="12">`</span>Memory_size_too_large -&gt; "memory size must be at most 65536 pages (4GiB)"
   | <span data-count="24">`</span>Msg msg -&gt; msg
@@ -933,7 +934,7 @@ let rec err_to_string = function
   | <span data-count="0">`</span>Unbound_module id -&gt; Fmt.str "unbound module %s" id
   | <span data-count="0">`</span>Unbound_name id -&gt; Fmt.str "unbound name %s" id
   | <span data-count="4">`</span>Undeclared_function_reference -&gt; "undeclared function reference"
-  | <span data-count="274">`</span>Unexpected_token s -&gt; Fmt.str "unexpected token %S" s
+  | <span data-count="284">`</span>Unexpected_token s -&gt; Fmt.str "unexpected token %S" s
   | <span data-count="10">`</span>Unknown_data id -&gt; Fmt.str "unknown data segment %a" Types.pp_indice id
   | <span data-count="4">`</span>Unknown_elem id -&gt; Fmt.str "unknown elem segment %a" Types.pp_indice id
   | <span data-count="45">`</span>Unknown_func id -&gt; Fmt.str "unknown function %a" Types.pp_indice id
@@ -946,7 +947,7 @@ let rec err_to_string = function
   | <span data-count="0">`</span>Unknown_module name -&gt; Fmt.str "unknown module %s" name
   | <span data-count="0">`</span>Unknown_operator -&gt; Fmt.str "unknown operator"
   | <span data-count="46">`</span>Unknown_table id -&gt; Fmt.str "unknown table %a" Types.pp_indice id
-  | <span data-count="38">`</span>Unknown_type id -&gt; Fmt.str "unknown type %a" Types.pp_indice id
+  | <span data-count="36">`</span>Unknown_type id -&gt; Fmt.str "unknown type %a" Types.pp_indice id
   | <span data-count="2">`</span>Unsupported_file_extension ext -&gt;
     Fmt.str "unsupported file_extension %S" ext
   | <span data-count="0">`</span>Spec_invalid_int32 i32 -&gt; Fmt.str "spec: invalid int32 %S" i32
@@ -1021,7 +1022,7 @@ let err_to_exit_code = function
   | <span data-count="0">`</span>Inline_function_type -&gt; 21
   | <span data-count="0">`</span>Invalid_result_arity -&gt; 22
   | <span data-count="0">`</span>Lexer_illegal_character _c -&gt; 23
-  | <span data-count="10">`</span>Lexer_unknown_operator _op -&gt; 23
+  | <span data-count="2">`</span>Lexer_unknown_operator _op -&gt; 23
   | <span data-count="0">`</span>Malformed_utf8_encoding _txt -&gt; 24
   | <span data-count="0">`</span>Memory_size_too_large -&gt; 25
   | <span data-count="12">`</span>Msg _msg -&gt; 26
@@ -1037,7 +1038,7 @@ let err_to_exit_code = function
   | <span data-count="0">`</span>Unbound_module _id -&gt; 37
   | <span data-count="0">`</span>Unbound_name _id -&gt; 38
   | <span data-count="0">`</span>Undeclared_function_reference -&gt; 39
-  | <span data-count="2">`</span>Unexpected_token _token -&gt; 40
+  | <span data-count="12">`</span>Unexpected_token _token -&gt; 40
   | <span data-count="0">`</span>Unknown_data _id -&gt; 41
   | <span data-count="0">`</span>Unknown_elem _id -&gt; 42
   | <span data-count="1">`</span>Unknown_func _id -&gt; 43
@@ -1049,7 +1050,7 @@ let err_to_exit_code = function
   | <span data-count="0">`</span>Unknown_module _id -&gt; 49
   | <span data-count="0">`</span>Unknown_operator -&gt; 50
   | <span data-count="0">`</span>Unknown_table _id -&gt; 51
-  | <span data-count="2">`</span>Unknown_type _id -&gt; 52
+  | <span data-count="0">`</span>Unknown_type _id -&gt; 52
   | <span data-count="2">`</span>Unsupported_file_extension _ext -&gt; 53
   | <span data-count="2">`</span>Failed_with_but_expected (_got, _expected) -&gt; 54
   | <span data-count="0">`</span>Spec_invalid_int32 _i32 -&gt; 56

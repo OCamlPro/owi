@@ -113,13 +113,13 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="63026">v</span>.value
+let get v = <span data-count="62861">v</span>.value
 
-let get_index v = <span data-count="48445">v</span>.index
+let get_index v = <span data-count="48298">v</span>.index
 
 let map f v = <span data-count="0">{</span> index = v.index; value = <span data-count="0">f</span> v.value }
 
-let return index value = <span data-count="62184">{</span> index; value }
+let return index value = <span data-count="61997">{</span> index; value }
 
 let has_index idx { index; _ } = <span data-count="274">i</span>dx = index
 
@@ -129,12 +129,12 @@ let get_at i values =
   | <span data-count="125">S</span>ome { value; _ } -&gt; Some value
 
 let list_to_array l =
-  <span data-count="42812">L</span>ist.sort
+  <span data-count="42798">L</span>ist.sort
     (fun { index = i1; value = _ } { index = i2; value = _ } -&gt;
-      <span data-count="37097">I</span>nt.compare i1 i2 )
+      <span data-count="37019">I</span>nt.compare i1 i2 )
     l
-  |&gt; <span data-count="42812">L</span>ist.map (fun { value; _ } -&gt; <span data-count="32344">v</span>alue)
-  |&gt; <span data-count="42812">A</span>rray.of_list
+  |&gt; <span data-count="42798">L</span>ist.map (fun { value; _ } -&gt; <span data-count="32292">v</span>alue)
+  |&gt; <span data-count="42798">A</span>rray.of_list
 
 let pp pp_v fmt { index; value } =
   <span data-count="6">F</span>mt.pf fmt "{ index = %d ; value = %a }" index pp_v value

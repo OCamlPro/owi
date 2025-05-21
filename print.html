@@ -1066,10 +1066,10 @@ All OK!
 $ cat plus_three.instrumented.wat
 (module
   (import "symbolic" "assert" (func $assert  (param i32)))
-  (type (sub final  (func (param $x i32) (result i32))))
-  (type (sub final  (func)))
-  (type (sub final  (func (param i32))))
-  (type (sub final  (func (result i32))))
+  (type (func (param $x i32) (result i32)))
+  (type (func))
+  (type (func (param i32)))
+  (type (func (result i32)))
   (func $plus_three (param $x i32) (result i32)
     local.get 0
     i32.const 3
@@ -1602,7 +1602,7 @@ owi: [INFO] running instr : drop
 <p>Owi is able to get rid of most of the code:</p>
 <pre><code class="language-sh">$ owi opt useless.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func $i32binop
 
   )
@@ -1656,7 +1656,7 @@ owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 <pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
 $ cat result.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func
     i32.const 20
     i32.const 22

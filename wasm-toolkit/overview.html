@@ -633,7 +633,7 @@ owi: [INFO] running instr : drop
 <p>Owi is able to get rid of most of the code:</p>
 <pre><code class="language-sh">$ owi opt useless.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func $i32binop
 
   )
@@ -687,7 +687,7 @@ owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 <pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
 $ cat result.wat
 (module
-  (type (sub final  (func)))
+  (type (func))
   (func
     i32.const 20
     i32.const 22

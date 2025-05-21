@@ -297,44 +297,44 @@ open Syntax
 
 module Text = struct
   let until_text_validate ~unsafe m =
-    <span data-count="6302">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6302">T</span>ext_validate.modul m
+    <span data-count="6298">i</span>f unsafe then <span data-count="0">O</span>k m else <span data-count="6298">T</span>ext_validate.modul m
 
   let until_group ~unsafe m =
-    <span data-count="6302">l</span>et* m = until_text_validat<span data-count="6302">e</span> ~unsafe m in
-    <span data-count="6237">G</span>rouped.of_text m
+    <span data-count="6298">l</span>et* m = until_text_validat<span data-count="6298">e</span> ~unsafe m in
+    <span data-count="6233">G</span>rouped.of_text m
 
   let until_assign ~unsafe m =
-    <span data-count="6302">l</span>et* m = until_grou<span data-count="6302">p</span> ~unsafe m in
-    <span data-count="6237">A</span>ssigned.of_grouped m
+    <span data-count="6298">l</span>et* m = until_grou<span data-count="6298">p</span> ~unsafe m in
+    <span data-count="6233">A</span>ssigned.of_grouped m
 
   let until_binary ~unsafe ~rac ~srac m =
-    <span data-count="6302">l</span>et* m = until_assig<span data-count="6302">n</span> ~unsafe m in
-    <span data-count="6180">l</span>et* m = Rewrite.modu<span data-count="6180">l</span> m in
-    <span data-count="6116">i</span>f srac then <span data-count="6">C</span>ode_generator.generate true m
-    else <span data-count="6110">i</span>f rac then <span data-count="9">C</span>ode_generator.generate false m
-    else <span data-count="6101">O</span>k m
+    <span data-count="6298">l</span>et* m = until_assig<span data-count="6298">n</span> ~unsafe m in
+    <span data-count="6177">l</span>et* m = Rewrite.modu<span data-count="6177">l</span> m in
+    <span data-count="6114">i</span>f srac then <span data-count="6">C</span>ode_generator.generate true m
+    else <span data-count="6108">i</span>f rac then <span data-count="9">C</span>ode_generator.generate false m
+    else <span data-count="6099">O</span>k m
 
   let until_binary_validate ~unsafe ~rac ~srac m =
-    <span data-count="6168">l</span>et* m = until_binar<span data-count="6168">y</span> ~unsafe ~rac ~srac m in
-    <span data-count="6107">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="6164">l</span>et* m = until_binar<span data-count="6164">y</span> ~unsafe ~rac ~srac m in
+    <span data-count="6105">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="6107">l</span>et+ () = Binary_validate.modu<span data-count="6107">l</span> m in
-      <span data-count="3140">m</span>
+      <span data-count="6105">l</span>et+ () = Binary_validate.modu<span data-count="6105">l</span> m in
+      <span data-count="3138">m</span>
 
   let until_optimize ~unsafe ~rac ~srac ~optimize m =
-    <span data-count="5958">l</span>et+ m = until_binary_validat<span data-count="5958">e</span> ~unsafe ~rac ~srac m in
-    <span data-count="2934">i</span>f optimize then <span data-count="1361">O</span>ptimize.modul m else <span data-count="1573">m</span>
+    <span data-count="5954">l</span>et+ m = until_binary_validat<span data-count="5954">e</span> ~unsafe ~rac ~srac m in
+    <span data-count="2932">i</span>f optimize then <span data-count="1361">O</span>ptimize.modul m else <span data-count="1571">m</span>
 
   let until_link ~unsafe ~rac ~srac ~optimize ~name link_state m =
-    <span data-count="5916">l</span>et* m = until_optimiz<span data-count="5916">e</span> ~unsafe ~rac ~srac ~optimize m in
-    <span data-count="2892">L</span>ink.modul link_state ~name m
+    <span data-count="5912">l</span>et* m = until_optimiz<span data-count="5912">e</span> ~unsafe ~rac ~srac ~optimize m in
+    <span data-count="2890">L</span>ink.modul link_state ~name m
 
   let until_interpret ~unsafe ~rac ~srac ~optimize ~name link_state m =
-    <span data-count="2579">l</span>et* m, link_state =
-      until_lin<span data-count="2579">k</span> ~unsafe ~rac ~srac ~optimize ~name link_state m
+    <span data-count="2575">l</span>et* m, link_state =
+      until_lin<span data-count="2575">k</span> ~unsafe ~rac ~srac ~optimize ~name link_state m
     in
-    <span data-count="2577">l</span>et+ () = Interpret.Concrete.modu<span data-count="2577">l</span> link_state.envs m in
-    <span data-count="2576">l</span>ink_state
+    <span data-count="2575">l</span>et+ () = Interpret.Concrete.modu<span data-count="2575">l</span> link_state.envs m in
+    <span data-count="2574">l</span>ink_state
 end
 
 module Binary = struct

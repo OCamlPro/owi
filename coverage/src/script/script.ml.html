@@ -813,7 +813,7 @@ let value_of_const : text const -&gt; V.t Result.t = function
   | <span data-count="23358">C</span>onst_F32 v -&gt; ok @@ V.F32 v
   | <span data-count="23690">C</span>onst_F64 v -&gt; ok @@ V.F64 v
   | <span data-count="28">C</span>onst_null rt -&gt;
-    let+ rt = Binary_types.convert_heap_typ<span data-count="28">e</span> None rt in
+    let+ rt = Binary_types.convert_heap_typ<span data-count="28">e</span> rt in
     <span data-count="28">V</span>.ref_null rt
   | <span data-count="65">C</span>onst_extern i -&gt; ok @@ V.Ref (Host_externref.valu<span data-count="65">e</span> i)
   | <span data-count="0">i</span> -&gt;
@@ -841,27 +841,27 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
 let unsafe = false
 
 let run ~no_exhaustion ~optimize script =
-  <span data-count="222">l</span>et state =
+  <span data-count="220">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="222">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="220">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.state) -&gt; function
-      | <span data-count="2551">T</span>ext.Text_module m -&gt;
+      | <span data-count="2547">T</span>ext.Text_module m -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
-          <span data-count="222">(</span>);
-        <span data-count="2551">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** module");
-        <span data-count="2551">i</span>ncr curr_module;
-        <span data-count="2551">l</span>et+ link_state =
-          Compile.Text.until_interpre<span data-count="2551">t</span> link_state ~unsafe ~rac:false ~srac:false
+          <span data-count="220">(</span>);
+        <span data-count="2547">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="2547">i</span>ncr curr_module;
+        <span data-count="2547">l</span>et+ link_state =
+          Compile.Text.until_interpre<span data-count="2547">t</span> link_state ~unsafe ~rac:false ~srac:false
             ~optimize ~name:None m
         in
         (* TODO: enable printing again! *)
-        <span data-count="2549">l</span>ink_state
+        <span data-count="2547">l</span>ink_state
       | <span data-count="3">T</span>ext.Quoted_module m -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
         <span data-count="3">i</span>ncr curr_module;
@@ -982,12 +982,12 @@ let run ~no_exhaustion ~optimize script =
             <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
         in
         <span data-count="30">l</span>ink_state
-      | <span data-count="269">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="222">n</span>ot !registered then (* TODO: disable debug *) <span data-count="222">(</span>);
-        <span data-count="269">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** register");
-        <span data-count="269">l</span>et+ state = Link.register_modul<span data-count="269">e</span> link_state ~name ~id:mod_name in
+      | <span data-count="267">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="220">n</span>ot !registered then (* TODO: disable debug *) <span data-count="220">(</span>);
+        <span data-count="267">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** register");
+        <span data-count="267">l</span>et+ state = Link.register_modul<span data-count="267">e</span> link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
-        <span data-count="269">s</span>tate
+        <span data-count="267">s</span>tate
       | <span data-count="312">A</span>ction a -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** action");
         <span data-count="312">l</span>et+ _stack = actio<span data-count="312">n</span> link_state a in
@@ -995,7 +995,7 @@ let run ~no_exhaustion ~optimize script =
     state script
 
 let exec ~no_exhaustion ~optimize script =
-  <span data-count="222">l</span>et+ _link_state = ru<span data-count="222">n</span> ~no_exhaustion ~optimize script in
+  <span data-count="220">l</span>et+ _link_state = ru<span data-count="220">n</span> ~no_exhaustion ~optimize script in
   <span data-count="218">(</span>)
 </code></pre>
       </div>

@@ -115,18 +115,18 @@ type 'a t =
 
 let empty = { values = []; named = String_map.empty }
 
-let create values named = <span data-count="80582">{</span> values; named }
+let create values named = <span data-count="80549">{</span> values; named }
 
 let fold f v acc =
-  <span data-count="6180">L</span>ist.fold_left
-    (fun acc v -&gt; <span data-count="9431">f</span> (Indexed.get_inde<span data-count="9431">x</span> v) (Indexed.ge<span data-count="9431">t</span> v) acc)
+  <span data-count="6177">L</span>ist.fold_left
+    (fun acc v -&gt; <span data-count="9399">f</span> (Indexed.get_inde<span data-count="9399">x</span> v) (Indexed.ge<span data-count="9399">t</span> v) acc)
     acc v.values
 
 let map f v =
   <span data-count="0">l</span>et values = List.map f v.values in
   <span data-count="0">{</span> v with values }
 
-let to_array v = <span data-count="42812">I</span>ndexed.list_to_array v.values
+let to_array v = <span data-count="42798">I</span>ndexed.list_to_array v.values
 
 let pp_values pp_v fmt values = <span data-count="7">I</span>ndexed.pp_list pp_v fmt values
 
