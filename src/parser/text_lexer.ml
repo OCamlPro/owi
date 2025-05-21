@@ -320,6 +320,7 @@ let keywords =
      ; ("i32.wrap_i64", I32_WRAP_I64)
      ; ("i32.xor", I32_XOR)
      ; ("i64", I64)
+     ; ("i64x2", I64X2)
      ; ("i64.add", I64_ADD)
      ; ("i64.and", I64_AND)
      ; ("i64.clz", I64_CLZ)
@@ -445,6 +446,7 @@ let keywords =
      ; ("then", THEN)
      ; ("type", TYPE)
      ; ("unreachable", UNREACHABLE)
+     ; ("v128.const", V128_CONST)
     |];
   tbl
 
