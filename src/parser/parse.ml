@@ -10,6 +10,7 @@ open Syntax
 let token_to_string = function
   | Text_parser.OFFSET -> "offset"
   | V128_CONST -> "v128.const"
+  | V128 -> "v128"
   | UNREACHABLE -> "unreachable"
   | TYPE -> "type"
   | THEN -> "then"
