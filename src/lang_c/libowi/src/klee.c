@@ -1,9 +1,7 @@
-#include <assert.h>
 #include <klee.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define __OWI_INTERNALS
 #include <owi.h>
@@ -57,38 +55,38 @@ void klee_silent_exit(int status) { owi_exit(status); }
 void klee_abort() { owi_abort(); }
 void klee_report_error(const char *file, int line, const char *message,
                        const char *suffix) {
-  assert(0);
+  owi_assert(0);
 }
 size_t klee_get_obj_size(void *ptr) {
-  assert(0);
+  owi_assert(0);
   return 0;
 }
-void klee_print_expr(const char *msg, ...) { assert(0); }
+void klee_print_expr(const char *msg, ...) { owi_assert(0); }
 
 uintptr_t klee_choose(uintptr_t n) {
-  assert(0);
+  owi_assert(0);
   return 0;
 }
 
-void klee_assert(int condition) { owi_assert(condition); }
-unsigned klee_is_symbolic(uintptr_t n) { assert(0); }
-unsigned klee_is_replay() { assert(0); }
+void klee_owi_assert(int condition) { owi_owi_assert(condition); }
+unsigned klee_is_symbolic(uintptr_t n) { owi_assert(0); }
+unsigned klee_is_replay() { owi_assert(0); }
 
 void klee_assume(uintptr_t condition) { owi_assume(condition); }
 void klee_warning(const char *message) {}
 void klee_warning_once(const char *message) {}
 
-void klee_prefer_cex(void *object, uintptr_t condition) { assert(0); }
-void klee_posix_prefer_cex(void *object, uintptr_t condition) { assert(0); }
-void klee_mark_global(void *object) { assert(0); }
+void klee_prefer_cex(void *object, uintptr_t condition) { owi_assert(0); }
+void klee_posix_prefer_cex(void *object, uintptr_t condition) { owi_assert(0); }
+void klee_mark_global(void *object) { owi_assert(0); }
 
-void klee_check_memory_access(const void *address, size_t size) { assert(0); }
-void klee_set_forking(unsigned enable) { assert(0); }
-void klee_stack_trace() { assert(0); }
-void klee_print_range(const char *name, int arg) { assert(0); }
-void klee_open_merge() { assert(0); }
-void klee_close_merge() { assert(0); }
+void klee_check_memory_access(const void *address, size_t size) { owi_assert(0); }
+void klee_set_forking(unsigned enable) { owi_assert(0); }
+void klee_stack_trace() { owi_assert(0); }
+void klee_print_range(const char *name, int arg) { owi_assert(0); }
+void klee_open_merge() { owi_assert(0); }
+void klee_close_merge() { owi_assert(0); }
 int klee_get_errno() {
-  assert(0);
+  owi_assert(0);
   return 1;
 }
