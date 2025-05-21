@@ -1506,17 +1506,16 @@ module Make (P : Interpret_intf.P) :
               again in this case. *)
            if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
              let stop =
-               match timeout, timeout_instr with
+               match (timeout, timeout_instr) with
                | None, None -> assert false
                | None, Some _instr -> fuel_left <= 0
                | Some s, Some _instr -> after_time s || fuel_left <= 0
                | Some s, None ->
                  let stop = after_time s in
-                 if not stop && fuel_left < 0 then Atomic.set fuel max_int;
+                 if (not stop) && fuel_left < 0 then Atomic.set fuel max_int;
                  stop
              in
-             if stop then Choice.trap (`Msg "timeout")
-             else Choice.return ()
+             if stop then Choice.trap (`Msg "timeout") else Choice.return ()
            end
            else Choice.return () )
 
