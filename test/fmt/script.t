@@ -697,7 +697,7 @@ print script:
       (func $f (param i32) (result i32)
         local.get 0
       )
-      (type $sig (sub final  (func (param i32) (result i32))))
+      (type $sig (func (param i32) (result i32)))
       (table 1 1 (ref null func))
       (elem (offset i32.const 0) (ref null func) (item ref.func $f))
       (func $type-unary-operand-empty-in-call_indirect
@@ -1074,7 +1074,7 @@ print script:
       (func $f (param i32) (result i32)
         local.get 0
       )
-      (type $sig (sub final  (func (param i32) (result i32))))
+      (type $sig (func (param i32) (result i32)))
       (table 1 1 (ref null func))
       (elem (offset i32.const 0) (ref null func) (item ref.func $f))
       (func $type-binary-1st-operand-empty-in-call_indirect
@@ -1092,7 +1092,7 @@ print script:
       (func $f (param i32) (result i32)
         local.get 0
       )
-      (type $sig (sub final  (func (param i32) (result i32))))
+      (type $sig (func (param i32) (result i32)))
       (table 1 1 (ref null func))
       (elem (offset i32.const 0) (ref null func) (item ref.func $f))
       (func $type-binary-2nd-operand-empty-in-call_indirect

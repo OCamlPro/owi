@@ -1,9 +1,9 @@
   $ owi wat2wasm block_type2.wat
   $ owi wasm2wat block_type2.wasm
   (module
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (param i32) (result i32))))
-    (type (sub final  (func)))
+    (type (func (result i32)))
+    (type (func (param i32) (result i32)))
+    (type (func))
     (func (result i32) (local i32)
       i32.const 0
       local.tee 0

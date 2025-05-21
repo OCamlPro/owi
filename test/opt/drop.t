@@ -2,7 +2,7 @@ drop instruction:
   $ owi opt drop.wat > drop.opt.wat
   $ cat drop.opt.wat
   (module
-    (type (sub final  (func)))
+    (type (func))
     (global $g i32 i32.const 0)
     (func $start
       call 1

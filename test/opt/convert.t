@@ -2,7 +2,7 @@ f**.convert_i** instructions:
   $ owi opt convert.wat > convert.opt.wat
   $ cat convert.opt.wat
   (module
-    (type (sub final  (func)))
+    (type (func))
     (func $start
       
     )

@@ -2,7 +2,7 @@ select instruction:
   $ owi opt select.wat > select.opt.wat
   $ cat select.opt.wat
   (module
-    (type (sub final  (func)))
+    (type (func))
     (func $start
       
     )

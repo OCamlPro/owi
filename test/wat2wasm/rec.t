@@ -2,8 +2,8 @@
   $ owi run rec.wasm
   $ owi wasm2wat rec.wasm
   (module
-    (type (sub final  (func (param i32) (result i32))))
-    (type (sub final  (func)))
+    (type (func (param i32) (result i32)))
+    (type (func))
     (memory 1)
     (func (param i32) (result i32)
       local.get 0

@@ -2,10 +2,10 @@
   $ cat forall.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (param i32) (result i32))))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
+    (type (func (param i32) (result i32)))
     (func $start
       
     )
@@ -41,10 +41,10 @@
   $ cat forall.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (param i32) (result i32))))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
+    (type (func (param i32) (result i32)))
     (func $start
       
     )

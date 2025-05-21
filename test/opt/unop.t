@@ -2,7 +2,7 @@ unop () instructions:
   $ owi opt unop.wat > unop.opt.wat
   $ cat unop.opt.wat
   (module
-    (type (sub final  (func)))
+    (type (func))
     (func $iunop
       
     )

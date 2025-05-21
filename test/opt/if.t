@@ -2,8 +2,8 @@ if then else instruction:
   $ owi opt if.wat > if.opt.wat
   $ cat if.opt.wat
   (module
-    (type (sub final  (func)))
-    (type (sub final  (func (result i32))))
+    (type (func))
+    (type (func (result i32)))
     (func $start
       (block (result i32)
         i32.const 42)

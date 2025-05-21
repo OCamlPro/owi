@@ -33,8 +33,8 @@
   owi: [INFO] running instr : drop
   $ owi wasm2wat call_indirect.wasm
   (module
-    (type (sub final  (func (param i64) (result i64))))
-    (type (sub final  (func)))
+    (type (func (param i64) (result i64)))
+    (type (func))
     (table 1 10 (ref null func))
     (func (param i64) (result i64)
       local.get 0

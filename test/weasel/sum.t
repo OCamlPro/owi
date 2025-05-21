@@ -2,11 +2,11 @@
   $ cat sum.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32))))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (param i32) (result i32))))
+    (type (func (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32)))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
+    (type (func (param i32) (result i32)))
     (func $sum (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32)
       local.get 0
       local.get 1
@@ -49,11 +49,11 @@
   $ cat sum.instrumented.wat
   (module
     (import "symbolic" "assert" (func $assert  (param i32)))
-    (type (sub final  (func (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32))))
-    (type (sub final  (func)))
-    (type (sub final  (func (param i32))))
-    (type (sub final  (func (result i32))))
-    (type (sub final  (func (param i32) (result i32))))
+    (type (func (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32)))
+    (type (func))
+    (type (func (param i32)))
+    (type (func (result i32)))
+    (type (func (param i32) (result i32)))
     (func $sum (param $p1 i32) (param $p2 i32) (param $p3 i32) (param $p4 i32) (result i32)
       local.get 0
       local.get 1
