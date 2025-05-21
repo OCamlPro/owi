@@ -25,7 +25,7 @@ int main (void) {
   char program[ITERS];
 
   for (int i = 0; i < ITERS; i++) {
-    program[i] = owi_i32();
+    program[i] = owi_char();
   }
 
   int old_x = x;

@@ -3,7 +3,7 @@
 #undef __OWI_INTERNALS
 
 int main() {
-    int normal_bool = owi_bool();
-    int invisible_bool = owi_invisible_bool();
+    _Bool normal_bool = owi_bool();
+    _Bool invisible_bool = owi_invisible_bool();
     owi_assert(0);
 }

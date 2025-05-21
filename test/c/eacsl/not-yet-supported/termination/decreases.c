@@ -9,7 +9,7 @@ int fact(int n) {
 }
 
 int main(void) {
-    int n = owi_i32();
+    int n = owi_int();
     owi_assume(n >= 0);
     owi_assume(n <= 10);
     fact(n);

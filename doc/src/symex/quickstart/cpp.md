@@ -13,7 +13,7 @@ struct IntPair {
 };
 
 int main() {
-  IntPair p{owi_i32(), owi_i32()};
+  IntPair p{owi_int(), owi_int()};
   owi_assert(p.mean1() == p.mean2());
 }
 ```

@@ -45,7 +45,7 @@ int size(List* node) {
 }*/
 
 int main(void) {
-    int n = owi_i32();
+    int n = owi_int();
     owi_assume(n >= 10);
     owi_assume(n <= 20);
     List *node = NULL;

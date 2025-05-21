@@ -1,7 +1,7 @@
 #include <owi.h>
 
 int main(void) {
-    int x = owi_i32();
+    int x = owi_int();
     owi_assume(x >= -1);
 
     //@ ghost int num;

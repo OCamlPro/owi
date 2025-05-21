@@ -9,7 +9,7 @@ void decrement(temperature *t, int n) {
 
 int main(void) {
     temperature t = 20;
-    int n = owi_i32();
+    int n = owi_int();
     decrement(&t, n);
     return 0;
 }

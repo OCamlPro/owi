@@ -15,8 +15,8 @@ int max(int x, int y) {
 }
 
 int main(void) {
-    int x = owi_i32();
-    int y = owi_i32();
+    int x = owi_int();
+    int y = owi_int();
     max(x, y);
     return 0;
 }

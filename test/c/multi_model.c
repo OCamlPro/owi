@@ -1,7 +1,7 @@
 #include <owi.h>
 
 int main() {
-    int nondet = owi_bool();
+    _Bool nondet = owi_bool();
     if (nondet) {
         owi_assert(0);
     } else {

@@ -152,9 +152,13 @@ Deque tests:
   All OK!
   Testing "files/normal/testsuite/deque/deque_test_zipIterAdd.c":
   Using owi sym:
-  All OK!
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
+  
+  [26]
   Using owi conc:
-  All OK!
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
+  
+  [26]
   Testing "files/normal/testsuite/deque/deque_test_zipIterNext.c":
   Using owi sym:
   All OK!
@@ -167,6 +171,10 @@ Deque tests:
   All OK!
   Testing "files/normal/testsuite/deque/deque_test_zipIterReplace.c":
   Using owi sym:
-  All OK!
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
+  
+  [26]
   Using owi conc:
-  All OK!
+  owi: [ERROR] clang failed (run with -vv if the full error message is not displayed above)
+  
+  [26]

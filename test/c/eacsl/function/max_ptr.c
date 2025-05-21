@@ -17,8 +17,8 @@ int main() {
     int* q;
     p = (int*)malloc(sizeof(int));
     q = (int*)malloc(sizeof(int));
-    *p = owi_i32();
-    *q = owi_i32();
+    *p = owi_int();
+    *q = owi_int();
     max_ptr(p, q);
     return 0;
 }

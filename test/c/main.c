@@ -2,9 +2,9 @@
 
 int main(int argc, char **argv) {
   static char array[5];
-  char c = owi_i8();
+  char c = owi_char();
   for (int i = 0; i < sizeof(array); i++) {
-    if (c == owi_i8()) {
+    if (c == owi_char()) {
       return i;
     }
   }

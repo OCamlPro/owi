@@ -1,7 +1,7 @@
 #include <owi.h>
 
 int main() {
-  int x = owi_i32();
+  int x = owi_int();
   int x2 = x * x;
   int x3 = x * x * x;
 

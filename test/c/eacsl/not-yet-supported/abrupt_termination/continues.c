@@ -1,7 +1,7 @@
 #include <owi.h>
 
 int main(void) {
-    int x = owi_i32();
+    int x = owi_int();
     owi_assume(x >= 0);
     owi_assume(x <= 20);
     while (x > 0) {
