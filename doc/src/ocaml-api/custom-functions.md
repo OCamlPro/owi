@@ -96,7 +96,10 @@ let module_to_run, link_state =
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs module_to_run with
+  match
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+      module_to_run
+  with
   | Error _o -> assert false
   | Ok () -> ()
 ```
@@ -217,7 +220,10 @@ let module_to_run, link_state =
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs module_to_run with
+  match
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+      module_to_run
+  with
   | Error _ -> assert false
   | Ok () -> ()
 ```
