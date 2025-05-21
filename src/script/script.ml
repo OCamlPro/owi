@@ -160,8 +160,8 @@ let run ~no_exhaustion ~optimize script =
         Logs.info (fun m -> m "*** module");
         incr curr_module;
         let+ link_state =
-          Compile.Text.until_interpret link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+          Compile.Text.until_interpret ~timeout:None ~timeout_instr:None
+            link_state ~unsafe ~rac:false ~srac:false ~optimize ~name:None m
         in
         (* TODO: enable printing again! *)
         link_state
@@ -171,7 +171,7 @@ let run ~no_exhaustion ~optimize script =
         let* m = Parse.Text.Inline_module.from_string m in
         let+ link_state =
           Compile.Text.until_interpret link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~timeout:None ~timeout_instr:None ~optimize ~name:None m
         in
         link_state
       | Text.Binary_module (id, m) ->
@@ -180,8 +180,8 @@ let run ~no_exhaustion ~optimize script =
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
         let+ link_state =
-          Compile.Binary.until_interpret link_state ~unsafe ~optimize ~name:None
-            m
+          Compile.Binary.until_interpret link_state ~timeout:None
+            ~timeout_instr:None ~unsafe ~optimize ~name:None m
         in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
@@ -191,7 +191,10 @@ let run ~no_exhaustion ~optimize script =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~optimize ~name:None m
         in
-        let got = Interpret.Concrete.modul link_state.envs m in
+        let got =
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
+            link_state.envs m
+        in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_binary (m, expected)) ->

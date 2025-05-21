@@ -1415,21 +1415,24 @@ module Make (P : Interpret_intf.P) :
         m "unimplemented instruction: %a" (Types.pp_instr ~short:false) i );
       assert false
 
-  let rec loop (state : State.exec_state) =
+  let rec loop ~heartbeat (state : State.exec_state) =
+    let* () =
+      match heartbeat with None -> Choice.return () | Some f -> f ()
+    in
     match state.pc with
     | instr :: pc -> begin
       let* state = exec_instr instr { state with pc } in
       match state with
-      | State.Continue state -> loop state
+      | State.Continue state -> loop ~heartbeat state
       | State.Return res -> Choice.return res
     end
     | [] -> (
       let* next_state = State.end_block state in
       match next_state with
-      | State.Continue state -> loop state
+      | State.Continue state -> loop ~heartbeat state
       | State.Return res -> Choice.return res )
 
-  let exec_expr envs env locals stack expr bt =
+  let exec_expr ~heartbeat envs env locals stack expr bt =
     let state : State.exec_state =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
@@ -1443,12 +1446,49 @@ module Make (P : Interpret_intf.P) :
       }
     in
 
-    let+ state = loop state in
+    let+ state = loop ~heartbeat state in
     state
 
-  let modul envs (modul : Module_to_run.t) : unit P.Choice.t =
-    Logs.info (fun m -> m "interpreting ...");
+  let make_heartbeat ~timeout ~timeout_instr () =
+    match (timeout, timeout_instr) with
+    | None, None -> None
+    | Some _, _ | _, Some _ ->
+      Some
+        (let fuel =
+           Atomic.make (match timeout_instr with Some i -> i | None -> max_int)
+         in
+         let after_time =
+           let start_time = Unix.gettimeofday () in
+           fun timeout_s ->
+             Float.compare (Unix.gettimeofday () -. start_time) timeout_s > 0
+         in
+         fun () ->
+           let fuel_left = Atomic.fetch_and_add fuel (-1) in
+           (* If we only use [timeout_instr], we want to stop all as
+              soon as [fuel_left <= 0]. But if we only use [timeout],
+              we don't want to run into the slow path below on each
+              instruction after [fuel_left] becomes negative. We avoid
+              this repeated slow path by bumping [fuel] to [max_int]
+              again in this case. *)
+           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
+             let stop =
+               match (timeout, timeout_instr) with
+               | None, None -> assert false
+               | None, Some _instr -> fuel_left <= 0
+               | Some s, Some _instr -> after_time s || fuel_left <= 0
+               | Some s, None ->
+                 let stop = after_time s in
+                 if (not stop) && fuel_left < 0 then Atomic.set fuel max_int;
+                 stop
+             in
+             if stop then Choice.trap (`Msg "timeout") else Choice.return ()
+           end
+           else Choice.return () )
 
+  let modul ~timeout ~timeout_instr envs (modul : Module_to_run.t) :
+    unit P.Choice.t =
+    let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
+    Logs.info (fun m -> m "interpreting ...");
     try
       begin
         let* () =
@@ -1457,8 +1497,8 @@ module Make (P : Interpret_intf.P) :
               let* () = u in
               let+ _end_stack =
                 let env = Module_to_run.env modul in
-                exec_expr envs env (State.Locals.of_list []) Stack.empty to_run
-                  None
+                exec_expr ~heartbeat envs env (State.Locals.of_list [])
+                  Stack.empty to_run None
               in
               () )
             (Choice.return ())
@@ -1490,7 +1530,7 @@ module Make (P : Interpret_intf.P) :
         match state with
         | State.Return res -> Choice.return res
         | State.Continue state ->
-          let+ res = loop state in
+          let+ res = loop ~heartbeat:None state in
           res
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
