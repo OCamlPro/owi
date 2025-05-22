@@ -80,9 +80,10 @@ let get_char_valtype = function
   | Num_type I64 -> '\x7E'
   | Num_type F32 -> '\x7D'
   | Num_type F64 -> '\x7C'
+  | Num_type V128 -> '\x7B'
   | Ref_type (Null, Func_ht) -> '\x70'
   | Ref_type (Null, Extern_ht) -> '\x6F'
-  | _ -> assert false (* vecttype v128 '\x7B' *)
+  | _ -> assert false
 
 let write_valtype buf vt =
   let c = get_char_valtype vt in
@@ -176,6 +177,10 @@ let write_func_import buf
 
 let write_fc buf i =
   Buffer.add_char buf '\xFC';
+  write_u32_of_int buf i
+
+let write_fd buf i =
+  Buffer.add_char buf '\xFD';
   write_u32_of_int buf i
 
 let rec write_instr buf instr =
@@ -312,7 +317,6 @@ let rec write_instr buf instr =
   | F64_const f ->
     add_char '\x44';
     write_f64 buf f
-  | V128_const _ | V_ibinop _ -> assert false
   | I_testop (S32, Eqz) -> add_char '\x45'
   | I_relop (S32, Eq) -> add_char '\x46'
   | I_relop (S32, Ne) -> add_char '\x47'
@@ -488,6 +492,19 @@ let rec write_instr buf instr =
   | Table_fill idx ->
     write_fc buf 17;
     write_indice buf idx
+  | V128_const v ->
+    write_fd buf 12;
+    let a, b = V128.to_i64x2 v in
+    write_bytes_8 buf a;
+    write_bytes_8 buf b
+  | V_ibinop (I8x16, Add) -> write_fd buf 110
+  | V_ibinop (I8x16, Sub) -> write_fd buf 113
+  | V_ibinop (I16x8, Add) -> write_fd buf 142
+  | V_ibinop (I16x8, Sub) -> write_fd buf 145
+  | V_ibinop (I32x4, Add) -> write_fd buf 174
+  | V_ibinop (I32x4, Sub) -> write_fd buf 177
+  | V_ibinop (I64x2, Add) -> write_fd buf 206
+  | V_ibinop (I64x2, Sub) -> write_fd buf 209
   | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
   | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
   | Extern_internalize ->
