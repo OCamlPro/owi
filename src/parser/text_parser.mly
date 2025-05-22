@@ -75,6 +75,28 @@ let f32 s =
   try Float32.of_string_exn s
   with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
 
+let wrong_number_of_lane_literals () =
+  failwith "wrong number of lane literals"
+
+let t2_of_v128_arg_list z = function
+  | [a; b] -> z a, z b
+  | _ -> wrong_number_of_lane_literals ()
+
+let t4_of_v128_arg_list z = function
+  | [a; b; c; d] -> z a, z b, z c, z d
+  | _ -> wrong_number_of_lane_literals ()
+
+let t8_of_v128_arg_list z = function
+  | [a; b; c; d; e; f; g; h] -> z a, z b, z c, z d, z e, z f, z g, z h
+  | _ -> wrong_number_of_lane_literals ()
+
+let t16_of_v128_arg_list z = function
+  | [a; b; c; d; e; f; g; h;
+     i; j; k; l; m; n; o; p;] ->
+     z a, z b, z c, z d, z e, z f, z g, z h,
+     z i, z j, z k, z l, z m, z n, z o, z p
+  | _ -> wrong_number_of_lane_literals ()
+
 %}
 
 %start <Text.script> script
@@ -202,20 +224,33 @@ let instr ==
 | ~ = expr; { expr }
 
 let v128_const :=
-  | V128_CONST; I8X16; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM;
-    n9 = NUM; n10 = NUM; n11 = NUM; n12 = NUM; n13 = NUM; n14 = NUM; n15 = NUM; n16 = NUM; {
-    V128.of_i8x16 (i8 n1) (i8 n2) (i8 n3) (i8 n4) (i8 n5) (i8 n6) (i8 n7) (i8 n8)
-                  (i8 n9) (i8 n10) (i8 n11) (i8 n12) (i8 n13) (i8 n14) (i8 n15) (i8 n16)
+  | V128_CONST; I8X16; n = list(NUM); {
+        let (n1, n2, n3, n4, n5, n6, n7, n8,
+             n9, n10, n11, n12, n13, n14, n15, n16) =
+          t16_of_v128_arg_list i8 n
+        in
+        V128.of_i8x16 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16
   }
-  | V128_CONST; I16X8; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; n5 = NUM; n6 = NUM; n7 = NUM; n8 = NUM; {
-    V128.of_i16x8 (i16 n1) (i16 n2) (i16 n3) (i16 n4) (i16 n5) (i16 n6) (i16 n7) (i16 n8)
+  | V128_CONST; I16X8; n = list(NUM); {
+        let (n1, n2, n3, n4, n5, n6, n7, n8) = t8_of_v128_arg_list i16 n in
+        V128.of_i16x8 n1 n2 n3 n4 n5 n6 n7 n8
   }
-  | V128_CONST; F32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; {
-    V128.of_f32x4 (f32 n1) (f32 n2) (f32 n3) (f32 n4)
+  | V128_CONST; F32X4; n = list(NUM); {
+        let (n1, n2, n3, n4) = t4_of_v128_arg_list f32 n in
+        V128.of_f32x4 n1 n2 n3 n4
   }
-  | V128_CONST; F64X2; n1 = NUM; n2 = NUM; { V128.of_f64x2 (f64 n1) (f64 n2) }
-  | V128_CONST; I32X4; n1 = NUM; n2 = NUM; n3 = NUM; n4 = NUM; { V128.of_i32x4 (i32 n1) (i32 n2) (i32 n3) (i32 n4) }
-  | V128_CONST; I64X2; n1 = NUM; n2 = NUM; { V128.of_i64x2 (i64 n1) (i64 n2) }
+  | V128_CONST; F64X2; n = list(NUM); {
+        let (n1, n2) = t2_of_v128_arg_list f64 n in
+        V128.of_f64x2 n1 n2
+      }
+  | V128_CONST; I32X4; n = list(NUM); {
+        let (n1, n2, n3, n4) = t4_of_v128_arg_list i32 n in
+        V128.of_i32x4 n1 n2 n3 n4
+      }
+  | V128_CONST; I64X2; n = list(NUM); {
+        let (n1, n2) = t2_of_v128_arg_list i64 n in
+        V128.of_i64x2 n1 n2
+      }
 
 let plain_instr :=
   | NOP; { Nop }
