@@ -73,7 +73,13 @@ let num_type_eq t1 t2 =
   | (I32 | I64 | F32 | F64 | V128), _ -> false
 
 let compare_num_type t1 t2 =
-  let to_int = function I32 -> 0 | I64 -> 1 | F32 -> 2 | F64 -> 3 | V128 -> 4 in
+  let to_int = function
+    | I32 -> 0
+    | I64 -> 1
+    | F32 -> 2
+    | F64 -> 3
+    | V128 -> 4
+  in
   compare (to_int t1) (to_int t2)
 
 type nullable =
@@ -116,9 +122,7 @@ type nonrec fshape =
   | F32x4
   | F64x8
 
-let pp_fshape fmt = function
-  | F32x4 -> pf fmt "f32x4"
-  | F64x8 -> pf fmt "f64x8"
+let pp_fshape fmt = function F32x4 -> pf fmt "f32x4" | F64x8 -> pf fmt "f64x8"
 
 type nonrec sx =
   | U
@@ -158,9 +162,7 @@ type nonrec vibinop =
   | Add
   | Sub
 
-let pp_vibinop fmt = function
-  | Add -> pf fmt "add"
-  | Sub -> pf fmt "sub"
+let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub"
 
 type nonrec ibinop =
   | Add

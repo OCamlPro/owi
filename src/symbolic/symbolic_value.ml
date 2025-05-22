@@ -26,8 +26,7 @@ let pp_float64 = Expr.pp
 
 type v128 = int64 * int64
 
-let pp_v128 fmt (a, b) =
-  Fmt.pf fmt "(%a,%a)" pp_int64 a pp_int64 b
+let pp_v128 fmt (a, b) = Fmt.pf fmt "(%a,%a)" pp_int64 a pp_int64 b
 
 type externref = V.externref
 
@@ -57,7 +56,7 @@ let const_f64 (f : Float64.t) : float64 = value (Num (F64 (Float64.to_bits f)))
 
 let const_v128 (v : V128.t) : v128 =
   let a, b = V128.to_i64x2 v in
-  const_i64 a, const_i64 b
+  (const_i64 a, const_i64 b)
 
 let ref_null _ty = Ref (Funcref None)
 
@@ -487,7 +486,7 @@ module V128 = struct
 
   let to_i32x4 _ = assert false (* TODO *)
 
-  let of_i64x2  _ = assert false (* TODO *)
+  let of_i64x2 _ = assert false (* TODO *)
 
   let to_i64x2 _ = assert false (* TODO *)
 end

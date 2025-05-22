@@ -57,8 +57,7 @@ end = struct
     if n < input.size then Some (String.get input.bytes (input.pt + n))
     else None
 
-  let as_string input =
-    String.sub input.bytes input.pt input.size
+  let as_string input = String.sub input.bytes input.pt input.size
 end
 
 let string_of_char_list char_list =

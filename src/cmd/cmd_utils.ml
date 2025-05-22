@@ -79,8 +79,7 @@ let default_symbol_of_t m =
     | Num_type I64 -> Ok (Types.Call i64_symbol)
     | Num_type F32 -> Ok (Types.Call f32_symbol)
     | Num_type F64 -> Ok (Types.Call f64_symbol)
-    | Num_type V128 ->
-      Fmt.error_msg "TODO default_symbol_of_t V128"
+    | Num_type V128 -> Fmt.error_msg "TODO default_symbol_of_t V128"
     | Ref_type t ->
       Fmt.error_msg "can not create default symbol of type %a" Types.pp_ref_type
         t )
