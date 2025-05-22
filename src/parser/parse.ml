@@ -9,6 +9,10 @@ open Syntax
 
 let token_to_string = function
   | Text_parser.OFFSET -> "offset"
+  | I32X4_ADD -> "i32x4.add"
+  | I32X4_SUB -> "i32x4.sub"
+  | I64X2_ADD -> "i64x2.add"
+  | I64X2_SUB -> "i64x2.sub"
   | V128_CONST -> "v128.const"
   | V128 -> "v128"
   | UNREACHABLE -> "unreachable"

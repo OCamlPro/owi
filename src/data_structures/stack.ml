@@ -57,6 +57,8 @@ module type S = sig
 
   val pop_v128 : t -> v128 * t
 
+  val pop2_v128 : t -> (v128 * v128) * t
+
   val pop_ref : t -> value * t
 
   val pop_as_ref : t -> ref_value * t
@@ -188,6 +190,11 @@ module Make (V : Value_intf.T) :
   let pop_v128 s =
     let hd, tl = pop s in
     match hd with V128 f -> (f, tl) | _ -> assert false
+
+  let pop2_v128 s =
+    let n2, s = pop s in
+    let n1, tl = pop s in
+    match (n1, n2) with V128 n1, V128 n2 -> ((n1, n2), tl) | _ -> assert false
 
   let pop_ref s =
     let hd, tl = pop s in

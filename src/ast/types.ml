@@ -100,6 +100,26 @@ type nonrec nn =
 
 let pp_nn fmt = function S32 -> pf fmt "32" | S64 -> pf fmt "64"
 
+type nonrec ishape =
+  | I8x16
+  | I16x8
+  | I32x4
+  | I64x2
+
+let pp_ishape fmt = function
+  | I8x16 -> pf fmt "i8x16"
+  | I16x8 -> pf fmt "i16x8"
+  | I32x4 -> pf fmt "i32x4"
+  | I64x2 -> pf fmt "i64x2"
+
+type nonrec fshape =
+  | F32x4
+  | F64x8
+
+let pp_fshape fmt = function
+  | F32x4 -> pf fmt "f32x4"
+  | F64x8 -> pf fmt "f64x8"
+
 type nonrec sx =
   | U
   | S
@@ -133,6 +153,14 @@ let pp_funop fmt = function
   | Floor -> pf fmt "floor"
   | Trunc -> pf fmt "trunc"
   | Nearest -> pf fmt "nearest"
+
+type nonrec vibinop =
+  | Add
+  | Sub
+
+let pp_vibinop fmt = function
+  | Add -> pf fmt "add"
+  | Sub -> pf fmt "sub"
 
 type nonrec ibinop =
   | Add
@@ -412,6 +440,7 @@ type 'a instr =
   | F_unop of nn * funop
   | I_binop of nn * ibinop
   | F_binop of nn * fbinop
+  | V_ibinop of ishape * vibinop
   | I_testop of nn * itestop
   | I_relop of nn * irelop
   | F_relop of nn * frelop
@@ -500,6 +529,7 @@ let rec pp_instr ~short fmt = function
   | F_unop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_funop op
   | I_binop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_ibinop op
   | F_binop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_fbinop op
+  | V_ibinop (shape, op) -> pf fmt "%a.%a" pp_ishape shape pp_vibinop op
   | I_testop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_itestop op
   | I_relop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_irelop op
   | F_relop (n, op) -> pf fmt "f%a.%a" pp_nn n frelop op
@@ -611,6 +641,7 @@ and iter_instr f (i : _ instr) =
   | F_unop (_, _)
   | I_binop (_, _)
   | F_binop (_, _)
+  | V_ibinop (_, _)
   | I_testop (_, _)
   | I_relop (_, _)
   | F_relop (_, _)
