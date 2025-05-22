@@ -9,13 +9,13 @@ let i16_of_i8x2 a b =
   upper lor (b land 0xFF)
 
 let i32_of_i16x2 a b =
-  let upper = Int32.shl (Int32.of_int a) 16l in
-  let lower = Int32.of_int b in
+  let upper = Int32.shl (Int32.of_int b) 16l in
+  let lower = Int32.of_int a in
   Int32.logor upper (Int32.logand lower 0xFFFFl)
 
 let i64_of_i32x2 a b =
-  let upper = Int64.shl (Int32.to_int64 a) 32L in
-  let lower = Int32.to_int64 b in
+  let upper = Int64.shl (Int32.to_int64 b) 32L in
+  let lower = Int32.to_int64 a in
   Int64.logor upper (Int64.logand lower 0xFFFFFFFFL)
 
 let i64_of_i16x4 a b c d =
@@ -62,7 +62,7 @@ let to_i64x2 t =
 let i64_to_i32x2 a =
   let high = Int64.(to_int32 (shift_right_logical a 32)) in
   let low = Int64.to_int32 a in
-  high, low
+  low, high
 
 let i64x2_to_i32x4 (v1, v2) =
   let a, b = i64_to_i32x2 v1 in
