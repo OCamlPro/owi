@@ -310,10 +310,10 @@ module type T = sig
 
     val of_i32x4 : int32 -> int32 -> int32 -> int32 -> v128
 
-    val to_i32x4 : v128 -> (int32 * int32 * int32 * int32)
+    val to_i32x4 : v128 -> int32 * int32 * int32 * int32
 
     val of_i64x2 : int64 -> int64 -> v128
 
-    val to_i64x2 : v128 -> (int64 * int64)
+    val to_i64x2 : v128 -> int64 * int64
   end
 end

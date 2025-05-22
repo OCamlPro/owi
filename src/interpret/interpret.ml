@@ -253,33 +253,27 @@ module Make (P : Interpret_intf.P) :
 
   let exec_vibinop stack (shape : ishape) (op : vibinop) =
     let (f1, f2), stack = Stack.pop2_v128 stack in
-    let v = match shape with
-      | I8x16
-      | I16x8 -> assert false (* TODO *)
+    let v =
+      match shape with
+      | I8x16 | I16x8 -> assert false (* TODO *)
       | I32x4 -> begin
-          let a1, b1, c1, d1 = V128.to_i32x4 f1 in
-          let a2, b2, c2, d2 = V128.to_i32x4 f2 in
-          let op = match op with
-            | Add -> I32.add
-            | Sub -> I32.sub
-          in
-          let a = op a1 a2 in
-          let b = op b1 b2 in
-          let c = op c1 c2 in
-          let d = op d1 d2 in
-          V128.of_i32x4 a b c d
-        end
+        let a1, b1, c1, d1 = V128.to_i32x4 f1 in
+        let a2, b2, c2, d2 = V128.to_i32x4 f2 in
+        let op = match op with Add -> I32.add | Sub -> I32.sub in
+        let a = op a1 a2 in
+        let b = op b1 b2 in
+        let c = op c1 c2 in
+        let d = op d1 d2 in
+        V128.of_i32x4 a b c d
+      end
       | I64x2 -> begin
-          let a1, b1 = V128.to_i64x2 f1 in
-          let a2, b2 = V128.to_i64x2 f2 in
-          let op = match op with
-            | Add -> I64.add
-            | Sub -> I64.sub
-          in
-          let a = op a1 a2 in
-          let b = op b1 b2 in
-          V128.of_i64x2 a b
-        end
+        let a1, b1 = V128.to_i64x2 f1 in
+        let a2, b2 = V128.to_i64x2 f2 in
+        let op = match op with Add -> I64.add | Sub -> I64.sub in
+        let a = op a1 a2 in
+        let b = op b1 b2 in
+        V128.of_i64x2 a b
+      end
     in
     Stack.push_v128 stack v
 
@@ -1035,7 +1029,8 @@ module Make (P : Interpret_intf.P) :
             (F64 v, stack)
           | V128 ->
             let v, stack = Stack.pop_v128 stack in
-            (V128 v, stack) )      in
+            (V128 v, stack) )
+      in
       Global.set_value global v;
       st stack
     | Table_get (Raw i) ->

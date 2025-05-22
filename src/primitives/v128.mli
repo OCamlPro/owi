@@ -3,9 +3,23 @@ type t
 val zero : t
 
 val of_i8x16 :
-  int -> int -> int -> int -> int -> int -> int -> int ->
-  int -> int -> int -> int -> int -> int -> int -> int ->
-  t
+     int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> int
+  -> t
 
 val of_i16x8 : int -> int -> int -> int -> int -> int -> int -> int -> t
 
