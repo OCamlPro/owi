@@ -160,6 +160,7 @@ end = struct
     | I64, I64 -> true
     | F32, F32 -> true
     | F64, F64 -> true
+    | V128, V128 -> true
     | _, _ -> false
 
   let match_ref_type required got =
@@ -577,6 +578,7 @@ let typecheck_const_instr (modul : Module.t) refs stack = function
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
+  | V128_const _ -> Stack.push [ v128 ] stack
   | Ref_null t -> Stack.push [ Ref_type t ] stack
   | Ref_func (Raw i) ->
     let* _t = Env.func_get i modul in

@@ -24,6 +24,8 @@ module Input : sig
 
   val get : int -> t -> char option
 
+  val as_string : t -> string
+
   val of_string : string -> t
 
   val sub : pos:int -> len:int -> t -> t Result.t
@@ -54,6 +56,9 @@ end = struct
   let get n input =
     if n < input.size then Some (String.get input.bytes (input.pt + n))
     else None
+
+  let as_string input =
+    String.sub input.bytes input.pt input.size
 end
 
 let string_of_char_list char_list =
@@ -220,6 +225,7 @@ let read_numtype input =
   | -0x02 -> Ok (I64, input)
   | -0x03 -> Ok (F32, input)
   | -0x04 -> Ok (F64, input)
+  | -0x05 -> Ok (V128, input)
   | b -> parse_fail "malformed number type: %d" b
 
 let read_vectype input =
@@ -323,6 +329,19 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
+  | i -> parse_fail "illegal opcode (1) %i" i
+
+let read_FD input =
+  let* i, input = read_U32 input in
+  match i with
+  | 12 ->
+    let* data = Input.sub_prefix 16 input in
+    let+ input = Input.sub_suffix 16 input in
+    let data = Input.as_string data in
+    let high = String.get_int64_le data 0 in
+    let low = String.get_int64_le data 8 in
+    let v128 = V128.of_i64x2 high low in
+    (V128_const v128, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
 let block_type_of_type_def (_id, (pt, rt)) =
@@ -654,6 +673,7 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC input
+  | '\xFD' -> read_FD input
   | c -> parse_fail "illegal opcode (2) %s" (Char.escaped c)
 
 and read_expr types input =

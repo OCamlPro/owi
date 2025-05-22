@@ -80,6 +80,8 @@ let compare_result_const result (const : V.t) =
     Float32.eq n n' || String.equal (Float32.to_string n) (Float32.to_string n')
   | Result_const (Literal (Const_F64 n)), F64 n' ->
     Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
+  | Result_const (Literal (Const_V128 n)), V128 n' ->
+    V128.eq n n'
   | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
   | Result_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -> begin
@@ -115,6 +117,7 @@ let value_of_const : text const -> V.t Result.t = function
   | Const_I64 v -> ok @@ V.I64 v
   | Const_F32 v -> ok @@ V.F32 v
   | Const_F64 v -> ok @@ V.F64 v
+  | Const_V128 v -> ok @@ V.V128 v
   | Const_null rt ->
     let+ rt = Binary_types.convert_heap_type rt in
     V.ref_null rt
