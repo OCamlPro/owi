@@ -86,6 +86,22 @@ let f_pair_1' fc fs (c, s) =
 
 let f_pair_2 fc fs (c1, s1) (c2, s2) = (fc c1 c2, fs s1 s2) [@@inline always]
 
+let f_pair_4 fc fs (c1, s1) (c2, s2) (c3, s3) (c4, s4) = (fc c1 c2 c3 c4, fs s1 s2 s3 s4)
+[@@inline always]
+
+let f_pair_1_2 fc fs (c, s) =
+  let (c1, c2) = fc c in
+  let (s1, s2) = fs s in
+  ((c1, s1), (c2, s2))
+[@@inline always]
+
+let f_pair_1_4 fc fs (c, s) =
+  let (c1, c2, c3, c4) = fc c in
+  let (s1, s2, s3, s4) = fs s in
+  ((c1, s1), (c2, s2), (c3, s3), (c4, s4))
+[@@inline always]
+
+
 let f_pair_1_cst fc fs v = (fc v, fs v) [@@inline always]
 
 let f_pair_2_cst' fc fs (c, s) v2 = (fc c v2, fs s v2) [@@inline always]
@@ -478,4 +494,10 @@ end
 
 module V128 = struct
   let zero = const_v128 V128.zero
+
+  let of_i32x4 = f_pair_4 C.V128.of_i32x4 S.V128.of_i32x4
+  let to_i32x4 = f_pair_1_4 C.V128.to_i32x4 S.V128.to_i32x4
+  let of_i64x2 = f_pair_2 C.V128.of_i64x2 S.V128.of_i64x2
+  let to_i64x2 = f_pair_1_2 C.V128.to_i64x2 S.V128.to_i64x2
+
 end

@@ -453,6 +453,10 @@ let keywords =
      ; ("unreachable", UNREACHABLE)
      ; ("v128", V128)
      ; ("v128.const", V128_CONST)
+     ; ("i32x4.add", I32X4_ADD)
+     ; ("i32x4.sub", I32X4_SUB)
+     ; ("i64x2.add", I64X2_ADD)
+     ; ("i64x2.sub", I64X2_SUB)
     |];
   tbl
 

@@ -59,6 +59,20 @@ let to_i64x2 t =
     i64_of_i32x2 a b,
     i64_of_i32x2 c d
 
+let i64_to_i32x2 a =
+  let high = Int64.(to_int32 (shift_right_logical a 32)) in
+  let low = Int64.to_int32 a in
+  high, low
+
+let i64x2_to_i32x4 (v1, v2) =
+  let a, b = i64_to_i32x2 v1 in
+  let c, d = i64_to_i32x2 v2 in
+  (a, b, c, d)
+
+let to_i32x4 = function
+  | I32x4 (a, b, c, d) -> (a, b, c, d)
+  | v -> i64x2_to_i32x4 (to_i64x2 v)
+
 let zero = of_i64x2 0L 0L
 
 let pp ppf v =

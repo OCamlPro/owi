@@ -482,4 +482,12 @@ end
 
 module V128 = struct
   let zero : v128 = const_v128 V128.zero
+
+  let of_i32x4 _ = assert false (* TODO *)
+
+  let to_i32x4 _ = assert false (* TODO *)
+
+  let of_i64x2  _ = assert false (* TODO *)
+
+  let to_i64x2 _ = assert false (* TODO *)
 end

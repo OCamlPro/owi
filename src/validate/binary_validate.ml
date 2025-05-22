@@ -254,6 +254,9 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     let t = ftype s in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
+  | V_ibinop (_shape, _op) ->
+    let* stack = Stack.pop [ v128; v128 ] stack in
+    Stack.push [ v128 ] stack
   | I_testop (nn, _) ->
     let* stack = Stack.pop [ itype nn ] stack in
     Stack.push [ i32 ] stack
