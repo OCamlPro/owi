@@ -21,4 +21,6 @@ val to_i64x2 : t -> int64 * int64
 
 val to_i32x4 : t -> int32 * int32 * int32 * int32
 
+val eq : t -> t -> bool
+
 val pp : Format.formatter -> t -> unit

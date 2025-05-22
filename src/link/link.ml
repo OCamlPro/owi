@@ -105,6 +105,7 @@ module Eval_const = struct
     | I64_const n -> ok @@ Stack.push_i64 stack n
     | F32_const f -> ok @@ Stack.push_f32 stack f
     | F64_const f -> ok @@ Stack.push_f64 stack f
+    | V128_const f -> ok @@ Stack.push_v128 stack f
     | I_binop (nn, op) -> ok @@ ibinop stack nn op
     | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
     | Ref_func (Raw f) ->

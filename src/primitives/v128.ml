@@ -75,6 +75,12 @@ let to_i32x4 = function
 
 let zero = of_i64x2 0L 0L
 
+let eq a b =
+  let a1, a2 = to_i64x2 a in
+  let b1, b2 = to_i64x2 b in
+  Int64.eq a1 b1 &&
+  Int64.eq a2 b2
+
 let pp ppf v =
   match v with
   | I64x2 (a, b) -> Fmt.pf ppf "i64x2 %Ld %Ld" a b
