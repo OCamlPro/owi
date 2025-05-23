@@ -40,6 +40,7 @@
 - add `owi_invisible_bool` primitive
 - add `owi_label_is_covered` primitive
 - add scopes with `owi_open_scope` and `owi_close_scope` primitives
+- start support for simd instructions
 
 ## 0.2 - 2024-04-24
 
