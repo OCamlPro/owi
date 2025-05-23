@@ -199,11 +199,11 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       | I64_extend32_s | F32_demote_f64 | I_extend8_s _ | I_extend16_s _
       | F64_promote_f32 | F_convert_i _ | I_trunc_f _ | I_trunc_sat_f _
       | Ref_is_null | F_binop _ | F32_const _ | F64_const _ | I32_const _
-      | I64_const _ | V128_const _ | Unreachable | Drop | Nop | Return | Extern_externalize
-      | Extern_internalize | I_load8 _ | I_store8 _ | I_load16 _ | I_store16 _
-      | I64_load32 _ | I64_store32 _ | I_load _ | F_load _ | F_store _
-      | I_store _ | Memory_copy | Memory_size | Memory_fill | Memory_grow | V_ibinop _ ) as i
-      ->
+      | I64_const _ | V128_const _ | Unreachable | Drop | Nop | Return
+      | Extern_externalize | Extern_internalize | I_load8 _ | I_store8 _
+      | I_load16 _ | I_store16 _ | I64_load32 _ | I64_store32 _ | I_load _
+      | F_load _ | F_store _ | I_store _ | Memory_copy | Memory_size
+      | Memory_fill | Memory_grow | V_ibinop _ ) as i ->
       Ok i
     | Ref_null t ->
       let+ t = Binary_types.convert_heap_type t in
