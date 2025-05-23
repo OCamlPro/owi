@@ -58,20 +58,28 @@ type nonrec num_type =
   | I64
   | F32
   | F64
+  | V128
 
 let pp_num_type fmt = function
   | I32 -> pf fmt "i32"
   | I64 -> pf fmt "i64"
   | F32 -> pf fmt "f32"
   | F64 -> pf fmt "f64"
+  | V128 -> pf fmt "v128"
 
 let num_type_eq t1 t2 =
   match (t1, t2) with
-  | I32, I32 | I64, I64 | F32, F32 | F64, F64 -> true
-  | (I32 | I64 | F32 | F64), _ -> false
+  | I32, I32 | I64, I64 | F32, F32 | F64, F64 | V128, V128 -> true
+  | (I32 | I64 | F32 | F64 | V128), _ -> false
 
 let compare_num_type t1 t2 =
-  let to_int = function I32 -> 0 | I64 -> 1 | F32 -> 2 | F64 -> 3 in
+  let to_int = function
+    | I32 -> 0
+    | I64 -> 1
+    | F32 -> 2
+    | F64 -> 3
+    | V128 -> 4
+  in
   compare (to_int t1) (to_int t2)
 
 type nullable =
@@ -97,6 +105,24 @@ type nonrec nn =
   | S64
 
 let pp_nn fmt = function S32 -> pf fmt "32" | S64 -> pf fmt "64"
+
+type nonrec ishape =
+  | I8x16
+  | I16x8
+  | I32x4
+  | I64x2
+
+let pp_ishape fmt = function
+  | I8x16 -> pf fmt "i8x16"
+  | I16x8 -> pf fmt "i16x8"
+  | I32x4 -> pf fmt "i32x4"
+  | I64x2 -> pf fmt "i64x2"
+
+type nonrec fshape =
+  | F32x4
+  | F64x8
+
+let pp_fshape fmt = function F32x4 -> pf fmt "f32x4" | F64x8 -> pf fmt "f64x8"
 
 type nonrec sx =
   | U
@@ -131,6 +157,12 @@ let pp_funop fmt = function
   | Floor -> pf fmt "floor"
   | Trunc -> pf fmt "trunc"
   | Nearest -> pf fmt "nearest"
+
+type nonrec vibinop =
+  | Add
+  | Sub
+
+let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub"
 
 type nonrec ibinop =
   | Add
@@ -405,10 +437,12 @@ type 'a instr =
   | I64_const of Int64.t
   | F32_const of Float32.t
   | F64_const of Float64.t
+  | V128_const of V128.t
   | I_unop of nn * iunop
   | F_unop of nn * funop
   | I_binop of nn * ibinop
   | F_binop of nn * fbinop
+  | V_ibinop of ishape * vibinop
   | I_testop of nn * itestop
   | I_relop of nn * irelop
   | F_relop of nn * frelop
@@ -492,10 +526,12 @@ let rec pp_instr ~short fmt = function
   | I64_const i -> pf fmt "i64.const %Ld" i
   | F32_const f -> pf fmt "f32.const %a" Float32.pp f
   | F64_const f -> pf fmt "f64.const %a" Float64.pp f
+  | V128_const f -> pf fmt "v128.const %a" V128.pp f
   | I_unop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_iunop op
   | F_unop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_funop op
   | I_binop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_ibinop op
   | F_binop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_fbinop op
+  | V_ibinop (shape, op) -> pf fmt "%a.%a" pp_ishape shape pp_vibinop op
   | I_testop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_itestop op
   | I_relop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_irelop op
   | F_relop (n, op) -> pf fmt "f%a.%a" pp_nn n frelop op
@@ -602,11 +638,12 @@ let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
 and iter_instr f (i : _ instr) =
   f i;
   match i with
-  | I32_const _ | I64_const _ | F32_const _ | F64_const _
+  | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
   | I_unop (_, _)
   | F_unop (_, _)
   | I_binop (_, _)
   | F_binop (_, _)
+  | V_ibinop (_, _)
   | I_testop (_, _)
   | I_relop (_, _)
   | F_relop (_, _)
@@ -737,6 +774,7 @@ type 'a const =
   | Const_I64 of Int64.t
   | Const_F32 of Float32.t
   | Const_F64 of Float64.t
+  | Const_V128 of V128.t
   | Const_null of 'a heap_type
   | Const_host of int
   | Const_extern of int
@@ -749,6 +787,7 @@ let pp_const fmt c =
       | Const_I64 i -> pf fmt "i64.const %Ld" i
       | Const_F32 f -> pf fmt "f32.const %a" Float32.pp f
       | Const_F64 f -> pf fmt "f64.const %a" Float64.pp f
+      | Const_V128 v -> pf fmt "v128.const %a" V128.pp v
       | Const_null rt -> pf fmt "ref.null %a" pp_heap_type rt
       | Const_host i -> pf fmt "ref.host %d" i
       | Const_extern i -> pf fmt "ref.extern %d" i )

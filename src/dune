@@ -50,6 +50,7 @@
   env_id
   float32
   float64
+  v128
   contract
   func_id
   func_intf

@@ -32,6 +32,7 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | I64 v -> I64 (Symbolic_value.const_i64 v)
   | F32 v -> F32 (Symbolic_value.const_f32 v)
   | F64 v -> F64 (Symbolic_value.const_f64 v)
+  | V128 v -> V128 (Symbolic_value.const_v128 v)
   | Ref (Funcref f) -> Ref (Funcref f)
   | Ref _ -> assert false
 

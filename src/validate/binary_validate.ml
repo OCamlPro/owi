@@ -119,6 +119,8 @@ let f32 = Num_type F32
 
 let f64 = Num_type F64
 
+let v128 = Num_type V128
+
 let any = Any
 
 let itype = function S32 -> i32 | S64 -> i64
@@ -158,6 +160,7 @@ end = struct
     | I64, I64 -> true
     | F32, F32 -> true
     | F64, F64 -> true
+    | V128, V128 -> true
     | _, _ -> false
 
   let match_ref_type required got =
@@ -235,6 +238,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
+  | V128_const _ -> Stack.push [ v128 ] stack
   | I_unop (s, _op) ->
     let t = itype s in
     let* stack = Stack.pop [ t ] stack in
@@ -251,6 +255,9 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
     let t = ftype s in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ t ] stack
+  | V_ibinop (_shape, _op) ->
+    let* stack = Stack.pop [ v128; v128 ] stack in
+    Stack.push [ v128 ] stack
   | I_testop (nn, _) ->
     let* stack = Stack.pop [ itype nn ] stack in
     Stack.push [ i32 ] stack
@@ -571,6 +578,7 @@ let typecheck_const_instr (modul : Module.t) refs stack = function
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
+  | V128_const _ -> Stack.push [ v128 ] stack
   | Ref_null t -> Stack.push [ Ref_type t ] stack
   | Ref_func (Raw i) ->
     let* _t = Env.func_get i modul in

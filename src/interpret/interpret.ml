@@ -251,6 +251,32 @@ module Make (P : Interpret_intf.P) :
          | Max -> max f1 f2
          | Copysign -> copy_sign f1 f2 )
 
+  let exec_vibinop stack (shape : ishape) (op : vibinop) =
+    let (f1, f2), stack = Stack.pop2_v128 stack in
+    let v =
+      match shape with
+      | I8x16 | I16x8 -> assert false (* TODO *)
+      | I32x4 -> begin
+        let a1, b1, c1, d1 = V128.to_i32x4 f1 in
+        let a2, b2, c2, d2 = V128.to_i32x4 f2 in
+        let op = match op with Add -> I32.add | Sub -> I32.sub in
+        let a = op a1 a2 in
+        let b = op b1 b2 in
+        let c = op c1 c2 in
+        let d = op d1 d2 in
+        V128.of_i32x4 a b c d
+      end
+      | I64x2 -> begin
+        let a1, b1 = V128.to_i64x2 f1 in
+        let a2, b2 = V128.to_i64x2 f2 in
+        let op = match op with Add -> I64.add | Sub -> I64.sub in
+        let a = op a1 a2 in
+        let b = op b1 b2 in
+        V128.of_i64x2 a b
+      end
+    in
+    Stack.push_v128 stack v
+
   let exec_itestop stack nn op =
     match nn with
     | S32 ->
@@ -494,6 +520,7 @@ module Make (P : Interpret_intf.P) :
     | Num_type I64 -> I64 I64.zero
     | Num_type F32 -> F32 F32.zero
     | Num_type F64 -> F64 F64.zero
+    | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> ref_null rt
 
   (* TODO move to module Env *)
@@ -800,12 +827,14 @@ module Make (P : Interpret_intf.P) :
     | I64_const n -> st @@ Stack.push_const_i64 stack n
     | F32_const f -> st @@ Stack.push_const_f32 stack f
     | F64_const f -> st @@ Stack.push_const_f64 stack f
+    | V128_const f -> st @@ Stack.push_const_v128 stack f
     | I_unop (nn, op) -> st @@ exec_iunop stack nn op
     | F_unop (nn, op) -> st @@ exec_funop stack nn op
     | I_binop (nn, op) ->
       let* stack = exec_ibinop stack nn op in
       st stack
     | F_binop (nn, op) -> st @@ exec_fbinop stack nn op
+    | V_ibinop (shape, op) -> st @@ exec_vibinop stack shape op
     | I_testop (nn, op) -> st @@ exec_itestop stack nn op
     | I_relop (nn, op) -> st @@ exec_irelop stack nn op
     | F_relop (nn, op) -> st @@ exec_frelop stack nn op
@@ -997,7 +1026,10 @@ module Make (P : Interpret_intf.P) :
             (F32 v, stack)
           | F64 ->
             let v, stack = Stack.pop_f64 stack in
-            (F64 v, stack) )
+            (F64 v, stack)
+          | V128 ->
+            let v, stack = Stack.pop_v128 stack in
+            (V128 v, stack) )
       in
       Global.set_value global v;
       st stack

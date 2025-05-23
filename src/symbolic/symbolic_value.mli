@@ -16,6 +16,7 @@ include
      and type int64 = Smtml.Expr.t
      and type float32 = Smtml.Expr.t
      and type float64 = Smtml.Expr.t
+     and type v128 = Smtml.Expr.t * Smtml.Expr.t
 
 module Bool : sig
   include module type of Bool

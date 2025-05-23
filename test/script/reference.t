@@ -85,6 +85,7 @@
   $ owi script --no-exhaustion reference/return.wast
   $ owi script --no-exhaustion reference/select.wast
   $ owi script --no-exhaustion reference/skip-stack-guard-page.wast
+  $ owi script --no-exhaustion reference/simd_const.wast
   $ owi script --no-exhaustion reference/stack.wast
   $ owi script --no-exhaustion reference/start.wast
   1

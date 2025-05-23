@@ -20,6 +20,7 @@ type t =
   | I64 of Int64.t
   | F32 of Float32.t
   | F64 of Float64.t
+  | V128 of V128.t
   | Ref of ref_value
 
 val cast_ref : externref -> 'a Type.Id.t -> 'a option
