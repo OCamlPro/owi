@@ -13,6 +13,8 @@ module type Value_types = sig
 
   type float64
 
+  type v128
+
   type bool
 end
 
@@ -33,6 +35,8 @@ module type T_Extern_func = sig
 
   type float64
 
+  type v128
+
   type 'a m
 
   type memory
@@ -42,6 +46,7 @@ module type T_Extern_func = sig
     | I64 : int64 telt
     | F32 : float32 telt
     | F64 : float64 telt
+    | V128 : v128 telt
     | Externref : 'a Type.Id.t -> 'a telt
 
   type _ rtype =
@@ -96,6 +101,7 @@ module Make_extern_func
        and type int64 := V.int64
        and type float32 := V.float32
        and type float64 := V.float64
+       and type v128 := V.v128
        and type 'a m := 'a M.t
        and type memory := Memory.t
 end = struct
@@ -108,6 +114,7 @@ end = struct
     | I64 : V.int64 telt
     | F32 : V.float32 telt
     | F64 : V.float64 telt
+    | V128 : V.v128 telt
     | Externref : 'a Type.Id.t -> 'a telt
 
   type _ rtype =
@@ -134,6 +141,7 @@ end = struct
     | I64 -> Num_type I64
     | F32 -> Num_type F32
     | F64 -> Num_type F64
+    | V128 -> Num_type V128
     | Externref _ -> Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : binary result_type =

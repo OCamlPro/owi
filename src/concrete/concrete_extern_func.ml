@@ -13,6 +13,8 @@ include
 
       type float64 = Float64.t
 
+      type v128 = V128.t
+
       type bool = Bool.t
     end)
     (struct

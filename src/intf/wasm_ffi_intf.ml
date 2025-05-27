@@ -15,6 +15,8 @@ module type S0 = sig
     type float32
 
     type float64
+
+    type v128
   end
 
   val symbol_i8 : unit -> Value.int32 t
@@ -28,6 +30,8 @@ module type S0 = sig
   val symbol_f32 : unit -> Value.float32 t
 
   val symbol_f64 : unit -> Value.float64 t
+
+  val symbol_v128 : unit -> Value.v128 t
 
   val symbol_invisible_bool : unit -> Value.int32 t
 

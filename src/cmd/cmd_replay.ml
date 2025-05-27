@@ -122,6 +122,16 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
         Logs.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
         assert false
 
+    let symbol_v128 () =
+      let i = next () in
+      match model.(i) with
+      | V.V128 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
+        assert false
+
     let symbol_range _ _ =
       let i = next () in
       match model.(i) with

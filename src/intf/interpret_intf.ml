@@ -97,6 +97,7 @@ module type P = sig
        and type int64 := Value.int64
        and type float32 := Value.float32
        and type float64 := Value.float64
+       and type v128 := Value.v128
        and type 'a m := 'a Choice.t
        and type memory := Memory.t
 

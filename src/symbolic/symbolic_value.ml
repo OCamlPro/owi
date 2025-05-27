@@ -483,22 +483,19 @@ module V128 = struct
   let zero : v128 = const_v128 V128.zero
 
   let of_i32x4 a b c d =
-    Smtml.Expr.concat
-      (Smtml.Expr.concat a b)
-      (Smtml.Expr.concat c d)
+    Smtml.Expr.concat (Smtml.Expr.concat a b) (Smtml.Expr.concat c d)
 
   let to_i32x4 v =
     let a = Smtml.Expr.extract v ~low:12 ~high:16 in
     let b = Smtml.Expr.extract v ~low:8 ~high:12 in
     let c = Smtml.Expr.extract v ~low:4 ~high:8 in
     let d = Smtml.Expr.extract v ~low:0 ~high:4 in
-    a, b, c, d
+    (a, b, c, d)
 
   let of_i64x2 a b = Smtml.Expr.concat a b
 
   let to_i64x2 v =
     let a = Smtml.Expr.extract v ~low:8 ~high:16 in
     let b = Smtml.Expr.extract v ~low:0 ~high:8 in
-    a, b
-
+    (a, b)
 end
