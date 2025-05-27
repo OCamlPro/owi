@@ -666,16 +666,16 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   <span data-count="406">l</span>et res_queue = Wq.make () in
   <span data-count="406">l</span>et path_count = Atomic.make 0 in
   <span data-count="406">l</span>et callback v =
-    <span data-count="1673">l</span>et open Symbolic_choice_intf in
+    <span data-count="1689">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1673">m</span>atch (fail_mode, v) with
-    | <span data-count="1444">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1690">m</span>atch (fail_mode, v) with
+    | <span data-count="1463">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="165">(</span> (<span data-count="165">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
       Wq.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
         res_queue
-    | <span data-count="63">(</span> (<span data-count="62">B</span>oth | <span data-count="1">A</span>ssertion_only)
+    | <span data-count="61">(</span> (<span data-count="60">B</span>oth | <span data-count="1">A</span>ssertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
       Wq.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
@@ -685,7 +685,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="788">W</span>q.make_pledge res_queue)
-      ~callback_end:(fun () -&gt; <span data-count="755">W</span>q.end_pledge res_queue)
+      ~callback_end:(fun () -&gt; <span data-count="759">W</span>q.end_pledge res_queue)
   in
   <span data-count="406">l</span>et results =
     Wq.read_as_seq res_queue ~finalizer:(fun () -&gt;
