@@ -282,15 +282,15 @@ type t =
   ; mutable data : bytes
   }
 
-let backup t = <span data-count="519">{</span> t with data = Bytes.cop<span data-count="519">y</span> t.data }
+let backup t = <span data-count="511">{</span> t with data = Bytes.cop<span data-count="511">y</span> t.data }
 
 let recover ~from_ ~to_ =
-  <span data-count="519">t</span>o_.limits &lt;- from_.limits;
+  <span data-count="511">t</span>o_.limits &lt;- from_.limits;
   to_.data &lt;- from_.data
 
 let init limits : t =
-  <span data-count="1087">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
-  <span data-count="1087">{</span> limits; data }
+  <span data-count="1097">l</span>et data = Bytes.make (page_size * limits.min) '\x00' in
+  <span data-count="1097">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="196">l</span>et limits =
@@ -328,25 +328,25 @@ let blit mem ~src ~dst ~len =
     <span data-count="250">f</span>alse <span data-count="0">)</span>
 
 let blit_string mem str ~src ~dst ~len =
-  <span data-count="994">l</span>et str_len = String.length str in
-  <span data-count="994">l</span>et src = Int32.to_int src in
-  <span data-count="994">l</span>et dst = Int32.to_int dst in
-  <span data-count="994">l</span>et len = Int32.to_int len in
-  <span data-count="994">s</span>rc &lt; <span data-count="0">0</span> || dst &lt; <span data-count="12">0</span> || len &lt; <span data-count="4">0</span>
+  <span data-count="986">l</span>et str_len = String.length str in
+  <span data-count="986">l</span>et src = Int32.to_int src in
+  <span data-count="986">l</span>et dst = Int32.to_int dst in
+  <span data-count="986">l</span>et len = Int32.to_int len in
+  <span data-count="986">s</span>rc &lt; <span data-count="0">0</span> || dst &lt; <span data-count="12">0</span> || len &lt; <span data-count="4">0</span>
   || src + len &gt; str_le<span data-count="27">n</span>
-  || dst + len &gt; Bytes.lengt<span data-count="951">h</span> mem.dat<span data-count="46">a</span>
+  || dst + len &gt; Bytes.lengt<span data-count="943">h</span> mem.dat<span data-count="46">a</span>
   ||
   ( Bytes.unsafe_blit_string str src mem.data dst len;
-    <span data-count="905">f</span>alse <span data-count="0">)</span>
+    <span data-count="897">f</span>alse <span data-count="0">)</span>
 
 let get_limit_max { limits; _ } = <span data-count="217">O</span>ption.map Int64.of_int limits.max
 
 let get_limits { limits; _ } = <span data-count="104">l</span>imits
 
 let store_8 mem ~addr n =
-  <span data-count="8144">l</span>et addr = Int32.to_int addr in
-  <span data-count="8144">l</span>et n = Int32.to_int n in
-  <span data-count="8144">O</span>k (Bytes.set_int<span data-count="8144">8</span> mem.data addr n)
+  <span data-count="7840">l</span>et addr = Int32.to_int addr in
+  <span data-count="7840">l</span>et n = Int32.to_int n in
+  <span data-count="7840">O</span>k (Bytes.set_int<span data-count="7840">8</span> mem.data addr n)
 
 let store_16 mem ~addr n =
   <span data-count="84">l</span>et addr = Int32.to_int addr in
@@ -354,20 +354,20 @@ let store_16 mem ~addr n =
   <span data-count="84">O</span>k (Bytes.set_int16_l<span data-count="84">e</span> mem.data addr n)
 
 let store_32 mem ~addr n =
-  <span data-count="26990">l</span>et addr = Int32.to_int addr in
-  <span data-count="26990">O</span>k (Bytes.set_int32_l<span data-count="26990">e</span> mem.data addr n)
+  <span data-count="26342">l</span>et addr = Int32.to_int addr in
+  <span data-count="26342">O</span>k (Bytes.set_int32_l<span data-count="26342">e</span> mem.data addr n)
 
 let store_64 mem ~addr n =
-  <span data-count="774">l</span>et addr = Int32.to_int addr in
-  <span data-count="774">O</span>k (Bytes.set_int64_l<span data-count="774">e</span> mem.data addr n)
+  <span data-count="766">l</span>et addr = Int32.to_int addr in
+  <span data-count="766">O</span>k (Bytes.set_int64_l<span data-count="766">e</span> mem.data addr n)
 
 let load_8_s mem addr =
   <span data-count="472">l</span>et addr = Int32.to_int addr in
   <span data-count="472">O</span>k (Int32.of_in<span data-count="472">t</span> @@ Bytes.get_int<span data-count="472">8</span> mem.data addr)
 
 let load_8_u mem addr =
-  <span data-count="1848371">l</span>et addr = Int32.to_int addr in
-  <span data-count="1848371">O</span>k (Int32.of_in<span data-count="1848371">t</span> @@ Bytes.get_uint<span data-count="1848371">8</span> mem.data addr)
+  <span data-count="1848067">l</span>et addr = Int32.to_int addr in
+  <span data-count="1848067">O</span>k (Int32.of_in<span data-count="1848067">t</span> @@ Bytes.get_uint<span data-count="1848067">8</span> mem.data addr)
 
 let load_16_s mem addr =
   <span data-count="104">l</span>et addr = Int32.to_int addr in
@@ -378,16 +378,16 @@ let load_16_u mem addr =
   <span data-count="104">O</span>k (Int32.of_in<span data-count="104">t</span> @@ Bytes.get_uint16_l<span data-count="104">e</span> mem.data addr)
 
 let load_32 mem addr =
-  <span data-count="45096">l</span>et addr = Int32.to_int addr in
-  <span data-count="45096">O</span>k (Bytes.get_int32_l<span data-count="45096">e</span> mem.data addr)
+  <span data-count="44020">l</span>et addr = Int32.to_int addr in
+  <span data-count="44020">O</span>k (Bytes.get_int32_l<span data-count="44020">e</span> mem.data addr)
 
 let load_64 mem addr =
   <span data-count="1342">l</span>et addr = Int32.to_int addr in
   <span data-count="1342">O</span>k (Bytes.get_int64_l<span data-count="1342">e</span> mem.data addr)
 
-let size_in_pages mem = <span data-count="798">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="798">h</span> mem.data / page_size)
+let size_in_pages mem = <span data-count="790">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="790">h</span> mem.data / page_size)
 
-let size mem = <span data-count="1932174">I</span>nt32.of_int @@ Bytes.lengt<span data-count="1932174">h</span> mem.data
+let size mem = <span data-count="1929834">I</span>nt32.of_int @@ Bytes.lengt<span data-count="1929834">h</span> mem.data
 </code></pre>
       </div>
     </div>

@@ -322,6 +322,25 @@
 <a id="L298"></a><span > </span>
 <a id="L299"></a><span > </span>
 <a id="L300"></a><span > </span>
+<a id="L301"></a><span > </span>
+<a id="L302"></a><span > </span>
+<a id="L303"></a><span > </span>
+<a id="L304"></a><span > </span>
+<a id="L305"></a><span > </span>
+<a id="L306"></a><span > </span>
+<a id="L307"></a><span > </span>
+<a id="L308"></a><span > </span>
+<a id="L309"></a><span > </span>
+<a id="L310"></a><span > </span>
+<a id="L311"></a><span > </span>
+<a id="L312"></a><span > </span>
+<a id="L313"></a><span > </span>
+<a id="L314"></a><span > </span>
+<a id="L315"></a><span > </span>
+<a id="L316"></a><span > </span>
+<a id="L317"></a><span > </span>
+<a id="L318"></a><span > </span>
+<a id="L319"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -626,6 +645,25 @@
 <a href="#L298">298</a>
 <a href="#L299">299</a>
 <a href="#L300">300</a>
+<a href="#L301">301</a>
+<a href="#L302">302</a>
+<a href="#L303">303</a>
+<a href="#L304">304</a>
+<a href="#L305">305</a>
+<a href="#L306">306</a>
+<a href="#L307">307</a>
+<a href="#L308">308</a>
+<a href="#L309">309</a>
+<a href="#L310">310</a>
+<a href="#L311">311</a>
+<a href="#L312">312</a>
+<a href="#L313">313</a>
+<a href="#L314">314</a>
+<a href="#L315">315</a>
+<a href="#L316">316</a>
+<a href="#L317">317</a>
+<a href="#L318">318</a>
+<a href="#L319">319</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -813,6 +851,10 @@ module type T = sig
 
   val pp_float64 : Format.formatter -&gt; float64 -&gt; unit
 
+  type v128
+
+  val pp_v128 : Format.formatter -&gt; v128 -&gt; unit
+
   type ref_value
 
   val pp_ref_value : Format.formatter -&gt; ref_value -&gt; unit
@@ -822,6 +864,7 @@ module type T = sig
     | I64 of int64
     | F32 of float32
     | F64 of float64
+    | V128 of v128
     | Ref of ref_value
 
   val pp : Format.formatter -&gt; t -&gt; unit
@@ -833,6 +876,8 @@ module type T = sig
   val const_f32 : Float32.t -&gt; float32
 
   val const_f64 : Float64.t -&gt; float64
+
+  val const_v128 : V128.t -&gt; v128
   (* TODO ref *)
 
   val ref_null : binary heap_type -&gt; t
@@ -925,6 +970,18 @@ module type T = sig
     val extend_i32_s : int32 -&gt; int64
 
     val extend_i32_u : int32 -&gt; int64
+  end
+
+  module V128 : sig
+    val zero : v128
+
+    val of_i32x4 : int32 -&gt; int32 -&gt; int32 -&gt; int32 -&gt; v128
+
+    val to_i32x4 : v128 -&gt; int32 * int32 * int32 * int32
+
+    val of_i64x2 : int64 -&gt; int64 -&gt; v128
+
+    val to_i64x2 : v128 -&gt; int64 * int64
   end
 end
 </code></pre>

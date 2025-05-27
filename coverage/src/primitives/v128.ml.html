@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>v128.ml &mdash; Coverage report</title>
+    <meta name="description" content="78.79% coverage in src/primitives/v128.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/primitives/</span>v128.ml
+        </a>
+      </h1>
+      <h2>78.79%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:33.33%"></span>
+      <span class="unvisited" style="bottom:30.86%"></span>
+      <span class="unvisited" style="bottom:27.16%"></span>
+      <span class="unvisited" style="bottom:25.93%"></span>
+      <span class="unvisited" style="bottom:24.69%"></span>
+      <span class="unvisited" style="bottom:19.75%"></span>
+      <span class="unvisited" style="bottom:7.41%"></span>
+      <span class="unvisited" style="bottom:6.17%"></span>
+      <span class="unvisited" style="bottom:4.94%"></span>
+      <span class="unvisited" style="bottom:3.70%"></span>
+      <span class="unvisited" style="bottom:2.47%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span class="unvisited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="unvisited"> </span>
+<a id="L60"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+</pre>
+<pre><code class="ocaml">type t =
+  | F32x4 of Float32.t * Float32.t * Float32.t * Float32.t
+  | F64x2 of Float64.t * Float64.t
+  | I32x4 of int32 * int32 * int32 * int32
+  | I64x2 of int64 * int64
+
+let i16_of_i8x2 a b =
+  <span data-count="128">l</span>et upper = a lsl 8 in
+  upper lor (b land 0xFF)
+
+let i32_of_i16x2 a b =
+  <span data-count="160">l</span>et upper = Int32.shl (Int32.of_in<span data-count="160">t</span> b) 16l in
+  <span data-count="160">l</span>et lower = Int32.of_int a in
+  <span data-count="160">I</span>nt32.logor upper (Int32.logan<span data-count="160">d</span> lower 0xFFFFl)
+
+let i64_of_i32x2 a b =
+  <span data-count="648">l</span>et upper = Int64.shl (Int32.to_int6<span data-count="648">4</span> b) 32L in
+  <span data-count="648">l</span>et lower = Int32.to_int64 a in
+  <span data-count="648">I</span>nt64.logor upper (Int64.logan<span data-count="648">d</span> lower 0xFFFFFFFFL)
+
+let i64_of_i16x4 a b c d = <span data-count="48">i</span>64_of_i32x2 (i32_of_i16x<span data-count="48">2</span> a b) (i32_of_i16x<span data-count="48">2</span> c d)
+
+let i32_of_i8x4 a b c d = <span data-count="64">i</span>32_of_i16x2 (i16_of_i8x<span data-count="64">2</span> a b) (i16_of_i8x<span data-count="64">2</span> c d)
+
+let i64_of_i8x8 a b c d e f g h =
+  <span data-count="32">i</span>64_of_i32x2 (i32_of_i8x<span data-count="32">4</span> a b c d) (i32_of_i8x<span data-count="32">4</span> e f g h)
+
+let of_i8x16 a b c d e f g h i j k l m n o p =
+  <span data-count="16">I</span>64x2 (i64_of_i8x<span data-count="16">8</span> a b c d e f g h, i64_of_i8x<span data-count="16">8</span> i j k l m n o p)
+
+let of_i16x8 a b c d e f g h = <span data-count="24">I</span>64x2 (i64_of_i16x<span data-count="24">4</span> a b c d, i64_of_i16x<span data-count="24">4</span> e f g h)
+
+let of_i32x4 a b c d = <span data-count="170">I</span>32x4 (a, b, c, d)
+
+let of_i64x2 a b = <span data-count="1152">I</span>64x2 (a, b)
+
+let of_f32x4 a b c d = <span data-count="240">F</span>32x4 (a, b, c, d)
+
+let of_f64x2 a b = <span data-count="494">F</span>64x2 (a, b)
+
+let to_i64x2 t =
+  <span data-count="2840">m</span>atch t with
+  | <span data-count="2130">I</span>64x2 (a, b) -&gt; (a, b)
+  | <span data-count="114">I</span>32x4 (a, b, c, d) -&gt; (i64_of_i32x<span data-count="114">2</span> a b, i64_of_i32x<span data-count="114">2</span> c d)
+  | <span data-count="426">F</span>64x2 (a, b) -&gt; (Float64.to_bit<span data-count="426">s</span> a, Float64.to_bit<span data-count="426">s</span> b)
+  | <span data-count="170">F</span>32x4 (a, b, c, d) -&gt;
+    let a = Float32.to_bits a in
+    <span data-count="170">l</span>et b = Float32.to_bits b in
+    <span data-count="170">l</span>et c = Float32.to_bits c in
+    <span data-count="170">l</span>et d = Float32.to_bits d in
+    <span data-count="170">(</span>i64_of_i32x<span data-count="170">2</span> a b, i64_of_i32x<span data-count="170">2</span> c d)
+
+let i64_to_i32x2 a =
+  <span data-count="0">l</span>et high = Int64.(to_int3<span data-count="0">2</span> (shift_right_logica<span data-count="0">l</span> a 32)) in
+  let low = Int64.to_int32 a in
+  <span data-count="0">(</span>low, high)
+
+let i64x2_to_i32x4 (v1, v2) =
+  <span data-count="0">l</span>et a, b = i64_to_i32x2 v1 in
+  <span data-count="0">l</span>et c, d = i64_to_i32x2 v2 in
+  <span data-count="0">(</span>a, b, c, d)
+
+let to_i32x4 = function
+  | <span data-count="4">I</span>32x4 (a, b, c, d) -&gt; (a, b, c, d)
+  | <span data-count="0">v</span> -&gt; i64x2_to_i32x4 (to_i64x<span data-count="0">2</span> v)
+
+let zero = of_i64x<span data-count="1014">2</span> 0L 0L
+
+let eq a b =
+  <span data-count="404">l</span>et a1, a2 = to_i64x2 a in
+  <span data-count="404">l</span>et b1, b2 = to_i64x2 b in
+  <span data-count="404">I</span>nt64.e<span data-count="404">q</span> a1 b1 &amp;&amp; <span data-count="404">I</span>nt64.eq a2 b2
+
+let pp ppf v =
+  <span data-count="0">m</span>atch v with
+  | <span data-count="0">I</span>64x2 (a, b) -&gt; Fmt.pf ppf "i64x2 %Ld %Ld" a b
+  | <span data-count="0">I</span>32x4 (a, b, c, d) -&gt; Fmt.pf ppf "i32x4 %ld %ld %ld %ld" a b c d
+  | <span data-count="0">F</span>64x2 (a, b) -&gt; Fmt.pf ppf "f64x2 %a %a" Float64.pp a Float64.pp b
+  | <span data-count="0">F</span>32x4 (a, b, c, d) -&gt;
+    Fmt.pf ppf "f32x4 %a %a %a %a" Float32.pp a Float32.pp b Float32.pp c
+      Float32.pp d
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
