@@ -16,6 +16,7 @@
 - january 2025: [JFLA 2025]
 - [february 2025]: [Wasm Research Day 2025]
 - february 2025: [PPS Seminar]
+- may 2025: [15th MirageOS hack retreat]
 
 
 [Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
@@ -28,6 +29,7 @@
 [december 2024]: https://fs.zapashcanon.fr/mp4/phd_defense.mp4
 [february 2025]: https://youtu.be/x6V-NJ9agjg
 
+[15th MirageOS hack retreat]: https://retreat.mirage.io
 [JFLA 2025]: https://jfla.inria.fr/jfla2025.html
 [GdR GPL]: https://gdr-gpl.cnrs.fr/
 [ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
