@@ -63,6 +63,8 @@ end = struct
 
   let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
 
+  let symbol_v128 () = Choice.with_new_symbol (Ty_bitv 128) Expr.symbol
+
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
     let open Choice in
     let* x = symbol_i32 () in
@@ -167,6 +169,9 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
+    ; ( "v128_symbol"
+      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 V128), symbol_v128)
       )
     ; ( "bool_symbol"
       , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)

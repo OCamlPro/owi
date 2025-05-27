@@ -536,6 +536,7 @@ module Make (P : Interpret_intf.P) :
       | I64 -> Choice.return @@ Stack.pop_i64 stack
       | F32 -> Choice.return @@ Stack.pop_f32 stack
       | F64 -> Choice.return @@ Stack.pop_f64 stack
+      | V128 -> Choice.return @@ Stack.pop_v128 stack
       | Externref ety -> (
         let v, stack = Stack.pop_as_ref stack in
         match Ref.get_externref v ety with
@@ -583,6 +584,7 @@ module Make (P : Interpret_intf.P) :
       | I64 -> Stack.push_i64 stack v
       | F32 -> Stack.push_f32 stack v
       | F64 -> Stack.push_f64 stack v
+      | V128 -> Stack.push_v128 stack v
       | Externref ty -> Stack.push_as_externref stack ty v
     in
     let+ r in

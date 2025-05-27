@@ -73,6 +73,23 @@ module M :
       let n = Float64.of_bits n in
       (F64 n, (n, Expr.symbol sym)) )
 
+  let symbol_v128 () : Value.v128 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 128) (fun sym forced_value ->
+      let a, b =
+        match forced_value with
+        | None ->
+          let a = Random.bits64 () in
+          let b = Random.bits64 () in
+          (a, b)
+        | Some (Bitv n) ->
+          let a = Smtml.Bitvector.extract n ~low:8 ~high:16 in
+          let b = Smtml.Bitvector.extract n ~low:0 ~high:8 in
+          (Smtml.Bitvector.to_int64 a, Smtml.Bitvector.to_int64 b)
+        | _ -> assert false
+      in
+      let n = V128.of_i64x2 a b in
+      (V128 n, (n, Expr.symbol sym)) )
+
   let symbol_invisible_bool () : Value.int32 Concolic_choice.t =
     Concolic_choice.with_new_invisible_symbol Ty_bool
       (fun sym (forced_value : Smtml.Value.t option) ->
@@ -192,6 +209,9 @@ let symbolic_extern_module =
       )
     ; ( "f64_symbol"
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
+      )
+    ; ( "v128_symbol"
+      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 V128), symbol_v128)
       )
     ; ( "bool_symbol"
       , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
