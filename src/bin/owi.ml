@@ -150,6 +150,10 @@ let model_out_file =
     & opt (some path_conv) None
     & info [ "model-out-file" ] ~docv:"FILE" ~doc )
 
+let model_with_entry_point =
+  let doc = "Add the entry point in the generated model for easier replay." in
+  Arg.(value & flag & info [ "model-with-entry-point" ] ~doc)
+
 let rac =
   let doc = "runtime assertion checking mode" in
   Arg.(value & flag & info [ "rac" ] ~doc)
@@ -247,12 +251,14 @@ let c_cmd =
   and+ out_file
   and+ model_out_file
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ entry_point in
   Cmd_c.cmd ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl ~includes
     ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
     ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~eacsl ~solver ~model_format ~entry_point
     ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point
 (* owi cpp *)
 
 let cpp_info =
@@ -284,12 +290,13 @@ let cpp_cmd =
   and+ workspace
   and+ model_out_file
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ entry_point in
   Cmd_cpp.cmd ~arch ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
     ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
-    ~with_breadcrumbs
+    ~with_breadcrumbs ~model_with_entry_point
 
 (* owi conc *)
 
@@ -317,11 +324,13 @@ let conc_cmd =
   and+ model_out_file
   and+ invoke_with_symbols
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ entry_point in
   Cmd_conc.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point
 
 (* owi fmt *)
 
@@ -475,12 +484,13 @@ let rust_cmd =
   and+ workspace
   and+ model_out_file
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ entry_point in
   Cmd_rust.cmd ~arch ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
     ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
     ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
     ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
-    ~with_breadcrumbs
+    ~with_breadcrumbs ~model_with_entry_point
 
 (* owi script *)
 
@@ -525,11 +535,13 @@ let sym_cmd =
   and+ entry_point
   and+ model_out_file
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ invoke_with_symbols in
   Cmd_sym.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point
 
 (* owi validate *)
 
@@ -619,11 +631,13 @@ let zig_cmd =
   and+ model_out_file
   and+ () = setup_log
   and+ with_breadcrumbs
+  and+ model_with_entry_point
   and+ entry_point in
   Cmd_zig.cmd ~includes ~workers ~files ~unsafe ~optimize ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~concolic ~solver ~model_format ~entry_point ~invoke_with_symbols
     ~out_file ~workspace ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point
 
 (* owi *)
 

@@ -27,4 +27,5 @@ val cmd :
   -> out_file:Fpath.t option
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> model_with_entry_point:bool
   -> unit Result.t

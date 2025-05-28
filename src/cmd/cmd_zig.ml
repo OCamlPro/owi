@@ -61,7 +61,7 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
 let cmd ~workers ~includes ~files ~unsafe ~optimize ~no_stop_at_failure
   ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
   ~fail_mode ~concolic ~solver ~model_format ~entry_point ~invoke_with_symbols
-  ~out_file ~workspace ~model_out_file ~with_breadcrumbs : unit Result.t =
+  ~out_file ~workspace ~model_out_file ~with_breadcrumbs ~model_with_entry_point : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -85,3 +85,4 @@ let cmd ~workers ~includes ~files ~unsafe ~optimize ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point

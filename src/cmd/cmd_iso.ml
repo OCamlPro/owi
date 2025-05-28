@@ -443,5 +443,5 @@ let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
       Cmd_sym.handle_result ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-        ~model_out_file ~with_breadcrumbs result )
+        ~model_out_file ~with_breadcrumbs ~model_with_entry_point:false ~entry_point:None result )
     () common_exports

@@ -177,8 +177,8 @@ let cmd ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl ~includes
   ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~concolic ~eacsl ~solver ~model_format ~(entry_point : string option)
-  ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs :
-  unit Result.t =
+  ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs
+  ~model_with_entry_point : unit Result.t =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -201,3 +201,4 @@ let cmd ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl ~includes
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
     ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+    ~model_with_entry_point

@@ -23,6 +23,8 @@ val handle_result :
   -> model_format:Cmd_utils.model_format
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> model_with_entry_point:bool
+  -> entry_point:string option
   -> unit Symbolic.Choice.t
   -> unit Result.t
 
@@ -45,4 +47,5 @@ val cmd :
   -> invoke_with_symbols:bool
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> model_with_entry_point:bool
   -> unit Result.t
