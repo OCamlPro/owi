@@ -261,19 +261,19 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
 let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
   ~invoke_with_symbols =
+  let file_ext = Fpath.get_ext replay_file in
   let* parse_fn =
-    let ext = Fpath.get_ext replay_file in
-    match String.lowercase_ascii ext with
+    match String.lowercase_ascii file_ext with
     | ".json" -> Ok Symbol_scope.model_of_json
     | ".scfg" -> Ok Symbol_scope.model_of_scfg
-    | _ -> Error (`Unsupported_file_extension ext)
+    | _ -> Error (`Unsupported_file_extension file_ext)
   in
   let* file_content = Bos.OS.File.read replay_file in
-  let* model =
+  let* model_entry_point, model =
     match parse_fn file_content with
     | Error (`Msg msg) -> Error (`Invalid_model msg)
     | Error err -> Error err
-    | Ok model ->
+    | Ok (entry_point, model) ->
       let bindings = Smtml.Model.get_bindings model in
       let+ model =
         list_map
@@ -298,8 +298,13 @@ let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
                    (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
           bindings
       in
-      Array.of_list model
+      (entry_point, Array.of_list model)
   in
+  let entry_point =
+    if Option.is_none entry_point then model_entry_point else entry_point
+  in
+  Logs.debug (fun m -> m "%s" (Option.value ~default:"na" entry_point));
+  Logs.debug (fun m -> m "%s" (Option.value ~default:"na" model_entry_point));
   let+ () =
     run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
       model

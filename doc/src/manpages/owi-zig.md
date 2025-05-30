@@ -48,6 +48,9 @@ OPTIONS
            given this is used as a prefix and the ouputed files would have
            PREFIX_%d.
 
+       --model-with-entry-point
+           Add the entry point in the generated model for easier replay.
+
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
 
