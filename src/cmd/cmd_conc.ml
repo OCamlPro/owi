@@ -433,7 +433,8 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
 let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order:_
   ~fail_mode:_ ~workspace ~solver ~files ~model_format ~entry_point
-  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs:_ ~model_with_entry_point:_ =
+  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs:_
+  ~model_with_entry_point:_ =
   let* workspace =
     match workspace with
     | Some path -> Ok path
