@@ -17,6 +17,7 @@
     }
     symbol symbol_8 i32 aaa
     symbol symbol_9 i32 aaa
+    entry_point main
   }
   owi: [ERROR] Reached problem!
   [13]

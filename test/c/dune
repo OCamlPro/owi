@@ -15,6 +15,7 @@
   main.c
   malloc_aligned.c
   malloc_zero.c
+  model_with_entry_point.c
   multi_model.c
   range.c
   scopes.c))

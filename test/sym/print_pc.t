@@ -115,5 +115,6 @@
   owi: [DEBUG] Current scope tokens: [symbol symbol_0]
   model {
     symbol symbol_0 i32 0
+    entry_point f
   }
   owi: [ERROR] Reached problem!

@@ -204,7 +204,10 @@ let model_of_json json_str =
     match List.assoc_opt "model" root with
     | Some items ->
       let+ () = process_json (Util.to_list items) in
-      tbl
+      let entry_point =
+        Option.map Util.to_string (List.assoc_opt "entry_point" root)
+      in
+      (entry_point, tbl)
     | None -> Fmt.error_msg "JSON does not contain model field" )
   | _ ->
     Fmt.error_msg "Invalid JSON format for symbol scope:@. %a"
@@ -238,6 +241,10 @@ let model_of_scfg scfg =
   match Query.get_dir "model" scfg with
   | Some model ->
     let+ () = process_dirs model.children in
-    tbl
+    let entry_point =
+      let dir = Query.get_dir "entry_point" model.children in
+      Option.bind dir (fun dir -> Result.to_option @@ Query.get_param 0 dir)
+    in
+    (entry_point, tbl)
   | None ->
     Fmt.error_msg "Could not find the directive `model` in the scfg config"

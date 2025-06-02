@@ -29,6 +29,7 @@ owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -487586839
   symbol symbol_1 i32 486539486
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]

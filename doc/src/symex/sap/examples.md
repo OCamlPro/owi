@@ -38,6 +38,7 @@ $ owi c ./poly.c -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -84,6 +85,7 @@ $ owi c ./poly2.c --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -135,6 +137,7 @@ $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -181,6 +184,7 @@ $ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -305,6 +309,7 @@ model {
   symbol symbol_25 i32
   symbol symbol_26 i32
   symbol symbol_27 i32
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -371,6 +376,7 @@ model {
   symbol symbol_4 i32
   symbol symbol_5 i32
   symbol symbol_6 i32
+  entry_point main
 }
 owi: [ERROR] Reached problem!
 [13]

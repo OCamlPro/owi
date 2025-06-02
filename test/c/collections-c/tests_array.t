@@ -73,6 +73,7 @@ Array tests:
     symbol symbol_1 i32 0
     symbol symbol_2 i32 0
     symbol symbol_3 i32 0
+    entry_point main
   }
   owi: [ERROR] Reached problem!
   
