@@ -34,8 +34,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   Interpret.Symbolic.modul link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
-  ~no_assert_failure_expression_printing ~with_breadcrumbs
-  ~model_with_entry_point ~entry_point bug =
+  ~no_assert_failure_expression_printing ~with_breadcrumbs ~entry_point bug =
   let pp fmt (model, labels, breadcrumbs, scoped_values) =
     match model_format with
     | Cmd_utils.Json ->
@@ -77,7 +76,8 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         else model
       in
       let model =
-        if model_with_entry_point then
+        match entry_point with
+        | Some entry_point ->
           let ep =
             [ { Scfg.Types.name = "entry_point"
               ; params = [ entry_point ]
@@ -86,7 +86,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
             ]
           in
           { model with children = model.children @ ep }
-        else model
+        | None -> model
       in
       Scfg.Pp.directive fmt model
   in
@@ -131,7 +131,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-  ~count_acc ~results ~with_breadcrumbs ~model_with_entry_point ~entry_point =
+  ~count_acc ~results ~with_breadcrumbs ~entry_point =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
@@ -147,7 +147,7 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
           let* () =
             print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
-              ~with_breadcrumbs ~model_with_entry_point ~entry_point bug
+              ~with_breadcrumbs ~entry_point bug
           in
           Ok model
         | `Error e -> Error e
@@ -176,7 +176,7 @@ let sort_results deterministic_result_order results =
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
-  ~model_with_entry_point ~entry_point (result : unit Symbolic.Choice.t) =
+  ~entry_point (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -207,16 +207,10 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
       Array.iter Domain.join join_handles )
   in
   let results = sort_results deterministic_result_order results in
-  let* entry_point =
-    if model_with_entry_point then
-      match entry_point with Some ep -> Ok ep | None -> Fmt.error_msg ""
-    else Ok ""
-  in
   let* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-      ~count_acc:0 ~results ~with_breadcrumbs ~model_with_entry_point
-      ~entry_point
+      ~count_acc:0 ~results ~with_breadcrumbs ~entry_point
   in
   Logs.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
@@ -229,7 +223,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~files ~model_format ~entry_point ~invoke_with_symbols
-  ~model_out_file ~with_breadcrumbs ~model_with_entry_point =
+  ~model_out_file ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -246,5 +240,4 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs
-    ~model_with_entry_point ~entry_point result
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~entry_point result

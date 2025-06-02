@@ -35,6 +35,7 @@ $ owi zig ./fib.zig -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 7
+  entry_point _start
 }
 owi: [ERROR] Reached problem!
 [13]

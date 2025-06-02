@@ -8,6 +8,7 @@
     symbol symbol_1 i64 0
     symbol symbol_2 f32 1.
     symbol symbol_3 f64 -1234.
+    entry_point f
   }
   owi: [ERROR] Reached problem!
   [13]

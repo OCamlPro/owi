@@ -303,8 +303,11 @@ let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
   let entry_point =
     if Option.is_none entry_point then model_entry_point else entry_point
   in
-  Logs.debug (fun m -> m "%s" (Option.value ~default:"na" entry_point));
-  Logs.debug (fun m -> m "%s" (Option.value ~default:"na" model_entry_point));
+  Logs.debug (fun m ->
+    m "Specified entry point: %s" (Option.value ~default:"None" entry_point) );
+  Logs.debug (fun m ->
+    m "Entry point inside model: %s"
+      (Option.value ~default:"None" model_entry_point) );
   let+ () =
     run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
       model

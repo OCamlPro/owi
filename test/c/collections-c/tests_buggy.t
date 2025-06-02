@@ -4,6 +4,7 @@ Bug-triggering tests:
   owi: [ERROR] Trap: memory heap buffer overflow
   model {
     symbol symbol_0 i32 8
+    entry_point main
   }
   owi: [ERROR] Reached problem!
   [13]
@@ -22,6 +23,7 @@ Bug-triggering tests:
     symbol symbol_8 i32
     symbol symbol_9 i32
     symbol symbol_10 i32
+    entry_point main
   }
   owi: [ERROR] Reached problem!
   [13]
