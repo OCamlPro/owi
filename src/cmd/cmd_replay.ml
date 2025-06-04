@@ -201,6 +201,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       ; ( "f64_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
         )
+      ; ( "v128_symbol"
+        , Concrete_extern_func.Extern_func
+            (Func (UArg Res, R1 V128), symbol_v128) )
       ; ( "bool_symbol"
         , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
         )
