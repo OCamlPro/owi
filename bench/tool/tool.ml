@@ -133,7 +133,6 @@ let execvp ~output_dir tool file timeout =
       , [ "owi"; "c" ]
         @ (if concolic then [ "--concolic" ] else [])
         @ [ "--unsafe"
-          ; "-vv"
           ; "--fail-on-assertion-only"
           ; Format.sprintf "-O%d" optimisation_level
           ; Format.sprintf "-w%d" workers
@@ -174,20 +173,6 @@ let dup ~src ~dst =
   Unix.dup2 new_file src;
   Unix.close new_file
 
-let move_query_log_to_output_dir ~(output_dir : Fpath.t) : unit =
-  let src = Fpath.v (Smtml.Tmp_log_path.get ()) in
-  let dst = Fpath.(output_dir / "queries_log.jsonl") in
-  match Bos.OS.File.exists src with
-  | Ok true -> (
-      match Bos.OS.Path.move src dst with
-      | Ok () -> ()
-      | Error (`Msg e) -> Logs.err (fun m -> m "move failed: %s" e)
-    )
-  | Ok false ->
-    Logs.err (fun m -> m "Query log not found at %a" Fpath.pp src)
-  | Error (`Msg msg) ->
-    Logs.err (fun m -> m "Error checking query log file: %s" msg)
-
 let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
   let output_dir = Fpath.(output_dir / string_of_int i) in
   let+ (_existed : bool) =
@@ -197,20 +182,26 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
   let result =
     let rec loop retries =
       let pid = Unix.fork () in
-      let tmp_log_path =
-        let pidt = Unix.getpid () in
-        Fmt.str "/home/intern-fw-03/Documents/queries/queries_log_%d.jsonl" pidt
-      in
       if pid = 0 then begin
-        Smtml.Tmp_log_path.set tmp_log_path;
+        let child_pid = Unix.getpid () in
+        let log_path = Fmt.str "/home/intern-fw-03/Documents/queries/queries_log_%d.jsonl" child_pid in
+        Unix.putenv "QUERY_LOG_PATH" log_path;
+        Smtml.Tmp_log_path.init_logging ();
         ExtUnix.Specific.setpgid 0 0;
         dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
         dup ~dst:dst_stderr ~src:Unix.stderr;
         execvp ~output_dir tool file (int_of_float timeout)
-      end
-      else begin
-        Smtml.Tmp_log_path.set tmp_log_path;
-        match wait_pid ~pid ~timeout ~tool ~dst_stderr with
+      end else begin
+        let log_path = Fmt.str "/home/intern-fw-03/Documents/queries/queries_log_%d.jsonl" pid in
+        let result = wait_pid ~pid ~timeout ~tool ~dst_stderr in
+        let src = Fpath.v log_path in
+        let dst = Fpath.(output_dir / "queries_log.jsonl") in
+        begin match Bos.OS.File.exists src with
+          | Ok true -> ignore (Bos.OS.Path.move src dst)
+          | Ok false -> Logs.err (fun m -> m "Query log not found at %a" Fpath.pp src)
+          | Error (`Msg e) -> Logs.err (fun m -> m "Error checking query log: %s" e)
+        end;
+        match result with
         | (Signaled _ | Stopped _) as result ->
           if retries = 0 then result else loop (pred retries)
         | result -> result
@@ -218,6 +209,5 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
     in
     loop 10
   in
-  move_query_log_to_output_dir ~output_dir;
   Format.fprintf fmt "%a@\n" Report.Run_result.pp result;
   result
