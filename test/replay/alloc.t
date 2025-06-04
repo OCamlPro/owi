@@ -22,7 +22,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : data.drop 0
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 12
+  owi: [INFO] running instr : call 13
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 0
