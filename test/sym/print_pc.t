@@ -86,7 +86,7 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 5
+  owi: [INFO] running instr : call 6
   owi: [DEBUG] path condition: [  ]
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
