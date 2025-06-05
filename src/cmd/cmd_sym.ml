@@ -215,7 +215,8 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
-
+  let log_path = String.concat "" [Fpath.(to_string @@ parent workspace); "queries_log.jsonl"] in
+  Smtml.Tmp_log_path.set log_path;
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let pc = Choice.return () in
