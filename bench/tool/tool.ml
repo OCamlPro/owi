@@ -185,8 +185,10 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
       if pid = 0 then begin
         let child_pid = Unix.getpid () in
         let log_path = Fmt.str "/home/intern-fw-03/Documents/queries/queries_log_%d.jsonl" child_pid in
+        Out_channel.with_open_gen [ Open_creat; Open_append; Open_text ]
+          0o644 log_path (fun outc ->
+              Out_channel.output_string outc "" );
         Unix.putenv "QUERY_LOG_PATH" log_path;
-        Smtml.Tmp_log_path.init_logging ();
         ExtUnix.Specific.setpgid 0 0;
         dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
         dup ~dst:dst_stderr ~src:Unix.stderr;
@@ -197,9 +199,12 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
         let src = Fpath.v log_path in
         let dst = Fpath.(output_dir / "queries_log.jsonl") in
         begin match Bos.OS.File.exists src with
-          | Ok true -> ignore (Bos.OS.Path.move src dst)
-          | Ok false -> Logs.err (fun m -> m "Query log not found at %a" Fpath.pp src)
-          | Error (`Msg e) -> Logs.err (fun m -> m "Error checking query log: %s" e)
+          | Ok true -> begin match Bos.OS.Path.move src dst with
+              | Ok () -> ()
+              | Error (`Msg m) -> Fmt.failwith "%s" m
+            end
+          | Ok false -> Fmt.failwith "Query log not found at %a" Fpath.pp src
+          | Error (`Msg e) -> Fmt.failwith "Error checking query log: %s" e
         end;
         match result with
         | (Signaled _ | Stopped _) as result ->
