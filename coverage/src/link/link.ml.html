@@ -970,15 +970,15 @@ let empty_state =
   }
 
 let load_from_module ls f (import : _ Imported.t) =
-  <span data-count="6283">m</span>atch StringMap.find_opt import.modul ls.by_name with
+  <span data-count="6662">m</span>atch StringMap.find_opt import.modul ls.by_name with
   | <span data-count="0">N</span>one -&gt; Error (`Unknown_module import.modul)
-  | <span data-count="6283">S</span>ome exports -&gt; (
-    match StringMap.find_opt import.name (<span data-count="6283">f</span> exports) with
+  | <span data-count="6662">S</span>ome exports -&gt; (
+    match StringMap.find_opt import.name (<span data-count="6662">f</span> exports) with
     | <span data-count="66">N</span>one -&gt;
       if StringSet.mem import.name exports.defined_names then
         <span data-count="44">E</span>rror (`Incompatible_import_type import.name)
       else <span data-count="22">E</span>rror (`Unknown_import (import.modul, import.name))
-    | <span data-count="6217">S</span>ome v -&gt; Ok v )
+    | <span data-count="6596">S</span>ome v -&gt; Ok v )
 
 let load_global (ls : 'f state) (import : binary global_type Imported.t) :
   global Result.t =
@@ -1140,30 +1140,30 @@ let eval_tables ls env tables =
 
 let load_func (ls : 'f state) (import : binary block_type Imported.t) :
   func Result.t =
-  <span data-count="5889">l</span>et (Bt_raw ((None | Some _), typ)) = import.desc in
-  let* func = load_from_modul<span data-count="5889">e</span> ls (fun (e : exports) -&gt; <span data-count="5889">e</span>.functions) import in
-  <span data-count="5871">l</span>et type' =
+  <span data-count="6268">l</span>et (Bt_raw ((None | Some _), typ)) = import.desc in
+  let* func = load_from_modul<span data-count="6268">e</span> ls (fun (e : exports) -&gt; <span data-count="6268">e</span>.functions) import in
+  <span data-count="6250">l</span>et type' =
     match func with
     | <span data-count="315">F</span>unc_intf.WASM (_, func, _) -&gt;
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | <span data-count="5556">E</span>xtern func_id -&gt; Func_id.get_ty<span data-count="5556">p</span> func_id ls.collection
+    | <span data-count="5935">E</span>xtern func_id -&gt; Func_id.get_ty<span data-count="5935">p</span> func_id ls.collection
   in
-  if Types.func_type_eq typ type' then <span data-count="5835">O</span>k func
+  if Types.func_type_eq typ type' then <span data-count="6214">O</span>k func
   else <span data-count="36">E</span>rror (`Incompatible_import_type import.name)
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
-  <span data-count="21692">m</span>atch func with
+  <span data-count="22071">m</span>atch func with
   | <span data-count="15803">R</span>untime.Local func -&gt; ok @@ Concrete_extern_func.was<span data-count="15803">m</span> func finished_env
-  | <span data-count="5889">I</span>mported import -&gt; load_func ls import
+  | <span data-count="6268">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : Link_env.t') env functions =
   <span data-count="4195">l</span>et+ env, _i =
     array_fold_lef<span data-count="4195">t</span>
       (fun (env, i) func -&gt;
-        <span data-count="21692">l</span>et+ func = eval_fun<span data-count="21692">c</span> ls finished_env func in
-        <span data-count="21638">l</span>et env = Link_env.Build.add_func i func env in
-        <span data-count="21638">(</span>env, suc<span data-count="21638">c</span> i) )
+        <span data-count="22071">l</span>et+ func = eval_fun<span data-count="22071">c</span> ls finished_env func in
+        <span data-count="22017">l</span>et env = Link_env.Build.add_func i func env in
+        <span data-count="22017">(</span>env, suc<span data-count="22017">c</span> i) )
       (env, 0) functions
   in
   <span data-count="4141">e</span>nv
@@ -1321,15 +1321,15 @@ let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; binary func_type)
   <span data-count="2406">l</span>et functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) -&gt;
-        <span data-count="15096">l</span>et typ = func_typ func in
-        <span data-count="15096">l</span>et id, collection = Func_id.add func typ collection in
-        <span data-count="15096">(</span>(name, Func_intf.Extern id) :: functions, collection) )
+        <span data-count="15677">l</span>et typ = func_typ func in
+        <span data-count="15677">l</span>et id, collection = Func_id.add func typ collection in
+        <span data-count="15677">(</span>(name, Func_intf.Extern id) :: functions, collection) )
       ([], ls.collection) module_.functions
   in
   <span data-count="2406">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="2406">q</span> functions) in
   <span data-count="2406">l</span>et defined_names =
     StringMap.fold
-      (fun name _ set -&gt; <span data-count="15096">S</span>tringSet.add name set)
+      (fun name _ set -&gt; <span data-count="15677">S</span>tringSet.add name set)
       functions StringSet.empty
   in
   <span data-count="2406">l</span>et exports =

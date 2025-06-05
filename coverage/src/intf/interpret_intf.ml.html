@@ -227,6 +227,7 @@
 <a id="L203"></a><span > </span>
 <a id="L204"></a><span > </span>
 <a id="L205"></a><span > </span>
+<a id="L206"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -436,6 +437,7 @@
 <a href="#L203">203</a>
 <a href="#L204">204</a>
 <a href="#L205">205</a>
+<a href="#L206">206</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -536,6 +538,7 @@ module type P = sig
        and type int64 := Value.int64
        and type float32 := Value.float32
        and type float64 := Value.float64
+       and type v128 := Value.v128
        and type 'a m := 'a Choice.t
        and type memory := Memory.t
 

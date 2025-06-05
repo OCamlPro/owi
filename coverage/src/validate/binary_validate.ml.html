@@ -2111,8 +2111,8 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
     | <span data-count="44782">S</span>ome stack_to_push -&gt; Stack.push rt stack_to_push
 
 let typecheck_function (modul : Module.t) func refs =
-  <span data-count="31675">m</span>atch func with
-  | <span data-count="7763">R</span>untime.Imported _ -&gt; Ok ()
+  <span data-count="32054">m</span>atch func with
+  | <span data-count="8142">R</span>untime.Imported _ -&gt; Ok ()
   | <span data-count="23912">L</span>ocal func -&gt;
     let (Bt_raw (_, (params, result))) = func.type_f in
     let env =
@@ -2303,7 +2303,7 @@ let modul (modul : Module.t) =
   <span data-count="7553">L</span>ist.iter
     (fun (export : export) -&gt; <span data-count="11629">H</span>ashtbl.add refs export.id ())
     modul.exports.func;
-  <span data-count="7553">a</span>rray_iter (fun func -&gt; <span data-count="31675">t</span>ypecheck_function modul func refs) modul.func
+  <span data-count="7553">a</span>rray_iter (fun func -&gt; <span data-count="32054">t</span>ypecheck_function modul func refs) modul.func
 </code></pre>
       </div>
     </div>
