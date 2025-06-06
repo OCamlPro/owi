@@ -10,7 +10,6 @@
 #define _EACSL_H_
 
 #include <stddef.h>
-#include <inttypes.h>
 
 /* Memory model */
 
@@ -156,8 +155,8 @@ typedef union __e_acsl_assert_data_content_t {
 
   __e_acsl_assert_data_real_content_t real_content;
 
-  uintptr_t value_ptr;
-  uintptr_t value_array;
+  unsigned int *value_ptr;
+  unsigned int *value_array;
 } __e_acsl_assert_data_content_t;
 
 typedef struct __e_acsl_assert_data_value_t {

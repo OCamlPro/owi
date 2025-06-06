@@ -8,12 +8,13 @@
 
 #include <eacsl.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-#include <inttypes.h>
 #include <limits.h>
 #include <owi.h>
+
+extern void *malloc(size_t size);
+extern void *calloc(size_t, size_t);
+__attribute__((import_module("summaries"), import_name("dealloc"))) void *free(void *);
 
 /* Memory model */
 

@@ -12,8 +12,8 @@ int is_dividable(int x, int y) {
 }
 
 int main(void) {
-  int numerator = owi_i32();
-  int denominator = owi_i32();
+  int numerator = owi_int();
+  int denominator = owi_int();
 
   owi_assume(denominator != 0);
 

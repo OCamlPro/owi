@@ -8,5 +8,5 @@ entry_point:
   [13]
 
   $ owi c++ entry_point.cpp
-  owi: [ERROR] wasm-ld failed: run with --debug to get the full error message
+  owi: [ERROR] wasm-ld failed: run with -vv to get the full error message if it was not displayed above
   [26]

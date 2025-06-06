@@ -13,12 +13,10 @@
   alloca.h
   assert.h
   ctype.h
-  eacsl.h
   endian.h
   errno.h
   fcntl.h
   inttypes.h
-  (klee.h as klee/klee.h)
   limits.h
   math.h
   pthread.h
@@ -34,5 +32,4 @@
   stdlib.h
   string.h
   time.h
-  unistd.h
-  owi.h))
+  unistd.h))

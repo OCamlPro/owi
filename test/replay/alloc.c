@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 int main() {
-  int size = owi_i32();
+  int size = owi_int();
   owi_assume(size < 10);
   owi_assume(size > 0);
   int* ptr = (int*) malloc(size);

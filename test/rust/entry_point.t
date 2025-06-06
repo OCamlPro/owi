@@ -8,5 +8,5 @@ entry_point:
   [13]
 
   $ owi rust entry_point.rs --entry-point=main
-  owi: [ERROR] rustc failed: run with --debug to get the full error message
+  owi: [ERROR] rustc failed: run with -vv to get the full error message if it was not displayed above
   [26]

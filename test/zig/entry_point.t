@@ -8,5 +8,5 @@ entry_point:
   [13]
 
   $ owi zig entry_point.zig
-  owi: [ERROR] zig failed: run with --debug to get the full error message
+  owi: [ERROR] zig failed: run with -vv to get the full error message if it was not displayed above
   [26]

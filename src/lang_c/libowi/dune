@@ -1,0 +1,24 @@
+(include_subdirs no)
+
+(executable
+ (name script)
+ (modules script))
+
+(rule
+ (target libowi.wasm)
+ (deps assert_fail.o klee.o owi.o test-comp.o eacsl.o)
+ (action
+  (run wasm-ld %{deps} -o %{target} --no-entry --export-all --relocatable)))
+
+(rule
+ (targets assert_fail.o klee.o owi.o test-comp.o eacsl.o)
+ (deps src/assert_fail.c src/klee.c src/owi.c src/test-comp.c src/eacsl.c)
+ (action
+  (run ./script.exe %{deps})))
+
+(install
+ (package owi)
+ (section
+  (site
+   (owi c_files)))
+ (files libowi.wasm))

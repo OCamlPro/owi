@@ -12,7 +12,7 @@ Given the following `poly.c` file:
 #include <owi.h>
 
 int main() {
-  int x = owi_i32();
+  int x = owi_int();
   int x2 = x * x;
   int x3 = x * x * x;
 
@@ -52,7 +52,7 @@ We can do so by assuming that `x` is not equal to any of these with the function
 #include <owi.h>
 
 int main() {
-  int x = owi_i32();
+  int x = owi_int();
   int x2 = x * x;
   int x3 = x * x * x;
 
@@ -111,7 +111,7 @@ private:
   int poly;
 public:
   Poly(int a, int b, int c, int d) {
-    int x = owi_i32();
+    int x = owi_int();
     int x2 = x * x;
     int x3 = x2 * x;
     poly = a*x3 + b*x2 + c*x + d;
@@ -153,7 +153,7 @@ private:
   int poly;
 public:
   Poly(int a, int b, int c, int d) {
-    int x = owi_i32();
+    int x = owi_int();
     int x2 = x * x;
     int x3 = x2 * x;
     owi_assume(x != 1);
@@ -225,7 +225,7 @@ int main (void) {
   char program[ITERS];
 
   for (int i = 0; i < ITERS; i++) {
-    program[i] = owi_i32();
+    program[i] = owi_char();
   }
 
   int old_x = x;
@@ -277,34 +277,34 @@ int main (void) {
 $ owi c ./maze.c --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32
-  symbol symbol_1 i32
-  symbol symbol_2 i32
-  symbol symbol_3 i32
-  symbol symbol_4 i32
-  symbol symbol_5 i32
-  symbol symbol_6 i32
-  symbol symbol_7 i32
-  symbol symbol_8 i32
-  symbol symbol_9 i32
-  symbol symbol_10 i32
-  symbol symbol_11 i32
-  symbol symbol_12 i32
-  symbol symbol_13 i32
-  symbol symbol_14 i32
-  symbol symbol_15 i32
-  symbol symbol_16 i32
-  symbol symbol_17 i32
-  symbol symbol_18 i32
-  symbol symbol_19 i32
-  symbol symbol_20 i32
-  symbol symbol_21 i32
-  symbol symbol_22 i32
-  symbol symbol_23 i32
-  symbol symbol_24 i32
-  symbol symbol_25 i32
-  symbol symbol_26 i32
-  symbol symbol_27 i32
+  symbol symbol_0 i8
+  symbol symbol_1 i8
+  symbol symbol_2 i8
+  symbol symbol_3 i8
+  symbol symbol_4 i8
+  symbol symbol_5 i8
+  symbol symbol_6 i8
+  symbol symbol_7 i8
+  symbol symbol_8 i8
+  symbol symbol_9 i8
+  symbol symbol_10 i8
+  symbol symbol_11 i8
+  symbol symbol_12 i8
+  symbol symbol_13 i8
+  symbol symbol_14 i8
+  symbol symbol_15 i8
+  symbol symbol_16 i8
+  symbol symbol_17 i8
+  symbol symbol_18 i8
+  symbol symbol_19 i8
+  symbol symbol_20 i8
+  symbol symbol_21 i8
+  symbol symbol_22 i8
+  symbol symbol_23 i8
+  symbol symbol_24 i8
+  symbol symbol_25 i8
+  symbol symbol_26 i8
+  symbol symbol_27 i8
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -338,7 +338,7 @@ int popcount(unsigned int x) {
 int main() {
     unsigned int cards[N_CARDS];
     for (int i=0;i < N_CARDS; i++) {
-        unsigned int x = owi_i32();
+        unsigned int x = owi_unsigned_int();
         owi_assume((x >> N_CARDS) == 0);
         owi_assume(popcount(x) == CARD_SIZE);
         cards[i] = x;

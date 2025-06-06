@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 void arbitrary_pre_align() {
-    int s = owi_i32();
+    int s = owi_int();
     owi_assume(s >= 0);
     owi_assume(s < 8);
     for (int i = 0; i < s; i++) {

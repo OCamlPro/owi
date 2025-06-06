@@ -33,7 +33,7 @@ void f(int x, int y) {
 }
 
 int main(void) {
-    int x = owi_i32(), y = owi_i32();
+    int x = owi_int(), y = owi_int();
     owi_assume(x >= 0);
     owi_assume(y >= 0);
     f(x, y);
