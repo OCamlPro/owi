@@ -20,6 +20,8 @@ let utime run = (rusage run).utime
 
 let stime run = (rusage run).stime
 
+let maxrss run = (rusage run).maxrss
+
 let is_reached { res; _ } = Run_result.is_reached res
 
 let is_timeout { res; _ } = Run_result.is_timeout res
