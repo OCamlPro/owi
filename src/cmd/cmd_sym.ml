@@ -215,8 +215,12 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
-  let log_path = String.concat "" [Fpath.(to_string @@ parent workspace); "queries_log.jsonl"] in
-  Smtml.Tmp_log_path.set log_path;
+  (* setting the file where to log all queries sent to solvers *)
+  let log_path =
+    Fpath.(parent workspace / "queries.jsonl.gz") |> Fpath.to_string
+  in
+  Smtml.Tmp_log_path.init log_path;
+  Stdlib__Domain.at_exit (fun () -> Smtml.Tmp_log_path.close ());
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
   let pc = Choice.return () in

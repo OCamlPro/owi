@@ -187,7 +187,8 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
         dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
         dup ~dst:dst_stderr ~src:Unix.stderr;
         execvp ~output_dir tool file (int_of_float timeout)
-      end else begin
+      end
+      else begin
         match wait_pid ~pid ~timeout ~tool ~dst_stderr with
         | (Signaled _ | Stopped _) as result ->
           if retries = 0 then result else loop (pred retries)
