@@ -116,6 +116,10 @@ module type T_Extern_func = sig
     val label : string -> (elt, 'a) t -> (string * elt, 'a) t
 
     val ( ^-> ) : ('k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+
+    val ( ^->! ) : ('k, 'a) t -> (unit, unit) t -> ('a -> unit m) func_type
+
+    val ( ^->. ) : ('k, 'a) t -> (elt, 'b) t -> ('a -> 'b m) func_type
   end
 end
 
@@ -235,13 +239,13 @@ end = struct
 
     let r0 = R0 |> return
 
-    let r1 = fun (Elt a) -> R1 a |> return
+    let r1 (Elt a) = R1 a |> return
 
-    let r2 = fun (Elt a) (Elt b) -> R2 (a, b) |> return
+    let r2 (Elt a) (Elt b) = R2 (a, b) |> return
 
-    let r3 = fun (Elt a) (Elt b) (Elt c) -> R3 (a, b, c) |> return
+    let r3 (Elt a) (Elt b) (Elt c) = R3 (a, b, c) |> return
 
-    let r4 = fun (Elt a) (Elt b) (Elt c) (Elt d) -> R4 (a, b, c, d) |> return
+    let r4 (Elt a) (Elt b) (Elt c) (Elt d) = R4 (a, b, c, d) |> return
 
     let i32 = Elt I32
 
@@ -268,5 +272,12 @@ end = struct
       | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
       | Unit -> Func (UArg b, r)
       | Memory -> Func (Mem b, r)
+
+    let ( ^->! ) : type k a.
+      (k, a) t -> (unit, unit) t -> (a -> unit m) func_type =
+     fun a _unit -> a ^-> r0
+
+    let ( ^->. ) : type k a b. (k, a) t -> (elt, b) t -> (a -> b m) func_type =
+     fun a b -> a ^-> r1 b
   end
 end

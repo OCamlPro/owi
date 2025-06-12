@@ -211,10 +211,10 @@ let summaries_extern_module =
   let open Symbolic.Extern_func in
   let open Symbolic.Extern_func.Syntax in
   let functions =
-    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^-> r1 i32, alloc))
-    ; ("dealloc", Extern_func (memory ^-> i32 ^-> r1 i32, free))
-    ; ("abort", Extern_func (unit ^-> r0, abort))
-    ; ("exit", Extern_func (i32 ^-> r0, exit))
+    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+    ; ("abort", Extern_func (unit ^->! unit, abort))
+    ; ("exit", Extern_func (i32 ^->! unit, exit))
     ]
   in
   { Link.functions }
