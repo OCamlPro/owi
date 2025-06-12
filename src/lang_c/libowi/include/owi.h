@@ -18,8 +18,8 @@ __attribute__((import_module("symbolic"), import_name("i64_symbol")))  int64_t  
 __attribute__((import_module("symbolic"), import_name("i64_symbol"))) uint64_t owi_uint64(void);
 
 #ifndef __FRAMAC__
-__attribute__((import_module("symbolic"), import_name("v128_symbol"))) __int128  owi_int128(void);
-__attribute__((import_module("symbolic"), import_name("v128_symbol"))) unsigned __int128 owi_uint128(void);
+//__attribute__((import_module("symbolic"), import_name("v128_symbol"))) __int128 owi_int128(void);
+//__attribute__((import_module("symbolic"), import_name("v128_symbol"))) unsigned __int128 owi_uint128(void);
 #endif
 
 _Static_assert(sizeof(float) == 4, "Unsupported float size. Please open an issue.");
