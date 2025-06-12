@@ -3,6 +3,7 @@ entry_point:
   owi: [ERROR] Assert failure: (i32.le_s 5 symbol_0)
   model {
     symbol symbol_0 i32 4
+    entry_point fun
   }
   owi: [ERROR] Reached problem!
   [13]

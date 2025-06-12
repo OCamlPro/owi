@@ -41,6 +41,7 @@
 - add `owi_label_is_covered` primitive
 - add scopes with `owi_open_scope` and `owi_close_scope` primitives
 - start support for simd instructions
+- add the symbolic execution's entry point to the model
 
 ## 0.2 - 2024-04-24
 

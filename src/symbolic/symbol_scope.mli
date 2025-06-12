@@ -24,6 +24,6 @@ val to_json :
   -> t
   -> [> `Assoc of (string * Yojson.Basic.t) list ]
 
-val model_of_json : string -> Smtml.Model.t Result.t
+val model_of_json : string -> (string option * Smtml.Model.t) Result.t
 
-val model_of_scfg : string -> Smtml.Model.t Result.t
+val model_of_scfg : string -> (string option * Smtml.Model.t) Result.t

@@ -34,7 +34,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   Interpret.Symbolic.modul link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
-  ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
+  ~no_assert_failure_expression_printing ~with_breadcrumbs ~entry_point bug =
   let pp fmt (model, labels, breadcrumbs, scoped_values) =
     match model_format with
     | Cmd_utils.Json ->
@@ -62,7 +62,8 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
             } )
           labels
       in
-      let children =
+      let model = { model with children = model.children @ lbls } in
+      let model =
         if with_breadcrumbs then
           let bcrumbs =
             [ { Scfg.Types.name = "breadcrumbs"
@@ -71,10 +72,23 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
               }
             ]
           in
-          model.children @ lbls @ bcrumbs
-        else model.children @ lbls
+          { model with children = model.children @ bcrumbs }
+        else model
       in
-      Scfg.Pp.directive fmt { model with children }
+      let model =
+        match entry_point with
+        | Some entry_point ->
+          let ep =
+            [ { Scfg.Types.name = "entry_point"
+              ; params = [ entry_point ]
+              ; children = []
+              }
+            ]
+          in
+          { model with children = model.children @ ep }
+        | None -> model
+      in
+      Scfg.Pp.directive fmt model
   in
   let to_file path model labels breadcrumbs symbol_scopes =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
@@ -117,7 +131,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-  ~count_acc ~results ~with_breadcrumbs =
+  ~count_acc ~results ~with_breadcrumbs ~entry_point =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
@@ -133,7 +147,7 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
           let* () =
             print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
-              ~with_breadcrumbs bug
+              ~with_breadcrumbs ~entry_point bug
           in
           Ok model
         | `Error e -> Error e
@@ -162,7 +176,7 @@ let sort_results deterministic_result_order results =
 let handle_result ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
-  (result : unit Symbolic.Choice.t) =
+  ~entry_point (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_queue = Wq.make () in
   let path_count = Atomic.make 0 in
@@ -196,7 +210,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   let* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-      ~count_acc:0 ~results ~with_breadcrumbs
+      ~count_acc:0 ~results ~with_breadcrumbs ~entry_point
   in
   Logs.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
@@ -226,4 +240,4 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs result
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~entry_point result
