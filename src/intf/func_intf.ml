@@ -69,6 +69,54 @@ module type T_Extern_func = sig
 
   (* val extern_type : _ func_type -> Simplified.func_type *)
   val extern_type : extern_func -> binary Types.func_type
+
+  module Syntax : sig
+    type elt
+
+    type mem
+
+    type (_, _) t = private
+      | Unit : (unit, unit) t
+      | Memory : (mem, memory) t
+      | Elt : 'a telt -> (elt, 'a) t
+      | Elt_labeled : string * 'a telt -> (string * elt, 'a) t
+
+    val i32 : (elt, int32) t
+
+    val i64 : (elt, int64) t
+
+    val f32 : (elt, float32) t
+
+    val f64 : (elt, float64) t
+
+    val v128 : (elt, v128) t
+
+    val externref : 'a Type.Id.t -> (elt, 'a) t
+
+    val r0 : unit m func_type
+
+    val r1 : (elt, 'a) t -> 'a m func_type
+
+    val r2 : (elt, 'a) t -> (elt, 'b) t -> ('a * 'b) m func_type
+
+    val r3 :
+      (elt, 'a) t -> (elt, 'b) t -> (elt, 'c) t -> ('a * 'b * 'c) m func_type
+
+    val r4 :
+         (elt, 'a) t
+      -> (elt, 'b) t
+      -> (elt, 'c) t
+      -> (elt, 'd) t
+      -> ('a * 'b * 'c * 'd) m func_type
+
+    val unit : (unit, unit) t
+
+    val memory : (mem, memory) t
+
+    val label : string -> (elt, 'a) t -> (string * elt, 'a) t
+
+    val ( ^-> ) : ('k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+  end
 end
 
 type t =
@@ -171,4 +219,54 @@ end = struct
       !r
 
   let wasm func env : t = WASM (fresh (), func, env)
+
+  module Syntax = struct
+    type elt
+
+    type mem
+
+    type (_, _) t =
+      | Unit : (unit, unit) t
+      | Memory : (mem, memory) t
+      | Elt : 'a telt -> (elt, 'a) t
+      | Elt_labeled : string * 'a telt -> (string * elt, 'a) t
+
+    let return r = Func (Res, r)
+
+    let r0 = R0 |> return
+
+    let r1 = fun (Elt a) -> R1 a |> return
+
+    let r2 = fun (Elt a) (Elt b) -> R2 (a, b) |> return
+
+    let r3 = fun (Elt a) (Elt b) (Elt c) -> R3 (a, b, c) |> return
+
+    let r4 = fun (Elt a) (Elt b) (Elt c) (Elt d) -> R4 (a, b, c, d) |> return
+
+    let i32 = Elt I32
+
+    let i64 = Elt I64
+
+    let f32 = Elt F32
+
+    let f64 = Elt F64
+
+    let v128 = Elt V128
+
+    let externref id = Elt (Externref id)
+
+    let unit = Unit
+
+    let memory = Memory
+
+    let label s (Elt v) = Elt_labeled (s, v)
+
+    let ( ^-> ) : type k a b. (k, a) t -> b func_type -> (a -> b) func_type =
+     fun a (Func (b, r)) ->
+      match a with
+      | Elt a -> Func (Arg (a, b), r)
+      | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
+      | Unit -> Func (UArg b, r)
+      | Memory -> Func (Mem b, r)
+  end
 end
