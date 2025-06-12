@@ -97,25 +97,6 @@ module type T_Extern_func = sig
 
     val externref : 'a Type.Id.t -> (lr, elt, 'a) t
 
-    val r0 : unit m func_type
-
-    val r1 : (lr, elt, 'a) t -> 'a m func_type
-
-    val r2 : (lr, elt, 'a) t -> (lr, elt, 'b) t -> ('a * 'b) m func_type
-
-    val r3 :
-         (lr, elt, 'a) t
-      -> (lr, elt, 'b) t
-      -> (lr, elt, 'c) t
-      -> ('a * 'b * 'c) m func_type
-
-    val r4 :
-         (lr, elt, 'a) t
-      -> (lr, elt, 'b) t
-      -> (lr, elt, 'c) t
-      -> (lr, elt, 'd) t
-      -> ('a * 'b * 'c * 'd) m func_type
-
     val unit : (lr, unit, unit) t
 
     val memory : (l, mem, memory) t
@@ -125,6 +106,24 @@ module type T_Extern_func = sig
     val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
     val ( ^->. ) : ('r, 'k, 'a) t -> (lr, 'kk, 'b) t -> ('a -> 'b m) func_type
+
+    val ( ^->.. ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
+      -> ('a -> ('b1 * 'b2) m) func_type
+
+    val ( ^->... ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
+      -> ('a -> ('b1 * 'b2 * 'b3) m) func_type
+
+    val ( ^->.... ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t
+         * (lr, elt, 'b2) t
+         * (lr, elt, 'b3) t
+         * (lr, elt, 'b4) t
+      -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) m) func_type
   end
 end
 
@@ -286,5 +285,23 @@ end = struct
     let ( ^->. ) : type ll k kk a b.
       (ll, k, a) t -> (lr, kk, b) t -> (a -> b m) func_type =
      fun a b -> match b with Elt _ -> a ^-> r1 b | Unit -> a ^-> r0
+
+    let ( ^->.. ) : type ll k a b1 b2.
+         (ll, k, a) t
+      -> (lr, elt, b1) t * (lr, elt, b2) t
+      -> (a -> (b1 * b2) m) func_type =
+     fun a (b1, b2) -> a ^-> r2 b1 b2
+
+    let ( ^->... ) : type ll k a b1 b2 b3.
+         (ll, k, a) t
+      -> (lr, elt, b1) t * (lr, elt, b2) t * (lr, elt, b3) t
+      -> (a -> (b1 * b2 * b3) m) func_type =
+     fun a (b1, b2, b3) -> a ^-> r3 b1 b2 b3
+
+    let ( ^->.... ) : type ll k a b1 b2 b3 b4.
+         (ll, k, a) t
+      -> (lr, elt, b1) t * (lr, elt, b2) t * (lr, elt, b3) t * (lr, elt, b4) t
+      -> (a -> (b1 * b2 * b3 * b4) m) func_type =
+     fun a (b1, b2, b3, b4) -> a ^-> r4 b1 b2 b3 b4
   end
 end
