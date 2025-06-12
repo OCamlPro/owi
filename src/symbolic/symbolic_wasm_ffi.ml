@@ -213,8 +213,8 @@ let summaries_extern_module =
   let functions =
     [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
     ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
-    ; ("abort", Extern_func (unit ^->! unit, abort))
-    ; ("exit", Extern_func (i32 ^->! unit, exit))
+    ; ("abort", Extern_func (unit ^->. unit, abort))
+    ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
   { Link.functions }

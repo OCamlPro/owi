@@ -71,55 +71,60 @@ module type T_Extern_func = sig
   val extern_type : extern_func -> binary Types.func_type
 
   module Syntax : sig
+    type l
+
+    type lr
+
     type elt
 
     type mem
 
-    type (_, _) t = private
-      | Unit : (unit, unit) t
-      | Memory : (mem, memory) t
-      | Elt : 'a telt -> (elt, 'a) t
-      | Elt_labeled : string * 'a telt -> (string * elt, 'a) t
+    type (_, _, _) t = private
+      | Unit : (lr, unit, unit) t
+      | Memory : (l, mem, memory) t
+      | Elt : 'a telt -> (lr, elt, 'a) t
+      | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 
-    val i32 : (elt, int32) t
+    val i32 : (lr, elt, int32) t
 
-    val i64 : (elt, int64) t
+    val i64 : (lr, elt, int64) t
 
-    val f32 : (elt, float32) t
+    val f32 : (lr, elt, float32) t
 
-    val f64 : (elt, float64) t
+    val f64 : (lr, elt, float64) t
 
-    val v128 : (elt, v128) t
+    val v128 : (lr, elt, v128) t
 
-    val externref : 'a Type.Id.t -> (elt, 'a) t
+    val externref : 'a Type.Id.t -> (lr, elt, 'a) t
 
     val r0 : unit m func_type
 
-    val r1 : (elt, 'a) t -> 'a m func_type
+    val r1 : (lr, elt, 'a) t -> 'a m func_type
 
-    val r2 : (elt, 'a) t -> (elt, 'b) t -> ('a * 'b) m func_type
+    val r2 : (lr, elt, 'a) t -> (lr, elt, 'b) t -> ('a * 'b) m func_type
 
     val r3 :
-      (elt, 'a) t -> (elt, 'b) t -> (elt, 'c) t -> ('a * 'b * 'c) m func_type
+         (lr, elt, 'a) t
+      -> (lr, elt, 'b) t
+      -> (lr, elt, 'c) t
+      -> ('a * 'b * 'c) m func_type
 
     val r4 :
-         (elt, 'a) t
-      -> (elt, 'b) t
-      -> (elt, 'c) t
-      -> (elt, 'd) t
+         (lr, elt, 'a) t
+      -> (lr, elt, 'b) t
+      -> (lr, elt, 'c) t
+      -> (lr, elt, 'd) t
       -> ('a * 'b * 'c * 'd) m func_type
 
-    val unit : (unit, unit) t
+    val unit : (lr, unit, unit) t
 
-    val memory : (mem, memory) t
+    val memory : (l, mem, memory) t
 
-    val label : string -> (elt, 'a) t -> (string * elt, 'a) t
+    val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
-    val ( ^-> ) : ('k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+    val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
-    val ( ^->! ) : ('k, 'a) t -> (unit, unit) t -> ('a -> unit m) func_type
-
-    val ( ^->. ) : ('k, 'a) t -> (elt, 'b) t -> ('a -> 'b m) func_type
+    val ( ^->. ) : ('r, 'k, 'a) t -> (lr, 'kk, 'b) t -> ('a -> 'b m) func_type
   end
 end
 
@@ -225,15 +230,19 @@ end = struct
   let wasm func env : t = WASM (fresh (), func, env)
 
   module Syntax = struct
+    type l
+
+    type lr
+
     type elt
 
     type mem
 
-    type (_, _) t =
-      | Unit : (unit, unit) t
-      | Memory : (mem, memory) t
-      | Elt : 'a telt -> (elt, 'a) t
-      | Elt_labeled : string * 'a telt -> (string * elt, 'a) t
+    type (_, _, _) t =
+      | Unit : (lr, unit, unit) t
+      | Memory : (l, mem, memory) t
+      | Elt : 'a telt -> (lr, elt, 'a) t
+      | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 
     let return r = Func (Res, r)
 
@@ -265,7 +274,8 @@ end = struct
 
     let label s (Elt v) = Elt_labeled (s, v)
 
-    let ( ^-> ) : type k a b. (k, a) t -> b func_type -> (a -> b) func_type =
+    let ( ^-> ) : type lr k a b.
+      (lr, k, a) t -> b func_type -> (a -> b) func_type =
      fun a (Func (b, r)) ->
       match a with
       | Elt a -> Func (Arg (a, b), r)
@@ -273,11 +283,8 @@ end = struct
       | Unit -> Func (UArg b, r)
       | Memory -> Func (Mem b, r)
 
-    let ( ^->! ) : type k a.
-      (k, a) t -> (unit, unit) t -> (a -> unit m) func_type =
-     fun a _unit -> a ^-> r0
-
-    let ( ^->. ) : type k a b. (k, a) t -> (elt, b) t -> (a -> b m) func_type =
-     fun a b -> a ^-> r1 b
+    let ( ^->. ) : type ll k kk a b.
+      (ll, k, a) t -> (lr, kk, b) t -> (a -> b m) func_type =
+     fun a b -> match b with Elt _ -> a ^-> r1 b | Unit -> a ^-> r0
   end
 end
