@@ -61,19 +61,16 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     Ok ()
   in
   (* we need to describe their types *)
+  let open Concrete_extern_func.Syntax in
   let functions =
-    [ ( "print_i32"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
-      )
+    [ ("print_i32", Concrete_extern_func.Extern_func (i32 ^->. unit, print_i32))
     ; ( "fresh"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 (Externref rint)), fresh) )
+      , Concrete_extern_func.Extern_func (i32 ^->. externref rint, fresh) )
     ; ( "set_i32r"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (Externref rint, Arg (I32, Res)), R0), set) )
+      , Concrete_extern_func.Extern_func (externref rint ^-> i32 ^->. unit, set)
+      )
     ; ( "get_i32r"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (Externref rint, Res), R1 I32), get) )
+      , Concrete_extern_func.Extern_func (externref rint ^->. i32, get) )
     ]
   in
   { functions }
@@ -190,13 +187,11 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     Ok ()
   in
   (* we need to describe their types *)
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
   let functions =
-    [ ( "print_x64"
-      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_x64)
-      )
-    ; ( "memset"
-      , Concrete_extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Arg (I32, Res)))), R0), memset) )
+    [ ("print_x64", Extern_func (i64 ^->. unit, print_x64))
+    ; ("memset", Extern_func (memory ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
     ]
   in
   { functions }

@@ -204,61 +204,34 @@ end
 type extern_func = Concolic.Extern_func.extern_func
 
 open M
+open Concolic.Extern_func
+open Concolic.Extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
-    [ ( "i8_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
-    ; ( "i16_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i16)
-      )
-    ; ( "i32_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-      )
-    ; ( "i64_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-      )
-    ; ( "f32_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-      )
-    ; ( "f64_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-      )
-    ; ( "v128_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 V128), symbol_v128)
-      )
-    ; ( "bool_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-      )
-    ; ( "invisible_bool_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-      )
-    ; ( "range_symbol"
-      , Concolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
-    ; ( "assume"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
-    ; ( "assert"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
-    ; ( "in_replay_mode"
-      , Concolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), in_replay_mode) )
-    ; ( "print_char"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
-      )
+    [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
+    ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
+    ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+    ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+    ; ("invisible_bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^->. unit, assume))
+    ; ("assert", Extern_func (i32 ^->. unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
     ]
   in
   { Link.functions }
 
 let summaries_extern_module =
   let functions =
-    [ ( "alloc"
-      , Concolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
-    ; ( "dealloc"
-      , Concolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-    ; ("abort", Concolic.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+    ; ("abort", Extern_func (unit ^->. unit, abort))
     ]
   in
   { Link.functions }
