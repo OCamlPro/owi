@@ -29,11 +29,11 @@ unsigned int __VERIFIER_nondet_uint(void) {
 }
 
 __int128 __VERIFIER_nondet_int128(void) {
-  return owi_int128();
+  return 0;
 }
 
 unsigned __int128 __VERIFIER_nondet_uint128(void) {
-  return owi_uint128;
+  return 0;
 }
 
 unsigned int __VERIFIER_nondet_charp(void) {
