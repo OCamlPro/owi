@@ -41,36 +41,20 @@ let extern_m =
   let func_in_i32 (_i : int32) = Ok () in
   let func_out_i32 = Ok 1l in
   let func_in_i32_out_i32 (_i : int32) = Ok 1l in
-
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
   let functions =
-    [ ("print", Concrete_extern_func.Extern_func (Func (Res, R0), print))
-    ; ( "print_i32"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), print_i32)
-      )
-    ; ( "print_i64"
-      , Concrete_extern_func.Extern_func (Func (Arg (I64, Res), R0), print_i64)
-      )
-    ; ( "print_f32"
-      , Concrete_extern_func.Extern_func (Func (Arg (F32, Res), R0), print_f32)
-      )
-    ; ( "print_f64"
-      , Concrete_extern_func.Extern_func (Func (Arg (F64, Res), R0), print_f64)
-      )
-    ; ( "print_i32_f32"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (I32, Arg (F32, Res)), R0), print_i32_f32) )
-    ; ( "print_f64_f64"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (F64, Arg (F64, Res)), R0), print_f64_f64) )
-    ; ("func", Concrete_extern_func.Extern_func (Func (Res, R0), func))
-    ; ( "func-i32"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), func_in_i32)
-      )
-    ; ( "func->i32"
-      , Concrete_extern_func.Extern_func (Func (Res, R1 I32), func_out_i32) )
-    ; ( "func-i32->i32"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), func_in_i32_out_i32) )
+    [ ("print", Extern_func (Func (Res, R0), print))
+    ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
+    ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
+    ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
+    ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
+    ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
+    ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
+    ; ("func", Extern_func (Func (Res, R0), func))
+    ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
+    ; ("func->i32", Extern_func (Func (Res, R1 I32), func_out_i32))
+    ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
     ]
   in
 

@@ -35,29 +35,18 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
   in
   let sleep _ms id = Symbolic_choice_with_memory.return id in
+  let open Symbolic.Extern_func in
+  let open Symbolic.Extern_func.Syntax in
   let functions =
-    [ ( "log-i32"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i32) )
+    [ ("log-i32", Extern_func (i32 ^->. unit, log_i32))
     ; ( "log-i64"
-      , if weird_log_i64 then
-          Symbolic.Extern_func.Extern_func
-            (Func (Arg (I32, Arg (I32, Res)), R0), log_i64_weird)
-        else
-          Symbolic.Extern_func.Extern_func (Func (Arg (I64, Res), R0), log_i64)
-      )
-    ; ( "log-f32"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (F32, Res), R0), log_f32) )
-    ; ( "log-f64"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (F64, Res), R0), log_f64) )
-    ; ( "call-export"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R0), call_export) )
-    ; ( "call-export-catch"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), call_export_catch) )
-    ; ( "sleep"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), sleep) )
+      , if weird_log_i64 then Extern_func (i32 ^-> i32 ^->. unit, log_i64_weird)
+        else Extern_func (i64 ^->. unit, log_i64) )
+    ; ("log-f32", Extern_func (f32 ^->. unit, log_f32))
+    ; ("log-f64", Extern_func (f64 ^->. unit, log_f64))
+    ; ("call-export", Extern_func (i32 ^-> i32 ^->. unit, call_export))
+    ; ("call-export-catch", Extern_func (i32 ^->. i32, call_export_catch))
+    ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
     ]
   in
   { Link.functions }
@@ -69,13 +58,11 @@ let emscripten_fuzzing_support_module () =
     Symbolic_choice_with_memory.return ()
   in
   let get_temp_ret_0 () = Symbolic_choice_with_memory.return !temp_ret_0 in
+  let open Symbolic.Extern_func in
+  let open Symbolic.Extern_func.Syntax in
   let functions =
-    [ ( "setTempRet0"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), set_temp_ret_0) )
-    ; ( "getTempRet0"
-      , Symbolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), get_temp_ret_0) )
+    [ ("setTempRet0", Extern_func (i32 ^->. unit, set_temp_ret_0))
+    ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
     ]
   in
   { Link.functions }
