@@ -10,7 +10,7 @@ type extern_module = Concrete_extern_func.extern_func Link.extern_module
 let ( let* ) = Result.bind
 
 let extern_m =
-  let print = Ok () in
+  let print () = Ok () in
   let print_i32 i =
     pr "%li@\n%!" i;
     Ok ()
@@ -37,23 +37,23 @@ let extern_m =
     let* () = print_f64 f2 in
     Ok ()
   in
-  let func = Ok () in
+  let func () = Ok () in
   let func_in_i32 (_i : int32) = Ok () in
-  let func_out_i32 = Ok 1l in
+  let func_out_i32 () = Ok 1l in
   let func_in_i32_out_i32 (_i : int32) = Ok 1l in
   let open Concrete_extern_func in
   let open Concrete_extern_func.Syntax in
   let functions =
-    [ ("print", Extern_func (Func (Res, R0), print))
+    [ ("print", Extern_func (unit ^->. unit, print))
     ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
     ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
     ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
     ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
     ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
     ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
-    ; ("func", Extern_func (Func (Res, R0), func))
+    ; ("func", Extern_func (unit ^->. unit, func))
     ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
-    ; ("func->i32", Extern_func (Func (Res, R1 I32), func_out_i32))
+    ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
     ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
     ]
   in
