@@ -22,7 +22,7 @@ int popcount(unsigned int x) {
 int main() {
     unsigned int cards[N_CARDS];
     for (int i=0;i < N_CARDS; i++) {
-        unsigned int x = owi_i32();
+        unsigned int x = owi_unsigned_int();
         owi_assume((x >> N_CARDS) == 0);
         owi_assume(popcount(x) == CARD_SIZE);
         cards[i] = x;

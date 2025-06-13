@@ -220,7 +220,7 @@ let pp fmt = function
   | <span data-count="0">V</span>128 v -&gt; pf fmt "v128.const %a" V128.pp v
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
-let ref_null' = function <span data-count="1280">F</span>unc_ht -&gt; Funcref None | <span data-count="121">E</span>xtern_ht -&gt; Externref None
+let ref_null' = function <span data-count="1281">F</span>unc_ht -&gt; Funcref None | <span data-count="121">E</span>xtern_ht -&gt; Externref None
 
 let ref_null typ = <span data-count="176">R</span>ef (ref_null<span data-count="176">'</span> typ)
 

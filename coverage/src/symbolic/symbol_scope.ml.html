@@ -593,7 +593,7 @@
 
 type t = token list
 
-let symbol s tl : t = <span data-count="1397">S</span>ymbol s :: tl
+let symbol s tl : t = <span data-count="1398">S</span>ymbol s :: tl
 
 let open_scope name tl = <span data-count="10">O</span>pen_scope name :: tl
 
@@ -607,7 +607,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="357">s</span> exprs)
 
-let of_symbol sym = <span data-count="910">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="849">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="6">m</span>atch token with
@@ -619,8 +619,8 @@ let pp fmt tokens =
   <span data-count="4">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1494">L</span>ist.filter_map
-    (function <span data-count="2777">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
+  <span data-count="1435">L</span>ist.filter_map
+    (function <span data-count="2720">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym =
@@ -629,13 +629,13 @@ let get_value model sym =
   | None -&gt; assert false
 
 let to_scfg ~no_value model scope_tokens =
-  <span data-count="226">l</span>et open Scfg.Types in
+  <span data-count="227">l</span>et open Scfg.Types in
   let open Smtml in
   let symbol_to_scfg symbol =
-    <span data-count="371">l</span>et p0 = Symbol.to_string symbol in
-    <span data-count="371">l</span>et p1 = Symbol.type_of symbol |&gt; <span data-count="371">T</span>y.string_of_type in
-    <span data-count="371">l</span>et params =
-      if no_value then <span data-count="225">[</span> p0; p1 ]
+    <span data-count="372">l</span>et p0 = Symbol.to_string symbol in
+    <span data-count="372">l</span>et p1 = Symbol.type_of symbol |&gt; <span data-count="372">T</span>y.string_of_type in
+    <span data-count="372">l</span>et params =
+      if no_value then <span data-count="226">[</span> p0; p1 ]
       else
         <span data-count="146">l</span>et value = get_value model symbol in
         <span data-count="146">l</span>et p2 = Value.to_string value in
@@ -666,8 +666,8 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rec process_tokens tokens acc =
-    <span data-count="593">m</span>atch tokens with
-    | <span data-count="226">[</span>] -&gt; List.rev acc
+    <span data-count="595">m</span>atch tokens with
+    | <span data-count="227">[</span>] -&gt; List.rev acc
     | <span data-count="5">O</span>pen_scope name :: rest -&gt;
       let content, remaining = process_scope name rest in
       <span data-count="5">l</span>et scope =
@@ -677,14 +677,14 @@ let to_scfg ~no_value model scope_tokens =
         | <span data-count="2">_</span> as children -&gt; { name = "scope"; params = [ name ]; children }
       in
       process_tokens remaining (scope :: acc)
-    | <span data-count="362">S</span>ymbol s :: rest -&gt; process_tokens rest (symbol_to_scf<span data-count="362">g</span> s :: acc)
+    | <span data-count="363">S</span>ymbol s :: rest -&gt; process_tokens rest (symbol_to_scf<span data-count="363">g</span> s :: acc)
     | Close_scope :: _ -&gt; assert false
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  <span data-count="226">L</span>ogs.debug (fun m -&gt; <span data-count="1">m</span> "Current scope tokens: [%a]" pp rev_scope_tokens);
-  <span data-count="226">l</span>et children = process_tokens rev_scope_tokens [] in
-  <span data-count="226">[</span> { name = "model"; params = []; children } ]
+  <span data-count="227">L</span>ogs.debug (fun m -&gt; <span data-count="1">m</span> "Current scope tokens: [%a]" pp rev_scope_tokens);
+  <span data-count="227">l</span>et children = process_tokens rev_scope_tokens [] in
+  <span data-count="227">[</span> { name = "model"; params = []; children } ]
 
 let to_json ~no_value model scope_tokens =
   <span data-count="0">l</span>et open Smtml in

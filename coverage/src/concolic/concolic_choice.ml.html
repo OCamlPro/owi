@@ -407,15 +407,15 @@ let pp_assignments ~no_value fmt assignments =
   Fmt.pf fmt "(model@\n  %a)" (Fmt.vbo<span data-count="0">x</span> (Fmt.lis<span data-count="0">t</span> pp_v)) assignments
 
 let pc_elt_to_expr = function
-  | <span data-count="4197">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2205">c</span> else <span data-count="1992">S</span>mtml.Expr.Bool.no<span data-count="1992">t</span> c)
+  | <span data-count="4185">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2201">c</span> else <span data-count="1984">S</span>mtml.Expr.Bool.no<span data-count="1984">t</span> c)
   | <span data-count="67">S</span>elect_i32 (n, c) -&gt; Some Smtml.Expr.Bitv.I32.(c = <span data-count="67">v</span> n)
-  | <span data-count="5308">A</span>ssume c -&gt; Some c
+  | <span data-count="5302">A</span>ssume c -&gt; Some c
   | <span data-count="79">A</span>ssert _ -&gt; None
   | EltExplicitStop -&gt;
     (* Should never be reached because no model should be requested if we stopped *)
     assert false
 
-let pc_to_exprs pc = <span data-count="858">L</span>ist.filter_map pc_elt_to_expr pc |&gt; <span data-count="858">S</span>mtml.Expr.Set.of_list
+let pc_to_exprs pc = <span data-count="857">L</span>ist.filter_map pc_elt_to_expr pc |&gt; <span data-count="857">S</span>mtml.Expr.Set.of_list
 
 type shared_thread_info =
   { memories : Symbolic_memory.collection
@@ -438,18 +438,18 @@ type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="1304857">M</span> (fun t -&gt; <span data-count="1304857">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="1314214">M</span> (fun t -&gt; <span data-count="1314214">(</span>Ok v, t)) [@@inline]
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="3414048">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="3432762">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="1707699">M</span>
+  <span data-count="1717056">M</span>
     (fun init_s -&gt;
-      <span data-count="1707699">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="1707699">m</span>atch v_final with
-      | <span data-count="1706349">O</span>k v_final -&gt; run (<span data-count="1706349">f</span> v_final) tmp_st
+      <span data-count="1717056">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="1717056">m</span>atch v_final with
+      | <span data-count="1715706">O</span>k v_final -&gt; run (<span data-count="1715706">f</span> v_final) tmp_st
       | <span data-count="1350">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 

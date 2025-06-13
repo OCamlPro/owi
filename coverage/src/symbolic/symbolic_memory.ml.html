@@ -378,13 +378,13 @@
 
 (** Single memories *)
 
-let page_size = Symbolic_value.const_i3<span data-count="1014">2</span> 65_536l
+let page_size = Symbolic_value.const_i3<span data-count="1015">2</span> 65_536l
 
 module Map = Map.Make (struct
   include Int32
 
   (* TODO: define this in Int32 directly? *)
-  let compare i1 i2 = <span data-count="1931557">c</span>ompare (Int32.to_in<span data-count="1931557">t</span> i1) (Int32.to_in<span data-count="1931557">t</span> i2)
+  let compare i1 i2 = <span data-count="1931562">c</span>ompare (Int32.to_in<span data-count="1931562">t</span> i1) (Int32.to_in<span data-count="1931562">t</span> i2)
 end)
 
 type t =

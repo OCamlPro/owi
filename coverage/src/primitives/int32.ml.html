@@ -424,10 +424,10 @@ let sx x =
  * by other functions (like parsing), and rely on it being
  * min/max for int32 *)
 (* The smallest signed |32|-bits int. *)
-let low_int = shift_lef<span data-count="1014">t</span> minus_one 31
+let low_int = shift_lef<span data-count="1015">t</span> minus_one 31
 
 (* The largest signed |32|-bits int. *)
-let high_int = logxo<span data-count="1014">r</span> low_int minus_one
+let high_int = logxo<span data-count="1015">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the 32. *)
 let shift f x y = <span data-count="61200">f</span> x (to_in<span data-count="61200">t</span> (logan<span data-count="61200">d</span> y 31l))
@@ -466,9 +466,9 @@ let hex_digit = function
   | <span data-count="0">_</span> -&gt; Fmt.failwith "of_string"
 [@@inline]
 
-let max_upper = unsigned_di<span data-count="1014">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="1015">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="1014">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="1015">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="129155">l</span>et sign_bit = logand (of_in<span data-count="129155">t</span> (1 lsl (32 - 1))) i in

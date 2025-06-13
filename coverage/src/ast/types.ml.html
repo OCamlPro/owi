@@ -1774,8 +1774,8 @@ let pp_id fmt id = <span data-count="538">p</span>f fmt "$%s" id
 
 let pp_id_opt fmt = function <span data-count="1010">N</span>one -&gt; () | <span data-count="391">S</span>ome i -&gt; pf fmt " %a" pp_id i
 
-let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="1316">f</span>unction
-  | <span data-count="1169">R</span>aw u -&gt; int fmt u
+let pp_indice (type kind) fmt : kind indice -&gt; unit = <span data-count="1317">f</span>unction
+  | <span data-count="1170">R</span>aw u -&gt; int fmt u
   | <span data-count="147">T</span>ext i -&gt; pp_id fmt i
 
 let compare_indice (type a) (id1 : a indice) (id2 : a indice) =
@@ -1806,8 +1806,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="3227306">m</span>atch (t1, t2) with
-  | <span data-count="2958223">I</span>32, I32 | <span data-count="89674">I</span>64, I64 | <span data-count="89354">F</span>32, F32 | <span data-count="89607">F</span>64, F64 | <span data-count="405">V</span>128, V128 -&gt; true
+  <span data-count="3227301">m</span>atch (t1, t2) with
+  | <span data-count="2958213">I</span>32, I32 | <span data-count="89675">I</span>64, I64 | <span data-count="89355">F</span>32, F32 | <span data-count="89608">F</span>64, F64 | <span data-count="406">V</span>128, V128 -&gt; true
   | <span data-count="43">(</span><span data-count="15">I</span>32 | <span data-count="10">I</span>64 | <span data-count="10">F</span>32 | <span data-count="8">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2067,8 +2067,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="3225415">m</span>atch (t1, t2) with
-  | <span data-count="3225392">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="3225409">m</span>atch (t1, t2) with
+  | <span data-count="3225386">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="22">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2083,7 +2083,7 @@ type nonrec 'a param = string option * 'a val_type
 
 let pp_param fmt (id, vt) = <span data-count="297">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="1616096">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="1616088">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="33611">c</span>ompare_val_type t1 t2
 
@@ -2091,7 +2091,7 @@ type nonrec 'a param_type = 'a param list
 
 let pp_param_type fmt params = <span data-count="158">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="1616393">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="1616396">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="75426">L</span>ist.compare compare_param t1 t2
 
@@ -2101,7 +2101,7 @@ let pp_result_ fmt vt = <span data-count="165">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="165">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="1616250">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="1616253">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="41540">L</span>ist.compare compare_val_type t1 t2
 
@@ -2120,7 +2120,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="1616393">p</span>aram_type_e<span data-count="1616395">q</span> pt1 pt2 &amp;&amp; <span data-count="1616250">r</span>esult_type_eq rt1 rt2
+  <span data-count="1616398">p</span>aram_type_e<span data-count="1616397">q</span> pt1 pt2 &amp;&amp; <span data-count="1616252">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
@@ -2361,7 +2361,7 @@ let rec pp_instr ~short fmt = function
   | <span data-count="1">R</span>eturn_call_indirect (tbl_id, ty_id) -&gt;
     pf fmt "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">R</span>eturn_call_ref ty_id -&gt; pf fmt "return_call_ref %a" pp_block_type ty_id
-  | <span data-count="195">C</span>all id -&gt; pf fmt "call %a" pp_indice id
+  | <span data-count="196">C</span>all id -&gt; pf fmt "call %a" pp_indice id
   | <span data-count="5">C</span>all_indirect (tbl_id, ty_id) -&gt;
     pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">C</span>all_ref ty_id -&gt; pf fmt "call_ref %a" pp_indice ty_id
@@ -2374,8 +2374,8 @@ and pp_expr ~short fmt instrs =
 let rec iter_expr f (e : _ expr) = <span data-count="10061">L</span>ist.iter (iter_inst<span data-count="10061">r</span> f) e
 
 and iter_instr f (i : _ instr) =
-  <span data-count="255424">f</span> i;
-  <span data-count="255424">m</span>atch i with
+  <span data-count="255761">f</span> i;
+  <span data-count="255761">m</span>atch i with
   | <span data-count="38908">I</span>32_const _ | <span data-count="756">I</span>64_const _ | <span data-count="150">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
   | <span data-count="681">I</span>_unop (_, _)
   | <span data-count="0">F</span>_unop (_, _)
@@ -2393,7 +2393,7 @@ and iter_instr f (i : _ instr) =
   | <span data-count="73">F</span>_convert_i (_, _, _)
   | <span data-count="0">I</span>_reinterpret_f (_, _)
   | <span data-count="0">F</span>_reinterpret_i (_, _)
-  | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="3731">D</span>rop | <span data-count="2298">S</span>elect _ | <span data-count="71931">L</span>ocal_get _
+  | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="3733">D</span>rop | <span data-count="2298">S</span>elect _ | <span data-count="71929">L</span>ocal_get _
   | <span data-count="13200">L</span>ocal_set _ | <span data-count="12211">L</span>ocal_tee _ | <span data-count="553">G</span>lobal_get _ | <span data-count="1029">G</span>lobal_set _ | <span data-count="0">T</span>able_get _
   | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _ | <span data-count="0">T</span>able_fill _
   | <span data-count="0">T</span>able_copy (_, _)
@@ -2409,11 +2409,11 @@ and iter_instr f (i : _ instr) =
   | <span data-count="3612">I</span>_store8 (_, _)
   | <span data-count="6">I</span>_store16 (_, _)
   | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="2">M</span>emory_grow | <span data-count="2">M</span>emory_fill | <span data-count="14">M</span>emory_copy
-  | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="123">U</span>nreachable | <span data-count="1987">B</span>r _ | <span data-count="9205">B</span>r_if _
+  | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="125">U</span>nreachable | <span data-count="1987">B</span>r _ | <span data-count="9205">B</span>r_if _
   | <span data-count="31">B</span>r_table (_, _)
   | <span data-count="1614">R</span>eturn | <span data-count="0">R</span>eturn_call _
   | <span data-count="0">R</span>eturn_call_indirect (_, _)
-  | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="12891">C</span>all _
+  | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="13226">C</span>all _
   | <span data-count="1930">C</span>all_indirect (_, _)
   | <span data-count="0">C</span>all_ref _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
     ()
