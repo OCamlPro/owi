@@ -10,12 +10,9 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     assert (not @@ Prelude.Int32.equal n 0l);
     Ok ()
   in
-  let functions =
-    [ ( "assert"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
-      )
-    ]
-  in
+  let open Concrete.Extern_func in
+  let open Concrete.Extern_func.Syntax in
+  let functions = [ ("assert", Extern_func (i32 ^->. unit, assert_i32)) ] in
   { functions }
 
 (* module name is called "symbolic" to be compatible with code generator *)

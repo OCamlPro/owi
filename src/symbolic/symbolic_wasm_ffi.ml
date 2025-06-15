@@ -149,77 +149,42 @@ end
 type extern_func = Symbolic.Extern_func.extern_func
 
 open M
+open Symbolic.Extern_func
+open Symbolic.Extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
-    [ ( "i8_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
-    ; ( "i16_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i16)
-      )
-    ; ( "i32_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-      )
-    ; ( "i32_symbol_constant"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), symbol_i32_constant) )
-    ; ( "i64_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-      )
-    ; ( "f32_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-      )
-    ; ( "f64_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-      )
-    ; ( "v128_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 V128), symbol_v128)
-      )
-    ; ( "bool_symbol"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-      )
+    [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
+    ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
+    ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    ; ("i32_symbol_constant", Extern_func (i32 ^->. i32, symbol_i32_constant))
+    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+    ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
     ; ( "invisible_bool_symbol"
-      , Symbolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), symbol_invisible_bool) )
-    ; ( "range_symbol"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
-    ; ( "assume"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
-    ; ( "assert"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
-    ; ( "in_replay_mode"
-      , Symbolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), in_replay_mode) )
-    ; ( "print_char"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
-      )
+      , Extern_func (unit ^->. i32, symbol_invisible_bool) )
+    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^->. unit, assume))
+    ; ("assert", Extern_func (i32 ^->. unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
     ; ( "cov_label_set"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
-    ; ( "cov_label_is_covered"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
-    ; ( "open_scope"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R0), open_scope) )
-    ; ( "close_scope"
-      , Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
+      , Extern_func (memory ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+    ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
+    ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
+    ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
     ]
   in
   { Link.functions }
 
 let summaries_extern_module =
   let functions =
-    [ ( "alloc"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
-    ; ( "dealloc"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-    ; ("abort", Symbolic.Extern_func.Extern_func (Func (UArg Res, R0), abort))
-    ; ( "exit"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+    ; ("abort", Extern_func (unit ^->. unit, abort))
+    ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
   { Link.functions }

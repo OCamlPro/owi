@@ -182,57 +182,28 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   end in
   let replay_extern_module =
     let open M in
+    let open Concrete.Extern_func in
+    let open Concrete.Extern_func.Syntax in
     let functions =
-      [ ( "i8_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
-        )
-      ; ( "i16_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i16)
-        )
-      ; ( "i32_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-        )
-      ; ( "i64_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-        )
-      ; ( "f32_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-        )
-      ; ( "f64_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-        )
-      ; ( "v128_symbol"
-        , Concrete_extern_func.Extern_func
-            (Func (UArg Res, R1 V128), symbol_v128) )
-      ; ( "bool_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-        )
-      ; ( "range_symbol"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
-      ; ( "assume"
-        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
-        )
-      ; ( "assert"
-        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
-        )
-      ; ( "in_replay_mode"
-        , Concrete_extern_func.Extern_func
-            (Func (UArg Res, R1 I32), in_replay_mode) )
-      ; ( "print_char"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Res), R0), print_char) )
+      [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
+      ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
+      ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+      ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+      ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+      ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+      ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+      ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+      ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+      ; ("assume", Extern_func (i32 ^->. unit, assume))
+      ; ("assert", Extern_func (i32 ^->. unit, assert'))
+      ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+      ; ("print_char", Extern_func (i32 ^->. unit, print_char))
       ; ( "cov_label_is_covered"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
+        , Extern_func (i32 ^->. i32, cov_label_is_covered) )
       ; ( "cov_label_set"
-        , Concrete_extern_func.Extern_func
-            (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
-      ; ( "open_scope"
-        , Concrete_extern_func.Extern_func
-            (Func (Mem (Arg (I32, Res)), R0), open_scope) )
-      ; ( "close_scope"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
+        , Extern_func (memory ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+      ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
+      ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
       ]
     in
     { Link.functions }
@@ -240,16 +211,13 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
 
   let summaries_extern_module =
     let open M in
+    let open Concrete.Extern_func in
+    let open Concrete.Extern_func.Syntax in
     let functions =
-      [ ( "alloc"
-        , Concrete.Extern_func.Extern_func
-            (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
-      ; ( "dealloc"
-        , Concrete.Extern_func.Extern_func
-            (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-      ; ("abort", Concrete.Extern_func.Extern_func (Func (UArg Res, R0), abort))
-      ; ( "exit"
-        , Concrete.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+      [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+      ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+      ; ("abort", Extern_func (unit ^->. unit, abort))
+      ; ("exit", Extern_func (i32 ^->. unit, exit))
       ]
     in
     { Link.functions }
