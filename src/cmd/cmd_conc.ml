@@ -29,14 +29,9 @@ let simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
   ~srac ~optimize filenames =
   let link_state = Link.empty_state in
   let link_state =
-    Link.extern_module' link_state ~name:"symbolic"
+    Link.extern_module' link_state ~name:"owi"
       ~func_typ:Concolic.Extern_func.extern_type
       Concolic_wasm_ffi.symbolic_extern_module
-  in
-  let link_state =
-    Link.extern_module' link_state ~name:"summaries"
-      ~func_typ:Concolic.Extern_func.extern_type
-      Concolic_wasm_ffi.summaries_extern_module
   in
   let+ link_state, modules_to_run =
     List.fold_left

@@ -19,7 +19,7 @@
                      )
                    )
                  )) } ; { index = 0 ; value = Imported ({
-                   modul: "symbolic"
+                   modul: "owi"
                    name: "i32_symbol"
                    assigned_name:  $i32_symbol
                    desc:  (result i32)}) }]
@@ -60,7 +60,7 @@
                        )
                      )
                    )) } ; { index = 0 ; value = Imported ({
-                     modul: "symbolic"
+                     modul: "owi"
                      name: "i32_symbol"
                      assigned_name:  $i32_symbol
                      desc:  (result i32)}) }]

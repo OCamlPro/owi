@@ -1,5 +1,5 @@
 (module
-  (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
+  (import "owi" "f32_symbol" (func $f32_symbol (result f32)))
 
   (func $start
     (local $x f32)

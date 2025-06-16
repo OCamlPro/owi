@@ -1,6 +1,6 @@
 (module
-  (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
-  (import "symbolic" "assume" (func $owi_assume (param i32)))
+  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
+  (import "owi" "assume" (func $owi_assume (param i32)))
 
   (memory $m 1)
 

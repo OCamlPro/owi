@@ -1,10 +1,10 @@
 (module
-  (import "symbolic" "i32_symbol" (func $i32_symbol (result i32)))
-  (import "symbolic" "i64_symbol" (func $i64_symbol (result i64)))
-  (import "symbolic" "f32_symbol" (func $f32_symbol (result f32)))
-  (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
-  (import "symbolic" "assume" (func $assume_i32 (param i32)))
-  (import "symbolic" "assert" (func $assert_i32 (param i32)))
+  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
+  (import "owi" "i64_symbol" (func $i64_symbol (result i64)))
+  (import "owi" "f32_symbol" (func $f32_symbol (result f32)))
+  (import "owi" "f64_symbol" (func $f64_symbol (result f64)))
+  (import "owi" "assume" (func $assume_i32 (param i32)))
+  (import "owi" "assert" (func $assert_i32 (param i32)))
 
   (global $x (mut i32) (i32.const 0))
   (global $y (mut i64) (i64.const 0))

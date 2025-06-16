@@ -223,13 +223,7 @@ let symbolic_extern_module =
     ; ("assert", Extern_func (i32 ^->. unit, assert'))
     ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
     ; ("print_char", Extern_func (i32 ^->. unit, print_char))
-    ]
-  in
-  { Link.functions }
-
-let summaries_extern_module =
-  let functions =
-    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
     ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
     ; ("abort", Extern_func (unit ^->. unit, abort))
     ]

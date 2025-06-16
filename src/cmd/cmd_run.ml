@@ -15,9 +15,7 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   let functions = [ ("assert", Extern_func (i32 ^->. unit, assert_i32)) ] in
   { functions }
 
-(* module name is called "symbolic" to be compatible with code generator *)
-let link_state =
-  Link.extern_module Link.empty_state ~name:"symbolic" extern_module
+let link_state = Link.extern_module Link.empty_state ~name:"owi" extern_module
 
 let run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize filename =
   let name = None in

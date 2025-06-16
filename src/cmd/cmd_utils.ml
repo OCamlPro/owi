@@ -52,7 +52,7 @@ let dummy_value_of_t = function
 
 let default_symbol_of_t m =
   (* TODO: make this lazy to avoid adding unused imports to the module *)
-  let modul_name = "symbolic" in
+  let modul_name = "owi" in
   let i32_symbol, m =
     let func_name = "i32_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ])) in
