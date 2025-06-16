@@ -204,17 +204,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
         , Extern_func (memory ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
       ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
       ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-      ]
-    in
-    { Link.functions }
-  in
-
-  let summaries_extern_module =
-    let open M in
-    let open Concrete.Extern_func in
-    let open Concrete.Extern_func.Syntax in
-    let functions =
-      [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+      ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
       ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
       ; ("abort", Extern_func (unit ^->. unit, abort))
       ; ("exit", Extern_func (i32 ^->. unit, exit))
@@ -224,10 +214,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   in
 
   let link_state =
-    Link.extern_module Link.empty_state ~name:"symbolic" replay_extern_module
-  in
-  let link_state =
-    Link.extern_module link_state ~name:"summaries" summaries_extern_module
+    Link.extern_module Link.empty_state ~name:"owi" replay_extern_module
   in
 
   let* m =

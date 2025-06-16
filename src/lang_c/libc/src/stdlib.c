@@ -11,13 +11,13 @@
 #define ldbltype double
 #endif
 
-__attribute__((import_module("summaries"), import_name("abort"))) void owi_abort(void);
+__attribute__((import_module("owi"), import_name("abort"))) void owi_abort(void);
 
 void abort(void) {
   owi_abort();
 }
 
-__attribute__((import_module("summaries"), import_name("exit"))) void owi_exit(int);
+__attribute__((import_module("owi"), import_name("exit"))) void owi_exit(int);
 
 void exit(int n) {
   owi_exit(n);

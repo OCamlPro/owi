@@ -126,7 +126,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_owi_assert =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "assert"
          ; assigned_name = Some "assert"
          ; desc = Types.Bt_raw (None, ([ (None, Types.Num_type I32) ], []))
@@ -244,7 +244,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_i32_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "i32_symbol"
          ; assigned_name = Some "i32_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I32 ]))
@@ -255,7 +255,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_i64_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "i64_symbol"
          ; assigned_name = Some "i64_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I64 ]))
@@ -266,7 +266,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_f32_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "f32_symbol"
          ; assigned_name = Some "f32_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F32 ]))
@@ -277,7 +277,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_f64_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "f64_symbol"
          ; assigned_name = Some "f64_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F64 ]))

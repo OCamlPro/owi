@@ -10,8 +10,8 @@
 
 void abort(void);
 void exit(int);
-__attribute__((import_module("summaries"), import_name("alloc"))) void *owi_malloc(void *, unsigned int);
-__attribute__((import_module("summaries"), import_name("dealloc"))) void *owi_free(void *);
+__attribute__((import_module("owi"), import_name("alloc"))) void *owi_malloc(void *, unsigned int);
+__attribute__((import_module("owi"), import_name("dealloc"))) void *owi_free(void *);
 
 void *malloc(size_t size);
 void free(void *ptr);

@@ -1,7 +1,7 @@
 ;; Loads symbolic memory in various iterations
 (module
-  (import "symbolic" "i32_symbol" (func $i32 (result i32)))
-  (import "symbolic" "assert" (func $assert (param i32)))
+  (import "owi" "i32_symbol" (func $i32 (result i32)))
+  (import "owi" "assert" (func $assert (param i32)))
 
   (func $test_globals (param i32)
         (global.get 0)

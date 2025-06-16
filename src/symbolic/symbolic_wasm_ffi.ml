@@ -175,13 +175,7 @@ let symbolic_extern_module =
     ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
     ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
     ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-    ]
-  in
-  { Link.functions }
-
-let summaries_extern_module =
-  let functions =
-    [ ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
     ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
     ; ("abort", Extern_func (unit ^->. unit, abort))
     ; ("exit", Extern_func (i32 ^->. unit, exit))

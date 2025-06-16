@@ -55,7 +55,7 @@ int klee_int(const char *name) {
 
 void klee_silent_exit(int status) { exit(status); }
 
-__attribute__((import_module("summaries"), import_name("abort"))) void abort(void);
+__attribute__((import_module("owi"), import_name("abort"))) void abort(void);
 void klee_abort() { abort(); }
 void klee_report_error(const char *file, int line, const char *message,
                        const char *suffix) {

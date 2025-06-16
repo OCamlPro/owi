@@ -1,9 +1,9 @@
 ;; sign(y)*abs(x) == copy_sign(x,y)
 
 (module
-  (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
-  (import "symbolic" "assert" (func $assert_i32 (param i32)))
-  (import "symbolic" "assume" (func $assume_i32 (param i32)))
+  (import "owi" "f64_symbol" (func $f64_symbol (result f64)))
+  (import "owi" "assert" (func $assert_i32 (param i32)))
+  (import "owi" "assume" (func $assume_i32 (param i32)))
 
   (func $start
     (local $x f64)
@@ -21,7 +21,7 @@
         (f64.eq (local.get $y) (local.get $y))
     )
 
-    (if  (i64.eqz (i64.shr_u (i64.reinterpret_f64 (local.get  $y)) (i64.const 63))) 
+    (if  (i64.eqz (i64.shr_u (i64.reinterpret_f64 (local.get  $y)) (i64.const 63)))
       (then (local.set $sign_y (f64.const 1)) )
       (else (local.set $sign_y (f64.const -1)))
     )

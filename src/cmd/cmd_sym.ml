@@ -14,12 +14,8 @@ type fail_mode =
 
 let link_symbolic_modules link_state =
   let func_typ = Symbolic.Extern_func.extern_type in
-  let link_state =
-    Link.extern_module' link_state ~name:"symbolic" ~func_typ
-      Symbolic_wasm_ffi.symbolic_extern_module
-  in
-  Link.extern_module' link_state ~name:"summaries" ~func_typ
-    Symbolic_wasm_ffi.summaries_extern_module
+  Link.extern_module' link_state ~name:"owi" ~func_typ
+    Symbolic_wasm_ffi.symbolic_extern_module
 
 let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   filename =

@@ -14,7 +14,7 @@
 
 extern void *malloc(size_t size);
 extern void *calloc(size_t, size_t);
-__attribute__((import_module("summaries"), import_name("dealloc"))) void *free(void *);
+__attribute__((import_module("owi"), import_name("dealloc"))) void *free(void *);
 
 /* Memory model */
 

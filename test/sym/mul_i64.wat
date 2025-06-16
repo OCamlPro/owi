@@ -1,7 +1,7 @@
 (module
-  (import "symbolic" "i64_symbol" (func $i64_symbol (result i64)))
-  (import "symbolic" "assume" (func $assume (param i32)))
-  (import "symbolic" "assert" (func $assert (param i32)))
+  (import "owi" "i64_symbol" (func $i64_symbol (result i64)))
+  (import "owi" "assume" (func $assume (param i32)))
+  (import "owi" "assert" (func $assert (param i32)))
 
   (func $start
     (local $x i64)
