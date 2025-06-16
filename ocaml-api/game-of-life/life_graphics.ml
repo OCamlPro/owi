@@ -43,29 +43,17 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     Ok ()
   in
   (* we need to describe their types *)
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
   let functions =
-    [ ( "height"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), height)
-      )
-    ; ( "width"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R1 I32), width)
-      )
-    ; ( "sleep"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), sleep) )
-    ; ( "newline"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), newline) )
-    ; ( "cell_print"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), cell_print)
-      )
-    ; ( "clear_screen"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), clear_screen) )
-    ; ( "rand_val"
-      , Concrete_extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), rand_val) )
-    ; ( "init_window"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), init_window)
-      )
+    [ ("height", Extern_func (i32 ^->. i32, height))
+    ; ("width", Extern_func (i32 ^->. i32, width))
+    ; ("sleep", Extern_func (i32 ^->. unit, sleep))
+    ; ("newline", Extern_func (i32 ^->. unit, newline))
+    ; ("cell_print", Extern_func (i32 ^->. unit, cell_print))
+    ; ("clear_screen", Extern_func (i32 ^->. unit, clear_screen))
+    ; ("rand_val", Extern_func (i32 ^->. i32, rand_val))
+    ; ("init_window", Extern_func (i32 ^->. unit, init_window))
     ]
   in
   { functions }
