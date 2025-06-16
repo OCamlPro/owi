@@ -219,7 +219,7 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   let log_path =
     Fpath.(parent workspace / "queries.jsonl.gz") |> Fpath.to_string
   in
-  Smtml.Tmp_log_path.init log_path;
+  Smtml.Tmp_log_path.init log_path (Fmt.to_to_string Smtml.Solver_type.pp solver);
   Stdlib__Domain.at_exit (fun () -> Smtml.Tmp_log_path.close ());
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
