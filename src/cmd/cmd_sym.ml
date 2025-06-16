@@ -45,32 +45,47 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         | `Assoc fields -> `Assoc (("labels", `List labels_json) :: fields)
         | _ -> json
       in
+      let json =
+        if with_breadcrumbs then
+          let crumbs =
+            List.map (fun crumb -> `Int crumb) (List.rev breadcrumbs)
+          in
+          match json with
+          | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
+          | _ -> json
+        else json
+      in
       Yojson.Basic.pretty_print fmt json
     | Scfg ->
       let scfg = Symbol_scope.to_scfg ~no_value model scoped_values in
       let model = Scfg.Query.get_dir_exn "model" scfg in
       let lbls =
-        List.map
-          (fun (id, lbl_name) ->
-            { Scfg.Types.name = "label"
-            ; params = [ string_of_int id; lbl_name ]
-            ; children = []
-            } )
-          labels
+        { Scfg.Types.name = "labels"
+        ; params = []
+        ; children =
+            List.map
+              (fun (id, lbl_name) ->
+                { Scfg.Types.name = "label"
+                ; params = [ string_of_int id; lbl_name ]
+                ; children = []
+                } )
+              labels
+        }
       in
-      let children =
+      let bcrumbs =
         if with_breadcrumbs then
-          let bcrumbs =
-            [ { Scfg.Types.name = "breadcrumbs"
-              ; params = List.map string_of_int (List.rev breadcrumbs)
-              ; children = []
-              }
-            ]
-          in
-          model.children @ lbls @ bcrumbs
-        else model.children @ lbls
+          [ { Scfg.Types.name = "breadcrumbs"
+            ; params = List.map string_of_int (List.rev breadcrumbs)
+            ; children = []
+            }
+          ]
+        else []
       in
-      Scfg.Pp.directive fmt { model with children }
+      let ret =
+        model
+        :: (if List.length lbls.children > 0 then lbls :: bcrumbs else bcrumbs)
+      in
+      Scfg.Pp.config fmt ret
   in
   let to_file path model labels breadcrumbs symbol_scopes =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
