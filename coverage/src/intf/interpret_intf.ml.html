@@ -228,6 +228,11 @@
 <a id="L204"></a><span > </span>
 <a id="L205"></a><span > </span>
 <a id="L206"></a><span > </span>
+<a id="L207"></a><span > </span>
+<a id="L208"></a><span > </span>
+<a id="L209"></a><span > </span>
+<a id="L210"></a><span > </span>
+<a id="L211"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -438,6 +443,11 @@
 <a href="#L204">204</a>
 <a href="#L205">205</a>
 <a href="#L206">206</a>
+<a href="#L207">207</a>
+<a href="#L208">208</a>
+<a href="#L209">209</a>
+<a href="#L210">210</a>
+<a href="#L211">211</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -601,7 +611,12 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul : env Env_id.collection -&gt; module_to_run -&gt; unit choice
+  val modul :
+       timeout:float option
+    -&gt; timeout_instr:int option
+    -&gt; env Env_id.collection
+    -&gt; module_to_run
+    -&gt; unit choice
 
   type value
 

@@ -1256,7 +1256,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
   <span data-count="3">l</span>et m = Symbolic.convert_module_to_run m in
 
-  <span data-count="3">I</span>nterpret.Symbolic.modul link_state.envs m
+  <span data-count="3">I</span>nterpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 module String_set = Set.Make (String)
 

@@ -407,15 +407,15 @@ let pp_assignments ~no_value fmt assignments =
   Fmt.pf fmt "(model@\n  %a)" (Fmt.vbo<span data-count="0">x</span> (Fmt.lis<span data-count="0">t</span> pp_v)) assignments
 
 let pc_elt_to_expr = function
-  | <span data-count="4185">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2201">c</span> else <span data-count="1984">S</span>mtml.Expr.Bool.no<span data-count="1984">t</span> c)
+  | <span data-count="4272">S</span>elect (v, c) -&gt; Some (if v then <span data-count="2244">c</span> else <span data-count="2028">S</span>mtml.Expr.Bool.no<span data-count="2028">t</span> c)
   | <span data-count="67">S</span>elect_i32 (n, c) -&gt; Some Smtml.Expr.Bitv.I32.(c = <span data-count="67">v</span> n)
-  | <span data-count="5302">A</span>ssume c -&gt; Some c
+  | <span data-count="5308">A</span>ssume c -&gt; Some c
   | <span data-count="79">A</span>ssert _ -&gt; None
   | EltExplicitStop -&gt;
     (* Should never be reached because no model should be requested if we stopped *)
     assert false
 
-let pc_to_exprs pc = <span data-count="857">L</span>ist.filter_map pc_elt_to_expr pc |&gt; <span data-count="857">S</span>mtml.Expr.Set.of_list
+let pc_to_exprs pc = <span data-count="870">L</span>ist.filter_map pc_elt_to_expr pc |&gt; <span data-count="870">S</span>mtml.Expr.Set.of_list
 
 type shared_thread_info =
   { memories : Symbolic_memory.collection
@@ -432,32 +432,32 @@ type thread =
   }
 
 let init_thread preallocated_values shared =
-  <span data-count="522">{</span> symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
+  <span data-count="530">{</span> symbols = 0; pc = []; symbols_value = []; preallocated_values; shared }
 
 type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="1314214">M</span> (fun t -&gt; <span data-count="1314214">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="1915268">M</span> (fun t -&gt; <span data-count="1915268">(</span>Ok v, t)) [@@inline]
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="3432762">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="4658704">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="1717056">M</span>
+  <span data-count="2330027">M</span>
     (fun init_s -&gt;
-      <span data-count="1717056">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="1717056">m</span>atch v_final with
-      | <span data-count="1715706">O</span>k v_final -&gt; run (<span data-count="1715706">f</span> v_final) tmp_st
+      <span data-count="2330027">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="2330027">m</span>atch v_final with
+      | <span data-count="2328677">O</span>k v_final -&gt; run (<span data-count="2328677">f</span> v_final) tmp_st
       | <span data-count="1350">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 
 let ( let* ) = bind
 
 let map v f =
-  <span data-count="111593">l</span>et* v in
-  <span data-count="110695">r</span>eturn (<span data-count="110695">f</span> v)
+  <span data-count="114730">l</span>et* v in
+  <span data-count="113832">r</span>eturn (<span data-count="113832">f</span> v)
 [@@inline]
 
 let ( let+ ) = map
@@ -470,22 +470,22 @@ let abort =
 let add_pc ((_c, s) : Concolic_value.bool) =
   <span data-count="0">M</span> (fun st -&gt; <span data-count="0">(</span>Ok (), { st with pc = Assume s :: st.pc }))
 
-let add_pc_to_thread (st : thread) c = <span data-count="4187">{</span> st with pc = c :: st.pc }
+let add_pc_to_thread (st : thread) c = <span data-count="4276">{</span> st with pc = c :: st.pc }
 
 let no_choice e =
-  <span data-count="228675">l</span>et v = Smtml.Expr.simplify e in
-  <span data-count="228675">n</span>ot (Smtml.Expr.is_symboli<span data-count="228675">c</span> v)
+  <span data-count="235575">l</span>et v = Smtml.Expr.simplify e in
+  <span data-count="235575">n</span>ot (Smtml.Expr.is_symboli<span data-count="235575">c</span> v)
 
 let select ((c, s) : Concolic_value.bool) =
-  <span data-count="144259">l</span>et cond = Select (c, s) in
+  <span data-count="148610">l</span>et cond = Select (c, s) in
   let no_choice = no_choice s in
-  <span data-count="144259">M</span> (fun st -&gt; <span data-count="144259">(</span>Ok c, if no_choice then <span data-count="142105">s</span>t else <span data-count="2154">a</span>dd_pc_to_threa<span data-count="2154">d</span> st cond))
+  <span data-count="148610">M</span> (fun st -&gt; <span data-count="148610">(</span>Ok c, if no_choice then <span data-count="146391">s</span>t else <span data-count="2219">a</span>dd_pc_to_threa<span data-count="2219">d</span> st cond))
 [@@inline]
 
 let select_i32 ((c, s) : Concolic_value.int32) =
-  <span data-count="83315">l</span>et expr = Select_i32 (c, s) in
+  <span data-count="85840">l</span>et expr = Select_i32 (c, s) in
   let no_choice = no_choice s in
-  <span data-count="83315">M</span> (fun st -&gt; <span data-count="83315">(</span>Ok c, if no_choice then <span data-count="83232">s</span>t else <span data-count="83">a</span>dd_pc_to_threa<span data-count="83">d</span> st expr))
+  <span data-count="85840">M</span> (fun st -&gt; <span data-count="85840">(</span>Ok c, if no_choice then <span data-count="85757">s</span>t else <span data-count="83">a</span>dd_pc_to_threa<span data-count="83">d</span> st expr))
 [@@inline]
 
 let assume ((c, s) : Concolic_value.bool) =
@@ -494,30 +494,30 @@ let assume ((c, s) : Concolic_value.bool) =
   else <span data-count="219">M</span> (fun st -&gt; <span data-count="219">(</span>Error (Assume_fail s), st))
 
 let assertion ((c, s) : Concolic_value.bool) =
-  <span data-count="1105">l</span>et assert_pc = Assert s in
+  <span data-count="1129">l</span>et assert_pc = Assert s in
   if c then
-    <span data-count="1101">l</span>et no_choice = no_choice s in
-    <span data-count="1101">M</span>
+    <span data-count="1125">l</span>et no_choice = no_choice s in
+    <span data-count="1125">M</span>
       (fun st -&gt;
-        <span data-count="1101">(</span>Ok (), if no_choice then <span data-count="899">s</span>t else <span data-count="202">a</span>dd_pc_to_threa<span data-count="202">d</span> st assert_pc) )
+        <span data-count="1125">(</span>Ok (), if no_choice then <span data-count="899">s</span>t else <span data-count="226">a</span>dd_pc_to_threa<span data-count="226">d</span> st assert_pc) )
   else <span data-count="4">M</span> (fun st -&gt; <span data-count="4">(</span>Error Assert_fail, st))
 
 let trap t = <span data-count="2">M</span> (fun th -&gt; <span data-count="2">(</span>Error (Trap t), th))
 
-let with_thread f = <span data-count="168231">M</span> (fun st -&gt; <span data-count="168231">(</span>Ok (<span data-count="168231">f</span> st), st))
+let with_thread f = <span data-count="173224">M</span> (fun st -&gt; <span data-count="173224">(</span>Ok (<span data-count="173224">f</span> st), st))
 
 let with_new_invisible_symbol (_ty : Smtml.Ty.t) _fn =
   <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "Not implemented in concolic mode");
   <span data-count="0">a</span>ssert false
 
 let with_new_symbol ty f =
-  <span data-count="3135">M</span>
+  <span data-count="3167">M</span>
     (fun st -&gt;
-      <span data-count="3135">l</span>et id = st.symbols + 1 in
-      let sym = Fmt.kstr (Smtml.Symbol.mak<span data-count="3135">e</span> ty) "symbol_%d" id in
-      <span data-count="3135">l</span>et value = Hashtbl.find_opt st.preallocated_values sym in
-      <span data-count="3135">l</span>et concrete, v = f sym value in
-      <span data-count="3135">l</span>et st =
+      <span data-count="3167">l</span>et id = st.symbols + 1 in
+      let sym = Fmt.kstr (Smtml.Symbol.mak<span data-count="3167">e</span> ty) "symbol_%d" id in
+      <span data-count="3167">l</span>et value = Hashtbl.find_opt st.preallocated_values sym in
+      <span data-count="3167">l</span>et concrete, v = f sym value in
+      <span data-count="3167">l</span>et st =
         { st with
           symbols = st.symbols + 1
         ; symbols_value = (sym, concrete) :: st.symbols_value
@@ -526,13 +526,13 @@ let with_new_symbol ty f =
       (Ok v, st) )
 
 let run preallocated_values (M v) : _ run_result =
-  <span data-count="522">l</span>et shared =
-    { memories = Symbolic_memory.ini<span data-count="522">t</span> ()
-    ; tables = Symbolic_table.ini<span data-count="522">t</span> ()
-    ; globals = Symbolic_global.ini<span data-count="522">t</span> ()
+  <span data-count="530">l</span>et shared =
+    { memories = Symbolic_memory.ini<span data-count="530">t</span> ()
+    ; tables = Symbolic_table.ini<span data-count="530">t</span> ()
+    ; globals = Symbolic_global.ini<span data-count="530">t</span> ()
     }
   in
-  v (init_threa<span data-count="522">d</span> preallocated_values shared)
+  v (init_threa<span data-count="530">d</span> preallocated_values shared)
 
 let run' t : _ run_result =
   <span data-count="0">l</span>et preallocated_values = Hashtbl.create 16 in
