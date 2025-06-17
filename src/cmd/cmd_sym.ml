@@ -19,7 +19,7 @@ let link_symbolic_modules link_state =
 
 let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   filename =
-  let* m = Compile.File.until_binary_validate ~unsafe ~rac ~srac filename in
+  let* m = Compile.File.until_validate ~unsafe ~rac ~srac filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state = link_symbolic_modules Link.empty_state in
 

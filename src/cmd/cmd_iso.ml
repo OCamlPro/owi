@@ -341,7 +341,7 @@ let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
   Logs.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
 
   let compile ~unsafe file =
-    Compile.File.until_binary_validate ~unsafe ~rac:false ~srac:false file
+    Compile.File.until_validate ~unsafe ~rac:false ~srac:false file
   in
 
   Logs.info (fun m -> m "Compiling %a" Fpath.pp file1);
