@@ -79,7 +79,10 @@ let module_to_run, link_state =
 
 (* let's run it ! First module to be interpreted *)
 let () =
-  match Interpret.Concrete.modul link_state.envs module_to_run with
+  match
+    Interpret.Concrete.modul link_state.envs module_to_run ~timeout:None
+      ~timeout_instr:None
+  with
   | Error _ -> assert false
   | Ok () -> ()
 
@@ -100,6 +103,9 @@ let module_to_run, link_state =
 
 (* let's run it ! it will animate the game of life in a graphics window *)
 let () =
-  match Interpret.Concrete.modul link_state.envs module_to_run with
+  match
+    Interpret.Concrete.modul link_state.envs module_to_run ~timeout:None
+      ~timeout_instr:None
+  with
   | Error _ -> assert false
   | Ok () -> ()
