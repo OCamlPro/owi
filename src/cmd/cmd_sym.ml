@@ -48,7 +48,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
       let json =
         if with_breadcrumbs then
           let crumbs =
-            List.map (fun crumb -> `Int crumb) (List.rev breadcrumbs)
+            List.rev_map (fun crumb -> `Int crumb) (List.rev breadcrumbs)
           in
           match json with
           | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
@@ -112,7 +112,9 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
     match model_out_file with
     | Some path -> to_file path model labels breadcrumbs symbol_scopes
     | None -> begin
-      Logs.app (fun m -> m "%a" pp (model, labels, breadcrumbs, symbol_scopes));
+      Logs.app (fun m ->
+        let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
+        fmt pp (model, labels, breadcrumbs, symbol_scopes) );
       Ok ()
     end
   in

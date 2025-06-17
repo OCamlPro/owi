@@ -5,6 +5,7 @@ add binop:
     symbol symbol_0 i32
     symbol symbol_1 i32
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym add_i64.wat --no-value --deterministic-result-order
@@ -13,6 +14,7 @@ add binop:
     symbol symbol_0 i64
     symbol symbol_1 i64
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym add_f32.wat --no-value --deterministic-result-order
@@ -22,6 +24,7 @@ add binop:
     symbol symbol_0 f32
     symbol symbol_1 f32
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym add_f64.wat --no-value --deterministic-result-order
@@ -31,5 +34,6 @@ add binop:
     symbol symbol_0 f64
     symbol symbol_1 f64
   }
+  
   owi: [ERROR] Reached problem!
   [13]

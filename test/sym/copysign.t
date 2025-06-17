@@ -6,6 +6,7 @@ float copysign:
     symbol symbol_0 f32
     symbol symbol_1 f32
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym copysign_f64.wat --deterministic-result-order --no-value
@@ -15,5 +16,6 @@ float copysign:
     symbol symbol_0 f64
     symbol symbol_1 f64
   }
+  
   owi: [ERROR] Reached problem!
   [13]

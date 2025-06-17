@@ -6,6 +6,7 @@ memory stuff:
   model {
     symbol symbol_0 i32
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym store.wat --no-value --deterministic-result-order
@@ -14,6 +15,7 @@ memory stuff:
   model {
     symbol symbol_0 i32
   }
+  
   owi: [ERROR] Reached problem!
   [13]
   $ owi sym memory2.wat --deterministic-result-order
