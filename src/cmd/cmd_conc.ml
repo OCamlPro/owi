@@ -13,8 +13,7 @@ let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize link_state m =
   let* m =
     match m with
-    | Kind.Wat _ | Wasm _ ->
-      Compile.Any.until_binary_validate ~unsafe ~rac ~srac m
+    | Kind.Wat _ | Wasm _ -> Compile.Any.until_validate ~unsafe ~rac ~srac m
     | Wast _ -> Fmt.error_msg "can't run concolic interpreter on a script"
     | Ocaml _ -> assert false
   in

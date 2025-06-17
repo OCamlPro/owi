@@ -218,7 +218,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   in
 
   let* m =
-    Compile.File.until_binary_validate ~rac:false ~srac:false ~unsafe filename
+    Compile.File.until_validate ~rac:false ~srac:false ~unsafe filename
   in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let* m, link_state =
