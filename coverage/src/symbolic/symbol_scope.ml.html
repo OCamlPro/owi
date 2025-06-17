@@ -607,7 +607,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="365">s</span> exprs)
 
-let of_symbol sym = <span data-count="924">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="818">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="6">m</span>atch token with
@@ -619,8 +619,8 @@ let pp fmt tokens =
   <span data-count="4">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1519">L</span>ist.filter_map
-    (function <span data-count="2838">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
+  <span data-count="1412">L</span>ist.filter_map
+    (function <span data-count="2721">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym =

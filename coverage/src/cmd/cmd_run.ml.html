@@ -39,21 +39,19 @@
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -88,8 +86,6 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 <a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -108,9 +104,7 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   let functions = [ ("assert", Extern_func (i32 ^-&gt;<span data-count="1019">.</span> unit, assert_i32)) ] in
   { functions }
 
-(* module name is called "symbolic" to be compatible with code generator *)
-let link_state =
-  Link.extern_modul<span data-count="1019">e</span> Link.empty_state ~name:"symbolic" extern_module
+let link_state = Link.extern_modul<span data-count="1019">e</span> Link.empty_state ~name:"owi" extern_module
 
 let run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize filename =
   <span data-count="39">l</span>et name = None in

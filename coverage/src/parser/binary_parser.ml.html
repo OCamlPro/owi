@@ -2864,16 +2864,16 @@ end = struct
     <span data-count="1741">{</span> bytes = str; pt = 0; size }
 
   let sub ~pos ~len input =
-    <span data-count="1091619">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="1091619">l</span>en &lt;= input.size - pos then
-      <span data-count="1091619">O</span>k { input with pt = input.pt + pos; size = len }
+    <span data-count="1083017">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="1083017">l</span>en &lt;= input.size - pos then
+      <span data-count="1083017">O</span>k { input with pt = input.pt + pos; size = len }
     else <span data-count="0">p</span>arse_fail "length out of bounds in section"
 
-  let sub_suffix pos input = <span data-count="1078209">s</span>ub ~pos ~len:(input.size - pos) input
+  let sub_suffix pos input = <span data-count="1069607">s</span>ub ~pos ~len:(input.size - pos) input
 
   let sub_prefix len input = <span data-count="12179">s</span>ub ~pos:0 ~len input
 
   let get n input =
-    <span data-count="1076764">i</span>f n &lt; input.size then <span data-count="1075209">S</span>ome (String.ge<span data-count="1075209">t</span> input.bytes (input.pt + n))
+    <span data-count="1068162">i</span>f n &lt; input.size then <span data-count="1066607">S</span>ome (String.ge<span data-count="1066607">t</span> input.bytes (input.pt + n))
     else <span data-count="1555">N</span>one
 
   let as_string input = <span data-count="12">S</span>tring.sub input.bytes input.pt input.size
@@ -2885,11 +2885,11 @@ let string_of_char_list char_list =
   <span data-count="7020">B</span>uffer.contents buf
 
 let read_byte ~msg input =
-  <span data-count="1057468">m</span>atch Input.get 0 input with
+  <span data-count="1048866">m</span>atch Input.get 0 input with
   | <span data-count="6">N</span>one -&gt; parse_fail "%s" msg
-  | <span data-count="1057462">S</span>ome c -&gt;
-    let+ next_input = Input.sub_suffi<span data-count="1057462">x</span> 1 input in
-    <span data-count="1057462">(</span>c, next_input)
+  | <span data-count="1048860">S</span>ome c -&gt;
+    let+ next_input = Input.sub_suffi<span data-count="1048860">x</span> 1 input in
+    <span data-count="1048860">(</span>c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
 let read_UN n input =
@@ -3005,15 +3005,15 @@ let read_F64 input =
 let vector parse_elt input =
   <span data-count="22592">l</span>et* nb_elt, input = read_U3<span data-count="22592">2</span> input in
   <span data-count="22564">l</span>et rec loop loop_id input acc =
-    <span data-count="106611">i</span>f nb_elt = loop_id then <span data-count="21732">O</span>k (List.re<span data-count="21732">v</span> acc, input)
+    <span data-count="98009">i</span>f nb_elt = loop_id then <span data-count="21732">O</span>k (List.re<span data-count="21732">v</span> acc, input)
     else
-      <span data-count="84879">l</span>et* acc_elt, input = parse_el<span data-count="84879">t</span> loop_id input in
-      <span data-count="84047">l</span>et acc = acc_elt :: acc in
+      <span data-count="76277">l</span>et* acc_elt, input = parse_el<span data-count="76277">t</span> loop_id input in
+      <span data-count="75445">l</span>et acc = acc_elt :: acc in
       loop (loop_id + 1) input acc
   in
   loop 0 input []
 
-let vector_no_id f input = <span data-count="22066">v</span>ector (fun _id -&gt; <span data-count="82540">f</span>) input
+let vector_no_id f input = <span data-count="22066">v</span>ector (fun _id -&gt; <span data-count="73938">f</span>) input
 
 let check_end_opcode ?unexpected_eoi_msg input =
   <span data-count="16155">l</span>et msg = Option.value unexpected_eoi_msg ~default:"END opcode expected" in
