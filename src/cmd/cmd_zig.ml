@@ -76,12 +76,13 @@ let cmd ~workers ~includes ~files ~unsafe ~optimize ~no_stop_at_failure
 *)
     includes
   in
-  let* modul = compile ~workspace ~entry_point ~includes ~out_file files in
-  let files = [ modul ] in
+  let* source_file =
+    compile ~workspace ~entry_point ~includes ~out_file files
+  in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
