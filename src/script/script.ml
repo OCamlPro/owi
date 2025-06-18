@@ -38,6 +38,7 @@ let check_error_result expected = function
   | Ok _whatever -> Error (`Did_not_fail_but_expected expected)
   | Error got -> check_error ~expected ~got
 
+(* TODO: move this somewhere else *)
 let load_func_from_module ls mod_id f_name =
   let* exports, env_id =
     match mod_id with
