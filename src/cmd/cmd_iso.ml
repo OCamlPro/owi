@@ -81,7 +81,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         match List.length pt with 1 -> false | _n -> true ) )
   in
 
-  let link_state = Cmd_sym.link_symbolic_modules Link.empty_state in
+  let link_state =
+    let func_typ = Symbolic.Extern_func.extern_type in
+    Link.extern_module' Link.empty_state ~name:"owi" ~func_typ
+      Symbolic_wasm_ffi.symbolic_extern_module
+  in
   let link_state =
     Link.extern_module' link_state ~name:"fuzzing-support"
       ~func_typ:Symbolic.Extern_func.extern_type

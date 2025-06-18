@@ -7,10 +7,6 @@ type fail_mode =
   | Assertion_only
   | Both
 
-val link_symbolic_modules :
-     Symbolic.Extern_func.extern_func Link.state
-  -> Symbolic.Extern_func.extern_func Link.state
-
 val handle_result :
      workers:int
   -> no_stop_at_failure:bool
