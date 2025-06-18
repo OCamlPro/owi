@@ -224,13 +224,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
-  let* () =
-    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
-  in
-  Ok ()
+  Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
-let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
-  ~invoke_with_symbols =
+let parse_model replay_file =
   let* parse_fn =
     let ext = Fpath.get_ext replay_file in
     match String.lowercase_ascii ext with
@@ -239,37 +235,39 @@ let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
     | _ -> Error (`Unsupported_file_extension ext)
   in
   let* file_content = Bos.OS.File.read replay_file in
-  let* model =
-    match parse_fn file_content with
-    | Error (`Msg msg) -> Error (`Invalid_model msg)
-    | Error err -> Error err
-    | Ok model ->
-      let bindings = Smtml.Model.get_bindings model in
-      let+ model =
-        list_map
-          (fun (_sym, v) ->
-            match v with
-            | Smtml.Value.False -> Ok (V.I32 0l)
-            | True -> Ok (V.I32 1l)
-            | Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
-              Ok (V.I32 (Smtml.Bitvector.to_int32 bv))
-            | Bitv bv when Smtml.Bitvector.numbits bv <= 64 ->
-              Ok (V.I64 (Smtml.Bitvector.to_int64 bv))
-            | Num (F32 n) -> Ok (V.F32 (Float32.of_bits n))
-            | Num (F64 n) -> Ok (V.F64 (Float64.of_bits n))
-            | Bitv bv ->
-              Error
-                (`Invalid_model
-                   (Fmt.str "can not handle bitvectors of size %d"
-                      (Smtml.Bitvector.numbits bv) ) )
-            | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing ->
-              Error
-                (`Invalid_model
-                   (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
-          bindings
-      in
-      Array.of_list model
-  in
+  match parse_fn file_content with
+  | Error (`Msg msg) -> Error (`Invalid_model msg)
+  | Error _ as e -> e
+  | Ok model ->
+    let bindings = Smtml.Model.get_bindings model in
+    let+ model =
+      list_map
+        (fun (_sym, v) ->
+          match v with
+          | Smtml.Value.False -> Ok (V.I32 0l)
+          | True -> Ok (V.I32 1l)
+          | Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
+            Ok (V.I32 (Smtml.Bitvector.to_int32 bv))
+          | Bitv bv when Smtml.Bitvector.numbits bv <= 64 ->
+            Ok (V.I64 (Smtml.Bitvector.to_int64 bv))
+          | Num (F32 n) -> Ok (V.F32 (Float32.of_bits n))
+          | Num (F64 n) -> Ok (V.F64 (Float64.of_bits n))
+          | Bitv bv ->
+            Error
+              (`Invalid_model
+                 (Fmt.str "can not handle bitvectors of size %d"
+                    (Smtml.Bitvector.numbits bv) ) )
+          | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing ->
+            Error
+              (`Invalid_model
+                 (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
+        bindings
+    in
+    Array.of_list model
+
+let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
+  ~invoke_with_symbols =
+  let* model = parse_model replay_file in
   let+ () =
     run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
       model

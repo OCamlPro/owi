@@ -6,11 +6,11 @@ NAME
        owi-sym - Run the symbolic interpreter
 
 SYNOPSIS
-       owi sym [OPTION]… FILE…
+       owi sym [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
-           source files
+           source file
 
 OPTIONS
        --color=WHEN (absent=auto)

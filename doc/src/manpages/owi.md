@@ -15,7 +15,7 @@ COMMANDS
        c++ [OPTION]… FILE…
            Compile a C++ file to Wasm and run the symbolic interpreter on it
 
-       conc [OPTION]… FILE…
+       conc [OPTION]… FILE
            Run the concolic interpreter
 
        fmt [OPTION]… FILE…
@@ -36,7 +36,7 @@ COMMANDS
            Replay a module containing symbols with concrete values in a
            replay file containing a model
 
-       run [OPTION]… FILE…
+       run [OPTION]… FILE
            Run the concrete interpreter
 
        rust [OPTION]… FILE…
@@ -45,7 +45,7 @@ COMMANDS
        script [OPTION]… FILE…
            Run a reference test suite script
 
-       sym [OPTION]… FILE…
+       sym [OPTION]… FILE
            Run the symbolic interpreter
 
        validate [OPTION]… FILE…

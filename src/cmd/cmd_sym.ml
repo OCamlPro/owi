@@ -214,9 +214,9 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   Logs.app (fun m -> m "All OK!")
 
 (* NB: This function propagates potential errors (Result.err) occurring
-         during evaluation (OS, syntax error, etc.), except for Trap and Assert,
-         which are handled here. Most of the computations are done in the Result
-         monad, hence the let*. *)
+             during evaluation (OS, syntax error, etc.), except for Trap and Assert,
+             which are handled here. Most of the computations are done in the Result
+             monad, hence the let*. *)
 let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~source_file ~model_format ~entry_point

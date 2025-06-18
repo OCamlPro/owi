@@ -6,11 +6,11 @@ NAME
        owi-conc - Run the concolic interpreter
 
 SYNOPSIS
-       owi conc [OPTION]… FILE…
+       owi conc [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
-           source files
+           source file
 
 OPTIONS
        --color=WHEN (absent=auto)
