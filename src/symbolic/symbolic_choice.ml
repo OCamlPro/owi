@@ -16,6 +16,8 @@ module Prio = struct
   type t = Default
 
   let default = Default
+
+  let to_int = function Default -> 1
 end
 
 module CoreImpl = struct
@@ -83,14 +85,14 @@ module CoreImpl = struct
       let work_queue = Wq.make () in
       { work_queue }
 
-    let add_init_task sched task = Wq.push task sched.work_queue
+    let add_init_task sched task = Wq.push task 0 sched.work_queue
 
     let work wls sched callback =
-      let rec handle_status (t : _ Schedulable.status) (write_back : ('a, 'b) Schedulable.t -> Prio.t -> unit) =
+      let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
         | Now x -> callback x
-        | Yield (prio, f) -> write_back f prio
+        | Yield (prio, f) -> write_back f (Prio.to_int prio)
         | Choice (m1, m2) ->
           handle_status m1 write_back;
           handle_status m2 write_back

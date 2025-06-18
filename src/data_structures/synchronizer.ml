@@ -6,7 +6,7 @@ type ('get, 'write) t =
   { mutex : Mutex.t
   ; cond : Condition.t
   ; getter : unit -> 'get option
-  ; writter : 'write -> Condition.t -> unit
+  ; writter : 'write -> int -> Condition.t -> unit
   ; mutable pledges : int
   ; mutable closed : bool
   }
@@ -35,8 +35,8 @@ let get synchro pledge =
   in
   Mutex.protect synchro.mutex (fun () -> inner_loop synchro pledge)
 
-let write v { writter; cond; mutex; _ } =
-  Mutex.protect mutex (fun () -> writter v cond)
+let write v prio { writter; cond; mutex; _ } =
+  Mutex.protect mutex (fun () -> writter v prio cond)
 
 let make_pledge synchro =
   Mutex.lock synchro.mutex;
@@ -59,6 +59,6 @@ let rec work_while f q =
   match get q true with
   | None -> ()
   | Some v ->
-    let () = f v (fun v -> write v q) in
+    let () = f v (fun v prio -> write v prio q) in
     end_pledge q;
     work_while f q
