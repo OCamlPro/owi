@@ -216,9 +216,7 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
   (* setting the file where to log all queries sent to solvers *)
-  let log_path =
-    Fpath.(parent workspace / "queries.jsonl.gz") |> Fpath.to_string
-  in
+  let log_path = Fpath.(parent workspace / "queries_log.txt") |> Fpath.to_string in
   Smtml.Tmp_log_path.init log_path (Fmt.to_to_string Smtml.Solver_type.pp solver);
   Stdlib__Domain.at_exit (fun () -> Smtml.Tmp_log_path.close ());
   (* deterministic_result_order implies no_stop_at_failure *)
