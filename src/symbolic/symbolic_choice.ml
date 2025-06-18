@@ -86,11 +86,11 @@ module CoreImpl = struct
     let add_init_task sched task = Wq.push task sched.work_queue
 
     let work wls sched callback =
-      let rec handle_status (t : _ Schedulable.status) write_back =
+      let rec handle_status (t : _ Schedulable.status) (write_back : ('a, 'b) Schedulable.t -> Prio.t -> unit) =
         match t with
         | Stop -> ()
         | Now x -> callback x
-        | Yield (_prio, f) -> write_back f
+        | Yield (prio, f) -> write_back f prio
         | Choice (m1, m2) ->
           handle_status m1 write_back;
           handle_status m2 write_back

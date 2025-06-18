@@ -24,10 +24,30 @@ let work_while f q = Synchronizer.work_while f q
 
 let fail = Synchronizer.fail
 
-let make () =
-  let q = Queue.create () in
+(*let make () =
+  let mutex = Mutex.create () in
+  let q = ref Priority_queue.empty in
   let writter v condvar =
-    Queue.push v q;
+    Mutex.protect mutex (fun () ->
+      let q' = Priority_queue.push v !q in
+      q := q' );
     Condition.signal condvar
   in
-  Synchronizer.init (fun () -> Queue.take_opt q) writter
+  Synchronizer.init
+    (fun () ->
+      Mutex.protect mutex (fun () ->
+        let x, q' = Priority_queue.pop !q in
+        q := q';
+        x ) )
+    writter*)
+
+let make () =
+  let mutex = Mutex.create () in
+  let q = Pq_imperative.empty () in
+  let writter v condvar =
+    Mutex.protect mutex (fun () -> Pq_imperative.push v q);
+    Condition.signal condvar
+  in
+  Synchronizer.init
+    (fun () -> Mutex.protect mutex (fun () -> Pq_imperative.pop q))
+    writter
