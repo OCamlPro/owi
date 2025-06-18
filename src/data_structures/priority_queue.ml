@@ -16,5 +16,4 @@ let rec merge h1 h2 =
 let pop h =
   match h with Empty -> (None, h) | Node (l, _, v, r) -> (Some v, merge l r)
 
-let push v h =
-  merge h (Node (Empty, 1, v, Empty))
+let push v h = merge h (Node (Empty, 1, v, Empty))

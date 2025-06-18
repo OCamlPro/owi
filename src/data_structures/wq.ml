@@ -18,7 +18,7 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     Nil
   | Some v -> Cons (v, read_as_seq q ~finalizer)
 
-let push v q = Synchronizer.write v q
+let push v prio q = Synchronizer.write v prio q
 
 let work_while f q = Synchronizer.work_while f q
 
@@ -44,8 +44,8 @@ let fail = Synchronizer.fail
 let make () =
   let mutex = Mutex.create () in
   let q = Pq_imperative.empty () in
-  let writter v condvar =
-    Mutex.protect mutex (fun () -> Pq_imperative.push v q);
+  let writter v prio condvar =
+    Mutex.protect mutex (fun () -> Pq_imperative.push (prio, v) q);
     Condition.signal condvar
   in
   Synchronizer.init
