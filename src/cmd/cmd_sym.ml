@@ -5,23 +5,21 @@
 open Bos
 open Syntax
 module Expr = Smtml.Expr
-module Choice = Symbolic_choice_with_memory
 
 type fail_mode =
   | Trap_only
   | Assertion_only
   | Both
 
-let link_symbolic_modules link_state =
-  let func_typ = Symbolic.Extern_func.extern_type in
-  Link.extern_module' link_state ~name:"owi" ~func_typ
-    Symbolic_wasm_ffi.symbolic_extern_module
-
-let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
+let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols
   filename =
   let* m = Compile.File.until_validate ~unsafe ~rac ~srac filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  let link_state = link_symbolic_modules Link.empty_state in
+  let link_state =
+    let func_typ = Symbolic.Extern_func.extern_type in
+    Link.extern_module' Link.empty_state ~name:"owi" ~func_typ
+      Symbolic_wasm_ffi.symbolic_extern_module
+  in
 
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
@@ -221,8 +219,8 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
          monad, hence the let*. *)
 let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~files ~model_format ~entry_point ~invoke_with_symbols
-  ~model_out_file ~with_breadcrumbs =
+  ~workspace ~solver ~source_file ~model_format ~entry_point
+  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -231,11 +229,9 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
 
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
-  let pc = Choice.return () in
   let* result : unit Symbolic.Choice.t =
-    list_fold_left
-      (run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols)
-      pc files
+    run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols
+      source_file
   in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace

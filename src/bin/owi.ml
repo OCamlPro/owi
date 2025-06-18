@@ -320,7 +320,7 @@ let conc_cmd =
   and+ workspace
   and+ () = setup_log
   and+ solver
-  and+ files
+  and+ source_file
   and+ model_format
   and+ model_out_file
   and+ invoke_with_symbols
@@ -328,7 +328,7 @@ let conc_cmd =
   and+ entry_point in
   Cmd_conc.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 
 (* owi fmt *)
@@ -451,8 +451,8 @@ let run_cmd =
   and+ rac
   and+ optimize
   and+ () = setup_log
-  and+ files in
-  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~files
+  and+ source_file in
+  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file
 
 (* owi rust *)
 
@@ -529,7 +529,7 @@ let sym_cmd =
   and+ fail_mode
   and+ workspace
   and+ solver
-  and+ files
+  and+ source_file
   and+ model_format
   and+ () = setup_log
   and+ entry_point
@@ -538,7 +538,7 @@ let sym_cmd =
   and+ invoke_with_symbols in
   Cmd_sym.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 
 (* owi validate *)

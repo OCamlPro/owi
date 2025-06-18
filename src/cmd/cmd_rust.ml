@@ -60,12 +60,11 @@ let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
   let* _did_create : bool = OS.Dir.create workspace in
   let entry_point = Option.value entry_point ~default:"main" in
 
-  let* modul = compile ~entry_point ~includes ~opt_lvl ~out_file files in
-  let files = [ modul ] in
+  let* source_file = compile ~entry_point ~includes ~opt_lvl ~out_file files in
   let entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
     ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs

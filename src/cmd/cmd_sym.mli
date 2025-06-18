@@ -39,7 +39,7 @@ val cmd :
   -> fail_mode:fail_mode
   -> workspace:Fpath.t option
   -> solver:Smtml.Solver_type.t
-  -> files:Fpath.t list
+  -> source_file:Fpath.t
   -> model_format:Cmd_utils.model_format
   -> entry_point:string option
   -> invoke_with_symbols:bool
