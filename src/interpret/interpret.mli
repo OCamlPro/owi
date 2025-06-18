@@ -6,12 +6,13 @@ module Concrete : sig
   val modul :
        timeout:float option
     -> timeout_instr:int option
+         (* TODO: replace this by a Concrete_extern_func.extern_func Link.state ? *)
     -> Concrete.Env.t Env_id.collection
     -> Concrete.Module_to_run.t
     -> unit Concrete_choice.t
 
   val exec_vfunc_from_outside :
-       locals:V.t list
+       locals:Concrete_value.t list
     -> env:Link_env.t'
     -> envs:Concrete.Env.t Env_id.collection
     -> Func_intf.t
@@ -51,6 +52,13 @@ module Symbolic : sig
     -> Symbolic.Env.t Env_id.collection
     -> Symbolic.Module_to_run.t
     -> unit Symbolic.Choice.t
+
+  val exec_vfunc_from_outside :
+       locals:Symbolic_value.t list
+    -> env:Link_env.t'
+    -> envs:Symbolic.Env.t Env_id.collection
+    -> Func_intf.t
+    -> Symbolic_value.t list Symbolic.Choice.t
 end
 
 module Minimalist_symbolic : sig
@@ -60,6 +68,13 @@ module Minimalist_symbolic : sig
     -> Minimalist_symbolic.Env.t Env_id.collection
     -> Minimalist_symbolic.Module_to_run.t
     -> unit Minimalist_symbolic.Choice.t
+
+  val exec_vfunc_from_outside :
+       locals:Symbolic_value.t list
+    -> env:Link_env.t'
+    -> envs:Minimalist_symbolic.Env.t Env_id.collection
+    -> Func_intf.t
+    -> Symbolic_value.t list Minimalist_symbolic.Choice.t
 end
 
 module Concolic : sig
@@ -69,4 +84,11 @@ module Concolic : sig
     -> Concolic.Env.t Env_id.collection
     -> Concolic.Module_to_run.t
     -> unit Concolic.Choice.t
+
+  val exec_vfunc_from_outside :
+       locals:Concolic_value.t list
+    -> env:Link_env.t'
+    -> envs:Concolic.Env.t Env_id.collection
+    -> Func_intf.t
+    -> Concolic_value.t list Concolic.Choice.t
 end

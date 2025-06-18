@@ -4,58 +4,25 @@
 
 open Bos
 open Syntax
-module Choice = Concolic.Choice
 
 (* let () = Random.self_init () *)
 let () = Random.init 42
 
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
-  ~optimize link_state m =
-  let* m =
-    match m with
-    | Kind.Wat _ | Wasm _ ->
-      Compile.Any.until_binary_validate ~unsafe ~rac ~srac m
-    | Wast _ -> Fmt.error_msg "can't run concolic interpreter on a script"
-    | Ocaml _ -> assert false
-  in
+  ~optimize source_file =
+  let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
+  let link_state =
+    Link.extern_module' Link.empty_state ~name:"owi"
+      ~func_typ:Concolic.Extern_func.extern_type
+      Concolic_wasm_ffi.symbolic_extern_module
+  in
+
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)
-
-let simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
-  ~srac ~optimize filenames =
-  let link_state = Link.empty_state in
-  let link_state =
-    Link.extern_module' link_state ~name:"owi"
-      ~func_typ:Concolic.Extern_func.extern_type
-      Concolic_wasm_ffi.symbolic_extern_module
-  in
-  let+ link_state, modules_to_run =
-    List.fold_left
-      (fun (acc : (_ * _) Result.t) filename ->
-        let* link_state, modules_to_run = acc in
-        let* m0dule = Parse.guess_from_file filename in
-        let+ link_state, module_to_run =
-          simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac
-            ~srac ~optimize link_state m0dule
-        in
-        (link_state, module_to_run :: modules_to_run) )
-      (Ok (link_state, []))
-      filenames
-  in
-  (link_state, List.rev modules_to_run)
-
-let run_modules_to_run (link_state : _ Link.state) modules_to_run =
-  List.fold_left
-    (fun (acc : unit Choice.t) to_run ->
-      Choice.bind acc (fun () ->
-        (Interpret.Concolic.modul ~timeout:None ~timeout_instr:None
-           link_state.envs )
-          to_run ) )
-    (Choice.return ()) modules_to_run
 
 type end_of_trace =
   | Assume_fail
@@ -256,9 +223,12 @@ let add_trace tree trace =
   let to_update = add_trace [] tree trace [] in
   List.iter update_unexplored to_update
 
-let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
-  let backups = List.map Concolic.backup modules_to_run in
-  let result = run_modules_to_run link_state modules_to_run in
+let run_once link_state module_to_run (forced_values : Smtml.Model.t) =
+  let backup = Concolic.backup module_to_run in
+  let result =
+    Interpret.Concolic.modul ~timeout:None ~timeout_instr:None
+      link_state.Link.envs module_to_run
+  in
   let ( result
       , Concolic_choice.
           { pc
@@ -269,7 +239,7 @@ let run_once link_state modules_to_run (forced_values : Smtml.Model.t) =
           } ) =
     Concolic_choice.run forced_values result
   in
-  let () = List.iter2 Concolic.recover backups modules_to_run in
+  let () = Concolic.recover backup module_to_run in
   let+ end_of_trace =
     match result with
     | Ok () -> Ok Normal
@@ -429,7 +399,7 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
    monad, hence the let*. *)
 let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order:_
-  ~fail_mode:_ ~workspace ~solver ~files ~model_format ~entry_point
+  ~fail_mode:_ ~workspace ~solver ~source_file ~model_format ~entry_point
   ~invoke_with_symbols ~model_out_file ~with_breadcrumbs:_ =
   let* workspace =
     match workspace with
@@ -447,12 +417,12 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
     | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in
   let solver = Solver.fresh solver () in
-  let* link_state, modules_to_run =
-    simplify_then_link_files ~entry_point ~invoke_with_symbols ~unsafe ~rac
-      ~srac ~optimize files
+  let* link_state, module_to_run =
+    simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
+      ~optimize source_file
   in
   let tree = fresh_tree [] in
-  let* result = run solver tree link_state modules_to_run in
+  let* result = run solver tree link_state module_to_run in
   let testcase assignments =
     if not no_value then
       let testcase : Smtml.Value.t list =

@@ -38,6 +38,7 @@ let check_error_result expected = function
   | Ok _whatever -> Error (`Did_not_fail_but_expected expected)
   | Error got -> check_error ~expected ~got
 
+(* TODO: move this somewhere else *)
 let load_func_from_module ls mod_id f_name =
   let* exports, env_id =
     match mod_id with
@@ -161,9 +162,13 @@ let run ~no_exhaustion ~optimize script =
           ();
         Logs.info (fun m -> m "*** module");
         incr curr_module;
-        let+ link_state =
-          Compile.Text.until_interpret ~timeout:None ~timeout_instr:None
-            link_state ~unsafe ~rac:false ~srac:false ~optimize ~name:None m
+        let* m, link_state =
+          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
+            ~optimize ~name:None m
+        in
+        let+ () =
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
+            link_state.envs m
         in
         (* TODO: enable printing again! *)
         link_state
@@ -171,9 +176,13 @@ let run ~no_exhaustion ~optimize script =
         Logs.info (fun m -> m "*** quoted module");
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
-        let+ link_state =
-          Compile.Text.until_interpret link_state ~unsafe ~rac:false ~srac:false
-            ~timeout:None ~timeout_instr:None ~optimize ~name:None m
+        let* m, link_state =
+          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
+            ~optimize ~name:None m
+        in
+        let+ () =
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
+            link_state.envs m
         in
         link_state
       | Text.Binary_module (id, m) ->
@@ -181,9 +190,12 @@ let run ~no_exhaustion ~optimize script =
         incr curr_module;
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
-        let+ link_state =
-          Compile.Binary.until_interpret link_state ~timeout:None
-            ~timeout_instr:None ~unsafe ~optimize ~name:None m
+        let* m, link_state =
+          Compile.Binary.until_link link_state ~unsafe ~optimize ~name:None m
+        in
+        let+ () =
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
+            link_state.envs m
         in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->

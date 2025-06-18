@@ -17,14 +17,14 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 let link_state = Link.extern_module Link.empty_state ~name:"owi" extern_module
 
-let run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize filename =
+let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file =
   let name = None in
   let link_state = if rac then link_state else Link.empty_state in
-  let+ (_ : _ Link.state) =
-    Compile.File.until_interpret ~unsafe ~timeout ~timeout_instr ~rac
-      ~srac:false ~optimize ~name link_state filename
+  let* m, (link_state : _ Link.state) =
+    Compile.File.until_link ~unsafe ~rac ~srac:false ~optimize ~name link_state
+      source_file
+  in
+  let+ () =
+    Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
   in
   ()
-
-let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~files =
-  list_iter (run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize) files
