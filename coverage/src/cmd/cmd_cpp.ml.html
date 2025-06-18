@@ -18,17 +18,17 @@
       <h2>87.38%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:13.28%"></span>
-      <span class="some-visited" style="top:14.06%"></span>
-      <span class="unvisited" style="top:28.91%"></span>
-      <span class="unvisited" style="top:29.69%"></span>
-      <span class="unvisited" style="top:30.47%"></span>
-      <span class="unvisited" style="bottom:49.22%"></span>
-      <span class="unvisited" style="bottom:48.44%"></span>
-      <span class="unvisited" style="bottom:47.66%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
-      <span class="unvisited" style="bottom:13.28%"></span>
-      <span class="some-visited" style="bottom:3.12%"></span>
+      <span class="unvisited" style="top:13.39%"></span>
+      <span class="some-visited" style="top:14.17%"></span>
+      <span class="unvisited" style="top:29.13%"></span>
+      <span class="unvisited" style="top:29.92%"></span>
+      <span class="unvisited" style="top:30.71%"></span>
+      <span class="unvisited" style="bottom:48.82%"></span>
+      <span class="unvisited" style="bottom:48.03%"></span>
+      <span class="unvisited" style="bottom:47.24%"></span>
+      <span class="unvisited" style="bottom:24.41%"></span>
+      <span class="unvisited" style="bottom:12.60%"></span>
+      <span class="some-visited" style="bottom:3.15%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -155,12 +155,11 @@
 <a id="L120"></a><span > </span>
 <a id="L121"></a><span class="visited"> </span>
 <a id="L122"></a><span > </span>
-<a id="L123"></a><span > </span>
-<a id="L124"></a><span class="some-visited"> </span>
+<a id="L123"></a><span class="some-visited"> </span>
+<a id="L124"></a><span > </span>
 <a id="L125"></a><span > </span>
 <a id="L126"></a><span > </span>
 <a id="L127"></a><span > </span>
-<a id="L128"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -292,7 +291,6 @@
 <a href="#L125">125</a>
 <a href="#L126">126</a>
 <a href="#L127">127</a>
-<a href="#L128">128</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -411,16 +409,15 @@ let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
 
   <span data-count="5">l</span>et entry_point = Option.value entry_point ~default:"main" in
   <span data-count="5">l</span>et includes = Cmd_utils.c_files_location @ includes in
-  let* modul =
+  let* source_file =
     compil<span data-count="5">e</span> ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
   in
-  <span data-count="4">l</span>et files = [ modul ] in
-  let entry_point = Some entry_point in
+  <span data-count="4">l</span>et entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="4">C</span>md_sym.cmd)
     ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 </code></pre>
       </div>

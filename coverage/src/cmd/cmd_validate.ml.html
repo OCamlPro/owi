@@ -18,7 +18,7 @@
       <h2>75.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:14.29%"></span>
+      <span class="unvisited" style="bottom:15.38%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -33,10 +33,9 @@
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="unvisited"> </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L11"></a><span class="unvisited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -54,7 +53,6 @@
 <a href="#L11">11</a>
 <a href="#L12">12</a>
 <a href="#L13">13</a>
-<a href="#L14">14</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -64,8 +62,7 @@ open Syntax
 
 let validate filename =
   <span data-count="4">l</span>et+ (_modul : Binary.Module.t) =
-    Compile.File.until_binary_validat<span data-count="4">e</span> ~unsafe:false ~rac:false ~srac:false
-      filename
+    Compile.File.until_validat<span data-count="4">e</span> ~unsafe:false ~rac:false ~srac:false filename
   in
   <span data-count="0">(</span>)
 

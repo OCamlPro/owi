@@ -18,16 +18,16 @@
       <h2>89.31%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:12.98%"></span>
-      <span class="some-visited" style="top:13.46%"></span>
-      <span class="unvisited" style="top:29.33%"></span>
-      <span class="some-visited" style="top:29.81%"></span>
-      <span class="unvisited" style="top:34.13%"></span>
-      <span class="unvisited" style="bottom:43.27%"></span>
-      <span class="some-visited" style="bottom:42.79%"></span>
-      <span class="unvisited" style="bottom:39.42%"></span>
-      <span class="some-visited" style="bottom:30.29%"></span>
-      <span class="unvisited" style="bottom:9.13%"></span>
+      <span class="unvisited" style="top:13.04%"></span>
+      <span class="some-visited" style="top:13.53%"></span>
+      <span class="unvisited" style="top:29.47%"></span>
+      <span class="some-visited" style="top:29.95%"></span>
+      <span class="unvisited" style="top:34.30%"></span>
+      <span class="unvisited" style="bottom:43.00%"></span>
+      <span class="some-visited" style="bottom:42.51%"></span>
+      <span class="unvisited" style="bottom:39.13%"></span>
+      <span class="some-visited" style="bottom:29.95%"></span>
+      <span class="unvisited" style="bottom:8.70%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -234,12 +234,11 @@
 <a id="L200"></a><span class="visited"> </span>
 <a id="L201"></a><span class="visited"> </span>
 <a id="L202"></a><span > </span>
-<a id="L203"></a><span > </span>
-<a id="L204"></a><span class="visited"> </span>
+<a id="L203"></a><span class="visited"> </span>
+<a id="L204"></a><span > </span>
 <a id="L205"></a><span > </span>
 <a id="L206"></a><span > </span>
 <a id="L207"></a><span > </span>
-<a id="L208"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -451,7 +450,6 @@
 <a href="#L205">205</a>
 <a href="#L206">206</a>
 <a href="#L207">207</a>
-<a href="#L208">208</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -649,17 +647,16 @@ let cmd ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl ~includes
 
   <span data-count="375">l</span>et includes = Cmd_utils.c_files_location @ includes in
   let* files = eacsl_instrumen<span data-count="375">t</span> eacsl ~includes files in
-  <span data-count="370">l</span>et* modul =
+  <span data-count="370">l</span>et* source_file =
     compil<span data-count="370">e</span> ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
   in
   <span data-count="367">l</span>et* () = metadat<span data-count="367">a</span> ~workspace arch property files in
-  <span data-count="367">l</span>et files = [ modul ] in
-  let entry_point = Some entry_point in
+  <span data-count="367">l</span>et entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then <span data-count="160">C</span>md_conc.cmd else <span data-count="207">C</span>md_sym.cmd)
     ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 </code></pre>
       </div>

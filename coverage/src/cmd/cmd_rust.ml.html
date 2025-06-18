@@ -18,11 +18,11 @@
       <h2>86.96%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:47.89%"></span>
-      <span class="some-visited" style="top:49.30%"></span>
-      <span class="unvisited" style="bottom:40.85%"></span>
-      <span class="unvisited" style="bottom:19.72%"></span>
-      <span class="some-visited" style="bottom:5.63%"></span>
+      <span class="unvisited" style="top:48.57%"></span>
+      <span class="some-visited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:40.00%"></span>
+      <span class="unvisited" style="bottom:18.57%"></span>
+      <span class="some-visited" style="bottom:5.71%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -92,12 +92,11 @@
 <a id="L63"></a><span class="visited"> </span>
 <a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span class="some-visited"> </span>
+<a id="L66"></a><span class="some-visited"> </span>
+<a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -172,7 +171,6 @@
 <a href="#L68">68</a>
 <a href="#L69">69</a>
 <a href="#L70">70</a>
-<a href="#L71">71</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -236,14 +234,13 @@ let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
   <span data-count="3">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="3">e</span> workspace in
   <span data-count="3">l</span>et entry_point = Option.value entry_point ~default:"main" in
 
-  <span data-count="3">l</span>et* modul = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl ~out_file files in
-  <span data-count="2">l</span>et files = [ modul ] in
-  let entry_point = Some entry_point in
+  <span data-count="3">l</span>et* source_file = compil<span data-count="3">e</span> ~entry_point ~includes ~opt_lvl ~out_file files in
+  <span data-count="2">l</span>et entry_point = Some entry_point in
   let workspace = Some workspace in
   (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="2">C</span>md_sym.cmd)
     ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
     ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~files ~model_format ~entry_point
+    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
     ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
 </code></pre>
       </div>

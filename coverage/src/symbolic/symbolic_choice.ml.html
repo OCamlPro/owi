@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_choice.ml &mdash; Coverage report</title>
-    <meta name="description" content="96.99% coverage in src/symbolic/symbolic_choice.ml">
+    <meta name="description" content="98.12% coverage in src/symbolic/symbolic_choice.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,9 @@
           <span class="dirname">src/symbolic/</span>symbolic_choice.ml
         </a>
       </h1>
-      <h2>96.99%</h2>
+      <h2>98.12%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:21.40%"></span>
-      <span class="unvisited" style="top:21.79%"></span>
-      <span class="unvisited" style="top:21.98%"></span>
       <span class="unvisited" style="bottom:32.88%"></span>
       <span class="unvisited" style="bottom:19.84%"></span>
       <span class="unvisited" style="bottom:17.51%"></span>
@@ -138,10 +135,10 @@
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span class="visited"> </span>
 <a id="L109"></a><span class="visited"> </span>
-<a id="L110"></a><span class="unvisited"> </span>
+<a id="L110"></a><span class="visited"> </span>
 <a id="L111"></a><span > </span>
-<a id="L112"></a><span class="unvisited"> </span>
-<a id="L113"></a><span class="unvisited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
 <a id="L114"></a><span > </span>
 <a id="L115"></a><span > </span>
 <a id="L116"></a><span > </span>
@@ -1097,42 +1094,42 @@ module CoreImpl = struct
       | Stop
 
     let run (Sched mxf : ('a, 'wls) t) (wls : 'wls) : ('a, 'wls) status =
-      <span data-count="76900550">m</span>xf wls
+      <span data-count="76868408">m</span>xf wls
 
-    let return x : _ t = <span data-count="38216127">S</span>ched (Fun.cons<span data-count="38216111">t</span> (Now x))
+    let return x : _ t = <span data-count="38200577">S</span>ched (Fun.cons<span data-count="38200546">t</span> (Now x))
 
     let return_status status = <span data-count="3057">S</span>ched (Fun.cons<span data-count="3057">t</span> status)
 
     let rec bind (mx : ('a, 'wls) t) (f : 'a -&gt; ('b, 'wls) t) : ('b, 'wls) t =
-      <span data-count="38578397">S</span>ched
+      <span data-count="38561850">S</span>ched
         (fun wls -&gt;
-          <span data-count="38577636">l</span>et rec unfold_status (x : ('a, 'wls) status) : ('b, 'wls) status =
-            <span data-count="38749972">m</span>atch x with
-            | <span data-count="38269827">N</span>ow x -&gt; run (<span data-count="38269852">f</span> x) wls
-            | <span data-count="278943">Y</span>ield (prio, lx) -&gt; Yield (prio, bin<span data-count="278941">d</span> lx f)
-            | <span data-count="86306">C</span>hoice (mx1, mx2) -&gt;
+          <span data-count="38561033">l</span>et rec unfold_status (x : ('a, 'wls) status) : ('b, 'wls) status =
+            <span data-count="38731720">m</span>atch x with
+            | <span data-count="38254051">N</span>ow x -&gt; run (<span data-count="38254097">f</span> x) wls
+            | <span data-count="277329">Y</span>ield (prio, lx) -&gt; Yield (prio, bin<span data-count="277327">d</span> lx f)
+            | <span data-count="85418">C</span>hoice (mx1, mx2) -&gt;
               let mx1' = unfold_status mx1 in
-              <span data-count="86302">l</span>et mx2' = unfold_status mx2 in
-              <span data-count="86304">C</span>hoice (mx1', mx2')
-            | <span data-count="115197">S</span>top -&gt; Stop
+              <span data-count="85414">l</span>et mx2' = unfold_status mx2 in
+              <span data-count="85416">C</span>hoice (mx1', mx2')
+            | <span data-count="115199">S</span>top -&gt; Stop
           in
-          unfold_status (ru<span data-count="38577122">n</span> mx wls) )
+          unfold_status (ru<span data-count="38560655">n</span> mx wls) )
 
     let ( let* ) = bind
 
     let map x f =
-      <span data-count="1153214">l</span>et* x in
-      <span data-count="1140455">r</span>eturn (<span data-count="1140453">f</span> x)
+      <span data-count="1152774">l</span>et* x in
+      <span data-count="1140015">r</span>eturn (<span data-count="1140019">f</span> x)
 
     let ( let+ ) = map
 
     let yield prio = <span data-count="2038">r</span>eturn_status (Yield (prio, Sched (Fun.cons<span data-count="2038">t</span> (Now ()))))
 
-    let choose a b = <span data-count="14261">S</span>ched (fun wls -&gt; <span data-count="14257">C</span>hoice (ru<span data-count="14261">n</span> a wls, ru<span data-count="14261">n</span> b wls))
+    let choose a b = <span data-count="14112">S</span>ched (fun wls -&gt; <span data-count="14110">C</span>hoice (ru<span data-count="14111">n</span> a wls, ru<span data-count="14111">n</span> b wls))
 
     let stop : ('a, 'b) t = return_statu<span data-count="1019">s</span> Stop
 
-    let worker_local : ('a, 'a) t = Sched (fun wls -&gt; <span data-count="27931">N</span>ow wls)
+    let worker_local : ('a, 'a) t = Sched (fun wls -&gt; <span data-count="27768">N</span>ow wls)
   end
 
   module Scheduler = struct
@@ -1150,31 +1147,31 @@ module CoreImpl = struct
     let add_init_task sched task = <span data-count="407">W</span>q.push task sched.work_queue
 
     let work wls sched callback =
-      <span data-count="779">l</span>et rec handle_status (t : _ Schedulable.status) write_back =
-        <span data-count="56607">m</span>atch t with
-        | <span data-count="12741">S</span>top -&gt; ()
-        | <span data-count="1857">N</span>ow x -&gt; callback x
-        | <span data-count="27747">Y</span>ield (_prio, f) -&gt; write_back f
-        | <span data-count="14260">C</span>hoice (m1, m2) -&gt;
+      <span data-count="784">l</span>et rec handle_status (t : _ Schedulable.status) write_back =
+        <span data-count="56154">m</span>atch t with
+        | <span data-count="12740">S</span>top -&gt; ()
+        | <span data-count="1721">N</span>ow x -&gt; callback x
+        | <span data-count="27582">Y</span>ield (_prio, f) -&gt; write_back f
+        | <span data-count="14111">C</span>hoice (m1, m2) -&gt;
           handle_status m1 write_back;
-          <span data-count="14259">h</span>andle_status m2 write_back
+          <span data-count="14110">h</span>andle_status m2 write_back
       in
       Wq.work_while
-        (fun f write_back -&gt; <span data-count="28108">h</span>andle_status (Schedulable.ru<span data-count="28089">n</span> f wls) write_back)
+        (fun f write_back -&gt; <span data-count="27945">h</span>andle_status (Schedulable.ru<span data-count="27935">n</span> f wls) write_back)
         sched.work_queue
 
     let spawn_worker sched wls_init callback callback_init callback_close =
       <span data-count="790">c</span>allback_init ();
       <span data-count="790">D</span>omain.spawn (fun () -&gt;
         <span data-count="790">F</span>un.protect
-          ~finally:(fun () -&gt; <span data-count="726">c</span>allback_close ())
+          ~finally:(fun () -&gt; <span data-count="731">c</span>allback_close ())
           (fun () -&gt;
             <span data-count="790">l</span>et wls = wls_init () in
-            <span data-count="779">t</span>ry wor<span data-count="726">k</span> wls sched callback
-            with <span data-count="0">e</span> -&gt;
+            <span data-count="784">t</span>ry wor<span data-count="730">k</span> wls sched callback
+            with <span data-count="1">e</span> -&gt;
               let bt = Printexc.get_raw_backtrace () in
-              <span data-count="0">W</span>q.fail sched.work_queue;
-              <span data-count="0">P</span>rintexc.raise_with_backtrace e bt ) )
+              <span data-count="1">W</span>q.fail sched.work_queue;
+              <span data-count="1">P</span>rintexc.raise_with_backtrace e bt ) )
   end
 
   module State = struct
@@ -1186,46 +1183,46 @@ module CoreImpl = struct
 
     type ('a, 's) t = St of ('s -&gt; ('a * 's, Solver.t) M.t) [@@unboxed]
 
-    let run (St mxf) st = <span data-count="75387046">m</span>xf st
+    let run (St mxf) st = <span data-count="75356697">m</span>xf st
 
-    let return x = <span data-count="34767297">S</span>t (fun st -&gt; <span data-count="34766448">M</span>.return (x, st))
+    let return x = <span data-count="34753574">S</span>t (fun st -&gt; <span data-count="34752945">M</span>.return (x, st))
 
     let lift (x : ('a, _) M.t) : ('a, 's) t =
       <span data-count="6114">l</span>et ( let+ ) = M.( let+ ) in
       St
         (fun (st : 's) -&gt;
-          <span data-count="68422">l</span>et+ x in
-          <span data-count="55632">(</span>x, st) )
+          <span data-count="68093">l</span>et+ x in
+          <span data-count="55306">(</span>x, st) )
 
     let bind mx f =
-      <span data-count="37001091">S</span>t
+      <span data-count="36987807">S</span>t
         (fun st -&gt;
-          <span data-count="37145853">l</span>et ( let* ) = M.( let* ) in
-          let* x, new_st = ru<span data-count="37146173">n</span> mx st in
-          <span data-count="37129589">r</span>un (<span data-count="37129395">f</span> x) new_st )
+          <span data-count="37131354">l</span>et ( let* ) = M.( let* ) in
+          let* x, new_st = ru<span data-count="37131649">n</span> mx st in
+          <span data-count="37114249">r</span>un (<span data-count="37114263">f</span> x) new_st )
 
     let ( let* ) = bind
 
     let map x f =
-      <span data-count="4710153">l</span>et* x in
-      <span data-count="4833582">r</span>eturn (<span data-count="4833577">f</span> x)
+      <span data-count="4708458">l</span>et* x in
+      <span data-count="4830413">r</span>eturn (<span data-count="4830407">f</span> x)
 
-    let liftF2 f x y = <span data-count="14261">S</span>t (fun st -&gt; <span data-count="14260">f</span> (ru<span data-count="14260">n</span> x st) (ru<span data-count="14259">n</span> y st))
+    let liftF2 f x y = <span data-count="14111">S</span>t (fun st -&gt; <span data-count="14111">f</span> (ru<span data-count="14111">n</span> x st) (ru<span data-count="14111">n</span> y st))
 
     let ( let+ ) = map
 
-    let with_state f = <span data-count="2166004">S</span>t (fun st -&gt; <span data-count="2222546">M</span>.return (<span data-count="2222562">f</span> st))
+    let with_state f = <span data-count="2165636">S</span>t (fun st -&gt; <span data-count="2221695">M</span>.return (<span data-count="2221710">f</span> st))
 
-    let modify_state f = <span data-count="60301">S</span>t (fun st -&gt; <span data-count="86785">M</span>.return ((), <span data-count="86784">f</span> st))
+    let modify_state f = <span data-count="59826">S</span>t (fun st -&gt; <span data-count="86008">M</span>.return ((), <span data-count="86012">f</span> st))
 
     let project_state (project_and_backup : 'st1 -&gt; 'st2 * 'backup) restore
       other =
-      <span data-count="1084807">S</span>t
+      <span data-count="1084689">S</span>t
         (fun st -&gt;
-          <span data-count="1084799">l</span>et ( let+ ) = M.( let+ ) in
+          <span data-count="1084689">l</span>et ( let+ ) = M.( let+ ) in
           let proj, backup = project_and_backup st in
-          <span data-count="1084795">l</span>et+ res, new_state = ru<span data-count="1084795">n</span> other proj in
-          <span data-count="1084825">(</span>res, restor<span data-count="1084820">e</span> backup new_state) )
+          <span data-count="1084683">l</span>et+ res, new_state = ru<span data-count="1084683">n</span> other proj in
+          <span data-count="1084710">(</span>res, restor<span data-count="1084713">e</span> backup new_state) )
   end
 
   module Eval = struct
@@ -1237,28 +1234,28 @@ module CoreImpl = struct
 
     type ('a, 's) t = ('a eval, 's) M.t
 
-    let return x : _ t = <span data-count="29933233">M</span>.return (EVal x)
+    let return x : _ t = <span data-count="29922644">M</span>.return (EVal x)
 
     let lift x =
-      <span data-count="2232419">l</span>et ( let+ ) = M.( let+ ) in
+      <span data-count="2231575">l</span>et ( let+ ) = M.( let+ ) in
       let+ x in
-      <span data-count="2364969">E</span>Val x
+      <span data-count="2363022">E</span>Val x
 
     let bind (mx : _ t) f : _ t =
-      <span data-count="32291200">l</span>et ( let* ) = M.( let* ) in
+      <span data-count="32279622">l</span>et ( let* ) = M.( let* ) in
       let* mx in
-      <span data-count="32296181">m</span>atch mx with
-      | <span data-count="32295778">E</span>Val x -&gt; f x
+      <span data-count="32284122">m</span>atch mx with
+      | <span data-count="32283686">E</span>Val x -&gt; f x
       | <span data-count="349">E</span>Trap _ as mx -&gt; M.return mx
       | <span data-count="124">E</span>Assert _ as mx -&gt; M.return mx
 
     let ( let* ) = bind
 
     let map mx f =
-      <span data-count="2477737">l</span>et ( let+ ) = M.( let+ ) in
+      <span data-count="2476900">l</span>et ( let+ ) = M.( let+ ) in
       let+ mx in
-      <span data-count="2468634">m</span>atch mx with
-      | <span data-count="2468035">E</span>Val x -&gt; EVal (<span data-count="2468035">f</span> x)
+      <span data-count="2467402">m</span>atch mx with
+      | <span data-count="2466804">E</span>Val x -&gt; EVal (<span data-count="2466814">f</span> x)
       | <span data-count="351">E</span>Trap _ as mx -&gt; mx
       | <span data-count="248">E</span>Assert _ as mx -&gt; mx
 
@@ -1342,27 +1339,27 @@ module CoreImpl = struct
       <span data-count="6114">l</span>ift v
 
     let with_thread (f : Thread.t -&gt; 'a) : 'a t =
-      <span data-count="2166007">l</span>et x = State.with_state (fun st -&gt; <span data-count="2222547">(</span><span data-count="2222564">f</span> st, st)) in
-      <span data-count="2166004">l</span>ift x
+      <span data-count="2165638">l</span>et x = State.with_state (fun st -&gt; <span data-count="2221696">(</span><span data-count="2221708">f</span> st, st)) in
+      <span data-count="2165637">l</span>ift x
 
     let thread = with_threa<span data-count="2038">d</span> Fun.id
 
-    let modify_thread f = <span data-count="60300">l</span>ift (State.modify_stat<span data-count="60302">e</span> f)
+    let modify_thread f = <span data-count="59826">l</span>ift (State.modify_stat<span data-count="59824">e</span> f)
 
-    let set_thread st = <span data-count="29113">m</span>odify_thread (Fun.cons<span data-count="29112">t</span> st)
+    let set_thread st = <span data-count="28801">m</span>odify_thread (Fun.cons<span data-count="28800">t</span> st)
 
     let clone_thread = modify_threa<span data-count="2038">d</span> Thread.clone
 
     let solver = lift_schedulabl<span data-count="2038">e</span> Schedulable.worker_local
 
     let choose a b =
-      <span data-count="14261">l</span>et a =
+      <span data-count="14109">l</span>et a =
         let* () = clone_thread in
-        <span data-count="14261">a</span>
+        <span data-count="14111">a</span>
       in
       let b =
         let* () = clone_thread in
-        <span data-count="14259">b</span>
+        <span data-count="14112">b</span>
       in
       State.liftF2 Schedulable.choose a b
 
@@ -1382,11 +1379,11 @@ module CoreImpl = struct
           callback_end )
 
     let trap t =
-      <span data-count="167">l</span>et* thread in
-      <span data-count="167">l</span>et* solver in
-      <span data-count="167">l</span>et pc = Thread.pc thread |&gt; <span data-count="167">S</span>ymbolic_path_condition.to_set in
-      <span data-count="167">l</span>et symbol_scopes = Thread.symbol_scopes thread in
-      <span data-count="167">l</span>et model = Solver.model solver ~symbol_scopes ~pc in
+      <span data-count="168">l</span>et* thread in
+      <span data-count="168">l</span>et* solver in
+      <span data-count="168">l</span>et pc = Thread.pc thread |&gt; <span data-count="168">S</span>ymbolic_path_condition.to_set in
+      <span data-count="168">l</span>et symbol_scopes = Thread.symbol_scopes thread in
+      <span data-count="168">l</span>et model = Solver.model solver ~symbol_scopes ~pc in
       <span data-count="167">l</span>et labels = Thread.labels thread in
       <span data-count="167">l</span>et breadcrumbs = Thread.breadcrumbs thread in
       <span data-count="167">S</span>tate.return (ETrap (t, model, labels, breadcrumbs, symbol_scopes))
@@ -1404,14 +1401,14 @@ module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
   let add_pc (c : Symbolic_value.bool) =
-    <span data-count="29294">l</span>et c = Smtml.Expr.simplify c in
-    <span data-count="29294">m</span>atch Smtml.Expr.view c with
+    <span data-count="28980">l</span>et c = Smtml.Expr.simplify c in
+    <span data-count="28981">m</span>atch Smtml.Expr.view c with
     | <span data-count="0">V</span>al True -&gt; return ()
-    | <span data-count="182">V</span>al False -&gt; stop
-    | <span data-count="29112">_</span> -&gt;
+    | <span data-count="180">V</span>al False -&gt; stop
+    | <span data-count="28799">_</span> -&gt;
       let* thread in
-      <span data-count="29111">l</span>et new_thread = Thread.add_pc thread c in
-      <span data-count="29112">s</span>et_thread new_thread
+      <span data-count="28802">l</span>et new_thread = Thread.add_pc thread c in
+      <span data-count="28802">s</span>et_thread new_thread
   [@@inline]
 
   let get_pc () =
@@ -1420,7 +1417,7 @@ module Make (Thread : Thread_intf.S) = struct
     <span data-count="8">S</span>ymbolic_path_condition.to_set pc
 
   let add_breadcrumb crumb =
-    <span data-count="27597">m</span>odify_thread (fun t -&gt; <span data-count="27596">T</span>hread.add_breadcrumb t crumb)
+    <span data-count="27441">m</span>odify_thread (fun t -&gt; <span data-count="27439">T</span>hread.add_breadcrumb t crumb)
 
   let add_label label = <span data-count="2">m</span>odify_thread (fun t -&gt; <span data-count="2">T</span>hread.add_label t label)
 
@@ -1451,127 +1448,127 @@ module Make (Thread : Thread_intf.S) = struct
     in check_reachability and get_model.
   *)
   let check_reachability v =
-    <span data-count="26674">l</span>et* () = yield in
-    <span data-count="26637">l</span>et* thread in
-    <span data-count="26637">l</span>et* solver in
-    <span data-count="26637">l</span>et pc = Thread.pc thread in
-    <span data-count="26637">l</span>et sliced_pc = Symbolic_path_condition.slice pc v in
-    <span data-count="26637">m</span>atch Solver.check solver sliced_pc with
-    | <span data-count="14206">`</span>Sat -&gt; return ()
-    | <span data-count="12419">`</span>Unsat -&gt; stop
+    <span data-count="26660">l</span>et* () = yield in
+    <span data-count="26621">l</span>et* thread in
+    <span data-count="26621">l</span>et* solver in
+    <span data-count="26621">l</span>et pc = Thread.pc thread in
+    <span data-count="26621">l</span>et sliced_pc = Symbolic_path_condition.slice pc v in
+    <span data-count="26620">m</span>atch Solver.check solver sliced_pc with
+    | <span data-count="14192">`</span>Sat -&gt; return ()
+    | <span data-count="12422">`</span>Unsat -&gt; stop
     | `Unknown -&gt; assert false
 
   let get_model_or_stop symbol =
-    <span data-count="1075">l</span>et* () = yield in
-    <span data-count="1064">l</span>et* solver in
-    <span data-count="1064">l</span>et+ thread in
-    <span data-count="1064">l</span>et pc = Thread.pc thread |&gt; <span data-count="1064">S</span>ymbolic_path_condition.to_set in
-    <span data-count="1064">m</span>atch Solver.check solver pc with
-    | <span data-count="138">`</span>Unsat -&gt; stop
-    | <span data-count="924">`</span>Sat -&gt; begin
+    <span data-count="925">l</span>et* () = yield in
+    <span data-count="917">l</span>et* solver in
+    <span data-count="917">l</span>et+ thread in
+    <span data-count="917">l</span>et pc = Thread.pc thread |&gt; <span data-count="917">S</span>ymbolic_path_condition.to_set in
+    <span data-count="917">m</span>atch Solver.check solver pc with
+    | <span data-count="135">`</span>Unsat -&gt; stop
+    | <span data-count="782">`</span>Sat -&gt; begin
       let symbol_scopes = Symbol_scope.of_symbol symbol in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
-      <span data-count="924">l</span>et model = Solver.model solver ~symbol_scopes ~pc in
-      <span data-count="923">m</span>atch Smtml.Model.evaluate model symbol with
+      <span data-count="782">l</span>et model = Solver.model solver ~symbol_scopes ~pc in
+      <span data-count="780">m</span>atch Smtml.Model.evaluate model symbol with
       | <span data-count="0">N</span>one -&gt;
         Fmt.failwith
           "Unreachable: The model exists so this symbol should evaluate"
-      | <span data-count="924">S</span>ome v -&gt; return v
+      | <span data-count="781">S</span>ome v -&gt; return v
     end
     | `Unknown -&gt; assert false
 
   let select_inner ~explore_first (cond : Symbolic_value.bool) =
-    <span data-count="1597710">l</span>et v = Smtml.Expr.simplify cond in
-    <span data-count="1597692">m</span>atch Smtml.Expr.view v with
-    | <span data-count="168297">V</span>al True -&gt; return true
-    | <span data-count="1416056">V</span>al False -&gt; return false
+    <span data-count="1597378">l</span>et v = Smtml.Expr.simplify cond in
+    <span data-count="1597359">m</span>atch Smtml.Expr.view v with
+    | <span data-count="168225">V</span>al True -&gt; return true
+    | <span data-count="1415802">V</span>al False -&gt; return false
     | <span data-count="0">V</span>al (Bitv _bv) -&gt; Fmt.failwith "unreachable (type error)"
-    | <span data-count="13337">_</span> -&gt;
+    | <span data-count="13330">_</span> -&gt;
       let true_branch =
-        let* () = add_p<span data-count="13337">c</span> v in
-        <span data-count="13337">l</span>et* () = add_breadcrum<span data-count="13337">b</span> 1 in
-        <span data-count="13336">l</span>et+ () = check_reachabilit<span data-count="13337">y</span> v in
-        <span data-count="11805">t</span>rue
+        let* () = add_p<span data-count="13330">c</span> v in
+        <span data-count="13330">l</span>et* () = add_breadcrum<span data-count="13330">b</span> 1 in
+        <span data-count="13330">l</span>et+ () = check_reachabilit<span data-count="13330">y</span> v in
+        <span data-count="11802">t</span>rue
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
-        <span data-count="13337">l</span>et* () = add_p<span data-count="13337">c</span> neg_v in
-        <span data-count="13337">l</span>et* () = add_breadcrum<span data-count="13337">b</span> 0 in
-        <span data-count="13337">l</span>et+ () = check_reachabilit<span data-count="13337">y</span> neg_v in
-        <span data-count="2401">f</span>alse
+        <span data-count="13329">l</span>et* () = add_p<span data-count="13330">c</span> neg_v in
+        <span data-count="13330">l</span>et* () = add_breadcrum<span data-count="13329">b</span> 0 in
+        <span data-count="13330">l</span>et+ () = check_reachabilit<span data-count="13329">y</span> neg_v in
+        <span data-count="2390">f</span>alse
       in
-      if explore_first then <span data-count="12895">c</span>hoose true_branch false_branch
-      else <span data-count="442">c</span>hoose false_branch true_branch
+      if explore_first then <span data-count="12886">c</span>hoose true_branch false_branch
+      else <span data-count="444">c</span>hoose false_branch true_branch
   [@@inline]
 
   let select (cond : Symbolic_value.bool) =
-    <span data-count="1500713">s</span>elect_inner cond ~explore_first:true
+    <span data-count="1500380">s</span>elect_inner cond ~explore_first:true
   [@@inline]
 
   let summary_symbol (e : Smtml.Expr.t) =
-    <span data-count="151">l</span>et* thread in
-    <span data-count="151">m</span>atch Smtml.Expr.view e with
+    <span data-count="143">l</span>et* thread in
+    <span data-count="143">m</span>atch Smtml.Expr.view e with
     | <span data-count="4">S</span>ymbol sym -&gt; return (None, sym)
-    | <span data-count="147">_</span> -&gt;
+    | <span data-count="139">_</span> -&gt;
       let num_symbols = Thread.num_symbols thread in
-      <span data-count="147">l</span>et+ () = modify_threa<span data-count="147">d</span> Thread.incr_num_symbols in
-      <span data-count="147">l</span>et sym_name = Fmt.str "choice_i32_%i" num_symbols in
-      <span data-count="147">l</span>et sym_type = Smtml.Ty.Ty_bitv 32 in
+      <span data-count="139">l</span>et+ () = modify_threa<span data-count="139">d</span> Thread.incr_num_symbols in
+      <span data-count="139">l</span>et sym_name = Fmt.str "choice_i32_%i" num_symbols in
+      <span data-count="139">l</span>et sym_type = Smtml.Ty.Ty_bitv 32 in
       let sym = Smtml.Symbol.make sym_type sym_name in
-      <span data-count="147">l</span>et assign = Smtml.Expr.(relo<span data-count="147">p</span> Ty_bool Eq (symbo<span data-count="147">l</span> sym) e) in
+      <span data-count="139">l</span>et assign = Smtml.Expr.(relo<span data-count="139">p</span> Ty_bool Eq (symbo<span data-count="139">l</span> sym) e) in
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_value.int32) =
-    <span data-count="53125">l</span>et sym_int = Smtml.Expr.simplify i in
-    <span data-count="53123">m</span>atch Smtml.Expr.view sym_int with
-    | <span data-count="52974">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="52972">s</span> bv &lt;= 32 -&gt;
-      <span data-count="52971">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="52973">2</span> bv)
-    | <span data-count="151">_</span> -&gt;
-      let* assign, symbol = summary_symbo<span data-count="151">l</span> sym_int in
-      <span data-count="151">l</span>et* () =
-        match assign with <span data-count="147">S</span>ome assign -&gt; add_p<span data-count="147">c</span> assign | <span data-count="4">N</span>one -&gt; retur<span data-count="4">n</span> ()
+    <span data-count="53066">l</span>et sym_int = Smtml.Expr.simplify i in
+    <span data-count="53056">m</span>atch Smtml.Expr.view sym_int with
+    | <span data-count="52915">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="52911">s</span> bv &lt;= 32 -&gt;
+      <span data-count="52911">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="52919">2</span> bv)
+    | <span data-count="143">_</span> -&gt;
+      let* assign, symbol = summary_symbo<span data-count="143">l</span> sym_int in
+      <span data-count="143">l</span>et* () =
+        match assign with <span data-count="139">S</span>ome assign -&gt; add_p<span data-count="139">c</span> assign | <span data-count="4">N</span>one -&gt; retur<span data-count="4">n</span> ()
       in
-      <span data-count="151">l</span>et rec generator () =
-        <span data-count="1075">l</span>et* possible_value = get_model_or_sto<span data-count="1074">p</span> symbol in
-        <span data-count="1062">l</span>et* possible_value in
-        <span data-count="923">l</span>et i =
+      <span data-count="143">l</span>et rec generator () =
+        <span data-count="925">l</span>et* possible_value = get_model_or_sto<span data-count="925">p</span> symbol in
+        <span data-count="917">l</span>et* possible_value in
+        <span data-count="782">l</span>et i =
           match possible_value with
-          | <span data-count="923">S</span>mtml.Value.Bitv bv when Smtml.Bitvector.numbit<span data-count="923">s</span> bv &lt;= 32 -&gt;
-            <span data-count="923">S</span>mtml.Bitvector.to_int3<span data-count="923">2</span> bv
+          | <span data-count="782">S</span>mtml.Value.Bitv bv when Smtml.Bitvector.numbit<span data-count="782">s</span> bv &lt;= 32 -&gt;
+            <span data-count="781">S</span>mtml.Bitvector.to_int3<span data-count="782">2</span> bv
           | <span data-count="0">_</span> -&gt; Fmt.failwit<span data-count="0">h</span> "Unreachable: found symbol must be a value"
         in
         let s = Smtml.Expr.symbol symbol in
-        <span data-count="924">l</span>et this_value_cond =
+        <span data-count="782">l</span>et this_value_cond =
           let open Smtml.Expr in
-          Bitv.I32.(s = <span data-count="923">v</span> i)
+          Bitv.I32.(s = <span data-count="782">v</span> i)
         in
         let not_this_value_cond =
           let open Smtml.Expr in
           (* != is **not** the physical inequality here *)
-          Bitv.I32.(s != <span data-count="924">v</span> i)
+          Bitv.I32.(s != <span data-count="782">v</span> i)
         in
         let this_val_branch =
-          let* () = add_breadcrum<span data-count="924">b</span> (Int32.to_in<span data-count="924">t</span> i) in
-          <span data-count="924">l</span>et+ () = add_p<span data-count="924">c</span> this_value_cond in
-          <span data-count="924">i</span>
+          let* () = add_breadcrum<span data-count="780">b</span> (Int32.to_in<span data-count="782">t</span> i) in
+          <span data-count="782">l</span>et+ () = add_p<span data-count="782">c</span> this_value_cond in
+          <span data-count="781">i</span>
         in
         let not_this_val_branch =
-          let* () = add_p<span data-count="923">c</span> not_this_value_cond in
-          <span data-count="924">g</span>enerator ()
+          let* () = add_p<span data-count="781">c</span> not_this_value_cond in
+          <span data-count="782">g</span>enerator ()
         in
         choose this_val_branch not_this_val_branch
       in
       generator ()
 
   let assertion c =
-    <span data-count="96997">l</span>et* assertion_true = select_inne<span data-count="96998">r</span> c ~explore_first:false in
-    <span data-count="97023">i</span>f assertion_true then <span data-count="96960">r</span>eturn ()
+    <span data-count="96997">l</span>et* assertion_true = select_inne<span data-count="96997">r</span> c ~explore_first:false in
+    <span data-count="97028">i</span>f assertion_true then <span data-count="96966">r</span>eturn ()
     else
-      <span data-count="63">l</span>et* thread in
-      <span data-count="63">l</span>et* solver in
-      <span data-count="63">l</span>et symbol_scopes = Thread.symbol_scopes thread in
-      <span data-count="63">l</span>et pc = Thread.pc thread |&gt; <span data-count="63">S</span>ymbolic_path_condition.to_set in
-      <span data-count="63">l</span>et model = Solver.model ~symbol_scopes ~pc solver in
+      <span data-count="62">l</span>et* thread in
+      <span data-count="62">l</span>et* solver in
+      <span data-count="62">l</span>et symbol_scopes = Thread.symbol_scopes thread in
+      <span data-count="62">l</span>et pc = Thread.pc thread |&gt; <span data-count="62">S</span>ymbolic_path_condition.to_set in
+      <span data-count="62">l</span>et model = Solver.model ~symbol_scopes ~pc solver in
       <span data-count="62">l</span>et breadcrumbs = Thread.breadcrumbs thread in
       <span data-count="62">l</span>et labels = Thread.labels thread in
       <span data-count="62">a</span>ssertion_fail c model labels breadcrumbs symbol_scopes

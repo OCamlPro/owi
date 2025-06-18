@@ -438,18 +438,18 @@ type 'a run_result = ('a, err) Prelude.Result.t * thread
 
 type 'a t = M of (thread -&gt; 'a run_result) [@@unboxed]
 
-let return v = <span data-count="1915268">M</span> (fun t -&gt; <span data-count="1915268">(</span>Ok v, t)) [@@inline]
+let return v = <span data-count="1914738">M</span> (fun t -&gt; <span data-count="1914738">(</span>Ok v, t)) [@@inline]
 
 let stop = M (fun st -&gt; <span data-count="0">(</span>Error ErrExplicitStop, st))
 
-let run (M v) st : _ run_result = <span data-count="4658704">v</span> st [@@inline]
+let run (M v) st : _ run_result = <span data-count="4657644">v</span> st [@@inline]
 
 let bind v f =
-  <span data-count="2330027">M</span>
+  <span data-count="2329497">M</span>
     (fun init_s -&gt;
-      <span data-count="2330027">l</span>et v_final, tmp_st = run v init_s in
-      <span data-count="2330027">m</span>atch v_final with
-      | <span data-count="2328677">O</span>k v_final -&gt; run (<span data-count="2328677">f</span> v_final) tmp_st
+      <span data-count="2329497">l</span>et v_final, tmp_st = run v init_s in
+      <span data-count="2329497">m</span>atch v_final with
+      | <span data-count="2328147">O</span>k v_final -&gt; run (<span data-count="2328147">f</span> v_final) tmp_st
       | <span data-count="1350">E</span>rror _ as e -&gt; (e, tmp_st) )
 [@@inline]
 

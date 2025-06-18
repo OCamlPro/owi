@@ -49,7 +49,7 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span class="visited"> </span>
 </pre>
@@ -106,17 +106,17 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 let link_state = Link.extern_modul<span data-count="1019">e</span> Link.empty_state ~name:"owi" extern_module
 
-let run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize filename =
+let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file =
   <span data-count="39">l</span>et name = None in
   let link_state = if rac then <span data-count="1">l</span>ink_state else <span data-count="38">L</span>ink.empty_state in
-  let+ (_ : _ Link.state) =
-    Compile.File.until_interpre<span data-count="39">t</span> ~unsafe ~timeout ~timeout_instr ~rac
-      ~srac:false ~optimize ~name link_state filename
+  let* m, (link_state : _ Link.state) =
+    Compile.File.until_lin<span data-count="39">k</span> ~unsafe ~rac ~srac:false ~optimize ~name link_state
+      source_file
+  in
+  <span data-count="39">l</span>et+ () =
+    Interpret.Concrete.modu<span data-count="39">l</span> ~timeout ~timeout_instr link_state.envs m
   in
   <span data-count="35">(</span>)
-
-let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~files =
-  <span data-count="39">l</span>ist_iter (run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize) files
 </code></pre>
       </div>
     </div>

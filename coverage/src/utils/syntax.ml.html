@@ -230,17 +230,17 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="3729727">m</span>atch o with <span data-count="3711479">O</span>k v -&gt; f v | <span data-count="18248">E</span>rror _ as e -&gt; e [@@inline]
+let ( let* ) o f = <span data-count="3729556">m</span>atch o with <span data-count="3711312">O</span>k v -&gt; f v | <span data-count="18244">E</span>rror _ as e -&gt; e [@@inline]
 
-let ( let+ ) o f = <span data-count="2342195">m</span>atch o with <span data-count="2332901">O</span>k v -&gt; Ok (<span data-count="2332901">f</span> v) | <span data-count="9294">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="2338568">m</span>atch o with <span data-count="2329278">O</span>k v -&gt; Ok (<span data-count="2329278">f</span> v) | <span data-count="9290">E</span>rror _ as e -&gt; e
 [@@inline]
 
 let ok v = <span data-count="647141">O</span>k v [@@inline]
 
 let list_iter f l =
-  <span data-count="39855">l</span>et rec aux = function
-    | <span data-count="39733">[</span>] -&gt; Ok ()
-    | <span data-count="21068">x</span> :: xs -&gt; ( match f x with <span data-count="20946">O</span>k () -&gt; aux xs | <span data-count="122">E</span>rror _ as e -&gt; e )
+  <span data-count="39816">l</span>et rec aux = function
+    | <span data-count="39698">[</span>] -&gt; Ok ()
+    | <span data-count="21029">x</span> :: xs -&gt; ( match f x with <span data-count="20911">O</span>k () -&gt; aux xs | <span data-count="118">E</span>rror _ as e -&gt; e )
   in
   aux l
 [@@inline]
@@ -266,10 +266,10 @@ let list_concat_map f l =
 [@@inline]
 
 let list_fold_left f acc l =
-  <span data-count="175321">l</span>et rec aux acc = function
-    | <span data-count="171909">[</span>] -&gt; Ok acc
-    | <span data-count="800223">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="796811">O</span>k acc -&gt; aux acc tl | <span data-count="3412">E</span>rror _ as e -&gt; e )
+  <span data-count="174915">l</span>et rec aux acc = function
+    | <span data-count="171505">[</span>] -&gt; Ok acc
+    | <span data-count="799817">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="796407">O</span>k acc -&gt; aux acc tl | <span data-count="3410">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 [@@inline]

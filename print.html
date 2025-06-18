@@ -1731,7 +1731,7 @@ COMMANDS
        c++ [OPTION]… FILE…
            Compile a C++ file to Wasm and run the symbolic interpreter on it
 
-       conc [OPTION]… FILE…
+       conc [OPTION]… FILE
            Run the concolic interpreter
 
        fmt [OPTION]… FILE…
@@ -1752,7 +1752,7 @@ COMMANDS
            Replay a module containing symbols with concrete values in a
            replay file containing a model
 
-       run [OPTION]… FILE…
+       run [OPTION]… FILE
            Run the concrete interpreter
 
        rust [OPTION]… FILE…
@@ -1761,7 +1761,7 @@ COMMANDS
        script [OPTION]… FILE…
            Run a reference test suite script
 
-       sym [OPTION]… FILE…
+       sym [OPTION]… FILE
            Run the symbolic interpreter
 
        validate [OPTION]… FILE…
@@ -2080,11 +2080,11 @@ NAME
        owi-conc - Run the concolic interpreter
 
 SYNOPSIS
-       owi conc [OPTION]… FILE…
+       owi conc [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
-           source files
+           source file
 
 OPTIONS
        --color=WHEN (absent=auto)
@@ -2576,11 +2576,11 @@ NAME
        owi-run - Run the concrete interpreter
 
 SYNOPSIS
-       owi run [OPTION]… FILE…
+       owi run [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
-           source files
+           source file
 
 OPTIONS
        --color=WHEN (absent=auto)
@@ -2846,11 +2846,11 @@ NAME
        owi-sym - Run the symbolic interpreter
 
 SYNOPSIS
-       owi sym [OPTION]… FILE…
+       owi sym [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
-           source files
+           source file
 
 OPTIONS
        --color=WHEN (absent=auto)
