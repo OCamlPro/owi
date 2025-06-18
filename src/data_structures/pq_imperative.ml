@@ -15,9 +15,8 @@ let rec move_up h x i =
     end
     else Dynarray.set h i x
 
-let push v h =
+let push x h =
   let n = Dynarray.length h in
-  let x = (1, v) in
   Dynarray.add_last h x;
   move_up h x n
 

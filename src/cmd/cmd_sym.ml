@@ -216,12 +216,12 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Wq.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
-        res_queue
+        1 res_queue
     | ( (Both | Assertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Wq.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
-        res_queue
+        1 res_queue
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =
