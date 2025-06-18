@@ -10,21 +10,14 @@ let () = Random.init 42
 
 let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
   ~optimize source_file =
-  let link_state = Link.empty_state in
+  let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
+  let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
-    Link.extern_module' link_state ~name:"owi"
+    Link.extern_module' Link.empty_state ~name:"owi"
       ~func_typ:Concolic.Extern_func.extern_type
       Concolic_wasm_ffi.symbolic_extern_module
   in
 
-  let* m = Parse.guess_from_file source_file in
-  let* m =
-    match m with
-    | Kind.Wat _ | Wasm _ -> Compile.Any.until_validate ~unsafe ~rac ~srac m
-    | Wast _ -> Fmt.error_msg "can't run concolic interpreter on a script"
-    | Ocaml _ -> assert false
-  in
-  let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
@@ -424,12 +417,12 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
     | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in
   let solver = Solver.fresh solver () in
-  let* link_state, modules_to_run =
+  let* link_state, module_to_run =
     simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
       ~optimize source_file
   in
   let tree = fresh_tree [] in
-  let* result = run solver tree link_state modules_to_run in
+  let* result = run solver tree link_state module_to_run in
   let testcase assignments =
     if not no_value then
       let testcase : Smtml.Value.t list =
