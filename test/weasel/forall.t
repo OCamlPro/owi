@@ -1,7 +1,7 @@
   $ owi instrument forall.wat
   $ cat forall.instrumented.wat
   (module
-    (import "symbolic" "assert" (func $assert  (param i32)))
+    (import "owi" "assert" (func $assert  (param i32)))
     (type (func))
     (type (func (param i32)))
     (type (func (result i32)))
@@ -40,7 +40,7 @@
   $ owi instrument forall.wat --symbolic
   $ cat forall.instrumented.wat
   (module
-    (import "symbolic" "assert" (func $assert  (param i32)))
+    (import "owi" "assert" (func $assert  (param i32)))
     (type (func))
     (type (func (param i32)))
     (type (func (result i32)))

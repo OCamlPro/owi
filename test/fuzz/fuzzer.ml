@@ -121,7 +121,7 @@ let prepare_for_sym (modul : Owi.Text.modul) =
   in
   let import_sym_cst_i32 =
     MImport
-      { modul = "symbolic"
+      { modul = "owi"
       ; name = "symbol_i32_constant"
       ; desc =
           Import_func

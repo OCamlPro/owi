@@ -28,20 +28,21 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
       % Fmt.str "link-args=--entry=%s" entry_point
       %% Cmd.of_list (List.map Cmd.p files) )
   in
+
+  let err =
+    match Logs.level () with
+    | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
+    | None | Some _ -> OS.Cmd.err_null
+  in
+
   let+ () =
-    match
-      OS.Cmd.run
-        ~err:
-          ( if false (* TODO: make this available via CLI *) then
-              OS.Cmd.err_run_out
-            else OS.Cmd.err_null )
-        rustc_cmd
-    with
+    match OS.Cmd.run ~err rustc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Fmt.error_msg "rustc failed: %s"
-        ( if false (* TODO: make this available via CLI *) then e
-          else "run with --debug to get the full error message" )
+      Logs.debug (fun m -> m "rustc failed: %s" e);
+      Fmt.error_msg
+        "rustc failed: run with -vv to get the full error message if it was \
+         not displayed above"
   in
 
   out

@@ -52,7 +52,7 @@ let dummy_value_of_t = function
 
 let default_symbol_of_t m =
   (* TODO: make this lazy to avoid adding unused imports to the module *)
-  let modul_name = "symbolic" in
+  let modul_name = "owi" in
   let i32_symbol, m =
     let func_name = "i32_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ])) in
@@ -73,13 +73,18 @@ let default_symbol_of_t m =
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F64 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
   in
+  let v128_symbol, m =
+    let func_name = "v128_symbol" in
+    let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.V128 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
   ( m
   , function
     | Types.Num_type I32 -> Ok (Types.Call i32_symbol)
     | Num_type I64 -> Ok (Types.Call i64_symbol)
     | Num_type F32 -> Ok (Types.Call f32_symbol)
     | Num_type F64 -> Ok (Types.Call f64_symbol)
-    | Num_type V128 -> Fmt.error_msg "TODO default_symbol_of_t V128"
+    | Num_type V128 -> Ok (Types.Call v128_symbol)
     | Ref_type t ->
       Fmt.error_msg "can not create default symbol of type %a" Types.pp_ref_type
         t )

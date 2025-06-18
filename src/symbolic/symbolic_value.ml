@@ -24,9 +24,9 @@ type float64 = Expr.t
 
 let pp_float64 = Expr.pp
 
-type v128 = int64 * int64
+type v128 = Expr.t
 
-let pp_v128 fmt (a, b) = Fmt.pf fmt "(%a,%a)" pp_int64 a pp_int64 b
+let pp_v128 = Expr.pp
 
 type externref = V.externref
 
@@ -56,7 +56,7 @@ let const_f64 (f : Float64.t) : float64 = value (Num (F64 (Float64.to_bits f)))
 
 let const_v128 (v : V128.t) : v128 =
   let a, b = V128.to_i64x2 v in
-  (const_i64 a, const_i64 b)
+  Smtml.Expr.concat (const_i64 a) (const_i64 b)
 
 let ref_null _ty = Ref (Funcref None)
 
@@ -482,11 +482,20 @@ end
 module V128 = struct
   let zero : v128 = const_v128 V128.zero
 
-  let of_i32x4 _ = assert false (* TODO *)
+  let of_i32x4 a b c d =
+    Smtml.Expr.concat (Smtml.Expr.concat a b) (Smtml.Expr.concat c d)
 
-  let to_i32x4 _ = assert false (* TODO *)
+  let to_i32x4 v =
+    let a = Smtml.Expr.extract v ~low:12 ~high:16 in
+    let b = Smtml.Expr.extract v ~low:8 ~high:12 in
+    let c = Smtml.Expr.extract v ~low:4 ~high:8 in
+    let d = Smtml.Expr.extract v ~low:0 ~high:4 in
+    (a, b, c, d)
 
-  let of_i64x2 _ = assert false (* TODO *)
+  let of_i64x2 a b = Smtml.Expr.concat a b
 
-  let to_i64x2 _ = assert false (* TODO *)
+  let to_i64x2 v =
+    let a = Smtml.Expr.extract v ~low:8 ~high:16 in
+    let b = Smtml.Expr.extract v ~low:0 ~high:8 in
+    (a, b)
 end

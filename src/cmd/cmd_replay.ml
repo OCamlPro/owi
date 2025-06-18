@@ -43,44 +43,6 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       end;
       Ok ()
 
-    let symbol_i32 () =
-      let i = next () in
-      match model.(i) with
-      | V.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
-        assert false
-
-    let symbol_char () =
-      let i = next () in
-      match model.(i) with
-      | V.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Logs.err (fun m ->
-          m "Got value %a but expected a char (i32) value." V.pp v );
-        assert false
-
-    let symbol_invisible_bool () = Ok 0l
-
-    let symbol_bool = symbol_char
-
-    let abort () =
-      Logs.err (fun m -> m "Unexpected abort call.");
-      exit 121
-
-    let alloc _m _addr size =
-      let r = !brk in
-      brk := Int32.add !brk size;
-      Ok r
-
-    let free (_ : memory) adr = Ok adr
-
-    let exit (n : Value.int32) = exit (Int32.to_int n)
-
     let symbol_i8 () =
       let i = next () in
       match model.(i) with
@@ -90,6 +52,31 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       | v ->
         Logs.err (fun m ->
           m "Got value %a but expected a i8 (i32) value." V.pp v );
+        assert false
+
+    let symbol_bool = symbol_i8
+
+    let symbol_invisible_bool () = Ok 0l
+
+    let symbol_i16 () =
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m ->
+          m "Got value %a but expected a i16 (i32) value." V.pp v );
+        assert false
+
+    let symbol_i32 () =
+      let i = next () in
+      match model.(i) with
+      | V.I32 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let symbol_i64 () =
@@ -121,6 +108,29 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
       | v ->
         Logs.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
         assert false
+
+    let symbol_v128 () =
+      let i = next () in
+      match model.(i) with
+      | V.V128 n ->
+        add_sym i;
+        Ok n
+      | v ->
+        Logs.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
+        assert false
+
+    let abort () =
+      Logs.err (fun m -> m "Unexpected abort call.");
+      exit 121
+
+    let alloc _m _addr size =
+      let r = !brk in
+      brk := Int32.add !brk size;
+      Ok r
+
+    let free (_ : memory) adr = Ok adr
+
+    let exit (n : Value.int32) = exit (Int32.to_int n)
 
     let symbol_range _ _ =
       let i = next () in
@@ -172,81 +182,39 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   end in
   let replay_extern_module =
     let open M in
+    let open Concrete.Extern_func in
+    let open Concrete.Extern_func.Syntax in
     let functions =
-      [ ( "i8_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8)
-        )
-      ; ( "char_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_char)
-        )
-      ; ( "i32_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-        )
-      ; ( "i64_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-        )
-      ; ( "f32_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-        )
-      ; ( "f64_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-        )
-      ; ( "bool_symbol"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-        )
-      ; ( "range_symbol"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
-      ; ( "assume"
-        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assume)
-        )
-      ; ( "assert"
-        , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert')
-        )
-      ; ( "in_replay_mode"
-        , Concrete_extern_func.Extern_func
-            (Func (UArg Res, R1 I32), in_replay_mode) )
-      ; ( "print_char"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Res), R0), print_char) )
+      [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
+      ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
+      ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+      ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+      ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+      ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+      ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+      ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+      ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+      ; ("assume", Extern_func (i32 ^->. unit, assume))
+      ; ("assert", Extern_func (i32 ^->. unit, assert'))
+      ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+      ; ("print_char", Extern_func (i32 ^->. unit, print_char))
       ; ( "cov_label_is_covered"
-        , Concrete_extern_func.Extern_func
-            (Func (Arg (I32, Res), R1 I32), cov_label_is_covered) )
+        , Extern_func (i32 ^->. i32, cov_label_is_covered) )
       ; ( "cov_label_set"
-        , Concrete_extern_func.Extern_func
-            (Func (Mem (Arg (I32, Arg (I32, Res))), R0), cov_label_set) )
-      ; ( "open_scope"
-        , Concrete_extern_func.Extern_func
-            (Func (Mem (Arg (I32, Res)), R0), open_scope) )
-      ; ( "close_scope"
-        , Concrete_extern_func.Extern_func (Func (UArg Res, R0), close_scope) )
-      ]
-    in
-    { Link.functions }
-  in
-
-  let summaries_extern_module =
-    let open M in
-    let functions =
-      [ ( "alloc"
-        , Concrete.Extern_func.Extern_func
-            (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
-      ; ( "dealloc"
-        , Concrete.Extern_func.Extern_func
-            (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-      ; ("abort", Concrete.Extern_func.Extern_func (Func (UArg Res, R0), abort))
-      ; ( "exit"
-        , Concrete.Extern_func.Extern_func (Func (Arg (I32, Res), R0), exit) )
+        , Extern_func (memory ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+      ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
+      ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
+      ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+      ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+      ; ("abort", Extern_func (unit ^->. unit, abort))
+      ; ("exit", Extern_func (i32 ^->. unit, exit))
       ]
     in
     { Link.functions }
   in
 
   let link_state =
-    Link.extern_module Link.empty_state ~name:"symbolic" replay_extern_module
-  in
-  let link_state =
-    Link.extern_module link_state ~name:"summaries" summaries_extern_module
+    Link.extern_module Link.empty_state ~name:"owi" replay_extern_module
   in
 
   let* m =
@@ -256,7 +224,9 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
   in
-  let* () = Interpret.Concrete.modul link_state.envs m in
+  let* () =
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  in
   Ok ()
 
 let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point

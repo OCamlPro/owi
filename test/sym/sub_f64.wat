@@ -1,6 +1,6 @@
 (module
-  (import "symbolic" "f64_symbol" (func $f64_symbol (result f64)))
-  (import "symbolic" "assert" (func $assert (param i32)))
+  (import "owi" "f64_symbol" (func $f64_symbol (result f64)))
+  (import "owi" "assert" (func $assert (param i32)))
 
   (func $start
     (local $x f64)

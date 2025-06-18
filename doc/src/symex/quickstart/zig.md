@@ -7,9 +7,9 @@ Given the following `fib.zig` file:
 <!-- $MDX file=fib.zig -->
 ```zig
 // TODO: replace this by a proper include of the owi header?
-extern "symbolic" fn i32_symbol() i32;
-extern "symbolic" fn assume(bool) void;
-extern "symbolic" fn assert(bool) void;
+extern "owi" fn i32_symbol() i32;
+extern "owi" fn assume(bool) void;
+extern "owi" fn assert(bool) void;
 
 fn fibonacci(n: i32) i32 {
     if (n < 0) {

@@ -133,6 +133,7 @@
   logs
   logs.cli
   logs.fmt
+  logs.threaded
   menhirLib
   ocaml_intrinsics
   ppxlib

@@ -22,17 +22,17 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : data.drop 0
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 12
+  owi: [INFO] running instr : call 14
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ]
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 0 ]
-  owi: [INFO] running instr : call 8
+  owi: [INFO] running instr : call 9
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 7
+  owi: [INFO] running instr : call 8
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : global.get 0
@@ -47,6 +47,9 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 8389632 ]
+  owi: [INFO] running instr : call 7
+  owi: [INFO] calling func  : func anonymous
+  owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 3
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389632 ]
   owi: [INFO] running instr : i32.store offset=12 align=4
@@ -162,7 +165,7 @@
   owi: [INFO] stack         : [ i32.const 8389648 ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389648 ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 0
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 8389632 ]
   owi: [INFO] running instr : i32.store offset=8 align=4
   owi: [INFO] stack         : [  ]
@@ -175,12 +178,12 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : call 2
+  owi: [INFO] running instr : call 1
   owi: [INFO] stack         : [ i32.const 0 ]
   owi: [INFO] running instr : drop
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 2
   owi: [INFO] scopes : [symbol symbol_0]
   Assertion failure was correctly reached!

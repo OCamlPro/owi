@@ -652,7 +652,7 @@ let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : Module.t)
       Array.map
         (fun (name, (ft, index)) ->
           ( name
-          , { Imported.modul = "symbolic"
+          , { Imported.modul = "owi"
             ; name
             ; assigned_name = Some name
             ; desc = Bt_raw (Some (Raw index), ft)

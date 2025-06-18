@@ -35,29 +35,18 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
   in
   let sleep _ms id = Symbolic_choice_with_memory.return id in
+  let open Symbolic.Extern_func in
+  let open Symbolic.Extern_func.Syntax in
   let functions =
-    [ ( "log-i32"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), log_i32) )
+    [ ("log-i32", Extern_func (i32 ^->. unit, log_i32))
     ; ( "log-i64"
-      , if weird_log_i64 then
-          Symbolic.Extern_func.Extern_func
-            (Func (Arg (I32, Arg (I32, Res)), R0), log_i64_weird)
-        else
-          Symbolic.Extern_func.Extern_func (Func (Arg (I64, Res), R0), log_i64)
-      )
-    ; ( "log-f32"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (F32, Res), R0), log_f32) )
-    ; ( "log-f64"
-      , Symbolic.Extern_func.Extern_func (Func (Arg (F64, Res), R0), log_f64) )
-    ; ( "call-export"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R0), call_export) )
-    ; ( "call-export-catch"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R1 I32), call_export_catch) )
-    ; ( "sleep"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), sleep) )
+      , if weird_log_i64 then Extern_func (i32 ^-> i32 ^->. unit, log_i64_weird)
+        else Extern_func (i64 ^->. unit, log_i64) )
+    ; ("log-f32", Extern_func (f32 ^->. unit, log_f32))
+    ; ("log-f64", Extern_func (f64 ^->. unit, log_f64))
+    ; ("call-export", Extern_func (i32 ^-> i32 ^->. unit, call_export))
+    ; ("call-export-catch", Extern_func (i32 ^->. i32, call_export_catch))
+    ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
     ]
   in
   { Link.functions }
@@ -69,13 +58,11 @@ let emscripten_fuzzing_support_module () =
     Symbolic_choice_with_memory.return ()
   in
   let get_temp_ret_0 () = Symbolic_choice_with_memory.return !temp_ret_0 in
+  let open Symbolic.Extern_func in
+  let open Symbolic.Extern_func.Syntax in
   let functions =
-    [ ( "setTempRet0"
-      , Symbolic.Extern_func.Extern_func
-          (Func (Arg (I32, Res), R0), set_temp_ret_0) )
-    ; ( "getTempRet0"
-      , Symbolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), get_temp_ret_0) )
+    [ ("setTempRet0", Extern_func (i32 ^->. unit, set_temp_ret_0))
+    ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
     ]
   in
   { Link.functions }
@@ -139,7 +126,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_owi_assert =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "assert"
          ; assigned_name = Some "assert"
          ; desc = Types.Bt_raw (None, ([ (None, Types.Num_type I32) ], []))
@@ -257,7 +244,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_i32_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "i32_symbol"
          ; assigned_name = Some "i32_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I32 ]))
@@ -268,7 +255,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_i64_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "i64_symbol"
          ; assigned_name = Some "i64_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I64 ]))
@@ -279,7 +266,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_f32_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "f32_symbol"
          ; assigned_name = Some "f32_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F32 ]))
@@ -290,7 +277,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let iso_modul, id_f64_symbol =
     Binary.Module.add_func
       (Runtime.Imported
-         { modul = "symbolic"
+         { modul = "owi"
          ; name = "f64_symbol"
          ; assigned_name = Some "f64_symbol"
          ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F64 ]))
@@ -329,7 +316,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
   let m = Symbolic.convert_module_to_run m in
 
-  Interpret.Symbolic.modul link_state.envs m
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 module String_set = Set.Make (String)
 

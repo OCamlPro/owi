@@ -48,7 +48,7 @@ With Weasel, we can annotate this function by specifying its postconditions:
 $ owi instrument plus_three.wat
 $ cat plus_three.instrumented.wat
 (module
-  (import "symbolic" "assert" (func $assert  (param i32)))
+  (import "owi" "assert" (func $assert  (param i32)))
   (type (func (param $x i32) (result i32)))
   (type (func))
   (type (func (param i32)))

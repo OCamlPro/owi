@@ -14,12 +14,8 @@ type fail_mode =
 
 let link_symbolic_modules link_state =
   let func_typ = Symbolic.Extern_func.extern_type in
-  let link_state =
-    Link.extern_module' link_state ~name:"symbolic" ~func_typ
-      Symbolic_wasm_ffi.symbolic_extern_module
-  in
-  Link.extern_module' link_state ~name:"summaries" ~func_typ
-    Symbolic_wasm_ffi.summaries_extern_module
+  Link.extern_module' link_state ~name:"owi" ~func_typ
+    Symbolic_wasm_ffi.symbolic_extern_module
 
 let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
   filename =
@@ -31,7 +27,7 @@ let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols _pc
     Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  Interpret.Symbolic.modul link_state.envs m
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
@@ -49,32 +45,47 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         | `Assoc fields -> `Assoc (("labels", `List labels_json) :: fields)
         | _ -> json
       in
+      let json =
+        if with_breadcrumbs then
+          let crumbs =
+            List.rev_map (fun crumb -> `Int crumb) (List.rev breadcrumbs)
+          in
+          match json with
+          | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
+          | _ -> json
+        else json
+      in
       Yojson.Basic.pretty_print fmt json
     | Scfg ->
       let scfg = Symbol_scope.to_scfg ~no_value model scoped_values in
       let model = Scfg.Query.get_dir_exn "model" scfg in
       let lbls =
-        List.map
-          (fun (id, lbl_name) ->
-            { Scfg.Types.name = "label"
-            ; params = [ string_of_int id; lbl_name ]
-            ; children = []
-            } )
-          labels
+        { Scfg.Types.name = "labels"
+        ; params = []
+        ; children =
+            List.map
+              (fun (id, lbl_name) ->
+                { Scfg.Types.name = "label"
+                ; params = [ string_of_int id; lbl_name ]
+                ; children = []
+                } )
+              labels
+        }
       in
-      let children =
+      let bcrumbs =
         if with_breadcrumbs then
-          let bcrumbs =
-            [ { Scfg.Types.name = "breadcrumbs"
-              ; params = List.map string_of_int (List.rev breadcrumbs)
-              ; children = []
-              }
-            ]
-          in
-          model.children @ lbls @ bcrumbs
-        else model.children @ lbls
+          [ { Scfg.Types.name = "breadcrumbs"
+            ; params = List.map string_of_int (List.rev breadcrumbs)
+            ; children = []
+            }
+          ]
+        else []
       in
-      Scfg.Pp.directive fmt { model with children }
+      let ret =
+        model
+        :: (if List.length lbls.children > 0 then lbls :: bcrumbs else bcrumbs)
+      in
+      Scfg.Pp.config fmt ret
   in
   let to_file path model labels breadcrumbs symbol_scopes =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
@@ -101,7 +112,9 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
     match model_out_file with
     | Some path -> to_file path model labels breadcrumbs symbol_scopes
     | None -> begin
-      Logs.app (fun m -> m "%a" pp (model, labels, breadcrumbs, symbol_scopes));
+      Logs.app (fun m ->
+        let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
+        fmt pp (model, labels, breadcrumbs, symbol_scopes) );
       Ok ()
     end
   in

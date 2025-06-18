@@ -10,26 +10,21 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     assert (not @@ Prelude.Int32.equal n 0l);
     Ok ()
   in
-  let functions =
-    [ ( "assert"
-      , Concrete_extern_func.Extern_func (Func (Arg (I32, Res), R0), assert_i32)
-      )
-    ]
-  in
+  let open Concrete.Extern_func in
+  let open Concrete.Extern_func.Syntax in
+  let functions = [ ("assert", Extern_func (i32 ^->. unit, assert_i32)) ] in
   { functions }
 
-(* module name is called "symbolic" to be compatible with code generator *)
-let link_state =
-  Link.extern_module Link.empty_state ~name:"symbolic" extern_module
+let link_state = Link.extern_module Link.empty_state ~name:"owi" extern_module
 
-let run_file ~unsafe ~rac ~optimize filename =
+let run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize filename =
   let name = None in
   let link_state = if rac then link_state else Link.empty_state in
   let+ (_ : _ Link.state) =
-    Compile.File.until_interpret ~unsafe ~rac ~srac:false ~optimize ~name
-      link_state filename
+    Compile.File.until_interpret ~unsafe ~timeout ~timeout_instr ~rac
+      ~srac:false ~optimize ~name link_state filename
   in
   ()
 
-let cmd ~unsafe ~rac ~optimize ~files =
-  list_iter (run_file ~unsafe ~rac ~optimize) files
+let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~files =
+  list_iter (run_file ~unsafe ~timeout ~timeout_instr ~rac ~optimize) files

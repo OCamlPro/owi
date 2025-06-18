@@ -97,6 +97,7 @@ module type P = sig
        and type int64 := Value.int64
        and type float32 := Value.float32
        and type float64 := Value.float64
+       and type v128 := Value.v128
        and type 'a m := 'a Choice.t
        and type memory := Memory.t
 
@@ -159,7 +160,12 @@ module type S = sig
   type module_to_run
 
   (** interpret a module *)
-  val modul : env Env_id.collection -> module_to_run -> unit choice
+  val modul :
+       timeout:float option
+    -> timeout_instr:int option
+    -> env Env_id.collection
+    -> module_to_run
+    -> unit choice
 
   type value
 

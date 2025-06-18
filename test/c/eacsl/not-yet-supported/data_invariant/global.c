@@ -8,7 +8,7 @@ void increment(void) {
 }
 
 int main(void) {
-    col = owi_i32();
+    col = owi_int();
     owi_assume(0 <= col);
     owi_assume(col <= 100);
     increment();

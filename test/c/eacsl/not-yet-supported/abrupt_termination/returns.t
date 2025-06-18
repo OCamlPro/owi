@@ -4,5 +4,5 @@
     This usually happens when using a label defined after the place
     where the Term should be translated
   [kernel] Plug-in e-acsl aborted: invalid user input.
-  owi: [ERROR] Frama-C failed: run with --debug to get the full error message
+  owi: [ERROR] Frama-C failed: run with -vv to get the full error message if it was not displayed above
   [26]

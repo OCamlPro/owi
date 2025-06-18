@@ -1,6 +1,6 @@
 (module
-  (import "symbolic" "range_symbol" (func $owi_range (param i32) (param i32) (result i32)))
-  (import "symbolic" "assert" (func $owi_assert (param i32)))
+  (import "owi" "range_symbol" (func $owi_range (param i32) (param i32) (result i32)))
+  (import "owi" "assert" (func $owi_assert (param i32)))
 
   (start $start)
   (func $start
@@ -15,4 +15,3 @@
     (call $owi_assert (i32.lt_u (local.get $y) (i32.const 299)))
   )
 )
-

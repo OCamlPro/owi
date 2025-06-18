@@ -19,7 +19,7 @@
                      )
                    )
                  )) } ; { index = 0 ; value = Imported ({
-                   modul: "symbolic"
+                   modul: "owi"
                    name: "i32_symbol"
                    assigned_name:  $i32_symbol
                    desc:  (result i32)}) }]
@@ -60,7 +60,7 @@
                        )
                      )
                    )) } ; { index = 0 ; value = Imported ({
-                     modul: "symbolic"
+                     modul: "owi"
                      name: "i32_symbol"
                      assigned_name:  $i32_symbol
                      desc:  (result i32)}) }]
@@ -86,7 +86,7 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 5
+  owi: [INFO] running instr : call 6
   owi: [DEBUG] path condition: [  ]
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]

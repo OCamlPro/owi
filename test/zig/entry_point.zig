@@ -1,6 +1,6 @@
-extern "symbolic" fn i32_symbol() i32;
-extern "symbolic" fn assume(bool) void;
-extern "symbolic" fn assert(bool) void;
+extern "owi" fn i32_symbol() i32;
+extern "owi" fn assume(bool) void;
+extern "owi" fn assert(bool) void;
 
 export fn fun() i32 {
     const n: i32 = i32_symbol();

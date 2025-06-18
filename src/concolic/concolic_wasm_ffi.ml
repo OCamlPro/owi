@@ -16,15 +16,30 @@ module M :
 
   module Value = Concolic_value
 
-  let symbol_i32 () : Value.int32 Concolic_choice.t =
-    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
-      let n =
+  let symbol_bool () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
+      let b =
         match forced_value with
-        | None -> Random.bits32 ()
-        | Some (Bitv bv) -> Smtml.Bitvector.to_int32 bv
+        | None -> Random.bool ()
+        | Some True -> true
+        | Some False -> false
         | _ -> assert false
       in
-      (I32 n, (n, Expr.symbol sym)) )
+      let n = Concrete_value.Bool.int32 b in
+      (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
+
+  let symbol_invisible_bool () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_invisible_symbol Ty_bool
+      (fun sym (forced_value : Smtml.Value.t option) ->
+      let b =
+        match forced_value with
+        | None -> Random.bool ()
+        | Some True -> true
+        | Some False -> false
+        | _ -> assert false
+      in
+      let n = Concrete_value.Bool.int32 b in
+      (V.I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
 
   let symbol_i8 () : Value.int32 Concolic_choice.t =
     Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
@@ -39,7 +54,28 @@ module M :
       in
       (I32 n, (n, sym_expr)) )
 
-  let symbol_char = symbol_i8
+  let symbol_i16 () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+      let n =
+        match forced_value with
+        | None -> Int32.logand 0xFFFFl (Random.bits32 ())
+        | Some (Bitv bv) -> Smtml.Bitvector.to_int32 bv
+        | _ -> assert false
+      in
+      let sym_expr =
+        Expr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbol sym)
+      in
+      (I32 n, (n, sym_expr)) )
+
+  let symbol_i32 () : Value.int32 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 32) (fun sym forced_value ->
+      let n =
+        match forced_value with
+        | None -> Random.bits32 ()
+        | Some (Bitv bv) -> Smtml.Bitvector.to_int32 bv
+        | _ -> assert false
+      in
+      (I32 n, (n, Expr.symbol sym)) )
 
   let symbol_i64 () : Value.int64 Concolic_choice.t =
     Concolic_choice.with_new_symbol (Ty_bitv 64) (fun sym forced_value ->
@@ -73,30 +109,22 @@ module M :
       let n = Float64.of_bits n in
       (F64 n, (n, Expr.symbol sym)) )
 
-  let symbol_invisible_bool () : Value.int32 Concolic_choice.t =
-    Concolic_choice.with_new_invisible_symbol Ty_bool
-      (fun sym (forced_value : Smtml.Value.t option) ->
-      let b =
+  let symbol_v128 () : Value.v128 Concolic_choice.t =
+    Concolic_choice.with_new_symbol (Ty_bitv 128) (fun sym forced_value ->
+      let a, b =
         match forced_value with
-        | None -> Random.bool ()
-        | Some True -> true
-        | Some False -> false
+        | None ->
+          let a = Random.bits64 () in
+          let b = Random.bits64 () in
+          (a, b)
+        | Some (Bitv n) ->
+          let a = Smtml.Bitvector.extract n ~low:8 ~high:16 in
+          let b = Smtml.Bitvector.extract n ~low:0 ~high:8 in
+          (Smtml.Bitvector.to_int64 a, Smtml.Bitvector.to_int64 b)
         | _ -> assert false
       in
-      let n = Concrete_value.Bool.int32 b in
-      (V.I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
-
-  let symbol_bool () : Value.int32 Concolic_choice.t =
-    Concolic_choice.with_new_symbol Ty_bool (fun sym forced_value ->
-      let b =
-        match forced_value with
-        | None -> Random.bool ()
-        | Some True -> true
-        | Some False -> false
-        | _ -> assert false
-      in
-      let n = Concrete_value.Bool.int32 b in
-      (I32 n, Value.Bool.int32 (b, Expr.symbol sym)) )
+      let n = V128.of_i64x2 a b in
+      (V128 n, (n, Expr.symbol sym)) )
 
   let add_pc_wrapper e = Concolic_choice.assume e
 
@@ -176,55 +204,28 @@ end
 type extern_func = Concolic.Extern_func.extern_func
 
 open M
+open Concolic.Extern_func
+open Concolic.Extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
-    [ ( "i8_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i8) )
-    ; ( "i32_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_i32)
-      )
-    ; ( "i64_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I64), symbol_i64)
-      )
-    ; ( "f32_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F32), symbol_f32)
-      )
-    ; ( "f64_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 F64), symbol_f64)
-      )
-    ; ( "bool_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-      )
-    ; ( "invisible_bool_symbol"
-      , Concolic.Extern_func.Extern_func (Func (UArg Res, R1 I32), symbol_bool)
-      )
-    ; ( "range_symbol"
-      , Concolic.Extern_func.Extern_func
-          (Func (Arg (I32, Arg (I32, Res)), R1 I32), symbol_range) )
-    ; ( "assume"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assume) )
-    ; ( "assert"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), assert') )
-    ; ( "in_replay_mode"
-      , Concolic.Extern_func.Extern_func
-          (Func (UArg Res, R1 I32), in_replay_mode) )
-    ; ( "print_char"
-      , Concolic.Extern_func.Extern_func (Func (Arg (I32, Res), R0), print_char)
-      )
-    ]
-  in
-  { Link.functions }
-
-let summaries_extern_module =
-  let functions =
-    [ ( "alloc"
-      , Concolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Arg (I32, Res))), R1 I32), alloc) )
-    ; ( "dealloc"
-      , Concolic.Extern_func.Extern_func
-          (Func (Mem (Arg (I32, Res)), R1 I32), free) )
-    ; ("abort", Concolic.Extern_func.Extern_func (Func (UArg Res, R0), abort))
+    [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
+    ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
+    ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+    ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+    ; ("invisible_bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
+    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^->. unit, assume))
+    ; ("assert", Extern_func (i32 ^->. unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
+    ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+    ; ("abort", Extern_func (unit ^->. unit, abort))
     ]
   in
   { Link.functions }

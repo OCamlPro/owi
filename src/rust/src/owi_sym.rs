@@ -5,7 +5,7 @@ pub use symbolic::{LazyArray, Symbolic, SymbolicInBounds};
 pub mod harness;
 
 mod sys {
-    #[link(wasm_import_module = "symbolic")]
+    #[link(wasm_import_module = "owi")]
     extern "C" {
         pub(super) fn bool_symbol() -> bool;
         pub(super) fn i8_symbol() -> i32;
@@ -17,10 +17,6 @@ mod sys {
         pub(super) fn assume(condition: bool);
         pub fn in_replay_mode() -> u32;
         pub fn print_char(byte: u32);
-    }
-
-    #[link(wasm_import_module = "summaries")]
-    extern "C" {
         pub fn alloc(base: *mut u8, size: u32) -> *mut u8;
         pub fn dealloc(base: *mut u8) -> *mut u8;
         pub fn abort() -> !;
