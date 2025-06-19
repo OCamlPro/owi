@@ -847,8 +847,8 @@ end = struct
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   let elt_type (type t) (e : t telt) : binary val_type =
-    <span data-count="19267">m</span>atch e with
-    | <span data-count="15591">I</span>32 -&gt; Num_type I32
+    <span data-count="20479">m</span>atch e with
+    | <span data-count="16803">I</span>32 -&gt; Num_type I32
     | <span data-count="808">I</span>64 -&gt; Num_type I64
     | <span data-count="1029">F</span>32 -&gt; Num_type F32
     | <span data-count="1254">F</span>64 -&gt; Num_type F64
@@ -856,9 +856,9 @@ end = struct
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
   let res_type (type t) (r : t rtype) : binary result_type =
-    <span data-count="15876">m</span>atch r with
+    <span data-count="16280">m</span>atch r with
     | <span data-count="7041">R</span>0 -&gt; []
-    | <span data-count="8835">R</span>1 a -&gt; [ elt_typ<span data-count="8835">e</span> a ]
+    | <span data-count="9239">R</span>1 a -&gt; [ elt_typ<span data-count="9239">e</span> a ]
     | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
@@ -866,12 +866,12 @@ end = struct
   let rec arg_type : type t r. (t, r) atype -&gt; binary param_type = function
     | <span data-count="1999">M</span>em tl -&gt; arg_type tl
     | <span data-count="7478">U</span>Arg tl -&gt; arg_type tl
-    | <span data-count="10432">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="10432">e</span> hd) :: arg_typ<span data-count="10432">e</span> tl
+    | <span data-count="11240">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="11240">e</span> hd) :: arg_typ<span data-count="11240">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-    | <span data-count="15876">R</span>es -&gt; []
+    | <span data-count="16280">R</span>es -&gt; []
 
   let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
-    <span data-count="15876">(</span>arg_typ<span data-count="15876">e</span> arg, res_typ<span data-count="15876">e</span> res)
+    <span data-count="16280">(</span>arg_typ<span data-count="16280">e</span> arg, res_typ<span data-count="16280">e</span> res)
 
   type nonrec t = t
 
@@ -898,11 +898,11 @@ end = struct
       | Elt : 'a telt -&gt; (lr, elt, 'a) t
       | Elt_labeled : string * 'a telt -&gt; (l, string * elt, 'a) t
 
-    let return r = <span data-count="67395">F</span>unc (Res, r)
+    let return r = <span data-count="68414">F</span>unc (Res, r)
 
     let r0 = R0 |&gt; retur<span data-count="4076">n</span>
 
-    let r1 (Elt a) = <span data-count="63319">R</span>1 a |&gt; return
+    let r1 (Elt a) = <span data-count="64338">R</span>1 a |&gt; return
 
     let r2 (Elt a) (Elt b) = <span data-count="0">R</span>2 (a, b) |&gt; return
 
@@ -931,15 +931,15 @@ end = struct
     let ( ^-&gt; ) : type lr k a b.
       (lr, k, a) t -&gt; b func_type -&gt; (a -&gt; b) func_type =
      fun a (Func (b, r)) -&gt;
-      <span data-count="161325">m</span>atch a with
-      | <span data-count="125506">E</span>lt a -&gt; Func (Arg (a, b), r)
+      <span data-count="163363">m</span>atch a with
+      | <span data-count="127544">E</span>lt a -&gt; Func (Arg (a, b), r)
       | <span data-count="0">E</span>lt_labeled (label, a) -&gt; Func (NArg (label, a, b), r)
       | <span data-count="29664">U</span>nit -&gt; Func (UArg b, r)
       | <span data-count="6155">M</span>emory -&gt; Func (Mem b, r)
 
     let ( ^-&gt;. ) : type ll k kk a b.
       (ll, k, a) t -&gt; (lr, kk, b) t -&gt; (a -&gt; b m) func_type =
-     fun a b -&gt; <span data-count="87877">m</span>atch b with <span data-count="63319">E</span>lt _ -&gt; a ^-&gt; r<span data-count="63319">1</span> b | <span data-count="24558">U</span>nit -&gt; a ^-&gt; r0
+     fun a b -&gt; <span data-count="88896">m</span>atch b with <span data-count="64338">E</span>lt _ -&gt; a ^-&gt; r<span data-count="64338">1</span> b | <span data-count="24558">U</span>nit -&gt; a ^-&gt; r0
 
     let ( ^-&gt;.. ) : type ll k a b1 b2.
          (ll, k, a) t
