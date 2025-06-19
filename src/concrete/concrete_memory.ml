@@ -38,12 +38,7 @@ let grow mem delta =
 let fill mem ~pos ~len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
-
-  pos < 0 || len < 0
-  || pos + len > Bytes.length mem.data
-  ||
-  ( Bytes.unsafe_fill mem.data pos len c;
-    false )
+  Bytes.unsafe_fill mem.data pos len c
 
 let blit mem ~src ~dst ~len =
   let src = Int32.to_int src in
@@ -51,6 +46,7 @@ let blit mem ~src ~dst ~len =
   let len = Int32.to_int len in
   let data_len = Bytes.length mem.data in
 
+  (* TODO: this looks wrong! *)
   src < 0 || dst < 0 || len < 0
   || src + len > data_len
   || dst + len > data_len

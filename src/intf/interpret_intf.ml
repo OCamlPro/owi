@@ -71,7 +71,7 @@ module type P = sig
 
     val grow : t -> Value.int32 -> unit
 
-    val fill : t -> pos:Value.int32 -> len:Value.int32 -> char -> Value.bool
+    val fill : t -> pos:Value.int32 -> len:Value.int32 -> char -> unit
 
     val blit :
       t -> src:Value.int32 -> dst:Value.int32 -> len:Value.int32 -> Value.bool

@@ -957,17 +957,24 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* c = Choice.select_i32 c in
-      let c =
-        let c = Int32.to_int c in
-        let c = Int.abs c mod 256 in
-        Char.chr c
-      in
-      (* TODO: move out of bonds check here ! *)
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds = Memory.fill mem ~pos ~len c in
+      let> out_of_bounds =
+        let curr_len = I64.extend_i32_u (Memory.size mem) in
+        let len = I64.extend_i32_u len in
+        let pos = I64.extend_i32_u pos in
+        I64.gt_u I64.(add pos len) curr_len
+      in
       if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else st stack
+      else
+        (* TODO: should we have something like select_i8 here? or rather, mask it correctly before calling select_i32? *)
+        let* c = Choice.select_i32 c in
+        let c =
+          let c = Int32.to_int c in
+          let c = Int.abs c mod 256 in
+          Char.chr c
+        in
+        Memory.fill mem ~pos ~len c;
+        st stack
     | Memory_copy ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
@@ -1499,11 +1506,11 @@ module Make (P : Interpret_intf.P) :
          fun () ->
            let fuel_left = Atomic.fetch_and_add fuel (-1) in
            (* If we only use [timeout_instr], we want to stop all as
-              soon as [fuel_left <= 0]. But if we only use [timeout],
-              we don't want to run into the slow path below on each
-              instruction after [fuel_left] becomes negative. We avoid
-              this repeated slow path by bumping [fuel] to [max_int]
-              again in this case. *)
+               soon as [fuel_left <= 0]. But if we only use [timeout],
+               we don't want to run into the slow path below on each
+               instruction after [fuel_left] becomes negative. We avoid
+               this repeated slow path by bumping [fuel] to [max_int]
+               again in this case. *)
            if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
              let stop =
                match (timeout, timeout_instr) with

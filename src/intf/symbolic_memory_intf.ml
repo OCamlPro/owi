@@ -99,7 +99,7 @@ module type S = sig
 
   val grow : t -> Smtml.Expr.t -> unit
 
-  val fill : t -> pos:Smtml.Expr.t -> len:Smtml.Expr.t -> char -> Smtml.Expr.t
+  val fill : t -> pos:Smtml.Expr.t -> len:Smtml.Expr.t -> char -> unit
 
   val blit :
        t
