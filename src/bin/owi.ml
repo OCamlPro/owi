@@ -79,11 +79,11 @@ let deterministic_result_order =
   in
   Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
 
-let entry_point =
+let entry_point default =
   let doc = "entry point of the executable" in
   Arg.(
     value
-    & opt (some string) None
+    & opt (some string) default
     & info [ "entry-point" ] ~doc ~docv:"FUNCTION" )
 
 let fail_mode =
@@ -210,6 +210,45 @@ let with_breadcrumbs =
   let doc = "add breadcrumbs to the generated model" in
   Arg.(value & flag & info [ "with-breadcrumbs" ] ~doc)
 
+(* shared symbolic parameters *)
+
+let symbolic_parameters default_entry_point =
+  let+ unsafe
+  and+ rac
+  and+ srac
+  and+ optimize
+  and+ workers
+  and+ no_stop_at_failure
+  and+ no_value
+  and+ no_assert_failure_expression_printing
+  and+ deterministic_result_order
+  and+ fail_mode
+  and+ workspace
+  and+ solver
+  and+ model_format
+  and+ entry_point = entry_point default_entry_point
+  and+ model_out_file
+  and+ with_breadcrumbs
+  and+ invoke_with_symbols in
+  { Cmd_sym.unsafe
+  ; rac
+  ; srac
+  ; optimize
+  ; workers
+  ; no_stop_at_failure
+  ; no_value
+  ; no_assert_failure_expression_printing
+  ; deterministic_result_order
+  ; fail_mode
+  ; workspace
+  ; solver
+  ; model_format
+  ; entry_point
+  ; model_out_file
+  ; with_breadcrumbs
+  ; invoke_with_symbols
+  }
+
 (* owi c *)
 
 let c_info =
@@ -230,18 +269,9 @@ let c_cmd =
   and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
-  and+ workspace
   and+ concolic
-  and+ workers
   and+ files
-  and+ unsafe
-  and+ optimize
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
   and+ () = setup_log
-  and+ deterministic_result_order
-  and+ fail_mode
   and+ eacsl =
     let doc =
       "e-acsl mode, refer to \
@@ -249,18 +279,12 @@ let c_cmd =
        Frama-C's current language feature implementations"
     in
     Arg.(value & flag & info [ "e-acsl" ] ~doc)
-  and+ solver
-  and+ model_format
-  and+ invoke_with_symbols
   and+ out_file
-  and+ model_out_file
-  and+ with_breadcrumbs
-  and+ entry_point in
-  Cmd_c.cmd ~arch ~property ~testcomp ~workspace ~workers ~opt_lvl ~includes
-    ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
-    ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~eacsl ~solver ~model_format ~entry_point
-    ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs
+  and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+  Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
+    ~testcomp ~concolic ~files ~eacsl
+
 (* owi cpp *)
 
 let cpp_info =
@@ -275,29 +299,13 @@ let cpp_cmd =
   and+ includes
   and+ opt_lvl
   and+ concolic
-  and+ workers
   and+ files
-  and+ unsafe
-  and+ optimize
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ solver
-  and+ model_format
-  and+ invoke_with_symbols
   and+ out_file
   and+ () = setup_log
-  and+ workspace
-  and+ model_out_file
-  and+ with_breadcrumbs
-  and+ entry_point in
-  Cmd_cpp.cmd ~arch ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
-    ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
-    ~with_breadcrumbs
+  and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+  Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~concolic
+    ~files
 
 (* owi conc *)
 
@@ -307,29 +315,11 @@ let conc_info =
   Cmd.info "conc" ~version ~doc ~sdocs ~man
 
 let conc_cmd =
-  let+ unsafe
-  and+ rac
-  and+ srac
-  and+ optimize
-  and+ workers
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ workspace
-  and+ () = setup_log
-  and+ solver
+  let+ () = setup_log
   and+ source_file
-  and+ model_format
-  and+ model_out_file
-  and+ invoke_with_symbols
-  and+ with_breadcrumbs
-  and+ entry_point in
-  Cmd_conc.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
-    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+  and+ parameters = symbolic_parameters None in
+
+  Cmd_conc.cmd ~parameters ~source_file
 
 (* owi fmt *)
 
@@ -433,7 +423,7 @@ let replay_cmd =
   and+ () = setup_log
   and+ source_file
   and+ invoke_with_symbols
-  and+ entry_point in
+  and+ entry_point = entry_point None in
   Cmd_replay.cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
     ~invoke_with_symbols
 
@@ -468,29 +458,13 @@ let rust_cmd =
   and+ includes
   and+ opt_lvl
   and+ concolic
-  and+ workers
   and+ files
-  and+ unsafe
-  and+ optimize
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ solver
-  and+ model_format
-  and+ invoke_with_symbols
   and+ out_file
   and+ () = setup_log
-  and+ workspace
-  and+ model_out_file
-  and+ with_breadcrumbs
-  and+ entry_point in
-  Cmd_rust.cmd ~arch ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
-    ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-    ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
-    ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
-    ~with_breadcrumbs
+  and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+  Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~concolic
+    ~out_file
 
 (* owi script *)
 
@@ -517,29 +491,11 @@ let sym_info =
   Cmd.info "sym" ~version ~doc ~sdocs ~man
 
 let sym_cmd =
-  let+ unsafe
-  and+ rac
-  and+ srac
-  and+ optimize
-  and+ workers
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ workspace
-  and+ solver
-  and+ source_file
-  and+ model_format
+  let+ source_file
   and+ () = setup_log
-  and+ entry_point
-  and+ model_out_file
-  and+ with_breadcrumbs
-  and+ invoke_with_symbols in
-  Cmd_sym.cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
-    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+  and+ parameters = symbolic_parameters None in
+
+  Cmd_sym.cmd ~parameters ~source_file
 
 (* owi validate *)
 
@@ -612,28 +568,11 @@ let zig_info =
 let zig_cmd =
   let+ concolic
   and+ includes
-  and+ workers
   and+ files
-  and+ unsafe
-  and+ optimize
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ solver
-  and+ model_format
-  and+ invoke_with_symbols
   and+ out_file
-  and+ workspace
-  and+ model_out_file
   and+ () = setup_log
-  and+ with_breadcrumbs
-  and+ entry_point in
-  Cmd_zig.cmd ~includes ~workers ~files ~unsafe ~optimize ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~concolic ~solver ~model_format ~entry_point ~invoke_with_symbols
-    ~out_file ~workspace ~model_out_file ~with_breadcrumbs
+  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+  Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~concolic ~out_file
 
 (* owi *)
 

@@ -3,25 +3,11 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     arch:int
-  -> workers:int
+     symbolic_parameters:Cmd_sym.parameters
+  -> arch:int
   -> opt_lvl:string
   -> includes:Fpath.t list
   -> files:Fpath.t list
-  -> unsafe:bool
-  -> optimize:bool
-  -> no_stop_at_failure:bool
-  -> no_value:bool
-  -> no_assert_failure_expression_printing:bool
-  -> deterministic_result_order:bool
-  -> fail_mode:Cmd_sym.fail_mode
   -> concolic:bool
-  -> solver:Smtml.Solver_type.t
-  -> model_format:Cmd_utils.model_format
-  -> entry_point:string option
-  -> invoke_with_symbols:bool
   -> out_file:Fpath.t option
-  -> workspace:Fpath.t option
-  -> model_out_file:Fpath.t option
-  -> with_breadcrumbs:bool
   -> unit Result.t

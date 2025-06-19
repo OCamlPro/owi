@@ -25,7 +25,9 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
       % "-o" % Cmd.p out
       (* link args parameters must be space separated *)
       % "-C"
-      % Fmt.str "link-args=--entry=%s" entry_point
+      % ( match entry_point with
+        | Some entry_point -> Fmt.str "link-args=--entry=%s" entry_point
+        | None -> (* TODO: meh *) "" )
       %% Cmd.of_list (List.map Cmd.p files) )
   in
 
@@ -47,24 +49,21 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
 
   out
 
-let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
-  ~entry_point ~invoke_with_symbols ~out_file ~(workspace : Fpath.t option)
-  ~model_out_file ~with_breadcrumbs : unit Result.t =
+let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~concolic
+  ~out_file : unit Result.t =
   let* workspace =
-    match workspace with
+    match symbolic_parameters.Cmd_sym.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_rust_%s"
   in
   let* _did_create : bool = OS.Dir.create workspace in
-  let entry_point = Option.value entry_point ~default:"main" in
 
-  let* source_file = compile ~entry_point ~includes ~opt_lvl ~out_file files in
-  let entry_point = Some entry_point in
+  let* source_file =
+    compile ~entry_point:symbolic_parameters.entry_point ~includes ~opt_lvl
+      ~out_file files
+  in
   let workspace = Some workspace in
-  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
-    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+
+  let parameters = { symbolic_parameters with workspace } in
+
+  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd) ~parameters ~source_file
