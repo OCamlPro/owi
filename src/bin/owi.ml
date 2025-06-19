@@ -497,6 +497,23 @@ let sym_cmd =
 
   Cmd_sym.cmd ~parameters ~source_file
 
+(* owi tinygo *)
+
+let tinygo_info =
+  let doc =
+    "Compile a TinyGo file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "tinygo" ~version ~doc ~sdocs ~man
+
+let tinygo_cmd =
+  let+ concolic
+  and+ files
+  and+ out_file
+  and+ () = setup_log
+  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+  Cmd_tinygo.cmd ~symbolic_parameters ~files ~concolic ~out_file
+
 (* owi validate *)
 
 let validate_info =
@@ -588,17 +605,18 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.v c_info c_cmd
+    ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
-    ; Cmd.v opt_info opt_cmd
     ; Cmd.v instrument_info instrument_cmd
     ; Cmd.v iso_info iso_cmd
+    ; Cmd.v opt_info opt_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
     ; Cmd.v script_info script_cmd
     ; Cmd.v sym_info sym_cmd
-    ; Cmd.v conc_info conc_cmd
+    ; Cmd.v tinygo_info tinygo_cmd
     ; Cmd.v validate_info validate_cmd
     ; Cmd.v version_info version_cmd
     ; Cmd.v wasm2wat_info wasm2wat_cmd

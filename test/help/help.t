@@ -46,6 +46,10 @@ no subcommand should print help
          sym [OPTION]… FILE
              Run the symbolic interpreter
   
+         tinygo [OPTION]… FILE…
+             Compile a TinyGo file to Wasm and run the symbolic interpreter on
+             it
+  
          validate [OPTION]… FILE…
              Validate a module
   
