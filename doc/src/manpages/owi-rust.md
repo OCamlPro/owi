@@ -24,7 +24,7 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
-       --entry-point=FUNCTION
+       --entry-point=FUNCTION (absent=main)
            entry point of the executable
 
        --fail-on-assertion-only
@@ -72,8 +72,14 @@ OPTIONS
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
+       --rac
+           runtime assertion checking mode
+
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
+
+       --srac
+           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass

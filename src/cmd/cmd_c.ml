@@ -85,20 +85,25 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
     Cmd.(
       of_list
-        [ Fmt.str "-O%s" opt_lvl
-        ; "--target=wasm32"
-        ; "-m32"
-        ; "-ffreestanding"
-        ; "--no-standard-libraries"
-        ; "-Wno-everything"
-        ; "-flto=thin"
-        ; (* LINKER FLAGS: *)
-          Fmt.str "-Wl,--entry=%s" entry_point
-        ; Fmt.str "-Wl,--export=%s" entry_point
-          (* TODO: allow this behind a flag, this is slooooow *)
-        ; "-Wl,--lto-O0"
-        ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
-        ]
+        ( [ Fmt.str "-O%s" opt_lvl
+          ; "--target=wasm32"
+          ; "-m32"
+          ; "-ffreestanding"
+          ; "--no-standard-libraries"
+          ; "-Wno-everything"
+          ; "-flto=thin"
+          ]
+        (* LINKER FLAGS: *)
+        @ ( match entry_point with
+          | Some entry_point ->
+            [ Fmt.str "-Wl,--entry=%s" entry_point
+            ; Fmt.str "-Wl,--export=%s" entry_point
+            ]
+          | None -> [] )
+        @ [ (* TODO: allow this behind a flag, this is slooooow *)
+            "-Wl,--lto-O0"
+          ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
+          ] )
       %% includes )
   in
 
@@ -178,30 +183,24 @@ let metadata ~workspace arch property files : unit Result.t =
   let* res = OS.File.with_oc fpath out_metadata { arch; property; files } in
   res
 
-let cmd ~arch ~property ~testcomp:_ ~workspace ~workers ~opt_lvl ~includes
-  ~files ~unsafe ~optimize ~no_stop_at_failure ~no_value
-  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~concolic ~eacsl ~solver ~model_format ~(entry_point : string option)
-  ~invoke_with_symbols ~out_file ~model_out_file ~with_breadcrumbs :
-  unit Result.t =
+let cmd ~symbolic_parameters ~arch ~property ~testcomp:_ ~opt_lvl ~includes
+  ~files ~concolic ~eacsl ~out_file : unit Result.t =
   let* workspace =
-    match workspace with
+    match symbolic_parameters.Cmd_sym.workspace with
     | Some path -> Ok path
     | None -> Bos.OS.Dir.tmp "owi_c_%s"
   in
   let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
-  let entry_point = Option.value entry_point ~default:"main" in
 
   let includes = Cmd_utils.c_files_location @ includes in
   let* files = eacsl_instrument eacsl ~includes files in
   let* source_file =
-    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
+    compile ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
+      ~opt_lvl ~out_file files
   in
   let* () = metadata ~workspace arch property files in
-  let entry_point = Some entry_point in
   let workspace = Some workspace in
-  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
-    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+
+  let parameters = { symbolic_parameters with Cmd_sym.workspace } in
+
+  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd) ~parameters ~source_file

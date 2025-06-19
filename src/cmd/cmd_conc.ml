@@ -8,8 +8,18 @@ open Syntax
 (* let () = Random.self_init () *)
 let () = Random.init 42
 
-let simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
-  ~optimize source_file =
+let simplify_then_link ~parameters source_file =
+  let { Cmd_sym.unsafe
+      ; rac
+      ; srac
+      ; entry_point
+      ; invoke_with_symbols
+      ; optimize
+      ; _
+      } =
+    parameters
+  in
+
   let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
@@ -397,10 +407,20 @@ let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
    during evaluation (OS, syntax error, etc.), except for Trap and Assert,
    which are handled here. Most of the computations are done in the Result
    monad, hence the let*. *)
-let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
-  ~no_assert_failure_expression_printing ~deterministic_result_order:_
-  ~fail_mode:_ ~workspace ~solver ~source_file ~model_format ~entry_point
-  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs:_ =
+let cmd ~parameters ~source_file =
+  let* link_state, module_to_run = simplify_then_link ~parameters source_file in
+
+  let { Cmd_sym.workspace
+      ; model_format
+      ; no_value
+      ; solver
+      ; model_out_file
+      ; no_assert_failure_expression_printing
+      ; _
+      } =
+    parameters
+  in
+
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -417,10 +437,7 @@ let cmd ~unsafe ~rac ~srac ~optimize ~workers:_ ~no_stop_at_failure:_ ~no_value
     | Scfg -> Smtml.Model.to_scfg_string ~no_value model
   in
   let solver = Solver.fresh solver () in
-  let* link_state, module_to_run =
-    simplify_then_link ~entry_point ~invoke_with_symbols ~unsafe ~rac ~srac
-      ~optimize source_file
-  in
+
   let tree = fresh_tree [] in
   let* result = run solver tree link_state module_to_run in
   let testcase assignments =

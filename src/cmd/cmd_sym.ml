@@ -11,9 +11,31 @@ type fail_mode =
   | Assertion_only
   | Both
 
-let run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols
-  filename =
-  let* m = Compile.File.until_validate ~unsafe ~rac ~srac filename in
+type parameters =
+  { unsafe : bool
+  ; rac : bool
+  ; srac : bool
+  ; optimize : bool
+  ; workers : int
+  ; no_stop_at_failure : bool
+  ; no_value : bool
+  ; no_assert_failure_expression_printing : bool
+  ; deterministic_result_order : bool
+  ; fail_mode : fail_mode
+  ; workspace : Fpath.t option
+  ; solver : Smtml.Solver_type.t
+  ; model_format : Cmd_utils.model_format
+  ; entry_point : string option
+  ; invoke_with_symbols : bool
+  ; model_out_file : Fpath.t option
+  ; with_breadcrumbs : bool
+  }
+
+let run_file ~parameters ~source_file =
+  let { unsafe; rac; srac; entry_point; invoke_with_symbols; optimize; _ } =
+    parameters
+  in
+  let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
     let func_typ = Symbolic.Extern_func.extern_type in
@@ -217,22 +239,36 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
-let cmd ~unsafe ~rac ~srac ~optimize ~workers ~no_stop_at_failure ~no_value
-  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~source_file ~model_format ~entry_point
-  ~invoke_with_symbols ~model_out_file ~with_breadcrumbs =
+let cmd ~parameters ~source_file =
+  let* result : unit Symbolic.Choice.t = run_file ~parameters ~source_file in
+
+  let { fail_mode
+      ; workers
+      ; solver
+      ; deterministic_result_order
+      ; model_format
+      ; no_value
+      ; no_assert_failure_expression_printing
+      ; workspace
+      ; model_out_file
+      ; with_breadcrumbs
+      ; _
+      } =
+    parameters
+  in
+
+  (* deterministic_result_order implies no_stop_at_failure *)
+  let no_stop_at_failure =
+    parameters.deterministic_result_order || parameters.no_stop_at_failure
+  in
+
+  (* TODO: can we handle this at the cmdliner level? *)
   let* workspace =
     match workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
 
-  (* deterministic_result_order implies no_stop_at_failure *)
-  let no_stop_at_failure = deterministic_result_order || no_stop_at_failure in
-  let* result : unit Symbolic.Choice.t =
-    run_file ~entry_point ~unsafe ~rac ~srac ~optimize ~invoke_with_symbols
-      source_file
-  in
   handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
     ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
     ~no_stop_at_failure ~model_out_file ~with_breadcrumbs result

@@ -69,10 +69,9 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
 
   let files_o =
-    Cmd.of_list
-    @@ List.map
-         (fun file -> Fpath.(workspace // Fpath.base (file -+ ".o")) |> Cmd.p)
-         files
+    List.map
+      (fun file -> Fpath.(workspace // Fpath.base (file -+ ".o")) |> Cmd.p)
+      files
   in
 
   let out =
@@ -83,10 +82,17 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let* libowi = Cmd_utils.find_installed_c_file (Fpath.v "libowi.wasm") in
   let wasmld_cmd : Cmd.t =
     Cmd.(
-      wasmld_bin % "-z" % "stack-size=8388608"
-      % Fmt.str "--export=%s" entry_point
-      % Fmt.str "--entry=%s" entry_point
-      %% files_o % p libc % p libowi % "-o" % p out )
+      wasmld_bin
+      %% of_list
+           ( [ "-z"; "stack-size=8388608" ]
+           @ ( match entry_point with
+             | None -> []
+             | Some entry_point ->
+               [ Fmt.str "--export=%s" entry_point
+               ; Fmt.str "--entry=%s" entry_point
+               ] )
+           @ files_o
+           @ [ p libc; p libowi; "-o"; p out ] ) )
   in
 
   let+ () =
@@ -101,27 +107,22 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
 
   out
 
-let cmd ~arch:_ ~workers ~opt_lvl ~includes ~files ~unsafe ~optimize
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~concolic ~solver ~model_format
-  ~entry_point ~invoke_with_symbols ~out_file ~workspace ~model_out_file
-  ~with_breadcrumbs : unit Result.t =
+let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~concolic
+  ~out_file : unit Result.t =
   let* workspace =
-    match workspace with
+    match symbolic_parameters.Cmd_sym.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_cpp_%s"
   in
   let* _did_create : bool = OS.Dir.create ~path:true workspace in
 
-  let entry_point = Option.value entry_point ~default:"main" in
   let includes = Cmd_utils.c_files_location @ includes in
   let* source_file =
-    compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
+    compile ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
+      ~opt_lvl ~out_file files
   in
-  let entry_point = Some entry_point in
   let workspace = Some workspace in
-  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd)
-    ~unsafe ~rac:false ~srac:false ~optimize ~workers ~no_stop_at_failure
-    ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
-    ~fail_mode ~workspace ~solver ~source_file ~model_format ~entry_point
-    ~invoke_with_symbols ~model_out_file ~with_breadcrumbs
+
+  let parameters = { symbolic_parameters with workspace } in
+
+  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd) ~parameters ~source_file
