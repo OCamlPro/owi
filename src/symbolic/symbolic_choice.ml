@@ -17,7 +17,7 @@ module Prio = struct
 
   let default = Default
 
-  let to_int = function Default -> 1
+  let to_int = function Default -> 0
 end
 
 module CoreImpl = struct
