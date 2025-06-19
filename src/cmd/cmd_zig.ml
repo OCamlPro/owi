@@ -12,12 +12,12 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   in
 
   let* zig_bin =
-    match OS.Cmd.resolve @@ Cmd.v "zig" with
+    let name = "zig" in
+    match OS.Cmd.resolve @@ Cmd.v name with
     | Error _ ->
-      Error
-        (`Msg
-           "The `zig` binary was not found, please make sure it is in your \
-            path." )
+      Fmt.error_msg
+        "The `%s` binary was not found, please make sure it is in your path."
+        name
     | Ok _ as ok -> ok
   in
 

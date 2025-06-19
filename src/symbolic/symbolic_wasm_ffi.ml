@@ -182,3 +182,13 @@ let symbolic_extern_module =
     ]
   in
   { Link.functions }
+
+let random_get _ _ =
+  let v = Random.int32 Int32.max_int in
+  Choice.return @@ Symbolic_value.const_i32 v
+
+let wasi_snapshot_preview1 =
+  let functions =
+    [ ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get)) ]
+  in
+  { Link.functions }

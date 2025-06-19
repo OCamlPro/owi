@@ -14,6 +14,7 @@
   choice_intf
   cmd_utils
   cmd_c
+  cmd_conc
   cmd_cpp
   cmd_fmt
   cmd_instrument
@@ -24,7 +25,7 @@
   cmd_rust
   cmd_script
   cmd_sym
-  cmd_conc
+  cmd_tinygo
   cmd_validate
   cmd_version
   cmd_wasm2wat
