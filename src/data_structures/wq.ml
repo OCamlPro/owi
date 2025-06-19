@@ -42,12 +42,11 @@ let fail = Synchronizer.fail
     writter*)
 
 let make () =
-  let mutex = Mutex.create () in
   let q = Pq_imperative.empty () in
   let writter v prio condvar =
-    Mutex.protect mutex (fun () -> Pq_imperative.push (prio, v) q);
+    Pq_imperative.push (prio, v) q;
     Condition.signal condvar
   in
   Synchronizer.init
-    (fun () -> Mutex.protect mutex (fun () -> Pq_imperative.pop q))
+    (fun () -> Pq_imperative.pop q)
     writter
