@@ -99,10 +99,19 @@ module type S = sig
 
   val grow : t -> Smtml.Expr.t -> unit
 
-  val fill : t -> pos:Smtml.Expr.t -> len:Smtml.Expr.t -> char -> unit
+  val fill :
+       t
+    -> pos:Smtml.Expr.t
+    -> len:Smtml.Expr.t
+    -> char
+    -> unit Symbolic_choice_without_memory.t
 
   val blit :
-    t -> src:Smtml.Expr.t -> dst:Smtml.Expr.t -> len:Smtml.Expr.t -> unit
+       t
+    -> src:Smtml.Expr.t
+    -> dst:Smtml.Expr.t
+    -> len:Smtml.Expr.t
+    -> unit Symbolic_choice_without_memory.t
 
   val blit_string :
        t

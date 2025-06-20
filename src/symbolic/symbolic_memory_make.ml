@@ -111,24 +111,42 @@ module Make (Backend : M) : Symbolic_memory_intf.S = struct
     let+ a = must_be_valid_address m.data addr 8 in
     Backend.storen m.data a v 8
 
-  let fill _m ~pos:(_pos : Smtml.Expr.t) ~len:(_len : Smtml.Expr.t) (_c : char)
-      =
-    assert false
-
-  (*
+  let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
     let open Symbolic_choice_without_memory in
-    let+ len = select_i32 len in
-    let+ pos = select_i32 pos in
-    if Int32.eq len 0l then Symbolic_value.const_i32 0l
-    else
-      let len = Int32.sub len 1l in
-      let addr = Int32.add pos len |> Symbolic_value.const_i32 in
-      let* () = Backend.storen m.data addr c 1 in
-      let len = Symbolic_value.const_i32 len in
-      fill m ~pos ~len c
-*)
+    let* len = select_i32 len in
+    let len = Int32.to_int len in
+    let* pos = select_i32 pos in
+    let pos = Int32.to_int pos in
+    let c = Symbolic_value.const_i32 (Int32.of_int (int_of_char c)) in
 
-  let blit _ = assert false
+    let rec aux i =
+      if i = len then return ()
+      else
+        let addr = Symbolic_value.const_i32 (Int32.of_int (pos + i)) in
+        let* () = store_8 m ~addr c in
+        aux (i + 1)
+    in
+    aux 0
+
+  let blit m ~src ~dst ~len =
+    let open Symbolic_choice_without_memory in
+    let* len = select_i32 len in
+    let len = Int32.to_int len in
+    let* src = select_i32 src in
+    let src = Int32.to_int src in
+    let* dst = select_i32 dst in
+    let dst = Int32.to_int dst in
+
+    let rec aux i =
+      if i = len then return ()
+      else
+        let addr = Symbolic_value.const_i32 (Int32.of_int (src + i)) in
+        let* v = load_8_s m addr in
+        let addr = Symbolic_value.const_i32 (Int32.of_int (dst + i)) in
+        let* () = store_8 m ~addr v in
+        aux (i + 1)
+    in
+    aux 0
 
   let blit_string m str ~src ~dst ~len =
     (* This function is only used in memory init so everything will be concrete *)
