@@ -42,20 +42,16 @@ let replace m k v = m.data <- Map.add k v m.data
 
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
-  let str_len = String.length str in
-  let mem_len = Int32.(to_int (i32 m.size) * to_int (i32 page_size)) in
+  (* TODO: I am not sure this is completely true... this should be investigated and fixed at some point *)
   let src = Int32.to_int @@ i32 src in
   let dst = Int32.to_int @@ i32 dst in
   let len = Int32.to_int @@ i32 len in
-  if src < 0 || dst < 0 || len < 0 || src + len > str_len || dst + len > mem_len
-  then Symbolic_value.Bool.const true
-  else begin
+  begin
     for i = 0 to len - 1 do
       let byte = Char.code @@ String.get str (src + i) in
       let dst = Int32.of_int (dst + i) in
       replace m dst (Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int8 byte)))
-    done;
-    Symbolic_value.Bool.const false
+    done
   end
 
 let load_byte a { data; _ } =

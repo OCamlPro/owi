@@ -43,7 +43,7 @@ val fill : t -> pos:int32 -> len:int32 -> char -> unit
 
 val blit : t -> src:int32 -> dst:int32 -> len:int32 -> unit
 
-val blit_string : t -> string -> src:int32 -> dst:int32 -> len:int32 -> bool
+val blit_string : t -> string -> src:int32 -> dst:int32 -> len:int32 -> unit
 
 val size_in_pages : t -> int32
 

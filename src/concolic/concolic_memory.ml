@@ -54,7 +54,8 @@ let blit_string (mc, ms) str ~src ~dst ~len =
   let src_c, src_s = src in
   let dst_c, dst_s = dst in
   let len_c, len_s = len in
-  ( Concrete_memory.blit_string mc str ~src:src_c ~dst:dst_c ~len:len_c
-  , Symbolic_memory.blit_string ms str ~src:src_s ~dst:dst_s ~len:len_s )
+  Concrete_memory.blit_string mc str ~src:src_c ~dst:dst_c ~len:len_c;
+  Symbolic_memory.blit_string ms str ~src:src_s ~dst:dst_s ~len:len_s;
+  ()
 
 let get_limit_max _ = Fmt.failwith "TODO"
