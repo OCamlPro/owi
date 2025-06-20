@@ -183,12 +183,21 @@ let symbolic_extern_module =
   in
   { Link.functions }
 
+let fd_write _ _ _ _ = assert false
+
+let proc_exit _ =
+  Logs.warn (fun m -> m "used dummy proc_exit implementation");
+  Choice.return ()
+
 let random_get _ _ =
-  let v = Random.int32 Int32.max_int in
-  Choice.return @@ Symbolic_value.const_i32 v
+  Logs.warn (fun m -> m "used dummy random_get implementation");
+  Choice.return @@ Symbolic_value.const_i32 0l
 
 let wasi_snapshot_preview1 =
   let functions =
-    [ ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get)) ]
+    [ ("fd_write", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write))
+    ; ("proc_exit", Extern_func (i32 ^->. unit, proc_exit))
+    ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
+    ]
   in
   { Link.functions }
