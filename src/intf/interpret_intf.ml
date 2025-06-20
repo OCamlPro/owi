@@ -82,7 +82,7 @@ module type P = sig
       -> src:Value.int32
       -> dst:Value.int32
       -> len:Value.int32
-      -> Value.bool
+      -> unit
 
     val size : t -> Value.int32
 
@@ -105,6 +105,8 @@ module type P = sig
     type t
 
     val value : t -> string
+
+    val size : t -> int
   end
 
   module Elem : sig

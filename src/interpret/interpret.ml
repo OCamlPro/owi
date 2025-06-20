@@ -999,12 +999,23 @@ module Make (P : Interpret_intf.P) :
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* data = Env.get_data env i in
-      let data = Data.value data in
-      (* TODO: move out of bonds check here ! *)
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds = Memory.blit_string mem data ~src ~dst ~len in
+      let> out_of_bounds =
+        let memsize = I64.extend_i32_u (Memory.size mem) in
+        let datasize = const_i64 @@ Int64.of_int (Data.size data) in
+        let len = I64.extend_i32_u len in
+        let src = I64.extend_i32_u src in
+        let dst = I64.extend_i32_u dst in
+        Bool.or_
+          (I64.gt_u I64.(add dst len) memsize)
+          (I64.gt_u I64.(add src len) datasize)
+      in
       if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else st stack
+      else begin
+        let data = Data.value data in
+        Memory.blit_string mem data ~src ~dst ~len;
+        st stack
+      end
     | Select _t ->
       if use_ite_for_select then begin
         let b, stack = Stack.pop_bool stack in

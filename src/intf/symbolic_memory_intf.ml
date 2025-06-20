@@ -110,7 +110,7 @@ module type S = sig
     -> src:Smtml.Expr.t
     -> dst:Smtml.Expr.t
     -> len:Smtml.Expr.t
-    -> Smtml.Expr.t
+    -> unit
 
   val size : t -> Smtml.Expr.t
 
