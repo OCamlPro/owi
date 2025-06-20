@@ -68,6 +68,10 @@ struct
     let store_32 m ~addr v = Choice.lift_mem @@ store_32 m ~addr v
 
     let store_64 m ~addr v = Choice.lift_mem @@ store_64 m ~addr v
+
+    let fill m ~pos ~len c = Choice.lift_mem @@ fill m ~pos ~len c
+
+    let blit m ~src ~dst ~len = Choice.lift_mem @@ blit m ~src ~dst ~len
   end
 
   module Data = struct

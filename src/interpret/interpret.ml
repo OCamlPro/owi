@@ -973,7 +973,7 @@ module Make (P : Interpret_intf.P) :
           let c = Int.abs c mod 256 in
           Char.chr c
         in
-        Memory.fill mem ~pos ~len c;
+        let* () = Memory.fill mem ~pos ~len c in
         st stack
     | Memory_copy ->
       let len, stack = Stack.pop_i32 stack in
@@ -991,7 +991,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
       else begin
-        Memory.blit mem ~src ~dst ~len;
+        let* () = Memory.blit mem ~src ~dst ~len in
         st stack
       end
     | Memory_init (Raw i) ->

@@ -39,9 +39,9 @@ val store_64 : t -> addr:int32 -> int64 -> unit Result.t
 
 val grow : t -> int32 -> unit
 
-val fill : t -> pos:int32 -> len:int32 -> char -> unit
+val fill : t -> pos:int32 -> len:int32 -> char -> unit Result.t
 
-val blit : t -> src:int32 -> dst:int32 -> len:int32 -> unit
+val blit : t -> src:int32 -> dst:int32 -> len:int32 -> unit Result.t
 
 val blit_string : t -> string -> src:int32 -> dst:int32 -> len:int32 -> unit
 
