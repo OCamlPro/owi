@@ -1115,7 +1115,12 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
-      let> out_of_bounds = I32.gt_u I32.(pos + len) (consti (Table.size t)) in
+      let> out_of_bounds =
+        let pos = I64.extend_i32_u pos in
+        let len = I64.extend_i32_u len in
+        let size = I64.extend_i32_u (consti @@ Table.size t) in
+        I64.gt_u I64.(add pos len) size
+      in
       if out_of_bounds then Choice.trap `Out_of_bounds_table_access
       else begin
         let* pos = Choice.select_i32 pos in
@@ -1130,24 +1135,26 @@ module Make (P : Interpret_intf.P) :
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let> out_of_bounds =
-        let t_src_len = Table.size t_src in
-        let t_dst_len = Table.size t_dst in
-        Bool.or_ (I32.gt_u I32.(src + len) (consti t_src_len))
-        @@ Bool.or_ (I32.gt_u I32.(dst + len) (consti t_dst_len))
-        (* TODO: I don't understand why this last one check is needed... *)
-        @@ Bool.or_ (I32.lt src (const 0l)) (I32.lt dst (const 0l))
+        let src_size = Table.size t_src |> consti |> I64.extend_i32_u in
+        let dst_size = Table.size t_dst |> consti |> I64.extend_i32_u in
+        let src = I64.extend_i32_u src in
+        let dst = I64.extend_i32_u dst in
+        let len = I64.extend_i32_u len in
+        Bool.or_
+          (I64.gt_u I64.(add src len) src_size)
+          (I64.gt_u I64.(add dst len) dst_size)
       in
       if out_of_bounds then Choice.trap `Out_of_bounds_table_access
       else begin
         let* () =
-          let> len_is_not_zero = I32.ne len (const 0l) in
-          if len_is_not_zero then begin
+          let> len_eqz = I32.eqz len in
+          if len_eqz then return ()
+          else begin
             let* src = Choice.select_i32 src in
             let* dst = Choice.select_i32 dst in
             let+ len = Choice.select_i32 len in
             Table.copy ~t_src ~t_dst ~src ~dst ~len
           end
-          else return ()
         in
         st stack
       end
@@ -1158,14 +1165,15 @@ module Make (P : Interpret_intf.P) :
       let len, stack = Stack.pop_i32 stack in
       let pos_x, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-
-      let table_size = Table.size t in
-      let elem_len = Elem.size elem in
       let> out_of_bounds =
-        Bool.or_ I32.(gt_u (pos_x + len) (consti elem_len))
-        @@ Bool.or_
-             I32.(gt_u (pos + len) (consti table_size))
-             I32.(const 0l > pos)
+        let pos = I64.extend_i32_u pos in
+        let pos_x = I64.extend_i32_u pos_x in
+        let len = I64.extend_i32_u len in
+        let tbl_size = Table.size t |> consti |> I64.extend_i32_u in
+        let elem_size = Elem.size elem |> consti |> I64.extend_i32_u in
+        Bool.or_
+          I64.(gt_u (add len pos_x) elem_size)
+          I64.(gt_u (add len pos) tbl_size)
       in
       if out_of_bounds then Choice.trap `Out_of_bounds_table_access
       else begin
