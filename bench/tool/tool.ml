@@ -183,6 +183,10 @@ let fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout =
     let rec loop retries =
       let pid = Unix.fork () in
       if pid = 0 then begin
+        (* setting the file where to log all queries sent to solvers *)
+        let log_path = Fpath.(output_dir / "queries_log.txt") |> Fpath.to_string in
+        Unix.putenv "QUERY_LOG_PATH" log_path;
+
         ExtUnix.Specific.setpgid 0 0;
         dup ~dst:Fpath.(output_dir / "stdout") ~src:Unix.stdout;
         dup ~dst:dst_stderr ~src:Unix.stderr;
