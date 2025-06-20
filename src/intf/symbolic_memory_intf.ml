@@ -102,11 +102,7 @@ module type S = sig
   val fill : t -> pos:Smtml.Expr.t -> len:Smtml.Expr.t -> char -> unit
 
   val blit :
-       t
-    -> src:Smtml.Expr.t
-    -> dst:Smtml.Expr.t
-    -> len:Smtml.Expr.t
-    -> Smtml.Expr.t
+    t -> src:Smtml.Expr.t -> dst:Smtml.Expr.t -> len:Smtml.Expr.t -> unit
 
   val blit_string :
        t

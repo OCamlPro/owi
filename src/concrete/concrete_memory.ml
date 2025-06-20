@@ -44,15 +44,7 @@ let blit mem ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  let data_len = Bytes.length mem.data in
-
-  (* TODO: this looks wrong! *)
-  src < 0 || dst < 0 || len < 0
-  || src + len > data_len
-  || dst + len > data_len
-  ||
-  ( Bytes.unsafe_blit mem.data src mem.data dst len;
-    false )
+  Bytes.unsafe_blit mem.data src mem.data dst len
 
 let blit_string mem str ~src ~dst ~len =
   let str_len = String.length str in
