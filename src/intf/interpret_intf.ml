@@ -74,7 +74,7 @@ module type P = sig
     val fill : t -> pos:Value.int32 -> len:Value.int32 -> char -> unit
 
     val blit :
-      t -> src:Value.int32 -> dst:Value.int32 -> len:Value.int32 -> Value.bool
+      t -> src:Value.int32 -> dst:Value.int32 -> len:Value.int32 -> unit
 
     val blit_string :
          t
