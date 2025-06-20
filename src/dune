@@ -71,6 +71,8 @@
   named
   optimize
   parse
+  pq_imperative
+  priority_queue
   result
   rewrite
   runtime

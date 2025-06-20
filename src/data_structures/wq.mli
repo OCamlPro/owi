@@ -10,7 +10,7 @@ type !'a t
 val make : unit -> 'a t
 
 (** Add a new element to the queue *)
-val push : 'a -> 'a t -> unit
+val push : 'a -> int -> 'a t -> unit
 
 (** Get an element from the queue. The boolean shall be true to atomically start
     a new pledge (cf make_pledge) while popping. *)
@@ -30,4 +30,4 @@ val fail : 'a t -> unit
 (** Pop all elements from the queue in a lazy Seq.t, *)
 val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
 
-val work_while : ('a -> ('a -> unit) -> unit) -> 'a t -> unit
+val work_while : ('a -> ('a -> int -> unit) -> unit) -> 'a t -> unit
