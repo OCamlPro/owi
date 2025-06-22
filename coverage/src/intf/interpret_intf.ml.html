@@ -235,6 +235,10 @@
 <a id="L211"></a><span > </span>
 <a id="L212"></a><span > </span>
 <a id="L213"></a><span > </span>
+<a id="L214"></a><span > </span>
+<a id="L215"></a><span > </span>
+<a id="L216"></a><span > </span>
+<a id="L217"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -452,6 +456,10 @@
 <a href="#L211">211</a>
 <a href="#L212">212</a>
 <a href="#L213">213</a>
+<a href="#L214">214</a>
+<a href="#L215">215</a>
+<a href="#L216">216</a>
+<a href="#L217">217</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -526,10 +534,14 @@ module type P = sig
 
     val grow : t -&gt; Value.int32 -&gt; unit
 
-    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; unit
+    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; unit Choice.t
 
     val blit :
-      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; unit
+         t
+      -&gt; src:Value.int32
+      -&gt; dst:Value.int32
+      -&gt; len:Value.int32
+      -&gt; unit Choice.t
 
     val blit_string :
          t

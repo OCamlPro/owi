@@ -160,6 +160,15 @@
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span > </span>
 <a id="L138"></a><span > </span>
+<a id="L139"></a><span > </span>
+<a id="L140"></a><span > </span>
+<a id="L141"></a><span > </span>
+<a id="L142"></a><span > </span>
+<a id="L143"></a><span > </span>
+<a id="L144"></a><span > </span>
+<a id="L145"></a><span > </span>
+<a id="L146"></a><span > </span>
+<a id="L147"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -302,6 +311,15 @@
 <a href="#L136">136</a>
 <a href="#L137">137</a>
 <a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
 </pre>
 <pre><code class="ocaml">module type M = sig
   type t
@@ -404,10 +422,19 @@ module type S = sig
 
   val grow : t -&gt; Smtml.Expr.t -&gt; unit
 
-  val fill : t -&gt; pos:Smtml.Expr.t -&gt; len:Smtml.Expr.t -&gt; char -&gt; unit
+  val fill :
+       t
+    -&gt; pos:Smtml.Expr.t
+    -&gt; len:Smtml.Expr.t
+    -&gt; char
+    -&gt; unit Symbolic_choice_without_memory.t
 
   val blit :
-    t -&gt; src:Smtml.Expr.t -&gt; dst:Smtml.Expr.t -&gt; len:Smtml.Expr.t -&gt; unit
+       t
+    -&gt; src:Smtml.Expr.t
+    -&gt; dst:Smtml.Expr.t
+    -&gt; len:Smtml.Expr.t
+    -&gt; unit Symbolic_choice_without_memory.t
 
   val blit_string :
        t
