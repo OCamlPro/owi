@@ -20,7 +20,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   let tinygo : Cmd.t =
     Cmd.(
       tinygo_bin % "build" % "-target" % "wasm" % "-no-debug" % "-opt" % "2"
-      % "-panic" % "trap" % "-o" % p out
+      % "-panic" % "trap" % "-gc" % "leaking" % "-o" % p out
       %% Cmd.of_list (List.map p files)
       (* % p libtinygo *) )
   in
