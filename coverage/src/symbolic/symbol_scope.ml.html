@@ -619,8 +619,8 @@ let pp fmt tokens =
   <span data-count="4">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1392">L</span>ist.filter_map
-    (function <span data-count="2713">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
+  <span data-count="1390">L</span>ist.filter_map
+    (function <span data-count="2700">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym =

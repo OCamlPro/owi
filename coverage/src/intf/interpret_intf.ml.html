@@ -233,6 +233,8 @@
 <a id="L209"></a><span > </span>
 <a id="L210"></a><span > </span>
 <a id="L211"></a><span > </span>
+<a id="L212"></a><span > </span>
+<a id="L213"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -448,6 +450,8 @@
 <a href="#L209">209</a>
 <a href="#L210">210</a>
 <a href="#L211">211</a>
+<a href="#L212">212</a>
+<a href="#L213">213</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -522,10 +526,10 @@ module type P = sig
 
     val grow : t -&gt; Value.int32 -&gt; unit
 
-    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; Value.bool
+    val fill : t -&gt; pos:Value.int32 -&gt; len:Value.int32 -&gt; char -&gt; unit
 
     val blit :
-      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; Value.bool
+      t -&gt; src:Value.int32 -&gt; dst:Value.int32 -&gt; len:Value.int32 -&gt; unit
 
     val blit_string :
          t
@@ -533,7 +537,7 @@ module type P = sig
       -&gt; src:Value.int32
       -&gt; dst:Value.int32
       -&gt; len:Value.int32
-      -&gt; Value.bool
+      -&gt; unit
 
     val size : t -&gt; Value.int32
 
@@ -556,6 +560,8 @@ module type P = sig
     type t
 
     val value : t -&gt; string
+
+    val size : t -&gt; int
   end
 
   module Elem : sig

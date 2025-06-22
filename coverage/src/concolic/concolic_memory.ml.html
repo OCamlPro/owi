@@ -18,15 +18,15 @@
       <h2>66.67%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:16.67%"></span>
-      <span class="unvisited" style="top:40.00%"></span>
-      <span class="unvisited" style="top:43.33%"></span>
-      <span class="unvisited" style="bottom:43.33%"></span>
-      <span class="unvisited" style="bottom:31.67%"></span>
-      <span class="unvisited" style="bottom:30.00%"></span>
-      <span class="unvisited" style="bottom:21.67%"></span>
-      <span class="unvisited" style="bottom:18.33%"></span>
-      <span class="unvisited" style="bottom:15.00%"></span>
+      <span class="unvisited" style="top:16.39%"></span>
+      <span class="unvisited" style="top:39.34%"></span>
+      <span class="unvisited" style="top:42.62%"></span>
+      <span class="unvisited" style="bottom:44.26%"></span>
+      <span class="unvisited" style="bottom:32.79%"></span>
+      <span class="unvisited" style="bottom:31.15%"></span>
+      <span class="unvisited" style="bottom:22.95%"></span>
+      <span class="unvisited" style="bottom:19.67%"></span>
+      <span class="unvisited" style="bottom:16.39%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -88,10 +88,11 @@
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span class="visited"> </span>
-<a id="L59"></a><span > </span>
-<a id="L60"></a><span class="unvisited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -156,6 +157,7 @@
 <a href="#L58">58</a>
 <a href="#L59">59</a>
 <a href="#L60">60</a>
+<a href="#L61">61</a>
 </pre>
 <pre><code class="ocaml">type t = Concrete_memory.t * Symbolic_memory.t
 
@@ -200,7 +202,7 @@ let grow (mc, ms) (deltac, deltas) =
   <span data-count="0">C</span>oncrete_memory.grow mc deltac;
   <span data-count="0">S</span>ymbolic_memory.grow ms deltas
 
-let size (mc, ms) = <span data-count="80037">(</span>Concrete_memory.siz<span data-count="80037">e</span> mc, Symbolic_memory.siz<span data-count="80037">e</span> ms)
+let size (mc, ms) = <span data-count="80566">(</span>Concrete_memory.siz<span data-count="80566">e</span> mc, Symbolic_memory.siz<span data-count="80566">e</span> ms)
 
 let size_in_pages (mc, ms) =
   <span data-count="0">(</span>Concrete_memory.size_in_page<span data-count="0">s</span> mc, Symbolic_memory.size_in_page<span data-count="0">s</span> ms)
@@ -213,8 +215,9 @@ let blit_string (mc, ms) str ~src ~dst ~len =
   <span data-count="529">l</span>et src_c, src_s = src in
   let dst_c, dst_s = dst in
   let len_c, len_s = len in
-  ( Concrete_memory.blit_strin<span data-count="529">g</span> mc str ~src:src_c ~dst:dst_c ~len:len_c
-  , Symbolic_memory.blit_strin<span data-count="529">g</span> ms str ~src:src_s ~dst:dst_s ~len:len_s )
+  Concrete_memory.blit_string mc str ~src:src_c ~dst:dst_c ~len:len_c;
+  <span data-count="529">S</span>ymbolic_memory.blit_string ms str ~src:src_s ~dst:dst_s ~len:len_s;
+  <span data-count="529">(</span>)
 
 let get_limit_max _ = <span data-count="0">F</span>mt.failwith "TODO"
 </code></pre>

@@ -440,7 +440,7 @@ let popcnt =
 (*
  * Unsigned comparison in terms of signed comparison.
  *)
-let cmp_u x op y = <span data-count="150875">o</span>p (ad<span data-count="150875">d</span> x min_int) (ad<span data-count="150875">d</span> y min_int) [@@inline]
+let cmp_u x op y = <span data-count="156792">o</span>p (ad<span data-count="156792">d</span> x min_int) (ad<span data-count="156792">d</span> y min_int) [@@inline]
 
 let eq (x : int64) y = <span data-count="10061755">e</span>qual x y [@@inline]
 
@@ -448,7 +448,7 @@ let ne (x : int64) y = <span data-count="51497">n</span>ot (equa<span data-count
 
 let lt (x : int64) y = <span data-count="20002">c</span>ompar<span data-count="20002">e</span> x y &lt; 0 [@@inline]
 
-let gt (x : int64) y = <span data-count="288">c</span>ompar<span data-count="288">e</span> x y &gt; 0 [@@inline]
+let gt (x : int64) y = <span data-count="6205">c</span>ompar<span data-count="6205">e</span> x y &gt; 0 [@@inline]
 
 let le (x : int64) y = <span data-count="151339">c</span>ompar<span data-count="151339">e</span> x y &lt;= 0 [@@inline]
 
@@ -458,7 +458,7 @@ let lt_u x y = <span data-count="15334">c</span>mp_u x lt y [@@inline]
 
 let le_u x y = <span data-count="134065">c</span>mp_u x le y [@@inline]
 
-let gt_u x y = <span data-count="208">c</span>mp_u x gt y [@@inline]
+let gt_u x y = <span data-count="6125">c</span>mp_u x gt y [@@inline]
 
 let ge_u x y = <span data-count="249">c</span>mp_u x ge y [@@inline]
 

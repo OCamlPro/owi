@@ -191,7 +191,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   <span data-count="0">l</span>et tinygo : Cmd.t =
     Cmd.(
       tinygo_bin <span data-count="0">%</span> "build" <span data-count="0">%</span> "-target" <span data-count="0">%</span> "wasm" <span data-count="0">%</span> "-no-debug" <span data-count="0">%</span> "-opt" <span data-count="0">%</span> "2"
-      <span data-count="0">%</span> "-panic" <span data-count="0">%</span> "trap" <span data-count="0">%</span> "-o" <span data-count="0">%</span> <span data-count="0">p</span> out
+      <span data-count="0">%</span> "-panic" <span data-count="0">%</span> "trap" <span data-count="0">%</span> "-gc" <span data-count="0">%</span> "leaking" <span data-count="0">%</span> "-o" <span data-count="0">%</span> <span data-count="0">p</span> out
       %<span data-count="0">%</span> Cmd.of_lis<span data-count="0">t</span> (List.ma<span data-count="0">p</span> p files)
       (* % p libtinygo *) )
   in

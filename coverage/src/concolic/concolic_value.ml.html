@@ -1167,7 +1167,7 @@ let symbolic_value (cs : t) : S.t =
   | <span data-count="0">V</span>128 (_c, s) -&gt; V128 s
   | <span data-count="0">R</span>ef (_c, s) -&gt; Ref s
 
-let f_pair_1 fc fs (c, s) = <span data-count="54835">(</span>f<span data-count="54835">c</span> c, f<span data-count="54835">s</span> s) [@@inline always]
+let f_pair_1 fc fs (c, s) = <span data-count="59531">(</span>f<span data-count="59531">c</span> c, f<span data-count="59531">s</span> s) [@@inline always]
 
 let f_pair_1' fc fs (c, s) =
   <span data-count="12">m</span>atch fc c with
@@ -1175,7 +1175,7 @@ let f_pair_1' fc fs (c, s) =
   | <span data-count="12">O</span>k c -&gt; ( match fs s with <span data-count="0">E</span>rror _ as e -&gt; e | <span data-count="12">O</span>k s -&gt; Ok (c, s) )
 [@@inline always]
 
-let f_pair_2 fc fs (c1, s1) (c2, s2) = <span data-count="539224">(</span>f<span data-count="539224">c</span> c1 c2, f<span data-count="539224">s</span> s1 s2) [@@inline always]
+let f_pair_2 fc fs (c1, s1) (c2, s2) = <span data-count="540837">(</span>f<span data-count="540837">c</span> c1 c2, f<span data-count="540837">s</span> s1 s2) [@@inline always]
 
 let f_pair_4 fc fs (c1, s1) (c2, s2) (c3, s3) (c4, s4) =
   <span data-count="0">(</span>f<span data-count="0">c</span> c1 c2 c3 c4, f<span data-count="0">s</span> s1 s2 s3 s4)
@@ -1193,13 +1193,13 @@ let f_pair_1_4 fc fs (c, s) =
   <span data-count="0">(</span>(c1, s1), (c2, s2), (c3, s3), (c4, s4))
 [@@inline always]
 
-let f_pair_1_cst fc fs v = <span data-count="386281">(</span>f<span data-count="386281">c</span> v, f<span data-count="386281">s</span> v) [@@inline always]
+let f_pair_1_cst fc fs v = <span data-count="386294">(</span>f<span data-count="386294">c</span> v, f<span data-count="386294">s</span> v) [@@inline always]
 
 let f_pair_2_cst' fc fs (c, s) v2 = <span data-count="5109">(</span>f<span data-count="5109">c</span> c v2, f<span data-count="5109">s</span> s v2) [@@inline always]
 
-let const_i32 v = <span data-count="382443">f</span>_pair_1_cst C.const_i32 S.const_i32 v
+let const_i32 v = <span data-count="381927">f</span>_pair_1_cst C.const_i32 S.const_i32 v
 
-let const_i64 v = <span data-count="2611">f</span>_pair_1_cst C.const_i64 S.const_i64 v
+let const_i64 v = <span data-count="3140">f</span>_pair_1_cst C.const_i64 S.const_i64 v
 
 let const_f32 v = <span data-count="208">f</span>_pair_1_cst C.const_f32 S.const_f32 v
 
