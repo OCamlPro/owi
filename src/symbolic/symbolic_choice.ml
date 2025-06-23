@@ -77,27 +77,27 @@ module CoreImpl = struct
     (*
         A scheduler for Schedulable values.
       *)
-    type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Wq.t
+    type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Wpq.t
 
     type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue } [@@unboxed]
 
     let init_scheduler () =
-      let work_queue = Wq.make () in
+      let work_queue = Wpq.make () in
       { work_queue }
 
-    let add_init_task sched task = Wq.push task 0 sched.work_queue
+    let add_init_task sched task = Wpq.push task 0 sched.work_queue
 
     let work wls sched callback =
       let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
-        | Now x -> callback x
-        | Yield (prio, f) -> write_back f (Prio.to_int prio)
+        | Now x -> callback  x
+        | Yield (prio, f) -> write_back ((Prio.to_int prio), f)
         | Choice (m1, m2) ->
           handle_status m1 write_back;
           handle_status m2 write_back
       in
-      Wq.work_while
+      Wpq.work_while
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
@@ -111,7 +111,7 @@ module CoreImpl = struct
             try work wls sched callback
             with e ->
               let bt = Printexc.get_raw_backtrace () in
-              Wq.fail sched.work_queue;
+              Wpq.fail sched.work_queue;
               Printexc.raise_with_backtrace e bt ) )
   end
 

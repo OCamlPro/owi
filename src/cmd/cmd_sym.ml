@@ -205,7 +205,7 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
   (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
-  let res_queue = Wq.make () in
+  let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in
   let callback v =
     let open Symbolic_choice_intf in
@@ -214,23 +214,23 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
     | _, (EVal (), _) -> ()
     | ( (Both | Trap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
-      Wq.push
+      Ws.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
-        Int.max_int res_queue
+        0 res_stack
     | ( (Both | Assertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
-      Wq.push
+      Ws.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
-        Int.max_int res_queue
+        0 res_stack
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =
     Symbolic_choice_with_memory.run ~workers solver result thread ~callback
-      ~callback_init:(fun () -> Wq.make_pledge res_queue)
-      ~callback_end:(fun () -> Wq.end_pledge res_queue)
+      ~callback_init:(fun () -> Ws.make_pledge res_stack)
+      ~callback_end:(fun () -> Ws.end_pledge res_stack)
   in
   let results =
-    Wq.read_as_seq res_queue ~finalizer:(fun () ->
+    Ws.read_as_seq res_stack ~finalizer:(fun () ->
       Array.iter Domain.join join_handles )
   in
   let results = sort_results deterministic_result_order results in
