@@ -24,7 +24,7 @@ type exports =
 type 'f module_to_run =
   { id : string option
   ; env : 'f Link_env.t
-  ; to_run : binary expr list
+  ; to_run : binary expr Annotated.t list
   }
 
 type 'f envs = 'f Link_env.t Env_id.collection
@@ -100,7 +100,7 @@ module Eval_const = struct
 
   (* TODO: binary+const instr *)
   let instr env stack instr =
-    match instr with
+    match instr.Annotated.raw with
     | I32_const n -> ok @@ Stack.push_i32 stack n
     | I64_const n -> ok @@ Stack.push_i64 stack n
     | F32_const f -> ok @@ Stack.push_f32 stack f
@@ -119,7 +119,7 @@ module Eval_const = struct
 
   (* TODO: binary+const expr *)
   let expr env e : Concrete_value.t Result.t =
-    let* stack = list_fold_left (instr env) Stack.empty e in
+    let* stack = list_fold_left (instr env) Stack.empty e.Annotated.raw in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
     | _ :: _ :: _ ->
@@ -386,6 +386,7 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
   in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
+  let to_run = List.map Annotated.dummy_deep to_run in
   let module_to_run = { id = modul.id; env; to_run } in
   Ok
     ( module_to_run

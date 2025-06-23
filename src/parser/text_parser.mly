@@ -191,9 +191,6 @@ let indice ==
 let id ==
   | ~ = ID; <>
 
-
-(* TODO: TO CLASSIFY *)
-
 let num_type ==
   | I32; { Types.I32 }
   | I64; { Types.I64 }
@@ -551,12 +548,13 @@ let block_instr ==
   | IF; id = option(id); (bt, es) = block; END; id2 = option(id); {
     if Option.is_some id2 && not @@ Option.equal String.equal id id2
     then failwith "mismatching label";
-    If_else (id, bt, es, [])
+    If_else (id, bt, es, Annotated.dummy [])
   }
   | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
     if (Option.is_some id2 && not @@ Option.equal String.equal id id2)
     || (Option.is_some id3 && not @@ Option.equal String.equal id id3)
     then failwith "mismatching label";
+    let instr_list = Annotated.dummy_deep instr_list in
     If_else (id, bt, es1, instr_list)
   }
 
@@ -566,6 +564,7 @@ let block ==
     | ([], []) -> bt_ind type_use
     | (pt, rt) -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt)
     in
+    let r = Annotated.dummy_deep r in
     Some block_type, r
   }
   | (l, r) = block_param_body; {
@@ -573,6 +572,7 @@ let block ==
       | [], [] -> None
       | (pt, rt) -> Some (bt_raw None (List.map (fun t -> None, t) pt, rt))
     in
+    let r = Annotated.dummy_deep r in
     block_type, r
   }
 
@@ -589,8 +589,12 @@ let block_result_body :=
   }
 
 let expr_aux ==
-  | ~ = plain_instr; ~ = expr_list; { expr_list, plain_instr }
+  | ~ = plain_instr; ~ = expr_list; {
+    let expr_list = Annotated.dummy expr_list in
+    expr_list, plain_instr
+  }
   | SELECT; (b, ts, es) = select_expr_result; {
+    let es = Annotated.dummy es in
     es, Select (if b then Some ts else None)
   }
   | ~ = call_indirect_prim; ~ = indice; (x, es) = call_expr_type; {
@@ -600,10 +604,12 @@ let expr_aux ==
     es, call_indirect_prim (raw 0, x)
   }
   | BLOCK; id = option(id); (bt, es) = block; {
-    [], Block (id, bt, es)
+    let l = Annotated.dummy [] in
+    l, Block (id, bt, es)
   }
   | LOOP; id = option(id); (bt, es) = block; {
-    [], Loop (id, bt, es)
+    let l = Annotated.dummy [] in
+    l, Loop (id, bt, es)
   }
   | IF; id = option(id); (bt, ((pt, rt), (es, es1, es2))) = if_block; {
     let bt = match pt, rt with
@@ -617,12 +623,15 @@ let expr_aux ==
       | None -> Some (bt_raw None raw)
       end
     in
+    let es1 = Annotated.dummy_deep es1 in
+    let es2 = Annotated.dummy_deep es2.raw in
     es, If_else (id, bt, es1, es2)
   }
 
 let expr :=
   | (es, e) = par(expr_aux); {
-    es @ [e]
+    let expr = es.raw @ [e] in
+    expr
   }
 
 let select_expr_result :=
@@ -646,6 +655,7 @@ let call_expr_params :=
     (l @ ts1, ts2), es
   }
   | (ts, es) = call_expr_results; {
+    let es = Annotated.dummy es in
     ([], ts), es
   }
 
@@ -675,27 +685,40 @@ let if_block_result_body :=
 
 let if_ :=
   | ~ = expr; (es0, es1, es2) = if_; {
-    expr @ es0, es1, es2
+    let es0 = Annotated.dummy (expr @ es0.raw) in
+    es0, es1, es2
   }
   | LPAR; THEN; es1 = instr_list; RPAR; LPAR; ELSE; es2 = instr_list; RPAR; {
-    [], es1, es2
+    let es0 = Annotated.dummy [] in
+    let es2 = Annotated.dummy es2 in
+    es0, es1, es2
   }
   | LPAR; THEN; ~ = instr_list; RPAR; {
-    [], instr_list, []
+    let es0 = Annotated.dummy [] in
+    let es1 = instr_list in
+    let es2 = Annotated.dummy [] in
+    es0, es1, es2
   }
 
 let instr_list :=
   | { [] }
-  | ~ = select_instr_instr_list; <>
-  | ~ = call_instr_instr_list; <>
-  | ~ = instr; ~ = instr_list; { instr @ instr_list }
+  | l = select_instr_instr_list; { l }
+  | l = call_instr_instr_list; { l }
+  | ~ = instr; ~ = instr_list; {
+    instr @ instr_list
+  }
 
 let expr_list :=
   | { [] }
-  | ~ = expr; ~ = expr_list; { expr @ expr_list }
+  | ~ = expr; ~ = expr_list; {
+    let l = expr @ expr_list in
+    l
+  }
 
 let const_expr ==
-  | ~ = instr_list; <>
+  | l = instr_list; {
+    l
+  }
 
 (* Functions *)
 
@@ -768,6 +791,7 @@ let func_result_body :=
 
 let func_body :=
   | body = instr_list; {
+    let body = Annotated.dummy_deep body in
     { type_f = bt_ind (raw Int.max_int); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
@@ -793,30 +817,49 @@ let elem_kind ==
   | FUNC; { Null, Func_ht }
 
 let elem_expr ==
-  | LPAR; ITEM; ~ = const_expr; RPAR; <>
-  | ~ = expr; <>
+  | LPAR; ITEM; l = const_expr; RPAR; {
+    l
+  }
+  | l = expr; {
+    l
+  }
 
 let elem_var ==
-  | id = indice; { [Ref_func id] }
+  | id = indice; {
+    Annotated.dummies [Ref_func id]
+  }
 
 let elem_list ==
-  | ~ = elem_kind; l = list(elem_var); { elem_kind, l }
-  | ~ = ref_type; l = list(elem_expr); { ref_type, l }
+  | ~ = elem_kind; l = list(elem_var); {
+    elem_kind, (l : text expr list)
+  }
+  | ~ = ref_type; l = list(elem_expr); {
+    let l : text expr list = List.map (List.map Annotated.dummy) l in
+    ref_type, l
+  }
 
 let elem ==
   | ELEM; id = option(id); (typ, init) = elem_list; {
+    let init = Annotated.dummies init in
     [ MElem { id; typ; init; mode = Elem_passive } ]
   }
   | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init) = elem_list; {
+    let init = Annotated.dummies init in
+    let offset = Annotated.dummy_deep offset in
     [ MElem { id; typ; init; mode = Elem_active (Some table_use, offset) } ]
   }
   | ELEM; id = option(id); DECLARE; (typ, init) = elem_list; {
+    let init = Annotated.dummies init in
     [ MElem { id; typ; init; mode = Elem_declarative } ]
   }
   | ELEM; id = option(id); ~ = offset; (typ, init) = elem_list; {
+    let init = Annotated.dummies init in
+    let offset = Annotated.dummy_deep offset in
     [ MElem { id; typ; init; mode = Elem_active (Some (raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
+    let init =  Annotated.dummies init in
+    let offset = Annotated.dummy_deep offset in
     [ MElem { id; typ = (Null, Func_ht); init; mode = Elem_active (Some (raw 0), offset) } ]
   }
 
@@ -826,7 +869,9 @@ let table ==
   List.rev_map (function
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
-    | MElem e -> MElem { e with mode = Elem_active (tbl_id, [I32_const 0l]) }
+    | MElem e ->
+      let mode = Elem_active (tbl_id, Annotated.dummy_deep [ I32_const 0l ]) in
+      MElem { e with mode }
     | MImport i -> begin match i.desc with
       | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
       | Import_func _ | Import_global _ | Import_mem _ -> assert false
@@ -839,8 +884,8 @@ let table ==
 }
 
 let init ==
-  | l = list(elem_var); { l }
-  | ~ = nonempty_list(elem_expr); <>
+  | l = list(elem_var); { List.map Annotated.dummy l }
+  | l = nonempty_list(elem_expr); { List.map Annotated.dummy_deep l }
 
 let table_fields :=
   | ~ = table_type; {
@@ -853,8 +898,12 @@ let table_fields :=
     MExport { name = inline_export; desc = Export_table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
-    let min = List.length (List.flatten init) in
-    [ MElem { id = None; typ = (Null, Func_ht); init; mode = Elem_active (None, []) }
+    let min = List.fold_left (fun sum l ->
+        sum + List.length l.Annotated.raw
+      ) 0 init
+    in
+    let mode = Elem_active (None, Annotated.dummy []) in
+    [ MElem { id = None; typ = (Null, Func_ht); init; mode }
     ; MTable (None, ({ min; max = Some min }, ref_type)) ]
   }
 
@@ -864,6 +913,7 @@ let data ==
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(raw 0) in
+    let offset = Annotated.dummy_deep offset in
     [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
   }
 
@@ -873,7 +923,9 @@ let memory ==
     List.rev_map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
-      | MData d -> MData { d with mode = Data_active (mem_id, [I32_const 0l]) }
+      | MData d ->
+        let mode = Data_active (mem_id, Annotated.dummy_deep [ I32_const 0l ]) in
+        MData { d with mode }
       | MImport i -> begin match i.desc with
         | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
         | Import_table _ | Import_func _ | Import_global _ -> assert false
@@ -898,7 +950,7 @@ let memory_fields :=
   | LPAR; DATA; init = string_list; RPAR; {
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     let min = Int32.to_int min in
-    [ MData { id = None; init; mode = Data_active (None, []) }
+    [ MData { id = None; init; mode = Data_active (None, Annotated.dummy []) }
     ; MMem (None, { min; max = Some min}) ]
   }
 
@@ -922,6 +974,7 @@ let global ==
 
 let global_fields :=
   | typ = global_type; init = const_expr; {
+    let init : text expr Annotated.t = Annotated.dummy_deep init in
     [ MGlobal { typ; init; id = None } ]
   }
   | (modul, name) = inline_import; ~ = global_type; {

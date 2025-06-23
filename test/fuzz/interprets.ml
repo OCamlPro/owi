@@ -29,7 +29,7 @@ let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
       try run () with Timeout -> Error `Timeout )
   with Timeout -> Error `Timeout
 
-module Owi_unoptimized : INTERPRET = struct
+module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
     let* simplified =
       Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
@@ -43,23 +43,6 @@ module Owi_unoptimized : INTERPRET = struct
         ~timeout_instr:None )
 
   let name = "owi_concrete"
-end
-
-module Owi_optimized : INTERPRET = struct
-  let parse_and_run modul =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
-    let* () = Binary_validate.modul simplified in
-    let simplified = Optimize.modul simplified in
-    let* regular, link_state =
-      Link.modul Link.empty_state ~name:None simplified
-    in
-    timeout_call_run (fun () ->
-      Interpret.Concrete.modul link_state.envs regular ~timeout:None
-        ~timeout_instr:None )
-
-  let name = "owi_concrete_optimized"
 end
 
 module Owi_minimalist_symbolic : INTERPRET = struct
@@ -142,8 +125,10 @@ end) : INTERPRET = struct
       let res_acc = ref [] in
       let res_acc_mutex = Mutex.create () in
       let jhs =
-        Symbolic_choice_with_memory.run ~workers:1 Smtml.Solver_type.Z3_solver c
-          init_thread
+        Symbolic_choice_with_memory.run ~workers:1
+          (* TODO: we should fuzz different exploration strategies! *)
+          (module Owi.Ws)
+          Smtml.Solver_type.Z3_solver c init_thread
           ~callback:(fun (res, _) ->
             Mutex.protect res_acc_mutex (fun () -> res_acc := res :: !res_acc) )
           ~callback_init:(fun () -> ())

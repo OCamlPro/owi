@@ -623,12 +623,10 @@ module Make (P : Interpret_intf.P) :
         locals
     end
 
-    type pc = binary instr list
-
     type block =
-      { branch : pc
+      { branch : binary expr Annotated.t
       ; branch_rt : binary result_type
-      ; continue : pc
+      ; continue : binary expr Annotated.t
       ; continue_rt : binary result_type
       ; stack : stack
       ; is_loop : Prelude.Bool.t
@@ -640,7 +638,8 @@ module Make (P : Interpret_intf.P) :
       { return_state : exec_state option
       ; stack : stack
       ; locals : Locals.t
-      ; pc : pc
+          (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
+      ; pc : binary expr Annotated.t
       ; block_stack : block_stack
       ; func_rt : binary result_type
       ; env : Env.t
@@ -651,7 +650,7 @@ module Make (P : Interpret_intf.P) :
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
-      ; pc = []
+      ; pc = Annotated.dummy []
       ; block_stack = []
       ; func_rt = []
       ; env
@@ -811,7 +810,7 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a" (Types.pp_instr ~short:true) instr );
+      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->
@@ -821,7 +820,7 @@ module Make (P : Interpret_intf.P) :
             (Smtml.Expr.Set.to_list pc) )
       | None | Some _ -> return ()
     in
-    match instr with
+    match instr.raw with
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
     | Unreachable -> Choice.trap `Unreachable
@@ -1489,8 +1488,9 @@ module Make (P : Interpret_intf.P) :
     let* () =
       match heartbeat with None -> Choice.return () | Some f -> f ()
     in
-    match state.pc with
+    match state.pc.raw with
     | instr :: pc -> begin
+      let pc = Annotated.dummy pc in
       let* state = exec_instr instr { state with pc } in
       match state with
       | State.Continue state -> loop ~heartbeat state

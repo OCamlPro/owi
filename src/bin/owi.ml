@@ -146,10 +146,6 @@ let no_value =
   let doc = "do not display a value for each symbol" in
   Arg.(value & flag & info [ "no-value" ] ~doc)
 
-let optimize =
-  let doc = "optimize mode" in
-  Arg.(value & flag & info [ "optimize" ] ~doc)
-
 let opt_lvl =
   let doc = "specify which optimization level to use" in
   Arg.(value & opt string "3" & info [ "O" ] ~doc)
@@ -235,7 +231,6 @@ let symbolic_parameters default_entry_point =
   let+ unsafe
   and+ rac
   and+ srac
-  and+ optimize
   and+ workers
   and+ no_stop_at_failure
   and+ no_value
@@ -253,7 +248,6 @@ let symbolic_parameters default_entry_point =
   { Cmd_sym.unsafe
   ; rac
   ; srac
-  ; optimize
   ; workers
   ; no_stop_at_failure
   ; no_value
@@ -410,20 +404,6 @@ let iso_cmd =
     ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
     ~model_out_file ~with_breadcrumbs
 
-(* owi opt *)
-
-let opt_info =
-  let doc = "Optimize a module" in
-  let man = [] @ shared_man in
-  Cmd.info "opt" ~version ~doc ~sdocs ~man
-
-let opt_cmd =
-  let+ unsafe
-  and+ () = setup_log
-  and+ source_file
-  and+ out_file in
-  Cmd_opt.cmd ~unsafe ~source_file ~out_file
-
 (* owi replay *)
 
 let replay_info =
@@ -436,7 +416,6 @@ let replay_info =
 
 let replay_cmd =
   let+ unsafe
-  and+ optimize
   and+ replay_file =
     let doc = "Which replay file to use" in
     Arg.(
@@ -447,7 +426,7 @@ let replay_cmd =
   and+ source_file
   and+ invoke_with_symbols
   and+ entry_point = entry_point None in
-  Cmd_replay.cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
+  Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
     ~invoke_with_symbols
 
 (* owi run *)
@@ -462,10 +441,9 @@ let run_cmd =
   and+ timeout
   and+ timeout_instr
   and+ rac
-  and+ optimize
   and+ () = setup_log
   and+ source_file in
-  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file
+  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file
 
 (* owi rust *)
 
@@ -497,14 +475,13 @@ let script_info =
   Cmd.info "script" ~version ~doc ~sdocs ~man
 
 let script_cmd =
-  let+ optimize
-  and+ files
+  let+ files
   and+ () = setup_log
   and+ no_exhaustion =
     let doc = "no exhaustion tests" in
     Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
   in
-  Cmd_script.cmd ~optimize ~files ~no_exhaustion
+  Cmd_script.cmd ~files ~no_exhaustion
 
 (* owi sym *)
 
@@ -590,11 +567,10 @@ let wat2wasm_info =
 
 let wat2wasm_cmd =
   let+ unsafe
-  and+ optimize
   and+ out_file
   and+ () = setup_log
   and+ source_file in
-  Cmd_wat2wasm.cmd ~unsafe ~optimize ~out_file ~source_file
+  Cmd_wat2wasm.cmd ~unsafe ~out_file ~source_file
 
 (* owi zig *)
 
@@ -633,7 +609,6 @@ let cli =
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.v instrument_info instrument_cmd
     ; Cmd.v iso_info iso_cmd
-    ; Cmd.v opt_info opt_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd

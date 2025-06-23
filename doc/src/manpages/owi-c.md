@@ -74,9 +74,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --optimize
-           optimize mode
-
        --property=FILE
            property file
 

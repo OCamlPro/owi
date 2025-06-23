@@ -42,6 +42,7 @@ let build_type_env (m : Module.t)
     [ Local_tee (Raw (Array.length param_types))
     ; Local_get (Raw (Array.length param_types))
     ]
+    |> Annotated.dummies
   in
 
   let void_to_i32 = (None, ([], [ Num_type I32 ])) in
@@ -77,9 +78,9 @@ let build_type_env (m : Module.t)
     }
   , { m with types } )
 
-let prop_true = I32_const (Int32.of_int 1)
+let prop_true = I32_const (Int32.of_int 1) |> Annotated.dummy
 
-let prop_false = I32_const (Int32.of_int 0)
+let prop_false = I32_const (Int32.of_int 0) |> Annotated.dummy
 
 let unop_generate (u : unop) (expr1 : binary expr) (ty1 : binary val_type) :
   (binary expr * binary val_type) Result.t =
@@ -88,22 +89,26 @@ let unop_generate (u : unop) (expr1 : binary expr) (ty1 : binary val_type) :
     match ty1 with
     | Num_type I32 ->
       let expr =
-        (I32_const (Int32.of_int 0) :: expr1) @ [ I_binop (S32, Sub) ]
+        ((I32_const (Int32.of_int 0) |> Annotated.dummy) :: expr1)
+        @ [ I_binop (S32, Sub) |> Annotated.dummy ]
       in
       Ok (expr, Num_type I32)
     | Num_type I64 ->
       let expr =
-        (I64_const (Int64.of_int 0) :: expr1) @ [ I_binop (S64, Sub) ]
+        ((I64_const (Int64.of_int 0) |> Annotated.dummy) :: expr1)
+        @ [ I_binop (S64, Sub) |> Annotated.dummy ]
       in
       Ok (expr, Num_type I64)
     | Num_type F32 ->
       let expr =
-        (F32_const (Float32.of_float 0.) :: expr1) @ [ F_binop (S32, Sub) ]
+        ((F32_const (Float32.of_float 0.) |> Annotated.dummy) :: expr1)
+        @ [ F_binop (S32, Sub) |> Annotated.dummy ]
       in
       Ok (expr, Num_type F32)
     | Num_type F64 ->
       let expr =
-        (F64_const (Float64.of_float 0.) :: expr1) @ [ F_binop (S64, Sub) ]
+        ((F64_const (Float64.of_float 0.) |> Annotated.dummy) :: expr1)
+        @ [ F_binop (S64, Sub) |> Annotated.dummy ]
       in
       Ok (expr, Num_type F64)
     | Num_type V128 -> Error (`Spec_type_error Fmt.(str "%a" pp_unop u))
@@ -116,83 +121,85 @@ let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
   | Plus -> (
     match (ty1, ty2) with
     | Num_type I32, Num_type I32 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S32, Add) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S32, Add) |> Annotated.dummy ] in
       Ok (expr, Num_type I32)
     | Num_type I64, Num_type I64 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S64, Add) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S64, Add) |> Annotated.dummy ] in
       Ok (expr, Num_type I64)
     | Num_type F32, Num_type F32 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S32, Add) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S32, Add) |> Annotated.dummy ] in
       Ok (expr, Num_type F32)
     | Num_type F64, Num_type F64 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S64, Add) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S64, Add) |> Annotated.dummy ] in
       Ok (expr, Num_type F64)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
   | Minus -> (
     match (ty1, ty2) with
     | Num_type I32, Num_type I32 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S32, Sub) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S32, Sub) |> Annotated.dummy ] in
       Ok (expr, Num_type I32)
     | Num_type I64, Num_type I64 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S64, Sub) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S64, Sub) |> Annotated.dummy ] in
       Ok (expr, Num_type I64)
     | Num_type F32, Num_type F32 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S32, Sub) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S32, Sub) |> Annotated.dummy ] in
       Ok (expr, Num_type F32)
     | Num_type F64, Num_type F64 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S64, Sub) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S64, Sub) |> Annotated.dummy ] in
       Ok (expr, Num_type F64)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
   | Mult -> (
     match (ty1, ty2) with
     | Num_type I32, Num_type I32 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S32, Mul) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S32, Mul) |> Annotated.dummy ] in
       Ok (expr, Num_type I32)
     | Num_type I64, Num_type I64 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S64, Mul) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S64, Mul) |> Annotated.dummy ] in
       Ok (expr, Num_type I64)
     | Num_type F32, Num_type F32 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S32, Mul) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S32, Mul) |> Annotated.dummy ] in
       Ok (expr, Num_type F32)
     | Num_type F64, Num_type F64 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S64, Mul) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S64, Mul) |> Annotated.dummy ] in
       Ok (expr, Num_type F64)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
   | Div -> (
     match (ty1, ty2) with
     | Num_type I32, Num_type I32 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S32, Div S) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S32, Div S) |> Annotated.dummy ] in
       Ok (expr, Num_type I32)
     | Num_type I64, Num_type I64 ->
-      let expr = expr1 @ expr2 @ [ I_binop (S64, Div S) ] in
+      let expr = expr1 @ expr2 @ [ I_binop (S64, Div S) |> Annotated.dummy ] in
       Ok (expr, Num_type I64)
     | Num_type F32, Num_type F32 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S32, Div) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S32, Div) |> Annotated.dummy ] in
       Ok (expr, Num_type F32)
     | Num_type F64, Num_type F64 ->
-      let expr = expr1 @ expr2 @ [ F_binop (S64, Div) ] in
+      let expr = expr1 @ expr2 @ [ F_binop (S64, Div) |> Annotated.dummy ] in
       Ok (expr, Num_type F64)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
 
 let rec term_generate tenv (term : binary term) :
   (binary expr * binary val_type) Result.t =
   match term with
-  | Int32 i32 -> Ok ([ I32_const i32 ], Num_type I32)
-  | Int64 i64 -> Ok ([ I64_const i64 ], Num_type I64)
-  | Float32 f32 -> Ok ([ F32_const f32 ], Num_type F32)
-  | Float64 f64 -> Ok ([ F64_const f64 ], Num_type F64)
+  | Int32 i32 -> Ok ([ I32_const i32 |> Annotated.dummy ], Num_type I32)
+  | Int64 i64 -> Ok ([ I64_const i64 |> Annotated.dummy ], Num_type I64)
+  | Float32 f32 -> Ok ([ F32_const f32 |> Annotated.dummy ], Num_type F32)
+  | Float64 f64 -> Ok ([ F64_const f64 |> Annotated.dummy ], Num_type F64)
   | ParamVar (Raw i as id) ->
     if i < 0 || i >= Array.length tenv.param_types then
       Error (`Spec_invalid_indice (Int.to_string i))
-    else Ok ([ Local_get id ], tenv.param_types.(i))
+    else Ok ([ Local_get id |> Annotated.dummy ], tenv.param_types.(i))
   | GlobalVar (Raw i as id) ->
     if i < 0 || i >= Array.length tenv.global_types then
       Error (`Spec_invalid_indice (Int.to_string i))
-    else Ok ([ Global_get id ], tenv.global_types.(i))
+    else Ok ([ Global_get id |> Annotated.dummy ], tenv.global_types.(i))
   | BinderVar (Raw i) ->
     if i < 0 || i >= Array.length tenv.binder_types then
       Error (`Spec_invalid_indice (Int.to_string i))
-    else Ok ([ Local_get (tenv.binder i) ], tenv.binder_types.(i))
+    else
+      Ok
+        ([ Local_get (tenv.binder i) |> Annotated.dummy ], tenv.binder_types.(i))
   | UnOp (u, tm1) ->
     let* expr1, ty1 = term_generate tenv tm1 in
     unop_generate u expr1 ty1
@@ -203,10 +210,14 @@ let rec term_generate tenv (term : binary term) :
   | Result (Some i) ->
     if i < 0 || i >= Array.length tenv.result_types then
       Error (`Spec_invalid_indice (Int.to_string i))
-    else Ok ([ Local_get (tenv.result i) ], tenv.result_types.(i))
+    else
+      Ok
+        ([ Local_get (tenv.result i) |> Annotated.dummy ], tenv.result_types.(i))
   | Result None ->
     if Array.length tenv.result_types = 0 then Error (`Spec_invalid_indice "0")
-    else Ok ([ Local_get (tenv.result 0) ], tenv.result_types.(0))
+    else
+      Ok
+        ([ Local_get (tenv.result 0) |> Annotated.dummy ], tenv.result_types.(0))
   | Memory tm1 -> (
     let* expr1, ty1 = term_generate tenv tm1 in
     match ty1 with
@@ -214,6 +225,7 @@ let rec term_generate tenv (term : binary term) :
       Ok
         ( expr1
           @ [ I_load (S32, { offset = Int32.of_int 0; align = Int32.of_int 0 })
+              |> Annotated.dummy
             ]
         , Num_type I32 )
     | _ -> Error (`Spec_type_error Fmt.(str "%a" pp_term tm1)) )
@@ -223,63 +235,120 @@ let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
   match b with
   | Ge -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Ge S) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Ge S) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Ge) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Ge) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Ge S) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Ge S) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Ge) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Ge) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
   | Gt -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Gt S) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Gt S) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Gt) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Gt) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Gt S) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Gt S) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Gt) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Gt) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
   | Le -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Le S) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Le S) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Le) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Le) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Le S) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Le S) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Le) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Le) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
   | Lt -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Lt S) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Lt S) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Lt) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Lt) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Lt S) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Lt S) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Lt) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Lt) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
   | Eq -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Eq) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Eq) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Eq) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Eq) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Eq) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Eq) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Eq) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Eq) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
   | Neq -> (
     match (ty1, ty2) with
-    | Num_type I32, Num_type I32 -> Ok (expr1 @ expr2 @ [ I_relop (S32, Ne) ])
-    | Num_type I64, Num_type I64 -> Ok (expr1 @ expr2 @ [ I_relop (S64, Ne) ])
-    | Num_type F32, Num_type F32 -> Ok (expr1 @ expr2 @ [ F_relop (S32, Ne) ])
-    | Num_type F64, Num_type F64 -> Ok (expr1 @ expr2 @ [ F_relop (S64, Ne) ])
+    | Num_type I32, Num_type I32 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S32, Ne) |> Annotated.dummy ])
+    | Num_type I64, Num_type I64 ->
+      Ok (expr1 @ expr2 @ [ I_relop (S64, Ne) |> Annotated.dummy ])
+    | Num_type F32, Num_type F32 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S32, Ne) |> Annotated.dummy ])
+    | Num_type F64, Num_type F64 ->
+      Ok (expr1 @ expr2 @ [ F_relop (S64, Ne) |> Annotated.dummy ])
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binpred b)) )
 
 let unconnect_generate (u : unconnect) (expr1 : binary expr) :
   binary expr Result.t =
-  match u with Not -> Ok ((prop_true :: expr1) @ [ I_binop (S32, Xor) ])
+  match u with
+  | Not -> Ok ((prop_true :: expr1) @ [ I_binop (S32, Xor) |> Annotated.dummy ])
 
 let binconnect_generate (b : binconnect) (expr1 : binary expr)
   (expr2 : binary expr) : binary expr Result.t =
   let bt = Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) in
   match b with
-  | And -> Ok (expr1 @ [ If_else (None, Some bt, expr2, [ prop_false ]) ])
-  | Or -> Ok (expr1 @ [ If_else (None, Some bt, [ prop_true ], expr2) ])
-  | Imply -> Ok (expr1 @ [ If_else (None, Some bt, expr2, [ prop_true ]) ])
+  | And ->
+    Ok
+      ( expr1
+      @ [ If_else
+            ( None
+            , Some bt
+            , expr2 |> Annotated.dummy
+            , [ prop_false ] |> Annotated.dummy )
+          |> Annotated.dummy
+        ] )
+  | Or ->
+    Ok
+      ( expr1
+      @ [ If_else
+            ( None
+            , Some bt
+            , [ prop_true ] |> Annotated.dummy
+            , expr2 |> Annotated.dummy )
+          |> Annotated.dummy
+        ] )
+  | Imply ->
+    Ok
+      ( expr1
+      @ [ If_else
+            ( None
+            , Some bt
+            , expr2 |> Annotated.dummy
+            , [ prop_true ] |> Annotated.dummy )
+          |> Annotated.dummy
+        ] )
   | Equiv ->
     Ok
       ( expr1
       @ [ If_else
-            (None, Some bt, expr2, (prop_true :: expr2) @ [ I_binop (S32, Xor) ])
+            ( None
+            , Some bt
+            , expr2 |> Annotated.dummy
+            , (prop_true :: expr2) @ [ I_binop (S32, Xor) |> Annotated.dummy ]
+              |> Annotated.dummy )
+          |> Annotated.dummy
         ] )
 
 let bounded_quantification :
@@ -317,148 +386,182 @@ let prop_generate tenv : binary prop -> (type_env * binary expr) Result.t =
       let* tenv2, expr2 = prop_generate_aux tenv1 pr2 in
       let+ expr = binconnect_generate b expr1 expr2 in
       (tenv2, expr)
-    | Binder _ as pr1 ->
+    | Binder _ as pr1 -> (
       let* b, bt, lower, upper, pr2 = bounded_quantification pr1 in
       let* lower, lower_ty = term_generate tenv lower in
       let* upper, upper_ty = term_generate tenv upper in
-      if val_type_eq lower_ty upper_ty && val_type_eq (Num_type bt) lower_ty
-      then
-        let tenv =
-          { tenv with
-            binder_types = Array.append [| Num_type bt |] tenv.binder_types
-          ; binder =
-              (fun i ->
-                let (Raw i) = tenv.binder i in
-                Raw (i + 1) )
-          }
+      let* () =
+        if val_type_eq lower_ty upper_ty && val_type_eq (Num_type bt) lower_ty
+        then Ok ()
+        else Error `Unbounded_quantification
+      in
+      let tenv =
+        { tenv with
+          binder_types = Array.append [| Num_type bt |] tenv.binder_types
+        ; binder =
+            (fun i ->
+              let (Raw i) = tenv.binder i in
+              Raw (i + 1) )
+        }
+      in
+      let+ tenv, expr1 = prop_generate_aux tenv pr2 in
+      match b with
+      | Forall ->
+        let init =
+          lower @ [ Local_set (tenv.binder 0) |> Annotated.dummy; prop_true ]
         in
-        let+ tenv, expr1 = prop_generate_aux tenv pr2 in
-        match b with
-        | Forall ->
-          let init = lower @ [ Local_set (tenv.binder 0); prop_true ] in
-          let incr =
-            match bt with
-            | I32 ->
-              [ Local_get (tenv.binder 0)
-              ; I32_const (Int32.of_int 1)
-              ; I_binop (S32, Add)
-              ; Local_set (tenv.binder 0)
-              ]
-            | I64 ->
-              [ Local_get (tenv.binder 0)
-              ; I64_const (Int64.of_int 1)
-              ; I_binop (S64, Add)
-              ; Local_set (tenv.binder 0)
-              ]
-            | _ -> assert false
-          in
-          let check_smaller =
-            match bt with
-            | I32 ->
-              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S32, Le S) ]
-            | I64 ->
-              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S64, Le S) ]
-            | _ -> assert false
-          in
-          let loop_body =
-            expr1
-            @ [ I_binop (S32, And) ]
-            @ tenv.copy
-            @ [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
-            @ incr @ check_smaller @ [ Br_if (Raw 0) ]
-          in
-          let loop =
-            [ Loop
-                ( Some "__weasel_loop"
-                , Some
-                    (Bt_raw
-                       ( Some tenv.i32_to_i32
-                       , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
-                , loop_body )
+        let incr =
+          match bt with
+          | I32 ->
+            [ Local_get (tenv.binder 0)
+            ; I32_const (Int32.of_int 1)
+            ; I_binop (S32, Add)
+            ; Local_set (tenv.binder 0)
             ]
-          in
-          ( tenv
-          , [ Block
-                ( Some "__weasel_forall"
-                , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
-                , init @ loop )
-            ] )
-        | Exists ->
-          let init = lower @ [ Local_set (tenv.binder 0); prop_false ] in
-          let incr =
-            match bt with
-            | I32 ->
-              [ Local_get (tenv.binder 0)
-              ; I32_const (Int32.of_int 1)
-              ; I_binop (S32, Add)
-              ; Local_set (tenv.binder 0)
-              ]
-            | I64 ->
-              [ Local_get (tenv.binder 0)
-              ; I64_const (Int64.of_int 1)
-              ; I_binop (S64, Add)
-              ; Local_set (tenv.binder 0)
-              ]
-            | _ -> assert false
-          in
-          let check_smaller =
-            match bt with
-            | I32 ->
-              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S32, Le S) ]
-            | I64 ->
-              [ Local_get (tenv.binder 0) ] @ upper @ [ I_relop (S64, Le S) ]
-            | _ -> assert false
-          in
-          let loop_body =
-            expr1
-            @ [ I_binop (S32, Or) ]
-            @ tenv.copy
-            @ [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
-            @ incr @ check_smaller @ [ Br_if (Raw 0) ]
-          in
-          let loop =
-            [ Loop
-                ( Some "__weasel_loop"
-                , Some
-                    (Bt_raw
-                       ( Some tenv.i32_to_i32
-                       , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
-                , loop_body )
+            |> Annotated.dummies
+          | I64 ->
+            [ Local_get (tenv.binder 0)
+            ; I64_const (Int64.of_int 1)
+            ; I_binop (S64, Add)
+            ; Local_set (tenv.binder 0)
             ]
-          in
-          ( tenv
-          , [ Block
-                ( Some "__weasel_exists"
-                , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
-                , init @ loop )
-            ] )
-      else Error `Unbounded_quantification
+            |> Annotated.dummies
+          | _ -> assert false
+        in
+        let check_smaller =
+          match bt with
+          | I32 ->
+            [ Local_get (tenv.binder 0) |> Annotated.dummy ]
+            @ upper
+            @ [ I_relop (S32, Le S) |> Annotated.dummy ]
+          | I64 ->
+            [ Local_get (tenv.binder 0) |> Annotated.dummy ]
+            @ upper
+            @ [ I_relop (S64, Le S) |> Annotated.dummy ]
+          | _ -> assert false
+        in
+        let loop_body =
+          expr1
+          @ [ I_binop (S32, And) |> Annotated.dummy ]
+          @ tenv.copy
+          @ ( [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
+            |> Annotated.dummies )
+          @ incr @ check_smaller
+          @ [ Br_if (Raw 0) |> Annotated.dummy ]
+        in
+        let loop =
+          [ Loop
+              ( Some "__weasel_loop"
+              , Some
+                  (Bt_raw
+                     ( Some tenv.i32_to_i32
+                     , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
+              , loop_body |> Annotated.dummy )
+            |> Annotated.dummy
+          ]
+        in
+        ( tenv
+        , [ Block
+              ( Some "__weasel_forall"
+              , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
+              , init @ loop |> Annotated.dummy )
+            |> Annotated.dummy
+          ] )
+      | Exists ->
+        let init =
+          lower @ [ Local_set (tenv.binder 0) |> Annotated.dummy; prop_false ]
+        in
+        let incr =
+          match bt with
+          | I32 ->
+            [ Local_get (tenv.binder 0)
+            ; I32_const (Int32.of_int 1)
+            ; I_binop (S32, Add)
+            ; Local_set (tenv.binder 0)
+            ]
+            |> Annotated.dummies
+          | I64 ->
+            [ Local_get (tenv.binder 0)
+            ; I64_const (Int64.of_int 1)
+            ; I_binop (S64, Add)
+            ; Local_set (tenv.binder 0)
+            ]
+            |> Annotated.dummies
+          | _ -> assert false
+        in
+        let check_smaller =
+          match bt with
+          | I32 ->
+            [ Local_get (tenv.binder 0) |> Annotated.dummy ]
+            @ upper
+            @ [ I_relop (S32, Le S) |> Annotated.dummy ]
+          | I64 ->
+            [ Local_get (tenv.binder 0) |> Annotated.dummy ]
+            @ upper
+            @ [ I_relop (S64, Le S) |> Annotated.dummy ]
+          | _ -> assert false
+        in
+        let loop_body =
+          expr1
+          @ [ I_binop (S32, Or) |> Annotated.dummy ]
+          @ tenv.copy
+          @ ( [ I32_const (Int32.of_int 1); I_binop (S32, Xor); Br_if (Raw 1) ]
+            |> Annotated.dummies )
+          @ incr @ check_smaller
+          @ [ Br_if (Raw 0) |> Annotated.dummy ]
+        in
+        let loop =
+          [ Loop
+              ( Some "__weasel_loop"
+              , Some
+                  (Bt_raw
+                     ( Some tenv.i32_to_i32
+                     , ([ (None, Num_type I32) ], [ Num_type I32 ]) ) )
+              , loop_body |> Annotated.dummy )
+            |> Annotated.dummy
+          ]
+        in
+        ( tenv
+        , [ Block
+              ( Some "__weasel_exists"
+              , Some (Bt_raw (Some tenv.void_to_i32, ([], [ Num_type I32 ])))
+              , init @ loop |> Annotated.dummy )
+            |> Annotated.dummy
+          ] ) )
   in
   fun pr ->
     let+ tenv, expr = prop_generate_aux tenv pr in
-    (tenv, expr @ [ Call tenv.owi_assert ])
+    (tenv, expr @ [ Call tenv.owi_assert |> Annotated.dummy ])
 
 let subst_index ?(subst_custom = false) (subst_task : (int * int) list)
   (m : Module.t) : Module.t =
   let subst i =
     match List.assoc_opt i subst_task with Some j -> j | None -> i
   in
-  let rec subst_instr (instr : binary instr) : binary instr =
-    match instr with
-    | Ref_func (Raw i) -> Ref_func (Raw (subst i))
-    | Block (str_opt, bt_opt, expr1) -> Block (str_opt, bt_opt, subst_expr expr1)
-    | Loop (str_opt, bt_opt, expr1) -> Loop (str_opt, bt_opt, subst_expr expr1)
-    | If_else (str_opt, bt_opt, expr1, expr2) ->
-      If_else (str_opt, bt_opt, subst_expr expr1, subst_expr expr2)
-    | Return_call (Raw i) -> Return_call (Raw (subst i))
-    | Call (Raw i) -> Call (Raw (subst i))
-    | instr -> instr
-  and subst_expr (expr : binary expr) = List.map subst_instr expr in
+  let rec subst_instr (instr : binary instr Annotated.t) :
+    binary instr Annotated.t =
+    Annotated.map
+      (function
+        | Ref_func (Raw i) -> Ref_func (Raw (subst i))
+        | Block (str_opt, bt_opt, expr1) ->
+          Block (str_opt, bt_opt, subst_expr expr1)
+        | Loop (str_opt, bt_opt, expr1) ->
+          Loop (str_opt, bt_opt, subst_expr expr1)
+        | If_else (str_opt, bt_opt, expr1, expr2) ->
+          If_else (str_opt, bt_opt, subst_expr expr1, subst_expr expr2)
+        | Return_call (Raw i) -> Return_call (Raw (subst i))
+        | Call (Raw i) -> Call (Raw (subst i))
+        | instr -> instr )
+      instr
+  and subst_expr (expr : binary expr Annotated.t) =
+    Annotated.map (List.map subst_instr) expr
+  in
 
   let subst_global (global : (global, binary global_type) Runtime.t) =
     match global with
     | Runtime.Local { typ; init; id } ->
-      Runtime.Local { typ; init = subst_expr init; id }
+      let init = subst_expr init in
+      Runtime.Local { typ; init; id }
     | Imported _ -> global
   in
   let global = Array.map subst_global m.global in
@@ -466,24 +569,31 @@ let subst_index ?(subst_custom = false) (subst_task : (int * int) list)
   let subst_func (func : (binary func, binary block_type) Runtime.t) =
     match func with
     | Runtime.Local { type_f; locals; body; id } ->
-      Runtime.Local { type_f; locals; body = subst_expr body; id }
+      let body = subst_expr body in
+      Runtime.Local { type_f; locals; body; id }
     | Imported _ -> func
   in
   let func = Array.map subst_func m.func in
 
   let subst_elem_mode = function
     | Elem_passive -> Elem_passive
-    | Elem_active (int_opt, expr1) -> Elem_active (int_opt, subst_expr expr1)
+    | Elem_active (int_opt, expr1) ->
+      let expr1 = subst_expr expr1 in
+      Elem_active (int_opt, expr1)
     | Elem_declarative -> Elem_declarative
   in
   let subst_elem ({ id; typ; init; mode } : elem) =
-    { id; typ; init = List.map subst_expr init; mode = subst_elem_mode mode }
+    let init = List.map subst_expr init in
+    let mode = subst_elem_mode mode in
+    { id; typ; init; mode }
   in
   let elem = Array.map subst_elem m.elem in
 
   let subst_data_mode = function
     | Data_passive -> Data_passive
-    | Data_active (int, expr1) -> Data_active (int, subst_expr expr1)
+    | Data_active (int, expr1) ->
+      let expr1 = subst_expr expr1 in
+      Data_active (int, expr1)
   in
   let subst_data ({ id; init; mode } : data) =
     { id; init; mode = subst_data_mode mode }
@@ -565,14 +675,15 @@ let contract_generate (owi_funcs : (string * int) array) (m : Module.t)
         (List.concat (List.map binder_locals (preconditions @ postconditions)))
   in
   let call =
-    List.init (Array.length tenv.param_types) (fun i -> Local_get (Raw i))
-    @ [ Call (Raw old_index) ]
+    List.init (Array.length tenv.param_types) (fun i ->
+      Local_get (Raw i) |> Annotated.dummy )
+    @ [ Call (Raw old_index) |> Annotated.dummy ]
     @ List.init (Array.length tenv.result_types) (fun i ->
-        Local_set (tenv.result i) )
+        Local_set (tenv.result i) |> Annotated.dummy )
   in
   let return =
     List.init (Array.length tenv.result_types) (fun i ->
-      Local_get (tenv.result i) )
+      Local_get (tenv.result i) |> Annotated.dummy )
   in
 
   let* tenv, precond_checker =
@@ -585,7 +696,9 @@ let contract_generate (owi_funcs : (string * int) array) (m : Module.t)
   in
   let postcond_checker = List.concat postcond_checker in
 
-  let body = precond_checker @ call @ postcond_checker @ return in
+  let body =
+    precond_checker @ call @ postcond_checker @ return |> Annotated.dummy
+  in
 
   let m = subst_index [ (old_index, index) ] m in
   let func =

@@ -185,7 +185,7 @@ let write_fd buf i =
 
 let rec write_instr buf instr =
   let add_char c = Buffer.add_char buf c in
-  match instr with
+  match instr.Annotated.raw with
   | Unreachable -> add_char '\x00'
   | Nop -> add_char '\x01'
   | Block (_str, bt, expr) ->
@@ -200,9 +200,9 @@ let rec write_instr buf instr =
     add_char '\x04';
     write_block_type buf bt;
     begin
-      match expr2 with
+      match expr2.raw with
       | [] -> write_expr buf expr1 ~end_op_code:None
-      | expr2 ->
+      | _ ->
         write_expr buf expr1 ~end_op_code:(Some '\x05');
         write_expr buf expr2 ~end_op_code:None
     end
@@ -511,7 +511,7 @@ let rec write_instr buf instr =
     assert false
 
 and write_expr buf expr ~end_op_code =
-  List.iter (write_instr buf) expr;
+  List.iter (write_instr buf) expr.Annotated.raw;
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
 
@@ -556,9 +556,10 @@ let write_locals buf locals =
 let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
   let write_init buf init =
     let is_ref_func = ref true in
-    encode_vector_list buf init (fun buf -> function
-      | [ Ref_func idx ] -> write_indice buf idx
-      | expr ->
+    encode_vector_list buf init (fun buf expr ->
+      match expr.Annotated.raw with
+      | [ { Annotated.raw = Ref_func idx; _ } ] -> write_indice buf idx
+      | _ ->
         write_expr buf expr ~end_op_code:None;
         is_ref_func := false );
     !is_ref_func
@@ -766,11 +767,8 @@ let write_file outfile filename content =
   let filename = Fpath.set_ext "wasm" filename in
   Bos.OS.File.write (Option.value outfile ~default:filename) content
 
-let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe ~optimize m
-    =
+let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe m =
   Logs.info (fun m -> m "binary encoding ...");
-  let* m =
-    Compile.Text.until_optimize ~unsafe ~rac:false ~srac:false ~optimize m
-  in
+  let* m = Compile.Text.until_validate ~unsafe ~rac:false ~srac:false m in
   let content = encode m in
   write_file outfile filename content

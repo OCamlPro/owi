@@ -133,6 +133,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
           List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
         in
         args @ [ Types.Call (Raw export.id) ] @ after_call
+        |> Annotated.dummies |> Annotated.dummy
       in
       let type_f : Types.binary Types.block_type =
         Types.Bt_raw (None, ([], []))

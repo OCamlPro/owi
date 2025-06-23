@@ -27,9 +27,6 @@ no subcommand should print help
              Check the iso-functionnality of two Wasm modules by comparing the
              output when calling their exports.
   
-         opt [OPTION]… FILE
-             Optimize a module
-  
          replay [OPTION]… FILE
              Replay a module containing symbols with concrete values in a
              replay file containing a model

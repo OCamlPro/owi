@@ -12,21 +12,12 @@ module Any : sig
     -> 'extern_func Kind.t
     -> Binary.Module.t Result.t
 
-  val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> optimize:bool
-    -> 'extern_func Kind.t
-    -> Binary.Module.t Result.t
-
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
     -> rac:bool
     -> srac:bool
-    -> optimize:bool
     -> name:string option
     -> 'extern_func Link.state
     -> 'extern_func Kind.t
@@ -37,21 +28,12 @@ module File : sig
   val until_validate :
     unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
 
-  val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> optimize:bool
-    -> Fpath.t
-    -> Binary.Module.t Result.t
-
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_link :
        unsafe:bool
     -> rac:bool
     -> srac:bool
-    -> optimize:bool
     -> name:string option
     -> 'extern_func Link.state
     -> Fpath.t
@@ -73,21 +55,12 @@ module Text : sig
     -> Text.modul
     -> Binary.Module.t Result.t
 
-  val until_optimize :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> optimize:bool
-    -> Text.modul
-    -> Binary.Module.t Result.t
-
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
     -> rac:bool
     -> srac:bool
-    -> optimize:bool
     -> name:string option
     -> 'f Link.state
     -> Text.modul
@@ -98,14 +71,10 @@ module Binary : sig
   val until_validate :
     unsafe:bool -> Binary.Module.t -> Binary.Module.t Result.t
 
-  val until_optimize :
-    unsafe:bool -> optimize:bool -> Binary.Module.t -> Binary.Module.t Result.t
-
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> optimize:bool
     -> name:string option
     -> 'f Link.state
     -> Binary.Module.t

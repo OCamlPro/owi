@@ -3,8 +3,4 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     unsafe:bool
-  -> optimize:bool
-  -> out_file:Fpath.t option
-  -> source_file:Fpath.t
-  -> unit Result.t
+  unsafe:bool -> out_file:Fpath.t option -> source_file:Fpath.t -> unit Result.t

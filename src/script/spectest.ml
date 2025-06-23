@@ -157,22 +157,24 @@ let m =
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
         ; MGlobal
             { typ = (Const, Num_type I32)
-            ; init = [ I32_const 666l ]
+            ; init = [ I32_const 666l ] |> Annotated.dummy_deep
             ; id = Some "global_i32"
             }
         ; MGlobal
             { typ = (Const, Num_type I64)
-            ; init = [ I64_const 666L ]
+            ; init = [ I64_const 666L ] |> Annotated.dummy_deep
             ; id = Some "global_i64"
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
-            ; init = [ F32_const (Float32.of_float 666.6) ]
+            ; init =
+                [ F32_const (Float32.of_float 666.6) ] |> Annotated.dummy_deep
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
-            ; init = [ F64_const (Float64.of_float 666.6) ]
+            ; init =
+                [ F64_const (Float64.of_float 666.6) ] |> Annotated.dummy_deep
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }

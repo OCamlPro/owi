@@ -6,6 +6,5 @@ val convert :
      Fpath.t option
   -> Fpath.t
   -> unsafe:bool
-  -> optimize:bool
   -> Text.modul
   -> (unit, Result.err) result

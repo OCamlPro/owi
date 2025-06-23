@@ -391,7 +391,7 @@ let rec read_instr types input =
       begin
         match read_byte ~msg:"read_instr (0x04)" input with
         | Ok ('\x05', input) -> read_expr types input
-        | Ok _ | Error _ -> Ok ([], input)
+        | Ok _ | Error _ -> Ok (Annotated.dummy [], input)
       end
     in
     let+ input = check_end_opcode input in
@@ -686,10 +686,12 @@ let rec read_instr types input =
 and read_expr types input =
   let rec aux acc input =
     match read_byte ~msg:"read_expr" input with
-    | Ok (('\x05' | '\x0B'), _) -> Ok (List.rev acc, input)
-    | Error _ -> Ok (List.rev acc, input)
+    | Ok (('\x05' | '\x0B'), _) | Error _ ->
+      let acc = List.rev acc |> Annotated.dummy in
+      Ok (acc, input)
     | Ok _ ->
       let* instr, input = read_instr types input in
+      let instr = Annotated.dummy instr in
       aux (instr :: acc) input
   in
   aux [] input
@@ -852,22 +854,26 @@ let read_element types input =
   | 0 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id read_elem_index input in
+    let init = List.map Annotated.dummy_deep init in
     let typ = (Null, Func_ht) in
     ({ id; typ; init; mode }, input)
   | 1 ->
     let mode = Elem_passive in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
+    let init = List.map Annotated.dummy_deep init in
     ({ id; typ; init; mode }, input)
   | 2 ->
     let* mode, input = read_elem_active types input in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
+    let init = List.map Annotated.dummy_deep init in
     ({ id; typ; init; mode }, input)
   | 3 ->
     let mode = Elem_declarative in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
+    let init = List.map Annotated.dummy_deep init in
     ({ id; typ; init; mode }, input)
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
@@ -1101,7 +1107,10 @@ let sections_iterate (input : Input.t) =
         | Data_drop _ | Memory_init _ -> code_use_dataidx := true
         | _ -> ()
       in
-      let expr = List.concat_map snd code_section in
+      let expr =
+        Annotated.dummy
+        @@ List.concat_map (fun (_, e) -> e.Annotated.raw) code_section
+      in
       iter_expr f_iter expr;
       if !code_use_dataidx then parse_fail "data count section required"
       else Ok ()

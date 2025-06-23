@@ -30,12 +30,8 @@ module Text = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_optimize ~unsafe ~rac ~srac ~optimize m =
-    let+ m = until_validate ~unsafe ~rac ~srac m in
-    if optimize then Optimize.modul m else m
-
-  let until_link ~unsafe ~rac ~srac ~optimize ~name link_state m =
-    let* m = until_optimize ~unsafe ~rac ~srac ~optimize m in
+  let until_link ~unsafe ~rac ~srac ~name link_state m =
+    let* m = until_validate ~unsafe ~rac ~srac m in
     Link.modul link_state ~name m
 end
 
@@ -46,12 +42,8 @@ module Binary = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_optimize ~unsafe ~optimize m =
-    let+ m = until_validate ~unsafe m in
-    if optimize then Optimize.modul m else m
-
-  let until_link ~unsafe ~optimize ~name link_state m =
-    let* m = until_optimize ~unsafe ~optimize m in
+  let until_link ~unsafe ~name link_state m =
+    let* m = until_validate ~unsafe m in
     Link.modul link_state ~name m
 end
 
@@ -62,16 +54,9 @@ module Any = struct
     | Wast _ -> Fmt.error_msg "can not validate a .wast file"
     | Ocaml _ -> Fmt.error_msg "can not validate an OCaml module"
 
-  let until_optimize ~unsafe ~rac ~srac ~optimize = function
-    | Kind.Wat m -> Text.until_optimize ~unsafe ~rac ~srac ~optimize m
-    | Wasm m -> Binary.until_optimize ~unsafe ~optimize m
-    | Wast _ -> Fmt.error_msg "can not optimize a .wast file"
-    | Ocaml _ -> Fmt.error_msg "can not optimize an OCaml module"
-
-  let until_link ~unsafe ~rac ~srac ~optimize ~name link_state = function
-    | Kind.Wat m ->
-      Text.until_link ~unsafe ~rac ~srac ~optimize ~name link_state m
-    | Wasm m -> Binary.until_link ~unsafe ~optimize ~name link_state m
+  let until_link ~unsafe ~rac ~srac ~name link_state = function
+    | Kind.Wat m -> Text.until_link ~unsafe ~rac ~srac ~name link_state m
+    | Wasm m -> Binary.until_link ~unsafe ~name link_state m
     | Ocaml _m ->
       (* TODO: we may be able to handle linking here but return an empty runnable module ? *)
       Fmt.error_msg "can not link an OCaml module"
@@ -86,18 +71,10 @@ module File = struct
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ | Ocaml _ -> assert false
 
-  let until_optimize ~unsafe ~rac ~srac ~optimize filename =
+  let until_link ~unsafe ~rac ~srac ~name link_state filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_optimize ~unsafe ~rac ~srac ~optimize m
-    | Wasm m -> Binary.until_optimize ~unsafe ~optimize m
-    | Wast _ | Ocaml _ -> assert false
-
-  let until_link ~unsafe ~rac ~srac ~optimize ~name link_state filename =
-    let* m = Parse.guess_from_file filename in
-    match m with
-    | Kind.Wat m ->
-      Text.until_link ~unsafe ~rac ~srac ~optimize ~name link_state m
-    | Wasm m -> Binary.until_link ~unsafe ~optimize ~name link_state m
+    | Kind.Wat m -> Text.until_link ~unsafe ~rac ~srac ~name link_state m
+    | Wasm m -> Binary.until_link ~unsafe ~name link_state m
     | Wast _ | Ocaml _ -> assert false
 end

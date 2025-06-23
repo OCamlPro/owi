@@ -145,7 +145,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
 
 let unsafe = false
 
-let run ~no_exhaustion ~optimize script =
+let run ~no_exhaustion script =
   let state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
@@ -163,7 +163,7 @@ let run ~no_exhaustion ~optimize script =
         incr curr_module;
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
         let+ () =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -177,7 +177,7 @@ let run ~no_exhaustion ~optimize script =
         let* m = Parse.Text.Inline_module.from_string m in
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
         let+ () =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -190,7 +190,7 @@ let run ~no_exhaustion ~optimize script =
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
         let* m, link_state =
-          Compile.Binary.until_link link_state ~unsafe ~optimize ~name:None m
+          Compile.Binary.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -202,7 +202,7 @@ let run ~no_exhaustion ~optimize script =
         incr curr_module;
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
         let got =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -249,7 +249,7 @@ let run ~no_exhaustion ~optimize script =
         Logs.info (fun m -> m "*** assert_invalid");
         let got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
         let+ () = check_error_result expected got in
         link_state
@@ -262,15 +262,15 @@ let run ~no_exhaustion ~optimize script =
         Logs.info (fun m -> m "*** assert_unlinkable");
         let got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed (m, expected)) ->
         Logs.info (fun m -> m "*** assert_malformed");
         let got =
-          Compile.Text.until_link ~unsafe ~optimize ~rac:false ~srac:false
-            ~name:None link_state m
+          Compile.Text.until_link ~unsafe ~rac:false ~srac:false ~name:None
+            link_state m
         in
         let+ () = check_error_result expected got in
         assert false
@@ -313,6 +313,6 @@ let run ~no_exhaustion ~optimize script =
         link_state )
     state script
 
-let exec ~no_exhaustion ~optimize script =
-  let+ _link_state = run ~no_exhaustion ~optimize script in
+let exec ~no_exhaustion script =
+  let+ _link_state = run ~no_exhaustion script in
   ()

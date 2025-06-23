@@ -97,12 +97,12 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       (emscripten_fuzzing_support_module ())
   in
   let* _module, link_state =
-    Compile.Binary.until_link ~name:(Some module_name1) ~unsafe ~optimize:false
-      link_state module1
+    Compile.Binary.until_link ~name:(Some module_name1) ~unsafe link_state
+      module1
   in
   let* _module, link_state =
-    Compile.Binary.until_link ~name:(Some module_name2) ~unsafe ~optimize:false
-      link_state module2
+    Compile.Binary.until_link ~name:(Some module_name2) ~unsafe link_state
+      module2
   in
 
   let typ = Types.Bt_raw (None, export_type) in
@@ -176,26 +176,30 @@ let check_iso ~unsafe export_name export_type module1 module2 =
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Local_get (Raw (local_offset + 0))
+                  Types.Local_get (Raw (local_offset + 0))
                 ; Local_get (Raw (local_offset + 1))
                 ; F_relop (S32, Eq)
                 ]
+                |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Local_get (Raw (local_offset + 1))
+                  Types.Local_get (Raw (local_offset + 1))
                 ; Local_get (Raw (local_offset + 1))
                 ; F_relop (S32, Eq)
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Local_get (Raw (local_offset + 0))
+                        Types.Local_get (Raw (local_offset + 0))
                       ; Local_get (Raw (local_offset + 1))
                       ; F_relop (S32, Eq)
                       ]
+                      |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        I32_const 1l
-                      ] )
-                ] )
+                        Types.I32_const 1l
+                      ]
+                      |> Annotated.dummy_deep )
+                ]
+                |> Annotated.dummy_deep )
           ]
         | [ Types.Num_type F64 ] ->
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
@@ -210,26 +214,30 @@ let check_iso ~unsafe export_name export_type module1 module2 =
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Local_get (Raw (local_offset + 2))
+                  Types.Local_get (Raw (local_offset + 2))
                 ; Local_get (Raw (local_offset + 3))
                 ; F_relop (S64, Eq)
                 ]
+                |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Local_get (Raw (local_offset + 3))
+                  Types.Local_get (Raw (local_offset + 3))
                 ; Local_get (Raw (local_offset + 3))
                 ; F_relop (S64, Eq)
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Local_get (Raw (local_offset + 2))
+                        Types.Local_get (Raw (local_offset + 2))
                       ; Local_get (Raw (local_offset + 3))
                       ; F_relop (S64, Eq)
                       ]
+                      |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        I32_const 1l
-                      ] )
-                ] )
+                        Types.I32_const 1l
+                      ]
+                      |> Annotated.dummy_deep )
+                ]
+                |> Annotated.dummy_deep )
           ]
         | rt ->
           Fmt.failwith
@@ -238,6 +246,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
             Types.pp_result_type rt )
       @ [ Call (Raw id_owi_assert) ]
     in
+    let body = Annotated.dummies body |> Annotated.dummy in
     let type_f =
       let (Bt_raw (_, typ)) = typ in
       Types.Bt_raw (None, (fst typ, []))
@@ -295,14 +304,19 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     let id = Some "start" in
     let locals = [] in
     let body =
-      List.map
-        (function
-          | (None | Some _), Types.Num_type I32 -> Types.Call (Raw id_i32_symbol)
-          | (None | Some _), Types.Num_type I64 -> Types.Call (Raw id_i64_symbol)
-          | (None | Some _), Types.Num_type F32 -> Types.Call (Raw id_f32_symbol)
-          | (None | Some _), Types.Num_type F64 -> Types.Call (Raw id_f64_symbol)
-          | _ -> Fmt.failwith "TODO" )
-        (fst export_type)
+      Annotated.dummy_deep
+      @@ List.map
+           (function
+             | (None | Some _), Types.Num_type I32 ->
+               Types.Call (Raw id_i32_symbol)
+             | (None | Some _), Types.Num_type I64 ->
+               Types.Call (Raw id_i64_symbol)
+             | (None | Some _), Types.Num_type F32 ->
+               Types.Call (Raw id_f32_symbol)
+             | (None | Some _), Types.Num_type F64 ->
+               Types.Call (Raw id_f64_symbol)
+             | _ -> Fmt.failwith "TODO" )
+           (fst export_type)
       @ [ Types.Call (Raw iso_check_index) ]
     in
     let type_f = Types.Bt_raw (None, ([], [])) in
@@ -315,8 +329,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   Logs.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.pp_modul text_modul );
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe:false ~optimize:false ~name:None
-      link_state modul
+    Compile.Binary.until_link ~unsafe:false ~name:None link_state modul
   in
   let m = Symbolic.convert_module_to_run m in
 

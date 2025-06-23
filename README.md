@@ -19,7 +19,7 @@ It offers a practical path from fuzzing to formal proofs.
 ### 🔧 The Wasm Swiss Army Knife
 
 Owi offers a set of practical tools for Wasm development and analysis:
-- **Formatter** and **optimizer** for Wasm modules;
+- **Formatter** for Wasm modules;
 - **Interpreter** for `.wasm`, `.wat`, and `.wast` files;
 - **Specification-compliant validator**;
 - **Bidirectional translation** between binary (`.wasm`) and text (`.wat`) formats;

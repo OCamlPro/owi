@@ -17,11 +17,11 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
 
 let link_state = Link.extern_module Link.empty_state ~name:"owi" extern_module
 
-let cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file =
+let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
   let name = None in
   let link_state = if rac then link_state else Link.empty_state in
   let* m, (link_state : _ Link.state) =
-    Compile.File.until_link ~unsafe ~rac ~srac:false ~optimize ~name link_state
+    Compile.File.until_link ~unsafe ~rac ~srac:false ~name link_state
       source_file
   in
   let+ () =

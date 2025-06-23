@@ -2,5 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd :
-  optimize:bool -> files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
+val cmd : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t

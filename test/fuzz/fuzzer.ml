@@ -107,12 +107,18 @@ let prepare_for_sym (modul : Owi.Text.modul) =
   let open Owi.Text in
   let open Owi.Types in
   let process_inst inst inst_list =
-    match inst with
-    | I32_const i -> I32_const i :: Call (Text "constant_symbol") :: inst_list
+    match inst.Owi.Annotated.raw with
+    | I32_const i ->
+      let l =
+        [ I32_const i; Call (Text "constant_symbol") ] |> Owi.Annotated.dummies
+      in
+      l @ inst_list
     | _ -> inst :: inst_list
   in
   let process_func fnc =
-    let updated_body = List.fold_right process_inst fnc.body [] in
+    let updated_body =
+      List.fold_right process_inst fnc.body.raw [] |> Owi.Annotated.dummy
+    in
     { fnc with body = updated_body }
   in
   let process_field = function
@@ -136,21 +142,17 @@ let prepare_for_sym (modul : Owi.Text.modul) =
 
 let () =
   let open Interprets in
-  if Param.optimize_fuzzing then
-    add_test "optimize_fuzzing" (gen Env.Concrete)
-      (module Owi_unoptimized)
-      (module Owi_optimized);
   if Param.reference_fuzzing then
     add_test "reference_fuzzing" (gen Env.Concrete)
-      (module Owi_unoptimized)
+      (module Owi_regular)
       (module Reference);
   if Param.symbolic_fuzzing then
     add_test "minimalist_symbolic_fuzzing" (gen Env.Symbolic)
-      (module Owi_unoptimized)
+      (module Owi_regular)
       (module Owi_minimalist_symbolic);
   if Param.full_symbolic_fuzzing then
     add_test "full_symbolic_fuzzing" (gen Env.Symbolic)
-      (module Owi_unoptimized)
+      (module Owi_regular)
       ( module Owi_full_symbolic (struct
         let symbolize = prepare_for_sym
       end) )

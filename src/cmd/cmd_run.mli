@@ -7,6 +7,5 @@ val cmd :
   -> timeout:float option
   -> timeout_instr:int option
   -> rac:bool
-  -> optimize:bool
   -> source_file:Fpath.t
   -> unit Result.t
