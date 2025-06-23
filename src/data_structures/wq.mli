@@ -30,4 +30,4 @@ val fail : 'a t -> unit
 (** Pop all elements from the queue in a lazy Seq.t, *)
 val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
 
-val work_while : ('a -> ('a -> int -> unit) -> unit) -> 'a t -> unit
+val work_while : ('a -> ((int * 'a) -> unit) -> unit) -> 'a t -> unit
