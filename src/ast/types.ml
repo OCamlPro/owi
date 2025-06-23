@@ -427,11 +427,6 @@ type nonrec 'a extern_type =
 (** Instructions *)
 
 type 'a instr =
-  (* { desc : instr_desc
-       ; loc : Lexing.position
-       }
-
-     and instr_desc =*)
   (* Numeric Instructions *)
   | I32_const of Int32.t
   | I64_const of Int64.t
@@ -500,9 +495,13 @@ type 'a instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * 'a block_type option * 'a expr
-  | Loop of string option * 'a block_type option * 'a expr
-  | If_else of string option * 'a block_type option * 'a expr * 'a expr
+  | Block of string option * 'a block_type option * 'a expr Annotated.t
+  | Loop of string option * 'a block_type option * 'a expr Annotated.t
+  | If_else of
+      string option
+      * 'a block_type option
+      * 'a expr Annotated.t
+      * 'a expr Annotated.t
   | Br of 'a indice
   | Br_if of 'a indice
   | Br_table of 'a indice array * 'a indice
@@ -517,7 +516,7 @@ type 'a instr =
   | Extern_externalize
   | Extern_internalize
 
-and 'a expr = 'a instr list
+and 'a expr = 'a instr Annotated.t list
 
 let pp_newline ppf () = pf ppf "@\n"
 
@@ -606,9 +605,9 @@ let rec pp_instr ~short fmt = function
         (pp_expr ~short) e
   | If_else (id, bt, e1, e2) ->
     let pp_else fmt e =
-      match e with
+      match e.Annotated.raw with
       | [] -> ()
-      | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e
+      | _ -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e
     in
     if short then pf fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
     else
@@ -631,13 +630,15 @@ let rec pp_instr ~short fmt = function
   | Extern_internalize -> pf fmt "extern.internalize"
 
 and pp_expr ~short fmt instrs =
-  list ~sep:pp_newline (pp_instr ~short) fmt instrs
+  list ~sep:pp_newline
+    (fun fmt { Annotated.raw } -> pp_instr ~short fmt raw)
+    fmt instrs.raw
 
 let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
 
-and iter_instr f (i : _ instr) =
-  f i;
-  match i with
+and iter_instr f { Annotated.raw } =
+  f raw;
+  match raw with
   | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
   | I_unop (_, _)
   | F_unop (_, _)
@@ -679,17 +680,17 @@ and iter_instr f (i : _ instr) =
   | Call_indirect (_, _)
   | Call_ref _ | Extern_externalize | Extern_internalize ->
     ()
-  | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
+  | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e.raw
   | If_else (_, _, e1, e2) ->
-    iter_expr f e1;
-    iter_expr f e2
+    iter_expr f e1.raw;
+    iter_expr f e2.raw
 
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =
   { type_f : 'a block_type
   ; locals : 'a param list
-  ; body : 'a expr
+  ; body : 'a expr Annotated.t
   ; id : string option
   }
 
