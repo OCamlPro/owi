@@ -72,7 +72,7 @@ let pure_wasm_module_1 =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:(Some "life") pure_wasm_module_1
+      ~name:(Some "life") pure_wasm_module_1
   with
   | Error _ -> assert false
   | Ok (m, state) -> (m, state)
@@ -96,7 +96,7 @@ let pure_wasm_module_2 =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module_2
+      ~name:None pure_wasm_module_2
   with
   | Error _ -> assert false
   | Ok (m, state) -> (m, state)

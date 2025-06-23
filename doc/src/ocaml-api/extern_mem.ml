@@ -42,7 +42,7 @@ let pure_wasm_module =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module
+      ~name:None pure_wasm_module
   with
   | Error _ -> assert false
   | Ok v -> v

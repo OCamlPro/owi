@@ -427,11 +427,6 @@ type nonrec 'a extern_type =
 (** Instructions *)
 
 type 'a instr =
-  (* { desc : instr_desc
-       ; loc : Lexing.position
-       }
-
-     and instr_desc =*)
   (* Numeric Instructions *)
   | I32_const of Int32.t
   | I64_const of Int64.t
@@ -500,9 +495,13 @@ type 'a instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * 'a block_type option * 'a expr
-  | Loop of string option * 'a block_type option * 'a expr
-  | If_else of string option * 'a block_type option * 'a expr * 'a expr
+  | Block of string option * 'a block_type option * 'a expr Annotated.t
+  | Loop of string option * 'a block_type option * 'a expr Annotated.t
+  | If_else of
+      string option
+      * 'a block_type option
+      * 'a expr Annotated.t
+      * 'a expr Annotated.t
   | Br of 'a indice
   | Br_if of 'a indice
   | Br_table of 'a indice array * 'a indice
@@ -517,7 +516,7 @@ type 'a instr =
   | Extern_externalize
   | Extern_internalize
 
-and 'a expr = 'a instr list
+and 'a expr = 'a instr Annotated.t list
 
 let pp_newline ppf () = pf ppf "@\n"
 
@@ -606,9 +605,11 @@ let rec pp_instr ~short fmt = function
         (pp_expr ~short) e
   | If_else (id, bt, e1, e2) ->
     let pp_else fmt e =
-      match e with
-      | [] -> ()
-      | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e
+      Annotated.iter
+        (function
+          | [] -> ()
+          | _ -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e )
+        e
     in
     if short then pf fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
     else
@@ -631,65 +632,73 @@ let rec pp_instr ~short fmt = function
   | Extern_internalize -> pf fmt "extern.internalize"
 
 and pp_expr ~short fmt instrs =
-  list ~sep:pp_newline (pp_instr ~short) fmt instrs
+  Annotated.iter
+    (fun instrs ->
+      list ~sep:pp_newline
+        (fun fmt i -> Annotated.iter (pp_instr ~short fmt) i)
+        fmt instrs )
+    instrs
 
-let rec iter_expr f (e : _ expr) = List.iter (iter_instr f) e
+let rec iter_expr f (e : _ expr Annotated.t) =
+  Annotated.iter (List.iter (iter_instr f)) e
 
-and iter_instr f (i : _ instr) =
-  f i;
-  match i with
-  | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
-  | I_unop (_, _)
-  | F_unop (_, _)
-  | I_binop (_, _)
-  | F_binop (_, _)
-  | V_ibinop (_, _)
-  | I_testop (_, _)
-  | I_relop (_, _)
-  | F_relop (_, _)
-  | I_extend8_s _ | I_extend16_s _ | I64_extend32_s | I32_wrap_i64
-  | I64_extend_i32 _
-  | I_trunc_f (_, _, _)
-  | I_trunc_sat_f (_, _, _)
-  | F32_demote_f64 | F64_promote_f32
-  | F_convert_i (_, _, _)
-  | I_reinterpret_f (_, _)
-  | F_reinterpret_i (_, _)
-  | Ref_null _ | Ref_is_null | Ref_func _ | Drop | Select _ | Local_get _
-  | Local_set _ | Local_tee _ | Global_get _ | Global_set _ | Table_get _
-  | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
-  | Table_copy (_, _)
-  | Table_init (_, _)
-  | Elem_drop _
-  | I_load (_, _)
-  | F_load (_, _)
-  | I_store (_, _)
-  | F_store (_, _)
-  | I_load8 (_, _, _)
-  | I_load16 (_, _, _)
-  | I64_load32 (_, _)
-  | I_store8 (_, _)
-  | I_store16 (_, _)
-  | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
-  | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
-  | Br_table (_, _)
-  | Return | Return_call _
-  | Return_call_indirect (_, _)
-  | Return_call_ref _ | Call _
-  | Call_indirect (_, _)
-  | Call_ref _ | Extern_externalize | Extern_internalize ->
-    ()
-  | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
-  | If_else (_, _, e1, e2) ->
-    iter_expr f e1;
-    iter_expr f e2
+and iter_instr f instr =
+  Annotated.iter f instr;
+  Annotated.iter
+    (function
+      | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
+      | I_unop (_, _)
+      | F_unop (_, _)
+      | I_binop (_, _)
+      | F_binop (_, _)
+      | V_ibinop (_, _)
+      | I_testop (_, _)
+      | I_relop (_, _)
+      | F_relop (_, _)
+      | I_extend8_s _ | I_extend16_s _ | I64_extend32_s | I32_wrap_i64
+      | I64_extend_i32 _
+      | I_trunc_f (_, _, _)
+      | I_trunc_sat_f (_, _, _)
+      | F32_demote_f64 | F64_promote_f32
+      | F_convert_i (_, _, _)
+      | I_reinterpret_f (_, _)
+      | F_reinterpret_i (_, _)
+      | Ref_null _ | Ref_is_null | Ref_func _ | Drop | Select _ | Local_get _
+      | Local_set _ | Local_tee _ | Global_get _ | Global_set _ | Table_get _
+      | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
+      | Table_copy (_, _)
+      | Table_init (_, _)
+      | Elem_drop _
+      | I_load (_, _)
+      | F_load (_, _)
+      | I_store (_, _)
+      | F_store (_, _)
+      | I_load8 (_, _, _)
+      | I_load16 (_, _, _)
+      | I64_load32 (_, _)
+      | I_store8 (_, _)
+      | I_store16 (_, _)
+      | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
+      | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
+      | Br_table (_, _)
+      | Return | Return_call _
+      | Return_call_indirect (_, _)
+      | Return_call_ref _ | Call _
+      | Call_indirect (_, _)
+      | Call_ref _ | Extern_externalize | Extern_internalize ->
+        ()
+      | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
+      | If_else (_, _, e1, e2) ->
+        iter_expr f e1;
+        iter_expr f e2 )
+    instr
 
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =
   { type_f : 'a block_type
   ; locals : 'a param list
-  ; body : 'a expr
+  ; body : 'a expr Annotated.t
   ; id : string option
   }
 

@@ -193,7 +193,7 @@ let add_mem value (fields : t) (curr : curr) =
 
 let rec extract_block_types expr =
   let aux instr =
-    match instr with
+    match instr.Annotated.raw with
     | Block (_str_opt, bt, expr1) | Loop (_str_opt, bt, expr1) ->
       Option.to_list bt @ extract_block_types expr1
     | If_else (_str_opt, bt, expr1, expr2) ->
@@ -203,7 +203,7 @@ let rec extract_block_types expr =
       [ bt ]
     | _ -> []
   in
-  List.concat_map aux expr
+  List.concat_map aux expr.raw
 
 let add_func value (fields : t) (curr : curr) =
   let fields =

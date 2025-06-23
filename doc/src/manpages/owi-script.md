@@ -19,9 +19,6 @@ OPTIONS
        --no-exhaustion
            no exhaustion tests
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 

@@ -223,9 +223,9 @@ end = struct
     push rt stack
 end
 
-let rec typecheck_instr (env : Env.t) (stack : stack) (instr : binary instr) :
-  stack Result.t =
-  match instr with
+let rec typecheck_instr (env : Env.t) (stack : stack)
+  (instr : binary instr Annotated.t) : stack Result.t =
+  match instr.raw with
   | Nop -> Ok stack
   | Drop -> Stack.drop stack
   | Return ->
@@ -540,7 +540,7 @@ and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
   in
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let* stack = list_fold_left (typecheck_instr env) pt expr in
+  let* stack = list_fold_left (typecheck_instr env) pt expr.raw in
   if not (Stack.equal rt stack) then
     Error
       (`Type_mismatch
@@ -573,7 +573,8 @@ let typecheck_function (modul : Module.t) func refs =
       Error (`Type_mismatch "typecheck_function")
     else Ok ()
 
-let typecheck_const_instr (modul : Module.t) refs stack = function
+let typecheck_const_instr (modul : Module.t) refs stack instr =
+  match instr.Annotated.raw with
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
   | F32_const _ -> Stack.push [ f32 ] stack
@@ -604,8 +605,8 @@ let typecheck_const_instr (modul : Module.t) refs stack = function
     Stack.push [ t ] stack
   | _ -> Error `Constant_expression_required
 
-let typecheck_const_expr (modul : Module.t) refs =
-  list_fold_left (typecheck_const_instr modul refs) []
+let typecheck_const_expr (modul : Module.t) refs expr =
+  list_fold_left (typecheck_const_instr modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
   (global : (global, binary global_type) Runtime.t) =

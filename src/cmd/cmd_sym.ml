@@ -20,7 +20,6 @@ type parameters =
   { unsafe : bool
   ; rac : bool
   ; srac : bool
-  ; optimize : bool
   ; workers : int
   ; no_stop_at_failure : bool
   ; no_value : bool
@@ -38,9 +37,7 @@ type parameters =
   }
 
 let run_file ~parameters ~source_file =
-  let { unsafe; rac; srac; entry_point; invoke_with_symbols; optimize; _ } =
-    parameters
-  in
+  let { unsafe; rac; srac; entry_point; invoke_with_symbols; _ } = parameters in
   let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
@@ -58,7 +55,7 @@ let run_file ~parameters ~source_file =
   in
 
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
+    Compile.Binary.until_link ~unsafe ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
   Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m

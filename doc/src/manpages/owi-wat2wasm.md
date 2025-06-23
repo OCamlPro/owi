@@ -20,9 +20,6 @@ OPTIONS
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 

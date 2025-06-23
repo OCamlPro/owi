@@ -136,7 +136,7 @@ module type T = sig
 
   type nonrec t = t
 
-  (* val typ : ('env, extern_func) t -> Simplified.func_type *)
+  (* val typ : ('env, extern_func) t -> binary func_type *)
 
   val wasm : binary func -> Env_id.t -> t
 end

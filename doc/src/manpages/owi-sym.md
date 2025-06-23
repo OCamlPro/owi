@@ -53,9 +53,6 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 

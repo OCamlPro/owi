@@ -4,6 +4,7 @@
  (public_name owi)
  (modules
   annot
+  annotated
   assigned
   binary
   binary_encoder
@@ -19,7 +20,6 @@
   cmd_fmt
   cmd_instrument
   cmd_iso
-  cmd_opt
   cmd_replay
   cmd_run
   cmd_rust
@@ -69,7 +69,6 @@
   minimalist_symbolic
   minimalist_symbolic_choice
   named
-  optimize
   parse
   pq_imperative
   prio

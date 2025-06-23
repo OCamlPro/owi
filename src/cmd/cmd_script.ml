@@ -8,6 +8,6 @@ let run_file exec filename =
   let* script = Parse.Text.Script.from_file filename in
   exec script
 
-let cmd ~optimize ~files ~no_exhaustion =
-  let exec = Script.exec ~no_exhaustion ~optimize in
+let cmd ~files ~no_exhaustion =
+  let exec = Script.exec ~no_exhaustion in
   list_iter (run_file exec) files
