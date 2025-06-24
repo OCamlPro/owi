@@ -4,7 +4,7 @@
 
 module Stack = Prelude.Stack
 
-type 'a t = ('a, int*'a) Synchronizer.t
+type 'a t = ('a, int * 'a) Synchronizer.t
 
 let pop s pledge = Synchronizer.get s pledge
 
@@ -20,7 +20,7 @@ let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
     Nil
   | Some v -> Cons (v, read_as_seq s ~finalizer)
 
-let push v prio s = Synchronizer.write (prio,v) s
+let push v prio s = Synchronizer.write (prio, v) s
 
 let work_while f s = Synchronizer.work_while f s
 

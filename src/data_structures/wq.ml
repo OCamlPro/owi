@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = ('a, int*'a) Synchronizer.t
+type 'a t = ('a, int * 'a) Synchronizer.t
 
 let pop q pledge = Synchronizer.get q pledge
 
@@ -18,7 +18,7 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     Nil
   | Some v -> Cons (v, read_as_seq q ~finalizer)
 
-let push v prio q = Synchronizer.write (prio,v) q
+let push v prio q = Synchronizer.write (prio, v) q
 
 let work_while f q = Synchronizer.work_while f q
 

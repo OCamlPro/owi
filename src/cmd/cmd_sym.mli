@@ -7,6 +7,11 @@ type fail_mode =
   | Assertion_only
   | Both
 
+type exploration_strategy =
+  | FIFO
+  | LIFO
+  | Random
+
 type parameters =
   { unsafe : bool
   ; rac : bool
@@ -18,6 +23,7 @@ type parameters =
   ; no_assert_failure_expression_printing : bool
   ; deterministic_result_order : bool
   ; fail_mode : fail_mode
+  ; exploration_strategy : exploration_strategy
   ; workspace : Fpath.t option
   ; solver : Smtml.Solver_type.t
   ; model_format : Cmd_utils.model_format
@@ -28,7 +34,8 @@ type parameters =
   }
 
 val handle_result :
-     workers:int
+     exploration_strategy:exploration_strategy
+  -> workers:int
   -> no_stop_at_failure:bool
   -> no_value:bool
   -> no_assert_failure_expression_printing:bool

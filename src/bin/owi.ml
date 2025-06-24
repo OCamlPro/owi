@@ -96,6 +96,18 @@ let fail_mode =
         ; (Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
 
+let exploration_strategy =
+  let fifo_doc = "explore the tree in fifo order" in
+  let lifo_doc = "explore the tree in lifo order" in
+  let random_doc = "explore the tree randomly" in
+  Arg.(
+    value
+    & vflag Cmd_sym.Random
+        [ (FIFO, info [ "fifo" ] ~doc:fifo_doc)
+        ; (LIFO, info [ "lifo" ] ~doc:lifo_doc)
+        ; (Random, info [ "random" ] ~doc:random_doc)
+        ] )
+
 let files =
   let doc = "source files" in
   Arg.(non_empty & pos_all existing_file_conv [] (info [] ~doc ~docv:"FILE"))
@@ -223,6 +235,7 @@ let symbolic_parameters default_entry_point =
   and+ no_assert_failure_expression_printing
   and+ deterministic_result_order
   and+ fail_mode
+  and+ exploration_strategy
   and+ workspace
   and+ solver
   and+ model_format
@@ -240,6 +253,7 @@ let symbolic_parameters default_entry_point =
   ; no_assert_failure_expression_printing
   ; deterministic_result_order
   ; fail_mode
+  ; exploration_strategy
   ; workspace
   ; solver
   ; model_format
@@ -370,6 +384,7 @@ let iso_info =
 let iso_cmd =
   let+ deterministic_result_order
   and+ fail_mode
+  and+ exploration_strategy
   and+ files
   and+ model_format
   and+ no_assert_failure_expression_printing
@@ -383,9 +398,10 @@ let iso_cmd =
   and+ with_breadcrumbs
   and+ workspace in
 
-  Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~files ~model_format
-    ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
-    ~unsafe ~workers ~workspace ~model_out_file ~with_breadcrumbs
+  Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
+    ~files ~model_format ~no_assert_failure_expression_printing
+    ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
+    ~model_out_file ~with_breadcrumbs
 
 (* owi opt *)
 

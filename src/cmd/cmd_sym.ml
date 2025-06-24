@@ -11,6 +11,11 @@ type fail_mode =
   | Assertion_only
   | Both
 
+type exploration_strategy =
+  | FIFO
+  | LIFO
+  | Random
+
 type parameters =
   { unsafe : bool
   ; rac : bool
@@ -22,6 +27,7 @@ type parameters =
   ; no_assert_failure_expression_printing : bool
   ; deterministic_result_order : bool
   ; fail_mode : fail_mode
+  ; exploration_strategy : exploration_strategy
   ; workspace : Fpath.t option
   ; solver : Smtml.Solver_type.t
   ; model_format : Cmd_utils.model_format
@@ -200,7 +206,7 @@ let sort_results deterministic_result_order results =
     |> List.to_seq |> Seq.map fst
   else results
 
-let handle_result ~workers ~no_stop_at_failure ~no_value
+let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
   (result : unit Symbolic.Choice.t) =
@@ -225,7 +231,12 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =
-    Symbolic_choice_with_memory.run ~workers solver result thread ~callback
+    Symbolic_choice_with_memory.run
+      ( match exploration_strategy with
+      | LIFO -> (module Wq)
+      | FIFO -> (module Ws)
+      | Random -> (module Wpq) )
+      ~workers solver result thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
       ~callback_end:(fun () -> Ws.end_pledge res_stack)
   in
@@ -250,7 +261,8 @@ let handle_result ~workers ~no_stop_at_failure ~no_value
 let cmd ~parameters ~source_file =
   let* result : unit Symbolic.Choice.t = run_file ~parameters ~source_file in
 
-  let { fail_mode
+  let { exploration_strategy
+      ; fail_mode
       ; workers
       ; solver
       ; deterministic_result_order
@@ -277,6 +289,7 @@ let cmd ~parameters ~source_file =
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
 
-  handle_result ~fail_mode ~workers ~solver ~deterministic_result_order
-    ~model_format ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs result
+  handle_result ~exploration_strategy ~fail_mode ~workers ~solver
+    ~deterministic_result_order ~model_format ~no_value
+    ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
+    ~model_out_file ~with_breadcrumbs result

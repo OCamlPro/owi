@@ -13,11 +13,9 @@ module Prio = struct
   (*
       Currently there is no real notion of priority. Future extensions adding it will ho here.
     *)
-  type t = Default
+  type t = Random
 
-  let default = Default
-
-  let to_int = function Default -> 0
+  let random = Random  let to_int = function Random -> Random.int 10000000
 end
 
 module CoreImpl = struct
@@ -73,31 +71,32 @@ module CoreImpl = struct
     let worker_local : ('a, 'a) t = Sched (fun wls -> Now wls)
   end
 
-  module Scheduler = struct
+  module Scheduler (Work_datastructure : Work_ds_intf.S) = struct
     (*
         A scheduler for Schedulable values.
       *)
-    type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Wpq.t
+    type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Work_datastructure.t
 
     type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue } [@@unboxed]
 
     let init_scheduler () =
-      let work_queue = Wpq.make () in
+      let work_queue = Work_datastructure.make () in
       { work_queue }
 
-    let add_init_task sched task = Wpq.push task 0 sched.work_queue
+    let add_init_task sched task =
+      Work_datastructure.push task 0 sched.work_queue
 
     let work wls sched callback =
       let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
-        | Now x -> callback  x
-        | Yield (prio, f) -> write_back ((Prio.to_int prio), f)
+        | Now x -> callback x
+        | Yield (prio, f) -> write_back (Prio.to_int prio, f)
         | Choice (m1, m2) ->
           handle_status m1 write_back;
           handle_status m2 write_back
       in
-      Wpq.work_while
+      Work_datastructure.work_while
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
@@ -111,7 +110,7 @@ module CoreImpl = struct
             try work wls sched callback
             with e ->
               let bt = Printexc.get_raw_backtrace () in
-              Wpq.fail sched.work_queue;
+              Work_datastructure.fail sched.work_queue;
               Printexc.raise_with_backtrace e bt ) )
   end
 
@@ -257,7 +256,8 @@ module CoreImpl = struct
     type 'a run_result = ('a eval * thread) Seq.t
 
     val run :
-         workers:int
+         (module Work_ds_intf.S)
+      -> workers:int
       -> Smtml.Solver_type.t
       -> 'a t
       -> thread
@@ -304,13 +304,15 @@ module CoreImpl = struct
       in
       State.liftF2 Schedulable.choose a b
 
-    let yield = lift_schedulable @@ Schedulable.yield Prio.default
+    let yield = lift_schedulable @@ Schedulable.yield Prio.random
 
     let stop = lift_schedulable Schedulable.stop
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
-    let run ~workers solver t thread ~callback ~callback_init ~callback_end =
+    let run (module M : Work_ds_intf.S) ~workers solver t thread ~callback
+      ~callback_init ~callback_end =
+      let module Scheduler = Scheduler (M) in
       let open Scheduler in
       let sched = init_scheduler () in
       add_init_task sched (State.run t thread);

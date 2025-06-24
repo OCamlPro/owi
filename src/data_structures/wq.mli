@@ -4,30 +4,4 @@
 
 (** Synchronized FIFO queues *)
 
-type !'a t
-
-(** Create a new queue *)
-val make : unit -> 'a t
-
-(** Add a new element to the queue *)
-val push : 'a -> int -> 'a t -> unit
-
-(** Get an element from the queue. The boolean shall be true to atomically start
-    a new pledge (cf make_pledge) while popping. *)
-val pop : 'a t -> bool -> 'a option
-
-(** Make a new pledge, ie indicate that new elements may be pushed to the queue
-    and that calls to pop should block waitting for them. *)
-val make_pledge : 'a t -> unit
-
-(** End one pledge. *)
-val end_pledge : 'a t -> unit
-
-(** Mark the queue as failed: all threads trying to pop from it will get no
-    element. *)
-val fail : 'a t -> unit
-
-(** Pop all elements from the queue in a lazy Seq.t, *)
-val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
-
-val work_while : ('a -> ((int * 'a) -> unit) -> unit) -> 'a t -> unit
+include Work_ds_intf.S

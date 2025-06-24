@@ -114,6 +114,7 @@
   value_intf
   v
   wasm_ffi_intf
+  work_ds_intf
   wpq
   wq
   ws
