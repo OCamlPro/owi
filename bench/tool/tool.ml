@@ -49,6 +49,8 @@ let wait_pid =
         Unix.sleepf timeout;
         did_timeout := true;
         (* we kill the process group id (pgid) which should be equal to pid *)
+        Unix.kill (-pid) 15;
+        Unix.sleepf 1.;
         Unix.kill (-pid) 9;
         Sys.set_signal Sys.sigchld Signal_default
       with Sigchld -> ()
