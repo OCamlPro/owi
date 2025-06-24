@@ -27,6 +27,12 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
+       --fifo
+           explore the tree in fifo order
+
+       --lifo
+           explore the tree in lifo order
+
        --model-format=VAL (absent=scfg)
             The format of the model ("json" or "scfg")
 
@@ -46,6 +52,9 @@ OPTIONS
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
+
+       --random
+           explore the tree randomly
 
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use

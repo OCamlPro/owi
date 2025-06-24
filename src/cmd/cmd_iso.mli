@@ -1,6 +1,7 @@
 val cmd :
      deterministic_result_order:bool
   -> fail_mode:Cmd_sym.fail_mode
+  -> exploration_strategy:Cmd_sym.exploration_strategy
   -> files:Fpath.t list
   -> model_format:Cmd_utils.model_format
   -> no_assert_failure_expression_printing:bool

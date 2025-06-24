@@ -324,9 +324,10 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
 module String_set = Set.Make (String)
 
-let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
-  ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~solver
-  ~unsafe ~workers ~workspace ~model_out_file ~with_breadcrumbs =
+let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
+  ~model_format ~no_assert_failure_expression_printing ~no_stop_at_failure
+  ~no_value ~solver ~unsafe ~workers ~workspace ~model_out_file
+  ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -431,7 +432,7 @@ let cmd ~deterministic_result_order ~fail_mode ~files ~model_format
       Logs.info (fun m -> m "checking export %s" export_name);
       let* result = check_iso ~unsafe export_name export_type module1 module2 in
 
-      Cmd_sym.handle_result ~fail_mode ~workers ~solver
+      Cmd_sym.handle_result ~exploration_strategy ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
         ~model_out_file ~with_breadcrumbs result )
