@@ -4,9 +4,11 @@
 (** What kind of differential fuzzing should be performed. *)
 let reference_fuzzing = false
 
-let symbolic_fuzzing = true
+let symbolic_fuzzing = false
 
 let full_symbolic_fuzzing = false
+
+let call_graph_fuzzing = true
 
 (** Enable debug mode, will slow down things. *)
 let debug = false
