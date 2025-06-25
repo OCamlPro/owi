@@ -18,7 +18,7 @@ let rec find_functions acc e =
     List.fold_left find_functions l1 e2
   | _ -> acc
 
-let print_func (m, i) f =
+let build_map (m, i) f =
   match f with
   | Local x ->
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
@@ -27,30 +27,53 @@ let print_func (m, i) f =
     (M.add i l m, i + 1)
   | _ -> (m, i + 1)
 
-let print_graph k l acc =
-  List.fold_left
-    (fun acc' i ->
-      let s' = match i with Raw i -> string_of_int i | _ -> "" in
-      String.concat "" [ acc'; string_of_int k; "->"; s'; ";" ] )
-    acc l
+let rec build_graph (call_graph, acc) k =
+  match M.find_opt k call_graph with
+  | None -> (call_graph, acc)
+  | Some l ->
+    let call_graph = M.remove k call_graph in
 
-let pp_call_graph fmt call_graph =
-  let s = M.fold print_graph call_graph "" in
+    List.fold_left
+      (fun (cg, acc) i ->
+        let cg', acc', s' =
+          match i with
+          | Raw i ->
+            let cg', acc' = build_graph (cg, acc) i in
+            (cg', acc', string_of_int i)
+          | _ -> (cg, acc, "")
+        in
+        (cg', String.concat "" [ acc'; string_of_int k; "->"; s'; ";" ]) )
+      (call_graph, acc) l
+
+let pp_call_graph fmt (call_graph, entries) =
+  let _, s = List.fold_left build_graph (call_graph, "") entries in
   Fmt.pf fmt "digraph call_graph {%s}" s
+
+let find_entry_points (m : Binary.Module.t) =
+  let l =
+    match m.start with
+    | Some i ->
+      Logs.app (fun log -> log "start : %a" Fmt.int i);
+      [ i ]
+    | None -> []
+  in
+  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
 
 let cmd_one file =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false file
   in
-  ( match m.start with
-  | Some i -> Logs.app (fun log -> log "start : %a" Fmt.int i)
-  | None -> () );
+  let entry_point = None in
+  let entries =
+    match entry_point with Some x -> [ x ] | None -> find_entry_points m
+  in
   let funcs = m.func in
 
-  let call_graph, _ = Array.fold_left print_func (M.empty, 0) funcs in
+  let call_graph, _ = Array.fold_left build_map (M.empty, 0) funcs in
 
   let* () =
-    Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" pp_call_graph call_graph
+    Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" pp_call_graph
+      (call_graph, entries)
   in
 
   Ok ()
