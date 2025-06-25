@@ -155,4 +155,14 @@ let () =
       (module Owi_regular)
       ( module Owi_full_symbolic (struct
         let symbolize = prepare_for_sym
-      end) )
+      end) );
+  if Param.call_graph_fuzzing then
+    Crowbar.add_test ~name:"call_graph_fuzzing"
+      [ gen Env.Concrete ]
+      (fun m ->
+        let open Owi.Cmd_call_graph in
+        let graph_complete =
+          build_call_graph_from_text_module Complete m None
+        in
+        let graph_sound = build_call_graph_from_text_module Sound m None in
+        Crowbar.check (Owi.Graph.is_subgraph graph_complete graph_sound) )

@@ -7,6 +7,19 @@ open Cmdliner
 
 (* Helpers *)
 
+let call_graph_conv =
+  let of_string s =
+    match String.lowercase_ascii s with
+    | "complete" -> Ok Cmd_call_graph.Complete
+    | "sound" -> Ok Cmd_call_graph.Sound
+    | _ -> Fmt.error_msg {|Expected "complete" or "sound" but got "%s"|} s
+  in
+  let pp fmt = function
+    | Cmd_call_graph.Complete -> Fmt.string fmt "complete"
+    | Cmd_call_graph.Sound -> Fmt.string fmt "sound"
+  in
+  Arg.conv (of_string, pp)
+
 let existing_file_conv =
   let parse s =
     match Fpath.of_string s with
@@ -93,6 +106,10 @@ let deterministic_result_order =
      --no-stop-at-failure."
   in
   Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
+
+let call_graph_mode =
+  let doc = {| The call graph is either "complete" or "sound" |} in
+  Arg.(value & opt call_graph_conv Sound & info [ "call-graph-mode" ] ~doc)
 
 let entry_point default =
   let doc = "entry point of the executable" in
@@ -299,6 +316,20 @@ let c_cmd =
 
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
+
+(* owi call_graph *)
+
+let cg_info =
+  let doc = "Build a call graph" in
+  let man = [] @ shared_man in
+  Cmd.info "cg" ~version ~doc ~sdocs ~man
+
+let cg_cmd =
+  let+ call_graph_mode
+  and+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
 
 (* owi cpp *)
 
@@ -604,6 +635,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.v c_info c_cmd
+    ; Cmd.v cg_info cg_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
