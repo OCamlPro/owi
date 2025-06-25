@@ -25,16 +25,14 @@ let print_func (m, i) f =
     let l = List.fold_left find_functions [] x.body in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" pp_indice i)) l;
     (M.add i l m, i + 1)
-  | _ -> (m, i+1)
+  | _ -> (m, i + 1)
 
-let print_graph k l acc = 
-  List.fold_left (
-    fun acc' i ->
-      let s' = (match i with 
-      | Raw i -> string_of_int i
-      | _ -> "") in
-      String.concat "" [acc';string_of_int k; "->";s';";"]
-      ) acc l
+let print_graph k l acc =
+  List.fold_left
+    (fun acc' i ->
+      let s' = match i with Raw i -> string_of_int i | _ -> "" in
+      String.concat "" [ acc'; string_of_int k; "->"; s'; ";" ] )
+    acc l
 
 let pp_call_graph fmt call_graph =
   let s = M.fold print_graph call_graph "" in
@@ -44,12 +42,12 @@ let cmd_one file =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false file
   in
-  (match m.start with
+  ( match m.start with
   | Some i -> Logs.app (fun log -> log "start : %a" Fmt.int i)
-  | None -> ());
+  | None -> () );
   let funcs = m.func in
 
-  let call_graph,_ = Array.fold_left print_func (M.empty, 0) funcs in
+  let call_graph, _ = Array.fold_left print_func (M.empty, 0) funcs in
 
   let* () =
     Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" pp_call_graph call_graph
@@ -58,8 +56,3 @@ let cmd_one file =
   Ok ()
 
 let cmd ~files = list_iter cmd_one files
-
-(*
-- créer une map_call graph
-- écrire pp_call_graph comme les exemples dans types
-*)
