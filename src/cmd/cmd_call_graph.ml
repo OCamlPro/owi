@@ -59,17 +59,22 @@ let find_entry_points (m : Binary.Module.t) =
   in
   List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
 
-let cmd_one file =
+let cmd_one entry_point file =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false file
-  in
-  let entry_point = None in
-  let entries =
-    match entry_point with Some x -> [ x ] | None -> find_entry_points m
   in
   let funcs = m.func in
 
   let call_graph, _ = Array.fold_left build_map (M.empty, 0) funcs in
+    let entries =
+    Option.value (Option.bind (Option.bind entry_point (
+      fun x ->
+        Array.find_index (fun f -> match f with 
+                                | Local y -> String.equal x (Option.value y.id ~default:"")
+                                | _ -> false) funcs  )   ) (fun x -> Some [x]))
+                              
+    ~default:(find_entry_points m)
+  in
 
   let* () =
     Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" pp_call_graph
@@ -78,4 +83,4 @@ let cmd_one file =
 
   Ok ()
 
-let cmd ~files = list_iter cmd_one files
+let cmd ~files ~entry_point = list_iter (cmd_one entry_point) files

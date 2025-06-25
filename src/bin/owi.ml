@@ -294,8 +294,9 @@ let cg_info =
 
 let cg_cmd =
   let+ files
+  and+ entry_point = entry_point None
   and+ () = setup_log in
-  Cmd_call_graph.cmd ~files
+  Cmd_call_graph.cmd ~files ~entry_point
 
 (* owi cpp *)
 
