@@ -72,6 +72,7 @@
   optimize
   parse
   pq_imperative
+  prio
   priority_queue
   result
   rewrite

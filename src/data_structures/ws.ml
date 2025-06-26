@@ -4,7 +4,7 @@
 
 module Stack = Prelude.Stack
 
-type 'a t = ('a, int * 'a) Synchronizer.t
+type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop s pledge = Synchronizer.get s pledge
 

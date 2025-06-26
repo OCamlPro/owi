@@ -9,16 +9,6 @@ include Symbolic_choice_intf
      in submodules. The module as a whole is made to provide a monad to explore in parallel
      different possibilites, with a notion of priority.
   *)
-module Prio = struct
-  (*
-      Currently there is no real notion of priority. Future extensions adding it will ho here.
-    *)
-  type t = Random
-
-  let random = Random
-
-  let to_int = function Random -> Random.int 10000000
-end
 
 module CoreImpl = struct
   module Schedulable = struct
@@ -86,14 +76,14 @@ module CoreImpl = struct
       { work_queue }
 
     let add_init_task sched task =
-      Work_datastructure.push task 0 sched.work_queue
+      Work_datastructure.push task Prio.default sched.work_queue
 
     let work wls sched callback =
       let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
         | Now x -> callback x
-        | Yield (prio, f) -> write_back (Prio.to_int prio, f)
+        | Yield (prio, f) -> write_back (prio, f)
         | Choice (m1, m2) ->
           handle_status m1 write_back;
           handle_status m2 write_back

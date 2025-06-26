@@ -222,12 +222,12 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Ws.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
-        0 res_stack
+        Prio.default res_stack
     | ( (Both | Assertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Ws.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
-        0 res_stack
+        Prio.default res_stack
     | (Trap_only | Assertion_only), _ -> ()
   in
   let join_handles =

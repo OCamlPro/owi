@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = ('a, int * 'a) Synchronizer.t
+type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop q pledge = Synchronizer.get q pledge
 
@@ -27,7 +27,8 @@ let fail = Synchronizer.fail
 let make () =
   let q = Pq_imperative.empty () in
   let writter prio_v condvar =
-    Pq_imperative.push prio_v q;
+    let prio, v = prio_v in
+    Pq_imperative.push (Prio.to_int prio, v) q;
     Condition.signal condvar
   in
   Synchronizer.init (fun () -> Pq_imperative.pop q) writter
