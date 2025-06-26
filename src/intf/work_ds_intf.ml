@@ -9,7 +9,7 @@ module type S = sig
   val make : unit -> 'a t
 
   (** Add a new element to the queue *)
-  val push : 'a -> int -> 'a t -> unit
+  val push : 'a -> Prio.t -> 'a t -> unit
 
   (** Get an element from the queue. The boolean shall be true to atomically
       start a new pledge (cf make_pledge) while popping. *)
@@ -29,5 +29,5 @@ module type S = sig
   (** Pop all elements from the queue in a lazy Seq.t, *)
   val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
 
-  val work_while : ('a -> (int * 'a -> unit) -> unit) -> 'a t -> unit
+  val work_while : ('a -> (Prio.t * 'a -> unit) -> unit) -> 'a t -> unit
 end

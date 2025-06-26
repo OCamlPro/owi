@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = ('a, int * 'a) Synchronizer.t
+type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop q pledge = Synchronizer.get q pledge
 
