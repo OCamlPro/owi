@@ -46,7 +46,7 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
  (depends
    ;; build
   (ocaml
-   (>= 5.1))
+   (>= 5.2))
   (menhir
    (and
     :build
