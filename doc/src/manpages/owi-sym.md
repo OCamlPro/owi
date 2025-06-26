@@ -23,21 +23,18 @@ OPTIONS
        --entry-point=FUNCTION
            entry point of the executable
 
+       --exploration=VAL (absent=lifo)
+           exploration strategy to use ("fifo", "lifo" or "random")
+
        --fail-on-assertion-only
            ignore traps and only report assertion violations
 
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       --fifo
-           explore the tree in fifo order
-
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
-
-       --lifo
-           explore the tree in lifo order
 
        --model-format=VAL (absent=scfg)
             The format of the model ("json" or "scfg")
@@ -64,9 +61,6 @@ OPTIONS
 
        --rac
            runtime assertion checking mode
-
-       --random
-           explore the tree randomly
 
        -s VAL, --solver=VAL (absent=Z3)
            SMT solver to use
