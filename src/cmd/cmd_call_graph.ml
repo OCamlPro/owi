@@ -81,4 +81,4 @@ let cmd_one entry_point file =
 
   Ok ()
 
-let cmd ~files ~entry_point = list_iter (cmd_one entry_point) files
+let cmd ~source_file ~entry_point = cmd_one entry_point source_file

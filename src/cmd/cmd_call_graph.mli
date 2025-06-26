@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd : files:Fpath.t list -> entry_point:string option -> unit Result.t
+val cmd : source_file:Fpath.t -> entry_point:string option -> unit Result.t

@@ -293,10 +293,10 @@ let cg_info =
   Cmd.info "cg" ~version ~doc ~sdocs ~man
 
 let cg_cmd =
-  let+ files
+  let+ source_file
   and+ entry_point = entry_point None
   and+ () = setup_log in
-  Cmd_call_graph.cmd ~files ~entry_point
+  Cmd_call_graph.cmd ~source_file ~entry_point
 
 (* owi cpp *)
 
