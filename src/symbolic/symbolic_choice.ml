@@ -15,7 +15,9 @@ module Prio = struct
     *)
   type t = Random
 
-  let random = Random  let to_int = function Random -> Random.int 10000000
+  let random = Random
+
+  let to_int = function Random -> Random.int 10000000
 end
 
 module CoreImpl = struct
