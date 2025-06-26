@@ -42,21 +42,15 @@ let rec build_graph (call_graph, acc) k =
             (cg', acc', string_of_int i)
           | _ -> (cg, acc, "")
         in
-        (cg', String.concat "" [ acc'; string_of_int k; "->"; s'; ";" ]) )
+        (cg', String.concat "" [ acc'; string_of_int k; "->"; s'; ";\n" ]) )
       (call_graph, acc) l
 
 let pp_call_graph fmt (call_graph, entries) =
   let _, s = List.fold_left build_graph (call_graph, "") entries in
-  Fmt.pf fmt "digraph call_graph {%s}" s
+  Fmt.pf fmt "digraph call_graph {\n%s}" s
 
 let find_entry_points (m : Binary.Module.t) =
-  let l =
-    match m.start with
-    | Some i ->
-      Logs.app (fun log -> log "start : %a" Fmt.int i);
-      [ i ]
-    | None -> []
-  in
+  let l = Option.to_list m.start in
   List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
 
 let cmd_one entry_point file =
@@ -66,14 +60,18 @@ let cmd_one entry_point file =
   let funcs = m.func in
 
   let call_graph, _ = Array.fold_left build_map (M.empty, 0) funcs in
-    let entries =
-    Option.value (Option.bind (Option.bind entry_point (
-      fun x ->
-        Array.find_index (fun f -> match f with 
-                                | Local y -> String.equal x (Option.value y.id ~default:"")
-                                | _ -> false) funcs  )   ) (fun x -> Some [x]))
-                              
-    ~default:(find_entry_points m)
+  let entries =
+    Option.value
+      (Option.bind
+         (Option.bind entry_point (fun x ->
+            Array.find_index
+              (fun f ->
+                match f with
+                | Local y -> String.equal x (Option.value y.id ~default:"")
+                | _ -> false )
+              funcs ) )
+         (fun x -> Some [ x ]) )
+      ~default:(find_entry_points m)
   in
 
   let* () =
