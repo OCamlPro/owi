@@ -4,7 +4,6 @@
 
 open Syntax
 open Types
-open Runtime
 module M = Map.Make (Int)
 
 let rec find_functions acc e =
@@ -20,14 +19,14 @@ let rec find_functions acc e =
 
 let build_map (m, i) f =
   match f with
-  | Local x ->
+  | Runtime.Local x ->
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
     let l = List.fold_left find_functions [] x.body in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" pp_indice i)) l;
     (M.add i l m, i + 1)
   | _ -> (m, i + 1)
 
-let rec build_graph (call_graph, acc) k =
+let rec print_graph (call_graph, acc) k =
   match M.find_opt k call_graph with
   | None -> (call_graph, acc)
   | Some l ->
@@ -38,7 +37,7 @@ let rec build_graph (call_graph, acc) k =
         let cg', acc', s' =
           match i with
           | Raw i ->
-            let cg', acc' = build_graph (cg, acc) i in
+            let cg', acc' = print_graph (cg, acc) i in
             (cg', acc', string_of_int i)
           | _ -> (cg, acc, "")
         in
@@ -46,7 +45,7 @@ let rec build_graph (call_graph, acc) k =
       (call_graph, acc) l
 
 let pp_call_graph fmt (call_graph, entries) =
-  let _, s = List.fold_left build_graph (call_graph, "") entries in
+  let _, s = List.fold_left print_graph (call_graph, "") entries in
   Fmt.pf fmt "digraph call_graph {\n%s}" s
 
 let find_entry_points (m : Binary.Module.t) =
@@ -67,7 +66,8 @@ let cmd_one entry_point file =
             Array.find_index
               (fun f ->
                 match f with
-                | Local y -> String.equal x (Option.value y.id ~default:"")
+                | Runtime.Local y ->
+                  Option.compare String.compare (Some x) y.id = 0
                 | _ -> false )
               funcs ) )
          (fun x -> Some [ x ]) )
