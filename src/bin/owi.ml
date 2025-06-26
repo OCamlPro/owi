@@ -37,6 +37,21 @@ let path_conv = Arg.conv (Fpath.of_string, Fpath.pp)
 
 let solver_conv = Arg.conv (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 
+let exploration_conv =
+  let of_string s =
+    match String.lowercase_ascii s with
+    | "fifo" -> Ok Cmd_sym.FIFO
+    | "lifo" -> Ok Cmd_sym.LIFO
+    | "random" -> Ok Cmd_sym.Random
+    | _ -> Fmt.error_msg {|Expected "fifo", "lifo" or "random" but got "%s"|} s
+  in
+  let pp fmt = function
+    | Cmd_sym.FIFO -> Fmt.string fmt "fifo"
+    | Cmd_sym.LIFO -> Fmt.string fmt "lifo"
+    | Cmd_sym.Random -> Fmt.string fmt "random"
+  in
+  Arg.conv (of_string, pp)
+
 let model_format_conv =
   let of_string s =
     match String.lowercase_ascii s with
@@ -97,16 +112,8 @@ let fail_mode =
         ] )
 
 let exploration_strategy =
-  let fifo_doc = "explore the tree in fifo order" in
-  let lifo_doc = "explore the tree in lifo order" in
-  let random_doc = "explore the tree randomly" in
-  Arg.(
-    value
-    & vflag Cmd_sym.Random
-        [ (FIFO, info [ "fifo" ] ~doc:fifo_doc)
-        ; (LIFO, info [ "lifo" ] ~doc:lifo_doc)
-        ; (Random, info [ "random" ] ~doc:random_doc)
-        ] )
+  let doc = "exploration strategy to use (\"fifo\", \"lifo\" or \"random\")" in
+  Arg.(value & opt exploration_conv Cmd_sym.LIFO & info [ "exploration" ] ~doc)
 
 let files =
   let doc = "source files" in
