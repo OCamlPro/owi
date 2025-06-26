@@ -8,8 +8,7 @@ module M = Map.Make (Int)
 
 let rec find_functions acc e =
   match e with
-  | Call i ->
-    if List.exists (fun x -> compare_indice i x = 0) acc then acc else i :: acc
+  | Call i -> i :: acc
   | Block (_, _, exp) -> List.fold_left find_functions acc exp
   | Loop (_, _, exp) -> List.fold_left find_functions acc exp
   | If_else (_, _, e1, e2) ->
@@ -21,7 +20,9 @@ let build_map (m, i) f =
   match f with
   | Runtime.Local x ->
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
-    let l = List.fold_left find_functions [] x.body in
+    let l =
+      List.sort_uniq compare_indice (List.fold_left find_functions [] x.body)
+    in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" pp_indice i)) l;
     (M.add i l m, i + 1)
   | _ -> (m, i + 1)
