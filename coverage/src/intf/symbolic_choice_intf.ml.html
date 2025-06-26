@@ -125,6 +125,7 @@
 <a id="L101"></a><span > </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
+<a id="L104"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -232,6 +233,7 @@
 <a href="#L101">101</a>
 <a href="#L102">102</a>
 <a href="#L103">103</a>
+<a href="#L104">104</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -302,7 +304,8 @@ module type S = sig
   type 'a run_result = ('a eval * thread) Seq.t
 
   val run :
-       workers:int
+       (module Work_ds_intf.S)
+    -&gt; workers:int
     -&gt; Smtml.Solver_type.t
     -&gt; 'a t
     -&gt; thread
