@@ -174,11 +174,30 @@ let rac =
   Arg.(value & flag & info [ "rac" ] ~doc)
 
 let solver =
-  let doc = "SMT solver to use" in
+  let docv = Arg.conv_docv solver_conv in
+  let doc =
+    let pp_solver fmt ty = Fmt.pf fmt "$(b,%a)" Smtml.Solver_type.pp ty in
+    let rec pp_solver_list =
+      let first = ref true in
+      fun fmt -> function
+        | [] -> ()
+        | [ x ] ->
+          if !first then pp_solver fmt x else Fmt.pf fmt "@ or %a" pp_solver x
+        | x :: remaining ->
+          if !first then first := false else Fmt.pf fmt ",@ ";
+          pp_solver fmt x;
+          pp_solver_list fmt remaining
+    in
+    Fmt.str
+      "SMT solver to use. $(i,%s) must be one of the %d available solvers: %a"
+      docv
+      (List.length Smtml.Solver_dispatcher.available)
+      pp_solver_list Smtml.Solver_dispatcher.available
+  in
   Arg.(
     value
     & opt solver_conv Smtml.Solver_type.Z3_solver
-    & info [ "solver"; "s" ] ~doc )
+    & info [ "solver"; "s" ] ~doc ~docv )
 
 let source_file =
   let doc = "source file" in
