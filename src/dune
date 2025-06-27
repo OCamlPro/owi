@@ -4,6 +4,7 @@
  (public_name owi)
  (modules
   annot
+  annotated
   assigned
   binary
   binary_encoder

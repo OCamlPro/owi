@@ -15,7 +15,7 @@ let bt_raw i t = Bt_raw (i, t)
 
 type global =
   { typ : text global_type
-  ; init : text expr
+  ; init : text expr Annotated.t
   ; id : string option
   }
 
@@ -25,7 +25,7 @@ let pp_global fmt (g : global) =
 
 type data_mode =
   | Data_passive
-  | Data_active of text indice option * text expr
+  | Data_active of text indice option * text expr Annotated.t
 
 let pp_data_mode fmt = function
   | Data_passive -> ()
@@ -43,7 +43,7 @@ let pp_data fmt (d : data) =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of text indice option * text expr
+  | Elem_active of text indice option * text expr Annotated.t
   | Elem_declarative
 
 let pp_elem_mode fmt = function
@@ -58,7 +58,7 @@ let pp_elem_mode fmt = function
 type elem =
   { id : string option
   ; typ : text ref_type
-  ; init : text expr list
+  ; init : text expr Annotated.t list
   ; mode : elem_mode
   }
 
