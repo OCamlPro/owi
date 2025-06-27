@@ -21,7 +21,7 @@ let build_graph (g, i) f =
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
     let l = List.sort_uniq compare (List.fold_left find_children [] x.body) in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" Fmt.int i)) l;
-    (Graph.add_node g i x.id l, i + 1)
+    ((i, x.id, l) :: g, i + 1)
   | _ -> (g, i + 1)
 
 let find_entry_points (m : Binary.Module.t) =
@@ -34,15 +34,22 @@ let cmd ~source_file ~entry_point =
   in
   let funcs = m.func in
 
-  let call_graph, _ = Array.fold_left build_graph (Graph.empty, 0) funcs in
+  let l, _ = Array.fold_left build_graph ([], 0) funcs in
   let entries =
     Option.value
       (Option.bind
-         (Option.bind entry_point (fun e -> Graph.find_indice call_graph e))
+         (Option.bind entry_point (fun x ->
+            Array.find_index
+              (fun f ->
+                match f with
+                | Runtime.Local y ->
+                  Option.compare String.compare (Some x) y.id = 0
+                | _ -> false )
+              funcs ) )
          (fun x -> Some [ x ]) )
       ~default:(find_entry_points m)
   in
-  let call_graph = Graph.set_entry_points call_graph entries in
+  let call_graph = Graph.init l entries in
 
   let* () =
     Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" Graph.pp_dot call_graph

@@ -1,33 +1,35 @@
+module S = Set.Make (Int)
+
 type node =
   { ind : int
   ; info : string option
   ; children : int list
-  ; mutable visited : bool
   }
 
 type t =
-  { nodes : node list
+  { nodes : node array
   ; entry_points : int list
   }
 
-let empty = { nodes = []; entry_points = [] }
+let init l entry_points =
+  let l' = List.sort (fun (n1, _, _) (n2, _, _) -> compare n1 n2) l in
+  let nodes =
+    Array.of_list
+      (List.map (fun (ind, info, children) -> { ind; info; children }) l')
+  in
+  { nodes; entry_points }
 
-let set_entry_points graph e = { graph with entry_points = e }
-
-let add_node graph i s l =
-  let n = { ind = i; info = s; children = l; visited = false } in
-  { graph with nodes = n :: graph.nodes }
-
-let rec print_graph nodes acc k =
-  match List.find_opt (fun n -> n.ind = k) nodes with
-  | None -> acc
-  | Some n ->
-    if n.visited then acc
-    else (
-      n.visited <- true;
-      List.fold_left
-        (fun acc i -> print_graph nodes ((k, i) :: acc) i)
-        acc n.children )
+let rec print_graph nodes (acc, visited) (n : node) =
+  if S.mem n.ind visited then (acc, visited)
+  else
+    let visited = S.add n.ind visited in
+    List.fold_left
+      (fun (acc, visited) (x : int) ->
+        if x < Array.length nodes then
+          let i = Array.get nodes x in
+          print_graph nodes ((n.ind, i.ind) :: acc, visited) i
+        else (acc, visited) )
+      (acc, visited) n.children
 
 let pp_entry_points fmt l =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";") Fmt.int fmt l
@@ -38,12 +40,15 @@ let pp_edges fmt l =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n") pp_edge fmt l
 
 let pp_dot fmt g =
-  List.iter (fun n -> n.visited <- false) g.nodes;
-  let l = List.fold_left (print_graph g.nodes) [] g.entry_points in
+  let entry_points =
+    List.concat_map
+      (fun x ->
+        Option.to_list
+          (if x < Array.length g.nodes then Some (Array.get g.nodes x) else None) )
+      g.entry_points
+  in
+  let l, _ = List.fold_left (print_graph g.nodes) ([], S.empty) entry_points in
   Fmt.pf fmt "digraph call_graph {\n%a;\n%a}" pp_entry_points g.entry_points
     pp_edges l
 
-let find_indice g s =
-  Option.map
-    (fun n -> n.ind)
-    (List.find_opt (fun n -> Option.equal String.equal n.info (Some s)) g.nodes)
+let get_info graph = (Array.get graph.nodes 1).info (* sert à utilser info *)
