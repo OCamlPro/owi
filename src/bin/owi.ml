@@ -187,11 +187,21 @@ let rac =
   Arg.(value & flag & info [ "rac" ] ~doc)
 
 let solver =
-  let doc = "SMT solver to use" in
+  let docv = Arg.conv_docv solver_conv in
+  let doc =
+    let pp_bold_solver fmt ty = Fmt.pf fmt "$(b,%a)" Smtml.Solver_type.pp ty in
+    let supported_solvers = Smtml.Solver_dispatcher.supported_solvers in
+    Fmt.str
+      "SMT solver to use. $(i,%s) must be one of the %d available solvers: %a"
+      docv
+      (List.length supported_solvers)
+      (Fmt.list ~sep:Fmt.comma pp_bold_solver)
+      supported_solvers
+  in
   Arg.(
     value
     & opt solver_conv Smtml.Solver_type.Z3_solver
-    & info [ "solver"; "s" ] ~doc )
+    & info [ "solver"; "s" ] ~doc ~docv )
 
 let source_file =
   let doc = "source file" in
