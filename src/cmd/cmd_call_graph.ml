@@ -21,7 +21,7 @@ let build_graph (g, i) f =
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
     let l = List.sort_uniq compare (List.fold_left find_children [] x.body) in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" Fmt.int i)) l;
-    (Graph.add_edges g i x.id l, i + 1)
+    (Graph.add_node g i x.id l, i + 1)
   | _ -> (g, i + 1)
 
 let find_entry_points (m : Binary.Module.t) =
