@@ -232,6 +232,7 @@ let parse_model replay_file =
     match String.lowercase_ascii ext with
     | ".json" -> Ok Symbol_scope.model_of_json
     | ".scfg" -> Ok Symbol_scope.model_of_scfg
+    | "" -> Ok Symbol_scope.model_of_scfg
     | _ -> Error (`Unsupported_file_extension ext)
   in
   let* file_content = Bos.OS.File.read replay_file in
