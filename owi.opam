@@ -89,3 +89,9 @@ depexts: [
 pin-depends: [
   [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
 ]
+post-messages: [
+  "Thank you for installing owi!"
+  "To fully utilize owi, consider installing a solver such as Z3 or CVC4."
+  "Join our community on Zulip: https://owi.zulipchat.com/"
+  "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
+]
