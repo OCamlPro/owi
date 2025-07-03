@@ -16,6 +16,7 @@
   cmd_utils
   cmd_c
   cmd_call_graph
+  cmd_cfg
   cmd_conc
   cmd_cpp
   cmd_fmt
