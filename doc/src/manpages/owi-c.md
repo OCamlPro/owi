@@ -83,8 +83,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 1 available solvers:
+           Z3
 
        --srac
            symbolic runtime assertion checking mode
