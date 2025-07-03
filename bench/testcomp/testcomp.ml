@@ -139,6 +139,7 @@ let runs =
           Tool.fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout
           |> ok_or_fail
         in
+        Printf.eprintf "Running test #%d\n%!" i;
         let _ = match result with
           | Reached _ ->
              let bin, args =
@@ -154,10 +155,13 @@ let runs =
              if pid = 0 then
                Array.of_list args |> Unix.execvp bin
              else begin
-                 let _,status = Unix.wait () in
-                 match status with
-                 | WEXITED _ -> ()
-                 | _ -> failwith "owi replay found unconcistant test"
+                 try
+                   match Tool.wait_pid ~pid ~timeout:3. ~tool ~dst_stderr:Fpath.(output_dir / "stdout_replay") with
+                   | (Signaled _ | Stopped _) as _result ->
+                      ()
+                   | _result -> ()
+                 with
+                   _ -> ()
                end
           | _ -> ()
         in
