@@ -15,6 +15,9 @@ val mk_klee : unit -> t
 
 val mk_symbiotic : unit -> t
 
+val wait_pid :
+  pid:int -> timeout:float -> tool:t -> dst_stderr:Fpath.t -> Report.Run_result.t
+
 val fork_and_run_on_file :
      i:int
   -> fmt:Format.formatter
