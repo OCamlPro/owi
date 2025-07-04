@@ -4,14 +4,12 @@ open Types
 type to_add =
   | Ind of int
   | Next
-  | End
 
 let update_edges x next (edges, acc) (n, m, s) =
   match m with
   | Next -> ((n, next, s) :: edges, acc)
   | Ind 0 -> ((n, x, s) :: edges, acc)
   | Ind m -> (edges, (n, Ind (m - 1), s) :: acc)
-  | _ -> (edges, (n, m, s) :: acc)
 
 let increase x =
   let n, m, s = x in
@@ -27,11 +25,8 @@ let rec build_graph (l : binary expr) nodes n node edges
   | instr :: l -> (
     match instr.raw with
     | Block (_, _, exp) ->
-      let nodes = (n, instr :: node) :: nodes in
-      let edges = (n, n + 1, None) :: edges in
       let nodes, edges, n, edges_to_add =
-        build_graph exp.raw nodes (n + 1) [] edges
-          (List.map increase edges_to_add)
+        build_graph exp.raw nodes n node edges (List.map increase edges_to_add)
       in
       let edges, edges_to_add =
         List.fold_left (update_edges n n) (edges, []) edges_to_add
@@ -78,16 +73,11 @@ let rec build_graph (l : binary expr) nodes n node edges
       build_graph l nodes (n + 1) [] edges edges_to_add
     | Return ->
       let nodes = (n, instr :: node) :: nodes in
-      let edges_to_add = (n, End, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add)
     | _ -> build_graph l nodes n (instr :: node) edges edges_to_add )
 
-let update_end x edges (n, m, s) =
-  match m with End -> (n, x, s) :: edges | _ -> edges
-
 let build_cfg instr =
-  let nodes, edges, n', edges_to_add = build_graph instr [] 0 [] [] [] in
-  let edges = List.fold_left (update_end n') edges edges_to_add in
+  let nodes, edges, _, _ = build_graph instr [] 0 [] [] [] in
   (nodes, edges)
 
 let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
