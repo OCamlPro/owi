@@ -7,19 +7,6 @@ open Cmdliner
 
 (* Helpers *)
 
-let analyze_mode_conv =
-  let of_string s =
-    match String.lowercase_ascii s with
-    | "cg" -> Ok Cmd_analyze.Call_graph
-    | "cfg" -> Ok Cmd_analyze.Control_flow_graph
-    | _ -> Fmt.error_msg {|Expected "cg" or "cfg" but got "%s"|} s
-  in
-  let pp fmt = function
-    | Cmd_analyze.Call_graph -> Fmt.string fmt "cg"
-    | Cmd_analyze.Control_flow_graph -> Fmt.string fmt "cfg"
-  in
-  Arg.conv (of_string, pp)
-
 let call_graph_mode_conv =
   let of_string s =
     match String.lowercase_ascii s with
@@ -104,12 +91,6 @@ let version = Cmd_version.owi_version ()
 (* Common terms *)
 
 open Term.Syntax
-
-let analyze_mode =
-  let doc =
-    {|analyze to execute ("cg" for call graph or "cfg" for control-flow graph)|}
-  in
-  Arg.(required & pos 1 (some analyze_mode_conv) None (info [] ~doc))
 
 let arch =
   let doc = "data model" in
@@ -307,14 +288,6 @@ let analyze_info =
   let man = [] @ shared_man in
   Cmd.info "analyze" ~version ~doc ~sdocs ~man
 
-let analyze_cmd =
-  let+ call_graph_mode
-  and+ analyze_mode
-  and+ source_file
-  and+ entry_point = entry_point None
-  and+ () = setup_log in
-  Cmd_analyze.cmd ~analyze_mode ~call_graph_mode ~source_file ~entry_point
-
 (* owi c *)
 
 let c_info =
@@ -350,6 +323,23 @@ let c_cmd =
 
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
+
+(* owi analyze cg *)
+
+let cg_info =
+  let doc = "Build a call graph" in
+
+  let man = [] @ shared_man in
+
+  Cmd.info "cg" ~version ~doc ~sdocs ~man
+
+let cg_cmd =
+  let+ call_graph_mode
+  and+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
 
 (* owi cpp *)
 
@@ -654,7 +644,7 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ Cmd.v analyze_info analyze_cmd
+    [ Cmd.group analyze_info [Cmd.v cg_info cg_cmd]
     ; Cmd.v c_info c_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
