@@ -25,12 +25,13 @@ let rec build_graph (l : binary expr) nodes n node edges
     let edges_to_add = (n, Next, None) :: edges_to_add in
     (nodes, edges, n + 1, edges_to_add)
   | instr :: l -> (
-    match instr with
+    match instr.raw with
     | Block (_, _, exp) ->
       let nodes = (n, instr :: node) :: nodes in
       let edges = (n, n + 1, None) :: edges in
       let nodes, edges, n, edges_to_add =
-        build_graph exp nodes (n + 1) [] edges (List.map increase edges_to_add)
+        build_graph exp.raw nodes (n + 1) [] edges
+          (List.map increase edges_to_add)
       in
       let edges, edges_to_add =
         List.fold_left (update_edges n n) (edges, []) edges_to_add
@@ -40,7 +41,8 @@ let rec build_graph (l : binary expr) nodes n node edges
       let nodes = (n, instr :: node) :: nodes in
       let edges = (n, n + 1, None) :: edges in
       let nodes, edges, n', edges_to_add =
-        build_graph exp nodes (n + 1) [] edges (List.map increase edges_to_add)
+        build_graph exp.raw nodes (n + 1) [] edges
+          (List.map increase edges_to_add)
       in
       let edges, edges_to_add =
         List.fold_left (update_edges n n') (edges, []) edges_to_add
@@ -51,12 +53,13 @@ let rec build_graph (l : binary expr) nodes n node edges
 
       let edges = (n, n + 1, Some "true") :: edges in
       let nodes, edges, n1, edges_to_add =
-        build_graph e1 nodes (n + 1) [] edges (List.map increase edges_to_add)
+        build_graph e1.raw nodes (n + 1) [] edges
+          (List.map increase edges_to_add)
       in
 
       let edges = (n, n1, Some "false") :: edges in
       let nodes, edges, n2, edges_to_add' =
-        build_graph e2 nodes n1 [] edges []
+        build_graph e2.raw nodes n1 [] edges []
       in
 
       let edges, edges_to_add =
@@ -87,8 +90,9 @@ let build_cfg instr =
   let edges = List.fold_left (update_end n') edges edges_to_add in
   (nodes, edges)
 
-let pp_exp fmt l =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") (pp_instr ~short:true) fmt l
+let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
+
+let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
 
 let pp_node fmt (n, exp) =
   Fmt.pf fmt {|%a [label="%a"]|} Fmt.int n pp_exp (List.rev exp)
@@ -118,7 +122,7 @@ let cmd ~source_file =
     match Array.get m.func 0 with Runtime.Local f -> f | _ -> assert false
   in
   (* add a parameter later *)
-  let nodes, edges = build_cfg f.body in
+  let nodes, edges = build_cfg f.body.raw in
   Logs.app (fun log -> log "%a" pp_graph (List.rev nodes, List.rev edges));
   let* () =
     Bos.OS.File.writef (Fpath.v "cfg.dot") "%a" pp_graph
