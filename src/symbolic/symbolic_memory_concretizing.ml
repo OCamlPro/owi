@@ -26,7 +26,9 @@ module Backend = struct
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
       return (Smtml.Bitvector.to_int32 bv)
     | Ptr { base; offset } ->
-      select_i32 Symbolic_value.(I32.add (const_i32 base) offset)
+      let base = Smtml.Bitvector.to_int32 base |> Symbolic_value.const_i32 in
+      let addr = Symbolic_value.I32.add base offset in
+      select_i32 addr
     | _ -> select_i32 a
 
   let address_i32 a = a
@@ -64,6 +66,7 @@ module Backend = struct
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
       let open Symbolic_value in
+      let base = Smtml.Bitvector.to_int32 base in
       match Map.find_opt base m.chunks with
       | None -> return (Error `Memory_leak_use_after_free)
       | Some chunk_size ->
@@ -85,7 +88,9 @@ module Backend = struct
   let ptr v =
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view v with
-    | Ptr { base; _ } -> return base
+    | Ptr { base; _ } ->
+      let base = Smtml.Bitvector.to_int32 base in
+      return base
     | _ ->
       Logs.err (fun m ->
         m {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v );
