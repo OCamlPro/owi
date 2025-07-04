@@ -16,68 +16,74 @@ let increase x =
   match m with Ind m -> (n, Ind (m + 1), s) | _ -> x
 
 let rec build_graph (l : binary expr) nodes n node edges
-  (edges_to_add : (int * to_add * string option) list) =
+  (edges_to_add : (int * to_add * string option) list) continue =
   match l with
   | [] ->
     let nodes = (n, node) :: nodes in
-    let edges_to_add = (n, Next, None) :: edges_to_add in
-    (nodes, edges, n + 1, edges_to_add)
+    if continue then
+      let edges_to_add = (n, Next, None) :: edges_to_add in
+      (nodes, edges, n + 1, edges_to_add, continue)
+    else (nodes, edges, n, edges_to_add, continue)
   | instr :: l -> (
     match instr.raw with
     | Block (_, _, exp) ->
-      let nodes, edges, n, edges_to_add =
-        build_graph exp.raw nodes n node edges (List.map increase edges_to_add)
+      let nodes, edges, n, edges_to_add, continue =
+        build_graph exp.raw nodes n node edges
+          (List.map increase edges_to_add)
+          continue
       in
       let edges, edges_to_add =
         List.fold_left (update_edges n n) (edges, []) edges_to_add
       in
-      build_graph l nodes n [] edges edges_to_add
+      build_graph l nodes n [] edges edges_to_add continue
     | Loop (_, _, exp) ->
       let nodes = (n, instr :: node) :: nodes in
       let edges = (n, n + 1, None) :: edges in
-      let nodes, edges, n', edges_to_add =
+      let nodes, edges, n', edges_to_add, continue =
         build_graph exp.raw nodes (n + 1) [] edges
           (List.map increase edges_to_add)
+          continue
       in
       let edges, edges_to_add =
         List.fold_left (update_edges n n') (edges, []) edges_to_add
       in
-      build_graph l nodes n' [] edges edges_to_add
+      build_graph l nodes n' [] edges edges_to_add continue
     | If_else (_, _, e1, e2) ->
       let nodes = (n, instr :: node) :: nodes in
 
       let edges = (n, n + 1, Some "true") :: edges in
-      let nodes, edges, n1, edges_to_add =
+      let nodes, edges, n1, edges_to_add, continue' =
         build_graph e1.raw nodes (n + 1) [] edges
           (List.map increase edges_to_add)
+          continue
       in
 
       let edges = (n, n1, Some "false") :: edges in
-      let nodes, edges, n2, edges_to_add' =
-        build_graph e2.raw nodes n1 [] edges []
+      let nodes, edges, n2, edges_to_add', continue =
+        build_graph e2.raw nodes n1 [] edges [] continue
       in
 
       let edges, edges_to_add =
         List.fold_left (update_edges n2 n2) (edges, [])
           (edges_to_add' @ edges_to_add)
       in
-      build_graph l nodes n2 [] edges edges_to_add
+      build_graph l nodes n2 [] edges edges_to_add (continue || continue')
     | Br (Raw i) ->
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, None) :: edges_to_add in
-      (nodes, edges, n + 1, edges_to_add)
+      (nodes, edges, n + 1, edges_to_add, false)
     | Br_if (Raw i) ->
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, Some "true") :: edges_to_add in
       let edges = (n, n + 1, Some "false") :: edges in
-      build_graph l nodes (n + 1) [] edges edges_to_add
+      build_graph l nodes (n + 1) [] edges edges_to_add continue
     | Return ->
       let nodes = (n, instr :: node) :: nodes in
-      (nodes, edges, n + 1, edges_to_add)
-    | _ -> build_graph l nodes n (instr :: node) edges edges_to_add )
+      (nodes, edges, n + 1, edges_to_add, false)
+    | _ -> build_graph l nodes n (instr :: node) edges edges_to_add continue )
 
 let build_cfg instr =
-  let nodes, edges, _, _ = build_graph instr [] 0 [] [] [] in
+  let nodes, edges, _, _, _ = build_graph instr [] 0 [] [] [] true in
   (nodes, edges)
 
 let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
