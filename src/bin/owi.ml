@@ -300,6 +300,18 @@ let c_cmd =
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
 
+(* owi cfg *)
+
+let cfg_info =
+  let doc = "Build a Control-Flow Graph" in
+  let man = [] @ shared_man in
+  Cmd.info "cfg" ~version ~doc ~sdocs ~man
+
+let cfg_cmd =
+  let+ source_file
+  and+ () = setup_log in
+  Cmd_cfg.cmd ~source_file
+
 (* owi cpp *)
 
 let cpp_info =
@@ -604,6 +616,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.v c_info c_cmd
+    ; Cmd.v cfg_info cfg_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
