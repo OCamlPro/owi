@@ -11,13 +11,14 @@ type mode =
   | Complete
   | Sound
 
-let rec find_tables acc (e : binary instr) =
-  match e with
+let rec find_tables acc (e : binary instr Annotated.t) =
+  match e.raw with
   | Table_set (Raw i) | Table_fill (Raw i) | Table_copy (Raw i, _) -> i :: acc
-  | Block (_, _, exp) | Loop (_, _, exp) -> List.fold_left find_tables acc exp
+  | Block (_, _, exp) | Loop (_, _, exp) ->
+    List.fold_left find_tables acc exp.raw
   | If_else (_, _, e1, e2) ->
-    let acc = List.fold_left find_tables acc e1 in
-    List.fold_left find_tables acc e2
+    let acc = List.fold_left find_tables acc e1.raw in
+    List.fold_left find_tables acc e2.raw
   | _ -> acc
 
 let find_functions_with_func_type func_type (acc, i)
@@ -29,21 +30,24 @@ let find_functions_with_func_type func_type (acc, i)
   in
   if func_type_eq func_type ft then (i :: acc, i + 1) else (acc, i + 1)
 
-let rec find_children mode tables funcs acc (l : binary instr list) =
+let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
+    =
   match (l, mode) with
   | [], _ -> acc
-  | (Call (Raw i) | Return_call (Raw i)) :: l, _ ->
+  | { raw = Call (Raw i) | Return_call (Raw i) } :: l, _ ->
     find_children mode tables funcs (i :: acc) l
-  | ( ( Call_indirect (_, Bt_raw (_, ft))
-      | Return_call_indirect (_, Bt_raw (_, ft)) )
+  | ( { raw =
+          ( Call_indirect (_, Bt_raw (_, ft))
+          | Return_call_indirect (_, Bt_raw (_, ft)) )
+      }
       :: l
     , Complete ) ->
     let acc, _ =
       Array.fold_left (find_functions_with_func_type ft) (acc, 0) funcs
     in
     find_children mode tables funcs acc l
-  | ( I32_const x
-      :: (Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _))
+  | ( { raw = I32_const x }
+      :: { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _) }
       :: l
     , Sound ) -> (
     let t_opt = M.find_opt i tables in
@@ -56,12 +60,12 @@ let rec find_children mode tables funcs acc (l : binary instr list) =
     match f with
     | Some f -> find_children mode tables funcs (f :: acc) l
     | None -> find_children mode tables funcs acc l )
-  | (Block (_, _, exp) | Loop (_, _, exp)) :: l, _ ->
-    let x = find_children mode tables funcs acc exp in
+  | { raw = Block (_, _, exp) | Loop (_, _, exp) } :: l, _ ->
+    let x = find_children mode tables funcs acc exp.raw in
     find_children mode tables funcs x l
-  | If_else (_, _, e1, e2) :: l, _ ->
-    let x = find_children mode tables funcs acc e1 in
-    let x = find_children mode tables funcs x e2 in
+  | { raw = If_else (_, _, e1, e2) } :: l, _ ->
+    let x = find_children mode tables funcs acc e1.raw in
+    let x = find_children mode tables funcs x e2.raw in
     find_children mode tables funcs x l
   | _ :: l, _ -> find_children mode tables funcs acc l
 
@@ -70,7 +74,7 @@ let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
   | Runtime.Local x ->
     Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
     let l =
-      List.sort_uniq compare (find_children mode tables funcs [] x.body)
+      List.sort_uniq compare (find_children mode tables funcs [] x.body.raw)
     in
     List.iter (fun i -> Logs.app (fun log -> log "- %a" Fmt.int i)) l;
     ((i, x.id, l) :: g, i + 1)
@@ -118,7 +122,7 @@ let get_const_global env id =
   match M.find_opt id env with Some n -> n | None -> assert false
 
 let eval_const_instr env stack instr =
-  match instr with
+  match instr.Annotated.raw with
   | I32_const n -> ok @@ Stack.push_i32 stack n
   | I64_const n -> ok @@ Stack.push_i64 stack n
   | F32_const f -> ok @@ Stack.push_f32 stack f
@@ -133,7 +137,9 @@ let eval_const_instr env stack instr =
   | _ -> assert false
 
 let eval_const env exp =
-  let* stack = list_fold_left (eval_const_instr env) Stack.empty exp in
+  let* stack =
+    list_fold_left (eval_const_instr env) Stack.empty exp.Annotated.raw
+  in
   match stack with
   | [] -> Error (`Type_mismatch "const expr returning zero values")
   | _ :: _ :: _ ->
@@ -154,6 +160,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
 
   let tables =
     let elems =
+      (* indice de la table * éléments *)
       List.filter_map
         (fun e ->
           match e.Binary.mode with
@@ -168,7 +175,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
       @ Array.fold_left
           (fun acc f ->
             match f with
-            | Runtime.Local x -> List.fold_left find_tables acc x.body
+            | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
             | _ -> acc )
           [] funcs
     in
