@@ -14,6 +14,7 @@
   binary_validate
   choice_intf
   cmd_utils
+  cmd_analyze
   cmd_c
   cmd_call_graph
   cmd_conc
