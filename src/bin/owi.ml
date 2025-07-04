@@ -8,7 +8,7 @@ open Cmdliner
 (* Helpers *)
 
 let analyze_mode_conv =
-    let of_string s =
+  let of_string s =
     match String.lowercase_ascii s with
     | "cg" -> Ok Cmd_analyze.Call_graph
     | "cfg" -> Ok Cmd_analyze.Control_flow_graph
@@ -106,9 +106,10 @@ let version = Cmd_version.owi_version ()
 open Term.Syntax
 
 let analyze_mode =
-    let doc = {|analyze to execute ("cg" for call graph or "cfg" for control-flow graph)|} in
-  Arg.(
-    required & pos 1 (some analyze_mode_conv) None (info [] ~doc) )
+  let doc =
+    {|analyze to execute ("cg" for call graph or "cfg" for control-flow graph)|}
+  in
+  Arg.(required & pos 1 (some analyze_mode_conv) None (info [] ~doc))
 
 let arch =
   let doc = "data model" in
@@ -313,7 +314,6 @@ let analyze_cmd =
   and+ entry_point = entry_point None
   and+ () = setup_log in
   Cmd_analyze.cmd ~analyze_mode ~call_graph_mode ~source_file ~entry_point
-
 
 (* owi c *)
 
