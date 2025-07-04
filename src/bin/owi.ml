@@ -644,7 +644,7 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ Cmd.group analyze_info [Cmd.v cg_info cg_cmd]
+    [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd ]
     ; Cmd.v c_info c_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
