@@ -47,6 +47,7 @@
 
 # Man pages
 - [`owi`](manpages/owi.md)
+    - [`owi analyze`](manpages/owi-analyze.md)
     - [`owi c`](manpages/owi-c.md)
     - [`owi c++`](manpages/owi-cpp.md)
     - [`owi conc`](manpages/owi-conc.md)
