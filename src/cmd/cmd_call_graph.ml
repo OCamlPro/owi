@@ -72,16 +72,11 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
 let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
   match f with
   | Runtime.Local x ->
-    Logs.app (fun log -> log "%a%a : " Fmt.int i pp_id_opt x.id);
     let l =
       List.sort_uniq compare (find_children mode tables funcs [] x.body.raw)
     in
-    List.iter (fun i -> Logs.app (fun log -> log "- %a" Fmt.int i)) l;
     ((i, x.id, l) :: g, i + 1)
-  | Runtime.Imported x ->
-    Logs.app (fun log ->
-      log "%a%a : imported" Fmt.int i pp_id_opt x.assigned_name );
-    ((i, x.assigned_name, []) :: g, i + 1)
+  | Runtime.Imported x -> ((i, x.assigned_name, []) :: g, i + 1)
 
 let find_entry_points (m : Binary.Module.t) =
   let l = Option.to_list m.start in
@@ -226,7 +221,7 @@ let cmd ~call_graph_mode ~source_file ~entry_point =
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
   let* () =
-    Bos.OS.File.writef (Fpath.v "call_graph.dot") "%a" Graph.pp_dot call_graph
+    Bos.OS.File.writef (Fpath.set_ext ".dot" source_file) "%a" Graph.pp_dot call_graph
   in
 
   Ok ()
