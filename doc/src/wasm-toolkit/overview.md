@@ -266,3 +266,45 @@ owi: [INFO] stack         : [ i32.const 42 ]
 owi: [INFO] running instr : drop
 ```
 
+## Call graph
+
+Given a file `useless.wat` with the following content:
+
+```wat
+(module
+
+  (func $start 
+    call $a
+    call $b
+  )
+
+  (func $a 
+    call $a
+    call $b
+  )
+
+  (func $b 
+    call $d
+  )
+
+  (func $c 
+    call $a
+  )
+
+  (func $d
+    call $b
+  )
+
+  (func $e)
+
+  (start $start))
+  ```
+
+  You can then create a file `useless.dot` containing the call_graph of the programm:
+
+  ```sh
+  $ owi analyze cg useless.wat
+  ```
+![image](call_graph.svg)
+
+
