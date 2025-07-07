@@ -7,14 +7,14 @@ no subcommand should print help
          owi [COMMAND] …
   
   COMMANDS
+         analyze COMMAND …
+             Analyze a program in different possible ways
+  
          c [OPTION]… FILE…
              Compile a C file to Wasm and run the symbolic interpreter on it
   
          c++ [OPTION]… FILE…
              Compile a C++ file to Wasm and run the symbolic interpreter on it
-  
-         cg [OPTION]… FILE
-             Build a call graph
   
          conc [OPTION]… FILE
              Run the concolic interpreter
