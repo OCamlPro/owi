@@ -325,7 +325,7 @@ Given a file `useless.wat` with the following content:
                    br 2)
              i32.const 42
              local.set 1
-             unreachable)
+             br 1)
          i32.const 99
          local.set 1)
        local.get 1)

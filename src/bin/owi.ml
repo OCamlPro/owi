@@ -337,7 +337,6 @@ let cfg_cmd =
   and+ () = setup_log in
   Cmd_cfg.cmd ~source_file ~entry_point
 
-
 (* owi analyze cg *)
 
 let cg_info =
@@ -658,7 +657,7 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd ; Cmd.v cfg_info cfg_cmd] 
+    [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
     ; Cmd.v c_info c_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
