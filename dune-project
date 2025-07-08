@@ -97,13 +97,11 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
     (>= 2.5)
     :with-dev-setup))
   (crowbar :with-dev-setup)
-  (graphics :with-dev-setup)
   (landmarks-ppx :with-dev-setup)
   (ocamlformat :with-dev-setup)
   (ocb
    (and
     (>= 0.1)
     :with-dev-setup))
-  (tiny_httpd :with-dev-setup)
   )
  (sites (share c_files) (share rust_files) (share zig_files)))

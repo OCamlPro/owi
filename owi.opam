@@ -47,11 +47,9 @@ depends: [
   "z3" {with-test}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
   "crowbar" {with-dev-setup}
-  "graphics" {with-dev-setup}
   "landmarks-ppx" {with-dev-setup}
   "ocamlformat" {with-dev-setup}
   "ocb" {>= "0.1" & with-dev-setup}
-  "tiny_httpd" {with-dev-setup}
 ]
 build: [
   ["dune" "subst"] {dev}
