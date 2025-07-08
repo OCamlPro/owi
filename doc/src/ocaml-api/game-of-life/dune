@@ -14,12 +14,15 @@
  (libraries tiny_httpd))
 
 (rule
- (target content.ml)
- (deps
-  (file content/life.wasm)
-  (file content/index.html)
-  (file content/life_browser.js))
- (action
-  (with-stdout-to
-   %{null}
-   (run ocaml-crunch -m plain content -o %{target}))))
+ (with-stdout-to
+  content.ml
+  (progn
+   (echo "let life_wasm = {|")
+   (cat content/life.wasm)
+   (echo "|}")
+   (echo "let index_html = {|")
+   (cat content/index.html)
+   (echo "|}")
+   (echo "let life_browser_js = {|")
+   (cat content/life_browser.js)
+   (echo "|}"))))

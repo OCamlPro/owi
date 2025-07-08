@@ -1,28 +1,25 @@
 module S = Tiny_httpd
 
-let asset_loader path =
-  match Content.read path with None -> assert false | Some asset -> asset
-
 let () =
   let server = S.create ~port:8000 () in
   S.add_route_handler ~meth:`GET server S.Route.return (fun _req ->
     S.Response.make_string
       ~headers:[ ("Content-Type", "text/html") ]
-      (Ok (asset_loader "index.html")) );
+      (Ok Content.index_html) );
 
   S.add_route_handler ~meth:`GET server
     S.Route.(exact "life_browser.js" @/ return)
     (fun _req ->
       S.Response.make_string
         ~headers:[ ("Content-Type", "application/javascript") ]
-        (Ok (asset_loader "life_browser.js")) );
+        (Ok Content.life_browser_js) );
 
   S.add_route_handler ~meth:`GET server
     S.Route.(exact "life.wasm" @/ return)
     (fun _req ->
       S.Response.make_string
         ~headers:[ ("Content-Type", "application/wasm") ]
-        (Ok (asset_loader "life.wasm")) );
+        (Ok Content.life_wasm) );
 
   Printf.printf "listening on http://%s:%d\n%!" (S.addr server) (S.port server);
   (* "&": if web browser is closed, the command must be executed in background *)
