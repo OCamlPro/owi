@@ -139,6 +139,32 @@ let runs =
           Tool.fork_and_run_on_file ~i ~fmt ~output_dir ~file ~tool ~timeout
           |> ok_or_fail
         in
+        Printf.eprintf "Running test #%d\n%!" i;
+        let _ = match result with
+          | Reached _ ->
+             let bin, args =
+                     ( "owi"
+                     , [ "owi"; "replay" ]
+                       @ [ Format.sprintf "--replay-file=%s"
+                             Fpath.(output_dir / Format.sprintf "%d" i / "stdout" |> to_string)
+                         ; "--entry-point=main"
+                         ; Fpath.( output_dir / Format.sprintf "%d" i / "owi" / "a.out.wasm" |> to_string)
+                     ] )
+             in
+             let pid = Unix.fork () in
+             if pid = 0 then
+               Array.of_list args |> Unix.execvp bin
+             else begin
+                 try
+                   match Tool.wait_pid ~pid ~timeout:3. ~tool ~dst_stderr:Fpath.(output_dir / "stdout_replay") with
+                   | (Signaled _ | Stopped _) as _result ->
+                      ()
+                   | _result -> ()
+                 with
+                   _ -> ()
+               end
+          | _ -> ()
+        in
         let result = { Report.Run.i; file; res = result } in
         results := Report.Runs.add result !results;
         pp "%a@]@\n%!" Report.Runs.pp_quick_results !results
