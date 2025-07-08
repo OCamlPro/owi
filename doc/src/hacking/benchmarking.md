@@ -10,6 +10,6 @@ Note: it seems landmarks is not compatible with domains and thus won't work with
 
 ## Test-comp
 
-See [bench].
+See [Symbocalypse].
 
-[bench]: https://github.com/OCamlPro/owi/tree/main/bench
+[Symbocalypse]: https://github.com/OCamlPro/symbocalypse
