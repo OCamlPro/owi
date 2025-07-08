@@ -1,4 +1,4 @@
-  $ owi cfg test_cfg.wat
+  $ owi analyze cfg test_cfg.wat
   $ cat test_cfg.dot
   digraph cfg {
    rankdir=LR;
@@ -15,7 +15,7 @@
   1 -> 4 [label="true"];
   2 -> 4 }
 
-  $ owi cfg loop.wat
+  $ owi analyze cfg loop.wat
   $ cat loop.dot
   digraph cfg {
    rankdir=LR;
@@ -33,7 +33,7 @@
   0 -> 4 [label="true"];
   2 -> 4 [label="true"]}
 
-  $ owi cfg fib.wat
+  $ owi analyze cfg fib.wat
   $ cat fib.dot
   digraph cfg {
    rankdir=LR;

@@ -324,7 +324,7 @@ let c_cmd =
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
 
-(* owi cfg *)
+(* owi analyze cfg *)
 
 let cfg_info =
   let doc = "Build a Control-Flow Graph" in
