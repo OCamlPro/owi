@@ -11,16 +11,6 @@ type mode =
   | Complete
   | Sound
 
-let rec find_tables acc (e : binary instr Annotated.t) =
-  match e.raw with
-  | Table_set (Raw i) | Table_fill (Raw i) | Table_copy (Raw i, _) -> i :: acc
-  | Block (_, _, exp) | Loop (_, _, exp) ->
-    List.fold_left find_tables acc exp.raw
-  | If_else (_, _, e1, e2) ->
-    let acc = List.fold_left find_tables acc e1.raw in
-    List.fold_left find_tables acc e2.raw
-  | _ -> acc
-
 let find_functions_with_func_type func_type (acc, i)
   (f : (binary func, binary block_type) Runtime.t) =
   let (Bt_raw (_, ft)) =
@@ -78,20 +68,6 @@ let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
     ((i, x.id, l) :: g, i + 1)
   | Runtime.Imported x -> ((i, x.assigned_name, []) :: g, i + 1)
 
-let find_entry_points (m : Binary.Module.t) =
-  let l = Option.to_list m.start in
-  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
-
-let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
-  match (l1, l2) with
-  | [], [] -> acc
-  | [], _ -> acc
-  | h :: t, [] -> remove_tables t [] (h :: acc)
-  | (n, e) :: t1, h2 :: t2 ->
-    if n = h2 then remove_tables t1 t2 acc
-    else if n < h2 then remove_tables t1 l2 ((n, e) :: acc)
-    else remove_tables l1 t2 acc
-
 let eval_ibinop stack nn (op : ibinop) =
   match nn with
   | S32 ->
@@ -142,6 +118,15 @@ let eval_const env exp =
   | [ Concrete_value.I32 i ] -> Ok i
   | [ _ ] -> Error (`Type_mismatch "expected int32")
 
+let eval_tables tables env =
+  let t =
+    List.map
+      (fun (n, elem) ->
+        (n, Array.of_list (List.map (eval_const env) elem.Binary.init)) )
+      tables
+  in
+  M.of_list t
+
 let build_env (env, n) (global : (Binary.global, 'a) Runtime.t) =
   match global with
   | Runtime.Local x -> (
@@ -150,48 +135,40 @@ let build_env (env, n) (global : (Binary.global, 'a) Runtime.t) =
     | _ -> (env, n + 1) )
   | _ -> (env, n + 1)
 
-let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
-  let funcs = m.func in
+let rec find_tables acc (e : binary instr Annotated.t) =
+  match e.raw with
+  | Table_set (Raw i) | Table_fill (Raw i) | Table_copy (Raw i, _) -> i :: acc
+  | Block (_, _, exp) | Loop (_, _, exp) ->
+    List.fold_left find_tables acc exp.raw
+  | If_else (_, _, e1, e2) ->
+    let acc = List.fold_left find_tables acc e1.raw in
+    List.fold_left find_tables acc e2.raw
+  | _ -> acc
 
-  let tables =
-    let elems =
-      (* indice de la table * éléments *)
-      List.filter_map
-        (fun e ->
-          match e.Binary.mode with
-          | Elem_active (Some n, _) -> Some (n, e)
-          | _ -> None )
-        (Array.to_list m.elem)
-    in
+let find_tables_to_remove export_tables funcs =
+  List.map (fun (x : Binary.export) -> x.id) export_tables
+  @ Array.fold_left
+      (fun acc f ->
+        match f with
+        | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
+        | _ -> acc )
+      [] funcs
 
-    let t =
-      (* tables to remove *)
-      List.map (fun (x : Binary.export) -> x.id) m.exports.table
-      @ Array.fold_left
-          (fun acc f ->
-            match f with
-            | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
-            | _ -> acc )
-          [] funcs
-    in
-    remove_tables
-      (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
-      (List.sort_uniq compare t) []
-  in
+let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
+  match (l1, l2) with
+  | [], [] -> acc
+  | [], _ -> acc
+  | h :: t, [] -> remove_tables t [] (h :: acc)
+  | (n, e) :: t1, h2 :: t2 ->
+    if n = h2 then remove_tables t1 t2 acc
+    else if n < h2 then remove_tables t1 l2 ((n, e) :: acc)
+    else remove_tables l1 t2 acc
 
-  let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
+let find_entry_points (m : Binary.Module.t) =
+  let l = Option.to_list m.start in
+  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
 
-  let tables =
-    List.map
-      (fun (n, elem) ->
-        (n, Array.of_list (List.map (eval_const env) elem.Binary.init)) )
-      tables
-  in
-  let tables = M.of_list tables in
-
-  let l, _ =
-    Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
-  in
+let find_entries entry_point (m : Binary.Module.t) =
   let entries =
     Option.bind
       (Option.bind entry_point (fun x ->
@@ -201,10 +178,38 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
              | Runtime.Local y ->
                Option.compare String.compare (Some x) y.id = 0
              | _ -> false )
-           funcs ) )
+           m.func ) )
       (fun x -> Some [ x ])
   in
-  let entries = Option.value entries ~default:(find_entry_points m) in
+  Option.value entries ~default:(find_entry_points m)
+
+let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
+  let funcs = m.func in
+
+  let tables =
+    let elems =
+      List.filter_map
+        (fun e ->
+          match e.Binary.mode with
+          | Elem_active (Some n, _) -> Some (n, e)
+          | _ -> None )
+        (Array.to_list m.elem)
+    in
+
+    let t = find_tables_to_remove m.exports.table funcs in
+    remove_tables
+      (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
+      (List.sort_uniq compare t) []
+  in
+
+  let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
+
+  let tables = eval_tables tables env in
+
+  let l, _ =
+    Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
+  in
+  let entries = find_entries entry_point m in
   Graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
@@ -221,7 +226,9 @@ let cmd ~call_graph_mode ~source_file ~entry_point =
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
   let* () =
-    Bos.OS.File.writef (Fpath.set_ext ".dot" source_file) "%a" Graph.pp_dot call_graph
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_dot call_graph
   in
 
   Ok ()
