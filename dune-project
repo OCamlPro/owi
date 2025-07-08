@@ -96,23 +96,14 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
    (and
     (>= 2.5)
     :with-dev-setup))
-  (cohttp :with-dev-setup)
-  (cohttp-lwt-unix :with-dev-setup)
   (crowbar :with-dev-setup)
-  (extunix :with-dev-setup)
-  (gnuplot :with-dev-setup)
   (graphics :with-dev-setup)
   (landmarks-ppx :with-dev-setup)
-  (lwt :with-dev-setup)
-  (lwt_ssl :with-dev-setup)
   (ocamlformat :with-dev-setup)
   (ocb
    (and
     (>= 0.1)
     :with-dev-setup))
-  (rusage :with-dev-setup)
   (tiny_httpd :with-dev-setup)
-  (tyxml :with-dev-setup)
-  (yaml :with-dev-setup)
   )
  (sites (share c_files) (share rust_files) (share zig_files)))
