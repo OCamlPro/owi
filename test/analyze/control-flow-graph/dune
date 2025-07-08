@@ -1,0 +1,2 @@
+(cram
+ (deps %{bin:owi} fib.wat loop.wat test_cfg.wat))
