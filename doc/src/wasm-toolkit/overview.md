@@ -273,29 +273,22 @@ Given a file `useless.wat` with the following content:
 ```wat
 (module
 
-  (func $start 
-    call $a
-    call $b
+  (func $start
+    i32.const 0
+    (if
+    (then call $a)
+    (else call $b)
+    )
   )
 
   (func $a 
-    call $a
-    call $b
-  )
+  (block
+  call $b)
+  call $c)
 
-  (func $b 
-    call $d
-  )
+  (func $b)
 
-  (func $c 
-    call $a
-  )
-
-  (func $d
-    call $b
-  )
-
-  (func $e)
+  (func $c)
 
   (start $start))
   ```
