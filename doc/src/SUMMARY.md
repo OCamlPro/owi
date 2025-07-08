@@ -68,7 +68,6 @@
 # Public OCaml API
 - [Overview](ocaml-api/overview.md)
 - [How to Define Custom Functions](ocaml-api/custom-functions.md)
-- [Game Of Life](ocaml-api/game-of-life/README.md)
 - [Generated API Documentation](ocaml-api/odoc.md)
 
 # Hacking
