@@ -77,7 +77,8 @@ let rec build_graph (l : binary expr) nodes n node edges
       let edges_to_add = (n, Ind i, Some "true") :: edges_to_add in
       let edges = (n, n + 1, Some "false") :: edges in
       build_graph l nodes (n + 1) [] edges edges_to_add continue
-    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Unreachable ->
+    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _
+    | Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
     | _ -> build_graph l nodes n (instr :: node) edges edges_to_add continue )
@@ -110,18 +111,31 @@ let pp_graph fmt (nodes, edges) =
   Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record];\n %a;\n %a}"
     pp_nodes nodes pp_edges edges
 
-let cmd ~source_file =
+let cmd ~source_file ~entry_point =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
+  let entry =
+    Option.value
+      (Option.bind entry_point (fun x ->
+         Array.find_index
+           (fun f ->
+             match f with
+             | Runtime.Local y ->
+               Option.compare String.compare (Some x) y.id = 0
+             | _ -> false )
+           m.func ) )
+      ~default:0
+  in
   let f =
-    match Array.get m.func 0 with Runtime.Local f -> f | _ -> assert false
+    match Array.get m.func entry with Runtime.Local f -> f | _ -> assert false
   in
   (* add a parameter later *)
   let nodes, edges = build_cfg f.body.raw in
-  Logs.app (fun log -> log "%a" pp_graph (List.rev nodes, List.rev edges));
   let* () =
-    Bos.OS.File.writef (Fpath.v "cfg.dot") "%a" pp_graph
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" pp_graph
       (List.rev nodes, List.rev edges)
   in
   Ok ()
