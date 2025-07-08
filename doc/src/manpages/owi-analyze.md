@@ -9,6 +9,9 @@ SYNOPSIS
        owi analyze COMMAND …
 
 COMMANDS
+       cfg [OPTION]… FILE
+           Build a Control-Flow Graph
+
        cg [OPTION]… FILE
            Build a call graph
 
