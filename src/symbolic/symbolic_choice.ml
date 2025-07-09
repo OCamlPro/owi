@@ -229,7 +229,7 @@ module CoreImpl = struct
 
     val thread : thread t
 
-    val yield : unit t
+    val yield : Prio.t -> unit t
 
     val solver : Solver.t t
 
@@ -296,7 +296,7 @@ module CoreImpl = struct
       in
       State.liftF2 Schedulable.choose a b
 
-    let yield = lift_schedulable @@ Schedulable.yield Prio.random
+    let yield prio = lift_schedulable @@ Schedulable.yield prio
 
     let stop = lift_schedulable Schedulable.stop
 
@@ -382,8 +382,8 @@ module Make (Thread : Thread_intf.S) = struct
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability v =
-    let* () = yield in
+  let check_reachability v prio =
+    let* () = yield prio in
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
@@ -394,7 +394,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unknown -> assert false
 
   let get_model_or_stop symbol =
-    let* () = yield in
+    let* () = yield Prio.default in
     let* solver in
     let+ thread in
     let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
@@ -413,7 +413,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unknown -> assert false
 
   let select_inner ~explore_first ?(with_breadcrumbs = true)
-    (cond : Symbolic_value.bool) =
+    (cond : Symbolic_value.bool) ~prio_true ~prio_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -423,22 +423,22 @@ module Make (Thread : Thread_intf.S) = struct
       let true_branch =
         let* () = add_pc v in
         let* () = if with_breadcrumbs then add_breadcrumb 1 else return () in
-        let+ () = check_reachability v in
+        let+ () = check_reachability v prio_true in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
         let* () = if with_breadcrumbs then add_breadcrumb 0 else return () in
-        let+ () = check_reachability neg_v in
+        let+ () = check_reachability neg_v prio_false in
         false
       in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) =
-    select_inner cond ~explore_first:true
+  let select (cond : Symbolic_value.bool) ~prio_true ~prio_false =
+    select_inner cond ~explore_first:true ~prio_true ~prio_false
   [@@inline]
 
   let summary_symbol (e : Smtml.Expr.t) =
@@ -498,7 +498,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assertion c =
     let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:false
+      select_inner c ~withwith_breadcrumbs:false ~explore_first:false
+        ~prio_true:Prio.Default ~prio_false:Prio.Default
     in
     if assertion_true then return ()
     else

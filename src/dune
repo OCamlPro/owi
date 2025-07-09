@@ -119,6 +119,7 @@
   wasm_ffi_intf
   work_ds_intf
   wpq
+  wq_random
   wq
   ws
   wutf8)
