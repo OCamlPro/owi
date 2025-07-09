@@ -15,6 +15,7 @@ type exploration_strategy =
   | FIFO
   | LIFO
   | Random
+  | Smart
 
 type parameters =
   { unsafe : bool
@@ -37,8 +38,20 @@ type parameters =
   }
 
 let run_file ~parameters ~source_file =
-  let { unsafe; rac; srac; entry_point; invoke_with_symbols; _ } = parameters in
+  let { unsafe
+      ; rac
+      ; srac
+      ; entry_point
+      ; invoke_with_symbols
+      ; exploration_strategy
+      ; _
+      } =
+    parameters
+  in
   let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
+  ( match exploration_strategy with
+  | Smart -> Cmd_call_graph.compute_distances m entry_point
+  | _ -> () );
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
     let func_typ = Symbolic.Extern_func.extern_type in
@@ -230,9 +243,10 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run
       ( match exploration_strategy with
-      | LIFO -> (module Wq)
-      | FIFO -> (module Ws)
-      | Random -> (module Wpq) )
+      | LIFO -> (module Ws)
+      | FIFO -> (module Wq)
+      | Random -> (module Wq_random)
+      | Smart -> (module Wpq) )
       ~workers solver result thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
       ~callback_end:(fun () -> Ws.end_pledge res_stack)

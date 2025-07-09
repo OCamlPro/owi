@@ -1,7 +1,3 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
-(* Written by the Owi programmers *)
-
 type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop q pledge = Synchronizer.get q pledge
@@ -26,10 +22,9 @@ let fail = Synchronizer.fail
 
 let make () =
   let q = Pq_imperative.empty () in
+  Random.init 0;
   let writter prio_v condvar =
-    let prio, v = prio_v in
-    (*Logs.app (fun log -> log "(prio : %a)" Fmt.int (Prio.to_int prio));*)
-    Pq_imperative.push (prio, v) q;
+    Pq_imperative.push (Prio.random, snd prio_v) q;
     Condition.signal condvar
   in
   Synchronizer.init (fun () -> Pq_imperative.pop q) writter
