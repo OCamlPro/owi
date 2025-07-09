@@ -24,11 +24,12 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
     =
   match (l, mode) with
   | [], _ -> acc
-  | { raw = Call (Raw i) | Return_call (Raw i) } :: l, _ ->
+  | { raw = Call (Raw i) | Return_call (Raw i); _ } :: l, _ ->
     find_children mode tables funcs (i :: acc) l
   | ( { raw =
           ( Call_indirect (_, Bt_raw (_, ft))
           | Return_call_indirect (_, Bt_raw (_, ft)) )
+      ; _
       }
       :: l
     , Complete ) ->
@@ -36,8 +37,8 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
       Array.fold_left (find_functions_with_func_type ft) (acc, 0) funcs
     in
     find_children mode tables funcs acc l
-  | ( { raw = I32_const x }
-      :: { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _) }
+  | ( { raw = I32_const x; _ }
+      :: { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _); _ }
       :: l
     , Sound ) -> (
     let t_opt = M.find_opt i tables in
@@ -50,10 +51,10 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
     match f with
     | Some f -> find_children mode tables funcs (f :: acc) l
     | None -> find_children mode tables funcs acc l )
-  | { raw = Block (_, _, exp) | Loop (_, _, exp) } :: l, _ ->
+  | { raw = Block (_, _, exp) | Loop (_, _, exp); _ } :: l, _ ->
     let x = find_children mode tables funcs acc exp.raw in
     find_children mode tables funcs x l
-  | { raw = If_else (_, _, e1, e2) } :: l, _ ->
+  | { raw = If_else (_, _, e1, e2); _ } :: l, _ ->
     let x = find_children mode tables funcs acc e1.raw in
     let x = find_children mode tables funcs x e2.raw in
     find_children mode tables funcs x l
