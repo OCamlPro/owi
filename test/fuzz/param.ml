@@ -8,7 +8,11 @@ let symbolic_fuzzing = false
 
 let full_symbolic_fuzzing = false
 
-let call_graph_fuzzing = true
+let call_graph_fuzzing = false
+
+let call_graph_scc_fuzzing = true
+
+let control_flow_graph_scc_fuzzing = true
 
 (** Enable debug mode, will slow down things. *)
 let debug = false
