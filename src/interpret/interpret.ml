@@ -807,10 +807,15 @@ module Make (P : Interpret_intf.P) :
     let stack = state.stack in
     let env = state.env in
     let locals = state.locals in
+
+    Atomic.incr instr.Annotated.nb_iter;
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
+      m "running instr : %a (%a)"
+        (Types.pp_instr ~short:true)
+        instr.Annotated.raw Fmt.int
+        (Atomic.get instr.Annotated.nb_iter) );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->

@@ -1,5 +1,8 @@
 (* TODO: hide the definition completely to force proper propagation of values *)
-type 'a t = private { raw : 'a }
+type 'a t = private
+  { raw : 'a
+  ; nb_iter : int Atomic.t
+  }
 
 val dummy : 'a -> 'a t
 
