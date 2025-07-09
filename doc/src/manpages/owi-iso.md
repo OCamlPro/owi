@@ -50,8 +50,9 @@ OPTIONS
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 1 available solvers:
+           Z3
 
        -u, --unsafe
            skip typechecking pass
