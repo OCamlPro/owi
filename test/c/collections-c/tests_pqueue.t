@@ -2,7 +2,7 @@ Pqueue tests:
   $ ./run-subdir.sh pqueue -O0 --no-value
   Testing "files/normal/testsuite/pqueue/pqueue_test_enqueue.c":
   Using owi sym:
-  owi: [ERROR] Trap: memory heap buffer overflow
+  owi: [ERROR] Trap: out of bounds memory access
   model {
     symbol symbol_0 i32
     symbol symbol_1 i32
@@ -18,7 +18,7 @@ Pqueue tests:
   All OK!
   Testing "files/normal/testsuite/pqueue/pqueue_test_pop.c":
   Using owi sym:
-  owi: [ERROR] Trap: memory heap buffer overflow
+  owi: [ERROR] Trap: out of bounds memory access
   model {
     symbol symbol_0 i32
     symbol symbol_1 i32
