@@ -11,6 +11,7 @@ type exploration_strategy =
   | FIFO
   | LIFO
   | Random
+  | Smart
 
 type parameters =
   { unsafe : bool

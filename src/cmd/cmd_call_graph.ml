@@ -6,6 +6,7 @@ open Syntax
 open Types
 module Stack = Stack.Make (Concrete_value)
 module M = Map.Make (Int)
+module S = Set.Make (Int)
 
 type mode =
   | Complete
@@ -18,26 +19,32 @@ let find_functions_with_func_type func_type (acc, i)
     | Runtime.Local x -> x.type_f
     | Runtime.Imported imp -> imp.desc
   in
-  if func_type_eq func_type ft then (i :: acc, i + 1) else (acc, i + 1)
+  if func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
-let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
-    =
+let rec find_children mode tables (funcs : 'a array) acc
+  (l : binary instr Annotated.t list) =
   match (l, mode) with
   | [], _ -> acc
-  | { raw = Call (Raw i) | Return_call (Raw i) } :: l, _ ->
-    find_children mode tables funcs (i :: acc) l
-  | ( { raw =
-          ( Call_indirect (_, Bt_raw (_, ft))
-          | Return_call_indirect (_, Bt_raw (_, ft)) )
-      }
+  | ({ raw = Call (Raw i) | Return_call (Raw i); _ } as instr) :: l, _ ->
+    Annotated.update_functions_called instr (S.singleton i);
+    find_children mode tables funcs (S.add i acc) l
+  | ( ( { raw =
+            ( Call_indirect (_, Bt_raw (_, ft))
+            | Return_call_indirect (_, Bt_raw (_, ft)) )
+        ; _
+        } as instr )
       :: l
     , Complete ) ->
-    let acc, _ =
-      Array.fold_left (find_functions_with_func_type ft) (acc, 0) funcs
+    let children, _ =
+      Array.fold_left (find_functions_with_func_type ft) (S.empty, 0) funcs
     in
+    Annotated.update_functions_called instr children;
+    let acc = S.union children acc in
     find_children mode tables funcs acc l
-  | ( { raw = I32_const x }
-      :: { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _) }
+  | ( { raw = I32_const x; _ }
+      :: ( { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _)
+           ; _
+           } as instr )
       :: l
     , Sound ) -> (
     let t_opt = M.find_opt i tables in
@@ -48,12 +55,14 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
         | _ -> None )
     in
     match f with
-    | Some f -> find_children mode tables funcs (f :: acc) l
+    | Some f ->
+      Annotated.update_functions_called instr (S.singleton f);
+      find_children mode tables funcs (S.add f acc) l
     | None -> find_children mode tables funcs acc l )
-  | { raw = Block (_, _, exp) | Loop (_, _, exp) } :: l, _ ->
+  | { raw = Block (_, _, exp) | Loop (_, _, exp); _ } :: l, _ ->
     let x = find_children mode tables funcs acc exp.raw in
     find_children mode tables funcs x l
-  | { raw = If_else (_, _, e1, e2) } :: l, _ ->
+  | { raw = If_else (_, _, e1, e2); _ } :: l, _ ->
     let x = find_children mode tables funcs acc e1.raw in
     let x = find_children mode tables funcs x e2.raw in
     find_children mode tables funcs x l
@@ -62,11 +71,10 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
 let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
   match f with
   | Runtime.Local x ->
-    let l =
-      List.sort_uniq compare (find_children mode tables funcs [] x.body.raw)
-    in
-    ((i, x.id, l) :: g, i + 1)
-  | Runtime.Imported x -> ((i, x.assigned_name, []) :: g, i + 1)
+    let s = find_children mode tables funcs S.empty x.body.raw in
+    let cfg = Cmd_cfg.build_cfg_from_func x in
+    ((i, Some cfg, s) :: g, i + 1)
+  | Runtime.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
 let eval_ibinop stack nn (op : ibinop) =
   match nn with
@@ -146,13 +154,13 @@ let rec find_tables acc (e : binary instr Annotated.t) =
   | _ -> acc
 
 let find_tables_to_remove export_tables funcs =
-  List.map (fun (x : Binary.export) -> x.id) export_tables
-  @ Array.fold_left
-      (fun acc f ->
-        match f with
-        | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
-        | _ -> acc )
-      [] funcs
+  let l = List.map (fun (x : Binary.export) -> x.id) export_tables in
+  Array.fold_left
+    (fun acc f ->
+      match f with
+      | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
+      | _ -> acc )
+    l funcs
 
 let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
   match (l1, l2) with
@@ -187,30 +195,33 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
   let funcs = m.func in
 
   let tables =
-    let elems =
-      List.filter_map
-        (fun e ->
-          match e.Binary.mode with
-          | Elem_active (Some n, _) -> Some (n, e)
-          | _ -> None )
-        (Array.to_list m.elem)
-    in
+    match call_graph_mode with
+    | Complete -> M.empty
+    | Sound ->
+      let tables =
+        let elems =
+          List.filter_map
+            (fun e ->
+              match e.Binary.mode with
+              | Elem_active (Some n, _) -> Some (n, e)
+              | _ -> None )
+            (Array.to_list m.elem)
+        in
+        let t = find_tables_to_remove m.exports.table funcs in
+        remove_tables
+          (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
+          (List.sort_uniq compare t) []
+      in
+      let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
 
-    let t = find_tables_to_remove m.exports.table funcs in
-    remove_tables
-      (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
-      (List.sort_uniq compare t) []
+      eval_tables tables env
   in
-
-  let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
-
-  let tables = eval_tables tables env in
 
   let l, _ =
     Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
   in
   let entries = find_entries entry_point m in
-  Graph.init l entries
+  Graph.init_cg l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
   let m =
@@ -220,15 +231,28 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
   | Ok m -> build_call_graph call_graph_mode m entry_point
   | _ -> assert false
 
-let cmd ~call_graph_mode ~source_file ~entry_point =
+let compute_distances m entry_point =
+  let call_graph = build_call_graph Sound m entry_point in
+  let _ : int array array array =
+    Graph.compute_distance_to_unreachable_cg call_graph
+  in
+  ()
+
+let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
-  let* () =
+
+  let distances = Graph.compute_distance_to_unreachable_cg call_graph in
+  Logs.app (fun log -> log "%a" Graph.pp_distances distances);
+
+  if scc then
+    let scc = Graph.build_scc_graph call_graph in
     Bos.OS.File.writef
       (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_dot call_graph
-  in
-
-  Ok ()
+      "%a" Graph.pp_scc_graph (scc, Graph.Cg)
+  else
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_cg call_graph
