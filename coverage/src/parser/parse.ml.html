@@ -1591,16 +1591,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="611">m</span>atch Fpath.get_ext ~multi:false file with
+  <span data-count="613">m</span>atch Fpath.get_ext ~multi:false file with
   | <span data-count="229">"</span>.wat" -&gt;
     let+ m = Text.Module.from_fil<span data-count="229">e</span> file in
     <span data-count="228">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="382">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="382">e</span> file in
-    <span data-count="382">K</span>ind.Wasm m
+  | <span data-count="384">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="384">e</span> file in
+    <span data-count="384">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>

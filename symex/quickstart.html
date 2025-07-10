@@ -305,7 +305,7 @@ int mean2(int x, int y) {
   return (x + y) / 2;
 }
 
-void check(int x, int y) {
+extern "C" void check(int x, int y) {
   owi_assert(mean1(x, y) == mean2(x, y));
 }
 </code></pre>
@@ -322,7 +322,8 @@ fn mean2(x: i32, y: i32) -&gt; i32 {
     (x + y) / 2
 }
 
-fn check(x : i32, y: i32) {
+#[no_mangle]
+pub extern "C" fn check(x : i32, y: i32) {
   owi_sym::assert(mean1(x, y) == mean2(x, y))
 }
 </code></pre>
@@ -410,14 +411,25 @@ owi: [ERROR] Reached problem!
 </div>
 <div class="mdbook-tab-content hidden" data-tabname="C++">
 <pre><code class="language-sh">$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
-owi: [ERROR] wasm-ld failed: run with -vv to get the full error message if it was not displayed above
-[26]
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -990380032
+  symbol symbol_1 i32 -2145908736
+}
+owi: [ERROR] Reached problem!
+[13]
 </code></pre>
 </div>
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
 <pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
-owi: [ERROR] rustc failed: run with -vv to get the full error message if it was not displayed above
-[26]
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -1052888556
+  symbol symbol_1 i32 -808758763
+}
+
+owi: [ERROR] Reached problem!
+[13]
 </code></pre>
 </div>
 <div class="mdbook-tab-content hidden" data-tabname="Zig">

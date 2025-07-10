@@ -1826,8 +1826,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1624626">m</span>atch (t1, t2) with
-  | <span data-count="1489092">I</span>32, I32 | <span data-count="45090">I</span>64, I64 | <span data-count="44945">F</span>32, F32 | <span data-count="45088">F</span>64, F64 | <span data-count="386">V</span>128, V128 -&gt; true
+  <span data-count="1624612">m</span>atch (t1, t2) with
+  | <span data-count="1489072">I</span>32, I32 | <span data-count="45092">I</span>64, I64 | <span data-count="44947">F</span>32, F32 | <span data-count="45090">F</span>64, F64 | <span data-count="388">V</span>128, V128 -&gt; true
   | <span data-count="25">(</span><span data-count="10">I</span>32 | <span data-count="6">I</span>64 | <span data-count="5">F</span>32 | <span data-count="4">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2050,8 +2050,8 @@ let pp_heap_type_short fmt = function
 
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
-  <span data-count="5787">m</span>atch (t1, t2) with
-  | <span data-count="5749">F</span>unc_ht, Func_ht | <span data-count="23">E</span>xtern_ht, Extern_ht -&gt; true
+  <span data-count="5823">m</span>atch (t1, t2) with
+  | <span data-count="5785">F</span>unc_ht, Func_ht | <span data-count="23">E</span>xtern_ht, Extern_ht -&gt; true
   | <span data-count="15">_</span>, _ -&gt; false
 
 let compare_heap_type t1 t2 =
@@ -2087,8 +2087,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1623220">m</span>atch (t1, t2) with
-  | <span data-count="1623206">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="1623199">m</span>atch (t1, t2) with
+  | <span data-count="1623184">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="13">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2103,7 +2103,7 @@ type nonrec 'a param = string option * 'a val_type
 
 let pp_param fmt (id, vt) = <span data-count="297">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="815093">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="815073">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="18524">c</span>ompare_val_type t1 t2
 
@@ -2111,7 +2111,7 @@ type nonrec 'a param_type = 'a param list
 
 let pp_param_type fmt params = <span data-count="158">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="814422">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="814424">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="41071">L</span>ist.compare compare_param t1 t2
 
@@ -2121,7 +2121,7 @@ let pp_result_ fmt vt = <span data-count="157">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="157">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="814309">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="814312">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="22174">L</span>ist.compare compare_val_type t1 t2
 
@@ -2140,7 +2140,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="814422">p</span>aram_type_e<span data-count="814420">q</span> pt1 pt2 &amp;&amp; <span data-count="814307">r</span>esult_type_eq rt1 rt2
+  <span data-count="814423">p</span>aram_type_e<span data-count="814422">q</span> pt1 pt2 &amp;&amp; <span data-count="814309">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
@@ -2398,54 +2398,54 @@ and pp_expr ~short fmt instrs =
     instrs
 
 let rec iter_expr f (e : _ expr Annotated.t) =
-  <span data-count="9550">A</span>nnotated.iter (List.ite<span data-count="9550">r</span> (iter_inst<span data-count="9550">r</span> f)) e
+  <span data-count="9828">A</span>nnotated.iter (List.ite<span data-count="9828">r</span> (iter_inst<span data-count="9828">r</span> f)) e
 
 and iter_instr f instr =
-  <span data-count="242262">A</span>nnotated.iter f instr;
-  <span data-count="242262">A</span>nnotated.iter
+  <span data-count="248547">A</span>nnotated.iter f instr;
+  <span data-count="248547">A</span>nnotated.iter
     (function
-      | <span data-count="36803">I</span>32_const _ | <span data-count="679">I</span>64_const _ | <span data-count="150">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
-      | <span data-count="670">I</span>_unop (_, _)
+      | <span data-count="37955">I</span>32_const _ | <span data-count="695">I</span>64_const _ | <span data-count="150">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
+      | <span data-count="675">I</span>_unop (_, _)
       | <span data-count="0">F</span>_unop (_, _)
-      | <span data-count="19908">I</span>_binop (_, _)
+      | <span data-count="20703">I</span>_binop (_, _)
       | <span data-count="65">F</span>_binop (_, _)
       | <span data-count="0">V</span>_ibinop (_, _)
-      | <span data-count="2670">I</span>_testop (_, _)
-      | <span data-count="6286">I</span>_relop (_, _)
+      | <span data-count="2737">I</span>_testop (_, _)
+      | <span data-count="6470">I</span>_relop (_, _)
       | <span data-count="146">F</span>_relop (_, _)
-      | <span data-count="37">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="9">I</span>32_wrap_i64
-      | <span data-count="14">I</span>64_extend_i32 _
+      | <span data-count="37">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="12">I</span>32_wrap_i64
+      | <span data-count="18">I</span>64_extend_i32 _
       | <span data-count="65">I</span>_trunc_f (_, _, _)
       | <span data-count="0">I</span>_trunc_sat_f (_, _, _)
       | <span data-count="0">F</span>32_demote_f64 | <span data-count="0">F</span>64_promote_f32
       | <span data-count="73">F</span>_convert_i (_, _, _)
       | <span data-count="0">I</span>_reinterpret_f (_, _)
       | <span data-count="0">F</span>_reinterpret_i (_, _)
-      | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="3719">D</span>rop | <span data-count="2240">S</span>elect _ | <span data-count="67833">L</span>ocal_get _
-      | <span data-count="11736">L</span>ocal_set _ | <span data-count="11777">L</span>ocal_tee _ | <span data-count="475">G</span>lobal_get _ | <span data-count="898">G</span>lobal_set _ | <span data-count="0">T</span>able_get _
+      | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="3726">D</span>rop | <span data-count="2287">S</span>elect _ | <span data-count="69504">L</span>ocal_get _
+      | <span data-count="12047">L</span>ocal_set _ | <span data-count="12110">L</span>ocal_tee _ | <span data-count="491">G</span>lobal_get _ | <span data-count="922">G</span>lobal_set _ | <span data-count="0">T</span>able_get _
       | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _ | <span data-count="0">T</span>able_fill _
       | <span data-count="0">T</span>able_copy (_, _)
       | <span data-count="0">T</span>able_init (_, _)
       | <span data-count="0">E</span>lem_drop _
-      | <span data-count="20420">I</span>_load (_, _)
+      | <span data-count="20749">I</span>_load (_, _)
       | <span data-count="89">F</span>_load (_, _)
-      | <span data-count="13406">I</span>_store (_, _)
+      | <span data-count="13826">I</span>_store (_, _)
       | <span data-count="24">F</span>_store (_, _)
-      | <span data-count="2346">I</span>_load8 (_, _, _)
-      | <span data-count="9">I</span>_load16 (_, _, _)
+      | <span data-count="2381">I</span>_load8 (_, _, _)
+      | <span data-count="16">I</span>_load16 (_, _, _)
       | <span data-count="0">I</span>64_load32 (_, _)
-      | <span data-count="3555">I</span>_store8 (_, _)
-      | <span data-count="3">I</span>_store16 (_, _)
-      | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="1">M</span>emory_grow | <span data-count="1">M</span>emory_fill | <span data-count="5">M</span>emory_copy
-      | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="55">U</span>nreachable | <span data-count="1806">B</span>r _ | <span data-count="8767">B</span>r_if _
-      | <span data-count="23">B</span>r_table (_, _)
-      | <span data-count="1500">R</span>eturn | <span data-count="0">R</span>eturn_call _
+      | <span data-count="3576">I</span>_store8 (_, _)
+      | <span data-count="6">I</span>_store16 (_, _)
+      | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="2">M</span>emory_grow | <span data-count="1">M</span>emory_fill | <span data-count="8">M</span>emory_copy
+      | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="86">U</span>nreachable | <span data-count="1902">B</span>r _ | <span data-count="9043">B</span>r_if _
+      | <span data-count="27">B</span>r_table (_, _)
+      | <span data-count="1543">R</span>eturn | <span data-count="0">R</span>eturn_call _
       | <span data-count="0">R</span>eturn_call_indirect (_, _)
-      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="12906">C</span>all _
-      | <span data-count="1903">C</span>all_indirect (_, _)
+      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="12992">C</span>all _
+      | <span data-count="1921">C</span>all_indirect (_, _)
       | <span data-count="0">C</span>all_ref _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
         ()
-      | <span data-count="7752">B</span>lock (_, _, e) | <span data-count="1438">L</span>oop (_, _, e) -&gt; iter_expr f e
+      | <span data-count="8001">B</span>lock (_, _, e) | <span data-count="1466">L</span>oop (_, _, e) -&gt; iter_expr f e
       | <span data-count="0">I</span>f_else (_, _, e1, e2) -&gt;
         iter_expr f e1;
         <span data-count="0">i</span>ter_expr f e2 )

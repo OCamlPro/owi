@@ -488,13 +488,13 @@ end = struct
 
   let cov_lock = Mutex.creat<span data-count="874">e</span> ()
 
-  let add_pc_wrapper e = <span data-count="615">C</span>hoice.add_pc e
+  let add_pc_wrapper e = <span data-count="607">C</span>hoice.add_pc e
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="591">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="591">l</span> i
+    <span data-count="583">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="583">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96962">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96962">l</span> i
+    <span data-count="96958">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96958">l</span> i
 
   let symbol_bool () =
     <span data-count="4">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -512,7 +512,7 @@ end = struct
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_bitv 16) (fun sym -&gt;
       <span data-count="0">E</span>xpr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbo<span data-count="0">l</span> sym) )
 
-  let symbol_i32 () = <span data-count="1165">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () = <span data-count="1169">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i32_constant v =
     <span data-count="0">l</span>et open Choice in
@@ -542,7 +542,7 @@ end = struct
     <span data-count="9918">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9918">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2536">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2539">e</span> m ptr
+    <span data-count="2536">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2540">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
 

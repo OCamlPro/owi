@@ -8,6 +8,7 @@ fn mean2(x: i32, y: i32) -> i32 {
     (x + y) / 2
 }
 
-fn check(x : i32, y: i32) {
+#[no_mangle]
+pub extern "C" fn check(x : i32, y: i32) {
   owi_sym::assert(mean1(x, y) == mean2(x, y))
 }

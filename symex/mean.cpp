@@ -8,6 +8,6 @@ int mean2(int x, int y) {
   return (x + y) / 2;
 }
 
-void check(int x, int y) {
+extern "C" void check(int x, int y) {
   owi_assert(mean1(x, y) == mean2(x, y));
 }

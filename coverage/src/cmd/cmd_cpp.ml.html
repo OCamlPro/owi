@@ -394,15 +394,15 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
 
   let+ () =
     match OS.Cmd.run ~err wasmld_cmd with
-    | <span data-count="3">O</span>k _ as v -&gt; v
-    | <span data-count="2">E</span>rror (`Msg e) -&gt;
+    | <span data-count="4">O</span>k _ as v -&gt; v
+    | <span data-count="1">E</span>rror (`Msg e) -&gt;
       Logs.debug (fun m -&gt; <span data-count="0">m</span> "wasm-ld failed: %s" e);
-      <span data-count="2">F</span>mt.error_ms<span data-count="2">g</span>
+      <span data-count="1">F</span>mt.error_ms<span data-count="1">g</span>
         "wasm-ld failed: run with -vv to get the full error message if it was \
          not displayed above"
   in
 
-  <span data-count="3">o</span>ut
+  <span data-count="4">o</span>ut
 
 let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~concolic
   ~out_file : unit Result.t =
@@ -418,11 +418,11 @@ let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~concolic
     compil<span data-count="5">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
       ~opt_lvl ~out_file files
   in
-  <span data-count="3">l</span>et workspace = Some workspace in
+  <span data-count="4">l</span>et workspace = Some workspace in
 
   let parameters = { symbolic_parameters with workspace } in
 
-  (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="3">C</span>md_sym.cmd) ~parameters ~source_file
+  (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="4">C</span>md_sym.cmd) ~parameters ~source_file
 </code></pre>
       </div>
     </div>

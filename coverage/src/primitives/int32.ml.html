@@ -404,7 +404,7 @@ let gt (x : int32) y = <span data-count="2152">c</span>ompar<span data-count="21
 
 let le (x : int32) y = <span data-count="1383401">c</span>ompar<span data-count="1383401">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int32) y = <span data-count="479070">c</span>ompar<span data-count="479070">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int32) y = <span data-count="480700">c</span>ompar<span data-count="480700">e</span> x y &gt;= 0 [@@inline]
 
 let lt_u x y = <span data-count="91252">c</span>mp_u x lt y [@@inline]
 
@@ -447,8 +447,8 @@ let rotr x y =
   <span data-count="13">l</span>ogor (shr_<span data-count="13">u</span> x n) (sh<span data-count="13">l</span> x (su<span data-count="13">b</span> 32l n))
 
 let extend_s n x =
-  <span data-count="667">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="667">t</span> x shift) shift
+  <span data-count="668">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="668">t</span> x shift) shift
 
 (* String conversion that allows leading signs and unsigned values *)
 
