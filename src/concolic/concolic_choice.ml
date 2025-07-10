@@ -101,7 +101,7 @@ let no_choice e =
   let v = Smtml.Expr.simplify e in
   not (Smtml.Expr.is_symbolic v)
 
-let select ((c, s) : Concolic_value.bool) ~prio_t:_ ~prio_f:_ =
+let select ((c, s) : Concolic_value.bool) ~counter_next_true:_ ~counter_next_false:_ =
   let cond = Select (c, s) in
   let no_choice = no_choice s in
   M (fun st -> (Ok c, if no_choice then st else add_pc_to_thread st cond))

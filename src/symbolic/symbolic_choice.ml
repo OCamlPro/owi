@@ -412,7 +412,7 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first (cond : Symbolic_value.bool) ~prio_t ~prio_f =
+  let select_inner ~explore_first (cond : Symbolic_value.bool) ~counter_next_true ~counter_next_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -422,22 +422,22 @@ module Make (Thread : Thread_intf.S) = struct
       let true_branch =
         let* () = add_pc v in
         let* () = add_breadcrumb 1 in
-        let+ () = check_reachability v prio_t in
+        let+ () = check_reachability v (Prio.compute ~instr_counter:counter_next_true) in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
         let* () = add_breadcrumb 0 in
-        let+ () = check_reachability neg_v prio_f in
+        let+ () = check_reachability neg_v (Prio.compute ~instr_counter:counter_next_false) in
         false
       in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) ~prio_t ~prio_f =
-    select_inner cond ~explore_first:true ~prio_t ~prio_f
+  let select (cond : Symbolic_value.bool) ~counter_next_true ~counter_next_false =
+    select_inner cond ~explore_first:true ~counter_next_true ~counter_next_false
   [@@inline]
 
   let summary_symbol (e : Smtml.Expr.t) =
@@ -497,8 +497,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assertion c =
     let* assertion_true =
-      select_inner c ~explore_first:false ~prio_t:Prio.default
-        ~prio_f:Prio.default
+      select_inner c ~explore_first:false ~counter_next_true:0
+        ~counter_next_false:0
     in
     if assertion_true then return ()
     else
