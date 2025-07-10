@@ -106,19 +106,19 @@ module Stack = Prelude.Stack
 
 type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
-let pop s pledge = <span data-count="584">S</span>ynchronizer.get s pledge
+let pop s pledge = <span data-count="576">S</span>ynchronizer.get s pledge
 
 let make_pledge = Synchronizer.make_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
- <span data-count="634">f</span>un () -&gt;
-  <span data-count="584">m</span>atch pop s false with
-  | <span data-count="357">N</span>one -&gt;
+ <span data-count="625">f</span>un () -&gt;
+  <span data-count="576">m</span>atch pop s false with
+  | <span data-count="350">N</span>one -&gt;
     finalizer ();
-    <span data-count="357">N</span>il
-  | <span data-count="227">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="227">q</span> s ~finalizer)
+    <span data-count="350">N</span>il
+  | <span data-count="226">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="226">q</span> s ~finalizer)
 
 let push v prio s = <span data-count="228">S</span>ynchronizer.write (prio, v) s
 
@@ -127,12 +127,12 @@ let work_while f s = <span data-count="0">S</span>ynchronizer.work_while f s
 let fail = Synchronizer.fail
 
 let make () =
-  <span data-count="407">l</span>et s = Stack.create () in
-  <span data-count="407">l</span>et writter prio_v condvar =
+  <span data-count="399">l</span>et s = Stack.create () in
+  <span data-count="399">l</span>et writter prio_v condvar =
     <span data-count="228">S</span>tack.push (sn<span data-count="228">d</span> prio_v) s;
     <span data-count="228">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="1126">S</span>tack.pop_opt s) writter
+  Synchronizer.init (fun () -&gt; <span data-count="1118">S</span>tack.pop_opt s) writter
 </code></pre>
       </div>
     </div>

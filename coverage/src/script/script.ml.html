@@ -738,95 +738,95 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="1019">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="874">e</span> ()
 
-  let value i = <span data-count="65">V</span>.Externref (Some (V.E (ty, i)))
+  let value i = <span data-count="34">V</span>.Externref (Some (V.E (ty, i)))
 end
 
 let check_error ~expected ~got : unit Result.t =
-  <span data-count="10946">l</span>et ok =
-    String.equa<span data-count="10946">l</span> (Result.err_to_strin<span data-count="10946">g</span> got) expecte<span data-count="2292">d</span>
-    || String.starts_wit<span data-count="8654">h</span> ~prefix:expected (Result.err_to_strin<span data-count="8654">g</span> got<span data-count="8638">)</span>
+  <span data-count="5548">l</span>et ok =
+    String.equa<span data-count="5548">l</span> (Result.err_to_strin<span data-count="5548">g</span> got) expecte<span data-count="1185">d</span>
+    || String.starts_wit<span data-count="4363">h</span> ~prefix:expected (Result.err_to_strin<span data-count="4363">g</span> got<span data-count="4355">)</span>
     ||
     match got with
-    | (<span data-count="0">`</span>Msg s | <span data-count="16">`</span>Parse_fail s)
-      when String.starts_wit<span data-count="16">h</span> ~prefix:"constant out of range" s -&gt;
-      <span data-count="14">S</span>tring.starts_wit<span data-count="14">h</span> ~prefix:"i32 constant" expected
+    | (<span data-count="0">`</span>Msg s | <span data-count="8">`</span>Parse_fail s)
+      when String.starts_wit<span data-count="8">h</span> ~prefix:"constant out of range" s -&gt;
+      <span data-count="7">S</span>tring.starts_wit<span data-count="7">h</span> ~prefix:"i32 constant" expected
     | <span data-count="0">`</span>Constant_out_of_range -&gt;
       String.starts_wit<span data-count="0">h</span> ~prefix:"i32 constant" expected
     | <span data-count="0">`</span>Msg "unexpected end of section or function" -&gt;
       String.equa<span data-count="0">l</span> expected "section size mismatch"
-    | <span data-count="2">_</span> -&gt; fals<span data-count="14">e</span>
+    | <span data-count="1">_</span> -&gt; fals<span data-count="7">e</span>
   in
-  if not ok then <span data-count="2">b</span>egin
+  if not ok then <span data-count="1">b</span>egin
     Error (`Failed_with_but_expected (got, expected))
   end
-  else <span data-count="10944">O</span>k ()
+  else <span data-count="5547">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="0">O</span>k _whatever -&gt; Error (`Did_not_fail_but_expected expected)
-  | <span data-count="9481">E</span>rror got -&gt; check_error ~expected ~got
+  | <span data-count="4812">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="48660">l</span>et* exports, env_id =
+  <span data-count="24432">l</span>et* exports, env_id =
     match mod_id with
-    | <span data-count="48443">N</span>one -&gt; begin
+    | <span data-count="24312">N</span>one -&gt; begin
       match ls.Link.last with
       | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
-      | <span data-count="48443">S</span>ome m -&gt; Ok m
+      | <span data-count="24312">S</span>ome m -&gt; Ok m
     end
-    | <span data-count="217">S</span>ome mod_id -&gt; (
+    | <span data-count="120">S</span>ome mod_id -&gt; (
       match Link.StringMap.find_opt mod_id ls.Link.by_id with
       | <span data-count="0">N</span>one -&gt; Error (`Unbound_module mod_id)
-      | <span data-count="217">S</span>ome exports -&gt; Ok exports )
+      | <span data-count="120">S</span>ome exports -&gt; Ok exports )
   in
-  <span data-count="48660">m</span>atch Link.StringMap.find_opt f_name exports.functions with
+  <span data-count="24432">m</span>atch Link.StringMap.find_opt f_name exports.functions with
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name f_name)
-  | <span data-count="48660">S</span>ome v -&gt; Ok (v, env_id)
+  | <span data-count="24432">S</span>ome v -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
-  <span data-count="22">l</span>et* exports =
+  <span data-count="11">l</span>et* exports =
     match mod_id with
-    | <span data-count="2">N</span>one -&gt; begin
+    | <span data-count="1">N</span>one -&gt; begin
       match ls.Link.last with
       | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
-      | <span data-count="2">S</span>ome (m, _env_id) -&gt; Ok m
+      | <span data-count="1">S</span>ome (m, _env_id) -&gt; Ok m
     end
-    | <span data-count="20">S</span>ome mod_id -&gt; (
+    | <span data-count="10">S</span>ome mod_id -&gt; (
       match Link.StringMap.find_opt mod_id ls.Link.by_id with
       | <span data-count="0">N</span>one -&gt; Error (`Unbound_module mod_id)
-      | <span data-count="20">S</span>ome (exports, _env_id) -&gt; Ok exports )
+      | <span data-count="10">S</span>ome (exports, _env_id) -&gt; Ok exports )
   in
-  <span data-count="22">m</span>atch Link.StringMap.find_opt name exports.globals with
+  <span data-count="11">m</span>atch Link.StringMap.find_opt name exports.globals with
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name name)
-  | <span data-count="22">S</span>ome v -&gt; Ok v
+  | <span data-count="11">S</span>ome v -&gt; Ok v
 
 let compare_result_const result (const : V.t) =
-  <span data-count="43238">m</span>atch (result, const) with
-  | <span data-count="25589">T</span>ext.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
-  | <span data-count="1777">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
-  | <span data-count="5724">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt;
-    Float32.e<span data-count="5724">q</span> n n<span data-count="5532">'</span> || String.equal (Float32.to_strin<span data-count="192">g</span> n) (Float32.to_strin<span data-count="192">g</span> n')
-  | <span data-count="5825">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt;
-    Float64.e<span data-count="5825">q</span> n n<span data-count="5635">'</span> || String.equal (Float64.to_strin<span data-count="190">g</span> n) (Float64.to_strin<span data-count="190">g</span> n')
-  | <span data-count="404">R</span>esult_const (Literal (Const_V128 n)), V128 n' -&gt; V128.eq n n'
-  | <span data-count="14">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Funcref None) -&gt; true
-  | <span data-count="51">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Externref None) -&gt; true
-  | <span data-count="66">R</span>esult_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -&gt; begin
+  <span data-count="21701">m</span>atch (result, const) with
+  | <span data-count="12863">T</span>ext.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
+  | <span data-count="892">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
+  | <span data-count="2865">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt;
+    Float32.e<span data-count="2865">q</span> n n<span data-count="2769">'</span> || String.equal (Float32.to_strin<span data-count="96">g</span> n) (Float32.to_strin<span data-count="96">g</span> n')
+  | <span data-count="2915">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt;
+    Float64.e<span data-count="2915">q</span> n n<span data-count="2820">'</span> || String.equal (Float64.to_strin<span data-count="95">g</span> n) (Float64.to_strin<span data-count="95">g</span> n')
+  | <span data-count="202">R</span>esult_const (Literal (Const_V128 n)), V128 n' -&gt; V128.eq n n'
+  | <span data-count="7">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Funcref None) -&gt; true
+  | <span data-count="28">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Externref None) -&gt; true
+  | <span data-count="35">R</span>esult_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -&gt; begin
     match V.cast_ref ref Host_externref.ty with
     | <span data-count="0">N</span>one -&gt; false
-    | <span data-count="66">S</span>ome n' -&gt; n = n'
+    | <span data-count="35">S</span>ome n' -&gt; n = n'
   end
-  | <span data-count="932">R</span>esult_const (Nan_canon S32), F32 f -&gt;
-    Float32.is_pos_na<span data-count="932">n</span> <span data-count="512">f</span> || Float32.is_neg_nan f
-  | <span data-count="934">R</span>esult_const (Nan_canon S64), F64 f -&gt;
-    Float64.is_pos_na<span data-count="934">n</span> <span data-count="514">f</span> || Float64.is_neg_nan f
-  | <span data-count="962">R</span>esult_const (Nan_arith S32), F32 f -&gt;
+  | <span data-count="466">R</span>esult_const (Nan_canon S32), F32 f -&gt;
+    Float32.is_pos_na<span data-count="466">n</span> <span data-count="256">f</span> || Float32.is_neg_nan f
+  | <span data-count="467">R</span>esult_const (Nan_canon S64), F64 f -&gt;
+    Float64.is_pos_na<span data-count="467">n</span> <span data-count="257">f</span> || Float64.is_neg_nan f
+  | <span data-count="481">R</span>esult_const (Nan_arith S32), F32 f -&gt;
     let pos_nan = Float32.to_bits Float32.pos_nan in
-    <span data-count="962">I</span>nt32.eq (Int32.logan<span data-count="962">d</span> (Float32.to_bit<span data-count="962">s</span> f) pos_nan) pos_nan
-  | <span data-count="960">R</span>esult_const (Nan_arith S64), F64 f -&gt;
+    <span data-count="481">I</span>nt32.eq (Int32.logan<span data-count="481">d</span> (Float32.to_bit<span data-count="481">s</span> f) pos_nan) pos_nan
+  | <span data-count="480">R</span>esult_const (Nan_arith S64), F64 f -&gt;
     let pos_nan = Float64.to_bits Float64.pos_nan in
-    <span data-count="960">I</span>nt64.eq (Int64.logan<span data-count="960">d</span> (Float64.to_bit<span data-count="960">s</span> f) pos_nan) pos_nan
+    <span data-count="480">I</span>nt64.eq (Int64.logan<span data-count="480">d</span> (Float64.to_bit<span data-count="480">s</span> f) pos_nan) pos_nan
   | <span data-count="0">R</span>esult_const (Nan_arith _), _
   | <span data-count="0">R</span>esult_const (Nan_canon _), _
   | <span data-count="0">R</span>esult_const (Literal (Const_I32 _)), _
@@ -841,210 +841,210 @@ let compare_result_const result (const : V.t) =
     <span data-count="0">a</span>ssert false
 
 let value_of_const : text const -&gt; V.t Result.t = function
-  | <span data-count="20475">C</span>onst_I32 v -&gt; ok @@ V.I32 v
-  | <span data-count="2264">C</span>onst_I64 v -&gt; ok @@ V.I64 v
-  | <span data-count="23358">C</span>onst_F32 v -&gt; ok @@ V.F32 v
-  | <span data-count="23690">C</span>onst_F64 v -&gt; ok @@ V.F64 v
-  | <span data-count="14">C</span>onst_V128 v -&gt; ok @@ V.V128 v
-  | <span data-count="28">C</span>onst_null rt -&gt;
-    let+ rt = Binary_types.convert_heap_typ<span data-count="28">e</span> rt in
-    <span data-count="28">V</span>.ref_null rt
-  | <span data-count="65">C</span>onst_extern i -&gt; ok @@ V.Ref (Host_externref.valu<span data-count="65">e</span> i)
+  | <span data-count="10293">C</span>onst_I32 v -&gt; ok @@ V.I32 v
+  | <span data-count="1133">C</span>onst_I64 v -&gt; ok @@ V.I64 v
+  | <span data-count="11680">C</span>onst_F32 v -&gt; ok @@ V.F32 v
+  | <span data-count="11846">C</span>onst_F64 v -&gt; ok @@ V.F64 v
+  | <span data-count="7">C</span>onst_V128 v -&gt; ok @@ V.V128 v
+  | <span data-count="14">C</span>onst_null rt -&gt;
+    let+ rt = Binary_types.convert_heap_typ<span data-count="14">e</span> rt in
+    <span data-count="14">V</span>.ref_null rt
+  | <span data-count="34">C</span>onst_extern i -&gt; ok @@ V.Ref (Host_externref.valu<span data-count="34">e</span> i)
   | <span data-count="0">i</span> -&gt;
     Logs.err (fun m -&gt;
       <span data-count="0">m</span> "TODO: unimplemented Script.value_of_const %a)" Types.pp_const i );
     <span data-count="0">a</span>ssert false
 
 let action (link_state : Concrete_extern_func.extern_func Link.state) = function
-  | <span data-count="48660">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="24432">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
     Logs.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         mod_id f Types.pp_consts args );
-    <span data-count="48660">l</span>et* f, env_id = load_func_from_modul<span data-count="48660">e</span> link_state mod_id f in
-    <span data-count="48660">l</span>et* stack = list_ma<span data-count="48660">p</span> value_of_const args in
-    <span data-count="48660">l</span>et stack = List.rev stack in
-    <span data-count="48660">I</span>nterpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
+    <span data-count="24432">l</span>et* f, env_id = load_func_from_modul<span data-count="24432">e</span> link_state mod_id f in
+    <span data-count="24432">l</span>et* stack = list_ma<span data-count="24432">p</span> value_of_const args in
+    <span data-count="24432">l</span>et stack = List.rev stack in
+    <span data-count="24432">I</span>nterpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
       ~envs:link_state.envs f
   end
-  | <span data-count="22">G</span>et (mod_id, name) -&gt;
+  | <span data-count="11">G</span>et (mod_id, name) -&gt;
     Logs.info (fun m -&gt; <span data-count="0">m</span> "get...");
-    <span data-count="22">l</span>et+ global = load_global_from_modul<span data-count="22">e</span> link_state mod_id name in
-    <span data-count="22">[</span> global.value ]
+    <span data-count="11">l</span>et+ global = load_global_from_modul<span data-count="11">e</span> link_state mod_id name in
+    <span data-count="11">[</span> global.value ]
 
 let unsafe = false
 
-let run ~no_exhaustion ~optimize script =
-  <span data-count="222">l</span>et state =
+let run ~no_exhaustion script =
+  <span data-count="129">l</span>et state =
     Link.extern_module Link.empty_state ~name:"spectest_extern"
       Spectest.extern_m
   in
-  <span data-count="222">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="129">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.state) -&gt; function
-      | <span data-count="3161">T</span>ext.Text_module m -&gt;
+      | <span data-count="1659">T</span>ext.Text_module m -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
-          <span data-count="222">(</span>);
-        <span data-count="3161">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** module");
-        <span data-count="3161">i</span>ncr curr_module;
-        <span data-count="3161">l</span>et* m, link_state =
-          Compile.Text.until_lin<span data-count="3161">k</span> link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+          <span data-count="129">(</span>);
+        <span data-count="1659">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="1659">i</span>ncr curr_module;
+        <span data-count="1659">l</span>et* m, link_state =
+          Compile.Text.until_lin<span data-count="1659">k</span> link_state ~unsafe ~rac:false ~srac:false
+            ~name:None m
         in
-        <span data-count="3161">l</span>et+ () =
-          Interpret.Concrete.modu<span data-count="3161">l</span> ~timeout:None ~timeout_instr:None
+        <span data-count="1659">l</span>et+ () =
+          Interpret.Concrete.modu<span data-count="1659">l</span> ~timeout:None ~timeout_instr:None
             link_state.envs m
         in
         (* TODO: enable printing again! *)
-        <span data-count="3161">l</span>ink_state
-      | <span data-count="3">T</span>ext.Quoted_module m -&gt;
+        <span data-count="1659">l</span>ink_state
+      | <span data-count="2">T</span>ext.Quoted_module m -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
-        <span data-count="3">i</span>ncr curr_module;
-        <span data-count="3">l</span>et* m = Parse.Text.Inline_module.from_strin<span data-count="3">g</span> m in
-        <span data-count="3">l</span>et* m, link_state =
-          Compile.Text.until_lin<span data-count="3">k</span> link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+        <span data-count="2">i</span>ncr curr_module;
+        <span data-count="2">l</span>et* m = Parse.Text.Inline_module.from_strin<span data-count="2">g</span> m in
+        <span data-count="2">l</span>et* m, link_state =
+          Compile.Text.until_lin<span data-count="2">k</span> link_state ~unsafe ~rac:false ~srac:false
+            ~name:None m
         in
-        <span data-count="3">l</span>et+ () =
-          Interpret.Concrete.modu<span data-count="3">l</span> ~timeout:None ~timeout_instr:None
+        <span data-count="2">l</span>et+ () =
+          Interpret.Concrete.modu<span data-count="2">l</span> ~timeout:None ~timeout_instr:None
             link_state.envs m
         in
-        <span data-count="3">l</span>ink_state
-      | <span data-count="94">T</span>ext.Binary_module (id, m) -&gt;
+        <span data-count="2">l</span>ink_state
+      | <span data-count="47">T</span>ext.Binary_module (id, m) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** binary module");
-        <span data-count="94">i</span>ncr curr_module;
-        <span data-count="94">l</span>et* m = Parse.Binary.Module.from_strin<span data-count="94">g</span> m in
-        <span data-count="94">l</span>et m = { m with id } in
+        <span data-count="47">i</span>ncr curr_module;
+        <span data-count="47">l</span>et* m = Parse.Binary.Module.from_strin<span data-count="47">g</span> m in
+        <span data-count="47">l</span>et m = { m with id } in
         let* m, link_state =
-          Compile.Binary.until_lin<span data-count="94">k</span> link_state ~unsafe ~optimize ~name:None m
+          Compile.Binary.until_lin<span data-count="47">k</span> link_state ~unsafe ~name:None m
         in
-        <span data-count="94">l</span>et+ () =
-          Interpret.Concrete.modu<span data-count="94">l</span> ~timeout:None ~timeout_instr:None
+        <span data-count="47">l</span>et+ () =
+          Interpret.Concrete.modu<span data-count="47">l</span> ~timeout:None ~timeout_instr:None
             link_state.envs m
         in
-        <span data-count="94">l</span>ink_state
-      | <span data-count="94">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
+        <span data-count="47">l</span>ink_state
+      | <span data-count="60">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
-        <span data-count="94">i</span>ncr curr_module;
-        <span data-count="94">l</span>et* m, link_state =
-          Compile.Text.until_lin<span data-count="94">k</span> link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+        <span data-count="60">i</span>ncr curr_module;
+        <span data-count="60">l</span>et* m, link_state =
+          Compile.Text.until_lin<span data-count="60">k</span> link_state ~unsafe ~rac:false ~srac:false
+            ~name:None m
         in
-        <span data-count="94">l</span>et got =
+        <span data-count="60">l</span>et got =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
             link_state.envs m
         in
-        <span data-count="94">l</span>et+ () = check_error_resul<span data-count="94">t</span> expected got in
-        <span data-count="94">l</span>ink_state
-      | <span data-count="1278">A</span>ssert (Assert_malformed_binary (m, expected)) -&gt;
+        <span data-count="60">l</span>et+ () = check_error_resul<span data-count="60">t</span> expected got in
+        <span data-count="60">l</span>ink_state
+      | <span data-count="641">A</span>ssert (Assert_malformed_binary (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_binary");
-        <span data-count="1278">l</span>et got = Parse.Binary.Module.from_string m in
-        <span data-count="1278">l</span>et+ () = check_error_resul<span data-count="1278">t</span> expected got in
-        <span data-count="1276">l</span>ink_state
-      | <span data-count="1573">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
+        <span data-count="641">l</span>et got = Parse.Binary.Module.from_string m in
+        <span data-count="641">l</span>et+ () = check_error_resul<span data-count="641">t</span> expected got in
+        <span data-count="640">l</span>ink_state
+      | <span data-count="789">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
-        <span data-count="1573">l</span>et got = Parse.Text.Script.from_string m in
-        <span data-count="1573">l</span>et+ () =
+        <span data-count="789">l</span>et got = Parse.Text.Script.from_string m in
+        <span data-count="789">l</span>et+ () =
           match got with
-          | <span data-count="1448">E</span>rror got -&gt; check_error ~expected ~got
-          | <span data-count="125">O</span>k [ Text_module m ] -&gt;
+          | <span data-count="725">E</span>rror got -&gt; check_error ~expected ~got
+          | <span data-count="64">O</span>k [ Text_module m ] -&gt;
             let got =
               Compile.Text.until_binary ~unsafe ~rac:false ~srac:false m
             in
-            <span data-count="125">c</span>heck_error_resul<span data-count="125">t</span> expected got
+            <span data-count="64">c</span>heck_error_resul<span data-count="64">t</span> expected got
           | _ -&gt; assert false
         in
-        <span data-count="1573">l</span>ink_state
-      | <span data-count="17">A</span>ssert (Assert_invalid_binary (m, expected)) -&gt;
+        <span data-count="789">l</span>ink_state
+      | <span data-count="11">A</span>ssert (Assert_invalid_binary (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_binary");
-        <span data-count="17">l</span>et got = Parse.Binary.Module.from_string m in
-        <span data-count="17">l</span>et+ () =
+        <span data-count="11">l</span>et got = Parse.Binary.Module.from_string m in
+        <span data-count="11">l</span>et+ () =
           match got with
           | <span data-count="0">E</span>rror got -&gt; check_error ~expected ~got
-          | <span data-count="17">O</span>k m -&gt; begin
+          | <span data-count="11">O</span>k m -&gt; begin
             match Binary_validate.modul m with
-            | <span data-count="17">E</span>rror got -&gt; check_error ~expected ~got
+            | <span data-count="11">E</span>rror got -&gt; check_error ~expected ~got
             | <span data-count="0">O</span>k () -&gt;
               let got = Link.modul link_state ~name:None m in
               <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
           end
         in
-        <span data-count="17">l</span>ink_state
-      | <span data-count="3074">A</span>ssert (Assert_invalid (m, expected)) -&gt;
+        <span data-count="11">l</span>ink_state
+      | <span data-count="1581">A</span>ssert (Assert_invalid (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
-        <span data-count="3074">l</span>et got =
+        <span data-count="1581">l</span>et got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
-        <span data-count="3074">l</span>et+ () = check_error_resul<span data-count="3074">t</span> expected got in
-        <span data-count="3074">l</span>ink_state
+        <span data-count="1581">l</span>et+ () = check_error_resul<span data-count="1581">t</span> expected got in
+        <span data-count="1581">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_quote");
         <span data-count="0">l</span>et got = Parse.Text.Module.from_string m in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">l</span>ink_state
-      | <span data-count="166">A</span>ssert (Assert_unlinkable (m, expected)) -&gt;
+      | <span data-count="83">A</span>ssert (Assert_unlinkable (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_unlinkable");
-        <span data-count="166">l</span>et got =
+        <span data-count="83">l</span>et got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~optimize ~name:None m
+            ~name:None m
         in
-        <span data-count="166">l</span>et+ () = check_error_resul<span data-count="166">t</span> expected got in
-        <span data-count="166">l</span>ink_state
+        <span data-count="83">l</span>et+ () = check_error_resul<span data-count="83">t</span> expected got in
+        <span data-count="83">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_malformed (m, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed");
         <span data-count="0">l</span>et got =
-          Compile.Text.until_link ~unsafe ~optimize ~rac:false ~srac:false
-            ~name:None link_state m
+          Compile.Text.until_link ~unsafe ~rac:false ~srac:false ~name:None
+            link_state m
         in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">a</span>ssert false
-      | <span data-count="43626">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="21903">A</span>ssert (Assert_return (a, res)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
-        <span data-count="43626">l</span>et* stack = actio<span data-count="43626">n</span> link_state a in
-        <span data-count="43626">l</span>et stack = List.rev stack in
-        <span data-count="43626">i</span>f
-          List.compare_length<span data-count="43626">s</span> res stack &lt;&gt; <span data-count="0">0</span>
-          || not (List.for_all<span data-count="43626">2</span> compare_result_const res stack<span data-count="0">)</span>
+        <span data-count="21903">l</span>et* stack = actio<span data-count="21903">n</span> link_state a in
+        <span data-count="21903">l</span>et stack = List.rev stack in
+        <span data-count="21903">i</span>f
+          List.compare_length<span data-count="21903">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+          || not (List.for_all<span data-count="21903">2</span> compare_result_const res stack<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Logs.err (fun m -&gt;
             <span data-count="0">m</span> "got:      %a@.expected: %a" Stack.pp stack Text.pp_results res );
           <span data-count="0">E</span>rror `Bad_result
         end
-        else <span data-count="43626">O</span>k link_state
-      | <span data-count="4744">A</span>ssert (Assert_trap (a, expected)) -&gt;
+        else <span data-count="21903">O</span>k link_state
+      | <span data-count="2383">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
-        <span data-count="4744">l</span>et got = action link_state a in
-        <span data-count="4744">l</span>et+ () = check_error_resul<span data-count="4744">t</span> expected got in
-        <span data-count="4744">l</span>ink_state
-      | <span data-count="30">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
+        <span data-count="2383">l</span>et got = action link_state a in
+        <span data-count="2383">l</span>et+ () = check_error_resul<span data-count="2383">t</span> expected got in
+        <span data-count="2383">l</span>ink_state
+      | <span data-count="15">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_exhaustion");
-        <span data-count="30">l</span>et+ () =
-          if no_exhaustion then <span data-count="30">O</span>k ()
+        <span data-count="15">l</span>et+ () =
+          if no_exhaustion then <span data-count="15">O</span>k ()
           else
             <span data-count="0">l</span>et got = action link_state a in
             <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
         in
-        <span data-count="30">l</span>ink_state
-      | <span data-count="269">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="222">n</span>ot !registered then (* TODO: disable debug *) <span data-count="222">(</span>);
-        <span data-count="269">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** register");
-        <span data-count="269">l</span>et+ state = Link.register_modul<span data-count="269">e</span> link_state ~name ~id:mod_name in
+        <span data-count="15">l</span>ink_state
+      | <span data-count="157">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="129">n</span>ot !registered then (* TODO: disable debug *) <span data-count="129">(</span>);
+        <span data-count="157">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** register");
+        <span data-count="157">l</span>et+ state = Link.register_modul<span data-count="157">e</span> link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
-        <span data-count="269">s</span>tate
-      | <span data-count="312">A</span>ction a -&gt;
+        <span data-count="157">s</span>tate
+      | <span data-count="157">A</span>ction a -&gt;
         Logs.info (fun m -&gt; <span data-count="0">m</span> "*** action");
-        <span data-count="312">l</span>et+ _stack = actio<span data-count="312">n</span> link_state a in
-        <span data-count="312">l</span>ink_state )
+        <span data-count="157">l</span>et+ _stack = actio<span data-count="157">n</span> link_state a in
+        <span data-count="157">l</span>ink_state )
     state script
 
-let exec ~no_exhaustion ~optimize script =
-  <span data-count="222">l</span>et+ _link_state = ru<span data-count="222">n</span> ~no_exhaustion ~optimize script in
-  <span data-count="220">(</span>)
+let exec ~no_exhaustion script =
+  <span data-count="129">l</span>et+ _link_state = ru<span data-count="129">n</span> ~no_exhaustion script in
+  <span data-count="128">(</span>)
 </code></pre>
       </div>
     </div>

@@ -28,6 +28,7 @@
         <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/tabs.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -185,7 +186,7 @@ mdx_gen.bc.exe: [INFO] parsing      ...
 ...
    annots = []}
 # let module_to_run, link_state =
-    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~optimize:false ~name:None m with
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -256,6 +257,7 @@ mdx_gen.bc.exe: [INFO] running instr : drop
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../theme/tabs.js"></script>
 
 
     </div>

@@ -28,6 +28,7 @@
         <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/tabs.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -249,7 +250,7 @@ let pure_wasm_module =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module
+      ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -356,7 +357,7 @@ let pure_wasm_module =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module
+      ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -386,7 +387,7 @@ based on the famous cellular automaton by Conway. It show how to link several mo
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../ocaml-api/game-of-life/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../ocaml-api/odoc.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -400,7 +401,7 @@ based on the famous cellular automaton by Conway. It show how to link several mo
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../ocaml-api/game-of-life/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../ocaml-api/odoc.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -424,6 +425,7 @@ based on the famous cellular automaton by Conway. It show how to link several mo
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../theme/tabs.js"></script>
 
 
     </div>

@@ -17,7 +17,6 @@ Owi.Binary_validate
 Owi.Cmd_c
 Owi.Cmd_conc
 Owi.Cmd_fmt
-Owi.Cmd_opt
 Owi.Cmd_run
 Owi.Cmd_script
 Owi.Cmd_sym
@@ -26,7 +25,6 @@ Owi.Cmd_wasm2wat
 Owi.Compile
 Owi.Interpret
 Owi.Link
-Owi.Optimize
 Owi.Parse
 Owi.Result
 Owi.Script

@@ -612,7 +612,7 @@ module type P = sig
 
     val env : t -&gt; Env.t
 
-    val to_run : t -&gt; binary expr list
+    val to_run : t -&gt; binary expr Annotated.t list
 
     val id : t -&gt; string option
   end

@@ -28,6 +28,7 @@
         <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/tabs.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -174,6 +175,9 @@ SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
+       analyze COMMAND …
+           Analyze a program in different possible ways
+
        c [OPTION]… FILE…
            Compile a C file to Wasm and run the symbolic interpreter on it
 
@@ -193,9 +197,6 @@ COMMANDS
        iso [OPTION]… FILE…
            Check the iso-functionnality of two Wasm modules by comparing the
            output when calling their exports.
-
-       opt [OPTION]… FILE
-           Optimize a module
 
        replay [OPTION]… FILE
            Replay a module containing symbols with concrete values in a
@@ -267,7 +268,7 @@ BUGS
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../manpages/owi-c.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../manpages/owi-analyze.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -281,7 +282,7 @@ BUGS
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../manpages/owi-c.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../manpages/owi-analyze.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -305,6 +306,7 @@ BUGS
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../theme/tabs.js"></script>
 
 
     </div>

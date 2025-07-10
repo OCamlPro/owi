@@ -238,7 +238,7 @@ type env =
   }
 
 let empty_env () =
-  <span data-count="6916">{</span> start = false
+  <span data-count="3709">{</span> start = false
   ; memory = false
   ; imported_memory = false
   ; funcs = false
@@ -247,77 +247,77 @@ let empty_env () =
   }
 
 let modul m =
-  <span data-count="6916">L</span>ogs.info (fun m -&gt; <span data-count="21">m</span> "checking     ...");
-  <span data-count="6916">l</span>et add_global =
+  <span data-count="3709">L</span>ogs.info (fun m -&gt; <span data-count="20">m</span> "checking     ...");
+  <span data-count="3709">l</span>et add_global =
     let seen = Hashtbl.create 512 in
-    <span data-count="6916">f</span>unction
-    | <span data-count="359">N</span>one -&gt; Ok ()
-    | <span data-count="1087">S</span>ome id -&gt;
-      if Hashtbl.mem seen id then <span data-count="9">E</span>rror (`Duplicate_global id)
-      else <span data-count="1078">O</span>k (Hashtbl.replac<span data-count="1078">e</span> seen id ())
+    <span data-count="3709">f</span>unction
+    | <span data-count="213">N</span>one -&gt; Ok ()
+    | <span data-count="643">S</span>ome id -&gt;
+      if Hashtbl.mem seen id then <span data-count="6">E</span>rror (`Duplicate_global id)
+      else <span data-count="637">O</span>k (Hashtbl.replac<span data-count="637">e</span> seen id ())
   in
   let add_table =
     let seen = Hashtbl.create 512 in
-    <span data-count="6916">f</span>unction
-    | <span data-count="727">N</span>one -&gt; Ok ()
-    | <span data-count="672">S</span>ome id -&gt;
-      if Hashtbl.mem seen id then <span data-count="6">E</span>rror (`Duplicate_table id)
-      else <span data-count="666">O</span>k (Hashtbl.replac<span data-count="666">e</span> seen id ())
+    <span data-count="3709">f</span>unction
+    | <span data-count="400">N</span>one -&gt; Ok ()
+    | <span data-count="366">S</span>ome id -&gt;
+      if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_table id)
+      else <span data-count="363">O</span>k (Hashtbl.replac<span data-count="363">e</span> seen id ())
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
-    <span data-count="6916">f</span>unction
-    | <span data-count="1384">N</span>one -&gt; Ok ()
-    | <span data-count="256">S</span>ome id -&gt;
-      if Hashtbl.mem seen id then <span data-count="6">E</span>rror (`Duplicate_memory id)
-      else <span data-count="250">O</span>k (Hashtbl.ad<span data-count="250">d</span> seen id ())
+    <span data-count="3709">f</span>unction
+    | <span data-count="729">N</span>one -&gt; Ok ()
+    | <span data-count="150">S</span>ome id -&gt;
+      if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_memory id)
+      else <span data-count="147">O</span>k (Hashtbl.ad<span data-count="147">d</span> seen id ())
   in
 
   let+ (_env : env) =
-    list_fold_lef<span data-count="6916">t</span>
+    list_fold_lef<span data-count="3709">t</span>
       (fun env field -&gt;
-        <span data-count="37415">m</span>atch field with
-        | <span data-count="12454">M</span>Export _e -&gt; Ok env
-        | <span data-count="13770">M</span>Func _f -&gt; Ok { env with funcs = true }
-        | <span data-count="312">M</span>Start _start -&gt;
-          if env.start then <span data-count="2">E</span>rror `Multiple_start_sections
-          else <span data-count="310">O</span>k { env with start = true }
-        | <span data-count="3690">M</span>Import i -&gt;
-          if env.funcs then <span data-count="8">E</span>rror `Import_after_function
-          else <span data-count="3682">i</span>f env.memory then <span data-count="8">E</span>rror `Import_after_memory
-          else <span data-count="3674">i</span>f env.tables then <span data-count="8">E</span>rror `Import_after_table
-          else <span data-count="3666">i</span>f env.globals then <span data-count="8">E</span>rror `Import_after_global
-          else <span data-count="3658">b</span>egin
+        <span data-count="20233">m</span>atch field with
+        | <span data-count="6623">M</span>Export _e -&gt; Ok env
+        | <span data-count="7148">M</span>Func _f -&gt; Ok { env with funcs = true }
+        | <span data-count="260">M</span>Start _start -&gt;
+          if env.start then <span data-count="1">E</span>rror `Multiple_start_sections
+          else <span data-count="259">O</span>k { env with start = true }
+        | <span data-count="2229">M</span>Import i -&gt;
+          if env.funcs then <span data-count="4">E</span>rror `Import_after_function
+          else <span data-count="2225">i</span>f env.memory then <span data-count="4">E</span>rror `Import_after_memory
+          else <span data-count="2221">i</span>f env.tables then <span data-count="4">E</span>rror `Import_after_table
+          else <span data-count="2217">i</span>f env.globals then <span data-count="4">E</span>rror `Import_after_global
+          else <span data-count="2213">b</span>egin
             match i.desc with
-            | <span data-count="140">I</span>mport_mem (id, _) -&gt;
-              let* () = add_memor<span data-count="140">y</span> id in
-              <span data-count="138">i</span>f env.imported_memory then <span data-count="2">E</span>rror `Multiple_memories
-              else <span data-count="136">O</span>k { env with imported_memory = true }
-            | <span data-count="3155">I</span>mport_func _ -&gt; Ok env
-            | <span data-count="206">I</span>mport_global (id, _) -&gt;
-              let+ () = add_globa<span data-count="206">l</span> id in
-              <span data-count="203">e</span>nv
-            | <span data-count="157">I</span>mport_table (id, _) -&gt;
-              let+ () = add_tabl<span data-count="157">e</span> id in
-              <span data-count="155">e</span>nv
+            | <span data-count="78">I</span>mport_mem (id, _) -&gt;
+              let* () = add_memor<span data-count="78">y</span> id in
+              <span data-count="77">i</span>f env.imported_memory then <span data-count="1">E</span>rror `Multiple_memories
+              else <span data-count="76">O</span>k { env with imported_memory = true }
+            | <span data-count="1922">I</span>mport_func _ -&gt; Ok env
+            | <span data-count="126">I</span>mport_global (id, _) -&gt;
+              let+ () = add_globa<span data-count="126">l</span> id in
+              <span data-count="124">e</span>nv
+            | <span data-count="87">I</span>mport_table (id, _) -&gt;
+              let+ () = add_tabl<span data-count="87">e</span> id in
+              <span data-count="86">e</span>nv
           end
-        | <span data-count="948">M</span>Data _d -&gt; Ok env
-        | <span data-count="1667">M</span>Elem _e -&gt; Ok env
-        | <span data-count="1500">M</span>Mem (id, _) -&gt;
-          let* () = add_memor<span data-count="1500">y</span> id in
-          <span data-count="1496">i</span>f env.memor<span data-count="4">y</span> || env.imported_memor<span data-count="4">y</span> then <span data-count="8">E</span>rror `Multiple_memories
-          else <span data-count="1488">O</span>k { env with memory = true }
-        | <span data-count="592">M</span>Type _t -&gt; Ok env
-        | <span data-count="1240">M</span>Global { id; _ } -&gt;
-          let+ () = add_globa<span data-count="1240">l</span> id in
-          <span data-count="1234">{</span> env with globals = true }
-        | <span data-count="1242">M</span>Table (id, _) -&gt;
-          let+ () = add_tabl<span data-count="1242">e</span> id in
-          <span data-count="1238">{</span> env with tables = true } )
-      (empty_en<span data-count="6916">v</span> ()) m.fields
+        | <span data-count="524">M</span>Data _d -&gt; Ok env
+        | <span data-count="919">M</span>Elem _e -&gt; Ok env
+        | <span data-count="801">M</span>Mem (id, _) -&gt;
+          let* () = add_memor<span data-count="801">y</span> id in
+          <span data-count="799">i</span>f env.memor<span data-count="2">y</span> || env.imported_memor<span data-count="2">y</span> then <span data-count="4">E</span>rror `Multiple_memories
+          else <span data-count="795">O</span>k { env with memory = true }
+        | <span data-count="320">M</span>Type _t -&gt; Ok env
+        | <span data-count="730">M</span>Global { id; _ } -&gt;
+          let+ () = add_globa<span data-count="730">l</span> id in
+          <span data-count="726">{</span> env with globals = true }
+        | <span data-count="679">M</span>Table (id, _) -&gt;
+          let+ () = add_tabl<span data-count="679">e</span> id in
+          <span data-count="677">{</span> env with tables = true } )
+      (empty_en<span data-count="3709">v</span> ()) m.fields
   in
 
-  <span data-count="6851">m</span>
+  <span data-count="3675">m</span>
 </code></pre>
       </div>
     </div>

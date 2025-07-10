@@ -1224,7 +1224,7 @@ let token_to_string = function
   | <span data-count="0">S</span>TRUCT -&gt; "struct"
   | <span data-count="0">S</span>TART -&gt; "start"
   | <span data-count="0">S</span>ELECT -&gt; "select"
-  | <span data-count="23">R</span>PAR -&gt; ")"
+  | <span data-count="15">R</span>PAR -&gt; ")"
   | <span data-count="0">R</span>ETURN_CALL_REF -&gt; "return_call_ref"
   | <span data-count="0">R</span>ETURN_CALL_INDIRECT -&gt; "return_call_indirect"
   | <span data-count="0">R</span>ETURN_CALL -&gt; "return_call"
@@ -1387,7 +1387,7 @@ let token_to_string = function
   | <span data-count="0">I</span>32_AND -&gt; "i32;and"
   | <span data-count="0">I</span>32_ADD -&gt; "i32.add"
   | <span data-count="0">I</span>32X4 -&gt; "i32x4"
-  | <span data-count="74">I</span>32 -&gt; "i32"
+  | <span data-count="37">I</span>32 -&gt; "i32"
   | <span data-count="0">I</span>31_REF -&gt; "i31.ref"
   | <span data-count="0">I</span>31_GET_U -&gt; "i31.get_u"
   | <span data-count="0">I</span>31_GET_S -&gt; "i31.get_s"
@@ -1479,7 +1479,7 @@ let token_to_string = function
   | <span data-count="0">E</span>LSE -&gt; "else"
   | <span data-count="0">E</span>LEM_DROP -&gt; "elem.drop"
   | <span data-count="0">E</span>LEM -&gt; "elem"
-  | <span data-count="10">D</span>ROP -&gt; "drop"
+  | <span data-count="5">D</span>ROP -&gt; "drop"
   | <span data-count="0">D</span>ECLARE -&gt; "declare"
   | <span data-count="0">D</span>ATA_DROP -&gt; "data.drop"
   | <span data-count="0">D</span>ATA -&gt; "data"
@@ -1515,9 +1515,9 @@ let token_to_string = function
   | <span data-count="0">A</span>NY_REF -&gt; "anyref"
   | <span data-count="0">A</span>NY -&gt; "any"
   | <span data-count="0">A</span>LIGN -&gt; "align"
-  | <span data-count="4">N</span>UM s -&gt; Fmt.str "%s" s
+  | <span data-count="2">N</span>UM s -&gt; Fmt.str "%s" s
   | <span data-count="0">N</span>AME s -&gt; Fmt.str {|"%s"|} s
-  | <span data-count="37">I</span>D s -&gt; Fmt.str "$%s" s
+  | <span data-count="19">I</span>D s -&gt; Fmt.str "$%s" s
 
 module Make (M : sig
   type t
@@ -1527,15 +1527,15 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="3057">f</span>un buf -&gt;
-      <span data-count="2106">L</span>ogs.info (fun m -&gt; <span data-count="21">m</span> "parsing      ...");
-      <span data-count="2106">l</span>et provider () =
-        <span data-count="1412370">l</span>et tok = Text_lexer.token buf in
-        <span data-count="1411670">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1411670">(</span>tok, start, stop)
+    <span data-count="2622">f</span>un buf -&gt;
+      <span data-count="1193">L</span>ogs.info (fun m -&gt; <span data-count="20">m</span> "parsing      ...");
+      <span data-count="1193">l</span>et provider () =
+        <span data-count="728269">l</span>et tok = Text_lexer.token buf in
+        <span data-count="727918">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="727918">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="644">r</span> provider) with
-      | <span data-count="610">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)
+      try Ok (parse<span data-count="455">r</span> provider) with
+      | <span data-count="305">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="0">T</span>ext_lexer.Empty_annotation_id -&gt; Error `Empty_annotation_id
       | <span data-count="0">T</span>ext_lexer.Empty_identifier -&gt; Error `Empty_identifier
       | <span data-count="2">T</span>ext_lexer.Illegal_escape msg -&gt; Error (`Illegal_escape msg)
@@ -1543,25 +1543,25 @@ struct
       | <span data-count="0">T</span>ext_lexer.Unclosed_annotation -&gt; Error `Unclosed_annotation
       | <span data-count="0">T</span>ext_lexer.Unclosed_comment -&gt; Error `Unclosed_comment
       | <span data-count="0">T</span>ext_lexer.Unclosed_string -&gt; Error `Unclosed_string
-      | <span data-count="698">T</span>ext_lexer.Unknown_operator msg -&gt; Error (`Lexer_unknown_operator msg)
-      | <span data-count="152">T</span>ext_parser.Error -&gt;
-        let tok = Text_lexer.token buf |&gt; <span data-count="152">t</span>oken_to_string in
-        <span data-count="152">E</span>rror (`Unexpected_token tok)
+      | <span data-count="349">T</span>ext_lexer.Unknown_operator msg -&gt; Error (`Lexer_unknown_operator msg)
+      | <span data-count="82">T</span>ext_parser.Error -&gt;
+        let tok = Text_lexer.token buf |&gt; <span data-count="82">t</span>oken_to_string in
+        <span data-count="82">E</span>rror (`Unexpected_token tok)
       | <span data-count="0">S</span>edlexing.MalFormed -&gt; Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
-    <span data-count="529">l</span>et open Syntax in
+    <span data-count="401">l</span>et open Syntax in
     let* res =
-      Bos.OS.File.with_i<span data-count="529">c</span> filename
+      Bos.OS.File.with_i<span data-count="401">c</span> filename
         (fun chan () -&gt;
-          <span data-count="529">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="529">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="529">g</span> filename);
-          <span data-count="529">f</span>rom_lexbuf lb )
+          <span data-count="401">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="401">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="401">g</span> filename);
+          <span data-count="401">f</span>rom_lexbuf lb )
         ()
     in
-    <span data-count="529">r</span>es
+    <span data-count="401">r</span>es
 
-  let from_string s = <span data-count="1577">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="1577">g</span> s)
+  let from_string s = <span data-count="792">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="792">g</span> s)
 
   let from_channel c = <span data-count="0">f</span>rom_lexbuf (Sedlexing.Utf8.from_channe<span data-count="0">l</span> c)
 end
@@ -1591,16 +1591,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="652">m</span>atch Fpath.get_ext ~multi:false file with
-  | <span data-count="262">"</span>.wat" -&gt;
-    let+ m = Text.Module.from_fil<span data-count="262">e</span> file in
-    <span data-count="261">K</span>ind.Wat m
+  <span data-count="611">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="229">"</span>.wat" -&gt;
+    let+ m = Text.Module.from_fil<span data-count="229">e</span> file in
+    <span data-count="228">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="390">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="390">e</span> file in
-    <span data-count="390">K</span>ind.Wasm m
+  | <span data-count="382">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="382">e</span> file in
+    <span data-count="382">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>

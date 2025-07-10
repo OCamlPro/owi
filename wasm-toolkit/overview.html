@@ -28,6 +28,7 @@
         <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/tabs.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -309,363 +310,6 @@ owi: [INFO] running instr : drop
 <pre><code class="language-sh">$ owi script ./print.wast
 42
 </code></pre>
-<h2 id="optimizer"><a class="header" href="#optimizer">Optimizer</a></h2>
-<p>Given the useless program <code>useless.wat</code>:</p>
-<details>
-<!-- $MDX file=useless.wat -->
-<pre><code class="language-wat">(module
-  (func $i32binop
-    i32.const 21
-    i32.const 21
-    i32.add
-    i32.const 0
-    drop
-    drop
-
-    i32.const 63
-    i32.const 21
-    i32.sub
-    i32.const 0
-    drop
-    drop
-
-    i32.const 21
-    i32.const 2
-    i32.mul
-    i32.const 0
-    drop
-    drop
-
-    i32.const 84
-    i32.const 2
-    i32.div_s
-    i32.const 0
-    drop
-    drop
-
-    i32.const 84
-    i32.const 2
-    i32.div_u
-    i32.const 0
-    drop
-    drop
-
-    i32.const -42
-    i32.const 4
-    i32.rem_s     ;; 4*10 + 2 &gt; =-2
-    i32.const 0
-    drop
-    drop
-
-    i32.const -42
-    i32.const 4
-    i32.rem_u     ;; 4*10 + 2 &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.and          ;; bitwise ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.or           ;; bitwise ope &gt; =3
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.xor          ;; bitwise ope &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.shl          ;; shift left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.shr_u        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.shr_s        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.rotl         ;; rotation left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.rotr         ;; rotation left ope &gt; =1
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $i64binop
-    i64.const 21
-    i64.const 21
-    i64.add
-    i32.const 0
-    drop
-    drop
-
-    i64.const 63
-    i64.const 21
-    i64.sub
-    i32.const 0
-    drop
-    drop
-
-    i64.const 21
-    i64.const 2
-    i64.mul
-    i32.const 0
-    drop
-    drop
-
-    i64.const 84
-    i64.const 2
-    i64.div_s
-    i32.const 0
-    drop
-    drop
-
-    i64.const 84
-    i64.const 2
-    i64.div_u
-    i32.const 0
-    drop
-    drop
-
-    i64.const -42
-    i64.const 4
-    i64.rem_s     ;; 4*10 + 2 &gt; =-2
-    i32.const 0
-    drop
-    drop
-
-    i64.const -42
-    i64.const 4
-    i64.rem_u     ;; 4*10 + 2 &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.and          ;; bitwise ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.or           ;; bitwise ope &gt; =3
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.xor          ;; bitwise ope &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.shl          ;; shift left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.shr_u        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.shr_s        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.rotl         ;; rotation left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.rotr         ;; rotation left ope &gt; =1
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $f32binop
-    f32.const 21
-    f32.const 21
-    f32.add
-    i32.const 0
-    drop
-    drop
-
-    f32.const 63
-    f32.const 21
-    f32.sub
-    i32.const 0
-    drop
-    drop
-
-    f32.const 21
-    f32.const 2
-    f32.mul
-    i32.const 0
-    drop
-    drop
-
-    f32.const 84
-    f32.const 2
-    f32.div
-    i32.const 0
-    drop
-    drop
-
-    f32.const 42
-    f32.const 21
-    f32.max
-    i32.const 0
-    drop
-    drop
-
-    f32.const 42
-    f32.const 84
-    f32.min
-    i32.const 0
-    drop
-    drop
-
-    f32.const -42
-    f32.const 21
-    f32.copysign
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $f64binop
-    f64.const 21
-    f64.const 21
-    f64.add
-    i32.const 0
-    drop
-    drop
-
-    f64.const 63
-    f64.const 21
-    f64.sub
-    i32.const 0
-    drop
-    drop
-
-    f64.const 21
-    f64.const 2
-    f64.mul
-    i32.const 0
-    drop
-    drop
-
-    f64.const 84
-    f64.const 2
-    f64.div
-    i32.const 0
-    drop
-    drop
-
-    f64.const 42
-    f64.const 21
-    f64.max
-    i32.const 0
-    drop
-    drop
-
-    f64.const 42
-    f64.const 84
-    f64.min
-    i32.const 0
-    drop
-    drop
-
-    f64.const -42
-    f64.const 21
-    f64.copysign
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $start
-    call $i32binop
-    call $i64binop
-    call $f32binop
-    call $f64binop
-  )
-
-  (start $start)
-)
-</code></pre>
-</details>
-<p>Owi is able to get rid of most of the code:</p>
-<pre><code class="language-sh">$ owi opt useless.wat
-(module
-  (type (func))
-  (func $i32binop
-
-  )
-  (func $i64binop
-
-  )
-  (func $f32binop
-
-  )
-  (func $f64binop
-
-  )
-  (func $start
-    call 0
-    call 1
-    call 2
-    call 3
-  )
-  (start 4)
-)
-</code></pre>
 <h2 id="validator"><a class="header" href="#validator">Validator</a></h2>
 <p>Given a file <code>type_error.wat</code> with the following content:</p>
 <!-- $MDX file=type_error.wat -->
@@ -744,6 +388,65 @@ owi: [INFO] running instr : i32.add
 owi: [INFO] stack         : [ i32.const 42 ]
 owi: [INFO] running instr : drop
 </code></pre>
+<h2 id="call-graph"><a class="header" href="#call-graph">Call Graph</a></h2>
+<p>Given a file <code>useless.wat</code> with the following content:</p>
+<pre><code class="language-wat">(module
+
+  (func $start
+    i32.const 0
+    (if
+    (then call $a)
+    (else call $b)
+    )
+  )
+
+  (func $a 
+  (block
+  call $b)
+  call $c)
+
+  (func $b)
+
+  (func $c)
+
+  (start $start))
+</code></pre>
+<p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
+<pre><code class="language-sh">$ owi analyze cg useless.wat
+</code></pre>
+<p><img src="call_graph.svg" alt="image" /></p>
+<h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
+<p>Given a file <code>useless.wat</code> with the following content:</p>
+<pre><code class="language-wat">(module
+    (func $foo (param i32) (result i32)
+       (local i32)
+       (block
+           (block
+               (block
+                   local.get 0
+                   i32.eqz
+                   br_if 0
+
+                   local.get 0
+                   i32.const 1
+                   i32.eq
+                   br_if 1
+
+                   i32.const 7
+                   local.set 1
+                   br 2)
+             i32.const 42
+             local.set 1
+             br 1)
+         i32.const 99
+         local.set 1)
+       local.get 1)
+)
+</code></pre>
+<p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
+<pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
+</code></pre>
+<p><img src="control-flow_graph.svg" alt="image" /></p>
 
                     </main>
 
@@ -791,6 +494,7 @@ owi: [INFO] running instr : drop
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../theme/tabs.js"></script>
 
 
     </div>

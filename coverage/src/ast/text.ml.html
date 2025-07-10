@@ -459,27 +459,27 @@
 open Fmt
 open Types
 
-let symbolic v = <span data-count="15692">T</span>ext v
+let symbolic v = <span data-count="9134">T</span>ext v
 
-let raw v = <span data-count="61679">R</span>aw v
+let raw v = <span data-count="31417">R</span>aw v
 
-let bt_ind i = <span data-count="15231">B</span>t_ind i
+let bt_ind i = <span data-count="7989">B</span>t_ind i
 
-let bt_raw i t = <span data-count="17154">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="9043">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
-  ; init : text expr
+  ; init : text expr Annotated.t
   ; id : string option
   }
 
 let pp_global fmt (g : global) =
-  <span data-count="8">p</span>f fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ
+  <span data-count="6">p</span>f fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ
     (pp_expr ~short:false) g.init
 
 type data_mode =
   | Data_passive
-  | Data_active of text indice option * text expr
+  | Data_active of text indice option * text expr Annotated.t
 
 let pp_data_mode fmt = function
   | <span data-count="0">D</span>ata_passive -&gt; ()
@@ -497,31 +497,31 @@ let pp_data fmt (d : data) =
 
 type elem_mode =
   | Elem_passive
-  | Elem_active of text indice option * text expr
+  | Elem_active of text indice option * text expr Annotated.t
   | Elem_declarative
 
 let pp_elem_mode fmt = function
   | <span data-count="0">E</span>lem_passive -&gt; ()
   | <span data-count="0">E</span>lem_declarative -&gt; pf fmt "declare"
-  | <span data-count="5">E</span>lem_active (i, e) -&gt; (
+  | <span data-count="4">E</span>lem_active (i, e) -&gt; (
     match i with
     | <span data-count="3">N</span>one -&gt; pf fmt "(offset %a)" (pp_expr ~short:false) e
-    | <span data-count="2">S</span>ome i -&gt;
+    | <span data-count="1">S</span>ome i -&gt;
       pf fmt "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
 
 type elem =
   { id : string option
   ; typ : text ref_type
-  ; init : text expr list
+  ; init : text expr Annotated.t list
   ; mode : elem_mode
   }
 
-let pp_elem_expr fmt e = <span data-count="5">p</span>f fmt "(item %a)" (pp_expr ~short:false) e
+let pp_elem_expr fmt e = <span data-count="4">p</span>f fmt "(item %a)" (pp_expr ~short:false) e
 
 let pp_elem fmt (e : elem) =
-  <span data-count="5">p</span>f fmt "@[&lt;hov 2&gt;(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
+  <span data-count="4">p</span>f fmt "@[&lt;hov 2&gt;(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
     pp_ref_type e.typ
-    (lis<span data-count="5">t</span> ~sep:pp_newline pp_elem_expr)
+    (lis<span data-count="4">t</span> ~sep:pp_newline pp_elem_expr)
     e.init
 
 type module_field =
@@ -537,14 +537,14 @@ type module_field =
   | MExport of text export
 
 let pp_module_field fmt = function
-  | <span data-count="104">M</span>Type t -&gt; pp_type_def fmt t
-  | <span data-count="8">M</span>Global g -&gt; pp_global fmt g
-  | <span data-count="6">M</span>Table t -&gt; pp_table fmt t
+  | <span data-count="79">M</span>Type t -&gt; pp_type_def fmt t
+  | <span data-count="6">M</span>Global g -&gt; pp_global fmt g
+  | <span data-count="5">M</span>Table t -&gt; pp_table fmt t
   | <span data-count="13">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="276">M</span>Func f -&gt; pp_func fmt f
-  | <span data-count="5">M</span>Elem e -&gt; pp_elem fmt e
+  | <span data-count="217">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="4">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="1">M</span>Data d -&gt; pp_data fmt d
-  | <span data-count="54">M</span>Start s -&gt; pp_start fmt s
+  | <span data-count="31">M</span>Start s -&gt; pp_start fmt s
   | <span data-count="10">M</span>Import i -&gt; pp_import fmt i
   | <span data-count="33">M</span>Export e -&gt; pp_export fmt e
 
@@ -555,10 +555,10 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="140">p</span>f fmt "%a(module%a@\n  @[&lt;v&gt;%a@]@\n)"
-    (lis<span data-count="140">t</span> ~sep:pp_newline Annot.pp_annot)
+  <span data-count="117">p</span>f fmt "%a(module%a@\n  @[&lt;v&gt;%a@]@\n)"
+    (lis<span data-count="117">t</span> ~sep:pp_newline Annot.pp_annot)
     m.annots pp_id_opt m.id
-    (lis<span data-count="140">t</span> ~sep:pp_newline pp_module_field)
+    (lis<span data-count="117">t</span> ~sep:pp_newline pp_module_field)
     m.fields
 
 type action =

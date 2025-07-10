@@ -87,25 +87,25 @@
 open Syntax
 
 let get_printer filename =
-  <span data-count="8">l</span>et ext = Fpath.get_ext filename in
-  <span data-count="8">m</span>atch ext with
-  | <span data-count="7">"</span>.wat" -&gt;
-    let+ v = Parse.Text.Module.from_fil<span data-count="7">e</span> filename in
-    <span data-count="7">f</span>un fmt () -&gt; <span data-count="7">T</span>ext.pp_modul fmt v
+  <span data-count="7">l</span>et ext = Fpath.get_ext filename in
+  <span data-count="7">m</span>atch ext with
+  | <span data-count="6">"</span>.wat" -&gt;
+    let+ v = Parse.Text.Module.from_fil<span data-count="6">e</span> filename in
+    <span data-count="6">f</span>un fmt () -&gt; <span data-count="6">T</span>ext.pp_modul fmt v
   | <span data-count="1">"</span>.wast" -&gt;
     let+ v = Parse.Text.Script.from_fil<span data-count="1">e</span> filename in
     <span data-count="1">f</span>un fmt () -&gt; <span data-count="1">T</span>ext.pp_script fmt v
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 
 let cmd_one inplace file =
-  <span data-count="8">l</span>et* pp = get_printe<span data-count="8">r</span> file in
-  <span data-count="8">i</span>f inplace then <span data-count="1">B</span>os.OS.File.writef file "%a@\n" pp ()
-  else <span data-count="7">b</span>egin
-    Logs.app (fun m -&gt; <span data-count="7">m</span> "%a" pp ());
-    <span data-count="7">O</span>k ()
+  <span data-count="7">l</span>et* pp = get_printe<span data-count="7">r</span> file in
+  <span data-count="7">i</span>f inplace then <span data-count="1">B</span>os.OS.File.writef file "%a@\n" pp ()
+  else <span data-count="6">b</span>egin
+    Logs.app (fun m -&gt; <span data-count="6">m</span> "%a" pp ());
+    <span data-count="6">O</span>k ()
   end
 
-let cmd ~inplace ~files = <span data-count="8">l</span>ist_iter (cmd_on<span data-count="8">e</span> inplace) files
+let cmd ~inplace ~files = <span data-count="7">l</span>ist_iter (cmd_on<span data-count="7">e</span> inplace) files
 </code></pre>
       </div>
     </div>

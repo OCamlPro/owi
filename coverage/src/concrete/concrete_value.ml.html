@@ -252,23 +252,23 @@ type v128 = V128.t
 
 let pp_v128 = V128.pp
 
-let const_i32 x = <span data-count="15180703">x</span>
+let const_i32 x = <span data-count="5777944">x</span>
 
-let const_i64 x = <span data-count="10232057">x</span>
+let const_i64 x = <span data-count="5146481">x</span>
 
-let const_f32 x = <span data-count="115122">x</span>
+let const_f32 x = <span data-count="57699">x</span>
 
-let const_f64 x = <span data-count="112414">x</span>
+let const_f64 x = <span data-count="56241">x</span>
 
-let const_v128 x = <span data-count="1441">x</span>
+let const_v128 x = <span data-count="1085">x</span>
 
 include V
 
 module Ref = struct
   let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-    <span data-count="1609745">m</span>atch r with
-    | <span data-count="1606209">F</span>uncref (Some f) -&gt; Ref_value f
-    | <span data-count="3536">F</span>uncref None -&gt; Null
+    <span data-count="807128">m</span>atch r with
+    | <span data-count="805357">F</span>uncref (Some f) -&gt; Ref_value f
+    | <span data-count="1771">F</span>uncref None -&gt; Null
     | <span data-count="0">_</span> -&gt; Type_mismatch
 
   let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
@@ -282,7 +282,7 @@ module Ref = struct
 end
 
 module Bool = struct
-  let const c = <span data-count="30">c</span>
+  let const c = <span data-count="15">c</span>
 
   let not = not
 
@@ -290,7 +290,7 @@ module Bool = struct
 
   let or_ = ( || )
 
-  let int32 = function <span data-count="1961807">t</span>rue -&gt; 1l | <span data-count="14179297">f</span>alse -&gt; 0l
+  let int32 = function <span data-count="986800">t</span>rue -&gt; 1l | <span data-count="7094784">f</span>alse -&gt; 0l
 
   let pp = Fmt.bool
 end
@@ -299,7 +299,7 @@ module I32 = struct
   include Int32
   include Convert.Int32
 
-  let to_bool i = <span data-count="16144737">I</span>nt32.ne i 0l
+  let to_bool i = <span data-count="8089545">I</span>nt32.ne i 0l
 
   let eq_const = eq
 end

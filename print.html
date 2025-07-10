@@ -29,6 +29,7 @@
         <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/tabs.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -254,25 +255,274 @@ $ dune install
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="symbolic-execution-101"><a class="header" href="#symbolic-execution-101">Symbolic Execution 101</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="c-quickstart"><a class="header" href="#c-quickstart">C Quickstart</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="c-quickstart-1"><a class="header" href="#c-quickstart-1">C++ Quickstart</a></h1>
+<h2 id="finding-a-simple-crash-in-a-function"><a class="header" href="#finding-a-simple-crash-in-a-function">Finding a simple crash in a function</a></h2>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<p>TODO</p>
+</div>
+</div>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<p>TODO</p>
+</div>
+</div>
+<h2 id="defining-symbols-by-hand"><a class="header" href="#defining-symbols-by-hand">Defining symbols by hand</a></h2>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<p>TODO</p>
+</div>
+</div>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<p>TODO</p>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<p>TODO</p>
+</div>
+</div>
 <h2 id="checking-the-equivalence-of-two-functions"><a class="header" href="#checking-the-equivalence-of-two-functions">Checking the equivalence of two functions</a></h2>
+<p>Here, we have two functions that we expect to be the same but we are not completely sure. This can be the case for instance when refactoring or optimizing a given function. Owi can check that the old one is equivalent to the new one.</p>
+<p>We have the original function, <code>mean_old</code>, that computes the mean of two integers. Then, we define the new function, <code>mean_new</code>, which we expect to do the same. Then, our main function is creating two symbolic integers, <code>n1</code> and <code>n2</code>, and asserts that the two functions always return the same value when given these symbolic integers as input.</p>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<!-- $MDX file=mean.c -->
+<pre><code class="language-c">#include &lt;owi.h&gt;
+
+int mean1(int x, int y) {
+  return (x &amp; y) + ((x ^ y) &gt;&gt; 1);
+}
+
+int mean2(int x, int y) {
+  return (x + y) / 2;
+}
+
+void check(int x, int y) {
+  owi_assert(mean1(x, y) == mean2(x, y));
+}
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
 <!-- $MDX file=mean.cpp -->
 <pre><code class="language-cpp">#include &lt;owi.h&gt;
 
-struct IntPair {
-  int x, y;
-  int mean1() const { return (x &amp; y) + ((x ^ y) &gt;&gt; 1); }
-  int mean2() const { return (x + y) / 2; }
-};
+int mean1(int x, int y) {
+  return (x &amp; y) + ((x ^ y) &gt;&gt; 1);
+}
 
-int main() {
-  IntPair p{owi_int(), owi_int()};
-  owi_assert(p.mean1() == p.mean2());
+int mean2(int x, int y) {
+  return (x + y) / 2;
+}
+
+void check(int x, int y) {
+  owi_assert(mean1(x, y) == mean2(x, y));
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c++ ./mean.cpp --no-assert-failure-expression-printing
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<!-- $MDX file=mean.rs -->
+<pre><code class="language-rs">#![no_main]
+
+fn mean1(x: i32, y: i32) -&gt; i32 {
+    (x &amp; y) + ((x ^ y) &gt;&gt; 1)
+}
+
+fn mean2(x: i32, y: i32) -&gt; i32 {
+    (x + y) / 2
+}
+
+fn check(x : i32, y: i32) {
+  owi_sym::assert(mean1(x, y) == mean2(x, y))
+}
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<!-- $MDX file=mean.zig -->
+<pre><code class="language-zig">extern "owi" fn i32_symbol() i32;
+extern "owi" fn assert(bool) void;
+
+fn mean1(x: i32, y: i32) i32 {
+  return (x &amp; y) + ((x ^ y) &gt;&gt; 1);
+}
+
+fn mean2(x: i32, y: i32) i32 {
+  return @divTrunc(x + y, 2);
+}
+
+export fn check(x: i32, y: i32) void {
+  assert(mean1(x, y) == mean2(x, y));
+}
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<!-- $MDX file=mean.wat -->
+<pre><code class="language-wat">(module
+  (func $mean1 (param $x i32) (param $y i32) (result i32)
+    local.get $x
+    local.get $y
+    i32.and
+
+    local.get $x
+    local.get $y
+    i32.xor
+    i32.const 1
+    i32.shr_s
+
+    i32.add
+  )
+
+  (func $mean2 (param $x i32) (param $y i32) (result i32)
+    local.get $x
+    local.get $y
+    i32.add
+    i32.const 2
+    i32.div_s
+  )
+
+  (func $check  (export "check") (param $x i32) (param $y i32)
+    local.get $x
+    local.get $y
+    call $mean1
+
+    local.get $x
+    local.get $y
+    call $mean2
+
+    i32.ne
+    if
+      unreachable
+    end
+  )
+)
+</code></pre>
+</div>
+</div>
+<p>We can now run Owi on our program to check if they are the same:</p>
+<div class="mdbook-tabs-container" data-tabglobal="lang">
+<nav class="mdbook-tabs">
+<button class="mdbook-tab active" data-tabname="C">C</button>
+<button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Rust">Rust</button>
+<button class="mdbook-tab" data-tabname="Zig">Zig</button>
+<button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
+</nav>
+<div class="mdbook-tab-content" data-tabname="C">
+<pre><code class="language-sh">$ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -990380032
+  symbol symbol_1 i32 -2145908736
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="C++">
+<pre><code class="language-sh">$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
+owi: [ERROR] wasm-ld failed: run with -vv to get the full error message if it was not displayed above
+[26]
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Rust">
+<pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+owi: [ERROR] rustc failed: run with -vv to get the full error message if it was not displayed above
+[26]
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Zig">
+<pre><code class="language-sh">$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -1023139840
+  symbol symbol_1 i32 -1073471487
+}
+
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+</div>
+<div class="mdbook-tab-content hidden" data-tabname="Wasm">
+<pre><code class="language-sh">$ owi sym ./mean.wat --entry-point=check --invoke-with-symbols
+owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 -2147483648
   symbol symbol_1 i32 -2147483646
@@ -280,115 +530,9 @@ model {
 owi: [ERROR] Reached problem!
 [13]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-quickstart"><a class="header" href="#rust-quickstart">Rust Quickstart</a></h1>
-<p>Given the following <code>main.rs</code> file:</p>
-<!-- $MDX file=mean.rs -->
-<pre><code class="language-rs">use owi_sym::Symbolic;
-
-fn mean_wrong(x: i32, y: i32) -&gt; i32 {
-    (x + y) / 2
-}
-
-fn mean_correct(x: i32, y: i32) -&gt; i32 {
-    (x &amp; y) + ((x ^ y) &gt;&gt; 1)
-}
-
-fn main() {
-    let x = i32::symbol();
-    let y = i32::symbol();
-    owi_sym::assert(mean_wrong(x, y) == mean_correct(x, y))
-}
-</code></pre>
-<p>Let's check if the two functions are the same for any input:</p>
-<pre><code class="language-sh">$ owi rust ./mean.rs -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
-owi: [ERROR] Assert failure
-model {
-  symbol symbol_0 i32 -487586839
-  symbol symbol_1 i32 486539486
-}
-
-owi: [ERROR] Reached problem!
-[13]
-</code></pre>
-<p>Indeed, in this case, there will be an integer overflow in one of the two functions and thus they won't give the same result.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="zig-quickstart"><a class="header" href="#zig-quickstart">Zig Quickstart</a></h1>
-<h2 id="fibonacci-example"><a class="header" href="#fibonacci-example">Fibonacci example</a></h2>
-<p>Given the following <code>fib.zig</code> file:</p>
-<!-- $MDX file=fib.zig -->
-<pre><code class="language-zig">// TODO: replace this by a proper include of the owi header?
-extern "owi" fn i32_symbol() i32;
-extern "owi" fn assume(bool) void;
-extern "owi" fn assert(bool) void;
-
-fn fibonacci(n: i32) i32 {
-    if (n &lt; 0) {
-        @panic("expected a positive number");
-    }
-    if (n &lt;= 2) return n;
-    return fibonacci(n - 1) + fibonacci(n - 2);
-}
-
-pub fn main() void {
-    const n: i32 = i32_symbol();
-    assume(n &gt; 0);
-    assume(n &lt; 10);
-    const result = fibonacci(n);
-    assert(result != 21);
-}
-</code></pre>
-<p>Owi can find a crash with:</p>
-<pre><code class="language-sh">$ owi zig ./fib.zig -w1 --no-assert-failure-expression-printing
-owi: [ERROR] Assert failure
-model {
-  symbol symbol_0 i32 7
-}
-owi: [ERROR] Reached problem!
-[13]
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="webassembly-quickstart"><a class="header" href="#webassembly-quickstart">WebAssembly Quickstart</a></h1>
-<h2 id="symbolic-engine"><a class="header" href="#symbolic-engine">Symbolic engine</a></h2>
-<p>The symbolic interpreter provides functions that allows to create <em>symbolic values</em>.
-For instance, here, the <code>$i32_symbol</code> function creates a symbol of type <code>i32</code>.
-This value will represent "any possible value".</p>
-<p>Then, during the execution we collect informations and when an error is reached, we are able to find a concrete value for each symbol such that this value lead to the error.</p>
-<p>For instance, in the following file, we define <code>x</code> as a symbolic variable.
-Then if <code>5 &lt; x</code>, we fail:</p>
-<!-- $MDX file=mini.wat -->
-<pre><code class="language-wat">(module
-
-  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
-
-  (func $start (local $x i32)
-    (local.set $x (call $i32_symbol))
-
-    (if (i32.lt_s (i32.const 5) (local.get $x)) (then
-      unreachable
-    ))
-  )
-
-  (start $start))
-</code></pre>
-<p>Let's see if owi is able to find a value for <code>x</code> that lead to an error:</p>
-<pre><code class="language-sh">$ owi sym ./mini.wat
-owi: [ERROR] Trap: unreachable
-model {
-  symbol symbol_0 i32 6
-}
-owi: [ERROR] Reached problem!
-[13]
-</code></pre>
-<p>Indeed, if <code>x</code> is equal to <code>6</code> then, the <code>unreachable</code> instruction will be reached.</p>
-<h2 id="concolic-engine"><a class="header" href="#concolic-engine">Concolic engine</a></h2>
-<p>The concolic engine works exactly in the same way than the symbolic engine:</p>
-<pre><code class="language-sh">$ owi conc ./mini.wat
-owi: [ERROR] Trap: unreachable
-Model:
- model {
-  symbol symbol_1 i32 6
-}
-owi: [ERROR] Reached problem!
-[13]
-</code></pre>
+</div>
+</div>
+<p>And indeed, in the <code>mean1</code> function, when using these values, there will be an overflow, leading to a wrong result.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bug-finding-testing--pen-testing"><a class="header" href="#bug-finding-testing--pen-testing">Bug-Finding, Testing &amp; Pen-testing</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-bug-finding"><a class="header" href="#examples-of-bug-finding">Examples of Bug Finding</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up"><a class="header" href="#how-to-speed-it-up">How to Speed it Up</a></h1>
@@ -1280,363 +1424,6 @@ owi: [INFO] running instr : drop
 <pre><code class="language-sh">$ owi script ./print.wast
 42
 </code></pre>
-<h2 id="optimizer"><a class="header" href="#optimizer">Optimizer</a></h2>
-<p>Given the useless program <code>useless.wat</code>:</p>
-<details>
-<!-- $MDX file=useless.wat -->
-<pre><code class="language-wat">(module
-  (func $i32binop
-    i32.const 21
-    i32.const 21
-    i32.add
-    i32.const 0
-    drop
-    drop
-
-    i32.const 63
-    i32.const 21
-    i32.sub
-    i32.const 0
-    drop
-    drop
-
-    i32.const 21
-    i32.const 2
-    i32.mul
-    i32.const 0
-    drop
-    drop
-
-    i32.const 84
-    i32.const 2
-    i32.div_s
-    i32.const 0
-    drop
-    drop
-
-    i32.const 84
-    i32.const 2
-    i32.div_u
-    i32.const 0
-    drop
-    drop
-
-    i32.const -42
-    i32.const 4
-    i32.rem_s     ;; 4*10 + 2 &gt; =-2
-    i32.const 0
-    drop
-    drop
-
-    i32.const -42
-    i32.const 4
-    i32.rem_u     ;; 4*10 + 2 &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.and          ;; bitwise ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.or           ;; bitwise ope &gt; =3
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.xor          ;; bitwise ope &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.shl          ;; shift left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.shr_u        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.shr_s        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i32.const 1
-    i32.const 3
-    i32.rotl         ;; rotation left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i32.const 8
-    i32.const 3
-    i32.rotr         ;; rotation left ope &gt; =1
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $i64binop
-    i64.const 21
-    i64.const 21
-    i64.add
-    i32.const 0
-    drop
-    drop
-
-    i64.const 63
-    i64.const 21
-    i64.sub
-    i32.const 0
-    drop
-    drop
-
-    i64.const 21
-    i64.const 2
-    i64.mul
-    i32.const 0
-    drop
-    drop
-
-    i64.const 84
-    i64.const 2
-    i64.div_s
-    i32.const 0
-    drop
-    drop
-
-    i64.const 84
-    i64.const 2
-    i64.div_u
-    i32.const 0
-    drop
-    drop
-
-    i64.const -42
-    i64.const 4
-    i64.rem_s     ;; 4*10 + 2 &gt; =-2
-    i32.const 0
-    drop
-    drop
-
-    i64.const -42
-    i64.const 4
-    i64.rem_u     ;; 4*10 + 2 &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.and          ;; bitwise ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.or           ;; bitwise ope &gt; =3
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.xor          ;; bitwise ope &gt; =2
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.shl          ;; shift left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.shr_u        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.shr_s        ;; shift right ope &gt; =1
-    i32.const 0
-    drop
-    drop
-
-    i64.const 1
-    i64.const 3
-    i64.rotl         ;; rotation left ope &gt; =8
-    i32.const 0
-    drop
-    drop
-
-    i64.const 8
-    i64.const 3
-    i64.rotr         ;; rotation left ope &gt; =1
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $f32binop
-    f32.const 21
-    f32.const 21
-    f32.add
-    i32.const 0
-    drop
-    drop
-
-    f32.const 63
-    f32.const 21
-    f32.sub
-    i32.const 0
-    drop
-    drop
-
-    f32.const 21
-    f32.const 2
-    f32.mul
-    i32.const 0
-    drop
-    drop
-
-    f32.const 84
-    f32.const 2
-    f32.div
-    i32.const 0
-    drop
-    drop
-
-    f32.const 42
-    f32.const 21
-    f32.max
-    i32.const 0
-    drop
-    drop
-
-    f32.const 42
-    f32.const 84
-    f32.min
-    i32.const 0
-    drop
-    drop
-
-    f32.const -42
-    f32.const 21
-    f32.copysign
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $f64binop
-    f64.const 21
-    f64.const 21
-    f64.add
-    i32.const 0
-    drop
-    drop
-
-    f64.const 63
-    f64.const 21
-    f64.sub
-    i32.const 0
-    drop
-    drop
-
-    f64.const 21
-    f64.const 2
-    f64.mul
-    i32.const 0
-    drop
-    drop
-
-    f64.const 84
-    f64.const 2
-    f64.div
-    i32.const 0
-    drop
-    drop
-
-    f64.const 42
-    f64.const 21
-    f64.max
-    i32.const 0
-    drop
-    drop
-
-    f64.const 42
-    f64.const 84
-    f64.min
-    i32.const 0
-    drop
-    drop
-
-    f64.const -42
-    f64.const 21
-    f64.copysign
-    i32.const 0
-    drop
-    drop
-  )
-
-  (func $start
-    call $i32binop
-    call $i64binop
-    call $f32binop
-    call $f64binop
-  )
-
-  (start $start)
-)
-</code></pre>
-</details>
-<p>Owi is able to get rid of most of the code:</p>
-<pre><code class="language-sh">$ owi opt useless.wat
-(module
-  (type (func))
-  (func $i32binop
-
-  )
-  (func $i64binop
-
-  )
-  (func $f32binop
-
-  )
-  (func $f64binop
-
-  )
-  (func $start
-    call 0
-    call 1
-    call 2
-    call 3
-  )
-  (start 4)
-)
-</code></pre>
 <h2 id="validator"><a class="header" href="#validator">Validator</a></h2>
 <p>Given a file <code>type_error.wat</code> with the following content:</p>
 <!-- $MDX file=type_error.wat -->
@@ -1715,6 +1502,65 @@ owi: [INFO] running instr : i32.add
 owi: [INFO] stack         : [ i32.const 42 ]
 owi: [INFO] running instr : drop
 </code></pre>
+<h2 id="call-graph"><a class="header" href="#call-graph">Call Graph</a></h2>
+<p>Given a file <code>useless.wat</code> with the following content:</p>
+<pre><code class="language-wat">(module
+
+  (func $start
+    i32.const 0
+    (if
+    (then call $a)
+    (else call $b)
+    )
+  )
+
+  (func $a 
+  (block
+  call $b)
+  call $c)
+
+  (func $b)
+
+  (func $c)
+
+  (start $start))
+</code></pre>
+<p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
+<pre><code class="language-sh">$ owi analyze cg useless.wat
+</code></pre>
+<p><img src="wasm-toolkit/call_graph.svg" alt="image" /></p>
+<h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
+<p>Given a file <code>useless.wat</code> with the following content:</p>
+<pre><code class="language-wat">(module
+    (func $foo (param i32) (result i32)
+       (local i32)
+       (block
+           (block
+               (block
+                   local.get 0
+                   i32.eqz
+                   br_if 0
+
+                   local.get 0
+                   i32.const 1
+                   i32.eq
+                   br_if 1
+
+                   i32.const 7
+                   local.set 1
+                   br 2)
+             i32.const 42
+             local.set 1
+             br 1)
+         i32.const 99
+         local.set 1)
+       local.get 1)
+)
+</code></pre>
+<p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
+<pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
+</code></pre>
+<p><img src="wasm-toolkit/control-flow_graph.svg" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with Other Tools</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="owi"><a class="header" href="#owi"><code>owi</code></a></h1>
 <pre><code class="language-sh">$ owi --help=plain
@@ -1725,6 +1571,9 @@ SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
+       analyze COMMAND …
+           Analyze a program in different possible ways
+
        c [OPTION]… FILE…
            Compile a C file to Wasm and run the symbolic interpreter on it
 
@@ -1744,9 +1593,6 @@ COMMANDS
        iso [OPTION]… FILE…
            Check the iso-functionnality of two Wasm modules by comparing the
            output when calling their exports.
-
-       opt [OPTION]… FILE
-           Optimize a module
 
        replay [OPTION]… FILE
            Replay a module containing symbols with concrete values in a
@@ -1807,6 +1653,48 @@ EXIT STATUS
 
 BUGS
        Email them to &lt;contact@ndrs.fr&gt;.
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-analyze"><a class="header" href="#owi-analyze"><code>owi analyze</code></a></h1>
+<pre><code class="language-sh">$ owi analyze --help=plain
+NAME
+       owi-analyze - Analyze a program in different possible ways
+
+SYNOPSIS
+       owi analyze COMMAND …
+
+COMMANDS
+       cfg [OPTION]… FILE
+           Build a Control-Flow Graph
+
+       cg [OPTION]… FILE
+           Build a call graph
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi analyze exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+BUGS
+       Email them to &lt;contact@ndrs.fr&gt;.
+
+SEE ALSO
+       owi(1)
 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="owi-c"><a class="header" href="#owi-c"><code>owi c</code></a></h1>
@@ -1882,9 +1770,6 @@ OPTIONS
 
        -O VAL (absent=3)
            specify which optimization level to use
-
-       --optimize
-           optimize mode
 
        --property=FILE
            property file
@@ -2027,9 +1912,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
@@ -2148,9 +2030,6 @@ OPTIONS
 
        --no-value
            do not display a value for each symbol
-
-       --optimize
-           optimize mode
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2455,72 +2334,6 @@ SEE ALSO
        owi(1)
 
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-opt"><a class="header" href="#owi-opt"><code>owi opt</code></a></h1>
-<pre><code class="language-sh">$ owi opt --help=plain
-NAME
-       owi-opt - Optimize a module
-
-SYNOPSIS
-       owi opt [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi opt exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi opt:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="owi-replay"><a class="header" href="#owi-replay"><code>owi replay</code></a></h1>
 <pre><code class="language-sh">$ owi replay --help=plain
 NAME
@@ -2544,9 +2357,6 @@ OPTIONS
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
-
-       --optimize
-           optimize mode
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2613,9 +2423,6 @@ ARGUMENTS
 OPTIONS
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
-
-       --optimize
-           optimize mode
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2742,9 +2549,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
@@ -2829,9 +2633,6 @@ OPTIONS
 
        --no-exhaustion
            no exhaustion tests
-
-       --optimize
-           optimize mode
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2929,9 +2730,6 @@ OPTIONS
 
        --no-value
            do not display a value for each symbol
-
-       --optimize
-           optimize mode
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -3202,9 +3000,6 @@ OPTIONS
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
@@ -3315,9 +3110,6 @@ OPTIONS
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
@@ -3404,7 +3196,7 @@ mdx_gen.bc.exe: [INFO] parsing      ...
 ...
    annots = []}
 # let module_to_run, link_state =
-    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~optimize:false ~name:None m with
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -3512,7 +3304,7 @@ let pure_wasm_module =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module
+      ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -3619,7 +3411,7 @@ let pure_wasm_module =
 let module_to_run, link_state =
   match
     Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~optimize:true ~name:None pure_wasm_module
+      ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -3640,40 +3432,6 @@ let () =
 <h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
 <p>To learn more, see our advanced <a href="ocaml-api/./life_game">Game of Life</a> example
 based on the famous cellular automaton by Conway. It show how to link several modules from different <code>.wat</code> files.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="conways-game-of-life"><a class="header" href="#conways-game-of-life">Conway's Game of Life</a></h1>
-<p>This example is a <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a> implementation.
-3 outputs are proposed (console, <a href="https://github.com/ocaml/graphics">OCaml Graphics</a> and HTML/JavaScript),
-each one using the same WebAssembly modules.</p>
-<h2 id="console-and-ocaml-graphics"><a class="header" href="#console-and-ocaml-graphics">Console and OCaml Graphics</a></h2>
-<p>Console and Graphics implementations use <em>external functions</em> technique as the
-<a href="ocaml-api/game-of-life/../custom-functions.html">standard example</a>. Here are the command lines to run in this directory to execute the programs:</p>
-<ul>
-<li>Console  mode: <code>dune exec -- ./life_graphics.exe</code></li>
-<li>Graphics mode: <code>dune exec -- ./life_console.exe</code></li>
-</ul>
-<p>Several modules (defined in <code>life.wat</code> and <code>life_loop.wat</code> files) are linked.</p>
-<p><strong>Why are two <code>.wat</code> files required ?</strong></p>
-<p>Because, in JavaScript, the <code>Sleep</code> function uses the
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise system</a>
-which cannot work in a wasm call context.
-So, if we want to use the same WebAssembly components in all contexts,
-the game loop had to be extracted in a separate module.</p>
-<p>See the following section for JavaScript implementation details.</p>
-<h2 id="htmljavascript"><a class="header" href="#htmljavascript">HTML/JavaScript</a></h2>
-<p>Here is a standard example of a wasm module called in a web page using the
-<a href="https://webassembly.org/getting-started/js-api/">JavaScript API</a>.</p>
-<p>First of all, a compiled version of the WebAssembly module is needed, obtained by the
-command line <code>wat2wasm life.wat</code>. wat2wasm is part of the
-<a href="https://github.com/WebAssembly/wabt">WABT: The WebAssembly Binary Toolkit</a>.</p>
-<p>As in OCaml in the previous contexts, external functions are defined in the environment execution
-(here in JavaScript). As explained before, only one wasm module is imported (<code>life.wasm</code>) and
-the game loop has been written directly in JavaScript.
-This function (<code>life()</code>) must be <code>async</code> because <code>sleep</code> function is called in <code>await</code> mode.</p>
-<p>To see the final result, simply open <code>life.html</code> in your favorite browser.</p>
-<p>However, the command line <code>dune exec -- ./runweb.exe</code> launches a full build and open it
-directly in your browser. Some additional dependencies are required including
-<a href="https://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> and
-<a href="https://github.com/mirage/ocaml-crunch">ocaml-crunch</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="generated-api-documentation"><a class="header" href="#generated-api-documentation">Generated API Documentation</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="development-setup"><a class="header" href="#development-setup">Development Setup</a></h1>
 <p>To get a proper development setup:</p>
@@ -3726,7 +3484,7 @@ xdg-open _coverage/index.html
 </code></pre>
 <p>Note: it seems landmarks is not compatible with domains and thus won't work with most sub-commands.</p>
 <h2 id="test-comp"><a class="header" href="#test-comp">Test-comp</a></h2>
-<p>See <a href="https://github.com/OCamlPro/owi/tree/main/bench">bench</a>.</p>
+<p>See <a href="https://github.com/OCamlPro/symbocalypse">Symbocalypse</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="history-of-owi"><a class="header" href="#history-of-owi">History of Owi</a></h1>
 <h3 id="spelling-and-pronunciation"><a class="header" href="#spelling-and-pronunciation">Spelling and pronunciation</a></h3>
 <p>Although the name Owi comes from an acronym (OCaml WebAssembly Interpreter), it must be written as a proper noun and only the first letter must be capitalized. It is possible to write the name in full lowercase when referring to the opam package or to the name of the binary.</p>
@@ -3793,6 +3551,7 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="theme/tabs.js"></script>
 
         <script>
         window.addEventListener('load', function() {

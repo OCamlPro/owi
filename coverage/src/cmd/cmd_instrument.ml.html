@@ -18,7 +18,7 @@
       <h2>93.75%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:7.14%"></span>
+      <span class="unvisited" style="bottom:7.41%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -46,11 +46,10 @@
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -82,7 +81,6 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
-<a href="#L28">28</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -105,8 +103,7 @@ let cmd_one unsafe symbolic file =
     <span data-count="7">l</span>et filename = Fpath.add_ext ".instrumented" filename in
     <span data-count="7">l</span>et filename = Fpath.add_ext ".wat" filename in
     <span data-count="7">l</span>et* () =
-      Binary_encoder.conver<span data-count="7">t</span> None filename ~unsafe ~optimize:false
-        instrumented_text_modul
+      Binary_encoder.conver<span data-count="7">t</span> None filename ~unsafe instrumented_text_modul
     in
     <span data-count="7">B</span>os.OS.File.writef filename "%a" Text.pp_modul instrumented_text_modul
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
