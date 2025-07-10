@@ -412,7 +412,8 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first (cond : Symbolic_value.bool) =
+  let select_inner ~explore_first ?(with_breadcrumbs = true)
+    (cond : Symbolic_value.bool) =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -421,14 +422,14 @@ module Make (Thread : Thread_intf.S) = struct
     | _ ->
       let true_branch =
         let* () = add_pc v in
-        let* () = add_breadcrumb 1 in
+        let* () = if with_breadcrumbs then add_breadcrumb 1 else return () in
         let+ () = check_reachability v in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
-        let* () = add_breadcrumb 0 in
+        let* () = if with_breadcrumbs then add_breadcrumb 0 else return () in
         let+ () = check_reachability neg_v in
         false
       in
@@ -496,7 +497,9 @@ module Make (Thread : Thread_intf.S) = struct
       generator ()
 
   let assertion c =
-    let* assertion_true = select_inner c ~explore_first:false in
+    let* assertion_true =
+      select_inner c ~with_breadcrumbs:false ~explore_first:false
+    in
     if assertion_true then return ()
     else
       let* thread in
@@ -507,4 +510,10 @@ module Make (Thread : Thread_intf.S) = struct
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
       assertion_fail c model labels breadcrumbs symbol_scopes
+
+  let assume c =
+    let* assertion_true =
+      select_inner c ~with_breadcrumbs:false ~explore_first:false
+    in
+    if assertion_true then return () else stop
 end
