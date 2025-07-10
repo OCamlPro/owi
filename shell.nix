@@ -19,6 +19,7 @@ pkgs.mkShell {
   nativeBuildInputs = with ocamlPackages; [
     dune_3
     findlib
+    pkgs.framac
     mdx
     menhir
     ocaml

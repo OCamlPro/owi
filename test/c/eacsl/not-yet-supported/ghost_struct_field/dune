@@ -1,5 +1,0 @@
-(cram
- (deps
-  %{bin:owi}
-  (package owi)
-  field.c))
