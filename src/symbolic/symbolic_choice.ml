@@ -382,7 +382,7 @@ module Make (Thread : Thread_intf.S) = struct
     let* () = yield in
     let* solver in
     match Solver.check solver pc with
-    | `Sat -> return ()
+    | `Sat -> modify_thread Thread.mark_pc_fresh
     | `Unsat -> stop
     | `Unknown -> assert false
 
@@ -413,6 +413,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unsat -> stop
     | `Sat -> begin
       let symbol_scopes = Symbol_scope.of_symbol symbol in
+      let* () = modify_thread Thread.mark_pc_fresh in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
       let model = Solver.model solver ~symbol_scopes ~pc in
       match Smtml.Model.evaluate model symbol with
