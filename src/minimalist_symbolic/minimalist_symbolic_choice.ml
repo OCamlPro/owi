@@ -35,7 +35,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let ( let+ ) = map
 
-  let select (vb : bool) ~prio_t:_ ~prio_f:_ =
+  let select (vb : bool) ~counter_next_true:_ ~counter_next_false:_ =
     let v = Smtml.Expr.simplify vb in
     match Smtml.Expr.view v with
     | Val True -> return true

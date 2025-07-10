@@ -78,7 +78,7 @@ module Backend = struct
             (Bool.or_
                (I32.ge_u start_offset chunk_size)
                (I32.ge_u end_offset chunk_size) )
-            ~prio_t:Prio.default ~prio_f:Prio.default
+            ~counter_next_true:0 ~counter_next_false:0
         in
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->
