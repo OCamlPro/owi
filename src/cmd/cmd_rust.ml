@@ -37,6 +37,10 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
     | None | Some _ -> OS.Cmd.err_null
   in
 
+  (* TODO: does not seem to work, once it does, we can remove the `#![no_main]` in many documentation examples
+  let* () = Bos.OS.Env.set_var "RUSTFLAGS" (Some "-Zcrate-attr=no_main") in
+  *)
+
   let+ () =
     match OS.Cmd.run ~err rustc_cmd with
     | Ok _ as v -> v

@@ -30,7 +30,7 @@ jobs:
           rustup update
           rustup target add wasm32-unknown-unknown
           sudo apt update
-          cargo install mdbook
+          cargo install mdbook mdbook-tabs
           wget https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
           mkdir zig
           tar xf zig-*.tar.xz -C zig --strip-components 1
