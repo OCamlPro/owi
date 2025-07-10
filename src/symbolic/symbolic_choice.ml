@@ -505,6 +505,7 @@ module Make (Thread : Thread_intf.S) = struct
       generator ()
 
   let assertion c =
+    let* () = check_reachability in
     let* assertion_true = select_inner c ~explore_first:false in
     if assertion_true then return ()
     else
