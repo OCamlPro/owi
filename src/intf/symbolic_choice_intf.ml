@@ -44,6 +44,8 @@ module type S = sig
 
   val assertion : V.bool -> unit t
 
+  val assume : V.bool -> unit t
+
   val with_thread : (thread -> 'a) -> 'a t
 
   val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
@@ -53,8 +55,6 @@ module type S = sig
   val solver : Solver.t t
 
   val thread : thread t
-
-  val add_pc : V.bool -> unit t
 
   val get_pc : unit -> Smtml.Expr.Set.t t
 

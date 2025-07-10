@@ -110,7 +110,11 @@ let prepare_for_sym (modul : Owi.Text.modul) =
     match inst.Owi.Annotated.raw with
     | I32_const i ->
       let l =
-        [ I32_const i; Call (Text "constant_symbol") ] |> Owi.Annotated.dummies
+        [ I32_const i
+        ; Call (Text "symbol_i32")
+          (* TODO: here we should create a temporary global for the whole module, store a new symbol in it, then, assume this symbol to be equal to `i`, then put it on the stack again *)
+        ]
+        |> Owi.Annotated.dummies
       in
       l @ inst_list
     | _ -> inst :: inst_list
@@ -125,19 +129,7 @@ let prepare_for_sym (modul : Owi.Text.modul) =
     | MFunc fnc -> MFunc (process_func fnc)
     | fld -> fld
   in
-  let import_sym_cst_i32 =
-    MImport
-      { modul = "owi"
-      ; name = "symbol_i32_constant"
-      ; desc =
-          Import_func
-            ( Some "symbol_i32_constant"
-            , Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) )
-      }
-  in
-  let updated_fields =
-    import_sym_cst_i32 :: List.map process_field modul.fields
-  in
+  let updated_fields = List.map process_field modul.fields in
   { modul with fields = updated_fields }
 
 let () =

@@ -63,13 +63,20 @@ module Make (Thread : Thread_intf.S) = struct
       Fmt.failwith "Minimalist_symbolic_choice.assertion failed on %a"
         Smtml.Expr.pp v
 
+  let assume (vb : bool) =
+    let v = Smtml.Expr.simplify vb in
+    match Smtml.Expr.view v with
+    | Val True -> return ()
+    | Val False -> (* TODO: abort *) assert false
+    | _ ->
+      Fmt.failwith "Minimalist_symbolic_choice.assume failed on %a"
+        Smtml.Expr.pp v
+
   let with_thread f = M (fun st _sol -> (Ok (f st), st))
 
   let thread = M (fun st _sol -> (Ok st, st))
 
   let solver = M (fun st sol -> (Ok sol, st))
-
-  let add_pc (_vb : bool) = return ()
 
   let run ~workers:_ solver t thread = run t thread (Solver.fresh solver ())
 
