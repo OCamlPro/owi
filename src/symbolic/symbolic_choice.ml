@@ -378,20 +378,31 @@ module Make (Thread : Thread_intf.S) = struct
     in
     f sym
 
+  let stop_if_unreachable pc =
+    let* () = yield in
+    let* solver in
+    match Solver.check solver pc with
+    | `Sat -> return ()
+    | `Unsat -> stop
+    | `Unknown -> assert false
+
   (*
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability v =
-    let* () = yield in
+  let check_reachability =
     let* thread in
-    let* solver in
-    let pc = Thread.pc thread in
-    let sliced_pc = Symbolic_path_condition.slice pc v in
-    match Solver.check solver sliced_pc with
-    | `Sat -> return ()
-    | `Unsat -> stop
-    | `Unknown -> assert false
+    if Thread.pc_is_fresh thread then return ()
+    else
+      let pc = Thread.pc thread in
+      stop_if_unreachable (Symbolic_path_condition.to_set pc)
+
+  let add_to_pc_and_check_reachability v =
+    let* () = check_reachability in
+    let* () = add_pc v in
+    let* thread in
+    let pc = Symbolic_path_condition.slice (Thread.pc thread) v in
+    stop_if_unreachable pc
 
   let get_model_or_stop symbol =
     let* () = yield in
@@ -420,16 +431,14 @@ module Make (Thread : Thread_intf.S) = struct
     | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
     | _ ->
       let true_branch =
-        let* () = add_pc v in
         let* () = add_breadcrumb 1 in
-        let+ () = check_reachability v in
+        let+ () = add_to_pc_and_check_reachability v in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
-        let* () = add_pc neg_v in
         let* () = add_breadcrumb 0 in
-        let+ () = check_reachability neg_v in
+        let+ () = add_to_pc_and_check_reachability neg_v in
         false
       in
       if explore_first then choose true_branch false_branch
