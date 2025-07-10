@@ -936,7 +936,12 @@ module Make (P : Interpret_intf.P) :
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
       let* b, stack =
-        pop_choice stack ~counter_next_true:0 ~counter_next_false:0
+        let counter_next_false =
+          match state.pc.raw with
+          | [] -> Int.max_int
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        in 
+        pop_choice stack ~counter_next_true:0 ~counter_next_false
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
