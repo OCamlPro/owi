@@ -83,13 +83,13 @@ module Make (P : Interpret_intf.P) :
 
   let page_size = const_i64 65_536L
 
-  let pop_choice stack prio_t prio_f =
+  let pop_choice stack ~prio_t ~prio_f =
     let b, stack = Stack.pop_bool stack in
-    let* b = select b prio_t prio_f in
+    let* b = select b ~prio_t ~prio_f in
     return (b, stack)
 
   let ( let> ) v f =
-    let* v = select v Prio.default Prio.default in
+    let* v = select v ~prio_t:Prio.default ~prio_f:Prio.default in
     f v
 
   let const = const_i32
@@ -921,7 +921,7 @@ module Make (P : Interpret_intf.P) :
           | [] -> Prio.default
           | h :: _ -> Prio.of_int (Atomic.get h.Annotated.nb_iter)
         in
-        pop_choice stack prio_t prio_f
+        pop_choice stack ~prio_t ~prio_f
       in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
@@ -935,7 +935,9 @@ module Make (P : Interpret_intf.P) :
     end
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
-      let* b, stack = pop_choice stack Prio.default Prio.default in
+      let* b, stack =
+        pop_choice stack ~prio_t:Prio.default ~prio_f:Prio.default
+      in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
@@ -1041,7 +1043,9 @@ module Make (P : Interpret_intf.P) :
         st @@ Stack.push stack res
       end
       else begin
-        let* b, stack = pop_choice stack Prio.default Prio.default in
+        let* b, stack =
+          pop_choice stack ~prio_t:Prio.default ~prio_f:Prio.default
+        in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
         st @@ Stack.push stack (if b then o1 else o2)

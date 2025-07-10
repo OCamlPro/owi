@@ -31,7 +31,7 @@ struct
       Choice.return (Value.F64 (Value.Bool.select_expr c ~if_true ~if_false))
     | Ref _, Ref _ ->
       let open Choice in
-      let+ b = select c Prio.default Prio.default in
+      let+ b = select c ~prio_t:Prio.default ~prio_f:Prio.default in
       if b then if_true else if_false
     | _, _ -> assert false
 

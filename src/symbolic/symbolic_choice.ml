@@ -412,7 +412,7 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first (cond : Symbolic_value.bool) prio_t prio_f =
+  let select_inner ~explore_first (cond : Symbolic_value.bool) ~prio_t ~prio_f =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -436,8 +436,8 @@ module Make (Thread : Thread_intf.S) = struct
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) prio_t prio_f =
-    select_inner cond ~explore_first:true prio_t prio_f
+  let select (cond : Symbolic_value.bool) ~prio_t ~prio_f =
+    select_inner cond ~explore_first:true ~prio_t ~prio_f
   [@@inline]
 
   let summary_symbol (e : Smtml.Expr.t) =
@@ -497,7 +497,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assertion c =
     let* assertion_true =
-      select_inner c ~explore_first:false Prio.default Prio.default
+      select_inner c ~explore_first:false ~prio_t:Prio.default
+        ~prio_f:Prio.default
     in
     if assertion_true then return ()
     else
