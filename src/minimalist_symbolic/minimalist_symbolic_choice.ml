@@ -35,7 +35,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let ( let+ ) = map
 
-  let select (vb : bool) =
+  let select (vb : bool) _ _ =
     let v = Smtml.Expr.simplify vb in
     match Smtml.Expr.view v with
     | Val True -> return true

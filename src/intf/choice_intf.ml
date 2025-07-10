@@ -13,7 +13,7 @@ module type Base = sig
 
   val map : 'a t -> ('a -> 'b) -> 'b t
 
-  val select : V.bool -> Bool.t t
+  val select : V.bool -> Prio.t -> Prio.t -> Bool.t t
 
   val select_i32 : V.int32 -> Int32.t t
 
