@@ -412,7 +412,8 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first (cond : Symbolic_value.bool) ~counter_next_true ~counter_next_false =
+  let select_inner ~explore_first (cond : Symbolic_value.bool)
+    ~counter_next_true ~counter_next_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -422,21 +423,27 @@ module Make (Thread : Thread_intf.S) = struct
       let true_branch =
         let* () = add_pc v in
         let* () = add_breadcrumb 1 in
-        let+ () = check_reachability v (Prio.compute ~instr_counter:counter_next_true) in
+        let+ () =
+          check_reachability v (Prio.compute ~instr_counter:counter_next_true)
+        in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
         let* () = add_breadcrumb 0 in
-        let+ () = check_reachability neg_v (Prio.compute ~instr_counter:counter_next_false) in
+        let+ () =
+          check_reachability neg_v
+            (Prio.compute ~instr_counter:counter_next_false)
+        in
         false
       in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) ~counter_next_true ~counter_next_false =
+  let select (cond : Symbolic_value.bool) ~counter_next_true ~counter_next_false
+      =
     select_inner cond ~explore_first:true ~counter_next_true ~counter_next_false
   [@@inline]
 

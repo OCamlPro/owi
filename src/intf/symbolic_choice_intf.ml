@@ -38,7 +38,8 @@ module type S = sig
 
   val trap : Result.err -> 'a t
 
-  val select : V.bool -> counter_next_true:int -> counter_next_false:int -> Bool.t t
+  val select :
+    V.bool -> counter_next_true:int -> counter_next_false:int -> Bool.t t
 
   val select_i32 : V.int32 -> Int32.t t
 
