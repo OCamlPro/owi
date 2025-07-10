@@ -14,7 +14,7 @@ let map v f = Result.map f v [@@inline]
 
 let ( let+ ) v f = map v f [@@inline]
 
-let select b = Ok b [@@inline]
+let select b _ _ = Ok b [@@inline]
 
 let select_i32 i = Ok i [@@inline]
 
