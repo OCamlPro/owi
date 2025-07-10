@@ -35,6 +35,8 @@ module type Complete = sig
 
   val assertion : V.bool -> unit t
 
+  val assume : V.bool -> unit t
+
   val with_thread : (thread -> 'b) -> 'b t
 
   val solver : Solver.t t
