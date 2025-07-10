@@ -11,21 +11,8 @@ extern void *malloc(size_t size);
 
 unsigned char *make_in(size_t size) {
   unsigned char *t = malloc(size);
-  switch (size) {
-  case 8:
-    *t = owi_int8();
-    break;
-  case 32:
-    *t = owi_int32();
-    break;
-  case 64:
-    *t = owi_int64();
-    break;
-  default:
-    for (int i = 0; i < (size / sizeof(char)); i++) {
-      t[i] = owi_int8();
-    }
-    break;
+  for (int i = 0; i < (size / sizeof(char)); i++) {
+    t[i] = owi_int8();
   }
   return t;
 }

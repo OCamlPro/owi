@@ -122,7 +122,7 @@ void check(int x, int y) {
 {{#tab name="Rust" }}
 <!-- $MDX file=mean.rs -->
 ```rs
-use owi_sym::Symbolic;
+#![no_main]
 
 fn mean1(x: i32, y: i32) -> i32 {
     (x & y) + ((x ^ y) >> 1)
@@ -132,8 +132,7 @@ fn mean2(x: i32, y: i32) -> i32 {
     (x + y) / 2
 }
 
-#[no_mangle]
-pub extern "C" fn check(x : i32, y: i32) {
+fn check(x : i32, y: i32) {
   owi_sym::assert(mean1(x, y) == mean2(x, y))
 }
 ```
@@ -141,13 +140,63 @@ pub extern "C" fn check(x : i32, y: i32) {
 {{#tab name="Zig" }}
 <!-- $MDX file=mean.zig -->
 ```zig
-TODO
+extern "owi" fn i32_symbol() i32;
+extern "owi" fn assert(bool) void;
+
+fn mean1(x: i32, y: i32) i32 {
+  return (x & y) + ((x ^ y) >> 1);
+}
+
+fn mean2(x: i32, y: i32) i32 {
+  return @divTrunc(x + y, 2);
+}
+
+export fn check(x: i32, y: i32) void {
+  assert(mean1(x, y) == mean2(x, y));
+}
 ```
 {{#endtab }}
 {{#tab name="Wasm" }}
 <!-- $MDX file=mean.wat -->
 ```wat
-TODO
+(module
+  (func $mean1 (param $x i32) (param $y i32) (result i32)
+    local.get $x
+    local.get $y
+    i32.and
+
+    local.get $x
+    local.get $y
+    i32.xor
+    i32.const 1
+    i32.shr_s
+
+    i32.add
+  )
+
+  (func $mean2 (param $x i32) (param $y i32) (result i32)
+    local.get $x
+    local.get $y
+    i32.add
+    i32.const 2
+    i32.div_s
+  )
+
+  (func $check  (export "check") (param $x i32) (param $y i32)
+    local.get $x
+    local.get $y
+    call $mean1
+
+    local.get $x
+    local.get $y
+    call $mean2
+
+    i32.ne
+    if
+      unreachable
+    end
+  )
+)
 ```
 {{#endtab }}
 {{#endtabs }}
@@ -184,15 +233,26 @@ owi: [ERROR] rustc failed: run with -vv to get the full error message if it was 
 {{#tab name="Zig" }}
 ```sh
 $ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
-owi: [ERROR] zig failed: run with -vv to get the full error message if it was not displayed above
-[26]
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -1023139840
+  symbol symbol_1 i32 -1073471487
+}
+
+owi: [ERROR] Reached problem!
+[13]
 ```
 {{#endtab }}
 {{#tab name="Wasm" }}
 ```sh
 $ owi sym ./mean.wat --entry-point=check --invoke-with-symbols
-owi: [ERROR] unknown operator "T"
-[23]
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 -2147483648
+  symbol symbol_1 i32 -2147483646
+}
+owi: [ERROR] Reached problem!
+[13]
 ```
 {{#endtab }}
 {{#endtabs }}
