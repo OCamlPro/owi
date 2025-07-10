@@ -3,6 +3,7 @@
   %{bin:owi}
   (package owi)
   abort.c
+  assume_properly_checked.c
   bool.c
   char.c
   concolic.c

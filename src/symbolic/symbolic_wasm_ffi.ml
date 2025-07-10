@@ -7,15 +7,11 @@ module Choice = Symbolic_choice_with_memory
 module Memory = Symbolic.Memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
-module M : sig
-  include
-    Wasm_ffi_intf.S0
-      with type 'a t = 'a Choice.t
-       and type memory = Memory.t
-       and module Value = Symbolic_value
-
-  val symbol_i32_constant : Value.int32 -> Value.int32 t
-end = struct
+module M :
+  Wasm_ffi_intf.S0
+    with type 'a t = 'a Choice.t
+     and type memory = Memory.t
+     and module Value = Symbolic_value = struct
   type 'a t = 'a Choice.t
 
   type memory = Memory.t
@@ -26,10 +22,8 @@ end = struct
 
   let cov_lock = Mutex.create ()
 
-  let add_pc_wrapper e = Choice.add_pc e
-
   let assume (i : Value.int32) : unit Choice.t =
-    add_pc_wrapper @@ Value.I32.to_bool i
+    Choice.assume @@ Value.I32.to_bool i
 
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
@@ -52,13 +46,6 @@ end = struct
 
   let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
-  let symbol_i32_constant v =
-    let open Choice in
-    let* s = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol in
-    let eq = Value.I32.eq v s in
-    let+ () = Choice.add_pc eq in
-    s
-
   let symbol_i64 () = Choice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
   let symbol_f32 () = Choice.with_new_symbol (Ty_fp 32) Expr.symbol
@@ -70,8 +57,8 @@ end = struct
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
     let open Choice in
     let* x = symbol_i32 () in
-    let* () = add_pc_wrapper (Value.I32.le lo x) in
-    let+ () = add_pc_wrapper (Value.I32.gt hi x) in
+    let* () = assume (Value.I32.le lo x) in
+    let+ () = assume (Value.I32.gt hi x) in
     x
 
   let abort () : unit Choice.t = Choice.stop
@@ -157,7 +144,6 @@ let symbolic_extern_module =
     [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
     ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
     ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
-    ; ("i32_symbol_constant", Extern_func (i32 ^->. i32, symbol_i32_constant))
     ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
     ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
     ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
