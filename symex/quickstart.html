@@ -331,7 +331,7 @@ owi: [ERROR] Reached problem!
 </div>
 <p>Owi says he reached a <em>trap</em>, which corresponds to a <em>programming error</em>. The exact trap depends on the input language and how it is compiled to Wasm. But here it'll either be "integer divide by zero" or "unreachable".</p>
 <p>Then Owi gives us a <em>model</em>, that is, the set of input values of the program leading to this <em>trap</em>. The model is a list of <em>symbols</em>, each symbols representing an input.</p>
-<p>Here we have a single symbol in the model, whose name is <code>symbol_0</code>, of type <code>i32 and whose value is </code>2<code>. And indeed, if we use </code>2<code>as the input value of the function</code>f`, there will be a crash in the program because of a division by zero!</p>
+<p>Here we have a single symbol in the model, whose name is <code>symbol_0</code>, of type <code>i32</code> and whose value is <code>2</code>. And indeed, if we use <code>2</code> as the input value of the function <code>f</code>, there will be a crash in the program because of a division by zero!</p>
 <h2 id="defining-symbols-by-hand"><a class="header" href="#defining-symbols-by-hand">Defining symbols by hand</a></h2>
 <div class="mdbook-tabs-container" data-tabglobal="lang">
 <nav class="mdbook-tabs">
