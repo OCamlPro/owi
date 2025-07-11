@@ -19,11 +19,15 @@ let rec build_graph (l : binary expr) nodes n node edges
   (edges_to_add : (int * to_add * string option) list) continue =
   match l with
   | [] ->
+   (match node with
+    | [] -> if continue then 
     let nodes = (n, node) :: nodes in
-    if continue then
-      let edges_to_add = (n, Next, None) :: edges_to_add in
-      (nodes, edges, n + 1, edges_to_add, continue)
-    else (nodes, edges, n, edges_to_add, continue)
+    let edges_to_add = (n, Next, None) :: edges_to_add in
+    (nodes, edges, n + 1, edges_to_add, true)
+else (nodes,edges,n,edges_to_add,true)
+| _ -> let nodes = (n, node) :: nodes in
+    let edges_to_add = (n, Next, None) :: edges_to_add in
+    (nodes, edges, n + 1, edges_to_add, true))
   | instr :: l -> (
     match instr.raw with
     | Block (_, _, exp) ->
