@@ -8,12 +8,13 @@
   2 [label="i32.const 7 | local.set 1 | br 2"];
   3 [label="i32.const 42 | local.set 1 | unreachable"];
   4 [label="i32.const 99 | local.set 1"];
-  4 [label="local.get 1"];
+  5 [label="local.get 1"];
    0 -> 1 [label="false"];
   1 -> 2 [label="false"];
   0 -> 3 [label="true"];
   1 -> 4 [label="true"];
-  2 -> 4 }
+  4 -> 5 ;
+  2 -> 5 }
 
   $ owi analyze cfg loop.wat
   $ cat loop.dot
@@ -24,7 +25,6 @@
   1 [label="loop"];
   2 [label="local.get 1 | local.get 0 | i64.mul | local.set 1 | local.get 0 | i64.const -1 | i64.add | local.tee 0 | i64.eqz | br_if 1"];
   3 [label="br 0"];
-  4 [label=""];
   4 [label="local.get 1"];
    0 -> 1 [label="false"];
   1 -> 2 ;

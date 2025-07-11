@@ -83,13 +83,13 @@ module Make (P : Interpret_intf.P) :
 
   let page_size = const_i64 65_536L
 
-  let pop_choice stack =
+  let pop_choice stack ~counter_next_true ~counter_next_false =
     let b, stack = Stack.pop_bool stack in
-    let* b = select b in
+    let* b = select b ~counter_next_true ~counter_next_false in
     return (b, stack)
 
   let ( let> ) v f =
-    let* v = select v in
+    let* v = select v ~counter_next_true:0 ~counter_next_false:0 in
     f v
 
   let const = const_i32
@@ -807,10 +807,15 @@ module Make (P : Interpret_intf.P) :
     let stack = state.stack in
     let env = state.env in
     let locals = state.locals in
+
+    Atomic.incr instr.Annotated.instr_counter;
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
+      m "running instr : %a (%a)"
+        (Types.pp_instr ~short:true)
+        instr.Annotated.raw Fmt.int
+        (Atomic.get instr.Annotated.instr_counter) );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->
@@ -905,7 +910,19 @@ module Make (P : Interpret_intf.P) :
       let locals = State.Locals.set locals i v in
       Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
-      let* b, stack = pop_choice stack in
+      let* b, stack =
+        let counter_next_true =
+          match e1.raw with
+          | [] -> 0
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        in
+        let counter_next_false =
+          match e2.raw with
+          | [] -> 0
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        in
+        pop_choice stack ~counter_next_true ~counter_next_false
+      in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call (Raw i) -> begin
@@ -918,7 +935,14 @@ module Make (P : Interpret_intf.P) :
     end
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
-      let* b, stack = pop_choice stack in
+      let* b, stack =
+        let counter_next_false =
+          match state.pc.raw with
+          | [] -> Int.max_int
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        in
+        pop_choice stack ~counter_next_true:0 ~counter_next_false
+      in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
@@ -1024,7 +1048,9 @@ module Make (P : Interpret_intf.P) :
         st @@ Stack.push stack res
       end
       else begin
-        let* b, stack = pop_choice stack in
+        let* b, stack =
+          pop_choice stack ~counter_next_true:0 ~counter_next_false:0
+        in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
         st @@ Stack.push stack (if b then o1 else o2)
