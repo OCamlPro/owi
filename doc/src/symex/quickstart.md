@@ -1,42 +1,175 @@
 # Quickstart
 
-## Finding a simple crash in a function
+## Finding a crash in a function
+
+Let's say you wrote a function `f` and want to check if it can crash for some input. The function could for instance be the following one (choose your programming language to get a specialized example):
 
 {{#tabs global="lang" }}
 {{#tab name="C" }}
-TODO
+<!-- $MDX file=f.c -->
+```c
+int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x >= 0 && x < 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+```
 {{#endtab }}
 {{#tab name="C++" }}
-TODO
+<!-- $MDX file=f.cpp -->
+```cpp
+extern "C" int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x >= 0 && x < 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+```
 {{#endtab }}
 {{#tab name="Rust" }}
-TODO
+<!-- $MDX file=f.rs -->
+```rs
+#![no_main]
+
+#[no_mangle]
+pub extern "C" fn f(x: usize) -> i32 {
+
+  let arr = [1, 2, 0, 4];
+
+  if x < arr.len() {
+    return 10 / arr[x];
+  }
+
+  -1
+}
+```
 {{#endtab }}
 {{#tab name="Zig" }}
-TODO
+<!-- $MDX file=f.zig -->
+```rs
+export fn f(x: usize) i32 {
+
+  const arr = [_]i32{ 1, 2, 0, 4 };
+
+  if (x < arr.len) {
+    return @divTrunc(10, arr[x]);
+  }
+
+  return -1;
+}
+```
 {{#endtab }}
 {{#tab name="Wasm" }}
-TODO
+<!-- $MDX file=f.wat -->
+```wasm
+(module
+  (memory 1)
+  (func $f (export "f") (param $x i32) (result i32)
+    (local $value i32)
+
+    (i32.store (i32.mul (i32.const 4) (i32.const 0)) (i32.const 1))
+    (i32.store (i32.mul (i32.const 4) (i32.const 1)) (i32.const 2))
+    (i32.store (i32.mul (i32.const 4) (i32.const 2)) (i32.const 0))
+    (i32.store (i32.mul (i32.const 4) (i32.const 3)) (i32.const 4))
+
+    (if (i32.ge_u (local.get $x) (i32.const 4) )
+      (then (return (i32.const -1))))
+
+    (local.set $value
+      (i32.load
+        (i32.mul
+          (local.get $x)
+          (i32.const 4))))
+
+    (i32.div_s
+      (i32.const 10)
+      (local.get $value))
+  )
+)
+```
 {{#endtab }}
 {{#endtabs }}
 
+We are going to use `owi` to look for a crash in the function. Owi has one subcommand for each programming language it supports. For instance, if you are analyzing a C program the command will be `owi c <...>`, whereas for a Rust program it will be `owi rust <...>`.
+
+Then, we use the `--entry-point=f` option to tell Owi to starts its analysis on the function we are interested in.
+
+Finally, we use the `--invoke-with-symbols` option to tell Owi it should invoke the functions with *symbolic* values. Here, it means that `x` will be a value representing "any possible integer", and not a concrete one. You'll learn more about this in the next example. What you should remember is that it allows Owi to check all possible execution path, for any value of `x`.
+
+All the others parameters are only here to make the output deterministic while generating the documentation and you should ignore them.
+
 {{#tabs global="lang" }}
 {{#tab name="C" }}
-TODO
+```sh
+$ owi c ./f.c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#tab name="C++" }}
-TODO
+```sh
+$ owi c++ ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#tab name="Rust" }}
-TODO
+```sh
+$ owi rust ./f.rs --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#tab name="Zig" }}
-TODO
+```sh
+$ owi zig ./f.zig --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#tab name="Wasm" }}
-TODO
+```sh
+$ owi sym ./f.wat --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#endtabs }}
+
+Owi says he reached a *trap*, which corresponds to a *programming error*. The exact trap depends on the input language and how it is compiled to Wasm. But here it'll either be "integer divide by zero" or "unreachable".
+
+Then Owi gives us a *model*, that is, the set of input values of the program leading to this *trap*. The model is a list of *symbols*, each symbols representing an input.
+
+Here we have a single symbol in the model, whose name is `symbol_0`, of type `i32 and whose value is `2`. And indeed, if we use `2` as the input value of the function `f`, there will be a crash in the program because of a division by zero!
 
 ## Defining symbols by hand
 
